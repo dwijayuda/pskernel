@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: full-std-batched-main
+  group: full-std-adaptive-main-v2
   cancel-in-progress: true
 
 jobs:

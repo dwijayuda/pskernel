@@ -10,7 +10,7 @@ The current implementation includes Lean core names/levels/expressions, substitu
 
 The pinned regression stack includes:
 
-- 92 TypeScript kernel/unit tests
+- 93 TypeScript kernel/unit tests
 - official Lean 4.34 fresh-module checking
 - official Lean 4.34 adversarial kernel regressions (21 expected-success + 1 expected-rejection)
 - official-vs-TypeScript definitional-equality differential cases (26/26)
@@ -49,4 +49,4 @@ For the official adversarial source-file oracle, set `LEAN434_SRC` to a Lean 4.3
 - `scripts/` — oracle, corpus, differential, and anti-drift gates
 - `docs/ANTI_DRIFT.md` — scope and compatibility rules
 
-Do not silently broaden acceptance to make a corpus pass. A Lean/TypeScript mismatch must be isolated and fixed at the semantic layer that differs from Lean 4.34.0.
+Native reduction is fail-closed unless an explicit `NativeEvaluator` TCB extension is configured.\n\nDo not silently broaden acceptance to make a corpus pass. A Lean/TypeScript mismatch must be isolated and fixed at the semantic layer that differs from Lean 4.34.0.

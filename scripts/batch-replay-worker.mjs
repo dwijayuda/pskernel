@@ -6,6 +6,8 @@ const rl=createInterface({input:process.stdin,crlfDelay:Infinity});
 let maxRssMiB=process.memoryUsage().rss/1048576;
 for await(const line of rl){
   if(!line.trim())continue;
+  let marker=null;try{marker=JSON.parse(line);}catch{}
+  if(marker?.environment||marker?.batch)continue;
   replay.replayLine(line);
   const rss=process.memoryUsage().rss/1048576;
   if(rss>maxRssMiB)maxRssMiB=rss;

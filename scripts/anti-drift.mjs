@@ -23,4 +23,7 @@ function forbidPackageMjs(p) {
   }
 }
 forbidPackageMjs(join(root,'packages'));
+const syntaxPkg = JSON.parse(readFileSync(join(root,'packages','syntax','package.json'),'utf8'));
+if (syntaxPkg.proofscript?.sourceLanguage !== 'typescript') throw new Error('Anti-drift violation: @proofscript/syntax must remain TypeScript-authored');
+if (syntaxPkg.proofscript?.specVersion !== '0.7.0' || syntaxPkg.proofscript?.leanSemantics !== '4.34.0') throw new Error('Anti-drift violation: @proofscript/syntax semantic pin drifted');
 console.log('anti-drift: PASS (Lean 4.34.0 pinned; packages TypeScript-first)');

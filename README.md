@@ -10,7 +10,7 @@ The current implementation includes Lean core names/levels/expressions, substitu
 
 The pinned regression stack includes:
 
-- 93 TypeScript kernel/unit tests
+- 95 TypeScript kernel/unit tests
 - official Lean 4.34 fresh-module checking
 - official Lean 4.34 adversarial kernel regressions (21 expected-success + 1 expected-rejection)
 - official-vs-TypeScript definitional-equality differential cases (42/42)

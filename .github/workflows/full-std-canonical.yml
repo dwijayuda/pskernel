@@ -1,4 +1,5 @@
 name: Canonical Full Std replay
+# trigger: canonical-std-v1
 
 on:
   workflow_dispatch:

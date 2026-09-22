@@ -494,6 +494,63 @@ partial def dumpBatchStream (env : Environment) (target : Name) (maxRoots startB
       pending := pending.push n
   flush pending batchIdx firstModule lastModule
 
+def flattenRoots (buckets : Array (Array Name)) : Array Name := Id.run do
+  let mut roots := #[]
+  for bucket in buckets do
+    for n in bucket do roots := roots.push n
+  return roots
+
+partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat) : IO Unit := do
+  if count == 0 then throw <| IO.userError "root range count must be positive"
+  let buckets := collectRootsByModule env
+  let roots := flattenRoots buckets
+  if roots.size != env.constants.map₁.size then
+    throw <| IO.userError s!"root coverage mismatch: {roots.size} != {env.constants.map₁.size}"
+  if start >= roots.size then
+    throw <| IO.userError s!"root range starts at {start}, but only {roots.size} roots exist"
+  let stop := min roots.size (start + count)
+  let selected := roots.extract start stop
+  IO.println <| (Json.mkObj [("environment", Json.mkObj [
+    ("module", target.toString),
+    ("constants", env.constants.map₁.size),
+    ("modules", env.header.moduleNames.size),
+    ("rootStart", start),
+    ("rootStop", stop),
+    ("selectedDirectRoots", selected.size)
+  ])]).compress
+  let firstModule :=
+    match selected[0]? >>= env.getModuleIdxFor? with
+    | some idx => env.header.moduleNames[idx]!.toString
+    | none => ""
+  let lastModule :=
+    match selected[selected.size - 1]? >>= env.getModuleIdxFor? with
+    | some idx => env.header.moduleNames[idx]!.toString
+    | none => ""
+  IO.println <| (Json.mkObj [("batch", Json.mkObj [
+    ("index", start),
+    ("firstModule", firstModule),
+    ("lastModule", lastModule),
+    ("directRoots", selected.size)
+  ])]).compress
+  let _ ← (do
+    let segmentRoots : Nat := 25
+    let mut segment : Nat := 0
+    let mut inSegment : Nat := 0
+    for n in selected do
+      if inSegment == 0 then
+        resetInternTables
+        IO.println <| (Json.mkObj [("segment", Json.mkObj [
+          ("index", segment),
+          ("maxDirectRoots", segmentRoots)
+        ])]).compress
+        dumpMeta
+      dumpConstant env n
+      inSegment := inSegment + 1
+      if inSegment == segmentRoots then
+        segment := segment + 1
+        inSegment := 0) |>.run {}
+  pure ()
+
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let total := env.constants.map₁.size
   IO.println <| (Json.mkObj [("environment", Json.mkObj [
@@ -540,6 +597,10 @@ unsafe def main (args : List String) : IO Unit := do
       let start := requestedRoots[2]!.toNat!
       let count := requestedRoots[3]!.toNat!
       dumpBatchStream env moduleName maxRoots start count
+    else if requestedRoots.length == 3 && requestedRoots.head! == "--root-range" then
+      let start := requestedRoots[1]!.toNat!
+      let count := requestedRoots[2]!.toNat!
+      dumpRootRange env moduleName start count
     else
       dumpMeta
       let _ ← (do

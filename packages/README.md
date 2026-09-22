@@ -15,8 +15,11 @@ See `package-map.json` for:
 
 ## Current implementation state
 
-- `cli/` — prototype implementation exists.
-- all other `@proofscript/*` directories — package-boundary scaffolds only unless their local README/source says otherwise.
+- `cli/` — prototype with replay/check and module commands.
+- `module/` — MVP checked-module artifact implementation.
+- `conformance/` — MVP Arena-style conformance runner.
+- `lean4export/` — MVP pinned Lean exporter transport.
+- remaining `@proofscript/*` directories — package-boundary scaffolds only unless their local README/source says otherwise.
 
 ## Trust rule
 

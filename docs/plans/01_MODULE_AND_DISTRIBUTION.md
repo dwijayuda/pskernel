@@ -1,6 +1,6 @@
 # Module and distribution plan
 
-Status: next implementation priority.
+Status: MVP implemented; format intentionally provisional.
 
 Lean 4.34 analogues:
 - `Lean.Environment.ModuleData`
@@ -70,3 +70,24 @@ Do not use `.olean` runtime-image serialization as the primary JS ecosystem form
 - package-manager replacement
 - trusted fast loading
 - arbitrary executable JavaScript inside trusted declaration payloads
+
+
+## MVP implementation note
+
+`@proofscript/module` format v1 currently uses canonical `lean4export` 3.1.0 NDJSON as its declaration payload. This is deliberately a transport representation, not a second declaration semantics.
+
+Implemented:
+- canonical JSON envelope
+- CRLF/LF normalization
+- SHA-256 payload integrity
+- SHA-256 whole-artifact integrity
+- canonical dependency ordering and dependency integrity checks
+- replay loading through pskernel
+- JSON Schema
+- CLI pack/verify/inspect/check integration
+
+Deferred:
+- ProofScript-native declaration payload codec
+- browser/WebCrypto hashing
+- trusted fast loading
+- package-manager dependency resolution

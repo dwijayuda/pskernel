@@ -41,7 +41,7 @@
       "path": "packages/conformance",
       "phase": "A",
       "trust": "test-only",
-      "status": "scaffold",
+      "status": "mvp",
       "packageName": "@proofscript/conformance",
       "dependsOn": [
         "kernel"
@@ -52,7 +52,7 @@
       "path": "packages/lean4export",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "mvp",
       "packageName": "@proofscript/lean4export",
       "dependsOn": [
         "kernel",
@@ -69,6 +69,9 @@
       "dependsOn": [
         "kernel",
         "module"
+      ],
+      "notes": [
+        "Module artifact hashing is Node-only in v1; browser module verification needs WebCrypto-compatible codec before depending on @proofscript/module at runtime."
       ]
     },
     {

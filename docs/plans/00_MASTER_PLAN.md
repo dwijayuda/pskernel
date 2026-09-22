@@ -112,3 +112,18 @@ native-ir -> NativeEvaluator interface
 ```
 
 No reverse dependency from the kernel into any outer layer.
+
+
+## Implementation status checkpoint
+
+Current Phase-A implementation status:
+
+- kernel public API: active
+- `@proofscript/module`: MVP
+- `@proofscript/conformance`: MVP
+- `@proofscript/lean4export`: MVP
+- CLI: prototype with module pack/verify/inspect/check
+- browser: scaffold only
+- native-ir: scaffold only
+
+The MVP packages remain private and are not wired as root npm workspaces while Full Std certification is active.

@@ -76,3 +76,12 @@ npm run oracle:std-full
 ```
 
 The default Node heap is 12 GiB. Override it with `PSKERNEL_STD_HEAP_MIB`. The runner keeps the checked environment but discards replay-local intern tables/caches between module shards.
+
+
+On Windows/PowerShell, the repository includes a helper that validates Node/Lean, builds pskernel, runs the canonical stream with a 12 GiB heap / enlarged isolated-process stack, and writes a single log:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/run-full-std-local.ps1
+```
+
+If memory is limited, override the heap, for example `-HeapMiB 8192`. On a machine with 24–32 GiB RAM, the default 12288 MiB is preferred. Send back `full-std.log` if the run fails or when it passes so the result can be recorded.

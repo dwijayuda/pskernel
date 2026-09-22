@@ -1,0 +1,12 @@
+{
+  "name": "@proofscript/language",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Incremental document snapshots, parse/elab reuse, cancellation and diagnostics.",
+  "proofscript": {
+    "status": "scaffold",
+    "phase": "D",
+    "trust": "untrusted-support"
+  }
+}

@@ -3,10 +3,23 @@
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "Pinned Lean exporter orchestration and Lean-environment transport.",
+  "description": "Cross-platform pinned Lean exporter process/stream transport for pskernel and ProofScript.",
   "proofscript": {
-    "status": "scaffold",
+    "status": "mvp",
     "phase": "A",
     "trust": "untrusted-support"
+  },
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "bin": {
+    "proofscript-lean4export": "./bin/proofscript-lean4export.mjs"
+  },
+  "scripts": {
+    "test": "node test/lean4export.test.mjs"
+  },
+  "dependencies": {
+    "@proofscript/module": "file:../module",
+    "lean-ts-kernel": "file:../.."
   }
 }

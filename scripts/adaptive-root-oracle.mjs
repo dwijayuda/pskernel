@@ -18,10 +18,11 @@ if(minChunk>baseChunk)throw new Error('adaptive-root-oracle: minChunk must be <=
 
 const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin',...(process.env.PATH??'').split(delimiter)]
   .filter(Boolean).map(p=>resolve(p));
-const bin=candidates.find(p=>fs.existsSync(join(p,'lean')));
+const leanExe=process.platform==='win32'?'lean.exe':'lean';
+const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
 if(!bin)throw new Error('adaptive-root-oracle: set LEAN434_BIN or put Lean 4.34 on PATH');
-const lean=join(bin,'lean');
-const envVars={...process.env,PATH:`${bin}:${process.env.PATH??''}`};
+const lean=join(bin,leanExe);
+const envVars={...process.env,PATH:`${bin}${delimiter}${process.env.PATH??''}`};
 const workerHeapMiB=Number(process.env.PSKERNEL_WORKER_HEAP_MIB??'4096');
 const workerTimeoutMs=Number(process.env.PSKERNEL_WORKER_TIMEOUT_MS??'90000');
 const maxBatchBytes=Number(process.env.PSKERNEL_MAX_BATCH_BYTES??String(64*1024*1024));

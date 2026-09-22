@@ -18,7 +18,9 @@ Require-Command npm
 Require-Command lean
 
 $nodeVersion = (& node --version).Trim()
+$leanCommand = Get-Command lean -ErrorAction Stop
 $leanVersion = (& lean --version | Select-Object -First 1).Trim()
+$env:LEAN434_BIN = Split-Path -Parent $leanCommand.Source
 if ($leanVersion -notmatch "version 4\.34\.0.*Release") {
   throw "Expected Lean 4.34.0 Release, got: $leanVersion"
 }
@@ -30,6 +32,7 @@ $env:PSKERNEL_STD_STACK_KIB = "$StackKiB"
 "started=$(Get-Date -Format o)" | Add-Content $Log
 "node=$nodeVersion" | Add-Content $Log
 "lean=$leanVersion" | Add-Content $Log
+"leanBin=$env:LEAN434_BIN" | Add-Content $Log
 "heapMiB=$HeapMiB stackKiB=$StackKiB" | Add-Content $Log
 
 Write-Host "Installing dependencies..."

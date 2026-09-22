@@ -8,5 +8,12 @@
   },
   "dependencies": {
     "lean-ts-kernel": "file:../.."
+  },
+  "description": "Private prototype CLI for streaming pskernel replay/check workflows.",
+  "proofscript": {
+    "status": "scaffold+prototype",
+    "phase": "A",
+    "trust": "untrusted-support",
+    "futureName": "@proofscript/cli"
   }
 }

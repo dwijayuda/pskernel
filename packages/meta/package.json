@@ -1,0 +1,12 @@
+{
+  "name": "@proofscript/meta",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Metavariables, unification, transparency, goals and instance synthesis.",
+  "proofscript": {
+    "status": "scaffold",
+    "phase": "B",
+    "trust": "untrusted-support"
+  }
+}

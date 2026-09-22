@@ -1,0 +1,12 @@
+{
+  "name": "@proofscript/browser",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Web Worker/browser host wrapper for streaming kernel verification.",
+  "proofscript": {
+    "status": "scaffold",
+    "phase": "A",
+    "trust": "untrusted-support"
+  }
+}

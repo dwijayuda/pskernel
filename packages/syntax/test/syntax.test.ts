@@ -1,6 +1,7 @@
 import {
   LEAN_SEMANTICS_COMMIT,
   LEAN_SEMANTICS_VERSION,
+  LEAN434_INHERITED_FEATURE_IDS,
   PROOFSCRIPT_SPEC_VERSION,
   SyntaxError,
   hasTriviaBefore,
@@ -27,6 +28,8 @@ function throws(f: () => unknown, pattern: RegExp): void {
 equal(PROOFSCRIPT_SPEC_VERSION, '0.7.0');
 equal(LEAN_SEMANTICS_VERSION, '4.34.0');
 equal(LEAN_SEMANTICS_COMMIT, '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b');
+equal(LEAN434_INHERITED_FEATURE_IDS.length,4);
+assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
 
 {
   const tokens=significantTokens('f(x)');

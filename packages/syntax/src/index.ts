@@ -5,6 +5,10 @@ export const LEAN_SEMANTICS_COMMIT = '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b' 
 export type SurfaceFeatureClass = 'L' | 'D' | 'E' | 'X';
 export type ProofScriptFeatureId =
   | 'L-CORE-LEAN'
+  | 'L-LEAN434-ERASED-DO'
+  | 'L-LEAN434-MONOTONICITY-BY'
+  | 'L-LEAN434-RECALL'
+  | 'L-LEAN434-LIA-GROBNER-PARAMS'
   | 'D-CALL'
   | 'D-EXPLICIT-PARAMS'
   | 'D-DECL-SEMI'
@@ -16,6 +20,13 @@ export type ProofScriptFeatureId =
   | 'E-INDUCTIVE-BODY'
   | 'E-MATCH-BODY'
   | 'E-WHERE-BODY';
+
+export const LEAN434_INHERITED_FEATURE_IDS = [
+  'L-LEAN434-ERASED-DO',
+  'L-LEAN434-MONOTONICITY-BY',
+  'L-LEAN434-RECALL',
+  'L-LEAN434-LIA-GROBNER-PARAMS',
+] as const satisfies readonly ProofScriptFeatureId[];
 
 export interface SourcePosition {
   readonly offset: number;

@@ -71,7 +71,7 @@ export class TypeChecker {
         // Instantiating the value is definitionally equal to retaining the local let and avoids leaking an fvar.
         r=this.infer(instantiate1(e.body,e.value),inferOnly);break;
       }
-      case'proj':r=this.inferProj(e);break;
+      case'proj':r=this.inferProj(e,inferOnly);break;
     }
     cache.set(key,r);return r;
   }
@@ -82,9 +82,9 @@ export class TypeChecker {
   isProp(e:Expr):boolean{return normalizesToZero(this.getSortLevel(e));}
 
   private validProjIndex(index:number):boolean{return Number.isInteger(index)&&index>=0&&index<=0xffff_ffff;}
-  private inferProj(e:Extract<Expr,{kind:'proj'}>):Expr{
+  private inferProj(e:Extract<Expr,{kind:'proj'}>,inferOnly:boolean):Expr{
     if(!this.validProjIndex(e.index))throw new KernelError('invalid projection index');
-    const st=this.whnf(this.infer(e.expr));const av=appView(st);if(av.fn.kind!=='const'||!nameEq(av.fn.name,e.typeName))throw new KernelError('invalid projection: structure type mismatch');
+    const st=this.whnf(this.infer(e.expr,inferOnly));const av=appView(st);if(av.fn.kind!=='const'||!nameEq(av.fn.name,e.typeName))throw new KernelError('invalid projection: structure type mismatch');
     const ii=this.env.get(e.typeName);if(ii.kind!=='inductive'||ii.ctors.length!==1||av.args.length!==ii.numParams+ii.numIndices)throw new KernelError('invalid projection: not a fully applied structure');
     const ci=this.env.get(ii.ctors[0]!);if(ci.kind!=='constructor'||e.index>=ci.numFields)throw new KernelError('invalid projection index');
     let ct=instantiateExprLevels(ci.type,ci.levelParams,av.fn.levels);

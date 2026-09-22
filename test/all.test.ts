@@ -208,6 +208,16 @@ test('Prop inductive cannot large-eliminate when data field occurs only inside a
 
 
 
+test('projection checking validates the projected structure expression',()=>{
+ const env=baseEnv(),FalseN=N.False,TrueN=nameFromDotted('True'),TrueIntro=nameFromDotted('True.intro'),Wrapper=nameFromDotted('Arena.Wrapper'),Mk=nameFromDotted('Arena.Wrapper.mk');
+ env.add({kind:'axiom',name:FalseN,levelParams:[],type:sort(levelZero)});
+ env.add({kind:'axiom',name:TrueN,levelParams:[],type:sort(levelZero)});
+ env.add({kind:'axiom',name:TrueIntro,levelParams:[],type:constant(TrueN)});
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:Wrapper,type:sort(levelZero),ctors:[{name:Mk,type:forallE(nameFromDotted('p'),constant(FalseN),constant(Wrapper))}]}]});
+ const badStruct=app(constant(Mk),constant(TrueIntro));
+ const badProj={kind:'proj',typeName:Wrapper,index:0,expr:badStruct} as const;
+ throws(()=>new TypeChecker(env).check(badProj));
+});
 test('projection typing forbids extracting data from a proof',()=>{
  const env=baseEnv(),I=nameFromDotted('ProofBox'),mk=nameFromDotted('ProofBox.mk'),p=nameFromDotted('proofBox');
  addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:sort(levelZero),ctors:[{name:mk,type:forallE(nameFromDotted('n'),constant(N.Nat),constant(I))}]}]});

@@ -1050,12 +1050,14 @@ test('kernel metadata equivalence ignores binder display names but retains annot
  assert(!exprKernelMetadataEq(a,implicit),'binder annotations must remain significant');
 });
 
-test('lean4export replay rejects sparse or out-of-order intern indices',()=>{
- const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
-  '{"in":2,"str":{"pre":0,"str":"sparse"}}'
- ].join('\n');
- throws(()=>new Lean4ExportReplay().replay(nd));
+test('lean4export replay accepts sparse and out-of-order intern indices',()=>{
+ const meta='{"meta":{"exporter":{"name":"handcrafted","version":"0.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}';
+ const sparse=[meta,'{"in":2,"str":{"pre":0,"str":"foo"}}','{"ie":4,"sort":0}','{"axiom":{"isUnsafe":false,"levelParams":[],"name":2,"type":4}}'].join('\n');
+ const a=new Lean4ExportReplay();a.replay(sparse);assert(a.env.entries().length===1);
+ const outOfOrder=[meta,'{"in":1,"str":{"pre":0,"str":"foo"}}','{"il":2,"succ":0}','{"il":1,"succ":2}','{"ie":0,"sort":1}','{"axiom":{"isUnsafe":false,"levelParams":[],"name":1,"type":0}}'].join('\n');
+ const b=new Lean4ExportReplay();b.replay(outOfOrder);assert(b.env.entries().length===1);
+ const duplicate=[meta,'{"in":2,"str":{"pre":0,"str":"foo"}}','{"in":2,"str":{"pre":0,"str":"bar"}}'].join('\n');
+ throws(()=>new Lean4ExportReplay().replay(duplicate));
 });
 
 test('lean4export replay rejects version drift before declarations',()=>{

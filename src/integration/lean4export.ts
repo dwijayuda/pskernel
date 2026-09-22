@@ -26,12 +26,22 @@ function boolField(o:JObject,k:string,where:string):boolean{return asBoolean(fie
 function namesEq(a:readonly Name[],b:readonly Name[]):boolean{return a.length===b.length&&a.every((x,i)=>nameEq(x,b[i]!));}
 class DenseIndexTable<T>{
   private readonly values:T[];
-  constructor(seed:readonly T[]=[]){this.values=[...seed];}
-  get size():number{return this.values.length;}
-  get(i:number,what:string):T{const x=this.values[i];if(x===undefined)throw new KernelError(`lean4export ${what} reference ${i} is undefined`);return x;}
+  private readonly sparse=new Map<number,T>();
+  private count:number;
+  constructor(seed:readonly T[]=[]){this.values=[...seed];this.count=seed.length;}
+  get size():number{return this.count;}
+  get(i:number,what:string):T{
+    if(i<this.values.length)return this.values[i]!;
+    const x=this.sparse.get(i);if(x===undefined)throw new KernelError(`lean4export ${what} reference ${i} is undefined`);return x;
+  }
   add(i:number,v:T,what:string):void{
-    if(i!==this.values.length)throw new KernelError(`lean4export ${what} index ${i} is not the next dense index ${this.values.length}`);
+    if(i<this.values.length||this.sparse.has(i))throw new KernelError(`lean4export ${what} index ${i} is already defined`);
+    this.count++;
+    if(i!==this.values.length){this.sparse.set(i,v);return;}
     this.values.push(v);
+    while(this.sparse.has(this.values.length)){
+      const j=this.values.length,next=this.sparse.get(j)!;this.sparse.delete(j);this.values.push(next);
+    }
   }
 }
 function sameBool(a:boolean|undefined,b:boolean):boolean{return (a??false)===b;}

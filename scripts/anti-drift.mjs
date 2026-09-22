@@ -9,4 +9,16 @@ if (lock.lean4export?.toolchain !== 'leanprover/lean4:v4.34.0') throw new Error(
 const forbidden = [/lean\s*4\.3[0-3]/i, /equivmanager/i];
 function walk(p) { for (const n of readdirSync(p)) { const q=join(p,n); const s=statSync(q); if(s.isDirectory()) walk(q); else if(q.endsWith('.ts')) { const t=readFileSync(q,'utf8'); for(const r of forbidden) if(r.test(t)) throw new Error(`Anti-drift violation ${r} in ${q}`); } } }
 walk(join(root,'src'));
-console.log('anti-drift: PASS (Lean 4.34.0 pinned)');
+
+// Package implementation source is TypeScript-first. Runtime .js is generated
+// under dist; hand-authored .mjs in packages would reintroduce two source
+// languages and bypass strict tsc checking.
+function forbidPackageMjs(p) {
+  for (const n of readdirSync(p)) {
+    const q=join(p,n); const s=statSync(q);
+    if (s.isDirectory()) forbidPackageMjs(q);
+    else if (q.endsWith('.mjs')) throw new Error('Anti-drift violation: hand-authored .mjs package source in ' + q);
+  }
+}
+forbidPackageMjs(join(root,'packages'));
+console.log('anti-drift: PASS (Lean 4.34.0 pinned; packages TypeScript-first)');

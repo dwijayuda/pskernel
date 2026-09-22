@@ -23,7 +23,8 @@
         "kernel",
         "module",
         "conformance"
-      ]
+      ],
+      "sourceLanguage": "typescript"
     },
     {
       "name": "module",
@@ -34,7 +35,8 @@
       "packageName": "@proofscript/module",
       "dependsOn": [
         "kernel"
-      ]
+      ],
+      "sourceLanguage": "typescript"
     },
     {
       "name": "conformance",
@@ -45,7 +47,8 @@
       "packageName": "@proofscript/conformance",
       "dependsOn": [
         "kernel"
-      ]
+      ],
+      "sourceLanguage": "typescript"
     },
     {
       "name": "lean4export",
@@ -57,7 +60,8 @@
       "dependsOn": [
         "kernel",
         "module"
-      ]
+      ],
+      "sourceLanguage": "typescript"
     },
     {
       "name": "browser",
@@ -216,5 +220,10 @@
         "language"
       ]
     }
-  ]
+  ],
+  "sourcePolicy": {
+    "authored": "typescript",
+    "runtime": "generated-esm-js",
+    "forbidHandAuthoredMjs": true
+  }
 }

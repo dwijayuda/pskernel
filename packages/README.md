@@ -36,3 +36,15 @@ Only after:
 4. root build/test behavior is reproduced under the workspace layout.
 
 Until then, manifests are architectural scaffolds rather than installable release packages.
+
+
+## Source language policy
+
+Package implementation source is **TypeScript-first**.
+
+- Author package code as `.ts`.
+- Compile to ESM `.js` under `dist/`.
+- Do not add hand-authored `.mjs` under `packages/` without an explicit architecture exception.
+- Root `scripts/*.mjs` are separate oracle/CI scripts and are not covered by this package-source rule.
+
+The root anti-drift check enforces this policy so new packages cannot silently bypass strict TypeScript checking.

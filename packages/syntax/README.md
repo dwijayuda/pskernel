@@ -24,3 +24,19 @@ f/-comment-/(x)  trivia-separated; not D-CALL
 ```
 
 Parser/category ownership will be implemented in later Phase-B packages against the v0.7 reference.
+
+
+## D-CALL parser MVP
+
+The first feature-scoped parser/lowerer covers the v0.7 direct cases:
+
+```text
+add(1, 2)       -> add 1 2
+f((x, y))       -> f (x, y)
+f()             -> f ()
+g(f(x), h(y))   -> g (f x) (h y)
+```
+
+Protected neighbors such as `f (x)`, `f (x, y)`, and comment-separated `f/-c-/(x)` return `DEFER`.
+
+This is intentionally not yet the full inherited Lean term grammar. Arbitrary Lean subterms inside D-CALL arguments will be supported through the later recursive term/category parser rather than by ad-hoc text rewriting.

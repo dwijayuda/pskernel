@@ -5,12 +5,15 @@
   "type": "module",
   "description": "ProofScript v0.7 source positions, trivia-preserving tokens, lexical errors, and feature identifiers.",
   "proofscript": {
-    "status": "lexer-mvp",
+    "status": "d-call-mvp",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript",
     "specVersion": "0.7.0",
-    "leanSemantics": "4.34.0"
+    "leanSemantics": "4.34.0",
+    "implementedFeatures": [
+      "D-CALL"
+    ]
   },
   "exports": {
     ".": {

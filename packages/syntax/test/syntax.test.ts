@@ -11,6 +11,7 @@ import {
   ParserError,
   TokenCursor,
   spanFromTokens,
+  lowerDCallSource,
   lex,
   significantTokens,
 } from '../src/index.js';
@@ -122,4 +123,32 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const error=new ParserError('PS_AMBIGUOUS_OWNERSHIP','ambiguous ownership',token.span);
   equal(error.code,'PS_AMBIGUOUS_OWNERSHIP');
   assert(error instanceof SyntaxError);
+}
+
+
+// v0.7 D-CALL conformance slice.
+{
+  const lowered=lowerDCallSource('add(1, 2)');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'add 1 2');
+}
+{
+  const lowered=lowerDCallSource('f((x, y))');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'f (x, y)');
+}
+{
+  const lowered=lowerDCallSource('f()');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'f ()');
+}
+{
+  const lowered=lowerDCallSource('g(f(x), h(y))');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'g (f x) (h y)');
+}
+{
+  equal(lowerDCallSource('f (x)').kind,'defer');
+  equal(lowerDCallSource('f (x, y)').kind,'defer');
+  equal(lowerDCallSource('f/-comment-/(x)').kind,'defer');
 }

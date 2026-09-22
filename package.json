@@ -26,6 +26,6 @@
     "generate:fixtures": "bash scripts/generate-oracle-fixtures.sh"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "5.8.3"
   }
 }

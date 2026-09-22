@@ -160,10 +160,11 @@ The root set covers `Lean.PersistentHashMap.Entry`, `Lean.PersistentHashMap.Node
 
 Reproducible export uses `oracle/replay-probe/DependencyExport.lean` with module `Lean.Data.PersistentHashMap` and the roots listed above. `npm run oracle:lean-persistenthashmap` runs this gate independently and it is included in `npm run check:corpus`.
 
-## Native reduction: kernel-provable subset
+## Native reduction: explicit TCB extension
 
-Lean 4.34 implements `Lean.reduceNat c` / `Lean.reduceBool c` by executing compiler IR for the closed constant `c`. That compiler/interpreter path is an explicit extension of the trusted code base and is deprecated upstream.
+Lean 4.34 implements `Lean.reduceNat c` / `Lean.reduceBool c` by executing compiler IR for the closed constant `c`. That path observes `[implemented_by]`, `[extern]`, and compiled implementations, so ordinary logical normalization of `c` is not behaviorally equivalent to the official kernel.
 
-The TypeScript kernel now implements a conservative first tier: if ordinary kernel reduction of the referenced closed constant already reaches a concrete Nat or Bool, the native-reduction hook returns that same value. This does not trust an additional evaluator and is therefore safe for external checking. Constants that require compiler IR, partial execution, implementation overrides, or extern behavior continue to fail closed.
+The TypeScript checker therefore fails closed on native reduction by default. Full native behavior is exposed through the shape-checked `NativeEvaluator` interface; configuring a provider explicitly extends the trusted computing base, matching Lean's own warning for this deprecated feature. Provider results must match the requested Bool/Nat result kind and Nat results must be non-negative.
 
-The official differential gate now includes Lean 4.34-style large arithmetic cases corresponding to `tests/elab/kernel1.lean`; `npm run oracle:defeq` passes **26/26** paired cases. This is partial native-reduction compatibility, not a claim that Lean's compiler-IR interpreter has been reimplemented.
+The official differential gate remains **26/26**. Its two native-reduction cases use explicit controlled providers for constants whose official Lean results are known. A standalone TypeScript compiler-IR provider remains an open compatibility gate.
+

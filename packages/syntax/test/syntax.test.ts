@@ -7,6 +7,10 @@ import {
   hasTriviaBefore,
   isAdjacentCallOpen,
   classifyCallOpen,
+  decideDCallOpen,
+  ParserError,
+  TokenCursor,
+  spanFromTokens,
   lex,
   significantTokens,
 } from '../src/index.js';
@@ -37,12 +41,16 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
   equal(tokens.map(t=>t.text).join(' '), 'f ( x )');
   assert(isAdjacentCallOpen(tokens[1]!), 'f(x) must expose an adjacent call open');
   equal(classifyCallOpen(tokens[1]!).feature,'D-CALL');
+  const owned=decideDCallOpen(tokens[1]!);
+  equal(owned.kind,'proofscript');
+  if(owned.kind==='proofscript')equal(owned.node.feature,'D-CALL');
   assert(!hasTriviaBefore(tokens[1]!));
 }
 {
   const tokens=significantTokens('f (x)');
   assert(!isAdjacentCallOpen(tokens[1]!), 'f (x) must defer rather than claim D-CALL');
   equal(classifyCallOpen(tokens[1]!).owner,'defer');
+  equal(decideDCallOpen(tokens[1]!).kind,'defer');
   equal(tokens[1]!.leadingTrivia[0]?.kind, 'whitespace');
 }
 {
@@ -90,3 +98,28 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
 }
 
 console.log('ok - @proofscript/syntax lexer MVP');
+
+
+// Shared parser-core contract used by every D/E feature parser.
+{
+  const tokens=lex('f(x)');
+  const cursor=new TokenCursor(tokens);
+  equal(cursor.peek().text,'f');
+  const f=cursor.expectKind('identifier');
+  const open=cursor.expect('(');
+  equal(cursor.position,2);
+  const mark=cursor.mark();
+  equal(cursor.expectKind('identifier').text,'x');
+  cursor.reset(mark);
+  equal(cursor.consume().text,'x');
+  const close=cursor.expect(')');
+  equal(spanFromTokens(f,close).end.offset,4);
+  assert(open.adjacentToPrevious);
+  assert(cursor.done);
+}
+{
+  const token=lex('x')[0]!;
+  const error=new ParserError('PS_AMBIGUOUS_OWNERSHIP','ambiguous ownership',token.span);
+  equal(error.code,'PS_AMBIGUOUS_OWNERSHIP');
+  assert(error instanceof SyntaxError);
+}

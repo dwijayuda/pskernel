@@ -41,8 +41,22 @@ Write-Host "Building pskernel..."
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "Running canonical Full Std replay. Progress is also written to $Log"
-& npm run oracle:std-full 2>&1 | Tee-Object -FilePath $Log -Append
-$code = $LASTEXITCODE
+
+# Windows PowerShell 5.1 turns native-process stderr into ErrorRecord objects.
+# npm writes normal notices/progress to stderr, so with ErrorActionPreference=Stop
+# a successful native command can be aborted before its exit code is observed.
+# Keep strict PowerShell error handling everywhere else, but treat native stdout/
+# stderr as ordinary log data for this one command.
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+try {
+  & npm run oracle:std-full 2>&1 |
+    ForEach-Object { $_.ToString() } |
+    Tee-Object -FilePath $Log -Append
+  $code = $LASTEXITCODE
+} finally {
+  $ErrorActionPreference = $previousErrorActionPreference
+}
 
 "finished=$(Get-Date -Format o)" | Add-Content $Log
 "exitCode=$code" | Add-Content $Log

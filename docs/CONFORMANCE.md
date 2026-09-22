@@ -1,7 +1,7 @@
 
 ## Lean 4.34 primitive-closure oracle
 
-`npm run oracle:primitive` replays the pinned `oracle/fixtures/lean434-primitive-closure.ndjson` stream through the production importer and kernel. The fixture contains 14,702 export records (12,125 expressions, 325 declaration records) and must result in exactly 390 environment constants. It exercises the real Lean 4.34 dependency closure through `Nat.mod`, `Nat.div`, `Nat.gcd`, and `Nat.bitwise`; no exported primitive declaration is trusted without its production recognizer.
+`npm run oracle:primitive` replays the pinned `oracle/fixtures/lean434-primitive-closure.ndjson` stream through the production importer and kernel. The fixture contains 15,320 export records (12,610 expressions, 325 declaration records) and must result in exactly 390 environment constants. It exercises the real Lean 4.34 dependency closure through `Nat.mod`, `Nat.div`, `Nat.gcd`, and `Nat.bitwise`; no exported primitive declaration is trusted without its production recognizer.
 
 Private Lean names remain structural: `_private.Init.Data.Nat.Bitwise.Basic.0...` contains a numeric `Name.num 0` component and is intentionally not interchangeable with a dotted string component `"0"`.
 

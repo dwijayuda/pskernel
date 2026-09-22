@@ -10,10 +10,6 @@ structure S where
   exprs : HashMap ExprStructEq Nat := HashMap.emptyWithCapacity 256
   emitted : NameSet := {}
   active : NameSet := {}
-  segmentLimit : Nat := 0
-  segmentIndex : Nat := 0
-  segmentUnits : Nat := 0
-  segmentOpen : Bool := false
 
 abbrev M := StateT S IO
 
@@ -301,42 +297,6 @@ def semanticDeps (n : Name) : List Name :=
   else
     []
 
-def resetInternTables : M Unit :=
-  modify fun s => { s with
-    names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
-    levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
-    exprs := HashMap.emptyWithCapacity 256
-  }
-
-def dumpMeta : IO Unit :=
-  IO.println <| (Json.mkObj [("meta", Json.mkObj [
-    ("exporter", Json.mkObj [("name", "dependency-closure"), ("version", "1")]),
-    ("lean", Json.mkObj [("githash", githash), ("version", versionString)]),
-    ("format", Json.mkObj [("version", "3.1.0")])
-  ])]).compress
-
-def beginAdmissionUnit : M Unit := do
-  let st ← get
-  if st.segmentLimit == 0 then return
-  if !st.segmentOpen || st.segmentUnits >= st.segmentLimit then
-    let idx := if st.segmentOpen then st.segmentIndex + 1 else st.segmentIndex
-    resetInternTables
-    IO.println <| (Json.mkObj [("segment", Json.mkObj [
-      ("index", idx),
-      ("maxAdmissionUnits", st.segmentLimit)
-    ])]).compress
-    dumpMeta
-    modify fun s => { s with
-      segmentOpen := true
-      segmentIndex := idx
-      segmentUnits := 0
-    }
-
-def endAdmissionUnit : M Unit := do
-  if (← get).segmentLimit > 0 then
-    modify fun s => { s with segmentUnits := s.segmentUnits + 1 }
-
-
 mutual
   partial def dumpConstant (env : Environment) (name : Name) : M Unit := do
     if ← isEmitted name then return
@@ -359,11 +319,9 @@ mutual
         for cn in tv.ctors do
           let cci ← findCI env cn
           dumpConstants env cci.getUsedConstantsAsSet
-      beginAdmissionUnit
       let emitted ← dumpInductiveGroupAll env iv
       setEmitted emitted
       clearActive iv.all
-      endAdmissionUnit
     | .defnInfo dv =>
       let group := if dv.all.isEmpty then [dv.name] else dv.all
       setActive group
@@ -371,50 +329,55 @@ mutual
         let some (.defnInfo _) := env.find? n | throw <| IO.userError s!"mutual definition member {n} missing"
         let ci ← findCI env n
         dumpConstants env ci.getUsedConstantsAsSet
-      beginAdmissionUnit
       for n in group do
         let some (.defnInfo d) := env.find? n | throw <| IO.userError s!"mutual definition member {n} missing"
         dumpDefinition d
       setEmitted group
       clearActive group
-      endAdmissionUnit
     | .axiomInfo av =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
-      beginAdmissionUnit
       dumpAxiom av
       setEmitted [name]
       clearActive [name]
-      endAdmissionUnit
     | .thmInfo tv =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
-      beginAdmissionUnit
       dumpTheorem tv
       setEmitted [name]
       clearActive [name]
-      endAdmissionUnit
     | .opaqueInfo ov =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
-      beginAdmissionUnit
       dumpOpaque ov
       setEmitted [name]
       clearActive [name]
-      endAdmissionUnit
     | .quotInfo qv =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
-      beginAdmissionUnit
       dumpQuot qv
       setEmitted [name]
       clearActive [name]
-      endAdmissionUnit
 
   partial def dumpConstants (env : Environment) (names : NameSet) : M Unit := do
     for n in names do dumpConstant env n
 end
 
+
+def resetInternTables : M Unit :=
+  modify fun s => { s with
+    names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
+    levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
+    exprs := HashMap.emptyWithCapacity 256
+    active := {}
+  }
+
+def dumpMeta : IO Unit :=
+  IO.println <| (Json.mkObj [("meta", Json.mkObj [
+    ("exporter", Json.mkObj [("name", "dependency-closure"), ("version", "1")]),
+    ("lean", Json.mkObj [("githash", githash), ("version", versionString)]),
+    ("format", Json.mkObj [("version", "3.1.0")])
+  ])]).compress
 
 def rootsForModule (env : Environment) (idx : ModuleIdx) : List Name := Id.run do
   let mut roots := []
@@ -572,8 +535,22 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
     ("directRoots", selected.size)
   ])]).compress
   let _ ← (do
-    modify fun s => { s with segmentLimit := 50 }
-    for n in selected do dumpConstant env n) |>.run {}
+    let segmentRoots : Nat := 25
+    let mut segment : Nat := 0
+    let mut inSegment : Nat := 0
+    for n in selected do
+      if inSegment == 0 then
+        resetInternTables
+        IO.println <| (Json.mkObj [("segment", Json.mkObj [
+          ("index", segment),
+          ("maxDirectRoots", segmentRoots)
+        ])]).compress
+        dumpMeta
+      dumpConstant env n
+      inSegment := inSegment + 1
+      if inSegment == segmentRoots then
+        segment := segment + 1
+        inSegment := 0) |>.run {}
   pure ()
 
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do

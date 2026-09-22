@@ -1,0 +1,12 @@
+{
+  "name": "@proofscript/syntax",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "ProofScript source positions, syntax trees, parser combinators and grammar.",
+  "proofscript": {
+    "status": "scaffold",
+    "phase": "B",
+    "trust": "untrusted-support"
+  }
+}

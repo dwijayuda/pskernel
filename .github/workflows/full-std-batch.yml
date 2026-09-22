@@ -1,4 +1,4 @@
-name: Full Std batched replay
+name: Full Std adaptive replay
 
 on:
   workflow_dispatch:
@@ -8,7 +8,8 @@ on:
       - "src/**"
       - "test/**"
       - "oracle/replay-probe/DependencyExport.lean"
-      - "scripts/batch-*.mjs"
+      - "scripts/adaptive-root-oracle.mjs"
+      - "scripts/batch-replay-worker.mjs"
       - ".github/workflows/full-std-batch.yml"
 
 permissions:
@@ -19,76 +20,61 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  std-prefix:
-    name: Std roots 0-15999
+  std-range:
+    name: Std roots ${{ matrix.start }}-${{ matrix.end }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install pinned Lean 4.34
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-          "$HOME/.elan/bin/lean" --version
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm install --no-audit --no-fund
-      - run: npm run build
-      - name: Verify 2,000-root prefix batches
-        run: node scripts/batch-stream-oracle.mjs Std 114029 2000 0 8 58
-
-  std-tail:
-    name: Std 500-root batches ${{ matrix.start }}-${{ matrix.end }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       max-parallel: 10
       matrix:
         include:
-          - { start: 32, end: 36, count: 5 }
-          - { start: 37, end: 41, count: 5 }
-          - { start: 42, end: 46, count: 5 }
-          - { start: 47, end: 51, count: 5 }
-          - { start: 52, end: 56, count: 5 }
-          - { start: 57, end: 61, count: 5 }
-          - { start: 62, end: 66, count: 5 }
-          - { start: 67, end: 71, count: 5 }
-          - { start: 72, end: 76, count: 5 }
-          - { start: 77, end: 81, count: 5 }
-          - { start: 82, end: 86, count: 5 }
-          - { start: 87, end: 91, count: 5 }
-          - { start: 92, end: 96, count: 5 }
-          - { start: 97, end: 101, count: 5 }
-          - { start: 102, end: 106, count: 5 }
-          - { start: 107, end: 111, count: 5 }
-          - { start: 112, end: 116, count: 5 }
-          - { start: 117, end: 121, count: 5 }
-          - { start: 122, end: 126, count: 5 }
-          - { start: 127, end: 131, count: 5 }
-          - { start: 132, end: 136, count: 5 }
-          - { start: 137, end: 141, count: 5 }
-          - { start: 142, end: 146, count: 5 }
-          - { start: 147, end: 151, count: 5 }
-          - { start: 152, end: 156, count: 5 }
-          - { start: 157, end: 161, count: 5 }
-          - { start: 162, end: 166, count: 5 }
-          - { start: 167, end: 171, count: 5 }
-          - { start: 172, end: 176, count: 5 }
-          - { start: 177, end: 181, count: 5 }
-          - { start: 182, end: 186, count: 5 }
-          - { start: 187, end: 191, count: 5 }
-          - { start: 192, end: 196, count: 5 }
-          - { start: 197, end: 201, count: 5 }
-          - { start: 202, end: 206, count: 5 }
-          - { start: 207, end: 211, count: 5 }
-          - { start: 212, end: 216, count: 5 }
-          - { start: 217, end: 221, count: 5 }
-          - { start: 222, end: 226, count: 5 }
-          - { start: 227, end: 228, count: 2 }
+          - { start: 0, end: 2499, count: 2500 }
+          - { start: 2500, end: 4999, count: 2500 }
+          - { start: 5000, end: 7499, count: 2500 }
+          - { start: 7500, end: 9999, count: 2500 }
+          - { start: 10000, end: 12499, count: 2500 }
+          - { start: 12500, end: 14999, count: 2500 }
+          - { start: 15000, end: 17499, count: 2500 }
+          - { start: 17500, end: 19999, count: 2500 }
+          - { start: 20000, end: 22499, count: 2500 }
+          - { start: 22500, end: 24999, count: 2500 }
+          - { start: 25000, end: 27499, count: 2500 }
+          - { start: 27500, end: 29999, count: 2500 }
+          - { start: 30000, end: 32499, count: 2500 }
+          - { start: 32500, end: 34999, count: 2500 }
+          - { start: 35000, end: 37499, count: 2500 }
+          - { start: 37500, end: 39999, count: 2500 }
+          - { start: 40000, end: 42499, count: 2500 }
+          - { start: 42500, end: 44999, count: 2500 }
+          - { start: 45000, end: 47499, count: 2500 }
+          - { start: 47500, end: 49999, count: 2500 }
+          - { start: 50000, end: 52499, count: 2500 }
+          - { start: 52500, end: 54999, count: 2500 }
+          - { start: 55000, end: 57499, count: 2500 }
+          - { start: 57500, end: 59999, count: 2500 }
+          - { start: 60000, end: 62499, count: 2500 }
+          - { start: 62500, end: 64999, count: 2500 }
+          - { start: 65000, end: 67499, count: 2500 }
+          - { start: 67500, end: 69999, count: 2500 }
+          - { start: 70000, end: 72499, count: 2500 }
+          - { start: 72500, end: 74999, count: 2500 }
+          - { start: 75000, end: 77499, count: 2500 }
+          - { start: 77500, end: 79999, count: 2500 }
+          - { start: 80000, end: 82499, count: 2500 }
+          - { start: 82500, end: 84999, count: 2500 }
+          - { start: 85000, end: 87499, count: 2500 }
+          - { start: 87500, end: 89999, count: 2500 }
+          - { start: 90000, end: 92499, count: 2500 }
+          - { start: 92500, end: 94999, count: 2500 }
+          - { start: 95000, end: 97499, count: 2500 }
+          - { start: 97500, end: 99999, count: 2500 }
+          - { start: 100000, end: 102499, count: 2500 }
+          - { start: 102500, end: 104999, count: 2500 }
+          - { start: 105000, end: 107499, count: 2500 }
+          - { start: 107500, end: 109999, count: 2500 }
+          - { start: 110000, end: 112499, count: 2500 }
+          - { start: 112500, end: 114028, count: 1529 }
     steps:
       - uses: actions/checkout@v4
       - name: Install pinned Lean 4.34
@@ -103,18 +89,16 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - run: npm run build
-      - name: Verify dependency-closed Std tail range
-        run: node scripts/batch-stream-oracle.mjs Std 114029 500 ${{ matrix.start }} ${{ matrix.count }} 229
+      - name: Verify adaptive dependency-closed Std root interval
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 ${{ matrix.start }} ${{ matrix.count }} 500 25
 
   std-complete:
     name: Full Std 114,029-root coverage
     if: always()
-    needs: [std-prefix, std-tail]
+    needs: [std-range]
     runs-on: ubuntu-latest
     steps:
-      - name: Require every Std shard
-        shell: bash
+      - name: Require every Std range
         run: |
-          test "${{ needs.std-prefix.result }}" = "success"
-          test "${{ needs.std-tail.result }}" = "success"
-          echo "Full Std coverage PASS: 16,000 prefix roots + 98,029 tail roots = 114,029"
+          test "${{ needs.std-range.result }}" = "success"
+          echo "Full Std coverage PASS: 114,029 / 114,029 direct roots"

@@ -1,6 +1,6 @@
 import { Environment } from '../src/core/environment.js';
 import { app, bvar, constant, exprEq, exprKernelMetadataEq, exprKey, forallE, fvar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
-import { levelEquivalent, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../src/core/level.js';
+import { levelEquivalent, levelMVar, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../src/core/level.js';
 import { nameFromDotted, nameToString } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
 import { lift } from '../src/core/instantiate.js';
@@ -912,6 +912,22 @@ test('declaration rejects undefined universe parameters and accepts declared one
  const env=baseEnv(),k=new Kernel(env),uN=nameFromDotted('u'),u=levelParam(uN);
  throws(()=>k.addAxiom({kind:'axiom',name:nameFromDotted('BadU'),levelParams:[],type:sort(u)}));
  k.addAxiom({kind:'axiom',name:nameFromDotted('GoodU'),levelParams:[uN],type:sort(u)});assert(env.has(nameFromDotted('GoodU')));
+});
+
+test('declaration rejects expression and universe metavariables transactionally',()=>{
+ const env=baseEnv(),k=new Kernel(env),em=nameFromDotted('BadExprMVar'),um=nameFromDotted('BadLevelMVar');
+ throws(()=>k.addAxiom({kind:'axiom',name:em,levelParams:[],type:{kind:'mvar',id:'?m.1'}}));
+ throws(()=>k.addAxiom({kind:'axiom',name:um,levelParams:[],type:sort(levelMVar(nameFromDotted('u?')))}));
+ assert(!env.has(em)&&!env.has(um),'metavariable rejection must commit nothing');
+});
+
+test('mutual inductive duplicate names reject transactionally',()=>{
+ const env=baseEnv(),I=nameFromDotted('DupInd'),Mk=nameFromDotted('DupInd.mk'),T=sort(levelSucc(levelZero));
+ throws(()=>addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[
+  {name:I,type:T,ctors:[{name:Mk,type:constant(I)}]},
+  {name:I,type:T,ctors:[{name:nameFromDotted('DupInd.mk2'),type:constant(I)}]}
+ ]}));
+ assert(!env.has(I)&&!env.has(Mk)&&!env.has(nameFromDotted('DupInd.mk2')),'duplicate mutual inductive rejection must commit nothing');
 });
 
 test('theorem admission requires a proposition',()=>{

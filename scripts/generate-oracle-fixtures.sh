@@ -32,7 +32,7 @@ run_export() {
 }
 
 run_export lean434-init-prelude.ndjson oracle/replay-probe/FullExport.lean
-run_export lean434-primitive-closure.ndjson oracle/replay-probe/DependencyExport.lean Init Nat.mod Nat.div Nat.gcd Nat.bitwise
+run_export lean434-primitive-closure.ndjson oracle/replay-probe/DependencyExport.lean Init Nat.mod Nat.div Nat.gcd Nat.bitwise Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight
 run_export lean434-std-parsec-roots.ndjson oracle/replay-probe/StdParsecRootsExport.lean
 run_export lean434-std-sat-cnf-roots.ndjson oracle/replay-probe/StdSatCNFRootsExport.lean
 run_export lean434-std-byteslice-roots.ndjson oracle/replay-probe/StdByteSliceRootsExport.lean

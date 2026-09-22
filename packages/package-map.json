@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "scaffold+prototype",
+      "status": "prototype+module-commands",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -30,7 +30,7 @@
       "path": "packages/module",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "mvp",
       "packageName": "@proofscript/module",
       "dependsOn": [
         "kernel"

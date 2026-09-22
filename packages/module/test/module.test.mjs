@@ -5,6 +5,7 @@ import {
   decodeModuleArtifact,
   encodeModuleArtifact,
   loadModuleArtifact,
+  moduleArtifactSummary,
   normalizeDeclarationStream,
   verifyModuleArtifact,
   verifyModuleDependencies
@@ -58,3 +59,10 @@ assert.throws(()=>verifyModuleArtifact(reordered),/canonical order|integrity mis
 
 assert.equal(canonicalJson({b:1,a:2}), '{"a":2,"b":1}');
 console.log('ok - @proofscript/module MVP');
+
+const summary=moduleArtifactSummary(a);
+assert.equal(summary.module,'Test.A');
+assert.equal(summary.dependencies,0);
+assert.equal(summary.payloadKind,'lean4export-ndjson');
+const cyc=[];cyc.push(cyc);
+assert.throws(()=>canonicalJson(cyc),/cycle/);

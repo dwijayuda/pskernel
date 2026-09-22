@@ -24,7 +24,13 @@ export function canonicalJson(value){
       return Object.is(x,-0)?'0':JSON.stringify(x);
     }
     if(typeof x==='bigint')fail(`bigint is not valid module JSON at ${path}`);
-    if(Array.isArray(x))return '['+x.map((v,i)=>go(v,`${path}[${i}]`)).join(',')+']';
+    if(Array.isArray(x)){
+      if(seen.has(x))fail(`cycle at ${path}`);
+      seen.add(x);
+      const out='['+x.map((v,i)=>go(v,`${path}[${i}]`)).join(',')+']';
+      seen.delete(x);
+      return out;
+    }
     if(isObject(x)){
       if(seen.has(x))fail(`cycle at ${path}`);
       seen.add(x);
@@ -154,6 +160,20 @@ export function loadModuleArtifact(artifact,{
     env:replay.env,
     stats,
     module:artifact.module,
+    integrity:artifact.integrity
+  };
+}
+
+export function moduleArtifactSummary(artifact){
+  verifyModuleArtifact(artifact);
+  return {
+    format:`${artifact.format}@${artifact.version}`,
+    module:artifact.module,
+    kernel:artifact.kernel,
+    dependencies:artifact.dependencies.length,
+    payloadKind:artifact.payload.kind,
+    payloadBytes:Buffer.byteLength(artifact.payload.text,'utf8'),
+    payloadIntegrity:artifact.payload.integrity,
     integrity:artifact.integrity
   };
 }

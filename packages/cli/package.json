@@ -7,11 +7,12 @@
     "pskernel": "./bin/pskernel.mjs"
   },
   "dependencies": {
-    "lean-ts-kernel": "file:../.."
+    "lean-ts-kernel": "file:../..",
+    "@proofscript/module": "file:../module"
   },
   "description": "Private prototype CLI for streaming pskernel replay/check workflows.",
   "proofscript": {
-    "status": "scaffold+prototype",
+    "status": "prototype+module-commands",
     "phase": "A",
     "trust": "untrusted-support",
     "futureName": "@proofscript/cli"

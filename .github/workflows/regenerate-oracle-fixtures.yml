@@ -39,7 +39,7 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - name: Regenerate pinned corpora
-        run: ./scripts/generate-oracle-fixtures.sh
+        run: bash scripts/generate-oracle-fixtures.sh
       - name: Build TypeScript kernel
         run: npm run build
       - name: Verify generated corpora

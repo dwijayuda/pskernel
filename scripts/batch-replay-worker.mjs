@@ -1,16 +1,40 @@
 import {createInterface} from 'node:readline';
+import {Environment} from '../dist/src/core/environment.js';
 import {Lean4ExportReplay} from '../dist/src/integration/lean4export.js';
 
-const replay=new Lean4ExportReplay();
+const shared=new Environment();
 const rl=createInterface({input:process.stdin,crlfDelay:Infinity});
+let replay=null;
+let lines=0,names=0,levels=0,expressions=0,declarations=0,segments=0;
 let maxRssMiB=process.memoryUsage().rss/1048576;
+const finishSegment=()=>{
+  if(!replay)return;
+  const s=replay.finish();
+  lines+=s.lines;names+=s.names;levels+=s.levels;expressions+=s.expressions;declarations+=s.declarations;
+  replay=null;
+  if(global.gc)global.gc();
+  const rss=process.memoryUsage().rss/1048576;
+  if(rss>maxRssMiB)maxRssMiB=rss;
+};
 for await(const line of rl){
   if(!line.trim())continue;
   let marker=null;try{marker=JSON.parse(line);}catch{}
   if(marker?.environment||marker?.batch)continue;
+  if(marker?.segment){
+    finishSegment();
+    replay=new Lean4ExportReplay(shared);
+    segments++;
+    continue;
+  }
+  if(!replay)replay=new Lean4ExportReplay(shared); // backward-compatible unsegmented batches
   replay.replayLine(line);
   const rss=process.memoryUsage().rss/1048576;
   if(rss>maxRssMiB)maxRssMiB=rss;
 }
-const stats=replay.finish();
-console.log(JSON.stringify({stats,constants:replay.env.entries().length,maxRssMiB:Number(maxRssMiB.toFixed(1))}));
+finishSegment();
+console.log(JSON.stringify({
+  stats:{lines,names,levels,expressions,declarations},
+  constants:shared.entries().length,
+  segments,
+  maxRssMiB:Number(maxRssMiB.toFixed(1))
+}));

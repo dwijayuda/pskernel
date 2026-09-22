@@ -461,8 +461,23 @@ partial def dumpBatchStream (env : Environment) (target : Name) (maxRoots startB
           ("lastModule", last),
           ("directRoots", roots.size)
         ])]).compress
-        dumpMeta
-        let _ ← (do for n in roots do dumpConstant env n) |>.run {}
+        let _ ← (do
+          let segmentRoots : Nat := 50
+          let mut segment : Nat := 0
+          let mut inSegment : Nat := 0
+          for n in roots do
+            if inSegment == 0 then
+              resetInternTables
+              IO.println <| (Json.mkObj [("segment", Json.mkObj [
+                ("index", segment),
+                ("maxDirectRoots", segmentRoots)
+              ])]).compress
+              dumpMeta
+            dumpConstant env n
+            inSegment := inSegment + 1
+            if inSegment == segmentRoots then
+              segment := segment + 1
+              inSegment := 0) |>.run {}
         pure ()
   for idx in [0:buckets.size] do
     let roots := buckets[idx]!

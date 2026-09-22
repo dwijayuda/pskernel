@@ -71,7 +71,7 @@ async function exportBatch(index,path){
 }
 async function replayBatch(index,path){
   const fd=openSync(path,'r');
-  const child=spawn(process.execPath,[`--max-old-space-size=${workerHeapMiB}`,'scripts/batch-replay-worker.mjs'],{cwd:resolve('.'),stdio:[fd,'pipe','pipe']});
+  const child=spawn(process.execPath,['--expose-gc',`--max-old-space-size=${workerHeapMiB}`,'scripts/batch-replay-worker.mjs'],{cwd:resolve('.'),stdio:[fd,'pipe','pipe']});
   let out='',err='';child.stdout.setEncoding('utf8');child.stdout.on('data',d=>out+=d);child.stderr.setEncoding('utf8');child.stderr.on('data',d=>err+=d);
   const [code,signal]=await new Promise(r=>child.on('close',(c,s)=>r([c,s])));
   closeSync(fd);

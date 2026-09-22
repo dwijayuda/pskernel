@@ -1,24 +1,64 @@
 import { Expr } from './expr.js';
 
 export function lift(e: Expr, amount = 1, cutoff = 0): Expr {
-  switch(e.kind){
-    case'bvar':return e.index>=cutoff?{kind:'bvar',index:e.index+amount}:e;
-    case'app':return {...e,fn:lift(e.fn,amount,cutoff),arg:lift(e.arg,amount,cutoff)};
-    case'lam':return {...e,type:lift(e.type,amount,cutoff),body:lift(e.body,amount,cutoff+1)};
-    case'forall':return {...e,type:lift(e.type,amount,cutoff),body:lift(e.body,amount,cutoff+1)};
-    case'let':return {...e,type:lift(e.type,amount,cutoff),value:lift(e.value,amount,cutoff),body:lift(e.body,amount,cutoff+1)};
-    case'mdata':return {...e,expr:lift(e.expr,amount,cutoff)};case'proj':return {...e,expr:lift(e.expr,amount,cutoff)};default:return e;
+  type Frame={e:Expr;cutoff:number;done:boolean};
+  const todo:Frame[]=[{e,cutoff,done:false}],out:Expr[]=[];
+  while(todo.length){
+    const f=todo.pop()!,x=f.e;
+    if(!f.done){
+      switch(x.kind){
+        case'bvar':out.push(x.index>=f.cutoff?{kind:'bvar',index:x.index+amount}:x);break;
+        case'app':todo.push({...f,done:true},{e:x.arg,cutoff:f.cutoff,done:false},{e:x.fn,cutoff:f.cutoff,done:false});break;
+        case'lam':case'forall':todo.push({...f,done:true},{e:x.body,cutoff:f.cutoff+1,done:false},{e:x.type,cutoff:f.cutoff,done:false});break;
+        case'let':todo.push({...f,done:true},{e:x.body,cutoff:f.cutoff+1,done:false},{e:x.value,cutoff:f.cutoff,done:false},{e:x.type,cutoff:f.cutoff,done:false});break;
+        case'mdata':case'proj':todo.push({...f,done:true},{e:x.expr,cutoff:f.cutoff,done:false});break;
+        default:out.push(x);break;
+      }
+      continue;
+    }
+    switch(x.kind){
+      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push({...x,fn,arg});break;}
+      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push({...x,type,body});break;}
+      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push({...x,type,value,body});break;}
+      case'mdata':case'proj':out.push({...x,expr:out.pop()!});break;
+      default:throw new Error('internal lift frame');
+    }
   }
+  if(out.length!==1)throw new Error('internal lift result');
+  return out[0]!;
 }
 export function instantiate(e: Expr, subst: readonly Expr[], depth=0): Expr {
-  switch(e.kind){
-    case'bvar': { if(e.index<depth)return e; const j=e.index-depth; if(j<subst.length)return lift(subst[j]!,depth,0); return {kind:'bvar',index:e.index-subst.length}; }
-    case'app':return {...e,fn:instantiate(e.fn,subst,depth),arg:instantiate(e.arg,subst,depth)};
-    case'lam':return {...e,type:instantiate(e.type,subst,depth),body:instantiate(e.body,subst,depth+1)};
-    case'forall':return {...e,type:instantiate(e.type,subst,depth),body:instantiate(e.body,subst,depth+1)};
-    case'let':return {...e,type:instantiate(e.type,subst,depth),value:instantiate(e.value,subst,depth),body:instantiate(e.body,subst,depth+1)};
-    case'mdata':return {...e,expr:instantiate(e.expr,subst,depth)};case'proj':return {...e,expr:instantiate(e.expr,subst,depth)};default:return e;
+  type Frame={e:Expr;depth:number;done:boolean};
+  const todo:Frame[]=[{e,depth,done:false}],out:Expr[]=[];
+  while(todo.length){
+    const f=todo.pop()!,x=f.e;
+    if(!f.done){
+      switch(x.kind){
+        case'bvar':{
+          if(x.index<f.depth){out.push(x);break;}
+          const j=x.index-f.depth;
+          if(j<subst.length)out.push(lift(subst[j]!,f.depth,0));
+          else out.push({kind:'bvar',index:x.index-subst.length});
+          break;
+        }
+        case'app':todo.push({...f,done:true},{e:x.arg,depth:f.depth,done:false},{e:x.fn,depth:f.depth,done:false});break;
+        case'lam':case'forall':todo.push({...f,done:true},{e:x.body,depth:f.depth+1,done:false},{e:x.type,depth:f.depth,done:false});break;
+        case'let':todo.push({...f,done:true},{e:x.body,depth:f.depth+1,done:false},{e:x.value,depth:f.depth,done:false},{e:x.type,depth:f.depth,done:false});break;
+        case'mdata':case'proj':todo.push({...f,done:true},{e:x.expr,depth:f.depth,done:false});break;
+        default:out.push(x);break;
+      }
+      continue;
+    }
+    switch(x.kind){
+      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push({...x,fn,arg});break;}
+      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push({...x,type,body});break;}
+      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push({...x,type,value,body});break;}
+      case'mdata':case'proj':out.push({...x,expr:out.pop()!});break;
+      default:throw new Error('internal instantiate frame');
+    }
   }
+  if(out.length!==1)throw new Error('internal instantiate result');
+  return out[0]!;
 }
 export const instantiate1=(e:Expr,v:Expr)=>instantiate(e,[v]);
 export function abstractFVar(e:Expr,id:string,depth=0):Expr{

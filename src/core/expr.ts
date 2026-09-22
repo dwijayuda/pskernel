@@ -159,7 +159,23 @@ export function hasLooseBVar(e: Expr, depth=0): boolean {
   }
 }
 export function hasFVar(e: Expr): boolean { switch(e.kind){case'fvar':return true;case'app':return hasFVar(e.fn)||hasFVar(e.arg);case'lam':case'forall':return hasFVar(e.type)||hasFVar(e.body);case'let':return hasFVar(e.type)||hasFVar(e.value)||hasFVar(e.body);case'mdata':return hasFVar(e.expr);case'proj':return hasFVar(e.expr);default:return false;} }
-export function hasMVar(e: Expr): boolean { switch(e.kind){case'mvar':return true;case'sort':return levelHasMVar(e.level);case'const':return e.levels.some(levelHasMVar);case'app':return hasMVar(e.fn)||hasMVar(e.arg);case'lam':case'forall':return hasMVar(e.type)||hasMVar(e.body);case'let':return hasMVar(e.type)||hasMVar(e.value)||hasMVar(e.body);case'mdata':return hasMVar(e.expr);case'proj':return hasMVar(e.expr);default:return false;} }
+export function hasMVar(e: Expr): boolean {
+  const todo:Expr[]=[e];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'mvar':return true;
+      case'sort':if(levelHasMVar(x.level))return true;break;
+      case'const':if(x.levels.some(levelHasMVar))return true;break;
+      case'app':todo.push(x.fn,x.arg);break;
+      case'lam':case'forall':todo.push(x.type,x.body);break;
+      case'let':todo.push(x.type,x.value,x.body);break;
+      case'mdata':case'proj':todo.push(x.expr);break;
+      default:break;
+    }
+  }
+  return false;
+}
 
 export function instantiateExprLevels(e: Expr, params: readonly Name[], levels: readonly Level[]): Expr {
   switch(e.kind){

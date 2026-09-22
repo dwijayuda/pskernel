@@ -1,0 +1,35 @@
+name: Bootstrap kernel source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".bootstrap/pskernel-source.patch"
+      - ".github/workflows/bootstrap-source.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-source-snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply source snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATCH=.bootstrap/pskernel-source.patch
+          if [[ ! -f "$PATCH" ]]; then
+            echo "No bootstrap patch present; nothing to do."
+            exit 0
+          fi
+          git apply --index "$PATCH"
+          git rm "$PATCH"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "import: Lean 4.34 TypeScript kernel snapshot"
+          git push origin HEAD:main

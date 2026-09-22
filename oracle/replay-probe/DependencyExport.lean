@@ -301,6 +301,42 @@ def semanticDeps (n : Name) : List Name :=
   else
     []
 
+def resetInternTables : M Unit :=
+  modify fun s => { s with
+    names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
+    levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
+    exprs := HashMap.emptyWithCapacity 256
+  }
+
+def dumpMeta : IO Unit :=
+  IO.println <| (Json.mkObj [("meta", Json.mkObj [
+    ("exporter", Json.mkObj [("name", "dependency-closure"), ("version", "1")]),
+    ("lean", Json.mkObj [("githash", githash), ("version", versionString)]),
+    ("format", Json.mkObj [("version", "3.1.0")])
+  ])]).compress
+
+def beginAdmissionUnit : M Unit := do
+  let st ← get
+  if st.segmentLimit == 0 then return
+  if !st.segmentOpen || st.segmentUnits >= st.segmentLimit then
+    let idx := if st.segmentOpen then st.segmentIndex + 1 else st.segmentIndex
+    resetInternTables
+    IO.println <| (Json.mkObj [("segment", Json.mkObj [
+      ("index", idx),
+      ("maxAdmissionUnits", st.segmentLimit)
+    ])]).compress
+    dumpMeta
+    modify fun s => { s with
+      segmentOpen := true
+      segmentIndex := idx
+      segmentUnits := 0
+    }
+
+def endAdmissionUnit : M Unit := do
+  if (← get).segmentLimit > 0 then
+    modify fun s => { s with segmentUnits := s.segmentUnits + 1 }
+
+
 mutual
   partial def dumpConstant (env : Environment) (name : Name) : M Unit := do
     if ← isEmitted name then return
@@ -379,41 +415,6 @@ mutual
     for n in names do dumpConstant env n
 end
 
-
-def resetInternTables : M Unit :=
-  modify fun s => { s with
-    names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
-    levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
-    exprs := HashMap.emptyWithCapacity 256
-  }
-
-def dumpMeta : IO Unit :=
-  IO.println <| (Json.mkObj [("meta", Json.mkObj [
-    ("exporter", Json.mkObj [("name", "dependency-closure"), ("version", "1")]),
-    ("lean", Json.mkObj [("githash", githash), ("version", versionString)]),
-    ("format", Json.mkObj [("version", "3.1.0")])
-  ])]).compress
-
-def beginAdmissionUnit : M Unit := do
-  let st ← get
-  if st.segmentLimit == 0 then return
-  if !st.segmentOpen || st.segmentUnits >= st.segmentLimit then
-    let idx := if st.segmentOpen then st.segmentIndex + 1 else st.segmentIndex
-    resetInternTables
-    IO.println <| (Json.mkObj [("segment", Json.mkObj [
-      ("index", idx),
-      ("maxAdmissionUnits", st.segmentLimit)
-    ])]).compress
-    dumpMeta
-    modify fun s => { s with
-      segmentOpen := true
-      segmentIndex := idx
-      segmentUnits := 0
-    }
-
-def endAdmissionUnit : M Unit := do
-  if (← get).segmentLimit > 0 then
-    modify fun s => { s with segmentUnits := s.segmentUnits + 1 }
 
 def rootsForModule (env : Environment) (idx : ModuleIdx) : List Name := Id.run do
   let mut roots := []

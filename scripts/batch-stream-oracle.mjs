@@ -1,19 +1,17 @@
-import {spawn} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
 import {createInterface} from 'node:readline';
-import {once} from 'node:events';
-import {resolve, join, delimiter} from 'node:path';
+import {createReadStream,mkdtempSync,openSync,closeSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {resolve,join,delimiter} from 'node:path';
 import fs from 'node:fs';
 
 const moduleName=process.argv[2]??'Init.Prelude';
 const expectedArg=process.argv[3];
 const maxRootsArg=process.argv[4]??process.env.PSKERNEL_BATCH_ROOTS??'4000';
 const maxRoots=Number(maxRootsArg);
-const rangeStartArg=process.argv[5];
-const rangeCountArg=process.argv[6];
-const rangeStart=rangeStartArg===undefined?0:Number(rangeStartArg);
-const rangeCount=rangeCountArg===undefined?0:Number(rangeCountArg);
-const expectedBatchesArg=process.argv[7];
-const expectedTotalBatches=expectedBatchesArg===undefined?null:Number(expectedBatchesArg);
+const rangeStart=process.argv[5]===undefined?0:Number(process.argv[5]);
+const rangeCount=process.argv[6]===undefined?0:Number(process.argv[6]);
+const expectedTotalBatches=process.argv[7]===undefined?null:Number(process.argv[7]);
 if(!Number.isSafeInteger(maxRoots)||maxRoots<=0)throw new Error(`batch-stream-oracle: invalid maxRoots ${maxRootsArg}`);
 if(!Number.isSafeInteger(rangeStart)||rangeStart<0||!Number.isSafeInteger(rangeCount)||rangeCount<0)throw new Error('batch-stream-oracle: invalid batch range');
 if(expectedTotalBatches!==null&&(!Number.isSafeInteger(expectedTotalBatches)||expectedTotalBatches<=0))throw new Error('batch-stream-oracle: invalid expected total batch count');
@@ -21,96 +19,87 @@ if(expectedTotalBatches!==null&&(!Number.isSafeInteger(expectedTotalBatches)||ex
 const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin',...(process.env.PATH??'').split(delimiter)]
   .filter(Boolean).map(p=>resolve(p));
 const bin=candidates.find(p=>fs.existsSync(join(p,'lean')));
-if(!bin)throw new Error('batch-stream-oracle: set LEAN434_BIN to Lean 4.34.0 bin directory');
+if(!bin)throw new Error('batch-stream-oracle: set LEAN434_BIN or put Lean 4.34 on PATH');
 const lean=join(bin,'lean');
 const envVars={...process.env,PATH:`${bin}:${process.env.PATH??''}`};
-const exportArgs=rangeCount>0||rangeStart>0?['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--batch-range',String(maxRoots),String(rangeStart),String(rangeCount)]:['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--batch-stream',String(maxRoots)];
-const exporter=spawn(lean,exportArgs,{
-  cwd:resolve('.'),env:envVars,stdio:['ignore','pipe','pipe']
+
+const manifestRun=spawnSync(lean,['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--batch-manifest',String(maxRoots)],{
+  cwd:resolve('.'),env:envVars,encoding:'utf8',maxBuffer:16*1024*1024
 });
-const exporterClosed=once(exporter,'close');
-const rl=createInterface({input:exporter.stdout,crlfDelay:Infinity});
-let exporterStderr='';exporter.stderr.setEncoding('utf8');exporter.stderr.on('data',d=>exporterStderr+=d);
+if(manifestRun.error)throw manifestRun.error;
+if(manifestRun.status!==0)throw new Error(`Lean manifest exporter exited ${manifestRun.status}: ${manifestRun.stderr}`);
+let manifest;
+try{manifest=JSON.parse(manifestRun.stdout.trim()).environment;}catch{throw new Error(`invalid batch manifest: ${manifestRun.stdout.slice(0,500)}`);}
+if(!manifest)throw new Error('missing batch manifest environment');
+const totalBatches=Number(manifest.batches);
+const environmentConstants=Number(manifest.constants);
+const batchSizes=manifest.batchSizes.map(Number);
+if(batchSizes.length!==totalBatches)throw new Error(`manifest batchSizes length ${batchSizes.length} != batches ${totalBatches}`);
+if(expectedTotalBatches!==null&&totalBatches!==expectedTotalBatches)throw new Error(`exporter batch count ${totalBatches} != expected ${expectedTotalBatches}`);
+const expected=expectedArg?Number(expectedArg):environmentConstants;
+if(environmentConstants!==expected)throw new Error(`exporter constant count ${environmentConstants} != expected ${expected}`);
+const rangeStop=rangeCount===0?totalBatches:Math.min(totalBatches,rangeStart+rangeCount);
+if(rangeStart>=totalBatches)throw new Error(`batch range starts at ${rangeStart}, but only ${totalBatches} batches exist`);
+const selectedRoots=batchSizes.slice(rangeStart,rangeStop).reduce((a,b)=>a+b,0);
 
-let header=null,current=null,worker=null,workerOut='',workerErr='',workerInputErr=null;
+const tmp=mkdtempSync(join(tmpdir(),'pskernel-batches-'));
 let batches=0,directRoots=0,totalRecords=0,totalDecls=0,totalReplayConstants=0,maxBatchConstants=0,maxWorkerRssMiB=0;
-let fatal=null;
 
-const startWorker=()=>{
-  workerOut='';workerErr='';workerInputErr=null;
-  const w=spawn(process.execPath,['scripts/batch-replay-worker.mjs'],{cwd:resolve('.'),stdio:['pipe','pipe','pipe']});
-  w.closed=once(w,'close');
-  w.stdout.setEncoding('utf8');w.stdout.on('data',d=>workerOut+=d);
-  w.stderr.setEncoding('utf8');w.stderr.on('data',d=>workerErr+=d);
-  w.stdin.on('error',e=>{workerInputErr=e;});
-  return w;
-};
-const workerFailure=(code,signal)=>new Error(
-  `batch ${current?.index??'?'} replay worker exited code=${code} signal=${signal??'none'}`+
-  (workerInputErr?` stdin=${workerInputErr.code??workerInputErr.message}`:'')+
-  (workerErr?`\nstderr:\n${workerErr}`:'')
-);
-const finishWorker=async()=>{
-  if(!worker)return;
-  const w=worker;
-  if(w.exitCode===null&&!w.stdin.destroyed&&!w.stdin.writableEnded)w.stdin.end();
-  const [code,signal]=await w.closed;
-  if(code!==0||signal)throw workerFailure(code,signal);
-  let summary;
-  try{summary=JSON.parse(workerOut.trim());}catch{throw new Error(`batch ${current?.index??'?'} invalid worker summary: ${workerOut}\n${workerErr}`);}
-  totalRecords+=summary.stats.lines;
-  totalDecls+=summary.stats.declarations;
-  totalReplayConstants+=summary.constants;
-  maxBatchConstants=Math.max(maxBatchConstants,summary.constants);
-  maxWorkerRssMiB=Math.max(maxWorkerRssMiB,summary.maxRssMiB);
-  worker=null;
-};
-try{
+async function readMarkers(path){
+  const rl=createInterface({input:createReadStream(path),crlfDelay:Infinity});
+  let environment=null,batch=null;
   for await(const line of rl){
     if(!line.trim())continue;
-    let marker=null;
-    try{marker=JSON.parse(line);}catch{}
-    if(marker?.environment){
-      if(header)throw new Error('duplicate environment header');
-      header=marker.environment;
-      continue;
-    }
-    if(marker?.batch){
-      await finishWorker();
-      current=marker.batch;
-      batches++;
-      directRoots+=Number(current.directRoots);
-      worker=startWorker();
-      console.error(`[batch-stream] batch=${current.index}/${header?.batches??'?'} selected=${batches} roots=${directRoots}/${header?.selectedDirectRoots??header?.constants??'?'} modules=${current.firstModule}..${current.lastModule}`);
-      continue;
-    }
-    if(!worker)throw new Error(`record before first batch: ${line.slice(0,120)}`);
-    if(worker.exitCode!==null||workerInputErr){
-      await finishWorker();
-      throw new Error(`batch ${current?.index??'?'} replay worker closed before exporter finished`);
-    }
-    if(!worker.stdin.write(line+'\n')){
-      const outcome=await Promise.race([
-        once(worker.stdin,'drain').then(()=> 'drain'),
-        worker.closed.then(()=> 'closed')
-      ]);
-      if(outcome==='closed')await finishWorker();
-    }
+    let x;try{x=JSON.parse(line);}catch{continue;}
+    if(x.environment)environment=x.environment;
+    if(x.batch){batch=x.batch;break;}
   }
-  await finishWorker();
-}catch(e){fatal=e;exporter.kill('SIGTERM');if(worker)worker.kill('SIGTERM');}
-const [code]=await exporterClosed;
-if(fatal)throw fatal;
-if(code!==0)throw new Error(`Lean exporter exited ${code}: ${exporterStderr}`);
-if(!header)throw new Error('missing environment header');
-const expected=expectedArg?Number(expectedArg):Number(header.constants);
-if(expectedTotalBatches!==null&&Number(header.batches)!==expectedTotalBatches)throw new Error(`exporter batch count ${header.batches} != expected ${expectedTotalBatches}`);
-if(Number(header.constants)!==expected)throw new Error(`exporter constant count ${header.constants} != expected ${expected}`);
-const expectedBatches=Number(header.selectedBatches??header.batches);
-const expectedDirectRoots=Number(header.selectedDirectRoots??header.constants);
-if(expectedBatches!==batches)throw new Error(`observed batches ${batches} != selected batches ${expectedBatches}`);
-if(directRoots!==expectedDirectRoots)throw new Error(`direct root coverage ${directRoots} != selected direct roots ${expectedDirectRoots}`);
+  rl.close();
+  return {environment,batch};
+}
+async function exportBatch(index,path){
+  const fd=openSync(path,'w');
+  const child=spawn(lean,['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--batch-range',String(maxRoots),String(index),'1'],{
+    cwd:resolve('.'),env:envVars,stdio:['ignore',fd,'pipe']
+  });
+  let stderr='';child.stderr.setEncoding('utf8');child.stderr.on('data',d=>stderr+=d);
+  const [code,signal]=await new Promise(r=>child.on('close',(c,s)=>r([c,s])));
+  closeSync(fd);
+  if(code!==0||signal)throw new Error(`batch ${index} Lean exporter exited code=${code} signal=${signal??'none'}\n${stderr}`);
+}
+async function replayBatch(index,path){
+  const fd=openSync(path,'r');
+  const child=spawn(process.execPath,['scripts/batch-replay-worker.mjs'],{cwd:resolve('.'),stdio:[fd,'pipe','pipe']});
+  let out='',err='';child.stdout.setEncoding('utf8');child.stdout.on('data',d=>out+=d);child.stderr.setEncoding('utf8');child.stderr.on('data',d=>err+=d);
+  const [code,signal]=await new Promise(r=>child.on('close',(c,s)=>r([c,s])));
+  closeSync(fd);
+  if(code!==0||signal)throw new Error(`batch ${index} replay worker exited code=${code} signal=${signal??'none'}\n${err}`);
+  try{return JSON.parse(out.trim());}catch{throw new Error(`batch ${index} invalid worker summary: ${out}\n${err}`);}
+}
+
+try{
+  for(let index=rangeStart;index<rangeStop;index++){
+    const file=join(tmp,`batch-${index}.ndjson`);
+    await exportBatch(index,file); // Lean exits here; its large heap is reclaimed before TS replay starts.
+    const {environment,batch}=await readMarkers(file);
+    if(!environment||!batch)throw new Error(`batch ${index} missing export markers`);
+    if(Number(batch.index)!==index)throw new Error(`requested batch ${index}, exporter emitted ${batch.index}`);
+    if(Number(batch.directRoots)!==batchSizes[index])throw new Error(`batch ${index} direct roots ${batch.directRoots} != manifest ${batchSizes[index]}`);
+    batches++;directRoots+=Number(batch.directRoots);
+    console.error(`[batch-stream] batch=${index}/${totalBatches} selected=${batches}/${rangeStop-rangeStart} roots=${directRoots}/${selectedRoots} modules=${batch.firstModule}..${batch.lastModule}`);
+    const summary=await replayBatch(index,file);
+    totalRecords+=summary.stats.lines;
+    totalDecls+=summary.stats.declarations;
+    totalReplayConstants+=summary.constants;
+    maxBatchConstants=Math.max(maxBatchConstants,summary.constants);
+    maxWorkerRssMiB=Math.max(maxWorkerRssMiB,summary.maxRssMiB);
+    rmSync(file,{force:true});
+  }
+} finally { rmSync(tmp,{recursive:true,force:true}); }
+
+if(batches!==rangeStop-rangeStart)throw new Error(`observed batches ${batches} != selected batches ${rangeStop-rangeStart}`);
+if(directRoots!==selectedRoots)throw new Error(`direct root coverage ${directRoots} != selected direct roots ${selectedRoots}`);
 console.log(JSON.stringify({
-  ok:true,module:moduleName,modules:Number(header.modules),totalBatches:Number(header.batches),batches,maxRoots,rangeStart:Number(header.rangeStart??0),rangeStop:Number(header.rangeStop??header.batches),directRoots,environmentConstants:expected,
+  ok:true,module:moduleName,modules:Number(manifest.modules),totalBatches,batches,maxRoots,rangeStart,rangeStop,directRoots,environmentConstants,
   records:totalRecords,declarations:totalDecls,totalReplayConstants,maxBatchConstants,maxWorkerRssMiB:Number(maxWorkerRssMiB.toFixed(1))
 },null,2));

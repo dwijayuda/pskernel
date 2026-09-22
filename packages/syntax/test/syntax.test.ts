@@ -6,6 +6,7 @@ import {
   SyntaxError,
   hasTriviaBefore,
   isAdjacentCallOpen,
+  classifyCallOpen,
   lex,
   significantTokens,
 } from '../src/index.js';
@@ -35,11 +36,13 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
   const tokens=significantTokens('f(x)');
   equal(tokens.map(t=>t.text).join(' '), 'f ( x )');
   assert(isAdjacentCallOpen(tokens[1]!), 'f(x) must expose an adjacent call open');
+  equal(classifyCallOpen(tokens[1]!).feature,'D-CALL');
   assert(!hasTriviaBefore(tokens[1]!));
 }
 {
   const tokens=significantTokens('f (x)');
   assert(!isAdjacentCallOpen(tokens[1]!), 'f (x) must defer rather than claim D-CALL');
+  equal(classifyCallOpen(tokens[1]!).owner,'defer');
   equal(tokens[1]!.leadingTrivia[0]?.kind, 'whitespace');
 }
 {

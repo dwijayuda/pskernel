@@ -3,10 +3,22 @@
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "Arena, differential, adversarial, corpus and release-evidence tooling.",
+  "description": "Reusable pskernel conformance runner for accept/reject corpora such as Lean Kernel Arena.",
   "proofscript": {
-    "status": "scaffold",
+    "status": "mvp",
     "phase": "A",
     "trust": "test-only"
+  },
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "bin": {
+    "pskernel-conformance": "./bin/pskernel-conformance.mjs"
+  },
+  "scripts": {
+    "test": "node test/conformance.test.mjs"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../.."
   }
 }

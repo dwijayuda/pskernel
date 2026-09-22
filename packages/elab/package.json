@@ -1,0 +1,12 @@
+{
+  "name": "@proofscript/elab",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "ProofScript term/command/declaration elaboration into kernel declarations.",
+  "proofscript": {
+    "status": "scaffold",
+    "phase": "B",
+    "trust": "untrusted-support"
+  }
+}

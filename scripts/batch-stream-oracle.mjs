@@ -1,7 +1,7 @@
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import {once} from 'node:events';
-import {resolve, join} from 'node:path';
+import {resolve, join, delimiter} from 'node:path';
 import fs from 'node:fs';
 
 const moduleName=process.argv[2]??'Init.Prelude';
@@ -18,7 +18,7 @@ if(!Number.isSafeInteger(maxRoots)||maxRoots<=0)throw new Error(`batch-stream-or
 if(!Number.isSafeInteger(rangeStart)||rangeStart<0||!Number.isSafeInteger(rangeCount)||rangeCount<0)throw new Error('batch-stream-oracle: invalid batch range');
 if(expectedTotalBatches!==null&&(!Number.isSafeInteger(expectedTotalBatches)||expectedTotalBatches<=0))throw new Error('batch-stream-oracle: invalid expected total batch count');
 
-const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin']
+const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin',...(process.env.PATH??'').split(delimiter)]
   .filter(Boolean).map(p=>resolve(p));
 const bin=candidates.find(p=>fs.existsSync(join(p,'lean')));
 if(!bin)throw new Error('batch-stream-oracle: set LEAN434_BIN to Lean 4.34.0 bin directory');

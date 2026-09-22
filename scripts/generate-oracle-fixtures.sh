@@ -15,7 +15,7 @@ if ! command -v lean >/dev/null 2>&1; then
 fi
 
 version="$(lean --version | head -n1)"
-if [[ "$version" != "Lean (version 4.34.0, Release)" ]]; then
+if [[ "$version" != Lean\ \(version\ 4.34.0,*Release* ]]; then
   echo "generate-oracle-fixtures: expected Lean 4.34.0 Release, got: $version" >&2
   exit 1
 fi

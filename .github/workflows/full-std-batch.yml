@@ -20,8 +20,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  std-hot:
+    name: Hot Std roots ${{ matrix.start }}-${{ matrix.end }}
+    if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[full-std]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { start: 16484, end: 16499, count: 16 }
+          - { start: 18843, end: 18858, count: 16 }
+          - { start: 20000, end: 20014, count: 15 }
+          - { start: 22640, end: 22655, count: 16 }
+          - { start: 25000, end: 25014, count: 15 }
+          - { start: 27515, end: 27530, count: 16 }
+          - { start: 33015, end: 33030, count: 16 }
+          - { start: 36452, end: 36467, count: 16 }
+          - { start: 37609, end: 37624, count: 16 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Verify formerly hot Std leaf
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 ${{ matrix.start }} ${{ matrix.count }} ${{ matrix.count }} 1
+
   std-range:
     name: Std roots ${{ matrix.start }}-${{ matrix.end }}
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-std]')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -94,7 +131,7 @@ jobs:
 
   std-complete:
     name: Full Std 114,029-root coverage
-    if: always()
+    if: always() && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-std]'))
     needs: [std-range]
     runs-on: ubuntu-latest
     steps:

@@ -1,0 +1,12 @@
+{
+  "name": "@proofscript/tactic",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Small proof tactic layer built on @proofscript/meta and @proofscript/elab.",
+  "proofscript": {
+    "status": "scaffold",
+    "phase": "B",
+    "trust": "untrusted-support"
+  }
+}

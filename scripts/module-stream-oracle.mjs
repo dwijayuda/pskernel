@@ -16,7 +16,7 @@ const child=spawn(lean,['--run','oracle/replay-probe/DependencyExport.lean',modu
 const rl=createInterface({input:child.stdout,crlfDelay:Infinity});
 let stderr='';child.stderr.setEncoding('utf8');child.stderr.on('data',d=>stderr+=d);
 const shared=new Environment();
-let replay=null,header=null,current=null,shards=0,totalLines=0,totalDecls=0;
+let replay=null,header=null,current=null,shards=0,totalLines=0,totalDecls=0,maxRssMiB=0,maxHeapMiB=0;
 let fatal=null;
 try{
  for await(const line of rl){
@@ -30,10 +30,11 @@ try{
      continue;
    }
    if(marker?.shard){
-     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;}
+     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;global.gc?.();}
      replay=new Lean4ExportReplay(shared);
      current=marker.shard.module;shards++;
-     if(shards===1||shards%50===0)console.error(`[module-stream] shard=${shards} module=${current} constants=${shared.entries().length} rssMiB=${(process.memoryUsage().rss/1048576).toFixed(1)}`);
+     const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);
+     if(shards===1||shards%25===0)console.error(`[module-stream] shard=${shards} module=${current} constants=${shared.size} rssMiB=${rss.toFixed(1)} heapMiB=${heap.toFixed(1)}`);
      continue;
    }
    if(!replay)throw new Error(`record before first shard: ${line.slice(0,120)}`);
@@ -47,5 +48,6 @@ if(code!==0)throw new Error(`Lean exporter exited ${code}: ${stderr}`);
 if(!header)throw new Error('missing environment header');
 const expected=expectedArg?Number(expectedArg):Number(header.constants);
 if(Number(header.constants)!==expected)throw new Error(`exporter constant count ${header.constants} != expected ${expected}`);
-if(shared.entries().length!==expected)throw new Error(`replayed constants ${shared.entries().length} != expected ${expected}`);
-console.log(JSON.stringify({ok:true,module:moduleName,modules:Number(header.modules),shards,records:totalLines,declarations:totalDecls,constants:shared.entries().length,rssMiB:Number((process.memoryUsage().rss/1048576).toFixed(1))},null,2));
+if(shared.size!==expected)throw new Error(`replayed constants ${shared.size} != expected ${expected}`);
+const finalMem=process.memoryUsage();maxRssMiB=Math.max(maxRssMiB,finalMem.rss/1048576);maxHeapMiB=Math.max(maxHeapMiB,finalMem.heapUsed/1048576);
+console.log(JSON.stringify({ok:true,module:moduleName,modules:Number(header.modules),shards,records:totalLines,declarations:totalDecls,constants:shared.size,rssMiB:Number((finalMem.rss/1048576).toFixed(1)),heapMiB:Number((finalMem.heapUsed/1048576).toFixed(1)),maxRssMiB:Number(maxRssMiB.toFixed(1)),maxHeapMiB:Number(maxHeapMiB.toFixed(1))},null,2));

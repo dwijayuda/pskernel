@@ -1,13 +1,13 @@
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
-import {resolve, join} from 'node:path';
+import {resolve, join, delimiter} from 'node:path';
 import fs from 'node:fs';
 import {Environment} from '../dist/src/core/environment.js';
 import {Lean4ExportReplay} from '../dist/src/integration/lean4export.js';
 
 const moduleName=process.argv[2]??'Init.Prelude';
 const expectedArg=process.argv[3];
-const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin'].filter(Boolean).map(p=>resolve(p));
+const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin',...(process.env.PATH??'').split(delimiter)].filter(Boolean).map(p=>resolve(p));
 const bin=candidates.find(p=>fs.existsSync(join(p,'lean')));
 if(!bin)throw new Error('module-stream-oracle: set LEAN434_BIN to Lean 4.34.0 bin directory');
 const lean=join(bin,'lean');

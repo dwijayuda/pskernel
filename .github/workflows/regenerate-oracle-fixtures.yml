@@ -39,6 +39,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
+      - name: Compile dependency exporter
+        run: lean oracle/replay-probe/DependencyExport.lean
       - name: Regenerate pinned corpora
         run: bash scripts/generate-oracle-fixtures.sh
       - name: Build TypeScript kernel

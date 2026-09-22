@@ -90,7 +90,8 @@
     "adversarial-soundness-expanded-95-direct-plus-22-official",
     "arena-static-correctness-170-of-170",
     "lean4export-sparse-index-compatibility",
-    "projection-structure-application-soundness"
+    "projection-structure-application-soundness",
+    "deep-structural-traversal-stack-hardening"
   ],
   "openGates": [
     "full-Std-environment-replay",
@@ -103,10 +104,11 @@
     "formal equivalence",
     "100% complete"
   ],
-  "lastVerifiedTestCount": 96,
+  "lastVerifiedTestCount": 97,
   "notes": [
+    "Deep-expression robustness hardening keeps 97/97 direct tests and 170/170 Arena correctness green: hasMVar, lift, and instantiate now use explicit traversal stacks, and isolated heavy oracle workers use a larger JavaScript stack while the kernel maxRecDepth limit remains authoritative.",
     "Lean Kernel Arena static correctness sweep passes 170/170 non-performance cases after two fixes: projection inference now checks the projected structure expression (rejecting the proj-of-prop false proof), and lean4export intern tables accept valid sparse/out-of-order IDs while still rejecting duplicates. Arena performance cases remain a separate optimization gate.",
-    "Full Std adaptive replay is now the active completion gate: exact direct-root ranges cover 114,029 constants, and OOM-heavy ranges are recursively bisected down to 25 roots without changing kernel semantics or skipping coverage.",
+    "Canonical one-pass module-order Full Std replay is now the preferred exhaustive completion gate. Dependency-closure batching is retained as diagnostic tooling for isolating failures, not as the release definition.",
     "Expanded soundness baseline passes 95/95 direct TypeScript tests plus 21 expected-success and 1 expected-rejection official Lean 4.34 kernel regression files. New direct invariants explicitly reject expression metavariables, universe metavariables, and duplicate mutual-inductive names transactionally.",
     "Official Lean 4.34 definitional-equality differential now passes 42/42 paired cases. The expansion covers every dedicated Nat reducer (sub/mul/pow/gcd/mod/div/land/lor/xor/shiftLeft/shiftRight/beq/ble), let-under-binder substitution, dependent Subtype structure eta, and K-like Eq.rec iota reduction.",
     "Native reduction is fail-closed by default. Lean 4.34 always executes compiler IR for Lean.reduceNat/Lean.reduceBool, so logical-body normalization is not a compatible substitute when implemented_by/extern overrides exist. A shape-checked NativeEvaluator is now the explicit TCB-extension boundary; the official differential's controlled native cases inject known results through that provider.",

@@ -10,7 +10,7 @@ The current implementation includes Lean core names/levels/expressions, substitu
 
 The pinned regression stack includes:
 
-- 95 TypeScript kernel/unit tests
+- 97 TypeScript kernel/unit tests
 - official Lean 4.34 fresh-module checking
 - official Lean 4.34 adversarial kernel regressions (21 expected-success + 1 expected-rejection)
 - official-vs-TypeScript definitional-equality differential cases (42/42)
@@ -64,7 +64,7 @@ npm run build
 node scripts/arena-static-oracle.mjs /path/to/extracted-arena-tests
 ```
 
-By default this checks correctness/adversarial cases and excludes `perf/`. Arena files are replayed using their recorded Lean version only at the test-harness boundary; this is cross-version compatibility evidence, not a replacement for the pinned Lean 4.34 oracle.
+By default this checks correctness/adversarial cases and excludes `perf/`. Arena files are replayed using their recorded Lean version only at the test-harness boundary; this is cross-version compatibility evidence, not a replacement for the pinned Lean 4.34 oracle. Heavy Arena workers use an enlarged JS stack (`ARENA_STACK_KIB`, default 65500) while pskernel's own recursion budget remains the semantic guard.
 
 ### Canonical full Std replay
 

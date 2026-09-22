@@ -998,3 +998,78 @@ test('lean4export incremental line replay matches bulk replay',()=>{
  const bulk=new Lean4ExportReplay(),a=bulk.replay(lines.join('\n'));
  const streaming=new Lean4ExportReplay();for(const line of lines)streaming.replayLine(line);const b=streaming.finish();
  assert(JSON.stringify(a)===JSON.stringify(b));
+ assert(streaming.env.has(nameFromDotted('A')));
+});
+
+test('real Lean 4.34 olean probe replays polymorphic inductives and definitions end to end',()=>{
+ const r=new Lean4ExportReplay(),st=r.replay(lean434RealProbe);
+ assert(st.declarations===8&&st.expressions===180&&r.env.entries().length===17);
+ for(const n of ['ReplayProbe.A','ReplayProbe.id','ReplayProbe.MiniNat','ReplayProbe.MiniNat.zero','ReplayProbe.MiniNat.succ','ReplayProbe.MiniNat.rec','ReplayProbe.one','ReplayProbe.MiniList','ReplayProbe.MiniList.nil','ReplayProbe.MiniList.cons','ReplayProbe.MiniList.rec','ReplayProbe.singleton','ReplayProbe.MiniVec','ReplayProbe.MiniVec.nil','ReplayProbe.MiniVec.cons','ReplayProbe.MiniVec.rec','ReplayProbe.vecOne'])assert(r.env.has(nameFromDotted(n)),`missing ${n}`);
+ const ci=r.env.get(nameFromDotted('ReplayProbe.singleton'));assert(ci.kind==='definition');
+});
+
+test('Lean 4.34 recursor synthesis performs strict implicit inference',()=>{
+ const r=new Lean4ExportReplay();r.replay(lean434RealProbe);
+ const rec=r.env.get(nameFromDotted('ReplayProbe.MiniNat.rec'));assert(rec.kind==='recursor'&&rec.type.kind==='forall');
+ assert(rec.type.binderInfo==='implicit','recursor motive must be inferred implicit');
+});
+
+
+test('Lean 4.34 recursor fresh elimination universe uses appendIndexAfter naming',()=>{
+ const r=new Lean4ExportReplay();r.replay(lean434RealProbe);
+ const rec=r.env.get(nameFromDotted('ReplayProbe.MiniList.rec'));assert(rec.kind==='recursor'&&rec.levelParams.length===2&&rec.type.kind==='forall');
+ assert(nameToString(rec.levelParams[0]!)==='u_1','fresh elimination universe must be u_1');
+ assert(rec.type.binderInfo==='implicit','parameter α must become implicit in recursor type');
+});
+
+
+test('real Lean 4.34 indexed recursor metadata matches exactly',()=>{
+ const r=new Lean4ExportReplay();r.replay(lean434RealProbe);
+ const ind=r.env.get(nameFromDotted('ReplayProbe.MiniVec')),rec=r.env.get(nameFromDotted('ReplayProbe.MiniVec.rec'));
+ assert(ind.kind==='inductive'&&ind.numParams===1&&ind.numIndices===1&&ind.isRec);
+ assert(rec.kind==='recursor'&&rec.numParams===1&&rec.numIndices===1&&rec.rules.length===2);
+});
+
+test('lean4export reconstructs partial mutual definition blocks from all metadata',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"in":1,"str":{"pre":0,"str":"A"}}','{"in":2,"str":{"pre":0,"str":"B"}}',
+  '{"ie":0,"sort":0}','{"ie":1,"const":{"name":1,"us":[]}}','{"ie":2,"const":{"name":2,"us":[]}}',
+  '{"def":{"name":2,"levelParams":[],"type":0,"value":1,"hints":{"regular":1},"safety":"partial","all":[1,2]}}',
+  '{"def":{"name":1,"levelParams":[],"type":0,"value":2,"hints":{"regular":1},"safety":"partial","all":[1,2]}}'
+ ].join('\n');
+ const r=new Lean4ExportReplay(),st=r.replay(nd);assert(st.declarations===2&&r.env.has(nameFromDotted('A'))&&r.env.has(nameFromDotted('B')));
+});
+
+test('lean4export rejects an incomplete mutual definition group',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"in":1,"str":{"pre":0,"str":"A"}}','{"in":2,"str":{"pre":0,"str":"B"}}',
+  '{"ie":0,"sort":0}','{"ie":1,"const":{"name":1,"us":[]}}',
+  '{"def":{"name":1,"levelParams":[],"type":0,"value":1,"hints":{"regular":1},"safety":"partial","all":[1,2]}}'
+ ].join('\n');throws(()=>new Lean4ExportReplay().replay(nd));
+});
+
+test('kernel metadata equivalence ignores binder display names but retains annotations',()=>{
+ const a=forallE(nameFromDotted('a'),sort(levelZero),bvar(0),'default');
+ const renamed=forallE(nameFromDotted('x'),sort(levelZero),bvar(0),'default');
+ const implicit=forallE(nameFromDotted('x'),sort(levelZero),bvar(0),'implicit');
+ assert(exprKernelMetadataEq(a,renamed),'binder display names are non-semantic');
+ assert(!exprKernelMetadataEq(a,implicit),'binder annotations must remain significant');
+});
+
+test('lean4export replay accepts sparse and out-of-order intern indices',()=>{
+ const meta='{"meta":{"exporter":{"name":"handcrafted","version":"0.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}';
+ const sparse=[meta,'{"in":2,"str":{"pre":0,"str":"foo"}}','{"ie":4,"sort":0}','{"axiom":{"isUnsafe":false,"levelParams":[],"name":2,"type":4}}'].join('\n');
+ const a=new Lean4ExportReplay();a.replay(sparse);assert(a.env.entries().length===1);
+ const outOfOrder=[meta,'{"in":1,"str":{"pre":0,"str":"foo"}}','{"il":2,"succ":0}','{"il":1,"succ":2}','{"ie":0,"sort":1}','{"axiom":{"isUnsafe":false,"levelParams":[],"name":1,"type":0}}'].join('\n');
+ const b=new Lean4ExportReplay();b.replay(outOfOrder);assert(b.env.entries().length===1);
+ const duplicate=[meta,'{"in":2,"str":{"pre":0,"str":"foo"}}','{"in":2,"str":{"pre":0,"str":"bar"}}'].join('\n');
+ throws(()=>new Lean4ExportReplay().replay(duplicate));
+});
+
+test('lean4export replay rejects version drift before declarations',()=>{
+ const nd='{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.33.0"},"format":{"version":"3.1.0"}}}';throws(()=>new Lean4ExportReplay().replay(nd));
+});
+
+console.log(`# pass ${pass}`);console.log(`# fail ${fail}`);if(fail)throw new Error(`${fail} tests failed`);

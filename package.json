@@ -22,7 +22,7 @@
     "oracle:lean-rbmap-full": "npm run build --silent && node scripts/lean-rbmap-full-oracle.mjs",
     "check:large-corpus": "npm run oracle:lean-rbmap-full",
     "oracle:lean-persistentarray": "npm run build --silent && node scripts/lean-persistentarray-oracle.mjs",
-    "oracle:lean-persistenthashmap": "npm run build --silent && node scripts/lean-persistenthashmap-oracle.mjs"
+    "oracle:lean-persistenthashmap": "npm run build --silent && node scripts/lean-persistenthashmap-oracle.mjs",\n    "generate:fixtures": "bash scripts/generate-oracle-fixtures.sh"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

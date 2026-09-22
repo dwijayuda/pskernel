@@ -25,7 +25,7 @@ See `package-map.json` for:
 
 A support package may construct, serialize, elaborate, compile, transport, display, or orchestrate declarations, but it does not make them trusted. Logical authority remains pskernel admission.
 
-`@proofscript/native-ir` is the explicit exception: configuring a native evaluator expands the TCB and must always be opt-in.
+Final Lean 4.34 has no in-kernel native compiler-evaluation extension. Compiler/backend packages remain outside the kernel TCB unless a future feature explicitly documents otherwise.
 
 ## When to enable workspaces
 

@@ -77,7 +77,7 @@ language-service package that the LSP package consumes.
 @proofscript/cli ---> @proofscript/kernel <--- @proofscript/browser
         |                    ^   ^
         |                    |   |
-        v                    |   +--- @proofscript/native-ir  (optional TCB)
+        v                    |
 @proofscript/lean4export     |
         |                    |
         +----> @proofscript/module

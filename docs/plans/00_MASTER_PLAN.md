@@ -25,7 +25,6 @@ Packages:
 - `@proofscript/lean4export`
 - `@proofscript/cli`
 - `@proofscript/browser`
-- `@proofscript/native-ir` (optional)
 
 Exit criteria:
 - stable kernel API
@@ -123,6 +122,5 @@ Current Phase-A implementation status:
 - `@proofscript/lean4export`: MVP
 - CLI: prototype with module pack/verify/inspect/check
 - browser: scaffold only
-- native-ir: scaffold only
 
 The MVP packages remain private and are not wired as root npm workspaces while Full Std certification is active.

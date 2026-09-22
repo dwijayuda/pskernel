@@ -13,7 +13,7 @@ The pinned regression stack includes:
 - 93 TypeScript kernel/unit tests
 - official Lean 4.34 fresh-module checking
 - official Lean 4.34 adversarial kernel regressions (21 expected-success + 1 expected-rejection)
-- official-vs-TypeScript definitional-equality differential cases (26/26)
+- official-vs-TypeScript definitional-equality differential cases (42/42)
 - complete `Init.Prelude` replay
 - primitive dependency closure through `Nat.mod`, `Nat.div`, `Nat.gcd`, and `Nat.bitwise`
 - bounded `Std` corpora (Parsec, SAT/CNF, ByteSlice)

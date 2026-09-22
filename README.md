@@ -49,4 +49,6 @@ For the official adversarial source-file oracle, set `LEAN434_SRC` to a Lean 4.3
 - `scripts/` — oracle, corpus, differential, and anti-drift gates
 - `docs/ANTI_DRIFT.md` — scope and compatibility rules
 
-Native reduction is fail-closed unless an explicit `NativeEvaluator` TCB extension is configured.\n\nDo not silently broaden acceptance to make a corpus pass. A Lean/TypeScript mismatch must be isolated and fixed at the semantic layer that differs from Lean 4.34.0.
+Native reduction is fail-closed unless an explicit `NativeEvaluator` TCB extension is configured.
+
+Do not silently broaden acceptance to make a corpus pass. A Lean/TypeScript mismatch must be isolated and fixed at the semantic layer that differs from Lean 4.34.0.

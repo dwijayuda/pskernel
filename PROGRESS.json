@@ -87,7 +87,10 @@
     "native-reduction-explicit-provider-boundary",
     "official-defeq-differential-42",
     "primitive-full-nat-reducer-corpus",
-    "adversarial-soundness-expanded-95-direct-plus-22-official"
+    "adversarial-soundness-expanded-95-direct-plus-22-official",
+    "arena-static-correctness-170-of-170",
+    "lean4export-sparse-index-compatibility",
+    "projection-structure-application-soundness"
   ],
   "openGates": [
     "full-Std-environment-replay",
@@ -100,8 +103,9 @@
     "formal equivalence",
     "100% complete"
   ],
-  "lastVerifiedTestCount": 95,
+  "lastVerifiedTestCount": 96,
   "notes": [
+    "Lean Kernel Arena static correctness sweep passes 170/170 non-performance cases after two fixes: projection inference now checks the projected structure expression (rejecting the proj-of-prop false proof), and lean4export intern tables accept valid sparse/out-of-order IDs while still rejecting duplicates. Arena performance cases remain a separate optimization gate.",
     "Full Std adaptive replay is now the active completion gate: exact direct-root ranges cover 114,029 constants, and OOM-heavy ranges are recursively bisected down to 25 roots without changing kernel semantics or skipping coverage.",
     "Expanded soundness baseline passes 95/95 direct TypeScript tests plus 21 expected-success and 1 expected-rejection official Lean 4.34 kernel regression files. New direct invariants explicitly reject expression metavariables, universe metavariables, and duplicate mutual-inductive names transactionally.",
     "Official Lean 4.34 definitional-equality differential now passes 42/42 paired cases. The expansion covers every dedicated Nat reducer (sub/mul/pow/gcd/mod/div/land/lor/xor/shiftLeft/shiftRight/beq/ble), let-under-binder substitution, dependent Subtype structure eta, and K-like Eq.rec iota reduction.",

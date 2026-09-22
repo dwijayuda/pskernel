@@ -8,15 +8,24 @@
     "status": "mvp",
     "phase": "A",
     "trust": "untrusted-support",
-    "artifactFormat": "proofscript-module@1"
+    "artifactFormat": "proofscript-module@1",
+    "sourceLanguage": "typescript"
   },
   "exports": {
-    ".": "./src/index.mjs"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
   },
   "scripts": {
-    "test": "node test/module.test.mjs"
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/module.test.js"
   },
   "dependencies": {
     "lean-ts-kernel": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "typescript": "5.8.3"
   }
 }

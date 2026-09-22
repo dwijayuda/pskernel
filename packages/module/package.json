@@ -3,10 +3,20 @@
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "Portable checked-module format, dependency hashes, and streaming kernel admission.",
+  "description": "Portable deterministic ProofScript checked-module artifacts with integrity and kernel replay.",
   "proofscript": {
-    "status": "scaffold",
+    "status": "mvp",
     "phase": "A",
-    "trust": "untrusted-support"
+    "trust": "untrusted-support",
+    "artifactFormat": "proofscript-module@1"
+  },
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "scripts": {
+    "test": "node test/module.test.mjs"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../.."
   }
 }

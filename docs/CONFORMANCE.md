@@ -175,3 +175,12 @@ The official differential gate now passes **42/42**. Its two native-reduction ca
 The direct TypeScript suite passes **95/95** cases. In addition to corpus and differential checks, it explicitly regression-locks unresolved expression/universe metavariable rejection and transactional rollback for duplicate mutual-inductive names.
 
 The official Lean 4.34 adversarial oracle passes **21 expected-success + 1 expected-rejection** kernel regression files. This includes projection metadata checks, reserved nested names, duplicate mutual declarations, imax/Prop elimination behavior, non-transitive algorithmic-defeq cache regressions, recursion/heartbeat limits, kernel error recovery, proposition detection, string-cost behavior, Fin fold kernel reduction, and rejection of the Quot-name-collision exploit.
+
+
+## Arena static correctness
+
+An external Lean Kernel Arena corpus runner is available via `scripts/arena-static-oracle.mjs`. The current verified non-performance sweep is **170/170** expected verdicts. This gate found and regression-locked two issues: checking the structure argument during projection typing, and supporting valid sparse/out-of-order lean4export intern IDs. Performance benchmarks are tracked separately from semantic correctness.
+
+## Full Std release gate
+
+The preferred exhaustive Std path is the canonical module-order stream (`npm run oracle:std-full`), which checks each declaration once into a shared environment and discards replay-local intern tables/caches between module shards. Dependency-closure batching remains diagnostic tooling for isolating failures, not the primary release-completion definition.

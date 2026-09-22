@@ -167,5 +167,8 @@
     "Lean Name compatibility now includes appendAfter/appendIndexAfter semantics used by the kernel. Fresh recursor elimination universes use u_1/u_2-style final-component suffixes, not hierarchical u.1 names.",
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
-  ]
+  ],
+  "currentTreeExpectedDirectTests": 96,
+  "currentTreeExpectedDefeqDifferentialCases": 40,
+  "currentTreeVerification": "pending refreshed execution after final-4.34 native-reduction correction"
 }

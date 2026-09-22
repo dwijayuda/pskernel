@@ -1,0 +1,12 @@
+{
+  "name": "@proofscript/lean4export",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Pinned Lean exporter orchestration and Lean-environment transport.",
+  "proofscript": {
+    "status": "scaffold",
+    "phase": "A",
+    "trust": "untrusted-support"
+  }
+}

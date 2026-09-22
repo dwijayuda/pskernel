@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - ".bootstrap/pskernel-source.patch"
+      - ".bootstrap/**"
       - ".github/workflows/bootstrap-source.yml"
   workflow_dispatch:
 
@@ -23,12 +23,19 @@ jobs:
         run: |
           set -euo pipefail
           PATCH=.bootstrap/pskernel-source.patch
-          if [[ ! -f "$PATCH" ]]; then
-            echo "No bootstrap patch present; nothing to do."
+          TMP_PATCH=/tmp/pskernel-source.patch
+          if [[ -f "$PATCH" ]]; then
+            cp "$PATCH" "$TMP_PATCH"
+          elif compgen -G ".bootstrap/parts/part-*" > /dev/null; then
+            cat .bootstrap/parts/part-* > "$TMP_PATCH"
+          else
+            echo "No bootstrap patch or patch parts present; nothing to do."
             exit 0
           fi
-          git apply --index "$PATCH"
-          git rm "$PATCH"
+          git apply --index "$TMP_PATCH"
+          if [[ -f "$PATCH" ]]; then git rm "$PATCH"; fi
+          if [[ -d .bootstrap/parts ]]; then git rm -r .bootstrap/parts; fi
+          rmdir .bootstrap 2>/dev/null || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "import: Lean 4.34 TypeScript kernel snapshot"

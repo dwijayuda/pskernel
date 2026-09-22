@@ -1,7 +1,7 @@
 
 ## Lean 4.34 primitive-closure oracle
 
-`npm run oracle:primitive` replays the pinned `oracle/fixtures/lean434-primitive-closure.ndjson` stream through the production importer and kernel. The fixture contains 15,320 export records (12,610 expressions, 325 declaration records) and must result in exactly 390 environment constants. It exercises the real Lean 4.34 dependency closure through `Nat.mod`, `Nat.div`, `Nat.gcd`, and `Nat.bitwise`; no exported primitive declaration is trusted without its production recognizer.
+`npm run oracle:primitive` replays the pinned `oracle/fixtures/lean434-primitive-closure.ndjson` stream through the production importer and kernel. The fixture contains 15,780 export records (12,931 expressions, 348 declaration records) and must result in exactly 390 environment constants. It exercises the real Lean 4.34 dependency closure through `Nat.mod`, `Nat.div`, `Nat.gcd`, and `Nat.bitwise`; no exported primitive declaration is trusted without its production recognizer.
 
 Private Lean names remain structural: `_private.Init.Data.Nat.Bitwise.Basic.0...` contains a numeric `Name.num 0` component and is intentionally not interchangeable with a dotted string component `"0"`.
 
@@ -166,5 +166,5 @@ Lean 4.34 implements `Lean.reduceNat c` / `Lean.reduceBool c` by executing compi
 
 The TypeScript checker therefore fails closed on native reduction by default. Full native behavior is exposed through the shape-checked `NativeEvaluator` interface; configuring a provider explicitly extends the trusted computing base, matching Lean's own warning for this deprecated feature. Provider results must match the requested Bool/Nat result kind and Nat results must be non-negative.
 
-The official differential gate remains **26/26**. Its two native-reduction cases use explicit controlled providers for constants whose official Lean results are known. A standalone TypeScript compiler-IR provider remains an open compatibility gate.
+The official differential gate now passes **42/42**. Its two native-reduction cases use explicit controlled providers for constants whose official Lean results are known. A standalone TypeScript compiler-IR provider remains an open compatibility gate.
 

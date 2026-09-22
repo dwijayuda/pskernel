@@ -7,19 +7,28 @@
   "proofscript": {
     "status": "mvp",
     "phase": "A",
-    "trust": "untrusted-support"
+    "trust": "untrusted-support",
+    "sourceLanguage": "typescript"
   },
   "exports": {
-    ".": "./src/index.mjs"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
   },
   "bin": {
-    "proofscript-lean4export": "./bin/proofscript-lean4export.mjs"
+    "proofscript-lean4export": "./dist/bin/proofscript-lean4export.js"
   },
   "scripts": {
-    "test": "node test/lean4export.test.mjs"
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/lean4export.test.js"
   },
   "dependencies": {
     "@proofscript/module": "file:../module",
     "lean-ts-kernel": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "typescript": "5.8.3"
   }
 }

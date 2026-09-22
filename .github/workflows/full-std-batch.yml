@@ -1,0 +1,54 @@
+name: Full Std batched replay
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "test/**"
+      - "oracle/replay-probe/DependencyExport.lean"
+      - "scripts/batch-*.mjs"
+      - ".github/workflows/full-std-batch.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  std-batch:
+    name: Std batches ${{ matrix.start }}-${{ matrix.end }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { start: 0,  end: 6 }
+          - { start: 7,  end: 13 }
+          - { start: 14, end: 20 }
+          - { start: 21, end: 27 }
+          - { start: 28, end: 34 }
+          - { start: 35, end: 41 }
+          - { start: 42, end: 48 }
+          - { start: 49, end: 55 }
+          - { start: 56, end: 62 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Verify dependency-closed Std batch range
+        shell: bash
+        run: |
+          count=$(( ${{ matrix.end }} - ${{ matrix.start }} + 1 ))
+          node scripts/batch-stream-oracle.mjs Std 114029 2000 ${{ matrix.start }} "$count" 63

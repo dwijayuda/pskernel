@@ -363,6 +363,142 @@ mutual
     for n in names do dumpConstant env n
 end
 
+
+def resetInternTables : M Unit :=
+  modify fun s => { s with
+    names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
+    levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
+    exprs := HashMap.emptyWithCapacity 256
+    active := {}
+  }
+
+def dumpMeta : IO Unit :=
+  IO.println <| (Json.mkObj [("meta", Json.mkObj [
+    ("exporter", Json.mkObj [("name", "dependency-closure"), ("version", "1")]),
+    ("lean", Json.mkObj [("githash", githash), ("version", versionString)]),
+    ("format", Json.mkObj [("version", "3.1.0")])
+  ])]).compress
+
+def rootsForModule (env : Environment) (idx : ModuleIdx) : List Name := Id.run do
+  let mut roots := []
+  for (n, _) in env.constants.map₁.toList do
+    if env.getModuleIdxFor? n == some idx then roots := n :: roots
+  return roots
+
+def collectRootsByModule (env : Environment) : Array (Array Name) := Id.run do
+  let mut buckets := Array.replicate env.header.moduleNames.size #[]
+  for (n, _) in env.constants.map₁.toList do
+    if let some idx := env.getModuleIdxFor? n then
+      buckets := buckets.modify idx (fun xs => xs.push n)
+  return buckets
+
+def batchSizes (buckets : Array (Array Name)) (maxRoots : Nat) : Array Nat := Id.run do
+  let mut sizes := #[]
+  let mut count := 0
+  for roots in buckets do
+    if roots.isEmpty then continue
+    if count > 0 && count + roots.size > maxRoots then
+      sizes := sizes.push count
+      count := 0
+    count := count + roots.size
+  if count > 0 then sizes := sizes.push count
+  return sizes
+
+def selectedBatchRoots (sizes : Array Nat) (start count : Nat) : Nat := Id.run do
+  let stop := if count == 0 then sizes.size else min sizes.size (start + count)
+  let mut total := 0
+  for i in [start:stop] do total := total + sizes[i]!
+  return total
+
+def dumpBatchManifest (env : Environment) (target : Name) (maxRoots : Nat) : IO Unit := do
+  if maxRoots == 0 then throw <| IO.userError "batch size must be positive"
+  let buckets := collectRootsByModule env
+  let sizes := batchSizes buckets maxRoots
+  let directRoots := sizes.foldl (· + ·) 0
+  if directRoots != env.constants.map₁.size then
+    throw <| IO.userError s!"batch root coverage mismatch: {directRoots} != {env.constants.map₁.size}"
+  IO.println <| (Json.mkObj [("environment", Json.mkObj [
+    ("module", target.toString),
+    ("constants", env.constants.map₁.size),
+    ("modules", env.header.moduleNames.size),
+    ("batches", sizes.size),
+    ("maxRoots", maxRoots),
+    ("batchSizes", Json.arr <| sizes.map fun n => toJson n)
+  ])]).compress
+
+partial def dumpBatchStream (env : Environment) (target : Name) (maxRoots startBatch batchLimit : Nat) : IO Unit := do
+  if maxRoots == 0 then throw <| IO.userError "batch size must be positive"
+  let buckets := collectRootsByModule env
+  let sizes := batchSizes buckets maxRoots
+  let directRoots := sizes.foldl (· + ·) 0
+  if directRoots != env.constants.map₁.size then
+    throw <| IO.userError s!"batch root coverage mismatch: {directRoots} != {env.constants.map₁.size}"
+  let stopBatch := if batchLimit == 0 then sizes.size else min sizes.size (startBatch + batchLimit)
+  let selectedRoots := selectedBatchRoots sizes startBatch batchLimit
+  IO.println <| (Json.mkObj [("environment", Json.mkObj [
+    ("module", target.toString),
+    ("constants", env.constants.map₁.size),
+    ("modules", env.header.moduleNames.size),
+    ("batches", sizes.size),
+    ("maxRoots", maxRoots),
+    ("rangeStart", startBatch),
+    ("rangeStop", stopBatch),
+    ("selectedBatches", stopBatch - min startBatch stopBatch),
+    ("selectedDirectRoots", selectedRoots)
+  ])]).compress
+  let mut pending : Array Name := #[]
+  let mut firstModule := ""
+  let mut lastModule := ""
+  let mut batchIdx : Nat := 0
+  let flush (roots : Array Name) (idx : Nat) (first last : String) : IO Unit := do
+    unless roots.isEmpty do
+      if idx >= startBatch && idx < stopBatch then
+        IO.println <| (Json.mkObj [("batch", Json.mkObj [
+          ("index", idx),
+          ("firstModule", first),
+          ("lastModule", last),
+          ("directRoots", roots.size)
+        ])]).compress
+        dumpMeta
+        let _ ← (do for n in roots do dumpConstant env n) |>.run {}
+        pure ()
+  for idx in [0:buckets.size] do
+    let roots := buckets[idx]!
+    if roots.isEmpty then continue
+    let mn := env.header.moduleNames[idx]!.toString
+    if !pending.isEmpty && pending.size + roots.size > maxRoots then
+      flush pending batchIdx firstModule lastModule
+      pending := #[]
+      firstModule := ""
+      batchIdx := batchIdx + 1
+    if pending.isEmpty then firstModule := mn
+    lastModule := mn
+    pending := pending ++ roots
+  flush pending batchIdx firstModule lastModule
+
+partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
+  let total := env.constants.map₁.size
+  IO.println <| (Json.mkObj [("environment", Json.mkObj [
+    ("module", target.toString),
+    ("constants", total),
+    ("modules", env.header.moduleNames.size)
+  ])]).compress
+  let buckets := collectRootsByModule env
+  let _ ← (do
+    for idx in [0:buckets.size] do
+      let roots : Array Name := buckets[idx]!
+      unless roots.isEmpty do
+        resetInternTables
+        let moduleName := env.header.moduleNames[idx]!
+        IO.println <| (Json.mkObj [("shard", Json.mkObj [
+          ("module", moduleName.toString),
+          ("index", idx),
+          ("roots", roots.size)
+        ])]).compress
+        dumpMeta
+        for n in roots do dumpConstant env n) |>.run {}
+  pure ()
+
 unsafe def main (args : List String) : IO Unit := do
   initSearchPath (← findSysroot)
   if args.length < 2 then
@@ -373,11 +509,21 @@ unsafe def main (args : List String) : IO Unit := do
     let roots :=
       if requestedRoots == ["--all"] then env.constants.map₁.toList.map (·.1)
       else requestedRoots.map String.toName
-    IO.println <| (Json.mkObj [("meta", Json.mkObj [
-      ("exporter", Json.mkObj [("name", "dependency-closure"), ("version", "1")]),
-      ("lean", Json.mkObj [("githash", githash), ("version", versionString)]),
-      ("format", Json.mkObj [("version", "3.1.0")])
-    ])]).compress
-    let _ ← (do
-      for n in roots do dumpConstant env n) |>.run {}
-    pure ()
+    if requestedRoots == ["--module-stream"] then
+      dumpModuleStream env moduleName
+    else if requestedRoots.length == 2 && requestedRoots.head! == "--batch-manifest" then
+      let maxRoots := requestedRoots.tail!.head! |>.toNat!
+      dumpBatchManifest env moduleName maxRoots
+    else if requestedRoots.length == 2 && requestedRoots.head! == "--batch-stream" then
+      let maxRoots := requestedRoots.tail!.head! |>.toNat!
+      dumpBatchStream env moduleName maxRoots 0 0
+    else if requestedRoots.length == 4 && requestedRoots.head! == "--batch-range" then
+      let maxRoots := requestedRoots[1]!.toNat!
+      let start := requestedRoots[2]!.toNat!
+      let count := requestedRoots[3]!.toNat!
+      dumpBatchStream env moduleName maxRoots start count
+    else
+      dumpMeta
+      let _ ← (do
+        for n in roots do dumpConstant env n) |>.run {}
+      pure ()

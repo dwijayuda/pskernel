@@ -3,10 +3,26 @@
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "ProofScript source positions, syntax trees, parser combinators and grammar.",
+  "description": "ProofScript v0.7 source positions, trivia-preserving tokens, lexical errors, and feature identifiers.",
   "proofscript": {
-    "status": "scaffold",
+    "status": "lexer-mvp",
     "phase": "B",
-    "trust": "untrusted-support"
+    "trust": "untrusted-support",
+    "sourceLanguage": "typescript",
+    "specVersion": "0.7.0",
+    "leanSemantics": "4.34.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/syntax.test.js"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
   }
 }

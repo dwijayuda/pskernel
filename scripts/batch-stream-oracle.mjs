@@ -22,6 +22,8 @@ const bin=candidates.find(p=>fs.existsSync(join(p,'lean')));
 if(!bin)throw new Error('batch-stream-oracle: set LEAN434_BIN or put Lean 4.34 on PATH');
 const lean=join(bin,'lean');
 const envVars={...process.env,PATH:`${bin}:${process.env.PATH??''}`};
+const workerHeapMiB=Number(process.env.PSKERNEL_WORKER_HEAP_MIB??'4096');
+if(!Number.isSafeInteger(workerHeapMiB)||workerHeapMiB<512)throw new Error(`batch-stream-oracle: invalid PSKERNEL_WORKER_HEAP_MIB ${process.env.PSKERNEL_WORKER_HEAP_MIB}`);
 
 const manifestRun=spawnSync(lean,['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--batch-manifest',String(maxRoots)],{
   cwd:resolve('.'),env:envVars,encoding:'utf8',maxBuffer:16*1024*1024
@@ -69,7 +71,7 @@ async function exportBatch(index,path){
 }
 async function replayBatch(index,path){
   const fd=openSync(path,'r');
-  const child=spawn(process.execPath,['scripts/batch-replay-worker.mjs'],{cwd:resolve('.'),stdio:[fd,'pipe','pipe']});
+  const child=spawn(process.execPath,[`--max-old-space-size=${workerHeapMiB}`,'scripts/batch-replay-worker.mjs'],{cwd:resolve('.'),stdio:[fd,'pipe','pipe']});
   let out='',err='';child.stdout.setEncoding('utf8');child.stdout.on('data',d=>out+=d);child.stderr.setEncoding('utf8');child.stderr.on('data',d=>err+=d);
   const [code,signal]=await new Promise(r=>child.on('close',(c,s)=>r([c,s])));
   closeSync(fd);
@@ -101,5 +103,5 @@ if(batches!==rangeStop-rangeStart)throw new Error(`observed batches ${batches} !
 if(directRoots!==selectedRoots)throw new Error(`direct root coverage ${directRoots} != selected direct roots ${selectedRoots}`);
 console.log(JSON.stringify({
   ok:true,module:moduleName,modules:Number(manifest.modules),totalBatches,batches,maxRoots,rangeStart,rangeStop,directRoots,environmentConstants,
-  records:totalRecords,declarations:totalDecls,totalReplayConstants,maxBatchConstants,maxWorkerRssMiB:Number(maxWorkerRssMiB.toFixed(1))
+  records:totalRecords,declarations:totalDecls,totalReplayConstants,maxBatchConstants,workerHeapMiB,maxWorkerRssMiB:Number(maxWorkerRssMiB.toFixed(1))
 },null,2));

@@ -35,7 +35,7 @@ try{
      replay=new Lean4ExportReplay(shared);
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);
-     if(shards===1||shards%25===0)console.error(`[module-stream] shard=${shards} module=${current} constants=${shared.size} rssMiB=${rss.toFixed(1)} heapMiB=${heap.toFixed(1)}`);
+     if(shards===1||shards%25===0)console.error(`[module-stream] shard=${shards}/${header?.plannedShards??'?'} module=${current} part=${marker.shard.part??0} roots=${marker.shard.roots??'?'} constants=${shared.size} rssMiB=${rss.toFixed(1)} heapMiB=${heap.toFixed(1)}`);
      continue;
    }
    if(!replay)throw new Error(`record before first shard: ${line.slice(0,120)}`);
@@ -51,4 +51,4 @@ const expected=expectedArg?Number(expectedArg):Number(header.constants);
 if(Number(header.constants)!==expected)throw new Error(`exporter constant count ${header.constants} != expected ${expected}`);
 if(shared.size!==expected)throw new Error(`replayed constants ${shared.size} != expected ${expected}`);
 const finalMem=process.memoryUsage();maxRssMiB=Math.max(maxRssMiB,finalMem.rss/1048576);maxHeapMiB=Math.max(maxHeapMiB,finalMem.heapUsed/1048576);
-console.log(JSON.stringify({ok:true,module:moduleName,modules:Number(header.modules),shards,records:totalLines,declarations:totalDecls,constants:shared.size,rssMiB:Number((finalMem.rss/1048576).toFixed(1)),heapMiB:Number((finalMem.heapUsed/1048576).toFixed(1)),maxRssMiB:Number(maxRssMiB.toFixed(1)),maxHeapMiB:Number(maxHeapMiB.toFixed(1))},null,2));
+if(header.plannedShards!==undefined&&shards!==Number(header.plannedShards))throw new Error(`observed shards ${shards} != planned ${header.plannedShards}`);\nconsole.log(JSON.stringify({ok:true,module:moduleName,modules:Number(header.modules),plannedShards:Number(header.plannedShards??shards),shards,rootsPerShard:Number(header.rootsPerShard??0),records:totalLines,declarations:totalDecls,constants:shared.size,rssMiB:Number((finalMem.rss/1048576).toFixed(1)),heapMiB:Number((finalMem.heapUsed/1048576).toFixed(1)),maxRssMiB:Number(maxRssMiB.toFixed(1)),maxHeapMiB:Number(maxHeapMiB.toFixed(1))},null,2));

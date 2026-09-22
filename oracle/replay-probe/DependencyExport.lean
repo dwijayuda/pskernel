@@ -555,25 +555,40 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
 
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let total := env.constants.map₁.size
+  let buckets := collectRootsByModule env
+  let rootsPerShard : Nat := 10
+  let mut plannedShards := 0
+  for roots in buckets do
+    unless roots.isEmpty do
+      plannedShards := plannedShards + (roots.size + rootsPerShard - 1) / rootsPerShard
   IO.println <| (Json.mkObj [("environment", Json.mkObj [
     ("module", target.toString),
     ("constants", total),
-    ("modules", env.header.moduleNames.size)
+    ("modules", env.header.moduleNames.size),
+    ("plannedShards", plannedShards),
+    ("rootsPerShard", rootsPerShard)
   ])]).compress
-  let buckets := collectRootsByModule env
   let _ ← (do
     for idx in [0:buckets.size] do
       let roots : Array Name := buckets[idx]!
       unless roots.isEmpty do
-        resetInternTables
         let moduleName := env.header.moduleNames[idx]!
-        IO.println <| (Json.mkObj [("shard", Json.mkObj [
-          ("module", moduleName.toString),
-          ("index", idx),
-          ("roots", roots.size)
-        ])]).compress
-        dumpMeta
-        for n in roots do dumpConstant env n) |>.run {}
+        let mut start := 0
+        let mut part := 0
+        while start < roots.size do
+          let stop := min roots.size (start + rootsPerShard)
+          let slice := roots.extract start stop
+          resetInternTables
+          IO.println <| (Json.mkObj [("shard", Json.mkObj [
+            ("module", moduleName.toString),
+            ("index", idx),
+            ("part", part),
+            ("roots", slice.size)
+          ])]).compress
+          dumpMeta
+          for n in slice do dumpConstant env n
+          start := stop
+          part := part + 1) |>.run {}
   pure ()
 
 unsafe def main (args : List String) : IO Unit := do

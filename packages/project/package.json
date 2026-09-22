@@ -1,0 +1,12 @@
+{
+  "name": "@proofscript/project",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "npm-oriented ProofScript project graph, cache and build orchestration.",
+  "proofscript": {
+    "status": "scaffold",
+    "phase": "D",
+    "trust": "untrusted-support"
+  }
+}

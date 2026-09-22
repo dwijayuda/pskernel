@@ -1,5 +1,5 @@
 import {spawn,spawnSync} from 'node:child_process';
-import {createReadStream,mkdtempSync,openSync,closeSync,rmSync} from 'node:fs';
+import {createReadStream,mkdtempSync,openSync,closeSync,rmSync,statSync} from 'node:fs';
 import {createInterface} from 'node:readline';
 import {tmpdir} from 'node:os';
 import {resolve,join,delimiter} from 'node:path';
@@ -24,7 +24,9 @@ const lean=join(bin,'lean');
 const envVars={...process.env,PATH:`${bin}:${process.env.PATH??''}`};
 const workerHeapMiB=Number(process.env.PSKERNEL_WORKER_HEAP_MIB??'4096');
 const workerTimeoutMs=Number(process.env.PSKERNEL_WORKER_TIMEOUT_MS??'90000');
+const maxBatchBytes=Number(process.env.PSKERNEL_MAX_BATCH_BYTES??String(64*1024*1024));
 if(!Number.isSafeInteger(workerTimeoutMs)||workerTimeoutMs<10000)throw new Error(`adaptive-root-oracle: invalid PSKERNEL_WORKER_TIMEOUT_MS ${process.env.PSKERNEL_WORKER_TIMEOUT_MS}`);
+if(!Number.isSafeInteger(maxBatchBytes)||maxBatchBytes<1024*1024)throw new Error(`adaptive-root-oracle: invalid PSKERNEL_MAX_BATCH_BYTES ${process.env.PSKERNEL_MAX_BATCH_BYTES}`);
 const tmp=mkdtempSync(join(tmpdir(),'pskernel-adaptive-'));
 let attempts=0,leaves=0,directRoots=0,totalRecords=0,totalDecls=0,totalReplayConstants=0,maxBatchConstants=0,maxWorkerRssMiB=0,maxDepth=0;
 
@@ -54,9 +56,11 @@ async function runWorker(path){
   const child=spawn(process.execPath,['--expose-gc',`--max-old-space-size=${workerHeapMiB}`,'scripts/batch-replay-worker.mjs'],{
     cwd:resolve('.'),stdio:[fd,'pipe','pipe']
   });
-  let out='',err='';child.stdout.setEncoding('utf8');child.stdout.on('data',d=>out+=d);child.stderr.setEncoding('utf8');child.stderr.on('data',d=>err+=d);
-  let timedOut=false;
-  const timer=setTimeout(()=>{timedOut=true;child.kill('SIGKILL');},workerTimeoutMs);
+  let out='',err='',timedOut=false,timer;
+  const arm=()=>{clearTimeout(timer);timer=setTimeout(()=>{timedOut=true;child.kill('SIGKILL');},workerTimeoutMs);};
+  child.stdout.setEncoding('utf8');child.stdout.on('data',d=>{out+=d;arm();});
+  child.stderr.setEncoding('utf8');child.stderr.on('data',d=>{err+=d;arm();});
+  arm();
   const [code,signal]=await new Promise(r=>child.on('close',(c,s)=>r([c,s])));
   clearTimeout(timer);
   closeSync(fd);
@@ -76,7 +80,16 @@ async function verify(start,count,depth=0){
   if(Number(environment.constants)!==expected)throw new Error(`environment constants ${environment.constants} != expected ${expected}`);
   const actual=Number(batch.directRoots);
   if(actual!==Math.min(count,expected-start))throw new Error(`root ${start}+${count}: direct roots ${actual} mismatch`);
-  console.error(`[adaptive] try start=${start} count=${actual} depth=${depth} modules=${batch.firstModule}..${batch.lastModule}`);
+  const bytes=statSync(path).size;
+  console.error(`[adaptive] try start=${start} count=${actual} depth=${depth} bytes=${bytes} modules=${batch.firstModule}..${batch.lastModule}`);
+  if(bytes>maxBatchBytes&&actual>minChunk){
+    rmSync(path,{force:true});
+    const left=Math.max(1,Math.floor(actual/2)),right=actual-left;
+    console.error(`[adaptive] size start=${start} count=${actual} bytes=${bytes}; split ${left}+${right}`);
+    await verify(start,left,depth+1);
+    if(right>0)await verify(start+left,right,depth+1);
+    return;
+  }
   const result=await runWorker(path);
   rmSync(path,{force:true});
   if(result.ok){
@@ -102,5 +115,5 @@ try{
     await verify(start,Math.min(baseChunk,stop-start),0);
   }
   if(directRoots!==stop-rootStart)throw new Error(`coverage ${directRoots} != expected interval ${stop-rootStart}`);
-  console.log(JSON.stringify({ok:true,module:moduleName,rootStart,rootStop:stop,directRoots,attempts,leaves,maxDepth,baseChunk,minChunk,workerHeapMiB,workerTimeoutMs,totalRecords,totalDecls,totalReplayConstants,maxBatchConstants,maxWorkerRssMiB:Number(maxWorkerRssMiB.toFixed(1))},null,2));
+  console.log(JSON.stringify({ok:true,module:moduleName,rootStart,rootStop:stop,directRoots,attempts,leaves,maxDepth,baseChunk,minChunk,workerHeapMiB,workerTimeoutMs,maxBatchBytes,totalRecords,totalDecls,totalReplayConstants,maxBatchConstants,maxWorkerRssMiB:Number(maxWorkerRssMiB.toFixed(1))},null,2));
 } finally { rmSync(tmp,{recursive:true,force:true}); }

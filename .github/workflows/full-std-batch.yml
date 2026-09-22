@@ -90,7 +90,7 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - name: Verify adaptive dependency-closed Std root interval
-        run: node scripts/adaptive-root-oracle.mjs Std 114029 ${{ matrix.start }} ${{ matrix.count }} 500 25
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 ${{ matrix.start }} ${{ matrix.count }} 500 1
 
   std-complete:
     name: Full Std 114,029-root coverage

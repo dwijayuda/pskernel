@@ -7,6 +7,9 @@ const rl=createInterface({input:process.stdin,crlfDelay:Infinity});
 let replay=null;
 let lines=0,names=0,levels=0,expressions=0,declarations=0,segments=0;
 let maxRssMiB=process.memoryUsage().rss/1048576;
+let physicalLines=0;
+const heartbeat=setInterval(()=>{console.error(`[batch-worker] lines=${physicalLines} segments=${segments} constants=${shared.entries().length} rssMiB=${(process.memoryUsage().rss/1048576).toFixed(1)}`);},10000);
+heartbeat.unref();
 const finishSegment=()=>{
   if(!replay)return;
   const s=replay.finish();
@@ -18,6 +21,7 @@ const finishSegment=()=>{
 };
 for await(const line of rl){
   if(!line.trim())continue;
+  physicalLines++;
   let marker=null;try{marker=JSON.parse(line);}catch{}
   if(marker?.environment||marker?.batch)continue;
   if(marker?.segment){
@@ -32,6 +36,7 @@ for await(const line of rl){
   if(rss>maxRssMiB)maxRssMiB=rss;
 }
 finishSegment();
+clearInterval(heartbeat);
 console.log(JSON.stringify({
   stats:{lines,names,levels,expressions,declarations},
   constants:shared.entries().length,

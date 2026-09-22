@@ -1,0 +1,12 @@
+{
+  "name": "pskernel-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "pskernel": "./bin/pskernel.mjs"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../.."
+  }
+}

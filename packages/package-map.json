@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "status": "living",
+  "workspaceEnabled": false,
+  "packages": [
+    {
+      "name": "kernel",
+      "path": ".",
+      "phase": "A",
+      "trust": "TCB",
+      "status": "active",
+      "packageName": "lean-ts-kernel",
+      "dependsOn": []
+    },
+    {
+      "name": "cli",
+      "path": "packages/cli",
+      "phase": "A",
+      "trust": "untrusted-support",
+      "status": "scaffold+prototype",
+      "packageName": "pskernel-cli",
+      "dependsOn": [
+        "kernel",
+        "module",
+        "conformance"
+      ]
+    },
+    {
+      "name": "module",
+      "path": "packages/module",
+      "phase": "A",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/module",
+      "dependsOn": [
+        "kernel"
+      ]
+    },
+    {
+      "name": "conformance",
+      "path": "packages/conformance",
+      "phase": "A",
+      "trust": "test-only",
+      "status": "scaffold",
+      "packageName": "@proofscript/conformance",
+      "dependsOn": [
+        "kernel"
+      ]
+    },
+    {
+      "name": "lean4export",
+      "path": "packages/lean4export",
+      "phase": "A",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/lean4export",
+      "dependsOn": [
+        "kernel",
+        "module"
+      ]
+    },
+    {
+      "name": "browser",
+      "path": "packages/browser",
+      "phase": "A",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/browser",
+      "dependsOn": [
+        "kernel",
+        "module"
+      ]
+    },
+    {
+      "name": "native-ir",
+      "path": "packages/native-ir",
+      "phase": "A",
+      "trust": "optional-tcb-extension",
+      "status": "scaffold",
+      "packageName": "@proofscript/native-ir",
+      "dependsOn": [
+        "kernel"
+      ]
+    },
+    {
+      "name": "syntax",
+      "path": "packages/syntax",
+      "phase": "B",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/syntax",
+      "dependsOn": []
+    },
+    {
+      "name": "pretty",
+      "path": "packages/pretty",
+      "phase": "B",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/pretty",
+      "dependsOn": [
+        "syntax",
+        "kernel"
+      ]
+    },
+    {
+      "name": "meta",
+      "path": "packages/meta",
+      "phase": "B",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/meta",
+      "dependsOn": [
+        "kernel"
+      ]
+    },
+    {
+      "name": "elab",
+      "path": "packages/elab",
+      "phase": "B",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/elab",
+      "dependsOn": [
+        "syntax",
+        "meta",
+        "pretty",
+        "kernel",
+        "module"
+      ]
+    },
+    {
+      "name": "tactic",
+      "path": "packages/tactic",
+      "phase": "B",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/tactic",
+      "dependsOn": [
+        "meta",
+        "elab",
+        "pretty"
+      ]
+    },
+    {
+      "name": "compiler-ir",
+      "path": "packages/compiler-ir",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/compiler-ir",
+      "dependsOn": [
+        "kernel"
+      ]
+    },
+    {
+      "name": "runtime",
+      "path": "packages/runtime",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/runtime",
+      "dependsOn": []
+    },
+    {
+      "name": "backend-ts",
+      "path": "packages/backend-ts",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/backend-ts",
+      "dependsOn": [
+        "compiler-ir",
+        "runtime"
+      ]
+    },
+    {
+      "name": "language",
+      "path": "packages/language",
+      "phase": "D",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/language",
+      "dependsOn": [
+        "syntax",
+        "meta",
+        "elab",
+        "module"
+      ]
+    },
+    {
+      "name": "lsp",
+      "path": "packages/lsp",
+      "phase": "D",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/lsp",
+      "dependsOn": [
+        "language",
+        "pretty"
+      ]
+    },
+    {
+      "name": "project",
+      "path": "packages/project",
+      "phase": "D",
+      "trust": "untrusted-support",
+      "status": "scaffold",
+      "packageName": "@proofscript/project",
+      "dependsOn": [
+        "module",
+        "compiler-ir",
+        "language"
+      ]
+    }
+  ]
+}

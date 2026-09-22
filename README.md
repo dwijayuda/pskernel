@@ -52,3 +52,27 @@ For the official adversarial source-file oracle, set `LEAN434_SRC` to a Lean 4.3
 Native reduction is fail-closed unless an explicit `NativeEvaluator` TCB extension is configured.
 
 Do not silently broaden acceptance to make a corpus pass. A Lean/TypeScript mismatch must be isolated and fixed at the semantic layer that differs from Lean 4.34.0.
+
+## Additional assurance gates
+
+### Arena correctness suite
+
+The external Lean Kernel Arena static corpus can be checked without vendoring it into this repository:
+
+```bash
+npm run build
+node scripts/arena-static-oracle.mjs /path/to/extracted-arena-tests
+```
+
+By default this checks correctness/adversarial cases and excludes `perf/`. Arena files are replayed using their recorded Lean version only at the test-harness boundary; this is cross-version compatibility evidence, not a replacement for the pinned Lean 4.34 oracle.
+
+### Canonical full Std replay
+
+For release/nightly assurance, prefer the one-pass module-order stream over repeated dependency closures:
+
+```bash
+# Lean 4.34.0 must be on PATH, or set LEAN434_BIN.
+npm run oracle:std-full
+```
+
+The default Node heap is 12 GiB. Override it with `PSKERNEL_STD_HEAP_MIB`. The runner keeps the checked environment but discards replay-local intern tables/caches between module shards.

@@ -10,5 +10,6 @@ export class Environment {
   find(n:Name):ConstantInfo|undefined{return this.constants.get(nameKey(n));}
   get(n:Name):ConstantInfo{const r=this.find(n);if(!r)throw new KernelError(`unknown constant '${nameToString(n)}'`);return r;}
   add(i:ConstantInfo):void{const k=nameKey(i.name);if(this.constants.has(k))throw new KernelError(`already declared '${nameToString(i.name)}'`);this.constants.set(k,i);}
+  get size():number{return this.constants.size;}
   entries():readonly ConstantInfo[]{return [...this.constants.values()];}
 }

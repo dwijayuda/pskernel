@@ -14,6 +14,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: full-std-batched-main
+  cancel-in-progress: true
+
 jobs:
   std-batch:
     name: Std batches ${{ matrix.start }}-${{ matrix.end }}
@@ -32,7 +36,7 @@ jobs:
           - { start: 35, end: 41 }
           - { start: 42, end: 48 }
           - { start: 49, end: 55 }
-          - { start: 56, end: 62 }
+          - { start: 56, end: 57 }
     steps:
       - uses: actions/checkout@v4
       - name: Install pinned Lean 4.34
@@ -51,4 +55,4 @@ jobs:
         shell: bash
         run: |
           count=$(( ${{ matrix.end }} - ${{ matrix.start }} + 1 ))
-          node scripts/batch-stream-oracle.mjs Std 114029 2000 ${{ matrix.start }} "$count" 63
+          node scripts/batch-stream-oracle.mjs Std 114029 2000 ${{ matrix.start }} "$count" 58

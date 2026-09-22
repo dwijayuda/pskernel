@@ -168,3 +168,10 @@ The TypeScript checker therefore fails closed on native reduction by default. Fu
 
 The official differential gate now passes **42/42**. Its two native-reduction cases use explicit controlled providers for constants whose official Lean results are known. A standalone TypeScript compiler-IR provider remains an open compatibility gate.
 
+
+
+## Expanded adversarial soundness baseline
+
+The direct TypeScript suite passes **95/95** cases. In addition to corpus and differential checks, it explicitly regression-locks unresolved expression/universe metavariable rejection and transactional rollback for duplicate mutual-inductive names.
+
+The official Lean 4.34 adversarial oracle passes **21 expected-success + 1 expected-rejection** kernel regression files. This includes projection metadata checks, reserved nested names, duplicate mutual declarations, imax/Prop elimination behavior, non-transitive algorithmic-defeq cache regressions, recursion/heartbeat limits, kernel error recovery, proposition detection, string-cost behavior, Fin fold kernel reduction, and rejection of the Quot-name-collision exploit.

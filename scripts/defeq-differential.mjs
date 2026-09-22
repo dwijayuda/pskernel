@@ -19,6 +19,9 @@ if(version!=='Lean (version 4.34.0, Release)') throw new Error(`defeq-differenti
 const replay=new Lean4ExportReplay();
 replay.replay(fs.readFileSync('oracle/fixtures/lean434-init-prelude.ndjson','utf8'));
 const env=replay.env;
+const primitiveReplay=new Lean4ExportReplay();
+primitiveReplay.replay(fs.readFileSync('oracle/fixtures/lean434-primitive-closure.ndjson','utf8'));
+const primitiveEnv=primitiveReplay.env;
 const N=s=>nameFromDotted(s), Nat=()=>constant(N('Nat')), Bool=()=>constant(N('Bool'));
 const oneLevel=levelSucc(levelZero);
 const arrow=(a,b)=>forallE(N('_'),a,b);
@@ -44,9 +47,25 @@ const cases=[
  {name:'beta',expected:true,lean:'example : ((fun x : Nat => x) 3) = 3 := rfl',ts:()=>({tc:new TypeChecker(env),lhs:app(lam(N('x'),Nat(),bvar(0)),natLit(3)),rhs:natLit(3)})},
  {name:'zeta',expected:true,lean:'example : (let x : Nat := 2; x) = 2 := rfl',ts:()=>({tc:new TypeChecker(env),lhs:{kind:'let',name:N('x'),type:Nat(),value:natLit(2),body:bvar(0)},rhs:natLit(2)})},
  {name:'nat-add',expected:true,lean:'example : (2 + 3 : Nat) = 5 := rfl',ts:()=>({tc:new TypeChecker(env),lhs:add(natLit(2),natLit(3)),rhs:natLit(5)})},
+ {name:'let-under-lambda',expected:true,lean:'example : (fun x : Nat => (let y := x; y)) = (fun x => x) := rfl',ts:()=>({tc:new TypeChecker(env),lhs:lam(N('x'),Nat(),{kind:'let',name:N('y'),type:Nat(),value:bvar(0),body:bvar(0)}),rhs:lam(N('x'),Nat(),bvar(0))})},
+ {name:'nat-sub',expected:true,lean:'example : Nat.sub 9 4 = 5 := rfl',ts:()=>({tc:new TypeChecker(env),lhs:mkAppN(constant(N('Nat.sub')),[natLit(9),natLit(4)]),rhs:natLit(5)})},
+ {name:'nat-mul',expected:true,lean:'example : Nat.mul 6 7 = 42 := rfl',ts:()=>({tc:new TypeChecker(env),lhs:mkAppN(constant(N('Nat.mul')),[natLit(6),natLit(7)]),rhs:natLit(42)})},
+ {name:'nat-pow',expected:true,lean:'example : Nat.pow 3 4 = 81 := rfl',ts:()=>({tc:new TypeChecker(env),lhs:mkAppN(constant(N('Nat.pow')),[natLit(3),natLit(4)]),rhs:natLit(81)})},
+ {name:'nat-gcd',expected:true,lean:'example : Nat.gcd 48 18 = 6 := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.gcd')),[natLit(48),natLit(18)]),rhs:natLit(6)})},
+ {name:'nat-mod',expected:true,lean:'example : Nat.mod 17 5 = 2 := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.mod')),[natLit(17),natLit(5)]),rhs:natLit(2)})},
+ {name:'nat-div',expected:true,lean:'example : Nat.div 17 5 = 3 := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.div')),[natLit(17),natLit(5)]),rhs:natLit(3)})},
+ {name:'nat-land',expected:true,lean:'example : Nat.land 6 3 = 2 := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.land')),[natLit(6),natLit(3)]),rhs:natLit(2)})},
+ {name:'nat-lor',expected:true,lean:'example : Nat.lor 4 3 = 7 := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.lor')),[natLit(4),natLit(3)]),rhs:natLit(7)})},
+ {name:'nat-xor',expected:true,lean:'example : Nat.xor 6 3 = 5 := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.xor')),[natLit(6),natLit(3)]),rhs:natLit(5)})},
+ {name:'nat-shift-left',expected:true,lean:'example : Nat.shiftLeft 3 4 = 48 := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.shiftLeft')),[natLit(3),natLit(4)]),rhs:natLit(48)})},
+ {name:'nat-shift-right',expected:true,lean:'example : Nat.shiftRight 48 4 = 3 := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.shiftRight')),[natLit(48),natLit(4)]),rhs:natLit(3)})},
+ {name:'nat-beq',expected:true,lean:'example : Nat.beq 7 7 = true := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.beq')),[natLit(7),natLit(7)]),rhs:constant(N('Bool.true'))})},
+ {name:'nat-ble',expected:true,lean:'example : Nat.ble 8 3 = false := rfl',ts:()=>({tc:new TypeChecker(primitiveEnv),lhs:mkAppN(constant(N('Nat.ble')),[natLit(8),natLit(3)]),rhs:constant(N('Bool.false'))})},
  {name:'function-eta',expected:true,lean:'example (f : Nat → Nat) : (fun x => f x) = f := rfl',ts:()=>mkLocal([['f',arrow(Nat(),Nat())]],(tc,x)=>({tc,lhs:lam(N('x'),Nat(),app(x.f,bvar(0))),rhs:x.f}))},
  {name:'proof-irrelevance',expected:true,lean:'example (p q : (0 : Nat) = 0) : p = q := rfl',ts:()=>mkLocal([['p',eqNat(natLit(0),natLit(0))],['q',eqNat(natLit(0),natLit(0))]],(tc,x)=>({tc,lhs:x.p,rhs:x.q}))},
  {name:'structure-eta',expected:true,lean:'example (p : PProd Nat Nat) : PProd.mk p.1 p.2 = p := rfl',ts:()=>{const pp=mkAppN(constant(N('PProd'),[oneLevel,oneLevel]),[Nat(),Nat()]);return mkLocal([['p',pp]],(tc,x)=>{const fst={kind:'proj',typeName:N('PProd'),index:0,expr:x.p},snd={kind:'proj',typeName:N('PProd'),index:1,expr:x.p};return {tc,lhs:mkAppN(constant(N('PProd.mk'),[oneLevel,oneLevel]),[Nat(),Nat(),fst,snd]),rhs:x.p};});}},
+ {name:'subtype-dependent-eta',expected:true,lean:'example (p : {n : Nat // n = n}) : (⟨p.val, p.property⟩ : {n : Nat // n = n}) = p := rfl',ts:()=>{const pred=lam(N('n'),Nat(),eqNat(bvar(0),bvar(0))),sub=mkAppN(constant(N('Subtype'),[oneLevel]),[Nat(),pred]);return mkLocal([['p',sub]],(tc,x)=>{const val={kind:'proj',typeName:N('Subtype'),index:0,expr:x.p},property={kind:'proj',typeName:N('Subtype'),index:1,expr:x.p};return {tc,lhs:mkAppN(constant(N('Subtype.mk'),[oneLevel]),[Nat(),pred,val,property]),rhs:x.p};});}},
+ {name:'eq-rec-k-iota',expected:true,lean:'example : Eq.rec (motive := fun _ _ => Nat) 7 (Eq.refl 3) = 7 := rfl',ts:()=>{const three=natLit(3),motive=lam(N('x'),Nat(),lam(N('h'),eqNat(three,bvar(0)),Nat())),refl=mkAppN(constant(N('Eq.refl'),[oneLevel]),[Nat(),three]);return {tc:new TypeChecker(env),lhs:mkAppN(constant(N('Eq.rec'),[oneLevel,oneLevel]),[Nat(),three,motive,natLit(7),three,refl]),rhs:natLit(7)};}},
  {name:'universe-max-commutes',expected:true,lean:'universe u v\nexample (α : Sort (max u v)) : Sort (max v u) := α',ts:()=>{const u=levelParam(N('u')),v=levelParam(N('v'));return {tc:new TypeChecker(env),lhs:sort(mkMax(u,v)),rhs:sort(mkMax(v,u))};}},
  {name:'delta-definition',expected:true,lean:'def DiffD : Nat := 1\nexample : DiffD = 1 := rfl',ts:()=>{const n=N('Diff.D');if(!env.has(n))env.add({kind:'definition',name:n,levelParams:[],type:Nat(),value:natLit(1),hints:{kind:'regular',height:1n},safety:'safe'});return {tc:new TypeChecker(env),lhs:constant(n),rhs:natLit(1)};}},
  {name:'opaque-does-not-delta',expected:false,lean:'opaque DiffO : Nat := 1\nexample : DiffO = 1 := rfl',ts:()=>{const n=N('Diff.O');if(!env.has(n))env.add({kind:'opaque',name:n,levelParams:[],type:Nat(),value:natLit(1)});return {tc:new TypeChecker(env),lhs:constant(n),rhs:natLit(1)};}},

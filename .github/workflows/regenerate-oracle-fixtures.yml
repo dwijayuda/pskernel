@@ -57,7 +57,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- oracle/fixtures; then
+          if [[ -z "$(git status --porcelain -- oracle/fixtures)" ]]; then
             echo "Fixtures already canonical."
             exit 0
           fi

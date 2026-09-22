@@ -530,6 +530,8 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
     ("index", start),
     ("firstModule", firstModule),
     ("lastModule", lastModule),
+    ("firstRoot", selected[0]!.toString),
+    ("lastRoot", selected[selected.size - 1]!.toString),
     ("directRoots", selected.size)
   ])]).compress
   let _ ← (do

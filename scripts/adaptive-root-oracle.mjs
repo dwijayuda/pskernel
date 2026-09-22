@@ -81,7 +81,7 @@ async function verify(start,count,depth=0){
   const actual=Number(batch.directRoots);
   if(actual!==Math.min(count,expected-start))throw new Error(`root ${start}+${count}: direct roots ${actual} mismatch`);
   const bytes=statSync(path).size;
-  console.error(`[adaptive] try start=${start} count=${actual} depth=${depth} bytes=${bytes} modules=${batch.firstModule}..${batch.lastModule}`);
+  console.error(`[adaptive] try start=${start} count=${actual} depth=${depth} bytes=${bytes} modules=${batch.firstModule}..${batch.lastModule} roots=${batch.firstRoot??'?'}..${batch.lastRoot??'?'}`);
   if(bytes>maxBatchBytes&&actual>minChunk){
     rmSync(path,{force:true});
     const left=Math.max(1,Math.floor(actual/2)),right=actual-left;

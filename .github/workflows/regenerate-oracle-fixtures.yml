@@ -1,0 +1,62 @@
+name: Regenerate Lean 4.34 oracle fixtures
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - lean-toolchain
+      - oracle/replay-probe/**
+      - scripts/generate-oracle-fixtures.sh
+      - .github/workflows/regenerate-oracle-fixtures.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - name: Regenerate pinned corpora
+        run: ./scripts/generate-oracle-fixtures.sh
+      - name: Build TypeScript kernel
+        run: npm run build
+      - name: Verify generated corpora
+        run: |
+          npm run oracle:primitive
+          npm run oracle:init
+          npm run oracle:std-parsec
+          npm run oracle:std-sat-cnf
+          npm run oracle:std-byteslice
+          npm run oracle:lean-rbmap
+          npm run oracle:lean-persistentarray
+          npm run oracle:lean-persistenthashmap
+          npm run oracle:lean-rbmap-full
+      - name: Commit generated fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- oracle/fixtures; then
+            echo "Fixtures already canonical."
+            exit 0
+          fi
+          git add oracle/fixtures
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "test: regenerate Lean 4.34 oracle fixtures"
+          git push origin HEAD:main

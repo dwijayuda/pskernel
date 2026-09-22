@@ -96,7 +96,6 @@
   "openGates": [
     "full-Std-environment-replay",
     "full-Lean-environment-replay",
-    "native-reduction-compiler-ir-provider",
     "formal-equivalence-proof"
   ],
   "prohibitedClaims": [
@@ -106,12 +105,13 @@
   ],
   "lastVerifiedTestCount": 97,
   "notes": [
+    "Lean 4.34 final alignment correction: upstream commit 2a7175c74ba17b160299accd7e6ea6984d7ea86f removed Lean.reduceBool/Lean.reduceNat, ofReduceBool/ofReduceNat, Lean.trustCompiler, and all in-kernel native compiler-IR reduction. pskernel removed NativeEvaluator/native-reduction special handling and retired the native-IR compatibility gate.",
     "Deep-expression robustness hardening keeps 97/97 direct tests and 170/170 Arena correctness green: hasMVar, lift, and instantiate now use explicit traversal stacks, and isolated heavy oracle workers use a larger JavaScript stack while the kernel maxRecDepth limit remains authoritative.",
     "Lean Kernel Arena static correctness sweep passes 170/170 non-performance cases after two fixes: projection inference now checks the projected structure expression (rejecting the proj-of-prop false proof), and lean4export intern tables accept valid sparse/out-of-order IDs while still rejecting duplicates. Arena performance cases remain a separate optimization gate.",
     "Canonical one-pass module-order Full Std replay is now the preferred exhaustive completion gate. Dependency-closure batching is retained as diagnostic tooling for isolating failures, not as the release definition.",
     "Expanded soundness baseline passes 95/95 direct TypeScript tests plus 21 expected-success and 1 expected-rejection official Lean 4.34 kernel regression files. New direct invariants explicitly reject expression metavariables, universe metavariables, and duplicate mutual-inductive names transactionally.",
-    "Official Lean 4.34 definitional-equality differential now passes 42/42 paired cases. The expansion covers every dedicated Nat reducer (sub/mul/pow/gcd/mod/div/land/lor/xor/shiftLeft/shiftRight/beq/ble), let-under-binder substitution, dependent Subtype structure eta, and K-like Eq.rec iota reduction.",
-    "Native reduction is fail-closed by default. Lean 4.34 always executes compiler IR for Lean.reduceNat/Lean.reduceBool, so logical-body normalization is not a compatible substitute when implemented_by/extern overrides exist. A shape-checked NativeEvaluator is now the explicit TCB-extension boundary; the official differential's controlled native cases inject known results through that provider.",
+    "Official Lean 4.34 definitional-equality differential previously passed 42/42 including two pre-final native-reduction cases; the final-4.34 matrix removes those obsolete cases and must be re-run. The expansion covers every dedicated Nat reducer (sub/mul/pow/gcd/mod/div/land/lor/xor/shiftLeft/shiftRight/beq/ble), let-under-binder substitution, dependent Subtype structure eta, and K-like Eq.rec iota reduction.",
+    "Final Lean 4.34 removed the deprecated in-kernel native-reduction declarations and compiler-IR hooks; pskernel no longer models them as kernel operations.",
     "GitHub repository dwijayuda/pskernel is now the persistent source of truth. Fast TypeScript CI is green, the Lean 4.34 fixture generator is reproducible on GitHub Actions, the official defeq differential is 26/26, and the adversarial oracle is 21 expected-success + 1 expected-rejection kernel regression cases.",
     "Real Lean.Data.PersistentHashMap dependency-closure roots replay passes: 12,885 records, 10,377 expressions, 298 declaration records, and exactly 397 admitted/generated constants. This gate adds nested Entry/Node families, BEq/Hashable-parameterized structures, collision-node handling, and insert/find/contains recursion without additional kernel changes.",
     "Real Lean.Data.PersistentArray dependency-closure roots replay passes: 85,105 records, 74,170 expressions, 1,440 declaration records, and exactly 1,633 admitted/generated constants. The corpus exposed and fixed Lean 4.34 nested-inductive parameter BinderInfo preservation: constructor parameters are recreated per constructor during preprocessing and again during restoration, with canonical nested parameters rebased to the fresh restoration locals.",
@@ -147,12 +147,12 @@
     "Nat literal sizing and Nat.pow/Nat.shiftLeft count guards now match Lean 4.34 core defaults: 128 MiB explicit trusted-core limit and 32-bit unsigned counts; runtime environment overrides remain outside the trusted core.",
     "Recursor reduction now applies Lean 4.34 non-recursive-structure eta conversion before rule selection; projection WHNF reuses the constructor-aware projection reducer.",
     "Recursor reduction now converts String literals through the same String.ofList/List Char constructor path used by Lean 4.34 before computation-rule selection.",
-    "Lean.reduceBool/Lean.reduceNat are now detected at the official kernel reduction boundary and fail closed until a compiler-IR evaluator exists; they no longer silently drift as irreducible applications.",
+    "Historical Lean.reduceBool/Lean.reduceNat special handling has been removed to match final Lean 4.34, where those declarations no longer exist.",
     "WellFounded.Nat.fix/fix.go structural certification now validates both the outer fixpoint wrapper and the inner Nat.rec predecessor-fuel equation; complex primitive equations themselves remain fail-closed.",
     "Well-founded primitive Probe infrastructure now derives the induction-hypothesis domain and validates defining equations independently from fixpoint scaffolding; outer-only and full certificates are separated to prevent accidental overclaiming.",
     "Ordinary inductive admission now propagates Lean 4.34 safe/unsafe checking mode through headers, constructors, recursor synthesis, and defensive recursor checks; unsafe inductives skip positivity while their generated constants remain unsafe.",
     "Nested-inductive restoration hardening now uses the declaration safety mode and each restored recursor's universe parameters, matching the 4.34 recheck boundary.",
-    "Lean 4.34 lazy defeq now invokes native reduction after Nat reduction and before lazy delta; native evaluator gaps fail closed.",
+    "Final Lean 4.34 lazy defeq has no native-reduction hook; pskernel now follows Nat reduction directly with ordinary lazy-delta machinery.",
     "Projection-headed lazy unfolding uses full projection WHNF, and projection indices are restricted to integral uint32 values.",
     "Lean 4.34 eagerReduce mode is now implemented: application-argument type checking enables eager Nat/reflection defeq even when free variables occur syntactically; regression coverage verifies the mode is scoped to eagerReduce arguments.",
     "Boolean primitive condition certification now checks the Lean-style Bool.decEq/ite boundary operationally: specialized Nat ite must typecheck and reduce to the true/false branch correctly; a swapped implementation is rejected.",

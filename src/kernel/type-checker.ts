@@ -8,7 +8,6 @@ import { nameEq, nameToString } from '../core/name.js';
 import { N } from './names.js';
 import { checkNatSize, LEAN_NAT_MAX_SIZE_DEFAULT, reduceNatApp } from './reduction/nat.js';
 import { stringLitToConstructor } from './reduction/literals.js';
-import { NativeEvaluator, reduceNative } from './reduction/native.js';
 import { reduceQuot } from './reduction/quot.js';
 import { reduceRecursor } from './reduction/recursor.js';
 import { KernelState } from './state.js';
@@ -29,11 +28,11 @@ function cmpHint(a:ReducibilityHints,b:ReducibilityHints):number{
 export class TypeChecker {
   readonly state:KernelState;
   private depth=0;
-  constructor(readonly env:Environment,readonly lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false,readonly nativeEvaluator?:NativeEvaluator){this.state=state??new KernelState();}
+  constructor(readonly env:Environment,readonly lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false){this.state=state??new KernelState();}
   private rec<T>(f:()=>T):T{if(++this.depth>this.limits.maxRecDepth){this.depth--;throw new KernelError('deep recursion');}try{return f();}finally{this.depth--;}}
   private checkLevel(l:Level):void{if(!this.allowedLevelParams)return;for(const p of levelParamNames(l))if(!this.allowedLevelParams.some(q=>nameEq(p,q)))throw new KernelError(`invalid reference to undefined universe level parameter '${nameToString(p)}'`);}
-  private withLocal<T>(name:string,type:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLocal(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}
-  private withLet<T>(name:string,type:Expr,value:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLet(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type,value);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}
+  private withLocal<T>(name:string,type:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLocal(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce));}
+  private withLet<T>(name:string,type:Expr,value:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLet(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type,value);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce));}
   private isEagerReduceExpr(e:Expr):boolean{const v=appView(e);return v.fn.kind==='const'&&nameEq(v.fn.name,N.EagerReduce)&&v.args.length===2;}
   private withEagerReduction<T>(k:()=>T):T{const old=this.eagerReduce;this.eagerReduce=true;try{return k();}finally{this.eagerReduce=old;}}
 
@@ -132,7 +131,6 @@ export class TypeChecker {
     const k=this.state.exprId(e),c=this.state.whnf.get(k);if(c)return c;let x=e;
     for(let fuel=0;fuel<100000;fuel++){
       const c0=this.whnfCore(x);if(!exprEq(c0,x)){x=c0;continue;}
-      const native=reduceNative(this.env,x,this.nativeEvaluator);if(native){x=native;continue;}
       const nr=reduceNatApp(this.env,x,y=>this.whnf(y),this.limits.maxNatBytes);if(nr){x=nr;continue;}
       const u=this.unfold(x);if(u){x=u;continue;}
       this.state.whnf.set(k,x);return x;
@@ -238,15 +236,13 @@ export class TypeChecker {
 
   isDefEq(a:Expr,b:Expr):boolean{return this.rec(()=>{
     const q=this.quick(a,b);if(q!==null)return q;
-    // Lean 4.34 reflection fast path: fully reduce a closed lhs when rhs is Bool.true.
+    // Lean 4.34 reflection fast path for ordinary kernel-reducible terms; native compiler evaluation is not a kernel reduction feature in final 4.34.
     if((!hasFVar(a)||this.eagerReduce)&&b.kind==='const'&&nameEq(b.name,N.BoolTrue)){const w=this.whnf(a);if(w.kind==='const'&&nameEq(w.name,N.BoolTrue)){this.state.success.add(this.state.pair(a,b));return true;}}
     let x=this.whnfCore(a,false,true),y=this.whnfCore(b,false,true);const q2=this.quick(x,y);if(q2!==null)return q2;
     const pi=this.proofIrrel(x,y);if(pi!==null)return pi;
     for(let i=0;i<512;i++){
       const off=this.defEqOffset(x,y);if(off!==null)return off;
       if(((!hasFVar(x)&&!hasFVar(y))||this.eagerReduce)){const rx=reduceNatApp(this.env,x,z=>this.whnf(z),this.limits.maxNatBytes);if(rx)return this.isDefEq(rx,y);const ry=reduceNatApp(this.env,y,z=>this.whnf(z),this.limits.maxNatBytes);if(ry)return this.isDefEq(x,ry);}
-      // Lean 4.34 checks native reduction after Nat reduction and before lazy delta, regardless of fvars.
-      const nx=reduceNative(this.env,x,this.nativeEvaluator);if(nx)return this.isDefEq(nx,y);const ny=reduceNative(this.env,y,this.nativeEvaluator);if(ny)return this.isDefEq(x,ny);
       const d=this.deltaStep(x,y);if(!d)break;if(d.equal){this.state.success.add(this.state.pair(a,b));return true;}x=d.a;y=d.b;const z=this.quick(x,y);if(z!==null)return z;
     }
     if(x.kind==='const'&&y.kind==='const'&&nameEq(x.name,y.name)&&x.levels.length===y.levels.length&&x.levels.every((l,i)=>levelEquivalent(l,y.levels[i]!))){this.state.success.add(this.state.pair(a,b));return true;}

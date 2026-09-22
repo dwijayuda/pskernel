@@ -66,11 +66,7 @@ This package must never be imported by the trusted kernel.
 
 ### 5. Native IR provider — optional TCB extension
 
-Future package: `pskernel-native-ir`.
-
-This is intentionally separate because implementing `Lean.reduceNat` /
-`Lean.reduceBool` through compiler IR expands the trusted computing base.
-The normal kernel remains fail-closed when no provider is configured.
+No `native-ir` kernel-extension package is planned for Lean 4.34 compatibility: final Lean 4.34 removed in-kernel compiler-IR reduction. Compiler IR remains relevant only to the ordinary executable compiler/backend layer.
 
 ### 6. Browser/worker wrapper — untrusted host layer
 
@@ -91,8 +87,6 @@ pskernel-cli --> kernel public API <-- pskernel-browser
                         |
                pskernel-lean4export
 
-pskernel-native-ir ----> NativeEvaluator interface
-       (optional TCB extension)
 ```
 
 Nothing in the kernel package may depend on CLI, conformance, exporter process

@@ -108,7 +108,6 @@ language -> syntax/meta/elab/module
 lsp -> language
 project -> module/compiler/language/npm
 
-native-ir -> NativeEvaluator interface
 ```
 
 No reverse dependency from the kernel into any outer layer.

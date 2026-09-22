@@ -36,11 +36,9 @@ Lean keeps the trusted kernel in `src/kernel`. The compiler, parser, elaborator,
 server and most library services are outside it. pskernel should preserve the same
 property.
 
-### Native compiler execution is not ordinary kernel reduction
+### Native compiler execution is not kernel definitional reduction
 
-Lean's compiler IR interpreter is in `src/library/ir_interpreter.cpp`, outside the
-kernel directory. This supports pskernel's current design: `NativeEvaluator` remains
-an optional TCB extension rather than being mixed into normal logical reduction.
+Final Lean 4.34 removed the deprecated `Lean.reduceNat` / `Lean.reduceBool` in-kernel compiler-interpreter path entirely. pskernel therefore does not need a NativeEvaluator compatibility extension. Compiler IR belongs to the executable compiler/backend roadmap, while native proof tactics belong to meta/tactic tooling with explicit trust assumptions.
 
 ### Module persistence is a separate layer
 

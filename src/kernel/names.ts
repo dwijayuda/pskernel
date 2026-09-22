@@ -12,7 +12,6 @@ export const N={
  String:nameFromDotted('String'),Char:nameFromDotted('Char'),List:nameFromDotted('List'),ListNil:nameFromDotted('List.nil'),ListCons:nameFromDotted('List.cons'),StringOfList:nameFromDotted('String.ofList'),CharOfNat:nameFromDotted('Char.ofNat'),
  Eq:nameFromDotted('Eq'),EqRefl:nameFromDotted('Eq.refl'),
  Quot:nameFromDotted('Quot'),QuotMk:nameFromDotted('Quot.mk'),QuotLift:nameFromDotted('Quot.lift'),QuotInd:nameFromDotted('Quot.ind'),
- LeanReduceBool:nameFromDotted('Lean.reduceBool'),LeanReduceNat:nameFromDotted('Lean.reduceNat'),
  WfNatFix:nameFromDotted('WellFounded.Nat.fix'),WfNatFixGo:nameFromDotted('WellFounded.Nat.fix.go'),WfNatEager:nameFromDotted('WellFounded.Nat.eager'),
  EagerReduce:nameFromDotted('eagerReduce'),
  AccRec:nameFromDotted('Acc.rec'),AccIntro:nameFromDotted('Acc.intro')

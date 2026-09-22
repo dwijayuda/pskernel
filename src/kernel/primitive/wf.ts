@@ -7,7 +7,7 @@ import { N } from '../names.js';
 import { TypeChecker } from '../type-checker.js';
 
 function child(tc:TypeChecker,lctx:LocalContext):TypeChecker {
-  return new TypeChecker(tc.env,lctx,tc.state,tc.limits,tc.definitionSafety,tc.allowedLevelParams,false,tc.nativeEvaluator);
+  return new TypeChecker(tc.env,lctx,tc.state,tc.limits,tc.definitionSafety,tc.allowedLevelParams,false);
 }
 
 function containsFVarId(e:Expr,id:string):boolean {

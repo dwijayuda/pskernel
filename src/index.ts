@@ -38,8 +38,3 @@ export type {
   ReplayProgressOptions
 } from './integration/lean4export.js';
 
-export type {
-  NativeEvaluator,
-  NativeEvaluationResult,
-  NativeReductionKind
-} from './kernel/reduction/native.js';

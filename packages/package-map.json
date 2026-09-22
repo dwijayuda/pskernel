@@ -79,17 +79,6 @@
       ]
     },
     {
-      "name": "native-ir",
-      "path": "packages/native-ir",
-      "phase": "A",
-      "trust": "optional-tcb-extension",
-      "status": "scaffold",
-      "packageName": "@proofscript/native-ir",
-      "dependsOn": [
-        "kernel"
-      ]
-    },
-    {
       "name": "syntax",
       "path": "packages/syntax",
       "phase": "B",
@@ -225,5 +214,8 @@
     "authored": "typescript",
     "runtime": "generated-esm-js",
     "forbidHandAuthoredMjs": true
-  }
+  },
+  "notes": [
+    "Lean 4.34 final removed deprecated in-kernel native reduction; no NativeEvaluator/native-ir kernel extension is part of the compatibility architecture."
+  ]
 }

@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 169,
   "notes": [
+    "Upstream kernel regression coverage expansion: added a direct `strLitProj.lean` analogue proving a String literal projection reduces through String.ofList to the structure field; mapped Lean 4.34 `proj_delta_issue.lean` and `etaStruct.lean` to existing exact direct regressions. Direct suite count is now 170 pending refreshed execution.",
     "Execution refresh for String literal hook hardening: aligned reconstructed direct-suite names to the current 169-test branch set, rebuilt with TypeScript 5.8.3, and passed 169/169 under Node v22.16.0 including missing/malformed Char.ofNat rejection.",
     "String literal hook admission hardening: final Lean 4.34 string_lit_to_constructor injects List.nil Char, List.cons Char, Char.ofNat, and String.ofList. String.ofList primitive validation now also requires Nat and a type-correct Char.ofNat : Nat → Char before the kernel-special string expansion name is admitted. Existing regression now covers missing/malformed Char.ofNat transactionally.",
     "Kernel-hook admission hardening: `eagerReduce`, `Lean.reduceBool`, and `Lean.reduceNat` are now reserved names. `eagerReduce` must be the safe one-universe polymorphic identity; native reduction markers must be safe monomorphic opaque Bool/Nat endofunctions and still have type-correct bodies. This prevents forged export streams from attaching final-Lean name-sensitive kernel behavior to arbitrary declarations. Nat.pred/Nat.bitwise remain documented pskernel validation dependencies rather than direct C++ normalizer hooks.",
@@ -239,7 +240,7 @@
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
   ],
-  "currentTreeExpectedDirectTests": 169,
+  "currentTreeExpectedDirectTests": 170,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "refreshed reconstructed-branch execution PASS after String.ofList/Char.ofNat hook hardening: TypeScript 5.8.3 build + 169/169 direct tests under Node v22.16.0. Pinned-Lean canonical replay/native smoke remain executable open gates."
+  "currentTreeVerification": "last executed checkpoint remains 169/169; new direct string-literal projection regression added and pending TypeScript build/test execution"
 }

@@ -36,6 +36,21 @@ const matrix={
 };
 
 const hardeningExtras={
+  'study/lean4-4.34.0/tests/elab/strLitProj.lean':{
+    kind:'direct',
+    tests:['string literal projection reduces through String.ofList like Lean strLitProj'],
+    note:'kernel projection reduction must expand a String literal through String.ofList before selecting the structure field',
+  },
+  'study/lean4-4.34.0/tests/elab/proj_delta_issue.lean':{
+    kind:'direct',
+    tests:['defeq compares projections after lazy delta even when other structure fields differ'],
+    note:'lazy projection delta compares the projected field before forcing unrelated expensive fields',
+  },
+  'study/lean4-4.34.0/tests/elab/etaStruct.lean':{
+    kind:'direct',
+    tests:['defeq implements structure eta through projections','defeq treats zero-field single-constructor inductives as unit-like'],
+    note:'core structure eta plus unit-like single-constructor equality',
+  },
   'study/lean4-4.34.0/tests/elab/reduceBool.lean':{
     kind:'direct-native-boundary',
     tests:['explicit native evaluator controls Lean.reduceNat and Lean.reduceBool results'],

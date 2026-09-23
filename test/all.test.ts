@@ -893,6 +893,21 @@ test('string-literal expansion requires direct level-free String.ofList',()=>{
  assert((tc as any).tryStringLitExpansionCore(lit,overapplied)===null,'overapplied String.ofList must not trigger expansion');
 });
 
+test('string literal projection reduces through String.ofList like Lean strLitProj',()=>{
+ const env=new Environment(),one=levelSucc(levelZero),uN=nameFromDotted('u'),u=levelParam(uN),TU=sort(levelSucc(u));
+ env.add({kind:'axiom',name:N.Char,levelParams:[],type:sort(one)});
+ env.add({kind:'inductive',name:N.List,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,TU,'implicit'),numParams:1,numIndices:0,all:[N.List],ctors:[N.ListNil,N.ListCons],numNested:0,isRec:true,isReflexive:false});
+ const listU=(x:any)=>app(constant(N.List,[u]),x);
+ env.add({kind:'constructor',name:N.ListNil,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,listU(bvar(0)),'implicit'),induct:N.List,cidx:0,numParams:1,numFields:0});
+ env.add({kind:'constructor',name:N.ListCons,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,forallE(nameFromDotted('a'),bvar(0),forallE(nameFromDotted('as'),listU(bvar(1)),listU(bvar(2)))),'implicit'),induct:N.List,cidx:1,numParams:1,numFields:2});
+ const listChar=app(constant(N.List,[levelZero]),constant(N.Char)),StringMk=nameFromDotted('String.mk');
+ env.add({kind:'inductive',name:N.String,levelParams:[],type:sort(one),numParams:0,numIndices:0,all:[N.String],ctors:[StringMk],numNested:0,isRec:false,isReflexive:false});
+ env.add({kind:'constructor',name:StringMk,levelParams:[],type:forallE(nameFromDotted('data'),listChar,constant(N.String)),induct:N.String,cidx:0,numParams:0,numFields:1});
+ env.add({kind:'definition',name:N.StringOfList,levelParams:[],type:forallE(nameFromDotted('data'),listChar,constant(N.String)),value:lam(nameFromDotted('data'),listChar,app(constant(StringMk),bvar(0))),hints:{kind:'regular',height:1n},safety:'safe'});
+ const got=new TypeChecker(env).whnf({kind:'proj',typeName:N.String,index:0,expr:strLit('')});
+ eqExpr(got,mkAppN(constant(N.ListNil,[levelZero]),[constant(N.Char)]),'empty string projection must reduce through String.ofList to List.nil Char');
+});
+
 test('defeq expands string literals exactly through String.ofList',()=>{
  const env=baseEnv(),one=levelSucc(levelZero),uN=nameFromDotted('u'),u=levelParam(uN),TU=sort(levelSucc(u));
  env.add({kind:'axiom',name:N.Char,levelParams:[],type:sort(one)});

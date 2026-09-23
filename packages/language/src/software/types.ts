@@ -164,12 +164,20 @@ export interface CheckedSoftwareParameter {
   readonly type:SoftwareType;
 }
 
+export interface CheckedSoftwareLocalDeclaration {
+  readonly name:string;
+  readonly params:readonly CheckedSoftwareParameter[];
+  readonly resultType:SoftwareType;
+  readonly body:CheckedSoftwareExpr;
+}
+
 export interface CheckedSoftwareDeclaration {
   readonly kind:V061ValueDeclaration['kind'];
   readonly name:string;
   readonly params:readonly CheckedSoftwareParameter[];
   readonly resultType:SoftwareType;
   readonly body:CheckedSoftwareExpr;
+  readonly whereDeclarations?:readonly CheckedSoftwareLocalDeclaration[];
 }
 
 export interface CheckedSoftwareModule {

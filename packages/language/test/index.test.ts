@@ -243,3 +243,35 @@ console.log('ok - @proofscript/language structure/value global namespace collisi
   equal(generic,true);
 }
 console.log('ok - @proofscript/language monomorphic inductive ADT checker');
+
+
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'def f(x : Nat) : Nat := helper(x) where { helper(y : Nat) : Nat := y + 1; }',
+  ));
+  equal(checked.declarations[0]?.whereDeclarations?.length,1);
+  equal(checked.declarations[0]?.whereDeclarations?.[0]?.name,'helper');
+  equal(checked.declarations[0]?.body.kind,'call');
+}
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'def f(x : Nat) : Nat := second(x) where { '+
+    'first(y : Nat) : Nat := y + 1; '+
+    'second(y : Nat) : Nat := first(y) + 1; }',
+  ));
+  equal(
+    checked.declarations[0]?.whereDeclarations?.map((local)=>local.name).join(','),
+    'first,second',
+  );
+}
+{
+  let recursive=false;
+  try{
+    checkV061SoftwareModule(parseV061Module(
+      'def f(x : Nat) : Nat := loop(x) where { '+
+      'loop(n : Nat) : Nat := loop(n); }',
+    ));
+  }catch(error){recursive=/PS_CHECK_WHERE_RECURSION_UNSUPPORTED/.test(String(error));}
+  equal(recursive,true);
+}
+console.log('ok - @proofscript/language acyclic where helper checker');

@@ -228,7 +228,7 @@
       "path": "packages/language",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "v061-monomorphic-adt-checker-mvp",
+      "status": "v061-where-checker-mvp",
       "packageName": "@proofscript/language",
       "dependsOn": [
         "syntax",
@@ -238,10 +238,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Software checking has dedicated structure, inductive, and match modules rather than one monolithic semantic switch.",
-        "The executable ADT subset supports monomorphic non-indexed inductives, nullary/payload constructors, recursive nominal fields, and exhaustive constructor matching.",
-        "Generic parameters, indexed families, explicit constructor result types, generated recursors, and positivity checking remain outside this software checker and require elaboration/kernel validation.",
-        "This checker remains outside the TCB; proof acceptance still requires elaboration to pskernel."
+        "Software checking has dedicated structure, inductive, match, and where modules rather than one monolithic semantic switch.",
+        "Acyclic where helpers are predeclared for local scope, type-checked with outer captures, dependency-sorted, and retained explicitly in checked HIR.",
+        "Recursive/mutually recursive where cycles fail closed until Lean-compatible termination elaboration is integrated.",
+        "Proof acceptance remains a pskernel/elaborator responsibility outside this software checker."
       ]
     },
     {

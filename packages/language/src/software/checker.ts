@@ -11,7 +11,7 @@ import type {
 } from './types.js';
 import {softwareTypeEquals,softwareTypeToString} from './types.js';
 import {asSoftwareType} from './type-conversion.js';
-import {checkSoftwareExpr} from './expression-checker.js';
+import {checkValueDeclarationWithWhere} from './where-checker.js';
 import {collectStructures} from './structure-checker.js';
 import {
   collectConstructorIndex,
@@ -71,18 +71,26 @@ export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule
     });
 
     const resultType=asSoftwareType(decl.resultType,nominalNames);
-    const body=checkSoftwareExpr(
-      decl.body,
+    const checkedBody=checkValueDeclarationWithWhere(
+      decl,
       {locals,signatures,structures,inductives,constructors},
       resultType,
     );
+    const body=checkedBody.body;
     if(!softwareTypeEquals(body.resultType,resultType)){
       throw new Error(
         'PS_CHECK_DECL_TYPE: '+decl.name+' expects '+softwareTypeToString(resultType)+
         ', got '+softwareTypeToString(body.resultType),
       );
     }
-    return {kind:decl.kind,name:decl.name,params,resultType,body};
+    return {
+      kind:decl.kind,
+      name:decl.name,
+      params,
+      resultType,
+      body,
+      whereDeclarations:checkedBody.whereDeclarations,
+    };
   });
 
   return {

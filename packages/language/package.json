@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Incremental document snapshots, parse/elab reuse, cancellation and diagnostics.",
   "proofscript": {
-    "status": "v061-monomorphic-adt-checker-mvp",
+    "status": "v061-where-checker-mvp",
     "phase": "D",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

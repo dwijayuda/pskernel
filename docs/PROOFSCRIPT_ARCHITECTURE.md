@@ -173,10 +173,19 @@ source
 -> 42
 ```
 
-The initial verified CLI ABI supports `Nat`, `Int`, `Bool`, `String`,
-and `Unit`. Generic, function-typed, and user-defined structured `main`
-parameters remain fail-closed until their runtime representations are part of
-the verified compiler/runtime contract.
+The verified CLI ABI supports primitive `Nat`, `Int`, `Bool`, `String`,
+and `Unit` values plus kernel-derived structure/ADT types whose runtime fields
+are representable by the verified IR. Structured values cross the CLI boundary
+as strict JSON: nested Nat/Int values are decimal strings, structures are exact
+field objects, and ADTs use `{"$ctor":"constructor", ...fields}`. ADT inputs
+are reconstructed through the generated constructor exports so verified match
+tags are genuine; results are encoded from the runtime representation back to
+the same JSON-safe shape.
+
+This boundary is untrusted input handling, not proof evidence. The accepted
+shape is derived from pskernel-admitted verified IR. Function-typed values,
+unknown types, unresolved type parameters, malformed constructors/fields, and
+unsupported dependent runtime shapes remain fail-closed.
 
 
 ## Verified structure checkpoint

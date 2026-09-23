@@ -137,6 +137,98 @@ console.log('ok - psc verified run filesystem pipeline');
 
 {
   const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-verified-structure-abi-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'structure User where { age : Nat; } '+
+      'function main(user : User) : User := '+
+      '{ age := user.age + 1 : User };\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['{"age":"41"}'],
+    });
+    const output=result.mainResult as Record<string,unknown>;
+    equal(output.age,'42');
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified structure JSON ABI round-trip');
+
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-verified-adt-abi-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'inductive PsOption(α : Type) where { '+
+      '| none; | some(value : α); } '+
+      'function main(value : PsOption(Nat)) : PsOption(Nat) := '+
+      'match value with { '+
+      '| .none => PsOption.some(1); '+
+      '| .some x => PsOption.some(x + 1); };\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['{"$ctor":"some","value":"41"}'],
+    });
+    const output=result.mainResult as Record<string,unknown>;
+    equal(output.$ctor,'some');
+    equal(output.value,'42');
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified generic ADT JSON ABI round-trip');
+
+
+{
+  const directory=await mkdtemp(
     join(tmpdir(),'proofscript-verified-recursive-run-'),
   );
   try{

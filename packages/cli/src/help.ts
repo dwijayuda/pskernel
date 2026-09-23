@@ -26,8 +26,10 @@ Verified compiler:
   --verified  source -> Lean-compatible elaboration -> pskernel checked core
               -> erasure -> compiler IR -> TypeScript -> JavaScript
   No automatic fallback to the legacy software checker.
-  run --verified currently accepts primitive main parameters:
+  run --verified accepts primitive main parameters directly:
   Nat, Int, Bool, String, Unit.
+  Supported structure/ADT parameters use the checked JSON ABI:
+  nested Nat/Int are decimal strings; ADTs use {"$ctor":"name",...fields}.
 
 Current language track:
   ProofScript ${PROOFSCRIPT_SPEC_VERSION} with v0.6.1 compiler-ready surface baseline

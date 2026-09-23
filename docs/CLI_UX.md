@@ -72,7 +72,9 @@ psc run -- 42
 psc run src/main.ps -- 42
 ```
 
-Builds the project, loads the emitted ESM module, invokes exported `main`, converts CLI arguments according to the declared primitive parameter types, and prints a non-Unit result.
+Builds the project, loads the emitted ESM module, invokes exported `main`, converts CLI arguments according to the verified IR parameter types, and prints a non-Unit result.
+
+Primitive `Nat`, `Int`, `Bool`, `String`, and `Unit` arguments retain the compact CLI forms. Supported structures and ADTs use a strict JSON boundary. Nested `Nat`/`Int` values are decimal JSON strings to avoid host-number precision loss; structures use exact field objects; ADTs use `{"$ctor":"constructor", ...fields}`. Structured results are encoded back to the same JSON-safe form. Function-typed, unknown, and unresolved type-parameter values fail closed.
 
 ### psc emit-lean
 

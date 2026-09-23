@@ -55,7 +55,8 @@ Already implemented on the preferred verified path:
 - bounded global instance registration/synthesis;
 - checked-core proof/type erasure;
 - verified compiler IR -> TypeScript -> JavaScript/.d.ts/source map;
-- psc check/build/run --verified for currently supported runtime ABI shapes;
+- psc check/build/run --verified with primitive plus strict JSON structure/ADT
+  runtime ABI shapes;
 - proof-aware LSP/VS Code dogfood tooling.
 
 The legacy `@proofscript/language` software checker remains transitional and
@@ -79,8 +80,8 @@ Remaining acceptance gates:
 - richer primitive comparison/equality coverage through Lean-compatible
   elaboration, not backend-only operators;
 - stable semantic primitive IR contracts;
-- verified run ABI for supported structures/ADTs where a deterministic JSON or
-  tagged-value bridge is defined;
+- broaden the landed deterministic JSON structure/ADT run ABI only when new
+  checked runtime shapes are added;
 - source-level regressions for every supported construct.
 
 Exit condition:

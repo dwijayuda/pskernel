@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "psc-ux-mvp+verified-run-primitive-abi+kernel-tools",
+      "status": "psc-ux-mvp+verified-run-json-abi+kernel-tools",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -35,7 +35,9 @@
       "notes": [
         "Verified filesystem execution now also covers a generic higher-order map plus structurally recursive length over a pskernel-admitted recursive list.",
         "CLI filesystem regression now executes a kernel-admitted recursive PsList plus structurally recursive length through emitted JavaScript and checks length(two elements) = 2.",
-        "psc run --verified now uses the semantic primitive types retained in verified IR: Nat/Int/Bool/String/Unit arguments are decoded by a dedicated ABI layer; generic or structured main signatures remain fail-closed.",
+        "psc run --verified now decodes arguments from verified IR types: primitive Nat/Int/Bool/String/Unit keep compact CLI forms, while supported structures/ADTs use a strict JSON ABI. Nested Nat/Int use decimal strings, ADTs use a $ctor field, and structured results are encoded back to the same JSON-safe shape.",
+        "ADT JSON inputs are rebuilt only through generated constructor exports, preserving verified runtime tags. Structure input is field-decoded according to pskernel-derived IR metadata; host JSON never becomes proof evidence.",
+        "Function-typed, unknown, unresolved type-parameter, malformed field/constructor, and unsupported dependent runtime values remain fail-closed at the CLI ABI boundary.",
         "Verified CLI elaboration starts from the shared pskernel-admitted Lean 4.34 Init.Prelude environment and fails closed when that fixture cannot be loaded.",
         "psc --verified uses the preferred source -> elaboration -> checked core -> erasure -> compiler IR -> TypeScript -> JavaScript architecture.",
         "Verified mode never falls back to the legacy software checker after an elaboration/erasure error.",

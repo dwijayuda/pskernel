@@ -15,7 +15,10 @@ import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
 import {compileTypeScript,emitModule,emitVerifiedTypeScript} from '../packages/backend-ts/dist/src/index.js';
 import {compileCheckedCore} from '../packages/compiler/dist/src/index.js';
 import {lowerVerifiedIrToWasm} from '../packages/wasm-lowering/dist/src/index.js';
-import {emitBinaryenWasm} from '../packages/backend-wasm/dist/src/index.js';
+import {
+  emitBinaryenWasm,
+  instantiateProofScriptWasm,
+} from '../packages/backend-wasm/dist/src/index.js';
 import {
   checkVerifiedSource,
   compileVerifiedSource,
@@ -612,6 +615,16 @@ assert(
   BigInt.asUintN(64,uintInstance.exports.id64(-1n))===
     0xffffffffffffffffn,
   'UInt64 bit-pattern mismatch',
+);
+const uintHost=instantiateProofScriptWasm(verifiedUIntWasm);
+assert(
+  uintHost.exports.id32(0xffffffff)===0xffffffff,
+  'UInt32 JS ABI did not preserve unsigned semantic value',
+);
+assert(
+  uintHost.exports.id64(0xffffffffffffffffn)===
+    0xffffffffffffffffn,
+  'UInt64 JS ABI did not preserve unsigned semantic value',
 );
 console.log('ok - verified fixed-width UInt source -> JS/Wasm pipeline');
 

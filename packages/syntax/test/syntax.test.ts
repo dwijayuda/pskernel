@@ -842,20 +842,26 @@ console.log('ok - @proofscript/syntax lexer MVP');
 
 {
   const module=parseV061Module(
-    'theorem simpProof(a : Nat, h : Eq Nat Nat.succ(a) a) : '+
-    'Eq Nat Nat.succ(a) a := by simp only [h];',
+    'theorem simpProof(A : Type, B : Type, C : Type, D : Type, '+
+    'h1 : Eq Type BoxT(A) B, h2 : Eq Type WrapT(C) D) : P := '+
+    'by simp only [h1, ← h2];',
   );
   const body=module.declarations[0]?.body;
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,1);
     equal(body.tactics[0]?.kind,'simp');
-    if(body.tactics[0]?.kind==='simp')equal(body.tactics[0].symm,false);
+    if(body.tactics[0]?.kind==='simp'){
+      equal(body.tactics[0].rules.length,2);
+      equal(body.tactics[0].rules[0]?.symm,false);
+      equal(body.tactics[0].rules[1]?.symm,true);
+    }
   }
   equal(
     lowerV061ModuleToLean(module),
-    'theorem simpProof (a : Nat) (h : Eq Nat (Nat.succ a) a) : '+
-    'Eq Nat (Nat.succ a) a := by simp only [h]\n',
+    'theorem simpProof (A : Type) (B : Type) (C : Type) (D : Type) '+
+    '(h1 : Eq Type (BoxT A) B) (h2 : Eq Type (WrapT C) D) : P := '+
+    'by simp only [h1, ← h2]\n',
   );
 }
 

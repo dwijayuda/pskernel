@@ -74,3 +74,11 @@ export function rewriteExprSize(expr:Expr):number {
     default:return 1;
   }
 }
+
+export function exactRewritePatternsOverlap(
+  left:Expr,
+  right:Expr,
+):boolean {
+  return abstractExactRewriteOccurrences(left,right).found
+    ||abstractExactRewriteOccurrences(right,left).found;
+}

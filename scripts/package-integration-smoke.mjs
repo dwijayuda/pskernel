@@ -184,13 +184,19 @@ assert(
 
 
 const verifiedSimpOnly=compileVerifiedSource(
-  'theorem simplifySucc(a : Nat, h : Eq Nat Nat.succ(a) a) : '+
-  'Eq Nat Nat.succ(a) a := by simp only [h];',
+  'inductive BoxT(α : Type) where { | mk; } '+
+  'inductive WrapT(α : Type) where { | mk; } '+
+  'inductive PairT(α : Type, β : Type) where { | mk; } '+
+  'theorem simplifyTypes'+
+  '(A : Type, B : Type, C : Type, D : Type, '+
+  'h1 : Eq Type BoxT(A) B, h2 : Eq Type WrapT(C) D) : '+
+  'Eq Type PairT(BoxT(A), WrapT(C)) PairT(B, D) := '+
+  'by simp only [h1, h2];',
   'verified-simp-only.ts',
 );
 assert(
   verifiedSimpOnly.checkedCore.theorems.length===1,
-  'bounded simp only did not construct a pskernel-admitted proof',
+  'bounded multi-rule simp only did not construct a pskernel-admitted proof',
 );
 
 

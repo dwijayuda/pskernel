@@ -109,8 +109,7 @@ function runTactic(
   if(tactic.kind==='simp'){
     simpOnlyV061Tactic(
       runtime,
-      tactic.proof,
-      tactic.symm,
+      tactic.rules,
       elaborate,
     );
     return;

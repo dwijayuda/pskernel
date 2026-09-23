@@ -629,14 +629,20 @@ console.log('ok - @proofscript/elab rw syntax reaches tactic AST');
 
 {
   const source=parseV061Module(
-    'theorem parsedSimp(a : Nat, h : Eq Nat Nat.succ(a) a) : '+
-    'Eq Nat Nat.succ(a) a := by simp only [h];',
+    'theorem parsedSimp(A : Type, B : Type, C : Type, D : Type, '+
+    'h1 : Eq Type BoxT(A) B, h2 : Eq Type WrapT(C) D) : P := '+
+    'by simp only [h1, ← h2];',
   );
   const body=source.declarations[0]?.body;
   equal(body?.kind,'by');
-  if(body?.kind==='by')equal(body.tactics[0]?.kind,'simp');
+  if(body?.kind==='by'){
+    equal(body.tactics[0]?.kind,'simp');
+    if(body.tactics[0]?.kind==='simp'){
+      equal(body.tactics[0].rules.length,2);
+    }
+  }
 }
-console.log('ok - @proofscript/elab simp-only syntax reaches tactic AST');
+console.log('ok - @proofscript/elab multi-rule simp-only syntax reaches tactic AST');
 
 
 function makeNatNotationEnvironment():Environment {

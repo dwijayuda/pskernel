@@ -52,8 +52,11 @@ export type V061Tactic =
     }
   | {
       readonly kind:'simp';
-      readonly proof:V061Expr;
-      readonly symm:boolean;
+      readonly rules:readonly {
+        readonly proof:V061Expr;
+        readonly symm:boolean;
+        readonly span:SourceSpan;
+      }[];
       readonly span:SourceSpan;
     }
   | {

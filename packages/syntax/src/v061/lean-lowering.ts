@@ -39,8 +39,10 @@ function lowerV061TacticToLean(
       return 'rw ['+(tactic.symm?'← ':'')+
         lowerV061ExprToLean(tactic.proof)+']';
     case 'simp':
-      return 'simp only ['+(tactic.symm?'← ':'')+
-        lowerV061ExprToLean(tactic.proof)+']';
+      return 'simp only ['+
+        tactic.rules.map((rule)=>
+          (rule.symm?'← ':'')+lowerV061ExprToLean(rule.proof)
+        ).join(', ')+']';
     case 'apply':return 'apply '+lowerV061ExprToLean(tactic.proof);
     case 'refine':return 'refine '+lowerV061ExprToLean(tactic.proof);
     case 'intro':return 'intro '+tactic.name;

@@ -76,20 +76,29 @@ function parseTactic(
     const first=context.cursor.consume();
     context.cursor.expect('only');
     context.cursor.expect('[');
-    const symm=context.cursor.at('<-')||context.cursor.at('←');
-    if(symm)context.cursor.consume();
-    const proof=expressions.parse();
-    if(context.cursor.at(',')){
+    const rules:Extract<V061Tactic,{kind:'simp'}>['rules'][number][]=[];
+    while(!context.cursor.at(']')){
+      const ruleStart=context.cursor.peek().span.start;
+      const symm=context.cursor.at('<-')||context.cursor.at('←');
+      if(symm)context.cursor.consume();
+      const proof=expressions.parse();
+      rules.push({
+        proof,
+        symm,
+        span:{start:ruleStart,end:proof.span.end},
+      });
+      if(!context.cursor.consumeIf(','))break;
+    }
+    if(rules.length===0){
       throw new SyntaxError(
-        'bounded simp only currently supports exactly one explicit rule',
+        'bounded simp only requires at least one explicit rule',
         context.cursor.peek().span,
       );
     }
     const close=context.cursor.expect(']');
     return {
       kind:'simp',
-      proof,
-      symm,
+      rules,
       span:{start:first.span.start,end:close.span.end},
     };
   }

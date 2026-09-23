@@ -11,7 +11,7 @@ import {
 } from '@proofscript/syntax';
 import {checkV061SoftwareModule,type CheckedSoftwareModule,type SoftwareType} from '@proofscript/language';
 import {compileTypeScript,emitV061TypeScript} from '@proofscript/backend-ts';
-import {DEFAULT_CONFIG,loadPsConfig,type LoadedPsConfig} from './config.js';
+import {DEFAULT_CONFIG,findPsConfig,loadPsConfig,type LoadedPsConfig} from './config.js';
 
 export const PSC_VERSION='0.1.0';
 
@@ -72,7 +72,12 @@ function parseCommon(args:readonly string[]):CommonArgs{
 }
 
 async function resolveInput(common:CommonArgs):Promise<{loaded:LoadedPsConfig;sourcePath:string;source:string}>{
-  const loaded=await loadPsConfig(common.project);
+  const discovered=common.project!==undefined?undefined:await findPsConfig();
+  const loaded=common.project!==undefined||discovered!==undefined
+    ? await loadPsConfig(common.project)
+    : common.entry!==undefined
+      ? {path:'<defaults>',directory:process.cwd(),config:{...DEFAULT_CONFIG,entry:common.entry}}
+      : await loadPsConfig();
   const sourcePath=resolve(loaded.directory,common.entry??loaded.config.entry);
   const source=await readFile(sourcePath,'utf8');
   return {loaded,sourcePath,source};

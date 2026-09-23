@@ -55,7 +55,7 @@ export async function loadPsConfig(project?:string):Promise<LoadedPsConfig>{
   if(parsed.languageVersion!==undefined&&parsed.languageVersion!=='0.7'){
     throw new Error("PS_CLI_CONFIG_VERSION: only languageVersion '0.7' is supported by this compiler milestone");
   }
-  const compiler=parsed.compilerOptions??{};
+  const compiler:Partial<PsConfig['compilerOptions']>=parsed.compilerOptions??{};
   const config:PsConfig={
     languageVersion:'0.7',
     entry:typeof parsed.entry==='string'?parsed.entry:DEFAULT_CONFIG.entry,

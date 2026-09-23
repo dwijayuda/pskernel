@@ -95,10 +95,12 @@ function checkExpr(
         return {kind:'binary',operator:op,left,right,resultType:'Bool'};
       }
       if(op==='<'||op==='<='||op==='>'||op==='>=') {
-        const numeric:SoftwareType=expected==='Int'?'Int':'Nat';
-        const left=checkExpr(expr.left,locals,signatures,numeric);
-        const right=checkExpr(expr.right,locals,signatures,numeric);
-        if((left.resultType!=='Nat'&&left.resultType!=='Int')||left.resultType!==right.resultType) {
+        const left=checkExpr(expr.left,locals,signatures);
+        if(left.resultType!=='Nat'&&left.resultType!=='Int') {
+          throw new Error('PS_CHECK_BINARY_TYPE: '+op+' expects numeric operands');
+        }
+        const right=checkExpr(expr.right,locals,signatures,left.resultType);
+        if(left.resultType!==right.resultType) {
           throw new Error('PS_CHECK_BINARY_TYPE: '+op+' expects matching numeric operands');
         }
         return {kind:'binary',operator:op,left,right,resultType:'Bool'};

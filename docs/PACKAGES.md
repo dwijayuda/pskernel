@@ -66,7 +66,7 @@ This package must never be imported by the trusted kernel.
 
 ### 5. Native IR provider — optional TCB extension
 
-No `native-ir` kernel-extension package is planned for Lean 4.34 compatibility: final Lean 4.34 removed in-kernel compiler-IR reduction. Compiler IR remains relevant only to the ordinary executable compiler/backend layer.
+Lean `v4.34.0` still has in-kernel compiler-IR reduction for `Lean.reduceNat` / `Lean.reduceBool`. The root kernel exposes the `NativeEvaluator` boundary, but no workspace provider is enabled yet. If a `native-ir` provider package is added, it must be marked as an optional TCB extension and kept separate from the ordinary untrusted compiler/backend IR.
 
 ### 6. Browser/worker wrapper — untrusted host layer
 

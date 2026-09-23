@@ -89,7 +89,7 @@ class LeanExprHasher {
           break;
         case'mdata':
           // Metadata participates in equality. A coarse metadata hash is deliberate:
-          // exact ordered-payload equality is checked by exprLeanEq on bucket hits.
+          // exact KVMap-equivalent payload equality is checked by exprLeanEq on bucket hits.
           h=mix(h,this.exprHashes.get(e.expr as object)!);
           break;
         case'proj':

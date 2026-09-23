@@ -290,16 +290,17 @@ test('isProp requires the inferred type to reduce to a Sort',()=>{
  throws(()=>tc.isProp(natLit(0)));
 });
 
-test('Lean structural equality preserves ordered MData entry structure',()=>{
+test('Lean structural equality uses extensional KVMap MData equality',()=>{
  const x=natLit(0);
  const a={kind:'mdata',data:{alpha:1,beta:true},expr:x} as const;
  const same={kind:'mdata',data:{alpha:1,beta:true},expr:x} as const;
  const reordered={kind:'mdata',data:{beta:true,alpha:1},expr:x} as const;
  const different={kind:'mdata',data:{alpha:1,beta:false},expr:x} as const;
- assert(exprLeanEq(a,same),'identical ordered metadata payloads remain structurally equal');
- assert(!exprLeanEq(a,reordered),'C++ kvmap structural equality preserves entry-list order');
- assert(!exprLeanEq(a,different),'different MData payloads must remain structurally distinct');
- assert(new TypeChecker(baseEnv()).isDefEq(a,reordered),'kernel defeq intentionally ignores MData payload ordering');
+ assert(exprLeanEq(a,same),'identical metadata payloads remain structurally equal');
+ assert(exprLeanEq(a,reordered),'Lean KVMap equality is extensional and ignores entry insertion order');
+ assert(!exprLeanEq(a,different),'different MData bindings must remain structurally distinct');
+ const st=new KernelState();st.infer.set(a,constant(N.Nat));assert(st.infer.has(reordered),'structural expression caches must share reordered but KVMap-equal metadata');
+ assert(new TypeChecker(baseEnv()).isDefEq(a,reordered),'kernel defeq intentionally ignores MData placement/payloads too');
  assert(new TypeChecker(baseEnv()).isDefEq(a,different),'kernel defeq intentionally ignores MData payloads');
 });
 

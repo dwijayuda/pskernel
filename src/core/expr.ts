@@ -42,8 +42,13 @@ function metadataValueEq(a:unknown,b:unknown):boolean{
     if(typeof x==='object'){
       const xo=x as Record<string,unknown>,yo=y as Record<string,unknown>,xk=Object.keys(xo),yk=Object.keys(yo);
       if(xk.length!==yk.length)return false;
-      for(let i=0;i<xk.length;i++)if(xk[i]!==yk[i])return false;
-      for(let i=xk.length-1;i>=0;i--){const k=xk[i]!;todo.push([xo[k],yo[k]]);}
+      // Lean KVMap equality is extensional: insertion/list order is not
+      // observable when the same key/value bindings exist.
+      for(let i=xk.length-1;i>=0;i--){
+        const k=xk[i]!;
+        if(!Object.prototype.hasOwnProperty.call(yo,k))return false;
+        todo.push([xo[k],yo[k]]);
+      }
       continue;
     }
     return false;

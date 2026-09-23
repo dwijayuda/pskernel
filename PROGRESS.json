@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 167,
   "notes": [
+    "Native evaluator anti-drift assertion repair: the guard now rejects executable `let value ← Meta.reduce*Native` calls rather than mere documentation mentions of those APIs. The corrected direct env.evalConst(checkMeta=false) helper remains unchanged.",
     "Native compiler-IR provider fidelity fix: NativeEval.lean no longer calls Meta.reduceNatNative/reduceBoolNative because those use Environment.evalConstCheck -> evalConst(checkMeta=true), which rejects imported runtime IR via evalCheckMeta. The helper now checks the declaration type head exactly Nat/Bool, then calls env.evalConst with empty options and checkMeta=false, reaching the same run_boxed interpreter path as final Lean 4.34 kernel run_boxed_kernel. Static anti-drift checks prevent reintroducing the Meta guard.",
     "Native reduction source audit + direct parity lock: final Lean 4.34 C++ WHNF uses native→Nat→delta while lazy defeq uses Nat→native→delta; TypeScript already matches both. Environment.evalConstCheck requires the native constant type head to be exactly Nat/Bool before compiler evaluation. Added a kernel1-style end-to-end defeq regression over named definitions; reconstructed execution passes 167/167.",
     "Anti-drift test repair: corrected the exporter source-order disclaimer assertion to match the actual wrapped comment (`This is not claimed to be\\nsource declaration order`). Protocol semantics were unchanged.",
@@ -231,5 +232,5 @@
   ],
   "currentTreeExpectedDirectTests": 167,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "TypeScript kernel remains 167/167 at the latest reconstructed execution checkpoint. NativeEval Lean helper changed after that checkpoint; its source boundary is statically locked, but native-oracle-smoke and canonical replay still require execution with pinned Lean 4.34."
+  "currentTreeVerification": "TypeScript kernel remains 167/167 at the latest reconstructed execution checkpoint; native helper boundary markers and corrected static guard are source-validated, Lean-backed execution pending."
 }

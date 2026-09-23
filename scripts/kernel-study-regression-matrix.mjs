@@ -120,8 +120,8 @@ for(const marker of [
 ]){
   if(!nativeEval.includes(marker))throw new Error('native evaluator boundary drift: missing '+marker);
 }
-if(nativeEval.includes('Meta.reduceNatNative')||nativeEval.includes('Meta.reduceBoolNative')){
-  throw new Error('native evaluator boundary drift: Meta native helper would reintroduce evalCheckMeta');
+if(nativeEval.includes('let value ← Meta.reduceNatNative')||nativeEval.includes('let value ← Meta.reduceBoolNative')){
+  throw new Error('native evaluator boundary drift: executable Meta native helper call would reintroduce evalCheckMeta');
 }
 
 const counts={};

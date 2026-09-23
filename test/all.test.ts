@@ -54,6 +54,23 @@ test('defeq success cache remains pair-local and never gains transitive closure'
  assert(!st.success.has(st.pair(a,c)),'Lean 4.34 defeq cache must not transitively close successful algorithmic comparisons');
 });
 
+test('defeq caches the original pair after delta proves equality',()=>{
+ const env=baseEnv(),A=nameFromDotted('Cache.deltaA'),B=nameFromDotted('Cache.deltaB'),k=new Kernel(env);
+ for(const n of [A,B])k.addDefinition({kind:'definition',name:n,levelParams:[],type:constant(N.Nat),value:natLit(7),hints:{kind:'regular',height:1n},safety:'safe'});
+ const a=constant(A),b=constant(B),tc=new TypeChecker(env);
+ assert(tc.isDefEq(a,b),'equal definitions should be definitionally equal');
+ assert(tc.state.success.has(tc.state.pair(a,b)),'Lean 4.34 caches every successful public defeq query at the original pair');
+});
+
+test('defeq compares application heads before rejecting arity mismatch',()=>{
+ const env=baseEnv(),F=nameFromDotted('Cache.curriedF'),fn=constant(F);
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('a'),constant(N.Nat),forallE(nameFromDotted('b'),constant(N.Nat),constant(N.Nat)))});
+ const oneArg=app(fn,natLit(0)),twoArgs=app(app(fn,natLit(0)),natLit(1)),tc=new TypeChecker(env);
+ assert(!tc.state.success.has(tc.state.pair(fn,fn)),'precondition: head pair must not already be cached');
+ assert(!tc.isDefEq(oneArg,twoArgs),'different application arities are not definitionally equal');
+ assert(tc.state.success.has(tc.state.pair(fn,fn)),'Lean 4.34 compares and caches equal heads before noticing the arity mismatch');
+});
+
 test('proof irrelevance compares arbitrary proofs of the same proposition',()=>{
  const env=baseEnv(),P=nameFromDotted('ProofIrrel.P');env.add({kind:'axiom',name:P,levelParams:[],type:sort(levelZero)});
  const lctx=new LocalContext();lctx.addLocal('p@0',nameFromDotted('p'),constant(P));lctx.addLocal('q@0',nameFromDotted('q'),constant(P));

@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 170,
   "notes": [
+    "Execution refresh: strengthened Nat.mod variable-divisor definitional-equality assertion passes; build PASS and direct suite PASS 170/170 with zero failures.",
     "Upstream `nat_mod_defeq.lean` is now explicitly mapped: after canonical Nat.mod admission, the direct regression rechecks `0 % n = 0` with `n` a free Nat, proving the result comes from the admitted definition/unfolding path rather than numeric fast reduction.",
     "Execution refresh: new `strLitProj.lean` analogue passed in the aligned reconstructed checkout; TypeScript build PASS and direct suite PASS 170/170 with zero failures.",
     "Upstream kernel regression coverage expansion: added a direct `strLitProj.lean` analogue proving a String literal projection reduces through String.ofList to the structure field; mapped Lean 4.34 `proj_delta_issue.lean` and `etaStruct.lean` to existing exact direct regressions. Direct suite count is now 170 pending refreshed execution.",
@@ -244,5 +245,5 @@
   ],
   "currentTreeExpectedDirectTests": 170,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "latest direct checkpoint remains 170/170; Nat.mod variable-divisor assertion strengthens an existing test and is pending refreshed execution"
+  "currentTreeVerification": "fresh reconstructed-branch execution PASS: TypeScript 5.8.3 build + 170/170 direct kernel tests under Node v22.16.0, including String-literal projection and Nat.mod 0 % n variable-divisor defeq. Pinned-Lean canonical replay/native smoke remain executable open gates."
 }

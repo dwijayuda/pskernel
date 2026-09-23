@@ -652,3 +652,36 @@ CLI acceptance from DS3.
 
 Unsupported Lean commands/terms produce `PS_LEAN_SUBSET_*` diagnostics rather
 than falling through to the ProofScript parser or approximating full Lean.
+
+## DS2.2 Lean declaration frontend checkpoint
+
+The bounded Lean-subset frontend now reads the canonical declaration families
+that the current ProofScript Lean target already emits:
+
+```text
+structure
+class
+instance
+inductive
+```
+
+and canonical structure/instance record values. These inputs produce the same
+existing v0.6.1 AST nodes as ProofScript input; there is no Lean-specific
+elaboration or proof path after parsing.
+
+Lean field layout required one explicit parsing boundary. Canonical
+structure/class fields are line-separated, while the shared type grammar uses
+whitespace for application. The type parser therefore exposes an opt-in
+`stopAtLineBreak` mode used by the Lean declaration frontend only. Default
+ProofScript parsing behavior is unchanged.
+
+The accepted declaration subset is intentionally narrower than full Lean 4.34:
+class/inductive binder shapes are limited to forms that can also be printed
+back into the current ProofScript grammar, explicit constructor result types are
+rejected, and namespaces/attributes/deriving/extends/custom commands remain
+outside the subset.
+
+The default source frontend registry still does not register `lean-subset`.
+Canonical `match` and `where` forms emitted by ProofScript remain the final
+DS2 parser gaps before DS3 can expose `.lean` through normal CLI source
+selection.

@@ -183,6 +183,38 @@ console.log('ok - @proofscript/syntax lexer MVP');
   throws(()=>parser.parseExpression(),/returned a node without consuming input/);
 }
 
+
+
+// Lean 4.34 inherited parenthesized type-ascription syntax.
+{
+  const term=parseTermSubset('(x : Nat)');
+  equal(term.kind,'ascription');
+  if(term.kind==='ascription'){
+    equal(term.value.kind,'atom');
+    equal(term.type?.kind,'atom');
+  }
+}
+{
+  const term=parseTermSubset('(x :)');
+  equal(term.kind,'ascription');
+  if(term.kind==='ascription')equal(term.type,undefined);
+}
+{
+  const lowered=lowerDCallSource('f((x : Nat))');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'f (x : Nat)');
+}
+{
+  const lowered=lowerDCallSource('(f(x) : Nat)');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'(f x : Nat)');
+}
+{
+  const lowered=lowerDCallSource('f((x :))');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'f (x :)');
+}
+
 // v0.7 D-CALL conformance slice.
 {
   const lowered=lowerDCallSource('add(1, 2)');

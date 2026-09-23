@@ -61,8 +61,9 @@ The inherited Lean term slice is now parsed by a reusable `TermParser` rather th
 - identifiers, numeric literals, and string literals;
 - parenthesized groups;
 - tuple syntax;
-- whitespace-separated application.
+- whitespace-separated application;
+- Lean 4.34 parenthesized type ascription, including `(e : T)` and `(e :)`.
 
 Feature-specific postfix syntax plugs into this parser through guarded extension hooks. A hook must either consume input and return a node, or consume nothing and defer; violating that contract fails closed. D-CALL is the first such postfix extension.
 
-This does not claim full Lean term parsing. Operators, lambdas, binders, type annotations, named arguments, and other inherited forms remain later Phase-B work.
+This does not claim full Lean term parsing. Operators, lambdas, binders, named arguments, and other inherited forms remain later Phase-B work.

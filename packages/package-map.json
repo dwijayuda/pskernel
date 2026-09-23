@@ -91,7 +91,7 @@
         "Pinned to ProofScript v0.7.0 / Lean 4.34.0 semantics metadata.",
         "Trivia-preserving lexer exposes exact adjacency for D-CALL ownership.",
         "Parser-core implements OverlayDecision, structured errors, cursor/span utilities, and a reusable inherited-term parser with fail-closed postfix extension hooks.",
-        "D-CALL covers direct/nested atom, tuple, and whitespace-separated Lean application-term arguments; operators, lambdas, annotations, and other inherited term forms remain later Phase-B obligations."
+        "D-CALL covers direct/nested atom, tuple, whitespace-separated application, and Lean 4.34 parenthesized type-ascription arguments; operators, lambdas, named arguments, and other inherited term forms remain later Phase-B obligations."
       ]
     },
     {

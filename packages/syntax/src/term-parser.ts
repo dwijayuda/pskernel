@@ -8,6 +8,7 @@ export type TermExpr =
   | {readonly kind:'group';readonly value:TermExpr;readonly span:SourceSpan}
   | {readonly kind:'tuple';readonly items:readonly TermExpr[];readonly span:SourceSpan}
   | {readonly kind:'application';readonly fn:TermExpr;readonly args:readonly TermExpr[];readonly span:SourceSpan}
+  | {readonly kind:'ascription';readonly value:TermExpr;readonly type?:TermExpr;readonly span:SourceSpan}
   | {
       readonly kind:'postfix';
       readonly feature:ProofScriptFeatureId;
@@ -126,6 +127,21 @@ export class TermParser {
       }
 
       const first=this.parseExpression();
+
+      if(this.cursor.consumeIf(':')){
+        const typeTerm=this.cursor.at(')')?undefined:this.parseExpression();
+        const close=this.cursor.expect(')');
+        const span={start:open.span.start,end:close.span.end};
+        return {
+          expr:typeTerm
+            ? {kind:'ascription',value:first.expr,type:typeTerm.expr,span}
+            : {kind:'ascription',value:first.expr,span},
+          featureIds:typeTerm
+            ? mergeFeatureIds(first.featureIds,typeTerm.featureIds)
+            : [...first.featureIds],
+        };
+      }
+
       const items:TermExpr[]=[first.expr];
       const featureGroups:(readonly ProofScriptFeatureId[])[]=[first.featureIds];
 

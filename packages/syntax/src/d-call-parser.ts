@@ -82,6 +82,10 @@ function lowerExpr(expr:TermExpr,asArgument=false):string{
       const body=`${lowerExpr(expr.fn)} ${expr.args.map(x=>lowerExpr(x,true)).join(' ')}`;
       return asArgument?`(${body})`:body;
     }
+    case 'ascription':
+      return expr.type
+        ? `(${lowerExpr(expr.value)} : ${lowerExpr(expr.type)})`
+        : `(${lowerExpr(expr.value)} :)`;
     case 'postfix':{
       if(expr.feature!=='D-CALL'){
         throw new Error(`D-CALL lowering cannot lower postfix feature ${expr.feature}`);
@@ -106,6 +110,9 @@ export function lowerDCall(node:DCallExpr):LoweringResult{
     }else if(expr.kind==='application'){
       visit(expr.fn);
       for(const arg of expr.args)visit(arg);
+    }else if(expr.kind==='ascription'){
+      visit(expr.value);
+      if(expr.type)visit(expr.type);
     }else if(expr.kind==='group'){
       visit(expr.value);
     }else if(expr.kind==='tuple'){

@@ -280,6 +280,14 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
       throw new Error('verified run did not retain runtime dependency policy');
     }
     equal(result.runtimeDependencyPolicy.used.length,1);
+    equal(
+      result.runtimeDependencyPolicy.integrity.startsWith('sha256:'),
+      true,
+    );
+    equal(
+      result.runtimeDependencyPolicy.schema,
+      'proofscript-runtime-dependencies-v1',
+    );
     equal(result.runtimeDependencyPolicy.used[0]?.source,'host-lib');
     equal(result.runtimeDependencyPolicy.used[0]?.version,'1.0.0');
     const artifacts=result.artifacts as Record<string,string>;

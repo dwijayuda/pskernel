@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import type {ResolvedSourceProject} from './project-sources.js';
@@ -8,6 +9,8 @@ export interface RuntimeDependencyPolicyEntry {
 }
 
 export interface RuntimeDependencyPolicyReport {
+  readonly schema:'proofscript-runtime-dependencies-v1';
+  readonly integrity:string;
   readonly used:readonly RuntimeDependencyPolicyEntry[];
 }
 
@@ -43,7 +46,11 @@ export function assertRuntimeDependencyPolicy(
     }
     return {source,version};
   });
-  return {used};
+  const schema='proofscript-runtime-dependencies-v1' as const;
+  const integrity='sha256:'+createHash('sha256')
+    .update(JSON.stringify({schema,used}),'utf8')
+    .digest('hex');
+  return {schema,integrity,used};
 }
 
 async function installedPackageIdentity(

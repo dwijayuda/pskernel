@@ -221,6 +221,16 @@ test('ordinary recursive inductive synthesizes constructors and recursor',()=>{
  const ii=env.get(I);assert(ii.kind==='inductive'&&ii.isRec);const ri=env.get(nameFromDotted('MyNat.rec'));assert(ri.kind==='recursor'&&ri.rules.length===2);
  const tc=new TypeChecker(env);tc.check(ri.type);
 });
+test('inductive uniformity is checked before WHNF can erase a bad occurrence',()=>{
+ const env=baseEnv(),I=nameFromDotted('BadUniform'),Mk=nameFromDotted('BadUniform.mk'),one=levelSucc(levelZero),Type=sort(one);
+ const indTy=forallE(nameFromDotted('α'),Type,Type,'implicit');
+ const badOccurrence=app(constant(I),constant(N.Nat));
+ const erased=app(lam(nameFromDotted('_'),Type,constant(N.Nat)),badOccurrence);
+ const ctorTy=forallE(nameFromDotted('α'),Type,forallE(nameFromDotted('hidden'),erased,app(constant(I),bvar(1))),'implicit');
+ throws(()=>addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{name:I,type:indTy,ctors:[{name:Mk,type:ctorTy}]}]}));
+ assert(!env.has(I)&&!env.has(Mk),'non-uniform occurrence rejection must be transactional');
+});
+
 test('ordinary inductive rejects negative recursive occurrence',()=>{
  const env=baseEnv(),I=nameFromDotted('Bad'),c=nameFromDotted('Bad.mk');
  const neg=forallE(nameFromDotted('f'),forallE(nameFromDotted('x'),constant(I),constant(N.Nat)),constant(I));

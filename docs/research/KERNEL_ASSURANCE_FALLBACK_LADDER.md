@@ -16,8 +16,10 @@ canonical Full Std
 -> formal equivalence
 ```
 
-That route is valuable because one shared environment in canonical declaration
-order exercises interactions that independent dependency closures can miss.
+That route is valuable because one exhaustive dependency-first stream into one
+shared environment exercises admission-history interactions that independent
+dependency closures can miss. "Canonical" here names pskernel's deterministic
+release protocol; it does not claim Lean source declaration order.
 
 However, infrastructure cost must not become the project. If the exhaustive
 route is blocked by runner availability, memory, wall-clock limits, or
@@ -197,7 +199,8 @@ npm run oracle:std-full
 Properties:
 
 - final Lean 4.34 exporter;
-- canonical module/declaration order;
+- project-canonical root seeding from Lean's serialized per-module `.olean` constant sequence;
+- dependency-first emission with each declaration exported once;
 - one shared pskernel environment;
 - replay-local intern tables discarded between shards;
 - every admitted declaration contributes to the environment seen by later

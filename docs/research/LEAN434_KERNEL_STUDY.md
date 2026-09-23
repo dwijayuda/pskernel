@@ -180,15 +180,17 @@ This is the correct ordering.
 
 ### Gate 1 — canonical Full Std
 
-Use the canonical module-order stream as the release gate, not dependency-root
-batch success. The canonical stream takes each imported module's root sequence
-directly from Lean 4.34 `EnvironmentHeader.moduleData[idx].constNames` (the
-`.olean` constant sequence actually loaded for that module), rather than
-reconstructing and sorting roots from the imported environment hash map. Each
-declaration should be checked once into one shared environment while replay-local
-intern/cache state is discarded between shards. Diagnostic root-range tooling
-keeps its existing deterministic Name.quickLt numbering so historical hot-range
-indices remain stable.
+Use the project-canonical single-stream replay as the release gate, not
+dependency-root batch success. Root seeding follows each imported module's
+`EnvironmentHeader.moduleData[idx].constNames`, i.e. the serialized `.olean`
+constant sequence actually loaded for that module. **Do not call this source
+declaration order**: Lean 4.34 may name-sort exported module data, and its own
+`Kernel.Environment.replay` seeds a `NameSet` rather than promising source order.
+The exporter recursively emits dependencies before each root and carries one
+global emitted set, so each declaration is exported once into one shared pskernel
+environment while replay-local intern/cache state is discarded between shards.
+Diagnostic root-range tooling keeps its existing deterministic Name.quickLt
+numbering so historical hot-range indices remain stable.
 
 The latest checked-in `full-std.log` did not produce semantic evidence: it
 failed before replay because `scripts/module-stream-oracle.mjs` contained a

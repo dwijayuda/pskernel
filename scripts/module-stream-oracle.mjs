@@ -42,6 +42,9 @@ try{
      if(header)throw new Error('duplicate environment header');
      header=marker.environment;
      if(header.rootOrder!=='olean-module-constNames')throw new Error(`unexpected canonical root order ${header.rootOrder??'<missing>'}`);
+     if(header.rootOrderMeaning!=='serialized-module-sequence')throw new Error(`unexpected root-order meaning ${header.rootOrderMeaning??'<missing>'}`);
+     if(header.emissionOrder!=='dependency-first')throw new Error(`unexpected emission order ${header.emissionOrder??'<missing>'}`);
+     if(header.canonicalScope!=='pskernel-project-protocol')throw new Error(`unexpected canonical scope ${header.canonicalScope??'<missing>'}`);
      continue;
    }
    if(marker?.shard){
@@ -73,6 +76,9 @@ console.log(JSON.stringify({
   leanVersion,
   leanGitHash,
   rootOrder:header.rootOrder,
+  rootOrderMeaning:header.rootOrderMeaning,
+  emissionOrder:header.emissionOrder,
+  canonicalScope:header.canonicalScope,
   module:moduleName,
   modules:Number(header.modules),
   plannedShards:Number(header.plannedShards??shards),

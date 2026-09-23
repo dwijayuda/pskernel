@@ -406,12 +406,15 @@ def collectRootsByModule (env : Environment) : Array (Array Name) := Id.run do
     buckets := buckets.set! idx (buckets[idx]!.qsort Name.quickLt)
   return buckets
 
-/-- Canonical release-gate root order.
-Lean 4.34 stores the constants actually loaded for each imported module in
-`EnvironmentHeader.moduleData[idx].constNames`. Use that .olean sequence directly
-for the one-pass shared-environment replay instead of reconstructing an order from
-the imported hash map. Keep `collectRootsByModule` above stable for diagnostic
-root-range numbering. -/
+/-- Project-canonical release-gate root seeding.
+Lean 4.34 stores the serialized constant sequence actually loaded for each imported
+module in `EnvironmentHeader.moduleData[idx].constNames`. This is not claimed to be
+source declaration order: exported .olean parts may be name-sorted, and Lean's own
+`Kernel.Environment.replay` seeds a NameSet and recursively replays dependencies.
+Use the serialized module sequence only as a deterministic exhaustive root order;
+`dumpConstant` emits dependencies first and the shared `emitted` set ensures each
+declaration is exported once. Keep `collectRootsByModule` above stable for
+diagnostic root-range numbering. -/
 def collectCanonicalRootsByModule (env : Environment) : Array (Array Name) := Id.run do
   let mut buckets := Array.replicate env.header.moduleNames.size #[]
   for idx in [0:buckets.size] do
@@ -595,7 +598,10 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
     ("modules", env.header.moduleNames.size),
     ("plannedShards", plannedShards),
     ("rootsPerShard", rootsPerShard),
-    ("rootOrder", "olean-module-constNames")
+    ("rootOrder", "olean-module-constNames"),
+    ("rootOrderMeaning", "serialized-module-sequence"),
+    ("emissionOrder", "dependency-first"),
+    ("canonicalScope", "pskernel-project-protocol")
   ])]).compress
   let _ ← (do
     for idx in [0:buckets.size] do

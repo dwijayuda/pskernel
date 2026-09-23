@@ -490,3 +490,40 @@ console.log('ok - @proofscript/elab bounded Nat notation');
   }
 }
 console.log('ok - @proofscript/elab dependent structure field admission');
+
+
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'structure User where { value : TestNat; } '+
+    'function make(x : TestNat) : User := { value := x : User }; '+
+    'function get(user : User) : TestNat := user.value;',
+  ),env);
+  equal(result.structures.length,1);
+  const make=result.definitions.find((item)=>
+    item.name.kind==='str'&&item.name.value==='make'
+  );
+  const get=result.definitions.find((item)=>
+    item.name.kind==='str'&&item.name.value==='get'
+  );
+  equal(make?.value.kind,'lam');
+  if(make?.value.kind==='lam'){
+    equal(make.value.body.kind,'app');
+  }
+  equal(get?.value.kind,'lam');
+  if(get?.value.kind==='lam'){
+    equal(get.value.body.kind,'proj');
+    if(get.value.body.kind==='proj')equal(get.value.body.index,0);
+  }
+}
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'structure SigmaBox where { T : Type; value : T; } '+
+    'function makeSigma(x : TestNat) : SigmaBox := '+
+    '{ T := TestNat, value := x : SigmaBox };',
+  ),env);
+  equal(result.definitions.length,1);
+  equal(result.structures[0]?.fields.length,2);
+}
+console.log('ok - @proofscript/elab record construction and kernel projection');

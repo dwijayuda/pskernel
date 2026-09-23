@@ -3,6 +3,7 @@ import {
   LocalContext,
   type Expr,
 } from 'lean-ts-kernel';
+import type {CheckedCoreStructure} from '@proofscript/checked-core';
 import {ExprMetaContext} from '@proofscript/meta';
 
 export interface V061CoreElabContext {
@@ -10,6 +11,7 @@ export interface V061CoreElabContext {
   readonly localContext:LocalContext;
   readonly locals:ReadonlyMap<string,string>;
   readonly metaContext:ExprMetaContext;
+  readonly structures:ReadonlyMap<string,CheckedCoreStructure>;
 }
 
 export function withLocalName(

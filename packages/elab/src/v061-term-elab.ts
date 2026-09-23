@@ -23,6 +23,8 @@ import {elaborateV061Type} from './v061-type-elab.js';
 import {elaborateV061ByExpression} from './v061-tactic-elab.js';
 import {elaborateV061BinaryNotation} from './v061-notation-elab.js';
 import {elaborateV061IfExpression} from './v061-if-elab.js';
+import {elaborateV061Record} from './v061-structure-term-elab.js';
+import {tryElaborateV061ProjectionReference} from './v061-reference-elab.js';
 
 function resolveReference(
   name:string,
@@ -50,6 +52,11 @@ export function elaborateV061Term(
     case 'group':
       return elaborateV061Term(expr.value,context,expected);
     case 'reference':{
+      const projection=tryElaborateV061ProjectionReference(
+        expr.name,
+        context,
+      );
+      if(projection!==undefined)return projection;
       const term=resolveReference(expr.name,context);
       return {term,type:checker.check(term)};
     }
@@ -260,6 +267,12 @@ export function elaborateV061Term(
         elaborateV061Term,
       );
     case 'record':
+      return elaborateV061Record(
+        expr,
+        context,
+        expected,
+        elaborateV061Term,
+      );
     case 'match':
       throw new Error(
         "PS_ELAB_TERM_UNSUPPORTED: term form '"+expr.kind+

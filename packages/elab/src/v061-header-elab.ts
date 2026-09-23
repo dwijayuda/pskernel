@@ -10,6 +10,7 @@ import {
   nameFromDotted,
 } from 'lean-ts-kernel';
 import {ExprMetaContext} from '@proofscript/meta';
+import type {CheckedCoreStructure} from '@proofscript/checked-core';
 import type {V061CoreElabContext} from './v061-context.js';
 import {elaborateV061Type} from './v061-type-elab.js';
 
@@ -30,12 +31,14 @@ export interface V061ElaboratedHeader {
 export function elaborateV061ValueHeader(
   source:V061ValueDeclaration,
   environment:Environment,
+  structures:ReadonlyMap<string,CheckedCoreStructure>=new Map(),
 ):V061ElaboratedHeader {
   let context:V061CoreElabContext={
     environment,
     localContext:new LocalContext(),
     locals:new Map(),
     metaContext:new ExprMetaContext(environment),
+    structures,
   };
   const parameters:V061ElaboratedParameter[]=[];
 

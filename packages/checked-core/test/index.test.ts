@@ -78,7 +78,12 @@ console.log('ok - @proofscript/checked-core kernel admission boundary');
     type:sort(levelSucc(levelZero)),
   });
   const checked=admitCheckedCoreAdmissions(base,[{
-    kind:'inductive',
+    kind:'structure',
+    structure:{
+      name:Box,
+      constructor:mk,
+      fields:[{name:'value',index:0,binderInfo:'default'}],
+    },
     declaration:{
       levelParams:[],
       numParams:0,
@@ -100,6 +105,8 @@ console.log('ok - @proofscript/checked-core kernel admission boundary');
   }]);
   equal(checked.inductiveDeclarations.length,1);
   equal(checked.inductives.length,1);
+  equal(checked.structures.length,1);
+  equal(checked.structures[0]?.fields[0]?.name,'value');
   equal(checked.environment.find(Box)?.kind,'inductive');
   equal(checked.environment.find(mk)?.kind,'constructor');
   equal(

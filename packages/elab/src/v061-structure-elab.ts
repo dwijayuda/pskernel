@@ -16,6 +16,7 @@ import {
   type InductiveDecl,
 } from 'lean-ts-kernel';
 import {ExprMetaContext} from '@proofscript/meta';
+import type {CheckedCoreStructure} from '@proofscript/checked-core';
 import type {V061CoreElabContext} from './v061-context.js';
 import {elaborateV061Type} from './v061-type-elab.js';
 
@@ -27,10 +28,15 @@ function fieldBinderInfo(
   return 'default';
 }
 
+export interface ElaboratedV061Structure {
+  readonly declaration:InductiveDecl;
+  readonly structure:CheckedCoreStructure;
+}
+
 export function elaborateV061StructureDeclaration(
   source:V061StructureDeclaration,
   environment:Environment,
-):InductiveDecl {
+):ElaboratedV061Structure {
   const structureName=nameFromDotted(source.name);
   const constructorName=nameFromDotted(source.name+'.mk');
   let context:V061CoreElabContext={
@@ -38,6 +44,7 @@ export function elaborateV061StructureDeclaration(
     localContext:new LocalContext(),
     locals:new Map(),
     metaContext:new ExprMetaContext(environment),
+    structures:new Map(),
   };
   const fields:{
     readonly id:string;
@@ -102,5 +109,16 @@ export function elaborateV061StructureDeclaration(
       "' must have at least one field",
     );
   }
-  return declaration;
+  return {
+    declaration,
+    structure:{
+      name:structureName,
+      constructor:constructorName,
+      fields:fields.map((field,index)=>({
+        name:nameToString(field.name),
+        index,
+        binderInfo:field.binderInfo,
+      })),
+    },
+  };
 }

@@ -38,3 +38,6 @@ export * from './v061-declaration-elab.js';
 export * from './v061-header-elab.js';
 
 export * from './v061-structure-elab.js';
+
+export * from './v061-structure-term-elab.js';
+export * from './v061-reference-elab.js';

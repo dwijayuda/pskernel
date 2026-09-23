@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Kernel-admitted dependent core boundary shared by ProofScript elaboration and compilation.",
   "proofscript": {
-    "status": "kernel-admitted-mixed-core-mvp",
+    "status": "kernel-admitted-structured-core-mvp",
     "phase": "B",
     "trust": "untrusted-boundary",
     "sourceLanguage": "typescript"

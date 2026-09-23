@@ -20,6 +20,7 @@ import {
   admitCheckedCoreAdmissions,
   type CheckedCoreAdmission,
   type CheckedCoreModule,
+  type CheckedCoreStructure,
 } from '@proofscript/checked-core';
 import {elaborateV061ValueHeader} from './v061-header-elab.js';
 import {elaborateV061StructureDeclaration} from './v061-structure-elab.js';
@@ -70,6 +71,7 @@ function maxRegularHeight(environment:Environment,expr:Expr):bigint {
 function elaborateValueDeclaration(
   source:V061ValueDeclaration,
   environment:Environment,
+  structures:ReadonlyMap<string,CheckedCoreStructure>,
 ):DefinitionInfo|TheoremInfo {
   if((source.whereDeclarations??[]).length>0){
     throw new Error(
@@ -77,7 +79,11 @@ function elaborateValueDeclaration(
     );
   }
 
-  const header=elaborateV061ValueHeader(source,environment);
+  const header=elaborateV061ValueHeader(
+    source,
+    environment,
+    structures,
+  );
   const context=header.context;
   const parameters=header.parameters;
   const resultType=header.resultType;
@@ -142,6 +148,7 @@ export function elaborateV061Definitions(
   const baseEnvironment=environment.clone();
   const workEnvironment=environment.clone();
   const admissions:CheckedCoreAdmission[]=[];
+  const structures=new Map<string,CheckedCoreStructure>();
   const kernel=new Kernel(workEnvironment);
 
   for(const declaration of module.declarations){
@@ -152,14 +159,19 @@ export function elaborateV061Definitions(
           declaration,
           workEnvironment,
         );
-        addInductive(workEnvironment,inductive);
+        addInductive(workEnvironment,inductive.declaration);
       }catch(error){
         const detail=error instanceof Error?error.message:String(error);
         throw new Error(
           "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
         );
       }
-      admissions.push({kind:'inductive',declaration:inductive});
+      structures.set(declaration.name,inductive.structure);
+      admissions.push({
+        kind:'structure',
+        declaration:inductive.declaration,
+        structure:inductive.structure,
+      });
       continue;
     }
     if(declaration.kind==='class'||declaration.kind==='inductive'){
@@ -171,7 +183,11 @@ export function elaborateV061Definitions(
 
     let info:DefinitionInfo|TheoremInfo;
     try{
-      info=elaborateValueDeclaration(declaration,workEnvironment);
+      info=elaborateValueDeclaration(
+        declaration,
+        workEnvironment,
+        structures,
+      );
     }catch(error){
       const detail=error instanceof Error?error.message:String(error);
       throw new Error(

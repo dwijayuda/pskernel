@@ -1,6 +1,6 @@
 import { ConstantInfo, DefinitionInfo, DefinitionSafety, ReducibilityHints, isUnsafeConstant } from '../core/declaration.js';
 import { Environment, KernelError } from '../core/environment.js';
-import { Expr, app, appView, constant, exprEq, exprToString, forallE, fvar, getAppArgs, getAppFn, hasFVar, hasLooseBVar, instantiateExprLevels, lam, mkAppN, natLit, sort, stripMData } from '../core/expr.js';
+import { Expr, app, appView, constant, exprEq, exprLeanEq, exprToString, forallE, fvar, getAppArgs, getAppFn, hasFVar, hasLooseBVar, instantiateExprLevels, lam, mkAppN, natLit, sort, stripMData } from '../core/expr.js';
 import { abstractFVar, instantiate, instantiate1 } from '../core/instantiate.js';
 import { Level, levelEquivalent, levelParamNames, levelSucc, levelToString, mkIMax, normalizesToZero } from '../core/level.js';
 import { LocalContext } from '../core/local-context.js';
@@ -225,7 +225,7 @@ export class TypeChecker {
           let head:Expr=f,i=0;
           while(i<av.args.length&&head.kind==='lam'){head=instantiate1(head.body,av.args[i]!);i++;}
           r=this.whnfCore(mkAppN(head,av.args.slice(i)),cheapRec,cheapProj);
-        }else if(exprEq(f,f0)){
+        }else if(exprLeanEq(f,f0)){
           const q=this.env.quotInitialized?reduceQuot(e,y=>this.whnf(y)):null;
           if(q)return this.whnfCore(q,cheapRec,cheapProj);
           const rr=reduceRecursor(this.env,e,y=>cheapRec?this.whnfCore(y,cheapRec,cheapProj):this.whnf(y),y=>this.infer(y),(a,b)=>this.isDefEq(a,b),y=>this.isProp(y));
@@ -271,7 +271,7 @@ export class TypeChecker {
   }
 
   private quick(a:Expr,b:Expr):boolean|null{
-    if(exprEq(a,b)||this.state.success.has(this.state.pair(a,b)))return true;
+    if(exprLeanEq(a,b)||this.state.success.has(this.state.pair(a,b)))return true;
     if(a.kind===b.kind){switch(a.kind){
       case'sort':return b.kind==='sort'&&levelEquivalent(a.level,b.level);
       case'lit':return b.kind==='lit'&&exprEq(a,b);
@@ -283,7 +283,7 @@ export class TypeChecker {
     const kind=a.kind,lctx=this.lctx.clone(),tc=this.child(lctx),subst:Expr[]=[];let t:Expr=a,s:Expr=b;
     do{
       const tb=t as Extract<Expr,{kind:'lam'|'forall'}>,sb=s as Extract<Expr,{kind:'lam'|'forall'}>;let sType:Expr|undefined;
-      if(!exprEq(tb.type,sb.type)){
+      if(!exprLeanEq(tb.type,sb.type)){
         sType=this.instantiateRev(sb.type,subst);const tType=this.instantiateRev(tb.type,subst);
         if(!tc.isDefEq(tType,sType))return false;
       }
@@ -346,7 +346,7 @@ export class TypeChecker {
   private defEqOffset(a:Expr,b:Expr):boolean|null{
     if(this.isNatZeroExpr(a)&&this.isNatZeroExpr(b))return true;const pa=this.natPredExpr(a),pb=this.natPredExpr(b);return pa&&pb?this.isDefEqCore(pa,pb):null;
   }
-  private tryUnfoldProjApp(e:Expr):Expr|null{const f=getAppFn(e);if(f.kind!=='proj')return null;const n=this.whnfCore(e,false,false);return exprEq(n,e)?null:n;}
+  private tryUnfoldProjApp(e:Expr):Expr|null{const f=getAppFn(e);if(f.kind!=='proj')return null;const n=this.whnfCore(e,false,false);return exprLeanEq(n,e)?null:n;}
   private reduceProjCore(e:Expr,typeName:import('../core/name.js').Name,index:number):Expr|null{
     if(!this.validProjIndex(index))return null;
     if(e.kind==='lit'&&e.literal.kind==='string')e=this.whnf(stringLitToConstructor(e));

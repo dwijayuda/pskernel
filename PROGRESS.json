@@ -101,6 +101,9 @@
   ],
   "lastVerifiedTestCount": 97,
   "notes": [
+    "GitHub Actions execution is currently unavailable for this repo on the continuation branch: both the canonical Full Std workflow run 35872878111 and fast CI run 35872913940 completed with zero job steps and no allocated runner. This is infrastructure-only evidence, not a kernel failure. Branch push triggers were removed again to avoid repeated noise.",
+    "Cheaper Std diagnostics are now first-class: oracle:std-probe checks a small first-root slice, oracle:std-hot checks nine historically troublesome root intervals with a 2 GiB default worker heap, oracle:std-range runs arbitrary adaptive ranges, and oracle:std-bisect recursively narrows semantic range failures while detecting failures that disappear when the interval is split.",
+    "Canonical Full Std remains the gold completion gate and stays open. Dependency-closed probes/range coverage may guide fixes and provide strong evidence but must not be relabeled as canonical shared-environment replay.",
     "Kernel continuation branch kernel/lean434-study-hardening audited the checked-in final Lean 4.34 C++ kernel and Lean4Lean study trees. The existing full-std.log failure was pre-replay JavaScript syntax corruption in scripts/module-stream-oracle.mjs, not kernel-semantic evidence; commit 3dda273 repairs it and commit 50bff93 adds runner syntax checks. full-Std-environment-replay remains open until a fresh canonical replay succeeds.",
     "Final-4.34 native-reduction correction is committed but awaits the refreshed CI/differential run before being promoted into the verified gate list.",
     "Lean 4.34 final alignment correction: upstream commit 2a7175c74ba17b160299accd7e6ea6984d7ea86f removed Lean.reduceBool/Lean.reduceNat, ofReduceBool/ofReduceNat, Lean.trustCompiler, and all in-kernel native compiler-IR reduction. pskernel removed NativeEvaluator/native-reduction special handling and retired the native-IR compatibility gate.",

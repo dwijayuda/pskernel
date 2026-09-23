@@ -1,7 +1,8 @@
 import {readdirSync,readFileSync,statSync} from 'node:fs';
-import {join,relative,resolve} from 'node:path';
+import {join,relative} from 'node:path';
+import {fileURLToPath} from 'node:url';
 
-const root=resolve(new URL('..',import.meta.url).pathname);
+const root=fileURLToPath(new URL('..',import.meta.url));
 const scopes=['syntax','language','compiler-ir','backend-ts','cli'];
 const maxLines=300;
 const maxLineLength=320;

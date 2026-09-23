@@ -54,6 +54,12 @@ test('defeq success cache remains pair-local and never gains transitive closure'
  assert(!st.success.has(st.pair(a,c)),'Lean 4.34 defeq cache must not transitively close successful algorithmic comparisons');
 });
 
+test('public defeq failures do not populate Lean lazy-delta failure cache',()=>{
+ const tc=new TypeChecker(baseEnv()),a=natLit(0),b=natLit(1),pair=tc.state.pair(a,b);
+ assert(!tc.isDefEq(a,b),'distinct Nat literals are not definitionally equal');
+ assert(!tc.state.failure.has(pair),'Lean 4.34 public defeq wrapper must not cache arbitrary failures');
+});
+
 test('defeq caches the original pair after delta proves equality',()=>{
  const env=baseEnv(),A=nameFromDotted('Cache.deltaA'),B=nameFromDotted('Cache.deltaB'),k=new Kernel(env);
  for(const n of [A,B])k.addDefinition({kind:'definition',name:n,levelParams:[],type:constant(N.Nat),value:natLit(7),hints:{kind:'regular',height:1n},safety:'safe'});

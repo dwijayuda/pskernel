@@ -1167,3 +1167,27 @@ The dogfood gate is intentionally cross-module and proof-bearing. It imports
 Option into Result/List, performs generic mapping and structural recursion,
 executes emitted JavaScript, and requires the stdlib's theorem declarations to
 be counted as pskernel-checked with no runtime external assumptions.
+
+## Expected-argument elaboration checkpoint
+
+The shared application engine already models Lean-style dependent application by
+exposing each explicit Pi binder's expected argument type. Source frontends now
+preserve that information instead of eagerly elaborating all call arguments.
+
+```text
+callee Pi binder
+  -> expected argument type
+  -> elaborate source argument against that expectation
+  -> unify / instantiate metas
+  -> continue telescope
+```
+
+This applies both to ordinary executable calls and theorem/type-position
+applications. It is especially important for constructors whose implicit
+parameters are not recoverable from their own explicit fields, such as a
+nullary generic constructor or one unused type parameter. In those cases the
+surrounding function parameter/result type may legitimately provide the missing
+constraint.
+
+The change stays entirely in untrusted Meta/Elab. pskernel still checks the
+fully instantiated application and remains the proof/type authority.

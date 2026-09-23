@@ -293,7 +293,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-source-ffi-admission+imported-metadata+bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-nested-expected-args+source-ffi-admission+imported-metadata+bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -306,6 +306,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Ordinary call arguments now elaborate lazily against each Pi binder's expected type through ApplicationArgumentSource instead of being fully elaborated first. Nested generic/nullary constructors can therefore infer implicit parameters from the enclosing call.",
+        "The theorem/type-position application path uses the same expected-argument protocol and also lets an enclosing expected result specialize zero-explicit-argument constants. This closes the same inference gap in specifications without a stdlib-specific special case.",
+        "Regressions cover a nullary generic OptExpected.none nested in a call and DuoExpected.ok(value), whose second type parameter is constrained only by the enclosing function argument type.",
         "Source extern signatures reuse ordinary header elaboration, are converted to non-unsafe Lean axioms plus explicit runtime-binding metadata, and are validated by the existing checked-core first-order primitive external invariant before entering the working environment.",
         "Proof-valued extern result types are rejected at the checked-core external boundary; source syntax does not create a more permissive FFI lane.",
         "Declaration elaboration accepts an optional checked-core seed containing already-admitted imported structures, classes, and instances. Imported metadata is reconstructed only from pskernel-validated CheckedCoreModule output, never directly from unverified source.",

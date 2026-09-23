@@ -450,6 +450,14 @@ Exit condition:
 
 ## Milestone L7 — standard library and ecosystem
 
+Current stdlib checkpoint:
+
+- `PsOption`: map, get-or-else, or-else, is-some plus reflexivity/computation laws;
+- `PsResult`: value/error mapping, get-or-else, Option conversion plus checked laws;
+- `PsList`: map, append, length, head Option plus reflexivity/append reduction laws;
+- the dogfood project executes all three modules through verified TS/JS emission
+  with zero runtime extern assumptions and nine pskernel-admitted theorems.
+
 Build libraries in ProofScript itself where practical:
 
 - Option / Result;
@@ -650,7 +658,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    Nat +,-,*,/,%, Nat/Bool ==/!=, and Bool !/&&/|| paths only where
    Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
-   instances/priorities only as ProofScript libraries require them.
+   instances/priorities only as ProofScript libraries require them. Nested
+   ordinary/theorem call arguments now already receive Pi-binder expected
+   types, so library-driven constructor inference should reuse that path
+   instead of adding syntax-specific inference.
 4. Validate the landed bounded multi-rule simp-only proof reconstruction.
 5. Keep theorem-statement syntax evidence-driven; explicit dependent Pi plus
    the current Nat/Bool/propositional forms cover the reference-backed
@@ -676,7 +687,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    a standard-library/application need justifies another ABI form.
 10. Expand the landed ProofScript-written standard-library foundation from
     PsOption/PsResult/PsList only when APIs are supported by the verified
-    language itself; next add laws/utilities rather than host shortcuts.
+    language itself. The first utility/law expansion now adds optionOrElse,
+    resultGetOrElse, structurally recursive listAppend, and six kernel-checked
+    definitional computation laws; continue with stronger laws/utilities only
+    when the proof/recursion surface supports them without host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.

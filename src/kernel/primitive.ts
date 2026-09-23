@@ -140,9 +140,11 @@ function checkCharOfNat(env:Environment,v:DefinitionInfo):void{
  const tc=new TypeChecker(env);tc.ensureSort(tc.check(constant(N.Char)),constant(N.Char));
 }
 function checkStringOfList(env:Environment,v:DefinitionInfo):void{
- requireDep(env,N.List);requireDep(env,N.ListNil);requireDep(env,N.ListCons);requireDep(env,N.Char);requireDep(env,N.String);
+ requireDep(env,N.Nat);requireDep(env,N.List);requireDep(env,N.ListNil);requireDep(env,N.ListCons);requireDep(env,N.Char);requireDep(env,N.CharOfNat);requireDep(env,N.String);
  const tc=new TypeChecker(env),u0=levelZero,chars=app(constant(N.List,[u0]),constant(N.Char));
  tc.ensureSort(tc.check(chars),chars);tc.ensureSort(tc.check(constant(N.Char)),constant(N.Char));
+ const charOfNatTy=arrow(Nat(),constant(N.Char)),charOfNatGot=tc.check(constant(N.CharOfNat));
+ if(!tc.isDefEq(charOfNatGot,charOfNatTy))throw new KernelError(`primitive '${nameToString(v.name)}' Char.ofNat prerequisite has unexpected type`);
  const nilTy=app(constant(N.List,[u0]),constant(N.Char));
  const consTy=arrow(constant(N.Char),arrow(chars,chars));
  const nilGot=tc.check(mkAppN(constant(N.ListNil,[u0]),[constant(N.Char)]));

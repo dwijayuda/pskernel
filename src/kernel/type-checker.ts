@@ -75,9 +75,13 @@ export class TypeChecker {
         if(!inferOnly){
           this.ensureSort(this.infer(e.type,false),e.type);const vt=this.infer(e.value,false);if(!this.isDefEq(vt,e.type))throw new KernelError('let value type mismatch');
         }
-        // Infer-only follows Lean by not inspecting the let value. Substitution
-        // preserves the resulting type while keeping the temporary local out of caches.
-        r=this.infer(instantiate1(e.body,e.value),inferOnly);break;
+        // Lean opens the let as a local declaration, infers the body, then closes
+        // the result with a let only when the result type actually depends on it.
+        r=this.withLet(nameToString(e.name),e.type,e.value,(id,tc)=>{
+          const bodyTy=tc.infer(instantiate1(e.body,fvar(id)),inferOnly);
+          const closed=abstractFVar(bodyTy,id);
+          return tc.hasLoose(closed)?{kind:'let',name:e.name,type:e.type,value:e.value,body:closed}:bodyTy;
+        });break;
       }
       case'proj':r=this.inferProj(e,inferOnly);break;
     }

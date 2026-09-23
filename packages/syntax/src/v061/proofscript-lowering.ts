@@ -84,12 +84,9 @@ function lowerDeclaration(decl:V061Declaration):string {
     const params=decl.kind==='class'
       ?lowerExplicitOnlyParameters(decl.params,'class')
       :lowerParameterSequence(decl.params);
-    return decl.kind+' '+decl.name+params+' where {
-'+
-      decl.fields.map(lowerField).join('
-')+
-      '
-};';
+    return decl.kind+' '+decl.name+params+' where {\\n'+
+      decl.fields.map(lowerField).join('\\n')+
+      '\\n};';
   }
 
   if(decl.kind==='inductive'){
@@ -107,13 +104,10 @@ function lowerDeclaration(decl:V061Declaration):string {
         'inductive constructor',
       )+
       ';',
-    ).join('
-');
-    return 'inductive '+decl.name+params+result+' where {
-'+
+    ).join('\\n');
+    return 'inductive '+decl.name+params+result+' where {\\n'+
       constructors+
-      '
-};';
+      '\\n};';
   }
 
   if(decl.kind==='external'){
@@ -145,11 +139,8 @@ function lowerDeclaration(decl:V061Declaration):string {
     lowerExplicitOnlyParameters(local.params,'where declaration')+
     ' : '+lowerV061TypeToProofScript(local.resultType)+
     ' := '+lowerV061ExprToProofScript(local.body)+';',
-  ).join('
-');
-  return base+' where {
-'+locals+'
-};';
+  ).join('\\n');
+  return base+' where {\\n'+locals+'\\n};';
 }
 
 export function lowerV061ModuleToProofScript(

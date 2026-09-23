@@ -40,14 +40,15 @@ Already implemented on the preferred verified path:
 
 - primitive Nat/Int/Bool/String/Unit representation;
 - generic functions and higher-order functions;
-- checked Nat arithmetic and bounded Nat comparison/if;
+- checked Nat arithmetic and bounded Nat equality/order comparison/if;
 - lambdas and lets;
 - structures, parameterized structures, record construction, projection;
 - inductives, generic inductives, constructors, checked pattern matching;
 - direct positive recursive ADTs;
 - bounded structural recursion, including invariant runtime parameters;
 - generic recursive list/map/length-style programs;
-- theorem proof terms and bounded tactics: exact, assumption, intro;
+- theorem proof terms and bounded tactics: exact, assumption, intro, and
+  single-premise apply;
 - class declarations as kernel-checked structure-like declarations;
 - local instance synthesis;
 - bounded global instance registration/synthesis;
@@ -58,6 +59,12 @@ Already implemented on the preferred verified path:
 
 The legacy `@proofscript/language` software checker remains transitional and
 must not receive new foundational semantics.
+
+Execution-evidence note (2026-09-23): current GitHub Actions push jobs are
+failing before any job step is created (`steps: null`). The source regressions
+for the latest equality/apply/instance-search changes are therefore committed
+but do not count as executed root-gate evidence until `npm run check` (or an
+equivalent executing CI run) completes.
 
 ## Milestone L1 — verified language core closure
 
@@ -138,7 +145,8 @@ Purpose: make formal verification pleasant enough for real software specs.
 
 Tactic order:
 
-1. apply;
+1. broaden the landed bounded single-premise apply only when multi-goal
+   machinery justifies it;
 2. refine;
 3. constructor;
 4. cases;
@@ -284,11 +292,12 @@ These are mandatory for all future development.
 Do not reorder without repository evidence.
 
 1. Repair/obtain an executing CI or local root-gate run.
-2. Close verified primitive/equality/comparison semantics needed by standard
-   ADTs and algorithms.
-3. Strengthen global instance synthesis toward the bounded Lean-compatible
-   subset actually needed by ProofScript libraries.
-4. Add apply/refine/constructor/cases before higher-level proof automation.
+2. Continue verified primitive/equality/comparison semantics beyond the landed
+   Nat == condition path only where Lean-compatible meaning is explicit.
+3. Extend the landed postponed global-instance lookup toward parameterized
+   instances/priorities only as ProofScript libraries require them.
+4. Continue theorem prover v1 with refine/constructor/cases; broaden apply only
+   with an explicit multi-goal model.
 5. Implement project/module/import semantics on the checked-core path.
 6. Design and implement explicit npm/JS FFI.
 7. Start the ProofScript-written standard library.

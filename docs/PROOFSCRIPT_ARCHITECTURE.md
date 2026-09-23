@@ -239,16 +239,19 @@ function caller {α : Type}[inst : Boxed(α)](x : α) : α :=
 used for structures. "Class" is elaborator metadata only; it does not extend
 the kernel's type theory.
 
-The first instance-synthesis slice is deliberately local-only. When an
-application needs an `instImplicit` argument whose head is a previously
-admitted ProofScript class, elaboration searches local `instImplicit`
-binders newest-first and uses ordinary Meta unification to check a candidate.
+The first instance-synthesis slice began local-only. The current bounded
+layer searches local `instImplicit` binders first and then registered global
+instance definitions. When the requested class target still contains
+metavariables, synthesis is postponed until later explicit arguments/result
+constraints have had a chance to solve them; only then is the instance goal
+retried. This prevents declaration order from prematurely fixing an otherwise
+unresolved type parameter.
+
 The resulting checked core contains the ordinary dictionary argument, so
 verified erasure/backend compilation needs no typeclass-specific escape hatch.
-
-Global instance declarations, priorities, recursive/table-based search,
-`outParam`/`semiOutParam`, and imported Lean instance indexes remain future
-Meta milestones and are not claimed by this checkpoint.
+Priorities, parameterized-instance application, recursive/table-based search,
+`outParam`/`semiOutParam`, ambiguity diagnostics, and imported Lean instance
+indexes remain future Meta milestones.
 
 
 ## Global instance checkpoint
@@ -279,7 +282,17 @@ core term contains the ordinary dictionary argument, and verified erasure
 therefore lowers `read` to an ordinary runtime call equivalent to
 `get(boxedNat, x)`.
 
-This remains intentionally smaller than Lean 4.34 `SynthInstance`:
-parameterized instance search, priorities, ambiguity handling, recursive/table
-resolution, out-parameters, and imported/prelude instance indexing are not
-claimed yet.
+Instance lookup remains intentionally smaller than Lean 4.34 `SynthInstance`:
+it is non-recursive and has no priorities, parameterized-instance application,
+out-parameters, ambiguity diagnostics, or imported/prelude instance index.
+A regression with competing `Boxed(Nat)` and `Boxed(Boxed(Nat))` instances
+locks the rule that an unresolved `Boxed(?α)` goal is postponed until a later
+explicit argument fixes `?α`.
+
+The theorem-prover slice also includes bounded single-premise `apply`.
+`by apply f; next` requires the elaborated candidate to expose one explicit
+Pi/function premise. The continuation constructs that premise proof; applying
+it to the candidate must then be definitionally equal to the original goal.
+The produced term is an ordinary application rechecked by pskernel. Candidates
+requiring multiple generated goals or unresolved implicit-instance search fail
+closed until the tactic state supports those cases.

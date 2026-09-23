@@ -110,6 +110,13 @@ It is:
 
 This is the reference direction for all future language/compiler work.
 
+A dedicated composition regression also locks that the same checked path can
+nest ordinary functional constructs rather than supporting them only in
+isolation: an outer `let` binds a lambda whose body is a checked Bool `if`,
+and the let body performs a verified ADT `match` whose branches call that
+local function. The expected verified-IR shape is asserted directly as
+`let -> lambda(if) -> match` before TypeScript emission.
+
 
 ## Verified Nat programming checkpoint
 

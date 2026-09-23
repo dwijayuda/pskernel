@@ -397,6 +397,7 @@
         "Canonical verified compilation now also carries globally synthesized class dictionaries as ordinary pskernel-checked definition arguments; no compiler-specific typeclass representation is introduced.",
         "Verified compilation now inherits acyclic local where helpers through ordinary checked-core let/lambda erasure; no compiler-specific where representation was added.",
         "Canonical verified compilation now covers parameterized pskernel structures, record construction, and projection with TypeScript generic API preservation.",
+        "A source-level composition gate asserts nested let -> lambda(if) -> ADT match in verified IR and local higher-order calls from both match branches, preventing feature support from remaining isolated happy paths.",
         "Canonical integration now covers higher-order generic structural recursion: map over a pskernel-admitted recursive generic list preserves TypeScript generics/function types while compiling recursor IHs to ordinary JavaScript recursion.",
         "Compiler orchestration starts at CheckedCoreModule; it has no syntax, parser, language-checker, or elaborator dependency.",
         "The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript Compiler API -> JavaScript/.d.ts/source map.",

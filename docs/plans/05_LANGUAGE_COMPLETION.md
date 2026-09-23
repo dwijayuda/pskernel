@@ -39,10 +39,12 @@ pass the erasure/compiler/backend path.
 Already implemented on the preferred verified path:
 
 - primitive Nat/Int/Bool/String/Unit representation;
-- generic functions and higher-order functions;
+- generic functions and higher-order functions, including direct generic
+  higher-order calls on the verified path;
 - checked Nat arithmetic including total / and %, bounded Nat/Bool equality,
   Nat order comparison, Bool logic, and checked Bool/ordering if conditions;
-- lambdas and lets;
+- lambdas and lets, with a source regression nesting let -> lambda(if) -> ADT
+  match and local higher-order calls;
 - structures, parameterized structures, record construction, projection;
 - inductives, generic inductives, constructors, checked pattern matching;
 - direct positive recursive ADTs;
@@ -75,8 +77,8 @@ are added.
 
 Remaining acceptance gates:
 
-- direct calls between generic functions and higher-order functions;
-- nested lets/lambdas/if/match combinations;
+- broaden generic/higher-order and nested expression composition only when new
+  core expression forms are introduced;
 - richer primitive comparison/equality coverage through Lean-compatible
   elaboration, not backend-only operators;
 - broaden the landed typed/exhaustive intrinsic contract only when new

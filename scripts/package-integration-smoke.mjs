@@ -315,6 +315,54 @@ assert(
 );
 
 
+const verifiedComposition=compileVerifiedSource(
+  'inductive ComposeOption(α : Type) where { '+
+  '| none; | some(value : α); } '+
+  'function composed(x : Nat, flag : Bool, value : ComposeOption(Nat)) : Nat := '+
+  'let choose : Nat -> Nat := fun y => '+
+  'if (flag) { y + 1 } else { y }; '+
+  'match value with { '+
+  '| .none => choose(x); '+
+  '| .some y => choose(y); };',
+  'verified-composition.ts',
+);
+const composed=verifiedComposition.ir.declarations.find(
+  (item)=>item.name==='composed',
+);
+assert(
+  composed?.body.kind==='let',
+  'verified composition did not retain outer let in IR',
+);
+if(composed?.body.kind==='let'){
+  assert(
+    composed.body.value.kind==='lambda',
+    'verified composition let value did not retain lambda in IR',
+  );
+  if(composed.body.value.kind==='lambda'){
+    assert(
+      composed.body.value.body.kind==='if',
+      'verified composition lambda body did not retain checked if in IR',
+    );
+  }
+  assert(
+    composed.body.body.kind==='match',
+    'verified composition let body did not retain ADT match in IR',
+  );
+}
+assert(
+  verifiedComposition.typeScript.includes('const choose ='),
+  'verified composition did not emit local higher-order binding',
+);
+assert(
+  verifiedComposition.typeScript.includes('case "some"'),
+  'verified composition did not emit ADT match branch',
+);
+assert(
+  verifiedComposition.typeScript.includes('flag ?'),
+  'verified composition did not emit nested Bool condition',
+);
+
+
 const verifiedStructure=compileVerifiedSource(
   'structure User where { age : Nat; } '+
   'function make(age : Nat) : User := { age := age : User }; '+

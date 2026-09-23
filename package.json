@@ -33,7 +33,7 @@
     "check:source-shape": "node scripts/source-shape-check.mjs",
     "check:vscode": "node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs",
     "check:architecture": "node scripts/proofscript-architecture-check.mjs",
-    "test:wasm": "tsc -p packages/compiler-ir/tsconfig.json && tsc -p packages/wasm-ir/tsconfig.json && node packages/wasm-ir/dist/test/index.test.js && tsc -p packages/wasm-lowering/tsconfig.json && node packages/wasm-lowering/dist/test/index.test.js && tsc -p packages/backend-wasm/tsconfig.json && node packages/backend-wasm/dist/test/index.test.js",
+    "test:wasm": "tsc -p packages/syntax/tsconfig.json && tsc -p packages/language/tsconfig.json && tsc -p packages/compiler-ir/tsconfig.json && tsc -p packages/wasm-ir/tsconfig.json && node packages/wasm-ir/dist/test/index.test.js && tsc -p packages/wasm-lowering/tsconfig.json && node packages/wasm-lowering/dist/test/index.test.js && tsc -p packages/backend-wasm/tsconfig.json && node packages/backend-wasm/dist/test/index.test.js",
     "check:workspace-lock": "node scripts/workspace-lock-check.mjs"
   },
   "devDependencies": {

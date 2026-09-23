@@ -32,7 +32,7 @@ function baseEnv():Environment{
  return e;
 }
 
-test('Name numeric and string components remain distinct',()=>{const a={kind:'str',prefix:nameFromDotted('X'),value:'1'} as const,b={kind:'num',prefix:nameFromDotted('X'),value:1n} as const;assert(JSON.stringify(a,(_k,v)=>typeof v==='bigint'?v.toString():v)!==JSON.stringify(b,(_k,v)=>typeof v==='bigint'?v.toString():v));assert(nameCmp(b,a)<0&&nameCmp(a,b)>0,'Lean Name order places numeral components before string components');});
+test('Name numeric and string components remain distinct',()=>{const prefix=nameFromDotted('X'),a={kind:'str',prefix,value:'1'} as const,b={kind:'num',prefix,value:1n} as const;assert(JSON.stringify(a,(_k,v)=>typeof v==='bigint'?v.toString():v)!==JSON.stringify(b,(_k,v)=>typeof v==='bigint'?v.toString():v));assert(nameCmp(b,a)<0&&nameCmp(a,b)>0,'Lean Name order places numeral components before string components');const bmp={kind:'str',prefix,value:'\uE000'} as const,astral={kind:'str',prefix,value:'\u{10000}'} as const;assert(nameCmp(bmp,astral)<0&&nameCmp(astral,bmp)>0,'Lean Name string order follows UTF-8/scalar order rather than JavaScript UTF-16 code-unit order');});
 test('Lean private names preserve numeric private-index components',()=>{assert(!exprEq(constant(N.NatBitwiseUnaryProof1),constant(nameFromDotted('_private.Init.Data.Nat.Bitwise.Basic.0.Nat.bitwise._unary._proof_1'))));});
 test('LocalContext freshness never collides with reconstructed local IDs',()=>{const l=new LocalContext();l.addLocal('a@1',nameFromDotted('a'),sort(levelZero));assert(l.fresh('a')==='a@0');assert(l.fresh('a')==='a@2');});
 test('deep structural traversals avoid the JavaScript call stack',()=>{

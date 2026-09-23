@@ -57,6 +57,21 @@ function components(n: Name, out: Array<{ k: 0 | 1; v: string | bigint }> = []):
   return out;
 }
 
+function leanStringCmp(a:string,b:string):-1|0|1{
+  const ai=a[Symbol.iterator](),bi=b[Symbol.iterator]();
+  while(true){
+    const x=ai.next(),y=bi.next();
+    if(x.done||y.done){
+      if(x.done&&y.done)return 0;
+      return x.done?-1:1;
+    }
+    const xc=x.value.codePointAt(0)!,yc=y.value.codePointAt(0)!;
+    if(xc!==yc)return xc<yc?-1:1;
+  }
+}
+
+/** Final Lean C++ Name order: NUMERAL components precede STRING components,
+ * and strings use UTF-8 byte order (equivalent to scalar-value order for valid strings). */
 export function nameCmp(a: Name, b: Name): -1 | 0 | 1 {
   if (nameEq(a, b)) return 0;
   const as = components(a), bs = components(b);
@@ -65,7 +80,7 @@ export function nameCmp(a: Name, b: Name): -1 | 0 | 1 {
     const x = as[i]!, y = bs[i]!;
     if (x.k !== y.k) return x.k < y.k ? 1 : -1; // Lean: NUMERAL components sort before STRING components
     if (typeof x.v === 'string' && typeof y.v === 'string') {
-      if (x.v !== y.v) return x.v < y.v ? -1 : 1;
+      const c=leanStringCmp(x.v,y.v);if(c!==0)return c;
     } else if (typeof x.v === 'bigint' && typeof y.v === 'bigint' && x.v !== y.v) {
       return x.v < y.v ? -1 : 1;
     }

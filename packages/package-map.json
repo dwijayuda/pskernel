@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "dual-source-ds5-source-roots+checked-module-cache",
+      "status": "dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -35,6 +35,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS5.6 emits one proofscript-module@2 checked-admission artifact per verified source module below dist/.proofscript/modules. Each artifact is dependency-linked by artifact integrity and replay-gated through checked core/pskernel before build acceptance.",
+        "Persistent artifacts are not yet source-skipping cache hits: a self-hashed kernel-valid artifact does not prove derivation from the current source. Trusted reuse waits for an external expected hash/lockfile or derivation certificate plus pinned base-environment identity.",
+        "moduleSources now expose both the existing canonical source/dependency cache-key integrity and moduleArtifactIntegrity; those identities intentionally serve different purposes.",
         "CLI project resolution now consumes @proofscript/project/node for sourceRoots expansion and logical .ps/.lean module lookup; the CLI preserves PS_CLI_CONFIG_SOURCE_ROOTS at its user-facing config boundary.",
         "DS5.5 adds project-relative `sourceRoots` configuration. Empty/unset preserves the historical entry-directory import root; configured roots replace that default search set.",
         "Every logical import is searched across all configured roots and both .ps/.lean. Resolution requires exactly one candidate; duplicates across roots or source kinds fail with PS_PROJECT_SOURCE_AMBIGUITY instead of first-root precedence.",
@@ -42,14 +45,12 @@
         "DS5.4 integrates @proofscript/project BuildCache for local checked admissions. Cache keys are SHA-256 over @proofscript/module canonical JSON containing the pinned kernel descriptor, logical module name, source-kind-neutral canonical source hash, and direct dependency integrity keys.",
         "Dependency integrity is transitive: changing a dependency changes its module key and therefore invalidates importers even when importer source is unchanged. Project integrity hashes the ordered module/integrity list.",
         "Cache hits remain untrusted acceleration only: the final combined admissions are replayed through checked core/pskernel exactly as on a cache miss.",
-        "Persistent .psmodule caching is not claimed yet. Module artifact v1 requires canonical Lean4Export NDJSON and the repository currently has no checked-core-admission serializer for that payload.",
         "DS5.3 seeds each module elaboration from the pskernel-replayed checked-core metadata of its transitive dependency closure, so cross-module structures, projections, classes, and global instance synthesis match same-file behavior.",
         "A mixed-source regression exercises Core.ps structure/class/global instance metadata from Data.lean record/projection/local-class code and instance synthesis, then runs the ProofScript entry through verified JS.",
         "DS5.2 verified check/build/run recursively resolve logical imports from the entry source directory, topo-sort them through @proofscript/project, elaborate each module against exactly its transitive dependency admissions, then compile one combined pskernel-checked project.",
         "Mixed-source runtime regressions cover ProofScript -> Lean -> ProofScript transitive imports and Lean -> ProofScript imports; imported ordinary definitions execute through the same verified IR/TS/JS backend.",
         "Verified project reports expose moduleCount, deterministic moduleOrder, and per-module source kind/path/canonicalSourceHash.",
         "Standalone verified source helpers reject imports without project context; the transitional legacy semantic lane rejects imports entirely rather than ignoring them.",
-        "DS5 MVP does not yet reconstruct imported structure/class/global-instance elaborator indexes, emit per-module Lean artifacts, use psmodule/cache artifacts, or support configured source roots.",
         "DS3.3 adds a source-kind-neutral SHA-256 identity over canonical ProofScript printing of the shared parsed surface; verified and legacy check/build reports/manifests expose canonicalSourceHash.",
         "Equivalent .ps and canonical supported .lean inputs are gated to produce the same canonicalSourceHash before semantic checking.",
         "DS4 integration compares pskernel checked-core admission fingerprints, verified compiler IR, TypeScript, JavaScript, and .d.ts across PS -> Lean and Lean -> PS round trips.",
@@ -76,14 +77,21 @@
     {
       "name": "module",
       "path": "packages/module",
-      "phase": "A",
+      "phase": "B",
       "trust": "untrusted-support",
-      "status": "mvp",
+      "status": "checked-admission-artifact-v2",
       "packageName": "@proofscript/module",
       "dependsOn": [
-        "kernel"
+        "kernel",
+        "checked-core"
       ],
-      "sourceLanguage": "typescript"
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Artifact v2 stores canonical ProofScript checked-admission JSON produced by @proofscript/checked-core. Loading verifies hashes/dependencies, decodes the closed admission payload, checks pinned kernel compatibility, then replays every admission through checked-core/pskernel.",
+        "Artifact v1 Lean4Export NDJSON remains supported unchanged for compatibility.",
+        "v2 is an untrusted persistent cache/transport. Free variables, expression/universe metavariables, and mdata are rejected by checked-core codec v1; no serialized proof bypasses kernel admission.",
+        "This closes the fake-Lean4Export blocker: ProofScript-produced modules no longer need a checked-core -> Lean4Export serializer to persist replayable admissions."
+      ]
     },
     {
       "name": "conformance",
@@ -223,13 +231,15 @@
       "path": "packages/checked-core",
       "phase": "B",
       "trust": "untrusted-boundary",
-      "status": "kernel-admitted-class+instance-core-mvp",
+      "status": "kernel-admitted-persistent-codec+class+instance-core-mvp",
       "packageName": "@proofscript/checked-core",
       "dependsOn": [
         "kernel"
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Checked-core codec v1 serializes closed definition/theorem/inductive/structure/class/instance admissions into versioned JSON data. It rejects free variables, expression/universe metavariables, and mdata rather than persisting unresolved elaborator state.",
+        "Decoded admissions do not become trusted declarations: callers must replay them through admitCheckedCoreAdmissions/pskernel.",
         "Instance metadata is accepted only for pskernel-admitted definitions whose final result head is a previously admitted class; the kernel itself still sees an ordinary definition.",
         "Class metadata is accepted only after the same single-constructor inductive validation used for structures; pskernel itself receives only ordinary inductive declarations.",
         "Structure field-name/index/binder metadata is accepted only after validation against the constructor generated by pskernel; metadata guides source names but has no proof authority.",
@@ -425,7 +435,7 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "verified-ir-foundation+intrinsic-contract+software-where-ir-mvp",
+      "status": "verified-ir-external-imports+intrinsic-contract+software-where-ir-mvp",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
         "kernel",
@@ -433,6 +443,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified IR can carry typed external named ESM imports. Import local names share the declaration value namespace, source/import names are validated, and import types use the same VerifiedIrType model as checked executable declarations.",
+        "External IR imports are runtime dependency metadata only; their presence does not constitute proof evidence or kernel admission.",
         "Compiler IR now has a verified-core lane distinct from the transitional software-HIR lane.",
         "Verified IR separates compile-time type parameters from runtime parameters so dependent/type binders can be erased from JavaScript while retained in TypeScript declarations.",
         "The verified IR is runtime-oriented and intentionally does not reuse kernel Expr as code-generation IR.",
@@ -466,7 +478,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "verified-core-typescript-mvp+software-where-typescript-mvp",
+      "status": "verified-esm-imports+verified-core-typescript-mvp+software-where-typescript-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -474,6 +486,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "The verified TypeScript emitter emits typed-IR external imports as canonical named ESM imports before generated declarations; aliases preserve the IR local name.",
+        "Backend imports consume explicit verified-IR metadata only and never infer proof assumptions from JavaScript/TypeScript packages.",
         "The preferred backend lane now accepts verified compiler IR produced after pskernel admission and erasure.",
         "Compile-time dependent type parameters are emitted as TypeScript generics for .ts/.d.ts while tsc removes them from JavaScript runtime code.",
         "The backend remains untrusted: TypeScript/JavaScript emission cannot affect theorem validity or kernel admission.",
@@ -540,14 +554,16 @@
       "path": "packages/compiler",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "checked-core-to-js-generic-structure+structural-recursion-mvp",
+      "status": "checked-core-to-js-generic-structure+structural-recursion+wasm-w1-mvp",
       "packageName": "@proofscript/compiler",
       "dependsOn": [
         "checked-core",
         "erasure",
         "compiler-ir",
         "backend-ts",
-        "kernel"
+        "kernel",
+        "wasm-lowering",
+        "backend-wasm"
       ],
       "sourceLanguage": "typescript",
       "notes": [
@@ -561,7 +577,8 @@
         "The compiler is untrusted with respect to theorem validity; pskernel admission has already occurred before this package runs.",
         "The verified compiler now covers construction and elimination of non-recursive unindexed generic ADTs through kernel-admitted constructors/recursors.",
         "The verified compiler now carries direct recursive ADTs and primitive structurally recursive functions—with invariant runtime parameters—from pskernel recursors to ordinary TypeScript/JavaScript recursion.",
-        "Canonical verified compilation now carries class dictionaries through the same structure IR/runtime representation; locally synthesized instances become ordinary checked runtime arguments."
+        "Canonical verified compilation now carries class dictionaries through the same structure IR/runtime representation; locally synthesized instances become ordinary checked runtime arguments.",
+        "W1 exposes checked-core -> erasure -> verified IR -> WasmIR -> Binaryen orchestration; unsupported Wasm runtime features remain fail-closed."
       ]
     },
     {

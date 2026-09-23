@@ -1,4 +1,10 @@
-import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {parseCommonArgs,parseTranslateArgs} from '../src/args.js';
@@ -6,9 +12,11 @@ import {compileVerifiedSource} from '../src/verified-pipeline.js';
 import {clearVerifiedProjectModuleCache} from '../src/verified-project-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
 import {runCommand} from '../src/commands/run.js';
+import {buildCommand} from '../src/commands/build.js';
 import {checkCommand} from '../src/commands/check.js';
 import {emitLeanCommand} from '../src/commands/emit-lean.js';
 import {translateCommand} from '../src/commands/translate.js';
+import {decodeModuleArtifact} from '@proofscript/module';
 
 function equal(actual:unknown,expected:unknown):void{
   if(actual!==expected)throw new Error('expected '+String(expected)+', got '+String(actual));
@@ -1233,6 +1241,103 @@ console.log('ok - psc mixed imports preserve structure/class/instance metadata')
   }
 }
 console.log('ok - psc checked-module cache uses dependency integrity keys');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-persistent-module-artifacts-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'def inc (x : Nat) : Nat := x + 1\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := inc(x);\n',
+      'utf8',
+    );
+
+    clearVerifiedProjectModuleCache();
+    const built=await buildCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    const artifactRecords=(
+      built.report.artifacts as {
+        readonly modules:readonly {
+          readonly module:string;
+          readonly path:string;
+          readonly integrity:string;
+        }[];
+      }
+    ).modules;
+    equal(artifactRecords.length,2);
+
+    const decoded=new Map<string,ReturnType<typeof decodeModuleArtifact>>();
+    for(const record of artifactRecords){
+      const artifact=decodeModuleArtifact(
+        await readFile(record.path,'utf8'),
+      );
+      equal(artifact.version,2);
+      equal(artifact.integrity,record.integrity);
+      decoded.set(record.module,artifact);
+    }
+    const data=decoded.get('Data');
+    const main=decoded.get('main');
+    if(data===undefined||main===undefined){
+      throw new Error('missing emitted module artifact');
+    }
+    equal(main.dependencies.length,1);
+    equal(main.dependencies[0]?.module,'Data');
+    equal(main.dependencies[0]?.integrity,data.integrity);
+    equal(
+      main.metadata!==undefined
+      &&typeof main.metadata==='object'
+      &&!Array.isArray(main.metadata),
+      true,
+    );
+    if(
+      main.metadata===undefined
+      ||typeof main.metadata!=='object'
+      ||main.metadata===null
+      ||Array.isArray(main.metadata)
+    ){
+      throw new Error('missing module artifact metadata');
+    }
+    equal(
+      String(main.metadata.canonicalSourceHash).startsWith('sha256:'),
+      true,
+    );
+    equal(
+      String(main.metadata.sourceCacheKey).startsWith('sha256:'),
+      true,
+    );
+    equal('sourceKind' in main.metadata,false);
+  }finally{
+    clearVerifiedProjectModuleCache();
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc emits replay-gated checked-admission .psmodule v2 artifacts');
+
 
 {
   const directory=await mkdtemp(

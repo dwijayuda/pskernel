@@ -6,6 +6,12 @@ import {
   emitVerifiedTypeScript,
   type TypeScriptCompileResult,
 } from '@proofscript/backend-ts/verified';
+import {lowerVerifiedIrToWasm} from '@proofscript/wasm-lowering';
+import {
+  emitBinaryenWasm,
+  type WasmEmitOptions,
+  type WasmEmitResult,
+} from '@proofscript/backend-wasm';
 
 export interface VerifiedCompileResult {
   readonly checkedCore:CheckedCoreModule;
@@ -23,4 +29,22 @@ export function compileCheckedCore(
   const typeScript=emitVerifiedTypeScript(ir);
   const emitted=compileTypeScript(typeScript,fileName);
   return {checkedCore,ir,typeScript,emitted};
+}
+
+export interface VerifiedWasmCompileResult {
+  readonly checkedCore:CheckedCoreModule;
+  readonly ir:ReturnType<typeof eraseCheckedCoreModule>;
+  readonly wasmIr:ReturnType<typeof lowerVerifiedIrToWasm>;
+  readonly wasm:WasmEmitResult;
+}
+
+export function compileCheckedCoreToWasm(
+  checkedCore:CheckedCoreModule,
+  options:WasmEmitOptions={},
+):VerifiedWasmCompileResult {
+  const ir=eraseCheckedCoreModule(checkedCore);
+  validateVerifiedIrModule(ir);
+  const wasmIr=lowerVerifiedIrToWasm(ir);
+  const wasm=emitBinaryenWasm(wasmIr,options);
+  return {checkedCore,ir,wasmIr,wasm};
 }

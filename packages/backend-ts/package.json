@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript checked executable IR to TypeScript source, compiled to JavaScript by TypeScript.",
   "proofscript": {
-    "status": "verified-core-typescript-mvp+software-where-typescript-mvp",
+    "status": "verified-esm-imports+verified-core-typescript-mvp+software-where-typescript-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

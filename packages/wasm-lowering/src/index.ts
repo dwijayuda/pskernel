@@ -27,6 +27,12 @@ export const PROOFSCRIPT_WASM_PROFILE=
 export function lowerVerifiedIrToWasm(
   module:VerifiedIrModule,
 ):WasmIrModule {
+  if((module.imports??[]).length!==0){
+    return unsupported(
+      'PS_WASM_UNSUPPORTED_EXTERNAL_IMPORTS',
+      'W1 does not yet define the WebAssembly FFI import ABI',
+    );
+  }
   if((module.structures??[]).length!==0){
     return unsupported(
       'PS_WASM_UNSUPPORTED_STRUCTURE',

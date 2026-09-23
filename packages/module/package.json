@@ -5,10 +5,10 @@
   "type": "module",
   "description": "Portable deterministic ProofScript checked-module artifacts with integrity and kernel replay.",
   "proofscript": {
-    "status": "mvp",
-    "phase": "A",
+    "status": "checked-admission-artifact-v2",
+    "phase": "B",
     "trust": "untrusted-support",
-    "artifactFormat": "proofscript-module@1",
+    "artifactFormat": "proofscript-module@1|2",
     "sourceLanguage": "typescript"
   },
   "exports": {
@@ -22,7 +22,8 @@
     "test": "npm run build --silent && node dist/test/module.test.js"
   },
   "dependencies": {
-    "lean-ts-kernel": "file:../.."
+    "lean-ts-kernel": "file:../..",
+    "@proofscript/checked-core": "file:../checked-core"
   },
   "devDependencies": {
     "@types/node": "22.15.3",

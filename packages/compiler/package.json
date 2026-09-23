@@ -3,9 +3,9 @@
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "Orchestrates verified compilation from kernel-admitted checked core through erasure, compiler IR, TypeScript, and JavaScript.",
+  "description": "Orchestrates verified compilation from kernel-admitted checked core to TypeScript/JavaScript or WebAssembly.",
   "proofscript": {
-    "status": "checked-core-to-js-mvp",
+    "status": "checked-core-to-js-generic-structure+structural-recursion+wasm-w1-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -25,7 +25,9 @@
     "@proofscript/checked-core": "file:../checked-core",
     "@proofscript/erasure": "file:../erasure",
     "@proofscript/compiler-ir": "file:../compiler-ir",
-    "@proofscript/backend-ts": "file:../backend-ts"
+    "@proofscript/backend-ts": "file:../backend-ts",
+    "@proofscript/wasm-lowering": "file:../wasm-lowering",
+    "@proofscript/backend-wasm": "file:../backend-wasm"
   },
   "devDependencies": {
     "typescript": "5.8.3"

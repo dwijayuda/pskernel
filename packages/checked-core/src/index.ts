@@ -251,3 +251,5 @@ export function admitCheckedCoreModule(
     })),
   );
 }
+
+export * from './codec-admissions.js';

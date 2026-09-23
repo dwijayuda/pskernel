@@ -243,3 +243,49 @@ console.log('ok - @proofscript/compiler-ir verified Nat intrinsic');
   equal(invalid,true);
 }
 console.log('ok - @proofscript/compiler-ir verified intrinsic contract');
+
+{
+  const module={
+    kind:'proofscript-verified-ir' as const,
+    imports:[{
+      localName:'hostLength',
+      source:'host-lib',
+      importedName:'length',
+      type:{
+        kind:'function' as const,
+        parameters:[{kind:'primitive' as const,name:'String' as const}],
+        result:{kind:'primitive' as const,name:'Nat' as const},
+      },
+    }],
+    declarations:[{
+      name:'main',
+      typeParameters:[],
+      parameters:[{
+        name:'value',
+        type:{kind:'primitive' as const,name:'String' as const},
+      }],
+      resultType:{kind:'primitive' as const,name:'Nat' as const},
+      body:{
+        kind:'call' as const,
+        fn:{kind:'var' as const,name:'hostLength'},
+        args:[{kind:'var' as const,name:'value'}],
+      },
+    }],
+  };
+  equal(validateVerifiedIrModule(module),true);
+
+  let collision=false;
+  try{
+    validateVerifiedIrModule({
+      ...module,
+      declarations:[{
+        ...module.declarations[0]!,
+        name:'hostLength',
+      }],
+    });
+  }catch(error){
+    collision=/duplicate verified IR value/.test(String(error));
+  }
+  equal(collision,true);
+}
+console.log('ok - @proofscript/compiler-ir external import boundary');

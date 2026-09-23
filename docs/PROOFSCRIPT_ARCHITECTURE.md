@@ -44,12 +44,15 @@ checked dependent core
                          |
                          v
                     compiler IR
-                         |
-                         v
-                   TypeScript
-                         |
-                         v
-                  tsc -> JavaScript
+                     /       \
+                    v         v
+              TypeScript    Wasm lowering
+                    |         |
+                    v         v
+             tsc -> JS      WasmIR
+                              |
+                              v
+                         Binaryen -> .wasm
 ```
 
 ## Dual-source frontend contract
@@ -124,7 +127,10 @@ or exposed through an explicit ProofScript Lean-subset language mode.
 - `@proofscript/erasure`: removes type/proof-only content from checked core.
 - `@proofscript/compiler-ir`: runtime-oriented executable representation.
 - `@proofscript/backend-ts`: verified IR to TypeScript text.
-- `@proofscript/compiler`: orchestration from checked core to TS/JS.
+- `@proofscript/wasm-ir`: ProofScript-owned typed WebAssembly-oriented IR.
+- `@proofscript/wasm-lowering`: fail-closed verified IR to WasmIR representation lowering.
+- `@proofscript/backend-wasm`: Binaryen-backed WasmIR validation/emission; outside the TCB.
+- `@proofscript/compiler`: orchestration from checked core to TS/JS or supported Wasm.
 - TypeScript Compiler API: TypeScript type-checking/emission to JavaScript,
   declarations, and source maps.
 
@@ -135,7 +141,7 @@ or exposed through an explicit ProofScript Lean-subset language mode.
    declarations are replayed through pskernel.
 3. Erasure consumes checked core, never raw syntax or the legacy software HIR.
 4. The verified compiler consumes checked core/verified IR, never source AST.
-5. TypeScript/JavaScript output has no authority over proof acceptance.
+5. TypeScript/JavaScript and WebAssembly output have no authority over proof acceptance.
 6. Erased proof/type values may not survive in executable code. If they do,
    compilation fails closed.
 7. Unsupported elaboration/erasure never falls back automatically to the
@@ -143,6 +149,40 @@ or exposed through an explicit ProofScript Lean-subset language mode.
 8. ProofScript conveniences may change syntax, not Lean-compatible meaning
    where dependent types, propositions, inductives, recursion, typeclasses,
    or theorem checking are involved.
+
+
+## WebAssembly backend checkpoint
+
+WebAssembly is an alternate execution backend after the same pskernel-admitted
+checked core and verified erasure used by TypeScript. It is not a second
+semantic pipeline:
+
+```text
+checked core
+    -> verified erasure
+    -> verified compiler IR
+       |                 |
+       v                 v
+ TypeScript backend   wasm-lowering
+       |                 |
+       v                 v
+ JavaScript            WasmIR
+                         |
+                         v
+                  Binaryen -> .wasm
+```
+
+The W1 executable subset is intentionally small: Bool/Unit control values and
+direct first-order functions. Runtime Nat/Int are rejected until an
+arbitrary-precision ABI exists; they must never be silently narrowed to i64.
+String, external imports, structures, ADTs, generic runtime values, and closures
+also fail closed until their representations are specified.
+
+Binaryen is untrusted compiler infrastructure. Its validator establishes
+WebAssembly validity, not equivalence to ProofScript semantics. The
+ProofScript-owned WasmIR boundary exists so later differential,
+translation-validation, and formal-refinement work can target a stable,
+versioned representation.
 
 ## Transitional legacy software path
 
@@ -907,3 +947,42 @@ enabled in the ProofScript workspace.
 This checkpoint remains document-local. DS5 project/import semantics must be
 composed into the language service before cross-file/cross-language navigation
 can claim semantic project awareness.
+
+## JavaScript/npm FFI foundation
+
+The verified compiler IR now has an explicit external-import surface:
+
+```text
+checked executable meaning
+        |
+        v
+ verified IR
+   imports: [
+     { localName, source, importedName, type }
+   ]
+        |
+        v
+ TypeScript named ESM import
+```
+
+This layer is intentionally **runtime-only metadata**. An IR import does not
+create a pskernel theorem, definition, or proof witness. The TypeScript backend
+may emit it only because an earlier trusted semantic boundary has supplied a
+typed runtime dependency contract.
+
+The next frontend/checked-core FFI checkpoint must preserve three distinct
+facts:
+
+1. the source signature that ProofScript typechecks against;
+2. the runtime binding (npm/ESM source + exported symbol);
+3. the trust/assumption status exposed to users and assurance tooling.
+
+JavaScript execution must never be used to discharge a theorem. If an external
+signature is represented in the kernel environment to typecheck executable
+uses, that declaration must be marked and reported as an external/runtime
+assumption, and proof-producing result types must fail closed in the first FFI
+profile.
+
+The initial backend form is named ESM import only. Default imports, namespace
+imports, CommonJS, dynamic import, side-effect imports, and package-resolution
+policy remain later explicit extensions.

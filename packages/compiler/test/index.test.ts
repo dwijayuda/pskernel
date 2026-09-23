@@ -9,7 +9,7 @@ import {
   sort,
 } from 'lean-ts-kernel';
 import {admitCheckedCoreModule} from '@proofscript/checked-core';
-import {compileCheckedCore} from '../src/index.js';
+import {compileCheckedCore,compileCheckedCoreToWasm} from '../src/index.js';
 
 function equal(actual:unknown,expected:unknown):void {
   if(actual!==expected){
@@ -66,3 +66,38 @@ console.log('ok - @proofscript/compiler checked-core orchestration');
   equal(typeof source,'function');
 }
 console.log('ok - @proofscript/compiler IR keeps language primitive identity upstream of TS mapping');
+
+{
+  const alpha=nameFromDotted('α');
+  const x=nameFromDotted('x');
+  const identity=nameFromDotted('wasmGenericIdentity');
+  const alphaType=sort(levelSucc(levelZero));
+  const checked=admitCheckedCoreModule(new Environment(),[{
+    kind:'definition',
+    name:identity,
+    levelParams:[],
+    type:forallE(
+      alpha,
+      alphaType,
+      forallE(x,bvar(0),bvar(1),'default'),
+      'implicit',
+    ),
+    value:lam(
+      alpha,
+      alphaType,
+      lam(x,bvar(0),bvar(0),'default'),
+      'implicit',
+    ),
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  }]);
+
+  let code:string|undefined;
+  try{
+    compileCheckedCoreToWasm(checked);
+  }catch(error){
+    code=(error as {code?:string}).code;
+  }
+  equal(code,'PS_WASM_UNSUPPORTED_GENERIC_DECLARATION');
+}
+console.log('ok - @proofscript/compiler Wasm path fails closed after checked core');

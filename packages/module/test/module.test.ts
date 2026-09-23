@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {canonicalJson,createModuleArtifact,decodeModuleArtifact,encodeModuleArtifact,loadModuleArtifact,moduleArtifactSummary,normalizeDeclarationStream,verifyModuleArtifact,verifyModuleDependencies} from '../src/index.js';
+import {Environment,constant,levelSucc,levelZero,nameFromDotted,sort} from 'lean-ts-kernel';
+import {canonicalJson,createCheckedModuleArtifact,createModuleArtifact,decodeModuleArtifact,DEFAULT_KERNEL,encodeModuleArtifact,loadModuleArtifact,moduleArtifactSummary,normalizeDeclarationStream,verifyModuleArtifact,verifyModuleDependencies} from '../src/index.js';
 
 const stream=[
   '{"meta":{"exporter":{"name":"test","version":"1"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
@@ -19,6 +20,8 @@ const decoded=decodeModuleArtifact(encoded);
 assert.deepEqual(decoded,a);
 assert.equal(verifyModuleArtifact(decoded),true);
 const loaded=loadModuleArtifact(decoded);
+assert.equal(loaded.payloadKind,'lean4export-ndjson');
+if(loaded.payloadKind!=='lean4export-ndjson')throw new Error('expected v1 replay');
 assert.equal(loaded.stats.declarations,1);
 assert.equal(loaded.env.size,1);
 const dep=createModuleArtifact({module:'Dep',declarations:stream});
@@ -36,3 +39,88 @@ assert.equal(summary.dependencies,0);
 const cyc:unknown[]=[];cyc.push(cyc);
 assert.throws(()=>canonicalJson(cyc),/cycle/);
 console.log('ok - @proofscript/module TypeScript MVP');
+
+{
+  const env=new Environment();
+  const A=nameFromDotted('Native.A');
+  const aName=nameFromDotted('Native.a');
+  const id=nameFromDotted('Native.id');
+  env.add({
+    kind:'axiom',
+    name:A,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  env.add({
+    kind:'axiom',
+    name:aName,
+    levelParams:[],
+    type:constant(A),
+  });
+  const artifact=createCheckedModuleArtifact({
+    module:'Native.Test',
+    admissions:[{
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:id,
+        levelParams:[],
+        type:constant(A),
+        value:constant(aName),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    }],
+  });
+  assert.equal(artifact.version,2);
+  assert.equal(
+    artifact.payload.kind,
+    'proofscript-checked-admissions-json',
+  );
+  const encoded=encodeModuleArtifact(artifact);
+  const decoded=decodeModuleArtifact(encoded);
+  assert.equal(decoded.version,2);
+  const loaded=loadModuleArtifact(decoded,{env});
+  assert.equal(
+    loaded.payloadKind,
+    'proofscript-checked-admissions-json',
+  );
+  if(loaded.payloadKind!=='proofscript-checked-admissions-json'){
+    throw new Error('expected native admission replay');
+  }
+  assert.equal(loaded.admissions.length,1);
+  assert.equal(loaded.env.find(id)?.kind,'definition');
+  const tampered=structuredClone(artifact) as typeof artifact & {
+    payload:{text:string};
+  };
+  tampered.payload.text=tampered.payload.text.replace(
+    '"Native"',
+    '"Tampered"',
+  );
+  assert.throws(
+    ()=>verifyModuleArtifact(tampered),
+    /payload integrity mismatch/,
+  );
+  const incompatible=createCheckedModuleArtifact({
+    module:'Native.Incompatible',
+    admissions:[{
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:nameFromDotted('Native.incompatible'),
+        levelParams:[],
+        type:constant(A),
+        value:constant(aName),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    }],
+    kernel:{...DEFAULT_KERNEL,apiVersion:'999'},
+  });
+  assert.throws(
+    ()=>loadModuleArtifact(incompatible,{env}),
+    /kernel compatibility mismatch/,
+  );
+  assert.equal(moduleArtifactSummary(artifact).format,'proofscript-module@2');
+}
+console.log('ok - @proofscript/module checked-admission artifact v2');

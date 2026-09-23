@@ -54,6 +54,7 @@ requireDeps('erasure',['checked-core','compiler-ir','kernel']);
 forbidDeps('erasure',[\n  'syntax','meta','elab','language','backend-ts','wasm-ir',\n  'wasm-lowering','backend-wasm','cli',\n]);
 requireDeps('compiler',[
   'checked-core','erasure','compiler-ir','backend-ts','kernel',
+  'wasm-lowering','backend-wasm',
 ]);
 forbidDeps('compiler',['syntax','meta','elab','language','cli']);
 forbidDeps('backend-ts',['syntax','meta','elab','language','checked-core']);

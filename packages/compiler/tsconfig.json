@@ -19,6 +19,12 @@
       ],
       "@proofscript/backend-ts/verified": [
         "../backend-ts/dist/src/verified-api.d.ts"
+      ],
+      "@proofscript/wasm-lowering": [
+        "../wasm-lowering/dist/src/index.d.ts"
+      ],
+      "@proofscript/backend-wasm": [
+        "../backend-wasm/dist/src/index.d.ts"
       ]
     }
   },

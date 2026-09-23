@@ -1,5 +1,6 @@
 import { Expr, exprLeanEq } from '../core/expr.js';
 import { Level } from '../core/level.js';
+import { LocalContext } from '../core/local-context.js';
 import { nameKey } from '../core/name.js';
 
 function mix(h:number,x:number):number{
@@ -167,6 +168,14 @@ export class KernelState {
 
   /** Shared Lean-style kernel recursion depth across local-context child checkers. */
   recDepth=0;
+
+  /** Lean's type_checker::state owns the name generator shared by all local scopes. */
+  private nextLocalId=0;
+  freshLocal(prefix:string,lctx:LocalContext):string{
+    let id:string;
+    do{id=`${prefix}@${this.nextLocalId++}`;}while(lctx.get(id)!==undefined);
+    return id;
+  }
 
   pair(a:Expr,b:Expr):ExprPair{return [a,b];}
 }

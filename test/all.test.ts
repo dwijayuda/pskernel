@@ -1444,6 +1444,14 @@ test('lean4export replay accepts sparse and out-of-order intern indices',()=>{
  throws(()=>new Lean4ExportReplay().replay(duplicate));
 });
 
+test('lean4export rejects negative Nat literals at the wire boundary',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"ie":0,"natVal":"-1"}'
+ ].join('\n');
+ throws(()=>new Lean4ExportReplay().replay(nd));
+});
+
 test('lean4export rejects projection indices above UInt32 before number conversion',()=>{
  const nd=[
   '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',

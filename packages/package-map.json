@@ -146,7 +146,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-theorem-term-elab-mvp",
+      "status": "v061-theorem-lambda-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -157,10 +157,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Kernel-facing elaboration now admits explicit proof-term theorem declarations through pskernel Kernel.addTheorem, not through the software checker.",
-        "Theorem parameters preserve Lean BinderInfo and theorem types must be propositions as decided by the kernel.",
-        "Sequential theorem references are ordinary constants and can be applied through the same dependent application elaborator.",
-        "Tactic `by` syntax, theorem automation, universe parameters, typeclass synthesis, recursive definitions, and inductive/class elaboration remain later milestones."
+        "Kernel-facing term elaboration now supports explicit lambdas using expected Pi types, matching Lean's expected-type-driven binder elaboration model.",
+        "Untyped lambda binders require an expected function type; annotated binders are checked definitionally against the expected Pi domain.",
+        "Current lambda syntax creates default/explicit binders only; implicit lambda binder syntax remains outside this v0.6.1 parser slice.",
+        "The resulting lambda and theorem proof terms are closed and rechecked by pskernel before admission."
       ]
     },
     {

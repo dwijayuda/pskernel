@@ -317,3 +317,35 @@ console.log('ok - @proofscript/elab dependent type application path');
   equal(rejected,true);
 }
 console.log('ok - @proofscript/elab kernel theorem proof-term admission');
+
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem functionProof(P : Prop) : P -> P := fun h => h;',
+  ));
+  equal(result.theorems.length,1);
+  const theorem=result.theorems[0]!;
+  equal(theorem.value.kind,'lam');
+  if(theorem.value.kind==='lam'){
+    equal(theorem.value.body.kind,'lam');
+  }
+}
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'const identityFunction : TestNat -> TestNat := fun x => x;',
+  ),env);
+  equal(result.definitions.length,1);
+  equal(result.definitions[0]?.value.kind,'lam');
+}
+{
+  const env=makeDefinitionEnvironment();
+  let noExpected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'const badLambda : TestNat := fun x => x;',
+    ),env);
+  }catch(error){noExpected=/PS_ELAB_LAMBDA_EXPECTED_FUNCTION/.test(String(error));}
+  equal(noExpected,true);
+}
+console.log('ok - @proofscript/elab expected-type lambda elaboration');

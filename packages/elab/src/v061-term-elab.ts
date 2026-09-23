@@ -1,10 +1,15 @@
 import type {V061Expr} from '@proofscript/syntax';
 import {
+  LocalContext,
   TypeChecker,
+  abstractFVar,
   constant,
   exprToString,
   fvar,
+  forallE,
   hasMVar,
+  instantiate1,
+  lam,
   nameFromDotted,
   natLit,
   strLit,
@@ -14,6 +19,7 @@ import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
 } from './v061-context.js';
+import {elaborateV061Type} from './v061-type-elab.js';
 
 function resolveReference(
   name:string,
@@ -31,6 +37,7 @@ function resolveReference(
 export function elaborateV061Term(
   expr:V061Expr,
   context:V061CoreElabContext,
+  expected?:import('lean-ts-kernel').Expr,
 ):ElaboratedCoreTerm {
   const checker=new TypeChecker(
     context.environment,
@@ -38,7 +45,7 @@ export function elaborateV061Term(
   );
   switch(expr.kind){
     case 'group':
-      return elaborateV061Term(expr.value,context);
+      return elaborateV061Term(expr.value,context,expected);
     case 'reference':{
       const term=resolveReference(expr.name,context);
       return {term,type:checker.check(term)};
@@ -88,8 +95,103 @@ export function elaborateV061Term(
       throw new Error(
         'PS_ELAB_NOTATION_UNSUPPORTED: operators require Lean-compatible notation/typeclass elaboration',
       );
+    case 'lambda':{
+      let bodyContext=context;
+      let expectedCursor=expected;
+      const binders:{
+        readonly id:string;
+        readonly name:ReturnType<typeof nameFromDotted>;
+        readonly type:import('lean-ts-kernel').Expr;
+      }[]=[];
+
+      for(const binder of expr.binders){
+        const expectedForall=expectedCursor===undefined
+          ? undefined
+          : checker.whnf(context.metaContext.instantiate(expectedCursor));
+        if(
+          expectedForall!==undefined
+          &&expectedForall.kind!=='forall'
+        ){
+          throw new Error(
+            'PS_ELAB_LAMBDA_EXPECTED_FUNCTION: lambda expected type is not a Pi/function type',
+          );
+        }
+        if(
+          expectedForall!==undefined
+          &&expectedForall.binderInfo!=='default'
+        ){
+          throw new Error(
+            'PS_ELAB_LAMBDA_BINDER_INFO: current lambda syntax only introduces explicit binders',
+          );
+        }
+
+        const binderType=binder.type===undefined
+          ? expectedForall?.type
+          : elaborateV061Type(binder.type,bodyContext);
+        if(binderType===undefined){
+          throw new Error(
+            "PS_ELAB_LAMBDA_BINDER_TYPE: cannot infer binder '"+binder.name+
+            "' without an expected function type",
+          );
+        }
+        if(
+          expectedForall!==undefined
+          &&!checker.isDefEq(
+            bodyContext.metaContext.instantiate(binderType),
+            bodyContext.metaContext.instantiate(expectedForall.type),
+          )
+        ){
+          throw new Error(
+            "PS_ELAB_LAMBDA_BINDER_TYPE: binder '"+binder.name+
+            "' disagrees with the expected Pi domain",
+          );
+        }
+
+        const next=bodyContext.localContext.clone();
+        const id=next.fresh(binder.name);
+        const userName=nameFromDotted(binder.name);
+        next.addLocal(id,userName,binderType,'default');
+        const locals=new Map(bodyContext.locals);
+        locals.set(binder.name,id);
+        bodyContext={...bodyContext,localContext:next,locals};
+        binders.push({id,name:userName,type:binderType});
+        expectedCursor=expectedForall===undefined
+          ? undefined
+          : instantiate1(expectedForall.body,fvar(id));
+      }
+
+      const body=elaborateV061Term(expr.body,bodyContext,expectedCursor);
+      let resultTerm=body.term;
+      let resultType=body.type;
+      for(let index=binders.length-1;index>=0;index-=1){
+        const binder=binders[index]!;
+        resultTerm=lam(
+          binder.name,
+          binder.type,
+          abstractFVar(resultTerm,binder.id),
+          'default',
+        );
+        resultType=forallE(
+          binder.name,
+          binder.type,
+          abstractFVar(resultType,binder.id),
+          'default',
+        );
+      }
+      if(
+        expected!==undefined
+        &&!checker.isDefEq(
+          context.metaContext.instantiate(resultType),
+          context.metaContext.instantiate(expected),
+        )
+      ){
+        throw new Error(
+          'PS_ELAB_LAMBDA_TYPE: elaborated lambda does not match expected type',
+        );
+      }
+      return {term:resultTerm,type:resultType};
+    }
     case 'if':
-    case 'lambda':
     case 'record':
     case 'match':
     case 'let':

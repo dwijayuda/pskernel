@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 167,
   "notes": [
+    "Recursor/constructor replay metadata comparator corrected to Lean 4.34 `Expr BEq` (`Expr.eqv`) semantics: binder names/annotations are ignored, but mdata placement/payload is significant. The previous helper was stricter on BinderInfo and too permissive on mdata. Updated regression passes in the fresh 167/167 direct suite.",
     "Native oracle anti-drift guard repair: forbidden checks now match executable call forms (`← Meta.reduce*Native` / direct `env.evalConst`) rather than API names in block comments. Kernel.whnf oracle implementation is unchanged.",
     "Native reference oracle fidelity hardening: NativeEval.lean now constructs `Lean.reduceNat c` / `Lean.reduceBool c` and invokes final Lean 4.34 `Kernel.whnf` directly. This enters the exact C++ `reduce_native` implementation, including run_boxed_kernel and runtime object-shape validation, and removes the extra declaration-type/meta guards introduced by Meta.reduce*Native / evalConstCheck.",
     "Quot replay ordering fix: DependencyExport now explicitly `dumpConstant env `Eq` before every quotInfo, matching Lean 4.34 Replay.replayConstant. This prevents canonical root order from attempting Quot bootstrap before Eq when the first Quot root's own type does not reference Eq.",
@@ -237,5 +238,5 @@
   ],
   "currentTreeExpectedDirectTests": 167,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "Fresh direct TypeScript checkpoint remains 167/167. Kernel.whnf native-oracle source markers pass; anti-drift comment false-positive repaired; pinned-Lean execution still pending."
+  "currentTreeVerification": "Fresh local reconstructed execution PASS after Expr-BEq replay fix: TypeScript 5.8.3 build + 167/167 direct tests on Node v22.16.0. Pinned-Lean canonical replay/native smoke remain the executable open gates."
 }

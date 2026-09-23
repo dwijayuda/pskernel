@@ -1827,12 +1827,16 @@ test('lean4export rejects an incomplete mutual definition group',()=>{
  ].join('\n');throws(()=>new Lean4ExportReplay().replay(nd));
 });
 
-test('kernel metadata equivalence ignores binder display names but retains annotations',()=>{
+test('kernel metadata equivalence matches Lean Expr BEq used by replay',()=>{
  const a=forallE(nameFromDotted('a'),sort(levelZero),bvar(0),'default');
- const renamed=forallE(nameFromDotted('x'),sort(levelZero),bvar(0),'default');
- const implicit=forallE(nameFromDotted('x'),sort(levelZero),bvar(0),'implicit');
- assert(exprKernelMetadataEq(a,renamed),'binder display names are non-semantic');
- assert(!exprKernelMetadataEq(a,implicit),'binder annotations must remain significant');
+ const renamedImplicit=forallE(nameFromDotted('x'),sort(levelZero),bvar(0),'implicit');
+ assert(exprKernelMetadataEq(a,renamedImplicit),'Lean Expr BEq ignores binder names and annotations');
+ const mdA={kind:'mdata',data:{tag:'a'},expr:a} as const;
+ const mdSame={kind:'mdata',data:{tag:'a'},expr:renamedImplicit} as const;
+ const mdDiff={kind:'mdata',data:{tag:'b'},expr:renamedImplicit} as const;
+ assert(exprKernelMetadataEq(mdA,mdSame),'equal mdata payloads must preserve alpha-equivalence');
+ assert(!exprKernelMetadataEq(mdA,a),'Lean Expr BEq observes mdata placement');
+ assert(!exprKernelMetadataEq(mdA,mdDiff),'Lean Expr BEq observes mdata payloads');
 });
 
 test('lean4export replay accepts sparse and out-of-order intern indices',()=>{

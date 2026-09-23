@@ -178,75 +178,55 @@ export function exprLeanEq(a:Expr,b:Expr):boolean{
 }
 
 
-/** Kernel-generated metadata comparison: binder display names and mdata placement are non-semantic; binder annotations remain significant. */
+/** Lean ConstantInfo/RecursorVal BEq uses Expr.eqv: binder names/annotations
+ * are ignored, while mdata placement and payload remain significant. */
 export function exprKernelMetadataEq(a: Expr, b: Expr): boolean {
-  const todo:[Expr,Expr][]=[[a,b]];
-  while(todo.length){
-    let [x,y]=todo.pop()!;
-    while(x.kind==='mdata')x=x.expr;
-    while(y.kind==='mdata')y=y.expr;
-    if(x===y)continue;
-    if(x.kind!==y.kind)return false;
-    switch(x.kind){
-      case'bvar':if(y.kind!=='bvar'||x.index!==y.index)return false;break;
-      case'fvar':if(y.kind!=='fvar'||x.id!==y.id)return false;break;
-      case'mvar':if(y.kind!=='mvar'||x.id!==y.id)return false;break;
-      case'sort':if(y.kind!=='sort'||!levelEqStructural(x.level,y.level))return false;break;
-      case'const':
-        if(y.kind!=='const'||!nameEq(x.name,y.name)||x.levels.length!==y.levels.length)return false;
-        for(let i=0;i<x.levels.length;i++)if(!levelEqStructural(x.levels[i]!,y.levels[i]!))return false;
-        break;
-      case'app':
-        if(y.kind!=='app')return false;
-        todo.push([x.arg,y.arg],[x.fn,y.fn]);break;
-      case'lam':
-        if(y.kind!=='lam'||x.binderInfo!==y.binderInfo)return false;
-        todo.push([x.body,y.body],[x.type,y.type]);break;
-      case'forall':
-        if(y.kind!=='forall'||x.binderInfo!==y.binderInfo)return false;
-        todo.push([x.body,y.body],[x.type,y.type]);break;
-      case'let':
-        if(y.kind!=='let'||(x.nondep??false)!==(y.nondep??false))return false;
-        todo.push([x.body,y.body],[x.value,y.value],[x.type,y.type]);break;
-      case'lit':
-        if(y.kind!=='lit'||x.literal.kind!==y.literal.kind)return false;
-        if(x.literal.kind==='nat'){
-          if(x.literal.value!==(y.literal as {kind:'nat';value:bigint}).value)return false;
-        }else if(x.literal.value!==(y.literal as {kind:'string';value:string}).value)return false;
-        break;
-      case'proj':
-        if(y.kind!=='proj'||!nameEq(x.typeName,y.typeName)||x.index!==y.index)return false;
-        todo.push([x.expr,y.expr]);break;
-    }
-  }
-  return true;
+  return exprLeanEq(a,b);
 }
 
-
-/** Return the first semantic metadata difference, using the same equivalence as `exprKernelMetadataEq`. */
+/** Return the first difference under the same Expr.eqv semantics used by Lean BEq. */
 export function exprKernelMetadataDiff(a: Expr, b: Expr, path = '$'): string | null {
-  if(a.kind==='mdata') return exprKernelMetadataDiff(a.expr,b,path+'.mdata');
-  if(b.kind==='mdata') return exprKernelMetadataDiff(a,b.expr,path+'.mdata');
-  if(a.kind!==b.kind) return `${path}: kind ${a.kind} != ${b.kind}`;
+  if(exprLeanEq(a,b))return null;
+  if(a.kind!==b.kind)return `${path}: kind ${a.kind} != ${b.kind}`;
   const levelJson=(x:unknown)=>JSON.stringify(x,(_k,v)=>typeof v==='bigint'?v.toString():v);
   switch(a.kind){
-    case 'bvar': return b.kind==='bvar'&&a.index===b.index?null:`${path}: bvar ${a.index} != ${b.kind==='bvar'?b.index:'?'}`;
-    case 'fvar': return b.kind==='fvar'&&a.id===b.id?null:`${path}: fvar mismatch`;
-    case 'mvar': return b.kind==='mvar'&&a.id===b.id?null:`${path}: mvar mismatch`;
-    case 'sort': return b.kind==='sort'&&levelJson(a.level)===levelJson(b.level)?null:`${path}: sort ${levelJson(a.level)} != ${b.kind==='sort'?levelJson(b.level):'?'}`;
-    case 'const': {
-      if(b.kind!=='const') return `${path}: const kind mismatch`;
-      if(!nameEq(a.name,b.name)) return `${path}: const name ${nameToString(a.name)} != ${nameToString(b.name)}`;
-      if(a.levels.length!==b.levels.length) return `${path}: const level arity ${a.levels.length} != ${b.levels.length}`;
-      for(let i=0;i<a.levels.length;i++) if(levelJson(a.levels[i])!==levelJson(b.levels[i])) return `${path}.levels[${i}]: ${levelJson(a.levels[i])} != ${levelJson(b.levels[i])}`;
+    case'bvar':return b.kind==='bvar'&&a.index===b.index?null:`${path}: bvar mismatch`;
+    case'fvar':return b.kind==='fvar'&&a.id===b.id?null:`${path}: fvar mismatch`;
+    case'mvar':return b.kind==='mvar'&&a.id===b.id?null:`${path}: mvar mismatch`;
+    case'sort':return b.kind==='sort'&&levelEqStructural(a.level,b.level)?null:`${path}: sort ${levelJson(a.level)} != ${b.kind==='sort'?levelJson(b.level):'?'}`;
+    case'const':{
+      if(b.kind!=='const')return `${path}: const kind mismatch`;
+      if(!nameEq(a.name,b.name))return `${path}: const name ${nameToString(a.name)} != ${nameToString(b.name)}`;
+      if(a.levels.length!==b.levels.length)return `${path}: const level arity ${a.levels.length} != ${b.levels.length}`;
+      for(let i=0;i<a.levels.length;i++)if(!levelEqStructural(a.levels[i]!,b.levels[i]!))return `${path}.levels[${i}]: level mismatch`;
       return null;
     }
-    case 'app': if(b.kind!=='app') return `${path}: app kind mismatch`; return exprKernelMetadataDiff(a.fn,b.fn,path+'.fn')??exprKernelMetadataDiff(a.arg,b.arg,path+'.arg');
-    case 'lam': if(b.kind!=='lam') return `${path}: lam kind mismatch`; if(a.binderInfo!==b.binderInfo)return `${path}: binderInfo ${a.binderInfo} != ${b.binderInfo}`; return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
-    case 'forall': if(b.kind!=='forall') return `${path}: forall kind mismatch`; if(a.binderInfo!==b.binderInfo)return `${path}: binderInfo ${a.binderInfo} != ${b.binderInfo}`; return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
-    case 'let': if(b.kind!=='let') return `${path}: let kind mismatch`; if((a.nondep??false)!==(b.nondep??false))return `${path}: let nondep mismatch`; return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.value,b.value,path+'.value')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
-    case 'lit': if(b.kind!=='lit'||a.literal.kind!==b.literal.kind)return `${path}: literal kind mismatch`; return a.literal.kind==='nat'?(a.literal.value===(b.literal as {kind:'nat';value:bigint}).value?null:`${path}: nat literal mismatch`):(a.literal.value===(b.literal as {kind:'string';value:string}).value?null:`${path}: string literal mismatch`);
-    case 'proj': if(b.kind!=='proj') return `${path}: proj kind mismatch`; if(!nameEq(a.typeName,b.typeName)||a.index!==b.index)return `${path}: projection metadata mismatch`; return exprKernelMetadataDiff(a.expr,b.expr,path+'.expr');
+    case'app':
+      if(b.kind!=='app')return `${path}: app kind mismatch`;
+      return exprKernelMetadataDiff(a.fn,b.fn,path+'.fn')??exprKernelMetadataDiff(a.arg,b.arg,path+'.arg');
+    case'lam':
+      if(b.kind!=='lam')return `${path}: lam kind mismatch`;
+      return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
+    case'forall':
+      if(b.kind!=='forall')return `${path}: forall kind mismatch`;
+      return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
+    case'let':
+      if(b.kind!=='let')return `${path}: let kind mismatch`;
+      if((a.nondep??false)!==(b.nondep??false))return `${path}: let nondep mismatch`;
+      return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.value,b.value,path+'.value')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
+    case'lit':
+      if(b.kind!=='lit'||a.literal.kind!==b.literal.kind)return `${path}: literal kind mismatch`;
+      return a.literal.kind==='nat'
+        ?(a.literal.value===(b.literal as {kind:'nat';value:bigint}).value?null:`${path}: nat literal mismatch`)
+        :(a.literal.value===(b.literal as {kind:'string';value:string}).value?null:`${path}: string literal mismatch`);
+    case'mdata':
+      if(b.kind!=='mdata')return `${path}: mdata kind mismatch`;
+      if(!metadataValueEq(a.data,b.data))return `${path}: mdata payload mismatch`;
+      return exprKernelMetadataDiff(a.expr,b.expr,path+'.expr');
+    case'proj':
+      if(b.kind!=='proj')return `${path}: proj kind mismatch`;
+      if(!nameEq(a.typeName,b.typeName)||a.index!==b.index)return `${path}: projection metadata mismatch`;
+      return exprKernelMetadataDiff(a.expr,b.expr,path+'.expr');
   }
 }
 

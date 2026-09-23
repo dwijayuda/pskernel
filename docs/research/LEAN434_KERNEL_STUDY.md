@@ -235,6 +235,12 @@ the current Quot root does not mention `Eq`, because adding the quotient
 declaration installs the whole Quot family and `Quot.lift`/`Quot.ind` depend
 on `Eq`.
 
+Constructor and recursor post-generation comparison uses Lean's own
+`ConstantInfo BEq` expression semantics. In 4.34 that is `Expr.eqv`:
+binder display names and binder annotations are ignored, while `mdata`
+placement/payload participates in equality. The importer comparator is locked to
+that behavior; it is separate from kernel definitional equality.
+
 The latest checked-in `full-std.log` did not produce semantic evidence: it
 failed before replay because `scripts/module-stream-oracle.mjs` contained a
 literal `\\n` before the final `console.log`, which made the module invalid

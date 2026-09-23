@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 166,
   "notes": [
+    "Anti-drift lock added to kernel-study-regression-matrix: npm test now fails if the canonical exporter loses serialized-module-sequence/dependency-first/project-scope markers, if the Node consumer stops validating them, or if the Lean 4.34 study drops the explicit source-order disclaimer.",
     "Canonical-order claim correction after Lean 4.34 source audit: moduleData.constNames is treated as the serialized per-module .olean constant sequence, not source declaration order. Lean's own Replay seeds a NameSet and recursively processes dependencies. The pskernel gate is therefore explicitly defined as project-canonical root seeding + dependency-first emission + one shared environment; protocol metadata now records rootOrderMeaning, emissionOrder, and canonicalScope.",
     "Permanent oracle syntax gate now includes official-oracle.mjs and native-oracle-smoke.mjs in addition to the canonical/replay diagnostic runners, so npm test catches syntax regressions in all Lean-backed evidence runners.",
     "Canonical replay evidence is now self-describing: module-stream-oracle validates Lean 4.34.0 plus the pinned git hash before export and includes protocol=`canonical-module-stream-v1`, canonical=true, full Lean version header, Lean git hash, and rootOrder in its final JSON summary.",
@@ -227,5 +228,5 @@
   ],
   "currentTreeExpectedDirectTests": 166,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "direct kernel suite remains 166/166; assurance JS parses cleanly; canonical protocol semantics clarified from source inspection, Lean-backed execution still pending"
+  "currentTreeVerification": "direct kernel suite remains 166/166; assurance JS parses cleanly; canonical protocol static anti-drift regression added and pending execution on exact checkout"
 }

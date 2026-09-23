@@ -82,6 +82,29 @@ for(const [path,entry] of [...Object.entries(matrix),...Object.entries(hardening
   }
 }
 
+const exporter=readFileSync('oracle/replay-probe/DependencyExport.lean','utf8');
+for(const marker of [
+  '("rootOrderMeaning", "serialized-module-sequence")',
+  '("emissionOrder", "dependency-first")',
+  '("canonicalScope", "pskernel-project-protocol")',
+  'not claimed to be source declaration order',
+]){
+  if(!exporter.includes(marker))throw new Error('canonical replay exporter protocol drift: missing '+marker);
+}
+const moduleStream=readFileSync('scripts/module-stream-oracle.mjs','utf8');
+for(const marker of [
+  "header.rootOrderMeaning!=='serialized-module-sequence'",
+  "header.emissionOrder!=='dependency-first'",
+  "header.canonicalScope!=='pskernel-project-protocol'",
+  "protocol:'canonical-module-stream-v1'",
+]){
+  if(!moduleStream.includes(marker))throw new Error('canonical replay consumer protocol drift: missing '+marker);
+}
+const assuranceDoc=readFileSync('docs/research/LEAN434_KERNEL_STUDY.md','utf8');
+if(!assuranceDoc.includes('Do not call this source\ndeclaration order')){
+  throw new Error('canonical replay assurance wording drift: source-order disclaimer missing');
+}
+
 const counts={};
 for(const entry of [...Object.values(matrix),...Object.values(hardeningExtras)])counts[entry.kind]=(counts[entry.kind]??0)+1;
 console.log(JSON.stringify({

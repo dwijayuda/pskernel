@@ -23,7 +23,7 @@ const matrix={
   'study/lean4-4.34.0/tests/elab/kernelInterrupt.lean':{kind:'operational-resource',note:'cancellation/exception transport is operational behavior, not kernel term semantics'},
   'study/lean4-4.34.0/tests/elab/kernelMaxRecDepth.lean':{kind:'direct',tests:['kernel recursion budget fails deterministically and succeeds when raised']},
   'study/lean4-4.34.0/tests/elab/kernelMutualDupName.lean':{kind:'direct',tests:['mutual definitions reject safe, mixed, duplicate, and non-transactional blocks']},
-  'study/lean4-4.34.0/tests/elab/kernelNestedAuxName.lean':{kind:'direct',tests:['nested inductive admission rejects the reserved _nested auxiliary namespace']},
+  'study/lean4-4.34.0/tests/elab/kernelNestedAuxName.lean':{kind:'direct',tests:['nested inductive admission rejects the reserved _nested auxiliary namespace','public ordinary admission rejects reserved _nested references but not sibling prefixes']},
   'study/lean4-4.34.0/tests/elab/kernelProjIdx.lean':{kind:'direct',tests:['projection indices reject negative, fractional, and uint32-overflow values']},
   'study/lean4-4.34.0/tests/elab/kernelProjSname.lean':{kind:'direct',tests:['projection reduction never crosses an unrelated structure name']},
   'study/lean4-4.34.0/tests/elab/kernel_is_def_eq_equiv_manager_1.lean':{kind:'direct-invariant-plus-oracle',tests:['defeq success cache remains pair-local and never gains transitive closure'],note:'full hash-collision exploit remains in official Lean adversarial oracle'},

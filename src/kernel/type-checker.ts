@@ -167,7 +167,11 @@ export class TypeChecker {
   }
   private tryEta(a:Expr,b:Expr):boolean{
     if(a.kind!=='lam'||b.kind==='lam')return false;
-    const bt=this.ensureForall(this.whnf(this.infer(b)));const eta=lam(bt.name,bt.type,app(b,{kind:'bvar',index:0}),bt.binderInfo);return this.isDefEq(a,eta);
+    const bt=this.whnf(this.infer(b));
+    // Lean 4.34's eta probe is optional: a non-function type means "not eta-equal",
+    // not a kernel type error.
+    if(bt.kind!=='forall')return false;
+    const eta=lam(bt.name,bt.type,app(b,{kind:'bvar',index:0}),bt.binderInfo);return this.isDefEq(a,eta);
   }
   /** Lean 4.34 structure eta: if s is the unique constructor application, compare its fields with projections of t. */
   private tryStructEtaCore(t:Expr,s:Expr):boolean{

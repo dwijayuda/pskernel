@@ -33,6 +33,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "CLI filesystem regression now executes a kernel-admitted recursive PsList plus structurally recursive length through emitted JavaScript and checks length(two elements) = 2.",
         "psc run --verified now uses the semantic primitive types retained in verified IR: Nat/Int/Bool/String/Unit arguments are decoded by a dedicated ABI layer; generic or structured main signatures remain fail-closed.",
         "Verified CLI elaboration starts from the shared pskernel-admitted Lean 4.34 Init.Prelude environment and fails closed when that fixture cannot be loaded.",
         "psc --verified uses the preferred source -> elaboration -> checked core -> erasure -> compiler IR -> TypeScript -> JavaScript architecture.",

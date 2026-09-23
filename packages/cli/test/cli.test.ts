@@ -136,6 +136,53 @@ console.log('ok - psc verified run filesystem pipeline');
 
 
 {
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-verified-recursive-run-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'inductive PsList(α : Type) where { '+
+      '| nil; | cons(head : α, tail : PsList(α)); } '+
+      'function length {α : Type}(xs : PsList(α)) : Nat := '+
+      'match xs with { | .nil => 0; '+
+      '| .cons head tail => 1 + length(tail); }; '+
+      'function main(x : Nat) : Nat := '+
+      'length(PsList.cons(x, PsList.cons(x, PsList.nil)));\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['9'],
+    });
+    equal(result.mainResult,'2');
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified structural recursion run filesystem pipeline');
+
+
+{
   const result=compileVerifiedSource(
     'function min(x : Nat, y : Nat) : Nat := '+
     'if (x <= y) { x } else { y };',

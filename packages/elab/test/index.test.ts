@@ -349,3 +349,24 @@ console.log('ok - @proofscript/elab kernel theorem proof-term admission');
   equal(noExpected,true);
 }
 console.log('ok - @proofscript/elab expected-type lambda elaboration');
+
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem letProof(P : Prop, h : P) : P := let x : P := h; x;',
+  ));
+  equal(result.theorems.length,1);
+  const proof=result.theorems[0]!.value;
+  equal(proof.kind,'lam');
+  if(proof.kind==='lam'&&proof.body.kind==='lam'){
+    equal(proof.body.body.kind,'let');
+  }
+}
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'function letValue(x : TestNat) : TestNat := let y := x; y;',
+  ),env);
+  equal(result.definitions[0]?.value.kind,'lam');
+}
+console.log('ok - @proofscript/elab core let elaboration');

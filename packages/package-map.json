@@ -146,7 +146,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-theorem-lambda-elab-mvp",
+      "status": "v061-core-term-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -157,10 +157,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Kernel-facing term elaboration now supports explicit lambdas using expected Pi types, matching Lean's expected-type-driven binder elaboration model.",
-        "Untyped lambda binders require an expected function type; annotated binders are checked definitionally against the expected Pi domain.",
-        "Current lambda syntax creates default/explicit binders only; implicit lambda binder syntax remains outside this v0.6.1 parser slice.",
-        "The resulting lambda and theorem proof terms are closed and rechecked by pskernel before admission."
+        "Kernel-facing term elaboration now covers references, literals, D-CALL applications, expected-type lambdas, and core lexical let expressions.",
+        "Lambda binder comparisons use the progressively extended LocalContext, preserving dependent binder types rather than checking them in a stale outer context.",
+        "Let expressions elaborate value/type/body in Lean-style lexical scope and are rebuilt as pskernel core let terms; pskernel recomputes their result type.",
+        "Operators/notation, if/match, records, coercions, typeclass synthesis, tactics, and recursive definitions remain fail-closed."
       ]
     },
     {

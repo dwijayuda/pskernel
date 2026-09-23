@@ -136,7 +136,10 @@ export function elaborateV061Term(
         }
         if(
           expectedForall!==undefined
-          &&!checker.isDefEq(
+          &&!new TypeChecker(
+            bodyContext.environment,
+            bodyContext.localContext.clone(),
+          ).isDefEq(
             bodyContext.metaContext.instantiate(binderType),
             bodyContext.metaContext.instantiate(expectedForall.type),
           )
@@ -191,10 +194,56 @@ export function elaborateV061Term(
       }
       return {term:resultTerm,type:resultType};
     }
+    case 'let':{
+      const declaredType=expr.declaredType===undefined
+        ? undefined
+        : elaborateV061Type(expr.declaredType,context);
+      const value=elaborateV061Term(expr.value,context,declaredType);
+      const bindingType=declaredType??value.type;
+      if(
+        declaredType!==undefined
+        &&!checker.isDefEq(
+          context.metaContext.instantiate(value.type),
+          context.metaContext.instantiate(declaredType),
+        )
+      ){
+        throw new Error(
+          'PS_ELAB_LET_TYPE: let value does not match its declared type',
+        );
+      }
+
+      const next=context.localContext.clone();
+      const id=next.fresh(expr.name);
+      const userName=nameFromDotted(expr.name);
+      next.addLet(id,userName,bindingType,value.term);
+      const locals=new Map(context.locals);
+      locals.set(expr.name,id);
+      const bodyContext={...context,localContext:next,locals};
+      const body=elaborateV061Term(expr.body,bodyContext,expected);
+      const term={
+        kind:'let' as const,
+        name:userName,
+        type:bindingType,
+        value:value.term,
+        body:abstractFVar(body.term,id),
+      };
+      const resultType=checker.check(term);
+      if(
+        expected!==undefined
+        &&!checker.isDefEq(
+          context.metaContext.instantiate(resultType),
+          context.metaContext.instantiate(expected),
+        )
+      ){
+        throw new Error(
+          'PS_ELAB_LET_RESULT_TYPE: let expression does not match expected type',
+        );
+      }
+      return {term,type:resultType};
+    }
     case 'if':
     case 'record':
     case 'match':
-    case 'let':
       throw new Error(
         "PS_ELAB_TERM_UNSUPPORTED: term form '"+expr.kind+
         "' is not yet implemented by the kernel-facing elaborator",

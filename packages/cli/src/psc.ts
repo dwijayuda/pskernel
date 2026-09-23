@@ -191,7 +191,7 @@ export async function runCommand(common:CommonArgs){
   if(typeof fn!=='function')throw new Error('PS_RUN_MAIN_EXPORT: generated module does not export callable main');
   const args=main.params.map((param,index)=>parseRuntimeArg(common.passthrough[index]!,param.type));
   const value=await (fn as (...values:unknown[])=>unknown)(...args);
-  if(value!==undefined)console.log(typeof value==='bigint'?value.toString():value);
+  if(value!==undefined&&!common.json)console.log(typeof value==='bigint'?value.toString():value);
   return {...build.report,command:'run',mainResult:value===undefined?null:(typeof value==='bigint'?value.toString():value)};
 }
 

@@ -1,0 +1,84 @@
+{
+  "name": "proofscript-vscode",
+  "displayName": "ProofScript",
+  "description": "VS Code support for ProofScript using the pskernel-backed language service.",
+  "version": "0.0.0-dev",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "main": "./src/extension.js",
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "proofscript",
+        "aliases": [
+          "ProofScript",
+          "proofscript"
+        ],
+        "extensions": [
+          ".ps"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "proofscript",
+        "scopeName": "source.proofscript",
+        "path": "./syntaxes/proofscript.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "proofscript.showInfoview",
+        "title": "ProofScript: Show Infoview"
+      },
+      {
+        "command": "proofscript.restartServer",
+        "title": "ProofScript: Restart Language Server"
+      },
+      {
+        "command": "proofscript.serverInfo",
+        "title": "ProofScript: Show Server Information"
+      }
+    ],
+    "configuration": {
+      "title": "ProofScript",
+      "properties": {
+        "proofscript.lsp.path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Optional path to the ProofScript LSP entry script."
+        }
+      }
+    },
+    "viewsContainers": {
+      "secondarySidebar": [
+        {
+          "id": "proofscript",
+          "title": "ProofScript",
+          "icon": "$(symbol-method)"
+        }
+      ]
+    },
+    "views": {
+      "proofscript": [
+        {
+          "id": "proofscript.infoview",
+          "name": "Infoview",
+          "type": "webview"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "test": "node test/smoke.mjs"
+  }
+}

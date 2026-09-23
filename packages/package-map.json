@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "psc-ux-mvp+verified-core-opt-in+kernel-tools",
+      "status": "psc-ux-mvp+verified-run-primitive-abi+kernel-tools",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -33,11 +33,11 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "psc run --verified now uses the semantic primitive types retained in verified IR: Nat/Int/Bool/String/Unit arguments are decoded by a dedicated ABI layer; generic or structured main signatures remain fail-closed.",
         "Verified CLI elaboration starts from the shared pskernel-admitted Lean 4.34 Init.Prelude environment and fails closed when that fixture cannot be loaded.",
         "psc --verified uses the preferred source -> elaboration -> checked core -> erasure -> compiler IR -> TypeScript -> JavaScript architecture.",
         "Verified mode never falls back to the legacy software checker after an elaboration/erasure error.",
-        "The legacy software path remains available without --verified only as a temporary compatibility lane while verified-core coverage expands.",
-        "psc run --verified is intentionally fail-closed until the verified runtime ABI/argument bridge is defined."
+        "The legacy software path remains available without --verified only as a temporary compatibility lane while verified-core coverage expands."
       ]
     },
     {

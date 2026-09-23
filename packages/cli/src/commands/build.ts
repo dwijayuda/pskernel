@@ -62,7 +62,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       writes.push(writeFile(mapPath,result.emitted.sourceMap,'utf8'));
     }
     await Promise.all(writes);
-    return {report,jsPath};
+    return {report,verifiedIr:result.ir,jsPath};
   }
 
   const input=await resolveInput(common);

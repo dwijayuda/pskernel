@@ -1,4 +1,5 @@
 import type {CheckedSoftwareModule,SoftwareType} from '@proofscript/language';
+import type {VerifiedIrModule} from '@proofscript/compiler-ir/verified';
 import type {LoadedPsConfig} from './config.js';
 
 export interface CommonArgs {
@@ -18,6 +19,7 @@ export interface ResolvedInput {
 export interface BuildResult {
   readonly report:Record<string,unknown>;
   readonly checked?:CheckedSoftwareModule;
+  readonly verifiedIr?:VerifiedIrModule;
   readonly jsPath:string;
 }
 

@@ -1,5 +1,6 @@
 import {parseCommonArgs} from '../src/args.js';
 import {compileVerifiedSource} from '../src/verified-pipeline.js';
+import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
 
 function equal(actual:unknown,expected:unknown):void{
   if(actual!==expected)throw new Error('expected '+String(expected)+', got '+String(actual));
@@ -59,3 +60,33 @@ console.log('ok - psc verified checked-core compiler pipeline');
   equal(result.emitted.javascript.includes('function twice(x)'),true);
 }
 console.log('ok - psc verified Nat source pipeline');
+
+
+{
+  equal(parseVerifiedRuntimeArg('42',{kind:'primitive',name:'Nat'}),42n);
+  equal(parseVerifiedRuntimeArg('-42',{kind:'primitive',name:'Int'}),-42n);
+  equal(parseVerifiedRuntimeArg('true',{kind:'primitive',name:'Bool'}),true);
+  equal(parseVerifiedRuntimeArg('hello',{kind:'primitive',name:'String'}),'hello');
+  equal(parseVerifiedRuntimeArg('()',{kind:'primitive',name:'Unit'}),undefined);
+  throws(
+    ()=>parseVerifiedRuntimeArg('-1',{kind:'primitive',name:'Nat'}),
+    /Nat argument cannot be negative/,
+  );
+  throws(
+    ()=>parseVerifiedRuntimeArg('yes',{kind:'primitive',name:'Bool'}),
+    /Bool argument/,
+  );
+  const args=prepareVerifiedMainArguments({
+    name:'main',
+    typeParameters:[],
+    parameters:[
+      {name:'x',type:{kind:'primitive',name:'Nat'}},
+      {name:'flag',type:{kind:'primitive',name:'Bool'}},
+    ],
+    resultType:{kind:'primitive',name:'Nat'},
+    body:{kind:'var',name:'x'},
+  },['7','false']);
+  equal(args[0],7n);
+  equal(args[1],false);
+}
+console.log('ok - psc verified runtime ABI');

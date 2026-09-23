@@ -2,9 +2,14 @@ import {pathToFileURL} from 'node:url';
 import type {SoftwareType} from '@proofscript/language';
 import {buildCommand} from './build.js';
 import type {CommonArgs} from '../types.js';
+import {prepareVerifiedMainArguments} from '../verified-runtime.js';
 
 function parseRuntimeArg(value:string,type:SoftwareType):unknown{
-  if(typeof type!=='string')throw new Error('PS_RUN_ARG: function-typed main parameters are not supported by CLI argument conversion');
+  if(typeof type!=='string'){
+    throw new Error(
+      'PS_RUN_ARG: function-typed main parameters are not supported by CLI argument conversion',
+    );
+  }
   switch(type){
     case 'Nat':{
       const n=BigInt(value);
@@ -21,30 +26,58 @@ function parseRuntimeArg(value:string,type:SoftwareType):unknown{
   }
 }
 
+function displayRuntimeValue(value:unknown):unknown {
+  if(value===undefined)return null;
+  return typeof value==='bigint'?value.toString():value;
+}
+
 export async function runCommand(common:CommonArgs){
-  if(common.verified){
+  const build=await buildCommand(common);
+  const mod=await import(
+    pathToFileURL(build.jsPath).href+'?v='+Date.now()
+  ) as Record<string,unknown>;
+  const fn=mod.main;
+  if(typeof fn!=='function'){
     throw new Error(
-      'PS_RUN_VERIFIED_ABI_PENDING: verified-core run requires the runtime ABI/argument bridge milestone',
+      'PS_RUN_MAIN_EXPORT: generated module does not export callable main',
     );
   }
-  const build=await buildCommand(common);
-  const main=build.checked?.declarations.find((decl)=>decl.name==='main');
-  if(main===undefined)throw new Error("PS_RUN_NO_MAIN: no declaration named 'main'");
-  if(main.params.length!==common.passthrough.length){
-    throw new Error('PS_RUN_ARITY: main expects '+main.params.length+' arguments, got '+common.passthrough.length);
+
+  let args:readonly unknown[];
+  if(common.verified){
+    const main=build.verifiedIr?.declarations.find(
+      (declaration)=>declaration.name==='main',
+    );
+    if(main===undefined){
+      throw new Error("PS_RUN_NO_MAIN: no executable declaration named 'main'");
+    }
+    args=prepareVerifiedMainArguments(main,common.passthrough);
+  }else{
+    const main=build.checked?.declarations.find(
+      (declaration)=>declaration.name==='main',
+    );
+    if(main===undefined){
+      throw new Error("PS_RUN_NO_MAIN: no declaration named 'main'");
+    }
+    if(main.params.length!==common.passthrough.length){
+      throw new Error(
+        'PS_RUN_ARITY: main expects '+main.params.length+
+        ' arguments, got '+common.passthrough.length,
+      );
+    }
+    args=main.params.map(
+      (param,index)=>parseRuntimeArg(common.passthrough[index]!,param.type),
+    );
   }
 
-  const mod=await import(pathToFileURL(build.jsPath).href+'?v='+Date.now()) as Record<string,unknown>;
-  const fn=mod.main;
-  if(typeof fn!=='function')throw new Error('PS_RUN_MAIN_EXPORT: generated module does not export callable main');
-
-  const args=main.params.map((param,index)=>parseRuntimeArg(common.passthrough[index]!,param.type));
   const value=await (fn as (...values:unknown[])=>unknown)(...args);
-  if(value!==undefined&&!common.json)console.log(typeof value==='bigint'?value.toString():value);
+  if(value!==undefined&&!common.json){
+    console.log(displayRuntimeValue(value));
+  }
 
   return {
     ...build.report,
     command:'run',
-    mainResult:value===undefined?null:(typeof value==='bigint'?value.toString():value),
+    mainResult:displayRuntimeValue(value),
   };
 }

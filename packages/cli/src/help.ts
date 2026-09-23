@@ -8,7 +8,7 @@ Usage:
   psc init [dir] [--lib] [-y]
   psc check [entry.ps] [-p, --project <path>] [--verified] [--json]
   psc build [entry.ps] [-p, --project <path>] [--verified] [--json]
-  psc run [entry.ps] [-p, --project <path>] [--json] [-- <args...>]
+  psc run [entry.ps] [-p, --project <path>] [--verified] [--json] [-- <args...>]
   psc emit-lean [entry.ps] [-p, --project <path>]
   psc clean [-p, --project <path>]
   psc --version
@@ -26,6 +26,8 @@ Verified compiler:
   --verified  source -> Lean-compatible elaboration -> pskernel checked core
               -> erasure -> compiler IR -> TypeScript -> JavaScript
   No automatic fallback to the legacy software checker.
+  run --verified currently accepts primitive main parameters:
+  Nat, Int, Bool, String, Unit.
 
 Current language track:
   ProofScript ${PROOFSCRIPT_SPEC_VERSION} with v0.6.1 compiler-ready surface baseline

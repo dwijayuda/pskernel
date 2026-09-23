@@ -34,6 +34,9 @@
       ],
       "@proofscript/environment/node": [
         "../environment/dist/src/node.d.ts"
+      ],
+      "@proofscript/compiler-ir/verified": [
+        "../compiler-ir/dist/src/verified.d.ts"
       ]
     }
   },

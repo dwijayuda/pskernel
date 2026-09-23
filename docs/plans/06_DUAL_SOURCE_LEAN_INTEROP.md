@@ -190,18 +190,28 @@ ProofScript project.
 
 ### DS1 — frontend abstraction
 
-Landed checkpoint: source-kind detection and a deterministic frontend registry.
-`.ps` is registered to the existing ProofScript parser; `.lean` is recognized
-as `lean-subset` but fails closed until the DS2 parser is registered. This is
-source dispatch only and changes no semantic acceptance.
+Landed checkpoints:
 
-- source-kind detection;
-- frontend registry;
-- canonical ProofScript printer;
-- move the current ProofScript parser/Lean lowering behind the frontend
-  interface.
+- source-kind detection and deterministic frontend registration;
+- the `proofscript` frontend owns both parsing and canonical ProofScript
+  printing through `SourceFrontend.parse/print`;
+- canonical ProofScript printing covers the complete current v0.6.1 AST,
+  normalizes owned D/E syntax, and is parse/print idempotent;
+- `.lean` is recognized as `lean-subset` but remains unavailable until DS2
+  registers a bounded Lean parser.
 
-No semantic change.
+Canonical Lean lowering intentionally remains a separate target printer for
+now. It must not be registered as a Lean source frontend until a DS2 parser can
+read the emitted subset back. This prevents output capability from being
+misreported as input compatibility.
+
+Remaining DS1 work:
+
+- define the target-printer/translation dispatch used by
+  `psc translate --to ps|lean`;
+- keep frontend/source selection independent from semantic elaboration.
+
+No semantic acceptance changes in DS1.
 
 ### DS2 — Lean-subset parser
 

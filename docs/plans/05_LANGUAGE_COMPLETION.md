@@ -487,12 +487,15 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 6. Validate and then broaden the landed bounded zero-subgoal `exact?` search
    only where Lean library-search semantics can be modeled explicitly; do not
    silently turn it into recursive automation.
-7. Implement project/module/import semantics on the checked-core path.
-8. Design and implement explicit npm/JS FFI.
-9. Start the ProofScript-written standard library.
-10. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
-11. Make verified mode default once feature coverage surpasses the legacy lane.
-12. Retire the legacy software checker.
+7. Continue DS1/DS2 dual-source work from the landed frontend registry and
+   canonical ProofScript printer: add explicit translation-target dispatch,
+   then the bounded Lean-subset parser before mixed module resolution.
+8. Implement project/module/import semantics on the checked-core path.
+9. Design and implement explicit npm/JS FFI.
+10. Start the ProofScript-written standard library.
+11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
+12. Make verified mode default once feature coverage surpasses the legacy lane.
+13. Retire the legacy software checker.
 
 ## Progress reporting format
 

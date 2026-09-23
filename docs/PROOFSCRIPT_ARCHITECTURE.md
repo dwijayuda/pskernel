@@ -565,3 +565,36 @@ polymorphic level instantiation, `using`, configuration, `+all`, and
 A failed candidate probe is side-effect-free. Once a candidate matches, any
 failure during actual assignment or parent-proof reconstruction propagates;
 the search loop does not swallow it.
+
+## Canonical ProofScript printer checkpoint
+
+The DS1 frontend abstraction now includes both parsing and canonical printing:
+
+```text
+.ps text
+  -> proofscript frontend.parse
+  -> canonical V061 surface module
+  -> proofscript frontend.print
+  -> canonical .ps text
+```
+
+The printer is an untrusted source canonicalizer. It does not elaborate,
+type-check, admit declarations, erase proofs, or influence pskernel.
+
+Canonicalization is intentionally stronger than formatting preservation:
+declaration semicolons, grouped explicit parameters, D-call/type-call spelling,
+braced E-forms, and the currently implemented flat tactic sequence are
+normalized. Comments and original whitespace are not preserved at this stage.
+
+The executable syntax gate is canonical idempotence:
+
+```text
+print(parse(print(parse(source)))) == print(parse(source))
+```
+
+for representative declarations and expressions across the complete current
+parser AST.
+
+Canonical Lean lowering remains a target printer, not a registered Lean source
+frontend. A `lean-subset` frontend will be registered only when DS2 can parse
+the emitted supported Lean subset back into the same canonical surface module.

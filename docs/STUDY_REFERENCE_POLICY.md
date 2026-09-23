@@ -176,3 +176,14 @@ those extra mechanisms are unnecessary: exact local hypotheses and
 zero-subgoal environment constants. This preserves the central Lean rule that
 `exact?` must close the goal while avoiding an invented approximation of
 full library search.
+
+## ProofScript canonical-printer evidence
+
+The DS1 canonical ProofScript printer follows the current parser plus the
+authoritative v0.7 owned D/E forms: D-call, explicit parameter groups,
+declaration semicolons, braced structure/class/inductive/match/where forms, and
+Lean vocabulary for lambdas/proofs. Where the broader v0.7 reference shows
+syntax the current parser has not implemented (for example braced tactic
+blocks), the printer emits the parser-supported canonical subset instead of
+claiming unreadable conformance. TypeScript references are not semantic
+authority for this source canonicalization.

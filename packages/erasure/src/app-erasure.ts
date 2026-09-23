@@ -54,17 +54,31 @@ function eraseVerifiedCondition(
     const reflected=view.args[1]!;
     const truth=view.args[2]!;
     const reflectedView=appView(reflected);
+    const isNatEq=
+      reflectedView.fn.kind==='const'
+      &&nameToString(reflectedView.fn.name)==='Nat.beq'
+      &&reflectedView.args.length===2;
+    let isNatNe=false;
+    if(
+      reflectedView.fn.kind==='const'
+      &&nameToString(reflectedView.fn.name)==='Bool.not'
+      &&reflectedView.args.length===1
+    ){
+      const inner=appView(reflectedView.args[0]!);
+      isNatNe=
+        inner.fn.kind==='const'
+        &&nameToString(inner.fn.name)==='Nat.beq'
+        &&inner.args.length===2;
+    }
     if(
       typeArg.kind!=='const'
       ||nameToString(typeArg.name)!=='Bool'
       ||truth.kind!=='const'
       ||nameToString(truth.name)!=='Bool.true'
-      ||reflectedView.fn.kind!=='const'
-      ||nameToString(reflectedView.fn.name)!=='Nat.beq'
-      ||reflectedView.args.length!==2
+      ||(!isNatEq&&!isNatNe)
     ){
       throw new Error(
-        'PS_ERASE_CONDITION_UNSUPPORTED: expected Nat.beq coerced from Bool to Prop',
+        'PS_ERASE_CONDITION_UNSUPPORTED: expected Nat ==/!= Bool condition coerced to Prop',
       );
     }
     return erase(reflected,scope,environment);
@@ -193,6 +207,25 @@ export function eraseRuntimeApplication(
       thenBranch:erase(view.args[3]!,scope,environment),
       elseBranch:erase(view.args[4]!,scope,environment),
     };
+  }
+
+  if(
+    view.fn.kind==='const'
+    &&nameToString(view.fn.name)==='Bool.not'
+    &&view.args.length===1
+  ){
+    const equality=appView(view.args[0]!);
+    if(
+      equality.fn.kind==='const'
+      &&nameToString(equality.fn.name)==='Nat.beq'
+      &&equality.args.length===2
+    ){
+      return {
+        kind:'intrinsic',
+        operation:'nat.ne',
+        args:equality.args.map((arg)=>erase(arg,scope,environment)),
+      };
+    }
   }
 
   if(view.fn.kind==='const'){

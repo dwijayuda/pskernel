@@ -127,14 +127,15 @@ only at `Nat`. Elaboration produces the real Lean constants
 `Nat.add`, `Nat.sub`, and `Nat.mul`; erasure then maps those checked
 applications to explicit verified-IR intrinsics.
 
-The bounded Nat equality surface follows Lean's existing `==` meaning rather
-than redefining it as propositional equality: `x == y` elaborates to
-`Nat.beq x y : Bool`. When that Boolean is used as an `if` condition, the
-frontend mirrors Lean's Bool-to-Prop coercion by checking
-`Eq Bool (Nat.beq x y) true` with `Bool.decEq`. Ordering conditions continue
-through `LE.le`/`LT.lt` with their Nat instances and checked deciders. Only
-after pskernel admission does erasure lower these checked forms to boolean
-verified-IR conditions.
+The bounded Nat equality surface follows Lean's existing `==`/`!=` meaning
+rather than redefining it as propositional equality: `x == y` elaborates to
+`Nat.beq x y : Bool`, while `x != y` elaborates to
+`Bool.not (Nat.beq x y)`, matching Lean 4.34's `bne` definition. When either
+Boolean is used as an `if` condition, the frontend mirrors Lean's Bool-to-Prop
+coercion by checking `Eq Bool condition true` with `Bool.decEq`. Ordering
+conditions continue through `LE.le`/`LT.lt` with their Nat instances and
+checked deciders. Only after pskernel admission does erasure lower these
+checked forms to boolean verified-IR conditions.
 
 This is intentionally narrower than pretending to have Lean's general
 `HAdd`/typeclass notation or generic `BEq` synthesis already. General

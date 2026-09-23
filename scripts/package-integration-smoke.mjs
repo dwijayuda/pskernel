@@ -213,7 +213,10 @@ const verifiedIf=compileVerifiedSource(
   'if (x > y) { x } else { y }; '+
   'function sameOr(x : Nat, y : Nat) : Nat := '+
   'if (x == y) { x } else { y }; '+
-  'function same(x : Nat, y : Nat) : Bool := x == y;',
+  'function same(x : Nat, y : Nat) : Bool := x == y; '+
+  'function differentOr(x : Nat, y : Nat) : Nat := '+
+  'if (x != y) { x } else { y }; '+
+  'function different(x : Nat, y : Nat) : Bool := x != y;',
   'verified-if.ts',
 );
 assert(
@@ -233,6 +236,20 @@ assert(
     'function same(x: bigint, y: bigint): boolean',
   ),
   'verified Nat == did not retain its Bool result outside a condition',
+);
+assert(
+  verifiedIf.typeScript.includes('return ((x !== y) ? x : y);'),
+  'verified Lean Nat != condition did not lower through bne semantics',
+);
+assert(
+  verifiedIf.typeScript.includes(
+    'function different(x: bigint, y: bigint): boolean',
+  ),
+  'verified Nat != did not retain its Bool result outside a condition',
+);
+assert(
+  verifiedIf.typeScript.includes('return (x !== y);'),
+  'verified Nat != did not emit the checked direct Bool comparison',
 );
 
 

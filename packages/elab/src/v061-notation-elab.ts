@@ -90,17 +90,35 @@ function elaborateNatBooleanEquality(
     elaborate,
   );
   const boolType=constant(requireConstant(context,'Bool'));
-  const term=mkAppN(
+  const equality=mkAppN(
     constant(requireConstant(context,'Nat.beq')),
     [left.term,right.term],
   );
-  const type=checker.check(term);
-  if(!checker.isDefEq(type,boolType)){
+  const equalityType=checker.check(equality);
+  if(!checker.isDefEq(equalityType,boolType)){
     throw new Error(
       "PS_ELAB_NAT_EQUALITY_RESULT: 'Nat.beq' did not produce Bool",
     );
   }
-  return {term,type};
+  if(expr.operator==='=='){
+    return {term:equality,type:equalityType};
+  }
+  if(expr.operator==='!='){
+    const term=mkAppN(
+      constant(requireConstant(context,'Bool.not')),
+      [equality],
+    );
+    const type=checker.check(term);
+    if(!checker.isDefEq(type,boolType)){
+      throw new Error(
+        "PS_ELAB_NAT_INEQUALITY_RESULT: 'Bool.not' did not produce Bool",
+      );
+    }
+    return {term,type};
+  }
+  throw new Error(
+    "PS_ELAB_NAT_EQUALITY_OPERATOR: unsupported operator '"+expr.operator+"'",
+  );
 }
 
 export function elaborateV061NatCondition(
@@ -108,7 +126,7 @@ export function elaborateV061NatCondition(
   context:V061CoreElabContext,
   elaborate:V061TermElaborator,
 ):ElaboratedNatCondition {
-  if(expr.operator==='=='){
+  if(expr.operator==='=='||expr.operator==='!='){
     const equality=elaborateNatBooleanEquality(
       expr,
       context,
@@ -178,7 +196,7 @@ export function elaborateV061BinaryNotation(
   expected:Expr|undefined,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
-  if(expr.operator==='=='){
+  if(expr.operator==='=='||expr.operator==='!='){
     const equality=elaborateNatBooleanEquality(
       expr,
       context,
@@ -196,7 +214,8 @@ export function elaborateV061BinaryNotation(
       )
     ){
       throw new Error(
-        "PS_ELAB_NAT_EQUALITY_EXPECTED_TYPE: operator '==' produces Bool",
+        "PS_ELAB_NAT_EQUALITY_EXPECTED_TYPE: operator '"+expr.operator+
+        "' produces Bool",
       );
     }
     return equality;

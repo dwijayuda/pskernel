@@ -73,6 +73,25 @@ function toRaw(
         );
       }
       return BigInt.asIntN(64,value);
+    case 'nat':
+      if(typeof value!=='bigint'){
+        throw new TypeError(
+          'PS_WASM_JS_ABI_NAT_TYPE: expected bigint',
+        );
+      }
+      if(value<0n){
+        throw new RangeError(
+          'PS_WASM_JS_ABI_NAT_RANGE: expected a non-negative bigint',
+        );
+      }
+      return value;
+    case 'int':
+      if(typeof value!=='bigint'){
+        throw new TypeError(
+          'PS_WASM_JS_ABI_INT_TYPE: expected bigint',
+        );
+      }
+      return value;
   }
 }
 
@@ -91,6 +110,20 @@ function fromRaw(
       return (value as number)>>>0;
     case 'uint64':
       return BigInt.asUintN(64,value as bigint);
+    case 'nat':
+      if(typeof value!=='bigint'||value<0n){
+        throw new TypeError(
+          'PS_WASM_JS_ABI_NAT_RESULT: expected non-negative bigint',
+        );
+      }
+      return value;
+    case 'int':
+      if(typeof value!=='bigint'){
+        throw new TypeError(
+          'PS_WASM_JS_ABI_INT_RESULT: expected bigint',
+        );
+      }
+      return value;
   }
 }
 

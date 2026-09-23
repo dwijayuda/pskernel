@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
+      "status": "dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w1-build",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -71,7 +71,8 @@
         "psc --verified uses the preferred source -> elaboration -> checked core -> erasure -> compiler IR -> TypeScript -> JavaScript architecture.",
         "Verified mode never falls back to the legacy software checker after an elaboration/erasure error.",
         "The legacy software path remains available without --verified only as a temporary compatibility lane while verified-core coverage expands.",
-        "CLI regression now executes a temporary verified project end-to-end through emitted JavaScript and checks Nat main(21) = 42."
+        "CLI regression now executes a temporary verified project end-to-end through emitted JavaScript and checks Nat main(21) = 42.",
+        "Wasm W1 build target adds `psc build --verified --target wasm`, emitting .wasm/.wat alongside canonical TS/JS evidence; non-verified Wasm builds and Wasm run remain fail-closed."
       ]
     },
     {

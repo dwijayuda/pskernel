@@ -30,7 +30,7 @@
   },
   "description": "ProofScript developer CLI (psc) plus low-level pskernel replay/module commands.",
   "proofscript": {
-    "status": "dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
+    "status": "dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w1-build",
     "phase": "A",
     "trust": "untrusted-support",
     "futureName": "@proofscript/cli",

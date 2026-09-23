@@ -35,6 +35,7 @@ function throws(fn:()=>unknown,pattern:RegExp):void{
   equal(args.project,'demo');
   equal(args.json,true);
   equal(args.verified,true);
+  equal(args.target,'js');
   equal(args.passthrough.join(','),'41,true');
 }
 {
@@ -42,7 +43,18 @@ function throws(fn:()=>unknown,pattern:RegExp):void{
   equal(args.project,'psconfig.json');
   equal(args.json,false);
   equal(args.verified,false);
+  equal(args.target,'js');
 }
+{
+  const args=parseCommonArgs([
+    'src/main.ps','--verified','--target','wasm',
+  ]);
+  equal(args.target,'wasm');
+}
+throws(
+  ()=>parseCommonArgs(['--target','wat']),
+  /PS_CLI_BUILD_TARGET/,
+);
 throws(()=>parseCommonArgs(['--wat']),/PS_CLI_UNKNOWN_OPTION/);
 throws(()=>parseCommonArgs(['a.ps','b.ps']),/PS_CLI_USAGE/);
 {
@@ -84,6 +96,90 @@ console.log('ok - psc CLI argument/UX contract');
   equal(result.emitted.javascript.includes('T0'),false);
 }
 console.log('ok - psc verified checked-core compiler pipeline');
+
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-wasm-build-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : Bool) : Bool := !x;\n',
+      'utf8',
+    );
+    const built=await buildCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      target:'wasm',
+      passthrough:[],
+    });
+    equal(built.report.buildTarget,'wasm');
+    const artifacts=built.report.artifacts as {
+      readonly webassembly:string;
+      readonly wat:string;
+    };
+    const wasm=new Uint8Array(
+      await readFile(artifacts.webassembly),
+    );
+    equal(WebAssembly.validate(wasm),true);
+    equal(
+      (await readFile(artifacts.wat,'utf8')).includes('(module'),
+      true,
+    );
+
+    let legacyRejected=false;
+    try{
+      await buildCommand({
+        project:directory,
+        json:true,
+        verified:false,
+        target:'wasm',
+        passthrough:[],
+      });
+    }catch(error){
+      legacyRejected=/PS_CLI_WASM_REQUIRES_VERIFIED/.test(
+        String(error),
+      );
+    }
+    equal(legacyRejected,true);
+
+    let runRejected=false;
+    try{
+      await runCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        target:'wasm',
+        passthrough:['true'],
+      });
+    }catch(error){
+      runRejected=/PS_CLI_WASM_RUN_UNSUPPORTED/.test(
+        String(error),
+      );
+    }
+    equal(runRejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Wasm W1 build target');
 
 
 {

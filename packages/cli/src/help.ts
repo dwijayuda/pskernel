@@ -7,7 +7,7 @@ export const HELP=`ProofScript compiler
 Usage:
   psc init [dir] [--lib] [-y]
   psc check [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
-  psc build [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
+  psc build [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--target js|wasm] [--json]
   psc run [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json] [-- <args...>]
   psc translate <entry.ps|entry.lean> --to ps|lean [-p, --project <path>]
   psc emit-lean [entry.ps|entry.lean] [-p, --project <path>]
@@ -18,7 +18,7 @@ Usage:
 Commands:
   init       Create a ProofScript project and psconfig.json
   check      Parse .ps or supported .lean and type-check without outputs
-  build      Compile .ps or supported .lean to TypeScript then JS/.d.ts
+  build      Compile .ps or supported .lean to JS, or verified W1 WebAssembly
   run        Build .ps or supported .lean and invoke exported main
   translate  Canonically translate supported .ps/.lean to ps or lean
   emit-lean  Print canonical Lean lowering for the supported reference slice
@@ -27,6 +27,10 @@ Commands:
 Verified compiler:
   --verified  source -> Lean-compatible elaboration -> pskernel checked core
               -> erasure -> compiler IR -> TypeScript -> JavaScript
+  --target wasm branches after verified compiler IR:
+              -> Wasm lowering -> typed WasmIR -> Binaryen -> .wasm/.wat
+  W1 Wasm currently supports Bool/Unit first-order runtime code only.
+  Nat/Int/String/structures/ADTs/generics/closures/FFI fail closed.
   No automatic fallback to the legacy software checker.
   run --verified accepts primitive main parameters directly:
   Nat, Int, Bool, String, Unit.

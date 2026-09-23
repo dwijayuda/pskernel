@@ -3,11 +3,14 @@ import type {VerifiedIrModule} from '@proofscript/compiler-ir/verified';
 import type {TranslationTarget} from '@proofscript/syntax';
 import type {LoadedPsConfig} from './config.js';
 
+export type BuildTarget='js'|'wasm';
+
 export interface CommonArgs {
   readonly entry?:string;
   readonly project?:string;
   readonly json:boolean;
   readonly verified:boolean;
+  readonly target?:BuildTarget;
   readonly passthrough:readonly string[];
 }
 

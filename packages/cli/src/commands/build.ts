@@ -1,6 +1,7 @@
 import {mkdir,writeFile} from 'node:fs/promises';
 import {basename,extname,join,resolve} from 'node:path';
 import {baseReport,compileSource} from '../pipeline.js';
+import {compileCheckedCoreToWasm} from '@proofscript/compiler';
 import {compileVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
@@ -10,6 +11,12 @@ import {
 } from '../project-artifact-output.js';
 
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
+  const target=common.target??'js';
+  if(target==='wasm'&&!common.verified){
+    throw new Error(
+      'PS_CLI_WASM_REQUIRES_VERIFIED: --target wasm requires --verified',
+    );
+  }
   if(common.verified){
     const input=await resolveInput(common);
     const extension=extname(input.sourcePath);
@@ -31,6 +38,11 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     const leanPath=join(outDir,stem+'.lean');
     const mapPath=join(outDir,stem+'.js.map');
     const manifestPath=join(outDir,stem+'.proofscript.json');
+    const wasmPath=join(outDir,stem+'.wasm');
+    const watPath=join(outDir,stem+'.wat');
+    const wasm=target==='wasm'
+      ?compileCheckedCoreToWasm(result.checkedCore)
+      :null;
     const moduleArtifactFiles=await writeVerifiedModuleArtifacts(
       outDir,
       result.moduleArtifacts,
@@ -54,6 +66,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       moduleCacheMisses:result.moduleCacheMisses,
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
+      buildTarget:target,
       outputDirectory:outDir,
       artifacts:{
         typescript:tsPath,
@@ -63,8 +76,17 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
         lean:leanPath,
         manifest:manifestPath,
         modules:moduleArtifactFiles,
+        ...(wasm===null?{}:{
+          webassembly:wasmPath,
+          wat:watPath,
+        }),
       },
       typescriptVersion:result.emitted.typescriptVersion,
+      ...(wasm===null?{}:{
+        binaryenVersion:wasm.wasm.binaryenVersion,
+        wasmProfile:wasm.wasm.profile,
+        wasmOptimized:wasm.wasm.optimized,
+      }),
     };
 
     const writes=[
@@ -80,6 +102,10 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     ];
     if(result.emitted.sourceMap!==undefined){
       writes.push(writeFile(mapPath,result.emitted.sourceMap,'utf8'));
+    }
+    if(wasm!==null){
+      writes.push(writeFile(wasmPath,wasm.wasm.binary));
+      writes.push(writeFile(watPath,wasm.wasm.text,'utf8'));
     }
     await Promise.all(writes);
     return {report,verifiedIr:result.ir,jsPath};

@@ -84,6 +84,13 @@ test('Nat literal and count limits follow explicit Lean kernel limits',()=>{
  throws(()=>normal.whnf(app(app(constant(N.NatShiftLeft),natLit(1)),natLit(0x1_0000_0000n))));
 });
 test('Nat.pow reduction',()=>{const tc=new TypeChecker(baseEnv());eqExpr(tc.whnf(app(app(constant(N.NatPow),natLit(2)),natLit(20))),natLit(1048576));});
+test('WHNF recursion budget matches Lean core placement',()=>{
+ const env=baseEnv(),zeroBudget=new TypeChecker(env,undefined,undefined,{maxRecDepth:0,maxNatBytes:134217728n}),oneBudget=new TypeChecker(env,undefined,undefined,{maxRecDepth:1,maxNatBytes:134217728n});
+ eqExpr(zeroBudget.whnf(natLit(3)),natLit(3));
+ eqExpr(zeroBudget.whnf(sort(levelZero)),sort(levelZero));
+ eqExpr(oneBudget.whnf(constant(N.NatZero)),constant(N.NatZero));
+});
+
 test('kernel recursion budget fails deterministically and succeeds when raised',()=>{
  const env=baseEnv();let deep:any=constant(N.NatZero);for(let i=0;i<20;i++)deep=app(constant(N.NatSucc),deep);
  const low=new TypeChecker(env,undefined,undefined,{maxRecDepth:8,maxNatBytes:134217728n});let message='';try{low.check(deep);}catch(e){message=e instanceof Error?e.message:String(e);}

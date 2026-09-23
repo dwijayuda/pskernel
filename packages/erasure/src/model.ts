@@ -1,4 +1,9 @@
-import type {Expr,LocalContext,TypeChecker} from 'lean-ts-kernel';
+import {
+  normalizesToZero,
+  type Expr,
+  type LocalContext,
+  type TypeChecker,
+} from 'lean-ts-kernel';
 import type {VerifiedIrType} from '@proofscript/compiler-ir';
 
 export type ErasedBinderKind='type'|'proof'|'runtime';
@@ -16,7 +21,9 @@ export function classifyBinder(
   checker:TypeChecker,
 ):ErasedBinderKind {
   const whnf=checker.whnf(type);
-  if(whnf.kind==='sort')return 'type';
+  if(whnf.kind==='sort'){
+    return normalizesToZero(whnf.level)?'proof':'type';
+  }
   if(checker.isProp(type))return 'proof';
   return 'runtime';
 }

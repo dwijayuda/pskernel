@@ -139,6 +139,25 @@ assert(
 );
 
 
+const proofCarrying=compileVerifiedSource(
+  'function keep {α : Type}(P : Prop, h : P, x : α) : α := x;',
+  'proof-erasure.ts',
+);
+assert(
+  proofCarrying.typeScript.includes('keep<T0>(x: T0): T0'),
+  'Prop/proof binders were not erased from the verified TypeScript API',
+);
+assert(
+  !proofCarrying.typeScript.includes('P:')&&
+  !proofCarrying.typeScript.includes('h:'),
+  'proof-carrying generic source leaked proposition/proof parameters',
+);
+assert(
+  proofCarrying.emitted.javascript.includes('function keep(x)'),
+  'proof-carrying generic did not erase to the expected runtime arity',
+);
+
+
 const snapshot=processDocument('demo.ps',1,'x!',{
   process:text=>({
     state:{length:text.length},

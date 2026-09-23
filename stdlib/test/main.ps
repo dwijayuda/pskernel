@@ -1,0 +1,17 @@
+import ProofScript.Data.List
+import ProofScript.Data.Result
+
+function inc(x : Nat) : Nat := x + 1;
+
+function asResult(x : Nat) : PsResult(Nat, Nat) :=
+  PsResult.ok(x);
+
+function main(x : Nat) : Nat :=
+  let mapped : PsResult(Nat, Nat) :=
+    resultMap(inc, asResult(x));
+  let option : PsOption(Nat) :=
+    resultToOption(mapped);
+  let xs : PsList(Nat) :=
+    PsList.cons(x, PsList.cons(x, PsList.nil));
+  optionGetOrElse(option, 0) +
+    listLength(listMap(inc, xs));

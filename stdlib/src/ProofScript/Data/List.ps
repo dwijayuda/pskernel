@@ -1,0 +1,30 @@
+import ProofScript.Data.Option
+
+inductive PsList(α : Type) where {
+  | nil;
+  | cons(head : α, tail : PsList(α));
+};
+
+function listMap {α : Type}{β : Type}
+(f : α -> β, xs : PsList(α)) : PsList(β) :=
+  match xs with {
+    | .nil => PsList.nil;
+    | .cons head tail =>
+      PsList.cons(f(head), listMap(f, tail));
+  };
+
+function listLength {α : Type}(xs : PsList(α)) : Nat :=
+  match xs with {
+    | .nil => 0;
+    | .cons head tail => 1 + listLength(tail);
+  };
+
+function listHeadOption {α : Type}
+(xs : PsList(α)) : PsOption(α) :=
+  match xs with {
+    | .nil => PsOption.none;
+    | .cons head tail => PsOption.some(head);
+  };
+
+theorem listRefl {α : Type}
+(xs : PsList(α)) : xs = xs := Eq.refl(xs);

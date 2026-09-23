@@ -1,0 +1,27 @@
+inductive PsOption(α : Type) where {
+  | none;
+  | some(value : α);
+};
+
+function optionMap {α : Type}{β : Type}
+(f : α -> β, value : PsOption(α)) : PsOption(β) :=
+  match value with {
+    | .none => PsOption.none;
+    | .some x => PsOption.some(f(x));
+  };
+
+function optionGetOrElse {α : Type}
+(value : PsOption(α), fallback : α) : α :=
+  match value with {
+    | .none => fallback;
+    | .some x => x;
+  };
+
+function optionIsSome {α : Type}(value : PsOption(α)) : Bool :=
+  match value with {
+    | .none => false;
+    | .some x => true;
+  };
+
+theorem optionRefl {α : Type}
+(value : PsOption(α)) : value = value := Eq.refl(value);

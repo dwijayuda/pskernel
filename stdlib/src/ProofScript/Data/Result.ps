@@ -1,0 +1,30 @@
+import ProofScript.Data.Option
+
+inductive PsResult(α : Type, ε : Type) where {
+  | ok(value : α);
+  | error(error : ε);
+};
+
+function resultMap {α : Type}{β : Type}{ε : Type}
+(f : α -> β, value : PsResult(α, ε)) : PsResult(β, ε) :=
+  match value with {
+    | .ok x => PsResult.ok(f(x));
+    | .error err => PsResult.error(err);
+  };
+
+function resultMapError {α : Type}{ε : Type}{δ : Type}
+(f : ε -> δ, value : PsResult(α, ε)) : PsResult(α, δ) :=
+  match value with {
+    | .ok x => PsResult.ok(x);
+    | .error err => PsResult.error(f(err));
+  };
+
+function resultToOption {α : Type}{ε : Type}
+(value : PsResult(α, ε)) : PsOption(α) :=
+  match value with {
+    | .ok x => PsOption.some(x);
+    | .error err => PsOption.none;
+  };
+
+theorem resultRefl {α : Type}{ε : Type}
+(value : PsResult(α, ε)) : value = value := Eq.refl(value);

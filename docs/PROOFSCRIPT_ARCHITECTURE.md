@@ -127,9 +127,15 @@ only at `Nat`. Elaboration produces the real Lean constants
 `Nat.add`, `Nat.sub`, and `Nat.mul`; erasure then maps those checked
 applications to explicit verified-IR intrinsics.
 
+Verified `if` also accepts the bounded Nat propositions `==`, `<`, `<=`,
+`>`, and `>=`. Nat equality elaborates to `Eq Nat x y` with
+`Nat.decEq x y`; order comparisons elaborate through `LE.le`/`LT.lt`
+with their Nat instances and checked deciders. Only after pskernel admission
+does erasure lower those propositions to boolean verified-IR conditions.
+
 This is intentionally narrower than pretending to have Lean's general
-`HAdd`/typeclass notation already. General overloaded notation must wait for
-the real typeclass-synthesis layer.
+`HAdd`/typeclass notation or generic equality notation already. General
+overloaded notation must wait for the real typeclass-synthesis layer.
 
 
 ## Verified execution checkpoint

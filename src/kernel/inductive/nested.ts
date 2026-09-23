@@ -5,7 +5,7 @@ import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
 import { Name, nameAppendIndexAfter, nameEq, nameFromDotted, nameKey, nameToString, strName } from '../../core/name.js';
 import { TypeChecker } from '../type-checker.js';
-import { addOrdinaryInductive, checkNoReservedNestedAux, checkUniformInductiveOccurrences, ConstructorDecl, InductiveDecl, InductiveTypeDecl } from './ordinary.js';
+import { addOrdinaryInductive, addOrdinaryInductiveInternal, checkNoReservedNestedAux, checkUniformInductiveOccurrences, ConstructorDecl, InductiveDecl, InductiveTypeDecl } from './ordinary.js';
 
 interface OpenParam { readonly id:string; readonly expr:Expr; readonly decl:Extract<LocalDecl,{kind:'local'}> }
 interface AuxFamily { readonly auxName:Name; readonly outerName:Name; readonly outerLevels:readonly import('../../core/level.js').Level[]; readonly fixedParams:readonly Expr[]; readonly nestedTemplate:Expr; readonly ctorMap:Map<string,Name> }
@@ -107,7 +107,7 @@ export function addInductive(env:Environment,d:InductiveDecl):void{
  checkNoReservedNestedAux(d);
  checkUniformInductiveOccurrences(d);
  const p=preprocess(env,d);if(p.aux.length===0){addOrdinaryInductive(env,{...d,numNested:0});return;}
- const transformed=env.clone();addOrdinaryInductive(transformed,{...p.decl,numNested:0},{allowReservedNestedAux:true});
+ const transformed=env.clone();addOrdinaryInductiveInternal(transformed,{...p.decl,numNested:0},{allowReservedNestedAux:true});
  const recRename=new Map<string,Name>();let idx=1;const mainRec=strName(d.types[0]!.name,'rec');for(const fam of p.aux)recRename.set(nameKey(strName(fam.auxName,'rec')),nameAppendIndexAfter(mainRec,idx++));
  const finalEnv=env.clone();copyOriginalInductive(transformed,finalEnv,d,p,recRename);copyAuxRecursors(transformed,finalEnv,d,p,recRename);
  // 4.34 hardening analogue: recheck restored constructor/recursor types and rule RHS type preservation by restoring the transformed inferred type.

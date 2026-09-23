@@ -2,6 +2,8 @@ param(
   [int]$HeapMiB = 12288,
   [int]$StackKiB = 65500,
   [string]$Log = "full-std.log",
+  [switch]$SkipTests,
+  [switch]$SkipCorpora,
   [switch]$SkipPreflight
 )
 
@@ -46,9 +48,53 @@ Write-Host "Installing dependencies..."
 & npm install --no-audit --no-fund
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-Write-Host "Building pskernel..."
-& npm run build
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+if (-not $SkipTests) {
+  Write-Host "Running full npm test gate..."
+  "testsStarted=$(Get-Date -Format o)" | Add-Content $Log
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    & npm test 2>&1 |
+      ForEach-Object { $_.ToString() } |
+      Tee-Object -FilePath $Log -Append
+    $testCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+  "testsFinished=$(Get-Date -Format o)" | Add-Content $Log
+  "testsExitCode=$testCode" | Add-Content $Log
+  if ($testCode -ne 0) {
+    Write-Host "npm test failed. Full Std was not started; send/upload $Log."
+    exit $testCode
+  }
+  Write-Host "npm test PASS."
+} else {
+  Write-Host "Skipping npm test; building pskernel..."
+  & npm run build
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
+
+if (-not $SkipCorpora) {
+  Write-Host "Running bounded real-corpus gate..."
+  "corporaStarted=$(Get-Date -Format o)" | Add-Content $Log
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    & npm run check:corpus 2>&1 |
+      ForEach-Object { $_.ToString() } |
+      Tee-Object -FilePath $Log -Append
+    $corporaCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+  "corporaFinished=$(Get-Date -Format o)" | Add-Content $Log
+  "corporaExitCode=$corporaCode" | Add-Content $Log
+  if ($corporaCode -ne 0) {
+    Write-Host "Bounded real-corpus gate failed. Full Std was not started; send/upload $Log."
+    exit $corporaCode
+  }
+  Write-Host "Bounded real-corpus gate PASS."
+}
 
 if (-not $SkipPreflight) {
   Write-Host "Running canonical Init.Prelude module-stream preflight..."

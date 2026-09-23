@@ -318,11 +318,27 @@ Examples:
 
 ## Current preferred next action
 
-Because GitHub Actions currently does not allocate a runner:
+Because GitHub Actions currently does not allocate a runner, the preferred
+Windows one-command path is:
 
-1. run `oracle:std-hot` or `oracle:std-probe` on any machine with the pinned
-   Lean 4.34 toolchain;
-2. if one fails, use `oracle:std-bisect` (or `oracle:std-range` for manual control) to isolate the minimal root interval;
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/run-full-std-local.ps1
+```
+
+By default it runs the assurance ladder in increasing cost order:
+
+1. full `npm test` gate;
+2. bounded real corpora (`npm run check:corpus`);
+3. canonical `Init.Prelude` module-stream preflight;
+4. canonical Full Std.
+
+Every stage is appended to `full-std.log` and the script stops at the first
+failure. `-SkipTests`, `-SkipCorpora`, and `-SkipPreflight` exist only for
+targeted reruns after the earlier stage is already known green.
+
+For diagnosis after a failure:
+
+1. if a cheap Std probe/range is needed, use `oracle:std-hot` or `oracle:std-probe`;
+2. use `oracle:std-bisect` (or `oracle:std-range`) to isolate the minimal root interval;
 3. patch only the demonstrated 4.34 parity gap;
-4. keep canonical Full Std open;
-5. resume canonical replay when a suitable runner is available.
+4. keep canonical Full Std open until the one-pass shared-environment gate passes.

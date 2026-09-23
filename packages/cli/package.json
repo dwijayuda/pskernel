@@ -16,7 +16,8 @@
     "@proofscript/module": "file:../module",
     "@proofscript/syntax": "file:../syntax",
     "@proofscript/language": "file:../language",
-    "@proofscript/backend-ts": "file:../backend-ts"
+    "@proofscript/backend-ts": "file:../backend-ts",
+    "@proofscript/compiler-ir": "file:../compiler-ir"
   },
   "devDependencies": {
     "@types/node": "22.15.3",

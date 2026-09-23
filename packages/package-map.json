@@ -25,7 +25,8 @@
         "conformance",
         "syntax",
         "language",
-        "backend-ts"
+        "backend-ts",
+        "compiler-ir"
       ],
       "sourceLanguage": "typescript",
       "notes": [
@@ -178,14 +179,17 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "foundation",
+      "status": "software-ir-mvp",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
-        "kernel"
+        "kernel",
+        "language"
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Foundation defines runtime-oriented IR nodes, module validation, traversal, and free-variable analysis; kernel Expr lowering remains a later Phase-C milestone."
+        "Compiler IR is a distinct typed executable representation lowered from checked software HIR.",
+        "The initial IR preserves primitive runtime types, calls, unary/binary operations, conditionals, and lexical let.",
+        "Kernel Expr erasure/lowering, ADTs, closures, effects, and optimization passes remain later milestones."
       ]
     },
     {
@@ -206,7 +210,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "typescript-compiler-mvp",
+      "status": "software-ir-typescript-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -214,9 +218,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Backend emits TypeScript source from the checked v0.6.1 software subset; it does not emit JavaScript directly.",
-        "The TypeScript Compiler API type-checks generated TypeScript and emits JavaScript, .d.ts, and source maps.",
-        "Broader compiler-IR lowering, runtime imports, source mapping to .ps, and optimization remain later milestones."
+        "Backend accepts only the typed executable compiler IR, not raw ProofScript or checked language HIR.",
+        "Backend emits TypeScript source; the TypeScript Compiler API type-checks it and emits JavaScript, .d.ts, and source maps.",
+        "Nat subtraction/division/modulo preserve current total semantics without duplicating operand evaluation."
       ]
     },
     {

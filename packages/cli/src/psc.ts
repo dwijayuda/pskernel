@@ -11,6 +11,7 @@ import {
 } from '@proofscript/syntax';
 import {checkV061SoftwareModule,type CheckedSoftwareModule,type SoftwareType} from '@proofscript/language';
 import {compileTypeScript,emitV061TypeScript} from '@proofscript/backend-ts';
+import {lowerCheckedSoftwareModule} from '@proofscript/compiler-ir';
 import {DEFAULT_CONFIG,findPsConfig,loadPsConfig,type LoadedPsConfig} from './config.js';
 
 export const PSC_VERSION='0.1.0';
@@ -114,7 +115,8 @@ export interface BuildResult {
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const input=await resolveInput(common);
   const result=checkSource(input.source);
-  const tsSource=emitV061TypeScript(result.checked);
+  const executableIr=lowerCheckedSoftwareModule(result.checked);
+  const tsSource=emitV061TypeScript(executableIr);
   const stem=extname(input.sourcePath)==='.ps'?basename(input.sourcePath,'.ps'):basename(input.sourcePath);
   const outDir=resolve(input.loaded.directory,input.loaded.config.compilerOptions.outDir);
   await mkdir(outDir,{recursive:true});

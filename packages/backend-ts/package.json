@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript checked executable IR to TypeScript source, compiled to JavaScript by TypeScript.",
   "proofscript": {
-    "status": "typescript-compiler-mvp",
+    "status": "software-ir-typescript-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -21,6 +21,7 @@
     "test": "npm run build --silent && node dist/test/index.test.js"
   },
   "dependencies": {
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "@proofscript/compiler-ir": "file:../compiler-ir"
   }
 }

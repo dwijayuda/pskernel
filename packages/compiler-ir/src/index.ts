@@ -71,3 +71,5 @@ export function freeVariables(expr:IrExpr):readonly string[]{
   go(expr,new Set());
   return [...free].sort();
 }
+
+export * from './software.js';

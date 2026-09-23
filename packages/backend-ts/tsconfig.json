@@ -3,7 +3,16 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "types": []
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@proofscript/compiler-ir": [
+        "../compiler-ir/dist/src/index.d.ts"
+      ]
+    }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
 }

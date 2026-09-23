@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Runtime-oriented compiler IR and lowering/optimization passes.",
   "proofscript": {
-    "status": "foundation",
+    "status": "software-ir-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -22,5 +22,8 @@
   },
   "devDependencies": {
     "typescript": "5.8.3"
+  },
+  "dependencies": {
+    "@proofscript/language": "file:../language"
   }
 }

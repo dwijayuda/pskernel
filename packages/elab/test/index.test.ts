@@ -614,6 +614,31 @@ console.log('ok - @proofscript/elab parameterized bounded cases');
 console.log('ok - @proofscript/elab bounded induction via recursor');
 
 {
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive NamedList(α : Type) where { '+
+    '| nil; | cons(head : α, tail : NamedList(α)); } '+
+    'function appendNamed {α : Type}'+
+    '(xs : NamedList(α), ys : NamedList(α)) : NamedList(α) := '+
+    'match xs with { | .nil => ys; '+
+    '| .cons head tail => NamedList.cons(head, appendNamed(tail, ys)); }; '+
+    'theorem appendNamedCons {α : Type}'+
+    '(head : α, tail : NamedList(α), ys : NamedList(α)) : '+
+    'appendNamed(NamedList.cons(head, tail), ys) = '+
+    'NamedList.cons(head, appendNamed(tail, ys)) := by rfl; '+
+    'theorem appendNamedNilRight {α : Type}(xs : NamedList(α)) : '+
+    'appendNamed(xs, NamedList.nil) = xs := '+
+    'by induction xs; rfl; '+
+    'rw [appendNamedCons(head, tail, NamedList.nil)]; rw [tail_ih];',
+  ));
+  equal(result.theorems.length,2);
+  equal(
+    result.environment.find(nameFromDotted('appendNamedNilRight'))?.kind,
+    'theorem',
+  );
+}
+console.log('ok - @proofscript/elab induction preserves field/IH source names');
+
+{
   const source=parseV061Module(
     'theorem parsedRw(a : Nat, b : Nat, h : a = b) : a = b := '+
     'by rw [h]; rw [← h]; assumption;',

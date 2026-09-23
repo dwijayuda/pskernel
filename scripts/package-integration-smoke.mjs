@@ -971,7 +971,7 @@ for(const moduleName of [
   );
 }
 assert(
-  stdlibRun.assurance?.kernelCheckedTheoremCount===9,
+  stdlibRun.assurance?.kernelCheckedTheoremCount===10,
   'ProofScript-written stdlib theorems were not admitted by pskernel',
 );
 assert(

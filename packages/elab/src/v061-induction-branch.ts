@@ -21,6 +21,7 @@ import type {
 
 interface InductionField {
   readonly id:string;
+  readonly sourceName:string;
   readonly name:Name;
   readonly type:Expr;
   readonly binderInfo:BinderInfo;
@@ -59,6 +60,27 @@ function containsConstant(expr:Expr,target:Name):boolean {
       return containsConstant(expr.expr,target);
     default:return false;
   }
+}
+
+function freshBranchName(
+  context:V061CoreElabContext,
+  preferred:string,
+):string {
+  const base=preferred.length===0||preferred==='_'?'field':preferred;
+  if(!context.locals.has(base))return base;
+  let suffix=1;
+  while(context.locals.has(base+'_'+suffix))suffix+=1;
+  return base+'_'+suffix;
+}
+
+function binderSourceName(
+  name:Name,
+  fallback:string,
+):string {
+  const rendered=nameToString(name);
+  return rendered.length===0||rendered==='_'
+    ? fallback
+    : rendered;
 }
 
 function isDirectRecursiveField(
@@ -139,8 +161,10 @@ export function buildV061InductionBranch(
       );
     }
 
-    let sourceName='_ind_'+branchIndex+'_'+index;
-    while(branchContext.locals.has(sourceName))sourceName+='x';
+    const sourceName=freshBranchName(
+      branchContext,
+      binderSourceName(binder.name,'field_'+branchIndex+'_'+index),
+    );
     const localContext=branchContext.localContext.clone();
     const id=localContext.fresh(sourceName);
     const userName=nameFromDotted(sourceName);
@@ -151,6 +175,7 @@ export function buildV061InductionBranch(
 
     fields.push({
       id,
+      sourceName,
       name:userName,
       type:binder.type,
       binderInfo:binder.binderInfo,
@@ -166,8 +191,10 @@ export function buildV061InductionBranch(
   for(let index=0;index<recursiveFields.length;index+=1){
     const field=recursiveFields[index]!;
     const type=instantiate1(motiveBody,fvar(field.id));
-    let sourceName='_ih_'+branchIndex+'_'+index;
-    while(branchContext.locals.has(sourceName))sourceName+='x';
+    const sourceName=freshBranchName(
+      branchContext,
+      field.sourceName+'_ih',
+    );
     const localContext=branchContext.localContext.clone();
     const id=localContext.fresh(sourceName);
     const userName=nameFromDotted(sourceName);

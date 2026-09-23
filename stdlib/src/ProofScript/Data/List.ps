@@ -45,3 +45,9 @@ theorem listAppendCons {α : Type}
 (head : α, tail : PsList(α), ys : PsList(α)) :
 listAppend(PsList.cons(head, tail), ys) =
 PsList.cons(head, listAppend(tail, ys)) := by rfl;
+
+theorem listAppendNilRight {α : Type}
+(xs : PsList(α)) :
+listAppend(xs, PsList.nil) = xs :=
+  by induction xs; rfl;
+  rw [listAppendCons(head, tail, PsList.nil)]; rw [tail_ih];

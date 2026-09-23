@@ -37,8 +37,8 @@ export class TypeChecker {
   private isEagerReduceExpr(e:Expr):boolean{const v=appView(e);return v.fn.kind==='const'&&nameEq(v.fn.name,N.EagerReduce)&&v.args.length===2;}
   private withEagerReduction<T>(k:()=>T):T{const old=this.eagerReduce;this.eagerReduce=true;try{return k();}finally{this.eagerReduce=old;}}
 
-  check(e:Expr):Expr { if(this.hasLoose(e))throw new KernelError('type checker does not support loose bound variables'); return this.infer(e,false); }
-  infer(e:Expr,inferOnly=true):Expr{return this.rec(()=>this.inferCore(e,inferOnly));}
+  check(e:Expr):Expr { return this.infer(e,false); }
+  infer(e:Expr,inferOnly=true):Expr{if(this.hasLoose(e))throw new KernelError('type checker does not support loose bound variables');return this.rec(()=>this.inferCore(e,inferOnly));}
   private hasLoose(e:Expr):boolean{const go=(x:Expr,d:number):boolean=>{switch(x.kind){case'bvar':return x.index>=d;case'app':return go(x.fn,d)||go(x.arg,d);case'lam':case'forall':return go(x.type,d)||go(x.body,d+1);case'let':return go(x.type,d)||go(x.value,d)||go(x.body,d+1);case'mdata':return go(x.expr,d);case'proj':return go(x.expr,d);default:return false;}};return go(e,0);}
 
   private inferCore(e:Expr,inferOnly:boolean):Expr{

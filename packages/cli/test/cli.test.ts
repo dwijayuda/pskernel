@@ -20,6 +20,7 @@ import {buildCommand} from '../src/commands/build.js';
 import {checkCommand} from '../src/commands/check.js';
 import {emitLeanCommand} from '../src/commands/emit-lean.js';
 import {translateCommand} from '../src/commands/translate.js';
+import {verifyRuntimeDependencyLock} from '../src/runtime-lock.js';
 import {decodeModuleArtifact} from '@proofscript/module';
 
 function equal(actual:unknown,expected:unknown):void{
@@ -206,6 +207,7 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
   try{
     await mkdir(join(directory,'src'),{recursive:true});
     await mkdir(join(directory,'node_modules','host-lib'),{recursive:true});
+    await mkdir(join(directory,'node_modules','helper-lib'),{recursive:true});
     await writeFile(
       join(directory,'psconfig.json'),
       JSON.stringify({
@@ -236,17 +238,68 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
             default:'./index.js',
           },
         },
+        dependencies:{'helper-lib':'2.0.0'},
       },null,2)+'\n',
       'utf8',
     );
     await writeFile(
       join(directory,'node_modules','host-lib','index.js'),
-      'export function shout(value) { return value + "!"; }\n',
+      'import { suffix } from "helper-lib"; '+
+      'export function shout(value) { return value + suffix; }\n',
       'utf8',
     );
     await writeFile(
       join(directory,'node_modules','host-lib','index.d.ts'),
       'export declare function shout(value: string): string;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','helper-lib','package.json'),
+      JSON.stringify({
+        name:'helper-lib',
+        version:'2.0.0',
+        type:'module',
+        main:'./index.js',
+        types:'./index.d.ts',
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','helper-lib','index.js'),
+      'export const suffix = "!";\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','helper-lib','index.d.ts'),
+      'export declare const suffix: string;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'package-lock.json'),
+      JSON.stringify({
+        name:'proofscript-runtime-fixture',
+        version:'1.0.0',
+        lockfileVersion:3,
+        requires:true,
+        packages:{
+          '':{
+            name:'proofscript-runtime-fixture',
+            version:'1.0.0',
+            dependencies:{'host-lib':'1.0.0'},
+          },
+          'node_modules/host-lib':{
+            version:'1.0.0',
+            resolved:'https://registry.npmjs.org/host-lib/-/host-lib-1.0.0.tgz',
+            integrity:'sha512-aG9zdA==',
+            dependencies:{'helper-lib':'2.0.0'},
+          },
+          'node_modules/helper-lib':{
+            version:'2.0.0',
+            resolved:'https://registry.npmjs.org/helper-lib/-/helper-lib-2.0.0.tgz',
+            integrity:'sha512-aGVscGVy',
+          },
+        },
+      },null,2)+'\n',
       'utf8',
     );
     await writeFile(
@@ -290,6 +343,25 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
     );
     equal(result.runtimeDependencyPolicy.used[0]?.source,'host-lib');
     equal(result.runtimeDependencyPolicy.used[0]?.version,'1.0.0');
+    if(!('runtimeDependencyLock' in result)){
+      throw new Error('verified run did not retain runtime dependency lock');
+    }
+    const lock=result.runtimeDependencyLock;
+    if(lock===null||typeof lock!=='object'){
+      throw new Error('verified run returned empty runtime dependency lock');
+    }
+    equal(lock.schema,'proofscript-runtime-lock-v1');
+    equal(lock.lockfileVersion,3);
+    equal(lock.integrity.startsWith('sha256:'),true);
+    equal(lock.roots.length,1);
+    equal(lock.packages.length,2);
+    equal(lock.packages[0]?.location,'node_modules/helper-lib');
+    equal(lock.packages[0]?.version,'2.0.0');
+    equal(lock.packages[1]?.location,'node_modules/host-lib');
+    equal(
+      lock.packages[1]?.dependencies[0]?.target,
+      'node_modules/helper-lib',
+    );
     const artifacts=result.artifacts as Record<string,string>;
     const javascript=await readFile(artifacts.javascript,'utf8');
     equal(
@@ -301,6 +373,58 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
   }
 }
 console.log('ok - psc verified source FFI resolves exact package and runs');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-runtime-lock-missing-transitive-'),
+  );
+  try{
+    await mkdir(join(directory,'node_modules','host-lib'),{recursive:true});
+    await writeFile(
+      join(directory,'node_modules','host-lib','package.json'),
+      JSON.stringify({
+        name:'host-lib',
+        version:'1.0.0',
+      })+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'package-lock.json'),
+      JSON.stringify({
+        name:'lock-missing-transitive',
+        version:'1.0.0',
+        lockfileVersion:3,
+        packages:{
+          '':{},
+          'node_modules/host-lib':{
+            version:'1.0.0',
+            resolved:'https://registry.npmjs.org/host-lib/-/host-lib-1.0.0.tgz',
+            integrity:'sha512-aG9zdA==',
+            dependencies:{'helper-lib':'2.0.0'},
+          },
+        },
+      })+'\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await verifyRuntimeDependencyLock(
+        directory,
+        {
+          schema:'proofscript-runtime-dependencies-v1',
+          integrity:'sha256:test',
+          used:[{source:'host-lib',version:'1.0.0'}],
+        },
+      );
+    }catch(error){
+      rejected=/PS_RUNTIME_LOCK_DEPENDENCY_MISSING/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc runtime lock rejects missing required transitive entry');
 
 
 

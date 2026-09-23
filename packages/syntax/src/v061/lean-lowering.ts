@@ -62,9 +62,12 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
 export function lowerV061ModuleToLean(module:V061Module):string {
   return module.declarations.map((decl)=>{
     if(decl.kind==='structure'){
-      const fields=decl.fields.map(
-        (field)=>'  '+field.name+' : '+lowerV061TypeToLean(field.type),
-      ).join('\n');
+      const fields=decl.fields.map((field)=>{
+        const rendered=field.name+' : '+lowerV061TypeToLean(field.type);
+        return field.binderKind==='implicit'
+          ? '  {'+rendered+'}'
+          : '  '+rendered;
+      }).join('\n');
       return 'structure '+decl.name+' where\n'+fields;
     }
     if(decl.kind==='inductive'){

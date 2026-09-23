@@ -20,6 +20,29 @@ export function parseV061StructureDeclaration(
 
   const fields:V061StructureField[]=[];
   while(!context.cursor.at('}')){
+    if(context.cursor.at('{')){
+      const open=context.cursor.consume();
+      const fieldName=context.cursor.expectKind('identifier','implicit structure field name');
+      context.cursor.expect(':');
+      const type=parseV061Type(context);
+      context.cursor.expect('}');
+      const semi=context.cursor.expect(';');
+      fields.push({
+        name:fieldName.text,
+        type,
+        binderKind:'implicit',
+        span:{start:open.span.start,end:semi.span.end},
+      });
+      continue;
+    }
+
+    if(context.cursor.at('[')){
+      throw new SyntaxError(
+        'instance structure fields require type-application parsing and are not yet implemented',
+        context.cursor.peek().span,
+      );
+    }
+
     const fieldName=context.cursor.expectKind('identifier','structure field name');
     context.cursor.expect(':');
     const type=parseV061Type(context);
@@ -27,6 +50,7 @@ export function parseV061StructureDeclaration(
     fields.push({
       name:fieldName.text,
       type,
+      binderKind:'explicit',
       span:{start:fieldName.span.start,end:semi.span.end},
     });
   }

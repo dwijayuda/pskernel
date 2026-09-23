@@ -101,9 +101,9 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Pinned to ProofScript v0.7.0 with the v0.6.1 compiler-ready surface as the implementation baseline.",
-        "E-WHERE-BODY is represented as explicit local declarations, not a generic statement block; decorated explicit-parameter parsing is shared across value, local, and inductive declaration forms.",
-        "Canonical lowering emits native Lean where declarations and preserves local-helper scope.",
-        "Nested where blocks and advanced Lean local declaration modifiers/termination suffixes remain fail-closed."
+        "E-STRUCT-BODY distinguishes outer ProofScript braces from inner Lean implicit field binders; the positive `{α : Type}` conformance case lowers canonically.",
+        "Instance structure fields remain fail-closed until native type-application syntax is represented.",
+        "E-WHERE-BODY is represented as local declarations, not a generic statement block; canonical lowering preserves Lean where structure."
       ]
     },
     {
@@ -241,7 +241,8 @@
         "Software checking has dedicated structure, inductive, match, and where modules rather than one monolithic semantic switch.",
         "Acyclic where helpers are predeclared for local scope, type-checked with outer captures, dependency-sorted, and retained explicitly in checked HIR.",
         "Recursive/mutually recursive where cycles fail closed until Lean-compatible termination elaboration is integrated.",
-        "Proof acceptance remains a pskernel/elaborator responsibility outside this software checker."
+        "Proof acceptance remains a pskernel/elaborator responsibility outside this software checker.",
+        "The executable structure subset accepts explicit named fields only; parsed implicit fields fail closed until generic structure elaboration exists."
       ]
     },
     {

@@ -548,3 +548,30 @@ console.log('ok - @proofscript/syntax lexer MVP');
     /nested where blocks are not yet implemented/,
   );
 }
+
+
+// v0.6.1 positive corpus: inner braces are Lean implicit structure-field binders.
+{
+  const module=parseV061Module(
+    'structure Box where { {α : Type}; value : α; }',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'structure');
+  if(declaration?.kind==='structure'){
+    equal(declaration.fields[0]?.binderKind,'implicit');
+    equal(declaration.fields[0]?.name,'α');
+    equal(declaration.fields[1]?.binderKind,'explicit');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'structure Box where\n  {α : Type}\n  value : α\n',
+  );
+}
+{
+  throws(
+    ()=>parseV061Module(
+      'structure Box where { [showα : ToString α]; value : α; }',
+    ),
+    /instance structure fields require type-application parsing/,
+  );
+}

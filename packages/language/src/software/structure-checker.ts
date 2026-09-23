@@ -17,6 +17,12 @@ export function collectStructures(
   const structures=new Map<string,CheckedSoftwareStructure>();
   for(const declaration of declarations){
     const seenFields=new Set<string>();
+    if(declaration.fields.some((field)=>field.binderKind!=='explicit')){
+      throw new Error(
+        "PS_CHECK_STRUCTURE_BINDER_UNSUPPORTED: structure '"+declaration.name+
+        "' uses implicit/instance fields; generic structure execution is not yet implemented",
+      );
+    }
     const fields=declaration.fields.map((field)=>{
       if(seenFields.has(field.name)){
         throw new Error(

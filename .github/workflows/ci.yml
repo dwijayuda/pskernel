@@ -2,7 +2,7 @@ name: TypeScript kernel CI
 
 on:
   push:
-    branches: [main, kernel/lean434-study-hardening]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -19,23 +19,5 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
-      - name: Run kernel tests
-        id: tests
-        shell: bash
-        run: |
-          set -o pipefail
-          npm test 2>&1 | tee ci-test.log
-      - name: Run anti-drift
-        if: always()
-        shell: bash
-        run: |
-          set -o pipefail
-          node scripts/anti-drift.mjs 2>&1 | tee ci-anti-drift.log
-      - name: Upload CI diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: kernel-ci-diagnostics
-          path: |
-            ci-test.log
-            ci-anti-drift.log
+      - run: npm test
+      - run: node scripts/anti-drift.mjs

@@ -9,7 +9,7 @@ import { N } from '../src/kernel/names.js';
 import { TypeChecker } from '../src/kernel/type-checker.js';
 import { NativeEvaluator } from '../src/kernel/reduction/native.js';
 import { KernelState } from '../src/kernel/state.js';
-import { addOrdinaryInductive } from '../src/kernel/inductive/ordinary.js';
+import { addOrdinaryInductive, validateInstalledRecursorsByReduction } from '../src/kernel/inductive/ordinary.js';
 import { addQuot } from '../src/kernel/quotient.js';
 import { addInductive } from '../src/kernel/inductive/nested.js';
 
@@ -465,6 +465,24 @@ test('recursor reduction converts String literals through String.ofList',()=>{
  const env=baseEnv(),R=nameFromDotted('String.testRec'),xsTy=constant(N.Nat);
  env.add({kind:'recursor',name:R,levelParams:[],type:forallE(nameFromDotted('s'),constant(N.String),constant(N.Nat)),all:[N.String],numParams:0,numIndices:0,numMotives:0,numMinors:0,k:false,rules:[{ctor:N.StringOfList,nFields:1,rhs:lam(nameFromDotted('xs'),xsTy,natLit(77))}]});
  eqExpr(new TypeChecker(env).whnf(app(constant(R),strLit('A🙂'))),natLit(77));
+});
+
+test('independent recursor validation rejects corrupted field-count metadata',()=>{
+ const env=baseEnv(),I=nameFromDotted('RecValidate.Nat'),Z=nameFromDotted('RecValidate.Nat.zero'),S=nameFromDotted('RecValidate.Nat.succ');
+ const decl={levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[
+   {name:Z,type:constant(I)},
+   {name:S,type:forallE(nameFromDotted('n'),constant(I),constant(I))}
+ ]}]} as const;
+ addOrdinaryInductive(env,decl);
+ validateInstalledRecursorsByReduction(env,decl);
+
+ const rn=nameFromDotted('RecValidate.Nat.rec'),ri=env.get(rn);assert(ri.kind==='recursor');
+ const bad=new Environment();bad.quotInitialized=env.quotInitialized;
+ for(const info of env.entries())if(nameToString(info.name)!==nameToString(rn))bad.add(info);
+ bad.add({...ri,rules:ri.rules.map(r=>nameToString(r.ctor)===nameToString(S)?{...r,nFields:0}:r)});
+ const stored=bad.get(rn);assert(stored.kind==='recursor');
+ const checker=new TypeChecker(bad);for(const rule of stored.rules)checker.check(rule.rhs);
+ throws(()=>validateInstalledRecursorsByReduction(bad,decl));
 });
 
 test('generated recursive recursor computes by iota',()=>{

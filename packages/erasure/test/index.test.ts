@@ -764,3 +764,53 @@ console.log('ok - @proofscript/erasure generic ADT recursor parameter substituti
   }
 }
 console.log('ok - @proofscript/erasure recursive ADT metadata erasure');
+
+
+{
+  const Alpha=nameFromDotted('α');
+  const Box=nameFromDotted('Box');
+  const BoxMk=nameFromDotted('Box.mk');
+  const declaration={
+    levelParams:[],
+    numParams:1,
+    types:[{
+      name:Box,
+      type:forallE(
+        Alpha,
+        sort(levelSucc(levelZero)),
+        sort(levelSucc(levelZero)),
+      ),
+      ctors:[{
+        name:BoxMk,
+        type:forallE(
+          Alpha,
+          sort(levelSucc(levelZero)),
+          forallE(
+            nameFromDotted('value'),
+            bvar(0),
+            {
+              kind:'app' as const,
+              fn:constant(Box),
+              arg:bvar(1),
+            },
+          ),
+          'implicit',
+        ),
+      }],
+    }],
+  };
+  const checked=admitCheckedCoreAdmissions(new Environment(),[{
+    kind:'structure',
+    declaration,
+    structure:{
+      name:Box,
+      constructor:BoxMk,
+      fields:[{name:'value',index:0,binderInfo:'default'}],
+    },
+  }]);
+  const erased=eraseCheckedCoreModule(checked);
+  equal(erased.structures?.[0]?.name,'Box');
+  equal(erased.structures?.[0]?.typeParameters?.length,1);
+  equal(erased.structures?.[0]?.fields[0]?.type.kind,'typeParameter');
+}
+console.log('ok - @proofscript/erasure generic structure metadata');

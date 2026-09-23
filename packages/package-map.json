@@ -257,7 +257,7 @@
       "path": "packages/erasure",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "invariant-structural-recursion-erasure-mvp",
+      "status": "generic-structure+invariant-structural-recursion-erasure-mvp",
       "packageName": "@proofscript/erasure",
       "dependsOn": [
         "checked-core",
@@ -266,6 +266,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Parameterized structures reuse pskernel InductiveInfo.numParams plus the existing inductive-parameter erasure machinery; only admitted type-level parameters become verified IR type parameters.",
+        "Structure field argument indexes include the admitted constructor parameter prefix, so erased type arguments cannot be mistaken for runtime fields.",
         "Recursor-IH lowering now derives the decreasing runtime parameter from the erased recursor major; invariant runtime parameters are forwarded unchanged and only the major position is replaced by the recursive field.",
         "The compiler-side self-call mapping depends on checked recursor structure and current checked-core runtime binders, not on raw source syntax.",
         "If the recursor major is not exactly a top-level runtime parameter, the IH remains erased and any executable use fails closed.",
@@ -314,7 +316,8 @@
         "Verified IR now represents nominal structure declarations, branded record construction, and field projection without carrying Lean kernel metadata into the backend.",
         "Verified IR now has nominal inductive/constructor metadata and explicit constructor-value expressions, independent of pskernel recursor internals.",
         "Verified IR now has explicit tagged-union match expressions with constructor-specific runtime field bindings.",
-        "Verified inductives may carry compile-time type parameters; constructor expressions may carry type arguments used only for TypeScript/.d.ts emission."
+        "Verified inductives may carry compile-time type parameters; constructor expressions may carry type arguments used only for TypeScript/.d.ts emission.",
+        "Verified structure declarations may now carry compile-time type parameters exactly like verified inductives."
       ]
     },
     {
@@ -352,7 +355,8 @@
         "Verified structures emit as branded readonly TypeScript interfaces; constructor values carry an internal unique-symbol brand so distinct Lean structures do not collapse under TypeScript structural typing.",
         "Verified inductives emit as unique-symbol tagged unions plus value-level constructor factories; constructor values remain nominally discriminated at runtime.",
         "Verified ADT match IR emits a single-evaluation tagged-union switch; branch field bindings come from checked recursor minors and runtime constructor metadata.",
-        "Generic verified ADTs emit TypeScript type parameters and generic constructor factories; tsc removes those type arguments from JavaScript."
+        "Generic verified ADTs emit TypeScript type parameters and generic constructor factories; tsc removes those type arguments from JavaScript.",
+        "Verified generic structures emit branded TypeScript interfaces with generic parameters; tsc erases those parameters from JavaScript while preserving them in .d.ts."
       ]
     },
     {
@@ -360,7 +364,7 @@
       "path": "packages/compiler",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "checked-core-to-js-structural-recursion-mvp",
+      "status": "checked-core-to-js-generic-structure+structural-recursion-mvp",
       "packageName": "@proofscript/compiler",
       "dependsOn": [
         "checked-core",
@@ -371,6 +375,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Canonical verified compilation now covers parameterized pskernel structures, record construction, and projection with TypeScript generic API preservation.",
         "Canonical integration now covers higher-order generic structural recursion: map over a pskernel-admitted recursive generic list preserves TypeScript generics/function types while compiling recursor IHs to ordinary JavaScript recursion.",
         "Compiler orchestration starts at CheckedCoreModule; it has no syntax, parser, language-checker, or elaborator dependency.",
         "The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript Compiler API -> JavaScript/.d.ts/source map.",

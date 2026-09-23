@@ -21,6 +21,8 @@ export interface RuntimeStructureInfo {
   readonly name:string;
   readonly typeKey:string;
   readonly constructorKey:string;
+  readonly numParams:number;
+  readonly typeParameters:readonly import('@proofscript/compiler-ir/verified').VerifiedIrTypeParameter[];
   readonly fields:readonly RuntimeStructureField[];
 }
 

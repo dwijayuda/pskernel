@@ -60,6 +60,17 @@ export function validateVerifiedIrModule(
       );
     }
     typeNames.add(structure.name);
+    const structureTypeParameters=new Set<string>();
+    for(const parameter of structure.typeParameters??[]){
+      assertVerifiedIrIdentifier(parameter.name);
+      if(structureTypeParameters.has(parameter.name)){
+        throw new Error(
+          "duplicate verified IR structure type parameter '"+
+          parameter.name+"'",
+        );
+      }
+      structureTypeParameters.add(parameter.name);
+    }
     validateNamedFields(structure.fields,'structure');
   }
 

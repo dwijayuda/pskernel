@@ -71,8 +71,12 @@ export function emitVerifiedStructures(
       'const '+brand+': unique symbol = Symbol('+
       JSON.stringify('ProofScript.'+structure.name)+');',
     );
+    const typeParameters=structure.typeParameters??[];
+    const genericSuffix=typeParameters.length===0
+      ?''
+      :'<'+typeParameters.map((parameter)=>parameter.name).join(', ')+'>';
     lines.push(
-      'export interface '+structure.name+' { '+
+      'export interface '+structure.name+genericSuffix+' { '+
       'readonly ['+brand+']: true; '+
       structure.fields.map((field)=>
         'readonly '+field.name+': '+

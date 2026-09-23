@@ -557,3 +557,21 @@ console.log('ok - psc verified generic map structural recursion pipeline');
   }
 }
 console.log('ok - psc verified generic map run filesystem pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'structure Box(α : Type) where { value : α; } '+
+    'function boxNat(x : Nat) : Box(Nat) := '+
+    '{ value := x : Box(Nat) }; '+
+    'function unboxNat(box : Box(Nat)) : Nat := box.value;',
+    'generic-structure-source.ts',
+  );
+  equal(result.checkedCore.structures.length,1);
+  equal(result.ir.structures?.[0]?.typeParameters?.length,1);
+  equal(result.typeScript.includes('export interface Box<T0> {'),true);
+  equal(result.typeScript.includes('Box<bigint>'),true);
+  equal(result.typeScript.includes('return box.value;'),true);
+  equal(result.emitted.javascript.includes('function unboxNat(box)'),true);
+}
+console.log('ok - psc verified generic structure source pipeline');

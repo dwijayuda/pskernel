@@ -574,3 +574,47 @@ console.log('ok - @proofscript/backend-ts verified ADT match emission');
   equal(compiled.declaration.includes('type PsOption<T0>'),true);
 }
 console.log('ok - @proofscript/backend-ts verified generic ADT TypeScript emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    structures:[{
+      name:'Box',
+      typeParameters:[{name:'T0'}],
+      fields:[{
+        name:'value',
+        type:{kind:'typeParameter',name:'T0'},
+      }],
+    }],
+    declarations:[{
+      name:'unbox',
+      typeParameters:[{name:'T0'}],
+      parameters:[{
+        name:'box',
+        type:{
+          kind:'named',
+          name:'Box',
+          args:[{kind:'typeParameter',name:'T0'}],
+        },
+      }],
+      resultType:{kind:'typeParameter',name:'T0'},
+      body:{
+        kind:'projection',
+        target:{kind:'var',name:'box'},
+        field:'value',
+      },
+    }],
+  });
+  equal(source.includes('export interface Box<T0> {'),true);
+  equal(
+    source.includes(
+      'export function unbox<T0>(box: Box<T0>): T0',
+    ),
+    true,
+  );
+  const compiled=compileTypeScript(source,'generic-structure.ts');
+  equal(compiled.javascript.includes('function unbox(box)'),true);
+  equal(compiled.declaration.includes('interface Box<T0>'),true);
+}
+console.log('ok - @proofscript/backend-ts generic structure TypeScript emission');

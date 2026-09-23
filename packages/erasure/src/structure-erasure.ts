@@ -17,6 +17,7 @@ import {
 } from './model.js';
 import {safeIdentifier} from './names.js';
 import {eraseRuntimeType} from './type-erasure.js';
+import {prepareInductiveParameters} from './inductive-parameter-erasure.js';
 
 export interface PreparedRuntimeStructures {
   readonly ir:readonly VerifiedIrStructure[];
@@ -40,21 +41,48 @@ export function prepareRuntimeStructures(
         nameToString(structure.constructor)+"'",
       );
     }
-    if(constructor.numParams!==0){
+    const inductive=module.environment.find(structure.name);
+    if(inductive?.kind!=='inductive'){
       throw new Error(
-        "PS_ERASE_PARAMETERIZED_STRUCTURE_UNSUPPORTED: '"+
+        "PS_ERASE_STRUCTURE_INDUCTIVE_MISSING: '"+
         nameToString(structure.name)+"'",
       );
     }
+    if(constructor.numParams!==inductive.numParams){
+      throw new Error(
+        "PS_ERASE_STRUCTURE_PARAMETER_MISMATCH: '"+
+        nameToString(structure.name)+"'",
+      );
+    }
+    const parameters=prepareInductiveParameters(
+      inductive,
+      module.environment,
+    );
 
     const structureName=symbolNames.get(nameKey(structure.name));
     if(structureName===undefined){
       throw new Error('PS_ERASE_STRUCTURE_NAME_MISSING');
     }
 
-    let localContext=new LocalContext();
+    let localContext=parameters.localContext.clone();
     let runtimeLocals=new Map<string,string>();
     let cursor=constructor.type;
+
+    for(let index=0;index<constructor.numParams;index+=1){
+      const checker=new TypeChecker(
+        module.environment,
+        localContext.clone(),
+      );
+      const binder=checker.ensureForall(checker.whnf(cursor));
+      const value=parameters.values[index];
+      if(value===undefined){
+        throw new Error(
+          "PS_ERASE_STRUCTURE_PARAMETER_VALUE_MISSING: '"+
+          structureName+"' parameter "+index,
+        );
+      }
+      cursor=instantiate1(binder.body,value);
+    }
     const fields:RuntimeStructureInfo['fields'][number][]=[];
     const names=new Set<string>();
 
@@ -84,8 +112,8 @@ export function prepareRuntimeStructures(
       const scope:ErasureScope={
         localContext,
         runtimeLocals,
-        typeLocals:new Map(),
-        erasedLocals:new Set(),
+        typeLocals:parameters.typeLocals,
+        erasedLocals:parameters.erasedLocals,
         declarationNames:symbolNames,
         structuresByType:byType,
         structuresByConstructor:byConstructor,
@@ -98,14 +126,14 @@ export function prepareRuntimeStructures(
         scope,
         module.environment,
       );
-      if(type.kind==='unknown'||type.kind==='typeParameter'){
+      if(type.kind==='unknown'){
         throw new Error(
           "PS_ERASE_STRUCTURE_FIELD_TYPE_UNSUPPORTED: structure '"+
           structureName+"' field '"+sourceField.name+"'",
         );
       }
       fields.push({
-        sourceIndex:sourceField.index,
+        sourceIndex:constructor.numParams+sourceField.index,
         name:fieldName,
         type,
       });
@@ -128,12 +156,15 @@ export function prepareRuntimeStructures(
       name:structureName,
       typeKey:nameKey(structure.name),
       constructorKey:nameKey(structure.constructor),
+      numParams:constructor.numParams,
+      typeParameters:parameters.typeParameters,
       fields,
     };
     byType.set(info.typeKey,info);
     byConstructor.set(info.constructorKey,info);
     ir.push({
       name:structureName,
+      typeParameters:parameters.typeParameters,
       fields:fields.map((field)=>({
         name:field.name,
         type:field.type,

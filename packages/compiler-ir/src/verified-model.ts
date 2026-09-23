@@ -25,6 +25,7 @@ export interface VerifiedIrStructureField {
 
 export interface VerifiedIrStructure {
   readonly name:string;
+  readonly typeParameters?:readonly VerifiedIrTypeParameter[];
   readonly fields:readonly VerifiedIrStructureField[];
 }
 

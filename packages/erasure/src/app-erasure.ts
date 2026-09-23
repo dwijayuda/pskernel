@@ -123,11 +123,12 @@ export function eraseRuntimeApplication(
       nameKey(view.fn.name),
     );
     if(structure!==undefined){
-      if(view.args.length!==structure.fields.length){
+      const expectedArity=structure.numParams+structure.fields.length;
+      if(view.args.length!==expectedArity){
         throw new Error(
           "PS_ERASE_STRUCTURE_ARITY: constructor for '"+
-          structure.name+"' expected "+structure.fields.length+
-          ' fields, got '+view.args.length,
+          structure.name+"' expected "+expectedArity+
+          ' total arguments, got '+view.args.length,
         );
       }
       return {

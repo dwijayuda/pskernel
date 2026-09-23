@@ -703,10 +703,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     PsOption/PsResult/PsList only when APIs are supported by the verified
     language itself. The current utility/law tranche includes optionOrElse,
     resultGetOrElse, structurally recursive listAppend, six definitional
-    computation laws, and the inductive law listAppendNilRight. Ten current
-    stdlib theorems now dogfood bounded tactics/proof terms; continue with
-    stronger laws/utilities only when the proof/recursion surface supports them
-    without host shortcuts.
+    computation laws, universal Option case analysis, and the inductive
+    listAppendNilRight law. Eleven current stdlib theorems now dogfood bounded
+    rfl/cases/induction/rw proof paths; continue with stronger laws/utilities
+    only when the proof/recursion surface supports them without host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.

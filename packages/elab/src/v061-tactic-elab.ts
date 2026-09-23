@@ -25,6 +25,7 @@ import {constructorV061Tactic} from './v061-constructor-tactic.js';
 import {inductionV061Tactic} from './v061-induction-tactic.js';
 import {refineV061Tactic} from './v061-refine-tactic.js';
 import {rewriteV061Tactic} from './v061-rewrite-tactic.js';
+import {simpOnlyV061Tactic} from './v061-simp-tactic.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
 
 export type V061TermElaborator=(
@@ -97,6 +98,16 @@ function runTactic(
 
   if(tactic.kind==='rw'){
     rewriteV061Tactic(
+      runtime,
+      tactic.proof,
+      tactic.symm,
+      elaborate,
+    );
+    return;
+  }
+
+  if(tactic.kind==='simp'){
+    simpOnlyV061Tactic(
       runtime,
       tactic.proof,
       tactic.symm,

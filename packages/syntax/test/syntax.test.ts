@@ -840,6 +840,25 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 
+{
+  const module=parseV061Module(
+    'theorem simpProof(a : Nat, h : Eq Nat Nat.succ(a) a) : '+
+    'Eq Nat Nat.succ(a) a := by simp only [h];',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'simp');
+    if(body.tactics[0]?.kind==='simp')equal(body.tactics[0].symm,false);
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem simpProof (a : Nat) (h : Eq Nat (Nat.succ a) a) : '+
+    'Eq Nat (Nat.succ a) a := by simp only [h]\n',
+  );
+}
+
 
 {
   const module=parseV061Module(

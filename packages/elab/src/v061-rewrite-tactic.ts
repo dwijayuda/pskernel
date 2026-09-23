@@ -14,17 +14,18 @@ import {
   nameFromDotted,
   type Expr,
 } from 'lean-ts-kernel';
+import type {ElaboratedCoreTerm} from './v061-context.js';
 import type {V061TermElaborator} from './v061-tactic-elab.js';
 import {abstractExactRewriteOccurrences} from './v061-rewrite-occurrence.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
 
-interface EqualityView {
+export interface EqualityView {
   readonly alpha:Expr;
   readonly lhs:Expr;
   readonly rhs:Expr;
 }
 
-function equalityView(
+export function equalityView(
   checker:TypeChecker,
   proofType:Expr,
 ):EqualityView {
@@ -88,19 +89,22 @@ function cheapEqRfl(
   return true;
 }
 
-export function rewriteV061Tactic(
+export interface RewriteV061Options {
+  readonly failIfNoOccurrence?:boolean;
+}
+
+export function rewriteV061Equality(
   runtime:V061TacticRuntime,
-  proofExpr:V061Expr,
+  equality:ElaboratedCoreTerm,
   symm:boolean,
-  elaborate:V061TermElaborator,
-):void {
+  options:RewriteV061Options={},
+):boolean {
   const goal=getMainGoal(runtime.state);
   const entry=runtime.entry(goal);
   const checker=new TypeChecker(
     entry.context.environment,
     entry.context.localContext.clone(),
   );
-  const equality=elaborate(proofExpr,entry.context);
   const rule=equalityView(
     checker,
     entry.context.metaContext.instantiate(equality.type),
@@ -111,6 +115,7 @@ export function rewriteV061Tactic(
   const target=runtime.expected(goal);
   const abstraction=abstractExactRewriteOccurrences(target,pattern);
   if(!abstraction.found){
+    if(options.failIfNoOccurrence===false)return false;
     throw new Error(
       'PS_ELAB_TACTIC_RW_OCCURRENCE: rewrite pattern does not occur structurally in the goal',
     );
@@ -170,7 +175,30 @@ export function rewriteV061Tactic(
   );
   if(cheapEqRfl(runtime,child)){
     runtime.state=replaceMainGoal(runtime.state,[]);
-    return;
+    return true;
   }
   runtime.state=replaceMainGoal(runtime.state,[child]);
+  return true;
+}
+
+export function tryCloseV061CheapEqRfl(
+  runtime:V061TacticRuntime,
+):boolean {
+  if(runtime.state.goals.length===0)return true;
+  const goal=getMainGoal(runtime.state);
+  if(!cheapEqRfl(runtime,goal))return false;
+  runtime.state=replaceMainGoal(runtime.state,[]);
+  return true;
+}
+
+export function rewriteV061Tactic(
+  runtime:V061TacticRuntime,
+  proofExpr:V061Expr,
+  symm:boolean,
+  elaborate:V061TermElaborator,
+):void {
+  const goal=getMainGoal(runtime.state);
+  const entry=runtime.entry(goal);
+  const equality=elaborate(proofExpr,entry.context);
+  rewriteV061Equality(runtime,equality,symm);
 }

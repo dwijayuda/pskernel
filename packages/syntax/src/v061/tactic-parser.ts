@@ -4,7 +4,7 @@ import {V061ParseContext} from './context.js';
 import type {V061ExpressionParser} from './expression-parser.js';
 
 const TACTIC_HEADS=new Set([
-  'exact','assumption','apply','refine','constructor','cases','induction','rw','intro',
+  'exact','assumption','apply','refine','constructor','cases','induction','rw','simp','intro',
 ]);
 
 function isTacticHead(text:string):boolean {
@@ -72,6 +72,28 @@ function parseTactic(
     };
   }
 
+  if(tacticToken.text==='simp'){
+    const first=context.cursor.consume();
+    context.cursor.expect('only');
+    context.cursor.expect('[');
+    const symm=context.cursor.at('<-')||context.cursor.at('←');
+    if(symm)context.cursor.consume();
+    const proof=expressions.parse();
+    if(context.cursor.at(',')){
+      throw new SyntaxError(
+        'bounded simp only currently supports exactly one explicit rule',
+        context.cursor.peek().span,
+      );
+    }
+    const close=context.cursor.expect(']');
+    return {
+      kind:'simp',
+      proof,
+      symm,
+      span:{start:first.span.start,end:close.span.end},
+    };
+  }
+
   if(tacticToken.text==='apply'){
     const first=context.cursor.consume();
     const proof=expressions.parse();
@@ -103,7 +125,7 @@ function parseTactic(
   }
 
   throw new SyntaxError(
-    "kernel-facing tactic subset supports 'exact', 'assumption', 'apply', 'refine', 'constructor', 'cases', 'induction', 'rw', and 'intro', got '"+
+    "kernel-facing tactic subset supports 'exact', 'assumption', 'apply', 'refine', 'constructor', 'cases', 'induction', 'rw', 'simp only', and 'intro', got '"+
     tacticToken.text+"'",
     tacticToken.span,
   );

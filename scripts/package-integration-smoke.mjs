@@ -183,6 +183,17 @@ assert(
 );
 
 
+const verifiedSimpOnly=compileVerifiedSource(
+  'theorem simplifySucc(a : Nat, h : Eq Nat Nat.succ(a) a) : '+
+  'Eq Nat Nat.succ(a) a := by simp only [h];',
+  'verified-simp-only.ts',
+);
+assert(
+  verifiedSimpOnly.checkedCore.theorems.length===1,
+  'bounded simp only did not construct a pskernel-admitted proof',
+);
+
+
 const verifiedNat=compileVerifiedSource(
   'function add(x : Nat, y : Nat) : Nat := x + y; '+
   'function twice(x : Nat) : Nat := add(x, x); '+

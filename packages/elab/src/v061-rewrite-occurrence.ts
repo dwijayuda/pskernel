@@ -56,3 +56,21 @@ export function abstractExactRewriteOccurrences(
 
   return {body:go(expr,0),found};
 }
+
+export function rewriteExprSize(expr:Expr):number {
+  switch(expr.kind){
+    case 'app':
+      return 1+rewriteExprSize(expr.fn)+rewriteExprSize(expr.arg);
+    case 'lam':
+    case 'forall':
+      return 1+rewriteExprSize(expr.type)+rewriteExprSize(expr.body);
+    case 'let':
+      return 1+rewriteExprSize(expr.type)
+        +rewriteExprSize(expr.value)
+        +rewriteExprSize(expr.body);
+    case 'mdata':
+    case 'proj':
+      return 1+rewriteExprSize(expr.expr);
+    default:return 1;
+  }
+}

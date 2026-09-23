@@ -627,6 +627,17 @@ console.log('ok - @proofscript/elab bounded induction via recursor');
 }
 console.log('ok - @proofscript/elab rw syntax reaches tactic AST');
 
+{
+  const source=parseV061Module(
+    'theorem parsedSimp(a : Nat, h : Eq Nat Nat.succ(a) a) : '+
+    'Eq Nat Nat.succ(a) a := by simp only [h];',
+  );
+  const body=source.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by')equal(body.tactics[0]?.kind,'simp');
+}
+console.log('ok - @proofscript/elab simp-only syntax reaches tactic AST');
+
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();

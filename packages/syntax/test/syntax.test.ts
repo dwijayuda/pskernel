@@ -1303,7 +1303,8 @@ throws(
 }
 {
   const registry=createDefaultSourceFrontendRegistry();
-  equal(registry.get('lean-subset'),undefined);
+  equal(registry.get('proofscript')?.kind,'proofscript');
+  equal(registry.get('lean-subset')?.kind,'lean-subset');
   equal(leanSubsetSourceFrontend.kind,'lean-subset');
 }
 console.log('ok - @proofscript/syntax DS2 complete emitted-subset frontend');

@@ -8,15 +8,21 @@
 import {
   LEAN_SEMANTICS_VERSION,
   PROOFSCRIPT_SPEC_VERSION,
+  createDefaultSourceFrontendRegistry,
   lowerV061ModuleToLean,
-  parseV061Module,
+  sourceKindFromFileName,
 } from '@proofscript/syntax';
 import {checkV061SoftwareModule} from '@proofscript/language';
 import {lowerCheckedSoftwareModule} from '@proofscript/compiler-ir';
 import {compileTypeScript,emitV061TypeScript} from '@proofscript/backend-ts';
 
-export function checkSource(source:string){
-  const surface=parseV061Module(source);
+const sourceFrontends=createDefaultSourceFrontendRegistry();
+
+export function checkSource(
+  source:string,
+  sourceFileName='input.ps',
+){
+  const surface=sourceFrontends.forFile(sourceFileName).parse(source);
   const checked=checkV061SoftwareModule(surface);
   return {
     surface,
@@ -25,8 +31,12 @@ export function checkSource(source:string){
   };
 }
 
-export function compileSource(source:string,fileName:string){
-  const checkedResult=checkSource(source);
+export function compileSource(
+  source:string,
+  fileName:string,
+  sourceFileName='input.ps',
+){
+  const checkedResult=checkSource(source,sourceFileName);
   const executableIr=lowerCheckedSoftwareModule(checkedResult.checked);
   const typeScript=emitV061TypeScript(executableIr);
   const emitted=compileTypeScript(typeScript,fileName);
@@ -47,5 +57,6 @@ export function baseReport(source:string,declarations:number,featureIds:readonly
     surfaceBaseline:'0.6.1-compiler-ready',
     leanSemantics:LEAN_SEMANTICS_VERSION,
     proofStatus:'software-typechecked-only',
+    sourceKind:sourceKindFromFileName(source),
   } as const;
 }

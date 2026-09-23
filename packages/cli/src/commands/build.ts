@@ -8,10 +8,13 @@ import type {BuildResult,CommonArgs} from '../types.js';
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   if(common.verified){
     const input=await resolveInput(common);
-    const stem=extname(input.sourcePath)==='.ps'
-      ?basename(input.sourcePath,'.ps')
-      :basename(input.sourcePath);
-    const result=compileVerifiedSource(input.source,stem+'.ts');
+    const extension=extname(input.sourcePath);
+    const stem=basename(input.sourcePath,extension);
+    const result=compileVerifiedSource(
+      input.source,
+      stem+'.ts',
+      input.sourcePath,
+    );
     const outDir=resolve(
       input.loaded.directory,
       input.loaded.config.compilerOptions.outDir,
@@ -66,8 +69,13 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   }
 
   const input=await resolveInput(common);
-  const stem=extname(input.sourcePath)==='.ps'?basename(input.sourcePath,'.ps'):basename(input.sourcePath);
-  const result=compileSource(input.source,stem+'.ts');
+  const extension=extname(input.sourcePath);
+  const stem=basename(input.sourcePath,extension);
+  const result=compileSource(
+    input.source,
+    stem+'.ts',
+    input.sourcePath,
+  );
   const outDir=resolve(input.loaded.directory,input.loaded.config.compilerOptions.outDir);
   await mkdir(outDir,{recursive:true});
 

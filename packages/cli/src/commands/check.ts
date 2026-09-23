@@ -6,7 +6,10 @@ import type {CommonArgs} from '../types.js';
 export async function checkCommand(common:CommonArgs){
   const input=await resolveInput(common);
   if(common.verified){
-    const result=checkVerifiedSource(input.source);
+    const result=checkVerifiedSource(
+      input.source,
+      input.sourcePath,
+    );
     return {
       ok:true,
       command:'check',
@@ -19,7 +22,10 @@ export async function checkCommand(common:CommonArgs){
       proofStatus:'kernel-verified',
     };
   }
-  const result=checkSource(input.source);
+  const result=checkSource(
+    input.source,
+    input.sourcePath,
+  );
   return {
     ok:true,
     command:'check',

@@ -67,5 +67,6 @@ export const leanSubsetSourceFrontend:SourceFrontend={
 
 export function createDefaultSourceFrontendRegistry():SourceFrontendRegistry {
   return new SourceFrontendRegistry()
-    .register(proofScriptSourceFrontend);
+    .register(proofScriptSourceFrontend)
+    .register(leanSubsetSourceFrontend);
 }

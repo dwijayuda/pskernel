@@ -135,6 +135,48 @@ console.log('ok - psc verified runtime ABI');
 }
 console.log('ok - psc verified run filesystem pipeline');
 
+{
+  const directory=await mkdtemp(join(tmpdir(),'proofscript-lean-verified-run-'));
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.lean',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.lean'),
+      'def main (x : Nat) : Nat := x + x\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['21'],
+    });
+    equal(result.mainResult,'42');
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+    equal(result.sourceKind,'lean-subset');
+    const artifacts=result.artifacts as Record<string,string>;
+    equal(artifacts.typescript.endsWith('main.ts'),true);
+    equal(artifacts.javascript.endsWith('main.js'),true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Lean-subset run filesystem pipeline');
+
 
 {
   const directory=await mkdtemp(

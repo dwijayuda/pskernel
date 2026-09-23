@@ -23,6 +23,13 @@ const natArithmetic=new Map<string,string>([
   ['%','Nat.mod'],
 ]);
 
+const fixedUIntAddition=new Map<string,string>([
+  ['UInt8','UInt8.add'],
+  ['UInt16','UInt16.add'],
+  ['UInt32','UInt32.add'],
+  ['UInt64','UInt64.add'],
+]);
+
 type NatRelationKind='le'|'lt';
 const natRelations=new Map<
   string,
@@ -119,6 +126,45 @@ export function elaborateV061NatArithmeticExpression(
   expected:Expr|undefined,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
+  if(expr.operator==='+'&&expected!==undefined){
+    const checker=new TypeChecker(
+      context.environment,
+      context.localContext.clone(),
+    );
+    const expectedType=context.metaContext.instantiate(expected);
+    for(const [typeName,constantName] of fixedUIntAddition){
+      const runtimeType=constant(
+        requireV061NotationConstant(context,typeName),
+      );
+      if(!checker.isDefEq(expectedType,runtimeType))continue;
+      const left=elaborate(expr.left,context,runtimeType);
+      const right=elaborate(expr.right,context,runtimeType);
+      if(
+        !checker.isDefEq(left.type,runtimeType)
+        ||!checker.isDefEq(right.type,runtimeType)
+      ){
+        throw new Error(
+          "PS_ELAB_UINT_ADD_OPERAND_TYPE: operator '+' at "+typeName+
+          ' requires matching fixed-width operands',
+        );
+      }
+      const term=mkAppN(
+        constant(
+          requireV061NotationConstant(context,constantName),
+        ),
+        [left.term,right.term],
+      );
+      const type=checker.check(term);
+      if(!checker.isDefEq(type,runtimeType)){
+        throw new Error(
+          "PS_ELAB_UINT_ADD_RESULT: '"+constantName+
+          "' did not produce "+typeName,
+        );
+      }
+      return {term,type};
+    }
+  }
+
   const {left,right}=elaborateNatOperands(expr,context,elaborate);
   return elaborateV061NatArithmeticTerms(
     expr.operator,

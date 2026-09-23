@@ -1,4 +1,4 @@
-import { Level, instantiateLevel, levelHasMVar, levelToString } from './level.js';
+import { Level, instantiateLevel, levelEqStructural, levelHasMVar, levelToString } from './level.js';
 import { Name, nameEq, nameFromDotted, nameKey, nameToString } from './name.js';
 
 export type BinderInfo = 'default' | 'implicit' | 'strictImplicit' | 'instImplicit';
@@ -88,22 +88,53 @@ export function exprEq(a: Expr, b: Expr): boolean {
  * Unlike exprEq, binder display names/info are intentionally ignored. MData payloads
  * participate in structural equality, exactly as Lean's kvmap payload does. */
 export function exprLeanEq(a:Expr,b:Expr):boolean{
-  if(a===b)return true;
-  if(a.kind!==b.kind)return false;
-  switch(a.kind){
-    case'bvar':return b.kind==='bvar'&&a.index===b.index;
-    case'fvar':return b.kind==='fvar'&&a.id===b.id;
-    case'mvar':return b.kind==='mvar'&&a.id===b.id;
-    case'sort':return b.kind==='sort'&&JSON.stringify(a.level,(_k,v)=>typeof v==='bigint'?v.toString():v)===JSON.stringify(b.level,(_k,v)=>typeof v==='bigint'?v.toString():v);
-    case'const':return b.kind==='const'&&nameEq(a.name,b.name)&&a.levels.length===b.levels.length&&a.levels.every((x,i)=>JSON.stringify(x,(_k,v)=>typeof v==='bigint'?v.toString():v)===JSON.stringify(b.levels[i],(_k,v)=>typeof v==='bigint'?v.toString():v));
-    case'app':return b.kind==='app'&&exprLeanEq(a.fn,b.fn)&&exprLeanEq(a.arg,b.arg);
-    case'lam':return b.kind==='lam'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.body,b.body);
-    case'forall':return b.kind==='forall'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.body,b.body);
-    case'let':return b.kind==='let'&&(a.nondep??false)===(b.nondep??false)&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.value,b.value)&&exprLeanEq(a.body,b.body);
-    case'lit':return b.kind==='lit'&&a.literal.kind===b.literal.kind&&(a.literal.kind==='nat'?a.literal.value===(b.literal as {kind:'nat';value:bigint}).value:a.literal.value===(b.literal as {kind:'string';value:string}).value);
-    case'mdata':return b.kind==='mdata'&&metadataValueEq(a.data,b.data)&&exprLeanEq(a.expr,b.expr);
-    case'proj':return b.kind==='proj'&&nameEq(a.typeName,b.typeName)&&a.index===b.index&&exprLeanEq(a.expr,b.expr);
+  const todo:[Expr,Expr][]=[[a,b]];
+  while(todo.length){
+    const [x,y]=todo.pop()!;
+    if(x===y)continue;
+    if(x.kind!==y.kind)return false;
+    switch(x.kind){
+      case'bvar':if(y.kind!=='bvar'||x.index!==y.index)return false;break;
+      case'fvar':if(y.kind!=='fvar'||x.id!==y.id)return false;break;
+      case'mvar':if(y.kind!=='mvar'||x.id!==y.id)return false;break;
+      case'sort':if(y.kind!=='sort'||!levelEqStructural(x.level,y.level))return false;break;
+      case'const':
+        if(y.kind!=='const'||!nameEq(x.name,y.name)||x.levels.length!==y.levels.length)return false;
+        for(let i=0;i<x.levels.length;i++)if(!levelEqStructural(x.levels[i]!,y.levels[i]!))return false;
+        break;
+      case'app':
+        if(y.kind!=='app')return false;
+        todo.push([x.fn,y.fn],[x.arg,y.arg]);
+        break;
+      case'lam':
+        if(y.kind!=='lam')return false;
+        todo.push([x.type,y.type],[x.body,y.body]);
+        break;
+      case'forall':
+        if(y.kind!=='forall')return false;
+        todo.push([x.type,y.type],[x.body,y.body]);
+        break;
+      case'let':
+        if(y.kind!=='let'||(x.nondep??false)!==(y.nondep??false))return false;
+        todo.push([x.type,y.type],[x.value,y.value],[x.body,y.body]);
+        break;
+      case'lit':
+        if(y.kind!=='lit'||x.literal.kind!==y.literal.kind)return false;
+        if(x.literal.kind==='nat'){
+          if(x.literal.value!==(y.literal as {kind:'nat';value:bigint}).value)return false;
+        }else if(x.literal.value!==(y.literal as {kind:'string';value:string}).value)return false;
+        break;
+      case'mdata':
+        if(y.kind!=='mdata'||!metadataValueEq(x.data,y.data))return false;
+        todo.push([x.expr,y.expr]);
+        break;
+      case'proj':
+        if(y.kind!=='proj'||!nameEq(x.typeName,y.typeName)||x.index!==y.index)return false;
+        todo.push([x.expr,y.expr]);
+        break;
+    }
   }
+  return true;
 }
 
 

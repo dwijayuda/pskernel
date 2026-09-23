@@ -43,38 +43,57 @@ export function levelEqStructural(a: Level, b: Level): boolean {
 
 
 export function levelHasMVar(l: Level): boolean {
-  switch(l.kind){
-    case 'mvar': return true;
-    case 'succ': return levelHasMVar(l.of);
-    case 'max': case 'imax': return levelHasMVar(l.left)||levelHasMVar(l.right);
-    case 'zero': case 'param': return false;
+  const todo:Level[]=[l];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'mvar':return true;
+      case'succ':todo.push(x.of);break;
+      case'max':case'imax':todo.push(x.right,x.left);break;
+      case'zero':case'param':break;
+    }
   }
+  return false;
 }
 export function levelParamNames(l: Level, out: Name[]=[]): readonly Name[] {
-  switch(l.kind){
-    case 'param': if(!out.some(n=>nameEq(n,l.name)))out.push(l.name); break;
-    case 'succ': levelParamNames(l.of,out); break;
-    case 'max': case 'imax': levelParamNames(l.left,out);levelParamNames(l.right,out);break;
-    case 'zero': case 'mvar': break;
+  const todo:Level[]=[l];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'param':if(!out.some(n=>nameEq(n,x.name)))out.push(x.name);break;
+      case'succ':todo.push(x.of);break;
+      case'max':case'imax':todo.push(x.right,x.left);break;
+      case'zero':case'mvar':break;
+    }
   }
   return out;
 }
 export function isZero(l: Level): boolean { return l.kind === 'zero'; }
 export function isNotZero(l: Level): boolean {
-  switch (l.kind) {
-    case 'zero': case 'param': case 'mvar': return false;
-    case 'succ': return true;
-    case 'max': return isNotZero(l.left) || isNotZero(l.right);
-    case 'imax': return isNotZero(l.right);
+  const todo:Level[]=[l];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'succ':return true;
+      case'max':todo.push(x.right,x.left);break;
+      case'imax':todo.push(x.right);break;
+      case'zero':case'param':case'mvar':break;
+    }
   }
+  return false;
 }
 export function normalizesToZero(l: Level): boolean {
-  switch (l.kind) {
-    case 'zero': return true;
-    case 'param': case 'mvar': case 'succ': return false;
-    case 'max': return normalizesToZero(l.left) && normalizesToZero(l.right);
-    case 'imax': return normalizesToZero(l.right);
+  const todo:Level[]=[l];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'zero':break;
+      case'param':case'mvar':case'succ':return false;
+      case'max':todo.push(x.right,x.left);break;
+      case'imax':todo.push(x.right);break;
+    }
   }
+  return true;
 }
 export function mkMax(a: Level, b: Level): Level {
   if (levelEqStructural(a, b)) return a;
@@ -102,18 +121,33 @@ export function addOffset(l: Level, k: bigint): Level {
   let r = l; for (let i = 0n; i < k; i++) r = levelSucc(r); return r;
 }
 
-export function instantiateLevel(l: Level, params: readonly Name[], values: readonly Level[]): Level {
-  switch (l.kind) {
-    case 'zero': return l;
-    case 'succ': return levelSucc(instantiateLevel(l.of, params, values));
-    case 'max': return mkMax(instantiateLevel(l.left, params, values), instantiateLevel(l.right, params, values));
-    case 'imax': return mkIMax(instantiateLevel(l.left, params, values), instantiateLevel(l.right, params, values));
-    case 'mvar': return l;
-    case 'param': {
-      const i = params.findIndex(p => nameEq(p, l.name));
-      return i >= 0 ? values[i]! : l;
+export function instantiateLevel(root: Level, params: readonly Name[], values: readonly Level[]): Level {
+  const done=new WeakMap<object,Level>();
+  const todo:{l:Level;done:boolean}[]=[{l:root,done:false}];
+  while(todo.length){
+    const f=todo.pop()!,l=f.l;
+    if(done.has(l as object))continue;
+    if(!f.done){
+      todo.push({l,done:true});
+      if(l.kind==='succ')todo.push({l:l.of,done:false});
+      else if(l.kind==='max'||l.kind==='imax')todo.push({l:l.right,done:false},{l:l.left,done:false});
+      continue;
     }
+    let r:Level;
+    switch(l.kind){
+      case'zero':case'mvar':r=l;break;
+      case'param':{
+        const i=params.findIndex(p=>nameEq(p,l.name));
+        r=i>=0?values[i]!:l;
+        break;
+      }
+      case'succ':r=levelSucc(done.get(l.of as object)!);break;
+      case'max':r=mkMax(done.get(l.left as object)!,done.get(l.right as object)!);break;
+      case'imax':r=mkIMax(done.get(l.left as object)!,done.get(l.right as object)!);break;
+    }
+    done.set(l as object,r);
   }
+  return done.get(root as object)!;
 }
 
 type LevelAtom = { readonly kind:'param'|'mvar'; readonly name:Name };
@@ -178,31 +212,61 @@ function addVar(norm: Norm, v: LevelAtom, k: bigint, path: readonly LevelAtom[])
   return alter(norm, path, n => ({ constant: n?.constant ?? 0n, vars: addVarTo(n?.vars ?? [], v, k) }));
 }
 function addNode(norm: Norm, v: LevelAtom, k: bigint, path: readonly LevelAtom[]): Norm { return addVar(norm, v, k, path); }
-function normalizeAux(l: Level, path: readonly LevelAtom[], k: bigint, acc: Norm): Norm {
-  switch (l.kind) {
-    case 'zero': return addConst(acc, k, path);
-    case 'succ': return normalizeAux(l.of, path, k + 1n, acc);
-    case 'max': return normalizeAux(l.right, path, k, normalizeAux(l.left, path, k, acc));
-    case 'imax': {
-      const r = l.right;
-      if (r.kind === 'zero') return addConst(acc, k, path);
-      if (r.kind === 'succ') return normalizeAux(r.of, path, k + 1n, normalizeAux(l.left, path, k, acc));
-      if (r.kind === 'max') return normalizeAux(mkIMax(l.left, r.right), path, k, normalizeAux(mkIMax(l.left, r.left), path, k, acc));
-      if (r.kind === 'imax') return normalizeAux(mkIMax(r.left, r.right), path, k, normalizeAux(mkIMax(l.left, r.right), path, k, acc));
-      const v:LevelAtom={kind:r.kind,name:r.name};
-      const path2 = orderedInsert(v, path);
-      if (path2) return normalizeAux(l.left, path2, k, addNode(addConst(acc, k, path), v, k, path2));
-      const a2 = k === 0n ? acc : addVar(acc, v, k, path);
-      return normalizeAux(l.left, path, k, a2);
-    }
-    case 'mvar':
-    case 'param': {
-      const v:LevelAtom={kind:l.kind,name:l.name};
-      const path2 = orderedInsert(v, path);
-      if (path2) return addNode(addConst(acc, k, path), v, k, path2);
-      return k === 0n ? acc : addVar(acc, v, k, path);
+function normalizeAux(root: Level, rootPath: readonly LevelAtom[], rootK: bigint, acc: Norm): Norm {
+  type Task={l:Level;path:readonly LevelAtom[];k:bigint};
+  const todo:Task[]=[{l:root,path:rootPath,k:rootK}];
+  let out=acc;
+  while(todo.length){
+    let {l,path,k}=todo.pop()!;
+    while(l.kind==='succ'){k++;l=l.of;}
+    switch(l.kind){
+      case'zero':
+        out=addConst(out,k,path);
+        break;
+      case'max':
+        // Recursive order is left then right because normalization updates the accumulator.
+        todo.push({l:l.right,path,k},{l:l.left,path,k});
+        break;
+      case'imax':{
+        const r=l.right;
+        if(r.kind==='zero'){
+          out=addConst(out,k,path);
+        }else if(r.kind==='succ'){
+          todo.push({l:r.of,path,k:k+1n},{l:l.left,path,k});
+        }else if(r.kind==='max'){
+          todo.push(
+            {l:mkIMax(l.left,r.right),path,k},
+            {l:mkIMax(l.left,r.left),path,k},
+          );
+        }else if(r.kind==='imax'){
+          todo.push(
+            {l:mkIMax(r.left,r.right),path,k},
+            {l:mkIMax(l.left,r.right),path,k},
+          );
+        }else{
+          const v:LevelAtom={kind:r.kind,name:r.name};
+          const path2=orderedInsert(v,path);
+          if(path2){
+            out=addNode(addConst(out,k,path),v,k,path2);
+            todo.push({l:l.left,path:path2,k});
+          }else{
+            if(k!==0n)out=addVar(out,v,k,path);
+            todo.push({l:l.left,path,k});
+          }
+        }
+        break;
+      }
+      case'mvar':
+      case'param':{
+        const v:LevelAtom={kind:l.kind,name:l.name};
+        const path2=orderedInsert(v,path);
+        if(path2)out=addNode(addConst(out,k,path),v,k,path2);
+        else if(k!==0n)out=addVar(out,v,k,path);
+        break;
+      }
     }
   }
+  return out;
 }
 function subsumeVars(a: readonly VarNode[], b: readonly VarNode[]): readonly VarNode[] {
   const out: VarNode[] = []; let j = 0;

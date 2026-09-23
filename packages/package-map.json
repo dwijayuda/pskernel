@@ -68,15 +68,17 @@
       "path": "packages/browser",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/browser",
       "dependsOn": [
         "kernel",
         "module"
       ],
       "notes": [
-        "Module artifact hashing is Node-only in v1; browser module verification needs WebCrypto-compatible codec before depending on @proofscript/module at runtime."
-      ]
+        "Browser foundation provides cancellation-aware streaming verification through an injected verifier adapter.",
+        "Kernel/module WebCrypto wiring remains outside this foundation until the browser-safe module codec is defined."
+      ],
+      "sourceLanguage": "typescript"
     },
     {
       "name": "syntax",
@@ -99,11 +101,15 @@
       "path": "packages/pretty",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/pretty",
       "dependsOn": [
         "syntax",
         "kernel"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation provides compositional documents, width-aware groups/indentation, and diagnostic rendering."
       ]
     },
     {
@@ -111,10 +117,14 @@
       "path": "packages/meta",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/meta",
       "dependsOn": [
         "kernel"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation provides metavariable allocation/assignment, goals, transparency modes, and kernel-service protocols; unification/typeclass synthesis remain later milestones."
       ]
     },
     {
@@ -122,7 +132,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -130,6 +140,10 @@
         "pretty",
         "kernel",
         "module"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation provides checked elaboration/admission protocols and structured diagnostics; concrete ProofScript declaration elaboration remains later work."
       ]
     },
     {
@@ -137,12 +151,16 @@
       "path": "packages/tactic",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/tactic",
       "dependsOn": [
         "meta",
         "elab",
         "pretty"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation provides generic exact, assumption, and intro state transitions; kernel proof-term construction remains adapter-driven and outside the TCB."
       ]
     },
     {

@@ -19,7 +19,10 @@ See `package-map.json` for:
 - `module/` — MVP checked-module artifact implementation.
 - `conformance/` — MVP Arena-style conformance runner.
 - `lean4export/` — MVP pinned Lean exporter transport.
-- remaining `@proofscript/*` directories — package-boundary scaffolds only unless their local README/source says otherwise.
+- `browser/` — cancellation-aware streaming verification foundation.
+- `syntax/` — v0.7 lexer/parser foundation with D-CALL MVP.
+- `pretty/`, `meta/`, `elab/`, `tactic/` — Phase-B TypeScript foundations with executable tests.
+- Phase-C/Phase-D directories remain scaffolds until their foundation commits land.
 
 ## Trust rule
 

@@ -3,10 +3,24 @@
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "Small proof tactic layer built on @proofscript/meta and @proofscript/elab.",
+  "description": "Small proof tactic layer built on meta/elaboration protocols.",
   "proofscript": {
-    "status": "scaffold",
+    "status": "foundation",
     "phase": "B",
-    "trust": "untrusted-support"
+    "trust": "untrusted-support",
+    "sourceLanguage": "typescript"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/index.test.js"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
   }
 }

@@ -5,8 +5,22 @@
   "type": "module",
   "description": "ProofScript/Expr pretty printing, parenthesization and diagnostic rendering.",
   "proofscript": {
-    "status": "scaffold",
+    "status": "foundation",
     "phase": "B",
-    "trust": "untrusted-support"
+    "trust": "untrusted-support",
+    "sourceLanguage": "typescript"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/index.test.js"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
   }
 }

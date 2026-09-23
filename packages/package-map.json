@@ -159,7 +159,8 @@
         "Application elaboration now consumes pskernel Expr/TypeChecker and the real @proofscript/meta ExprMetaContext.",
         "Default binders consume explicit arguments; implicit binders create natural metavariables; strict-implicit binders are inserted only while explicit arguments remain; instance binders create synthetic obligations.",
         "Dependent result types are instantiated after every inserted/explicit argument, and ground argument compatibility is checked through pskernel defeq.",
-        "Named arguments, expected-type propagation, coercions, typeclass synthesis, postponed constraints, overloaded notation, and full Lean Elab.App behavior remain later milestones."
+        "Named arguments, expected-type propagation, coercions, typeclass synthesis, postponed constraints, overloaded notation, and full Lean Elab.App behavior remain later milestones.",
+        "Root package-integration smoke now exercises the real pskernel → ExprMetaContext → application elaborator → grounded kernel-check path."
       ]
     },
     {

@@ -1,7 +1,8 @@
 import {lowerDCallSource} from '../packages/syntax/dist/src/index.js';
 import {text,render} from '../packages/pretty/dist/src/index.js';
-import {MetaVarContext,createGoal} from '../packages/meta/dist/src/index.js';
-import {elaborateChecked} from '../packages/elab/dist/src/index.js';
+import {ExprMetaContext,MetaVarContext,createGoal} from '../packages/meta/dist/src/index.js';
+import {elaborateApplication,elaborateChecked} from '../packages/elab/dist/src/index.js';
+import {Environment,Kernel,LocalContext,TypeChecker,bvar,constant,exprEq,forallE,levelSucc,levelZero,nameFromDotted,sort} from '../dist/src/index.js';
 import {exact} from '../packages/tactic/dist/src/index.js';
 import {freeVariables,validateIrModule} from '../packages/compiler-ir/dist/src/index.js';
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
@@ -30,6 +31,48 @@ const elaborated=elaborateChecked({
   }),
 },'zero',{expectedType:'Nat'});
 assert(elaborated.expectedType==='Nat','elaboration expected type did not flow');
+
+
+const kernelEnv=new Environment();
+const kernel=new Kernel(kernelEnv);
+const TestNat=nameFromDotted('Integration.Nat');
+const testZero=nameFromDotted('Integration.zero');
+const testId=nameFromDotted('Integration.id');
+kernel.addAxiom({
+  kind:'axiom',
+  name:TestNat,
+  levelParams:[],
+  type:sort(levelSucc(levelZero)),
+});
+kernel.addAxiom({
+  kind:'axiom',
+  name:testZero,
+  levelParams:[],
+  type:constant(TestNat),
+});
+kernel.addAxiom({
+  kind:'axiom',
+  name:testId,
+  levelParams:[],
+  type:forallE(
+    nameFromDotted('α'),
+    sort(levelSucc(levelZero)),
+    forallE(nameFromDotted('x'),bvar(0),bvar(1)),
+    'implicit',
+  ),
+});
+const exprMeta=new ExprMetaContext(kernelEnv);
+const applied=elaborateApplication({
+  environment:kernelEnv,
+  metaContext:exprMeta,
+  fn:constant(testId),
+  args:[constant(testZero)],
+});
+assert(applied.inserted.length===1,'real application elaborator did not insert implicit argument');
+assert(exprMeta.snapshotAssignments().size===1,'implicit type metavariable was not solved');
+assert(exprEq(applied.type,constant(TestNat)),'application elaborator produced wrong dependent result type');
+const appliedType=new TypeChecker(kernelEnv,new LocalContext()).check(applied.term);
+assert(exprEq(appliedType,constant(TestNat)),'kernel rejected grounded elaborated application');
 
 const tacticState=exact(
   {goals:[{target:'Nat',locals:[]}],proofs:[]},

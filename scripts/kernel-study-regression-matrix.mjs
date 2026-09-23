@@ -110,6 +110,20 @@ if(!assuranceDoc.includes('Do not call this source\ndeclaration order')){
   throw new Error('canonical replay assurance wording drift: source-order disclaimer missing');
 }
 
+const nativeEval=readFileSync('oracle/replay-probe/NativeEval.lean','utf8');
+for(const marker of [
+  '(checkMeta := false)',
+  'env.evalConst Nat {} constName',
+  'env.evalConst Bool {} constName',
+  'checkConstType env \`Nat constName',
+  'checkConstType env \`Bool constName',
+]){
+  if(!nativeEval.includes(marker))throw new Error('native evaluator boundary drift: missing '+marker);
+}
+if(nativeEval.includes('Meta.reduceNatNative')||nativeEval.includes('Meta.reduceBoolNative')){
+  throw new Error('native evaluator boundary drift: Meta native helper would reintroduce evalCheckMeta');
+}
+
 const counts={};
 for(const entry of [...Object.values(matrix),...Object.values(hardeningExtras)])counts[entry.kind]=(counts[entry.kind]??0)+1;
 console.log(JSON.stringify({

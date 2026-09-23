@@ -190,12 +190,16 @@ The TypeScript checker follows both orders. Its native marker shape also matches
 C++: a level-free `Lean.reduceBool` or `Lean.reduceNat` application with one
 constant argument, evaluated by name through an explicit TCB provider.
 
-For the Lean-backed provider, `NativeEval.lean` uses
-`Meta.reduceBoolNative`/`Meta.reduceNatNative`. In final 4.34 these call
-`evalConstCheck`, which first requires the named declaration's type head to be
-exactly `Bool`/`Nat` and then executes `env.evalConst`. This preserves the
-compiler-IR/`@[implemented_by]` boundary instead of substituting logical kernel
-normalization.
+The Lean-backed provider deliberately does **not** call
+`Meta.reduceBoolNative`/`Meta.reduceNatNative`. Those helpers route through
+`Environment.evalConstCheck`, and its default `evalConst(checkMeta := true)`
+rejects imported declarations whose IR phase is ordinary `.runtime`. Final
+Lean 4.34 kernel `ir::run_boxed_kernel` has no such meta-only guard. Instead,
+`NativeEval.lean` checks the named declaration's type head exactly
+`Bool`/`Nat`, then calls `env.evalConst` with empty options and
+`checkMeta := false`. Both `lean_eval_const` and `run_boxed_kernel` reach
+the same IR interpreter `run_boxed`, preserving compiler-IR/`@[implemented_by]`
+behavior without accidentally narrowing the kernel's runtime domain.
 
 Direct coverage now includes the native cases from upstream `kernel1.lean`:
 equality/disequality of compiler-reduced Nat definitions, symmetric reduction to

@@ -156,13 +156,16 @@ test('isProp requires the inferred type to reduce to a Sort',()=>{
  throws(()=>tc.isProp(natLit(0)));
 });
 
-test('Lean structural equality preserves KVMap-like MData equality',()=>{
+test('Lean structural equality preserves ordered MData entry structure',()=>{
  const x=natLit(0);
  const a={kind:'mdata',data:{alpha:1,beta:true},expr:x} as const;
+ const same={kind:'mdata',data:{alpha:1,beta:true},expr:x} as const;
  const reordered={kind:'mdata',data:{beta:true,alpha:1},expr:x} as const;
  const different={kind:'mdata',data:{alpha:1,beta:false},expr:x} as const;
- assert(exprLeanEq(a,reordered),'KVMap equality is key based, not insertion-order based');
+ assert(exprLeanEq(a,same),'identical ordered metadata payloads remain structurally equal');
+ assert(!exprLeanEq(a,reordered),'C++ kvmap structural equality preserves entry-list order');
  assert(!exprLeanEq(a,different),'different MData payloads must remain structurally distinct');
+ assert(new TypeChecker(baseEnv()).isDefEq(a,reordered),'kernel defeq intentionally ignores MData payload ordering');
  assert(new TypeChecker(baseEnv()).isDefEq(a,different),'kernel defeq intentionally ignores MData payloads');
 });
 

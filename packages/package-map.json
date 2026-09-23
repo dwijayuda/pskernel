@@ -435,7 +435,7 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "verified-ir-foundation+intrinsic-contract+software-where-ir-mvp",
+      "status": "verified-ir-external-imports+intrinsic-contract+software-where-ir-mvp",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
         "kernel",
@@ -443,6 +443,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified IR can carry typed external named ESM imports. Import local names share the declaration value namespace, source/import names are validated, and import types use the same VerifiedIrType model as checked executable declarations.",
+        "External IR imports are runtime dependency metadata only; their presence does not constitute proof evidence or kernel admission.",
         "Compiler IR now has a verified-core lane distinct from the transitional software-HIR lane.",
         "Verified IR separates compile-time type parameters from runtime parameters so dependent/type binders can be erased from JavaScript while retained in TypeScript declarations.",
         "The verified IR is runtime-oriented and intentionally does not reuse kernel Expr as code-generation IR.",
@@ -476,7 +478,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "verified-core-typescript-mvp+software-where-typescript-mvp",
+      "status": "verified-esm-imports+verified-core-typescript-mvp+software-where-typescript-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -484,6 +486,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "The verified TypeScript emitter emits typed-IR external imports as canonical named ESM imports before generated declarations; aliases preserve the IR local name.",
+        "Backend imports consume explicit verified-IR metadata only and never infer proof assumptions from JavaScript/TypeScript packages.",
         "The preferred backend lane now accepts verified compiler IR produced after pskernel admission and erasure.",
         "Compile-time dependent type parameters are emitted as TypeScript generics for .ts/.d.ts while tsc removes them from JavaScript runtime code.",
         "The backend remains untrusted: TypeScript/JavaScript emission cannot affect theorem validity or kernel admission.",

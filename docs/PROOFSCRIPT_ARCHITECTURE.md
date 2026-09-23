@@ -907,3 +907,42 @@ enabled in the ProofScript workspace.
 This checkpoint remains document-local. DS5 project/import semantics must be
 composed into the language service before cross-file/cross-language navigation
 can claim semantic project awareness.
+
+## JavaScript/npm FFI foundation
+
+The verified compiler IR now has an explicit external-import surface:
+
+```text
+checked executable meaning
+        |
+        v
+ verified IR
+   imports: [
+     { localName, source, importedName, type }
+   ]
+        |
+        v
+ TypeScript named ESM import
+```
+
+This layer is intentionally **runtime-only metadata**. An IR import does not
+create a pskernel theorem, definition, or proof witness. The TypeScript backend
+may emit it only because an earlier trusted semantic boundary has supplied a
+typed runtime dependency contract.
+
+The next frontend/checked-core FFI checkpoint must preserve three distinct
+facts:
+
+1. the source signature that ProofScript typechecks against;
+2. the runtime binding (npm/ESM source + exported symbol);
+3. the trust/assumption status exposed to users and assurance tooling.
+
+JavaScript execution must never be used to discharge a theorem. If an external
+signature is represented in the kernel environment to typecheck executable
+uses, that declaration must be marked and reported as an external/runtime
+assumption, and proof-producing result types must fail closed in the first FFI
+profile.
+
+The initial backend form is named ESM import only. Default imports, namespace
+imports, CommonJS, dynamic import, side-effect imports, and package-resolution
+policy remain later explicit extensions.

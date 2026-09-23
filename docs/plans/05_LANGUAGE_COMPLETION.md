@@ -342,6 +342,17 @@ Interop rule:
 - verified ProofScript code may prove properties about models/specifications,
   but pskernel must never trust JavaScript execution as a proof oracle.
 
+Current FFI checkpoint:
+
+- verified IR now represents typed named ESM imports;
+- the TypeScript backend emits those imports canonically;
+- local import names share the verified value namespace with generated
+  declarations;
+- no source declaration or kernel assumption is created yet, so this checkpoint
+  changes no proof semantics;
+- next, source-level FFI signatures must make their runtime trust explicit and
+  remain distinguishable from theorem/definition admissions.
+
 Exit condition:
 
 - a small Node application can use at least one normal npm package while its
@@ -488,18 +499,19 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 6. Validate and then broaden the landed bounded zero-subgoal `exact?` search
    only where Lean library-search semantics can be modeled explicitly; do not
    silently turn it into recursive automation.
-7. Continue the landed DS5 mixed-source verified project MVP: imported
-   semantic metadata, checked-module cache/integrity, project integrity, and
-   configured project-relative source roots are now landed. The remaining DS5
-   blocker is a real persistent module-artifact payload path; do not fabricate
-   Lean4Export records.
+7. Continue DS5 from the landed mixed-source project + replay-gated persistent
+   proofscript-module@2 artifact path. The next blocker is the explicit
+   JavaScript/npm FFI source boundary and its trust/assumption reporting; do not
+   let runtime imports become proof evidence.
 8. DS6 editor MVP is landed: source-kind routing, checked import composition,
    shared Node/LSP source-root resolution, cross-source navigation,
    non-destructive .ps / supported .lean conversion actions, and importer
    diagnostic refresh across open documents. Later optimize refresh scope and
    improve lexical navigation with scope-aware indexing without changing proof
    authority.
-9. Design and implement explicit npm/JS FFI.
+9. Continue the explicit npm/JS FFI from the landed verified-IR named ESM
+   import foundation: add source signatures, checked admission/trust metadata,
+   project dependency policy, and runtime binding tests in that order.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.

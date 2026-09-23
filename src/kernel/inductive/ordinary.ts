@@ -167,6 +167,44 @@ function generateRecursors(work:Environment,d:InductiveDecl,stats:Stats):{infos:
  });
  return {infos,expectedRules};
 }
+/** Lean 4.34 PR #14808 defense-in-depth: validate the installed recursor through
+ * the real reducer, independently of the synthesis-side expected-rule calculation. */
+export function validateInstalledRecursorsByReduction(work:Environment,d:InductiveDecl):void{
+ const ctorLevels=d.levelParams.map(levelParam);
+ for(const it of d.types){
+   const ri=work.get(recName(it.name));if(ri.kind!=='recursor')throw new KernelError(`missing generated recursor '${nameToString(recName(it.name))}'`);
+   const base=new LocalContext(),baseTc=tc(work,base,!!d.isUnsafe,ri.levelParams);
+   baseTc.ensureSort(baseTc.check(ri.type),ri.type);
+   let rt=baseTc.whnf(ri.type);const pre:OpenVar[]=[];
+   const preCount=ri.numParams+ri.numMotives+ri.numMinors;
+   for(let i=0;i<preCount;i++){
+     rt=baseTc.whnf(rt);if(rt.kind!=='forall')throw new KernelError(`generated recursor '${nameToString(ri.name)}' has malformed binder metadata`);
+     const v=addLocal(base,rt.name,rt.type,rt.binderInfo);pre.push(v);rt=baseTc.whnf(instantiate1(rt.body,v.expr));
+   }
+   const params=pre.slice(0,ri.numParams).map(x=>x.expr);
+   const recPre=mkAppN(constant(ri.name,ri.levelParams.map(levelParam)),pre.map(x=>x.expr));
+   for(const ctor of it.ctors){
+     const lctx=base.clone(),checker=tc(work,lctx,!!d.isUnsafe,ri.levelParams);let ct=ctor.type;
+     for(let i=0;i<ri.numParams;i++){
+       ct=checker.whnf(ct);if(ct.kind!=='forall')throw new KernelError(`constructor '${nameToString(ctor.name)}' has fewer parameters than its recursor`);
+       ct=checker.whnf(instantiate1(ct.body,params[i]!));
+     }
+     const fields:OpenVar[]=[];
+     while((ct=checker.whnf(ct)).kind==='forall'){
+       const v=addLocal(lctx,ct.name,ct.type,ct.binderInfo);fields.push(v);ct=instantiate1(ct.body,v.expr);
+     }
+     ct=checker.whnf(ct);const result=appView(ct);
+     if(result.fn.kind!=='const'||!nameEq(result.fn.name,it.name)||result.args.length!==ri.numParams+ri.numIndices)
+       throw new KernelError(`constructor '${nameToString(ctor.name)}' result does not match generated recursor metadata`);
+     for(let i=0;i<ri.numParams;i++)if(!checker.isDefEq(result.args[i]!,params[i]!))
+       throw new KernelError(`constructor '${nameToString(ctor.name)}' parameter does not match generated recursor metadata`);
+     const indices=result.args.slice(ri.numParams),intro=mkAppN(constant(ctor.name,ctorLevels),[...params,...fields.map(x=>x.expr)]);
+     const lhs=mkAppN(recPre,[...indices,intro]),expected=checker.check(lhs),reduct=checker.whnf(lhs),actual=checker.check(reduct);
+     if(!checker.isDefEq(actual,expected))
+       throw new KernelError(`generated recursor computation rule for '${nameToString(ctor.name)}' is not type-preserving`);
+   }
+ }
+}
 function commit(from:Environment,to:Environment,originalKeys:Set<string>):void{for(const i of from.entries())if(!originalKeys.has(nameKey(i.name)))to.add(i);}
 
 interface InternalInductiveAdmissionOptions { readonly allowPrimitiveNames?: boolean; readonly allowReservedNestedAux?: boolean }
@@ -182,8 +220,12 @@ export function addOrdinaryInductiveInternal(env:Environment,d:InductiveDecl,opt
  const stage=<T>(label:string,f:()=>T):T=>{try{return f();}catch(e){const msg=e instanceof Error?e.message:String(e);throw new KernelError(`inductive ${label}: ${msg}`);}};
  const original=new Set(env.entries().map(x=>nameKey(x.name)));const work=env.clone();const stats=stage('header checking',()=>computeStats(work,d));stage('type declaration',()=>declareTypes(work,d,stats));stage('constructor checking',()=>checkConstructors(work,d,stats));stage('constructor declaration',()=>declareConstructors(work,d));
  const {infos,expectedRules}=stage('recursor synthesis',()=>generateRecursors(work,d,stats));for(const i of infos){if(work.has(i.name))throw new KernelError(`already declared '${nameToString(i.name)}'`);work.add(i);}
- // Defensive 4.34-style preservation checks: synthesized recursor types and every computation rule must typecheck.
- stage('recursor validation',()=>{for(const i of infos){const checker=new TypeChecker(work,new LocalContext(),undefined,undefined,d.isUnsafe?'unsafe':'safe',i.levelParams);stage(`recursor type ${nameToString(i.name)}`,()=>checker.ensureSort(checker.check(i.type),i.type));for(const rb of expectedRules.get(nameKey(i.name))??[]){stage(`recursor rule ${nameToString(rb.rule.ctor)}`,()=>{const got=checker.check(rb.rule.rhs);if(!checker.isDefEq(got,rb.expectedType))throw new KernelError(`recursor rule for '${nameToString(rb.rule.ctor)}' is not type preserving`);});}}});
+ // Defensive 4.34-style preservation checks: first verify synthesis-side rule types,
+ // then independently exercise each installed rule through the real recursor reducer (PR #14808).
+ stage('recursor validation',()=>{
+   for(const i of infos){const checker=new TypeChecker(work,new LocalContext(),undefined,undefined,d.isUnsafe?'unsafe':'safe',i.levelParams);stage(`recursor type ${nameToString(i.name)}`,()=>checker.ensureSort(checker.check(i.type),i.type));for(const rb of expectedRules.get(nameKey(i.name))??[]){stage(`recursor rule ${nameToString(rb.rule.ctor)}`,()=>{const got=checker.check(rb.rule.rhs);if(!checker.isDefEq(got,rb.expectedType))throw new KernelError(`recursor rule for '${nameToString(rb.rule.ctor)}' is not type preserving`);});}}
+   validateInstalledRecursorsByReduction(work,d);
+ });
  commit(work,env,original);
 }
 

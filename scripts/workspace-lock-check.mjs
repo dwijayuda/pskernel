@@ -15,6 +15,17 @@ function fail(message){
   throw new Error('workspace-lock: '+message);
 }
 
+function normalizedRecord(value){
+  return Object.fromEntries(
+    Object.entries(value).sort(([a],[b])=>a.localeCompare(b)),
+  );
+}
+
+function recordsEqual(a,b){
+  return JSON.stringify(normalizedRecord(a))===
+    JSON.stringify(normalizedRecord(b));
+}
+
 if(lock.lockfileVersion!==3){
   fail('expected lockfileVersion 3');
 }
@@ -59,7 +70,7 @@ for(const dir of workspaceDirs){
   for(const field of ['dependencies','devDependencies']){
     const expected=manifest[field]??{};
     const actual=locked[field]??{};
-    if(JSON.stringify(actual)!==JSON.stringify(expected)){
+    if(!recordsEqual(actual,expected)){
       fail(path+' '+field+' drift');
     }
   }

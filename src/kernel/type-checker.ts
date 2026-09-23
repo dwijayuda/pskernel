@@ -228,9 +228,11 @@ export class TypeChecker {
       case'app':{
         const av=appView(e),f0=av.fn,f=this.whnfCore(f0,cheapRec,cheapProj);
         if(f.kind==='lam'){
-          let head:Expr=f,i=0;
-          while(i<av.args.length&&head.kind==='lam'){head=instantiate1(head.body,av.args[i]!);i++;}
-          r=this.whnfCore(mkAppN(head,av.args.slice(i)),cheapRec,cheapProj);
+          let head:Extract<Expr,{kind:'lam'}>=f,m=1;
+          while(m<av.args.length&&head.body.kind==='lam'){head=head.body;m++;}
+          const consumed=[...av.args.slice(0,m)].reverse();
+          const body=instantiate(head.body,consumed);
+          r=this.whnfCore(mkAppN(body,av.args.slice(m)),cheapRec,cheapProj);
         }else if(exprLeanEq(f,f0)){
           const q=this.env.quotInitialized?reduceQuot(e,y=>this.whnf(y)):null;
           if(q)return this.whnfCore(q,cheapRec,cheapProj);

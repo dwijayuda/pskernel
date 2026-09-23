@@ -27,6 +27,27 @@ function arity(e:Expr):number{let n=0,x=e;while(x.kind==='forall'){n++;x=x.body;
 function uniqueNames(xs:readonly Name[]):boolean{return xs.every((x,i)=>xs.findIndex(y=>nameEq(x,y))===i);}
 function mkBinder(kind:'forall'|'lam',v:OpenVar,body:Expr):Expr{const b=abstractFVar(body,v.id);return kind==='forall'?forallE(v.decl.userName,v.decl.type,b,v.decl.binderInfo):lam(v.decl.userName,v.decl.type,b,v.decl.binderInfo);}
 function closeMany(kind:'forall'|'lam',vs:readonly OpenVar[],body:Expr):Expr{let r=body;for(let i=vs.length-1;i>=0;i--)r=mkBinder(kind,vs[i]!,r);return r;}
+function isReservedNestedName(n:Name):boolean{
+ const s=nameToString(n);return s==='_nested'||s.startsWith('_nested.');
+}
+function usesReservedNestedAux(e:Expr):boolean{
+ switch(e.kind){
+   case'const':return isReservedNestedName(e.name);
+   case'proj':return isReservedNestedName(e.typeName)||usesReservedNestedAux(e.expr);
+   case'app':return usesReservedNestedAux(e.fn)||usesReservedNestedAux(e.arg);
+   case'lam':case'forall':return usesReservedNestedAux(e.type)||usesReservedNestedAux(e.body);
+   case'let':return usesReservedNestedAux(e.type)||usesReservedNestedAux(e.value)||usesReservedNestedAux(e.body);
+   case'mdata':return usesReservedNestedAux(e.expr);
+   default:return false;
+ }
+}
+export function checkNoReservedNestedAux(d:InductiveDecl):void{
+ for(const it of d.types){
+   if(usesReservedNestedAux(it.type))throw new KernelError(`invalid declaration '${nameToString(it.name)}', it uses the reserved prefix '_nested'`);
+   for(const ctor of it.ctors)if(usesReservedNestedAux(ctor.type))throw new KernelError(`invalid declaration '${nameToString(ctor.name)}', it uses the reserved prefix '_nested'`);
+ }
+}
+
 /** Final Lean 4.34 syntactic uniform-occurrence check.
  * This intentionally runs before WHNF/nested preprocessing because reduction can erase
  * a malformed recursive occurrence before positivity checking sees it. */
@@ -149,9 +170,10 @@ function generateRecursors(work:Environment,d:InductiveDecl,stats:Stats):{infos:
 function commit(from:Environment,to:Environment,originalKeys:Set<string>):void{for(const i of from.entries())if(!originalKeys.has(nameKey(i.name)))to.add(i);}
 
 /** Admit an ordinary (non-nested) inductive declaration and synthesize its constructors/recursors. */
-export interface InductiveAdmissionOptions { readonly allowPrimitiveNames?: boolean }
+export interface InductiveAdmissionOptions { readonly allowPrimitiveNames?: boolean; readonly allowReservedNestedAux?: boolean }
 
 export function addOrdinaryInductive(env:Environment,d:InductiveDecl,options:InductiveAdmissionOptions={}):void{
+ if(!options.allowReservedNestedAux)checkNoReservedNestedAux(d);
  checkUniformInductiveOccurrences(d);
  if(!options.allowPrimitiveNames){
    for(const it of d.types){if(isPrimitiveName(it.name))throw new KernelError(`primitive '${nameToString(it.name)}' must go through primitive recognition`);for(const c of it.ctors)if(isPrimitiveName(c.name))throw new KernelError(`primitive '${nameToString(c.name)}' must go through primitive recognition`);}

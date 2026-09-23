@@ -1,0 +1,49 @@
+import {equal,throws} from 'node:assert/strict';
+import type {VerifiedIrModule} from '@proofscript/compiler-ir/verified';
+import {
+  lowerVerifiedIrToWasm,
+  WasmLoweringError,
+} from '../src/index.js';
+
+const boolModule:VerifiedIrModule={
+  kind:'proofscript-verified-ir',
+  declarations:[{
+    name:'not',
+    typeParameters:[],
+    parameters:[{
+      name:'x',
+      type:{kind:'primitive',name:'Bool'},
+    }],
+    resultType:{kind:'primitive',name:'Bool'},
+    body:{
+      kind:'intrinsic',
+      operation:'bool.not',
+      args:[{kind:'var',name:'x'}],
+    },
+  }],
+};
+
+const lowered=lowerVerifiedIrToWasm(boolModule);
+equal(lowered.functions[0]?.name,'not');
+equal(lowered.functions[0]?.result,'i32');
+
+throws(
+  ()=>lowerVerifiedIrToWasm({
+    kind:'proofscript-verified-ir',
+    declarations:[{
+      name:'badNat',
+      typeParameters:[],
+      parameters:[{
+        name:'x',
+        type:{kind:'primitive',name:'Nat'},
+      }],
+      resultType:{kind:'primitive',name:'Nat'},
+      body:{kind:'var',name:'x'},
+    }],
+  }),
+  (error:unknown)=>
+    error instanceof WasmLoweringError&&
+    error.code==='PS_WASM_UNSUPPORTED_NAT_RUNTIME',
+);
+
+console.log('ok - @proofscript/wasm-lowering W1 fail-closed lowering');

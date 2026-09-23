@@ -327,7 +327,7 @@ test('Lean structural equality preserves let nondep while defeq zeta-reduces it 
 
 test('lean4export opaque MData equality ids survive replay',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"MetaA"}}',
   '{"in":2,"str":{"pre":0,"str":"MetaB"}}',
   '{"ie":0,"sort":0}',
@@ -1702,7 +1702,7 @@ test('exact JSON parser preserves integers beyond JavaScript safe range',()=>{
 
 test('lean4export preserves raw max and imax level syntax',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"u"}}',
   '{"in":2,"str":{"pre":0,"str":"RawMax"}}',
   '{"in":3,"str":{"pre":0,"str":"RawIMax"}}',
@@ -1723,7 +1723,7 @@ test('lean4export preserves raw max and imax level syntax',()=>{
 
 test('lean4export replay admits a version-pinned axiom stream',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"A"}}',
   '{"il":1,"succ":0}',
   '{"ie":0,"sort":1}',
@@ -1736,7 +1736,7 @@ test('lean4export replay admits a version-pinned axiom stream',()=>{
 
 test('lean4export incremental line replay matches bulk replay',()=>{
  const lines=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"A"}}',
   '{"il":1,"succ":0}',
   '{"ie":0,"sort":1}',
@@ -1779,7 +1779,7 @@ test('real Lean 4.34 indexed recursor metadata matches exactly',()=>{
 
 test('lean4export reconstructs partial mutual definition blocks from all metadata',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"A"}}','{"in":2,"str":{"pre":0,"str":"B"}}',
   '{"ie":0,"sort":0}','{"ie":1,"const":{"name":1,"us":[]}}','{"ie":2,"const":{"name":2,"us":[]}}',
   '{"def":{"name":2,"levelParams":[],"type":0,"value":1,"hints":{"regular":1},"safety":"partial","all":[1,2]}}',
@@ -1790,7 +1790,7 @@ test('lean4export reconstructs partial mutual definition blocks from all metadat
 
 test('lean4export rejects an incomplete mutual definition group',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"A"}}','{"in":2,"str":{"pre":0,"str":"B"}}',
   '{"ie":0,"sort":0}','{"ie":1,"const":{"name":1,"us":[]}}',
   '{"def":{"name":1,"levelParams":[],"type":0,"value":1,"hints":{"regular":1},"safety":"partial","all":[1,2]}}'
@@ -1806,7 +1806,7 @@ test('kernel metadata equivalence ignores binder display names but retains annot
 });
 
 test('lean4export replay accepts sparse and out-of-order intern indices',()=>{
- const meta='{"meta":{"exporter":{"name":"handcrafted","version":"0.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}';
+ const meta='{"meta":{"exporter":{"name":"handcrafted","version":"0.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}';
  const sparse=[meta,'{"in":2,"str":{"pre":0,"str":"foo"}}','{"ie":4,"sort":0}','{"axiom":{"isUnsafe":false,"levelParams":[],"name":2,"type":4}}'].join('\n');
  const a=new Lean4ExportReplay();a.replay(sparse);assert(a.env.entries().length===1);
  const outOfOrder=[meta,'{"in":1,"str":{"pre":0,"str":"foo"}}','{"il":2,"succ":0}','{"il":1,"succ":2}','{"ie":0,"sort":1}','{"axiom":{"isUnsafe":false,"levelParams":[],"name":1,"type":0}}'].join('\n');
@@ -1817,7 +1817,7 @@ test('lean4export replay accepts sparse and out-of-order intern indices',()=>{
 
 test('lean4export rejects negative Nat literals at the wire boundary',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"ie":0,"natVal":"-1"}'
  ].join('\n');
  throws(()=>new Lean4ExportReplay().replay(nd));
@@ -1825,7 +1825,7 @@ test('lean4export rejects negative Nat literals at the wire boundary',()=>{
 
 test('lean4export rejects projection indices above UInt32 before number conversion',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"S"}}',
   '{"ie":0,"proj":{"typeName":1,"idx":4294967296,"struct":999}}'
  ].join('\n');
@@ -1833,7 +1833,10 @@ test('lean4export rejects projection indices above UInt32 before number conversi
 });
 
 test('lean4export replay rejects version drift before declarations',()=>{
- const nd='{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.33.0"},"format":{"version":"3.1.0"}}}';throws(()=>new Lean4ExportReplay().replay(nd));
+ const nd='{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.33.0"},"format":{"version":"3.1.0"}}}';throws(()=>new Lean4ExportReplay().replay(nd));
+});
+test('lean4export replay rejects git-hash drift before declarations',()=>{
+ const nd='{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"0000000000000000000000000000000000000000","version":"4.34.0"},"format":{"version":"3.1.0"}}}';throws(()=>new Lean4ExportReplay().replay(nd));
 });
 
 console.log(`# pass ${pass}`);console.log(`# fail ${fail}`);if(fail)throw new Error(`${fail} tests failed`);

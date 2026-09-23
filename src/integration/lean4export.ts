@@ -13,9 +13,13 @@ import { TypeChecker } from '../kernel/type-checker.js';
 import { NativeEvaluator } from '../kernel/reduction/native.js';
 import { ExactJson, JObject, asArray, asBigInt, asBoolean, asIndex, asObject, asString, field, maybeField, parseExactJson } from './exact-json.js';
 
+export const LEAN434_PINNED_GITHASH='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b' as const;
+
 export interface Lean4ExportOptions {
   /** Strict by default: an oracle-facing replay must be produced by the pinned Lean release. */
   readonly expectedLeanVersion?: string;
+  /** Exact source commit used to build the oracle binary. */
+  readonly expectedLeanGitHash?: string;
   readonly supportedFormatVersions?: readonly string[];
   /** Optional Lean 4.34 compiler-IR evaluator. Configuring it extends the TCB. */
   readonly nativeEvaluator?: NativeEvaluator;
@@ -57,10 +61,13 @@ export class Lean4ExportReplay {
   private readonly exprs=new DenseIndexTable<Expr>();
   private sawMeta=false; private lineNo=0; private decls=0;
   private readonly pendingMutual=new Map<string,{all:readonly Name[]; defs:Map<string,DefinitionInfo>}>();
-  private readonly expectedLeanVersion:string; private readonly formats:readonly string[];
+  private readonly expectedLeanVersion:string; private readonly expectedLeanGitHash:string; private readonly formats:readonly string[];
 
   constructor(env=new Environment(),options:Lean4ExportOptions={}){
-    this.env=env;this.kernel=new Kernel(env,options.nativeEvaluator);this.expectedLeanVersion=options.expectedLeanVersion??'4.34.0';this.formats=options.supportedFormatVersions??['3.1.0'];
+    this.env=env;this.kernel=new Kernel(env,options.nativeEvaluator);
+    this.expectedLeanVersion=options.expectedLeanVersion??'4.34.0';
+    this.expectedLeanGitHash=options.expectedLeanGitHash??LEAN434_PINNED_GITHASH;
+    this.formats=options.supportedFormatVersions??['3.1.0'];
   }
 
   private stats():ReplayStats{return {lines:this.lineNo,names:this.names.size-1,levels:this.levels.size-1,expressions:this.exprs.size,declarations:this.decls};}
@@ -107,8 +114,9 @@ export class Lean4ExportReplay {
   private meta(m:JObject):void{
     if(this.sawMeta||this.lineNo!==1)throw new KernelError('duplicate or non-initial lean4export metadata');
     const lean=asObject(field(m,'lean','meta'),'meta.lean'),format=asObject(field(m,'format','meta'),'meta.format');
-    const lv=asString(field(lean,'version','meta.lean'),'meta.lean.version'),fv=asString(field(format,'version','meta.format'),'meta.format.version');
+    const lv=asString(field(lean,'version','meta.lean'),'meta.lean.version'),gh=asString(field(lean,'githash','meta.lean'),'meta.lean.githash'),fv=asString(field(format,'version','meta.format'),'meta.format.version');
     if(lv!==this.expectedLeanVersion)throw new KernelError(`lean4export Lean version ${lv} does not match pinned ${this.expectedLeanVersion}`);
+    if(gh!==this.expectedLeanGitHash)throw new KernelError(`lean4export Lean git hash ${gh||'<empty>'} does not match pinned ${this.expectedLeanGitHash}`);
     if(!this.formats.includes(fv))throw new KernelError(`unsupported lean4export format ${fv}; expected ${this.formats.join(' or ')}`);
     this.sawMeta=true;
   }

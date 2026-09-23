@@ -496,7 +496,8 @@
     "docs/PROOFSCRIPT_ARCHITECTURE.md plus scripts/proofscript-architecture-check.mjs define and enforce the canonical verified compiler dependency direction.",
     "The canonical integration regression now compiles multiple pskernel-admitted Nat functions, including a user-definition call, through verified IR to TypeScript/JavaScript.",
     "The canonical verified integration regression now includes a pskernel-admitted structure whose constructor and projection lower through verified IR to branded TypeScript/JavaScript.",
-    "The canonical verified integration regression now includes an unparameterized pskernel-admitted ADT and zero-/one-field constructor values compiled through tagged verified IR to TypeScript/JavaScript."
+    "The canonical verified integration regression now includes an unparameterized pskernel-admitted ADT and zero-/one-field constructor values compiled through tagged verified IR to TypeScript/JavaScript.",
+    "The active language completion plan is docs/plans/05_LANGUAGE_COMPLETION.md; new language work must satisfy its source-to-kernel-to-runtime or source-to-kernel proof acceptance gates."
   ],
   "preferredPipeline": [
     "syntax",
@@ -513,5 +514,6 @@
     "status": "transitional",
     "package": "language",
     "rule": "no automatic fallback from verified-core compilation"
-  }
+  },
+  "activeLanguagePlan": "docs/plans/05_LANGUAGE_COMPLETION.md"
 }

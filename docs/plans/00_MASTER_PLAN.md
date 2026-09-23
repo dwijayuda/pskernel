@@ -196,3 +196,15 @@ slice:
 `psc check --verified` and `psc build --verified` expose this path without
 fallback. The previous software checker/compiler lane remains temporary until
 verified-core coverage catches up.
+
+
+## Active language completion execution plan
+
+The concrete language-completion/anti-drift sequence is maintained in:
+
+- `docs/plans/05_LANGUAGE_COMPLETION.md`
+
+That plan defines acceptance gates for verified-core closure, dependent ADTs
+and recursion, Meta/Elab convergence, theorem prover v1, npm/JS interop,
+controlled effects, standard library work, legacy-path retirement, and
+production hardening.

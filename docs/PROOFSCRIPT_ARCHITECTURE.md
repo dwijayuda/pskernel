@@ -978,3 +978,48 @@ types remain fail-closed until their ABI and assurance story are specified.
 Checked-admission persistence is versioned compatibly: codec v1 / payload
 1.0.0 remains readable; new external admissions require codec v2 / payload
 1.1.0. Artifact verification enforces that coupling.
+
+## Explicit source FFI and assurance checkpoint
+
+The first source-level JavaScript/npm FFI declaration is now an intentional
+post-v0.7 repository extension:
+
+```proofscript
+extern function hostInc(x : Nat) : Nat
+  from "host-lib"
+  import inc;
+```
+
+It records four separate facts: the ProofScript-local name, the checked logical
+signature, the ESM package/module source, and the named runtime export.
+
+The frontend does not trust this declaration directly. Its signature is
+elaborated through the ordinary declaration-header path, represented as a
+non-`unsafe` opaque axiom, paired with explicit runtime-binding metadata, and
+validated by the existing checked-core external invariant before admission.
+That invariant remains stricter than the source grammar: the first profile
+requires one or more explicit primitive runtime arguments and a primitive
+runtime result, rejecting proof-valued, polymorphic, nominal, and higher-order
+extern signatures.
+
+The two output views are deliberately different:
+
+- internal logical Lean lowering may render the signature as an `axiom`, so
+  verified checking/building can expose the logical assumption;
+- canonical ProofScript printing preserves the full ESM binding;
+- source translation to canonical Lean rejects extern-bearing modules because
+  a Lean source file cannot preserve the runtime binding metadata.
+
+Verified CLI reports now include a separate assurance record with:
+
+- pskernel-checked definition count;
+- pskernel-checked theorem count;
+- runtime-external assumption count;
+- each external's local name, module source, imported symbol, and logical
+  signature;
+- `proofEvidence=false` for every runtime external.
+
+Thus `proofStatus: kernel-verified` continues to describe the proof checking
+performed on internal theorems; it is not a claim that JavaScript/npm runtime
+bindings were proven correct. The next FFI checkpoint is deterministic package
+dependency policy and a real resolvable runtime-binding test.

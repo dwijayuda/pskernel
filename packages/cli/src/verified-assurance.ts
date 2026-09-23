@@ -16,6 +16,8 @@ export interface VerifiedRuntimeAssumption {
 export interface VerifiedAssuranceReport {
   readonly proofAuthority:'pskernel';
   readonly internalProofs:'kernel-verified';
+  readonly kernelCheckedDefinitionCount:number;
+  readonly kernelCheckedTheoremCount:number;
   readonly runtimeAssumptionCount:number;
   readonly hasRuntimeAssumptions:boolean;
   readonly runtimeAssumptions:readonly VerifiedRuntimeAssumption[];
@@ -36,6 +38,8 @@ export function verifiedAssuranceReport(
   return {
     proofAuthority:'pskernel',
     internalProofs:'kernel-verified',
+    kernelCheckedDefinitionCount:checkedCore.definitions.length,
+    kernelCheckedTheoremCount:checkedCore.theorems.length,
     runtimeAssumptionCount:runtimeAssumptions.length,
     hasRuntimeAssumptions:runtimeAssumptions.length>0,
     runtimeAssumptions,

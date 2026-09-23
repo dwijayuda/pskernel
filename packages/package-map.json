@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
+      "status": "source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -35,6 +35,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified check/build/run reports now include an assurance object separating pskernel-checked definitions/theorems from trusted runtime external assumptions. Each runtime assumption records local name, ESM source, imported symbol, logical signature, and proofEvidence=false.",
+        "Human-readable verified check/build output warns when runtime external assumptions are present; --json exposes complete binding details.",
         "DS5.6 emits one proofscript-module@2 checked-admission artifact per verified source module below dist/.proofscript/modules. Each artifact is dependency-linked by artifact integrity and replay-gated through checked core/pskernel before build acceptance.",
         "Persistent artifacts are not yet source-skipping cache hits: a self-hashed kernel-valid artifact does not prove derivation from the current source. Trusted reuse waits for an external expected hash/lockfile or derivation certificate plus pinned base-environment identity.",
         "moduleSources now expose both the existing canonical source/dependency cache-key integrity and moduleArtifactIntegrity; those identities intentionally serve different purposes.",
@@ -142,11 +144,13 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-ds5-import-headers+lean-ds3-registered-frontend+translation-target-dispatch+canonical-ps-printer+frontend-registry+exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
+      "status": "v061-source-ffi+ds5-import-headers+lean-ds3-registered-frontend+translation-target-dispatch+canonical-ps-printer+frontend-registry+exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "A post-v0.7 repository extension adds `extern function local(args) : Result from \"pkg\" import named;` as the explicit first-order named-ESM FFI source form. The ProofScript printer preserves the full runtime binding; internal Lean lowering renders only its logical axiom view.",
+        "`psc translate --to lean` rejects modules containing extern declarations because canonical Lean cannot preserve npm/ESM runtime binding metadata; losing that metadata silently would violate dual-source semantic translation.",
         "DS5.1 adds shared leading `import Foo.Bar` module headers to the V061 module AST. Both source frontends parse them and both canonical printers preserve them before declarations.",
         "The bounded import header intentionally accepts exactly one logical module per line; Lean-subset imports reject semicolon spelling, while ProofScript input may accept it but canonical printing normalizes to Lean-compatible no-semicolon headers.",
         "DS3.1 registers the completed bounded lean-subset SourceFrontend alongside proofscript in the default registry. Source extension selects only parsing/printing ownership; downstream semantic pipeline choice remains independent.",
@@ -282,7 +286,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-imported-metadata+bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-source-ffi-admission+imported-metadata+bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -295,6 +299,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Source extern signatures reuse ordinary header elaboration, are converted to non-unsafe Lean axioms plus explicit runtime-binding metadata, and are validated by the existing checked-core first-order primitive external invariant before entering the working environment.",
+        "Proof-valued extern result types are rejected at the checked-core external boundary; source syntax does not create a more permissive FFI lane.",
         "Declaration elaboration accepts an optional checked-core seed containing already-admitted imported structures, classes, and instances. Imported metadata is reconstructed only from pskernel-validated CheckedCoreModule output, never directly from unverified source.",
         "Imported structure/class metadata initializes record/projection and class recognition exactly like same-file metadata. Imported instances are reversed into newest-admission-first candidate order, matching the existing same-file unshift priority.",
         "Bounded `exact?` now closes a goal using newest-first local exact hypotheses, then newest-first already-admitted zero-universe environment constants whose checked type is definitionally equal to the target.",

@@ -1222,4 +1222,19 @@ console.log('ok - @proofscript/elab imported structure/class/instance metadata s
   equal(result.externals[0]?.binding.importedName,'inc');
   equal(result.definitions.length,1);
 }
+{
+  const env=makeNatNotationEnvironment();
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'extern function proofOracle(x : Nat) : Prop '+
+      'from "host-lib" import proofOracle;',
+    ),env);
+  }catch(error){
+    rejected=/checked-core external invariant/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab proof-valued external fails closed');
+
 console.log('ok - @proofscript/elab explicit runtime external admission');

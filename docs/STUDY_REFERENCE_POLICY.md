@@ -212,3 +212,16 @@ for both source kinds rather than inventing a second spelling.
 Only the common logical-module header is inherited. Lean's broader module
 header features such as `public`, `meta`, `all`, package facets, and the
 full Lake resolver are not implied by this checkpoint.
+
+## Source FFI design provenance
+
+The authoritative ProofScript v0.7 study reference does not specify a concrete
+`extern`/JavaScript FFI declaration. The landed
+`extern function ... from "..." import ...;` form is therefore an explicit
+repository design revision, not a claim of v0.7 source conformance.
+
+Its logical treatment follows the existing pskernel/checked-core external
+boundary: the signature is an opaque assumption and host execution is never
+proof evidence. The named ESM host form is informed by the TypeScript/JavaScript
+study material and existing verified TypeScript emitter, but those host
+references do not define theorem or type-theoretic semantics.

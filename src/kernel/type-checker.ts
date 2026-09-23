@@ -352,12 +352,11 @@ export class TypeChecker {
 
   isDefEq(a:Expr,b:Expr):boolean{
     const pair=this.state.pair(a,b);
-    // Final Lean 4.34 uses plain symmetric pair caches, not a transitive
-    // equivalence structure. Both successful and failed public queries are cached.
-    if(this.state.failure.has(pair))return false;
+    // Final Lean 4.34 caches successful public queries only. The failure cache is
+    // reserved for the same-definition lazy-delta argument optimization.
     if(this.state.success.has(pair))return true;
     const r=this.isDefEqCore(a,b);
-    (r?this.state.success:this.state.failure).add(pair);
+    if(r)this.state.success.add(pair);
     return r;
   }
 }

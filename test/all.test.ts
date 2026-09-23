@@ -891,6 +891,28 @@ test('independent recursor validation rejects corrupted field-count metadata',()
  throws(()=>validateInstalledRecursorsByReduction(bad,decl));
 });
 
+test('independent recursor validation rejects a well-typed under-applied minor rule',()=>{
+ const env=baseEnv(),I=nameFromDotted('RecValidate.Under'),Z=nameFromDotted('RecValidate.Under.zero'),S=nameFromDotted('RecValidate.Under.succ');
+ const decl={levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[
+   {name:Z,type:constant(I)},
+   {name:S,type:forallE(nameFromDotted('n'),constant(I),constant(I))}
+ ]}]} as const;
+ addOrdinaryInductive(env,decl);
+ const rn=nameFromDotted('RecValidate.Under.rec'),ri=env.get(rn);assert(ri.kind==='recursor');
+ const stripFinalApp=(e:any):any=>{
+   if(e.kind==='lam')return {...e,body:stripFinalApp(e.body)};
+   if(e.kind==='app')return e.fn;
+   throw new Error('expected generated recursive rule to end in an application');
+ };
+ const bad=new Environment();bad.quotInitialized=env.quotInitialized;
+ for(const info of env.entries())if(nameToString(info.name)!==nameToString(rn))bad.add(info);
+ bad.add({...ri,rules:ri.rules.map(r=>nameToString(r.ctor)===nameToString(S)?{...r,rhs:stripFinalApp(r.rhs)}:r)});
+ const stored=bad.get(rn);assert(stored.kind==='recursor');
+ const checker=new TypeChecker(bad);
+ for(const rule of stored.rules)checker.check(rule.rhs);
+ throws(()=>validateInstalledRecursorsByReduction(bad,decl));
+});
+
 test('generated recursive recursor computes by iota',()=>{
  const env=baseEnv(),I=nameFromDotted('Count'),z=nameFromDotted('Count.zero'),s=nameFromDotted('Count.succ');
  addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[{name:z,type:constant(I)},{name:s,type:forallE(nameFromDotted('n'),constant(I),constant(I))}]}]});

@@ -98,11 +98,19 @@ export interface SoftwareIrParameter {
   readonly type:SoftwareIrType;
 }
 
+export interface SoftwareIrLocalDeclaration {
+  readonly name:string;
+  readonly params:readonly SoftwareIrParameter[];
+  readonly resultType:SoftwareIrType;
+  readonly body:SoftwareIrExpr;
+}
+
 export interface SoftwareIrDeclaration {
   readonly name:string;
   readonly params:readonly SoftwareIrParameter[];
   readonly resultType:SoftwareIrType;
   readonly body:SoftwareIrExpr;
+  readonly whereDeclarations?:readonly SoftwareIrLocalDeclaration[];
 }
 
 export interface SoftwareIrModule {
@@ -204,6 +212,12 @@ export function lowerCheckedSoftwareModule(module:CheckedSoftwareModule):Softwar
       params:decl.params.map((param)=>({name:param.name,type:param.type})),
       resultType:decl.resultType,
       body:lowerExpr(decl.body),
+      whereDeclarations:(decl.whereDeclarations??[]).map((local)=>({
+        name:local.name,
+        params:local.params.map((param)=>({name:param.name,type:param.type})),
+        resultType:local.resultType,
+        body:lowerExpr(local.body),
+      })),
     })),
   };
 }

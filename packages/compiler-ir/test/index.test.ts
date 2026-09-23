@@ -123,3 +123,39 @@ console.log('ok - @proofscript/compiler-ir nominal structure lowering');
   equal(ir.declarations[0]?.body.kind,'constructor');
 }
 console.log('ok - @proofscript/compiler-ir inductive ADT lowering');
+
+
+{
+  const ir=lowerCheckedSoftwareModule({
+    kind:'checked-v061-software-module',
+    structures:[],
+    inductives:[],
+    declarations:[{
+      kind:'function',
+      name:'f',
+      params:[{name:'x',type:'Nat'}],
+      resultType:'Nat',
+      body:{
+        kind:'call',
+        callee:'helper',
+        args:[{kind:'reference',name:'x',resultType:'Nat'}],
+        callStyle:'direct',
+        resultType:'Nat',
+      },
+      whereDeclarations:[{
+        name:'helper',
+        params:[{name:'y',type:'Nat'}],
+        resultType:'Nat',
+        body:{
+          kind:'binary',
+          operator:'+',
+          resultType:'Nat',
+          left:{kind:'reference',name:'y',resultType:'Nat'},
+          right:{kind:'nat',value:1n,resultType:'Nat'},
+        },
+      }],
+    }],
+  });
+  equal(ir.declarations[0]?.whereDeclarations?.[0]?.name,'helper');
+}
+console.log('ok - @proofscript/compiler-ir where helper lowering');

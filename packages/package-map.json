@@ -178,7 +178,7 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-adt-ir-mvp",
+      "status": "software-where-ir-mvp",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
         "kernel",
@@ -187,8 +187,8 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Compiler IR is a distinct typed executable representation lowered from checked software HIR.",
-        "IR now represents nominal structures, monomorphic inductive definitions, constructor values, constructor patterns, lexical lets, calls, lambdas, conditionals, and matches.",
-        "Kernel Expr erasure/lowering, generic ADTs, effects, and optimization passes remain later milestones."
+        "IR retains lexical local where declarations explicitly alongside structures, monomorphic inductives, constructors, matches, lambdas, lets, and calls.",
+        "Recursive where groups, kernel Expr erasure/lowering, generic ADTs, effects, and optimization passes remain later milestones."
       ]
     },
     {
@@ -209,7 +209,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-adt-typescript-mvp",
+      "status": "software-where-typescript-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -218,8 +218,8 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Backend accepts only typed executable compiler IR, not raw ProofScript or checked language HIR.",
-        "Structures use private unique-symbol brands; inductives use private unique-symbol discriminants plus exported constructor objects, preserving nominal typing while providing JS/TS-friendly construction.",
-        "Exhaustive inductive matches compile to single-evaluation switch expressions; Bool matches compile to equivalent conditionals.",
+        "Acyclic where helpers emit as lexically scoped local TypeScript declarations before the containing result expression.",
+        "Structures use private unique-symbol brands; inductives use private unique-symbol discriminants and exported constructor objects.",
         "TypeScript Compiler API type-checks generated TS and emits JavaScript, .d.ts, and source maps."
       ]
     },

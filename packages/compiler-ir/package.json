@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Runtime-oriented compiler IR and lowering/optimization passes.",
   "proofscript": {
-    "status": "software-adt-ir-mvp",
+    "status": "software-where-ir-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

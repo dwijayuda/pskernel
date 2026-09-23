@@ -197,3 +197,45 @@ console.log('ok - @proofscript/backend-ts nominal structure TypeScript emission'
   equal(compiled.declaration.includes('export declare const MaybeNat'),true);
 }
 console.log('ok - @proofscript/backend-ts nominal inductive TypeScript emission');
+
+
+{
+  const source=emitV061TypeScript(lowerCheckedSoftwareModule({
+    kind:'checked-v061-software-module',
+    structures:[],
+    inductives:[],
+    declarations:[{
+      kind:'function',
+      name:'f',
+      params:[{name:'x',type:'Nat'}],
+      resultType:'Nat',
+      body:{
+        kind:'call',
+        callee:'helper',
+        args:[{kind:'reference',name:'x',resultType:'Nat'}],
+        callStyle:'direct',
+        resultType:'Nat',
+      },
+      whereDeclarations:[{
+        name:'helper',
+        params:[{name:'y',type:'Nat'}],
+        resultType:'Nat',
+        body:{
+          kind:'binary',
+          operator:'+',
+          resultType:'Nat',
+          left:{kind:'reference',name:'y',resultType:'Nat'},
+          right:{kind:'nat',value:1n,resultType:'Nat'},
+        },
+      }],
+    }],
+  }));
+  equal(
+    source.includes('function helper(y: bigint): bigint { return y + 1n; }'),
+    true,
+  );
+  equal(source.includes('return helper(x);'),true);
+  const compiled=compileTypeScript(source,'where.ts');
+  equal(compiled.javascript.includes('function helper(y)'),true);
+}
+console.log('ok - @proofscript/backend-ts where helper TypeScript emission');

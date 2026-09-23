@@ -116,6 +116,7 @@ function dependencyEdges(
   packages:JsonRecord,
   owner:string,
   descriptor:JsonRecord,
+  ownerRequired:boolean,
 ):readonly RuntimeLockEdge[] {
   const required=stringMap(
     descriptor.dependencies,
@@ -144,7 +145,7 @@ function dependencyEdges(
   return names.map((name)=>{
     let kind:RuntimeLockEdge['kind'];
     let spec:string;
-    let missingAllowed=false;
+    let missingAllowed=!ownerRequired;
     if(optional[name]!==undefined){
       kind='optional';
       spec=optional[name]!;
@@ -217,11 +218,11 @@ export function parseRuntimeLockPackage(
     typeof version!=='string'
     ||typeof resolved!=='string'
     ||typeof integrity!=='string'
-    ||integrity.length===0
+    ||!/^(?:sha512|sha1)-\S+/.test(integrity)
   ){
     throw new Error(
       "PS_RUNTIME_LOCK_PACKAGE_SOURCE: '"+location+
-      "' must have string version/resolved/integrity metadata",
+      "' must have version/resolved plus sha512/sha1 SRI metadata",
     );
   }
   return {
@@ -231,6 +232,11 @@ export function parseRuntimeLockPackage(
     resolved,
     integrity,
     required,
-    dependencies:dependencyEdges(packages,location,descriptor),
+    dependencies:dependencyEdges(
+      packages,
+      location,
+      descriptor,
+      required,
+    ),
   };
 }

@@ -376,6 +376,11 @@ mutual
       setEmitted [name]
       clearActive [name]
     | .quotInfo qv =>
+      -- Match Lean.Kernel.Environment.Replay exactly: any quotient record first
+      -- replays Eq, because adding Declaration.quotDecl installs all four Quot
+      -- constants and Quot.lift/Quot.ind depend on Eq even when the current root
+      -- (for example Quot or Quot.mk) does not mention Eq in its own type.
+      dumpConstant env `Eq
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
       dumpQuot qv

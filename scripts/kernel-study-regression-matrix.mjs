@@ -100,6 +100,7 @@ for(const marker of [
   '("skippedPartial", skippedPartial)',
   'skipNonReplayable := true',
   'ci.isUnsafe || ci.isPartial',
+  'dumpConstant env \`Eq',
   'This is not claimed to be\nsource declaration order',
 ]){
   if(!exporter.includes(marker))throw new Error('canonical replay exporter protocol drift: missing '+marker);

@@ -230,6 +230,12 @@ unsafe skip count, partial skip count, and actual replayed environment size.
 Diagnostic root-range tooling keeps its existing deterministic Name.quickLt
 numbering so historical hot-range indices remain stable.
 
+Quotient replay follows Lean's special case as well: before emitting any
+`quotInfo`, the exporter recursively emits `Eq`. This is required even when
+the current Quot root does not mention `Eq`, because adding the quotient
+declaration installs the whole Quot family and `Quot.lift`/`Quot.ind` depend
+on `Eq`.
+
 The latest checked-in `full-std.log` did not produce semantic evidence: it
 failed before replay because `scripts/module-stream-oracle.mjs` contained a
 literal `\\n` before the final `console.log`, which made the module invalid

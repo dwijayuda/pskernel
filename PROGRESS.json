@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 167,
   "notes": [
+    "Quot replay ordering fix: DependencyExport now explicitly `dumpConstant env `Eq` before every quotInfo, matching Lean 4.34 Replay.replayConstant. This prevents canonical root order from attempting Quot bootstrap before Eq when the first Quot root's own type does not reference Eq.",
     "Canonical root-order hardening: moduleData.constNames can contain duplicate private theorem names across imported modules (Lean 4.34 finalizeImport explicitly supports this), while env.constants.map₁ is deduplicated. collectCanonicalRootsByModule now preserves module/serialized order but keeps only each name's first serialized occurrence, so direct-root coverage is one root per final ConstantInfo. Protocol metadata records rootDedup=`first-serialized-occurrence`.",
     "Canonical Full-Std protocol v2 now mirrors Lean 4.34 `Kernel.Environment.replay` scope: module-stream excludes ConstantInfo where `isUnsafe || isPartial` from kernel replay, while still traversing/accounting for every corpus root. Header/final evidence records totalConstants, replayableConstants, skippedUnsafe, skippedPartial, replayPolicy, and replayedConstants; the known Std corpus total remains 114029.",
     "Native evaluator anti-drift assertion repair: the guard now rejects executable `let value ← Meta.reduce*Native` calls rather than mere documentation mentions of those APIs. The corrected direct env.evalConst(checkMeta=false) helper remains unchanged.",
@@ -234,5 +235,5 @@
   ],
   "currentTreeExpectedDirectTests": 167,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "Fresh local reconstructed direct gate PASS after current src/test state: TypeScript 5.8.3 build + 167/167 tests on Node v22.16.0. Assurance-only protocol v2/root-dedup edits pass JS/static validation; pinned-Lean canonical execution remains pending."
+  "currentTreeVerification": "Fresh local reconstructed direct gate remains PASS: TypeScript 5.8.3 + 167/167 tests on Node v22.16.0. Assurance exporter now mirrors Lean replay scope, root dedup, and Quot→Eq ordering; JS/static checks continue to pass, pinned-Lean execution pending."
 }

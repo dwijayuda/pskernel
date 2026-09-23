@@ -596,6 +596,59 @@ console.log('ok - psc runtime lock rejects missing required transitive entry');
 }
 console.log('ok - psc verified Wasm W2 build/run target');
 
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-wasm-uint-run-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+
+    const cases=[
+      {type:'UInt8',input:'255',expected:255},
+      {type:'UInt16',input:'65535',expected:65535},
+      {type:'UInt32',input:'4294967295',expected:4294967295},
+      {
+        type:'UInt64',
+        input:'18446744073709551615',
+        expected:'18446744073709551615',
+      },
+    ] as const;
+
+    for(const item of cases){
+      await writeFile(
+        join(directory,'src','main.ps'),
+        'function main(x : '+item.type+') : '+item.type+' := x;\n',
+        'utf8',
+      );
+      const result=await runCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        buildTarget:'wasm',
+        passthrough:[item.input],
+      });
+      equal(result.mainResult,item.expected);
+    }
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Wasm W2 UInt CLI run ABI');
+
 
 {
   const result=compileVerifiedSource(

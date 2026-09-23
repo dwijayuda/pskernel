@@ -40,7 +40,8 @@ Already implemented on the preferred verified path:
 
 - primitive Nat/Int/Bool/String/Unit representation;
 - generic functions and higher-order functions;
-- checked Nat arithmetic and bounded Nat equality/order comparison/if;
+- checked Nat arithmetic, bounded Nat equality/order comparison, Bool logic,
+  and checked Bool/ordering if conditions;
 - lambdas and lets;
 - structures, parameterized structures, record construction, projection;
 - inductives, generic inductives, constructors, checked pattern matching;
@@ -293,7 +294,7 @@ Do not reorder without repository evidence.
 
 1. Repair/obtain an executing CI or local root-gate run.
 2. Continue verified primitive/equality/comparison semantics beyond the landed
-   Nat ==/!= Bool path only where Lean-compatible meaning is explicit.
+   Nat ==/!= and Bool !/&&/|| paths only where Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
 4. Continue theorem prover v1 with refine/constructor/cases; broaden apply only

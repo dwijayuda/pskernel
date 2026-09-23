@@ -11,7 +11,7 @@ import type {
   V061CoreElabContext,
 } from './v061-context.js';
 import {
-  elaborateV061NatCondition,
+  elaborateV061Condition,
   type V061TermElaborator,
 } from './v061-notation-elab.js';
 
@@ -21,13 +21,7 @@ export function elaborateV061IfExpression(
   expected:Expr|undefined,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
-  if(expr.condition.kind!=='binary'){
-    throw new Error(
-      'PS_ELAB_IF_CONDITION_UNSUPPORTED: verified if currently requires '+
-      'a decidable Nat comparison/equality (==, <, <=, >, >=)',
-    );
-  }
-  const condition=elaborateV061NatCondition(
+  const condition=elaborateV061Condition(
     expr.condition,
     context,
     elaborate,

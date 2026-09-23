@@ -255,6 +255,42 @@ assert(
 
 
 
+const verifiedBoolLogic=compileVerifiedSource(
+  'function logic(a : Bool, b : Bool) : Bool := !a || (a && b); '+
+  'function chooseFlag(flag : Bool, x : Nat, y : Nat) : Nat := '+
+  'if (flag) { x } else { y }; '+
+  'function chooseLogic(a : Bool, b : Bool, x : Nat, y : Nat) : Nat := '+
+  'if (a && !b) { x } else { y };',
+  'verified-bool-logic.ts',
+);
+assert(
+  verifiedBoolLogic.typeScript.includes(
+    'function logic(a: boolean, b: boolean): boolean',
+  ),
+  'verified Bool logic lost its Bool signature',
+);
+assert(
+  verifiedBoolLogic.typeScript.includes('(!a)'),
+  'verified Bool.not did not reach TypeScript',
+);
+assert(
+  verifiedBoolLogic.typeScript.includes('(a && b)'),
+  'verified Bool.and did not reach TypeScript',
+);
+assert(
+  verifiedBoolLogic.typeScript.includes('||'),
+  'verified Bool.or did not reach TypeScript',
+);
+assert(
+  verifiedBoolLogic.typeScript.includes('(flag ? x : y)'),
+  'verified Bool local did not become a checked if condition',
+);
+assert(
+  verifiedBoolLogic.typeScript.includes('((a && (!b)) ? x : y)'),
+  'verified composed Bool condition did not reach TypeScript',
+);
+
+
 const verifiedStructure=compileVerifiedSource(
   'structure User where { age : Nat; } '+
   'function make(age : Nat) : User := { age := age : User }; '+

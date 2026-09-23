@@ -18,7 +18,10 @@ import type {
 import {v061LocalInstanceTerms} from './v061-context.js';
 import {elaborateV061Type} from './v061-type-elab.js';
 import {elaborateV061ByExpression} from './v061-tactic-elab.js';
-import {elaborateV061BinaryNotation} from './v061-notation-elab.js';
+import {
+  elaborateV061BinaryNotation,
+  elaborateV061UnaryNotation,
+} from './v061-notation-elab.js';
 import {elaborateV061IfExpression} from './v061-if-elab.js';
 import {elaborateV061Record} from './v061-structure-term-elab.js';
 import {tryElaborateV061ProjectionReference} from './v061-reference-elab.js';
@@ -137,8 +140,11 @@ export function elaborateV061Term(
       return {term,type};
     }
     case 'unary':
-      throw new Error(
-        'PS_ELAB_NOTATION_UNSUPPORTED: unary operators require Lean-compatible notation/typeclass elaboration',
+      return elaborateV061UnaryNotation(
+        expr,
+        context,
+        expected,
+        elaborateV061Term,
       );
     case 'binary':
       return elaborateV061BinaryNotation(

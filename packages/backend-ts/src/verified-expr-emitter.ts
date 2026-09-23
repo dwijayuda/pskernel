@@ -22,6 +22,9 @@ export function emitVerifiedExpr(
     case 'var':
       return expr.name;
     case 'intrinsic':{
+      if(expr.operation==='bool.not'){
+        return '(!'+emitVerifiedExpr(expr.args[0]!,brands,tags)+')';
+      }
       const left=emitVerifiedExpr(expr.args[0]!,brands,tags);
       const right=emitVerifiedExpr(expr.args[1]!,brands,tags);
       if(expr.operation==='nat.add')return '('+left+' + '+right+')';
@@ -30,6 +33,8 @@ export function emitVerifiedExpr(
       if(expr.operation==='nat.ne')return '('+left+' !== '+right+')';
       if(expr.operation==='nat.le')return '('+left+' <= '+right+')';
       if(expr.operation==='nat.lt')return '('+left+' < '+right+')';
+      if(expr.operation==='bool.and')return '('+left+' && '+right+')';
+      if(expr.operation==='bool.or')return '('+left+' || '+right+')';
       return '((__ps_a: bigint, __ps_b: bigint) => '+
         '(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))('+
         left+', '+right+')';

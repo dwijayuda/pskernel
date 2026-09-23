@@ -130,9 +130,13 @@ applications to explicit verified-IR intrinsics.
 The bounded Nat equality surface follows Lean's existing `==`/`!=` meaning
 rather than redefining it as propositional equality: `x == y` elaborates to
 `Nat.beq x y : Bool`, while `x != y` elaborates to
-`Bool.not (Nat.beq x y)`, matching Lean 4.34's `bne` definition. When either
-Boolean is used as an `if` condition, the frontend mirrors Lean's Bool-to-Prop
-coercion by checking `Eq Bool condition true` with `Bool.decEq`. Ordering
+`Bool.not (Nat.beq x y)`, matching Lean 4.34's `bne` definition.
+
+The same verified Bool lane now covers `!x`, `x && y`, and `x || y` through
+the actual Lean constants `Bool.not`, `Bool.and`, and `Bool.or`. Any
+supported expression already checked to have type `Bool` may be used as an
+`if` condition. The frontend reflects that Bool to the proposition
+`Eq Bool condition true` with `Bool.decEq`; proposition-native Nat ordering
 conditions continue through `LE.le`/`LT.lt` with their Nat instances and
 checked deciders. Only after pskernel admission does erasure lower these
 checked forms to boolean verified-IR conditions.

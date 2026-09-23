@@ -149,15 +149,18 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
     case 'var':
       assertVerifiedIrIdentifier(expr.name);
       return;
-    case 'intrinsic':
-      if(expr.args.length!==2){
+    case 'intrinsic':{
+      const expectedArity=expr.operation==='bool.not'?1:2;
+      if(expr.args.length!==expectedArity){
         throw new Error(
           "verified IR intrinsic '"+expr.operation+
-          "' expects two arguments",
+          "' expects "+expectedArity+" argument"+
+          (expectedArity===1?'':'s'),
         );
       }
       for(const arg of expr.args)validateVerifiedIrExpr(arg);
       return;
+    }
     case 'lambda':
       for(const parameter of expr.parameters){
         assertVerifiedIrIdentifier(parameter.name);

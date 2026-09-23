@@ -53,32 +53,14 @@ function eraseVerifiedCondition(
     const typeArg=view.args[0]!;
     const reflected=view.args[1]!;
     const truth=view.args[2]!;
-    const reflectedView=appView(reflected);
-    const isNatEq=
-      reflectedView.fn.kind==='const'
-      &&nameToString(reflectedView.fn.name)==='Nat.beq'
-      &&reflectedView.args.length===2;
-    let isNatNe=false;
-    if(
-      reflectedView.fn.kind==='const'
-      &&nameToString(reflectedView.fn.name)==='Bool.not'
-      &&reflectedView.args.length===1
-    ){
-      const inner=appView(reflectedView.args[0]!);
-      isNatNe=
-        inner.fn.kind==='const'
-        &&nameToString(inner.fn.name)==='Nat.beq'
-        &&inner.args.length===2;
-    }
     if(
       typeArg.kind!=='const'
       ||nameToString(typeArg.name)!=='Bool'
       ||truth.kind!=='const'
       ||nameToString(truth.name)!=='Bool.true'
-      ||(!isNatEq&&!isNatNe)
     ){
       throw new Error(
-        'PS_ERASE_CONDITION_UNSUPPORTED: expected Nat ==/!= Bool condition coerced to Prop',
+        'PS_ERASE_CONDITION_UNSUPPORTED: expected checked Bool condition coerced to Prop',
       );
     }
     return erase(reflected,scope,environment);
@@ -226,6 +208,26 @@ export function eraseRuntimeApplication(
         args:equality.args.map((arg)=>erase(arg,scope,environment)),
       };
     }
+    return {
+      kind:'intrinsic',
+      operation:'bool.not',
+      args:[erase(view.args[0]!,scope,environment)],
+    };
+  }
+
+  if(
+    view.fn.kind==='const'
+    &&(nameToString(view.fn.name)==='Bool.and'
+      ||nameToString(view.fn.name)==='Bool.or')
+    &&view.args.length===2
+  ){
+    return {
+      kind:'intrinsic',
+      operation:nameToString(view.fn.name)==='Bool.and'
+        ?'bool.and'
+        :'bool.or',
+      args:view.args.map((arg)=>erase(arg,scope,environment)),
+    };
   }
 
   if(view.fn.kind==='const'){

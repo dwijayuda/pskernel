@@ -7,6 +7,8 @@ import {
   levelZero,
   nameFromDotted,
   sort,
+  constant,
+  mkAppN,
 } from 'lean-ts-kernel';
 import {admitCheckedCoreModule} from '@proofscript/checked-core';
 import {validateVerifiedIrModule} from '@proofscript/compiler-ir/verified';
@@ -117,3 +119,62 @@ console.log('ok - @proofscript/erasure generic identity');
   equal(declaration.resultType.kind,'typeParameter');
 }
 console.log('ok - @proofscript/erasure Prop and proof binder erasure');
+
+
+{
+  const env=new Environment();
+  const Nat=nameFromDotted('Nat');
+  env.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const binaryType=forallE(
+    nameFromDotted('x'),
+    constant(Nat),
+    forallE(
+      nameFromDotted('y'),
+      constant(Nat),
+      constant(Nat),
+    ),
+  );
+  for(const name of ['Nat.add','Nat.sub','Nat.mul']){
+    env.add({
+      kind:'axiom',
+      name:nameFromDotted(name),
+      levelParams:[],
+      type:binaryType,
+    });
+  }
+  const x=nameFromDotted('x');
+  const y=nameFromDotted('y');
+  const add=nameFromDotted('add');
+  const value=lam(
+    x,
+    constant(Nat),
+    lam(
+      y,
+      constant(Nat),
+      mkAppN(
+        constant(nameFromDotted('Nat.add')),
+        [bvar(1),bvar(0)],
+      ),
+    ),
+  );
+  const checked=admitCheckedCoreModule(env,[{
+    kind:'definition',
+    name:add,
+    levelParams:[],
+    type:binaryType,
+    value,
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  }]);
+  const erased=eraseCheckedCoreModule(checked);
+  equal(erased.declarations[0]?.body.kind,'intrinsic');
+  if(erased.declarations[0]?.body.kind==='intrinsic'){
+    equal(erased.declarations[0]?.body.operation,'nat.add');
+  }
+}
+console.log('ok - @proofscript/erasure Nat intrinsic lowering');

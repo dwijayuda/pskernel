@@ -21,6 +21,7 @@ import type {
 } from './v061-context.js';
 import {elaborateV061Type} from './v061-type-elab.js';
 import {elaborateV061ByExpression} from './v061-tactic-elab.js';
+import {elaborateV061BinaryNotation} from './v061-notation-elab.js';
 
 function resolveReference(
   name:string,
@@ -92,9 +93,15 @@ export function elaborateV061Term(
       return {term,type};
     }
     case 'unary':
-    case 'binary':
       throw new Error(
-        'PS_ELAB_NOTATION_UNSUPPORTED: operators require Lean-compatible notation/typeclass elaboration',
+        'PS_ELAB_NOTATION_UNSUPPORTED: unary operators require Lean-compatible notation/typeclass elaboration',
+      );
+    case 'binary':
+      return elaborateV061BinaryNotation(
+        expr,
+        context,
+        expected,
+        elaborateV061Term,
       );
     case 'lambda':{
       let bodyContext=context;

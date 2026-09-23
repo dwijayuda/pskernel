@@ -34,6 +34,15 @@ function emitExpr(expr:VerifiedIrExpr):string {
       return emitLiteral(expr.value);
     case 'var':
       return expr.name;
+    case 'intrinsic':{
+      const left=emitExpr(expr.args[0]!);
+      const right=emitExpr(expr.args[1]!);
+      if(expr.operation==='nat.add')return '('+left+' + '+right+')';
+      if(expr.operation==='nat.mul')return '('+left+' * '+right+')';
+      return '((__ps_a: bigint, __ps_b: bigint) => '+
+        '(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))('+
+        left+', '+right+')';
+    }
     case 'call':
       return emitExpr(expr.fn)+'('+
         expr.args.map(emitExpr).join(', ')+')';

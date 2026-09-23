@@ -186,7 +186,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-intro-tactic-elab-mvp",
+      "status": "v061-nat-notation+intro-tactic-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -198,6 +198,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "The bounded verified notation subset maps Nat +, -, and * directly to the real Lean constants Nat.add, Nat.sub, and Nat.mul after requiring Nat operands/results. Other operators remain fail-closed until general typeclass notation elaboration.",
         "Lean-native `intro` opens a real forall goal, extends LocalContext with the exact binder type/info, elaborates the continuation against the instantiated codomain, and constructs a lambda proof.",
         "`exact`, `assumption`, and `intro` all elaborate to ordinary pskernel Expr proof terms; Kernel.addTheorem remains final authority.",
         "This milestone still has no synthetic tactic goal engine or cursor snapshots; apply/refine/rewrite/simp/typeclass synthesis and multi-goal tactics remain later work.",
@@ -226,7 +227,7 @@
       "path": "packages/erasure",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "generic-function-erasure-mvp",
+      "status": "nat-intrinsics+generic-function-erasure-mvp",
       "packageName": "@proofscript/erasure",
       "dependsOn": [
         "checked-core",
@@ -239,7 +240,8 @@
         "Sort/type binders become TypeScript type parameters but are erased from runtime arguments; Prop proof binders are erased entirely; runtime binders remain.",
         "If an erased type/proof local survives in executable code, lowering fails closed.",
         "The first executable verified-core slice supports generic functions, variables, applications, nested lambdas, lets, literals, and a tiny set of Bool/Unit constants; projections/recursors/primitive runtime calls remain later milestones.",
-        "Sort 0 / Prop binders are proof-level and erased completely; higher Sort binders become compile-time TypeScript type parameters. Proof terms whose types inhabit Prop are also erased."
+        "Sort 0 / Prop binders are proof-level and erased completely; higher Sort binders become compile-time TypeScript type parameters. Proof terms whose types inhabit Prop are also erased.",
+        "Applications headed by Nat.add/sub/mul lower to verified IR intrinsics. Nat.sub remains a distinct intrinsic because JavaScript bigint subtraction does not have Lean Nat saturation semantics."
       ]
     },
     {
@@ -258,7 +260,8 @@
         "Compiler IR now has a verified-core lane distinct from the transitional software-HIR lane.",
         "Verified IR separates compile-time type parameters from runtime parameters so dependent/type binders can be erased from JavaScript while retained in TypeScript declarations.",
         "The verified IR is runtime-oriented and intentionally does not reuse kernel Expr as code-generation IR.",
-        "Legacy software IR remains temporarily for coverage while verified-core erasure grows to structures, inductives, recursion, primitives, and effects."
+        "Legacy software IR remains temporarily for coverage while verified-core erasure grows to structures, inductives, recursion, primitives, and effects.",
+        "Verified IR has explicit Nat arithmetic intrinsics so Lean runtime semantics are represented intentionally instead of inferred from TypeScript operators."
       ]
     },
     {
@@ -290,7 +293,8 @@
         "The preferred backend lane now accepts verified compiler IR produced after pskernel admission and erasure.",
         "Compile-time dependent type parameters are emitted as TypeScript generics for .ts/.d.ts while tsc removes them from JavaScript runtime code.",
         "The backend remains untrusted: TypeScript/JavaScript emission cannot affect theorem validity or kernel admission.",
-        "The legacy software-HIR emitter remains temporarily for language coverage until verified-core lowering reaches those constructs."
+        "The legacy software-HIR emitter remains temporarily for language coverage until verified-core lowering reaches those constructs.",
+        "Verified Nat.add/Nat.mul emit bigint arithmetic; Nat.sub emits a single-evaluation saturating expression matching Lean Nat subtraction."
       ]
     },
     {

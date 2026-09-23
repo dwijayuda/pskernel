@@ -122,6 +122,28 @@ export function eraseRuntimeExpr(
     }
     case 'app':{
       const view=appView(expr);
+      if(view.fn.kind==='const'){
+        const intrinsic=new Map<string,'nat.add'|'nat.sub'|'nat.mul'>([
+          ['Nat.add','nat.add'],
+          ['Nat.sub','nat.sub'],
+          ['Nat.mul','nat.mul'],
+        ]).get(nameToString(view.fn.name));
+        if(intrinsic!==undefined){
+          if(view.args.length!==2){
+            throw new Error(
+              "PS_ERASE_INTRINSIC_ARITY: '"+intrinsic+
+              "' expects two arguments",
+            );
+          }
+          return {
+            kind:'intrinsic',
+            operation:intrinsic,
+            args:view.args.map(
+              (arg)=>eraseRuntimeExpr(arg,scope,environment),
+            ),
+          };
+        }
+      }
       const checker=new TypeChecker(environment,scope.localContext.clone());
       let fnType=checker.check(view.fn);
       const runtimeArgs:VerifiedIrExpr[]=[];

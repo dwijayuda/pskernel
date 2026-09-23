@@ -22,6 +22,11 @@ export type VerifiedIrExpr =
   | {readonly kind:'literal';readonly value:VerifiedIrLiteral}
   | {readonly kind:'var';readonly name:string}
   | {
+      readonly kind:'intrinsic';
+      readonly operation:'nat.add'|'nat.sub'|'nat.mul';
+      readonly args:readonly VerifiedIrExpr[];
+    }
+  | {
       readonly kind:'lambda';
       readonly parameters:readonly {
         readonly name:string;
@@ -114,6 +119,14 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
       return;
     case 'var':
       assertVerifiedIrIdentifier(expr.name);
+      return;
+    case 'intrinsic':
+      if(expr.args.length!==2){
+        throw new Error(
+          "verified IR intrinsic '"+expr.operation+"' expects two arguments",
+        );
+      }
+      for(const arg of expr.args)validateVerifiedIrExpr(arg);
       return;
     case 'lambda':
       for(const parameter of expr.parameters){

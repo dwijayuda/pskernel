@@ -242,7 +242,7 @@ function makeDefinitionEnvironment():Environment {
     elaborateV061Definitions(parseV061Module(
       'function bad(x : TestNat) : TestNat := x + x;',
     ),env);
-  }catch(error){notation=/PS_ELAB_NOTATION_UNSUPPORTED/.test(String(error));}
+  }catch(error){notation=/PS_ELAB_NAT_ENVIRONMENT/.test(String(error));}
   equal(notation,true);
 }
 {
@@ -425,3 +425,47 @@ console.log('ok - @proofscript/elab declaration expected-type propagation');
   equal(failed,true);
 }
 console.log('ok - @proofscript/elab intro tactic proof-term construction');
+
+
+function makeNatNotationEnvironment():Environment {
+  const env=new Environment();
+  const kernel=new Kernel(env);
+  const Nat=nameFromDotted('Nat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const binaryType=forallE(
+    nameFromDotted('x'),
+    constant(Nat),
+    forallE(
+      nameFromDotted('y'),
+      constant(Nat),
+      constant(Nat),
+    ),
+  );
+  for(const name of ['Nat.add','Nat.sub','Nat.mul']){
+    kernel.addAxiom({
+      kind:'axiom',
+      name:nameFromDotted(name),
+      levelParams:[],
+      type:binaryType,
+    });
+  }
+  return env;
+}
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'function add(x : Nat, y : Nat) : Nat := x + y; '+
+    'function sub(x : Nat, y : Nat) : Nat := x - y; '+
+    'function mul(x : Nat, y : Nat) : Nat := x * y;',
+  ),env);
+  equal(result.definitions.length,3);
+  for(const definition of result.definitions){
+    equal(definition.value.kind,'lam');
+  }
+}
+console.log('ok - @proofscript/elab bounded Nat notation');

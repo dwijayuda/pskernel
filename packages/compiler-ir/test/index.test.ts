@@ -178,3 +178,29 @@ console.log('ok - @proofscript/compiler-ir where helper lowering');
   equal(validateVerifiedIrModule(module),true);
 }
 console.log('ok - @proofscript/compiler-ir verified dependent-core IR schema');
+
+
+{
+  const module={
+    kind:'proofscript-verified-ir' as const,
+    declarations:[{
+      name:'add',
+      typeParameters:[],
+      parameters:[
+        {name:'x',type:{kind:'primitive' as const,name:'bigint' as const}},
+        {name:'y',type:{kind:'primitive' as const,name:'bigint' as const}},
+      ],
+      resultType:{kind:'primitive' as const,name:'bigint' as const},
+      body:{
+        kind:'intrinsic' as const,
+        operation:'nat.add' as const,
+        args:[
+          {kind:'var' as const,name:'x'},
+          {kind:'var' as const,name:'y'},
+        ],
+      },
+    }],
+  };
+  equal(validateVerifiedIrModule(module),true);
+}
+console.log('ok - @proofscript/compiler-ir verified Nat intrinsic');

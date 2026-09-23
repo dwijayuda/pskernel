@@ -272,3 +272,52 @@ console.log('ok - @proofscript/backend-ts where helper TypeScript emission');
   );
 }
 console.log('ok - @proofscript/backend-ts verified generic TypeScript emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    declarations:[
+      {
+        name:'add',
+        typeParameters:[],
+        parameters:[
+          {name:'x',type:{kind:'primitive',name:'bigint'}},
+          {name:'y',type:{kind:'primitive',name:'bigint'}},
+        ],
+        resultType:{kind:'primitive',name:'bigint'},
+        body:{
+          kind:'intrinsic',
+          operation:'nat.add',
+          args:[
+            {kind:'var',name:'x'},
+            {kind:'var',name:'y'},
+          ],
+        },
+      },
+      {
+        name:'sub',
+        typeParameters:[],
+        parameters:[
+          {name:'x',type:{kind:'primitive',name:'bigint'}},
+          {name:'y',type:{kind:'primitive',name:'bigint'}},
+        ],
+        resultType:{kind:'primitive',name:'bigint'},
+        body:{
+          kind:'intrinsic',
+          operation:'nat.sub',
+          args:[
+            {kind:'var',name:'x'},
+            {kind:'var',name:'y'},
+          ],
+        },
+      },
+    ],
+  });
+  equal(source.includes('return (x + y);'),true);
+  equal(source.includes('__ps_a >= __ps_b ? __ps_a - __ps_b : 0n'),true);
+  const compiled=compileTypeScript(source,'verified-nat.ts');
+  equal(compiled.javascript.includes('x + y'),true);
+  equal(compiled.javascript.includes('__ps_a >= __ps_b'),true);
+}
+console.log('ok - @proofscript/backend-ts verified Nat intrinsic emission');

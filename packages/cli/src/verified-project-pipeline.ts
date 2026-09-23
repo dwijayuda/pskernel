@@ -227,6 +227,7 @@ export function checkVerifiedSourceProject(
     lean:lowerV061ModuleToLean(entry.surface),
     featureIds,
     projectIntegrity,
+    sourceRoots:project.sourceRoots,
     moduleCacheHits,
     moduleCacheMisses,
     moduleOrder:project.plan.order,

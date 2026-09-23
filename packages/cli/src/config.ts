@@ -1,11 +1,12 @@
 
 import {readFile} from 'node:fs/promises';
-import {dirname,join,resolve} from 'node:path';
+import {dirname,isAbsolute,join,resolve} from 'node:path';
 import {existsSync} from 'node:fs';
 
 export interface PsConfig {
   readonly languageVersion:'0.7';
   readonly entry:string;
+  readonly sourceRoots:readonly string[];
   readonly compilerOptions:{
     readonly outDir:string;
     readonly emitTypeScript:boolean;
@@ -17,6 +18,7 @@ export interface PsConfig {
 export const DEFAULT_CONFIG:PsConfig={
   languageVersion:'0.7',
   entry:'src/main.ps',
+  sourceRoots:[],
   compilerOptions:{
     outDir:'dist',
     emitTypeScript:true,
@@ -42,6 +44,29 @@ export async function findPsConfig(start=process.cwd()):Promise<string|undefined
   }
 }
 
+function sourceRootsFromConfig(value:unknown):readonly string[] {
+  if(value===undefined)return [];
+  if(!Array.isArray(value)){
+    throw new Error(
+      'PS_CLI_CONFIG_SOURCE_ROOTS: sourceRoots must be an array of relative paths',
+    );
+  }
+  const roots:string[]=[];
+  for(const root of value){
+    if(
+      typeof root!=='string'
+      ||root.length===0
+      ||isAbsolute(root)
+    ){
+      throw new Error(
+        'PS_CLI_CONFIG_SOURCE_ROOTS: each source root must be a non-empty relative path',
+      );
+    }
+    if(!roots.includes(root))roots.push(root);
+  }
+  return roots;
+}
+
 export async function loadPsConfig(project?:string):Promise<LoadedPsConfig>{
   let path:string|undefined;
   if(project!==undefined){
@@ -59,6 +84,9 @@ export async function loadPsConfig(project?:string):Promise<LoadedPsConfig>{
   const config:PsConfig={
     languageVersion:'0.7',
     entry:typeof parsed.entry==='string'?parsed.entry:DEFAULT_CONFIG.entry,
+    sourceRoots:sourceRootsFromConfig(
+      (parsed as Partial<PsConfig>).sourceRoots,
+    ),
     compilerOptions:{
       outDir:typeof compiler.outDir==='string'?compiler.outDir:DEFAULT_CONFIG.compilerOptions.outDir,
       emitTypeScript:typeof compiler.emitTypeScript==='boolean'?compiler.emitTypeScript:DEFAULT_CONFIG.compilerOptions.emitTypeScript,

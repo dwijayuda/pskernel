@@ -31,6 +31,7 @@ export interface LoadedProjectSource extends ProjectSourceModule {
 export interface ResolvedSourceProject {
   readonly entryModule:string;
   readonly rootDirectory:string;
+  readonly sourceRoots:readonly string[];
   readonly plan:SourceBuildPlan;
   readonly sources:ReadonlyMap<string,LoadedProjectSource>;
 }
@@ -49,27 +50,32 @@ function moduleRelativePath(module:string):string {
 }
 
 function resolveImportedSource(
-  rootDirectory:string,
+  sourceRoots:readonly string[],
   module:string,
 ):string {
   const relative=moduleRelativePath(module);
-  const ps=join(rootDirectory,relative+'.ps');
-  const lean=join(rootDirectory,relative+'.lean');
-  const psExists=existsSync(ps);
-  const leanExists=existsSync(lean);
-  if(psExists&&leanExists){
+  const candidates:string[]=[];
+  for(const root of sourceRoots){
+    const ps=join(root,relative+'.ps');
+    const lean=join(root,relative+'.lean');
+    if(existsSync(ps))candidates.push(ps);
+    if(existsSync(lean))candidates.push(lean);
+  }
+  if(candidates.length>1){
     throw new Error(
       "PS_PROJECT_SOURCE_AMBIGUITY: logical module '"+module+
-      "' has both '"+ps+"' and '"+lean+"'",
+      "' resolves to multiple sources: "+
+      candidates.map((item)=>"'"+item+"'").join(', '),
     );
   }
-  if(!psExists&&!leanExists){
+  if(candidates.length===0){
     throw new Error(
       "PS_PROJECT_SOURCE_MISSING: no .ps or .lean source for module '"+
-      module+"' below '"+rootDirectory+"'",
+      module+"' below configured roots: "+
+      sourceRoots.map((root)=>"'"+root+"'").join(', '),
     );
   }
-  return psExists?ps:lean;
+  return candidates[0]!;
 }
 
 function entryLogicalName(sourcePath:string):string {
@@ -80,6 +86,12 @@ export async function resolveSourceProject(
   input:ResolvedInput,
 ):Promise<ResolvedSourceProject> {
   const rootDirectory=dirname(input.sourcePath);
+  const configured=input.loaded.config.sourceRoots;
+  const sourceRoots=configured.length===0
+    ?[rootDirectory]
+    :[...new Set(
+        configured.map((root)=>resolve(input.loaded.directory,root)),
+      )];
   const entryModule=entryLogicalName(input.sourcePath);
   const loaded=new Map<string,LoadedProjectSource>();
 
@@ -117,7 +129,7 @@ export async function resolveSourceProject(
 
     for(const dependency of item.imports){
       const dependencyPath=resolveImportedSource(
-        rootDirectory,
+        sourceRoots,
         dependency,
       );
       await load(dependency,dependencyPath);
@@ -129,6 +141,7 @@ export async function resolveSourceProject(
   return {
     entryModule,
     rootDirectory,
+    sourceRoots,
     plan,
     sources:loaded,
   };

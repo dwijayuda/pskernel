@@ -42,6 +42,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       moduleOrder:result.moduleOrder,
       moduleSources:result.moduleSources,
       projectIntegrity:result.projectIntegrity,
+      sourceRoots:result.sourceRoots,
       moduleCacheHits:result.moduleCacheHits,
       moduleCacheMisses:result.moduleCacheMisses,
       semanticPipeline:'verified-core',

@@ -22,6 +22,7 @@ export async function checkCommand(common:CommonArgs){
       moduleOrder:result.moduleOrder,
       moduleSources:result.moduleSources,
       projectIntegrity:result.projectIntegrity,
+      sourceRoots:result.sourceRoots,
       moduleCacheHits:result.moduleCacheHits,
       moduleCacheMisses:result.moduleCacheMisses,
       semanticPipeline:'verified-core',

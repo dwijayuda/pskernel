@@ -1236,6 +1236,110 @@ console.log('ok - psc checked-module cache uses dependency integrity keys');
 
 {
   const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-configured-source-roots-'),
+  );
+  try{
+    await mkdir(join(directory,'app'),{recursive:true});
+    await mkdir(join(directory,'lib','Util'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'app/main.ps',
+        sourceRoots:['lib'],
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'app','main.ps'),
+      'import Util.Math\nfunction main(x : Nat) : Nat := inc(x);\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'lib','Util','Math.lean'),
+      'def inc (x : Nat) : Nat := x + 1\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['41'],
+    });
+    equal(result.mainResult,'42');
+    const roots=result.sourceRoots as readonly string[];
+    equal(roots.length,1);
+    equal(roots[0],join(directory,'lib'));
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc configured source roots resolve mixed-source imports');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-source-root-ambiguity-'),
+  );
+  try{
+    await mkdir(join(directory,'app'),{recursive:true});
+    await mkdir(join(directory,'lib-a'),{recursive:true});
+    await mkdir(join(directory,'lib-b'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'app/main.ps',
+        sourceRoots:['lib-a','lib-b'],
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'app','main.ps'),
+      'import Shared\nfunction main(x : Nat) : Nat := id(x);\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'lib-a','Shared.ps'),
+      'function id(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'lib-b','Shared.lean'),
+      'def id (x : Nat) : Nat := x\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await checkCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:[],
+      });
+    }catch(error){
+      rejected=/PS_PROJECT_SOURCE_AMBIGUITY/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc configured source roots reject duplicate logical modules');
+
+{
+  const directory=await mkdtemp(
     join(tmpdir(),'proofscript-mixed-ambiguity-'),
   );
   try{

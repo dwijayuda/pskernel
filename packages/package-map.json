@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w2-check-build-run",
+      "status": "runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w2-check-build-run",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -35,6 +35,11 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Named ESM extern sources may now use bounded npm package subpaths such as host-lib/feature. Runtime policy v2 records the authored source plus its pinned packageRoot; exact versions and lock roots are keyed by package root, not repeated per subpath.",
+        "Package subpath resolution is deliberately delegated to the existing host resolvers: TypeScript bundler resolution checks package exports/types during compilation and Node ESM resolves the runtime import. ProofScript does not implement a parallel conditional-exports algorithm.",
+        "Verified build/run now require a top-level package-lock.json lockfileVersion 3 whenever runtime externals are used. The CLI traverses the reachable direct/transitive npm package closure from declared runtime roots, fingerprints exact version/resolved/SRI metadata plus dependency edges, and reports it separately as runtimeDependencyLock.",
+        "Required reachable lock packages are checked against installed node_modules package name/version metadata. Optional-only branches may be absent; linked packages and lock entries without version/resolved/SRI metadata fail closed.",
+        "runtimeDependencyLock.integrity is runtime reproducibility/assurance metadata only. It does not alter pskernel projectIntegrity, does not prove JavaScript behavior, and does not claim installed unpacked bytes match the tarball SRI. npm ci remains the strict installation mechanism.",
         "Verified project check requires every source external module to be explicitly listed in psconfig.json runtimeDependencies. Build/run additionally read node_modules/<package>/package.json and require exact name/version identity before TypeScript compilation.",
         "Runtime dependency policy has its own SHA-256 fingerprint and is reported separately from pskernel projectIntegrity; host package versions do not alter theorem meaning.",
         "Verified build compiles the generated TypeScript using the absolute dist/<entry>.ts path, aligning TypeScript package lookup with the emitted JavaScript runtime location. A local no-network ESM fixture gates String -> String external execution end to end.",
@@ -520,17 +525,19 @@
       ]
     },
     {
-      "name": "wasm-ir",
-      "path": "packages/wasm-ir",
+      "name": "backend-wasm",
+      "path": "packages/backend-wasm",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w2-fixed-width-abi-ir",
-      "packageName": "@proofscript/wasm-ir",
-      "dependsOn": [],
+      "status": "w2-binaryen-fixed-width-js-abi",
+      "packageName": "@proofscript/backend-wasm",
+      "dependsOn": [
+        "wasm-ir"
+      ],
       "sourceLanguage": "typescript",
       "notes": [
-        "ProofScript-owned typed WasmIR is independent of Binaryen and carries no proof authority.",
-        "W2 preserves logical Bool/UInt8/UInt16/UInt32/UInt64 ABI types separately from physical i32/i64 representation."
+        "Binaryen 132.0.0 is an exact-pinned untrusted emitter/validator dependency.",
+        "W2 emits raw canonical Wasm plus a JS host adapter that restores unsigned ProofScript values across the signed WebAssembly JS i32/i64 bridge."
       ]
     },
     {
@@ -551,19 +558,17 @@
       ]
     },
     {
-      "name": "backend-wasm",
-      "path": "packages/backend-wasm",
+      "name": "wasm-ir",
+      "path": "packages/wasm-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w2-binaryen-fixed-width-js-abi",
-      "packageName": "@proofscript/backend-wasm",
-      "dependsOn": [
-        "wasm-ir"
-      ],
+      "status": "w2-fixed-width-abi-ir",
+      "packageName": "@proofscript/wasm-ir",
+      "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
-        "Binaryen 132.0.0 is an exact-pinned untrusted emitter/validator dependency.",
-        "W2 emits raw canonical Wasm plus a JS host adapter that restores unsigned ProofScript values across the signed WebAssembly JS i32/i64 bridge."
+        "ProofScript-owned typed WasmIR is independent of Binaryen and carries no proof authority.",
+        "W2 preserves logical Bool/UInt8/UInt16/UInt32/UInt64 ABI types separately from physical i32/i64 representation."
       ]
     },
     {
@@ -693,7 +698,7 @@
       "path": "packages/project",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "runtime-dependency-policy+dual-source-node-resolver+module-graph-mvp",
+      "status": "runtime-package-subpaths+runtime-dependency-policy+dual-source-node-resolver+module-graph-mvp",
       "packageName": "@proofscript/project",
       "dependsOn": [
         "module",
@@ -702,6 +707,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "The Node project layer exposes one bounded npm external-specifier classifier: package roots remain the only runtimeDependencies config keys, while external sources may append safe package subpath segments. Relative/absolute/node: sources and traversal/node_modules segments fail closed.",
         "`runtimeDependencies` config parsing accepts only exact npm package-root specifiers and exact x.y.z versions in the first FFI profile. Relative sources, package subpaths, node: builtins, semver ranges, and non-package objects fail closed.",
         "The Node subpath centralizes psconfig sourceRoots validation, nearest-config discovery, project-relative root expansion, and exact .ps/.lean logical-module resolution for both psc and LSP consumers.",
         "Configured source roots have no first-root-wins behavior: zero matches fail missing, multiple matches across roots/source kinds fail ambiguity.",

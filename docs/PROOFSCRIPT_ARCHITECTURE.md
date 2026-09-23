@@ -54,6 +54,13 @@ checked dependent core
 
 ## Dual-source frontend contract
 
+The first DS1 checkpoint now makes source-kind ownership explicit. Extension
+recognition is independent of parser availability: `.ps` resolves to the
+registered ProofScript frontend, while `.lean` resolves to the
+`lean-subset` source kind but fails closed until the bounded Lean parser is
+registered. Merely recognizing a file extension never grants semantic support.
+
+
 ProofScript supports two intended authored source forms:
 
 - `.ps`: the primary small ProofScript syntax;

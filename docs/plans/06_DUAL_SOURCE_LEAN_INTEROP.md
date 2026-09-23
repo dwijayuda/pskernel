@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **planned; subordinate to the canonical checked-core architecture**
+Status: **DS1 in progress; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -189,6 +189,11 @@ ProofScript project.
 ## Implementation phases
 
 ### DS1 — frontend abstraction
+
+Landed checkpoint: source-kind detection and a deterministic frontend registry.
+`.ps` is registered to the existing ProofScript parser; `.lean` is recognized
+as `lean-subset` but fails closed until the DS2 parser is registered. This is
+source dispatch only and changes no semantic acceptance.
 
 - source-kind detection;
 - frontend registry;

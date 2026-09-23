@@ -291,7 +291,7 @@ Lean 4 surface without creating a second semantic pipeline.
 
 Implement, in this order:
 
-1. define a source-kind/frontend registry for `.ps` and supported `.lean`;
+1. define a source-kind/frontend registry for `.ps` and supported `.lean` — **landed**; `.lean` recognition currently fails closed until DS2;
 2. add a Lean-subset parser that lowers only documented supported constructs
    into the canonical surface module;
 3. add a canonical ProofScript source printer, complementing the existing

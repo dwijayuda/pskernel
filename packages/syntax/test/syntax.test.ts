@@ -19,6 +19,9 @@ import {
   parseV061Module,
   lowerV061ModuleToLean,
   lowerV061TypeToLean,
+  sourceKindFromFileName,
+  createDefaultSourceFrontendRegistry,
+  type SourceFrontend,
 } from '../src/index.js';
 
 function assert(condition: unknown, message = 'assertion failed'): asserts condition {
@@ -41,6 +44,38 @@ equal(LEAN_SEMANTICS_VERSION, '4.34.0');
 equal(LEAN_SEMANTICS_COMMIT, '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b');
 equal(LEAN434_INHERITED_FEATURE_IDS.length,4);
 assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
+
+{
+  equal(sourceKindFromFileName('main.ps'),'proofscript');
+  equal(sourceKindFromFileName('Main.lean'),'lean-subset');
+  equal(sourceKindFromFileName('UPPER.PS'),'proofscript');
+  throws(
+    ()=>sourceKindFromFileName('main.ts'),
+    /PS_FRONTEND_SOURCE_KIND/,
+  );
+
+  const registry=createDefaultSourceFrontendRegistry();
+  equal(registry.forFile('main.ps').kind,'proofscript');
+  equal(
+    registry.forFile('main.ps').parse('def id(x : Nat) : Nat := x;').declarations.length,
+    1,
+  );
+  throws(
+    ()=>registry.forFile('Main.lean'),
+    /PS_FRONTEND_UNAVAILABLE/,
+  );
+
+  const leanStub:SourceFrontend={
+    kind:'lean-subset',
+    parse:parseV061Module,
+  };
+  registry.register(leanStub);
+  equal(registry.forFile('Main.lean'),leanStub);
+  throws(
+    ()=>registry.register(leanStub),
+    /PS_FRONTEND_DUPLICATE/,
+  );
+}
 
 {
   const tokens=significantTokens('f(x)');

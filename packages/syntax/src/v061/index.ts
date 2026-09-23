@@ -14,6 +14,7 @@ export * from './class-parser.js';
 export * from './inductive-parser.js';
 export * from './where-parser.js';
 export * from './declaration-parser.js';
+export * from './frontend.js';
 export * from './lean-lowering.js';
 
 export * from './instance-parser.js';

@@ -153,6 +153,15 @@ test('infer-only let does not inspect its closed ill-typed value',()=>{
  throws(()=>tc.check(term));
 });
 
+test('dependent let inference preserves the let in the resulting type',()=>{
+ const env=baseEnv(),P=nameFromDotted('InferLet.P'),g=nameFromDotted('InferLet.g'),one=levelSucc(levelZero);
+ env.add({kind:'axiom',name:P,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),sort(one))});
+ env.add({kind:'axiom',name:g,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),app(constant(P),bvar(0)))});
+ const term={kind:'let',name:nameFromDotted('n'),type:constant(N.Nat),value:natLit(3),body:app(constant(g),bvar(0))} as const;
+ const expected={kind:'let',name:nameFromDotted('n'),type:constant(N.Nat),value:natLit(3),body:app(constant(P),bvar(0))} as const;
+ const tc=new TypeChecker(env);eqExpr(tc.infer(term,true),expected);eqExpr(tc.check(term),expected);
+});
+
 test('application checker rejects wrong argument',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));throws(()=>tc.check(app(id,constant(N.BoolTrue))));});
 test('eagerReduce enables Lean 4.34 eager defeq for application arguments with syntactic fvars',()=>{
  const env=baseEnv(),one=levelSucc(levelZero),F=nameFromDotted('Eager.F');

@@ -79,6 +79,12 @@ throws(
   ()=>parseTranslateArgs(['main.ps','--to','lean','--verified']),
   /PS_CLI_TRANSLATE_VERIFIED/,
 );
+throws(
+  ()=>parseTranslateArgs([
+    'main.ps','--to','lean','--target','wasm',
+  ]),
+  /PS_CLI_TRANSLATE_BUILD_TARGET/,
+);
 console.log('ok - psc CLI argument/UX contract');
 
 
@@ -123,6 +129,16 @@ console.log('ok - psc verified checked-core compiler pipeline');
       'function main(x : Bool) : Bool := !x;\n',
       'utf8',
     );
+    const checked=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[],
+    });
+    equal(checked.buildTarget,'wasm');
+    equal(checked.wasmProfile,'proofscript-wasm32-gc-js-v1');
+
     const built=await buildCommand({
       project:directory,
       json:true,

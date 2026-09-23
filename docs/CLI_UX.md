@@ -17,7 +17,9 @@ The command vocabulary intentionally follows familiar JavaScript/TypeScript tool
 
 Configuration lives in `psconfig.json`, analogous to `tsconfig.json`. `-p/--project` selects a config file or directory.
 
-## Current build pipeline
+## Current build pipelines
+
+The default/legacy software lane remains:
 
 ```text
 .ps
@@ -29,7 +31,20 @@ Configuration lives in `psconfig.json`, analogous to `tsconfig.json`. `-p/--proj
 → .js + .d.ts + .js.map
 ```
 
-Generated TypeScript is retained as a build artifact. ProofScript does not maintain a separate JavaScript emitter.
+The verified lane can now branch after one pskernel-admitted compiler IR:
+
+```text
+.ps / supported .lean
+→ Lean-compatible elaboration
+→ pskernel checked core
+→ verified erasure
+→ compiler IR
+   ├→ TypeScript → JavaScript
+   └→ Wasm lowering → typed WasmIR → Binaryen → .wasm/.wat
+```
+
+Generated TypeScript remains as evidence/debugging output for W1 Wasm builds.
+The Wasm backend is untrusted execution infrastructure and has no proof authority.
 
 ## Commands
 
@@ -50,9 +65,12 @@ psc check
 psc check src/main.ps
 psc check -p ./psconfig.json
 psc check --json
+psc check --verified --target wasm
 ```
 
-No build artifacts are written.
+No build artifacts are written. The Wasm form performs target-capability
+lowering/validation in memory and fails closed when the verified runtime IR is
+outside the current W1 subset.
 
 Current claim ceiling: the initial software subset is parsed and type-checked. Theorem/proof declarations are not yet elaborated into pskernel by this command.
 
@@ -61,9 +79,13 @@ Current claim ceiling: the initial software subset is parsed and type-checked. T
 ```bash
 psc build
 psc build src/main.ps
+psc build src/main.ps --verified --target wasm
 ```
 
-Produces TypeScript, JavaScript, TypeScript declarations, source maps when available, canonical Lean, and a manifest describing the exact claim boundary.
+The default target produces TypeScript, JavaScript, TypeScript declarations,
+source maps when available, canonical Lean, and a manifest. W1 Wasm builds also
+produce `.wasm` and `.wat`, while retaining the canonical TS/JS evidence
+artifacts and recording the Binaryen version/profile in the manifest.
 
 ### psc run
 
@@ -71,6 +93,9 @@ Produces TypeScript, JavaScript, TypeScript declarations, source maps when avail
 psc run -- 42
 psc run src/main.ps -- 42
 ```
+
+`psc run --target wasm` currently fails closed. The Wasm argument/result ABI
+must be specified before direct CLI execution is enabled.
 
 Builds the project, loads the emitted ESM module, invokes exported `main`, converts CLI arguments according to the verified IR parameter types, and prints a non-Unit result.
 

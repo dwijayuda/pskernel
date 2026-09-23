@@ -1,10 +1,41 @@
 # ProofScript WebAssembly backend plan
 
-Status: **W0 architecture / fail-closed foundation**
+Status: **W1 Bool/Unit vertical slice implemented; executable CI evidence pending runner recovery**
 
 This plan adds WebAssembly as an execution backend for pskernel-admitted
 ProofScript programs. It does not change ProofScript logical semantics and does
 not add WebAssembly code generation to the trusted kernel.
+
+## 0. Current implementation checkpoint
+
+Implemented on `feature/wasm-backend`:
+
+- ProofScript-owned typed WasmIR package;
+- fail-closed verified IR -> WasmIR lowering;
+- Binaryen 132.0.0 emitter with explicit MVP feature profile;
+- Bool/Unit first-order functions, calls, let, if, and Bool intrinsics;
+- semantic Bool normalization before raw i32 use;
+- canonical and optimized Binaryen validation tests;
+- verified source JS/Wasm differential gate, including noncanonical host i32 Bool inputs;
+- `@proofscript/compiler` checked-core -> Wasm orchestration;
+- `psc check/build --verified --target wasm`;
+- `.wasm` and `.wat` build artifacts plus Binaryen/profile manifest metadata;
+- full npm workspace lock repair and a workspace-lock anti-drift gate.
+
+Still intentionally unsupported:
+
+- runtime Nat/Int until arbitrary-precision semantics are preserved;
+- String/Char ABI;
+- structures and inductive ADTs;
+- generic runtime values and closures;
+- external imports/FFI;
+- `psc run --target wasm`;
+- fixed-width UInt source/compiler support (must land end-to-end before the backend uses it).
+
+GitHub Actions currently creates the PR job but terminates before any step is
+recorded (`steps: null`). Per repository anti-drift policy this is infrastructure
+evidence, not a passing or failing semantic gate. Keep the PR draft until an
+executing root gate is obtained.
 
 ## 1. Goals
 

@@ -103,6 +103,12 @@ export function parseTranslateArgs(args:readonly string[]):TranslateArgs {
       'PS_CLI_TRANSLATE_VERIFIED: source translation does not use --verified',
     );
   }
+  if(common.buildTarget==='wasm'){
+    throw new Error(
+      'PS_CLI_TRANSLATE_BUILD_TARGET: source translation does not use '+
+      '--target wasm',
+    );
+  }
   if(common.json){
     throw new Error(
       'PS_CLI_TRANSLATE_JSON: source translation writes canonical source text',

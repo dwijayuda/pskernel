@@ -1,14 +1,24 @@
 import {baseReport,checkSource} from '../pipeline.js';
+import {compileCheckedCoreToWasm} from '@proofscript/compiler';
 import {checkVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
 import type {CommonArgs} from '../types.js';
 
 export async function checkCommand(common:CommonArgs){
+  const target=common.buildTarget??'js';
+  if(target==='wasm'&&!common.verified){
+    throw new Error(
+      'PS_CLI_WASM_REQUIRES_VERIFIED: --target wasm requires --verified',
+    );
+  }
   const input=await resolveInput(common);
   if(common.verified){
     const project=await resolveSourceProject(input);
     const result=checkVerifiedSourceProject(project);
+    const wasm=target==='wasm'
+      ?compileCheckedCoreToWasm(result.checkedCore)
+      :null;
     return {
       ok:true,
       command:'check',
@@ -27,6 +37,12 @@ export async function checkCommand(common:CommonArgs){
       moduleCacheMisses:result.moduleCacheMisses,
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
+      buildTarget:target,
+      ...(wasm===null?{}:{
+        binaryenVersion:wasm.wasm.binaryenVersion,
+        wasmProfile:wasm.wasm.profile,
+        wasmOptimized:wasm.wasm.optimized,
+      }),
     };
   }
   const result=checkSource(

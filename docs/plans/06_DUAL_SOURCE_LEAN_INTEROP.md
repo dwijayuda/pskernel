@@ -252,10 +252,19 @@ their Lean subset parser/printer coverage lands.
 
 ### DS3 — CLI convergence
 
-- `check/build/run` accept both source kinds;
-- `translate --to ps|lean`;
-- `emit-lean` remains compatible;
-- manifests record input source kind and canonical-source hashes.
+Landed DS3.1 checkpoint:
+
+- the default source frontend registry registers both `proofscript` and the bounded `lean-subset` frontend;
+- `check/build/run` and `emit-lean` select only the parser from the entry extension; both source kinds continue into the same chosen semantic pipeline;
+- a verified filesystem regression runs canonical `.lean` through Lean-subset parse -> shared Meta/Elab -> pskernel -> checked core -> IR -> TypeScript -> JavaScript -> runtime;
+- build stems strip either `.ps` or `.lean` cleanly;
+- reports/manifests record `sourceKind`.
+
+Remaining DS3 work:
+
+- add `psc translate <file> --to ps|lean`;
+- record canonical-source hashes in manifests;
+- retain `emit-lean` as a compatible convenience alias and add direct translation regressions for both source directions.
 
 ### DS4 — semantic round trips
 

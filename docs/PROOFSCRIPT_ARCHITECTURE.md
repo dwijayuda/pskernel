@@ -712,3 +712,20 @@ Even after DS2 closure, `lean-subset` remains absent from the default frontend
 registry. Enabling `.lean` for normal `psc check/build/run` is a separate DS3
 product decision and must still route into the identical elaboration, pskernel,
 checked-core, erasure, and backend pipeline.
+
+## DS3.1 dual-source compiler input checkpoint
+
+Normal source selection now recognizes both `.ps` and the documented bounded `.lean` subset through the same `SourceFrontendRegistry`.
+
+The boundary is intentionally narrow:
+
+```text
+filename extension
+  -> source frontend
+  -> shared V061 surface AST
+  -> existing semantic pipeline selection
+```
+
+The source kind does not select a type system, proof checker, erasure strategy, or backend. In verified mode both source forms pass through the identical Meta/Elab, pskernel, checked-core, erasure, IR, and TypeScript/JavaScript path.
+
+Build manifests/reports expose `sourceKind`, and output stems strip the actual input extension. Canonical translation command UX and canonical-source hashes remain DS3 follow-up work.

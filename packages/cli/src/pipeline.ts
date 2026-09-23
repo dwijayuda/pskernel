@@ -48,15 +48,19 @@ export function compileSource(
   };
 }
 
-export function baseReport(source:string,declarations:number,featureIds:readonly string[]){
+export function baseReport(
+  sourcePath:string,
+  declarations:number,
+  featureIds:readonly string[],
+){
   return {
-    source,
+    source:sourcePath,
     declarations,
     featureIds,
     languageVersion:PROOFSCRIPT_SPEC_VERSION,
     surfaceBaseline:'0.6.1-compiler-ready',
     leanSemantics:LEAN_SEMANTICS_VERSION,
     proofStatus:'software-typechecked-only',
-    sourceKind:sourceKindFromFileName(source),
+    sourceKind:sourceKindFromFileName(sourcePath),
   } as const;
 }

@@ -1,8 +1,8 @@
-export type WasmValueType='i32'|'i64'|'f32'|'f64';
+export type WasmValueType='i32'|'i64'|'f32'|'f64'|'externref';
 
 export type WasmAbiValueType=
   |'bool'
-  |'uint8'|'uint16'|'uint32'|'uint64';
+  |'uint8'|'uint16'|'uint32'|'uint64'\n  |'nat'|'int';
 
 export interface WasmIrAbiSignature {
   readonly parameters:readonly WasmAbiValueType[];
@@ -76,7 +76,7 @@ export interface WasmIrFunction {
 
 export interface WasmIrModule {
   readonly kind:'proofscript-wasm-ir';
-  readonly profile:'proofscript-wasm32-mvp-js-v1';
+  readonly profile:\n    |'proofscript-wasm32-mvp-js-v1'\n    |'proofscript-wasm32-ref-js-v1';
   readonly functions:readonly WasmIrFunction[];
 }
 
@@ -198,6 +198,33 @@ export function wasmIrExprType(
         expr.operation+' right operand',
       );
       return 'i32';
+  }
+}
+
+function wasmExprUsesExternref(expr:WasmIrExpr):boolean {
+  switch(expr.kind){
+    case 'nop':
+    case 'i32.const':
+      return false;
+    case 'local':
+      return expr.type==='externref';
+    case 'call':
+      return expr.result==='externref'||
+        expr.args.some(wasmExprUsesExternref);
+    case 'let':
+      return expr.type==='externref'||expr.result==='externref'||
+        wasmExprUsesExternref(expr.value)||
+        wasmExprUsesExternref(expr.body);
+    case 'if':
+      return expr.result==='externref'||
+        wasmExprUsesExternref(expr.condition)||
+        wasmExprUsesExternref(expr.thenBranch)||
+        wasmExprUsesExternref(expr.elseBranch);
+    case 'i32.unary':
+      return wasmExprUsesExternref(expr.operand);
+    case 'i32.binary':
+      return wasmExprUsesExternref(expr.left)||
+        wasmExprUsesExternref(expr.right);
   }
 }
 

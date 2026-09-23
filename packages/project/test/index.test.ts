@@ -2,6 +2,7 @@ import {
   BuildCache,
   createBuildPlan,
   createSourceBuildPlan,
+  sourceDependencyClosure,
 } from '../src/index.js';
 
 function equal(a:unknown,b:unknown):void{
@@ -55,6 +56,14 @@ const mixed=createSourceBuildPlan([
 equal(mixed.order.join(','),'Data,App');
 equal(mixed.modules.get('App')?.sourceKind,'proofscript');
 equal(mixed.modules.get('Data')?.sourceKind,'lean-subset');
+equal(
+  sourceDependencyClosure(mixed,'App').join(','),
+  'Data',
+);
+equal(
+  sourceDependencyClosure(mixed,'Data').join(','),
+  '',
+);
 
 throws(
   ()=>createSourceBuildPlan([

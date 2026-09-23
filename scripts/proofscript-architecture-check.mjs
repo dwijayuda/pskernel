@@ -43,6 +43,7 @@ if(entry('kernel').dependsOn.length!==0){
 requireDeps('environment',['kernel']);
 requireDeps('cli',['environment','project','checked-core']);
 requireDeps('lsp',['environment']);
+requireDeps('language-service',['checked-core','project']);
 requireDeps('checked-core',['kernel']);
 requireDeps('elab',['tactic']);
 forbidDeps('tactic',['elab']);

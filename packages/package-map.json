@@ -543,15 +543,20 @@
       "path": "packages/language-service",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "dual-source-document-service-mvp",
+      "status": "dual-source-project-environment-mvp",
       "packageName": "@proofscript/language-service",
       "dependsOn": [
         "syntax",
         "elab",
-        "kernel"
+        "kernel",
+        "checked-core",
+        "project"
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS6.2 composes transitive imported checked admissions and structure/class/instance metadata before analyzing the entry document. The language service consumes an injected project source host; filesystem resolution remains outside this package.",
+        "Same-document declarations now elaborate sequentially against the environment/metadata produced by earlier verified declarations, aligning editor verification with source order instead of rechecking every declaration against the original base environment.",
+        "Project-host failures fail closed with PS_PROJECT_ANALYSIS_ERROR and suppress document-level kernel verification rather than silently analyzing imports as absent.",
         "DS6.1 snapshots carry sourceKind and analyzer parsing dispatches through the same default SourceFrontendRegistry used by psc. ProofScript and supported Lean documents therefore enter the same shared AST/elaboration/pskernel analysis path.",
         "Document status reports sourceKind; replacement edits preserve the source kind selected at didOpen. Canonical Lean display continues to lower from the shared AST.",
         "Project/import environment composition and cross-file definition/reference indexing remain later DS6 work; this checkpoint is source-kind routing only.",
@@ -600,6 +605,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "sourceDependencyClosure exposes deterministic transitive source dependencies in build-plan order so CLI and editor composition share the same graph semantics.",
         "DS5.1 extends the deterministic project graph with logical source modules carrying source path, source kind, and imports.",
         "One logical module may map to exactly one source; `.ps`/`.lean` duplicates fail with PS_PROJECT_SOURCE_AMBIGUITY before semantic build.",
         "Existing deterministic topological ordering, missing-dependency rejection, and cycle rejection are reused unchanged.",

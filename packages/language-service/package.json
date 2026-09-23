@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Proof-aware editor language service over ProofScript syntax/elaboration and pskernel admission.",
   "proofscript": {
-    "status": "dual-source-document-service-mvp",
+    "status": "dual-source-project-environment-mvp",
     "phase": "D",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

@@ -12,9 +12,11 @@ import {
 } from '@proofscript/elab';
 import {
   Environment,
+  constant,
   exprToString,
   levelToString,
   normalizesToZero,
+  nameToString,
   type Expr,
 } from 'lean-ts-kernel';
 import type {
@@ -65,20 +67,15 @@ function initialTheoremGoal(
   if(declaration.kind!=='theorem')return undefined;
   try{
     const structures=new Map(
-      seed.structures.map((item)=>[
-        item.name.kind==='str'?item.name.str:'',
-        item,
-      ]),
+      seed.structures.map((item)=>[nameToString(item.name),item]),
     );
     const classes=new Set(
-      seed.classes.map((item)=>
-        item.name.kind==='str'?item.name.str:'',
-      ),
+      seed.classes.map((item)=>nameToString(item.name)),
     );
     const globalInstances=seed.instances
       .slice()
       .reverse()
-      .map((item)=>({kind:'const' as const,name:item.name,levels:[]}));
+      .map((item)=>constant(item.name));
     const header=elaborateV061ValueHeader(
       declaration,
       environment,

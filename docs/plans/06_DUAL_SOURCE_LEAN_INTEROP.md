@@ -392,7 +392,7 @@ Remaining DS5 work:
 
 ### DS6 — editor support
 
-Status: **DS6.1 source-kind routing landed; project-aware navigation remains**
+Status: **DS6.2 language-service project environment composition staged; Node/LSP resolution and project-aware navigation remain**
 
 Landed DS6.1:
 
@@ -410,11 +410,23 @@ Landed DS6.1:
 - provider callbacks and document synchronization remain guarded by that
   opt-in/manual-source check.
 
+Landed DS6.2:
+
+- the language service accepts an injected project source host and composes
+  transitive imports through the shared @proofscript/project graph;
+- imported admissions are replayed through checked core/pskernel before entry
+  analysis, with imported structure/class/global-instance metadata seeded into
+  elaboration;
+- same-document declarations elaborate sequentially in source order;
+- open imported buffers override host-provided source text, and any document
+  edit invalidates project-aware analysis caches;
+- unresolved/ambiguous project context fails closed instead of labeling the
+  entry verified without its imports.
+
 Remaining DS6 work:
 
-- compose project/import environments in the language service using the DS5
-  resolver and checked metadata rather than analyzing every document as an
-  isolated file;
+- wire the Node/LSP project source host to the same DS5 configured source-root
+  resolution policy used by psc;
 - build cross-document/cross-source definition and reference indexes;
 - add cross-language navigation;
 - add source conversion code actions after project-aware document identity is

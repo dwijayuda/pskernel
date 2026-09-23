@@ -764,6 +764,22 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 
+{
+  const module=parseV061Module(
+    'theorem ctorProof : Choice := by constructor;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'constructor');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem ctorProof : Choice := by constructor\n',
+  );
+}
+
 
 {
   const module=parseV061Module(

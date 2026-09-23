@@ -3,7 +3,9 @@ import type {V061Expr,V061Tactic} from './ast.js';
 import {V061ParseContext} from './context.js';
 import type {V061ExpressionParser} from './expression-parser.js';
 
-const TACTIC_HEADS=new Set(['exact','assumption','apply','refine','intro']);
+const TACTIC_HEADS=new Set([
+  'exact','assumption','apply','refine','constructor','intro',
+]);
 
 function isTacticHead(text:string):boolean {
   return TACTIC_HEADS.has(text);
@@ -28,6 +30,11 @@ function parseTactic(
   if(tacticToken.text==='assumption'){
     const token=context.cursor.consume();
     return {kind:'assumption',span:token.span};
+  }
+
+  if(tacticToken.text==='constructor'){
+    const token=context.cursor.consume();
+    return {kind:'constructor',span:token.span};
   }
 
   if(tacticToken.text==='apply'){
@@ -61,7 +68,7 @@ function parseTactic(
   }
 
   throw new SyntaxError(
-    "kernel-facing tactic subset supports 'exact', 'assumption', 'apply', 'refine', and 'intro', got '"+
+    "kernel-facing tactic subset supports 'exact', 'assumption', 'apply', 'refine', 'constructor', and 'intro', got '"+
     tacticToken.text+"'",
     tacticToken.span,
   );

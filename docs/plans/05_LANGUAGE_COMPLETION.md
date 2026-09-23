@@ -493,10 +493,12 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    configured project-relative source roots are now landed. The remaining DS5
    blocker is a real persistent module-artifact payload path; do not fabricate
    Lean4Export records.
-8. Continue landed DS6: source-kind routing, checked import composition,
-   shared Node/LSP source-root resolution, cross-source navigation, and
-   non-destructive .ps / supported .lean conversion actions are landed.
-   Next tighten importer diagnostic refresh when an open dependency changes.
+8. DS6 editor MVP is landed: source-kind routing, checked import composition,
+   shared Node/LSP source-root resolution, cross-source navigation,
+   non-destructive .ps / supported .lean conversion actions, and importer
+   diagnostic refresh across open documents. Later optimize refresh scope and
+   improve lexical navigation with scope-aware indexing without changing proof
+   authority.
 9. Design and implement explicit npm/JS FFI.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.

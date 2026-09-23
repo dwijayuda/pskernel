@@ -13,6 +13,7 @@ import {
   lspCapabilities,
   sourceKindFromLspDocument,
   createNodeProjectSourceHost,
+  diagnosticRefreshUris,
 } from '../src/index.js';
 
 {
@@ -126,3 +127,15 @@ console.log('ok - @proofscript/lsp shared project source-root resolver');
   equal(translated.extension,'.lean');
 }
 console.log('ok - @proofscript/lsp translation service surface');
+
+{
+  const uris=diagnosticRefreshUris([
+    'file:///Main.ps',
+    'file:///Core.lean',
+    'file:///Main.ps',
+  ]);
+  equal(uris.length,2);
+  equal(uris[0],'file:///Main.ps');
+  equal(uris[1],'file:///Core.lean');
+}
+console.log('ok - @proofscript/lsp importer diagnostic refresh targets');

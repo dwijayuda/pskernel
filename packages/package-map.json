@@ -578,7 +578,7 @@
       "path": "packages/lsp",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "dual-source-conversion+cross-navigation-mvp",
+      "status": "dual-source-editor-mvp",
       "packageName": "@proofscript/lsp",
       "dependsOn": [
         "language-service",
@@ -588,6 +588,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS6.6 republishes diagnostics for all managed open documents whenever any managed buffer opens, changes, or closes, ensuring importers immediately reflect open dependency edits.",
+        "Refresh-all is conservative editor invalidation only; semantic caches are already invalidated by the language service, and proof authority remains pskernel.",
         "Protocol v2 adds proofscript/translateDocument and advertises experimental.translateDocument. The request delegates directly to the language-service frontend/target registries.",
         "Conversion returns canonical target text and extension only; the LSP does not overwrite source files or claim verification as part of translation.",
         "Existing LSP completion/definition/reference methods now inherit DS6.4 cross-source results from the project-aware language service without adding a second transport-side symbol index.",

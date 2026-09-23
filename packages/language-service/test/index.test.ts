@@ -254,3 +254,49 @@ console.log('ok - @proofscript/language-service cross-source navigation');
   equal(proofscript.text.includes('theorem id(P : Prop, h : P)'),true);
 }
 console.log('ok - @proofscript/language-service document translation');
+
+{
+  const coreUri='file:///Core.lean';
+  const mainUri='file:///Main.ps';
+  const diskCore=
+    'theorem id (P : Prop) (h : P) : P := by assumption\n';
+  const service=new ProofScriptLanguageService({
+    projectHost:{
+      entryModule:(snapshot)=>
+        snapshot.uri===mainUri?'Main':'Core',
+      resolveImport:(_entry,_importer,module)=>{
+        if(module!=='Core')throw new Error('missing module '+module);
+        return {
+          uri:coreUri,
+          sourceKind:'lean-subset' as const,
+          text:diskCore,
+        };
+      },
+    },
+  });
+  service.openDocument(
+    mainUri,
+    1,
+    'import Core; theorem use(P : Prop, h : P) : P := by exact id(P, h);',
+  );
+  equal(service.analyze(mainUri).kernel,'verified');
+
+  service.openDocument(
+    coreUri,
+    1,
+    'theorem id (P : Prop) : P := by assumption\n',
+    'lean-subset',
+  );
+  equal(service.analyze(mainUri).kernel,'rejected');
+
+  service.replaceDocument(
+    coreUri,
+    2,
+    diskCore,
+  );
+  equal(service.analyze(mainUri).kernel,'verified');
+
+  service.closeDocument(coreUri);
+  equal(service.analyze(mainUri).kernel,'verified');
+}
+console.log('ok - @proofscript/language-service importer buffer invalidation');

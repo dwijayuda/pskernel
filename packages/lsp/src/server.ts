@@ -11,6 +11,7 @@ import {
   PROOFSCRIPT_LSP_PROTOCOL_VERSION,
   lspCapabilities,
 } from './capabilities.js';
+import {diagnosticRefreshUris} from './diagnostic-refresh.js';
 
 interface RpcMessage {
   readonly jsonrpc?:string;
@@ -91,7 +92,7 @@ export class ProofScriptLanguageServer {
               document.uri,
             ),
           );
-          this.publishDiagnostics(document.uri);
+          this.publishOpenDiagnostics();
           return;
         }
         case 'textDocument/didChange':{
@@ -102,7 +103,7 @@ export class ProofScriptLanguageServer {
             ?String(changes[changes.length-1]?.text??'')
             :(this.service.getDocument(uri)?.text??'');
           this.service.replaceDocument(uri,version,text);
-          this.publishDiagnostics(uri);
+          this.publishOpenDiagnostics();
           return;
         }
         case 'textDocument/didClose':{
@@ -112,6 +113,7 @@ export class ProofScriptLanguageServer {
             uri,
             diagnostics:[],
           });
+          this.publishOpenDiagnostics();
           return;
         }
         case 'textDocument/completion':
@@ -202,6 +204,12 @@ export class ProofScriptLanguageServer {
       }else{
         this.log(messageOf(error));
       }
+    }
+  }
+
+  private publishOpenDiagnostics():void {
+    for(const uri of diagnosticRefreshUris(this.service.openDocumentUris())){
+      this.publishDiagnostics(uri);
     }
   }
 

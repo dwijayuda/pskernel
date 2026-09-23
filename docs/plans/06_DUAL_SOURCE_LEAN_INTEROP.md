@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **DS6.5 source conversion actions landed; importer diagnostic refresh hardening remains; subordinate to the canonical checked-core architecture**
+Status: **DS6 editor MVP complete through DS6.6 importer diagnostic refresh; later navigation/index optimizations remain; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -392,7 +392,7 @@ Remaining DS5 work:
 
 ### DS6 — editor support
 
-Status: **DS6.5 non-destructive source conversion actions landed; refresh hardening remains**
+Status: **DS6.6 importer diagnostic refresh landed; editor MVP complete**
 
 Landed DS6.1:
 
@@ -455,12 +455,21 @@ Landed DS6.5:
   the original source in place;
 - translation is explicitly source transformation, not proof verification.
 
-Remaining DS6 work:
+Landed DS6.6:
 
-- republish affected importer diagnostics when an imported open document
-  changes, rather than waiting for the next request on that importer;
-- later improve the lexical reference index with scope-aware resolution without
-  moving name-binding authority out of elaboration.
+- opening, changing, or closing a managed document invalidates all project-aware
+  semantic/navigation caches;
+- the LSP republishes diagnostics for every remaining managed open document, so
+  importers immediately reflect edits to open dependencies;
+- closing a dependency first clears its diagnostics, then importers are
+  reanalyzed using the shared project host (including the on-disk fallback);
+- refresh-all is deliberately conservative for correctness. Dependency-specific
+  refresh is a later performance optimization.
+
+DS6 editor MVP is complete for the documented subset. Future editor work may
+improve lexical references with scope-aware indexing and narrow diagnostic
+refresh sets, but neither optimization moves name-binding or proof authority out
+of elaboration/pskernel.
 
 ## Non-goals
 

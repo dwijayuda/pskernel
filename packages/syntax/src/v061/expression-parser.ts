@@ -1,0 +1,116 @@
+import {SyntaxError} from '../source.js';
+import type {V061Expr} from './ast.js';
+import {V061ParseContext,spanBetween} from './context.js';
+import {v061BinaryPrecedence} from './operators.js';
+
+export class V061ExpressionParser {
+  constructor(readonly context:V061ParseContext){}
+
+  parse(minPrecedence=0):V061Expr {
+    let left=this.parsePrefix();
+    while(true){
+      const op=this.context.cursor.peek();
+      const precedence=v061BinaryPrecedence(op.text);
+      if(precedence===undefined||precedence<minPrecedence)break;
+      this.context.cursor.consume();
+      const right=this.parse(precedence+1);
+      left={kind:'binary',operator:op.text,left,right,span:spanBetween(left,right)};
+    }
+    return left;
+  }
+
+  private parsePrefix():V061Expr {
+    if(this.context.cursor.at('let'))return this.parseLet();
+    if(this.context.cursor.at('if'))return this.parseIf();
+    if(this.context.cursor.at('!')){
+      const first=this.context.cursor.consume();
+      const operand=this.parse(7);
+      return {kind:'unary',operator:'!',operand,span:spanBetween(first,operand)};
+    }
+    return this.parsePrimary();
+  }
+
+  private parseLet():V061Expr {
+    const first=this.context.cursor.expect('let');
+    const name=this.context.cursor.expectKind('identifier','let binding name');
+    let declaredType:string|undefined;
+    if(this.context.cursor.consumeIf(':')){
+      declaredType=this.context.cursor.expectKind('identifier','let binding type').text;
+    }
+    this.context.cursor.expect(':=');
+    const value=this.parse();
+    this.context.cursor.expect(';');
+    const body=this.parse();
+    return {
+      kind:'let',
+      name:name.text,
+      ...(declaredType===undefined?{}:{declaredType}),
+      value,
+      body,
+      span:{start:first.span.start,end:body.span.end},
+    };
+  }
+
+  private parseIf():V061Expr {
+    const first=this.context.cursor.expect('if');
+    this.context.own('E-IF-BRACE');
+    this.context.cursor.expect('(');
+    const condition=this.parse();
+    this.context.cursor.expect(')');
+    this.context.cursor.expect('{');
+    const thenBranch=this.parse();
+    this.context.cursor.expect('}');
+    this.context.cursor.expect('else');
+    this.context.cursor.expect('{');
+    const elseBranch=this.parse();
+    const close=this.context.cursor.expect('}');
+    return {kind:'if',condition,thenBranch,elseBranch,span:{start:first.span.start,end:close.span.end}};
+  }
+
+  private parsePrimary():V061Expr {
+    const token=this.context.cursor.peek();
+
+    if(token.kind==='number'){
+      this.context.cursor.consume();
+      return {kind:'nat',text:token.text,span:token.span};
+    }
+    if(token.kind==='string'){
+      this.context.cursor.consume();
+      return {kind:'string',value:token.value??'',span:token.span};
+    }
+    if(token.text==='true'||token.text==='false'){
+      this.context.cursor.consume();
+      return {kind:'bool',value:token.text==='true',span:token.span};
+    }
+    if(token.text==='('){
+      const open=this.context.cursor.consume();
+      if(this.context.cursor.at(')')){
+        const close=this.context.cursor.consume();
+        return {kind:'unit',span:{start:open.span.start,end:close.span.end}};
+      }
+      const value=this.parse();
+      const close=this.context.cursor.expect(')');
+      return {kind:'group',value,span:{start:open.span.start,end:close.span.end}};
+    }
+    if(token.kind==='identifier'){
+      this.context.cursor.consume();
+      const reference:V061Expr={kind:'reference',name:token.text,span:token.span};
+      const open=this.context.cursor.peek();
+      if(open.text!=='('||!open.adjacentToPrevious)return reference;
+
+      this.context.own('D-CALL');
+      this.context.cursor.consume();
+      const args:V061Expr[]=[];
+      if(!this.context.cursor.at(')')){
+        while(true){
+          args.push(this.parse());
+          if(!this.context.cursor.consumeIf(','))break;
+        }
+      }
+      const close=this.context.cursor.expect(')');
+      return {kind:'call',callee:token.text,args,span:{start:token.span.start,end:close.span.end}};
+    }
+
+    throw new SyntaxError("expected expression, got '"+token.text+"'",token.span);
+  }
+}

@@ -94,13 +94,14 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-software-parser-mvp",
+      "status": "v061-let-parser-mvp",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
         "Pinned to ProofScript v0.7.0 with the v0.6.1 compiler-ready surface as the implementation baseline.",
-        "Reference-backed software parser covers const, def/function explicit parameters, D-CALL, primitive expressions/operators, grouping/unit, and E-IF-BRACE.",
+        "v0.6.1 parsing is split into AST, parser context, operator table, expression parser, declaration parser, and Lean lowering modules.",
+        "Reference-backed software syntax covers const, def/function explicit parameters, D-CALL, primitive expressions/operators, grouping/unit, E-IF-BRACE, and lexical let.",
         "Canonical Lean lowering is emitted from the parsed AST; unsupported syntax fails closed.",
         "Broader Lean term/declaration coverage and v0.7 verification constructs remain later milestones."
       ]

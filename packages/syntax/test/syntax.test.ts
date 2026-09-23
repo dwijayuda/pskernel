@@ -293,3 +293,27 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(module.featureIds.includes('D-CALL'),true);
   equal(lowerV061ModuleToLean(module),'def use (x : Nat) : Nat := add (inc x) 2\n');
 }
+
+
+// v0.6.1 inherited lexical let term.
+{
+  const module=parseV061Module('function incTwice(x : Nat) : Nat := let y : Nat := x + 1; y + 1;');
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'let');
+  if(body?.kind==='let'){
+    equal(body.name,'y');
+    equal(body.declaredType,'Nat');
+    equal(body.value.kind,'binary');
+    equal(body.body.kind,'binary');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'def incTwice (x : Nat) : Nat := let y : Nat := x + 1; y + 1\n',
+  );
+}
+{
+  const module=parseV061Module('function shadow(x : Nat) : Nat := let x := x + 1; x;');
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'let');
+  if(body?.kind==='let')equal(body.declaredType,undefined);
+}

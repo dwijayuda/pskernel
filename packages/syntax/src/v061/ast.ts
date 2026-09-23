@@ -1,0 +1,46 @@
+import type {ProofScriptFeatureId} from '../features.js';
+import type {SourceSpan} from '../source.js';
+
+export type V061TypeName='Nat'|'Int'|'Bool'|'String'|'Unit'|string;
+
+export interface V061Parameter {
+  readonly name:string;
+  readonly type:V061TypeName;
+  readonly span:SourceSpan;
+}
+
+export type V061Expr =
+  | {readonly kind:'nat';readonly text:string;readonly span:SourceSpan}
+  | {readonly kind:'string';readonly value:string;readonly span:SourceSpan}
+  | {readonly kind:'bool';readonly value:boolean;readonly span:SourceSpan}
+  | {readonly kind:'unit';readonly span:SourceSpan}
+  | {readonly kind:'reference';readonly name:string;readonly span:SourceSpan}
+  | {readonly kind:'group';readonly value:V061Expr;readonly span:SourceSpan}
+  | {readonly kind:'call';readonly callee:string;readonly args:readonly V061Expr[];readonly span:SourceSpan}
+  | {readonly kind:'unary';readonly operator:'!';readonly operand:V061Expr;readonly span:SourceSpan}
+  | {readonly kind:'binary';readonly operator:string;readonly left:V061Expr;readonly right:V061Expr;readonly span:SourceSpan}
+  | {readonly kind:'if';readonly condition:V061Expr;readonly thenBranch:V061Expr;readonly elseBranch:V061Expr;readonly span:SourceSpan}
+  | {
+      readonly kind:'let';
+      readonly name:string;
+      readonly declaredType?:V061TypeName;
+      readonly value:V061Expr;
+      readonly body:V061Expr;
+      readonly span:SourceSpan;
+    };
+
+export interface V061Declaration {
+  readonly kind:'const'|'def'|'function';
+  readonly name:string;
+  readonly params:readonly V061Parameter[];
+  readonly resultType:V061TypeName;
+  readonly body:V061Expr;
+  readonly terminatedBySemicolon:boolean;
+  readonly span:SourceSpan;
+}
+
+export interface V061Module {
+  readonly kind:'v061-module';
+  readonly declarations:readonly V061Declaration[];
+  readonly featureIds:readonly ProofScriptFeatureId[];
+}

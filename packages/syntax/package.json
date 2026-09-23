@@ -5,14 +5,20 @@
   "type": "module",
   "description": "ProofScript v0.7 source positions, trivia-preserving tokens, lexical errors, and feature identifiers.",
   "proofscript": {
-    "status": "v061-software-parser-mvp",
+    "status": "v061-let-parser-mvp",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript",
     "specVersion": "0.7.0",
     "leanSemantics": "4.34.0",
     "implementedFeatures": [
-      "D-CALL"
+      "L-CORE-LEAN",
+      "D-CALL",
+      "D-EXPLICIT-PARAMS",
+      "D-DECL-SEMI",
+      "D-CONST-ALIAS",
+      "D-FUNCTION-ALIAS",
+      "E-IF-BRACE"
     ]
   },
   "exports": {

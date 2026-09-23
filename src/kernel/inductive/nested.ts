@@ -5,7 +5,7 @@ import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
 import { Name, nameAppendIndexAfter, nameEq, nameFromDotted, nameKey, nameToString, strName } from '../../core/name.js';
 import { TypeChecker } from '../type-checker.js';
-import { addOrdinaryInductive, addOrdinaryInductiveInternal, checkNoReservedNestedAux, checkUniformInductiveOccurrences, ConstructorDecl, InductiveDecl, InductiveTypeDecl } from './ordinary.js';
+import { addOrdinaryInductive, addOrdinaryInductiveInternal, checkNoReservedNestedAux, checkUniformInductiveOccurrences, validateInstalledRecursorsByReduction, ConstructorDecl, InductiveDecl, InductiveTypeDecl } from './ordinary.js';
 
 interface OpenParam { readonly id:string; readonly expr:Expr; readonly decl:Extract<LocalDecl,{kind:'local'}> }
 interface AuxFamily { readonly auxName:Name; readonly outerName:Name; readonly outerLevels:readonly import('../../core/level.js').Level[]; readonly fixedParams:readonly Expr[]; readonly nestedTemplate:Expr; readonly ctorMap:Map<string,Name> }
@@ -120,5 +120,6 @@ export function addInductive(env:Environment,d:InductiveDecl):void{
  for(const fam of p.aux)compareRestoredRules(strName(fam.auxName,'rec'),recRename.get(nameKey(strName(fam.auxName,'rec')))!);
  for(const it of d.types){for(const cn of it.ctors.map(c=>c.name)){const ci=finalEnv.get(cn);if(ci.kind!=='constructor')throw new KernelError('restored constructor missing');checker(finalEnv,d,d.levelParams).check(ci.type);}const rn=strName(it.name,'rec');const ri=finalEnv.get(rn);if(ri.kind!=='recursor')throw new KernelError('restored recursor missing');const rtc=checker(finalEnv,d,ri.levelParams);rtc.ensureSort(rtc.check(ri.type),ri.type);}
  for(const fam of p.aux){const rn=recRename.get(nameKey(strName(fam.auxName,'rec')))!;const ri=finalEnv.get(rn);if(ri.kind!=='recursor')throw new KernelError('restored auxiliary recursor missing');const rtc=checker(finalEnv,d,ri.levelParams);rtc.ensureSort(rtc.check(ri.type),ri.type);for(const rule of ri.rules)rtc.check(rule.rhs);}
+ validateInstalledRecursorsByReduction(finalEnv,d);
  const originalKeys=new Set(env.entries().map(x=>nameKey(x.name)));for(const i of finalEnv.entries())if(!originalKeys.has(nameKey(i.name)))env.add(i);
 }

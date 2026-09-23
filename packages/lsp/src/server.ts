@@ -6,6 +6,7 @@ import {
 } from '@proofscript/language-service';
 import {createInitPreludeEnvironmentProvider} from './prelude-environment.js';
 import {sourceKindFromLspDocument} from './source-kind.js';
+import {createNodeProjectSourceHost} from './project-source-host.js';
 
 interface RpcMessage {
   readonly jsonrpc?:string;
@@ -36,6 +37,7 @@ export class ProofScriptLanguageServer {
   private readonly prelude=createInitPreludeEnvironmentProvider();
   private readonly service=new ProofScriptLanguageService({
     environmentFactory:()=>this.prelude.create(),
+    projectHost:createNodeProjectSourceHost(),
   });
   private input=Buffer.alloc(0);
   private shutdownRequested=false;
@@ -191,6 +193,7 @@ export class ProofScriptLanguageServer {
             proofStateGranularity:'declaration',
             cursorSensitiveTacticSteps:false,
             editorEnvironment:this.prelude.status(),
+            projectAwareImports:true,
           });
           return;
         default:

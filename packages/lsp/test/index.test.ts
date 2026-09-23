@@ -12,6 +12,7 @@ import {
   ProofScriptLanguageService,
   lspCapabilities,
   sourceKindFromLspDocument,
+  createNodeProjectSourceHost,
 } from '../src/index.js';
 
 {
@@ -60,3 +61,54 @@ console.log('ok - @proofscript/lsp proof-aware protocol surface');
   equal(service.documentStatus('file:///Main.lean').kernel,'verified');
 }
 console.log('ok - @proofscript/lsp dual-source document routing');
+
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
+
+{
+  const root=mkdtempSync(join(tmpdir(),'proofscript-lsp-project-'));
+  try{
+    mkdirSync(join(root,'src'),{recursive:true});
+    writeFileSync(
+      join(root,'psconfig.json'),
+      JSON.stringify({sourceRoots:['src']}),
+    );
+    const entryPath=join(root,'src','Main.ps');
+    const corePath=join(root,'src','Core.lean');
+    writeFileSync(entryPath,'import Core;');
+    writeFileSync(
+      corePath,
+      'theorem id (P : Prop) (h : P) : P := by assumption\n',
+    );
+    const host=createNodeProjectSourceHost();
+    const entry={
+      uri:pathToFileURL(entryPath).href,
+      sourceKind:'proofscript' as const,
+      version:1,
+      generation:1,
+      text:'import Core;',
+    };
+    equal(host.entryModule(entry),'Main');
+    const core=host.resolveImport(
+      entry,
+      {
+        uri:entry.uri,
+        sourceKind:entry.sourceKind,
+        text:entry.text,
+      },
+      'Core',
+    );
+    equal(core.sourceKind,'lean-subset');
+    equal(core.uri,pathToFileURL(corePath).href);
+  }finally{
+    rmSync(root,{recursive:true,force:true});
+  }
+}
+console.log('ok - @proofscript/lsp shared project source-root resolver');

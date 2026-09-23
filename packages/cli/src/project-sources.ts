@@ -1,10 +1,8 @@
-import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import {
   basename,
   dirname,
   extname,
-  join,
   resolve,
 } from 'node:path';
 import {
@@ -17,6 +15,10 @@ import {
   type ProjectSourceModule,
   type SourceBuildPlan,
 } from '@proofscript/project';
+import {
+  resolveLogicalModuleSource,
+  resolvedProjectSourceRoots,
+} from '@proofscript/project/node';
 import {canonicalSourceIdentity} from './canonical-source.js';
 import type {ResolvedInput} from './types.js';
 
@@ -36,48 +38,6 @@ export interface ResolvedSourceProject {
   readonly sources:ReadonlyMap<string,LoadedProjectSource>;
 }
 
-function moduleRelativePath(module:string):string {
-  const parts=module.split('.');
-  if(
-    parts.length===0
-    ||parts.some((part)=>part.length===0)
-  ){
-    throw new Error(
-      "PS_PROJECT_IMPORT_NAME: invalid logical module '"+module+"'",
-    );
-  }
-  return join(...parts);
-}
-
-function resolveImportedSource(
-  sourceRoots:readonly string[],
-  module:string,
-):string {
-  const relative=moduleRelativePath(module);
-  const candidates:string[]=[];
-  for(const root of sourceRoots){
-    const ps=join(root,relative+'.ps');
-    const lean=join(root,relative+'.lean');
-    if(existsSync(ps))candidates.push(ps);
-    if(existsSync(lean))candidates.push(lean);
-  }
-  if(candidates.length>1){
-    throw new Error(
-      "PS_PROJECT_SOURCE_AMBIGUITY: logical module '"+module+
-      "' resolves to multiple sources: "+
-      candidates.map((item)=>"'"+item+"'").join(', '),
-    );
-  }
-  if(candidates.length===0){
-    throw new Error(
-      "PS_PROJECT_SOURCE_MISSING: no .ps or .lean source for module '"+
-      module+"' below configured roots: "+
-      sourceRoots.map((root)=>"'"+root+"'").join(', '),
-    );
-  }
-  return candidates[0]!;
-}
-
 function entryLogicalName(sourcePath:string):string {
   return basename(sourcePath,extname(sourcePath));
 }
@@ -87,11 +47,11 @@ export async function resolveSourceProject(
 ):Promise<ResolvedSourceProject> {
   const rootDirectory=dirname(input.sourcePath);
   const configured=input.loaded.config.sourceRoots;
-  const sourceRoots=configured.length===0
-    ?[rootDirectory]
-    :[...new Set(
-        configured.map((root)=>resolve(input.loaded.directory,root)),
-      )];
+  const sourceRoots=resolvedProjectSourceRoots(
+    input.loaded.directory,
+    configured,
+    rootDirectory,
+  );
   const entryModule=entryLogicalName(input.sourcePath);
   const loaded=new Map<string,LoadedProjectSource>();
 
@@ -128,7 +88,7 @@ export async function resolveSourceProject(
     loaded.set(module,item);
 
     for(const dependency of item.imports){
-      const dependencyPath=resolveImportedSource(
+      const dependencyPath=resolveLogicalModuleSource(
         sourceRoots,
         dependency,
       );

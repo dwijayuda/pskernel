@@ -148,7 +148,7 @@ console.log('ok - @proofscript/language-service sequential document environment'
     projectHost:{
       entryModule:(snapshot)=>
         snapshot.uri.endsWith('/Main.ps')?'Main':'Core',
-      resolveImport:(_importer,module)=>{
+      resolveImport:(_entry,_importer,module)=>{
         const source=sources.get(module);
         if(source===undefined)throw new Error('missing module '+module);
         return source;

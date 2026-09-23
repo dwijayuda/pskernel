@@ -16,6 +16,9 @@
       ],
       "@proofscript/environment/node": [
         "../environment/dist/src/node.d.ts"
+      ],
+      "@proofscript/project/node": [
+        "../project/dist/src/node.d.ts"
       ]
     }
   },

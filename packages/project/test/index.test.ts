@@ -100,3 +100,41 @@ cache.set('x',1);
 equal(cache.get('x'),1);
 
 console.log('ok - @proofscript/project mixed-source graph foundation');
+
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {
+  nodeProjectResolutionForEntry,
+  projectSourceRootsFromConfig,
+  resolveLogicalModuleSource,
+} from '../src/node.js';
+
+{
+  const root=mkdtempSync(join(tmpdir(),'proofscript-project-'));
+  try{
+    mkdirSync(join(root,'src'),{recursive:true});
+    writeFileSync(
+      join(root,'psconfig.json'),
+      JSON.stringify({sourceRoots:['src']}),
+    );
+    writeFileSync(join(root,'src','Core.lean'),'theorem core : Prop := by exact True.intro\n');
+    const entry=join(root,'src','Main.ps');
+    writeFileSync(entry,'import Core;');
+    const resolution=nodeProjectResolutionForEntry(entry);
+    equal(resolution.sourceRoots.length,1);
+    equal(
+      resolveLogicalModuleSource(resolution.sourceRoots,'Core'),
+      join(root,'src','Core.lean'),
+    );
+    equal(projectSourceRootsFromConfig(['src','src']).length,1);
+  }finally{
+    rmSync(root,{recursive:true,force:true});
+  }
+}
+console.log('ok - @proofscript/project shared Node source-root resolver');

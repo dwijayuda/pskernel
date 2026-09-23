@@ -33,6 +33,7 @@ export interface ProjectResolvedSource {
 export interface LanguageServiceProjectHost {
   entryModule(snapshot:TextDocumentSnapshot):string;
   resolveImport(
+    entry:TextDocumentSnapshot,
     importer:ProjectResolvedSource,
     logicalModule:string,
   ):ProjectResolvedSource;
@@ -120,7 +121,7 @@ export function buildProjectAnalysisContext(
     for(const dependency of surface.imports??[]){
       load(
         dependency,
-        host.resolveImport(source,dependency),
+        host.resolveImport(entry,source,dependency),
       );
     }
   };

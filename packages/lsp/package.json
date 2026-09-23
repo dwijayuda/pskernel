@@ -30,6 +30,7 @@
   "dependencies": {
     "@proofscript/language-service": "file:../language-service",
     "lean-ts-kernel": "file:../..",
-    "@proofscript/environment": "file:../environment"
+    "@proofscript/environment": "file:../environment",
+    "@proofscript/project": "file:../project"
   }
 }

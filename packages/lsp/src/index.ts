@@ -53,3 +53,4 @@ export {
 export * from './prelude-environment.js';
 
 export * from './source-kind.js';
+export * from './project-source-host.js';

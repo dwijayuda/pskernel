@@ -43,6 +43,9 @@
       ],
       "@proofscript/project": [
         "../project/dist/src/index.d.ts"
+      ],
+      "@proofscript/project/node": [
+        "../project/dist/src/node.d.ts"
       ]
     }
   },

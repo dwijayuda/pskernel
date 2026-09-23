@@ -14,16 +14,31 @@ export const levelParam = (name: Name): Level => Object.freeze({ kind: 'param', 
 export const levelMVar = (name: Name): Level => Object.freeze({ kind: 'mvar', name });
 
 export function levelEqStructural(a: Level, b: Level): boolean {
-  if (a === b) return true;
-  if (a.kind !== b.kind) return false;
-  switch (a.kind) {
-    case 'zero': return true;
-    case 'succ': return b.kind === 'succ' && levelEqStructural(a.of, b.of);
-    case 'max': return b.kind === 'max' && levelEqStructural(a.left, b.left) && levelEqStructural(a.right, b.right);
-    case 'imax': return b.kind === 'imax' && levelEqStructural(a.left, b.left) && levelEqStructural(a.right, b.right);
-    case 'param': return b.kind === 'param' && nameEq(a.name, b.name);
-    case 'mvar': return b.kind === 'mvar' && nameEq(a.name, b.name);
+  const todo:[Level,Level][]=[[a,b]];
+  while(todo.length){
+    const [x,y]=todo.pop()!;
+    if(x===y)continue;
+    if(x.kind!==y.kind)return false;
+    switch(x.kind){
+      case'zero':break;
+      case'param':case'mvar':
+        if((y.kind!=='param'&&y.kind!=='mvar')||!nameEq(x.name,y.name))return false;
+        break;
+      case'succ':
+        if(y.kind!=='succ')return false;
+        todo.push([x.of,y.of]);
+        break;
+      case'max':
+        if(y.kind!=='max')return false;
+        todo.push([x.left,y.left],[x.right,y.right]);
+        break;
+      case'imax':
+        if(y.kind!=='imax')return false;
+        todo.push([x.left,y.left],[x.right,y.right]);
+        break;
+    }
   }
+  return true;
 }
 
 

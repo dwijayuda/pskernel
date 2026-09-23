@@ -9,7 +9,10 @@ import {
   DEFAULT_KERNEL,
   canonicalJson,
 } from '@proofscript/module';
-import {BuildCache} from '@proofscript/project';
+import {
+  BuildCache,
+  sourceDependencyClosure,
+} from '@proofscript/project';
 import {lowerV061ModuleToLean} from '@proofscript/syntax';
 import {canonicalSourceIdentity} from './canonical-source.js';
 import {
@@ -43,28 +46,6 @@ function sha256Canonical(value:unknown):string {
   return 'sha256:'+createHash('sha256')
     .update(canonicalJson(value),'utf8')
     .digest('hex');
-}
-
-function dependencyClosure(
-  project:ResolvedSourceProject,
-  module:string,
-):Set<string> {
-  const out=new Set<string>();
-  const visit=(name:string):void=>{
-    const source=project.sources.get(name);
-    if(source===undefined){
-      throw new Error(
-        "PS_PROJECT_INTERNAL_SOURCE: unresolved module '"+name+"'",
-      );
-    }
-    for(const dependency of source.imports){
-      if(out.has(dependency))continue;
-      out.add(dependency);
-      visit(dependency);
-    }
-  };
-  visit(module);
-  return out;
 }
 
 function directDependencyIntegrities(
@@ -174,7 +155,7 @@ export function checkVerifiedSourceProject(
       continue;
     }
 
-    const closure=dependencyClosure(project,name);
+    const closure=new Set(sourceDependencyClosure(project.plan,name));
     const dependencyAdmissions=project.plan.order
       .filter((candidate)=>closure.has(candidate))
       .flatMap((candidate)=>[

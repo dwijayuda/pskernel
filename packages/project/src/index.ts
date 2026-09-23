@@ -77,3 +77,31 @@ export class BuildCache<Value> {
   has(key:string):boolean{return this.values.has(key);}
   clear():void{this.values.clear();}
 }
+
+
+export function sourceDependencyClosure(
+  plan:SourceBuildPlan,
+  module:string,
+):readonly string[] {
+  if(!plan.modules.has(module)){
+    throw new Error(
+      "PS_PROJECT_SOURCE_MISSING_NODE: unknown logical module '"+module+"'",
+    );
+  }
+  const out=new Set<string>();
+  const visit=(name:string):void=>{
+    const source=plan.modules.get(name);
+    if(source===undefined){
+      throw new Error(
+        "PS_PROJECT_SOURCE_MISSING_NODE: unknown logical module '"+name+"'",
+      );
+    }
+    for(const dependency of source.imports){
+      if(out.has(dependency))continue;
+      out.add(dependency);
+      visit(dependency);
+    }
+  };
+  visit(module);
+  return plan.order.filter((name)=>out.has(name));
+}

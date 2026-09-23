@@ -46,6 +46,10 @@ export interface DeclarationStatus {
   readonly canonicalLean:string;
   readonly initialGoal?:ProofGoal;
 }
+export interface ProjectDocumentStatus {
+  readonly entryModule:string;
+  readonly moduleOrder:readonly string[];
+}
 export interface DocumentAnalysis {
   readonly uri:string;
   readonly sourceKind:DocumentSourceKind;
@@ -57,6 +61,7 @@ export interface DocumentAnalysis {
   readonly diagnostics:readonly ServiceDiagnostic[];
   readonly declarations:readonly DeclarationStatus[];
   readonly canonicalLean?:string;
+  readonly project?:ProjectDocumentStatus;
 }
 export interface ProofState {
   readonly status:'closed'|'rejected'|'unavailable'|'none';

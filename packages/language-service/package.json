@@ -23,7 +23,9 @@
   "dependencies": {
     "@proofscript/syntax": "file:../syntax",
     "@proofscript/elab": "file:../elab",
-    "lean-ts-kernel": "file:../.."
+    "lean-ts-kernel": "file:../..",
+    "@proofscript/checked-core": "file:../checked-core",
+    "@proofscript/project": "file:../project"
   },
   "devDependencies": {
     "typescript": "5.8.3"

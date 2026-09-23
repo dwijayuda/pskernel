@@ -6,10 +6,17 @@ import type {
   type DocumentSourceKind,
 } from './model.js';
 import {analyzeDocument,type AnalysisOptions} from './analyzer.js';
+import {
+  buildProjectAnalysisContext,
+  type LanguageServiceProjectHost,
+} from './project-context.js';
+import {Environment} from 'lean-ts-kernel';
 import {offsetAt} from './positions.js';
 import {completionItems,definitionLocation,referenceLocations} from './navigation.js';
 
-export interface LanguageServiceOptions extends AnalysisOptions {}
+export interface LanguageServiceOptions extends AnalysisOptions {
+  readonly projectHost?:LanguageServiceProjectHost;
+}
 
 export class ProofScriptLanguageService {
   private readonly docs=new Map<string,TextDocumentSnapshot>();
@@ -32,7 +39,7 @@ export class ProofScriptLanguageService {
       text,
     };
     this.docs.set(uri,snapshot);
-    this.analyses.delete(uri);
+    this.analyses.clear();
     return snapshot;
   }
 
@@ -55,7 +62,7 @@ export class ProofScriptLanguageService {
 
   closeDocument(uri:string):void {
     this.docs.delete(uri);
-    this.analyses.delete(uri);
+    this.analyses.clear();
   }
 
   getDocument(uri:string):TextDocumentSnapshot|undefined {
@@ -71,7 +78,53 @@ export class ProofScriptLanguageService {
       &&cached.generation===snapshot.generation
       &&cached.version===snapshot.version
     )return cached;
-    const analysis=analyzeDocument(snapshot,this.options);
+    let options:AnalysisOptions=this.options;
+    if(this.options.projectHost!==undefined){
+      try{
+        const base=this.options.environmentFactory?.()??new Environment();
+        const project=buildProjectAnalysisContext(
+          snapshot,
+          base,
+          this.options.projectHost,
+          (target)=>this.docs.get(target),
+        );
+        options={
+          ...this.options,
+          environment:project.environment,
+          seed:project.seed,
+          project:{
+            entryModule:project.entryModule,
+            moduleOrder:project.moduleOrder,
+          },
+        };
+      }catch(error){
+        const local=analyzeDocument(snapshot,this.options);
+        const message=error instanceof Error?error.message:String(error);
+        const analysis={
+          ...local,
+          kernel:'not-run' as const,
+          diagnostics:[{
+            range:{
+              start:{line:0,character:0},
+              end:{line:0,character:0},
+            },
+            severity:1 as const,
+            code:'PS_PROJECT_ANALYSIS_ERROR',
+            source:'proofscript' as const,
+            phase:'tooling' as const,
+            message,
+          }],
+          declarations:local.declarations.map((item)=>({
+            ...item,
+            kernel:'not-run' as const,
+            message,
+          })),
+        };
+        this.analyses.set(uri,analysis);
+        return analysis;
+      }
+    }
+    const analysis=analyzeDocument(snapshot,options);
     this.analyses.set(uri,analysis);
     return analysis;
   }
@@ -199,6 +252,9 @@ export class ProofScriptLanguageService {
       rejectedDeclarations:analysis.declarations.filter(
         (item)=>item.kernel==='rejected',
       ).length,
+      ...(analysis.project===undefined?{}:{
+        project:analysis.project,
+      }),
     };
   }
 }

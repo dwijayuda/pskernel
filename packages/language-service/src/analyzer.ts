@@ -8,6 +8,7 @@ import {
 import {
   elaborateV061Declarations,
   elaborateV061ValueHeader,
+  type V061ElaborationSeed,
 } from '@proofscript/elab';
 import {
   Environment,
@@ -28,6 +29,12 @@ import {rangeFromOffsets} from './positions.js';
 
 export interface AnalysisOptions {
   readonly environmentFactory?:()=>Environment;
+  readonly environment?:Environment;
+  readonly seed?:V061ElaborationSeed;
+  readonly project?:{
+    readonly entryModule:string;
+    readonly moduleOrder:readonly string[];
+  };
 }
 
 const sourceFrontends=createDefaultSourceFrontendRegistry();
@@ -53,10 +60,32 @@ function displayCoreExpr(
 function initialTheoremGoal(
   declaration:V061Declaration,
   environment:Environment,
+  seed:V061ElaborationSeed,
 ):ProofGoal|undefined {
   if(declaration.kind!=='theorem')return undefined;
   try{
-    const header=elaborateV061ValueHeader(declaration,environment);
+    const structures=new Map(
+      seed.structures.map((item)=>[
+        item.name.kind==='str'?item.name.str:'',
+        item,
+      ]),
+    );
+    const classes=new Set(
+      seed.classes.map((item)=>
+        item.name.kind==='str'?item.name.str:'',
+      ),
+    );
+    const globalInstances=seed.instances
+      .slice()
+      .reverse()
+      .map((item)=>({kind:'const' as const,name:item.name,levels:[]}));
+    const header=elaborateV061ValueHeader(
+      declaration,
+      environment,
+      structures,
+      classes,
+      globalInstances,
+    );
     const ids=new Map(
       header.parameters.map((parameter)=>[
         parameter.id,
@@ -156,19 +185,35 @@ export function analyzeDocument(
   }
 
   const canonicalLean=lowerV061ModuleToLean(module);
-  const environment=options.environmentFactory?.()??new Environment();
+  let environment=(
+    options.environment
+    ??options.environmentFactory?.()
+    ??new Environment()
+  ).clone();
+  let seed:V061ElaborationSeed=options.seed??{
+    structures:[],
+    classes:[],
+    instances:[],
+  };
   const declarations:DeclarationStatus[]=[];
   const diagnostics:ServiceDiagnostic[]=[];
 
   for(const declaration of module.declarations){
-    const initialGoal=initialTheoremGoal(declaration,environment);
+    const initialGoal=initialTheoremGoal(declaration,environment,seed);
     let kernel:DeclarationKernelStatus='not-run';
     let message:string|undefined;
     try{
-      elaborateV061Declarations(
+      const checked=elaborateV061Declarations(
         singleDeclarationModule(module,declaration),
         environment,
+        seed,
       );
+      environment=checked.environment;
+      seed={
+        structures:[...seed.structures,...checked.structures],
+        classes:[...seed.classes,...checked.classes],
+        instances:[...seed.instances,...checked.instances],
+      };
       kernel='verified';
     }catch(error){
       message=error instanceof Error?error.message:String(error);
@@ -217,5 +262,6 @@ export function analyzeDocument(
     diagnostics,
     declarations,
     canonicalLean,
+    ...(options.project===undefined?{}:{project:options.project}),
   };
 }

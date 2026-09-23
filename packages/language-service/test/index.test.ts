@@ -118,3 +118,70 @@ console.log('ok - @proofscript/language-service Lean-subset source routing');
   equal(references.length,2);
 }
 console.log('ok - @proofscript/language-service navigation and completion');
+
+{
+  const service=new ProofScriptLanguageService();
+  service.openDocument(
+    'file:///sequence.ps',
+    1,
+    'theorem id(P : Prop, h : P) : P := by assumption; '+
+    'theorem use(P : Prop, h : P) : P := by exact id(P, h);',
+  );
+  const analysis=service.analyze('file:///sequence.ps');
+  equal(analysis.kernel,'verified');
+  equal(analysis.declarations[1]?.kernel,'verified');
+}
+console.log('ok - @proofscript/language-service sequential document environment');
+
+{
+  const sources=new Map([
+    [
+      'Core',
+      {
+        uri:'file:///Core.lean',
+        sourceKind:'lean-subset' as const,
+        text:'theorem id (P : Prop) (h : P) : P := by assumption\n',
+      },
+    ],
+  ]);
+  const service=new ProofScriptLanguageService({
+    projectHost:{
+      entryModule:(snapshot)=>
+        snapshot.uri.endsWith('/Main.ps')?'Main':'Core',
+      resolveImport:(_importer,module)=>{
+        const source=sources.get(module);
+        if(source===undefined)throw new Error('missing module '+module);
+        return source;
+      },
+    },
+  });
+  service.openDocument(
+    'file:///Main.ps',
+    1,
+    'import Core; theorem use(P : Prop, h : P) : P := by exact id(P, h);',
+  );
+  const analysis=service.analyze('file:///Main.ps');
+  equal(analysis.kernel,'verified');
+  equal(analysis.declarations[0]?.kernel,'verified');
+  equal(analysis.project?.entryModule,'Main');
+  equal(analysis.project?.moduleOrder.join(','),'Core,Main');
+}
+console.log('ok - @proofscript/language-service mixed-source import environment');
+
+{
+  const service=new ProofScriptLanguageService({
+    projectHost:{
+      entryModule:()=> 'Main',
+      resolveImport:()=>{throw new Error('no source');},
+    },
+  });
+  service.openDocument(
+    'file:///Main.ps',
+    1,
+    'import Missing; theorem id(P : Prop, h : P) : P := by assumption;',
+  );
+  const analysis=service.analyze('file:///Main.ps');
+  equal(analysis.kernel,'not-run');
+  equal(analysis.diagnostics[0]?.code,'PS_PROJECT_ANALYSIS_ERROR');
+}
+console.log('ok - @proofscript/language-service project failure is fail-closed');

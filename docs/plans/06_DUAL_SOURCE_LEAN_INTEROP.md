@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **DS2 in progress; canonical values + structure/class/instance/inductive/record frontend landed; match/where closure next; subordinate to the canonical checked-core architecture**
+Status: **DS2 complete for the canonical emitted subset; DS3 CLI convergence next; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -219,44 +219,36 @@ bounded fail-closed Lean parser before any command accepts `.lean` input.
 
 ### DS2 — Lean-subset parser
 
-Landed DS2.1 checkpoint:
+Status: **complete for the canonical Lean subset currently emitted by psc**
 
-- a separate `lean-subset` parser reads canonical Lean `def` and
-  `theorem` declarations into the shared v0.6.1 AST;
+Landed checkpoints:
+
+- a separate `lean-subset` parser reads canonical Lean `def`, `theorem`,
+  `structure`, `class`, `instance`, and `inductive` declarations into
+  the shared v0.6.1 AST;
 - native explicit/implicit/strict-implicit/instance binders reuse the shared
-  binder/type representation;
+  binder/type representation where the canonical ProofScript printer can also
+  round-trip them;
 - canonical named application, literals, unary/binary terms, `fun`, `let`,
-  `if`, synthetic holes, and the current theorem tactic subset are accepted.
+  `if`, record values, `match`, synthetic holes, and the current theorem
+  tactic subset are accepted;
+- canonical Lean `where` declarations parse with token-bounded local bodies,
+  including multiline match bodies, without creating a second expression AST;
+- structure/class fields use an opt-in line-boundary type parse mode so
+  newline-separated Lean fields do not get mistaken for whitespace
+  application;
+- unsupported commands/forms remain fail-closed, including namespaces/macros,
+  custom elaboration, explicit inductive constructor result types, and binder
+  shapes that cannot yet round-trip through canonical ProofScript;
+- the integrated syntax gate covers:
+  `ProofScript -> Lean -> Lean-subset AST -> Lean` idempotence and canonical
+  ProofScript equivalence across the full currently emitted subset;
+- the `lean-subset` SourceFrontend remains exported but deliberately
+  unregistered by default. DS3 owns CLI acceptance.
 
-Landed DS2.2 checkpoint:
-
-- canonical Lean `structure`, `class`, `instance`, and `inductive`
-  declarations now parse into the same existing declaration AST nodes used by
-  ProofScript;
-- canonical record values `{ field := value : Type }` are accepted, closing
-  the ordinary instance-body form emitted by the Lean target printer;
-- newline-delimited structure/class fields use an explicit line-boundary type
-  parse mode so whitespace application inside a field remains valid without
-  consuming the next field;
-- implicit and instance structure fields round-trip; class/inductive binder
-  shapes remain bounded to what the canonical ProofScript printer can read
-  back;
-- explicit constructor result types, namespaces, macros, custom elaboration,
-  and other unsupported Lean commands remain fail-closed with
-  `PS_LEAN_SUBSET_*` diagnostics;
-- ProofScript -> canonical Lean -> Lean-subset parse -> canonical Lean and
-  canonical ProofScript printing are gated across the landed declaration
-  subset;
-- the `lean-subset` frontend object remains deliberately unregistered in the
-  default registry. Parser availability is not yet CLI acceptance.
-
-Remaining DS2 work before DS3:
-
-- canonical Lean `match ... with` terms;
-- canonical Lean `where` declarations;
-- final emitted-subset round-trip corpus and precise diagnostics for adjacent
-  unsupported command modifiers/forms.
-
+DS2 exit condition is met for the current emitted surface. Future language
+features must extend both source frontends or remain source-kind gated until
+their Lean subset parser/printer coverage lands.
 
 ### DS3 — CLI convergence
 

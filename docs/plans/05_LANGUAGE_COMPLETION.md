@@ -293,7 +293,8 @@ Implement, in this order:
 
 1. define a source-kind/frontend registry for `.ps` and supported `.lean` — **landed**; `.lean` recognition currently fails closed until DS2;
 2. add a Lean-subset parser that lowers only documented supported constructs
-   into the canonical surface module;
+   into the canonical surface module — **landed for the complete currently
+   emitted subset**;
 3. add a canonical ProofScript source printer, complementing the existing
    canonical Lean lowering;
 4. make `psc check/build/run` select the frontend from the entry source kind;

@@ -685,3 +685,30 @@ The default source frontend registry still does not register `lean-subset`.
 Canonical `match` and `where` forms emitted by ProofScript remain the final
 DS2 parser gaps before DS3 can expose `.lean` through normal CLI source
 selection.
+
+## DS2 emitted-subset closure
+
+The bounded Lean frontend now parses every source form currently emitted by the
+canonical Lean target printer for the supported v0.6.1 surface. This includes
+declarations, records, match expressions, where declarations, and the landed
+tactic subset.
+
+The DS2 closure gate is source-semantic, not textual preservation:
+
+```text
+ProofScript source
+  -> canonical V061 AST
+  -> canonical Lean
+  -> Lean-subset parser
+  -> canonical V061 AST
+  -> canonical Lean / canonical ProofScript
+```
+
+The canonical outputs must be stable/equivalent for the supported subset.
+Comments, original formatting, and unsupported Lean extensions are not part of
+the contract.
+
+Even after DS2 closure, `lean-subset` remains absent from the default frontend
+registry. Enabling `.lean` for normal `psc check/build/run` is a separate DS3
+product decision and must still route into the identical elaboration, pskernel,
+checked-core, erasure, and backend pipeline.

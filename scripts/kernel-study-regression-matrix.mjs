@@ -14,7 +14,7 @@ function walk(dir){
 }
 
 const matrix={
-  'study/lean4-4.34.0/tests/elab/kernel1.lean':{kind:'direct',tests:['Nat.add reduction uses exact bigint'],note:'basic kernel defeq/Nat behavior'},
+  'study/lean4-4.34.0/tests/elab/kernel1.lean':{kind:'direct',tests:['Nat.add reduction uses exact bigint','native reduction matches Lean kernel1 defeq cases after delta unfolding'],note:'basic kernel defeq/Nat behavior plus Lean.reduceNat/Lean.reduceBool compiler-backed reduction through delta unfolding'},
   'study/lean4-4.34.0/tests/elab/kernel2.lean':{kind:'direct',tests:['defeq expands string literals exactly through String.ofList','Nat.pow reduction'],note:'basic WHNF/defeq/string and arithmetic behavior'},
   'study/lean4-4.34.0/tests/elab/kernelBacktrack.lean':{kind:'frontend-operational',note:'Core task/error backtracking is outside the trusted semantic checker'},
   'study/lean4-4.34.0/tests/elab/kernelErrorFollowup.lean':{kind:'frontend-operational',note:'frontend environment/error recovery after rejected declarations'},
@@ -36,6 +36,11 @@ const matrix={
 };
 
 const hardeningExtras={
+  'study/lean4-4.34.0/tests/elab/reduceBool.lean':{
+    kind:'direct-native-boundary',
+    tests:['explicit native evaluator controls Lean.reduceNat and Lean.reduceBool results'],
+    note:'upstream smoke for Lean.reduceNat/Lean.reduceBool; direct TS provider test locks returned Nat/Bool behavior while native-oracle-smoke locks compiler execution and @[implemented_by]',
+  },
   'study/lean4-4.34.0/tests/elab/issue_14576.lean':{
     kind:'direct-invariant-plus-oracle',
     tests:['nested fixed parameters are checked even when auxiliary preprocessing drops them'],

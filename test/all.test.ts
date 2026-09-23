@@ -474,6 +474,36 @@ test('explicit native evaluator controls Lean.reduceNat and Lean.reduceBool resu
  eqExpr(tc.whnf(app(constant(N.LeanReduceNat),constant(vNat))),natLit(7));
  eqExpr(tc.whnf(app(constant(N.LeanReduceBool),constant(vBool))),constant(N.BoolFalse));
 });
+test('native reduction matches Lean kernel1 defeq cases after delta unfolding',()=>{
+ const env=baseEnv();
+ env.add({kind:'axiom',name:N.LeanReduceBool,levelParams:[],type:forallE(nameFromDotted('b'),constant(N.Bool),constant(N.Bool))});
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ const v1=nameFromDotted('Native.Kernel1.v1'),v2=nameFromDotted('Native.Kernel1.v2'),v3=nameFromDotted('Native.Kernel1.v3'),v4=nameFromDotted('Native.Kernel1.v4'),v5=nameFromDotted('Native.Kernel1.v5');
+ for(const n of [v1,v2,v3,v5])env.add({kind:'axiom',name:n,levelParams:[],type:constant(N.Nat)});
+ env.add({kind:'axiom',name:v4,levelParams:[],type:constant(N.Bool)});
+ const c1=nameFromDotted('Native.Kernel1.c1'),c2=nameFromDotted('Native.Kernel1.c2'),c3=nameFromDotted('Native.Kernel1.c3'),c4=nameFromDotted('Native.Kernel1.c4'),c5=nameFromDotted('Native.Kernel1.c5');
+ const def=(name:any,type:any,value:any)=>env.add({kind:'definition',name,levelParams:[],type,value,hints:{kind:'regular',height:1n},safety:'safe'});
+ def(c1,constant(N.Nat),app(constant(N.LeanReduceNat),constant(v1)));
+ def(c2,constant(N.Nat),app(constant(N.LeanReduceNat),constant(v2)));
+ def(c3,constant(N.Nat),app(constant(N.LeanReduceNat),constant(v3)));
+ def(c4,constant(N.Bool),app(constant(N.LeanReduceBool),constant(v4)));
+ def(c5,constant(N.Nat),app(constant(N.LeanReduceNat),constant(v5)));
+ const values=new Map([
+  [nameToString(v1),{kind:'nat',value:200000000000n} as const],
+  [nameToString(v2),{kind:'nat',value:200000000000n} as const],
+  [nameToString(v3),{kind:'nat',value:200000000001n} as const],
+  [nameToString(v4),{kind:'bool',value:false} as const],
+  [nameToString(v5),{kind:'nat',value:0n} as const],
+ ]);
+ const evaluator:NativeEvaluator={evaluate(_env,request){return values.get(nameToString(request.constant))??null;}};
+ const tc=new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,evaluator);
+ assert(tc.isDefEq(constant(c1),constant(c2)),'kernel1 c1/c2 native Nat values must be definitionally equal');
+ assert(!tc.isDefEq(constant(c1),constant(c3)),'kernel1 c1/c3 native Nat values must differ');
+ assert(tc.isDefEq(constant(c5),constant(N.NatZero)),'kernel1 native zero must equal Nat.zero');
+ assert(tc.isDefEq(constant(N.NatZero),constant(c5)),'kernel1 Nat.zero equality must be symmetric');
+ assert(!tc.isDefEq(constant(c4),constant(N.BoolTrue)),'kernel1 native false must not equal Bool.true');
+});
+
 test('native reduction marker must be the exact level-free Lean constant',()=>{
  const env=baseEnv(),v=nameFromDotted('Native.levelMarker');let calls=0;
  env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});

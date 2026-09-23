@@ -178,6 +178,31 @@ open:
 
 This is the correct ordering.
 
+### Native reduction boundary audit
+
+Final Lean 4.34 has two observable reduction orders that must both be preserved:
+
+- kernel `whnf`: `whnf_core -> reduce_native -> reduce_nat -> delta`;
+- lazy definitional equality: offset check -> conditional Nat reduction -> native
+  reduction -> lazy delta.
+
+The TypeScript checker follows both orders. Its native marker shape also matches
+C++: a level-free `Lean.reduceBool` or `Lean.reduceNat` application with one
+constant argument, evaluated by name through an explicit TCB provider.
+
+For the Lean-backed provider, `NativeEval.lean` uses
+`Meta.reduceBoolNative`/`Meta.reduceNatNative`. In final 4.34 these call
+`evalConstCheck`, which first requires the named declaration's type head to be
+exactly `Bool`/`Nat` and then executes `env.evalConst`. This preserves the
+compiler-IR/`@[implemented_by]` boundary instead of substituting logical kernel
+normalization.
+
+Direct coverage now includes the native cases from upstream `kernel1.lean`:
+equality/disequality of compiler-reduced Nat definitions, symmetric reduction to
+`Nat.zero`, and Bool false versus `Bool.true`. `native-oracle-smoke` remains
+the executable check that the external provider actually observes
+`@[implemented_by]`; it still requires the pinned Lean runtime.
+
 ### Gate 1 — canonical Full Std
 
 Use the project-canonical single-stream replay as the release gate, not

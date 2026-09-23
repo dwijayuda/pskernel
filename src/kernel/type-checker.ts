@@ -404,7 +404,8 @@ export class TypeChecker {
     if((!hasFVar(a)||this.eagerReduce)&&b.kind==='const'&&nameEq(b.name,N.BoolTrue)){
       const w=this.whnf(a);if(w.kind==='const'&&nameEq(w.name,N.BoolTrue))return true;
     }
-    let x=this.whnfCore(a,false,true),y=this.whnfCore(b,false,true);const q2=this.quick(x,y);if(q2!==null)return q2;
+    let x=this.whnfCore(a,false,true),y=this.whnfCore(b,false,true);
+    if(x!==a||y!==b){const q2=this.quick(x,y);if(q2!==null)return q2;}
     const pi=this.proofIrrel(x,y);if(pi!==null)return pi;
     while(true){
       const off=this.defEqOffset(x,y);if(off!==null)return off;
@@ -421,7 +422,7 @@ export class TypeChecker {
     if(x.kind==='const'&&y.kind==='const'&&nameEq(x.name,y.name)&&x.levels.length===y.levels.length&&x.levels.every((l,i)=>levelEquivalent(l,y.levels[i]!)))return true;
     if(x.kind==='fvar'&&y.kind==='fvar'&&x.id===y.id)return true;
     if(x.kind==='proj'&&y.kind==='proj'&&nameEq(x.typeName,y.typeName)&&x.index===y.index&&this.lazyDeltaProjReduction(x.expr,y.expr,x.typeName,x.index))return true;
-    const xx=this.whnfCore(x,false,false),yy=this.whnfCore(y,false,false);if(!exprEq(xx,x)||!exprEq(yy,y))return this.isDefEqCore(xx,yy);
+    const xx=this.whnfCore(x,false,false),yy=this.whnfCore(y,false,false);if(xx!==x||yy!==y)return this.isDefEqCore(xx,yy);
     if(x.kind==='app'&&y.kind==='app'&&this.defEqApp(x,y))return true;
     if(this.tryEta(x,y)||this.tryEta(y,x)||this.tryStructEta(x,y))return true;
     const str=this.tryStringLitExpansion(x,y);if(str!==null)return str;

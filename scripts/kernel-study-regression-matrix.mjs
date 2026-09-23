@@ -87,7 +87,7 @@ for(const marker of [
   '("rootOrderMeaning", "serialized-module-sequence")',
   '("emissionOrder", "dependency-first")',
   '("canonicalScope", "pskernel-project-protocol")',
-  'not claimed to be source declaration order',
+  'This is not claimed to be\nsource declaration order',
 ]){
   if(!exporter.includes(marker))throw new Error('canonical replay exporter protocol drift: missing '+marker);
 }

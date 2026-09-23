@@ -295,11 +295,8 @@ export function inferImplicit(e: Expr, strict: boolean, numParams = Number.MAX_S
   }
   for(let i=binders.length-1;i>=0;i--){
     const b=binders[i]!;
-    body=b.binderInfo!=='default'
-      ? {...b,body}
-      : hasLooseBVarInPiDomain(body,0,strict)
-        ? {...b,body,binderInfo:'implicit'}
-        : {...b,body};
+    const bi=b.binderInfo==='default'&&hasLooseBVarInPiDomain(body,0,strict)?'implicit':b.binderInfo;
+    body=body===b.body&&bi===b.binderInfo?b:{...b,body,binderInfo:bi};
   }
   return body;
 }

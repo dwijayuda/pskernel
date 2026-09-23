@@ -48,11 +48,12 @@ test('deep structural traversals avoid the JavaScript call stack',()=>{
  let e:any=bvar(0);
  for(let i=0;i<12000;i++)e=lam(nameFromDotted('x'),constant(N.Nat),e);
  assert(!hasMVar(e));assert(!hasFVar(e));assert(!hasLooseBVar(e));
- const eClone=lift(e,0,0);assert(exprEq(e,eClone),'deep strong expression equality must be stack-safe');assert(exprKernelMetadataEq(e,eClone),'deep generated-metadata equality must be stack-safe');
+ const eClone=lift(e,0,0);assert(eClone===e,'zero lift must preserve Lean node identity');assert(exprEq(e,eClone),'deep strong expression equality must be stack-safe');assert(exprKernelMetadataEq(e,eClone),'deep generated-metadata equality must be stack-safe');
  const deepKey=exprKey(e);assert(deepKey.startsWith('L(')&&deepKey.endsWith('b0'+')'.repeat(12000)),'deep nested-inductive expression keys must be stack-safe');
  const lifted=lift(e,1,0);
  const inst=instantiate(lifted,[natLit(0)]);
- assert(lifted.kind==='lam'&&inst.kind==='lam');
+ assert(lifted===e&&inst===e,'lift/instantiate must reuse a closed expression when no loose bvar changes');
+ assert(abstractFVar(e,'absent@0')===e,'abstractFVar reconstruction must reuse an unchanged closed tree');
 
  const id='deep@0';let withFVar:any=fvar(id);
  for(let i=0;i<12000;i++)withFVar=lam(nameFromDotted('x'),constant(N.Nat),withFVar);
@@ -75,7 +76,8 @@ test('deep structural traversals avoid the JavaScript call stack',()=>{
 
  let deepPi:any=constant(N.Nat);
  for(let i=0;i<2048;i++)deepPi=forallE(nameFromDotted('x'),constant(N.Nat),deepPi);
- assert(inferImplicit(deepPi,true,2048).kind==='forall','recursor implicit inference uses an explicit binder stack');
+ const inferredPi=inferImplicit(deepPi,true,2048);
+ assert(inferredPi===deepPi,'recursor implicit inference reuses an unchanged binder spine like Lean update_binding');
 });
 test('universe metavariables remain distinct symbolic atoms',()=>{
  const n=nameFromDotted('u'),u=levelMVar(n),v=levelMVar(nameFromDotted('v')),p=levelParam(n);

@@ -1,6 +1,8 @@
 import { Expr } from './expr.js';
 
 export function lift(e: Expr, amount = 1, cutoff = 0): Expr {
+  // Lean lift_loose_bvars returns the original node when d = 0 or no child changes.
+  if(amount===0)return e;
   type Frame={e:Expr;cutoff:number;done:boolean};
   const todo:Frame[]=[{e,cutoff,done:false}],out:Expr[]=[];
   while(todo.length){
@@ -17,10 +19,10 @@ export function lift(e: Expr, amount = 1, cutoff = 0): Expr {
       continue;
     }
     switch(x.kind){
-      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push({...x,fn,arg});break;}
-      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push({...x,type,body});break;}
-      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push({...x,type,value,body});break;}
-      case'mdata':case'proj':out.push({...x,expr:out.pop()!});break;
+      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push(fn===x.fn&&arg===x.arg?x:{...x,fn,arg});break;}
+      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push(type===x.type&&body===x.body?x:{...x,type,body});break;}
+      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push(type===x.type&&value===x.value&&body===x.body?x:{...x,type,value,body});break;}
+      case'mdata':case'proj':{const inner=out.pop()!;out.push(inner===x.expr?x:{...x,expr:inner});break;}
       default:throw new Error('internal lift frame');
     }
   }
@@ -28,6 +30,9 @@ export function lift(e: Expr, amount = 1, cutoff = 0): Expr {
   return out[0]!;
 }
 export function instantiate(e: Expr, subst: readonly Expr[], depth=0): Expr {
+  // Lean instantiate returns the input unchanged for an empty substitution and
+  // reuses every composite node whose children were not rewritten.
+  if(subst.length===0)return e;
   type Frame={e:Expr;depth:number;done:boolean};
   const todo:Frame[]=[{e,depth,done:false}],out:Expr[]=[];
   while(todo.length){
@@ -50,10 +55,10 @@ export function instantiate(e: Expr, subst: readonly Expr[], depth=0): Expr {
       continue;
     }
     switch(x.kind){
-      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push({...x,fn,arg});break;}
-      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push({...x,type,body});break;}
-      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push({...x,type,value,body});break;}
-      case'mdata':case'proj':out.push({...x,expr:out.pop()!});break;
+      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push(fn===x.fn&&arg===x.arg?x:{...x,fn,arg});break;}
+      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push(type===x.type&&body===x.body?x:{...x,type,body});break;}
+      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push(type===x.type&&value===x.value&&body===x.body?x:{...x,type,value,body});break;}
+      case'mdata':case'proj':{const inner=out.pop()!;out.push(inner===x.expr?x:{...x,expr:inner});break;}
       default:throw new Error('internal instantiate frame');
     }
   }
@@ -79,10 +84,10 @@ export function abstractFVar(e:Expr,id:string,depth=0):Expr{
       continue;
     }
     switch(x.kind){
-      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push({...x,fn,arg});break;}
-      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push({...x,type,body});break;}
-      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push({...x,type,value,body});break;}
-      case'mdata':case'proj':out.push({...x,expr:out.pop()!});break;
+      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push(fn===x.fn&&arg===x.arg?x:{...x,fn,arg});break;}
+      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push(type===x.type&&body===x.body?x:{...x,type,body});break;}
+      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push(type===x.type&&value===x.value&&body===x.body?x:{...x,type,value,body});break;}
+      case'mdata':case'proj':{const inner=out.pop()!;out.push(inner===x.expr?x:{...x,expr:inner});break;}
       default:throw new Error('internal abstractFVar frame');
     }
   }

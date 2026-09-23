@@ -107,6 +107,7 @@
     "Source-level Lean 4.34 universe parity correction: levelEquivalent/levelLe now follow the final C++ kernel normalizer/is_geq rather than Lean4Lean's stronger complete level decision procedure. A direct regression locks the observable kernel incompleteness on max v u versus max (imax u v) u. Execution remains pending.",
     "lean4export Level fidelity correction: serialized `.max`/`.imax` nodes are reconstructed with raw structural constructors instead of mkMax/mkIMax smart simplifiers. This preserves exact universe syntax for structural kernel checks; an end-to-end replay regression locks raw max 0 u and imax 0 u.",
     "Universe-substitution identity parity: instantiateLevel and instantiateExprLevels now mirror Lean update_* behavior, preserving unchanged nodes/raw max/imax syntax and invoking smart constructors only when a substituted child actually changes.",
+    "Expression update identity parity: lift, bound-variable instantiate, abstractFVar reconstruction, and inferImplicit now reuse unchanged nodes like Lean replace/update_* helpers. This preserves is_eqp-sensitive progress behavior while keeping the existing abstraction semantics.",
     "MData/KVMap structural parity correction: Lean KVMap BEq is extensional (mutual subset), so metadata object insertion order no longer affects exprLeanEq/exprEq or structural memo-table hits. The prior order-sensitive regression was corrected and now verifies cache sharing across reordered equal bindings.",
     "Nat optimized-reduction parity correction: the fast path now recognizes exactly final Lean 4.34 `is_nat_lit_ext` (Nat literals plus level-free Nat.zero). It no longer recursively interprets Nat.succ constructor syntax as a numeral; the existing primitive-head regression covers unary and binary stuck cases.",
     "Nested-key universe hardening: exprKey now encodes Level trees with an explicit work stack instead of JSON.stringify recursion. The existing 20,000-Succ universe regression now exercises exprKey(sort(level)) directly.",
@@ -213,5 +214,5 @@
   ],
   "currentTreeExpectedDirectTests": 165,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "pending refreshed execution after exact Lean 4.34 raw-level syntax/substitution identity, level equivalence, name, MData, Nat-literal, nested-family, constructor-shape, and Quot-bootstrap parity corrections plus structural-cache/comparison and deep traversal hardening; lastVerifiedTestCount remains unchanged"
+  "currentTreeVerification": "pending refreshed execution after exact Lean 4.34 raw-level/substitution and expression update identity, level equivalence, name, MData, Nat-literal, nested-family, constructor-shape, and Quot-bootstrap parity corrections plus structural-cache/comparison and deep traversal hardening; lastVerifiedTestCount remains unchanged"
 }

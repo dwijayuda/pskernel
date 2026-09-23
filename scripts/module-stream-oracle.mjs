@@ -4,6 +4,7 @@ import {resolve, join, delimiter} from 'node:path';
 import fs from 'node:fs';
 import {Environment} from '../dist/src/core/environment.js';
 import {Lean4ExportReplay} from '../dist/src/integration/lean4export.js';
+import {createLeanNativeEvaluator} from './lean-native-evaluator.mjs';
 
 const moduleName=process.argv[2]??'Init.Prelude';
 const expectedArg=process.argv[3];
@@ -13,6 +14,7 @@ const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
 if(!bin)throw new Error('module-stream-oracle: set LEAN434_BIN to Lean 4.34.0 bin directory');
 const lean=join(bin,leanExe);
 const envVars={...process.env,PATH:`${bin}${delimiter}${process.env.PATH??''}`};
+const nativeEvaluator=createLeanNativeEvaluator({lean,moduleName,cwd:resolve('.'),env:envVars});
 const child=spawn(lean,['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--module-stream'],{cwd:resolve('.'),env:envVars,stdio:['ignore','pipe','pipe']});
 const rl=createInterface({input:child.stdout,crlfDelay:Infinity});
 let stderr='';child.stderr.setEncoding('utf8');child.stderr.on('data',d=>stderr+=d);
@@ -32,7 +34,7 @@ try{
    }
    if(marker?.shard){
      if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;global.gc?.();}
-     replay=new Lean4ExportReplay(shared);
+     replay=new Lean4ExportReplay(shared,{nativeEvaluator});
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);
      if(shards===1||shards%25===0)console.error(`[module-stream] shard=${shards}/${header?.plannedShards??'?'} module=${current} part=${marker.shard.part??0} roots=${marker.shard.roots??'?'} constants=${shared.size} rssMiB=${rss.toFixed(1)} heapMiB=${heap.toFixed(1)}`);

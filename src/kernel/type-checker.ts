@@ -99,7 +99,17 @@ export class TypeChecker {
 
   check(e:Expr):Expr { return this.infer(e,false); }
   infer(e:Expr,inferOnly=true):Expr{if(this.hasLoose(e))throw new KernelError('type checker does not support loose bound variables');return this.rec(()=>this.inferCore(e,inferOnly));}
-  private hasLoose(e:Expr):boolean{const go=(x:Expr,d:number):boolean=>{switch(x.kind){case'bvar':return x.index>=d;case'app':return go(x.fn,d)||go(x.arg,d);case'lam':case'forall':return go(x.type,d)||go(x.body,d+1);case'let':return go(x.type,d)||go(x.value,d)||go(x.body,d+1);case'mdata':return go(x.expr,d);case'proj':return go(x.expr,d);default:return false;}};return go(e,0);}
+  private hasLoose(e:Expr):boolean{return hasLooseBVar(e);}
+  private containsFVar(e:Expr,id:string):boolean{
+    switch(e.kind){
+      case'fvar':return e.id===id;
+      case'app':return this.containsFVar(e.fn,id)||this.containsFVar(e.arg,id);
+      case'lam':case'forall':return this.containsFVar(e.type,id)||this.containsFVar(e.body,id);
+      case'let':return this.containsFVar(e.type,id)||this.containsFVar(e.value,id)||this.containsFVar(e.body,id);
+      case'mdata':case'proj':return this.containsFVar(e.expr,id);
+      default:return false;
+    }
+  }
 
   private inferCore(e:Expr,inferOnly:boolean):Expr{
     const key=this.state.exprId(e),cache=inferOnly?this.state.infer:this.state.checkedInfer,cached=cache.get(key);if(cached)return cached;

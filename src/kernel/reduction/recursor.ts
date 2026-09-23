@@ -25,7 +25,13 @@ export function reduceRecursor(env:Environment,e:Expr,whnf:(x:Expr)=>Expr,infer:
  const {fn,args}=appView(e);if(fn.kind!=='const')return null;const ri=env.find(fn.name);if(!ri||ri.kind!=='recursor')return null;
  const majorIdx=ri.numParams+ri.numMotives+ri.numMinors+ri.numIndices;if(args.length<=majorIdx)return null;const major=args[majorIdx]!;
  let mw=major;
- if(ri.k){const ty=whnf(infer(major));const tv=appView(ty);if(tv.fn.kind==='const'){const tvName=tv.fn.name;if(ri.all.some(n=>nameEq(n,tvName))){const ctor=firstCtor(env,tvName);if(ctor){const ci=env.find(ctor);if(ci?.kind==='constructor'){const candidate=mkAppN(constant(ctor,tv.fn.levels),tv.args.slice(0,ci.numParams));if(isDefEq(ty,infer(candidate)))mw=candidate;}}}}}
+ if(ri.k){
+   const ty=whnf(infer(major)),tv=appView(ty),ind=majorInduct(ri);
+   if(ind&&tv.fn.kind==='const'&&nameEq(tv.fn.name,ind)){
+     const ctor=firstCtor(env,ind);
+     if(ctor){const ci=env.find(ctor);if(ci?.kind==='constructor'){const candidate=mkAppN(constant(ctor,tv.fn.levels),tv.args.slice(0,ci.numParams));if(isDefEq(ty,infer(candidate)))mw=candidate;}}
+   }
+ }
  mw=whnf(mw);
  if(mw.kind==='lit'&&mw.literal.kind==='nat')mw=natToCtor(mw.literal.value);
  else if(mw.kind==='lit'&&mw.literal.kind==='string')mw=whnf(stringLitToConstructor(mw));

@@ -6,7 +6,7 @@ import {
 
 const boolNot:WasmIrModule={
   kind:'proofscript-wasm-ir',
-  profile:'proofscript-wasm32-gc-js-v1',
+  profile:'proofscript-wasm32-mvp-js-v1',
   functions:[{
     name:'not',
     parameters:[{name:'x',type:'i32'}],
@@ -39,7 +39,7 @@ console.log('ok - @proofscript/wasm-ir W1 structural validation');
 throws(
   ()=>validateWasmIrModule({
     kind:'proofscript-wasm-ir',
-    profile:'proofscript-wasm32-gc-js-v1',
+    profile:'proofscript-wasm32-mvp-js-v1',
     functions:[{
       name:'badAbi',
       parameters:[{name:'x',type:'i32'}],

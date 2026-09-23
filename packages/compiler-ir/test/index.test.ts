@@ -159,3 +159,22 @@ console.log('ok - @proofscript/compiler-ir inductive ADT lowering');
   equal(ir.declarations[0]?.whereDeclarations?.[0]?.name,'helper');
 }
 console.log('ok - @proofscript/compiler-ir where helper lowering');
+
+
+{
+  const module={
+    kind:'proofscript-verified-ir' as const,
+    declarations:[{
+      name:'identity',
+      typeParameters:[{name:'T0'}],
+      parameters:[{
+        name:'x',
+        type:{kind:'typeParameter' as const,name:'T0'},
+      }],
+      resultType:{kind:'typeParameter' as const,name:'T0'},
+      body:{kind:'var' as const,name:'x'},
+    }],
+  };
+  equal(validateVerifiedIrModule(module),true);
+}
+console.log('ok - @proofscript/compiler-ir verified dependent-core IR schema');

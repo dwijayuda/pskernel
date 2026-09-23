@@ -205,7 +205,7 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-where-ir-mvp",
+      "status": "verified-ir-foundation+software-where-ir-mvp",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
         "kernel",
@@ -213,9 +213,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Compiler IR is a distinct typed executable representation lowered from checked software HIR.",
-        "IR retains lexical local where declarations explicitly alongside structures, monomorphic inductives, constructors, matches, lambdas, lets, and calls.",
-        "Recursive where groups, kernel Expr erasure/lowering, generic ADTs, effects, and optimization passes remain later milestones."
+        "Compiler IR now has a verified-core lane distinct from the transitional software-HIR lane.",
+        "Verified IR separates compile-time type parameters from runtime parameters so dependent/type binders can be erased from JavaScript while retained in TypeScript declarations.",
+        "The verified IR is runtime-oriented and intentionally does not reuse kernel Expr as code-generation IR.",
+        "Legacy software IR remains temporarily for coverage while verified-core erasure grows to structures, inductives, recursion, primitives, and effects."
       ]
     },
     {

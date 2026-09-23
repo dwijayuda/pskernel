@@ -73,3 +73,5 @@ export function freeVariables(expr:IrExpr):readonly string[]{
 }
 
 export * from './software.js';
+
+export * from './verified.js';

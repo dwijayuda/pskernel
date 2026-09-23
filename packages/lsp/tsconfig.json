@@ -3,7 +3,18 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "types": []
+    "types": [
+      "node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@proofscript/language-service": [
+        "../language-service/dist/src/index.d.ts"
+      ]
+    }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
 }

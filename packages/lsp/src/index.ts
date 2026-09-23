@@ -36,3 +36,16 @@ export function toLspDiagnostics(text:string,diagnostics:readonly OffsetDiagnost
     range:{start:positionAt(text,d.start),end:positionAt(text,d.end)},
   }));
 }
+
+export {
+  ProofScriptLanguageService,
+  type DocumentAnalysis,
+  type ProofState,
+  type ServiceDiagnostic,
+} from '@proofscript/language-service';
+export {
+  PROOFSCRIPT_LSP_PROTOCOL_VERSION,
+  ProofScriptLanguageServer,
+  lspCapabilities,
+  startLspServer,
+} from './server.js';

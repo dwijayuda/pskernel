@@ -277,15 +277,17 @@
       "path": "packages/lsp",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "foundation",
+      "status": "proof-aware-stdio-mvp",
       "packageName": "@proofscript/lsp",
       "dependsOn": [
-        "language-service",
-        "pretty"
+        "language-service"
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "LSP transport remains untrusted and downstream of the proof-aware language service; transport/editor caches have no proof authority."
+        "Stdio JSON-RPC transport is adapted from the prior ProofScript LSP architecture but delegates all semantic answers to the current proof-aware language service.",
+        "Supported MVP requests: diagnostics, hover, document symbols, declaration-level proofState/documentStatus, and serverInfo.",
+        "The transport never upgrades parsed/unsupported declarations to verified; pskernel admission remains the only source of verified proof status.",
+        "Worker lanes, completion, rename, references, semantic tokens, code actions, and cursor-sensitive tactic snapshots remain later editor milestones."
       ]
     },
     {

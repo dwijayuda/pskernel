@@ -3,9 +3,9 @@
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "Language Server Protocol adapter over language-service protocols.",
+  "description": "Thin Language Server Protocol transport over the proof-aware ProofScript language service.",
   "proofscript": {
-    "status": "foundation",
+    "status": "proof-aware-stdio-mvp",
     "phase": "D",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -21,6 +21,13 @@
     "test": "npm run build --silent && node dist/test/index.test.js"
   },
   "devDependencies": {
+    "@types/node": "22.15.3",
     "typescript": "5.8.3"
+  },
+  "bin": {
+    "proofscript-lsp": "./dist/src/bin.js"
+  },
+  "dependencies": {
+    "@proofscript/language-service": "file:../language-service"
   }
 }

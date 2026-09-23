@@ -170,57 +170,80 @@ export class TypeChecker {
   }
 
   whnfCore(e:Expr,cheapRec=false,cheapProj=false):Expr{return this.rec(()=>{
+    // Final Lean 4.34 handles these before the whnfCore cache lookup.
+    switch(e.kind){
+      case'bvar':case'sort':case'mvar':case'forall':case'const':case'lam':case'lit':return e;
+      case'mdata':return this.whnfCore(e.expr,cheapRec,cheapProj);
+      case'fvar':{const d=this.lctx.get(e.id);if(!d||d.kind!=='let')return e;break;}
+      case'app':case'let':case'proj':break;
+    }
+
     const key=this.state.exprId(e);
-    // Lean 4.34 deliberately bypasses the shared whnfCore cache in cheap-rec/proj mode.
-    // A full-mode result may have unfolded a recursor major or projection structure that
-    // a cheap call is specifically required to leave opaque.
     if(!cheapRec&&!cheapProj){const cached=this.state.whnfCore.get(key);if(cached)return cached;}
-    let x=e,cacheOriginal=true;
-    const done=(r:Expr):Expr=>{if(!cheapRec&&!cheapProj&&cacheOriginal)this.state.whnfCore.set(key,r);return r;};
-    while(true){
-      if(x.kind==='mdata'){x=x.expr;continue;}
-      if(x.kind==='let'){x=instantiate1(x.body,x.value);continue;}
-      if(x.kind==='fvar'){const d=this.lctx.get(x.id);if(d?.kind==='let'){x=d.value;continue;}return done(x);}
-      if(x.kind==='app'){
-        // Lean flattens the application spine first, so a wide application does
-        // not consume one recursion-depth frame per argument.
-        const av=appView(x),f0=av.fn,f=this.whnfCore(f0,cheapRec,cheapProj);
+    let r:Expr;
+
+    switch(e.kind){
+      case'fvar':{
+        const d=this.lctx.get(e.id);
+        if(!d||d.kind!=='let')return e;
+        // Lean's whnf_fvar returns directly, so the fvar itself is not cached.
+        return this.whnfCore(d.value,cheapRec,cheapProj);
+      }
+      case'proj':{
+        const major=cheapProj?this.whnfCore(e.expr,cheapRec,cheapProj):this.whnf(e.expr);
+        const reduced=this.reduceProjCore(major,e.typeName,e.index);
+        r=reduced?this.whnfCore(reduced,cheapRec,cheapProj):e;
+        break;
+      }
+      case'app':{
+        const av=appView(e),f0=av.fn,f=this.whnfCore(f0,cheapRec,cheapProj);
         if(f.kind==='lam'){
           let head:Expr=f,i=0;
           while(i<av.args.length&&head.kind==='lam'){head=instantiate1(head.body,av.args[i]!);i++;}
-          x=mkAppN(head,av.args.slice(i));continue;
+          r=this.whnfCore(mkAppN(head,av.args.slice(i)),cheapRec,cheapProj);
+        }else if(exprEq(f,f0)){
+          const q=this.env.quotInitialized?reduceQuot(e,y=>this.whnf(y)):null;
+          if(q)return this.whnfCore(q,cheapRec,cheapProj);
+          const rr=reduceRecursor(this.env,e,y=>cheapRec?this.whnfCore(y,cheapRec,cheapProj):this.whnf(y),y=>this.infer(y),(a,b)=>this.isDefEq(a,b),y=>this.isProp(y));
+          if(rr)return this.whnfCore(rr,cheapRec,cheapProj);
+          // C++ returns stuck applications directly rather than caching them.
+          return e;
+        }else{
+          r=this.whnfCore(mkAppN(f,av.args),cheapRec,cheapProj);
         }
-        if(!exprEq(f,f0)){x=mkAppN(f,av.args);continue;}
-        const q=this.env.quotInitialized?reduceQuot(x,y=>this.whnf(y)):null;if(q){if(exprEq(x,e))cacheOriginal=false;x=q;continue;}
-        const rr=reduceRecursor(this.env,x,y=>cheapRec?this.whnfCore(y,cheapRec,cheapProj):this.whnf(y),y=>this.infer(y),(a,b)=>this.isDefEq(a,b),y=>this.isProp(y));if(rr){if(exprEq(x,e))cacheOriginal=false;x=rr;continue;}
-        return done(x);
+        break;
       }
-      if(x.kind==='proj'){
-        const s=cheapProj?this.whnfCore(x.expr,cheapRec,cheapProj):this.whnf(x.expr);const v=this.reduceProjCore(s,x.typeName,x.index);
-        if(v){x=v;continue;}return done({...x,expr:s});
-      }
-      return done(x);
+      case'let':
+        r=this.whnfCore(instantiate1(e.body,e.value),cheapRec,cheapProj);
+        break;
+      default:
+        throw new Error('internal whnfCore case');
     }
+
+    if(!cheapRec&&!cheapProj)this.state.whnfCore.set(key,r);
+    return r;
   });}
 
   whnf(e:Expr):Expr{
-    // Lean 4.34 returns these cases before entering whnf_core, so they consume no
-    // recursion-depth budget and are not inserted into the WHNF cache.
+    // Lean 4.34 returns these cases before the WHNF cache lookup.
     switch(e.kind){
       case'bvar':case'sort':case'mvar':case'forall':case'lit':return e;
       case'mdata':return this.whnf(e.expr);
       case'fvar':{const d=this.lctx.get(e.id);if(!d||d.kind!=='let')return e;break;}
       case'lam':case'app':case'const':case'let':case'proj':break;
     }
-    const k=this.state.exprId(e),c=this.state.whnf.get(k);if(c)return c;let x=e;
-    for(let fuel=0;fuel<100000;fuel++){
-      const c0=this.whnfCore(x);if(!exprEq(c0,x)){x=c0;continue;}
-      const native=reduceNative(this.env,x,this.nativeEvaluator);if(native){x=native;continue;}
-      const nr=reduceNatApp(this.env,x,y=>this.whnf(y),this.limits.maxNatBytes);if(nr){x=nr;continue;}
-      const u=this.unfold(x);if(u){x=u;continue;}
-      this.state.whnf.set(k,x);return x;
+    const k=this.state.exprId(e),cached=this.state.whnf.get(k);if(cached)return cached;
+    let t=e;
+    while(true){
+      const t1=this.whnfCore(t);
+      const native=reduceNative(this.env,t1,this.nativeEvaluator);
+      if(native){this.state.whnf.set(k,native);return native;}
+      const nr=reduceNatApp(this.env,t1,y=>this.whnf(y),this.limits.maxNatBytes);
+      if(nr){this.state.whnf.set(k,nr);return nr;}
+      const u=this.unfold(t1);
+      if(u){t=u;continue;}
+      this.state.whnf.set(k,t1);return t1;
     }
-    throw new KernelError('WHNF fuel exhausted');
   }
 
   private quick(a:Expr,b:Expr):boolean|null{

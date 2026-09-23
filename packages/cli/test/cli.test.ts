@@ -135,7 +135,7 @@ console.log('ok - psc verified checked-core compiler pipeline');
       verified:true,
       buildTarget:'wasm',
       passthrough:[],
-    });
+    }) as Record<string,unknown>;
     equal(checked.buildTarget,'wasm');
     equal(checked.wasmProfile,'proofscript-wasm32-gc-js-v1');
 

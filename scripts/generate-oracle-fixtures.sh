@@ -15,8 +15,14 @@ if ! command -v lean >/dev/null 2>&1; then
 fi
 
 version="$(lean --version | head -n1)"
+githash="$(lean --githash)"
+expected_githash="293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
 if [[ "$version" != Lean\ \(version\ 4.34.0,*Release* ]]; then
   echo "generate-oracle-fixtures: expected Lean 4.34.0 Release, got: $version" >&2
+  exit 1
+fi
+if [[ "$githash" != "$expected_githash" ]]; then
+  echo "generate-oracle-fixtures: expected Lean commit $expected_githash, got: $githash" >&2
   exit 1
 fi
 
@@ -56,4 +62,4 @@ echo "[fixture] lean434-lean-rbmap-all.ndjson.gz"
 lean --run oracle/replay-probe/DependencyExport.lean Lean.Data.RBMap --all > "$TMP/lean434-lean-rbmap-all.ndjson"
 gzip -n -9 -c "$TMP/lean434-lean-rbmap-all.ndjson" > oracle/fixtures/lean434-lean-rbmap-all.ndjson.gz
 
-printf 'generate-oracle-fixtures: PASS (%s)\n' "$version"
+printf 'generate-oracle-fixtures: PASS (%s; commit %s)\n' "$version" "$githash"

@@ -15,9 +15,17 @@ const candidates=[
 const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
 if(!bin)throw new Error('native-oracle-smoke: set LEAN434_BIN or put Lean 4.34.0 on PATH');
 const lean=join(bin,leanExe);
-const version=spawnSync(lean,['--version'],{encoding:'utf8',timeout:5000}).stdout.trim();
-if(version!=='Lean (version 4.34.0, Release)'){
-  throw new Error(`native-oracle-smoke: Lean version drift: ${version}`);
+const expectedVersion=/^Lean \\(version 4\\.34\\.0(?:,|\\)).*Release\\)?$/;
+const expectedGitHash='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
+const versionRun=spawnSync(lean,['--version'],{encoding:'utf8',timeout:5000});
+const version=versionRun.stdout.trim();
+if(versionRun.error||versionRun.status!==0||!expectedVersion.test(version)){
+  throw new Error('native-oracle-smoke: Lean version drift/failure: '+(versionRun.error?.message??versionRun.stderr??version));
+}
+const hashRun=spawnSync(lean,['--githash'],{encoding:'utf8',timeout:5000});
+const leanGitHash=hashRun.stdout.trim();
+if(hashRun.error||hashRun.status!==0||leanGitHash!==expectedGitHash){
+  throw new Error('native-oracle-smoke: Lean git hash drift/failure: expected '+expectedGitHash+', got '+(hashRun.error?.message??hashRun.stderr??leanGitHash));
 }
 
 const tmp=mkdtempSync(join(tmpdir(),'pskernel-native-smoke-'));
@@ -87,6 +95,7 @@ end NativeEvalFixture
   console.log(JSON.stringify({
     ok:true,
     lean:version,
+    leanGitHash,
     nat:42,
     implementedByBool:false,
   },null,2));

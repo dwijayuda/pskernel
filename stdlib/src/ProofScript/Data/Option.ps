@@ -40,3 +40,8 @@ optionOrElse(PsOption.none, fallback) = fallback := by rfl;
 theorem optionGetOrElseSome {α : Type}
 (value : α, fallback : α) :
 optionGetOrElse(PsOption.some(value), fallback) = value := by rfl;
+
+theorem optionOrElseNoneRight {α : Type}
+(value : PsOption(α)) :
+optionOrElse(value, PsOption.none) = value :=
+  by cases value; rfl; rfl;

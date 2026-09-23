@@ -226,13 +226,48 @@ Exit condition:
 - representative data-structure invariants and function-correctness theorems
   can be written without manually constructing proof terms.
 
+## Milestone L4.5 — dual-source ProofScript / Lean-subset frontends
+
+Purpose: make the supported ProofScript language interchangeable with a bounded
+Lean 4 surface without creating a second semantic pipeline.
+
+Implement, in this order:
+
+1. define a source-kind/frontend registry for `.ps` and supported `.lean`;
+2. add a Lean-subset parser that lowers only documented supported constructs
+   into the canonical surface module;
+3. add a canonical ProofScript source printer, complementing the existing
+   canonical Lean lowering;
+4. make `psc check/build/run` select the frontend from the entry source kind;
+5. add `psc translate <file> --to ps|lean`; keep `emit-lean` as a
+   backward-compatible convenience alias;
+6. make both source kinds compile through the identical checked-core ->
+   erasure -> verified IR -> TypeScript -> JavaScript path;
+7. add semantic round-trip gates for `.ps -> .lean -> checked core` and
+   `.lean -> .ps -> checked core`;
+8. reject unsupported Lean syntax/extensions explicitly rather than
+   approximating them.
+
+Initial Lean-subset scope follows features already admitted by ProofScript, not
+full Lean syntax. User-defined syntax/macros/elaborators, metaprogramming,
+arbitrary commands/attributes, and unsupported tactics remain outside the
+subset until they receive explicit semantics.
+
+Exit condition:
+
+- the same representative program/theorem corpus can be authored in canonical
+  `.ps` or canonical supported `.lean`, produces pskernel-equivalent
+  checked declarations, and emits the same verified runtime IR.
+
 ## Milestone L5 — modules, projects, and npm interoperability
 
 Purpose: make the language useful for real JavaScript projects.
 
 Implement:
 
-- ProofScript module/import graph with deterministic project builds;
+- source-kind-independent module/import graph with deterministic project builds;
+- mixed `.ps` / supported `.lean` dependency resolution, rejecting
+  ambiguous duplicate logical modules;
 - package manifests/configuration integrated with `psc`;
 - npm package resolution for runtime dependencies;
 - explicit `extern`/FFI declarations with a checked boundary;
@@ -309,6 +344,18 @@ Required before deletion:
 
 ## Milestone L9 — production hardening
 
+Dual-source tooling gates:
+
+- LSP document snapshots carry source kind and dispatch through the same
+  frontend registry as `psc`;
+- diagnostics, hover, navigation, completion, document symbols, and proof-state
+  requests work for both `.ps` and supported `.lean`;
+- VS Code recognizes `.ps` directly and supports Lean-subset documents via
+  an opt-in/workspace-aware selector so it does not unconditionally conflict
+  with the official Lean extension;
+- source conversion becomes an editor action only after CLI round-trip gates
+  are stable.
+
 - deterministic incremental builds;
 - package cache;
 - diagnostic stability;
@@ -349,9 +396,23 @@ These are mandatory for all future development.
 14. Prefer deleting transitional duplication after verified-core coverage
     catches up instead of maintaining two implementations indefinitely.
 
+### Dual-source anti-drift additions
+
+- `.ps` and supported `.lean` must converge before semantic acceptance:
+  source kind may change parsing/printing, never checked-core meaning, proof
+  authority, erasure, or backend semantics.
+- Lean-subset parsing is fail-closed. Unsupported Lean macros, syntax
+  extensions, elaborators, commands, tactics, and attributes get a specific
+  subset diagnostic instead of approximation.
+- Bidirectional source translation is judged by checked declaration and
+  executable-IR equivalence, not textual identity.
+
 ## Immediate execution queue
 
-Do not reorder without repository evidence.
+Do not reorder without repository evidence. The dual-source L4.5 frontend
+milestone enters after the current theorem-prover rewrite/simp work and before
+the project/module interoperability implementation; this preserves the existing
+semantic priorities while making mixed-source modules possible when L5 begins.
 
 1. Repair/obtain an executing CI or local root-gate run.
 2. Continue verified primitive/equality/comparison semantics beyond the landed

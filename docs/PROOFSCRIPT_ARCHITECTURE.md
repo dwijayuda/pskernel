@@ -9,11 +9,22 @@ semantic acceptance must not bypass Lean-compatible elaboration and pskernel.
 
 ## Canonical pipeline
 
+The semantic pipeline may accept more than one bounded source syntax, but source
+selection must end before semantic acceptance.
+
 ```text
-ProofScript source
-        |
-        v
-   syntax / names
+ .ps source          supported .lean source
+     |                       |
+     v                       v
+ProofScript parser      Lean-subset parser
+     |                       |
+     +----------+------------+
+                |
+                v
+      canonical surface module
+                |
+                v
+          syntax / names
         |
         +---- pinned Lean 4.34 environment
         |     (pskernel-admitted Init.Prelude)
@@ -38,6 +49,57 @@ checked dependent core
                          v
                   tsc -> JavaScript
 ```
+
+## Dual-source frontend contract
+
+ProofScript supports two intended authored source forms:
+
+- `.ps`: the primary small ProofScript syntax;
+- `.lean`: a documented Lean 4 subset whose constructs have an explicit
+  ProofScript/checked-core meaning.
+
+Both frontends lower into one canonical surface representation and then share
+the same name resolution, Meta/Elab, pskernel admission, checked core, erasure,
+compiler IR, TypeScript backend, and JavaScript emission. A supported `.lean`
+file must never bypass the ProofScript semantic pipeline by becoming trusted
+kernel data.
+
+The supported conversion graph is:
+
+```text
+.ps   -> canonical surface -> checked core -> TypeScript -> JavaScript
+.lean -> canonical surface -> checked core -> TypeScript -> JavaScript
+
+.ps   -> canonical surface -> canonical Lean-subset source
+.lean -> canonical surface -> canonical ProofScript source
+```
+
+Source-to-source conversion is semantic, not textual. The first implementation
+may normalize formatting, binder spelling, parentheses, and supported syntactic
+sugar, and may omit comments until a lossless concrete-syntax layer exists.
+Round-trip acceptance is defined by pskernel-admitted declarations and
+executable erasure/IR equivalence, not byte-identical source.
+
+The Lean frontend is intentionally fail-closed. Arbitrary Lean syntax
+extensions, macros, custom elaborators, commands, tactics, attributes, or
+metaprogramming are not implicitly accepted. A construct enters the psc Lean
+subset only when its parser ownership, canonical lowering, Lean-compatible
+meaning, pskernel gate, source translation behavior, and tooling behavior are
+specified.
+
+Mixed-source projects use one source-kind-independent module graph. A `.ps`
+module may import a supported `.lean` module and vice versa; imported
+declarations enter the same checked environment. Resolution must reject
+ambiguous duplicate module sources rather than silently choosing between
+`.ps` and `.lean`.
+
+Tooling follows the same rule. The language service records source kind and
+dispatches parsing through a frontend registry, after which diagnostics,
+kernel status, proof goals, navigation, completion, and hover use the shared
+semantic services. The VS Code extension must recognize both source kinds
+without unconditionally taking ownership of every `.lean` file from the
+official Lean extension; Lean-subset support should be workspace/setting aware
+or exposed through an explicit ProofScript Lean-subset language mode.
 
 ## Package ownership
 

@@ -103,6 +103,24 @@ test('native evaluator results are shape-checked at the kernel boundary',()=>{
  throws(()=>new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,wrong).whnf(app(constant(N.LeanReduceNat),constant(v))));
  throws(()=>new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,negative).whnf(app(constant(N.LeanReduceNat),constant(v))));
 });
+test('kernel admission threads native evaluator into definitional equality',()=>{
+ const env=baseEnv(),one=levelSucc(levelZero);
+ const v=nameFromDotted('Native.kernelV'),F=nameFromDotted('Native.F'),x=nameFromDotted('Native.x'),d=nameFromDotted('Native.d');
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'axiom',name:v,levelParams:[],type:constant(N.Nat)});
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),sort(one))});
+ env.add({kind:'axiom',name:x,levelParams:[],type:app(constant(F),natLit(7))});
+ const info={kind:'definition',name:d,levelParams:[],type:app(constant(F),app(constant(N.LeanReduceNat),constant(v))),value:constant(x),hints:{kind:'regular',height:1n},safety:'safe'} as const;
+ throws(()=>new Kernel(env.clone()).addDefinition(info));
+ const evaluator:NativeEvaluator={evaluate(_env,request){return request.kind==='nat'&&nameToString(request.constant)==='Native.kernelV'?{kind:'nat',value:7n}:null;}};
+ const work=env.clone();new Kernel(work,evaluator).addDefinition(info);assert(work.has(d),'kernel admission must preserve the configured native evaluator');
+});
+test('lean4export replay threads the explicit native evaluator into its kernel',()=>{
+ const evaluator:NativeEvaluator={evaluate(){return null;}};
+ const replay=new Lean4ExportReplay(baseEnv(),{nativeEvaluator:evaluator});
+ assert(replay.kernel.nativeEvaluator===evaluator,'replay kernel must retain NativeEvaluator identity');
+});
+
 test('application checker rejects wrong argument',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));throws(()=>tc.check(app(id,constant(N.BoolTrue))));});
 test('eagerReduce enables Lean 4.34 eager defeq for application arguments with syntactic fvars',()=>{
  const env=baseEnv(),one=levelSucc(levelZero),F=nameFromDotted('Eager.F');

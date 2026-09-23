@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "dual-source-ds3-input-dispatch",
+      "status": "dual-source-ds3-translate",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -33,6 +33,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS3.2 adds `psc translate <file> --to ps|lean` as a pure source frontend -> canonical AST -> target printer operation. It does not invoke verified or legacy semantic checking.",
+        "Translate requires an explicit input file and exactly one target; --verified, --json, and runtime passthrough are rejected as category errors.",
+        "Filesystem regressions cover `.ps -> canonical .lean -> canonical .ps` through the same frontend/target registries.",
         "DS3.1 check/build/run/emit-lean select the source frontend from .ps/.lean paths while preserving the existing verified-vs-legacy pipeline choice; source kind never selects a weaker semantic checker.",
         "Verified .lean filesystem run regression exercises Lean-subset parse -> shared elaboration -> pskernel -> checked core -> compiler IR -> TypeScript -> JavaScript -> runtime.",
         "Build artifact stems strip the actual entry extension, so main.lean emits main.ts/main.js rather than main.lean.ts.",

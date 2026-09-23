@@ -46,6 +46,10 @@ throws(
   /PS_CLI_TRANSLATE_TARGET/,
 );
 throws(
+  ()=>parseTranslateArgs(['--to','lean','-p','demo']),
+  /PS_CLI_TRANSLATE_ENTRY/,
+);
+throws(
   ()=>parseTranslateArgs(['main.ps','--to','ts']),
   /PS_CLI_TRANSLATE_TARGET/,
 );

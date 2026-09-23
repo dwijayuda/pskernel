@@ -28,7 +28,7 @@
   },
   "description": "ProofScript developer CLI (psc) plus low-level pskernel replay/module commands.",
   "proofscript": {
-    "status": "dual-source-ds3-input-dispatch",
+    "status": "dual-source-ds3-translate",
     "phase": "A",
     "trust": "untrusted-support",
     "futureName": "@proofscript/cli",

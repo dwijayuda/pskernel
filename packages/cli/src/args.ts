@@ -77,6 +77,11 @@ export function parseTranslateArgs(args:readonly string[]):TranslateArgs {
     );
   }
   const common=parseCommonArgs(commonArgs);
+  if(common.entry===undefined){
+    throw new Error(
+      'PS_CLI_TRANSLATE_ENTRY: translate requires an explicit input file',
+    );
+  }
   if(common.verified){
     throw new Error(
       'PS_CLI_TRANSLATE_VERIFIED: source translation does not use --verified',

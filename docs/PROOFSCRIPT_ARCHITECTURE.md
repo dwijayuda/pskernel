@@ -729,3 +729,19 @@ filename extension
 The source kind does not select a type system, proof checker, erasure strategy, or backend. In verified mode both source forms pass through the identical Meta/Elab, pskernel, checked-core, erasure, IR, and TypeScript/JavaScript path.
 
 Build manifests/reports expose `sourceKind`, and output stems strip the actual input extension. Canonical translation command UX and canonical-source hashes remain DS3 follow-up work.
+
+## DS3.2 canonical source translation checkpoint
+
+`psc translate <file> --to ps|lean` now exposes the already-separated source frontend and translation target registries as a direct user workflow.
+
+```text
+input path
+  -> source frontend selected by extension
+  -> canonical V061 surface module
+  -> requested target printer (ps | lean)
+  -> canonical source text
+```
+
+The command is intentionally not a proof/check command. `--verified`, JSON reporting, and runtime passthrough are rejected rather than implying that translation changes semantic trust.
+
+`emit-lean` remains as a convenience alias-style workflow for canonical Lean output. The remaining DS3 product gate is manifest canonical-source hashing.

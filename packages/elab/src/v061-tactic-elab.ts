@@ -20,6 +20,7 @@ import type {
   V061CoreElabContext,
 } from './v061-context.js';
 import {applyV061Tactic} from './v061-apply-tactic.js';
+import {casesV061Tactic} from './v061-cases-tactic.js';
 import {constructorV061Tactic} from './v061-constructor-tactic.js';
 import {refineV061Tactic} from './v061-refine-tactic.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
@@ -79,6 +80,11 @@ function runTactic(
 
   if(tactic.kind==='constructor'){
     constructorV061Tactic(runtime);
+    return;
+  }
+
+  if(tactic.kind==='cases'){
+    casesV061Tactic(runtime,tactic.target);
     return;
   }
 

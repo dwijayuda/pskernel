@@ -35,6 +35,11 @@ export type V061Tactic =
   | {readonly kind:'assumption';readonly span:SourceSpan}
   | {readonly kind:'constructor';readonly span:SourceSpan}
   | {
+      readonly kind:'cases';
+      readonly target:string;
+      readonly span:SourceSpan;
+    }
+  | {
       readonly kind:'apply';
       readonly proof:V061Expr;
       readonly span:SourceSpan;

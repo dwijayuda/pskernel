@@ -530,6 +530,46 @@ console.log('ok - @proofscript/elab bounded synthetic-hole refine tactic');
 }
 console.log('ok - @proofscript/elab bounded constructor via apply');
 
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive Choice where { | left; | right; } '+
+    'theorem chooseCases(P : Prop, h : P, c : Choice) : P := '+
+    'by cases c; assumption; assumption;',
+  ));
+  equal(result.inductives.length,1);
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('chooseCases'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem badCases(P : Prop, h : P) : P := by cases h; assumption;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_CASES/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded cases via recursor');
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive Wrap(α : Type) where { | mk(value : α); } '+
+    'theorem unwrapCase(P : Prop, h : P, w : Wrap(Prop)) : P := '+
+    'by cases w; assumption;',
+  ));
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('unwrapCase'))?.kind,
+    'theorem',
+  );
+}
+console.log('ok - @proofscript/elab parameterized bounded cases');
+
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();

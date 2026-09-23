@@ -109,6 +109,7 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "Inherited Lean `cases <local>` tactic syntax is parsed/lowered canonically; the bounded semantic implementation lives in elab and delegates elimination to pskernel-generated recursors.",
         "Inherited Lean constructor tactic syntax is parsed as an ordinary theorem tactic and lowers canonically to `constructor`; no ProofScript-specific proof rule is introduced.",
         "Inherited Lean synthetic-hole syntax ?_ is parsed/lowered for theorem tactics; ordinary executable elaboration rejects it, and the current semantic consumer is bounded refine only.",
         "Inherited Lean tactic terms use an ordered flat tactic sequence rather than recursive continuation fields; semicolons are consumed as tactic separators only when followed by a supported tactic head.",
@@ -204,7 +205,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -217,6 +218,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Cases rejects local let scrutinees and any surrounding local whose type/value depends on the scrutinee; Lean's dependent-context substitution/generalization machinery must land before those shapes are accepted.",
+        "Bounded cases constructs an ordinary pskernel-generated recursor proof for unindexed, non-recursive inductive locals. The current goal is abstracted over the scrutinee to form the motive, and one ordered tactic goal is created per constructor.",
+        "Constructor fields are introduced only inside each branch context and branch proofs are lambda-abstracted into recursor minors. Empty inductives close the parent goal with the zero-minor recursor path.",
+        "Recursive and indexed inductives fail closed in cases until induction hypotheses, index generalization/equalities, and dependent branch contexts are modeled with Lean-compatible semantics.",
         "Bounded constructor follows Lean 4.34 MVarId.constructor: inspect the inductive target, try constructors in declaration order, and delegate the first applicable constructor to the same apply machinery.",
         "The current constructor slice inherits bounded apply's explicit-binder limitation; constructors requiring unresolved implicit/instance binders remain fail-closed instead of gaining a tactic-specific inference shortcut.",
         "Bounded refine follows Lean 4.34 refineCore's key contract: a partial proof is checked against the current target and explicit synthetic ?_ holes become ordered goals whose solutions are assembled into one ordinary pskernel-checkable Expr.",

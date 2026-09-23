@@ -780,6 +780,25 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 
+{
+  const module=parseV061Module(
+    'theorem casesProof(c : Choice) : P := by cases c; assumption; assumption;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,3);
+    equal(body.tactics[0]?.kind,'cases');
+    if(body.tactics[0]?.kind==='cases'){
+      equal(body.tactics[0].target,'c');
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem casesProof (c : Choice) : P := by cases c; assumption; assumption\n',
+  );
+}
+
 
 {
   const module=parseV061Module(

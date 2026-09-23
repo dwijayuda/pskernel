@@ -51,8 +51,9 @@ Already implemented on the preferred verified path:
 - bounded structural recursion, including invariant runtime parameters;
 - generic recursive list/map/length-style programs;
 - theorem proof terms and bounded tactics: exact, assumption, intro, ordered
-  explicit multi-premise apply, bounded refine with synthetic ?_ holes, and
-  bounded constructor via the same apply machinery;
+  explicit multi-premise apply, bounded refine with synthetic ?_ holes,
+  bounded constructor via the same apply machinery, and bounded cases through
+  pskernel-generated recursors;
 - class declarations as kernel-checked structure-like declarations;
 - local instance synthesis;
 - bounded global instance registration/synthesis;
@@ -189,6 +190,18 @@ inductive target, tries constructors in declaration order, and invokes the
 existing apply path for the first constructor that matches. Because apply still
 fails closed on unresolved implicit/instance binders, parameterized constructor
 cases that require broader Meta synthesis remain a later checkpoint.
+
+Bounded `cases local` now supports unindexed, non-recursive inductive locals,
+including shared inductive parameters already present in the scrutinee type.
+The tactic abstracts the current target over the scrutinee to build a motive,
+creates one ordered branch goal per constructor, lambda-abstracts constructor
+fields into recursor minors, and closes the parent using the pskernel-generated
+`.rec` declaration. Empty inductives use the same zero-minor recursor path.
+Recursive and indexed inductives remain fail-closed until Lean-compatible
+induction hypotheses and index generalization/equality obligations are modeled.
+Local let scrutinees and surrounding locals that depend on the scrutinee also
+remain fail-closed until Lean-compatible context substitution/generalization is
+implemented; ordinary independent hypotheses remain available in every branch.
 
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
@@ -331,8 +344,8 @@ Do not reorder without repository evidence.
    Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
-4. Continue theorem prover v1 with cases on the landed ordered multi-goal
-   apply/refine/constructor foundation.
+4. Continue theorem prover v1 with induction on the landed ordered multi-goal
+   apply/refine/constructor/cases foundation.
 5. Implement project/module/import semantics on the checked-core path.
 6. Design and implement explicit npm/JS FFI.
 7. Start the ProofScript-written standard library.

@@ -1,5 +1,5 @@
 import { Environment } from '../src/core/environment.js';
-import { app, bvar, constant, exprEq, exprKernelMetadataEq, exprKey, forallE, fvar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
+import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
 import { levelEquivalent, levelMVar, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../src/core/level.js';
 import { nameFromDotted, nameToString } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
@@ -100,6 +100,14 @@ test('defeq compares application heads before rejecting arity mismatch',()=>{
 test('isProp requires the inferred type to reduce to a Sort',()=>{
  const tc=new TypeChecker(baseEnv());
  throws(()=>tc.isProp(natLit(0)));
+});
+
+test('Lean structural expression equality ignores binder annotations',()=>{
+ const ty=constant(N.Nat),body=bvar(0);
+ const a=lam(nameFromDotted('x'),ty,body,'default'),b=lam(nameFromDotted('y'),ty,body,'implicit');
+ assert(!exprEq(a,b),'exact expression equality retains binder metadata');
+ assert(exprLeanEq(a,b),'Lean kernel Expr == ignores binder names and BinderInfo');
+ const tc=new TypeChecker(baseEnv());assert(tc.isDefEq(a,b),'defeq quick path must follow Lean structural equality');
 });
 
 test('binder defeq flattens wide Pi chains within Lean kernel depth budget',()=>{

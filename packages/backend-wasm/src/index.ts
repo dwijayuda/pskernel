@@ -176,7 +176,7 @@ export function emitBinaryenWasm(
 ):WasmEmitResult {
   validateWasmIrModule(input);
   const module=new binaryen.Module();
-  module.setFeatures(PROOFSCRIPT_WASM_BINARYEN_FEATURES);
+  module.setFeatures(binaryenFeaturesForProfile(input.profile));
 
   for(const fn of input.functions){
     const emitted=emitFunctionBody(module,fn);

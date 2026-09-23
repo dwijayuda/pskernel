@@ -76,7 +76,7 @@ export interface WasmIrFunction {
 
 export interface WasmIrModule {
   readonly kind:'proofscript-wasm-ir';
-  readonly profile:'proofscript-wasm32-gc-js-v1';
+  readonly profile:'proofscript-wasm32-mvp-js-v1';
   readonly functions:readonly WasmIrFunction[];
 }
 
@@ -205,7 +205,7 @@ export function validateWasmIrModule(module:WasmIrModule):true {
   if(module.kind!=='proofscript-wasm-ir'){
     throw new Error('PS_WASM_IR_INVALID_MODULE_KIND');
   }
-  if(module.profile!=='proofscript-wasm32-gc-js-v1'){
+  if(module.profile!=='proofscript-wasm32-mvp-js-v1'){
     throw new Error('PS_WASM_IR_UNSUPPORTED_PROFILE');
   }
 

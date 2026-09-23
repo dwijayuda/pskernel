@@ -184,6 +184,11 @@ test('theorem declarations do not delta unfold in Lean 4.34',()=>{
 });
 test('opaque declarations do not delta unfold',()=>{const env=baseEnv(),k=new Kernel(env),nm=nameFromDotted('opaqueNat');k.addOpaque({kind:'opaque',name:nm,levelParams:[],type:constant(N.Nat),value:natLit(4)});const tc=new TypeChecker(env);eqExpr(tc.whnf(constant(nm)),constant(nm));});
 test('loose bvars rejected',()=>{const tc=new TypeChecker(baseEnv());throws(()=>tc.check(bvar(0)));});
+test('infer-only rejects loose bvars even inside skipped application arguments',()=>{
+ const env=baseEnv(),F=nameFromDotted('InferLoose.f');
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat))});
+ throws(()=>new TypeChecker(env).infer(app(constant(F),bvar(0)),true));
+});
 
 
 test('Prop inductive only large-eliminates when non-Prop constructor fields occur as direct result arguments',()=>{

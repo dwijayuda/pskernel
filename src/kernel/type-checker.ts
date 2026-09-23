@@ -421,9 +421,9 @@ export class TypeChecker {
 
   isDefEq(a:Expr,b:Expr):boolean{
     const pair=this.state.pair(a,b);
-    // Final Lean 4.34 caches successful public queries only. The failure cache is
-    // reserved for the same-definition lazy-delta argument optimization.
-    if(this.state.success.has(pair))return true;
+    // Final Lean 4.34 always enters is_def_eq_core first; quick_is_def_eq inside
+    // the guarded core consults the positive cache. Do not bypass recursion-depth
+    // accounting at the public wrapper.
     const r=this.isDefEqCore(a,b);
     if(r)this.state.success.add(pair);
     return r;

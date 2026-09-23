@@ -1281,10 +1281,31 @@ throws(
   /PS_LEAN_SUBSET_WHERE_LAYOUT/,
 );
 {
+  const proofScript=parseV061Module(
+    'structure Box(α : Type) where { value : α; } '+
+    'class Sized(α : Type) where { size : α -> Nat; } '+
+    'inductive Choice where { | left; | right; } '+
+    'instance sizedNat : Sized(Nat) := '+
+    '{ size := fun x => x : Sized(Nat) }; '+
+    'def choose(flag : Bool) : Nat := match flag with { '+
+    '| true => 1; | false => 2; }; '+
+    'def viaWhere(x : Nat) : Nat := helper(x) where { '+
+    'helper(y : Nat) : Nat := y; }; '+
+    'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    lowerV061ModuleToProofScript(proofScript),
+  );
+}
+{
   const registry=createDefaultSourceFrontendRegistry();
   equal(registry.get('lean-subset'),undefined);
   equal(leanSubsetSourceFrontend.kind,'lean-subset');
 }
-console.log('ok - @proofscript/syntax DS2.4 Lean where frontend');
+console.log('ok - @proofscript/syntax DS2 complete emitted-subset frontend');
 
 console.log('ok - @proofscript/syntax inherited instance declarations');

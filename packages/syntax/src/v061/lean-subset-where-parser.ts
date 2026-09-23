@@ -1,4 +1,3 @@
-import {TokenCursor} from '../parser-core.js';
 import {SyntaxError,type Token} from '../source.js';
 import type {
   V061WhereDeclaration,

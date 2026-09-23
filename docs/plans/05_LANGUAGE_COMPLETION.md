@@ -103,10 +103,10 @@ Purpose: make ProofScript adequate for nontrivial verified libraries.
 Implement, in this order:
 
 1. broaden the landed dependent theorem/result term support beyond the now
-   landed named applications, Nat literals/arithmetic (+,-,*,/,%), and native
-   propositional `=`; next add only the remaining expression forms required
-   by real specifications (comparisons/Boolean propositions, then
-   lambdas/match where justified);
+   landed named applications, Nat literals/arithmetic (+,-,*,/,%), Nat
+   relations (<,<=,>,>=), and native propositional `=`; next add only the
+   remaining expression forms required by real specifications (Bool-valued
+   terms inside propositions, then lambdas/match where justified);
 2. indexed/dependent inductive application in elaboration and erasure;
 3. constructor/match coverage for indexed families;
 4. multiple structural recursive parameters where Lean's termination theory
@@ -262,11 +262,12 @@ source spelling is now used in the proof regressions; the implicit carrier type
 is inferred. The first executable gate covers `Eq (Nat.succ a) a`.
 Native infix `=` is now parsed as non-associative proposition syntax with
 application precedence above equality and arrow precedence below it, and it
-elaborates to the real polymorphic `Eq`. Nat literals and arithmetic
-`+ - * / %` are also accepted in theorem/result positions using the same
-Nat elaboration semantics as ordinary expressions; this closes the v0.7
-`n + 0 = n` statement shape. Comparisons/Boolean proposition forms and
-lambdas/matches remain future surface work.
+elaborates to the real polymorphic `Eq`. Nat literals, arithmetic `+ - * / %`, and Nat relations `< <= > >=` are
+also accepted in theorem/result positions using the same verified Nat
+elaboration semantics as ordinary expressions. Relation propositions use
+`LE.le`/`LT.lt`; decidability remains a separate executable-condition
+concern. Bool-valued proposition ingredients and lambdas/matches remain future
+surface work.
 
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
@@ -473,9 +474,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
 4. Validate the landed bounded multi-rule simp-only proof reconstruction.
-5. Broaden the landed theorem-statement term support beyond native `=` and
-   Nat literals/arithmetic to the remaining proposition forms required by real
-   specifications; do not invent theorem-only operator semantics.
+5. Broaden the landed theorem-statement term support beyond native `=`, Nat
+   literals/arithmetic, and Nat relations to the remaining proposition forms
+   required by real specifications; do not invent theorem-only operator
+   semantics.
 6. Add deterministic search tactics such as exact? only after that foundation.
 7. Implement project/module/import semantics on the checked-core path.
 8. Design and implement explicit npm/JS FFI.

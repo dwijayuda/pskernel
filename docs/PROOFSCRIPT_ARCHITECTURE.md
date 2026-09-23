@@ -459,3 +459,25 @@ v061-notation-support
 
 The split restores the repository source-shape invariant without exemptions and
 keeps theorem-header and executable Nat arithmetic on one semantic path.
+
+## Nat relation theorem-surface checkpoint
+
+The theorem/result grammar now admits the verified Nat relation subset
+`< <= > >=`. These are propositions, not Boolean comparisons. The elaborator
+reuses the same `LE.le` / `LT.lt` construction and Nat instances used by
+ordinary relation expressions. Reverse spellings `>` and `>=` preserve the
+existing operand-swap semantics.
+
+Decidability remains separate: theorem statements do not require
+`Nat.decLt`/`Nat.decLe`; executable conditional elaboration adds those
+deciders only when execution needs them.
+
+This keeps the distinction intact:
+
+```text
+x <= y      : Prop
+x == y      : Bool
+x = y       : Prop
+```
+
+No theorem-only comparison relation has been introduced.

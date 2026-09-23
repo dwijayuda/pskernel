@@ -104,11 +104,12 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
+      "status": "v061-nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "The theorem/type-position binary grammar now includes Nat <,<=,>,>= using the shared operator precedence table. Relations bind below Nat arithmetic and above propositional `=`/arrows in the supported surface.",
         "Type/proposition positions now parse Nat literals and the existing +,-,*,/,% precedence using the shared v0.6.1 operator table. Arithmetic binds tighter than propositional `=`, which binds tighter than arrows.",
         "This syntax supports reference examples such as `theorem addZero(n : Nat) : n + 0 = n := ...` while leaving comparison/Boolean/general expression header syntax for later checkpoints.",
         "Type-position syntax now has a non-associative propositional equality node. Applications bind tighter than `=`, and `=` binds tighter than arrows; lowering preserves Lean's `a = b` spelling.",
@@ -215,7 +216,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -228,6 +229,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Nat <,<=,>,>= in theorem/type-position syntax reuse the same LE.le/LT.lt construction as ordinary verified relation expressions. Header elaboration builds only the proposition; executable if-condition elaboration separately constructs Nat.decLt/Nat.decLe.",
         "Nat literals and +,-,*,/,% in theorem/type-position expressions now reuse the same Nat constant construction and operand/result checks as ordinary expression notation; no second theorem-only arithmetic semantics exists.",
         "Notation elaboration is split by responsibility into support, Nat, Bool, and a small dispatcher, restoring the enforced <=300-line source-shape invariant without adding an exemption.",
         "The theorem/type-position arithmetic slice is intentionally Nat-only. General Lean overloaded arithmetic/typeclass notation remains unsupported until its Meta semantics are modeled.",

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build --silent && node dist/bin/pskernel.js --help && node dist/bin/psc.js --help"
+    "test": "npm run build --silent && node dist/test/cli.test.js && node dist/bin/pskernel.js --help && node dist/bin/psc.js --help"
   },
   "dependencies": {
     "lean-ts-kernel": "file:../..",

@@ -10,18 +10,22 @@ import type {
 } from '@proofscript/compiler-ir/verified';
 import {buildDeclarationNames} from './names.js';
 import {openAndEraseDefinition} from './expr-erasure.js';
+import {prepareRuntimeStructures} from './structure-erasure.js';
 
 export * from './model.js';
 export * from './names.js';
 export * from './type-erasure.js';
 export * from './expr-erasure.js';
+export * from './structure-erasure.js';
 
 export function eraseCheckedCoreModule(
   module:CheckedCoreModule,
 ):VerifiedIrModule {
-  const declarationNames=buildDeclarationNames(
-    module.definitions.map((definition)=>definition.name),
-  );
+  const declarationNames=buildDeclarationNames([
+    ...module.structures.map((structure)=>structure.name),
+    ...module.definitions.map((definition)=>definition.name),
+  ]);
+  const structures=prepareRuntimeStructures(module,declarationNames);
   const declarations:VerifiedIrDeclaration[]=[];
 
   for(const definition of module.definitions){
@@ -37,6 +41,8 @@ export function eraseCheckedCoreModule(
         typeLocals:new Map(),
         erasedLocals:new Set(),
         declarationNames,
+        structuresByType:structures.byType,
+        structuresByConstructor:structures.byConstructor,
       },
       module.environment,
     );
@@ -47,5 +53,9 @@ export function eraseCheckedCoreModule(
     declarations.push({name,...lowered});
   }
 
-  return {kind:'proofscript-verified-ir',declarations};
+  return {
+    kind:'proofscript-verified-ir',
+    structures:structures.ir,
+    declarations,
+  };
 }

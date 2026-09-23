@@ -220,3 +220,81 @@ console.log('ok - @proofscript/erasure Nat intrinsic lowering');
   }
 }
 console.log('ok - @proofscript/erasure semantic primitive type identity');
+
+
+{
+  const base=new Environment();
+  const kernel=new (await import('lean-ts-kernel')).Kernel(base);
+  const Nat=nameFromDotted('TestNat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const User=nameFromDotted('User');
+  const UserMk=nameFromDotted('User.mk');
+  const age=nameFromDotted('age');
+  const make=nameFromDotted('make');
+  const get=nameFromDotted('get');
+  const userType=constant(User);
+  const natType=constant(Nat);
+  const checked=admitCheckedCoreAdmissions(base,[
+    {
+      kind:'structure',
+      declaration:{
+        levelParams:[],
+        numParams:0,
+        types:[{
+          name:User,
+          type:sort(levelSucc(levelZero)),
+          ctors:[{
+            name:UserMk,
+            type:forallE(age,natType,userType),
+          }],
+        }],
+      },
+      structure:{
+        name:User,
+        constructor:UserMk,
+        fields:[{name:'age',index:0,binderInfo:'default'}],
+      },
+    },
+    {
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:make,
+        levelParams:[],
+        type:forallE(age,natType,userType),
+        value:lam(age,natType,app(constant(UserMk),bvar(0))),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+    {
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:get,
+        levelParams:[],
+        type:forallE(nameFromDotted('user'),userType,natType),
+        value:lam(
+          nameFromDotted('user'),
+          userType,
+          {kind:'proj',typeName:User,index:0,expr:bvar(0)},
+        ),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+  ]);
+  const erased=eraseCheckedCoreModule(checked);
+  equal(erased.structures?.length,1);
+  equal(erased.structures?.[0]?.name,'User');
+  const makeIr=erased.declarations.find((item)=>item.name==='make');
+  const getIr=erased.declarations.find((item)=>item.name==='get');
+  equal(makeIr?.body.kind,'record');
+  equal(getIr?.body.kind,'projection');
+}
+console.log('ok - @proofscript/erasure verified runtime structures');

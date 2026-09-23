@@ -198,8 +198,29 @@ export function eraseRuntimeExpr(
         "PS_ERASE_TYPE_TERM_AT_RUNTIME: '"+expr.kind+
         "' survives in executable code",
       );
-    case 'proj':
-      throw new Error('PS_ERASE_PROJECTION_UNSUPPORTED');
+    case 'proj':{
+      const structure=scope.structuresByType.get(nameKey(expr.typeName));
+      if(structure===undefined){
+        throw new Error(
+          "PS_ERASE_PROJECTION_STRUCTURE_UNSUPPORTED: '"+
+          nameToString(expr.typeName)+"'",
+        );
+      }
+      const field=structure.fields.find(
+        (item)=>item.sourceIndex===expr.index,
+      );
+      if(field===undefined){
+        throw new Error(
+          "PS_ERASE_PROJECTION_FIELD_UNSUPPORTED: structure '"+
+          structure.name+"' field index "+expr.index,
+        );
+      }
+      return {
+        kind:'projection',
+        target:eraseRuntimeExpr(expr.expr,scope,environment),
+        field:field.name,
+      };
+    }
   }
 }
 

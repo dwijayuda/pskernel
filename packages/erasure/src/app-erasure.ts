@@ -3,6 +3,7 @@ import {
   TypeChecker,
   appView,
   instantiate1,
+  nameKey,
   nameToString,
   type Expr,
 } from 'lean-ts-kernel';
@@ -77,6 +78,33 @@ export function eraseRuntimeApplication(
   erase:RuntimeExprEraser,
 ):VerifiedIrExpr {
   const view=appView(expr);
+
+  if(view.fn.kind==='const'){
+    const structure=scope.structuresByConstructor.get(
+      nameKey(view.fn.name),
+    );
+    if(structure!==undefined){
+      if(view.args.length!==structure.fields.length){
+        throw new Error(
+          "PS_ERASE_STRUCTURE_ARITY: constructor for '"+
+          structure.name+"' expected "+structure.fields.length+
+          ' fields, got '+view.args.length,
+        );
+      }
+      return {
+        kind:'record',
+        structure:structure.name,
+        fields:structure.fields.map((field)=>({
+          name:field.name,
+          value:erase(
+            view.args[field.sourceIndex]!,
+            scope,
+            environment,
+          ),
+        })),
+      };
+    }
+  }
 
   if(
     view.fn.kind==='const'

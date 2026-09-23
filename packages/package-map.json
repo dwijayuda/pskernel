@@ -235,7 +235,7 @@
       "path": "packages/erasure",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "nat-ite+intrinsics+generic-function-erasure-mvp",
+      "status": "verified-runtime-structure-erasure-mvp",
       "packageName": "@proofscript/erasure",
       "dependsOn": [
         "checked-core",
@@ -244,6 +244,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Kernel-admitted simple structures now lower to verified nominal structure IR; constructor applications become record values and kernel projections become named field access.",
+        "Structure layout comes only from checked-core metadata that was validated against pskernel-generated constructor metadata.",
+        "Structure fields must currently all be runtime-level and independently representable; Type/Prop/dependent existential fields fail closed rather than being flattened unsafely.",
         "Erasure consumes only kernel-admitted checked core, never source AST or the transitional software checker.",
         "Sort/type binders become TypeScript type parameters but are erased from runtime arguments; Prop proof binders are erased entirely; runtime binders remain.",
         "If an erased type/proof local survives in executable code, lowering fails closed.",

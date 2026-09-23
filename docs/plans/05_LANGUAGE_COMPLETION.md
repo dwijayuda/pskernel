@@ -50,8 +50,8 @@ Already implemented on the preferred verified path:
 - direct positive recursive ADTs;
 - bounded structural recursion, including invariant runtime parameters;
 - generic recursive list/map/length-style programs;
-- theorem proof terms and bounded tactics: exact, assumption, intro, and
-  single-premise apply;
+- theorem proof terms and bounded tactics: exact, assumption, intro, ordered
+  explicit multi-premise apply, and bounded refine with synthetic ?_ holes;
 - class declarations as kernel-checked structure-like declarations;
 - local instance synthesis;
 - bounded global instance registration/synthesis;
@@ -174,6 +174,14 @@ explicit `apply` may expose multiple ordered premise goals; solved premises
 are assembled into one ordinary kernel proof term before declaration admission.
 Implicit and instance binders remain fail-closed until their Meta synthesis
 policy is implemented.
+
+Bounded `refine` now admits Lean-style synthetic `?_` holes in the two
+currently explicit shapes: the whole refinement term, or direct D-CALL
+arguments such as `f(?_)`. Each unassigned synthetic hole becomes an ordered
+goal and the parent proof is finalized only after every hole has a
+pskernel-checkable solution. This intentionally implements `refine`, not
+`refine'`: natural `_` holes and unresolved implicit/instance parameters
+remain errors. Nested term holes wait for a general term-with-holes elaborator.
 
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
@@ -316,8 +324,8 @@ Do not reorder without repository evidence.
    Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
-4. Continue theorem prover v1 with refine/constructor/cases; broaden apply only
-   with an explicit multi-goal model.
+4. Continue theorem prover v1 with constructor/cases on the landed ordered
+   multi-goal apply/refine foundation.
 5. Implement project/module/import semantics on the checked-core path.
 6. Design and implement explicit npm/JS FFI.
 7. Start the ProofScript-written standard library.

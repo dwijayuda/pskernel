@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Untrusted ordered proof-goal state and tactic transition protocols.",
   "proofscript": {
-    "status": "ordered-multigoal-state-integrated",
+    "status": "ordered-multigoal-refine-integrated",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

@@ -64,6 +64,14 @@ test('mkMax matches Lean structural absorption shortcuts',()=>{
  assert(levelEqStructural(mkMax(uv,u),uv),'max (max u v) u must return the existing lhs node shape');
 });
 
+test('deep structural universe equality is stack-safe',()=>{
+ let a:any=levelZero,b:any=levelZero;
+ for(let i=0;i<20000;i++){a=levelSucc(a);b=levelSucc(b);}
+ assert(levelEqStructural(a,b),'deep structural universe equality must not overflow the JavaScript stack');
+ const st=new KernelState();st.infer.set(sort(a),constant(N.Nat));
+ assert(st.infer.has(sort(b)),'structural expression caches must compare deep universe levels without recursion overflow');
+});
+
 test('universe max commutative semantically',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));assert(levelEquivalent(mkMax(u,v),mkMax(v,u)));});
 test('imax u 0 = 0',()=>{const u=levelParam(nameFromDotted('u'));assert(levelEquivalent(mkIMax(u,levelZero),levelZero));});
 test('imax u (v+1) = max u (v+1)',()=>{const u=levelParam(nameFromDotted('u')),v=levelSucc(levelParam(nameFromDotted('v')));assert(levelEquivalent(mkIMax(u,v),mkMax(u,v)));});
@@ -477,6 +485,15 @@ test('theorem declarations do not delta unfold in Lean 4.34',()=>{
  k.addTheorem({kind:'theorem',name:th,levelParams:[],type:constant(P),value:constant(pr)});
  const tc=new TypeChecker(env);assert(tc.unfold(constant(th))===null,'theorem proof must not participate in delta reduction');
 });
+test('opaque admission rejects dangling free variables transactionally',()=>{
+ const env=baseEnv(),k=new Kernel(env),nm=nameFromDotted('opaqueDanglingFVar');
+ const natToNat=forallE(nameFromDotted('h'),constant(N.Nat),constant(N.Nat));
+ const identity=lam(nameFromDotted('h'),constant(N.Nat),bvar(0));
+ const cachePrimingType=app(lam(nameFromDotted('_'),natToNat,constant(N.Nat)),identity);
+ throws(()=>k.addOpaque({kind:'opaque',name:nm,levelParams:[],type:cachePrimingType,value:fvar('_kernel_fresh@2')}));
+ assert(!env.has(nm),'rejected opaque declaration must not mutate the environment');
+});
+
 test('opaque declarations do not delta unfold',()=>{const env=baseEnv(),k=new Kernel(env),nm=nameFromDotted('opaqueNat');k.addOpaque({kind:'opaque',name:nm,levelParams:[],type:constant(N.Nat),value:natLit(4)});const tc=new TypeChecker(env);eqExpr(tc.whnf(constant(nm)),constant(nm));});
 test('loose bvars rejected',()=>{const tc=new TypeChecker(baseEnv());throws(()=>tc.check(bvar(0)));});
 test('infer-only rejects loose bvars even inside skipped application arguments',()=>{

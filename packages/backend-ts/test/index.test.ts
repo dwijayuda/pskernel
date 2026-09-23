@@ -11,6 +11,7 @@ console.log('ok - @proofscript/backend-ts foundation');
 {
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    structures:[],
     declarations:[
       {kind:'const',name:'answer',params:[],resultType:'Nat',body:{kind:'nat',value:42n,resultType:'Nat'}},
       {kind:'function',name:'id',params:[{name:'x',type:'Nat'}],resultType:'Nat',body:{kind:'reference',name:'x',resultType:'Nat'}},
@@ -28,6 +29,7 @@ console.log('ok - @proofscript/backend-ts TypeScript compiler pipeline');
 {
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    structures:[],
     declarations:[{
       kind:'function',name:'incTwice',params:[{name:'x',type:'Nat'}],resultType:'Nat',
       body:{
@@ -44,6 +46,7 @@ console.log('ok - @proofscript/backend-ts compiler IR boundary');
 {
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    structures:[],
     declarations:[
       {
         kind:'const',name:'increment',params:[],
@@ -78,6 +81,7 @@ console.log('ok - @proofscript/backend-ts curried lambda TypeScript emission');
 {
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    structures:[],
     declarations:[{
       kind:'function',name:'choose',params:[{name:'flag',type:'Bool'}],resultType:'Nat',
       body:{
@@ -95,3 +99,37 @@ console.log('ok - @proofscript/backend-ts curried lambda TypeScript emission');
   equal(compiled.javascript.includes('flag ? 1n : 2n'),true);
 }
 console.log('ok - @proofscript/backend-ts Bool match TypeScript emission');
+
+{
+  const userType={kind:'nominal',name:'User'} as const;
+  const source=emitV061TypeScript(lowerCheckedSoftwareModule({
+    kind:'checked-v061-software-module',
+    structures:[{name:'User',fields:[{name:'name',type:'String'},{name:'age',type:'Nat'}]}],
+    declarations:[
+      {
+        kind:'const',name:'ada',params:[],resultType:userType,
+        body:{
+          kind:'record',structure:'User',resultType:userType,
+          fields:[
+            {name:'name',value:{kind:'string',value:'Ada',resultType:'String'}},
+            {name:'age',value:{kind:'nat',value:33n,resultType:'Nat'}},
+          ],
+        },
+      },
+      {
+        kind:'function',name:'age',params:[{name:'user',type:userType}],resultType:'Nat',
+        body:{
+          kind:'projection',field:'age',resultType:'Nat',
+          target:{kind:'reference',name:'user',resultType:userType},
+        },
+      },
+    ],
+  }));
+  equal(source.includes('export interface User {'),true);
+  equal(source.includes('readonly age: bigint;'),true);
+  equal(source.includes('export const ada: User = { name: "Ada", age: 33n };'),true);
+  equal(source.includes('return user.age;'),true);
+  const compiled=compileTypeScript(source,'structure.ts');
+  equal(compiled.declaration.includes('export interface User'),true);
+}
+console.log('ok - @proofscript/backend-ts nominal structure TypeScript emission');

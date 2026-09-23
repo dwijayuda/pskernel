@@ -179,7 +179,7 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-bool-match-ir-mvp",
+      "status": "software-structure-ir-mvp",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
         "kernel",
@@ -210,7 +210,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-bool-match-typescript-mvp",
+      "status": "software-structure-typescript-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -228,7 +228,7 @@
       "path": "packages/language",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "v061-bool-match-checker-mvp",
+      "status": "v061-structure-checker-mvp",
       "packageName": "@proofscript/language",
       "dependsOn": [
         "syntax",
@@ -238,10 +238,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Software checking is split into type conversion, expression checking, module orchestration, and shared HIR types.",
-        "Expression semantics remain focused and source/backend-independent; new semantic families should split again before exceeding the source-shape gate.",
-        "Reference-backed checker covers primitive/function types, calls, lambdas, lexical let, conditionals, operators, and bounded exhaustive Bool match.",
-        "This checker remains outside the TCB; theorem/proof acceptance still requires elaboration to pskernel."
+        "Nominal structure types, field environments, record construction, and projection checking are implemented outside the TCB.",
+        "Structure-specific semantics live in a dedicated module; the generic expression dispatcher delegates rather than embedding field logic.",
+        "Only explicit named fields are supported by the current structure parser/checker; implicit/instance/generic structure fields remain fail-closed.",
+        "Proof acceptance and Lean-equivalent structure elaboration remain future pskernel/elaborator work."
       ]
     },
     {

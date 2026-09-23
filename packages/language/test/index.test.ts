@@ -156,3 +156,30 @@ console.log('ok - @proofscript/language empty D-CALL Unit semantics');
   equal(unsupported,true);
 }
 console.log('ok - @proofscript/language exhaustive Bool match checker');
+
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'structure User where { name : String; age : Nat; } '+
+    'const ada : User := { name := "Ada", age := 33 : User }; '+
+    'function age(user : User) : Nat := user.age;',
+  ));
+  equal(checked.structures.length,1);
+  equal(checked.structures[0]?.name,'User');
+  equal(checked.declarations[0]?.body.kind,'record');
+  equal(checked.declarations[1]?.body.kind,'projection');
+  if(checked.declarations[1]?.body.kind==='projection'){
+    equal(checked.declarations[1].body.field,'age');
+    equal(checked.declarations[1].body.resultType,'Nat');
+  }
+}
+{
+  let missing=false;
+  try{
+    checkV061SoftwareModule(parseV061Module(
+      'structure User where { name : String; age : Nat; } '+
+      'const bad : User := { name := "Ada" : User };',
+    ));
+  }catch(error){missing=/PS_CHECK_MISSING_FIELD/.test(String(error));}
+  equal(missing,true);
+}
+console.log('ok - @proofscript/language nominal structure checker');

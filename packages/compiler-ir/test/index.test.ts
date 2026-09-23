@@ -12,6 +12,7 @@ console.log('ok - @proofscript/compiler-ir foundation');
 {
   const ir=lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    structures:[],
     declarations:[{
       kind:'function',
       name:'incTwice',
@@ -32,6 +33,7 @@ console.log('ok - @proofscript/compiler-ir software lowering');
 {
   const ir=lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    structures:[],
     declarations:[{
       kind:'const',name:'increment',params:[],
       resultType:{kind:'function',parameter:'Nat',result:'Nat'},
@@ -54,6 +56,7 @@ console.log('ok - @proofscript/compiler-ir software lambda lowering');
 {
   const ir=lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    structures:[],
     declarations:[{
       kind:'function',name:'choose',params:[{name:'flag',type:'Bool'}],resultType:'Nat',
       body:{
@@ -69,3 +72,24 @@ console.log('ok - @proofscript/compiler-ir software lambda lowering');
   equal(ir.declarations[0]?.body.kind,'match');
 }
 console.log('ok - @proofscript/compiler-ir Bool match lowering');
+
+{
+  const userType={kind:'nominal',name:'User'} as const;
+  const ir=lowerCheckedSoftwareModule({
+    kind:'checked-v061-software-module',
+    structures:[{name:'User',fields:[{name:'name',type:'String'},{name:'age',type:'Nat'}]}],
+    declarations:[{
+      kind:'const',name:'ada',params:[],resultType:userType,
+      body:{
+        kind:'record',structure:'User',resultType:userType,
+        fields:[
+          {name:'name',value:{kind:'string',value:'Ada',resultType:'String'}},
+          {name:'age',value:{kind:'nat',value:33n,resultType:'Nat'}},
+        ],
+      },
+    }],
+  });
+  equal(ir.structures[0]?.name,'User');
+  equal(ir.declarations[0]?.body.kind,'record');
+}
+console.log('ok - @proofscript/compiler-ir nominal structure lowering');

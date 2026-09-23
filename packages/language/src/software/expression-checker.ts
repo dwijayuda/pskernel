@@ -2,7 +2,6 @@ import type {V061Expr} from '@proofscript/syntax';
 import type {
   CheckedSoftwareExpr,
   PrimitiveSoftwareType,
-  SoftwareSignature,
   SoftwareType,
 } from './types.js';
 import {
@@ -14,21 +13,9 @@ import {
   asSoftwareType,
   requirePrimitiveSoftwareType,
 } from './type-conversion.js';
-
-export interface SoftwareExpressionContext {
-  readonly locals:ReadonlyMap<string,SoftwareType>;
-  readonly signatures:ReadonlyMap<string,SoftwareSignature>;
-}
-
-function withLocal(
-  context:SoftwareExpressionContext,
-  name:string,
-  type:SoftwareType,
-):SoftwareExpressionContext {
-  const locals=new Map(context.locals);
-  locals.set(name,type);
-  return {...context,locals};
-}
+import type {SoftwareExpressionContext} from './check-context.js';
+import {nominalTypeNames,withSoftwareLocal} from './check-context.js';
+import {checkRecordExpression,tryCheckProjectionReference} from './structure-checker.js';
 
 function checkNumericBinary(
   operator:string,
@@ -59,7 +46,7 @@ function checkCall(
     let current=localType;
     const args:CheckedSoftwareExpr[]=[];
     for(let index=0;index<expr.args.length;index+=1){
-      if(typeof current==='string'){
+      if(typeof current==='string'||current.kind!=='function'){
         throw new Error("PS_CHECK_NOT_CALLABLE: local '"+expr.callee+"' has type "+softwareTypeToString(current));
       }
       const checked=checkSoftwareExpr(expr.args[index]!,context,current.parameter);
@@ -104,7 +91,7 @@ function checkCall(
   let current=signature.result;
   const args:CheckedSoftwareExpr[]=[];
   for(let index=0;index<expr.args.length;index+=1){
-    if(typeof current==='string'){
+    if(typeof current==='string'||current.kind!=='function'){
       throw new Error(
         "PS_CHECK_NOT_CALLABLE: declaration '"+expr.callee+"' has type "+softwareTypeToString(current),
       );
@@ -190,9 +177,9 @@ function checkLambda(
   const binders:{name:string;type:SoftwareType}[]=[];
 
   for(const binder of expr.binders){
-    const declared=binder.type===undefined?undefined:asSoftwareType(binder.type);
+    const declared=binder.type===undefined?undefined:asSoftwareType(binder.type,nominalTypeNames(context));
     let binderType:SoftwareType;
-    if(expectedCursor!==undefined&&typeof expectedCursor!=='string'){
+    if(expectedCursor!==undefined&&typeof expectedCursor!=='string'&&expectedCursor.kind==='function'){
       if(declared!==undefined&&!softwareTypeEquals(declared,expectedCursor.parameter)){
         throw new Error(
           'PS_CHECK_LAMBDA_BINDER_TYPE: '+binder.name+' expects '+
@@ -210,7 +197,7 @@ function checkLambda(
         "' without an expected function type",
       );
     }
-    bodyContext=withLocal(bodyContext,binder.name,binderType);
+    bodyContext=withSoftwareLocal(bodyContext,binder.name,binderType);
     binders.push({name:binder.name,type:binderType});
   }
 
@@ -246,12 +233,12 @@ export function checkSoftwareExpr(
       if(signature!==undefined&&signature.params.length===0){
         return {kind:'reference',name:expr.name,resultType:signature.result};
       }
+      const projection=tryCheckProjectionReference(expr.name,context);
+      if(projection!==undefined)return projection;
       throw new Error("PS_CHECK_UNKNOWN_IDENTIFIER: unknown identifier '"+expr.name+"'");
     }
     case 'record':
-      throw new Error(
-        'PS_CHECK_RECORD_UNSUPPORTED: record values require nominal structure elaboration',
-      );
+      return checkRecordExpression(expr,context,checkSoftwareExpr);
     case 'call':return checkCall(expr,context);
     case 'lambda':return checkLambda(expr,context,expected);
     case 'match':return checkMatch(expr,context,expected);
@@ -307,7 +294,7 @@ export function checkSoftwareExpr(
       return {kind:'if',condition,thenBranch,elseBranch,resultType:thenBranch.resultType};
     }
     case 'let':{
-      const declaredType=expr.declaredType===undefined?undefined:asSoftwareType(expr.declaredType);
+      const declaredType=expr.declaredType===undefined?undefined:asSoftwareType(expr.declaredType,nominalTypeNames(context));
       const value=checkSoftwareExpr(expr.value,context,declaredType);
       if(declaredType!==undefined&&!softwareTypeEquals(value.resultType,declaredType)){
         throw new Error(
@@ -316,7 +303,7 @@ export function checkSoftwareExpr(
         );
       }
       const bindingType=declaredType??value.resultType;
-      const body=checkSoftwareExpr(expr.body,withLocal(context,expr.name,bindingType),expected);
+      const body=checkSoftwareExpr(expr.body,withSoftwareLocal(context,expr.name,bindingType),expected);
       return {
         kind:'let',
         name:expr.name,

@@ -1,25 +1,43 @@
 import type {V061ValueDeclaration} from '@proofscript/syntax';
 
 export type PrimitiveSoftwareType='Nat'|'Int'|'Bool'|'String'|'Unit';
+
+export interface NominalSoftwareType {
+  readonly kind:'nominal';
+  readonly name:string;
+}
+
 export interface FunctionSoftwareType {
   readonly kind:'function';
   readonly parameter:SoftwareType;
   readonly result:SoftwareType;
 }
-export type SoftwareType=PrimitiveSoftwareType|FunctionSoftwareType;
+
+export type SoftwareType=PrimitiveSoftwareType|NominalSoftwareType|FunctionSoftwareType;
 
 export function isPrimitiveSoftwareType(type:SoftwareType):type is PrimitiveSoftwareType {
   return typeof type==='string';
 }
 
-export function softwareTypeEquals(left:SoftwareType,right:SoftwareType):boolean {
-  if(typeof left==='string'||typeof right==='string')return left===right;
-  return left.kind==='function'&&right.kind==='function'
-    &&softwareTypeEquals(left.parameter,right.parameter)
-    &&softwareTypeEquals(left.result,right.result);
+export function isFunctionSoftwareType(type:SoftwareType):type is FunctionSoftwareType {
+  return typeof type!=='string'&&type.kind==='function';
 }
 
-export function makeFunctionSoftwareType(parameters:readonly SoftwareType[],result:SoftwareType):SoftwareType {
+export function softwareTypeEquals(left:SoftwareType,right:SoftwareType):boolean {
+  if(typeof left==='string'||typeof right==='string')return left===right;
+  if(left.kind!==right.kind)return false;
+  if(left.kind==='nominal'&&right.kind==='nominal')return left.name===right.name;
+  if(left.kind==='function'&&right.kind==='function'){
+    return softwareTypeEquals(left.parameter,right.parameter)
+      &&softwareTypeEquals(left.result,right.result);
+  }
+  return false;
+}
+
+export function makeFunctionSoftwareType(
+  parameters:readonly SoftwareType[],
+  result:SoftwareType,
+):SoftwareType {
   return [...parameters].reverse().reduce<SoftwareType>(
     (body,parameter)=>({kind:'function',parameter,result:body}),
     result,
@@ -28,10 +46,21 @@ export function makeFunctionSoftwareType(parameters:readonly SoftwareType[],resu
 
 export function softwareTypeToString(type:SoftwareType):string {
   if(typeof type==='string')return type;
-  const domain=typeof type.parameter==='string'
+  if(type.kind==='nominal')return type.name;
+  const domain=isPrimitiveSoftwareType(type.parameter)||type.parameter.kind==='nominal'
     ? softwareTypeToString(type.parameter)
     : '('+softwareTypeToString(type.parameter)+')';
   return domain+' -> '+softwareTypeToString(type.result);
+}
+
+export interface CheckedSoftwareStructureField {
+  readonly name:string;
+  readonly type:SoftwareType;
+}
+
+export interface CheckedSoftwareStructure {
+  readonly name:string;
+  readonly fields:readonly CheckedSoftwareStructureField[];
 }
 
 export type CheckedSoftwarePattern =
@@ -49,6 +78,18 @@ export type CheckedSoftwareExpr =
   | {readonly kind:'bool';readonly value:boolean;readonly resultType:'Bool'}
   | {readonly kind:'unit';readonly resultType:'Unit'}
   | {readonly kind:'reference';readonly name:string;readonly resultType:SoftwareType}
+  | {
+      readonly kind:'projection';
+      readonly target:CheckedSoftwareExpr;
+      readonly field:string;
+      readonly resultType:SoftwareType;
+    }
+  | {
+      readonly kind:'record';
+      readonly structure:string;
+      readonly fields:readonly {readonly name:string;readonly value:CheckedSoftwareExpr}[];
+      readonly resultType:NominalSoftwareType;
+    }
   | {
       readonly kind:'call';
       readonly callee:string;
@@ -95,6 +136,7 @@ export interface CheckedSoftwareDeclaration {
 
 export interface CheckedSoftwareModule {
   readonly kind:'checked-v061-software-module';
+  readonly structures:readonly CheckedSoftwareStructure[];
   readonly declarations:readonly CheckedSoftwareDeclaration[];
 }
 

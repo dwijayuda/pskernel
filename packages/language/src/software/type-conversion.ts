@@ -3,21 +3,28 @@ import type {PrimitiveSoftwareType,SoftwareType} from './types.js';
 import {softwareTypeToString} from './types.js';
 
 const PRIMITIVES=new Set<PrimitiveSoftwareType>(['Nat','Int','Bool','String','Unit']);
+const EMPTY_NOMINALS:ReadonlySet<string>=new Set();
 
-export function asSoftwareType(type:V061TypeExpr):SoftwareType {
+export function asSoftwareType(
+  type:V061TypeExpr,
+  nominalTypes:ReadonlySet<string>=EMPTY_NOMINALS,
+):SoftwareType {
   switch(type.kind){
     case 'group':
-      return asSoftwareType(type.value);
+      return asSoftwareType(type.value,nominalTypes);
     case 'named':
-      if(!PRIMITIVES.has(type.name as PrimitiveSoftwareType)){
-        throw new Error("PS_CHECK_UNKNOWN_TYPE: unsupported software type '"+type.name+"'");
+      if(PRIMITIVES.has(type.name as PrimitiveSoftwareType)){
+        return type.name as PrimitiveSoftwareType;
       }
-      return type.name as PrimitiveSoftwareType;
+      if(nominalTypes.has(type.name)){
+        return {kind:'nominal',name:type.name};
+      }
+      throw new Error("PS_CHECK_UNKNOWN_TYPE: unsupported software type '"+type.name+"'");
     case 'arrow':
       return {
         kind:'function',
-        parameter:asSoftwareType(type.domain),
-        result:asSoftwareType(type.codomain),
+        parameter:asSoftwareType(type.domain,nominalTypes),
+        result:asSoftwareType(type.codomain,nominalTypes),
       };
   }
 }

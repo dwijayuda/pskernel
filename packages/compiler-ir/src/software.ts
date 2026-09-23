@@ -6,6 +6,11 @@ import type {
 
 export type SoftwareIrType=SoftwareType;
 
+export interface SoftwareIrStructure {
+  readonly name:string;
+  readonly fields:readonly {readonly name:string;readonly type:SoftwareIrType}[];
+}
+
 export type SoftwareIrPattern =
   | {readonly kind:'bool';readonly value:boolean}
   | {readonly kind:'wildcard'};
@@ -18,6 +23,18 @@ export interface SoftwareIrMatchAlternative {
 export type SoftwareIrExpr =
   | {readonly kind:'literal';readonly value:bigint|string|boolean|undefined;readonly type:SoftwareIrType}
   | {readonly kind:'var';readonly name:string;readonly type:SoftwareIrType}
+  | {
+      readonly kind:'projection';
+      readonly target:SoftwareIrExpr;
+      readonly field:string;
+      readonly type:SoftwareIrType;
+    }
+  | {
+      readonly kind:'record';
+      readonly structure:string;
+      readonly fields:readonly {readonly name:string;readonly value:SoftwareIrExpr}[];
+      readonly type:SoftwareIrType;
+    }
   | {
       readonly kind:'call';
       readonly callee:string;
@@ -63,6 +80,7 @@ export interface SoftwareIrDeclaration {
 
 export interface SoftwareIrModule {
   readonly kind:'proofscript-software-ir';
+  readonly structures:readonly SoftwareIrStructure[];
   readonly declarations:readonly SoftwareIrDeclaration[];
 }
 
@@ -73,6 +91,15 @@ function lowerExpr(expr:CheckedSoftwareExpr):SoftwareIrExpr {
     case 'bool':return {kind:'literal',value:expr.value,type:'Bool'};
     case 'unit':return {kind:'literal',value:undefined,type:'Unit'};
     case 'reference':return {kind:'var',name:expr.name,type:expr.resultType};
+    case 'projection':
+      return {kind:'projection',target:lowerExpr(expr.target),field:expr.field,type:expr.resultType};
+    case 'record':
+      return {
+        kind:'record',
+        structure:expr.structure,
+        fields:expr.fields.map((field)=>({name:field.name,value:lowerExpr(field.value)})),
+        type:expr.resultType,
+      };
     case 'call':
       return {
         kind:'call',
@@ -125,6 +152,10 @@ function lowerExpr(expr:CheckedSoftwareExpr):SoftwareIrExpr {
 export function lowerCheckedSoftwareModule(module:CheckedSoftwareModule):SoftwareIrModule {
   return {
     kind:'proofscript-software-ir',
+    structures:module.structures.map((structure)=>({
+      name:structure.name,
+      fields:structure.fields.map((field)=>({name:field.name,type:field.type})),
+    })),
     declarations:module.declarations.map((decl)=>({
       name:decl.name,
       params:decl.params.map((param)=>({name:param.name,type:param.type})),

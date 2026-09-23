@@ -980,12 +980,12 @@ test('generated recursive recursor computes by iota',()=>{
 test('Quot bootstrap accepts alpha-renamed Eq.refl universe parameter like Lean 4.34',()=>{
  const env=new Environment(),eqU=nameFromDotted('eqU'),reflU=nameFromDotted('reflU');
  const arrow=(a:any,b:any)=>forallE(nameFromDotted('_'),a,b);
- const eqType=forallE(nameFromDotted('α'),sort(levelParam(eqU)),arrow(bvar(0),arrow(bvar(1),sort(levelZero))),'implicit');
- const reflType=forallE(nameFromDotted('α'),sort(levelParam(reflU)),
-   forallE(nameFromDotted('a'),bvar(0),mkAppN(constant(N.Eq,[levelParam(reflU)]),[bvar(1),bvar(0),bvar(0)])),'implicit');
+ const eqType=forallE(nameFromDotted('DifferentEqBinder'),sort(levelParam(eqU)),arrow(bvar(0),arrow(bvar(1),sort(levelZero))),'default');
+ const reflType=forallE(nameFromDotted('DifferentReflBinder'),sort(levelParam(reflU)),
+   forallE(nameFromDotted('DifferentValueBinder'),bvar(0),mkAppN(constant(N.Eq,[levelParam(reflU)]),[bvar(1),bvar(0),bvar(0)])),'strictImplicit');
  env.add({kind:'inductive',name:N.Eq,levelParams:[eqU],type:eqType,numParams:0,numIndices:0,all:[N.Eq],ctors:[N.EqRefl],numNested:0,isRec:false,isReflexive:false});
  env.add({kind:'constructor',name:N.EqRefl,levelParams:[reflU],type:reflType,induct:N.Eq,cidx:0,numParams:0,numFields:0});
- addQuot(env);assert(env.quotInitialized,'Eq and Eq.refl universe binder names are local and need not be identical');
+ addQuot(env);assert(env.quotInitialized,'Eq/Eq.refl universe names and Pi binder metadata are ignored by the same structural equality used by Lean 4.34');
 });
 
 test('Quot bootstrap requires exact Eq shape and lift reduces',()=>{

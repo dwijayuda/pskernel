@@ -1,5 +1,5 @@
 import { Environment, KernelError } from '../core/environment.js';
-import { Expr, app, bvar, constant, exprEq, forallE, mkAppN, sort } from '../core/expr.js';
+import { Expr, app, bvar, constant, exprLeanEq, forallE, mkAppN, sort } from '../core/expr.js';
 import { levelParam, levelZero } from '../core/level.js';
 import { nameFromDotted } from '../core/name.js';
 import { N } from './names.js';
@@ -15,8 +15,8 @@ function expectedReflType(param:import('../core/name.js').Name):Expr{
 export function checkEqShape(env:Environment):void{
  const eq=env.find(N.Eq);if(!eq||eq.kind!=='inductive'||eq.levelParams.length!==1||eq.ctors.length!==1)throw new KernelError('failed to initialize Quot: unexpected Eq declaration');
  const eqParam=eq.levelParams[0]!;
- if(!exprEq(eq.type,expectedEqType(eqParam)))throw new KernelError('failed to initialize Quot: Eq has unexpected type');
- const r=env.find(eq.ctors[0]!);if(!r||r.kind!=='constructor'||r.levelParams.length!==1||!exprEq(r.type,expectedReflType(r.levelParams[0]!)))throw new KernelError('failed to initialize Quot: Eq.refl has unexpected type');
+ if(!exprLeanEq(eq.type,expectedEqType(eqParam)))throw new KernelError('failed to initialize Quot: Eq has unexpected type');
+ const r=env.find(eq.ctors[0]!);if(!r||r.kind!=='constructor'||r.levelParams.length!==1||!exprLeanEq(r.type,expectedReflType(r.levelParams[0]!)))throw new KernelError('failed to initialize Quot: Eq.refl has unexpected type');
 }
 export function addQuot(env:Environment):void{
  if(env.quotInitialized)return;checkEqShape(env);for(const n of [N.Quot,N.QuotMk,N.QuotLift,N.QuotInd])if(env.has(n))throw new KernelError('failed to initialize Quot: name already declared');

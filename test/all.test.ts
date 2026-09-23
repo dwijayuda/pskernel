@@ -89,7 +89,7 @@ test('defeq treats historical native-reduction names as ordinary opaque applicat
  env.add({kind:'axiom',name:reduceBool,levelParams:[],type:forallE(nameFromDotted('b'),constant(N.Bool),constant(N.Bool))});
  env.add({kind:'definition',name:v,levelParams:[],type:constant(N.Bool),value:constant(N.BoolTrue),hints:{kind:'regular',height:1n},safety:'safe'});
  const tc=new TypeChecker(env),e=app(constant(reduceBool),constant(v));
- assert.equal(tc.isDefEq(e,constant(N.BoolFalse)),false);
+ assert(!tc.isDefEq(e,constant(N.BoolFalse)));
 });
 test('application checker rejects wrong argument',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));throws(()=>tc.check(app(id,constant(N.BoolTrue))));});
 test('eagerReduce enables Lean 4.34 eager defeq for application arguments with syntactic fvars',()=>{

@@ -436,7 +436,7 @@ console.log('ok - @proofscript/erasure verified ADT constructors');
       nameFromDotted('value'),
       maybeType,
       mkAppN(
-        constant(recursor,[levelZero]),
+        constant(recursor,[levelSucc(levelZero)]),
         [
           motive,
           natLit(0),
@@ -489,6 +489,7 @@ console.log('ok - @proofscript/erasure verified ADT constructors');
     equal(body.alternatives[0]?.constructor,'none');
     equal(body.alternatives[1]?.constructor,'some');
     equal(body.alternatives[1]?.bindings[0]?.field,'value');
+    equal(body.alternatives[1]?.bindings[0]?.type.kind,'primitive');
     equal(body.alternatives[1]?.body.kind,'var');
   }
 }

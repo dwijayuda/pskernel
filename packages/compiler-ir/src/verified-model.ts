@@ -107,6 +107,7 @@ export type VerifiedIrExpr =
         readonly bindings:readonly {
           readonly field:string;
           readonly name:string;
+          readonly type:VerifiedIrType;
         }[];
         readonly body:VerifiedIrExpr;
       }[];

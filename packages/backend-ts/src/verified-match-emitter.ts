@@ -5,6 +5,7 @@ import type {
   BrandMap,
   TagMap,
 } from './verified-symbols.js';
+import {emitVerifiedType} from './verified-type-emitter.js';
 
 export type VerifiedExprEmitter=(
   expr:VerifiedIrExpr,
@@ -92,7 +93,7 @@ export function emitVerifiedMatch(
         ': return '+body+';';
     }
     const parameters=alternative.bindings.map(
-      (binding)=>binding.name,
+      (binding)=>binding.name+': '+emitVerifiedType(binding.type),
     ).join(', ');
     const args=alternative.bindings.map(
       (binding)=>temp+'.'+binding.field,

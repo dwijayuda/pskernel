@@ -250,7 +250,7 @@ console.log('ok - psc verified ADT constructor pipeline');
   equal(result.typeScript.includes('case "none": return 0n;'),true);
   equal(
     result.typeScript.includes(
-      'case "some": return ((x) => x)(__ps$match$0.value);',
+      'case "some": return ((x: bigint) => x)(__ps$match$0.value);',
     ),
     true,
   );

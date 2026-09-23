@@ -286,7 +286,7 @@ assert(
 );
 assert(
   verifiedAdtMatch.typeScript.includes(
-    'case "some": return ((x) => x)(__ps$match$0.value);',
+    'case "some": return ((x: bigint) => x)(__ps$match$0.value);',
   ),
   'verified ADT match field binding was not preserved',
 );

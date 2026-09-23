@@ -49,6 +49,7 @@ function eraseMinor(
   const bindings:{
     readonly field:string;
     readonly name:string;
+    readonly type:import('@proofscript/compiler-ir/verified').VerifiedIrType;
   }[]=[];
 
   for(let index=0;index<constructor.fields.length;index+=1){
@@ -88,7 +89,11 @@ function eraseMinor(
     const runtimeLocals=new Map(branchScope.runtimeLocals);
     runtimeLocals.set(id,binderName);
     branchScope={...branchScope,localContext,runtimeLocals};
-    bindings.push({field:sourceField.name,name:binderName});
+    bindings.push({
+      field:sourceField.name,
+      name:binderName,
+      type:sourceField.type,
+    });
     cursor=instantiate1(cursor.body,fvar(id));
   }
 

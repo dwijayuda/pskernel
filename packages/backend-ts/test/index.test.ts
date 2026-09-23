@@ -472,7 +472,11 @@ console.log('ok - @proofscript/backend-ts verified ADT constructor emission');
           },
           {
             constructor:'some',
-            bindings:[{field:'value',name:'x'}],
+            bindings:[{
+              field:'value',
+              name:'x',
+              type:{kind:'primitive',name:'Nat'},
+            }],
             body:{kind:'var',name:'x'},
           },
         ],
@@ -483,7 +487,7 @@ console.log('ok - @proofscript/backend-ts verified ADT constructor emission');
   equal(source.includes('case "none": return 0n;'),true);
   equal(
     source.includes(
-      'case "some": return ((x) => x)(__ps$match$0.value);',
+      'case "some": return ((x: bigint) => x)(__ps$match$0.value);',
     ),
     true,
   );

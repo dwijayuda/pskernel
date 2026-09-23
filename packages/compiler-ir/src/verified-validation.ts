@@ -187,6 +187,7 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
         for(const binding of alternative.bindings){
           assertVerifiedIrIdentifier(binding.field);
           assertVerifiedIrIdentifier(binding.name);
+          validateType(binding.type);
           if(names.has(binding.name)){
             throw new Error(
               "duplicate verified IR match binder '"+binding.name+"'",

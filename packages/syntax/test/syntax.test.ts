@@ -1204,17 +1204,47 @@ throws(
   ),
   /PS_LEAN_SUBSET_UNSUPPORTED_COMMAND/,
 );
+{
+  const proofScript=parseV061Module(
+    'def choose(flag : Bool) : Nat := match flag with { '+
+    '| true => 1; | false => 2; };',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    lowerV061ModuleToProofScript(proofScript),
+  );
+}
+{
+  const lean=
+    'def unwrap (x : Maybe) : Nat := match x with\n'+
+    '  | .some value => value\n'+
+    '  | .none => 0\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'def');
+  if(declaration?.kind==='def'){
+    equal(declaration.body.kind,'match');
+    if(declaration.body.kind==='match'){
+      equal(declaration.body.alternatives.length,2);
+      equal(declaration.body.alternatives[0]?.pattern.kind,'constructor');
+    }
+  }
+}
 throws(
   ()=>parseV061LeanSubsetModule(
-    'def bad (x : Nat) : Nat := match x with\n  | 0 => 0\n',
+    'def bad (x : Nat) : Nat := match x with\n',
   ),
-  /PS_LEAN_SUBSET_UNSUPPORTED_TERM/,
+  /PS_LEAN_SUBSET_MATCH/,
 );
 {
   const registry=createDefaultSourceFrontendRegistry();
   equal(registry.get('lean-subset'),undefined);
   equal(leanSubsetSourceFrontend.kind,'lean-subset');
 }
-console.log('ok - @proofscript/syntax DS2.2 Lean declaration frontend');
+console.log('ok - @proofscript/syntax DS2.3 Lean match frontend');
 
 console.log('ok - @proofscript/syntax inherited instance declarations');

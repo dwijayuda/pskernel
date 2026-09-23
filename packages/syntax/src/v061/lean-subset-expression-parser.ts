@@ -1,7 +1,12 @@
 import {SyntaxError,type Token} from '../source.js';
-import type {V061Expr,V061LambdaBinder} from './ast.js';
+import type {
+  V061Expr,
+  V061LambdaBinder,
+  V061MatchAlternative,
+} from './ast.js';
 import {V061ParseContext,spanBetween} from './context.js';
 import {v061BinaryPrecedence} from './operators.js';
+import {parseV061Pattern} from './pattern-parser.js';
 import {parseV061RecordExpression} from './record-parser.js';
 import {parseV061ByExpression} from './tactic-parser.js';
 import {parseV061Type} from './type-parser.js';
@@ -48,12 +53,7 @@ export class V061LeanSubsetExpressionParser {
     if(this.context.cursor.at('fun'))return this.parseLambda();
     if(this.context.cursor.at('let'))return this.parseLet();
     if(this.context.cursor.at('if'))return this.parseIf();
-    if(this.context.cursor.at('match')){
-      throw new SyntaxError(
-        'PS_LEAN_SUBSET_UNSUPPORTED_TERM: match is not in DS2.1',
-        this.context.cursor.peek().span,
-      );
-    }
+    if(this.context.cursor.at('match'))return this.parseMatch();
     if(this.context.cursor.at('{')){
       return parseV061RecordExpression(
         this.context,
@@ -90,6 +90,39 @@ export class V061LeanSubsetExpressionParser {
       callee:first.name,
       args,
       span:{start:first.span.start,end:args[args.length-1]!.span.end},
+    };
+  }
+
+  private parseMatch():V061Expr {
+    const first=this.context.cursor.expect('match');
+    const scrutinee=this.parse();
+    this.context.cursor.expect('with');
+    const alternatives:V061MatchAlternative[]=[];
+    while(this.context.cursor.at('|')){
+      const bar=this.context.cursor.consume();
+      const pattern=parseV061Pattern(this.context);
+      this.context.cursor.expect('=>');
+      const body=this.parse();
+      alternatives.push({
+        pattern,
+        body,
+        span:{start:bar.span.start,end:body.span.end},
+      });
+    }
+    if(alternatives.length===0){
+      throw new SyntaxError(
+        'PS_LEAN_SUBSET_MATCH: match requires at least one alternative',
+        this.context.cursor.peek().span,
+      );
+    }
+    return {
+      kind:'match',
+      scrutinee,
+      alternatives,
+      span:{
+        start:first.span.start,
+        end:alternatives[alternatives.length-1]!.span.end,
+      },
     };
   }
 

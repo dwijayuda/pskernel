@@ -180,6 +180,12 @@ export class TypeChecker {
     const field=this.ensureForall(this.whnf(ct)).type;if(propStructure&&!this.isProp(field))throw new KernelError('invalid projection: cannot eliminate proof into data');return field;
   }
 
+  private deltaTarget(e:Expr):DefinitionInfo|null{
+    const fn=getAppFn(e);if(fn.kind!=='const')return null;
+    const i=deltaInfo(this.env.find(fn.name));
+    return i&&fn.levels.length===i.levelParams.length?i:null;
+  }
+
   unfold(e:Expr):Expr|null{
     const av=appView(e);if(av.fn.kind!=='const')return null;const i=deltaInfo(this.env.find(av.fn.name));if(!i||av.fn.levels.length!==i.levelParams.length)return null;
     let value:Expr;
@@ -373,12 +379,12 @@ export class TypeChecker {
     if(!this.isDefEq(av.fn,bv.fn))return false;if(av.args.length!==bv.args.length)return false;for(let i=0;i<av.args.length;i++)if(!this.isDefEq(av.args[i]!,bv.args[i]!))return false;return true;
   }
   private deltaStep(a:Expr,b:Expr):{a:Expr;b:Expr;equal?:boolean}|null{
-    const af=getAppFn(a),bf=getAppFn(b);const ai=af.kind==='const'?deltaInfo(this.env.find(af.name)):null,bi=bf.kind==='const'?deltaInfo(this.env.find(bf.name)):null;
+    const af=getAppFn(a),bf=getAppFn(b),ai=this.deltaTarget(a),bi=this.deltaTarget(b);
     if(!ai&&!bi)return null;
     if(ai&&!bi){const bp=this.tryUnfoldProjApp(b);if(bp)return {a,b:bp};const u=this.unfold(a);return u?{a:this.whnfCore(u,false,true),b}:null;}
     if(!ai&&bi){const ap=this.tryUnfoldProjApp(a);if(ap)return {a:ap,b};const u=this.unfold(b);return u?{a,b:this.whnfCore(u,false,true)}:null;}
     const c=cmpHint(hint(ai!),hint(bi!));if(c<0){const u=this.unfold(a)!;return {a:this.whnfCore(u,false,true),b};}if(c>0){const u=this.unfold(b)!;return {a,b:this.whnfCore(u,false,true)};}
-    if(a.kind==='app'&&b.kind==='app'&&nameEq(ai!.name,bi!.name)&&hint(ai!).kind==='regular'){
+    if(a.kind==='app'&&b.kind==='app'&&ai===bi&&hint(ai!).kind==='regular'){
       const pair=this.state.pair(a,b);if(!this.state.failure.has(pair)){
         const al=af.kind==='const'?af.levels:[],bl=bf.kind==='const'?bf.levels:[];
         if(al.length===bl.length&&al.every((l,i)=>levelEquivalent(l,bl[i]!))&&this.isDefEqArgs(a,b))return {a,b,equal:true};

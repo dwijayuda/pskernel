@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 170,
   "notes": [
+    "Build repair for shared-state hardening: exactOptionalPropertyTypes requires cache-config keys that are always passed to be declared as explicit `T | undefined`, not optional properties. Runtime policy is unchanged.",
     "Public checker-state cache hardening: KernelState now binds cache-affecting TypeChecker configuration (definition safety, allowed universe parameters including undefined-universe-ignore mode, recursion/Nat resource limits, and native evaluator identity). Reusing one state under incompatible settings fails closed instead of allowing permissive cached checked-inference/WHNF results to bypass stricter checks. Normal Kernel admission already used fresh states; this secures the public shared-state API.",
     "Local Full-Std runner now executes the assurance ladder in cost order by default: full npm test → bounded real corpora → canonical Init.Prelude preflight → canonical Full Std, logging each stage and stopping at the first failure. Skip switches are available only for targeted reruns.",
     "Execution refresh: strengthened Nat.mod variable-divisor definitional-equality assertion passes; build PASS and direct suite PASS 170/170 with zero failures.",
@@ -247,5 +248,5 @@
   ],
   "currentTreeExpectedDirectTests": 171,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "last executed direct checkpoint remains 170/170; new shared-state configuration isolation regression raises source count to 171 and is pending refreshed build/test execution"
+  "currentTreeVerification": "shared-state hardening source count remains 171; exactOptionalPropertyTypes build repair applied, refreshed execution pending"
 }

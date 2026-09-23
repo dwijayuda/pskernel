@@ -199,10 +199,10 @@ export class KernelState {
    */
   bindCheckerConfig(config:{
     readonly definitionSafety:string;
-    readonly allowedLevelParams?:readonly Name[];
+    readonly allowedLevelParams:readonly Name[]|undefined;
     readonly maxRecDepth:number;
     readonly maxNatBytes:bigint;
-    readonly nativeEvaluator?:unknown;
+    readonly nativeEvaluator:unknown|undefined;
   }):void{
     const lps=config.allowedLevelParams===undefined
       ? '<ignore-undefined-universes>'

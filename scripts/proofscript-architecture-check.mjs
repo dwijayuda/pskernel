@@ -40,6 +40,9 @@ function forbidDeps(name,forbidden){
 if(entry('kernel').dependsOn.length!==0){
   throw new Error('architecture: kernel must remain dependency root');
 }
+requireDeps('environment',['kernel']);
+requireDeps('cli',['environment']);
+requireDeps('lsp',['environment']);
 requireDeps('checked-core',['kernel']);
 forbidDeps('checked-core',[
   'syntax','meta','elab','language','erasure','compiler-ir','backend-ts',
@@ -93,6 +96,19 @@ forbidImports(join(root,'packages','compiler','src'),[
   "@proofscript/elab",
   "@proofscript/language",
 ]);
+
+const expectedPipeline=[
+  'syntax','environment','meta','elab','checked-core',
+  'erasure','compiler-ir','backend-ts','typescript',
+];
+if(
+  JSON.stringify(map.preferredPipeline)!==JSON.stringify(expectedPipeline)
+){
+  throw new Error(
+    'architecture: preferredPipeline drift; expected '+
+    expectedPipeline.join(' -> '),
+  );
+}
 
 const verifiedPipeline=readFileSync(
   join(root,'packages','cli','src','verified-pipeline.ts'),

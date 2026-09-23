@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Lean-aware erasure from kernel-admitted ProofScript checked core to verified compiler IR.",
   "proofscript": {
-    "status": "generic-function-erasure-mvp",
+    "status": "nat-ite+intrinsics+generic-function-erasure-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

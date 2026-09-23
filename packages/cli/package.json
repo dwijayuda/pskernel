@@ -28,7 +28,7 @@
   },
   "description": "ProofScript developer CLI (psc) plus low-level pskernel replay/module commands.",
   "proofscript": {
-    "status": "psc-ux-mvp+verified-core-opt-in+kernel-tools",
+    "status": "psc-ux-mvp+verified-run-primitive-abi+kernel-tools",
     "phase": "A",
     "trust": "untrusted-support",
     "futureName": "@proofscript/cli",

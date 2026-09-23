@@ -15,6 +15,8 @@ ProofScript source
         v
    syntax / names
         |
+        +---- pinned Lean 4.34 environment
+        |     (pskernel-admitted Init.Prelude)
         v
  Lean-compatible elaboration
         |
@@ -40,6 +42,7 @@ checked dependent core
 ## Package ownership
 
 - `@proofscript/syntax`: source grammar and source ownership only.
+- `@proofscript/environment`: shared pinned Lean 4.34 environment replay used by compiler and tooling.
 - `@proofscript/meta` / `@proofscript/elab`: untrusted Lean-compatible
   elaboration.
 - `@proofscript/checked-core`: stable boundary containing declarations

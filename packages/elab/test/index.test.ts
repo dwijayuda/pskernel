@@ -370,3 +370,24 @@ console.log('ok - @proofscript/elab expected-type lambda elaboration');
   equal(result.definitions[0]?.value.kind,'lam');
 }
 console.log('ok - @proofscript/elab core let elaboration');
+
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem byExact(P : Prop, h : P) : P := by exact h; '+
+    'theorem byAssumption(P : Prop, h : P) : P := by assumption;',
+  ));
+  equal(result.theorems.length,2);
+  equal(result.environment.find(nameFromDotted('byExact'))?.kind,'theorem');
+  equal(result.environment.find(nameFromDotted('byAssumption'))?.kind,'theorem');
+}
+{
+  let failed=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem noAssumption(P : Prop) : P := by assumption;',
+    ));
+  }catch(error){failed=/PS_ELAB_TACTIC_ASSUMPTION/.test(String(error));}
+  equal(failed,true);
+}
+console.log('ok - @proofscript/elab exact and assumption tactic terms');

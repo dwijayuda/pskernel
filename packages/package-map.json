@@ -104,7 +104,8 @@
         "D-EXPLICIT-PARAMS remains a ProofScript-owned non-empty explicit group; native `{...}`, `{{...}}`, and named `[...]` binders remain Lean-shaped syntax.",
         "The function alias still requires at least one D-EXPLICIT-PARAMS group, so native implicit binders alone do not satisfy the alias rule.",
         "Canonical lowering and exact feature-ownership conformance preserve binder categories rather than translating them into TypeScript generics.",
-        "Native Lean theorem declarations are parsed as inherited command heads; only registered ProofScript parameter/separator decoration is claimed by feature ownership."
+        "Native Lean theorem declarations are parsed as inherited command heads; only registered ProofScript parameter/separator decoration is claimed by feature ownership.",
+        "A bounded inherited Lean tactic-term parser recognizes `by exact term` and `by assumption` without registering a new ProofScript syntax exception."
       ]
     },
     {
@@ -146,7 +147,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-core-term-elab-mvp",
+      "status": "v061-basic-tactic-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -157,10 +158,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Kernel-facing term elaboration now covers references, literals, D-CALL applications, expected-type lambdas, and core lexical let expressions.",
-        "Lambda binder comparisons use the progressively extended LocalContext, preserving dependent binder types rather than checking them in a stale outer context.",
-        "Let expressions elaborate value/type/body in Lean-style lexical scope and are rebuilt as pskernel core let terms; pskernel recomputes their result type.",
-        "Operators/notation, if/match, records, coercions, typeclass synthesis, tactics, and recursive definitions remain fail-closed."
+        "Theorem tactic terms support Lean-native `by exact` and `by assumption`; both elaborate to ordinary pskernel proof terms and receive no trusted authority.",
+        "`exact` elaborates/checks its term against the expected goal; `assumption` searches local hypotheses by pskernel definitional equality.",
+        "Kernel.addTheorem remains the final proof-acceptance boundary.",
+        "Multi-step tactic sequences, intro/apply/refine, tactic metavariable goals, typeclass synthesis, and automation remain later milestones."
       ]
     },
     {

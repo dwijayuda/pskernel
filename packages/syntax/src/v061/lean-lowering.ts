@@ -67,6 +67,10 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
       ).join('\n');
       return 'match '+lowerV061ExprToLean(expr.scrutinee)+' with\n'+alternatives;
     }
+    case 'by':
+      return expr.tactic.kind==='exact'
+        ? 'by exact '+lowerV061ExprToLean(expr.tactic.proof)
+        : 'by assumption';
     case 'lambda':{
       const binders=expr.binders.map((binder)=>
         binder.type===undefined

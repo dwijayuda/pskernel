@@ -662,3 +662,25 @@ console.log('ok - @proofscript/syntax lexer MVP');
     /function requires at least one D-EXPLICIT-PARAMS group/,
   );
 }
+
+
+{
+  const module=parseV061Module(
+    'theorem exactProof(P : Prop, h : P) : P := by exact h;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by')equal(body.tactic.kind,'exact');
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem exactProof (P : Prop) (h : P) : P := by exact h\n',
+  );
+}
+{
+  const module=parseV061Module(
+    'theorem assumptionProof(P : Prop, h : P) : P := by assumption;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by')equal(body.tactic.kind,'assumption');
+}

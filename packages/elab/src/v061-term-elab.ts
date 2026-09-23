@@ -194,6 +194,40 @@ export function elaborateV061Term(
       }
       return {term:resultTerm,type:resultType};
     }
+    case 'by':{
+      if(expected===undefined){
+        throw new Error(
+          'PS_ELAB_TACTIC_EXPECTED_TYPE: tactic blocks require an expected goal type',
+        );
+      }
+      if(expr.tactic.kind==='exact'){
+        const proof=elaborateV061Term(
+          expr.tactic.proof,
+          context,
+          expected,
+        );
+        checkElaboratedTerm(proof,expected,context);
+        return proof;
+      }
+
+      const candidates=[...context.locals.entries()].reverse();
+      for(const [,id] of candidates){
+        const declaration=context.localContext.get(id);
+        if(
+          declaration!==undefined
+          &&checker.isDefEq(
+            context.metaContext.instantiate(declaration.type),
+            context.metaContext.instantiate(expected),
+          )
+        ){
+          const proof=fvar(id);
+          return {term:proof,type:declaration.type};
+        }
+      }
+      throw new Error(
+        'PS_ELAB_TACTIC_ASSUMPTION: no local hypothesis matches the goal',
+      );
+    }
     case 'let':{
       const declaredType=expr.declaredType===undefined
         ? undefined

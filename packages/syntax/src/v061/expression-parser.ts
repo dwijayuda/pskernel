@@ -5,6 +5,7 @@ import {v061BinaryPrecedence} from './operators.js';
 import {parseV061Type} from './type-parser.js';
 import {parseV061Pattern} from './pattern-parser.js';
 import {parseV061RecordExpression} from './record-parser.js';
+import {parseV061ByExpression} from './tactic-parser.js';
 
 export class V061ExpressionParser {
   constructor(readonly context:V061ParseContext){}
@@ -23,6 +24,7 @@ export class V061ExpressionParser {
   }
 
   private parsePrefix():V061Expr {
+    if(this.context.cursor.at('by'))return parseV061ByExpression(this.context,this);
     if(this.context.cursor.at('match'))return this.parseMatch();
     if(this.context.cursor.at('fun'))return this.parseLambda();
     if(this.context.cursor.at('let'))return this.parseLet();

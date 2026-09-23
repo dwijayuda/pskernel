@@ -6,6 +6,7 @@ export * from './ast.js';
 export * from './operators.js';
 export * from './context.js';
 export * from './expression-parser.js';
+export * from './tactic-parser.js';
 export * from './field-parser.js';
 export * from './structure-parser.js';
 export * from './class-parser.js';

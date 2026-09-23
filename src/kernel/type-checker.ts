@@ -53,8 +53,13 @@ export class TypeChecker {
       case'lit':{if(e.literal.kind==='nat')checkNatSize(e.literal.value,this.limits.maxNatBytes,'Nat');const n=e.literal.kind==='nat'?N.Nat:N.String;if(!inferOnly)this.env.get(n);r=constant(n);break;}
       case'mdata':r=this.infer(e.expr,inferOnly);break;
       case'app':{
-        const ft=this.ensureForall(this.infer(e.fn,inferOnly),e);const at=this.infer(e.arg,inferOnly);
-        if(!inferOnly){const ok=this.isEagerReduceExpr(e.arg)?this.withEagerReduction(()=>this.isDefEq(ft.type,at)):this.isDefEq(ft.type,at);if(!ok){const ef=ft.type.kind==='sort'?` Sort.${levelToString(ft.type.level)}`:'';const af=at.kind==='sort'?` Sort.${levelToString(at.level)}`:'';throw new KernelError(`application type mismatch in ${exprToString(e)}: expected ${exprToString(ft.type)}${ef}, got ${exprToString(at)}${af} for argument ${exprToString(e.arg)}`);}}
+        const ft=this.ensureForall(this.infer(e.fn,inferOnly),e);
+        // Lean 4.34 infer-only mode computes the application result from the
+        // function type without inferring/checking the argument.
+        if(!inferOnly){
+          const at=this.infer(e.arg,false);const ok=this.isEagerReduceExpr(e.arg)?this.withEagerReduction(()=>this.isDefEq(ft.type,at)):this.isDefEq(ft.type,at);
+          if(!ok){const ef=ft.type.kind==='sort'?` Sort.${levelToString(ft.type.level)}`:'';const af=at.kind==='sort'?` Sort.${levelToString(at.level)}`:'';throw new KernelError(`application type mismatch in ${exprToString(e)}: expected ${exprToString(ft.type)}${ef}, got ${exprToString(at)}${af} for argument ${exprToString(e.arg)}`);}
+        }
         r=instantiate1(ft.body,e.arg);break;
       }
       case'lam':{
@@ -67,8 +72,11 @@ export class TypeChecker {
         r=sort(mkIMax(s1.level,s2.level));}catch(err){const msg=err instanceof Error?err.message:String(err);throw new KernelError(`forall binder ${nameToString(e.name)} : ${exprToString(e.type)}: ${msg}`);}break;
       }
       case'let':{
-        if(!inferOnly)this.ensureSort(this.infer(e.type,inferOnly),e.type);const vt=this.infer(e.value,inferOnly);if(!inferOnly&&!this.isDefEq(vt,e.type))throw new KernelError('let value type mismatch');
-        // Instantiating the value is definitionally equal to retaining the local let and avoids leaking an fvar.
+        if(!inferOnly){
+          this.ensureSort(this.infer(e.type,false),e.type);const vt=this.infer(e.value,false);if(!this.isDefEq(vt,e.type))throw new KernelError('let value type mismatch');
+        }
+        // Infer-only follows Lean by not inspecting the let value. Substitution
+        // preserves the resulting type while keeping the temporary local out of caches.
         r=this.infer(instantiate1(e.body,e.value),inferOnly);break;
       }
       case'proj':r=this.inferProj(e,inferOnly);break;

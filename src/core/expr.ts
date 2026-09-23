@@ -143,15 +143,19 @@ export function exprKernelMetadataDiff(a: Expr, b: Expr, path = '$'): string | n
 
 /** Lean 4 `has_loose_bvar(e, i)`: whether de Bruijn index `i` is free at the current depth. */
 export function hasLooseBVarAt(e: Expr, index: number, depth = 0): boolean {
-  switch(e.kind){
-    case 'bvar': return e.index === index + depth;
-    case 'app': return hasLooseBVarAt(e.fn,index,depth)||hasLooseBVarAt(e.arg,index,depth);
-    case 'lam': case 'forall': return hasLooseBVarAt(e.type,index,depth)||hasLooseBVarAt(e.body,index,depth+1);
-    case 'let': return hasLooseBVarAt(e.type,index,depth)||hasLooseBVarAt(e.value,index,depth)||hasLooseBVarAt(e.body,index,depth+1);
-    case 'mdata': return hasLooseBVarAt(e.expr,index,depth);
-    case 'proj': return hasLooseBVarAt(e.expr,index,depth);
-    default: return false;
+  const todo:{e:Expr;depth:number}[]=[{e,depth}];
+  while(todo.length){
+    const f=todo.pop()!,x=f.e;
+    switch(x.kind){
+      case'bvar':if(x.index===index+f.depth)return true;break;
+      case'app':todo.push({e:x.fn,depth:f.depth},{e:x.arg,depth:f.depth});break;
+      case'lam':case'forall':todo.push({e:x.type,depth:f.depth},{e:x.body,depth:f.depth+1});break;
+      case'let':todo.push({e:x.type,depth:f.depth},{e:x.value,depth:f.depth},{e:x.body,depth:f.depth+1});break;
+      case'mdata':case'proj':todo.push({e:x.expr,depth:f.depth});break;
+      default:break;
+    }
   }
+  return false;
 }
 
 function hasLooseBVarInPiDomain(b: Expr, vidx: number, strict: boolean): boolean {
@@ -174,14 +178,35 @@ export function inferImplicit(e: Expr, strict: boolean, numParams = Number.MAX_S
 }
 
 export function hasLooseBVar(e: Expr, depth=0): boolean {
-  switch(e.kind){
-    case'bvar':return e.index>=depth; case'app':return hasLooseBVar(e.fn,depth)||hasLooseBVar(e.arg,depth);
-    case'lam':case'forall':return hasLooseBVar(e.type,depth)||hasLooseBVar(e.body,depth+1);
-    case'let':return hasLooseBVar(e.type,depth)||hasLooseBVar(e.value,depth)||hasLooseBVar(e.body,depth+1);
-    case'mdata':return hasLooseBVar(e.expr,depth); case'proj':return hasLooseBVar(e.expr,depth); default:return false;
+  const todo:{e:Expr;depth:number}[]=[{e,depth}];
+  while(todo.length){
+    const f=todo.pop()!,x=f.e;
+    switch(x.kind){
+      case'bvar':if(x.index>=f.depth)return true;break;
+      case'app':todo.push({e:x.fn,depth:f.depth},{e:x.arg,depth:f.depth});break;
+      case'lam':case'forall':todo.push({e:x.type,depth:f.depth},{e:x.body,depth:f.depth+1});break;
+      case'let':todo.push({e:x.type,depth:f.depth},{e:x.value,depth:f.depth},{e:x.body,depth:f.depth+1});break;
+      case'mdata':case'proj':todo.push({e:x.expr,depth:f.depth});break;
+      default:break;
+    }
   }
+  return false;
 }
-export function hasFVar(e: Expr): boolean { switch(e.kind){case'fvar':return true;case'app':return hasFVar(e.fn)||hasFVar(e.arg);case'lam':case'forall':return hasFVar(e.type)||hasFVar(e.body);case'let':return hasFVar(e.type)||hasFVar(e.value)||hasFVar(e.body);case'mdata':return hasFVar(e.expr);case'proj':return hasFVar(e.expr);default:return false;} }
+export function hasFVar(e: Expr): boolean {
+  const todo:Expr[]=[e];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'fvar':return true;
+      case'app':todo.push(x.fn,x.arg);break;
+      case'lam':case'forall':todo.push(x.type,x.body);break;
+      case'let':todo.push(x.type,x.value,x.body);break;
+      case'mdata':case'proj':todo.push(x.expr);break;
+      default:break;
+    }
+  }
+  return false;
+}
 export function hasMVar(e: Expr): boolean {
   const todo:Expr[]=[e];
   while(todo.length){

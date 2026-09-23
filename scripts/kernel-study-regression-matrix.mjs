@@ -36,6 +36,16 @@ const matrix={
 };
 
 const hardeningExtras={
+  'study/lean4-4.34.0/tests/elab/issue_14576.lean':{
+    kind:'direct-invariant-plus-oracle',
+    tests:['nested fixed parameters are checked even when auxiliary preprocessing drops them'],
+    note:'compact TS regression covers #14577 dropped nested fixed-parameter checking; the full hash-collision exploit remains official Lean oracle stress coverage',
+  },
+  'study/lean4-4.34.0/tests/elab/issue_14576_min.lean':{
+    kind:'direct-invariant-plus-oracle',
+    tests:['nested fixed parameters are checked even when auxiliary preprocessing drops them'],
+    note:'minimal upstream #14577 scenario maps to the same direct nested-application checking invariant',
+  },
   'study/lean4-4.34.0/tests/elab/issue14484.lean':{
     kind:'direct-hardening',
     tests:['opaque admission rejects dangling free variables transactionally'],

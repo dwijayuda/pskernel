@@ -103,6 +103,9 @@
   ],
   "lastVerifiedTestCount": 97,
   "notes": [
+    "Lean Expr structural fidelity now preserves let_nondep and ordered MData payload identity. The canonical DependencyExport stream carries stable opaque MData equality IDs across module shards and the replay parser preserves them without trusting metadata contents.",
+    "KernelState memo tables now match Lean 4.34 expr_map structural-key semantics using cached structural hashes plus exprLeanEq collision checks; defeq success/failure caches use symmetric structural expression pairs rather than object identity.",
+    "Current source direct-test count is 144. lastVerifiedTestCount remains unchanged because the current tree has not received a fresh executable run.",
     "Nat resource accounting now matches Lean 4.34's 64-bit runtime representation metric (8-byte scalars and 8-byte MPZ limbs), and lazy delta only classifies definitions with exact universe-argument arity as reducible targets.",
     "Lean 4.34 type-checker parity hardening now matches shared 16x kernel maxRecDepth semantics with configured default 512, flattened lambda/Pi/let and infer-only application spines, guarded public defeq cache lookup, cache-neutral internal defeq, and unbounded lazy-delta search.",
     "Current source direct-test count is 130. lastVerifiedTestCount remains 97 because current GitHub Actions runs are not allocating executable job steps and no fresh local/private-repo run is available.",
@@ -185,7 +188,7 @@
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
   ],
-  "currentTreeExpectedDirectTests": 130,
+  "currentTreeExpectedDirectTests": 144,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "pending refreshed execution after Lean 4.34 recursion-depth, inference-spine, WHNF/cache, defeq-history, Nat-storage, and lazy-delta universe-arity hardening; last verified direct-test count remains unchanged"
+  "currentTreeVerification": "pending refreshed execution after Lean 4.34 structural-cache, expression-metadata, recursion-depth, inference-spine, WHNF/defeq-history, Nat-storage, and replay-boundary hardening; last verified direct-test count remains unchanged"
 }

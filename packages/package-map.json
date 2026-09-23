@@ -224,7 +224,7 @@
       "path": "packages/language",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "v061-software-checker-mvp",
+      "status": "v061-let-checker-mvp",
       "packageName": "@proofscript/language",
       "dependsOn": [
         "syntax",
@@ -234,8 +234,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Reference-backed software checker covers Nat, Int, Bool, String, Unit, declarations, calls, operators, and braced if for the initial executable subset.",
-        "This checker is an untrusted frontend/software-profile checker; theorem/proof acceptance still requires elaboration to pskernel."
+        "Checked software HIR types and checking logic are split into separate modules.",
+        "Reference-backed checker covers Nat, Int, Bool, String, Unit, declarations, calls, operators, braced if, and lexical let with shadowing/type checks.",
+        "This checker remains outside the TCB; theorem/proof acceptance still requires elaboration to pskernel."
       ]
     },
     {

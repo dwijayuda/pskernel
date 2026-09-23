@@ -23,3 +23,39 @@ console.log('ok - @proofscript/language foundation');
   equal(checked.declarations[0]?.body.kind,'binary');
 }
 console.log('ok - @proofscript/language v0.6.1 software checker');
+
+{
+  const z={offset:0,line:1,column:1};
+  const s={start:z,end:z};
+  const module:V061Module={kind:'v061-module',featureIds:[],declarations:[{
+    kind:'function',name:'incTwice',terminatedBySemicolon:true,resultType:'Nat',
+    params:[{name:'x',type:'Nat',span:s}],
+    body:{
+      kind:'let',name:'y',declaredType:'Nat',
+      value:{kind:'binary',operator:'+',left:{kind:'reference',name:'x',span:s},right:{kind:'nat',text:'1',span:s},span:s},
+      body:{kind:'binary',operator:'+',left:{kind:'reference',name:'y',span:s},right:{kind:'nat',text:'1',span:s},span:s},
+      span:s,
+    },
+    span:s,
+  }]};
+  const checked=checkV061SoftwareModule(module);
+  const body=checked.declarations[0]?.body;
+  equal(body?.kind,'let');
+  if(body?.kind==='let'){
+    equal(body.value.resultType,'Nat');
+    equal(body.body.resultType,'Nat');
+  }
+}
+{
+  const z={offset:0,line:1,column:1};
+  const s={start:z,end:z};
+  const bad:V061Module={kind:'v061-module',featureIds:[],declarations:[{
+    kind:'const',name:'bad',terminatedBySemicolon:true,resultType:'Nat',params:[],
+    body:{kind:'let',name:'y',declaredType:'Bool',value:{kind:'nat',text:'1',span:s},body:{kind:'nat',text:'2',span:s},span:s},
+    span:s,
+  }]};
+  let threw=false;
+  try{checkV061SoftwareModule(bad);}catch(error){threw=/PS_CHECK_LET_TYPE/.test(String(error));}
+  equal(threw,true);
+}
+console.log('ok - @proofscript/language lexical let checker');

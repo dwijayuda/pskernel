@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Incremental document snapshots, parse/elab reuse, cancellation and diagnostics.",
   "proofscript": {
-    "status": "v061-software-checker-mvp",
+    "status": "v061-let-checker-mvp",
     "phase": "D",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

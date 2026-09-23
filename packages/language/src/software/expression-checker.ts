@@ -248,6 +248,10 @@ export function checkSoftwareExpr(
       }
       throw new Error("PS_CHECK_UNKNOWN_IDENTIFIER: unknown identifier '"+expr.name+"'");
     }
+    case 'record':
+      throw new Error(
+        'PS_CHECK_RECORD_UNSUPPORTED: record values require nominal structure elaboration',
+      );
     case 'call':return checkCall(expr,context);
     case 'lambda':return checkLambda(expr,context,expected);
     case 'match':return checkMatch(expr,context,expected);

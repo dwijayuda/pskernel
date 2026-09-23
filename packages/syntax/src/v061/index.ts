@@ -1,5 +1,6 @@
 export * from './type-parser.js';
 export * from './pattern-parser.js';
+export * from './record-parser.js';
 export * from './ast.js';
 export * from './operators.js';
 export * from './context.js';

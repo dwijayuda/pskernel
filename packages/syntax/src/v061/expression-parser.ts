@@ -4,6 +4,7 @@ import {V061ParseContext,spanBetween} from './context.js';
 import {v061BinaryPrecedence} from './operators.js';
 import {parseV061Type} from './type-parser.js';
 import {parseV061Pattern} from './pattern-parser.js';
+import {parseV061RecordExpression} from './record-parser.js';
 
 export class V061ExpressionParser {
   constructor(readonly context:V061ParseContext){}
@@ -135,6 +136,9 @@ export class V061ExpressionParser {
   }
 
   private parsePrimary():V061Expr {
+    if(this.context.cursor.at('{')){
+      return parseV061RecordExpression(this.context,()=>this.parse());
+    }
     const token=this.context.cursor.peek();
 
     if(token.kind==='number'){

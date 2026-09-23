@@ -32,6 +32,12 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
     }
     case 'if':
       return 'if '+lowerV061ExprToLean(expr.condition)+' then '+lowerV061ExprToLean(expr.thenBranch)+' else '+lowerV061ExprToLean(expr.elseBranch);
+    case 'record':{
+      const fields=expr.fields.map(
+        (field)=>field.name+' := '+lowerV061ExprToLean(field.value),
+      ).join(', ');
+      return '{ '+fields+' : '+lowerV061TypeToLean(expr.type)+' }';
+    }
     case 'match':{
       const alternatives=expr.alternatives.map(
         (alt)=>'  | '+lowerV061PatternToLean(alt.pattern)+' => '+lowerV061ExprToLean(alt.body),

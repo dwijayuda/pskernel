@@ -9,6 +9,12 @@ export interface V061Parameter {
   readonly span:SourceSpan;
 }
 
+export interface V061RecordField {
+  readonly name:string;
+  readonly value:V061Expr;
+  readonly span:SourceSpan;
+}
+
 export interface V061MatchAlternative {
   readonly pattern:V061Pattern;
   readonly body:V061Expr;
@@ -33,6 +39,12 @@ export type V061Expr =
   | {readonly kind:'binary';readonly operator:string;readonly left:V061Expr;readonly right:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'if';readonly condition:V061Expr;readonly thenBranch:V061Expr;readonly elseBranch:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'lambda';readonly binders:readonly V061LambdaBinder[];readonly body:V061Expr;readonly span:SourceSpan}
+  | {
+      readonly kind:'record';
+      readonly fields:readonly V061RecordField[];
+      readonly type:V061TypeExpr;
+      readonly span:SourceSpan;
+    }
   | {
       readonly kind:'match';
       readonly scrutinee:V061Expr;

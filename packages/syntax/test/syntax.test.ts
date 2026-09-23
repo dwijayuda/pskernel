@@ -454,3 +454,25 @@ console.log('ok - @proofscript/syntax lexer MVP');
     /parameterized\/implicit structure headers are not yet implemented/,
   );
 }
+
+
+// Inherited Lean structure value syntax used by the software profile.
+{
+  const module=parseV061Module(
+    'structure User where { name : String; age : Nat; } const ada : User := { name := "Ada", age := 33 : User };',
+  );
+  const declaration=module.declarations[1];
+  equal(declaration?.kind,'const');
+  if(declaration?.kind==='const'){
+    equal(declaration.body.kind,'record');
+    if(declaration.body.kind==='record'){
+      equal(declaration.body.fields.length,2);
+      equal(declaration.body.fields[0]?.name,'name');
+      equal(declaration.body.type.kind,'named');
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'structure User where\n  name : String\n  age : Nat\n\ndef ada : User := { name := "Ada", age := 33 : User }\n',
+  );
+}

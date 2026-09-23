@@ -278,7 +278,7 @@ Initial capability policy:
 | dependent types | supported when runtime erasure is representable |
 | Bool | W1 supported |
 | Unit | W1 supported |
-| fixed-width UInts | after verified-IR implementation |
+| fixed-width UInt values/calls | W2 supported with JS ABI normalization |\n| fixed-width UInt arithmetic | blocked until verified IR intrinsics land |
 | Nat / Int | blocked until arbitrary-precision runtime lands |
 | String | blocked until runtime ABI lands |
 | structures | blocked until WasmGC/layout checkpoint |
@@ -408,18 +408,20 @@ Support the semantically direct subset:
 
 Produce a real Binaryen module and execute differential JS/Wasm tests.
 
-### W2 - fixed-width numeric and direct recursion
+### W2 - fixed-width numeric values and direct recursion
 
-First extend the verified runtime IR from the authoritative ProofScript
-foundational type set, then support:
+Current W2 checkpoint supports runtime values and direct calls for:
 
-- UInt8;
-- UInt16;
-- UInt32;
-- UInt64;
-- arithmetic/comparisons;
-- direct recursion;
-- noncapturing function references where required.
+- UInt8 -> i32 with 8-bit normalization;
+- UInt16 -> i32 with 16-bit normalization;
+- UInt32 -> i32 bit representation;
+- UInt64 -> i64 bit representation;
+- logical ABI metadata retained separately from physical Wasm types;
+- JS-host normalization so UInt32/UInt64 high-bit results remain unsigned.
+
+Arithmetic/comparison intrinsics remain blocked until they exist in verified IR
+with explicit Lean-faithful semantics. Direct recursion and noncapturing
+function references remain later W2 work.
 
 Do not introduce Wasm-specific source types.
 

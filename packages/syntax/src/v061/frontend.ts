@@ -1,5 +1,7 @@
 import type {V061Module} from './ast.js';
 import {parseV061Module} from './declaration-parser.js';
+import {lowerV061ModuleToLean} from './lean-lowering.js';
+import {parseV061LeanSubsetModule} from './lean-subset-parser.js';
 import {lowerV061ModuleToProofScript} from './proofscript-lowering.js';
 
 export type SourceKind='proofscript'|'lean-subset';
@@ -55,6 +57,12 @@ export const proofScriptSourceFrontend:SourceFrontend={
   kind:'proofscript',
   parse:parseV061Module,
   print:lowerV061ModuleToProofScript,
+};
+
+export const leanSubsetSourceFrontend:SourceFrontend={
+  kind:'lean-subset',
+  parse:parseV061LeanSubsetModule,
+  print:lowerV061ModuleToLean,
 };
 
 export function createDefaultSourceFrontendRegistry():SourceFrontendRegistry {

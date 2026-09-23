@@ -1081,4 +1081,53 @@ throws(
     'instance : Boxed Nat := { value := 0 : Boxed Nat }\n',
   );
 }
+{
+  const proofScript=parseV061Module(
+    'def choose(p : Bool, a : Nat, b : Nat) : Nat := '+
+    'if (p) { a } else { b }; '+
+    'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    'def choose(p : Bool, a : Nat, b : Nat) : Nat := if (p) { a } else { b };\n\n'+
+    'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;\n',
+  );
+}
+{
+  const lean=
+    'def applyTwo (f : Nat -> Nat) (x : Nat) : Nat := f x\n\n'+
+    'theorem rewriteProof (a : Nat) (b : Nat) (h : a = b) : a = b := '+
+    'by rw [h]\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
+{
+  const lean=
+    'def local (x : Nat) : Nat := let y : Nat := x; y\n\n'+
+    'def identity : Nat -> Nat := fun x => x\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'structure Box where\n  value : Nat\n',
+  ),
+  /PS_LEAN_SUBSET_UNSUPPORTED_COMMAND/,
+);
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'def bad (x : Nat) : Nat := match x with\n  | 0 => 0\n',
+  ),
+  /PS_LEAN_SUBSET_UNSUPPORTED_TERM/,
+);
+{
+  const registry=createDefaultSourceFrontendRegistry();
+  equal(registry.get('lean-subset'),undefined);
+  equal(leanSubsetSourceFrontend.kind,'lean-subset');
+}
+console.log('ok - @proofscript/syntax DS2.1 bounded Lean value frontend');
+
 console.log('ok - @proofscript/syntax inherited instance declarations');

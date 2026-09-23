@@ -1,7 +1,9 @@
 import {SyntaxError} from '../source.js';
 import type {V061Expr,V061Tactic} from './ast.js';
 import {V061ParseContext} from './context.js';
-import type {V061ExpressionParser} from './expression-parser.js';
+export interface V061TacticExpressionParser {
+  parse(minPrecedence?:number):V061Expr;
+}
 
 const TACTIC_HEADS=new Set([
   'exact','exact?','assumption','apply','refine','constructor','cases','induction','rw','simp','intro',
@@ -13,7 +15,7 @@ function isTacticHead(text:string):boolean {
 
 function parseTactic(
   context:V061ParseContext,
-  expressions:V061ExpressionParser,
+  expressions:V061TacticExpressionParser,
 ):V061Tactic {
   const tacticToken=context.cursor.peek();
 
@@ -147,7 +149,7 @@ function parseTactic(
 
 export function parseV061ByExpression(
   context:V061ParseContext,
-  expressions:V061ExpressionParser,
+  expressions:V061TacticExpressionParser,
 ):V061Expr {
   const first=context.cursor.expect('by');
   const tactics:V061Tactic[]=[parseTactic(context,expressions)];

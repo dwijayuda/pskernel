@@ -3,9 +3,12 @@ import type {SourceSpan} from '../source.js';
 import type {V061TypeExpr} from './type-parser.js';
 import type {V061Pattern} from './pattern-parser.js';
 
+export type V061BinderInfo='default'|'implicit'|'strictImplicit'|'instImplicit';
+
 export interface V061Parameter {
   readonly name:string;
   readonly type:V061TypeExpr;
+  readonly binderInfo?:V061BinderInfo;
   readonly span:SourceSpan;
 }
 

@@ -100,10 +100,10 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
-        "The v0.6.1 conformance gate compares canonical Lean text and exact parser-owned feature IDs per case; coverage is derived from actual ownership, not test labels.",
-        "Field, constructor, match-alternative, where-local, and top-level ProofScript semicolon boundaries consistently register D-DECL-SEMI.",
-        "L-CORE-LEAN remains a protected defer path rather than a ProofScript-owned rewrite.",
-        "Unsupported Lean elaboration forms remain fail-closed in the bounded executable software subset."
+        "Declaration parameters preserve Lean BinderInfo categories: default, implicit, strictImplicit, and named instImplicit.",
+        "D-EXPLICIT-PARAMS remains a ProofScript-owned non-empty explicit group; native `{...}`, `{{...}}`, and named `[...]` binders remain Lean-shaped syntax.",
+        "The function alias still requires at least one D-EXPLICIT-PARAMS group, so native implicit binders alone do not satisfy the alias rule.",
+        "Canonical lowering and exact feature-ownership conformance preserve binder categories rather than translating them into TypeScript generics."
       ]
     },
     {
@@ -156,10 +156,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Kernel-facing v0.6.1 elaboration admits sequential non-recursive const/def/function declarations through pskernel Kernel.addDefinition.",
-        "Declaration parameters become curried Lean forall/lambda binders; exact local/global names and calls are resolved to pskernel Expr; final declarations must be closed and kernel-accepted.",
-        "Regular reducibility hints use Lean's elaborator rule: one plus the maximum regular-definition height referenced by the body.",
-        "Operators, type applications, where recursion, structures, classes, inductives, theorem/tactic declarations, coercions, typeclass synthesis, namespaces, and universe parameters remain fail-closed until their Lean-compatible elaboration layers exist."
+        "Kernel-facing v0.6.1 definition elaboration preserves declaration BinderInfo in LocalContext, forall types, and lambda values.",
+        "Polymorphic implicit parameters can therefore participate in the real ExprMetaContext/application elaborator path and are still rechecked by pskernel.",
+        "Instance synthesis itself remains unimplemented; named instance binders are represented faithfully but unresolved instance obligations fail closed.",
+        "Recursion/termination, structures/classes/inductives, theorem/tactic declarations, coercions, namespaces, and universe parameters remain later Lean-compatible elaboration milestones."
       ]
     },
     {

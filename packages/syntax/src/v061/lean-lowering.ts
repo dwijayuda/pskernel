@@ -3,6 +3,18 @@ import {v061BinaryPrecedence} from './operators.js';
 import {lowerV061TypeToLean} from './type-parser.js';
 import {lowerV061PatternToLean} from './pattern-parser.js';
 
+function lowerV061ParameterToLean(
+  parameter:import('./ast.js').V061Parameter,
+):string {
+  const rendered=parameter.name+' : '+lowerV061TypeToLean(parameter.type);
+  switch(parameter.binderInfo??'default'){
+    case 'default':return '('+rendered+')';
+    case 'implicit':return '{'+rendered+'}';
+    case 'strictImplicit':return '{{'+rendered+'}}';
+    case 'instImplicit':return '['+rendered+']';
+  }
+}
+
 function lowerV061FieldToLean(
   field:import('./ast.js').V061StructureField,
 ):string {
@@ -78,21 +90,21 @@ export function lowerV061ModuleToLean(module:V061Module):string {
     }
     if(decl.kind==='class'){
       const params=decl.params.map(
-        (param)=>' ('+param.name+' : '+lowerV061TypeToLean(param.type)+')',
+        (param)=>' '+lowerV061ParameterToLean(param),
       ).join('');
       const fields=decl.fields.map(lowerV061FieldToLean).join('\n');
       return 'class '+decl.name+params+' where\n'+fields;
     }
     if(decl.kind==='inductive'){
       const params=decl.params.map(
-        (param)=>' ('+param.name+' : '+lowerV061TypeToLean(param.type)+')',
+        (param)=>' '+lowerV061ParameterToLean(param),
       ).join('');
       const result=decl.resultType===undefined
         ? ''
         : ' : '+lowerV061TypeToLean(decl.resultType);
       const constructors=decl.constructors.map((ctor)=>{
         const ctorParams=ctor.params.map(
-          (param)=>' ('+param.name+' : '+lowerV061TypeToLean(param.type)+')',
+          (param)=>' '+lowerV061ParameterToLean(param),
         ).join('');
         return '  | '+ctor.name+ctorParams;
       }).join('\n');
@@ -100,7 +112,7 @@ export function lowerV061ModuleToLean(module:V061Module):string {
     }
     const head=decl.kind==='function'||decl.kind==='const'?'def':decl.kind;
     const params=decl.params.map(
-      (p)=>' ('+p.name+' : '+lowerV061TypeToLean(p.type)+')',
+      (p)=>' '+lowerV061ParameterToLean(p),
     ).join('');
     const base=head+' '+decl.name+params+' : '+
       lowerV061TypeToLean(decl.resultType)+' := '+lowerV061ExprToLean(decl.body);
@@ -108,7 +120,7 @@ export function lowerV061ModuleToLean(module:V061Module):string {
     if(whereDeclarations.length===0)return base;
     const locals=whereDeclarations.map((local)=>{
       const localParams=local.params.map(
-        (p)=>' ('+p.name+' : '+lowerV061TypeToLean(p.type)+')',
+        (p)=>' '+lowerV061ParameterToLean(p),
       ).join('');
       return '  '+local.name+localParams+' : '+
         lowerV061TypeToLean(local.resultType)+' := '+

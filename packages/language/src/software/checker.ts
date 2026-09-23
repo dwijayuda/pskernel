@@ -51,6 +51,12 @@ export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule
 
   const signatures=new Map<string,SoftwareSignature>();
   for(const decl of valueDecls){
+    if(decl.params.some((param)=>(param.binderInfo??'default')!=='default')){
+      throw new Error(
+        "PS_CHECK_BINDER_UNSUPPORTED: '"+decl.name+
+        "' uses implicit/instance parameters; software-profile generic elaboration is not implemented",
+      );
+    }
     if(nominalNames.has(decl.name)||constructors.has(decl.name)){
       throw new Error(
         "PS_CHECK_DUPLICATE_GLOBAL: '"+decl.name+"' conflicts with a type or constructor",

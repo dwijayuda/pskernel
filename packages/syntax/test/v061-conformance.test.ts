@@ -67,6 +67,12 @@ const moduleCases=[
     covers:['D-CONST-ALIAS','D-DECL-SEMI'] as const,
   },
   {
+    id:'function-implicit-binder',
+    source:'function identity {α : Type}(x : α) : α := x;',
+    expected:'def identity {α : Type} (x : α) : α := x',
+    covers:['D-FUNCTION-ALIAS','D-EXPLICIT-PARAMS','D-DECL-SEMI'] as const,
+  },
+  {
     id:'function-add',
     source:'function add(x : Nat, y : Nat) : Nat := x + y;',
     expected:'def add (x : Nat) (y : Nat) : Nat := x + y',

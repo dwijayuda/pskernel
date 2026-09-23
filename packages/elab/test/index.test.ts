@@ -245,3 +245,22 @@ function makeDefinitionEnvironment():Environment {
   equal(declaration,true);
 }
 console.log('ok - @proofscript/elab kernel-facing non-recursive definitions');
+
+
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Definitions(parseV061Module(
+    'function identity {α : Type}(x : α) : α := x; '+
+    'function useIdentity(x : TestNat) : TestNat := identity(x);',
+  ),env);
+  const identity=result.definitions[0]!;
+  equal(identity.type.kind,'forall');
+  if(identity.type.kind==='forall'){
+    equal(identity.type.binderInfo,'implicit');
+    equal(identity.body?.kind,undefined);
+  }
+  const use=result.definitions[1]!;
+  equal(use.hints.kind,'regular');
+  if(use.hints.kind==='regular')equal(use.hints.height,2n);
+}
+console.log('ok - @proofscript/elab implicit declaration binders');

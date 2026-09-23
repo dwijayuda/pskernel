@@ -83,6 +83,7 @@ function elaborateValueDeclaration(
     readonly id:string;
     readonly name:ReturnType<typeof nameFromDotted>;
     readonly type:Expr;
+    readonly binderInfo:import('lean-ts-kernel').BinderInfo;
   }[]=[];
 
   for(const parameter of source.params){
@@ -100,11 +101,12 @@ function elaborateValueDeclaration(
     const userName=nameFromDotted(parameter.name);
     const next=context.localContext.clone();
     const id=next.fresh(parameter.name);
-    next.addLocal(id,userName,type,'default');
+    const binderInfo=parameter.binderInfo??'default';
+    next.addLocal(id,userName,type,binderInfo);
     const locals=new Map(context.locals);
     locals.set(parameter.name,id);
     context={...context,localContext:next,locals};
-    parameters.push({id,name:userName,type});
+    parameters.push({id,name:userName,type,binderInfo});
   }
 
   const resultType=elaborateV061Type(source.resultType,context);
@@ -128,13 +130,13 @@ function elaborateValueDeclaration(
       parameter.name,
       parameter.type,
       abstractFVar(value,parameter.id),
-      'default',
+      parameter.binderInfo,
     );
     type=forallE(
       parameter.name,
       parameter.type,
       abstractFVar(type,parameter.id),
-      'default',
+      parameter.binderInfo,
     );
   }
 

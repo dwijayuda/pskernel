@@ -6,7 +6,7 @@ import {parseV061Type} from './type-parser.js';
 import {parseV061StructureDeclaration} from './structure-parser.js';
 import {parseV061InductiveDeclaration} from './inductive-parser.js';
 import {parseV061ClassDeclaration} from './class-parser.js';
-import {parseV061ExplicitParameters} from './parameter-parser.js';
+import {parseV061ParameterSequence} from './parameter-parser.js';
 import {parseV061WhereBlock} from './where-parser.js';
 
 export class V061DeclarationParser {
@@ -45,19 +45,32 @@ export class V061DeclarationParser {
     this.context.cursor.consume();
     const kind=keyword.text as V061ValueDeclaration['kind'];
     const name=this.context.cursor.expectKind('identifier','declaration name');
-    if(kind==='const'&&this.context.cursor.at('(')){
+    if(
+      kind==='const'
+      &&(
+        this.context.cursor.at('(')
+        ||this.context.cursor.at('{')
+        ||this.context.cursor.at('[')
+      )
+    ){
       throw new SyntaxError(
         'const declarations cannot have parameters',
         this.context.cursor.peek().span,
       );
     }
-    const params=this.context.cursor.at('(')
-      ? parseV061ExplicitParameters(this.context)
-      : [];
+    const parsedParams=kind==='const'
+      ? {params:[],explicitGroups:0}
+      : parseV061ParameterSequence(this.context);
+    const params=parsedParams.params;
 
     if(kind==='function'){
       this.context.own('D-FUNCTION-ALIAS');
-      if(params.length===0)throw new SyntaxError('function requires at least one explicit parameter',name.span);
+      if(parsedParams.explicitGroups===0){
+        throw new SyntaxError(
+          'function requires at least one D-EXPLICIT-PARAMS group',
+          name.span,
+        );
+      }
     }
     if(kind==='const')this.context.own('D-CONST-ALIAS');
 

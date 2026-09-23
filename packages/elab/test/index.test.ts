@@ -527,3 +527,41 @@ console.log('ok - @proofscript/elab dependent structure field admission');
   equal(result.structures[0]?.fields.length,2);
 }
 console.log('ok - @proofscript/elab record construction and kernel projection');
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive MaybeNat where { | none; | some(value : Nat); } '+
+    'const noneValue : MaybeNat := MaybeNat.none; '+
+    'const oneValue : MaybeNat := MaybeNat.some(1);',
+  ),env);
+  equal(result.inductives.length,1);
+  equal(
+    result.environment.find(nameFromDotted('MaybeNat'))?.kind,
+    'inductive',
+  );
+  equal(
+    result.environment.find(nameFromDotted('MaybeNat.none'))?.kind,
+    'constructor',
+  );
+  equal(
+    result.environment.find(nameFromDotted('MaybeNat.some'))?.kind,
+    'constructor',
+  );
+  equal(result.definitions.length,2);
+}
+{
+  const env=makeNatNotationEnvironment();
+  let recursive=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'inductive NatList where { '+
+      '| nil; | cons(head : Nat, tail : NatList); }',
+    ),env);
+  }catch(error){
+    recursive=/PS_ELAB_RECURSIVE_INDUCTIVE_UNSUPPORTED/.test(String(error));
+  }
+  equal(recursive,true);
+}
+console.log('ok - @proofscript/elab unparameterized inductive admission');

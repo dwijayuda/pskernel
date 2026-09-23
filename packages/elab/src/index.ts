@@ -41,3 +41,5 @@ export * from './v061-structure-elab.js';
 
 export * from './v061-structure-term-elab.js';
 export * from './v061-reference-elab.js';
+
+export * from './v061-inductive-elab.js';

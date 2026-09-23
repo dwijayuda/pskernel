@@ -189,7 +189,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-record-projection+structure+nat-ite-elab-mvp",
+      "status": "v061-simple-inductive-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -201,6 +201,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Unparameterized non-recursive ProofScript inductives now elaborate to real pskernel InductiveDecl values and are admitted with pskernel addInductive.",
+        "Constructors are qualified as TypeName.constructor and become ordinary environment constants; existing dependent application elaboration handles constructor calls.",
+        "Parameterized and recursive inductives remain explicit fail-closed milestones; pattern matching is not yet enabled on this verified inductive path.",
         "Record literals elaborate to applications of the pskernel-admitted structure constructor, in validated field order; dependent field types are instantiated by the constructor Pi telescope.",
         "Dotted structure field references elaborate to kernel Expr.proj nodes whose type is checked by pskernel.",
         "Non-parameterized v0.6.1 structures elaborate to genuine single-constructor kernel inductives with generated constructor/recursor metadata. Dependent later fields may reference earlier fields.",

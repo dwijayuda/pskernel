@@ -24,6 +24,7 @@ import {
 } from '@proofscript/checked-core';
 import {elaborateV061ValueHeader} from './v061-header-elab.js';
 import {elaborateV061StructureDeclaration} from './v061-structure-elab.js';
+import {elaborateV061InductiveDeclaration} from './v061-inductive-elab.js';
 import {
   checkElaboratedTerm,
   elaborateV061Term,
@@ -174,7 +175,27 @@ export function elaborateV061Definitions(
       });
       continue;
     }
-    if(declaration.kind==='class'||declaration.kind==='inductive'){
+    if(declaration.kind==='inductive'){
+      let inductive;
+      try{
+        inductive=elaborateV061InductiveDeclaration(
+          declaration,
+          workEnvironment,
+        );
+        addInductive(workEnvironment,inductive);
+      }catch(error){
+        const detail=error instanceof Error?error.message:String(error);
+        throw new Error(
+          "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
+        );
+      }
+      admissions.push({
+        kind:'inductive',
+        declaration:inductive,
+      });
+      continue;
+    }
+    if(declaration.kind==='class'){
       throw new Error(
         "PS_ELAB_DECL_UNSUPPORTED: declaration kind '"+declaration.kind+
         "' requires dedicated Lean-compatible declaration elaboration",

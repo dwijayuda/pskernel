@@ -12,10 +12,18 @@ export function spanBetween(first:Spanned,last:Spanned):SourceSpan {
 
 export class V061ParseContext {
   readonly cursor:TokenCursor;
-  readonly features=new Set<ProofScriptFeatureId>();
+  readonly features:Set<ProofScriptFeatureId>;
 
-  constructor(source:string){
-    this.cursor=new TokenCursor(lex(source));
+  constructor(
+    sourceOrTokens:string|readonly Token[],
+    features?:Set<ProofScriptFeatureId>,
+  ){
+    this.cursor=new TokenCursor(
+      typeof sourceOrTokens==='string'
+        ?lex(sourceOrTokens)
+        :sourceOrTokens,
+    );
+    this.features=features??new Set<ProofScriptFeatureId>();
   }
 
   own(feature:ProofScriptFeatureId):void{

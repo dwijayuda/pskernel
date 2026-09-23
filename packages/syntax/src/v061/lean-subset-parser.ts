@@ -8,6 +8,7 @@ import {V061LeanSubsetExpressionParser} from './lean-subset-expression-parser.js
 import {parseV061LeanSubsetDeclaration} from './lean-subset-declaration-parser.js';
 import {parseV061ParameterSequence} from './parameter-parser.js';
 import {parseV061Type} from './type-parser.js';
+import {parseV061LeanSubsetWhereDeclarations} from './lean-subset-where-parser.js';
 
 export class V061LeanSubsetParser {
   readonly context:V061ParseContext;
@@ -51,12 +52,9 @@ export class V061LeanSubsetParser {
     this.context.cursor.expect(':=');
     const body=this.expressions.parse();
 
-    if(this.context.cursor.at('where')){
-      throw new SyntaxError(
-        'PS_LEAN_SUBSET_UNSUPPORTED_WHERE: Lean where declarations are not in DS2.2',
-        this.context.cursor.peek().span,
-      );
-    }
+    const whereDeclarations=this.context.cursor.at('where')
+      ?parseV061LeanSubsetWhereDeclarations(this.context)
+      :undefined;
     if(this.context.cursor.at(';')){
       throw new SyntaxError(
         'PS_LEAN_SUBSET_DECL_SEMICOLON: canonical Lean declarations do not use a trailing semicolon',
@@ -70,8 +68,13 @@ export class V061LeanSubsetParser {
       params,
       resultType,
       body,
+      ...(whereDeclarations===undefined?{}:{whereDeclarations}),
       terminatedBySemicolon:false,
-      span:{start:first.span.start,end:body.span.end},
+      span:{
+        start:first.span.start,
+        end:whereDeclarations?.[whereDeclarations.length-1]?.span.end
+          ??body.span.end,
+      },
     };
   }
 }

@@ -1241,10 +1241,50 @@ throws(
   /PS_LEAN_SUBSET_MATCH/,
 );
 {
+  const proofScript=parseV061Module(
+    'def f(x : Nat) : Nat := first(x) where { '+
+    'first(y : Nat) : Nat := second(y); '+
+    'second(z : Nat) : Nat := z; };',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    lowerV061ModuleToProofScript(proofScript),
+  );
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'def');
+  if(declaration?.kind==='def'){
+    equal(declaration.whereDeclarations?.length,2);
+  }
+}
+{
+  const lean=
+    'def chooseViaLocal (flag : Bool) : Nat := helper flag where\n'+
+    '  helper (value : Bool) : Nat := match value with\n'+
+    '  | true => 1\n'+
+    '  | false => 0\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'def');
+  if(declaration?.kind==='def'){
+    equal(declaration.whereDeclarations?.[0]?.body.kind,'match');
+  }
+}
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'def bad (x : Nat) : Nat := x where\n'+
+    ' helper (y : Nat) : Nat := y\n',
+  ),
+  /PS_LEAN_SUBSET_WHERE_LAYOUT/,
+);
+{
   const registry=createDefaultSourceFrontendRegistry();
   equal(registry.get('lean-subset'),undefined);
   equal(leanSubsetSourceFrontend.kind,'lean-subset');
 }
-console.log('ok - @proofscript/syntax DS2.3 Lean match frontend');
+console.log('ok - @proofscript/syntax DS2.4 Lean where frontend');
 
 console.log('ok - @proofscript/syntax inherited instance declarations');

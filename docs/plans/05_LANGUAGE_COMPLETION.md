@@ -102,9 +102,10 @@ Purpose: make ProofScript adequate for nontrivial verified libraries.
 
 Implement, in this order:
 
-1. general term expressions in dependent theorem/result types (for example
-   propositions such as `Eq Nat (Nat.succ a) a`) so proof statements are not
-   limited to the current type-expression grammar;
+1. broaden the landed dependent theorem/result application-term support to
+   the remaining ordinary expression forms needed in propositions (operators,
+   literals, lambdas/match where justified) and add native infix propositional
+   `=` parsing;
 2. indexed/dependent inductive application in elaboration and erasure;
 3. constructor/match coverage for indexed families;
 4. multiple structural recursive parameters where Lean's termination theory
@@ -251,6 +252,15 @@ the same proof-producing transport chain. Global `@[simp]` sets, iff lemmas,
 theorem preprocessing, congruence indexes, dischargers, locations,
 `simp_all`, and Lean's complete orientation/priority algorithm remain
 fail-closed.
+
+Dependent theorem/result applications now elaborate nested application arguments
+as ordinary terms through the same Lean-compatible application elaborator. The
+outer declaration type is still required to inhabit a `Sort`, so this widens
+expressiveness without weakening type acceptance. Lean-compatible `Eq a b`
+source spelling is now used in the proof regressions; the implicit carrier type
+is inferred. The first executable gate covers `Eq (Nat.succ a) a`.
+General operators/literals/lambdas/matches in theorem headers and infix `=`
+syntax remain future surface work.
 
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
@@ -457,9 +467,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
 4. Validate the landed bounded multi-rule simp-only proof reconstruction.
-5. Before adding search tactics, close the discovered theorem-statement gap:
-   allow ordinary term expressions in dependent proposition/result positions
-   (for example `Eq Nat (Nat.succ a) a`) through Lean-compatible elaboration.
+5. Broaden the landed dependent theorem-statement application-term support to
+   native infix `=` plus the remaining ordinary expression forms required by
+   real specifications.
 6. Add deterministic search tactics such as exact? only after that foundation.
 7. Implement project/module/import semantics on the checked-core path.
 8. Design and implement explicit npm/JS FFI.

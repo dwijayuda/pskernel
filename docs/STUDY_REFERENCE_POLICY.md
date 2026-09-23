@@ -127,10 +127,9 @@ core, and TypeScript remains only the downstream host/backend target.
 
 While replacing the first simp smoke test, the repository exposed a current
 surface limitation: `V061TypeExpr` accepts applications only when the applied
-result is itself a sort. Consequently, a theorem proposition such as
-`Eq Nat (Nat.succ a) a` cannot yet be represented through the verified
-declaration header even though the kernel and term elaborator understand the
-underlying terms. Tests must not use such statements as executable evidence
-until the dependent theorem/result expression surface is widened. The bounded
-multi-rule simp gate therefore uses type-level rewrite terms that the current
-verified header elaborator actually supports.
+result is itself a sort. That limitation is now partially closed: nested named applications in a
+theorem/result type elaborate as ordinary terms, while the final declaration
+type must still inhabit a `Sort`. Thus `Eq (Nat.succ a) a` is now a valid
+checked header form. The remaining gap is syntactic breadth (operators,
+literals, lambdas/matches as needed, and native infix `=`), not permission to
+bypass the final type check.

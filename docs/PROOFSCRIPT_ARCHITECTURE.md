@@ -396,3 +396,21 @@ it to the candidate must then be definitionally equal to the original goal.
 The produced term is an ordinary application rechecked by pskernel. Candidates
 requiring multiple generated goals or unresolved implicit-instance search fail
 closed until the tactic state supports those cases.
+
+## Dependent theorem/result surface checkpoint
+
+Declaration header elaboration now distinguishes a **type-position term** from
+the final requirement that a declaration type inhabit a sort. Nested named
+applications are elaborated with the same application/implicit-argument logic
+used elsewhere, so Lean-compatible propositions such as
+`Eq (Nat.succ a) a` can be stated without treating `Nat.succ a` as though it
+were itself a type.
+
+This does not make arbitrary runtime expressions valid types. After dependent
+arguments are elaborated, the complete parameter/result/annotation term is
+still checked by pskernel to inhabit a `Sort`.
+
+ProofScript source should use Lean-compatible `Eq a b` when spelling the
+constant directly; the carrier type is implicit. Native infix propositional
+`=` remains the preferred eventual surface and is still pending in the v0.6.1
+header grammar.

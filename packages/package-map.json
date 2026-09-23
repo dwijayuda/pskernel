@@ -211,7 +211,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -224,6 +224,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Type-position application arguments now elaborate as ordinary dependent terms through the shared application elaborator; only the final declared parameter/result/annotation is required to inhabit a Sort. This admits propositions such as `Eq (Nat.succ a) a` without weakening type validity.",
+        "Source equality regressions now use Lean-compatible `Eq a b` spelling, leaving the element type implicit as in Lean. Internal kernel Expr construction may still apply Eq with the explicit core type argument after elaboration.",
+        "The current type-position syntax can express named references, applications, grouping, and arrows. Numeric literals, operators, lambdas, matches, and general ordinary expression grammar in theorem headers remain future syntax work; infix propositional `=` is also not yet parsed there.",
         "Bounded `simp only` now accepts one or more explicit Eq rules in inherited Lean list syntax and applies them in source order across repeated passes, reconstructing every change through the shared kernel-checked equality transport path.",
         "Until Lean's discrimination-tree candidate ordering and priorities are modeled, multi-rule simp rejects pairwise structurally overlapping selected lhs patterns. This makes the accepted subset deterministic instead of silently choosing a non-Lean rule order.",
         "Every selected direction must still strictly decrease the conservative expression-size metric; a global 64-step fuel bound remains a secondary safety guard.",

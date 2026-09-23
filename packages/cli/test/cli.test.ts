@@ -3,6 +3,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {parseCommonArgs,parseTranslateArgs} from '../src/args.js';
 import {compileVerifiedSource} from '../src/verified-pipeline.js';
+import {clearVerifiedProjectModuleCache} from '../src/verified-project-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
 import {runCommand} from '../src/commands/run.js';
 import {checkCommand} from '../src/commands/check.js';
@@ -1151,6 +1152,87 @@ console.log('ok - psc mixed Lean -> ProofScript import run');
   }
 }
 console.log('ok - psc mixed imports preserve structure/class/instance metadata');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-project-cache-integrity-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'def inc (x : Nat) : Nat := x + 1\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := inc(x);\n',
+      'utf8',
+    );
+
+    clearVerifiedProjectModuleCache();
+    const first=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    equal(first.moduleCacheHits,0);
+    equal(first.moduleCacheMisses,2);
+    equal(String(first.projectIntegrity).startsWith('sha256:'),true);
+    const firstSources=first.moduleSources as readonly {
+      readonly module:string;
+      readonly moduleIntegrity:string;
+    }[];
+    equal(
+      firstSources.every((item)=>item.moduleIntegrity.startsWith('sha256:')),
+      true,
+    );
+
+    const second=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    equal(second.projectIntegrity,first.projectIntegrity);
+    equal(second.moduleCacheHits,2);
+    equal(second.moduleCacheMisses,0);
+
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'def inc (x : Nat) : Nat := x + 2\n',
+      'utf8',
+    );
+    const third=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    equal(third.moduleCacheHits,0);
+    equal(third.moduleCacheMisses,2);
+    equal(third.projectIntegrity===first.projectIntegrity,false);
+  }finally{
+    clearVerifiedProjectModuleCache();
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc checked-module cache uses dependency integrity keys');
 
 {
   const directory=await mkdtemp(

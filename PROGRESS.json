@@ -103,8 +103,9 @@
   "lastVerifiedTestCount": 97,
   "notes": [
     "Lean v4.33→v4.34 ancestry audit found and closed the exact nested-inductive #14577/#14607 boundaries: original inductive/constructor expressions are closed before preprocessing, and every original nested application is rechecked in the restored environment so dropped fixed parameters cannot escape type checking.",
+    "Exact v4.33.0→v4.34.0 src/kernel ancestry audit is recorded in docs/research/LEAN433_TO_434_KERNEL_DELTA.md. All six release-pinned kernel changes have direct TS mappings; master-only native-reduction removal 2a7175c is explicitly excluded from the v4.34 target.",
     "All 19 final-4.34 kernel*.lean regression files are now classified with direct, direct-invariant-plus-oracle, or explicitly non-semantic operational coverage; the two large isProp transported-history exploits map to the compact ensure_sort/isProp invariant while remaining full oracle stress tests.",
-    "Current source direct-test count is 157. lastVerifiedTestCount remains 97 because no fresh executable runner is currently available; source regressions must not be reported as executed passes.",
+    "Current source direct-test count is 159. lastVerifiedTestCount remains 97 because no fresh executable runner is currently available; source regressions must not be reported as executed passes.",
     "Historical large-corpus checkpoint (superseded cache architecture): full imported Lean.Data.RBMap replay passed with the former identity-keyed cache at 463,440 records / 391,273 expressions / 10,573 declaration records / 11,223 constants. The current Lean-structural cache tree requires refreshed corpus execution before this is current evidence.",
     "Historical performance checkpoint (superseded cache architecture): identity-only memo keys substantially reduced replay allocation versus serialized exprKey strings, but final Lean 4.34 source audit later showed expr_map equality is structural. The implementation now uses structural hashes + exprLeanEq with identity only as a fast path; fresh performance evidence is pending.",
     "Lean 4.34 expr_map parity correction: KernelState memo tables and defeq pair caches are structurally keyed using cached structural hashes plus exprLeanEq collision checks. The previous identity-keyed milestone is retired from verified status pending refreshed execution.",
@@ -191,7 +192,7 @@
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
   ],
-  "currentTreeExpectedDirectTests": 157,
+  "currentTreeExpectedDirectTests": 159,
   "currentTreeExpectedDefeqDifferentialCases": 42,
   "currentTreeVerification": "pending refreshed execution after Lean 4.34 structural-cache correction, environment/local-context snapshot hardening, isProp adversarial minimization, opaque-FVar closure coverage, deep-universe stack hardening, nested dropped-parameter/FVar/MVar hardening, expression-metadata fidelity, recursion-depth/inference/WHNF/defeq-history hardening, and replay-boundary changes; lastVerifiedTestCount remains unchanged"
 }

@@ -76,14 +76,21 @@
     {
       "name": "module",
       "path": "packages/module",
-      "phase": "A",
+      "phase": "B",
       "trust": "untrusted-support",
-      "status": "mvp",
+      "status": "checked-admission-artifact-v2",
       "packageName": "@proofscript/module",
       "dependsOn": [
-        "kernel"
+        "kernel",
+        "checked-core"
       ],
-      "sourceLanguage": "typescript"
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Artifact v2 stores canonical ProofScript checked-admission JSON produced by @proofscript/checked-core. Loading verifies hashes/dependencies, decodes the closed admission payload, checks pinned kernel compatibility, then replays every admission through checked-core/pskernel.",
+        "Artifact v1 Lean4Export NDJSON remains supported unchanged for compatibility.",
+        "v2 is an untrusted persistent cache/transport. Free variables, expression/universe metavariables, and mdata are rejected by checked-core codec v1; no serialized proof bypasses kernel admission.",
+        "This closes the fake-Lean4Export blocker: ProofScript-produced modules no longer need a checked-core -> Lean4Export serializer to persist replayable admissions."
+      ]
     },
     {
       "name": "conformance",

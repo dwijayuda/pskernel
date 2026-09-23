@@ -2,7 +2,7 @@ import { ConstantInfo, DefinitionInfo, DefinitionSafety, ReducibilityHints, isUn
 import { Environment, KernelError } from '../core/environment.js';
 import { Expr, app, appView, constant, exprEq, exprLeanEq, exprToString, forallE, fvar, getAppArgs, getAppFn, hasFVar, hasLooseBVar, instantiateExprLevels, lam, mkAppN, natLit, sort, stripMData } from '../core/expr.js';
 import { abstractFVar, instantiate, instantiate1 } from '../core/instantiate.js';
-import { Level, levelEquivalent, levelParamNames, levelSucc, levelToString, mkIMax, normalizesToZero } from '../core/level.js';
+import { Level, levelEquivalent, levelParamNames, levelSucc, levelToString, levelZero, mkIMax, normalizesToZero } from '../core/level.js';
 import { LocalContext } from '../core/local-context.js';
 import { nameEq, nameToString } from '../core/name.js';
 import { N } from './names.js';
@@ -278,7 +278,8 @@ export class TypeChecker {
       case'lam':case'app':case'const':case'let':case'proj':break;
     }
     const cached=this.state.whnf.get(e);if(cached)return cached;
-    let t=e;
+    // The early-return switch narrows `e`; keep the mutable reduction cursor at the full Expr type.
+    let t:Expr=e;
     while(true){
       const t1=this.whnfCore(t);
       const native=reduceNative(this.env,t1,this.nativeEvaluator);

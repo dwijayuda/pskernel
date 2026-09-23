@@ -530,6 +530,8 @@ assert(
 );
 
 const verifiedWasmBool=compileVerifiedSource(
+  'function wasmNot(a : Bool) : Bool := !a; '+
+  'function wasmDoubleNot(a : Bool) : Bool := wasmNot(wasmNot(a)); '+
   'function wasmLogic(a : Bool, b : Bool) : Bool := !a || (a && b); '+
   'function wasmSame(a : Bool, b : Bool) : Bool := a == b; '+
   'function wasmDifferent(a : Bool, b : Bool) : Bool := a != b;',
@@ -553,6 +555,16 @@ for(const ai of [0,1,2,-1]){
   for(const bi of [0,1,2,-1]){
     const a=ai!==0;
     const b=bi!==0;
+    assert(
+      verifiedWasmInstance.exports.wasmNot(ai)===
+        (verifiedJsModule.wasmNot(a)?1:0),
+      'verified direct Bool call JS/Wasm mismatch',
+    );
+    assert(
+      verifiedWasmInstance.exports.wasmDoubleNot(ai)===
+        (verifiedJsModule.wasmDoubleNot(a)?1:0),
+      'verified nested direct Bool call JS/Wasm mismatch',
+    );
     assert(
       verifiedWasmInstance.exports.wasmLogic(ai,bi)===
         (verifiedJsModule.wasmLogic(a,b)?1:0),

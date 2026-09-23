@@ -45,6 +45,8 @@ checked dependent core
 - `@proofscript/environment`: shared pinned Lean 4.34 environment replay used by compiler and tooling.
 - `@proofscript/meta` / `@proofscript/elab`: untrusted Lean-compatible
   elaboration.
+- `@proofscript/tactic`: untrusted ordered goal-state transitions. It owns no
+  proof acceptance; Meta/elaboration adapters construct and assign proof terms.
 - `@proofscript/checked-core`: stable boundary containing declarations
   re-admitted by pskernel.
 - `lean-ts-kernel`: proof/type acceptance authority and TCB.

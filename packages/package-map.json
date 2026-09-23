@@ -257,16 +257,15 @@
       "path": "packages/tactic",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "foundation",
+      "status": "ordered-multigoal-state-foundation",
       "packageName": "@proofscript/tactic",
-      "dependsOn": [
-        "meta",
-        "elab",
-        "pretty"
-      ],
+      "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
-        "Foundation provides generic exact, assumption, and intro state transitions; kernel proof-term construction remains adapter-driven and outside the TCB."
+        "Tactic state now owns only the ordered open-goal list; proof/metavariable assignment is adapter-driven, matching Lean 4.34's Tactic.State versus Meta separation.",
+        "replaceMainGoal preserves trailing goals while exact/assumption close one goal, intro replaces it with one child, and apply may replace it with zero or many ordered subgoals.",
+        "The tactic package remains outside the TCB. Adapters must construct/assign ordinary proof terms that are ultimately rechecked by pskernel.",
+        "This state foundation is intentionally independent of @proofscript/elab so the elaborator can consume it without an npm dependency cycle."
       ]
     },
     {

@@ -150,16 +150,23 @@ Purpose: make formal verification pleasant enough for real software specs.
 
 Tactic order:
 
-1. broaden the landed bounded single-premise apply only when multi-goal
-   machinery justifies it;
-2. refine;
-3. constructor;
-4. cases;
-5. induction;
-6. rewrite;
-7. simp with a small explicit theorem set;
-8. exact? / assumption-style search only after deterministic core tactics;
-9. structured multi-goal state and cursor-sensitive LSP proof state.
+1. establish the ordered multi-goal state foundation used by all tactics;
+2. broaden the landed bounded single-premise apply on that state model;
+3. refine;
+4. constructor;
+5. cases;
+6. induction;
+7. rewrite;
+8. simp with a small explicit theorem set;
+9. exact? / assumption-style search only after deterministic core tactics;
+10. add cursor-sensitive LSP proof-state snapshots on top of the same goal model.
+
+The low-level multi-goal foundation follows Lean 4.34's separation: tactic state
+tracks an ordered list of metavariable goals, while Meta owns metavariable
+assignment and proof-term construction. In particular, Lean's `MVarId.apply`
+assigns the parent goal and returns the remaining ordered subgoals. ProofScript
+must preserve that split; tactic state must not accumulate an independent
+`proofs[]` authority.
 
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.

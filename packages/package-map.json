@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w1-check-build",
+      "status": "runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w1-check-build",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -35,6 +35,11 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified project check requires every source external module to be explicitly listed in psconfig.json runtimeDependencies. Build/run additionally read node_modules/<package>/package.json and require exact name/version identity before TypeScript compilation.",
+        "Runtime dependency policy has its own SHA-256 fingerprint and is reported separately from pskernel projectIntegrity; host package versions do not alter theorem meaning.",
+        "Verified build compiles the generated TypeScript using the absolute dist/<entry>.ts path, aligning TypeScript package lookup with the emitted JavaScript runtime location. A local no-network ESM fixture gates String -> String external execution end to end.",
+        "Verified check/build/run reports now include an assurance object separating pskernel-checked definitions/theorems from trusted runtime external assumptions. Each runtime assumption records local name, ESM source, imported symbol, logical signature, and proofEvidence=false.",
+        "Human-readable verified check/build output warns when runtime external assumptions are present; --json exposes complete binding details.",
         "DS5.6 emits one proofscript-module@2 checked-admission artifact per verified source module below dist/.proofscript/modules. Each artifact is dependency-linked by artifact integrity and replay-gated through checked core/pskernel before build acceptance.",
         "Persistent artifacts are not yet source-skipping cache hits: a self-hashed kernel-valid artifact does not prove derivation from the current source. Trusted reuse waits for an external expected hash/lockfile or derivation certificate plus pinned base-environment identity.",
         "moduleSources now expose both the existing canonical source/dependency cache-key integrity and moduleArtifactIntegrity; those identities intentionally serve different purposes.",
@@ -143,11 +148,13 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-ds5-import-headers+lean-ds3-registered-frontend+translation-target-dispatch+canonical-ps-printer+frontend-registry+exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
+      "status": "v061-source-ffi+ds5-import-headers+lean-ds3-registered-frontend+translation-target-dispatch+canonical-ps-printer+frontend-registry+exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "A post-v0.7 repository extension adds `extern function local(args) : Result from \"pkg\" import named;` as the explicit first-order named-ESM FFI source form. The ProofScript printer preserves the full runtime binding; internal Lean lowering renders only its logical axiom view.",
+        "`psc translate --to lean` rejects modules containing extern declarations because canonical Lean cannot preserve npm/ESM runtime binding metadata; losing that metadata silently would violate dual-source semantic translation.",
         "DS5.1 adds shared leading `import Foo.Bar` module headers to the V061 module AST. Both source frontends parse them and both canonical printers preserve them before declarations.",
         "The bounded import header intentionally accepts exactly one logical module per line; Lean-subset imports reject semicolon spelling, while ProofScript input may accept it but canonical printing normalizes to Lean-compatible no-semicolon headers.",
         "DS3.1 registers the completed bounded lean-subset SourceFrontend alongside proofscript in the default registry. Source extension selects only parsing/printing ownership; downstream semantic pipeline choice remains independent.",
@@ -177,7 +184,6 @@
         "Type-position syntax now has a non-associative propositional equality node. Applications bind tighter than `=`, and `=` binds tighter than arrows; lowering preserves Lean's `a = b` spelling.",
         "Chained `a = b = c` is rejected unless explicitly parenthesized; no global textual equality rewrite is used.",
         "Bounded `simp only [h1, ← h2, ...]` now parses an explicit rule list, including optional reverse markers and a trailing comma, while default `simp`, erasures, `*`, locations, pre/post markers, and configs remain outside the supported parser subset.",
-        "The bounded simplifier preserves inherited Lean spelling `simp only [h]` and `simp only [← h]`. The parser currently accepts exactly one explicit rule and rejects multi-rule lists instead of approximating full Lean simp syntax.",
         "The tactic parser preserves Lean-compatible rewrite spelling for the bounded subset: `rw [h]` and `rw [← h]`; it does not introduce a ProofScript-only bare-rw syntax.",
         "Inherited Lean `induction <local>` syntax is parsed/lowered canonically; the bounded semantic implementation uses pskernel recursors and does not introduce a second induction principle.",
         "Inherited Lean `cases <local>` tactic syntax is parsed/lowered canonically; the bounded semantic implementation lives in elab and delegates elimination to pskernel-generated recursors.",
@@ -283,7 +289,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-imported-metadata+bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-source-ffi-admission+imported-metadata+bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -296,6 +302,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Source extern signatures reuse ordinary header elaboration, are converted to non-unsafe Lean axioms plus explicit runtime-binding metadata, and are validated by the existing checked-core first-order primitive external invariant before entering the working environment.",
+        "Proof-valued extern result types are rejected at the checked-core external boundary; source syntax does not create a more permissive FFI lane.",
         "Declaration elaboration accepts an optional checked-core seed containing already-admitted imported structures, classes, and instances. Imported metadata is reconstructed only from pskernel-validated CheckedCoreModule output, never directly from unverified source.",
         "Imported structure/class metadata initializes record/projection and class recognition exactly like same-file metadata. Imported instances are reversed into newest-admission-first candidate order, matching the existing same-file unshift priority.",
         "Bounded `exact?` now closes a goal using newest-first local exact hypotheses, then newest-first already-admitted zero-universe environment constants whose checked type is definitionally equal to the target.",
@@ -511,19 +519,17 @@
       ]
     },
     {
-      "name": "backend-wasm",
-      "path": "packages/backend-wasm",
+      "name": "wasm-ir",
+      "path": "packages/wasm-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w1-binaryen-bool-unit-mvp",
-      "packageName": "@proofscript/backend-wasm",
-      "dependsOn": [
-        "wasm-ir"
-      ],
+      "status": "w1-bool-unit-ir-mvp",
+      "packageName": "@proofscript/wasm-ir",
+      "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
-        "Binaryen 132.0.0 is an exact-pinned untrusted emitter/validator dependency.",
-        "The first executable gate emits and runs an exported Bool not function and checks both canonical and optimized WebAssembly."
+        "ProofScript-owned typed WasmIR is independent of Binaryen and carries no proof authority.",
+        "W1 models i32 Bool/control values and explicit first-order calls/locals while reserving i64/f32/f64 for later semantically justified representations."
       ]
     },
     {
@@ -544,17 +550,19 @@
       ]
     },
     {
-      "name": "wasm-ir",
-      "path": "packages/wasm-ir",
+      "name": "backend-wasm",
+      "path": "packages/backend-wasm",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w1-bool-unit-ir-mvp",
-      "packageName": "@proofscript/wasm-ir",
-      "dependsOn": [],
+      "status": "w1-binaryen-bool-unit-mvp",
+      "packageName": "@proofscript/backend-wasm",
+      "dependsOn": [
+        "wasm-ir"
+      ],
       "sourceLanguage": "typescript",
       "notes": [
-        "ProofScript-owned typed WasmIR is independent of Binaryen and carries no proof authority.",
-        "W1 models i32 Bool/control values and explicit first-order calls/locals while reserving i64/f32/f64 for later semantically justified representations."
+        "Binaryen 132.0.0 is an exact-pinned untrusted emitter/validator dependency.",
+        "The first executable gate emits and runs an exported Bool not function and checks both canonical and optimized WebAssembly."
       ]
     },
     {
@@ -683,7 +691,7 @@
       "path": "packages/project",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "dual-source-node-resolver+module-graph-mvp",
+      "status": "runtime-dependency-policy+dual-source-node-resolver+module-graph-mvp",
       "packageName": "@proofscript/project",
       "dependsOn": [
         "module",
@@ -692,6 +700,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "`runtimeDependencies` config parsing accepts only exact npm package-root specifiers and exact x.y.z versions in the first FFI profile. Relative sources, package subpaths, node: builtins, semver ranges, and non-package objects fail closed.",
         "The Node subpath centralizes psconfig sourceRoots validation, nearest-config discovery, project-relative root expansion, and exact .ps/.lean logical-module resolution for both psc and LSP consumers.",
         "Configured source roots have no first-root-wins behavior: zero matches fail missing, multiple matches across roots/source kinds fail ambiguity.",
         "sourceDependencyClosure exposes deterministic transitive source dependencies in build-plan order so CLI and editor composition share the same graph semantics.",

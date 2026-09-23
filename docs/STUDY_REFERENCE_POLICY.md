@@ -212,3 +212,28 @@ for both source kinds rather than inventing a second spelling.
 Only the common logical-module header is inherited. Lean's broader module
 header features such as `public`, `meta`, `all`, package facets, and the
 full Lake resolver are not implied by this checkpoint.
+
+## Source FFI design provenance
+
+The authoritative ProofScript v0.7 study reference does not specify a concrete
+`extern`/JavaScript FFI declaration. The landed
+`extern function ... from "..." import ...;` form is therefore an explicit
+repository design revision, not a claim of v0.7 source conformance.
+
+Its logical treatment follows the existing pskernel/checked-core external
+boundary: the signature is an opaque assumption and host execution is never
+proof evidence. The named ESM host form is informed by the TypeScript/JavaScript
+study material and existing verified TypeScript emitter, but those host
+references do not define theorem or type-theoretic semantics.
+
+## TypeScript/npm resolution evidence for the first FFI package policy
+
+The host-side policy follows the repository's TypeScript study/reference role:
+named ESM imports are resolved by TypeScript/Node as runtime modules, but their
+package metadata is not proof evidence. The first project policy therefore
+pins direct package roots to exact installed versions and fingerprints that
+runtime policy separately from pskernel project integrity.
+
+No claim is made yet about transitive npm lockfile closure. Semver ranges,
+subpaths, builtins, and alternate module systems remain unsupported until their
+runtime reproducibility and ABI story is specified.

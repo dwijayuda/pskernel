@@ -19,6 +19,7 @@ import {
   parseV061Module,
   lowerV061ModuleToLean,
   lowerV061ModuleToProofScript,
+  leanTranslationTarget,
   lowerV061TypeToLean,
   sourceKindFromFileName,
   createDefaultSourceFrontendRegistry,
@@ -1336,5 +1337,41 @@ throws(
   equal(leanSubsetSourceFrontend.kind,'lean-subset');
 }
 console.log('ok - @proofscript/syntax DS2 complete emitted-subset frontend');
+
+
+{
+  const module=parseV061Module(
+    'extern function hostInc(x : Nat) : Nat from "host-lib" import inc; '+
+    'function main(x : Nat) : Nat := hostInc(x);',
+  );
+  equal(module.declarations[0]?.kind,'external');
+  equal(module.featureIds.includes('D-EXTERN-FFI'),true);
+  equal(module.featureIds.includes('D-EXPLICIT-PARAMS'),true);
+  equal(module.featureIds.includes('D-DECL-SEMI'),true);
+  if(module.declarations[0]?.kind==='external'){
+    equal(module.declarations[0].binding.source,'host-lib');
+    equal(module.declarations[0].binding.importedName,'inc');
+  }
+  equal(
+    lowerV061ModuleToLean(module).startsWith(
+      'axiom hostInc (x : Nat) : Nat\n\ndef main',
+    ),
+    true,
+  );
+  equal(
+    lowerV061ModuleToProofScript(module).includes(
+      'extern function hostInc(x : Nat) : Nat from "host-lib" import inc;',
+    ),
+    true,
+  );
+  let rejected=false;
+  try{
+    leanTranslationTarget.print(module);
+  }catch(error){
+    rejected=/PS_TRANSLATE_EXTERNAL_RUNTIME_BINDING/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/syntax explicit runtime external declaration');
 
 console.log('ok - @proofscript/syntax inherited instance declarations');

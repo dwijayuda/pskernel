@@ -172,8 +172,10 @@ checked core
                   Binaryen -> .wasm
 ```
 
-The W1 executable subset is intentionally small: Bool/Unit control values and
-direct first-order functions. Runtime Nat/Int are rejected until an
+The W1 executable subset covers Bool/Unit control values and direct first-order
+functions. W2 now also carries fixed-width UInt8/16/32/64 values through the
+verified runtime IR and Wasm scalar ABI; fixed-width arithmetic/comparisons are
+still a separate milestone. Runtime Nat/Int are rejected until an
 arbitrary-precision ABI exists; they must never be silently narrowed to i64.
 String, external imports, structures, ADTs, generic runtime values, and closures
 also fail closed until their representations are specified.
@@ -1024,3 +1026,100 @@ types remain fail-closed until their ABI and assurance story are specified.
 Checked-admission persistence is versioned compatibly: codec v1 / payload
 1.0.0 remains readable; new external admissions require codec v2 / payload
 1.1.0. Artifact verification enforces that coupling.
+
+## Explicit source FFI and assurance checkpoint
+
+The first source-level JavaScript/npm FFI declaration is now an intentional
+post-v0.7 repository extension:
+
+```proofscript
+extern function hostInc(x : Nat) : Nat
+  from "host-lib"
+  import inc;
+```
+
+It records four separate facts: the ProofScript-local name, the checked logical
+signature, the ESM package/module source, and the named runtime export.
+
+The frontend does not trust this declaration directly. Its signature is
+elaborated through the ordinary declaration-header path, represented as a
+non-`unsafe` opaque axiom, paired with explicit runtime-binding metadata, and
+validated by the existing checked-core external invariant before admission.
+That invariant remains stricter than the source grammar: the first profile
+requires one or more explicit primitive runtime arguments and a primitive
+runtime result, rejecting proof-valued, polymorphic, nominal, and higher-order
+extern signatures.
+
+The two output views are deliberately different:
+
+- internal logical Lean lowering may render the signature as an `axiom`, so
+  verified checking/building can expose the logical assumption;
+- canonical ProofScript printing preserves the full ESM binding;
+- source translation to canonical Lean rejects extern-bearing modules because
+  a Lean source file cannot preserve the runtime binding metadata.
+
+Verified CLI reports now include a separate assurance record with:
+
+- pskernel-checked definition count;
+- pskernel-checked theorem count;
+- runtime-external assumption count;
+- each external's local name, module source, imported symbol, and logical
+  signature;
+- `proofEvidence=false` for every runtime external.
+
+Thus `proofStatus: kernel-verified` continues to describe the proof checking
+performed on internal theorems; it is not a claim that JavaScript/npm runtime
+bindings were proven correct. The next FFI checkpoint is deterministic package
+dependency policy and a real resolvable runtime-binding test.
+
+## Exact runtime dependency policy checkpoint
+
+Project-level FFI resolution is now explicit in `psconfig.json`:
+
+```json
+{
+  "runtimeDependencies": {
+    "host-lib": "1.0.0"
+  }
+}
+```
+
+This first profile accepts npm package **roots** with exact versions only.
+Verified `check` requires every admitted external source to be present in that
+map. Verified `build` and `run` additionally require
+`node_modules/<package>/package.json` to report the same package name and
+exact version before generated TypeScript is compiled.
+
+Runtime dependency identity is deliberately separate from semantic project
+identity:
+
+```text
+projectIntegrity
+  = source/dependency/kernel semantic identity
+
+runtimeDependencyPolicy.integrity
+  = exact direct host-package policy identity
+```
+
+Changing a host package version therefore changes the build/assurance policy
+fingerprint without pretending theorem meaning changed or that pskernel proved
+the package implementation.
+
+Verified build now compiles its in-memory TypeScript under the absolute
+`dist/<entry>.ts` path. TypeScript module resolution therefore starts from the
+same project/output tree that the emitted JavaScript will execute from. A
+no-network regression installs a temporary ESM package with matching `.d.ts`,
+executes a ProofScript `String -> String` external through Node, and verifies
+the host result while retaining `proofEvidence=false` in assurance.
+
+Still unsupported in this checkpoint:
+
+- semver ranges;
+- package subpath imports;
+- `node:` builtins;
+- default/namespace/CommonJS/dynamic imports;
+- package installation;
+- transitive lockfile integrity claims.
+
+Those require separate project/runtime policy decisions and do not expand the
+kernel trust boundary.

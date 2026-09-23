@@ -8,7 +8,11 @@ import {
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {parseCommonArgs,parseTranslateArgs} from '../src/args.js';
-import {compileVerifiedSource} from '../src/verified-pipeline.js';
+import {
+  checkVerifiedSource,
+  compileVerifiedSource,
+} from '../src/verified-pipeline.js';
+import {verifiedAssuranceReport} from '../src/verified-assurance.js';
 import {clearVerifiedProjectModuleCache} from '../src/verified-project-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
 import {runCommand} from '../src/commands/run.js';
@@ -102,6 +106,221 @@ console.log('ok - psc CLI argument/UX contract');
   equal(result.emitted.javascript.includes('T0'),false);
 }
 console.log('ok - psc verified checked-core compiler pipeline');
+
+{
+  const checked=checkVerifiedSource(
+    'extern function hostInc(x : Nat) : Nat '+
+    'from "host-lib" import inc; '+
+    'function use(x : Nat) : Nat := hostInc(x);',
+  );
+  const assurance=verifiedAssuranceReport(checked.checkedCore);
+  equal(checked.checkedCore.externals.length,1);
+  equal(assurance.runtimeAssumptionCount,1);
+  equal(assurance.runtimeAssumptions[0]?.name,'hostInc');
+  equal(assurance.runtimeAssumptions[0]?.source,'host-lib');
+  equal(assurance.runtimeAssumptions[0]?.importedName,'inc');
+  equal(assurance.runtimeAssumptions[0]?.proofEvidence,false);
+  equal(assurance.runtimeExternalsAreProofEvidence,false);
+}
+console.log('ok - psc verified runtime external assurance');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-external-assurance-check-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        runtimeDependencies:{'host-lib':'1.0.0'},
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'extern function hostInc(x : Nat) : Nat '+
+      'from "host-lib" import inc; '+
+      'function use(x : Nat) : Nat := hostInc(x);\n',
+      'utf8',
+    );
+    const result=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    if(!('assurance' in result)){
+      throw new Error('verified check did not return assurance');
+    }
+    const assurance=result.assurance;
+    equal(assurance.runtimeAssumptionCount,1);
+    equal(assurance.kernelCheckedDefinitionCount,1);
+    equal(assurance.kernelCheckedTheoremCount,0);
+    equal(assurance.runtimeAssumptions[0]?.source,'host-lib');
+    equal(assurance.runtimeExternalsAreProofEvidence,false);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified project assurance reports source externals');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-external-policy-reject-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'extern function hostInc(x : Nat) : Nat '+
+      'from "host-lib" import inc;\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await checkCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:[],
+      });
+    }catch(error){
+      rejected=/PS_RUNTIME_DEPENDENCY_UNDECLARED/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified check rejects undeclared runtime dependency');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-external-runtime-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await mkdir(join(directory,'node_modules','host-lib'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        runtimeDependencies:{'host-lib':'1.0.0'},
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','package.json'),
+      JSON.stringify({
+        name:'host-lib',
+        version:'1.0.0',
+        type:'module',
+        main:'./index.js',
+        types:'./index.d.ts',
+        exports:{
+          '.':{
+            types:'./index.d.ts',
+            import:'./index.js',
+            default:'./index.js',
+          },
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','index.js'),
+      'export function shout(value) { return value + "!"; }\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','index.d.ts'),
+      'export declare function shout(value: string): string;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'extern function hostShout(value : String) : String '+
+      'from "host-lib" import shout; '+
+      'function main(value : String) : String := hostShout(value);\n',
+      'utf8',
+    );
+
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['hello'],
+    });
+    equal(result.mainResult,'hello!');
+    if(!('assurance' in result)){
+      throw new Error('verified run did not retain assurance');
+    }
+    equal(result.assurance.runtimeAssumptionCount,1);
+    equal(
+      result.assurance.runtimeAssumptions[0]?.expectedVersion,
+      '1.0.0',
+    );
+    equal(
+      result.assurance.runtimeExternalsAreProofEvidence,
+      false,
+    );
+    if(!('runtimeDependencyPolicy' in result)){
+      throw new Error('verified run did not retain runtime dependency policy');
+    }
+    equal(result.runtimeDependencyPolicy.used.length,1);
+    equal(
+      result.runtimeDependencyPolicy.integrity.startsWith('sha256:'),
+      true,
+    );
+    equal(
+      result.runtimeDependencyPolicy.schema,
+      'proofscript-runtime-dependencies-v1',
+    );
+    equal(result.runtimeDependencyPolicy.used[0]?.source,'host-lib');
+    equal(result.runtimeDependencyPolicy.used[0]?.version,'1.0.0');
+    const artifacts=result.artifacts as Record<string,string>;
+    const javascript=await readFile(artifacts.javascript,'utf8');
+    equal(
+      javascript.includes('from "host-lib"'),
+      true,
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified source FFI resolves exact package and runs');
+
+
 
 
 {

@@ -9,6 +9,11 @@ import type {BuildResult,CommonArgs} from '../types.js';
 import {
   writeVerifiedModuleArtifacts,
 } from '../project-artifact-output.js';
+import {verifiedAssuranceReport} from '../verified-assurance.js';
+import {
+  assertRuntimeDependencyPolicy,
+  verifyInstalledRuntimeDependencies,
+} from '../runtime-dependencies.js';
 
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const target=common.buildTarget??'js';
@@ -22,9 +27,13 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     const extension=extname(input.sourcePath);
     const stem=basename(input.sourcePath,extension);
     const project=await resolveSourceProject(input);
-    const result=compileVerifiedSourceProject(
+    const runtimeDependencyPolicy=assertRuntimeDependencyPolicy(
       project,
-      stem+'.ts',
+      input.loaded.config.runtimeDependencies,
+    );
+    await verifyInstalledRuntimeDependencies(
+      input.loaded.directory,
+      runtimeDependencyPolicy,
     );
     const outDir=resolve(
       input.loaded.directory,
@@ -33,6 +42,10 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     await mkdir(outDir,{recursive:true});
 
     const tsPath=join(outDir,stem+'.ts');
+    const result=compileVerifiedSourceProject(
+      project,
+      tsPath,
+    );
     const jsPath=join(outDir,stem+'.js');
     const dtsPath=join(outDir,stem+'.d.ts');
     const leanPath=join(outDir,stem+'.lean');
@@ -66,6 +79,11 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       moduleCacheMisses:result.moduleCacheMisses,
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
+      assurance:verifiedAssuranceReport(
+        result.checkedCore,
+        input.loaded.config.runtimeDependencies,
+      ),
+      runtimeDependencyPolicy,
       buildTarget:target,
       outputDirectory:outDir,
       artifacts:{

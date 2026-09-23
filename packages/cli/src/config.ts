@@ -1,7 +1,10 @@
 
 import {readFile} from 'node:fs/promises';
 import {dirname,join,resolve} from 'node:path';
-import {projectSourceRootsFromConfig} from '@proofscript/project/node';
+import {
+  projectRuntimeDependenciesFromConfig,
+  projectSourceRootsFromConfig,
+} from '@proofscript/project/node';
 
 function cliSourceRootsFromConfig(value:unknown):readonly string[] {
   try{
@@ -15,6 +18,22 @@ function cliSourceRootsFromConfig(value:unknown):readonly string[] {
       ),
     );
   }
+} 
+
+function cliRuntimeDependenciesFromConfig(
+  value:unknown,
+):Readonly<Record<string,string>> {
+  try{
+    return projectRuntimeDependenciesFromConfig(value);
+  }catch(error){
+    const message=error instanceof Error?error.message:String(error);
+    throw new Error(
+      message.replace(
+        'PS_PROJECT_CONFIG_RUNTIME_DEPENDENCIES',
+        'PS_CLI_CONFIG_RUNTIME_DEPENDENCIES',
+      ),
+    );
+  }
 }
 import {existsSync} from 'node:fs';
 
@@ -22,6 +41,7 @@ export interface PsConfig {
   readonly languageVersion:'0.7';
   readonly entry:string;
   readonly sourceRoots:readonly string[];
+  readonly runtimeDependencies:Readonly<Record<string,string>>;
   readonly compilerOptions:{
     readonly outDir:string;
     readonly emitTypeScript:boolean;
@@ -34,6 +54,7 @@ export const DEFAULT_CONFIG:PsConfig={
   languageVersion:'0.7',
   entry:'src/main.ps',
   sourceRoots:[],
+  runtimeDependencies:{},
   compilerOptions:{
     outDir:'dist',
     emitTypeScript:true,
@@ -78,6 +99,9 @@ export async function loadPsConfig(project?:string):Promise<LoadedPsConfig>{
     entry:typeof parsed.entry==='string'?parsed.entry:DEFAULT_CONFIG.entry,
     sourceRoots:cliSourceRootsFromConfig(
       (parsed as Partial<PsConfig>).sourceRoots,
+    ),
+    runtimeDependencies:cliRuntimeDependenciesFromConfig(
+      (parsed as Partial<PsConfig>).runtimeDependencies,
     ),
     compilerOptions:{
       outDir:typeof compiler.outDir==='string'?compiler.outDir:DEFAULT_CONFIG.compilerOptions.outDir,

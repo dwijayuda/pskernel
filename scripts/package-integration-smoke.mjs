@@ -16,7 +16,10 @@ import {compileTypeScript,emitModule,emitVerifiedTypeScript} from '../packages/b
 import {compileCheckedCore} from '../packages/compiler/dist/src/index.js';
 import {lowerVerifiedIrToWasm} from '../packages/wasm-lowering/dist/src/index.js';
 import {emitBinaryenWasm} from '../packages/backend-wasm/dist/src/index.js';
-import {compileVerifiedSource} from '../packages/cli/dist/src/verified-pipeline.js';
+import {
+  checkVerifiedSource,
+  compileVerifiedSource,
+} from '../packages/cli/dist/src/verified-pipeline.js';
 import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
@@ -992,4 +995,27 @@ assert(
 assert(
   verifiedGlobalInstance.emitted.javascript.includes('get(boxedNat, x)'),
   'global instance dictionary call did not compile to JavaScript',
+);
+
+const verifiedExternalChecked=checkVerifiedSource(
+  'extern function hostInc(x : Nat) : Nat from "host-lib" import inc; '+
+  'function main(x : Nat) : Nat := hostInc(x);',
+);
+const verifiedExternalIr=eraseCheckedCoreModule(
+  verifiedExternalChecked.checkedCore,
+);
+const verifiedExternalTs=emitVerifiedTypeScript(verifiedExternalIr);
+assert(
+  verifiedExternalChecked.checkedCore.externals.length===1,
+  'source external was not represented in checked core',
+);
+assert(
+  verifiedExternalTs.includes(
+    'import { inc as hostInc } from "host-lib";',
+  ),
+  'source external did not lower to named ESM import',
+);
+assert(
+  verifiedExternalTs.includes('return hostInc(x);'),
+  'source external call did not survive verified TypeScript emission',
 );

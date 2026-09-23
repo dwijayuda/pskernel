@@ -44,6 +44,46 @@ export function projectSourceRootsFromConfig(
   return roots;
 }
 
+const NPM_PACKAGE_ROOT=/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/;
+const EXACT_PACKAGE_VERSION=/^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+
+export type ProjectRuntimeDependencies=Readonly<Record<string,string>>;
+
+export function projectRuntimeDependenciesFromConfig(
+  value:unknown,
+):ProjectRuntimeDependencies {
+  if(value===undefined)return {};
+  if(
+    typeof value!=='object'
+    ||value===null
+    ||Array.isArray(value)
+  ){
+    throw new Error(
+      'PS_PROJECT_CONFIG_RUNTIME_DEPENDENCIES: runtimeDependencies must be an object of exact npm package versions',
+    );
+  }
+  const out:Record<string,string>={};
+  for(const [source,version] of Object.entries(value)){
+    if(!NPM_PACKAGE_ROOT.test(source)){
+      throw new Error(
+        "PS_PROJECT_CONFIG_RUNTIME_DEPENDENCIES: '"+source+
+        "' must be an npm package root; subpaths, relative paths, and node: specifiers are not in the first FFI policy",
+      );
+    }
+    if(
+      typeof version!=='string'
+      ||!EXACT_PACKAGE_VERSION.test(version)
+    ){
+      throw new Error(
+        "PS_PROJECT_CONFIG_RUNTIME_DEPENDENCIES: '"+source+
+        "' must use an exact x.y.z package version",
+      );
+    }
+    out[source]=version;
+  }
+  return out;
+}
+
 export function resolvedProjectSourceRoots(
   configDirectory:string,
   configured:readonly string[],

@@ -354,9 +354,26 @@ Current FFI checkpoint:
 - the first profile bans proof-valued/polymorphic extern signatures, so the
   external axiom cannot inject proof evidence; JavaScript execution remains
   outside pskernel entirely;
-- next, source syntax must make the external runtime binding explicit, while
-  assurance output must distinguish these runtime assumptions from ordinary
-  definitions/theorems.
+- source syntax now makes the first-order named-ESM runtime binding explicit
+  with `extern function ... from "pkg" import name;`;
+- verified check/build/run assurance output distinguishes pskernel-checked
+  definitions/theorems from trusted runtime external assumptions and marks
+  runtime externals as `proofEvidence=false`;
+- canonical ProofScript printing preserves the binding, while source
+  translation to Lean fails closed because Lean source cannot preserve the ESM
+  binding metadata;
+- exact-version `runtimeDependencies` policy is now project-configured:
+  check requires every external package root to be allowlisted, while
+  build/run require the installed package name/version to match exactly;
+- runtime dependency policy has a separate SHA-256 integrity from semantic
+  `projectIntegrity`;
+- an actual temporary local ESM package is resolved by TypeScript and Node in
+  the verified run regression, exercising source extern -> checked core ->
+  erasure -> IR import -> TypeScript -> JavaScript -> host package;
+- next, decide whether transitive npm lockfile integrity is required before
+  broadening beyond exact root-package imports; package subpaths, ranges,
+  Node builtins, default/namespace imports, and automatic installation remain
+  fail-closed.
 
 Exit condition:
 
@@ -505,19 +522,19 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    only where Lean library-search semantics can be modeled explicitly; do not
    silently turn it into recursive automation.
 7. Continue DS5 from the landed mixed-source project + replay-gated persistent
-   proofscript-module@2 artifact path. The next blocker is the explicit
-   JavaScript/npm FFI source boundary and its trust/assumption reporting; do not
-   let runtime imports become proof evidence.
+   proofscript-module@2 artifact path. Source FFI, assurance, exact direct
+   package policy, and real runtime resolution are landed; next evaluate
+   transitive lockfile integrity before broadening the package surface.
 8. DS6 editor MVP is landed: source-kind routing, checked import composition,
    shared Node/LSP source-root resolution, cross-source navigation,
    non-destructive .ps / supported .lean conversion actions, and importer
    diagnostic refresh across open documents. Later optimize refresh scope and
    improve lexical navigation with scope-aware indexing without changing proof
    authority.
-9. Continue the explicit npm/JS FFI from the landed verified-IR import plus
-   replayable checked-core external-admission foundation. Next add source
-   signatures plus assurance reporting, then project dependency policy and
-   end-to-end runtime binding tests.
+9. Continue the explicit npm/JS FFI from the landed source signature,
+   assurance, exact-version direct-package policy, replayable checked-core
+   admission, and end-to-end ESM runtime binding. Next decide lockfile/transitive
+   integrity, then broaden imports only when their ABI/trust model is explicit.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.

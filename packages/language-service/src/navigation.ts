@@ -105,7 +105,7 @@ export function completionItems(
     add({label,kind:7,detail:'Lean foundational type',source:'foundational'});
   }
   for(const label of [
-    'theorem','def','const','function','structure','class','inductive',
+    'theorem','def','const','function','extern','structure','class','inductive',
     'fun','let','match','if','by','exact','assumption','apply','intro',
   ]){
     add({label,kind:14,detail:'ProofScript / inherited Lean syntax',source:'syntax'});

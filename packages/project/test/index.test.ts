@@ -111,6 +111,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {
   nodeProjectResolutionForEntry,
+  projectRuntimeDependenciesFromConfig,
   projectSourceRootsFromConfig,
   resolveLogicalModuleSource,
 } from '../src/node.js';
@@ -138,3 +139,21 @@ import {
   }
 }
 console.log('ok - @proofscript/project shared Node source-root resolver');
+
+{
+  const deps=projectRuntimeDependenciesFromConfig({
+    'host-lib':'1.2.3',
+    '@scope/pkg':'2.0.0-beta.1',
+  });
+  equal(deps['host-lib'],'1.2.3');
+  equal(deps['@scope/pkg'],'2.0.0-beta.1');
+  throws(
+    ()=>projectRuntimeDependenciesFromConfig({'host-lib':'^1.2.3'}),
+    /PS_PROJECT_CONFIG_RUNTIME_DEPENDENCIES/,
+  );
+  throws(
+    ()=>projectRuntimeDependenciesFromConfig({'host-lib/subpath':'1.2.3'}),
+    /PS_PROJECT_CONFIG_RUNTIME_DEPENDENCIES/,
+  );
+}
+console.log('ok - @proofscript/project exact runtime dependency policy parser');

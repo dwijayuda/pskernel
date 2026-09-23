@@ -14,6 +14,7 @@ export * from './class-parser.js';
 export * from './inductive-parser.js';
 export * from './where-parser.js';
 export * from './declaration-parser.js';
+export * from './external-parser.js';
 export * from './module-import-parser.js';
 export * from './frontend.js';
 export * from './lean-subset-expression-parser.js';

@@ -97,6 +97,19 @@ export type VerifiedIrExpr =
         readonly name:string;
         readonly value:VerifiedIrExpr;
       }[];
+    }
+  | {
+      readonly kind:'match';
+      readonly inductive:string;
+      readonly scrutinee:VerifiedIrExpr;
+      readonly alternatives:readonly {
+        readonly constructor:string;
+        readonly bindings:readonly {
+          readonly field:string;
+          readonly name:string;
+        }[];
+        readonly body:VerifiedIrExpr;
+      }[];
     };
 
 export interface VerifiedIrTypeParameter {

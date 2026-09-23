@@ -19,6 +19,7 @@ export * from './type-erasure.js';
 export * from './expr-erasure.js';
 export * from './structure-erasure.js';
 export * from './inductive-erasure.js';
+export * from './recursor-erasure.js';
 
 export function eraseCheckedCoreModule(
   module:CheckedCoreModule,
@@ -60,6 +61,7 @@ export function eraseCheckedCoreModule(
         structuresByConstructor:structures.byConstructor,
         inductivesByType:inductives.byType,
         inductivesByConstructor:inductives.byConstructor,
+        inductivesByRecursor:inductives.byRecursor,
       },
       module.environment,
     );

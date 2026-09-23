@@ -3,8 +3,10 @@ import {
   TypeChecker,
   fvar,
   instantiate1,
+  nameEq,
   nameKey,
   nameToString,
+  strName,
 } from 'lean-ts-kernel';
 import type {CheckedCoreModule} from '@proofscript/checked-core';
 import type {
@@ -23,6 +25,7 @@ export interface PreparedRuntimeInductives {
   readonly ir:readonly VerifiedIrInductive[];
   readonly byType:ReadonlyMap<string,RuntimeInductiveInfo>;
   readonly byConstructor:ReadonlyMap<string,RuntimeConstructorInfo>;
+  readonly byRecursor:ReadonlyMap<string,RuntimeInductiveInfo>;
 }
 
 function shortName(name:string):string {
@@ -42,6 +45,7 @@ export function prepareRuntimeInductives(
   const ir:VerifiedIrInductive[]=[];
   const byType=new Map<string,RuntimeInductiveInfo>();
   const byConstructor=new Map<string,RuntimeConstructorInfo>();
+  const byRecursor=new Map<string,RuntimeInductiveInfo>();
 
   for(const inductive of module.inductives){
     const typeKey=nameKey(inductive.name);
@@ -114,6 +118,7 @@ export function prepareRuntimeInductives(
           structuresByConstructor,
           inductivesByType:byType,
           inductivesByConstructor:byConstructor,
+          inductivesByRecursor:byRecursor,
         };
         const type=eraseRuntimeType(
           binder.type,
@@ -155,12 +160,40 @@ export function prepareRuntimeInductives(
       byConstructor.set(info.constructorKey,info);
     }
 
+    const recursorName=strName(inductive.name,'rec');
+    const recursor=module.environment.find(recursorName);
+    if(
+      recursor?.kind!=='recursor'
+      ||recursor.numParams!==0
+      ||recursor.numIndices!==0
+      ||recursor.numMotives!==1
+      ||recursor.numMinors!==constructors.length
+      ||recursor.rules.length!==constructors.length
+    ){
+      throw new Error(
+        "PS_ERASE_RECURSOR_METADATA_UNSUPPORTED: '"+
+        nameToString(recursorName)+"'",
+      );
+    }
+    for(let index=0;index<constructors.length;index+=1){
+      const rule=recursor.rules[index]!;
+      const constructorName=inductive.ctors[index]!;
+      if(!nameEq(rule.ctor,constructorName)){
+        throw new Error(
+          "PS_ERASE_RECURSOR_RULE_ORDER: '"+nameToString(recursorName)+
+          "' rule "+index+" does not match admitted constructor order",
+        );
+      }
+    }
+
     const info:RuntimeInductiveInfo={
       name:inductiveName,
       typeKey,
+      recursorKey:nameKey(recursorName),
       constructors,
     };
     byType.set(typeKey,info);
+    byRecursor.set(info.recursorKey,info);
     ir.push({
       name:inductiveName,
       constructors:constructors.map((constructor)=>({
@@ -173,5 +206,5 @@ export function prepareRuntimeInductives(
     });
   }
 
-  return {ir,byType,byConstructor};
+  return {ir,byType,byConstructor,byRecursor};
 }

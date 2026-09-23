@@ -31,6 +31,7 @@ export interface RuntimeConstructorInfo {
 export interface RuntimeInductiveInfo {
   readonly name:string;
   readonly typeKey:string;
+  readonly recursorKey:string;
   readonly constructors:readonly RuntimeConstructorInfo[];
 }
 
@@ -44,6 +45,7 @@ export interface ErasureScope {
   readonly structuresByConstructor:ReadonlyMap<string,RuntimeStructureInfo>;
   readonly inductivesByType:ReadonlyMap<string,RuntimeInductiveInfo>;
   readonly inductivesByConstructor:ReadonlyMap<string,RuntimeConstructorInfo>;
+  readonly inductivesByRecursor:ReadonlyMap<string,RuntimeInductiveInfo>;
 }
 
 export function classifyBinder(

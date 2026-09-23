@@ -12,6 +12,7 @@ import {
   classifyBinder,
   type ErasureScope,
 } from './model.js';
+import {tryEraseRuntimeRecursorApplication} from './recursor-erasure.js';
 
 export type RuntimeExprEraser=(
   expr:Expr,
@@ -78,6 +79,13 @@ export function eraseRuntimeApplication(
   erase:RuntimeExprEraser,
 ):VerifiedIrExpr {
   const view=appView(expr);
+  const recursor=tryEraseRuntimeRecursorApplication(
+    expr,
+    scope,
+    environment,
+    erase,
+  );
+  if(recursor!==undefined)return recursor;
 
   if(view.fn.kind==='const'){
     const constructor=scope.inductivesByConstructor.get(

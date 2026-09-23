@@ -434,3 +434,60 @@ console.log('ok - @proofscript/backend-ts verified nominal structure emission');
   equal(compiled.declaration.includes('export declare const MaybeNat'),true);
 }
 console.log('ok - @proofscript/backend-ts verified ADT constructor emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    inductives:[{
+      name:'MaybeNat',
+      constructors:[
+        {name:'none',fields:[]},
+        {
+          name:'some',
+          fields:[{
+            name:'value',
+            type:{kind:'primitive',name:'Nat'},
+          }],
+        },
+      ],
+    }],
+    declarations:[{
+      name:'getOrZero',
+      typeParameters:[],
+      parameters:[{
+        name:'value',
+        type:{kind:'named',name:'MaybeNat',args:[]},
+      }],
+      resultType:{kind:'primitive',name:'Nat'},
+      body:{
+        kind:'match',
+        inductive:'MaybeNat',
+        scrutinee:{kind:'var',name:'value'},
+        alternatives:[
+          {
+            constructor:'none',
+            bindings:[],
+            body:{kind:'literal',value:0n},
+          },
+          {
+            constructor:'some',
+            bindings:[{field:'value',name:'x'}],
+            body:{kind:'var',name:'x'},
+          },
+        ],
+      },
+    }],
+  });
+  equal(source.includes('switch (__ps$match$0[__ps$tag$0])'),true);
+  equal(source.includes('case "none": return 0n;'),true);
+  equal(
+    source.includes(
+      'case "some": return ((x) => x)(__ps$match$0.value);',
+    ),
+    true,
+  );
+  const compiled=compileTypeScript(source,'verified-match.ts');
+  equal(compiled.javascript.includes('switch (__ps$match$0[__ps$tag$0])'),true);
+}
+console.log('ok - @proofscript/backend-ts verified ADT match emission');

@@ -234,3 +234,26 @@ console.log('ok - psc verified nominal structure pipeline');
   );
 }
 console.log('ok - psc verified ADT constructor pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'inductive MaybeNat where { | none; | some(value : Nat); } '+
+    'function getOrZero(value : MaybeNat) : Nat := '+
+    'match value with { | .none => 0; | .some x => x; };',
+    'adt-match.ts',
+  );
+  const get=result.ir.declarations.find(
+    (item)=>item.name==='getOrZero',
+  );
+  equal(get?.body.kind,'match');
+  equal(result.typeScript.includes('case "none": return 0n;'),true);
+  equal(
+    result.typeScript.includes(
+      'case "some": return ((x) => x)(__ps$match$0.value);',
+    ),
+    true,
+  );
+  equal(result.emitted.javascript.includes('case "some"'),true);
+}
+console.log('ok - psc verified ADT match pipeline');

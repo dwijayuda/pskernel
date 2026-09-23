@@ -383,3 +383,113 @@ console.log('ok - @proofscript/erasure verified runtime structures');
   );
 }
 console.log('ok - @proofscript/erasure verified ADT constructors');
+
+
+{
+  const base=new Environment();
+  const kernel=new Kernel(base);
+  const Nat=nameFromDotted('TestNat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const Maybe=nameFromDotted('MaybeNat');
+  const None=nameFromDotted('MaybeNat.none');
+  const Some=nameFromDotted('MaybeNat.some');
+  const maybeType=constant(Maybe);
+  const checkedBase=admitCheckedCoreAdmissions(base,[{
+    kind:'inductive',
+    declaration:{
+      levelParams:[],
+      numParams:0,
+      types:[{
+        name:Maybe,
+        type:sort(levelSucc(levelZero)),
+        ctors:[
+          {name:None,type:maybeType},
+          {
+            name:Some,
+            type:forallE(
+              nameFromDotted('value'),
+              constant(Nat),
+              maybeType,
+            ),
+          },
+        ],
+      }],
+    },
+  }]);
+  const recursor=nameFromDotted('MaybeNat.rec');
+  const motive=lam(
+    nameFromDotted('_'),
+    maybeType,
+    constant(Nat),
+  );
+  const matchValue={
+    kind:'definition' as const,
+    name:nameFromDotted('getOrZero'),
+    levelParams:[],
+    type:forallE(nameFromDotted('value'),maybeType,constant(Nat)),
+    value:lam(
+      nameFromDotted('value'),
+      maybeType,
+      mkAppN(
+        constant(recursor,[levelZero]),
+        [
+          motive,
+          natLit(0),
+          lam(
+            nameFromDotted('x'),
+            constant(Nat),
+            bvar(0),
+          ),
+          bvar(0),
+        ],
+      ),
+    ),
+    hints:{kind:'regular' as const,height:1n},
+    safety:'safe' as const,
+  };
+  const checked=admitCheckedCoreAdmissions(base,[
+    {
+      kind:'inductive',
+      declaration:{
+        levelParams:[],
+        numParams:0,
+        types:[{
+          name:Maybe,
+          type:sort(levelSucc(levelZero)),
+          ctors:[
+            {name:None,type:maybeType},
+            {
+              name:Some,
+              type:forallE(
+                nameFromDotted('value'),
+                constant(Nat),
+                maybeType,
+              ),
+            },
+          ],
+        }],
+      },
+    },
+    {kind:'constant',declaration:matchValue},
+  ]);
+  void checkedBase;
+  const erased=eraseCheckedCoreModule(checked);
+  const body=erased.declarations.find(
+    (item)=>item.name==='getOrZero',
+  )?.body;
+  equal(body?.kind,'match');
+  if(body?.kind==='match'){
+    equal(body.inductive,'MaybeNat');
+    equal(body.alternatives.length,2);
+    equal(body.alternatives[0]?.constructor,'none');
+    equal(body.alternatives[1]?.constructor,'some');
+    equal(body.alternatives[1]?.bindings[0]?.field,'value');
+    equal(body.alternatives[1]?.body.kind,'var');
+  }
+}
+console.log('ok - @proofscript/erasure verified ADT recursor match lowering');

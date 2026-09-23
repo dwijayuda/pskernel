@@ -170,6 +170,34 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
       assertVerifiedIrIdentifier(expr.constructor);
       validateValueFields(expr.fields,'constructor value');
       return;
+    case 'match':{
+      assertVerifiedIrIdentifier(expr.inductive);
+      validateVerifiedIrExpr(expr.scrutinee);
+      const constructors=new Set<string>();
+      for(const alternative of expr.alternatives){
+        assertVerifiedIrIdentifier(alternative.constructor);
+        if(constructors.has(alternative.constructor)){
+          throw new Error(
+            "duplicate verified IR match constructor '"+
+            alternative.constructor+"'",
+          );
+        }
+        constructors.add(alternative.constructor);
+        const names=new Set<string>();
+        for(const binding of alternative.bindings){
+          assertVerifiedIrIdentifier(binding.field);
+          assertVerifiedIrIdentifier(binding.name);
+          if(names.has(binding.name)){
+            throw new Error(
+              "duplicate verified IR match binder '"+binding.name+"'",
+            );
+          }
+          names.add(binding.name);
+        }
+        validateVerifiedIrExpr(alternative.body);
+      }
+      return;
+    }
   }
 }
 

@@ -266,6 +266,36 @@ assert(
 );
 
 
+const verifiedAdtMatch=compileVerifiedSource(
+  'inductive MaybeNat where { | none; | some(value : Nat); } '+
+  'function getOrZero(value : MaybeNat) : Nat := '+
+  'match value with { | .none => 0; | .some x => x; };',
+  'verified-adt-match.ts',
+);
+assert(
+  verifiedAdtMatch.ir.declarations.find(
+    (item)=>item.name==='getOrZero',
+  )?.body.kind==='match',
+  'verified ADT match did not reach explicit compiler IR',
+);
+assert(
+  verifiedAdtMatch.typeScript.includes(
+    'switch (__ps$match$0[__ps$tag$0])',
+  ),
+  'verified ADT match did not reach TypeScript tagged-union dispatch',
+);
+assert(
+  verifiedAdtMatch.typeScript.includes(
+    'case "some": return ((x) => x)(__ps$match$0.value);',
+  ),
+  'verified ADT match field binding was not preserved',
+);
+assert(
+  verifiedAdtMatch.emitted.javascript.includes('case "some"'),
+  'verified ADT match did not compile to JavaScript',
+);
+
+
 const snapshot=processDocument('demo.ps',1,'x!',{
   process:text=>({
     state:{length:text.length},

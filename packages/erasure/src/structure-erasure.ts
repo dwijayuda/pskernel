@@ -91,6 +91,7 @@ export function prepareRuntimeStructures(
         structuresByConstructor:byConstructor,
         inductivesByType:new Map(),
         inductivesByConstructor:new Map(),
+        inductivesByRecursor:new Map(),
       };
       const type=eraseRuntimeType(
         binder.type,

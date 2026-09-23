@@ -8,6 +8,7 @@ import { Kernel } from '../src/kernel/kernel.js';
 import { N } from '../src/kernel/names.js';
 import { TypeChecker } from '../src/kernel/type-checker.js';
 import { NativeEvaluator } from '../src/kernel/reduction/native.js';
+import { asNat } from '../src/kernel/reduction/nat.js';
 import { KernelState } from '../src/kernel/state.js';
 import { addOrdinaryInductive, checkNoReservedNestedAux, checkUniformInductiveOccurrences, validateInstalledRecursorsByReduction } from '../src/kernel/inductive/ordinary.js';
 import { addQuot } from '../src/kernel/quotient.js';
@@ -247,8 +248,8 @@ test('lazy delta ignores definitions with malformed universe arity',()=>{
  env.add({kind:'definition',name:A,levelParams:[uN],type:sort(u),value:sort(levelZero),hints:{kind:'abbrev'},safety:'safe'});
  env.add({kind:'definition',name:B,levelParams:[uN],type:sort(u),value:sort(levelZero),hints:{kind:'regular',height:1n},safety:'safe'});
  const tc=new TypeChecker(env),a=constant(A),b=constant(B);
- assert(!tc.isDefEq(a,b),'wrong-universe-arity constants must not be treated as delta targets');
- assert((tc as any).deltaTarget(a)===null&&(tc as any).deltaTarget(b)===null,'Lean is_delta requires exact universe arity');
+ throws(()=>tc.isDefEq(a,b));
+ assert((tc as any).deltaTarget(a)===null&&(tc as any).deltaTarget(b)===null,'Lean is_delta requires exact universe arity even though public defeq rejects the malformed constants earlier');
 });
 
 test('lazy delta reduction has no arbitrary 512-step semantic cap',()=>{
@@ -374,10 +375,11 @@ test('Nat optimized reduction requires exact level-free primitive heads',()=>{
  assert(!(tc as any).isNatZeroExpr(malformedZero),'Nat.zero with universe arguments is not Lean kernel zero');
  assert((tc as any).natPredExpr(malformedSucc)===null,'Nat.succ with universe arguments is not a Lean kernel successor');
  const ctorOne=app(constant(N.NatSucc),constant(N.NatZero));
+ assert(asNat(ctorOne)===null,'the literal fast path itself must not reinterpret Nat.succ constructor syntax');
  const succOfCtorZero=app(constant(N.NatSucc),ctorOne);
- eqExpr(tc.whnf(succOfCtorZero),succOfCtorZero,'optimized Nat.succ only consumes a literal or Nat.zero, not constructor-form Nat.succ');
+ eqExpr(tc.whnf(succOfCtorZero),natLit(2),'Lean WHNF reduces the operand first, then the exact literal fast path consumes the resulting numeral');
  const addCtor=app(app(constant(N.NatAdd),ctorOne),natLit(2));
- eqExpr(tc.whnf(addCtor),addCtor,'optimized binary Nat reduction must not reinterpret Nat.succ constructor syntax as a literal');
+ eqExpr(tc.whnf(addCtor),natLit(3),'binary Nat reduction likewise WHNFs constructor-form operands before literal extraction');
 });
 
 test('Nat.add reduction uses exact bigint',()=>{const tc=new TypeChecker(baseEnv());const e=app(app(constant(N.NatAdd),natLit(9007199254740993n)),natLit(7));eqExpr(tc.whnf(e),natLit(9007199254741000n));});
@@ -784,7 +786,7 @@ test('recursor structure eta never projects data from an imax-normalized proof',
  const minor=lam(nameFromDotted('_b'),constant(N.Bool),constant(p));
  const term=mkAppN(constant(R),[motive,minor,constant(p)]);
  const tc=new TypeChecker(env);
- eqExpr(tc.check(term),constant(I));
+ assert(tc.isDefEq(tc.check(term),constant(I)),'Lean infer_app may leave the motive application as a beta redex, but its type must be definitionally I');
  eqExpr(tc.whnf(term),term,'Prop-valued structure major must remain opaque; eta expansion would illegally project its Bool field');
 });
 

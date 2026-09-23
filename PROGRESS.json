@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 166,
   "notes": [
+    "Permanent oracle syntax gate now includes official-oracle.mjs and native-oracle-smoke.mjs in addition to the canonical/replay diagnostic runners, so npm test catches syntax regressions in all Lean-backed evidence runners.",
     "Canonical replay evidence is now self-describing: module-stream-oracle validates Lean 4.34.0 plus the pinned git hash before export and includes protocol=`canonical-module-stream-v1`, canonical=true, full Lean version header, Lean git hash, and rootOrder in its final JSON summary.",
     "Runner syntax repair: corrected an over-escaped JavaScript Lean-version regex introduced during oracle identity hardening; the malformed regex was found by immediate local syntax-risk validation before any oracle evidence was accepted.",
     "Oracle-runner identity hardening: official-oracle, native-oracle-smoke, and fixture regeneration now require the exact Lean 4.34.0 commit before emitting evidence. official-oracle is also portable across Windows/POSIX executable names and PATH delimiters, and version matching accepts the real release header shape while the commit check supplies exact identity.",
@@ -225,5 +226,5 @@
   ],
   "currentTreeExpectedDirectTests": 166,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "direct kernel suite remains 166/166; all edited JS assurance runners parse cleanly in exact-branch syntax validation; canonical Lean-backed execution remains pending"
+  "currentTreeVerification": "direct kernel suite remains 166/166; exact-branch JS assurance runners parse cleanly; package oracle-syntax gate expanded but full npm test is pending on a byte-exact checkout"
 }

@@ -69,6 +69,29 @@ export function exprEq(a: Expr, b: Expr): boolean {
 }
 
 
+/** Lean kernel Expr structural equality for the expression fields represented here.
+ * Unlike exprEq, binder display names/info are intentionally ignored. MData payloads
+ * are not represented by ProofScript's core Expr, so only their wrapped terms compare. */
+export function exprLeanEq(a:Expr,b:Expr):boolean{
+  if(a===b)return true;
+  if(a.kind!==b.kind)return false;
+  switch(a.kind){
+    case'bvar':return b.kind==='bvar'&&a.index===b.index;
+    case'fvar':return b.kind==='fvar'&&a.id===b.id;
+    case'mvar':return b.kind==='mvar'&&a.id===b.id;
+    case'sort':return b.kind==='sort'&&JSON.stringify(a.level,(_k,v)=>typeof v==='bigint'?v.toString():v)===JSON.stringify(b.level,(_k,v)=>typeof v==='bigint'?v.toString():v);
+    case'const':return b.kind==='const'&&nameEq(a.name,b.name)&&a.levels.length===b.levels.length&&a.levels.every((x,i)=>JSON.stringify(x,(_k,v)=>typeof v==='bigint'?v.toString():v)===JSON.stringify(b.levels[i],(_k,v)=>typeof v==='bigint'?v.toString():v));
+    case'app':return b.kind==='app'&&exprLeanEq(a.fn,b.fn)&&exprLeanEq(a.arg,b.arg);
+    case'lam':return b.kind==='lam'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.body,b.body);
+    case'forall':return b.kind==='forall'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.body,b.body);
+    case'let':return b.kind==='let'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.value,b.value)&&exprLeanEq(a.body,b.body);
+    case'lit':return b.kind==='lit'&&a.literal.kind===b.literal.kind&&(a.literal.kind==='nat'?a.literal.value===(b.literal as {kind:'nat';value:bigint}).value:a.literal.value===(b.literal as {kind:'string';value:string}).value);
+    case'mdata':return b.kind==='mdata'&&exprLeanEq(a.expr,b.expr);
+    case'proj':return b.kind==='proj'&&nameEq(a.typeName,b.typeName)&&a.index===b.index&&exprLeanEq(a.expr,b.expr);
+  }
+}
+
+
 /** Kernel-generated metadata comparison: binder display names and mdata placement are non-semantic; binder annotations remain significant. */
 export function exprKernelMetadataEq(a: Expr, b: Expr): boolean {
   if(a.kind==='mdata') return exprKernelMetadataEq(a.expr,b);

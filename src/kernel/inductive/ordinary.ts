@@ -169,10 +169,10 @@ function generateRecursors(work:Environment,d:InductiveDecl,stats:Stats):{infos:
 }
 function commit(from:Environment,to:Environment,originalKeys:Set<string>):void{for(const i of from.entries())if(!originalKeys.has(nameKey(i.name)))to.add(i);}
 
-/** Admit an ordinary (non-nested) inductive declaration and synthesize its constructors/recursors. */
-export interface InductiveAdmissionOptions { readonly allowPrimitiveNames?: boolean; readonly allowReservedNestedAux?: boolean }
+interface InternalInductiveAdmissionOptions { readonly allowPrimitiveNames?: boolean; readonly allowReservedNestedAux?: boolean }
 
-export function addOrdinaryInductive(env:Environment,d:InductiveDecl,options:InductiveAdmissionOptions={}):void{
+/** Internal admission entry used only after a dedicated recognizer/preprocessor has justified a bypass. */
+export function addOrdinaryInductiveInternal(env:Environment,d:InductiveDecl,options:InternalInductiveAdmissionOptions={}):void{
  if(!options.allowReservedNestedAux)checkNoReservedNestedAux(d);
  checkUniformInductiveOccurrences(d);
  if(!options.allowPrimitiveNames){
@@ -185,4 +185,9 @@ export function addOrdinaryInductive(env:Environment,d:InductiveDecl,options:Ind
  // Defensive 4.34-style preservation checks: synthesized recursor types and every computation rule must typecheck.
  stage('recursor validation',()=>{for(const i of infos){const checker=new TypeChecker(work,new LocalContext(),undefined,undefined,d.isUnsafe?'unsafe':'safe',i.levelParams);stage(`recursor type ${nameToString(i.name)}`,()=>checker.ensureSort(checker.check(i.type),i.type));for(const rb of expectedRules.get(nameKey(i.name))??[]){stage(`recursor rule ${nameToString(rb.rule.ctor)}`,()=>{const got=checker.check(rb.rule.rhs);if(!checker.isDefEq(got,rb.expectedType))throw new KernelError(`recursor rule for '${nameToString(rb.rule.ctor)}' is not type preserving`);});}}});
  commit(work,env,original);
+}
+
+/** Public ordinary-inductive admission is deliberately fail-closed. */
+export function addOrdinaryInductive(env:Environment,d:InductiveDecl):void{
+ addOrdinaryInductiveInternal(env,d);
 }

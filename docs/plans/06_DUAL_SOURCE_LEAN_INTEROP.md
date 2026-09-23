@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **DS6.3 shared Node/LSP project source-root resolution landed; cross-language navigation remains; subordinate to the canonical checked-core architecture**
+Status: **DS6.4 cross-language navigation landed; source conversion actions and refresh hardening remain; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -392,7 +392,7 @@ Remaining DS5 work:
 
 ### DS6 — editor support
 
-Status: **DS6.3 shared Node/LSP resolution landed; project-aware navigation remains**
+Status: **DS6.4 project-aware cross-language navigation landed; conversion actions and refresh hardening remain**
 
 Landed DS6.1:
 
@@ -434,12 +434,24 @@ Landed DS6.3:
 - psc preserves its established PS_CLI_CONFIG_SOURCE_ROOTS diagnostic at the
   CLI boundary while sharing the underlying resolver semantics.
 
+Landed DS6.4:
+
+- completion includes declarations from the checked transitive project closure;
+- definition lookup can jump from a ProofScript use to a supported Lean
+  declaration and vice versa;
+- references scan the checked project source set across both source kinds;
+- the navigation layer remains an untrusted lexical editor aid and is not used
+  by elaboration, proof checking, or kernel admission;
+- open-buffer edits invalidate semantic/navigation caches together.
+
 Remaining DS6 work:
 
-- build cross-document/cross-source definition and reference indexes;
-- add cross-language navigation;
-- add source conversion code actions after project-aware document identity is
-  stable.
+- add source conversion code actions now that project-aware document identity
+  is stable;
+- republish affected importer diagnostics when an imported open document
+  changes, rather than waiting for the next request on that importer;
+- later improve the lexical reference index with scope-aware resolution without
+  moving name-binding authority out of elaboration.
 
 ## Non-goals
 

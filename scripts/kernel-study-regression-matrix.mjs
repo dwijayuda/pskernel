@@ -1,0 +1,63 @@
+import {readdirSync,readFileSync,statSync} from 'node:fs';
+import {join} from 'node:path';
+
+const roots=['study/lean4-4.34.0/tests/elab','study/lean4-4.34.0/tests/elab_fail'];
+
+function walk(dir){
+  const out=[];
+  for(const name of readdirSync(dir)){
+    const p=join(dir,name),s=statSync(p);
+    if(s.isDirectory())out.push(...walk(p));
+    else if(/^kernel.*\.lean$/.test(name))out.push(p.replaceAll('\\\\','/'));
+  }
+  return out;
+}
+
+const matrix={
+  'study/lean4-4.34.0/tests/elab/kernel1.lean':{kind:'direct',tests:['Nat.add reduction uses exact bigint'],note:'basic kernel defeq/Nat behavior'},
+  'study/lean4-4.34.0/tests/elab/kernel2.lean':{kind:'direct',tests:['defeq expands string literals exactly through String.ofList','Nat.pow reduction'],note:'basic WHNF/defeq/string and arithmetic behavior'},
+  'study/lean4-4.34.0/tests/elab/kernelBacktrack.lean':{kind:'frontend-operational',note:'Core task/error backtracking is outside the trusted semantic checker'},
+  'study/lean4-4.34.0/tests/elab/kernelErrorFollowup.lean':{kind:'frontend-operational',note:'frontend environment/error recovery after rejected declarations'},
+  'study/lean4-4.34.0/tests/elab/kernelImaxProp.lean':{kind:'direct',tests:['imax-normalized Prop inductive keeps Prop-only elimination','projection typing forbids extracting data from a proof']},
+  'study/lean4-4.34.0/tests/elab/kernelImaxPropInductive.lean':{kind:'direct',tests:['imax-normalized Prop inductive keeps Prop-only elimination']},
+  'study/lean4-4.34.0/tests/elab/kernelInterrupt.lean':{kind:'operational-resource',note:'cancellation/exception transport is operational behavior, not kernel term semantics'},
+  'study/lean4-4.34.0/tests/elab/kernelMaxRecDepth.lean':{kind:'direct',tests:['kernel recursion budget fails deterministically and succeeds when raised']},
+  'study/lean4-4.34.0/tests/elab/kernelMutualDupName.lean':{kind:'direct',tests:['mutual definitions reject safe, mixed, duplicate, and non-transactional blocks']},
+  'study/lean4-4.34.0/tests/elab/kernelNestedAuxName.lean':{kind:'direct',tests:['nested inductive admission rejects the reserved _nested auxiliary namespace']},
+  'study/lean4-4.34.0/tests/elab/kernelProjIdx.lean':{kind:'direct',tests:['projection indices reject negative, fractional, and uint32-overflow values']},
+  'study/lean4-4.34.0/tests/elab/kernelProjSname.lean':{kind:'direct',tests:['projection reduction never crosses an unrelated structure name']},
+  'study/lean4-4.34.0/tests/elab/kernel_is_def_eq_equiv_manager_1.lean':{kind:'direct-invariant-plus-oracle',tests:['defeq success cache remains pair-local and never gains transitive closure'],note:'full hash-collision exploit remains in official Lean adversarial oracle'},
+  'study/lean4-4.34.0/tests/elab/kernel_is_def_eq_equiv_manager_2.lean':{kind:'direct-invariant-plus-oracle',tests:['defeq success cache remains pair-local and never gains transitive closure'],note:'full transported result-sort exploit remains oracle coverage until compact TS minimization'},
+  'study/lean4-4.34.0/tests/elab/kernel_is_prop_ensure_sort.lean':{kind:'oracle-only-adversarial',note:'large transported-history soundness regression; underlying isProp/projection invariants have direct tests'},
+  'study/lean4-4.34.0/tests/elab/kernel_is_prop_issue.lean':{kind:'oracle-only-adversarial',note:'large transported-history/eager/projection sequence; keep explicit until compact TS minimization'},
+  'study/lean4-4.34.0/tests/elab/kernel_maxheartbeats.lean':{kind:'operational-resource',note:'deterministic heartbeat accounting is outside current semantic-equivalence target'},
+  'study/lean4-4.34.0/tests/elab_fail/kernelMVarBug.lean':{kind:'frontend-plus-direct-boundary',tests:['declaration rejects expression and universe metavariables transactionally'],note:'original bug is elaborator postponed-instance registration; kernel rejection boundary is direct'},
+  'study/lean4-4.34.0/tests/elab_fail/kernelQuotNameCollision.lean':{kind:'direct',tests:['Quot bootstrap rejects occupied primitive names without overwriting them']},
+};
+
+const actual=roots.flatMap(walk).sort();
+const expected=Object.keys(matrix).sort();
+const missing=actual.filter(p=>!(p in matrix));
+const stale=expected.filter(p=>!actual.includes(p));
+if(missing.length||stale.length){
+  let msg='kernel study regression matrix drift';
+  if(missing.length)msg+='\nunclassified: '+missing.join(', ');
+  if(stale.length)msg+='\nstale: '+stale.join(', ');
+  throw new Error(msg);
+}
+
+const tests=readFileSync('test/all.test.ts','utf8');
+for(const [path,entry] of Object.entries(matrix)){
+  for(const name of entry.tests??[]){
+    if(!tests.includes("test('"+name+"'"))throw new Error(path+': mapped TS regression is missing: '+name);
+  }
+}
+
+const counts={};
+for(const entry of Object.values(matrix))counts[entry.kind]=(counts[entry.kind]??0)+1;
+console.log(JSON.stringify({
+  ok:true,
+  classified:actual.length,
+  counts,
+  oracleOnly:Object.entries(matrix).filter(([,v])=>v.kind==='oracle-only-adversarial').map(([path,v])=>({path,note:v.note})),
+},null,2));

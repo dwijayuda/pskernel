@@ -31,6 +31,14 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
     }
     case 'if':
       return 'if '+lowerV061ExprToLean(expr.condition)+' then '+lowerV061ExprToLean(expr.thenBranch)+' else '+lowerV061ExprToLean(expr.elseBranch);
+    case 'lambda':{
+      const binders=expr.binders.map((binder)=>
+        binder.type===undefined
+          ? binder.name
+          : '('+binder.name+' : '+lowerV061TypeToLean(binder.type)+')'
+      ).join(' ');
+      return 'fun '+binders+' => '+lowerV061ExprToLean(expr.body);
+    }
     case 'let':{
       const annotation=expr.declaredType===undefined?'':' : '+lowerV061TypeToLean(expr.declaredType);
       return 'let '+expr.name+annotation+' := '+lowerV061ExprToLean(expr.value)+'; '+lowerV061ExprToLean(expr.body);

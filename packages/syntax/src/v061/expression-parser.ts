@@ -1,5 +1,5 @@
 import {SyntaxError} from '../source.js';
-import type {V061Expr} from './ast.js';
+import type {V061Expr,V061LambdaBinder} from './ast.js';
 import {V061ParseContext,spanBetween} from './context.js';
 import {v061BinaryPrecedence} from './operators.js';
 import {parseV061Type} from './type-parser.js';
@@ -21,6 +21,7 @@ export class V061ExpressionParser {
   }
 
   private parsePrefix():V061Expr {
+    if(this.context.cursor.at('fun'))return this.parseLambda();
     if(this.context.cursor.at('let'))return this.parseLet();
     if(this.context.cursor.at('if'))return this.parseIf();
     if(this.context.cursor.at('!')){
@@ -29,6 +30,36 @@ export class V061ExpressionParser {
       return {kind:'unary',operator:'!',operand,span:spanBetween(first,operand)};
     }
     return this.parsePrimary();
+  }
+
+
+  private parseLambda():V061Expr {
+    const first=this.context.cursor.expect('fun');
+    const binders:V061LambdaBinder[]=[];
+
+    while(!this.context.cursor.at('=>')){
+      const start=this.context.cursor.peek();
+      if(start.text==='('){
+        const open=this.context.cursor.consume();
+        const name=this.context.cursor.expectKind('identifier','lambda binder name');
+        this.context.cursor.expect(':');
+        const type=parseV061Type(this.context);
+        const close=this.context.cursor.expect(')');
+        binders.push({name:name.text,type,span:{start:open.span.start,end:close.span.end}});
+      }else if(start.kind==='identifier'){
+        const name=this.context.cursor.consume();
+        binders.push({name:name.text,span:name.span});
+      }else{
+        throw new SyntaxError("expected lambda binder or '=>', got '"+start.text+"'",start.span);
+      }
+    }
+
+    if(binders.length===0){
+      throw new SyntaxError('lambda requires at least one binder',first.span);
+    }
+    this.context.cursor.expect('=>');
+    const body=this.parse();
+    return {kind:'lambda',binders,body,span:{start:first.span.start,end:body.span.end}};
   }
 
   private parseLet():V061Expr {

@@ -95,16 +95,16 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-let-parser-mvp",
+      "status": "v061-lambda-parser-mvp",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
         "Pinned to ProofScript v0.7.0 with the v0.6.1 compiler-ready surface as the implementation baseline.",
         "v0.6.1 parsing is split into type AST/parser, expression AST/parser, declaration parser, operator table, parser context, and Lean lowering modules.",
-        "Type syntax now has a first-class right-associative arrow AST instead of stringly-typed annotations.",
-        "Reference-backed software syntax covers const, def/function explicit parameters, D-CALL, primitive expressions/operators, grouping/unit, E-IF-BRACE, and lexical let.",
-        "Canonical Lean lowering is emitted from AST nodes; unsupported syntax fails closed."
+        "Reference-backed syntax covers first-class function arrows and inherited fun lambdas with bare or explicitly typed binders.",
+        "Canonical Lean lowering preserves fun semantics; TypeScript-style arrow-lambda syntax is not admitted.",
+        "Unsupported syntax fails closed."
       ]
     },
     {

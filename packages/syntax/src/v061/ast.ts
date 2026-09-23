@@ -8,6 +8,12 @@ export interface V061Parameter {
   readonly span:SourceSpan;
 }
 
+export interface V061LambdaBinder {
+  readonly name:string;
+  readonly type?:V061TypeExpr;
+  readonly span:SourceSpan;
+}
+
 export type V061Expr =
   | {readonly kind:'nat';readonly text:string;readonly span:SourceSpan}
   | {readonly kind:'string';readonly value:string;readonly span:SourceSpan}
@@ -19,6 +25,7 @@ export type V061Expr =
   | {readonly kind:'unary';readonly operator:'!';readonly operand:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'binary';readonly operator:string;readonly left:V061Expr;readonly right:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'if';readonly condition:V061Expr;readonly thenBranch:V061Expr;readonly elseBranch:V061Expr;readonly span:SourceSpan}
+  | {readonly kind:'lambda';readonly binders:readonly V061LambdaBinder[];readonly body:V061Expr;readonly span:SourceSpan}
   | {
       readonly kind:'let';
       readonly name:string;

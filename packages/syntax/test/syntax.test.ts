@@ -337,3 +337,40 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(type?.kind,'arrow');
   if(type?.kind==='arrow')equal(type.codomain.kind,'arrow');
 }
+
+
+// v0.6.1 inherited lambda syntax.
+{
+  const module=parseV061Module('const increment : Nat -> Nat := fun x => x + 1;');
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'lambda');
+  if(body?.kind==='lambda'){
+    equal(body.binders.length,1);
+    equal(body.binders[0]?.name,'x');
+    equal(body.binders[0]?.type,undefined);
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'def increment : Nat -> Nat := fun x => x + 1\n',
+  );
+}
+{
+  const module=parseV061Module('const addFn : Nat -> Nat -> Nat := fun (x : Nat) (y : Nat) => x + y;');
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'lambda');
+  if(body?.kind==='lambda'){
+    equal(body.binders.length,2);
+    equal(body.binders[0]?.type?.kind,'named');
+    equal(body.binders[1]?.type?.kind,'named');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'def addFn : Nat -> Nat -> Nat := fun (x : Nat) (y : Nat) => x + y\n',
+  );
+}
+{
+  throws(
+    ()=>parseV061Module('const bad : Nat -> Nat := fun => 1;'),
+    /lambda requires at least one binder/,
+  );
+}

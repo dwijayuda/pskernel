@@ -40,6 +40,7 @@ export interface VerifiedIrConstructor {
 
 export interface VerifiedIrInductive {
   readonly name:string;
+  readonly typeParameters?:readonly VerifiedIrTypeParameter[];
   readonly constructors:readonly VerifiedIrConstructor[];
 }
 
@@ -93,6 +94,7 @@ export type VerifiedIrExpr =
       readonly kind:'constructor';
       readonly inductive:string;
       readonly constructor:string;
+      readonly typeArgs?:readonly VerifiedIrType[];
       readonly fields:readonly {
         readonly name:string;
         readonly value:VerifiedIrExpr;

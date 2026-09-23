@@ -25,6 +25,7 @@ export interface RuntimeConstructorInfo {
   readonly inductive:string;
   readonly name:string;
   readonly constructorKey:string;
+  readonly numParams:number;
   readonly fields:readonly RuntimeStructureField[];
 }
 
@@ -32,6 +33,8 @@ export interface RuntimeInductiveInfo {
   readonly name:string;
   readonly typeKey:string;
   readonly recursorKey:string;
+  readonly numParams:number;
+  readonly typeParameters:readonly import('@proofscript/compiler-ir/verified').VerifiedIrTypeParameter[];
   readonly constructors:readonly RuntimeConstructorInfo[];
 }
 

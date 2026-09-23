@@ -246,7 +246,7 @@
       "path": "packages/erasure",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "verified-adt-match-erasure-mvp",
+      "status": "generic-nonrecursive-adt-erasure-mvp",
       "packageName": "@proofscript/erasure",
       "dependsOn": [
         "checked-core",
@@ -271,7 +271,9 @@
         "Application/ite/intrinsic lowering is isolated in app-erasure.ts so expression erasure remains below the repository source-shape ceiling.",
         "Source-level regression locks the current boundary: simple runtime structures compile end-to-end, while dependent Type/Prop fields remain explicit fail-closed cases.",
         "Source-level MaybeNat regression locks constructor identity across pskernel admission, checked core, verified IR, TypeScript tagged unions, JavaScript factories, and .d.ts output.",
-        "Kernel-admitted non-recursive ADT recursor applications now lower to verified match IR using RecursorInfo motive/minor/major metadata and admitted constructor order; source pattern ordering is not trusted by erasure."
+        "Kernel-admitted non-recursive ADT recursor applications now lower to verified match IR using RecursorInfo motive/minor/major metadata and admitted constructor order; source pattern ordering is not trusted by erasure.",
+        "Non-recursive type-parameterized inductives now preserve shared type parameters as verified IR generics while erasing constructor parameter arguments from JavaScript runtime arity.",
+        "Parameterized recursor/match erasure remains fail-closed for a separate milestone."
       ]
     },
     {
@@ -296,7 +298,8 @@
         "Verified IR now represents Nat le/lt conditions and if branching explicitly after proposition/Decidable erasure.",
         "Verified IR now represents nominal structure declarations, branded record construction, and field projection without carrying Lean kernel metadata into the backend.",
         "Verified IR now has nominal inductive/constructor metadata and explicit constructor-value expressions, independent of pskernel recursor internals.",
-        "Verified IR now has explicit tagged-union match expressions with constructor-specific runtime field bindings."
+        "Verified IR now has explicit tagged-union match expressions with constructor-specific runtime field bindings.",
+        "Verified inductives may carry compile-time type parameters; constructor expressions may carry type arguments used only for TypeScript/.d.ts emission."
       ]
     },
     {
@@ -333,7 +336,8 @@
         "backend-ts is the layer that maps semantic primitive IR types to host types: Nat/Int -> bigint, Bool -> boolean, String -> string, Unit -> undefined.",
         "Verified structures emit as branded readonly TypeScript interfaces; constructor values carry an internal unique-symbol brand so distinct Lean structures do not collapse under TypeScript structural typing.",
         "Verified inductives emit as unique-symbol tagged unions plus value-level constructor factories; constructor values remain nominally discriminated at runtime.",
-        "Verified ADT match IR emits a single-evaluation tagged-union switch; branch field bindings come from checked recursor minors and runtime constructor metadata."
+        "Verified ADT match IR emits a single-evaluation tagged-union switch; branch field bindings come from checked recursor minors and runtime constructor metadata.",
+        "Generic verified ADTs emit TypeScript type parameters and generic constructor factories; tsc removes those type arguments from JavaScript."
       ]
     },
     {

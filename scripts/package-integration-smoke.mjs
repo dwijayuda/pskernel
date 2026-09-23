@@ -356,3 +356,27 @@ assert(
   preludeService.documentStatus('file:///prelude-editor.ps').kernel==='verified',
   'Init.Prelude-backed editor service did not verify ordinary Nat declaration',
 );
+
+
+const verifiedGenericAdt=compileVerifiedSource(
+  'inductive PsOption(α : Type) where { | none; | some(value : α); } '+
+  'const noneNat : PsOption(Nat) := PsOption.none; '+
+  'const oneNat : PsOption(Nat) := PsOption.some(1);',
+  'verified-generic-adt.ts',
+);
+assert(
+  verifiedGenericAdt.typeScript.includes('export type PsOption<T0> ='),
+  'verified generic ADT did not preserve its type parameter',
+);
+assert(
+  verifiedGenericAdt.typeScript.includes('PsOption["none"]<bigint>()'),
+  'nullary generic constructor did not retain compile-time type argument',
+);
+assert(
+  verifiedGenericAdt.typeScript.includes('PsOption["some"]<bigint>(1n)'),
+  'generic constructor did not erase shared parameter at runtime',
+);
+assert(
+  !verifiedGenericAdt.emitted.javascript.includes('<T0>'),
+  'generic ADT type parameter leaked into JavaScript',
+);

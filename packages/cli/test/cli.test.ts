@@ -257,3 +257,18 @@ console.log('ok - psc verified ADT constructor pipeline');
   equal(result.emitted.javascript.includes('case "some"'),true);
 }
 console.log('ok - psc verified ADT match pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'inductive PsOption(α : Type) where { | none; | some(value : α); } '+
+  'const noneNat : PsOption(Nat) := PsOption.none; '+
+  'const oneNat : PsOption(Nat) := PsOption.some(1);',
+    'generic-adt.ts',
+  );
+  equal(result.typeScript.includes('export type PsOption<T0> ='),true);
+  equal(result.typeScript.includes('PsOption["none"]<bigint>()'),true);
+  equal(result.typeScript.includes('PsOption["some"]<bigint>(1n)'),true);
+  equal(result.emitted.javascript.includes('<T0>'),false);
+}
+console.log('ok - psc verified generic ADT constructor pipeline');

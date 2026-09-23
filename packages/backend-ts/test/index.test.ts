@@ -495,3 +495,82 @@ console.log('ok - @proofscript/backend-ts verified ADT constructor emission');
   equal(compiled.javascript.includes('switch (__ps$match$0[__ps$tag$0])'),true);
 }
 console.log('ok - @proofscript/backend-ts verified ADT match emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    inductives:[{
+      name:'PsOption',
+      typeParameters:[{name:'T0'}],
+      constructors:[
+        {name:'none',fields:[]},
+        {
+          name:'some',
+          fields:[{
+            name:'value',
+            type:{kind:'typeParameter',name:'T0'},
+          }],
+        },
+      ],
+    }],
+    declarations:[
+      {
+        name:'noneNat',
+        typeParameters:[],
+        parameters:[],
+        resultType:{
+          kind:'named',
+          name:'PsOption',
+          args:[{kind:'primitive',name:'Nat'}],
+        },
+        body:{
+          kind:'constructor',
+          inductive:'PsOption',
+          constructor:'none',
+          typeArgs:[{kind:'primitive',name:'Nat'}],
+          fields:[],
+        },
+      },
+      {
+        name:'oneNat',
+        typeParameters:[],
+        parameters:[],
+        resultType:{
+          kind:'named',
+          name:'PsOption',
+          args:[{kind:'primitive',name:'Nat'}],
+        },
+        body:{
+          kind:'constructor',
+          inductive:'PsOption',
+          constructor:'some',
+          typeArgs:[{kind:'primitive',name:'Nat'}],
+          fields:[{
+            name:'value',
+            value:{kind:'literal',value:1n},
+          }],
+        },
+      },
+    ],
+  });
+  equal(source.includes('export type PsOption<T0> ='),true);
+  equal(
+    source.includes(
+      '"none": <T0>(): PsOption<T0> =>',
+    ),
+    true,
+  );
+  equal(
+    source.includes(
+      '"some": <T0>(__field0: T0): PsOption<T0> =>',
+    ),
+    true,
+  );
+  equal(source.includes('PsOption["none"]<bigint>()'),true);
+  equal(source.includes('PsOption["some"]<bigint>(1n)'),true);
+  const compiled=compileTypeScript(source,'generic-adt.ts');
+  equal(compiled.javascript.includes('<T0>'),false);
+  equal(compiled.declaration.includes('type PsOption<T0>'),true);
+}
+console.log('ok - @proofscript/backend-ts verified generic ADT TypeScript emission');

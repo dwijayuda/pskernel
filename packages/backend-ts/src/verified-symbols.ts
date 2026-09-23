@@ -100,6 +100,11 @@ export function emitVerifiedInductives(
       'const '+tag+': unique symbol = Symbol('+
       JSON.stringify('ProofScript.'+inductive.name+'.tag')+');',
     );
+    const typeParameters=inductive.typeParameters??[];
+    const genericNames=typeParameters.map((parameter)=>parameter.name);
+    const genericSuffix=genericNames.length===0
+      ?''
+      :'<'+genericNames.join(', ')+'>';
     const variants=inductive.constructors.map((constructor)=>{
       const fields=constructor.fields.map((field)=>
         'readonly '+field.name+': '+
@@ -110,18 +115,22 @@ export function emitVerifiedInductives(
         fields.join(' ')+' }';
     });
     lines.push(
-      'export type '+inductive.name+' =\n  | '+
+      'export type '+inductive.name+genericSuffix+' =\n  | '+
       variants.join('\n  | ')+';',
     );
     lines.push('export const '+inductive.name+' = {');
     for(const constructor of inductive.constructors){
-      if(constructor.fields.length===0){
+      const resultType=inductive.name+genericSuffix;
+      if(typeParameters.length===0&&constructor.fields.length===0){
         lines.push(
           '  '+JSON.stringify(constructor.name)+': { ['+tag+']: '+
-          JSON.stringify(constructor.name)+' } as '+inductive.name+',',
+          JSON.stringify(constructor.name)+' } as '+resultType+',',
         );
         continue;
       }
+      const genericPrefix=typeParameters.length===0
+        ?''
+        :'<'+genericNames.join(', ')+'>';
       const params=constructor.fields.map((field,index)=>
         '__field'+index+': '+emitVerifiedType(field.type)
       ).join(', ');
@@ -129,10 +138,11 @@ export function emitVerifiedInductives(
         field.name+': __field'+index
       );
       lines.push(
-        '  '+JSON.stringify(constructor.name)+': ('+params+'): '+
-        inductive.name+' => ({ ['+tag+']: '+
-        JSON.stringify(constructor.name)+', '+
-        fields.join(', ')+' } as '+inductive.name+'),',
+        '  '+JSON.stringify(constructor.name)+': '+genericPrefix+
+        '('+params+'): '+resultType+' => ({ ['+tag+']: '+
+        JSON.stringify(constructor.name)+
+        (fields.length===0?'':', '+fields.join(', '))+
+        ' } as '+resultType+'),',
       );
     }
     lines.push('} as const;');

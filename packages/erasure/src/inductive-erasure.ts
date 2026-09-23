@@ -20,6 +20,7 @@ import {
 } from './model.js';
 import {safeIdentifier} from './names.js';
 import {eraseRuntimeType} from './type-erasure.js';
+import {prepareInductiveParameters} from './inductive-parameter-erasure.js';
 
 export interface PreparedRuntimeInductives {
   readonly ir:readonly VerifiedIrInductive[];
@@ -50,9 +51,9 @@ export function prepareRuntimeInductives(
   for(const inductive of module.inductives){
     const typeKey=nameKey(inductive.name);
     if(structureKeys.has(typeKey))continue;
-    if(inductive.numParams!==0||inductive.numIndices!==0){
+    if(inductive.numIndices!==0){
       throw new Error(
-        "PS_ERASE_PARAMETERIZED_INDUCTIVE_UNSUPPORTED: '"+
+        "PS_ERASE_INDEXED_INDUCTIVE_UNSUPPORTED: '"+
         nameToString(inductive.name)+"'",
       );
     }
@@ -67,6 +68,10 @@ export function prepareRuntimeInductives(
     if(inductiveName===undefined){
       throw new Error('PS_ERASE_INDUCTIVE_NAME_MISSING');
     }
+    const parameters=prepareInductiveParameters(
+      inductive,
+      module.environment,
+    );
     const constructors:RuntimeConstructorInfo[]=[];
 
     for(const constructorName of inductive.ctors){
@@ -79,8 +84,24 @@ export function prepareRuntimeInductives(
       }
 
       let cursor=constructor.type;
-      let localContext=new LocalContext();
+      let localContext=parameters.localContext.clone();
       let runtimeLocals=new Map<string,string>();
+
+      for(let index=0;index<constructor.numParams;index+=1){
+        const checker=new TypeChecker(
+          module.environment,
+          localContext.clone(),
+        );
+        const binder=checker.ensureForall(checker.whnf(cursor));
+        const value=parameters.values[index];
+        if(value===undefined){
+          throw new Error(
+            "PS_ERASE_CONSTRUCTOR_PARAMETER_MISMATCH: '"+
+            nameToString(constructorName)+"'",
+          );
+        }
+        cursor=instantiate1(binder.body,value);
+      }
       const fields:RuntimeConstructorInfo['fields'][number][]=[];
       const fieldNames=new Set<string>();
 
@@ -111,8 +132,8 @@ export function prepareRuntimeInductives(
         const scope:ErasureScope={
           localContext,
           runtimeLocals,
-          typeLocals:new Map(),
-          erasedLocals:new Set(),
+          typeLocals:parameters.typeLocals,
+          erasedLocals:parameters.erasedLocals,
           declarationNames:symbolNames,
           structuresByType,
           structuresByConstructor,
@@ -125,13 +146,17 @@ export function prepareRuntimeInductives(
           scope,
           module.environment,
         );
-        if(type.kind==='unknown'||type.kind==='typeParameter'){
+        if(type.kind==='unknown'){
           throw new Error(
             "PS_ERASE_INDUCTIVE_FIELD_TYPE_UNSUPPORTED: constructor '"+
             nameToString(constructorName)+"' field "+index,
           );
         }
-        fields.push({sourceIndex:index,name:fieldName,type});
+        fields.push({
+          sourceIndex:constructor.numParams+index,
+          name:fieldName,
+          type,
+        });
 
         const next=localContext.clone();
         const id=next.fresh(sourceName);
@@ -154,6 +179,7 @@ export function prepareRuntimeInductives(
           'constructor',
         ),
         constructorKey:nameKey(constructorName),
+        numParams:constructor.numParams,
         fields,
       };
       constructors.push(info);
@@ -164,7 +190,7 @@ export function prepareRuntimeInductives(
     const recursor=module.environment.find(recursorName);
     if(
       recursor?.kind!=='recursor'
-      ||recursor.numParams!==0
+      ||recursor.numParams!==inductive.numParams
       ||recursor.numIndices!==0
       ||recursor.numMotives!==1
       ||recursor.numMinors!==constructors.length
@@ -190,12 +216,15 @@ export function prepareRuntimeInductives(
       name:inductiveName,
       typeKey,
       recursorKey:nameKey(recursorName),
+      numParams:inductive.numParams,
+      typeParameters:parameters.typeParameters,
       constructors,
     };
     byType.set(typeKey,info);
     byRecursor.set(info.recursorKey,info);
     ir.push({
       name:inductiveName,
+      typeParameters:parameters.typeParameters,
       constructors:constructors.map((constructor)=>({
         name:constructor.name,
         fields:constructor.fields.map((field)=>({

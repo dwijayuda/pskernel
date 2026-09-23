@@ -71,6 +71,17 @@ export function validateVerifiedIrModule(
       );
     }
     typeNames.add(inductive.name);
+    const typeParameters=new Set<string>();
+    for(const parameter of inductive.typeParameters??[]){
+      assertVerifiedIrIdentifier(parameter.name);
+      if(typeParameters.has(parameter.name)){
+        throw new Error(
+          "duplicate verified IR inductive type parameter '"+
+          parameter.name+"'",
+        );
+      }
+      typeParameters.add(parameter.name);
+    }
     const constructors=new Set<string>();
     for(const constructor of inductive.constructors){
       assertVerifiedIrIdentifier(constructor.name);
@@ -168,6 +179,7 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
     case 'constructor':
       assertVerifiedIrIdentifier(expr.inductive);
       assertVerifiedIrIdentifier(expr.constructor);
+      for(const typeArg of expr.typeArgs??[])validateType(typeArg);
       validateValueFields(expr.fields,'constructor value');
       return;
     case 'match':{

@@ -75,8 +75,12 @@ export function emitVerifiedExpr(
       }
       const access=expr.inductive+
         '['+JSON.stringify(expr.constructor)+']';
-      if(expr.fields.length===0)return access;
-      return access+'('+
+      const typeArgs=expr.typeArgs??[];
+      const generic=typeArgs.length===0
+        ?''
+        :'<'+typeArgs.map(emitVerifiedType).join(', ')+'>';
+      if(typeArgs.length===0&&expr.fields.length===0)return access;
+      return access+generic+'('+
         expr.fields.map((field)=>
           emitVerifiedExpr(field.value,brands,tags)
         ).join(', ')+')';

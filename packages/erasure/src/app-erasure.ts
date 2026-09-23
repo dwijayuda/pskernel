@@ -13,6 +13,7 @@ import {
   type ErasureScope,
 } from './model.js';
 import {tryEraseRuntimeRecursorApplication} from './recursor-erasure.js';
+import {eraseRuntimeType} from './type-erasure.js';
 
 export type RuntimeExprEraser=(
   expr:Expr,
@@ -92,17 +93,21 @@ export function eraseRuntimeApplication(
       nameKey(view.fn.name),
     );
     if(constructor!==undefined){
-      if(view.args.length!==constructor.fields.length){
+      const expectedArity=constructor.numParams+constructor.fields.length;
+      if(view.args.length!==expectedArity){
         throw new Error(
           "PS_ERASE_CONSTRUCTOR_ARITY: '"+constructor.inductive+'.'+
-          constructor.name+"' expected "+constructor.fields.length+
-          ' fields, got '+view.args.length,
+          constructor.name+"' expected "+expectedArity+
+          ' arguments including erased parameters, got '+view.args.length,
         );
       }
       return {
         kind:'constructor',
         inductive:constructor.inductive,
         constructor:constructor.name,
+        typeArgs:view.args.slice(0,constructor.numParams).map(
+          (arg)=>eraseRuntimeType(arg,scope,environment),
+        ),
         fields:constructor.fields.map((field)=>({
           name:field.name,
           value:erase(

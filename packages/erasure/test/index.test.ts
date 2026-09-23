@@ -494,3 +494,102 @@ console.log('ok - @proofscript/erasure verified ADT constructors');
   }
 }
 console.log('ok - @proofscript/erasure verified ADT recursor match lowering');
+
+
+{
+  const base=new Environment();
+  const kernel=new Kernel(base);
+  const Nat=nameFromDotted('GenericNat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const OptionType=nameFromDotted('PsOption');
+  const None=nameFromDotted('PsOption.none');
+  const Some=nameFromDotted('PsOption.some');
+  const alpha=nameFromDotted('α');
+  const alphaSort=sort(levelSucc(levelZero));
+  const optionAlpha=app(constant(OptionType),bvar(0));
+  const checked=admitCheckedCoreAdmissions(base,[
+    {
+      kind:'inductive',
+      declaration:{
+        levelParams:[],
+        numParams:1,
+        types:[{
+          name:OptionType,
+          type:forallE(alpha,alphaSort,alphaSort),
+          ctors:[
+            {
+              name:None,
+              type:forallE(
+                alpha,
+                alphaSort,
+                optionAlpha,
+                'implicit',
+              ),
+            },
+            {
+              name:Some,
+              type:forallE(
+                alpha,
+                alphaSort,
+                forallE(
+                  nameFromDotted('value'),
+                  bvar(0),
+                  app(constant(OptionType),bvar(1)),
+                ),
+                'implicit',
+              ),
+            },
+          ],
+        }],
+      },
+    },
+    {
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:nameFromDotted('noneNat'),
+        levelParams:[],
+        type:app(constant(OptionType),constant(Nat)),
+        value:app(constant(None),constant(Nat)),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+    {
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:nameFromDotted('oneNat'),
+        levelParams:[],
+        type:app(constant(OptionType),constant(Nat)),
+        value:mkAppN(
+          constant(Some),
+          [constant(Nat),natLit(1n)],
+        ),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+  ]);
+  const erased=eraseCheckedCoreModule(checked);
+  const option=erased.inductives?.[0];
+  equal(option?.typeParameters?.[0]?.name,'T0');
+  equal(option?.constructors[1]?.fields[0]?.type.kind,'typeParameter');
+  const none=erased.declarations.find((item)=>item.name==='noneNat');
+  const some=erased.declarations.find((item)=>item.name==='oneNat');
+  equal(none?.body.kind,'constructor');
+  if(none?.body.kind==='constructor'){
+    equal(none.body.typeArgs?.[0]?.kind,'primitive');
+  }
+  equal(some?.body.kind,'constructor');
+  if(some?.body.kind==='constructor'){
+    equal(some.body.typeArgs?.[0]?.kind,'primitive');
+    equal(some.body.fields.length,1);
+  }
+}
+console.log('ok - @proofscript/erasure generic nonrecursive ADT constructor erasure');

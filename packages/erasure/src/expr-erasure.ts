@@ -114,6 +114,13 @@ export function eraseRuntimeExpr(
         nameKey(expr.name),
       );
       if(constructor!==undefined){
+        if(constructor.numParams!==0){
+          throw new Error(
+            "PS_ERASE_GENERIC_CONSTRUCTOR_STUCK: '"+
+            constructor.inductive+'.'+constructor.name+
+            "' requires inferred type arguments before erasure",
+          );
+        }
         if(constructor.fields.length!==0){
           throw new Error(
             "PS_ERASE_CONSTRUCTOR_FUNCTION_UNSUPPORTED: '"+
@@ -124,6 +131,7 @@ export function eraseRuntimeExpr(
           kind:'constructor',
           inductive:constructor.inductive,
           constructor:constructor.name,
+          typeArgs:[],
           fields:[],
         };
       }

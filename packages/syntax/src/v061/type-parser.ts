@@ -13,7 +13,7 @@ export type V061TypeExpr =
     }
   | {
       readonly kind:'binary';
-      readonly operator:'+'|'-'|'*'|'/'|'%';
+      readonly operator:'+'|'-'|'*'|'/'|'%'|'<'|'<='|'>'|'>=';
       readonly left:V061TypeExpr;
       readonly right:V061TypeExpr;
       readonly span:SourceSpan;
@@ -47,7 +47,9 @@ export function parseV061Type(context:V061ParseContext):V061TypeExpr {
   return domain;
 }
 
-const TYPE_TERM_BINARY_OPERATORS=new Set(['+','-','*','/','%']);
+const TYPE_TERM_BINARY_OPERATORS=new Set([
+  '+','-','*','/','%','<','<=','>','>=',
+]);
 
 function parseTypeTermBinary(
   context:V061ParseContext,
@@ -63,7 +65,7 @@ function parseTypeTermBinary(
     const right=parseTypeTermBinary(context,precedence+1);
     left={
       kind:'binary',
-      operator:token.text as '+'|'-'|'*'|'/'|'%',
+      operator:token.text as '+'|'-'|'*'|'/'|'%'|'<'|'<='|'>'|'>=',
       left,
       right,
       span:spanBetween(left,right),
@@ -185,9 +187,12 @@ export function lowerV061TypeToLean(
       return precedence<parentPrecedence?'('+rendered+')':rendered;
     }
     case 'binary':{
-      const precedence=type.operator==='*'||type.operator==='/'||type.operator==='%'
-        ?65
-        :60;
+      const precedence=
+        type.operator==='*'||type.operator==='/'||type.operator==='%'
+          ?65
+          :type.operator==='+'||type.operator==='-'
+            ?60
+            :55;
       const rendered=lowerV061TypeToLean(type.left,precedence)+' '+
         type.operator+' '+
         lowerV061TypeToLean(type.right,precedence+1);

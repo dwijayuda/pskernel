@@ -862,6 +862,29 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 
+{
+  const module=parseV061Module(
+    'theorem leAssumed(x : Nat, y : Nat, h : x <= y) : '+
+    'x <= y := by assumption;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem leAssumed (x : Nat) (y : Nat) (h : x <= y) : '+
+    'x <= y := by assumption\n',
+  );
+}
+{
+  const module=parseV061Module(
+    'theorem reversedRelations(x : Nat, y : Nat, h1 : x > y, h2 : x >= y) : '+
+    'x > y := by assumption;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem reversedRelations (x : Nat) (y : Nat) (h1 : x > y) '+
+    '(h2 : x >= y) : x > y := by assumption\n',
+  );
+}
+
 throws(
   ()=>parseV061Module(
     'theorem badEq(a : Nat, b : Nat, c : Nat) : a = b = c := by assumption;',

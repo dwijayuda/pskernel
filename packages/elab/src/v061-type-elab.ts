@@ -16,7 +16,11 @@ import {elaborateApplication} from './application.js';
 import {elaborateV061Constant} from './v061-constant-elab.js';
 import type {V061CoreElabContext} from './v061-context.js';
 import {v061LocalInstanceTerms} from './v061-context.js';
-import {elaborateV061NatArithmeticTerms} from './v061-nat-notation-elab.js';
+import {
+  elaborateV061NatArithmeticTerms,
+  elaborateV061NatRelationTerms,
+  isV061NatRelation,
+} from './v061-nat-notation-elab.js';
 
 function elaborateTypePositionApplication(
   fn:Expr,
@@ -81,10 +85,20 @@ function elaborateV061TypePositionTerm(
       );
       const left=elaborateV061TypePositionTerm(syntax.left,context);
       const right=elaborateV061TypePositionTerm(syntax.right,context);
+      const lhs={term:left,type:checker.check(left)};
+      const rhs={term:right,type:checker.check(right)};
+      if(isV061NatRelation(syntax.operator)){
+        return elaborateV061NatRelationTerms(
+          syntax.operator,
+          lhs,
+          rhs,
+          context,
+        ).term;
+      }
       return elaborateV061NatArithmeticTerms(
         syntax.operator,
-        {term:left,type:checker.check(left)},
-        {term:right,type:checker.check(right)},
+        lhs,
+        rhs,
         context,
       ).term;
     }

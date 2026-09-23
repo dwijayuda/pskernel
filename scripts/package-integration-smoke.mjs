@@ -222,6 +222,19 @@ assert(
 );
 
 
+const verifiedRelationTheoremType=compileVerifiedSource(
+  'theorem leAssumed(x : Nat, y : Nat, h : x <= y) : '+
+  'x <= y := by assumption; '+
+  'theorem gtAssumed(x : Nat, y : Nat, h : x > y) : '+
+  'x > y := by assumption;',
+  'verified-relation-theorem-type.ts',
+);
+assert(
+  verifiedRelationTheoremType.checkedCore.theorems.length===2,
+  'Nat relation theorem result syntax was not admitted',
+);
+
+
 const verifiedNat=compileVerifiedSource(
   'function add(x : Nat, y : Nat) : Nat := x + y; '+
   'function twice(x : Nat) : Nat := add(x, x); '+

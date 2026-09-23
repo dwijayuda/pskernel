@@ -129,7 +129,13 @@ export function elaborateV061NatArithmeticExpression(
   );
 }
 
-export interface ElaboratedNatCondition extends ElaboratedCoreTerm {
+export interface ElaboratedNatRelation extends ElaboratedCoreTerm {
+  readonly first:Expr;
+  readonly second:Expr;
+  readonly deciderName:string;
+}
+
+export interface ElaboratedNatCondition extends ElaboratedNatRelation {
   readonly decider:Expr;
 }
 
@@ -137,23 +143,33 @@ export function isV061NatRelation(operator:string):boolean {
   return natRelations.has(operator);
 }
 
-export function elaborateV061NatCondition(
-  expr:Extract<V061Expr,{kind:'binary'}>,
+export function elaborateV061NatRelationTerms(
+  operator:string,
+  left:ElaboratedCoreTerm,
+  right:ElaboratedCoreTerm,
   context:V061CoreElabContext,
-  elaborate:V061TermElaborator,
-):ElaboratedNatCondition {
-  const relation=natRelations.get(expr.operator);
+):ElaboratedNatRelation {
+  const relation=natRelations.get(operator);
   if(relation===undefined){
     throw new Error(
-      "PS_ELAB_CONDITION_UNSUPPORTED: operator '"+expr.operator+
-      "' is not a supported Nat proposition condition",
+      "PS_ELAB_CONDITION_UNSUPPORTED: operator '"+operator+
+      "' is not a supported Nat proposition relation",
     );
   }
-  const {checker,natType,left,right}=elaborateNatOperands(
-    expr,
-    context,
-    elaborate,
+  const natType=constant(requireV061NotationConstant(context,'Nat'));
+  const checker=new TypeChecker(
+    context.environment,
+    context.localContext.clone(),
   );
+  if(
+    !checker.isDefEq(left.type,natType)
+    ||!checker.isDefEq(right.type,natType)
+  ){
+    throw new Error(
+      "PS_ELAB_NAT_NOTATION_OPERAND_TYPE: operator '"+operator+
+      "' currently supports Nat operands only",
+    );
+  }
   const first=relation.reverse?right.term:left.term;
   const second=relation.reverse?left.term:right.term;
   const relationClass=relation.kind==='le'?'LE.le':'LT.lt';
@@ -171,11 +187,35 @@ export function elaborateV061NatCondition(
       second,
     ],
   );
-  const type=checker.check(term);
+  return {
+    term,
+    type:checker.check(term),
+    first,
+    second,
+    deciderName,
+  };
+}
+
+export function elaborateV061NatCondition(
+  expr:Extract<V061Expr,{kind:'binary'}>,
+  context:V061CoreElabContext,
+  elaborate:V061TermElaborator,
+):ElaboratedNatCondition {
+  const {left,right}=elaborateNatOperands(expr,context,elaborate);
+  const relation=elaborateV061NatRelationTerms(
+    expr.operator,
+    left,
+    right,
+    context,
+  );
+  const checker=new TypeChecker(
+    context.environment,
+    context.localContext.clone(),
+  );
   const decider=mkAppN(
-    constant(requireV061NotationConstant(context,deciderName)),
-    [first,second],
+    constant(requireV061NotationConstant(context,relation.deciderName)),
+    [relation.first,relation.second],
   );
   checker.check(decider);
-  return {term,type,decider};
+  return {...relation,decider};
 }

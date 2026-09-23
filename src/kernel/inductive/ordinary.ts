@@ -21,8 +21,36 @@ function addLocal(lctx:LocalContext,name:Name,type:Expr,bi:BinderInfo='default')
 function tc(env:Environment,lctx:LocalContext,isUnsafe=false,lparams?:readonly Name[]){return new TypeChecker(env,lctx,undefined,undefined,isUnsafe?'unsafe':'safe',lparams);}
 function stc(env:Environment,lctx:LocalContext,stats:Stats){return tc(env,lctx,stats.isUnsafe,stats.lparams);}
 function recName(n:Name):Name{return strName(n,'rec');}
-function hasConst(e:Expr,names:readonly Name[]):boolean{switch(e.kind){case'const':return names.some(n=>nameEq(n,e.name));case'app':return hasConst(e.fn,names)||hasConst(e.arg,names);case'lam':case'forall':return hasConst(e.type,names)||hasConst(e.body,names);case'let':return hasConst(e.type,names)||hasConst(e.value,names)||hasConst(e.body,names);case'mdata':return hasConst(e.expr,names);case'proj':return hasConst(e.expr,names);default:return false;}}
-function containsFVar(e:Expr,id:string):boolean{switch(e.kind){case'fvar':return e.id===id;case'app':return containsFVar(e.fn,id)||containsFVar(e.arg,id);case'lam':case'forall':return containsFVar(e.type,id)||containsFVar(e.body,id);case'let':return containsFVar(e.type,id)||containsFVar(e.value,id)||containsFVar(e.body,id);case'mdata':return containsFVar(e.expr,id);case'proj':return containsFVar(e.expr,id);default:return false;}}
+function hasConst(e:Expr,names:readonly Name[]):boolean{
+ const todo:Expr[]=[e];
+ while(todo.length){
+   const x=todo.pop()!;
+   switch(x.kind){
+     case'const':if(names.some(n=>nameEq(n,x.name)))return true;break;
+     case'app':todo.push(x.arg,x.fn);break;
+     case'lam':case'forall':todo.push(x.body,x.type);break;
+     case'let':todo.push(x.body,x.value,x.type);break;
+     case'mdata':case'proj':todo.push(x.expr);break;
+     default:break;
+   }
+ }
+ return false;
+}
+function containsFVar(e:Expr,id:string):boolean{
+ const todo:Expr[]=[e];
+ while(todo.length){
+   const x=todo.pop()!;
+   switch(x.kind){
+     case'fvar':if(x.id===id)return true;break;
+     case'app':todo.push(x.arg,x.fn);break;
+     case'lam':case'forall':todo.push(x.body,x.type);break;
+     case'let':todo.push(x.body,x.value,x.type);break;
+     case'mdata':case'proj':todo.push(x.expr);break;
+     default:break;
+   }
+ }
+ return false;
+}
 function arity(e:Expr):number{let n=0,x=e;while(x.kind==='forall'){n++;x=x.body;}return n;}
 function uniqueNames(xs:readonly Name[]):boolean{return xs.every((x,i)=>xs.findIndex(y=>nameEq(x,y))===i);}
 function mkBinder(kind:'forall'|'lam',v:OpenVar,body:Expr):Expr{const b=abstractFVar(body,v.id);return kind==='forall'?forallE(v.decl.userName,v.decl.type,b,v.decl.binderInfo):lam(v.decl.userName,v.decl.type,b,v.decl.binderInfo);}
@@ -31,15 +59,20 @@ function isReservedNestedName(n:Name):boolean{
  const s=nameToString(n);return s==='_nested'||s.startsWith('_nested.');
 }
 function usesReservedNestedAux(e:Expr):boolean{
- switch(e.kind){
-   case'const':return isReservedNestedName(e.name);
-   case'proj':return isReservedNestedName(e.typeName)||usesReservedNestedAux(e.expr);
-   case'app':return usesReservedNestedAux(e.fn)||usesReservedNestedAux(e.arg);
-   case'lam':case'forall':return usesReservedNestedAux(e.type)||usesReservedNestedAux(e.body);
-   case'let':return usesReservedNestedAux(e.type)||usesReservedNestedAux(e.value)||usesReservedNestedAux(e.body);
-   case'mdata':return usesReservedNestedAux(e.expr);
-   default:return false;
+ const todo:Expr[]=[e];
+ while(todo.length){
+   const x=todo.pop()!;
+   switch(x.kind){
+     case'const':if(isReservedNestedName(x.name))return true;break;
+     case'proj':if(isReservedNestedName(x.typeName))return true;todo.push(x.expr);break;
+     case'app':todo.push(x.arg,x.fn);break;
+     case'lam':case'forall':todo.push(x.body,x.type);break;
+     case'let':todo.push(x.body,x.value,x.type);break;
+     case'mdata':todo.push(x.expr);break;
+     default:break;
+   }
  }
+ return false;
 }
 export function checkNoReservedNestedAux(d:InductiveDecl):void{
  for(const it of d.types){
@@ -56,31 +89,24 @@ export function checkUniformInductiveOccurrences(d:InductiveDecl):void{
  const names=d.types.map(x=>x.name),levels=d.levelParams.map(levelParam);
  const isDeclared=(n:Name)=>names.some(x=>nameEq(x,n));
  const levelsMatch=(xs:readonly Level[])=>xs.length===levels.length&&xs.every((x,i)=>levelEqStructural(x,levels[i]!));
- const visit=(e:Expr,offset:number):void=>{
-   const av=appView(e);
-   if(av.fn.kind==='const'&&isDeclared(av.fn.name)){
-     if(av.args.length<=d.numParams){
-       let ok=av.args.length===d.numParams&&offset>=d.numParams&&levelsMatch(av.fn.levels);
-       for(let i=0;ok&&i<d.numParams;i++){
-         const a=av.args[i]!;
-         ok=a.kind==='bvar'&&a.index===offset-1-i;
-       }
-       if(!ok)throw new KernelError(`invalid occurrence of datatype '${nameToString(av.fn.name)}' being declared: it must be applied to the parameters and universe levels of the mutual declaration`);
-       return;
-     }
-     // Over-applied occurrences are traversed below. Their parameter prefix is
-     // itself an application subterm and will be checked at exactly numParams.
+ const todo:{e:Expr;offset:number}[]=[];
+ for(let ti=d.types.length-1;ti>=0;ti--)for(let ci=d.types[ti]!.ctors.length-1;ci>=0;ci--)todo.push({e:d.types[ti]!.ctors[ci]!.type,offset:0});
+ while(todo.length){
+   const {e,offset}=todo.pop()!,av=appView(e);
+   if(av.fn.kind==='const'&&isDeclared(av.fn.name)&&av.args.length<=d.numParams){
+     let ok=av.args.length===d.numParams&&offset>=d.numParams&&levelsMatch(av.fn.levels);
+     for(let i=0;ok&&i<d.numParams;i++){const a=av.args[i]!;ok=a.kind==='bvar'&&a.index===offset-1-i;}
+     if(!ok)throw new KernelError(`invalid occurrence of datatype '${nameToString(av.fn.name)}' being declared: it must be applied to the parameters and universe levels of the mutual declaration`);
+     continue;
    }
    switch(e.kind){
-     case'app':visit(e.fn,offset);visit(e.arg,offset);break;
-     case'lam':case'forall':visit(e.type,offset);visit(e.body,offset+1);break;
-     case'let':visit(e.type,offset);visit(e.value,offset);visit(e.body,offset+1);break;
-     case'mdata':visit(e.expr,offset);break;
-     case'proj':visit(e.expr,offset);break;
+     case'app':todo.push({e:e.arg,offset},{e:e.fn,offset});break;
+     case'lam':case'forall':todo.push({e:e.body,offset:offset+1},{e:e.type,offset});break;
+     case'let':todo.push({e:e.body,offset:offset+1},{e:e.value,offset},{e:e.type,offset});break;
+     case'mdata':case'proj':todo.push({e:e.expr,offset});break;
      default:break;
    }
- };
- for(const it of d.types)for(const ctor of it.ctors)visit(ctor.type,0);
+ }
 }
 function validIndApp(work:Environment,stats:Stats,lctx:LocalContext,t:Expr):{idx:number;indices:readonly Expr[]}|null{
  const w=stc(work,lctx,stats).whnf(t),v=appView(w);if(v.fn.kind!=='const')return null;const idx=stats.names.findIndex(n=>nameEq(n,v.fn.kind==='const'?v.fn.name:n));if(idx<0)return null;const ni=stats.nindices[idx]!;if(v.args.length!==stats.params.length+ni)return null;
@@ -89,12 +115,16 @@ function validIndApp(work:Environment,stats:Stats,lctx:LocalContext,t:Expr):{idx
  return {idx,indices:v.args.slice(stats.params.length)};
 }
 function checkPositivity(work:Environment,stats:Stats,lctx:LocalContext,t:Expr,ctor:Name,argNo:number):void{
- let w=stc(work,lctx,stats).whnf(t);if(!hasConst(w,stats.names))return;
- if(w.kind==='forall'){
+ let c=lctx,w=stc(work,c,stats).whnf(t);
+ while(hasConst(w,stats.names)){
+   if(w.kind!=='forall'){
+     if(!validIndApp(work,stats,c,w))throw new KernelError(`arg #${argNo} of '${nameToString(ctor)}' has a non-valid occurrence of the datatypes being declared`);
+     return;
+   }
    if(hasConst(w.type,stats.names))throw new KernelError(`arg #${argNo} of '${nameToString(ctor)}' has a non-positive occurrence`);
-   const c=lctx.clone(),v=addLocal(c,w.name,w.type,w.binderInfo);checkPositivity(work,stats,c,instantiate1(w.body,v.expr),ctor,argNo);return;
+   const next=c.clone(),v=addLocal(next,w.name,w.type,w.binderInfo);
+   c=next;w=stc(work,c,stats).whnf(instantiate1(w.body,v.expr));
  }
- if(!validIndApp(work,stats,lctx,w))throw new KernelError(`arg #${argNo} of '${nameToString(ctor)}' has a non-valid occurrence of the datatypes being declared`);
 }
 function openHeader(env:Environment,type:Expr,numParams:number,shared:readonly OpenVar[]|null,d:InductiveDecl):{lctx:LocalContext;params:OpenVar[];indices:OpenVar[];result:Expr}{
  const lctx=new LocalContext();const params:OpenVar[]=[];const indices:OpenVar[]=[];let t=tc(env,lctx,!!d.isUnsafe,d.levelParams).whnf(type);let i=0;

@@ -15,7 +15,21 @@ function checker(env:Environment,d:InductiveDecl,lparams?:readonly Name[]):TypeC
 
 function addParam(lctx:LocalContext,name:Name,type:Expr,bi:BinderInfo):OpenParam{const id=lctx.fresh(nameToString(name));lctx.addLocal(id,name,type,bi);const d=lctx.get(id);if(!d||d.kind!=='local')throw new Error('local invariant');return {id,expr:fvar(id),decl:d};}
 function close(kind:'forall'|'lam',params:readonly OpenParam[],body:Expr):Expr{let r=body;for(let i=params.length-1;i>=0;i--){const p=params[i]!;const b=abstractFVar(r,p.id);r=kind==='forall'?forallE(p.decl.userName,p.decl.type,b,p.decl.binderInfo):lam(p.decl.userName,p.decl.type,b,p.decl.binderInfo);}return r;}
-function hasNew(e:Expr,names:readonly Name[]):boolean{switch(e.kind){case'const':return names.some(n=>nameEq(n,e.name));case'app':return hasNew(e.fn,names)||hasNew(e.arg,names);case'lam':case'forall':return hasNew(e.type,names)||hasNew(e.body,names);case'let':return hasNew(e.type,names)||hasNew(e.value,names)||hasNew(e.body,names);case'mdata':return hasNew(e.expr,names);case'proj':return hasNew(e.expr,names);default:return false;}}
+function hasNew(e:Expr,names:readonly Name[]):boolean{
+ const todo:Expr[]=[e];
+ while(todo.length){
+   const x=todo.pop()!;
+   switch(x.kind){
+     case'const':if(names.some(n=>nameEq(n,x.name)))return true;break;
+     case'app':todo.push(x.arg,x.fn);break;
+     case'lam':case'forall':todo.push(x.body,x.type);break;
+     case'let':todo.push(x.body,x.value,x.type);break;
+     case'mdata':case'proj':todo.push(x.expr);break;
+     default:break;
+   }
+ }
+ return false;
+}
 function instFirstParams(e:Expr,args:readonly Expr[]):Expr{let t=e;for(const a of args){if(t.kind!=='forall')throw new KernelError('ill-formed nested inductive parameter instantiation');t=instantiate1(t.body,a);}return t;}
 function openShared(e:Expr,params:readonly OpenParam[]):{kind:'forall'|'lam';body:Expr}|null{if(params.length===0)return {kind:'forall',body:e};let t=e;let k:'forall'|'lam'|null=null;for(const p of params){if(t.kind!=='forall'&&t.kind!=='lam')return null;if(k===null)k=t.kind;else if(k!==t.kind)return null;t=instantiate1(t.body,p.expr);}return k?{kind:k,body:t}:null;}
 /** Re-open constructor parameters in a fresh local context. Lean does this per constructor
@@ -39,7 +53,33 @@ function rebaseParams(e:Expr,from:readonly OpenParam[],to:readonly OpenParam[]):
  const byId=new Map<string,Expr>();for(let i=0;i<from.length;i++)byId.set(from[i]!.id,to[i]!.expr);
  return mapExpr(e,x=>x.kind==='fvar'?(byId.get(x.id)??null):null);
 }
-function mapExpr(e:Expr,f:(x:Expr)=>Expr|null):Expr{const r=f(e);if(r)return r;switch(e.kind){case'app':return {...e,fn:mapExpr(e.fn,f),arg:mapExpr(e.arg,f)};case'lam':return {...e,type:mapExpr(e.type,f),body:mapExpr(e.body,f)};case'forall':return {...e,type:mapExpr(e.type,f),body:mapExpr(e.body,f)};case'let':return {...e,type:mapExpr(e.type,f),value:mapExpr(e.value,f),body:mapExpr(e.body,f)};case'mdata':return {...e,expr:mapExpr(e.expr,f)};case'proj':return {...e,expr:mapExpr(e.expr,f)};default:return e;}}
+function mapExpr(e:Expr,f:(x:Expr)=>Expr|null):Expr{
+ type Frame={e:Expr;done:boolean};
+ const todo:Frame[]=[{e,done:false}],out:Expr[]=[];
+ while(todo.length){
+   const frame=todo.pop()!,x=frame.e;
+   if(!frame.done){
+     const r=f(x);if(r){out.push(r);continue;}
+     switch(x.kind){
+       case'app':todo.push({e:x,done:true},{e:x.arg,done:false},{e:x.fn,done:false});break;
+       case'lam':case'forall':todo.push({e:x,done:true},{e:x.body,done:false},{e:x.type,done:false});break;
+       case'let':todo.push({e:x,done:true},{e:x.body,done:false},{e:x.value,done:false},{e:x.type,done:false});break;
+       case'mdata':case'proj':todo.push({e:x,done:true},{e:x.expr,done:false});break;
+       default:out.push(x);break;
+     }
+     continue;
+   }
+   switch(x.kind){
+     case'app':{const arg=out.pop()!,fn=out.pop()!;out.push({...x,fn,arg});break;}
+     case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push({...x,type,body});break;}
+     case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push({...x,type,value,body});break;}
+     case'mdata':case'proj':out.push({...x,expr:out.pop()!});break;
+     default:throw new Error('internal nested map frame');
+   }
+ }
+ if(out.length!==1)throw new Error('internal nested map result');
+ return out[0]!;
+}
 function appendUnique(base:Name,used:Set<string>,counter:{n:number}):Name{while(true){const n=strName(base,String(counter.n++));const k=nameKey(n);if(!used.has(k)){used.add(k);return n;}}}
 
 function preprocess(env:Environment,d:InductiveDecl):Preprocess{

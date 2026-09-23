@@ -9,7 +9,7 @@ import { N } from '../src/kernel/names.js';
 import { TypeChecker } from '../src/kernel/type-checker.js';
 import { NativeEvaluator } from '../src/kernel/reduction/native.js';
 import { KernelState } from '../src/kernel/state.js';
-import { addOrdinaryInductive, validateInstalledRecursorsByReduction } from '../src/kernel/inductive/ordinary.js';
+import { addOrdinaryInductive, checkNoReservedNestedAux, checkUniformInductiveOccurrences, validateInstalledRecursorsByReduction } from '../src/kernel/inductive/ordinary.js';
 import { addQuot } from '../src/kernel/quotient.js';
 import { addInductive } from '../src/kernel/inductive/nested.js';
 
@@ -65,6 +65,9 @@ test('deep structural traversals avoid the JavaScript call stack',()=>{
  for(let i=0;i<12000;i++)withLevel=lam(nameFromDotted('x'),constant(N.Nat),withLevel);
  const levelInst=instantiateExprLevels(withLevel,[u],[levelZero]);
  assert(levelInst.kind==='lam','deep expression-level universe instantiation must be stack-safe');
+
+ const deepDecl:any={levelParams:[],numParams:0,types:[{name:nameFromDotted('DeepScan'),type:sort(levelZero),ctors:[{name:nameFromDotted('DeepScan.mk'),type:e}]}]};
+ checkNoReservedNestedAux(deepDecl);checkUniformInductiveOccurrences(deepDecl);
 });
 test('universe metavariables remain distinct symbolic atoms',()=>{
  const n=nameFromDotted('u'),u=levelMVar(n),v=levelMVar(nameFromDotted('v')),p=levelParam(n);

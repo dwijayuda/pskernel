@@ -14,9 +14,11 @@ import {
   encodeCodecName,
 } from './codec-base.js';
 import {
+  decodeCodecAxiom,
   decodeCodecDefinition,
   decodeCodecInductive,
   decodeCodecTheorem,
+  encodeCodecAxiom,
   encodeCodecDefinition,
   encodeCodecInductive,
   encodeCodecTheorem,
@@ -24,7 +26,7 @@ import {
 
 export interface CheckedCoreAdmissionsPayload {
   readonly format:'proofscript-checked-admissions';
-  readonly version:1;
+  readonly version:1|2;
   readonly admissions:readonly unknown[];
 }
 
@@ -74,6 +76,15 @@ function decodeInstance(value:unknown):CheckedCoreInstance {
 
 function encodeAdmission(admission:CheckedCoreAdmission):unknown {
   switch(admission.kind){
+    case 'external':
+      return {
+        kind:'external',
+        declaration:encodeCodecAxiom(admission.declaration),
+        binding:{
+          source:admission.binding.source,
+          importedName:admission.binding.importedName,
+        },
+      };
     case 'constant':
       return admission.declaration.kind==='definition'
         ?{kind:'constant',declaration:encodeCodecDefinition(admission.declaration)}
@@ -98,6 +109,20 @@ function encodeAdmission(admission:CheckedCoreAdmission):unknown {
 function decodeAdmission(value:unknown):CheckedCoreAdmission {
   const o=codecObject(value,'admission');
   switch(o.kind){
+    case 'external':{
+      const binding=codecObject(o.binding,'external.binding');
+      return {
+        kind:'external',
+        declaration:decodeCodecAxiom(o.declaration),
+        binding:{
+          source:codecString(binding.source,'external.binding.source'),
+          importedName:codecString(
+            binding.importedName,
+            'external.binding.importedName',
+          ),
+        },
+      };
+    }
     case 'constant':{
       const d=codecObject(o.declaration,'constant.declaration');
       return {
@@ -132,7 +157,7 @@ export function encodeCheckedCoreAdmissions(
 ):CheckedCoreAdmissionsPayload {
   return {
     format:'proofscript-checked-admissions',
-    version:1,
+    version:2,
     admissions:admissions.map(encodeAdmission),
   };
 }
@@ -141,7 +166,10 @@ export function decodeCheckedCoreAdmissions(
   value:unknown,
 ):readonly CheckedCoreAdmission[] {
   const o=codecObject(value,'payload');
-  if(o.format!=='proofscript-checked-admissions'||o.version!==1){
+  if(
+    o.format!=='proofscript-checked-admissions'
+    ||(o.version!==1&&o.version!==2)
+  ){
     throw new Error('checked-core codec: unsupported payload format/version');
   }
   return codecArray(o.admissions,'payload.admissions').map(decodeAdmission);

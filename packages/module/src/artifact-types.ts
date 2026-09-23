@@ -24,7 +24,7 @@ export interface Lean4ExportPayload {
 }
 export interface CheckedAdmissionsPayload {
   readonly kind:'proofscript-checked-admissions-json';
-  readonly formatVersion:'1.0.0';
+  readonly formatVersion:'1.0.0'|'1.1.0';
   readonly integrity:Sha256;
   readonly text:string;
 }

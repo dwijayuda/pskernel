@@ -124,7 +124,10 @@ export function verifyModuleArtifact(
   }else{
     if(
       value.payload.kind!=='proofscript-checked-admissions-json'
-      ||value.payload.formatVersion!=='1.0.0'
+      ||(
+        value.payload.formatVersion!=='1.0.0'
+        &&value.payload.formatVersion!=='1.1.0'
+      )
       ||typeof value.payload.text!=='string'
       ||!moduleHex256(value.payload.integrity)
     ){

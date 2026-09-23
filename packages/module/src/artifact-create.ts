@@ -78,7 +78,7 @@ export function createCheckedModuleArtifact({
   const text=canonicalJson(encoded)+'\n';
   const payload:CheckedAdmissionsPayload={
     kind:'proofscript-checked-admissions-json',
-    formatVersion:'1.0.0',
+    formatVersion:'1.1.0',
     integrity:moduleSha256(text),
     text,
   };

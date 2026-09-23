@@ -814,3 +814,66 @@ console.log('ok - @proofscript/erasure recursive ADT metadata erasure');
   equal(erased.structures?.[0]?.fields[0]?.type.kind,'typeParameter');
 }
 console.log('ok - @proofscript/erasure generic structure metadata');
+
+{
+  const base=new Environment();
+  const Nat=nameFromDotted('Nat');
+  const hostInc=nameFromDotted('hostInc');
+  const main=nameFromDotted('externalMain');
+  base.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const fnType=forallE(
+    nameFromDotted('x'),
+    constant(Nat),
+    constant(Nat),
+  );
+  const checked=admitCheckedCoreAdmissions(base,[
+    {
+      kind:'external',
+      declaration:{
+        kind:'axiom',
+        name:hostInc,
+        levelParams:[],
+        type:fnType,
+        isUnsafe:true,
+      },
+      binding:{source:'host-lib',importedName:'inc'},
+    },
+    {
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:main,
+        levelParams:[],
+        type:fnType,
+        value:lam(
+          nameFromDotted('x'),
+          constant(Nat),
+          {
+            kind:'app',
+            fn:constant(hostInc),
+            arg:bvar(0),
+          },
+        ),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+  ]);
+  const erased=eraseCheckedCoreModule(checked);
+  equal(erased.imports?.length,1);
+  equal(erased.imports?.[0]?.localName,'hostInc');
+  equal(erased.imports?.[0]?.source,'host-lib');
+  equal(erased.imports?.[0]?.importedName,'inc');
+  equal(erased.imports?.[0]?.type.kind,'function');
+  const body=erased.declarations.find(
+    (item)=>item.name==='externalMain',
+  )?.body;
+  equal(body?.kind,'call');
+  if(body?.kind==='call')equal(body.fn.kind,'var');
+}
+console.log('ok - @proofscript/erasure external import lowering');

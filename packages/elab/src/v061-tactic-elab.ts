@@ -4,6 +4,7 @@ import {
   TypeChecker,
   type Expr,
   abstractFVar,
+  app,
   fvar,
   instantiate1,
   lam,
@@ -63,6 +64,42 @@ function elaborateTactic(
     throw new Error(
       'PS_ELAB_TACTIC_ASSUMPTION: no local hypothesis matches the goal',
     );
+  }
+
+  if(tactic.kind==='apply'){
+    const candidate=elaborate(tactic.proof,context);
+    const functionType=checker.whnf(
+      context.metaContext.instantiate(candidate.type),
+    );
+    if(functionType.kind!=='forall'){
+      throw new Error(
+        'PS_ELAB_TACTIC_APPLY: candidate is not a forall/function type',
+      );
+    }
+    if(functionType.binderInfo!=='default'){
+      throw new Error(
+        'PS_ELAB_TACTIC_APPLY: bounded apply requires one explicit premise',
+      );
+    }
+    const premise=elaborateTactic(
+      tactic.next,
+      context,
+      context.metaContext.instantiate(functionType.type),
+      elaborate,
+    );
+    const term=app(candidate.term,premise.term);
+    const type=checker.check(term);
+    if(
+      !checker.isDefEq(
+        context.metaContext.instantiate(type),
+        context.metaContext.instantiate(expected),
+      )
+    ){
+      throw new Error(
+        'PS_ELAB_TACTIC_APPLY: applying one premise does not solve the goal',
+      );
+    }
+    return {term,type};
   }
 
   const functionType=checker.whnf(

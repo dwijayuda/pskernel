@@ -713,6 +713,25 @@ console.log('ok - @proofscript/syntax lexer MVP');
     'theorem introProof (P : Prop) : P -> P := by intro h; assumption\n',
   );
 }
+{
+  const module=parseV061Module(
+    'theorem applyProof(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
+    'by apply f; assumption;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactic.kind,'apply');
+    if(body.tactic.kind==='apply'){
+      equal(body.tactic.proof.kind,'reference');
+      equal(body.tactic.next.kind,'assumption');
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem applyProof (P : Prop) (Q : Prop) (f : P -> Q) (h : P) : Q := by apply f; assumption\n',
+  );
+}
 
 
 {

@@ -435,6 +435,31 @@ console.log('ok - @proofscript/elab declaration expected-type propagation');
 console.log('ok - @proofscript/elab intro tactic proof-term construction');
 
 
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem applyPremise(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
+    'by apply f; assumption;',
+  ));
+  equal(result.theorems.length,1);
+  const theorem=result.theorems[0]!;
+  equal(theorem.value.kind,'lam');
+  equal(
+    result.environment.find(nameFromDotted('applyPremise'))?.kind,
+    'theorem',
+  );
+}
+{
+  let failed=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem badApply(P : Prop, h : P) : P := by apply h; assumption;',
+    ));
+  }catch(error){failed=/PS_ELAB_TACTIC_APPLY/.test(String(error));}
+  equal(failed,true);
+}
+console.log('ok - @proofscript/elab bounded apply tactic proof-term construction');
+
+
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();
   const kernel=new Kernel(env);

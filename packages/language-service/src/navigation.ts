@@ -54,7 +54,7 @@ export function completionItems(
   }
   for(const label of [
     'theorem','def','const','function','structure','class','inductive',
-    'fun','let','match','if','by','exact','assumption','intro',
+    'fun','let','match','if','by','exact','assumption','apply','intro',
   ]){
     add({label,kind:14,detail:'ProofScript / inherited Lean syntax',source:'syntax'});
   }

@@ -32,6 +32,9 @@ function lowerV061TacticToLean(
   switch(tactic.kind){
     case 'exact':return 'exact '+lowerV061ExprToLean(tactic.proof);
     case 'assumption':return 'assumption';
+    case 'apply':
+      return 'apply '+lowerV061ExprToLean(tactic.proof)+'; '+
+        lowerV061TacticToLean(tactic.next);
     case 'intro':
       return 'intro '+tactic.name+'; '+lowerV061TacticToLean(tactic.next);
   }

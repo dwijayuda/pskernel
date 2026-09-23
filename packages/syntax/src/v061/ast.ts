@@ -34,6 +34,12 @@ export type V061Tactic =
   | {readonly kind:'exact';readonly proof:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'assumption';readonly span:SourceSpan}
   | {
+      readonly kind:'apply';
+      readonly proof:V061Expr;
+      readonly next:V061Tactic;
+      readonly span:SourceSpan;
+    }
+  | {
       readonly kind:'intro';
       readonly name:string;
       readonly next:V061Tactic;

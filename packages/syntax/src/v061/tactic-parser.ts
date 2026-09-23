@@ -24,6 +24,19 @@ function parseTactic(
     return {kind:'assumption',span:token.span};
   }
 
+  if(tacticToken.text==='apply'){
+    const first=context.cursor.consume();
+    const proof=expressions.parse();
+    context.cursor.expect(';');
+    const next=parseTactic(context,expressions);
+    return {
+      kind:'apply',
+      proof,
+      next,
+      span:{start:first.span.start,end:next.span.end},
+    };
+  }
+
   if(tacticToken.text==='intro'){
     const first=context.cursor.consume();
     const name=context.cursor.expectKind('identifier','intro name');
@@ -38,7 +51,7 @@ function parseTactic(
   }
 
   throw new SyntaxError(
-    "kernel-facing tactic subset supports 'exact', 'assumption', and 'intro', got '"+
+    "kernel-facing tactic subset supports 'exact', 'assumption', 'apply', and 'intro', got '"+
     tacticToken.text+"'",
     tacticToken.span,
   );

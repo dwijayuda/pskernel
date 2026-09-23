@@ -159,6 +159,17 @@ assert(
 );
 
 
+const verifiedApply=compileVerifiedSource(
+  'theorem applyPremise(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
+  'by apply f; assumption;',
+  'verified-apply.ts',
+);
+assert(
+  verifiedApply.checkedCore.theorems.length===1,
+  'bounded apply did not construct a pskernel-admitted theorem proof term',
+);
+
+
 const verifiedNat=compileVerifiedSource(
   'function add(x : Nat, y : Nat) : Nat := x + y; '+
   'function twice(x : Nat) : Nat := add(x, x); '+

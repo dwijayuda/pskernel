@@ -137,7 +137,7 @@ ProofScript theorem correctness.
 The first target profile is:
 
 ```text
-proofscript-wasm32-gc-js-v1
+proofscript-wasm32-mvp-js-v1
 ```
 
 It is JavaScript-hosted, 32-bit-memory WebAssembly with an explicitly pinned

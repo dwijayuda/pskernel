@@ -10,6 +10,8 @@ for(const [name,value] of Object.entries({start,count,minCount})){
 }
 if(minCount>count)throw new Error('std-bisect-oracle: minCount must be <= count');
 
+const adaptiveScript=process.env.PSKERNEL_ADAPTIVE_ORACLE??'scripts/adaptive-root-oracle.mjs';
+
 const env={
   ...process.env,
   PSKERNEL_WORKER_HEAP_MIB:process.env.PSKERNEL_WORKER_HEAP_MIB??'2048',
@@ -23,7 +25,7 @@ function check(rangeStart,rangeCount){
   const r=spawnSync(
     process.execPath,
     [
-      'scripts/adaptive-root-oracle.mjs',
+      adaptiveScript,
       'Std',
       '114029',
       String(rangeStart),

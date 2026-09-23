@@ -22,8 +22,13 @@ function parseRuntimeArg(value:string,type:SoftwareType):unknown{
 }
 
 export async function runCommand(common:CommonArgs){
+  if(common.verified){
+    throw new Error(
+      'PS_RUN_VERIFIED_ABI_PENDING: verified-core run requires the runtime ABI/argument bridge milestone',
+    );
+  }
   const build=await buildCommand(common);
-  const main=build.checked.declarations.find((decl)=>decl.name==='main');
+  const main=build.checked?.declarations.find((decl)=>decl.name==='main');
   if(main===undefined)throw new Error("PS_RUN_NO_MAIN: no declaration named 'main'");
   if(main.params.length!==common.passthrough.length){
     throw new Error('PS_RUN_ARITY: main expects '+main.params.length+' arguments, got '+common.passthrough.length);

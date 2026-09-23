@@ -5,6 +5,7 @@ export interface CommonArgs {
   readonly entry?:string;
   readonly project?:string;
   readonly json:boolean;
+  readonly verified:boolean;
   readonly passthrough:readonly string[];
 }
 
@@ -16,7 +17,7 @@ export interface ResolvedInput {
 
 export interface BuildResult {
   readonly report:Record<string,unknown>;
-  readonly checked:CheckedSoftwareModule;
+  readonly checked?:CheckedSoftwareModule;
   readonly jsPath:string;
 }
 

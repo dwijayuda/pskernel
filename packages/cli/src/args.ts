@@ -7,6 +7,7 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
   let entry:string|undefined;
   let project:string|undefined;
   let json=false;
+  let verified=false;
 
   for(let i=0;i<own.length;i+=1){
     const arg=own[i]!;
@@ -16,6 +17,8 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
       project=value;
     }else if(arg==='--json'){
       json=true;
+    }else if(arg==='--verified'){
+      verified=true;
     }else if(arg.startsWith('-')){
       throw new Error("PS_CLI_UNKNOWN_OPTION: unknown option '"+arg+"'");
     }else if(entry===undefined){
@@ -29,6 +32,7 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
     ...(entry===undefined?{}:{entry}),
     ...(project===undefined?{}:{project}),
     json,
+    verified,
     passthrough,
   };
 }

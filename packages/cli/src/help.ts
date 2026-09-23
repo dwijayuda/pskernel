@@ -6,8 +6,8 @@ export const HELP=`ProofScript compiler
 
 Usage:
   psc init [dir] [--lib] [-y]
-  psc check [entry.ps] [-p, --project <path>] [--json]
-  psc build [entry.ps] [-p, --project <path>] [--json]
+  psc check [entry.ps] [-p, --project <path>] [--verified] [--json]
+  psc build [entry.ps] [-p, --project <path>] [--verified] [--json]
   psc run [entry.ps] [-p, --project <path>] [--json] [-- <args...>]
   psc emit-lean [entry.ps] [-p, --project <path>]
   psc clean [-p, --project <path>]
@@ -17,10 +17,15 @@ Usage:
 Commands:
   init       Create a ProofScript project and psconfig.json
   check      Parse and type-check without writing build outputs
-  build      Check, emit canonical Lean + TypeScript, then let TypeScript emit JS/.d.ts
+  build      Compile to TypeScript, then let TypeScript emit JS/.d.ts
   run        Build and invoke exported main with arguments after --
   emit-lean  Print canonical Lean lowering for the supported reference slice
   clean      Remove the configured output directory
+
+Verified compiler:
+  --verified  source -> Lean-compatible elaboration -> pskernel checked core
+              -> erasure -> compiler IR -> TypeScript -> JavaScript
+  No automatic fallback to the legacy software checker.
 
 Current language track:
   ProofScript ${PROOFSCRIPT_SPEC_VERSION} with v0.6.1 compiler-ready surface baseline

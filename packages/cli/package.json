@@ -17,7 +17,9 @@
     "@proofscript/syntax": "file:../syntax",
     "@proofscript/language": "file:../language",
     "@proofscript/backend-ts": "file:../backend-ts",
-    "@proofscript/compiler-ir": "file:../compiler-ir"
+    "@proofscript/compiler-ir": "file:../compiler-ir",
+    "@proofscript/elab": "file:../elab",
+    "@proofscript/compiler": "file:../compiler"
   },
   "devDependencies": {
     "@types/node": "22.15.3",
@@ -25,7 +27,7 @@
   },
   "description": "ProofScript developer CLI (psc) plus low-level pskernel replay/module commands.",
   "proofscript": {
-    "status": "psc-ux-mvp+kernel-tools",
+    "status": "psc-ux-mvp+verified-core-opt-in+kernel-tools",
     "phase": "A",
     "trust": "untrusted-support",
     "futureName": "@proofscript/cli",

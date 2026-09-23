@@ -9,9 +9,19 @@ import {
 import {lowerVerifiedIrToWasm} from '@proofscript/wasm-lowering';
 import {
   emitBinaryenWasm,
+  instantiateProofScriptWasm,
+  type ProofScriptWasmHostInstance,
+  type ProofScriptWasmHostValue,
   type WasmEmitOptions,
   type WasmEmitResult,
 } from '@proofscript/backend-wasm';
+
+export {instantiateProofScriptWasm};
+export type {
+  ProofScriptWasmHostInstance,
+  ProofScriptWasmHostValue,
+  WasmEmitResult,
+};
 
 export interface VerifiedCompileResult {
   readonly checkedCore:CheckedCoreModule;

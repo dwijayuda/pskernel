@@ -84,6 +84,13 @@ test('Nat literal and count limits follow explicit Lean kernel limits',()=>{
  throws(()=>normal.whnf(app(app(constant(N.NatShiftLeft),natLit(1)),natLit(0x1_0000_0000n))));
 });
 test('Nat.pow reduction',()=>{const tc=new TypeChecker(baseEnv());eqExpr(tc.whnf(app(app(constant(N.NatPow),natLit(2)),natLit(20))),natLit(1048576));});
+test('WHNF application spines do not consume one recursion frame per argument',()=>{
+ const env=baseEnv(),F=nameFromDotted('WideApp.f');env.add({kind:'axiom',name:F,levelParams:[],type:sort(levelSucc(levelZero))});
+ let term:any=constant(F);for(let i=0;i<1000;i++)term=app(term,natLit(i));
+ const tc=new TypeChecker(env,undefined,undefined,{maxRecDepth:2,maxNatBytes:134217728n});
+ eqExpr(tc.whnfCore(term),term);
+});
+
 test('WHNF recursion budget matches Lean core placement',()=>{
  const env=baseEnv(),zeroBudget=new TypeChecker(env,undefined,undefined,{maxRecDepth:0,maxNatBytes:134217728n}),oneBudget=new TypeChecker(env,undefined,undefined,{maxRecDepth:1,maxNatBytes:134217728n});
  eqExpr(zeroBudget.whnf(natLit(3)),natLit(3));

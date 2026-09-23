@@ -14,6 +14,8 @@ import {eraseCheckedCoreModule} from '../packages/erasure/dist/src/index.js';
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
 import {compileTypeScript,emitModule,emitVerifiedTypeScript} from '../packages/backend-ts/dist/src/index.js';
 import {compileCheckedCore} from '../packages/compiler/dist/src/index.js';
+import {lowerVerifiedIrToWasm} from '../packages/wasm-lowering/dist/src/index.js';
+import {emitBinaryenWasm} from '../packages/backend-wasm/dist/src/index.js';
 import {compileVerifiedSource} from '../packages/cli/dist/src/verified-pipeline.js';
 import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
@@ -520,6 +522,49 @@ assert(
   verifiedBoolLogic.typeScript.includes('((a && (!b)) ? x : y)'),
   'verified composed Bool condition did not reach TypeScript',
 );
+
+const verifiedWasmBool=compileVerifiedSource(
+  'function wasmLogic(a : Bool, b : Bool) : Bool := !a || (a && b); '+
+  'function wasmSame(a : Bool, b : Bool) : Bool := a == b; '+
+  'function wasmDifferent(a : Bool, b : Bool) : Bool := a != b;',
+  'verified-wasm-bool.ts',
+);
+const verifiedWasmIr=lowerVerifiedIrToWasm(verifiedWasmBool.ir);
+const verifiedWasmArtifact=emitBinaryenWasm(verifiedWasmIr);
+assert(
+  WebAssembly.validate(verifiedWasmArtifact.binary),
+  'verified Bool Wasm artifact failed host validation',
+);
+const verifiedWasmInstance=new WebAssembly.Instance(
+  new WebAssembly.Module(verifiedWasmArtifact.binary),
+  {},
+);
+const verifiedJsModule=await import(
+  'data:text/javascript;base64,'+
+  Buffer.from(verifiedWasmBool.emitted.javascript).toString('base64')
+);
+for(const a of [false,true]){
+  for(const b of [false,true]){
+    const ai=a?1:0;
+    const bi=b?1:0;
+    assert(
+      verifiedWasmInstance.exports.wasmLogic(ai,bi)===
+        (verifiedJsModule.wasmLogic(a,b)?1:0),
+      'verified Bool logic JS/Wasm differential mismatch',
+    );
+    assert(
+      verifiedWasmInstance.exports.wasmSame(ai,bi)===
+        (verifiedJsModule.wasmSame(a,b)?1:0),
+      'verified Bool equality JS/Wasm differential mismatch',
+    );
+    assert(
+      verifiedWasmInstance.exports.wasmDifferent(ai,bi)===
+        (verifiedJsModule.wasmDifferent(a,b)?1:0),
+      'verified Bool inequality JS/Wasm differential mismatch',
+    );
+  }
+}
+console.log('ok - verified Bool source differential JS/Wasm execution');
 
 
 const verifiedComposition=compileVerifiedSource(

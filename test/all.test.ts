@@ -103,11 +103,32 @@ test('WHNF recursion budget matches Lean core placement',()=>{
  eqExpr(oneBudget.whnf(constant(N.NatZero)),constant(N.NatZero));
 });
 
-test('kernel recursion budget fails deterministically and succeeds when raised',()=>{
- const env=baseEnv();let deep:any=constant(N.NatZero);for(let i=0;i<20;i++)deep=app(constant(N.NatSucc),deep);
- const low=new TypeChecker(env,undefined,undefined,{maxRecDepth:8,maxNatBytes:134217728n});let message='';try{low.check(deep);}catch(e){message=e instanceof Error?e.message:String(e);}
- assert(message.includes('deep recursion'),'low maxRecDepth must fail with deterministic kernel recursion error');
- const high=new TypeChecker(env,undefined,undefined,{maxRecDepth:64,maxNatBytes:134217728n});eqExpr(high.check(deep),constant(N.Nat));
+test('kernel recursion budget matches Lean 4.34 unlimited and 16x semantics',()=>{
+ const env=baseEnv();let deep:any=constant(N.NatZero);for(let i=0;i<24;i++)deep=app(constant(N.NatSucc),deep);
+ const unlimited=new TypeChecker(env,undefined,undefined,{maxRecDepth:0,maxNatBytes:134217728n});eqExpr(unlimited.check(deep),constant(N.Nat));
+ const low=new TypeChecker(env,undefined,undefined,{maxRecDepth:1,maxNatBytes:134217728n});let message='';try{low.check(deep);}catch(e){message=e instanceof Error?e.message:String(e);}
+ assert(message.includes('deep recursion'),'configured maxRecDepth 1 must allow 16 kernel frames and then fail');
+ const high=new TypeChecker(env,undefined,undefined,{maxRecDepth:2,maxNatBytes:134217728n});eqExpr(high.check(deep),constant(N.Nat));
+});
+
+test('inference binder spines share depth without charging one frame per binder',()=>{
+ const env=baseEnv(),limits={maxRecDepth:1,maxNatBytes:134217728n},tc=new TypeChecker(env,undefined,undefined,limits);
+ let lambda:any=natLit(0),pi:any=constant(N.Nat),letChain:any=natLit(0);
+ for(let i=0;i<100;i++){
+   lambda=lam(nameFromDotted('x'+i),constant(N.Nat),lambda);
+   pi=forallE(nameFromDotted('p'+i),constant(N.Nat),pi);
+   letChain={kind:'let',name:nameFromDotted('l'+i),type:constant(N.Nat),value:natLit(i),body:letChain};
+ }
+ tc.check(lambda);tc.check(pi);eqExpr(tc.check(letChain),constant(N.Nat));
+});
+
+test('infer-only application spine does not consume one recursion frame per argument',()=>{
+ const env=baseEnv(),F=nameFromDotted('InferOnly.wide');let fType:any=constant(N.Nat);
+ for(let i=0;i<1000;i++)fType=forallE(nameFromDotted('a'+i),constant(N.Nat),fType);
+ env.add({kind:'axiom',name:F,levelParams:[],type:fType});
+ let term:any=constant(F);for(let i=0;i<1000;i++)term=app(term,natLit(i));
+ const tc=new TypeChecker(env,undefined,undefined,{maxRecDepth:1,maxNatBytes:134217728n});
+ eqExpr(tc.infer(term,true),constant(N.Nat));
 });
 test('native reduction fails closed by default even when the logical body normalizes',()=>{
  const env=baseEnv(),vNat=nameFromDotted('Native.vNat'),vBool=nameFromDotted('Native.vBool');

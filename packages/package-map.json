@@ -489,6 +489,53 @@
       ]
     },
     {
+      "name": "backend-wasm",
+      "path": "packages/backend-wasm",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "w1-binaryen-bool-unit-mvp",
+      "packageName": "@proofscript/backend-wasm",
+      "dependsOn": [
+        "wasm-ir"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Binaryen 132.0.0 is an exact-pinned untrusted emitter/validator dependency.",
+        "The first executable gate emits and runs an exported Bool not function and checks both canonical and optimized WebAssembly."
+      ]
+    },
+    {
+      "name": "wasm-lowering",
+      "path": "packages/wasm-lowering",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "w1-bool-unit-lowering-mvp",
+      "packageName": "@proofscript/wasm-lowering",
+      "dependsOn": [
+        "compiler-ir",
+        "wasm-ir"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Lowering consumes only verified compiler IR and fails closed for Nat, Int, String, named runtime data, generics, lambdas/closures, structures, and ADTs in W1.",
+        "Nat and Int explicitly reject rather than narrowing arbitrary-precision Lean semantics to i64."
+      ]
+    },
+    {
+      "name": "wasm-ir",
+      "path": "packages/wasm-ir",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "w1-bool-unit-ir-mvp",
+      "packageName": "@proofscript/wasm-ir",
+      "dependsOn": [],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "ProofScript-owned typed WasmIR is independent of Binaryen and carries no proof authority.",
+        "W1 models i32 Bool/control values and explicit first-order calls/locals while reserving i64/f32/f64 for later semantically justified representations."
+      ]
+    },
+    {
       "name": "compiler",
       "path": "packages/compiler",
       "phase": "C",
@@ -642,7 +689,8 @@
     "The canonical integration regression now compiles multiple pskernel-admitted Nat functions, including a user-definition call, through verified IR to TypeScript/JavaScript.",
     "The canonical verified integration regression now includes a pskernel-admitted structure whose constructor and projection lower through verified IR to branded TypeScript/JavaScript.",
     "The canonical verified integration regression now includes an unparameterized pskernel-admitted ADT and zero-/one-field constructor values compiled through tagged verified IR to TypeScript/JavaScript.",
-    "The active language completion plan is docs/plans/05_LANGUAGE_COMPLETION.md; new language work must satisfy its source-to-kernel-to-runtime or source-to-kernel proof acceptance gates."
+    "The active language completion plan is docs/plans/05_LANGUAGE_COMPLETION.md; new language work must satisfy its source-to-kernel-to-runtime or source-to-kernel proof acceptance gates.",
+    "WebAssembly W1 is an alternate untrusted execution backend: verified IR -> wasm-lowering -> ProofScript WasmIR -> Binaryen. It does not change the kernel TCB."
   ],
   "preferredPipeline": [
     "syntax",
@@ -660,5 +708,19 @@
     "package": "language",
     "rule": "no automatic fallback from verified-core compilation"
   },
-  "activeLanguagePlan": "docs/plans/05_LANGUAGE_COMPLETION.md"
+  "activeLanguagePlan": "docs/plans/05_LANGUAGE_COMPLETION.md",
+  "wasmPipeline": [
+    "syntax",
+    "environment",
+    "meta",
+    "elab",
+    "checked-core",
+    "erasure",
+    "compiler-ir",
+    "wasm-lowering",
+    "wasm-ir",
+    "backend-wasm",
+    "binaryen",
+    "webassembly"
+  ]
 }

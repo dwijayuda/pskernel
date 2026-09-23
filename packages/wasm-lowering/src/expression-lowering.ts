@@ -1,0 +1,324 @@
+import type {
+  VerifiedIrExpr,
+} from '@proofscript/compiler-ir/verified';
+import type {
+  WasmIrExpr,
+} from '@proofscript/wasm-ir';
+import {
+  WasmLoweringError,
+  unsupported,
+} from './errors.js';
+import type {
+  RuntimeType,
+  Signature,
+} from './type-lowering.js';
+
+export function expressionRuntimeType(
+  expr:VerifiedIrExpr,
+  locals:ReadonlyMap<string,RuntimeType>,
+  signatures:ReadonlyMap<string,Signature>,
+):RuntimeType {
+  switch(expr.kind){
+    case 'literal':
+      if(typeof expr.value==='boolean')return 'i32';
+      if(expr.value===undefined)return null;
+      if(typeof expr.value==='bigint'){
+        return unsupported(
+          'PS_WASM_UNSUPPORTED_NAT_INT_LITERAL',
+          'arbitrary-precision integer literals require the Nat/Int runtime',
+        );
+      }
+      return unsupported(
+        'PS_WASM_UNSUPPORTED_STRING_LITERAL',
+        'String literals require the String runtime ABI',
+      );
+
+    case 'var':{
+      const local=locals.get(expr.name);
+      if(local!==undefined)return local;
+      if(signatures.has(expr.name)){
+        return unsupported(
+          'PS_WASM_UNSUPPORTED_FUNCTION_VALUE',
+          "function '"+expr.name+"' may only appear as a direct call target in W1",
+        );
+      }
+      return unsupported(
+        'PS_WASM_UNKNOWN_RUNTIME_NAME',
+        "unknown runtime name '"+expr.name+"'",
+      );
+    }
+
+    case 'intrinsic':
+      if(expr.operation.startsWith('bool.'))return 'i32';
+      return unsupported(
+        'PS_WASM_UNSUPPORTED_INTRINSIC',
+        "intrinsic '"+expr.operation+"' is not supported in W1",
+      );
+
+    case 'call':{
+      if(expr.fn.kind!=='var'){
+        return unsupported(
+          'PS_WASM_UNSUPPORTED_INDIRECT_CALL',
+          'W1 supports direct first-order call targets only',
+        );
+      }
+      const signature=signatures.get(expr.fn.name);
+      if(signature===undefined){
+        return unsupported(
+          'PS_WASM_UNKNOWN_CALL_TARGET',
+          "unknown call target '"+expr.fn.name+"'",
+        );
+      }
+      return signature.result;
+    }
+
+    case 'let':{
+      const valueType=expressionRuntimeType(
+        expr.value,
+        locals,
+        signatures,
+      );
+      if(valueType===null){
+        return unsupported(
+          'PS_WASM_UNSUPPORTED_UNIT_LOCAL',
+          'Unit-valued let bindings are not lowered in W1',
+        );
+      }
+      const next=new Map(locals);
+      next.set(expr.name,valueType);
+      return expressionRuntimeType(expr.body,next,signatures);
+    }
+
+    case 'if':
+      return expressionRuntimeType(expr.thenBranch,locals,signatures);
+
+    case 'lambda':
+      return unsupported(
+        'PS_WASM_UNSUPPORTED_LAMBDA',
+        'lambdas require function-reference/closure lowering',
+      );
+
+    case 'record':
+    case 'projection':
+      return unsupported(
+        'PS_WASM_UNSUPPORTED_STRUCTURE',
+        'structures require the Wasm GC/layout checkpoint',
+      );
+
+    case 'constructor':
+    case 'match':
+      return unsupported(
+        'PS_WASM_UNSUPPORTED_ADT',
+        'inductive runtime values require the Wasm GC/layout checkpoint',
+      );
+  }
+}
+
+function requireType(
+  actual:RuntimeType,
+  expected:RuntimeType,
+  label:string,
+):void {
+  if(actual!==expected){
+    throw new WasmLoweringError(
+      'PS_WASM_TYPE_MISMATCH',
+      label+' expected '+String(expected)+' but got '+String(actual),
+    );
+  }
+}
+
+export function lowerRuntimeExpr(
+  expr:VerifiedIrExpr,
+  expected:RuntimeType,
+  locals:ReadonlyMap<string,RuntimeType>,
+  signatures:ReadonlyMap<string,Signature>,
+):WasmIrExpr {
+  requireType(
+    expressionRuntimeType(expr,locals,signatures),
+    expected,
+    'expression',
+  );
+
+  switch(expr.kind){
+    case 'literal':
+      if(typeof expr.value==='boolean'){
+        return {kind:'i32.const',value:expr.value?1:0};
+      }
+      if(expr.value===undefined)return {kind:'nop'};
+      return unsupported(
+        'PS_WASM_UNSUPPORTED_LITERAL',
+        'literal is outside the W1 Bool/Unit subset',
+      );
+
+    case 'var':{
+      const type=locals.get(expr.name);
+      if(type===undefined||type===null){
+        return unsupported(
+          'PS_WASM_UNKNOWN_RUNTIME_LOCAL',
+          "runtime local '"+expr.name+"' is unavailable",
+        );
+      }
+      return {kind:'local',name:expr.name,type};
+    }
+
+    case 'intrinsic':
+      switch(expr.operation){
+        case 'bool.not':
+          return {
+            kind:'i32.unary',
+            operation:'eqz',
+            operand:lowerRuntimeExpr(
+              expr.args[0]!,
+              'i32',
+              locals,
+              signatures,
+            ),
+          };
+        case 'bool.and':
+        case 'bool.or':
+        case 'bool.eq':
+        case 'bool.ne':{
+          const operation={
+            'bool.and':'and',
+            'bool.or':'or',
+            'bool.eq':'eq',
+            'bool.ne':'ne',
+          } as const;
+          return {
+            kind:'i32.binary',
+            operation:operation[expr.operation],
+            left:lowerRuntimeExpr(
+              expr.args[0]!,
+              'i32',
+              locals,
+              signatures,
+            ),
+            right:lowerRuntimeExpr(
+              expr.args[1]!,
+              'i32',
+              locals,
+              signatures,
+            ),
+          };
+        }
+        default:
+          return unsupported(
+            'PS_WASM_UNSUPPORTED_INTRINSIC',
+            "intrinsic '"+expr.operation+"' is not supported in W1",
+          );
+      }
+
+    case 'call':{
+      if(expr.fn.kind!=='var'){
+        return unsupported(
+          'PS_WASM_UNSUPPORTED_INDIRECT_CALL',
+          'W1 supports direct first-order call targets only',
+        );
+      }
+      const signature=signatures.get(expr.fn.name);
+      if(signature===undefined){
+        return unsupported(
+          'PS_WASM_UNKNOWN_CALL_TARGET',
+          "unknown call target '"+expr.fn.name+"'",
+        );
+      }
+      if(expr.args.length!==signature.parameters.length){
+        throw new WasmLoweringError(
+          'PS_WASM_CALL_ARITY',
+          "call '"+expr.fn.name+"' has the wrong number of arguments",
+        );
+      }
+      return {
+        kind:'call',
+        target:expr.fn.name,
+        args:expr.args.map((arg,index)=>
+          lowerRuntimeExpr(
+            arg,
+            signature.parameters[index]!,
+            locals,
+            signatures,
+          )
+        ),
+        result:signature.result,
+      };
+    }
+
+    case 'let':{
+      const valueType=expressionRuntimeType(
+        expr.value,
+        locals,
+        signatures,
+      );
+      if(valueType===null){
+        return unsupported(
+          'PS_WASM_UNSUPPORTED_UNIT_LOCAL',
+          'Unit-valued let bindings are not lowered in W1',
+        );
+      }
+      const next=new Map(locals);
+      next.set(expr.name,valueType);
+      return {
+        kind:'let',
+        name:expr.name,
+        type:valueType,
+        value:lowerRuntimeExpr(
+          expr.value,
+          valueType,
+          locals,
+          signatures,
+        ),
+        body:lowerRuntimeExpr(
+          expr.body,
+          expected,
+          next,
+          signatures,
+        ),
+        result:expected,
+      };
+    }
+
+    case 'if':
+      return {
+        kind:'if',
+        condition:lowerRuntimeExpr(
+          expr.condition,
+          'i32',
+          locals,
+          signatures,
+        ),
+        thenBranch:lowerRuntimeExpr(
+          expr.thenBranch,
+          expected,
+          locals,
+          signatures,
+        ),
+        elseBranch:lowerRuntimeExpr(
+          expr.elseBranch,
+          expected,
+          locals,
+          signatures,
+        ),
+        result:expected,
+      };
+
+    case 'lambda':
+      return unsupported(
+        'PS_WASM_UNSUPPORTED_LAMBDA',
+        'lambdas require function-reference/closure lowering',
+      );
+
+    case 'record':
+    case 'projection':
+      return unsupported(
+        'PS_WASM_UNSUPPORTED_STRUCTURE',
+        'structures require the Wasm GC/layout checkpoint',
+      );
+
+    case 'constructor':
+    case 'match':
+      return unsupported(
+        'PS_WASM_UNSUPPORTED_ADT',
+        'inductive runtime values require the Wasm GC/layout checkpoint',
+      );
+  }
+}

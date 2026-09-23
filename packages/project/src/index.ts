@@ -28,6 +28,48 @@ export function createBuildPlan(nodes:readonly ProjectNode[]):BuildPlan{
   return {order};
 }
 
+export type ProjectSourceKind='proofscript'|'lean-subset';
+
+export interface ProjectSourceModule {
+  readonly module:string;
+  readonly sourcePath:string;
+  readonly sourceKind:ProjectSourceKind;
+  readonly imports:readonly string[];
+}
+
+export interface SourceBuildPlan extends BuildPlan {
+  readonly modules:ReadonlyMap<string,ProjectSourceModule>;
+}
+
+export function createSourceBuildPlan(
+  modules:readonly ProjectSourceModule[],
+):SourceBuildPlan {
+  const byName=new Map<string,ProjectSourceModule>();
+  for(const source of modules){
+    if(source.module.length===0){
+      throw new Error(
+        'PS_PROJECT_SOURCE_NAME: logical module name must be non-empty',
+      );
+    }
+    const prior=byName.get(source.module);
+    if(prior!==undefined){
+      throw new Error(
+        "PS_PROJECT_SOURCE_AMBIGUITY: logical module '"+source.module+
+        "' has multiple sources: '"+prior.sourcePath+
+        "' and '"+source.sourcePath+"'",
+      );
+    }
+    byName.set(source.module,source);
+  }
+  const plan=createBuildPlan(
+    modules.map((source)=>({
+      name:source.module,
+      dependencies:source.imports,
+    })),
+  );
+  return {order:plan.order,modules:byName};
+}
+
 export class BuildCache<Value> {
   private readonly values=new Map<string,Value>();
   get(key:string):Value|undefined{return this.values.get(key);}

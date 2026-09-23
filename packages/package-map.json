@@ -222,6 +222,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Because Lean `rw` is `rewrite` followed by a reducible `rfl` attempt, the bounded implementation now tries to close rewritten Eq goals with the real polymorphic Eq.refl when both sides are definitionally equal. Broader reflexive relations remain outside the current rfl slice.",
         "Bounded rw follows Lean 4.34 rewrite's core equality-transport model: inspect an Eq proof, abstract target occurrences into a motive, solve the rewritten target, then reconstruct the parent with Prelude Eq.ndrec_symm (forward) or Eq.ndrec (reverse).",
         "The first rw slice accepts one rule in inherited Lean spelling `rw [h]` or `rw [← h]`, rewrites only exact structural occurrences in the current goal, and kernel-checks the final transport term.",
         "Locations (`at h`), multiple rules, occurrence selectors, iff rewriting, defeq/kabstract occurrence matching, and theorem-argument synthesis beyond existing term elaboration remain fail-closed.",

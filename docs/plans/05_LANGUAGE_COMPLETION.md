@@ -224,9 +224,14 @@ rewrite construction rather than mutating goal text: it recognizes a real
 Prelude `Eq` proof, abstracts exact structural occurrences of the selected
 side into a motive, creates the rewritten child goal, and reconstructs the
 parent proof with kernel-checked `Eq.ndrec_symm` (forward) or `Eq.ndrec`
-(reverse). Multiple rules, locations, occurrence selectors, iff rewriting,
-definitional/kabstract matching, and extra theorem-argument synthesis remain
-fail-closed until their Meta behavior is modeled.
+(reverse). The bounded `rw` macro behavior also follows Lean's documented
+`rewrite; try (with_reducible rfl)` shape for equality goals: after transport,
+an `Eq` target whose sides are definitionally equal is closed with the real
+polymorphic `Eq.refl`. This is not yet a general standalone `rfl` tactic.
+Multiple rules, locations, occurrence selectors, iff rewriting,
+definitional/kabstract occurrence matching, broader reflexive relations, and
+extra theorem-argument synthesis remain fail-closed until their Meta behavior
+is modeled.
 
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.

@@ -172,9 +172,9 @@ assert(
 
 const verifiedRewrite=compileVerifiedSource(
   'theorem rewriteForward(a : Nat, b : Nat, h : Eq Nat a b) : '+
-  'Eq Nat a b := by rw [h]; exact Eq.refl(b); '+
+  'Eq Nat a b := by rw [h]; '+
   'theorem rewriteReverse(a : Nat, b : Nat, h : Eq Nat a b) : '+
-  'Eq Nat b a := by rw [← h]; exact Eq.refl(a);',
+  'Eq Nat b a := by rw [← h];',
   'verified-rewrite.ts',
 );
 assert(

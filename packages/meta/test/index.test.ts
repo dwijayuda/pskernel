@@ -15,6 +15,7 @@ import {
   fvar,
   levelSucc,
   levelZero,
+  levelEqStructural,
   nameFromDotted,
   sort,
 } from 'lean-ts-kernel';
@@ -228,3 +229,27 @@ console.log('ok - @proofscript/meta Lean-style metavariable depth discipline');
   equal(context.isAssigned(meta),false);
 }
 console.log('ok - @proofscript/meta structural application unification with rollback');
+
+{
+  const environment=new Environment();
+  const context=new ExprMetaContext(environment);
+  const universe=context.mkFreshLevel();
+  const typeMeta=context.mkFresh(sort(universe));
+  context.assign(typeMeta,sort(levelZero));
+  const solved=context.instantiate(sort(universe));
+  equal(solved.kind,'sort');
+  if(solved.kind==='sort'){
+    equal(levelEqStructural(solved.level,levelSucc(levelZero)),true);
+  }
+  context.validateGroundAssignments();
+}
+{
+  const environment=new Environment();
+  const context=new ExprMetaContext(environment);
+  context.mkFreshLevel();
+  let unresolved=false;
+  try{context.validateGroundAssignments();}
+  catch(error){unresolved=/unresolved universe metavariable/.test(String(error));}
+  equal(unresolved,true);
+}
+console.log('ok - @proofscript/meta bounded universe metavariable solving');

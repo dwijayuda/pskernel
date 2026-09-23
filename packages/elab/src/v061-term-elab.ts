@@ -2,7 +2,6 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   LocalContext,
   TypeChecker,
-  constant,
   exprToString,
   fvar,
   hasMVar,
@@ -11,6 +10,7 @@ import {
   strLit,
 } from 'lean-ts-kernel';
 import {elaborateApplication} from './application.js';
+import {elaborateV061Constant} from './v061-constant-elab.js';
 import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
@@ -41,7 +41,7 @@ function resolveReference(
   if(context.environment.find(full)===undefined){
     throw new Error("PS_ELAB_UNKNOWN_NAME: unknown name '"+name+"'");
   }
-  return constant(full);
+  return elaborateV061Constant(full,context);
 }
 
 export function elaborateV061Term(

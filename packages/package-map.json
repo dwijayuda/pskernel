@@ -185,13 +185,15 @@
       "path": "packages/meta",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "expr-mvar-context-mvp",
+      "status": "expr+level-mvar-context-mvp",
       "packageName": "@proofscript/meta",
       "dependsOn": [
         "kernel"
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Meta now owns bounded universe metavariables alongside expression metavariables. Simple structural universe equations are solved during elaboration, assignments are transactional with expression unification, and unresolved universe metavariables fail before kernel admission.",
+        "This is intentionally smaller than Lean Meta level unification: complex max/imax constraints that are not structurally aligned fail closed rather than being guessed.",
         "Expr metavariables now use pskernel's real Expr and LocalContext rather than only a generic placeholder protocol.",
         "The context records natural/synthetic/syntheticOpaque kind, creation depth, local scope, assignments, recursive instantiation, occurs checks, and kernel-backed validation once assignments are ground.",
         "Ordinary unification never assigns syntheticOpaque metavariables; explicit assignment remains available to tactic/elaboration code.",
@@ -219,6 +221,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Global constant references now instantiate every declaration universe parameter with a fresh untrusted level metavariable. This enables ordinary elaboration constraints to specialize universe-polymorphic Prelude constants without changing pskernel.",
         "Bounded induction supports unindexed inductives and constructs the motive by abstracting the major premise from the current target. Each branch receives all constructor fields followed by induction hypotheses for direct recursive fields, matching pskernel recursor-minor binder order.",
         "Each induction hypothesis has the motive instantiated at its recursive field; branch proofs are lambda-abstracted over fields first and IHs second before the pskernel-generated recursor is applied.",
         "Higher-order/nested recursive fields, indexed families, local-let majors, and surrounding locals dependent on the major fail closed until the corresponding Lean Meta generalization/recursor machinery is modeled.",

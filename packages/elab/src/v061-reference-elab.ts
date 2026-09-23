@@ -6,6 +6,7 @@ import {
   nameToString,
   type Expr,
 } from 'lean-ts-kernel';
+import {elaborateV061Constant} from './v061-constant-elab.js';
 import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
@@ -20,7 +21,7 @@ function rootTerm(
   const full=nameFromDotted(name);
   return context.environment.find(full)===undefined
     ?undefined
-    :{kind:'const',name:full,levels:[]};
+    :elaborateV061Constant(full,context);
 }
 
 export function tryElaborateV061ProjectionReference(

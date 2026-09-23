@@ -1,7 +1,6 @@
 import type {V061TypeExpr} from '@proofscript/syntax';
 import {
   type Expr,
-  constant,
   forallE,
   fvar,
   levelSucc,
@@ -13,6 +12,7 @@ import {
   exprToString,
 } from 'lean-ts-kernel';
 import {elaborateApplication} from './application.js';
+import {elaborateV061Constant} from './v061-constant-elab.js';
 import type {V061CoreElabContext} from './v061-context.js';
 import {v061LocalInstanceTerms} from './v061-context.js';
 
@@ -32,7 +32,7 @@ export function elaborateV061Type(
       if(context.environment.find(name)===undefined){
         throw new Error("PS_ELAB_UNKNOWN_TYPE: unknown type '"+type.name+"'");
       }
-      return constant(name);
+      return elaborateV061Constant(name,context);
     }
     case 'application':{
       const fn=elaborateV061Type(type.fn,context);

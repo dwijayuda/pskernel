@@ -3,6 +3,7 @@ import {
   LocalContext,
   TypeChecker,
   type Expr,
+  type Level,
   exprEq,
   hasLooseBVar,
   hasMVar,
@@ -26,14 +27,20 @@ import {
   containsMVarId,
   rebuildExprWith,
 } from './expr-meta-support.js';
+import {LevelMetaContext} from './level-meta.js';
 
 export class ExprMetaContext {
   private nextIndex=0;
   private currentDepth=0;
   private readonly declarations=new Map<string,ExprMetavarDecl>();
   private readonly assignments=new Map<string,Expr>();
+  readonly levels=new LevelMetaContext();
 
   constructor(readonly environment:Environment){}
+
+  mkFreshLevel():Level {
+    return this.levels.mkFresh();
+  }
 
   withDepth<T>(action:()=>T):T {
     this.currentDepth+=1;
@@ -92,7 +99,7 @@ export class ExprMetaContext {
       }
       return rebuildExprWith(value,go,active);
     };
-    return go(expr,new Set());
+    return this.levels.instantiateExpr(go(expr,new Set()));
   }
 
   private validateGroundAssignment(
@@ -107,8 +114,26 @@ export class ExprMetaContext {
       this.environment,
       declaration.localContext.clone(),
     );
-    const actual=checker.check(instantiatedValue);
-    if(!checker.isDefEq(actual,instantiatedType)){
+    let actual=checker.check(instantiatedValue);
+    let expected=instantiatedType;
+    if(
+      this.levels.hasUnresolvedExpr(actual)
+      ||this.levels.hasUnresolvedExpr(expected)
+    ){
+      if(!this.levels.unifyExprLevels(actual,expected)){
+        throw new Error(
+          "metavariable '?"+declaration.id+
+          "' assignment has incompatible universe levels",
+        );
+      }
+      actual=this.levels.instantiateExpr(actual);
+      expected=this.levels.instantiateExpr(expected);
+      if(
+        this.levels.hasUnresolvedExpr(actual)
+        ||this.levels.hasUnresolvedExpr(expected)
+      )return;
+    }
+    if(!checker.isDefEq(actual,expected)){
       throw new Error(
         "metavariable '?"+declaration.id+"' assignment has incompatible type",
       );
@@ -146,7 +171,13 @@ export class ExprMetaContext {
         );
       }
     }
-    this.validateGroundAssignment(declaration,instantiated);
+    const levelSnapshot=this.levels.snapshot();
+    try{
+      this.validateGroundAssignment(declaration,instantiated);
+    }catch(error){
+      this.levels.restore(levelSnapshot);
+      throw error;
+    }
     this.assignments.set(declaration.id,instantiated);
   }
 
@@ -198,6 +229,16 @@ export class ExprMetaContext {
     if(lhs.kind==='mvar')return this.tryAssignByUnification(lhs,rhs);
     if(rhs.kind==='mvar')return this.tryAssignByUnification(rhs,lhs);
 
+    if(lhs.kind==='sort'&&rhs.kind==='sort'){
+      return this.levels.unify(lhs.level,rhs.level);
+    }
+    if(
+      this.levels.hasUnresolvedExpr(lhs)
+      ||this.levels.hasUnresolvedExpr(rhs)
+    ){
+      return this.levels.unifyExprLevels(lhs,rhs);
+    }
+
     if(lhs.kind==='app'&&rhs.kind==='app'){
       return this.unifyCore(lhs.fn,rhs.fn,localContext)
         &&this.unifyCore(lhs.arg,rhs.arg,localContext);
@@ -223,12 +264,17 @@ export class ExprMetaContext {
 
   unify(left:Expr,right:Expr,localContext=new LocalContext()):boolean {
     const snapshot=new Map(this.assignments);
+    const levelSnapshot=this.levels.snapshot();
     try{
       const success=this.unifyCore(left,right,localContext);
-      if(!success)this.restoreAssignments(snapshot);
+      if(!success){
+        this.restoreAssignments(snapshot);
+        this.levels.restore(levelSnapshot);
+      }
       return success;
     }catch(error){
       this.restoreAssignments(snapshot);
+      this.levels.restore(levelSnapshot);
       throw error;
     }
   }
@@ -237,6 +283,7 @@ export class ExprMetaContext {
     for(const [id,value] of this.assignments){
       this.validateGroundAssignment(this.getDecl(id),value);
     }
+    this.levels.validateResolved();
   }
 
   snapshotAssignments():ReadonlyMap<string,Expr> {

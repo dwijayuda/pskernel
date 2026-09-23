@@ -27,3 +27,4 @@ export function checkExpectedType<Term>(
 ):boolean{return kernel.isDefEq(kernel.inferType(term),expected,transparency);}
 
 export * from './expr-meta.js';
+export * from './level-meta.js';

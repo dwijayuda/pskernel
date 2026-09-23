@@ -4,11 +4,8 @@ import type {
 } from '@proofscript/syntax';
 import {
   TypeChecker,
-  abstractFVar,
   appView,
   constant,
-  fvar,
-  instantiate1,
   lam,
   mkAppN,
   nameEq,
@@ -22,12 +19,10 @@ import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
 } from './v061-context.js';
-
-export type MatchTermElaborator=(
-  expr:V061Expr,
-  context:V061CoreElabContext,
-  expected?:Expr,
-)=>ElaboratedCoreTerm;
+import {
+  elaborateV061MatchMinor,
+  type MatchTermElaborator,
+} from './v061-match-minor-elab.js';
 
 function patternConstructorName(
   pattern:V061Pattern,
@@ -46,94 +41,6 @@ function patternConstructorName(
     return nameFromDotted(pattern.name);
   }
   return nameFromDotted(inductiveText+'.'+pattern.name);
-}
-
-function elaborateMinor(
-  alternative:Extract<
-    Extract<V061Expr,{kind:'match'}>['alternatives'][number],
-    {pattern:V061Pattern}
-  >,
-  constructorName:Name,
-  context:V061CoreElabContext,
-  expected:Expr,
-  elaborate:MatchTermElaborator,
-):Expr {
-  const pattern=alternative.pattern;
-  if(pattern.kind!=='constructor')throw new Error('unreachable');
-  const constructor=context.environment.find(constructorName);
-  if(constructor?.kind!=='constructor'){
-    throw new Error(
-      "PS_ELAB_MATCH_CONSTRUCTOR: unknown constructor '"+
-      nameToString(constructorName)+"'",
-    );
-  }
-  if(pattern.binders.length!==constructor.numFields){
-    throw new Error(
-      "PS_ELAB_MATCH_ARITY: constructor '"+
-      nameToString(constructorName)+"' binds "+
-      constructor.numFields+' fields, got '+pattern.binders.length,
-    );
-  }
-
-  let cursor=constructor.type;
-  let branchContext=context;
-  const fields:{
-    readonly id:string;
-    readonly name:Name;
-    readonly type:Expr;
-    readonly binderInfo:import('lean-ts-kernel').BinderInfo;
-  }[]=[];
-
-  for(let index=0;index<constructor.numFields;index+=1){
-    const checker=new TypeChecker(
-      context.environment,
-      branchContext.localContext.clone(),
-    );
-    const binder=checker.ensureForall(checker.whnf(cursor));
-    const sourceName=pattern.binders[index]!;
-    if(branchContext.locals.has(sourceName)){
-      throw new Error(
-        "PS_ELAB_MATCH_BINDER_DUPLICATE: '"+sourceName+"'",
-      );
-    }
-
-    const localContext=branchContext.localContext.clone();
-    const id=localContext.fresh(sourceName);
-    const userName=nameFromDotted(sourceName);
-    localContext.addLocal(
-      id,
-      userName,
-      binder.type,
-      binder.binderInfo,
-    );
-    const locals=new Map(branchContext.locals);
-    locals.set(sourceName,id);
-    branchContext={...branchContext,localContext,locals};
-    fields.push({
-      id,
-      name:userName,
-      type:binder.type,
-      binderInfo:binder.binderInfo,
-    });
-    cursor=instantiate1(binder.body,fvar(id));
-  }
-
-  const branch=elaborate(
-    alternative.body,
-    branchContext,
-    expected,
-  );
-  let minor=branch.term;
-  for(let index=fields.length-1;index>=0;index-=1){
-    const field=fields[index]!;
-    minor=lam(
-      field.name,
-      field.type,
-      abstractFVar(minor,field.id),
-      field.binderInfo,
-    );
-  }
-  return minor;
 }
 
 export function elaborateV061MatchExpression(
@@ -155,23 +62,31 @@ export function elaborateV061MatchExpression(
   const scrutinee=elaborate(expr.scrutinee,context);
   const scrutineeType=checker.whnf(scrutinee.type);
   const typeView=appView(scrutineeType);
-  if(typeView.fn.kind!=='const'||typeView.args.length!==0){
+  if(typeView.fn.kind!=='const'){
     throw new Error(
-      'PS_ELAB_MATCH_SCRUTINEE: current verified match requires an unparameterized inductive',
+      'PS_ELAB_MATCH_SCRUTINEE: verified match requires an inductive application',
     );
   }
 
   const inductive=context.environment.find(typeView.fn.name);
   if(
     inductive?.kind!=='inductive'
-    ||inductive.numParams!==0
     ||inductive.numIndices!==0
     ||inductive.isRec
   ){
     throw new Error(
-      'PS_ELAB_MATCH_INDUCTIVE_UNSUPPORTED: verified match currently supports only unparameterized, unindexed, non-recursive inductives',
+      'PS_ELAB_MATCH_INDUCTIVE_UNSUPPORTED: verified match currently supports non-recursive, unindexed inductives',
     );
   }
+
+  if(typeView.args.length!==inductive.numParams){
+    throw new Error(
+      "PS_ELAB_MATCH_PARAMETER_ARITY: inductive '"+
+      nameToString(inductive.name)+"' expects "+
+      inductive.numParams+' parameters, got '+typeView.args.length,
+    );
+  }
+  const parameterArgs=typeView.args.slice(0,inductive.numParams);
 
   const byConstructor=new Map<string,typeof expr.alternatives[number]>();
   for(const alternative of expr.alternatives){
@@ -212,9 +127,10 @@ export function elaborateV061MatchExpression(
   );
   const minors=inductive.ctors.map((constructor)=>{
     const alternative=byConstructor.get(nameToString(constructor))!;
-    return elaborateMinor(
+    return elaborateV061MatchMinor(
       alternative,
       constructor,
+      parameterArgs,
       context,
       expected,
       elaborate,
@@ -225,7 +141,7 @@ export function elaborateV061MatchExpression(
   const recursor=context.environment.find(recursorName);
   if(
     recursor?.kind!=='recursor'
-    ||recursor.numParams!==0
+    ||recursor.numParams!==inductive.numParams
     ||recursor.numIndices!==0
     ||recursor.numMotives!==1
     ||recursor.numMinors!==inductive.ctors.length
@@ -253,7 +169,7 @@ export function elaborateV061MatchExpression(
 
   const term=mkAppN(
     constant(recursorName,levels),
-    [motive,...minors,scrutinee.term],
+    [...parameterArgs,motive,...minors,scrutinee.term],
   );
   const type=checker.check(term);
   if(!checker.isDefEq(type,expected)){

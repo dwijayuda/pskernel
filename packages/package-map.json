@@ -191,7 +191,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-parameterized-inductive-elab-mvp",
+      "status": "v061-generic-adt-match-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -221,7 +221,9 @@
         "The public declaration elaborator now returns @proofscript/checked-core, re-admitted through pskernel as the stable compiler boundary.",
         "Non-recursive parameterized inductives now elaborate shared parameters into the pskernel InductiveDecl; constructor copies of shared parameters are implicit, matching Lean constructor use such as Option.some/Option.none.",
         "Expected-type application/reference elaboration can solve inserted implicit constructor parameters for nullary constructors without introducing runtime arguments.",
-        "Recursive parameterized inductives, indices, universe-polymorphic source binders, and dependent pattern matching remain later milestones."
+        "Recursive parameterized inductives, indices, universe-polymorphic source binders, and dependent pattern matching remain later milestones.",
+        "Verified match elaboration now passes admitted shared inductive parameters before motive/minors/major, matching pskernel recursor binder order for non-recursive unindexed parameterized inductives.",
+        "Constructor branch field types are obtained only after instantiating the admitted constructor parameter prefix; source patterns do not define constructor field types."
       ]
     },
     {

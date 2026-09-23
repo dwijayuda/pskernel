@@ -642,3 +642,41 @@ console.log('ok - @proofscript/elab verified match recursor elaboration');
   equal(result.definitions.length,2);
 }
 console.log('ok - @proofscript/elab parameterized inductive constructor inference');
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive PsOption(α : Type) where { '+
+    '| none; | some(value : α); } '+
+    'function getOr {α : Type}'+
+    '(value : PsOption(α), fallback : α) : α := '+
+    'match value with { | .none => fallback; | .some x => x; };',
+  ),env);
+  const definition=result.definitions.find(
+    (item)=>item.name.kind==='str'&&item.name.value==='getOr',
+  );
+  equal(definition?.value.kind,'lam');
+  if(definition?.value.kind==='lam'){
+    const Some=constant(nameFromDotted('PsOption.some'));
+    const someSeven=mkAppN(
+      Some,
+      [constant(nameFromDotted('Nat')),natLit(7n)],
+    );
+    const reduced=new TypeChecker(
+      result.environment,
+      new LocalContext(),
+    ).whnf(
+      mkAppN(
+        definition.value,
+        [
+          constant(nameFromDotted('Nat')),
+          someSeven,
+          natLit(3n),
+        ],
+      ),
+    );
+    equal(exprEq(reduced,natLit(7n)),true);
+  }
+}
+console.log('ok - @proofscript/elab parameterized verified match recursor elaboration');

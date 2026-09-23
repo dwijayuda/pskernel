@@ -108,7 +108,6 @@ console.log('ok - @proofscript/compiler-ir nominal structure lowering');
   const maybe={kind:'nominal',name:'MaybeNat'} as const;
   const ir=lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
-    inductives:[],
     structures:[],
     inductives:[{
       name:'MaybeNat',

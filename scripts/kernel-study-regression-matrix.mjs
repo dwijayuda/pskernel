@@ -36,6 +36,11 @@ const matrix={
 };
 
 const hardeningExtras={
+  'study/lean4-4.34.0/tests/elab/issue14484.lean':{
+    kind:'direct-hardening',
+    tests:['opaque admission rejects dangling free variables transactionally'],
+    note:'Lean #14484/#14498 closure fix: opaque bodies must reject FVars before stale inference-cache entries can be reused',
+  },
   'study/lean4-4.34.0/tests/elab/issue_14576_nonuniform.lean':{
     kind:'direct-hardening',
     tests:[

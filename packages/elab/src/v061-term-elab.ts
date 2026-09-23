@@ -22,6 +22,7 @@ import type {
 import {elaborateV061Type} from './v061-type-elab.js';
 import {elaborateV061ByExpression} from './v061-tactic-elab.js';
 import {elaborateV061BinaryNotation} from './v061-notation-elab.js';
+import {elaborateV061IfExpression} from './v061-if-elab.js';
 
 function resolveReference(
   name:string,
@@ -252,6 +253,12 @@ export function elaborateV061Term(
       return {term,type:resultType};
     }
     case 'if':
+      return elaborateV061IfExpression(
+        expr,
+        context,
+        expected,
+        elaborateV061Term,
+      );
     case 'record':
     case 'match':
       throw new Error(

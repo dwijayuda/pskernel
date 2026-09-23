@@ -195,6 +195,23 @@ assert(
 );
 
 
+const verifiedIf=compileVerifiedSource(
+  'function min(x : Nat, y : Nat) : Nat := '+
+  'if (x <= y) { x } else { y }; '+
+  'function max(x : Nat, y : Nat) : Nat := '+
+  'if (x > y) { x } else { y };',
+  'verified-if.ts',
+);
+assert(
+  verifiedIf.typeScript.includes('return ((x <= y) ? x : y);'),
+  'verified Lean ite did not lower through Nat ≤',
+);
+assert(
+  verifiedIf.typeScript.includes('return ((y < x) ? x : y);'),
+  'verified Lean > relation did not normalize to reversed Nat <',
+);
+
+
 const snapshot=processDocument('demo.ps',1,'x!',{
   process:text=>({
     state:{length:text.length},

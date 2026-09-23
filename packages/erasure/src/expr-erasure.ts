@@ -88,6 +88,46 @@ function openBinder(
   };
 }
 
+function eraseVerifiedCondition(
+  proposition:Expr,
+  scope:ErasureScope,
+  environment:Environment,
+):VerifiedIrExpr {
+  const view=appView(proposition);
+  if(view.fn.kind!=='const'||view.args.length!==4){
+    throw new Error(
+      'PS_ERASE_CONDITION_UNSUPPORTED: expected checked Nat relation',
+    );
+  }
+  const head=nameToString(view.fn.name);
+  const instance=view.args[1];
+  if(instance?.kind!=='const'){
+    throw new Error(
+      'PS_ERASE_CONDITION_UNSUPPORTED: relation instance is not constant',
+    );
+  }
+  const instanceName=nameToString(instance.name);
+  let operation:'nat.le'|'nat.lt';
+  if(head==='LE.le'&&instanceName==='instLENat'){
+    operation='nat.le';
+  }else if(head==='LT.lt'&&instanceName==='instLTNat'){
+    operation='nat.lt';
+  }else{
+    throw new Error(
+      "PS_ERASE_CONDITION_UNSUPPORTED: relation '"+head+
+      "' with instance '"+instanceName+"' is not executable yet",
+    );
+  }
+  return {
+    kind:'intrinsic',
+    operation,
+    args:[
+      eraseRuntimeExpr(view.args[2]!,scope,environment),
+      eraseRuntimeExpr(view.args[3]!,scope,environment),
+    ],
+  };
+}
+
 export function eraseRuntimeExpr(
   expr:Expr,
   scope:ErasureScope,
@@ -122,6 +162,30 @@ export function eraseRuntimeExpr(
     }
     case 'app':{
       const view=appView(expr);
+      if(
+        view.fn.kind==='const'
+        &&nameToString(view.fn.name)==='ite'
+        &&view.args.length===5
+      ){
+        return {
+          kind:'if',
+          condition:eraseVerifiedCondition(
+            view.args[1]!,
+            scope,
+            environment,
+          ),
+          thenBranch:eraseRuntimeExpr(
+            view.args[3]!,
+            scope,
+            environment,
+          ),
+          elseBranch:eraseRuntimeExpr(
+            view.args[4]!,
+            scope,
+            environment,
+          ),
+        };
+      }
       if(view.fn.kind==='const'){
         const intrinsic=new Map<string,'nat.add'|'nat.sub'|'nat.mul'>([
           ['Nat.add','nat.add'],

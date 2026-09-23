@@ -23,7 +23,7 @@ export type VerifiedIrExpr =
   | {readonly kind:'var';readonly name:string}
   | {
       readonly kind:'intrinsic';
-      readonly operation:'nat.add'|'nat.sub'|'nat.mul';
+      readonly operation:'nat.add'|'nat.sub'|'nat.mul'|'nat.le'|'nat.lt';
       readonly args:readonly VerifiedIrExpr[];
     }
   | {
@@ -44,6 +44,12 @@ export type VerifiedIrExpr =
       readonly name:string;
       readonly value:VerifiedIrExpr;
       readonly body:VerifiedIrExpr;
+    }
+  | {
+      readonly kind:'if';
+      readonly condition:VerifiedIrExpr;
+      readonly thenBranch:VerifiedIrExpr;
+      readonly elseBranch:VerifiedIrExpr;
     };
 
 export interface VerifiedIrTypeParameter {
@@ -142,6 +148,11 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
       assertVerifiedIrIdentifier(expr.name);
       validateVerifiedIrExpr(expr.value);
       validateVerifiedIrExpr(expr.body);
+      return;
+    case 'if':
+      validateVerifiedIrExpr(expr.condition);
+      validateVerifiedIrExpr(expr.thenBranch);
+      validateVerifiedIrExpr(expr.elseBranch);
       return;
   }
 }

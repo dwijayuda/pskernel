@@ -50,6 +50,8 @@ function emitExpr(expr:VerifiedIrExpr):string {
       const right=emitExpr(expr.args[1]!);
       if(expr.operation==='nat.add')return '('+left+' + '+right+')';
       if(expr.operation==='nat.mul')return '('+left+' * '+right+')';
+      if(expr.operation==='nat.le')return '('+left+' <= '+right+')';
+      if(expr.operation==='nat.lt')return '('+left+' < '+right+')';
       return '((__ps_a: bigint, __ps_b: bigint) => '+
         '(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))('+
         left+', '+right+')';
@@ -65,6 +67,10 @@ function emitExpr(expr:VerifiedIrExpr):string {
     case 'let':
       return '(() => { const '+expr.name+' = '+emitExpr(expr.value)+
         '; return '+emitExpr(expr.body)+'; })()';
+    case 'if':
+      return '('+emitExpr(expr.condition)+' ? '+
+        emitExpr(expr.thenBranch)+' : '+
+        emitExpr(expr.elseBranch)+')';
   }
 }
 

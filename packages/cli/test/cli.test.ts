@@ -133,3 +133,18 @@ console.log('ok - psc verified runtime ABI');
   }
 }
 console.log('ok - psc verified run filesystem pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'function min(x : Nat, y : Nat) : Nat := '+
+    'if (x <= y) { x } else { y };',
+    'if.ts',
+  );
+  equal(
+    result.typeScript.includes('return ((x <= y) ? x : y);'),
+    true,
+  );
+  equal(result.emitted.javascript.includes('x <= y ? x : y'),true);
+}
+console.log('ok - psc verified proposition-based if pipeline');

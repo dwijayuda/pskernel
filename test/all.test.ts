@@ -226,6 +226,18 @@ test('defeq compares application heads before rejecting arity mismatch',()=>{
  assert(tc.state.success.has(tc.state.pair(fn,fn)),'Lean 4.34 compares and caches equal heads before noticing the arity mismatch');
 });
 
+test('reducible Prop sort remains proof-only through inductive and projection checking',()=>{
+ const env=baseEnv(),Gate=nameFromDotted('EnsureSort.Gate'),I=nameFromDotted('EnsureSort.Owner'),Mk=nameFromDotted('EnsureSort.Owner.mk'),p=nameFromDotted('EnsureSort.proof');
+ const k=new Kernel(env);
+ k.addDefinition({kind:'definition',name:Gate,levelParams:[],type:sort(levelSucc(levelZero)),value:sort(levelZero),hints:{kind:'abbrev'},safety:'safe'});
+ assert(new TypeChecker(env).isProp(constant(Gate)),'isProp must WHNF the inferred sort before reading its universe level');
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:constant(Gate),ctors:[{name:Mk,type:forallE(nameFromDotted('bit'),constant(N.Bool),constant(I))}]}]});
+ const ri=env.get(nameFromDotted('EnsureSort.Owner.rec'));
+ assert(ri.kind==='recursor'&&ri.levelParams.length===0,'a reducible Prop result sort must not gain large elimination');
+ env.add({kind:'axiom',name:p,levelParams:[],type:constant(I)});
+ throws(()=>new TypeChecker(env).check({kind:'proj',typeName:I,index:0,expr:constant(p)}));
+});
+
 test('isProp requires the inferred type to reduce to a Sort',()=>{
  const tc=new TypeChecker(baseEnv());
  throws(()=>tc.isProp(natLit(0)));

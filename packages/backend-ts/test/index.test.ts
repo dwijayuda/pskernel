@@ -126,10 +126,15 @@ console.log('ok - @proofscript/backend-ts Bool match TypeScript emission');
     ],
   }));
   equal(source.includes('export interface User {'),true);
+  equal(source.includes('unique symbol = Symbol("ProofScript.User")'),true);
+  equal(source.includes('readonly [__ps_brand_User_'),true);
   equal(source.includes('readonly age: bigint;'),true);
-  equal(source.includes('export const ada: User = { name: "Ada", age: 33n };'),true);
+  equal(source.includes('export const ada: User = { [__ps_brand_User_'),true);
+  equal(source.includes('name: "Ada", age: 33n };'),true);
   equal(source.includes('return user.age;'),true);
   const compiled=compileTypeScript(source,'structure.ts');
+  equal(compiled.declaration.includes('declare const __ps_brand_User_'),true);
+  equal(compiled.declaration.includes('unique symbol'),true);
   equal(compiled.declaration.includes('export interface User'),true);
 }
 console.log('ok - @proofscript/backend-ts nominal structure TypeScript emission');

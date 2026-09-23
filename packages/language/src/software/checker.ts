@@ -46,6 +46,14 @@ export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule
   const nominalNames=new Set(structures.keys());
   const valueDecls=module.declarations.filter((decl)=>decl.kind!=='structure');
 
+  for(const decl of valueDecls){
+    if(nominalNames.has(decl.name)){
+      throw new Error(
+        "PS_CHECK_DUPLICATE_GLOBAL: '"+decl.name+"' is already declared as a structure",
+      );
+    }
+  }
+
   const signatures=new Map<string,SoftwareSignature>();
   for(const decl of valueDecls){
     if(signatures.has(decl.name)){

@@ -183,3 +183,14 @@ console.log('ok - @proofscript/language exhaustive Bool match checker');
   equal(missing,true);
 }
 console.log('ok - @proofscript/language nominal structure checker');
+
+{
+  let collided=false;
+  try{
+    checkV061SoftwareModule(parseV061Module(
+      'structure User where { age : Nat; } const User : Nat := 1;',
+    ));
+  }catch(error){collided=/PS_CHECK_DUPLICATE_GLOBAL/.test(String(error));}
+  equal(collided,true);
+}
+console.log('ok - @proofscript/language structure/value global namespace collision');

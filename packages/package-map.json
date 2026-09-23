@@ -218,7 +218,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Backend accepts only the typed executable compiler IR, not raw ProofScript or checked language HIR.",
+        "Backend accepts only typed executable compiler IR, not raw ProofScript or checked language HIR.",
+        "Nominal ProofScript structures use module-private unique-symbol brands in emitted TypeScript declarations and constructed values; plain structural lookalikes do not satisfy the generated type.",
         "Backend emits TypeScript source; the TypeScript Compiler API type-checks it and emits JavaScript, .d.ts, and source maps.",
         "Nat subtraction/division/modulo preserve current total semantics without duplicating operand evaluation."
       ]
@@ -239,6 +240,7 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Nominal structure types, field environments, record construction, and projection checking are implemented outside the TCB.",
+        "Structure and value declarations share one global source namespace; conflicting names fail closed.",
         "Structure-specific semantics live in a dedicated module; the generic expression dispatcher delegates rather than embedding field logic.",
         "Only explicit named fields are supported by the current structure parser/checker; implicit/instance/generic structure fields remain fail-closed.",
         "Proof acceptance and Lean-equivalent structure elaboration remain future pskernel/elaborator work."

@@ -1,4 +1,5 @@
 export * from './type-parser.js';
+export * from './type-lowering.js';
 export * from './pattern-parser.js';
 export * from './record-parser.js';
 export * from './parameter-parser.js';

@@ -1,6 +1,6 @@
 import type {V061Expr,V061Module} from './ast.js';
 import {v061BinaryPrecedence} from './operators.js';
-import {lowerV061TypeToLean} from './type-parser.js';
+import {lowerV061TypeToLean} from './type-lowering.js';
 import {lowerV061PatternToLean} from './pattern-parser.js';
 
 function lowerV061ParameterToLean(

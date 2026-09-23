@@ -49,7 +49,7 @@ For the official adversarial source-file oracle, set `LEAN434_SRC` to a Lean 4.3
 - `scripts/` — oracle, corpus, differential, and anti-drift gates
 - `docs/ANTI_DRIFT.md` — scope and compatibility rules
 
-Final Lean 4.34 removes the deprecated in-kernel `Lean.reduceNat` / `Lean.reduceBool` compiler-interpreter reduction path. pskernel therefore has no NativeEvaluator/native-reduction kernel extension in the 4.34 profile.
+Lean `v4.34.0` still implements the deprecated in-kernel `Lean.reduceNat` / `Lean.reduceBool` compiler-IR path. pskernel models that boundary with an explicit, shape-checked `NativeEvaluator`; without a configured provider these operations fail closed rather than guessing from logical bodies.
 
 Do not silently broaden acceptance to make a corpus pass. A Lean/TypeScript mismatch must be isolated and fixed at the semantic layer that differs from Lean 4.34.0.
 

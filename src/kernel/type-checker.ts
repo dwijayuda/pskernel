@@ -299,10 +299,13 @@ export class TypeChecker {
   });}
 
   isDefEq(a:Expr,b:Expr):boolean{
+    const pair=this.state.pair(a,b);
+    // Final Lean 4.34 uses plain symmetric pair caches, not a transitive
+    // equivalence structure. Both successful and failed public queries are cached.
+    if(this.state.failure.has(pair))return false;
+    if(this.state.success.has(pair))return true;
     const r=this.isDefEqCore(a,b);
-    // Lean 4.34 caches every successful public defeq query at the original pair,
-    // independent of which internal path (delta, proof irrelevance, eta, etc.) proved it.
-    if(r)this.state.success.add(this.state.pair(a,b));
+    (r?this.state.success:this.state.failure).add(pair);
     return r;
   }
 }

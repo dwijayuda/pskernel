@@ -1,11 +1,12 @@
 import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {parseCommonArgs} from '../src/args.js';
+import {parseCommonArgs,parseTranslateArgs} from '../src/args.js';
 import {compileVerifiedSource} from '../src/verified-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
 import {runCommand} from '../src/commands/run.js';
 import {emitLeanCommand} from '../src/commands/emit-lean.js';
+import {translateCommand} from '../src/commands/translate.js';
 
 function equal(actual:unknown,expected:unknown):void{
   if(actual!==expected)throw new Error('expected '+String(expected)+', got '+String(actual));
@@ -34,6 +35,24 @@ function throws(fn:()=>unknown,pattern:RegExp):void{
 }
 throws(()=>parseCommonArgs(['--wat']),/PS_CLI_UNKNOWN_OPTION/);
 throws(()=>parseCommonArgs(['a.ps','b.ps']),/PS_CLI_USAGE/);
+{
+  const args=parseTranslateArgs(['src/main.lean','--to','ps','-p','demo']);
+  equal(args.entry,'src/main.lean');
+  equal(args.target,'ps');
+  equal(args.project,'demo');
+}
+throws(
+  ()=>parseTranslateArgs(['main.ps']),
+  /PS_CLI_TRANSLATE_TARGET/,
+);
+throws(
+  ()=>parseTranslateArgs(['main.ps','--to','ts']),
+  /PS_CLI_TRANSLATE_TARGET/,
+);
+throws(
+  ()=>parseTranslateArgs(['main.ps','--to','lean','--verified']),
+  /PS_CLI_TRANSLATE_VERIFIED/,
+);
 console.log('ok - psc CLI argument/UX contract');
 
 
@@ -836,3 +855,63 @@ console.log('ok - psc verified global class instance pipeline');
   }
 }
 console.log('ok - psc emit-lean uses source/target dispatch');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-translate-roundtrip-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function add(x : Nat, y : Nat) : Nat := x + y;\n',
+      'utf8',
+    );
+    const lean=await translateCommand({
+      project:directory,
+      entry:'src/main.ps',
+      target:'lean',
+      json:false,
+      verified:false,
+      passthrough:[],
+    });
+    equal(
+      lean,
+      'def add (x : Nat) (y : Nat) : Nat := x + y\n',
+    );
+    await writeFile(
+      join(directory,'src','main.lean'),
+      lean,
+      'utf8',
+    );
+    const proofScript=await translateCommand({
+      project:directory,
+      entry:'src/main.lean',
+      target:'ps',
+      json:false,
+      verified:false,
+      passthrough:[],
+    });
+    equal(
+      proofScript,
+      'def add(x : Nat, y : Nat) : Nat := x + y;\n',
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc translate ps/lean canonical round-trip');

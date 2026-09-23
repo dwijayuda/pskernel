@@ -9,6 +9,7 @@ Usage:
   psc check [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
   psc build [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
   psc run [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json] [-- <args...>]
+  psc translate <entry.ps|entry.lean> --to ps|lean [-p, --project <path>]
   psc emit-lean [entry.ps|entry.lean] [-p, --project <path>]
   psc clean [-p, --project <path>]
   psc --version
@@ -19,6 +20,7 @@ Commands:
   check      Parse .ps or supported .lean and type-check without outputs
   build      Compile .ps or supported .lean to TypeScript then JS/.d.ts
   run        Build .ps or supported .lean and invoke exported main
+  translate  Canonically translate supported .ps/.lean to ps or lean
   emit-lean  Print canonical Lean lowering for the supported reference slice
   clean      Remove the configured output directory
 

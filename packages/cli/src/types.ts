@@ -1,5 +1,6 @@
 import type {CheckedSoftwareModule,SoftwareType} from '@proofscript/language';
 import type {VerifiedIrModule} from '@proofscript/compiler-ir/verified';
+import type {TranslationTarget} from '@proofscript/syntax';
 import type {LoadedPsConfig} from './config.js';
 
 export interface CommonArgs {
@@ -8,6 +9,10 @@ export interface CommonArgs {
   readonly json:boolean;
   readonly verified:boolean;
   readonly passthrough:readonly string[];
+}
+
+export interface TranslateArgs extends CommonArgs {
+  readonly target:TranslationTarget;
 }
 
 export interface ResolvedInput {

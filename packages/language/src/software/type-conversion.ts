@@ -20,6 +20,10 @@ export function asSoftwareType(
         return {kind:'nominal',name:type.name};
       }
       throw new Error("PS_CHECK_UNKNOWN_TYPE: unsupported software type '"+type.name+"'");
+    case 'application':
+      throw new Error(
+        'PS_CHECK_TYPE_APPLICATION_UNSUPPORTED: applied/generic types require elaboration',
+      );
     case 'arrow':
       return {
         kind:'function',

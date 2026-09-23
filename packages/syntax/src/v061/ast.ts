@@ -79,7 +79,7 @@ export interface V061InductiveDeclaration {
 export interface V061StructureField {
   readonly name:string;
   readonly type:V061TypeExpr;
-  readonly binderKind:'explicit'|'implicit';
+  readonly binderKind:'explicit'|'implicit'|'instance';
   readonly span:SourceSpan;
 }
 

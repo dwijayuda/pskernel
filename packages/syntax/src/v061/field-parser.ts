@@ -33,10 +33,19 @@ export function parseV061FieldBody(
       continue;
     }
     if(context.cursor.at('[')){
-      throw new SyntaxError(
-        'instance fields require native type-application parsing and are not yet implemented',
-        context.cursor.peek().span,
-      );
+      const instanceOpen=context.cursor.consume();
+      const name=context.cursor.expectKind('identifier','instance field name');
+      context.cursor.expect(':');
+      const type=parseV061Type(context);
+      context.cursor.expect(']');
+      const semi=context.cursor.expect(';');
+      fields.push({
+        name:name.text,
+        type,
+        binderKind:'instance',
+        span:{start:instanceOpen.span.start,end:semi.span.end},
+      });
+      continue;
     }
 
     const name=context.cursor.expectKind('identifier','field name');

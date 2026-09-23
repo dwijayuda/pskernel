@@ -100,10 +100,10 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
-        "All registered v0.6.1 D/E feature identifiers now have an explicit parser/lowering path, with documented bounded sub-grammars.",
-        "Lean 4.34 structure/class parsing informed a shared field-body parser, while class remains a distinct AST declaration and canonical Lean class.",
-        "E-STRUCT-BODY preserves inner implicit binder braces; E-CLASS-BODY supports explicit parameters and explicit/implicit fields.",
-        "Instance fields, generic structure execution, class/typeclass execution, and broader native Lean syntax remain fail-closed where not implemented."
+        "All registered v0.6.1 D/E feature identifiers have explicit parser/lowering ownership with bounded sub-grammars.",
+        "The type AST now represents right-associative arrows plus left-associative type application from native Lean whitespace or registered D-CALL syntax.",
+        "Structure/class field parsing distinguishes explicit, implicit, and named instance binders and preserves their canonical Lean brackets.",
+        "Applied/generic types are parsed but remain fail-closed in the executable software checker until elaboration supports them."
       ]
     },
     {

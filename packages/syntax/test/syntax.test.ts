@@ -568,11 +568,18 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 {
-  throws(
-    ()=>parseV061Module(
-      'structure Box where { [showα : ToString α]; value : α; }',
-    ),
-    /instance structure fields require type-application parsing/,
+  const module=parseV061Module(
+    'structure Box where { {α : Type}; [showα : ToString α]; value : α; }',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'structure');
+  if(declaration?.kind==='structure'){
+    equal(declaration.fields[1]?.binderKind,'instance');
+    equal(declaration.fields[1]?.type.kind,'application');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'structure Box where\n  {α : Type}\n  [showα : ToString α]\n  value : α\n',
   );
 }
 
@@ -594,4 +601,24 @@ console.log('ok - @proofscript/syntax lexer MVP');
     lowerV061ModuleToLean(module),
     'class Sized (α : Type) where\n  size : α -> Nat\n',
   );
+}
+
+
+// Type application is a term-level concept: native whitespace and D-CALL normalize to Lean application.
+{
+  const native=parseV061Module('const x : ToString Nat := y;');
+  const type=native.declarations[0]?.kind==='const'
+    ? native.declarations[0].resultType
+    : undefined;
+  equal(type?.kind,'application');
+  if(type!==undefined)equal(lowerV061TypeToLean(type),'ToString Nat');
+}
+{
+  const decorated=parseV061Module('const x : Result(Nat, String) := y;');
+  const type=decorated.declarations[0]?.kind==='const'
+    ? decorated.declarations[0].resultType
+    : undefined;
+  equal(type?.kind,'application');
+  equal(decorated.featureIds.includes('D-CALL'),true);
+  if(type!==undefined)equal(lowerV061TypeToLean(type),'Result Nat String');
 }

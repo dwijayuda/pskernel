@@ -115,8 +115,9 @@ The current tactic work follows this policy:
   and pskernel's generated recursor binder order;
 - `rw`: checked against Lean 4.34 Rewrite and the `rw` macro, including its
   post-rewrite cheap-rfl attempt;
-- next `simp`: must model simplification results and proof reconstruction,
-  not merely alias repeated textual rewriting.
+- `simp only`: the first bounded slice reuses kernel-checked equality transport
+  to a terminating fixed point and keeps Lean's broader simp database,
+  preprocessing, congruence, and orientation machinery explicitly unsupported.
 
 The dual-source `.ps` / supported `.lean` plan also follows the policy:
 Lean syntax is bounded explicitly, both source forms converge before checked

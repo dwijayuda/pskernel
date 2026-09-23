@@ -159,7 +159,7 @@ Tactic order:
 5. cases;
 6. induction;
 7. rewrite — bounded current-goal equality transport landed;
-8. simp with a small explicit theorem set;
+8. simp with a small explicit theorem set — first single-rule simp-only slice landed;
 9. exact? / assumption-style search only after deterministic core tactics;
 10. add cursor-sensitive LSP proof-state snapshots on top of the same goal model.
 
@@ -232,6 +232,16 @@ Multiple rules, locations, occurrence selectors, iff rewriting,
 definitional/kabstract occurrence matching, broader reflexive relations, and
 extra theorem-argument synthesis remain fail-closed until their Meta behavior
 is modeled.
+
+The first simplifier checkpoint is intentionally `simp only [h]` (or
+`simp only [← h]`) with one explicit `Eq` proof. It shares the same
+kernel-checked equality transport as `rw`, repeats the selected rewrite to a
+fixed point, and then attempts bounded equality reflexivity. To make
+termination explicit before Lean's full simp orientation/index machinery is
+ported, the chosen direction must strictly reduce a conservative structural
+expression-size metric. Global `@[simp]` sets, multiple rules, iff lemmas,
+theorem preprocessing, congruence indexes, dischargers, locations,
+`simp_all`, and Lean's complete orientation algorithm remain fail-closed.
 
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
@@ -437,9 +447,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
-4. Continue theorem prover v1 with small explicit-set simp on the landed
-   universe-polymorphic constant elaboration and ordered multi-goal
-   apply/refine/constructor/cases/induction/rw foundation.
+4. Validate and then broaden the landed single-rule simp-only proof
+   reconstruction. Expand explicit simp sets before adding search tactics such
+   as exact?.
 5. Implement project/module/import semantics on the checked-core path.
 6. Design and implement explicit npm/JS FFI.
 7. Start the ProofScript-written standard library.

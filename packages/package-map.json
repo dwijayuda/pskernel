@@ -109,6 +109,7 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "The bounded simplifier preserves inherited Lean spelling `simp only [h]` and `simp only [← h]`. The parser currently accepts exactly one explicit rule and rejects multi-rule lists instead of approximating full Lean simp syntax.",
         "The tactic parser preserves Lean-compatible rewrite spelling for the bounded subset: `rw [h]` and `rw [← h]`; it does not introduce a ProofScript-only bare-rw syntax.",
         "Inherited Lean `induction <local>` syntax is parsed/lowered canonically; the bounded semantic implementation uses pskernel recursors and does not introduce a second induction principle.",
         "Inherited Lean `cases <local>` tactic syntax is parsed/lowered canonically; the bounded semantic implementation lives in elab and delegates elimination to pskernel-generated recursors.",
@@ -209,7 +210,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-simp-only+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -222,6 +223,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "The first simp slice is `simp only [h]` / `simp only [← h]` with exactly one explicit Eq proof. It repeatedly uses the kernel-checked rw transport path to a fixed point, so simplification never mutates a goal without proof reconstruction.",
+        "To guarantee termination before Lean's full simp orientation/index machinery is modeled, the selected direction must strictly decrease a conservative structural expression-size metric; non-decreasing directions fail closed.",
+        "Global @[simp] databases, multiple simp rules, theorem preprocessing, iff rules, congruence theorem indexes, dischargers, locations, simp_all, and Lean's full orientation algorithm remain unsupported.",
         "Because Lean `rw` is `rewrite` followed by a reducible `rfl` attempt, the bounded implementation now tries to close rewritten Eq goals with the real polymorphic Eq.refl when both sides are definitionally equal. Broader reflexive relations remain outside the current rfl slice.",
         "Bounded rw follows Lean 4.34 rewrite's core equality-transport model: inspect an Eq proof, abstract target occurrences into a motive, solve the rewritten target, then reconstruct the parent with Prelude Eq.ndrec_symm (forward) or Eq.ndrec (reverse).",
         "The first rw slice accepts one rule in inherited Lean spelling `rw [h]` or `rw [← h]`, rewrites only exact structural occurrences in the current goal, and kernel-checks the final transport term.",

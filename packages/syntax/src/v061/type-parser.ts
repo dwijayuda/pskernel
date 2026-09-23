@@ -1,12 +1,21 @@
 import {SyntaxError,type SourceSpan,type Token} from '../source.js';
-import {V061ParseContext} from './context.js';
+import {V061ParseContext,spanBetween} from './context.js';
+import {v061BinaryPrecedence} from './operators.js';
 
 export type V061TypeExpr =
+  | {readonly kind:'nat';readonly text:string;readonly span:SourceSpan}
   | {readonly kind:'named';readonly name:string;readonly span:SourceSpan}
   | {
       readonly kind:'application';
       readonly fn:V061TypeExpr;
       readonly args:readonly V061TypeExpr[];
+      readonly span:SourceSpan;
+    }
+  | {
+      readonly kind:'binary';
+      readonly operator:'+'|'-'|'*'|'/'|'%';
+      readonly left:V061TypeExpr;
+      readonly right:V061TypeExpr;
       readonly span:SourceSpan;
     }
   | {
@@ -38,11 +47,36 @@ export function parseV061Type(context:V061ParseContext):V061TypeExpr {
   return domain;
 }
 
+const TYPE_TERM_BINARY_OPERATORS=new Set(['+','-','*','/','%']);
+
+function parseTypeTermBinary(
+  context:V061ParseContext,
+  minPrecedence=0,
+):V061TypeExpr {
+  let left=parseApplicationType(context);
+  while(true){
+    const token=context.cursor.peek();
+    if(!TYPE_TERM_BINARY_OPERATORS.has(token.text))break;
+    const precedence=v061BinaryPrecedence(token.text);
+    if(precedence===undefined||precedence<minPrecedence)break;
+    context.cursor.consume();
+    const right=parseTypeTermBinary(context,precedence+1);
+    left={
+      kind:'binary',
+      operator:token.text as '+'|'-'|'*'|'/'|'%',
+      left,
+      right,
+      span:spanBetween(left,right),
+    };
+  }
+  return left;
+}
+
 function parseEqualityType(context:V061ParseContext):V061TypeExpr {
-  const left=parseApplicationType(context);
+  const left=parseTypeTermBinary(context);
   if(!context.cursor.at('='))return left;
   context.cursor.consume();
-  const right=parseApplicationType(context);
+  const right=parseTypeTermBinary(context);
   if(context.cursor.at('=')){
     throw new SyntaxError(
       'propositional equality is non-associative; parenthesize nested equality',
@@ -58,7 +92,7 @@ function parseEqualityType(context:V061ParseContext):V061TypeExpr {
 }
 
 function canStartAtomicType(token:Token):boolean {
-  return token.kind==='identifier'||token.text==='(';
+  return token.kind==='identifier'||token.kind==='number'||token.text==='(';
 }
 
 function appendApplication(
@@ -112,6 +146,10 @@ function parseApplicationType(context:V061ParseContext):V061TypeExpr {
 
 function parseAtomicType(context:V061ParseContext):V061TypeExpr {
   const token=context.cursor.peek();
+  if(token.kind==='number'){
+    context.cursor.consume();
+    return {kind:'nat',text:token.text,span:token.span};
+  }
   if(token.kind==='identifier'){
     context.cursor.consume();
     return {kind:'named',name:token.text,span:token.span};
@@ -134,6 +172,8 @@ export function lowerV061TypeToLean(
   parentPrecedence=0,
 ):string {
   switch(type.kind){
+    case 'nat':
+      return type.text;
     case 'named':
       return type.name;
     case 'group':
@@ -142,6 +182,15 @@ export function lowerV061TypeToLean(
       const precedence=70;
       const rendered=lowerV061TypeToLean(type.fn,precedence)+' '+
         type.args.map((arg)=>lowerV061TypeToLean(arg,precedence+1)).join(' ');
+      return precedence<parentPrecedence?'('+rendered+')':rendered;
+    }
+    case 'binary':{
+      const precedence=type.operator==='*'||type.operator==='/'||type.operator==='%'
+        ?65
+        :60;
+      const rendered=lowerV061TypeToLean(type.left,precedence)+' '+
+        type.operator+' '+
+        lowerV061TypeToLean(type.right,precedence+1);
       return precedence<parentPrecedence?'('+rendered+')':rendered;
     }
     case 'equality':{

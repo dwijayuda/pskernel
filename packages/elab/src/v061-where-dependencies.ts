@@ -10,6 +10,8 @@ function collectTypeDependencies(
   out:Set<string>,
 ):void {
   switch(type.kind){
+    case 'nat':
+      return;
     case 'named':
       if(names.has(type.name))out.add(type.name);
       return;
@@ -19,6 +21,10 @@ function collectTypeDependencies(
     case 'application':
       collectTypeDependencies(type.fn,names,out);
       for(const arg of type.args)collectTypeDependencies(arg,names,out);
+      return;
+    case 'binary':
+      collectTypeDependencies(type.left,names,out);
+      collectTypeDependencies(type.right,names,out);
       return;
     case 'equality':
       collectTypeDependencies(type.left,names,out);

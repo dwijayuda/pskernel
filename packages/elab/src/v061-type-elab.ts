@@ -10,11 +10,13 @@ import {
   TypeChecker,
   hasMVar,
   exprToString,
+  natLit,
 } from 'lean-ts-kernel';
 import {elaborateApplication} from './application.js';
 import {elaborateV061Constant} from './v061-constant-elab.js';
 import type {V061CoreElabContext} from './v061-context.js';
 import {v061LocalInstanceTerms} from './v061-context.js';
+import {elaborateV061NatArithmeticTerms} from './v061-notation-elab.js';
 
 function elaborateTypePositionApplication(
   fn:Expr,
@@ -47,6 +49,8 @@ function elaborateV061TypePositionTerm(
   context:V061CoreElabContext,
 ):Expr {
   switch(syntax.kind){
+    case 'nat':
+      return natLit(BigInt(syntax.text.replaceAll('_','')));
     case 'group':
       return elaborateV061TypePositionTerm(syntax.value,context);
     case 'named':{
@@ -70,6 +74,20 @@ function elaborateV061TypePositionTerm(
         ),
         context,
       );
+    case 'binary':{
+      const checker=new TypeChecker(
+        context.environment,
+        context.localContext.clone(),
+      );
+      const left=elaborateV061TypePositionTerm(syntax.left,context);
+      const right=elaborateV061TypePositionTerm(syntax.right,context);
+      return elaborateV061NatArithmeticTerms(
+        syntax.operator,
+        {term:left,type:checker.check(left)},
+        {term:right,type:checker.check(right)},
+        context,
+      ).term;
+    }
     case 'equality':
       return elaborateTypePositionApplication(
         elaborateV061Constant(nameFromDotted('Eq'),context),

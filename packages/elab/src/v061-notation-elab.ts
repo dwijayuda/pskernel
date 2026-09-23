@@ -106,6 +106,60 @@ function elaborateNatOperands(
   return {checker,natType,left,right};
 }
 
+export function elaborateV061NatArithmeticTerms(
+  operator:string,
+  left:ElaboratedCoreTerm,
+  right:ElaboratedCoreTerm,
+  context:V061CoreElabContext,
+  expected?:Expr,
+):ElaboratedCoreTerm {
+  const constantName=natArithmetic.get(operator);
+  if(constantName===undefined){
+    throw new Error(
+      "PS_ELAB_NOTATION_UNSUPPORTED: operator '"+operator+
+      "' requires Lean-compatible notation/typeclass elaboration",
+    );
+  }
+  const natType=constant(requireConstant(context,'Nat'));
+  const checker=new TypeChecker(
+    context.environment,
+    context.localContext.clone(),
+  );
+  if(
+    !checker.isDefEq(left.type,natType)
+    ||!checker.isDefEq(right.type,natType)
+  ){
+    throw new Error(
+      "PS_ELAB_NAT_NOTATION_OPERAND_TYPE: operator '"+operator+
+      "' currently supports Nat operands only",
+    );
+  }
+  if(
+    expected!==undefined
+    &&!checker.isDefEq(
+      context.metaContext.instantiate(expected),
+      natType,
+    )
+  ){
+    throw new Error(
+      "PS_ELAB_NAT_NOTATION_EXPECTED_TYPE: operator '"+operator+
+      "' currently supports Nat results only",
+    );
+  }
+  const term=mkAppN(
+    constant(requireConstant(context,constantName)),
+    [left.term,right.term],
+  );
+  const type=checker.check(term);
+  if(!checker.isDefEq(type,natType)){
+    throw new Error(
+      "PS_ELAB_NAT_NOTATION_RESULT: '"+constantName+
+      "' did not produce Nat",
+    );
+  }
+  return {term,type};
+}
+
 export interface ElaboratedNatCondition extends ElaboratedCoreTerm {
   readonly decider:Expr;
 }
@@ -403,43 +457,16 @@ export function elaborateV061BinaryNotation(
     return {term:condition.term,type:condition.type};
   }
 
-  const constantName=natArithmetic.get(expr.operator);
-  if(constantName===undefined){
-    throw new Error(
-      "PS_ELAB_NOTATION_UNSUPPORTED: operator '"+expr.operator+
-      "' requires Lean-compatible notation/typeclass elaboration",
-    );
-  }
-
-  const {checker,natType,left,right}=elaborateNatOperands(
+  const {left,right}=elaborateNatOperands(
     expr,
     context,
     elaborate,
   );
-  if(
-    expected!==undefined
-    &&!checker.isDefEq(
-      context.metaContext.instantiate(expected),
-      natType,
-    )
-  ){
-    throw new Error(
-      "PS_ELAB_NAT_NOTATION_EXPECTED_TYPE: operator '"+expr.operator+
-      "' currently supports Nat results only",
-    );
-  }
-
-  const operationName=requireConstant(context,constantName);
-  const term=mkAppN(
-    constant(operationName),
-    [left.term,right.term],
+  return elaborateV061NatArithmeticTerms(
+    expr.operator,
+    left,
+    right,
+    context,
+    expected,
   );
-  const type=checker.check(term);
-  if(!checker.isDefEq(type,natType)){
-    throw new Error(
-      "PS_ELAB_NAT_NOTATION_RESULT: '"+constantName+
-      "' did not produce Nat",
-    );
-  }
-  return {term,type};
 }

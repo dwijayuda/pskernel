@@ -852,6 +852,16 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 
+{
+  const module=parseV061Module(
+    'theorem addZero(n : Nat, h : n + 0 = n) : n + 0 = n := by rw [h];',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem addZero (n : Nat) (h : n + 0 = n) : n + 0 = n := by rw [h]\n',
+  );
+}
+
 throws(
   ()=>parseV061Module(
     'theorem badEq(a : Nat, b : Nat, c : Nat) : a = b = c := by assumption;',

@@ -211,6 +211,17 @@ assert(
 );
 
 
+const verifiedArithmeticTheoremType=compileVerifiedSource(
+  'theorem addZeroAssumed(n : Nat, h : n + 0 = n) : '+
+  'n + 0 = n := by rw [h];',
+  'verified-arithmetic-theorem-type.ts',
+);
+assert(
+  verifiedArithmeticTheoremType.checkedCore.theorems.length===1,
+  'Nat arithmetic/literal theorem result syntax was not admitted',
+);
+
+
 const verifiedNat=compileVerifiedSource(
   'function add(x : Nat, y : Nat) : Nat := x + y; '+
   'function twice(x : Nat) : Nat := add(x, x); '+

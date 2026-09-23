@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 169,
   "notes": [
+    "Execution refresh for String literal hook hardening: aligned reconstructed direct-suite names to the current 169-test branch set, rebuilt with TypeScript 5.8.3, and passed 169/169 under Node v22.16.0 including missing/malformed Char.ofNat rejection.",
     "String literal hook admission hardening: final Lean 4.34 string_lit_to_constructor injects List.nil Char, List.cons Char, Char.ofNat, and String.ofList. String.ofList primitive validation now also requires Nat and a type-correct Char.ofNat : Nat → Char before the kernel-special string expansion name is admitted. Existing regression now covers missing/malformed Char.ofNat transactionally.",
     "Kernel-hook admission hardening: `eagerReduce`, `Lean.reduceBool`, and `Lean.reduceNat` are now reserved names. `eagerReduce` must be the safe one-universe polymorphic identity; native reduction markers must be safe monomorphic opaque Bool/Nat endofunctions and still have type-correct bodies. This prevents forged export streams from attaching final-Lean name-sensitive kernel behavior to arbitrary declarations. Nat.pred/Nat.bitwise remain documented pskernel validation dependencies rather than direct C++ normalizer hooks.",
     "Recursor/constructor replay metadata comparator corrected to Lean 4.34 `Expr BEq` (`Expr.eqv`) semantics: binder names/annotations are ignored, but mdata placement/payload is significant. The previous helper was stricter on BinderInfo and too permissive on mdata. Updated regression passes in the fresh 167/167 direct suite.",
@@ -240,5 +241,5 @@
   ],
   "currentTreeExpectedDirectTests": 169,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "latest exact-source direct checkpoint remains 169/169 before String.ofList prerequisite hardening; strengthened existing regression keeps the direct-test count unchanged and is pending refreshed execution"
+  "currentTreeVerification": "refreshed reconstructed-branch execution PASS after String.ofList/Char.ofNat hook hardening: TypeScript 5.8.3 build + 169/169 direct tests under Node v22.16.0. Pinned-Lean canonical replay/native smoke remain executable open gates."
 }

@@ -177,6 +177,17 @@ Disallowed claim:
 
 ## Tier 5 — canonical Full Std
 
+Before paying for the exhaustive stream, validate the exact same canonical
+module-stream protocol on the much smaller `Init.Prelude` environment:
+
+```text
+npm run oracle:init-canonical
+```
+
+This preflight checks the pinned Lean exporter, `.olean` module constant
+ordering, stream markers, shared pskernel environment, and importer. It is a
+diagnostic preflight only and **does not close** the Full Std gate.
+
 Gold behavioral gate:
 
 ```text

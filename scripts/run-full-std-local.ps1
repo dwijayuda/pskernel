@@ -1,7 +1,8 @@
 param(
   [int]$HeapMiB = 12288,
   [int]$StackKiB = 65500,
-  [string]$Log = "full-std.log"
+  [string]$Log = "full-std.log",
+  [switch]$SkipPreflight
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,6 +43,30 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Write-Host "Building pskernel..."
 & npm run build
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+if (-not $SkipPreflight) {
+  Write-Host "Running canonical Init.Prelude module-stream preflight..."
+  "preflightStarted=$(Get-Date -Format o)" | Add-Content $Log
+
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    & node scripts/module-stream-oracle.mjs Init.Prelude 2>&1 |
+      ForEach-Object { $_.ToString() } |
+      Tee-Object -FilePath $Log -Append
+    $preflightCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+
+  "preflightFinished=$(Get-Date -Format o)" | Add-Content $Log
+  "preflightExitCode=$preflightCode" | Add-Content $Log
+  if ($preflightCode -ne 0) {
+    Write-Host "Canonical Init.Prelude preflight failed. Full Std was not started; send/upload $Log."
+    exit $preflightCode
+  }
+  Write-Host "Canonical Init.Prelude preflight PASS."
+}
 
 Write-Host "Running canonical Full Std replay. Progress is also written to $Log"
 

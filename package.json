@@ -40,7 +40,8 @@
     "oracle:std-bisect": "npm run build --silent && node scripts/std-bisect-oracle.mjs",
     "test:oracle-tools": "node scripts/std-bisect-oracle-test.mjs && npm run test:kernel-study-matrix",
     "oracle:native-smoke": "npm run build --silent && node scripts/native-oracle-smoke.mjs",
-    "test:kernel-study-matrix": "node scripts/kernel-study-regression-matrix.mjs"
+    "test:kernel-study-matrix": "node scripts/kernel-study-regression-matrix.mjs",
+    "oracle:init-canonical": "npm run build --silent && node scripts/module-stream-oracle.mjs Init.Prelude"
   },
   "devDependencies": {
     "typescript": "5.8.3"

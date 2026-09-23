@@ -13,6 +13,7 @@ import {
   spanFromTokens,
   lowerDCallSource,
   parseTermSubset,
+  TermParser,
   lex,
   significantTokens,
 } from '../src/index.js';
@@ -157,6 +158,29 @@ console.log('ok - @proofscript/syntax lexer MVP');
 }
 {
   throws(()=>parseTermSubset('f(x)'),/term subset stopped before '\\('/);
+}
+
+
+
+// Parser extensions fail closed: deferring must consume nothing, claiming must consume something.
+{
+  const parser=new TermParser(lex('f(x)'),[{
+    feature:'D-CALL',
+    tryParse(inner){
+      if(inner.cursor.at('('))inner.cursor.consume();
+      return undefined;
+    },
+  }]);
+  throws(()=>parser.parseExpression(),/consumed input before deferring/);
+}
+{
+  const parser=new TermParser(lex('f(x)'),[{
+    feature:'D-CALL',
+    tryParse(_inner,current){
+      return current;
+    },
+  }]);
+  throws(()=>parser.parseExpression(),/returned a node without consuming input/);
 }
 
 // v0.7 D-CALL conformance slice.

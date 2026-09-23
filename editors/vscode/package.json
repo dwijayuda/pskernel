@@ -63,8 +63,7 @@
       "secondarySidebar": [
         {
           "id": "proofscript",
-          "title": "ProofScript",
-          "icon": "$(symbol-method)"
+          "title": "ProofScript"
         }
       ]
     },
@@ -80,5 +79,12 @@
   },
   "scripts": {
     "test": "node test/smoke.mjs"
-  }
+  },
+  "activationEvents": [
+    "onLanguage:proofscript",
+    "onView:proofscript.infoview",
+    "onCommand:proofscript.showInfoview",
+    "onCommand:proofscript.restartServer",
+    "onCommand:proofscript.serverInfo"
+  ]
 }

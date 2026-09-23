@@ -32,8 +32,9 @@ class RpcClient {
     if(!fs.existsSync(target)){
       throw new Error('ProofScript LSP not found: '+target);
     }
-    this.proc=cp.spawn('node',[target],{
+    this.proc=cp.spawn(process.execPath,[target],{
       cwd:root,
+      env:{...process.env,ELECTRON_RUN_AS_NODE:'1'},
       stdio:['pipe','pipe','pipe'],
       windowsHide:true,
     });
@@ -300,6 +301,11 @@ async function activate(context){
         },
         contentChanges:[{text:event.document.getText()}],
       });
+      clearTimeout(selectionTimer);
+      selectionTimer=setTimeout(
+        ()=>void syncInfoview(vscode.window.activeTextEditor),
+        80,
+      );
     }),
     vscode.workspace.onDidCloseTextDocument((document)=>{
       if(isProofScript(document)){
@@ -337,7 +343,9 @@ async function activate(context){
         return values.map((item)=>new vscode.DocumentSymbol(
           item.name,
           item.detail??'',
-          item.kind,
+          item.kind===12
+            ?vscode.SymbolKind.Function
+            :vscode.SymbolKind.Variable,
           new vscode.Range(
             item.range.start.line,item.range.start.character,
             item.range.end.line,item.range.end.character,

@@ -32,7 +32,13 @@ export interface V061LambdaBinder {
 
 export type V061Tactic =
   | {readonly kind:'exact';readonly proof:V061Expr;readonly span:SourceSpan}
-  | {readonly kind:'assumption';readonly span:SourceSpan};
+  | {readonly kind:'assumption';readonly span:SourceSpan}
+  | {
+      readonly kind:'intro';
+      readonly name:string;
+      readonly next:V061Tactic;
+      readonly span:SourceSpan;
+    };
 
 export type V061Expr =
   | {readonly kind:'nat';readonly text:string;readonly span:SourceSpan}

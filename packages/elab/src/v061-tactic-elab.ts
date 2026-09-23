@@ -1,8 +1,13 @@
-import type {V061Expr} from '@proofscript/syntax';
+import type {V061Expr,V061Tactic} from '@proofscript/syntax';
 import {
+  LocalContext,
   TypeChecker,
   type Expr,
+  abstractFVar,
   fvar,
+  instantiate1,
+  lam,
+  nameFromDotted,
 } from 'lean-ts-kernel';
 import type {
   ElaboratedCoreTerm,
@@ -15,24 +20,19 @@ export type V061TermElaborator=(
   expected?:Expr,
 )=>ElaboratedCoreTerm;
 
-export function elaborateV061ByExpression(
-  expr:Extract<V061Expr,{kind:'by'}>,
+function elaborateTactic(
+  tactic:V061Tactic,
   context:V061CoreElabContext,
-  expected:Expr|undefined,
+  expected:Expr,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
-  if(expected===undefined){
-    throw new Error(
-      'PS_ELAB_TACTIC_EXPECTED_TYPE: tactic blocks require an expected goal type',
-    );
-  }
   const checker=new TypeChecker(
     context.environment,
     context.localContext.clone(),
   );
 
-  if(expr.tactic.kind==='exact'){
-    const proof=elaborate(expr.tactic.proof,context,expected);
+  if(tactic.kind==='exact'){
+    const proof=elaborate(tactic.proof,context,expected);
     if(
       !checker.isDefEq(
         context.metaContext.instantiate(proof.type),
@@ -46,20 +46,88 @@ export function elaborateV061ByExpression(
     return proof;
   }
 
-  const candidates=[...context.locals.entries()].reverse();
-  for(const [,id] of candidates){
-    const declaration=context.localContext.get(id);
-    if(
-      declaration!==undefined
-      &&checker.isDefEq(
-        context.metaContext.instantiate(declaration.type),
-        context.metaContext.instantiate(expected),
-      )
-    ){
-      return {term:fvar(id),type:declaration.type};
+  if(tactic.kind==='assumption'){
+    const candidates=[...context.locals.entries()].reverse();
+    for(const [,id] of candidates){
+      const declaration=context.localContext.get(id);
+      if(
+        declaration!==undefined
+        &&checker.isDefEq(
+          context.metaContext.instantiate(declaration.type),
+          context.metaContext.instantiate(expected),
+        )
+      ){
+        return {term:fvar(id),type:declaration.type};
+      }
     }
+    throw new Error(
+      'PS_ELAB_TACTIC_ASSUMPTION: no local hypothesis matches the goal',
+    );
   }
-  throw new Error(
-    'PS_ELAB_TACTIC_ASSUMPTION: no local hypothesis matches the goal',
+
+  const functionType=checker.whnf(
+    context.metaContext.instantiate(expected),
   );
+  if(functionType.kind!=='forall'){
+    throw new Error(
+      'PS_ELAB_TACTIC_INTRO: goal is not a forall/function type',
+    );
+  }
+
+  const nextLocalContext=context.localContext.clone();
+  const id=nextLocalContext.fresh(tactic.name);
+  const userName=nameFromDotted(tactic.name);
+  nextLocalContext.addLocal(
+    id,
+    userName,
+    functionType.type,
+    functionType.binderInfo,
+  );
+  const locals=new Map(context.locals);
+  locals.set(tactic.name,id);
+  const nextContext={
+    ...context,
+    localContext:nextLocalContext,
+    locals,
+  };
+  const nextExpected=instantiate1(functionType.body,fvar(id));
+  const body=elaborateTactic(
+    tactic.next,
+    nextContext,
+    nextExpected,
+    elaborate,
+  );
+
+  const term=lam(
+    userName,
+    functionType.type,
+    abstractFVar(body.term,id),
+    functionType.binderInfo,
+  );
+  const type=checker.check(term);
+  if(
+    !checker.isDefEq(
+      context.metaContext.instantiate(type),
+      context.metaContext.instantiate(expected),
+    )
+  ){
+    throw new Error(
+      'PS_ELAB_TACTIC_INTRO: generated lambda does not match the goal',
+    );
+  }
+  return {term,type};
+}
+
+export function elaborateV061ByExpression(
+  expr:Extract<V061Expr,{kind:'by'}>,
+  context:V061CoreElabContext,
+  expected:Expr|undefined,
+  elaborate:V061TermElaborator,
+):ElaboratedCoreTerm {
+  if(expected===undefined){
+    throw new Error(
+      'PS_ELAB_TACTIC_EXPECTED_TYPE: tactic blocks require an expected goal type',
+    );
+  }
+  return elaborateTactic(expr.tactic,context,expected,elaborate);
 }

@@ -105,7 +105,8 @@
         "The function alias still requires at least one D-EXPLICIT-PARAMS group, so native implicit binders alone do not satisfy the alias rule.",
         "Canonical lowering and exact feature-ownership conformance preserve binder categories rather than translating them into TypeScript generics.",
         "Native Lean theorem declarations are parsed as inherited command heads; only registered ProofScript parameter/separator decoration is claimed by feature ownership.",
-        "A bounded inherited Lean tactic-term parser recognizes `by exact term` and `by assumption` without registering a new ProofScript syntax exception."
+        "A bounded inherited Lean tactic-term parser recognizes `by exact term` and `by assumption` without registering a new ProofScript syntax exception.",
+        "Inherited Lean tactic syntax now includes a bounded `intro name; <continuation>` form; it is not registered as new ProofScript syntax."
       ]
     },
     {
@@ -147,7 +148,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-basic-tactic-elab-mvp",
+      "status": "v061-intro-tactic-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -158,12 +159,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Theorem tactic terms support Lean-native `by exact` and `by assumption`; both elaborate to ordinary pskernel proof terms and receive no trusted authority.",
-        "`exact` elaborates/checks its term against the expected goal; `assumption` searches local hypotheses by pskernel definitional equality.",
-        "Kernel.addTheorem remains the final proof-acceptance boundary.",
-        "Multi-step tactic sequences, intro/apply/refine, tactic metavariable goals, typeclass synthesis, and automation remain later milestones.",
-        "Value/theorem headers are elaborated once through a reusable semantic header API; declaration bodies receive the declared result type as their expected type, enabling faithful expected-type lambda and tactic elaboration.",
-        "The reusable header API is intended for editor goal display but returns real pskernel Expr/LocalContext state; editor consumers receive no proof authority from it."
+        "Lean-native `intro` opens a real forall goal, extends LocalContext with the exact binder type/info, elaborates the continuation against the instantiated codomain, and constructs a lambda proof.",
+        "`exact`, `assumption`, and `intro` all elaborate to ordinary pskernel Expr proof terms; Kernel.addTheorem remains final authority.",
+        "This milestone still has no synthetic tactic goal engine or cursor snapshots; apply/refine/rewrite/simp/typeclass synthesis and multi-goal tactics remain later work."
       ]
     },
     {

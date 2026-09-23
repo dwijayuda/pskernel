@@ -684,3 +684,23 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(body?.kind,'by');
   if(body?.kind==='by')equal(body.tactic.kind,'assumption');
 }
+
+
+{
+  const module=parseV061Module(
+    'theorem introProof(P : Prop) : P -> P := by intro h; assumption;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactic.kind,'intro');
+    if(body.tactic.kind==='intro'){
+      equal(body.tactic.name,'h');
+      equal(body.tactic.next.kind,'assumption');
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem introProof (P : Prop) : P -> P := by intro h; assumption\n',
+  );
+}

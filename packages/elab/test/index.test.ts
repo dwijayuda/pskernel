@@ -403,3 +403,25 @@ console.log('ok - @proofscript/elab exact and assumption tactic terms');
   equal(result.environment.find(nameFromDotted('expectedLambda'))?.kind,'theorem');
 }
 console.log('ok - @proofscript/elab declaration expected-type propagation');
+
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem introIdentity(P : Prop) : P -> P := by intro h; assumption; '+
+    'theorem introExact(P : Prop) : P -> P := by intro h; exact h;',
+  ));
+  equal(result.theorems.length,2);
+  for(const theorem of result.theorems){
+    equal(theorem.value.kind,'lam');
+  }
+}
+{
+  let failed=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem badIntro(P : Prop) : P := by intro h; assumption;',
+    ));
+  }catch(error){failed=/PS_ELAB_TACTIC_INTRO/.test(String(error));}
+  equal(failed,true);
+}
+console.log('ok - @proofscript/elab intro tactic proof-term construction');

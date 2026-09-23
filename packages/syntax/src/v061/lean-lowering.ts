@@ -26,6 +26,17 @@ function lowerV061FieldToLean(
   }
 }
 
+function lowerV061TacticToLean(
+  tactic:import('./ast.js').V061Tactic,
+):string {
+  switch(tactic.kind){
+    case 'exact':return 'exact '+lowerV061ExprToLean(tactic.proof);
+    case 'assumption':return 'assumption';
+    case 'intro':
+      return 'intro '+tactic.name+'; '+lowerV061TacticToLean(tactic.next);
+  }
+}
+
 function precedence(expr:V061Expr):number {
   return expr.kind==='binary'?(v061BinaryPrecedence(expr.operator)??0):8;
 }
@@ -68,9 +79,7 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
       return 'match '+lowerV061ExprToLean(expr.scrutinee)+' with\n'+alternatives;
     }
     case 'by':
-      return expr.tactic.kind==='exact'
-        ? 'by exact '+lowerV061ExprToLean(expr.tactic.proof)
-        : 'by assumption';
+      return 'by '+lowerV061TacticToLean(expr.tactic);
     case 'lambda':{
       const binders=expr.binders.map((binder)=>
         binder.type===undefined

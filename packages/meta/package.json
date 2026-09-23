@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Metavariables, unification, transparency, goals and instance synthesis.",
   "proofscript": {
-    "status": "foundation",
+    "status": "expr-mvar-context-mvp",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -22,5 +22,8 @@
   },
   "devDependencies": {
     "typescript": "5.8.3"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../.."
   }
 }

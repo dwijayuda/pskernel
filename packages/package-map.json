@@ -127,14 +127,17 @@
       "path": "packages/meta",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "foundation",
+      "status": "expr-mvar-context-mvp",
       "packageName": "@proofscript/meta",
       "dependsOn": [
         "kernel"
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Foundation provides metavariable allocation/assignment, goals, transparency modes, and kernel-service protocols; unification/typeclass synthesis remain later milestones."
+        "Expr metavariables now use pskernel's real Expr and LocalContext rather than only a generic placeholder protocol.",
+        "The context records natural/synthetic/syntheticOpaque kind, creation depth, local scope, assignments, recursive instantiation, occurs checks, and kernel-backed validation once assignments are ground.",
+        "Ordinary unification never assigns syntheticOpaque metavariables; explicit assignment remains available to tactic/elaboration code.",
+        "This is intentionally not full Lean.Meta.isDefEq: level metavariables, delayed assignments, higher-order pattern unification, postponed constraints, local instance synthesis, and transparency-sensitive meta reduction remain later milestones."
       ]
     },
     {

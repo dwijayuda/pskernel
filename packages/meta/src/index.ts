@@ -25,3 +25,5 @@ export function createGoal<Term>(context:MetaVarContext<Term>,target:Term,locals
 export function checkExpectedType<Term>(
   kernel:MetaKernel<Term>,term:Term,expected:Term,transparency:TransparencyMode='reducible',
 ):boolean{return kernel.isDefEq(kernel.inferType(term),expected,transparency);}
+
+export * from './expr-meta.js';

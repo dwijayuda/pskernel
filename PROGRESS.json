@@ -100,8 +100,9 @@
     "100% complete",
     "full Lean 4.34 native-reduction compatibility"
   ],
-  "lastVerifiedTestCount": 169,
+  "lastVerifiedTestCount": 170,
   "notes": [
+    "Execution refresh: new `strLitProj.lean` analogue passed in the aligned reconstructed checkout; TypeScript build PASS and direct suite PASS 170/170 with zero failures.",
     "Upstream kernel regression coverage expansion: added a direct `strLitProj.lean` analogue proving a String literal projection reduces through String.ofList to the structure field; mapped Lean 4.34 `proj_delta_issue.lean` and `etaStruct.lean` to existing exact direct regressions. Direct suite count is now 170 pending refreshed execution.",
     "Execution refresh for String literal hook hardening: aligned reconstructed direct-suite names to the current 169-test branch set, rebuilt with TypeScript 5.8.3, and passed 169/169 under Node v22.16.0 including missing/malformed Char.ofNat rejection.",
     "String literal hook admission hardening: final Lean 4.34 string_lit_to_constructor injects List.nil Char, List.cons Char, Char.ofNat, and String.ofList. String.ofList primitive validation now also requires Nat and a type-correct Char.ofNat : Nat → Char before the kernel-special string expansion name is admitted. Existing regression now covers missing/malformed Char.ofNat transactionally.",
@@ -242,5 +243,5 @@
   ],
   "currentTreeExpectedDirectTests": 170,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "last executed checkpoint remains 169/169; new direct string-literal projection regression added and pending TypeScript build/test execution"
+  "currentTreeVerification": "fresh reconstructed-branch execution PASS: TypeScript 5.8.3 build + 170/170 direct kernel tests under Node v22.16.0, including upstream strLitProj-style String literal projection. Pinned-Lean canonical replay/native smoke remain executable open gates."
 }

@@ -9,6 +9,8 @@ import {ExprMetaContext} from '@proofscript/meta';
 export interface V061StructuralRecursion {
   readonly functionName:string;
   readonly calls:ReadonlyMap<string,string>;
+  readonly explicitParameterIds:readonly string[];
+  readonly recursiveParameterIndex:number;
 }
 
 export interface V061CoreElabContext {

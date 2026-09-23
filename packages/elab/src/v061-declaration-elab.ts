@@ -25,38 +25,12 @@ import {
 import {elaborateV061ValueHeader} from './v061-header-elab.js';
 import {elaborateV061StructureDeclaration} from './v061-structure-elab.js';
 import {elaborateV061InductiveDeclaration} from './v061-inductive-elab.js';
+import {withStructuralRecursionContext} from './v061-structural-recursion.js';
 import {
   checkElaboratedTerm,
   elaborateV061Term,
 } from './v061-term-elab.js';
 
-
-function withStructuralRecursion(
-  source:V061ValueDeclaration,
-  context:import('./v061-context.js').V061CoreElabContext,
-):import('./v061-context.js').V061CoreElabContext {
-  if(
-    source.kind==='theorem'
-    ||source.body.kind!=='match'
-    ||source.body.scrutinee.kind!=='reference'
-  )return context;
-
-  const explicit=source.params.filter(
-    (parameter)=>(parameter.binderInfo??'default')==='default',
-  );
-  if(
-    explicit.length!==1
-    ||explicit[0]!.name!==source.body.scrutinee.name
-  )return context;
-
-  return {
-    ...context,
-    structuralRecursion:{
-      functionName:source.name,
-      calls:new Map(),
-    },
-  };
-}
 
 function maxRegularHeight(environment:Environment,expr:Expr):bigint {
   let max=0n;
@@ -117,7 +91,7 @@ function elaborateValueDeclaration(
   const parameters=header.parameters;
   const resultType=header.resultType;
 
-  const bodyContext=withStructuralRecursion(source,context);
+  const bodyContext=withStructuralRecursionContext(source,context);
   const body=elaborateV061Term(
     source.body,
     bodyContext,

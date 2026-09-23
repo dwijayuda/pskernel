@@ -1,4 +1,4 @@
-import type {V061Expr} from '@proofscript/syntax';
+import type {V061Expr,V061ValueDeclaration} from '@proofscript/syntax';
 import {
   TypeChecker,
   fvar,
@@ -8,6 +8,47 @@ import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
 } from './v061-context.js';
+
+
+export function withStructuralRecursionContext(
+  source:V061ValueDeclaration,
+  context:V061CoreElabContext,
+):V061CoreElabContext {
+  if(
+    source.kind==='theorem'
+    ||source.body.kind!=='match'
+    ||source.body.scrutinee.kind!=='reference'
+  )return context;
+
+  const explicit=source.params.filter(
+    (parameter)=>(parameter.binderInfo??'default')==='default',
+  );
+  const recursiveParameterIndex=explicit.findIndex(
+    (parameter)=>parameter.name===source.body.scrutinee.name,
+  );
+  if(recursiveParameterIndex<0)return context;
+
+  const explicitParameterIds=explicit.map((parameter)=>{
+    const id=context.locals.get(parameter.name);
+    if(id===undefined){
+      throw new Error(
+        "PS_ELAB_STRUCTURAL_RECURSION_INTERNAL: missing parameter local '"+
+        parameter.name+"'",
+      );
+    }
+    return id;
+  });
+
+  return {
+    ...context,
+    structuralRecursion:{
+      functionName:source.name,
+      calls:new Map(),
+      explicitParameterIds,
+      recursiveParameterIndex,
+    },
+  };
+}
 
 function structuralArgumentName(expr:V061Expr):string|undefined {
   if(expr.kind==='reference')return expr.name;
@@ -24,25 +65,42 @@ export function tryElaborateStructuralSelfCall(
   if(recursion===undefined||expr.callee!==recursion.functionName){
     return undefined;
   }
-  if(expr.args.length!==1){
+  if(expr.args.length!==recursion.explicitParameterIds.length){
     throw new Error(
-      'PS_ELAB_STRUCTURAL_RECURSION_ARITY: recursive call must have exactly one explicit decreasing argument',
+      'PS_ELAB_STRUCTURAL_RECURSION_ARITY: recursive call must pass every explicit parameter exactly once',
     );
   }
-  const argumentName=structuralArgumentName(expr.args[0]!);
-  if(argumentName===undefined){
-    throw new Error(
-      'PS_ELAB_STRUCTURAL_RECURSION_ARGUMENT: recursive call must target a directly bound recursive field',
-    );
+
+  let ihId:string|undefined;
+  for(let index=0;index<expr.args.length;index+=1){
+    const argumentName=structuralArgumentName(expr.args[index]!);
+    const argumentId=argumentName===undefined
+      ?undefined
+      :context.locals.get(argumentName);
+
+    if(index===recursion.recursiveParameterIndex){
+      ihId=argumentId===undefined
+        ?undefined
+        :recursion.calls.get(argumentId);
+      if(ihId===undefined){
+        throw new Error(
+          'PS_ELAB_STRUCTURAL_RECURSION_NOT_DECREASING: recursive argument '+
+          index+' must be a directly bound recursive field',
+        );
+      }
+      continue;
+    }
+
+    if(argumentId!==recursion.explicitParameterIds[index]){
+      throw new Error(
+        'PS_ELAB_STRUCTURAL_RECURSION_INVARIANT_ARGUMENT: explicit argument '+
+        index+' must be passed unchanged in a recursive call',
+      );
+    }
   }
-  const argumentId=context.locals.get(argumentName);
-  const ihId=argumentId===undefined
-    ?undefined
-    :recursion.calls.get(argumentId);
   if(ihId===undefined){
     throw new Error(
-      "PS_ELAB_STRUCTURAL_RECURSION_NOT_DECREASING: recursive call '"+
-      expr.callee+"("+argumentName+")' is not on a direct recursive field",
+      'PS_ELAB_STRUCTURAL_RECURSION_INTERNAL: decreasing induction hypothesis missing',
     );
   }
 

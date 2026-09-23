@@ -794,3 +794,40 @@ function containsNamePrefix(
   equal(rejected,true);
 }
 console.log('ok - @proofscript/elab structural recursion via recursor');
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive PsList2(α : Type) where { '+
+    '| nil; | cons(head : α, tail : PsList2(α)); } '+
+    'function countFrom {α : Type}(base : Nat, xs : PsList2(α)) : Nat := '+
+    'match xs with { | .nil => base; '+
+    '| .cons head tail => 1 + countFrom(base, tail); };',
+  ),env);
+  const countFrom=result.definitions.find(
+    (item)=>containsNamePrefix(item.name,'countFrom'),
+  );
+  equal(countFrom?.kind,'definition');
+  if(countFrom?.kind==='definition'){
+    equal(containsNamedConstant(countFrom.value,'PsList2.rec'),true);
+    equal(containsNamedConstant(countFrom.value,'countFrom'),false);
+  }
+}
+{
+  const env=makeNatNotationEnvironment();
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'inductive PsList3(α : Type) where { '+
+      '| nil; | cons(head : α, tail : PsList3(α)); } '+
+      'function badCount {α : Type}(base : Nat, xs : PsList3(α)) : Nat := '+
+      'match xs with { | .nil => base; '+
+      '| .cons head tail => badCount(0, tail); };',
+    ),env);
+  }catch(error){
+    rejected=/PS_ELAB_STRUCTURAL_RECURSION_INVARIANT_ARGUMENT/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab structural recursion with invariant parameters');
+

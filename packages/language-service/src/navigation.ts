@@ -44,7 +44,7 @@ export function completionItems(
   for(const declaration of analysis.declarations){
     add({
       label:declaration.name,
-      kind:declaration.kind==='theorem'?3:3,
+      kind:3,
       detail:declaration.kind+' · '+declaration.kernel,
       source:'document',
     });

@@ -659,3 +659,37 @@ console.log('ok - @proofscript/backend-ts generic structure TypeScript emission'
   );
 }
 console.log('ok - @proofscript/backend-ts external ESM import emission');
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    declarations:[
+      {
+        name:'id8',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'UInt8'},
+        }],
+        resultType:{kind:'primitive',name:'UInt8'},
+        body:{kind:'var',name:'x'},
+      },
+      {
+        name:'id64',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'UInt64'},
+        }],
+        resultType:{kind:'primitive',name:'UInt64'},
+        body:{kind:'var',name:'x'},
+      },
+    ],
+  });
+  equal(source.includes('id8(x: number): number'),true);
+  equal(source.includes('id64(x: bigint): bigint'),true);
+  const compiled=compileTypeScript(source,'verified-uint.ts');
+  equal(compiled.javascript.includes('function id8(x)'),true);
+  equal(compiled.javascript.includes('function id64(x)'),true);
+}
+console.log('ok - @proofscript/backend-ts verified fixed-width UInt types');

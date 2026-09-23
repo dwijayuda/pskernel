@@ -567,6 +567,52 @@ for(const ai of [0,1,2,-1]){
 console.log('ok - verified Bool source differential JS/Wasm execution');
 
 
+const verifiedUInt=compileVerifiedSource(
+  'function id8(x : UInt8) : UInt8 := x; '+
+  'function id16(x : UInt16) : UInt16 := x; '+
+  'function id32(x : UInt32) : UInt32 := x; '+
+  'function id64(x : UInt64) : UInt64 := x;',
+  'verified-wasm-uint.ts',
+);
+assert(
+  verifiedUInt.typeScript.includes(
+    'function id8(x: number): number',
+  ),
+  'verified UInt8 did not reach TypeScript as a fixed-width host number',
+);
+assert(
+  verifiedUInt.typeScript.includes(
+    'function id64(x: bigint): bigint',
+  ),
+  'verified UInt64 did not reach TypeScript as bigint',
+);
+const verifiedUIntWasm=emitBinaryenWasm(
+  lowerVerifiedIrToWasm(verifiedUInt.ir),
+);
+assert(
+  WebAssembly.validate(verifiedUIntWasm.binary),
+  'verified UInt Wasm artifact failed host validation',
+);
+const uintInstance=new WebAssembly.Instance(
+  new WebAssembly.Module(verifiedUIntWasm.binary),
+  {},
+);
+assert(uintInstance.exports.id8(255)===255,'UInt8 identity mismatch');
+assert(uintInstance.exports.id8(257)===1,'UInt8 boundary mask mismatch');
+assert(uintInstance.exports.id16(65535)===65535,'UInt16 identity mismatch');
+assert(uintInstance.exports.id16(65537)===1,'UInt16 boundary mask mismatch');
+assert(
+  (uintInstance.exports.id32(-1)>>>0)===0xffffffff,
+  'UInt32 bit-pattern mismatch',
+);
+assert(
+  BigInt.asUintN(64,uintInstance.exports.id64(-1n))===
+    0xffffffffffffffffn,
+  'UInt64 bit-pattern mismatch',
+);
+console.log('ok - verified fixed-width UInt source -> JS/Wasm pipeline');
+
+
 const verifiedComposition=compileVerifiedSource(
   'inductive ComposeOption(α : Type) where { '+
   '| none; | some(value : α); } '+

@@ -216,6 +216,19 @@ console.log('ok - psc verified Nat source pipeline');
   equal(parseVerifiedRuntimeArg('42',{kind:'primitive',name:'Nat'}),42n);
   equal(parseVerifiedRuntimeArg('-42',{kind:'primitive',name:'Int'}),-42n);
   equal(parseVerifiedRuntimeArg('true',{kind:'primitive',name:'Bool'}),true);
+  equal(parseVerifiedRuntimeArg('255',{kind:'primitive',name:'UInt8'}),255);
+  equal(parseVerifiedRuntimeArg('65535',{kind:'primitive',name:'UInt16'}),65535);
+  equal(
+    parseVerifiedRuntimeArg('4294967295',{kind:'primitive',name:'UInt32'}),
+    4294967295,
+  );
+  equal(
+    parseVerifiedRuntimeArg(
+      '18446744073709551615',
+      {kind:'primitive',name:'UInt64'},
+    ),
+    18446744073709551615n,
+  );
   equal(parseVerifiedRuntimeArg('hello',{kind:'primitive',name:'String'}),'hello');
   equal(parseVerifiedRuntimeArg('()',{kind:'primitive',name:'Unit'}),undefined);
   throws(
@@ -225,6 +238,17 @@ console.log('ok - psc verified Nat source pipeline');
   throws(
     ()=>parseVerifiedRuntimeArg('yes',{kind:'primitive',name:'Bool'}),
     /Bool argument/,
+  );
+  throws(
+    ()=>parseVerifiedRuntimeArg('256',{kind:'primitive',name:'UInt8'}),
+    /outside/,
+  );
+  throws(
+    ()=>parseVerifiedRuntimeArg(
+      '18446744073709551616',
+      {kind:'primitive',name:'UInt64'},
+    ),
+    /outside/,
   );
   const args=prepareVerifiedMainArguments({
     name:'main',

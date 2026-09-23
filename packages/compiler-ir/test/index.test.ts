@@ -215,6 +215,7 @@ console.log('ok - @proofscript/compiler-ir verified Nat intrinsic');
 {
   equal(VERIFIED_IR_INTRINSIC_ARITY['bool.not'],1);
   equal(VERIFIED_IR_INTRINSIC_ARITY['nat.sub'],2);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['uint32.add'],2);
   let invalid=false;
   try{
     validateVerifiedIrModule({
@@ -289,3 +290,28 @@ console.log('ok - @proofscript/compiler-ir verified intrinsic contract');
   equal(collision,true);
 }
 console.log('ok - @proofscript/compiler-ir external import boundary');
+
+{
+  const module={
+    kind:'proofscript-verified-ir' as const,
+    declarations:[{
+      name:'add32',
+      typeParameters:[],
+      parameters:[
+        {name:'x',type:{kind:'primitive' as const,name:'UInt32' as const}},
+        {name:'y',type:{kind:'primitive' as const,name:'UInt32' as const}},
+      ],
+      resultType:{kind:'primitive' as const,name:'UInt32' as const},
+      body:{
+        kind:'intrinsic' as const,
+        operation:'uint32.add' as const,
+        args:[
+          {kind:'var' as const,name:'x'},
+          {kind:'var' as const,name:'y'},
+        ],
+      },
+    }],
+  };
+  equal(validateVerifiedIrModule(module),true);
+}
+console.log('ok - @proofscript/compiler-ir verified UInt wrapping add intrinsic');

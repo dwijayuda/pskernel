@@ -1,7 +1,7 @@
 import { ConstantInfo, DefinitionInfo, ReducibilityHints } from '../core/declaration.js';
 import { Environment, KernelError } from '../core/environment.js';
 import { BinderInfo, Expr, app, bvar, constant, exprEq, exprKernelMetadataDiff, exprKernelMetadataEq, exprToString, forallE, lam, natLit, sort, strLit } from '../core/expr.js';
-import { Level, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../core/level.js';
+import { Level, levelIMaxRaw, levelMaxRaw, levelParam, levelSucc, levelZero } from '../core/level.js';
 import { Name, anonymous, nameEq, nameKey, nameToString, numName, strName } from '../core/name.js';
 import { Kernel } from '../kernel/kernel.js';
 import { addInductive } from '../kernel/inductive/nested.js';
@@ -125,8 +125,8 @@ export class Lean4ExportReplay {
   private levelRecord(o:JObject):void{
     const i=asIndex(field(o,'il','Level'),'Level.il');let l:Level;
     if('succ' in o)l=levelSucc(this.l(asIndex(o.succ!,'Level.succ')));
-    else if('max' in o){const a=arrIndex(asArray(o.max!,'Level.max'),'Level.max');if(a.length!==2)throw new KernelError('Level.max requires two operands');l=mkMax(this.l(a[0]!),this.l(a[1]!));}
-    else if('imax' in o){const a=arrIndex(asArray(o.imax!,'Level.imax'),'Level.imax');if(a.length!==2)throw new KernelError('Level.imax requires two operands');l=mkIMax(this.l(a[0]!),this.l(a[1]!));}
+    else if('max' in o){const a=arrIndex(asArray(o.max!,'Level.max'),'Level.max');if(a.length!==2)throw new KernelError('Level.max requires two operands');l=levelMaxRaw(this.l(a[0]!),this.l(a[1]!));}
+    else if('imax' in o){const a=arrIndex(asArray(o.imax!,'Level.imax'),'Level.imax');if(a.length!==2)throw new KernelError('Level.imax requires two operands');l=levelIMaxRaw(this.l(a[0]!),this.l(a[1]!));}
     else if('param' in o)l=levelParam(this.n(asIndex(o.param!,'Level.param')));
     else throw new KernelError('invalid lean4export Level record');this.levels.add(i,l,'Level');
   }

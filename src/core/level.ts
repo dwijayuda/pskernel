@@ -13,6 +13,11 @@ export const levelSucc = (of: Level): Level => Object.freeze({ kind: 'succ', of 
 export const levelParam = (name: Name): Level => Object.freeze({ kind: 'param', name });
 export const levelMVar = (name: Name): Level => Object.freeze({ kind: 'mvar', name });
 
+/** Raw constructors used when reconstructing serialized Lean kernel syntax.
+ * Unlike mkMax/mkIMax, these do not perform definitional simplification. */
+export const levelMaxRaw = (left:Level,right:Level):Level => Object.freeze({kind:'max',left,right});
+export const levelIMaxRaw = (left:Level,right:Level):Level => Object.freeze({kind:'imax',left,right});
+
 export function levelEqStructural(a: Level, b: Level): boolean {
   const todo:[Level,Level][]=[[a,b]];
   while(todo.length){

@@ -1688,6 +1688,27 @@ test('exact JSON parser preserves integers beyond JavaScript safe range',()=>{
  const v=parseExactJson('{"n":9007199254740993123456789}');assert(typeof v==='object'&&v!==null&&!Array.isArray(v));assert((v as any).n===9007199254740993123456789n);
 });
 
+test('lean4export preserves raw max and imax level syntax',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"in":1,"str":{"pre":0,"str":"u"}}',
+  '{"in":2,"str":{"pre":0,"str":"RawMax"}}',
+  '{"in":3,"str":{"pre":0,"str":"RawIMax"}}',
+  '{"il":1,"param":1}',
+  '{"il":2,"max":[0,1]}',
+  '{"il":3,"imax":[0,1]}',
+  '{"ie":0,"sort":2}',
+  '{"ie":1,"sort":3}',
+  '{"axiom":{"name":2,"levelParams":[1],"type":0,"isUnsafe":false}}',
+  '{"axiom":{"name":3,"levelParams":[1],"type":1,"isUnsafe":false}}'
+ ].join('\n');
+ const r=new Lean4ExportReplay(),st=r.replay(nd);
+ assert(st.declarations===2);
+ const a=r.env.get(nameFromDotted('RawMax')),b=r.env.get(nameFromDotted('RawIMax'));
+ assert(a.type.kind==='sort'&&a.type.level.kind==='max','raw exported Level.max must not be simplified during replay');
+ assert(b.type.kind==='sort'&&b.type.level.kind==='imax','raw exported Level.imax must not be simplified during replay');
+});
+
 test('lean4export replay admits a version-pinned axiom stream',()=>{
  const nd=[
   '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',

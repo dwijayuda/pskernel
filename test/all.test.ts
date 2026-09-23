@@ -55,6 +55,7 @@ test('deep structural traversals avoid the JavaScript call stack',()=>{
  const id='deep@0';let withFVar:any=fvar(id);
  for(let i=0;i<12000;i++)withFVar=lam(nameFromDotted('x'),constant(N.Nat),withFVar);
  assert(hasFVar(withFVar),'deep free-variable scan must find the leaf without recursion overflow');
+ const tcScan:any=new TypeChecker(baseEnv());assert(tcScan.containsFVar(withFVar,id),'checker-specific deep free-variable scan must be stack-safe');assert(!tcScan.containsFVar(withFVar,'other@0'));
  const abstracted=abstractFVar(withFVar,id);
  assert(abstracted.kind==='lam'&&!hasFVar(abstracted),'deep abstraction must be stack-safe and close the free variable');
 });

@@ -395,26 +395,27 @@ console.log('ok - psc verified source FFI resolves exact package and runs');
     }
     equal(legacyRejected,true);
 
-    let runRejected=false;
-    try{
-      await runCommand({
-        project:directory,
-        json:true,
-        verified:true,
-        buildTarget:'wasm',
-        passthrough:['true'],
-      });
-    }catch(error){
-      runRejected=/PS_CLI_WASM_RUN_UNSUPPORTED/.test(
-        String(error),
-      );
-    }
-    equal(runRejected,true);
+    const runTrue=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:['true'],
+    });
+    equal(runTrue.mainResult,false);
+    const runFalse=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:['false'],
+    });
+    equal(runFalse.mainResult,true);
   }finally{
     await rm(directory,{recursive:true,force:true});
   }
 }
-console.log('ok - psc verified Wasm W1 build target');
+console.log('ok - psc verified Wasm W2 build/run target');
 
 
 {

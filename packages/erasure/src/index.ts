@@ -48,6 +48,10 @@ export function eraseCheckedCoreModule(
     const checker=new TypeChecker(module.environment,new LocalContext());
     if(checker.isProp(definition.type))continue;
 
+    const name=declarationNames.get(nameKey(definition.name));
+    if(name===undefined){
+      throw new Error('PS_ERASE_DECLARATION_NAME_MISSING');
+    }
     const lowered=openAndEraseDefinition(
       definition.type,
       definition.value,
@@ -64,11 +68,8 @@ export function eraseCheckedCoreModule(
         inductivesByRecursor:inductives.byRecursor,
       },
       module.environment,
+      name,
     );
-    const name=declarationNames.get(nameKey(definition.name));
-    if(name===undefined){
-      throw new Error('PS_ERASE_DECLARATION_NAME_MISSING');
-    }
     declarations.push({name,...lowered});
   }
 

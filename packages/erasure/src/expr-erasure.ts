@@ -99,6 +99,8 @@ export function eraseRuntimeExpr(
     case 'lit':
       return {kind:'literal',value:expr.literal.value};
     case 'fvar':{
+      const replacement=scope.runtimeExpressions?.get(expr.id);
+      if(replacement!==undefined)return replacement;
       const runtime=scope.runtimeLocals.get(expr.id);
       if(runtime!==undefined)return {kind:'var',name:runtime};
       if(scope.erasedLocals.has(expr.id)||scope.typeLocals.has(expr.id)){
@@ -254,6 +256,7 @@ export function openAndEraseDefinition(
   value:Expr,
   baseScope:ErasureScope,
   environment:Environment,
+  definitionName:string,
 ):OpenedDefinition {
   let currentType=type;
   let currentValue=value;
@@ -287,10 +290,21 @@ export function openAndEraseDefinition(
     currentValue=instantiate1(currentValue.body,opened.variable);
   }
 
+  const executableScope:ErasureScope={
+    ...scope,
+    currentDefinition:{
+      name:definitionName,
+      runtimeArity:parameters.length,
+    },
+  };
   return {
     typeParameters,
     parameters,
     resultType:eraseRuntimeType(currentType,scope,environment),
-    body:eraseRuntimeExpr(currentValue,scope,environment),
+    body:eraseRuntimeExpr(
+      currentValue,
+      executableScope,
+      environment,
+    ),
   };
 }

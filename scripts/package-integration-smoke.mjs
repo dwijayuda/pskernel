@@ -434,3 +434,26 @@ assert(
   verifiedRecursiveAdt.emitted.javascript.includes('case "cons"'),
   'recursive ADT match did not compile to JavaScript',
 );
+
+
+const verifiedLength=compileVerifiedSource(
+  'inductive PsList(α : Type) where { '+
+  '| nil; | cons(head : α, tail : PsList(α)); } '+
+  'function length {α : Type}(xs : PsList(α)) : Nat := '+
+  'match xs with { | .nil => 0; | .cons head tail => 1 + length(tail); };',
+  'verified-length.ts',
+);
+assert(
+  verifiedLength.typeScript.includes(
+    'function length<T0>(xs: PsList<T0>): bigint',
+  ),
+  'structural recursive function lost its verified generic signature',
+);
+assert(
+  verifiedLength.typeScript.includes('1n + length(tail)'),
+  'recursor induction hypothesis did not lower to structural runtime self-call',
+);
+assert(
+  verifiedLength.emitted.javascript.includes('length(tail)'),
+  'structural recursion did not compile to JavaScript recursion',
+);

@@ -107,9 +107,9 @@ function eraseMinor(
   }
 
 
-  const recursiveFields=constructor.fields.filter(
-    (field)=>field.recursive,
-  );
+  const recursiveFields=constructor.fields
+    .map((field,index)=>({field,index}))
+    .filter((entry)=>entry.field.recursive);
   for(let index=0;index<recursiveFields.length;index+=1){
     if(cursor.kind!=='lam'){
       throw new Error(
@@ -118,6 +118,14 @@ function eraseMinor(
         "' minor is missing induction-hypothesis lambda "+index,
       );
     }
+    const entry=recursiveFields[index]!;
+    const binding=bindings[entry.index];
+    if(binding===undefined){
+      throw new Error(
+        'PS_ERASE_MATCH_IH_BINDING: missing runtime recursive field binding',
+      );
+    }
+
     const localContext=branchScope.localContext.clone();
     const id=localContext.fresh('_ih'+index);
     localContext.addLocal(
@@ -127,8 +135,30 @@ function eraseMinor(
       cursor.binderInfo,
     );
     const erasedLocals=new Set(branchScope.erasedLocals);
-    erasedLocals.add(id);
-    branchScope={...branchScope,localContext,erasedLocals};
+    const runtimeExpressions=new Map(
+      branchScope.runtimeExpressions??[],
+    );
+    if(branchScope.currentDefinition?.runtimeArity===1){
+      runtimeExpressions.set(id,{
+        kind:'call',
+        fn:{
+          kind:'var',
+          name:branchScope.currentDefinition.name,
+        },
+        args:[{
+          kind:'var',
+          name:binding.name,
+        }],
+      });
+    }else{
+      erasedLocals.add(id);
+    }
+    branchScope={
+      ...branchScope,
+      localContext,
+      erasedLocals,
+      runtimeExpressions,
+    };
     cursor=instantiate1(cursor.body,fvar(id));
   }
 

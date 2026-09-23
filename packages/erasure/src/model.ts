@@ -4,7 +4,10 @@ import {
   type LocalContext,
   type TypeChecker,
 } from 'lean-ts-kernel';
-import type {VerifiedIrType} from '@proofscript/compiler-ir/verified';
+import type {
+  VerifiedIrExpr,
+  VerifiedIrType,
+} from '@proofscript/compiler-ir/verified';
 
 export type ErasedBinderKind='type'|'proof'|'runtime';
 
@@ -44,6 +47,11 @@ export interface RuntimeInductiveInfo {
 
 export interface ErasureScope {
   readonly localContext:LocalContext;
+  readonly runtimeExpressions?:ReadonlyMap<string,VerifiedIrExpr>;
+  readonly currentDefinition?:{
+    readonly name:string;
+    readonly runtimeArity:number;
+  };
   readonly runtimeLocals:ReadonlyMap<string,string>;
   readonly typeLocals:ReadonlyMap<string,string>;
   readonly erasedLocals:ReadonlySet<string>;

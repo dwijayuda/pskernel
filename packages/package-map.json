@@ -253,7 +253,7 @@
       "path": "packages/erasure",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "direct-recursive-adt-erasure-mvp",
+      "status": "structural-recursion-erasure-mvp",
       "packageName": "@proofscript/erasure",
       "dependsOn": [
         "checked-core",
@@ -262,6 +262,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "For checked definitions with exactly one runtime parameter, a used recursor induction-hypothesis local lowers to a verified IR self-call on its corresponding direct recursive field.",
+        "The self-call mapping is derived from pskernel recursor structure and checked-core binder opening, not from raw source recursion.",
+        "Definitions with other runtime arities do not receive this mapping; any surviving IH use then fails through erased-local checks.",
+        "This enables structurally recursive functions over direct recursive ADTs while general/well-founded recursion remains outside the current compiler subset.",
         "Direct recursive constructor fields now remain self-referential verified IR types and compile to ordinary recursive TypeScript tagged unions.",
         "For recursive recursor applications, generated induction-hypothesis lambdas are consumed as checked compiler-internal artifacts and erased; source patterns still bind constructor fields only.",
         "If an erased induction-hypothesis local survives in executable branch code, ordinary erased-local checks fail closed.",

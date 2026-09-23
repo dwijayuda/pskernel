@@ -328,3 +328,35 @@ console.log('ok - psc verified generic ADT match pipeline');
   equal(result.emitted.javascript.includes('case "cons"'),true);
 }
 console.log('ok - psc verified recursive ADT match pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'inductive PsList(α : Type) where { '+
+    '| nil; | cons(head : α, tail : PsList(α)); } '+
+    'function length {α : Type}(xs : PsList(α)) : Nat := '+
+    'match xs with { | .nil => 0; | .cons head tail => 1 + length(tail); };',
+    'recursive-function.ts',
+  );
+  const length=result.ir.declarations.find(
+    (item)=>item.name==='length',
+  );
+  equal(length?.body.kind,'match');
+  equal(
+    result.typeScript.includes(
+      'function length<T0>(xs: PsList<T0>): bigint',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes(
+      '1n + length(tail)',
+    ),
+    true,
+  );
+  equal(
+    result.emitted.javascript.includes('length(tail)'),
+    true,
+  );
+}
+console.log('ok - psc verified structural recursive function pipeline');

@@ -532,6 +532,19 @@ test('nested inductive preserves constructor-specific parameter BinderInfo throu
  const ci=env.get(Node);assert(ci.kind==='constructor');assert(ci.type.kind==='forall'&&ci.type.binderInfo==='implicit');eqExpr(ci.type,ctorTy);
 });
 
+test('public ordinary admission rejects reserved _nested references but not sibling prefixes',()=>{
+ const env=baseEnv(),I=nameFromDotted('ReservedOrdinary'),Mk=nameFromDotted('ReservedOrdinary.mk'),aux=nameFromDotted('_nested.KNHost_1');
+ const badTy=forallE(nameFromDotted('x'),constant(aux),constant(I));
+ throws(()=>addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[{name:Mk,type:badTy}]}]}));
+ assert(!env.has(I)&&!env.has(Mk),'public ordinary admission must reject reserved nested auxiliaries transactionally');
+
+ const okEnv=baseEnv(),Payload=nameFromDotted('_nestedX.Payload'),J=nameFromDotted('ReservedSibling'),JMk=nameFromDotted('ReservedSibling.mk');
+ okEnv.add({kind:'axiom',name:Payload,levelParams:[],type:sort(levelSucc(levelZero))});
+ const goodTy=forallE(nameFromDotted('x'),constant(Payload),constant(J));
+ addOrdinaryInductive(okEnv,{levelParams:[],numParams:0,types:[{name:J,type:sort(levelSucc(levelZero)),ctors:[{name:JMk,type:goodTy}]}]});
+ assert(okEnv.has(J)&&okEnv.has(JMk),'only the _nested name component is reserved; _nestedX must remain legal');
+});
+
 test('nested inductive admission rejects the reserved _nested auxiliary namespace',()=>{
  const env=baseEnv(),I=nameFromDotted('ReservedNested'),Mk=nameFromDotted('ReservedNested.mk'),aux=nameFromDotted('_nested.KNHost_1');
  const badConstTy=forallE(nameFromDotted('x'),constant(aux),constant(I));

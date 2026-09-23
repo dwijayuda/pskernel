@@ -6,14 +6,9 @@ import type {
 } from './ast.js';
 import {V061ParseContext} from './context.js';
 import {V061LeanSubsetExpressionParser} from './lean-subset-expression-parser.js';
+import {parseV061LeanSubsetDeclaration} from './lean-subset-declaration-parser.js';
 import {parseV061ParameterSequence} from './parameter-parser.js';
 import {parseV061Type} from './type-parser.js';
-
-const UNSUPPORTED_COMMANDS=new Set([
-  'structure','class','instance','inductive','namespace','section',
-  'open','variable','axiom','opaque','abbrev','example','macro',
-  'syntax','elab','attribute','noncomputable','private','protected',
-]);
 
 export class V061LeanSubsetParser {
   readonly context:V061ParseContext;
@@ -36,20 +31,12 @@ export class V061LeanSubsetParser {
     };
   }
 
-  private parseDeclaration():V061ValueDeclaration {
+  private parseDeclaration():V061Declaration {
     const token=this.context.cursor.peek();
-    if(UNSUPPORTED_COMMANDS.has(token.text)){
-      throw new SyntaxError(
-        "PS_LEAN_SUBSET_UNSUPPORTED_COMMAND: '"+token.text+
-        "' is outside the current DS2.1 subset",
-        token.span,
-      );
-    }
     if(token.text!=='def'&&token.text!=='theorem'){
-      throw new SyntaxError(
-        "PS_LEAN_SUBSET_COMMAND: expected def or theorem, got '"+
-        token.text+"'",
-        token.span,
+      return parseV061LeanSubsetDeclaration(
+        this.context,
+        this.expressions,
       );
     }
 
@@ -67,7 +54,7 @@ export class V061LeanSubsetParser {
 
     if(this.context.cursor.at('where')){
       throw new SyntaxError(
-        'PS_LEAN_SUBSET_UNSUPPORTED_WHERE: Lean where declarations are not in DS2.1',
+        'PS_LEAN_SUBSET_UNSUPPORTED_WHERE: Lean where declarations are not in DS2.2',
         this.context.cursor.peek().span,
       );
     }

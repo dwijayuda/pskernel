@@ -49,18 +49,38 @@ export type V061TypeExpr =
     }
   | {readonly kind:'group';readonly value:V061TypeExpr;readonly span:SourceSpan};
 
+export interface V061TypeParseOptions {
+  readonly stopAtLineBreak?:boolean;
+}
+
+const TYPE_APPLICATION_STOP_WORDS=new Set([
+  'where','with','then','else','by',
+]);
+
+function crossesLineBoundary(
+  current:V061TypeExpr,
+  next:Token,
+  options:V061TypeParseOptions,
+):boolean {
+  return options.stopAtLineBreak===true
+    &&next.span.start.line>current.span.end.line;
+}
+
 function startsDependentArrow(context:V061ParseContext):boolean {
   return context.cursor.at('(')
     &&context.cursor.peek(1).kind==='identifier'
     &&context.cursor.peek(2).text===':';
 }
 
-export function parseV061Type(context:V061ParseContext):V061TypeExpr {
+export function parseV061Type(
+  context:V061ParseContext,
+  options:V061TypeParseOptions={},
+):V061TypeExpr {
   if(startsDependentArrow(context)){
     const open=context.cursor.consume();
     const name=context.cursor.expectKind('identifier','dependent binder name');
     context.cursor.expect(':');
-    const domain=parseV061Type(context);
+    const domain=parseV061Type(context,options);
     context.cursor.expect(')');
     if(!(context.cursor.at('->')||context.cursor.at('→'))){
       throw new SyntaxError(
@@ -69,7 +89,7 @@ export function parseV061Type(context:V061ParseContext):V061TypeExpr {
       );
     }
     context.cursor.consume();
-    const codomain=parseV061Type(context);
+    const codomain=parseV061Type(context,options);
     return {
       kind:'dependentArrow',
       name:name.text,
@@ -79,10 +99,13 @@ export function parseV061Type(context:V061ParseContext):V061TypeExpr {
     };
   }
 
-  const domain=parseEqualityType(context);
-  if(context.cursor.at('->')||context.cursor.at('→')){
+  const domain=parseEqualityType(context,options);
+  if(
+    (context.cursor.at('->')||context.cursor.at('→'))
+    &&!crossesLineBoundary(domain,context.cursor.peek(),options)
+  ){
     context.cursor.consume();
-    const codomain=parseV061Type(context);
+    const codomain=parseV061Type(context,options);
     return {
       kind:'arrow',
       domain,
@@ -100,15 +123,17 @@ const TYPE_TERM_BINARY_OPERATORS=new Set([
 function parseTypeTermBinary(
   context:V061ParseContext,
   minPrecedence=0,
+  options:V061TypeParseOptions={},
 ):V061TypeExpr {
-  let left=parsePrefixType(context);
+  let left=parsePrefixType(context,options);
   while(true){
     const token=context.cursor.peek();
+    if(crossesLineBoundary(left,token,options))break;
     if(!TYPE_TERM_BINARY_OPERATORS.has(token.text))break;
     const precedence=v061BinaryPrecedence(token.text);
     if(precedence===undefined||precedence<minPrecedence)break;
     context.cursor.consume();
-    const right=parseTypeTermBinary(context,precedence+1);
+    const right=parseTypeTermBinary(context,precedence+1,options);
     left={
       kind:'binary',
       operator:token.text as
@@ -123,11 +148,17 @@ function parseTypeTermBinary(
   return left;
 }
 
-function parseEqualityType(context:V061ParseContext):V061TypeExpr {
-  const left=parseTypeTermBinary(context);
-  if(!context.cursor.at('='))return left;
+function parseEqualityType(
+  context:V061ParseContext,
+  options:V061TypeParseOptions,
+):V061TypeExpr {
+  const left=parseTypeTermBinary(context,0,options);
+  if(
+    !context.cursor.at('=')
+    ||crossesLineBoundary(left,context.cursor.peek(),options)
+  )return left;
   context.cursor.consume();
-  const right=parseTypeTermBinary(context);
+  const right=parseTypeTermBinary(context,0,options);
   if(context.cursor.at('=')){
     throw new SyntaxError(
       'propositional equality is non-associative; parenthesize nested equality',
@@ -142,10 +173,13 @@ function parseEqualityType(context:V061ParseContext):V061TypeExpr {
   };
 }
 
-function parsePrefixType(context:V061ParseContext):V061TypeExpr {
+function parsePrefixType(
+  context:V061ParseContext,
+  options:V061TypeParseOptions,
+):V061TypeExpr {
   if(context.cursor.at('!')){
     const first=context.cursor.consume();
-    const operand=parsePrefixType(context);
+    const operand=parsePrefixType(context,options);
     return {
       kind:'unary',
       operator:'!',
@@ -153,10 +187,11 @@ function parsePrefixType(context:V061ParseContext):V061TypeExpr {
       span:spanBetween(first,operand),
     };
   }
-  return parseApplicationType(context);
+  return parseApplicationType(context,options);
 }
 
 function canStartAtomicType(token:Token):boolean {
+  if(TYPE_APPLICATION_STOP_WORDS.has(token.text))return false;
   return token.kind==='identifier'||token.kind==='number'||token.text==='(';
 }
 
@@ -175,8 +210,11 @@ function appendApplication(
   };
 }
 
-function parseApplicationType(context:V061ParseContext):V061TypeExpr {
-  let current=parseAtomicType(context);
+function parseApplicationType(
+  context:V061ParseContext,
+  options:V061TypeParseOptions,
+):V061TypeExpr {
+  let current=parseAtomicType(context,options);
 
   while(true){
     const next=context.cursor.peek();
@@ -191,7 +229,7 @@ function parseApplicationType(context:V061ParseContext):V061TypeExpr {
       }
       const args:V061TypeExpr[]=[];
       while(true){
-        args.push(parseV061Type(context));
+        args.push(parseV061Type(context,options));
         if(!context.cursor.consumeIf(','))break;
       }
       context.cursor.expect(')');
@@ -199,8 +237,12 @@ function parseApplicationType(context:V061ParseContext):V061TypeExpr {
       continue;
     }
 
-    if(canStartAtomicType(next)&&next.leadingTrivia.length>0){
-      const arg=parseAtomicType(context);
+    if(
+      canStartAtomicType(next)
+      &&next.leadingTrivia.length>0
+      &&!crossesLineBoundary(current,next,options)
+    ){
+      const arg=parseAtomicType(context,options);
       current=appendApplication(current,[arg]);
       continue;
     }
@@ -209,7 +251,10 @@ function parseApplicationType(context:V061ParseContext):V061TypeExpr {
   return current;
 }
 
-function parseAtomicType(context:V061ParseContext):V061TypeExpr {
+function parseAtomicType(
+  context:V061ParseContext,
+  options:V061TypeParseOptions,
+):V061TypeExpr {
   const token=context.cursor.peek();
   if(token.kind==='number'){
     context.cursor.consume();
@@ -225,7 +270,7 @@ function parseAtomicType(context:V061ParseContext):V061TypeExpr {
   }
   if(token.text==='('){
     const open=context.cursor.consume();
-    const value=parseV061Type(context);
+    const value=parseV061Type(context,options);
     const close=context.cursor.expect(')');
     return {
       kind:'group',

@@ -1120,12 +1120,37 @@ throws(
   const parsed=parseV061LeanSubsetModule(lean);
   equal(lowerV061ModuleToLean(parsed),lean);
 }
-throws(
-  ()=>parseV061LeanSubsetModule(
-    'structure Box where\n  value : Nat\n',
-  ),
-  /PS_LEAN_SUBSET_UNSUPPORTED_COMMAND/,
-);
+{
+  const proofScript=parseV061Module(
+    'structure Box(α : Type) where { value : α; } '+
+    'class Sized(α : Type) where { size : α -> Nat; } '+
+    'instance sizedNat : Sized(Nat) := '+
+    '{ size := fun x => x : Sized(Nat) }; '+
+    'inductive Result(α : Type, ε : Type) where { '+
+    '| ok(value : α); | error(error : ε); }',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    lowerV061ModuleToProofScript(proofScript),
+  );
+}
+{
+  const lean=
+    'structure Box (α : Type) where\n'+
+    '  value : α\n\n'+
+    'class Sized (α : Type) where\n'+
+    '  size : α -> Nat\n\n'+
+    'instance sizedNat : Sized Nat := '+
+    '{ size := fun x => x : Sized Nat }\n\n'+
+    'inductive Result (α : Type) (ε : Type) where\n'+
+    '  | ok (value : α)\n'+
+    '  | error (error : ε)\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
 throws(
   ()=>parseV061LeanSubsetModule(
     'def bad (x : Nat) : Nat := match x with\n  | 0 => 0\n',
@@ -1137,6 +1162,6 @@ throws(
   equal(registry.get('lean-subset'),undefined);
   equal(leanSubsetSourceFrontend.kind,'lean-subset');
 }
-console.log('ok - @proofscript/syntax DS2.1 bounded Lean value frontend');
+console.log('ok - @proofscript/syntax DS2.2 Lean declaration frontend');
 
 console.log('ok - @proofscript/syntax inherited instance declarations');

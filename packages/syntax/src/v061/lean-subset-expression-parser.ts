@@ -2,6 +2,7 @@ import {SyntaxError,type Token} from '../source.js';
 import type {V061Expr,V061LambdaBinder} from './ast.js';
 import {V061ParseContext,spanBetween} from './context.js';
 import {v061BinaryPrecedence} from './operators.js';
+import {parseV061RecordExpression} from './record-parser.js';
 import {parseV061ByExpression} from './tactic-parser.js';
 import {parseV061Type} from './type-parser.js';
 
@@ -54,9 +55,9 @@ export class V061LeanSubsetExpressionParser {
       );
     }
     if(this.context.cursor.at('{')){
-      throw new SyntaxError(
-        'PS_LEAN_SUBSET_UNSUPPORTED_TERM: structure instances are not in DS2.1',
-        this.context.cursor.peek().span,
+      return parseV061RecordExpression(
+        this.context,
+        ()=>this.parse(),
       );
     }
     if(this.context.cursor.at('!')){

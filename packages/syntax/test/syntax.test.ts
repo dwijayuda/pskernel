@@ -637,3 +637,28 @@ console.log('ok - @proofscript/syntax lexer MVP');
     /D-EXPLICIT-PARAMS requires at least one explicit binding/,
   );
 }
+
+
+{
+  const module=parseV061Module(
+    'def binders {α : Type}{{β : Type}}[inst : α](x : β) : β := x;',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'def');
+  if(declaration?.kind==='def'){
+    equal(declaration.params.map((p)=>p.binderInfo??'default').join(','),
+      'implicit,strictImplicit,instImplicit,default');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'def binders {α : Type} {{β : Type}} [inst : α] (x : β) : β := x\n',
+  );
+}
+{
+  throws(
+    ()=>parseV061Module(
+      'function onlyImplicit {α : Type} : Type := α;',
+    ),
+    /function requires at least one D-EXPLICIT-PARAMS group/,
+  );
+}

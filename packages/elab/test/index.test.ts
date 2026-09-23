@@ -257,7 +257,10 @@ console.log('ok - @proofscript/elab kernel-facing non-recursive definitions');
   equal(identity.type.kind,'forall');
   if(identity.type.kind==='forall'){
     equal(identity.type.binderInfo,'implicit');
-    equal(identity.body?.kind,undefined);
+  }
+  equal(identity.value.kind,'lam');
+  if(identity.value.kind==='lam'){
+    equal(identity.value.binderInfo,'implicit');
   }
   const use=result.definitions[1]!;
   equal(use.hints.kind,'regular');

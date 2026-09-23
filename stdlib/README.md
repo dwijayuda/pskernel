@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain nine pskernel-admitted theorems in total:
+The three modules now contain ten pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,7 +49,22 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- nine admitted stdlib theorems, all currently discharged by bounded `rfl`;
+- ten admitted stdlib theorems: nine definitional laws use bounded `rfl`,
+  while `listAppendNilRight` dogfoods bounded induction plus checked rewriting;
 - zero runtime external assumptions.
 
 For input `9`, the current dogfood `main` returns `22`.
+
+## First inductive library law
+
+`ProofScript.Data.List.listAppendNilRight` is the first stdlib law in this
+tranche that is not pure definitional reflexivity:
+
+```text
+listAppend(xs, PsList.nil) = xs
+```
+
+It uses bounded induction. Constructor fields retain their source names in the
+recursive branch and the recursive field `tail` exposes `tail_ih`. The proof
+then rewrites with the checked constructor computation law and that induction
+hypothesis. No host theorem or compiler shortcut is involved.

@@ -1216,3 +1216,25 @@ special-cases `HEq` and searches a discrimination-tree-backed `@[refl]`
 environment extension for arbitrary reflexive relations. ProofScript does not
 yet own those environment/attribute semantics, so non-Eq reflexive goals fail
 closed instead of being approximated.
+
+## Induction branch naming checkpoint
+
+The bounded recursor-based induction implementation now keeps user-facing names
+for direct constructor fields. Given a constructor such as:
+
+```text
+| cons(head : α, tail : PsList(α))
+```
+
+the corresponding branch context exposes `head`, `tail`, and for the direct
+recursive field, `tail_ih`. Existing local-name collisions are resolved with
+deterministic numeric suffixes.
+
+This does not alter the core induction principle. The pskernel-generated
+recursor still determines the minor-premise telescope (all constructor fields,
+then direct recursive induction hypotheses), and the elaborator still
+lambda-abstracts exactly those locals into the minor proof. Names exist only in
+the untrusted source/tactic context.
+
+The first standard-library consumer is `listAppendNilRight`, proved by
+induction plus checked rewrite steps rather than a host-side list theorem.

@@ -214,8 +214,12 @@ recursive fields. The motive is obtained by abstracting the major premise from
 the current goal; constructor fields are introduced first, followed by one
 induction hypothesis per direct recursive field, exactly matching pskernel's
 generated minor binder order. Each IH has the motive instantiated at that
-recursive field. Indexed families, higher-order/nested recursive arguments,
-local-let majors, and dependent surrounding locals remain fail-closed.
+recursive field. Default branch contexts now preserve source constructor field
+names when possible and expose direct recursive hypotheses as `<field>_ih`,
+with deterministic collision suffixes. This is naming only; recursor/proof
+construction is unchanged. Indexed families, higher-order/nested recursive
+arguments, local-let majors, and dependent surrounding locals remain
+fail-closed.
 
 Universe-polymorphic Prelude constants are a prerequisite for equality tactics.
 The Meta layer now creates fresh level metavariables for declaration universe
@@ -697,11 +701,12 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    a standard-library/application need justifies another ABI form.
 10. Expand the landed ProofScript-written standard-library foundation from
     PsOption/PsResult/PsList only when APIs are supported by the verified
-    language itself. The first utility/law expansion now adds optionOrElse,
-    resultGetOrElse, structurally recursive listAppend, and six kernel-checked
-    definitional computation laws. All nine current stdlib theorems now dogfood
-    bounded `by rfl`; continue with stronger laws/utilities only when the
-    proof/recursion surface supports them without host shortcuts.
+    language itself. The current utility/law tranche includes optionOrElse,
+    resultGetOrElse, structurally recursive listAppend, six definitional
+    computation laws, and the inductive law listAppendNilRight. Ten current
+    stdlib theorems now dogfood bounded tactics/proof terms; continue with
+    stronger laws/utilities only when the proof/recursion surface supports them
+    without host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.

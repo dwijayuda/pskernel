@@ -294,7 +294,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-bounded-rfl+nested-expected-args+source-ffi-admission+imported-metadata+bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-induction-branch-names+bounded-rfl+nested-expected-args+source-ffi-admission+imported-metadata+bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -307,6 +307,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Bounded induction now preserves admitted constructor field binder names in each branch context when collision-free, using deterministic numeric suffixes on collisions. Direct recursive fields also receive a `<field>_ih` induction-hypothesis name.",
+        "This naming layer changes only untrusted tactic-context lookup. Recursor minor binder order, branch target construction, proof lambda abstraction, and final pskernel checking are unchanged.",
+        "A regression and stdlib law prove append(xs,nil)=xs using `induction xs; rfl; rw [appendCons(head,tail,nil)]; rw [tail_ih]`, demonstrating that named fields/IHs are ordinary checked local proof terms.",
         "Bounded standalone `rfl` now closes only Lean `Eq` goals whose sides are definitionally equal. It constructs the real universe-polymorphic `Eq.refl`, kernel-checks the term, and closes the ordinary tactic goal; it is not a separate proof rule.",
         "`rw` post-rewrite reflexivity and `simp only` terminal reflexivity reuse the same Eq-only helper as standalone `rfl`, eliminating duplicate reflexivity implementations.",
         "Full Lean `rfl` additionally handles HEq and arbitrary relations registered through the `[refl]` environment extension. Those cases remain fail-closed until ProofScript explicitly owns equivalent relation/attribute indexing semantics.",

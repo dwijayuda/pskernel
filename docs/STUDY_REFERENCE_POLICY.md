@@ -303,3 +303,14 @@ The bounded standalone `rfl` checkpoint was derived from:
 ProofScript currently implements only the first Eq case and explicitly records
 the remaining HEq/`@[refl]` behavior as unsupported rather than silently
 claiming full Lean `rfl` parity.
+
+## Lean induction naming evidence
+
+The induction branch naming checkpoint follows the pinned Lean 4.34 induction
+implementation. `Lean.Meta.MVarId.induction` exposes the introduced minor
+premise fields, while the elaborator supports user-facing alternative variable
+names around those fields. ProofScript's bounded flat tactic syntax does not yet
+implement Lean's full `with | ctor ... =>` alternative grammar, so the current
+small step preserves constructor binder names by default and names a direct
+recursive hypothesis `<field>_ih`. This is a source-context convenience only;
+recursor semantics remain unchanged.

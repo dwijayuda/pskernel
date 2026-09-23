@@ -12,7 +12,7 @@ export type Expr =
   | { readonly kind: 'app'; readonly fn: Expr; readonly arg: Expr }
   | { readonly kind: 'lam'; readonly name: Name; readonly type: Expr; readonly body: Expr; readonly binderInfo: BinderInfo }
   | { readonly kind: 'forall'; readonly name: Name; readonly type: Expr; readonly body: Expr; readonly binderInfo: BinderInfo }
-  | { readonly kind: 'let'; readonly name: Name; readonly type: Expr; readonly value: Expr; readonly body: Expr }
+  | { readonly kind: 'let'; readonly name: Name; readonly type: Expr; readonly value: Expr; readonly body: Expr; readonly nondep?: boolean }
   | { readonly kind: 'lit'; readonly literal: Literal }
   | { readonly kind: 'mdata'; readonly data: Readonly<Record<string, unknown>>; readonly expr: Expr }
   | { readonly kind: 'proj'; readonly typeName: Name; readonly index: number; readonly expr: Expr };
@@ -37,8 +37,8 @@ function metadataValueEq(a:unknown,b:unknown):boolean{
   }
   if(typeof a==='object'){
     const ao=a as Record<string,unknown>,bo=b as Record<string,unknown>,ak=Object.keys(ao),bk=Object.keys(bo);
-    if(ak.length!==bk.length||!ak.every((k,i)=>k===bk[i]))return false;
-    return ak.every(k=>metadataValueEq(ao[k],bo[k]));
+    if(ak.length!==bk.length)return false;
+    return ak.every(k=>Object.prototype.hasOwnProperty.call(bo,k)&&metadataValueEq(ao[k],bo[k]));
   }
   return false;
 }
@@ -76,7 +76,7 @@ export function exprEq(a: Expr, b: Expr): boolean {
     case 'app': return b.kind==='app'&&exprEq(a.fn,b.fn)&&exprEq(a.arg,b.arg);
     case 'lam': return b.kind==='lam'&&a.binderInfo===b.binderInfo&&exprEq(a.type,b.type)&&exprEq(a.body,b.body);
     case 'forall': return b.kind==='forall'&&a.binderInfo===b.binderInfo&&exprEq(a.type,b.type)&&exprEq(a.body,b.body);
-    case 'let': return b.kind==='let'&&exprEq(a.type,b.type)&&exprEq(a.value,b.value)&&exprEq(a.body,b.body);
+    case 'let': return b.kind==='let'&&(a.nondep??false)===(b.nondep??false)&&exprEq(a.type,b.type)&&exprEq(a.value,b.value)&&exprEq(a.body,b.body);
     case 'lit': return b.kind==='lit'&&a.literal.kind===b.literal.kind&&(a.literal.kind==='nat'?a.literal.value===(b.literal as {kind:'nat';value:bigint}).value:a.literal.value===(b.literal as {kind:'string';value:string}).value);
     case 'mdata': return b.kind==='mdata'&&metadataValueEq(a.data,b.data)&&exprEq(a.expr,b.expr);
     case 'proj': return b.kind==='proj'&&nameEq(a.typeName,b.typeName)&&a.index===b.index&&exprEq(a.expr,b.expr);
@@ -99,7 +99,7 @@ export function exprLeanEq(a:Expr,b:Expr):boolean{
     case'app':return b.kind==='app'&&exprLeanEq(a.fn,b.fn)&&exprLeanEq(a.arg,b.arg);
     case'lam':return b.kind==='lam'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.body,b.body);
     case'forall':return b.kind==='forall'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.body,b.body);
-    case'let':return b.kind==='let'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.value,b.value)&&exprLeanEq(a.body,b.body);
+    case'let':return b.kind==='let'&&(a.nondep??false)===(b.nondep??false)&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.value,b.value)&&exprLeanEq(a.body,b.body);
     case'lit':return b.kind==='lit'&&a.literal.kind===b.literal.kind&&(a.literal.kind==='nat'?a.literal.value===(b.literal as {kind:'nat';value:bigint}).value:a.literal.value===(b.literal as {kind:'string';value:string}).value);
     case'mdata':return b.kind==='mdata'&&metadataValueEq(a.data,b.data)&&exprLeanEq(a.expr,b.expr);
     case'proj':return b.kind==='proj'&&nameEq(a.typeName,b.typeName)&&a.index===b.index&&exprLeanEq(a.expr,b.expr);
@@ -122,7 +122,7 @@ export function exprKernelMetadataEq(a: Expr, b: Expr): boolean {
     case 'app': return b.kind==='app'&&exprKernelMetadataEq(a.fn,b.fn)&&exprKernelMetadataEq(a.arg,b.arg);
     case 'lam': return b.kind==='lam'&&a.binderInfo===b.binderInfo&&exprKernelMetadataEq(a.type,b.type)&&exprKernelMetadataEq(a.body,b.body);
     case 'forall': return b.kind==='forall'&&a.binderInfo===b.binderInfo&&exprKernelMetadataEq(a.type,b.type)&&exprKernelMetadataEq(a.body,b.body);
-    case 'let': return b.kind==='let'&&exprKernelMetadataEq(a.type,b.type)&&exprKernelMetadataEq(a.value,b.value)&&exprKernelMetadataEq(a.body,b.body);
+    case 'let': return b.kind==='let'&&(a.nondep??false)===(b.nondep??false)&&exprKernelMetadataEq(a.type,b.type)&&exprKernelMetadataEq(a.value,b.value)&&exprKernelMetadataEq(a.body,b.body);
     case 'lit': return b.kind==='lit'&&a.literal.kind===b.literal.kind&&(a.literal.kind==='nat'?a.literal.value===(b.literal as {kind:'nat';value:bigint}).value:a.literal.value===(b.literal as {kind:'string';value:string}).value);
     case 'proj': return b.kind==='proj'&&nameEq(a.typeName,b.typeName)&&a.index===b.index&&exprKernelMetadataEq(a.expr,b.expr);
   }
@@ -150,7 +150,7 @@ export function exprKernelMetadataDiff(a: Expr, b: Expr, path = '$'): string | n
     case 'app': if(b.kind!=='app') return `${path}: app kind mismatch`; return exprKernelMetadataDiff(a.fn,b.fn,path+'.fn')??exprKernelMetadataDiff(a.arg,b.arg,path+'.arg');
     case 'lam': if(b.kind!=='lam') return `${path}: lam kind mismatch`; if(a.binderInfo!==b.binderInfo)return `${path}: binderInfo ${a.binderInfo} != ${b.binderInfo}`; return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
     case 'forall': if(b.kind!=='forall') return `${path}: forall kind mismatch`; if(a.binderInfo!==b.binderInfo)return `${path}: binderInfo ${a.binderInfo} != ${b.binderInfo}`; return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
-    case 'let': if(b.kind!=='let') return `${path}: let kind mismatch`; return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.value,b.value,path+'.value')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
+    case 'let': if(b.kind!=='let') return `${path}: let kind mismatch`; if((a.nondep??false)!==(b.nondep??false))return `${path}: let nondep mismatch`; return exprKernelMetadataDiff(a.type,b.type,path+'.type')??exprKernelMetadataDiff(a.value,b.value,path+'.value')??exprKernelMetadataDiff(a.body,b.body,path+'.body');
     case 'lit': if(b.kind!=='lit'||a.literal.kind!==b.literal.kind)return `${path}: literal kind mismatch`; return a.literal.kind==='nat'?(a.literal.value===(b.literal as {kind:'nat';value:bigint}).value?null:`${path}: nat literal mismatch`):(a.literal.value===(b.literal as {kind:'string';value:string}).value?null:`${path}: string literal mismatch`);
     case 'proj': if(b.kind!=='proj') return `${path}: proj kind mismatch`; if(!nameEq(a.typeName,b.typeName)||a.index!==b.index)return `${path}: projection metadata mismatch`; return exprKernelMetadataDiff(a.expr,b.expr,path+'.expr');
   }
@@ -258,7 +258,7 @@ export function exprKey(e: Expr): string {
     case'sort':return `S${JSON.stringify(e.level,(_k,v)=>typeof v==='bigint'?v.toString():v)}`;
     case'const':return `C${nameKey(e.name)}[${e.levels.map(x=>JSON.stringify(x,(_k,v)=>typeof v==='bigint'?v.toString():v)).join(',')}]`;
     case'app':return `A(${exprKey(e.fn)},${exprKey(e.arg)})`; case'lam':return `L(${exprKey(e.type)},${exprKey(e.body)})`;case'forall':return `P(${exprKey(e.type)},${exprKey(e.body)})`;
-    case'let':return `T(${exprKey(e.type)},${exprKey(e.value)},${exprKey(e.body)})`; case'lit':return e.literal.kind==='nat'?`N${e.literal.value}`:`Q${JSON.stringify(e.literal.value)}`;
+    case'let':return `T${e.nondep?'1':'0'}(${exprKey(e.type)},${exprKey(e.value)},${exprKey(e.body)})`; case'lit':return e.literal.kind==='nat'?`N${e.literal.value}`:`Q${JSON.stringify(e.literal.value)}`;
     case'mdata':return exprKey(e.expr); case'proj':return `R${nameKey(e.typeName)}:${e.index}(${exprKey(e.expr)})`;
   }
 }

@@ -82,14 +82,14 @@ throws(
   ()=>lowerVerifiedIrToWasm({
     kind:'proofscript-verified-ir',
     declarations:[{
-      name:'broken',
+      name:'broken-name',
       typeParameters:[],
       parameters:[],
       resultType:{kind:'primitive',name:'Bool'},
-      body:{kind:'var',name:'missing'},
+      body:{kind:'literal',value:true},
     }],
   }),
-  /unknown variable|free variable|missing/u,
+  /invalid verified IR identifier/u,
 );
 
 console.log('ok - @proofscript/wasm-lowering validates input IR');

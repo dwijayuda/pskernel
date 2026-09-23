@@ -106,7 +106,11 @@ export class TypeChecker {
   }
 
   whnfCore(e:Expr,cheapRec=false,cheapProj=false):Expr{return this.rec(()=>{
-    const key=this.state.exprId(e),cached=this.state.whnfCore.get(key);if(cached)return cached;
+    const key=this.state.exprId(e);
+    // Lean 4.34 deliberately bypasses the shared whnfCore cache in cheap-rec/proj mode.
+    // A full-mode result may have unfolded a recursor major or projection structure that
+    // a cheap call is specifically required to leave opaque.
+    if(!cheapRec&&!cheapProj){const cached=this.state.whnfCore.get(key);if(cached)return cached;}
     let x=e,cacheOriginal=true;
     const done=(r:Expr):Expr=>{if(!cheapRec&&!cheapProj&&cacheOriginal)this.state.whnfCore.set(key,r);return r;};
     while(true){

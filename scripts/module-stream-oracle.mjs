@@ -45,6 +45,7 @@ try{
      if(header.rootOrderMeaning!=='serialized-module-sequence')throw new Error(`unexpected root-order meaning ${header.rootOrderMeaning??'<missing>'}`);
      if(header.emissionOrder!=='dependency-first')throw new Error(`unexpected emission order ${header.emissionOrder??'<missing>'}`);
      if(header.canonicalScope!=='pskernel-project-protocol')throw new Error(`unexpected canonical scope ${header.canonicalScope??'<missing>'}`);
+     if(header.replayPolicy!=='Lean.Kernel.Environment.replay')throw new Error(`unexpected replay policy ${header.replayPolicy??'<missing>'}`);
      continue;
    }
    if(marker?.shard){
@@ -64,14 +65,20 @@ const code=await new Promise(r=>child.on('close',r));
 if(fatal)throw fatal;
 if(code!==0)throw new Error(`Lean exporter exited ${code}: ${stderr}`);
 if(!header)throw new Error('missing environment header');
-const expected=expectedArg?Number(expectedArg):Number(header.constants);
-if(Number(header.constants)!==expected)throw new Error(`exporter constant count ${header.constants} != expected ${expected}`);
-if(shared.size!==expected)throw new Error(`replayed constants ${shared.size} != expected ${expected}`);
+const expectedTotal=expectedArg?Number(expectedArg):Number(header.constants);
+const totalConstants=Number(header.constants);
+const replayableConstants=Number(header.replayableConstants);
+const skippedUnsafe=Number(header.skippedUnsafe);
+const skippedPartial=Number(header.skippedPartial);
+if(totalConstants!==expectedTotal)throw new Error(`exporter total constant count ${totalConstants} != expected corpus count ${expectedTotal}`);
+if(!Number.isSafeInteger(replayableConstants)||!Number.isSafeInteger(skippedUnsafe)||!Number.isSafeInteger(skippedPartial))throw new Error('invalid canonical replay accounting in exporter header');
+if(replayableConstants+skippedUnsafe+skippedPartial!==totalConstants)throw new Error(`canonical replay accounting mismatch: replayable=${replayableConstants} unsafe=${skippedUnsafe} partial=${skippedPartial} total=${totalConstants}`);
+if(shared.size!==replayableConstants)throw new Error(`replayed constants ${shared.size} != replayable exporter count ${replayableConstants}`);
 const finalMem=process.memoryUsage();maxRssMiB=Math.max(maxRssMiB,finalMem.rss/1048576);maxHeapMiB=Math.max(maxHeapMiB,finalMem.heapUsed/1048576);
 if(header.plannedShards!==undefined&&shards!==Number(header.plannedShards))throw new Error(`observed shards ${shards} != planned ${header.plannedShards}`);
 console.log(JSON.stringify({
   ok:true,
-  protocol:'canonical-module-stream-v1',
+  protocol:'canonical-module-stream-v2',
   canonical:true,
   leanVersion,
   leanGitHash,
@@ -79,6 +86,7 @@ console.log(JSON.stringify({
   rootOrderMeaning:header.rootOrderMeaning,
   emissionOrder:header.emissionOrder,
   canonicalScope:header.canonicalScope,
+  replayPolicy:header.replayPolicy,
   module:moduleName,
   modules:Number(header.modules),
   plannedShards:Number(header.plannedShards??shards),
@@ -86,7 +94,11 @@ console.log(JSON.stringify({
   rootsPerShard:Number(header.rootsPerShard??0),
   records:totalLines,
   declarations:totalDecls,
-  constants:shared.size,
+  totalConstants,
+  replayableConstants,
+  skippedUnsafe,
+  skippedPartial,
+  replayedConstants:shared.size,
   rssMiB:Number((finalMem.rss/1048576).toFixed(1)),
   heapMiB:Number((finalMem.heapUsed/1048576).toFixed(1)),
   maxRssMiB:Number(maxRssMiB.toFixed(1)),

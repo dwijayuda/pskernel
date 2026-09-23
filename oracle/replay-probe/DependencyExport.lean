@@ -11,6 +11,9 @@ structure S where
   mdata : Array KVMap := #[]
   emitted : NameSet := {}
   active : NameSet := {}
+  /-- Canonical module-stream follows Lean.Kernel.Environment.replay and skips
+      unsafe/partial ConstantInfo. Diagnostic export modes leave this false. -/
+  skipNonReplayable : Bool := false
 
 abbrev M := StateT S IO
 
@@ -312,6 +315,17 @@ mutual
     if ← isActive name then return
     for dep in semanticDeps name do dumpConstant env dep
     let ci ← findCI env name
+    if (← get).skipNonReplayable && (ci.isUnsafe || ci.isPartial) then
+      -- Lean.Kernel.Environment.replay excludes these constants from its
+      -- `remaining` work set. Mark mutual definition peers together so a
+      -- partial/unsafe block cannot be emitted piecemeal by later roots.
+      match ci with
+      | .defnInfo dv =>
+        let group := if dv.all.isEmpty then [dv.name] else dv.all
+        setEmitted group
+      | _ =>
+        setEmitted [name]
+      return
     match ci with
     | .ctorInfo cv => dumpConstant env cv.induct
     | .recInfo rv =>
@@ -583,6 +597,18 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
 
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let total := env.constants.map₁.size
+  let mut replayable := 0
+  let mut skippedUnsafe := 0
+  let mut skippedPartial := 0
+  for (_, ci) in env.constants.map₁.toList do
+    if ci.isUnsafe then
+      skippedUnsafe := skippedUnsafe + 1
+    else if ci.isPartial then
+      skippedPartial := skippedPartial + 1
+    else
+      replayable := replayable + 1
+  if replayable + skippedUnsafe + skippedPartial != total then
+    throw <| IO.userError "canonical replay accounting mismatch"
   let buckets := collectCanonicalRootsByModule env
   let directRoots := buckets.foldl (init := 0) fun n roots => n + roots.size
   if directRoots != total then
@@ -595,6 +621,10 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   IO.println <| (Json.mkObj [("environment", Json.mkObj [
     ("module", target.toString),
     ("constants", total),
+    ("replayableConstants", replayable),
+    ("skippedUnsafe", skippedUnsafe),
+    ("skippedPartial", skippedPartial),
+    ("replayPolicy", "Lean.Kernel.Environment.replay"),
     ("modules", env.header.moduleNames.size),
     ("plannedShards", plannedShards),
     ("rootsPerShard", rootsPerShard),
@@ -604,6 +634,7 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
     ("canonicalScope", "pskernel-project-protocol")
   ])]).compress
   let _ ← (do
+    modify fun s => { s with skipNonReplayable := true }
     for idx in [0:buckets.size] do
       let roots : Array Name := buckets[idx]!
       unless roots.isEmpty do

@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 167,
   "notes": [
+    "Canonical Full-Std protocol v2 now mirrors Lean 4.34 `Kernel.Environment.replay` scope: module-stream excludes ConstantInfo where `isUnsafe || isPartial` from kernel replay, while still traversing/accounting for every corpus root. Header/final evidence records totalConstants, replayableConstants, skippedUnsafe, skippedPartial, replayPolicy, and replayedConstants; the known Std corpus total remains 114029.",
     "Native evaluator anti-drift assertion repair: the guard now rejects executable `let value ← Meta.reduce*Native` calls rather than mere documentation mentions of those APIs. The corrected direct env.evalConst(checkMeta=false) helper remains unchanged.",
     "Native compiler-IR provider fidelity fix: NativeEval.lean no longer calls Meta.reduceNatNative/reduceBoolNative because those use Environment.evalConstCheck -> evalConst(checkMeta=true), which rejects imported runtime IR via evalCheckMeta. The helper now checks the declaration type head exactly Nat/Bool, then calls env.evalConst with empty options and checkMeta=false, reaching the same run_boxed interpreter path as final Lean 4.34 kernel run_boxed_kernel. Static anti-drift checks prevent reintroducing the Meta guard.",
     "Native reduction source audit + direct parity lock: final Lean 4.34 C++ WHNF uses native→Nat→delta while lazy defeq uses Nat→native→delta; TypeScript already matches both. Environment.evalConstCheck requires the native constant type head to be exactly Nat/Bool before compiler evaluation. Added a kernel1-style end-to-end defeq regression over named definitions; reconstructed execution passes 167/167.",
@@ -232,5 +233,5 @@
   ],
   "currentTreeExpectedDirectTests": 167,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "TypeScript kernel remains 167/167 at the latest reconstructed execution checkpoint; native helper boundary markers and corrected static guard are source-validated, Lean-backed execution pending."
+  "currentTreeVerification": "TypeScript direct kernel checkpoint remains 167/167. Canonical module-stream protocol v2 and replay-scope accounting are source-edited; JS syntax/static checks pending, pinned-Lean execution pending."
 }

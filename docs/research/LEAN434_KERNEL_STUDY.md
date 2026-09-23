@@ -216,8 +216,13 @@ constant sequence actually loaded for that module. **Do not call this source
 declaration order**: Lean 4.34 may name-sort exported module data, and its own
 `Kernel.Environment.replay` seeds a `NameSet` rather than promising source order.
 The exporter recursively emits dependencies before each root and carries one
-global emitted set, so each declaration is exported once into one shared pskernel
-environment while replay-local intern/cache state is discarded between shards.
+global emitted set, so each replayable declaration is exported once into one
+shared pskernel environment while replay-local intern/cache state is discarded
+between shards. The canonical gate follows Lean 4.34
+`Kernel.Environment.replay` exactly on scope: constants with
+`ci.isUnsafe || ci.isPartial` are excluded from kernel replay. They are not
+silently forgotten: release evidence reports the total corpus, replayable count,
+unsafe skip count, partial skip count, and actual replayed environment size.
 Diagnostic root-range tooling keeps its existing deterministic Name.quickLt
 numbering so historical hot-range indices remain stable.
 

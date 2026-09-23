@@ -92,6 +92,12 @@ for(const marker of [
   '("rootOrderMeaning", "serialized-module-sequence")',
   '("emissionOrder", "dependency-first")',
   '("canonicalScope", "pskernel-project-protocol")',
+  '("replayPolicy", "Lean.Kernel.Environment.replay")',
+  '("replayableConstants", replayable)',
+  '("skippedUnsafe", skippedUnsafe)',
+  '("skippedPartial", skippedPartial)',
+  'skipNonReplayable := true',
+  'ci.isUnsafe || ci.isPartial',
   'This is not claimed to be\nsource declaration order',
 ]){
   if(!exporter.includes(marker))throw new Error('canonical replay exporter protocol drift: missing '+marker);
@@ -101,7 +107,10 @@ for(const marker of [
   "header.rootOrderMeaning!=='serialized-module-sequence'",
   "header.emissionOrder!=='dependency-first'",
   "header.canonicalScope!=='pskernel-project-protocol'",
-  "protocol:'canonical-module-stream-v1'",
+  "header.replayPolicy!=='Lean.Kernel.Environment.replay'",
+  "protocol:'canonical-module-stream-v2'",
+  'replayableConstants+skippedUnsafe+skippedPartial!==totalConstants',
+  'shared.size!==replayableConstants',
 ]){
   if(!moduleStream.includes(marker))throw new Error('canonical replay consumer protocol drift: missing '+marker);
 }

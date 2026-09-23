@@ -342,6 +342,26 @@ test('Nat literal and count limits follow explicit Lean kernel limits',()=>{
  const normal=new TypeChecker(env);throws(()=>normal.whnf(app(app(constant(N.NatPow),natLit(2)),natLit(0x1_0000_0000n))));
  throws(()=>normal.whnf(app(app(constant(N.NatShiftLeft),natLit(1)),natLit(0x1_0000_0000n))));
 });
+test('Nat resource limits cover final-4.34 growth checkpoints',()=>{
+ const env=baseEnv(),tc=new TypeChecker(env,undefined,undefined,{maxRecDepth:512,maxNatBytes:8n});
+ const whnf=(name:any,a:bigint,b?:bigint)=>{
+   const head=constant(name);
+   return tc.whnf(b===undefined?app(head,natLit(a)):app(app(head,natLit(a)),natLit(b)));
+ };
+ // One 64-bit limb is still within the 8-byte budget.
+ eqExpr(whnf(N.NatSucc,(1n<<63n)-1n),natLit(1n<<63n));
+ eqExpr(whnf(N.NatAdd,1n<<62n,1n<<62n),natLit(1n<<63n));
+ eqExpr(whnf(N.NatMul,1n<<31n,1n<<31n),natLit(1n<<62n));
+
+ // Crossing into a second 64-bit limb is rejected at every v4.34 growth point.
+ throws(()=>whnf(N.NatSucc,(1n<<64n)-1n));
+ throws(()=>whnf(N.NatAdd,1n<<63n,1n<<63n));
+ throws(()=>whnf(N.NatSub,1n<<65n,0n));
+ throws(()=>whnf(N.NatMul,1n<<32n,1n<<32n));
+ throws(()=>whnf(N.NatPow,2n,64n));
+ throws(()=>whnf(N.NatShiftLeft,1n,64n));
+});
+
 test('Nat.pow reduction',()=>{const tc=new TypeChecker(baseEnv());eqExpr(tc.whnf(app(app(constant(N.NatPow),natLit(2)),natLit(20))),natLit(1048576));});
 test('WHNF application spines do not consume one recursion frame per argument',()=>{
  const env=baseEnv(),F=nameFromDotted('WideApp.f');env.add({kind:'axiom',name:F,levelParams:[],type:sort(levelSucc(levelZero))});

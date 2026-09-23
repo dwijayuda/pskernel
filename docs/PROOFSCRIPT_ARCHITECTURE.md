@@ -1191,3 +1191,28 @@ constraint.
 
 The change stays entirely in untrusted Meta/Elab. pskernel still checks the
 fully instantiated application and remains the proof/type authority.
+
+## Bounded reflexivity tactic checkpoint
+
+ProofScript now exposes inherited Lean `rfl` syntax for the first faithful
+reflexivity slice:
+
+```text
+goal
+  -> whnf target
+  -> require Eq α lhs rhs
+  -> require lhs ≡ rhs by kernel definitional equality
+  -> build Eq.refl.{u} α lhs
+  -> pskernel checks proof type
+  -> close goal
+```
+
+The proof is an ordinary Lean core term. Tactic state gains no proof authority.
+The same helper is shared by standalone `rfl`, the cheap post-rewrite close in
+`rw`, and the terminal reflexivity attempt in bounded `simp only`.
+
+This is intentionally narrower than Lean 4.34 `MVarId.applyRfl`. Lean also
+special-cases `HEq` and searches a discrimination-tree-backed `@[refl]`
+environment extension for arbitrary reflexive relations. ProofScript does not
+yet own those environment/attribute semantics, so non-Eq reflexive goals fail
+closed instead of being approximated.

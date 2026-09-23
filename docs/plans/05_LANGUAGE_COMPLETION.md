@@ -163,10 +163,11 @@ Tactic order:
 4. constructor;
 5. cases;
 6. induction;
-7. rewrite — bounded current-goal equality transport landed;
-8. simp with a small explicit theorem set — bounded non-overlapping multi-rule simp-only sets landed;
-9. exact? / assumption-style search only after deterministic core tactics;
-10. add cursor-sensitive LSP proof-state snapshots on top of the same goal model.
+7. rfl — bounded Eq-only definitional reflexivity landed;
+8. rewrite — bounded current-goal equality transport landed;
+9. simp with a small explicit theorem set — bounded non-overlapping multi-rule simp-only sets landed;
+10. exact? / assumption-style search only after deterministic core tactics;
+11. add cursor-sensitive LSP proof-state snapshots on top of the same goal model.
 
 The low-level multi-goal foundation follows Lean 4.34's separation: tactic state
 tracks an ordered list of metavariable goals, while Meta owns metavariable
@@ -229,10 +230,17 @@ rewrite construction rather than mutating goal text: it recognizes a real
 Prelude `Eq` proof, abstracts exact structural occurrences of the selected
 side into a motive, creates the rewritten child goal, and reconstructs the
 parent proof with kernel-checked `Eq.ndrec_symm` (forward) or `Eq.ndrec`
-(reverse). The bounded `rw` macro behavior also follows Lean's documented
-`rewrite; try (with_reducible rfl)` shape for equality goals: after transport,
-an `Eq` target whose sides are definitionally equal is closed with the real
-polymorphic `Eq.refl`. This is not yet a general standalone `rfl` tactic.
+(reverse). Standalone bounded `rfl` is now landed for the common Lean equality case:
+the goal must reduce to `Eq α lhs rhs`, `lhs` and `rhs` must be
+definitionally equal, and the tactic constructs the real polymorphic
+`Eq.refl` before pskernel rechecks it. The same helper is used by the
+post-rewrite reflexivity attempt and by `simp only` when simplification
+reaches an equality fixed point. Full Lean `rfl` also supports `HEq` and
+arbitrary relations registered with `@[refl]`; those remain fail-closed until
+the corresponding attribute/discrimination-tree semantics exist.
+
+The bounded `rw` macro behavior therefore follows Lean's documented
+`rewrite; try (with_reducible rfl)` shape for the supported Eq slice.
 Multiple rules, locations, occurrence selectors, iff rewriting,
 definitional/kabstract occurrence matching, broader reflexive relations, and
 extra theorem-argument synthesis remain fail-closed until their Meta behavior
@@ -662,7 +670,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    ordinary/theorem call arguments now already receive Pi-binder expected
    types, so library-driven constructor inference should reuse that path
    instead of adding syntax-specific inference.
-4. Validate the landed bounded multi-rule simp-only proof reconstruction.
+4. Validate the landed Eq-only `rfl` / bounded multi-rule `simp only`
+   proof reconstruction. Do not broaden `rfl` to HEq or arbitrary reflexive
+   relations before equivalent Lean `@[refl]` indexing semantics are owned.
 5. Keep theorem-statement syntax evidence-driven; explicit dependent Pi plus
    the current Nat/Bool/propositional forms cover the reference-backed
    foundation. Add lambdas/match only when a concrete specification needs them.
@@ -689,8 +699,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     PsOption/PsResult/PsList only when APIs are supported by the verified
     language itself. The first utility/law expansion now adds optionOrElse,
     resultGetOrElse, structurally recursive listAppend, and six kernel-checked
-    definitional computation laws; continue with stronger laws/utilities only
-    when the proof/recursion surface supports them without host shortcuts.
+    definitional computation laws. All nine current stdlib theorems now dogfood
+    bounded `by rfl`; continue with stronger laws/utilities only when the
+    proof/recursion surface supports them without host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.

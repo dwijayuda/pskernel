@@ -287,3 +287,19 @@ inductive admissions, the initial executable stdlib uses source-owned
 `PsOption`/`PsList` rather than claiming that Prelude `Option`/`List`
 already compile through verified IR. That limitation should be removed by an
 explicit checked-runtime-metadata design, not by weakening erasure provenance.
+
+## Lean 4.34 reflexivity evidence
+
+The bounded standalone `rfl` checkpoint was derived from:
+
+- `study/lean4-4.34.0/src/Lean/Meta/Tactic/Refl.lean`, where core equality
+  reflexivity checks definitional equality and assigns `Eq.refl`;
+- `study/lean4-4.34.0/src/Lean/Meta/Tactic/Rfl.lean`, where full Lean
+  `applyRfl` extends that behavior to `HEq` and relations registered in a
+  discrimination-tree-backed `@[refl]` environment extension;
+- `study/lean4-4.34.0/src/Lean/Elab/Tactic/Rfl.lean`, which exposes the tactic
+  layer without moving proof authority out of Meta/kernel checking.
+
+ProofScript currently implements only the first Eq case and explicitly records
+the remaining HEq/`@[refl]` behavior as unsupported rather than silently
+claiming full Lean `rfl` parity.

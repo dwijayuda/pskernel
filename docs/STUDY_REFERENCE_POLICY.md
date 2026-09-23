@@ -225,3 +225,15 @@ boundary: the signature is an opaque assumption and host execution is never
 proof evidence. The named ESM host form is informed by the TypeScript/JavaScript
 study material and existing verified TypeScript emitter, but those host
 references do not define theorem or type-theoretic semantics.
+
+## TypeScript/npm resolution evidence for the first FFI package policy
+
+The host-side policy follows the repository's TypeScript study/reference role:
+named ESM imports are resolved by TypeScript/Node as runtime modules, but their
+package metadata is not proof evidence. The first project policy therefore
+pins direct package roots to exact installed versions and fingerprints that
+runtime policy separately from pskernel project integrity.
+
+No claim is made yet about transitive npm lockfile closure. Semver ranges,
+subpaths, builtins, and alternate module systems remain unsupported until their
+runtime reproducibility and ABI story is specified.

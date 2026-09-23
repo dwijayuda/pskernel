@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
+      "status": "runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -35,6 +35,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified project check requires every source external module to be explicitly listed in psconfig.json runtimeDependencies. Build/run additionally read node_modules/<package>/package.json and require exact name/version identity before TypeScript compilation.",
+        "Runtime dependency policy has its own SHA-256 fingerprint and is reported separately from pskernel projectIntegrity; host package versions do not alter theorem meaning.",
+        "Verified build compiles the generated TypeScript using the absolute dist/<entry>.ts path, aligning TypeScript package lookup with the emitted JavaScript runtime location. A local no-network ESM fixture gates String -> String external execution end to end.",
         "Verified check/build/run reports now include an assurance object separating pskernel-checked definitions/theorems from trusted runtime external assumptions. Each runtime assumption records local name, ESM source, imported symbol, logical signature, and proofEvidence=false.",
         "Human-readable verified check/build output warns when runtime external assumptions are present; --json exposes complete binding details.",
         "DS5.6 emits one proofscript-module@2 checked-admission artifact per verified source module below dist/.proofscript/modules. Each artifact is dependency-linked by artifact integrity and replay-gated through checked core/pskernel before build acceptance.",
@@ -637,7 +640,7 @@
       "path": "packages/project",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "dual-source-node-resolver+module-graph-mvp",
+      "status": "runtime-dependency-policy+dual-source-node-resolver+module-graph-mvp",
       "packageName": "@proofscript/project",
       "dependsOn": [
         "module",
@@ -646,6 +649,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "`runtimeDependencies` config parsing accepts only exact npm package-root specifiers and exact x.y.z versions in the first FFI profile. Relative sources, package subpaths, node: builtins, semver ranges, and non-package objects fail closed.",
         "The Node subpath centralizes psconfig sourceRoots validation, nearest-config discovery, project-relative root expansion, and exact .ps/.lean logical-module resolution for both psc and LSP consumers.",
         "Configured source roots have no first-root-wins behavior: zero matches fail missing, multiple matches across roots/source kinds fail ambiguity.",
         "sourceDependencyClosure exposes deterministic transitive source dependencies in build-plan order so CLI and editor composition share the same graph semantics.",

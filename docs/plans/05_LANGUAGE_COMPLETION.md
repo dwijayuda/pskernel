@@ -362,8 +362,18 @@ Current FFI checkpoint:
 - canonical ProofScript printing preserves the binding, while source
   translation to Lean fails closed because Lean source cannot preserve the ESM
   binding metadata;
-- next, define project dependency/package policy and add an end-to-end runtime
-  binding test against an actually resolvable package.
+- exact-version `runtimeDependencies` policy is now project-configured:
+  check requires every external package root to be allowlisted, while
+  build/run require the installed package name/version to match exactly;
+- runtime dependency policy has a separate SHA-256 integrity from semantic
+  `projectIntegrity`;
+- an actual temporary local ESM package is resolved by TypeScript and Node in
+  the verified run regression, exercising source extern -> checked core ->
+  erasure -> IR import -> TypeScript -> JavaScript -> host package;
+- next, decide whether transitive npm lockfile integrity is required before
+  broadening beyond exact root-package imports; package subpaths, ranges,
+  Node builtins, default/namespace imports, and automatic installation remain
+  fail-closed.
 
 Exit condition:
 
@@ -512,10 +522,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    only where Lean library-search semantics can be modeled explicitly; do not
    silently turn it into recursive automation.
 7. Continue DS5 from the landed mixed-source project + replay-gated persistent
-   proofscript-module@2 artifact path. The explicit source FFI boundary and
-   assurance reporting are landed; next define deterministic project package
-   dependency policy and runtime resolution without letting imports become
-   proof evidence.
+   proofscript-module@2 artifact path. Source FFI, assurance, exact direct
+   package policy, and real runtime resolution are landed; next evaluate
+   transitive lockfile integrity before broadening the package surface.
 8. DS6 editor MVP is landed: source-kind routing, checked import composition,
    shared Node/LSP source-root resolution, cross-source navigation,
    non-destructive .ps / supported .lean conversion actions, and importer
@@ -523,9 +532,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    improve lexical navigation with scope-aware indexing without changing proof
    authority.
 9. Continue the explicit npm/JS FFI from the landed source signature,
-   assurance, verified-IR import, and replayable checked-core admission path.
-   Next add project dependency policy plus an end-to-end runtime binding test
-   against a pinned resolvable package.
+   assurance, exact-version direct-package policy, replayable checked-core
+   admission, and end-to-end ESM runtime binding. Next decide lockfile/transitive
+   integrity, then broaden imports only when their ABI/trust model is explicit.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.

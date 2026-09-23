@@ -1023,3 +1023,55 @@ Thus `proofStatus: kernel-verified` continues to describe the proof checking
 performed on internal theorems; it is not a claim that JavaScript/npm runtime
 bindings were proven correct. The next FFI checkpoint is deterministic package
 dependency policy and a real resolvable runtime-binding test.
+
+## Exact runtime dependency policy checkpoint
+
+Project-level FFI resolution is now explicit in `psconfig.json`:
+
+```json
+{
+  "runtimeDependencies": {
+    "host-lib": "1.0.0"
+  }
+}
+```
+
+This first profile accepts npm package **roots** with exact versions only.
+Verified `check` requires every admitted external source to be present in that
+map. Verified `build` and `run` additionally require
+`node_modules/<package>/package.json` to report the same package name and
+exact version before generated TypeScript is compiled.
+
+Runtime dependency identity is deliberately separate from semantic project
+identity:
+
+```text
+projectIntegrity
+  = source/dependency/kernel semantic identity
+
+runtimeDependencyPolicy.integrity
+  = exact direct host-package policy identity
+```
+
+Changing a host package version therefore changes the build/assurance policy
+fingerprint without pretending theorem meaning changed or that pskernel proved
+the package implementation.
+
+Verified build now compiles its in-memory TypeScript under the absolute
+`dist/<entry>.ts` path. TypeScript module resolution therefore starts from the
+same project/output tree that the emitted JavaScript will execute from. A
+no-network regression installs a temporary ESM package with matching `.d.ts`,
+executes a ProofScript `String -> String` external through Node, and verifies
+the host result while retaining `proofEvidence=false` in assurance.
+
+Still unsupported in this checkpoint:
+
+- semver ranges;
+- package subpath imports;
+- `node:` builtins;
+- default/namespace/CommonJS/dynamic imports;
+- package installation;
+- transitive lockfile integrity claims.
+
+Those require separate project/runtime policy decisions and do not expand the
+kernel trust boundary.

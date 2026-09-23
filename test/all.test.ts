@@ -671,6 +671,31 @@ test('imax-normalized Prop inductive keeps Prop-only elimination',()=>{
  const ri=env.get(nameFromDotted('ImaxPropData.rec'));assert(ri.kind==='recursor'&&ri.levelParams.length===0,'imax-normalized Prop must not gain large elimination');
 });
 
+test('imax-normalized Prop agrees with Sort 0 on K-target recursor metadata',()=>{
+ const env=baseEnv(),P=nameFromDotted('ImaxK.Prop'),PMk=nameFromDotted('ImaxK.Prop.mk'),Q=nameFromDotted('ImaxK.Zero'),QMk=nameFromDotted('ImaxK.Zero.mk');
+ const imaxProp=sort(mkIMax(levelSucc(levelZero),levelZero));
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:P,type:imaxProp,ctors:[{name:PMk,type:constant(P)}]}]});
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:Q,type:sort(levelZero),ctors:[{name:QMk,type:constant(Q)}]}]});
+ const pr=env.get(nameFromDotted('ImaxK.Prop.rec')),qr=env.get(nameFromDotted('ImaxK.Zero.rec'));
+ assert(pr.kind==='recursor'&&qr.kind==='recursor');
+ assert(pr.k===qr.k&&pr.k,'normalized-Prop and syntactic-Prop nullary structures must agree on K reduction');
+ assert(pr.levelParams.length===qr.levelParams.length,'normalized-Prop and syntactic-Prop recursors must agree on elimination universes');
+});
+
+test('recursor structure eta never projects data from an imax-normalized proof',()=>{
+ const env=baseEnv(),I=nameFromDotted('ImaxEta.ProofBox'),Mk=nameFromDotted('ImaxEta.ProofBox.mk'),p=nameFromDotted('ImaxEta.p'),R=nameFromDotted('ImaxEta.ProofBox.rec');
+ const imaxProp=sort(mkIMax(levelSucc(levelZero),levelZero));
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:imaxProp,ctors:[{name:Mk,type:forallE(nameFromDotted('b'),constant(N.Bool),constant(I))}]}]});
+ env.add({kind:'axiom',name:p,levelParams:[],type:constant(I)});
+ const ri=env.get(R);assert(ri.kind==='recursor'&&!ri.k&&ri.levelParams.length===0);
+ const motive=lam(nameFromDotted('_'),constant(I),constant(I));
+ const minor=lam(nameFromDotted('_b'),constant(N.Bool),constant(p));
+ const term=mkAppN(constant(R),[motive,minor,constant(p)]);
+ const tc=new TypeChecker(env);
+ eqExpr(tc.check(term),constant(I));
+ eqExpr(tc.whnf(term),term,'Prop-valued structure major must remain opaque; eta expansion would illegally project its Bool field');
+});
+
 test('Prop inductive cannot large-eliminate when data field occurs only inside an index expression',()=>{
  const env=baseEnv(),I=nameFromDotted('NestedIndexProp'),mk=nameFromDotted('NestedIndexProp.mk');
  const ty=forallE(nameFromDotted('n'),constant(N.Nat),sort(levelZero));

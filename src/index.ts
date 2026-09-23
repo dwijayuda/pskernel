@@ -47,7 +47,6 @@ export type {
   ConstructorDecl,
   InductiveTypeDecl,
   InductiveDecl,
-  InductiveAdmissionOptions,
 } from './kernel/inductive/ordinary.js';
 export {addInductive} from './kernel/inductive/nested.js';
 

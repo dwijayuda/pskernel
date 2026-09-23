@@ -3,6 +3,7 @@ import {spawnSync} from 'node:child_process';
 import {join, resolve} from 'node:path';
 
 const expected=/^Lean \(version 4\.34\.0(?:,|\)).*Release\)?$/;
+const expectedGitHash='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
 const bins=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin'].filter(Boolean).map(p=>resolve(p));
 const bin=bins.find(p=>existsSync(join(p,'lean')));
 if(!bin){console.error('adversarial-oracle: SKIP/FAIL: set LEAN434_BIN to Lean 4.34.0 bin');process.exit(2);}
@@ -13,6 +14,8 @@ const env={...process.env,PATH:`${bin}:${process.env.PATH??''}`};
 const run=(args,timeout=12000)=>spawnSync(join(bin,'lean'),args,{cwd:src,env,encoding:'utf8',timeout});
 const ver=run(['--version'],5000);
 if(ver.error||ver.status!==0||!expected.test(ver.stdout.trim())){console.error(`adversarial-oracle: version mismatch/failure: ${ver.error?.message??ver.stderr??ver.stdout}`);process.exit(1);}
+const gh=run(['--githash'],5000);
+if(gh.error||gh.status!==0||gh.stdout.trim()!==expectedGitHash){console.error(`adversarial-oracle: git hash mismatch/failure: expected ${expectedGitHash}, got ${gh.error?.message??gh.stderr??gh.stdout}`);process.exit(1);}
 const successFiles=[
  'tests/elab/kernelProjIdx.lean',
  'tests/elab/kernelProjSname.lean',

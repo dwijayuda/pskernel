@@ -21,9 +21,14 @@ Require-Command lean
 $nodeVersion = (& node --version).Trim()
 $leanCommand = Get-Command lean -ErrorAction Stop
 $leanVersion = (& lean --version | Select-Object -First 1).Trim()
+$leanGitHash = (& lean --githash).Trim()
 $env:LEAN434_BIN = Split-Path -Parent $leanCommand.Source
+$oracleLock = Get-Content "ORACLE_LOCK.json" -Raw | ConvertFrom-Json
 if ($leanVersion -notmatch "version 4\.34\.0.*Release") {
   throw "Expected Lean 4.34.0 Release, got: $leanVersion"
+}
+if ($leanGitHash -ne $oracleLock.leanCommit) {
+  throw "Expected Lean commit $($oracleLock.leanCommit), got: $leanGitHash"
 }
 
 $env:PSKERNEL_STD_HEAP_MIB = "$HeapMiB"
@@ -33,6 +38,7 @@ $env:PSKERNEL_STD_STACK_KIB = "$StackKiB"
 "started=$(Get-Date -Format o)" | Add-Content $Log
 "node=$nodeVersion" | Add-Content $Log
 "lean=$leanVersion" | Add-Content $Log
+"leanGitHash=$leanGitHash" | Add-Content $Log
 "leanBin=$env:LEAN434_BIN" | Add-Content $Log
 "heapMiB=$HeapMiB stackKiB=$StackKiB" | Add-Content $Log
 

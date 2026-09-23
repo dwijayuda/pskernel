@@ -50,7 +50,7 @@ export interface ErasureScope {
   readonly runtimeExpressions?:ReadonlyMap<string,VerifiedIrExpr>;
   readonly currentDefinition?:{
     readonly name:string;
-    readonly runtimeArity:number;
+    readonly runtimeParameters:readonly string[];
   };
   readonly runtimeLocals:ReadonlyMap<string,string>;
   readonly typeLocals:ReadonlyMap<string,string>;

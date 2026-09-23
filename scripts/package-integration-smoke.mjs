@@ -457,3 +457,22 @@ assert(
   verifiedLength.emitted.javascript.includes('length(tail)'),
   'structural recursion did not compile to JavaScript recursion',
 );
+
+
+const verifiedCountFrom=compileVerifiedSource(
+  'inductive PsListInvariant(α : Type) where { '+
+  '| nil; | cons(head : α, tail : PsListInvariant(α)); } '+
+  'function countFrom {α : Type}'+
+  '(base : Nat, xs : PsListInvariant(α)) : Nat := '+
+  'match xs with { | .nil => base; '+
+  '| .cons head tail => 1 + countFrom(base, tail); };',
+  'verified-count-from.ts',
+);
+assert(
+  verifiedCountFrom.typeScript.includes('countFrom(base, tail)'),
+  'recursor IH did not preserve invariant runtime parameters in self-call',
+);
+assert(
+  verifiedCountFrom.emitted.javascript.includes('countFrom(base, tail)'),
+  'invariant structural recursion did not compile to JavaScript',
+);

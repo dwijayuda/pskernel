@@ -407,3 +407,78 @@ console.log('ok - psc verified recursive ADT match pipeline');
   );
 }
 console.log('ok - psc verified structural recursive function pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'inductive PsListInvariant(α : Type) where { '+
+    '| nil; | cons(head : α, tail : PsListInvariant(α)); } '+
+    'function countFrom {α : Type}'+
+    '(base : Nat, xs : PsListInvariant(α)) : Nat := '+
+    'match xs with { | .nil => base; '+
+    '| .cons head tail => 1 + countFrom(base, tail); };',
+    'invariant-recursion.ts',
+  );
+  equal(
+    result.typeScript.includes(
+      'function countFrom<T0>(base: bigint, xs: PsListInvariant<T0>): bigint',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes('countFrom(base, tail)'),
+    true,
+  );
+  equal(
+    result.emitted.javascript.includes('countFrom(base, tail)'),
+    true,
+  );
+}
+console.log('ok - psc verified invariant structural recursion pipeline');
+
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-verified-invariant-recursion-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'inductive PsList(α : Type) where { '+
+      '| nil; | cons(head : α, tail : PsList(α)); } '+
+      'function countFrom {α : Type}(base : Nat, xs : PsList(α)) : Nat := '+
+      'match xs with { | .nil => base; '+
+      '| .cons head tail => 1 + countFrom(base, tail); }; '+
+      'function main(x : Nat) : Nat := '+
+      'countFrom(x, PsList.cons(x, PsList.cons(x, PsList.nil)));\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['5'],
+    });
+    equal(result.mainResult,'7');
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified invariant structural recursion run');

@@ -48,6 +48,7 @@ function eraseMinor(
     string,
     import('@proofscript/compiler-ir/verified').VerifiedIrType
   >,
+  recursiveParameterIndex:number,
 ):Extract<VerifiedIrExpr,{kind:'match'}>['alternatives'][number] {
   let cursor=minor;
   let branchScope=scope;
@@ -138,17 +139,20 @@ function eraseMinor(
     const runtimeExpressions=new Map(
       branchScope.runtimeExpressions??[],
     );
-    if(branchScope.currentDefinition?.runtimeArity===1){
+    const current=branchScope.currentDefinition;
+    if(current!==undefined&&recursiveParameterIndex>=0){
       runtimeExpressions.set(id,{
         kind:'call',
         fn:{
           kind:'var',
-          name:branchScope.currentDefinition.name,
+          name:current.name,
         },
-        args:[{
-          kind:'var',
-          name:binding.name,
-        }],
+        args:current.runtimeParameters.map((name,parameterIndex)=>({
+          kind:'var' as const,
+          name:parameterIndex===recursiveParameterIndex
+            ?binding.name
+            :name,
+        })),
       });
     }else{
       erasedLocals.add(id);
@@ -227,6 +231,17 @@ export function tryEraseRuntimeRecursorApplication(
     ] as const),
   );
 
+  const scrutinee=erase(
+    view.args[majorIndex]!,
+    scope,
+    environment,
+  );
+  const current=scope.currentDefinition;
+  const recursiveParameterIndex=
+    current!==undefined&&scrutinee.kind==='var'
+      ?current.runtimeParameters.indexOf(scrutinee.name)
+      :-1;
+
   const minorStart=recursor.numParams+recursor.numMotives;
   const alternatives=inductive.constructors.map(
     (constructor,index)=>eraseMinor(
@@ -236,13 +251,14 @@ export function tryEraseRuntimeRecursorApplication(
       environment,
       erase,
       substitutions,
+      recursiveParameterIndex,
     ),
   );
 
   return {
     kind:'match',
     inductive:inductive.name,
-    scrutinee:erase(view.args[majorIndex]!,scope,environment),
+    scrutinee,
     alternatives,
   };
 }

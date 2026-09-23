@@ -283,7 +283,7 @@ export function openAndEraseDefinition(
     ...scope,
     currentDefinition:{
       name:definitionName,
-      runtimeArity:parameters.length,
+      runtimeParameters:parameters.map((parameter)=>parameter.name),
     },
   };
   return {

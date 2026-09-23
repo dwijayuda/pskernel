@@ -80,3 +80,4 @@ export function eraseCheckedCoreModule(
     declarations,
   };
 }
+export * from './local-erasure.js';

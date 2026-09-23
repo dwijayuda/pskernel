@@ -20,6 +20,7 @@ import {
 import {eraseRuntimeType} from './type-erasure.js';
 import {safeIdentifier} from './names.js';
 import {eraseRuntimeApplication} from './app-erasure.js';
+import {eraseRuntimeFVar} from './local-erasure.js';
 
 export interface OpenedDefinition {
   readonly typeParameters:readonly VerifiedIrTypeParameter[];
@@ -98,19 +99,8 @@ export function eraseRuntimeExpr(
       return eraseRuntimeExpr(expr.expr,scope,environment);
     case 'lit':
       return {kind:'literal',value:expr.literal.value};
-    case 'fvar':{
-      const replacement=scope.runtimeExpressions?.get(expr.id);
-      if(replacement!==undefined)return replacement;
-      const runtime=scope.runtimeLocals.get(expr.id);
-      if(runtime!==undefined)return {kind:'var',name:runtime};
-      if(scope.erasedLocals.has(expr.id)||scope.typeLocals.has(expr.id)){
-        throw new Error(
-          "PS_ERASE_ERASED_LOCAL_USED: erased local '"+expr.id+
-          "' survives in executable code",
-        );
-      }
-      throw new Error("PS_ERASE_UNKNOWN_LOCAL: '"+expr.id+"'");
-    }
+    case 'fvar':
+      return eraseRuntimeFVar(expr,scope);
     case 'const':{
       const constructor=scope.inductivesByConstructor.get(
         nameKey(expr.name),

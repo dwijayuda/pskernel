@@ -211,6 +211,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Declaration orchestration is split from value and instance elaboration; typeclass growth must stay in dedicated modules rather than expanding the command dispatcher.",
         "Named/anonymous instance declarations elaborate as ordinary checked definitions and are registered for subsequent class-aware application synthesis.",
         "Current global resolution searches registered instance constants after local instances and uses ordinary transactional Meta unification. This is a bounded SynthInstance slice, not Lean's full tabled resolver.",
         "Parameterized instance application, priorities, outParam/semiOutParam, recursive search, imported instance indexes, and ambiguity diagnostics remain future milestones.",

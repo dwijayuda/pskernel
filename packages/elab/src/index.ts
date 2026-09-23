@@ -52,3 +52,6 @@ export * from './v061-let-elab.js';
 export * from './v061-where-elab.js';
 
 export * from './v061-class-elab.js';
+
+export * from './v061-value-declaration-elab.js';
+export * from './v061-instance-elab.js';

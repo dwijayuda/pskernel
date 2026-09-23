@@ -1,23 +1,12 @@
-import type {
-  V061Module,
-  V061ValueDeclaration,
-} from '@proofscript/syntax';
+import type {V061Module} from '@proofscript/syntax';
 import {
   Environment,
   Kernel,
   addInductive,
-  type DefinitionInfo,
-  type TheoremInfo,
-  type Expr,
-  abstractFVar,
-  exprToString,
-  forallE,
-  appView,
   constant,
-  nameToString,
-  hasMVar,
-  lam,
-  nameFromDotted,
+  type DefinitionInfo,
+  type Expr,
+  type TheoremInfo,
 } from 'lean-ts-kernel';
 import {
   admitCheckedCoreAdmissions,
@@ -25,196 +14,18 @@ import {
   type CheckedCoreModule,
   type CheckedCoreStructure,
 } from '@proofscript/checked-core';
-import {elaborateV061ValueHeader} from './v061-header-elab.js';
 import {elaborateV061StructureDeclaration} from './v061-structure-elab.js';
 import {elaborateV061ClassDeclaration} from './v061-class-elab.js';
 import {elaborateV061InductiveDeclaration} from './v061-inductive-elab.js';
-import {withStructuralRecursionContext} from './v061-structural-recursion.js';
-import {
-  checkElaboratedTerm,
-  elaborateV061Term,
-} from './v061-term-elab.js';
-import {elaborateV061WhereBody} from './v061-where-elab.js';
+import {elaborateV061ValueDeclaration} from './v061-value-declaration-elab.js';
+import {elaborateV061InstanceDeclaration} from './v061-instance-elab.js';
 
-
-function maxRegularHeight(environment:Environment,expr:Expr):bigint {
-  let max=0n;
-  const visit=(value:Expr):void=>{
-    switch(value.kind){
-      case 'const':{
-        const info=environment.find(value.name);
-        if(
-          info?.kind==='definition'
-          &&info.hints.kind==='regular'
-          &&info.hints.height>max
-        )max=info.hints.height;
-        return;
-      }
-      case 'app':
-        visit(value.fn);
-        visit(value.arg);
-        return;
-      case 'lam':
-      case 'forall':
-        visit(value.type);
-        visit(value.body);
-        return;
-      case 'let':
-        visit(value.type);
-        visit(value.value);
-        visit(value.body);
-        return;
-      case 'mdata':
-      case 'proj':
-        visit(value.expr);
-        return;
-      default:
-        return;
-    }
-  };
-  visit(expr);
-  return max;
-}
-
-function elaborateValueDeclaration(
-  source:V061ValueDeclaration,
-  environment:Environment,
-  structures:ReadonlyMap<string,CheckedCoreStructure>,
-  classes:ReadonlySet<string>,
-  globalInstances:readonly Expr[],
-):DefinitionInfo|TheoremInfo {
-  const header=elaborateV061ValueHeader(
-    source,
-    environment,
-    structures,
-    classes,
-    globalInstances,
-  );
-  const context=header.context;
-  const parameters=header.parameters;
-  const resultType=header.resultType;
-
-  const bodyContext=withStructuralRecursionContext(source,context);
-  const whereDeclarations=source.whereDeclarations??[];
-  const body=whereDeclarations.length===0
-    ? elaborateV061Term(
-        source.body,
-        bodyContext,
-        resultType,
-      )
-    : elaborateV061WhereBody(
-        whereDeclarations,
-        source.body,
-        bodyContext,
-        resultType,
-        elaborateV061Term,
-      );
-  checkElaboratedTerm(body,resultType,bodyContext);
-  context.metaContext.validateGroundAssignments();
-  let value=context.metaContext.instantiate(body.term);
-  let type=context.metaContext.instantiate(resultType);
-  if(hasMVar(value)||hasMVar(type)){
-    throw new Error(
-      'PS_ELAB_UNSOLVED_METAVARS: declaration contains unresolved metavariables',
-    );
-  }
-
-  for(let index=parameters.length-1;index>=0;index-=1){
-    const parameter=parameters[index]!;
-    value=lam(
-      parameter.name,
-      parameter.type,
-      abstractFVar(value,parameter.id),
-      parameter.binderInfo,
-    );
-    type=forallE(
-      parameter.name,
-      parameter.type,
-      abstractFVar(type,parameter.id),
-      parameter.binderInfo,
-    );
-  }
-
-  if(source.kind==='theorem'){
-    return {
-      kind:'theorem',
-      name:nameFromDotted(source.name),
-      levelParams:[],
-      type,
-      value,
-    };
-  }
-
-  return {
-    kind:'definition',
-    name:nameFromDotted(source.name),
-    levelParams:[],
-    type,
-    value,
-    hints:{
-      kind:'regular',
-      height:maxRegularHeight(environment,value)+1n,
-    },
-    safety:'safe',
-  };
-}
-
-
-function instanceTargetClass(
-  type:Expr,
-  classes:ReadonlySet<string>,
-):ReturnType<typeof nameFromDotted> {
-  let target=type;
-  while(target.kind==='forall')target=target.body;
-  const view=appView(target);
-  if(view.fn.kind!=='const'){
-    throw new Error(
-      'PS_ELAB_INSTANCE_TARGET: instance result must be an admitted class application',
-    );
-  }
-  const className=nameToString(view.fn.name);
-  if(!classes.has(className)){
-    throw new Error(
-      "PS_ELAB_INSTANCE_TARGET: '"+className+
-      "' is not a previously admitted ProofScript class",
-    );
-  }
-  return view.fn.name;
-}
-
-function elaborateInstanceDeclaration(
-  source:V061InstanceDeclaration,
-  environment:Environment,
-  structures:ReadonlyMap<string,CheckedCoreStructure>,
-  classes:ReadonlySet<string>,
-  globalInstances:readonly Expr[],
-):{
-  readonly declaration:DefinitionInfo;
-  readonly className:ReturnType<typeof nameFromDotted>;
-} {
-  const valueSource:V061ValueDeclaration={
-    kind:'def',
-    name:source.name,
-    params:source.params,
-    resultType:source.resultType,
-    body:source.body,
-    terminatedBySemicolon:source.terminatedBySemicolon,
-    span:source.span,
-  };
-  const elaborated=elaborateValueDeclaration(
-    valueSource,
-    environment,
-    structures,
-    classes,
-    globalInstances,
-  );
-  if(elaborated.kind!=='definition'){
-    throw new Error('PS_ELAB_INSTANCE_INTERNAL: instance did not elaborate as definition');
-  }
-  return {
-    declaration:elaborated,
-    className:instanceTargetClass(elaborated.type,classes),
-  };
+function declarationFailure(
+  name:string,
+  error:unknown,
+):Error {
+  const detail=error instanceof Error?error.message:String(error);
+  return new Error("PS_ELAB_DECL_FAILED: '"+name+"': "+detail);
 }
 
 export type ElaboratedV061Module=CheckedCoreModule;
@@ -233,104 +44,87 @@ export function elaborateV061Definitions(
 
   for(const declaration of module.declarations){
     if(declaration.kind==='structure'){
-      let inductive;
       try{
-        inductive=elaborateV061StructureDeclaration(
+        const result=elaborateV061StructureDeclaration(
           declaration,
           workEnvironment,
         );
-        addInductive(workEnvironment,inductive.declaration);
+        addInductive(workEnvironment,result.declaration);
+        structures.set(declaration.name,result.structure);
+        admissions.push({
+          kind:'structure',
+          declaration:result.declaration,
+          structure:result.structure,
+        });
       }catch(error){
-        const detail=error instanceof Error?error.message:String(error);
-        throw new Error(
-          "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
-        );
+        throw declarationFailure(declaration.name,error);
       }
-      structures.set(declaration.name,inductive.structure);
-      admissions.push({
-        kind:'structure',
-        declaration:inductive.declaration,
-        structure:inductive.structure,
-      });
       continue;
     }
+
     if(declaration.kind==='inductive'){
-      let inductive;
       try{
-        inductive=elaborateV061InductiveDeclaration(
+        const result=elaborateV061InductiveDeclaration(
           declaration,
           workEnvironment,
         );
-        addInductive(workEnvironment,inductive);
+        addInductive(workEnvironment,result);
+        admissions.push({kind:'inductive',declaration:result});
       }catch(error){
-        const detail=error instanceof Error?error.message:String(error);
-        throw new Error(
-          "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
-        );
+        throw declarationFailure(declaration.name,error);
       }
-      admissions.push({
-        kind:'inductive',
-        declaration:inductive,
-      });
       continue;
     }
+
     if(declaration.kind==='class'){
-      let klass;
       try{
-        klass=elaborateV061ClassDeclaration(
+        const result=elaborateV061ClassDeclaration(
           declaration,
           workEnvironment,
         );
-        addInductive(workEnvironment,klass.declaration);
+        addInductive(workEnvironment,result.declaration);
+        structures.set(declaration.name,result.structure);
+        classes.add(declaration.name);
+        admissions.push({
+          kind:'class',
+          declaration:result.declaration,
+          structure:result.structure,
+        });
       }catch(error){
-        const detail=error instanceof Error?error.message:String(error);
-        throw new Error(
-          "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
-        );
+        throw declarationFailure(declaration.name,error);
       }
-      structures.set(declaration.name,klass.structure);
-      classes.add(declaration.name);
-      admissions.push({
-        kind:'class',
-        declaration:klass.declaration,
-        structure:klass.structure,
-      });
       continue;
     }
 
     if(declaration.kind==='instance'){
-      let instance;
       try{
-        instance=elaborateInstanceDeclaration(
+        const result=elaborateV061InstanceDeclaration(
           declaration,
           workEnvironment,
           structures,
           classes,
           globalInstances,
         );
-        kernel.addDefinition(instance.declaration);
+        kernel.addDefinition(result.declaration);
+        globalInstances.unshift(constant(result.declaration.name));
+        admissions.push({
+          kind:'instance',
+          declaration:result.declaration,
+          instance:{
+            name:result.declaration.name,
+            className:result.className,
+            anonymous:declaration.anonymous,
+          },
+        });
       }catch(error){
-        const detail=error instanceof Error?error.message:String(error);
-        throw new Error(
-          "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
-        );
+        throw declarationFailure(declaration.name,error);
       }
-      globalInstances.unshift(constant(instance.declaration.name));
-      admissions.push({
-        kind:'instance',
-        declaration:instance.declaration,
-        instance:{
-          name:instance.declaration.name,
-          className:instance.className,
-          anonymous:declaration.anonymous,
-        },
-      });
       continue;
     }
 
     let info:DefinitionInfo|TheoremInfo;
     try{
-      info=elaborateValueDeclaration(
+      info=elaborateV061ValueDeclaration(
         declaration,
         workEnvironment,
         structures,
@@ -338,11 +132,9 @@ export function elaborateV061Definitions(
         globalInstances,
       );
     }catch(error){
-      const detail=error instanceof Error?error.message:String(error);
-      throw new Error(
-        "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
-      );
+      throw declarationFailure(declaration.name,error);
     }
+
     if(info.kind==='theorem')kernel.addTheorem(info);
     else kernel.addDefinition(info);
     admissions.push({kind:'constant',declaration:info});
@@ -351,6 +143,5 @@ export function elaborateV061Definitions(
   return admitCheckedCoreAdmissions(baseEnvironment,admissions);
 }
 
-
-/** Preferred name now that the kernel-facing path also admits theorem proof terms. */
+/** Preferred name now that the kernel-facing path also admits proof terms. */
 export const elaborateV061Declarations=elaborateV061Definitions;

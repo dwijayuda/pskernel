@@ -12,6 +12,7 @@ console.log('ok - @proofscript/compiler-ir foundation');
 {
   const ir=lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[],
     declarations:[{
       kind:'function',
@@ -33,6 +34,7 @@ console.log('ok - @proofscript/compiler-ir software lowering');
 {
   const ir=lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[],
     declarations:[{
       kind:'const',name:'increment',params:[],
@@ -56,6 +58,7 @@ console.log('ok - @proofscript/compiler-ir software lambda lowering');
 {
   const ir=lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[],
     declarations:[{
       kind:'function',name:'choose',params:[{name:'flag',type:'Bool'}],resultType:'Nat',
@@ -77,6 +80,7 @@ console.log('ok - @proofscript/compiler-ir Bool match lowering');
   const userType={kind:'nominal',name:'User'} as const;
   const ir=lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[{name:'User',fields:[{name:'name',type:'String'},{name:'age',type:'Nat'}]}],
     declarations:[{
       kind:'const',name:'ada',params:[],resultType:userType,
@@ -98,6 +102,7 @@ console.log('ok - @proofscript/compiler-ir nominal structure lowering');
   const maybe={kind:'nominal',name:'MaybeNat'} as const;
   const ir=lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[],
     inductives:[{
       name:'MaybeNat',

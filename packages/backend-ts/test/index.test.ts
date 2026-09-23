@@ -11,6 +11,7 @@ console.log('ok - @proofscript/backend-ts foundation');
 {
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[],
     declarations:[
       {kind:'const',name:'answer',params:[],resultType:'Nat',body:{kind:'nat',value:42n,resultType:'Nat'}},
@@ -29,6 +30,7 @@ console.log('ok - @proofscript/backend-ts TypeScript compiler pipeline');
 {
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[],
     declarations:[{
       kind:'function',name:'incTwice',params:[{name:'x',type:'Nat'}],resultType:'Nat',
@@ -46,6 +48,7 @@ console.log('ok - @proofscript/backend-ts compiler IR boundary');
 {
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[],
     declarations:[
       {
@@ -81,6 +84,7 @@ console.log('ok - @proofscript/backend-ts curried lambda TypeScript emission');
 {
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[],
     declarations:[{
       kind:'function',name:'choose',params:[{name:'flag',type:'Bool'}],resultType:'Nat',
@@ -104,6 +108,7 @@ console.log('ok - @proofscript/backend-ts Bool match TypeScript emission');
   const userType={kind:'nominal',name:'User'} as const;
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[{name:'User',fields:[{name:'name',type:'String'},{name:'age',type:'Nat'}]}],
     declarations:[
       {
@@ -143,6 +148,7 @@ console.log('ok - @proofscript/backend-ts nominal structure TypeScript emission'
   const maybe={kind:'nominal',name:'MaybeNat'} as const;
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
+    inductives:[],
     structures:[],
     inductives:[{
       name:'MaybeNat',

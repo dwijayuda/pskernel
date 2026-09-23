@@ -41,6 +41,16 @@ function property(name:string):string {
   return JSON.stringify(name);
 }
 
+function plainMember(name:string):string {
+  return /^[A-Za-z_$][A-Za-z0-9_$]*$/u.test(name)?name:property(name);
+}
+
+function propertyAccess(name:string):string {
+  return /^[A-Za-z_$][A-Za-z0-9_$]*$/u.test(name)
+    ? '.'+name
+    : '['+property(name)+']';
+}
+
 const PRECEDENCE:Readonly<Record<string,number>>={
   '||':1,'&&':2,'==':3,'!=':3,'<':4,'<=':4,'>':4,'>=':4,'+':5,'-':5,'*':6,'/':6,'%':6,
 };
@@ -118,13 +128,13 @@ export function emitSoftwareIrExpression(expr:SoftwareIrExpr,parentPrecedence=0)
       return JSON.stringify(expr.value);
     case 'var':return expr.name;
     case 'projection':
-      return emitSoftwareIrExpression(expr.target)+'['+property(expr.field)+']';
+      return emitSoftwareIrExpression(expr.target)+propertyAccess(expr.field);
     case 'record':{
       const brand=brandIdentifier(expr.structure);
       const fields=[
         '['+brand+']: true',
         ...expr.fields.map(
-          (field)=>property(field.name)+': '+emitSoftwareIrExpression(field.value),
+          (field)=>plainMember(field.name)+': '+emitSoftwareIrExpression(field.value),
         ),
       ];
       return '{ '+fields.join(', ')+' }';
@@ -191,7 +201,7 @@ function emitInductive(lines:string[],inductive:SoftwareIrInductive):void {
 
   const variants=inductive.constructors.map((constructor)=>{
     const fields=constructor.fields.map(
-      (field)=>'readonly '+property(field.name)+': '+typeScriptType(field.type)+';',
+      (field)=>'readonly '+plainMember(field.name)+': '+typeScriptType(field.type)+';',
     );
     return '{ readonly ['+tag+']: '+JSON.stringify(constructor.name)+'; '+
       fields.join(' ')+' }';
@@ -213,7 +223,7 @@ function emitInductive(lines:string[],inductive:SoftwareIrInductive):void {
       (field,index)=>'__field'+index+': '+typeScriptType(field.type),
     ).join(', ');
     const fields=constructor.fields.map(
-      (field,index)=>property(field.name)+': __field'+index,
+      (field,index)=>plainMember(field.name)+': __field'+index,
     );
     lines.push(
       '  '+property(constructor.name)+': ('+params+'): '+inductive.name+
@@ -236,7 +246,7 @@ export function emitV061TypeScript(module:SoftwareIrModule):string {
     lines.push('export interface '+structure.name+' {');
     lines.push('  readonly ['+brand+']: true;');
     for(const field of structure.fields){
-      lines.push('  readonly '+property(field.name)+': '+typeScriptType(field.type)+';');
+      lines.push('  readonly '+plainMember(field.name)+': '+typeScriptType(field.type)+';');
     }
     lines.push('}');
   }

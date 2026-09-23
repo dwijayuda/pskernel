@@ -10,12 +10,15 @@ import { isPrimitiveName } from '../kernel/primitive-names.js';
 import { addPrimitiveDefinition, addPrimitiveInductive } from '../kernel/primitive.js';
 import { addQuot } from '../kernel/quotient.js';
 import { TypeChecker } from '../kernel/type-checker.js';
+import { NativeEvaluator } from '../kernel/reduction/native.js';
 import { ExactJson, JObject, asArray, asBigInt, asBoolean, asIndex, asObject, asString, field, maybeField, parseExactJson } from './exact-json.js';
 
 export interface Lean4ExportOptions {
   /** Strict by default: an oracle-facing replay must be produced by the pinned Lean release. */
   readonly expectedLeanVersion?: string;
   readonly supportedFormatVersions?: readonly string[];
+  /** Optional Lean 4.34 compiler-IR evaluator. Configuring it extends the TCB. */
+  readonly nativeEvaluator?: NativeEvaluator;
 }
 export interface ReplayStats { readonly lines:number; readonly names:number; readonly levels:number; readonly expressions:number; readonly declarations:number }
 export interface ReplayProgressOptions { readonly every?:number; readonly onProgress?:(stats:ReplayStats)=>void }
@@ -57,7 +60,7 @@ export class Lean4ExportReplay {
   private readonly expectedLeanVersion:string; private readonly formats:readonly string[];
 
   constructor(env=new Environment(),options:Lean4ExportOptions={}){
-    this.env=env;this.kernel=new Kernel(env);this.expectedLeanVersion=options.expectedLeanVersion??'4.34.0';this.formats=options.supportedFormatVersions??['3.1.0'];
+    this.env=env;this.kernel=new Kernel(env,options.nativeEvaluator);this.expectedLeanVersion=options.expectedLeanVersion??'4.34.0';this.formats=options.supportedFormatVersions??['3.1.0'];
   }
 
   private stats():ReplayStats{return {lines:this.lineNo,names:this.names.size-1,levels:this.levels.size-1,expressions:this.exprs.size,declarations:this.decls};}

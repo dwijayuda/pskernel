@@ -1,6 +1,6 @@
 import { Environment } from '../src/core/environment.js';
 import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
-import { levelEquivalent, levelMVar, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../src/core/level.js';
+import { levelEqStructural, levelEquivalent, levelMVar, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../src/core/level.js';
 import { nameFromDotted, nameToString } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
 import { abstractFVar, instantiate, lift } from '../src/core/instantiate.js';
@@ -55,6 +55,13 @@ test('universe metavariables remain distinct symbolic atoms',()=>{
  assert(!levelEquivalent(u,v),'distinct universe metavariables must not collapse');
  assert(!levelEquivalent(u,p),'a metavariable and parameter with the same Name remain distinct kinds');
  assert(levelEquivalent(mkMax(u,v),mkMax(v,u)),'max remains commutative with universe metavariables');
+});
+
+test('mkMax matches Lean structural absorption shortcuts',()=>{
+ const u=levelParam(nameFromDotted('absorb.u')),v=levelParam(nameFromDotted('absorb.v'));
+ const uv=mkMax(u,v);
+ assert(levelEqStructural(mkMax(u,uv),uv),'max u (max u v) must return the existing rhs node shape');
+ assert(levelEqStructural(mkMax(uv,u),uv),'max (max u v) u must return the existing lhs node shape');
 });
 
 test('universe max commutative semantically',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));assert(levelEquivalent(mkMax(u,v),mkMax(v,u)));});

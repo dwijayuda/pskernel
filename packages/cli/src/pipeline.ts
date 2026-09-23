@@ -24,6 +24,11 @@ export function checkSource(
   sourceFileName='input.ps',
 ){
   const surface=sourceFrontends.forFile(sourceFileName).parse(source);
+  if((surface.imports?.length??0)>0){
+    throw new Error(
+      'PS_PROJECT_IMPORTS_REQUIRE_VERIFIED: imports currently require --verified',
+    );
+  }
   const canonical=canonicalSourceIdentity(surface);
   const checked=checkV061SoftwareModule(surface);
   return {

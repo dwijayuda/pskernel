@@ -20,7 +20,9 @@
     "@proofscript/compiler-ir": "file:../compiler-ir",
     "@proofscript/elab": "file:../elab",
     "@proofscript/compiler": "file:../compiler",
-    "@proofscript/environment": "file:../environment"
+    "@proofscript/environment": "file:../environment",
+    "@proofscript/checked-core": "file:../checked-core",
+    "@proofscript/project": "file:../project"
   },
   "devDependencies": {
     "@types/node": "22.15.3",

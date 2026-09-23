@@ -29,7 +29,9 @@
         "compiler-ir",
         "elab",
         "compiler",
-        "environment"
+        "environment",
+        "checked-core",
+        "project"
       ],
       "sourceLanguage": "typescript",
       "notes": [

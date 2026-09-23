@@ -991,3 +991,152 @@ console.log('ok - psc translate ps/lean canonical round-trip');
   }
 }
 console.log('ok - psc canonical source hash is source-kind neutral');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-mixed-ps-entry-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := double(x);\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'def double (x : Nat) : Nat := x + x\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['21'],
+    });
+    equal(result.mainResult,'42');
+    equal(
+      (result.moduleOrder as readonly string[]).join(','),
+      'Data,main',
+    );
+    equal(result.moduleCount,2);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc mixed ProofScript -> Lean import run');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-mixed-lean-entry-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.lean',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.lean'),
+      'import Data\ndef main (x : Nat) : Nat := inc x\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.ps'),
+      'function inc(x : Nat) : Nat := x + 1;\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['41'],
+    });
+    equal(result.mainResult,'42');
+    equal(
+      (result.moduleOrder as readonly string[]).join(','),
+      'Data,main',
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc mixed Lean -> ProofScript import run');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-mixed-ambiguity-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.ps'),
+      'function a(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'def b (x : Nat) : Nat := x\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await checkCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:[],
+      });
+    }catch(error){
+      rejected=/PS_PROJECT_SOURCE_AMBIGUITY/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc mixed-source module ambiguity fails closed');
+

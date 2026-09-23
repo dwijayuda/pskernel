@@ -1,7 +1,8 @@
 import {mkdir,writeFile} from 'node:fs/promises';
 import {basename,extname,join,resolve} from 'node:path';
 import {baseReport,compileSource} from '../pipeline.js';
-import {compileVerifiedSource} from '../verified-pipeline.js';
+import {compileVerifiedSourceProject} from '../verified-project-pipeline.js';
+import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
 import type {BuildResult,CommonArgs} from '../types.js';
 
@@ -10,10 +11,10 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     const input=await resolveInput(common);
     const extension=extname(input.sourcePath);
     const stem=basename(input.sourcePath,extension);
-    const result=compileVerifiedSource(
-      input.source,
+    const project=await resolveSourceProject(input);
+    const result=compileVerifiedSourceProject(
+      project,
       stem+'.ts',
-      input.sourcePath,
     );
     const outDir=resolve(
       input.loaded.directory,
@@ -34,9 +35,12 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       ...baseReport(
         input.sourcePath,
         result.checkedCore.declarations.length,
-        result.surface.featureIds,
+        result.featureIds,
         result.canonicalSourceHash,
       ),
+      moduleCount:result.moduleOrder.length,
+      moduleOrder:result.moduleOrder,
+      moduleSources:result.moduleSources,
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
       outputDirectory:outDir,

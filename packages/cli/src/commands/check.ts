@@ -1,24 +1,26 @@
 import {baseReport,checkSource} from '../pipeline.js';
-import {checkVerifiedSource} from '../verified-pipeline.js';
+import {checkVerifiedSourceProject} from '../verified-project-pipeline.js';
+import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
 import type {CommonArgs} from '../types.js';
 
 export async function checkCommand(common:CommonArgs){
   const input=await resolveInput(common);
   if(common.verified){
-    const result=checkVerifiedSource(
-      input.source,
-      input.sourcePath,
-    );
+    const project=await resolveSourceProject(input);
+    const result=checkVerifiedSourceProject(project);
     return {
       ok:true,
       command:'check',
       ...baseReport(
         input.sourcePath,
         result.checkedCore.declarations.length,
-        result.surface.featureIds,
+        result.featureIds,
         result.canonicalSourceHash,
       ),
+      moduleCount:result.moduleOrder.length,
+      moduleOrder:result.moduleOrder,
+      moduleSources:result.moduleSources,
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
     };

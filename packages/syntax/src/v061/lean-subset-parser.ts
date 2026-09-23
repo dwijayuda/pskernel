@@ -2,7 +2,6 @@ import {SyntaxError} from '../source.js';
 import type {
   V061Declaration,
   V061Module,
-  V061ValueDeclaration,
 } from './ast.js';
 import {V061ParseContext} from './context.js';
 import {V061LeanSubsetExpressionParser} from './lean-subset-expression-parser.js';

@@ -1151,6 +1151,59 @@ throws(
   const parsed=parseV061LeanSubsetModule(lean);
   equal(lowerV061ModuleToLean(parsed),lean);
 }
+
+{
+  const lean=
+    'structure Context where\n'+
+    '  {α : Type}\n'+
+    '  [showα : ToString α]\n'+
+    '  value : α\n'+
+    '  count : Nat\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'structure');
+  if(declaration?.kind==='structure'){
+    equal(declaration.fields.length,4);
+    equal(declaration.fields[0]?.binderKind,'implicit');
+    equal(declaration.fields[1]?.binderKind,'instance');
+    equal(declaration.fields[2]?.name,'value');
+    equal(declaration.fields[3]?.name,'count');
+  }
+}
+{
+  const lean=
+    'inductive Marker : Type where\n'+
+    '  | mk\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'inductive');
+  if(declaration?.kind==='inductive'){
+    equal(declaration.resultType?.kind,'named');
+  }
+}
+{
+  const lean=
+    'instance : Sized Nat := { size := fun x => x : Sized Nat }\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'instance');
+  if(declaration?.kind==='instance')equal(declaration.anonymous,true);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'inductive Vector where\n  | nil : Vector\n',
+  ),
+  /PS_LEAN_SUBSET_CONSTRUCTOR_RESULT/,
+);
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'namespace Demo\ndef x : Nat := 0\nend Demo\n',
+  ),
+  /PS_LEAN_SUBSET_UNSUPPORTED_COMMAND/,
+);
 throws(
   ()=>parseV061LeanSubsetModule(
     'def bad (x : Nat) : Nat := match x with\n  | 0 => 0\n',

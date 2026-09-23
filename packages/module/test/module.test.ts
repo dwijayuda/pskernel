@@ -90,7 +90,9 @@ console.log('ok - @proofscript/module TypeScript MVP');
   }
   assert.equal(loaded.admissions.length,1);
   assert.equal(loaded.env.find(id)?.kind,'definition');
-  const tampered=structuredClone(artifact);
+  const tampered=structuredClone(artifact) as typeof artifact & {
+    payload:{text:string};
+  };
   tampered.payload.text=tampered.payload.text.replace(
     '"Native"',
     '"Tampered"',

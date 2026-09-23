@@ -1314,6 +1314,23 @@ console.log('ok - psc checked-module cache uses dependency integrity keys');
       &&!Array.isArray(main.metadata),
       true,
     );
+    if(
+      main.metadata===undefined
+      ||typeof main.metadata!=='object'
+      ||main.metadata===null
+      ||Array.isArray(main.metadata)
+    ){
+      throw new Error('missing module artifact metadata');
+    }
+    equal(
+      String(main.metadata.canonicalSourceHash).startsWith('sha256:'),
+      true,
+    );
+    equal(
+      String(main.metadata.sourceCacheKey).startsWith('sha256:'),
+      true,
+    );
+    equal('sourceKind' in main.metadata,false);
   }finally{
     clearVerifiedProjectModuleCache();
     await rm(directory,{recursive:true,force:true});

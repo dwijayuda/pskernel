@@ -124,7 +124,7 @@ export class TypeChecker {
       case'mdata':r=this.infer(e.expr,inferOnly);break;
       case'app':{
         if(inferOnly){r=this.inferAppOnlySpine(e);break;}
-        const ft=this.ensureForall(this.infer(e.fn,false),e),at=this.infer(e.arg,false);const ok=this.isEagerReduceExpr(e.arg)?this.withEagerReduction(()=>this.isDefEq(ft.type,at)):this.isDefEq(ft.type,at);
+        const ft=this.ensureForall(this.infer(e.fn,false),e),at=this.infer(e.arg,false);const ok=this.isEagerReduceExpr(e.arg)?this.withEagerReduction(()=>this.isDefEq(at,ft.type)):this.isDefEq(at,ft.type);
         if(!ok){const ef=ft.type.kind==='sort'?` Sort.${levelToString(ft.type.level)}`:'';const af=at.kind==='sort'?` Sort.${levelToString(at.level)}`:'';throw new KernelError(`application type mismatch in ${exprToString(e)}: expected ${exprToString(ft.type)}${ef}, got ${exprToString(at)}${af} for argument ${exprToString(e.arg)}`);}
         r=instantiate1(ft.body,e.arg);break;
       }

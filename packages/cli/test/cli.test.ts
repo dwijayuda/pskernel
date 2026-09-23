@@ -5,6 +5,7 @@ import {parseCommonArgs} from '../src/args.js';
 import {compileVerifiedSource} from '../src/verified-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
 import {runCommand} from '../src/commands/run.js';
+import {emitLeanCommand} from '../src/commands/emit-lean.js';
 
 function equal(actual:unknown,expected:unknown):void{
   if(actual!==expected)throw new Error('expected '+String(expected)+', got '+String(actual));
@@ -751,3 +752,45 @@ console.log('ok - psc verified local class instance pipeline');
   equal(result.emitted.javascript.includes('get(boxedNat, x)'),true);
 }
 console.log('ok - psc verified global class instance pipeline');
+
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-emit-lean-target-registry-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function add(x : Nat, y : Nat) : Nat := x + y;\n',
+      'utf8',
+    );
+    const lean=await emitLeanCommand({
+      project:directory,
+      json:false,
+      verified:false,
+      passthrough:[],
+    });
+    equal(
+      lean,
+      'def add (x : Nat) (y : Nat) : Nat := x + y\n',
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc emit-lean uses source/target dispatch');

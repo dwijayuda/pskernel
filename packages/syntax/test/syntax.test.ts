@@ -22,6 +22,7 @@ import {
   lowerV061TypeToLean,
   sourceKindFromFileName,
   createDefaultSourceFrontendRegistry,
+  createDefaultTranslationTargetPrinterRegistry,
   type SourceFrontend,
 } from '../src/index.js';
 
@@ -109,6 +110,19 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
   equal(printed.includes('def identity {α : Type}(x : α)'),true);
   equal(printed.includes('match x with { | .none => fallback;'),true);
   equal(printed.includes('where {\n  helper(y : Nat)'),true);
+
+  const targets=createDefaultTranslationTargetPrinterRegistry();
+  equal(targets.require('ps').print(first),printed);
+  equal(
+    targets.require('lean').print(first),
+    lowerV061ModuleToLean(first),
+  );
+  equal(targets.require('ps').extension,'.ps');
+  equal(targets.require('lean').extension,'.lean');
+  throws(
+    ()=>targets.register(targets.require('ps')),
+    /PS_TRANSLATION_TARGET_DUPLICATE/,
+  );
 }
 
 {

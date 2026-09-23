@@ -217,7 +217,11 @@ console.log('ok - @proofscript/language structure/value global namespace collisi
     'inductive NatList where { | nil; | cons(head : Nat, tail : NatList); } '+
     'const empty : NatList := NatList.nil;',
   ));
-  equal(checked.inductives[0]?.constructors[1]?.fields[1]?.type.kind,'nominal');
+  const recursiveType=checked.inductives[0]?.constructors[1]?.fields[1]?.type;
+  equal(typeof recursiveType,'object');
+  if(typeof recursiveType==='object'&&recursiveType!==null){
+    equal(recursiveType.kind,'nominal');
+  }
 }
 {
   let nonExhaustive=false;

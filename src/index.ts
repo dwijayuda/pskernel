@@ -2,8 +2,8 @@
  * Stable public library surface for pskernel.
  *
  * Keep trusted implementation modules under src/core and src/kernel. Support
- * packages should depend on this façade (or the explicit lean4export
- * subpath) instead of importing internal files directly.
+ * packages should depend on this façade (or the explicit lean4export/native
+ * subpaths) instead of importing internal files directly.
  */
 export { Environment, KernelError } from './core/environment.js';
 export type {
@@ -50,3 +50,9 @@ export type {
   InductiveAdmissionOptions,
 } from './kernel/inductive/ordinary.js';
 export {addInductive} from './kernel/inductive/nested.js';
+
+export type {
+  NativeEvaluator,
+  NativeEvaluationResult,
+  NativeReductionKind
+} from './kernel/reduction/native.js';

@@ -30,7 +30,7 @@
   },
   "description": "ProofScript developer CLI (psc) plus low-level pskernel replay/module commands.",
   "proofscript": {
-    "status": "runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w2-check-build-run",
+    "status": "runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w2-check-build-run",
     "phase": "A",
     "trust": "untrusted-support",
     "futureName": "@proofscript/cli",

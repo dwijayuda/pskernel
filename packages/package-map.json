@@ -238,9 +238,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Checked software HIR supports first-class function types/lambdas and a bounded executable match representation.",
-        "E-MATCH-BODY execution currently accepts exhaustive Bool true/false alternatives or a single wildcard.",
-        "Constructor patterns are parsed/lowered but rejected by the executable checker until inductive-type elaboration exists.",
+        "Software checking is split into type conversion, expression checking, module orchestration, and shared HIR types.",
+        "Expression semantics remain focused and source/backend-independent; new semantic families should split again before exceeding the source-shape gate.",
+        "Reference-backed checker covers primitive/function types, calls, lambdas, lexical let, conditionals, operators, and bounded exhaustive Bool match.",
         "This checker remains outside the TCB; theorem/proof acceptance still requires elaboration to pskernel."
       ]
     },

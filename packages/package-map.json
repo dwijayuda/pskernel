@@ -17,14 +17,23 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "prototype+module-commands",
+      "status": "psc-ux-mvp+kernel-tools",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
         "module",
-        "conformance"
+        "conformance",
+        "syntax",
+        "language",
+        "backend-ts"
       ],
-      "sourceLanguage": "typescript"
+      "sourceLanguage": "typescript",
+      "notes": [
+        "psc is the user-facing ProofScript CLI; pskernel remains the low-level replay/module CLI.",
+        "Implemented commands: init, check, build, run, emit-lean, clean, help, version.",
+        "psconfig.json follows a TypeScript-familiar project/config model.",
+        "Current psc check/build claim ceiling is the initial reference-backed software subset; theorem/proof declarations are not yet submitted to pskernel."
+      ]
     },
     {
       "name": "module",

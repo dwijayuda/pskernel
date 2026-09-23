@@ -144,3 +144,23 @@ Current outer-package foundation status:
 - `@proofscript/project`: foundation
 
 The root `test:packages` gate compiles and executes these TypeScript foundations without enabling npm workspaces. Existing Phase-A module/conformance/export/CLI packages retain their separate MVP/prototype status.
+
+
+## PSC-LANG-1 vertical compiler checkpoint
+
+The first reference-backed language slice now follows:
+
+```text
+ProofScript v0.7 track
+  + v0.6.1 compiler-ready surface baseline
+→ syntax AST
+→ initial software type checker
+→ canonical Lean source
+→ TypeScript source
+→ TypeScript Compiler API
+→ JavaScript / .d.ts / source map
+```
+
+The normal developer CLI is `psc` with `init`, `check`, `build`, `run`, `emit-lean`, and `clean`. The low-level `pskernel` CLI remains available for replay/module workflows.
+
+This checkpoint does not claim theorem-prover completion: theorem/proof syntax, elaboration to kernel Expr, contracts, and pskernel admission remain the next vertical milestones.

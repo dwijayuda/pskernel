@@ -15,7 +15,7 @@ See `package-map.json` for:
 
 ## Current implementation state
 
-- `cli/` — prototype with replay/check and module commands.
+- `cli/` — user-facing `psc` UX MVP plus the low-level `pskernel` replay/module commands.
 - `module/` — MVP checked-module artifact implementation.
 - `conformance/` — MVP Arena-style conformance runner.
 - `lean4export/` — MVP pinned Lean exporter transport.

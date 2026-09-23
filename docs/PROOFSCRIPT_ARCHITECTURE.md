@@ -745,3 +745,28 @@ input path
 The command is intentionally not a proof/check command. `--verified`, JSON reporting, and runtime passthrough are rejected rather than implying that translation changes semantic trust.
 
 `emit-lean` remains as a convenience alias-style workflow for canonical Lean output. The remaining DS3 product gate is manifest canonical-source hashing.
+
+## DS3/DS4 dual-source identity and semantic-equivalence checkpoint
+
+Source kind now ends at the shared surface boundary. The CLI computes a
+source-kind-neutral `canonicalSourceHash` by printing that shared surface in
+canonical ProofScript form and hashing the UTF-8 bytes with SHA-256.
+
+```text
+.ps ----\
+        -> shared surface -> canonical ProofScript -> SHA-256
+.lean --/
+```
+
+This identity is reported by check/build manifests and is equal for canonical
+supported sources with the same shared surface meaning.
+
+DS4 adds a stronger executable equivalence gate. For a representative supported
+corpus, ProofScript, canonical Lean, and Lean->ProofScript round-trip sources
+must produce identical pskernel checked-core admissions and identical verified
+compiler IR. Because backend input is identical, the gate also requires
+identical TypeScript, JavaScript, and declaration output.
+
+Unsupported Lean remains fail-closed before checked core. The equivalence gate
+therefore proves two bounded frontends converge; it does not broaden the
+documented Lean subset.

@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **DS2 complete for the canonical emitted subset; DS3 CLI convergence next; subordinate to the canonical checked-core architecture**
+Status: **DS4 semantic equivalence landed for the canonical supported subset; DS5 mixed modules next; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -252,26 +252,71 @@ their Lean subset parser/printer coverage lands.
 
 ### DS3 — CLI convergence
 
-Landed DS3.1 checkpoint:
+Status: **complete**
 
-- the default source frontend registry registers both `proofscript` and the bounded `lean-subset` frontend;
-- `check/build/run` and `emit-lean` select only the parser from the entry extension; both source kinds continue into the same chosen semantic pipeline;
-- a verified filesystem regression runs canonical `.lean` through Lean-subset parse -> shared Meta/Elab -> pskernel -> checked core -> IR -> TypeScript -> JavaScript -> runtime;
+Landed checkpoints:
+
+- the default source frontend registry registers both `proofscript` and the
+  bounded `lean-subset` frontend;
+- `check/build/run` and `emit-lean` select only the parser from the entry
+  extension; both source kinds continue into the same selected semantic
+  pipeline;
+- a verified filesystem regression runs canonical `.lean` through
+  Lean-subset parse -> shared Meta/Elab -> pskernel -> checked core -> IR ->
+  TypeScript -> JavaScript -> runtime;
 - build stems strip either `.ps` or `.lean` cleanly;
-- reports/manifests record `sourceKind`.
+- reports/manifests record `sourceKind`;
+- `psc translate <file> --to ps|lean` performs source frontend -> canonical
+  AST -> target printer conversion without implying proof/check authority;
+- `emit-lean` remains a compatible convenience workflow;
+- verified and legacy source parsing compute a SHA-256
+  `canonicalSourceHash` from canonical ProofScript printing of the shared
+  surface AST;
+- semantically equivalent canonical `.ps` and supported `.lean` inputs are
+  gated to produce the same canonical-source hash.
 
-Remaining DS3 work:
-
-- add `psc translate <file> --to ps|lean`;
-- record canonical-source hashes in manifests;
-- retain `emit-lean` as a compatible convenience alias and add direct translation regressions for both source directions.
+DS3 is closed. Source kind now affects parsing/printing and reporting, never the
+checked-core semantics or backend selection.
 
 ### DS4 — semantic round trips
 
-- PS -> Lean -> checked-core equivalence corpus;
-- Lean -> PS -> checked-core equivalence corpus;
-- verified-IR equivalence corpus;
-- differential checks against pinned Lean 4.34 where practical.
+Status: **landed for the canonical supported subset**
+
+The integration gate now exercises a representative corpus containing:
+
+- a generic structure;
+- a class and named global instance;
+- an inductive;
+- match;
+- acyclic `where`;
+- Nat arithmetic;
+- a theorem using bounded `exact?`.
+
+It checks all three routes:
+
+```text
+ProofScript source -> checked core / verified IR
+ProofScript -> canonical Lean -> Lean-subset -> checked core / verified IR
+Lean-subset -> canonical ProofScript -> checked core / verified IR
+```
+
+Required equalities are executable:
+
+- identical `canonicalSourceHash`;
+- identical checked-core admission fingerprints, i.e. the declarations and
+  inductive/structure/class/instance metadata replayed through pskernel;
+- identical verified compiler IR after erasure;
+- identical generated TypeScript;
+- identical generated JavaScript;
+- identical generated `.d.ts`.
+
+The same gate asserts an unsupported Lean command fails with the documented
+Lean-subset diagnostic before checked-core admission.
+
+Differential execution against an external Lean 4.34 executable remains useful
+assurance where available, but it is separate from the internal dual-source
+equivalence claim: both psc frontends already converge into the same
+pskernel-checked semantics.
 
 ### DS5 — mixed modules
 

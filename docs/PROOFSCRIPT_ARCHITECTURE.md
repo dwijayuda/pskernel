@@ -110,6 +110,13 @@ It is:
 
 This is the reference direction for all future language/compiler work.
 
+A dedicated composition regression also locks that the same checked path can
+nest ordinary functional constructs rather than supporting them only in
+isolation: an outer `let` binds a lambda whose body is a checked Bool `if`,
+and the let body performs a verified ADT `match` whose branches call that
+local function. The expected verified-IR shape is asserted directly as
+`let -> lambda(if) -> match` before TypeScript emission.
+
 
 ## Verified Nat programming checkpoint
 
@@ -149,6 +156,13 @@ This is intentionally narrower than pretending to have Lean's general
 overloaded notation must wait for the real typeclass-synthesis layer.
 
 
+Verified runtime intrinsics have one shared compiler-IR contract for operation
+identity and arity. Validation consumes that contract, and backend-ts emits the
+operation union exhaustively. There is no catch-all emission fallback: adding a
+new verified intrinsic without defining its backend semantics is a TypeScript
+compile-time error rather than silently changing meaning.
+
+
 ## Verified execution checkpoint
 
 The CLI runtime path now consumes the semantic types retained in verified IR.
@@ -173,10 +187,19 @@ source
 -> 42
 ```
 
-The initial verified CLI ABI supports `Nat`, `Int`, `Bool`, `String`,
-and `Unit`. Generic, function-typed, and user-defined structured `main`
-parameters remain fail-closed until their runtime representations are part of
-the verified compiler/runtime contract.
+The verified CLI ABI supports primitive `Nat`, `Int`, `Bool`, `String`,
+and `Unit` values plus kernel-derived structure/ADT types whose runtime fields
+are representable by the verified IR. Structured values cross the CLI boundary
+as strict JSON: nested Nat/Int values are decimal strings, structures are exact
+field objects, and ADTs use `{"$ctor":"constructor", ...fields}`. ADT inputs
+are reconstructed through the generated constructor exports so verified match
+tags are genuine; results are encoded from the runtime representation back to
+the same JSON-safe shape.
+
+This boundary is untrusted input handling, not proof evidence. The accepted
+shape is derived from pskernel-admitted verified IR. Function-typed values,
+unknown types, unresolved type parameters, malformed constructors/fields, and
+unsupported dependent runtime shapes remain fail-closed.
 
 
 ## Verified structure checkpoint

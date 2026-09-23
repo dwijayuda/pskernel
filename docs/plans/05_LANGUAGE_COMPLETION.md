@@ -39,10 +39,12 @@ pass the erasure/compiler/backend path.
 Already implemented on the preferred verified path:
 
 - primitive Nat/Int/Bool/String/Unit representation;
-- generic functions and higher-order functions;
+- generic functions and higher-order functions, including direct generic
+  higher-order calls on the verified path;
 - checked Nat arithmetic including total / and %, bounded Nat/Bool equality,
   Nat order comparison, Bool logic, and checked Bool/ordering if conditions;
-- lambdas and lets;
+- lambdas and lets, with a source regression nesting let -> lambda(if) -> ADT
+  match and local higher-order calls;
 - structures, parameterized structures, record construction, projection;
 - inductives, generic inductives, constructors, checked pattern matching;
 - direct positive recursive ADTs;
@@ -55,7 +57,8 @@ Already implemented on the preferred verified path:
 - bounded global instance registration/synthesis;
 - checked-core proof/type erasure;
 - verified compiler IR -> TypeScript -> JavaScript/.d.ts/source map;
-- psc check/build/run --verified for currently supported runtime ABI shapes;
+- psc check/build/run --verified with primitive plus strict JSON structure/ADT
+  runtime ABI shapes;
 - proof-aware LSP/VS Code dogfood tooling.
 
 The legacy `@proofscript/language` software checker remains transitional and
@@ -74,13 +77,14 @@ are added.
 
 Remaining acceptance gates:
 
-- direct calls between generic functions and higher-order functions;
-- nested lets/lambdas/if/match combinations;
+- broaden generic/higher-order and nested expression composition only when new
+  core expression forms are introduced;
 - richer primitive comparison/equality coverage through Lean-compatible
   elaboration, not backend-only operators;
-- stable semantic primitive IR contracts;
-- verified run ABI for supported structures/ADTs where a deterministic JSON or
-  tagged-value bridge is defined;
+- broaden the landed typed/exhaustive intrinsic contract only when new
+  verified runtime primitives are introduced;
+- broaden the landed deterministic JSON structure/ADT run ABI only when new
+  checked runtime shapes are added;
 - source-level regressions for every supported construct.
 
 Exit condition:

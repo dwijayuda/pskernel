@@ -2,7 +2,10 @@ import {pathToFileURL} from 'node:url';
 import type {SoftwareType} from '@proofscript/language';
 import {buildCommand} from './build.js';
 import type {CommonArgs} from '../types.js';
-import {prepareVerifiedMainArguments} from '../verified-runtime.js';
+import {
+  encodeVerifiedRuntimeResult,
+  prepareVerifiedMainArguments,
+} from '../verified-runtime.js';
 
 function parseRuntimeArg(value:string,type:SoftwareType):unknown{
   if(typeof type!=='string'){
@@ -51,7 +54,16 @@ export async function runCommand(common:CommonArgs){
     if(main===undefined){
       throw new Error("PS_RUN_NO_MAIN: no executable declaration named 'main'");
     }
-    args=prepareVerifiedMainArguments(main,common.passthrough);
+    if(build.verifiedIr===undefined){
+      throw new Error(
+        'PS_RUN_VERIFIED_IR_MISSING: verified build did not retain compiler IR',
+      );
+    }
+    args=prepareVerifiedMainArguments(
+      main,
+      common.passthrough,
+      {module:build.verifiedIr,runtimeExports:mod},
+    );
   }else{
     const main=build.checked?.declarations.find(
       (declaration)=>declaration.name==='main',
@@ -71,13 +83,36 @@ export async function runCommand(common:CommonArgs){
   }
 
   const value=await (fn as (...values:unknown[])=>unknown)(...args);
+  let displayed:unknown;
+  if(common.verified){
+    const main=build.verifiedIr?.declarations.find(
+      (declaration)=>declaration.name==='main',
+    );
+    if(main===undefined||build.verifiedIr===undefined){
+      throw new Error(
+        'PS_RUN_VERIFIED_RESULT_TYPE: verified main result metadata is unavailable',
+      );
+    }
+    displayed=encodeVerifiedRuntimeResult(
+      value,
+      main.resultType,
+      build.verifiedIr,
+    );
+  }else{
+    displayed=displayRuntimeValue(value);
+  }
+
   if(value!==undefined&&!common.json){
-    console.log(displayRuntimeValue(value));
+    console.log(
+      typeof displayed==='object'&&displayed!==null
+        ?JSON.stringify(displayed)
+        :displayed,
+    );
   }
 
   return {
     ...build.report,
     command:'run',
-    mainResult:displayRuntimeValue(value),
+    mainResult:displayed,
   };
 }

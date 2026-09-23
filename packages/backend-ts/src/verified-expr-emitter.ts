@@ -27,29 +27,32 @@ export function emitVerifiedExpr(
       }
       const left=emitVerifiedExpr(expr.args[0]!,brands,tags);
       const right=emitVerifiedExpr(expr.args[1]!,brands,tags);
-      if(expr.operation==='nat.add')return '('+left+' + '+right+')';
-      if(expr.operation==='nat.mul')return '('+left+' * '+right+')';
-      if(expr.operation==='nat.div'){
-        return '((__ps_a: bigint, __ps_b: bigint) => '+
-          '(__ps_b === 0n ? 0n : __ps_a / __ps_b))('+
-          left+', '+right+')';
+      switch(expr.operation){
+        case 'nat.add':return '('+left+' + '+right+')';
+        case 'nat.sub':
+          return '((__ps_a: bigint, __ps_b: bigint) => '+
+            '(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))('+
+            left+', '+right+')';
+        case 'nat.mul':return '('+left+' * '+right+')';
+        case 'nat.div':
+          return '((__ps_a: bigint, __ps_b: bigint) => '+
+            '(__ps_b === 0n ? 0n : __ps_a / __ps_b))('+
+            left+', '+right+')';
+        case 'nat.mod':
+          return '((__ps_a: bigint, __ps_b: bigint) => '+
+            '(__ps_b === 0n ? __ps_a : __ps_a % __ps_b))('+
+            left+', '+right+')';
+        case 'nat.eq':return '('+left+' === '+right+')';
+        case 'nat.ne':return '('+left+' !== '+right+')';
+        case 'nat.le':return '('+left+' <= '+right+')';
+        case 'nat.lt':return '('+left+' < '+right+')';
+        case 'bool.and':return '('+left+' && '+right+')';
+        case 'bool.or':return '('+left+' || '+right+')';
+        case 'bool.eq':return '('+left+' === '+right+')';
+        case 'bool.ne':return '('+left+' !== '+right+')';
       }
-      if(expr.operation==='nat.mod'){
-        return '((__ps_a: bigint, __ps_b: bigint) => '+
-          '(__ps_b === 0n ? __ps_a : __ps_a % __ps_b))('+
-          left+', '+right+')';
-      }
-      if(expr.operation==='nat.eq')return '('+left+' === '+right+')';
-      if(expr.operation==='nat.ne')return '('+left+' !== '+right+')';
-      if(expr.operation==='nat.le')return '('+left+' <= '+right+')';
-      if(expr.operation==='nat.lt')return '('+left+' < '+right+')';
-      if(expr.operation==='bool.and')return '('+left+' && '+right+')';
-      if(expr.operation==='bool.or')return '('+left+' || '+right+')';
-      if(expr.operation==='bool.eq')return '('+left+' === '+right+')';
-      if(expr.operation==='bool.ne')return '('+left+' !== '+right+')';
-      return '((__ps_a: bigint, __ps_b: bigint) => '+
-        '(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))('+
-        left+', '+right+')';
+      const unreachable:never=expr.operation;
+      return unreachable;
     }
     case 'call':
       return emitVerifiedExpr(expr.fn,brands,tags)+'('+

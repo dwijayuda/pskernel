@@ -3,6 +3,7 @@ import type {
   VerifiedIrModule,
   VerifiedIrType,
 } from './verified-model.js';
+import {verifiedIrIntrinsicArity} from './verified-intrinsics.js';
 
 const identifierPattern=/^[A-Za-z_$][A-Za-z0-9_$]*$/u;
 
@@ -150,7 +151,7 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
       assertVerifiedIrIdentifier(expr.name);
       return;
     case 'intrinsic':{
-      const expectedArity=expr.operation==='bool.not'?1:2;
+      const expectedArity=verifiedIrIntrinsicArity(expr.operation);
       if(expr.args.length!==expectedArity){
         throw new Error(
           "verified IR intrinsic '"+expr.operation+

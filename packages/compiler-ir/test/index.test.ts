@@ -1,4 +1,10 @@
-import {freeVariables,lowerCheckedSoftwareModule,validateIrModule} from '../src/index.js';
+import {
+  VERIFIED_IR_INTRINSIC_ARITY,
+  freeVariables,
+  lowerCheckedSoftwareModule,
+  validateIrModule,
+  validateVerifiedIrModule,
+} from '../src/index.js';
 function equal(a:unknown,b:unknown):void{if(a!==b)throw new Error(`expected ${String(b)}, got ${String(a)}`);}
 {
   const expr={kind:'lambda',params:['x'],body:{kind:'call',fn:{kind:'var',name:'f'},args:[{kind:'var',name:'x'},{kind:'var',name:'y'}]}} as const;
@@ -187,10 +193,10 @@ console.log('ok - @proofscript/compiler-ir verified dependent-core IR schema');
       name:'add',
       typeParameters:[],
       parameters:[
-        {name:'x',type:{kind:'primitive' as const,name:'bigint' as const}},
-        {name:'y',type:{kind:'primitive' as const,name:'bigint' as const}},
+        {name:'x',type:{kind:'primitive' as const,name:'Nat' as const}},
+        {name:'y',type:{kind:'primitive' as const,name:'Nat' as const}},
       ],
-      resultType:{kind:'primitive' as const,name:'bigint' as const},
+      resultType:{kind:'primitive' as const,name:'Nat' as const},
       body:{
         kind:'intrinsic' as const,
         operation:'nat.add' as const,
@@ -204,3 +210,36 @@ console.log('ok - @proofscript/compiler-ir verified dependent-core IR schema');
   equal(validateVerifiedIrModule(module),true);
 }
 console.log('ok - @proofscript/compiler-ir verified Nat intrinsic');
+
+
+{
+  equal(VERIFIED_IR_INTRINSIC_ARITY['bool.not'],1);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['nat.sub'],2);
+  let invalid=false;
+  try{
+    validateVerifiedIrModule({
+      kind:'proofscript-verified-ir',
+      declarations:[{
+        name:'badNot',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'Bool'},
+        }],
+        resultType:{kind:'primitive',name:'Bool'},
+        body:{
+          kind:'intrinsic',
+          operation:'bool.not',
+          args:[
+            {kind:'var',name:'x'},
+            {kind:'var',name:'x'},
+          ],
+        },
+      }],
+    });
+  }catch(error){
+    invalid=/expects 1 argument/.test(String(error));
+  }
+  equal(invalid,true);
+}
+console.log('ok - @proofscript/compiler-ir verified intrinsic contract');

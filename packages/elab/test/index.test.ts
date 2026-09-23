@@ -555,16 +555,30 @@ console.log('ok - @proofscript/elab record construction and kernel projection');
 }
 {
   const env=makeNatNotationEnvironment();
-  let recursive=false;
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive NatList where { '+
+    '| nil; | cons(head : Nat, tail : NatList); }',
+  ),env);
+  const list=result.environment.find(nameFromDotted('NatList'));
+  equal(list?.kind,'inductive');
+  if(list?.kind==='inductive')equal(list.isRec,true);
+  equal(
+    result.environment.find(nameFromDotted('NatList.rec'))?.kind,
+    'recursor',
+  );
+}
+{
+  const env=makeNatNotationEnvironment();
+  let rejected=false;
   try{
     elaborateV061Declarations(parseV061Module(
-      'inductive NatList where { '+
-      '| nil; | cons(head : Nat, tail : NatList); }',
+      'inductive BadRec where { '+
+      '| mk(f : BadRec -> Nat); }',
     ),env);
   }catch(error){
-    recursive=/PS_ELAB_RECURSIVE_INDUCTIVE_UNSUPPORTED/.test(String(error));
+    rejected=/non-positive occurrence/.test(String(error));
   }
-  equal(recursive,true);
+  equal(rejected,true);
 }
 console.log('ok - @proofscript/elab unparameterized inductive admission');
 
@@ -681,3 +695,23 @@ console.log('ok - @proofscript/elab parameterized inductive constructor inferenc
   }
 }
 console.log('ok - @proofscript/elab parameterized verified match recursor elaboration');
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive PsList(α : Type) where { '+
+    '| nil; | cons(head : α, tail : PsList(α)); } '+
+    'function headOr {α : Type}'+
+    '(value : PsList(α), fallback : α) : α := '+
+    'match value with { | .nil => fallback; | .cons head tail => head; };',
+  ),env);
+  const list=result.environment.find(nameFromDotted('PsList'));
+  equal(list?.kind,'inductive');
+  if(list?.kind==='inductive')equal(list.isRec,true);
+  const headOr=result.definitions.find(
+    (item)=>item.name.kind==='str'&&item.name.value==='headOr',
+  );
+  equal(headOr?.kind,'definition');
+}
+console.log('ok - @proofscript/elab direct recursive inductive + recursor match');

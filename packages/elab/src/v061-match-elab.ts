@@ -72,10 +72,9 @@ export function elaborateV061MatchExpression(
   if(
     inductive?.kind!=='inductive'
     ||inductive.numIndices!==0
-    ||inductive.isRec
   ){
     throw new Error(
-      'PS_ELAB_MATCH_INDUCTIVE_UNSUPPORTED: verified match currently supports non-recursive, unindexed inductives',
+      'PS_ELAB_MATCH_INDUCTIVE_UNSUPPORTED: verified match currently supports unindexed inductives',
     );
   }
 

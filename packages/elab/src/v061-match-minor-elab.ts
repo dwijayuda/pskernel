@@ -5,9 +5,11 @@ import type {
 import {
   TypeChecker,
   abstractFVar,
+  appView,
   fvar,
   instantiate1,
   lam,
+  nameEq,
   nameFromDotted,
   nameToString,
   type Expr,
@@ -17,6 +19,42 @@ import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
 } from './v061-context.js';
+
+
+function hasConstant(
+  expr:Expr,
+  target:Name,
+):boolean {
+  switch(expr.kind){
+    case 'const':return nameEq(expr.name,target);
+    case 'app':return hasConstant(expr.fn,target)||hasConstant(expr.arg,target);
+    case 'lam':
+    case 'forall':
+      return hasConstant(expr.type,target)||hasConstant(expr.body,target);
+    case 'let':
+      return hasConstant(expr.type,target)
+        ||hasConstant(expr.value,target)
+        ||hasConstant(expr.body,target);
+    case 'mdata':
+    case 'proj':
+      return hasConstant(expr.expr,target);
+    default:return false;
+  }
+}
+
+function isDirectRecursiveField(
+  type:Expr,
+  inductive:Name,
+  parameterArgs:readonly Expr[],
+  checker:TypeChecker,
+):boolean {
+  const view=appView(checker.whnf(type));
+  if(view.fn.kind!=='const'||!nameEq(view.fn.name,inductive))return false;
+  if(view.args.length!==parameterArgs.length)return false;
+  return view.args.every(
+    (arg,index)=>checker.isDefEq(arg,parameterArgs[index]!),
+  );
+}
 
 export type MatchTermElaborator=(
   expr:V061Expr,
@@ -76,6 +114,7 @@ export function elaborateV061MatchMinor(
     readonly name:Name;
     readonly type:Expr;
     readonly binderInfo:import('lean-ts-kernel').BinderInfo;
+    readonly recursive:boolean;
   }[]=[];
 
   for(let index=0;index<constructor.numFields;index+=1){
@@ -84,6 +123,22 @@ export function elaborateV061MatchMinor(
       branchContext.localContext.clone(),
     );
     const binder=checker.ensureForall(checker.whnf(cursor));
+    const directRecursive=isDirectRecursiveField(
+      binder.type,
+      constructor.induct,
+      parameterArgs,
+      checker,
+    );
+    if(
+      !directRecursive
+      &&hasConstant(checker.whnf(binder.type),constructor.induct)
+    ){
+      throw new Error(
+        'PS_ELAB_MATCH_HIGHER_ORDER_RECURSION_UNSUPPORTED: constructor field '+
+        index+' of '+nameToString(constructorName),
+      );
+    }
+
     const sourceName=pattern.binders[index]!;
     if(branchContext.locals.has(sourceName)){
       throw new Error(
@@ -108,6 +163,7 @@ export function elaborateV061MatchMinor(
       name:userName,
       type:binder.type,
       binderInfo:binder.binderInfo,
+      recursive:directRecursive,
     });
     cursor=instantiate1(binder.body,fvar(id));
   }
@@ -118,6 +174,16 @@ export function elaborateV061MatchMinor(
     expected,
   );
   let result=branch.term;
+  const recursiveFields=fields.filter((field)=>field.recursive);
+  for(let index=recursiveFields.length-1;index>=0;index-=1){
+    const field=recursiveFields[index]!;
+    result=lam(
+      nameFromDotted('_ih_'+nameToString(field.name)),
+      expected,
+      result,
+      'default',
+    );
+  }
   for(let index=fields.length-1;index>=0;index-=1){
     const field=fields[index]!;
     result=lam(

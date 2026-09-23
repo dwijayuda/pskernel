@@ -123,13 +123,25 @@ export function elaborateV061InductiveDeclaration(
     shared.parameters,
     false,
   );
+  const recursiveEnvironment=environment.clone();
+  recursiveEnvironment.add({
+    kind:'axiom',
+    name:typeName,
+    levelParams:[],
+    type:inductiveType,
+  });
+  const recursiveContext:V061CoreElabContext={
+    ...shared.context,
+    environment:recursiveEnvironment,
+    metaContext:new ExprMetaContext(recursiveEnvironment),
+  };
   const appliedInductive=mkAppN(
     constant(typeName),
     shared.parameters.map((parameter)=>fvar(parameter.id)),
   );
 
   const constructors=source.constructors.map((constructor)=>{
-    let context=shared.context;
+    let context=recursiveContext;
     const fields:{
       readonly id:string;
       readonly name:ReturnType<typeof nameFromDotted>;
@@ -138,22 +150,10 @@ export function elaborateV061InductiveDeclaration(
     }[]=[];
 
     for(const parameter of constructor.params){
-      let type:Expr;
-      try{
-        type=elaborateV061Type(parameter.type,context);
-      }catch(error){
-        const detail=error instanceof Error?error.message:String(error);
-        if(detail.includes("unknown type '"+source.name+"'")){
-          throw new Error(
-            'PS_ELAB_RECURSIVE_INDUCTIVE_UNSUPPORTED: '+
-            "'"+source.name+"'",
-          );
-        }
-        throw error;
-      }
+      const type=elaborateV061Type(parameter.type,context);
 
       const checker=new TypeChecker(
-        environment,
+        recursiveEnvironment,
         context.localContext.clone(),
       );
       checker.ensureSort(checker.check(type),type);

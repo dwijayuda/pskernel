@@ -6,11 +6,11 @@ This repository is intentionally version-pinned. Lean 4.34.0 is the compatibilit
 
 ## Current verified surface
 
-The current implementation includes Lean core names/levels/expressions, substitution and local contexts, type inference, WHNF and kernel reduction, algorithmic definitional equality, quotients, ordinary/mutual/indexed/nested inductives, recursor generation/reduction, Lean 4.34 primitive recognition, `lean4export` 3.1.0 replay, resource limits, and identity-keyed kernel caches.
+The current implementation includes Lean core names/levels/expressions, substitution and local contexts, type inference, WHNF and kernel reduction, algorithmic definitional equality, quotients, ordinary/mutual/indexed/nested inductives, recursor generation/reduction, Lean 4.34 primitive recognition, `lean4export` 3.1.0 replay, resource limits, and Lean-structural kernel caches with an identity fast path.
 
 The pinned regression stack includes:
 
-- 97 TypeScript kernel/unit tests
+- 153 TypeScript kernel/unit tests in the current source tree (last executed direct-suite checkpoint: 97; refreshed execution is pending)
 - official Lean 4.34 fresh-module checking
 - official Lean 4.34 adversarial kernel regressions (21 expected-success + 1 expected-rejection)
 - official-vs-TypeScript definitional-equality differential cases (42/42)

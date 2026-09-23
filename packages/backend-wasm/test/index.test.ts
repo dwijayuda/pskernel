@@ -59,6 +59,32 @@ const unsignedModule:WasmIrModule={
   profile:'proofscript-wasm32-gc-js-v1',
   functions:[
     {
+      name:'id8',
+      parameters:[{name:'x',type:'i32'}],
+      result:'i32',
+      abi:{parameters:['uint8'],result:'uint8'},
+      exportName:'id8',
+      body:{
+        kind:'i32.binary',
+        operation:'and',
+        left:{kind:'local',name:'x',type:'i32'},
+        right:{kind:'i32.const',value:0xff},
+      },
+    },
+    {
+      name:'id16',
+      parameters:[{name:'x',type:'i32'}],
+      result:'i32',
+      abi:{parameters:['uint16'],result:'uint16'},
+      exportName:'id16',
+      body:{
+        kind:'i32.binary',
+        operation:'and',
+        left:{kind:'local',name:'x',type:'i32'},
+        right:{kind:'i32.const',value:0xffff},
+      },
+    },
+    {
       name:'id32',
       parameters:[{name:'x',type:'i32'}],
       result:'i32',
@@ -78,6 +104,8 @@ const unsignedModule:WasmIrModule={
 };
 const unsignedArtifact=emitBinaryenWasm(unsignedModule);
 const unsignedHost=instantiateProofScriptWasm(unsignedArtifact);
+equal(unsignedHost.exports.id8?.(0xff),0xff);
+equal(unsignedHost.exports.id16?.(0xffff),0xffff);
 equal(unsignedHost.exports.id32?.(0xffffffff),0xffffffff);
 equal(
   unsignedHost.exports.id64?.(0xffffffffffffffffn),
@@ -89,6 +117,14 @@ ok(typeof rawId32==='function');
 ok(typeof rawId64==='function');
 equal((rawId32 as (x:number)=>number)(0xffffffff),-1);
 equal((rawId64 as (x:bigint)=>bigint)(-1n),-1n);
+throws(
+  ()=>unsignedHost.exports.id8?.(0x100),
+  /PS_WASM_JS_ABI_UINT8_RANGE/u,
+);
+throws(
+  ()=>unsignedHost.exports.id16?.(0x1_0000),
+  /PS_WASM_JS_ABI_UINT16_RANGE/u,
+);
 throws(
   ()=>unsignedHost.exports.id32?.(0x1_0000_0000),
   /PS_WASM_JS_ABI_UINT32_RANGE/u,

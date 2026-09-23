@@ -18,6 +18,7 @@ import {
   significantTokens,
   parseV061Module,
   lowerV061ModuleToLean,
+  lowerV061ModuleToProofScript,
   lowerV061TypeToLean,
   sourceKindFromFileName,
   createDefaultSourceFrontendRegistry,
@@ -68,6 +69,7 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
   const leanStub:SourceFrontend={
     kind:'lean-subset',
     parse:parseV061Module,
+    print:lowerV061ModuleToProofScript,
   };
   registry.register(leanStub);
   equal(registry.forFile('Main.lean'),leanStub);
@@ -75,6 +77,36 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
     ()=>registry.register(leanStub),
     /PS_FRONTEND_DUPLICATE/,
   );
+}
+
+{
+  const source=[
+    'structure Box(α : Type) where { value : α; };',
+    'class Sized(α : Type) where { size : α -> Nat; };',
+    'inductive Maybe(α : Type) where { | none; | some(value : α); };',
+    'function choose(x : Nat, y : Nat) : Nat := '+
+      'if (x < y) { x } else { y };',
+    'def unwrap(x : Maybe(Nat), fallback : Nat) : Nat := '+
+      'match x with { | .none => fallback; | .some value => value; };',
+    'def localDemo(x : Nat) : Nat := helper(x) where { '+
+      'helper(y : Nat) : Nat := y + 1; };',
+    'instance boxedNat : Box(Nat) := { value := 0 : Box(Nat) };',
+    'theorem reflViaSearch(P : Prop, h : P) : P := by exact?;',
+  ].join('\n');
+  const first=parseV061Module(source);
+  const printed=lowerV061ModuleToProofScript(first);
+  const second=parseV061Module(printed);
+  const printedAgain=lowerV061ModuleToProofScript(second);
+  equal(printedAgain,printed);
+  equal(
+    createDefaultSourceFrontendRegistry()
+      .forFile('canonical.ps')
+      .print(first),
+    printed,
+  );
+  equal(printed.includes('function choose(x : Nat, y : Nat)'),true);
+  equal(printed.includes('match x with { | .none => fallback;'),true);
+  equal(printed.includes('where {\n  helper(y : Nat)'),true);
 }
 
 {

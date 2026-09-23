@@ -15,6 +15,9 @@ export * from './inductive-parser.js';
 export * from './where-parser.js';
 export * from './declaration-parser.js';
 export * from './frontend.js';
+export * from './proofscript-type-lowering.js';
+export * from './proofscript-expression-lowering.js';
+export * from './proofscript-lowering.js';
 export * from './lean-lowering.js';
 
 export * from './instance-parser.js';

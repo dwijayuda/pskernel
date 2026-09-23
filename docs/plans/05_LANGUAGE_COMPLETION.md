@@ -102,14 +102,17 @@ Purpose: make ProofScript adequate for nontrivial verified libraries.
 
 Implement, in this order:
 
-1. indexed/dependent inductive application in elaboration and erasure;
-2. constructor/match coverage for indexed families;
-3. multiple structural recursive parameters where Lean's termination theory
+1. general term expressions in dependent theorem/result types (for example
+   propositions such as `Eq Nat (Nat.succ a) a`) so proof statements are not
+   limited to the current type-expression grammar;
+2. indexed/dependent inductive application in elaboration and erasure;
+3. constructor/match coverage for indexed families;
+4. multiple structural recursive parameters where Lean's termination theory
    justifies them;
-4. mutual inductive declarations;
-5. mutual recursive definitions;
-6. recursive local `where` groups;
-7. bounded well-founded recursion only after the structural path is solid.
+5. mutual inductive declarations;
+6. mutual recursive definitions;
+7. recursive local `where` groups;
+8. bounded well-founded recursion only after the structural path is solid.
 
 Lean rule:
 
@@ -159,7 +162,7 @@ Tactic order:
 5. cases;
 6. induction;
 7. rewrite — bounded current-goal equality transport landed;
-8. simp with a small explicit theorem set — first single-rule simp-only slice landed;
+8. simp with a small explicit theorem set — bounded non-overlapping multi-rule simp-only sets landed;
 9. exact? / assumption-style search only after deterministic core tactics;
 10. add cursor-sensitive LSP proof-state snapshots on top of the same goal model.
 
@@ -239,9 +242,15 @@ kernel-checked equality transport as `rw`, repeats the selected rewrite to a
 fixed point, and then attempts bounded equality reflexivity. To make
 termination explicit before Lean's full simp orientation/index machinery is
 ported, the chosen direction must strictly reduce a conservative structural
-expression-size metric. Global `@[simp]` sets, multiple rules, iff lemmas,
+expression-size metric. The explicit-set checkpoint now accepts multiple rules in source order. Because
+Lean's real simplifier resolves candidates through indexed theorem lookup and
+priorities, ProofScript currently rejects pairwise structurally overlapping
+selected lhs patterns rather than inventing a conflicting rule-selection
+policy. Non-overlapping explicit rules are repeated to a fixed point through
+the same proof-producing transport chain. Global `@[simp]` sets, iff lemmas,
 theorem preprocessing, congruence indexes, dischargers, locations,
-`simp_all`, and Lean's complete orientation algorithm remain fail-closed.
+`simp_all`, and Lean's complete orientation/priority algorithm remain
+fail-closed.
 
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
@@ -447,9 +456,11 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
-4. Validate and then broaden the landed single-rule simp-only proof
-   reconstruction. Expand explicit simp sets before adding search tactics such
-   as exact?.
+4. Validate the landed bounded multi-rule simp-only proof reconstruction.
+5. Before adding search tactics, close the discovered theorem-statement gap:
+   allow ordinary term expressions in dependent proposition/result positions
+   (for example `Eq Nat (Nat.succ a) a`) through Lean-compatible elaboration.
+6. Add deterministic search tactics such as exact? only after that foundation.
 5. Implement project/module/import semantics on the checked-core path.
 6. Design and implement explicit npm/JS FFI.
 7. Start the ProofScript-written standard library.

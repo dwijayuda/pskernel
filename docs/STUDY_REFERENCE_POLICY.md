@@ -122,3 +122,15 @@ The current tactic work follows this policy:
 The dual-source `.ps` / supported `.lean` plan also follows the policy:
 Lean syntax is bounded explicitly, both source forms converge before checked
 core, and TypeScript remains only the downstream host/backend target.
+
+## Evidence-driven correction recorded 2026-09-23
+
+While replacing the first simp smoke test, the repository exposed a current
+surface limitation: `V061TypeExpr` accepts applications only when the applied
+result is itself a sort. Consequently, a theorem proposition such as
+`Eq Nat (Nat.succ a) a` cannot yet be represented through the verified
+declaration header even though the kernel and term elaborator understand the
+underlying terms. Tests must not use such statements as executable evidence
+until the dependent theorem/result expression surface is widened. The bounded
+multi-rule simp gate therefore uses type-level rewrite terms that the current
+verified header elaborator actually supports.

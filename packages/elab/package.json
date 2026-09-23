@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript term/command/declaration elaboration into kernel declarations.",
   "proofscript": {
-    "status": "v061-simp-only+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+    "status": "v061-simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

@@ -109,6 +109,7 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "Bounded `simp only [h1, ← h2, ...]` now parses an explicit rule list, including optional reverse markers and a trailing comma, while default `simp`, erasures, `*`, locations, pre/post markers, and configs remain outside the supported parser subset.",
         "The bounded simplifier preserves inherited Lean spelling `simp only [h]` and `simp only [← h]`. The parser currently accepts exactly one explicit rule and rejects multi-rule lists instead of approximating full Lean simp syntax.",
         "The tactic parser preserves Lean-compatible rewrite spelling for the bounded subset: `rw [h]` and `rw [← h]`; it does not introduce a ProofScript-only bare-rw syntax.",
         "Inherited Lean `induction <local>` syntax is parsed/lowered canonically; the bounded semantic implementation uses pskernel recursors and does not introduce a second induction principle.",
@@ -210,7 +211,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-simp-only+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -223,6 +224,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Bounded `simp only` now accepts one or more explicit Eq rules in inherited Lean list syntax and applies them in source order across repeated passes, reconstructing every change through the shared kernel-checked equality transport path.",
+        "Until Lean's discrimination-tree candidate ordering and priorities are modeled, multi-rule simp rejects pairwise structurally overlapping selected lhs patterns. This makes the accepted subset deterministic instead of silently choosing a non-Lean rule order.",
+        "Every selected direction must still strictly decrease the conservative expression-size metric; a global 64-step fuel bound remains a secondary safety guard.",
         "The first simp slice is `simp only [h]` / `simp only [← h]` with exactly one explicit Eq proof. It repeatedly uses the kernel-checked rw transport path to a fixed point, so simplification never mutates a goal without proof reconstruction.",
         "To guarantee termination before Lean's full simp orientation/index machinery is modeled, the selected direction must strictly decrease a conservative structural expression-size metric; non-decreasing directions fail closed.",
         "Global @[simp] databases, multiple simp rules, theorem preprocessing, iff rules, congruence theorem indexes, dischargers, locations, simp_all, and Lean's full orientation algorithm remain unsupported.",

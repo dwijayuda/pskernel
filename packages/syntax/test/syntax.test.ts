@@ -23,6 +23,8 @@ import {
   sourceKindFromFileName,
   createDefaultSourceFrontendRegistry,
   createDefaultTranslationTargetPrinterRegistry,
+  parseV061LeanSubsetModule,
+  leanSubsetSourceFrontend,
   type SourceFrontend,
 } from '../src/index.js';
 
@@ -1101,6 +1103,13 @@ throws(
     'def applyTwo (f : Nat -> Nat) (x : Nat) : Nat := f x\n\n'+
     'theorem rewriteProof (a : Nat) (b : Nat) (h : a = b) : a = b := '+
     'by rw [h]\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
+
+{
+  const lean=
+    'def nested (x : Nat) : Nat := Nat.add (Nat.add x 1) 2\n';
   const parsed=parseV061LeanSubsetModule(lean);
   equal(lowerV061ModuleToLean(parsed),lean);
 }

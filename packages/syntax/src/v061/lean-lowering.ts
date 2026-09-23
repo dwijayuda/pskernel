@@ -66,7 +66,7 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
     case 'call':{
       const args=expr.args.map((arg)=>{
         const rendered=lowerV061ExprToLean(arg);
-        return arg.kind==='reference'||arg.kind==='nat'||arg.kind==='string'||arg.kind==='bool'||arg.kind==='unit'||arg.kind==='syntheticHole'
+        return arg.kind==='reference'||arg.kind==='nat'||arg.kind==='string'||arg.kind==='bool'||arg.kind==='unit'||arg.kind==='syntheticHole'||arg.kind==='group'
           ? rendered
           : '('+rendered+')';
       });

@@ -272,15 +272,32 @@ export function hasMVar(e: Expr): boolean {
 }
 
 export function instantiateExprLevels(e: Expr, params: readonly Name[], levels: readonly Level[]): Expr {
-  switch(e.kind){
-    case'sort':return {...e,level:instantiateLevel(e.level,params,levels)};
-    case'const':return {...e,levels:e.levels.map(l=>instantiateLevel(l,params,levels))};
-    case'app':return app(instantiateExprLevels(e.fn,params,levels),instantiateExprLevels(e.arg,params,levels));
-    case'lam':return {...e,type:instantiateExprLevels(e.type,params,levels),body:instantiateExprLevels(e.body,params,levels)};
-    case'forall':return {...e,type:instantiateExprLevels(e.type,params,levels),body:instantiateExprLevels(e.body,params,levels)};
-    case'let':return {...e,type:instantiateExprLevels(e.type,params,levels),value:instantiateExprLevels(e.value,params,levels),body:instantiateExprLevels(e.body,params,levels)};
-    case'mdata':return {...e,expr:instantiateExprLevels(e.expr,params,levels)}; case'proj':return {...e,expr:instantiateExprLevels(e.expr,params,levels)}; default:return e;
+  type Frame={e:Expr;done:boolean};
+  const todo:Frame[]=[{e,done:false}],out:Expr[]=[];
+  while(todo.length){
+    const f=todo.pop()!,x=f.e;
+    if(!f.done){
+      switch(x.kind){
+        case'sort':out.push({...x,level:instantiateLevel(x.level,params,levels)});break;
+        case'const':out.push({...x,levels:x.levels.map(l=>instantiateLevel(l,params,levels))});break;
+        case'app':todo.push({e:x,done:true},{e:x.arg,done:false},{e:x.fn,done:false});break;
+        case'lam':case'forall':todo.push({e:x,done:true},{e:x.body,done:false},{e:x.type,done:false});break;
+        case'let':todo.push({e:x,done:true},{e:x.body,done:false},{e:x.value,done:false},{e:x.type,done:false});break;
+        case'mdata':case'proj':todo.push({e:x,done:true},{e:x.expr,done:false});break;
+        default:out.push(x);break;
+      }
+      continue;
+    }
+    switch(x.kind){
+      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push({...x,fn,arg});break;}
+      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push({...x,type,body});break;}
+      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push({...x,type,value,body});break;}
+      case'mdata':case'proj':out.push({...x,expr:out.pop()!});break;
+      default:throw new Error('internal instantiateExprLevels frame');
+    }
   }
+  if(out.length!==1)throw new Error('internal instantiateExprLevels result');
+  return out[0]!;
 }
 
 export function exprKey(e: Expr): string {

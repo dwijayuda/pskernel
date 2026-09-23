@@ -166,7 +166,19 @@ export class Lean4ExportReplay {
     if(g.defs.size===g.all.length){const defs=g.all.map(n=>g!.defs.get(nameKey(n))).filter((x):x is DefinitionInfo=>x!==undefined);if(defs.length!==g.all.length)throw new KernelError('exported mutual definition group is inconsistent');this.kernel.addMutualDefinitions(defs);this.pendingMutual.delete(key);}
   }
   private exprUsesName(e:Expr,n:Name):boolean{
-    switch(e.kind){case'const':return nameEq(e.name,n);case'app':return this.exprUsesName(e.fn,n)||this.exprUsesName(e.arg,n);case'lam':case'forall':return this.exprUsesName(e.type,n)||this.exprUsesName(e.body,n);case'let':return this.exprUsesName(e.type,n)||this.exprUsesName(e.value,n)||this.exprUsesName(e.body,n);case'mdata':return this.exprUsesName(e.expr,n);case'proj':return this.exprUsesName(e.expr,n);default:return false;}
+    const todo:Expr[]=[e];
+    while(todo.length){
+      const x=todo.pop()!;
+      switch(x.kind){
+        case'const':if(nameEq(x.name,n))return true;break;
+        case'app':todo.push(x.arg,x.fn);break;
+        case'lam':case'forall':todo.push(x.body,x.type);break;
+        case'let':todo.push(x.body,x.value,x.type);break;
+        case'mdata':case'proj':todo.push(x.expr);break;
+        default:break;
+      }
+    }
+    return false;
   }
   private declarationRecord(o:JObject):void{
     if('axiom' in o){const a=asObject(o.axiom!,'axiom');this.kernel.addAxiom({kind:'axiom',name:this.n(asIndex(field(a,'name','axiom'),'axiom.name')),levelParams:this.ns(field(a,'levelParams','axiom'),'axiom.levelParams'),type:this.e(asIndex(field(a,'type','axiom'),'axiom.type')),isUnsafe:boolField(a,'isUnsafe','axiom')});return;}

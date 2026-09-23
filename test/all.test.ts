@@ -1,5 +1,5 @@
 import { Environment } from '../src/core/environment.js';
-import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
+import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, instantiateExprLevels, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
 import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelLe, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
 import { nameCmp, nameEq, nameFromDotted, nameKey, nameReplacePrefix, nameToString } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
@@ -58,6 +58,11 @@ test('deep structural traversals avoid the JavaScript call stack',()=>{
  const tcScan:any=new TypeChecker(baseEnv());assert(tcScan.containsFVar(withFVar,id),'checker-specific deep free-variable scan must be stack-safe');assert(!tcScan.containsFVar(withFVar,'other@0'));
  const abstracted=abstractFVar(withFVar,id);
  assert(abstracted.kind==='lam'&&!hasFVar(abstracted),'deep abstraction must be stack-safe and close the free variable');
+
+ const u=nameFromDotted('deep.level');let withLevel:any=sort(levelParam(u));
+ for(let i=0;i<12000;i++)withLevel=lam(nameFromDotted('x'),constant(N.Nat),withLevel);
+ const levelInst=instantiateExprLevels(withLevel,[u],[levelZero]);
+ assert(levelInst.kind==='lam','deep expression-level universe instantiation must be stack-safe');
 });
 test('universe metavariables remain distinct symbolic atoms',()=>{
  const n=nameFromDotted('u'),u=levelMVar(n),v=levelMVar(nameFromDotted('v')),p=levelParam(n);

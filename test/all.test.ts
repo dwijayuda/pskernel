@@ -97,6 +97,8 @@ test('deep structural universe equality is stack-safe',()=>{
  for(let i=0;i<20000;i++){a=levelSucc(a);b=levelSucc(b);}
  assert(levelEqStructural(a,b),'deep structural universe equality must not overflow the JavaScript stack');
  assert(levelEquivalent(a,b),'deep universe normalization/equivalence must not overflow the JavaScript stack');
+ const deepLevelExprKey=exprKey(sort(a));
+ assert(deepLevelExprKey.startsWith('Ss(')&&deepLevelExprKey.endsWith(')'.repeat(20000)),'expression keys must encode deep universe levels without recursive JSON serialization');
 
  const uN=nameFromDotted('deep.u');let p:any=levelParam(uN),m:any=levelMVar(nameFromDotted('deep.m'));
  for(let i=0;i<20000;i++){p=levelSucc(p);m=levelSucc(m);}

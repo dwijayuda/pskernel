@@ -383,7 +383,23 @@ export function instantiateExprLevels(e: Expr, params: readonly Name[], levels: 
 
 export function exprKey(e: Expr): string {
   type Frame={e:Expr;done:boolean};
-  const levelJson=(x:Level)=>JSON.stringify(x,(_k,v)=>typeof v==='bigint'?v.toString():v);
+  type LevelPart=Level|string;
+  const levelKey=(root:Level):string=>{
+    const todo:LevelPart[]=[root],parts:string[]=[];
+    while(todo.length){
+      const x=todo.pop()!;
+      if(typeof x==='string'){parts.push(x);continue;}
+      switch(x.kind){
+        case'zero':parts.push('z');break;
+        case'param':{const k=nameKey(x.name);parts.push(`p${k.length}:${k}`);break;}
+        case'mvar':{const k=nameKey(x.name);parts.push(`v${k.length}:${k}`);break;}
+        case'succ':parts.push('s(');todo.push(')',x.of);break;
+        case'max':parts.push('m(');todo.push(')',x.right,',',x.left);break;
+        case'imax':parts.push('i(');todo.push(')',x.right,',',x.left);break;
+      }
+    }
+    return parts.join('');
+  };
   const todo:Frame[]=[{e,done:false}],out:string[]=[];
   while(todo.length){
     const f=todo.pop()!,x=f.e;
@@ -392,8 +408,8 @@ export function exprKey(e: Expr): string {
         case'bvar':out.push(`b${x.index}`);break;
         case'fvar':out.push(`f${x.id}`);break;
         case'mvar':out.push(`?${x.id}`);break;
-        case'sort':out.push(`S${levelJson(x.level)}`);break;
-        case'const':out.push(`C${nameKey(x.name)}[${x.levels.map(levelJson).join(',')}]`);break;
+        case'sort':out.push(`S${levelKey(x.level)}`);break;
+        case'const':out.push(`C${nameKey(x.name)}[${x.levels.map(levelKey).join(',')}]`);break;
         case'lit':out.push(x.literal.kind==='nat'?`N${x.literal.value}`:`Q${JSON.stringify(x.literal.value)}`);break;
         case'app':todo.push({e:x,done:true},{e:x.arg,done:false},{e:x.fn,done:false});break;
         case'lam':case'forall':todo.push({e:x,done:true},{e:x.body,done:false},{e:x.type,done:false});break;

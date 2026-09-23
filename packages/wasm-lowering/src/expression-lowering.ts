@@ -11,9 +11,12 @@ import {
 import {
   expressionRuntimeType,
 } from './expression-type.js';
-import type {
-  RuntimeType,
-  Signature,
+import {
+  wasmResultType,
+  wasmValueType,
+  type RuntimeType,
+  type RuntimeValueType,
+  type Signature,
 } from './type-lowering.js';
 
 function requireType(
@@ -26,6 +29,26 @@ function requireType(
       'PS_WASM_TYPE_MISMATCH',
       label+' expected '+String(expected)+' but got '+String(actual),
     );
+  }
+}
+
+function lowerLocal(
+  name:string,
+  type:RuntimeValueType,
+):WasmIrExpr {
+  const local:WasmIrExpr={
+    kind:'local',
+    name,
+    type:wasmValueType(type),
+  };
+  switch(type){
+    case 'bool':
+      return {
+        kind:'i32.binary',
+        operation:'ne',
+        left:local,
+        right:{kind:'i32.const',value:0},
+      };
   }
 }
 
@@ -60,7 +83,7 @@ export function lowerRuntimeExpr(
           "runtime local '"+expr.name+"' is unavailable",
         );
       }
-      return {kind:'local',name:expr.name,type};
+      return lowerLocal(expr.name,type);
     }
 
     case 'intrinsic':
@@ -71,7 +94,7 @@ export function lowerRuntimeExpr(
             operation:'eqz',
             operand:lowerRuntimeExpr(
               expr.args[0]!,
-              'i32',
+              'bool',
               locals,
               signatures,
             ),
@@ -92,13 +115,13 @@ export function lowerRuntimeExpr(
             operation:operation[expr.operation],
             left:lowerRuntimeExpr(
               expr.args[0]!,
-              'i32',
+              'bool',
               locals,
               signatures,
             ),
             right:lowerRuntimeExpr(
               expr.args[1]!,
-              'i32',
+              'bool',
               locals,
               signatures,
             ),
@@ -143,7 +166,7 @@ export function lowerRuntimeExpr(
             signatures,
           )
         ),
-        result:signature.result,
+        result:wasmResultType(signature.result),
       };
     }
 
@@ -164,7 +187,7 @@ export function lowerRuntimeExpr(
       return {
         kind:'let',
         name:expr.name,
-        type:valueType,
+        type:wasmValueType(valueType),
         value:lowerRuntimeExpr(
           expr.value,
           valueType,
@@ -177,7 +200,7 @@ export function lowerRuntimeExpr(
           next,
           signatures,
         ),
-        result:expected,
+        result:wasmResultType(expected),
       };
     }
 
@@ -186,7 +209,7 @@ export function lowerRuntimeExpr(
         kind:'if',
         condition:lowerRuntimeExpr(
           expr.condition,
-          'i32',
+          'bool',
           locals,
           signatures,
         ),
@@ -202,7 +225,7 @@ export function lowerRuntimeExpr(
           locals,
           signatures,
         ),
-        result:expected,
+        result:wasmResultType(expected),
       };
 
     case 'lambda':

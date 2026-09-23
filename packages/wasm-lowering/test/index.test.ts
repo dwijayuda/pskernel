@@ -25,7 +25,15 @@ const boolModule:VerifiedIrModule={
 
 const lowered=lowerVerifiedIrToWasm(boolModule);
 equal(lowered.functions[0]?.name,'not');
+equal(lowered.functions[0]?.parameters[0]?.type,'i32');
 equal(lowered.functions[0]?.result,'i32');
+equal(lowered.functions[0]?.body.kind,'i32.unary');
+if(lowered.functions[0]?.body.kind==='i32.unary'){
+  equal(lowered.functions[0].body.operand.kind,'i32.binary');
+  if(lowered.functions[0].body.operand.kind==='i32.binary'){
+    equal(lowered.functions[0].body.operand.operation,'ne');
+  }
+}
 
 throws(
   ()=>lowerVerifiedIrToWasm({
@@ -46,7 +54,7 @@ throws(
     error.code==='PS_WASM_UNSUPPORTED_NAT_RUNTIME',
 );
 
-console.log('ok - @proofscript/wasm-lowering W1 fail-closed lowering');
+console.log('ok - @proofscript/wasm-lowering W1 semantic Bool lowering');
 
 throws(
   ()=>lowerVerifiedIrToWasm({

@@ -16,7 +16,7 @@ export function expressionRuntimeType(
 ):RuntimeType {
   switch(expr.kind){
     case 'literal':
-      if(typeof expr.value==='boolean')return 'i32';
+      if(typeof expr.value==='boolean')return 'bool';
       if(expr.value===undefined)return null;
       if(typeof expr.value==='bigint'){
         return unsupported(
@@ -45,7 +45,7 @@ export function expressionRuntimeType(
     }
 
     case 'intrinsic':
-      if(expr.operation.startsWith('bool.'))return 'i32';
+      if(expr.operation.startsWith('bool.'))return 'bool';
       return unsupported(
         'PS_WASM_UNSUPPORTED_INTRINSIC',
         "intrinsic '"+expr.operation+"' is not supported in W1",

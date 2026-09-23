@@ -10,6 +10,8 @@ import {unsupported} from './errors.js';
 import {lowerRuntimeExpr} from './expression-lowering.js';
 import {
   signatureOf,
+  wasmResultType,
+  wasmValueType,
   type RuntimeType,
   type Signature,
 } from './type-lowering.js';
@@ -19,6 +21,8 @@ export {
 } from './errors.js';
 export {
   lowerRuntimeType,
+  wasmResultType,
+  wasmValueType,
 } from './type-lowering.js';
 
 export const PROOFSCRIPT_WASM_PROFILE=
@@ -59,14 +63,17 @@ export function lowerVerifiedIrToWasm(
         (parameter,index)=>{
           const type=signature.parameters[index]!;
           locals.set(parameter.name,type);
-          return {name:parameter.name,type};
+          return {
+            name:parameter.name,
+            type:wasmValueType(type),
+          };
         },
       );
 
       return {
         name:declaration.name,
         parameters,
-        result:signature.result,
+        result:wasmResultType(signature.result),
         exportName:declaration.name,
         body:lowerRuntimeExpr(
           declaration.body,

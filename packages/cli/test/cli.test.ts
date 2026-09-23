@@ -1095,6 +1095,65 @@ console.log('ok - psc mixed Lean -> ProofScript import run');
 
 {
   const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-mixed-imported-metadata-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Core.ps'),
+      'structure Box(α : Type) where { value : α; } '+
+      'class Boxed(α : Type) where { value : α; } '+
+      'instance boxedNat : Boxed(Nat) := { value := 7 : Boxed(Nat) };\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'import Core\n'+
+      'def make (x : Nat) : Box Nat := { value := x : Box Nat }\n'+
+      'def unwrap (box : Box Nat) : Nat := box.value\n'+
+      'def get {α : Type} [inst : Boxed α] (x : α) : α := inst.value\n'+
+      'def read (x : Nat) : Nat := get x\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\n'+
+      'function main(x : Nat) : Nat := read(unwrap(make(x)));\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['21'],
+    });
+    equal(result.mainResult,'7');
+    equal(
+      (result.moduleOrder as readonly string[]).join(','),
+      'Core,Data,main',
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc mixed imports preserve structure/class/instance metadata');
+
+{
+  const directory=await mkdtemp(
     join(tmpdir(),'proofscript-mixed-ambiguity-'),
   );
   try{

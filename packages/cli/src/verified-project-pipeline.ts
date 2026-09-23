@@ -53,13 +53,14 @@ export function checkVerifiedSourceProject(
       .flatMap((candidate)=>[
         ...(localAdmissions.get(candidate)??[]),
       ]);
-    const dependencyEnvironment=admitCheckedCoreAdmissions(
+    const dependencyChecked=admitCheckedCoreAdmissions(
       base,
       dependencyAdmissions,
-    ).environment;
+    );
     const checked=elaborateV061Declarations(
       source.surface,
-      dependencyEnvironment,
+      dependencyChecked.environment,
+      dependencyChecked,
     );
     localAdmissions.set(name,checked.admissions);
   }

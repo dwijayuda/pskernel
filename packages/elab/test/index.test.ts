@@ -1181,3 +1181,32 @@ console.log('ok - @proofscript/elab local class instance synthesis');
   equal(result.environment.find(nameFromDotted('boxedNat'))?.kind,'definition');
 }
 console.log('ok - @proofscript/elab global class instance synthesis');
+
+{
+  const env=makeNatNotationEnvironment();
+  const dependency=elaborateV061Declarations(parseV061Module(
+    'structure Box(α : Type) where { value : α; } '+
+    'class Boxed(α : Type) where { value : α; } '+
+    'instance boxedNat : Boxed(Nat) := { value := 7 : Boxed(Nat) };',
+  ),env);
+  const result=elaborateV061Declarations(parseV061Module(
+    'function make(x : Nat) : Box(Nat) := { value := x : Box(Nat) }; '+
+    'function unwrap(box : Box(Nat)) : Nat := box.value; '+
+    'function get {α : Type}[inst : Boxed(α)](x : α) : α := inst.value; '+
+    'function read(x : Nat) : Nat := get(x);',
+  ),dependency.environment,dependency);
+  equal(result.definitions.length,4);
+  equal(
+    result.definitions.some((item)=>
+      item.name.kind==='str'&&item.name.value==='unwrap'
+    ),
+    true,
+  );
+  equal(
+    result.definitions.some((item)=>
+      item.name.kind==='str'&&item.name.value==='read'
+    ),
+    true,
+  );
+}
+console.log('ok - @proofscript/elab imported structure/class/instance metadata seed');

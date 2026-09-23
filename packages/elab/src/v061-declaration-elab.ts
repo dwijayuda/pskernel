@@ -7,6 +7,7 @@ import {
   type DefinitionInfo,
   type Expr,
   type TheoremInfo,
+  nameToString,
 } from 'lean-ts-kernel';
 import {
   admitCheckedCoreAdmissions,
@@ -30,16 +31,34 @@ function declarationFailure(
 
 export type ElaboratedV061Module=CheckedCoreModule;
 
+export type V061ElaborationSeed=Pick<
+  CheckedCoreModule,
+  'structures'|'classes'|'instances'
+>;
+
+const EMPTY_V061_ELABORATION_SEED:V061ElaborationSeed={
+  structures:[],
+  classes:[],
+  instances:[],
+};
+
 export function elaborateV061Definitions(
   module:V061Module,
   environment=new Environment(),
+  seed:V061ElaborationSeed=EMPTY_V061_ELABORATION_SEED,
 ):ElaboratedV061Module {
   const baseEnvironment=environment.clone();
   const workEnvironment=environment.clone();
   const admissions:CheckedCoreAdmission[]=[];
-  const structures=new Map<string,CheckedCoreStructure>();
-  const classes=new Set<string>();
-  const globalInstances:Expr[]=[];
+  const structures=new Map<string,CheckedCoreStructure>(
+    seed.structures.map((item)=>[nameToString(item.name),item]),
+  );
+  const classes=new Set<string>(
+    seed.classes.map((item)=>nameToString(item.name)),
+  );
+  const globalInstances:Expr[]=[
+    ...seed.instances,
+  ].reverse().map((item)=>constant(item.name));
   const kernel=new Kernel(workEnvironment);
 
   for(const declaration of module.declarations){

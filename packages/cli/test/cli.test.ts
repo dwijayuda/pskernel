@@ -562,6 +562,34 @@ console.log('ok - psc runtime lock rejects missing required transitive entry');
       passthrough:['false'],
     });
     equal(runFalse.mainResult,true);
+
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : UInt32) : UInt32 := x;\n',
+      'utf8',
+    );
+    const runUInt32=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:['4294967295'],
+    });
+    equal(runUInt32.mainResult,4294967295);
+
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : UInt64) : UInt64 := x;\n',
+      'utf8',
+    );
+    const runUInt64=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:['18446744073709551615'],
+    });
+    equal(runUInt64.mainResult,'18446744073709551615');
   }finally{
     await rm(directory,{recursive:true,force:true});
   }

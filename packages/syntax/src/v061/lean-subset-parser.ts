@@ -9,6 +9,7 @@ import {parseV061LeanSubsetDeclaration} from './lean-subset-declaration-parser.j
 import {parseV061ParameterSequence} from './parameter-parser.js';
 import {parseV061Type} from './type-parser.js';
 import {parseV061LeanSubsetWhereDeclarations} from './lean-subset-where-parser.js';
+import {parseV061ModuleImports} from './module-import-parser.js';
 
 export class V061LeanSubsetParser {
   readonly context:V061ParseContext;
@@ -20,12 +21,17 @@ export class V061LeanSubsetParser {
   }
 
   parseModule():V061Module {
+    const imports=parseV061ModuleImports(this.context,{
+      allowSemicolon:false,
+      owner:'Lean subset',
+    });
     const declarations:V061Declaration[]=[];
     while(!this.context.cursor.done){
       declarations.push(this.parseDeclaration());
     }
     return {
       kind:'v061-module',
+      ...(imports.length===0?{}:{imports}),
       declarations,
       featureIds:[...this.context.features],
     };

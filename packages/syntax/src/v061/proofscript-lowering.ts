@@ -147,8 +147,13 @@ function lowerDeclaration(decl:V061Declaration):string {
 export function lowerV061ModuleToProofScript(
   module:V061Module,
 ):string {
-  return module.declarations.map(lowerDeclaration).join('
-
-')+'
-';
+  const imports=(module.imports??[])
+    .map((name)=>'import '+name)
+    .join('\n');
+  const declarations=module.declarations
+    .map(lowerDeclaration)
+    .join('\n\n');
+  const sections=[imports,declarations]
+    .filter((section)=>section.length>0);
+  return sections.length===0?'':sections.join('\n\n')+'\n';
 }

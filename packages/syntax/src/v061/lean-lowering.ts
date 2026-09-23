@@ -110,7 +110,7 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
 }
 
 export function lowerV061ModuleToLean(module:V061Module):string {
-  return module.declarations.map((decl)=>{
+  const declarations=module.declarations.map((decl)=>{
     if(decl.kind==='structure'){
       const params=decl.params.map(
         (param)=>' '+lowerV061ParameterToLean(param),
@@ -166,5 +166,11 @@ export function lowerV061ModuleToLean(module:V061Module):string {
         lowerV061ExprToLean(local.body);
     }).join('\n');
     return base+' where\n'+locals;
-  }).join('\n\n')+'\n';
+  }).join('\n\n');
+  const imports=(module.imports??[])
+    .map((name)=>'import '+name)
+    .join('\n');
+  const sections=[imports,declarations]
+    .filter((section)=>section.length>0);
+  return sections.length===0?'':sections.join('\n\n')+'\n';
 }

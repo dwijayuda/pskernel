@@ -191,6 +191,7 @@ export type V061Declaration=
 
 export interface V061Module {
   readonly kind:'v061-module';
+  readonly imports?:readonly string[];
   readonly declarations:readonly V061Declaration[];
   readonly featureIds:readonly ProofScriptFeatureId[];
 }

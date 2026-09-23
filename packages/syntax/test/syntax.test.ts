@@ -25,7 +25,6 @@ import {
   createDefaultTranslationTargetPrinterRegistry,
   parseV061LeanSubsetModule,
   leanSubsetSourceFrontend,
-  type SourceFrontend,
 } from '../src/index.js';
 
 function assert(condition: unknown, message = 'assertion failed'): asserts condition {
@@ -60,25 +59,54 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
 
   const registry=createDefaultSourceFrontendRegistry();
   equal(registry.forFile('main.ps').kind,'proofscript');
+  equal(registry.forFile('Main.lean').kind,'lean-subset');
   equal(
-    registry.forFile('main.ps').parse('def id(x : Nat) : Nat := x;').declarations.length,
+    registry.forFile('main.ps')
+      .parse('def id(x : Nat) : Nat := x;')
+      .declarations.length,
     1,
   );
   throws(
-    ()=>registry.forFile('Main.lean'),
-    /PS_FRONTEND_UNAVAILABLE/,
+    ()=>registry.register(leanSubsetSourceFrontend),
+    /PS_FRONTEND_DUPLICATE/,
+  );
+}
+
+
+{
+  const ps=parseV061Module(
+    'import Data.Core\nimport Logic\n'+
+    'def use(x : Nat) : Nat := x;',
+  );
+  equal(ps.imports?.join(','),'Data.Core,Logic');
+  equal(
+    lowerV061ModuleToProofScript(ps),
+    'import Data.Core\nimport Logic\n\ndef use(x : Nat) : Nat := x;\n',
+  );
+  equal(
+    lowerV061ModuleToLean(ps),
+    'import Data.Core\nimport Logic\n\ndef use (x : Nat) : Nat := x\n',
   );
 
-  const leanStub:SourceFrontend={
-    kind:'lean-subset',
-    parse:parseV061Module,
-    print:lowerV061ModuleToProofScript,
-  };
-  registry.register(leanStub);
-  equal(registry.forFile('Main.lean'),leanStub);
+  const lean=parseV061LeanSubsetModule(
+    'import Data.Core\nimport Logic\n\ndef use (x : Nat) : Nat := x\n',
+  );
+  equal(lean.imports?.join(','),'Data.Core,Logic');
+  equal(lowerV061ModuleToLean(lean),lowerV061ModuleToLean(ps));
+  equal(
+    lowerV061ModuleToProofScript(lean),
+    lowerV061ModuleToProofScript(ps),
+  );
+
   throws(
-    ()=>registry.register(leanStub),
-    /PS_FRONTEND_DUPLICATE/,
+    ()=>parseV061LeanSubsetModule(
+      'import Data.Core;\ndef x : Nat := 0\n',
+    ),
+    /PS_LEAN_SUBSET_IMPORT_SEMICOLON/,
+  );
+  throws(
+    ()=>parseV061Module('import Data Core\ndef x : Nat := 0;'),
+    /PS_MODULE_IMPORT_FORM/,
   );
 }
 

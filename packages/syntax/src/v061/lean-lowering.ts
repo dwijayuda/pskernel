@@ -3,6 +3,17 @@ import {v061BinaryPrecedence} from './operators.js';
 import {lowerV061TypeToLean} from './type-parser.js';
 import {lowerV061PatternToLean} from './pattern-parser.js';
 
+function lowerV061FieldToLean(
+  field:import('./ast.js').V061StructureField,
+):string {
+  const rendered=field.name+' : '+lowerV061TypeToLean(field.type);
+  switch(field.binderKind){
+    case 'explicit':return '  '+rendered;
+    case 'implicit':return '  {'+rendered+'}';
+    case 'instance':return '  ['+rendered+']';
+  }
+}
+
 function precedence(expr:V061Expr):number {
   return expr.kind==='binary'?(v061BinaryPrecedence(expr.operator)??0):8;
 }
@@ -62,24 +73,14 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
 export function lowerV061ModuleToLean(module:V061Module):string {
   return module.declarations.map((decl)=>{
     if(decl.kind==='structure'){
-      const fields=decl.fields.map((field)=>{
-        const rendered=field.name+' : '+lowerV061TypeToLean(field.type);
-        return field.binderKind==='implicit'
-          ? '  {'+rendered+'}'
-          : '  '+rendered;
-      }).join('\n');
+      const fields=decl.fields.map(lowerV061FieldToLean).join('\n');
       return 'structure '+decl.name+' where\n'+fields;
     }
     if(decl.kind==='class'){
       const params=decl.params.map(
         (param)=>' ('+param.name+' : '+lowerV061TypeToLean(param.type)+')',
       ).join('');
-      const fields=decl.fields.map((field)=>{
-        const rendered=field.name+' : '+lowerV061TypeToLean(field.type);
-        return field.binderKind==='implicit'
-          ? '  {'+rendered+'}'
-          : '  '+rendered;
-      }).join('\n');
+      const fields=decl.fields.map(lowerV061FieldToLean).join('\n');
       return 'class '+decl.name+params+' where\n'+fields;
     }
     if(decl.kind==='inductive'){

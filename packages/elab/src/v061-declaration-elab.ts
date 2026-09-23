@@ -30,6 +30,34 @@ import {
   elaborateV061Term,
 } from './v061-term-elab.js';
 
+
+function withStructuralRecursion(
+  source:V061ValueDeclaration,
+  context:import('./v061-context.js').V061CoreElabContext,
+):import('./v061-context.js').V061CoreElabContext {
+  if(
+    source.kind==='theorem'
+    ||source.body.kind!=='match'
+    ||source.body.scrutinee.kind!=='reference'
+  )return context;
+
+  const explicit=source.params.filter(
+    (parameter)=>(parameter.binderInfo??'default')==='default',
+  );
+  if(
+    explicit.length!==1
+    ||explicit[0]!.name!==source.body.scrutinee.name
+  )return context;
+
+  return {
+    ...context,
+    structuralRecursion:{
+      functionName:source.name,
+      calls:new Map(),
+    },
+  };
+}
+
 function maxRegularHeight(environment:Environment,expr:Expr):bigint {
   let max=0n;
   const visit=(value:Expr):void=>{
@@ -89,8 +117,13 @@ function elaborateValueDeclaration(
   const parameters=header.parameters;
   const resultType=header.resultType;
 
-  const body=elaborateV061Term(source.body,context,resultType);
-  checkElaboratedTerm(body,resultType,context);
+  const bodyContext=withStructuralRecursion(source,context);
+  const body=elaborateV061Term(
+    source.body,
+    bodyContext,
+    resultType,
+  );
+  checkElaboratedTerm(body,resultType,bodyContext);
   context.metaContext.validateGroundAssignments();
   let value=context.metaContext.instantiate(body.term);
   let type=context.metaContext.instantiate(resultType);

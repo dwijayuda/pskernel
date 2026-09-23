@@ -6,12 +6,18 @@ import {
 import type {CheckedCoreStructure} from '@proofscript/checked-core';
 import {ExprMetaContext} from '@proofscript/meta';
 
+export interface V061StructuralRecursion {
+  readonly functionName:string;
+  readonly calls:ReadonlyMap<string,string>;
+}
+
 export interface V061CoreElabContext {
   readonly environment:Environment;
   readonly localContext:LocalContext;
   readonly locals:ReadonlyMap<string,string>;
   readonly metaContext:ExprMetaContext;
   readonly structures:ReadonlyMap<string,CheckedCoreStructure>;
+  readonly structuralRecursion?:V061StructuralRecursion;
 }
 
 export function withLocalName(

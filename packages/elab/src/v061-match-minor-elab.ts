@@ -168,19 +168,47 @@ export function elaborateV061MatchMinor(
     cursor=instantiate1(binder.body,fvar(id));
   }
 
+  const recursiveFields=fields.filter((field)=>field.recursive);
+  const inductionHypotheses:{
+    readonly id:string;
+    readonly name:Name;
+    readonly type:Expr;
+  }[]=[];
+  for(let index=0;index<recursiveFields.length;index+=1){
+    const field=recursiveFields[index]!;
+    const localContext=branchContext.localContext.clone();
+    const name=nameFromDotted('_ih_'+nameToString(field.name));
+    const id=localContext.fresh(nameToString(name));
+    localContext.addLocal(id,name,expected,'default');
+
+    let structuralRecursion=branchContext.structuralRecursion;
+    if(structuralRecursion!==undefined){
+      const calls=new Map(structuralRecursion.calls);
+      calls.set(field.id,id);
+      structuralRecursion={...structuralRecursion,calls};
+    }
+    branchContext={
+      ...branchContext,
+      localContext,
+      ...(structuralRecursion===undefined
+        ?{}
+        :{structuralRecursion}),
+    };
+    inductionHypotheses.push({id,name,type:expected});
+  }
+
   const branch=elaborate(
     alternative.body,
     branchContext,
     expected,
   );
   let result=branch.term;
-  const recursiveFields=fields.filter((field)=>field.recursive);
-  for(let index=recursiveFields.length-1;index>=0;index-=1){
-    const field=recursiveFields[index]!;
+  for(let index=inductionHypotheses.length-1;index>=0;index-=1){
+    const ih=inductionHypotheses[index]!;
     result=lam(
-      nameFromDotted('_ih_'+nameToString(field.name)),
-      expected,
-      result,
+      ih.name,
+      ih.type,
+      abstractFVar(result,ih.id),
       'default',
     );
   }

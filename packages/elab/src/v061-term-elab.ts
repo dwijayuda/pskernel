@@ -27,6 +27,64 @@ import {elaborateV061Record} from './v061-structure-term-elab.js';
 import {tryElaborateV061ProjectionReference} from './v061-reference-elab.js';
 import {elaborateV061MatchExpression} from './v061-match-elab.js';
 
+
+function structuralArgumentName(expr:V061Expr):string|undefined {
+  if(expr.kind==='reference')return expr.name;
+  if(expr.kind==='group')return structuralArgumentName(expr.value);
+  return undefined;
+}
+
+function tryElaborateStructuralSelfCall(
+  expr:Extract<V061Expr,{kind:'call'}>,
+  context:V061CoreElabContext,
+  expected:import('lean-ts-kernel').Expr|undefined,
+):ElaboratedCoreTerm|undefined {
+  const recursion=context.structuralRecursion;
+  if(recursion===undefined||expr.callee!==recursion.functionName){
+    return undefined;
+  }
+  if(expr.args.length!==1){
+    throw new Error(
+      'PS_ELAB_STRUCTURAL_RECURSION_ARITY: recursive call must have exactly one explicit decreasing argument',
+    );
+  }
+  const argumentName=structuralArgumentName(expr.args[0]!);
+  if(argumentName===undefined){
+    throw new Error(
+      'PS_ELAB_STRUCTURAL_RECURSION_ARGUMENT: recursive call must target a directly bound recursive field',
+    );
+  }
+  const argumentId=context.locals.get(argumentName);
+  const ihId=argumentId===undefined
+    ?undefined
+    :recursion.calls.get(argumentId);
+  if(ihId===undefined){
+    throw new Error(
+      "PS_ELAB_STRUCTURAL_RECURSION_NOT_DECREASING: recursive call '"+
+      expr.callee+"("+argumentName+")' is not on a direct recursive field",
+    );
+  }
+
+  const checker=new TypeChecker(
+    context.environment,
+    context.localContext.clone(),
+  );
+  const term=fvar(ihId);
+  const type=checker.check(term);
+  if(
+    expected!==undefined
+    &&!checker.isDefEq(
+      context.metaContext.instantiate(type),
+      context.metaContext.instantiate(expected),
+    )
+  ){
+    throw new Error(
+      'PS_ELAB_STRUCTURAL_RECURSION_RESULT: induction hypothesis does not match expected result type',
+    );
+  }
+  return {term,type};
+}
+
 function resolveReference(
   name:string,
   context:V061CoreElabContext,
@@ -102,6 +160,12 @@ export function elaborateV061Term(
       return {term,type:checker.check(term)};
     }
     case 'call':{
+      const recursive=tryElaborateStructuralSelfCall(
+        expr,
+        context,
+        expected,
+      );
+      if(recursive!==undefined)return recursive;
       const fn=resolveReference(expr.callee,context);
       const args=expr.args.map(
         (arg)=>elaborateV061Term(arg,context).term,

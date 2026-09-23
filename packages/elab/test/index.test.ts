@@ -715,3 +715,82 @@ console.log('ok - @proofscript/elab parameterized verified match recursor elabor
   equal(headOr?.kind,'definition');
 }
 console.log('ok - @proofscript/elab direct recursive inductive + recursor match');
+
+
+function containsNamedConstant(
+  expr:import('lean-ts-kernel').Expr,
+  name:string,
+):boolean {
+  switch(expr.kind){
+    case 'const':
+      return expr.name.kind==='str'&&
+        (expr.name.value===name||containsNamePrefix(expr.name,name));
+    case 'app':
+      return containsNamedConstant(expr.fn,name)
+        ||containsNamedConstant(expr.arg,name);
+    case 'lam':
+    case 'forall':
+      return containsNamedConstant(expr.type,name)
+        ||containsNamedConstant(expr.body,name);
+    case 'let':
+      return containsNamedConstant(expr.type,name)
+        ||containsNamedConstant(expr.value,name)
+        ||containsNamedConstant(expr.body,name);
+    case 'mdata':
+    case 'proj':
+      return containsNamedConstant(expr.expr,name);
+    default:
+      return false;
+  }
+}
+function containsNamePrefix(
+  name:import('lean-ts-kernel').Name,
+  expected:string,
+):boolean {
+  const parts:string[]=[];
+  let cursor=name;
+  while(cursor.kind!=='anonymous'){
+    if(cursor.kind==='str'){
+      parts.push(cursor.value);
+      cursor=cursor.prefix;
+    }else{
+      parts.push(String(cursor.value));
+      cursor=cursor.prefix;
+    }
+  }
+  return parts.reverse().join('.')===expected;
+}
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive PsList(α : Type) where { '+
+    '| nil; | cons(head : α, tail : PsList(α)); } '+
+    'function length {α : Type}(xs : PsList(α)) : Nat := '+
+    'match xs with { | .nil => 0; | .cons head tail => 1 + length(tail); };',
+  ),env);
+  const length=result.definitions.find(
+    (item)=>containsNamePrefix(item.name,'length'),
+  );
+  equal(length?.kind,'definition');
+  if(length?.kind==='definition'){
+    equal(containsNamedConstant(length.value,'PsList.rec'),true);
+    equal(containsNamedConstant(length.value,'length'),false);
+  }
+}
+{
+  const env=makeNatNotationEnvironment();
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'inductive PsList(α : Type) where { '+
+      '| nil; | cons(head : α, tail : PsList(α)); } '+
+      'function bad {α : Type}(xs : PsList(α)) : Nat := '+
+      'match xs with { | .nil => 0; | .cons head tail => bad(xs); };',
+    ),env);
+  }catch(error){
+    rejected=/PS_ELAB_STRUCTURAL_RECURSION_NOT_DECREASING/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab structural recursion via recursor');

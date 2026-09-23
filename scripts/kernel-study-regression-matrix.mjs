@@ -8,7 +8,7 @@ function walk(dir){
   for(const name of readdirSync(dir)){
     const p=join(dir,name),s=statSync(p);
     if(s.isDirectory())out.push(...walk(p));
-    else if(/^kernel.*\.lean$/.test(name))out.push(p.replaceAll('\\\\','/'));
+    else if(/^kernel.*\.lean$/.test(name))out.push(p.replaceAll('\\','/'));
   }
   return out;
 }

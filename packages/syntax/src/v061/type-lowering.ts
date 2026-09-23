@@ -20,6 +20,8 @@ function leanTypeTermBinaryPrecedence(operator:string):number {
       return 35;
     case '||':
       return 30;
+    default:
+      throw new Error('unsupported type binary operator '+operator);
   }
 }
 

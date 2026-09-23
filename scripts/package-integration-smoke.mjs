@@ -18,6 +18,8 @@ import {
   checkVerifiedSource,
   compileVerifiedSource,
 } from '../packages/cli/dist/src/verified-pipeline.js';
+import {runCommand} from '../packages/cli/dist/src/commands/run.js';
+import {fileURLToPath} from 'node:url';
 import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
@@ -928,3 +930,43 @@ assert(
   verifiedExternalTs.includes('return hostInc(x);'),
   'source external call did not survive verified TypeScript emission',
 );
+
+
+const stdlibDirectory=fileURLToPath(
+  new URL('../stdlib/',import.meta.url),
+);
+const stdlibRun=await runCommand({
+  project:stdlibDirectory,
+  json:true,
+  verified:true,
+  passthrough:['9'],
+});
+assert(
+  stdlibRun.mainResult==='12',
+  'ProofScript-written stdlib dogfood program did not return 12',
+);
+assert(
+  stdlibRun.moduleCount===4,
+  'ProofScript-written stdlib project did not load four modules',
+);
+const stdlibModules=new Set(stdlibRun.moduleOrder);
+for(const moduleName of [
+  'ProofScript.Data.Option',
+  'ProofScript.Data.Result',
+  'ProofScript.Data.List',
+  'main',
+]){
+  assert(
+    stdlibModules.has(moduleName),
+    'ProofScript-written stdlib project missed module '+moduleName,
+  );
+}
+assert(
+  stdlibRun.assurance?.kernelCheckedTheoremCount===3,
+  'ProofScript-written stdlib theorems were not admitted by pskernel',
+);
+assert(
+  stdlibRun.assurance?.runtimeAssumptionCount===0,
+  'ProofScript-written stdlib unexpectedly depends on runtime externals',
+);
+

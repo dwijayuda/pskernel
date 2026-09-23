@@ -588,6 +588,20 @@ test('Quot bootstrap requires exact Eq shape and lift reduces',()=>{
 test('Quot bootstrap fails closed on malformed Eq',()=>{const env=baseEnv();env.add({kind:'axiom',name:N.Eq,levelParams:[],type:sort(levelSucc(levelZero))});throws(()=>addQuot(env));assert(!env.quotInitialized);});
 
 
+test('Quot recursors reject over-applied Quot.mk majors',()=>{
+ const env=baseEnv(),one=levelSucc(levelZero);
+ // Reduction only depends on quotient initialization and the primitive names; use
+ // compact declarations here to exercise malformed reduction directly.
+ env.quotInitialized=true;
+ const alpha=constant(N.Nat),rel=lam(nameFromDotted('a'),alpha,lam(nameFromDotted('b'),alpha,sort(levelZero)));
+ const q=mkAppN(constant(N.QuotMk,[one]),[alpha,rel,natLit(3),natLit(99)]);
+ const lift=mkAppN(constant(N.QuotLift,[one,one]),[alpha,rel,alpha,lam(nameFromDotted('x'),alpha,bvar(0)),constant(N.BoolTrue),q]);
+ const ind=mkAppN(constant(N.QuotInd,[one]),[alpha,rel,lam(nameFromDotted('_'),alpha,sort(levelZero)),lam(nameFromDotted('x'),alpha,constant(N.BoolTrue)),q]);
+ const tc=new TypeChecker(env);
+ eqExpr(tc.whnf(lift),lift,'Quot.lift must not reduce an over-applied Quot.mk');
+ eqExpr(tc.whnf(ind),ind,'Quot.ind must not reduce an over-applied Quot.mk');
+});
+
 test('Quot bootstrap rejects occupied primitive names without overwriting them',()=>{
  const env=baseEnv(),uN=nameFromDotted('u'),u=levelParam(uN),anon=nameFromDotted('_');const arrow=(a:any,b:any)=>forallE(anon,a,b);
  const eqTy=forallE(nameFromDotted('α'),sort(u),arrow(bvar(0),arrow(bvar(1),sort(levelZero))),'implicit');

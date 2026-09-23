@@ -6,7 +6,7 @@ import {
   nameFromDotted,
   sort,
 } from 'lean-ts-kernel';
-import {admitCheckedCoreModule} from '../src/index.js';
+import {admitCheckedCoreAdmissions,admitCheckedCoreModule} from '../src/index.js';
 
 function equal(actual:unknown,expected:unknown):void {
   if(actual!==expected){
@@ -64,3 +64,48 @@ function equal(actual:unknown,expected:unknown):void {
   equal(rejected,true);
 }
 console.log('ok - @proofscript/checked-core kernel admission boundary');
+
+
+{
+  const Box=nameFromDotted('Box');
+  const mk=nameFromDotted('Box.mk');
+  const Nat=nameFromDotted('Nat');
+  const base=new Environment();
+  base.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const checked=admitCheckedCoreAdmissions(base,[{
+    kind:'inductive',
+    declaration:{
+      levelParams:[],
+      numParams:0,
+      types:[{
+        name:Box,
+        type:sort(levelSucc(levelZero)),
+        ctors:[{
+          name:mk,
+          type:{
+            kind:'forall',
+            name:nameFromDotted('value'),
+            type:constant(Nat),
+            body:constant(Box),
+            binderInfo:'default',
+          },
+        }],
+      }],
+    },
+  }]);
+  equal(checked.inductiveDeclarations.length,1);
+  equal(checked.inductives.length,1);
+  equal(checked.environment.find(Box)?.kind,'inductive');
+  equal(checked.environment.find(mk)?.kind,'constructor');
+  equal(
+    checked.environment.find(nameFromDotted('Box.rec'))?.kind,
+    'recursor',
+  );
+  equal(base.find(Box),undefined);
+}
+console.log('ok - @proofscript/checked-core mixed inductive admission');

@@ -152,13 +152,14 @@
       "path": "packages/checked-core",
       "phase": "B",
       "trust": "untrusted-boundary",
-      "status": "kernel-admitted-core-mvp",
+      "status": "kernel-admitted-mixed-core-mvp",
       "packageName": "@proofscript/checked-core",
       "dependsOn": [
         "kernel"
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Checked core now replays constants and inductive declarations in admission order; inductive families are admitted by pskernel's Lean-style inductive checker.",
         "Checked core is the single semantic boundary between elaboration and compilation.",
         "A CheckedCoreModule is constructed only by replaying declarations through pskernel into a cloned base environment.",
         "Compiler/erasure/editor layers may consume checked core but cannot bypass kernel admission or mutate the kernel TCB."
@@ -187,7 +188,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-nat-ite+notation+intro-tactic-elab-mvp",
+      "status": "v061-structure+nat-ite+notation+intro-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -199,6 +200,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Non-parameterized v0.6.1 structures elaborate to genuine single-constructor kernel inductives with generated constructor/recursor metadata. Dependent later fields may reference earlier fields.",
+        "Record literals and projections remain a separate later term-elaboration/erasure milestone; structure declaration support does not imply TS-only record semantics.",
         "Verified braced if now follows Lean ite semantics for the bounded Nat relation subset: condition is a Prop built with LE.le/LT.lt plus instLENat/instLTNat, and Nat.decLe/Nat.decLt supplies the checked Decidable witness.",
         "The runtime compiler erases the checked proposition/decider and lowers the already-validated Nat relation to a boolean host condition; the frontend does not reinterpret if as Bool.",
         "The bounded verified notation subset maps Nat +, -, and * directly to the real Lean constants Nat.add, Nat.sub, and Nat.mul after requiring Nat operands/results. Other operators remain fail-closed until general typeclass notation elaboration.",

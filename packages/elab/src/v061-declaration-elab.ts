@@ -5,6 +5,7 @@ import type {
 import {
   Environment,
   Kernel,
+  addInductive,
   type DefinitionInfo,
   type TheoremInfo,
   type Expr,
@@ -16,10 +17,12 @@ import {
   nameFromDotted,
 } from 'lean-ts-kernel';
 import {
-  admitCheckedCoreModule,
+  admitCheckedCoreAdmissions,
+  type CheckedCoreAdmission,
   type CheckedCoreModule,
 } from '@proofscript/checked-core';
 import {elaborateV061ValueHeader} from './v061-header-elab.js';
+import {elaborateV061StructureDeclaration} from './v061-structure-elab.js';
 import {
   checkElaboratedTerm,
   elaborateV061Term,
@@ -138,15 +141,28 @@ export function elaborateV061Definitions(
 ):ElaboratedV061Module {
   const baseEnvironment=environment.clone();
   const workEnvironment=environment.clone();
-  const declarations:(DefinitionInfo|TheoremInfo)[]=[];
+  const admissions:CheckedCoreAdmission[]=[];
   const kernel=new Kernel(workEnvironment);
 
   for(const declaration of module.declarations){
-    if(
-      declaration.kind==='structure'
-      ||declaration.kind==='class'
-      ||declaration.kind==='inductive'
-    ){
+    if(declaration.kind==='structure'){
+      let inductive;
+      try{
+        inductive=elaborateV061StructureDeclaration(
+          declaration,
+          workEnvironment,
+        );
+        addInductive(workEnvironment,inductive);
+      }catch(error){
+        const detail=error instanceof Error?error.message:String(error);
+        throw new Error(
+          "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
+        );
+      }
+      admissions.push({kind:'inductive',declaration:inductive});
+      continue;
+    }
+    if(declaration.kind==='class'||declaration.kind==='inductive'){
       throw new Error(
         "PS_ELAB_DECL_UNSUPPORTED: declaration kind '"+declaration.kind+
         "' requires dedicated Lean-compatible declaration elaboration",
@@ -164,10 +180,10 @@ export function elaborateV061Definitions(
     }
     if(info.kind==='theorem')kernel.addTheorem(info);
     else kernel.addDefinition(info);
-    declarations.push(info);
+    admissions.push({kind:'constant',declaration:info});
   }
 
-  return admitCheckedCoreModule(baseEnvironment,declarations);
+  return admitCheckedCoreAdmissions(baseEnvironment,admissions);
 }
 
 

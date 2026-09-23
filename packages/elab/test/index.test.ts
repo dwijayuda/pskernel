@@ -247,13 +247,19 @@ function makeDefinitionEnvironment():Environment {
 }
 {
   const env=makeDefinitionEnvironment();
-  let declaration=false;
-  try{
-    elaborateV061Definitions(parseV061Module(
-      'structure Box where { value : TestNat; }',
-    ),env);
-  }catch(error){declaration=/PS_ELAB_DECL_UNSUPPORTED/.test(String(error));}
-  equal(declaration,true);
+  const result=elaborateV061Definitions(parseV061Module(
+    'structure Box where { value : TestNat; }',
+  ),env);
+  equal(result.inductives.length,1);
+  equal(result.environment.find(nameFromDotted('Box'))?.kind,'inductive');
+  equal(
+    result.environment.find(nameFromDotted('Box.mk'))?.kind,
+    'constructor',
+  );
+  equal(
+    result.environment.find(nameFromDotted('Box.rec'))?.kind,
+    'recursor',
+  );
 }
 console.log('ok - @proofscript/elab kernel-facing non-recursive definitions');
 
@@ -469,3 +475,18 @@ function makeNatNotationEnvironment():Environment {
   }
 }
 console.log('ok - @proofscript/elab bounded Nat notation');
+
+
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'structure SigmaBox where { T : Type; value : T; }',
+  ),env);
+  const ctor=result.environment.find(nameFromDotted('SigmaBox.mk'));
+  equal(ctor?.kind,'constructor');
+  if(ctor?.kind==='constructor'){
+    equal(ctor.numFields,2);
+    equal(ctor.type.kind,'forall');
+  }
+}
+console.log('ok - @proofscript/elab dependent structure field admission');

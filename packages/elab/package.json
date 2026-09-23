@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript term/command/declaration elaboration into kernel declarations.",
   "proofscript": {
-    "status": "v061-nat-ite+notation+intro-tactic-elab-mvp",
+    "status": "v061-structure+nat-ite+notation+intro-elab-mvp",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

@@ -68,8 +68,8 @@ function equal(actual:unknown,expected:unknown):void {
     'structure Box where { value : Type; }',
   );
   const analysis=service.analyze('file:///unsupported.ps');
-  equal(analysis.kernel,'unsupported');
-  equal(analysis.diagnostics[0]?.severity,2);
+  equal(analysis.kernel,'verified');
+  equal(analysis.diagnostics.length,0);
 }
 
 console.log('ok - @proofscript/language-service proof-aware document analysis');

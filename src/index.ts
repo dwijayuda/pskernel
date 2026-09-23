@@ -39,3 +39,14 @@ export type {
   ReplayProgressOptions
 } from './integration/lean4export.js';
 
+
+export {
+  addOrdinaryInductive,
+} from './kernel/inductive/ordinary.js';
+export type {
+  ConstructorDecl,
+  InductiveTypeDecl,
+  InductiveDecl,
+  InductiveAdmissionOptions,
+} from './kernel/inductive/ordinary.js';
+export {addInductive} from './kernel/inductive/nested.js';

@@ -36,3 +36,5 @@ export * from './v061-type-elab.js';
 export * from './v061-term-elab.js';
 export * from './v061-declaration-elab.js';
 export * from './v061-header-elab.js';
+
+export * from './v061-structure-elab.js';

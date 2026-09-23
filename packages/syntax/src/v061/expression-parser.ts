@@ -144,6 +144,18 @@ export class V061ExpressionParser {
     }
     const token=this.context.cursor.peek();
 
+    if(
+      token.text==='?'
+      &&this.context.cursor.peek(1).text==='_'
+    ){
+      const first=this.context.cursor.consume();
+      const hole=this.context.cursor.consume();
+      return {
+        kind:'syntheticHole',
+        span:{start:first.span.start,end:hole.span.end},
+      };
+    }
+
     if(token.kind==='number'){
       this.context.cursor.consume();
       return {kind:'nat',text:token.text,span:token.span};

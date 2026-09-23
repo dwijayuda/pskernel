@@ -108,6 +108,10 @@ export function elaborateV061Term(
       const term=resolveReference('Unit.unit',context);
       return {term,type:checker.check(term)};
     }
+    case 'syntheticHole':
+      throw new Error(
+        'PS_ELAB_SYNTHETIC_HOLE_OUTSIDE_REFINE: ?_ is accepted only by refine',
+      );
     case 'call':{
       const recursive=tryElaborateStructuralSelfCall(
         expr,

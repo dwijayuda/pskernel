@@ -741,6 +741,29 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 
+{
+  const module=parseV061Module(
+    'theorem refineProof(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
+    'by refine f(?_); assumption;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,2);
+    equal(body.tactics[0]?.kind,'refine');
+    if(body.tactics[0]?.kind==='refine'){
+      equal(body.tactics[0].proof.kind,'call');
+      if(body.tactics[0].proof.kind==='call'){
+        equal(body.tactics[0].proof.args[0]?.kind,'syntheticHole');
+      }
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem refineProof (P : Prop) (Q : Prop) (f : P -> Q) (h : P) : Q := by refine f ?_; assumption\n',
+  );
+}
+
 
 {
   const module=parseV061Module(

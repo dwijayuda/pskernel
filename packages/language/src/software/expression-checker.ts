@@ -178,6 +178,10 @@ export function checkSoftwareExpr(
     case 'string':return {kind:'string',value:expr.value,resultType:'String'};
     case 'bool':return {kind:'bool',value:expr.value,resultType:'Bool'};
     case 'unit':return {kind:'unit',resultType:'Unit'};
+    case 'syntheticHole':
+      throw new Error(
+        'PS_CHECK_SYNTHETIC_HOLE: ?_ is proof-tactic syntax and is not executable software',
+      );
     case 'group':return checkSoftwareExpr(expr.value,context,expected);
     case 'reference':{
       const local=context.locals.get(expr.name);

@@ -474,6 +474,36 @@ console.log('ok - @proofscript/elab bounded apply tactic proof-term construction
 }
 console.log('ok - @proofscript/elab ordered multi-goal apply tactic');
 
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem refinePremise(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
+    'by refine f(?_); assumption; '+
+    'theorem refineGoal(P : Prop, h : P) : P := '+
+    'by refine ?_; assumption;',
+  ));
+  equal(result.theorems.length,2);
+  equal(
+    result.environment.find(nameFromDotted('refinePremise'))?.kind,
+    'theorem',
+  );
+  equal(
+    result.environment.find(nameFromDotted('refineGoal'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem holeOutside(P : Prop) : P := ?_;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_SYNTHETIC_HOLE_OUTSIDE_REFINE/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded synthetic-hole refine tactic');
+
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();

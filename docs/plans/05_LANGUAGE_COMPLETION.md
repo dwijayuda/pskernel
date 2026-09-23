@@ -168,6 +168,13 @@ assigns the parent goal and returns the remaining ordered subgoals. ProofScript
 must preserve that split; tactic state must not accumulate an independent
 `proofs[]` authority.
 
+Current checkpoint: the source AST stores tactic blocks as ordered sequences and
+the elaborator consumes the shared @proofscript/tactic goal state. Bounded
+explicit `apply` may expose multiple ordered premise goals; solved premises
+are assembled into one ordinary kernel proof term before declaration admission.
+Implicit and instance binders remain fail-closed until their Meta synthesis
+policy is implemented.
+
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
 

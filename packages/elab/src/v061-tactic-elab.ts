@@ -1,10 +1,15 @@
+import {
+  assumption,
+  exact,
+  getMainGoal,
+  intro,
+  type TacticGoal,
+} from '@proofscript/tactic';
 import type {V061Expr,V061Tactic} from '@proofscript/syntax';
 import {
-  LocalContext,
   TypeChecker,
   type Expr,
   abstractFVar,
-  app,
   fvar,
   instantiate1,
   lam,
@@ -14,6 +19,8 @@ import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
 } from './v061-context.js';
+import {applyV061Tactic} from './v061-apply-tactic.js';
+import {V061TacticRuntime} from './v061-tactic-runtime.js';
 
 export type V061TermElaborator=(
   expr:V061Expr,
@@ -21,138 +28,119 @@ export type V061TermElaborator=(
   expected?:Expr,
 )=>ElaboratedCoreTerm;
 
-function elaborateTactic(
+function currentGoal(
+  runtime:V061TacticRuntime,
+):TacticGoal<Expr> {
+  try{
+    return getMainGoal(runtime.state);
+  }catch{
+    throw new Error('PS_ELAB_TACTIC_NO_GOALS: no goals to be solved');
+  }
+}
+
+function runTactic(
   tactic:V061Tactic,
-  context:V061CoreElabContext,
-  expected:Expr,
+  runtime:V061TacticRuntime,
   elaborate:V061TermElaborator,
-):ElaboratedCoreTerm {
-  const checker=new TypeChecker(
-    context.environment,
-    context.localContext.clone(),
-  );
+):void {
+  const goal=currentGoal(runtime);
+  const entry=runtime.entry(goal);
 
   if(tactic.kind==='exact'){
-    const proof=elaborate(tactic.proof,context,expected);
-    if(
-      !checker.isDefEq(
-        context.metaContext.instantiate(proof.type),
-        context.metaContext.instantiate(expected),
-      )
-    ){
+    const proof=elaborate(
+      tactic.proof,
+      entry.context,
+      runtime.expected(goal),
+    );
+    try{
+      runtime.state=exact(runtime.state,proof.term,runtime.kernel);
+    }catch(error){
       throw new Error(
-        'PS_ELAB_TACTIC_EXACT: proof term does not match the goal',
+        'PS_ELAB_TACTIC_EXACT: '+
+        (error instanceof Error?error.message:String(error)),
       );
     }
-    return proof;
+    return;
   }
 
   if(tactic.kind==='assumption'){
-    const candidates=[...context.locals.entries()].reverse();
-    for(const [,id] of candidates){
-      const declaration=context.localContext.get(id);
-      if(
-        declaration!==undefined
-        &&checker.isDefEq(
-          context.metaContext.instantiate(declaration.type),
-          context.metaContext.instantiate(expected),
-        )
-      ){
-        return {term:fvar(id),type:declaration.type};
-      }
+    try{
+      runtime.state=assumption(runtime.state,runtime.kernel);
+    }catch(error){
+      throw new Error(
+        'PS_ELAB_TACTIC_ASSUMPTION: '+
+        (error instanceof Error?error.message:String(error)),
+      );
     }
-    throw new Error(
-      'PS_ELAB_TACTIC_ASSUMPTION: no local hypothesis matches the goal',
-    );
+    return;
   }
 
   if(tactic.kind==='apply'){
-    const candidate=elaborate(tactic.proof,context);
-    const functionType=checker.whnf(
-      context.metaContext.instantiate(candidate.type),
-    );
-    if(functionType.kind!=='forall'){
-      throw new Error(
-        'PS_ELAB_TACTIC_APPLY: candidate is not a forall/function type',
-      );
-    }
-    if(functionType.binderInfo!=='default'){
-      throw new Error(
-        'PS_ELAB_TACTIC_APPLY: bounded apply requires one explicit premise',
-      );
-    }
-    const premise=elaborateTactic(
-      tactic.next,
-      context,
-      context.metaContext.instantiate(functionType.type),
-      elaborate,
-    );
-    const term=app(candidate.term,premise.term);
-    const type=checker.check(term);
-    if(
-      !checker.isDefEq(
-        context.metaContext.instantiate(type),
-        context.metaContext.instantiate(expected),
-      )
-    ){
-      throw new Error(
-        'PS_ELAB_TACTIC_APPLY: applying one premise does not solve the goal',
-      );
-    }
-    return {term,type};
+    const candidate=elaborate(tactic.proof,entry.context);
+    applyV061Tactic(runtime,candidate);
+    return;
   }
 
-  const functionType=checker.whnf(
-    context.metaContext.instantiate(expected),
-  );
-  if(functionType.kind!=='forall'){
-    throw new Error(
-      'PS_ELAB_TACTIC_INTRO: goal is not a forall/function type',
-    );
-  }
+  runtime.state=intro(
+    runtime.state,
+    tactic.name,
+    {
+      intro:(parentGoal,userName)=>{
+        const parent=runtime.entry(parentGoal);
+        const checker=new TypeChecker(
+          parent.context.environment,
+          parent.context.localContext.clone(),
+        );
+        const functionType=checker.whnf(
+          parent.context.metaContext.instantiate(parentGoal.target),
+        );
+        if(functionType.kind!=='forall')return undefined;
 
-  const nextLocalContext=context.localContext.clone();
-  const id=nextLocalContext.fresh(tactic.name);
-  const userName=nameFromDotted(tactic.name);
-  nextLocalContext.addLocal(
-    id,
-    userName,
-    functionType.type,
-    functionType.binderInfo,
-  );
-  const locals=new Map(context.locals);
-  locals.set(tactic.name,id);
-  const nextContext={
-    ...context,
-    localContext:nextLocalContext,
-    locals,
-  };
-  const nextExpected=instantiate1(functionType.body,fvar(id));
-  const body=elaborateTactic(
-    tactic.next,
-    nextContext,
-    nextExpected,
-    elaborate,
-  );
+        const nextLocalContext=parent.context.localContext.clone();
+        const id=nextLocalContext.fresh(userName);
+        const leanName=nameFromDotted(userName);
+        nextLocalContext.addLocal(
+          id,
+          leanName,
+          functionType.type,
+          functionType.binderInfo,
+        );
+        const locals=new Map(parent.context.locals);
+        locals.set(userName,id);
+        const nextContext={
+          ...parent.context,
+          localContext:nextLocalContext,
+          locals,
+        };
+        const nextExpected=instantiate1(functionType.body,fvar(id));
 
-  const term=lam(
-    userName,
-    functionType.type,
-    abstractFVar(body.term,id),
-    functionType.binderInfo,
+        return runtime.createGoal(
+          nextContext,
+          nextExpected,
+          (body)=>{
+            const term=lam(
+              leanName,
+              functionType.type,
+              abstractFVar(body.term,id),
+              functionType.binderInfo,
+            );
+            const type=checker.check(term);
+            if(
+              !checker.isDefEq(
+                parent.context.metaContext.instantiate(type),
+                parent.context.metaContext.instantiate(parentGoal.target),
+              )
+            ){
+              throw new Error(
+                'PS_ELAB_TACTIC_INTRO: generated lambda does not match the goal',
+              );
+            }
+            runtime.completeGoal(parentGoal,{term,type});
+          },
+        );
+      },
+    },
   );
-  const type=checker.check(term);
-  if(
-    !checker.isDefEq(
-      context.metaContext.instantiate(type),
-      context.metaContext.instantiate(expected),
-    )
-  ){
-    throw new Error(
-      'PS_ELAB_TACTIC_INTRO: generated lambda does not match the goal',
-    );
-  }
-  return {term,type};
 }
 
 export function elaborateV061ByExpression(
@@ -166,5 +154,10 @@ export function elaborateV061ByExpression(
       'PS_ELAB_TACTIC_EXPECTED_TYPE: tactic blocks require an expected goal type',
     );
   }
-  return elaborateTactic(expr.tactic,context,expected,elaborate);
+
+  const runtime=new V061TacticRuntime(context,expected);
+  for(const tactic of expr.tactics){
+    runTactic(tactic,runtime,elaborate);
+  }
+  return runtime.result();
 }

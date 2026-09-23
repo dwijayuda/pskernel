@@ -679,7 +679,10 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
   const body=module.declarations[0]?.body;
   equal(body?.kind,'by');
-  if(body?.kind==='by')equal(body.tactic.kind,'exact');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'exact');
+  }
   equal(
     lowerV061ModuleToLean(module),
     'theorem exactProof (P : Prop) (h : P) : P := by exact h\n',
@@ -691,7 +694,10 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
   const body=module.declarations[0]?.body;
   equal(body?.kind,'by');
-  if(body?.kind==='by')equal(body.tactic.kind,'assumption');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'assumption');
+  }
 }
 
 
@@ -702,11 +708,12 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const body=module.declarations[0]?.body;
   equal(body?.kind,'by');
   if(body?.kind==='by'){
-    equal(body.tactic.kind,'intro');
-    if(body.tactic.kind==='intro'){
-      equal(body.tactic.name,'h');
-      equal(body.tactic.next.kind,'assumption');
+    equal(body.tactics.length,2);
+    equal(body.tactics[0]?.kind,'intro');
+    if(body.tactics[0]?.kind==='intro'){
+      equal(body.tactics[0].name,'h');
     }
+    equal(body.tactics[1]?.kind,'assumption');
   }
   equal(
     lowerV061ModuleToLean(module),
@@ -721,11 +728,12 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const body=module.declarations[0]?.body;
   equal(body?.kind,'by');
   if(body?.kind==='by'){
-    equal(body.tactic.kind,'apply');
-    if(body.tactic.kind==='apply'){
-      equal(body.tactic.proof.kind,'reference');
-      equal(body.tactic.next.kind,'assumption');
+    equal(body.tactics.length,2);
+    equal(body.tactics[0]?.kind,'apply');
+    if(body.tactics[0]?.kind==='apply'){
+      equal(body.tactics[0].proof.kind,'reference');
     }
+    equal(body.tactics[1]?.kind,'assumption');
   }
   equal(
     lowerV061ModuleToLean(module),

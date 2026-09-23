@@ -36,13 +36,11 @@ export type V061Tactic =
   | {
       readonly kind:'apply';
       readonly proof:V061Expr;
-      readonly next:V061Tactic;
       readonly span:SourceSpan;
     }
   | {
       readonly kind:'intro';
       readonly name:string;
-      readonly next:V061Tactic;
       readonly span:SourceSpan;
     };
 
@@ -58,7 +56,7 @@ export type V061Expr =
   | {readonly kind:'binary';readonly operator:string;readonly left:V061Expr;readonly right:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'if';readonly condition:V061Expr;readonly thenBranch:V061Expr;readonly elseBranch:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'lambda';readonly binders:readonly V061LambdaBinder[];readonly body:V061Expr;readonly span:SourceSpan}
-  | {readonly kind:'by';readonly tactic:V061Tactic;readonly span:SourceSpan}
+  | {readonly kind:'by';readonly tactics:readonly V061Tactic[];readonly span:SourceSpan}
   | {
       readonly kind:'record';
       readonly fields:readonly V061RecordField[];

@@ -17,6 +17,9 @@
       ],
       "@proofscript/checked-core": [
         "../checked-core/dist/src/index.d.ts"
+      ],
+      "@proofscript/tactic": [
+        "../tactic/dist/src/index.d.ts"
       ]
     }
   },

@@ -109,6 +109,7 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "Inherited Lean tactic terms use an ordered flat tactic sequence rather than recursive continuation fields; semicolons are consumed as tactic separators only when followed by a supported tactic head.",
         "Inherited Lean `instance` declarations now parse as named or anonymous definition-like commands with ordinary binder sequences, result type, and term body; no new ProofScript feature ownership is claimed.",
         "Anonymous instances receive deterministic internal names for downstream metadata while canonical Lean lowering omits that generated name.",
         "Declaration parameters preserve Lean BinderInfo categories: default, implicit, strictImplicit, and named instImplicit.",
@@ -201,7 +202,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-global-instance-mvp+local-instance+class-admission+structural-recursion",
+      "status": "v061-multigoal-tactic+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -209,10 +210,13 @@
         "pretty",
         "kernel",
         "module",
-        "checked-core"
+        "checked-core",
+        "tactic"
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Theorem tactic elaboration consumes @proofscript/tactic's ordered goal state. exact/assumption close the main goal, intro replaces it with one child, and bounded explicit apply may replace it with multiple ordered subgoals.",
+        "Multi-goal apply assembles an ordinary kernel Expr only after all explicit premise goals are solved; result-side unification may infer explicit parameters, while implicit/instance binders remain fail-closed.",
         "Declaration orchestration is split from value and instance elaboration; typeclass growth must stay in dedicated modules rather than expanding the command dispatcher.",
         "Named/anonymous instance declarations elaborate as ordinary checked definitions and are registered for subsequent class-aware application synthesis.",
         "Current global resolution searches registered instance constants after local instances. Instance goals containing unresolved metavariables are postponed and retried after later explicit/result constraints, preventing declaration order from prematurely fixing type parameters.",
@@ -257,7 +261,7 @@
       "path": "packages/tactic",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "ordered-multigoal-state-foundation",
+      "status": "ordered-multigoal-state-integrated",
       "packageName": "@proofscript/tactic",
       "dependsOn": [],
       "sourceLanguage": "typescript",

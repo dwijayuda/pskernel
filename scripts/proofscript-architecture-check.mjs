@@ -44,6 +44,8 @@ requireDeps('environment',['kernel']);
 requireDeps('cli',['environment']);
 requireDeps('lsp',['environment']);
 requireDeps('checked-core',['kernel']);
+requireDeps('elab',['tactic']);
+forbidDeps('tactic',['elab']);
 forbidDeps('checked-core',[
   'syntax','meta','elab','language','erasure','compiler-ir','backend-ts',
 ]);

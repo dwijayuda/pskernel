@@ -27,6 +27,7 @@
     "lean-ts-kernel": "file:../..",
     "@proofscript/meta": "file:../meta",
     "@proofscript/syntax": "file:../syntax",
-    "@proofscript/checked-core": "file:../checked-core"
+    "@proofscript/checked-core": "file:../checked-core",
+    "@proofscript/tactic": "file:../tactic"
   }
 }

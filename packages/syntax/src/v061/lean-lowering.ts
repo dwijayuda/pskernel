@@ -32,11 +32,8 @@ function lowerV061TacticToLean(
   switch(tactic.kind){
     case 'exact':return 'exact '+lowerV061ExprToLean(tactic.proof);
     case 'assumption':return 'assumption';
-    case 'apply':
-      return 'apply '+lowerV061ExprToLean(tactic.proof)+'; '+
-        lowerV061TacticToLean(tactic.next);
-    case 'intro':
-      return 'intro '+tactic.name+'; '+lowerV061TacticToLean(tactic.next);
+    case 'apply':return 'apply '+lowerV061ExprToLean(tactic.proof);
+    case 'intro':return 'intro '+tactic.name;
   }
 }
 
@@ -82,7 +79,7 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
       return 'match '+lowerV061ExprToLean(expr.scrutinee)+' with\n'+alternatives;
     }
     case 'by':
-      return 'by '+lowerV061TacticToLean(expr.tactic);
+      return 'by '+expr.tactics.map(lowerV061TacticToLean).join('; ');
     case 'lambda':{
       const binders=expr.binders.map((binder)=>
         binder.type===undefined

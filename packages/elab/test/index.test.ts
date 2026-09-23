@@ -452,12 +452,27 @@ console.log('ok - @proofscript/elab intro tactic proof-term construction');
   let failed=false;
   try{
     elaborateV061Declarations(parseV061Module(
-      'theorem badApply(P : Prop, h : P) : P := by apply h; assumption;',
+      'theorem badApply(P : Prop, Q : Prop, h : P) : Q := '+
+      'by apply h; assumption;',
     ));
   }catch(error){failed=/PS_ELAB_TACTIC_APPLY/.test(String(error));}
   equal(failed,true);
 }
 console.log('ok - @proofscript/elab bounded apply tactic proof-term construction');
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem applyTwo(P : Prop, Q : Prop, R : Prop, '+
+    'f : P -> Q -> R, hp : P, hq : Q) : R := '+
+    'by apply f; assumption; assumption;',
+  ));
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('applyTwo'))?.kind,
+    'theorem',
+  );
+}
+console.log('ok - @proofscript/elab ordered multi-goal apply tactic');
 
 
 function makeNatNotationEnvironment():Environment {

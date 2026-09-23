@@ -134,6 +134,26 @@ The adaptive runner:
 This is the default diagnostic replacement for repeatedly launching the whole
 canonical stream.
 
+### Automatic semantic bisection
+
+When a range fails semantically, use:
+
+```text
+npm run oracle:std-bisect -- <start> <count> [minCount]
+```
+
+Example:
+
+```text
+npm run oracle:std-bisect -- 36000 1000 1
+```
+
+The wrapper tests the whole interval, then recursively tests the left half first
+and narrows toward the earliest failing range. If both halves pass while the
+parent interval fails, it reports an **interaction failure** rather than falsely
+blaming one root. This preserves the possibility that the bug depends on a
+combination of direct roots.
+
 ## Tier 4 — exhaustive dependency-root coverage
 
 Purpose: cover every direct Std root when canonical one-pass streaming is too
@@ -288,7 +308,7 @@ Because GitHub Actions currently does not allocate a runner:
 
 1. run `oracle:std-hot` or `oracle:std-probe` on any machine with the pinned
    Lean 4.34 toolchain;
-2. if one fails, use `oracle:std-range` to isolate the minimal root interval;
+2. if one fails, use `oracle:std-bisect` (or `oracle:std-range` for manual control) to isolate the minimal root interval;
 3. patch only the demonstrated 4.34 parity gap;
 4. keep canonical Full Std open;
 5. resume canonical replay when a suitable runner is available.

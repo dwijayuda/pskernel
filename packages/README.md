@@ -22,7 +22,8 @@ See `package-map.json` for:
 - `browser/` — cancellation-aware streaming verification foundation.
 - `syntax/` — v0.7 lexer/parser foundation with D-CALL MVP.
 - `pretty/`, `meta/`, `elab/`, `tactic/` — Phase-B TypeScript foundations with executable tests.
-- Phase-C/Phase-D directories remain scaffolds until their foundation commits land.
+- `compiler-ir/`, `runtime/`, `backend-ts/` — Phase-C foundations with IR/runtime/emission tests.
+- `language/`, `lsp/`, `project/` — Phase-D foundations for snapshots, protocol mapping, and build planning.
 
 ## Trust rule
 

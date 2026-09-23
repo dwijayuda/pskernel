@@ -168,10 +168,14 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
         "kernel"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation defines runtime-oriented IR nodes, module validation, traversal, and free-variable analysis; kernel Expr lowering remains a later Phase-C milestone."
       ]
     },
     {
@@ -179,20 +183,28 @@
       "path": "packages/runtime",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/runtime",
-      "dependsOn": []
+      "dependsOn": [],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation implements exact bigint Nat/Int basics, saturating Nat subtraction, UInt8 normalization, and tagged constructor values; broader Lean runtime semantics remain later work."
+      ]
     },
     {
       "name": "backend-ts",
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
         "runtime"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation emits deterministic ESM for the compiler-IR structural subset; workspace-level direct package wiring and source maps remain later milestones."
       ]
     },
     {
@@ -200,13 +212,17 @@
       "path": "packages/language",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/language",
       "dependsOn": [
         "syntax",
         "meta",
         "elab",
         "module"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation provides reusable document snapshots, unchanged-text reuse, cancellation checks, diagnostics, and non-overlapping text edits."
       ]
     },
     {
@@ -214,11 +230,15 @@
       "path": "packages/lsp",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/lsp",
       "dependsOn": [
         "language",
         "pretty"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation provides UTF-16 offset/position mapping and diagnostic conversion; protocol transport and semantic requests remain later milestones."
       ]
     },
     {
@@ -226,12 +246,16 @@
       "path": "packages/project",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "scaffold",
+      "status": "foundation",
       "packageName": "@proofscript/project",
       "dependsOn": [
         "module",
         "compiler-ir",
         "language"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Foundation provides deterministic dependency ordering, cycle/missing-dependency rejection, and an in-memory build cache; npm/config integration remains later work."
       ]
     }
   ],

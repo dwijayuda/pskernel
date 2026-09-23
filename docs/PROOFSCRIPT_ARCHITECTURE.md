@@ -129,7 +129,7 @@ or exposed through an explicit ProofScript Lean-subset language mode.
 - `@proofscript/backend-ts`: verified IR to TypeScript text.
 - `@proofscript/wasm-ir`: ProofScript-owned typed WebAssembly-oriented IR.
 - `@proofscript/wasm-lowering`: fail-closed verified IR to WasmIR representation lowering.
-- `@proofscript/backend-wasm`: Binaryen-backed WasmIR validation/emission; outside the TCB.
+- `@proofscript/backend-wasm`: Binaryen-backed WasmIR validation/emission and JS-host ABI; outside the TCB.
 - `@proofscript/compiler`: orchestration from checked core to TS/JS or supported Wasm.
 - TypeScript Compiler API: TypeScript type-checking/emission to JavaScript,
   declarations, and source maps.
@@ -172,19 +172,30 @@ checked core
                   Binaryen -> .wasm
 ```
 
-The W1 executable subset covers Bool/Unit control values and direct first-order
-functions. W2 now also carries fixed-width UInt8/16/32/64 values through the
-verified runtime IR and Wasm scalar ABI; fixed-width arithmetic/comparisons are
-still a separate milestone. Runtime Nat/Int are rejected until an
-arbitrary-precision ABI exists; they must never be silently narrowed to i64.
-String, external imports, structures, ADTs, generic runtime values, and closures
+W2 supports Bool and fixed-width UInt8/16/32/64 first-order runtime values and
+direct calls, plus Unit results. UInt8/UInt16 are normalized at their narrow
+boundaries; UInt32/UInt64 retain the exact i32/i64 bit representation. A
+separate JS-host ABI restores unsigned ProofScript values because the
+WebAssembly JavaScript interface observes i32/i64 as signed Number/BigInt
+values. The raw WebAssembly instance remains available separately.
+
+Fixed-width arithmetic/comparison intrinsics are not invented in the backend;
+they remain unsupported until the verified compiler IR has explicit
+Lean-faithful operations. Runtime Nat/Int are rejected until an
+arbitrary-precision ABI exists and must never be silently narrowed to i64.
+String, structures, ADTs, generic runtime values, closures, and WebAssembly FFI
 also fail closed until their representations are specified.
 
+`psc check/build/run --verified --target wasm` uses this same verified path.
+Build emits canonical TypeScript/JavaScript evidence alongside `.wasm` and
+`.wat`; run crosses the semantic JS-host ABI rather than exposing signed raw
+integer values as ProofScript UInt results.
+
 The checked-core/verified-IR external import surface remains an explicit runtime
-trust boundary. W1 rejects non-empty verified IR imports with
+trust boundary. W2 rejects non-empty verified IR imports with
 `PS_WASM_UNSUPPORTED_EXTERNAL_IMPORTS` until a WebAssembly FFI ABI is defined;
-it does not reinterpret Lean declaration safety or FFI trust to make emission
-succeed.
+it does not reinterpret Lean declaration safety, npm runtime policy, or runtime
+lock assurance to make emission succeed.
 
 Binaryen is untrusted compiler infrastructure. Its validator establishes
 WebAssembly validity, not equivalence to ProofScript semantics. The
@@ -1115,7 +1126,6 @@ the host result while retaining `proofEvidence=false` in assurance.
 Still unsupported in this checkpoint:
 
 - semver ranges;
-- package subpath imports;
 - `node:` builtins;
 - default/namespace/CommonJS/dynamic imports;
 - package installation;
@@ -1123,3 +1133,71 @@ Still unsupported in this checkpoint:
 
 Those require separate project/runtime policy decisions and do not expand the
 kernel trust boundary.
+
+## Transitive runtime lockfile assurance checkpoint
+
+Runtime externals now have three deliberately separate identities:
+
+```text
+projectIntegrity
+runtimeDependencyPolicy.integrity
+runtimeDependencyLock.integrity
+```
+
+The new runtime lock identity is computed only for verified build/run when
+externals are used. The CLI reads the project's top-level npm
+`package-lock.json` and currently requires `lockfileVersion: 3`. Starting
+from exact direct roots admitted by `runtimeDependencies`, it follows the
+lockfile's installed-tree locations using Node-style ancestor `node_modules`
+lookup and records the reachable closure.
+
+Each reachable lock package contributes:
+
+- package location;
+- inferred package root name;
+- exact lock version;
+- `resolved` source;
+- npm `sha512`/`sha1` SRI metadata;
+- required/optional reachability;
+- deterministic dependency, optional-dependency, and peer edges.
+
+Required transitive lock entries must resolve and required installed packages
+must expose the same package name/version as the closure. Optional-only
+branches may be absent. Symlink/link entries fail closed in this first profile.
+
+The lock closure remains **untrusted runtime assurance**. pskernel never reads
+it, checked-core admission does not depend on it, and changing it does not
+change theorem identity. In particular, lockfile SRI identifies the package
+artifact npm resolved; ProofScript does not claim to prove the behavior of that
+artifact or to re-hash every unpacked runtime file.
+
+## Public npm package-subpath checkpoint
+
+Named ESM runtime externs may now target a bounded public package subpath while
+the dependency identity remains the exact package root.
+
+```text
+external source: host-lib/feature
+package root:    host-lib
+configured pin:  host-lib@1.0.0
+lock root:       node_modules/host-lib
+```
+
+The host-resolution contract intentionally follows existing ecosystem
+ownership:
+
+- ProofScript classifies the package root, enforces the exact configured
+  version, and verifies the reachable package-lock closure;
+- TypeScript's current `Bundler` module resolution resolves the generated
+  import for type/declaration checking and follows `package.json.exports`;
+- Node ESM resolves the emitted runtime import and its conditional
+  `import`/default export target.
+
+ProofScript does not clone Node's `PACKAGE_EXPORTS_RESOLVE` algorithm. This is
+important for conditional exports: TypeScript may select a `types` branch for
+static checking while Node selects the runtime `import` branch. That host
+difference is part of the explicit FFI trust boundary, not a theorem semantic.
+
+The first subpath classifier is intentionally conservative and excludes
+relative/absolute sources, `node:` builtins, path traversal, empty segments,
+and nested `node_modules` segments. Only named ESM imports remain supported.

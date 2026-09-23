@@ -618,6 +618,14 @@ assert(
 );
 const uintHost=instantiateProofScriptWasm(verifiedUIntWasm);
 assert(
+  uintHost.exports.id8(0xff)===0xff,
+  'UInt8 JS ABI did not preserve unsigned semantic value',
+);
+assert(
+  uintHost.exports.id16(0xffff)===0xffff,
+  'UInt16 JS ABI did not preserve unsigned semantic value',
+);
+assert(
   uintHost.exports.id32(0xffffffff)===0xffffffff,
   'UInt32 JS ABI did not preserve unsigned semantic value',
 );

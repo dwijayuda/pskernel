@@ -23,11 +23,12 @@ export type RuntimeExprEraser=(
 
 const natIntrinsics=new Map<
   string,
-  'nat.add'|'nat.sub'|'nat.mul'
+  'nat.add'|'nat.sub'|'nat.mul'|'nat.eq'
 >([
   ['Nat.add','nat.add'],
   ['Nat.sub','nat.sub'],
   ['Nat.mul','nat.mul'],
+  ['Nat.beq','nat.eq'],
 ]);
 
 function eraseVerifiedCondition(
@@ -46,26 +47,27 @@ function eraseVerifiedCondition(
   if(head==='Eq'){
     if(view.args.length!==3){
       throw new Error(
-        'PS_ERASE_CONDITION_UNSUPPORTED: malformed checked equality',
+        'PS_ERASE_CONDITION_UNSUPPORTED: malformed checked equality coercion',
       );
     }
     const typeArg=view.args[0]!;
+    const reflected=view.args[1]!;
+    const truth=view.args[2]!;
+    const reflectedView=appView(reflected);
     if(
       typeArg.kind!=='const'
-      ||nameToString(typeArg.name)!=='Nat'
+      ||nameToString(typeArg.name)!=='Bool'
+      ||truth.kind!=='const'
+      ||nameToString(truth.name)!=='Bool.true'
+      ||reflectedView.fn.kind!=='const'
+      ||nameToString(reflectedView.fn.name)!=='Nat.beq'
+      ||reflectedView.args.length!==2
     ){
       throw new Error(
-        'PS_ERASE_CONDITION_UNSUPPORTED: only Nat equality is executable yet',
+        'PS_ERASE_CONDITION_UNSUPPORTED: expected Nat.beq coerced from Bool to Prop',
       );
     }
-    return {
-      kind:'intrinsic',
-      operation:'nat.eq',
-      args:[
-        erase(view.args[1]!,scope,environment),
-        erase(view.args[2]!,scope,environment),
-      ],
-    };
+    return erase(reflected,scope,environment);
   }
   if(view.args.length!==4){
     throw new Error(

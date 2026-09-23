@@ -293,7 +293,7 @@ Do not reorder without repository evidence.
 
 1. Repair/obtain an executing CI or local root-gate run.
 2. Continue verified primitive/equality/comparison semantics beyond the landed
-   Nat == condition path only where Lean-compatible meaning is explicit.
+   Nat.beq/Bool-coercion == path only where Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
 4. Continue theorem prover v1 with refine/constructor/cases; broaden apply only

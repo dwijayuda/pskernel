@@ -25,12 +25,11 @@ const natArithmetic=new Map<string,string>([
   ['*','Nat.mul'],
 ]);
 
-type NatRelationKind='le'|'lt'|'eq';
+type NatRelationKind='le'|'lt';
 const natRelations=new Map<
   string,
   {readonly kind:NatRelationKind;readonly reverse:boolean}
 >([
-  ['==',{kind:'eq',reverse:false}],
   ['<=',{kind:'le',reverse:false}],
   ['>=',{kind:'le',reverse:true}],
   ['<',{kind:'lt',reverse:false}],
@@ -80,16 +79,68 @@ export interface ElaboratedNatCondition extends ElaboratedCoreTerm {
   readonly decider:Expr;
 }
 
+function elaborateNatBooleanEquality(
+  expr:Extract<V061Expr,{kind:'binary'}>,
+  context:V061CoreElabContext,
+  elaborate:V061TermElaborator,
+):ElaboratedCoreTerm {
+  const {checker,left,right}=elaborateNatOperands(
+    expr,
+    context,
+    elaborate,
+  );
+  const boolType=constant(requireConstant(context,'Bool'));
+  const term=mkAppN(
+    constant(requireConstant(context,'Nat.beq')),
+    [left.term,right.term],
+  );
+  const type=checker.check(term);
+  if(!checker.isDefEq(type,boolType)){
+    throw new Error(
+      "PS_ELAB_NAT_EQUALITY_RESULT: 'Nat.beq' did not produce Bool",
+    );
+  }
+  return {term,type};
+}
+
 export function elaborateV061NatCondition(
   expr:Extract<V061Expr,{kind:'binary'}>,
   context:V061CoreElabContext,
   elaborate:V061TermElaborator,
 ):ElaboratedNatCondition {
+  if(expr.operator==='=='){
+    const equality=elaborateNatBooleanEquality(
+      expr,
+      context,
+      elaborate,
+    );
+    const checker=new TypeChecker(
+      context.environment,
+      context.localContext.clone(),
+    );
+    const boolType=constant(requireConstant(context,'Bool'));
+    const trueTerm=constant(requireConstant(context,'Bool.true'));
+    const term=mkAppN(
+      constant(
+        requireConstant(context,'Eq'),
+        [levelSucc(levelZero)],
+      ),
+      [boolType,equality.term,trueTerm],
+    );
+    const type=checker.check(term);
+    const decider=mkAppN(
+      constant(requireConstant(context,'Bool.decEq')),
+      [equality.term,trueTerm],
+    );
+    checker.check(decider);
+    return {term,type,decider};
+  }
+
   const relation=natRelations.get(expr.operator);
   if(relation===undefined){
     throw new Error(
       "PS_ELAB_CONDITION_UNSUPPORTED: operator '"+expr.operator+
-      "' is not a supported Nat proposition",
+      "' is not a supported Nat proposition/boolean condition",
     );
   }
   const {checker,natType,left,right}=elaborateNatOperands(
@@ -99,23 +150,6 @@ export function elaborateV061NatCondition(
   );
   const first=relation.reverse?right.term:left.term;
   const second=relation.reverse?left.term:right.term;
-
-  if(relation.kind==='eq'){
-    const term=mkAppN(
-      constant(
-        requireConstant(context,'Eq'),
-        [levelSucc(levelZero)],
-      ),
-      [natType,first,second],
-    );
-    const type=checker.check(term);
-    const decider=mkAppN(
-      constant(requireConstant(context,'Nat.decEq')),
-      [first,second],
-    );
-    checker.check(decider);
-    return {term,type,decider};
-  }
 
   const relationClass=relation.kind==='le'?'LE.le':'LT.lt';
   const instance=relation.kind==='le'?'instLENat':'instLTNat';
@@ -144,6 +178,30 @@ export function elaborateV061BinaryNotation(
   expected:Expr|undefined,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
+  if(expr.operator==='=='){
+    const equality=elaborateNatBooleanEquality(
+      expr,
+      context,
+      elaborate,
+    );
+    const checker=new TypeChecker(
+      context.environment,
+      context.localContext.clone(),
+    );
+    if(
+      expected!==undefined
+      &&!checker.isDefEq(
+        context.metaContext.instantiate(expected),
+        equality.type,
+      )
+    ){
+      throw new Error(
+        "PS_ELAB_NAT_EQUALITY_EXPECTED_TYPE: operator '==' produces Bool",
+      );
+    }
+    return equality;
+  }
+
   if(natRelations.has(expr.operator)){
     const condition=elaborateV061NatCondition(expr,context,elaborate);
     const checker=new TypeChecker(

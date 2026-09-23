@@ -212,7 +212,8 @@ const verifiedIf=compileVerifiedSource(
   'function max(x : Nat, y : Nat) : Nat := '+
   'if (x > y) { x } else { y }; '+
   'function sameOr(x : Nat, y : Nat) : Nat := '+
-  'if (x == y) { x } else { y };',
+  'if (x == y) { x } else { y }; '+
+  'function same(x : Nat, y : Nat) : Bool := x == y;',
   'verified-if.ts',
 );
 assert(
@@ -225,7 +226,13 @@ assert(
 );
 assert(
   verifiedIf.typeScript.includes('return ((x === y) ? x : y);'),
-  'verified Lean Nat equality did not lower through Eq/Nat.decEq',
+  'verified Lean Nat == condition did not lower through Nat.beq/Bool coercion',
+);
+assert(
+  verifiedIf.typeScript.includes(
+    'function same(x: bigint, y: bigint): boolean',
+  ),
+  'verified Nat == did not retain its Bool result outside a condition',
 );
 
 

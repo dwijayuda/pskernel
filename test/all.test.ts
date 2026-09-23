@@ -530,6 +530,16 @@ test('non-recursive structure recursor uses kernel eta expansion',()=>{
  eqExpr(new TypeChecker(env).whnf(term),expected);
 });
 
+test('recursor reduction fails closed on universe arity mismatch',()=>{
+ const env=baseEnv(),I=nameFromDotted('RecLevel.I'),C=nameFromDotted('RecLevel.I.mk'),R=nameFromDotted('RecLevel.I.rec'),uN=nameFromDotted('u');
+ env.add({kind:'inductive',name:I,levelParams:[],type:sort(levelSucc(levelZero)),numParams:0,numIndices:0,all:[I],ctors:[C],numNested:0,isRec:false,isReflexive:false});
+ env.add({kind:'constructor',name:C,levelParams:[],type:constant(I),induct:I,cidx:0,numParams:0,numFields:0});
+ env.add({kind:'recursor',name:R,levelParams:[uN],type:forallE(nameFromDotted('t'),constant(I),constant(N.Nat)),all:[I],numParams:0,numIndices:0,numMotives:0,numMinors:0,rules:[{ctor:C,nFields:0,rhs:natLit(7)}],k:false});
+ const bad=app(constant(R),constant(C)),good=app(constant(R,[levelZero]),constant(C)),tc=new TypeChecker(env);
+ eqExpr(tc.whnf(bad),bad,'wrong recursor universe arity must remain stuck');
+ eqExpr(tc.whnf(good),natLit(7),'correct recursor universe arity must still reduce');
+});
+
 test('recursor reduction converts String literals through String.ofList',()=>{
  const env=baseEnv(),R=nameFromDotted('String.testRec'),xsTy=constant(N.Nat);
  env.add({kind:'recursor',name:R,levelParams:[],type:forallE(nameFromDotted('s'),constant(N.String),constant(N.Nat)),all:[N.String],numParams:0,numIndices:0,numMotives:0,numMinors:0,k:false,rules:[{ctor:N.StringOfList,nFields:1,rhs:lam(nameFromDotted('xs'),xsTy,natLit(77))}]});

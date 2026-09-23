@@ -66,3 +66,31 @@ function equal(actual:unknown,expected:unknown):void {
 }
 
 console.log('ok - @proofscript/language-service proof-aware document analysis');
+
+
+{
+  const service=new ProofScriptLanguageService();
+  service.openDocument(
+    'file:///nav.ps',
+    1,
+    'theorem id(P : Prop, h : P) : P := h; theorem use(P : Prop, h : P) : P := id(P, h);',
+  );
+  const completions=service.completions(
+    'file:///nav.ps',
+    {line:0,character:0},
+  );
+  equal(completions.some((item)=>item.label==='id'),true);
+  equal(completions.some((item)=>item.label==='Prop'),true);
+  const definition=service.definition(
+    'file:///nav.ps',
+    {line:0,character:75},
+  );
+  equal(definition?.uri,'file:///nav.ps');
+  const references=service.references(
+    'file:///nav.ps',
+    {line:0,character:75},
+    true,
+  );
+  equal(references.length,2);
+}
+console.log('ok - @proofscript/language-service navigation and completion');

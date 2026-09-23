@@ -6,6 +6,7 @@ import type {
 } from './model.js';
 import {analyzeDocument,type AnalysisOptions} from './analyzer.js';
 import {offsetAt} from './positions.js';
+import {completionItems,definitionLocation,referenceLocations} from './navigation.js';
 
 export interface LanguageServiceOptions extends AnalysisOptions {}
 
@@ -52,6 +53,26 @@ export class ProofScriptLanguageService {
 
   diagnostics(uri:string){
     return this.analyze(uri).diagnostics;
+  }
+
+  completions(uri:string,_position:Position){
+    return completionItems(this.analyze(uri));
+  }
+
+  definition(uri:string,position:Position){
+    return definitionLocation(this.analyze(uri),position);
+  }
+
+  references(
+    uri:string,
+    position:Position,
+    includeDeclaration=true,
+  ){
+    return referenceLocations(
+      this.analyze(uri),
+      position,
+      includeDeclaration,
+    );
   }
 
   documentSymbols(uri:string){

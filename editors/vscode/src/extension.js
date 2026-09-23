@@ -319,6 +319,58 @@ async function activate(context){
       clearTimeout(selectionTimer);
       selectionTimer=setTimeout(()=>void syncInfoview(event.textEditor),60);
     }),
+    vscode.languages.registerCompletionItemProvider('proofscript',{
+      provideCompletionItems:async(document,position)=>{
+        const result=await client?.request('textDocument/completion',{
+          textDocument:{uri:document.uri.toString()},
+          position:toProtocolPosition(position),
+        });
+        return (result?.items??[]).map((item)=>{
+          const completion=new vscode.CompletionItem(
+            item.label,
+            item.kind===14
+              ?vscode.CompletionItemKind.Keyword
+              :item.kind===7
+                ?vscode.CompletionItemKind.Class
+                :vscode.CompletionItemKind.Function,
+          );
+          completion.detail=item.detail;
+          return completion;
+        });
+      },
+    },'.'),
+    vscode.languages.registerDefinitionProvider('proofscript',{
+      provideDefinition:async(document,position)=>{
+        const result=await client?.request('textDocument/definition',{
+          textDocument:{uri:document.uri.toString()},
+          position:toProtocolPosition(position),
+        });
+        if(result===null||result===undefined)return undefined;
+        return new vscode.Location(
+          vscode.Uri.parse(result.uri),
+          new vscode.Range(
+            result.range.start.line,result.range.start.character,
+            result.range.end.line,result.range.end.character,
+          ),
+        );
+      },
+    }),
+    vscode.languages.registerReferenceProvider('proofscript',{
+      provideReferences:async(document,position,context)=>{
+        const result=await client?.request('textDocument/references',{
+          textDocument:{uri:document.uri.toString()},
+          position:toProtocolPosition(position),
+          context:{includeDeclaration:context.includeDeclaration},
+        })??[];
+        return result.map((item)=>new vscode.Location(
+          vscode.Uri.parse(item.uri),
+          new vscode.Range(
+            item.range.start.line,item.range.start.character,
+            item.range.end.line,item.range.end.character,
+          ),
+        ));
+      },
+    }),
     vscode.languages.registerHoverProvider('proofscript',{
       provideHover:async(document,position)=>{
         const result=await client?.request('textDocument/hover',{

@@ -269,7 +269,8 @@
       "notes": [
         "Editor analysis distinguishes parse success from kernel verification; only pskernel-admitted declarations are labeled verified.",
         "Declaration-level proof state never fabricates tactic goals: verified theorems report closed, rejected theorems report the actual failure, and unsupported declarations report unavailable.",
-        "The service reuses the current parser/elaborator and accepts an environment factory for future project/import integration."
+        "The service reuses the current parser/elaborator and accepts an environment factory for future project/import integration.",
+        "Completion, same-document definition, and reference lookup are lexical/declaration editor aids only; they do not participate in elaboration or kernel admission."
       ]
     },
     {
@@ -288,7 +289,8 @@
         "The stdio LSP reuses the pinned Lean 4.34 Init.Prelude replay fixture to construct a cached pskernel editor environment when available.",
         "Every document analysis receives a clone of that admitted environment; the fixture is replayed by pskernel rather than trusted as pre-verified metadata.",
         "If the fixture is missing or replay fails, the server falls back to an empty environment and reports the degraded editor environment through serverInfo instead of weakening proof acceptance.",
-        "Project/import environment composition remains a later language-service milestone."
+        "Project/import environment composition remains a later language-service milestone.",
+        "The transport now exposes completion/definition/references backed by the untrusted language-service index; proof verification status remains independently kernel-derived."
       ]
     },
     {

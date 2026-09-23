@@ -19,6 +19,9 @@ export function lspCapabilities(){
   return {
     textDocumentSync:1,
     hoverProvider:true,
+    completionProvider:{triggerCharacters:['.']},
+    definitionProvider:true,
+    referencesProvider:true,
     documentSymbolProvider:true,
     experimental:{
       proofscriptProtocolVersion:PROOFSCRIPT_LSP_PROTOCOL_VERSION,
@@ -118,6 +121,34 @@ export class ProofScriptLanguageServer {
           });
           return;
         }
+        case 'textDocument/completion':
+          this.reply(message.id,{
+            isIncomplete:false,
+            items:this.service.completions(
+              message.params.textDocument.uri,
+              message.params.position as Position,
+            ),
+          });
+          return;
+        case 'textDocument/definition':
+          this.reply(
+            message.id,
+            this.service.definition(
+              message.params.textDocument.uri,
+              message.params.position as Position,
+            ),
+          );
+          return;
+        case 'textDocument/references':
+          this.reply(
+            message.id,
+            this.service.references(
+              message.params.textDocument.uri,
+              message.params.position as Position,
+              message.params.context?.includeDeclaration!==false,
+            ),
+          );
+          return;
         case 'textDocument/hover':
           this.reply(
             message.id,

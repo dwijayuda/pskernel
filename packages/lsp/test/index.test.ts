@@ -17,6 +17,8 @@ import {
   const capabilities=lspCapabilities();
   equal(capabilities.textDocumentSync,1);
   equal(capabilities.hoverProvider,true);
+  equal(capabilities.definitionProvider,true);
+  equal(capabilities.referencesProvider,true);
   equal(
     capabilities.experimental.proofscriptProtocolVersion,
     PROOFSCRIPT_LSP_PROTOCOL_VERSION,

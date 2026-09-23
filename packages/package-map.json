@@ -383,6 +383,22 @@
   },
   "notes": [
     "Lean 4.34 final removed deprecated in-kernel native reduction; no NativeEvaluator/native-ir kernel extension is part of the compatibility architecture.",
-    "npm workspaces are enabled so package-name imports resolve from the single root install; the root lean-ts-kernel remains the TCB package and outer workspaces may depend on it, never the reverse."
-  ]
+    "npm workspaces are enabled so package-name imports resolve from the single root install; the root lean-ts-kernel remains the TCB package and outer workspaces may depend on it, never the reverse.",
+    "docs/PROOFSCRIPT_ARCHITECTURE.md plus scripts/proofscript-architecture-check.mjs define and enforce the canonical verified compiler dependency direction."
+  ],
+  "preferredPipeline": [
+    "syntax",
+    "meta",
+    "elab",
+    "checked-core",
+    "erasure",
+    "compiler-ir",
+    "backend-ts",
+    "typescript"
+  ],
+  "legacySoftwarePipeline": {
+    "status": "transitional",
+    "package": "language",
+    "rule": "no automatic fallback from verified-core compilation"
+  }
 }

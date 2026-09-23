@@ -1,3 +1,10 @@
+/**
+ * TRANSITIONAL LEGACY SOFTWARE PIPELINE.
+ *
+ * New foundational work must target verified-pipeline.ts:
+ * source -> Lean-compatible elaboration -> checked core -> erasure -> IR.
+ * Do not add proof/type-theory semantics here.
+ */
 import {
   LEAN_SEMANTICS_VERSION,
   PROOFSCRIPT_SPEC_VERSION,

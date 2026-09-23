@@ -7,6 +7,13 @@ Status: living plan.
 Build ProofScript as an npm-native verified programming/theorem-proving ecosystem around a small Lean-4.34-compatible TypeScript kernel.
 
 ## Non-negotiable architecture
+- The canonical compiler path is source -> syntax -> Lean-compatible elaboration
+  -> @proofscript/checked-core -> @proofscript/erasure -> compiler IR
+  -> TypeScript -> tsc -> JavaScript.
+- @proofscript/checked-core is the only frontend/compiler semantic handoff and
+  is constructed by pskernel re-admission.
+- The legacy software checker is transitional coverage only; it must not become
+  a second type theory or automatic fallback.
 
 - pskernel stays small and independently checkable.
 - Parser, elaborator, tactics, compiler, LSP, browser hosting and project tooling stay outside the default TCB.
@@ -54,9 +61,12 @@ Exit criteria:
 ### Phase C — software/compiler stack
 
 Packages:
+- `@proofscript/checked-core`
+- `@proofscript/erasure`
 - `@proofscript/compiler-ir`
 - `@proofscript/runtime`
 - `@proofscript/backend-ts`
+- `@proofscript/compiler`
 
 Exit criteria:
 - kernel terms lower into a compiler-specific IR
@@ -164,3 +174,25 @@ ProofScript v0.7 track
 The normal developer CLI is `psc` with `init`, `check`, `build`, `run`, `emit-lean`, and `clean`. The low-level `pskernel` CLI remains available for replay/module workflows.
 
 This checkpoint does not claim theorem-prover completion: theorem/proof syntax, elaboration to kernel Expr, contracts, and pskernel admission remain the next vertical milestones.
+
+
+## Verified-core convergence checkpoint
+
+The preferred compiler path is now executable for the first generic function
+slice:
+
+```text
+.ps
+-> @proofscript/syntax
+-> @proofscript/meta / @proofscript/elab
+-> @proofscript/checked-core (pskernel re-admission)
+-> @proofscript/erasure
+-> verified @proofscript/compiler-ir
+-> @proofscript/backend-ts
+-> TypeScript Compiler API
+-> .js / .d.ts / source map
+```
+
+`psc check --verified` and `psc build --verified` expose this path without
+fallback. The previous software checker/compiler lane remains temporary until
+verified-core coverage catches up.

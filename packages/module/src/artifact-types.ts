@@ -74,7 +74,7 @@ export interface Lean4ExportLoadResult {
 export interface CheckedAdmissionsLoadResult {
   readonly payloadKind:'proofscript-checked-admissions-json';
   readonly env:Environment;
-  readonly admissions:number;
+  readonly admissions:readonly CheckedCoreAdmission[];
   readonly module:string;
   readonly integrity:Sha256;
 }

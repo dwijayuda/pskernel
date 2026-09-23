@@ -88,7 +88,7 @@ console.log('ok - @proofscript/module TypeScript MVP');
   if(loaded.payloadKind!=='proofscript-checked-admissions-json'){
     throw new Error('expected native admission replay');
   }
-  assert.equal(loaded.admissions,1);
+  assert.equal(loaded.admissions.length,1);
   assert.equal(loaded.env.find(id)?.kind,'definition');
   const tampered=structuredClone(artifact);
   tampered.payload.text=tampered.payload.text.replace(

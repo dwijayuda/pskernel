@@ -8,6 +8,7 @@ import {elaborateV061Declarations} from '@proofscript/elab';
 import {
   DEFAULT_KERNEL,
   canonicalJson,
+  type ModuleArtifactV2,
 } from '@proofscript/module';
 import {
   BuildCache,
@@ -19,6 +20,9 @@ import {
   requireVerifiedBaseEnvironment,
 } from './verified-pipeline.js';
 import type {ResolvedSourceProject} from './project-sources.js';
+import {
+  createReplayGatedModuleArtifact,
+} from './project-module-artifact.js';
 
 const MODULE_CACHE_SCHEMA='proofscript-checked-module-cache-v1';
 const PROJECT_INTEGRITY_SCHEMA='proofscript-project-integrity-v1';
@@ -130,6 +134,7 @@ export function checkVerifiedSourceProject(
   const localAdmissions=
     new Map<string,readonly CheckedCoreAdmission[]>();
   const moduleIntegrities=new Map<string,string>();
+  const moduleArtifacts=new Map<string,ModuleArtifactV2>();
   const cache=options.moduleCache??sharedModuleCache;
   let moduleCacheHits=0;
   let moduleCacheMisses=0;
@@ -148,13 +153,6 @@ export function checkVerifiedSourceProject(
     );
     moduleIntegrities.set(name,integrity);
 
-    const cached=cache.get(integrity);
-    if(cached!==undefined){
-      localAdmissions.set(name,cached.admissions);
-      moduleCacheHits+=1;
-      continue;
-    }
-
     const closure=new Set(sourceDependencyClosure(project.plan,name));
     const dependencyAdmissions=project.plan.order
       .filter((candidate)=>closure.has(candidate))
@@ -165,14 +163,43 @@ export function checkVerifiedSourceProject(
       base,
       dependencyAdmissions,
     );
-    const checked=elaborateV061Declarations(
-      source.surface,
-      dependencyChecked.environment,
-      dependencyChecked,
-    );
-    localAdmissions.set(name,checked.admissions);
-    cache.set(integrity,{admissions:checked.admissions});
-    moduleCacheMisses+=1;
+
+    const cached=cache.get(integrity);
+    let admissions:readonly CheckedCoreAdmission[];
+    if(cached!==undefined){
+      admissions=cached.admissions;
+      moduleCacheHits+=1;
+    }else{
+      const checked=elaborateV061Declarations(
+        source.surface,
+        dependencyChecked.environment,
+        dependencyChecked,
+      );
+      admissions=checked.admissions;
+      cache.set(integrity,{admissions});
+      moduleCacheMisses+=1;
+    }
+    localAdmissions.set(name,admissions);
+
+    const artifactDependencies=source.imports.map((dependency)=>{
+      const artifact=moduleArtifacts.get(dependency);
+      if(artifact===undefined){
+        throw new Error(
+          "PS_PROJECT_INTERNAL_ARTIFACT: dependency '"+dependency+
+          "' of '"+name+"' has no artifact",
+        );
+      }
+      return {module:dependency,artifact};
+    });
+    const artifact=createReplayGatedModuleArtifact({
+      module:name,
+      admissions,
+      canonicalSourceHash:source.canonicalSourceHash,
+      sourceCacheKey:integrity,
+      dependencyEnvironment:dependencyChecked.environment,
+      dependencies:artifactDependencies,
+    });
+    moduleArtifacts.set(name,artifact);
   }
 
   const allAdmissions=project.plan.order.flatMap(
@@ -212,6 +239,10 @@ export function checkVerifiedSourceProject(
     moduleCacheHits,
     moduleCacheMisses,
     moduleOrder:project.plan.order,
+    moduleArtifacts:project.plan.order.map((name)=>({
+      module:name,
+      artifact:moduleArtifacts.get(name)!,
+    })),
     moduleSources:project.plan.order.map((name)=>{
       const source=project.sources.get(name)!;
       return {
@@ -220,6 +251,7 @@ export function checkVerifiedSourceProject(
         sourceKind:source.sourceKind,
         canonicalSourceHash:source.canonicalSourceHash,
         moduleIntegrity:moduleIntegrities.get(name)!,
+        moduleArtifactIntegrity:moduleArtifacts.get(name)!.integrity,
       };
     }),
   };

@@ -58,7 +58,7 @@ export function loadModuleArtifact(
   return {
     payloadKind:'proofscript-checked-admissions-json',
     env:checked.environment,
-    admissions:admissions.length,
+    admissions,
     module:artifact.module,
     integrity:artifact.integrity,
   };

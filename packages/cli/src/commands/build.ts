@@ -5,6 +5,9 @@ import {compileVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
 import type {BuildResult,CommonArgs} from '../types.js';
+import {
+  writeVerifiedModuleArtifacts,
+} from '../project-artifact-output.js';
 
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   if(common.verified){
@@ -28,6 +31,10 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     const leanPath=join(outDir,stem+'.lean');
     const mapPath=join(outDir,stem+'.js.map');
     const manifestPath=join(outDir,stem+'.proofscript.json');
+    const moduleArtifactFiles=await writeVerifiedModuleArtifacts(
+      outDir,
+      result.moduleArtifacts,
+    );
 
     const report={
       ok:true,
@@ -55,6 +62,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
         sourceMap:result.emitted.sourceMap===undefined?null:mapPath,
         lean:leanPath,
         manifest:manifestPath,
+        modules:moduleArtifactFiles,
       },
       typescriptVersion:result.emitted.typescriptVersion,
     };

@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { delimiter, dirname, join, resolve } from "node:path";
 
-const expectedVersion = /^Lean \\(version 4\\.34\\.0(?:,|\\)).*Release\\)?$/;
+const expectedVersion = /^Lean \(version 4\.34\.0(?:,|\)).*Release\)?$/;
 const expectedGitHash = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b";
 const leanExe = process.platform === "win32" ? "lean.exe" : "lean";
 const leancheckerExe = process.platform === "win32" ? "leanchecker.exe" : "leanchecker";

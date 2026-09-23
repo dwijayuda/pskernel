@@ -15,7 +15,7 @@ const candidates=[
 const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
 if(!bin)throw new Error('native-oracle-smoke: set LEAN434_BIN or put Lean 4.34.0 on PATH');
 const lean=join(bin,leanExe);
-const expectedVersion=/^Lean \\(version 4\\.34\\.0(?:,|\\)).*Release\\)?$/;
+const expectedVersion=/^Lean \(version 4\.34\.0(?:,|\)).*Release\)?$/;
 const expectedGitHash='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
 const versionRun=spawnSync(lean,['--version'],{encoding:'utf8',timeout:5000});
 const version=versionRun.stdout.trim();

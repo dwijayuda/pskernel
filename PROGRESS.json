@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 166,
   "notes": [
+    "Runner syntax repair: corrected an over-escaped JavaScript Lean-version regex introduced during oracle identity hardening; the malformed regex was found by immediate local syntax-risk validation before any oracle evidence was accepted.",
     "Oracle-runner identity hardening: official-oracle, native-oracle-smoke, and fixture regeneration now require the exact Lean 4.34.0 commit before emitting evidence. official-oracle is also portable across Windows/POSIX executable names and PATH delimiters, and version matching accepts the real release header shape while the commit check supplies exact identity.",
     "Oracle identity pin hardening: Lean4ExportReplay now rejects metadata unless both version 4.34.0 and git hash 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b match by default. The Windows Full-Std runner and adversarial oracle also verify lean --githash against ORACLE_LOCK before producing evidence. Synthetic 4.34 test streams were updated to the normative commit and a direct wrong-hash rejection regression was added.",
     "Canonical Full-Std ordering fidelity: module-stream replay now sources roots from Lean 4.34 `EnvironmentHeader.moduleData[idx].constNames`, with a total-coverage check and an explicit `rootOrder=olean-module-constNames` protocol marker validated by the Node consumer. Adaptive/hot diagnostic root numbering intentionally remains Name.quickLt-stable.",
@@ -223,5 +224,5 @@
   ],
   "currentTreeExpectedDirectTests": 166,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "direct kernel suite remains 166/166 at the latest executable checkpoint; oracle runner identity checks changed afterward and require script syntax/local Lean execution as applicable"
+  "currentTreeVerification": "direct kernel suite remains 166/166; updated oracle runner regexes require refreshed local node --check/version-pattern smoke before use"
 }

@@ -92,9 +92,20 @@ export class TypeChecker {
     return r;
   }
   private inferAppOnlySpine(e:Extract<Expr,{kind:'app'}>):Expr{
-    const av=appView(e);let type=this.infer(av.fn,true);
-    for(const arg of av.args){const pi=this.ensureForall(type,e);type=instantiate1(pi.body,arg);}
-    return type;
+    const av=appView(e);let type=this.infer(av.fn,true),j=0;
+    // Match Lean 4.34 infer_app: consume syntactic Pi binders without eagerly
+    // instantiating them, and instantiate the accumulated argument slice only
+    // when a non-Pi head must be exposed.
+    for(let i=0;i<av.args.length;i++){
+      if(type.kind==='forall'){
+        type=type.body;
+      }else{
+        type=this.instantiateRev(type,av.args.slice(j,i));
+        type=this.ensureForall(type,e).body;
+        j=i;
+      }
+    }
+    return this.instantiateRev(type,av.args.slice(j));
   }
 
   check(e:Expr):Expr { return this.infer(e,false); }
@@ -120,7 +131,12 @@ export class TypeChecker {
       case'fvar':{const d=this.lctx.get(e.id);if(!d)throw new KernelError(`unknown free variable ${e.id}`);r=d.type;break;}
       case'sort':if(!inferOnly)this.checkLevel(e.level);r=sort(levelSucc(e.level));break;
       case'const':{const i=this.env.get(e.name);if(e.levels.length!==i.levelParams.length)throw new KernelError(`incorrect number of universe levels at ${nameToString(e.name)}`);if(!inferOnly){if(isUnsafeConstant(i)&&this.definitionSafety!=='unsafe')throw new KernelError(`invalid declaration, it uses unsafe declaration '${nameToString(e.name)}'`);if(i.kind==='definition'&&i.safety==='partial'&&this.definitionSafety==='safe')throw new KernelError(`invalid declaration, safe declaration must not contain partial declaration '${nameToString(e.name)}'`);for(const l of e.levels)this.checkLevel(l);}r=instantiateExprLevels(i.type,i.levelParams,e.levels);break;}
-      case'lit':{if(e.literal.kind==='nat')checkNatSize(e.literal.value,this.limits.maxNatBytes,'Nat');const n=e.literal.kind==='nat'?N.Nat:N.String;if(!inferOnly)this.env.get(n);r=constant(n);break;}
+      case'lit':{
+        if(e.literal.kind==='nat')checkNatSize(e.literal.value,this.limits.maxNatBytes,'Nat');
+        // Final Lean 4.34 trusts the prelude here: infer_lit returns Nat/String
+        // directly and does not verify that the literal type is present in env.
+        r=constant(e.literal.kind==='nat'?N.Nat:N.String);break;
+      }
       case'mdata':r=this.infer(e.expr,inferOnly);break;
       case'app':{
         if(inferOnly){r=this.inferAppOnlySpine(e);break;}

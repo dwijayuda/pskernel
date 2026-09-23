@@ -21,8 +21,14 @@ const module:WasmIrModule={
 };
 
 const canonical=emitBinaryenWasm(module);
+const canonicalAgain=emitBinaryenWasm(module);
 ok(canonical.binary.length>0);
 ok(WebAssembly.validate(canonical.binary));
+equal(canonical.text,canonicalAgain.text);
+equal(
+  Buffer.from(canonical.binary).toString('hex'),
+  Buffer.from(canonicalAgain.binary).toString('hex'),
+);
 
 const compiled=new WebAssembly.Module(canonical.binary);
 const instance=new WebAssembly.Instance(compiled,{});
@@ -43,3 +49,5 @@ equal((optimizedNot as (value:number)=>number)(0),1);
 equal((optimizedNot as (value:number)=>number)(1),0);
 
 console.log('ok - @proofscript/backend-wasm Binaryen W1 execution');
+
+console.log('ok - @proofscript/backend-wasm canonical emission is deterministic');

@@ -1,5 +1,6 @@
-import type {
-  VerifiedIrModule,
+import {
+  validateVerifiedIrModule,
+  type VerifiedIrModule,
 } from '@proofscript/compiler-ir/verified';
 import {
   validateWasmIrModule,
@@ -31,6 +32,7 @@ export const PROOFSCRIPT_WASM_PROFILE=
 export function lowerVerifiedIrToWasm(
   module:VerifiedIrModule,
 ):WasmIrModule {
+  validateVerifiedIrModule(module);
   if((module.imports??[]).length!==0){
     return unsupported(
       'PS_WASM_UNSUPPORTED_EXTERNAL_IMPORTS',

@@ -77,3 +77,19 @@ throws(
 );
 
 console.log('ok - @proofscript/wasm-lowering W1 rejects external imports');
+
+throws(
+  ()=>lowerVerifiedIrToWasm({
+    kind:'proofscript-verified-ir',
+    declarations:[{
+      name:'broken',
+      typeParameters:[],
+      parameters:[],
+      resultType:{kind:'primitive',name:'Bool'},
+      body:{kind:'var',name:'missing'},
+    }],
+  }),
+  /unknown variable|free variable|missing/u,
+);
+
+console.log('ok - @proofscript/wasm-lowering validates input IR');

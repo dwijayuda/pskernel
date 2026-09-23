@@ -82,6 +82,16 @@ test('isProp requires the inferred type to reduce to a Sort',()=>{
  throws(()=>tc.isProp(natLit(0)));
 });
 
+test('binder defeq flattens wide Pi chains within Lean kernel depth budget',()=>{
+ let a:any=constant(N.Nat),b:any=constant(N.Nat);
+ for(let i=0;i<200;i++){
+   a=forallE(nameFromDotted('left'+i),constant(N.Nat),a);
+   b=forallE(nameFromDotted('right'+i),constant(N.Nat),b);
+ }
+ const tc=new TypeChecker(baseEnv(),undefined,undefined,{maxRecDepth:1,maxNatBytes:134217728n});
+ assert(tc.isDefEq(a,b),'binder display names must not matter and wide binder chains must not consume one recursion frame each');
+});
+
 test('proof irrelevance compares arbitrary proofs of the same proposition',()=>{
  const env=baseEnv(),P=nameFromDotted('ProofIrrel.P');env.add({kind:'axiom',name:P,levelParams:[],type:sort(levelZero)});
  const lctx=new LocalContext();lctx.addLocal('p@0',nameFromDotted('p'),constant(P));lctx.addLocal('q@0',nameFromDotted('q'),constant(P));

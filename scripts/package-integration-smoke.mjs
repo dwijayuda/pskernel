@@ -238,6 +238,34 @@ assert(
 );
 
 
+
+
+const verifiedAdt=compileVerifiedSource(
+  'inductive MaybeNat where { | none; | some(value : Nat); } '+
+  'const noneValue : MaybeNat := MaybeNat.none; '+
+  'const oneValue : MaybeNat := MaybeNat.some(1);',
+  'verified-adt.ts',
+);
+assert(
+  verifiedAdt.typeScript.includes('export type MaybeNat ='),
+  'verified checked inductive did not reach TypeScript union emission',
+);
+assert(
+  verifiedAdt.typeScript.includes('MaybeNat["some"](1n)'),
+  'verified constructor application did not reach runtime factory',
+);
+assert(
+  verifiedAdt.emitted.javascript.includes(
+    'Symbol("ProofScript.MaybeNat.tag")',
+  ),
+  'verified ADT lost nominal runtime constructor tag',
+);
+assert(
+  verifiedAdt.emitted.declaration.includes('export declare const MaybeNat'),
+  'verified ADT constructor API was not preserved in .d.ts',
+);
+
+
 const snapshot=processDocument('demo.ps',1,'x!',{
   process:text=>({
     state:{length:text.length},

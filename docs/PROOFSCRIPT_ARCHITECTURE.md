@@ -185,3 +185,29 @@ branded interface.
 Dependent/existential structures such as `{ T : Type; value : T }` remain
 fail-closed in verified compilation until their runtime existential packaging
 semantics are designed; they are not flattened into unsound structural types.
+
+
+## Verified ADT constructor checkpoint
+
+The preferred pipeline now covers simple unparameterized, non-recursive
+algebraic data types and constructor values:
+
+```proofscript
+inductive MaybeNat where {
+  | none;
+  | some(value : Nat);
+}
+
+const noneValue : MaybeNat := MaybeNat.none;
+const oneValue : MaybeNat := MaybeNat.some(1);
+```
+
+The inductive and constructors are admitted by pskernel first. Erasure derives
+runtime constructor shape from pskernel `ConstructorInfo`, then verified IR
+represents the ADT as a nominal tagged union. TypeScript emits an internal
+unique-symbol tag plus a constructor object; JavaScript therefore preserves
+constructor identity without trusting source-only ADT metadata.
+
+Parameterized, indexed, recursive inductives and pattern matching remain
+separate milestones and fail closed until their Lean-compatible core semantics
+are implemented.

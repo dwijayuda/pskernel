@@ -189,3 +189,48 @@ console.log('ok - psc verified proposition-based if pipeline');
   );
 }
 console.log('ok - psc verified nominal structure pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'inductive MaybeNat where { | none; | some(value : Nat); } '+
+    'const noneValue : MaybeNat := MaybeNat.none; '+
+    'const oneValue : MaybeNat := MaybeNat.some(1);',
+    'adt.ts',
+  );
+  equal(result.checkedCore.inductives.length,1);
+  equal(result.ir.inductives?.length,1);
+  equal(result.ir.inductives?.[0]?.name,'MaybeNat');
+  equal(result.typeScript.includes('export type MaybeNat ='),true);
+  equal(
+    result.typeScript.includes(
+      'unique symbol = Symbol("ProofScript.MaybeNat.tag")',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes(
+      '"some": (__field0: bigint): MaybeNat',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes(
+      'export const oneValue: MaybeNat = MaybeNat["some"](1n);',
+    ),
+    true,
+  );
+  equal(
+    result.emitted.javascript.includes('Symbol("ProofScript.MaybeNat.tag")'),
+    true,
+  );
+  equal(
+    result.emitted.declaration.includes('export type MaybeNat ='),
+    true,
+  );
+  equal(
+    result.emitted.declaration.includes('export declare const MaybeNat'),
+    true,
+  );
+}
+console.log('ok - psc verified ADT constructor pipeline');

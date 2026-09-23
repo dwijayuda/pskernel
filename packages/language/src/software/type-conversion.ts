@@ -24,6 +24,10 @@ export function asSoftwareType(
       throw new Error(
         'PS_CHECK_TYPE_APPLICATION_UNSUPPORTED: applied/generic types require elaboration',
       );
+    case 'equality':
+      throw new Error(
+        'PS_CHECK_PROPOSITION_EQUALITY_UNSUPPORTED: proof propositions require verified elaboration',
+      );
     case 'arrow':
       return {
         kind:'function',

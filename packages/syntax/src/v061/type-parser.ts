@@ -10,6 +10,12 @@ export type V061TypeExpr =
       readonly span:SourceSpan;
     }
   | {
+      readonly kind:'equality';
+      readonly left:V061TypeExpr;
+      readonly right:V061TypeExpr;
+      readonly span:SourceSpan;
+    }
+  | {
       readonly kind:'arrow';
       readonly domain:V061TypeExpr;
       readonly codomain:V061TypeExpr;
@@ -18,7 +24,7 @@ export type V061TypeExpr =
   | {readonly kind:'group';readonly value:V061TypeExpr;readonly span:SourceSpan};
 
 export function parseV061Type(context:V061ParseContext):V061TypeExpr {
-  const domain=parseApplicationType(context);
+  const domain=parseEqualityType(context);
   if(context.cursor.at('->')||context.cursor.at('→')){
     context.cursor.consume();
     const codomain=parseV061Type(context);
@@ -30,6 +36,25 @@ export function parseV061Type(context:V061ParseContext):V061TypeExpr {
     };
   }
   return domain;
+}
+
+function parseEqualityType(context:V061ParseContext):V061TypeExpr {
+  const left=parseApplicationType(context);
+  if(!context.cursor.at('='))return left;
+  context.cursor.consume();
+  const right=parseApplicationType(context);
+  if(context.cursor.at('=')){
+    throw new SyntaxError(
+      'propositional equality is non-associative; parenthesize nested equality',
+      context.cursor.peek().span,
+    );
+  }
+  return {
+    kind:'equality',
+    left,
+    right,
+    span:{start:left.span.start,end:right.span.end},
+  };
 }
 
 function canStartAtomicType(token:Token):boolean {
@@ -117,6 +142,12 @@ export function lowerV061TypeToLean(
       const precedence=70;
       const rendered=lowerV061TypeToLean(type.fn,precedence)+' '+
         type.args.map((arg)=>lowerV061TypeToLean(arg,precedence+1)).join(' ');
+      return precedence<parentPrecedence?'('+rendered+')':rendered;
+    }
+    case 'equality':{
+      const precedence=50;
+      const rendered=lowerV061TypeToLean(type.left,precedence+1)+' = '+
+        lowerV061TypeToLean(type.right,precedence+1);
       return precedence<parentPrecedence?'('+rendered+')':rendered;
     }
     case 'arrow':{

@@ -16,6 +16,32 @@ import {elaborateV061Constant} from './v061-constant-elab.js';
 import type {V061CoreElabContext} from './v061-context.js';
 import {v061LocalInstanceTerms} from './v061-context.js';
 
+function elaborateTypePositionApplication(
+  fn:Expr,
+  args:readonly Expr[],
+  context:V061CoreElabContext,
+):Expr {
+  const applied=elaborateApplication({
+    environment:context.environment,
+    metaContext:context.metaContext,
+    fn,
+    args,
+    localContext:context.localContext,
+    localInstances:v061LocalInstanceTerms(context),
+    globalInstances:context.globalInstances,
+    classNames:context.classes,
+  });
+  const term=context.metaContext.instantiate(applied.term);
+  const resultType=context.metaContext.instantiate(applied.type);
+  if(hasMVar(term)||hasMVar(resultType)){
+    throw new Error(
+      'PS_ELAB_TYPE_APPLICATION_STUCK: unresolved implicit/instance '+
+      'arguments in '+exprToString(term),
+    );
+  }
+  return term;
+}
+
 function elaborateV061TypePositionTerm(
   syntax:V061TypeExpr,
   context:V061CoreElabContext,
@@ -36,31 +62,23 @@ function elaborateV061TypePositionTerm(
       }
       return elaborateV061Constant(name,context);
     }
-    case 'application':{
-      const fn=elaborateV061TypePositionTerm(syntax.fn,context);
-      const args=syntax.args.map(
-        (arg)=>elaborateV061TypePositionTerm(arg,context),
+    case 'application':
+      return elaborateTypePositionApplication(
+        elaborateV061TypePositionTerm(syntax.fn,context),
+        syntax.args.map(
+          (arg)=>elaborateV061TypePositionTerm(arg,context),
+        ),
+        context,
       );
-      const applied=elaborateApplication({
-        environment:context.environment,
-        metaContext:context.metaContext,
-        fn,
-        args,
-        localContext:context.localContext,
-        localInstances:v061LocalInstanceTerms(context),
-        globalInstances:context.globalInstances,
-        classNames:context.classes,
-      });
-      const term=context.metaContext.instantiate(applied.term);
-      const resultType=context.metaContext.instantiate(applied.type);
-      if(hasMVar(term)||hasMVar(resultType)){
-        throw new Error(
-          'PS_ELAB_TYPE_APPLICATION_STUCK: unresolved implicit/instance '+
-          'arguments in '+exprToString(term),
-        );
-      }
-      return term;
-    }
+    case 'equality':
+      return elaborateTypePositionApplication(
+        elaborateV061Constant(nameFromDotted('Eq'),context),
+        [
+          elaborateV061TypePositionTerm(syntax.left,context),
+          elaborateV061TypePositionTerm(syntax.right,context),
+        ],
+        context,
+      );
     case 'arrow':{
       const domain=elaborateV061Type(syntax.domain,context);
       const codomain=elaborateV061Type(syntax.codomain,context);

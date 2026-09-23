@@ -821,7 +821,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 
 {
   const module=parseV061Module(
-    'theorem rwProof(a : Nat, b : Nat, h : Eq a b) : Eq a b := '+
+    'theorem rwProof(a : Nat, b : Nat, h : a = b) : a = b := '+
     'by rw [h]; rw [← h]; assumption;',
   );
   const body=module.declarations[0]?.body;
@@ -835,19 +835,19 @@ console.log('ok - @proofscript/syntax lexer MVP');
   }
   equal(
     lowerV061ModuleToLean(module),
-    'theorem rwProof (a : Nat) (b : Nat) (h : Eq a b) : Eq a b := '+
+    'theorem rwProof (a : Nat) (b : Nat) (h : a = b) : a = b := '+
     'by rw [h]; rw [← h]; assumption\n',
   );
 }
 
 {
   const module=parseV061Module(
-    'theorem succEq(a : Nat, h : Eq Nat.succ(a) a) : '+
+    'theorem succEq(a : Nat, h : Nat.succ(a) = a) : '+
     'Eq Nat.succ(a) a := by rw [h];',
   );
   equal(
     lowerV061ModuleToLean(module),
-    'theorem succEq (a : Nat) (h : Eq (Nat.succ a) a) : '+
+    'theorem succEq (a : Nat) (h : Nat.succ a = a) : '+
     'Eq (Nat.succ a) a := by rw [h]\n',
   );
 }
@@ -855,7 +855,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 {
   const module=parseV061Module(
     'theorem simpProof(A : Type, B : Type, C : Type, D : Type, '+
-    'h1 : Eq BoxT(A) B, h2 : Eq WrapT(C) D) : P := '+
+    'h1 : BoxT(A) = B, h2 : WrapT(C) = D) : P := '+
     'by simp only [h1, ← h2];',
   );
   const body=module.declarations[0]?.body;
@@ -872,7 +872,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(
     lowerV061ModuleToLean(module),
     'theorem simpProof (A : Type) (B : Type) (C : Type) (D : Type) '+
-    '(h1 : Eq (BoxT A) B) (h2 : Eq (WrapT C) D) : P := '+
+    '(h1 : BoxT A = B) (h2 : WrapT C = D) : P := '+
     'by simp only [h1, ← h2]\n',
   );
 }

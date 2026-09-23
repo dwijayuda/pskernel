@@ -171,10 +171,10 @@ assert(
 
 
 const verifiedRewrite=compileVerifiedSource(
-  'theorem rewriteForward(a : Nat, b : Nat, h : Eq a b) : '+
-  'Eq a b := by rw [h]; '+
-  'theorem rewriteReverse(a : Nat, b : Nat, h : Eq a b) : '+
-  'Eq b a := by rw [← h];',
+  'theorem rewriteForward(a : Nat, b : Nat, h : a = b) : '+
+  'a = b := by rw [h]; '+
+  'theorem rewriteReverse(a : Nat, b : Nat, h : a = b) : '+
+  'b = a := by rw [← h];',
   'verified-rewrite.ts',
 );
 assert(
@@ -189,8 +189,8 @@ const verifiedSimpOnly=compileVerifiedSource(
   'inductive PairT(α : Type, β : Type) where { | mk; } '+
   'theorem simplifyTypes'+
   '(A : Type, B : Type, C : Type, D : Type, '+
-  'h1 : Eq BoxT(A) B, h2 : Eq WrapT(C) D) : '+
-  'Eq PairT(BoxT(A), WrapT(C)) PairT(B, D) := '+
+  'h1 : BoxT(A) = B, h2 : WrapT(C) = D) : '+
+  'PairT(BoxT(A), WrapT(C)) = PairT(B, D) := '+
   'by simp only [h1, h2];',
   'verified-simp-only.ts',
 );
@@ -201,8 +201,8 @@ assert(
 
 
 const verifiedDependentTheoremType=compileVerifiedSource(
-  'theorem succRewrite(a : Nat, h : Eq Nat.succ(a) a) : '+
-  'Eq Nat.succ(a) a := by rw [h];',
+  'theorem succRewrite(a : Nat, h : Nat.succ(a) = a) : '+
+  'Nat.succ(a) = a := by rw [h];',
   'verified-dependent-theorem-type.ts',
 );
 assert(

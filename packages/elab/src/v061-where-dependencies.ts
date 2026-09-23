@@ -20,6 +20,10 @@ function collectTypeDependencies(
       collectTypeDependencies(type.fn,names,out);
       for(const arg of type.args)collectTypeDependencies(arg,names,out);
       return;
+    case 'equality':
+      collectTypeDependencies(type.left,names,out);
+      collectTypeDependencies(type.right,names,out);
+      return;
     case 'arrow':
       collectTypeDependencies(type.domain,names,out);
       collectTypeDependencies(type.codomain,names,out);

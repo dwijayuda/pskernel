@@ -37,7 +37,7 @@ console.log('ok - @proofscript/elab foundation');
 
 function makeApplicationEnvironment():{
   env:Environment;
-  names:{Nat:returnType<typeof nameFromDotted>;zero:returnType<typeof nameFromDotted>};
+  names:{Nat:ReturnType<typeof nameFromDotted>;zero:ReturnType<typeof nameFromDotted>};
 }{
   const env=new Environment();
   const kernel=new Kernel(env);

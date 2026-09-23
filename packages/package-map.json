@@ -254,6 +254,25 @@
       ]
     },
     {
+      "name": "language-service",
+      "path": "packages/language-service",
+      "phase": "D",
+      "trust": "untrusted-support",
+      "status": "proof-aware-document-service-mvp",
+      "packageName": "@proofscript/language-service",
+      "dependsOn": [
+        "syntax",
+        "elab",
+        "kernel"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Editor analysis distinguishes parse success from kernel verification; only pskernel-admitted declarations are labeled verified.",
+        "Declaration-level proof state never fabricates tactic goals: verified theorems report closed, rejected theorems report the actual failure, and unsupported declarations report unavailable.",
+        "The service reuses the current parser/elaborator and accepts an environment factory for future project/import integration."
+      ]
+    },
+    {
       "name": "lsp",
       "path": "packages/lsp",
       "phase": "D",
@@ -261,12 +280,12 @@
       "status": "foundation",
       "packageName": "@proofscript/lsp",
       "dependsOn": [
-        "language",
+        "language-service",
         "pretty"
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Foundation provides UTF-16 offset/position mapping and diagnostic conversion; protocol transport and semantic requests remain later milestones."
+        "LSP transport remains untrusted and downstream of the proof-aware language service; transport/editor caches have no proof authority."
       ]
     },
     {

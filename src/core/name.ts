@@ -37,6 +37,24 @@ function components(n:Name,out:NameComponent[]=[]):NameComponent[]{
   return out;
 }
 
+export function nameIsPrefixOf(prefix:Name,n:Name):boolean{
+  const ps=components(prefix),ns=components(n);
+  if(ps.length>ns.length)return false;
+  for(let i=0;i<ps.length;i++){
+    const a=ps[i]!,b=ns[i]!;
+    if(a.k!==b.k||a.v!==b.v)return false;
+  }
+  return true;
+}
+
+/** Lean C++ `operator+(Name, Name)`: append suffix components structurally. */
+export function nameAppend(prefix:Name,suffix:Name):Name{
+  let r=prefix;
+  for(const c of components(suffix))
+    r=c.k===0?strName(r,c.v as string):numName(r,c.v as bigint);
+  return r;
+}
+
 export function nameReplacePrefix(n: Name, prefix: Name, replacement: Name = anonymous): Name | null {
   const ns=components(n),ps=components(prefix);
   if(ps.length>ns.length)return null;

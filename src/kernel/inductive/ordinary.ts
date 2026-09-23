@@ -5,7 +5,7 @@ import { BinderInfo, Expr, app, appView, constant, consumeTypeAnnotations, exprE
 import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
 import { Level, isNotZero, levelEqStructural, levelEquivalent, levelLe, levelParam, levelZero, normalizesToZero } from '../../core/level.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
-import { Name, anonymous, nameAppendAfter, nameAppendIndexAfter, nameEq, nameFromDotted, nameKey, nameReplacePrefix, nameToString, strName } from '../../core/name.js';
+import { Name, anonymous, nameAppendAfter, nameAppendIndexAfter, nameEq, nameFromDotted, nameIsPrefixOf, nameKey, nameReplacePrefix, nameToString, strName } from '../../core/name.js';
 import { TypeChecker } from '../type-checker.js';
 import { isPrimitiveName } from '../primitive-names.js';
 
@@ -55,9 +55,8 @@ function arity(e:Expr):number{let n=0,x=e;while(x.kind==='forall'){n++;x=x.body;
 function uniqueNames(xs:readonly Name[]):boolean{return xs.every((x,i)=>xs.findIndex(y=>nameEq(x,y))===i);}
 function mkBinder(kind:'forall'|'lam',v:OpenVar,body:Expr):Expr{const b=abstractFVar(body,v.id);return kind==='forall'?forallE(v.decl.userName,v.decl.type,b,v.decl.binderInfo):lam(v.decl.userName,v.decl.type,b,v.decl.binderInfo);}
 function closeMany(kind:'forall'|'lam',vs:readonly OpenVar[],body:Expr):Expr{let r=body;for(let i=vs.length-1;i>=0;i--)r=mkBinder(kind,vs[i]!,r);return r;}
-function isReservedNestedName(n:Name):boolean{
- const s=nameToString(n);return s==='_nested'||s.startsWith('_nested.');
-}
+const reservedNestedName=nameFromDotted('_nested');
+function isReservedNestedName(n:Name):boolean{return nameIsPrefixOf(reservedNestedName,n);}
 function usesReservedNestedAux(e:Expr):boolean{
  const todo:Expr[]=[e];
  while(todo.length){

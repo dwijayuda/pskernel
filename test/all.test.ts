@@ -1,7 +1,7 @@
 import { Environment } from '../src/core/environment.js';
 import { app, bvar, constant, consumeTypeAnnotations, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, inferImplicit, instantiateExprLevels, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
 import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelLe, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
-import { nameCmp, nameEq, nameFromDotted, nameKey, nameReplacePrefix, nameToString } from '../src/core/name.js';
+import { nameAppend, nameCmp, nameEq, nameFromDotted, nameIsPrefixOf, nameKey, nameReplacePrefix, nameToString, strName } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
 import { abstractFVar, instantiate, lift } from '../src/core/instantiate.js';
 import { Kernel } from '../src/kernel/kernel.js';
@@ -32,7 +32,7 @@ function baseEnv():Environment{
  return e;
 }
 
-test('Name numeric and string components remain distinct',()=>{const prefix=nameFromDotted('X'),a={kind:'str',prefix,value:'1'} as const,b={kind:'num',prefix,value:1n} as const;assert(JSON.stringify(a,(_k,v)=>typeof v==='bigint'?v.toString():v)!==JSON.stringify(b,(_k,v)=>typeof v==='bigint'?v.toString():v));assert(nameCmp(b,a)<0&&nameCmp(a,b)>0,'Lean Name order places numeral components before string components');const bmp={kind:'str',prefix,value:'\uE000'} as const,astral={kind:'str',prefix,value:'\u{10000}'} as const;assert(nameCmp(bmp,astral)<0&&nameCmp(astral,bmp)>0,'Lean Name string order follows UTF-8/scalar order rather than JavaScript UTF-16 code-unit order');});
+test('Name numeric and string components remain distinct',()=>{const prefix=nameFromDotted('X'),a={kind:'str',prefix,value:'1'} as const,b={kind:'num',prefix,value:1n} as const;assert(JSON.stringify(a,(_k,v)=>typeof v==='bigint'?v.toString():v)!==JSON.stringify(b,(_k,v)=>typeof v==='bigint'?v.toString():v));assert(nameCmp(b,a)<0&&nameCmp(a,b)>0,'Lean Name order places numeral components before string components');const bmp={kind:'str',prefix,value:'\uE000'} as const,astral={kind:'str',prefix,value:'\u{10000}'} as const;assert(nameCmp(bmp,astral)<0&&nameCmp(astral,bmp)>0,'Lean Name string order follows UTF-8/scalar order rather than JavaScript UTF-16 code-unit order');const nested=nameFromDotted('_nested'),singleDot=strName(nameFromDotted(''),'_nested.fake');assert(nameIsPrefixOf(nested,nameFromDotted('_nested.real'))&&!nameIsPrefixOf(nested,singleDot),'Lean Name prefix checks are structural, not rendered-string prefixes');assert(nameEq(nameAppend(nested,nameFromDotted('Pkg.Box')),nameFromDotted('_nested.Pkg.Box')),'Lean Name concatenation preserves suffix components');});
 test('deep Lean Name operations avoid the JavaScript call stack',()=>{
  let a:any=nameFromDotted(''),b:any=nameFromDotted(''),prefix:any=null;
  for(let i=0;i<12000;i++){a={kind:'str',prefix:a,value:'x'};b={kind:'str',prefix:b,value:'x'};if(i===5999)prefix=a;}
@@ -1045,11 +1045,12 @@ test('public ordinary admission rejects reserved _nested references but not sibl
  throws(()=>addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[{name:Mk,type:badTy}]}]}));
  assert(!env.has(I)&&!env.has(Mk),'public ordinary admission must reject reserved nested auxiliaries transactionally');
 
- const okEnv=baseEnv(),Payload=nameFromDotted('_nestedX.Payload'),J=nameFromDotted('ReservedSibling'),JMk=nameFromDotted('ReservedSibling.mk');
+ const okEnv=baseEnv(),Payload=nameFromDotted('_nestedX.Payload'),DotPayload=strName(nameFromDotted(''),'_nested.fake'),J=nameFromDotted('ReservedSibling'),JMk=nameFromDotted('ReservedSibling.mk');
  okEnv.add({kind:'axiom',name:Payload,levelParams:[],type:sort(levelSucc(levelZero))});
- const goodTy=forallE(nameFromDotted('x'),constant(Payload),constant(J));
+ okEnv.add({kind:'axiom',name:DotPayload,levelParams:[],type:sort(levelSucc(levelZero))});
+ const goodTy=forallE(nameFromDotted('x'),constant(Payload),forallE(nameFromDotted('y'),constant(DotPayload),constant(J)));
  addOrdinaryInductive(okEnv,{levelParams:[],numParams:0,types:[{name:J,type:sort(levelSucc(levelZero)),ctors:[{name:JMk,type:goodTy}]}]});
- assert(okEnv.has(J)&&okEnv.has(JMk),'only the _nested name component is reserved; _nestedX must remain legal');
+ assert(okEnv.has(J)&&okEnv.has(JMk),'only structural _nested descendants are reserved; _nestedX and a single string component containing a dot remain legal');
 });
 
 test('nested inductive admission rejects the reserved _nested auxiliary namespace',()=>{

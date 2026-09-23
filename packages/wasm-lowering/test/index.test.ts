@@ -93,3 +93,61 @@ throws(
 );
 
 console.log('ok - @proofscript/wasm-lowering validates input IR');
+
+{
+  const uintModule:VerifiedIrModule={
+    kind:'proofscript-verified-ir',
+    declarations:[
+      {
+        name:'id8',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'UInt8'},
+        }],
+        resultType:{kind:'primitive',name:'UInt8'},
+        body:{kind:'var',name:'x'},
+      },
+      {
+        name:'id16',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'UInt16'},
+        }],
+        resultType:{kind:'primitive',name:'UInt16'},
+        body:{kind:'var',name:'x'},
+      },
+      {
+        name:'id32',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'UInt32'},
+        }],
+        resultType:{kind:'primitive',name:'UInt32'},
+        body:{kind:'var',name:'x'},
+      },
+      {
+        name:'id64',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'UInt64'},
+        }],
+        resultType:{kind:'primitive',name:'UInt64'},
+        body:{kind:'var',name:'x'},
+      },
+    ],
+  };
+  const loweredUInt=lowerVerifiedIrToWasm(uintModule);
+  equal(loweredUInt.functions[0]?.parameters[0]?.type,'i32');
+  equal(loweredUInt.functions[1]?.parameters[0]?.type,'i32');
+  equal(loweredUInt.functions[2]?.parameters[0]?.type,'i32');
+  equal(loweredUInt.functions[3]?.parameters[0]?.type,'i64');
+  equal(loweredUInt.functions[0]?.body.kind,'i32.binary');
+  equal(loweredUInt.functions[1]?.body.kind,'i32.binary');
+  equal(loweredUInt.functions[2]?.body.kind,'local');
+  equal(loweredUInt.functions[3]?.body.kind,'local');
+}
+console.log('ok - @proofscript/wasm-lowering fixed-width UInt pass-through');

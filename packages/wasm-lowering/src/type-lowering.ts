@@ -5,7 +5,7 @@ import type {
 import type {WasmValueType} from '@proofscript/wasm-ir';
 import {unsupported} from './errors.js';
 
-export type RuntimeValueType='bool';
+export type RuntimeValueType=\n  |'bool'\n  |'uint8'|'uint16'|'uint32'|'uint64';
 export type RuntimeType=RuntimeValueType|null;
 
 export interface Signature {
@@ -18,7 +18,12 @@ export function wasmValueType(
 ):WasmValueType {
   switch(type){
     case 'bool':
+    case 'uint8':
+    case 'uint16':
+    case 'uint32':
       return 'i32';
+    case 'uint64':
+      return 'i64';
   }
 }
 
@@ -37,6 +42,14 @@ export function lowerRuntimeType(
       switch(type.name){
         case 'Bool':
           return 'bool';
+        case 'UInt8':
+          return 'uint8';
+        case 'UInt16':
+          return 'uint16';
+        case 'UInt32':
+          return 'uint32';
+        case 'UInt64':
+          return 'uint64';
         case 'Unit':
           if(position==='parameter'){
             return unsupported(

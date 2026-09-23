@@ -49,6 +49,23 @@ function lowerLocal(
         left:local,
         right:{kind:'i32.const',value:0},
       };
+    case 'uint8':
+      return {
+        kind:'i32.binary',
+        operation:'and',
+        left:local,
+        right:{kind:'i32.const',value:0xff},
+      };
+    case 'uint16':
+      return {
+        kind:'i32.binary',
+        operation:'and',
+        left:local,
+        right:{kind:'i32.const',value:0xffff},
+      };
+    case 'uint32':
+    case 'uint64':
+      return local;
   }
 }
 

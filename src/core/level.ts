@@ -1,4 +1,4 @@
-import { Name, nameCmp, nameEq, nameKey, nameToString } from './name.js';
+import { Name, nameCmp, nameEq, nameToString } from './name.js';
 
 export type Level =
   | { readonly kind: 'zero' }

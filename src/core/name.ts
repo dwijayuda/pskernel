@@ -63,7 +63,7 @@ export function nameCmp(a: Name, b: Name): -1 | 0 | 1 {
   const n = Math.min(as.length, bs.length);
   for (let i = 0; i < n; i++) {
     const x = as[i]!, y = bs[i]!;
-    if (x.k !== y.k) return x.k < y.k ? -1 : 1;
+    if (x.k !== y.k) return x.k < y.k ? 1 : -1; // Lean: NUMERAL components sort before STRING components
     if (typeof x.v === 'string' && typeof y.v === 'string') {
       if (x.v !== y.v) return x.v < y.v ? -1 : 1;
     } else if (typeof x.v === 'bigint' && typeof y.v === 'bigint' && x.v !== y.v) {

@@ -1,7 +1,7 @@
 import { Environment } from '../src/core/environment.js';
 import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
-import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
-import { nameFromDotted, nameToString } from '../src/core/name.js';
+import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelLe, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
+import { nameCmp, nameFromDotted, nameToString } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
 import { abstractFVar, instantiate, lift } from '../src/core/instantiate.js';
 import { Kernel } from '../src/kernel/kernel.js';
@@ -32,7 +32,7 @@ function baseEnv():Environment{
  return e;
 }
 
-test('Name numeric and string components remain distinct',()=>{const a={kind:'str',prefix:nameFromDotted('X'),value:'1'} as const,b={kind:'num',prefix:nameFromDotted('X'),value:1n} as const;assert(JSON.stringify(a,(_k,v)=>typeof v==='bigint'?v.toString():v)!==JSON.stringify(b,(_k,v)=>typeof v==='bigint'?v.toString():v));});
+test('Name numeric and string components remain distinct',()=>{const a={kind:'str',prefix:nameFromDotted('X'),value:'1'} as const,b={kind:'num',prefix:nameFromDotted('X'),value:1n} as const;assert(JSON.stringify(a,(_k,v)=>typeof v==='bigint'?v.toString():v)!==JSON.stringify(b,(_k,v)=>typeof v==='bigint'?v.toString():v));assert(nameCmp(b,a)<0&&nameCmp(a,b)>0,'Lean Name order places numeral components before string components');});
 test('Lean private names preserve numeric private-index components',()=>{assert(!exprEq(constant(N.NatBitwiseUnaryProof1),constant(nameFromDotted('_private.Init.Data.Nat.Bitwise.Basic.0.Nat.bitwise._unary._proof_1'))));});
 test('LocalContext freshness never collides with reconstructed local IDs',()=>{const l=new LocalContext();l.addLocal('a@1',nameFromDotted('a'),sort(levelZero));assert(l.fresh('a')==='a@0');assert(l.fresh('a')==='a@2');});
 test('deep structural traversals avoid the JavaScript call stack',()=>{
@@ -84,7 +84,7 @@ test('deep structural universe equality is stack-safe',()=>{
 test('universe max commutative semantically',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));assert(levelEquivalent(mkMax(u,v),mkMax(v,u)));});
 test('imax u 0 = 0',()=>{const u=levelParam(nameFromDotted('u'));assert(levelEquivalent(mkIMax(u,levelZero),levelZero));});
 test('imax u (v+1) = max u (v+1)',()=>{const u=levelParam(nameFromDotted('u')),v=levelSucc(levelParam(nameFromDotted('v')));assert(levelEquivalent(mkIMax(u,v),mkMax(u,v)));});
-test('Lean 4.34 universe equivalence preserves kernel incompleteness',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));const lhs=mkMax(v,u),rhs=mkMax(mkIMax(u,v),u);assert(!levelEquivalent(lhs,rhs));});
+test('Lean 4.34 universe equivalence preserves kernel incompleteness',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));const lhs=mkMax(v,u),rhs=mkMax(mkIMax(u,v),u);assert(!levelEquivalent(lhs,rhs));assert(levelLe(lhs,rhs)&&!levelLe(rhs,lhs),'Lean 4.34 kernel geq remains intentionally incomplete on this semantically equal pair');});
 test('Lean structural equality includes MData payload while defeq ignores it',()=>{
  const a={kind:'mdata',data:{tag:'a'},expr:natLit(0)} as const;
  const b={kind:'mdata',data:{tag:'b'},expr:natLit(0)} as const;

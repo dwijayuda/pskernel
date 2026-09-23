@@ -575,3 +575,18 @@ console.log('ok - psc verified generic map run filesystem pipeline');
   equal(result.emitted.javascript.includes('function unboxNat(box)'),true);
 }
 console.log('ok - psc verified generic structure source pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'function plusTwo(x : Nat) : Nat := second(x) where { '+
+    'second(y : Nat) : Nat := first(y) + 1; '+
+    'first(y : Nat) : Nat := y + 1; }',
+    'verified-where.ts',
+  );
+  equal(result.typeScript.includes('const first'),true);
+  equal(result.typeScript.includes('const second'),true);
+  equal(result.emitted.javascript.includes('first'),true);
+  equal(result.emitted.javascript.includes('second'),true);
+}
+console.log('ok - psc verified acyclic where source pipeline');

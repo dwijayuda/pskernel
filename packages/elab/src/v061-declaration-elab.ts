@@ -30,6 +30,7 @@ import {
   checkElaboratedTerm,
   elaborateV061Term,
 } from './v061-term-elab.js';
+import {elaborateV061WhereBody} from './v061-where-elab.js';
 
 
 function maxRegularHeight(environment:Environment,expr:Expr):bigint {
@@ -76,12 +77,6 @@ function elaborateValueDeclaration(
   environment:Environment,
   structures:ReadonlyMap<string,CheckedCoreStructure>,
 ):DefinitionInfo|TheoremInfo {
-  if((source.whereDeclarations??[]).length>0){
-    throw new Error(
-      'PS_ELAB_WHERE_UNSUPPORTED: kernel-facing where elaboration requires recursion/termination predefinition processing',
-    );
-  }
-
   const header=elaborateV061ValueHeader(
     source,
     environment,
@@ -92,11 +87,20 @@ function elaborateValueDeclaration(
   const resultType=header.resultType;
 
   const bodyContext=withStructuralRecursionContext(source,context);
-  const body=elaborateV061Term(
-    source.body,
-    bodyContext,
-    resultType,
-  );
+  const whereDeclarations=source.whereDeclarations??[];
+  const body=whereDeclarations.length===0
+    ? elaborateV061Term(
+        source.body,
+        bodyContext,
+        resultType,
+      )
+    : elaborateV061WhereBody(
+        whereDeclarations,
+        source.body,
+        bodyContext,
+        resultType,
+        elaborateV061Term,
+      );
   checkElaboratedTerm(body,resultType,bodyContext);
   context.metaContext.validateGroundAssignments();
   let value=context.metaContext.instantiate(body.term);

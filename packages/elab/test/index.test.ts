@@ -851,3 +851,30 @@ console.log('ok - @proofscript/elab structural recursion with invariant paramete
   equal(result.definitions.length,2);
 }
 console.log('ok - @proofscript/elab generic structure admission');
+
+
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'function use(x : TestNat) : TestNat := second(x) where { '+
+    'second(y : TestNat) : TestNat := first(y); '+
+    'first(y : TestNat) : TestNat := y; }',
+  ),env);
+  equal(result.definitions.length,1);
+  const use=result.definitions[0]!;
+  equal(use.value.kind,'lam');
+}
+{
+  const env=makeDefinitionEnvironment();
+  let recursive=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'function use(x : TestNat) : TestNat := loop(x) where { '+
+      'loop(y : TestNat) : TestNat := loop(y); }',
+    ),env);
+  }catch(error){
+    recursive=/PS_ELAB_WHERE_RECURSION_UNSUPPORTED/.test(String(error));
+  }
+  equal(recursive,true);
+}
+console.log('ok - @proofscript/elab acyclic where local helpers');

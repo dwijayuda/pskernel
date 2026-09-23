@@ -194,7 +194,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-generic-structure-elab+invariant-structural-recursion-mvp",
+      "status": "v061-acyclic-where+generic-structure+invariant-structural-recursion-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -206,6 +206,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Acyclic where helpers now elaborate as typed local definitions and are closed into ordinary kernel let/lambda terms; dependency ordering includes term references and type annotations with lexical shadowing.",
+        "Recursive/mutual where cycles still fail closed with PS_ELAB_WHERE_RECURSION_UNSUPPORTED until they can use Lean-compatible termination elaboration.",
         "Parameterized structures elaborate as genuine pskernel single-constructor inductives with shared parameters; constructor parameters are copied implicitly as in the existing inductive path.",
         "Record literals for applied structures feed the admitted constructor parameter telescope before fields, and projections resolve structure identity through the applied target type.",
         "Primitive structural recursion may carry invariant explicit parameters: every non-decreasing explicit argument must be passed as the identical local, while exactly the matched ADT parameter decreases to a direct recursive field.",
@@ -375,6 +377,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified compilation now inherits acyclic local where helpers through ordinary checked-core let/lambda erasure; no compiler-specific where representation was added.",
         "Canonical verified compilation now covers parameterized pskernel structures, record construction, and projection with TypeScript generic API preservation.",
         "Canonical integration now covers higher-order generic structural recursion: map over a pskernel-admitted recursive generic list preserves TypeScript generics/function types while compiling recursor IHs to ordinary JavaScript recursion.",
         "Compiler orchestration starts at CheckedCoreModule; it has no syntax, parser, language-checker, or elaborator dependency.",

@@ -575,3 +575,23 @@ console.log('ok - @proofscript/syntax lexer MVP');
     /instance structure fields require type-application parsing/,
   );
 }
+
+
+// v0.6.1 E-CLASS-BODY: class remains Lean typeclass syntax, not a JS class.
+{
+  const module=parseV061Module(
+    'class Sized(α : Type) where { size : α -> Nat; }',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'class');
+  equal(module.featureIds.includes('E-CLASS-BODY'),true);
+  if(declaration?.kind==='class'){
+    equal(declaration.params.length,1);
+    equal(declaration.fields.length,1);
+    equal(declaration.fields[0]?.name,'size');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'class Sized (α : Type) where\n  size : α -> Nat\n',
+  );
+}

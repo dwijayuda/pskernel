@@ -70,6 +70,18 @@ export function lowerV061ModuleToLean(module:V061Module):string {
       }).join('\n');
       return 'structure '+decl.name+' where\n'+fields;
     }
+    if(decl.kind==='class'){
+      const params=decl.params.map(
+        (param)=>' ('+param.name+' : '+lowerV061TypeToLean(param.type)+')',
+      ).join('');
+      const fields=decl.fields.map((field)=>{
+        const rendered=field.name+' : '+lowerV061TypeToLean(field.type);
+        return field.binderKind==='implicit'
+          ? '  {'+rendered+'}'
+          : '  '+rendered;
+      }).join('\n');
+      return 'class '+decl.name+params+' where\n'+fields;
+    }
     if(decl.kind==='inductive'){
       const params=decl.params.map(
         (param)=>' ('+param.name+' : '+lowerV061TypeToLean(param.type)+')',

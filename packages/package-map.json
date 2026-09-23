@@ -95,15 +95,15 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-where-parser-mvp",
+      "status": "v061-registered-surface-parser-mvp",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
-        "Pinned to ProofScript v0.7.0 with the v0.6.1 compiler-ready surface as the implementation baseline.",
-        "E-STRUCT-BODY distinguishes outer ProofScript braces from inner Lean implicit field binders; the positive `{α : Type}` conformance case lowers canonically.",
-        "Instance structure fields remain fail-closed until native type-application syntax is represented.",
-        "E-WHERE-BODY is represented as local declarations, not a generic statement block; canonical lowering preserves Lean where structure."
+        "All registered v0.6.1 D/E feature identifiers now have an explicit parser/lowering path, with documented bounded sub-grammars.",
+        "Lean 4.34 structure/class parsing informed a shared field-body parser, while class remains a distinct AST declaration and canonical Lean class.",
+        "E-STRUCT-BODY preserves inner implicit binder braces; E-CLASS-BODY supports explicit parameters and explicit/implicit fields.",
+        "Instance fields, generic structure execution, class/typeclass execution, and broader native Lean syntax remain fail-closed where not implemented."
       ]
     },
     {

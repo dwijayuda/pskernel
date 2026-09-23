@@ -19,6 +19,12 @@ import {
 } from './inductive-checker.js';
 
 export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule {
+  if(module.declarations.some((decl)=>decl.kind==='class')){
+    throw new Error(
+      'PS_CHECK_DECL_UNSUPPORTED: class declarations require typeclass/instance elaboration',
+    );
+  }
+
   const structureDecls=module.declarations.filter(
     (decl):decl is V061StructureDeclaration=>decl.kind==='structure',
   );
@@ -26,7 +32,7 @@ export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule
     (decl):decl is V061InductiveDeclaration=>decl.kind==='inductive',
   );
   const valueDecls=module.declarations.filter(
-    (decl):decl is V061ValueDeclaration=>decl.kind!=='structure'&&decl.kind!=='inductive',
+    (decl):decl is V061ValueDeclaration=>decl.kind!=='structure'&&decl.kind!=='class'&&decl.kind!=='inductive',
   );
 
   const nominalNames=new Set<string>();

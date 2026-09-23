@@ -5,6 +5,7 @@ import {V061ExpressionParser} from './expression-parser.js';
 import {parseV061Type} from './type-parser.js';
 import {parseV061StructureDeclaration} from './structure-parser.js';
 import {parseV061InductiveDeclaration} from './inductive-parser.js';
+import {parseV061ClassDeclaration} from './class-parser.js';
 import {parseV061ExplicitParameters} from './parameter-parser.js';
 import {parseV061WhereBlock} from './where-parser.js';
 
@@ -29,6 +30,9 @@ export class V061DeclarationParser {
     }
     if(this.context.cursor.at('inductive')){
       return parseV061InductiveDeclaration(this.context);
+    }
+    if(this.context.cursor.at('class')){
+      return parseV061ClassDeclaration(this.context);
     }
     return this.parseValueDeclaration();
   }

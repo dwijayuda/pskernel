@@ -92,27 +92,28 @@
   "openGates": [
     "full-Std-environment-replay",
     "full-Lean-environment-replay",
+    "native-reduction-compiler-ir-provider",
     "formal-equivalence-proof"
   ],
   "prohibitedClaims": [
     "full Lean compatibility",
     "formal equivalence",
-    "100% complete"
+    "100% complete",
+    "full Lean 4.34 native-reduction compatibility"
   ],
   "lastVerifiedTestCount": 97,
   "notes": [
+    "Oracle-drift correction: the exact Lean v4.34.0 tag at commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b still contains reduce_native plus Lean.reduceNat/Lean.reduceBool compiler-IR hooks. The earlier removal interpretation came from post-v4.34 commit 2a7175c and was incorrect for this pinned target.",
+    "The TypeScript kernel has restored the exact v4.34 native-reduction positions: WHNF tries native reduction before ordinary Nat reduction; lazy definitional equality tries Nat reduction first, then native reduction before lazy delta. An explicit shape-checked NativeEvaluator is the TCB extension boundary and fails closed when no provider/result is configured.",
+    "The controlled official defeq differential again includes Lean.reduceNat and Lean.reduceBool provider cases. Current-tree direct/differential execution is still pending because GitHub Actions is not allocating a runner; historical pass counts are not being reused as fresh evidence.",
     "GitHub Actions execution is currently unavailable for this repo on the continuation branch: both the canonical Full Std workflow run 35872878111 and fast CI run 35872913940 completed with zero job steps and no allocated runner. This is infrastructure-only evidence, not a kernel failure. Branch push triggers were removed again to avoid repeated noise.",
     "Cheaper Std diagnostics are now first-class: oracle:std-probe checks a small first-root slice, oracle:std-hot checks nine historically troublesome root intervals with a 2 GiB default worker heap, oracle:std-range runs arbitrary adaptive ranges, and oracle:std-bisect recursively narrows semantic range failures while detecting failures that disappear when the interval is split.",
     "Canonical Full Std remains the gold completion gate and stays open. Dependency-closed probes/range coverage may guide fixes and provide strong evidence but must not be relabeled as canonical shared-environment replay.",
     "Kernel continuation branch kernel/lean434-study-hardening audited the checked-in final Lean 4.34 C++ kernel and Lean4Lean study trees. The existing full-std.log failure was pre-replay JavaScript syntax corruption in scripts/module-stream-oracle.mjs, not kernel-semantic evidence; commit 3dda273 repairs it and commit 50bff93 adds runner syntax checks. full-Std-environment-replay remains open until a fresh canonical replay succeeds.",
-    "Final-4.34 native-reduction correction is committed but awaits the refreshed CI/differential run before being promoted into the verified gate list.",
-    "Lean 4.34 final alignment correction: upstream commit 2a7175c74ba17b160299accd7e6ea6984d7ea86f removed Lean.reduceBool/Lean.reduceNat, ofReduceBool/ofReduceNat, Lean.trustCompiler, and all in-kernel native compiler-IR reduction. pskernel removed NativeEvaluator/native-reduction special handling and retired the native-IR compatibility gate.",
     "Deep-expression robustness hardening keeps 97/97 direct tests and 170/170 Arena correctness green: hasMVar, lift, and instantiate now use explicit traversal stacks, and isolated heavy oracle workers use a larger JavaScript stack while the kernel maxRecDepth limit remains authoritative.",
     "Lean Kernel Arena static correctness sweep passes 170/170 non-performance cases after two fixes: projection inference now checks the projected structure expression (rejecting the proj-of-prop false proof), and lean4export intern tables accept valid sparse/out-of-order IDs while still rejecting duplicates. Arena performance cases remain a separate optimization gate.",
     "Canonical one-pass module-order Full Std replay is now the preferred exhaustive completion gate. Dependency-closure batching is retained as diagnostic tooling for isolating failures, not as the release definition.",
     "Expanded soundness baseline passes 95/95 direct TypeScript tests plus 21 expected-success and 1 expected-rejection official Lean 4.34 kernel regression files. New direct invariants explicitly reject expression metavariables, universe metavariables, and duplicate mutual-inductive names transactionally.",
-    "Official Lean 4.34 definitional-equality differential previously passed 42/42 including two pre-final native-reduction cases; the final-4.34 matrix removes those obsolete cases and must be re-run. The expansion covers every dedicated Nat reducer (sub/mul/pow/gcd/mod/div/land/lor/xor/shiftLeft/shiftRight/beq/ble), let-under-binder substitution, dependent Subtype structure eta, and K-like Eq.rec iota reduction.",
-    "Final Lean 4.34 removed the deprecated in-kernel native-reduction declarations and compiler-IR hooks; pskernel no longer models them as kernel operations.",
     "GitHub repository dwijayuda/pskernel is now the persistent source of truth. Fast TypeScript CI is green, the Lean 4.34 fixture generator is reproducible on GitHub Actions, the official defeq differential is 26/26, and the adversarial oracle is 21 expected-success + 1 expected-rejection kernel regression cases.",
     "Real Lean.Data.PersistentHashMap dependency-closure roots replay passes: 12,885 records, 10,377 expressions, 298 declaration records, and exactly 397 admitted/generated constants. This gate adds nested Entry/Node families, BEq/Hashable-parameterized structures, collision-node handling, and insert/find/contains recursion without additional kernel changes.",
     "Real Lean.Data.PersistentArray dependency-closure roots replay passes: 85,105 records, 74,170 expressions, 1,440 declaration records, and exactly 1,633 admitted/generated constants. The corpus exposed and fixed Lean 4.34 nested-inductive parameter BinderInfo preservation: constructor parameters are recreated per constructor during preprocessing and again during restoration, with canonical nested parameters rebased to the fresh restoration locals.",
@@ -153,7 +154,6 @@
     "Well-founded primitive Probe infrastructure now derives the induction-hypothesis domain and validates defining equations independently from fixpoint scaffolding; outer-only and full certificates are separated to prevent accidental overclaiming.",
     "Ordinary inductive admission now propagates Lean 4.34 safe/unsafe checking mode through headers, constructors, recursor synthesis, and defensive recursor checks; unsafe inductives skip positivity while their generated constants remain unsafe.",
     "Nested-inductive restoration hardening now uses the declaration safety mode and each restored recursor's universe parameters, matching the 4.34 recheck boundary.",
-    "Final Lean 4.34 lazy defeq has no native-reduction hook; pskernel now follows Nat reduction directly with ordinary lazy-delta machinery.",
     "Projection-headed lazy unfolding uses full projection WHNF, and projection indices are restricted to integral uint32 values.",
     "Lean 4.34 eagerReduce mode is now implemented: application-argument type checking enables eager Nat/reflection defeq even when free variables occur syntactically; regression coverage verifies the mode is scoped to eagerReduce arguments.",
     "Boolean primitive condition certification now checks the Lean-style Bool.decEq/ite boundary operationally: specialized Nat ite must typecheck and reduce to the true/false branch correctly; a swapped implementation is rejected.",
@@ -172,7 +172,7 @@
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
   ],
-  "currentTreeExpectedDirectTests": 96,
-  "currentTreeExpectedDefeqDifferentialCases": 40,
-  "currentTreeVerification": "pending refreshed execution after final-4.34 native-reduction correction"
+  "currentTreeExpectedDirectTests": 97,
+  "currentTreeExpectedDefeqDifferentialCases": 42,
+  "currentTreeVerification": "pending refreshed execution after exact-v4.34.0 native-reduction restoration"
 }

@@ -2,7 +2,7 @@ name: TypeScript kernel CI
 
 on:
   push:
-    branches: [main, kernel/lean434-study-hardening]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:

@@ -156,6 +156,42 @@ test('isProp requires the inferred type to reduce to a Sort',()=>{
  throws(()=>tc.isProp(natLit(0)));
 });
 
+test('Lean structural equality preserves KVMap-like MData equality',()=>{
+ const x=natLit(0);
+ const a={kind:'mdata',data:{alpha:1,beta:true},expr:x} as const;
+ const reordered={kind:'mdata',data:{beta:true,alpha:1},expr:x} as const;
+ const different={kind:'mdata',data:{alpha:1,beta:false},expr:x} as const;
+ assert(exprLeanEq(a,reordered),'KVMap equality is key based, not insertion-order based');
+ assert(!exprLeanEq(a,different),'different MData payloads must remain structurally distinct');
+ assert(new TypeChecker(baseEnv()).isDefEq(a,different),'kernel defeq intentionally ignores MData payloads');
+});
+
+test('Lean structural equality preserves let nondep while defeq zeta-reduces it away',()=>{
+ const name=nameFromDotted('x'),ty=sort(levelSucc(levelZero)),value=sort(levelZero),body=sort(levelZero);
+ const dep={kind:'let',name,type:ty,value,body,nondep:false} as const;
+ const nondep={kind:'let',name,type:ty,value,body,nondep:true} as const;
+ assert(!exprLeanEq(dep,nondep),'Lean Expr == compares let_nondep');
+ assert(new TypeChecker(baseEnv()).isDefEq(dep,nondep),'let_nondep is structural metadata, not a type-theoretic distinction after zeta');
+});
+
+test('lean4export opaque MData equality ids survive replay',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"in":1,"str":{"pre":0,"str":"MetaA"}}',
+  '{"in":2,"str":{"pre":0,"str":"MetaB"}}',
+  '{"ie":0,"sort":0}',
+  '{"ie":1,"mdata":{"dataEq":0,"expr":0}}',
+  '{"ie":2,"mdata":{"dataEq":1,"expr":0}}',
+  '{"axiom":{"name":1,"levelParams":[],"type":1,"isUnsafe":false}}',
+  '{"axiom":{"name":2,"levelParams":[],"type":2,"isUnsafe":false}}'
+ ].join('\n');
+ const r=new Lean4ExportReplay();r.replay(nd);
+ const a=r.env.get(nameFromDotted('MetaA')),b=r.env.get(nameFromDotted('MetaB'));
+ assert(a.kind==='axiom'&&b.kind==='axiom');
+ assert(!exprLeanEq(a.type,b.type),'distinct exported KVMap equality ids remain structurally distinct');
+ assert(new TypeChecker(r.env).isDefEq(a.type,b.type),'defeq still ignores metadata after replay');
+});
+
 test('Lean structural expression equality ignores binder annotations',()=>{
  const ty=constant(N.Nat),body=bvar(0);
  const a=lam(nameFromDotted('x'),ty,body,'default'),b=lam(nameFromDotted('y'),ty,body,'implicit');

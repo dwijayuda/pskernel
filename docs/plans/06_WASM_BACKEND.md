@@ -1,6 +1,6 @@
 # ProofScript WebAssembly backend plan
 
-Status: **W1 Bool/Unit vertical slice implemented; executable CI evidence pending runner recovery**
+Status: **W2 fixed-width ABI + check/build/run implemented; executable CI evidence pending runner recovery**
 
 This plan adds WebAssembly as an execution backend for pskernel-admitted
 ProofScript programs. It does not change ProofScript logical semantics and does
@@ -14,12 +14,14 @@ Implemented on `feature/wasm-backend`:
 - fail-closed verified IR -> WasmIR lowering;
 - Binaryen 132.0.0 emitter with explicit MVP feature profile;
 - Bool/Unit first-order functions, calls, let, if, and Bool intrinsics;
-- semantic Bool normalization before raw i32 use;
+- UInt8/UInt16/UInt32/UInt64 runtime values with physical i32/i64 lowering;
+- semantic Bool and narrow-UInt normalization before raw Wasm use;
+- logical Wasm export ABI metadata plus a JS host adapter that restores unsigned UInt32/UInt64 values;
 - canonical and optimized Binaryen validation tests;
 - verified source JS/Wasm differential gate, including noncanonical host i32 Bool inputs;
 - `@proofscript/compiler` checked-core -> Wasm orchestration;
-- `psc check/build --verified --target wasm`;
-- `.wasm` and `.wat` build artifacts plus Binaryen/profile manifest metadata;
+- `psc check/build/run --verified --target wasm`;
+- `.wasm` and `.wat` build artifacts plus Binaryen/profile/export-ABI manifest metadata;
 - full npm workspace lock repair and a workspace-lock anti-drift gate.
 
 Still intentionally unsupported:
@@ -29,8 +31,8 @@ Still intentionally unsupported:
 - structures and inductive ADTs;
 - generic runtime values and closures;
 - external imports/FFI;
-- `psc run --target wasm`;
-- fixed-width UInt source/compiler support (must land end-to-end before the backend uses it).
+- fixed-width UInt arithmetic/comparison intrinsics until they exist explicitly in verified IR;
+- structures/ADTs, function values, and recursive runtime data until their Wasm representations land.
 
 GitHub Actions currently creates the PR job but terminates before any step is
 recorded (`steps: null`). Per repository anti-drift policy this is infrastructure
@@ -278,14 +280,15 @@ Initial capability policy:
 | dependent types | supported when runtime erasure is representable |
 | Bool | W1 supported |
 | Unit | W1 supported |
-| fixed-width UInt values/calls | W2 supported with JS ABI normalization |\n| fixed-width UInt arithmetic | blocked until verified IR intrinsics land |
+| fixed-width UInt values/calls | W2 supported with JS ABI normalization |
+| fixed-width UInt arithmetic | blocked until verified IR intrinsics land |
 | Nat / Int | blocked until arbitrary-precision runtime lands |
 | String | blocked until runtime ABI lands |
 | structures | blocked until WasmGC/layout checkpoint |
 | inductive ADTs | blocked until WasmGC/layout checkpoint |
 | direct first-order calls | W1 |
-| direct recursion | W1/W2 |
-| noncapturing lambdas | W2 |
+| direct recursion | blocked at source-Wasm boundary until recursive runtime representations are supported |
+| noncapturing lambdas | blocked until function-reference lowering lands |
 | capturing lambdas | blocked until closure conversion |
 | generic runtime values | blocked until monomorphization/uniform representation |
 | USize | blocked initially |
@@ -499,10 +502,12 @@ Add:
 
 ## 15. Immediate execution queue
 
-1. Land W0 package scaffolds and architecture guards.
-2. Implement Bool/Unit typed WasmIR and fail-closed type mapping.
-3. Add Binaryen 132.0.0 adapter and one executable Bool function fixture.
-4. Add JS/Wasm differential gate for Bool/Unit control flow.
-5. Extend verified runtime IR with fixed-width UInt types from the authoritative
-   language reference before widening the Wasm backend.
-6. Design the BigInt host ABI before enabling runtime Nat/Int compilation.
+1. Obtain an actually executing root/CI gate; continue treating `steps: null`
+   jobs as infrastructure-only evidence.
+2. Define explicit verified-IR fixed-width UInt arithmetic/comparison intrinsics
+   before adding corresponding Wasm instructions.
+3. Design and implement the arbitrary-precision Nat/Int host ABI without
+   narrowing either type to i64.
+4. Add source-level UInt high-bit differential gates through `psc run --target wasm`.
+5. Design WasmGC/layout lowering for structures and inductive ADTs.
+6. Add translation-validation/refinement evidence for VerifiedIR -> WasmIR.

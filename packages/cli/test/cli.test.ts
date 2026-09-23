@@ -106,6 +106,51 @@ console.log('ok - psc verified checked-core compiler pipeline');
 }
 console.log('ok - psc verified runtime external assurance');
 
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-external-assurance-check-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'extern function hostInc(x : Nat) : Nat '+
+      'from "host-lib" import inc; '+
+      'function use(x : Nat) : Nat := hostInc(x);\n',
+      'utf8',
+    );
+    const result=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    const assurance=result.assurance;
+    equal(assurance.runtimeAssumptionCount,1);
+    equal(assurance.kernelCheckedDefinitionCount,1);
+    equal(assurance.kernelCheckedTheoremCount,0);
+    equal(assurance.runtimeAssumptions[0]?.source,'host-lib');
+    equal(assurance.runtimeExternalsAreProofEvidence,false);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified project assurance reports source externals');
+
 
 {
   const result=compileVerifiedSource(

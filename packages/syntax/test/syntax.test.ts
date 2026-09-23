@@ -1345,6 +1345,9 @@ console.log('ok - @proofscript/syntax DS2 complete emitted-subset frontend');
     'function main(x : Nat) : Nat := hostInc(x);',
   );
   equal(module.declarations[0]?.kind,'external');
+  equal(module.featureIds.includes('D-EXTERN-FFI'),true);
+  equal(module.featureIds.includes('D-EXPLICIT-PARAMS'),true);
+  equal(module.featureIds.includes('D-DECL-SEMI'),true);
   if(module.declarations[0]?.kind==='external'){
     equal(module.declarations[0].binding.source,'host-lib');
     equal(module.declarations[0].binding.importedName,'inc');

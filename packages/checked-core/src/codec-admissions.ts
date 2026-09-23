@@ -172,5 +172,17 @@ export function decodeCheckedCoreAdmissions(
   ){
     throw new Error('checked-core codec: unsupported payload format/version');
   }
-  return codecArray(o.admissions,'payload.admissions').map(decodeAdmission);
+  const admissions=codecArray(
+    o.admissions,
+    'payload.admissions',
+  ).map(decodeAdmission);
+  if(
+    o.version===1
+    &&admissions.some((admission)=>admission.kind==='external')
+  ){
+    throw new Error(
+      'checked-core codec: external admissions require payload version 2',
+    );
+  }
+  return admissions;
 }

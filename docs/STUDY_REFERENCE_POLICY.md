@@ -256,3 +256,20 @@ runtime.
 The repository's TypeScript study material remains relevant to ESM/host module
 resolution and emitted import behavior. npm lock metadata supplements that host
 layer; it does not flow backward into theorem elaboration.
+
+## TypeScript/Node evidence for bounded package subpaths
+
+The TypeScript study corpus documents package.json exports support under
+`node16`, `nodenext`, and `bundler` resolution. The current verified
+backend uses TypeScript `Bundler` resolution, so generated named ESM subpath
+imports already pass through that host resolver.
+
+Current Node package documentation defines `exports` as the public package
+entry-point map, including explicit and patterned subpath exports, and states
+that unexported subpaths are encapsulated. Node's ESM resolver selects runtime
+conditions while TypeScript may additionally select `types` conditions.
+
+ProofScript therefore records/pins the package **root** and leaves public
+subpath resolution to those host tools. This is a host interoperability
+decision only; neither resolver nor package exports metadata influences
+pskernel proof admission.

@@ -1067,7 +1067,6 @@ the host result while retaining `proofEvidence=false` in assurance.
 Still unsupported in this checkpoint:
 
 - semver ranges;
-- package subpath imports;
 - `node:` builtins;
 - default/namespace/CommonJS/dynamic imports;
 - package installation;
@@ -1112,3 +1111,34 @@ it, checked-core admission does not depend on it, and changing it does not
 change theorem identity. In particular, lockfile SRI identifies the package
 artifact npm resolved; ProofScript does not claim to prove the behavior of that
 artifact or to re-hash every unpacked runtime file.
+
+## Public npm package-subpath checkpoint
+
+Named ESM runtime externs may now target a bounded public package subpath while
+the dependency identity remains the exact package root.
+
+```text
+external source: host-lib/feature
+package root:    host-lib
+configured pin:  host-lib@1.0.0
+lock root:       node_modules/host-lib
+```
+
+The host-resolution contract intentionally follows existing ecosystem
+ownership:
+
+- ProofScript classifies the package root, enforces the exact configured
+  version, and verifies the reachable package-lock closure;
+- TypeScript's current `Bundler` module resolution resolves the generated
+  import for type/declaration checking and follows `package.json.exports`;
+- Node ESM resolves the emitted runtime import and its conditional
+  `import`/default export target.
+
+ProofScript does not clone Node's `PACKAGE_EXPORTS_RESOLVE` algorithm. This is
+important for conditional exports: TypeScript may select a `types` branch for
+static checking while Node selects the runtime `import` branch. That host
+difference is part of the explicit FFI trust boundary, not a theorem semantic.
+
+The first subpath classifier is intentionally conservative and excludes
+relative/absolute sources, `node:` builtins, path traversal, empty segments,
+and nested `node_modules` segments. Only named ESM imports remain supported.

@@ -103,6 +103,10 @@
   ],
   "lastVerifiedTestCount": 97,
   "notes": [
+    "Final Lean 4.34 issue_14576_nonuniform hardening is now represented directly: syntactic recursive occurrences are checked before WHNF and before nested preprocessing, recursive universe arguments must exactly match the declaration, nested bad parameters cannot be dropped by auxiliary transformation, and definitionally-equal constructor parameter domains remain accepted.",
+    "Stable public addOrdinaryInductive is now fail-closed: primitive-name and reserved _nested bypasses moved behind an internal-only admission entry used by primitive recognition and nested transformation. The reserved namespace check is component-aware, so _nestedX remains legal.",
+    "Lean 4.34 infer-only semantics now skip closed application arguments and let values while preserving global loose-bvar rejection; dependent let result types are reconstructed with a let only when the inferred type depends on the local, matching local_ctx.mk_pi(..., remove_dead_let=true).",
+    "Lean 4.34 WHNF recursion accounting now avoids charging the outer whnf wrapper and flattens wide application spines before head normalization, preventing false maxRecDepth failures on wide applications.",
     "Lean 4.34 source audit found and fixed cheap-WHNF cache contamination: cheap recursor/projection reduction now bypasses the full whnfCore cache exactly like C++, so a prior full reduction cannot make a later cheap probe unfold more than Lean.",
     "Lean 4.34 eta probing now fails closed on a non-function counterpart instead of throwing; the direct regression compares an identity lambda against a Nat literal and requires ordinary not-defeq.",
     "Lean 4.34 public defeq success caching is now exact at the wrapper boundary: every successful original expression pair is cached, including successes discovered only after delta reduction. Application defeq also compares heads before rejecting argument-count mismatch, matching C++ evaluation order.",
@@ -177,7 +181,7 @@
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
   ],
-  "currentTreeExpectedDirectTests": 104,
+  "currentTreeExpectedDirectTests": 115,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "pending refreshed execution after Lean 4.34 cache/eta/Quot/defeq-order hardening; GitHub Actions currently allocates no runner"
+  "currentTreeVerification": "pending refreshed execution after Lean 4.34 defeq/infer/WHNF/uniform-inductive hardening; GitHub Actions currently allocates no runner"
 }

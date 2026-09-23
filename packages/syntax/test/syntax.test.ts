@@ -152,3 +152,29 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(lowerDCallSource('f (x, y)').kind,'defer');
   equal(lowerDCallSource('f/-comment-/(x)').kind,'defer');
 }
+
+
+// D-CALL arguments may contain the inherited Lean application-term slice.
+{
+  const lowered=lowerDCallSource('apply(f x, xs)');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'apply (f x) xs');
+}
+{
+  const lowered=lowerDCallSource('apply(f (x), g y)');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'apply (f (x)) (g y)');
+}
+{
+  const lowered=lowerDCallSource('f g(x)');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'f (g x)');
+}
+{
+  const lowered=lowerDCallSource('apply((f x, g y), z)');
+  equal(lowered.kind,'proofscript');
+  if(lowered.kind==='proofscript')equal(lowered.node.leanText,'apply (f x, g y) z');
+}
+{
+  equal(lowerDCallSource('f x').kind,'defer');
+}

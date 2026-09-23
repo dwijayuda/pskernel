@@ -8,6 +8,7 @@ export type DCallExpr =
   | {readonly kind:'atom';readonly token:Token;readonly span:SourceSpan}
   | {readonly kind:'group';readonly value:DCallExpr;readonly span:SourceSpan}
   | {readonly kind:'tuple';readonly items:readonly DCallExpr[];readonly span:SourceSpan}
+  | {readonly kind:'application';readonly fn:DCallExpr;readonly args:readonly DCallExpr[];readonly span:SourceSpan}
   | {readonly kind:'call';readonly feature:'D-CALL';readonly fn:DCallExpr;readonly args:readonly DCallExpr[];readonly emptyArgumentList:boolean;readonly span:SourceSpan};
 
 export interface LoweringResult {
@@ -24,10 +25,33 @@ class DCallParser {
   constructor(tokens:readonly Token[]){this.cursor=new TokenCursor(tokens);}
 
   parseExpression():ParseExprResult {
+    return this.parseApplication();
+  }
+
+  private parseApplication():ParseExprResult {
+    const head=this.parsePostfix();
+    const args:DCallExpr[]=[];
+    let hasOwnedCall=head.hasOwnedCall;
+    while(this.startsApplicationArgument(this.cursor.peek())){
+      const arg=this.parsePostfix();
+      args.push(arg.expr);
+      hasOwnedCall ||= arg.hasOwnedCall;
+    }
+    if(args.length===0)return head;
+    return {
+      expr:{kind:'application',fn:head.expr,args,span:{start:head.expr.span.start,end:args[args.length-1]!.span.end}},
+      hasOwnedCall,
+    };
+  }
+
+  private startsApplicationArgument(token:Token):boolean {
+    if(token.leadingTrivia.length===0)return false;
+    return token.kind==='identifier'||token.kind==='number'||token.kind==='string'||token.text==='(';
+  }
+
+  private parsePostfix():ParseExprResult {
     let result=this.parseAtom();
-    while(true){
-      const decision=decideDCallOpen(this.cursor.peek());
-      if(decision.kind==='defer')break;
+    while(decideDCallOpen(this.cursor.peek()).kind==='proofscript'){
       result={expr:this.parseCallSuffix(result.expr),hasOwnedCall:true};
     }
     return result;
@@ -89,6 +113,10 @@ function lowerExpr(expr:DCallExpr,asArgument=false):string{
     case 'atom':return expr.token.text;
     case 'group':return `(${lowerExpr(expr.value)})`;
     case 'tuple':return `(${expr.items.map(x=>lowerExpr(x)).join(', ')})`;
+    case 'application':{
+      const body=`${lowerExpr(expr.fn)} ${expr.args.map(x=>lowerExpr(x,true)).join(' ')}`;
+      return asArgument?`(${body})`:body;
+    }
     case 'call':{
       const fn=lowerExpr(expr.fn);
       const body=expr.emptyArgumentList
@@ -103,6 +131,7 @@ export function lowerDCall(node:DCallExpr):LoweringResult{
   const ids=new Set<ProofScriptFeatureId>();
   const visit=(x:DCallExpr):void=>{
     if(x.kind==='call'){ids.add('D-CALL');visit(x.fn);for(const arg of x.args)visit(arg);}
+    else if(x.kind==='application'){visit(x.fn);for(const arg of x.args)visit(arg);}
     else if(x.kind==='group')visit(x.value);
     else if(x.kind==='tuple')for(const item of x.items)visit(item);
   };

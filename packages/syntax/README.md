@@ -40,3 +40,15 @@ g(f(x), h(y))   -> g (f x) (h y)
 Protected neighbors such as `f (x)`, `f (x, y)`, and comment-separated `f/-c-/(x)` return `DEFER`.
 
 This is intentionally not yet the full inherited Lean term grammar. Arbitrary Lean subterms inside D-CALL arguments will be supported through the later recursive term/category parser rather than by ad-hoc text rewriting.
+
+
+### Inherited Lean application arguments
+
+D-CALL arguments now accept the small inherited Lean application-term slice needed for ordinary space-applied terms:
+
+```text
+apply(f x, xs)   -> apply (f x) xs
+f g(x)           -> f (g x)
+```
+
+Plain Lean application remains owned by Lean: `f x` still returns `DEFER` when no D-CALL appears. This is not yet the full inherited Lean term grammar; operators, lambdas, type annotations, and other term forms remain later Phase-B parser obligations.

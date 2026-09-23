@@ -489,11 +489,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    only where Lean library-search semantics can be modeled explicitly; do not
    silently turn it into recursive automation.
 7. Continue the landed DS5 mixed-source verified project MVP: imported
-   structure/class/global-instance elaborator metadata is now preserved from
-   pskernel-validated dependency modules; next integrate psmodule/cache
-   artifacts and configured source roots. Ordinary cross-source
-   definitions/theorems already compile through topo-ordered pskernel
-   admissions.
+   semantic metadata, in-memory checked-module BuildCache, transitive module
+   integrity keys, and project integrity are now landed. Next define a real
+   persistent module-artifact payload path (without fabricating Lean4Export)
+   and configured source roots.
 8. Start DS6 language-service/LSP source-kind routing only after imported
    semantic metadata is stable; VS Code must not take unconditional ownership
    of all `.lean` files.

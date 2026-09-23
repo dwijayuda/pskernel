@@ -829,3 +829,30 @@ candidate list.
 This closes the semantic difference between same-file and imported usage for
 the current structure/class/global-instance subset while keeping module-local
 admissions separate for future artifact caching.
+
+## DS5 checked-module cache and integrity checkpoint
+
+The mixed-project pipeline now has an untrusted in-process module cache. A cache
+entry contains only the module's previously pskernel-admitted **local
+admissions**. Cache hits do not return a trusted environment: after resolving
+all modules, the complete ordered admission stream is replayed through checked
+core and pskernel as before.
+
+Module cache/integrity keys are SHA-256 hashes over canonical JSON containing:
+
+- cache schema;
+- pinned Lean/kernel compatibility descriptor;
+- logical module name;
+- source-kind-neutral canonical source hash;
+- sorted direct dependency module/integrity pairs.
+
+Because each dependency integrity already includes its own dependencies,
+invalidation is transitive. Project integrity hashes the entry module plus the
+deterministic topo-ordered module/integrity list.
+
+This checkpoint intentionally does **not** emit persistent `.psmodule`
+artifacts. The current module artifact v1 payload is Lean4Export 3.1.0 NDJSON,
+and ProofScript has no serializer from checked-core admissions back into that
+transport. Inventing one ad hoc would violate the artifact trust model. A
+persistent cache must first land a real replayable payload codec or a formally
+versioned new artifact payload.

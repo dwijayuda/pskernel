@@ -320,7 +320,7 @@ pskernel-checked semantics.
 
 ### DS5 — mixed modules
 
-Status: **MVP landed with imported semantic metadata; artifact/cache/source-root integration remains**
+Status: **MVP landed with semantic metadata + checked-module cache/integrity; persistent artifacts/source roots remain**
 
 Landed DS5.1/DS5.2:
 
@@ -349,6 +349,12 @@ Landed DS5.1/DS5.2:
   instance elaborator metadata from the already pskernel-validated checked
   module. Cross-module record construction/projection and instance synthesis
   therefore use the same metadata model as same-file elaboration.
+- in-process verified builds now cache each module's local checked admissions
+  using `BuildCache`. The SHA-256 cache/integrity key includes pinned kernel
+  compatibility, logical module, canonical source hash, and direct dependency
+  integrity keys. Project integrity covers the deterministic ordered module
+  integrity list. Final project admission is still replayed through pskernel
+  on cache hits.
 
 Current bounded resolution rule:
 
@@ -363,12 +369,13 @@ source roots/package resolution are later DS5 work.
 
 Remaining DS5 work:
 
-- integrate `@proofscript/module` artifacts and `BuildCache` rather than
-  rebuilding all reachable source on every invocation;
+- define a real persistent `@proofscript/module` payload path for
+  ProofScript-produced checked admissions. Artifact v1 currently requires
+  Lean4Export NDJSON, and no checked-core -> Lean4Export serializer exists;
 - define configured source roots/package import resolution;
-- emit/cache canonical per-module artifacts instead of only a bundled runtime
-  output and entry-source Lean artifact;
-- add project-level integrity keys covering dependency hashes;
+- emit/cache canonical persistent per-module artifacts once that payload path
+  exists, instead of only a bundled runtime output and entry-source Lean
+  artifact;
 - then expose cross-language definition/reference resolution to DS6 tooling.
 
 ### DS6 — editor support

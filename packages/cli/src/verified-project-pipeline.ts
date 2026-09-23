@@ -20,14 +20,23 @@ import type {ResolvedSourceProject} from './project-sources.js';
 const MODULE_CACHE_SCHEMA='proofscript-checked-module-cache-v1';
 const PROJECT_INTEGRITY_SCHEMA='proofscript-project-integrity-v1';
 
-interface CachedModuleElaboration {
+export interface VerifiedProjectCachedModule {
   readonly admissions:readonly CheckedCoreAdmission[];
 }
 
-const sharedModuleCache=new BuildCache<CachedModuleElaboration>();
+export type VerifiedProjectModuleCache=
+  BuildCache<VerifiedProjectCachedModule>;
+
+const sharedModuleCache:VerifiedProjectModuleCache=
+  new BuildCache<VerifiedProjectCachedModule>();
 
 export interface VerifiedProjectCheckOptions {
-  readonly moduleCache?:BuildCache<CachedModuleElaboration>;
+  readonly moduleCache?:VerifiedProjectModuleCache;
+}
+
+export function createVerifiedProjectModuleCache():
+VerifiedProjectModuleCache {
+  return new BuildCache<VerifiedProjectCachedModule>();
 }
 
 function sha256Canonical(value:unknown):string {

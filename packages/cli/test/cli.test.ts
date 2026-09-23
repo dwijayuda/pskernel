@@ -1190,7 +1190,7 @@ console.log('ok - psc mixed imports preserve structure/class/instance metadata')
       json:true,
       verified:true,
       passthrough:[],
-    });
+    }) as Record<string,unknown>;
     equal(first.moduleCacheHits,0);
     equal(first.moduleCacheMisses,2);
     equal(String(first.projectIntegrity).startsWith('sha256:'),true);
@@ -1208,7 +1208,7 @@ console.log('ok - psc mixed imports preserve structure/class/instance metadata')
       json:true,
       verified:true,
       passthrough:[],
-    });
+    }) as Record<string,unknown>;
     equal(second.projectIntegrity,first.projectIntegrity);
     equal(second.moduleCacheHits,2);
     equal(second.moduleCacheMisses,0);
@@ -1223,7 +1223,7 @@ console.log('ok - psc mixed imports preserve structure/class/instance metadata')
       json:true,
       verified:true,
       passthrough:[],
-    });
+    }) as Record<string,unknown>;
     equal(third.moduleCacheHits,0);
     equal(third.moduleCacheMisses,2);
     equal(third.projectIntegrity===first.projectIntegrity,false);

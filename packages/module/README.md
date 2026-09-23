@@ -66,3 +66,21 @@ npm test
 - no npm workspace wiring yet
 
 A future payload version can add a ProofScript-native declaration codec without changing the trust rule: declarations are still replayed through the kernel.
+
+## ProofScript compiler integration note
+
+The mixed-source ProofScript compiler now uses `@proofscript/project`
+`BuildCache` plus dependency-integrity keys for **in-process** checked-module
+reuse. This does not yet create `.psmodule` files.
+
+Module artifact v1 requires a canonical Lean4Export NDJSON payload. The current
+ProofScript elaborator produces checked-core admissions directly and no
+checked-core -> Lean4Export serializer exists. Persistent compiler artifacts
+must therefore wait for either:
+
+1. a correct serializer into the existing replayable payload; or
+2. a versioned ProofScript-native payload whose loader still rechecks every
+   declaration through pskernel.
+
+Do not encode checked admissions as fake Lean4Export records merely to reuse
+the v1 container.

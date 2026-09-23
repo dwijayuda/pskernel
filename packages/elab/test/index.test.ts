@@ -901,3 +901,20 @@ console.log('ok - @proofscript/elab acyclic where local helpers');
   );
 }
 console.log('ok - @proofscript/elab class admission as kernel inductive');
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'class Boxed(α : Type) where { value : α; } '+
+    'function reuse {α : Type}[inst : Boxed(α)](x : α) : α := x; '+
+    'function caller {α : Type}[inst : Boxed(α)](x : α) : α := reuse(x);',
+  ),env);
+  equal(result.classes.length,1);
+  const caller=result.definitions.find(
+    (item)=>item.name.kind==='str'&&item.name.value==='caller',
+  );
+  equal(caller?.kind,'definition');
+  equal(caller?.value.kind,'lam');
+}
+console.log('ok - @proofscript/elab local class instance synthesis');

@@ -32,6 +32,7 @@ export function elaborateV061ValueHeader(
   source:V061ValueDeclaration,
   environment:Environment,
   structures:ReadonlyMap<string,CheckedCoreStructure>=new Map(),
+  classes:ReadonlySet<string>=new Set(),
 ):V061ElaboratedHeader {
   let context:V061CoreElabContext={
     environment,
@@ -39,6 +40,7 @@ export function elaborateV061ValueHeader(
     locals:new Map(),
     metaContext:new ExprMetaContext(environment),
     structures,
+    classes,
   };
   const parameters:V061ElaboratedParameter[]=[];
 

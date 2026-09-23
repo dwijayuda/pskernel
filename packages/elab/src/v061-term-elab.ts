@@ -15,6 +15,7 @@ import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
 } from './v061-context.js';
+import {v061LocalInstanceTerms} from './v061-context.js';
 import {elaborateV061Type} from './v061-type-elab.js';
 import {elaborateV061ByExpression} from './v061-tactic-elab.js';
 import {elaborateV061BinaryNotation} from './v061-notation-elab.js';
@@ -69,6 +70,8 @@ export function elaborateV061Term(
         args:[],
         ...(expected===undefined?{}:{expectedType:expected}),
         localContext:context.localContext,
+        localInstances:v061LocalInstanceTerms(context),
+        classNames:context.classes,
       });
       const elaboratedTerm=context.metaContext.instantiate(applied.term);
       const elaboratedType=context.metaContext.instantiate(applied.type);
@@ -119,6 +122,8 @@ export function elaborateV061Term(
         args,
         ...(expected===undefined?{}:{expectedType:expected}),
         localContext:context.localContext,
+        localInstances:v061LocalInstanceTerms(context),
+        classNames:context.classes,
       });
       const term=context.metaContext.instantiate(result.term);
       const type=context.metaContext.instantiate(result.type);

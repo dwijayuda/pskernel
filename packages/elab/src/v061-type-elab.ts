@@ -14,6 +14,7 @@ import {
 } from 'lean-ts-kernel';
 import {elaborateApplication} from './application.js';
 import type {V061CoreElabContext} from './v061-context.js';
+import {v061LocalInstanceTerms} from './v061-context.js';
 
 export function elaborateV061Type(
   type:V061TypeExpr,
@@ -42,6 +43,8 @@ export function elaborateV061Type(
         fn,
         args,
         localContext:context.localContext,
+        localInstances:v061LocalInstanceTerms(context),
+        classNames:context.classes,
       });
       const term=context.metaContext.instantiate(applied.term);
       const resultType=context.metaContext.instantiate(applied.type);

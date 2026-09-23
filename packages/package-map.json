@@ -187,7 +187,8 @@
         "Ordinary unification never assigns syntheticOpaque metavariables; explicit assignment remains available to tactic/elaboration code.",
         "This is intentionally not full Lean.Meta.isDefEq: level metavariables, delayed assignments, higher-order pattern unification, postponed constraints, local instance synthesis, and transparency-sensitive meta reduction remain later milestones.",
         "First-order application-spine unification is transactional: nested metavariables such as Option ?α can be solved from expected Option Nat, and failed structural unification rolls assignments back.",
-        "This remains intentionally smaller than Lean.Meta.isDefEq; higher-order patterns, level metavariables, coercions and postponed constraints are separate milestones."
+        "This remains intentionally smaller than Lean.Meta.isDefEq; higher-order patterns, level metavariables, coercions and postponed constraints are separate milestones.",
+        "The first typeclass-resolution slice is local-only and class-aware: application elaboration may solve an instImplicit goal from the newest matching local instImplicit binder after ordinary Meta unification."
       ]
     },
     {
@@ -195,7 +196,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-class-admission+acyclic-where+generic-structure+invariant-structural-recursion-mvp",
+      "status": "v061-local-instance+class-admission+acyclic-where+generic-structure+invariant-structural-recursion-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -207,6 +208,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Applications of functions with instImplicit parameters now reuse matching local class instances from the elaboration context. Targets must be previously admitted ProofScript classes; arbitrary instImplicit types are not treated as classes.",
+        "This is intentionally not global Lean SynthInstance: instance declarations, priorities, recursive search, outParam/semiOutParam, tabled resolution, and prelude instance indexing remain later milestones.",
         "ProofScript class declarations now elaborate through the structure/inductive path and are admitted by pskernel; class-ness remains untrusted elaborator metadata, matching Lean's kernel boundary.",
         "This does not yet claim instance synthesis: global/local instance search, priorities, outParams, and recursive typeclass resolution remain separate Meta milestones.",
         "Acyclic where helpers now elaborate as typed local definitions and are closed into ordinary kernel let/lambda terms; dependency ordering includes term references and type annotations with lexical shadowing.",

@@ -19,6 +19,7 @@ export interface V061CoreElabContext {
   readonly locals:ReadonlyMap<string,string>;
   readonly metaContext:ExprMetaContext;
   readonly structures:ReadonlyMap<string,CheckedCoreStructure>;
+  readonly classes?:ReadonlySet<string>;
   readonly structuralRecursion?:V061StructuralRecursion;
 }
 
@@ -35,4 +36,22 @@ export function withLocalName(
 export interface ElaboratedCoreTerm {
   readonly term:Expr;
   readonly type:Expr;
+}
+
+
+export function v061LocalInstanceTerms(
+  context:V061CoreElabContext,
+):readonly Expr[] {
+  const ids=[...context.locals.values()].reverse();
+  const instances:Expr[]=[];
+  for(const id of ids){
+    const declaration=context.localContext.get(id);
+    if(
+      declaration?.kind==='local'
+      &&declaration.binderInfo==='instImplicit'
+    ){
+      instances.push({kind:'fvar',id});
+    }
+  }
+  return instances;
 }

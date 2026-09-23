@@ -77,11 +77,13 @@ function elaborateValueDeclaration(
   source:V061ValueDeclaration,
   environment:Environment,
   structures:ReadonlyMap<string,CheckedCoreStructure>,
+  classes:ReadonlySet<string>,
 ):DefinitionInfo|TheoremInfo {
   const header=elaborateV061ValueHeader(
     source,
     environment,
     structures,
+    classes,
   );
   const context=header.context;
   const parameters=header.parameters;
@@ -162,6 +164,7 @@ export function elaborateV061Definitions(
   const workEnvironment=environment.clone();
   const admissions:CheckedCoreAdmission[]=[];
   const structures=new Map<string,CheckedCoreStructure>();
+  const classes=new Set<string>();
   const kernel=new Kernel(workEnvironment);
 
   for(const declaration of module.declarations){
@@ -222,6 +225,7 @@ export function elaborateV061Definitions(
         );
       }
       structures.set(declaration.name,klass.structure);
+      classes.add(declaration.name);
       admissions.push({
         kind:'class',
         declaration:klass.declaration,
@@ -236,6 +240,7 @@ export function elaborateV061Definitions(
         declaration,
         workEnvironment,
         structures,
+        classes,
       );
     }catch(error){
       const detail=error instanceof Error?error.message:String(error);

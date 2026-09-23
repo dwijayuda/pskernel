@@ -622,3 +622,18 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(decorated.featureIds.includes('D-CALL'),true);
   if(type!==undefined)equal(lowerV061TypeToLean(type),'Result Nat String');
 }
+
+
+// D-EXPLICIT-PARAMS is a non-empty binder group, matching the frozen v0.6.1 grammar.
+{
+  throws(
+    ()=>parseV061Module('def bad() : Nat := 0;'),
+    /D-EXPLICIT-PARAMS requires at least one explicit binding/,
+  );
+}
+{
+  throws(
+    ()=>parseV061Module('inductive EmptyArgs() where { | mk; }'),
+    /D-EXPLICIT-PARAMS requires at least one explicit binding/,
+  );
+}

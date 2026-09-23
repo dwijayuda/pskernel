@@ -100,10 +100,10 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
-        "All registered v0.6.1 D/E feature identifiers have explicit parser/lowering ownership with bounded sub-grammars.",
-        "The type AST now represents right-associative arrows plus left-associative type application from native Lean whitespace or registered D-CALL syntax.",
-        "Structure/class field parsing distinguishes explicit, implicit, and named instance binders and preserves their canonical Lean brackets.",
-        "Applied/generic types are parsed but remain fail-closed in the executable software checker until elaboration supports them."
+        "The frozen v0.6.1 baseline feature list is exported in code and the conformance test fails if any registered L/D/E feature lacks explicit evidence.",
+        "L-CORE-LEAN evidence is a protected-neighbor defer case: inherited Lean syntax is not re-owned by ProofScript.",
+        "D-EXPLICIT-PARAMS is non-empty and preserves ordered explicit Lean binder semantics; empty parameter groups fail closed.",
+        "All registered v0.6.1 D/E features have parser/lowering paths, while unsupported Lean elaboration forms remain outside the executable software subset."
       ]
     },
     {

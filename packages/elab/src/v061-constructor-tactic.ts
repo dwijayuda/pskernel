@@ -3,6 +3,7 @@ import {
   TypeChecker,
   appView,
   constant,
+  type Expr,
 } from 'lean-ts-kernel';
 import {applyV061Tactic} from './v061-apply-tactic.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
@@ -34,7 +35,7 @@ export function constructorV061Tactic(
   const errors:string[]=[];
   for(const ctor of info.ctors){
     const term=constant(ctor,view.fn.levels);
-    let type;
+    let type:Expr;
     try{
       type=checker.check(term);
       applyV061Tactic(runtime,{term,type});

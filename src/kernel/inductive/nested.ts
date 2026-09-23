@@ -1,7 +1,7 @@
 import { ensureClosed } from '../../core/checks.js';
 import { ConstantInfo, ConstructorInfo, InductiveInfo, RecursorInfo, RecursorRule } from '../../core/declaration.js';
 import { Environment, KernelError } from '../../core/environment.js';
-import { BinderInfo, Expr, app, appView, constant, exprKey, fvar, forallE, instantiateExprLevels, lam, mkAppN } from '../../core/expr.js';
+import { BinderInfo, Expr, app, appView, constant, exprKey, exprLeanEq, fvar, forallE, instantiateExprLevels, lam, mkAppN } from '../../core/expr.js';
 import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
 import { Name, nameAppendIndexAfter, nameEq, nameFromDotted, nameKey, nameToString, strName } from '../../core/name.js';
@@ -85,7 +85,9 @@ function appendUnique(base:Name,used:Set<string>,counter:{n:number}):Name{while(
 function preprocess(env:Environment,d:InductiveDecl):Preprocess{
  if(d.types.length===0)throw new KernelError('empty nested inductive declaration');
  const lctx=new LocalContext();const params:OpenParam[]=[];let t=d.types[0]!.type;for(let i=0;i<d.numParams;i++){if(t.kind!=='forall')throw new KernelError('incorrect number of inductive parameters');const p=addParam(lctx,t.name,t.type,t.binderInfo);params.push(p);t=instantiate1(t.body,p.expr);}
- const names=d.types.map(x=>x.name);const used=new Set([...env.entries().map(x=>nameKey(x.name)),...names.map(nameKey)]);const counter={n:1};const aux:AuxFamily[]=[];const auxByNested=new Map<string,AuxFamily>();const outTypes:InductiveTypeDecl[]=d.types.map(x=>({name:x.name,type:x.type,ctors:x.ctors.map(c=>({...c}))}));
+ const names=d.types.map(x=>x.name);const used=new Set([...env.entries().map(x=>nameKey(x.name)),...names.map(nameKey)]);const counter={n:1};const aux:AuxFamily[]=[];const auxByNested=new Map<string,AuxFamily[]>();const outTypes:InductiveTypeDecl[]=d.types.map(x=>({name:x.name,type:x.type,ctors:x.ctors.map(c=>({...c}))}));
+ const findAux=(template:Expr):AuxFamily|undefined=>auxByNested.get(exprKey(template))?.find(f=>exprLeanEq(f.nestedTemplate,template));
+ const addAux=(template:Expr,fam:AuxFamily):void=>{const k=exprKey(template),bucket=auxByNested.get(k);if(bucket)bucket.push(fam);else auxByNested.set(k,[fam]);};
  const lvls=d.levelParams.map(n=>({kind:'param',name:n} as const));
  function ensureFamily(nested:Expr,currentParams:readonly OpenParam[]):AuxFamily{
    const av=appView(nested);if(av.fn.kind!=='const')throw new KernelError('internal nested head');const outer=env.find(av.fn.name);if(!outer||outer.kind!=='inductive')throw new KernelError('internal nested family');if(av.args.length<outer.numParams)throw new KernelError('nested application has too few parameters');
@@ -93,9 +95,9 @@ function preprocess(env:Environment,d:InductiveDecl):Preprocess{
    // Lean canonicalizes constructor-local parameters back to the declaration parameters
    // before looking up an existing nested auxiliary family.
    const canonicalFixed=fixed.map(a=>rebaseParams(a,currentParams,params));
-   const key=exprKey(mkAppN(av.fn,canonicalFixed));const old=auxByNested.get(key);if(old)return old;
+   const canonical=mkAppN(av.fn,canonicalFixed),old=findAux(canonical);if(old)return old;
    let selected:AuxFamily|null=null;
-   for(const familyName of outer.all){const oi=env.get(familyName);if(oi.kind!=='inductive')throw new KernelError('invalid outer mutual inductive metadata');const auxName=appendUnique(strName(nameFromDotted('_nested'),nameToString(familyName)),used,counter);const template=mkAppN(constant(familyName,av.fn.levels),canonicalFixed);const ctorMap=new Map<string,Name>();const fam:AuxFamily={auxName,outerName:familyName,outerLevels:av.fn.levels,fixedParams:canonicalFixed,nestedTemplate:template,ctorMap};aux.push(fam);auxByNested.set(exprKey(template),fam);if(nameEq(familyName,av.fn.name))selected=fam;
+   for(const familyName of outer.all){const oi=env.get(familyName);if(oi.kind!=='inductive')throw new KernelError('invalid outer mutual inductive metadata');const auxName=appendUnique(strName(nameFromDotted('_nested'),nameToString(familyName)),used,counter);const template=mkAppN(constant(familyName,av.fn.levels),canonicalFixed);const ctorMap=new Map<string,Name>();const fam:AuxFamily={auxName,outerName:familyName,outerLevels:av.fn.levels,fixedParams:canonicalFixed,nestedTemplate:template,ctorMap};aux.push(fam);addAux(template,fam);if(nameEq(familyName,av.fn.name))selected=fam;
      let auxType=instantiateExprLevels(oi.type,oi.levelParams,av.fn.levels);auxType=instFirstParams(auxType,fixed);const auxCtors:ConstructorDecl[]=[];
      for(const ocn of oi.ctors){const oc=env.get(ocn);if(oc.kind!=='constructor')throw new KernelError('outer constructor metadata mismatch');const acn=appendUnique(strName(auxName,nameToString(ocn)),used,counter);ctorMap.set(nameKey(acn),ocn);let act=instantiateExprLevels(oc.type,oc.levelParams,av.fn.levels);act=instFirstParams(act,fixed);auxCtors.push({name:acn,type:close('forall',currentParams,act)});}
      outTypes.push({name:auxName,type:close('forall',currentParams,auxType),ctors:auxCtors});

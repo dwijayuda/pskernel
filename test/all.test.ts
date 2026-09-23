@@ -603,6 +603,24 @@ test('nested fixed parameters are checked even when auxiliary preprocessing drop
  assert(!env.has(Bad)&&!env.has(BadMk),'ill-typed nested fixed parameter must be rejected transactionally');
 });
 
+test('nested auxiliary dedup follows Lean structural MData equality',()=>{
+ const env=baseEnv(),Type=sort(levelSucc(levelZero));
+ const Box=nameFromDotted('NestedMData.Box'),BoxMk=nameFromDotted('NestedMData.Box.mk');
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{
+   name:Box,
+   type:forallE(nameFromDotted('α'),Type,Type,'implicit'),
+   ctors:[{name:BoxMk,type:forallE(nameFromDotted('α'),Type,app(constant(Box),bvar(0)),'implicit')}]
+ }]});
+ const I=nameFromDotted('NestedMData.I'),Mk=nameFromDotted('NestedMData.I.mk');
+ const fixedA={kind:'mdata',data:{tag:'a'},expr:constant(I)} as const;
+ const fixedB={kind:'mdata',data:{tag:'b'},expr:constant(I)} as const;
+ const ctorTy=forallE(nameFromDotted('a'),app(constant(Box),fixedA),
+   forallE(nameFromDotted('b'),app(constant(Box),fixedB),constant(I)));
+ addInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:Type,ctors:[{name:Mk,type:ctorTy}]}]});
+ const ii=env.get(I);
+ assert(ii.kind==='inductive'&&ii.numNested===2,'Lean structural nested-family dedup must keep distinct MData payloads separate');
+});
+
 test('nested declarations reject FVars and MVars before preprocessing can erase them',()=>{
  const env=baseEnv(),one=levelSucc(levelZero),Type=sort(one);
  const Box=nameFromDotted('NestedClosed.Box'),BoxMk=nameFromDotted('NestedClosed.Box.mk');

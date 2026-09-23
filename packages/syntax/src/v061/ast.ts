@@ -40,6 +40,11 @@ export type V061Tactic =
       readonly span:SourceSpan;
     }
   | {
+      readonly kind:'induction';
+      readonly target:string;
+      readonly span:SourceSpan;
+    }
+  | {
       readonly kind:'apply';
       readonly proof:V061Expr;
       readonly span:SourceSpan;

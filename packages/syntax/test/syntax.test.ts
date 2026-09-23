@@ -799,6 +799,26 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 
+{
+  const module=parseV061Module(
+    'theorem inductionProof(xs : Chain) : P := '+
+    'by induction xs; assumption; assumption;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,3);
+    equal(body.tactics[0]?.kind,'induction');
+    if(body.tactics[0]?.kind==='induction'){
+      equal(body.tactics[0].target,'xs');
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem inductionProof (xs : Chain) : P := by induction xs; assumption; assumption\n',
+  );
+}
+
 
 {
   const module=parseV061Module(

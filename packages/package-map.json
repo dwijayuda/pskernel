@@ -109,6 +109,7 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "Inherited Lean `induction <local>` syntax is parsed/lowered canonically; the bounded semantic implementation uses pskernel recursors and does not introduce a second induction principle.",
         "Inherited Lean `cases <local>` tactic syntax is parsed/lowered canonically; the bounded semantic implementation lives in elab and delegates elimination to pskernel-generated recursors.",
         "Inherited Lean constructor tactic syntax is parsed as an ordinary theorem tactic and lowers canonically to `constructor`; no ProofScript-specific proof rule is introduced.",
         "Inherited Lean synthetic-hole syntax ?_ is parsed/lowered for theorem tactics; ordinary executable elaboration rejects it, and the current semantic consumer is bounded refine only.",
@@ -205,7 +206,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -218,6 +219,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Bounded induction supports unindexed inductives and constructs the motive by abstracting the major premise from the current target. Each branch receives all constructor fields followed by induction hypotheses for direct recursive fields, matching pskernel recursor-minor binder order.",
+        "Each induction hypothesis has the motive instantiated at its recursive field; branch proofs are lambda-abstracted over fields first and IHs second before the pskernel-generated recursor is applied.",
+        "Higher-order/nested recursive fields, indexed families, local-let majors, and surrounding locals dependent on the major fail closed until the corresponding Lean Meta generalization/recursor machinery is modeled.",
         "Cases rejects local let scrutinees and any surrounding local whose type/value depends on the scrutinee; Lean's dependent-context substitution/generalization machinery must land before those shapes are accepted.",
         "Bounded cases constructs an ordinary pskernel-generated recursor proof for unindexed, non-recursive inductive locals. The current goal is abstracted over the scrutinee to form the motive, and one ordered tactic goal is created per constructor.",
         "Constructor fields are introduced only inside each branch context and branch proofs are lambda-abstracted into recursor minors. Empty inductives close the parent goal with the zero-minor recursor path.",

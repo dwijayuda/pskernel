@@ -52,8 +52,8 @@ Already implemented on the preferred verified path:
 - generic recursive list/map/length-style programs;
 - theorem proof terms and bounded tactics: exact, assumption, intro, ordered
   explicit multi-premise apply, bounded refine with synthetic ?_ holes,
-  bounded constructor via the same apply machinery, and bounded cases through
-  pskernel-generated recursors;
+  bounded constructor via the same apply machinery, bounded cases, and
+  bounded induction through pskernel-generated recursors;
 - class declarations as kernel-checked structure-like declarations;
 - local instance synthesis;
 - bounded global instance registration/synthesis;
@@ -203,6 +203,14 @@ Local let scrutinees and surrounding locals that depend on the scrutinee also
 remain fail-closed until Lean-compatible context substitution/generalization is
 implemented; ordinary independent hypotheses remain available in every branch.
 
+Bounded `induction local` now extends the same recursor path to direct
+recursive fields. The motive is obtained by abstracting the major premise from
+the current goal; constructor fields are introduced first, followed by one
+induction hypothesis per direct recursive field, exactly matching pskernel's
+generated minor binder order. Each IH has the motive instantiated at that
+recursive field. Indexed families, higher-order/nested recursive arguments,
+local-let majors, and dependent surrounding locals remain fail-closed.
+
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
 
@@ -344,8 +352,8 @@ Do not reorder without repository evidence.
    Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
-4. Continue theorem prover v1 with induction on the landed ordered multi-goal
-   apply/refine/constructor/cases foundation.
+4. Continue theorem prover v1 with rewrite on the landed ordered multi-goal
+   apply/refine/constructor/cases/induction foundation.
 5. Implement project/module/import semantics on the checked-core path.
 6. Design and implement explicit npm/JS FFI.
 7. Start the ProofScript-written standard library.

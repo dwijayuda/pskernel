@@ -570,6 +570,49 @@ console.log('ok - @proofscript/elab bounded cases via recursor');
 }
 console.log('ok - @proofscript/elab parameterized bounded cases');
 
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive Chain where { | nil; | cons(tail : Chain); } '+
+    'theorem chainInduction(P : Prop, base : P, step : P -> P, xs : Chain) : P := '+
+    'by induction xs; assumption; apply step; assumption;',
+  ));
+  equal(result.inductives.length,1);
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('chainInduction'))?.kind,
+    'theorem',
+  );
+}
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive PsListI(α : Type) where { '+
+    '| nil; | cons(head : α, tail : PsListI(α)); } '+
+    'theorem listInduction {α : Type}'+
+    '(P : Prop, base : P, step : P -> P, xs : PsListI(α)) : P := '+
+    'by induction xs; assumption; apply step; assumption;',
+  ));
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('listInduction'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'inductive ChoiceI where { | left; | right; } '+
+      'theorem badDependentContext'+
+      '(M : ChoiceI -> Prop, c : ChoiceI, h : M(c), P : Prop, hp : P) : P := '+
+      'by induction c; assumption; assumption;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_INDUCTION_DEPENDENT_CONTEXT/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded induction via recursor');
+
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();

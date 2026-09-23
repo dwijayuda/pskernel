@@ -20,9 +20,10 @@ function containsFVar(expr:Expr,id:string):boolean {
   }
 }
 
-export function assertCasesContextIndependent(
+function assertElimContextIndependent(
   context:V061CoreElabContext,
   majorId:string,
+  tactic:'CASES'|'INDUCTION',
 ):void {
   for(const id of context.locals.values()){
     if(id===majorId)continue;
@@ -35,9 +36,23 @@ export function assertCasesContextIndependent(
       );
     if(depends){
       throw new Error(
-        'PS_ELAB_TACTIC_CASES_DEPENDENT_CONTEXT: another local depends on '+
+        'PS_ELAB_TACTIC_'+tactic+'_DEPENDENT_CONTEXT: another local depends on '+
         'the scrutinee; dependent context substitution is not yet supported',
       );
     }
   }
+}
+
+export function assertCasesContextIndependent(
+  context:V061CoreElabContext,
+  majorId:string,
+):void {
+  assertElimContextIndependent(context,majorId,'CASES');
+}
+
+export function assertInductionContextIndependent(
+  context:V061CoreElabContext,
+  majorId:string,
+):void {
+  assertElimContextIndependent(context,majorId,'INDUCTION');
 }

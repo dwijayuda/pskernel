@@ -34,6 +34,7 @@ function lowerV061TacticToLean(
     case 'assumption':return 'assumption';
     case 'constructor':return 'constructor';
     case 'cases':return 'cases '+tactic.target;
+    case 'induction':return 'induction '+tactic.target;
     case 'apply':return 'apply '+lowerV061ExprToLean(tactic.proof);
     case 'refine':return 'refine '+lowerV061ExprToLean(tactic.proof);
     case 'intro':return 'intro '+tactic.name;

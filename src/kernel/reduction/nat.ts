@@ -21,10 +21,14 @@ export function natSizeInBytes(n:bigint):bigint{
 export function checkNatSize(n:bigint,maxBytes:bigint,op='Nat numeral'):void{
   if(natSizeInBytes(n)>maxBytes)throw new KernelError(`the kernel refused a \`${op}\` numeral because its size exceeds the maximum; increase the LEAN_NAT_MAX_SIZE environment variable to allow it`);
 }
+/** Final Lean 4.34 `is_nat_lit_ext` / `get_nat_val` boundary:
+ * optimized Nat evaluation recognizes only literal numerals and the level-free
+ * constant `Nat.zero`. Constructor syntax such as `Nat.succ Nat.zero` is not
+ * reinterpreted as a literal by this fast path. */
 export function asNat(e:Expr):bigint|null{
   if(e.kind==='lit'&&e.literal.kind==='nat')return e.literal.value;
   if(e.kind==='const'&&e.levels.length===0&&nameEq(e.name,N.NatZero))return 0n;
-  const {fn,args}=appView(e);if(fn.kind==='const'&&fn.levels.length===0&&nameEq(fn.name,N.NatSucc)&&args.length===1){const n=asNat(args[0]!);return n===null?null:n+1n;} return null;
+  return null;
 }
 function boolExpr(v:boolean):Expr{return constant(v?N.BoolTrue:N.BoolFalse);}
 function gcd(a:bigint,b:bigint):bigint{while(b!==0n){const t=a%b;a=b;b=t;}return a;}

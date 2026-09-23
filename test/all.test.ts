@@ -361,6 +361,11 @@ test('Nat optimized reduction requires exact level-free primitive heads',()=>{
  const malformedSucc=app(constant(N.NatSucc,[levelZero]),natLit(0));
  assert(!(tc as any).isNatZeroExpr(malformedZero),'Nat.zero with universe arguments is not Lean kernel zero');
  assert((tc as any).natPredExpr(malformedSucc)===null,'Nat.succ with universe arguments is not a Lean kernel successor');
+ const ctorOne=app(constant(N.NatSucc),constant(N.NatZero));
+ const succOfCtorZero=app(constant(N.NatSucc),ctorOne);
+ eqExpr(tc.whnf(succOfCtorZero),succOfCtorZero,'optimized Nat.succ only consumes a literal or Nat.zero, not constructor-form Nat.succ');
+ const addCtor=app(app(constant(N.NatAdd),ctorOne),natLit(2));
+ eqExpr(tc.whnf(addCtor),addCtor,'optimized binary Nat reduction must not reinterpret Nat.succ constructor syntax as a literal');
 });
 
 test('Nat.add reduction uses exact bigint',()=>{const tc=new TypeChecker(baseEnv());const e=app(app(constant(N.NatAdd),natLit(9007199254740993n)),natLit(7));eqExpr(tc.whnf(e),natLit(9007199254741000n));});

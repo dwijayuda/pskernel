@@ -116,3 +116,48 @@ console.log('ok - @proofscript/checked-core kernel admission boundary');
   equal(base.find(Box),undefined);
 }
 console.log('ok - @proofscript/checked-core mixed inductive admission');
+
+
+{
+  const Sized=nameFromDotted('Sized');
+  const mk=nameFromDotted('Sized.mk');
+  const Nat=nameFromDotted('Nat');
+  const base=new Environment();
+  base.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const checked=admitCheckedCoreAdmissions(base,[{
+    kind:'class',
+    structure:{
+      name:Sized,
+      constructor:mk,
+      fields:[{name:'size',index:0,binderInfo:'default'}],
+    },
+    declaration:{
+      levelParams:[],
+      numParams:0,
+      types:[{
+        name:Sized,
+        type:sort(levelSucc(levelZero)),
+        ctors:[{
+          name:mk,
+          type:{
+            kind:'forall',
+            name:nameFromDotted('size'),
+            type:constant(Nat),
+            body:constant(Sized),
+            binderInfo:'default',
+          },
+        }],
+      }],
+    },
+  }]);
+  equal(checked.classes.length,1);
+  equal(checked.structures.length,1);
+  equal(checked.classes[0]?.name.kind,'str');
+  equal(checked.environment.find(Sized)?.kind,'inductive');
+}
+console.log('ok - @proofscript/checked-core class metadata admission');

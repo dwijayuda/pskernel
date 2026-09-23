@@ -878,3 +878,26 @@ console.log('ok - @proofscript/elab generic structure admission');
   equal(recursive,true);
 }
 console.log('ok - @proofscript/elab acyclic where local helpers');
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'class Sized(α : Type) where { size : α -> Nat; }',
+  ),env);
+  equal(result.classes.length,1);
+  equal(result.structures.length,1);
+  equal(
+    result.environment.find(nameFromDotted('Sized'))?.kind,
+    'inductive',
+  );
+  equal(
+    result.environment.find(nameFromDotted('Sized.mk'))?.kind,
+    'constructor',
+  );
+  equal(
+    result.environment.find(nameFromDotted('Sized.rec'))?.kind,
+    'recursor',
+  );
+}
+console.log('ok - @proofscript/elab class admission as kernel inductive');

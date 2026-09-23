@@ -50,3 +50,5 @@ export * from './v061-structural-recursion.js';
 export * from './v061-lambda-elab.js';
 export * from './v061-let-elab.js';
 export * from './v061-where-elab.js';
+
+export * from './v061-class-elab.js';

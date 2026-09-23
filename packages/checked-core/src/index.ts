@@ -27,6 +27,8 @@ export interface CheckedCoreStructure {
   readonly fields:readonly CheckedCoreStructureField[];
 }
 
+export interface CheckedCoreClass extends CheckedCoreStructure {}
+
 export type CheckedCoreAdmission =
   | {
       readonly kind:'constant';
@@ -40,6 +42,11 @@ export type CheckedCoreAdmission =
       readonly kind:'structure';
       readonly declaration:InductiveDecl;
       readonly structure:CheckedCoreStructure;
+    }
+  | {
+      readonly kind:'class';
+      readonly declaration:InductiveDecl;
+      readonly structure:CheckedCoreClass;
     };
 
 export interface CheckedCoreModule {
@@ -52,6 +59,7 @@ export interface CheckedCoreModule {
   readonly inductiveDeclarations:readonly InductiveDecl[];
   readonly inductives:readonly InductiveInfo[];
   readonly structures:readonly CheckedCoreStructure[];
+  readonly classes:readonly CheckedCoreClass[];
 }
 
 function validateStructure(
@@ -122,9 +130,14 @@ export function admitCheckedCoreAdmissions(
   const inductiveDeclarations:InductiveDecl[]=[];
   const inductives:InductiveInfo[]=[];
   const structures:CheckedCoreStructure[]=[];
+  const classes:CheckedCoreClass[]=[];
 
   for(const admission of admissions){
-    if(admission.kind==='inductive'||admission.kind==='structure'){
+    if(
+      admission.kind==='inductive'
+      ||admission.kind==='structure'
+      ||admission.kind==='class'
+    ){
       addInductive(environment,admission.declaration);
       inductiveDeclarations.push(admission.declaration);
       for(const type of admission.declaration.types){
@@ -137,9 +150,12 @@ export function admitCheckedCoreAdmissions(
         }
         inductives.push(info);
       }
-      if(admission.kind==='structure'){
+      if(admission.kind==='structure'||admission.kind==='class'){
         validateStructure(environment,admission.structure);
         structures.push(admission.structure);
+        if(admission.kind==='class'){
+          classes.push(admission.structure);
+        }
       }
       continue;
     }
@@ -165,6 +181,7 @@ export function admitCheckedCoreAdmissions(
     inductiveDeclarations,
     inductives,
     structures,
+    classes,
   };
 }
 

@@ -24,6 +24,7 @@ import {
 } from '@proofscript/checked-core';
 import {elaborateV061ValueHeader} from './v061-header-elab.js';
 import {elaborateV061StructureDeclaration} from './v061-structure-elab.js';
+import {elaborateV061ClassDeclaration} from './v061-class-elab.js';
 import {elaborateV061InductiveDeclaration} from './v061-inductive-elab.js';
 import {withStructuralRecursionContext} from './v061-structural-recursion.js';
 import {
@@ -207,10 +208,26 @@ export function elaborateV061Definitions(
       continue;
     }
     if(declaration.kind==='class'){
-      throw new Error(
-        "PS_ELAB_DECL_UNSUPPORTED: declaration kind '"+declaration.kind+
-        "' requires dedicated Lean-compatible declaration elaboration",
-      );
+      let klass;
+      try{
+        klass=elaborateV061ClassDeclaration(
+          declaration,
+          workEnvironment,
+        );
+        addInductive(workEnvironment,klass.declaration);
+      }catch(error){
+        const detail=error instanceof Error?error.message:String(error);
+        throw new Error(
+          "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
+        );
+      }
+      structures.set(declaration.name,klass.structure);
+      admissions.push({
+        kind:'class',
+        declaration:klass.declaration,
+        structure:klass.structure,
+      });
+      continue;
     }
 
     let info:DefinitionInfo|TheoremInfo;

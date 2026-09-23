@@ -5,7 +5,7 @@ import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
 import { Name, nameAppendIndexAfter, nameEq, nameFromDotted, nameKey, nameToString, strName } from '../../core/name.js';
 import { TypeChecker } from '../type-checker.js';
-import { addOrdinaryInductive, checkUniformInductiveOccurrences, ConstructorDecl, InductiveDecl, InductiveTypeDecl } from './ordinary.js';
+import { addOrdinaryInductive, checkNoReservedNestedAux, checkUniformInductiveOccurrences, ConstructorDecl, InductiveDecl, InductiveTypeDecl } from './ordinary.js';
 
 interface OpenParam { readonly id:string; readonly expr:Expr; readonly decl:Extract<LocalDecl,{kind:'local'}> }
 interface AuxFamily { readonly auxName:Name; readonly outerName:Name; readonly outerLevels:readonly import('../../core/level.js').Level[]; readonly fixedParams:readonly Expr[]; readonly nestedTemplate:Expr; readonly ctorMap:Map<string,Name> }
@@ -15,7 +15,6 @@ function checker(env:Environment,d:InductiveDecl,lparams?:readonly Name[]):TypeC
 function addParam(lctx:LocalContext,name:Name,type:Expr,bi:BinderInfo):OpenParam{const id=lctx.fresh(nameToString(name));lctx.addLocal(id,name,type,bi);const d=lctx.get(id);if(!d||d.kind!=='local')throw new Error('local invariant');return {id,expr:fvar(id),decl:d};}
 function close(kind:'forall'|'lam',params:readonly OpenParam[],body:Expr):Expr{let r=body;for(let i=params.length-1;i>=0;i--){const p=params[i]!;const b=abstractFVar(r,p.id);r=kind==='forall'?forallE(p.decl.userName,p.decl.type,b,p.decl.binderInfo):lam(p.decl.userName,p.decl.type,b,p.decl.binderInfo);}return r;}
 function hasNew(e:Expr,names:readonly Name[]):boolean{switch(e.kind){case'const':return names.some(n=>nameEq(n,e.name));case'app':return hasNew(e.fn,names)||hasNew(e.arg,names);case'lam':case'forall':return hasNew(e.type,names)||hasNew(e.body,names);case'let':return hasNew(e.type,names)||hasNew(e.value,names)||hasNew(e.body,names);case'mdata':return hasNew(e.expr,names);case'proj':return hasNew(e.expr,names);default:return false;}}
-function hasReserved(e:Expr):boolean{switch(e.kind){case'const':return nameToString(e.name).startsWith('_nested');case'proj':return nameToString(e.typeName).startsWith('_nested')||hasReserved(e.expr);case'app':return hasReserved(e.fn)||hasReserved(e.arg);case'lam':case'forall':return hasReserved(e.type)||hasReserved(e.body);case'let':return hasReserved(e.type)||hasReserved(e.value)||hasReserved(e.body);case'mdata':return hasReserved(e.expr);default:return false;}}
 function instFirstParams(e:Expr,args:readonly Expr[]):Expr{let t=e;for(const a of args){if(t.kind!=='forall')throw new KernelError('ill-formed nested inductive parameter instantiation');t=instantiate1(t.body,a);}return t;}
 function openShared(e:Expr,params:readonly OpenParam[]):{kind:'forall'|'lam';body:Expr}|null{if(params.length===0)return {kind:'forall',body:e};let t=e;let k:'forall'|'lam'|null=null;for(const p of params){if(t.kind!=='forall'&&t.kind!=='lam')return null;if(k===null)k=t.kind;else if(k!==t.kind)return null;t=instantiate1(t.body,p.expr);}return k?{kind:k,body:t}:null;}
 /** Re-open constructor parameters in a fresh local context. Lean does this per constructor
@@ -43,7 +42,7 @@ function mapExpr(e:Expr,f:(x:Expr)=>Expr|null):Expr{const r=f(e);if(r)return r;s
 function appendUnique(base:Name,used:Set<string>,counter:{n:number}):Name{while(true){const n=strName(base,String(counter.n++));const k=nameKey(n);if(!used.has(k)){used.add(k);return n;}}}
 
 function preprocess(env:Environment,d:InductiveDecl):Preprocess{
- if(d.types.length===0)throw new KernelError('empty nested inductive declaration');for(const t of d.types){if(hasReserved(t.type))throw new KernelError(`reserved _nested name in ${nameToString(t.name)}`);for(const c of t.ctors)if(hasReserved(c.type))throw new KernelError(`reserved _nested name in ${nameToString(c.name)}`);}
+ if(d.types.length===0)throw new KernelError('empty nested inductive declaration');
  const lctx=new LocalContext();const params:OpenParam[]=[];let t=d.types[0]!.type;for(let i=0;i<d.numParams;i++){if(t.kind!=='forall')throw new KernelError('incorrect number of inductive parameters');const p=addParam(lctx,t.name,t.type,t.binderInfo);params.push(p);t=instantiate1(t.body,p.expr);}
  const names=d.types.map(x=>x.name);const used=new Set([...env.entries().map(x=>nameKey(x.name)),...names.map(nameKey)]);const counter={n:1};const aux:AuxFamily[]=[];const auxByNested=new Map<string,AuxFamily>();const outTypes:InductiveTypeDecl[]=d.types.map(x=>({name:x.name,type:x.type,ctors:x.ctors.map(c=>({...c}))}));
  const lvls=d.levelParams.map(n=>({kind:'param',name:n} as const));
@@ -105,9 +104,10 @@ function copyAuxRecursors(transformed:Environment,finalEnv:Environment,d:Inducti
 
 /** Lean-style nested-inductive preprocessing -> ordinary mutual induction -> restoration/hardening. */
 export function addInductive(env:Environment,d:InductiveDecl):void{
+ checkNoReservedNestedAux(d);
  checkUniformInductiveOccurrences(d);
  const p=preprocess(env,d);if(p.aux.length===0){addOrdinaryInductive(env,{...d,numNested:0});return;}
- const transformed=env.clone();addOrdinaryInductive(transformed,{...p.decl,numNested:0});
+ const transformed=env.clone();addOrdinaryInductive(transformed,{...p.decl,numNested:0},{allowReservedNestedAux:true});
  const recRename=new Map<string,Name>();let idx=1;const mainRec=strName(d.types[0]!.name,'rec');for(const fam of p.aux)recRename.set(nameKey(strName(fam.auxName,'rec')),nameAppendIndexAfter(mainRec,idx++));
  const finalEnv=env.clone();copyOriginalInductive(transformed,finalEnv,d,p,recRename);copyAuxRecursors(transformed,finalEnv,d,p,recRename);
  // 4.34 hardening analogue: recheck restored constructor/recursor types and rule RHS type preservation by restoring the transformed inferred type.

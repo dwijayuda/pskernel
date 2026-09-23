@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **DS6.4 cross-language navigation landed; source conversion actions and refresh hardening remain; subordinate to the canonical checked-core architecture**
+Status: **DS6.5 source conversion actions landed; importer diagnostic refresh hardening remains; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -392,7 +392,7 @@ Remaining DS5 work:
 
 ### DS6 — editor support
 
-Status: **DS6.4 project-aware cross-language navigation landed; conversion actions and refresh hardening remain**
+Status: **DS6.5 non-destructive source conversion actions landed; refresh hardening remains**
 
 Landed DS6.1:
 
@@ -444,10 +444,19 @@ Landed DS6.4:
   by elaboration, proof checking, or kernel admission;
 - open-buffer edits invalidate semantic/navigation caches together.
 
+Landed DS6.5:
+
+- language service conversion uses the same source frontend registry and
+  translation target printer registry as psc translate;
+- LSP protocol v2 exposes proofscript/translateDocument;
+- VS Code offers refactor actions to convert ProofScript to the supported Lean
+  subset or supported Lean to ProofScript;
+- conversion opens a new untitled target-language document and never overwrites
+  the original source in place;
+- translation is explicitly source transformation, not proof verification.
+
 Remaining DS6 work:
 
-- add source conversion code actions now that project-aware document identity
-  is stable;
 - republish affected importer diagnostics when an imported open document
   changes, rather than waiting for the next request on that importer;
 - later improve the lexical reference index with scope-aware resolution without

@@ -544,7 +544,7 @@
       "path": "packages/language-service",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "dual-source-cross-navigation-mvp",
+      "status": "dual-source-conversion+cross-navigation-mvp",
       "packageName": "@proofscript/language-service",
       "dependsOn": [
         "syntax",
@@ -555,6 +555,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS6.5 exposes source conversion through the same registered source frontends and translation-target printers used by psc translate. Conversion is syntax/printing only and carries no proof-authority claim.",
         "DS6.4 builds completion/definition/reference data across the same checked mixed-source project closure used for semantic analysis. Imported .ps/.lean declarations can navigate across source kinds.",
         "Cross-source reference lookup remains lexical and intentionally untrusted; it may over-approximate shadowed identifiers and never participates in elaboration or kernel admission.",
         "Navigation caches are invalidated together with semantic analysis when any open document changes, and imported open buffers override host-provided source text.",
@@ -577,7 +578,7 @@
       "path": "packages/lsp",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "dual-source-cross-navigation-mvp",
+      "status": "dual-source-conversion+cross-navigation-mvp",
       "packageName": "@proofscript/lsp",
       "dependsOn": [
         "language-service",
@@ -587,6 +588,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Protocol v2 adds proofscript/translateDocument and advertises experimental.translateDocument. The request delegates directly to the language-service frontend/target registries.",
+        "Conversion returns canonical target text and extension only; the LSP does not overwrite source files or claim verification as part of translation.",
         "Existing LSP completion/definition/reference methods now inherit DS6.4 cross-source results from the project-aware language service without adding a second transport-side symbol index.",
         "DS6.3 wires the language-service project host to @proofscript/project/node, so editor import resolution uses the same .ps/.lean ambiguity and configured sourceRoots policy as psc.",
         "For file:// entry documents, the LSP finds the nearest psconfig.json; absent config, it falls back to the entry directory exactly like the unconfigured DS5 source-root behavior.",

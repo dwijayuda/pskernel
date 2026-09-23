@@ -494,9 +494,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    blocker is a real persistent module-artifact payload path; do not fabricate
    Lean4Export records.
 8. Continue landed DS6: source-kind routing, checked import composition,
-   shared Node/LSP source-root resolution, and cross-source completion/
-   definition/reference navigation are landed. Next add source conversion
-   code actions and tighten project-change diagnostic refresh behavior.
+   shared Node/LSP source-root resolution, cross-source navigation, and
+   non-destructive .ps / supported .lean conversion actions are landed.
+   Next tighten importer diagnostic refresh when an open dependency changes.
 9. Design and implement explicit npm/JS FFI.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.

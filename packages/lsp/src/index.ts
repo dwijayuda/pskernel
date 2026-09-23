@@ -56,4 +56,3 @@ export * from './prelude-environment.js';
 
 export * from './source-kind.js';
 export * from './project-source-host.js';
-export * from './capabilities.js';

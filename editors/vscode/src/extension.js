@@ -254,7 +254,7 @@ function registerLanguageProviders(context){
 
 
 async function convertActiveSource(uri,target){
-  if(client===undefined)return;
+  if(client===undefined||uri===undefined)return;
   const result=await client.request('proofscript/translateDocument',{
     textDocument:{uri:uri.toString()},
     target,

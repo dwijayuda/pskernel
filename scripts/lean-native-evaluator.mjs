@@ -1,7 +1,7 @@
 import {spawnSync} from 'node:child_process';
 import {nameToString} from '../dist/src/core/name.js';
 
-export function createLeanNativeEvaluator({lean,moduleName,cwd=process.cwd(),env=process.env}){
+export function createLeanNativeEvaluator({lean,moduleName,cwd=process.cwd(),env=process.env,runner=spawnSync}){
   if(typeof lean!=='string'||lean.length===0)throw new Error('native oracle: lean executable is required');
   if(typeof moduleName!=='string'||moduleName.length===0)throw new Error('native oracle: module name is required');
   const cache=new Map();
@@ -11,7 +11,7 @@ export function createLeanNativeEvaluator({lean,moduleName,cwd=process.cwd(),env
       const key=`${request.kind}:${constant}`;
       const cached=cache.get(key);
       if(cached!==undefined)return cached;
-      const r=spawnSync(
+      const r=runner(
         lean,
         ['--run','oracle/replay-probe/NativeEval.lean',moduleName,request.kind,constant],
         {cwd,env,encoding:'utf8',maxBuffer:16*1024*1024},

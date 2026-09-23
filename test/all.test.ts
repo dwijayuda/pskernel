@@ -7,6 +7,7 @@ import { instantiate, lift } from '../src/core/instantiate.js';
 import { Kernel } from '../src/kernel/kernel.js';
 import { N } from '../src/kernel/names.js';
 import { TypeChecker } from '../src/kernel/type-checker.js';
+import { NativeEvaluator } from '../src/kernel/reduction/native.js';
 import { KernelState } from '../src/kernel/state.js';
 import { addOrdinaryInductive } from '../src/kernel/inductive/ordinary.js';
 import { addQuot } from '../src/kernel/quotient.js';
@@ -72,24 +73,35 @@ test('kernel recursion budget fails deterministically and succeeds when raised',
  assert(message.includes('deep recursion'),'low maxRecDepth must fail with deterministic kernel recursion error');
  const high=new TypeChecker(env,undefined,undefined,{maxRecDepth:64,maxNatBytes:134217728n});eqExpr(high.check(deep),constant(N.Nat));
 });
-test('Lean 4.34 profile removes deprecated in-kernel native-reduction declarations',()=>{
- const env=baseEnv();
- for(const n of ['Lean.reduceNat','Lean.reduceBool','Lean.ofReduceNat','Lean.ofReduceBool','Lean.trustCompiler'])
-   assert(!env.has(nameFromDotted(n)),`${n} must not be part of the final Lean 4.34 profile`);
+test('native reduction fails closed by default even when the logical body normalizes',()=>{
+ const env=baseEnv(),vNat=nameFromDotted('Native.vNat'),vBool=nameFromDotted('Native.vBool');
+ env.add({kind:'axiom',name:N.LeanReduceBool,levelParams:[],type:forallE(nameFromDotted('b'),constant(N.Bool),constant(N.Bool))});
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'definition',name:vNat,levelParams:[],type:constant(N.Nat),value:natLit(1),hints:{kind:'regular',height:1n},safety:'safe'});
+ env.add({kind:'definition',name:vBool,levelParams:[],type:constant(N.Bool),value:constant(N.BoolTrue),hints:{kind:'regular',height:1n},safety:'safe'});
+ const tc=new TypeChecker(env);
+ throws(()=>tc.whnf(app(constant(N.LeanReduceNat),constant(vNat))));
+ throws(()=>tc.whnf(app(constant(N.LeanReduceBool),constant(vBool))));
 });
-test('historical Lean.reduceNat name is not a kernel reduction opcode',()=>{
- const env=baseEnv(),reduceNat=nameFromDotted('Lean.reduceNat'),v=nameFromDotted('NativeCompat.userValue');
- env.add({kind:'axiom',name:reduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
- env.add({kind:'definition',name:v,levelParams:[],type:constant(N.Nat),value:natLit(7),hints:{kind:'regular',height:1n},safety:'safe'});
- const e=app(constant(reduceNat),constant(v)),w=new TypeChecker(env).whnf(e);
- eqExpr(w,e);
+test('explicit native evaluator controls Lean.reduceNat and Lean.reduceBool results',()=>{
+ const env=baseEnv(),vNat=nameFromDotted('Native.vNatProvider'),vBool=nameFromDotted('Native.vBoolProvider');
+ env.add({kind:'axiom',name:N.LeanReduceBool,levelParams:[],type:forallE(nameFromDotted('b'),constant(N.Bool),constant(N.Bool))});
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'definition',name:vNat,levelParams:[],type:constant(N.Nat),value:natLit(1),hints:{kind:'regular',height:1n},safety:'safe'});
+ env.add({kind:'definition',name:vBool,levelParams:[],type:constant(N.Bool),value:constant(N.BoolTrue),hints:{kind:'regular',height:1n},safety:'safe'});
+ const evaluator:NativeEvaluator={evaluate(_env,request){const n=nameToString(request.constant);if(n==='Native.vNatProvider')return {kind:'nat',value:7n};if(n==='Native.vBoolProvider')return {kind:'bool',value:false};return null;}};
+ const tc=new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,evaluator);
+ eqExpr(tc.whnf(app(constant(N.LeanReduceNat),constant(vNat))),natLit(7));
+ eqExpr(tc.whnf(app(constant(N.LeanReduceBool),constant(vBool))),constant(N.BoolFalse));
 });
-test('defeq treats historical native-reduction names as ordinary opaque applications',()=>{
- const env=baseEnv(),reduceBool=nameFromDotted('Lean.reduceBool'),v=nameFromDotted('NativeCompat.boolValue');
- env.add({kind:'axiom',name:reduceBool,levelParams:[],type:forallE(nameFromDotted('b'),constant(N.Bool),constant(N.Bool))});
- env.add({kind:'definition',name:v,levelParams:[],type:constant(N.Bool),value:constant(N.BoolTrue),hints:{kind:'regular',height:1n},safety:'safe'});
- const tc=new TypeChecker(env),e=app(constant(reduceBool),constant(v));
- assert.equal(tc.isDefEq(e,constant(N.BoolFalse)),false);
+test('native evaluator results are shape-checked at the kernel boundary',()=>{
+ const env=baseEnv(),v=nameFromDotted('Native.badProvider');
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'opaque',name:v,levelParams:[],type:constant(N.Nat),value:natLit(0)});
+ const wrong:NativeEvaluator={evaluate(){return {kind:'bool',value:true};}};
+ const negative:NativeEvaluator={evaluate(){return {kind:'nat',value:-1n};}};
+ throws(()=>new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,wrong).whnf(app(constant(N.LeanReduceNat),constant(v))));
+ throws(()=>new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,negative).whnf(app(constant(N.LeanReduceNat),constant(v))));
 });
 test('application checker rejects wrong argument',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));throws(()=>tc.check(app(id,constant(N.BoolTrue))));});
 test('eagerReduce enables Lean 4.34 eager defeq for application arguments with syntactic fvars',()=>{
@@ -239,6 +251,13 @@ test('projection reduction never crosses an unrelated structure name',()=>{
  const tc=new TypeChecker(env);eqExpr(tc.whnf(right),natLit(7));
  const stuck=tc.whnf(wrong);assert(stuck.kind==='proj'&&nameToString(stuck.typeName)==='ProjStructA','wrong-structure projection must remain stuck');
  throws(()=>tc.check(wrong));
+});
+
+test('defeq enters native-reduction hook and fails closed instead of returning false',()=>{
+ const env=baseEnv(),closedNat=nameFromDotted('closedNatDefEq');
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('x'),sort(levelSucc(levelZero)),constant(N.Nat))});
+ env.add({kind:'axiom',name:closedNat,levelParams:[],type:sort(levelSucc(levelZero))});
+ const tc=new TypeChecker(env);throws(()=>tc.isDefEq(app(constant(N.LeanReduceNat),constant(closedNat)),natLit(0)));
 });
 
 test('projection-headed application reduces through a functional structure field',()=>{

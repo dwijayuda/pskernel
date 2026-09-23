@@ -84,6 +84,19 @@ test('WHNF beta reduction consumes wide lambda spines in one substitution batch'
 });
 
 test('beta reduction',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));eqExpr(tc.whnf(app(id,natLit(3))),natLit(3));});
+test('kernel memo tables share entries across Lean-structurally equal clones',()=>{
+ const st=new KernelState();
+ const a=app(constant(N.NatSucc),natLit(0)),aClone=app(constant(N.NatSucc),natLit(0));
+ st.whnf.set(a,natLit(1));
+ assert(st.whnf.has(aClone),'expr_map cache lookup must use Lean structural equality, not object identity');
+ eqExpr(st.whnf.get(aClone)!,natLit(1));
+ const x=constant(nameFromDotted('CacheClone.x')),y=constant(nameFromDotted('CacheClone.y'));
+ const xClone=constant(nameFromDotted('CacheClone.x')),yClone=constant(nameFromDotted('CacheClone.y'));
+ st.success.add(st.pair(x,y));
+ assert(st.success.has(st.pair(xClone,yClone)),'defeq success cache must recognize structurally equal cloned pairs');
+ assert(st.success.has(st.pair(yClone,xClone)),'defeq pair cache remains symmetric like Lean hash-canonicalized pairs');
+});
+
 test('defeq success cache remains pair-local and never gains transitive closure',()=>{
  const st=new KernelState(),a=constant(nameFromDotted('Cache.a')),b=constant(nameFromDotted('Cache.b')),c=constant(nameFromDotted('Cache.c'));
  st.success.add(st.pair(a,b));st.success.add(st.pair(b,c));
@@ -1094,14 +1107,14 @@ test('whnfCore cache follows Lean 4.34 cheap/full and direct-iota boundaries',()
  tc.whnfCore(beta,true,true);
  assert(Number(tc.state.whnfCore.size)===0,'cheap WHNF must not populate the full whnfCore cache');
  eqExpr(tc.whnfCore(beta),natLit(3));
- assert(tc.state.whnfCore.has(tc.state.exprId(beta)),'full beta WHNF should cache the original expression');
+ assert(tc.state.whnfCore.has(beta),'full beta WHNF should cache the original expression');
 
  const tc2=new TypeChecker(env);
  const motive=lam(nameFromDotted('_'),constant(N.Nat),constant(N.Nat));
  const step=lam(nameFromDotted('_n'),constant(N.Nat),lam(nameFromDotted('ih'),constant(N.Nat),bvar(0)));
  const rec=mkAppN(constant(nameFromDotted('Nat.rec'),[one]),[motive,natLit(17),step,constant(N.NatZero)]);
  eqExpr(tc2.whnfCore(rec),natLit(17));
- assert(!tc2.state.whnfCore.has(tc2.state.exprId(rec)),'Lean 4.34 returns directly after recursor iota instead of caching the original recursor application');
+ assert(!tc2.state.whnfCore.has(rec),'Lean 4.34 returns directly after recursor iota instead of caching the original recursor application');
 });
 
 test('whnfCore easy, stuck-app, and projection cache boundaries match Lean 4.34',()=>{
@@ -1110,11 +1123,11 @@ test('whnfCore easy, stuck-app, and projection cache boundaries match Lean 4.34'
  env.add({kind:'definition',name:D,levelParams:[],type:constant(N.Nat),value:natLit(3),hints:{kind:'regular',height:1n},safety:'safe'});
  const tc=new TypeChecker(env),easy=constant(F),stuck=app(easy,natLit(1)),proj={kind:'proj',typeName:Fake,index:0,expr:constant(D)} as const;
  eqExpr(tc.whnfCore(easy),easy);
- assert(!tc.state.whnfCore.has(tc.state.exprId(easy)),'easy whnfCore cases bypass the cache');
+ assert(!tc.state.whnfCore.has(easy),'easy whnfCore cases bypass the cache');
  eqExpr(tc.whnfCore(stuck),stuck);
- assert(!tc.state.whnfCore.has(tc.state.exprId(stuck)),'stuck applications return directly without whnfCore caching');
+ assert(!tc.state.whnfCore.has(stuck),'stuck applications return directly without whnfCore caching');
  eqExpr(tc.whnfCore(proj),proj);
- assert(tc.state.whnfCore.has(tc.state.exprId(proj)),'unreduced projections are cached as the original projection node');
+ assert(tc.state.whnfCore.has(proj),'unreduced projections are cached as the original projection node');
 });
 
 test('cheap projection WHNF never reuses a full-mode cache entry',()=>{
@@ -1124,7 +1137,7 @@ test('cheap projection WHNF never reuses a full-mode cache entry',()=>{
  const k=new Kernel(env);k.addDefinition({kind:'definition',name:box,levelParams:[],type:constant(I),value:app(constant(Mk),natLit(7)),hints:{kind:'regular',height:1n},safety:'safe'});
  const proj={kind:'proj',typeName:I,index:0,expr:constant(box)} as const,tc=new TypeChecker(env);
  eqExpr(tc.whnfCore(proj,false,false),natLit(7));
- assert(tc.state.whnfCore.has(tc.state.exprId(proj)),'full projection WHNF should cache its reduced field');
+ assert(tc.state.whnfCore.has(proj),'full projection WHNF should cache its reduced field');
  const cheap=tc.whnfCore(proj,false,true);
  assert(cheap.kind==='proj'&&exprEq(cheap.expr,constant(box)),'cheap projection WHNF must ignore the full-mode cache and leave the hidden structure opaque');
 });

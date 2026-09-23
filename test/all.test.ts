@@ -385,6 +385,19 @@ test('Quot bootstrap requires exact Eq shape and lift reduces',()=>{
 test('Quot bootstrap fails closed on malformed Eq',()=>{const env=baseEnv();env.add({kind:'axiom',name:N.Eq,levelParams:[],type:sort(levelSucc(levelZero))});throws(()=>addQuot(env));assert(!env.quotInitialized);});
 
 
+test('Quot bootstrap rejects occupied primitive names without overwriting them',()=>{
+ const env=baseEnv(),uN=nameFromDotted('u'),u=levelParam(uN),anon=nameFromDotted('_');const arrow=(a:any,b:any)=>forallE(anon,a,b);
+ const eqTy=forallE(nameFromDotted('α'),sort(u),arrow(bvar(0),arrow(bvar(1),sort(levelZero))),'implicit');
+ const reflTy=forallE(nameFromDotted('α'),sort(u),forallE(nameFromDotted('a'),bvar(0),app(app(app(constant(N.Eq,[u]),bvar(1)),bvar(0)),bvar(0))),'implicit');
+ env.add({kind:'inductive',name:N.Eq,levelParams:[uN],type:eqTy,numParams:2,numIndices:1,all:[N.Eq],ctors:[N.EqRefl],numNested:0,isRec:false,isReflexive:false});
+ env.add({kind:'constructor',name:N.EqRefl,levelParams:[uN],type:reflTy,induct:N.Eq,cidx:0,numParams:2,numFields:0});
+ const plantedType=sort(levelZero);env.add({kind:'axiom',name:N.QuotLift,levelParams:[],type:plantedType});
+ throws(()=>addQuot(env));
+ assert(!env.quotInitialized,'failed quotient initialization must not flip the initialized flag');
+ const planted=env.get(N.QuotLift);assert(planted.kind==='axiom'&&exprEq(planted.type,plantedType),'pre-existing Quot.lift must not be overwritten');
+ assert(!env.has(N.Quot)&&!env.has(N.QuotMk)&&!env.has(N.QuotInd),'quotient bootstrap must reject collisions before inserting any primitive');
+});
+
 test('nested inductive through Box is transformed and restored',()=>{
  const env=baseEnv(),Box=nameFromDotted('Box'),BoxMk=nameFromDotted('Box.mk'),Tree=nameFromDotted('Tree'),Node=nameFromDotted('Tree.node'),T=sort(levelSucc(levelZero));
  const boxTy=forallE(nameFromDotted('α'),T,T,'implicit');

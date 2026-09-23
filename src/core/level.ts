@@ -99,29 +99,33 @@ export function instantiateLevel(l: Level, params: readonly Name[], values: read
   }
 }
 
-interface VarNode { readonly name: Name; readonly offset: bigint }
+type LevelAtom = { readonly kind:'param'|'mvar'; readonly name:Name };
+interface VarNode { readonly atom: LevelAtom; readonly offset: bigint }
 interface Node { readonly constant: bigint; readonly vars: readonly VarNode[] }
-interface Entry { readonly path: readonly Name[]; readonly node: Node }
+interface Entry { readonly path: readonly LevelAtom[]; readonly node: Node }
 type Norm = Entry[];
 const emptyNode = (): Node => ({ constant: 0n, vars: [] });
-const pathEq = (a: readonly Name[], b: readonly Name[]) => a.length === b.length && a.every((x, i) => nameEq(x, b[i]!));
-const pathKey = (p: readonly Name[]) => p.map(nameKey).join('|');
-function subset(a: readonly Name[], b: readonly Name[]): boolean {
+const atomEq=(a:LevelAtom,b:LevelAtom)=>a.kind===b.kind&&nameEq(a.name,b.name);
+const atomCmp=(a:LevelAtom,b:LevelAtom):number=>a.kind===b.kind?nameCmp(a.name,b.name):(a.kind==='param'?-1:1);
+const atomKey=(a:LevelAtom)=>`${a.kind}:${nameKey(a.name)}`;
+const pathEq = (a: readonly LevelAtom[], b: readonly LevelAtom[]) => a.length === b.length && a.every((x, i) => atomEq(x, b[i]!));
+const pathKey = (p: readonly LevelAtom[]) => p.map(atomKey).join('|');
+function subset(a: readonly LevelAtom[], b: readonly LevelAtom[]): boolean {
   let i = 0, j = 0;
   while (i < a.length) {
     if (j >= b.length) return false;
-    const c = nameCmp(a[i]!, b[j]!);
+    const c = atomCmp(a[i]!, b[j]!);
     if (c < 0) return false;
     if (c === 0) i++;
     j++;
   }
   return true;
 }
-function orderedInsert(a: Name, xs: readonly Name[]): readonly Name[] | null {
-  const out: Name[] = [];
+function orderedInsert(a: LevelAtom, xs: readonly LevelAtom[]): readonly LevelAtom[] | null {
+  const out: LevelAtom[] = [];
   let inserted = false;
   for (const x of xs) {
-    const c = nameCmp(a, x);
+    const c = atomCmp(a, x);
     if (c === 0) return null;
     if (!inserted && c < 0) { out.push(a); inserted = true; }
     out.push(x);
@@ -129,18 +133,18 @@ function orderedInsert(a: Name, xs: readonly Name[]): readonly Name[] | null {
   if (!inserted) out.push(a);
   return out;
 }
-function addVarTo(vars: readonly VarNode[], name: Name, offset: bigint): readonly VarNode[] {
+function addVarTo(vars: readonly VarNode[], atom: LevelAtom, offset: bigint): readonly VarNode[] {
   const out: VarNode[] = []; let done = false;
   for (const v of vars) {
-    const c = nameCmp(name, v.name);
-    if (!done && c < 0) { out.push({ name, offset }); done = true; }
-    if (c === 0) { out.push({ name, offset: offset > v.offset ? offset : v.offset }); done = true; }
+    const c = atomCmp(atom, v.atom);
+    if (!done && c < 0) { out.push({ atom, offset }); done = true; }
+    if (c === 0) { out.push({ atom, offset: offset > v.offset ? offset : v.offset }); done = true; }
     else out.push(v);
   }
-  if (!done) out.push({ name, offset });
+  if (!done) out.push({ atom, offset });
   return out;
 }
-function alter(norm: Norm, path: readonly Name[], f: (n: Node | undefined) => Node | undefined): Norm {
+function alter(norm: Norm, path: readonly LevelAtom[], f: (n: Node | undefined) => Node | undefined): Norm {
   const k = pathKey(path); const out: Norm = []; let found = false;
   for (const e of norm) {
     if (pathKey(e.path) === k && pathEq(e.path, path)) { found = true; const n = f(e.node); if (n) out.push({ path, node: n }); }
@@ -149,15 +153,15 @@ function alter(norm: Norm, path: readonly Name[], f: (n: Node | undefined) => No
   if (!found) { const n = f(undefined); if (n) out.push({ path, node: n }); }
   return out;
 }
-function addConst(norm: Norm, k: bigint, path: readonly Name[]): Norm {
+function addConst(norm: Norm, k: bigint, path: readonly LevelAtom[]): Norm {
   if (k === 0n || (k === 1n && path.length > 0)) return norm;
   return alter(norm, path, n => ({ constant: n ? (n.constant > k ? n.constant : k) : k, vars: n?.vars ?? [] }));
 }
-function addVar(norm: Norm, v: Name, k: bigint, path: readonly Name[]): Norm {
+function addVar(norm: Norm, v: LevelAtom, k: bigint, path: readonly LevelAtom[]): Norm {
   return alter(norm, path, n => ({ constant: n?.constant ?? 0n, vars: addVarTo(n?.vars ?? [], v, k) }));
 }
-function addNode(norm: Norm, v: Name, k: bigint, path: readonly Name[]): Norm { return addVar(norm, v, k, path); }
-function normalizeAux(l: Level, path: readonly Name[], k: bigint, acc: Norm): Norm {
+function addNode(norm: Norm, v: LevelAtom, k: bigint, path: readonly LevelAtom[]): Norm { return addVar(norm, v, k, path); }
+function normalizeAux(l: Level, path: readonly LevelAtom[], k: bigint, acc: Norm): Norm {
   switch (l.kind) {
     case 'zero': return addConst(acc, k, path);
     case 'succ': return normalizeAux(l.of, path, k + 1n, acc);
@@ -168,26 +172,26 @@ function normalizeAux(l: Level, path: readonly Name[], k: bigint, acc: Norm): No
       if (r.kind === 'succ') return normalizeAux(r.of, path, k + 1n, normalizeAux(l.left, path, k, acc));
       if (r.kind === 'max') return normalizeAux(mkIMax(l.left, r.right), path, k, normalizeAux(mkIMax(l.left, r.left), path, k, acc));
       if (r.kind === 'imax') return normalizeAux(mkIMax(r.left, r.right), path, k, normalizeAux(mkIMax(l.left, r.right), path, k, acc));
-      if (r.kind === 'mvar') return acc;
-      const v = r.name;
+      const v:LevelAtom={kind:r.kind,name:r.name};
       const path2 = orderedInsert(v, path);
       if (path2) return normalizeAux(l.left, path2, k, addNode(addConst(acc, k, path), v, k, path2));
       const a2 = k === 0n ? acc : addVar(acc, v, k, path);
       return normalizeAux(l.left, path, k, a2);
     }
-    case 'mvar': return acc;
+    case 'mvar':
     case 'param': {
-      const path2 = orderedInsert(l.name, path);
-      if (path2) return addNode(addConst(acc, k, path), l.name, k, path2);
-      return k === 0n ? acc : addVar(acc, l.name, k, path);
+      const v:LevelAtom={kind:l.kind,name:l.name};
+      const path2 = orderedInsert(v, path);
+      if (path2) return addNode(addConst(acc, k, path), v, k, path2);
+      return k === 0n ? acc : addVar(acc, v, k, path);
     }
   }
 }
 function subsumeVars(a: readonly VarNode[], b: readonly VarNode[]): readonly VarNode[] {
   const out: VarNode[] = []; let j = 0;
   for (const x of a) {
-    while (j < b.length && nameCmp(b[j]!.name, x.name) < 0) j++;
-    if (j < b.length && nameEq(x.name, b[j]!.name) && x.offset <= b[j]!.offset) continue;
+    while (j < b.length && atomCmp(b[j]!.atom, x.atom) < 0) j++;
+    if (j < b.length && atomEq(x.atom, b[j]!.atom) && x.offset <= b[j]!.offset) continue;
     out.push(x);
   }
   return out;

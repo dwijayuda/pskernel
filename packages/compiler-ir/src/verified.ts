@@ -28,6 +28,21 @@ export interface VerifiedIrStructure {
   readonly fields:readonly VerifiedIrStructureField[];
 }
 
+export interface VerifiedIrConstructorField {
+  readonly name:string;
+  readonly type:VerifiedIrType;
+}
+
+export interface VerifiedIrConstructor {
+  readonly name:string;
+  readonly fields:readonly VerifiedIrConstructorField[];
+}
+
+export interface VerifiedIrInductive {
+  readonly name:string;
+  readonly constructors:readonly VerifiedIrConstructor[];
+}
+
 export type VerifiedIrExpr =
   | {readonly kind:'literal';readonly value:VerifiedIrLiteral}
   | {readonly kind:'var';readonly name:string}
@@ -73,6 +88,15 @@ export type VerifiedIrExpr =
       readonly kind:'projection';
       readonly target:VerifiedIrExpr;
       readonly field:string;
+    }
+  | {
+      readonly kind:'constructor';
+      readonly inductive:string;
+      readonly constructor:string;
+      readonly fields:readonly {
+        readonly name:string;
+        readonly value:VerifiedIrExpr;
+      }[];
     };
 
 export interface VerifiedIrTypeParameter {
@@ -95,6 +119,7 @@ export interface VerifiedIrDeclaration {
 export interface VerifiedIrModule {
   readonly kind:'proofscript-verified-ir';
   readonly structures?:readonly VerifiedIrStructure[];
+  readonly inductives?:readonly VerifiedIrInductive[];
   readonly declarations:readonly VerifiedIrDeclaration[];
 }
 
@@ -145,6 +170,38 @@ export function validateVerifiedIrModule(module:VerifiedIrModule):true {
       }
       fields.add(field.name);
       validateVerifiedIrType(field.type);
+    }
+  }
+
+  const inductives=new Set<string>();
+  for(const inductive of module.inductives??[]){
+    assertVerifiedIrIdentifier(inductive.name);
+    if(inductives.has(inductive.name)){
+      throw new Error(
+        "duplicate verified IR inductive '"+inductive.name+"'",
+      );
+    }
+    inductives.add(inductive.name);
+    const constructors=new Set<string>();
+    for(const constructor of inductive.constructors){
+      assertVerifiedIrIdentifier(constructor.name);
+      if(constructors.has(constructor.name)){
+        throw new Error(
+          "duplicate verified IR constructor '"+constructor.name+"'",
+        );
+      }
+      constructors.add(constructor.name);
+      const fields=new Set<string>();
+      for(const field of constructor.fields){
+        assertVerifiedIrIdentifier(field.name);
+        if(fields.has(field.name)){
+          throw new Error(
+            "duplicate verified IR constructor field '"+field.name+"'",
+          );
+        }
+        fields.add(field.name);
+        validateVerifiedIrType(field.type);
+      }
     }
   }
 
@@ -240,5 +297,21 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
       assertVerifiedIrIdentifier(expr.field);
       validateVerifiedIrExpr(expr.target);
       return;
+    case 'constructor':{
+      assertVerifiedIrIdentifier(expr.inductive);
+      assertVerifiedIrIdentifier(expr.constructor);
+      const fields=new Set<string>();
+      for(const field of expr.fields){
+        assertVerifiedIrIdentifier(field.name);
+        if(fields.has(field.name)){
+          throw new Error(
+            "duplicate verified IR constructor value field '"+field.name+"'",
+          );
+        }
+        fields.add(field.name);
+        validateVerifiedIrExpr(field.value);
+      }
+      return;
+    }
   }
 }

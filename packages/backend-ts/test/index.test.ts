@@ -376,3 +376,61 @@ console.log('ok - @proofscript/backend-ts verified Nat intrinsic emission');
   equal(compiled.javascript.includes('Symbol("ProofScript.User")'),true);
 }
 console.log('ok - @proofscript/backend-ts verified nominal structure emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    inductives:[{
+      name:'MaybeNat',
+      constructors:[
+        {name:'none',fields:[]},
+        {
+          name:'some',
+          fields:[{
+            name:'value',
+            type:{kind:'primitive',name:'Nat'},
+          }],
+        },
+      ],
+    }],
+    declarations:[
+      {
+        name:'noneValue',
+        typeParameters:[],
+        parameters:[],
+        resultType:{kind:'named',name:'MaybeNat',args:[]},
+        body:{
+          kind:'constructor',
+          inductive:'MaybeNat',
+          constructor:'none',
+          fields:[],
+        },
+      },
+      {
+        name:'oneValue',
+        typeParameters:[],
+        parameters:[],
+        resultType:{kind:'named',name:'MaybeNat',args:[]},
+        body:{
+          kind:'constructor',
+          inductive:'MaybeNat',
+          constructor:'some',
+          fields:[{
+            name:'value',
+            value:{kind:'literal',value:1n},
+          }],
+        },
+      },
+    ],
+  });
+  equal(source.includes('export type MaybeNat ='),true);
+  equal(source.includes('unique symbol = Symbol("ProofScript.MaybeNat.tag")'),true);
+  equal(source.includes('"none": { [__ps$tag$0]: "none" } as MaybeNat'),true);
+  equal(source.includes('"some": (__field0: bigint): MaybeNat'),true);
+  equal(source.includes('MaybeNat["some"](1n)'),true);
+  const compiled=compileTypeScript(source,'verified-adt.ts');
+  equal(compiled.declaration.includes('export type MaybeNat ='),true);
+  equal(compiled.declaration.includes('export declare const MaybeNat'),true);
+}
+console.log('ok - @proofscript/backend-ts verified ADT constructor emission');

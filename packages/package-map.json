@@ -281,7 +281,8 @@
         "Verified IR has explicit Nat arithmetic intrinsics so Lean runtime semantics are represented intentionally instead of inferred from TypeScript operators.",
         "Verified IR preserves ProofScript primitive identities (Nat/Int/Bool/String/Unit); host TypeScript types are selected only by backend-ts. This keeps runtime/ABI semantics out of the backend type representation.",
         "Verified IR now represents Nat le/lt conditions and if branching explicitly after proposition/Decidable erasure.",
-        "Verified IR now represents nominal structure declarations, branded record construction, and field projection without carrying Lean kernel metadata into the backend."
+        "Verified IR now represents nominal structure declarations, branded record construction, and field projection without carrying Lean kernel metadata into the backend.",
+        "Verified IR now has nominal inductive/constructor metadata and explicit constructor-value expressions, independent of pskernel recursor internals."
       ]
     },
     {
@@ -316,7 +317,8 @@
         "The legacy software-HIR emitter remains temporarily for language coverage until verified-core lowering reaches those constructs.",
         "Verified Nat.add/Nat.mul emit bigint arithmetic; Nat.sub emits a single-evaluation saturating expression matching Lean Nat subtraction.",
         "backend-ts is the layer that maps semantic primitive IR types to host types: Nat/Int -> bigint, Bool -> boolean, String -> string, Unit -> undefined.",
-        "Verified structures emit as branded readonly TypeScript interfaces; constructor values carry an internal unique-symbol brand so distinct Lean structures do not collapse under TypeScript structural typing."
+        "Verified structures emit as branded readonly TypeScript interfaces; constructor values carry an internal unique-symbol brand so distinct Lean structures do not collapse under TypeScript structural typing.",
+        "Verified inductives emit as unique-symbol tagged unions plus value-level constructor factories; constructor values remain nominally discriminated at runtime."
       ]
     },
     {

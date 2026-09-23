@@ -287,7 +287,9 @@ console.log('ok - @proofscript/language-service document translation');
     'theorem id (P : Prop) : P := by assumption\n',
     'lean-subset',
   );
-  equal(service.analyze(mainUri).kernel,'rejected');
+  const broken=service.analyze(mainUri);
+  equal(broken.kernel,'not-run');
+  equal(broken.diagnostics[0]?.code,'PS_PROJECT_ANALYSIS_ERROR');
 
   service.replaceDocument(
     coreUri,

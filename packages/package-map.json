@@ -544,7 +544,7 @@
       "path": "packages/language-service",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "dual-source-conversion+cross-navigation-mvp",
+      "status": "dual-source-editor-mvp",
       "packageName": "@proofscript/language-service",
       "dependsOn": [
         "syntax",
@@ -555,6 +555,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS6.6 cache invalidation ensures open imported-buffer edits affect subsequent importer analysis immediately; LSP refresh-all then republishes those updated diagnostics to the client.",
+        "An invalid imported module fails project composition as not-run with PS_PROJECT_ANALYSIS_ERROR rather than being misclassified as a local theorem rejection.",
         "DS6.5 exposes source conversion through the same registered source frontends and translation-target printers used by psc translate. Conversion is syntax/printing only and carries no proof-authority claim.",
         "DS6.4 builds completion/definition/reference data across the same checked mixed-source project closure used for semantic analysis. Imported .ps/.lean declarations can navigate across source kinds.",
         "Cross-source reference lookup remains lexical and intentionally untrusted; it may over-approximate shadowed identifiers and never participates in elaboration or kernel admission.",

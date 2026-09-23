@@ -83,7 +83,21 @@ export function lowerV061ModuleToLean(module:V061Module):string {
       return 'inductive '+decl.name+params+result+' where\n'+constructors;
     }
     const head=decl.kind==='function'||decl.kind==='const'?'def':decl.kind;
-    const params=decl.params.map((p)=>' ('+p.name+' : '+lowerV061TypeToLean(p.type)+')').join('');
-    return head+' '+decl.name+params+' : '+lowerV061TypeToLean(decl.resultType)+' := '+lowerV061ExprToLean(decl.body);
+    const params=decl.params.map(
+      (p)=>' ('+p.name+' : '+lowerV061TypeToLean(p.type)+')',
+    ).join('');
+    const base=head+' '+decl.name+params+' : '+
+      lowerV061TypeToLean(decl.resultType)+' := '+lowerV061ExprToLean(decl.body);
+    const whereDeclarations=decl.whereDeclarations??[];
+    if(whereDeclarations.length===0)return base;
+    const locals=whereDeclarations.map((local)=>{
+      const localParams=local.params.map(
+        (p)=>' ('+p.name+' : '+lowerV061TypeToLean(p.type)+')',
+      ).join('');
+      return '  '+local.name+localParams+' : '+
+        lowerV061TypeToLean(local.resultType)+' := '+
+        lowerV061ExprToLean(local.body);
+    }).join('\n');
+    return base+' where\n'+locals;
   }).join('\n\n')+'\n';
 }

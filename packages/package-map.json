@@ -95,16 +95,15 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-inductive-parser-mvp",
+      "status": "v061-where-parser-mvp",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
         "Pinned to ProofScript v0.7.0 with the v0.6.1 compiler-ready surface as the implementation baseline.",
-        "Inductive declaration parsing is isolated from value and structure declaration parsing, following Lean's command/elaboration boundary.",
-        "E-INDUCTIVE-BODY covers constructor order, explicit decorated parameters, and canonical Lean lowering for non-indexed constructor signatures.",
-        "Explicit constructor result types, implicit/instance binders, indexed families, deriving, and computed fields remain fail-closed.",
-        "The executable checker rejects inductives until ADT semantics are implemented."
+        "E-WHERE-BODY is represented as explicit local declarations, not a generic statement block; decorated explicit-parameter parsing is shared across value, local, and inductive declaration forms.",
+        "Canonical lowering emits native Lean where declarations and preserves local-helper scope.",
+        "Nested where blocks and advanced Lean local declaration modifiers/termination suffixes remain fail-closed."
       ]
     },
     {

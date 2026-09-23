@@ -520,3 +520,31 @@ console.log('ok - @proofscript/syntax lexer MVP');
     /explicit constructor result types are not yet implemented/,
   );
 }
+
+
+// v0.6.1 E-WHERE-BODY: braces delimit Lean local declarations, not statements.
+{
+  const module=parseV061Module(
+    'def f(x : Nat) : Nat := helper(x) where { helper(y : Nat) : Nat := y + 1; }',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'def');
+  equal(module.featureIds.includes('E-WHERE-BODY'),true);
+  if(declaration?.kind==='def'){
+    equal(declaration.whereDeclarations?.length,1);
+    equal(declaration.whereDeclarations?.[0]?.name,'helper');
+    equal(declaration.whereDeclarations?.[0]?.params.length,1);
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'def f (x : Nat) : Nat := helper x where\n  helper (y : Nat) : Nat := y + 1\n',
+  );
+}
+{
+  throws(
+    ()=>parseV061Module(
+      'def f(x : Nat) : Nat := x where { helper(y : Nat) : Nat := y where { z : Nat := 1; }; }',
+    ),
+    /nested where blocks are not yet implemented/,
+  );
+}

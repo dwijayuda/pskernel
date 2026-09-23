@@ -82,12 +82,21 @@ export interface V061StructureField {
   readonly span:SourceSpan;
 }
 
+export interface V061WhereDeclaration {
+  readonly name:string;
+  readonly params:readonly V061Parameter[];
+  readonly resultType:V061TypeExpr;
+  readonly body:V061Expr;
+  readonly span:SourceSpan;
+}
+
 export interface V061ValueDeclaration {
   readonly kind:'const'|'def'|'function';
   readonly name:string;
   readonly params:readonly V061Parameter[];
   readonly resultType:V061TypeExpr;
   readonly body:V061Expr;
+  readonly whereDeclarations?:readonly V061WhereDeclaration[];
   readonly terminatedBySemicolon:boolean;
   readonly span:SourceSpan;
 }

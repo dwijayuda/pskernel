@@ -1,10 +1,12 @@
 import {SyntaxError} from '../source.js';
-import type {V061Declaration,V061Module,V061Parameter,V061ValueDeclaration} from './ast.js';
+import type {V061Declaration,V061Module,V061ValueDeclaration} from './ast.js';
 import {V061ParseContext,spanBetween} from './context.js';
 import {V061ExpressionParser} from './expression-parser.js';
 import {parseV061Type} from './type-parser.js';
 import {parseV061StructureDeclaration} from './structure-parser.js';
 import {parseV061InductiveDeclaration} from './inductive-parser.js';
+import {parseV061ExplicitParameters} from './parameter-parser.js';
+import {parseV061WhereBlock} from './where-parser.js';
 
 export class V061DeclarationParser {
   readonly context:V061ParseContext;
@@ -39,23 +41,15 @@ export class V061DeclarationParser {
     this.context.cursor.consume();
     const kind=keyword.text as V061ValueDeclaration['kind'];
     const name=this.context.cursor.expectKind('identifier','declaration name');
-    const params:V061Parameter[]=[];
-
-    if(this.context.cursor.at('(')){
-      if(kind==='const')throw new SyntaxError('const declarations cannot have parameters',this.context.cursor.peek().span);
-      this.context.own('D-EXPLICIT-PARAMS');
-      this.context.cursor.consume();
-      if(!this.context.cursor.at(')')){
-        while(true){
-          const paramName=this.context.cursor.expectKind('identifier','parameter name');
-          this.context.cursor.expect(':');
-          const paramType=parseV061Type(this.context);
-          params.push({name:paramName.text,type:paramType,span:{start:paramName.span.start,end:paramType.span.end}});
-          if(!this.context.cursor.consumeIf(','))break;
-        }
-      }
-      this.context.cursor.expect(')');
+    if(kind==='const'&&this.context.cursor.at('(')){
+      throw new SyntaxError(
+        'const declarations cannot have parameters',
+        this.context.cursor.peek().span,
+      );
     }
+    const params=this.context.cursor.at('(')
+      ? parseV061ExplicitParameters(this.context)
+      : [];
 
     if(kind==='function'){
       this.context.own('D-FUNCTION-ALIAS');
@@ -67,6 +61,9 @@ export class V061DeclarationParser {
     const resultType=parseV061Type(this.context);
     this.context.cursor.expect(':=');
     const body=this.expressions.parse();
+    const whereBlock=this.context.cursor.at('where')
+      ? parseV061WhereBlock(this.context,this.expressions)
+      : undefined;
     const semi=this.context.cursor.consumeIf(';');
     if(semi)this.context.own('D-DECL-SEMI');
     if(!semi&&!this.context.cursor.done){
@@ -79,8 +76,12 @@ export class V061DeclarationParser {
       params,
       resultType,
       body,
+      ...(whereBlock===undefined?{}:{whereDeclarations:whereBlock.declarations}),
       terminatedBySemicolon:semi!==undefined,
-      span:{start:keyword.span.start,end:(semi??body).span.end},
+      span:{
+        start:keyword.span.start,
+        end:semi?.span.end??whereBlock?.span.end??body.span.end,
+      },
     };
   }
 }

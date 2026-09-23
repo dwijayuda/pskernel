@@ -97,6 +97,15 @@ test('kernel memo tables share entries across Lean-structurally equal clones',()
  assert(st.success.has(st.pair(yClone,xClone)),'defeq pair cache remains symmetric like Lean hash-canonicalized pairs');
 });
 
+test('kernel structural cache keys ignore binder display metadata like Lean expr_map',()=>{
+ const st=new KernelState(),ty=constant(N.Nat),body=bvar(0);
+ const a=lam(nameFromDotted('left'),ty,body,'default');
+ const b=lam(nameFromDotted('right'),ty,body,'implicit');
+ st.infer.set(a,constant(N.Nat));
+ assert(st.infer.has(b),'Lean expr_map equality ignores binder names and BinderInfo');
+ eqExpr(st.infer.get(b)!,constant(N.Nat));
+});
+
 test('defeq success cache remains pair-local and never gains transitive closure',()=>{
  const st=new KernelState(),a=constant(nameFromDotted('Cache.a')),b=constant(nameFromDotted('Cache.b')),c=constant(nameFromDotted('Cache.c'));
  st.success.add(st.pair(a,b));st.success.add(st.pair(b,c));

@@ -103,6 +103,12 @@
   ],
   "lastVerifiedTestCount": 97,
   "notes": [
+    "Lean 4.34 source audit found and fixed cheap-WHNF cache contamination: cheap recursor/projection reduction now bypasses the full whnfCore cache exactly like C++, so a prior full reduction cannot make a later cheap probe unfold more than Lean.",
+    "Lean 4.34 eta probing now fails closed on a non-function counterpart instead of throwing; the direct regression compares an identity lambda against a Nat literal and requires ordinary not-defeq.",
+    "Lean 4.34 public defeq success caching is now exact at the wrapper boundary: every successful original expression pair is cached, including successes discovered only after delta reduction. Application defeq also compares heads before rejecting argument-count mismatch, matching C++ evaluation order.",
+    "Direct soundness coverage now includes the final-4.34 Quot primitive name-collision regression: quotient initialization rejects an occupied Quot.lift before inserting any primitive and preserves the existing declaration transactionally.",
+    "The checked-in final-4.34 kernel regression matrix classifies all 19 kernel*.lean files. Two large transported-history soundness cases remain explicitly oracle-only pending compact TS minimization; operational/frontend cases are not misrepresented as trusted-core semantic coverage.",
+    "Native reduction corpus execution already has a cheaper oracle-backed provider: module-stream replay shares a cached Lean v4.34 evaluator, adaptive workers receive the same provider boundary, and native-oracle-smoke checks compiler execution including @[implemented_by]. The open native-reduction-compiler-ir-provider gate therefore means an independent/production provider, not a blocker to oracle-assisted corpus replay.",
     "Oracle-drift correction: the exact Lean v4.34.0 tag at commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b still contains reduce_native plus Lean.reduceNat/Lean.reduceBool compiler-IR hooks. The earlier removal interpretation came from post-v4.34 commit 2a7175c and was incorrect for this pinned target.",
     "The TypeScript kernel has restored the exact v4.34 native-reduction positions: WHNF tries native reduction before ordinary Nat reduction; lazy definitional equality tries Nat reduction first, then native reduction before lazy delta. An explicit shape-checked NativeEvaluator is the TCB extension boundary and fails closed when no provider/result is configured.",
     "The controlled official defeq differential again includes Lean.reduceNat and Lean.reduceBool provider cases. Current-tree direct/differential execution is still pending because GitHub Actions is not allocating a runner; historical pass counts are not being reused as fresh evidence.",
@@ -171,7 +177,7 @@
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
   ],
-  "currentTreeExpectedDirectTests": 97,
+  "currentTreeExpectedDirectTests": 104,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "pending refreshed execution after exact-v4.34.0 native-reduction restoration"
+  "currentTreeVerification": "pending refreshed execution after Lean 4.34 cache/eta/Quot/defeq-order hardening; GitHub Actions currently allocates no runner"
 }

@@ -308,7 +308,7 @@ console.log('ok - @proofscript/checked-core persistent admission codec');
         constant(Nat),
         constant(Nat),
       ),
-      isUnsafe:true,
+      isUnsafe:false,
     },
     binding:{source:'host-lib',importedName:'inc'},
   }];
@@ -320,7 +320,36 @@ console.log('ok - @proofscript/checked-core persistent admission codec');
   equal(checked.environment.find(hostInc)?.kind,'axiom');
   equal(
     (checked.environment.find(hostInc) as {isUnsafe?:boolean})?.isUnsafe,
-    true,
+    false,
   );
 }
 console.log('ok - @proofscript/checked-core external admission codec');
+
+{
+  const base=new Environment();
+  const Nat=nameFromDotted('Nat');
+  base.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  let rejected=false;
+  try{
+    admitCheckedCoreAdmissions(base,[{
+      kind:'external',
+      declaration:{
+        kind:'axiom',
+        name:nameFromDotted('badExternal'),
+        levelParams:[],
+        type:sort(levelZero),
+        isUnsafe:false,
+      },
+      binding:{source:'host-lib',importedName:'badExternal'},
+    }]);
+  }catch(error){
+    rejected=/first-order primitive runtime function/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/checked-core rejects proof-valued external');

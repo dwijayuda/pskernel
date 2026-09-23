@@ -222,7 +222,7 @@ export function admitCheckedCoreAdmissions(
         declaration:admission.declaration,
         binding:admission.binding,
       };
-      validateCheckedCoreExternal(external);
+      validateCheckedCoreExternal(external,environment);
       kernel.addAxiom(admission.declaration);
       externals.push(external);
       continue;

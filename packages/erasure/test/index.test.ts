@@ -860,7 +860,7 @@ console.log('ok - @proofscript/erasure generic structure metadata');
           },
         ),
         hints:{kind:'regular',height:1n},
-        safety:'unsafe',
+        safety:'safe',
       },
     },
   ]);

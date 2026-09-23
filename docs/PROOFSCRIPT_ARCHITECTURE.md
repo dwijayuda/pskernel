@@ -937,11 +937,10 @@ facts:
 2. the runtime binding (npm/ESM source + exported symbol);
 3. the trust/assumption status exposed to users and assurance tooling.
 
-JavaScript execution must never be used to discharge a theorem. If an external
-signature is represented in the kernel environment to typecheck executable
-uses, that declaration must be marked and reported as an external/runtime
-assumption, and proof-producing result types must fail closed in the first FFI
-profile.
+JavaScript execution must never be used to discharge a theorem. If an external signature is represented in the kernel environment to typecheck
+executable uses, its separate checked-core runtime-external metadata must be
+reported as an assumption and proof-producing result types must fail closed in
+the first FFI profile.
 
 The initial backend form is named ESM import only. Default imports, namespace
 imports, CommonJS, dynamic import, side-effect imports, and package-resolution
@@ -953,7 +952,7 @@ The FFI boundary now exists above verified IR as a checked-core admission:
 
 ```text
 external signature
-   -> unsafe pskernel axiom
+   -> typed pskernel axiom
    +  { source, importedName } runtime binding
    -> checked-admission codec v2
    -> proofscript-module@2 payload 1.1.0
@@ -962,15 +961,19 @@ external signature
    -> typed verified IR ESM import
 ```
 
-The unsafe marker is semantically important. pskernel rejects use of unsafe
-declarations from safe definitions/theorems, so an external JavaScript function
-cannot silently enter the safe proof lane. The first source FFI profile must
-therefore make unsafe executable code explicit.
+The runtime binding and the logical constant are deliberately distinct. The
+kernel admits only the declared type of the external as an opaque axiom; it
+never executes JavaScript to validate or discharge a proof. The first profile
+requires at least one explicit argument and primitive runtime argument/result
+types, so proof-valued and polymorphic extern signatures fail before admission.
 
-The initial erasure profile accepts only first-order primitive runtime
-functions. Polymorphic, proof-valued, nominal, higher-order, or unknown runtime
-external signatures fail closed until their ABI and assurance story are
-specified.
+This permits verified code to call an opaque external function while proofs can
+use only its declared type, never facts learned from host execution. Assurance
+tooling must still report the external assumption separately from ordinary
+definitions/theorems and from other project axioms.
+
+Nominal, higher-order, proof-valued, polymorphic, or unknown external runtime
+types remain fail-closed until their ABI and assurance story are specified.
 
 Checked-admission persistence is versioned compatibly: codec v1 / payload
 1.0.0 remains readable; new external admissions require codec v2 / payload

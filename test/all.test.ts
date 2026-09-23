@@ -79,6 +79,15 @@ test('internal defeq core success does not populate the public success cache',()
  assert(tc.state.success.has(pair),'public successful query must populate the success cache');
 });
 
+test('lazy delta ignores definitions with malformed universe arity',()=>{
+ const env=baseEnv(),uN=nameFromDotted('u'),u=levelParam(uN),A=nameFromDotted('DeltaArity.A'),B=nameFromDotted('DeltaArity.B');
+ env.add({kind:'definition',name:A,levelParams:[uN],type:sort(u),value:sort(levelZero),hints:{kind:'abbrev'},safety:'safe'});
+ env.add({kind:'definition',name:B,levelParams:[uN],type:sort(u),value:sort(levelZero),hints:{kind:'regular',height:1n},safety:'safe'});
+ const tc=new TypeChecker(env),a=constant(A),b=constant(B);
+ assert(!tc.isDefEq(a,b),'wrong-universe-arity constants must not be treated as delta targets');
+ assert((tc as any).deltaTarget(a)===null&&(tc as any).deltaTarget(b)===null,'Lean is_delta requires exact universe arity');
+});
+
 test('lazy delta reduction has no arbitrary 512-step semantic cap',()=>{
  const env=baseEnv(),count=600;
  for(let i=count;i>=0;i--){

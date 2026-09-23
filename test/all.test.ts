@@ -149,6 +149,16 @@ test('proof irrelevance compares arbitrary proofs of the same proposition',()=>{
  const lctx=new LocalContext();lctx.addLocal('p@0',nameFromDotted('p'),constant(P));lctx.addLocal('q@0',nameFromDotted('q'),constant(P));
  const tc=new TypeChecker(env,lctx);assert(tc.isDefEq(fvar('p@0'),fvar('q@0')));
 });
+test('Nat optimized reduction requires exact level-free primitive heads',()=>{
+ const env=baseEnv(),tc=new TypeChecker(env);
+ const malformedAdd=app(app(constant(N.NatAdd,[levelZero]),natLit(1)),natLit(2));
+ eqExpr(tc.whnf(malformedAdd),malformedAdd);
+ const malformedZero=constant(N.NatZero,[levelZero]);
+ const malformedSucc=app(constant(N.NatSucc,[levelZero]),natLit(0));
+ assert(!(tc as any).isNatZeroExpr(malformedZero),'Nat.zero with universe arguments is not Lean kernel zero');
+ assert((tc as any).natPredExpr(malformedSucc)===null,'Nat.succ with universe arguments is not a Lean kernel successor');
+});
+
 test('Nat.add reduction uses exact bigint',()=>{const tc=new TypeChecker(baseEnv());const e=app(app(constant(N.NatAdd),natLit(9007199254740993n)),natLit(7));eqExpr(tc.whnf(e),natLit(9007199254741000n));});
 test('Nat literal and count limits follow explicit Lean kernel limits',()=>{
  const env=baseEnv(),limits={maxRecDepth:512,maxNatBytes:8n},tc=new TypeChecker(env,undefined,undefined,limits);
@@ -505,6 +515,14 @@ test('projection-headed application reduces through a functional structure field
  const k=new Kernel(env);k.addDefinition({kind:'definition',name:box,levelParams:[],type:constant(I),value:app(constant(mk),lam(nameFromDotted('x'),constant(N.Nat),bvar(0))),hints:{kind:'regular',height:1n},safety:'safe'});
  const projected={kind:'proj',typeName:I,index:0,expr:constant(box)} as const;
  eqExpr(new TypeChecker(env).whnf(app(projected,natLit(3))),natLit(3));
+});
+
+test('string-literal expansion requires direct level-free String.ofList',()=>{
+ const tc=new TypeChecker(baseEnv()),lit=strLit('x');
+ const wrongLevel=app(constant(N.StringOfList,[levelZero]),natLit(0));
+ const overapplied=app(app(constant(N.StringOfList),natLit(0)),natLit(1));
+ assert((tc as any).tryStringLitExpansionCore(lit,wrongLevel)===null,'universe-instantiated String.ofList must not trigger expansion');
+ assert((tc as any).tryStringLitExpansionCore(lit,overapplied)===null,'overapplied String.ofList must not trigger expansion');
 });
 
 test('defeq expands string literals exactly through String.ofList',()=>{

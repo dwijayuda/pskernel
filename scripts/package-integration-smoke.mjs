@@ -476,3 +476,28 @@ assert(
   verifiedCountFrom.emitted.javascript.includes('countFrom(base, tail)'),
   'invariant structural recursion did not compile to JavaScript',
 );
+
+
+const verifiedGenericMap=compileVerifiedSource(
+  'inductive PsMapList(α : Type) where { '+
+  '| nil; | cons(head : α, tail : PsMapList(α)); } '+
+  'function map {α : Type}{β : Type}'+
+  '(f : α -> β, xs : PsMapList(α)) : PsMapList(β) := '+
+  'match xs with { | .nil => PsMapList.nil; '+
+  '| .cons head tail => PsMapList.cons(f(head), map(f, tail)); };',
+  'verified-generic-map.ts',
+);
+assert(
+  verifiedGenericMap.typeScript.includes(
+    'function map<T0, T1>(f: (_arg0: T0) => T1, xs: PsMapList<T0>): PsMapList<T1>',
+  ),
+  'higher-order generic recursive signature was not preserved',
+);
+assert(
+  verifiedGenericMap.typeScript.includes('map(f, tail)'),
+  'generic map IH did not lower to a structural self-call',
+);
+assert(
+  verifiedGenericMap.emitted.javascript.includes('map(f, tail)'),
+  'generic map did not compile to JavaScript recursion',
+);

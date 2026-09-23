@@ -33,6 +33,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified filesystem execution now also covers a generic higher-order map plus structurally recursive length over a pskernel-admitted recursive list.",
         "CLI filesystem regression now executes a kernel-admitted recursive PsList plus structurally recursive length through emitted JavaScript and checks length(two elements) = 2.",
         "psc run --verified now uses the semantic primitive types retained in verified IR: Nat/Int/Bool/String/Unit arguments are decoded by a dedicated ABI layer; generic or structured main signatures remain fail-closed.",
         "Verified CLI elaboration starts from the shared pskernel-admitted Lean 4.34 Init.Prelude environment and fails closed when that fixture cannot be loaded.",
@@ -356,7 +357,7 @@
       "path": "packages/compiler",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "checked-core-to-js-mvp",
+      "status": "checked-core-to-js-structural-recursion-mvp",
       "packageName": "@proofscript/compiler",
       "dependsOn": [
         "checked-core",
@@ -367,6 +368,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Canonical integration now covers higher-order generic structural recursion: map over a pskernel-admitted recursive generic list preserves TypeScript generics/function types while compiling recursor IHs to ordinary JavaScript recursion.",
         "Compiler orchestration starts at CheckedCoreModule; it has no syntax, parser, language-checker, or elaborator dependency.",
         "The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript Compiler API -> JavaScript/.d.ts/source map.",
         "The compiler is untrusted with respect to theorem validity; pskernel admission has already occurred before this package runs.",

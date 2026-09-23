@@ -482,3 +482,78 @@ console.log('ok - psc verified invariant structural recursion pipeline');
   }
 }
 console.log('ok - psc verified invariant structural recursion run');
+
+
+{
+  const result=compileVerifiedSource(
+    'inductive PsMapList(α : Type) where { '+
+    '| nil; | cons(head : α, tail : PsMapList(α)); } '+
+    'function map {α : Type}{β : Type}'+
+    '(f : α -> β, xs : PsMapList(α)) : PsMapList(β) := '+
+    'match xs with { | .nil => PsMapList.nil; '+
+    '| .cons head tail => PsMapList.cons(f(head), map(f, tail)); };',
+    'generic-map.ts',
+  );
+  equal(
+    result.typeScript.includes(
+      'function map<T0, T1>(f: (_arg0: T0) => T1, xs: PsMapList<T0>): PsMapList<T1>',
+    ),
+    true,
+  );
+  equal(result.typeScript.includes('map(f, tail)'),true);
+  equal(result.typeScript.includes('f(head)'),true);
+  equal(result.emitted.javascript.includes('map(f, tail)'),true);
+}
+console.log('ok - psc verified generic map structural recursion pipeline');
+
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-verified-generic-map-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'inductive PsList(α : Type) where { '+
+      '| nil; | cons(head : α, tail : PsList(α)); } '+
+      'function inc(x : Nat) : Nat := x + 1; '+
+      'function map {α : Type}{β : Type}'+
+      '(f : α -> β, xs : PsList(α)) : PsList(β) := '+
+      'match xs with { | .nil => PsList.nil; '+
+      '| .cons head tail => PsList.cons(f(head), map(f, tail)); }; '+
+      'function length {α : Type}(xs : PsList(α)) : Nat := '+
+      'match xs with { | .nil => 0; '+
+      '| .cons head tail => 1 + length(tail); }; '+
+      'function main(x : Nat) : Nat := '+
+      'length(map(inc, PsList.cons(x, PsList.cons(x, PsList.nil))));\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['9'],
+    });
+    equal(result.mainResult,'2');
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified generic map run filesystem pipeline');

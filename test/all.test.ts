@@ -577,6 +577,13 @@ test('ordinary recursive inductive synthesizes constructors and recursor',()=>{
  const ii=env.get(I);assert(ii.kind==='inductive'&&ii.isRec);const ri=env.get(nameFromDotted('MyNat.rec'));assert(ri.kind==='recursor'&&ri.rules.length===2);
  const tc=new TypeChecker(env);tc.check(ri.type);
 });
+test('constructor result shape is structural like Lean 4.34',()=>{
+ const env=baseEnv(),I=nameFromDotted('CtorShape.I'),Mk=nameFromDotted('CtorShape.I.mk'),T=sort(levelSucc(levelZero));
+ const wrapped=app(lam(nameFromDotted('_'),constant(N.Nat),constant(I)),natLit(0));
+ throws(()=>addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:T,ctors:[{name:Mk,type:wrapped}]}]}));
+ assert(!env.has(I)&&!env.has(Mk),'beta-reducing a constructor result into the inductive type must not make an invalid structural result admissible');
+});
+
 test('inductive uniformity is checked before WHNF can erase a bad occurrence',()=>{
  const env=baseEnv(),I=nameFromDotted('BadUniform'),Mk=nameFromDotted('BadUniform.mk'),one=levelSucc(levelZero),Type=sort(one);
  const indTy=forallE(nameFromDotted('α'),Type,Type,'implicit');

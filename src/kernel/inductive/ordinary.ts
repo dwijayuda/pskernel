@@ -1,7 +1,7 @@
 import { ConstructorInfo, InductiveInfo, RecursorInfo, RecursorRule } from '../../core/declaration.js';
 import { ensureClosed } from '../../core/checks.js';
 import { Environment, KernelError } from '../../core/environment.js';
-import { BinderInfo, Expr, app, appView, constant, consumeTypeAnnotations, exprEq, exprToString, forallE, fvar, inferImplicit, instantiateExprLevels, lam, mkAppN, sort } from '../../core/expr.js';
+import { BinderInfo, Expr, app, appView, constant, consumeTypeAnnotations, exprEq, exprLeanEq, exprToString, forallE, fvar, inferImplicit, instantiateExprLevels, lam, mkAppN, sort } from '../../core/expr.js';
 import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
 import { Level, isNotZero, levelEqStructural, levelEquivalent, levelLe, levelParam, levelZero, normalizesToZero } from '../../core/level.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
@@ -107,9 +107,15 @@ export function checkUniformInductiveOccurrences(d:InductiveDecl):void{
    }
  }
 }
-function validIndApp(work:Environment,stats:Stats,lctx:LocalContext,t:Expr):{idx:number;indices:readonly Expr[]}|null{
- const w=stc(work,lctx,stats).whnf(t),v=appView(w);if(v.fn.kind!=='const')return null;const idx=stats.names.findIndex(n=>nameEq(n,v.fn.kind==='const'?v.fn.name:n));if(idx<0)return null;const ni=stats.nindices[idx]!;if(v.args.length!==stats.params.length+ni)return null;
- for(let i=0;i<stats.params.length;i++)if(!stc(work,lctx,stats).isDefEq(v.args[i]!,stats.params[i]!.expr))return null;
+function validIndApp(_work:Environment,stats:Stats,_lctx:LocalContext,t:Expr):{idx:number;indices:readonly Expr[]}|null{
+ // Final Lean 4.34 is_valid_ind_app is intentionally structural here: callers
+ // WHNF recursive argument types where required, but constructor results
+ // themselves are not reduced into shape.
+ const v=appView(t);if(v.fn.kind!=='const')return null;
+ const idx=stats.names.findIndex(n=>nameEq(n,v.fn.name));if(idx<0)return null;
+ if(!exprLeanEq(v.fn,constant(stats.names[idx]!,stats.levels)))return null;
+ const ni=stats.nindices[idx]!;if(v.args.length!==stats.params.length+ni)return null;
+ for(let i=0;i<stats.params.length;i++)if(!exprLeanEq(v.args[i]!,stats.params[i]!.expr))return null;
  for(let i=stats.params.length;i<v.args.length;i++)if(hasConst(v.args[i]!,stats.names))return null;
  return {idx,indices:v.args.slice(stats.params.length)};
 }
@@ -148,11 +154,11 @@ function declareTypes(work:Environment,d:InductiveDecl,stats:Stats):void{
 function checkConstructors(work:Environment,d:InductiveDecl,stats:Stats):void{
  const seen=new Set<string>();d.types.forEach((it,itIdx)=>it.ctors.forEach(ctor=>{
    const k=nameKey(ctor.name);if(seen.has(k))throw new KernelError(`duplicate constructor '${nameToString(ctor.name)}'`);seen.add(k);ensureClosed(ctor.type,`constructor ${nameToString(ctor.name)}`);tc(work,new LocalContext(),stats.isUnsafe,stats.lparams).check(ctor.type);
-   const lctx=new LocalContext();for(const p of stats.params)lctx.addLocal(p.id,p.decl.userName,p.decl.type,p.decl.binderInfo);let t=stc(work,lctx,stats).whnf(ctor.type);let i=0;
+   const lctx=new LocalContext();for(const p of stats.params)lctx.addLocal(p.id,p.decl.userName,p.decl.type,p.decl.binderInfo);let t=ctor.type,i=0;
    while(t.kind==='forall'){
-     if(i<stats.params.length){const p=stats.params[i]!;if(!stc(work,lctx,stats).isDefEq(t.type,p.decl.type))throw new KernelError(`arg #${i+1} of '${nameToString(ctor.name)}' does not match parameters`);t=stc(work,lctx,stats).whnf(instantiate1(t.body,p.expr));i++;continue;}
+     if(i<stats.params.length){const p=stats.params[i]!;if(!stc(work,lctx,stats).isDefEq(t.type,p.decl.type))throw new KernelError(`arg #${i+1} of '${nameToString(ctor.name)}' does not match parameters`);t=instantiate1(t.body,p.expr);i++;continue;}
      const s=stc(work,lctx,stats).ensureSort(stc(work,lctx,stats).infer(t.type,false),t.type).level;if(!normalizesToZero(stats.resultLevel)&&!levelLe(s,stats.resultLevel))throw new KernelError(`universe level of constructor field is too large in '${nameToString(ctor.name)}'`);
-     if(!d.isUnsafe)checkPositivity(work,stats,lctx,t.type,ctor.name,i+1);const v=addLocal(lctx,t.name,t.type,t.binderInfo);t=stc(work,lctx,stats).whnf(instantiate1(t.body,v.expr));i++;
+     if(!d.isUnsafe)checkPositivity(work,stats,lctx,t.type,ctor.name,i+1);const v=addLocal(lctx,t.name,t.type,t.binderInfo);t=instantiate1(t.body,v.expr);i++;
    }
    const appInfo=validIndApp(work,stats,lctx,t);if(!appInfo||appInfo.idx!==itIdx)throw new KernelError(`invalid return type for '${nameToString(ctor.name)}'`);
  }));
@@ -172,7 +178,7 @@ function openIndices(work:Environment,type:Expr,stats:Stats,lctx:LocalContext):O
 function recArgInfo(work:Environment,stats:Stats,base:LocalContext,arg:OpenVar):{target:number;indices:readonly Expr[];xs:readonly OpenVar[];applied:Expr}|null{
  const c=base.clone();let ty=stc(work,c,stats).whnf(arg.decl.type);const xs:OpenVar[]=[];let applied=arg.expr;while(ty.kind==='forall'){const x=addLocal(c,ty.name,ty.type,ty.binderInfo);xs.push(x);applied=app(applied,x.expr);ty=stc(work,c,stats).whnf(instantiate1(ty.body,x.expr));}const v=validIndApp(work,stats,c,ty);return v?{target:v.idx,indices:v.indices,xs,applied}:null;
 }
-function openCtorFields(work:Environment,stats:Stats,ctor:ConstructorDecl,base:LocalContext):{lctx:LocalContext;fields:OpenVar[];result:Expr}{const c=base.clone();let t=stc(work,c,stats).whnf(ctor.type),i=0;while(i<stats.params.length){if(t.kind!=='forall')throw new KernelError('constructor parameter mismatch');t=stc(work,c,stats).whnf(instantiate1(t.body,stats.params[i]!.expr));i++;}const fields:OpenVar[]=[];while(t.kind==='forall'){const x=addLocal(c,t.name,t.type,t.binderInfo);fields.push(x);t=stc(work,c,stats).whnf(instantiate1(t.body,x.expr));}return {lctx:c,fields,result:t};}
+function openCtorFields(_work:Environment,stats:Stats,ctor:ConstructorDecl,base:LocalContext):{lctx:LocalContext;fields:OpenVar[];result:Expr}{const c=base.clone();let t=ctor.type,i=0;while(i<stats.params.length){if(t.kind!=='forall')throw new KernelError('constructor parameter mismatch');t=instantiate1(t.body,stats.params[i]!.expr);i++;}const fields:OpenVar[]=[];while(t.kind==='forall'){const x=addLocal(c,t.name,t.type,t.binderInfo);fields.push(x);t=instantiate1(t.body,x.expr);}return {lctx:c,fields,result:t};}
 function generateRecursors(work:Environment,d:InductiveDecl,stats:Stats):{infos:RecursorInfo[];expectedRules:Map<string,readonly RuleBuild[]>}{
  const {level:elimLevel,name:elimName}=chooseElimLevel(work,d,stats);const recLevels=elimName?[elimLevel,...stats.levels]:stats.levels;const recLParams=elimName?[elimName,...d.levelParams]:d.levelParams;const base=new LocalContext();for(const p of stats.params)base.addLocal(p.id,p.decl.userName,p.decl.type,p.decl.binderInfo);
  const builds:RecBuild[]=[];const motiveVars:OpenVar[]=[];

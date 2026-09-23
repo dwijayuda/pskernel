@@ -3,8 +3,10 @@ import {
   admitElaborated,
   elaborateApplication,
   elaborateChecked,
+  elaborateV061Definitions,
 } from '../src/index.js';
 import {ExprMetaContext} from '@proofscript/meta';
+import {parseV061Module} from '@proofscript/syntax';
 import {
   Environment,
   Kernel,
@@ -171,3 +173,75 @@ function makeApplicationEnvironment():{
   equal(bare.type.kind,'forall');
 }
 console.log('ok - @proofscript/elab Lean-style application elaboration');
+
+
+function makeDefinitionEnvironment():Environment {
+  const env=new Environment();
+  const kernel=new Kernel(env);
+  const TestNat=nameFromDotted('TestNat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:TestNat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('testZero'),
+    levelParams:[],
+    type:constant(TestNat),
+  });
+  return env;
+}
+
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Definitions(parseV061Module(
+    'function id(x : TestNat) : TestNat := x; '+
+    'function use(x : TestNat) : TestNat := id(x); '+
+    'const z : TestNat := testZero;',
+  ),env);
+  equal(result.definitions.length,3);
+  const id=result.definitions[0]!;
+  const use=result.definitions[1]!;
+  const z=result.definitions[2]!;
+  equal(id.hints.kind,'regular');
+  if(id.hints.kind==='regular')equal(id.hints.height,1n);
+  equal(use.hints.kind,'regular');
+  if(use.hints.kind==='regular')equal(use.hints.height,2n);
+  equal(z.hints.kind,'regular');
+  if(z.hints.kind==='regular')equal(z.hints.height,1n);
+  equal(result.environment.find(nameFromDotted('id'))?.kind,'definition');
+  equal(result.environment.find(nameFromDotted('use'))?.kind,'definition');
+}
+{
+  const env=makeDefinitionEnvironment();
+  let recursive=false;
+  try{
+    elaborateV061Definitions(parseV061Module(
+      'function loop(x : TestNat) : TestNat := loop(x);',
+    ),env);
+  }catch(error){recursive=/PS_ELAB_UNKNOWN_NAME/.test(String(error));}
+  equal(recursive,true);
+}
+{
+  const env=makeDefinitionEnvironment();
+  let notation=false;
+  try{
+    elaborateV061Definitions(parseV061Module(
+      'function bad(x : TestNat) : TestNat := x + x;',
+    ),env);
+  }catch(error){notation=/PS_ELAB_NOTATION_UNSUPPORTED/.test(String(error));}
+  equal(notation,true);
+}
+{
+  const env=makeDefinitionEnvironment();
+  let declaration=false;
+  try{
+    elaborateV061Definitions(parseV061Module(
+      'structure Box where { value : TestNat; }',
+    ),env);
+  }catch(error){declaration=/PS_ELAB_DECL_UNSUPPORTED/.test(String(error));}
+  equal(declaration,true);
+}
+console.log('ok - @proofscript/elab kernel-facing non-recursive definitions');

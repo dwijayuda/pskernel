@@ -212,7 +212,7 @@
       "path": "packages/language",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "foundation",
+      "status": "v061-software-checker-mvp",
       "packageName": "@proofscript/language",
       "dependsOn": [
         "syntax",
@@ -222,7 +222,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Foundation provides reusable document snapshots, unchanged-text reuse, cancellation checks, diagnostics, and non-overlapping text edits."
+        "Reference-backed software checker covers Nat, Int, Bool, String, Unit, declarations, calls, operators, and braced if for the initial executable subset.",
+        "This checker is an untrusted frontend/software-profile checker; theorem/proof acceptance still requires elaboration to pskernel."
       ]
     },
     {

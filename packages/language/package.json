@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Incremental document snapshots, parse/elab reuse, cancellation and diagnostics.",
   "proofscript": {
-    "status": "foundation",
+    "status": "v061-software-checker-mvp",
     "phase": "D",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -22,5 +22,8 @@
   },
   "devDependencies": {
     "typescript": "5.8.3"
+  },
+  "dependencies": {
+    "@proofscript/syntax": "file:../syntax"
   }
 }

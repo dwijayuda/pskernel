@@ -53,3 +53,5 @@ export function applyTextEdits(source:string,edits:readonly TextEdit[]):string{
   }
   return result;
 }
+
+export * from './v061-software.js';

@@ -28,6 +28,7 @@
     "proofscript-lsp": "./dist/src/bin.js"
   },
   "dependencies": {
-    "@proofscript/language-service": "file:../language-service"
+    "@proofscript/language-service": "file:../language-service",
+    "lean-ts-kernel": "file:../.."
   }
 }

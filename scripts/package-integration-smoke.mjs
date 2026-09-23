@@ -8,7 +8,7 @@ import {freeVariables,validateIrModule} from '../packages/compiler-ir/dist/src/i
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
 import {emitModule} from '../packages/backend-ts/dist/src/index.js';
 import {processDocument} from '../packages/language/dist/src/index.js';
-import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
+import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
 import {createBuildPlan} from '../packages/project/dist/src/index.js';
 import {verifyStream} from '../packages/browser/dist/src/index.js';
@@ -137,3 +137,20 @@ assert(verified===6,'browser verification stream failed');
 assert(render(text('ok'))==='ok','pretty rendering failed');
 
 console.log('package integration smoke: PASS');
+
+
+const preludeProvider=createInitPreludeEnvironmentProvider();
+const preludeStatus=preludeProvider.status();
+assert(preludeStatus.loaded===true,'editor prelude environment did not load');
+const preludeService=new ProofScriptLanguageService({
+  environmentFactory:()=>preludeProvider.create(),
+});
+preludeService.openDocument(
+  'file:///prelude-editor.ps',
+  1,
+  'function idNat(x : Nat) : Nat := x;',
+);
+assert(
+  preludeService.documentStatus('file:///prelude-editor.ps').kernel==='verified',
+  'Init.Prelude-backed editor service did not verify ordinary Nat declaration',
+);

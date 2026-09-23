@@ -10,6 +10,9 @@
     "paths": {
       "@proofscript/language-service": [
         "../language-service/dist/src/index.d.ts"
+      ],
+      "lean-ts-kernel": [
+        "../../dist/src/index.d.ts"
       ]
     }
   },

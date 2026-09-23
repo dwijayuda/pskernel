@@ -4,6 +4,7 @@ import {
   type Position,
   type ServiceDiagnostic,
 } from '@proofscript/language-service';
+import {createInitPreludeEnvironmentProvider} from './prelude-environment.js';
 
 interface RpcMessage {
   readonly jsonrpc?:string;
@@ -28,7 +29,10 @@ export function lspCapabilities(){
 }
 
 export class ProofScriptLanguageServer {
-  private readonly service=new ProofScriptLanguageService();
+  private readonly prelude=createInitPreludeEnvironmentProvider();
+  private readonly service=new ProofScriptLanguageService({
+    environmentFactory:()=>this.prelude.create(),
+  });
   private input=Buffer.alloc(0);
   private shutdownRequested=false;
 
@@ -150,6 +154,7 @@ export class ProofScriptLanguageServer {
             proofAuthority:'pskernel',
             proofStateGranularity:'declaration',
             cursorSensitiveTacticSteps:false,
+            editorEnvironment:this.prelude.status(),
           });
           return;
         default:

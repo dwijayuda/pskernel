@@ -280,14 +280,15 @@
       "status": "proof-aware-stdio-mvp",
       "packageName": "@proofscript/lsp",
       "dependsOn": [
-        "language-service"
+        "language-service",
+        "kernel"
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Stdio JSON-RPC transport is adapted from the prior ProofScript LSP architecture but delegates all semantic answers to the current proof-aware language service.",
-        "Supported MVP requests: diagnostics, hover, document symbols, declaration-level proofState/documentStatus, and serverInfo.",
-        "The transport never upgrades parsed/unsupported declarations to verified; pskernel admission remains the only source of verified proof status.",
-        "Worker lanes, completion, rename, references, semantic tokens, code actions, and cursor-sensitive tactic snapshots remain later editor milestones."
+        "The stdio LSP reuses the pinned Lean 4.34 Init.Prelude replay fixture to construct a cached pskernel editor environment when available.",
+        "Every document analysis receives a clone of that admitted environment; the fixture is replayed by pskernel rather than trusted as pre-verified metadata.",
+        "If the fixture is missing or replay fails, the server falls back to an empty environment and reports the degraded editor environment through serverInfo instead of weakening proof acceptance.",
+        "Project/import environment composition remains a later language-service milestone."
       ]
     },
     {

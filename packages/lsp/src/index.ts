@@ -49,3 +49,5 @@ export {
   lspCapabilities,
   startLspServer,
 } from './server.js';
+
+export * from './prelude-environment.js';

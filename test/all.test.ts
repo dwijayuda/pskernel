@@ -724,6 +724,18 @@ test('whnfCore cache follows Lean 4.34 cheap/full and direct-iota boundaries',()
  assert(!tc2.state.whnfCore.has(tc2.state.exprId(rec)),'Lean 4.34 returns directly after recursor iota instead of caching the original recursor application');
 });
 
+test('cheap projection WHNF never reuses a full-mode cache entry',()=>{
+ const env=baseEnv(),I=nameFromDotted('CheapProjBox'),Mk=nameFromDotted('CheapProjBox.mk'),box=nameFromDotted('cheapProjBoxValue');
+ const ctorTy=forallE(nameFromDotted('field'),constant(N.Nat),constant(I));
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[{name:Mk,type:ctorTy}]}]});
+ const k=new Kernel(env);k.addDefinition({kind:'definition',name:box,levelParams:[],type:constant(I),value:app(constant(Mk),natLit(7)),hints:{kind:'regular',height:1n},safety:'safe'});
+ const proj={kind:'proj',typeName:I,index:0,expr:constant(box)} as const,tc=new TypeChecker(env);
+ eqExpr(tc.whnfCore(proj,false,false),natLit(7));
+ assert(tc.state.whnfCore.has(tc.state.exprId(proj)),'full projection WHNF should cache its reduced field');
+ const cheap=tc.whnfCore(proj,false,true);
+ assert(cheap.kind==='proj'&&exprEq(cheap.expr,constant(box)),'cheap projection WHNF must ignore the full-mode cache and leave the hidden structure opaque');
+});
+
 test('well-founded primitive outer recognizer validates Lean fix/fix.go skeleton',()=>{
  const env=primitiveNatEnv(),{wrapper,measure}=addSyntheticNatWfScaffold(env);
  const r=inspectNatWfOuter(env,constant(wrapper),measure);

@@ -18,6 +18,8 @@ import {
   type RuntimeInductiveInfo,
 } from './model.js';
 import {safeIdentifier} from './names.js';
+import {eraseRuntimeType} from './type-erasure.js';
+import {substituteVerifiedType} from './verified-type-substitution.js';
 import type {RuntimeExprEraser} from './app-erasure.js';
 
 function freshBranchName(
@@ -42,6 +44,10 @@ function eraseMinor(
   scope:ErasureScope,
   environment:Environment,
   erase:RuntimeExprEraser,
+  substitutions:ReadonlyMap<
+    string,
+    import('@proofscript/compiler-ir/verified').VerifiedIrType
+  >,
 ):Extract<VerifiedIrExpr,{kind:'match'}>['alternatives'][number] {
   let cursor=minor;
   let branchScope=scope;
@@ -92,7 +98,10 @@ function eraseMinor(
     bindings.push({
       field:sourceField.name,
       name:binderName,
-      type:sourceField.type,
+      type:substituteVerifiedType(
+        sourceField.type,
+        substitutions,
+      ),
     });
     cursor=instantiate1(cursor.body,fvar(id));
   }
@@ -120,7 +129,7 @@ export function tryEraseRuntimeRecursorApplication(
   const recursor=environment.find(view.fn.name);
   if(
     recursor?.kind!=='recursor'
-    ||recursor.numParams!==0
+    ||recursor.numParams!==inductive.numParams
     ||recursor.numIndices!==0
     ||recursor.numMotives!==1
     ||recursor.numMinors!==inductive.constructors.length
@@ -144,6 +153,24 @@ export function tryEraseRuntimeRecursorApplication(
     );
   }
 
+  const typeArgs=view.args
+    .slice(0,recursor.numParams)
+    .map((arg)=>eraseRuntimeType(arg,scope,environment));
+  if(typeArgs.length!==inductive.typeParameters.length){
+    throw new Error(
+      "PS_ERASE_MATCH_PARAMETER_ARITY: '"+
+      nameToString(view.fn.name)+"' expected "+
+      inductive.typeParameters.length+' type parameters, got '+
+      typeArgs.length,
+    );
+  }
+  const substitutions=new Map(
+    inductive.typeParameters.map((parameter,index)=>[
+      parameter.name,
+      typeArgs[index]!,
+    ] as const),
+  );
+
   const minorStart=recursor.numParams+recursor.numMotives;
   const alternatives=inductive.constructors.map(
     (constructor,index)=>eraseMinor(
@@ -152,6 +179,7 @@ export function tryEraseRuntimeRecursorApplication(
       scope,
       environment,
       erase,
+      substitutions,
     ),
   );
 

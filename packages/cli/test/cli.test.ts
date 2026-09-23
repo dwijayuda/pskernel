@@ -272,3 +272,27 @@ console.log('ok - psc verified ADT match pipeline');
   equal(result.emitted.javascript.includes('<T0>'),false);
 }
 console.log('ok - psc verified generic ADT constructor pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'inductive PsOption(α : Type) where { | none; | some(value : α); } '+
+  'function getOr {α : Type}'+
+  '(value : PsOption(α), fallback : α) : α := '+
+  'match value with { | .none => fallback; | .some x => x; };',
+    'generic-adt-match.ts',
+  );
+  const getOr=result.ir.declarations.find(
+    (item)=>item.name==='getOr',
+  );
+  equal(getOr?.body.kind,'match');
+  equal(
+    result.typeScript.includes(
+      'function getOr<T0>(value: PsOption<T0>, fallback: T0): T0',
+    ),
+    true,
+  );
+  equal(result.typeScript.includes('(x: T0) => x'),true);
+  equal(result.emitted.javascript.includes('case "some"'),true);
+}
+console.log('ok - psc verified generic ADT match pipeline');

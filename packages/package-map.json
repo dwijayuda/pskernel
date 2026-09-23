@@ -248,7 +248,7 @@
       "path": "packages/erasure",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "generic-nonrecursive-adt-erasure-mvp",
+      "status": "generic-adt-match-erasure-mvp",
       "packageName": "@proofscript/erasure",
       "dependsOn": [
         "checked-core",
@@ -275,7 +275,8 @@
         "Source-level MaybeNat regression locks constructor identity across pskernel admission, checked core, verified IR, TypeScript tagged unions, JavaScript factories, and .d.ts output.",
         "Kernel-admitted non-recursive ADT recursor applications now lower to verified match IR using RecursorInfo motive/minor/major metadata and admitted constructor order; source pattern ordering is not trusted by erasure.",
         "Non-recursive type-parameterized inductives now preserve shared type parameters as verified IR generics while erasing constructor parameter arguments from JavaScript runtime arity.",
-        "Parameterized recursor/match erasure remains fail-closed for a separate milestone."
+        "Parameterized recursor/match erasure remains fail-closed for a separate milestone.",
+        "Parameterized recursor erasure now consumes the admitted recursor parameter prefix, erases those checked type arguments, and substitutes them into generic constructor field types before emitting match branch bindings."
       ]
     },
     {
@@ -360,7 +361,8 @@
       "notes": [
         "Compiler orchestration starts at CheckedCoreModule; it has no syntax, parser, language-checker, or elaborator dependency.",
         "The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript Compiler API -> JavaScript/.d.ts/source map.",
-        "The compiler is untrusted with respect to theorem validity; pskernel admission has already occurred before this package runs."
+        "The compiler is untrusted with respect to theorem validity; pskernel admission has already occurred before this package runs.",
+        "The verified compiler now covers construction and elimination of non-recursive unindexed generic ADTs through kernel-admitted constructors/recursors."
       ]
     },
     {

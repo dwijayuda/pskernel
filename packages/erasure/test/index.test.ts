@@ -593,3 +593,119 @@ console.log('ok - @proofscript/erasure verified ADT recursor match lowering');
   }
 }
 console.log('ok - @proofscript/erasure generic nonrecursive ADT constructor erasure');
+
+
+{
+  const base=new Environment();
+  const kernel=new Kernel(base);
+  const Nat=nameFromDotted('MatchNat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const OptionType=nameFromDotted('MatchOption');
+  const None=nameFromDotted('MatchOption.none');
+  const Some=nameFromDotted('MatchOption.some');
+  const alpha=nameFromDotted('α');
+  const alphaSort=sort(levelSucc(levelZero));
+  const optionAlpha=app(constant(OptionType),bvar(0));
+  const optionNat=app(constant(OptionType),constant(Nat));
+  const recursor=nameFromDotted('MatchOption.rec');
+
+  const getOrNat={
+    kind:'definition' as const,
+    name:nameFromDotted('getOrNat'),
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('value'),
+      optionNat,
+      forallE(
+        nameFromDotted('fallback'),
+        constant(Nat),
+        constant(Nat),
+      ),
+    ),
+    value:lam(
+      nameFromDotted('value'),
+      optionNat,
+      lam(
+        nameFromDotted('fallback'),
+        constant(Nat),
+        mkAppN(
+          constant(recursor,[levelSucc(levelZero)]),
+          [
+            constant(Nat),
+            lam(
+              nameFromDotted('_match'),
+              optionNat,
+              constant(Nat),
+            ),
+            bvar(0),
+            lam(
+              nameFromDotted('x'),
+              constant(Nat),
+              bvar(0),
+            ),
+            bvar(1),
+          ],
+        ),
+      ),
+    ),
+    hints:{kind:'regular' as const,height:1n},
+    safety:'safe' as const,
+  };
+
+  const checked=admitCheckedCoreAdmissions(base,[
+    {
+      kind:'inductive',
+      declaration:{
+        levelParams:[],
+        numParams:1,
+        types:[{
+          name:OptionType,
+          type:forallE(alpha,alphaSort,alphaSort),
+          ctors:[
+            {
+              name:None,
+              type:forallE(
+                alpha,
+                alphaSort,
+                optionAlpha,
+                'implicit',
+              ),
+            },
+            {
+              name:Some,
+              type:forallE(
+                alpha,
+                alphaSort,
+                forallE(
+                  nameFromDotted('value'),
+                  bvar(0),
+                  app(constant(OptionType),bvar(1)),
+                ),
+                'implicit',
+              ),
+            },
+          ],
+        }],
+      },
+    },
+    {kind:'constant',declaration:getOrNat},
+  ]);
+  const erased=eraseCheckedCoreModule(checked);
+  const body=erased.declarations.find(
+    (item)=>item.name==='getOrNat',
+  )?.body;
+  equal(body?.kind,'match');
+  if(body?.kind==='match'){
+    const binding=body.alternatives[1]?.bindings[0];
+    equal(binding?.type.kind,'primitive');
+    if(binding?.type.kind==='primitive'){
+      equal(binding.type.name,'Nat');
+    }
+  }
+}
+console.log('ok - @proofscript/erasure generic ADT recursor parameter substitution');

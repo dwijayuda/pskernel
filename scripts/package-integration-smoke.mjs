@@ -380,3 +380,33 @@ assert(
   !verifiedGenericAdt.emitted.javascript.includes('<T0>'),
   'generic ADT type parameter leaked into JavaScript',
 );
+
+
+const verifiedGenericMatch=compileVerifiedSource(
+  'inductive PsOption(α : Type) where { | none; | some(value : α); } '+
+  'function getOr {α : Type}'+
+  '(value : PsOption(α), fallback : α) : α := '+
+  'match value with { | .none => fallback; | .some x => x; };',
+  'verified-generic-match.ts',
+);
+const getOr=verifiedGenericMatch.ir.declarations.find(
+  (item)=>item.name==='getOr',
+);
+assert(
+  getOr?.body.kind==='match',
+  'generic ADT match did not reach verified match IR',
+);
+assert(
+  verifiedGenericMatch.typeScript.includes(
+    'function getOr<T0>(value: PsOption<T0>, fallback: T0): T0',
+  ),
+  'generic ADT match did not preserve the enclosing type parameter',
+);
+assert(
+  verifiedGenericMatch.typeScript.includes('(x: T0) => x'),
+  'generic ADT branch field type was not instantiated from recursor parameters',
+);
+assert(
+  verifiedGenericMatch.emitted.javascript.includes('case "some"'),
+  'generic ADT match did not compile to JavaScript',
+);

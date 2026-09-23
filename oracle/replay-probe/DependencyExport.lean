@@ -378,7 +378,9 @@ def resetInternTables : M Unit :=
     names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
     levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
     exprs := HashMap.emptyWithCapacity 256
-    mdata := #[]
+    -- Keep mdata equality identities stable across module-stream shards. The TS
+    -- replay shares one Environment across shards, so restarting these IDs could
+    -- make distinct Lean KVMaps look structurally equal.
     active := {}
   }
 

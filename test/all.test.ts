@@ -221,6 +221,17 @@ test('explicit native evaluator controls Lean.reduceNat and Lean.reduceBool resu
  eqExpr(tc.whnf(app(constant(N.LeanReduceNat),constant(vNat))),natLit(7));
  eqExpr(tc.whnf(app(constant(N.LeanReduceBool),constant(vBool))),constant(N.BoolFalse));
 });
+test('native reduction marker must be the exact level-free Lean constant',()=>{
+ const env=baseEnv(),v=nameFromDotted('Native.levelMarker');let calls=0;
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'axiom',name:v,levelParams:[],type:constant(N.Nat)});
+ const evaluator:NativeEvaluator={evaluate(){calls++;return {kind:'nat',value:9n};}};
+ const malformed=app(constant(N.LeanReduceNat,[levelZero]),constant(v));
+ const tc=new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,evaluator);
+ eqExpr(tc.whnf(malformed),malformed);
+ assert(calls===0,'malformed universe arguments on the marker must not enter the native TCB provider');
+});
+
 test('native evaluator results are shape-checked at the kernel boundary',()=>{
  const env=baseEnv(),v=nameFromDotted('Native.badProvider');
  env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});

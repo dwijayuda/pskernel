@@ -7,7 +7,7 @@ import type {CheckedCoreModule} from '@proofscript/checked-core';
 import type {
   VerifiedIrDeclaration,
   VerifiedIrModule,
-} from '@proofscript/compiler-ir';
+} from '@proofscript/compiler-ir/verified';
 import {buildDeclarationNames} from './names.js';
 import {openAndEraseDefinition} from './expr-erasure.js';
 

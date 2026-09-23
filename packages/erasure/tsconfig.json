@@ -11,8 +11,8 @@
       "@proofscript/checked-core": [
         "../checked-core/dist/src/index.d.ts"
       ],
-      "@proofscript/compiler-ir": [
-        "../compiler-ir/dist/src/index.d.ts"
+      "@proofscript/compiler-ir/verified": [
+        "../compiler-ir/dist/src/verified.d.ts"
       ]
     }
   },

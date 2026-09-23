@@ -7,7 +7,7 @@ import {
   nameToString,
   type Expr,
 } from 'lean-ts-kernel';
-import type {VerifiedIrType} from '@proofscript/compiler-ir';
+import type {VerifiedIrType} from '@proofscript/compiler-ir/verified';
 import {
   classifyBinder,
   type ErasureScope,

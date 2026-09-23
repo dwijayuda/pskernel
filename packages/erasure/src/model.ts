@@ -4,7 +4,7 @@ import {
   type LocalContext,
   type TypeChecker,
 } from 'lean-ts-kernel';
-import type {VerifiedIrType} from '@proofscript/compiler-ir';
+import type {VerifiedIrType} from '@proofscript/compiler-ir/verified';
 
 export type ErasedBinderKind='type'|'proof'|'runtime';
 

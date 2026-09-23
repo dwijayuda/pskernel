@@ -14,11 +14,11 @@
       "@proofscript/erasure": [
         "../erasure/dist/src/index.d.ts"
       ],
-      "@proofscript/compiler-ir": [
-        "../compiler-ir/dist/src/index.d.ts"
+      "@proofscript/compiler-ir/verified": [
+        "../compiler-ir/dist/src/verified.d.ts"
       ],
-      "@proofscript/backend-ts": [
-        "../backend-ts/dist/src/index.d.ts"
+      "@proofscript/backend-ts/verified": [
+        "../backend-ts/dist/src/verified-api.d.ts"
       ]
     }
   },

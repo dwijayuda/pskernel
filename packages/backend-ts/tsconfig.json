@@ -14,6 +14,9 @@
       ],
       "@proofscript/syntax": [
         "../syntax/dist/src/index.d.ts"
+      ],
+      "@proofscript/compiler-ir/verified": [
+        "../compiler-ir/dist/src/verified.d.ts"
       ]
     }
   },

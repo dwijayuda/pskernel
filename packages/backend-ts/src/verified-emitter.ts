@@ -3,7 +3,7 @@ import {
   type VerifiedIrExpr,
   type VerifiedIrModule,
   type VerifiedIrType,
-} from '@proofscript/compiler-ir';
+} from '@proofscript/compiler-ir/verified';
 
 function emitType(type:VerifiedIrType):string {
   switch(type.kind){

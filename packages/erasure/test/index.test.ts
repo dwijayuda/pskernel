@@ -9,7 +9,7 @@ import {
   sort,
 } from 'lean-ts-kernel';
 import {admitCheckedCoreModule} from '@proofscript/checked-core';
-import {validateVerifiedIrModule} from '@proofscript/compiler-ir';
+import {validateVerifiedIrModule} from '@proofscript/compiler-ir/verified';
 import {eraseCheckedCoreModule} from '../src/index.js';
 
 function equal(actual:unknown,expected:unknown):void {

@@ -78,6 +78,7 @@ function forbidImports(dir,patterns){
 }
 
 forbidImports(join(root,'packages','erasure','src'),[
+  "from '@proofscript/compiler-ir';",
   "@proofscript/syntax",
   "@proofscript/meta",
   "@proofscript/elab",
@@ -85,6 +86,8 @@ forbidImports(join(root,'packages','erasure','src'),[
   "@proofscript/backend-ts",
 ]);
 forbidImports(join(root,'packages','compiler','src'),[
+  "from '@proofscript/compiler-ir';",
+  "from '@proofscript/backend-ts';",
   "@proofscript/syntax",
   "@proofscript/meta",
   "@proofscript/elab",
@@ -123,3 +126,14 @@ console.log(
   'proofscript-architecture: PASS '+
   '(source -> elab -> checked-core -> erasure -> IR -> TS -> JS)',
 );
+
+
+const verifiedEmitter=readFileSync(
+  join(root,'packages','backend-ts','src','verified-emitter.ts'),
+  'utf8',
+);
+if(verifiedEmitter.includes("from '@proofscript/compiler-ir';")){
+  throw new Error(
+    'architecture: verified backend must import compiler-ir/verified subpath',
+  );
+}

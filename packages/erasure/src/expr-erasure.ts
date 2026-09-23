@@ -13,7 +13,7 @@ import type {
   VerifiedIrExpr,
   VerifiedIrParameter,
   VerifiedIrTypeParameter,
-} from '@proofscript/compiler-ir';
+} from '@proofscript/compiler-ir/verified';
 import {
   classifyBinder,
   type ErasureScope,
@@ -24,7 +24,7 @@ import {safeIdentifier} from './names.js';
 export interface OpenedDefinition {
   readonly typeParameters:readonly VerifiedIrTypeParameter[];
   readonly parameters:readonly VerifiedIrParameter[];
-  readonly resultType:import('@proofscript/compiler-ir').VerifiedIrType;
+  readonly resultType:import('@proofscript/compiler-ir/verified').VerifiedIrType;
   readonly body:VerifiedIrExpr;
 }
 

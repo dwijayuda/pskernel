@@ -1,11 +1,11 @@
 import type {CheckedCoreModule} from '@proofscript/checked-core';
 import {eraseCheckedCoreModule} from '@proofscript/erasure';
-import {validateVerifiedIrModule} from '@proofscript/compiler-ir';
+import {validateVerifiedIrModule} from '@proofscript/compiler-ir/verified';
 import {
   compileTypeScript,
   emitVerifiedTypeScript,
   type TypeScriptCompileResult,
-} from '@proofscript/backend-ts';
+} from '@proofscript/backend-ts/verified';
 
 export interface VerifiedCompileResult {
   readonly checkedCore:CheckedCoreModule;

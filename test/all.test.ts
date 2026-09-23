@@ -1,6 +1,6 @@
 import { Environment } from '../src/core/environment.js';
 import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
-import { levelEqStructural, levelEquivalent, levelMVar, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../src/core/level.js';
+import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
 import { nameFromDotted, nameToString } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
 import { abstractFVar, instantiate, lift } from '../src/core/instantiate.js';
@@ -68,6 +68,15 @@ test('deep structural universe equality is stack-safe',()=>{
  let a:any=levelZero,b:any=levelZero;
  for(let i=0;i<20000;i++){a=levelSucc(a);b=levelSucc(b);}
  assert(levelEqStructural(a,b),'deep structural universe equality must not overflow the JavaScript stack');
+ assert(levelEquivalent(a,b),'deep universe normalization/equivalence must not overflow the JavaScript stack');
+
+ const uN=nameFromDotted('deep.u');let p:any=levelParam(uN),m:any=levelMVar(nameFromDotted('deep.m'));
+ for(let i=0;i<20000;i++){p=levelSucc(p);m=levelSucc(m);}
+ assert(levelParamNames(p).some(n=>nameToString(n)==='deep.u'),'deep level parameter scan must reach the leaf');
+ assert(!levelHasMVar(p)&&levelHasMVar(m),'deep universe metavariable scan must be stack-safe');
+ assert(!normalizesToZero(p),'successor towers cannot normalize to zero');
+ assert(levelEqStructural(instantiateLevel(p,[uN],[levelZero]),a),'deep universe instantiation must be stack-safe');
+
  const st=new KernelState();st.infer.set(sort(a),constant(N.Nat));
  assert(st.infer.has(sort(b)),'structural expression caches must compare deep universe levels without recursion overflow');
 });

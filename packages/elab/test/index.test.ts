@@ -615,7 +615,7 @@ console.log('ok - @proofscript/elab bounded induction via recursor');
 
 {
   const source=parseV061Module(
-    'theorem parsedRw(a : Nat, b : Nat, h : Eq Nat a b) : Eq Nat a b := '+
+    'theorem parsedRw(a : Nat, b : Nat, h : Eq a b) : Eq a b := '+
     'by rw [h]; rw [← h]; assumption;',
   );
   const body=source.declarations[0]?.body;
@@ -630,7 +630,7 @@ console.log('ok - @proofscript/elab rw syntax reaches tactic AST');
 {
   const source=parseV061Module(
     'theorem parsedSimp(A : Type, B : Type, C : Type, D : Type, '+
-    'h1 : Eq Type BoxT(A) B, h2 : Eq Type WrapT(C) D) : P := '+
+    'h1 : Eq BoxT(A) B, h2 : Eq WrapT(C) D) : P := '+
     'by simp only [h1, ← h2];',
   );
   const body=source.declarations[0]?.body;

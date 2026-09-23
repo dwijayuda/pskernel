@@ -171,10 +171,10 @@ assert(
 
 
 const verifiedRewrite=compileVerifiedSource(
-  'theorem rewriteForward(a : Nat, b : Nat, h : Eq Nat a b) : '+
-  'Eq Nat a b := by rw [h]; '+
-  'theorem rewriteReverse(a : Nat, b : Nat, h : Eq Nat a b) : '+
-  'Eq Nat b a := by rw [← h];',
+  'theorem rewriteForward(a : Nat, b : Nat, h : Eq a b) : '+
+  'Eq a b := by rw [h]; '+
+  'theorem rewriteReverse(a : Nat, b : Nat, h : Eq a b) : '+
+  'Eq b a := by rw [← h];',
   'verified-rewrite.ts',
 );
 assert(
@@ -189,14 +189,25 @@ const verifiedSimpOnly=compileVerifiedSource(
   'inductive PairT(α : Type, β : Type) where { | mk; } '+
   'theorem simplifyTypes'+
   '(A : Type, B : Type, C : Type, D : Type, '+
-  'h1 : Eq Type BoxT(A) B, h2 : Eq Type WrapT(C) D) : '+
-  'Eq Type PairT(BoxT(A), WrapT(C)) PairT(B, D) := '+
+  'h1 : Eq BoxT(A) B, h2 : Eq WrapT(C) D) : '+
+  'Eq PairT(BoxT(A), WrapT(C)) PairT(B, D) := '+
   'by simp only [h1, h2];',
   'verified-simp-only.ts',
 );
 assert(
   verifiedSimpOnly.checkedCore.theorems.length===1,
   'bounded multi-rule simp only did not construct a pskernel-admitted proof',
+);
+
+
+const verifiedDependentTheoremType=compileVerifiedSource(
+  'theorem succRewrite(a : Nat, h : Eq Nat.succ(a) a) : '+
+  'Eq Nat.succ(a) a := by rw [h];',
+  'verified-dependent-theorem-type.ts',
+);
+assert(
+  verifiedDependentTheoremType.checkedCore.theorems.length===1,
+  'dependent term application in theorem result type was not admitted',
 );
 
 

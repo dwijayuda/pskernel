@@ -8,6 +8,7 @@ import {freeVariables,validateIrModule,validateVerifiedIrModule} from '../packag
 import {eraseCheckedCoreModule} from '../packages/erasure/dist/src/index.js';
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
 import {compileTypeScript,emitModule,emitVerifiedTypeScript} from '../packages/backend-ts/dist/src/index.js';
+import {compileCheckedCore} from '../packages/compiler/dist/src/index.js';
 import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
@@ -125,6 +126,16 @@ assert(
 assert(
   verifiedJs.declaration.includes('identity<T0>(x: T0): T0'),
   'generic API was not preserved in .d.ts',
+);
+
+
+const compilerOrchestrated=compileCheckedCore(
+  checkedCore,
+  'verified-identity-orchestrated.ts',
+);
+assert(
+  compilerOrchestrated.emitted.javascript.includes('function identity(x)'),
+  'checked-core compiler orchestration did not produce JavaScript',
 );
 
 

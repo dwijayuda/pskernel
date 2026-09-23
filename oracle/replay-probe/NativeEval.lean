@@ -24,5 +24,8 @@ unsafe def main (args : List String) : IO Unit := do
   let moduleName := args[0]!.toName
   let kind := args[1]!
   let constName := args[2]!.toName
-  withImportModules #[{module := moduleName}] {} fun env => do
-    IO.println (← evalNative env kind constName).compress
+  -- Native reduction is compiler execution. Load persistent environment
+  -- extensions so attributes such as @[implemented_by] are visible to evalConstCheck.
+  unsafe enableInitializersExecution
+  let env ← importModules (loadExts := true) #[{module := moduleName}] {}
+  IO.println (← evalNative env kind constName).compress

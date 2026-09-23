@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {Environment,constant,levelSucc,levelZero,nameFromDotted,sort} from 'lean-ts-kernel';
-import {canonicalJson,createCheckedModuleArtifact,createModuleArtifact,decodeModuleArtifact,encodeModuleArtifact,loadModuleArtifact,moduleArtifactSummary,normalizeDeclarationStream,verifyModuleArtifact,verifyModuleDependencies} from '../src/index.js';
+import {canonicalJson,createCheckedModuleArtifact,createModuleArtifact,decodeModuleArtifact,DEFAULT_KERNEL,encodeModuleArtifact,loadModuleArtifact,moduleArtifactSummary,normalizeDeclarationStream,verifyModuleArtifact,verifyModuleDependencies} from '../src/index.js';
 
 const stream=[
   '{"meta":{"exporter":{"name":"test","version":"1"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
@@ -99,15 +99,26 @@ console.log('ok - @proofscript/module TypeScript MVP');
     ()=>verifyModuleArtifact(tampered),
     /payload integrity mismatch/,
   );
-  const wrongKernel={
-    ...artifact,
-    kernel:{...artifact.kernel,apiVersion:'999'},
-  };
-  const body={
-    ...wrongKernel,
-    integrity:undefined,
-  };
-  void body;
+  const incompatible=createCheckedModuleArtifact({
+    module:'Native.Incompatible',
+    admissions:[{
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:nameFromDotted('Native.incompatible'),
+        levelParams:[],
+        type:constant(A),
+        value:constant(aName),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    }],
+    kernel:{...DEFAULT_KERNEL,apiVersion:'999'},
+  });
+  assert.throws(
+    ()=>loadModuleArtifact(incompatible,{env}),
+    /kernel compatibility mismatch/,
+  );
   assert.equal(moduleArtifactSummary(artifact).format,'proofscript-module@2');
 }
 console.log('ok - @proofscript/module checked-admission artifact v2');

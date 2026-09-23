@@ -79,7 +79,8 @@ Remaining acceptance gates:
 - nested lets/lambdas/if/match combinations;
 - richer primitive comparison/equality coverage through Lean-compatible
   elaboration, not backend-only operators;
-- stable semantic primitive IR contracts;
+- broaden the landed typed/exhaustive intrinsic contract only when new
+  verified runtime primitives are introduced;
 - broaden the landed deterministic JSON structure/ADT run ABI only when new
   checked runtime shapes are added;
 - source-level regressions for every supported construct.

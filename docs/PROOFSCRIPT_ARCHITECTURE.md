@@ -149,6 +149,13 @@ This is intentionally narrower than pretending to have Lean's general
 overloaded notation must wait for the real typeclass-synthesis layer.
 
 
+Verified runtime intrinsics have one shared compiler-IR contract for operation
+identity and arity. Validation consumes that contract, and backend-ts emits the
+operation union exhaustively. There is no catch-all emission fallback: adding a
+new verified intrinsic without defining its backend semantics is a TypeScript
+compile-time error rather than silently changing meaning.
+
+
 ## Verified execution checkpoint
 
 The CLI runtime path now consumes the semantic types retained in verified IR.

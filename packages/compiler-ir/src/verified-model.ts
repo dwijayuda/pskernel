@@ -18,6 +18,11 @@ export type VerifiedIrType =
 
 export type VerifiedIrLiteral=bigint|string|boolean|undefined;
 
+export type VerifiedIrIntrinsicOperation =
+  |'nat.add'|'nat.sub'|'nat.mul'|'nat.div'|'nat.mod'
+  |'nat.eq'|'nat.ne'|'nat.le'|'nat.lt'
+  |'bool.not'|'bool.and'|'bool.or'|'bool.eq'|'bool.ne';
+
 export interface VerifiedIrStructureField {
   readonly name:string;
   readonly type:VerifiedIrType;
@@ -50,10 +55,7 @@ export type VerifiedIrExpr =
   | {readonly kind:'var';readonly name:string}
   | {
       readonly kind:'intrinsic';
-      readonly operation:
-        |'nat.add'|'nat.sub'|'nat.mul'|'nat.div'|'nat.mod'
-        |'nat.eq'|'nat.ne'|'nat.le'|'nat.lt'
-        |'bool.not'|'bool.and'|'bool.or'|'bool.eq'|'bool.ne';
+      readonly operation:VerifiedIrIntrinsicOperation;
       readonly args:readonly VerifiedIrExpr[];
     }
   | {

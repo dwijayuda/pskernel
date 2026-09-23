@@ -107,10 +107,27 @@ test('checker state is locked to one immutable environment revision',()=>{
  throws(()=>new TypeChecker(env.clone(),new LocalContext(),st));
 });
 
+test('type checker snapshots caller-owned local contexts',()=>{
+ const env=baseEnv(),lctx=new LocalContext(),id='snapshot@0';
+ lctx.addLocal(id,nameFromDotted('x'),constant(N.Nat));
+ const tc=new TypeChecker(env,lctx);
+ lctx.addLocal(id,nameFromDotted('x'),sort(levelZero));
+ eqExpr(tc.check(fvar(id)),constant(N.Nat));
+});
+
+test('shared checker state rejects incompatible FVar rebinding',()=>{
+ const env=baseEnv(),st=new KernelState(),a=new LocalContext(),b=new LocalContext(),id='shared@0';
+ a.addLocal(id,nameFromDotted('x'),constant(N.Nat));
+ new TypeChecker(env,a,st);
+ b.addLocal(id,nameFromDotted('x'),sort(levelZero));
+ throws(()=>new TypeChecker(env,b,st));
+});
+
 test('checker-state local name generator stays unique across independent local contexts',()=>{
  const st=new KernelState(),a=new LocalContext(),b=new LocalContext();
  const x=st.freshLocal('x',a),y=st.freshLocal('x',b);
  assert(x!==y,'Lean-style checker state must never recycle fvar ids across sibling contexts');
+ assert(x.startsWith('_kernel_fresh@')&&y.startsWith('_kernel_fresh@'),'kernel-generated fvars use a reserved internal namespace');
 });
 
 test('structural WHNF cache preserves Lean is_eqp progress distinction',()=>{

@@ -16,7 +16,7 @@ import {elaborateApplication} from './application.js';
 import {elaborateV061Constant} from './v061-constant-elab.js';
 import type {V061CoreElabContext} from './v061-context.js';
 import {v061LocalInstanceTerms} from './v061-context.js';
-import {elaborateV061NatArithmeticTerms} from './v061-notation-elab.js';
+import {elaborateV061NatArithmeticTerms} from './v061-nat-notation-elab.js';
 
 function elaborateTypePositionApplication(
   fn:Expr,

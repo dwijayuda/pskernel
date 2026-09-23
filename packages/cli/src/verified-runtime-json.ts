@@ -2,6 +2,10 @@ import type {
   VerifiedIrModule,
   VerifiedIrType,
 } from '@proofscript/compiler-ir/verified';
+import {
+  decodeVerifiedJsonPrimitive,
+  encodeVerifiedPrimitiveResult,
+} from './verified-runtime-primitives.js';
 
 export interface VerifiedRuntimeAbiContext {
   readonly module:VerifiedIrModule;
@@ -56,59 +60,6 @@ function bindTypeParameters(
   return next;
 }
 
-function decodePrimitive(
-  value:unknown,
-  name:Extract<VerifiedIrType,{kind:'primitive'}>['name'],
-):unknown {
-  if(name==='Nat'){
-    if(typeof value!=='string'||!/^\d+$/u.test(value)){
-      fail('nested Nat values must be decimal JSON strings');
-    }
-    return BigInt(value);
-  }
-  if(name==='Int'){
-    if(typeof value!=='string'||!^-?\d+$/u.test(value)){
-      fail('nested Int values must be decimal JSON strings');
-    }
-    return BigInt(value);
-  }
-  if(name==='UInt8'||name==='UInt16'||name==='UInt32'){
-    const bits=name==='UInt8'?8n:name==='UInt16'?16n:32n;
-    const limit=1n<<bits;
-    if(
-      typeof value!=='number'||
-      !Number.isInteger(value)||
-      value<0||
-      BigInt(value)>=limit
-    ){
-      fail(
-        'nested '+name+' values must be in-range JSON integers',
-      );
-    }
-    return value;
-  }
-  if(name==='UInt64'){
-    if(typeof value!=='string'||!/^\d+$/u.test(value)){
-      fail('nested UInt64 values must be decimal JSON strings');
-    }
-    const parsed=BigInt(value);
-    if(parsed>=(1n<<64n)){
-      fail('nested UInt64 value is outside its 64-bit range');
-    }
-    return parsed;
-  }
-  if(name==='Bool'){
-    if(typeof value!=='boolean')fail('nested Bool values must be JSON booleans');
-    return value;
-  }
-  if(name==='String'){
-    if(typeof value!=='string')fail('nested String values must be JSON strings');
-    return value;
-  }
-  if(value!==null)fail('nested Unit values must be JSON null');
-  return undefined;
-}
-
 function decodeValue(
   value:unknown,
   type:VerifiedIrType,
@@ -116,7 +67,7 @@ function decodeValue(
   substitution:TypeSubstitution=new Map(),
 ):unknown {
   const resolved=instantiateType(type,substitution);
-  if(resolved.kind==='primitive')return decodePrimitive(value,resolved.name);
+  if(resolved.kind==='primitive')return decodeVerifiedJsonPrimitive(value,resolved.name,fail);
   if(resolved.kind==='typeParameter'){
     fail("unresolved runtime type parameter '"+resolved.name+"'");
   }
@@ -209,51 +160,6 @@ function decodeValue(
   fail("runtime constructor '"+resolved.name+'.'+ctorName+"' is unavailable");
 }
 
-function encodePrimitive(
-  value:unknown,
-  name:Extract<VerifiedIrType,{kind:'primitive'}>['name'],
-):unknown {
-  if(name==='Nat'||name==='Int'){
-    if(typeof value!=='bigint'){
-      fail(name+' result did not use the verified bigint runtime representation');
-    }
-    return value.toString();
-  }
-  if(name==='UInt8'||name==='UInt16'||name==='UInt32'){
-    const bits=name==='UInt8'?8n:name==='UInt16'?16n:32n;
-    const limit=1n<<bits;
-    if(
-      typeof value!=='number'||
-      !Number.isInteger(value)||
-      value<0||
-      BigInt(value)>=limit
-    ){
-      fail(name+' result is outside its verified unsigned range');
-    }
-    return value;
-  }
-  if(name==='UInt64'){
-    if(
-      typeof value!=='bigint'||
-      value<0n||
-      value>=(1n<<64n)
-    ){
-      fail('UInt64 result is outside its verified unsigned range');
-    }
-    return value.toString();
-  }
-  if(name==='Bool'){
-    if(typeof value!=='boolean')fail('Bool result is not a boolean');
-    return value;
-  }
-  if(name==='String'){
-    if(typeof value!=='string')fail('String result is not a string');
-    return value;
-  }
-  if(value!==undefined)fail('Unit result is not undefined');
-  return null;
-}
-
 function constructorName(
   value:Record<string,unknown>,
   inductive:string,
@@ -274,7 +180,7 @@ function encodeValue(
   substitution:TypeSubstitution=new Map(),
 ):unknown {
   const resolved=instantiateType(type,substitution);
-  if(resolved.kind==='primitive')return encodePrimitive(value,resolved.name);
+  if(resolved.kind==='primitive')return encodeVerifiedPrimitiveResult(value,resolved.name,fail);
   if(resolved.kind==='typeParameter'){
     fail("unresolved result type parameter '"+resolved.name+"'");
   }

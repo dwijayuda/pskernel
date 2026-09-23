@@ -244,7 +244,7 @@ export class TypeChecker {
     const ua=this.unfold(a),ub=this.unfold(b);return ua&&ub?{a:this.whnfCore(ua,false,true),b:this.whnfCore(ub,false,true)}:null;
   }
 
-  isDefEq(a:Expr,b:Expr):boolean{return this.rec(()=>{
+  private isDefEqCore(a:Expr,b:Expr):boolean{return this.rec(()=>{
     const q=this.quick(a,b);if(q!==null)return q;
     // Lean 4.34 reflection fast path: fully reduce a closed lhs when rhs is Bool.true.
     if((!hasFVar(a)||this.eagerReduce)&&b.kind==='const'&&nameEq(b.name,N.BoolTrue)){const w=this.whnf(a);if(w.kind==='const'&&nameEq(w.name,N.BoolTrue)){this.state.success.add(this.state.pair(a,b));return true;}}
@@ -267,4 +267,12 @@ export class TypeChecker {
     if(this.isDefEqUnitLike(x,y)){this.state.success.add(this.state.pair(a,b));return true;}
     return false;
   });}
+
+  isDefEq(a:Expr,b:Expr):boolean{
+    const r=this.isDefEqCore(a,b);
+    // Lean 4.34 caches every successful public defeq query at the original pair,
+    // independent of which internal path (delta, proof irrelevance, eta, etc.) proved it.
+    if(r)this.state.success.add(this.state.pair(a,b));
+    return r;
+  }
 }

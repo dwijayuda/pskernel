@@ -53,6 +53,10 @@
     "./lean4export": {
       "types": "./dist/src/integration/lean4export.d.ts",
       "import": "./dist/src/integration/lean4export.js"
+    },
+    "./native": {
+      "types": "./dist/src/kernel/reduction/native.d.ts",
+      "import": "./dist/src/kernel/reduction/native.js"
     }
   },
   "workspaces": [

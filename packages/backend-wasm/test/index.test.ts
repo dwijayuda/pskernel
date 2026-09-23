@@ -7,7 +7,7 @@ import type {WasmIrModule} from '@proofscript/wasm-ir';
 
 const module:WasmIrModule={
   kind:'proofscript-wasm-ir',
-  profile:'proofscript-wasm32-gc-js-v1',
+  profile:'proofscript-wasm32-mvp-js-v1',
   functions:[{
     name:'not',
     parameters:[{name:'x',type:'i32'}],
@@ -56,7 +56,7 @@ console.log('ok - @proofscript/backend-wasm canonical emission is deterministic'
 
 const unsignedModule:WasmIrModule={
   kind:'proofscript-wasm-ir',
-  profile:'proofscript-wasm32-gc-js-v1',
+  profile:'proofscript-wasm32-mvp-js-v1',
   functions:[
     {
       name:'id8',

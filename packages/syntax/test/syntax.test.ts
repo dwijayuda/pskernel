@@ -819,6 +819,27 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 
+{
+  const module=parseV061Module(
+    'theorem rwProof(a : Nat, b : Nat, h : Eq Nat a b) : Eq Nat a b := '+
+    'by rw [h]; rw [← h]; assumption;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,3);
+    equal(body.tactics[0]?.kind,'rw');
+    equal(body.tactics[1]?.kind,'rw');
+    if(body.tactics[0]?.kind==='rw')equal(body.tactics[0].symm,false);
+    if(body.tactics[1]?.kind==='rw')equal(body.tactics[1].symm,true);
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem rwProof (a : Nat) (b : Nat) (h : Eq Nat a b) : Eq Nat a b := '+
+    'by rw [h]; rw [← h]; assumption\n',
+  );
+}
+
 
 {
   const module=parseV061Module(

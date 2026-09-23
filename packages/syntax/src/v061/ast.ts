@@ -45,6 +45,12 @@ export type V061Tactic =
       readonly span:SourceSpan;
     }
   | {
+      readonly kind:'rw';
+      readonly proof:V061Expr;
+      readonly symm:boolean;
+      readonly span:SourceSpan;
+    }
+  | {
       readonly kind:'apply';
       readonly proof:V061Expr;
       readonly span:SourceSpan;

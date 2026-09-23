@@ -4,7 +4,7 @@ import {V061ParseContext} from './context.js';
 import type {V061ExpressionParser} from './expression-parser.js';
 
 const TACTIC_HEADS=new Set([
-  'exact','assumption','apply','refine','constructor','cases','induction','intro',
+  'exact','assumption','apply','refine','constructor','cases','induction','rw','intro',
 ]);
 
 function isTacticHead(text:string):boolean {
@@ -57,6 +57,21 @@ function parseTactic(
     };
   }
 
+  if(tacticToken.text==='rw'){
+    const first=context.cursor.consume();
+    context.cursor.expect('[');
+    const symm=context.cursor.at('<-')||context.cursor.at('←');
+    if(symm)context.cursor.consume();
+    const proof=expressions.parse();
+    const close=context.cursor.expect(']');
+    return {
+      kind:'rw',
+      proof,
+      symm,
+      span:{start:first.span.start,end:close.span.end},
+    };
+  }
+
   if(tacticToken.text==='apply'){
     const first=context.cursor.consume();
     const proof=expressions.parse();
@@ -88,7 +103,7 @@ function parseTactic(
   }
 
   throw new SyntaxError(
-    "kernel-facing tactic subset supports 'exact', 'assumption', 'apply', 'refine', 'constructor', 'cases', 'induction', and 'intro', got '"+
+    "kernel-facing tactic subset supports 'exact', 'assumption', 'apply', 'refine', 'constructor', 'cases', 'induction', 'rw', and 'intro', got '"+
     tacticToken.text+"'",
     tacticToken.span,
   );

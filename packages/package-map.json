@@ -109,6 +109,7 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "The tactic parser preserves Lean-compatible rewrite spelling for the bounded subset: `rw [h]` and `rw [← h]`; it does not introduce a ProofScript-only bare-rw syntax.",
         "Inherited Lean `induction <local>` syntax is parsed/lowered canonically; the bounded semantic implementation uses pskernel recursors and does not introduce a second induction principle.",
         "Inherited Lean `cases <local>` tactic syntax is parsed/lowered canonically; the bounded semantic implementation lives in elab and delegates elimination to pskernel-generated recursors.",
         "Inherited Lean constructor tactic syntax is parsed as an ordinary theorem tactic and lowers canonically to `constructor`; no ProofScript-specific proof rule is introduced.",
@@ -208,7 +209,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -221,6 +222,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Bounded rw follows Lean 4.34 rewrite's core equality-transport model: inspect an Eq proof, abstract target occurrences into a motive, solve the rewritten target, then reconstruct the parent with Prelude Eq.ndrec_symm (forward) or Eq.ndrec (reverse).",
+        "The first rw slice accepts one rule in inherited Lean spelling `rw [h]` or `rw [← h]`, rewrites only exact structural occurrences in the current goal, and kernel-checks the final transport term.",
+        "Locations (`at h`), multiple rules, occurrence selectors, iff rewriting, defeq/kabstract occurrence matching, and theorem-argument synthesis beyond existing term elaboration remain fail-closed.",
         "Global constant references now instantiate every declaration universe parameter with a fresh untrusted level metavariable. This enables ordinary elaboration constraints to specialize universe-polymorphic Prelude constants without changing pskernel.",
         "Bounded induction supports unindexed inductives and constructs the motive by abstracting the major premise from the current target. Each branch receives all constructor fields followed by induction hypotheses for direct recursive fields, matching pskernel recursor-minor binder order.",
         "Each induction hypothesis has the motive instantiated at its recursive field; branch proofs are lambda-abstracted over fields first and IHs second before the pskernel-generated recursor is applied.",

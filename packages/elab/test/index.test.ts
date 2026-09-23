@@ -613,6 +613,20 @@ console.log('ok - @proofscript/elab parameterized bounded cases');
 }
 console.log('ok - @proofscript/elab bounded induction via recursor');
 
+{
+  const source=parseV061Module(
+    'theorem parsedRw(a : Nat, b : Nat, h : Eq Nat a b) : Eq Nat a b := '+
+    'by rw [h]; rw [← h]; assumption;',
+  );
+  const body=source.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics[0]?.kind,'rw');
+    equal(body.tactics[1]?.kind,'rw');
+  }
+}
+console.log('ok - @proofscript/elab rw syntax reaches tactic AST');
+
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();

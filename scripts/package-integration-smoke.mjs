@@ -170,6 +170,19 @@ assert(
 );
 
 
+const verifiedRewrite=compileVerifiedSource(
+  'theorem rewriteForward(a : Nat, b : Nat, h : Eq Nat a b) : '+
+  'Eq Nat a b := by rw [h]; exact Eq.refl(b); '+
+  'theorem rewriteReverse(a : Nat, b : Nat, h : Eq Nat a b) : '+
+  'Eq Nat b a := by rw [← h]; exact Eq.refl(a);',
+  'verified-rewrite.ts',
+);
+assert(
+  verifiedRewrite.checkedCore.theorems.length===2,
+  'bounded rw did not construct pskernel-admitted equality transport proofs',
+);
+
+
 const verifiedNat=compileVerifiedSource(
   'function add(x : Nat, y : Nat) : Nat := x + y; '+
   'function twice(x : Nat) : Nat := add(x, x); '+

@@ -1,7 +1,7 @@
 import { Environment } from '../src/core/environment.js';
 import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
 import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelLe, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
-import { nameCmp, nameFromDotted, nameToString } from '../src/core/name.js';
+import { nameCmp, nameEq, nameFromDotted, nameKey, nameReplacePrefix, nameToString } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
 import { abstractFVar, instantiate, lift } from '../src/core/instantiate.js';
 import { Kernel } from '../src/kernel/kernel.js';
@@ -33,6 +33,15 @@ function baseEnv():Environment{
 }
 
 test('Name numeric and string components remain distinct',()=>{const prefix=nameFromDotted('X'),a={kind:'str',prefix,value:'1'} as const,b={kind:'num',prefix,value:1n} as const;assert(JSON.stringify(a,(_k,v)=>typeof v==='bigint'?v.toString():v)!==JSON.stringify(b,(_k,v)=>typeof v==='bigint'?v.toString():v));assert(nameCmp(b,a)<0&&nameCmp(a,b)>0,'Lean Name order places numeral components before string components');const bmp={kind:'str',prefix,value:'\uE000'} as const,astral={kind:'str',prefix,value:'\u{10000}'} as const;assert(nameCmp(bmp,astral)<0&&nameCmp(astral,bmp)>0,'Lean Name string order follows UTF-8/scalar order rather than JavaScript UTF-16 code-unit order');});
+test('deep Lean Name operations avoid the JavaScript call stack',()=>{
+ let a:any=nameFromDotted(''),b:any=nameFromDotted(''),prefix:any=null;
+ for(let i=0;i<12000;i++){a={kind:'str',prefix:a,value:'x'};b={kind:'str',prefix:b,value:'x'};if(i===5999)prefix=a;}
+ assert(nameEq(a,b),'deep structural Name equality must be stack-safe');
+ assert(nameCmp(a,b)===0,'deep Name comparison must be stack-safe');
+ assert(nameKey(a).startsWith('a/s:1:x'),'deep Name key generation must be stack-safe');
+ const r=nameReplacePrefix(a,prefix,nameFromDotted('R'));
+ assert(r!==null&&nameToString(r).startsWith('R.'),'deep Name prefix replacement/component extraction must be stack-safe');
+});
 test('Lean private names preserve numeric private-index components',()=>{assert(!exprEq(constant(N.NatBitwiseUnaryProof1),constant(nameFromDotted('_private.Init.Data.Nat.Bitwise.Basic.0.Nat.bitwise._unary._proof_1'))));});
 test('LocalContext freshness never collides with reconstructed local IDs',()=>{const l=new LocalContext();l.addLocal('a@1',nameFromDotted('a'),sort(levelZero));assert(l.fresh('a')==='a@0');assert(l.fresh('a')==='a@2');});
 test('deep structural traversals avoid the JavaScript call stack',()=>{

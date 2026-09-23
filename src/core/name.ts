@@ -24,37 +24,54 @@ export function nameAppendIndexAfter(n: Name, idx: bigint | number): Name {
 }
 
 /** Lean `Name.replacePrefix`: replace an ancestor prefix while preserving structural string/number suffix components. */
+type NameComponent={readonly k:0|1;readonly v:string|bigint};
+
+function components(n:Name,out:NameComponent[]=[]):NameComponent[]{
+  const rev:NameComponent[]=[];
+  let x=n;
+  while(x.kind!=='anonymous'){
+    rev.push(x.kind==='str'?{k:0,v:x.value}:{k:1,v:x.value});
+    x=x.prefix;
+  }
+  for(let i=rev.length-1;i>=0;i--)out.push(rev[i]!);
+  return out;
+}
+
 export function nameReplacePrefix(n: Name, prefix: Name, replacement: Name = anonymous): Name | null {
-  if (nameEq(n, prefix)) return replacement;
-  if (n.kind === 'anonymous') return null;
-  const p = nameReplacePrefix(n.prefix, prefix, replacement);
-  if (p === null) return null;
-  return n.kind === 'str' ? strName(p, n.value) : numName(p, n.value);
+  const ns=components(n),ps=components(prefix);
+  if(ps.length>ns.length)return null;
+  for(let i=0;i<ps.length;i++){
+    const a=ns[i]!,b=ps[i]!;
+    if(a.k!==b.k||a.v!==b.v)return null;
+  }
+  let r=replacement;
+  for(let i=ps.length;i<ns.length;i++){
+    const c=ns[i]!;
+    r=c.k===0?strName(r,c.v as string):numName(r,c.v as bigint);
+  }
+  return r;
 }
 
 export function nameEq(a: Name, b: Name): boolean {
-  if (a === b) return true;
-  if (a.kind !== b.kind) return false;
-  switch (a.kind) {
-    case 'anonymous': return true;
-    case 'str': return b.kind === 'str' && a.value === b.value && nameEq(a.prefix, b.prefix);
-    case 'num': return b.kind === 'num' && a.value === b.value && nameEq(a.prefix, b.prefix);
+  let x=a,y=b;
+  while(true){
+    if(x===y)return true;
+    if(x.kind!==y.kind)return false;
+    if(x.kind==='anonymous')return true;
+    if(x.kind==='str'){
+      if(y.kind!=='str'||x.value!==y.value)return false;
+      x=x.prefix;y=y.prefix;continue;
+    }
+    if(y.kind!=='num'||x.value!==y.value)return false;
+    x=x.prefix;y=y.prefix;
   }
 }
 
 export function nameKey(n: Name): string {
-  switch (n.kind) {
-    case 'anonymous': return 'a';
-    case 'str': return `${nameKey(n.prefix)}/s:${n.value.length}:${n.value}`;
-    case 'num': return `${nameKey(n.prefix)}/n:${n.value}`;
-  }
-}
-
-function components(n: Name, out: Array<{ k: 0 | 1; v: string | bigint }> = []): Array<{ k: 0 | 1; v: string | bigint }> {
-  if (n.kind === 'anonymous') return out;
-  components(n.prefix, out);
-  out.push(n.kind === 'str' ? { k: 0, v: n.value } : { k: 1, v: n.value });
-  return out;
+  const parts:string[]=['a'];
+  for(const c of components(n))
+    parts.push(c.k===0?`/s:${(c.v as string).length}:${c.v as string}`:`/n:${c.v as bigint}`);
+  return parts.join('');
 }
 
 function leanStringCmp(a:string,b:string):-1|0|1{

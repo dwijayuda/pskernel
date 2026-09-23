@@ -68,6 +68,13 @@ test('universe max commutative semantically',()=>{const u=levelParam(nameFromDot
 test('imax u 0 = 0',()=>{const u=levelParam(nameFromDotted('u'));assert(levelEquivalent(mkIMax(u,levelZero),levelZero));});
 test('imax u (v+1) = max u (v+1)',()=>{const u=levelParam(nameFromDotted('u')),v=levelSucc(levelParam(nameFromDotted('v')));assert(levelEquivalent(mkIMax(u,v),mkMax(u,v)));});
 test('infer identity lambda',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));const ty=tc.check(id);eqExpr(ty,forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat)));});
+test('WHNF beta reduction consumes wide lambda spines in one substitution batch',()=>{
+ const n=512;let fn:any=bvar(n-1);
+ for(let i=0;i<n;i++)fn=lam(nameFromDotted('x'+i),constant(N.Nat),fn);
+ const args=Array.from({length:n},(_,i)=>natLit(i+1));
+ eqExpr(new TypeChecker(baseEnv()).whnf(mkAppN(fn,args)),args[0]);
+});
+
 test('beta reduction',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));eqExpr(tc.whnf(app(id,natLit(3))),natLit(3));});
 test('defeq success cache remains pair-local and never gains transitive closure',()=>{
  const st=new KernelState(),a=constant(nameFromDotted('Cache.a')),b=constant(nameFromDotted('Cache.b')),c=constant(nameFromDotted('Cache.c'));

@@ -3,6 +3,7 @@ import {
   assumption,
   exact,
   intro,
+  refine,
   type TacticGoal,
 } from '../src/index.js';
 
@@ -101,6 +102,22 @@ const kernel={
     },
   });
   equal(next.goals.length,0);
+}
+
+{
+  const state={goals:[goal('g5','R'),goal('tail','Q')]};
+  const next=refine(state,'pair ?m0 ?m1',{
+    refine:(current,candidate)=>{
+      equal(current.id,'g5');
+      equal(candidate,'pair ?m0 ?m1');
+      assignments.set(current.id,candidate);
+      return [goal('m0','A'),goal('m1','B')];
+    },
+  });
+  equal(next.goals.length,3);
+  equal(next.goals[0]?.id,'m0');
+  equal(next.goals[1]?.id,'m1');
+  equal(next.goals[2]?.id,'tail');
 }
 
 console.log('ok - @proofscript/tactic ordered multi-goal state');

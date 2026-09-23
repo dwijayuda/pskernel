@@ -33,8 +33,14 @@ export interface V061LambdaBinder {
 export type V061Tactic =
   | {readonly kind:'exact';readonly proof:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'assumption';readonly span:SourceSpan}
+  | {readonly kind:'constructor';readonly span:SourceSpan}
   | {
       readonly kind:'apply';
+      readonly proof:V061Expr;
+      readonly span:SourceSpan;
+    }
+  | {
+      readonly kind:'refine';
       readonly proof:V061Expr;
       readonly span:SourceSpan;
     }
@@ -49,6 +55,7 @@ export type V061Expr =
   | {readonly kind:'string';readonly value:string;readonly span:SourceSpan}
   | {readonly kind:'bool';readonly value:boolean;readonly span:SourceSpan}
   | {readonly kind:'unit';readonly span:SourceSpan}
+  | {readonly kind:'syntheticHole';readonly span:SourceSpan}
   | {readonly kind:'reference';readonly name:string;readonly span:SourceSpan}
   | {readonly kind:'group';readonly value:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'call';readonly callee:string;readonly args:readonly V061Expr[];readonly span:SourceSpan}

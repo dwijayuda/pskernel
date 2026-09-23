@@ -109,6 +109,8 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "Inherited Lean constructor tactic syntax is parsed as an ordinary theorem tactic and lowers canonically to `constructor`; no ProofScript-specific proof rule is introduced.",
+        "Inherited Lean synthetic-hole syntax ?_ is parsed/lowered for theorem tactics; ordinary executable elaboration rejects it, and the current semantic consumer is bounded refine only.",
         "Inherited Lean tactic terms use an ordered flat tactic sequence rather than recursive continuation fields; semicolons are consumed as tactic separators only when followed by a supported tactic head.",
         "Inherited Lean `instance` declarations now parse as named or anonymous definition-like commands with ordinary binder sequences, result type, and term body; no new ProofScript feature ownership is claimed.",
         "Anonymous instances receive deterministic internal names for downstream metadata while canonical Lean lowering omits that generated name.",
@@ -202,7 +204,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-multigoal-tactic+global-instance+structural-recursion",
+      "status": "v061-constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -215,6 +217,11 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Bounded constructor follows Lean 4.34 MVarId.constructor: inspect the inductive target, try constructors in declaration order, and delegate the first applicable constructor to the same apply machinery.",
+        "The current constructor slice inherits bounded apply's explicit-binder limitation; constructors requiring unresolved implicit/instance binders remain fail-closed instead of gaining a tactic-specific inference shortcut.",
+        "Bounded refine follows Lean 4.34 refineCore's key contract: a partial proof is checked against the current target and explicit synthetic ?_ holes become ordered goals whose solutions are assembled into one ordinary pskernel-checkable Expr.",
+        "Current refine intentionally differs from refine': natural _ holes, unresolved implicit parameters, and unresolved instances do not become goals; they fail closed.",
+        "The first refine slice supports a direct ?_ goal and direct D-CALL arguments such as f(?_); nested synthetic holes remain unsupported until general term-with-holes elaboration exists.",
         "Theorem tactic elaboration consumes @proofscript/tactic's ordered goal state. exact/assumption close the main goal, intro replaces it with one child, and bounded explicit apply may replace it with multiple ordered subgoals.",
         "Multi-goal apply assembles an ordinary kernel Expr only after all explicit premise goals are solved; result-side unification may infer explicit parameters, while implicit/instance binders remain fail-closed.",
         "Declaration orchestration is split from value and instance elaboration; typeclass growth must stay in dedicated modules rather than expanding the command dispatcher.",
@@ -261,11 +268,12 @@
       "path": "packages/tactic",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "ordered-multigoal-state-integrated",
+      "status": "ordered-multigoal-refine-integrated",
       "packageName": "@proofscript/tactic",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "The generic refine transition replaces the main goal with the ordered holes returned by an elaboration adapter; it carries no proof authority and does not inspect kernel terms.",
         "Tactic state now owns only the ordered open-goal list; proof/metavariable assignment is adapter-driven, matching Lean 4.34's Tactic.State versus Meta separation.",
         "replaceMainGoal preserves trailing goals while exact/assumption close one goal, intro replaces it with one child, and apply may replace it with zero or many ordered subgoals.",
         "The tactic package remains outside the TCB. Adapters must construct/assign ordinary proof terms that are ultimately rechecked by pskernel.",

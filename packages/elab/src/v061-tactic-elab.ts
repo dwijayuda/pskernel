@@ -20,6 +20,8 @@ import type {
   V061CoreElabContext,
 } from './v061-context.js';
 import {applyV061Tactic} from './v061-apply-tactic.js';
+import {constructorV061Tactic} from './v061-constructor-tactic.js';
+import {refineV061Tactic} from './v061-refine-tactic.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
 
 export type V061TermElaborator=(
@@ -75,9 +77,19 @@ function runTactic(
     return;
   }
 
+  if(tactic.kind==='constructor'){
+    constructorV061Tactic(runtime);
+    return;
+  }
+
   if(tactic.kind==='apply'){
     const candidate=elaborate(tactic.proof,entry.context);
     applyV061Tactic(runtime,candidate);
+    return;
+  }
+
+  if(tactic.kind==='refine'){
+    refineV061Tactic(runtime,tactic.proof,elaborate);
     return;
   }
 

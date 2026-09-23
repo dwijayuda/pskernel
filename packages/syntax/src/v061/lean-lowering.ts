@@ -32,7 +32,9 @@ function lowerV061TacticToLean(
   switch(tactic.kind){
     case 'exact':return 'exact '+lowerV061ExprToLean(tactic.proof);
     case 'assumption':return 'assumption';
+    case 'constructor':return 'constructor';
     case 'apply':return 'apply '+lowerV061ExprToLean(tactic.proof);
+    case 'refine':return 'refine '+lowerV061ExprToLean(tactic.proof);
     case 'intro':return 'intro '+tactic.name;
   }
 }
@@ -47,12 +49,13 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
     case 'string':return JSON.stringify(expr.value);
     case 'bool':return expr.value?'true':'false';
     case 'unit':return '()';
+    case 'syntheticHole':return '?_';
     case 'reference':return expr.name;
     case 'group':return '('+lowerV061ExprToLean(expr.value)+')';
     case 'call':{
       const args=expr.args.map((arg)=>{
         const rendered=lowerV061ExprToLean(arg);
-        return arg.kind==='reference'||arg.kind==='nat'||arg.kind==='string'||arg.kind==='bool'||arg.kind==='unit'
+        return arg.kind==='reference'||arg.kind==='nat'||arg.kind==='string'||arg.kind==='bool'||arg.kind==='unit'||arg.kind==='syntheticHole'
           ? rendered
           : '('+rendered+')';
       });

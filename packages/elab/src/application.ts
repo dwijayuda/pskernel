@@ -30,11 +30,25 @@ export interface ElaboratedApplication {
   readonly consumedExplicitArgs:number;
 }
 
+export interface ApplicationArgument {
+  readonly term:Expr;
+  readonly allowUnresolvedMVar?:boolean;
+}
+
+export interface ApplicationArgumentSource {
+  readonly length:number;
+  elaborate(index:number,expectedType:Expr):ApplicationArgument;
+}
+
+export type ApplicationArguments=
+  | readonly Expr[]
+  | ApplicationArgumentSource;
+
 export interface ElaborateApplicationOptions {
   readonly environment:Environment;
   readonly metaContext:ExprMetaContext;
   readonly fn:Expr;
-  readonly args:readonly Expr[];
+  readonly args:ApplicationArguments;
   readonly expectedType?:Expr;
   readonly localContext?:LocalContext;
   readonly localInstances?:readonly Expr[];
@@ -44,6 +58,21 @@ export interface ElaborateApplicationOptions {
 
 function implicitKind(info:BinderInfo):ExprMetavarKind {
   return info==='instImplicit'?'synthetic':'natural';
+}
+
+function isArgumentSource(
+  args:ApplicationArguments,
+):args is ApplicationArgumentSource {
+  return !Array.isArray(args);
+}
+
+function explicitArgument(
+  args:ApplicationArguments,
+  index:number,
+  expectedType:Expr,
+):ApplicationArgument {
+  if(isArgumentSource(args))return args.elaborate(index,expectedType);
+  return {term:args[index]!};
 }
 
 function targetClassName(
@@ -124,19 +153,42 @@ export function elaborateApplication({
 
     if(functionType.binderInfo==='default'){
       if(explicitIndex>=args.length)break;
-      const sourceArg=args[explicitIndex++]!;
+      const expectedArgumentType=metaContext.instantiate(functionType.type);
+      const supplied=explicitArgument(
+        args,
+        explicitIndex++,
+        expectedArgumentType,
+      );
+      const sourceArg=supplied.term;
       const argument=metaContext.instantiate(sourceArg);
+
+      let actualType:Expr;
       if(hasMVar(argument)){
-        throw new Error(
-          'PS_ELAB_APP_ARGUMENT_STUCK: explicit argument contains unresolved metavariables',
+        if(
+          !supplied.allowUnresolvedMVar
+          ||argument.kind!=='mvar'
+        ){
+          throw new Error(
+            'PS_ELAB_APP_ARGUMENT_STUCK: explicit argument contains unresolved metavariables',
+          );
+        }
+        actualType=metaContext.instantiate(
+          metaContext.getDecl(argument).type,
         );
+      }else{
+        actualType=checker.check(argument);
       }
 
-      const actualType=checker.check(argument);
-      const expectedType=metaContext.instantiate(functionType.type);
-      if(!metaContext.unify(actualType,expectedType,localContext)){
+      if(
+        !metaContext.unify(
+          actualType,
+          expectedArgumentType,
+          localContext,
+        )
+      ){
         throw new Error(
-          'PS_ELAB_APP_TYPE_MISMATCH: expected '+exprToString(expectedType)+
+          'PS_ELAB_APP_TYPE_MISMATCH: expected '+
+          exprToString(expectedArgumentType)+
           ', got '+exprToString(actualType),
         );
       }

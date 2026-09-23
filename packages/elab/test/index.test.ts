@@ -474,6 +474,62 @@ console.log('ok - @proofscript/elab bounded apply tactic proof-term construction
 }
 console.log('ok - @proofscript/elab ordered multi-goal apply tactic');
 
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem refinePremise(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
+    'by refine f(?_); assumption; '+
+    'theorem refineGoal(P : Prop, h : P) : P := '+
+    'by refine ?_; assumption;',
+  ));
+  equal(result.theorems.length,2);
+  equal(
+    result.environment.find(nameFromDotted('refinePremise'))?.kind,
+    'theorem',
+  );
+  equal(
+    result.environment.find(nameFromDotted('refineGoal'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem holeOutside(P : Prop) : P := ?_;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_SYNTHETIC_HOLE_OUTSIDE_REFINE/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded synthetic-hole refine tactic');
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive PropPair where { | mk(left : Prop, right : Prop); } '+
+    'theorem buildPair(P : Prop, Q : Prop) : PropPair := '+
+    'by constructor; assumption; assumption;',
+  ));
+  equal(result.inductives.length,1);
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('buildPair'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem badConstructor(P : Prop) : P := by constructor;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_CONSTRUCTOR/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded constructor via apply');
+
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();

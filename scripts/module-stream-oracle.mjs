@@ -43,6 +43,7 @@ try{
      header=marker.environment;
      if(header.rootOrder!=='olean-module-constNames')throw new Error(`unexpected canonical root order ${header.rootOrder??'<missing>'}`);
      if(header.rootOrderMeaning!=='serialized-module-sequence')throw new Error(`unexpected root-order meaning ${header.rootOrderMeaning??'<missing>'}`);
+     if(header.rootDedup!=='first-serialized-occurrence')throw new Error(`unexpected root dedup policy ${header.rootDedup??'<missing>'}`);
      if(header.emissionOrder!=='dependency-first')throw new Error(`unexpected emission order ${header.emissionOrder??'<missing>'}`);
      if(header.canonicalScope!=='pskernel-project-protocol')throw new Error(`unexpected canonical scope ${header.canonicalScope??'<missing>'}`);
      if(header.replayPolicy!=='Lean.Kernel.Environment.replay')throw new Error(`unexpected replay policy ${header.replayPolicy??'<missing>'}`);
@@ -84,6 +85,7 @@ console.log(JSON.stringify({
   leanGitHash,
   rootOrder:header.rootOrder,
   rootOrderMeaning:header.rootOrderMeaning,
+  rootDedup:header.rootDedup,
   emissionOrder:header.emissionOrder,
   canonicalScope:header.canonicalScope,
   replayPolicy:header.replayPolicy,

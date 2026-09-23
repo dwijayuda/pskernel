@@ -431,9 +431,15 @@ declaration is exported once. Keep `collectRootsByModule` above stable for
 diagnostic root-range numbering. -/
 def collectCanonicalRootsByModule (env : Environment) : Array (Array Name) := Id.run do
   let mut buckets := Array.replicate env.header.moduleNames.size #[]
+  let mut seen : NameSet := {}
   for idx in [0:buckets.size] do
     if let some data := env.header.moduleData[idx]? then
-      buckets := buckets.set! idx data.constNames
+      let mut roots := #[]
+      for n in data.constNames do
+        unless seen.contains n do
+          seen := seen.insert n
+          roots := roots.push n
+      buckets := buckets.set! idx roots
   return buckets
 
 def batchSizes (buckets : Array (Array Name)) (maxRoots : Nat) : Array Nat := Id.run do
@@ -630,6 +636,7 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
     ("rootsPerShard", rootsPerShard),
     ("rootOrder", "olean-module-constNames"),
     ("rootOrderMeaning", "serialized-module-sequence"),
+    ("rootDedup", "first-serialized-occurrence"),
     ("emissionOrder", "dependency-first"),
     ("canonicalScope", "pskernel-project-protocol")
   ])]).compress

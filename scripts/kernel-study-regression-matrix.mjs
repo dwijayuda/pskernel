@@ -90,6 +90,8 @@ for(const [path,entry] of [...Object.entries(matrix),...Object.entries(hardening
 const exporter=readFileSync('oracle/replay-probe/DependencyExport.lean','utf8');
 for(const marker of [
   '("rootOrderMeaning", "serialized-module-sequence")',
+  '("rootDedup", "first-serialized-occurrence")',
+  'unless seen.contains n do',
   '("emissionOrder", "dependency-first")',
   '("canonicalScope", "pskernel-project-protocol")',
   '("replayPolicy", "Lean.Kernel.Environment.replay")',
@@ -105,6 +107,7 @@ for(const marker of [
 const moduleStream=readFileSync('scripts/module-stream-oracle.mjs','utf8');
 for(const marker of [
   "header.rootOrderMeaning!=='serialized-module-sequence'",
+  "header.rootDedup!=='first-serialized-occurrence'",
   "header.emissionOrder!=='dependency-first'",
   "header.canonicalScope!=='pskernel-project-protocol'",
   "header.replayPolicy!=='Lean.Kernel.Environment.replay'",

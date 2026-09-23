@@ -212,9 +212,13 @@ the executable check that the external provider actually observes
 Use the project-canonical single-stream replay as the release gate, not
 dependency-root batch success. Root seeding follows each imported module's
 `EnvironmentHeader.moduleData[idx].constNames`, i.e. the serialized `.olean`
-constant sequence actually loaded for that module. **Do not call this source
-declaration order**: Lean 4.34 may name-sort exported module data, and its own
-`Kernel.Environment.replay` seeds a `NameSet` rather than promising source order.
+constant sequence actually loaded for that module, with first-occurrence
+deduplication across modules. The deduplication is required because Lean 4.34
+`finalizeImport` explicitly permits compatible duplicate private theorem names
+across module data while `env.constants.map₁` contains one final ConstantInfo
+per name. **Do not call this source declaration order**: Lean 4.34 may name-sort
+exported module data, and its own `Kernel.Environment.replay` seeds a `NameSet`
+rather than promising source order.
 The exporter recursively emits dependencies before each root and carries one
 global emitted set, so each replayable declaration is exported once into one
 shared pskernel environment while replay-local intern/cache state is discarded

@@ -15,6 +15,7 @@ import { KernelState } from './state.js';
 
 export interface KernelLimits { readonly maxRecDepth:number; readonly maxNatBytes:bigint; }
 const DEFAULT_LIMITS:KernelLimits={maxRecDepth:4096,maxNatBytes:LEAN_NAT_MAX_SIZE_DEFAULT};
+const LEAN_KERNEL_REC_DEPTH_FACTOR=16;
 
 function deltaInfo(i:ConstantInfo|undefined): DefinitionInfo|null {
   // Lean 4.34: only DefinitionVal has a delta-reducible value. Theorems and opaque constants do not.
@@ -28,9 +29,16 @@ function cmpHint(a:ReducibilityHints,b:ReducibilityHints):number{
 
 export class TypeChecker {
   readonly state:KernelState;
-  private depth=0;
   constructor(readonly env:Environment,readonly lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false,readonly nativeEvaluator?:NativeEvaluator){this.state=state??new KernelState();}
-  private rec<T>(f:()=>T):T{if(++this.depth>this.limits.maxRecDepth){this.depth--;throw new KernelError('deep recursion');}try{return f();}finally{this.depth--;}}
+  private rec<T>(f:()=>T):T{
+    this.state.recDepth++;
+    const max=this.limits.maxRecDepth;
+    if(max>0&&this.state.recDepth>max*LEAN_KERNEL_REC_DEPTH_FACTOR){
+      this.state.recDepth--;
+      throw new KernelError('deep recursion');
+    }
+    try{return f();}finally{this.state.recDepth--;}
+  }
   private checkLevel(l:Level):void{if(!this.allowedLevelParams)return;for(const p of levelParamNames(l))if(!this.allowedLevelParams.some(q=>nameEq(p,q)))throw new KernelError(`invalid reference to undefined universe level parameter '${nameToString(p)}'`);}
   private withLocal<T>(name:string,type:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLocal(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}
   private withLet<T>(name:string,type:Expr,value:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLet(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type,value);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}

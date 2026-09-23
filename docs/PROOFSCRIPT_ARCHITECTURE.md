@@ -946,3 +946,32 @@ profile.
 The initial backend form is named ESM import only. Default imports, namespace
 imports, CommonJS, dynamic import, side-effect imports, and package-resolution
 policy remain later explicit extensions.
+
+## Replayable runtime-external admission checkpoint
+
+The FFI boundary now exists above verified IR as a checked-core admission:
+
+```text
+external signature
+   -> unsafe pskernel axiom
+   +  { source, importedName } runtime binding
+   -> checked-admission codec v2
+   -> proofscript-module@2 payload 1.1.0
+   -> replay through pskernel
+   -> erasure
+   -> typed verified IR ESM import
+```
+
+The unsafe marker is semantically important. pskernel rejects use of unsafe
+declarations from safe definitions/theorems, so an external JavaScript function
+cannot silently enter the safe proof lane. The first source FFI profile must
+therefore make unsafe executable code explicit.
+
+The initial erasure profile accepts only first-order primitive runtime
+functions. Polymorphic, proof-valued, nominal, higher-order, or unknown runtime
+external signatures fail closed until their ABI and assurance story are
+specified.
+
+Checked-admission persistence is versioned compatibly: codec v1 / payload
+1.0.0 remains readable; new external admissions require codec v2 / payload
+1.1.0. Artifact verification enforces that coupling.

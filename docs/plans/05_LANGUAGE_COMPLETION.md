@@ -344,14 +344,17 @@ Interop rule:
 
 Current FFI checkpoint:
 
-- verified IR now represents typed named ESM imports;
-- the TypeScript backend emits those imports canonically;
-- local import names share the verified value namespace with generated
-  declarations;
-- no source declaration or kernel assumption is created yet, so this checkpoint
-  changes no proof semantics;
-- next, source-level FFI signatures must make their runtime trust explicit and
-  remain distinguishable from theorem/definition admissions.
+- verified IR represents typed named ESM imports and TypeScript emits them;
+- checked core represents runtime externals as **unsafe axioms** plus explicit
+  ESM binding metadata;
+- checked-admission codec v2 / module payload 1.1.0 persists and replay-checks
+  those external assumptions while preserving v1 compatibility;
+- erasure accepts only primitive first-order external function profiles and
+  lowers them to the verified-IR import namespace;
+- safe definitions/theorems remain unable to use unsafe externals because
+  pskernel enforces declaration safety;
+- next, source syntax must require explicit unsafe executable use instead of
+  inferring or hiding the trust boundary.
 
 Exit condition:
 
@@ -509,9 +512,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    diagnostic refresh across open documents. Later optimize refresh scope and
    improve lexical navigation with scope-aware indexing without changing proof
    authority.
-9. Continue the explicit npm/JS FFI from the landed verified-IR named ESM
-   import foundation: add source signatures, checked admission/trust metadata,
-   project dependency policy, and runtime binding tests in that order.
+9. Continue the explicit npm/JS FFI from the landed verified-IR import plus
+   replayable checked-core external-admission foundation. Next add source
+   signatures/unsafe executable syntax, then project dependency policy and
+   end-to-end runtime binding tests.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.

@@ -79,7 +79,7 @@
       "path": "packages/module",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "checked-admission-artifact-v2",
+      "status": "checked-admission-artifact-v2+external-codec-1.1",
       "packageName": "@proofscript/module",
       "dependsOn": [
         "kernel",
@@ -87,6 +87,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "proofscript-module@2 checked-admission payload formatVersion 1.1.0 carries checked-core codec v2, including replayable external admissions. Existing 1.0.0/codec-v1 artifacts remain readable.",
+        "Artifact verification couples payload formatVersion 1.0.0 to codec v1 and 1.1.0 to codec v2, preventing version-label downgrades from smuggling newer admission kinds.",
         "Artifact v2 stores canonical ProofScript checked-admission JSON produced by @proofscript/checked-core. Loading verifies hashes/dependencies, decodes the closed admission payload, checks pinned kernel compatibility, then replays every admission through checked-core/pskernel.",
         "Artifact v1 Lean4Export NDJSON remains supported unchanged for compatibility.",
         "v2 is an untrusted persistent cache/transport. Free variables, expression/universe metavariables, and mdata are rejected by checked-core codec v1; no serialized proof bypasses kernel admission.",
@@ -231,13 +233,15 @@
       "path": "packages/checked-core",
       "phase": "B",
       "trust": "untrusted-boundary",
-      "status": "kernel-admitted-persistent-codec+class+instance-core-mvp",
+      "status": "replayable-runtime-externals+admission-codec-v2",
       "packageName": "@proofscript/checked-core",
       "dependsOn": [
         "kernel"
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Checked core now admits explicit runtime externals as unsafe axioms paired with named ESM binding metadata. Unsafe is mandatory so safe definitions/theorems cannot silently depend on JavaScript.",
+        "Checked-admissions codec version 2 persists external admissions; version 1 remains readable and is forbidden from containing the new admission kind.",
         "Checked-core codec v1 serializes closed definition/theorem/inductive/structure/class/instance admissions into versioned JSON data. It rejects free variables, expression/universe metavariables, and mdata rather than persisting unresolved elaborator state.",
         "Decoded admissions do not become trusted declarations: callers must replay them through admitCheckedCoreAdmissions/pskernel.",
         "Instance metadata is accepted only for pskernel-admitted definitions whose final result head is a previously admitted class; the kernel itself still sees an ordinary definition.",
@@ -394,7 +398,7 @@
       "path": "packages/erasure",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "generic-structure+invariant-structural-recursion-erasure-mvp",
+      "status": "verified-external-import-erasure+dependent-runtime-erasure",
       "packageName": "@proofscript/erasure",
       "dependsOn": [
         "checked-core",
@@ -403,6 +407,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Erasure lowers checked-core externals to typed VerifiedIrExternalImport entries and places their safe JS identifiers in the same runtime declaration namespace used by executable definitions.",
+        "The initial external runtime type profile is primitive function parameters/results only. Proof-valued, polymorphic, nominal, unknown, or higher-order external types fail closed.",
         "Parameterized structures reuse pskernel InductiveInfo.numParams plus the existing inductive-parameter erasure machinery; only admitted type-level parameters become verified IR type parameters.",
         "Structure field argument indexes include the admitted constructor parameter prefix, so erased type arguments cannot be mistaken for runtime fields.",
         "Recursor-IH lowering now derives the decreasing runtime parameter from the erased recursor major; invariant runtime parameters are forwarded unchanged and only the major position is replaced by the recursive field.",

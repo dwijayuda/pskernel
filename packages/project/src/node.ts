@@ -45,6 +45,44 @@ export function projectSourceRootsFromConfig(
 }
 
 const NPM_PACKAGE_ROOT=/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/;
+const NPM_PACKAGE_SUBPATH_SEGMENT=/^[A-Za-z0-9._-]+$/;
+
+export function npmPackageRootFromExternalSource(
+  source:string,
+):string {
+  if(
+    source.length===0
+    ||source.startsWith('.')
+    ||source.startsWith('/')
+    ||source.startsWith('node:')
+  ){
+    throw new Error(
+      "PS_PROJECT_RUNTIME_SOURCE: '"+source+
+      "' must be an npm package root or bounded package subpath",
+    );
+  }
+  const parts=source.split('/');
+  const root=source.startsWith('@')
+    ?parts.slice(0,2).join('/')
+    :parts[0]!;
+  const rest=source.startsWith('@')?parts.slice(2):parts.slice(1);
+  if(
+    !NPM_PACKAGE_ROOT.test(root)
+    ||rest.some((segment)=>
+      segment.length===0
+      ||segment==='.'
+      ||segment==='..'
+      ||segment==='node_modules'
+      ||!NPM_PACKAGE_SUBPATH_SEGMENT.test(segment)
+    )
+  ){
+    throw new Error(
+      "PS_PROJECT_RUNTIME_SOURCE: '"+source+
+      "' is outside the bounded npm package/subpath policy",
+    );
+  }
+  return root;
+}
 const EXACT_PACKAGE_VERSION=/^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
 export type ProjectRuntimeDependencies=Readonly<Record<string,string>>;

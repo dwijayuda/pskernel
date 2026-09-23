@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript v0.7 source positions, trivia-preserving tokens, lexical errors, and feature identifiers.",
   "proofscript": {
-    "status": "d-call-mvp",
+    "status": "v061-software-parser-mvp",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript",

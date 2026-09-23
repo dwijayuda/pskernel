@@ -85,15 +85,15 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "d-call-mvp",
+      "status": "v061-software-parser-mvp",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
-        "Pinned to ProofScript v0.7.0 / Lean 4.34.0 semantics metadata.",
-        "Trivia-preserving lexer exposes exact adjacency for D-CALL ownership.",
-        "Parser-core implements OverlayDecision, structured errors, cursor/span utilities, and a reusable inherited-term parser with fail-closed postfix extension hooks.",
-        "D-CALL covers direct/nested atom, tuple, whitespace-separated application, and Lean 4.34 parenthesized type-ascription arguments; operators, lambdas, named arguments, and other inherited term forms remain later Phase-B obligations."
+        "Pinned to ProofScript v0.7.0 with the v0.6.1 compiler-ready surface as the implementation baseline.",
+        "Reference-backed software parser covers const, def/function explicit parameters, D-CALL, primitive expressions/operators, grouping/unit, and E-IF-BRACE.",
+        "Canonical Lean lowering is emitted from the parsed AST; unsupported syntax fails closed.",
+        "Broader Lean term/declaration coverage and v0.7 verification constructs remain later milestones."
       ]
     },
     {

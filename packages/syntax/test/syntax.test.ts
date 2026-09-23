@@ -16,6 +16,8 @@ import {
   TermParser,
   lex,
   significantTokens,
+  parseV061Module,
+  lowerV061ModuleToLean,
 } from '../src/index.js';
 
 function assert(condition: unknown, message = 'assertion failed'): asserts condition {
@@ -266,4 +268,28 @@ console.log('ok - @proofscript/syntax lexer MVP');
 }
 {
   equal(lowerDCallSource('f x').kind,'defer');
+}
+
+
+// v0.6.1 compiler-ready declaration slice.
+{
+  const module=parseV061Module('const answer : Nat := 42; function add(x : Nat, y : Nat) : Nat := x + y;');
+  equal(module.declarations.length,2);
+  equal(module.declarations[0]?.kind,'const');
+  equal(module.declarations[1]?.kind,'function');
+  equal(module.featureIds.includes('D-CONST-ALIAS'),true);
+  equal(module.featureIds.includes('D-FUNCTION-ALIAS'),true);
+  equal(module.featureIds.includes('D-EXPLICIT-PARAMS'),true);
+  equal(module.featureIds.includes('D-DECL-SEMI'),true);
+  equal(lowerV061ModuleToLean(module),'def answer : Nat := 42\n\ndef add (x : Nat) (y : Nat) : Nat := x + y\n');
+}
+{
+  const module=parseV061Module('function choose(x : Nat, y : Nat) : Nat := if (x < y) { x } else { y };');
+  equal(module.featureIds.includes('E-IF-BRACE'),true);
+  equal(lowerV061ModuleToLean(module),'def choose (x : Nat) (y : Nat) : Nat := if x < y then x else y\n');
+}
+{
+  const module=parseV061Module('function use(x : Nat) : Nat := add(inc(x), 2);');
+  equal(module.featureIds.includes('D-CALL'),true);
+  equal(lowerV061ModuleToLean(module),'def use (x : Nat) : Nat := add (inc x) 2\n');
 }

@@ -1,3 +1,4 @@
+import { Environment, KernelError } from '../core/environment.js';
 import { Expr, exprLeanEq } from '../core/expr.js';
 import { Level } from '../core/level.js';
 import { LocalContext } from '../core/local-context.js';
@@ -158,6 +159,8 @@ export class LeanExprPairSet{
  */
 export class KernelState {
   private readonly hasher=new LeanExprHasher();
+  private boundEnvironment:Environment|undefined;
+  private boundRevision=0;
   readonly infer=new LeanExprMap<Expr>(this.hasher);
   readonly checkedInfer=new LeanExprMap<Expr>(this.hasher);
   readonly whnfCore=new LeanExprMap<Expr>(this.hasher);
@@ -168,6 +171,19 @@ export class KernelState {
 
   /** Shared Lean-style kernel recursion depth across local-context child checkers. */
   recDepth=0;
+
+  /**
+   * Lean's type_checker::state owns an environment value. TS Environment is
+   * mutable, so bind the state to the exact identity/revision and fail closed
+   * instead of letting old memo entries observe later declarations.
+   */
+  bindEnvironment(env:Environment):void{
+    if(this.boundEnvironment===undefined){
+      this.boundEnvironment=env;this.boundRevision=env.revision;return;
+    }
+    if(this.boundEnvironment!==env||this.boundRevision!==env.revision)
+      throw new KernelError('type checker environment changed; create a new checker state');
+  }
 
   /** Lean's type_checker::state owns the name generator shared by all local scopes. */
   private nextLocalId=0;

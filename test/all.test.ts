@@ -1146,7 +1146,7 @@ test('unsafe nested inductive preserves unsafe checking through restoration hard
 
 
 
-import { addPrimitiveDefinition, addPrimitiveInductive, canonicalNatAddValue } from '../src/kernel/primitive.js';
+import { addPrimitiveDefinition, addPrimitiveInductive, addPrimitiveOpaque, canonicalNatAddValue } from '../src/kernel/primitive.js';
 import { closeLambda, inspectNatWellFounded, inspectNatWfOuter, probeNatWellFounded, probeNatWellFoundedRecursiveCall } from '../src/kernel/primitive/wf.js';
 import { probeNatBitwiseEquation } from '../src/kernel/primitive/bitwise.js';
 import { buildNatDecEqModel, checkBoolCondition, checkNatEqCondition, checkNatLeCondition } from '../src/kernel/primitive/condition.js';
@@ -1588,6 +1588,30 @@ function makeBitwiseEquationProbe(bad=false):{env:Environment;tc:TypeChecker;P:a
 test('Nat.bitwise equation probe checks nested conditions and recursive target',()=>{
  const good=makeBitwiseEquationProbe(false);checkNatEqCondition(good.env);checkBoolCondition(good.env);probeNatBitwiseEquation(good.tc,good.P,good.f,good.n,good.m);
  const bad=makeBitwiseEquationProbe(true);throws(()=>probeNatBitwiseEquation(bad.tc,bad.P,bad.f,bad.n,bad.m));
+});
+
+test('eagerReduce primitive admission locks the polymorphic identity semantics',()=>{
+ const env=new Environment(),u=nameFromDotted('u'),alpha=nameFromDotted('α'),a=nameFromDotted('a');
+ const ty=forallE(alpha,sort(levelParam(u)),forallE(a,bvar(0),bvar(1),'default'),'implicit');
+ const good=lam(alpha,sort(levelParam(u)),lam(a,bvar(0),bvar(0),'default'),'implicit');
+ addPrimitiveDefinition(env,{kind:'definition',name:N.EagerReduce,levelParams:[u],type:ty,value:good,hints:{kind:'regular',height:1n},safety:'safe'});
+ assert(env.has(N.EagerReduce));
+ const badEnv=new Environment(),bad=lam(alpha,sort(levelParam(u)),lam(a,bvar(0),bvar(1),'default'),'implicit');
+ throws(()=>addPrimitiveDefinition(badEnv,{kind:'definition',name:N.EagerReduce,levelParams:[u],type:ty,value:bad,hints:{kind:'regular',height:1n},safety:'safe'}));
+ assert(!badEnv.has(N.EagerReduce));
+});
+
+test('native reduction marker opaques require canonical Bool/Nat endofunction types',()=>{
+ const env=baseEnv(),n=nameFromDotted('n'),b=nameFromDotted('b');
+ addPrimitiveOpaque(env,{kind:'opaque',name:N.LeanReduceNat,levelParams:[],type:forallE(n,constant(N.Nat),constant(N.Nat)),value:lam(n,constant(N.Nat),bvar(0)),isUnsafe:false});
+ addPrimitiveOpaque(env,{kind:'opaque',name:N.LeanReduceBool,levelParams:[],type:forallE(b,constant(N.Bool),constant(N.Bool)),value:lam(b,constant(N.Bool),bvar(0)),isUnsafe:false});
+ assert(env.has(N.LeanReduceNat)&&env.has(N.LeanReduceBool));
+ const bad=baseEnv();
+ throws(()=>addPrimitiveOpaque(bad,{kind:'opaque',name:N.LeanReduceNat,levelParams:[],type:forallE(b,constant(N.Bool),constant(N.Bool)),value:lam(b,constant(N.Bool),bvar(0)),isUnsafe:false}));
+ assert(!bad.has(N.LeanReduceNat));
+ const ordinary=baseEnv();
+ throws(()=>new Kernel(ordinary).addOpaque({kind:'opaque',name:N.LeanReduceNat,levelParams:[],type:forallE(n,constant(N.Nat),constant(N.Nat)),value:lam(n,constant(N.Nat),bvar(0)),isUnsafe:false}));
+ assert(!ordinary.has(N.LeanReduceNat));
 });
 
 test('reserved primitive names cannot enter through ordinary declaration paths',()=>{

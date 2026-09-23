@@ -1,8 +1,8 @@
-import { DefinitionInfo } from '../core/declaration.js';
+import { DefinitionInfo, OpaqueInfo } from '../core/declaration.js';
 import { ensureClosed } from '../core/checks.js';
 import { Environment, KernelError } from '../core/environment.js';
 import { Expr, app, appView, bvar, constant, exprEq, forallE, fvar, lam, mkAppN, sort } from '../core/expr.js';
-import { levelSucc, levelZero } from '../core/level.js';
+import { levelParam, levelSucc, levelZero } from '../core/level.js';
 import { LocalContext } from '../core/local-context.js';
 import { Name, nameEq, nameFromDotted, nameToString } from '../core/name.js';
 import { InductiveDecl, addOrdinaryInductiveInternal } from './inductive/ordinary.js';
@@ -59,6 +59,33 @@ function validateBody(env:Environment,v:DefinitionInfo):void{
  if(!safeMono(v))throw new KernelError(`primitive '${nameToString(v.name)}' must be safe and monomorphic`);
  ensureClosed(v.type,`type of ${nameToString(v.name)}`);ensureClosed(v.value,`value of ${nameToString(v.name)}`);
  const tc=new TypeChecker(env);tc.ensureSort(tc.check(v.type),v.type);const got=tc.check(v.value);if(!tc.isDefEq(got,v.type))throw new KernelError(`primitive '${nameToString(v.name)}' value has wrong type`);
+}
+
+function checkEagerReduce(env:Environment,v:DefinitionInfo):void{
+ if(v.safety!=='safe'||v.levelParams.length!==1)throw new KernelError("primitive 'eagerReduce' must be safe with exactly one universe parameter");
+ const u=v.levelParams[0]!,alpha=nameFromDotted('α'),a=nameFromDotted('a');
+ const expectedType=forallE(alpha,sort(levelParam(u)),forallE(a,bvar(0),bvar(1),'default'),'implicit');
+ const expectedValue=lam(alpha,sort(levelParam(u)),lam(a,bvar(0),bvar(0),'default'),'implicit');
+ ensureClosed(v.type,`type of ${nameToString(v.name)}`);ensureClosed(v.value,`value of ${nameToString(v.name)}`);
+ const tc=new TypeChecker(env,new LocalContext(),undefined,undefined,'safe',v.levelParams);
+ tc.ensureSort(tc.check(v.type),v.type);const got=tc.check(v.value);
+ if(!tc.isDefEq(got,v.type)||!tc.isDefEq(v.type,expectedType)||!tc.isDefEq(v.value,expectedValue))throw new KernelError("primitive 'eagerReduce' must be the polymorphic identity");
+}
+
+/** Admit final-Lean native-reduction marker declarations without allowing an
+ * arbitrary opaque declaration to acquire their name-sensitive kernel meaning. */
+export function addPrimitiveOpaque(env:Environment,v:OpaqueInfo):void{
+ const isNat=nameEq(v.name,N.LeanReduceNat),isBool=nameEq(v.name,N.LeanReduceBool);
+ if(!isNat&&!isBool)throw new KernelError(`primitive opaque recognizer for '${nameToString(v.name)}' is not implemented; refusing declaration`);
+ if(env.has(v.name))throw new KernelError(`already declared '${nameToString(v.name)}'`);
+ if(v.isUnsafe||v.levelParams.length!==0)throw new KernelError(`primitive '${nameToString(v.name)}' must be safe and monomorphic`);
+ const base=isNat?N.Nat:N.Bool;requireDep(env,base);
+ const expectedType=arrow(constant(base),constant(base));
+ ensureClosed(v.type,`type of ${nameToString(v.name)}`);ensureClosed(v.value,`opaque value of ${nameToString(v.name)}`);
+ const tc=new TypeChecker(env);tc.ensureSort(tc.check(v.type),v.type);
+ if(!tc.isDefEq(v.type,expectedType))throw new KernelError(`invalid type for primitive '${nameToString(v.name)}'`);
+ const got=tc.check(v.value);if(!tc.isDefEq(got,v.type))throw new KernelError(`primitive '${nameToString(v.name)}' value has wrong type`);
+ env.add(v);
 }
 
 function checkNatAdd(env:Environment,v:DefinitionInfo):void{requireDep(env,N.Nat);exactType(env,v,nat2());const l=new LocalContext(),x=local(l,'x',Nat()),y=local(l,'y',Nat()),tc=new TypeChecker(env,l),f=v.value;eq(tc,app2(f,x,zero()),x,v,'Nat.add x 0 = x');eq(tc,app2(f,x,succ(y)),succ(app2(f,x,y)),v,'Nat.add x (succ y) = succ (Nat.add x y)');}
@@ -132,6 +159,7 @@ function checkStringOfList(env:Environment,v:DefinitionInfo):void{
 export function addPrimitiveDefinition(env:Environment,v:DefinitionInfo):void{
  if(!isPrimitiveName(v.name))throw new KernelError(`'${nameToString(v.name)}' is not a reserved primitive`);
  if(env.has(v.name))throw new KernelError(`already declared '${nameToString(v.name)}'`);
+ if(nameEq(v.name,N.EagerReduce)){checkEagerReduce(env,v);env.add(v);return;}
  validateBody(env,v);
  if(nameEq(v.name,N.NatAdd))checkNatAdd(env,v);
  else if(nameEq(v.name,N.NatPred))checkNatPred(env,v);

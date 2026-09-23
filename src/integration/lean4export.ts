@@ -1,4 +1,4 @@
-import { ConstantInfo, DefinitionInfo, ReducibilityHints } from '../core/declaration.js';
+import { ConstantInfo, DefinitionInfo, OpaqueInfo, ReducibilityHints } from '../core/declaration.js';
 import { Environment, KernelError } from '../core/environment.js';
 import { BinderInfo, Expr, app, bvar, constant, exprEq, exprKernelMetadataDiff, exprKernelMetadataEq, exprToString, forallE, lam, natLit, sort, strLit } from '../core/expr.js';
 import { Level, levelIMaxRaw, levelMaxRaw, levelParam, levelSucc, levelZero } from '../core/level.js';
@@ -7,7 +7,7 @@ import { Kernel } from '../kernel/kernel.js';
 import { addInductive } from '../kernel/inductive/nested.js';
 import { ConstructorDecl, InductiveDecl, addOrdinaryInductive } from '../kernel/inductive/ordinary.js';
 import { isPrimitiveName } from '../kernel/primitive-names.js';
-import { addPrimitiveDefinition, addPrimitiveInductive } from '../kernel/primitive.js';
+import { addPrimitiveDefinition, addPrimitiveInductive, addPrimitiveOpaque } from '../kernel/primitive.js';
 import { addQuot } from '../kernel/quotient.js';
 import { TypeChecker } from '../kernel/type-checker.js';
 import { NativeEvaluator } from '../kernel/reduction/native.js';
@@ -192,7 +192,7 @@ export class Lean4ExportReplay {
     if('axiom' in o){const a=asObject(o.axiom!,'axiom');this.kernel.addAxiom({kind:'axiom',name:this.n(asIndex(field(a,'name','axiom'),'axiom.name')),levelParams:this.ns(field(a,'levelParams','axiom'),'axiom.levelParams'),type:this.e(asIndex(field(a,'type','axiom'),'axiom.type')),isUnsafe:boolField(a,'isUnsafe','axiom')});return;}
     if('def' in o){const a=asObject(o.def!,'def'),s=asString(field(a,'safety','def'),'def.safety');if(s!=='safe'&&s!=='unsafe'&&s!=='partial')throw new KernelError(`invalid definition safety ${s}`);const info:DefinitionInfo={kind:'definition',name:this.n(asIndex(field(a,'name','def'),'def.name')),levelParams:this.ns(field(a,'levelParams','def'),'def.levelParams'),type:this.e(asIndex(field(a,'type','def'),'def.type')),value:this.e(asIndex(field(a,'value','def'),'def.value')),hints:this.hints(field(a,'hints','def')),safety:s};const all=maybeField(a,'all')===undefined?[info.name]:this.ns(field(a,'all','def'),'def.all');this.addExportedDefinition(info,all);return;}
     if('thm' in o){const a=asObject(o.thm!,'thm');this.kernel.addTheorem({kind:'theorem',name:this.n(asIndex(field(a,'name','thm'),'thm.name')),levelParams:this.ns(field(a,'levelParams','thm'),'thm.levelParams'),type:this.e(asIndex(field(a,'type','thm'),'thm.type')),value:this.e(asIndex(field(a,'value','thm'),'thm.value'))});return;}
-    if('opaque' in o){const a=asObject(o.opaque!,'opaque');this.kernel.addOpaque({kind:'opaque',name:this.n(asIndex(field(a,'name','opaque'),'opaque.name')),levelParams:this.ns(field(a,'levelParams','opaque'),'opaque.levelParams'),type:this.e(asIndex(field(a,'type','opaque'),'opaque.type')),value:this.e(asIndex(field(a,'value','opaque'),'opaque.value')),isUnsafe:boolField(a,'isUnsafe','opaque')});return;}
+    if('opaque' in o){const a=asObject(o.opaque!,'opaque'),info:OpaqueInfo={kind:'opaque',name:this.n(asIndex(field(a,'name','opaque'),'opaque.name')),levelParams:this.ns(field(a,'levelParams','opaque'),'opaque.levelParams'),type:this.e(asIndex(field(a,'type','opaque'),'opaque.type')),value:this.e(asIndex(field(a,'value','opaque'),'opaque.value')),isUnsafe:boolField(a,'isUnsafe','opaque')};if(isPrimitiveName(info.name))addPrimitiveOpaque(this.env,info);else this.kernel.addOpaque(info);return;}
     if('quot' in o){this.quot(asObject(o.quot!,'quot'));return;}
     if('inductive' in o){this.inductive(asObject(o.inductive!,'inductive'));return;}
     throw new KernelError(`unknown lean4export declaration record at line ${this.lineNo}`);

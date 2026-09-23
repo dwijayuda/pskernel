@@ -178,6 +178,30 @@ open:
 
 This is the correct ordering.
 
+### Name-sensitive bootstrap and primitive hardening
+
+Final Lean 4.34 gives several declarations semantics by **name**, outside ordinary
+delta reduction. The C++ type checker directly recognizes `Bool.true`,
+`eagerReduce`, `Lean.reduceBool`/`Lean.reduceNat`, `Nat.zero`/`Nat.succ`,
+the optimized Nat arithmetic/bitwise operation names, and `String.ofList`.
+The inductive/literal layer additionally hard-codes `Char.ofNat` and the
+`List Char` constructors used to expand string literals.
+
+Lean's own source-admission path largely trusts that its bootstrap library gives
+those names their intended declarations. pskernel intentionally strengthens
+this boundary for an independent checker consuming untrusted export streams:
+reserved names cannot enter through ordinary declaration APIs. Nat/Bool
+inductives have exact-shape admission; optimized Nat primitives are checked
+against their defining equations; `eagerReduce` must be the polymorphic
+identity; and the native-reduction markers must be safe monomorphic opaque
+`Bool → Bool` / `Nat → Nat` declarations with type-correct bodies.
+
+`Nat.pred` and `Nat.bitwise` are a separate category: final C++ does not
+directly reduce them by name, but pskernel reserves and validates them because
+they are semantic dependencies used to prove `Nat.sub` and the optimized
+land/lor/xor family without circular self-validation. This is a deliberate TCB
+strengthening, not a claim that Lean C++ has the same admission recognizers.
+
 ### Native reduction boundary audit
 
 Final Lean 4.34 has two observable reduction orders that must both be preserved:

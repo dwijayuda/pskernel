@@ -921,6 +921,19 @@ test('whnfCore cache follows Lean 4.34 cheap/full and direct-iota boundaries',()
  assert(!tc2.state.whnfCore.has(tc2.state.exprId(rec)),'Lean 4.34 returns directly after recursor iota instead of caching the original recursor application');
 });
 
+test('whnfCore easy, stuck-app, and projection cache boundaries match Lean 4.34',()=>{
+ const env=baseEnv(),F=nameFromDotted('WhnfBoundary.f'),D=nameFromDotted('WhnfBoundary.d'),Fake=nameFromDotted('WhnfBoundary.Fake');
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'definition',name:D,levelParams:[],type:constant(N.Nat),value:natLit(3),hints:{kind:'regular',height:1n},safety:'safe'});
+ const tc=new TypeChecker(env),easy=constant(F),stuck=app(easy,natLit(1)),proj={kind:'proj',typeName:Fake,index:0,expr:constant(D)} as const;
+ eqExpr(tc.whnfCore(easy),easy);
+ assert(!tc.state.whnfCore.has(tc.state.exprId(easy)),'easy whnfCore cases bypass the cache');
+ eqExpr(tc.whnfCore(stuck),stuck);
+ assert(!tc.state.whnfCore.has(tc.state.exprId(stuck)),'stuck applications return directly without whnfCore caching');
+ eqExpr(tc.whnfCore(proj),proj);
+ assert(tc.state.whnfCore.has(tc.state.exprId(proj)),'unreduced projections are cached as the original projection node');
+});
+
 test('cheap projection WHNF never reuses a full-mode cache entry',()=>{
  const env=baseEnv(),I=nameFromDotted('CheapProjBox'),Mk=nameFromDotted('CheapProjBox.mk'),box=nameFromDotted('cheapProjBoxValue');
  const ctorTy=forallE(nameFromDotted('field'),constant(N.Nat),constant(I));

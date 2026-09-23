@@ -1,6 +1,7 @@
 import binaryen from 'binaryen';
 import {
   validateWasmIrModule,
+  type WasmAbiValueType,
   type WasmIrExpr,
   type WasmIrFunction,
   type WasmIrModule,
@@ -15,13 +16,26 @@ export interface WasmEmitOptions {
   readonly optimize?:boolean;
 }
 
+export interface WasmExportAbi {
+  readonly name:string;
+  readonly parameters:readonly WasmAbiValueType[];
+  readonly result:WasmAbiValueType|null;
+}
+
 export interface WasmEmitResult {
   readonly binary:Uint8Array;
   readonly text:string;
   readonly optimized:boolean;
   readonly binaryenVersion:typeof BINARYEN_VERSION;
   readonly profile:WasmIrModule['profile'];
+  readonly exports:readonly WasmExportAbi[];
 }
+
+export {
+  instantiateProofScriptWasm,
+  type ProofScriptWasmHostInstance,
+  type ProofScriptWasmHostValue,
+} from './js-abi.js';
 
 function binaryenType(type:WasmValueType):number {
   switch(type){
@@ -195,5 +209,14 @@ export function emitBinaryenWasm(
     optimized:options.optimize===true,
     binaryenVersion:BINARYEN_VERSION,
     profile:input.profile,
+    exports:input.functions.flatMap((fn)=>
+      fn.exportName===undefined
+        ?[]
+        :[{
+          name:fn.exportName,
+          parameters:[...fn.abi.parameters],
+          result:fn.abi.result,
+        }]
+    ),
   };
 }

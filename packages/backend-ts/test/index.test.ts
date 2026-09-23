@@ -67,7 +67,7 @@ console.log('ok - @proofscript/backend-ts compiler IR boundary');
       },
     ],
   }));
-  equal(source.includes('export const increment: (bigint) => bigint'),true);
+  equal(source.includes('export const increment: (_arg: bigint) => bigint'),true);
   equal(source.includes('(x: bigint) => x + 1n'),true);
   equal(source.includes('return increment(x);'),true);
   const compiled=compileTypeScript(source,'lambda.ts');

@@ -130,11 +130,14 @@ export class V061ExpressionParser {
       this.context.own('D-CALL');
       this.context.cursor.consume();
       const args:V061Expr[]=[];
-      if(!this.context.cursor.at(')')){
-        while(true){
-          args.push(this.parse());
-          if(!this.context.cursor.consumeIf(','))break;
-        }
+      if(this.context.cursor.at(')')){
+        const close=this.context.cursor.consume();
+        args.push({kind:'unit',span:{start:open.span.start,end:close.span.end}});
+        return {kind:'call',callee:token.text,args,span:{start:token.span.start,end:close.span.end}};
+      }
+      while(true){
+        args.push(this.parse());
+        if(!this.context.cursor.consumeIf(','))break;
       }
       const close=this.context.cursor.expect(')');
       return {kind:'call',callee:token.text,args,span:{start:token.span.start,end:close.span.end}};

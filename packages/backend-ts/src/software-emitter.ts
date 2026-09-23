@@ -6,7 +6,7 @@ import type {
 
 function typeScriptType(type:SoftwareIrType):string {
   if(typeof type!=='string'){
-    return '('+typeScriptType(type.parameter)+') => '+typeScriptType(type.result);
+    return '(_arg: '+typeScriptType(type.parameter)+') => '+typeScriptType(type.result);
   }
   switch(type){
     case 'Nat':

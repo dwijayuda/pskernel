@@ -105,3 +105,17 @@ console.log('ok - @proofscript/language function type HIR conversion');
   equal(threw,true);
 }
 console.log('ok - @proofscript/language reference-backed lambda checker');
+
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'const run : Unit -> Nat := fun u => 7; const answer : Nat := run();',
+  ));
+  const call=checked.declarations[1]?.body;
+  equal(call?.kind,'call');
+  if(call?.kind==='call'){
+    equal(call.args.length,1);
+    equal(call.args[0]?.kind,'unit');
+    equal(call.callStyle,'curried');
+  }
+}
+console.log('ok - @proofscript/language empty D-CALL Unit semantics');

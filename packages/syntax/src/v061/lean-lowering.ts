@@ -21,7 +21,7 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
           ? rendered
           : '('+rendered+')';
       });
-      return args.length===0?expr.callee+' ()':expr.callee+' '+args.join(' ');
+      return expr.callee+' '+args.join(' ');
     }
     case 'unary':return '!'+lowerV061ExprToLean(expr.operand,7);
     case 'binary':{

@@ -374,3 +374,16 @@ console.log('ok - @proofscript/syntax lexer MVP');
     /lambda requires at least one binder/,
   );
 }
+
+
+// Empty D-CALL is Unit application, not zero-arity invocation.
+{
+  const module=parseV061Module('function run(f : Unit -> Nat) : Nat := f();');
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'call');
+  if(body?.kind==='call'){
+    equal(body.args.length,1);
+    equal(body.args[0]?.kind,'unit');
+  }
+  equal(lowerV061ModuleToLean(module),'def run (f : Unit -> Nat) : Nat := f ()\n');
+}

@@ -14,24 +14,13 @@ import {
 } from './model.js';
 import {tryEraseRuntimeRecursorApplication} from './recursor-erasure.js';
 import {eraseRuntimeType} from './type-erasure.js';
+import {verifiedBinaryRuntimeIntrinsic} from './runtime-intrinsics.js';
 
 export type RuntimeExprEraser=(
   expr:Expr,
   scope:ErasureScope,
   environment:Environment,
 )=>VerifiedIrExpr;
-
-const natIntrinsics=new Map<
-  string,
-  'nat.add'|'nat.sub'|'nat.mul'|'nat.div'|'nat.mod'|'nat.eq'
->([
-  ['Nat.add','nat.add'],
-  ['Nat.sub','nat.sub'],
-  ['Nat.mul','nat.mul'],
-  ['Nat.div','nat.div'],
-  ['Nat.mod','nat.mod'],
-  ['Nat.beq','nat.eq'],
-]);
 
 function eraseVerifiedCondition(
   proposition:Expr,
@@ -256,7 +245,9 @@ export function eraseRuntimeApplication(
   }
 
   if(view.fn.kind==='const'){
-    const intrinsic=natIntrinsics.get(nameToString(view.fn.name));
+    const intrinsic=verifiedBinaryRuntimeIntrinsic(
+      nameToString(view.fn.name),
+    );
     if(intrinsic!==undefined){
       if(view.args.length!==2){
         throw new Error(

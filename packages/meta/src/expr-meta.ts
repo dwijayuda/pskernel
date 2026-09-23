@@ -5,6 +5,7 @@ import {
   type Expr,
   app,
   exprEq,
+  hasLooseBVar,
   hasMVar,
 } from 'lean-ts-kernel';
 
@@ -40,6 +41,35 @@ function containsMVarId(expr:Expr,id:string):boolean {
     case 'proj':return containsMVarId(expr.expr,id);
     default:return false;
   }
+}
+
+function collectMVarIds(expr:Expr,out:Set<string>=new Set()):ReadonlySet<string> {
+  switch(expr.kind){
+    case 'mvar':
+      out.add(expr.id);
+      break;
+    case 'app':
+      collectMVarIds(expr.fn,out);
+      collectMVarIds(expr.arg,out);
+      break;
+    case 'lam':
+    case 'forall':
+      collectMVarIds(expr.type,out);
+      collectMVarIds(expr.body,out);
+      break;
+    case 'let':
+      collectMVarIds(expr.type,out);
+      collectMVarIds(expr.value,out);
+      collectMVarIds(expr.body,out);
+      break;
+    case 'mdata':
+    case 'proj':
+      collectMVarIds(expr.expr,out);
+      break;
+    default:
+      break;
+  }
+  return out;
 }
 
 function assertFVarsInScope(expr:Expr,lctx:LocalContext):void {
@@ -204,17 +234,40 @@ export class ExprMetaContext {
     }
 
     const instantiated=this.instantiate(value);
+    if(hasLooseBVar(instantiated)){
+      throw new Error(
+        "metavariable '?"+declaration.id+"' assignment contains a loose bound variable",
+      );
+    }
     if(containsMVarId(instantiated,declaration.id)){
       throw new Error("occurs check failed for '?"+declaration.id+"'");
     }
     assertFVarsInScope(instantiated,declaration.localContext);
+    for(const dependencyId of collectMVarIds(instantiated)){
+      const dependency=this.declarations.get(dependencyId);
+      if(dependency===undefined){
+        throw new Error(
+          "metavariable '?"+declaration.id+
+          "' assignment references unknown metavariable '?"+dependencyId+"'",
+        );
+      }
+      if(dependency.depth>declaration.depth){
+        throw new Error(
+          "metavariable '?"+declaration.id+
+          "' assignment depends on deeper metavariable '?"+dependencyId+"'",
+        );
+      }
+    }
     this.validateGroundAssignment(declaration,instantiated);
     this.assignments.set(declaration.id,instantiated);
   }
 
   tryAssignByUnification(meta:Expr|string,value:Expr):boolean {
     const declaration=this.getDecl(meta);
-    if(declaration.kind==='syntheticOpaque')return false;
+    if(
+      declaration.kind==='syntheticOpaque'
+      ||declaration.depth!==this.currentDepth
+    )return false;
     this.assign(declaration.id,value);
     return true;
   }

@@ -109,3 +109,41 @@ console.log('ok - @proofscript/meta foundation');
   equal(depth,1);
 }
 console.log('ok - @proofscript/meta Expr metavariable context');
+
+
+{
+  const environment=new Environment();
+  const context=new ExprMetaContext(environment);
+  const type=sort(levelSucc(levelZero));
+  const meta=context.mkFresh(type);
+  let loose=false;
+  try{context.assign(meta,{kind:'bvar',index:0});}
+  catch(error){loose=/loose bound variable/.test(String(error));}
+  equal(loose,true);
+}
+{
+  const environment=new Environment();
+  const context=new ExprMetaContext(environment);
+  const type=sort(levelSucc(levelZero));
+  const outer=context.mkFresh(type);
+  let inner!:import('lean-ts-kernel').Expr;
+  context.withDepth(()=>{
+    inner=context.mkFresh(type);
+    equal(context.tryAssignByUnification(outer,sort(levelZero)),false);
+    equal(context.unify(outer,inner),true);
+    equal(exprEq(context.getAssignment(inner)!,outer),true);
+  });
+}
+{
+  const environment=new Environment();
+  const context=new ExprMetaContext(environment);
+  const type=sort(levelSucc(levelZero));
+  const outer=context.mkFresh(type);
+  let inner!:import('lean-ts-kernel').Expr;
+  context.withDepth(()=>{inner=context.mkFresh(type);});
+  let leaked=false;
+  try{context.assign(outer,inner);}
+  catch(error){leaked=/depends on deeper metavariable/.test(String(error));}
+  equal(leaked,true);
+}
+console.log('ok - @proofscript/meta Lean-style metavariable depth discipline');

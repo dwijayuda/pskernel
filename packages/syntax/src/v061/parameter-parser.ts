@@ -1,3 +1,4 @@
+import {SyntaxError} from '../source.js';
 import type {V061Parameter} from './ast.js';
 import {V061ParseContext} from './context.js';
 import {parseV061Type} from './type-parser.js';
@@ -10,9 +11,9 @@ export function parseV061ExplicitParameters(
   context.own('D-EXPLICIT-PARAMS');
 
   if(context.cursor.at(')')){
-    throw new Error(
-      'D-EXPLICIT-PARAMS requires at least one explicit binding at offset '+
-      open.span.start.offset,
+    throw new SyntaxError(
+      'D-EXPLICIT-PARAMS requires at least one explicit binding',
+      open.span,
     );
   }
 

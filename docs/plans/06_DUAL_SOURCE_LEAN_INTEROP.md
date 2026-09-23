@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **DS6.2 project-aware language-service environment composition landed; Node/LSP source-root resolution and cross-language navigation remain; subordinate to the canonical checked-core architecture**
+Status: **DS6.3 shared Node/LSP project source-root resolution landed; cross-language navigation remains; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -392,7 +392,7 @@ Remaining DS5 work:
 
 ### DS6 — editor support
 
-Status: **DS6.2 language-service project environment composition landed; Node/LSP resolution and project-aware navigation remain**
+Status: **DS6.3 shared Node/LSP resolution landed; project-aware navigation remains**
 
 Landed DS6.1:
 
@@ -423,10 +423,19 @@ Landed DS6.2:
 - unresolved/ambiguous project context fails closed instead of labeling the
   entry verified without its imports.
 
+Landed DS6.3:
+
+- @proofscript/project/node now owns sourceRoots validation/expansion and exact
+  logical .ps/.lean source resolution;
+- psc and the LSP both consume that resolver instead of carrying separate
+  ambiguity/missing-module rules;
+- the LSP finds the nearest psconfig.json for file:// entry documents and
+  falls back to the entry directory when no config exists;
+- psc preserves its established PS_CLI_CONFIG_SOURCE_ROOTS diagnostic at the
+  CLI boundary while sharing the underlying resolver semantics.
+
 Remaining DS6 work:
 
-- wire the Node/LSP project source host to the same DS5 configured source-root
-  resolution policy used by psc;
 - build cross-document/cross-source definition and reference indexes;
 - add cross-language navigation;
 - add source conversion code actions after project-aware document identity is

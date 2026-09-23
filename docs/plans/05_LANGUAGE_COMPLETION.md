@@ -493,10 +493,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    configured project-relative source roots are now landed. The remaining DS5
    blocker is a real persistent module-artifact payload path; do not fabricate
    Lean4Export records.
-8. Continue landed DS6: source-kind routing plus language-service project/import
-   environment composition are now landed. Next wire the Node/LSP project host
-   to DS5 source-root resolution, then add cross-document/cross-language
-   navigation on that checked project context.
+8. Continue landed DS6: source-kind routing, language-service checked import
+   composition, and shared Node/LSP DS5 source-root resolution are landed.
+   Next build cross-document/cross-language definition/reference indexes on
+   that checked project context.
 9. Design and implement explicit npm/JS FFI.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.

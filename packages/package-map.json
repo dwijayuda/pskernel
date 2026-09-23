@@ -35,6 +35,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "CLI project resolution now consumes @proofscript/project/node for sourceRoots expansion and logical .ps/.lean module lookup; the CLI preserves PS_CLI_CONFIG_SOURCE_ROOTS at its user-facing config boundary.",
         "DS5.5 adds project-relative `sourceRoots` configuration. Empty/unset preserves the historical entry-directory import root; configured roots replace that default search set.",
         "Every logical import is searched across all configured roots and both .ps/.lean. Resolution requires exactly one candidate; duplicates across roots or source kinds fail with PS_PROJECT_SOURCE_AMBIGUITY instead of first-root precedence.",
         "Verified check/build/run reports expose the absolute resolved sourceRoots alongside module/project integrity data.",
@@ -573,15 +574,18 @@
       "path": "packages/lsp",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "dual-source-stdio-routing-mvp",
+      "status": "dual-source-project-routing-mvp",
       "packageName": "@proofscript/lsp",
       "dependsOn": [
         "language-service",
         "kernel",
-        "environment"
+        "environment",
+        "project"
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS6.3 wires the language-service project host to @proofscript/project/node, so editor import resolution uses the same .ps/.lean ambiguity and configured sourceRoots policy as psc.",
+        "For file:// entry documents, the LSP finds the nearest psconfig.json; absent config, it falls back to the entry directory exactly like the unconfigured DS5 source-root behavior.",
         "DS6.1 maps `proofscript` LSP documents to the ProofScript frontend and `proofscript-lean` documents to the Lean-subset frontend. .ps/.lean URI extension fallback supports clients that preserve another editor language id.",
         "The LSP does not decide VS Code file ownership; source-kind routing is isolated in a small transport module and forwarded to the language service.",
         "LSP environment loading is delegated to @proofscript/environment/node so editor and compiler share the same pinned Lean 4.34 replay policy.",
@@ -596,7 +600,7 @@
       "path": "packages/project",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "dual-source-module-graph-mvp",
+      "status": "dual-source-node-resolver+module-graph-mvp",
       "packageName": "@proofscript/project",
       "dependsOn": [
         "module",
@@ -605,6 +609,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "The Node subpath centralizes psconfig sourceRoots validation, nearest-config discovery, project-relative root expansion, and exact .ps/.lean logical-module resolution for both psc and LSP consumers.",
+        "Configured source roots have no first-root-wins behavior: zero matches fail missing, multiple matches across roots/source kinds fail ambiguity.",
         "sourceDependencyClosure exposes deterministic transitive source dependencies in build-plan order so CLI and editor composition share the same graph semantics.",
         "DS5.1 extends the deterministic project graph with logical source modules carrying source path, source kind, and imports.",
         "One logical module may map to exactly one source; `.ps`/`.lean` duplicates fail with PS_PROJECT_SOURCE_AMBIGUITY before semantic build.",

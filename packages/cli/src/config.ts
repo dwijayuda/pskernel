@@ -2,6 +2,20 @@
 import {readFile} from 'node:fs/promises';
 import {dirname,join,resolve} from 'node:path';
 import {projectSourceRootsFromConfig} from '@proofscript/project/node';
+
+function cliSourceRootsFromConfig(value:unknown):readonly string[] {
+  try{
+    return projectSourceRootsFromConfig(value);
+  }catch(error){
+    const message=error instanceof Error?error.message:String(error);
+    throw new Error(
+      message.replace(
+        'PS_PROJECT_CONFIG_SOURCE_ROOTS',
+        'PS_CLI_CONFIG_SOURCE_ROOTS',
+      ),
+    );
+  }
+}
 import {existsSync} from 'node:fs';
 
 export interface PsConfig {
@@ -62,7 +76,7 @@ export async function loadPsConfig(project?:string):Promise<LoadedPsConfig>{
   const config:PsConfig={
     languageVersion:'0.7',
     entry:typeof parsed.entry==='string'?parsed.entry:DEFAULT_CONFIG.entry,
-    sourceRoots:projectSourceRootsFromConfig(
+    sourceRoots:cliSourceRootsFromConfig(
       (parsed as Partial<PsConfig>).sourceRoots,
     ),
     compilerOptions:{

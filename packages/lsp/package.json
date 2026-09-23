@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Thin Language Server Protocol transport over the proof-aware ProofScript language service.",
   "proofscript": {
-    "status": "dual-source-stdio-routing-mvp",
+    "status": "dual-source-project-routing-mvp",
     "phase": "D",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

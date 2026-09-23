@@ -5,7 +5,7 @@
   "type": "module",
   "description": "npm-oriented ProofScript project graph, cache and build orchestration.",
   "proofscript": {
-    "status": "dual-source-module-graph-mvp",
+    "status": "dual-source-node-resolver+module-graph-mvp",
     "phase": "D",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

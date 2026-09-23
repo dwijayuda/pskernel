@@ -166,7 +166,15 @@ export class TypeChecker {
 
   unfold(e:Expr):Expr|null{
     const av=appView(e);if(av.fn.kind!=='const')return null;const i=deltaInfo(this.env.find(av.fn.name));if(!i||av.fn.levels.length!==i.levelParams.length)return null;
-    const value=instantiateExprLevels(i.value,i.levelParams,av.fn.levels);return mkAppN(value,av.args);
+    let value:Expr;
+    if(av.fn.levels.length>0){
+      const key=this.state.exprId(av.fn),cached=this.state.unfold.get(key);
+      if(cached)value=cached;
+      else{value=instantiateExprLevels(i.value,i.levelParams,av.fn.levels);this.state.unfold.set(key,value);}
+    }else{
+      value=instantiateExprLevels(i.value,i.levelParams,av.fn.levels);
+    }
+    return mkAppN(value,av.args);
   }
 
   whnfCore(e:Expr,cheapRec=false,cheapProj=false):Expr{return this.rec(()=>{

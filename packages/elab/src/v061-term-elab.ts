@@ -58,8 +58,29 @@ export function elaborateV061Term(
         context,
       );
       if(projection!==undefined)return projection;
-      const term=resolveReference(expr.name,context);
-      return {term,type:checker.check(term)};
+      const reference=resolveReference(expr.name,context);
+      if(reference.kind==='fvar'){
+        return {term:reference,type:checker.check(reference)};
+      }
+      const applied=elaborateApplication({
+        environment:context.environment,
+        metaContext:context.metaContext,
+        fn:reference,
+        args:[],
+        ...(expected===undefined?{}:{expectedType:expected}),
+        localContext:context.localContext,
+      });
+      const elaboratedTerm=context.metaContext.instantiate(applied.term);
+      const elaboratedType=context.metaContext.instantiate(applied.type);
+      if(hasMVar(elaboratedTerm)||hasMVar(elaboratedType)){
+        if(expected===undefined){
+          return {term:reference,type:checker.check(reference)};
+        }
+        throw new Error(
+          'PS_ELAB_REFERENCE_STUCK: unresolved implicit or instance arguments',
+        );
+      }
+      return {term:elaboratedTerm,type:elaboratedType};
     }
     case 'nat':{
       const term=natLit(BigInt(expr.text.replaceAll('_','')));
@@ -90,6 +111,7 @@ export function elaborateV061Term(
         metaContext:context.metaContext,
         fn,
         args,
+        ...(expected===undefined?{}:{expectedType:expected}),
         localContext:context.localContext,
       });
       const term=context.metaContext.instantiate(result.term);

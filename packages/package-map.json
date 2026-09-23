@@ -189,7 +189,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-simple-adt-match-elab-mvp",
+      "status": "v061-parameterized-inductive-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -216,7 +216,10 @@
         "Lean-native `intro` opens a real forall goal, extends LocalContext with the exact binder type/info, elaborates the continuation against the instantiated codomain, and constructs a lambda proof.",
         "`exact`, `assumption`, and `intro` all elaborate to ordinary pskernel Expr proof terms; Kernel.addTheorem remains final authority.",
         "This milestone still has no synthetic tactic goal engine or cursor snapshots; apply/refine/rewrite/simp/typeclass synthesis and multi-goal tactics remain later work.",
-        "The public declaration elaborator now returns @proofscript/checked-core, re-admitted through pskernel as the stable compiler boundary."
+        "The public declaration elaborator now returns @proofscript/checked-core, re-admitted through pskernel as the stable compiler boundary.",
+        "Non-recursive parameterized inductives now elaborate shared parameters into the pskernel InductiveDecl; constructor copies of shared parameters are implicit, matching Lean constructor use such as Option.some/Option.none.",
+        "Expected-type application/reference elaboration can solve inserted implicit constructor parameters for nullary constructors without introducing runtime arguments.",
+        "Recursive parameterized inductives, indices, universe-polymorphic source binders, and dependent pattern matching remain later milestones."
       ]
     },
     {

@@ -606,3 +606,39 @@ console.log('ok - @proofscript/elab unparameterized inductive admission');
   equal(nonexhaustive,true);
 }
 console.log('ok - @proofscript/elab verified match recursor elaboration');
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive Option(α : Type) where { '+
+    '| none; | some(value : α); } '+
+    'const noneNat : Option(Nat) := Option.none; '+
+    'const oneNat : Option(Nat) := Option.some(1);',
+  ),env);
+  const option=result.environment.find(nameFromDotted('Option'));
+  const none=result.environment.find(nameFromDotted('Option.none'));
+  const some=result.environment.find(nameFromDotted('Option.some'));
+  equal(option?.kind,'inductive');
+  if(option?.kind==='inductive')equal(option.numParams,1);
+  equal(none?.kind,'constructor');
+  if(none?.kind==='constructor'){
+    equal(none.numParams,1);
+    equal(none.numFields,0);
+    equal(none.type.kind,'forall');
+    if(none.type.kind==='forall'){
+      equal(none.type.binderInfo,'implicit');
+    }
+  }
+  equal(some?.kind,'constructor');
+  if(some?.kind==='constructor'){
+    equal(some.numParams,1);
+    equal(some.numFields,1);
+    equal(some.type.kind,'forall');
+    if(some.type.kind==='forall'){
+      equal(some.type.binderInfo,'implicit');
+    }
+  }
+  equal(result.definitions.length,2);
+}
+console.log('ok - @proofscript/elab parameterized inductive constructor inference');

@@ -32,6 +32,7 @@ export interface ElaborateApplicationOptions {
   readonly metaContext:ExprMetaContext;
   readonly fn:Expr;
   readonly args:readonly Expr[];
+  readonly expectedType?:Expr;
   readonly localContext?:LocalContext;
 }
 
@@ -44,6 +45,7 @@ export function elaborateApplication({
   metaContext,
   fn,
   args,
+  expectedType,
   localContext=new LocalContext(),
 }:ElaborateApplicationOptions):ElaboratedApplication {
   const checker=new TypeChecker(environment,localContext.clone());
@@ -116,6 +118,17 @@ export function elaborateApplication({
     });
     if(functionType.binderInfo==='instImplicit'){
       pendingInstances.push(implicit);
+    }
+  }
+
+  if(expectedType!==undefined){
+    const actual=metaContext.instantiate(type);
+    const expected=metaContext.instantiate(expectedType);
+    if(!metaContext.unify(actual,expected,localContext)){
+      throw new Error(
+        'PS_ELAB_APP_RESULT_TYPE_MISMATCH: expected '+
+        exprToString(expected)+', got '+exprToString(actual),
+      );
     }
   }
 

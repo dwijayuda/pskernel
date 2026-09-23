@@ -332,7 +332,7 @@ export class TypeChecker {
   private tryStructEta(a:Expr,b:Expr):boolean{return this.tryStructEtaCore(a,b)||this.tryStructEtaCore(b,a);}
   private tryStringLitExpansionCore(t:Expr,s:Expr):boolean|null{
     if(t.kind!=='lit'||t.literal.kind!=='string'||s.kind!=='app')return null;
-    const sf=getAppFn(s);if(sf.kind!=='const'||!nameEq(sf.name,N.StringOfList))return null;
+    const sf=s.fn;if(sf.kind!=='const'||sf.levels.length!==0||!nameEq(sf.name,N.StringOfList))return null;
     return this.isDefEqCore(this.whnf(stringLitToConstructor(t)),s);
   }
   private tryStringLitExpansion(t:Expr,s:Expr):boolean|null{

@@ -808,3 +808,24 @@ definitions/theorems are the supported semantic slice.
 
 The legacy software checker does not gain an import implementation. Imports
 require the verified project pipeline and otherwise fail closed.
+
+## DS5 imported semantic metadata checkpoint
+
+A mixed-source project module is elaborated against two products of its
+transitive dependency closure:
+
+1. the pskernel-replayed dependency environment; and
+2. the validated checked-core metadata for structures, classes, and instances.
+
+The second product is an **elaboration seed**, not proof authority. Structure
+and class descriptors have already been checked against pskernel-generated
+constructors by checked core, and instance declarations have already passed
+checked-core class-target validation.
+
+Imported global instances are presented newest-admission-first, matching the
+existing same-file rule where each newly declared instance is prepended to the
+candidate list.
+
+This closes the semantic difference between same-file and imported usage for
+the current structure/class/global-instance subset while keeping module-local
+admissions separate for future artifact caching.

@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "dual-source-ds5-mixed-project-mvp",
+      "status": "dual-source-ds5-imported-metadata",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -35,6 +35,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS5.3 seeds each module elaboration from the pskernel-replayed checked-core metadata of its transitive dependency closure, so cross-module structures, projections, classes, and global instance synthesis match same-file behavior.",
+        "A mixed-source regression exercises Core.ps structure/class/global instance metadata from Data.lean record/projection/local-class code and instance synthesis, then runs the ProofScript entry through verified JS.",
         "DS5.2 verified check/build/run recursively resolve logical imports from the entry source directory, topo-sort them through @proofscript/project, elaborate each module against exactly its transitive dependency admissions, then compile one combined pskernel-checked project.",
         "Mixed-source runtime regressions cover ProofScript -> Lean -> ProofScript transitive imports and Lean -> ProofScript imports; imported ordinary definitions execute through the same verified IR/TS/JS backend.",
         "Verified project reports expose moduleCount, deterministic moduleOrder, and per-module source kind/path/canonicalSourceHash.",
@@ -257,7 +259,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-imported-metadata+bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -270,6 +272,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Declaration elaboration accepts an optional checked-core seed containing already-admitted imported structures, classes, and instances. Imported metadata is reconstructed only from pskernel-validated CheckedCoreModule output, never directly from unverified source.",
+        "Imported structure/class metadata initializes record/projection and class recognition exactly like same-file metadata. Imported instances are reversed into newest-admission-first candidate order, matching the existing same-file unshift priority.",
         "Bounded `exact?` now closes a goal using newest-first local exact hypotheses, then newest-first already-admitted zero-universe environment constants whose checked type is definitionally equal to the target.",
         "Search is capped at 4096 environment candidates. Candidate probing is side-effect-free and final closure delegates to the ordinary `exact` transition/runtime kernel adapter.",
         "Full Lean library search remains unsupported: no polymorphic candidate instantiation, apply-generated subgoals, solveByElim, symmetry, Iff mp/mpr candidates, unstable-name filtering, config, `using`, +all, or +grind.",

@@ -320,7 +320,7 @@ pskernel-checked semantics.
 
 ### DS5 — mixed modules
 
-Status: **MVP landed for verified ordinary declarations; metadata/artifact integration remains**
+Status: **MVP landed with imported semantic metadata; artifact/cache/source-root integration remains**
 
 Landed DS5.1/DS5.2:
 
@@ -345,6 +345,10 @@ Landed DS5.1/DS5.2:
   canonical hash;
 - imports are verified-only in this checkpoint; the transitional legacy lane
   fails closed instead of silently ignoring dependency semantics.
+- dependency closure replay now also seeds imported structure/class/global-
+  instance elaborator metadata from the already pskernel-validated checked
+  module. Cross-module record construction/projection and instance synthesis
+  therefore use the same metadata model as same-file elaboration.
 
 Current bounded resolution rule:
 
@@ -359,9 +363,6 @@ source roots/package resolution are later DS5 work.
 
 Remaining DS5 work:
 
-- reconstruct imported structure/class/global-instance elaborator metadata so
-  cross-module records, projections, and instance synthesis have the same
-  context as same-file elaboration;
 - integrate `@proofscript/module` artifacts and `BuildCache` rather than
   rebuilding all reachable source on every invocation;
 - define configured source roots/package import resolution;

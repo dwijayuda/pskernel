@@ -488,9 +488,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 6. Validate and then broaden the landed bounded zero-subgoal `exact?` search
    only where Lean library-search semantics can be modeled explicitly; do not
    silently turn it into recursive automation.
-7. Continue the landed DS5 mixed-source verified project MVP: reconstruct
-   imported structure/class/global-instance elaborator metadata, then integrate
-   psmodule/cache artifacts and configured source roots. Ordinary cross-source
+7. Continue the landed DS5 mixed-source verified project MVP: imported
+   structure/class/global-instance elaborator metadata is now preserved from
+   pskernel-validated dependency modules; next integrate psmodule/cache
+   artifacts and configured source roots. Ordinary cross-source
    definitions/theorems already compile through topo-ordered pskernel
    admissions.
 8. Start DS6 language-service/LSP source-kind routing only after imported

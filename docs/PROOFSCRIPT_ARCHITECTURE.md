@@ -512,3 +512,23 @@ x == y = true
 
 The type/proposition parser and Lean lowering are now separate modules, keeping
 parser growth below the repository source-shape ceiling.
+
+## Explicit dependent Pi checkpoint
+
+The verified type/proposition surface now supports the reference-backed form:
+
+```text
+(x : T) -> U
+```
+
+The binder is elaborated as an ordinary Lean-style dependent function:
+`T` is checked as a type, a fresh local `x : T` is introduced while
+elaborating `U`, and the resulting codomain is abstracted into kernel
+`forallE`.
+
+This is not a second function-type representation. Non-dependent `A -> B`
+continues to use the same kernel constructor with an anonymous binder.
+
+The first accepted source slice is explicit/default binding only. Implicit
+`{x : T}`, strict implicit `{{x : T}}`, and instance `[x : T]` Pi syntax
+remain unsupported until a concrete ProofScript library requires them.

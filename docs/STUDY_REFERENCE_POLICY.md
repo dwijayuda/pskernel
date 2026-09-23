@@ -152,3 +152,13 @@ propositional equality layer. Therefore canonical lowering must parenthesize
 that subtree instead of assuming the two parsers choose the same tree.
 The Bool theorem-term checkpoint follows that rule and continues to use the
 existing verified Bool/BEq elaboration helpers.
+
+## Dependent Pi reference evidence
+
+The authoritative ProofScript v0.7 reference explicitly lists dependent
+functions and gives the type example `(x : Nat) -> Fin x -> Nat`. The pinned
+Lean 4.34 parser models dependent arrow as a bracketed binder followed by
+`->`/Unicode arrow at arrow precedence. The implemented checkpoint follows
+that model for one explicit named binder and lowers/elaborates to ordinary
+kernel `forallE`; it does not introduce a ProofScript-specific dependent
+function semantics.

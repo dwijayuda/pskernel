@@ -102,11 +102,11 @@ Purpose: make ProofScript adequate for nontrivial verified libraries.
 
 Implement, in this order:
 
-1. broaden the landed dependent theorem/result term support beyond the now
-   landed named applications, Nat literals/arithmetic (+,-,*,/,%), Nat
-   relations (<,<=,>,>=), Bool literals/! / && / || / == / != terms, and
-   native propositional `=`; next add only the remaining expression forms
-   required by real specifications (lambdas/match where justified);
+1. theorem/result foundations now include named applications, explicit
+   dependent Pi binders, Nat literals/arithmetic/relations, Bool primitive
+   terms, and native propositional `=`. Add further expression forms only
+   when a concrete specification requires them; do not expand syntax by
+   analogy alone.
 2. indexed/dependent inductive application in elaboration and erasure;
 3. constructor/match coverage for indexed families;
 4. multiple structural recursive parameters where Lean's termination theory
@@ -475,11 +475,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
 4. Validate the landed bounded multi-rule simp-only proof reconstruction.
-5. Broaden the landed theorem-statement term support beyond native `=`, Nat
-   literals/arithmetic/relations, and Bool-valued primitive terms only as real
-   specifications require; next evaluate dependent lambdas/match rather than
-   inventing theorem-only operator semantics.
-6. Add deterministic search tactics such as exact? only after that foundation.
+5. Keep theorem-statement syntax evidence-driven; explicit dependent Pi plus
+   the current Nat/Bool/propositional forms cover the reference-backed
+   foundation. Add lambdas/match only when a concrete specification needs them.
+6. Add deterministic search tactics such as exact? on top of this foundation.
 7. Implement project/module/import semantics on the checked-core path.
 8. Design and implement explicit npm/JS FFI.
 9. Start the ProofScript-written standard library.

@@ -104,11 +104,13 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
+      "status": "v061-dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "The type/proposition grammar now recognizes explicit dependent arrows `(x : T) -> U`, matching the v0.7 reference example `(x : Nat) -> Fin x -> Nat` and lowering directly to Lean binder-arrow syntax.",
+        "Named dependent binders are scoped in dependency analysis so the binder name is not misclassified as a local declaration dependency.",
         "The theorem/type-position grammar now reuses the full current v0.6.1 Bool/Nat binary precedence table for +,-,*,/,%, relations, ==, !=, &&, and ||, and adds Bool literals plus unary !.",
         "Canonical Lean lowering is split from parsing. It uses Lean 4.34 operator precedences, including =/== at 50, && at 35, and || at 30, so generated parentheses preserve the ProofScript AST.",
         "The theorem/type-position binary grammar now includes Nat <,<=,>,>= using the shared operator precedence table. Relations bind below Nat arithmetic and above propositional `=`/arrows in the supported surface.",
@@ -218,7 +220,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -231,6 +233,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Explicit dependent Pi types `(x : T) -> U` now elaborate by checking T as a type, extending the local context with x while elaborating U, then abstracting the local free variable into the kernel `forallE` body.",
+        "The current Pi slice intentionally supports one explicit default binder per arrow. Implicit/strict-implicit/instance Pi binders in type syntax remain fail-closed until required by real source.",
         "Bool literals plus !, &&, ||, ==, and != can now appear as dependent theorem/type-position terms. They reuse the same Bool.not/Bool.and/Bool.or and bounded Nat/Bool BEq construction/checking helpers as ordinary expressions.",
         "Bool-valued header expressions are not propositions by themselves: final declaration types still must inhabit a Sort. Typical propositions use outer propositional equality, for example `(x == y) = true`.",
         "The syntax lowerer preserves ProofScript's established operator ordering but emits parentheses where Lean 4.34's equal precedence for `=` and `==` would otherwise change the parse.",

@@ -67,6 +67,14 @@ test('mkMax matches Lean structural absorption shortcuts',()=>{
 test('universe max commutative semantically',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));assert(levelEquivalent(mkMax(u,v),mkMax(v,u)));});
 test('imax u 0 = 0',()=>{const u=levelParam(nameFromDotted('u'));assert(levelEquivalent(mkIMax(u,levelZero),levelZero));});
 test('imax u (v+1) = max u (v+1)',()=>{const u=levelParam(nameFromDotted('u')),v=levelSucc(levelParam(nameFromDotted('v')));assert(levelEquivalent(mkIMax(u,v),mkMax(u,v)));});
+test('Lean structural equality includes MData payload while defeq ignores it',()=>{
+ const a={kind:'mdata',data:{tag:'a'},expr:natLit(0)} as const;
+ const b={kind:'mdata',data:{tag:'b'},expr:natLit(0)} as const;
+ assert(!exprLeanEq(a,b),'Lean Expr structural equality compares MData payloads');
+ assert(!exprEq(a,b),'strong core expression equality compares MData payloads');
+ assert(new TypeChecker(baseEnv()).isDefEq(a,b),'kernel definitional equality intentionally ignores MData payloads');
+});
+
 test('infer identity lambda',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));const ty=tc.check(id);eqExpr(ty,forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat)));});
 test('WHNF beta reduction consumes wide lambda spines in one substitution batch',()=>{
  const n=512;let fn:any=bvar(n-1);

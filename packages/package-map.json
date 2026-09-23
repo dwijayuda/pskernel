@@ -161,7 +161,9 @@
         "Theorem tactic terms support Lean-native `by exact` and `by assumption`; both elaborate to ordinary pskernel proof terms and receive no trusted authority.",
         "`exact` elaborates/checks its term against the expected goal; `assumption` searches local hypotheses by pskernel definitional equality.",
         "Kernel.addTheorem remains the final proof-acceptance boundary.",
-        "Multi-step tactic sequences, intro/apply/refine, tactic metavariable goals, typeclass synthesis, and automation remain later milestones."
+        "Multi-step tactic sequences, intro/apply/refine, tactic metavariable goals, typeclass synthesis, and automation remain later milestones.",
+        "Value/theorem headers are elaborated once through a reusable semantic header API; declaration bodies receive the declared result type as their expected type, enabling faithful expected-type lambda and tactic elaboration.",
+        "The reusable header API is intended for editor goal display but returns real pskernel Expr/LocalContext state; editor consumers receive no proof authority from it."
       ]
     },
     {

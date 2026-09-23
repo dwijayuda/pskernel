@@ -391,3 +391,15 @@ console.log('ok - @proofscript/elab core let elaboration');
   equal(failed,true);
 }
 console.log('ok - @proofscript/elab exact and assumption tactic terms');
+
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem expectedBy(P : Prop, h : P) : P := by exact h; '+
+    'theorem expectedLambda(P : Prop) : P -> P := fun h => h;',
+  ));
+  equal(result.theorems.length,2);
+  equal(result.environment.find(nameFromDotted('expectedBy'))?.kind,'theorem');
+  equal(result.environment.find(nameFromDotted('expectedLambda'))?.kind,'theorem');
+}
+console.log('ok - @proofscript/elab declaration expected-type propagation');

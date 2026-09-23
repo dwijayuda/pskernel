@@ -5,8 +5,6 @@ import type {
 import {
   Environment,
   Kernel,
-  LocalContext,
-  TypeChecker,
   type DefinitionInfo,
   type TheoremInfo,
   type Expr,
@@ -17,13 +15,11 @@ import {
   lam,
   nameFromDotted,
 } from 'lean-ts-kernel';
-import {ExprMetaContext} from '@proofscript/meta';
-import {elaborateV061Type} from './v061-type-elab.js';
+import {elaborateV061ValueHeader} from './v061-header-elab.js';
 import {
   checkElaboratedTerm,
   elaborateV061Term,
 } from './v061-term-elab.js';
-import type {V061CoreElabContext} from './v061-context.js';
 
 function maxRegularHeight(environment:Environment,expr:Expr):bigint {
   let max=0n;
@@ -74,47 +70,12 @@ function elaborateValueDeclaration(
     );
   }
 
-  let context:V061CoreElabContext={
-    environment,
-    localContext:new LocalContext(),
-    locals:new Map(),
-    metaContext:new ExprMetaContext(environment),
-  };
-  const parameters:{
-    readonly id:string;
-    readonly name:ReturnType<typeof nameFromDotted>;
-    readonly type:Expr;
-    readonly binderInfo:import('lean-ts-kernel').BinderInfo;
-  }[]=[];
+  const header=elaborateV061ValueHeader(source,environment);
+  const context=header.context;
+  const parameters=header.parameters;
+  const resultType=header.resultType;
 
-  for(const parameter of source.params){
-    if(context.locals.has(parameter.name)){
-      throw new Error(
-        "PS_ELAB_DUPLICATE_PARAM: duplicate parameter '"+parameter.name+"'",
-      );
-    }
-    const type=elaborateV061Type(parameter.type,context);
-    const checker=new TypeChecker(
-      environment,
-      context.localContext.clone(),
-    );
-    checker.ensureSort(checker.check(type),type);
-    const userName=nameFromDotted(parameter.name);
-    const next=context.localContext.clone();
-    const id=next.fresh(parameter.name);
-    const binderInfo=parameter.binderInfo??'default';
-    next.addLocal(id,userName,type,binderInfo);
-    const locals=new Map(context.locals);
-    locals.set(parameter.name,id);
-    context={...context,localContext:next,locals};
-    parameters.push({id,name:userName,type,binderInfo});
-  }
-
-  const resultType=elaborateV061Type(source.resultType,context);
-  const checker=new TypeChecker(environment,context.localContext.clone());
-  checker.ensureSort(checker.check(resultType),resultType);
-
-  const body=elaborateV061Term(source.body,context);
+  const body=elaborateV061Term(source.body,context,resultType);
   checkElaboratedTerm(body,resultType,context);
   context.metaContext.validateGroundAssignments();
   let value=context.metaContext.instantiate(body.term);

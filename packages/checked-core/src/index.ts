@@ -2,6 +2,7 @@ import {
   Environment,
   Kernel,
   addInductive,
+  appView,
   nameEq,
   nameKey,
   nameToString,
@@ -29,6 +30,12 @@ export interface CheckedCoreStructure {
 
 export interface CheckedCoreClass extends CheckedCoreStructure {}
 
+export interface CheckedCoreInstance {
+  readonly name:Name;
+  readonly className:Name;
+  readonly anonymous:boolean;
+}
+
 export type CheckedCoreAdmission =
   | {
       readonly kind:'constant';
@@ -47,6 +54,11 @@ export type CheckedCoreAdmission =
       readonly kind:'class';
       readonly declaration:InductiveDecl;
       readonly structure:CheckedCoreClass;
+    }
+  | {
+      readonly kind:'instance';
+      readonly declaration:DefinitionInfo;
+      readonly instance:CheckedCoreInstance;
     };
 
 export interface CheckedCoreModule {
@@ -60,6 +72,7 @@ export interface CheckedCoreModule {
   readonly inductives:readonly InductiveInfo[];
   readonly structures:readonly CheckedCoreStructure[];
   readonly classes:readonly CheckedCoreClass[];
+  readonly instances:readonly CheckedCoreInstance[];
 }
 
 function validateStructure(
@@ -113,6 +126,36 @@ function validateStructure(
   }
 }
 
+
+function validateInstance(
+  classes:readonly CheckedCoreClass[],
+  declaration:DefinitionInfo,
+  instance:CheckedCoreInstance,
+):void {
+  if(!nameEq(declaration.name,instance.name)){
+    throw new Error('checked-core instance invariant: declaration/name mismatch');
+  }
+  if(!classes.some((item)=>nameEq(item.name,instance.className))){
+    throw new Error(
+      "checked-core instance invariant: class '"+nameToString(instance.className)+
+      "' was not admitted before instance '"+nameToString(instance.name)+"'",
+    );
+  }
+
+  let target=declaration.type;
+  while(target.kind==='forall')target=target.body;
+  const view=appView(target);
+  if(
+    view.fn.kind!=='const'
+    ||!nameEq(view.fn.name,instance.className)
+  ){
+    throw new Error(
+      "checked-core instance invariant: declaration '"+nameToString(instance.name)+
+      "' does not return class '"+nameToString(instance.className)+"'",
+    );
+  }
+}
+
 /**
  * Replay the complete frontend result through pskernel in source admission
  * order. Structure field metadata is accepted only after it is checked against
@@ -131,6 +174,7 @@ export function admitCheckedCoreAdmissions(
   const inductives:InductiveInfo[]=[];
   const structures:CheckedCoreStructure[]=[];
   const classes:CheckedCoreClass[]=[];
+  const instances:CheckedCoreInstance[]=[];
 
   for(const admission of admissions){
     if(
@@ -160,6 +204,15 @@ export function admitCheckedCoreAdmissions(
       continue;
     }
 
+    if(admission.kind==='instance'){
+      validateInstance(classes,admission.declaration,admission.instance);
+      kernel.addDefinition(admission.declaration);
+      declarations.push(admission.declaration);
+      definitions.push(admission.declaration);
+      instances.push(admission.instance);
+      continue;
+    }
+
     const declaration=admission.declaration;
     if(declaration.kind==='definition'){
       kernel.addDefinition(declaration);
@@ -182,6 +235,7 @@ export function admitCheckedCoreAdmissions(
     inductives,
     structures,
     classes,
+    instances,
   };
 }
 

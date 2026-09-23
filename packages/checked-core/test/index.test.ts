@@ -161,3 +161,71 @@ console.log('ok - @proofscript/checked-core mixed inductive admission');
   equal(checked.environment.find(Sized)?.kind,'inductive');
 }
 console.log('ok - @proofscript/checked-core class metadata admission');
+
+
+{
+  const Boxed=nameFromDotted('Boxed');
+  const mk=nameFromDotted('Boxed.mk');
+  const boxedNat=nameFromDotted('boxedNat');
+  const Nat=nameFromDotted('Nat');
+  const base=new Environment();
+  base.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const checked=admitCheckedCoreAdmissions(base,[
+    {
+      kind:'class',
+      structure:{
+        name:Boxed,
+        constructor:mk,
+        fields:[{name:'value',index:0,binderInfo:'default'}],
+      },
+      declaration:{
+        levelParams:[],
+        numParams:0,
+        types:[{
+          name:Boxed,
+          type:sort(levelSucc(levelZero)),
+          ctors:[{
+            name:mk,
+            type:{
+              kind:'forall',
+              name:nameFromDotted('value'),
+              type:constant(Nat),
+              body:constant(Boxed),
+              binderInfo:'default',
+            },
+          }],
+        }],
+      },
+    },
+    {
+      kind:'instance',
+      instance:{
+        name:boxedNat,
+        className:Boxed,
+        anonymous:false,
+      },
+      declaration:{
+        kind:'definition',
+        name:boxedNat,
+        levelParams:[],
+        type:constant(Boxed),
+        value:{
+          kind:'app',
+          fn:constant(mk),
+          arg:{kind:'lit',literal:{kind:'nat',value:0n}},
+        },
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+  ]);
+  equal(checked.instances.length,1);
+  equal(checked.instances[0]?.anonymous,false);
+  equal(checked.environment.find(boxedNat)?.kind,'definition');
+}
+console.log('ok - @proofscript/checked-core instance registry metadata');

@@ -12,6 +12,9 @@ import {
   abstractFVar,
   exprToString,
   forallE,
+  appView,
+  constant,
+  nameToString,
   hasMVar,
   lam,
   nameFromDotted,
@@ -78,12 +81,14 @@ function elaborateValueDeclaration(
   environment:Environment,
   structures:ReadonlyMap<string,CheckedCoreStructure>,
   classes:ReadonlySet<string>,
+  globalInstances:readonly Expr[],
 ):DefinitionInfo|TheoremInfo {
   const header=elaborateV061ValueHeader(
     source,
     environment,
     structures,
     classes,
+    globalInstances,
   );
   const context=header.context;
   const parameters=header.parameters;
@@ -154,6 +159,64 @@ function elaborateValueDeclaration(
   };
 }
 
+
+function instanceTargetClass(
+  type:Expr,
+  classes:ReadonlySet<string>,
+):ReturnType<typeof nameFromDotted> {
+  let target=type;
+  while(target.kind==='forall')target=target.body;
+  const view=appView(target);
+  if(view.fn.kind!=='const'){
+    throw new Error(
+      'PS_ELAB_INSTANCE_TARGET: instance result must be an admitted class application',
+    );
+  }
+  const className=nameToString(view.fn.name);
+  if(!classes.has(className)){
+    throw new Error(
+      "PS_ELAB_INSTANCE_TARGET: '"+className+
+      "' is not a previously admitted ProofScript class",
+    );
+  }
+  return view.fn.name;
+}
+
+function elaborateInstanceDeclaration(
+  source:V061InstanceDeclaration,
+  environment:Environment,
+  structures:ReadonlyMap<string,CheckedCoreStructure>,
+  classes:ReadonlySet<string>,
+  globalInstances:readonly Expr[],
+):{
+  readonly declaration:DefinitionInfo;
+  readonly className:ReturnType<typeof nameFromDotted>;
+} {
+  const valueSource:V061ValueDeclaration={
+    kind:'def',
+    name:source.name,
+    params:source.params,
+    resultType:source.resultType,
+    body:source.body,
+    terminatedBySemicolon:source.terminatedBySemicolon,
+    span:source.span,
+  };
+  const elaborated=elaborateValueDeclaration(
+    valueSource,
+    environment,
+    structures,
+    classes,
+    globalInstances,
+  );
+  if(elaborated.kind!=='definition'){
+    throw new Error('PS_ELAB_INSTANCE_INTERNAL: instance did not elaborate as definition');
+  }
+  return {
+    declaration:elaborated,
+    className:instanceTargetClass(elaborated.type,classes),
+  };
+}
+
 export type ElaboratedV061Module=CheckedCoreModule;
 
 export function elaborateV061Definitions(
@@ -165,6 +228,7 @@ export function elaborateV061Definitions(
   const admissions:CheckedCoreAdmission[]=[];
   const structures=new Map<string,CheckedCoreStructure>();
   const classes=new Set<string>();
+  const globalInstances:Expr[]=[];
   const kernel=new Kernel(workEnvironment);
 
   for(const declaration of module.declarations){
@@ -234,6 +298,36 @@ export function elaborateV061Definitions(
       continue;
     }
 
+    if(declaration.kind==='instance'){
+      let instance;
+      try{
+        instance=elaborateInstanceDeclaration(
+          declaration,
+          workEnvironment,
+          structures,
+          classes,
+          globalInstances,
+        );
+        kernel.addDefinition(instance.declaration);
+      }catch(error){
+        const detail=error instanceof Error?error.message:String(error);
+        throw new Error(
+          "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
+        );
+      }
+      globalInstances.unshift(constant(instance.declaration.name));
+      admissions.push({
+        kind:'instance',
+        declaration:instance.declaration,
+        instance:{
+          name:instance.declaration.name,
+          className:instance.className,
+          anonymous:declaration.anonymous,
+        },
+      });
+      continue;
+    }
+
     let info:DefinitionInfo|TheoremInfo;
     try{
       info=elaborateValueDeclaration(
@@ -241,6 +335,7 @@ export function elaborateV061Definitions(
         workEnvironment,
         structures,
         classes,
+        globalInstances,
       );
     }catch(error){
       const detail=error instanceof Error?error.message:String(error);

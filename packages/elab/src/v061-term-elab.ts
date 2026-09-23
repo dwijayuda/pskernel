@@ -71,6 +71,7 @@ export function elaborateV061Term(
         ...(expected===undefined?{}:{expectedType:expected}),
         localContext:context.localContext,
         localInstances:v061LocalInstanceTerms(context),
+        globalInstances:context.globalInstances,
         classNames:context.classes,
       });
       const elaboratedTerm=context.metaContext.instantiate(applied.term);
@@ -123,6 +124,7 @@ export function elaborateV061Term(
         ...(expected===undefined?{}:{expectedType:expected}),
         localContext:context.localContext,
         localInstances:v061LocalInstanceTerms(context),
+        globalInstances:context.globalInstances,
         classNames:context.classes,
       });
       const term=context.metaContext.instantiate(result.term);

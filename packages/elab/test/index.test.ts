@@ -918,3 +918,23 @@ console.log('ok - @proofscript/elab class admission as kernel inductive');
   equal(caller?.value.kind,'lam');
 }
 console.log('ok - @proofscript/elab local class instance synthesis');
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'class Boxed(α : Type) where { value : α; } '+
+    'instance boxedNat : Boxed(Nat) := { value := 7 : Boxed(Nat) }; '+
+    'function get {α : Type}[inst : Boxed(α)](x : α) : α := inst.value; '+
+    'function read(x : Nat) : Nat := get(x);',
+  ),env);
+  equal(result.classes.length,1);
+  equal(result.instances.length,1);
+  equal(result.instances[0]?.anonymous,false);
+  const read=result.definitions.find(
+    (item)=>item.name.kind==='str'&&item.name.value==='read',
+  );
+  equal(read?.kind,'definition');
+  equal(result.environment.find(nameFromDotted('boxedNat'))?.kind,'definition');
+}
+console.log('ok - @proofscript/elab global class instance synthesis');

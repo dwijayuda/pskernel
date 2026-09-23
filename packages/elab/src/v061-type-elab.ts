@@ -44,6 +44,7 @@ export function elaborateV061Type(
         args,
         localContext:context.localContext,
         localInstances:v061LocalInstanceTerms(context),
+        globalInstances:context.globalInstances,
         classNames:context.classes,
       });
       const term=context.metaContext.instantiate(applied.term);

@@ -20,6 +20,7 @@ export interface V061CoreElabContext {
   readonly metaContext:ExprMetaContext;
   readonly structures:ReadonlyMap<string,CheckedCoreStructure>;
   readonly classes?:ReadonlySet<string>;
+  readonly globalInstances?:readonly Expr[];
   readonly structuralRecursion?:V061StructuralRecursion;
 }
 

@@ -38,6 +38,7 @@ export interface ElaborateApplicationOptions {
   readonly expectedType?:Expr;
   readonly localContext?:LocalContext;
   readonly localInstances?:readonly Expr[];
+  readonly globalInstances?:readonly Expr[];
   readonly classNames?:ReadonlySet<string>;
 }
 
@@ -91,6 +92,7 @@ export function elaborateApplication({
   expectedType,
   localContext=new LocalContext(),
   localInstances=[],
+  globalInstances=[],
   classNames=new Set(),
 }:ElaborateApplicationOptions):ElaboratedApplication {
   const checker=new TypeChecker(environment,localContext.clone());
@@ -164,7 +166,7 @@ export function elaborateApplication({
     if(functionType.binderInfo==='instImplicit'){
       const synthesized=trySynthesizeLocalInstance(
         expectedType,
-        localInstances,
+        [...localInstances,...globalInstances],
         classNames,
         metaContext,
         checker,

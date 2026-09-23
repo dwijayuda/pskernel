@@ -5,7 +5,7 @@
   "type": "module",
   "description": "npm-oriented ProofScript project graph, cache and build orchestration.",
   "proofscript": {
-    "status": "runtime-dependency-policy+dual-source-node-resolver+module-graph-mvp",
+    "status": "runtime-package-subpaths+runtime-dependency-policy+dual-source-node-resolver+module-graph-mvp",
     "phase": "D",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

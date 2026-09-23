@@ -1,15 +1,17 @@
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
+import {npmPackageRootFromExternalSource} from '@proofscript/project/node';
 import type {ResolvedSourceProject} from './project-sources.js';
 
 export interface RuntimeDependencyPolicyEntry {
   readonly source:string;
+  readonly packageRoot:string;
   readonly version:string;
 }
 
 export interface RuntimeDependencyPolicyReport {
-  readonly schema:'proofscript-runtime-dependencies-v1';
+  readonly schema:'proofscript-runtime-dependencies-v2';
   readonly integrity:string;
   readonly used:readonly RuntimeDependencyPolicyEntry[];
 }
@@ -37,16 +39,18 @@ export function assertRuntimeDependencyPolicy(
   configured:Readonly<Record<string,string>>,
 ):RuntimeDependencyPolicyReport {
   const used=usedRuntimeSources(project).map((source)=>{
-    const version=configured[source];
+    const packageRoot=npmPackageRootFromExternalSource(source);
+    const version=configured[packageRoot];
     if(version===undefined){
       throw new Error(
         "PS_RUNTIME_DEPENDENCY_UNDECLARED: external module '"+source+
-        "' is not listed in psconfig.json runtimeDependencies",
+        "' belongs to package root '"+packageRoot+
+        "', which is not listed in psconfig.json runtimeDependencies",
       );
     }
-    return {source,version};
+    return {source,packageRoot,version};
   });
-  const schema='proofscript-runtime-dependencies-v1' as const;
+  const schema='proofscript-runtime-dependencies-v2' as const;
   const integrity='sha256:'+createHash('sha256')
     .update(JSON.stringify({schema,used}),'utf8')
     .digest('hex');
@@ -55,12 +59,12 @@ export function assertRuntimeDependencyPolicy(
 
 async function installedPackageIdentity(
   projectDirectory:string,
-  source:string,
+  packageRoot:string,
 ):Promise<{readonly name:string;readonly version:string}> {
   const path=join(
     projectDirectory,
     'node_modules',
-    ...source.split('/'),
+    ...packageRoot.split('/'),
     'package.json',
   );
   let text:string;
@@ -68,7 +72,7 @@ async function installedPackageIdentity(
     text=await readFile(path,'utf8');
   }catch{
     throw new Error(
-      "PS_RUNTIME_DEPENDENCY_MISSING: package '"+source+
+      "PS_RUNTIME_DEPENDENCY_MISSING: package '"+packageRoot+
       "' is not installed at '"+path+"'",
     );
   }
@@ -77,7 +81,7 @@ async function installedPackageIdentity(
     parsed=JSON.parse(text);
   }catch{
     throw new Error(
-      "PS_RUNTIME_DEPENDENCY_PACKAGE_JSON: package '"+source+
+      "PS_RUNTIME_DEPENDENCY_PACKAGE_JSON: package '"+packageRoot+
       "' has invalid package.json",
     );
   }
@@ -87,14 +91,14 @@ async function installedPackageIdentity(
     ||Array.isArray(parsed)
   ){
     throw new Error(
-      "PS_RUNTIME_DEPENDENCY_PACKAGE_JSON: package '"+source+
+      "PS_RUNTIME_DEPENDENCY_PACKAGE_JSON: package '"+packageRoot+
       "' has invalid package metadata",
     );
   }
   const record=parsed as Record<string,unknown>;
   if(typeof record.name!=='string'||typeof record.version!=='string'){
     throw new Error(
-      "PS_RUNTIME_DEPENDENCY_PACKAGE_JSON: package '"+source+
+      "PS_RUNTIME_DEPENDENCY_PACKAGE_JSON: package '"+packageRoot+
       "' must expose string name/version",
     );
   }
@@ -105,21 +109,25 @@ export async function verifyInstalledRuntimeDependencies(
   projectDirectory:string,
   policy:RuntimeDependencyPolicyReport,
 ):Promise<void> {
+  const roots=new Map<string,string>();
   for(const dependency of policy.used){
+    roots.set(dependency.packageRoot,dependency.version);
+  }
+  for(const [packageRoot,version] of [...roots.entries()].sort()){
     const installed=await installedPackageIdentity(
       projectDirectory,
-      dependency.source,
+      packageRoot,
     );
-    if(installed.name!==dependency.source){
+    if(installed.name!==packageRoot){
       throw new Error(
         "PS_RUNTIME_DEPENDENCY_IDENTITY: expected package '"+
-        dependency.source+"', installed metadata names '"+installed.name+"'",
+        packageRoot+"', installed metadata names '"+installed.name+"'",
       );
     }
-    if(installed.version!==dependency.version){
+    if(installed.version!==version){
       throw new Error(
-        "PS_RUNTIME_DEPENDENCY_VERSION: package '"+dependency.source+
-        "' requires exact version "+dependency.version+
+        "PS_RUNTIME_DEPENDENCY_VERSION: package '"+packageRoot+
+        "' requires exact version "+version+
         ', installed '+installed.version,
       );
     }

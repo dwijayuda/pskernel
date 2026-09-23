@@ -380,6 +380,53 @@ Exit condition:
 - a small Node application can use at least one normal npm package while its
   internal pure logic remains verified ProofScript.
 
+### Runtime lockfile closure checkpoint
+
+Verified `build`/`run` now strengthen the host-runtime assurance boundary
+when source externals are present:
+
+```text
+psconfig runtimeDependencies (exact roots)
+  -> package-lock.json v3
+  -> direct package entries
+  -> reachable dependency / optional / peer edges
+  -> canonical runtime lock closure
+  -> required installed name/version checks
+  -> sha256 runtimeDependencyLock.integrity
+```
+
+The closure records package location, package name, exact version, resolved
+source, npm SRI metadata, required-vs-optional reachability, and deterministic
+dependency edges. Required missing transitive entries fail closed. Optional-only
+subtrees may be absent, matching npm's platform-dependent optional dependency
+model.
+
+This identity remains deliberately separate from both source/proof identity and
+the direct runtime policy identity:
+
+```text
+projectIntegrity
+  = checked source/dependency/kernel semantic identity
+
+runtimeDependencyPolicy.integrity
+  = declared exact direct host-package roots
+
+runtimeDependencyLock.integrity
+  = reachable package-lock v3 runtime tree metadata
+```
+
+A lockfile/SRI proves neither theorem truth nor host implementation behavior.
+The CLI still reports every extern with `proofEvidence=false`. Verified
+`check` does not require a lockfile or installed packages; verified
+`build`/`run` do, because they make an executable-runtime reproducibility
+claim.
+
+The first lock policy rejects linked packages and entries without exact
+version/resolved/SRI metadata. It verifies installed package name/version for
+required reachable entries, but does not claim to re-hash unpacked
+`node_modules` contents against tarball SRI. Strict installation remains the
+package-manager responsibility (for npm, `npm ci`).
+
 ## Milestone L6 — controlled effects for general-purpose JS
 
 Purpose: move from pure verified libraries to applications.
@@ -501,6 +548,53 @@ These are mandatory for all future development.
 - Bidirectional source translation is judged by checked declaration and
   executable-IR equivalence, not textual identity.
 
+### Bounded npm package-subpath checkpoint
+
+The first FFI policy now allows public package subpaths while keeping
+`psconfig.runtimeDependencies` keyed only by exact package roots:
+
+```json
+{
+  "runtimeDependencies": {
+    "host-lib": "1.0.0"
+  }
+}
+```
+
+may back:
+
+```text
+extern function hostShout(value : String) : String
+  from "host-lib/feature" import shout;
+```
+
+Runtime policy v2 records both:
+
+```text
+source      = host-lib/feature
+packageRoot = host-lib
+version     = 1.0.0
+```
+
+The direct installed-package check and package-lock closure start from
+`host-lib` exactly once even if multiple public subpaths are imported.
+
+ProofScript does not reimplement `package.json.exports` conditional
+resolution. The generated TypeScript is compiled with the existing TypeScript
+Bundler resolver, which consumes package exports/type conditions, and emitted
+ESM is then resolved by Node at runtime using Node's `import` conditions. An
+unexported or type-incompatible subpath therefore fails at the host compile or
+runtime resolver boundary rather than being silently interpreted by
+ProofScript.
+
+The external logical signature remains authored ProofScript metadata and a
+runtime assumption. Resolving a public package subpath does not make host code
+proof evidence.
+
+The bounded source classifier rejects relative/absolute paths, `node:`
+builtins, traversal segments, empty segments, and nested `node_modules`
+segments. Default/namespace/CommonJS/dynamic imports remain unsupported.
+
 ## Immediate execution queue
 
 Do not reorder without repository evidence. The dual-source L4.5 frontend
@@ -522,9 +616,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    only where Lean library-search semantics can be modeled explicitly; do not
    silently turn it into recursive automation.
 7. Continue DS5 from the landed mixed-source project + replay-gated persistent
-   proofscript-module@2 artifact path. Source FFI, assurance, exact direct
-   package policy, and real runtime resolution are landed; next evaluate
-   transitive lockfile integrity before broadening the package surface.
+   proofscript-module@2 artifact path. Source FFI, assurance, exact package-root
+   policy, transitive package-lock v3 closure fingerprinting, and bounded public
+   package subpaths are landed. Do not broaden to default/namespace/CommonJS,
+   builtins, or arbitrary deep files without a concrete ABI requirement.
 8. DS6 editor MVP is landed: source-kind routing, checked import composition,
    shared Node/LSP source-root resolution, cross-source navigation,
    non-destructive .ps / supported .lean conversion actions, and importer
@@ -532,9 +627,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    improve lexical navigation with scope-aware indexing without changing proof
    authority.
 9. Continue the explicit npm/JS FFI from the landed source signature,
-   assurance, exact-version direct-package policy, replayable checked-core
-   admission, and end-to-end ESM runtime binding. Next decide lockfile/transitive
-   integrity, then broaden imports only when their ABI/trust model is explicit.
+   assurance, exact-version package-root policy, replayable checked-core
+   admission, end-to-end named ESM binding, transitive package-lock v3 closure,
+   and bounded public package subpaths. Hold the host import surface here until
+   a standard-library/application need justifies another ABI form.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.

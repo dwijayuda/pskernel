@@ -112,6 +112,7 @@ import {join} from 'node:path';
 import {
   nodeProjectResolutionForEntry,
   projectRuntimeDependenciesFromConfig,
+  npmPackageRootFromExternalSource,
   projectSourceRootsFromConfig,
   resolveLogicalModuleSource,
 } from '../src/node.js';
@@ -154,6 +155,20 @@ console.log('ok - @proofscript/project shared Node source-root resolver');
   throws(
     ()=>projectRuntimeDependenciesFromConfig({'host-lib/subpath':'1.2.3'}),
     /PS_PROJECT_CONFIG_RUNTIME_DEPENDENCIES/,
+  );
+  equal(npmPackageRootFromExternalSource('host-lib'),'host-lib');
+  equal(npmPackageRootFromExternalSource('host-lib/feature'),'host-lib');
+  equal(
+    npmPackageRootFromExternalSource('@scope/pkg/feature.js'),
+    '@scope/pkg',
+  );
+  throws(
+    ()=>npmPackageRootFromExternalSource('node:fs'),
+    /PS_PROJECT_RUNTIME_SOURCE/,
+  );
+  throws(
+    ()=>npmPackageRootFromExternalSource('host-lib/../secret'),
+    /PS_PROJECT_RUNTIME_SOURCE/,
   );
 }
 console.log('ok - @proofscript/project exact runtime dependency policy parser');

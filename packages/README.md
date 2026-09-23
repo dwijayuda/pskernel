@@ -52,3 +52,10 @@ Package implementation source is **TypeScript-first**.
 - Root `scripts/*.mjs` are separate oracle/CI scripts and are not covered by this package-source rule.
 
 The root anti-drift check enforces this policy so new packages cannot silently bypass strict TypeScript checking.
+
+
+## Cross-package foundation gate
+
+`npm run test:packages` compiles and executes each standalone foundation without enabling npm workspaces. After those builds, `npm run test:package-integration` runs a root-level smoke pipeline across syntax, pretty, meta, elaboration, tactics, compiler IR, runtime, TS backend, language snapshots, LSP mapping, project planning, and browser verification.
+
+This is an integration gate for package architecture, not a claim that the Phase B/C/D exit criteria are complete.

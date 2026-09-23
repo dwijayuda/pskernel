@@ -8,6 +8,9 @@
     "paths": {
       "@proofscript/language": [
         "../language/dist/src/index.d.ts"
+      ],
+      "@proofscript/syntax": [
+        "../syntax/dist/src/index.d.ts"
       ]
     }
   },

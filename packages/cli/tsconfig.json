@@ -2,7 +2,31 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "lean-ts-kernel": [
+        "../../dist/src/index.d.ts"
+      ],
+      "lean-ts-kernel/lean4export": [
+        "../../dist/src/integration/lean4export.d.ts"
+      ],
+      "@proofscript/module": [
+        "../module/dist/src/index.d.ts"
+      ],
+      "@proofscript/syntax": [
+        "../syntax/dist/src/index.d.ts"
+      ],
+      "@proofscript/language": [
+        "../language/dist/src/index.d.ts"
+      ],
+      "@proofscript/compiler-ir": [
+        "../compiler-ir/dist/src/index.d.ts"
+      ],
+      "@proofscript/backend-ts": [
+        "../backend-ts/dist/src/index.d.ts"
+      ]
+    }
   },
   "include": [
     "bin/**/*.ts",

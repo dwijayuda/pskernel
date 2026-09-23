@@ -201,6 +201,26 @@
       ]
     },
     {
+      "name": "erasure",
+      "path": "packages/erasure",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "generic-function-erasure-mvp",
+      "packageName": "@proofscript/erasure",
+      "dependsOn": [
+        "checked-core",
+        "compiler-ir",
+        "kernel"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Erasure consumes only kernel-admitted checked core, never source AST or the transitional software checker.",
+        "Sort/type binders become TypeScript type parameters but are erased from runtime arguments; Prop proof binders are erased entirely; runtime binders remain.",
+        "If an erased type/proof local survives in executable code, lowering fails closed.",
+        "The first executable verified-core slice supports generic functions, variables, applications, nested lambdas, lets, literals, and a tiny set of Bool/Unit constants; projections/recursors/primitive runtime calls remain later milestones."
+      ]
+    },
+    {
       "name": "compiler-ir",
       "path": "packages/compiler-ir",
       "phase": "C",

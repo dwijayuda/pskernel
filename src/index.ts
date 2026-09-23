@@ -23,6 +23,7 @@ export type {
 export * from './core/name.js';
 export * from './core/level.js';
 export * from './core/expr.js';
+export * from './core/instantiate.js';
 export { LocalContext } from './core/local-context.js';
 
 export { Kernel } from './kernel/kernel.js';

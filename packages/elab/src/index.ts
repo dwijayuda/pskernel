@@ -28,3 +28,5 @@ export interface DeclarationAdmission<Declaration,Environment> {
 export function admitElaborated<Declaration,Environment>(
   admission:DeclarationAdmission<Declaration,Environment>,environment:Environment,declaration:Declaration,
 ):Environment{return admission.admit(environment,declaration);}
+
+export * from './application.js';

@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript term/command/declaration elaboration into kernel declarations.",
   "proofscript": {
-    "status": "foundation",
+    "status": "application-elab-mvp",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -22,5 +22,9 @@
   },
   "devDependencies": {
     "typescript": "5.8.3"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../..",
+    "@proofscript/meta": "file:../meta"
   }
 }

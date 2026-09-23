@@ -19,6 +19,13 @@ export function softwareTypeEquals(left:SoftwareType,right:SoftwareType):boolean
     &&softwareTypeEquals(left.result,right.result);
 }
 
+export function makeFunctionSoftwareType(parameters:readonly SoftwareType[],result:SoftwareType):SoftwareType {
+  return [...parameters].reverse().reduce<SoftwareType>(
+    (body,parameter)=>({kind:'function',parameter,result:body}),
+    result,
+  );
+}
+
 export function softwareTypeToString(type:SoftwareType):string {
   if(typeof type==='string')return type;
   const domain=typeof type.parameter==='string'
@@ -33,7 +40,19 @@ export type CheckedSoftwareExpr =
   | {readonly kind:'bool';readonly value:boolean;readonly resultType:'Bool'}
   | {readonly kind:'unit';readonly resultType:'Unit'}
   | {readonly kind:'reference';readonly name:string;readonly resultType:SoftwareType}
-  | {readonly kind:'call';readonly callee:string;readonly args:readonly CheckedSoftwareExpr[];readonly resultType:SoftwareType}
+  | {
+      readonly kind:'call';
+      readonly callee:string;
+      readonly args:readonly CheckedSoftwareExpr[];
+      readonly callStyle:'direct'|'curried';
+      readonly resultType:SoftwareType;
+    }
+  | {
+      readonly kind:'lambda';
+      readonly binders:readonly {readonly name:string;readonly type:SoftwareType}[];
+      readonly body:CheckedSoftwareExpr;
+      readonly resultType:SoftwareType;
+    }
   | {readonly kind:'unary';readonly operator:'!';readonly operand:CheckedSoftwareExpr;readonly resultType:'Bool'}
   | {readonly kind:'binary';readonly operator:string;readonly left:CheckedSoftwareExpr;readonly right:CheckedSoftwareExpr;readonly resultType:PrimitiveSoftwareType}
   | {readonly kind:'if';readonly condition:CheckedSoftwareExpr;readonly thenBranch:CheckedSoftwareExpr;readonly elseBranch:CheckedSoftwareExpr;readonly resultType:SoftwareType}

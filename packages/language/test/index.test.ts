@@ -1,5 +1,5 @@
 import {applyTextEdits,checkV061SoftwareModule,processDocument} from '../src/index.js';
-import type {V061Module} from '@proofscript/syntax';
+import {parseV061Module,type V061Module} from '@proofscript/syntax';
 function equal(a:unknown,b:unknown):void{if(a!==b)throw new Error(`expected ${String(b)}, got ${String(a)}`);}
 const processor={process:(text:string,previous:number|undefined)=>({state:(previous??0)+1,diagnostics:text.includes('!')?[{severity:'error' as const,message:'bang',start:0,end:1}]:[]})};
 const first=processDocument('file.ps',1,'abc',processor);
@@ -74,3 +74,34 @@ console.log('ok - @proofscript/language lexical let checker');
   equal(threw,true);
 }
 console.log('ok - @proofscript/language function type HIR conversion');
+
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'const increment : Nat -> Nat := fun x => x + 1; function main(x : Nat) : Nat := increment(x);',
+  ));
+  const increment=checked.declarations[0]?.body;
+  equal(increment?.kind,'lambda');
+  if(increment?.kind==='lambda'){
+    equal(increment.binders[0]?.type,'Nat');
+    equal(typeof increment.resultType,'object');
+  }
+  const call=checked.declarations[1]?.body;
+  equal(call?.kind,'call');
+  if(call?.kind==='call')equal(call.callStyle,'curried');
+}
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'const addFn : Nat -> Nat -> Nat := fun (x : Nat) (y : Nat) => x + y;',
+  ));
+  equal(checked.declarations[0]?.body.kind,'lambda');
+}
+{
+  let threw=false;
+  try{
+    checkV061SoftwareModule(parseV061Module(
+      'const bad : Nat -> Nat := fun (x : Bool) => 1;',
+    ));
+  }catch(error){threw=/PS_CHECK_LAMBDA_BINDER_TYPE/.test(String(error));}
+  equal(threw,true);
+}
+console.log('ok - @proofscript/language reference-backed lambda checker');

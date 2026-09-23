@@ -6,7 +6,7 @@ import type {
   SoftwareSignature,
   SoftwareType,
 } from './types.js';
-import {softwareTypeEquals,softwareTypeToString} from './types.js';
+import {makeFunctionSoftwareType,softwareTypeEquals,softwareTypeToString} from './types.js';
 
 const PRIMITIVES=new Set<PrimitiveSoftwareType>(['Nat','Int','Bool','String','Unit']);
 
@@ -71,20 +71,94 @@ function checkExpr(
       throw new Error("PS_CHECK_UNKNOWN_IDENTIFIER: unknown identifier '"+expr.name+"'");
     }
     case 'call':{
+      const localType=locals.get(expr.callee);
+      if(localType!==undefined){
+        let current=localType;
+        const args:CheckedSoftwareExpr[]=[];
+        for(let index=0;index<expr.args.length;index+=1){
+          if(typeof current==='string'){
+            throw new Error("PS_CHECK_NOT_CALLABLE: local '"+expr.callee+"' has type "+softwareTypeToString(current));
+          }
+          const checked=checkExpr(expr.args[index]!,locals,signatures,current.parameter);
+          if(!softwareTypeEquals(checked.resultType,current.parameter)){
+            throw new Error("PS_CHECK_CALL_TYPE: argument "+(index+1)+" of '"+expr.callee+"' expects "+softwareTypeToString(current.parameter)+", got "+softwareTypeToString(checked.resultType));
+          }
+          args.push(checked);
+          current=current.result;
+        }
+        return {kind:'call',callee:expr.callee,args,callStyle:'curried',resultType:current};
+      }
+
       const signature=signatures.get(expr.callee);
       if(signature===undefined)throw new Error("PS_CHECK_UNKNOWN_CALL: unknown function '"+expr.callee+"'");
-      if(signature.params.length!==expr.args.length){
-        throw new Error("PS_CHECK_CALL_ARITY: '"+expr.callee+"' expects "+signature.params.length+" arguments, got "+expr.args.length);
-      }
-      const args=expr.args.map((arg,index)=>{
-        const wanted=signature.params[index]!;
-        const checked=checkExpr(arg,locals,signatures,wanted);
-        if(!softwareTypeEquals(checked.resultType,wanted)){
-          throw new Error("PS_CHECK_CALL_TYPE: argument "+(index+1)+" of '"+expr.callee+"' expects "+softwareTypeToString(wanted)+", got "+softwareTypeToString(checked.resultType));
+
+      if(signature.params.length>0){
+        if(signature.params.length!==expr.args.length){
+          throw new Error("PS_CHECK_CALL_ARITY: '"+expr.callee+"' expects "+signature.params.length+" arguments, got "+expr.args.length);
         }
-        return checked;
-      });
-      return {kind:'call',callee:expr.callee,args,resultType:signature.result};
+        const args=expr.args.map((arg,index)=>{
+          const wanted=signature.params[index]!;
+          const checked=checkExpr(arg,locals,signatures,wanted);
+          if(!softwareTypeEquals(checked.resultType,wanted)){
+            throw new Error("PS_CHECK_CALL_TYPE: argument "+(index+1)+" of '"+expr.callee+"' expects "+softwareTypeToString(wanted)+", got "+softwareTypeToString(checked.resultType));
+          }
+          return checked;
+        });
+        return {kind:'call',callee:expr.callee,args,callStyle:'direct',resultType:signature.result};
+      }
+
+      let current=signature.result;
+      const args:CheckedSoftwareExpr[]=[];
+      for(let index=0;index<expr.args.length;index+=1){
+        if(typeof current==='string'){
+          throw new Error("PS_CHECK_NOT_CALLABLE: declaration '"+expr.callee+"' has type "+softwareTypeToString(current));
+        }
+        const checked=checkExpr(expr.args[index]!,locals,signatures,current.parameter);
+        if(!softwareTypeEquals(checked.resultType,current.parameter)){
+          throw new Error("PS_CHECK_CALL_TYPE: argument "+(index+1)+" of '"+expr.callee+"' expects "+softwareTypeToString(current.parameter)+", got "+softwareTypeToString(checked.resultType));
+        }
+        args.push(checked);
+        current=current.result;
+      }
+      return {kind:'call',callee:expr.callee,args,callStyle:'curried',resultType:current};
+    }
+    case 'lambda':{
+      let expectedCursor=expected;
+      const bodyLocals=new Map(locals);
+      const binders:{name:string;type:SoftwareType}[]=[];
+
+      for(const binder of expr.binders){
+        const declared=binder.type===undefined?undefined:asType(binder.type);
+        let binderType:SoftwareType;
+        if(expectedCursor!==undefined&&typeof expectedCursor!=='string'){
+          if(declared!==undefined&&!softwareTypeEquals(declared,expectedCursor.parameter)){
+            throw new Error(
+              'PS_CHECK_LAMBDA_BINDER_TYPE: '+binder.name+' expects '+softwareTypeToString(expectedCursor.parameter)+
+              ', got '+softwareTypeToString(declared),
+            );
+          }
+          binderType=declared??expectedCursor.parameter;
+          expectedCursor=expectedCursor.result;
+        }else if(declared!==undefined){
+          binderType=declared;
+          expectedCursor=undefined;
+        }else{
+          throw new Error(
+            "PS_CHECK_LAMBDA_BINDER_TYPE: cannot infer type of lambda binder '"+binder.name+"' without an expected function type",
+          );
+        }
+        bodyLocals.set(binder.name,binderType);
+        binders.push({name:binder.name,type:binderType});
+      }
+
+      const body=checkExpr(expr.body,bodyLocals,signatures,expectedCursor);
+      const resultType=makeFunctionSoftwareType(binders.map((binder)=>binder.type),body.resultType);
+      if(expected!==undefined&&!softwareTypeEquals(resultType,expected)){
+        throw new Error(
+          'PS_CHECK_LAMBDA_TYPE: expected '+softwareTypeToString(expected)+', got '+softwareTypeToString(resultType),
+        );
+      }
+      return {kind:'lambda',binders,body,resultType};
     }
     case 'unary':{
       const operand=checkExpr(expr.operand,locals,signatures,'Bool');

@@ -9,7 +9,19 @@ export type SoftwareIrType=SoftwareType;
 export type SoftwareIrExpr =
   | {readonly kind:'literal';readonly value:bigint|string|boolean|undefined;readonly type:SoftwareIrType}
   | {readonly kind:'var';readonly name:string;readonly type:SoftwareIrType}
-  | {readonly kind:'call';readonly callee:string;readonly args:readonly SoftwareIrExpr[];readonly type:SoftwareIrType}
+  | {
+      readonly kind:'call';
+      readonly callee:string;
+      readonly args:readonly SoftwareIrExpr[];
+      readonly callStyle:'direct'|'curried';
+      readonly type:SoftwareIrType;
+    }
+  | {
+      readonly kind:'lambda';
+      readonly binders:readonly {readonly name:string;readonly type:SoftwareIrType}[];
+      readonly body:SoftwareIrExpr;
+      readonly type:SoftwareIrType;
+    }
   | {readonly kind:'unary';readonly operator:'!';readonly operand:SoftwareIrExpr;readonly type:'Bool'}
   | {readonly kind:'binary';readonly operator:string;readonly left:SoftwareIrExpr;readonly right:SoftwareIrExpr;readonly type:SoftwareIrType}
   | {readonly kind:'if';readonly condition:SoftwareIrExpr;readonly thenBranch:SoftwareIrExpr;readonly elseBranch:SoftwareIrExpr;readonly type:SoftwareIrType}
@@ -47,7 +59,20 @@ function lowerExpr(expr:CheckedSoftwareExpr):SoftwareIrExpr {
     case 'unit':return {kind:'literal',value:undefined,type:'Unit'};
     case 'reference':return {kind:'var',name:expr.name,type:expr.resultType};
     case 'call':
-      return {kind:'call',callee:expr.callee,args:expr.args.map(lowerExpr),type:expr.resultType};
+      return {
+        kind:'call',
+        callee:expr.callee,
+        args:expr.args.map(lowerExpr),
+        callStyle:expr.callStyle,
+        type:expr.resultType,
+      };
+    case 'lambda':
+      return {
+        kind:'lambda',
+        binders:expr.binders.map((binder)=>({name:binder.name,type:binder.type})),
+        body:lowerExpr(expr.body),
+        type:expr.resultType,
+      };
     case 'unary':
       return {kind:'unary',operator:expr.operator,operand:lowerExpr(expr.operand),type:'Bool'};
     case 'binary':

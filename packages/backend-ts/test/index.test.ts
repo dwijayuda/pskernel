@@ -40,3 +40,37 @@ console.log('ok - @proofscript/backend-ts TypeScript compiler pipeline');
   equal(source.includes('const y: bigint = x + 1n; return y + 1n;'),true);
 }
 console.log('ok - @proofscript/backend-ts compiler IR boundary');
+
+{
+  const source=emitV061TypeScript(lowerCheckedSoftwareModule({
+    kind:'checked-v061-software-module',
+    declarations:[
+      {
+        kind:'const',name:'increment',params:[],
+        resultType:{kind:'function',parameter:'Nat',result:'Nat'},
+        body:{
+          kind:'lambda',binders:[{name:'x',type:'Nat'}],
+          resultType:{kind:'function',parameter:'Nat',result:'Nat'},
+          body:{
+            kind:'binary',operator:'+',resultType:'Nat',
+            left:{kind:'reference',name:'x',resultType:'Nat'},
+            right:{kind:'nat',value:1n,resultType:'Nat'},
+          },
+        },
+      },
+      {
+        kind:'function',name:'main',params:[{name:'x',type:'Nat'}],resultType:'Nat',
+        body:{
+          kind:'call',callee:'increment',callStyle:'curried',resultType:'Nat',
+          args:[{kind:'reference',name:'x',resultType:'Nat'}],
+        },
+      },
+    ],
+  }));
+  equal(source.includes('export const increment: (bigint) => bigint'),true);
+  equal(source.includes('(x: bigint) => x + 1n'),true);
+  equal(source.includes('return increment(x);'),true);
+  const compiled=compileTypeScript(source,'lambda.ts');
+  equal(compiled.javascript.includes('increment = (x) => x + 1n'),true);
+}
+console.log('ok - @proofscript/backend-ts curried lambda TypeScript emission');

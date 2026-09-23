@@ -41,7 +41,21 @@ export function emitSoftwareIrExpression(expr:SoftwareIrExpr,parentPrecedence=0)
       if(expr.type==='Nat'||expr.type==='Int')return String(expr.value)+'n';
       return JSON.stringify(expr.value);
     case 'var':return expr.name;
-    case 'call':return expr.callee+'('+expr.args.map((arg)=>emitSoftwareIrExpression(arg)).join(', ')+')';
+    case 'call':{
+      if(expr.callStyle==='direct'){
+        return expr.callee+'('+expr.args.map((arg)=>emitSoftwareIrExpression(arg)).join(', ')+')';
+      }
+      return expr.args.reduce(
+        (callee,arg)=>callee+'('+emitSoftwareIrExpression(arg)+')',
+        expr.callee,
+      );
+    }
+    case 'lambda':{
+      return [...expr.binders].reverse().reduce(
+        (body,binder)=>'('+binder.name+': '+typeScriptType(binder.type)+') => '+body,
+        emitSoftwareIrExpression(expr.body),
+      );
+    }
     case 'unary':return '!'+emitSoftwareIrExpression(expr.operand,7);
     case 'if':
       return '('+emitSoftwareIrExpression(expr.condition)+' ? '+emitSoftwareIrExpression(expr.thenBranch)+' : '+emitSoftwareIrExpression(expr.elseBranch)+')';

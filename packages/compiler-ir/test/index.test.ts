@@ -28,3 +28,25 @@ console.log('ok - @proofscript/compiler-ir foundation');
   equal(ir.declarations[0]?.body.kind,'let');
 }
 console.log('ok - @proofscript/compiler-ir software lowering');
+
+{
+  const ir=lowerCheckedSoftwareModule({
+    kind:'checked-v061-software-module',
+    declarations:[{
+      kind:'const',name:'increment',params:[],
+      resultType:{kind:'function',parameter:'Nat',result:'Nat'},
+      body:{
+        kind:'lambda',
+        binders:[{name:'x',type:'Nat'}],
+        resultType:{kind:'function',parameter:'Nat',result:'Nat'},
+        body:{
+          kind:'binary',operator:'+',resultType:'Nat',
+          left:{kind:'reference',name:'x',resultType:'Nat'},
+          right:{kind:'nat',value:1n,resultType:'Nat'},
+        },
+      },
+    }],
+  });
+  equal(ir.declarations[0]?.body.kind,'lambda');
+}
+console.log('ok - @proofscript/compiler-ir software lambda lowering');

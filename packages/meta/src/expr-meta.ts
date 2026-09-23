@@ -160,7 +160,18 @@ export class ExprMetaContext {
     return true;
   }
 
-  unify(left:Expr,right:Expr,localContext=new LocalContext()):boolean {
+  private restoreAssignments(
+    snapshot:ReadonlyMap<string,Expr>,
+  ):void {
+    this.assignments.clear();
+    for(const [id,value] of snapshot)this.assignments.set(id,value);
+  }
+
+  private unifyCore(
+    left:Expr,
+    right:Expr,
+    localContext:LocalContext,
+  ):boolean {
     const lhs=this.instantiate(left);
     const rhs=this.instantiate(right);
     if(exprEq(lhs,rhs))return true;
@@ -187,6 +198,18 @@ export class ExprMetaContext {
     if(lhs.kind==='mvar')return this.tryAssignByUnification(lhs,rhs);
     if(rhs.kind==='mvar')return this.tryAssignByUnification(rhs,lhs);
 
+    if(lhs.kind==='app'&&rhs.kind==='app'){
+      return this.unifyCore(lhs.fn,rhs.fn,localContext)
+        &&this.unifyCore(lhs.arg,rhs.arg,localContext);
+    }
+
+    if(lhs.kind==='mdata'){
+      return this.unifyCore(lhs.expr,rhs,localContext);
+    }
+    if(rhs.kind==='mdata'){
+      return this.unifyCore(lhs,rhs.expr,localContext);
+    }
+
     if(hasMVar(lhs)||hasMVar(rhs))return false;
     try{
       return new TypeChecker(
@@ -195,6 +218,18 @@ export class ExprMetaContext {
       ).isDefEq(lhs,rhs);
     }catch{
       return false;
+    }
+  }
+
+  unify(left:Expr,right:Expr,localContext=new LocalContext()):boolean {
+    const snapshot=new Map(this.assignments);
+    try{
+      const success=this.unifyCore(left,right,localContext);
+      if(!success)this.restoreAssignments(snapshot);
+      return success;
+    }catch(error){
+      this.restoreAssignments(snapshot);
+      throw error;
     }
   }
 

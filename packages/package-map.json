@@ -181,7 +181,9 @@
         "Expr metavariables now use pskernel's real Expr and LocalContext rather than only a generic placeholder protocol.",
         "The context records natural/synthetic/syntheticOpaque kind, creation depth, local scope, assignments, recursive instantiation, occurs checks, and kernel-backed validation once assignments are ground.",
         "Ordinary unification never assigns syntheticOpaque metavariables; explicit assignment remains available to tactic/elaboration code.",
-        "This is intentionally not full Lean.Meta.isDefEq: level metavariables, delayed assignments, higher-order pattern unification, postponed constraints, local instance synthesis, and transparency-sensitive meta reduction remain later milestones."
+        "This is intentionally not full Lean.Meta.isDefEq: level metavariables, delayed assignments, higher-order pattern unification, postponed constraints, local instance synthesis, and transparency-sensitive meta reduction remain later milestones.",
+        "First-order application-spine unification is transactional: nested metavariables such as Option ?α can be solved from expected Option Nat, and failed structural unification rolls assignments back.",
+        "This remains intentionally smaller than Lean.Meta.isDefEq; higher-order patterns, level metavariables, coercions and postponed constraints are separate milestones."
       ]
     },
     {

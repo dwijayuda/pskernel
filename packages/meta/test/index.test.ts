@@ -6,6 +6,7 @@ import {
 } from '../src/index.js';
 import {
   Environment,
+  Kernel,
   LocalContext,
   exprEq,
   fvar,
@@ -147,3 +148,80 @@ console.log('ok - @proofscript/meta Expr metavariable context');
   equal(leaked,true);
 }
 console.log('ok - @proofscript/meta Lean-style metavariable depth discipline');
+
+
+{
+  const environment=new Environment();
+  const kernel=new Kernel(environment);
+  const U=sort(levelSucc(levelZero));
+  const Nat=nameFromDotted('MetaNat');
+  const StringType=nameFromDotted('MetaString');
+  const F=nameFromDotted('MetaF');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:U,
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:StringType,
+    levelParams:[],
+    type:U,
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:F,
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('α'),
+      U,
+      forallE(nameFromDotted('β'),U,U),
+    ),
+  });
+
+  const context=new ExprMetaContext(environment);
+  const meta=context.mkFresh(U);
+  equal(
+    context.unify(
+      app(constant(F),meta),
+      app(constant(F),constant(Nat)),
+    ),
+    true,
+  );
+  equal(exprEq(context.instantiate(meta),constant(Nat)),true);
+}
+{
+  const environment=new Environment();
+  const kernel=new Kernel(environment);
+  const U=sort(levelSucc(levelZero));
+  const Nat=nameFromDotted('RollbackNat');
+  const Other=nameFromDotted('RollbackOther');
+  const F=nameFromDotted('RollbackF');
+  for(const name of [Nat,Other]){
+    kernel.addAxiom({
+      kind:'axiom',
+      name,
+      levelParams:[],
+      type:U,
+    });
+  }
+  kernel.addAxiom({
+    kind:'axiom',
+    name:F,
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('α'),
+      U,
+      forallE(nameFromDotted('β'),U,U),
+    ),
+  });
+
+  const context=new ExprMetaContext(environment);
+  const meta=context.mkFresh(U);
+  const left=app(app(constant(F),meta),constant(Nat));
+  const right=app(app(constant(F),constant(Other)),constant(Other));
+  equal(context.unify(left,right),false);
+  equal(context.isAssigned(meta),false);
+}
+console.log('ok - @proofscript/meta structural application unification with rollback');

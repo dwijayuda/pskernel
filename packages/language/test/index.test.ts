@@ -25,6 +25,19 @@ console.log('ok - @proofscript/language foundation');
 console.log('ok - @proofscript/language v0.6.1 software checker');
 
 {
+  let proofTerm=false;
+  try{
+    checkV061SoftwareModule(parseV061Module(
+      'function bad(x : Nat) : Nat := by exact x;',
+    ));
+  }catch(error){
+    proofTerm=/PS_CHECK_PROOF_TERM/.test(String(error));
+  }
+  equal(proofTerm,true);
+}
+console.log('ok - @proofscript/language proof syntax stays non-executable');
+
+{
   const z={offset:0,line:1,column:1};
   const s={start:z,end:z};
   const module:V061Module={kind:'v061-module',featureIds:[],declarations:[{

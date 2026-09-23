@@ -6,7 +6,7 @@ export const HELP=`ProofScript compiler
 
 Usage:
   psc init [dir] [--lib] [-y]
-  psc check [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
+  psc check [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--target js|wasm] [--json]
   psc build [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--target js|wasm] [--json]
   psc run [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--target js|wasm] [--json] [-- <args...>]
   psc translate <entry.ps|entry.lean> --to ps|lean [-p, --project <path>]

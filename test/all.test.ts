@@ -60,6 +60,15 @@ test('defeq success cache remains pair-local and never gains transitive closure'
  assert(!st.success.has(st.pair(a,c)),'Lean 4.34 defeq cache must not transitively close successful algorithmic comparisons');
 });
 
+test('cached public defeq still enters the Lean recursion guard',()=>{
+ const env=baseEnv(),st=new KernelState(),a=natLit(0),b=natLit(0),tc=new TypeChecker(env,undefined,st,{maxRecDepth:1,maxNatBytes:134217728n});
+ st.success.add(st.pair(a,b));
+ st.recDepth=16;
+ throws(()=>tc.isDefEq(a,b));
+ st.recDepth=0;
+ assert(tc.isDefEq(a,b),'cached success remains available once the guarded core can be entered');
+});
+
 test('internal defeq core success does not populate the public success cache',()=>{
  const env=baseEnv(),K=nameFromDotted('CoreCache.K'),uN=nameFromDotted('u'),u=levelParam(uN);
  env.add({kind:'axiom',name:K,levelParams:[uN],type:sort(u)});

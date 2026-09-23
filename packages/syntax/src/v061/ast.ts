@@ -34,6 +34,7 @@ export type V061Tactic =
   | {readonly kind:'exact';readonly proof:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'exactSearch';readonly span:SourceSpan}
   | {readonly kind:'assumption';readonly span:SourceSpan}
+  | {readonly kind:'rfl';readonly span:SourceSpan}
   | {readonly kind:'constructor';readonly span:SourceSpan}
   | {
       readonly kind:'cases';

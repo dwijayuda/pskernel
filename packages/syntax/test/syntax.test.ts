@@ -951,6 +951,19 @@ console.log('ok - @proofscript/syntax lexer MVP');
 
 {
   const module=parseV061Module(
+    'theorem rflProof(n : Nat) : n + 0 = n := by rfl;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by')equal(body.tactics[0]?.kind,'rfl');
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem rflProof (n : Nat) : n + 0 = n := by rfl\n',
+  );
+}
+
+{
+  const module=parseV061Module(
     'theorem rwProof(a : Nat, b : Nat, h : a = b) : a = b := '+
     'by rw [h]; rw [← h]; assumption;',
   );

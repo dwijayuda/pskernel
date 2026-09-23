@@ -932,6 +932,15 @@ assert(
 );
 
 
+const verifiedRfl=compileVerifiedSource(
+  'theorem boundedRfl(n : Nat) : n + 0 = n := by rfl;',
+  'verified-rfl.ts',
+);
+assert(
+  verifiedRfl.checkedCore.theorems.length===1,
+  'bounded Eq-only rfl did not construct a pskernel-admitted theorem',
+);
+
 const stdlibDirectory=fileURLToPath(
   new URL('../stdlib/',import.meta.url),
 );

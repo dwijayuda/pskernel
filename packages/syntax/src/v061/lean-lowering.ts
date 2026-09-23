@@ -33,6 +33,7 @@ function lowerV061TacticToLean(
     case 'exact':return 'exact '+lowerV061ExprToLean(tactic.proof);
     case 'exactSearch':return 'exact?';
     case 'assumption':return 'assumption';
+    case 'rfl':return 'rfl';
     case 'constructor':return 'constructor';
     case 'cases':return 'cases '+tactic.target;
     case 'induction':return 'induction '+tactic.target;

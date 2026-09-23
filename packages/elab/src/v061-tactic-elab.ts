@@ -24,6 +24,7 @@ import {casesV061Tactic} from './v061-cases-tactic.js';
 import {constructorV061Tactic} from './v061-constructor-tactic.js';
 import {inductionV061Tactic} from './v061-induction-tactic.js';
 import {refineV061Tactic} from './v061-refine-tactic.js';
+import {rflV061Tactic} from './v061-rfl-tactic.js';
 import {rewriteV061Tactic} from './v061-rewrite-tactic.js';
 import {simpOnlyV061Tactic} from './v061-simp-tactic.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
@@ -84,6 +85,11 @@ function runTactic(
         (error instanceof Error?error.message:String(error)),
       );
     }
+    return;
+  }
+
+  if(tactic.kind==='rfl'){
+    rflV061Tactic(runtime);
     return;
   }
 

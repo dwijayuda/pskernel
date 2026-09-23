@@ -17,6 +17,9 @@ import {
 import type {ElaboratedCoreTerm} from './v061-context.js';
 import type {V061TermElaborator} from './v061-tactic-elab.js';
 import {abstractExactRewriteOccurrences} from './v061-rewrite-occurrence.js';
+import {
+  tryCompleteV061EqRfl,
+} from './v061-rfl-tactic.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
 
 export interface EqualityView {
@@ -48,45 +51,6 @@ export function equalityView(
 
 function transportName(symm:boolean):ReturnType<typeof nameFromDotted> {
   return nameFromDotted(symm?'Eq.ndrec':'Eq.ndrec_symm');
-}
-
-function cheapEqRfl(
-  runtime:V061TacticRuntime,
-  child:ReturnType<V061TacticRuntime['createGoal']>,
-):boolean {
-  const entry=runtime.entry(child);
-  const checker=new TypeChecker(
-    entry.context.environment,
-    entry.context.localContext.clone(),
-  );
-  const target=checker.whnf(runtime.expected(child));
-  const view=appView(target);
-  if(
-    view.fn.kind!=='const'
-    ||!nameEq(view.fn.name,nameFromDotted('Eq'))
-    ||view.args.length!==3
-  )return false;
-
-  const alpha=view.args[0]!;
-  const lhs=view.args[1]!;
-  const rhs=view.args[2]!;
-  if(!checker.isDefEq(lhs,rhs))return false;
-
-  const reflName=nameFromDotted('Eq.refl');
-  const reflInfo=entry.context.environment.find(reflName);
-  if(reflInfo===undefined||reflInfo.levelParams.length!==1)return false;
-  const alphaLevel=checker.ensureSort(
-    checker.check(alpha),
-    alpha,
-  ).level;
-  const term=mkAppN(
-    constant(reflName,[alphaLevel]),
-    [alpha,lhs],
-  );
-  const type=checker.check(term);
-  if(!checker.isDefEq(type,target))return false;
-  runtime.completeGoal(child,{term,type});
-  return true;
 }
 
 export interface RewriteV061Options {
@@ -173,21 +137,11 @@ export function rewriteV061Equality(
       runtime.completeGoal(goal,{term,type});
     },
   );
-  if(cheapEqRfl(runtime,child)){
+  if(tryCompleteV061EqRfl(runtime,child)){
     runtime.state=replaceMainGoal(runtime.state,[]);
     return true;
   }
   runtime.state=replaceMainGoal(runtime.state,[child]);
-  return true;
-}
-
-export function tryCloseV061CheapEqRfl(
-  runtime:V061TacticRuntime,
-):boolean {
-  if(runtime.state.goals.length===0)return true;
-  const goal=getMainGoal(runtime.state);
-  if(!cheapEqRfl(runtime,goal))return false;
-  runtime.state=replaceMainGoal(runtime.state,[]);
   return true;
 }
 

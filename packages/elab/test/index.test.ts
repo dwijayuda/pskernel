@@ -674,6 +674,30 @@ console.log('ok - @proofscript/elab multi-rule simp-only syntax reaches tactic A
 }
 console.log('ok - @proofscript/elab bounded exact search');
 
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem rflAddZero(n : Nat) : n + 0 = n := by rfl;',
+  ),env);
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('rflAddZero'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem badRfl(P : Prop, h : P) : P := by rfl;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_RFL/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded Eq-only rfl tactic');
+
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();

@@ -29,8 +29,9 @@ function cmpHint(a:ReducibilityHints,b:ReducibilityHints):number{
 
 export class TypeChecker {
   readonly state:KernelState;
-  constructor(readonly env:Environment,readonly lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false,readonly nativeEvaluator?:NativeEvaluator){this.state=state??new KernelState();}
+  constructor(readonly env:Environment,readonly lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false,readonly nativeEvaluator?:NativeEvaluator){this.state=state??new KernelState();this.state.bindEnvironment(env);}
   private rec<T>(f:()=>T):T{
+    this.state.bindEnvironment(this.env);
     this.state.recDepth++;
     const max=this.limits.maxRecDepth;
     if(max>0&&this.state.recDepth>max*LEAN_KERNEL_REC_DEPTH_FACTOR){
@@ -187,6 +188,7 @@ export class TypeChecker {
   }
 
   unfold(e:Expr):Expr|null{
+    this.state.bindEnvironment(this.env);
     const av=appView(e);if(av.fn.kind!=='const')return null;const i=deltaInfo(this.env.find(av.fn.name));if(!i||av.fn.levels.length!==i.levelParams.length)return null;
     let value:Expr;
     if(av.fn.levels.length>0){
@@ -256,6 +258,7 @@ export class TypeChecker {
   });}
 
   whnf(e:Expr):Expr{
+    this.state.bindEnvironment(this.env);
     // Lean 4.34 returns these cases before the WHNF cache lookup.
     switch(e.kind){
       case'bvar':case'sort':case'mvar':case'forall':case'lit':return e;

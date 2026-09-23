@@ -196,7 +196,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "foundation",
+      "status": "typescript-compiler-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -204,7 +204,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Foundation emits deterministic ESM for the compiler-IR structural subset; workspace-level direct package wiring and source maps remain later milestones."
+        "Backend emits TypeScript source from the checked v0.6.1 software subset; it does not emit JavaScript directly.",
+        "The TypeScript Compiler API type-checks generated TypeScript and emits JavaScript, .d.ts, and source maps.",
+        "Broader compiler-IR lowering, runtime imports, source mapping to .ps, and optimization remain later milestones."
       ]
     },
     {

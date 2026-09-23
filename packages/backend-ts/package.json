@@ -3,9 +3,9 @@
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "Compiler IR to TypeScript/JavaScript ESM backend.",
+  "description": "ProofScript checked executable IR to TypeScript source, compiled to JavaScript by TypeScript.",
   "proofscript": {
-    "status": "foundation",
+    "status": "typescript-compiler-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -21,6 +21,9 @@
     "test": "npm run build --silent && node dist/test/index.test.js"
   },
   "devDependencies": {
+    "typescript": "5.8.3"
+  },
+  "dependencies": {
     "typescript": "5.8.3"
   }
 }

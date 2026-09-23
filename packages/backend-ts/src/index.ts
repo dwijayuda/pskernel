@@ -45,3 +45,5 @@ export function emitModule(module:BackendModule):string{
   }
   return lines.join('\n')+'\n';
 }
+
+export * from './v061.js';

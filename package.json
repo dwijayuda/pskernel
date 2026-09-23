@@ -33,12 +33,13 @@
     "check:source-shape": "node scripts/source-shape-check.mjs",
     "check:vscode": "node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs",
     "check:architecture": "node scripts/proofscript-architecture-check.mjs",
-    "check:oracle-syntax": "node --check scripts/module-stream-oracle.mjs && node --check scripts/full-std-oracle.mjs && node --check scripts/std-hot-oracle.mjs && node --check scripts/std-bisect-oracle.mjs && node --check scripts/std-bisect-oracle-test.mjs && node --check scripts/adaptive-root-oracle.mjs && node --check scripts/batch-replay-worker.mjs && node --check scripts/lean-native-evaluator.mjs && node --check scripts/lean-native-evaluator-test.mjs",
+    "check:oracle-syntax": "node --check scripts/module-stream-oracle.mjs && node --check scripts/full-std-oracle.mjs && node --check scripts/std-hot-oracle.mjs && node --check scripts/std-bisect-oracle.mjs && node --check scripts/std-bisect-oracle-test.mjs && node --check scripts/adaptive-root-oracle.mjs && node --check scripts/batch-replay-worker.mjs && node --check scripts/lean-native-evaluator.mjs && node --check scripts/lean-native-evaluator-test.mjs && node --check scripts/native-oracle-smoke.mjs",
     "oracle:std-probe": "npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029 0 250 100 10",
     "oracle:std-range": "npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029",
     "oracle:std-hot": "npm run build --silent && node scripts/std-hot-oracle.mjs",
     "oracle:std-bisect": "npm run build --silent && node scripts/std-bisect-oracle.mjs",
-    "test:oracle-tools": "node scripts/std-bisect-oracle-test.mjs && node scripts/lean-native-evaluator-test.mjs"
+    "test:oracle-tools": "node scripts/std-bisect-oracle-test.mjs && node scripts/lean-native-evaluator-test.mjs",
+    "oracle:native-smoke": "npm run build --silent && node scripts/native-oracle-smoke.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

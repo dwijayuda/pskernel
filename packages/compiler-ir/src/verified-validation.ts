@@ -52,7 +52,23 @@ function validateNamedFields(
 export function validateVerifiedIrModule(
   module:VerifiedIrModule,
 ):true {
-  const typeNames=new Set<string>();
+  const valueNames=new Set<string>();
+  for(const item of module.imports??[]){
+    assertVerifiedIrIdentifier(item.localName);
+    assertVerifiedIrIdentifier(item.importedName);
+    if(item.source.length===0){
+      throw new Error('verified IR external import source must be non-empty');
+    }
+    if(valueNames.has(item.localName)){
+      throw new Error(
+        "duplicate verified IR value '"+item.localName+"'",
+      );
+    }
+    valueNames.add(item.localName);
+    validateType(item.type);
+  }
+
+    const typeNames=new Set<string>();
   for(const structure of module.structures??[]){
     assertVerifiedIrIdentifier(structure.name);
     if(typeNames.has(structure.name)){
@@ -110,12 +126,13 @@ export function validateVerifiedIrModule(
   const declarations=new Set<string>();
   for(const declaration of module.declarations){
     assertVerifiedIrIdentifier(declaration.name);
-    if(declarations.has(declaration.name)){
+    if(declarations.has(declaration.name)||valueNames.has(declaration.name)){
       throw new Error(
-        "duplicate verified IR declaration '"+declaration.name+"'",
+        "duplicate verified IR value '"+declaration.name+"'",
       );
     }
     declarations.add(declaration.name);
+    valueNames.add(declaration.name);
     const typeParameters=new Set<string>();
     for(const parameter of declaration.typeParameters){
       assertVerifiedIrIdentifier(parameter.name);

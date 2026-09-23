@@ -72,6 +72,31 @@ function decodePrimitive(
     }
     return BigInt(value);
   }
+  if(name==='UInt8'||name==='UInt16'||name==='UInt32'){
+    const bits=name==='UInt8'?8n:name==='UInt16'?16n:32n;
+    const limit=1n<<bits;
+    if(
+      typeof value!=='number'||
+      !Number.isInteger(value)||
+      value<0||
+      BigInt(value)>=limit
+    ){
+      fail(
+        'nested '+name+' values must be in-range JSON integers',
+      );
+    }
+    return value;
+  }
+  if(name==='UInt64'){
+    if(typeof value!=='string'||!/^\d+$/u.test(value)){
+      fail('nested UInt64 values must be decimal JSON strings');
+    }
+    const parsed=BigInt(value);
+    if(parsed>=(1n<<64n)){
+      fail('nested UInt64 value is outside its 64-bit range');
+    }
+    return parsed;
+  }
   if(name==='Bool'){
     if(typeof value!=='boolean')fail('nested Bool values must be JSON booleans');
     return value;
@@ -191,6 +216,29 @@ function encodePrimitive(
   if(name==='Nat'||name==='Int'){
     if(typeof value!=='bigint'){
       fail(name+' result did not use the verified bigint runtime representation');
+    }
+    return value.toString();
+  }
+  if(name==='UInt8'||name==='UInt16'||name==='UInt32'){
+    const bits=name==='UInt8'?8n:name==='UInt16'?16n:32n;
+    const limit=1n<<bits;
+    if(
+      typeof value!=='number'||
+      !Number.isInteger(value)||
+      value<0||
+      BigInt(value)>=limit
+    ){
+      fail(name+' result is outside its verified unsigned range');
+    }
+    return value;
+  }
+  if(name==='UInt64'){
+    if(
+      typeof value!=='bigint'||
+      value<0n||
+      value>=(1n<<64n)
+    ){
+      fail('UInt64 result is outside its verified unsigned range');
     }
     return value.toString();
   }

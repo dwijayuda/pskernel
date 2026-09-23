@@ -36,6 +36,33 @@ export function parseVerifiedRuntimeArg(
             "PS_RUN_ARG: Int argument must be an integer, got '"+value+"'",
           );
         }
+      case 'UInt8':
+      case 'UInt16':
+      case 'UInt32':
+      case 'UInt64':{
+        let parsed:bigint;
+        try{parsed=BigInt(value);}
+        catch{
+          throw new Error(
+            'PS_RUN_ARG: '+type.name+
+            " argument must be an integer, got '"+value+"'",
+          );
+        }
+        const bits={
+          UInt8:8n,
+          UInt16:16n,
+          UInt32:32n,
+          UInt64:64n,
+        }[type.name];
+        const limit=1n<<bits;
+        if(parsed<0n||parsed>=limit){
+          throw new Error(
+            'PS_RUN_ARG: '+type.name+
+            ' argument is outside [0, '+(limit-1n).toString()+']',
+          );
+        }
+        return type.name==='UInt64'?parsed:Number(parsed);
+      }
       case 'Bool':
         if(value==='true')return true;
         if(value==='false')return false;

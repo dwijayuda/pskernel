@@ -590,3 +590,34 @@ console.log('ok - psc verified generic structure source pipeline');
   equal(result.emitted.javascript.includes('second'),true);
 }
 console.log('ok - psc verified acyclic where source pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'class Boxed(α : Type) where { value : α; } '+
+    'function reuse {α : Type}[inst : Boxed(α)](x : α) : α := x; '+
+    'function caller {α : Type}[inst : Boxed(α)](x : α) : α := reuse(x);',
+    'local-instance-class.ts',
+  );
+  equal(result.checkedCore.classes.length,1);
+  equal(result.checkedCore.structures.length,1);
+  equal(
+    result.typeScript.includes('export interface Boxed<T0> {'),
+    true,
+  );
+  equal(
+    result.typeScript.includes(
+      'function reuse<T0>(inst: Boxed<T0>, x: T0): T0',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes(
+      'function caller<T0>(inst: Boxed<T0>, x: T0): T0',
+    ),
+    true,
+  );
+  equal(result.typeScript.includes('return reuse(inst, x);'),true);
+  equal(result.emitted.javascript.includes('reuse(inst, x)'),true);
+}
+console.log('ok - psc verified local class instance pipeline');

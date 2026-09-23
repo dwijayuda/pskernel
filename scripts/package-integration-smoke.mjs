@@ -501,3 +501,25 @@ assert(
   verifiedGenericMap.emitted.javascript.includes('map(f, tail)'),
   'generic map did not compile to JavaScript recursion',
 );
+
+
+const verifiedClassLocalInstance=compileVerifiedSource(
+  'class Boxed(α : Type) where { value : α; } '+
+  'function reuse {α : Type}[inst : Boxed(α)](x : α) : α := x; '+
+  'function caller {α : Type}[inst : Boxed(α)](x : α) : α := reuse(x);',
+  'verified-class-local-instance.ts',
+);
+assert(
+  verifiedClassLocalInstance.checkedCore.classes.length===1,
+  'class metadata did not survive pskernel checked-core admission',
+);
+assert(
+  verifiedClassLocalInstance.typeScript.includes(
+    'function caller<T0>(inst: Boxed<T0>, x: T0): T0',
+  ),
+  'class-constrained function lost its runtime dictionary parameter',
+);
+assert(
+  verifiedClassLocalInstance.typeScript.includes('return reuse(inst, x);'),
+  'local class instance synthesis did not become an ordinary runtime dictionary call',
+);

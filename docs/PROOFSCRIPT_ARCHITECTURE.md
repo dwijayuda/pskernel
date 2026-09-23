@@ -211,3 +211,35 @@ constructor identity without trusting source-only ADT metadata.
 Parameterized, indexed, recursive inductives and pattern matching remain
 separate milestones and fail closed until their Lean-compatible core semantics
 are implemented.
+
+
+## Local class-instance checkpoint
+
+ProofScript class declarations now follow Lean's kernel boundary:
+
+```proofscript
+class Boxed(α : Type) where {
+  value : α;
+}
+
+function reuse {α : Type}[inst : Boxed(α)](x : α) : α :=
+  x;
+
+function caller {α : Type}[inst : Boxed(α)](x : α) : α :=
+  reuse(x);
+```
+
+`Boxed` is admitted by pskernel as the same single-constructor inductive shape
+used for structures. "Class" is elaborator metadata only; it does not extend
+the kernel's type theory.
+
+The first instance-synthesis slice is deliberately local-only. When an
+application needs an `instImplicit` argument whose head is a previously
+admitted ProofScript class, elaboration searches local `instImplicit`
+binders newest-first and uses ordinary Meta unification to check a candidate.
+The resulting checked core contains the ordinary dictionary argument, so
+verified erasure/backend compilation needs no typeclass-specific escape hatch.
+
+Global instance declarations, priorities, recursive/table-based search,
+`outParam`/`semiOutParam`, and imported Lean instance indexes remain future
+Meta milestones and are not claimed by this checkpoint.

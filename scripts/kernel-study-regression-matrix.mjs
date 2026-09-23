@@ -36,6 +36,11 @@ const matrix={
 };
 
 const hardeningExtras={
+  'study/lean4-4.34.0/tests/elab/nat_mod_defeq.lean':{
+    kind:'direct',
+    tests:['primitive Nat.mod checks bounded wrapper and go fuel equations'],
+    note:'admitted Nat.mod is explicitly rechecked at a free divisor: 0 % n is definitionally equal to 0, so coverage cannot come from the numeric-literal fast path',
+  },
   'study/lean4-4.34.0/tests/elab/strLitProj.lean':{
     kind:'direct',
     tests:['string literal projection reduces through String.ofList like Lean strLitProj'],

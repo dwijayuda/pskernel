@@ -1417,6 +1417,8 @@ test('Nat = primitive condition verifier checks reflection plus ite/dite control
 
 test('primitive Nat.mod checks bounded wrapper and go fuel equations',()=>{
  const env=primitiveNatBoolEnv();addBoolConditionScaffold(env);addNatLeConditionScaffold(env);const v=addBoundedNatFuelFixture(env,'mod');addPrimitiveDefinition(env,v);assert(env.has(N.NatMod));
+ const lctx=new LocalContext(),id=lctx.fresh('n');lctx.addLocal(id,nameFromDotted('n'),constant(N.Nat));const n=fvar(id),tc=new TypeChecker(env,lctx);
+ assert(tc.isDefEq(app(app(constant(N.NatMod),natLit(0)),n),natLit(0)),'Lean nat_mod_defeq: 0 % n must reduce definitionally to 0 for a variable divisor');
  const bad=primitiveNatBoolEnv();addBoolConditionScaffold(bad);addNatLeConditionScaffold(bad);const bv=addBoundedNatFuelFixture(bad,'mod',true);throws(()=>addPrimitiveDefinition(bad,bv));
 });
 

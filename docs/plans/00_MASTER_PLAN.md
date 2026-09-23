@@ -124,3 +124,23 @@ Current Phase-A implementation status:
 - browser: scaffold only
 
 The MVP packages remain private and are not wired as root npm workspaces while Full Std certification is active.
+
+
+## Outer-package foundation checkpoint
+
+Current outer-package foundation status:
+
+- `@proofscript/browser`: foundation
+- `@proofscript/syntax`: D-CALL parser MVP on reusable term parser
+- `@proofscript/pretty`: foundation
+- `@proofscript/meta`: foundation
+- `@proofscript/elab`: foundation
+- `@proofscript/tactic`: foundation
+- `@proofscript/compiler-ir`: foundation
+- `@proofscript/runtime`: foundation
+- `@proofscript/backend-ts`: foundation
+- `@proofscript/language`: foundation
+- `@proofscript/lsp`: foundation
+- `@proofscript/project`: foundation
+
+The root `test:packages` gate compiles and executes these TypeScript foundations without enabling npm workspaces. Existing Phase-A module/conformance/export/CLI packages retain their separate MVP/prototype status.

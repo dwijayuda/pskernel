@@ -71,3 +71,10 @@ Initially test compiler/runtime differentially. Formal compiler correctness can 
 - multiple backends before TS is stable
 - pretending compilation is trusted because source proofs are trusted
 - embedding host JS evaluation into the kernel
+
+
+## Foundation checkpoint
+
+Phase C now has executable TypeScript foundations for compiler IR, runtime values, and TypeScript emission. The current IR supports literals, variables, lambdas, calls, lets, conditionals, and tagged constructors, with traversal/free-variable analysis. Runtime coverage is intentionally narrow (Nat/Int basics, UInt8, tagged constructors). The TS backend emits deterministic ESM for this structural subset.
+
+Kernel-Expr lowering, erasure proofs, closure conversion, optimization passes, source maps, and direct workspace wiring remain open milestones.

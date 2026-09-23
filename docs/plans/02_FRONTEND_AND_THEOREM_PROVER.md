@@ -87,3 +87,16 @@ A small multi-file ProofScript project must:
 3. expose useful holes/goals,
 4. produce checked module artifacts,
 5. re-open those artifacts in a fresh kernel environment.
+
+
+## Foundation checkpoint
+
+The Phase-B package boundaries now contain executable TypeScript foundations:
+
+- syntax: lexer, ownership, reusable term parser, D-CALL, parenthesized type ascription;
+- pretty: compositional documents and diagnostic rendering;
+- meta: metavariable context, goals, transparency/kernel protocols;
+- elab: diagnostic-aware elaboration/admission protocols;
+- tactic: exact, assumption, and intro state transitions.
+
+These are foundations, not Phase-B exit-criteria completion. Concrete kernel Expr elaboration, unification, implicit arguments, typeclass synthesis, and proof-term construction remain open.

@@ -18,7 +18,9 @@ function name(value:string):string{
 function literal(value:BackendLiteral):string{
   if(typeof value==='bigint')return `${value}n`;
   if(typeof value==='number'&&!Number.isFinite(value))throw new Error('non-finite backend literal');
-  return JSON.stringify(value);
+  const encoded=JSON.stringify(value);
+  if(encoded===undefined)throw new Error('unsupported backend literal');
+  return encoded;
 }
 export function emitExpression(expr:BackendExpr):string{
   switch(expr.kind){

@@ -71,3 +71,10 @@ MVP:
 - browser-safe diagnostics
 
 This package must not fork kernel semantics.
+
+
+## Foundation checkpoint
+
+Phase D now has executable TypeScript foundations for incremental document snapshots, unchanged-text reuse, text edits, UTF-16 LSP position/range mapping, diagnostics conversion, deterministic project dependency ordering, cycle rejection, and build caching.
+
+Protocol transport, completion/hover/references, semantic tokens, persistent build cache, npm config discovery, and full incremental parse/elaboration remain open.

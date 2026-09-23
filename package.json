@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node dist/test/all.test.js && npm run test:syntax",
+    "test": "npm run build && node dist/test/all.test.js && npm run test:packages",
     "check": "npm run test && node scripts/anti-drift.mjs && node scripts/oracle-fingerprint.mjs",
     "replay": "npm run build --silent && node scripts/replay.mjs",
     "oracle:official": "node scripts/official-oracle.mjs",
@@ -26,7 +26,8 @@
     "generate:fixtures": "bash scripts/generate-oracle-fixtures.sh",
     "oracle:arena": "npm run build --silent && node scripts/arena-static-oracle.mjs",
     "oracle:std-full": "npm run build --silent && node scripts/full-std-oracle.mjs",
-    "test:syntax": "tsc -p packages/syntax/tsconfig.json && node packages/syntax/dist/test/syntax.test.js"
+    "test:syntax": "tsc -p packages/syntax/tsconfig.json && node packages/syntax/dist/test/syntax.test.js",
+    "test:packages": "npm run test:syntax && tsc -p packages/browser/tsconfig.json && node packages/browser/dist/test/index.test.js && tsc -p packages/pretty/tsconfig.json && node packages/pretty/dist/test/index.test.js && tsc -p packages/meta/tsconfig.json && node packages/meta/dist/test/index.test.js && tsc -p packages/elab/tsconfig.json && node packages/elab/dist/test/index.test.js && tsc -p packages/tactic/tsconfig.json && node packages/tactic/dist/test/index.test.js && tsc -p packages/compiler-ir/tsconfig.json && node packages/compiler-ir/dist/test/index.test.js && tsc -p packages/runtime/tsconfig.json && node packages/runtime/dist/test/index.test.js && tsc -p packages/backend-ts/tsconfig.json && node packages/backend-ts/dist/test/index.test.js && tsc -p packages/language/tsconfig.json && node packages/language/dist/test/index.test.js && tsc -p packages/lsp/tsconfig.json && node packages/lsp/dist/test/index.test.js && tsc -p packages/project/tsconfig.json && node packages/project/dist/test/index.test.js"
   },
   "devDependencies": {
     "typescript": "5.8.3"

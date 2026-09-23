@@ -3,7 +3,7 @@ import { ensureClosed } from '../../core/checks.js';
 import { Environment, KernelError } from '../../core/environment.js';
 import { BinderInfo, Expr, app, appView, constant, consumeTypeAnnotations, exprEq, exprToString, forallE, fvar, inferImplicit, instantiateExprLevels, lam, mkAppN, sort } from '../../core/expr.js';
 import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
-import { Level, isNotZero, levelEquivalent, levelLe, levelParam, levelZero, normalizesToZero } from '../../core/level.js';
+import { Level, isNotZero, levelEqStructural, levelEquivalent, levelLe, levelParam, levelZero, normalizesToZero } from '../../core/level.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
 import { Name, anonymous, nameAppendAfter, nameAppendIndexAfter, nameEq, nameFromDotted, nameKey, nameReplacePrefix, nameToString, strName } from '../../core/name.js';
 import { TypeChecker } from '../type-checker.js';
@@ -27,6 +27,40 @@ function arity(e:Expr):number{let n=0,x=e;while(x.kind==='forall'){n++;x=x.body;
 function uniqueNames(xs:readonly Name[]):boolean{return xs.every((x,i)=>xs.findIndex(y=>nameEq(x,y))===i);}
 function mkBinder(kind:'forall'|'lam',v:OpenVar,body:Expr):Expr{const b=abstractFVar(body,v.id);return kind==='forall'?forallE(v.decl.userName,v.decl.type,b,v.decl.binderInfo):lam(v.decl.userName,v.decl.type,b,v.decl.binderInfo);}
 function closeMany(kind:'forall'|'lam',vs:readonly OpenVar[],body:Expr):Expr{let r=body;for(let i=vs.length-1;i>=0;i--)r=mkBinder(kind,vs[i]!,r);return r;}
+/** Final Lean 4.34 syntactic uniform-occurrence check.
+ * This intentionally runs before WHNF/nested preprocessing because reduction can erase
+ * a malformed recursive occurrence before positivity checking sees it. */
+export function checkUniformInductiveOccurrences(d:InductiveDecl):void{
+ if(!Number.isSafeInteger(d.numParams)||d.numParams<0)throw new KernelError('invalid inductive datatype, number of parameters is invalid');
+ const names=d.types.map(x=>x.name),levels=d.levelParams.map(levelParam);
+ const isDeclared=(n:Name)=>names.some(x=>nameEq(x,n));
+ const levelsMatch=(xs:readonly Level[])=>xs.length===levels.length&&xs.every((x,i)=>levelEqStructural(x,levels[i]!));
+ const visit=(e:Expr,offset:number):void=>{
+   const av=appView(e);
+   if(av.fn.kind==='const'&&isDeclared(av.fn.name)){
+     if(av.args.length<=d.numParams){
+       let ok=av.args.length===d.numParams&&offset>=d.numParams&&levelsMatch(av.fn.levels);
+       for(let i=0;ok&&i<d.numParams;i++){
+         const a=av.args[i]!;
+         ok=a.kind==='bvar'&&a.index===offset-1-i;
+       }
+       if(!ok)throw new KernelError(`invalid occurrence of datatype '${nameToString(av.fn.name)}' being declared: it must be applied to the parameters and universe levels of the mutual declaration`);
+       return;
+     }
+     // Over-applied occurrences are traversed below. Their parameter prefix is
+     // itself an application subterm and will be checked at exactly numParams.
+   }
+   switch(e.kind){
+     case'app':visit(e.fn,offset);visit(e.arg,offset);break;
+     case'lam':case'forall':visit(e.type,offset);visit(e.body,offset+1);break;
+     case'let':visit(e.type,offset);visit(e.value,offset);visit(e.body,offset+1);break;
+     case'mdata':visit(e.expr,offset);break;
+     case'proj':visit(e.expr,offset);break;
+     default:break;
+   }
+ };
+ for(const it of d.types)for(const ctor of it.ctors)visit(ctor.type,0);
+}
 function validIndApp(work:Environment,stats:Stats,lctx:LocalContext,t:Expr):{idx:number;indices:readonly Expr[]}|null{
  const w=stc(work,lctx,stats).whnf(t),v=appView(w);if(v.fn.kind!=='const')return null;const idx=stats.names.findIndex(n=>nameEq(n,v.fn.kind==='const'?v.fn.name:n));if(idx<0)return null;const ni=stats.nindices[idx]!;if(v.args.length!==stats.params.length+ni)return null;
  for(let i=0;i<stats.params.length;i++)if(!stc(work,lctx,stats).isDefEq(v.args[i]!,stats.params[i]!.expr))return null;
@@ -118,6 +152,7 @@ function commit(from:Environment,to:Environment,originalKeys:Set<string>):void{f
 export interface InductiveAdmissionOptions { readonly allowPrimitiveNames?: boolean }
 
 export function addOrdinaryInductive(env:Environment,d:InductiveDecl,options:InductiveAdmissionOptions={}):void{
+ checkUniformInductiveOccurrences(d);
  if(!options.allowPrimitiveNames){
    for(const it of d.types){if(isPrimitiveName(it.name))throw new KernelError(`primitive '${nameToString(it.name)}' must go through primitive recognition`);for(const c of it.ctors)if(isPrimitiveName(c.name))throw new KernelError(`primitive '${nameToString(c.name)}' must go through primitive recognition`);}
  }

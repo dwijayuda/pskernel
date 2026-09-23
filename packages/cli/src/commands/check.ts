@@ -4,11 +4,16 @@ import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
 import type {CommonArgs} from '../types.js';
 import {verifiedAssuranceReport} from '../verified-assurance.js';
+import {assertRuntimeDependencyPolicy} from '../runtime-dependencies.js';
 
 export async function checkCommand(common:CommonArgs){
   const input=await resolveInput(common);
   if(common.verified){
     const project=await resolveSourceProject(input);
+    const runtimeDependencyPolicy=assertRuntimeDependencyPolicy(
+      project,
+      input.loaded.config.runtimeDependencies,
+    );
     const result=checkVerifiedSourceProject(project);
     return {
       ok:true,
@@ -28,7 +33,11 @@ export async function checkCommand(common:CommonArgs){
       moduleCacheMisses:result.moduleCacheMisses,
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
-      assurance:verifiedAssuranceReport(result.checkedCore),
+      assurance:verifiedAssuranceReport(
+        result.checkedCore,
+        input.loaded.config.runtimeDependencies,
+      ),
+      runtimeDependencyPolicy,
     };
   }
   const result=checkSource(

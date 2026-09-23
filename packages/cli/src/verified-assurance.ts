@@ -10,6 +10,7 @@ export interface VerifiedRuntimeAssumption {
   readonly source:string;
   readonly importedName:string;
   readonly logicalSignature:string;
+  readonly expectedVersion?:string;
   readonly proofEvidence:false;
 }
 
@@ -26,6 +27,7 @@ export interface VerifiedAssuranceReport {
 
 export function verifiedAssuranceReport(
   checkedCore:CheckedCoreModule,
+  runtimeDependencies:Readonly<Record<string,string>>={},
 ):VerifiedAssuranceReport {
   const runtimeAssumptions=checkedCore.externals.map((external)=>({
     kind:'runtime-external' as const,
@@ -33,6 +35,9 @@ export function verifiedAssuranceReport(
     source:external.binding.source,
     importedName:external.binding.importedName,
     logicalSignature:exprToString(external.declaration.type),
+    ...(runtimeDependencies[external.binding.source]===undefined
+      ?{}
+      :{expectedVersion:runtimeDependencies[external.binding.source]}),
     proofEvidence:false as const,
   }));
   return {

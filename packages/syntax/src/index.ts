@@ -4,5 +4,6 @@ export * from './source.js';
 export * from './lexer.js';
 export * from './ownership.js';
 export * from './parser-core.js';
+export * from './term-parser.js';
 export * from './d-call.js';
 export * from './d-call-parser.js';

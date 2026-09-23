@@ -52,3 +52,17 @@ f g(x)           -> f (g x)
 ```
 
 Plain Lean application remains owned by Lean: `f x` still returns `DEFER` when no D-CALL appears. This is not yet the full inherited Lean term grammar; operators, lambdas, type annotations, and other term forms remain later Phase-B parser obligations.
+
+
+## Reusable term parser core
+
+The inherited Lean term slice is now parsed by a reusable `TermParser` rather than being embedded in the D-CALL implementation. Its current deliberately small grammar covers:
+
+- identifiers, numeric literals, and string literals;
+- parenthesized groups;
+- tuple syntax;
+- whitespace-separated application.
+
+Feature-specific postfix syntax plugs into this parser through guarded extension hooks. A hook must either consume input and return a node, or consume nothing and defer; violating that contract fails closed. D-CALL is the first such postfix extension.
+
+This does not claim full Lean term parsing. Operators, lambdas, binders, type annotations, named arguments, and other inherited forms remain later Phase-B work.

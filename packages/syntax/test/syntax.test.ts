@@ -12,6 +12,7 @@ import {
   TokenCursor,
   spanFromTokens,
   lowerDCallSource,
+  parseTermSubset,
   lex,
   significantTokens,
 } from '../src/index.js';
@@ -125,6 +126,38 @@ console.log('ok - @proofscript/syntax lexer MVP');
   assert(error instanceof SyntaxError);
 }
 
+
+
+
+// Reusable inherited Lean term parser foundation, independent of D-CALL ownership.
+{
+  const term=parseTermSubset('f x y');
+  equal(term.kind,'application');
+  if(term.kind==='application'){
+    equal(term.args.length,2);
+    equal(term.span.start.offset,0);
+    equal(term.span.end.offset,5);
+  }
+}
+{
+  const term=parseTermSubset('f (g x)');
+  equal(term.kind,'application');
+  if(term.kind==='application'){
+    equal(term.args[0]?.kind,'group');
+  }
+}
+{
+  const term=parseTermSubset('(f x, g y)');
+  equal(term.kind,'tuple');
+  if(term.kind==='tuple'){
+    equal(term.items.length,2);
+    equal(term.items[0]?.kind,'application');
+    equal(term.items[1]?.kind,'application');
+  }
+}
+{
+  throws(()=>parseTermSubset('f(x)'),/term subset stopped before '\\('/);
+}
 
 // v0.7 D-CALL conformance slice.
 {

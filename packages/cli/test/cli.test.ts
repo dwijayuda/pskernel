@@ -5,6 +5,7 @@ import {parseCommonArgs,parseTranslateArgs} from '../src/args.js';
 import {compileVerifiedSource} from '../src/verified-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
 import {runCommand} from '../src/commands/run.js';
+import {checkCommand} from '../src/commands/check.js';
 import {emitLeanCommand} from '../src/commands/emit-lean.js';
 import {translateCommand} from '../src/commands/translate.js';
 
@@ -1019,7 +1020,12 @@ console.log('ok - psc canonical source hash is source-kind neutral');
     );
     await writeFile(
       join(directory,'src','Data.lean'),
-      'def double (x : Nat) : Nat := x + x\n',
+      'import Core\ndef double (x : Nat) : Nat := twice x\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Core.ps'),
+      'function twice(x : Nat) : Nat := x + x;\n',
       'utf8',
     );
     const result=await runCommand({
@@ -1031,9 +1037,9 @@ console.log('ok - psc canonical source hash is source-kind neutral');
     equal(result.mainResult,'42');
     equal(
       (result.moduleOrder as readonly string[]).join(','),
-      'Data,main',
+      'Core,Data,main',
     );
-    equal(result.moduleCount,2);
+    equal(result.moduleCount,3);
   }finally{
     await rm(directory,{recursive:true,force:true});
   }
@@ -1139,4 +1145,53 @@ console.log('ok - psc mixed Lean -> ProofScript import run');
   }
 }
 console.log('ok - psc mixed-source module ambiguity fails closed');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-imports-legacy-reject-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.ps'),
+      'function id(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await checkCommand({
+        project:directory,
+        json:true,
+        verified:false,
+        passthrough:[],
+      });
+    }catch(error){
+      rejected=/PS_PROJECT_IMPORTS_REQUIRE_VERIFIED/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc imports fail closed on legacy semantic lane');
+
 

@@ -8,6 +8,7 @@ structure S where
   names : HashMap Name Nat := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
   levels : HashMap Level Nat := HashMap.emptyWithCapacity 32 |>.insert .zero 0
   exprs : HashMap ExprStructEq Nat := HashMap.emptyWithCapacity 256
+  mdata : Array KVMap := #[]
   emitted : NameSet := {}
   active : NameSet := {}
 
@@ -33,6 +34,14 @@ def biJson : BinderInfo → Json
   modify fun s => setM s ((getM s).insert x i)
   return i
 
+def dumpMDataEqId (d : KVMap) : M Nat := do
+  let xs := (← get).mdata
+  for i in [0:xs.size] do
+    if xs[i]! == d then return i
+  let i := xs.size
+  modify fun s => { s with mdata := s.mdata.push d }
+  return i
+
 def dumpName (n : Name) : M Nat := intern n "in" (·.names) ({ · with names := · }) do
   match n with
   | .anonymous => unreachable!
@@ -52,14 +61,14 @@ def dumpLevel (l : Level) : M Nat := intern l "il" (·.levels) ({ · with levels
 partial def dumpExpr (e : Expr) : M Nat := intern (ExprStructEq.mk e) "ie" (·.exprs) ({ · with exprs := · }) do
   match e with
   | .fvar .. | .mvar .. => throw <| IO.userError "free/meta variable in kernel export"
-  | .mdata _ b => return .mkObj [("mdata", .mkObj [("data", .mkObj []), ("expr", ← dumpExpr b)])]
+  | .mdata d b => return .mkObj [("mdata", .mkObj [("dataEq", ← dumpMDataEqId d), ("expr", ← dumpExpr b)])]
   | .bvar i => return .mkObj [("bvar", i)]
   | .sort l => return .mkObj [("sort", ← dumpLevel l)]
   | .const n us => return .mkObj [("const", .mkObj [("name", ← dumpName n), ("us", (← us.mapM dumpLevel).toJson)])]
   | .app f a => return .mkObj [("app", .mkObj [("fn", ← dumpExpr f), ("arg", ← dumpExpr a)])]
   | .lam n d b bi => return .mkObj [("lam", .mkObj [("name", ← dumpName n), ("type", ← dumpExpr d), ("body", ← dumpExpr b), ("binderInfo", biJson bi)])]
   | .forallE n d b bi => return .mkObj [("forallE", .mkObj [("name", ← dumpName n), ("type", ← dumpExpr d), ("body", ← dumpExpr b), ("binderInfo", biJson bi)])]
-  | .letE n d v b _ => return .mkObj [("letE", .mkObj [("name", ← dumpName n), ("type", ← dumpExpr d), ("value", ← dumpExpr v), ("body", ← dumpExpr b)])]
+  | .letE n d v b nondep => return .mkObj [("letE", .mkObj [("name", ← dumpName n), ("type", ← dumpExpr d), ("value", ← dumpExpr v), ("body", ← dumpExpr b), ("nondep", nondep)])]
   | .proj s i a => return .mkObj [("proj", .mkObj [("typeName", ← dumpName s), ("idx", i), ("struct", ← dumpExpr a)])]
   | .lit (.natVal n) => return .mkObj [("natVal", s!"{n}")]
   | .lit (.strVal s) => return .mkObj [("strVal", s)]
@@ -369,6 +378,7 @@ def resetInternTables : M Unit :=
     names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
     levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
     exprs := HashMap.emptyWithCapacity 256
+    mdata := #[]
     active := {}
   }
 

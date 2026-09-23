@@ -543,10 +543,10 @@ const verifiedJsModule=await import(
   'data:text/javascript;base64,'+
   Buffer.from(verifiedWasmBool.emitted.javascript).toString('base64')
 );
-for(const a of [false,true]){
-  for(const b of [false,true]){
-    const ai=a?1:0;
-    const bi=b?1:0;
+for(const ai of [0,1,2,-1]){
+  for(const bi of [0,1,2,-1]){
+    const a=ai!==0;
+    const b=bi!==0;
     assert(
       verifiedWasmInstance.exports.wasmLogic(ai,bi)===
         (verifiedJsModule.wasmLogic(a,b)?1:0),

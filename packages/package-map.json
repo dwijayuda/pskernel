@@ -104,11 +104,12 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
+      "status": "v061-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "Kernel-facing tactic syntax recognizes bare `exact?` and lowers it to Lean `exact?`. Config/using modifiers are intentionally outside the accepted slice.",
         "The type/proposition grammar now recognizes explicit dependent arrows `(x : T) -> U`, matching the v0.7 reference example `(x : Nat) -> Fin x -> Nat` and lowering directly to Lean binder-arrow syntax.",
         "Named dependent binders are scoped in dependency analysis so the binder name is not misclassified as a local declaration dependency.",
         "The theorem/type-position grammar now reuses the full current v0.6.1 Bool/Nat binary precedence table for +,-,*,/,%, relations, ==, !=, &&, and ||, and adds Bool literals plus unary !.",
@@ -220,7 +221,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-bounded-exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -233,6 +234,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Bounded `exact?` now closes a goal using newest-first local exact hypotheses, then newest-first already-admitted zero-universe environment constants whose checked type is definitionally equal to the target.",
+        "Search is capped at 4096 environment candidates. Candidate probing is side-effect-free and final closure delegates to the ordinary `exact` transition/runtime kernel adapter.",
+        "Full Lean library search remains unsupported: no polymorphic candidate instantiation, apply-generated subgoals, solveByElim, symmetry, Iff mp/mpr candidates, unstable-name filtering, config, `using`, +all, or +grind.",
         "Explicit dependent Pi types `(x : T) -> U` now elaborate by checking T as a type, extending the local context with x while elaborating U, then abstracting the local free variable into the kernel `forallE` body.",
         "The current Pi slice intentionally supports one explicit default binder per arrow. Implicit/strict-implicit/instance Pi binders in type syntax remain fail-closed until required by real source.",
         "Bool literals plus !, &&, ||, ==, and != can now appear as dependent theorem/type-position terms. They reuse the same Bool.not/Bool.and/Bool.or and bounded Nat/Bool BEq construction/checking helpers as ordinary expressions.",

@@ -162,3 +162,17 @@ Lean 4.34 parser models dependent arrow as a bracketed binder followed by
 that model for one explicit named binder and lowers/elaborates to ordinary
 kernel `forallE`; it does not introduce a ProofScript-specific dependent
 function semantics.
+
+## Lean 4.34 exact-search evidence
+
+Pinned Lean 4.34 implements `exact?` through
+`Lean.Meta.Tactic.LibrarySearch`: relevant declarations are indexed, each
+candidate may be applied, generated subgoals may be discharged by
+`solveByElim`, symmetry and Iff directions can be considered, and
+`exact?` requires a complete solution.
+
+The ProofScript checkpoint deliberately implements only the subset for which
+those extra mechanisms are unnecessary: exact local hypotheses and
+zero-subgoal environment constants. This preserves the central Lean rule that
+`exact?` must close the goal while avoiding an invented approximation of
+full library search.

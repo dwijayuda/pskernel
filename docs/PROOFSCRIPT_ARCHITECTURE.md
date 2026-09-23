@@ -532,3 +532,29 @@ continues to use the same kernel constructor with an anonymous binder.
 The first accepted source slice is explicit/default binding only. Implicit
 `{x : T}`, strict implicit `{{x : T}}`, and instance `[x : T]` Pi syntax
 remain unsupported until a concrete ProofScript library requires them.
+
+## Bounded exact-search checkpoint
+
+ProofScript now has a first deterministic `exact?` slice. It is an untrusted
+search procedure, not a proof authority.
+
+Candidate order is deterministic:
+
+1. local hypotheses, newest first;
+2. already-admitted environment constants, newest first.
+
+The environment phase considers only declarations with zero universe
+parameters and stops after 4096 candidates. A candidate is only accepted when
+its already-checkable type is definitionally equal to the goal. The selected
+term is then submitted through the ordinary `exact` transition and pskernel
+checker.
+
+This intentionally omits Lean's broader library-search machinery:
+discrimination-tree indexing, symmetry search, `Iff.mp`/`Iff.mpr`
+variants, applying lemmas with premises, `solveByElim` subgoal discharge,
+polymorphic level instantiation, `using`, configuration, `+all`, and
+`+grind`.
+
+A failed candidate probe is side-effect-free. Once a candidate matches, any
+failure during actual assignment or parent-proof reconstruction propagates;
+the search loop does not swallow it.

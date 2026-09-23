@@ -270,6 +270,12 @@ notation semantics as ordinary expressions. Relation propositions use
 such as `(x == y) = true` is still required. Dependent lambdas/matches remain
 future surface work.
 
+The first deterministic search slice is now landed as bounded `exact?`.
+It searches newest-first locals and then at most 4096 newest-first
+zero-universe environment constants, accepting only candidates that already
+close the target by ordinary `exact`. It does not apply candidates with
+premises or recursively solve generated goals.
+
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
 
@@ -478,7 +484,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 5. Keep theorem-statement syntax evidence-driven; explicit dependent Pi plus
    the current Nat/Bool/propositional forms cover the reference-backed
    foundation. Add lambdas/match only when a concrete specification needs them.
-6. Add deterministic search tactics such as exact? on top of this foundation.
+6. Validate and then broaden the landed bounded zero-subgoal `exact?` search
+   only where Lean library-search semantics can be modeled explicitly; do not
+   silently turn it into recursive automation.
 7. Implement project/module/import semantics on the checked-core path.
 8. Design and implement explicit npm/JS FFI.
 9. Start the ProofScript-written standard library.

@@ -856,3 +856,23 @@ and ProofScript has no serializer from checked-core admissions back into that
 transport. Inventing one ad hoc would violate the artifact trust model. A
 persistent cache must first land a real replayable payload codec or a formally
 versioned new artifact payload.
+
+## DS5 configured source-root checkpoint
+
+Logical module resolution now accepts project-relative `sourceRoots` in
+`psconfig.json`.
+
+Rules:
+
+- empty/unset `sourceRoots` preserves the previous behavior: imports resolve
+  below the entry file's directory;
+- configured roots are resolved relative to `psconfig.json`;
+- every logical module path is searched under every configured root for both
+  `.ps` and `.lean`;
+- exactly one candidate is required;
+- more than one candidate is an ambiguity error, even when candidates live in
+  different roots or use different source kinds;
+- no root has implicit priority.
+
+This keeps resolution deterministic and makes mixed-source projects portable
+without coupling source-kind choice to import precedence.

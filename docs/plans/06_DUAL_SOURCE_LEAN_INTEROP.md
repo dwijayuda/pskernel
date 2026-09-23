@@ -320,7 +320,7 @@ pskernel-checked semantics.
 
 ### DS5 — mixed modules
 
-Status: **MVP landed with semantic metadata + checked-module cache/integrity; persistent artifacts/source roots remain**
+Status: **MVP landed with semantic metadata, cache/integrity, and configured source roots; persistent artifacts remain**
 
 Landed DS5.1/DS5.2:
 
@@ -355,24 +355,36 @@ Landed DS5.1/DS5.2:
   integrity keys. Project integrity covers the deterministic ordered module
   integrity list. Final project admission is still replayed through pskernel
   on cache hits.
+- `psconfig.json` now accepts project-relative `sourceRoots`. Empty/unset
+  preserves entry-directory lookup; configured roots are searched together,
+  and exactly one `.ps` or `.lean` candidate must exist for each logical
+  import. Verified reports expose the resolved absolute root list.
 
-Current bounded resolution rule:
+Current resolution rule:
 
 ```text
+# default, when sourceRoots is empty/unset
 entry directory/
   Foo/Bar.ps
   Foo/Bar.lean
+
+# configured
+psconfig.json
+sourceRoots: ["src", "vendor"]
+  -> search each configured project-relative root for Foo/Bar.ps|.lean
 ```
 
-Exactly one candidate may exist for logical module `Foo.Bar`. Configured
-source roots/package resolution are later DS5 work.
+Exactly one candidate may exist for logical module `Foo.Bar` across all
+searched roots and both source kinds. Multiple matches are an ambiguity error;
+there is no first-root-wins precedence.
 
 Remaining DS5 work:
 
 - define a real persistent `@proofscript/module` payload path for
   ProofScript-produced checked admissions. Artifact v1 currently requires
   Lean4Export NDJSON, and no checked-core -> Lean4Export serializer exists;
-- define configured source roots/package import resolution;
+- define package import resolution beyond the landed project-relative
+  sourceRoots search;
 - emit/cache canonical persistent per-module artifacts once that payload path
   exists, instead of only a bundled runtime output and entry-source Lean
   artifact;

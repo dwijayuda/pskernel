@@ -1,6 +1,7 @@
 import type {CheckedSoftwareModule,SoftwareType} from '@proofscript/language';
 import type {VerifiedIrModule} from '@proofscript/compiler-ir/verified';
 import type {TranslationTarget} from '@proofscript/syntax';
+import type {WasmEmitResult} from '@proofscript/compiler';
 import type {LoadedPsConfig} from './config.js';
 
 export type BuildTarget='js'|'wasm';
@@ -28,6 +29,7 @@ export interface BuildResult {
   readonly report:Record<string,unknown>;
   readonly checked?:CheckedSoftwareModule;
   readonly verifiedIr?:VerifiedIrModule;
+  readonly wasm?:WasmEmitResult;
   readonly jsPath:string;
 }
 

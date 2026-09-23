@@ -898,6 +898,44 @@ console.log('ok - @proofscript/elab verified match recursor elaboration');
 }
 console.log('ok - @proofscript/elab parameterized inductive constructor inference');
 
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive OptExpected(α : Type) where { | none; | some(value : α); } '+
+    'function chooseExpected {α : Type}'+
+    '(value : OptExpected(α), fallback : OptExpected(α)) : OptExpected(α) := '+
+    'match value with { | .none => fallback; | .some x => OptExpected.some(x); }; '+
+    'function useExpectedNone {α : Type}'+
+    '(fallback : OptExpected(α)) : OptExpected(α) := '+
+    'chooseExpected(OptExpected.none, fallback); '+
+    'theorem chooseExpectedNone {α : Type}'+
+    '(fallback : OptExpected(α)) : '+
+    'chooseExpected(OptExpected.none, fallback) = fallback := Eq.refl(fallback);',
+  ),env);
+  equal(result.definitions.length,2);
+  equal(result.theorems.length,1);
+}
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive DuoExpected(α : Type, ε : Type) where { '+
+    '| ok(value : α); | error(error : ε); } '+
+    'function duoGetOr {α : Type}{ε : Type}'+
+    '(value : DuoExpected(α, ε), fallback : α) : α := '+
+    'match value with { | .ok x => x; | .error err => fallback; }; '+
+    'function useExpectedOk {α : Type}{ε : Type}'+
+    '(value : α, fallback : α) : α := '+
+    'duoGetOr(DuoExpected.ok(value), fallback); '+
+    'theorem duoExpectedOk {α : Type}{ε : Type}'+
+    '(value : α, fallback : α) : '+
+    'duoGetOr(DuoExpected.ok(value), fallback) = value := Eq.refl(value);',
+  ),env);
+  equal(result.definitions.length,2);
+  equal(result.theorems.length,1);
+}
+console.log('ok - @proofscript/elab expected-type propagation into nested calls');
+
+
 
 {
   const env=makeNatNotationEnvironment();

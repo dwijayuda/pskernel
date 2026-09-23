@@ -27,7 +27,7 @@ export {
 } from './type-lowering.js';
 
 export const PROOFSCRIPT_WASM_PROFILE=
-  'proofscript-wasm32-gc-js-v1' as const;
+  'proofscript-wasm32-mvp-js-v1' as const;
 
 export function lowerVerifiedIrToWasm(
   module:VerifiedIrModule,

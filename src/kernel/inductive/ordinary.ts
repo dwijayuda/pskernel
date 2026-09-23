@@ -111,9 +111,9 @@ function validIndApp(_work:Environment,stats:Stats,_lctx:LocalContext,t:Expr):{i
  // Final Lean 4.34 is_valid_ind_app is intentionally structural here: callers
  // WHNF recursive argument types where required, but constructor results
  // themselves are not reduced into shape.
- const v=appView(t);if(v.fn.kind!=='const')return null;
- const idx=stats.names.findIndex(n=>nameEq(n,v.fn.name));if(idx<0)return null;
- if(!exprLeanEq(v.fn,constant(stats.names[idx]!,stats.levels)))return null;
+ const v=appView(t),head=v.fn;if(head.kind!=='const')return null;
+ const idx=stats.names.findIndex(n=>nameEq(n,head.name));if(idx<0)return null;
+ if(!exprLeanEq(head,constant(stats.names[idx]!,stats.levels)))return null;
  const ni=stats.nindices[idx]!;if(v.args.length!==stats.params.length+ni)return null;
  for(let i=0;i<stats.params.length;i++)if(!exprLeanEq(v.args[i]!,stats.params[i]!.expr))return null;
  for(let i=stats.params.length;i<v.args.length;i++)if(hasConst(v.args[i]!,stats.names))return null;

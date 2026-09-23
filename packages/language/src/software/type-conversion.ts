@@ -11,6 +11,8 @@ export function asSoftwareType(
 ):SoftwareType {
   switch(type.kind){
     case 'nat':
+    case 'bool':
+    case 'unary':
     case 'binary':
       throw new Error(
         'PS_CHECK_DEPENDENT_TYPE_TERM_UNSUPPORTED: theorem/type terms require verified elaboration',

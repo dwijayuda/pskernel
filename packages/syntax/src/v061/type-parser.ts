@@ -4,6 +4,7 @@ import {v061BinaryPrecedence} from './operators.js';
 
 export type V061TypeExpr =
   | {readonly kind:'nat';readonly text:string;readonly span:SourceSpan}
+  | {readonly kind:'bool';readonly value:boolean;readonly span:SourceSpan}
   | {readonly kind:'named';readonly name:string;readonly span:SourceSpan}
   | {
       readonly kind:'application';
@@ -12,8 +13,17 @@ export type V061TypeExpr =
       readonly span:SourceSpan;
     }
   | {
+      readonly kind:'unary';
+      readonly operator:'!';
+      readonly operand:V061TypeExpr;
+      readonly span:SourceSpan;
+    }
+  | {
       readonly kind:'binary';
-      readonly operator:'+'|'-'|'*'|'/'|'%'|'<'|'<='|'>'|'>=';
+      readonly operator:
+        |'+'|'-'|'*'|'/'|'%'
+        |'<'|'<='|'>'|'>='
+        |'=='|'!='|'&&'|'||';
       readonly left:V061TypeExpr;
       readonly right:V061TypeExpr;
       readonly span:SourceSpan;
@@ -48,14 +58,14 @@ export function parseV061Type(context:V061ParseContext):V061TypeExpr {
 }
 
 const TYPE_TERM_BINARY_OPERATORS=new Set([
-  '+','-','*','/','%','<','<=','>','>=',
+  '+','-','*','/','%','<','<=','>','>=','==','!=','&&','||',
 ]);
 
 function parseTypeTermBinary(
   context:V061ParseContext,
   minPrecedence=0,
 ):V061TypeExpr {
-  let left=parseApplicationType(context);
+  let left=parsePrefixType(context);
   while(true){
     const token=context.cursor.peek();
     if(!TYPE_TERM_BINARY_OPERATORS.has(token.text))break;
@@ -65,7 +75,10 @@ function parseTypeTermBinary(
     const right=parseTypeTermBinary(context,precedence+1);
     left={
       kind:'binary',
-      operator:token.text as '+'|'-'|'*'|'/'|'%'|'<'|'<='|'>'|'>=',
+      operator:token.text as
+        |'+'|'-'|'*'|'/'|'%'
+        |'<'|'<='|'>'|'>='
+        |'=='|'!='|'&&'|'||',
       left,
       right,
       span:spanBetween(left,right),
@@ -91,6 +104,20 @@ function parseEqualityType(context:V061ParseContext):V061TypeExpr {
     right,
     span:{start:left.span.start,end:right.span.end},
   };
+}
+
+function parsePrefixType(context:V061ParseContext):V061TypeExpr {
+  if(context.cursor.at('!')){
+    const first=context.cursor.consume();
+    const operand=parsePrefixType(context);
+    return {
+      kind:'unary',
+      operator:'!',
+      operand,
+      span:spanBetween(first,operand),
+    };
+  }
+  return parseApplicationType(context);
 }
 
 function canStartAtomicType(token:Token):boolean {
@@ -152,6 +179,10 @@ function parseAtomicType(context:V061ParseContext):V061TypeExpr {
     context.cursor.consume();
     return {kind:'nat',text:token.text,span:token.span};
   }
+  if(token.text==='true'||token.text==='false'){
+    context.cursor.consume();
+    return {kind:'bool',value:token.text==='true',span:token.span};
+  }
   if(token.kind==='identifier'){
     context.cursor.consume();
     return {kind:'named',name:token.text,span:token.span};
@@ -169,6 +200,29 @@ function parseAtomicType(context:V061ParseContext):V061TypeExpr {
   throw new SyntaxError("expected type, got '"+token.text+"'",token.span);
 }
 
+function leanTypeTermBinaryPrecedence(operator:string):number {
+  switch(operator){
+    case '*':
+    case '/':
+    case '%':
+      return 70;
+    case '+':
+    case '-':
+      return 65;
+    case '<':
+    case '<=':
+    case '>':
+    case '>=':
+    case '==':
+    case '!=':
+      return 50;
+    case '&&':
+      return 35;
+    case '||':
+      return 30;
+  }
+}
+
 export function lowerV061TypeToLean(
   type:V061TypeExpr,
   parentPrecedence=0,
@@ -176,23 +230,25 @@ export function lowerV061TypeToLean(
   switch(type.kind){
     case 'nat':
       return type.text;
+    case 'bool':
+      return type.value?'true':'false';
     case 'named':
       return type.name;
     case 'group':
       return '('+lowerV061TypeToLean(type.value)+')';
     case 'application':{
-      const precedence=70;
+      const precedence=80;
       const rendered=lowerV061TypeToLean(type.fn,precedence)+' '+
         type.args.map((arg)=>lowerV061TypeToLean(arg,precedence+1)).join(' ');
       return precedence<parentPrecedence?'('+rendered+')':rendered;
     }
+    case 'unary':{
+      const precedence=75;
+      const rendered='!'+lowerV061TypeToLean(type.operand,precedence);
+      return precedence<parentPrecedence?'('+rendered+')':rendered;
+    }
     case 'binary':{
-      const precedence=
-        type.operator==='*'||type.operator==='/'||type.operator==='%'
-          ?65
-          :type.operator==='+'||type.operator==='-'
-            ?60
-            :55;
+      const precedence=leanTypeTermBinaryPrecedence(type.operator);
       const rendered=lowerV061TypeToLean(type.left,precedence)+' '+
         type.operator+' '+
         lowerV061TypeToLean(type.right,precedence+1);

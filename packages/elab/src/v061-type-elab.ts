@@ -21,6 +21,12 @@ import {
   elaborateV061NatRelationTerms,
   isV061NatRelation,
 } from './v061-nat-notation-elab.js';
+import {
+  elaborateV061BoolBinaryTerms,
+  elaborateV061BoolNotTerm,
+  elaborateV061PrimitiveBooleanEqualityTerms,
+  isV061BoolBinary,
+} from './v061-bool-notation-elab.js';
 
 function elaborateTypePositionApplication(
   fn:Expr,
@@ -55,6 +61,11 @@ function elaborateV061TypePositionTerm(
   switch(syntax.kind){
     case 'nat':
       return natLit(BigInt(syntax.text.replaceAll('_','')));
+    case 'bool':
+      return elaborateV061Constant(
+        nameFromDotted(syntax.value?'Bool.true':'Bool.false'),
+        context,
+      );
     case 'group':
       return elaborateV061TypePositionTerm(syntax.value,context);
     case 'named':{
@@ -78,6 +89,20 @@ function elaborateV061TypePositionTerm(
         ),
         context,
       );
+    case 'unary':{
+      const checker=new TypeChecker(
+        context.environment,
+        context.localContext.clone(),
+      );
+      const operand=elaborateV061TypePositionTerm(
+        syntax.operand,
+        context,
+      );
+      return elaborateV061BoolNotTerm(
+        {term:operand,type:checker.check(operand)},
+        context,
+      ).term;
+    }
     case 'binary':{
       const checker=new TypeChecker(
         context.environment,
@@ -89,6 +114,22 @@ function elaborateV061TypePositionTerm(
       const rhs={term:right,type:checker.check(right)};
       if(isV061NatRelation(syntax.operator)){
         return elaborateV061NatRelationTerms(
+          syntax.operator,
+          lhs,
+          rhs,
+          context,
+        ).term;
+      }
+      if(isV061BoolBinary(syntax.operator)){
+        return elaborateV061BoolBinaryTerms(
+          syntax.operator,
+          lhs,
+          rhs,
+          context,
+        ).term;
+      }
+      if(syntax.operator==='=='||syntax.operator==='!='){
+        return elaborateV061PrimitiveBooleanEqualityTerms(
           syntax.operator,
           lhs,
           rhs,

@@ -885,6 +885,29 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 
+{
+  const module=parseV061Module(
+    'theorem beqAssumed(x : Nat, y : Nat, h : x == y = true) : '+
+    'x == y = true := by assumption;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem beqAssumed (x : Nat) (y : Nat) (h : (x == y) = true) : '+
+    '(x == y) = true := by assumption\n',
+  );
+}
+{
+  const module=parseV061Module(
+    'theorem boolLogicAssumed(p : Bool, q : Bool, h : !p || q = true) : '+
+    '!p || q = true := by assumption;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem boolLogicAssumed (p : Bool) (q : Bool) '+
+    '(h : (!p || q) = true) : (!p || q) = true := by assumption\n',
+  );
+}
+
 throws(
   ()=>parseV061Module(
     'theorem badEq(a : Nat, b : Nat, c : Nat) : a = b = c := by assumption;',

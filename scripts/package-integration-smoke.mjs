@@ -235,6 +235,19 @@ assert(
 );
 
 
+const verifiedBoolTheoremTerms=compileVerifiedSource(
+  'theorem beqAssumed(x : Nat, y : Nat, h : x == y = true) : '+
+  'x == y = true := by assumption; '+
+  'theorem boolLogicAssumed(p : Bool, q : Bool, h : !p || q = true) : '+
+  '!p || q = true := by assumption;',
+  'verified-bool-theorem-terms.ts',
+);
+assert(
+  verifiedBoolTheoremTerms.checkedCore.theorems.length===2,
+  'Bool-valued theorem term syntax was not admitted inside propositions',
+);
+
+
 const verifiedNat=compileVerifiedSource(
   'function add(x : Nat, y : Nat) : Nat := x + y; '+
   'function twice(x : Nat) : Nat := add(x, x); '+

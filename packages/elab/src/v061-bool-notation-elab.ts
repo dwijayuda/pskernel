@@ -23,28 +23,189 @@ export function isV061BoolBinary(operator:string):boolean {
   return boolBinary.has(operator);
 }
 
-function elaborateBoolOperands(
-  expr:Extract<V061Expr,{kind:'binary'}>,
+function boolType(
   context:V061CoreElabContext,
-  elaborate:V061TermElaborator,
-){
-  const boolType=constant(requireV061NotationConstant(context,'Bool'));
+):Expr {
+  return constant(requireV061NotationConstant(context,'Bool'));
+}
+
+function requirePrimitiveEqualityOperandType(
+  type:Expr,
+  context:V061CoreElabContext,
+  checker:TypeChecker,
+  operator:string,
+):{readonly type:Expr;readonly equalityName:string} {
+  const natType=constant(requireV061NotationConstant(context,'Nat'));
+  const expectedBool=boolType(context);
+  if(checker.isDefEq(type,natType)){
+    return {type:natType,equalityName:'Nat.beq'};
+  }
+  if(checker.isDefEq(type,expectedBool)){
+    return {type:expectedBool,equalityName:'Bool.beq'};
+  }
+  throw new Error(
+    "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+operator+
+    "' currently supports Nat or Bool operands",
+  );
+}
+
+function requireExpectedBool(
+  expected:Expr|undefined,
+  context:V061CoreElabContext,
+  checker:TypeChecker,
+  message:string,
+):Expr {
+  const expectedBool=boolType(context);
+  if(
+    expected!==undefined
+    &&!checker.isDefEq(
+      context.metaContext.instantiate(expected),
+      expectedBool,
+    )
+  ){
+    throw new Error(message);
+  }
+  return expectedBool;
+}
+
+export function elaborateV061BoolBinaryTerms(
+  operator:string,
+  left:ElaboratedCoreTerm,
+  right:ElaboratedCoreTerm,
+  context:V061CoreElabContext,
+  expected?:Expr,
+):ElaboratedCoreTerm {
+  const boolConstant=boolBinary.get(operator);
+  if(boolConstant===undefined){
+    throw new Error(
+      "PS_ELAB_BOOL_NOTATION_OPERATOR: unsupported operator '"+operator+"'",
+    );
+  }
   const checker=new TypeChecker(
     context.environment,
     context.localContext.clone(),
   );
-  const left=elaborate(expr.left,context,boolType);
-  const right=elaborate(expr.right,context,boolType);
+  const expectedBool=requireExpectedBool(
+    expected,
+    context,
+    checker,
+    "PS_ELAB_BOOL_NOTATION_EXPECTED_TYPE: operator '"+operator+
+      "' produces Bool",
+  );
   if(
-    !checker.isDefEq(left.type,boolType)
-    ||!checker.isDefEq(right.type,boolType)
+    !checker.isDefEq(left.type,expectedBool)
+    ||!checker.isDefEq(right.type,expectedBool)
   ){
     throw new Error(
-      "PS_ELAB_BOOL_NOTATION_OPERAND_TYPE: operator '"+expr.operator+
+      "PS_ELAB_BOOL_NOTATION_OPERAND_TYPE: operator '"+operator+
       "' requires Bool operands",
     );
   }
-  return {checker,boolType,left,right};
+  const term=mkAppN(
+    constant(requireV061NotationConstant(context,boolConstant)),
+    [left.term,right.term],
+  );
+  const type=checker.check(term);
+  if(!checker.isDefEq(type,expectedBool)){
+    throw new Error(
+      "PS_ELAB_BOOL_NOTATION_RESULT: '"+boolConstant+
+      "' did not produce Bool",
+    );
+  }
+  return {term,type};
+}
+
+export function elaborateV061PrimitiveBooleanEqualityTerms(
+  operator:string,
+  left:ElaboratedCoreTerm,
+  right:ElaboratedCoreTerm,
+  context:V061CoreElabContext,
+  expected?:Expr,
+):ElaboratedCoreTerm {
+  const checker=new TypeChecker(
+    context.environment,
+    context.localContext.clone(),
+  );
+  const expectedBool=requireExpectedBool(
+    expected,
+    context,
+    checker,
+    "PS_ELAB_EQUALITY_EXPECTED_TYPE: operator '"+operator+
+      "' produces Bool",
+  );
+  const operand=requirePrimitiveEqualityOperandType(
+    left.type,
+    context,
+    checker,
+    operator,
+  );
+  if(!checker.isDefEq(right.type,operand.type)){
+    throw new Error(
+      "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+operator+
+      "' requires matching primitive operands",
+    );
+  }
+  const equality=mkAppN(
+    constant(requireV061NotationConstant(context,operand.equalityName)),
+    [left.term,right.term],
+  );
+  const equalityType=checker.check(equality);
+  if(!checker.isDefEq(equalityType,expectedBool)){
+    throw new Error(
+      "PS_ELAB_EQUALITY_RESULT: '"+operand.equalityName+
+      "' did not produce Bool",
+    );
+  }
+  if(operator==='==')return {term:equality,type:equalityType};
+  if(operator==='!='){
+    const term=mkAppN(
+      constant(requireV061NotationConstant(context,'Bool.not')),
+      [equality],
+    );
+    const type=checker.check(term);
+    if(!checker.isDefEq(type,expectedBool)){
+      throw new Error(
+        "PS_ELAB_INEQUALITY_RESULT: 'Bool.not' did not produce Bool",
+      );
+    }
+    return {term,type};
+  }
+  throw new Error(
+    "PS_ELAB_EQUALITY_OPERATOR: unsupported operator '"+operator+"'",
+  );
+}
+
+export function elaborateV061BoolNotTerm(
+  operand:ElaboratedCoreTerm,
+  context:V061CoreElabContext,
+  expected?:Expr,
+):ElaboratedCoreTerm {
+  const checker=new TypeChecker(
+    context.environment,
+    context.localContext.clone(),
+  );
+  const expectedBool=requireExpectedBool(
+    expected,
+    context,
+    checker,
+    "PS_ELAB_BOOL_NOTATION_EXPECTED_TYPE: operator '!' produces Bool",
+  );
+  if(!checker.isDefEq(operand.type,expectedBool)){
+    throw new Error(
+      "PS_ELAB_BOOL_NOTATION_OPERAND_TYPE: operator '!' requires Bool",
+    );
+  }
+  const term=mkAppN(
+    constant(requireV061NotationConstant(context,'Bool.not')),
+    [operand.term],
+  );
+  const type=checker.check(term);
+  if(!checker.isDefEq(type,expectedBool)){
+    throw new Error(
+      "PS_ELAB_BOOL_NOTATION_RESULT: 'Bool.not' did not produce Bool",
+    );
+  }
+  return {term,type};
 }
 
 export function elaborateV061PrimitiveBooleanEquality(
@@ -57,57 +218,18 @@ export function elaborateV061PrimitiveBooleanEquality(
     context.localContext.clone(),
   );
   const left=elaborate(expr.left,context);
-  const natType=constant(requireV061NotationConstant(context,'Nat'));
-  const boolType=constant(requireV061NotationConstant(context,'Bool'));
-  let operandType:Expr;
-  let equalityName:string;
-  if(checker.isDefEq(left.type,natType)){
-    operandType=natType;
-    equalityName='Nat.beq';
-  }else if(checker.isDefEq(left.type,boolType)){
-    operandType=boolType;
-    equalityName='Bool.beq';
-  }else{
-    throw new Error(
-      "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+expr.operator+
-      "' currently supports Nat or Bool operands",
-    );
-  }
-  const right=elaborate(expr.right,context,operandType);
-  if(!checker.isDefEq(right.type,operandType)){
-    throw new Error(
-      "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+expr.operator+
-      "' requires matching primitive operands",
-    );
-  }
-  const equality=mkAppN(
-    constant(requireV061NotationConstant(context,equalityName)),
-    [left.term,right.term],
+  const operand=requirePrimitiveEqualityOperandType(
+    left.type,
+    context,
+    checker,
+    expr.operator,
   );
-  const equalityType=checker.check(equality);
-  if(!checker.isDefEq(equalityType,boolType)){
-    throw new Error(
-      "PS_ELAB_EQUALITY_RESULT: '"+equalityName+"' did not produce Bool",
-    );
-  }
-  if(expr.operator==='=='){
-    return {term:equality,type:equalityType};
-  }
-  if(expr.operator==='!='){
-    const term=mkAppN(
-      constant(requireV061NotationConstant(context,'Bool.not')),
-      [equality],
-    );
-    const type=checker.check(term);
-    if(!checker.isDefEq(type,boolType)){
-      throw new Error(
-        "PS_ELAB_INEQUALITY_RESULT: 'Bool.not' did not produce Bool",
-      );
-    }
-    return {term,type};
-  }
-  throw new Error(
-    "PS_ELAB_EQUALITY_OPERATOR: unsupported operator '"+expr.operator+"'",
+  const right=elaborate(expr.right,context,operand.type);
+  return elaborateV061PrimitiveBooleanEqualityTerms(
+    expr.operator,
+    left,
+    right,
+    context,
   );
 }
 
@@ -117,41 +239,16 @@ export function elaborateV061BoolBinaryNotation(
   expected:Expr|undefined,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
-  const boolConstant=boolBinary.get(expr.operator);
-  if(boolConstant===undefined){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_OPERATOR: unsupported operator '"+expr.operator+"'",
-    );
-  }
-  const {checker,boolType,left,right}=elaborateBoolOperands(
-    expr,
+  const expectedBool=boolType(context);
+  const left=elaborate(expr.left,context,expectedBool);
+  const right=elaborate(expr.right,context,expectedBool);
+  return elaborateV061BoolBinaryTerms(
+    expr.operator,
+    left,
+    right,
     context,
-    elaborate,
+    expected,
   );
-  if(
-    expected!==undefined
-    &&!checker.isDefEq(
-      context.metaContext.instantiate(expected),
-      boolType,
-    )
-  ){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_EXPECTED_TYPE: operator '"+expr.operator+
-      "' produces Bool",
-    );
-  }
-  const term=mkAppN(
-    constant(requireV061NotationConstant(context,boolConstant)),
-    [left.term,right.term],
-  );
-  const type=checker.check(term);
-  if(!checker.isDefEq(type,boolType)){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_RESULT: '"+boolConstant+
-      "' did not produce Bool",
-    );
-  }
-  return {term,type};
 }
 
 export function elaborateV061UnaryNotation(
@@ -160,37 +257,10 @@ export function elaborateV061UnaryNotation(
   expected:Expr|undefined,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
-  const boolType=constant(requireV061NotationConstant(context,'Bool'));
-  const checker=new TypeChecker(
-    context.environment,
-    context.localContext.clone(),
+  const operand=elaborate(expr.operand,context,boolType(context));
+  return elaborateV061BoolNotTerm(
+    operand,
+    context,
+    expected,
   );
-  const operand=elaborate(expr.operand,context,boolType);
-  if(!checker.isDefEq(operand.type,boolType)){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_OPERAND_TYPE: operator '!' requires Bool",
-    );
-  }
-  if(
-    expected!==undefined
-    &&!checker.isDefEq(
-      context.metaContext.instantiate(expected),
-      boolType,
-    )
-  ){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_EXPECTED_TYPE: operator '!' produces Bool",
-    );
-  }
-  const term=mkAppN(
-    constant(requireV061NotationConstant(context,'Bool.not')),
-    [operand.term],
-  );
-  const type=checker.check(term);
-  if(!checker.isDefEq(type,boolType)){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_RESULT: 'Bool.not' did not produce Bool",
-    );
-  }
-  return {term,type};
 }

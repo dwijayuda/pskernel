@@ -142,3 +142,13 @@ Nat operation semantics rather than a theorem-only parser/elaborator shortcut.
 This was also used to split the oversized notation elaborator into focused Nat,
 Bool, support, and dispatcher modules so reference-driven surface growth does
 not violate the repository source-shape gate.
+
+## Lean 4.34 precedence evidence for theorem Bool terms
+
+The pinned `study/lean4-4.34.0/src/Init/Notation.lean` declares both
+propositional `=` and Boolean `==` at precedence 50. ProofScript's current
+expression table intentionally orders `==` above the outer theorem
+propositional equality layer. Therefore canonical lowering must parenthesize
+that subtree instead of assuming the two parsers choose the same tree.
+The Bool theorem-term checkpoint follows that rule and continues to use the
+existing verified Bool/BEq elaboration helpers.

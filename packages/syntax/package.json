@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript v0.7 source positions, trivia-preserving tokens, lexical errors, and feature identifiers.",
   "proofscript": {
-    "status": "v061-nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
+    "status": "v061-bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript",

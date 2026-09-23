@@ -481,3 +481,34 @@ x = y       : Prop
 ```
 
 No theorem-only comparison relation has been introduced.
+
+## Bool-valued theorem-term checkpoint
+
+The theorem/result surface now admits the already-verified Bool term subset:
+Bool literals, unary `!`, `&&`, `||`, and bounded primitive `==`/`!=`
+for Nat and Bool. These constructs reuse the same term constructors and kernel
+checks as executable expressions.
+
+This does **not** turn Bool into Prop. For example:
+
+```text
+x == y             : Bool
+(x == y) = true    : Prop
+x = y              : Prop
+```
+
+The final declaration header remains required to inhabit a `Sort`, so a bare
+Bool-valued expression is rejected as a theorem result.
+
+Canonical Lean lowering also accounts for a source-precedence difference.
+ProofScript keeps its existing expression precedence where `==` binds tighter
+than the outer propositional `=`. Lean 4.34 declares both `=` and `==` at
+precedence 50, so lowering inserts parentheses such as:
+
+```text
+x == y = true
+  -> (x == y) = true
+```
+
+The type/proposition parser and Lean lowering are now separate modules, keeping
+parser growth below the repository source-shape ceiling.

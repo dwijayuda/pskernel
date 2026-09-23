@@ -104,11 +104,13 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
+      "status": "v061-bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "The theorem/type-position grammar now reuses the full current v0.6.1 Bool/Nat binary precedence table for +,-,*,/,%, relations, ==, !=, &&, and ||, and adds Bool literals plus unary !.",
+        "Canonical Lean lowering is split from parsing. It uses Lean 4.34 operator precedences, including =/== at 50, && at 35, and || at 30, so generated parentheses preserve the ProofScript AST.",
         "The theorem/type-position binary grammar now includes Nat <,<=,>,>= using the shared operator precedence table. Relations bind below Nat arithmetic and above propositional `=`/arrows in the supported surface.",
         "Type/proposition positions now parse Nat literals and the existing +,-,*,/,% precedence using the shared v0.6.1 operator table. Arithmetic binds tighter than propositional `=`, which binds tighter than arrows.",
         "This syntax supports reference examples such as `theorem addZero(n : Nat) : n + 0 = n := ...` while leaving comparison/Boolean/general expression header syntax for later checkpoints.",
@@ -216,7 +218,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -229,6 +231,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Bool literals plus !, &&, ||, ==, and != can now appear as dependent theorem/type-position terms. They reuse the same Bool.not/Bool.and/Bool.or and bounded Nat/Bool BEq construction/checking helpers as ordinary expressions.",
+        "Bool-valued header expressions are not propositions by themselves: final declaration types still must inhabit a Sort. Typical propositions use outer propositional equality, for example `(x == y) = true`.",
+        "The syntax lowerer preserves ProofScript's established operator ordering but emits parentheses where Lean 4.34's equal precedence for `=` and `==` would otherwise change the parse.",
         "Nat <,<=,>,>= in theorem/type-position syntax reuse the same LE.le/LT.lt construction as ordinary verified relation expressions. Header elaboration builds only the proposition; executable if-condition elaboration separately constructs Nat.decLt/Nat.decLe.",
         "Nat literals and +,-,*,/,% in theorem/type-position expressions now reuse the same Nat constant construction and operand/result checks as ordinary expression notation; no second theorem-only arithmetic semantics exists.",
         "Notation elaboration is split by responsibility into support, Nat, Bool, and a small dispatcher, restoring the enforced <=300-line source-shape invariant without adding an exemption.",

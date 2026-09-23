@@ -344,10 +344,10 @@ export class TypeChecker {
     const ci=this.env.find(ii.ctors[0]!);if(ci?.kind!=='constructor'||ci.numFields!==0)return false;
     return this.isDefEqCore(ty,this.infer(s));
   }
-  private isNatZeroExpr(e:Expr):boolean{return (e.kind==='const'&&nameEq(e.name,N.NatZero))||(e.kind==='lit'&&e.literal.kind==='nat'&&e.literal.value===0n);}
+  private isNatZeroExpr(e:Expr):boolean{return (e.kind==='const'&&e.levels.length===0&&nameEq(e.name,N.NatZero))||(e.kind==='lit'&&e.literal.kind==='nat'&&e.literal.value===0n);}
   private natPredExpr(e:Expr):Expr|null{
     if(e.kind==='lit'&&e.literal.kind==='nat'&&e.literal.value>0n)return natLit(e.literal.value-1n);
-    const av=appView(e);return av.fn.kind==='const'&&nameEq(av.fn.name,N.NatSucc)&&av.args.length===1?av.args[0]!:null;
+    const av=appView(e);return av.fn.kind==='const'&&av.fn.levels.length===0&&nameEq(av.fn.name,N.NatSucc)&&av.args.length===1?av.args[0]!:null;
   }
   private defEqOffset(a:Expr,b:Expr):boolean|null{
     if(this.isNatZeroExpr(a)&&this.isNatZeroExpr(b))return true;const pa=this.natPredExpr(a),pb=this.natPredExpr(b);return pa&&pb?this.isDefEqCore(pa,pb):null;

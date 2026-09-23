@@ -487,9 +487,11 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 6. Validate and then broaden the landed bounded zero-subgoal `exact?` search
    only where Lean library-search semantics can be modeled explicitly; do not
    silently turn it into recursive automation.
-7. Continue dual-source work at DS2: DS1 source/target dispatch is complete;
-   implement the bounded fail-closed Lean-subset parser before any mixed module
-   resolution or `.lean` CLI acceptance.
+7. Continue dual-source DS2 from the landed canonical def/theorem value
+   frontend: add the emitted structure/class/instance/inductive, record, match,
+   and where-declaration subset with explicit fail-closed diagnostics. Do not
+   enable default `.lean` CLI acceptance until the intended emitted subset
+   round-trips.
 8. Implement project/module/import semantics on the checked-core path.
 9. Design and implement explicit npm/JS FFI.
 10. Start the ProofScript-written standard library.

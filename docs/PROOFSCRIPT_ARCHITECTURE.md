@@ -625,3 +625,30 @@ parser.
 
 This completes DS1 without changing elaboration, checked-core semantics, proof
 authority, erasure, or backend behavior.
+
+## DS2.1 Lean value frontend checkpoint
+
+The syntax package now contains a **separate** bounded Lean-subset frontend for
+canonical value declarations. It is not implemented by feeding Lean text to the
+ProofScript declaration parser.
+
+Current accepted DS2.1 source shapes include:
+
+```text
+def name (x : T) ... : R := term
+theorem name (x : T) ... : P := by ...
+```
+
+with the already-owned dependent type/proposition syntax, named whitespace
+application, literals/operators, `fun`, `let`, Lean `if ... then ... else`,
+synthetic holes, and the current tactic subset.
+
+The parser lowers directly to the same v0.6.1 AST used by ProofScript. No proof,
+type, erasure, or runtime semantics are source-kind specific after that point.
+
+The `lean-subset` frontend remains **unregistered by default**. This is an
+intentional phase boundary: parser existence in DS2 must not silently turn into
+CLI acceptance from DS3.
+
+Unsupported Lean commands/terms produce `PS_LEAN_SUBSET_*` diagnostics rather
+than falling through to the ProofScript parser or approximating full Lean.

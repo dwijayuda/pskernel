@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **DS1 complete; DS2 bounded Lean-subset parser next; subordinate to the canonical checked-core architecture**
+Status: **DS2 in progress; canonical def/theorem value frontend landed; broader declarations/terms next; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -218,6 +218,25 @@ DS1 is complete with no semantic acceptance changes. DS2 must now add a
 bounded fail-closed Lean parser before any command accepts `.lean` input.
 
 ### DS2 — Lean-subset parser
+
+Landed DS2.1 checkpoint:
+
+- a separate `lean-subset` parser now reads canonical Lean `def` and
+  `theorem` declarations into the shared v0.6.1 AST;
+- native explicit/implicit/strict-implicit/instance binders reuse the shared
+  binder/type representation;
+- canonical named application, literals, unary/binary terms, `fun`, `let`,
+  `if`, synthetic holes, and the current theorem tactic subset are accepted;
+- parsing is fail-closed for unsupported commands and terms such as
+  `structure`, `class`, `instance`, `inductive`, records, `match`,
+  namespaces, macros, and custom elaboration;
+- ProofScript -> canonical Lean -> Lean-subset parse -> canonical Lean is
+  idempotence-gated for the landed value subset;
+- the `lean-subset` frontend object is exported but deliberately not
+  registered in the default frontend registry. CLI `.lean` acceptance remains
+  DS3, after DS2 covers the intended emitted declaration subset.
+
+Remaining DS2 work:
 
 - declarations/binders/types;
 - ordinary terms;

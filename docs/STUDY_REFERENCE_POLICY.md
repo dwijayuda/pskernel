@@ -187,3 +187,16 @@ syntax the current parser has not implemented (for example braced tactic
 blocks), the printer emits the parser-supported canonical subset instead of
 claiming unreadable conformance. TypeScript references are not semantic
 authority for this source canonicalization.
+
+## DS2 Lean parser reference checkpoint
+
+The first Lean-subset parser tranche was checked against the pinned Lean 4.34
+command/term/tactic parser sources, especially:
+
+- `study/lean4-4.34.0/src/Lean/Parser/Command.lean`
+- `study/lean4-4.34.0/src/Lean/Parser/Term/Basic.lean`
+- `study/lean4-4.34.0/src/Lean/Parser/Tactic.lean`
+
+Only canonical syntax already emitted by psc is accepted in DS2.1. Broader Lean
+parser capabilities in those sources are evidence for future explicit subset
+work, not permission to accept unsupported syntax.

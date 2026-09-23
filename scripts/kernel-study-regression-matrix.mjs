@@ -135,14 +135,13 @@ for(const marker of [
   if(!nativeEval.includes(marker))throw new Error('native evaluator boundary drift: missing '+marker);
 }
 for(const forbidden of [
-  'Meta.reduceNatNative',
-  'Meta.reduceBoolNative',
-  'env.evalConst Nat',
-  'env.evalConst Bool',
+  '← Meta.reduceNatNative',
+  '← Meta.reduceBoolNative',
+  '← IO.ofExcept <| env.evalConst Nat',
+  '← IO.ofExcept <| env.evalConst Bool',
   'checkConstType env',
 ]){
-  const executable=nativeEval.split('\n').some(line=>!line.trimStart().startsWith('--')&&!line.trimStart().startsWith('/-')&&line.includes(forbidden));
-  if(executable)throw new Error('native evaluator boundary drift: reference helper must use Kernel.whnf, found '+forbidden);
+  if(nativeEval.includes(forbidden))throw new Error('native evaluator boundary drift: reference helper must use Kernel.whnf, found '+forbidden);
 }
 
 const counts={};

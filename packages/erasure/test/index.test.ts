@@ -10,6 +10,7 @@ import {
   levelZero,
   mkAppN,
   nameFromDotted,
+  natLit,
   sort,
 } from 'lean-ts-kernel';
 import {
@@ -303,3 +304,82 @@ console.log('ok - @proofscript/erasure semantic primitive type identity');
   equal(getIr?.body.kind,'projection');
 }
 console.log('ok - @proofscript/erasure verified runtime structures');
+
+
+{
+  const base=new Environment();
+  const kernel=new Kernel(base);
+  const Nat=nameFromDotted('TestNat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const Maybe=nameFromDotted('MaybeNat');
+  const None=nameFromDotted('MaybeNat.none');
+  const Some=nameFromDotted('MaybeNat.some');
+  const valueName=nameFromDotted('value');
+  const maybeType=constant(Maybe);
+  const checked=admitCheckedCoreAdmissions(base,[
+    {
+      kind:'inductive',
+      declaration:{
+        levelParams:[],
+        numParams:0,
+        types:[{
+          name:Maybe,
+          type:sort(levelSucc(levelZero)),
+          ctors:[
+            {name:None,type:maybeType},
+            {
+              name:Some,
+              type:forallE(
+                valueName,
+                constant(Nat),
+                maybeType,
+              ),
+            },
+          ],
+        }],
+      },
+    },
+    {
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:nameFromDotted('noneValue'),
+        levelParams:[],
+        type:maybeType,
+        value:constant(None),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+    {
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:nameFromDotted('oneValue'),
+        levelParams:[],
+        type:maybeType,
+        value:app(constant(Some),natLit(1n)),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+  ]);
+  const erased=eraseCheckedCoreModule(checked);
+  equal(erased.inductives?.length,1);
+  equal(erased.inductives?.[0]?.name,'MaybeNat');
+  equal(erased.inductives?.[0]?.constructors.length,2);
+  equal(
+    erased.declarations.find((item)=>item.name==='noneValue')?.body.kind,
+    'constructor',
+  );
+  equal(
+    erased.declarations.find((item)=>item.name==='oneValue')?.body.kind,
+    'constructor',
+  );
+}
+console.log('ok - @proofscript/erasure verified ADT constructors');

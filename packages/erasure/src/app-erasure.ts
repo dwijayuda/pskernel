@@ -80,6 +80,32 @@ export function eraseRuntimeApplication(
   const view=appView(expr);
 
   if(view.fn.kind==='const'){
+    const constructor=scope.inductivesByConstructor.get(
+      nameKey(view.fn.name),
+    );
+    if(constructor!==undefined){
+      if(view.args.length!==constructor.fields.length){
+        throw new Error(
+          "PS_ERASE_CONSTRUCTOR_ARITY: '"+constructor.inductive+'.'+
+          constructor.name+"' expected "+constructor.fields.length+
+          ' fields, got '+view.args.length,
+        );
+      }
+      return {
+        kind:'constructor',
+        inductive:constructor.inductive,
+        constructor:constructor.name,
+        fields:constructor.fields.map((field)=>({
+          name:field.name,
+          value:erase(
+            view.args[field.sourceIndex]!,
+            scope,
+            environment,
+          ),
+        })),
+      };
+    }
+
     const structure=scope.structuresByConstructor.get(
       nameKey(view.fn.name),
     );

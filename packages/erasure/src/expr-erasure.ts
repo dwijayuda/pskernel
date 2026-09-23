@@ -110,6 +110,23 @@ export function eraseRuntimeExpr(
       throw new Error("PS_ERASE_UNKNOWN_LOCAL: '"+expr.id+"'");
     }
     case 'const':{
+      const constructor=scope.inductivesByConstructor.get(
+        nameKey(expr.name),
+      );
+      if(constructor!==undefined){
+        if(constructor.fields.length!==0){
+          throw new Error(
+            "PS_ERASE_CONSTRUCTOR_FUNCTION_UNSUPPORTED: '"+
+            constructor.inductive+'.'+constructor.name+"'",
+          );
+        }
+        return {
+          kind:'constructor',
+          inductive:constructor.inductive,
+          constructor:constructor.name,
+          fields:[],
+        };
+      }
       const known=scope.declarationNames.get(nameKey(expr.name));
       if(known!==undefined)return {kind:'var',name:known};
       const name=nameToString(expr.name);

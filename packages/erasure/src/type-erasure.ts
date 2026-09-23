@@ -4,6 +4,7 @@ import {
   appView,
   fvar,
   instantiate1,
+  nameKey,
   nameToString,
   type Expr,
 } from 'lean-ts-kernel';
@@ -38,20 +39,26 @@ export function eraseRuntimeType(
   }
 
   if(value.kind==='const'){
-    return primitives.get(nameToString(value.name))
-      ??{
-        kind:'named',
-        name:safeIdentifier(nameToString(value.name).replaceAll('.','_'),'Type'),
-        args:[],
-      };
+    const primitive=primitives.get(nameToString(value.name));
+    if(primitive!==undefined)return primitive;
+    const known=scope.declarationNames.get(nameKey(value.name));
+    return {
+      kind:'named',
+      name:known??safeIdentifier(
+        nameToString(value.name).replaceAll('.','_'),
+        'Type',
+      ),
+      args:[],
+    };
   }
 
   if(value.kind==='app'){
     const view=appView(value);
     if(view.fn.kind!=='const')return {kind:'unknown'};
+    const known=scope.declarationNames.get(nameKey(view.fn.name));
     return {
       kind:'named',
-      name:safeIdentifier(
+      name:known??safeIdentifier(
         nameToString(view.fn.name).replaceAll('.','_'),
         'Type',
       ),

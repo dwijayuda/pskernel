@@ -238,7 +238,7 @@
       "path": "packages/erasure",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "verified-runtime-structure-erasure-mvp",
+      "status": "verified-structure-and-adt-erasure-mvp",
       "packageName": "@proofscript/erasure",
       "dependsOn": [
         "checked-core",
@@ -247,6 +247,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Unparameterized non-recursive pskernel inductives now lower to verified nominal ADT metadata; kernel constructor constants/applications become verified constructor values.",
+        "Constructor field names/types are derived from pskernel-generated ConstructorInfo, not trusted source-side ADT metadata.",
+        "Parameterized, indexed, recursive, proof/type-field constructors and higher-order constructor values remain fail-closed until their runtime semantics are implemented.",
         "Kernel-admitted simple structures now lower to verified nominal structure IR; constructor applications become record values and kernel projections become named field access.",
         "Structure layout comes only from checked-core metadata that was validated against pskernel-generated constructor metadata.",
         "Structure fields must currently all be runtime-level and independently representable; Type/Prop/dependent existential fields fail closed rather than being flattened unsafely.",

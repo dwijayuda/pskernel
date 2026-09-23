@@ -89,6 +89,8 @@ export function prepareRuntimeStructures(
         declarationNames:symbolNames,
         structuresByType:byType,
         structuresByConstructor:byConstructor,
+        inductivesByType:new Map(),
+        inductivesByConstructor:new Map(),
       };
       const type=eraseRuntimeType(
         binder.type,

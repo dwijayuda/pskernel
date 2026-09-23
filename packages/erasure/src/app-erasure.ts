@@ -210,10 +210,33 @@ export function eraseRuntimeApplication(
         args:equality.args.map((arg)=>erase(arg,scope,environment)),
       };
     }
+    if(
+      equality.fn.kind==='const'
+      &&nameToString(equality.fn.name)==='Bool.beq'
+      &&equality.args.length===2
+    ){
+      return {
+        kind:'intrinsic',
+        operation:'bool.ne',
+        args:equality.args.map((arg)=>erase(arg,scope,environment)),
+      };
+    }
     return {
       kind:'intrinsic',
       operation:'bool.not',
       args:[erase(view.args[0]!,scope,environment)],
+    };
+  }
+
+  if(
+    view.fn.kind==='const'
+    &&nameToString(view.fn.name)==='Bool.beq'
+    &&view.args.length===2
+  ){
+    return {
+      kind:'intrinsic',
+      operation:'bool.eq',
+      args:view.args.map((arg)=>erase(arg,scope,environment)),
     };
   }
 

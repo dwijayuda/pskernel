@@ -271,6 +271,8 @@ assert(
 
 const verifiedBoolLogic=compileVerifiedSource(
   'function logic(a : Bool, b : Bool) : Bool := !a || (a && b); '+
+  'function sameBool(a : Bool, b : Bool) : Bool := a == b; '+
+  'function differentBool(a : Bool, b : Bool) : Bool := a != b; '+
   'function chooseFlag(flag : Bool, x : Nat, y : Nat) : Nat := '+
   'if (flag) { x } else { y }; '+
   'function chooseLogic(a : Bool, b : Bool, x : Nat, y : Nat) : Nat := '+
@@ -290,6 +292,14 @@ assert(
 assert(
   verifiedBoolLogic.typeScript.includes('(a && b)'),
   'verified Bool.and did not reach TypeScript',
+);
+assert(
+  verifiedBoolLogic.typeScript.includes('return (a === b);'),
+  'verified Bool == did not lower through Bool.beq',
+);
+assert(
+  verifiedBoolLogic.typeScript.includes('return (a !== b);'),
+  'verified Bool != did not lower through Bool.not/Bool.beq',
 );
 assert(
   verifiedBoolLogic.typeScript.includes('||'),

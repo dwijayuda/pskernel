@@ -53,7 +53,7 @@ export type VerifiedIrExpr =
       readonly operation:
         |'nat.add'|'nat.sub'|'nat.mul'|'nat.div'|'nat.mod'
         |'nat.eq'|'nat.ne'|'nat.le'|'nat.lt'
-        |'bool.not'|'bool.and'|'bool.or';
+        |'bool.not'|'bool.and'|'bool.or'|'bool.eq'|'bool.ne';
       readonly args:readonly VerifiedIrExpr[];
     }
   | {

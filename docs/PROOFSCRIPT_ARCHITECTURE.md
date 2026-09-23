@@ -129,10 +129,11 @@ maps those checked applications to explicit verified-IR intrinsics. Runtime
 division/modulo preserve Lean's total Nat semantics: division by zero yields
 `0`, while modulo by zero returns the dividend.
 
-The bounded Nat equality surface follows Lean's existing `==`/`!=` meaning
-rather than redefining it as propositional equality: `x == y` elaborates to
-`Nat.beq x y : Bool`, while `x != y` elaborates to
-`Bool.not (Nat.beq x y)`, matching Lean 4.34's `bne` definition.
+The bounded primitive equality surface follows Lean's existing `==`/`!=`
+meaning rather than redefining it as propositional equality. Nat operands use
+`Nat.beq`; Bool operands use `Bool.beq`; both produce `Bool`. Inequality is
+`Bool.not` of the corresponding checked equality, matching Lean 4.34's
+`bne` definition. Generic `BEq` synthesis is intentionally not claimed.
 
 The same verified Bool lane now covers `!x`, `x && y`, and `x || y` through
 the actual Lean constants `Bool.not`, `Bool.and`, and `Bool.or`. Any

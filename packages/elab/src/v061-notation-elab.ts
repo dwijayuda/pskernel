@@ -110,25 +110,47 @@ export interface ElaboratedNatCondition extends ElaboratedCoreTerm {
   readonly decider:Expr;
 }
 
-function elaborateNatBooleanEquality(
+function elaboratePrimitiveBooleanEquality(
   expr:Extract<V061Expr,{kind:'binary'}>,
   context:V061CoreElabContext,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
-  const {checker,left,right}=elaborateNatOperands(
-    expr,
-    context,
-    elaborate,
+  const checker=new TypeChecker(
+    context.environment,
+    context.localContext.clone(),
   );
+  const left=elaborate(expr.left,context);
+  const natType=constant(requireConstant(context,'Nat'));
   const boolType=constant(requireConstant(context,'Bool'));
+  let operandType:Expr;
+  let equalityName:string;
+  if(checker.isDefEq(left.type,natType)){
+    operandType=natType;
+    equalityName='Nat.beq';
+  }else if(checker.isDefEq(left.type,boolType)){
+    operandType=boolType;
+    equalityName='Bool.beq';
+  }else{
+    throw new Error(
+      "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+expr.operator+
+      "' currently supports Nat or Bool operands",
+    );
+  }
+  const right=elaborate(expr.right,context,operandType);
+  if(!checker.isDefEq(right.type,operandType)){
+    throw new Error(
+      "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+expr.operator+
+      "' requires matching primitive operands",
+    );
+  }
   const equality=mkAppN(
-    constant(requireConstant(context,'Nat.beq')),
+    constant(requireConstant(context,equalityName)),
     [left.term,right.term],
   );
   const equalityType=checker.check(equality);
   if(!checker.isDefEq(equalityType,boolType)){
     throw new Error(
-      "PS_ELAB_NAT_EQUALITY_RESULT: 'Nat.beq' did not produce Bool",
+      "PS_ELAB_EQUALITY_RESULT: '"+equalityName+"' did not produce Bool",
     );
   }
   if(expr.operator==='=='){
@@ -142,13 +164,13 @@ function elaborateNatBooleanEquality(
     const type=checker.check(term);
     if(!checker.isDefEq(type,boolType)){
       throw new Error(
-        "PS_ELAB_NAT_INEQUALITY_RESULT: 'Bool.not' did not produce Bool",
+        "PS_ELAB_INEQUALITY_RESULT: 'Bool.not' did not produce Bool",
       );
     }
     return {term,type};
   }
   throw new Error(
-    "PS_ELAB_NAT_EQUALITY_OPERATOR: unsupported operator '"+expr.operator+"'",
+    "PS_ELAB_EQUALITY_OPERATOR: unsupported operator '"+expr.operator+"'",
   );
 }
 
@@ -158,7 +180,7 @@ export function elaborateV061NatCondition(
   elaborate:V061TermElaborator,
 ):ElaboratedNatCondition {
   if(expr.operator==='=='||expr.operator==='!='){
-    const equality=elaborateNatBooleanEquality(
+    const equality=elaboratePrimitiveBooleanEquality(
       expr,
       context,
       elaborate,
@@ -339,7 +361,7 @@ export function elaborateV061BinaryNotation(
   }
 
   if(expr.operator==='=='||expr.operator==='!='){
-    const equality=elaborateNatBooleanEquality(
+    const equality=elaboratePrimitiveBooleanEquality(
       expr,
       context,
       elaborate,
@@ -356,7 +378,7 @@ export function elaborateV061BinaryNotation(
       )
     ){
       throw new Error(
-        "PS_ELAB_NAT_EQUALITY_EXPECTED_TYPE: operator '"+expr.operator+
+        "PS_ELAB_EQUALITY_EXPECTED_TYPE: operator '"+expr.operator+
         "' produces Bool",
       );
     }

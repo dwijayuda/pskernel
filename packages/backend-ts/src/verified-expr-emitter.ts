@@ -45,6 +45,8 @@ export function emitVerifiedExpr(
       if(expr.operation==='nat.lt')return '('+left+' < '+right+')';
       if(expr.operation==='bool.and')return '('+left+' && '+right+')';
       if(expr.operation==='bool.or')return '('+left+' || '+right+')';
+      if(expr.operation==='bool.eq')return '('+left+' === '+right+')';
+      if(expr.operation==='bool.ne')return '('+left+' !== '+right+')';
       return '((__ps_a: bigint, __ps_b: bigint) => '+
         '(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))('+
         left+', '+right+')';

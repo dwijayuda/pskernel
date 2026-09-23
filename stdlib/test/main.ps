@@ -9,9 +9,18 @@ function asResult(x : Nat) : PsResult(Nat, Nat) :=
 function main(x : Nat) : Nat :=
   let mapped : PsResult(Nat, Nat) :=
     resultMap(inc, asResult(x));
+  let resultValue : Nat :=
+    resultGetOrElse(mapped, 0);
   let option : PsOption(Nat) :=
     resultToOption(mapped);
+  let chosen : PsOption(Nat) :=
+    optionOrElse(option, PsOption.some(0));
   let xs : PsList(Nat) :=
     PsList.cons(x, PsList.cons(x, PsList.nil));
-  optionGetOrElse(option, 0) +
-    listLength(listMap(inc, xs));
+  let empty : PsList(Nat) :=
+    PsList.nil;
+  let extended : PsList(Nat) :=
+    listAppend(listMap(inc, xs), empty);
+  resultValue +
+    optionGetOrElse(chosen, 0) +
+    listLength(extended);

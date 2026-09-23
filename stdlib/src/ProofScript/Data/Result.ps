@@ -19,6 +19,13 @@ function resultMapError {α : Type}{ε : Type}{δ : Type}
     | .error err => PsResult.error(f(err));
   };
 
+function resultGetOrElse {α : Type}{ε : Type}
+(value : PsResult(α, ε), fallback : α) : α :=
+  match value with {
+    | .ok x => x;
+    | .error err => fallback;
+  };
+
 function resultToOption {α : Type}{ε : Type}
 (value : PsResult(α, ε)) : PsOption(α) :=
   match value with {
@@ -28,3 +35,11 @@ function resultToOption {α : Type}{ε : Type}
 
 theorem resultRefl {α : Type}{ε : Type}
 (value : PsResult(α, ε)) : value = value := Eq.refl(value);
+
+theorem resultGetOrElseOk {α : Type}{ε : Type}
+(value : α, fallback : α) :
+resultGetOrElse(PsResult.ok(value), fallback) = value := Eq.refl(value);
+
+theorem resultGetOrElseError {α : Type}{ε : Type}
+(error : ε, fallback : α) :
+resultGetOrElse(PsResult.error(error), fallback) = fallback := Eq.refl(fallback);

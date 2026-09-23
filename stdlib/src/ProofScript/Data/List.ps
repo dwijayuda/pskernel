@@ -13,6 +13,14 @@ function listMap {α : Type}{β : Type}
       PsList.cons(f(head), listMap(f, tail));
   };
 
+function listAppend {α : Type}
+(xs : PsList(α), ys : PsList(α)) : PsList(α) :=
+  match xs with {
+    | .nil => ys;
+    | .cons head tail =>
+      PsList.cons(head, listAppend(tail, ys));
+  };
+
 function listLength {α : Type}(xs : PsList(α)) : Nat :=
   match xs with {
     | .nil => 0;
@@ -28,3 +36,13 @@ function listHeadOption {α : Type}
 
 theorem listRefl {α : Type}
 (xs : PsList(α)) : xs = xs := Eq.refl(xs);
+
+theorem listAppendNilLeft {α : Type}
+(ys : PsList(α)) :
+listAppend(PsList.nil, ys) = ys := Eq.refl(ys);
+
+theorem listAppendCons {α : Type}
+(head : α, tail : PsList(α), ys : PsList(α)) :
+listAppend(PsList.cons(head, tail), ys) =
+PsList.cons(head, listAppend(tail, ys)) :=
+  Eq.refl(PsList.cons(head, listAppend(tail, ys)));

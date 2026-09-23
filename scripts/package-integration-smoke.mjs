@@ -942,8 +942,8 @@ const stdlibRun=await runCommand({
   passthrough:['9'],
 });
 assert(
-  stdlibRun.mainResult==='12',
-  'ProofScript-written stdlib dogfood program did not return 12',
+  stdlibRun.mainResult==='22',
+  'ProofScript-written stdlib dogfood program did not return 22',
 );
 assert(
   stdlibRun.moduleCount===4,
@@ -962,7 +962,7 @@ for(const moduleName of [
   );
 }
 assert(
-  stdlibRun.assurance?.kernelCheckedTheoremCount===3,
+  stdlibRun.assurance?.kernelCheckedTheoremCount===9,
   'ProofScript-written stdlib theorems were not admitted by pskernel',
 );
 assert(

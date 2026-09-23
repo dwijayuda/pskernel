@@ -150,159 +150,216 @@ export function instantiateLevel(root: Level, params: readonly Name[], values: r
   return done.get(root as object)!;
 }
 
-type LevelAtom = { readonly kind:'param'|'mvar'; readonly name:Name };
-interface VarNode { readonly atom: LevelAtom; readonly offset: bigint }
-interface Node { readonly constant: bigint; readonly vars: readonly VarNode[] }
-interface Entry { readonly path: readonly LevelAtom[]; readonly node: Node }
-type Norm = Entry[];
-const emptyNode = (): Node => ({ constant: 0n, vars: [] });
-const atomEq=(a:LevelAtom,b:LevelAtom)=>a.kind===b.kind&&nameEq(a.name,b.name);
-const atomCmp=(a:LevelAtom,b:LevelAtom):number=>a.kind===b.kind?nameCmp(a.name,b.name):(a.kind==='param'?-1:1);
-const atomKey=(a:LevelAtom)=>`${a.kind}:${nameKey(a.name)}`;
-const pathEq = (a: readonly LevelAtom[], b: readonly LevelAtom[]) => a.length === b.length && a.every((x, i) => atomEq(x, b[i]!));
-const pathKey = (p: readonly LevelAtom[]) => p.map(atomKey).join('|');
-function subset(a: readonly LevelAtom[], b: readonly LevelAtom[]): boolean {
-  let i = 0, j = 0;
-  while (i < a.length) {
-    if (j >= b.length) return false;
-    const c = atomCmp(a[i]!, b[j]!);
-    if (c < 0) return false;
-    if (c === 0) i++;
-    j++;
-  }
-  return true;
+const levelKindRank:Record<Level['kind'],number>={zero:0,succ:1,max:2,imax:3,param:4,mvar:5};
+
+function isExplicitLevel(l:Level):boolean{
+  let x=l;
+  while(x.kind==='succ')x=x.of;
+  return x.kind==='zero';
 }
-function orderedInsert(a: LevelAtom, xs: readonly LevelAtom[]): readonly LevelAtom[] | null {
-  const out: LevelAtom[] = [];
-  let inserted = false;
-  for (const x of xs) {
-    const c = atomCmp(a, x);
-    if (c === 0) return null;
-    if (!inserted && c < 0) { out.push(a); inserted = true; }
-    out.push(x);
-  }
-  if (!inserted) out.push(a);
-  return out;
-}
-function addVarTo(vars: readonly VarNode[], atom: LevelAtom, offset: bigint): readonly VarNode[] {
-  const out: VarNode[] = []; let done = false;
-  for (const v of vars) {
-    const c = atomCmp(atom, v.atom);
-    if (!done && c < 0) { out.push({ atom, offset }); done = true; }
-    if (c === 0) { out.push({ atom, offset: offset > v.offset ? offset : v.offset }); done = true; }
-    else out.push(v);
-  }
-  if (!done) out.push({ atom, offset });
-  return out;
-}
-function alter(norm: Norm, path: readonly LevelAtom[], f: (n: Node | undefined) => Node | undefined): Norm {
-  const k = pathKey(path); const out: Norm = []; let found = false;
-  for (const e of norm) {
-    if (pathKey(e.path) === k && pathEq(e.path, path)) { found = true; const n = f(e.node); if (n) out.push({ path, node: n }); }
-    else out.push(e);
-  }
-  if (!found) { const n = f(undefined); if (n) out.push({ path, node: n }); }
-  return out;
-}
-function addConst(norm: Norm, k: bigint, path: readonly LevelAtom[]): Norm {
-  if (k === 0n || (k === 1n && path.length > 0)) return norm;
-  return alter(norm, path, n => ({ constant: n ? (n.constant > k ? n.constant : k) : k, vars: n?.vars ?? [] }));
-}
-function addVar(norm: Norm, v: LevelAtom, k: bigint, path: readonly LevelAtom[]): Norm {
-  return alter(norm, path, n => ({ constant: n?.constant ?? 0n, vars: addVarTo(n?.vars ?? [], v, k) }));
-}
-function addNode(norm: Norm, v: LevelAtom, k: bigint, path: readonly LevelAtom[]): Norm { return addVar(norm, v, k, path); }
-function normalizeAux(root: Level, rootPath: readonly LevelAtom[], rootK: bigint, acc: Norm): Norm {
-  type Task={l:Level;path:readonly LevelAtom[];k:bigint};
-  const todo:Task[]=[{l:root,path:rootPath,k:rootK}];
-  let out=acc;
+
+/** Flatten only syntactic max nodes, preserving Lean's left-to-right order. */
+function pushMaxArgs(root:Level,out:Level[]):void{
+  const todo:Level[]=[root];
   while(todo.length){
-    let {l,path,k}=todo.pop()!;
-    while(l.kind==='succ'){k++;l=l.of;}
-    switch(l.kind){
-      case'zero':
-        out=addConst(out,k,path);
-        break;
-      case'max':
-        // Recursive order is left then right because normalization updates the accumulator.
-        todo.push({l:l.right,path,k},{l:l.left,path,k});
-        break;
-      case'imax':{
-        const r=l.right;
-        if(r.kind==='zero'){
-          out=addConst(out,k,path);
-        }else if(r.kind==='succ'){
-          todo.push({l:r.of,path,k:k+1n},{l:l.left,path,k});
-        }else if(r.kind==='max'){
-          todo.push(
-            {l:mkIMax(l.left,r.right),path,k},
-            {l:mkIMax(l.left,r.left),path,k},
-          );
-        }else if(r.kind==='imax'){
-          todo.push(
-            {l:mkIMax(r.left,r.right),path,k},
-            {l:mkIMax(l.left,r.right),path,k},
-          );
-        }else{
-          const v:LevelAtom={kind:r.kind,name:r.name};
-          const path2=orderedInsert(v,path);
-          if(path2){
-            out=addNode(addConst(out,k,path),v,k,path2);
-            todo.push({l:l.left,path:path2,k});
-          }else{
-            if(k!==0n)out=addVar(out,v,k,path);
-            todo.push({l:l.left,path,k});
-          }
-        }
-        break;
-      }
+    const l=todo.pop()!;
+    if(l.kind==='max')todo.push(l.right,l.left);
+    else out.push(l);
+  }
+}
+
+/** Final Lean 4.34 C++ `is_norm_lt`, expressed iteratively for stack safety. */
+function normCmp(a:Level,b:Level):number{
+  const todo:[Level,Level][]=[[a,b]];
+  while(todo.length){
+    const [x,y]=todo.pop()!;
+    if(levelEqStructural(x,y))continue;
+    const px=toOffset(x),py=toOffset(y),bx=px.base,by=py.base;
+    if(levelEqStructural(bx,by)){
+      if(px.offset<py.offset)return -1;
+      if(px.offset>py.offset)return 1;
+      continue;
+    }
+    const kx=levelKindRank[bx.kind],ky=levelKindRank[by.kind];
+    if(kx!==ky)return kx<ky?-1:1;
+    switch(bx.kind){
+      case'param':
+        if(by.kind!=='param')return kx<ky?-1:1;
+        return nameCmp(bx.name,by.name);
       case'mvar':
-      case'param':{
-        const v:LevelAtom={kind:l.kind,name:l.name};
-        const path2=orderedInsert(v,path);
-        if(path2)out=addNode(addConst(out,k,path),v,k,path2);
-        else if(k!==0n)out=addVar(out,v,k,path);
-        break;
-      }
+        if(by.kind!=='mvar')return kx<ky?-1:1;
+        return nameCmp(bx.name,by.name);
+      case'max':
+        if(by.kind!=='max')return kx<ky?-1:1;
+        if(!levelEqStructural(bx.left,by.left)){todo.push([bx.left,by.left]);continue;}
+        todo.push([bx.right,by.right]);continue;
+      case'imax':
+        if(by.kind!=='imax')return kx<ky?-1:1;
+        if(!levelEqStructural(bx.left,by.left)){todo.push([bx.left,by.left]);continue;}
+        todo.push([bx.right,by.right]);continue;
+      case'zero':
+      case'succ':
+        // `toOffset` removes Succ, and unequal Zero bases are impossible.
+        continue;
     }
   }
-  return out;
+  return 0;
 }
-function subsumeVars(a: readonly VarNode[], b: readonly VarNode[]): readonly VarNode[] {
-  const out: VarNode[] = []; let j = 0;
-  for (const x of a) {
-    while (j < b.length && atomCmp(b[j]!.atom, x.atom) < 0) j++;
-    if (j < b.length && atomEq(x.atom, b[j]!.atom) && x.offset <= b[j]!.offset) continue;
-    out.push(x);
+
+function normalizeLevelWithMemo(root:Level,memo:WeakMap<object,Level>):Level{
+  const cached=memo.get(root as object);if(cached!==undefined)return cached;
+  type Task={l:Level;done:boolean;leaves?:Level[]};
+  const todo:Task[]=[{l:root,done:false}];
+  while(todo.length){
+    const task=todo.pop()!,l=task.l;
+    if(memo.has(l as object))continue;
+    const p=toOffset(l),base=p.base;
+    if(base.kind==='zero'||base.kind==='param'||base.kind==='mvar'){
+      // This is exactly the C++ fast path: zero/param/mvar with any outer Succ
+      // offset is already normalized and is returned unchanged.
+      memo.set(l as object,l);
+      continue;
+    }
+    if(!task.done){
+      if(base.kind==='imax'){
+        todo.push({l,done:true});
+        todo.push({l:base.right,done:false},{l:base.left,done:false});
+      }else if(base.kind==='max'){
+        const leaves:Level[]=[];pushMaxArgs(base,leaves);
+        todo.push({l,done:true,leaves});
+        for(let i=leaves.length-1;i>=0;i--)todo.push({l:leaves[i]!,done:false});
+      }
+      continue;
+    }
+    if(base.kind==='imax'){
+      const lhs=memo.get(base.left as object)!,rhs=memo.get(base.right as object)!;
+      // Deliberately do not re-normalize if mkIMax turns into a max. Final
+      // Lean 4.34 does the same, and this incompleteness is observable.
+      memo.set(l as object,addOffset(mkIMax(lhs,rhs),p.offset));
+      continue;
+    }
+
+    const args:Level[]=[];
+    for(const leaf of task.leaves!){
+      const n=memo.get(leaf as object)!;
+      pushMaxArgs(n,args);
+    }
+    args.sort(normCmp);
+
+    let i=0;
+    if(isExplicitLevel(args[i]!)){
+      while(i+1<args.length&&isExplicitLevel(args[i+1]!))i++;
+      const k=toOffset(args[i]!).offset;
+      let j=i+1;
+      while(j<args.length&&toOffset(args[j]!).offset<k)j++;
+      if(j<args.length)i++;
+    }
+
+    const rargs:Level[]=[args[i]!];
+    let prev=toOffset(args[i]!);
+    i++;
+    for(;i<args.length;i++){
+      const curr=toOffset(args[i]!);
+      if(levelEqStructural(prev.base,curr.base)){
+        if(prev.offset<curr.offset){
+          prev=curr;
+          rargs.pop();
+          rargs.push(args[i]!);
+        }
+      }else{
+        prev=curr;
+        rargs.push(args[i]!);
+      }
+    }
+
+    const shifted=rargs.map(a=>addOffset(a,p.offset));
+    let r=shifted[shifted.length-1]!;
+    for(let j=shifted.length-2;j>=0;j--)r=mkMax(shifted[j]!,r);
+    memo.set(l as object,r);
   }
-  return out;
+  return memo.get(root as object)!;
 }
-function subsumeBy(a: Node, b: Node, same: boolean): Node {
-  let constant = a.constant;
-  const maxVar = b.vars.reduce((m, x) => x.offset > m ? x.offset : m, 0n);
-  if (!(constant === 0n || ((same || constant > b.constant) && (b.vars.length === 0 || constant > maxVar + 1n)))) constant = 0n;
-  return { constant, vars: same || b.vars.length === 0 ? a.vars : subsumeVars(a.vars, b.vars) };
+
+/** Exact final Lean 4.34 C++ kernel level normalizer, kept iterative for deep levels. */
+export function normalizeLevel(l:Level):Level{
+  return normalizeLevelWithMemo(l,new WeakMap<object,Level>());
 }
-function nodeEmpty(n: Node): boolean { return n.constant === 0n && n.vars.length === 0; }
-function subsumption(norm: Norm): Norm {
-  const out: Norm = [];
-  for (const e of norm) {
-    let n = e.node;
-    for (const d of norm) if (subset(d.path, e.path)) n = subsumeBy(n, d.node, d.path.length === e.path.length);
-    if (!nodeEmpty(n)) out.push({ path: e.path, node: n });
+
+type GeqFrame={
+  a:Level;
+  b:Level;
+  state:0|1|2;
+  op?:'and'|'or'|'single';
+  secondA?:Level;
+  secondB?:Level;
+};
+
+/** Final Lean 4.34 `is_geq`: normalize first, then use the kernel's incomplete search. */
+function kernelGeq(a:Level,b:Level):boolean{
+  const memo=new WeakMap<object,Level>();
+  const norm=(l:Level)=>normalizeLevelWithMemo(l,memo);
+  const stack:GeqFrame[]=[{a:norm(a),b:norm(b),state:0}];
+  let last=false;
+  while(stack.length){
+    const f=stack[stack.length-1]!;
+    if(f.state===0){
+      const l1=f.a,l2=f.b;
+      if(levelEqStructural(l1,l2)||isZero(l2)){last=true;stack.pop();continue;}
+      if(l2.kind==='max'){
+        f.state=1;f.op='and';f.secondA=l1;f.secondB=norm(l2.right);
+        stack.push({a:l1,b:norm(l2.left),state:0});continue;
+      }
+      if(l1.kind==='max'){
+        f.state=1;f.op='or';f.secondA=norm(l1.right);f.secondB=l2;
+        stack.push({a:norm(l1.left),b:l2,state:0});continue;
+      }
+      if(l2.kind==='imax'){
+        f.state=1;f.op='and';f.secondA=l1;f.secondB=norm(l2.right);
+        stack.push({a:l1,b:norm(l2.left),state:0});continue;
+      }
+      if(l1.kind==='imax'){
+        f.state=1;f.op='single';
+        stack.push({a:norm(l1.right),b:l2,state:0});continue;
+      }
+      const p1=toOffset(l1),p2=toOffset(l2);
+      if(levelEqStructural(p1.base,p2.base)||isZero(p2.base)){
+        last=p1.offset>=p2.offset;stack.pop();continue;
+      }
+      if(p1.offset===p2.offset&&p1.offset>0n){
+        f.state=1;f.op='single';
+        stack.push({a:norm(p1.base),b:norm(p2.base),state:0});continue;
+      }
+      last=false;stack.pop();continue;
+    }
+    if(f.state===1){
+      if(f.op==='single'){stack.pop();continue;}
+      if(f.op==='and'&&!last){last=false;stack.pop();continue;}
+      if(f.op==='or'&&last){last=true;stack.pop();continue;}
+      f.state=2;
+      stack.push({a:f.secondA!,b:f.secondB!,state:0});
+      continue;
+    }
+    stack.pop();
   }
-  return out;
+  return last;
 }
-export function normalizeLevel(l: Level): Norm { return subsumption(normalizeAux(l, [], 0n, [])); }
-function normLe(a: Norm, b: Norm): boolean {
-  return a.every(e => {
-    let n = e.node;
-    for (const d of b) if (subset(d.path, e.path)) { n = subsumeBy(n, d.node, false); if (nodeEmpty(n)) return true; }
-    return nodeEmpty(n);
-  });
+
+/** Lean kernel `a ≤ b`, implemented as final-4.34 `is_geq(b, a)`. */
+export function levelLe(a:Level,b:Level):boolean{return kernelGeq(b,a);}
+
+/**
+ * Final Lean 4.34 `is_equivalent`.
+ *
+ * Keep the kernel's intentional incompleteness: do not fall back to the
+ * stronger Lean4Lean complete decision procedure, because doing so accepts
+ * universe equalities that the target C++ kernel rejects.
+ */
+export function levelEquivalent(a:Level,b:Level):boolean{
+  if(levelEqStructural(a,b))return true;
+  const memo=new WeakMap<object,Level>();
+  return levelEqStructural(normalizeLevelWithMemo(a,memo),normalizeLevelWithMemo(b,memo));
 }
-export function levelLe(a: Level, b: Level): boolean { return normLe(normalizeLevel(a), normalizeLevel(b)); }
-export function levelEquivalent(a: Level, b: Level): boolean { return levelLe(a, b) && levelLe(b, a); }
+
 export function levelToString(l: Level): string {
   switch (l.kind) {
     case 'zero': return '0'; case 'succ': return `(${levelToString(l.of)}+1)`;

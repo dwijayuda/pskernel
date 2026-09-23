@@ -84,6 +84,7 @@ test('deep structural universe equality is stack-safe',()=>{
 test('universe max commutative semantically',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));assert(levelEquivalent(mkMax(u,v),mkMax(v,u)));});
 test('imax u 0 = 0',()=>{const u=levelParam(nameFromDotted('u'));assert(levelEquivalent(mkIMax(u,levelZero),levelZero));});
 test('imax u (v+1) = max u (v+1)',()=>{const u=levelParam(nameFromDotted('u')),v=levelSucc(levelParam(nameFromDotted('v')));assert(levelEquivalent(mkIMax(u,v),mkMax(u,v)));});
+test('Lean 4.34 universe equivalence preserves kernel incompleteness',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));const lhs=mkMax(v,u),rhs=mkMax(mkIMax(u,v),u);assert(!levelEquivalent(lhs,rhs));});
 test('Lean structural equality includes MData payload while defeq ignores it',()=>{
  const a={kind:'mdata',data:{tag:'a'},expr:natLit(0)} as const;
  const b={kind:'mdata',data:{tag:'b'},expr:natLit(0)} as const;

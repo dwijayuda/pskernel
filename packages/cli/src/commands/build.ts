@@ -104,6 +104,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
         binaryenVersion:wasm.wasm.binaryenVersion,
         wasmProfile:wasm.wasm.profile,
         wasmOptimized:wasm.wasm.optimized,
+        wasmExports:wasm.wasm.exports,
       }),
     };
 
@@ -126,7 +127,12 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       writes.push(writeFile(watPath,wasm.wasm.text,'utf8'));
     }
     await Promise.all(writes);
-    return {report,verifiedIr:result.ir,jsPath};
+    return {
+      report,
+      verifiedIr:result.ir,
+      ...(wasm===null?{}:{wasm:wasm.wasm}),
+      jsPath,
+    };
   }
 
   const input=await resolveInput(common);

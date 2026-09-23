@@ -22,6 +22,7 @@ function parseConstructor(
   }
 
   const semi=context.cursor.expect(';');
+  context.own('D-DECL-SEMI');
   return {
     name:name.text,
     params,

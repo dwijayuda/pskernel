@@ -51,6 +51,7 @@ export class V061ExpressionParser {
       this.context.cursor.expect('=>');
       const body=this.parse();
       const semi=this.context.cursor.consumeIf(';');
+      if(semi)this.context.own('D-DECL-SEMI');
       if(!semi&&!this.context.cursor.at('}')){
         throw new SyntaxError("expected ';' or '}' after match alternative",this.context.cursor.peek().span);
       }

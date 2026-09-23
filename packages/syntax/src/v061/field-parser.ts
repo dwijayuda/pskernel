@@ -24,6 +24,7 @@ export function parseV061FieldBody(
       const type=parseV061Type(context);
       context.cursor.expect('}');
       const semi=context.cursor.expect(';');
+      context.own('D-DECL-SEMI');
       fields.push({
         name:name.text,
         type,
@@ -39,6 +40,7 @@ export function parseV061FieldBody(
       const type=parseV061Type(context);
       context.cursor.expect(']');
       const semi=context.cursor.expect(';');
+      context.own('D-DECL-SEMI');
       fields.push({
         name:name.text,
         type,
@@ -52,6 +54,7 @@ export function parseV061FieldBody(
     context.cursor.expect(':');
     const type=parseV061Type(context);
     const semi=context.cursor.expect(';');
+    context.own('D-DECL-SEMI');
     fields.push({
       name:name.text,
       type,

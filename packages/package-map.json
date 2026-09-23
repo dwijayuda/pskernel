@@ -100,10 +100,10 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
-        "The frozen v0.6.1 baseline feature list is exported in code and the conformance test fails if any registered L/D/E feature lacks explicit evidence.",
-        "L-CORE-LEAN evidence is a protected-neighbor defer case: inherited Lean syntax is not re-owned by ProofScript.",
-        "D-EXPLICIT-PARAMS is non-empty and preserves ordered explicit Lean binder semantics; empty parameter groups fail closed.",
-        "All registered v0.6.1 D/E features have parser/lowering paths, while unsupported Lean elaboration forms remain outside the executable software subset."
+        "The v0.6.1 conformance gate compares canonical Lean text and exact parser-owned feature IDs per case; coverage is derived from actual ownership, not test labels.",
+        "Field, constructor, match-alternative, where-local, and top-level ProofScript semicolon boundaries consistently register D-DECL-SEMI.",
+        "L-CORE-LEAN remains a protected defer path rather than a ProofScript-owned rewrite.",
+        "Unsupported Lean elaboration forms remain fail-closed in the bounded executable software subset."
       ]
     },
     {

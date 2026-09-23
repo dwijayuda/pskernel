@@ -14,11 +14,25 @@ function equal(actual:unknown,expected:unknown,label:string):void{
   }
 }
 
-function lowerModule(source:string):string {
-  return lowerV061ModuleToLean(parseV061Module(source)).trimEnd();
+function sorted(ids:readonly string[]):string {
+  return [...ids].sort().join(',');
 }
 
-function lowerExpression(source:string):string {
+function lowerModule(source:string):{
+  readonly lean:string;
+  readonly featureIds:readonly string[];
+} {
+  const module=parseV061Module(source);
+  return {
+    lean:lowerV061ModuleToLean(module).trimEnd(),
+    featureIds:module.featureIds,
+  };
+}
+
+function lowerExpression(source:string):{
+  readonly lean:string;
+  readonly featureIds:readonly string[];
+} {
   const context=new V061ParseContext(source);
   const parser=new V061ExpressionParser(context);
   const expression=parser.parse();
@@ -27,7 +41,10 @@ function lowerExpression(source:string):string {
       "expression conformance case left trailing token '"+context.cursor.peek().text+"'",
     );
   }
-  return lowerV061ExprToLean(expression);
+  return {
+    lean:lowerV061ExprToLean(expression),
+    featureIds:[...context.features],
+  };
 }
 
 const covered=new Set<string>();
@@ -94,8 +111,10 @@ const moduleCases=[
 ] as const;
 
 for(const entry of moduleCases){
-  equal(lowerModule(entry.source),entry.expected,entry.id);
-  cover(...entry.covers);
+  const actual=lowerModule(entry.source);
+  equal(actual.lean,entry.expected,entry.id);
+  equal(sorted(actual.featureIds),sorted(entry.covers),entry.id+' feature ownership');
+  cover(...actual.featureIds);
 }
 
 for(const entry of [
@@ -112,8 +131,10 @@ for(const entry of [
     covers:['E-MATCH-BODY','D-CALL','D-DECL-SEMI'] as const,
   },
 ] as const){
-  equal(lowerExpression(entry.source),entry.expected,entry.id);
-  cover(...entry.covers);
+  const actual=lowerExpression(entry.source);
+  equal(actual.lean,entry.expected,entry.id);
+  equal(sorted(actual.featureIds),sorted(entry.covers),entry.id+' feature ownership');
+  cover(...actual.featureIds);
 }
 
 for(const entry of [

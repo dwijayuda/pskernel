@@ -82,29 +82,33 @@ function directRoots(
   policy:RuntimeDependencyPolicyReport,
   packages:ReturnType<typeof parseRuntimeLockDocument>['packages'],
 ){
-  return policy.used.map((dependency)=>{
-    const location='node_modules/'+dependency.source;
+  const roots=new Map<string,string>();
+  for(const dependency of policy.used){
+    roots.set(dependency.packageRoot,dependency.version);
+  }
+  return [...roots.entries()].sort().map(([packageRoot,version])=>{
+    const location='node_modules/'+packageRoot;
     if(packages[location]===undefined){
       throw new Error(
         "PS_RUNTIME_LOCK_ROOT_MISSING: package-lock.json has no entry for '"+
-        dependency.source+"'",
+        packageRoot+"'",
       );
     }
     const descriptor=asRuntimeLockRecord(packages[location],location);
-    if(descriptor.version!==dependency.version){
+    if(descriptor.version!==version){
       throw new Error(
-        "PS_RUNTIME_LOCK_ROOT_VERSION: '"+dependency.source+
-        "' policy requires "+dependency.version+
+        "PS_RUNTIME_LOCK_ROOT_VERSION: '"+packageRoot+
+        "' policy requires "+version+
         ', lockfile has '+String(descriptor.version),
       );
     }
-    return {source:dependency.source,location};
+    return {packageRoot,location};
   });
 }
 
 function transitiveClosure(
   packages:ReturnType<typeof parseRuntimeLockDocument>['packages'],
-  roots:readonly {readonly source:string;readonly location:string}[],
+  roots:readonly {readonly packageRoot:string;readonly location:string}[],
 ):readonly RuntimeLockPackage[] {
   const closure=new Map<string,RuntimeLockPackage>();
   const queue=roots.map((root)=>({location:root.location,required:true}));
@@ -165,7 +169,7 @@ export async function verifyRuntimeDependencyLock(
   const locked=transitiveClosure(packages,roots);
   await verifyInstalledClosure(projectDirectory,locked);
 
-  const schema='proofscript-runtime-lock-v1' as const;
+  const schema='proofscript-runtime-lock-v2' as const;
   const canonical={
     schema,
     lockfileVersion:3 as const,

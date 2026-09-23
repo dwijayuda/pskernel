@@ -18,11 +18,11 @@ export interface RuntimeLockPackage {
 }
 
 export interface RuntimeDependencyLockReport {
-  readonly schema:'proofscript-runtime-lock-v1';
+  readonly schema:'proofscript-runtime-lock-v2';
   readonly lockfileVersion:3;
   readonly integrity:string;
   readonly roots:readonly {
-    readonly source:string;
+    readonly packageRoot:string;
     readonly location:string;
   }[];
   readonly packages:readonly RuntimeLockPackage[];

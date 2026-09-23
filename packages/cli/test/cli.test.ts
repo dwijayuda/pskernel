@@ -237,6 +237,11 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
             import:'./index.js',
             default:'./index.js',
           },
+          './feature':{
+            types:'./feature.d.ts',
+            import:'./feature.js',
+            default:'./feature.js',
+          },
         },
         dependencies:{'helper-lib':'2.0.0'},
       },null,2)+'\n',
@@ -250,6 +255,17 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
     );
     await writeFile(
       join(directory,'node_modules','host-lib','index.d.ts'),
+      'export declare function shout(value: string): string;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','feature.js'),
+      'import { suffix } from "helper-lib"; '+
+      'export function shout(value) { return value + suffix; }\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','feature.d.ts'),
       'export declare function shout(value: string): string;\n',
       'utf8',
     );
@@ -305,7 +321,7 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
     await writeFile(
       join(directory,'src','main.ps'),
       'extern function hostShout(value : String) : String '+
-      'from "host-lib" import shout; '+
+      'from "host-lib/feature" import shout; '+
       'function main(value : String) : String := hostShout(value);\n',
       'utf8',
     );
@@ -339,9 +355,16 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
     );
     equal(
       result.runtimeDependencyPolicy.schema,
-      'proofscript-runtime-dependencies-v1',
+      'proofscript-runtime-dependencies-v2',
     );
-    equal(result.runtimeDependencyPolicy.used[0]?.source,'host-lib');
+    equal(
+      result.runtimeDependencyPolicy.used[0]?.source,
+      'host-lib/feature',
+    );
+    equal(
+      result.runtimeDependencyPolicy.used[0]?.packageRoot,
+      'host-lib',
+    );
     equal(result.runtimeDependencyPolicy.used[0]?.version,'1.0.0');
     if(!('runtimeDependencyLock' in result)){
       throw new Error('verified run did not retain runtime dependency lock');
@@ -350,8 +373,9 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
     if(lock===null||typeof lock!=='object'){
       throw new Error('verified run returned empty runtime dependency lock');
     }
-    equal(lock.schema,'proofscript-runtime-lock-v1');
+    equal(lock.schema,'proofscript-runtime-lock-v2');
     equal(lock.lockfileVersion,3);
+    equal(lock.roots[0]?.packageRoot,'host-lib');
     equal(lock.integrity.startsWith('sha256:'),true);
     equal(lock.roots.length,1);
     equal(lock.packages.length,2);
@@ -365,7 +389,7 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
     const artifacts=result.artifacts as Record<string,string>;
     const javascript=await readFile(artifacts.javascript,'utf8');
     equal(
-      javascript.includes('from "host-lib"'),
+      javascript.includes('from "host-lib/feature"'),
       true,
     );
   }finally{
@@ -411,9 +435,13 @@ console.log('ok - psc verified source FFI resolves exact package and runs');
       await verifyRuntimeDependencyLock(
         directory,
         {
-          schema:'proofscript-runtime-dependencies-v1',
+          schema:'proofscript-runtime-dependencies-v2',
           integrity:'sha256:test',
-          used:[{source:'host-lib',version:'1.0.0'}],
+          used:[{
+            source:'host-lib/feature',
+            packageRoot:'host-lib',
+            version:'1.0.0',
+          }],
         },
       );
     }catch(error){

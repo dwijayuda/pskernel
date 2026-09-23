@@ -1,4 +1,5 @@
 import type {CheckedCoreModule} from '@proofscript/checked-core';
+import {npmPackageRootFromExternalSource} from '@proofscript/project/node';
 import {
   exprToString,
   nameToString,
@@ -8,6 +9,7 @@ export interface VerifiedRuntimeAssumption {
   readonly kind:'runtime-external';
   readonly name:string;
   readonly source:string;
+  readonly packageRoot:string;
   readonly importedName:string;
   readonly logicalSignature:string;
   readonly expectedVersion?:string;
@@ -29,17 +31,23 @@ export function verifiedAssuranceReport(
   checkedCore:CheckedCoreModule,
   runtimeDependencies:Readonly<Record<string,string>>={},
 ):VerifiedAssuranceReport {
-  const runtimeAssumptions=checkedCore.externals.map((external)=>({
-    kind:'runtime-external' as const,
-    name:nameToString(external.declaration.name),
-    source:external.binding.source,
-    importedName:external.binding.importedName,
-    logicalSignature:exprToString(external.declaration.type),
-    ...(runtimeDependencies[external.binding.source]===undefined
-      ?{}
-      :{expectedVersion:runtimeDependencies[external.binding.source]}),
-    proofEvidence:false as const,
-  }));
+  const runtimeAssumptions=checkedCore.externals.map((external)=>{
+    const packageRoot=npmPackageRootFromExternalSource(
+      external.binding.source,
+    );
+    return {
+      kind:'runtime-external' as const,
+      name:nameToString(external.declaration.name),
+      source:external.binding.source,
+      packageRoot,
+      importedName:external.binding.importedName,
+      logicalSignature:exprToString(external.declaration.type),
+      ...(runtimeDependencies[packageRoot]===undefined
+        ?{}
+        :{expectedVersion:runtimeDependencies[packageRoot]}),
+      proofEvidence:false as const,
+    };
+  });
   return {
     proofAuthority:'pskernel',
     internalProofs:'kernel-verified',

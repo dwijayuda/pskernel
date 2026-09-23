@@ -9,4 +9,5 @@ export class LocalContext{
   addLocal(id:string,userName:Name,type:Expr,binderInfo:BinderInfo='default'):void{this.map.set(id,{kind:'local',id,userName,binderInfo,type});}
   addLet(id:string,userName:Name,type:Expr,value:Expr):void{this.map.set(id,{kind:'let',id,userName,type,value});}
   get(id:string):LocalDecl|undefined{return this.map.get(id);}
+  entries():readonly LocalDecl[]{return [...this.map.values()];}
 }

@@ -320,10 +320,55 @@ pskernel-checked semantics.
 
 ### DS5 — mixed modules
 
-- source-kind-independent imports;
-- deterministic mixed-source build graph;
-- module artifact/cache integration;
-- cross-language definition/reference resolution.
+Status: **MVP landed for verified ordinary declarations; metadata/artifact integration remains**
+
+Landed DS5.1/DS5.2:
+
+- both ProofScript and the bounded Lean subset parse canonical leading
+  `import Foo.Bar` headers into the same module AST;
+- both target printers preserve the logical import list;
+- logical module names resolve below the entry source directory as
+  `Foo/Bar.ps` or `Foo/Bar.lean`;
+- if both source kinds exist for the same imported logical module, resolution
+  fails with `PS_PROJECT_SOURCE_AMBIGUITY`;
+- the existing project graph provides deterministic topological ordering plus
+  missing-dependency/cycle rejection;
+- verified project elaboration gives each module **only its transitive imported
+  admissions**, preventing unrelated sibling modules from leaking into scope;
+- all local admissions are replayed in deterministic topo order into one final
+  pskernel-checked project, then the existing erasure -> verified IR ->
+  TypeScript -> JavaScript backend compiles the bundle;
+- filesystem regressions execute
+  `main.ps -> Data.lean -> Core.ps` and the reverse Lean-entry/ProofScript-
+  dependency direction;
+- project reports expose module order/count and per-module source kind/path/
+  canonical hash;
+- imports are verified-only in this checkpoint; the transitional legacy lane
+  fails closed instead of silently ignoring dependency semantics.
+
+Current bounded resolution rule:
+
+```text
+entry directory/
+  Foo/Bar.ps
+  Foo/Bar.lean
+```
+
+Exactly one candidate may exist for logical module `Foo.Bar`. Configured
+source roots/package resolution are later DS5 work.
+
+Remaining DS5 work:
+
+- reconstruct imported structure/class/global-instance elaborator metadata so
+  cross-module records, projections, and instance synthesis have the same
+  context as same-file elaboration;
+- integrate `@proofscript/module` artifacts and `BuildCache` rather than
+  rebuilding all reachable source on every invocation;
+- define configured source roots/package import resolution;
+- emit/cache canonical per-module artifacts instead of only a bundled runtime
+  output and entry-source Lean artifact;
+- add project-level integrity keys covering dependency hashes;
+- then expose cross-language definition/reference resolution to DS6 tooling.
 
 ### DS6 — editor support
 

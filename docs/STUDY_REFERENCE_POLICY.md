@@ -200,3 +200,15 @@ command/term/tactic parser sources, especially:
 Only canonical syntax already emitted by psc is accepted in DS2.1. Broader Lean
 parser capabilities in those sources are evidence for future explicit subset
 work, not permission to accept unsupported syntax.
+
+## Lean module-header evidence for DS5
+
+The shared import header was checked against
+`study/lean4-4.34.0/src/Lean/Parser/Module.lean`. The ProofScript v0.7 study
+reference does not define a competing module-import surface, so the bounded
+dual-source project layer adopts the Lean-compatible `import Foo.Bar` header
+for both source kinds rather than inventing a second spelling.
+
+Only the common logical-module header is inherited. Lean's broader module
+header features such as `public`, `meta`, `all`, package facets, and the
+full Lake resolver are not implied by this checkpoint.

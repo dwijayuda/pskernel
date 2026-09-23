@@ -30,7 +30,7 @@
   },
   "description": "ProofScript developer CLI (psc) plus low-level pskernel replay/module commands.",
   "proofscript": {
-    "status": "dual-source-ds4-semantic-equivalence",
+    "status": "dual-source-ds5-mixed-project-mvp",
     "phase": "A",
     "trust": "untrusted-support",
     "futureName": "@proofscript/cli",

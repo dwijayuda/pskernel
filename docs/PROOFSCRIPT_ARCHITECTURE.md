@@ -770,3 +770,41 @@ identical TypeScript, JavaScript, and declaration output.
 Unsupported Lean remains fail-closed before checked core. The equivalence gate
 therefore proves two bounded frontends converge; it does not broaden the
 documented Lean subset.
+
+## DS5 mixed-source verified-project checkpoint
+
+The first mixed-source module implementation keeps source ownership outside the
+TCB:
+
+```text
+entry .ps/.lean
+  -> parse import headers
+  -> logical module resolver
+  -> deterministic project DAG
+  -> per-module shared frontend parse
+  -> dependency-only pskernel environment
+  -> module checked-core admissions
+  -> deterministic combined checked core
+  -> erasure -> verified IR -> TypeScript -> JavaScript
+```
+
+A module is elaborated against the transitive closure of the modules it
+actually imports, not against a global mutable environment containing unrelated
+siblings. Dependency visibility is therefore explicit in the project graph.
+
+For the bounded MVP, logical `Foo.Bar` resolves relative to the entry
+directory to exactly one of `Foo/Bar.ps` or `Foo/Bar.lean`. Ambiguous dual
+sources, missing modules, and cycles fail before semantic compilation.
+
+The bundled checked core is created by replaying every local admission in
+topological order through pskernel. The source language of a module never
+changes the proof/type authority.
+
+Current limitation: same-file elaboration keeps untrusted metadata indexes for
+structures, classes, and global instances. Those indexes are not yet
+reconstructed from imported checked-core admissions, so DS5 does not yet claim
+cross-module record/projection or typeclass-synthesis parity. Ordinary imported
+definitions/theorems are the supported semantic slice.
+
+The legacy software checker does not gain an import implementation. Imports
+require the verified project pipeline and otherwise fail closed.

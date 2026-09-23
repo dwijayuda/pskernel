@@ -18,6 +18,9 @@ export class KernelState {
   readonly success=new Set<string>();
   readonly failure=new Set<string>();
 
+  /** Shared Lean-style kernel recursion depth across local-context child checkers. */
+  recDepth=0;
+
   private readonly ids=new WeakMap<object,number>();
   private nextId=1;
 

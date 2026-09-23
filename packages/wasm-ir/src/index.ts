@@ -1,5 +1,28 @@
 export type WasmValueType='i32'|'i64'|'f32'|'f64';
 
+export type WasmAbiValueType=
+  |'bool'
+  |'uint8'|'uint16'|'uint32'|'uint64';
+
+export interface WasmIrAbiSignature {
+  readonly parameters:readonly WasmAbiValueType[];
+  readonly result:WasmAbiValueType|null;
+}
+
+export function wasmAbiPhysicalType(
+  type:WasmAbiValueType,
+):WasmValueType {
+  switch(type){
+    case 'bool':
+    case 'uint8':
+    case 'uint16':
+    case 'uint32':
+      return 'i32';
+    case 'uint64':
+      return 'i64';
+  }
+}
+
 export interface WasmIrParameter {
   readonly name:string;
   readonly type:WasmValueType;
@@ -46,6 +69,7 @@ export interface WasmIrFunction {
   readonly name:string;
   readonly parameters:readonly WasmIrParameter[];
   readonly result:WasmValueType|null;
+  readonly abi:WasmIrAbiSignature;
   readonly body:WasmIrExpr;
   readonly exportName?:string;
 }
@@ -202,6 +226,25 @@ export function validateWasmIrModule(module:WasmIrModule):true {
       }
       params.add(parameter.name);
     }
+    if(fn.abi.parameters.length!==fn.parameters.length){
+      throw new Error(
+        "PS_WASM_IR_ABI_ARITY: '"+fn.name+"' ABI has "+
+        fn.abi.parameters.length+' parameter(s), physical function has '+
+        fn.parameters.length,
+      );
+    }
+    fn.parameters.forEach((parameter,index)=>{
+      expectType(
+        wasmAbiPhysicalType(fn.abi.parameters[index]!),
+        parameter.type,
+        'ABI parameter '+index+' of '+fn.name,
+      );
+    });
+    expectType(
+      fn.abi.result===null?null:wasmAbiPhysicalType(fn.abi.result),
+      fn.result,
+      'ABI result of '+fn.name,
+    );
     if(fn.exportName!==undefined){
       if(fn.exportName.length===0){
         throw new Error('PS_WASM_IR_EMPTY_EXPORT_NAME');

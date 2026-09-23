@@ -214,6 +214,13 @@ test('lean4export replay threads the explicit native evaluator into its kernel',
  assert(replay.kernel.nativeEvaluator===evaluator,'replay kernel must retain NativeEvaluator identity');
 });
 
+test('literal inference matches Lean trusted-prelude behavior',()=>{
+ const env=new Environment(),tc=new TypeChecker(env);
+ eqExpr(tc.check(natLit(0)),constant(N.Nat));
+ eqExpr(tc.check(strLit('x')),constant(N.String));
+ assert(!env.has(N.Nat)&&!env.has(N.String),'literal inference must not synthesize or require prelude declarations');
+});
+
 test('infer-only application does not inspect a closed ill-typed argument',()=>{
  const env=baseEnv(),F=nameFromDotted('InferOnly.f');
  env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat))});

@@ -59,13 +59,14 @@ const typeAnnotationAutoParam = nameFromDotted('autoParam');
 
 /** Lean 4.34 `Expr.consumeTypeAnnotations`: strip only leading type-annotation gadgets. */
 export function consumeTypeAnnotations(e: Expr): Expr {
-  const v=appView(e);
-  if(v.fn.kind!=='const') return e;
-  if((nameEq(v.fn.name,typeAnnotationOutParam)||nameEq(v.fn.name,typeAnnotationSemiOutParam))&&v.args.length===1)
-    return consumeTypeAnnotations(v.args[0]!);
-  if((nameEq(v.fn.name,typeAnnotationOptParam)||nameEq(v.fn.name,typeAnnotationAutoParam))&&v.args.length===2)
-    return consumeTypeAnnotations(v.args[0]!);
-  return e;
+  let x=e;
+  while(true){
+    const v=appView(x);
+    if(v.fn.kind!=='const')return x;
+    if((nameEq(v.fn.name,typeAnnotationOutParam)||nameEq(v.fn.name,typeAnnotationSemiOutParam))&&v.args.length===1){x=v.args[0]!;continue;}
+    if((nameEq(v.fn.name,typeAnnotationOptParam)||nameEq(v.fn.name,typeAnnotationAutoParam))&&v.args.length===2){x=v.args[0]!;continue;}
+    return x;
+  }
 }
 
 export function getAppFn(e: Expr): Expr { let x=e; while(x.kind==='app') x=x.fn; return x; }
@@ -262,22 +263,40 @@ export function hasLooseBVarAt(e: Expr, index: number, depth = 0): boolean {
 }
 
 function hasLooseBVarInPiDomain(b: Expr, vidx: number, strict: boolean): boolean {
-  if(b.kind==='forall'){
-    if(hasLooseBVarAt(b.type,vidx)){
-      if(b.binderInfo==='default') return true;
-      if(hasLooseBVarInPiDomain(b.body,0,strict)) return true;
+  const todo:{b:Expr;vidx:number}[]=[{b,vidx}];
+  while(todo.length){
+    const f=todo.pop()!,x=f.b;
+    if(x.kind==='forall'){
+      if(hasLooseBVarAt(x.type,f.vidx)){
+        if(x.binderInfo==='default')return true;
+        // Preserve Lean's transitive dependency search before the ordinary body search.
+        todo.push({b:x.body,vidx:f.vidx+1},{b:x.body,vidx:0});
+      }else{
+        todo.push({b:x.body,vidx:f.vidx+1});
+      }
+    }else if(!strict&&hasLooseBVarAt(x,f.vidx)){
+      return true;
     }
-    return hasLooseBVarInPiDomain(b.body,vidx+1,strict);
   }
-  return strict ? false : hasLooseBVarAt(b,vidx);
+  return false;
 }
 
 /** Port of Lean 4.34 `infer_implicit`; used by kernel-generated recursor types. */
 export function inferImplicit(e: Expr, strict: boolean, numParams = Number.MAX_SAFE_INTEGER): Expr {
-  if(numParams===0 || e.kind!=='forall') return e;
-  const body=inferImplicit(e.body,strict,numParams-1);
-  if(e.binderInfo!=='default') return {...e,body};
-  return hasLooseBVarInPiDomain(body,0,strict) ? {...e,body,binderInfo:'implicit'} : {...e,body};
+  const binders:Extract<Expr,{kind:'forall'}>[]=[];
+  let body=e,remaining=numParams;
+  while(remaining>0&&body.kind==='forall'){
+    binders.push(body);body=body.body;remaining--;
+  }
+  for(let i=binders.length-1;i>=0;i--){
+    const b=binders[i]!;
+    body=b.binderInfo!=='default'
+      ? {...b,body}
+      : hasLooseBVarInPiDomain(body,0,strict)
+        ? {...b,body,binderInfo:'implicit'}
+        : {...b,body};
+  }
+  return body;
 }
 
 export function hasLooseBVar(e: Expr, depth=0): boolean {

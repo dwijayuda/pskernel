@@ -1,5 +1,5 @@
 import { Environment } from '../src/core/environment.js';
-import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, instantiateExprLevels, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
+import { app, bvar, constant, consumeTypeAnnotations, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, inferImplicit, instantiateExprLevels, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
 import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelLe, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
 import { nameCmp, nameEq, nameFromDotted, nameKey, nameReplacePrefix, nameToString } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
@@ -68,6 +68,14 @@ test('deep structural traversals avoid the JavaScript call stack',()=>{
 
  const deepDecl:any={levelParams:[],numParams:0,types:[{name:nameFromDotted('DeepScan'),type:sort(levelZero),ctors:[{name:nameFromDotted('DeepScan.mk'),type:e}]}]};
  checkNoReservedNestedAux(deepDecl);checkUniformInductiveOccurrences(deepDecl);
+
+ let annotated:any=constant(N.Nat),outParam=constant(nameFromDotted('outParam'));
+ for(let i=0;i<12000;i++)annotated=app(outParam,annotated);
+ assert(exprEq(consumeTypeAnnotations(annotated),constant(N.Nat)),'deep leading type annotations must be consumed without recursion overflow');
+
+ let deepPi:any=constant(N.Nat);
+ for(let i=0;i<2048;i++)deepPi=forallE(nameFromDotted('x'),constant(N.Nat),deepPi);
+ assert(inferImplicit(deepPi,true,2048).kind==='forall','recursor implicit inference uses an explicit binder stack');
 });
 test('universe metavariables remain distinct symbolic atoms',()=>{
  const n=nameFromDotted('u'),u=levelMVar(n),v=levelMVar(nameFromDotted('v')),p=levelParam(n);

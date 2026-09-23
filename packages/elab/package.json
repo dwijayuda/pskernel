@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript term/command/declaration elaboration into kernel declarations.",
   "proofscript": {
-    "status": "v061-record-projection+structure+nat-ite-elab-mvp",
+    "status": "v061-multigoal-tactic+global-instance+structural-recursion",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

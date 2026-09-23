@@ -133,8 +133,10 @@ test('proof irrelevance compares arbitrary proofs of the same proposition',()=>{
 });
 test('Nat.add reduction uses exact bigint',()=>{const tc=new TypeChecker(baseEnv());const e=app(app(constant(N.NatAdd),natLit(9007199254740993n)),natLit(7));eqExpr(tc.whnf(e),natLit(9007199254741000n));});
 test('Nat literal and count limits follow explicit Lean kernel limits',()=>{
- const env=baseEnv(),limits={maxRecDepth:4096,maxNatBytes:8n},tc=new TypeChecker(env,undefined,undefined,limits);
- tc.check(natLit((1n<<64n)-1n));throws(()=>tc.check(natLit(1n<<64n)));
+ const env=baseEnv(),limits={maxRecDepth:512,maxNatBytes:8n},tc=new TypeChecker(env,undefined,undefined,limits);
+ tc.check(natLit(0));tc.check(natLit((1n<<64n)-1n));throws(()=>tc.check(natLit(1n<<64n)));
+ const belowWord=new TypeChecker(env,undefined,undefined,{maxRecDepth:512,maxNatBytes:7n});
+ throws(()=>belowWord.check(natLit(0)));
  const normal=new TypeChecker(env);throws(()=>normal.whnf(app(app(constant(N.NatPow),natLit(2)),natLit(0x1_0000_0000n))));
  throws(()=>normal.whnf(app(app(constant(N.NatShiftLeft),natLit(1)),natLit(0x1_0000_0000n))));
 });

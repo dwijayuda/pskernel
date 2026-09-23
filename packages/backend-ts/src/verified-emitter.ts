@@ -33,7 +33,9 @@ function emitType(type:VerifiedIrType):string {
   }
 }
 
-function emitLiteral(value:bigint|string|boolean|undefined):string {
+function emitLiteral(
+  value:bigint|string|boolean|undefined,
+):string {
   if(typeof value==='bigint')return String(value)+'n';
   if(value===undefined)return 'undefined';
   return JSON.stringify(value);
@@ -41,7 +43,10 @@ function emitLiteral(value:bigint|string|boolean|undefined):string {
 
 type BrandMap=ReadonlyMap<string,string>;
 
-function emitExpr(expr:VerifiedIrExpr,brands:BrandMap):string {
+function emitExpr(
+  expr:VerifiedIrExpr,
+  brands:BrandMap,
+):string {
   switch(expr.kind){
     case 'literal':
       return emitLiteral(expr.value);
@@ -67,8 +72,9 @@ function emitExpr(expr:VerifiedIrExpr,brands:BrandMap):string {
           parameter.name+': '+emitType(parameter.type)
         ).join(', ')+') => '+emitExpr(expr.body,brands);
     case 'let':
-      return '(() => { const '+expr.name+' = '+emitExpr(expr.value,brands)+
-        '; return '+emitExpr(expr.body,brands)+'; })()';
+      return '(() => { const '+expr.name+' = '+
+        emitExpr(expr.value,brands)+'; return '+
+        emitExpr(expr.body,brands)+'; })()';
     case 'if':
       return '('+emitExpr(expr.condition,brands)+' ? '+
         emitExpr(expr.thenBranch,brands)+' : '+
@@ -92,25 +98,36 @@ function emitExpr(expr:VerifiedIrExpr,brands:BrandMap):string {
   }
 }
 
-function buildBrandMap(module:VerifiedIrModule):ReadonlyMap<string,string> {
+function buildBrandMap(
+  module:VerifiedIrModule,
+):ReadonlyMap<string,string> {
   const used=new Set(module.declarations.map((item)=>item.name));
-  for(const structure of module.structures??[])used.add(structure.name);
+  for(const structure of module.structures??[]){
+    used.add(structure.name);
+  }
   const result=new Map<string,string>();
   let index=0;
   for(const structure of module.structures??[]){
-    let candidate='__ps$brand
+    let candidate='__ps$brand$'+index++;
+    while(used.has(candidate))candidate+='_';
+    used.add(candidate);
+    result.set(structure.name,candidate);
+  }
+  return result;
+}
 
-export function emitVerifiedTypeScript(
+function emitStructures(
   module:VerifiedIrModule,
-):string {
-  validateVerifiedIrModule(module);
-  const lines=[
-    '// generated from pskernel-admitted ProofScript checked core',
-  ];
-  const brands=buildBrandMap(module);
-
+  brands:BrandMap,
+):string[] {
+  const lines:string[]=[];
   for(const structure of module.structures??[]){
-    const brand=brands.get(structure.name)!;
+    const brand=brands.get(structure.name);
+    if(brand===undefined){
+      throw new Error(
+        "PS_TS_STRUCTURE_BRAND_MISSING: '"+structure.name+"'",
+      );
+    }
     lines.push(
       'const '+brand+': unique symbol = Symbol('+
       JSON.stringify('ProofScript.'+structure.name)+');',
@@ -124,64 +141,30 @@ export function emitVerifiedTypeScript(
       ' }',
     );
   }
-
-  for(const declaration of module.declarations){
-    const generics=declaration.typeParameters.length===0
-      ?''
-      :'<'+declaration.typeParameters.map((item)=>item.name).join(', ')+'>';
-
-    if(declaration.parameters.length===0){
-      if(declaration.typeParameters.length>0){
-        throw new Error(
-          "PS_TS_GENERIC_VALUE_UNSUPPORTED: '"+declaration.name+
-          "' has erased type parameters but no runtime parameters",
-        );
-      }
-      lines.push(
-        'export const '+declaration.name+': '+
-        emitType(declaration.resultType)+' = '+
-        emitExpr(declaration.body,brands)+';',
-      );
-      continue;
-    }
-
-    const parameters=declaration.parameters.map((parameter)=>
-      parameter.name+': '+emitType(parameter.type)
-    ).join(', ');
-    lines.push(
-      'export function '+declaration.name+generics+
-      '('+parameters+'): '+emitType(declaration.resultType)+
-      ' { return '+emitExpr(declaration.body,brands)+'; }',
-    );
-  }
-
-  return lines.join('\n')+'\n';
-}
-+index++;
-    while(used.has(candidate))candidate+='_';
-    used.add(candidate);
-    result.set(structure.name,candidate);
-  }
-  return result;
+  return lines;
 }
 
 export function emitVerifiedTypeScript(
   module:VerifiedIrModule,
 ):string {
   validateVerifiedIrModule(module);
+  const brands=buildBrandMap(module);
   const lines=[
     '// generated from pskernel-admitted ProofScript checked core',
+    ...emitStructures(module,brands),
   ];
 
   for(const declaration of module.declarations){
     const generics=declaration.typeParameters.length===0
       ?''
-      :'<'+declaration.typeParameters.map((item)=>item.name).join(', ')+'>';
+      :'<'+declaration.typeParameters
+        .map((item)=>item.name).join(', ')+'>';
 
     if(declaration.parameters.length===0){
       if(declaration.typeParameters.length>0){
         throw new Error(
-          "PS_TS_GENERIC_VALUE_UNSUPPORTED: '"+declaration.name+
+          "PS_TS_GENERIC_VALUE_UNSUPPORTED: '"+
+          declaration.name+
           "' has erased type parameters but no runtime parameters",
         );
       }

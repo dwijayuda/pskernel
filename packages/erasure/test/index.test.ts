@@ -1,16 +1,21 @@
 import {
   Environment,
+  Kernel,
+  app,
   bvar,
+  constant,
   forallE,
   lam,
   levelSucc,
   levelZero,
+  mkAppN,
   nameFromDotted,
   sort,
-  constant,
-  mkAppN,
 } from 'lean-ts-kernel';
-import {admitCheckedCoreModule} from '@proofscript/checked-core';
+import {
+  admitCheckedCoreAdmissions,
+  admitCheckedCoreModule,
+} from '@proofscript/checked-core';
 import {validateVerifiedIrModule} from '@proofscript/compiler-ir/verified';
 import {eraseCheckedCoreModule} from '../src/index.js';
 
@@ -224,7 +229,7 @@ console.log('ok - @proofscript/erasure semantic primitive type identity');
 
 {
   const base=new Environment();
-  const kernel=new (await import('lean-ts-kernel')).Kernel(base);
+  const kernel=new Kernel(base);
   const Nat=nameFromDotted('TestNat');
   kernel.addAxiom({
     kind:'axiom',

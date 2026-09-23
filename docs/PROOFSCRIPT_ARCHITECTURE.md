@@ -434,3 +434,28 @@ Thus `Nat.succ(a) = a -> P` parses as
 
 Boolean `==` remains a distinct runtime/BEq operation. No backend or parser
 shortcut equates `=` with `==`.
+
+## Theorem-position Nat term checkpoint
+
+The dependent header surface now reuses the ordinary Nat notation semantics for
+numeric literals and `+ - * / %`. Parsing uses the same operator precedence
+table as ordinary expressions, while header elaboration delegates Nat operation
+construction/checking to the same Nat notation module.
+
+This is deliberately not a generic operator overloading system. The supported
+header arithmetic is the existing verified Nat subset only. Lean-style
+typeclass-driven arithmetic notation remains fail-closed until the shared Meta
+layer owns it.
+
+To keep that sharing maintainable, notation elaboration is split into focused
+modules:
+
+```text
+v061-notation-support
+     ├── v061-nat-notation-elab
+     ├── v061-bool-notation-elab
+     └── v061-notation-elab       (small dispatcher/reflection)
+```
+
+The split restores the repository source-shape invariant without exemptions and
+keeps theorem-header and executable Nat arithmetic on one semantic path.

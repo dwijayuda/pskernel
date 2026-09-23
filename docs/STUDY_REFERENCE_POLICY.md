@@ -133,3 +133,12 @@ type must still inhabit a `Sort`. Thus `Eq (Nat.succ a) a` is now a valid
 checked header form. The remaining gap is syntactic breadth (operators,
 literals, lambdas/matches as needed, and native infix `=`), not permission to
 bypass the final type check.
+
+## Study-driven theorem statement checkpoint
+
+The ProofScript v0.7 reference explicitly uses theorem statements such as
+`n + 0 = n`. The verified frontend now supports that shape using the existing
+Nat operation semantics rather than a theorem-only parser/elaborator shortcut.
+This was also used to split the oversized notation elaborator into focused Nat,
+Bool, support, and dispatcher modules so reference-driven surface growth does
+not violate the repository source-shape gate.

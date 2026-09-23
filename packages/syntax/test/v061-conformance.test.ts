@@ -79,6 +79,12 @@ const moduleCases=[
     covers:['D-FUNCTION-ALIAS','D-EXPLICIT-PARAMS','D-DECL-SEMI'] as const,
   },
   {
+    id:'native-theorem-proof-term',
+    source:'theorem idProp(P : Prop, h : P) : P := h;',
+    expected:'theorem idProp (P : Prop) (h : P) : P := h',
+    covers:['D-EXPLICIT-PARAMS','D-DECL-SEMI'] as const,
+  },
+  {
     id:'def-general',
     source:'def mul(x : Nat, y : Nat) : Nat := x * y;',
     expected:'def mul (x : Nat) (y : Nat) : Nat := x * y',

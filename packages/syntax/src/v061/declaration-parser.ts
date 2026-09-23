@@ -39,8 +39,11 @@ export class V061DeclarationParser {
 
   private parseValueDeclaration():V061ValueDeclaration {
     const keyword=this.context.cursor.peek();
-    if(keyword.text!=='const'&&keyword.text!=='def'&&keyword.text!=='function'){
-      throw new SyntaxError("expected const, def, or function, got '"+keyword.text+"'",keyword.span);
+    if(keyword.text!=='const'&&keyword.text!=='def'&&keyword.text!=='function'&&keyword.text!=='theorem'){
+      throw new SyntaxError(
+        "expected const, def, function, or theorem, got '"+keyword.text+"'",
+        keyword.span,
+      );
     }
     this.context.cursor.consume();
     const kind=keyword.text as V061ValueDeclaration['kind'];

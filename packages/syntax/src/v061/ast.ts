@@ -95,7 +95,7 @@ export interface V061WhereDeclaration {
 }
 
 export interface V061ValueDeclaration {
-  readonly kind:'const'|'def'|'function';
+  readonly kind:'const'|'def'|'function'|'theorem';
   readonly name:string;
   readonly params:readonly V061Parameter[];
   readonly resultType:V061TypeExpr;

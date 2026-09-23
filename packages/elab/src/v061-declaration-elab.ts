@@ -8,6 +8,7 @@ import {
   LocalContext,
   TypeChecker,
   type DefinitionInfo,
+  type TheoremInfo,
   type Expr,
   abstractFVar,
   exprToString,
@@ -66,7 +67,7 @@ function maxRegularHeight(environment:Environment,expr:Expr):bigint {
 function elaborateValueDeclaration(
   source:V061ValueDeclaration,
   environment:Environment,
-):DefinitionInfo {
+):DefinitionInfo|TheoremInfo {
   if((source.whereDeclarations??[]).length>0){
     throw new Error(
       'PS_ELAB_WHERE_UNSUPPORTED: kernel-facing where elaboration requires recursion/termination predefinition processing',
@@ -140,6 +141,16 @@ function elaborateValueDeclaration(
     );
   }
 
+  if(source.kind==='theorem'){
+    return {
+      kind:'theorem',
+      name:nameFromDotted(source.name),
+      levelParams:[],
+      type,
+      value,
+    };
+  }
+
   return {
     kind:'definition',
     name:nameFromDotted(source.name),
@@ -156,14 +167,18 @@ function elaborateValueDeclaration(
 
 export interface ElaboratedV061Module {
   readonly environment:Environment;
+  readonly declarations:readonly (DefinitionInfo|TheoremInfo)[];
   readonly definitions:readonly DefinitionInfo[];
+  readonly theorems:readonly TheoremInfo[];
 }
 
 export function elaborateV061Definitions(
   module:V061Module,
   environment=new Environment(),
 ):ElaboratedV061Module {
+  const declarations:(DefinitionInfo|TheoremInfo)[]=[];
   const definitions:DefinitionInfo[]=[];
+  const theorems:TheoremInfo[]=[];
   const kernel=new Kernel(environment);
 
   for(const declaration of module.declarations){
@@ -178,7 +193,7 @@ export function elaborateV061Definitions(
       );
     }
 
-    let info:DefinitionInfo;
+    let info:DefinitionInfo|TheoremInfo;
     try{
       info=elaborateValueDeclaration(declaration,environment);
     }catch(error){
@@ -187,9 +202,19 @@ export function elaborateV061Definitions(
         "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
       );
     }
-    kernel.addDefinition(info);
-    definitions.push(info);
+    if(info.kind==='theorem'){
+      kernel.addTheorem(info);
+      theorems.push(info);
+    }else{
+      kernel.addDefinition(info);
+      definitions.push(info);
+    }
+    declarations.push(info);
   }
 
-  return {environment,definitions};
+  return {environment,declarations,definitions,theorems};
 }
+
+
+/** Preferred name now that the kernel-facing path also admits theorem proof terms. */
+export const elaborateV061Declarations=elaborateV061Definitions;

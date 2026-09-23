@@ -4,6 +4,7 @@ import {
   elaborateApplication,
   elaborateChecked,
   elaborateV061Definitions,
+  elaborateV061Declarations,
 } from '../src/index.js';
 import {ExprMetaContext} from '@proofscript/meta';
 import {parseV061Module} from '@proofscript/syntax';
@@ -292,3 +293,27 @@ console.log('ok - @proofscript/elab implicit declaration binders');
   equal(result.environment.find(nameFromDotted('keepBox'))?.kind,'definition');
 }
 console.log('ok - @proofscript/elab dependent type application path');
+
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem identityProp(P : Prop, h : P) : P := h; '+
+    'theorem useIdentityProp(P : Prop, h : P) : P := identityProp(P, h);',
+  ));
+  equal(result.theorems.length,2);
+  equal(result.definitions.length,0);
+  equal(result.declarations.length,2);
+  equal(result.environment.find(nameFromDotted('identityProp'))?.kind,'theorem');
+  equal(result.environment.find(nameFromDotted('useIdentityProp'))?.kind,'theorem');
+}
+{
+  const env=makeDefinitionEnvironment();
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem notAProposition : TestNat := testZero;',
+    ),env);
+  }catch(error){rejected=/type is not a proposition/.test(String(error));}
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab kernel theorem proof-term admission');

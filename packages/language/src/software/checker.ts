@@ -19,6 +19,11 @@ import {
 } from './inductive-checker.js';
 
 export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule {
+  if(module.declarations.some((decl)=>decl.kind==='theorem')){
+    throw new Error(
+      'PS_CHECK_DECL_UNSUPPORTED: theorem declarations belong to kernel-facing elaboration',
+    );
+  }
   if(module.declarations.some((decl)=>decl.kind==='class')){
     throw new Error(
       'PS_CHECK_DECL_UNSUPPORTED: class declarations require typeclass/instance elaboration',

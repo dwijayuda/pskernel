@@ -233,8 +233,24 @@ export class TypeChecker {
     }}return null;
   }
   private defEqBinder(a:Extract<Expr,{kind:'lam'|'forall'}>,b:Extract<Expr,{kind:'lam'|'forall'}>):boolean{
-    if(!this.isDefEq(a.type,b.type))return false;
-    return this.withLocal('x',b.type,(id,tc)=>tc.isDefEq(instantiate1(a.body,fvar(id)),instantiate1(b.body,fvar(id))));
+    const kind=a.kind,lctx=this.lctx.clone(),tc=this.child(lctx),subst:Expr[]=[];let t:Expr=a,s:Expr=b;
+    do{
+      const tb=t as Extract<Expr,{kind:'lam'|'forall'}>,sb=s as Extract<Expr,{kind:'lam'|'forall'}>;let sType:Expr|undefined;
+      if(!exprEq(tb.type,sb.type)){
+        sType=this.instantiateRev(sb.type,subst);const tType=this.instantiateRev(tb.type,subst);
+        if(!tc.isDefEq(tType,sType))return false;
+      }
+      if(hasLooseBVar(tb.body)||hasLooseBVar(sb.body)){
+        sType??=this.instantiateRev(sb.type,subst);
+        const id=lctx.fresh(nameToString(sb.name));lctx.addLocal(id,sb.name,sType,sb.binderInfo);subst.push(fvar(id));
+      }else{
+        // Lean uses a persistent internal don't-care term here; the value is never
+        // observed because neither remaining body contains the corresponding bvar.
+        subst.push(sort(levelZero));
+      }
+      t=tb.body;s=sb.body;
+    }while(t.kind===kind&&s.kind===kind);
+    return tc.isDefEq(this.instantiateRev(t,subst),this.instantiateRev(s,subst));
   }
   private proofIrrel(a:Expr,b:Expr):boolean|null{
     // Lean proof irrelevance applies when the *type* of a is a proposition.

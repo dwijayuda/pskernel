@@ -9,6 +9,7 @@ import {eraseCheckedCoreModule} from '../packages/erasure/dist/src/index.js';
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
 import {compileTypeScript,emitModule,emitVerifiedTypeScript} from '../packages/backend-ts/dist/src/index.js';
 import {compileCheckedCore} from '../packages/compiler/dist/src/index.js';
+import {compileVerifiedSource} from '../packages/cli/dist/src/verified-pipeline.js';
 import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
@@ -155,6 +156,42 @@ assert(
 assert(
   proofCarrying.emitted.javascript.includes('function keep(x)'),
   'proof-carrying generic did not erase to the expected runtime arity',
+);
+
+
+const verifiedNat=compileVerifiedSource(
+  'function add(x : Nat, y : Nat) : Nat := x + y; '+
+  'function twice(x : Nat) : Nat := add(x, x); '+
+  'function sub(x : Nat, y : Nat) : Nat := x - y;',
+  'verified-nat.ts',
+);
+assert(
+  verifiedNat.checkedCore.definitions.length===3,
+  'verified Nat source was not admitted as three checked definitions',
+);
+assert(
+  verifiedNat.typeScript.includes(
+    'function add(x: bigint, y: bigint): bigint',
+  ),
+  'verified Nat.add did not reach typed TypeScript',
+);
+assert(
+  verifiedNat.typeScript.includes('return (x + y);'),
+  'verified Nat.add intrinsic did not emit bigint addition',
+);
+assert(
+  verifiedNat.typeScript.includes('return add(x, x);'),
+  'verified Nat functions did not compose through checked core',
+);
+assert(
+  verifiedNat.typeScript.includes(
+    '__ps_a >= __ps_b ? __ps_a - __ps_b : 0n',
+  ),
+  'verified Nat.sub lost saturating Lean semantics',
+);
+assert(
+  verifiedNat.emitted.javascript.includes('function twice(x)'),
+  'verified Nat composition did not compile to JavaScript',
 );
 
 

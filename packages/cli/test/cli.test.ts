@@ -45,3 +45,17 @@ console.log('ok - psc CLI argument/UX contract');
   equal(result.emitted.javascript.includes('T0'),false);
 }
 console.log('ok - psc verified checked-core compiler pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'function add(x : Nat, y : Nat) : Nat := x + y; '+
+    'function twice(x : Nat) : Nat := add(x, x);',
+    'nat.ts',
+  );
+  equal(result.checkedCore.definitions.length,2);
+  equal(result.typeScript.includes('return (x + y);'),true);
+  equal(result.typeScript.includes('return add(x, x);'),true);
+  equal(result.emitted.javascript.includes('function twice(x)'),true);
+}
+console.log('ok - psc verified Nat source pipeline');

@@ -106,3 +106,24 @@ It is:
 8. emitted to `.d.ts` with the generic type preserved.
 
 This is the reference direction for all future language/compiler work.
+
+
+## Verified Nat programming checkpoint
+
+The canonical path now also covers composing ordinary checked functions:
+
+```proofscript
+function add(x : Nat, y : Nat) : Nat := x + y;
+
+function twice(x : Nat) : Nat :=
+  add(x, x);
+```
+
+For the current bounded notation milestone, `+`, `-`, and `*` are accepted
+only at `Nat`. Elaboration produces the real Lean constants
+`Nat.add`, `Nat.sub`, and `Nat.mul`; erasure then maps those checked
+applications to explicit verified-IR intrinsics.
+
+This is intentionally narrower than pretending to have Lean's general
+`HAdd`/typeclass notation already. General overloaded notation must wait for
+the real typeclass-synthesis layer.

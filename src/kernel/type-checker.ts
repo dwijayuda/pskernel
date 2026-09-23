@@ -34,6 +34,13 @@ export class TypeChecker {
     this.lctx=lctx.clone();
     this.state=state??new KernelState();
     this.state.bindEnvironment(env);
+    this.state.bindCheckerConfig({
+      definitionSafety:this.definitionSafety,
+      allowedLevelParams:this.allowedLevelParams,
+      maxRecDepth:this.limits.maxRecDepth,
+      maxNatBytes:this.limits.maxNatBytes,
+      nativeEvaluator:this.nativeEvaluator,
+    });
     this.state.bindLocalContext(this.lctx);
   }
   private rec<T>(f:()=>T):T{

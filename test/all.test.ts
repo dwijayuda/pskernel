@@ -174,6 +174,31 @@ test('type checker snapshots caller-owned local contexts',()=>{
  eqExpr(tc.check(fvar(id)),constant(N.Nat));
 });
 
+test('shared checker state rejects incompatible cache-affecting checker configuration',()=>{
+ const env=baseEnv();
+ const unsafeName=nameFromDotted('StateMode.unsafe');
+ env.add({kind:'axiom',name:unsafeName,levelParams:[],type:constant(N.Nat),isUnsafe:true});
+
+ const safetyState=new KernelState();
+ new TypeChecker(env,new LocalContext(),safetyState,undefined,'unsafe').check(constant(unsafeName));
+ throws(()=>new TypeChecker(env,new LocalContext(),safetyState,undefined,'safe'));
+
+ const u=nameFromDotted('StateMode.u'),v=nameFromDotted('StateMode.v');
+ const levelState=new KernelState();
+ new TypeChecker(env,new LocalContext(),levelState,undefined,'safe',[u]);
+ throws(()=>new TypeChecker(env,new LocalContext(),levelState,undefined,'safe',[v]));
+
+ const limitsState=new KernelState();
+ new TypeChecker(env,new LocalContext(),limitsState,{maxRecDepth:512,maxNatBytes:1024n});
+ throws(()=>new TypeChecker(env,new LocalContext(),limitsState,{maxRecDepth:512,maxNatBytes:8n}));
+
+ const nativeA:NativeEvaluator={evaluate(){return {kind:'nat',value:1n};}};
+ const nativeB:NativeEvaluator={evaluate(){return {kind:'nat',value:1n};}};
+ const nativeState=new KernelState();
+ new TypeChecker(env,new LocalContext(),nativeState,undefined,'safe',undefined,false,nativeA);
+ throws(()=>new TypeChecker(env,new LocalContext(),nativeState,undefined,'safe',undefined,false,nativeB));
+});
+
 test('shared checker state rejects incompatible FVar rebinding',()=>{
  const env=baseEnv(),st=new KernelState(),a=new LocalContext(),b=new LocalContext(),id='shared@0';
  a.addLocal(id,nameFromDotted('x'),constant(N.Nat));

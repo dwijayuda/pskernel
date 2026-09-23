@@ -2,7 +2,7 @@ import { Environment, KernelError } from '../core/environment.js';
 import { Expr, exprLeanEq } from '../core/expr.js';
 import { Level } from '../core/level.js';
 import { LocalContext, LocalDecl } from '../core/local-context.js';
-import { nameKey } from '../core/name.js';
+import { Name, nameKey } from '../core/name.js';
 
 function mix(h:number,x:number):number{
   h^=x>>>0;
@@ -162,6 +162,8 @@ export class KernelState {
   private boundEnvironment:Environment|undefined;
   private boundRevision=0;
   private readonly localDecls=new Map<string,LocalDecl>();
+  private checkerConfigKey:string|undefined;
+  private checkerNativeEvaluator:unknown=undefined;
   readonly infer=new LeanExprMap<Expr>(this.hasher);
   readonly checkedInfer=new LeanExprMap<Expr>(this.hasher);
   readonly whnfCore=new LeanExprMap<Expr>(this.hasher);
@@ -184,6 +186,33 @@ export class KernelState {
     }
     if(this.boundEnvironment!==env||this.boundRevision!==env.revision)
       throw new KernelError('type checker environment changed; create a new checker state');
+  }
+
+  /**
+   * Memoized checked inference / WHNF / defeq results depend on more than the
+   * environment and local context. Public TypeChecker callers may supply an
+   * existing state, so fail closed if one state is reused under incompatible
+   * safety, universe-policy, resource-limit, or native-evaluator settings.
+   *
+   * Lean's own state-sharing is internal and preserves these invariants; this
+   * guard makes the same assumption explicit at the public TypeScript boundary.
+   */
+  bindCheckerConfig(config:{
+    readonly definitionSafety:string;
+    readonly allowedLevelParams?:readonly Name[];
+    readonly maxRecDepth:number;
+    readonly maxNatBytes:bigint;
+    readonly nativeEvaluator?:unknown;
+  }):void{
+    const lps=config.allowedLevelParams===undefined
+      ? '<ignore-undefined-universes>'
+      : [...config.allowedLevelParams].map(nameKey).sort().join('|');
+    const key=`${config.definitionSafety}\0${config.maxRecDepth}\0${config.maxNatBytes}\0${lps}`;
+    if(this.checkerConfigKey===undefined){
+      this.checkerConfigKey=key;this.checkerNativeEvaluator=config.nativeEvaluator;return;
+    }
+    if(this.checkerConfigKey!==key||this.checkerNativeEvaluator!==config.nativeEvaluator)
+      throw new KernelError('type checker state reused with incompatible checker configuration');
   }
 
   /**

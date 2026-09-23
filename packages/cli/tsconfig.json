@@ -25,6 +25,12 @@
       ],
       "@proofscript/backend-ts": [
         "../backend-ts/dist/src/index.d.ts"
+      ],
+      "@proofscript/elab": [
+        "../elab/dist/src/index.d.ts"
+      ],
+      "@proofscript/compiler": [
+        "../compiler/dist/src/index.d.ts"
       ]
     }
   },

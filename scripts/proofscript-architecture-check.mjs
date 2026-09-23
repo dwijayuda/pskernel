@@ -122,12 +122,6 @@ for(const forbidden of [
   }
 }
 
-console.log(
-  'proofscript-architecture: PASS '+
-  '(source -> elab -> checked-core -> erasure -> IR -> TS -> JS)',
-);
-
-
 const verifiedEmitter=readFileSync(
   join(root,'packages','backend-ts','src','verified-emitter.ts'),
   'utf8',
@@ -137,3 +131,9 @@ if(verifiedEmitter.includes("from '@proofscript/compiler-ir';")){
     'architecture: verified backend must import compiler-ir/verified subpath',
   );
 }
+
+
+console.log(
+  'proofscript-architecture: PASS '+
+  '(source -> elab -> checked-core -> erasure -> IR -> TS -> JS)',
+);

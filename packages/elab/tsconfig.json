@@ -3,7 +3,25 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "types": []
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "lean-ts-kernel": [
+        "../../dist/src/index.d.ts"
+      ],
+      "@proofscript/syntax": [
+        "../syntax/dist/src/index.d.ts"
+      ],
+      "@proofscript/meta": [
+        "../meta/dist/src/index.d.ts"
+      ],
+      "@proofscript/checked-core": [
+        "../checked-core/dist/src/index.d.ts"
+      ]
+    }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
 }

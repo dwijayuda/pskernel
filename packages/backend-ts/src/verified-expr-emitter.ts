@@ -29,6 +29,16 @@ export function emitVerifiedExpr(
       const right=emitVerifiedExpr(expr.args[1]!,brands,tags);
       if(expr.operation==='nat.add')return '('+left+' + '+right+')';
       if(expr.operation==='nat.mul')return '('+left+' * '+right+')';
+      if(expr.operation==='nat.div'){
+        return '((__ps_a: bigint, __ps_b: bigint) => '+
+          '(__ps_b === 0n ? 0n : __ps_a / __ps_b))('+
+          left+', '+right+')';
+      }
+      if(expr.operation==='nat.mod'){
+        return '((__ps_a: bigint, __ps_b: bigint) => '+
+          '(__ps_b === 0n ? __ps_a : __ps_a % __ps_b))('+
+          left+', '+right+')';
+      }
       if(expr.operation==='nat.eq')return '('+left+' === '+right+')';
       if(expr.operation==='nat.ne')return '('+left+' !== '+right+')';
       if(expr.operation==='nat.le')return '('+left+' <= '+right+')';

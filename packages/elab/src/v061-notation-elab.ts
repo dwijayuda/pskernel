@@ -23,6 +23,8 @@ const natArithmetic=new Map<string,string>([
   ['+','Nat.add'],
   ['-','Nat.sub'],
   ['*','Nat.mul'],
+  ['/','Nat.div'],
+  ['%','Nat.mod'],
 ]);
 
 const boolBinary=new Map<string,string>([

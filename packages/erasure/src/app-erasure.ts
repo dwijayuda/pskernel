@@ -23,11 +23,13 @@ export type RuntimeExprEraser=(
 
 const natIntrinsics=new Map<
   string,
-  'nat.add'|'nat.sub'|'nat.mul'|'nat.eq'
+  'nat.add'|'nat.sub'|'nat.mul'|'nat.div'|'nat.mod'|'nat.eq'
 >([
   ['Nat.add','nat.add'],
   ['Nat.sub','nat.sub'],
   ['Nat.mul','nat.mul'],
+  ['Nat.div','nat.div'],
+  ['Nat.mod','nat.mod'],
   ['Nat.beq','nat.eq'],
 ]);
 

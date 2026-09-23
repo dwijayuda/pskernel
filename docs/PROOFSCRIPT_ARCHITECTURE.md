@@ -122,10 +122,12 @@ function twice(x : Nat) : Nat :=
   add(x, x);
 ```
 
-For the current bounded notation milestone, `+`, `-`, and `*` are accepted
-only at `Nat`. Elaboration produces the real Lean constants
-`Nat.add`, `Nat.sub`, and `Nat.mul`; erasure then maps those checked
-applications to explicit verified-IR intrinsics.
+For the current bounded notation milestone, `+`, `-`, `*`, `/`, and `%`
+are accepted only at `Nat`. Elaboration produces the real Lean constants
+`Nat.add`, `Nat.sub`, `Nat.mul`, `Nat.div`, and `Nat.mod`; erasure then
+maps those checked applications to explicit verified-IR intrinsics. Runtime
+division/modulo preserve Lean's total Nat semantics: division by zero yields
+`0`, while modulo by zero returns the dividend.
 
 The bounded Nat equality surface follows Lean's existing `==`/`!=` meaning
 rather than redefining it as propositional equality: `x == y` elaborates to

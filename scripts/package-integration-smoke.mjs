@@ -173,12 +173,14 @@ assert(
 const verifiedNat=compileVerifiedSource(
   'function add(x : Nat, y : Nat) : Nat := x + y; '+
   'function twice(x : Nat) : Nat := add(x, x); '+
-  'function sub(x : Nat, y : Nat) : Nat := x - y;',
+  'function sub(x : Nat, y : Nat) : Nat := x - y; '+
+  'function div(x : Nat, y : Nat) : Nat := x / y; '+
+  'function mod(x : Nat, y : Nat) : Nat := x % y;',
   'verified-nat.ts',
 );
 assert(
-  verifiedNat.checkedCore.definitions.length===3,
-  'verified Nat source was not admitted as three checked definitions',
+  verifiedNat.checkedCore.definitions.length===5,
+  'verified Nat source was not admitted as five checked definitions',
 );
 assert(
   verifiedNat.typeScript.includes(
@@ -199,6 +201,18 @@ assert(
     '__ps_a >= __ps_b ? __ps_a - __ps_b : 0n',
   ),
   'verified Nat.sub lost saturating Lean semantics',
+);
+assert(
+  verifiedNat.typeScript.includes(
+    '__ps_b === 0n ? 0n : __ps_a / __ps_b',
+  ),
+  'verified Nat.div lost Lean total division-by-zero semantics',
+);
+assert(
+  verifiedNat.typeScript.includes(
+    '__ps_b === 0n ? __ps_a : __ps_a % __ps_b',
+  ),
+  'verified Nat.mod lost Lean total modulo-by-zero semantics',
 );
 assert(
   verifiedNat.emitted.javascript.includes('function twice(x)'),

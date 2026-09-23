@@ -8,7 +8,8 @@ import {freeVariables,validateIrModule} from '../packages/compiler-ir/dist/src/i
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
 import {emitModule} from '../packages/backend-ts/dist/src/index.js';
 import {processDocument} from '../packages/language/dist/src/index.js';
-import {toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
+import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
+import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
 import {createBuildPlan} from '../packages/project/dist/src/index.js';
 import {verifyStream} from '../packages/browser/dist/src/index.js';
 
@@ -101,6 +102,25 @@ const snapshot=processDocument('demo.ps',1,'x!',{
 });
 const diagnostics=toLspDiagnostics(snapshot.text,snapshot.diagnostics);
 assert(diagnostics[0]?.range.start.character===1,'language/LSP diagnostic mapping failed');
+
+
+const editorService=new ProofScriptLanguageService();
+editorService.openDocument(
+  'file:///integration.ps',
+  1,
+  'theorem editorProof(P : Prop, h : P) : P := by assumption;',
+);
+const editorAnalysis=editorService.analyze('file:///integration.ps');
+assert(editorAnalysis.kernel==='verified','editor service must derive verified only from pskernel admission');
+assert(
+  editorService.proofState(
+    'file:///integration.ps',
+    {line:0,character:12},
+  ).status==='closed',
+  'verified theorem should expose closed declaration-level proof state',
+);
+assert(PROOFSCRIPT_LSP_PROTOCOL_VERSION===1,'LSP protocol drift');
+assert(lspCapabilities().hoverProvider===true,'LSP hover capability missing');
 
 const plan=createBuildPlan([
   {name:'app',dependencies:['core']},

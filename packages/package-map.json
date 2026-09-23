@@ -1,7 +1,7 @@
 {
   "version": 1,
   "status": "living",
-  "workspaceEnabled": false,
+  "workspaceEnabled": true,
   "packages": [
     {
       "name": "kernel",
@@ -314,6 +314,7 @@
     "forbidHandAuthoredMjs": true
   },
   "notes": [
-    "Lean 4.34 final removed deprecated in-kernel native reduction; no NativeEvaluator/native-ir kernel extension is part of the compatibility architecture."
+    "Lean 4.34 final removed deprecated in-kernel native reduction; no NativeEvaluator/native-ir kernel extension is part of the compatibility architecture.",
+    "npm workspaces are enabled so package-name imports resolve from the single root install; the root lean-ts-kernel remains the TCB package and outer workspaces may depend on it, never the reverse."
   ]
 }

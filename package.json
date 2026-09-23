@@ -47,5 +47,8 @@
       "types": "./dist/src/integration/lean4export.d.ts",
       "import": "./dist/src/integration/lean4export.js"
     }
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

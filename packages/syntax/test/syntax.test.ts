@@ -86,6 +86,7 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
     'inductive Maybe(α : Type) where { | none; | some(value : α); };',
     'function choose(x : Nat, y : Nat) : Nat := '+
       'if (x < y) { x } else { y };',
+    'def identity {α : Type}(x : α) : α := x;',
     'def unwrap(x : Maybe(Nat), fallback : Nat) : Nat := '+
       'match x with { | .none => fallback; | .some value => value; };',
     'def localDemo(x : Nat) : Nat := helper(x) where { '+
@@ -105,6 +106,7 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
     printed,
   );
   equal(printed.includes('function choose(x : Nat, y : Nat)'),true);
+  equal(printed.includes('def identity {α : Type}(x : α)'),true);
   equal(printed.includes('match x with { | .none => fallback;'),true);
   equal(printed.includes('where {\n  helper(y : Nat)'),true);
 }

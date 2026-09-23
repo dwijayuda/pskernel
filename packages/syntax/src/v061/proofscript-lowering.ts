@@ -44,7 +44,8 @@ function lowerParameterSequence(
     }
     out.push('('+explicit.join(', ')+')');
   }
-  return out.length===0?'':' '+out.join('');
+  if(out.length===0)return '';
+  return (out[0]!.startsWith('(')?'':' ')+out.join('');
 }
 
 function lowerExplicitOnlyParameters(
@@ -62,7 +63,7 @@ function lowerExplicitOnlyParameters(
   }
   return params.length===0
     ?''
-    :' ('+params.map(lowerParameter).join(', ')+')';
+    :'('+params.map(lowerParameter).join(', ')+')';
 }
 
 function lowerField(field:V061StructureField):string {

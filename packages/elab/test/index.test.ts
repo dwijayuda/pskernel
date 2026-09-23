@@ -950,12 +950,15 @@ console.log('ok - @proofscript/elab local class instance synthesis');
   const result=elaborateV061Declarations(parseV061Module(
     'class Boxed(α : Type) where { value : α; } '+
     'instance boxedNat : Boxed(Nat) := { value := 7 : Boxed(Nat) }; '+
+    'instance boxedBoxedNat : Boxed(Boxed(Nat)) := '+
+    '{ value := boxedNat : Boxed(Boxed(Nat)) }; '+
     'function get {α : Type}[inst : Boxed(α)](x : α) : α := inst.value; '+
     'function read(x : Nat) : Nat := get(x);',
   ),env);
   equal(result.classes.length,1);
-  equal(result.instances.length,1);
+  equal(result.instances.length,2);
   equal(result.instances[0]?.anonymous,false);
+  equal(result.instances[1]?.anonymous,false);
   const read=result.definitions.find(
     (item)=>item.name.kind==='str'&&item.name.value==='read',
   );

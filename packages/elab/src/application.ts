@@ -164,14 +164,17 @@ export function elaborateApplication({
       argument:implicit,
     });
     if(functionType.binderInfo==='instImplicit'){
-      const synthesized=trySynthesizeLocalInstance(
-        expectedType,
-        [...localInstances,...globalInstances],
-        classNames,
-        metaContext,
-        checker,
-        localContext,
-      );
+      const target=metaContext.instantiate(expectedType);
+      const synthesized=hasMVar(target)
+        ?undefined
+        :trySynthesizeLocalInstance(
+          target,
+          [...localInstances,...globalInstances],
+          classNames,
+          metaContext,
+          checker,
+          localContext,
+        );
       if(synthesized===undefined){
         pendingInstances.push(implicit);
       }else{
@@ -193,11 +196,36 @@ export function elaborateApplication({
     }
   }
 
+  const unresolvedInstances:Expr[]=[];
+  for(const pending of pendingInstances){
+    if(metaContext.isAssigned(pending))continue;
+    const target=metaContext.instantiate(
+      metaContext.getDecl(pending).type,
+    );
+    if(hasMVar(target)){
+      unresolvedInstances.push(pending);
+      continue;
+    }
+    const synthesized=trySynthesizeLocalInstance(
+      target,
+      [...localInstances,...globalInstances],
+      classNames,
+      metaContext,
+      checker,
+      localContext,
+    );
+    if(synthesized===undefined){
+      unresolvedInstances.push(pending);
+      continue;
+    }
+    metaContext.assign(pending,synthesized);
+  }
+
   return {
     term:metaContext.instantiate(term),
     type:metaContext.instantiate(type),
     inserted,
-    pendingInstances,
+    pendingInstances:unresolvedInstances,
     consumedExplicitArgs:explicitIndex,
   };
 }

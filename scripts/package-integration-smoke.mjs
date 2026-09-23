@@ -545,12 +545,14 @@ assert(
 const verifiedGlobalInstance=compileVerifiedSource(
   'class Boxed(α : Type) where { value : α; } '+
   'instance boxedNat : Boxed(Nat) := { value := 7 : Boxed(Nat) }; '+
+  'instance boxedBoxedNat : Boxed(Boxed(Nat)) := '+
+  '{ value := boxedNat : Boxed(Boxed(Nat)) }; '+
   'function get {α : Type}[inst : Boxed(α)](x : α) : α := inst.value; '+
   'function read(x : Nat) : Nat := get(x);',
   'verified-global-instance.ts',
 );
 assert(
-  verifiedGlobalInstance.checkedCore.instances.length===1,
+  verifiedGlobalInstance.checkedCore.instances.length===2,
   'global instance metadata did not survive checked-core admission',
 );
 assert(

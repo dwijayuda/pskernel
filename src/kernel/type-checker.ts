@@ -40,8 +40,8 @@ export class TypeChecker {
     try{return f();}finally{this.state.recDepth--;}
   }
   private checkLevel(l:Level):void{if(!this.allowedLevelParams)return;for(const p of levelParamNames(l))if(!this.allowedLevelParams.some(q=>nameEq(p,q)))throw new KernelError(`invalid reference to undefined universe level parameter '${nameToString(p)}'`);}
-  private withLocal<T>(name:string,type:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLocal(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}
-  private withLet<T>(name:string,type:Expr,value:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLet(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type,value);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}
+  private withLocal<T>(name:string,type:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=this.state.freshLocal(name,c);c.addLocal(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}
+  private withLet<T>(name:string,type:Expr,value:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=this.state.freshLocal(name,c);c.addLet(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type,value);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}
   private isEagerReduceExpr(e:Expr):boolean{const v=appView(e);return v.fn.kind==='const'&&nameEq(v.fn.name,N.EagerReduce)&&v.args.length===2;}
   private withEagerReduction<T>(k:()=>T):T{const old=this.eagerReduce;this.eagerReduce=true;try{return k();}finally{this.eagerReduce=old;}}
 
@@ -65,7 +65,7 @@ export class TypeChecker {
     while(cur.kind==='lam'){
       const type=this.instantiateRev(cur.type,vs.map(v=>v.expr));
       if(!inferOnly)tc.ensureSort(tc.infer(type,false),type);
-      const id=lctx.fresh(nameToString(cur.name));lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,name:cur.name,type,binderInfo:cur.binderInfo,expr:fvar(id)});cur=cur.body;
+      const id=this.state.freshLocal(nameToString(cur.name),lctx);lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,name:cur.name,type,binderInfo:cur.binderInfo,expr:fvar(id)});cur=cur.body;
     }
     const body=this.instantiateRev(cur,vs.map(v=>v.expr));const r=this.cheapBetaReduce(tc.infer(body,inferOnly));
     return this.closePiLocals(vs,r);
@@ -74,7 +74,7 @@ export class TypeChecker {
     const lctx=this.lctx.clone(),tc=this.child(lctx),vs:{id:string;expr:Expr}[]=[];const levels:Level[]=[];let cur:Expr=e;
     while(cur.kind==='forall'){
       const type=this.instantiateRev(cur.type,vs.map(v=>v.expr)),s=tc.ensureSort(tc.infer(type,inferOnly),type);levels.push(s.level);
-      const id=lctx.fresh(nameToString(cur.name));lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,expr:fvar(id)});cur=cur.body;
+      const id=this.state.freshLocal(nameToString(cur.name),lctx);lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,expr:fvar(id)});cur=cur.body;
     }
     const body=this.instantiateRev(cur,vs.map(v=>v.expr)),s=tc.ensureSort(tc.infer(body,inferOnly),body);let level=s.level;
     for(let i=levels.length-1;i>=0;i--)level=mkIMax(levels[i]!,level);
@@ -85,7 +85,7 @@ export class TypeChecker {
     while(cur.kind==='let'){
       const open=vs.map(v=>v.expr),type=this.instantiateRev(cur.type,open),value=this.instantiateRev(cur.value,open);
       if(!inferOnly){tc.ensureSort(tc.infer(type,false),type);const vt=tc.infer(value,false);if(!tc.isDefEq(vt,type))throw new KernelError('let value type mismatch');}
-      const id=lctx.fresh(nameToString(cur.name));lctx.addLet(id,cur.name,type,value);vs.push({id,name:cur.name,type,value,expr:fvar(id)});cur=cur.body;
+      const id=this.state.freshLocal(nameToString(cur.name),lctx);lctx.addLet(id,cur.name,type,value);vs.push({id,name:cur.name,type,value,expr:fvar(id)});cur=cur.body;
     }
     const body=this.instantiateRev(cur,vs.map(v=>v.expr));let r=this.cheapBetaReduce(tc.infer(body,inferOnly));
     for(let i=vs.length-1;i>=0;i--){const v=vs[i]!;if(this.containsFVar(r,v.id))r={kind:'let',name:v.name,type:v.type,value:v.value,body:abstractFVar(r,v.id)};}
@@ -296,7 +296,7 @@ export class TypeChecker {
       }
       if(hasLooseBVar(tb.body)||hasLooseBVar(sb.body)){
         sType??=this.instantiateRev(sb.type,subst);
-        const id=lctx.fresh(nameToString(sb.name));lctx.addLocal(id,sb.name,sType,sb.binderInfo);subst.push(fvar(id));
+        const id=this.state.freshLocal(nameToString(sb.name),lctx);lctx.addLocal(id,sb.name,sType,sb.binderInfo);subst.push(fvar(id));
       }else{
         // Lean uses a persistent internal don't-care term here; the value is never
         // observed because neither remaining body contains the corresponding bvar.

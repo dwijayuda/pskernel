@@ -1437,6 +1437,15 @@ test('lean4export replay accepts sparse and out-of-order intern indices',()=>{
  throws(()=>new Lean4ExportReplay().replay(duplicate));
 });
 
+test('lean4export rejects projection indices above UInt32 before number conversion',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"in":1,"str":{"pre":0,"str":"S"}}',
+  '{"ie":0,"proj":{"typeName":1,"idx":4294967296,"struct":999}}'
+ ].join('\n');
+ throws(()=>new Lean4ExportReplay().replay(nd));
+});
+
 test('lean4export replay rejects version drift before declarations',()=>{
  const nd='{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.33.0"},"format":{"version":"3.1.0"}}}';throws(()=>new Lean4ExportReplay().replay(nd));
 });

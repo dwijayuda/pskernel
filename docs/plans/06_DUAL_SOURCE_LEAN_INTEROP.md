@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **DS4 semantic equivalence landed for the canonical supported subset; DS5 mixed modules next; subordinate to the canonical checked-core architecture**
+Status: **DS6.2 project-aware language-service environment composition landed; Node/LSP source-root resolution and cross-language navigation remain; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -392,7 +392,7 @@ Remaining DS5 work:
 
 ### DS6 — editor support
 
-Status: **DS6.2 language-service project environment composition staged; Node/LSP resolution and project-aware navigation remain**
+Status: **DS6.2 language-service project environment composition landed; Node/LSP resolution and project-aware navigation remain**
 
 Landed DS6.1:
 

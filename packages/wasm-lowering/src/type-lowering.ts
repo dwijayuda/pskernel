@@ -5,7 +5,9 @@ import type {
 import type {WasmValueType} from '@proofscript/wasm-ir';
 import {unsupported} from './errors.js';
 
-export type RuntimeValueType=\n  |'bool'\n  |'uint8'|'uint16'|'uint32'|'uint64';
+export type RuntimeValueType=
+  |'bool'
+  |'uint8'|'uint16'|'uint32'|'uint64';
 export type RuntimeType=RuntimeValueType|null;
 
 export interface Signature {

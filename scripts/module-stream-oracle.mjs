@@ -1,9 +1,9 @@
-import {spawn} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import {resolve, join, delimiter} from 'node:path';
 import fs from 'node:fs';
 import {Environment} from '../dist/src/core/environment.js';
-import {Lean4ExportReplay} from '../dist/src/integration/lean4export.js';
+import {LEAN434_PINNED_GITHASH,Lean4ExportReplay} from '../dist/src/integration/lean4export.js';
 import {createLeanNativeEvaluator} from './lean-native-evaluator.mjs';
 
 const moduleName=process.argv[2]??'Init.Prelude';
@@ -14,6 +14,17 @@ const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
 if(!bin)throw new Error('module-stream-oracle: set LEAN434_BIN to Lean 4.34.0 bin directory');
 const lean=join(bin,leanExe);
 const envVars={...process.env,PATH:`${bin}${delimiter}${process.env.PATH??''}`};
+const expectedVersion=/^Lean \(version 4\.34\.0(?:,|\)).*Release\)?$/;
+const versionRun=spawnSync(lean,['--version'],{encoding:'utf8',timeout:5000,env:envVars});
+const leanVersion=versionRun.stdout?.trim()??'';
+if(versionRun.error||versionRun.status!==0||!expectedVersion.test(leanVersion)){
+  throw new Error(`module-stream-oracle: Lean version drift/failure: ${versionRun.error?.message??versionRun.stderr??leanVersion}`);
+}
+const hashRun=spawnSync(lean,['--githash'],{encoding:'utf8',timeout:5000,env:envVars});
+const leanGitHash=hashRun.stdout?.trim()??'';
+if(hashRun.error||hashRun.status!==0||leanGitHash!==LEAN434_PINNED_GITHASH){
+  throw new Error(`module-stream-oracle: Lean git hash drift/failure: expected ${LEAN434_PINNED_GITHASH}, got ${hashRun.error?.message??hashRun.stderr??leanGitHash}`);
+}
 const nativeEvaluator=createLeanNativeEvaluator({lean,moduleName,cwd:resolve('.'),env:envVars});
 const child=spawn(lean,['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--module-stream'],{cwd:resolve('.'),env:envVars,stdio:['ignore','pipe','pipe']});
 const rl=createInterface({input:child.stdout,crlfDelay:Infinity});
@@ -55,4 +66,23 @@ if(Number(header.constants)!==expected)throw new Error(`exporter constant count 
 if(shared.size!==expected)throw new Error(`replayed constants ${shared.size} != expected ${expected}`);
 const finalMem=process.memoryUsage();maxRssMiB=Math.max(maxRssMiB,finalMem.rss/1048576);maxHeapMiB=Math.max(maxHeapMiB,finalMem.heapUsed/1048576);
 if(header.plannedShards!==undefined&&shards!==Number(header.plannedShards))throw new Error(`observed shards ${shards} != planned ${header.plannedShards}`);
-console.log(JSON.stringify({ok:true,module:moduleName,modules:Number(header.modules),plannedShards:Number(header.plannedShards??shards),shards,rootsPerShard:Number(header.rootsPerShard??0),records:totalLines,declarations:totalDecls,constants:shared.size,rssMiB:Number((finalMem.rss/1048576).toFixed(1)),heapMiB:Number((finalMem.heapUsed/1048576).toFixed(1)),maxRssMiB:Number(maxRssMiB.toFixed(1)),maxHeapMiB:Number(maxHeapMiB.toFixed(1))},null,2));
+console.log(JSON.stringify({
+  ok:true,
+  protocol:'canonical-module-stream-v1',
+  canonical:true,
+  leanVersion,
+  leanGitHash,
+  rootOrder:header.rootOrder,
+  module:moduleName,
+  modules:Number(header.modules),
+  plannedShards:Number(header.plannedShards??shards),
+  shards,
+  rootsPerShard:Number(header.rootsPerShard??0),
+  records:totalLines,
+  declarations:totalDecls,
+  constants:shared.size,
+  rssMiB:Number((finalMem.rss/1048576).toFixed(1)),
+  heapMiB:Number((finalMem.heapUsed/1048576).toFixed(1)),
+  maxRssMiB:Number(maxRssMiB.toFixed(1)),
+  maxHeapMiB:Number(maxHeapMiB.toFixed(1))
+},null,2));

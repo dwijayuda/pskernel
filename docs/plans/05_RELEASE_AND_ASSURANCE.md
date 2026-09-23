@@ -54,7 +54,7 @@ Prefer machine-readable release evidence:
 - test counts
 - Arena counts
 - corpus fingerprints
-- Full Std summary
+- Full Std summary, including canonical protocol and root-order provenance
 - known optional gates
 - prohibited claims
 

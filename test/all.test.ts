@@ -1,6 +1,6 @@
 import { Environment } from '../src/core/environment.js';
 import { app, bvar, constant, consumeTypeAnnotations, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, inferImplicit, instantiateExprLevels, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
-import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelLe, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
+import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelIMaxRaw, levelLe, levelMaxRaw, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
 import { nameAppend, nameCmp, nameEq, nameFromDotted, nameIsPrefixOf, nameKey, nameReplacePrefix, nameToString, strName } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
 import { abstractFVar, instantiate, lift } from '../src/core/instantiate.js';
@@ -106,6 +106,14 @@ test('deep structural universe equality is stack-safe',()=>{
  assert(!levelHasMVar(p)&&levelHasMVar(m),'deep universe metavariable scan must be stack-safe');
  assert(!normalizesToZero(p),'successor towers cannot normalize to zero');
  assert(levelEqStructural(instantiateLevel(p,[uN],[levelZero]),a),'deep universe instantiation must be stack-safe');
+
+ const rawMax=levelMaxRaw(levelZero,levelZero),rawIMax=levelIMaxRaw(levelZero,levelZero);
+ assert(instantiateLevel(rawMax,[],[])===rawMax,'empty universe substitution preserves raw max identity instead of simplifying it');
+ assert(instantiateLevel(rawIMax,[nameFromDotted('unused')],[levelZero])===rawIMax,'unmatched universe substitution preserves raw imax identity instead of simplifying it');
+ const rawExpr=sort(rawMax);
+ assert(instantiateExprLevels(rawExpr,[],[])===rawExpr,'empty expression-level universe substitution preserves expression identity');
+ const untouched=lam(nameFromDotted('x'),sort(rawMax),constant(N.Nat));
+ assert(instantiateExprLevels(untouched,[nameFromDotted('unused')],[levelZero])===untouched,'unmatched expression-level universe substitution preserves the original tree');
 
  const st=new KernelState();st.infer.set(sort(a),constant(N.Nat));
  assert(st.infer.has(sort(b)),'structural expression caches must compare deep universe levels without recursion overflow');

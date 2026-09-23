@@ -127,6 +127,10 @@ export function addOffset(l: Level, k: bigint): Level {
 }
 
 export function instantiateLevel(root: Level, params: readonly Name[], values: readonly Level[]): Level {
+  // Lean's level instantiate/update helpers preserve the original node whenever
+  // substitution leaves its children unchanged. This matters for raw serialized
+  // max/imax syntax: smart constructors are used only after an actual change.
+  if(params.length===0)return root;
   const done=new WeakMap<object,Level>();
   const todo:{l:Level;done:boolean}[]=[{l:root,done:false}];
   while(todo.length){
@@ -146,9 +150,21 @@ export function instantiateLevel(root: Level, params: readonly Name[], values: r
         r=i>=0?values[i]!:l;
         break;
       }
-      case'succ':r=levelSucc(done.get(l.of as object)!);break;
-      case'max':r=mkMax(done.get(l.left as object)!,done.get(l.right as object)!);break;
-      case'imax':r=mkIMax(done.get(l.left as object)!,done.get(l.right as object)!);break;
+      case'succ':{
+        const of=done.get(l.of as object)!;
+        r=of===l.of?l:levelSucc(of);
+        break;
+      }
+      case'max':{
+        const left=done.get(l.left as object)!,right=done.get(l.right as object)!;
+        r=left===l.left&&right===l.right?l:mkMax(left,right);
+        break;
+      }
+      case'imax':{
+        const left=done.get(l.left as object)!,right=done.get(l.right as object)!;
+        r=left===l.left&&right===l.right?l:mkIMax(left,right);
+        break;
+      }
     }
     done.set(l as object,r);
   }

@@ -353,14 +353,26 @@ export function hasMVar(e: Expr): boolean {
 }
 
 export function instantiateExprLevels(e: Expr, params: readonly Name[], levels: readonly Level[]): Expr {
+  // Final Lean 4.34 instantiate_lparams returns the original expression when no
+  // universe substitution is needed and uses update_* nodes otherwise.
+  if(params.length===0)return e;
   type Frame={e:Expr;done:boolean};
   const todo:Frame[]=[{e,done:false}],out:Expr[]=[];
   while(todo.length){
     const f=todo.pop()!,x=f.e;
     if(!f.done){
       switch(x.kind){
-        case'sort':out.push({...x,level:instantiateLevel(x.level,params,levels)});break;
-        case'const':out.push({...x,levels:x.levels.map(l=>instantiateLevel(l,params,levels))});break;
+        case'sort':{
+          const level=instantiateLevel(x.level,params,levels);
+          out.push(level===x.level?x:{...x,level});
+          break;
+        }
+        case'const':{
+          let changed=false;
+          const us=x.levels.map(l=>{const r=instantiateLevel(l,params,levels);if(r!==l)changed=true;return r;});
+          out.push(changed?{...x,levels:us}:x);
+          break;
+        }
         case'app':todo.push({e:x,done:true},{e:x.arg,done:false},{e:x.fn,done:false});break;
         case'lam':case'forall':todo.push({e:x,done:true},{e:x.body,done:false},{e:x.type,done:false});break;
         case'let':todo.push({e:x,done:true},{e:x.body,done:false},{e:x.value,done:false},{e:x.type,done:false});break;
@@ -370,10 +382,22 @@ export function instantiateExprLevels(e: Expr, params: readonly Name[], levels: 
       continue;
     }
     switch(x.kind){
-      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push({...x,fn,arg});break;}
-      case'lam':case'forall':{const body=out.pop()!,type=out.pop()!;out.push({...x,type,body});break;}
-      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push({...x,type,value,body});break;}
-      case'mdata':case'proj':out.push({...x,expr:out.pop()!});break;
+      case'app':{
+        const arg=out.pop()!,fn=out.pop()!;
+        out.push(fn===x.fn&&arg===x.arg?x:{...x,fn,arg});break;
+      }
+      case'lam':case'forall':{
+        const body=out.pop()!,type=out.pop()!;
+        out.push(type===x.type&&body===x.body?x:{...x,type,body});break;
+      }
+      case'let':{
+        const body=out.pop()!,value=out.pop()!,type=out.pop()!;
+        out.push(type===x.type&&value===x.value&&body===x.body?x:{...x,type,value,body});break;
+      }
+      case'mdata':case'proj':{
+        const inner=out.pop()!;
+        out.push(inner===x.expr?x:{...x,expr:inner});break;
+      }
       default:throw new Error('internal instantiateExprLevels frame');
     }
   }

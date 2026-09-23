@@ -17,6 +17,7 @@ export async function checkCommand(common:CommonArgs){
         input.sourcePath,
         result.checkedCore.declarations.length,
         result.surface.featureIds,
+        result.canonicalSourceHash,
       ),
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
@@ -29,6 +30,13 @@ export async function checkCommand(common:CommonArgs){
   return {
     ok:true,
     command:'check',
-    ...baseReport(input.sourcePath,result.checked.structures.length+result.checked.inductives.length+result.checked.declarations.length,result.surface.featureIds),
+    ...baseReport(
+      input.sourcePath,
+      result.checked.structures.length+
+        result.checked.inductives.length+
+        result.checked.declarations.length,
+      result.surface.featureIds,
+      result.canonicalSourceHash,
+    ),
   };
 }

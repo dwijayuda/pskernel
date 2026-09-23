@@ -191,6 +191,11 @@ console.log('ok - psc verified run filesystem pipeline');
     equal(result.semanticPipeline,'verified-core');
     equal(result.proofStatus,'kernel-verified');
     equal(result.sourceKind,'lean-subset');
+    equal(
+      typeof result.canonicalSourceHash==='string'
+        &&String(result.canonicalSourceHash).startsWith('sha256:'),
+      true,
+    );
     const artifacts=result.artifacts as Record<string,string>;
     equal(artifacts.typescript.endsWith('main.ts'),true);
     equal(artifacts.javascript.endsWith('main.js'),true);
@@ -919,3 +924,70 @@ console.log('ok - psc emit-lean uses source/target dispatch');
   }
 }
 console.log('ok - psc translate ps/lean canonical round-trip');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-canonical-source-hash-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    const psSource='function add(x : Nat, y : Nat) : Nat := x + y;\n';
+    await writeFile(
+      join(directory,'src','main.ps'),
+      psSource,
+      'utf8',
+    );
+    const psCheck=await checkCommand({
+      project:directory,
+      entry:'src/main.ps',
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    const lean=await translateCommand({
+      project:directory,
+      entry:'src/main.ps',
+      target:'lean',
+      json:false,
+      verified:false,
+      passthrough:[],
+    });
+    await writeFile(
+      join(directory,'src','main.lean'),
+      lean,
+      'utf8',
+    );
+    const leanCheck=await checkCommand({
+      project:directory,
+      entry:'src/main.lean',
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    equal(
+      psCheck.canonicalSourceHash,
+      leanCheck.canonicalSourceHash,
+    );
+    equal(
+      String(psCheck.canonicalSourceHash).startsWith('sha256:'),
+      true,
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc canonical source hash is source-kind neutral');

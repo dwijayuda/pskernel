@@ -35,6 +35,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
         input.sourcePath,
         result.checkedCore.declarations.length,
         result.surface.featureIds,
+        result.canonicalSourceHash,
       ),
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
@@ -89,7 +90,14 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const report={
     ok:true,
     command:'build',
-    ...baseReport(input.sourcePath,result.checked.structures.length+result.checked.inductives.length+result.checked.declarations.length,result.surface.featureIds),
+    ...baseReport(
+      input.sourcePath,
+      result.checked.structures.length+
+        result.checked.inductives.length+
+        result.checked.declarations.length,
+      result.surface.featureIds,
+      result.canonicalSourceHash,
+    ),
     outputDirectory:outDir,
     artifacts:{
       typescript:tsPath,

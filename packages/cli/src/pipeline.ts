@@ -15,6 +15,7 @@ import {
 import {checkV061SoftwareModule} from '@proofscript/language';
 import {lowerCheckedSoftwareModule} from '@proofscript/compiler-ir';
 import {compileTypeScript,emitV061TypeScript} from '@proofscript/backend-ts';
+import {canonicalSourceIdentity} from './canonical-source.js';
 
 const sourceFrontends=createDefaultSourceFrontendRegistry();
 
@@ -23,9 +24,11 @@ export function checkSource(
   sourceFileName='input.ps',
 ){
   const surface=sourceFrontends.forFile(sourceFileName).parse(source);
+  const canonical=canonicalSourceIdentity(surface);
   const checked=checkV061SoftwareModule(surface);
   return {
     surface,
+    ...canonical,
     checked,
     lean:lowerV061ModuleToLean(surface),
   };
@@ -52,6 +55,7 @@ export function baseReport(
   sourcePath:string,
   declarations:number,
   featureIds:readonly string[],
+  canonicalSourceHash:string,
 ){
   return {
     source:sourcePath,
@@ -62,5 +66,6 @@ export function baseReport(
     leanSemantics:LEAN_SEMANTICS_VERSION,
     proofStatus:'software-typechecked-only',
     sourceKind:sourceKindFromFileName(sourcePath),
+    canonicalSourceHash,
   } as const;
 }

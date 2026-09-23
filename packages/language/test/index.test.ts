@@ -119,3 +119,40 @@ console.log('ok - @proofscript/language reference-backed lambda checker');
   }
 }
 console.log('ok - @proofscript/language empty D-CALL Unit semantics');
+
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'function choose(flag : Bool) : Nat := match flag with { | true => 1; | false => 2; };',
+  ));
+  const body=checked.declarations[0]?.body;
+  equal(body?.kind,'match');
+  if(body?.kind==='match'){
+    equal(body.alternatives.length,2);
+    equal(body.resultType,'Nat');
+  }
+}
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'function choose(flag : Bool) : Nat := match flag with { | _ => 1; };',
+  ));
+  equal(checked.declarations[0]?.body.kind,'match');
+}
+{
+  let exhaustive=false;
+  try{
+    checkV061SoftwareModule(parseV061Module(
+      'function choose(flag : Bool) : Nat := match flag with { | true => 1; };',
+    ));
+  }catch(error){exhaustive=/PS_CHECK_MATCH_EXHAUSTIVE/.test(String(error));}
+  equal(exhaustive,true);
+}
+{
+  let unsupported=false;
+  try{
+    checkV061SoftwareModule(parseV061Module(
+      'function choose(flag : Bool) : Nat := match flag with { | .some x => 1; | .none => 2; };',
+    ));
+  }catch(error){unsupported=/PS_CHECK_MATCH_PATTERN_UNSUPPORTED/.test(String(error));}
+  equal(unsupported,true);
+}
+console.log('ok - @proofscript/language exhaustive Bool match checker');

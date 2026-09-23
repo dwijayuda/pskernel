@@ -6,6 +6,15 @@ import type {
 
 export type SoftwareIrType=SoftwareType;
 
+export type SoftwareIrPattern =
+  | {readonly kind:'bool';readonly value:boolean}
+  | {readonly kind:'wildcard'};
+
+export interface SoftwareIrMatchAlternative {
+  readonly pattern:SoftwareIrPattern;
+  readonly body:SoftwareIrExpr;
+}
+
 export type SoftwareIrExpr =
   | {readonly kind:'literal';readonly value:bigint|string|boolean|undefined;readonly type:SoftwareIrType}
   | {readonly kind:'var';readonly name:string;readonly type:SoftwareIrType}
@@ -25,6 +34,12 @@ export type SoftwareIrExpr =
   | {readonly kind:'unary';readonly operator:'!';readonly operand:SoftwareIrExpr;readonly type:'Bool'}
   | {readonly kind:'binary';readonly operator:string;readonly left:SoftwareIrExpr;readonly right:SoftwareIrExpr;readonly type:SoftwareIrType}
   | {readonly kind:'if';readonly condition:SoftwareIrExpr;readonly thenBranch:SoftwareIrExpr;readonly elseBranch:SoftwareIrExpr;readonly type:SoftwareIrType}
+  | {
+      readonly kind:'match';
+      readonly scrutinee:SoftwareIrExpr;
+      readonly alternatives:readonly SoftwareIrMatchAlternative[];
+      readonly type:SoftwareIrType;
+    }
   | {
       readonly kind:'let';
       readonly name:string;
@@ -64,6 +79,16 @@ function lowerExpr(expr:CheckedSoftwareExpr):SoftwareIrExpr {
         callee:expr.callee,
         args:expr.args.map(lowerExpr),
         callStyle:expr.callStyle,
+        type:expr.resultType,
+      };
+    case 'match':
+      return {
+        kind:'match',
+        scrutinee:lowerExpr(expr.scrutinee),
+        alternatives:expr.alternatives.map((alternative)=>({
+          pattern:alternative.pattern,
+          body:lowerExpr(alternative.body),
+        })),
         type:expr.resultType,
       };
     case 'lambda':

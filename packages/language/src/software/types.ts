@@ -34,6 +34,15 @@ export function softwareTypeToString(type:SoftwareType):string {
   return domain+' -> '+softwareTypeToString(type.result);
 }
 
+export type CheckedSoftwarePattern =
+  | {readonly kind:'bool';readonly value:boolean}
+  | {readonly kind:'wildcard'};
+
+export interface CheckedSoftwareMatchAlternative {
+  readonly pattern:CheckedSoftwarePattern;
+  readonly body:CheckedSoftwareExpr;
+}
+
 export type CheckedSoftwareExpr =
   | {readonly kind:'nat';readonly value:bigint;readonly resultType:'Nat'|'Int'}
   | {readonly kind:'string';readonly value:string;readonly resultType:'String'}
@@ -56,6 +65,12 @@ export type CheckedSoftwareExpr =
   | {readonly kind:'unary';readonly operator:'!';readonly operand:CheckedSoftwareExpr;readonly resultType:'Bool'}
   | {readonly kind:'binary';readonly operator:string;readonly left:CheckedSoftwareExpr;readonly right:CheckedSoftwareExpr;readonly resultType:PrimitiveSoftwareType}
   | {readonly kind:'if';readonly condition:CheckedSoftwareExpr;readonly thenBranch:CheckedSoftwareExpr;readonly elseBranch:CheckedSoftwareExpr;readonly resultType:SoftwareType}
+  | {
+      readonly kind:'match';
+      readonly scrutinee:CheckedSoftwareExpr;
+      readonly alternatives:readonly CheckedSoftwareMatchAlternative[];
+      readonly resultType:SoftwareType;
+    }
   | {
       readonly kind:'let';
       readonly name:string;

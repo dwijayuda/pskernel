@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Runtime-oriented compiler IR and lowering/optimization passes.",
   "proofscript": {
-    "status": "software-lambda-ir-mvp",
+    "status": "software-bool-match-ir-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

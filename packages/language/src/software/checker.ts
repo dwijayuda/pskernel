@@ -122,6 +122,59 @@ function checkExpr(
       }
       return {kind:'call',callee:expr.callee,args,callStyle:'curried',resultType:current};
     }
+    case 'match':{
+      const scrutinee=checkExpr(expr.scrutinee,locals,signatures,'Bool');
+      if(scrutinee.resultType!=='Bool'){
+        throw new Error('PS_CHECK_MATCH_SCRUTINEE: initial executable match subset requires Bool');
+      }
+
+      const alternatives:{pattern:{kind:'bool';value:boolean}|{kind:'wildcard'};body:CheckedSoftwareExpr}[]=[];
+      let seenTrue=false;
+      let seenFalse=false;
+      let wildcard=false;
+      let branchType:SoftwareType|undefined;
+
+      for(const alternative of expr.alternatives){
+        let pattern:{kind:'bool';value:boolean}|{kind:'wildcard'};
+        if(alternative.pattern.kind==='constructor'){
+          throw new Error(
+            'PS_CHECK_MATCH_PATTERN_UNSUPPORTED: constructor patterns require inductive-type elaboration',
+          );
+        }
+        if(alternative.pattern.kind==='wildcard'){
+          if(wildcard||alternatives.length>0){
+            throw new Error('PS_CHECK_MATCH_PATTERN: wildcard must be the only alternative in the initial executable subset');
+          }
+          wildcard=true;
+          pattern={kind:'wildcard'};
+        }else{
+          if(wildcard){
+            throw new Error('PS_CHECK_MATCH_PATTERN: no alternatives may follow wildcard');
+          }
+          if(alternative.pattern.value){
+            if(seenTrue)throw new Error('PS_CHECK_MATCH_DUPLICATE: duplicate true alternative');
+            seenTrue=true;
+          }else{
+            if(seenFalse)throw new Error('PS_CHECK_MATCH_DUPLICATE: duplicate false alternative');
+            seenFalse=true;
+          }
+          pattern={kind:'bool',value:alternative.pattern.value};
+        }
+
+        const body=checkExpr(alternative.body,locals,signatures,branchType??expected);
+        if(branchType!==undefined&&!softwareTypeEquals(body.resultType,branchType)){
+          throw new Error('PS_CHECK_MATCH_BRANCH: match alternatives must have the same type');
+        }
+        branchType=body.resultType;
+        alternatives.push({pattern,body});
+      }
+
+      if(!wildcard&&(!seenTrue||!seenFalse)){
+        throw new Error('PS_CHECK_MATCH_EXHAUSTIVE: Bool match requires true and false alternatives');
+      }
+      if(branchType===undefined)throw new Error('PS_CHECK_MATCH_EMPTY: match has no alternatives');
+      return {kind:'match',scrutinee,alternatives,resultType:branchType};
+    }
     case 'lambda':{
       let expectedCursor=expected;
       const bodyLocals=new Map(locals);

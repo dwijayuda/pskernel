@@ -50,3 +50,22 @@ console.log('ok - @proofscript/compiler-ir software lowering');
   equal(ir.declarations[0]?.body.kind,'lambda');
 }
 console.log('ok - @proofscript/compiler-ir software lambda lowering');
+
+{
+  const ir=lowerCheckedSoftwareModule({
+    kind:'checked-v061-software-module',
+    declarations:[{
+      kind:'function',name:'choose',params:[{name:'flag',type:'Bool'}],resultType:'Nat',
+      body:{
+        kind:'match',resultType:'Nat',
+        scrutinee:{kind:'reference',name:'flag',resultType:'Bool'},
+        alternatives:[
+          {pattern:{kind:'bool',value:true},body:{kind:'nat',value:1n,resultType:'Nat'}},
+          {pattern:{kind:'bool',value:false},body:{kind:'nat',value:2n,resultType:'Nat'}},
+        ],
+      },
+    }],
+  });
+  equal(ir.declarations[0]?.body.kind,'match');
+}
+console.log('ok - @proofscript/compiler-ir Bool match lowering');

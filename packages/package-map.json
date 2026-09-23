@@ -179,7 +179,7 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-lambda-ir-mvp",
+      "status": "software-bool-match-ir-mvp",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
         "kernel",
@@ -210,7 +210,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-lambda-typescript-mvp",
+      "status": "software-bool-match-typescript-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -228,7 +228,7 @@
       "path": "packages/language",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "v061-lambda-checker-mvp",
+      "status": "v061-bool-match-checker-mvp",
       "packageName": "@proofscript/language",
       "dependsOn": [
         "syntax",
@@ -238,9 +238,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Checked software HIR models primitive and first-class function types explicitly.",
-        "Reference-backed lambda checking uses expected function types for untyped Lean binders and validates explicitly typed binders.",
-        "Call nodes carry an explicit direct-vs-curried runtime call style so the backend never guesses source semantics.",
+        "Checked software HIR supports first-class function types/lambdas and a bounded executable match representation.",
+        "E-MATCH-BODY execution currently accepts exhaustive Bool true/false alternatives or a single wildcard.",
+        "Constructor patterns are parsed/lowered but rejected by the executable checker until inductive-type elaboration exists.",
         "This checker remains outside the TCB; theorem/proof acceptance still requires elaboration to pskernel."
       ]
     },

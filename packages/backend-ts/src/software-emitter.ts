@@ -50,6 +50,23 @@ export function emitSoftwareIrExpression(expr:SoftwareIrExpr,parentPrecedence=0)
         expr.callee,
       );
     }
+    case 'match':{
+      if(expr.alternatives.length===1&&expr.alternatives[0]?.pattern.kind==='wildcard'){
+        const body=emitSoftwareIrExpression(expr.alternatives[0].body);
+        return '((__match) => '+body+')('+emitSoftwareIrExpression(expr.scrutinee)+')';
+      }
+      const trueAlt=expr.alternatives.find(
+        (alternative)=>alternative.pattern.kind==='bool'&&alternative.pattern.value,
+      );
+      const falseAlt=expr.alternatives.find(
+        (alternative)=>alternative.pattern.kind==='bool'&&!alternative.pattern.value,
+      );
+      if(trueAlt===undefined||falseAlt===undefined){
+        throw new Error('PS_TS_MATCH_UNSUPPORTED: expected exhaustive Bool alternatives');
+      }
+      return '('+emitSoftwareIrExpression(expr.scrutinee)+' ? '+
+        emitSoftwareIrExpression(trueAlt.body)+' : '+emitSoftwareIrExpression(falseAlt.body)+')';
+    }
     case 'lambda':{
       return [...expr.binders].reverse().reduce(
         (body,binder)=>'('+binder.name+': '+typeScriptType(binder.type)+') => '+body,

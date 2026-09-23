@@ -21,7 +21,6 @@ import {eraseRuntimeType} from './type-erasure.js';
 import {safeIdentifier} from './names.js';
 import {eraseRuntimeApplication} from './app-erasure.js';
 import {eraseRuntimeFVar} from './local-erasure.js';
-
 export interface OpenedDefinition {
   readonly typeParameters:readonly VerifiedIrTypeParameter[];
   readonly parameters:readonly VerifiedIrParameter[];

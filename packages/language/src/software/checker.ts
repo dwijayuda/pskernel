@@ -29,6 +29,11 @@ export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule
       'PS_CHECK_DECL_UNSUPPORTED: class declarations require typeclass/instance elaboration',
     );
   }
+  if(module.declarations.some((decl)=>decl.kind==='instance')){
+    throw new Error(
+      'PS_CHECK_DECL_UNSUPPORTED: instance declarations belong to kernel-facing elaboration',
+    );
+  }
 
   const structureDecls=module.declarations.filter(
     (decl):decl is V061StructureDeclaration=>decl.kind==='structure',
@@ -37,7 +42,7 @@ export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule
     (decl):decl is V061InductiveDeclaration=>decl.kind==='inductive',
   );
   const valueDecls=module.declarations.filter(
-    (decl):decl is V061ValueDeclaration=>decl.kind!=='structure'&&decl.kind!=='class'&&decl.kind!=='inductive',
+    (decl):decl is V061ValueDeclaration=>decl.kind!=='structure'&&decl.kind!=='class'&&decl.kind!=='instance'&&decl.kind!=='inductive',
   );
 
   const nominalNames=new Set<string>();

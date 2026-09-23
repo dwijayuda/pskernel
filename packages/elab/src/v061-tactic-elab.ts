@@ -27,6 +27,7 @@ import {refineV061Tactic} from './v061-refine-tactic.js';
 import {rewriteV061Tactic} from './v061-rewrite-tactic.js';
 import {simpOnlyV061Tactic} from './v061-simp-tactic.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
+import {exactSearchV061Tactic} from './v061-exact-search-tactic.js';
 
 export type V061TermElaborator=(
   expr:V061Expr,
@@ -66,6 +67,11 @@ function runTactic(
         (error instanceof Error?error.message:String(error)),
       );
     }
+    return;
+  }
+
+  if(tactic.kind==='exactSearch'){
+    exactSearchV061Tactic(runtime);
     return;
   }
 

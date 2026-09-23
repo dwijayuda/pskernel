@@ -259,6 +259,17 @@ assert(
 );
 
 
+const verifiedExactSearch=compileVerifiedSource(
+  'theorem exactSearchBase(P : Prop, h : P) : P := by assumption; '+
+  'theorem exactSearchCopy : (P : Prop) -> P -> P := by exact?;',
+  'verified-exact-search.ts',
+);
+assert(
+  verifiedExactSearch.checkedCore.theorems.length===2,
+  'bounded exact? did not construct a pskernel-admitted proof',
+);
+
+
 const verifiedNat=compileVerifiedSource(
   'function add(x : Nat, y : Nat) : Nat := x + y; '+
   'function twice(x : Nat) : Nat := add(x, x); '+

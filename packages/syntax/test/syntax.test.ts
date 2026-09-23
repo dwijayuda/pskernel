@@ -821,6 +821,22 @@ console.log('ok - @proofscript/syntax lexer MVP');
 
 {
   const module=parseV061Module(
+    'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'exactSearch');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem exactSearchProof (P : Prop) (h : P) : P := by exact?\n',
+  );
+}
+
+{
+  const module=parseV061Module(
     'theorem rwProof(a : Nat, b : Nat, h : a = b) : a = b := '+
     'by rw [h]; rw [← h]; assumption;',
   );

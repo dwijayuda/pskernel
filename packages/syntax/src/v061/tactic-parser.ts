@@ -4,7 +4,7 @@ import {V061ParseContext} from './context.js';
 import type {V061ExpressionParser} from './expression-parser.js';
 
 const TACTIC_HEADS=new Set([
-  'exact','assumption','apply','refine','constructor','cases','induction','rw','simp','intro',
+  'exact','exact?','assumption','apply','refine','constructor','cases','induction','rw','simp','intro',
 ]);
 
 function isTacticHead(text:string):boolean {
@@ -25,6 +25,11 @@ function parseTactic(
       proof,
       span:{start:tacticToken.span.start,end:proof.span.end},
     };
+  }
+
+  if(tacticToken.text==='exact?'){
+    const token=context.cursor.consume();
+    return {kind:'exactSearch',span:token.span};
   }
 
   if(tacticToken.text==='assumption'){
@@ -134,7 +139,7 @@ function parseTactic(
   }
 
   throw new SyntaxError(
-    "kernel-facing tactic subset supports 'exact', 'assumption', 'apply', 'refine', 'constructor', 'cases', 'induction', 'rw', 'simp only', and 'intro', got '"+
+    "kernel-facing tactic subset supports 'exact', bounded 'exact?', 'assumption', 'apply', 'refine', 'constructor', 'cases', 'induction', 'rw', 'simp only', and 'intro', got '"+
     tacticToken.text+"'",
     tacticToken.span,
   );

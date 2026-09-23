@@ -31,6 +31,7 @@ function lowerV061TacticToLean(
 ):string {
   switch(tactic.kind){
     case 'exact':return 'exact '+lowerV061ExprToLean(tactic.proof);
+    case 'exactSearch':return 'exact?';
     case 'assumption':return 'assumption';
     case 'constructor':return 'constructor';
     case 'cases':return 'cases '+tactic.target;

@@ -644,6 +644,36 @@ console.log('ok - @proofscript/elab rw syntax reaches tactic AST');
 }
 console.log('ok - @proofscript/elab multi-rule simp-only syntax reaches tactic AST');
 
+{
+  const local=elaborateV061Declarations(parseV061Module(
+    'theorem localExactSearch(P : Prop, h : P) : P := by exact?;',
+  ));
+  equal(local.theorems.length,1);
+}
+{
+  const environment=elaborateV061Declarations(parseV061Module(
+    'theorem searchBase(P : Prop, h : P) : P := by assumption; '+
+    'theorem searchCopy : (P : Prop) -> P -> P := by exact?;',
+  ));
+  equal(environment.theorems.length,2);
+  equal(
+    environment.environment.find(nameFromDotted('searchCopy'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem searchMissing(P : Prop) : P := by exact?;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_EXACT_SEARCH/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded exact search');
+
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();

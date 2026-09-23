@@ -52,6 +52,14 @@
       {
         "command": "proofscript.serverInfo",
         "title": "ProofScript: Show Server Information"
+      },
+      {
+        "command": "proofscript.convertToLean",
+        "title": "ProofScript: Convert to Lean Subset"
+      },
+      {
+        "command": "proofscript.convertToProofScript",
+        "title": "ProofScript: Convert to ProofScript"
       }
     ],
     "configuration": {
@@ -100,6 +108,8 @@
     "onCommand:proofscript.restartServer",
     "onCommand:proofscript.serverInfo",
     "onLanguage:proofscript-lean",
-    "workspaceContains:psconfig.json"
+    "workspaceContains:psconfig.json",
+    "onCommand:proofscript.convertToLean",
+    "onCommand:proofscript.convertToProofScript"
   ]
 }

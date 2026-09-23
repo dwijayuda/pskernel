@@ -33,12 +33,16 @@ for(const command of [
   'proofscript.showInfoview',
   'proofscript.restartServer',
   'proofscript.serverInfo',
+  'proofscript.convertToLean',
+  'proofscript.convertToProofScript',
 ]){
   assert(pkg.contributes.commands.some((item)=>item.command===command),'missing command '+command);
   assert(source.includes("registerCommand('"+command+"'"),'command not implemented '+command);
 }
-assert(source.includes('EXPECTED_PROTOCOL=1'),'protocol guard missing');
+assert(source.includes('EXPECTED_PROTOCOL=2'),'protocol guard missing');
 assert(source.includes('proofscript/proofState'),'proof-state request missing');
+assert(source.includes('proofscript/translateDocument'),'translation request missing');
+assert(source.includes('registerCodeActionsProvider'),'translation code-action provider missing');
 assert(source.includes("{pattern:'**/*.lean'}"),'opt-in .lean provider selector missing');
 assert(source.includes("languageId==='proofscript-lean'"),'Lean-subset protocol mode missing');
 assert(source.includes('leanSubsetEnabled()'),'Lean-subset opt-in guard missing');

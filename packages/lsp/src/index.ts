@@ -45,8 +45,10 @@ export {
 } from '@proofscript/language-service';
 export {
   PROOFSCRIPT_LSP_PROTOCOL_VERSION,
-  ProofScriptLanguageServer,
   lspCapabilities,
+} from './capabilities.js';
+export {
+  ProofScriptLanguageServer,
   startLspServer,
 } from './server.js';
 
@@ -54,3 +56,4 @@ export * from './prelude-environment.js';
 
 export * from './source-kind.js';
 export * from './project-source-host.js';
+export * from './capabilities.js';

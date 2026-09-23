@@ -11,6 +11,8 @@ import {
   type LanguageServiceProjectHost,
 } from './project-context.js';
 import {Environment} from 'lean-ts-kernel';
+import type {TranslationTarget} from '@proofscript/syntax';
+import {translateDocumentSnapshot} from './translation.js';
 import {offsetAt} from './positions.js';
 import {completionItems,definitionLocation,referenceLocations} from './navigation.js';
 
@@ -70,6 +72,16 @@ export class ProofScriptLanguageService {
 
   getDocument(uri:string):TextDocumentSnapshot|undefined {
     return this.docs.get(uri);
+  }
+
+  openDocumentUris():readonly string[] {
+    return [...this.docs.keys()];
+  }
+
+  translateDocument(uri:string,target:TranslationTarget){
+    const snapshot=this.docs.get(uri);
+    if(snapshot===undefined)throw new Error('document is not open: '+uri);
+    return translateDocumentSnapshot(snapshot,target);
   }
 
   analyze(uri:string):DocumentAnalysis {

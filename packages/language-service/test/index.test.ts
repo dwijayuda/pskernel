@@ -228,3 +228,29 @@ console.log('ok - @proofscript/language-service project failure is fail-closed')
   equal(imported?.source,'project');
 }
 console.log('ok - @proofscript/language-service cross-source navigation');
+
+{
+  const service=new ProofScriptLanguageService();
+  service.openDocument(
+    'file:///Translate.ps',
+    1,
+    'theorem id(P : Prop, h : P) : P := by assumption;',
+  );
+  const lean=service.translateDocument('file:///Translate.ps','lean');
+  equal(lean.extension,'.lean');
+  equal(lean.text.includes('theorem id (P : Prop) (h : P)'),true);
+
+  service.openDocument(
+    'file:///Translate.lean',
+    1,
+    lean.text,
+    'lean-subset',
+  );
+  const proofscript=service.translateDocument(
+    'file:///Translate.lean',
+    'ps',
+  );
+  equal(proofscript.extension,'.ps');
+  equal(proofscript.text.includes('theorem id(P : Prop, h : P)'),true);
+}
+console.log('ok - @proofscript/language-service document translation');

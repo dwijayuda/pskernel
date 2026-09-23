@@ -25,6 +25,7 @@ import {
     capabilities.experimental.proofscriptProtocolVersion,
     PROOFSCRIPT_LSP_PROTOCOL_VERSION,
   );
+  equal(capabilities.experimental.translateDocument,true);
 }
 {
   const service=new ProofScriptLanguageService();
@@ -112,3 +113,16 @@ import {pathToFileURL} from 'node:url';
   }
 }
 console.log('ok - @proofscript/lsp shared project source-root resolver');
+
+{
+  const service=new ProofScriptLanguageService();
+  service.openDocument(
+    'file:///convert.ps',
+    1,
+    'theorem id(P : Prop, h : P) : P := by assumption;',
+  );
+  const translated=service.translateDocument('file:///convert.ps','lean');
+  equal(translated.target,'lean');
+  equal(translated.extension,'.lean');
+}
+console.log('ok - @proofscript/lsp translation service surface');

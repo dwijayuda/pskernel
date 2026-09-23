@@ -12,7 +12,7 @@ const {
   toRange,
 }=require('./protocol.js');
 
-const EXPECTED_PROTOCOL=1;
+const EXPECTED_PROTOCOL=2;
 let client;
 let diagnostics;
 let output;
@@ -222,7 +222,49 @@ function registerLanguageProviders(context){
         ));
       },
     }),
+    vscode.languages.registerCodeActionsProvider(
+      languageSelector,
+      {
+        provideCodeActions:(document)=>{
+          if(!isManagedDocument(document))return [];
+          const target=document.languageId==='proofscript'
+            ?'lean'
+            :'ps';
+          const title=target==='lean'
+            ?'ProofScript: Convert to Lean subset'
+            :'ProofScript: Convert to ProofScript';
+          const action=new vscode.CodeAction(
+            title,
+            vscode.CodeActionKind.RefactorRewrite,
+          );
+          action.command={
+            command:target==='lean'
+              ?'proofscript.convertToLean'
+              :'proofscript.convertToProofScript',
+            title,
+            arguments:[document.uri],
+          };
+          return [action];
+        },
+      },
+      {providedCodeActionKinds:[vscode.CodeActionKind.RefactorRewrite]},
+    ),
   );
+}
+
+
+async function convertActiveSource(uri,target){
+  if(client===undefined)return;
+  const result=await client.request('proofscript/translateDocument',{
+    textDocument:{uri:uri.toString()},
+    target,
+  });
+  const language=target==='lean'?'proofscript-lean':'proofscript';
+  const document=await vscode.workspace.openTextDocument({
+    language,
+    content:result.text,
+  });
+  await vscode.window.showTextDocument(document,{preview:false});
 }
 
 function registerCommands(context){
@@ -239,6 +281,20 @@ function registerCommands(context){
       output.appendLine(JSON.stringify(info,null,2));
       output.show(true);
     }),
+    vscode.commands.registerCommand(
+      'proofscript.convertToLean',
+      async(uri)=>convertActiveSource(
+        uri??vscode.window.activeTextEditor?.document.uri,
+        'lean',
+      ),
+    ),
+    vscode.commands.registerCommand(
+      'proofscript.convertToProofScript',
+      async(uri)=>convertActiveSource(
+        uri??vscode.window.activeTextEditor?.document.uri,
+        'ps',
+      ),
+    ),
   );
 }
 

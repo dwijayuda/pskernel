@@ -7,30 +7,16 @@ import {
 import {createInitPreludeEnvironmentProvider} from './prelude-environment.js';
 import {sourceKindFromLspDocument} from './source-kind.js';
 import {createNodeProjectSourceHost} from './project-source-host.js';
+import {
+  PROOFSCRIPT_LSP_PROTOCOL_VERSION,
+  lspCapabilities,
+} from './capabilities.js';
 
 interface RpcMessage {
   readonly jsonrpc?:string;
   readonly id?:number|string|null;
   readonly method?:string;
   readonly params?:any;
-}
-
-export const PROOFSCRIPT_LSP_PROTOCOL_VERSION=1;
-
-export function lspCapabilities(){
-  return {
-    textDocumentSync:1,
-    hoverProvider:true,
-    completionProvider:{triggerCharacters:['.']},
-    definitionProvider:true,
-    referencesProvider:true,
-    documentSymbolProvider:true,
-    experimental:{
-      proofscriptProtocolVersion:PROOFSCRIPT_LSP_PROTOCOL_VERSION,
-      proofState:true,
-      documentStatus:true,
-    },
-  };
 }
 
 export class ProofScriptLanguageServer {
@@ -184,6 +170,15 @@ export class ProofScriptLanguageServer {
           this.reply(
             message.id,
             this.service.documentStatus(message.params.textDocument.uri),
+          );
+          return;
+        case 'proofscript/translateDocument':
+          this.reply(
+            message.id,
+            this.service.translateDocument(
+              message.params.textDocument.uri,
+              message.params.target,
+            ),
           );
           return;
         case 'proofscript/serverInfo':

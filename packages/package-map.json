@@ -37,7 +37,8 @@
         "Verified CLI elaboration starts from the shared pskernel-admitted Lean 4.34 Init.Prelude environment and fails closed when that fixture cannot be loaded.",
         "psc --verified uses the preferred source -> elaboration -> checked core -> erasure -> compiler IR -> TypeScript -> JavaScript architecture.",
         "Verified mode never falls back to the legacy software checker after an elaboration/erasure error.",
-        "The legacy software path remains available without --verified only as a temporary compatibility lane while verified-core coverage expands."
+        "The legacy software path remains available without --verified only as a temporary compatibility lane while verified-core coverage expands.",
+        "CLI regression now executes a temporary verified project end-to-end through emitted JavaScript and checks Nat main(21) = 42."
       ]
     },
     {

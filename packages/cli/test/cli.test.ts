@@ -1,6 +1,10 @@
+import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {parseCommonArgs} from '../src/args.js';
 import {compileVerifiedSource} from '../src/verified-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
+import {runCommand} from '../src/commands/run.js';
 
 function equal(actual:unknown,expected:unknown):void{
   if(actual!==expected)throw new Error('expected '+String(expected)+', got '+String(actual));
@@ -90,3 +94,42 @@ console.log('ok - psc verified Nat source pipeline');
   equal(args[1],false);
 }
 console.log('ok - psc verified runtime ABI');
+
+
+{
+  const directory=await mkdtemp(join(tmpdir(),'proofscript-verified-run-'));
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : Nat) : Nat := x + x;\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['21'],
+    });
+    equal(result.mainResult,'42');
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified run filesystem pipeline');

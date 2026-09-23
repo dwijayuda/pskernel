@@ -127,3 +127,33 @@ applications to explicit verified-IR intrinsics.
 This is intentionally narrower than pretending to have Lean's general
 `HAdd`/typeclass notation already. General overloaded notation must wait for
 the real typeclass-synthesis layer.
+
+
+## Verified execution checkpoint
+
+The CLI runtime path now consumes the semantic types retained in verified IR.
+For primitive entrypoints, the complete developer flow is executable:
+
+```proofscript
+function main(x : Nat) : Nat :=
+  x + x;
+```
+
+```text
+psc run --verified -- 21
+source
+-> shared Lean 4.34 Init.Prelude environment
+-> elaboration
+-> pskernel checked core
+-> verified erasure/IR
+-> TypeScript
+-> tsc JavaScript
+-> verified runtime ABI (Nat)
+-> main(21n)
+-> 42
+```
+
+The initial verified CLI ABI supports `Nat`, `Int`, `Bool`, `String`,
+and `Unit`. Generic, function-typed, and user-defined structured `main`
+parameters remain fail-closed until their runtime representations are part of
+the verified compiler/runtime contract.

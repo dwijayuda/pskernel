@@ -385,6 +385,8 @@ Dual-source tooling gates:
 
 ## Anti-drift rules
 
+Reference-source precedence is defined in `docs/STUDY_REFERENCE_POLICY.md` and is mandatory for Lean-sensitive, ProofScript-surface, and TypeScript-host changes.
+
 These are mandatory for all future development.
 
 1. Repository HEAD is source of truth; re-read before editing.

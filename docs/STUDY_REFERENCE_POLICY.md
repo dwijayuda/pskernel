@@ -1,0 +1,123 @@
+# Study reference policy
+
+Status: **normative anti-drift research policy**
+
+The checked repository is the source of truth for implementation state. The
+`study/` tree is the source-of-reference collection used to answer semantic,
+surface-language, backend, and tooling questions before changing that state.
+
+## Reference precedence by concern
+
+### Lean semantics and theorem-prover behavior
+
+Primary:
+
+- `study/lean4-4.34.0/`
+
+Use the pinned Lean 4.34.0 source for kernel, Meta, elaboration, tactic,
+recursor, equality, simplifier, parser, and runtime-semantic questions. When a
+ProofScript feature claims Lean-compatible behavior, implementation work should
+locate the corresponding Lean source path before changing semantics.
+
+Secondary documentation:
+
+- `study/lean4-language-reference/`
+
+Use the generated Lean language reference to understand documented user-facing
+syntax and behavior. If prose and executable Lean source appear to differ,
+inspect the pinned source and tests before deciding implementation semantics.
+
+Implementation cross-check only:
+
+- `study/lean4lean-master/`
+
+lean4lean is useful for an independent implementation perspective and for
+finding smaller representations of Lean behavior. It does not override the
+pinned Lean 4.34.0 source or pskernel's explicit compatibility gates.
+
+## ProofScript language intent
+
+Primary:
+
+- `study/proofscript-language-reference-v0.7.0/`
+
+The v0.7.0 authoritative draft is the current intended language-design
+reference in the study corpus. In particular, preserve its central rule that
+ProofScript may use a friendlier surface while Lean semantics remain
+authoritative where dependent types, proofs, recursion, typeclasses, and tactic
+meaning are involved.
+
+Historical comparison:
+
+- `study/proofscript-language-reference-v0.6.1/`
+
+Use v0.6.1 to understand earlier decisions, compatibility changes, and
+regressions. It must not silently override a deliberate v0.7.0 revision or the
+current repository architecture.
+
+The active repository docs and executable gates can be newer than both study
+references. When they are newer, record the intentional revision rather than
+quietly treating an old reference as current implementation truth.
+
+## TypeScript and JavaScript ecosystem behavior
+
+Primary study corpus:
+
+- `study/typescriptlang/`
+
+Use this material for TypeScript syntax/API conventions, compiler emission,
+module resolution, ESM/CJS behavior, declaration files, source maps, project
+references, and editor/tooling integration.
+
+TypeScript documentation does **not** define ProofScript proof semantics,
+dependent type theory, erasure correctness, or theorem acceptance. Backend
+convenience must never flow backward into pskernel or Lean-compatible
+elaboration.
+
+## Required workflow for semantic changes
+
+Before a Lean-sensitive language or theorem-prover change:
+
+1. identify the current repository implementation and active plan;
+2. inspect the relevant pinned Lean 4.34 source;
+3. inspect the Lean language reference when user-facing syntax is involved;
+4. inspect ProofScript v0.7.0 for intended surface/compatibility constraints;
+5. use lean4lean only as a secondary implementation cross-check when useful;
+6. inspect TypeScript references only if the change reaches compiler/backend,
+   modules, declarations, JavaScript emission, or editor integration;
+7. implement the smallest faithful supported slice;
+8. add an executable regression for the accepted behavior;
+9. keep unsupported neighboring behavior fail-closed;
+10. report which gates actually executed.
+
+## Conflict handling
+
+Do not silently reconcile conflicting sources.
+
+- Repository implementation state answers "what exists now".
+- The active architecture/plan answers "what this repository currently intends
+  to build".
+- Lean 4.34 source answers "what Lean-compatible semantics require".
+- ProofScript v0.7.0 study material answers "what the referenced ProofScript
+  surface intended at that checkpoint".
+- TypeScript study material answers host ecosystem questions.
+
+If these disagree materially, document the conflict and make an explicit
+architecture/spec revision before broadening support.
+
+## Current examples
+
+The current tactic work follows this policy:
+
+- `refine`: checked against Lean's term-with-holes/refine elaboration;
+- `constructor`: checked against Lean Meta's constructor-via-apply behavior;
+- `cases` / `induction`: checked against Lean recursor/elimination behavior
+  and pskernel's generated recursor binder order;
+- `rw`: checked against Lean 4.34 Rewrite and the `rw` macro, including its
+  post-rewrite cheap-rfl attempt;
+- next `simp`: must model simplification results and proof reconstruction,
+  not merely alias repeated textual rewriting.
+
+The dual-source `.ps` / supported `.lean` plan also follows the policy:
+Lean syntax is bounded explicitly, both source forms converge before checked
+core, and TypeScript remains only the downstream host/backend target.

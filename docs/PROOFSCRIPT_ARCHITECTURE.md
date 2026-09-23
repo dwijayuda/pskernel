@@ -2,6 +2,8 @@
 
 Status: **normative anti-drift architecture**.
 
+Reference research for this architecture follows `docs/STUDY_REFERENCE_POLICY.md`.
+
 ProofScript is a small general-purpose language for the JavaScript ecosystem
 with Lean-compatible dependent types, theorem proving, and formal
 verification. Surface syntax may be smaller and more familiar than Lean, but

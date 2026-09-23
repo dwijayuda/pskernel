@@ -20,7 +20,6 @@ import {
   lowerV061ModuleToLean,
   lowerV061ModuleToProofScript,
   leanTranslationTarget,
-  lowerV061ModuleToProofScript,
   lowerV061TypeToLean,
   sourceKindFromFileName,
   createDefaultSourceFrontendRegistry,

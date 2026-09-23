@@ -8,7 +8,11 @@ import {
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {parseCommonArgs,parseTranslateArgs} from '../src/args.js';
-import {compileVerifiedSource} from '../src/verified-pipeline.js';
+import {
+  checkVerifiedSource,
+  compileVerifiedSource,
+} from '../src/verified-pipeline.js';
+import {verifiedAssuranceReport} from '../src/verified-assurance.js';
 import {clearVerifiedProjectModuleCache} from '../src/verified-project-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
 import {runCommand} from '../src/commands/run.js';
@@ -84,6 +88,23 @@ console.log('ok - psc CLI argument/UX contract');
   equal(result.emitted.javascript.includes('T0'),false);
 }
 console.log('ok - psc verified checked-core compiler pipeline');
+
+{
+  const checked=checkVerifiedSource(
+    'extern function hostInc(x : Nat) : Nat '+
+    'from "host-lib" import inc; '+
+    'function use(x : Nat) : Nat := hostInc(x);',
+  );
+  const assurance=verifiedAssuranceReport(checked.checkedCore);
+  equal(checked.checkedCore.externals.length,1);
+  equal(assurance.runtimeAssumptionCount,1);
+  equal(assurance.runtimeAssumptions[0]?.name,'hostInc');
+  equal(assurance.runtimeAssumptions[0]?.source,'host-lib');
+  equal(assurance.runtimeAssumptions[0]?.importedName,'inc');
+  equal(assurance.runtimeAssumptions[0]?.proofEvidence,false);
+  equal(assurance.runtimeExternalsAreProofEvidence,false);
+}
+console.log('ok - psc verified runtime external assurance');
 
 
 {

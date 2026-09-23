@@ -14,7 +14,7 @@ export function parseV061ExternalDeclaration(
   const params=parseV061ExplicitParameters(context);
 
   context.cursor.expect(':');
-  const resultType=parseV061Type(context);
+  const resultType=parseV061Type(context,{stopWords:['from']});
   context.cursor.expect('from');
   const sourceToken=context.cursor.expectKind('string','ESM module source');
   const source=sourceToken.value;

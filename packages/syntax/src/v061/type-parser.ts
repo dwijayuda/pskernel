@@ -51,6 +51,7 @@ export type V061TypeExpr =
 
 export interface V061TypeParseOptions {
   readonly stopAtLineBreak?:boolean;
+  readonly stopWords?:readonly string[];
 }
 
 const TYPE_APPLICATION_STOP_WORDS=new Set([
@@ -190,8 +191,12 @@ function parsePrefixType(
   return parseApplicationType(context,options);
 }
 
-function canStartAtomicType(token:Token):boolean {
+function canStartAtomicType(
+  token:Token,
+  options:V061TypeParseOptions,
+):boolean {
   if(TYPE_APPLICATION_STOP_WORDS.has(token.text))return false;
+  if(options.stopWords?.includes(token.text)===true)return false;
   return token.kind==='identifier'||token.kind==='number'||token.text==='(';
 }
 
@@ -238,7 +243,7 @@ function parseApplicationType(
     }
 
     if(
-      canStartAtomicType(next)
+      canStartAtomicType(next,options)
       &&next.leadingTrivia.length>0
       &&!crossesLineBoundary(current,next,options)
     ){

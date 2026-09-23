@@ -14,7 +14,10 @@ import {eraseCheckedCoreModule} from '../packages/erasure/dist/src/index.js';
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
 import {compileTypeScript,emitModule,emitVerifiedTypeScript} from '../packages/backend-ts/dist/src/index.js';
 import {compileCheckedCore} from '../packages/compiler/dist/src/index.js';
-import {compileVerifiedSource} from '../packages/cli/dist/src/verified-pipeline.js';
+import {
+  checkVerifiedSource,
+  compileVerifiedSource,
+} from '../packages/cli/dist/src/verified-pipeline.js';
 import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
@@ -903,22 +906,25 @@ assert(
   'global instance dictionary call did not compile to JavaScript',
 );
 
-const verifiedExternalSource=compileVerifiedSource(
+const verifiedExternalChecked=checkVerifiedSource(
   'extern function hostInc(x : Nat) : Nat from "host-lib" import inc; '+
   'function main(x : Nat) : Nat := hostInc(x);',
-  'verified-external-source.ts',
 );
+const verifiedExternalIr=eraseCheckedCoreModule(
+  verifiedExternalChecked.checkedCore,
+);
+const verifiedExternalTs=emitVerifiedTypeScript(verifiedExternalIr);
 assert(
-  verifiedExternalSource.checkedCore.externals.length===1,
+  verifiedExternalChecked.checkedCore.externals.length===1,
   'source external was not represented in checked core',
 );
 assert(
-  verifiedExternalSource.typeScript.includes(
+  verifiedExternalTs.includes(
     'import { inc as hostInc } from "host-lib";',
   ),
   'source external did not lower to named ESM import',
 );
 assert(
-  verifiedExternalSource.typeScript.includes('return hostInc(x);'),
-  'source external call did not survive verified compilation',
+  verifiedExternalTs.includes('return hostInc(x);'),
+  'source external call did not survive verified TypeScript emission',
 );

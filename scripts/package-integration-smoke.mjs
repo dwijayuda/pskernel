@@ -1,12 +1,13 @@
-import {lowerDCallSource} from '../packages/syntax/dist/src/index.js';
+import {lowerDCallSource,parseV061Module} from '../packages/syntax/dist/src/index.js';
 import {text,render} from '../packages/pretty/dist/src/index.js';
 import {ExprMetaContext,MetaVarContext,createGoal} from '../packages/meta/dist/src/index.js';
-import {elaborateApplication,elaborateChecked} from '../packages/elab/dist/src/index.js';
+import {elaborateApplication,elaborateChecked,elaborateV061Declarations} from '../packages/elab/dist/src/index.js';
 import {Environment,Kernel,LocalContext,TypeChecker,bvar,constant,exprEq,forallE,levelSucc,levelZero,nameFromDotted,sort} from '../dist/src/index.js';
 import {exact} from '../packages/tactic/dist/src/index.js';
-import {freeVariables,validateIrModule} from '../packages/compiler-ir/dist/src/index.js';
+import {freeVariables,validateIrModule,validateVerifiedIrModule} from '../packages/compiler-ir/dist/src/index.js';
+import {eraseCheckedCoreModule} from '../packages/erasure/dist/src/index.js';
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
-import {emitModule} from '../packages/backend-ts/dist/src/index.js';
+import {compileTypeScript,emitModule,emitVerifiedTypeScript} from '../packages/backend-ts/dist/src/index.js';
 import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
@@ -93,6 +94,39 @@ validateIrModule(irModule);
 const emitted=emitModule(irModule);
 assert(emitted.includes('export const main = 1;'),'backend TS emission failed');
 assert(natAdd(nat(2),nat(3))===5n,'runtime Nat semantics failed');
+
+const verifiedSurface=parseV061Module(
+  'function identity {α : Type}(x : α) : α := x;',
+);
+const checkedCore=elaborateV061Declarations(verifiedSurface);
+assert(
+  checkedCore.kind==='proofscript-checked-core',
+  'elaborator did not produce checked dependent core',
+);
+const verifiedIr=eraseCheckedCoreModule(checkedCore);
+validateVerifiedIrModule(verifiedIr);
+const verifiedTs=emitVerifiedTypeScript(verifiedIr);
+const verifiedJs=compileTypeScript(
+  verifiedTs,
+  'verified-identity.ts',
+);
+assert(
+  verifiedTs.includes('identity<T0>(x: T0): T0'),
+  'verified generic type information was not preserved in TypeScript',
+);
+assert(
+  verifiedJs.javascript.includes('function identity(x)'),
+  'verified generic function did not compile to JavaScript',
+);
+assert(
+  !verifiedJs.javascript.includes('T0'),
+  'erased dependent type parameter leaked into JavaScript',
+);
+assert(
+  verifiedJs.declaration.includes('identity<T0>(x: T0): T0'),
+  'generic API was not preserved in .d.ts',
+);
+
 
 const snapshot=processDocument('demo.ps',1,'x!',{
   process:text=>({

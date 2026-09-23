@@ -47,3 +47,5 @@ export function emitModule(module:BackendModule):string{
 }
 
 export * from './v061.js';
+
+export * from './verified-emitter.js';

@@ -257,7 +257,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-where-typescript-mvp",
+      "status": "verified-core-typescript-mvp+software-where-typescript-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -265,10 +265,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Backend accepts only typed executable compiler IR, not raw ProofScript or checked language HIR.",
-        "Acyclic where helpers emit as lexically scoped local TypeScript declarations before the containing result expression.",
-        "Structures use private unique-symbol brands; inductives use private unique-symbol discriminants and exported constructor objects.",
-        "TypeScript Compiler API type-checks generated TS and emits JavaScript, .d.ts, and source maps."
+        "The preferred backend lane now accepts verified compiler IR produced after pskernel admission and erasure.",
+        "Compile-time dependent type parameters are emitted as TypeScript generics for .ts/.d.ts while tsc removes them from JavaScript runtime code.",
+        "The backend remains untrusted: TypeScript/JavaScript emission cannot affect theorem validity or kernel admission.",
+        "The legacy software-HIR emitter remains temporarily for language coverage until verified-core lowering reaches those constructs."
       ]
     },
     {

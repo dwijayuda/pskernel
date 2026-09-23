@@ -1,4 +1,4 @@
-import {compileTypeScript,emitExpression,emitModule,emitV061TypeScript} from '../src/index.js';
+import {compileTypeScript,emitExpression,emitModule,emitVerifiedTypeScript,emitV061TypeScript} from '../src/index.js';
 import {lowerCheckedSoftwareModule} from '@proofscript/compiler-ir';
 function equal(a:unknown,b:unknown):void{if(a!==b)throw new Error(`expected ${String(b)}, got ${String(a)}`);}
 equal(emitExpression({kind:'literal',value:3n}),'3n');
@@ -239,3 +239,36 @@ console.log('ok - @proofscript/backend-ts nominal inductive TypeScript emission'
   equal(compiled.javascript.includes('function helper(y)'),true);
 }
 console.log('ok - @proofscript/backend-ts where helper TypeScript emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    declarations:[{
+      name:'identity',
+      typeParameters:[{name:'T0'}],
+      parameters:[{
+        name:'x',
+        type:{kind:'typeParameter',name:'T0'},
+      }],
+      resultType:{kind:'typeParameter',name:'T0'},
+      body:{kind:'var',name:'x'},
+    }],
+  });
+  equal(source.includes(
+    'export function identity<T0>(x: T0): T0 { return x; }',
+  ),true);
+  const compiled=compileTypeScript(source,'verified-identity.ts');
+  equal(
+    compiled.javascript.includes('export function identity(x)'),
+    true,
+  );
+  equal(compiled.javascript.includes('T0'),false);
+  equal(
+    compiled.declaration.includes(
+      'export declare function identity<T0>(x: T0): T0;',
+    ),
+    true,
+  );
+}
+console.log('ok - @proofscript/backend-ts verified generic TypeScript emission');

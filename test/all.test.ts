@@ -538,6 +538,42 @@ test('inductive uniformity is checked before WHNF can erase a bad occurrence',()
  assert(!env.has(I)&&!env.has(Mk),'non-uniform occurrence rejection must be transactional');
 });
 
+test('nested fixed parameters are checked even when auxiliary preprocessing drops them',()=>{
+ const env=baseEnv(),one=levelSucc(levelZero),Type=sort(one);
+ const Box=nameFromDotted('NestedCheck.Box'),BoxMk=nameFromDotted('NestedCheck.Box.mk');
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{
+   name:Box,
+   type:forallE(nameFromDotted('α'),Type,Type,'implicit'),
+   ctors:[{name:BoxMk,type:forallE(nameFromDotted('α'),Type,app(constant(Box),bvar(0)),'implicit')}]
+ }]});
+
+ const Bad=nameFromDotted('NestedCheck.Bad'),BadMk=nameFromDotted('NestedCheck.Bad.mk');
+ const badFixed=app(lam(nameFromDotted('_'),constant(N.Nat),constant(Bad)),constant(N.BoolTrue));
+ const ctorTy=forallE(nameFromDotted('field'),app(constant(Box),badFixed),constant(Bad));
+ throws(()=>addInductive(env,{levelParams:[],numParams:0,types:[{name:Bad,type:Type,ctors:[{name:BadMk,type:ctorTy}]}]}));
+ assert(!env.has(Bad)&&!env.has(BadMk),'ill-typed nested fixed parameter must be rejected transactionally');
+});
+
+test('nested declarations reject FVars and MVars before preprocessing can erase them',()=>{
+ const env=baseEnv(),one=levelSucc(levelZero),Type=sort(one);
+ const Box=nameFromDotted('NestedClosed.Box'),BoxMk=nameFromDotted('NestedClosed.Box.mk');
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{
+   name:Box,
+   type:forallE(nameFromDotted('α'),Type,Type,'implicit'),
+   ctors:[{name:BoxMk,type:forallE(nameFromDotted('α'),Type,app(constant(Box),bvar(0)),'implicit')}]
+ }]});
+
+ const checkBad=(suffix:string,payload:any)=>{
+   const I=nameFromDotted('NestedClosed.'+suffix),Mk=nameFromDotted('NestedClosed.'+suffix+'.mk');
+   const fixed=app(lam(nameFromDotted('_'),constant(N.Nat),constant(I)),payload);
+   const ctorTy=forallE(nameFromDotted('field'),app(constant(Box),fixed),constant(I));
+   throws(()=>addInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:Type,ctors:[{name:Mk,type:ctorTy}]}]}));
+   assert(!env.has(I)&&!env.has(Mk),'invalid nested declaration must commit nothing');
+ };
+ checkBad('Free',fvar('dangling-nested-fvar'));
+ checkBad('Meta',{kind:'mvar',id:'?nested'} as const);
+});
+
 test('nested inductive uniformity is checked before preprocessing can drop bad parameters',()=>{
  const env=baseEnv(),T=sort(levelSucc(levelZero));
  const W=nameFromDotted('UniformNested.W'),W0=nameFromDotted('UniformNested.W.zero');

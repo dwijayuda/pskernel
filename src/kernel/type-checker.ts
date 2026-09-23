@@ -14,7 +14,7 @@ import { reduceRecursor } from './reduction/recursor.js';
 import { KernelState } from './state.js';
 
 export interface KernelLimits { readonly maxRecDepth:number; readonly maxNatBytes:bigint; }
-const DEFAULT_LIMITS:KernelLimits={maxRecDepth:4096,maxNatBytes:LEAN_NAT_MAX_SIZE_DEFAULT};
+const DEFAULT_LIMITS:KernelLimits={maxRecDepth:512,maxNatBytes:LEAN_NAT_MAX_SIZE_DEFAULT};
 const LEAN_KERNEL_REC_DEPTH_FACTOR=16;
 
 function deltaInfo(i:ConstantInfo|undefined): DefinitionInfo|null {

@@ -248,6 +248,17 @@ assert(
 );
 
 
+const verifiedDependentPi=compileVerifiedSource(
+  'theorem dependentPiReflexive'+
+  '(f : (x : Nat) -> x = x, n : Nat) : n = n := by exact f(n);',
+  'verified-dependent-pi.ts',
+);
+assert(
+  verifiedDependentPi.checkedCore.theorems.length===1,
+  'explicit dependent Pi binder was not admitted through checked core',
+);
+
+
 const verifiedNat=compileVerifiedSource(
   'function add(x : Nat, y : Nat) : Nat := x + y; '+
   'function twice(x : Nat) : Nat := add(x, x); '+

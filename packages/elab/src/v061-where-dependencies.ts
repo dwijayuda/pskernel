@@ -8,35 +8,45 @@ function collectTypeDependencies(
   type:V061TypeExpr,
   names:ReadonlySet<string>,
   out:Set<string>,
+  bound:ReadonlySet<string>=new Set(),
 ):void {
   switch(type.kind){
     case 'nat':
     case 'bool':
       return;
     case 'named':
-      if(names.has(type.name))out.add(type.name);
+      if(names.has(type.name)&&!bound.has(type.name))out.add(type.name);
       return;
     case 'group':
-      collectTypeDependencies(type.value,names,out);
+      collectTypeDependencies(type.value,names,out,bound);
       return;
     case 'application':
-      collectTypeDependencies(type.fn,names,out);
-      for(const arg of type.args)collectTypeDependencies(arg,names,out);
+      collectTypeDependencies(type.fn,names,out,bound);
+      for(const arg of type.args){
+        collectTypeDependencies(arg,names,out,bound);
+      }
       return;
     case 'unary':
-      collectTypeDependencies(type.operand,names,out);
+      collectTypeDependencies(type.operand,names,out,bound);
       return;
     case 'binary':
-      collectTypeDependencies(type.left,names,out);
-      collectTypeDependencies(type.right,names,out);
+      collectTypeDependencies(type.left,names,out,bound);
+      collectTypeDependencies(type.right,names,out,bound);
       return;
     case 'equality':
-      collectTypeDependencies(type.left,names,out);
-      collectTypeDependencies(type.right,names,out);
+      collectTypeDependencies(type.left,names,out,bound);
+      collectTypeDependencies(type.right,names,out,bound);
       return;
+    case 'dependentArrow':{
+      collectTypeDependencies(type.domain,names,out,bound);
+      const next=new Set(bound);
+      next.add(type.name);
+      collectTypeDependencies(type.codomain,names,out,next);
+      return;
+    }
     case 'arrow':
-      collectTypeDependencies(type.domain,names,out);
-      collectTypeDependencies(type.codomain,names,out);
+      collectTypeDependencies(type.domain,names,out,bound);
+      collectTypeDependencies(type.codomain,names,out,bound);
       return;
   }
 }

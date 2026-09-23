@@ -35,6 +35,13 @@ export type V061TypeExpr =
       readonly span:SourceSpan;
     }
   | {
+      readonly kind:'dependentArrow';
+      readonly name:string;
+      readonly domain:V061TypeExpr;
+      readonly codomain:V061TypeExpr;
+      readonly span:SourceSpan;
+    }
+  | {
       readonly kind:'arrow';
       readonly domain:V061TypeExpr;
       readonly codomain:V061TypeExpr;
@@ -42,7 +49,36 @@ export type V061TypeExpr =
     }
   | {readonly kind:'group';readonly value:V061TypeExpr;readonly span:SourceSpan};
 
+function startsDependentArrow(context:V061ParseContext):boolean {
+  return context.cursor.at('(')
+    &&context.cursor.peek(1).kind==='identifier'
+    &&context.cursor.peek(2).text===':';
+}
+
 export function parseV061Type(context:V061ParseContext):V061TypeExpr {
+  if(startsDependentArrow(context)){
+    const open=context.cursor.consume();
+    const name=context.cursor.expectKind('identifier','dependent binder name');
+    context.cursor.expect(':');
+    const domain=parseV061Type(context);
+    context.cursor.expect(')');
+    if(!(context.cursor.at('->')||context.cursor.at('→'))){
+      throw new SyntaxError(
+        'dependent type binder requires -> or → after the binder',
+        context.cursor.peek().span,
+      );
+    }
+    context.cursor.consume();
+    const codomain=parseV061Type(context);
+    return {
+      kind:'dependentArrow',
+      name:name.text,
+      domain,
+      codomain,
+      span:{start:open.span.start,end:codomain.span.end},
+    };
+  }
+
   const domain=parseEqualityType(context);
   if(context.cursor.at('->')||context.cursor.at('→')){
     context.cursor.consume();

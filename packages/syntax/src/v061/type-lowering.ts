@@ -60,6 +60,13 @@ export function lowerV061TypeToLean(
         lowerV061TypeToLean(type.right,precedence+1);
       return precedence<parentPrecedence?'('+rendered+')':rendered;
     }
+    case 'dependentArrow':{
+      const precedence=25;
+      const rendered='('+type.name+' : '+
+        lowerV061TypeToLean(type.domain)+') -> '+
+        lowerV061TypeToLean(type.codomain,precedence);
+      return precedence<parentPrecedence?'('+rendered+')':rendered;
+    }
     case 'arrow':{
       const precedence=25;
       const rendered=lowerV061TypeToLean(type.domain,precedence+1)+' -> '+

@@ -11,6 +11,7 @@ import {
   hasMVar,
   exprToString,
   natLit,
+  abstractFVar,
 } from 'lean-ts-kernel';
 import {elaborateApplication} from './application.js';
 import {elaborateV061Constant} from './v061-constant-elab.js';
@@ -152,6 +153,30 @@ function elaborateV061TypePositionTerm(
         ],
         context,
       );
+    case 'dependentArrow':{
+      const domain=elaborateV061Type(syntax.domain,context);
+      const nextLocalContext=context.localContext.clone();
+      const id=nextLocalContext.fresh(syntax.name);
+      const binderName=nameFromDotted(syntax.name);
+      nextLocalContext.addLocal(
+        id,
+        binderName,
+        domain,
+        'default',
+      );
+      const locals=new Map(context.locals);
+      locals.set(syntax.name,id);
+      const codomain=elaborateV061Type(
+        syntax.codomain,
+        {...context,localContext:nextLocalContext,locals},
+      );
+      return forallE(
+        binderName,
+        domain,
+        abstractFVar(codomain,id),
+        'default',
+      );
+    }
     case 'arrow':{
       const domain=elaborateV061Type(syntax.domain,context);
       const codomain=elaborateV061Type(syntax.codomain,context);

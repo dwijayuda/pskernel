@@ -917,6 +917,16 @@ throws(
 
 {
   const module=parseV061Module(
+    'const depFn : (x : Nat) -> Fin(x) -> Nat := fun x => fun i => x;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'def depFn : (x : Nat) -> Fin x -> Nat := fun x => fun i => x\n',
+  );
+}
+
+{
+  const module=parseV061Module(
     'theorem simpProof(A : Type, B : Type, C : Type, D : Type, '+
     'h1 : BoxT(A) = B, h2 : WrapT(C) = D) : P := '+
     'by simp only [h1, ← h2];',

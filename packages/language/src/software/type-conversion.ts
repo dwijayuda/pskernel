@@ -14,6 +14,7 @@ export function asSoftwareType(
     case 'bool':
     case 'unary':
     case 'binary':
+    case 'dependentArrow':
       throw new Error(
         'PS_CHECK_DEPENDENT_TYPE_TERM_UNSUPPORTED: theorem/type terms require verified elaboration',
       );

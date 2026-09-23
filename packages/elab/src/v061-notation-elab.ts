@@ -2,6 +2,7 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   TypeChecker,
   constant,
+  levelSucc,
   levelZero,
   mkAppN,
   nameFromDotted,
@@ -24,11 +25,12 @@ const natArithmetic=new Map<string,string>([
   ['*','Nat.mul'],
 ]);
 
-type NatRelationKind='le'|'lt';
+type NatRelationKind='le'|'lt'|'eq';
 const natRelations=new Map<
   string,
   {readonly kind:NatRelationKind;readonly reverse:boolean}
 >([
+  ['==',{kind:'eq',reverse:false}],
   ['<=',{kind:'le',reverse:false}],
   ['>=',{kind:'le',reverse:true}],
   ['<',{kind:'lt',reverse:false}],
@@ -97,6 +99,23 @@ export function elaborateV061NatCondition(
   );
   const first=relation.reverse?right.term:left.term;
   const second=relation.reverse?left.term:right.term;
+
+  if(relation.kind==='eq'){
+    const term=mkAppN(
+      constant(
+        requireConstant(context,'Eq'),
+        [levelSucc(levelZero)],
+      ),
+      [natType,first,second],
+    );
+    const type=checker.check(term);
+    const decider=mkAppN(
+      constant(requireConstant(context,'Nat.decEq')),
+      [first,second],
+    );
+    checker.check(decider);
+    return {term,type,decider};
+  }
 
   const relationClass=relation.kind==='le'?'LE.le':'LT.lt';
   const instance=relation.kind==='le'?'instLENat':'instLTNat';

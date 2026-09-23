@@ -37,12 +37,41 @@ function eraseVerifiedCondition(
   erase:RuntimeExprEraser,
 ):VerifiedIrExpr {
   const view=appView(proposition);
-  if(view.fn.kind!=='const'||view.args.length!==4){
+  if(view.fn.kind!=='const'){
     throw new Error(
       'PS_ERASE_CONDITION_UNSUPPORTED: expected checked Nat relation',
     );
   }
   const head=nameToString(view.fn.name);
+  if(head==='Eq'){
+    if(view.args.length!==3){
+      throw new Error(
+        'PS_ERASE_CONDITION_UNSUPPORTED: malformed checked equality',
+      );
+    }
+    const typeArg=view.args[0]!;
+    if(
+      typeArg.kind!=='const'
+      ||nameToString(typeArg.name)!=='Nat'
+    ){
+      throw new Error(
+        'PS_ERASE_CONDITION_UNSUPPORTED: only Nat equality is executable yet',
+      );
+    }
+    return {
+      kind:'intrinsic',
+      operation:'nat.eq',
+      args:[
+        erase(view.args[1]!,scope,environment),
+        erase(view.args[2]!,scope,environment),
+      ],
+    };
+  }
+  if(view.args.length!==4){
+    throw new Error(
+      'PS_ERASE_CONDITION_UNSUPPORTED: expected checked Nat relation',
+    );
+  }
   const instance=view.args[1];
   if(instance?.kind!=='const'){
     throw new Error(

@@ -50,7 +50,7 @@ export type VerifiedIrExpr =
   | {readonly kind:'var';readonly name:string}
   | {
       readonly kind:'intrinsic';
-      readonly operation:'nat.add'|'nat.sub'|'nat.mul'|'nat.le'|'nat.lt';
+      readonly operation:'nat.add'|'nat.sub'|'nat.mul'|'nat.eq'|'nat.le'|'nat.lt';
       readonly args:readonly VerifiedIrExpr[];
     }
   | {

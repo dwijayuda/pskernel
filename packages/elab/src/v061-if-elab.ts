@@ -24,7 +24,7 @@ export function elaborateV061IfExpression(
   if(expr.condition.kind!=='binary'){
     throw new Error(
       'PS_ELAB_IF_CONDITION_UNSUPPORTED: verified if currently requires '+
-      'a decidable Nat comparison (<, <=, >, >=)',
+      'a decidable Nat comparison/equality (==, <, <=, >, >=)',
     );
   }
   const condition=elaborateV061NatCondition(

@@ -199,7 +199,9 @@ const verifiedIf=compileVerifiedSource(
   'function min(x : Nat, y : Nat) : Nat := '+
   'if (x <= y) { x } else { y }; '+
   'function max(x : Nat, y : Nat) : Nat := '+
-  'if (x > y) { x } else { y };',
+  'if (x > y) { x } else { y }; '+
+  'function sameOr(x : Nat, y : Nat) : Nat := '+
+  'if (x == y) { x } else { y };',
   'verified-if.ts',
 );
 assert(
@@ -209,6 +211,10 @@ assert(
 assert(
   verifiedIf.typeScript.includes('return ((y < x) ? x : y);'),
   'verified Lean > relation did not normalize to reversed Nat <',
+);
+assert(
+  verifiedIf.typeScript.includes('return ((x === y) ? x : y);'),
+  'verified Lean Nat equality did not lower through Eq/Nat.decEq',
 );
 
 

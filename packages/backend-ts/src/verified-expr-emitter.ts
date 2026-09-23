@@ -26,6 +26,7 @@ export function emitVerifiedExpr(
       const right=emitVerifiedExpr(expr.args[1]!,brands,tags);
       if(expr.operation==='nat.add')return '('+left+' + '+right+')';
       if(expr.operation==='nat.mul')return '('+left+' * '+right+')';
+      if(expr.operation==='nat.eq')return '('+left+' === '+right+')';
       if(expr.operation==='nat.le')return '('+left+' <= '+right+')';
       if(expr.operation==='nat.lt')return '('+left+' < '+right+')';
       return '((__ps_a: bigint, __ps_b: bigint) => '+

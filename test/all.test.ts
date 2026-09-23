@@ -325,6 +325,11 @@ test('defeq compares projections after lazy delta even when other structure fiel
  assert(!tc.isDefEq({kind:'proj',typeName:I,index:1,expr:constant(a)},{kind:'proj',typeName:I,index:1,expr:constant(b)}),'different projected fields must remain distinct');
 });
 
+test('eta probe returns false instead of throwing for a non-function rhs',()=>{
+ const tc=new TypeChecker(baseEnv()),lhs=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));
+ assert(!tc.isDefEq(lhs,natLit(0)),'Lean eta probing must treat a non-function rhs as simply not definitionally equal');
+});
+
 test('defeq implements structure eta through projections',()=>{
  const env=baseEnv(),I=nameFromDotted('PairN'),mk=nameFromDotted('PairN.mk'),p=nameFromDotted('pairNValue');
  const ctorTy=forallE(nameFromDotted('fst'),constant(N.Nat),forallE(nameFromDotted('snd'),constant(N.Nat),constant(I)));

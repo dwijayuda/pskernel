@@ -29,7 +29,13 @@ function cmpHint(a:ReducibilityHints,b:ReducibilityHints):number{
 
 export class TypeChecker {
   readonly state:KernelState;
-  constructor(readonly env:Environment,readonly lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false,readonly nativeEvaluator?:NativeEvaluator){this.state=state??new KernelState();this.state.bindEnvironment(env);}
+  readonly lctx:LocalContext;
+  constructor(readonly env:Environment,lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false,readonly nativeEvaluator?:NativeEvaluator){
+    this.lctx=lctx.clone();
+    this.state=state??new KernelState();
+    this.state.bindEnvironment(env);
+    this.state.bindLocalContext(this.lctx);
+  }
   private rec<T>(f:()=>T):T{
     this.state.bindEnvironment(this.env);
     this.state.recDepth++;

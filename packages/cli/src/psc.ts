@@ -44,7 +44,7 @@ export async function runPsc(argv:readonly string[]):Promise<number>{
     ){
       throw new Error(
         'PS_CLI_BUILD_TARGET_COMMAND: --target wasm is supported only by '+
-        'check, build, and run (run currently fails closed)',
+        'check, build, and run',
       );
     }
     if(command==='check')outputResult(await checkCommand(common),common.json);

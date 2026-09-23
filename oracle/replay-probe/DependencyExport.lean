@@ -406,6 +406,19 @@ def collectRootsByModule (env : Environment) : Array (Array Name) := Id.run do
     buckets := buckets.set! idx (buckets[idx]!.qsort Name.quickLt)
   return buckets
 
+/-- Canonical release-gate root order.
+Lean 4.34 stores the constants actually loaded for each imported module in
+`EnvironmentHeader.moduleData[idx].constNames`. Use that .olean sequence directly
+for the one-pass shared-environment replay instead of reconstructing an order from
+the imported hash map. Keep `collectRootsByModule` above stable for diagnostic
+root-range numbering. -/
+def collectCanonicalRootsByModule (env : Environment) : Array (Array Name) := Id.run do
+  let mut buckets := Array.replicate env.header.moduleNames.size #[]
+  for idx in [0:buckets.size] do
+    if let some data := env.header.moduleData[idx]? then
+      buckets := buckets.set! idx data.constNames
+  return buckets
+
 def batchSizes (buckets : Array (Array Name)) (maxRoots : Nat) : Array Nat := Id.run do
   let mut sizes := #[]
   let mut count := 0
@@ -567,7 +580,10 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
 
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let total := env.constants.map₁.size
-  let buckets := collectRootsByModule env
+  let buckets := collectCanonicalRootsByModule env
+  let directRoots := buckets.foldl (init := 0) fun n roots => n + roots.size
+  if directRoots != total then
+    throw <| IO.userError s!"canonical module root coverage mismatch: {directRoots} != {total}"
   let rootsPerShard : Nat := 10
   let mut plannedShards := 0
   for roots in buckets do
@@ -578,7 +594,8 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
     ("constants", total),
     ("modules", env.header.moduleNames.size),
     ("plannedShards", plannedShards),
-    ("rootsPerShard", rootsPerShard)
+    ("rootsPerShard", rootsPerShard),
+    ("rootOrder", "olean-module-constNames")
   ])]).compress
   let _ ← (do
     for idx in [0:buckets.size] do

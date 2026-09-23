@@ -181,8 +181,14 @@ This is the correct ordering.
 ### Gate 1 — canonical Full Std
 
 Use the canonical module-order stream as the release gate, not dependency-root
-batch success. Each declaration should be checked once into one shared
-environment while replay-local intern/cache state is discarded between shards.
+batch success. The canonical stream takes each imported module's root sequence
+directly from Lean 4.34 `EnvironmentHeader.moduleData[idx].constNames` (the
+`.olean` constant sequence actually loaded for that module), rather than
+reconstructing and sorting roots from the imported environment hash map. Each
+declaration should be checked once into one shared environment while replay-local
+intern/cache state is discarded between shards. Diagnostic root-range tooling
+keeps its existing deterministic Name.quickLt numbering so historical hot-range
+indices remain stable.
 
 The latest checked-in `full-std.log` did not produce semantic evidence: it
 failed before replay because `scripts/module-stream-oracle.mjs` contained a

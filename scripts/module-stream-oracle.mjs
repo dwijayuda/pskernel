@@ -30,6 +30,7 @@ try{
    if(marker?.environment){
      if(header)throw new Error('duplicate environment header');
      header=marker.environment;
+     if(header.rootOrder!=='olean-module-constNames')throw new Error(`unexpected canonical root order ${header.rootOrder??'<missing>'}`);
      continue;
    }
    if(marker?.shard){

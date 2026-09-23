@@ -35,6 +35,19 @@ const matrix={
   'study/lean4-4.34.0/tests/elab_fail/kernelQuotNameCollision.lean':{kind:'direct',tests:['Quot bootstrap rejects occupied primitive names without overwriting them']},
 };
 
+const hardeningExtras={
+  'study/lean4-4.34.0/tests/elab/issue_14576_nonuniform.lean':{
+    kind:'direct-hardening',
+    tests:[
+      'inductive uniformity is checked before WHNF can erase a bad occurrence',
+      'nested inductive uniformity is checked before preprocessing can drop bad parameters',
+      'inductive uniformity requires exact declaration universe arguments',
+      'uniform occurrence accepts a constructor parameter whose type is definitionally equal',
+    ],
+    note:'Lean 4.34 follow-up to #14576: syntactic uniformity must run before WHNF and nested preprocessing while preserving definitionally-equal parameter domains',
+  },
+};
+
 const actual=roots.flatMap(walk).sort();
 const expected=Object.keys(matrix).sort();
 const missing=actual.filter(p=>!(p in matrix));
@@ -47,17 +60,19 @@ if(missing.length||stale.length){
 }
 
 const tests=readFileSync('test/all.test.ts','utf8');
-for(const [path,entry] of Object.entries(matrix)){
+for(const [path,entry] of [...Object.entries(matrix),...Object.entries(hardeningExtras)]){
+  if(!readFileSync(path,'utf8'))throw new Error(path+': hardening source is unreadable');
   for(const name of entry.tests??[]){
     if(!tests.includes("test('"+name+"'"))throw new Error(path+': mapped TS regression is missing: '+name);
   }
 }
 
 const counts={};
-for(const entry of Object.values(matrix))counts[entry.kind]=(counts[entry.kind]??0)+1;
+for(const entry of [...Object.values(matrix),...Object.values(hardeningExtras)])counts[entry.kind]=(counts[entry.kind]??0)+1;
 console.log(JSON.stringify({
   ok:true,
   classified:actual.length,
+  hardeningExtras:Object.keys(hardeningExtras).length,
   counts,
   oracleOnly:Object.entries(matrix).filter(([,v])=>v.kind==='oracle-only-adversarial').map(([path,v])=>({path,note:v.note})),
 },null,2));

@@ -21,6 +21,7 @@ import {
   levelSucc,
   levelZero,
   nameFromDotted,
+  natLit,
   sort,
 } from 'lean-ts-kernel';
 function equal(a:unknown,b:unknown):void{if(a!==b)throw new Error(`expected ${String(b)}, got ${String(a)}`);}
@@ -565,3 +566,43 @@ console.log('ok - @proofscript/elab record construction and kernel projection');
   equal(recursive,true);
 }
 console.log('ok - @proofscript/elab unparameterized inductive admission');
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive MaybeNat where { | none; | some(value : Nat); } '+
+    'function getOrZero(value : MaybeNat) : Nat := '+
+    'match value with { | .none => 0; | .some x => x; };',
+  ),env);
+  const definition=result.definitions.find(
+    (item)=>item.name.kind==='str'&&item.name.value==='getOrZero',
+  );
+  equal(definition?.value.kind,'lam');
+  if(definition?.value.kind==='lam'){
+    const some=app(
+      constant(nameFromDotted('MaybeNat.some')),
+      natLit(7n),
+    );
+    const reduced=new TypeChecker(
+      result.environment,
+      new LocalContext(),
+    ).whnf(app(definition.value,some));
+    equal(exprEq(reduced,natLit(7n)),true);
+  }
+}
+{
+  const env=makeNatNotationEnvironment();
+  let nonexhaustive=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'inductive MaybeNat where { | none; | some(value : Nat); } '+
+      'function bad(value : MaybeNat) : Nat := '+
+      'match value with { | .none => 0; };',
+    ),env);
+  }catch(error){
+    nonexhaustive=/PS_ELAB_MATCH_NONEXHAUSTIVE/.test(String(error));
+  }
+  equal(nonexhaustive,true);
+}
+console.log('ok - @proofscript/elab verified match recursor elaboration');

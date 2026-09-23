@@ -25,6 +25,7 @@ import {elaborateV061BinaryNotation} from './v061-notation-elab.js';
 import {elaborateV061IfExpression} from './v061-if-elab.js';
 import {elaborateV061Record} from './v061-structure-term-elab.js';
 import {tryElaborateV061ProjectionReference} from './v061-reference-elab.js';
+import {elaborateV061MatchExpression} from './v061-match-elab.js';
 
 function resolveReference(
   name:string,
@@ -274,9 +275,11 @@ export function elaborateV061Term(
         elaborateV061Term,
       );
     case 'match':
-      throw new Error(
-        "PS_ELAB_TERM_UNSUPPORTED: term form '"+expr.kind+
-        "' is not yet implemented by the kernel-facing elaborator",
+      return elaborateV061MatchExpression(
+        expr,
+        context,
+        expected,
+        elaborateV061Term,
       );
   }
 }

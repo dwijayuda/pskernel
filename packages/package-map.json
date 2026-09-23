@@ -189,7 +189,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-simple-inductive-elab-mvp",
+      "status": "v061-simple-adt-match-elab-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -201,6 +201,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified constructor pattern matching now elaborates to the pskernel-generated recursor, not to a source-level switch.",
+        "The current bounded match subset is exhaustive, constructor-only, fixed-result, unparameterized, unindexed, and non-recursive; recursor universe instantiation is derived from the expected result sort.",
+        "A reduction regression checks that getOrZero (MaybeNat.some 7) iota-reduces through pskernel to 7.",
         "Unparameterized non-recursive ProofScript inductives now elaborate to real pskernel InductiveDecl values and are admitted with pskernel addInductive.",
         "Constructors are qualified as TypeName.constructor and become ordinary environment constants; existing dependent application elaboration handles constructor calls.",
         "Parameterized and recursive inductives remain explicit fail-closed milestones; pattern matching is not yet enabled on this verified inductive path.",

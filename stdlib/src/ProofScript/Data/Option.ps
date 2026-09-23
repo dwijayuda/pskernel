@@ -31,12 +31,12 @@ function optionIsSome {α : Type}(value : PsOption(α)) : Bool :=
   };
 
 theorem optionRefl {α : Type}
-(value : PsOption(α)) : value = value := Eq.refl(value);
+(value : PsOption(α)) : value = value := by rfl;
 
 theorem optionOrElseNone {α : Type}
 (fallback : PsOption(α)) :
-optionOrElse(PsOption.none, fallback) = fallback := Eq.refl(fallback);
+optionOrElse(PsOption.none, fallback) = fallback := by rfl;
 
 theorem optionGetOrElseSome {α : Type}
 (value : α, fallback : α) :
-optionGetOrElse(PsOption.some(value), fallback) = value := Eq.refl(value);
+optionGetOrElse(PsOption.some(value), fallback) = value := by rfl;

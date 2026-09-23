@@ -34,12 +34,12 @@ function resultToOption {α : Type}{ε : Type}
   };
 
 theorem resultRefl {α : Type}{ε : Type}
-(value : PsResult(α, ε)) : value = value := Eq.refl(value);
+(value : PsResult(α, ε)) : value = value := by rfl;
 
 theorem resultGetOrElseOk {α : Type}{ε : Type}
 (value : α, fallback : α) :
-resultGetOrElse(PsResult.ok(value), fallback) = value := Eq.refl(value);
+resultGetOrElse(PsResult.ok(value), fallback) = value := by rfl;
 
 theorem resultGetOrElseError {α : Type}{ε : Type}
 (error : ε, fallback : α) :
-resultGetOrElse(PsResult.error(error), fallback) = fallback := Eq.refl(fallback);
+resultGetOrElse(PsResult.error(error), fallback) = fallback := by rfl;

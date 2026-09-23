@@ -18,8 +18,9 @@ an erasure special case.
 
 The three modules now contain nine pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
-List helpers. These laws deliberately use ordinary `Eq` proof terms and kernel
-definitional equality; they do not add a stdlib-only proof rule.
+List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
+ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
+stdlib still has no library-only proof rule.
 
 Stronger algebraic laws should be added only when the required induction,
 rewriting, and branch-proof surface is supported faithfully.
@@ -48,7 +49,7 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- nine admitted stdlib theorems;
+- nine admitted stdlib theorems, all currently discharged by bounded `rfl`;
 - zero runtime external assumptions.
 
 For input `9`, the current dogfood `main` returns `22`.

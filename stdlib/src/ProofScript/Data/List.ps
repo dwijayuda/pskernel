@@ -35,14 +35,13 @@ function listHeadOption {α : Type}
   };
 
 theorem listRefl {α : Type}
-(xs : PsList(α)) : xs = xs := Eq.refl(xs);
+(xs : PsList(α)) : xs = xs := by rfl;
 
 theorem listAppendNilLeft {α : Type}
 (ys : PsList(α)) :
-listAppend(PsList.nil, ys) = ys := Eq.refl(ys);
+listAppend(PsList.nil, ys) = ys := by rfl;
 
 theorem listAppendCons {α : Type}
 (head : α, tail : PsList(α), ys : PsList(α)) :
 listAppend(PsList.cons(head, tail), ys) =
-PsList.cons(head, listAppend(tail, ys)) :=
-  Eq.refl(PsList.cons(head, listAppend(tail, ys)));
+PsList.cons(head, listAppend(tail, ys)) := by rfl;

@@ -20,6 +20,7 @@ import {
   forallE,
   levelSucc,
   levelZero,
+  mkAppN,
   nameFromDotted,
   natLit,
   sort,

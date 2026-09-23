@@ -47,3 +47,25 @@ throws(
 );
 
 console.log('ok - @proofscript/wasm-lowering W1 fail-closed lowering');
+
+throws(
+  ()=>lowerVerifiedIrToWasm({
+    kind:'proofscript-verified-ir',
+    imports:[{
+      localName:'hostNot',
+      source:'host',
+      importedName:'not',
+      type:{
+        kind:'function',
+        parameters:[{kind:'primitive',name:'Bool'}],
+        result:{kind:'primitive',name:'Bool'},
+      },
+    }],
+    declarations:[],
+  }),
+  (error:unknown)=>
+    error instanceof WasmLoweringError&&
+    error.code==='PS_WASM_UNSUPPORTED_EXTERNAL_IMPORTS',
+);
+
+console.log('ok - @proofscript/wasm-lowering W1 rejects external imports');

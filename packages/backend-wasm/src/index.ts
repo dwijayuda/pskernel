@@ -8,6 +8,8 @@ import {
 } from '@proofscript/wasm-ir';
 
 export const BINARYEN_VERSION='132.0.0' as const;
+export const PROOFSCRIPT_WASM_BINARYEN_FEATURES=
+  binaryen.Features.MVP;
 
 export interface WasmEmitOptions {
   readonly optimize?:boolean;
@@ -160,6 +162,7 @@ export function emitBinaryenWasm(
 ):WasmEmitResult {
   validateWasmIrModule(input);
   const module=new binaryen.Module();
+  module.setFeatures(PROOFSCRIPT_WASM_BINARYEN_FEATURES);
 
   for(const fn of input.functions){
     const emitted=emitFunctionBody(module,fn);

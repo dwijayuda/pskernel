@@ -1,4 +1,9 @@
-import {lowerDCallSource,parseV061Module} from '../packages/syntax/dist/src/index.js';
+import {
+  createDefaultSourceFrontendRegistry,
+  createDefaultTranslationTargetPrinterRegistry,
+  lowerDCallSource,
+  parseV061Module,
+} from '../packages/syntax/dist/src/index.js';
 import {text,render} from '../packages/pretty/dist/src/index.js';
 import {ExprMetaContext,MetaVarContext,createGoal} from '../packages/meta/dist/src/index.js';
 import {elaborateApplication,elaborateChecked,elaborateV061Declarations} from '../packages/elab/dist/src/index.js';
@@ -18,6 +23,15 @@ import {verifyStream} from '../packages/browser/dist/src/index.js';
 
 function assert(condition,message){
   if(!condition)throw new Error('package integration smoke: '+message);
+}
+
+function semanticFingerprint(value){
+  return JSON.stringify(
+    value,
+    (_key,item)=>typeof item==='bigint'
+      ?{$bigint:item.toString()}
+      :item,
+  );
 }
 
 const lowered=lowerDCallSource('apply(f x, (y : Nat))');
@@ -267,6 +281,99 @@ const verifiedExactSearch=compileVerifiedSource(
 assert(
   verifiedExactSearch.checkedCore.theorems.length===2,
   'bounded exact? did not construct a pskernel-admitted proof',
+);
+
+
+const dualSourceCorpus=
+  'structure Box(α : Type) where { value : α; } '+
+  'class Sized(α : Type) where { size : α -> Nat; } '+
+  'inductive Choice where { | left; | right; } '+
+  'instance sizedNat : Sized(Nat) := '+
+  '{ size := fun x => x : Sized(Nat) }; '+
+  'def choose(flag : Bool) : Nat := match flag with { '+
+  '| true => 1; | false => 2; }; '+
+  'def viaWhere(x : Nat) : Nat := helper(x) where { '+
+  'helper(y : Nat) : Nat := y + 1; }; '+
+  'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;';
+
+const dualFrontends=createDefaultSourceFrontendRegistry();
+const dualTargets=createDefaultTranslationTargetPrinterRegistry();
+
+const dualPs=compileVerifiedSource(
+  dualSourceCorpus,
+  'dual-source-equivalence.ts',
+  'dual-source-equivalence.ps',
+);
+const dualLeanSource=dualTargets.require('lean').print(dualPs.surface);
+const dualLean=compileVerifiedSource(
+  dualLeanSource,
+  'dual-source-equivalence.ts',
+  'dual-source-equivalence.lean',
+);
+const dualProofScriptSource=dualTargets.require('ps').print(dualLean.surface);
+const dualPsRoundTrip=compileVerifiedSource(
+  dualProofScriptSource,
+  'dual-source-equivalence.ts',
+  'dual-source-equivalence-roundtrip.ps',
+);
+
+assert(
+  dualFrontends.forFile('x.ps').kind==='proofscript'
+    &&dualFrontends.forFile('x.lean').kind==='lean-subset',
+  'dual-source frontend registry did not select both source kinds',
+);
+assert(
+  dualPs.canonicalSourceHash===dualLean.canonicalSourceHash
+    &&dualLean.canonicalSourceHash===dualPsRoundTrip.canonicalSourceHash,
+  'dual-source canonical source identity diverged',
+);
+assert(
+  dualProofScriptSource===dualPs.canonicalSource,
+  'Lean -> ProofScript translation did not recover canonical shared source',
+);
+assert(
+  semanticFingerprint(dualPs.checkedCore.admissions)
+    ===semanticFingerprint(dualLean.checkedCore.admissions)
+    &&semanticFingerprint(dualLean.checkedCore.admissions)
+      ===semanticFingerprint(dualPsRoundTrip.checkedCore.admissions),
+  'PS/Lean round-trip changed pskernel checked-core admissions',
+);
+assert(
+  semanticFingerprint(dualPs.ir)===semanticFingerprint(dualLean.ir)
+    &&semanticFingerprint(dualLean.ir)
+      ===semanticFingerprint(dualPsRoundTrip.ir),
+  'PS/Lean round-trip changed verified compiler IR',
+);
+assert(
+  dualPs.typeScript===dualLean.typeScript
+    &&dualLean.typeScript===dualPsRoundTrip.typeScript,
+  'PS/Lean round-trip changed emitted TypeScript',
+);
+assert(
+  dualPs.emitted.javascript===dualLean.emitted.javascript
+    &&dualLean.emitted.javascript===dualPsRoundTrip.emitted.javascript,
+  'PS/Lean round-trip changed emitted JavaScript',
+);
+assert(
+  dualPs.emitted.declaration===dualLean.emitted.declaration
+    &&dualLean.emitted.declaration===dualPsRoundTrip.emitted.declaration,
+  'PS/Lean round-trip changed emitted TypeScript declarations',
+);
+
+let unsupportedLeanRejected=false;
+try{
+  compileVerifiedSource(
+    'namespace Demo\ndef x : Nat := 0\nend Demo\n',
+    'unsupported-lean.ts',
+    'unsupported-lean.lean',
+  );
+}catch(error){
+  unsupportedLeanRejected=
+    /PS_LEAN_SUBSET_UNSUPPORTED_COMMAND/.test(String(error));
+}
+assert(
+  unsupportedLeanRejected,
+  'unsupported Lean command did not fail closed before checked core',
 );
 
 

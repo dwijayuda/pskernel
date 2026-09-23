@@ -123,7 +123,7 @@ export class TypeChecker {
   }
 
   private inferCore(e:Expr,inferOnly:boolean):Expr{
-    const key=this.state.exprId(e),cache=inferOnly?this.state.infer:this.state.checkedInfer,cached=cache.get(key);if(cached)return cached;
+    const cache=inferOnly?this.state.infer:this.state.checkedInfer,cached=cache.get(e);if(cached)return cached;
     let r:Expr;
     switch(e.kind){
       case'bvar':throw new KernelError('loose bound variable in type checker');
@@ -153,7 +153,7 @@ export class TypeChecker {
       case'let':r=this.inferLetSpine(e,inferOnly);break;
       case'proj':r=this.inferProj(e,inferOnly);break;
     }
-    cache.set(key,r);return r;
+    cache.set(e,r);return r;
   }
 
   ensureSort(t:Expr,origin=t):Extract<Expr,{kind:'sort'}>{const w=this.whnf(t);if(w.kind!=='sort')throw new KernelError(`expected sort at ${exprToString(origin)}, got ${exprToString(w)}`);return w;}
@@ -190,9 +190,9 @@ export class TypeChecker {
     const av=appView(e);if(av.fn.kind!=='const')return null;const i=deltaInfo(this.env.find(av.fn.name));if(!i||av.fn.levels.length!==i.levelParams.length)return null;
     let value:Expr;
     if(av.fn.levels.length>0){
-      const key=this.state.exprId(av.fn),cached=this.state.unfold.get(key);
+      const cached=this.state.unfold.get(av.fn);
       if(cached)value=cached;
-      else{value=instantiateExprLevels(i.value,i.levelParams,av.fn.levels);this.state.unfold.set(key,value);}
+      else{value=instantiateExprLevels(i.value,i.levelParams,av.fn.levels);this.state.unfold.set(av.fn,value);}
     }else{
       value=instantiateExprLevels(i.value,i.levelParams,av.fn.levels);
     }
@@ -208,8 +208,7 @@ export class TypeChecker {
       case'app':case'let':case'proj':break;
     }
 
-    const key=this.state.exprId(e);
-    if(!cheapRec&&!cheapProj){const cached=this.state.whnfCore.get(key);if(cached)return cached;}
+    if(!cheapRec&&!cheapProj){const cached=this.state.whnfCore.get(e);if(cached)return cached;}
     let r:Expr;
 
     switch(e.kind){
@@ -252,7 +251,7 @@ export class TypeChecker {
         throw new Error('internal whnfCore case');
     }
 
-    if(!cheapRec&&!cheapProj)this.state.whnfCore.set(key,r);
+    if(!cheapRec&&!cheapProj)this.state.whnfCore.set(e,r);
     return r;
   });}
 
@@ -264,17 +263,17 @@ export class TypeChecker {
       case'fvar':{const d=this.lctx.get(e.id);if(!d||d.kind!=='let')return e;break;}
       case'lam':case'app':case'const':case'let':case'proj':break;
     }
-    const k=this.state.exprId(e),cached=this.state.whnf.get(k);if(cached)return cached;
+    const cached=this.state.whnf.get(e);if(cached)return cached;
     let t=e;
     while(true){
       const t1=this.whnfCore(t);
       const native=reduceNative(this.env,t1,this.nativeEvaluator);
-      if(native){this.state.whnf.set(k,native);return native;}
+      if(native){this.state.whnf.set(e,native);return native;}
       const nr=reduceNatApp(this.env,t1,y=>this.whnf(y),this.limits.maxNatBytes);
-      if(nr){this.state.whnf.set(k,nr);return nr;}
+      if(nr){this.state.whnf.set(e,nr);return nr;}
       const u=this.unfold(t1);
       if(u){t=u;continue;}
-      this.state.whnf.set(k,t1);return t1;
+      this.state.whnf.set(e,t1);return t1;
     }
   }
 

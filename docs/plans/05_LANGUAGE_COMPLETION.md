@@ -461,12 +461,12 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    allow ordinary term expressions in dependent proposition/result positions
    (for example `Eq Nat (Nat.succ a) a`) through Lean-compatible elaboration.
 6. Add deterministic search tactics such as exact? only after that foundation.
-5. Implement project/module/import semantics on the checked-core path.
-6. Design and implement explicit npm/JS FFI.
-7. Start the ProofScript-written standard library.
-8. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
-9. Make verified mode default once feature coverage surpasses the legacy lane.
-10. Retire the legacy software checker.
+7. Implement project/module/import semantics on the checked-core path.
+8. Design and implement explicit npm/JS FFI.
+9. Start the ProofScript-written standard library.
+10. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
+11. Make verified mode default once feature coverage surpasses the legacy lane.
+12. Retire the legacy software checker.
 
 ## Progress reporting format
 

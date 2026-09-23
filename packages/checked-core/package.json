@@ -1,13 +1,13 @@
 {
-  "name": "@proofscript/elab",
+  "name": "@proofscript/checked-core",
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "ProofScript term/command/declaration elaboration into kernel declarations.",
+  "description": "Kernel-admitted dependent core boundary shared by ProofScript elaboration and compilation.",
   "proofscript": {
-    "status": "v061-intro-tactic-elab-mvp",
+    "status": "kernel-admitted-core-mvp",
     "phase": "B",
-    "trust": "untrusted-support",
+    "trust": "untrusted-boundary",
     "sourceLanguage": "typescript"
   },
   "exports": {
@@ -20,13 +20,10 @@
     "build": "tsc -p tsconfig.json",
     "test": "npm run build --silent && node dist/test/index.test.js"
   },
+  "dependencies": {
+    "lean-ts-kernel": "file:../.."
+  },
   "devDependencies": {
     "typescript": "5.8.3"
-  },
-  "dependencies": {
-    "lean-ts-kernel": "file:../..",
-    "@proofscript/meta": "file:../meta",
-    "@proofscript/syntax": "file:../syntax",
-    "@proofscript/checked-core": "file:../checked-core"
   }
 }

@@ -126,6 +126,23 @@
       ]
     },
     {
+      "name": "checked-core",
+      "path": "packages/checked-core",
+      "phase": "B",
+      "trust": "untrusted-boundary",
+      "status": "kernel-admitted-core-mvp",
+      "packageName": "@proofscript/checked-core",
+      "dependsOn": [
+        "kernel"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Checked core is the single semantic boundary between elaboration and compilation.",
+        "A CheckedCoreModule is constructed only by replaying declarations through pskernel into a cloned base environment.",
+        "Compiler/erasure/editor layers may consume checked core but cannot bypass kernel admission or mutate the kernel TCB."
+      ]
+    },
+    {
       "name": "meta",
       "path": "packages/meta",
       "phase": "B",
@@ -155,13 +172,15 @@
         "meta",
         "pretty",
         "kernel",
-        "module"
+        "module",
+        "checked-core"
       ],
       "sourceLanguage": "typescript",
       "notes": [
         "Lean-native `intro` opens a real forall goal, extends LocalContext with the exact binder type/info, elaborates the continuation against the instantiated codomain, and constructs a lambda proof.",
         "`exact`, `assumption`, and `intro` all elaborate to ordinary pskernel Expr proof terms; Kernel.addTheorem remains final authority.",
-        "This milestone still has no synthetic tactic goal engine or cursor snapshots; apply/refine/rewrite/simp/typeclass synthesis and multi-goal tactics remain later work."
+        "This milestone still has no synthetic tactic goal engine or cursor snapshots; apply/refine/rewrite/simp/typeclass synthesis and multi-goal tactics remain later work.",
+        "The public declaration elaborator now returns @proofscript/checked-core, re-admitted through pskernel as the stable compiler boundary."
       ]
     },
     {

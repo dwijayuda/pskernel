@@ -15,6 +15,10 @@ import {
   lam,
   nameFromDotted,
 } from 'lean-ts-kernel';
+import {
+  admitCheckedCoreModule,
+  type CheckedCoreModule,
+} from '@proofscript/checked-core';
 import {elaborateV061ValueHeader} from './v061-header-elab.js';
 import {
   checkElaboratedTerm,
@@ -126,21 +130,16 @@ function elaborateValueDeclaration(
   };
 }
 
-export interface ElaboratedV061Module {
-  readonly environment:Environment;
-  readonly declarations:readonly (DefinitionInfo|TheoremInfo)[];
-  readonly definitions:readonly DefinitionInfo[];
-  readonly theorems:readonly TheoremInfo[];
-}
+export type ElaboratedV061Module=CheckedCoreModule;
 
 export function elaborateV061Definitions(
   module:V061Module,
   environment=new Environment(),
 ):ElaboratedV061Module {
+  const baseEnvironment=environment.clone();
+  const workEnvironment=environment.clone();
   const declarations:(DefinitionInfo|TheoremInfo)[]=[];
-  const definitions:DefinitionInfo[]=[];
-  const theorems:TheoremInfo[]=[];
-  const kernel=new Kernel(environment);
+  const kernel=new Kernel(workEnvironment);
 
   for(const declaration of module.declarations){
     if(
@@ -156,24 +155,19 @@ export function elaborateV061Definitions(
 
     let info:DefinitionInfo|TheoremInfo;
     try{
-      info=elaborateValueDeclaration(declaration,environment);
+      info=elaborateValueDeclaration(declaration,workEnvironment);
     }catch(error){
       const detail=error instanceof Error?error.message:String(error);
       throw new Error(
         "PS_ELAB_DECL_FAILED: '"+declaration.name+"': "+detail,
       );
     }
-    if(info.kind==='theorem'){
-      kernel.addTheorem(info);
-      theorems.push(info);
-    }else{
-      kernel.addDefinition(info);
-      definitions.push(info);
-    }
+    if(info.kind==='theorem')kernel.addTheorem(info);
+    else kernel.addDefinition(info);
     declarations.push(info);
   }
 
-  return {environment,declarations,definitions,theorems};
+  return admitCheckedCoreModule(baseEnvironment,declarations);
 }
 
 

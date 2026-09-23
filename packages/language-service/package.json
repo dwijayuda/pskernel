@@ -1,0 +1,31 @@
+{
+  "name": "@proofscript/language-service",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Proof-aware editor language service over ProofScript syntax/elaboration and pskernel admission.",
+  "proofscript": {
+    "status": "proof-aware-document-service-mvp",
+    "phase": "D",
+    "trust": "untrusted-support",
+    "sourceLanguage": "typescript"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/index.test.js"
+  },
+  "dependencies": {
+    "@proofscript/syntax": "file:../syntax",
+    "@proofscript/elab": "file:../elab",
+    "lean-ts-kernel": "file:../.."
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}

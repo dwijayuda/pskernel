@@ -6,11 +6,17 @@ import { N } from '../names.js';
 export const LEAN_NAT_MAX_SIZE_DEFAULT = 128n * 1024n * 1024n;
 export const UINT32_MAX = 0xffff_ffffn;
 
-/** Lean's size metric is the storage size of the natural in bytes. */
+/** Lean 4.34's 64-bit runtime storage metric (lean_nat_size_in_bytes).
+ * Scalar Nats occupy one machine word. Heap MPZ values are rounded to whole
+ * 64-bit limbs, not to the mathematical minimum byte length. */
+export const LEAN_RUNTIME_WORD_BYTES=8n;
+export const LEAN_MAX_SMALL_NAT=(1n<<63n)-1n;
 export function natSizeInBytes(n:bigint):bigint{
   if(n<0n)throw new KernelError('Nat cannot be negative');
-  if(n===0n)return 1n;
-  const hex=n.toString(16);return BigInt(Math.ceil(hex.length/2));
+  if(n<=LEAN_MAX_SMALL_NAT)return LEAN_RUNTIME_WORD_BYTES;
+  const bits=BigInt(n.toString(2).length);
+  const limbs=(bits+63n)/64n;
+  return limbs*LEAN_RUNTIME_WORD_BYTES;
 }
 export function checkNatSize(n:bigint,maxBytes:bigint,op='Nat numeral'):void{
   if(natSizeInBytes(n)>maxBytes)throw new KernelError(`the kernel refused a \`${op}\` numeral because its size exceeds the maximum; increase the LEAN_NAT_MAX_SIZE environment variable to allow it`);

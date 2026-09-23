@@ -65,6 +65,8 @@ export function mkMax(a: Level, b: Level): Level {
   if (levelEqStructural(a, b)) return a;
   if (isZero(a)) return b;
   if (isZero(b)) return a;
+  if (b.kind==='max'&&(levelEqStructural(b.left,a)||levelEqStructural(b.right,a))) return b;
+  if (a.kind==='max'&&(levelEqStructural(a.left,b)||levelEqStructural(a.right,b))) return a;
   const oa = toOffset(a), ob = toOffset(b);
   if (levelEqStructural(oa.base, ob.base)) return oa.offset >= ob.offset ? a : b;
   return Object.freeze({ kind: 'max', left: a, right: b });

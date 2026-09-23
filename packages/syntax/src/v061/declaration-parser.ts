@@ -2,6 +2,7 @@ import {SyntaxError} from '../source.js';
 import type {V061Declaration,V061Module,V061Parameter} from './ast.js';
 import {V061ParseContext,spanBetween} from './context.js';
 import {V061ExpressionParser} from './expression-parser.js';
+import {parseV061Type} from './type-parser.js';
 
 export class V061DeclarationParser {
   readonly context:V061ParseContext;
@@ -36,8 +37,8 @@ export class V061DeclarationParser {
         while(true){
           const paramName=this.context.cursor.expectKind('identifier','parameter name');
           this.context.cursor.expect(':');
-          const paramType=this.context.cursor.expectKind('identifier','parameter type');
-          params.push({name:paramName.text,type:paramType.text,span:spanBetween(paramName,paramType)});
+          const paramType=parseV061Type(this.context);
+          params.push({name:paramName.text,type:paramType,span:{start:paramName.span.start,end:paramType.span.end}});
           if(!this.context.cursor.consumeIf(','))break;
         }
       }
@@ -51,7 +52,7 @@ export class V061DeclarationParser {
     if(kind==='const')this.context.own('D-CONST-ALIAS');
 
     this.context.cursor.expect(':');
-    const resultType=this.context.cursor.expectKind('identifier','result type');
+    const resultType=parseV061Type(this.context);
     this.context.cursor.expect(':=');
     const body=this.expressions.parse();
     const semi=this.context.cursor.consumeIf(';');
@@ -64,7 +65,7 @@ export class V061DeclarationParser {
       kind,
       name:name.text,
       params,
-      resultType:resultType.text,
+      resultType,
       body,
       terminatedBySemicolon:semi!==undefined,
       span:{start:keyword.span.start,end:(semi??body).span.end},

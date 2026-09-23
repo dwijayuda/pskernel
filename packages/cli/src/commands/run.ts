@@ -4,6 +4,7 @@ import {buildCommand} from './build.js';
 import type {CommonArgs} from '../types.js';
 
 function parseRuntimeArg(value:string,type:SoftwareType):unknown{
+  if(typeof type!=='string')throw new Error('PS_RUN_ARG: function-typed main parameters are not supported by CLI argument conversion');
   switch(type){
     case 'Nat':{
       const n=BigInt(value);

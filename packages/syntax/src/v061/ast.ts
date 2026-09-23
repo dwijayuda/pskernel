@@ -1,11 +1,10 @@
 import type {ProofScriptFeatureId} from '../features.js';
 import type {SourceSpan} from '../source.js';
-
-export type V061TypeName='Nat'|'Int'|'Bool'|'String'|'Unit'|string;
+import type {V061TypeExpr} from './type-parser.js';
 
 export interface V061Parameter {
   readonly name:string;
-  readonly type:V061TypeName;
+  readonly type:V061TypeExpr;
   readonly span:SourceSpan;
 }
 
@@ -23,7 +22,7 @@ export type V061Expr =
   | {
       readonly kind:'let';
       readonly name:string;
-      readonly declaredType?:V061TypeName;
+      readonly declaredType?:V061TypeExpr;
       readonly value:V061Expr;
       readonly body:V061Expr;
       readonly span:SourceSpan;
@@ -33,7 +32,7 @@ export interface V061Declaration {
   readonly kind:'const'|'def'|'function';
   readonly name:string;
   readonly params:readonly V061Parameter[];
-  readonly resultType:V061TypeName;
+  readonly resultType:V061TypeExpr;
   readonly body:V061Expr;
   readonly terminatedBySemicolon:boolean;
   readonly span:SourceSpan;

@@ -18,6 +18,7 @@ import {
   significantTokens,
   parseV061Module,
   lowerV061ModuleToLean,
+  lowerV061TypeToLean,
 } from '../src/index.js';
 
 function assert(condition: unknown, message = 'assertion failed'): asserts condition {
@@ -277,6 +278,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(module.declarations.length,2);
   equal(module.declarations[0]?.kind,'const');
   equal(module.declarations[1]?.kind,'function');
+  equal(module.declarations[0]?.resultType.kind,'named');
   equal(module.featureIds.includes('D-CONST-ALIAS'),true);
   equal(module.featureIds.includes('D-FUNCTION-ALIAS'),true);
   equal(module.featureIds.includes('D-EXPLICIT-PARAMS'),true);
@@ -302,7 +304,8 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(body?.kind,'let');
   if(body?.kind==='let'){
     equal(body.name,'y');
-    equal(body.declaredType,'Nat');
+    equal(body.declaredType?.kind,'named');
+    if(body.declaredType?.kind==='named')equal(body.declaredType.name,'Nat');
     equal(body.value.kind,'binary');
     equal(body.body.kind,'binary');
   }
@@ -316,4 +319,21 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const body=module.declarations[0]?.body;
   equal(body?.kind,'let');
   if(body?.kind==='let')equal(body.declaredType,undefined);
+}
+
+
+// v0.6.1 inherited function type syntax.
+{
+  const module=parseV061Module('const increment : Nat -> Nat := 1;');
+  const type=module.declarations[0]?.resultType;
+  equal(type?.kind,'arrow');
+  if(type?.kind==='arrow'){
+    equal(lowerV061TypeToLean(type),'Nat -> Nat');
+  }
+}
+{
+  const module=parseV061Module('const composeType : Nat -> Bool -> String := "x";');
+  const type=module.declarations[0]?.resultType;
+  equal(type?.kind,'arrow');
+  if(type?.kind==='arrow')equal(type.codomain.kind,'arrow');
 }

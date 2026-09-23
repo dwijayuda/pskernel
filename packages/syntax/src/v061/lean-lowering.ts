@@ -1,5 +1,6 @@
 import type {V061Expr,V061Module} from './ast.js';
 import {v061BinaryPrecedence} from './operators.js';
+import {lowerV061TypeToLean} from './type-parser.js';
 
 function precedence(expr:V061Expr):number {
   return expr.kind==='binary'?(v061BinaryPrecedence(expr.operator)??0):8;
@@ -31,7 +32,7 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
     case 'if':
       return 'if '+lowerV061ExprToLean(expr.condition)+' then '+lowerV061ExprToLean(expr.thenBranch)+' else '+lowerV061ExprToLean(expr.elseBranch);
     case 'let':{
-      const annotation=expr.declaredType===undefined?'':' : '+expr.declaredType;
+      const annotation=expr.declaredType===undefined?'':' : '+lowerV061TypeToLean(expr.declaredType);
       return 'let '+expr.name+annotation+' := '+lowerV061ExprToLean(expr.value)+'; '+lowerV061ExprToLean(expr.body);
     }
   }
@@ -40,7 +41,7 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
 export function lowerV061ModuleToLean(module:V061Module):string {
   return module.declarations.map((decl)=>{
     const head=decl.kind==='function'||decl.kind==='const'?'def':decl.kind;
-    const params=decl.params.map((p)=>' ('+p.name+' : '+p.type+')').join('');
-    return head+' '+decl.name+params+' : '+decl.resultType+' := '+lowerV061ExprToLean(decl.body);
+    const params=decl.params.map((p)=>' ('+p.name+' : '+lowerV061TypeToLean(p.type)+')').join('');
+    return head+' '+decl.name+params+' : '+lowerV061TypeToLean(decl.resultType)+' := '+lowerV061ExprToLean(decl.body);
   }).join('\n\n')+'\n';
 }

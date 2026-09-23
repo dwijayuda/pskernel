@@ -13,8 +13,8 @@ console.log('ok - @proofscript/language foundation');
   const z={offset:0,line:1,column:1};
   const s={start:z,end:z};
   const module:V061Module={kind:'v061-module',featureIds:[],declarations:[{
-    kind:'function',name:'add',terminatedBySemicolon:true,resultType:'Nat',
-    params:[{name:'x',type:'Nat',span:s},{name:'y',type:'Nat',span:s}],
+    kind:'function',name:'add',terminatedBySemicolon:true,resultType:{kind:'named',name:'Nat',span:s},
+    params:[{name:'x',type:{kind:'named',name:'Nat',span:s},span:s},{name:'y',type:{kind:'named',name:'Nat',span:s},span:s}],
     body:{kind:'binary',operator:'+',left:{kind:'reference',name:'x',span:s},right:{kind:'reference',name:'y',span:s},span:s},
     span:s,
   }]};
@@ -28,10 +28,10 @@ console.log('ok - @proofscript/language v0.6.1 software checker');
   const z={offset:0,line:1,column:1};
   const s={start:z,end:z};
   const module:V061Module={kind:'v061-module',featureIds:[],declarations:[{
-    kind:'function',name:'incTwice',terminatedBySemicolon:true,resultType:'Nat',
-    params:[{name:'x',type:'Nat',span:s}],
+    kind:'function',name:'incTwice',terminatedBySemicolon:true,resultType:{kind:'named',name:'Nat',span:s},
+    params:[{name:'x',type:{kind:'named',name:'Nat',span:s},span:s}],
     body:{
-      kind:'let',name:'y',declaredType:'Nat',
+      kind:'let',name:'y',declaredType:{kind:'named',name:'Nat',span:s},
       value:{kind:'binary',operator:'+',left:{kind:'reference',name:'x',span:s},right:{kind:'nat',text:'1',span:s},span:s},
       body:{kind:'binary',operator:'+',left:{kind:'reference',name:'y',span:s},right:{kind:'nat',text:'1',span:s},span:s},
       span:s,
@@ -50,8 +50,8 @@ console.log('ok - @proofscript/language v0.6.1 software checker');
   const z={offset:0,line:1,column:1};
   const s={start:z,end:z};
   const bad:V061Module={kind:'v061-module',featureIds:[],declarations:[{
-    kind:'const',name:'bad',terminatedBySemicolon:true,resultType:'Nat',params:[],
-    body:{kind:'let',name:'y',declaredType:'Bool',value:{kind:'nat',text:'1',span:s},body:{kind:'nat',text:'2',span:s},span:s},
+    kind:'const',name:'bad',terminatedBySemicolon:true,resultType:{kind:'named',name:'Nat',span:s},params:[],
+    body:{kind:'let',name:'y',declaredType:{kind:'named',name:'Bool',span:s},value:{kind:'nat',text:'1',span:s},body:{kind:'nat',text:'2',span:s},span:s},
     span:s,
   }]};
   let threw=false;
@@ -59,3 +59,18 @@ console.log('ok - @proofscript/language v0.6.1 software checker');
   equal(threw,true);
 }
 console.log('ok - @proofscript/language lexical let checker');
+
+{
+  const z={offset:0,line:1,column:1};
+  const s={start:z,end:z};
+  const module:V061Module={kind:'v061-module',featureIds:[],declarations:[{
+    kind:'const',name:'f',terminatedBySemicolon:true,params:[],
+    resultType:{kind:'arrow',domain:{kind:'named',name:'Nat',span:s},codomain:{kind:'named',name:'Nat',span:s},span:s},
+    body:{kind:'nat',text:'1',span:s},
+    span:s,
+  }]};
+  let threw=false;
+  try{checkV061SoftwareModule(module);}catch(error){threw=/PS_CHECK_DECL_TYPE/.test(String(error));}
+  equal(threw,true);
+}
+console.log('ok - @proofscript/language function type HIR conversion');

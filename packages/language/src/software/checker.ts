@@ -1,18 +1,31 @@
-import type {V061Expr,V061Module} from '@proofscript/syntax';
+import type {V061Expr,V061Module,V061TypeExpr} from '@proofscript/syntax';
 import type {
   CheckedSoftwareExpr,
   CheckedSoftwareModule,
+  PrimitiveSoftwareType,
   SoftwareSignature,
   SoftwareType,
 } from './types.js';
+import {softwareTypeEquals,softwareTypeToString} from './types.js';
 
-const PRIMITIVES=new Set<SoftwareType>(['Nat','Int','Bool','String','Unit']);
+const PRIMITIVES=new Set<PrimitiveSoftwareType>(['Nat','Int','Bool','String','Unit']);
 
-function asType(name:string):SoftwareType {
-  if(!PRIMITIVES.has(name as SoftwareType)){
-    throw new Error("PS_CHECK_UNKNOWN_TYPE: unsupported software type '"+name+"'");
+function asType(type:V061TypeExpr):SoftwareType {
+  switch(type.kind){
+    case 'group':return asType(type.value);
+    case 'named':
+      if(!PRIMITIVES.has(type.name as PrimitiveSoftwareType)){
+        throw new Error("PS_CHECK_UNKNOWN_TYPE: unsupported software type '"+type.name+"'");
+      }
+      return type.name as PrimitiveSoftwareType;
+    case 'arrow':
+      return {kind:'function',parameter:asType(type.domain),result:asType(type.codomain)};
   }
-  return name as SoftwareType;
+}
+
+function requirePrimitive(type:SoftwareType,context:string):PrimitiveSoftwareType {
+  if(typeof type!=='string')throw new Error(context+' expects a primitive software type, got '+softwareTypeToString(type));
+  return type;
 }
 
 function checkNumericBinary(
@@ -23,13 +36,14 @@ function checkNumericBinary(
   signatures:ReadonlyMap<string,SoftwareSignature>,
   expected?:SoftwareType,
 ):CheckedSoftwareExpr {
-  const numeric:SoftwareType=expected==='Int'?'Int':'Nat';
+  const numeric:PrimitiveSoftwareType=expected==='Int'?'Int':'Nat';
   const left=checkExpr(leftExpr,locals,signatures,numeric);
-  const right=checkExpr(rightExpr,locals,signatures,left.resultType);
-  if((left.resultType!=='Nat'&&left.resultType!=='Int')||left.resultType!==right.resultType){
+  const leftType=requirePrimitive(left.resultType,'PS_CHECK_BINARY_TYPE: '+operator);
+  const right=checkExpr(rightExpr,locals,signatures,leftType);
+  if((leftType!=='Nat'&&leftType!=='Int')||!softwareTypeEquals(left.resultType,right.resultType)){
     throw new Error('PS_CHECK_BINARY_TYPE: '+operator+' expects matching numeric operands');
   }
-  return {kind:'binary',operator,left,right,resultType:left.resultType};
+  return {kind:'binary',operator,left,right,resultType:leftType};
 }
 
 function checkExpr(
@@ -40,7 +54,7 @@ function checkExpr(
 ):CheckedSoftwareExpr {
   switch(expr.kind){
     case 'nat':{
-      const resultType:SoftwareType=expected==='Int'?'Int':'Nat';
+      const resultType:PrimitiveSoftwareType=expected==='Int'?'Int':'Nat';
       return {kind:'nat',value:BigInt(expr.text.replaceAll('_','')),resultType};
     }
     case 'string':return {kind:'string',value:expr.value,resultType:'String'};
@@ -65,8 +79,8 @@ function checkExpr(
       const args=expr.args.map((arg,index)=>{
         const wanted=signature.params[index]!;
         const checked=checkExpr(arg,locals,signatures,wanted);
-        if(checked.resultType!==wanted){
-          throw new Error("PS_CHECK_CALL_TYPE: argument "+(index+1)+" of '"+expr.callee+"' expects "+wanted+", got "+checked.resultType);
+        if(!softwareTypeEquals(checked.resultType,wanted)){
+          throw new Error("PS_CHECK_CALL_TYPE: argument "+(index+1)+" of '"+expr.callee+"' expects "+softwareTypeToString(wanted)+", got "+softwareTypeToString(checked.resultType));
         }
         return checked;
       });
@@ -90,18 +104,20 @@ function checkExpr(
       if(op==='=='||op==='!='){
         const left=checkExpr(expr.left,locals,signatures);
         const right=checkExpr(expr.right,locals,signatures,left.resultType);
-        if(left.resultType!==right.resultType){
+        if(!softwareTypeEquals(left.resultType,right.resultType)){
           throw new Error('PS_CHECK_EQUALITY_TYPE: '+op+' operands must have the same type');
         }
+        requirePrimitive(left.resultType,'PS_CHECK_EQUALITY_TYPE: '+op);
         return {kind:'binary',operator:op,left,right,resultType:'Bool'};
       }
       if(op==='<'||op==='<='||op==='>'||op==='>='){
         const left=checkExpr(expr.left,locals,signatures);
-        if(left.resultType!=='Nat'&&left.resultType!=='Int'){
+        const leftType=requirePrimitive(left.resultType,'PS_CHECK_BINARY_TYPE: '+op);
+        if(leftType!=='Nat'&&leftType!=='Int'){
           throw new Error('PS_CHECK_BINARY_TYPE: '+op+' expects numeric operands');
         }
-        const right=checkExpr(expr.right,locals,signatures,left.resultType);
-        if(left.resultType!==right.resultType){
+        const right=checkExpr(expr.right,locals,signatures,leftType);
+        if(!softwareTypeEquals(left.resultType,right.resultType)){
           throw new Error('PS_CHECK_BINARY_TYPE: '+op+' expects matching numeric operands');
         }
         return {kind:'binary',operator:op,left,right,resultType:'Bool'};
@@ -116,7 +132,7 @@ function checkExpr(
       if(condition.resultType!=='Bool')throw new Error('PS_CHECK_IF_CONDITION: if condition must be Bool');
       const thenBranch=checkExpr(expr.thenBranch,locals,signatures,expected);
       const elseBranch=checkExpr(expr.elseBranch,locals,signatures,thenBranch.resultType);
-      if(thenBranch.resultType!==elseBranch.resultType){
+      if(!softwareTypeEquals(thenBranch.resultType,elseBranch.resultType)){
         throw new Error('PS_CHECK_IF_BRANCH: if branches must have the same type');
       }
       return {kind:'if',condition,thenBranch,elseBranch,resultType:thenBranch.resultType};
@@ -124,8 +140,8 @@ function checkExpr(
     case 'let':{
       const declaredType=expr.declaredType===undefined?undefined:asType(expr.declaredType);
       const value=checkExpr(expr.value,locals,signatures,declaredType);
-      if(declaredType!==undefined&&value.resultType!==declaredType){
-        throw new Error('PS_CHECK_LET_TYPE: let '+expr.name+' expects '+declaredType+', got '+value.resultType);
+      if(declaredType!==undefined&&!softwareTypeEquals(value.resultType,declaredType)){
+        throw new Error('PS_CHECK_LET_TYPE: let '+expr.name+' expects '+softwareTypeToString(declaredType)+', got '+softwareTypeToString(value.resultType));
       }
       const bindingType=declaredType??value.resultType;
       const bodyLocals=new Map(locals);
@@ -167,8 +183,8 @@ export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule
     });
     const resultType=asType(decl.resultType);
     const body=checkExpr(decl.body,locals,signatures,resultType);
-    if(body.resultType!==resultType){
-      throw new Error('PS_CHECK_DECL_TYPE: '+decl.name+' expects '+resultType+', got '+body.resultType);
+    if(!softwareTypeEquals(body.resultType,resultType)){
+      throw new Error('PS_CHECK_DECL_TYPE: '+decl.name+' expects '+softwareTypeToString(resultType)+', got '+softwareTypeToString(body.resultType));
     }
     return {kind:decl.kind,name:decl.name,params,resultType,body};
   });

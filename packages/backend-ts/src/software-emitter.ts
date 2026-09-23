@@ -5,6 +5,9 @@ import type {
 } from '@proofscript/compiler-ir';
 
 function typeScriptType(type:SoftwareIrType):string {
+  if(typeof type!=='string'){
+    return '('+typeScriptType(type.parameter)+') => '+typeScriptType(type.result);
+  }
   switch(type){
     case 'Nat':
     case 'Int':return 'bigint';

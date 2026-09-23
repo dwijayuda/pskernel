@@ -2,6 +2,7 @@ import {SyntaxError} from '../source.js';
 import type {V061Expr} from './ast.js';
 import {V061ParseContext,spanBetween} from './context.js';
 import {v061BinaryPrecedence} from './operators.js';
+import {parseV061Type} from './type-parser.js';
 
 export class V061ExpressionParser {
   constructor(readonly context:V061ParseContext){}
@@ -33,10 +34,7 @@ export class V061ExpressionParser {
   private parseLet():V061Expr {
     const first=this.context.cursor.expect('let');
     const name=this.context.cursor.expectKind('identifier','let binding name');
-    let declaredType:string|undefined;
-    if(this.context.cursor.consumeIf(':')){
-      declaredType=this.context.cursor.expectKind('identifier','let binding type').text;
-    }
+    const declaredType=this.context.cursor.consumeIf(':')?parseV061Type(this.context):undefined;
     this.context.cursor.expect(':=');
     const value=this.parse();
     this.context.cursor.expect(';');

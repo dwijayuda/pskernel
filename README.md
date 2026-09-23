@@ -10,7 +10,7 @@ The current implementation includes Lean core names/levels/expressions, substitu
 
 The pinned regression stack includes:
 
-- 153 TypeScript kernel/unit tests in the current source tree (last executed direct-suite checkpoint: 97; refreshed execution is pending)
+- 155 TypeScript kernel/unit tests in the current source tree (last executed direct-suite checkpoint: 97; refreshed execution is pending)
 - official Lean 4.34 fresh-module checking
 - official Lean 4.34 adversarial kernel regressions (21 expected-success + 1 expected-rejection)
 - official-vs-TypeScript definitional-equality differential cases (42/42)

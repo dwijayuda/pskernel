@@ -48,10 +48,14 @@ requireDeps('checked-core',['kernel']);
 requireDeps('elab',['tactic']);
 forbidDeps('tactic',['elab']);
 forbidDeps('checked-core',[
-  'syntax','meta','elab','language','erasure','compiler-ir','backend-ts',\n  'wasm-ir','wasm-lowering','backend-wasm',
+  'syntax','meta','elab','language','erasure','compiler-ir','backend-ts',
+  'wasm-ir','wasm-lowering','backend-wasm',
 ]);
 requireDeps('erasure',['checked-core','compiler-ir','kernel']);
-forbidDeps('erasure',[\n  'syntax','meta','elab','language','backend-ts','wasm-ir',\n  'wasm-lowering','backend-wasm','cli',\n]);
+forbidDeps('erasure',[
+  'syntax','meta','elab','language','backend-ts','wasm-ir',
+  'wasm-lowering','backend-wasm','cli',
+]);
 requireDeps('compiler',[
   'checked-core','erasure','compiler-ir','backend-ts','kernel',
   'wasm-lowering','backend-wasm',

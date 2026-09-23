@@ -45,3 +45,7 @@ export * from './v061-reference-elab.js';
 export * from './v061-inductive-elab.js';
 
 export * from './v061-match-elab.js';
+
+export * from './v061-structural-recursion.js';
+export * from './v061-lambda-elab.js';
+export * from './v061-let-elab.js';

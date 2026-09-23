@@ -359,8 +359,8 @@ Do not reorder without repository evidence.
    Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
    instances/priorities only as ProofScript libraries require them.
-4. Land bounded universe-polymorphic constant elaboration, then continue
-   theorem prover v1 with rewrite on the landed ordered multi-goal
+4. Continue theorem prover v1 with rewrite on the landed bounded
+   universe-polymorphic constant elaboration and ordered multi-goal
    apply/refine/constructor/cases/induction foundation.
 5. Implement project/module/import semantics on the checked-core path.
 6. Design and implement explicit npm/JS FFI.

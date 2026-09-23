@@ -252,4 +252,21 @@ console.log('ok - @proofscript/meta structural application unification with roll
   catch(error){unresolved=/unresolved universe metavariable/.test(String(error));}
   equal(unresolved,true);
 }
+{
+  const environment=new Environment();
+  const context=new ExprMetaContext(environment);
+  const universe=context.mkFreshLevel();
+  const left=app(sort(universe),sort(levelZero));
+  const right=app(
+    sort(levelSucc(levelZero)),
+    sort(levelSucc(levelZero)),
+  );
+  equal(context.unify(left,right),false);
+  let rolledBack=false;
+  try{context.validateGroundAssignments();}
+  catch(error){
+    rolledBack=/unresolved universe metavariable/.test(String(error));
+  }
+  equal(rolledBack,true);
+}
 console.log('ok - @proofscript/meta bounded universe metavariable solving');

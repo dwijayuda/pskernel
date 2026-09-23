@@ -598,3 +598,30 @@ parser AST.
 Canonical Lean lowering remains a target printer, not a registered Lean source
 frontend. A `lean-subset` frontend will be registered only when DS2 can parse
 the emitted supported Lean subset back into the same canonical surface module.
+
+## Translation-target dispatch checkpoint
+
+DS1 now separates **input frontend selection** from **output language
+selection**.
+
+```text
+input filename
+   -> SourceFrontendRegistry
+   -> canonical V061 surface module
+   -> TranslationTargetPrinterRegistry
+        ├── ps   -> canonical ProofScript
+        └── lean -> canonical supported Lean
+```
+
+The target registry uses user-facing translation targets `ps|lean`; it is not
+keyed by source frontend ownership. This matters because canonical Lean output
+already exists while Lean input parsing does not.
+
+`psc emit-lean` is the first CLI integration of this split. It selects the
+source frontend from the input path, parses once into the canonical surface,
+then independently requests the Lean target printer. A `.lean` input still
+fails with `PS_FRONTEND_UNAVAILABLE` until DS2 registers a bounded Lean
+parser.
+
+This completes DS1 without changing elaboration, checked-core semantics, proof
+authority, erasure, or backend behavior.

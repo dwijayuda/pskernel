@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-Status: **DS1 in progress; subordinate to the canonical checked-core architecture**
+Status: **DS1 complete; DS2 bounded Lean-subset parser next; subordinate to the canonical checked-core architecture**
 
 ## Objective
 
@@ -205,13 +205,17 @@ now. It must not be registered as a Lean source frontend until a DS2 parser can
 read the emitted subset back. This prevents output capability from being
 misreported as input compatibility.
 
-Remaining DS1 work:
+Final DS1 checkpoint:
 
-- define the target-printer/translation dispatch used by
-  `psc translate --to ps|lean`;
-- keep frontend/source selection independent from semantic elaboration.
+- translation targets are registered independently as user-facing `ps` and
+  `lean` printers;
+- `psc emit-lean` now demonstrates source frontend selection and target
+  printer selection as two independent decisions;
+- canonical Lean output support still does not register a Lean source
+  frontend.
 
-No semantic acceptance changes in DS1.
+DS1 is complete with no semantic acceptance changes. DS2 must now add a
+bounded fail-closed Lean parser before any command accepts `.lean` input.
 
 ### DS2 — Lean-subset parser
 

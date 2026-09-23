@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "psc-ux-mvp+verified-run-json-abi+kernel-tools",
+      "status": "psc-ux-mvp+translation-target-dispatch+verified-run-json-abi+kernel-tools",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -33,6 +33,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "psc emit-lean now resolves input through the source frontend registry and output through the independent translation-target registry; it no longer hard-codes parseV061Module/lowerV061ModuleToLean.",
+        "Because the default source registry still has no lean-subset frontend, emit-lean on `.lean` input fails closed instead of treating emitted Lean capability as parse capability.",
         "Verified filesystem execution now also covers a generic higher-order map plus structurally recursive length over a pskernel-admitted recursive list.",
         "CLI filesystem regression now executes a kernel-admitted recursive PsList plus structurally recursive length through emitted JavaScript and checks length(two elements) = 2.",
         "psc run --verified now decodes arguments from verified IR types: primitive Nat/Int/Bool/String/Unit keep compact CLI forms, while supported structures/ADTs use a strict JSON ABI. Nested Nat/Int use decimal strings, ADTs use a $ctor field, and structured results are encoded back to the same JSON-safe shape.",
@@ -104,11 +106,14 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-canonical-ps-printer+frontend-registry+exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
+      "status": "v061-translation-target-dispatch+canonical-ps-printer+frontend-registry+exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS1 translation targets are explicit and separate from source frontends: target `ps` uses the canonical ProofScript printer and target `lean` uses canonical Lean lowering.",
+        "Both translation target printers are available even though only the ProofScript source frontend is registered; output capability therefore cannot be mistaken for Lean input compatibility.",
+        "Translation target registration rejects duplicate ownership and records canonical output extensions `.ps` / `.lean` for later CLI translate integration.",
         "DS1 canonical ProofScript printing now covers every AST shape produced by the current v0.6.1 parser and is exposed as SourceFrontend.print for the proofscript frontend.",
         "Canonical printing normalizes formatting, declaration semicolons, grouped explicit parameters, D-call/type-call spelling, braced E-forms, and the current flat tactic sequence. It intentionally does not promise comment/whitespace preservation.",
         "A parse -> canonical print -> parse -> canonical print regression is byte-stable across structures, classes, inductives, functions, implicit+explicit binders, if, match, where, records/instances, and theorem tactics.",

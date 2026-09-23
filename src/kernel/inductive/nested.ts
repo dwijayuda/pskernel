@@ -5,7 +5,7 @@ import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
 import { Name, nameAppendIndexAfter, nameEq, nameFromDotted, nameKey, nameToString, strName } from '../../core/name.js';
 import { TypeChecker } from '../type-checker.js';
-import { addOrdinaryInductive, ConstructorDecl, InductiveDecl, InductiveTypeDecl } from './ordinary.js';
+import { addOrdinaryInductive, checkUniformInductiveOccurrences, ConstructorDecl, InductiveDecl, InductiveTypeDecl } from './ordinary.js';
 
 interface OpenParam { readonly id:string; readonly expr:Expr; readonly decl:Extract<LocalDecl,{kind:'local'}> }
 interface AuxFamily { readonly auxName:Name; readonly outerName:Name; readonly outerLevels:readonly import('../../core/level.js').Level[]; readonly fixedParams:readonly Expr[]; readonly nestedTemplate:Expr; readonly ctorMap:Map<string,Name> }
@@ -105,6 +105,7 @@ function copyAuxRecursors(transformed:Environment,finalEnv:Environment,d:Inducti
 
 /** Lean-style nested-inductive preprocessing -> ordinary mutual induction -> restoration/hardening. */
 export function addInductive(env:Environment,d:InductiveDecl):void{
+ checkUniformInductiveOccurrences(d);
  const p=preprocess(env,d);if(p.aux.length===0){addOrdinaryInductive(env,{...d,numNested:0});return;}
  const transformed=env.clone();addOrdinaryInductive(transformed,{...p.decl,numNested:0});
  const recRename=new Map<string,Name>();let idx=1;const mainRec=strName(d.types[0]!.name,'rec');for(const fam of p.aux)recRename.set(nameKey(strName(fam.auxName,'rec')),nameAppendIndexAfter(mainRec,idx++));

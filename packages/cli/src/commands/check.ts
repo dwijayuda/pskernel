@@ -8,6 +8,6 @@ export async function checkCommand(common:CommonArgs){
   return {
     ok:true,
     command:'check',
-    ...baseReport(input.sourcePath,result.checked.structures.length+result.checked.declarations.length,result.surface.featureIds),
+    ...baseReport(input.sourcePath,result.checked.structures.length+result.checked.inductives.length+result.checked.declarations.length,result.surface.featureIds),
   };
 }

@@ -179,7 +179,7 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-structure-ir-mvp",
+      "status": "software-adt-ir-mvp",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
         "kernel",
@@ -188,8 +188,8 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Compiler IR is a distinct typed executable representation lowered from checked software HIR.",
-        "The initial IR preserves primitive runtime types, calls, unary/binary operations, conditionals, and lexical let.",
-        "Kernel Expr erasure/lowering, ADTs, closures, effects, and optimization passes remain later milestones."
+        "IR now represents nominal structures, monomorphic inductive definitions, constructor values, constructor patterns, lexical lets, calls, lambdas, conditionals, and matches.",
+        "Kernel Expr erasure/lowering, generic ADTs, effects, and optimization passes remain later milestones."
       ]
     },
     {
@@ -210,7 +210,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "software-structure-typescript-mvp",
+      "status": "software-adt-typescript-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -219,9 +219,9 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Backend accepts only typed executable compiler IR, not raw ProofScript or checked language HIR.",
-        "Nominal ProofScript structures use module-private unique-symbol brands in emitted TypeScript declarations and constructed values; plain structural lookalikes do not satisfy the generated type.",
-        "Backend emits TypeScript source; the TypeScript Compiler API type-checks it and emits JavaScript, .d.ts, and source maps.",
-        "Nat subtraction/division/modulo preserve current total semantics without duplicating operand evaluation."
+        "Structures use private unique-symbol brands; inductives use private unique-symbol discriminants plus exported constructor objects, preserving nominal typing while providing JS/TS-friendly construction.",
+        "Exhaustive inductive matches compile to single-evaluation switch expressions; Bool matches compile to equivalent conditionals.",
+        "TypeScript Compiler API type-checks generated TS and emits JavaScript, .d.ts, and source maps."
       ]
     },
     {
@@ -229,7 +229,7 @@
       "path": "packages/language",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "v061-structure-checker-mvp",
+      "status": "v061-monomorphic-adt-checker-mvp",
       "packageName": "@proofscript/language",
       "dependsOn": [
         "syntax",
@@ -239,11 +239,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Nominal structure types, field environments, record construction, and projection checking are implemented outside the TCB.",
-        "Structure and value declarations share one global source namespace; conflicting names fail closed.",
-        "Structure-specific semantics live in a dedicated module; the generic expression dispatcher delegates rather than embedding field logic.",
-        "Only explicit named fields are supported by the current structure parser/checker; implicit/instance/generic structure fields remain fail-closed.",
-        "Proof acceptance and Lean-equivalent structure elaboration remain future pskernel/elaborator work."
+        "Software checking has dedicated structure, inductive, and match modules rather than one monolithic semantic switch.",
+        "The executable ADT subset supports monomorphic non-indexed inductives, nullary/payload constructors, recursive nominal fields, and exhaustive constructor matching.",
+        "Generic parameters, indexed families, explicit constructor result types, generated recursors, and positivity checking remain outside this software checker and require elaboration/kernel validation.",
+        "This checker remains outside the TCB; proof acceptance still requires elaboration to pskernel."
       ]
     },
     {

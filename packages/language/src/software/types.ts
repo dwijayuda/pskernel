@@ -63,9 +63,40 @@ export interface CheckedSoftwareStructure {
   readonly fields:readonly CheckedSoftwareStructureField[];
 }
 
+export interface CheckedSoftwareInductiveField {
+  readonly name:string;
+  readonly type:SoftwareType;
+}
+
+export interface CheckedSoftwareConstructor {
+  readonly name:string;
+  readonly qualifiedName:string;
+  readonly fields:readonly CheckedSoftwareInductiveField[];
+}
+
+export interface CheckedSoftwareInductive {
+  readonly name:string;
+  readonly constructors:readonly CheckedSoftwareConstructor[];
+}
+
+export interface CheckedSoftwareConstructorRef {
+  readonly inductive:CheckedSoftwareInductive;
+  readonly constructor:CheckedSoftwareConstructor;
+}
+
 export type CheckedSoftwarePattern =
   | {readonly kind:'bool';readonly value:boolean}
-  | {readonly kind:'wildcard'};
+  | {readonly kind:'wildcard'}
+  | {
+      readonly kind:'constructor';
+      readonly inductive:string;
+      readonly constructor:string;
+      readonly binders:readonly {
+        readonly name:string;
+        readonly field:string;
+        readonly type:SoftwareType;
+      }[];
+    };
 
 export interface CheckedSoftwareMatchAlternative {
   readonly pattern:CheckedSoftwarePattern;
@@ -87,6 +118,13 @@ export type CheckedSoftwareExpr =
   | {
       readonly kind:'record';
       readonly structure:string;
+      readonly fields:readonly {readonly name:string;readonly value:CheckedSoftwareExpr}[];
+      readonly resultType:NominalSoftwareType;
+    }
+  | {
+      readonly kind:'constructor';
+      readonly inductive:string;
+      readonly constructor:string;
       readonly fields:readonly {readonly name:string;readonly value:CheckedSoftwareExpr}[];
       readonly resultType:NominalSoftwareType;
     }
@@ -137,6 +175,7 @@ export interface CheckedSoftwareDeclaration {
 export interface CheckedSoftwareModule {
   readonly kind:'checked-v061-software-module';
   readonly structures:readonly CheckedSoftwareStructure[];
+  readonly inductives:readonly CheckedSoftwareInductive[];
   readonly declarations:readonly CheckedSoftwareDeclaration[];
 }
 

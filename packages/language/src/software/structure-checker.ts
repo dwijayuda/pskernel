@@ -1,19 +1,36 @@
-import type {V061Expr} from '@proofscript/syntax';
-import type {SoftwareExpressionContext} from './check-context.js';
+import type {V061StructureDeclaration} from '@proofscript/syntax';
+import type {SoftwareExpressionContext,CheckSoftwareExpr} from './check-context.js';
 import {nominalTypeNames} from './check-context.js';
 import type {
   CheckedSoftwareExpr,
+  CheckedSoftwareStructure,
   NominalSoftwareType,
   SoftwareType,
 } from './types.js';
 import {softwareTypeEquals,softwareTypeToString} from './types.js';
 import {asSoftwareType} from './type-conversion.js';
 
-export type CheckSoftwareExpr=(
-  expr:V061Expr,
-  context:SoftwareExpressionContext,
-  expected?:SoftwareType,
-)=>CheckedSoftwareExpr;
+export function collectStructures(
+  declarations:readonly V061StructureDeclaration[],
+  nominalNames:ReadonlySet<string>,
+):Map<string,CheckedSoftwareStructure> {
+  const structures=new Map<string,CheckedSoftwareStructure>();
+  for(const declaration of declarations){
+    const seenFields=new Set<string>();
+    const fields=declaration.fields.map((field)=>{
+      if(seenFields.has(field.name)){
+        throw new Error(
+          "PS_CHECK_DUPLICATE_STRUCTURE_FIELD: duplicate field '"+field.name+
+          "' in structure '"+declaration.name+"'",
+        );
+      }
+      seenFields.add(field.name);
+      return {name:field.name,type:asSoftwareType(field.type,nominalNames)};
+    });
+    structures.set(declaration.name,{name:declaration.name,fields});
+  }
+  return structures;
+}
 
 function rootValue(
   name:string,
@@ -46,9 +63,7 @@ export function tryCheckProjectionReference(
       );
     }
     const structure=context.structures.get(type.name);
-    if(structure===undefined){
-      throw new Error("PS_CHECK_UNKNOWN_STRUCTURE: unknown structure '"+type.name+"'");
-    }
+    if(structure===undefined)return undefined;
     const field=structure.fields.find((candidate)=>candidate.name===fieldName);
     if(field===undefined){
       throw new Error(
@@ -61,7 +76,7 @@ export function tryCheckProjectionReference(
 }
 
 export function checkRecordExpression(
-  expr:Extract<V061Expr,{kind:'record'}>,
+  expr:Extract<import('@proofscript/syntax').V061Expr,{kind:'record'}>,
   context:SoftwareExpressionContext,
   check:CheckSoftwareExpr,
 ):CheckedSoftwareExpr {

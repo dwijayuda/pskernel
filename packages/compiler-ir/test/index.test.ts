@@ -93,3 +93,28 @@ console.log('ok - @proofscript/compiler-ir Bool match lowering');
   equal(ir.declarations[0]?.body.kind,'record');
 }
 console.log('ok - @proofscript/compiler-ir nominal structure lowering');
+
+{
+  const maybe={kind:'nominal',name:'MaybeNat'} as const;
+  const ir=lowerCheckedSoftwareModule({
+    kind:'checked-v061-software-module',
+    structures:[],
+    inductives:[{
+      name:'MaybeNat',
+      constructors:[
+        {name:'none',qualifiedName:'MaybeNat.none',fields:[]},
+        {name:'some',qualifiedName:'MaybeNat.some',fields:[{name:'value',type:'Nat'}]},
+      ],
+    }],
+    declarations:[{
+      kind:'const',name:'one',params:[],resultType:maybe,
+      body:{
+        kind:'constructor',inductive:'MaybeNat',constructor:'some',resultType:maybe,
+        fields:[{name:'value',value:{kind:'nat',value:1n,resultType:'Nat'}}],
+      },
+    }],
+  });
+  equal(ir.inductives[0]?.name,'MaybeNat');
+  equal(ir.declarations[0]?.body.kind,'constructor');
+}
+console.log('ok - @proofscript/compiler-ir inductive ADT lowering');

@@ -21,7 +21,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const report={
     ok:true,
     command:'build',
-    ...baseReport(input.sourcePath,result.checked.structures.length+result.checked.declarations.length,result.surface.featureIds),
+    ...baseReport(input.sourcePath,result.checked.structures.length+result.checked.inductives.length+result.checked.declarations.length,result.surface.featureIds),
     outputDirectory:outDir,
     artifacts:{
       typescript:tsPath,

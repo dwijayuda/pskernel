@@ -194,3 +194,48 @@ console.log('ok - @proofscript/language nominal structure checker');
   equal(collided,true);
 }
 console.log('ok - @proofscript/language structure/value global namespace collision');
+
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'inductive MaybeNat where { | none; | some(value : Nat); } '+
+    'const one : MaybeNat := MaybeNat.some(1); '+
+    'function get(value : MaybeNat) : Nat := '+
+    'match value with { | .none => 0; | .some x => x; };',
+  ));
+  equal(checked.inductives.length,1);
+  equal(checked.inductives[0]?.name,'MaybeNat');
+  equal(checked.inductives[0]?.constructors.length,2);
+  equal(checked.declarations[0]?.body.kind,'constructor');
+  const matchBody=checked.declarations[1]?.body;
+  equal(matchBody?.kind,'match');
+  if(matchBody?.kind==='match'){
+    equal(matchBody.alternatives[1]?.pattern.kind,'constructor');
+  }
+}
+{
+  const checked=checkV061SoftwareModule(parseV061Module(
+    'inductive NatList where { | nil; | cons(head : Nat, tail : NatList); } '+
+    'const empty : NatList := NatList.nil;',
+  ));
+  equal(checked.inductives[0]?.constructors[1]?.fields[1]?.type.kind,'nominal');
+}
+{
+  let nonExhaustive=false;
+  try{
+    checkV061SoftwareModule(parseV061Module(
+      'inductive Color where { | red; | blue; } '+
+      'function f(c : Color) : Nat := match c with { | .red => 1; };',
+    ));
+  }catch(error){nonExhaustive=/PS_CHECK_MATCH_EXHAUSTIVE/.test(String(error));}
+  equal(nonExhaustive,true);
+}
+{
+  let generic=false;
+  try{
+    checkV061SoftwareModule(parseV061Module(
+      'inductive Box(α : Type) where { | box(value : α); }',
+    ));
+  }catch(error){generic=/PS_CHECK_INDUCTIVE_PARAMS_UNSUPPORTED/.test(String(error));}
+  equal(generic,true);
+}
+console.log('ok - @proofscript/language monomorphic inductive ADT checker');

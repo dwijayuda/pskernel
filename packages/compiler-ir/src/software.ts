@@ -11,9 +11,29 @@ export interface SoftwareIrStructure {
   readonly fields:readonly {readonly name:string;readonly type:SoftwareIrType}[];
 }
 
+export interface SoftwareIrConstructor {
+  readonly name:string;
+  readonly fields:readonly {readonly name:string;readonly type:SoftwareIrType}[];
+}
+
+export interface SoftwareIrInductive {
+  readonly name:string;
+  readonly constructors:readonly SoftwareIrConstructor[];
+}
+
 export type SoftwareIrPattern =
   | {readonly kind:'bool';readonly value:boolean}
-  | {readonly kind:'wildcard'};
+  | {readonly kind:'wildcard'}
+  | {
+      readonly kind:'constructor';
+      readonly inductive:string;
+      readonly constructor:string;
+      readonly binders:readonly {
+        readonly name:string;
+        readonly field:string;
+        readonly type:SoftwareIrType;
+      }[];
+    };
 
 export interface SoftwareIrMatchAlternative {
   readonly pattern:SoftwareIrPattern;
@@ -32,6 +52,13 @@ export type SoftwareIrExpr =
   | {
       readonly kind:'record';
       readonly structure:string;
+      readonly fields:readonly {readonly name:string;readonly value:SoftwareIrExpr}[];
+      readonly type:SoftwareIrType;
+    }
+  | {
+      readonly kind:'constructor';
+      readonly inductive:string;
+      readonly constructor:string;
       readonly fields:readonly {readonly name:string;readonly value:SoftwareIrExpr}[];
       readonly type:SoftwareIrType;
     }
@@ -81,6 +108,7 @@ export interface SoftwareIrDeclaration {
 export interface SoftwareIrModule {
   readonly kind:'proofscript-software-ir';
   readonly structures:readonly SoftwareIrStructure[];
+  readonly inductives:readonly SoftwareIrInductive[];
   readonly declarations:readonly SoftwareIrDeclaration[];
 }
 
@@ -97,6 +125,14 @@ function lowerExpr(expr:CheckedSoftwareExpr):SoftwareIrExpr {
       return {
         kind:'record',
         structure:expr.structure,
+        fields:expr.fields.map((field)=>({name:field.name,value:lowerExpr(field.value)})),
+        type:expr.resultType,
+      };
+    case 'constructor':
+      return {
+        kind:'constructor',
+        inductive:expr.inductive,
+        constructor:expr.constructor,
         fields:expr.fields.map((field)=>({name:field.name,value:lowerExpr(field.value)})),
         type:expr.resultType,
       };
@@ -155,6 +191,13 @@ export function lowerCheckedSoftwareModule(module:CheckedSoftwareModule):Softwar
     structures:module.structures.map((structure)=>({
       name:structure.name,
       fields:structure.fields.map((field)=>({name:field.name,type:field.type})),
+    })),
+    inductives:module.inductives.map((inductive)=>({
+      name:inductive.name,
+      constructors:inductive.constructors.map((constructor)=>({
+        name:constructor.name,
+        fields:constructor.fields.map((field)=>({name:field.name,type:field.type})),
+      })),
     })),
     declarations:module.declarations.map((decl)=>({
       name:decl.name,

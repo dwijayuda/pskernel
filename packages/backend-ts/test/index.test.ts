@@ -138,3 +138,56 @@ console.log('ok - @proofscript/backend-ts Bool match TypeScript emission');
   equal(compiled.declaration.includes('export interface User'),true);
 }
 console.log('ok - @proofscript/backend-ts nominal structure TypeScript emission');
+
+{
+  const maybe={kind:'nominal',name:'MaybeNat'} as const;
+  const source=emitV061TypeScript(lowerCheckedSoftwareModule({
+    kind:'checked-v061-software-module',
+    structures:[],
+    inductives:[{
+      name:'MaybeNat',
+      constructors:[
+        {name:'none',qualifiedName:'MaybeNat.none',fields:[]},
+        {name:'some',qualifiedName:'MaybeNat.some',fields:[{name:'value',type:'Nat'}]},
+      ],
+    }],
+    declarations:[
+      {
+        kind:'const',name:'one',params:[],resultType:maybe,
+        body:{
+          kind:'constructor',inductive:'MaybeNat',constructor:'some',resultType:maybe,
+          fields:[{name:'value',value:{kind:'nat',value:1n,resultType:'Nat'}}],
+        },
+      },
+      {
+        kind:'function',name:'get',params:[{name:'value',type:maybe}],resultType:'Nat',
+        body:{
+          kind:'match',resultType:'Nat',
+          scrutinee:{kind:'reference',name:'value',resultType:maybe},
+          alternatives:[
+            {
+              pattern:{kind:'constructor',inductive:'MaybeNat',constructor:'none',binders:[]},
+              body:{kind:'nat',value:0n,resultType:'Nat'},
+            },
+            {
+              pattern:{
+                kind:'constructor',inductive:'MaybeNat',constructor:'some',
+                binders:[{name:'x',field:'value',type:'Nat'}],
+              },
+              body:{kind:'reference',name:'x',resultType:'Nat'},
+            },
+          ],
+        },
+      },
+    ],
+  }));
+  equal(source.includes('export type MaybeNat ='),true);
+  equal(source.includes('unique symbol = Symbol("ProofScript.MaybeNat.tag")'),true);
+  equal(source.includes('"some": (__field0: bigint): MaybeNat'),true);
+  equal(source.includes('MaybeNat["some"](1n)'),true);
+  equal(source.includes('switch (__ps$match[__ps_tag_MaybeNat_'),true);
+  const compiled=compileTypeScript(source,'adt.ts');
+  equal(compiled.declaration.includes('export type MaybeNat ='),true);
+  equal(compiled.declaration.includes('export declare const MaybeNat'),true);
+}
+console.log('ok - @proofscript/backend-ts nominal inductive TypeScript emission');

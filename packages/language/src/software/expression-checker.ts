@@ -16,6 +16,11 @@ import {
 import type {SoftwareExpressionContext} from './check-context.js';
 import {nominalTypeNames,withSoftwareLocal} from './check-context.js';
 import {checkRecordExpression,tryCheckProjectionReference} from './structure-checker.js';
+import {
+  tryCheckConstructorCall,
+  tryCheckConstructorReference,
+} from './inductive-checker.js';
+import {checkMatchExpression} from './match-checker.js';
 
 function checkNumericBinary(
   operator:string,
@@ -61,6 +66,9 @@ function checkCall(
     }
     return {kind:'call',callee:expr.callee,args,callStyle:'curried',resultType:current};
   }
+
+  const constructor=tryCheckConstructorCall(expr,context,checkSoftwareExpr);
+  if(constructor!==undefined)return constructor;
 
   const signature=context.signatures.get(expr.callee);
   if(signature===undefined){
@@ -109,64 +117,6 @@ function checkCall(
   return {kind:'call',callee:expr.callee,args,callStyle:'curried',resultType:current};
 }
 
-function checkMatch(
-  expr:Extract<V061Expr,{kind:'match'}>,
-  context:SoftwareExpressionContext,
-  expected?:SoftwareType,
-):CheckedSoftwareExpr {
-  const scrutinee=checkSoftwareExpr(expr.scrutinee,context,'Bool');
-  if(scrutinee.resultType!=='Bool'){
-    throw new Error('PS_CHECK_MATCH_SCRUTINEE: initial executable match subset requires Bool');
-  }
-
-  const alternatives:Extract<CheckedSoftwareExpr,{kind:'match'}>['alternatives'][number][]=[];
-  let seenTrue=false;
-  let seenFalse=false;
-  let wildcard=false;
-  let branchType:SoftwareType|undefined;
-
-  for(const alternative of expr.alternatives){
-    let pattern:Extract<CheckedSoftwareExpr,{kind:'match'}>['alternatives'][number]['pattern'];
-    if(alternative.pattern.kind==='constructor'){
-      throw new Error(
-        'PS_CHECK_MATCH_PATTERN_UNSUPPORTED: constructor patterns require inductive-type elaboration',
-      );
-    }
-    if(alternative.pattern.kind==='wildcard'){
-      if(wildcard||alternatives.length>0){
-        throw new Error(
-          'PS_CHECK_MATCH_PATTERN: wildcard must be the only alternative in the initial executable subset',
-        );
-      }
-      wildcard=true;
-      pattern={kind:'wildcard'};
-    }else{
-      if(wildcard)throw new Error('PS_CHECK_MATCH_PATTERN: no alternatives may follow wildcard');
-      if(alternative.pattern.value){
-        if(seenTrue)throw new Error('PS_CHECK_MATCH_DUPLICATE: duplicate true alternative');
-        seenTrue=true;
-      }else{
-        if(seenFalse)throw new Error('PS_CHECK_MATCH_DUPLICATE: duplicate false alternative');
-        seenFalse=true;
-      }
-      pattern={kind:'bool',value:alternative.pattern.value};
-    }
-
-    const body=checkSoftwareExpr(alternative.body,context,branchType??expected);
-    if(branchType!==undefined&&!softwareTypeEquals(body.resultType,branchType)){
-      throw new Error('PS_CHECK_MATCH_BRANCH: match alternatives must have the same type');
-    }
-    branchType=body.resultType;
-    alternatives.push({pattern,body});
-  }
-
-  if(!wildcard&&(!seenTrue||!seenFalse)){
-    throw new Error('PS_CHECK_MATCH_EXHAUSTIVE: Bool match requires true and false alternatives');
-  }
-  if(branchType===undefined)throw new Error('PS_CHECK_MATCH_EMPTY: match has no alternatives');
-  return {kind:'match',scrutinee,alternatives,resultType:branchType};
-}
-
 function checkLambda(
   expr:Extract<V061Expr,{kind:'lambda'}>,
   context:SoftwareExpressionContext,
@@ -177,7 +127,10 @@ function checkLambda(
   const binders:{name:string;type:SoftwareType}[]=[];
 
   for(const binder of expr.binders){
-    const declared=binder.type===undefined?undefined:asSoftwareType(binder.type,nominalTypeNames(context));
+    const declared=binder.type===undefined?undefined:asSoftwareType(
+      binder.type,
+      nominalTypeNames(context),
+    );
     let binderType:SoftwareType;
     if(expectedCursor!==undefined&&typeof expectedCursor!=='string'&&expectedCursor.kind==='function'){
       if(declared!==undefined&&!softwareTypeEquals(declared,expectedCursor.parameter)){
@@ -233,6 +186,8 @@ export function checkSoftwareExpr(
       if(signature!==undefined&&signature.params.length===0){
         return {kind:'reference',name:expr.name,resultType:signature.result};
       }
+      const constructor=tryCheckConstructorReference(expr.name,context);
+      if(constructor!==undefined)return constructor;
       const projection=tryCheckProjectionReference(expr.name,context);
       if(projection!==undefined)return projection;
       throw new Error("PS_CHECK_UNKNOWN_IDENTIFIER: unknown identifier '"+expr.name+"'");
@@ -241,7 +196,7 @@ export function checkSoftwareExpr(
       return checkRecordExpression(expr,context,checkSoftwareExpr);
     case 'call':return checkCall(expr,context);
     case 'lambda':return checkLambda(expr,context,expected);
-    case 'match':return checkMatch(expr,context,expected);
+    case 'match':return checkMatchExpression(expr,context,expected,checkSoftwareExpr);
     case 'unary':{
       const operand=checkSoftwareExpr(expr.operand,context,'Bool');
       if(operand.resultType!=='Bool')throw new Error('PS_CHECK_UNARY_TYPE: ! expects Bool');
@@ -294,7 +249,10 @@ export function checkSoftwareExpr(
       return {kind:'if',condition,thenBranch,elseBranch,resultType:thenBranch.resultType};
     }
     case 'let':{
-      const declaredType=expr.declaredType===undefined?undefined:asSoftwareType(expr.declaredType,nominalTypeNames(context));
+      const declaredType=expr.declaredType===undefined?undefined:asSoftwareType(
+        expr.declaredType,
+        nominalTypeNames(context),
+      );
       const value=checkSoftwareExpr(expr.value,context,declaredType);
       if(declaredType!==undefined&&!softwareTypeEquals(value.resultType,declaredType)){
         throw new Error(
@@ -303,7 +261,11 @@ export function checkSoftwareExpr(
         );
       }
       const bindingType=declaredType??value.resultType;
-      const body=checkSoftwareExpr(expr.body,withSoftwareLocal(context,expr.name,bindingType),expected);
+      const body=checkSoftwareExpr(
+        expr.body,
+        withSoftwareLocal(context,expr.name,bindingType),
+        expected,
+      );
       return {
         kind:'let',
         name:expr.name,

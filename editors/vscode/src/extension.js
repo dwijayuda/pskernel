@@ -1,7 +1,16 @@
 const vscode=require('vscode');
 const fs=require('node:fs');
 const path=require('node:path');
-const cp=require('node:child_process');
+const {RpcClient}=require('./rpc-client.js');
+const {InfoviewProvider}=require('./infoview.js');
+const {
+  isProofScript,
+  openParams,
+  publishDiagnostics,
+  toLocation,
+  toProtocolPosition,
+  toRange,
+}=require('./protocol.js');
 
 const EXPECTED_PROTOCOL=1;
 let client;
@@ -11,234 +20,18 @@ let statusBar;
 let infoview;
 let selectionTimer;
 
-class RpcClient {
-  constructor(extensionPath){
-    this.extensionPath=extensionPath;
-    this.proc=null;
-    this.buffer=Buffer.alloc(0);
-    this.nextId=1;
-    this.pending=new Map();
-    this.listeners=new Map();
+function resolveServerTarget(extensionPath){
+  const config=vscode.workspace.getConfiguration('proofscript');
+  const configured=config.get('lsp.path');
+  const root=vscode.workspace.workspaceFolders?.[0]?.uri.fsPath??process.cwd();
+  const bundled=path.join(extensionPath,'server','run-lsp.mjs');
+  const target=configured
+    ?(path.isAbsolute(configured)?configured:path.resolve(root,configured))
+    :bundled;
+  if(!fs.existsSync(target)){
+    throw new Error('ProofScript LSP not found: '+target);
   }
-
-  async start(){
-    const config=vscode.workspace.getConfiguration('proofscript');
-    const configured=config.get('lsp.path');
-    const root=vscode.workspace.workspaceFolders?.[0]?.uri.fsPath??process.cwd();
-    const bundled=path.join(this.extensionPath,'server','run-lsp.mjs');
-    const target=configured
-      ?(path.isAbsolute(configured)?configured:path.resolve(root,configured))
-      :bundled;
-    if(!fs.existsSync(target)){
-      throw new Error('ProofScript LSP not found: '+target);
-    }
-    this.proc=cp.spawn(process.execPath,[target],{
-      cwd:root,
-      env:{...process.env,ELECTRON_RUN_AS_NODE:'1'},
-      stdio:['pipe','pipe','pipe'],
-      windowsHide:true,
-    });
-    this.proc.stdout.on('data',(chunk)=>{
-      this.buffer=Buffer.concat([this.buffer,chunk]);
-      this.drain();
-    });
-    this.proc.stderr.on('data',(chunk)=>output.append(chunk.toString()));
-    this.proc.on('exit',(code)=>{
-      output.appendLine('ProofScript LSP exited: '+String(code));
-    });
-    const init=await this.request('initialize',{
-      processId:process.pid,
-      rootUri:vscode.workspace.workspaceFolders?.[0]?.uri.toString()??null,
-      capabilities:{},
-    });
-    const protocol=init?.capabilities?.experimental?.proofscriptProtocolVersion;
-    if(protocol!==EXPECTED_PROTOCOL){
-      throw new Error(
-        'ProofScript LSP protocol mismatch: editor expects '+
-        EXPECTED_PROTOCOL+', server reports '+String(protocol),
-      );
-    }
-    this.notify('initialized',{});
-  }
-
-  drain(){
-    while(true){
-      const headerEnd=this.buffer.indexOf('\r\n\r\n');
-      if(headerEnd<0)return;
-      const header=this.buffer.slice(0,headerEnd).toString();
-      const match=/Content-Length:\s*(\d+)/i.exec(header);
-      if(match===null){
-        this.buffer=this.buffer.slice(headerEnd+4);
-        continue;
-      }
-      const length=Number(match[1]);
-      const start=headerEnd+4;
-      if(this.buffer.length<start+length)return;
-      const message=JSON.parse(
-        this.buffer.slice(start,start+length).toString('utf8'),
-      );
-      this.buffer=this.buffer.slice(start+length);
-      if(message.id!==undefined){
-        const pending=this.pending.get(message.id);
-        if(pending!==undefined){
-          this.pending.delete(message.id);
-          message.error
-            ?pending.reject(new Error(message.error.message))
-            :pending.resolve(message.result);
-        }
-      }else if(message.method!==undefined){
-        for(const listener of this.listeners.get(message.method)??[]){
-          listener(message.params);
-        }
-      }
-    }
-  }
-
-  request(method,params){
-    const id=this.nextId++;
-    return new Promise((resolve,reject)=>{
-      this.pending.set(id,{resolve,reject});
-      this.send({jsonrpc:'2.0',id,method,params});
-    });
-  }
-
-  notify(method,params){
-    this.send({jsonrpc:'2.0',method,params});
-  }
-
-  send(message){
-    if(!this.proc?.stdin?.writable)throw new Error('ProofScript LSP is not running');
-    const body=JSON.stringify(message);
-    this.proc.stdin.write(
-      'Content-Length: '+Buffer.byteLength(body)+'\r\n\r\n'+body,
-    );
-  }
-
-  on(method,listener){
-    const values=this.listeners.get(method)??[];
-    values.push(listener);
-    this.listeners.set(method,values);
-  }
-
-  async stop(){
-    if(this.proc===null)return;
-    try{
-      await Promise.race([
-        this.request('shutdown',{}),
-        new Promise((resolve)=>setTimeout(resolve,400)),
-      ]);
-      this.notify('exit',{});
-    }catch{}
-    try{this.proc.kill();}catch{}
-    this.proc=null;
-  }
-}
-
-class InfoviewProvider {
-  constructor(){
-    this.view=null;
-    this.proof=null;
-    this.status=null;
-  }
-
-  resolveWebviewView(view){
-    this.view=view;
-    this.render();
-  }
-
-  update(proof,status){
-    this.proof=proof;
-    this.status=status;
-    this.render();
-  }
-
-  render(){
-    if(this.view===null)return;
-    const proof=this.proof;
-    const status=this.status;
-    const proofText=proof===null
-      ?'Move the cursor into a theorem.'
-      :escapeHtml(proof.message);
-    const statusText=status===null
-      ?'No document status.'
-      :'Frontend: '+escapeHtml(status.frontend)+
-        ' · Kernel: '+escapeHtml(status.kernel)+
-        ' · Verified: '+String(status.verifiedDeclarations)+'/'+
-        String(status.declarations);
-    const goalText=proof?.initialGoal===undefined
-      ?''
-      :'<h4>Initial elaborated goal</h4><pre>'+
-        escapeHtml([
-          ...proof.initialGoal.locals.map((local)=>
-            renderGoalLocal(local)
-          ),
-          '⊢ '+proof.initialGoal.target,
-        ].join('\n'))+
-        '</pre>';
-    this.view.webview.html=
-      '<!doctype html><html><body>'+
-      '<h3>ProofScript</h3>'+
-      '<p><strong>'+proofText+'</strong></p>'+
-      goalText+
-      '<p>'+statusText+'</p>'+
-      '<hr><p><small>Proof authority: pskernel. '+
-      'Cursor-sensitive tactic snapshots are not implemented yet.</small></p>'+
-      '</body></html>';
-  }
-}
-
-function renderGoalLocal(local){
-  const rendered=local.name+' : '+local.type;
-  if(local.binderInfo==='implicit')return '{'+rendered+'}';
-  if(local.binderInfo==='strictImplicit')return '{{'+rendered+'}}';
-  if(local.binderInfo==='instImplicit')return '['+rendered+']';
-  return rendered;
-}
-
-function escapeHtml(value){
-  return String(value)
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;');
-}
-
-function isProofScript(document){
-  return document?.languageId==='proofscript';
-}
-
-function toProtocolPosition(position){
-  return {line:position.line,character:position.character};
-}
-
-function openParams(document){
-  return {
-    textDocument:{
-      uri:document.uri.toString(),
-      languageId:'proofscript',
-      version:document.version,
-      text:document.getText(),
-    },
-  };
-}
-
-function publishDiagnostics(params){
-  const uri=vscode.Uri.parse(params.uri);
-  const converted=(params.diagnostics??[]).map((item)=>{
-    const range=new vscode.Range(
-      item.range.start.line,item.range.start.character,
-      item.range.end.line,item.range.end.character,
-    );
-    const severity=item.severity===1
-      ?vscode.DiagnosticSeverity.Error
-      :item.severity===2
-        ?vscode.DiagnosticSeverity.Warning
-        :vscode.DiagnosticSeverity.Information;
-    const diagnostic=new vscode.Diagnostic(range,item.message,severity);
-    diagnostic.code=item.code;
-    diagnostic.source='ProofScript';
-    return diagnostic;
-  });
-  diagnostics.set(uri,converted);
+  return {target,root};
 }
 
 async function syncInfoview(editor){
@@ -270,46 +63,44 @@ async function syncInfoview(editor){
   }
 }
 
+function scheduleInfoview(editor,delay){
+  clearTimeout(selectionTimer);
+  selectionTimer=setTimeout(()=>void syncInfoview(editor),delay);
+}
+
 async function startServer(context){
   if(client!==undefined)await client.stop();
-  client=new RpcClient(context.extensionPath);
-  client.on('textDocument/publishDiagnostics',publishDiagnostics);
-  await client.start();
+  const {target,root}=resolveServerTarget(context.extensionPath);
+  client=new RpcClient({target,cwd:root,output});
+  client.on(
+    'textDocument/publishDiagnostics',
+    (params)=>publishDiagnostics(vscode,diagnostics,params),
+  );
+  const init=await client.start(
+    vscode.workspace.workspaceFolders?.[0]?.uri.toString()??null,
+  );
+  const protocol=init?.capabilities?.experimental?.proofscriptProtocolVersion;
+  if(protocol!==EXPECTED_PROTOCOL){
+    await client.stop();
+    throw new Error(
+      'ProofScript LSP protocol mismatch: editor expects '+
+      EXPECTED_PROTOCOL+', server reports '+String(protocol),
+    );
+  }
   for(const document of vscode.workspace.textDocuments){
-    if(isProofScript(document))client.notify('textDocument/didOpen',openParams(document));
+    if(isProofScript(document)){
+      client.notify('textDocument/didOpen',openParams(document));
+    }
   }
   await syncInfoview(vscode.window.activeTextEditor);
 }
 
-async function activate(context){
-  output=vscode.window.createOutputChannel('ProofScript');
-  diagnostics=vscode.languages.createDiagnosticCollection('proofscript');
-  statusBar=vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left,100);
-  statusBar.command='proofscript.showInfoview';
-  infoview=new InfoviewProvider();
-
+function registerDocumentLifecycle(context){
   context.subscriptions.push(
-    output,
-    diagnostics,
-    statusBar,
-    vscode.window.registerWebviewViewProvider(
-      'proofscript.infoview',
-      infoview,
-    ),
-    vscode.commands.registerCommand('proofscript.showInfoview',async()=>{
-      await vscode.commands.executeCommand('proofscript.infoview.focus');
-      await syncInfoview(vscode.window.activeTextEditor);
-    }),
-    vscode.commands.registerCommand('proofscript.restartServer',async()=>{
-      await startServer(context);
-    }),
-    vscode.commands.registerCommand('proofscript.serverInfo',async()=>{
-      const info=await client?.request('proofscript/serverInfo',{});
-      output.appendLine(JSON.stringify(info,null,2));
-      output.show(true);
-    }),
     vscode.workspace.onDidOpenTextDocument((document)=>{
-      if(isProofScript(document))client?.notify('textDocument/didOpen',openParams(document));
+      if(isProofScript(document)){
+        client?.notify('textDocument/didOpen',openParams(document));
+      }
     }),
     vscode.workspace.onDidChangeTextDocument((event)=>{
       if(!isProofScript(event.document))return;
@@ -320,24 +111,23 @@ async function activate(context){
         },
         contentChanges:[{text:event.document.getText()}],
       });
-      clearTimeout(selectionTimer);
-      selectionTimer=setTimeout(
-        ()=>void syncInfoview(vscode.window.activeTextEditor),
-        80,
-      );
+      scheduleInfoview(vscode.window.activeTextEditor,80);
     }),
     vscode.workspace.onDidCloseTextDocument((document)=>{
-      if(isProofScript(document)){
-        client?.notify('textDocument/didClose',{
-          textDocument:{uri:document.uri.toString()},
-        });
-        diagnostics.delete(document.uri);
-      }
+      if(!isProofScript(document))return;
+      client?.notify('textDocument/didClose',{
+        textDocument:{uri:document.uri.toString()},
+      });
+      diagnostics.delete(document.uri);
     }),
     vscode.window.onDidChangeTextEditorSelection((event)=>{
-      clearTimeout(selectionTimer);
-      selectionTimer=setTimeout(()=>void syncInfoview(event.textEditor),60);
+      scheduleInfoview(event.textEditor,60);
     }),
+  );
+}
+
+function registerLanguageProviders(context){
+  context.subscriptions.push(
     vscode.languages.registerCompletionItemProvider('proofscript',{
       provideCompletionItems:async(document,position)=>{
         const result=await client?.request('textDocument/completion',{
@@ -345,14 +135,12 @@ async function activate(context){
           position:toProtocolPosition(position),
         });
         return (result?.items??[]).map((item)=>{
-          const completion=new vscode.CompletionItem(
-            item.label,
-            item.kind===14
-              ?vscode.CompletionItemKind.Keyword
-              :item.kind===7
-                ?vscode.CompletionItemKind.Class
-                :vscode.CompletionItemKind.Function,
-          );
+          const kind=item.kind===14
+            ?vscode.CompletionItemKind.Keyword
+            :item.kind===7
+              ?vscode.CompletionItemKind.Class
+              :vscode.CompletionItemKind.Function;
+          const completion=new vscode.CompletionItem(item.label,kind);
           completion.detail=item.detail;
           return completion;
         });
@@ -364,30 +152,19 @@ async function activate(context){
           textDocument:{uri:document.uri.toString()},
           position:toProtocolPosition(position),
         });
-        if(result===null||result===undefined)return undefined;
-        return new vscode.Location(
-          vscode.Uri.parse(result.uri),
-          new vscode.Range(
-            result.range.start.line,result.range.start.character,
-            result.range.end.line,result.range.end.character,
-          ),
-        );
+        return result===null||result===undefined
+          ?undefined
+          :toLocation(vscode,result);
       },
     }),
     vscode.languages.registerReferenceProvider('proofscript',{
-      provideReferences:async(document,position,context)=>{
+      provideReferences:async(document,position,contextValue)=>{
         const result=await client?.request('textDocument/references',{
           textDocument:{uri:document.uri.toString()},
           position:toProtocolPosition(position),
-          context:{includeDeclaration:context.includeDeclaration},
+          context:{includeDeclaration:contextValue.includeDeclaration},
         })??[];
-        return result.map((item)=>new vscode.Location(
-          vscode.Uri.parse(item.uri),
-          new vscode.Range(
-            item.range.start.line,item.range.start.character,
-            item.range.end.line,item.range.end.character,
-          ),
-        ));
+        return result.map((item)=>toLocation(vscode,item));
       },
     }),
     vscode.languages.registerHoverProvider('proofscript',{
@@ -399,10 +176,7 @@ async function activate(context){
         if(result===null||result===undefined)return undefined;
         return new vscode.Hover(
           new vscode.MarkdownString(result.contents.value),
-          new vscode.Range(
-            result.range.start.line,result.range.start.character,
-            result.range.end.line,result.range.end.character,
-          ),
+          toRange(vscode,result.range),
         );
       },
     }),
@@ -417,24 +191,61 @@ async function activate(context){
           item.kind===12
             ?vscode.SymbolKind.Function
             :vscode.SymbolKind.Variable,
-          new vscode.Range(
-            item.range.start.line,item.range.start.character,
-            item.range.end.line,item.range.end.character,
-          ),
-          new vscode.Range(
-            item.selectionRange.start.line,item.selectionRange.start.character,
-            item.selectionRange.end.line,item.selectionRange.end.character,
-          ),
+          toRange(vscode,item.range),
+          toRange(vscode,item.selectionRange),
         ));
       },
     }),
   );
+}
+
+function registerCommands(context){
+  context.subscriptions.push(
+    vscode.commands.registerCommand('proofscript.showInfoview',async()=>{
+      await vscode.commands.executeCommand('proofscript.infoview.focus');
+      await syncInfoview(vscode.window.activeTextEditor);
+    }),
+    vscode.commands.registerCommand('proofscript.restartServer',async()=>{
+      await startServer(context);
+    }),
+    vscode.commands.registerCommand('proofscript.serverInfo',async()=>{
+      const info=await client?.request('proofscript/serverInfo',{});
+      output.appendLine(JSON.stringify(info,null,2));
+      output.show(true);
+    }),
+  );
+}
+
+async function activate(context){
+  output=vscode.window.createOutputChannel('ProofScript');
+  diagnostics=vscode.languages.createDiagnosticCollection('proofscript');
+  statusBar=vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    100,
+  );
+  statusBar.command='proofscript.showInfoview';
+  infoview=new InfoviewProvider();
+
+  context.subscriptions.push(
+    output,
+    diagnostics,
+    statusBar,
+    vscode.window.registerWebviewViewProvider(
+      'proofscript.infoview',
+      infoview,
+    ),
+  );
+  registerCommands(context);
+  registerDocumentLifecycle(context);
+  registerLanguageProviders(context);
 
   try{
     await startServer(context);
   }catch(error){
     output.appendLine(String(error));
-    vscode.window.showErrorMessage('ProofScript LSP failed to start. See output.');
+    vscode.window.showErrorMessage(
+      'ProofScript LSP failed to start. See output.',
+    );
   }
 }
 

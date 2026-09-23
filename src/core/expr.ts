@@ -37,8 +37,8 @@ function metadataValueEq(a:unknown,b:unknown):boolean{
   }
   if(typeof a==='object'){
     const ao=a as Record<string,unknown>,bo=b as Record<string,unknown>,ak=Object.keys(ao),bk=Object.keys(bo);
-    if(ak.length!==bk.length)return false;
-    return ak.every(k=>Object.prototype.hasOwnProperty.call(bo,k)&&metadataValueEq(ao[k],bo[k]));
+    if(ak.length!==bk.length||!ak.every((k,i)=>k===bk[i]))return false;
+    return ak.every(k=>metadataValueEq(ao[k],bo[k]));
   }
   return false;
 }

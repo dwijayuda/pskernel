@@ -124,3 +124,51 @@ console.log('ok - @proofscript/module TypeScript MVP');
   assert.equal(moduleArtifactSummary(artifact).format,'proofscript-module@2');
 }
 console.log('ok - @proofscript/module checked-admission artifact v2');
+
+{
+  const env=new Environment();
+  const Nat=nameFromDotted('Nat');
+  const hostInc=nameFromDotted('hostInc');
+  env.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const artifact=createCheckedModuleArtifact({
+    module:'External.Test',
+    admissions:[{
+      kind:'external',
+      declaration:{
+        kind:'axiom',
+        name:hostInc,
+        levelParams:[],
+        type:{
+          kind:'forall',
+          name:nameFromDotted('x'),
+          type:constant(Nat),
+          body:constant(Nat),
+          binderInfo:'default',
+        },
+        isUnsafe:true,
+      },
+      binding:{source:'host-lib',importedName:'inc'},
+    }],
+  });
+  assert.equal(artifact.payload.formatVersion,'1.1.0');
+  const loaded=loadModuleArtifact(
+    decodeModuleArtifact(encodeModuleArtifact(artifact)),
+    {env},
+  );
+  assert.equal(
+    loaded.payloadKind,
+    'proofscript-checked-admissions-json',
+  );
+  if(loaded.payloadKind!=='proofscript-checked-admissions-json'){
+    throw new Error('expected checked admissions');
+  }
+  const external=loaded.admissions[0];
+  assert.equal(external?.kind,'external');
+  assert.equal(loaded.env.find(hostInc)?.kind,'axiom');
+}
+console.log('ok - @proofscript/module external admission persistence');

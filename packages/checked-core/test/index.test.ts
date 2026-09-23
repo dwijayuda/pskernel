@@ -286,3 +286,41 @@ console.log('ok - @proofscript/checked-core instance registry metadata');
   equal(rejected,true);
 }
 console.log('ok - @proofscript/checked-core persistent admission codec');
+
+{
+  const base=new Environment();
+  const Nat=nameFromDotted('Nat');
+  const hostInc=nameFromDotted('hostInc');
+  base.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const admissions=[{
+    kind:'external' as const,
+    declaration:{
+      kind:'axiom' as const,
+      name:hostInc,
+      levelParams:[],
+      type:forallE(
+        nameFromDotted('x'),
+        constant(Nat),
+        constant(Nat),
+      ),
+      isUnsafe:true,
+    },
+    binding:{source:'host-lib',importedName:'inc'},
+  }];
+  const encoded=encodeCheckedCoreAdmissions(admissions);
+  equal(encoded.version,2);
+  const decoded=decodeCheckedCoreAdmissions(encoded);
+  const checked=admitCheckedCoreAdmissions(base,decoded);
+  equal(checked.externals.length,1);
+  equal(checked.environment.find(hostInc)?.kind,'axiom');
+  equal(
+    (checked.environment.find(hostInc) as {isUnsafe?:boolean})?.isUnsafe,
+    true,
+  );
+}
+console.log('ok - @proofscript/checked-core external admission codec');

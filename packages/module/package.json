@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Portable deterministic ProofScript checked-module artifacts with integrity and kernel replay.",
   "proofscript": {
-    "status": "checked-admission-artifact-v2",
+    "status": "checked-admission-artifact-v2+external-codec-1.1",
     "phase": "B",
     "trust": "untrusted-support",
     "artifactFormat": "proofscript-module@1|2",

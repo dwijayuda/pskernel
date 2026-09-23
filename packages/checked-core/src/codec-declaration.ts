@@ -1,4 +1,5 @@
 import type {
+  AxiomInfo,
   DefinitionInfo,
   InductiveDecl,
   ReducibilityHints,
@@ -23,6 +24,14 @@ type EncodedHints=
   |{readonly k:'opaque'}
   |{readonly k:'abbrev'}
   |{readonly k:'regular';readonly h:string};
+
+export interface EncodedAxiom {
+  readonly k:'axiom';
+  readonly n:EncodedName;
+  readonly lp:readonly EncodedName[];
+  readonly t:EncodedExpr;
+  readonly u:boolean;
+}
 
 export interface EncodedDefinition {
   readonly k:'definition';
@@ -73,6 +82,27 @@ function decodeHints(value:unknown):ReducibilityHints {
 function decodeSafety(value:unknown):DefinitionInfo['safety'] {
   if(value==='unsafe'||value==='safe'||value==='partial')return value;
   throw new Error('checked-core codec: invalid definition safety');
+}
+
+export function encodeCodecAxiom(info:AxiomInfo):EncodedAxiom {
+  return {
+    k:'axiom',
+    n:encodeCodecName(info.name),
+    lp:info.levelParams.map(encodeCodecName),
+    t:encodeCodecExpr(info.type),
+    u:info.isUnsafe===true,
+  };
+}
+export function decodeCodecAxiom(value:unknown):AxiomInfo {
+  const o=codecObject(value,'axiom');
+  if(o.k!=='axiom')throw new Error('checked-core codec: expected axiom');
+  return {
+    kind:'axiom',
+    name:decodeCodecName(o.n),
+    levelParams:codecArray(o.lp,'axiom.levelParams').map(decodeCodecName),
+    type:decodeCodecExpr(o.t),
+    isUnsafe:codecBool(o.u,'axiom.isUnsafe'),
+  };
 }
 
 export function encodeCodecDefinition(info:DefinitionInfo):EncodedDefinition {

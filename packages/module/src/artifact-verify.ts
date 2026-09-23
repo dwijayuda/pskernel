@@ -38,6 +38,18 @@ export function parseCheckedAdmissionsPayload(
   if(canonicalJson(parsed)+'\n'!==payload.text){
     moduleFail('checked admissions payload is not canonical JSON');
   }
+  if(
+    !moduleObject(parsed)
+    ||(
+      payload.formatVersion==='1.0.0'
+        ?parsed.version!==1
+        :parsed.version!==2
+    )
+  ){
+    moduleFail(
+      'checked admissions payload format/version mismatch',
+    );
+  }
   try{
     return decodeCheckedCoreAdmissions(parsed);
   }catch(error){
@@ -124,7 +136,10 @@ export function verifyModuleArtifact(
   }else{
     if(
       value.payload.kind!=='proofscript-checked-admissions-json'
-      ||value.payload.formatVersion!=='1.0.0'
+      ||(
+        value.payload.formatVersion!=='1.0.0'
+        &&value.payload.formatVersion!=='1.1.0'
+      )
       ||typeof value.payload.text!=='string'
       ||!moduleHex256(value.payload.integrity)
     ){

@@ -29,18 +29,26 @@ export const natLit = (value: bigint | number): Expr => ({ kind: 'lit', literal:
 export const strLit = (value: string): Expr => ({ kind: 'lit', literal: { kind: 'string', value } });
 
 function metadataValueEq(a:unknown,b:unknown):boolean{
-  if(Object.is(a,b))return true;
-  if(typeof a!==typeof b||a===null||b===null)return false;
-  if(Array.isArray(a)||Array.isArray(b)){
-    if(!Array.isArray(a)||!Array.isArray(b)||a.length!==b.length)return false;
-    return a.every((x,i)=>metadataValueEq(x,b[i]));
+  const todo:[unknown,unknown][]=[[a,b]];
+  while(todo.length){
+    const [x,y]=todo.pop()!;
+    if(Object.is(x,y))continue;
+    if(typeof x!==typeof y||x===null||y===null)return false;
+    if(Array.isArray(x)||Array.isArray(y)){
+      if(!Array.isArray(x)||!Array.isArray(y)||x.length!==y.length)return false;
+      for(let i=x.length-1;i>=0;i--)todo.push([x[i],y[i]]);
+      continue;
+    }
+    if(typeof x==='object'){
+      const xo=x as Record<string,unknown>,yo=y as Record<string,unknown>,xk=Object.keys(xo),yk=Object.keys(yo);
+      if(xk.length!==yk.length)return false;
+      for(let i=0;i<xk.length;i++)if(xk[i]!==yk[i])return false;
+      for(let i=xk.length-1;i>=0;i--){const k=xk[i]!;todo.push([xo[k],yo[k]]);}
+      continue;
+    }
+    return false;
   }
-  if(typeof a==='object'){
-    const ao=a as Record<string,unknown>,bo=b as Record<string,unknown>,ak=Object.keys(ao),bk=Object.keys(bo);
-    if(ak.length!==bk.length||!ak.every((k,i)=>k===bk[i]))return false;
-    return ak.every(k=>metadataValueEq(ao[k],bo[k]));
-  }
-  return false;
+  return true;
 }
 
 
@@ -66,21 +74,47 @@ export function appView(e: Expr): { fn: Expr; args: readonly Expr[] } { return {
 export function stripMData(e: Expr): Expr { while(e.kind==='mdata') e=e.expr; return e; }
 
 export function exprEq(a: Expr, b: Expr): boolean {
-  if (a === b) return true; if (a.kind !== b.kind) return false;
-  switch(a.kind){
-    case 'bvar': return b.kind==='bvar'&&a.index===b.index;
-    case 'fvar': return b.kind==='fvar'&&a.id===b.id;
-    case 'mvar': return b.kind==='mvar'&&a.id===b.id;
-    case 'sort': return b.kind==='sort' && JSON.stringify(a.level, (_k,v)=>typeof v==='bigint'?v.toString():v)===JSON.stringify(b.level,(_k,v)=>typeof v==='bigint'?v.toString():v);
-    case 'const': return b.kind==='const'&&nameEq(a.name,b.name)&&a.levels.length===b.levels.length&&a.levels.every((x,i)=>JSON.stringify(x,(_k,v)=>typeof v==='bigint'?v.toString():v)===JSON.stringify(b.levels[i],(_k,v)=>typeof v==='bigint'?v.toString():v));
-    case 'app': return b.kind==='app'&&exprEq(a.fn,b.fn)&&exprEq(a.arg,b.arg);
-    case 'lam': return b.kind==='lam'&&a.binderInfo===b.binderInfo&&exprEq(a.type,b.type)&&exprEq(a.body,b.body);
-    case 'forall': return b.kind==='forall'&&a.binderInfo===b.binderInfo&&exprEq(a.type,b.type)&&exprEq(a.body,b.body);
-    case 'let': return b.kind==='let'&&(a.nondep??false)===(b.nondep??false)&&exprEq(a.type,b.type)&&exprEq(a.value,b.value)&&exprEq(a.body,b.body);
-    case 'lit': return b.kind==='lit'&&a.literal.kind===b.literal.kind&&(a.literal.kind==='nat'?a.literal.value===(b.literal as {kind:'nat';value:bigint}).value:a.literal.value===(b.literal as {kind:'string';value:string}).value);
-    case 'mdata': return b.kind==='mdata'&&metadataValueEq(a.data,b.data)&&exprEq(a.expr,b.expr);
-    case 'proj': return b.kind==='proj'&&nameEq(a.typeName,b.typeName)&&a.index===b.index&&exprEq(a.expr,b.expr);
+  const todo:[Expr,Expr][]=[[a,b]];
+  while(todo.length){
+    const [x,y]=todo.pop()!;
+    if(x===y)continue;
+    if(x.kind!==y.kind)return false;
+    switch(x.kind){
+      case'bvar':if(y.kind!=='bvar'||x.index!==y.index)return false;break;
+      case'fvar':if(y.kind!=='fvar'||x.id!==y.id)return false;break;
+      case'mvar':if(y.kind!=='mvar'||x.id!==y.id)return false;break;
+      case'sort':if(y.kind!=='sort'||!levelEqStructural(x.level,y.level))return false;break;
+      case'const':
+        if(y.kind!=='const'||!nameEq(x.name,y.name)||x.levels.length!==y.levels.length)return false;
+        for(let i=0;i<x.levels.length;i++)if(!levelEqStructural(x.levels[i]!,y.levels[i]!))return false;
+        break;
+      case'app':
+        if(y.kind!=='app')return false;
+        todo.push([x.arg,y.arg],[x.fn,y.fn]);break;
+      case'lam':
+        if(y.kind!=='lam'||x.binderInfo!==y.binderInfo)return false;
+        todo.push([x.body,y.body],[x.type,y.type]);break;
+      case'forall':
+        if(y.kind!=='forall'||x.binderInfo!==y.binderInfo)return false;
+        todo.push([x.body,y.body],[x.type,y.type]);break;
+      case'let':
+        if(y.kind!=='let'||(x.nondep??false)!==(y.nondep??false))return false;
+        todo.push([x.body,y.body],[x.value,y.value],[x.type,y.type]);break;
+      case'lit':
+        if(y.kind!=='lit'||x.literal.kind!==y.literal.kind)return false;
+        if(x.literal.kind==='nat'){
+          if(x.literal.value!==(y.literal as {kind:'nat';value:bigint}).value)return false;
+        }else if(x.literal.value!==(y.literal as {kind:'string';value:string}).value)return false;
+        break;
+      case'mdata':
+        if(y.kind!=='mdata'||!metadataValueEq(x.data,y.data))return false;
+        todo.push([x.expr,y.expr]);break;
+      case'proj':
+        if(y.kind!=='proj'||!nameEq(x.typeName,y.typeName)||x.index!==y.index)return false;
+        todo.push([x.expr,y.expr]);break;
+    }
   }
+  return true;
 }
 
 
@@ -140,23 +174,46 @@ export function exprLeanEq(a:Expr,b:Expr):boolean{
 
 /** Kernel-generated metadata comparison: binder display names and mdata placement are non-semantic; binder annotations remain significant. */
 export function exprKernelMetadataEq(a: Expr, b: Expr): boolean {
-  if(a.kind==='mdata') return exprKernelMetadataEq(a.expr,b);
-  if(b.kind==='mdata') return exprKernelMetadataEq(a,b.expr);
-  if(a===b) return true;
-  if(a.kind!==b.kind) return false;
-  switch(a.kind){
-    case 'bvar': return b.kind==='bvar'&&a.index===b.index;
-    case 'fvar': return b.kind==='fvar'&&a.id===b.id;
-    case 'mvar': return b.kind==='mvar'&&a.id===b.id;
-    case 'sort': return b.kind==='sort'&&JSON.stringify(a.level,(_k,v)=>typeof v==='bigint'?v.toString():v)===JSON.stringify(b.level,(_k,v)=>typeof v==='bigint'?v.toString():v);
-    case 'const': return b.kind==='const'&&nameEq(a.name,b.name)&&a.levels.length===b.levels.length&&a.levels.every((x,i)=>JSON.stringify(x,(_k,v)=>typeof v==='bigint'?v.toString():v)===JSON.stringify(b.levels[i],(_k,v)=>typeof v==='bigint'?v.toString():v));
-    case 'app': return b.kind==='app'&&exprKernelMetadataEq(a.fn,b.fn)&&exprKernelMetadataEq(a.arg,b.arg);
-    case 'lam': return b.kind==='lam'&&a.binderInfo===b.binderInfo&&exprKernelMetadataEq(a.type,b.type)&&exprKernelMetadataEq(a.body,b.body);
-    case 'forall': return b.kind==='forall'&&a.binderInfo===b.binderInfo&&exprKernelMetadataEq(a.type,b.type)&&exprKernelMetadataEq(a.body,b.body);
-    case 'let': return b.kind==='let'&&(a.nondep??false)===(b.nondep??false)&&exprKernelMetadataEq(a.type,b.type)&&exprKernelMetadataEq(a.value,b.value)&&exprKernelMetadataEq(a.body,b.body);
-    case 'lit': return b.kind==='lit'&&a.literal.kind===b.literal.kind&&(a.literal.kind==='nat'?a.literal.value===(b.literal as {kind:'nat';value:bigint}).value:a.literal.value===(b.literal as {kind:'string';value:string}).value);
-    case 'proj': return b.kind==='proj'&&nameEq(a.typeName,b.typeName)&&a.index===b.index&&exprKernelMetadataEq(a.expr,b.expr);
+  const todo:[Expr,Expr][]=[[a,b]];
+  while(todo.length){
+    let [x,y]=todo.pop()!;
+    while(x.kind==='mdata')x=x.expr;
+    while(y.kind==='mdata')y=y.expr;
+    if(x===y)continue;
+    if(x.kind!==y.kind)return false;
+    switch(x.kind){
+      case'bvar':if(y.kind!=='bvar'||x.index!==y.index)return false;break;
+      case'fvar':if(y.kind!=='fvar'||x.id!==y.id)return false;break;
+      case'mvar':if(y.kind!=='mvar'||x.id!==y.id)return false;break;
+      case'sort':if(y.kind!=='sort'||!levelEqStructural(x.level,y.level))return false;break;
+      case'const':
+        if(y.kind!=='const'||!nameEq(x.name,y.name)||x.levels.length!==y.levels.length)return false;
+        for(let i=0;i<x.levels.length;i++)if(!levelEqStructural(x.levels[i]!,y.levels[i]!))return false;
+        break;
+      case'app':
+        if(y.kind!=='app')return false;
+        todo.push([x.arg,y.arg],[x.fn,y.fn]);break;
+      case'lam':
+        if(y.kind!=='lam'||x.binderInfo!==y.binderInfo)return false;
+        todo.push([x.body,y.body],[x.type,y.type]);break;
+      case'forall':
+        if(y.kind!=='forall'||x.binderInfo!==y.binderInfo)return false;
+        todo.push([x.body,y.body],[x.type,y.type]);break;
+      case'let':
+        if(y.kind!=='let'||(x.nondep??false)!==(y.nondep??false))return false;
+        todo.push([x.body,y.body],[x.value,y.value],[x.type,y.type]);break;
+      case'lit':
+        if(y.kind!=='lit'||x.literal.kind!==y.literal.kind)return false;
+        if(x.literal.kind==='nat'){
+          if(x.literal.value!==(y.literal as {kind:'nat';value:bigint}).value)return false;
+        }else if(x.literal.value!==(y.literal as {kind:'string';value:string}).value)return false;
+        break;
+      case'proj':
+        if(y.kind!=='proj'||!nameEq(x.typeName,y.typeName)||x.index!==y.index)return false;
+        todo.push([x.expr,y.expr]);break;
+    }
   }
+  return true;
 }
 
 

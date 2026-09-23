@@ -48,6 +48,7 @@ test('deep structural traversals avoid the JavaScript call stack',()=>{
  let e:any=bvar(0);
  for(let i=0;i<12000;i++)e=lam(nameFromDotted('x'),constant(N.Nat),e);
  assert(!hasMVar(e));assert(!hasFVar(e));assert(!hasLooseBVar(e));
+ const eClone=lift(e,0,0);assert(exprEq(e,eClone),'deep strong expression equality must be stack-safe');assert(exprKernelMetadataEq(e,eClone),'deep generated-metadata equality must be stack-safe');
  const deepKey=exprKey(e);assert(deepKey.startsWith('L(')&&deepKey.endsWith('b0'+')'.repeat(12000)),'deep nested-inductive expression keys must be stack-safe');
  const lifted=lift(e,1,0);
  const inst=instantiate(lifted,[natLit(0)]);

@@ -226,7 +226,10 @@ export class TypeChecker {
     let x=a,y=b;while(x.kind==='app'&&y.kind==='app'){if(!this.isDefEq(x.arg,y.arg))return false;x=x.fn;y=y.fn;}return x.kind!=='app'&&y.kind!=='app';
   }
   private defEqApp(a:Expr,b:Expr):boolean{
-    const av=appView(a),bv=appView(b);if(av.args.length!==bv.args.length)return false;if(!this.isDefEq(av.fn,bv.fn))return false;for(let i=0;i<av.args.length;i++)if(!this.isDefEq(av.args[i]!,bv.args[i]!))return false;return true;
+    const av=appView(a),bv=appView(b);
+    // Match Lean 4.34 evaluation order exactly: compare heads before rejecting arity mismatch.
+    // Defeq is intentionally incomplete, so observable cache/evaluation history is part of parity.
+    if(!this.isDefEq(av.fn,bv.fn))return false;if(av.args.length!==bv.args.length)return false;for(let i=0;i<av.args.length;i++)if(!this.isDefEq(av.args[i]!,bv.args[i]!))return false;return true;
   }
   private deltaStep(a:Expr,b:Expr):{a:Expr;b:Expr;equal?:boolean}|null{
     const af=getAppFn(a),bf=getAppFn(b);const ai=af.kind==='const'?deltaInfo(this.env.find(af.name)):null,bi=bf.kind==='const'?deltaInfo(this.env.find(bf.name)):null;

@@ -523,13 +523,13 @@
       "path": "packages/wasm-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w1-bool-unit-ir-mvp",
+      "status": "w2-fixed-width-abi-ir",
       "packageName": "@proofscript/wasm-ir",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
         "ProofScript-owned typed WasmIR is independent of Binaryen and carries no proof authority.",
-        "W1 models i32 Bool/control values and explicit first-order calls/locals while reserving i64/f32/f64 for later semantically justified representations."
+        "W2 preserves logical Bool/UInt8/UInt16/UInt32/UInt64 ABI types separately from physical i32/i64 representation."
       ]
     },
     {
@@ -537,7 +537,7 @@
       "path": "packages/wasm-lowering",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w1-bool-unit-lowering-mvp",
+      "status": "w2-fixed-width-uint-lowering",
       "packageName": "@proofscript/wasm-lowering",
       "dependsOn": [
         "compiler-ir",
@@ -545,7 +545,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Lowering consumes only verified compiler IR and fails closed for Nat, Int, String, named runtime data, generics, lambdas/closures, structures, and ADTs in W1.",
+        "Lowering consumes only verified compiler IR; fixed-width UInt values lower to i32/i64 with UInt8/UInt16 boundary masking.",
         "Nat and Int explicitly reject rather than narrowing arbitrary-precision Lean semantics to i64."
       ]
     },
@@ -554,7 +554,7 @@
       "path": "packages/backend-wasm",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w1-binaryen-bool-unit-mvp",
+      "status": "w2-binaryen-fixed-width-js-abi",
       "packageName": "@proofscript/backend-wasm",
       "dependsOn": [
         "wasm-ir"
@@ -562,7 +562,7 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Binaryen 132.0.0 is an exact-pinned untrusted emitter/validator dependency.",
-        "The first executable gate emits and runs an exported Bool not function and checks both canonical and optimized WebAssembly."
+        "W2 emits raw canonical Wasm plus a JS host adapter that restores unsigned ProofScript values across the signed WebAssembly JS i32/i64 bridge."
       ]
     },
     {
@@ -570,7 +570,7 @@
       "path": "packages/compiler",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "checked-core-to-js-generic-structure+structural-recursion+wasm-w1-mvp",
+      "status": "checked-core-to-js-generic-structure+structural-recursion+wasm-w2-mvp",
       "packageName": "@proofscript/compiler",
       "dependsOn": [
         "checked-core",
@@ -594,7 +594,8 @@
         "The verified compiler now covers construction and elimination of non-recursive unindexed generic ADTs through kernel-admitted constructors/recursors.",
         "The verified compiler now carries direct recursive ADTs and primitive structurally recursive functions—with invariant runtime parameters—from pskernel recursors to ordinary TypeScript/JavaScript recursion.",
         "Canonical verified compilation now carries class dictionaries through the same structure IR/runtime representation; locally synthesized instances become ordinary checked runtime arguments.",
-        "W1 exposes checked-core -> erasure -> verified IR -> WasmIR -> Binaryen orchestration; unsupported Wasm runtime features remain fail-closed."
+        "W1 exposes checked-core -> erasure -> verified IR -> WasmIR -> Binaryen orchestration; unsupported Wasm runtime features remain fail-closed.",
+        "W2 preserves fixed-width UInt semantics across the JS-hosted Wasm ABI while keeping raw Wasm bit representations i32/i64."
       ]
     },
     {

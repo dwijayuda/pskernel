@@ -26,7 +26,9 @@ export interface NativeEvaluator {
  * trusted provider. Returns null when `e` is not a native-reduction marker. */
 export function reduceNative(env:Environment,e:Expr,evaluator?:NativeEvaluator):Expr|null {
   const {fn,args}=appView(e);
-  if(fn.kind!=='const'||args.length!==1||args[0]!.kind!=='const')return null;
+  if(fn.kind!=='const'||fn.levels.length!==0||args.length!==1||args[0]!.kind!=='const')return null;
+  // Lean 4.34 compares the immediate marker function against persistent,
+  // level-free constants Lean.reduceBool / Lean.reduceNat.
   const isBool=nameEq(fn.name,N.LeanReduceBool),isNat=nameEq(fn.name,N.LeanReduceNat);
   if(!isBool&&!isNat)return null;
   const kind:NativeReductionKind=isBool?'bool':'nat';

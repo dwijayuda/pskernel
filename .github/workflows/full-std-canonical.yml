@@ -4,12 +4,21 @@ name: Canonical Full Std replay
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, kernel/lean434-study-hardening]
     paths:
       - ".github/workflows/full-std-canonical.yml"
+      - "scripts/module-stream-oracle.mjs"
+      - "scripts/full-std-oracle.mjs"
+      - "src/core/**"
+      - "src/kernel/**"
+      - "src/integration/lean4export.ts"
 
 permissions:
   contents: read
+
+concurrency:
+  group: canonical-full-std-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   std:
@@ -28,8 +37,9 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
+      - run: npm run check:oracle-syntax
       - run: npm run build
       - name: Canonical one-pass Std replay
         env:
-          PSKERNEL_STD_HEAP_MIB: "6144"
+          PSKERNEL_STD_HEAP_MIB: "5632"
         run: npm run oracle:std-full

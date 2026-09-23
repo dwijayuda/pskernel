@@ -39,15 +39,17 @@ function emitLiteral(value:bigint|string|boolean|undefined):string {
   return JSON.stringify(value);
 }
 
-function emitExpr(expr:VerifiedIrExpr):string {
+type BrandMap=ReadonlyMap<string,string>;
+
+function emitExpr(expr:VerifiedIrExpr,brands:BrandMap):string {
   switch(expr.kind){
     case 'literal':
       return emitLiteral(expr.value);
     case 'var':
       return expr.name;
     case 'intrinsic':{
-      const left=emitExpr(expr.args[0]!);
-      const right=emitExpr(expr.args[1]!);
+      const left=emitExpr(expr.args[0]!,brands);
+      const right=emitExpr(expr.args[1]!,brands);
       if(expr.operation==='nat.add')return '('+left+' + '+right+')';
       if(expr.operation==='nat.mul')return '('+left+' * '+right+')';
       if(expr.operation==='nat.le')return '('+left+' <= '+right+')';
@@ -57,21 +59,110 @@ function emitExpr(expr:VerifiedIrExpr):string {
         left+', '+right+')';
     }
     case 'call':
-      return emitExpr(expr.fn)+'('+
-        expr.args.map(emitExpr).join(', ')+')';
+      return emitExpr(expr.fn,brands)+'('+
+        expr.args.map((arg)=>emitExpr(arg,brands)).join(', ')+')';
     case 'lambda':
       return '('+
         expr.parameters.map((parameter)=>
           parameter.name+': '+emitType(parameter.type)
-        ).join(', ')+') => '+emitExpr(expr.body);
+        ).join(', ')+') => '+emitExpr(expr.body,brands);
     case 'let':
-      return '(() => { const '+expr.name+' = '+emitExpr(expr.value)+
-        '; return '+emitExpr(expr.body)+'; })()';
+      return '(() => { const '+expr.name+' = '+emitExpr(expr.value,brands)+
+        '; return '+emitExpr(expr.body,brands)+'; })()';
     case 'if':
-      return '('+emitExpr(expr.condition)+' ? '+
-        emitExpr(expr.thenBranch)+' : '+
-        emitExpr(expr.elseBranch)+')';
+      return '('+emitExpr(expr.condition,brands)+' ? '+
+        emitExpr(expr.thenBranch,brands)+' : '+
+        emitExpr(expr.elseBranch,brands)+')';
+    case 'record':{
+      const brand=brands.get(expr.structure);
+      if(brand===undefined){
+        throw new Error(
+          "PS_TS_UNKNOWN_STRUCTURE: '"+expr.structure+"'",
+        );
+      }
+      const fields=expr.fields.map((field)=>
+        field.name+': '+emitExpr(field.value,brands)
+      );
+      return '{ ['+brand+']: true'+
+        (fields.length===0?'':', '+fields.join(', '))+
+        ' }';
+    }
+    case 'projection':
+      return emitExpr(expr.target,brands)+'.'+expr.field;
   }
+}
+
+function buildBrandMap(module:VerifiedIrModule):ReadonlyMap<string,string> {
+  const used=new Set(module.declarations.map((item)=>item.name));
+  for(const structure of module.structures??[])used.add(structure.name);
+  const result=new Map<string,string>();
+  let index=0;
+  for(const structure of module.structures??[]){
+    let candidate='__ps$brand
+
+export function emitVerifiedTypeScript(
+  module:VerifiedIrModule,
+):string {
+  validateVerifiedIrModule(module);
+  const lines=[
+    '// generated from pskernel-admitted ProofScript checked core',
+  ];
+  const brands=buildBrandMap(module);
+
+  for(const structure of module.structures??[]){
+    const brand=brands.get(structure.name)!;
+    lines.push(
+      'const '+brand+': unique symbol = Symbol('+
+      JSON.stringify('ProofScript.'+structure.name)+');',
+    );
+    lines.push(
+      'export interface '+structure.name+' { '+
+      'readonly ['+brand+']: true; '+
+      structure.fields.map((field)=>
+        'readonly '+field.name+': '+emitType(field.type)+';'
+      ).join(' ')+
+      ' }',
+    );
+  }
+
+  for(const declaration of module.declarations){
+    const generics=declaration.typeParameters.length===0
+      ?''
+      :'<'+declaration.typeParameters.map((item)=>item.name).join(', ')+'>';
+
+    if(declaration.parameters.length===0){
+      if(declaration.typeParameters.length>0){
+        throw new Error(
+          "PS_TS_GENERIC_VALUE_UNSUPPORTED: '"+declaration.name+
+          "' has erased type parameters but no runtime parameters",
+        );
+      }
+      lines.push(
+        'export const '+declaration.name+': '+
+        emitType(declaration.resultType)+' = '+
+        emitExpr(declaration.body,brands)+';',
+      );
+      continue;
+    }
+
+    const parameters=declaration.parameters.map((parameter)=>
+      parameter.name+': '+emitType(parameter.type)
+    ).join(', ');
+    lines.push(
+      'export function '+declaration.name+generics+
+      '('+parameters+'): '+emitType(declaration.resultType)+
+      ' { return '+emitExpr(declaration.body,brands)+'; }',
+    );
+  }
+
+  return lines.join('\n')+'\n';
+}
++index++;
+    while(used.has(candidate))candidate+='_';
+    used.add(candidate);
+    result.set(structure.name,candidate);
+  }
+  return result;
 }
 
 export function emitVerifiedTypeScript(
@@ -97,7 +188,7 @@ export function emitVerifiedTypeScript(
       lines.push(
         'export const '+declaration.name+': '+
         emitType(declaration.resultType)+' = '+
-        emitExpr(declaration.body)+';',
+        emitExpr(declaration.body,brands)+';',
       );
       continue;
     }
@@ -108,7 +199,7 @@ export function emitVerifiedTypeScript(
     lines.push(
       'export function '+declaration.name+generics+
       '('+parameters+'): '+emitType(declaration.resultType)+
-      ' { return '+emitExpr(declaration.body)+'; }',
+      ' { return '+emitExpr(declaration.body,brands)+'; }',
     );
   }
 

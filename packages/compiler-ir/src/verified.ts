@@ -18,6 +18,16 @@ export type VerifiedIrType =
 
 export type VerifiedIrLiteral=bigint|string|boolean|undefined;
 
+export interface VerifiedIrStructureField {
+  readonly name:string;
+  readonly type:VerifiedIrType;
+}
+
+export interface VerifiedIrStructure {
+  readonly name:string;
+  readonly fields:readonly VerifiedIrStructureField[];
+}
+
 export type VerifiedIrExpr =
   | {readonly kind:'literal';readonly value:VerifiedIrLiteral}
   | {readonly kind:'var';readonly name:string}
@@ -50,6 +60,19 @@ export type VerifiedIrExpr =
       readonly condition:VerifiedIrExpr;
       readonly thenBranch:VerifiedIrExpr;
       readonly elseBranch:VerifiedIrExpr;
+    }
+  | {
+      readonly kind:'record';
+      readonly structure:string;
+      readonly fields:readonly {
+        readonly name:string;
+        readonly value:VerifiedIrExpr;
+      }[];
+    }
+  | {
+      readonly kind:'projection';
+      readonly target:VerifiedIrExpr;
+      readonly field:string;
     };
 
 export interface VerifiedIrTypeParameter {
@@ -71,6 +94,7 @@ export interface VerifiedIrDeclaration {
 
 export interface VerifiedIrModule {
   readonly kind:'proofscript-verified-ir';
+  readonly structures?:readonly VerifiedIrStructure[];
   readonly declarations:readonly VerifiedIrDeclaration[];
 }
 
@@ -82,7 +106,48 @@ export function assertVerifiedIrIdentifier(name:string):void {
   }
 }
 
+function validateVerifiedIrType(type:VerifiedIrType):void {
+  switch(type.kind){
+    case 'unknown':
+    case 'primitive':
+      return;
+    case 'typeParameter':
+      assertVerifiedIrIdentifier(type.name);
+      return;
+    case 'named':
+      assertVerifiedIrIdentifier(type.name);
+      for(const arg of type.args)validateVerifiedIrType(arg);
+      return;
+    case 'function':
+      for(const parameter of type.parameters)validateVerifiedIrType(parameter);
+      validateVerifiedIrType(type.result);
+      return;
+  }
+}
+
 export function validateVerifiedIrModule(module:VerifiedIrModule):true {
+  const structures=new Set<string>();
+  for(const structure of module.structures??[]){
+    assertVerifiedIrIdentifier(structure.name);
+    if(structures.has(structure.name)){
+      throw new Error(
+        "duplicate verified IR structure '"+structure.name+"'",
+      );
+    }
+    structures.add(structure.name);
+    const fields=new Set<string>();
+    for(const field of structure.fields){
+      assertVerifiedIrIdentifier(field.name);
+      if(fields.has(field.name)){
+        throw new Error(
+          "duplicate verified IR structure field '"+field.name+"'",
+        );
+      }
+      fields.add(field.name);
+      validateVerifiedIrType(field.type);
+    }
+  }
+
   const declarations=new Set<string>();
   for(const declaration of module.declarations){
     assertVerifiedIrIdentifier(declaration.name);
@@ -113,7 +178,9 @@ export function validateVerifiedIrModule(module:VerifiedIrModule):true {
         );
       }
       runtimeParameters.add(parameter.name);
+      validateVerifiedIrType(parameter.type);
     }
+    validateVerifiedIrType(declaration.resultType);
     validateVerifiedIrExpr(declaration.body);
   }
   return true;
@@ -153,6 +220,25 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
       validateVerifiedIrExpr(expr.condition);
       validateVerifiedIrExpr(expr.thenBranch);
       validateVerifiedIrExpr(expr.elseBranch);
+      return;
+    case 'record':{
+      assertVerifiedIrIdentifier(expr.structure);
+      const fields=new Set<string>();
+      for(const field of expr.fields){
+        assertVerifiedIrIdentifier(field.name);
+        if(fields.has(field.name)){
+          throw new Error(
+            "duplicate verified IR record field '"+field.name+"'",
+          );
+        }
+        fields.add(field.name);
+        validateVerifiedIrExpr(field.value);
+      }
+      return;
+    }
+    case 'projection':
+      assertVerifiedIrIdentifier(expr.field);
+      validateVerifiedIrExpr(expr.target);
       return;
   }
 }

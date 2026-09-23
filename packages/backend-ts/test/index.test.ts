@@ -321,3 +321,58 @@ console.log('ok - @proofscript/backend-ts verified generic TypeScript emission')
   equal(compiled.javascript.includes('__ps_a >= __ps_b'),true);
 }
 console.log('ok - @proofscript/backend-ts verified Nat intrinsic emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    structures:[{
+      name:'User',
+      fields:[{
+        name:'age',
+        type:{kind:'primitive',name:'Nat'},
+      }],
+    }],
+    declarations:[
+      {
+        name:'make',
+        typeParameters:[],
+        parameters:[{
+          name:'age',
+          type:{kind:'primitive',name:'Nat'},
+        }],
+        resultType:{kind:'named',name:'User',args:[]},
+        body:{
+          kind:'record',
+          structure:'User',
+          fields:[{
+            name:'age',
+            value:{kind:'var',name:'age'},
+          }],
+        },
+      },
+      {
+        name:'get',
+        typeParameters:[],
+        parameters:[{
+          name:'user',
+          type:{kind:'named',name:'User',args:[]},
+        }],
+        resultType:{kind:'primitive',name:'Nat'},
+        body:{
+          kind:'projection',
+          target:{kind:'var',name:'user'},
+          field:'age',
+        },
+      },
+    ],
+  });
+  equal(source.includes('export interface User {'),true);
+  equal(source.includes('unique symbol = Symbol("ProofScript.User")'),true);
+  equal(source.includes('return { [__ps$brand$0]: true, age: age };'),true);
+  equal(source.includes('return user.age;'),true);
+  const compiled=compileTypeScript(source,'verified-structure.ts');
+  equal(compiled.declaration.includes('export interface User'),true);
+  equal(compiled.javascript.includes('Symbol("ProofScript.User")'),true);
+}
+console.log('ok - @proofscript/backend-ts verified nominal structure emission');

@@ -1,4 +1,3 @@
-import {HELP} from '../src/help.js';
 import {parseCommonArgs} from '../src/args.js';
 
 function equal(actual:unknown,expected:unknown):void{
@@ -26,9 +25,4 @@ function throws(fn:()=>unknown,pattern:RegExp):void{
 }
 throws(()=>parseCommonArgs(['--wat']),/PS_CLI_UNKNOWN_OPTION/);
 throws(()=>parseCommonArgs(['a.ps','b.ps']),/PS_CLI_USAGE/);
-equal(HELP.includes('psc init'),true);
-equal(HELP.includes('psc check'),true);
-equal(HELP.includes('psc build'),true);
-equal(HELP.includes('psc run'),true);
-
 console.log('ok - psc CLI argument/UX contract');

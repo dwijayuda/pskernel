@@ -31,8 +31,8 @@
       "sourceLanguage": "typescript",
       "notes": [
         "psc is a thin command router; argument parsing, config/input resolution, compilation pipeline, artifact writing, execution, and each user command are isolated modules.",
+        "Root non-workspace gates compile the CLI and execute only dependency-free argument tests; installed CLI smoke belongs to the package-local install/test path.",
         "Implemented commands: init, check, build, run, emit-lean, clean, help, version.",
-        "psconfig.json follows a TypeScript-familiar project/config model.",
         "Current psc check/build claim ceiling is the initial reference-backed software subset; theorem/proof declarations are not yet submitted to pskernel."
       ]
     },

@@ -35,7 +35,7 @@ function displayRuntimeValue(value:unknown):unknown {
 }
 
 export async function runCommand(common:CommonArgs){
-  if((common.target??'js')==='wasm'){
+  if((common.buildTarget??'js')==='wasm'){
     throw new Error(
       'PS_CLI_WASM_RUN_UNSUPPORTED: use build --verified --target wasm; '+
       'the Wasm runtime argument/result ABI is not defined yet',

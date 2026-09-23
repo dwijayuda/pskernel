@@ -35,7 +35,7 @@ function throws(fn:()=>unknown,pattern:RegExp):void{
   equal(args.project,'demo');
   equal(args.json,true);
   equal(args.verified,true);
-  equal(args.target,'js');
+  equal(args.buildTarget,'js');
   equal(args.passthrough.join(','),'41,true');
 }
 {
@@ -43,13 +43,13 @@ function throws(fn:()=>unknown,pattern:RegExp):void{
   equal(args.project,'psconfig.json');
   equal(args.json,false);
   equal(args.verified,false);
-  equal(args.target,'js');
+  equal(args.buildTarget,'js');
 }
 {
   const args=parseCommonArgs([
     'src/main.ps','--verified','--target','wasm',
   ]);
-  equal(args.target,'wasm');
+  equal(args.buildTarget,'wasm');
 }
 throws(
   ()=>parseCommonArgs(['--target','wat']),
@@ -127,7 +127,7 @@ console.log('ok - psc verified checked-core compiler pipeline');
       project:directory,
       json:true,
       verified:true,
-      target:'wasm',
+      buildTarget:'wasm',
       passthrough:[],
     });
     equal(built.report.buildTarget,'wasm');
@@ -150,7 +150,7 @@ console.log('ok - psc verified checked-core compiler pipeline');
         project:directory,
         json:true,
         verified:false,
-        target:'wasm',
+        buildTarget:'wasm',
         passthrough:[],
       });
     }catch(error){
@@ -166,7 +166,7 @@ console.log('ok - psc verified checked-core compiler pipeline');
         project:directory,
         json:true,
         verified:true,
-        target:'wasm',
+        buildTarget:'wasm',
         passthrough:['true'],
       });
     }catch(error){

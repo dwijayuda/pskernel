@@ -9,7 +9,7 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
   let project:string|undefined;
   let json=false;
   let verified=false;
-  let target:BuildTarget='js';
+  let buildTarget:BuildTarget='js';
 
   for(let i=0;i<own.length;i+=1){
     const arg=own[i]!;
@@ -34,7 +34,7 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
           "'; expected js or wasm",
         );
       }
-      target=value;
+      buildTarget=value;
     }else if(arg.startsWith('-')){
       throw new Error("PS_CLI_UNKNOWN_OPTION: unknown option '"+arg+"'");
     }else if(entry===undefined){
@@ -49,7 +49,7 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
     ...(project===undefined?{}:{project}),
     json,
     verified,
-    target,
+    buildTarget,
     passthrough,
   };
 }

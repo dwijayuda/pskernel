@@ -11,7 +11,7 @@ import {
 } from '../project-artifact-output.js';
 
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
-  const target=common.target??'js';
+  const target=common.buildTarget??'js';
   if(target==='wasm'&&!common.verified){
     throw new Error(
       'PS_CLI_WASM_REQUIRES_VERIFIED: --target wasm requires --verified',

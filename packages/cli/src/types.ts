@@ -10,7 +10,7 @@ export interface CommonArgs {
   readonly project?:string;
   readonly json:boolean;
   readonly verified:boolean;
-  readonly target?:BuildTarget;
+  readonly buildTarget?:BuildTarget;
   readonly passthrough:readonly string[];
 }
 

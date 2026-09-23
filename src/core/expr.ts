@@ -28,6 +28,21 @@ export const lam = (name: Name, type: Expr, body: Expr, binderInfo: BinderInfo =
 export const natLit = (value: bigint | number): Expr => ({ kind: 'lit', literal: { kind: 'nat', value: BigInt(value) } });
 export const strLit = (value: string): Expr => ({ kind: 'lit', literal: { kind: 'string', value } });
 
+function metadataValueEq(a:unknown,b:unknown):boolean{
+  if(Object.is(a,b))return true;
+  if(typeof a!==typeof b||a===null||b===null)return false;
+  if(Array.isArray(a)||Array.isArray(b)){
+    if(!Array.isArray(a)||!Array.isArray(b)||a.length!==b.length)return false;
+    return a.every((x,i)=>metadataValueEq(x,b[i]));
+  }
+  if(typeof a==='object'){
+    const ao=a as Record<string,unknown>,bo=b as Record<string,unknown>,ak=Object.keys(ao),bk=Object.keys(bo);
+    if(ak.length!==bk.length||!ak.every((k,i)=>k===bk[i]))return false;
+    return ak.every(k=>metadataValueEq(ao[k],bo[k]));
+  }
+  return false;
+}
+
 
 const typeAnnotationOutParam = nameFromDotted('outParam');
 const typeAnnotationSemiOutParam = nameFromDotted('semiOutParam');
@@ -63,7 +78,7 @@ export function exprEq(a: Expr, b: Expr): boolean {
     case 'forall': return b.kind==='forall'&&a.binderInfo===b.binderInfo&&exprEq(a.type,b.type)&&exprEq(a.body,b.body);
     case 'let': return b.kind==='let'&&exprEq(a.type,b.type)&&exprEq(a.value,b.value)&&exprEq(a.body,b.body);
     case 'lit': return b.kind==='lit'&&a.literal.kind===b.literal.kind&&(a.literal.kind==='nat'?a.literal.value===(b.literal as {kind:'nat';value:bigint}).value:a.literal.value===(b.literal as {kind:'string';value:string}).value);
-    case 'mdata': return b.kind==='mdata'&&exprEq(a.expr,b.expr);
+    case 'mdata': return b.kind==='mdata'&&metadataValueEq(a.data,b.data)&&exprEq(a.expr,b.expr);
     case 'proj': return b.kind==='proj'&&nameEq(a.typeName,b.typeName)&&a.index===b.index&&exprEq(a.expr,b.expr);
   }
 }
@@ -71,7 +86,7 @@ export function exprEq(a: Expr, b: Expr): boolean {
 
 /** Lean kernel Expr structural equality for the expression fields represented here.
  * Unlike exprEq, binder display names/info are intentionally ignored. MData payloads
- * are not represented by ProofScript's core Expr, so only their wrapped terms compare. */
+ * participate in structural equality, exactly as Lean's kvmap payload does. */
 export function exprLeanEq(a:Expr,b:Expr):boolean{
   if(a===b)return true;
   if(a.kind!==b.kind)return false;
@@ -86,7 +101,7 @@ export function exprLeanEq(a:Expr,b:Expr):boolean{
     case'forall':return b.kind==='forall'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.body,b.body);
     case'let':return b.kind==='let'&&exprLeanEq(a.type,b.type)&&exprLeanEq(a.value,b.value)&&exprLeanEq(a.body,b.body);
     case'lit':return b.kind==='lit'&&a.literal.kind===b.literal.kind&&(a.literal.kind==='nat'?a.literal.value===(b.literal as {kind:'nat';value:bigint}).value:a.literal.value===(b.literal as {kind:'string';value:string}).value);
-    case'mdata':return b.kind==='mdata'&&exprLeanEq(a.expr,b.expr);
+    case'mdata':return b.kind==='mdata'&&metadataValueEq(a.data,b.data)&&exprLeanEq(a.expr,b.expr);
     case'proj':return b.kind==='proj'&&nameEq(a.typeName,b.typeName)&&a.index===b.index&&exprLeanEq(a.expr,b.expr);
   }
 }

@@ -212,6 +212,32 @@ assert(
 );
 
 
+
+
+const verifiedStructure=compileVerifiedSource(
+  'structure User where { age : Nat; } '+
+  'function make(age : Nat) : User := { age := age : User }; '+
+  'function get(user : User) : Nat := user.age;',
+  'verified-structure.ts',
+);
+assert(
+  verifiedStructure.typeScript.includes('export interface User {'),
+  'verified checked structure did not reach TypeScript interface emission',
+);
+assert(
+  verifiedStructure.typeScript.includes('return user.age;'),
+  'verified kernel projection did not reach TypeScript field access',
+);
+assert(
+  verifiedStructure.emitted.javascript.includes('Symbol("ProofScript.User")'),
+  'verified structure lost nominal runtime branding',
+);
+assert(
+  verifiedStructure.emitted.declaration.includes('export interface User'),
+  'verified structure API was not preserved in .d.ts',
+);
+
+
 const snapshot=processDocument('demo.ps',1,'x!',{
   process:text=>({
     state:{length:text.length},

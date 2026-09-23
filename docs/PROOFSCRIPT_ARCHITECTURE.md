@@ -160,3 +160,28 @@ The initial verified CLI ABI supports `Nat`, `Int`, `Bool`, `String`,
 and `Unit`. Generic, function-typed, and user-defined structured `main`
 parameters remain fail-closed until their runtime representations are part of
 the verified compiler/runtime contract.
+
+
+## Verified structure checkpoint
+
+The preferred pipeline now also covers simple nominal structures:
+
+```proofscript
+structure User where { age : Nat; }
+
+function make(age : Nat) : User :=
+  { age := age : User };
+
+function get(user : User) : Nat :=
+  user.age;
+```
+
+The structure is first admitted as a pskernel inductive. Checked-core structure
+metadata is accepted only after validation against the generated constructor.
+Erasure then lowers constructor applications to branded runtime records and
+kernel projections to field access. TypeScript receives a readonly nominally
+branded interface.
+
+Dependent/existential structures such as `{ T : Type; value : T }` remain
+fail-closed in verified compilation until their runtime existential packaging
+semantics are designed; they are not flattened into unsound structural types.

@@ -148,3 +148,44 @@ console.log('ok - psc verified run filesystem pipeline');
   equal(result.emitted.javascript.includes('x <= y ? x : y'),true);
 }
 console.log('ok - psc verified proposition-based if pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'structure User where { age : Nat; } '+
+    'function make(age : Nat) : User := { age := age : User }; '+
+    'function get(user : User) : Nat := user.age;',
+    'structure.ts',
+  );
+  equal(result.checkedCore.structures.length,1);
+  equal(result.ir.structures?.length,1);
+  equal(result.typeScript.includes('export interface User {'),true);
+  equal(
+    result.typeScript.includes(
+      'function make(age: bigint): User',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes(
+      'return { [__ps$brand$0]: true, age: age };',
+    ),
+    true,
+  );
+  equal(result.typeScript.includes('return user.age;'),true);
+  equal(result.emitted.javascript.includes('Symbol("ProofScript.User")'),true);
+  equal(result.emitted.javascript.includes('function get(user)'),true);
+  equal(result.emitted.declaration.includes('export interface User'),true);
+}
+{
+  throws(
+    ()=>compileVerifiedSource(
+      'structure SigmaBox where { T : Type; value : T; } '+
+      'function makeSigma(x : Nat) : SigmaBox := '+
+      '{ T := Nat, value := x : SigmaBox };',
+      'dependent-structure.ts',
+    ),
+    /PS_ERASE_DEPENDENT_STRUCTURE_FIELD_UNSUPPORTED/,
+  );
+}
+console.log('ok - psc verified nominal structure pipeline');

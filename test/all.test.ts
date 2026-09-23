@@ -113,6 +113,26 @@ test('checker-state local name generator stays unique across independent local c
  assert(x!==y,'Lean-style checker state must never recycle fvar ids across sibling contexts');
 });
 
+test('structural WHNF cache preserves Lean is_eqp progress distinction',()=>{
+ const tc=new TypeChecker(baseEnv()),S=nameFromDotted('Eqp.Fake');
+ const a={kind:'proj',typeName:S,index:0,expr:natLit(0)} as const;
+ const b={kind:'proj',typeName:S,index:0,expr:natLit(0)} as const;
+ const first=tc.whnfCore(a),second=tc.whnfCore(b);
+ assert(first===a,'first unreduced projection is cached as its original object');
+ assert(second===a&&second!==b,'structural cache hit may return another equal object, so defeq progress must use object identity like is_eqp');
+});
+
+test('Lean structural equality and cache lookup are stack-safe on deep clones',()=>{
+ const ty=constant(N.Nat);let a:any=natLit(0),b:any=natLit(0);
+ for(let i=0;i<12000;i++){
+   a=lam(nameFromDotted('a'+i),ty,a,'default');
+   b=lam(nameFromDotted('b'+i),ty,b,'implicit');
+ }
+ assert(exprLeanEq(a,b),'deep binder metadata-insensitive structural equality must not overflow the JS stack');
+ const st=new KernelState();st.infer.set(a,ty);
+ assert(st.infer.has(b),'deep structurally equal clones must hit Lean-style expression caches');
+});
+
 test('kernel structural cache keys ignore binder display metadata like Lean expr_map',()=>{
  const st=new KernelState(),ty=constant(N.Nat),body=bvar(0);
  const a=lam(nameFromDotted('left'),ty,body,'default');

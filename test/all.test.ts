@@ -231,6 +231,42 @@ test('inductive uniformity is checked before WHNF can erase a bad occurrence',()
  assert(!env.has(I)&&!env.has(Mk),'non-uniform occurrence rejection must be transactional');
 });
 
+test('nested inductive uniformity is checked before preprocessing can drop bad parameters',()=>{
+ const env=baseEnv(),T=sort(levelSucc(levelZero));
+ const W=nameFromDotted('UniformNested.W'),W0=nameFromDotted('UniformNested.W.zero');
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:W,type:T,ctors:[{name:W0,type:constant(W)}]}]});
+ const L=nameFromDotted('UniformNested.L'),LMk=nameFromDotted('UniformNested.L.mk');
+ const lTy=forallE(nameFromDotted('α'),T,T,'implicit'),l=(x:any)=>app(constant(L),x);
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{name:L,type:lTy,ctors:[{name:LMk,type:forallE(nameFromDotted('α'),T,l(bvar(0)),'implicit')}]}]});
+ const E=nameFromDotted('UniformNested.E'),EMk=nameFromDotted('UniformNested.E.mk');
+ const e=(w:any)=>app(constant(E),w);
+ const eTy=forallE(nameFromDotted('w'),constant(W),T);
+ const badNested=l(e(constant(W0)));
+ const ctorTy=forallE(nameFromDotted('w'),constant(W),forallE(nameFromDotted('xs'),badNested,e(bvar(1))));
+ throws(()=>addInductive(env,{levelParams:[],numParams:1,types:[{name:E,type:eTy,ctors:[{name:EMk,type:ctorTy}]}]}));
+ assert(!env.has(E)&&!env.has(EMk),'nested non-uniform occurrence must be rejected before auxiliary preprocessing');
+});
+
+test('inductive uniformity requires exact declaration universe arguments',()=>{
+ const env=baseEnv(),U=nameFromDotted('UniformLevels.U'),Mk=nameFromDotted('UniformLevels.U.mk');
+ const uN=nameFromDotted('u'),vN=nameFromDotted('v'),u=levelParam(uN),v=levelParam(vN),T=sort(levelSucc(levelZero));
+ const uTy=forallE(nameFromDotted('p'),T,T);
+ const good=(p:any)=>app(constant(U,[u,v]),p),bad=(p:any)=>app(constant(U,[v,u]),p);
+ const ctorTy=forallE(nameFromDotted('p'),T,forallE(nameFromDotted('hidden'),bad(bvar(0)),good(bvar(1))));
+ throws(()=>addOrdinaryInductive(env,{levelParams:[uN,vN],numParams:1,types:[{name:U,type:uTy,ctors:[{name:Mk,type:ctorTy}]}]}));
+ assert(!env.has(U)&&!env.has(Mk),'swapped recursive universe parameters must reject transactionally');
+});
+
+test('uniform occurrence accepts a constructor parameter whose type is definitionally equal',()=>{
+ const env=baseEnv(),Alias=nameFromDotted('UniformDefeq.Alias'),V=nameFromDotted('UniformDefeq.V'),Mk=nameFromDotted('UniformDefeq.V.mk');
+ const T=sort(levelSucc(levelZero)),k=new Kernel(env);
+ k.addDefinition({kind:'definition',name:Alias,levelParams:[],type:sort(levelSucc(levelSucc(levelZero))),value:T,hints:{kind:'abbrev'},safety:'safe'});
+ const vTy=forallE(nameFromDotted('p'),T,T),v=(p:any)=>app(constant(V),p);
+ const ctorTy=forallE(nameFromDotted('p'),constant(Alias),forallE(nameFromDotted('self'),v(bvar(0)),v(bvar(1))));
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{name:V,type:vTy,ctors:[{name:Mk,type:ctorTy}]}]});
+ assert(env.has(V)&&env.has(Mk),'definitionally equal constructor parameter domains must remain accepted');
+});
+
 test('ordinary inductive rejects negative recursive occurrence',()=>{
  const env=baseEnv(),I=nameFromDotted('Bad'),c=nameFromDotted('Bad.mk');
  const neg=forallE(nameFromDotted('f'),forallE(nameFromDotted('x'),constant(I),constant(N.Nat)),constant(I));

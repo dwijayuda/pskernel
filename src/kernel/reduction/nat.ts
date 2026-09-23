@@ -23,8 +23,8 @@ export function checkNatSize(n:bigint,maxBytes:bigint,op='Nat numeral'):void{
 }
 export function asNat(e:Expr):bigint|null{
   if(e.kind==='lit'&&e.literal.kind==='nat')return e.literal.value;
-  if(e.kind==='const'&&nameEq(e.name,N.NatZero))return 0n;
-  const {fn,args}=appView(e);if(fn.kind==='const'&&nameEq(fn.name,N.NatSucc)&&args.length===1){const n=asNat(args[0]!);return n===null?null:n+1n;} return null;
+  if(e.kind==='const'&&e.levels.length===0&&nameEq(e.name,N.NatZero))return 0n;
+  const {fn,args}=appView(e);if(fn.kind==='const'&&fn.levels.length===0&&nameEq(fn.name,N.NatSucc)&&args.length===1){const n=asNat(args[0]!);return n===null?null:n+1n;} return null;
 }
 function boolExpr(v:boolean):Expr{return constant(v?N.BoolTrue:N.BoolFalse);}
 function gcd(a:bigint,b:bigint):bigint{while(b!==0n){const t=a%b;a=b;b=t;}return a;}
@@ -48,7 +48,7 @@ function shiftRight(v:bigint,shift:bigint):bigint{
 }
 
 export function reduceNatApp(_env:Environment,e:Expr,whnf:(x:Expr)=>Expr,maxBytes:bigint=LEAN_NAT_MAX_SIZE_DEFAULT):Expr|null{
-  const {fn,args}=appView(e);if(fn.kind!=='const')return null;
+  const {fn,args}=appView(e);if(fn.kind!=='const'||fn.levels.length!==0)return null;
   const unarySucc=():Expr|null=>{if(args.length!==1)return null;const a=asNat(whnf(args[0]!));if(a===null)return null;const r=a+1n;checkNatSize(r,maxBytes,'Nat.succ');return natLit(r);};
   const binary=(f:(a:bigint,b:bigint)=>bigint,op:string,checkResult=false):Expr|null=>{if(args.length!==2)return null;const a=asNat(whnf(args[0]!)),b=asNat(whnf(args[1]!));if(a===null||b===null)return null;const r=f(a,b);if(checkResult)checkNatSize(r,maxBytes,op);return natLit(r);};
   if(nameEq(fn.name,N.NatSucc))return unarySucc();

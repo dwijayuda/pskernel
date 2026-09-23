@@ -49,6 +49,14 @@ test('deep structural traversals avoid the JavaScript call stack',()=>{
  const abstracted=abstractFVar(withFVar,id);
  assert(abstracted.kind==='lam'&&!hasFVar(abstracted),'deep abstraction must be stack-safe and close the free variable');
 });
+test('universe metavariables remain distinct symbolic atoms',()=>{
+ const n=nameFromDotted('u'),u=levelMVar(n),v=levelMVar(nameFromDotted('v')),p=levelParam(n);
+ assert(levelEquivalent(u,u),'a universe metavariable is equivalent to itself');
+ assert(!levelEquivalent(u,v),'distinct universe metavariables must not collapse');
+ assert(!levelEquivalent(u,p),'a metavariable and parameter with the same Name remain distinct kinds');
+ assert(levelEquivalent(mkMax(u,v),mkMax(v,u)),'max remains commutative with universe metavariables');
+});
+
 test('universe max commutative semantically',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));assert(levelEquivalent(mkMax(u,v),mkMax(v,u)));});
 test('imax u 0 = 0',()=>{const u=levelParam(nameFromDotted('u'));assert(levelEquivalent(mkIMax(u,levelZero),levelZero));});
 test('imax u (v+1) = max u (v+1)',()=>{const u=levelParam(nameFromDotted('u')),v=levelSucc(levelParam(nameFromDotted('v')));assert(levelEquivalent(mkIMax(u,v),mkMax(u,v)));});

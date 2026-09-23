@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
+      "status": "runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -35,6 +35,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified build/run now require a top-level package-lock.json lockfileVersion 3 whenever runtime externals are used. The CLI traverses the reachable direct/transitive npm package closure from declared runtime roots, fingerprints exact version/resolved/SRI metadata plus dependency edges, and reports it separately as runtimeDependencyLock.",
+        "Required reachable lock packages are checked against installed node_modules package name/version metadata. Optional-only branches may be absent; linked packages and lock entries without version/resolved/SRI metadata fail closed.",
+        "runtimeDependencyLock.integrity is runtime reproducibility/assurance metadata only. It does not alter pskernel projectIntegrity, does not prove JavaScript behavior, and does not claim installed unpacked bytes match the tarball SRI. npm ci remains the strict installation mechanism.",
         "Verified project check requires every source external module to be explicitly listed in psconfig.json runtimeDependencies. Build/run additionally read node_modules/<package>/package.json and require exact name/version identity before TypeScript compilation.",
         "Runtime dependency policy has its own SHA-256 fingerprint and is reported separately from pskernel projectIntegrity; host package versions do not alter theorem meaning.",
         "Verified build compiles the generated TypeScript using the absolute dist/<entry>.ts path, aligning TypeScript package lookup with the emitted JavaScript runtime location. A local no-network ESM fixture gates String -> String external execution end to end.",

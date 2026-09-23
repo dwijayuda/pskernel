@@ -237,3 +237,22 @@ runtime policy separately from pskernel project integrity.
 No claim is made yet about transitive npm lockfile closure. Semver ranges,
 subpaths, builtins, and alternate module systems remain unsupported until their
 runtime reproducibility and ABI story is specified.
+
+## npm package-lock v3 evidence for transitive FFI assurance
+
+The transitive FFI policy was checked against current npm package-lock
+documentation in addition to the repository's TypeScript host references. npm
+documents `package-lock.json` as the exact dependency-tree representation and
+documents lockfile-v3 `packages` entries with package locations, exact
+versions, `resolved` sources, SRI `integrity`, and dependency metadata.
+
+ProofScript uses those fields only for runtime reproducibility/assurance. They
+do not define ProofScript semantics and are not proof evidence. The checked
+core and pskernel remain independent of npm. The first implementation also
+keeps verified source checking independent of installation state; lock closure
+validation begins only when verified build/run claims an executable host
+runtime.
+
+The repository's TypeScript study material remains relevant to ESM/host module
+resolution and emitted import behavior. npm lock metadata supplements that host
+layer; it does not flow backward into theorem elaboration.

@@ -1075,3 +1075,40 @@ Still unsupported in this checkpoint:
 
 Those require separate project/runtime policy decisions and do not expand the
 kernel trust boundary.
+
+## Transitive runtime lockfile assurance checkpoint
+
+Runtime externals now have three deliberately separate identities:
+
+```text
+projectIntegrity
+runtimeDependencyPolicy.integrity
+runtimeDependencyLock.integrity
+```
+
+The new runtime lock identity is computed only for verified build/run when
+externals are used. The CLI reads the project's top-level npm
+`package-lock.json` and currently requires `lockfileVersion: 3`. Starting
+from exact direct roots admitted by `runtimeDependencies`, it follows the
+lockfile's installed-tree locations using Node-style ancestor `node_modules`
+lookup and records the reachable closure.
+
+Each reachable lock package contributes:
+
+- package location;
+- inferred package root name;
+- exact lock version;
+- `resolved` source;
+- npm `sha512`/`sha1` SRI metadata;
+- required/optional reachability;
+- deterministic dependency, optional-dependency, and peer edges.
+
+Required transitive lock entries must resolve and required installed packages
+must expose the same package name/version as the closure. Optional-only
+branches may be absent. Symlink/link entries fail closed in this first profile.
+
+The lock closure remains **untrusted runtime assurance**. pskernel never reads
+it, checked-core admission does not depend on it, and changing it does not
+change theorem identity. In particular, lockfile SRI identifies the package
+artifact npm resolved; ProofScript does not claim to prove the behavior of that
+artifact or to re-hash every unpacked runtime file.

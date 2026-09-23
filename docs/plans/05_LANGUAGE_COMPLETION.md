@@ -380,6 +380,53 @@ Exit condition:
 - a small Node application can use at least one normal npm package while its
   internal pure logic remains verified ProofScript.
 
+### Runtime lockfile closure checkpoint
+
+Verified `build`/`run` now strengthen the host-runtime assurance boundary
+when source externals are present:
+
+```text
+psconfig runtimeDependencies (exact roots)
+  -> package-lock.json v3
+  -> direct package entries
+  -> reachable dependency / optional / peer edges
+  -> canonical runtime lock closure
+  -> required installed name/version checks
+  -> sha256 runtimeDependencyLock.integrity
+```
+
+The closure records package location, package name, exact version, resolved
+source, npm SRI metadata, required-vs-optional reachability, and deterministic
+dependency edges. Required missing transitive entries fail closed. Optional-only
+subtrees may be absent, matching npm's platform-dependent optional dependency
+model.
+
+This identity remains deliberately separate from both source/proof identity and
+the direct runtime policy identity:
+
+```text
+projectIntegrity
+  = checked source/dependency/kernel semantic identity
+
+runtimeDependencyPolicy.integrity
+  = declared exact direct host-package roots
+
+runtimeDependencyLock.integrity
+  = reachable package-lock v3 runtime tree metadata
+```
+
+A lockfile/SRI proves neither theorem truth nor host implementation behavior.
+The CLI still reports every extern with `proofEvidence=false`. Verified
+`check` does not require a lockfile or installed packages; verified
+`build`/`run` do, because they make an executable-runtime reproducibility
+claim.
+
+The first lock policy rejects linked packages and entries without exact
+version/resolved/SRI metadata. It verifies installed package name/version for
+required reachable entries, but does not claim to re-hash unpacked
+`node_modules` contents against tarball SRI. Strict installation remains the
+package-manager responsibility (for npm, `npm ci`).
+
 ## Milestone L6 — controlled effects for general-purpose JS
 
 Purpose: move from pure verified libraries to applications.
@@ -523,8 +570,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    silently turn it into recursive automation.
 7. Continue DS5 from the landed mixed-source project + replay-gated persistent
    proofscript-module@2 artifact path. Source FFI, assurance, exact direct
-   package policy, and real runtime resolution are landed; next evaluate
-   transitive lockfile integrity before broadening the package surface.
+   package policy, real runtime resolution, and transitive package-lock v3
+   closure fingerprinting are landed. Next decide whether package subpaths are
+   worth admitting and, if so, specify exports/ABI resolution before syntax.
 8. DS6 editor MVP is landed: source-kind routing, checked import composition,
    shared Node/LSP source-root resolution, cross-source navigation,
    non-destructive .ps / supported .lean conversion actions, and importer
@@ -533,8 +581,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    authority.
 9. Continue the explicit npm/JS FFI from the landed source signature,
    assurance, exact-version direct-package policy, replayable checked-core
-   admission, and end-to-end ESM runtime binding. Next decide lockfile/transitive
-   integrity, then broaden imports only when their ABI/trust model is explicit.
+   admission, end-to-end ESM runtime binding, and transitive package-lock v3
+   closure assurance. Broaden imports only when package exports/ABI/trust
+   semantics are explicit; do not infer proof evidence from lock metadata.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.

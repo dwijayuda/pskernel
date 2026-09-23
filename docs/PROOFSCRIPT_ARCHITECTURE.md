@@ -1142,3 +1142,28 @@ difference is part of the explicit FFI trust boundary, not a theorem semantic.
 The first subpath classifier is intentionally conservative and excludes
 relative/absolute sources, `node:` builtins, path traversal, empty segments,
 and nested `node_modules` segments. Only named ESM imports remain supported.
+
+## ProofScript-written standard-library checkpoint
+
+The repository now contains a self-hosted `stdlib/` ProofScript project.
+Standard-library definitions pass through exactly the same source/module,
+elaboration, pskernel, erasure, IR, TypeScript, and JavaScript path as user
+projects. There is no privileged stdlib checker or backend.
+
+The initial executable types are named `PsOption`, `PsResult`, and
+`PsList`. This prefix is intentionally transitional. Lean 4.34 Init already
+owns `Option` and `List`, but the current verified erasure layer derives
+runtime constructor/recursor metadata from inductives present in
+`CheckedCoreModule.inductives`, i.e. source/project admissions. Prelude
+inductives exist in the kernel environment but are not yet provenance-carrying
+runtime IR declarations.
+
+Therefore the first stdlib chooses source-owned runtime ADTs instead of either:
+
+- redeclaring/shadowing Lean Prelude constants; or
+- adding an unprincipled backend special case for built-in `Option`/`List`.
+
+The dogfood gate is intentionally cross-module and proof-bearing. It imports
+Option into Result/List, performs generic mapping and structural recursion,
+executes emitted JavaScript, and requires the stdlib's theorem declarations to
+be counted as pskernel-checked with no runtime external assumptions.

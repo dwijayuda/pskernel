@@ -273,3 +273,17 @@ ProofScript therefore records/pins the package **root** and leaves public
 subpath resolution to those host tools. This is a host interoperability
 decision only; neither resolver nor package exports metadata influences
 pskernel proof admission.
+
+## Stdlib reference policy
+
+The first ProofScript-written stdlib tranche uses the v0.7 language reference
+for intended surface examples and Lean 4.34 `Init.Data.Option` /
+`Init.Data.List` as semantic/API inspiration. Lean source is a reference, not
+code to copy wholesale: only operations that the current verified ProofScript
+language can express without semantic shortcuts should enter `stdlib/`.
+
+Because the current runtime erasure owns metadata only for checked-project
+inductive admissions, the initial executable stdlib uses source-owned
+`PsOption`/`PsList` rather than claiming that Prelude `Option`/`List`
+already compile through verified IR. That limitation should be removed by an
+explicit checked-runtime-metadata design, not by weakening erasure provenance.

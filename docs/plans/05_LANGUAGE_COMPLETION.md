@@ -595,6 +595,49 @@ The bounded source classifier rejects relative/absolute paths, `node:`
 builtins, traversal segments, empty segments, and nested `node_modules`
 segments. Default/namespace/CommonJS/dynamic imports remain unsupported.
 
+### ProofScript-written standard-library foundation
+
+The first self-hosted standard-library project is now source code under
+`stdlib/`, not a TypeScript helper library:
+
+```text
+ProofScript.Data.Option  -> PsOption
+ProofScript.Data.Result  -> PsResult
+ProofScript.Data.List    -> PsList
+```
+
+The first APIs deliberately stay inside already verified language features:
+
+- generic inductive types and constructors;
+- pattern matching through admitted recursors;
+- higher-order generic map;
+- direct structural recursion for list map/length;
+- cross-module checked metadata;
+- primitive Bool/Nat results;
+- ordinary theorem declarations checked by pskernel.
+
+The repository integration gate runs `stdlib/test/main.ps` through the full
+verified multi-module project pipeline and JavaScript runtime. The gate checks
+the runtime result, module graph, kernel-checked theorem count, and absence of
+runtime FFI assumptions.
+
+The `Ps*` names are a temporary semantic boundary, not a new type-theory
+choice. Lean Init already defines `Option` and `List`, but verified runtime
+erasure currently constructs executable ADT metadata from inductives admitted
+by the checked source project. Until Prelude inductive runtime metadata can be
+reused without weakening erasure provenance, the stdlib does not shadow Lean's
+built-in names and does not special-case them in the backend.
+
+The next stdlib work should prefer:
+
+1. small executable helpers that exercise real user needs;
+2. pskernel-checked algebraic laws when the proof surface can express them
+   faithfully;
+3. migration/aliasing toward canonical Lean names only after verified runtime
+   metadata for Prelude inductives has an explicit provenance story.
+
+It should not grow a parallel TypeScript runtime semantics layer.
+
 ## Immediate execution queue
 
 Do not reorder without repository evidence. The dual-source L4.5 frontend
@@ -631,7 +674,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    admission, end-to-end named ESM binding, transitive package-lock v3 closure,
    and bounded public package subpaths. Hold the host import surface here until
    a standard-library/application need justifies another ABI form.
-10. Start the ProofScript-written standard library.
+10. Expand the landed ProofScript-written standard-library foundation from
+    PsOption/PsResult/PsList only when APIs are supported by the verified
+    language itself; next add laws/utilities rather than host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.

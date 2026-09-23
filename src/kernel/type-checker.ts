@@ -130,8 +130,15 @@ export class TypeChecker {
       if(x.kind==='let'){x=instantiate1(x.body,x.value);continue;}
       if(x.kind==='fvar'){const d=this.lctx.get(x.id);if(d?.kind==='let'){x=d.value;continue;}return done(x);}
       if(x.kind==='app'){
-        const f=this.whnfCore(x.fn,cheapRec,cheapProj);if(f.kind==='lam'){x=instantiate1(f.body,x.arg);continue;} // overwritten below
-        if(!exprEq(f,x.fn))x=app(f,x.arg);
+        // Lean flattens the application spine first, so a wide application does
+        // not consume one recursion-depth frame per argument.
+        const av=appView(x),f0=av.fn,f=this.whnfCore(f0,cheapRec,cheapProj);
+        if(f.kind==='lam'){
+          let head:Expr=f,i=0;
+          while(i<av.args.length&&head.kind==='lam'){head=instantiate1(head.body,av.args[i]!);i++;}
+          x=mkAppN(head,av.args.slice(i));continue;
+        }
+        if(!exprEq(f,f0)){x=mkAppN(f,av.args);continue;}
         const q=this.env.quotInitialized?reduceQuot(x,y=>this.whnf(y)):null;if(q){if(exprEq(x,e))cacheOriginal=false;x=q;continue;}
         const rr=reduceRecursor(this.env,x,y=>cheapRec?this.whnfCore(y,cheapRec,cheapProj):this.whnf(y),y=>this.infer(y),(a,b)=>this.isDefEq(a,b),y=>this.isProp(y));if(rr){if(exprEq(x,e))cacheOriginal=false;x=rr;continue;}
         return done(x);

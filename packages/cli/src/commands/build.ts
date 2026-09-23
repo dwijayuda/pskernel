@@ -14,6 +14,7 @@ import {
   assertRuntimeDependencyPolicy,
   verifyInstalledRuntimeDependencies,
 } from '../runtime-dependencies.js';
+import {verifyRuntimeDependencyLock} from '../runtime-lock.js';
 
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const target=common.buildTarget??'js';
@@ -32,6 +33,10 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       input.loaded.config.runtimeDependencies,
     );
     await verifyInstalledRuntimeDependencies(
+      input.loaded.directory,
+      runtimeDependencyPolicy,
+    );
+    const runtimeDependencyLock=await verifyRuntimeDependencyLock(
       input.loaded.directory,
       runtimeDependencyPolicy,
     );
@@ -84,6 +89,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
         input.loaded.config.runtimeDependencies,
       ),
       runtimeDependencyPolicy,
+      runtimeDependencyLock,
       buildTarget:target,
       outputDirectory:outDir,
       artifacts:{

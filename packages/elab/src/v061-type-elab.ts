@@ -9,7 +9,10 @@ import {
   nameFromDotted,
   sort,
   TypeChecker,
+  hasMVar,
+  exprToString,
 } from 'lean-ts-kernel';
+import {elaborateApplication} from './application.js';
 import type {V061CoreElabContext} from './v061-context.js';
 
 export function elaborateV061Type(
@@ -30,10 +33,28 @@ export function elaborateV061Type(
       }
       return constant(name);
     }
-    case 'application':
-      throw new Error(
-        'PS_ELAB_TYPE_APPLICATION_UNSUPPORTED: type applications require dependent application elaboration',
-      );
+    case 'application':{
+      const fn=elaborateV061Type(type.fn,context);
+      const args=type.args.map((arg)=>elaborateV061Type(arg,context));
+      const applied=elaborateApplication({
+        environment:context.environment,
+        metaContext:context.metaContext,
+        fn,
+        args,
+        localContext:context.localContext,
+      });
+      const term=context.metaContext.instantiate(applied.term);
+      const resultType=context.metaContext.instantiate(applied.type);
+      if(hasMVar(term)||hasMVar(resultType)){
+        throw new Error(
+          'PS_ELAB_TYPE_APPLICATION_STUCK: unresolved implicit/instance arguments in '+
+          exprToString(term),
+        );
+      }
+      new TypeChecker(context.environment,context.localContext.clone())
+        .ensureSort(resultType,term);
+      return term;
+    }
     case 'arrow':{
       const domain=elaborateV061Type(type.domain,context);
       new TypeChecker(context.environment,context.localContext.clone())

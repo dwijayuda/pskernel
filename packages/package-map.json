@@ -156,10 +156,10 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Kernel-facing v0.6.1 definition elaboration preserves declaration BinderInfo in LocalContext, forall types, and lambda values.",
-        "Polymorphic implicit parameters can therefore participate in the real ExprMetaContext/application elaborator path and are still rechecked by pskernel.",
-        "Instance synthesis itself remains unimplemented; named instance binders are represented faithfully but unresolved instance obligations fail closed.",
-        "Recursion/termination, structures/classes/inductives, theorem/tactic declarations, coercions, namespaces, and universe parameters remain later Lean-compatible elaboration milestones."
+        "Kernel-facing type elaboration now uses the same dependent application engine for V061 type applications such as Box(TestNat), preserving source application as core Expr application.",
+        "The resulting type term must itself have a Sort type under pskernel; unresolved implicit/instance obligations fail closed.",
+        "Declaration BinderInfo, dependent result instantiation, and final Kernel.addDefinition admission remain the correctness boundary.",
+        "Universe parameters, named/explicit implicit arguments, coercions, typeclass synthesis, and full Lean name resolution remain future Meta/Elab work."
       ]
     },
     {

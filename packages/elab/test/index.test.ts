@@ -191,6 +191,16 @@ function makeDefinitionEnvironment():Environment {
     levelParams:[],
     type:constant(TestNat),
   });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Box'),
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(levelSucc(levelZero)),
+      sort(levelSucc(levelZero)),
+    ),
+  });
   return env;
 }
 
@@ -267,3 +277,18 @@ console.log('ok - @proofscript/elab kernel-facing non-recursive definitions');
   if(use.hints.kind==='regular')equal(use.hints.height,2n);
 }
 console.log('ok - @proofscript/elab implicit declaration binders');
+
+
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Definitions(parseV061Module(
+    'function keepBox(x : Box(TestNat)) : Box(TestNat) := x;',
+  ),env);
+  const definition=result.definitions[0]!;
+  equal(definition.type.kind,'forall');
+  if(definition.type.kind==='forall'){
+    equal(definition.type.type.kind,'app');
+  }
+  equal(result.environment.find(nameFromDotted('keepBox'))?.kind,'definition');
+}
+console.log('ok - @proofscript/elab dependent type application path');

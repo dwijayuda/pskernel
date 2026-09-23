@@ -1,7 +1,7 @@
 import { ConstantInfo, DefinitionInfo, DefinitionSafety, ReducibilityHints, isUnsafeConstant } from '../core/declaration.js';
 import { Environment, KernelError } from '../core/environment.js';
-import { Expr, app, appView, constant, exprEq, exprToString, forallE, fvar, getAppArgs, getAppFn, hasFVar, instantiateExprLevels, lam, mkAppN, natLit, sort, stripMData } from '../core/expr.js';
-import { abstractFVar, instantiate1 } from '../core/instantiate.js';
+import { Expr, app, appView, constant, exprEq, exprToString, forallE, fvar, getAppArgs, getAppFn, hasFVar, hasLooseBVar, instantiateExprLevels, lam, mkAppN, natLit, sort, stripMData } from '../core/expr.js';
+import { abstractFVar, instantiate, instantiate1 } from '../core/instantiate.js';
 import { Level, levelEquivalent, levelParamNames, levelSucc, levelToString, mkIMax, normalizesToZero } from '../core/level.js';
 import { LocalContext } from '../core/local-context.js';
 import { nameEq, nameToString } from '../core/name.js';
@@ -45,6 +45,58 @@ export class TypeChecker {
   private isEagerReduceExpr(e:Expr):boolean{const v=appView(e);return v.fn.kind==='const'&&nameEq(v.fn.name,N.EagerReduce)&&v.args.length===2;}
   private withEagerReduction<T>(k:()=>T):T{const old=this.eagerReduce;this.eagerReduce=true;try{return k();}finally{this.eagerReduce=old;}}
 
+  private child(lctx:LocalContext):TypeChecker{return new TypeChecker(this.env,lctx,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator);}
+  private instantiateRev(e:Expr,xs:readonly Expr[]):Expr{return xs.length===0?e:instantiate(e,[...xs].reverse());}
+  private cheapBetaReduce(e:Expr):Expr{
+    if(e.kind!=='app')return e;
+    const av=appView(e);let fn=av.fn;if(fn.kind!=='lam')return e;
+    let i=0;while(fn.kind==='lam'&&i<av.args.length){i++;fn=fn.body;}
+    if(!hasLooseBVar(fn))return mkAppN(fn,av.args.slice(i));
+    if(fn.kind==='bvar'&&fn.index<i)return mkAppN(av.args[i-fn.index-1]!,av.args.slice(i));
+    return e;
+  }
+  private closePiLocals(vs:readonly {id:string;name:import('../core/name.js').Name;type:Expr;binderInfo:import('../core/expr.js').BinderInfo}[],body:Expr):Expr{
+    let r=body;
+    for(let i=vs.length-1;i>=0;i--){const v=vs[i]!;r=forallE(v.name,v.type,abstractFVar(r,v.id),v.binderInfo);}
+    return r;
+  }
+  private inferLambdaSpine(e:Extract<Expr,{kind:'lam'}>,inferOnly:boolean):Expr{
+    const lctx=this.lctx.clone(),tc=this.child(lctx),vs:{id:string;name:import('../core/name.js').Name;type:Expr;binderInfo:import('../core/expr.js').BinderInfo;expr:Expr}[]=[];let cur:Expr=e;
+    while(cur.kind==='lam'){
+      const type=this.instantiateRev(cur.type,vs.map(v=>v.expr));
+      if(!inferOnly)tc.ensureSort(tc.infer(type,false),type);
+      const id=lctx.fresh(nameToString(cur.name));lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,name:cur.name,type,binderInfo:cur.binderInfo,expr:fvar(id)});cur=cur.body;
+    }
+    const body=this.instantiateRev(cur,vs.map(v=>v.expr));const r=this.cheapBetaReduce(tc.infer(body,inferOnly));
+    return this.closePiLocals(vs,r);
+  }
+  private inferPiSpine(e:Extract<Expr,{kind:'forall'}>,inferOnly:boolean):Expr{
+    const lctx=this.lctx.clone(),tc=this.child(lctx),vs:{id:string;expr:Expr}[]=[];const levels:Level[]=[];let cur:Expr=e;
+    while(cur.kind==='forall'){
+      const type=this.instantiateRev(cur.type,vs.map(v=>v.expr)),s=tc.ensureSort(tc.infer(type,inferOnly),type);levels.push(s.level);
+      const id=lctx.fresh(nameToString(cur.name));lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,expr:fvar(id)});cur=cur.body;
+    }
+    const body=this.instantiateRev(cur,vs.map(v=>v.expr)),s=tc.ensureSort(tc.infer(body,inferOnly),body);let level=s.level;
+    for(let i=levels.length-1;i>=0;i--)level=mkIMax(levels[i]!,level);
+    return sort(level);
+  }
+  private inferLetSpine(e:Extract<Expr,{kind:'let'}>,inferOnly:boolean):Expr{
+    const lctx=this.lctx.clone(),tc=this.child(lctx),vs:{id:string;name:import('../core/name.js').Name;type:Expr;value:Expr;expr:Expr}[]=[];let cur:Expr=e;
+    while(cur.kind==='let'){
+      const open=vs.map(v=>v.expr),type=this.instantiateRev(cur.type,open),value=this.instantiateRev(cur.value,open);
+      if(!inferOnly){tc.ensureSort(tc.infer(type,false),type);const vt=tc.infer(value,false);if(!tc.isDefEq(vt,type))throw new KernelError('let value type mismatch');}
+      const id=lctx.fresh(nameToString(cur.name));lctx.addLet(id,cur.name,type,value);vs.push({id,name:cur.name,type,value,expr:fvar(id)});cur=cur.body;
+    }
+    const body=this.instantiateRev(cur,vs.map(v=>v.expr));let r=this.cheapBetaReduce(tc.infer(body,inferOnly));
+    for(let i=vs.length-1;i>=0;i--){const v=vs[i]!;if(this.containsFVar(r,v.id))r={kind:'let',name:v.name,type:v.type,value:v.value,body:abstractFVar(r,v.id)};}
+    return r;
+  }
+  private inferAppOnlySpine(e:Extract<Expr,{kind:'app'}>):Expr{
+    const av=appView(e);let type=this.infer(av.fn,true);
+    for(const arg of av.args){const pi=this.ensureForall(type,e);type=instantiate1(pi.body,arg);}
+    return type;
+  }
+
   check(e:Expr):Expr { return this.infer(e,false); }
   infer(e:Expr,inferOnly=true):Expr{if(this.hasLoose(e))throw new KernelError('type checker does not support loose bound variables');return this.rec(()=>this.inferCore(e,inferOnly));}
   private hasLoose(e:Expr):boolean{const go=(x:Expr,d:number):boolean=>{switch(x.kind){case'bvar':return x.index>=d;case'app':return go(x.fn,d)||go(x.arg,d);case'lam':case'forall':return go(x.type,d)||go(x.body,d+1);case'let':return go(x.type,d)||go(x.value,d)||go(x.body,d+1);case'mdata':return go(x.expr,d);case'proj':return go(x.expr,d);default:return false;}};return go(e,0);}
@@ -61,36 +113,18 @@ export class TypeChecker {
       case'lit':{if(e.literal.kind==='nat')checkNatSize(e.literal.value,this.limits.maxNatBytes,'Nat');const n=e.literal.kind==='nat'?N.Nat:N.String;if(!inferOnly)this.env.get(n);r=constant(n);break;}
       case'mdata':r=this.infer(e.expr,inferOnly);break;
       case'app':{
-        const ft=this.ensureForall(this.infer(e.fn,inferOnly),e);
-        // Lean 4.34 infer-only mode computes the application result from the
-        // function type without inferring/checking the argument.
-        if(!inferOnly){
-          const at=this.infer(e.arg,false);const ok=this.isEagerReduceExpr(e.arg)?this.withEagerReduction(()=>this.isDefEq(ft.type,at)):this.isDefEq(ft.type,at);
-          if(!ok){const ef=ft.type.kind==='sort'?` Sort.${levelToString(ft.type.level)}`:'';const af=at.kind==='sort'?` Sort.${levelToString(at.level)}`:'';throw new KernelError(`application type mismatch in ${exprToString(e)}: expected ${exprToString(ft.type)}${ef}, got ${exprToString(at)}${af} for argument ${exprToString(e.arg)}`);}
-        }
+        if(inferOnly){r=this.inferAppOnlySpine(e);break;}
+        const ft=this.ensureForall(this.infer(e.fn,false),e),at=this.infer(e.arg,false);const ok=this.isEagerReduceExpr(e.arg)?this.withEagerReduction(()=>this.isDefEq(ft.type,at)):this.isDefEq(ft.type,at);
+        if(!ok){const ef=ft.type.kind==='sort'?` Sort.${levelToString(ft.type.level)}`:'';const af=at.kind==='sort'?` Sort.${levelToString(at.level)}`:'';throw new KernelError(`application type mismatch in ${exprToString(e)}: expected ${exprToString(ft.type)}${ef}, got ${exprToString(at)}${af} for argument ${exprToString(e.arg)}`);}
         r=instantiate1(ft.body,e.arg);break;
       }
       case'lam':{
-        try{if(!inferOnly)this.ensureSort(this.infer(e.type,inferOnly),e.type);
-        r=this.withLocal('x',e.type,(id,tc)=>{const bt=tc.infer(instantiate1(e.body,fvar(id)),inferOnly);return forallE(e.name,e.type,abstractFVar(bt,id),e.binderInfo);});}catch(err){const msg=err instanceof Error?err.message:String(err);throw new KernelError(`lambda binder ${nameToString(e.name)} : ${exprToString(e.type)}: ${msg}`);}break;
+        try{r=this.inferLambdaSpine(e,inferOnly);}catch(err){const msg=err instanceof Error?err.message:String(err);throw new KernelError(`lambda binder ${nameToString(e.name)} : ${exprToString(e.type)}: ${msg}`);}break;
       }
       case'forall':{
-        try{const s1=this.ensureSort(this.infer(e.type,inferOnly),e.type);
-        const s2=this.withLocal('x',e.type,(id,tc)=>tc.ensureSort(tc.infer(instantiate1(e.body,fvar(id)),inferOnly),e.body));
-        r=sort(mkIMax(s1.level,s2.level));}catch(err){const msg=err instanceof Error?err.message:String(err);throw new KernelError(`forall binder ${nameToString(e.name)} : ${exprToString(e.type)}: ${msg}`);}break;
+        try{r=this.inferPiSpine(e,inferOnly);}catch(err){const msg=err instanceof Error?err.message:String(err);throw new KernelError(`forall binder ${nameToString(e.name)} : ${exprToString(e.type)}: ${msg}`);}break;
       }
-      case'let':{
-        if(!inferOnly){
-          this.ensureSort(this.infer(e.type,false),e.type);const vt=this.infer(e.value,false);if(!this.isDefEq(vt,e.type))throw new KernelError('let value type mismatch');
-        }
-        // Lean opens the let as a local declaration, infers the body, then closes
-        // the result with a let only when the result type actually depends on it.
-        r=this.withLet(nameToString(e.name),e.type,e.value,(id,tc)=>{
-          const bodyTy=tc.infer(instantiate1(e.body,fvar(id)),inferOnly);
-          const closed=abstractFVar(bodyTy,id);
-          return tc.hasLoose(closed)?{kind:'let',name:e.name,type:e.type,value:e.value,body:closed}:bodyTy;
-        });break;
-      }
+      case'let':r=this.inferLetSpine(e,inferOnly);break;
       case'proj':r=this.inferProj(e,inferOnly);break;
     }
     cache.set(key,r);return r;

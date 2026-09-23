@@ -5,13 +5,17 @@ export {
 export {
   createCheckedModuleArtifact,
   createModuleArtifact,
+} from './artifact-create.js';
+export {
   decodeModuleArtifact,
   encodeModuleArtifact,
-  loadModuleArtifact,
-  moduleArtifactSummary,
   verifyModuleArtifact,
   verifyModuleDependencies,
-} from './artifact.js';
+} from './artifact-verify.js';
+export {
+  loadModuleArtifact,
+  moduleArtifactSummary,
+} from './artifact-load.js';
 export {
   CHECKED_MODULE_FORMAT_VERSION,
   DEFAULT_KERNEL,

@@ -97,6 +97,12 @@ test('kernel memo tables share entries across Lean-structurally equal clones',()
  assert(st.success.has(st.pair(yClone,xClone)),'defeq pair cache remains symmetric like Lean hash-canonicalized pairs');
 });
 
+test('checker-state local name generator stays unique across independent local contexts',()=>{
+ const st=new KernelState(),a=new LocalContext(),b=new LocalContext();
+ const x=st.freshLocal('x',a),y=st.freshLocal('x',b);
+ assert(x!==y,'Lean-style checker state must never recycle fvar ids across sibling contexts');
+});
+
 test('kernel structural cache keys ignore binder display metadata like Lean expr_map',()=>{
  const st=new KernelState(),ty=constant(N.Nat),body=bvar(0);
  const a=lam(nameFromDotted('left'),ty,body,'default');

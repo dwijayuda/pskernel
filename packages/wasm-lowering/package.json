@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Fail-closed lowering from pskernel-derived verified runtime IR to ProofScript WasmIR.",
   "proofscript": {
-    "status": "w1-bool-unit-lowering-mvp",
+    "status": "w2-fixed-width-uint-lowering",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

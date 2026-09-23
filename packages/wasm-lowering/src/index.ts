@@ -76,6 +76,10 @@ export function lowerVerifiedIrToWasm(
         name:declaration.name,
         parameters,
         result:wasmResultType(signature.result),
+        abi:{
+          parameters:[...signature.parameters],
+          result:signature.result,
+        },
         exportName:declaration.name,
         body:lowerRuntimeExpr(
           declaration.body,

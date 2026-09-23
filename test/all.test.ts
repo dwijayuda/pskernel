@@ -71,6 +71,11 @@ test('defeq compares application heads before rejecting arity mismatch',()=>{
  assert(tc.state.success.has(tc.state.pair(fn,fn)),'Lean 4.34 compares and caches equal heads before noticing the arity mismatch');
 });
 
+test('isProp requires the inferred type to reduce to a Sort',()=>{
+ const tc=new TypeChecker(baseEnv());
+ throws(()=>tc.isProp(natLit(0)));
+});
+
 test('proof irrelevance compares arbitrary proofs of the same proposition',()=>{
  const env=baseEnv(),P=nameFromDotted('ProofIrrel.P');env.add({kind:'axiom',name:P,levelParams:[],type:sort(levelZero)});
  const lctx=new LocalContext();lctx.addLocal('p@0',nameFromDotted('p'),constant(P));lctx.addLocal('q@0',nameFromDotted('q'),constant(P));

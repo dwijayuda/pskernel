@@ -32,7 +32,9 @@
     "test:package-integration": "node scripts/package-integration-smoke.mjs",
     "check:source-shape": "node scripts/source-shape-check.mjs",
     "check:vscode": "node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs",
-    "check:architecture": "node scripts/proofscript-architecture-check.mjs"
+    "check:architecture": "node scripts/proofscript-architecture-check.mjs",
+    "prepare": "npm run build",
+    "test:public-consumer": "npm run build --silent && node dist/test/public-api-consumer.test.js"
   },
   "devDependencies": {
     "typescript": "5.8.3"
@@ -51,5 +53,11 @@
   },
   "workspaces": [
     "packages/*"
+  ],
+  "files": [
+    "dist/src",
+    "README.md",
+    "docs/ANTI_DRIFT.md",
+    "docs/EXTERNAL_CONSUMER_CONTRACT.md"
   ]
 }

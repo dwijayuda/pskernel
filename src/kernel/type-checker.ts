@@ -144,7 +144,15 @@ export class TypeChecker {
     }
   });}
 
-  whnf(e:Expr):Expr{return this.rec(()=>{
+  whnf(e:Expr):Expr{
+    // Lean 4.34 returns these cases before entering whnf_core, so they consume no
+    // recursion-depth budget and are not inserted into the WHNF cache.
+    switch(e.kind){
+      case'bvar':case'sort':case'mvar':case'forall':case'lit':return e;
+      case'mdata':return this.whnf(e.expr);
+      case'fvar':{const d=this.lctx.get(e.id);if(!d||d.kind!=='let')return e;break;}
+      case'lam':case'app':case'const':case'let':case'proj':break;
+    }
     const k=this.state.exprId(e),c=this.state.whnf.get(k);if(c)return c;let x=e;
     for(let fuel=0;fuel<100000;fuel++){
       const c0=this.whnfCore(x);if(!exprEq(c0,x)){x=c0;continue;}
@@ -154,7 +162,7 @@ export class TypeChecker {
       this.state.whnf.set(k,x);return x;
     }
     throw new KernelError('WHNF fuel exhausted');
-  });}
+  }
 
   private quick(a:Expr,b:Expr):boolean|null{
     if(exprEq(a,b)||this.state.success.has(this.state.pair(a,b)))return true;

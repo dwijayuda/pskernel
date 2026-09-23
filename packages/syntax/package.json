@@ -34,7 +34,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build --silent && node dist/test/syntax.test.js"
+    "test": "npm run build --silent && node dist/test/syntax.test.js && node dist/test/v061-conformance.test.js"
   },
   "devDependencies": {
     "typescript": "5.8.3"

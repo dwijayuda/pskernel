@@ -507,7 +507,7 @@ console.log('ok - psc runtime lock rejects missing required transitive entry');
       passthrough:[],
     }) as Record<string,unknown>;
     equal(checked.buildTarget,'wasm');
-    equal(checked.wasmProfile,'proofscript-wasm32-gc-js-v1');
+    equal(checked.wasmProfile,'proofscript-wasm32-mvp-js-v1');
 
     const built=await buildCommand({
       project:directory,

@@ -68,33 +68,33 @@ export class TypeChecker {
     return r;
   }
   private inferLambdaSpine(e:Extract<Expr,{kind:'lam'}>,inferOnly:boolean):Expr{
-    const lctx=this.lctx.clone(),tc=this.child(lctx),vs:{id:string;name:import('../core/name.js').Name;type:Expr;binderInfo:import('../core/expr.js').BinderInfo;expr:Expr}[]=[];let cur:Expr=e;
+    const lctx=this.lctx.clone(),vs:{id:string;name:import('../core/name.js').Name;type:Expr;binderInfo:import('../core/expr.js').BinderInfo;expr:Expr}[]=[];let cur:Expr=e;
     while(cur.kind==='lam'){
       const type=this.instantiateRev(cur.type,vs.map(v=>v.expr));
-      if(!inferOnly)tc.ensureSort(tc.infer(type,false),type);
+      if(!inferOnly){const tc=this.child(lctx);tc.ensureSort(tc.infer(type,false),type);}
       const id=this.state.freshLocal(nameToString(cur.name),lctx);lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,name:cur.name,type,binderInfo:cur.binderInfo,expr:fvar(id)});cur=cur.body;
     }
-    const body=this.instantiateRev(cur,vs.map(v=>v.expr));const r=this.cheapBetaReduce(tc.infer(body,inferOnly));
+    const body=this.instantiateRev(cur,vs.map(v=>v.expr));const r=this.cheapBetaReduce(this.child(lctx).infer(body,inferOnly));
     return this.closePiLocals(vs,r);
   }
   private inferPiSpine(e:Extract<Expr,{kind:'forall'}>,inferOnly:boolean):Expr{
-    const lctx=this.lctx.clone(),tc=this.child(lctx),vs:{id:string;expr:Expr}[]=[];const levels:Level[]=[];let cur:Expr=e;
+    const lctx=this.lctx.clone(),vs:{id:string;expr:Expr}[]=[];const levels:Level[]=[];let cur:Expr=e;
     while(cur.kind==='forall'){
-      const type=this.instantiateRev(cur.type,vs.map(v=>v.expr)),s=tc.ensureSort(tc.infer(type,inferOnly),type);levels.push(s.level);
+      const type=this.instantiateRev(cur.type,vs.map(v=>v.expr)),tc=this.child(lctx),s=tc.ensureSort(tc.infer(type,inferOnly),type);levels.push(s.level);
       const id=this.state.freshLocal(nameToString(cur.name),lctx);lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,expr:fvar(id)});cur=cur.body;
     }
-    const body=this.instantiateRev(cur,vs.map(v=>v.expr)),s=tc.ensureSort(tc.infer(body,inferOnly),body);let level=s.level;
+    const body=this.instantiateRev(cur,vs.map(v=>v.expr)),tc=this.child(lctx),s=tc.ensureSort(tc.infer(body,inferOnly),body);let level=s.level;
     for(let i=levels.length-1;i>=0;i--)level=mkIMax(levels[i]!,level);
     return sort(level);
   }
   private inferLetSpine(e:Extract<Expr,{kind:'let'}>,inferOnly:boolean):Expr{
-    const lctx=this.lctx.clone(),tc=this.child(lctx),vs:{id:string;name:import('../core/name.js').Name;type:Expr;value:Expr;expr:Expr}[]=[];let cur:Expr=e;
+    const lctx=this.lctx.clone(),vs:{id:string;name:import('../core/name.js').Name;type:Expr;value:Expr;expr:Expr}[]=[];let cur:Expr=e;
     while(cur.kind==='let'){
       const open=vs.map(v=>v.expr),type=this.instantiateRev(cur.type,open),value=this.instantiateRev(cur.value,open);
-      if(!inferOnly){tc.ensureSort(tc.infer(type,false),type);const vt=tc.infer(value,false);if(!tc.isDefEq(vt,type))throw new KernelError('let value type mismatch');}
+      if(!inferOnly){const tc=this.child(lctx);tc.ensureSort(tc.infer(type,false),type);const vt=tc.infer(value,false);if(!tc.isDefEq(vt,type))throw new KernelError('let value type mismatch');}
       const id=this.state.freshLocal(nameToString(cur.name),lctx);lctx.addLet(id,cur.name,type,value);vs.push({id,name:cur.name,type,value,expr:fvar(id)});cur=cur.body;
     }
-    const body=this.instantiateRev(cur,vs.map(v=>v.expr));let r=this.cheapBetaReduce(tc.infer(body,inferOnly));
+    const body=this.instantiateRev(cur,vs.map(v=>v.expr));let r=this.cheapBetaReduce(this.child(lctx).infer(body,inferOnly));
     for(let i=vs.length-1;i>=0;i--){const v=vs[i]!;if(this.containsFVar(r,v.id))r={kind:'let',name:v.name,type:v.type,value:v.value,body:abstractFVar(r,v.id)};}
     return r;
   }
@@ -296,12 +296,12 @@ export class TypeChecker {
     }}return null;
   }
   private defEqBinder(a:Extract<Expr,{kind:'lam'|'forall'}>,b:Extract<Expr,{kind:'lam'|'forall'}>):boolean{
-    const kind=a.kind,lctx=this.lctx.clone(),tc=this.child(lctx),subst:Expr[]=[];let t:Expr=a,s:Expr=b;
+    const kind=a.kind,lctx=this.lctx.clone(),subst:Expr[]=[];let t:Expr=a,s:Expr=b;
     do{
       const tb=t as Extract<Expr,{kind:'lam'|'forall'}>,sb=s as Extract<Expr,{kind:'lam'|'forall'}>;let sType:Expr|undefined;
       if(!exprLeanEq(tb.type,sb.type)){
         sType=this.instantiateRev(sb.type,subst);const tType=this.instantiateRev(tb.type,subst);
-        if(!tc.isDefEq(tType,sType))return false;
+        if(!this.child(lctx).isDefEq(tType,sType))return false;
       }
       if(hasLooseBVar(tb.body)||hasLooseBVar(sb.body)){
         sType??=this.instantiateRev(sb.type,subst);
@@ -313,7 +313,7 @@ export class TypeChecker {
       }
       t=tb.body;s=sb.body;
     }while(t.kind===kind&&s.kind===kind);
-    return tc.isDefEq(this.instantiateRev(t,subst),this.instantiateRev(s,subst));
+    return this.child(lctx).isDefEq(this.instantiateRev(t,subst),this.instantiateRev(s,subst));
   }
   private proofIrrel(a:Expr,b:Expr):boolean|null{
     // Lean proof irrelevance applies when the *type* of a is a proposition.

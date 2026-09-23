@@ -1,3 +1,4 @@
+import { ensureClosed } from '../../core/checks.js';
 import { ConstantInfo, ConstructorInfo, InductiveInfo, RecursorInfo, RecursorRule } from '../../core/declaration.js';
 import { Environment, KernelError } from '../../core/environment.js';
 import { BinderInfo, Expr, app, appView, constant, exprKey, fvar, forallE, instantiateExprLevels, lam, mkAppN } from '../../core/expr.js';
@@ -105,11 +106,29 @@ function copyAuxRecursors(transformed:Environment,finalEnv:Environment,d:Inducti
 /** Lean-style nested-inductive preprocessing -> ordinary mutual induction -> restoration/hardening. */
 export function addInductive(env:Environment,d:InductiveDecl):void{
  checkNoReservedNestedAux(d);
+ // Final Lean 4.34 #14607: reject FVars/MVars before nested preprocessing can
+ // erase or rewrite the part of a declaration that contains them.
+ for(const it of d.types){
+   ensureClosed(it.type,`inductive type ${nameToString(it.name)}`);
+   for(const ctor of it.ctors)ensureClosed(ctor.type,`constructor ${nameToString(ctor.name)}`);
+ }
  checkUniformInductiveOccurrences(d);
  const p=preprocess(env,d);if(p.aux.length===0){addOrdinaryInductive(env,{...d,numNested:0});return;}
  const transformed=env.clone();addOrdinaryInductiveInternal(transformed,{...p.decl,numNested:0},{allowReservedNestedAux:true});
  const recRename=new Map<string,Name>();let idx=1;const mainRec=strName(d.types[0]!.name,'rec');for(const fam of p.aux)recRename.set(nameKey(strName(fam.auxName,'rec')),nameAppendIndexAfter(mainRec,idx++));
  const finalEnv=env.clone();copyOriginalInductive(transformed,finalEnv,d,p,recRename);copyAuxRecursors(transformed,finalEnv,d,p,recRename);
+
+ // Final Lean 4.34 #14577: nested fixed parameters are removed from the
+ // auxiliary declarations. Re-check each original nested application in a
+ // context declaring the source parameters so an ill-typed fixed argument
+ // cannot disappear during preprocessing.
+ {
+   const paramsLctx=new LocalContext();
+   for(const p0 of p.params)paramsLctx.addLocal(p0.id,p0.decl.userName,p0.decl.type,p0.decl.binderInfo);
+   const ntc=new TypeChecker(finalEnv,paramsLctx,undefined,undefined,d.isUnsafe?'unsafe':'safe',d.levelParams);
+   for(const fam of p.aux)ntc.check(fam.nestedTemplate);
+ }
+
  // 4.34 hardening analogue: recheck restored constructor/recursor types and rule RHS type preservation by restoring the transformed inferred type.
  const compareRestoredRules=(oldName:Name,newName:Name)=>{
    const old=transformed.get(oldName),neu=finalEnv.get(newName);if(old.kind!=='recursor'||neu.kind!=='recursor'||old.rules.length!==neu.rules.length)throw new KernelError('restored recursor rule metadata mismatch');

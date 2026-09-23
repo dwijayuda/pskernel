@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {canonicalJson,createModuleArtifact,decodeModuleArtifact,encodeModuleArtifact,loadModuleArtifact,moduleArtifactSummary,normalizeDeclarationStream,verifyModuleArtifact,verifyModuleDependencies} from '../src/index.js';
 
 const stream=[
-  '{"meta":{"exporter":{"name":"test","version":"1"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"test","version":"1"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"A"}}',
   '{"il":1,"succ":0}',
   '{"ie":0,"sort":1}',

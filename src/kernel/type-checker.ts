@@ -303,7 +303,7 @@ export class TypeChecker {
   private tryStringLitExpansionCore(t:Expr,s:Expr):boolean|null{
     if(t.kind!=='lit'||t.literal.kind!=='string'||s.kind!=='app')return null;
     const sf=getAppFn(s);if(sf.kind!=='const'||!nameEq(sf.name,N.StringOfList))return null;
-    return this.isDefEq(this.whnf(stringLitToConstructor(t)),s);
+    return this.isDefEqCore(this.whnf(stringLitToConstructor(t)),s);
   }
   private tryStringLitExpansion(t:Expr,s:Expr):boolean|null{
     const r=this.tryStringLitExpansionCore(t,s);return r!==null?r:this.tryStringLitExpansionCore(s,t);
@@ -312,7 +312,7 @@ export class TypeChecker {
     const ty=this.whnf(this.infer(t)),head=getAppFn(ty);if(head.kind!=='const')return false;
     const ii=this.env.find(head.name);if(ii?.kind!=='inductive'||ii.isRec||ii.numIndices!==0||ii.ctors.length!==1)return false;
     const ci=this.env.find(ii.ctors[0]!);if(ci?.kind!=='constructor'||ci.numFields!==0)return false;
-    return this.isDefEq(ty,this.infer(s));
+    return this.isDefEqCore(ty,this.infer(s));
   }
   private isNatZeroExpr(e:Expr):boolean{return (e.kind==='const'&&nameEq(e.name,N.NatZero))||(e.kind==='lit'&&e.literal.kind==='nat'&&e.literal.value===0n);}
   private natPredExpr(e:Expr):Expr|null{
@@ -320,7 +320,7 @@ export class TypeChecker {
     const av=appView(e);return av.fn.kind==='const'&&nameEq(av.fn.name,N.NatSucc)&&av.args.length===1?av.args[0]!:null;
   }
   private defEqOffset(a:Expr,b:Expr):boolean|null{
-    if(this.isNatZeroExpr(a)&&this.isNatZeroExpr(b))return true;const pa=this.natPredExpr(a),pb=this.natPredExpr(b);return pa&&pb?this.isDefEq(pa,pb):null;
+    if(this.isNatZeroExpr(a)&&this.isNatZeroExpr(b))return true;const pa=this.natPredExpr(a),pb=this.natPredExpr(b);return pa&&pb?this.isDefEqCore(pa,pb):null;
   }
   private tryUnfoldProjApp(e:Expr):Expr|null{const f=getAppFn(e);if(f.kind!=='proj')return null;const n=this.whnfCore(e,false,false);return exprEq(n,e)?null:n;}
   private reduceProjCore(e:Expr,typeName:import('../core/name.js').Name,index:number):Expr|null{
@@ -333,12 +333,11 @@ export class TypeChecker {
   /** Lean 4.34 `lazy_delta_proj_reduction`: unfold the structure values lazily before comparing a field. */
   private lazyDeltaProjReduction(a:Expr,b:Expr,typeName:import('../core/name.js').Name,index:number):boolean{
     let x=a,y=b;
-    const finish=()=>{const px=this.reduceProjCore(x,typeName,index),py=this.reduceProjCore(y,typeName,index);return px&&py?this.isDefEq(px,py):this.isDefEq(x,y);};
-    for(let i=0;i<512;i++){
+    const finish=()=>{const px=this.reduceProjCore(x,typeName,index),py=this.reduceProjCore(y,typeName,index);return px&&py?this.isDefEqCore(px,py):this.isDefEqCore(x,y);};
+    while(true){
       const d=this.deltaStep(x,y);if(!d)return finish();if(d.equal)return true;x=d.a;y=d.b;
       const q=this.quick(x,y);if(q===true)return true;if(q===false)return finish();
     }
-    return finish();
   }
   private isDefEqArgs(a:Expr,b:Expr):boolean{
     let x=a,y=b;while(x.kind==='app'&&y.kind==='app'){if(!this.isDefEq(x.arg,y.arg))return false;x=x.fn;y=y.fn;}return x.kind!=='app'&&y.kind!=='app';
@@ -368,24 +367,31 @@ export class TypeChecker {
   private isDefEqCore(a:Expr,b:Expr):boolean{return this.rec(()=>{
     const q=this.quick(a,b);if(q!==null)return q;
     // Lean 4.34 reflection fast path: fully reduce a closed lhs when rhs is Bool.true.
-    if((!hasFVar(a)||this.eagerReduce)&&b.kind==='const'&&nameEq(b.name,N.BoolTrue)){const w=this.whnf(a);if(w.kind==='const'&&nameEq(w.name,N.BoolTrue)){this.state.success.add(this.state.pair(a,b));return true;}}
+    if((!hasFVar(a)||this.eagerReduce)&&b.kind==='const'&&nameEq(b.name,N.BoolTrue)){
+      const w=this.whnf(a);if(w.kind==='const'&&nameEq(w.name,N.BoolTrue))return true;
+    }
     let x=this.whnfCore(a,false,true),y=this.whnfCore(b,false,true);const q2=this.quick(x,y);if(q2!==null)return q2;
     const pi=this.proofIrrel(x,y);if(pi!==null)return pi;
-    for(let i=0;i<512;i++){
+    while(true){
       const off=this.defEqOffset(x,y);if(off!==null)return off;
-      if(((!hasFVar(x)&&!hasFVar(y))||this.eagerReduce)){const rx=reduceNatApp(this.env,x,z=>this.whnf(z),this.limits.maxNatBytes);if(rx)return this.isDefEq(rx,y);const ry=reduceNatApp(this.env,y,z=>this.whnf(z),this.limits.maxNatBytes);if(ry)return this.isDefEq(x,ry);}
+      if(((!hasFVar(x)&&!hasFVar(y))||this.eagerReduce)){
+        const rx=reduceNatApp(this.env,x,z=>this.whnf(z),this.limits.maxNatBytes);if(rx)return this.isDefEqCore(rx,y);
+        const ry=reduceNatApp(this.env,y,z=>this.whnf(z),this.limits.maxNatBytes);if(ry)return this.isDefEqCore(x,ry);
+      }
       // Lean 4.34 checks native reduction after Nat reduction and before lazy delta, regardless of fvars.
-      const nx=reduceNative(this.env,x,this.nativeEvaluator);if(nx)return this.isDefEq(nx,y);const ny=reduceNative(this.env,y,this.nativeEvaluator);if(ny)return this.isDefEq(x,ny);
-      const d=this.deltaStep(x,y);if(!d)break;if(d.equal){this.state.success.add(this.state.pair(a,b));return true;}x=d.a;y=d.b;const z=this.quick(x,y);if(z!==null)return z;
+      const nx=reduceNative(this.env,x,this.nativeEvaluator);if(nx)return this.isDefEqCore(nx,y);
+      const ny=reduceNative(this.env,y,this.nativeEvaluator);if(ny)return this.isDefEqCore(x,ny);
+      const d=this.deltaStep(x,y);if(!d)break;if(d.equal)return true;x=d.a;y=d.b;
+      const z=this.quick(x,y);if(z!==null)return z;
     }
-    if(x.kind==='const'&&y.kind==='const'&&nameEq(x.name,y.name)&&x.levels.length===y.levels.length&&x.levels.every((l,i)=>levelEquivalent(l,y.levels[i]!))){this.state.success.add(this.state.pair(a,b));return true;}
+    if(x.kind==='const'&&y.kind==='const'&&nameEq(x.name,y.name)&&x.levels.length===y.levels.length&&x.levels.every((l,i)=>levelEquivalent(l,y.levels[i]!)))return true;
     if(x.kind==='fvar'&&y.kind==='fvar'&&x.id===y.id)return true;
     if(x.kind==='proj'&&y.kind==='proj'&&nameEq(x.typeName,y.typeName)&&x.index===y.index&&this.lazyDeltaProjReduction(x.expr,y.expr,x.typeName,x.index))return true;
-    const xx=this.whnfCore(x,false,false),yy=this.whnfCore(y,false,false);if(!exprEq(xx,x)||!exprEq(yy,y))return this.isDefEq(xx,yy);
-    if(x.kind==='app'&&y.kind==='app'&&this.defEqApp(x,y)){this.state.success.add(this.state.pair(a,b));return true;}
-    if(this.tryEta(x,y)||this.tryEta(y,x)||this.tryStructEta(x,y)){this.state.success.add(this.state.pair(a,b));return true;}
-    const str=this.tryStringLitExpansion(x,y);if(str!==null){if(str)this.state.success.add(this.state.pair(a,b));return str;}
-    if(this.isDefEqUnitLike(x,y)){this.state.success.add(this.state.pair(a,b));return true;}
+    const xx=this.whnfCore(x,false,false),yy=this.whnfCore(y,false,false);if(!exprEq(xx,x)||!exprEq(yy,y))return this.isDefEqCore(xx,yy);
+    if(x.kind==='app'&&y.kind==='app'&&this.defEqApp(x,y))return true;
+    if(this.tryEta(x,y)||this.tryEta(y,x)||this.tryStructEta(x,y))return true;
+    const str=this.tryStringLitExpansion(x,y);if(str!==null)return str;
+    if(this.isDefEqUnitLike(x,y))return true;
     return false;
   });}
 

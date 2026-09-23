@@ -139,6 +139,9 @@ console.log('ok - psc verified runtime external assurance');
       verified:true,
       passthrough:[],
     });
+    if(!('assurance' in result)){
+      throw new Error('verified check did not return assurance');
+    }
     const assurance=result.assurance;
     equal(assurance.runtimeAssumptionCount,1);
     equal(assurance.kernelCheckedDefinitionCount,1);

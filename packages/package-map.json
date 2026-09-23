@@ -180,7 +180,6 @@
         "Type-position syntax now has a non-associative propositional equality node. Applications bind tighter than `=`, and `=` binds tighter than arrows; lowering preserves Lean's `a = b` spelling.",
         "Chained `a = b = c` is rejected unless explicitly parenthesized; no global textual equality rewrite is used.",
         "Bounded `simp only [h1, ← h2, ...]` now parses an explicit rule list, including optional reverse markers and a trailing comma, while default `simp`, erasures, `*`, locations, pre/post markers, and configs remain outside the supported parser subset.",
-        "The bounded simplifier preserves inherited Lean spelling `simp only [h]` and `simp only [← h]`. The parser currently accepts exactly one explicit rule and rejects multi-rule lists instead of approximating full Lean simp syntax.",
         "The tactic parser preserves Lean-compatible rewrite spelling for the bounded subset: `rw [h]` and `rw [← h]`; it does not introduce a ProofScript-only bare-rw syntax.",
         "Inherited Lean `induction <local>` syntax is parsed/lowered canonically; the bounded semantic implementation uses pskernel recursors and does not introduce a second induction principle.",
         "Inherited Lean `cases <local>` tactic syntax is parsed/lowered canonically; the bounded semantic implementation lives in elab and delegates elimination to pskernel-generated recursors.",

@@ -149,7 +149,6 @@
     "Nat literal sizing and Nat.pow/Nat.shiftLeft count guards now match Lean 4.34 core defaults: 128 MiB explicit trusted-core limit and 32-bit unsigned counts; runtime environment overrides remain outside the trusted core.",
     "Recursor reduction now applies Lean 4.34 non-recursive-structure eta conversion before rule selection; projection WHNF reuses the constructor-aware projection reducer.",
     "Recursor reduction now converts String literals through the same String.ofList/List Char constructor path used by Lean 4.34 before computation-rule selection.",
-    "Historical Lean.reduceBool/Lean.reduceNat special handling has been removed to match final Lean 4.34, where those declarations no longer exist.",
     "WellFounded.Nat.fix/fix.go structural certification now validates both the outer fixpoint wrapper and the inner Nat.rec predecessor-fuel equation; complex primitive equations themselves remain fail-closed.",
     "Well-founded primitive Probe infrastructure now derives the induction-hypothesis domain and validates defining equations independently from fixpoint scaffolding; outer-only and full certificates are separated to prevent accidental overclaiming.",
     "Ordinary inductive admission now propagates Lean 4.34 safe/unsafe checking mode through headers, constructors, recursor synthesis, and defensive recursor checks; unsafe inductives skip positivity while their generated constants remain unsafe.",

@@ -345,16 +345,18 @@ Interop rule:
 Current FFI checkpoint:
 
 - verified IR represents typed named ESM imports and TypeScript emits them;
-- checked core represents runtime externals as **unsafe axioms** plus explicit
+- checked core represents runtime externals as typed axioms plus explicit
   ESM binding metadata;
 - checked-admission codec v2 / module payload 1.1.0 persists and replay-checks
   those external assumptions while preserving v1 compatibility;
 - erasure accepts only primitive first-order external function profiles and
   lowers them to the verified-IR import namespace;
-- safe definitions/theorems remain unable to use unsafe externals because
-  pskernel enforces declaration safety;
-- next, source syntax must require explicit unsafe executable use instead of
-  inferring or hiding the trust boundary.
+- the first profile bans proof-valued/polymorphic extern signatures, so the
+  external axiom cannot inject proof evidence; JavaScript execution remains
+  outside pskernel entirely;
+- next, source syntax must make the external runtime binding explicit, while
+  assurance output must distinguish these runtime assumptions from ordinary
+  definitions/theorems.
 
 Exit condition:
 
@@ -514,7 +516,7 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    authority.
 9. Continue the explicit npm/JS FFI from the landed verified-IR import plus
    replayable checked-core external-admission foundation. Next add source
-   signatures/unsafe executable syntax, then project dependency policy and
+   signatures plus assurance reporting, then project dependency policy and
    end-to-end runtime binding tests.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.

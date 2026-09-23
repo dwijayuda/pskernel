@@ -240,7 +240,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "Checked core now admits explicit runtime externals as unsafe axioms paired with named ESM binding metadata. Unsafe is mandatory so safe definitions/theorems cannot silently depend on JavaScript.",
+        "Runtime externals are replayed as ordinary non-proof-valued axioms plus separate runtime-external binding metadata. They are not Lean `unsafe` declarations: JavaScript execution is never used by pskernel, and the logical constant is opaque/uninterpreted.",
+        "Replay itself enforces the first FFI profile: at least one explicit parameter, primitive runtime parameter/result types only, no proof-valued or polymorphic external signatures.",
         "Checked-admissions codec version 2 persists external admissions; version 1 remains readable and is forbidden from containing the new admission kind.",
         "Checked-core codec v1 serializes closed definition/theorem/inductive/structure/class/instance admissions into versioned JSON data. It rejects free variables, expression/universe metavariables, and mdata rather than persisting unresolved elaborator state.",
         "Decoded admissions do not become trusted declarations: callers must replay them through admitCheckedCoreAdmissions/pskernel.",

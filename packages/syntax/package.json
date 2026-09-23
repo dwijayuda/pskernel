@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript v0.7 source positions, trivia-preserving tokens, lexical errors, and feature identifiers.",
   "proofscript": {
-    "status": "v061-structure-parser-mvp",
+    "status": "v061-inductive-parser-mvp",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript",
@@ -20,7 +20,8 @@
       "D-FUNCTION-ALIAS",
       "E-IF-BRACE",
       "E-MATCH-BODY",
-      "E-STRUCT-BODY"
+      "E-STRUCT-BODY",
+      "E-INDUCTIVE-BODY"
     ]
   },
   "exports": {

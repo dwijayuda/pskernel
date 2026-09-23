@@ -39,6 +39,12 @@ function collectStructures(
 }
 
 export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule {
+  if(module.declarations.some((decl)=>decl.kind==='inductive')){
+    throw new Error(
+      'PS_CHECK_DECL_UNSUPPORTED: inductive declarations require ADT elaboration',
+    );
+  }
+
   const structureDecls=module.declarations.filter(
     (decl):decl is V061StructureDeclaration=>decl.kind==='structure',
   );

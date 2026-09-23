@@ -95,16 +95,16 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-structure-parser-mvp",
+      "status": "v061-inductive-parser-mvp",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
         "Pinned to ProofScript v0.7.0 with the v0.6.1 compiler-ready surface as the implementation baseline.",
-        "Structure declaration parsing is isolated from ordinary value declarations, mirroring Lean's declaration-specific elaboration boundary.",
-        "E-STRUCT-BODY currently parses explicit named fields and emits canonical Lean structure syntax.",
-        "Parameterized, implicit, and instance fields fail closed until their binder semantics are implemented.",
-        "The executable software checker intentionally rejects structures until nominal structure semantics are added."
+        "Inductive declaration parsing is isolated from value and structure declaration parsing, following Lean's command/elaboration boundary.",
+        "E-INDUCTIVE-BODY covers constructor order, explicit decorated parameters, and canonical Lean lowering for non-indexed constructor signatures.",
+        "Explicit constructor result types, implicit/instance binders, indexed families, deriving, and computed fields remain fail-closed.",
+        "The executable checker rejects inductives until ADT semantics are implemented."
       ]
     },
     {

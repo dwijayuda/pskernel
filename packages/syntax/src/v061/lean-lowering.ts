@@ -67,6 +67,21 @@ export function lowerV061ModuleToLean(module:V061Module):string {
       ).join('\n');
       return 'structure '+decl.name+' where\n'+fields;
     }
+    if(decl.kind==='inductive'){
+      const params=decl.params.map(
+        (param)=>' ('+param.name+' : '+lowerV061TypeToLean(param.type)+')',
+      ).join('');
+      const result=decl.resultType===undefined
+        ? ''
+        : ' : '+lowerV061TypeToLean(decl.resultType);
+      const constructors=decl.constructors.map((ctor)=>{
+        const ctorParams=ctor.params.map(
+          (param)=>' ('+param.name+' : '+lowerV061TypeToLean(param.type)+')',
+        ).join('');
+        return '  | '+ctor.name+ctorParams;
+      }).join('\n');
+      return 'inductive '+decl.name+params+result+' where\n'+constructors;
+    }
     const head=decl.kind==='function'||decl.kind==='const'?'def':decl.kind;
     const params=decl.params.map((p)=>' ('+p.name+' : '+lowerV061TypeToLean(p.type)+')').join('');
     return head+' '+decl.name+params+' : '+lowerV061TypeToLean(decl.resultType)+' := '+lowerV061ExprToLean(decl.body);

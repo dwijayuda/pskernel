@@ -60,6 +60,22 @@ export type V061Expr =
       readonly span:SourceSpan;
     };
 
+export interface V061InductiveConstructor {
+  readonly name:string;
+  readonly params:readonly V061Parameter[];
+  readonly span:SourceSpan;
+}
+
+export interface V061InductiveDeclaration {
+  readonly kind:'inductive';
+  readonly name:string;
+  readonly params:readonly V061Parameter[];
+  readonly resultType?:V061TypeExpr;
+  readonly constructors:readonly V061InductiveConstructor[];
+  readonly terminatedBySemicolon:boolean;
+  readonly span:SourceSpan;
+}
+
 export interface V061StructureField {
   readonly name:string;
   readonly type:V061TypeExpr;
@@ -84,7 +100,7 @@ export interface V061StructureDeclaration {
   readonly span:SourceSpan;
 }
 
-export type V061Declaration=V061ValueDeclaration|V061StructureDeclaration;
+export type V061Declaration=V061ValueDeclaration|V061StructureDeclaration|V061InductiveDeclaration;
 
 export interface V061Module {
   readonly kind:'v061-module';

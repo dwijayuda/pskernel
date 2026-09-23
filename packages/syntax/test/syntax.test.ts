@@ -476,3 +476,47 @@ console.log('ok - @proofscript/syntax lexer MVP');
     'structure User where\n  name : String\n  age : Nat\n\ndef ada : User := { name := "Ada", age := 33 : User }\n',
   );
 }
+
+
+// v0.6.1 E-INDUCTIVE-BODY: braces/semicolons decorate Lean inductive declarations.
+{
+  const module=parseV061Module(
+    'inductive Color where { | red; | blue; }',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'inductive');
+  equal(module.featureIds.includes('E-INDUCTIVE-BODY'),true);
+  if(declaration?.kind==='inductive'){
+    equal(declaration.constructors.length,2);
+    equal(declaration.constructors[0]?.name,'red');
+    equal(declaration.constructors[1]?.name,'blue');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'inductive Color where\n  | red\n  | blue\n',
+  );
+}
+{
+  const module=parseV061Module(
+    'inductive Result(α : Type, ε : Type) where { | ok(value : α); | error(error : ε); }',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'inductive');
+  if(declaration?.kind==='inductive'){
+    equal(declaration.params.length,2);
+    equal(declaration.constructors[0]?.params.length,1);
+    equal(declaration.constructors[1]?.params.length,1);
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'inductive Result (α : Type) (ε : Type) where\n  | ok (value : α)\n  | error (error : ε)\n',
+  );
+}
+{
+  throws(
+    ()=>parseV061Module(
+      'inductive Vector where { | nil : Vector; }',
+    ),
+    /explicit constructor result types are not yet implemented/,
+  );
+}

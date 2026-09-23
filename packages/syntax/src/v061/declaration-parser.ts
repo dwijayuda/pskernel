@@ -4,6 +4,7 @@ import {V061ParseContext,spanBetween} from './context.js';
 import {V061ExpressionParser} from './expression-parser.js';
 import {parseV061Type} from './type-parser.js';
 import {parseV061StructureDeclaration} from './structure-parser.js';
+import {parseV061InductiveDeclaration} from './inductive-parser.js';
 
 export class V061DeclarationParser {
   readonly context:V061ParseContext;
@@ -23,6 +24,9 @@ export class V061DeclarationParser {
   private parseDeclaration():V061Declaration {
     if(this.context.cursor.at('structure')){
       return parseV061StructureDeclaration(this.context);
+    }
+    if(this.context.cursor.at('inductive')){
+      return parseV061InductiveDeclaration(this.context);
     }
     return this.parseValueDeclaration();
   }

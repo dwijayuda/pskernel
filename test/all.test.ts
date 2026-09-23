@@ -54,6 +54,26 @@ test('defeq success cache remains pair-local and never gains transitive closure'
  assert(!st.success.has(st.pair(a,c)),'Lean 4.34 defeq cache must not transitively close successful algorithmic comparisons');
 });
 
+test('internal defeq core success does not populate the public success cache',()=>{
+ const env=baseEnv(),K=nameFromDotted('CoreCache.K'),uN=nameFromDotted('u'),u=levelParam(uN);
+ env.add({kind:'axiom',name:K,levelParams:[uN],type:sort(u)});
+ const a=constant(K,[mkMax(u,u)]),b=constant(K,[u]),tc=new TypeChecker(env),pair=tc.state.pair(a,b);
+ assert((tc as any).isDefEqCore(a,b),'equivalent universe arguments on the same constant are core-definitionally equal');
+ assert(!tc.state.success.has(pair),'core-only success must remain cache-neutral until the public wrapper is used');
+ assert(tc.isDefEq(a,b),'public wrapper must preserve the same result');
+ assert(tc.state.success.has(pair),'public successful query must populate the success cache');
+});
+
+test('lazy delta reduction has no arbitrary 512-step semantic cap',()=>{
+ const env=baseEnv(),count=600;
+ for(let i=count;i>=0;i--){
+   const n=nameFromDotted('LongDelta.D'+i),value=i===count?natLit(0):constant(nameFromDotted('LongDelta.D'+(i+1)));
+   env.add({kind:'definition',name:n,levelParams:[],type:constant(N.Nat),value,hints:{kind:'regular',height:BigInt(count-i+1)},safety:'safe'});
+ }
+ const tc=new TypeChecker(env);
+ assert(tc.isDefEq(constant(nameFromDotted('LongDelta.D0')),natLit(0)),'Lean lazy delta must continue past 512 definition steps');
+});
+
 test('public defeq failures do not populate Lean lazy-delta failure cache',()=>{
  const tc=new TypeChecker(baseEnv()),a=natLit(0),b=natLit(1),pair=tc.state.pair(a,b);
  assert(!tc.isDefEq(a,b),'distinct Nat literals are not definitionally equal');

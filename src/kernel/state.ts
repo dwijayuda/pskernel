@@ -1,7 +1,7 @@
 import { Environment, KernelError } from '../core/environment.js';
 import { Expr, exprLeanEq } from '../core/expr.js';
 import { Level } from '../core/level.js';
-import { LocalContext } from '../core/local-context.js';
+import { LocalContext, LocalDecl } from '../core/local-context.js';
 import { nameKey } from '../core/name.js';
 
 function mix(h:number,x:number):number{
@@ -161,6 +161,7 @@ export class KernelState {
   private readonly hasher=new LeanExprHasher();
   private boundEnvironment:Environment|undefined;
   private boundRevision=0;
+  private readonly localDecls=new Map<string,LocalDecl>();
   readonly infer=new LeanExprMap<Expr>(this.hasher);
   readonly checkedInfer=new LeanExprMap<Expr>(this.hasher);
   readonly whnfCore=new LeanExprMap<Expr>(this.hasher);
@@ -185,11 +186,28 @@ export class KernelState {
       throw new KernelError('type checker environment changed; create a new checker state');
   }
 
+  /**
+   * Shared caches are sound only when an FVar id has one declaration throughout
+   * the checker state, matching Lean's globally unique free-variable names.
+   */
+  bindLocalContext(lctx:LocalContext):void{
+    for(const d of lctx.entries()){
+      const old=this.localDecls.get(d.id);
+      if(old===undefined){this.localDecls.set(d.id,d);continue;}
+      if(old.kind!==d.kind||!exprLeanEq(old.type,d.type))
+        throw new KernelError(`free variable '${d.id}' was rebound incompatibly in one checker state`);
+      if(old.kind==='local'&&d.kind==='local'&&old.binderInfo!==d.binderInfo)
+        throw new KernelError(`free variable '${d.id}' changed binder information in one checker state`);
+      if(old.kind==='let'&&d.kind==='let'&&!exprLeanEq(old.value,d.value))
+        throw new KernelError(`let variable '${d.id}' was rebound incompatibly in one checker state`);
+    }
+  }
+
   /** Lean's type_checker::state owns the name generator shared by all local scopes. */
   private nextLocalId=0;
-  freshLocal(prefix:string,lctx:LocalContext):string{
+  freshLocal(_prefix:string,lctx:LocalContext):string{
     let id:string;
-    do{id=`${prefix}@${this.nextLocalId++}`;}while(lctx.get(id)!==undefined);
+    do{id=`_kernel_fresh@${this.nextLocalId++}`;}while(lctx.get(id)!==undefined||this.localDecls.has(id));
     return id;
   }
 

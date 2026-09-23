@@ -493,9 +493,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    configured project-relative source roots are now landed. The remaining DS5
    blocker is a real persistent module-artifact payload path; do not fabricate
    Lean4Export records.
-8. Start DS6 language-service/LSP source-kind routing only after imported
-   semantic metadata is stable; VS Code must not take unconditional ownership
-   of all `.lean` files.
+8. Continue landed DS6 source-kind routing: language-service/LSP now use the
+   shared .ps / supported .lean frontend selection, and VS Code exposes manual
+   or opt-in .lean providers without taking global .lean ownership. Next add
+   project/import environment composition and cross-language navigation.
 9. Design and implement explicit npm/JS FFI.
 10. Start the ProofScript-written standard library.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.

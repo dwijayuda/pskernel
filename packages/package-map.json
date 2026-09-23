@@ -543,7 +543,7 @@
       "path": "packages/language-service",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "proof-aware-document-service-mvp",
+      "status": "dual-source-document-service-mvp",
       "packageName": "@proofscript/language-service",
       "dependsOn": [
         "syntax",
@@ -552,6 +552,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS6.1 snapshots carry sourceKind and analyzer parsing dispatches through the same default SourceFrontendRegistry used by psc. ProofScript and supported Lean documents therefore enter the same shared AST/elaboration/pskernel analysis path.",
+        "Document status reports sourceKind; replacement edits preserve the source kind selected at didOpen. Canonical Lean display continues to lower from the shared AST.",
+        "Project/import environment composition and cross-file definition/reference indexing remain later DS6 work; this checkpoint is source-kind routing only.",
         "Editor analysis distinguishes parse success from kernel verification; only pskernel-admitted declarations are labeled verified.",
         "Declaration-level proof state never fabricates tactic goals: verified theorems report closed, rejected theorems report the actual failure, and unsupported declarations report unavailable.",
         "The service reuses the current parser/elaborator and accepts an environment factory for future project/import integration.",
@@ -565,7 +568,7 @@
       "path": "packages/lsp",
       "phase": "D",
       "trust": "untrusted-support",
-      "status": "proof-aware-stdio-mvp",
+      "status": "dual-source-stdio-routing-mvp",
       "packageName": "@proofscript/lsp",
       "dependsOn": [
         "language-service",
@@ -574,6 +577,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "DS6.1 maps `proofscript` LSP documents to the ProofScript frontend and `proofscript-lean` documents to the Lean-subset frontend. .ps/.lean URI extension fallback supports clients that preserve another editor language id.",
+        "The LSP does not decide VS Code file ownership; source-kind routing is isolated in a small transport module and forwarded to the language service.",
         "LSP environment loading is delegated to @proofscript/environment/node so editor and compiler share the same pinned Lean 4.34 replay policy.",
         "Every document analysis receives a clone of that admitted environment; the fixture is replayed by pskernel rather than trusted as pre-verified metadata.",
         "If the fixture is missing or replay fails, the server falls back to an empty environment and reports the degraded editor environment through serverInfo instead of weakening proof acceptance.",

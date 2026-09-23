@@ -392,11 +392,33 @@ Remaining DS5 work:
 
 ### DS6 — editor support
 
-- source-kind-aware document snapshots;
-- both frontends in the language service;
-- VS Code opt-in Lean-subset mode;
-- cross-language navigation;
-- source conversion code actions after CLI conversion stabilizes.
+Status: **DS6.1 source-kind routing landed; project-aware navigation remains**
+
+Landed DS6.1:
+
+- language-service snapshots carry `proofscript` or `lean-subset` source
+  kind;
+- analyzer parsing uses the same registered source frontends as `psc`;
+- LSP `didOpen` maps `proofscript` / `proofscript-lean` documents to that
+  source kind and preserves it across edits;
+- document status reports source kind alongside parser/kernel status;
+- VS Code contributes an explicit `proofscript-lean` manual language mode
+  **without** associating `.lean` globally;
+- `proofscript.leanSubset.enable` defaults false. When enabled in an active
+  ProofScript workspace, providers may attach to `.lean` documents while the
+  existing Lean language ownership remains unchanged;
+- provider callbacks and document synchronization remain guarded by that
+  opt-in/manual-source check.
+
+Remaining DS6 work:
+
+- compose project/import environments in the language service using the DS5
+  resolver and checked metadata rather than analyzing every document as an
+  isolated file;
+- build cross-document/cross-source definition and reference indexes;
+- add cross-language navigation;
+- add source conversion code actions after project-aware document identity is
+  stable.
 
 ## Non-goals
 

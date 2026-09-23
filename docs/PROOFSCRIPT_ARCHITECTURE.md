@@ -876,3 +876,34 @@ Rules:
 
 This keeps resolution deterministic and makes mixed-source projects portable
 without coupling source-kind choice to import precedence.
+
+## DS6 source-kind-aware editor checkpoint
+
+Editor parsing now follows the same frontend boundary as the compiler.
+
+```text
+LSP document
+    |
+    +-- sourceKind=proofscript --> ProofScript frontend --+
+    |                                                    |
+    +-- sourceKind=lean-subset --> Lean subset frontend -+
+                                                         |
+                                                         v
+                                                   shared V061 AST
+                                                         |
+                                                         v
+                                              shared elab -> pskernel
+```
+
+The LSP source-kind mapping is transport metadata only; it does not create a
+second checker. Document edits preserve their initially selected source kind.
+
+VS Code deliberately avoids an unconditional `.lean` extension association.
+It exposes a `proofscript-lean` manual mode and an opt-in
+`proofscript.leanSubset.enable` provider path. The extension may attach
+ProofScript features to an existing Lean-owned document only when explicitly
+enabled in the ProofScript workspace.
+
+This checkpoint remains document-local. DS5 project/import semantics must be
+composed into the language service before cross-file/cross-language navigation
+can claim semantic project awareness.

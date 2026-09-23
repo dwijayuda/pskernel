@@ -1,9 +1,9 @@
 import { Environment } from '../src/core/environment.js';
-import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
+import { app, bvar, constant, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
 import { levelEquivalent, levelMVar, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../src/core/level.js';
 import { nameFromDotted, nameToString } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
-import { instantiate, lift } from '../src/core/instantiate.js';
+import { abstractFVar, instantiate, lift } from '../src/core/instantiate.js';
 import { Kernel } from '../src/kernel/kernel.js';
 import { N } from '../src/kernel/names.js';
 import { TypeChecker } from '../src/kernel/type-checker.js';
@@ -37,11 +37,17 @@ test('Lean private names preserve numeric private-index components',()=>{assert(
 test('LocalContext freshness never collides with reconstructed local IDs',()=>{const l=new LocalContext();l.addLocal('a@1',nameFromDotted('a'),sort(levelZero));assert(l.fresh('a')==='a@0');assert(l.fresh('a')==='a@2');});
 test('deep structural traversals avoid the JavaScript call stack',()=>{
  let e:any=bvar(0);
- for(let i=0;i<6000;i++)e=lam(nameFromDotted('x'),constant(N.Nat),e);
- assert(!hasMVar(e));
+ for(let i=0;i<12000;i++)e=lam(nameFromDotted('x'),constant(N.Nat),e);
+ assert(!hasMVar(e));assert(!hasFVar(e));assert(!hasLooseBVar(e));
  const lifted=lift(e,1,0);
  const inst=instantiate(lifted,[natLit(0)]);
  assert(lifted.kind==='lam'&&inst.kind==='lam');
+
+ const id='deep@0';let withFVar:any=fvar(id);
+ for(let i=0;i<12000;i++)withFVar=lam(nameFromDotted('x'),constant(N.Nat),withFVar);
+ assert(hasFVar(withFVar),'deep free-variable scan must find the leaf without recursion overflow');
+ const abstracted=abstractFVar(withFVar,id);
+ assert(abstracted.kind==='lam'&&!hasFVar(abstracted),'deep abstraction must be stack-safe and close the free variable');
 });
 test('universe max commutative semantically',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));assert(levelEquivalent(mkMax(u,v),mkMax(v,u)));});
 test('imax u 0 = 0',()=>{const u=levelParam(nameFromDotted('u'));assert(levelEquivalent(mkIMax(u,levelZero),levelZero));});

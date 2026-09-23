@@ -122,7 +122,7 @@ Pinned invariants:
 - 10,573 declaration records
 - exactly 11,223 admitted/generated constants
 
-The fixture is stored compressed as `oracle/fixtures/lean434-lean-rbmap-all.ndjson.gz`. On the identity-keyed kernel-cache architecture, the replay completes within the bounded local oracle window; this gate is primarily for large-environment compatibility and replay-performance regression detection.
+The fixture is stored compressed as `oracle/fixtures/lean434-lean-rbmap-all.ndjson.gz`. The recorded successful replay predates the current Lean-structural cache correction and was measured on the superseded identity-keyed cache implementation. It remains historical large-environment evidence, but the current structural-cache tree requires a refreshed replay before its performance/result can be claimed as current.
 
 `npm run check:large-corpus` runs this gate independently. It is deliberately excluded from `npm run check:corpus` so fast development cycles do not inherit the large-environment runtime and memory cost.
 

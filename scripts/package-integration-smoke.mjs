@@ -410,3 +410,27 @@ assert(
   verifiedGenericMatch.emitted.javascript.includes('case "some"'),
   'generic ADT match did not compile to JavaScript',
 );
+
+
+const verifiedRecursiveAdt=compileVerifiedSource(
+  'inductive PsList(α : Type) where { '+
+  '| nil; | cons(head : α, tail : PsList(α)); } '+
+  'function headOr {α : Type}'+
+  '(value : PsList(α), fallback : α) : α := '+
+  'match value with { | .nil => fallback; | .cons head tail => head; };',
+  'verified-recursive-adt.ts',
+);
+assert(
+  verifiedRecursiveAdt.typeScript.includes(
+    'readonly tail: PsList<T0>;',
+  ),
+  'direct recursive ADT field did not remain recursive in verified TypeScript',
+);
+assert(
+  verifiedRecursiveAdt.typeScript.includes('case "cons"'),
+  'recursive ADT recursor did not erase to runtime match',
+);
+assert(
+  verifiedRecursiveAdt.emitted.javascript.includes('case "cons"'),
+  'recursive ADT match did not compile to JavaScript',
+);

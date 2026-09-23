@@ -1,12 +1,14 @@
 import {
   LocalContext,
   TypeChecker,
+  appView,
   fvar,
   instantiate1,
   nameEq,
   nameKey,
   nameToString,
   strName,
+  type Expr,
 } from 'lean-ts-kernel';
 import type {CheckedCoreModule} from '@proofscript/checked-core';
 import type {
@@ -27,6 +29,39 @@ export interface PreparedRuntimeInductives {
   readonly byType:ReadonlyMap<string,RuntimeInductiveInfo>;
   readonly byConstructor:ReadonlyMap<string,RuntimeConstructorInfo>;
   readonly byRecursor:ReadonlyMap<string,RuntimeInductiveInfo>;
+}
+
+
+function hasConstant(expr:Expr,target:import('lean-ts-kernel').Name):boolean {
+  switch(expr.kind){
+    case 'const':return nameEq(expr.name,target);
+    case 'app':return hasConstant(expr.fn,target)||hasConstant(expr.arg,target);
+    case 'lam':
+    case 'forall':
+      return hasConstant(expr.type,target)||hasConstant(expr.body,target);
+    case 'let':
+      return hasConstant(expr.type,target)
+        ||hasConstant(expr.value,target)
+        ||hasConstant(expr.body,target);
+    case 'mdata':
+    case 'proj':
+      return hasConstant(expr.expr,target);
+    default:return false;
+  }
+}
+
+function isDirectRecursiveField(
+  type:Expr,
+  inductive:import('lean-ts-kernel').InductiveInfo,
+  parameterValues:readonly Expr[],
+  checker:TypeChecker,
+):boolean {
+  const view=appView(checker.whnf(type));
+  if(view.fn.kind!=='const'||!nameEq(view.fn.name,inductive.name))return false;
+  if(view.args.length!==parameterValues.length)return false;
+  return view.args.every(
+    (arg,index)=>checker.isDefEq(arg,parameterValues[index]!),
+  );
 }
 
 function shortName(name:string):string {
@@ -57,13 +92,6 @@ export function prepareRuntimeInductives(
         nameToString(inductive.name)+"'",
       );
     }
-    if(inductive.isRec){
-      throw new Error(
-        "PS_ERASE_RECURSIVE_INDUCTIVE_UNSUPPORTED: '"+
-        nameToString(inductive.name)+"'",
-      );
-    }
-
     const inductiveName=symbolNames.get(typeKey);
     if(inductiveName===undefined){
       throw new Error('PS_ERASE_INDUCTIVE_NAME_MISSING');
@@ -120,6 +148,23 @@ export function prepareRuntimeInductives(
           );
         }
 
+        const directRecursive=isDirectRecursiveField(
+          binder.type,
+          inductive,
+          parameters.values,
+          checker,
+        );
+        if(
+          inductive.isRec
+          &&!directRecursive
+          &&hasConstant(checker.whnf(binder.type),inductive.name)
+        ){
+          throw new Error(
+            "PS_ERASE_HIGHER_ORDER_RECURSION_UNSUPPORTED: constructor '"+
+            nameToString(constructorName)+"' field "+index,
+          );
+        }
+
         const sourceName=nameToString(binder.name)||'field'+index;
         const fieldName=safeIdentifier(sourceName,'field'+index);
         if(fieldNames.has(fieldName)){
@@ -156,6 +201,7 @@ export function prepareRuntimeInductives(
           sourceIndex:constructor.numParams+index,
           name:fieldName,
           type,
+          recursive:directRecursive,
         });
 
         const next=localContext.clone();

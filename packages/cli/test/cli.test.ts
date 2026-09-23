@@ -296,3 +296,35 @@ console.log('ok - psc verified generic ADT constructor pipeline');
   equal(result.emitted.javascript.includes('case "some"'),true);
 }
 console.log('ok - psc verified generic ADT match pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'inductive PsList(α : Type) where { '+
+    '| nil; | cons(head : α, tail : PsList(α)); } '+
+    'function headOr {α : Type}'+
+    '(value : PsList(α), fallback : α) : α := '+
+    'match value with { | .nil => fallback; | .cons head tail => head; };',
+    'recursive-adt.ts',
+  );
+  const list=result.checkedCore.environment.find(
+    nameFromDotted('PsList'),
+  );
+  equal(list?.kind,'inductive');
+  if(list?.kind==='inductive')equal(list.isRec,true);
+  equal(
+    result.typeScript.includes(
+      'readonly tail: PsList<T0>;',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes(
+      'function headOr<T0>(value: PsList<T0>, fallback: T0): T0',
+    ),
+    true,
+  );
+  equal(result.typeScript.includes('case "cons"'),true);
+  equal(result.emitted.javascript.includes('case "cons"'),true);
+}
+console.log('ok - psc verified recursive ADT match pipeline');

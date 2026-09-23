@@ -106,6 +106,32 @@ function eraseMinor(
     cursor=instantiate1(cursor.body,fvar(id));
   }
 
+
+  const recursiveFields=constructor.fields.filter(
+    (field)=>field.recursive,
+  );
+  for(let index=0;index<recursiveFields.length;index+=1){
+    if(cursor.kind!=='lam'){
+      throw new Error(
+        "PS_ERASE_MATCH_IH_ARITY: constructor '"+
+        constructor.inductive+'.'+constructor.name+
+        "' minor is missing induction-hypothesis lambda "+index,
+      );
+    }
+    const localContext=branchScope.localContext.clone();
+    const id=localContext.fresh('_ih'+index);
+    localContext.addLocal(
+      id,
+      cursor.name,
+      cursor.type,
+      cursor.binderInfo,
+    );
+    const erasedLocals=new Set(branchScope.erasedLocals);
+    erasedLocals.add(id);
+    branchScope={...branchScope,localContext,erasedLocals};
+    cursor=instantiate1(cursor.body,fvar(id));
+  }
+
   return {
     constructor:constructor.name,
     bindings,

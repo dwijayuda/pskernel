@@ -21,12 +21,16 @@ export interface RuntimeStructureInfo {
   readonly fields:readonly RuntimeStructureField[];
 }
 
+export interface RuntimeConstructorField extends RuntimeStructureField {
+  readonly recursive:boolean;
+}
+
 export interface RuntimeConstructorInfo {
   readonly inductive:string;
   readonly name:string;
   readonly constructorKey:string;
   readonly numParams:number;
-  readonly fields:readonly RuntimeStructureField[];
+  readonly fields:readonly RuntimeConstructorField[];
 }
 
 export interface RuntimeInductiveInfo {

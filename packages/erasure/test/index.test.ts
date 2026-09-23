@@ -709,3 +709,58 @@ console.log('ok - @proofscript/erasure generic nonrecursive ADT constructor eras
   }
 }
 console.log('ok - @proofscript/erasure generic ADT recursor parameter substitution');
+
+
+{
+  const env=new Environment();
+  const Nat=nameFromDotted('Nat');
+  const List=nameFromDotted('PsList');
+  const Nil=nameFromDotted('PsList.nil');
+  const Cons=nameFromDotted('PsList.cons');
+  env.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const declaration={
+    levelParams:[],
+    numParams:0,
+    types:[{
+      name:List,
+      type:sort(levelSucc(levelZero)),
+      ctors:[
+        {name:Nil,type:constant(List)},
+        {
+          name:Cons,
+          type:forallE(
+            nameFromDotted('head'),
+            constant(Nat),
+            forallE(
+              nameFromDotted('tail'),
+              constant(List),
+              constant(List),
+            ),
+          ),
+        },
+      ],
+    }],
+  };
+  const checked=admitCheckedCoreAdmissions(env,[{
+    kind:'inductive',
+    declaration,
+  }]);
+  const list=checked.environment.find(List);
+  equal(list?.kind,'inductive');
+  if(list?.kind==='inductive')equal(list.isRec,true);
+  const erased=eraseCheckedCoreModule(checked);
+  equal(erased.inductives?.[0]?.name,'PsList');
+  const cons=erased.inductives?.[0]?.constructors.find(
+    (item)=>item.name==='cons',
+  );
+  equal(cons?.fields[1]?.type.kind,'named');
+  if(cons?.fields[1]?.type.kind==='named'){
+    equal(cons.fields[1]?.type.name,'PsList');
+  }
+}
+console.log('ok - @proofscript/erasure recursive ADT metadata erasure');

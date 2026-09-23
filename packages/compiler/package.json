@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Orchestrates verified compilation from kernel-admitted checked core to TypeScript/JavaScript or WebAssembly.",
   "proofscript": {
-    "status": "checked-core-to-js-generic-structure+structural-recursion+wasm-w1-mvp",
+    "status": "checked-core-to-js-generic-structure+structural-recursion+wasm-w2-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

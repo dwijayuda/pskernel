@@ -243,3 +243,37 @@ verified erasure/backend compilation needs no typeclass-specific escape hatch.
 Global instance declarations, priorities, recursive/table-based search,
 `outParam`/`semiOutParam`, and imported Lean instance indexes remain future
 Meta milestones and are not claimed by this checkpoint.
+
+
+## Global instance checkpoint
+
+The bounded typeclass layer now also supports definition-like global
+instances:
+
+```proofscript
+class Boxed(α : Type) where {
+  value : α;
+}
+
+instance boxedNat : Boxed(Nat) :=
+  { value := 7 : Boxed(Nat) };
+
+function get {α : Type}[inst : Boxed(α)](x : α) : α :=
+  inst.value;
+
+function read(x : Nat) : Nat :=
+  get(x);
+```
+
+The instance is first elaborated and admitted as an ordinary pskernel
+definition. Checked-core records only validated instance-registry metadata
+whose final result head is a previously admitted class. Later application
+elaboration may select that constant as an instance candidate. The resulting
+core term contains the ordinary dictionary argument, and verified erasure
+therefore lowers `read` to an ordinary runtime call equivalent to
+`get(boxedNat, x)`.
+
+This remains intentionally smaller than Lean 4.34 `SynthInstance`:
+parameterized instance search, priorities, ambiguity handling, recursive/table
+resolution, out-parameters, and imported/prelude instance indexing are not
+claimed yet.

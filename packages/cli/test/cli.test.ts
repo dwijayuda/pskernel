@@ -621,3 +621,41 @@ console.log('ok - psc verified acyclic where source pipeline');
   equal(result.emitted.javascript.includes('reuse(inst, x)'),true);
 }
 console.log('ok - psc verified local class instance pipeline');
+
+
+{
+  const result=compileVerifiedSource(
+    'class Boxed(α : Type) where { value : α; } '+
+    'instance boxedNat : Boxed(Nat) := { value := 7 : Boxed(Nat) }; '+
+    'function get {α : Type}[inst : Boxed(α)](x : α) : α := inst.value; '+
+    'function read(x : Nat) : Nat := get(x);',
+    'global-instance-class.ts',
+  );
+  equal(result.checkedCore.classes.length,1);
+  equal(result.checkedCore.instances.length,1);
+  equal(result.checkedCore.instances[0]?.anonymous,false);
+  equal(
+    result.typeScript.includes(
+      'export const boxedNat: Boxed<bigint>',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes(
+      'function get<T0>(inst: Boxed<T0>, x: T0): T0',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes(
+      'function read(x: bigint): bigint',
+    ),
+    true,
+  );
+  equal(
+    result.typeScript.includes('return get(boxedNat, x);'),
+    true,
+  );
+  equal(result.emitted.javascript.includes('get(boxedNat, x)'),true);
+}
+console.log('ok - psc verified global class instance pipeline');

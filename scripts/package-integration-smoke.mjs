@@ -523,3 +523,24 @@ assert(
   verifiedClassLocalInstance.typeScript.includes('return reuse(inst, x);'),
   'local class instance synthesis did not become an ordinary runtime dictionary call',
 );
+
+
+const verifiedGlobalInstance=compileVerifiedSource(
+  'class Boxed(α : Type) where { value : α; } '+
+  'instance boxedNat : Boxed(Nat) := { value := 7 : Boxed(Nat) }; '+
+  'function get {α : Type}[inst : Boxed(α)](x : α) : α := inst.value; '+
+  'function read(x : Nat) : Nat := get(x);',
+  'verified-global-instance.ts',
+);
+assert(
+  verifiedGlobalInstance.checkedCore.instances.length===1,
+  'global instance metadata did not survive checked-core admission',
+);
+assert(
+  verifiedGlobalInstance.typeScript.includes('return get(boxedNat, x);'),
+  'global instance synthesis did not become an ordinary checked dictionary call',
+);
+assert(
+  verifiedGlobalInstance.emitted.javascript.includes('get(boxedNat, x)'),
+  'global instance dictionary call did not compile to JavaScript',
+);

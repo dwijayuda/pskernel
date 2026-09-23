@@ -1210,3 +1210,16 @@ console.log('ok - @proofscript/elab global class instance synthesis');
   );
 }
 console.log('ok - @proofscript/elab imported structure/class/instance metadata seed');
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'extern function hostInc(x : Nat) : Nat from "host-lib" import inc; '+
+    'function use(x : Nat) : Nat := hostInc(x);',
+  ),env);
+  equal(result.externals.length,1);
+  equal(result.externals[0]?.binding.source,'host-lib');
+  equal(result.externals[0]?.binding.importedName,'inc');
+  equal(result.definitions.length,1);
+}
+console.log('ok - @proofscript/elab explicit runtime external admission');

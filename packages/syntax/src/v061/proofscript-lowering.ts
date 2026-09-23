@@ -116,6 +116,14 @@ function lowerDeclaration(decl:V061Declaration):string {
 };';
   }
 
+  if(decl.kind==='external'){
+    return 'extern function '+decl.name+
+      lowerExplicitOnlyParameters(decl.params,'external function')+
+      ' : '+lowerV061TypeToProofScript(decl.resultType)+
+      ' from '+JSON.stringify(decl.binding.source)+
+      ' import '+decl.binding.importedName+';';
+  }
+
   if(decl.kind==='instance'){
     return 'instance'+
       (decl.anonymous?'':' '+decl.name)+

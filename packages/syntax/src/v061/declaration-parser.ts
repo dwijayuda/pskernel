@@ -10,6 +10,7 @@ import {parseV061ParameterSequence} from './parameter-parser.js';
 import {parseV061WhereBlock} from './where-parser.js';
 import {parseV061InstanceDeclaration} from './instance-parser.js';
 import {parseV061ModuleImports} from './module-import-parser.js';
+import {parseV061ExternalDeclaration} from './external-parser.js';
 
 export class V061DeclarationParser {
   readonly context:V061ParseContext;
@@ -38,6 +39,9 @@ export class V061DeclarationParser {
   }
 
   private parseDeclaration():V061Declaration {
+    if(this.context.cursor.at('extern')){
+      return parseV061ExternalDeclaration(this.context);
+    }
     if(this.context.cursor.at('structure')){
       return parseV061StructureDeclaration(this.context);
     }

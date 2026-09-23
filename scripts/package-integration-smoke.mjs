@@ -902,3 +902,23 @@ assert(
   verifiedGlobalInstance.emitted.javascript.includes('get(boxedNat, x)'),
   'global instance dictionary call did not compile to JavaScript',
 );
+
+const verifiedExternalSource=compileVerifiedSource(
+  'extern function hostInc(x : Nat) : Nat from "host-lib" import inc; '+
+  'function main(x : Nat) : Nat := hostInc(x);',
+  'verified-external-source.ts',
+);
+assert(
+  verifiedExternalSource.checkedCore.externals.length===1,
+  'source external was not represented in checked core',
+);
+assert(
+  verifiedExternalSource.typeScript.includes(
+    'import { inc as hostInc } from "host-lib";',
+  ),
+  'source external did not lower to named ESM import',
+);
+assert(
+  verifiedExternalSource.typeScript.includes('return hostInc(x);'),
+  'source external call did not survive verified compilation',
+);

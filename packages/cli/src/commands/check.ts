@@ -3,6 +3,7 @@ import {checkVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
 import type {CommonArgs} from '../types.js';
+import {verifiedAssuranceReport} from '../verified-assurance.js';
 
 export async function checkCommand(common:CommonArgs){
   const input=await resolveInput(common);
@@ -27,6 +28,7 @@ export async function checkCommand(common:CommonArgs){
       moduleCacheMisses:result.moduleCacheMisses,
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
+      assurance:verifiedAssuranceReport(result.checkedCore),
     };
   }
   const result=checkSource(

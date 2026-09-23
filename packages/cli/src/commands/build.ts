@@ -8,6 +8,7 @@ import type {BuildResult,CommonArgs} from '../types.js';
 import {
   writeVerifiedModuleArtifacts,
 } from '../project-artifact-output.js';
+import {verifiedAssuranceReport} from '../verified-assurance.js';
 
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   if(common.verified){
@@ -54,6 +55,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       moduleCacheMisses:result.moduleCacheMisses,
       semanticPipeline:'verified-core',
       proofStatus:'kernel-verified',
+      assurance:verifiedAssuranceReport(result.checkedCore),
       outputDirectory:outDir,
       artifacts:{
         typescript:tsPath,

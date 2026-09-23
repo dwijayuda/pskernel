@@ -49,10 +49,23 @@ export const proofScriptTranslationTarget:TranslationTargetPrinter={
   print:lowerV061ModuleToProofScript,
 };
 
+function printLeanTranslation(module:V061Module):string {
+  const external=module.declarations.find(
+    (declaration)=>declaration.kind==='external',
+  );
+  if(external!==undefined){
+    throw new Error(
+      "PS_TRANSLATE_EXTERNAL_RUNTIME_BINDING: external '"+external.name+
+      "' cannot translate to canonical Lean without losing its runtime binding",
+    );
+  }
+  return lowerV061ModuleToLean(module);
+}
+
 export const leanTranslationTarget:TranslationTargetPrinter={
   target:'lean',
   extension:'.lean',
-  print:lowerV061ModuleToLean,
+  print:printLeanTranslation,
 };
 
 export function createDefaultTranslationTargetPrinterRegistry():

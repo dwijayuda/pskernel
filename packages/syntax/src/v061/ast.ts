@@ -142,6 +142,19 @@ export interface V061WhereDeclaration {
   readonly span:SourceSpan;
 }
 
+export interface V061ExternalDeclaration {
+  readonly kind:'external';
+  readonly name:string;
+  readonly params:readonly V061Parameter[];
+  readonly resultType:V061TypeExpr;
+  readonly binding:{
+    readonly source:string;
+    readonly importedName:string;
+  };
+  readonly terminatedBySemicolon:boolean;
+  readonly span:SourceSpan;
+}
+
 export interface V061ValueDeclaration {
   readonly kind:'const'|'def'|'function'|'theorem';
   readonly name:string;
@@ -184,6 +197,7 @@ export interface V061StructureDeclaration {
 
 export type V061Declaration=
   | V061ValueDeclaration
+  | V061ExternalDeclaration
   | V061StructureDeclaration
   | V061ClassDeclaration
   | V061InstanceDeclaration

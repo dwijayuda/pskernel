@@ -11,6 +11,7 @@ import {
 } from 'lean-ts-kernel';
 import {
   admitCheckedCoreAdmissions,
+  validateCheckedCoreExternal,
   type CheckedCoreAdmission,
   type CheckedCoreModule,
   type CheckedCoreStructure,
@@ -20,6 +21,7 @@ import {elaborateV061ClassDeclaration} from './v061-class-elab.js';
 import {elaborateV061InductiveDeclaration} from './v061-inductive-elab.js';
 import {elaborateV061ValueDeclaration} from './v061-value-declaration-elab.js';
 import {elaborateV061InstanceDeclaration} from './v061-instance-elab.js';
+import {elaborateV061ExternalDeclaration} from './v061-external-elab.js';
 
 function declarationFailure(
   name:string,
@@ -62,6 +64,32 @@ export function elaborateV061Definitions(
   const kernel=new Kernel(workEnvironment);
 
   for(const declaration of module.declarations){
+    if(declaration.kind==='external'){
+      try{
+        const info=elaborateV061ExternalDeclaration(
+          declaration,
+          workEnvironment,
+          structures,
+          classes,
+          globalInstances,
+        );
+        const external={
+          declaration:info,
+          binding:declaration.binding,
+        };
+        validateCheckedCoreExternal(external,workEnvironment);
+        kernel.addAxiom(info);
+        admissions.push({
+          kind:'external',
+          declaration:info,
+          binding:declaration.binding,
+        });
+      }catch(error){
+        throw declarationFailure(declaration.name,error);
+      }
+      continue;
+    }
+
     if(declaration.kind==='structure'){
       try{
         const result=elaborateV061StructureDeclaration(

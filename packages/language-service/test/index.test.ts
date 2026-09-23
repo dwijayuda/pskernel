@@ -185,3 +185,46 @@ console.log('ok - @proofscript/language-service mixed-source import environment'
   equal(analysis.diagnostics[0]?.code,'PS_PROJECT_ANALYSIS_ERROR');
 }
 console.log('ok - @proofscript/language-service project failure is fail-closed');
+
+{
+  const mainText=
+    'import Core; theorem use(P : Prop, h : P) : P := by exact id(P, h);';
+  const coreText=
+    'theorem id (P : Prop) (h : P) : P := by assumption\n';
+  const service=new ProofScriptLanguageService({
+    projectHost:{
+      entryModule:(snapshot)=>
+        snapshot.uri.endsWith('/Main.ps')?'Main':'Core',
+      resolveImport:(_entry,_importer,module)=>{
+        if(module!=='Core')throw new Error('missing module '+module);
+        return {
+          uri:'file:///Core.lean',
+          sourceKind:'lean-subset' as const,
+          text:coreText,
+        };
+      },
+    },
+  });
+  service.openDocument('file:///Main.ps',1,mainText);
+  const useOffset=mainText.indexOf('id(');
+  const definition=service.definition(
+    'file:///Main.ps',
+    positionAt(mainText,useOffset+1),
+  );
+  equal(definition?.uri,'file:///Core.lean');
+  const references=service.references(
+    'file:///Main.ps',
+    positionAt(mainText,useOffset+1),
+    true,
+  );
+  equal(references.length,2);
+  equal(references.some((item)=>item.uri==='file:///Core.lean'),true);
+  equal(references.some((item)=>item.uri==='file:///Main.ps'),true);
+  const completions=service.completions(
+    'file:///Main.ps',
+    {line:0,character:0},
+  );
+  const imported=completions.find((item)=>item.label==='id');
+  equal(imported?.source,'project');
+}
+console.log('ok - @proofscript/language-service cross-source navigation');

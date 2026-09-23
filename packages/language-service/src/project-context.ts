@@ -51,12 +51,16 @@ interface ModuleMetadata {
   readonly instances:readonly CheckedCoreInstance[];
 }
 
+export interface ProjectAnalysisSource extends ProjectResolvedSource {
+  readonly module:string;
+  readonly surface:V061Module;
+}
 export interface ProjectAnalysisContext {
   readonly entryModule:string;
   readonly moduleOrder:readonly string[];
   readonly environment:Environment;
   readonly seed:V061ElaborationSeed;
-  readonly sources:ReadonlyMap<string,ProjectResolvedSource>;
+  readonly sources:ReadonlyMap<string,ProjectAnalysisSource>;
 }
 
 function seedFromModules(
@@ -182,9 +186,11 @@ export function buildProjectAnalysisContext(
       [...loaded.entries()].map(([name,source])=>[
         name,
         {
+          module:name,
           uri:source.uri,
           sourceKind:source.sourceKind,
           text:source.text,
+          surface:source.surface,
         },
       ]),
     ),

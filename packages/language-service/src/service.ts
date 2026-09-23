@@ -21,6 +21,7 @@ export interface LanguageServiceOptions extends AnalysisOptions {
 export class ProofScriptLanguageService {
   private readonly docs=new Map<string,TextDocumentSnapshot>();
   private readonly analyses=new Map<string,DocumentAnalysis>();
+  private readonly projectContexts=new Map<string,ReturnType<typeof buildProjectAnalysisContext>>();
   private generation=0;
 
   constructor(readonly options:LanguageServiceOptions={}){}
@@ -40,6 +41,7 @@ export class ProofScriptLanguageService {
     };
     this.docs.set(uri,snapshot);
     this.analyses.clear();
+    this.projectContexts.clear();
     return snapshot;
   }
 
@@ -63,6 +65,7 @@ export class ProofScriptLanguageService {
   closeDocument(uri:string):void {
     this.docs.delete(uri);
     this.analyses.clear();
+    this.projectContexts.clear();
   }
 
   getDocument(uri:string):TextDocumentSnapshot|undefined {
@@ -88,6 +91,7 @@ export class ProofScriptLanguageService {
           this.options.projectHost,
           (target)=>this.docs.get(target),
         );
+        this.projectContexts.set(uri,project);
         options={
           ...this.options,
           environment:project.environment,
@@ -98,6 +102,7 @@ export class ProofScriptLanguageService {
           },
         };
       }catch(error){
+        this.projectContexts.delete(uri);
         const local=analyzeDocument(snapshot,this.options);
         const message=error instanceof Error?error.message:String(error);
         const analysis={
@@ -124,6 +129,9 @@ export class ProofScriptLanguageService {
         return analysis;
       }
     }
+    if(this.options.projectHost===undefined){
+      this.projectContexts.delete(uri);
+    }
     const analysis=analyzeDocument(snapshot,options);
     this.analyses.set(uri,analysis);
     return analysis;
@@ -134,11 +142,18 @@ export class ProofScriptLanguageService {
   }
 
   completions(uri:string,_position:Position){
-    return completionItems(this.analyze(uri));
+    return completionItems(
+      this.analyze(uri),
+      this.projectContexts.get(uri),
+    );
   }
 
   definition(uri:string,position:Position){
-    return definitionLocation(this.analyze(uri),position);
+    return definitionLocation(
+      this.analyze(uri),
+      position,
+      this.projectContexts.get(uri),
+    );
   }
 
   references(
@@ -150,6 +165,7 @@ export class ProofScriptLanguageService {
       this.analyze(uri),
       position,
       includeDeclaration,
+      this.projectContexts.get(uri),
     );
   }
 

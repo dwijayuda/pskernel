@@ -125,16 +125,24 @@ if(!assuranceDoc.includes('Do not call this source\ndeclaration order')){
 
 const nativeEval=readFileSync('oracle/replay-probe/NativeEval.lean','utf8');
 for(const marker of [
-  '(checkMeta := false)',
-  'env.evalConst Nat {} constName',
-  'env.evalConst Bool {} constName',
-  'checkConstType env \`Nat constName',
-  'checkConstType env \`Bool constName',
+  'Kernel.whnf env {} e',
+  'mkApp (mkConst \`\`Lean.reduceNat) arg',
+  'mkApp (mkConst \`\`Lean.reduceBool) arg',
+  '.lit (.natVal value)',
+  'result.isConstOf \`\`Bool.true',
+  'result.isConstOf \`\`Bool.false',
 ]){
   if(!nativeEval.includes(marker))throw new Error('native evaluator boundary drift: missing '+marker);
 }
-if(nativeEval.includes('let value ← Meta.reduceNatNative')||nativeEval.includes('let value ← Meta.reduceBoolNative')){
-  throw new Error('native evaluator boundary drift: executable Meta native helper call would reintroduce evalCheckMeta');
+for(const forbidden of [
+  'Meta.reduceNatNative',
+  'Meta.reduceBoolNative',
+  'env.evalConst Nat',
+  'env.evalConst Bool',
+  'checkConstType env',
+]){
+  const executable=nativeEval.split('\n').some(line=>!line.trimStart().startsWith('--')&&!line.trimStart().startsWith('/-')&&line.includes(forbidden));
+  if(executable)throw new Error('native evaluator boundary drift: reference helper must use Kernel.whnf, found '+forbidden);
 }
 
 const counts={};

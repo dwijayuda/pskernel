@@ -2,40 +2,41 @@ import Lean
 
 open Lean
 
-private def checkConstType (env : Environment) (typeName constName : Name) : Except String Unit :=
-  match env.find? constName with
-  | none => throw s!"NativeEval: unknown constant '{constName}'"
-  | some info =>
-    match info.type with
-    | .const c _ =>
-      if c == typeName then
-        pure ()
-      else
-        throw s!"NativeEval: unexpected type at '{constName}', '{typeName}' expected"
-    | _ =>
-      throw s!"NativeEval: unexpected type at '{constName}', '{typeName}' expected"
+private def kernelWhnf (env : Environment) (e : Expr) : IO Expr := do
+  match Kernel.whnf env {} e with
+  | .ok value => pure value
+  | .error ex =>
+    throw <| IO.userError (← ex.toMessageData {} |>.toString)
 
 /--
-Mirror the final Lean 4.34 kernel native-reduction boundary.
+Reference implementation for pskernel's optional native-reduction provider.
 
-The kernel's `ir::run_boxed_kernel` executes ordinary runtime IR directly and
-does not apply `evalCheckMeta`. `Meta.reduceNatNative` / `reduceBoolNative`
-route through `Environment.evalConstCheck`, whose default `evalConst` call
-does apply that meta-only guard and can reject imported runtime declarations.
+Do not route this through Meta.reduceNatNative / reduceBoolNative or
+Environment.evalConstCheck: those Meta APIs add declaration-type and meta-IR
+availability checks that the final Lean 4.34 C++ kernel does not perform.
 
-We therefore perform the same exact Nat/Bool declaration-head check here, then
-call the same IR interpreter through `Environment.evalConst` with
-`checkMeta := false` and empty options, matching the kernel execution path.
+Instead construct the exact kernel marker and ask Lean 4.34's own Kernel.whnf.
+That enters type_checker.cpp::reduce_native, including its actual compiler-IR
+execution and runtime object-shape validation. The helper only serializes the
+already-validated WHNF result for the TypeScript oracle provider.
 -/
 private unsafe def evalNative (env : Environment) (kind : String) (constName : Name) : IO Json := do
+  let arg := mkConst constName
   if kind == "nat" then
-    IO.ofExcept <| checkConstType env `Nat constName
-    let value ← IO.ofExcept <| env.evalConst Nat {} constName (checkMeta := false)
-    return Json.mkObj [("kind", "nat"), ("value", s!"{value}")]
+    let result ← kernelWhnf env (mkApp (mkConst ``Lean.reduceNat) arg)
+    match result with
+    | .lit (.natVal value) =>
+      return Json.mkObj [("kind", "nat"), ("value", s!"{value}")]
+    | _ =>
+      throw <| IO.userError s!"NativeEval: kernel returned unexpected Nat WHNF for '{constName}': {result}"
   else if kind == "bool" then
-    IO.ofExcept <| checkConstType env `Bool constName
-    let value ← IO.ofExcept <| env.evalConst Bool {} constName (checkMeta := false)
-    return Json.mkObj [("kind", "bool"), ("value", value)]
+    let result ← kernelWhnf env (mkApp (mkConst ``Lean.reduceBool) arg)
+    if result.isConstOf ``Bool.true then
+      return Json.mkObj [("kind", "bool"), ("value", true)]
+    else if result.isConstOf ``Bool.false then
+      return Json.mkObj [("kind", "bool"), ("value", false)]
+    else
+      throw <| IO.userError s!"NativeEval: kernel returned unexpected Bool WHNF for '{constName}': {result}"
   else
     throw <| IO.userError s!"NativeEval: expected kind nat or bool, got '{kind}'"
 
@@ -46,8 +47,8 @@ unsafe def main (args : List String) : IO Unit := do
   let moduleName := args[0]!.toName
   let kind := args[1]!
   let constName := args[2]!.toName
-  -- Native reduction is compiler execution. Load persistent environment
-  -- extensions so @[implemented_by] and runtime compiler IR are visible.
+  -- Native reduction is compiler execution. The imported kernel environment
+  -- needs runtime IR and persistent extensions for @[implemented_by]/externs.
   unsafe enableInitializersExecution
   let env ← importModules (loadExts := true) #[{module := moduleName}] {}
   IO.println (← evalNative env kind constName).compress

@@ -192,14 +192,13 @@ constant argument, evaluated by name through an explicit TCB provider.
 
 The Lean-backed provider deliberately does **not** call
 `Meta.reduceBoolNative`/`Meta.reduceNatNative`. Those helpers route through
-`Environment.evalConstCheck`, and its default `evalConst(checkMeta := true)`
-rejects imported declarations whose IR phase is ordinary `.runtime`. Final
-Lean 4.34 kernel `ir::run_boxed_kernel` has no such meta-only guard. Instead,
-`NativeEval.lean` checks the named declaration's type head exactly
-`Bool`/`Nat`, then calls `env.evalConst` with empty options and
-`checkMeta := false`. Both `lean_eval_const` and `run_boxed_kernel` reach
-the same IR interpreter `run_boxed`, preserving compiler-IR/`@[implemented_by]`
-behavior without accidentally narrowing the kernel's runtime domain.
+`Environment.evalConstCheck` and add declaration-type/meta-IR restrictions
+that final C++ `reduce_native` does not impose. The oracle instead constructs
+the exact `Lean.reduceBool c` / `Lean.reduceNat c` marker and calls pinned
+Lean 4.34 `Kernel.whnf`. This enters the reference C++ `reduce_native`
+implementation itself, so `run_boxed_kernel`, `@[implemented_by]`/extern
+behavior, and Bool/Nat runtime-object validation are all taken from the same
+code path we are comparing against.
 
 Direct coverage now includes the native cases from upstream `kernel1.lean`:
 equality/disequality of compiler-reduced Nat definitions, symmetric reduction to

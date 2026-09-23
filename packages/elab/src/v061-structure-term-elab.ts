@@ -2,6 +2,7 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   TypeChecker,
   app,
+  appView,
   constant,
   instantiate1,
   nameToString,
@@ -35,15 +36,16 @@ export function elaborateV061Record(
       'PS_ELAB_RECORD_EXPECTED_TYPE: record annotation does not match expected type',
     );
   }
-  if(target.kind!=='const'){
+  const targetView=appView(checker.whnf(target));
+  if(targetView.fn.kind!=='const'){
     throw new Error(
-      'PS_ELAB_RECORD_TYPE: current structure records require a named structure type',
+      'PS_ELAB_RECORD_TYPE: structure record target must be an admitted named structure application',
     );
   }
-  const structure=context.structures.get(nameToString(target.name));
+  const structure=context.structures.get(nameToString(targetView.fn.name));
   if(structure===undefined){
     throw new Error(
-      "PS_ELAB_UNKNOWN_STRUCTURE: '"+nameToString(target.name)+
+      "PS_ELAB_UNKNOWN_STRUCTURE: '"+nameToString(targetView.fn.name)+
       "' is not a checked ProofScript structure",
     );
   }
@@ -64,8 +66,25 @@ export function elaborateV061Record(
     provided.set(field.name,field.value);
   }
 
+  const constructor=context.environment.find(structure.constructor);
+  if(constructor?.kind!=='constructor'){
+    throw new Error('PS_ELAB_RECORD_CONSTRUCTOR_MISSING');
+  }
+  if(targetView.args.length!==constructor.numParams){
+    throw new Error(
+      "PS_ELAB_RECORD_PARAMETER_ARITY: structure '"+
+      nameToString(structure.name)+"' expects "+constructor.numParams+
+      ' parameters, got '+targetView.args.length,
+    );
+  }
+
   let term:Expr=constant(structure.constructor);
   let cursor=checker.check(term);
+  for(const parameter of targetView.args){
+    const binder=checker.ensureForall(checker.whnf(cursor));
+    term=app(term,parameter);
+    cursor=instantiate1(binder.body,parameter);
+  }
   for(const field of structure.fields){
     const source=provided.get(field.name);
     if(source===undefined){

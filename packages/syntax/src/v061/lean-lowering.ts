@@ -98,8 +98,11 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
 export function lowerV061ModuleToLean(module:V061Module):string {
   return module.declarations.map((decl)=>{
     if(decl.kind==='structure'){
+      const params=decl.params.map(
+        (param)=>' '+lowerV061ParameterToLean(param),
+      ).join('');
       const fields=decl.fields.map(lowerV061FieldToLean).join('\n');
-      return 'structure '+decl.name+' where\n'+fields;
+      return 'structure '+decl.name+params+' where\n'+fields;
     }
     if(decl.kind==='class'){
       const params=decl.params.map(

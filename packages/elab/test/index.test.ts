@@ -831,3 +831,23 @@ console.log('ok - @proofscript/elab structural recursion via recursor');
 }
 console.log('ok - @proofscript/elab structural recursion with invariant parameters');
 
+
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'structure Box(α : Type) where { value : α; } '+
+    'function boxId {α : Type}(x : α) : Box(α) := '+
+    '{ value := x : Box(α) }; '+
+    'function unbox {α : Type}(box : Box(α)) : α := box.value;',
+  ));
+  equal(result.structures.length,1);
+  const structure=result.structures[0]!;
+  const info=result.environment.find(structure.name);
+  equal(info?.kind,'inductive');
+  if(info?.kind==='inductive')equal(info.numParams,1);
+  const constructor=result.environment.find(structure.constructor);
+  equal(constructor?.kind,'constructor');
+  if(constructor?.kind==='constructor')equal(constructor.numParams,1);
+  equal(result.definitions.length,2);
+}
+console.log('ok - @proofscript/elab generic structure admission');

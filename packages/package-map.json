@@ -113,7 +113,8 @@
         "Canonical lowering and exact feature-ownership conformance preserve binder categories rather than translating them into TypeScript generics.",
         "Native Lean theorem declarations are parsed as inherited command heads; only registered ProofScript parameter/separator decoration is claimed by feature ownership.",
         "A bounded inherited Lean tactic-term parser recognizes `by exact term` and `by assumption` without registering a new ProofScript syntax exception.",
-        "Inherited Lean tactic syntax now includes a bounded `intro name; <continuation>` form; it is not registered as new ProofScript syntax."
+        "Inherited Lean tactic syntax now includes a bounded `intro name; <continuation>` form; it is not registered as new ProofScript syntax.",
+        "Structure headers now reuse the shared Lean binder sequence; parameterized structures lower canonically instead of being a separate grammar."
       ]
     },
     {
@@ -193,7 +194,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-invariant-structural-recursion-elab-mvp",
+      "status": "v061-generic-structure-elab+invariant-structural-recursion-mvp",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -205,6 +206,8 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Parameterized structures elaborate as genuine pskernel single-constructor inductives with shared parameters; constructor parameters are copied implicitly as in the existing inductive path.",
+        "Record literals for applied structures feed the admitted constructor parameter telescope before fields, and projections resolve structure identity through the applied target type.",
         "Primitive structural recursion may carry invariant explicit parameters: every non-decreasing explicit argument must be passed as the identical local, while exactly the matched ADT parameter decreases to a direct recursive field.",
         "Recursive calls are replaced by pskernel recursor induction hypotheses before checked-core admission; accepted definitions contain the recursor, never a self constant.",
         "Changing an invariant argument, recursing on the original scrutinee, using arbitrary decreasing expressions, or changing recursive-call arity fails closed.",

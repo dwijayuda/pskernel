@@ -1,5 +1,6 @@
 import {
   TypeChecker,
+  appView,
   fvar,
   nameFromDotted,
   nameToString,
@@ -37,9 +38,9 @@ export function tryElaborateV061ProjectionReference(
   let type=checker.check(term);
 
   for(const fieldName of parts.slice(1)){
-    const reduced=checker.whnf(type);
-    if(reduced.kind!=='const')return undefined;
-    const structure=context.structures.get(nameToString(reduced.name));
+    const reduced=appView(checker.whnf(type));
+    if(reduced.fn.kind!=='const')return undefined;
+    const structure=context.structures.get(nameToString(reduced.fn.name));
     if(structure===undefined)return undefined;
     const field=structure.fields.find((item)=>item.name===fieldName);
     if(field===undefined){

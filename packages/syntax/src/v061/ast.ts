@@ -128,6 +128,7 @@ export interface V061ClassDeclaration {
 export interface V061StructureDeclaration {
   readonly kind:'structure';
   readonly name:string;
+  readonly params:readonly V061Parameter[];
   readonly fields:readonly V061StructureField[];
   readonly terminatedBySemicolon:boolean;
   readonly span:SourceSpan;

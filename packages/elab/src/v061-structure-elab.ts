@@ -1,4 +1,7 @@
-import type {V061StructureDeclaration} from '@proofscript/syntax';
+import type {
+  V061Parameter,
+  V061StructureDeclaration,
+} from '@proofscript/syntax';
 import {
   Environment,
   LocalContext,
@@ -6,7 +9,9 @@ import {
   abstractFVar,
   constant,
   forallE,
+  fvar,
   levelZero,
+  mkAppN,
   mkMax,
   nameFromDotted,
   nameToString,
@@ -20,12 +25,38 @@ import type {CheckedCoreStructure} from '@proofscript/checked-core';
 import type {V061CoreElabContext} from './v061-context.js';
 import {elaborateV061Type} from './v061-type-elab.js';
 
+interface SharedParameter {
+  readonly source:V061Parameter;
+  readonly id:string;
+  readonly name:ReturnType<typeof nameFromDotted>;
+  readonly type:Expr;
+  readonly binderInfo:BinderInfo;
+}
+
 function fieldBinderInfo(
   kind:V061StructureDeclaration['fields'][number]['binderKind'],
 ):BinderInfo {
   if(kind==='implicit')return 'implicit';
   if(kind==='instance')return 'instImplicit';
   return 'default';
+}
+
+function closeParameters(
+  expr:Expr,
+  parameters:readonly SharedParameter[],
+  constructorCopy:boolean,
+):Expr {
+  let result=expr;
+  for(let index=parameters.length-1;index>=0;index-=1){
+    const parameter=parameters[index]!;
+    result=forallE(
+      parameter.name,
+      parameter.type,
+      abstractFVar(result,parameter.id),
+      constructorCopy?'implicit':parameter.binderInfo,
+    );
+  }
+  return result;
 }
 
 export interface ElaboratedV061Structure {
@@ -46,6 +77,39 @@ export function elaborateV061StructureDeclaration(
     metaContext:new ExprMetaContext(environment),
     structures:new Map(),
   };
+  const parameters:SharedParameter[]=[];
+
+  for(const parameter of source.params){
+    if(context.locals.has(parameter.name)){
+      throw new Error(
+        "PS_ELAB_DUPLICATE_PARAM: duplicate structure parameter '"+
+        parameter.name+"'",
+      );
+    }
+    const type=elaborateV061Type(parameter.type,context);
+    const checker=new TypeChecker(
+      environment,
+      context.localContext.clone(),
+    );
+    checker.ensureSort(checker.check(type),type);
+
+    const localContext=context.localContext.clone();
+    const id=localContext.fresh(parameter.name);
+    const name=nameFromDotted(parameter.name);
+    const binderInfo=parameter.binderInfo??'default';
+    localContext.addLocal(id,name,type,binderInfo);
+    const locals=new Map(context.locals);
+    locals.set(parameter.name,id);
+    context={...context,localContext,locals};
+    parameters.push({
+      source:parameter,
+      id,
+      name,
+      type,
+      binderInfo,
+    });
+  }
+
   const fields:{
     readonly id:string;
     readonly name:ReturnType<typeof nameFromDotted>;
@@ -79,7 +143,11 @@ export function elaborateV061StructureDeclaration(
     fields.push({id,name:userName,type,binderInfo});
   }
 
-  let constructorType:Expr=constant(structureName);
+  const appliedStructure=mkAppN(
+    constant(structureName),
+    parameters.map((parameter)=>fvar(parameter.id)),
+  );
+  let constructorType:Expr=appliedStructure;
   for(let index=fields.length-1;index>=0;index-=1){
     const field=fields[index]!;
     constructorType=forallE(
@@ -89,13 +157,23 @@ export function elaborateV061StructureDeclaration(
       field.binderInfo,
     );
   }
+  constructorType=closeParameters(
+    constructorType,
+    parameters,
+    true,
+  );
+  const structureType=closeParameters(
+    sort(resultLevel),
+    parameters,
+    false,
+  );
 
   const declaration:InductiveDecl={
     levelParams:[],
-    numParams:0,
+    numParams:parameters.length,
     types:[{
       name:structureName,
-      type:sort(resultLevel),
+      type:structureType,
       ctors:[{
         name:constructorName,
         type:constructorType,

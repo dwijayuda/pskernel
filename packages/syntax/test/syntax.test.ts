@@ -449,9 +449,18 @@ console.log('ok - @proofscript/syntax lexer MVP');
   );
 }
 {
-  throws(
-    ()=>parseV061Module('structure Box(α : Type) where { value : α; }'),
-    /parameterized\/implicit structure headers are not yet implemented/,
+  const module=parseV061Module(
+    'structure Box(α : Type) where { value : α; }',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'structure');
+  if(declaration?.kind==='structure'){
+    equal(declaration.params.length,1);
+    equal(declaration.params[0]?.name,'α');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'structure Box (α : Type) where\n  value : α\n',
   );
 }
 

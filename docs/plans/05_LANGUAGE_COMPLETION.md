@@ -104,8 +104,8 @@ Implement, in this order:
 
 1. broaden the landed dependent theorem/result application-term support to
    the remaining ordinary expression forms needed in propositions (operators,
-   literals, lambdas/match where justified) and add native infix propositional
-   `=` parsing;
+   literals, lambdas/match where justified); native infix propositional `=`
+   is now landed;
 2. indexed/dependent inductive application in elaboration and erasure;
 3. constructor/match coverage for indexed families;
 4. multiple structural recursive parameters where Lean's termination theory
@@ -259,8 +259,10 @@ outer declaration type is still required to inhabit a `Sort`, so this widens
 expressiveness without weakening type acceptance. Lean-compatible `Eq a b`
 source spelling is now used in the proof regressions; the implicit carrier type
 is inferred. The first executable gate covers `Eq (Nat.succ a) a`.
-General operators/literals/lambdas/matches in theorem headers and infix `=`
-syntax remain future surface work.
+Native infix `=` is now parsed as non-associative proposition syntax with
+application precedence above equality and arrow precedence below it, and it
+elaborates to the real polymorphic `Eq`. General operators, literals,
+lambdas, and matches in theorem headers remain future surface work.
 
 Every tactic must construct an ordinary core proof term. Tactics and LSP goal
 state never become proof authorities.
@@ -468,8 +470,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    instances/priorities only as ProofScript libraries require them.
 4. Validate the landed bounded multi-rule simp-only proof reconstruction.
 5. Broaden the landed dependent theorem-statement application-term support to
-   native infix `=` plus the remaining ordinary expression forms required by
-   real specifications.
+   the remaining ordinary expression forms required by real specifications;
+   native infix `=` is now supported.
 6. Add deterministic search tactics such as exact? only after that foundation.
 7. Implement project/module/import semantics on the checked-core path.
 8. Design and implement explicit npm/JS FFI.

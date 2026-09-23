@@ -414,3 +414,23 @@ ProofScript source should use Lean-compatible `Eq a b` when spelling the
 constant directly; the carrier type is implicit. Native infix propositional
 `=` remains the preferred eventual surface and is still pending in the v0.6.1
 header grammar.
+
+## Propositional equality surface checkpoint
+
+The verified v0.6.1 header grammar now owns native non-associative
+propositional `=` in type/proposition position. It is not a separate
+ProofScript equality relation: the elaborator constructs the real polymorphic
+Lean `Eq` application and lets the shared Meta/application layer infer the
+implicit carrier type.
+
+Precedence is intentionally Lean-like for the supported slice:
+
+```text
+application  >  =  >  ->
+```
+
+Thus `Nat.succ(a) = a -> P` parses as
+`(Nat.succ(a) = a) -> P`. Chained equality requires parentheses.
+
+Boolean `==` remains a distinct runtime/BEq operation. No backend or parser
+shortcut equates `=` with `==`.

@@ -104,11 +104,13 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-registered-surface-parser-mvp",
+      "status": "v061-propositional-equality+ordered-tactics+dependent-type-surface",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "Type-position syntax now has a non-associative propositional equality node. Applications bind tighter than `=`, and `=` binds tighter than arrows; lowering preserves Lean's `a = b` spelling.",
+        "Chained `a = b = c` is rejected unless explicitly parenthesized; no global textual equality rewrite is used.",
         "Bounded `simp only [h1, ← h2, ...]` now parses an explicit rule list, including optional reverse markers and a trailing comma, while default `simp`, erasures, `*`, locations, pre/post markers, and configs remain outside the supported parser subset.",
         "The bounded simplifier preserves inherited Lean spelling `simp only [h]` and `simp only [← h]`. The parser currently accepts exactly one explicit rule and rejects multi-rule lists instead of approximating full Lean simp syntax.",
         "The tactic parser preserves Lean-compatible rewrite spelling for the bounded subset: `rw [h]` and `rw [← h]`; it does not introduce a ProofScript-only bare-rw syntax.",
@@ -211,7 +213,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -224,6 +226,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Native theorem/header `=` elaborates through the real polymorphic Lean Eq constant and the shared application elaborator; operand types must unify and the completed proposition is still required to inhabit a Sort.",
         "Type-position application arguments now elaborate as ordinary dependent terms through the shared application elaborator; only the final declared parameter/result/annotation is required to inhabit a Sort. This admits propositions such as `Eq (Nat.succ a) a` without weakening type validity.",
         "Source equality regressions now use Lean-compatible `Eq a b` spelling, leaving the element type implicit as in Lean. Internal kernel Expr construction may still apply Eq with the explicit core type argument after elaboration.",
         "The current type-position syntax can express named references, applications, grouping, and arrows. Numeric literals, operators, lambdas, matches, and general ordinary expression grammar in theorem headers remain future syntax work; infix propositional `=` is also not yet parsed there.",

@@ -843,14 +843,21 @@ console.log('ok - @proofscript/syntax lexer MVP');
 {
   const module=parseV061Module(
     'theorem succEq(a : Nat, h : Nat.succ(a) = a) : '+
-    'Eq Nat.succ(a) a := by rw [h];',
+    'Nat.succ(a) = a := by rw [h];',
   );
   equal(
     lowerV061ModuleToLean(module),
     'theorem succEq (a : Nat) (h : Nat.succ a = a) : '+
-    'Eq (Nat.succ a) a := by rw [h]\n',
+    'Nat.succ a = a := by rw [h]\n',
   );
 }
+
+throws(
+  ()=>parseV061Module(
+    'theorem badEq(a : Nat, b : Nat, c : Nat) : a = b = c := by assumption;',
+  ),
+  /propositional equality is non-associative/,
+);
 
 {
   const module=parseV061Module(

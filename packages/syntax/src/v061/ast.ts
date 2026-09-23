@@ -116,6 +116,17 @@ export interface V061ValueDeclaration {
   readonly span:SourceSpan;
 }
 
+export interface V061InstanceDeclaration {
+  readonly kind:'instance';
+  readonly name:string;
+  readonly anonymous:boolean;
+  readonly params:readonly V061Parameter[];
+  readonly resultType:V061TypeExpr;
+  readonly body:V061Expr;
+  readonly terminatedBySemicolon:boolean;
+  readonly span:SourceSpan;
+}
+
 export interface V061ClassDeclaration {
   readonly kind:'class';
   readonly name:string;
@@ -134,7 +145,12 @@ export interface V061StructureDeclaration {
   readonly span:SourceSpan;
 }
 
-export type V061Declaration=V061ValueDeclaration|V061StructureDeclaration|V061ClassDeclaration|V061InductiveDeclaration;
+export type V061Declaration=
+  | V061ValueDeclaration
+  | V061StructureDeclaration
+  | V061ClassDeclaration
+  | V061InstanceDeclaration
+  | V061InductiveDeclaration;
 
 export interface V061Module {
   readonly kind:'v061-module';

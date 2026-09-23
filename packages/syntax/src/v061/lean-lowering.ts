@@ -111,6 +111,15 @@ export function lowerV061ModuleToLean(module:V061Module):string {
       const fields=decl.fields.map(lowerV061FieldToLean).join('\n');
       return 'class '+decl.name+params+' where\n'+fields;
     }
+    if(decl.kind==='instance'){
+      const name=decl.anonymous?'':' '+decl.name;
+      const params=decl.params.map(
+        (param)=>' '+lowerV061ParameterToLean(param),
+      ).join('');
+      return 'instance'+name+params+' : '+
+        lowerV061TypeToLean(decl.resultType)+' := '+
+        lowerV061ExprToLean(decl.body);
+    }
     if(decl.kind==='inductive'){
       const params=decl.params.map(
         (param)=>' '+lowerV061ParameterToLean(param),

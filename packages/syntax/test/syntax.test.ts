@@ -713,3 +713,37 @@ console.log('ok - @proofscript/syntax lexer MVP');
     'theorem introProof (P : Prop) : P -> P := by intro h; assumption\n',
   );
 }
+
+
+{
+  const module=parseV061Module(
+    'instance boxedNat : Boxed(Nat) := { value := 0 : Boxed(Nat) };',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'instance');
+  if(declaration?.kind==='instance'){
+    equal(declaration.name,'boxedNat');
+    equal(declaration.anonymous,false);
+    equal(declaration.params.length,0);
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'instance boxedNat : Boxed Nat := { value := 0 : Boxed Nat }\n',
+  );
+}
+{
+  const module=parseV061Module(
+    'instance : Boxed(Nat) := { value := 0 : Boxed(Nat) };',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'instance');
+  if(declaration?.kind==='instance'){
+    equal(declaration.anonymous,true);
+    equal(declaration.name.startsWith('__ps_inst_'),true);
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'instance : Boxed Nat := { value := 0 : Boxed Nat }\n',
+  );
+}
+console.log('ok - @proofscript/syntax inherited instance declarations');

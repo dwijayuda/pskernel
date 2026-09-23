@@ -107,6 +107,8 @@
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
+        "Inherited Lean `instance` declarations now parse as named or anonymous definition-like commands with ordinary binder sequences, result type, and term body; no new ProofScript feature ownership is claimed.",
+        "Anonymous instances receive deterministic internal names for downstream metadata while canonical Lean lowering omits that generated name.",
         "Declaration parameters preserve Lean BinderInfo categories: default, implicit, strictImplicit, and named instImplicit.",
         "D-EXPLICIT-PARAMS remains a ProofScript-owned non-empty explicit group; native `{...}`, `{{...}}`, and named `[...]` binders remain Lean-shaped syntax.",
         "The function alias still requires at least one D-EXPLICIT-PARAMS group, so native implicit binders alone do not satisfy the alias rule.",

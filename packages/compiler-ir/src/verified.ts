@@ -3,7 +3,7 @@ export type VerifiedIrType =
   | {readonly kind:'typeParameter';readonly name:string}
   | {
       readonly kind:'primitive';
-      readonly name:'bigint'|'boolean'|'string'|'undefined';
+      readonly name:'Nat'|'Int'|'Bool'|'String'|'Unit';
     }
   | {
       readonly kind:'function';

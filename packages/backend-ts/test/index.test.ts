@@ -282,10 +282,10 @@ console.log('ok - @proofscript/backend-ts verified generic TypeScript emission')
         name:'add',
         typeParameters:[],
         parameters:[
-          {name:'x',type:{kind:'primitive',name:'bigint'}},
-          {name:'y',type:{kind:'primitive',name:'bigint'}},
+          {name:'x',type:{kind:'primitive',name:'Nat'}},
+          {name:'y',type:{kind:'primitive',name:'Nat'}},
         ],
-        resultType:{kind:'primitive',name:'bigint'},
+        resultType:{kind:'primitive',name:'Nat'},
         body:{
           kind:'intrinsic',
           operation:'nat.add',
@@ -299,10 +299,10 @@ console.log('ok - @proofscript/backend-ts verified generic TypeScript emission')
         name:'sub',
         typeParameters:[],
         parameters:[
-          {name:'x',type:{kind:'primitive',name:'bigint'}},
-          {name:'y',type:{kind:'primitive',name:'bigint'}},
+          {name:'x',type:{kind:'primitive',name:'Nat'}},
+          {name:'y',type:{kind:'primitive',name:'Nat'}},
         ],
-        resultType:{kind:'primitive',name:'bigint'},
+        resultType:{kind:'primitive',name:'Nat'},
         body:{
           kind:'intrinsic',
           operation:'nat.sub',

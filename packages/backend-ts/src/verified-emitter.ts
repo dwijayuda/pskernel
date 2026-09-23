@@ -9,7 +9,18 @@ function emitType(type:VerifiedIrType):string {
   switch(type.kind){
     case 'unknown':return 'unknown';
     case 'typeParameter':return type.name;
-    case 'primitive':return type.name;
+    case 'primitive':
+      switch(type.name){
+        case 'Nat':
+        case 'Int':
+          return 'bigint';
+        case 'Bool':
+          return 'boolean';
+        case 'String':
+          return 'string';
+        case 'Unit':
+          return 'undefined';
+      }
     case 'named':
       return type.args.length===0
         ?type.name

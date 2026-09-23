@@ -178,3 +178,45 @@ console.log('ok - @proofscript/erasure Prop and proof binder erasure');
   }
 }
 console.log('ok - @proofscript/erasure Nat intrinsic lowering');
+
+
+{
+  const env=new Environment();
+  const Nat=nameFromDotted('Nat');
+  env.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const id=nameFromDotted('natIdentity');
+  const type=forallE(
+    nameFromDotted('x'),
+    constant(Nat),
+    constant(Nat),
+  );
+  const value=lam(
+    nameFromDotted('x'),
+    constant(Nat),
+    bvar(0),
+  );
+  const checked=admitCheckedCoreModule(env,[{
+    kind:'definition',
+    name:id,
+    levelParams:[],
+    type,
+    value,
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  }]);
+  const declaration=eraseCheckedCoreModule(checked).declarations[0]!;
+  equal(declaration.parameters[0]?.type.kind,'primitive');
+  if(declaration.parameters[0]?.type.kind==='primitive'){
+    equal(declaration.parameters[0].type.name,'Nat');
+  }
+  equal(declaration.resultType.kind,'primitive');
+  if(declaration.resultType.kind==='primitive'){
+    equal(declaration.resultType.name,'Nat');
+  }
+}
+console.log('ok - @proofscript/erasure semantic primitive type identity');

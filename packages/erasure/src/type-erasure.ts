@@ -15,11 +15,11 @@ import {
 import {safeIdentifier} from './names.js';
 
 const primitives=new Map<string,VerifiedIrType>([
-  ['Nat',{kind:'primitive',name:'bigint'}],
-  ['Int',{kind:'primitive',name:'bigint'}],
-  ['Bool',{kind:'primitive',name:'boolean'}],
-  ['String',{kind:'primitive',name:'string'}],
-  ['Unit',{kind:'primitive',name:'undefined'}],
+  ['Nat',{kind:'primitive',name:'Nat'}],
+  ['Int',{kind:'primitive',name:'Int'}],
+  ['Bool',{kind:'primitive',name:'Bool'}],
+  ['String',{kind:'primitive',name:'String'}],
+  ['Unit',{kind:'primitive',name:'Unit'}],
 ]);
 
 export function eraseRuntimeType(

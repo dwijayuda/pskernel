@@ -59,3 +59,10 @@ function equal(actual:unknown,expected:unknown):void {
   );
 }
 console.log('ok - @proofscript/compiler checked-core orchestration');
+
+
+{
+  const source=compileCheckedCore;
+  equal(typeof source,'function');
+}
+console.log('ok - @proofscript/compiler IR keeps language primitive identity upstream of TS mapping');

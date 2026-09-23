@@ -261,7 +261,8 @@
         "Verified IR separates compile-time type parameters from runtime parameters so dependent/type binders can be erased from JavaScript while retained in TypeScript declarations.",
         "The verified IR is runtime-oriented and intentionally does not reuse kernel Expr as code-generation IR.",
         "Legacy software IR remains temporarily for coverage while verified-core erasure grows to structures, inductives, recursion, primitives, and effects.",
-        "Verified IR has explicit Nat arithmetic intrinsics so Lean runtime semantics are represented intentionally instead of inferred from TypeScript operators."
+        "Verified IR has explicit Nat arithmetic intrinsics so Lean runtime semantics are represented intentionally instead of inferred from TypeScript operators.",
+        "Verified IR preserves ProofScript primitive identities (Nat/Int/Bool/String/Unit); host TypeScript types are selected only by backend-ts. This keeps runtime/ABI semantics out of the backend type representation."
       ]
     },
     {
@@ -294,7 +295,8 @@
         "Compile-time dependent type parameters are emitted as TypeScript generics for .ts/.d.ts while tsc removes them from JavaScript runtime code.",
         "The backend remains untrusted: TypeScript/JavaScript emission cannot affect theorem validity or kernel admission.",
         "The legacy software-HIR emitter remains temporarily for language coverage until verified-core lowering reaches those constructs.",
-        "Verified Nat.add/Nat.mul emit bigint arithmetic; Nat.sub emits a single-evaluation saturating expression matching Lean Nat subtraction."
+        "Verified Nat.add/Nat.mul emit bigint arithmetic; Nat.sub emits a single-evaluation saturating expression matching Lean Nat subtraction.",
+        "backend-ts is the layer that maps semantic primitive IR types to host types: Nat/Int -> bigint, Bool -> boolean, String -> string, Unit -> undefined."
       ]
     },
     {

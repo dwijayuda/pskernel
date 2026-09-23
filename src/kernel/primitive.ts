@@ -5,7 +5,7 @@ import { Expr, app, appView, bvar, constant, exprEq, forallE, fvar, lam, mkAppN,
 import { levelSucc, levelZero } from '../core/level.js';
 import { LocalContext } from '../core/local-context.js';
 import { Name, nameEq, nameFromDotted, nameToString } from '../core/name.js';
-import { InductiveDecl, addOrdinaryInductive } from './inductive/ordinary.js';
+import { InductiveDecl, addOrdinaryInductiveInternal } from './inductive/ordinary.js';
 import { N } from './names.js';
 import { isPrimitiveName } from './primitive-names.js';
 import { TypeChecker } from './type-checker.js';
@@ -52,7 +52,7 @@ export function addPrimitiveInductive(env:Environment,d:InductiveDecl):void{
       !exprEq(it.ctors[0]!.type,constant(N.Nat))||!exprEq(it.ctors[1]!.type,succTy))
      throw new KernelError('invalid form for primitive inductive Nat');
  }else throw new KernelError(`'${nameToString(it.name)}' is not a primitive inductive`);
- addOrdinaryInductive(env,d,{allowPrimitiveNames:true});
+ addOrdinaryInductiveInternal(env,d,{allowPrimitiveNames:true});
 }
 
 function validateBody(env:Environment,v:DefinitionInfo):void{

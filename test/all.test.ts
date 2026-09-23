@@ -97,6 +97,16 @@ test('kernel memo tables share entries across Lean-structurally equal clones',()
  assert(st.success.has(st.pair(yClone,xClone)),'defeq pair cache remains symmetric like Lean hash-canonicalized pairs');
 });
 
+test('checker state is locked to one immutable environment revision',()=>{
+ const env=baseEnv(),st=new KernelState(),tc=new TypeChecker(env,new LocalContext(),st),A=nameFromDotted('EnvRevision.A');
+ eqExpr(tc.check(natLit(0)),constant(N.Nat));
+ env.add({kind:'axiom',name:A,levelParams:[],type:constant(N.Nat)});
+ throws(()=>tc.check(constant(A)));
+ const fresh=new TypeChecker(env);
+ eqExpr(fresh.check(constant(A)),constant(N.Nat));
+ throws(()=>new TypeChecker(env.clone(),new LocalContext(),st));
+});
+
 test('checker-state local name generator stays unique across independent local contexts',()=>{
  const st=new KernelState(),a=new LocalContext(),b=new LocalContext();
  const x=st.freshLocal('x',a),y=st.freshLocal('x',b);

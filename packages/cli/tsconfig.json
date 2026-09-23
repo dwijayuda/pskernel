@@ -31,6 +31,9 @@
       ],
       "@proofscript/compiler": [
         "../compiler/dist/src/index.d.ts"
+      ],
+      "@proofscript/environment/node": [
+        "../environment/dist/src/node.d.ts"
       ]
     }
   },

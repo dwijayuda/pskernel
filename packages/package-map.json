@@ -28,10 +28,12 @@
         "backend-ts",
         "compiler-ir",
         "elab",
-        "compiler"
+        "compiler",
+        "environment"
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Verified CLI elaboration starts from the shared pskernel-admitted Lean 4.34 Init.Prelude environment and fails closed when that fixture cannot be loaded.",
         "psc --verified uses the preferred source -> elaboration -> checked core -> erasure -> compiler IR -> TypeScript -> JavaScript architecture.",
         "Verified mode never falls back to the legacy software checker after an elaboration/erasure error.",
         "The legacy software path remains available without --verified only as a temporary compatibility lane while verified-core coverage expands.",
@@ -125,6 +127,23 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Foundation provides compositional documents, width-aware groups/indentation, and diagnostic rendering."
+      ]
+    },
+    {
+      "name": "environment",
+      "path": "packages/environment",
+      "phase": "B",
+      "trust": "untrusted-support",
+      "status": "lean434-prelude-provider-mvp",
+      "packageName": "@proofscript/environment",
+      "dependsOn": [
+        "kernel"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Platform-neutral replay turns pinned lean4export text into a pskernel Environment.",
+        "The Node subpath locates/replays the Lean 4.34 Init.Prelude fixture once and returns clones to compiler/editor clients.",
+        "Verified compilation requires the shared prelude provider and fails closed if it is unavailable; editor tooling may expose degraded empty-environment behavior separately."
       ]
     },
     {
@@ -348,11 +367,12 @@
       "packageName": "@proofscript/lsp",
       "dependsOn": [
         "language-service",
-        "kernel"
+        "kernel",
+        "environment"
       ],
       "sourceLanguage": "typescript",
       "notes": [
-        "The stdio LSP reuses the pinned Lean 4.34 Init.Prelude replay fixture to construct a cached pskernel editor environment when available.",
+        "LSP environment loading is delegated to @proofscript/environment/node so editor and compiler share the same pinned Lean 4.34 replay policy.",
         "Every document analysis receives a clone of that admitted environment; the fixture is replayed by pskernel rather than trusted as pre-verified metadata.",
         "If the fixture is missing or replay fails, the server falls back to an empty environment and reports the degraded editor environment through serverInfo instead of weakening proof acceptance.",
         "Project/import environment composition remains a later language-service milestone.",

@@ -19,7 +19,8 @@
     "@proofscript/backend-ts": "file:../backend-ts",
     "@proofscript/compiler-ir": "file:../compiler-ir",
     "@proofscript/elab": "file:../elab",
-    "@proofscript/compiler": "file:../compiler"
+    "@proofscript/compiler": "file:../compiler",
+    "@proofscript/environment": "file:../environment"
   },
   "devDependencies": {
     "@types/node": "22.15.3",

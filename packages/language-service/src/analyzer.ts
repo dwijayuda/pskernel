@@ -5,12 +5,22 @@ import {
   type V061Declaration,
   type V061Module,
 } from '@proofscript/syntax';
-import {elaborateV061Declarations} from '@proofscript/elab';
-import {Environment} from 'lean-ts-kernel';
+import {
+  elaborateV061Declarations,
+  elaborateV061ValueHeader,
+} from '@proofscript/elab';
+import {
+  Environment,
+  exprToString,
+  levelToString,
+  normalizesToZero,
+  type Expr,
+} from 'lean-ts-kernel';
 import type {
   DeclarationKernelStatus,
   DeclarationStatus,
   DocumentAnalysis,
+  ProofGoal,
   ServiceDiagnostic,
   TextDocumentSnapshot,
 } from './model.js';
@@ -18,6 +28,50 @@ import {rangeFromOffsets} from './positions.js';
 
 export interface AnalysisOptions {
   readonly environmentFactory?:()=>Environment;
+}
+
+function displayCoreExpr(
+  expr:Expr,
+  ids:ReadonlyMap<string,string>,
+):string {
+  if(expr.kind==='sort'){
+    return normalizesToZero(expr.level)
+      ?'Prop'
+      :'Sort '+levelToString(expr.level);
+  }
+  let rendered=exprToString(expr);
+  const replacements=[...ids.entries()]
+    .sort((a,b)=>b[0].length-a[0].length);
+  for(const [id,name] of replacements){
+    rendered=rendered.split(id).join(name);
+  }
+  return rendered;
+}
+
+function initialTheoremGoal(
+  declaration:V061Declaration,
+  environment:Environment,
+):ProofGoal|undefined {
+  if(declaration.kind!=='theorem')return undefined;
+  try{
+    const header=elaborateV061ValueHeader(declaration,environment);
+    const ids=new Map(
+      header.parameters.map((parameter)=>[
+        parameter.id,
+        parameter.sourceName,
+      ] as const),
+    );
+    return {
+      locals:header.parameters.map((parameter)=>({
+        name:parameter.sourceName,
+        type:displayCoreExpr(parameter.type,ids),
+        binderInfo:parameter.binderInfo,
+      })),
+      target:displayCoreExpr(header.resultType,ids),
+    };
+  }catch{
+    return undefined;
+  }
 }
 
 function declarationNameOffset(
@@ -105,6 +159,7 @@ export function analyzeDocument(
   const diagnostics:ServiceDiagnostic[]=[];
 
   for(const declaration of module.declarations){
+    const initialGoal=initialTheoremGoal(declaration,environment);
     let kernel:DeclarationKernelStatus='not-run';
     let message:string|undefined;
     try{
@@ -138,6 +193,7 @@ export function analyzeDocument(
       ),
       kernel,
       ...(message===undefined?{}:{message}),
+      ...(initialGoal===undefined?{}:{initialGoal}),
       canonicalLean:lowerV061ModuleToLean(
         singleDeclarationModule(module,declaration),
       ).trim(),

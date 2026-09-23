@@ -165,15 +165,34 @@ class InfoviewProvider {
         ' · Kernel: '+escapeHtml(status.kernel)+
         ' · Verified: '+String(status.verifiedDeclarations)+'/'+
         String(status.declarations);
+    const goalText=proof?.initialGoal===undefined
+      ?''
+      :'<h4>Initial elaborated goal</h4><pre>'+
+        escapeHtml([
+          ...proof.initialGoal.locals.map((local)=>
+            renderGoalLocal(local)
+          ),
+          '⊢ '+proof.initialGoal.target,
+        ].join('\n'))+
+        '</pre>';
     this.view.webview.html=
       '<!doctype html><html><body>'+
       '<h3>ProofScript</h3>'+
       '<p><strong>'+proofText+'</strong></p>'+
+      goalText+
       '<p>'+statusText+'</p>'+
       '<hr><p><small>Proof authority: pskernel. '+
       'Cursor-sensitive tactic snapshots are not implemented yet.</small></p>'+
       '</body></html>';
   }
+}
+
+function renderGoalLocal(local){
+  const rendered=local.name+' : '+local.type;
+  if(local.binderInfo==='implicit')return '{'+rendered+'}';
+  if(local.binderInfo==='strictImplicit')return '{{'+rendered+'}}';
+  if(local.binderInfo==='instImplicit')return '['+rendered+']';
+  return rendered;
 }
 
 function escapeHtml(value){

@@ -126,6 +126,9 @@ export class ProofScriptLanguageService {
         declaration:declaration.name,
         message:'Goals accomplished!',
         goals:[],
+        ...(declaration.initialGoal===undefined
+          ?{}
+          :{initialGoal:declaration.initialGoal}),
       };
     }
     if(declaration.kernel==='rejected'){
@@ -134,6 +137,9 @@ export class ProofScriptLanguageService {
         declaration:declaration.name,
         message:declaration.message??'The kernel rejected this theorem.',
         goals:[],
+        ...(declaration.initialGoal===undefined
+          ?{}
+          :{initialGoal:declaration.initialGoal}),
       };
     }
     return {
@@ -143,6 +149,9 @@ export class ProofScriptLanguageService {
         'Proof state unavailable because this declaration is outside the '+
         'current kernel-facing elaboration subset.',
       goals:[],
+      ...(declaration.initialGoal===undefined
+        ?{}
+        :{initialGoal:declaration.initialGoal}),
     };
   }
 

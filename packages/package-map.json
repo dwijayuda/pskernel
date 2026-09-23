@@ -272,7 +272,9 @@
         "Editor analysis distinguishes parse success from kernel verification; only pskernel-admitted declarations are labeled verified.",
         "Declaration-level proof state never fabricates tactic goals: verified theorems report closed, rejected theorems report the actual failure, and unsupported declarations report unavailable.",
         "The service reuses the current parser/elaborator and accepts an environment factory for future project/import integration.",
-        "Completion, same-document definition, and reference lookup are lexical/declaration editor aids only; they do not participate in elaboration or kernel admission."
+        "Completion, same-document definition, and reference lookup are lexical/declaration editor aids only; they do not participate in elaboration or kernel admission.",
+        "Theorem proof-state responses may include an initialGoal derived from the same real header elaboration used by declaration checking; a verified theorem still reports zero open goals.",
+        "Initial goal display is contextual editor information only and is not a cursor-sensitive tactic snapshot."
       ]
     },
     {

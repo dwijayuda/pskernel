@@ -35,6 +35,13 @@ function equal(actual:unknown,expected:unknown):void {
   );
   equal(state.status,'closed');
   equal(state.message,'Goals accomplished!');
+  equal(state.goals.length,0);
+  equal(state.initialGoal?.target,'P');
+  equal(state.initialGoal?.locals.length,2);
+  equal(state.initialGoal?.locals[0]?.name,'P');
+  equal(state.initialGoal?.locals[0]?.type,'Prop');
+  equal(state.initialGoal?.locals[1]?.name,'h');
+  equal(state.initialGoal?.locals[1]?.type,'P');
 }
 
 {

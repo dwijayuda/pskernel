@@ -23,6 +23,15 @@ export interface TextDocumentSnapshot {
   readonly text:string;
 }
 export type DeclarationKernelStatus='verified'|'unsupported'|'rejected'|'not-run';
+export interface ProofGoalLocal {
+  readonly name:string;
+  readonly type:string;
+  readonly binderInfo:'default'|'implicit'|'strictImplicit'|'instImplicit';
+}
+export interface ProofGoal {
+  readonly locals:readonly ProofGoalLocal[];
+  readonly target:string;
+}
 export interface DeclarationStatus {
   readonly name:string;
   readonly kind:string;
@@ -31,6 +40,7 @@ export interface DeclarationStatus {
   readonly kernel:DeclarationKernelStatus;
   readonly message?:string;
   readonly canonicalLean:string;
+  readonly initialGoal?:ProofGoal;
 }
 export interface DocumentAnalysis {
   readonly uri:string;
@@ -47,5 +57,6 @@ export interface ProofState {
   readonly status:'closed'|'rejected'|'unavailable'|'none';
   readonly declaration?:string;
   readonly message:string;
-  readonly goals:readonly string[];
+  readonly goals:readonly ProofGoal[];
+  readonly initialGoal?:ProofGoal;
 }

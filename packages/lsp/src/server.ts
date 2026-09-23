@@ -1,6 +1,7 @@
 import {Buffer} from 'node:buffer';
 import {
   ProofScriptLanguageService,
+  type DocumentSourceKind,
   type Position,
   type ServiceDiagnostic,
 } from '@proofscript/language-service';
@@ -14,6 +15,21 @@ interface RpcMessage {
 }
 
 export const PROOFSCRIPT_LSP_PROTOCOL_VERSION=1;
+
+export function sourceKindFromLspDocument(
+  languageId:string|undefined,
+  uri:string,
+):DocumentSourceKind {
+  if(languageId==='proofscript')return 'proofscript';
+  if(languageId==='proofscript-lean')return 'lean-subset';
+  const normalized=uri.toLowerCase();
+  if(normalized.endsWith('.ps'))return 'proofscript';
+  if(normalized.endsWith('.lean'))return 'lean-subset';
+  throw new Error(
+    "PS_LSP_SOURCE_KIND: unsupported document language '"+String(languageId)+
+    "' for '"+uri+"'",
+  );
+}
 
 export function lspCapabilities(){
   return {
@@ -97,6 +113,10 @@ export class ProofScriptLanguageServer {
             document.uri,
             document.version??0,
             document.text??'',
+            sourceKindFromLspDocument(
+              document.languageId,
+              document.uri,
+            ),
           );
           this.publishDiagnostics(document.uri);
           return;

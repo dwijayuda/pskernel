@@ -11,6 +11,7 @@ import {
   PROOFSCRIPT_LSP_PROTOCOL_VERSION,
   ProofScriptLanguageService,
   lspCapabilities,
+  sourceKindFromLspDocument,
 } from '../src/index.js';
 
 {
@@ -34,3 +35,28 @@ import {
   equal(service.documentStatus('file:///proof.ps').kernel,'verified');
 }
 console.log('ok - @proofscript/lsp proof-aware protocol surface');
+
+{
+  equal(
+    sourceKindFromLspDocument('proofscript','file:///main.ps'),
+    'proofscript',
+  );
+  equal(
+    sourceKindFromLspDocument('proofscript-lean','file:///Main.lean'),
+    'lean-subset',
+  );
+  equal(
+    sourceKindFromLspDocument('lean4','file:///Main.lean'),
+    'lean-subset',
+  );
+  const service=new ProofScriptLanguageService();
+  service.openDocument(
+    'file:///Main.lean',
+    1,
+    'theorem id (P : Prop) (h : P) : P := by assumption\n',
+    'lean-subset',
+  );
+  equal(service.documentStatus('file:///Main.lean').sourceKind,'lean-subset');
+  equal(service.documentStatus('file:///Main.lean').kernel,'verified');
+}
+console.log('ok - @proofscript/lsp dual-source document routing');

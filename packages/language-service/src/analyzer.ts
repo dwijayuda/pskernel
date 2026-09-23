@@ -1,7 +1,7 @@
 import {
   SyntaxError as ProofScriptSyntaxError,
+  createDefaultSourceFrontendRegistry,
   lowerV061ModuleToLean,
-  parseV061Module,
   type V061Declaration,
   type V061Module,
 } from '@proofscript/syntax';
@@ -29,6 +29,8 @@ import {rangeFromOffsets} from './positions.js';
 export interface AnalysisOptions {
   readonly environmentFactory?:()=>Environment;
 }
+
+const sourceFrontends=createDefaultSourceFrontendRegistry();
 
 function displayCoreExpr(
   expr:Expr,
@@ -128,7 +130,7 @@ export function analyzeDocument(
 ):DocumentAnalysis {
   let module:V061Module;
   try{
-    module=parseV061Module(snapshot.text);
+    module=sourceFrontends.require(snapshot.sourceKind).parse(snapshot.text);
   }catch(error){
     if(error instanceof ProofScriptSyntaxError){
       return {

@@ -3,6 +3,7 @@ import type {
   Position,
   ProofState,
   TextDocumentSnapshot,
+  type DocumentSourceKind,
 } from './model.js';
 import {analyzeDocument,type AnalysisOptions} from './analyzer.js';
 import {offsetAt} from './positions.js';
@@ -17,15 +18,39 @@ export class ProofScriptLanguageService {
 
   constructor(readonly options:LanguageServiceOptions={}){}
 
-  openDocument(uri:string,version:number,text:string):TextDocumentSnapshot {
-    const snapshot={uri,version,generation:++this.generation,text};
+  openDocument(
+    uri:string,
+    version:number,
+    text:string,
+    sourceKind:DocumentSourceKind='proofscript',
+  ):TextDocumentSnapshot {
+    const snapshot={
+      uri,
+      sourceKind,
+      version,
+      generation:++this.generation,
+      text,
+    };
     this.docs.set(uri,snapshot);
     this.analyses.delete(uri);
     return snapshot;
   }
 
-  replaceDocument(uri:string,version:number,text:string):TextDocumentSnapshot {
-    return this.openDocument(uri,version,text);
+  replaceDocument(
+    uri:string,
+    version:number,
+    text:string,
+  ):TextDocumentSnapshot {
+    const current=this.docs.get(uri);
+    if(current===undefined){
+      throw new Error('document is not open: '+uri);
+    }
+    return this.openDocument(
+      uri,
+      version,
+      text,
+      current.sourceKind,
+    );
   }
 
   closeDocument(uri:string):void {
@@ -159,6 +184,7 @@ export class ProofScriptLanguageService {
     const analysis=this.analyze(uri);
     return {
       uri,
+      sourceKind:analysis.sourceKind,
       version:analysis.version,
       generation:analysis.generation,
       frontend:analysis.frontend,

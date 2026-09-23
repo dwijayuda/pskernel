@@ -1,3 +1,4 @@
+import type {SourceKind} from '@proofscript/syntax';
 export interface Position {
   readonly line:number;
   readonly character:number;
@@ -16,8 +17,11 @@ export interface ServiceDiagnostic {
   readonly phase:AnalysisPhase;
   readonly message:string;
 }
+export type DocumentSourceKind=SourceKind;
+
 export interface TextDocumentSnapshot {
   readonly uri:string;
+  readonly sourceKind:DocumentSourceKind;
   readonly version:number;
   readonly generation:number;
   readonly text:string;
@@ -44,6 +48,7 @@ export interface DeclarationStatus {
 }
 export interface DocumentAnalysis {
   readonly uri:string;
+  readonly sourceKind:DocumentSourceKind;
   readonly version:number;
   readonly generation:number;
   readonly text:string;

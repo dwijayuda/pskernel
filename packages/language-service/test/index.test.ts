@@ -74,6 +74,23 @@ function equal(actual:unknown,expected:unknown):void {
 
 console.log('ok - @proofscript/language-service proof-aware document analysis');
 
+{
+  const service=new ProofScriptLanguageService();
+  service.openDocument(
+    'file:///proof.lean',
+    1,
+    'theorem id (P : Prop) (h : P) : P := by assumption\n',
+    'lean-subset',
+  );
+  const analysis=service.analyze('file:///proof.lean');
+  equal(analysis.sourceKind,'lean-subset');
+  equal(analysis.frontend,'parsed');
+  equal(analysis.kernel,'verified');
+  equal(analysis.declarations[0]?.canonicalLean.startsWith('theorem id '),true);
+  equal(service.documentStatus('file:///proof.lean').sourceKind,'lean-subset');
+}
+console.log('ok - @proofscript/language-service Lean-subset source routing');
+
 
 {
   const service=new ProofScriptLanguageService();

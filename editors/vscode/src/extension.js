@@ -20,6 +20,22 @@ let statusBar;
 let infoview;
 let selectionTimer;
 
+function leanSubsetEnabled(){
+  return vscode.workspace
+    .getConfiguration('proofscript')
+    .get('leanSubset.enable',false)===true;
+}
+
+function isManagedDocument(document){
+  return isProofScript(document,leanSubsetEnabled());
+}
+
+const languageSelector=[
+  {language:'proofscript'},
+  {language:'proofscript-lean'},
+  {pattern:'**/*.lean'},
+];
+
 function resolveServerTarget(extensionPath){
   const config=vscode.workspace.getConfiguration('proofscript');
   const configured=config.get('lsp.path');
@@ -35,7 +51,7 @@ function resolveServerTarget(extensionPath){
 }
 
 async function syncInfoview(editor){
-  if(client===undefined||!isProofScript(editor?.document)){
+  if(client===undefined||!isManagedDocument(editor?.document)){
     infoview?.update(null,null);
     return;
   }
@@ -88,8 +104,8 @@ async function startServer(context){
     );
   }
   for(const document of vscode.workspace.textDocuments){
-    if(isProofScript(document)){
-      client.notify('textDocument/didOpen',openParams(document));
+    if(isManagedDocument(document)){
+      client.notify('textDocument/didOpen',openParams(document,leanSubsetEnabled()));
     }
   }
   await syncInfoview(vscode.window.activeTextEditor);
@@ -98,12 +114,12 @@ async function startServer(context){
 function registerDocumentLifecycle(context){
   context.subscriptions.push(
     vscode.workspace.onDidOpenTextDocument((document)=>{
-      if(isProofScript(document)){
-        client?.notify('textDocument/didOpen',openParams(document));
+      if(isManagedDocument(document)){
+        client?.notify('textDocument/didOpen',openParams(document,leanSubsetEnabled()));
       }
     }),
     vscode.workspace.onDidChangeTextDocument((event)=>{
-      if(!isProofScript(event.document))return;
+      if(!isManagedDocument(event.document))return;
       client?.notify('textDocument/didChange',{
         textDocument:{
           uri:event.document.uri.toString(),
@@ -114,7 +130,7 @@ function registerDocumentLifecycle(context){
       scheduleInfoview(vscode.window.activeTextEditor,80);
     }),
     vscode.workspace.onDidCloseTextDocument((document)=>{
-      if(!isProofScript(document))return;
+      if(!isManagedDocument(document))return;
       client?.notify('textDocument/didClose',{
         textDocument:{uri:document.uri.toString()},
       });
@@ -123,13 +139,19 @@ function registerDocumentLifecycle(context){
     vscode.window.onDidChangeTextEditorSelection((event)=>{
       scheduleInfoview(event.textEditor,60);
     }),
+    vscode.workspace.onDidChangeConfiguration((event)=>{
+      if(event.affectsConfiguration('proofscript.leanSubset.enable')){
+        void startServer(context);
+      }
+    }),
   );
 }
 
 function registerLanguageProviders(context){
   context.subscriptions.push(
-    vscode.languages.registerCompletionItemProvider('proofscript',{
+    vscode.languages.registerCompletionItemProvider(languageSelector,{
       provideCompletionItems:async(document,position)=>{
+        if(!isManagedDocument(document))return [];
         const result=await client?.request('textDocument/completion',{
           textDocument:{uri:document.uri.toString()},
           position:toProtocolPosition(position),
@@ -146,8 +168,9 @@ function registerLanguageProviders(context){
         });
       },
     },'.'),
-    vscode.languages.registerDefinitionProvider('proofscript',{
+    vscode.languages.registerDefinitionProvider(languageSelector,{
       provideDefinition:async(document,position)=>{
+        if(!isManagedDocument(document))return undefined;
         const result=await client?.request('textDocument/definition',{
           textDocument:{uri:document.uri.toString()},
           position:toProtocolPosition(position),
@@ -157,8 +180,9 @@ function registerLanguageProviders(context){
           :toLocation(vscode,result);
       },
     }),
-    vscode.languages.registerReferenceProvider('proofscript',{
+    vscode.languages.registerReferenceProvider(languageSelector,{
       provideReferences:async(document,position,contextValue)=>{
+        if(!isManagedDocument(document))return [];
         const result=await client?.request('textDocument/references',{
           textDocument:{uri:document.uri.toString()},
           position:toProtocolPosition(position),
@@ -167,8 +191,9 @@ function registerLanguageProviders(context){
         return result.map((item)=>toLocation(vscode,item));
       },
     }),
-    vscode.languages.registerHoverProvider('proofscript',{
+    vscode.languages.registerHoverProvider(languageSelector,{
       provideHover:async(document,position)=>{
+        if(!isManagedDocument(document))return undefined;
         const result=await client?.request('textDocument/hover',{
           textDocument:{uri:document.uri.toString()},
           position:toProtocolPosition(position),
@@ -180,8 +205,9 @@ function registerLanguageProviders(context){
         );
       },
     }),
-    vscode.languages.registerDocumentSymbolProvider('proofscript',{
+    vscode.languages.registerDocumentSymbolProvider(languageSelector,{
       provideDocumentSymbols:async(document)=>{
+        if(!isManagedDocument(document))return [];
         const values=await client?.request('textDocument/documentSymbol',{
           textDocument:{uri:document.uri.toString()},
         })??[];

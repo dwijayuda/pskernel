@@ -134,3 +134,37 @@ throws(
   /PS_WASM_JS_ABI_UINT64_RANGE/u,
 );
 console.log('ok - @proofscript/backend-wasm JS ABI restores unsigned semantics');
+
+const bigintIdentityModule:WasmIrModule={
+  kind:'proofscript-wasm-ir',
+  profile:'proofscript-wasm32-ref-js-v1',
+  functions:[
+    {
+      name:'idNat',
+      parameters:[{name:'x',type:'externref'}],
+      result:'externref',
+      abi:{parameters:['nat'],result:'nat'},
+      exportName:'idNat',
+      body:{kind:'local',name:'x',type:'externref'},
+    },
+    {
+      name:'idInt',
+      parameters:[{name:'x',type:'externref'}],
+      result:'externref',
+      abi:{parameters:['int'],result:'int'},
+      exportName:'idInt',
+      body:{kind:'local',name:'x',type:'externref'},
+    },
+  ],
+};
+const bigintArtifact=emitBinaryenWasm(bigintIdentityModule);
+ok(WebAssembly.validate(bigintArtifact.binary));
+const bigintHost=instantiateProofScriptWasm(bigintArtifact);
+const hugeNat=(1n<<100n)+123456789n;
+equal(bigintHost.exports.idNat?.(hugeNat),hugeNat);
+equal(bigintHost.exports.idInt?.(-hugeNat),-hugeNat);
+throws(
+  ()=>bigintHost.exports.idNat?.(-1n),
+  /PS_WASM_JS_ABI_NAT_RANGE/u,
+);
+console.log('ok - @proofscript/backend-wasm W3 externref bigint identity scaffold');

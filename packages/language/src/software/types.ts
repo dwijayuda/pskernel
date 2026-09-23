@@ -1,4 +1,4 @@
-import type {V061Declaration} from '@proofscript/syntax';
+import type {V061ValueDeclaration} from '@proofscript/syntax';
 
 export type PrimitiveSoftwareType='Nat'|'Int'|'Bool'|'String'|'Unit';
 export interface FunctionSoftwareType {
@@ -86,7 +86,7 @@ export interface CheckedSoftwareParameter {
 }
 
 export interface CheckedSoftwareDeclaration {
-  readonly kind:V061Declaration['kind'];
+  readonly kind:V061ValueDeclaration['kind'];
   readonly name:string;
   readonly params:readonly CheckedSoftwareParameter[];
   readonly resultType:SoftwareType;

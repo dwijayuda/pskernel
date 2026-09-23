@@ -55,6 +55,12 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
 
 export function lowerV061ModuleToLean(module:V061Module):string {
   return module.declarations.map((decl)=>{
+    if(decl.kind==='structure'){
+      const fields=decl.fields.map(
+        (field)=>'  '+field.name+' : '+lowerV061TypeToLean(field.type),
+      ).join('\n');
+      return 'structure '+decl.name+' where\n'+fields;
+    }
     const head=decl.kind==='function'||decl.kind==='const'?'def':decl.kind;
     const params=decl.params.map((p)=>' ('+p.name+' : '+lowerV061TypeToLean(p.type)+')').join('');
     return head+' '+decl.name+params+' : '+lowerV061TypeToLean(decl.resultType)+' := '+lowerV061ExprToLean(decl.body);

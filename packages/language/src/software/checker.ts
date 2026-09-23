@@ -11,6 +11,11 @@ import {checkSoftwareExpr} from './expression-checker.js';
 export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule {
   const signatures=new Map<string,SoftwareSignature>();
   for(const decl of module.declarations){
+    if(decl.kind==='structure'){
+      throw new Error(
+        'PS_CHECK_DECL_UNSUPPORTED: structure declarations require nominal structure elaboration',
+      );
+    }
     if(signatures.has(decl.name)){
       throw new Error("PS_CHECK_DUPLICATE_DECL: duplicate declaration '"+decl.name+"'");
     }
@@ -21,6 +26,11 @@ export function checkV061SoftwareModule(module:V061Module):CheckedSoftwareModule
   }
 
   const declarations=module.declarations.map((decl)=>{
+    if(decl.kind==='structure'){
+      throw new Error(
+        'PS_CHECK_DECL_UNSUPPORTED: structure declarations require nominal structure elaboration',
+      );
+    }
     const locals=new Map<string,SoftwareType>();
     const params=decl.params.map((param)=>{
       if(locals.has(param.name)){

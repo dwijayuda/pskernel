@@ -4,5 +4,6 @@ export * from './ast.js';
 export * from './operators.js';
 export * from './context.js';
 export * from './expression-parser.js';
+export * from './structure-parser.js';
 export * from './declaration-parser.js';
 export * from './lean-lowering.js';

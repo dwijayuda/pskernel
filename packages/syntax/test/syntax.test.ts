@@ -428,3 +428,29 @@ console.log('ok - @proofscript/syntax lexer MVP');
     }
   }
 }
+
+
+// v0.6.1 E-STRUCT-BODY: outer braces delimit structure members.
+{
+  const module=parseV061Module(
+    'structure User where { name : String; age : Nat; }',
+  );
+  const declaration=module.declarations[0];
+  equal(declaration?.kind,'structure');
+  equal(module.featureIds.includes('E-STRUCT-BODY'),true);
+  if(declaration?.kind==='structure'){
+    equal(declaration.fields.length,2);
+    equal(declaration.fields[0]?.name,'name');
+    equal(declaration.fields[1]?.name,'age');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'structure User where\n  name : String\n  age : Nat\n',
+  );
+}
+{
+  throws(
+    ()=>parseV061Module('structure Box(α : Type) where { value : α; }'),
+    /parameterized\/implicit structure headers are not yet implemented/,
+  );
+}

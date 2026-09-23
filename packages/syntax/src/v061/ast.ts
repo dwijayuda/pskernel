@@ -48,7 +48,13 @@ export type V061Expr =
       readonly span:SourceSpan;
     };
 
-export interface V061Declaration {
+export interface V061StructureField {
+  readonly name:string;
+  readonly type:V061TypeExpr;
+  readonly span:SourceSpan;
+}
+
+export interface V061ValueDeclaration {
   readonly kind:'const'|'def'|'function';
   readonly name:string;
   readonly params:readonly V061Parameter[];
@@ -57,6 +63,16 @@ export interface V061Declaration {
   readonly terminatedBySemicolon:boolean;
   readonly span:SourceSpan;
 }
+
+export interface V061StructureDeclaration {
+  readonly kind:'structure';
+  readonly name:string;
+  readonly fields:readonly V061StructureField[];
+  readonly terminatedBySemicolon:boolean;
+  readonly span:SourceSpan;
+}
+
+export type V061Declaration=V061ValueDeclaration|V061StructureDeclaration;
 
 export interface V061Module {
   readonly kind:'v061-module';

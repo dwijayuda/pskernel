@@ -1,8 +1,9 @@
 import {SyntaxError} from '../source.js';
-import type {V061Declaration,V061Module,V061Parameter} from './ast.js';
+import type {V061Declaration,V061Module,V061Parameter,V061ValueDeclaration} from './ast.js';
 import {V061ParseContext,spanBetween} from './context.js';
 import {V061ExpressionParser} from './expression-parser.js';
 import {parseV061Type} from './type-parser.js';
+import {parseV061StructureDeclaration} from './structure-parser.js';
 
 export class V061DeclarationParser {
   readonly context:V061ParseContext;
@@ -20,12 +21,19 @@ export class V061DeclarationParser {
   }
 
   private parseDeclaration():V061Declaration {
+    if(this.context.cursor.at('structure')){
+      return parseV061StructureDeclaration(this.context);
+    }
+    return this.parseValueDeclaration();
+  }
+
+  private parseValueDeclaration():V061ValueDeclaration {
     const keyword=this.context.cursor.peek();
     if(keyword.text!=='const'&&keyword.text!=='def'&&keyword.text!=='function'){
       throw new SyntaxError("expected const, def, or function, got '"+keyword.text+"'",keyword.span);
     }
     this.context.cursor.consume();
-    const kind=keyword.text as V061Declaration['kind'];
+    const kind=keyword.text as V061ValueDeclaration['kind'];
     const name=this.context.cursor.expectKind('identifier','declaration name');
     const params:V061Parameter[]=[];
 

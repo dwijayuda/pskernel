@@ -95,16 +95,16 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-match-parser-mvp",
+      "status": "v061-structure-parser-mvp",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
         "Pinned to ProofScript v0.7.0 with the v0.6.1 compiler-ready surface as the implementation baseline.",
-        "Parser modules are separated by type, pattern, expression, declaration, ownership/context, and canonical Lean lowering responsibilities.",
-        "E-MATCH-BODY has an explicit pattern AST; Bool, wildcard, and constructor-shaped native Lean patterns are represented without TypeScript-style constructor-call patterns.",
-        "Executable checking initially supports only a bounded pattern subset; parsing/lowering does not pretend broader patterns are already executable.",
-        "Unsupported syntax fails closed."
+        "Structure declaration parsing is isolated from ordinary value declarations, mirroring Lean's declaration-specific elaboration boundary.",
+        "E-STRUCT-BODY currently parses explicit named fields and emits canonical Lean structure syntax.",
+        "Parameterized, implicit, and instance fields fail closed until their binder semantics are implemented.",
+        "The executable software checker intentionally rejects structures until nominal structure semantics are added."
       ]
     },
     {

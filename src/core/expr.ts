@@ -301,13 +301,37 @@ export function instantiateExprLevels(e: Expr, params: readonly Name[], levels: 
 }
 
 export function exprKey(e: Expr): string {
-  switch(e.kind){
-    case'bvar':return `b${e.index}`; case'fvar':return `f${e.id}`;case'mvar':return `?${e.id}`;
-    case'sort':return `S${JSON.stringify(e.level,(_k,v)=>typeof v==='bigint'?v.toString():v)}`;
-    case'const':return `C${nameKey(e.name)}[${e.levels.map(x=>JSON.stringify(x,(_k,v)=>typeof v==='bigint'?v.toString():v)).join(',')}]`;
-    case'app':return `A(${exprKey(e.fn)},${exprKey(e.arg)})`; case'lam':return `L(${exprKey(e.type)},${exprKey(e.body)})`;case'forall':return `P(${exprKey(e.type)},${exprKey(e.body)})`;
-    case'let':return `T${e.nondep?'1':'0'}(${exprKey(e.type)},${exprKey(e.value)},${exprKey(e.body)})`; case'lit':return e.literal.kind==='nat'?`N${e.literal.value}`:`Q${JSON.stringify(e.literal.value)}`;
-    case'mdata':return exprKey(e.expr); case'proj':return `R${nameKey(e.typeName)}:${e.index}(${exprKey(e.expr)})`;
+  type Frame={e:Expr;done:boolean};
+  const levelJson=(x:Level)=>JSON.stringify(x,(_k,v)=>typeof v==='bigint'?v.toString():v);
+  const todo:Frame[]=[{e,done:false}],out:string[]=[];
+  while(todo.length){
+    const f=todo.pop()!,x=f.e;
+    if(!f.done){
+      switch(x.kind){
+        case'bvar':out.push(`b${x.index}`);break;
+        case'fvar':out.push(`f${x.id}`);break;
+        case'mvar':out.push(`?${x.id}`);break;
+        case'sort':out.push(`S${levelJson(x.level)}`);break;
+        case'const':out.push(`C${nameKey(x.name)}[${x.levels.map(levelJson).join(',')}]`);break;
+        case'lit':out.push(x.literal.kind==='nat'?`N${x.literal.value}`:`Q${JSON.stringify(x.literal.value)}`);break;
+        case'app':todo.push({e:x,done:true},{e:x.arg,done:false},{e:x.fn,done:false});break;
+        case'lam':case'forall':todo.push({e:x,done:true},{e:x.body,done:false},{e:x.type,done:false});break;
+        case'let':todo.push({e:x,done:true},{e:x.body,done:false},{e:x.value,done:false},{e:x.type,done:false});break;
+        case'mdata':todo.push({e:x.expr,done:false});break;
+        case'proj':todo.push({e:x,done:true},{e:x.expr,done:false});break;
+      }
+      continue;
+    }
+    switch(x.kind){
+      case'app':{const arg=out.pop()!,fn=out.pop()!;out.push(`A(${fn},${arg})`);break;}
+      case'lam':{const body=out.pop()!,type=out.pop()!;out.push(`L(${type},${body})`);break;}
+      case'forall':{const body=out.pop()!,type=out.pop()!;out.push(`P(${type},${body})`);break;}
+      case'let':{const body=out.pop()!,value=out.pop()!,type=out.pop()!;out.push(`T${x.nondep?'1':'0'}(${type},${value},${body})`);break;}
+      case'proj':out.push(`R${nameKey(x.typeName)}:${x.index}(${out.pop()!})`);break;
+      default:throw new Error('internal exprKey frame');
+    }
   }
+  if(out.length!==1)throw new Error('internal exprKey result');
+  return out[0]!;
 }
 export function exprToString(e: Expr): string { switch(e.kind){case'bvar':return `#${e.index}`;case'fvar':return e.id;case'mvar':return `?${e.id}`;case'sort':return 'Sort';case'const':return `${nameToString(e.name)}${e.levels.length?`.{${e.levels.map(levelToString).join(',')}}`:''}`;case'app':return `(${exprToString(e.fn)} ${exprToString(e.arg)})`;case'lam':return `(fun ${nameToString(e.name)} => ${exprToString(e.body)})`;case'forall':return `(Pi ${nameToString(e.name)} : ${exprToString(e.type)}, ${exprToString(e.body)})`;case'let':return `(let ${nameToString(e.name)} := ${exprToString(e.value)}; ${exprToString(e.body)})`;case'lit':return e.literal.kind==='nat'?String(e.literal.value):JSON.stringify(e.literal.value);case'mdata':return exprToString(e.expr);case'proj':return `${exprToString(e.expr)}.${e.index}`;} }

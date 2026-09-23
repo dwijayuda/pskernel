@@ -138,6 +138,21 @@ test('lean4export replay threads the explicit native evaluator into its kernel',
  assert(replay.kernel.nativeEvaluator===evaluator,'replay kernel must retain NativeEvaluator identity');
 });
 
+test('infer-only application does not inspect a closed ill-typed argument',()=>{
+ const env=baseEnv(),F=nameFromDotted('InferOnly.f');
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat))});
+ const badArg=app(natLit(0),natLit(1)),term=app(constant(F),badArg),tc=new TypeChecker(env);
+ eqExpr(tc.infer(term,true),constant(N.Nat));
+ throws(()=>tc.check(term));
+});
+
+test('infer-only let does not inspect its closed ill-typed value',()=>{
+ const tc=new TypeChecker(baseEnv()),badValue=app(natLit(0),natLit(1));
+ const term={kind:'let',name:nameFromDotted('x'),type:constant(N.Nat),value:badValue,body:natLit(0)} as const;
+ eqExpr(tc.infer(term,true),constant(N.Nat));
+ throws(()=>tc.check(term));
+});
+
 test('application checker rejects wrong argument',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));throws(()=>tc.check(app(id,constant(N.BoolTrue))));});
 test('eagerReduce enables Lean 4.34 eager defeq for application arguments with syntactic fvars',()=>{
  const env=baseEnv(),one=levelSucc(levelZero),F=nameFromDotted('Eager.F');

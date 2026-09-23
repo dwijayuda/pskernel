@@ -1,10 +1,17 @@
 import type {ProofScriptFeatureId} from '../features.js';
 import type {SourceSpan} from '../source.js';
 import type {V061TypeExpr} from './type-parser.js';
+import type {V061Pattern} from './pattern-parser.js';
 
 export interface V061Parameter {
   readonly name:string;
   readonly type:V061TypeExpr;
+  readonly span:SourceSpan;
+}
+
+export interface V061MatchAlternative {
+  readonly pattern:V061Pattern;
+  readonly body:V061Expr;
   readonly span:SourceSpan;
 }
 
@@ -26,6 +33,12 @@ export type V061Expr =
   | {readonly kind:'binary';readonly operator:string;readonly left:V061Expr;readonly right:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'if';readonly condition:V061Expr;readonly thenBranch:V061Expr;readonly elseBranch:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'lambda';readonly binders:readonly V061LambdaBinder[];readonly body:V061Expr;readonly span:SourceSpan}
+  | {
+      readonly kind:'match';
+      readonly scrutinee:V061Expr;
+      readonly alternatives:readonly V061MatchAlternative[];
+      readonly span:SourceSpan;
+    }
   | {
       readonly kind:'let';
       readonly name:string;

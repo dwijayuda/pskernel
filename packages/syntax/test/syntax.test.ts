@@ -387,3 +387,44 @@ console.log('ok - @proofscript/syntax lexer MVP');
   }
   equal(lowerV061ModuleToLean(module),'def run (f : Unit -> Nat) : Nat := f ()\n');
 }
+
+
+// v0.6.1 E-MATCH-BODY: braces/separators change, patterns retain Lean meaning.
+{
+  const module=parseV061Module(
+    'function choose(flag : Bool) : Nat := match flag with { | true => 1; | false => 2; };',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'match');
+  equal(module.featureIds.includes('E-MATCH-BODY'),true);
+  if(body?.kind==='match'){
+    equal(body.alternatives.length,2);
+    equal(body.alternatives[0]?.pattern.kind,'bool');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'def choose (flag : Bool) : Nat := match flag with\n  | true => 1\n  | false => 2\n',
+  );
+}
+{
+  const module=parseV061Module(
+    'function get(value : Bool) : Nat := match value with { | _ => 1; };',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'match');
+  if(body?.kind==='match')equal(body.alternatives[0]?.pattern.kind,'wildcard');
+}
+{
+  const module=parseV061Module(
+    'function get(value : Bool) : Nat := match value with { | .some x => transform(x); | .none => 0; };',
+  );
+  const body=module.declarations[0]?.body;
+  equal(body?.kind,'match');
+  if(body?.kind==='match'){
+    equal(body.alternatives[0]?.pattern.kind,'constructor');
+    if(body.alternatives[0]?.pattern.kind==='constructor'){
+      equal(body.alternatives[0].pattern.name,'.some');
+      equal(body.alternatives[0].pattern.binders[0],'x');
+    }
+  }
+}

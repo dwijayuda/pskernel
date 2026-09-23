@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript v0.7 source positions, trivia-preserving tokens, lexical errors, and feature identifiers.",
   "proofscript": {
-    "status": "v061-lambda-parser-mvp",
+    "status": "v061-match-parser-mvp",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript",
@@ -18,7 +18,8 @@
       "D-DECL-SEMI",
       "D-CONST-ALIAS",
       "D-FUNCTION-ALIAS",
-      "E-IF-BRACE"
+      "E-IF-BRACE",
+      "E-MATCH-BODY"
     ]
   },
   "exports": {

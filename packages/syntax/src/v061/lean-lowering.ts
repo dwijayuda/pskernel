@@ -1,6 +1,7 @@
 import type {V061Expr,V061Module} from './ast.js';
 import {v061BinaryPrecedence} from './operators.js';
 import {lowerV061TypeToLean} from './type-parser.js';
+import {lowerV061PatternToLean} from './pattern-parser.js';
 
 function precedence(expr:V061Expr):number {
   return expr.kind==='binary'?(v061BinaryPrecedence(expr.operator)??0):8;
@@ -31,6 +32,12 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
     }
     case 'if':
       return 'if '+lowerV061ExprToLean(expr.condition)+' then '+lowerV061ExprToLean(expr.thenBranch)+' else '+lowerV061ExprToLean(expr.elseBranch);
+    case 'match':{
+      const alternatives=expr.alternatives.map(
+        (alt)=>'  | '+lowerV061PatternToLean(alt.pattern)+' => '+lowerV061ExprToLean(alt.body),
+      ).join('\n');
+      return 'match '+lowerV061ExprToLean(expr.scrutinee)+' with\n'+alternatives;
+    }
     case 'lambda':{
       const binders=expr.binders.map((binder)=>
         binder.type===undefined

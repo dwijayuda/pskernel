@@ -95,15 +95,15 @@
       "path": "packages/syntax",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-lambda-parser-mvp",
+      "status": "v061-match-parser-mvp",
       "packageName": "@proofscript/syntax",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
         "Pinned to ProofScript v0.7.0 with the v0.6.1 compiler-ready surface as the implementation baseline.",
-        "v0.6.1 parsing is split into type AST/parser, expression AST/parser, declaration parser, operator table, parser context, and Lean lowering modules.",
-        "Reference-backed syntax covers first-class function arrows and inherited fun lambdas with bare or explicitly typed binders.",
-        "Canonical Lean lowering preserves fun semantics; TypeScript-style arrow-lambda syntax is not admitted.",
+        "Parser modules are separated by type, pattern, expression, declaration, ownership/context, and canonical Lean lowering responsibilities.",
+        "E-MATCH-BODY has an explicit pattern AST; Bool, wildcard, and constructor-shaped native Lean patterns are represented without TypeScript-style constructor-call patterns.",
+        "Executable checking initially supports only a bounded pattern subset; parsing/lowering does not pretend broader patterns are already executable.",
         "Unsupported syntax fails closed."
       ]
     },

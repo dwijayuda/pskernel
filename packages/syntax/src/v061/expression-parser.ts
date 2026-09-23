@@ -3,6 +3,7 @@ import type {V061Expr,V061LambdaBinder} from './ast.js';
 import {V061ParseContext,spanBetween} from './context.js';
 import {v061BinaryPrecedence} from './operators.js';
 import {parseV061Type} from './type-parser.js';
+import {parseV061Pattern} from './pattern-parser.js';
 
 export class V061ExpressionParser {
   constructor(readonly context:V061ParseContext){}
@@ -21,6 +22,7 @@ export class V061ExpressionParser {
   }
 
   private parsePrefix():V061Expr {
+    if(this.context.cursor.at('match'))return this.parseMatch();
     if(this.context.cursor.at('fun'))return this.parseLambda();
     if(this.context.cursor.at('let'))return this.parseLet();
     if(this.context.cursor.at('if'))return this.parseIf();
@@ -32,6 +34,42 @@ export class V061ExpressionParser {
     return this.parsePrimary();
   }
 
+
+
+  private parseMatch():V061Expr {
+    const first=this.context.cursor.expect('match');
+    this.context.own('E-MATCH-BODY');
+    const scrutinee=this.parse();
+    this.context.cursor.expect('with');
+    this.context.cursor.expect('{');
+
+    const alternatives:{pattern:ReturnType<typeof parseV061Pattern>;body:V061Expr;span:V061Expr['span']}[]=[];
+    while(!this.context.cursor.at('}')){
+      const bar=this.context.cursor.expect('|');
+      const pattern=parseV061Pattern(this.context);
+      this.context.cursor.expect('=>');
+      const body=this.parse();
+      const semi=this.context.cursor.consumeIf(';');
+      if(!semi&&!this.context.cursor.at('}')){
+        throw new SyntaxError("expected ';' or '}' after match alternative",this.context.cursor.peek().span);
+      }
+      alternatives.push({
+        pattern,
+        body,
+        span:{start:bar.span.start,end:(semi??body).span.end},
+      });
+    }
+    const close=this.context.cursor.expect('}');
+    if(alternatives.length===0){
+      throw new SyntaxError('match requires at least one alternative',close.span);
+    }
+    return {
+      kind:'match',
+      scrutinee,
+      alternatives,
+      span:{start:first.span.start,end:close.span.end},
+    };
+  }
 
   private parseLambda():V061Expr {
     const first=this.context.cursor.expect('fun');

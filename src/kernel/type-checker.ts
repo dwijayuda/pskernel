@@ -158,7 +158,7 @@ export class TypeChecker {
 
   ensureSort(t:Expr,origin=t):Extract<Expr,{kind:'sort'}>{const w=this.whnf(t);if(w.kind!=='sort')throw new KernelError(`expected sort at ${exprToString(origin)}, got ${exprToString(w)}`);return w;}
   ensureForall(t:Expr,origin=t):Extract<Expr,{kind:'forall'}>{const w=this.whnf(t);if(w.kind!=='forall')throw new KernelError(`expected function type at ${exprToString(origin)}, got ${exprToString(w)}`);return w;}
-  getSortLevel(e:Expr):Level{return this.ensureSort(this.whnf(this.infer(e)),e).level;}
+  getSortLevel(e:Expr):Level{return this.ensureSort(this.infer(e),e).level;}
   isProp(e:Expr):boolean{return normalizesToZero(this.getSortLevel(e));}
 
   private validProjIndex(index:number):boolean{return Number.isInteger(index)&&index>=0&&index<=0xffff_ffff;}

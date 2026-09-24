@@ -25,6 +25,9 @@ import {
   Lean434RuntimeMetadataIndex,
   parseLean434RuntimeMetadata,
 } from '../src/lean4-metadata.js';
+import {
+  Lean434InitializerRunner,
+} from '../src/lean4-init.js';
 import {ctor,nat,natAdd,natMul,natSub,uint8} from '../src/index.js';
 import {
   LEAN434_JS_EXTERN_MANIFEST,
@@ -479,3 +482,73 @@ console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressi
   equal(lean_st_ref_get(firstRef),9n);
 }
 console.log('ok - Lean ST externs execute as deferred state actions');
+
+{
+  const environment=new Environment();
+  const kernel=new Kernel(environment);
+  const target=nameFromDotted('RuntimeInit.value');
+  const actionName=nameFromDotted('RuntimeInit.make');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:target,
+    levelParams:[],
+    type:sort(levelZero),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:actionName,
+    levelParams:[],
+    type:sort(levelZero),
+  });
+
+  const evaluator=new Lean434Evaluator(environment);
+  const action=evaluator.evaluate(
+    mkAppN(
+      constant(nameFromDotted('ST.Prim.mkRef')),
+      [sort(levelZero),sort(levelZero),natLit(11n)],
+    ),
+  );
+  evaluator.setRuntimeGlobal('RuntimeInit.make',action);
+
+  const metadata=parseLean434RuntimeMetadata({
+    format:'proofscript-lean434-runtime-metadata',
+    formatVersion:1,
+    lean:{
+      version:'4.34.0',
+      githash:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
+    },
+    module:'RuntimeInit',
+    externs:[],
+    implementedBy:[],
+    initializers:[
+      {
+        module:'RuntimeInit',
+        moduleIndex:0,
+        kind:'builtin',
+        source:'olean',
+        declaration:'RuntimeInit.value',
+        initFunction:'RuntimeInit.make',
+        ioUnit:false,
+      },
+    ],
+  });
+  const runner=new Lean434InitializerRunner(
+    evaluator,
+    new Lean434RuntimeMetadataIndex(metadata),
+  );
+  const first=runner.runAll();
+  equal(first.executed.length,1);
+  equal(first.skipped.length,0);
+
+  const initialized=evaluator.evaluate(constant(target));
+  if(!(initialized instanceof LeanRef)){
+    throw new Error('initializer did not store its computed LeanRef');
+  }
+  equal(lean_st_ref_get(initialized),11n);
+
+  const second=runner.runAll();
+  equal(second.executed.length,0);
+  equal(second.skipped.length,1);
+  equal(evaluator.evaluate(constant(target)),initialized);
+}
+console.log('ok - Lean initializer runner stores globals and runs once');

@@ -618,8 +618,12 @@ console.log('ok - @proofscript/elab bounded induction via recursor');
     'theorem parsedRw(a : Nat, b : Nat, h : a = b) : a = b := '+
     'by rw [h]; rw [← h]; assumption;',
   );
-  const body=source.declarations[0]?.body;
-  equal(body?.kind,'by');
+  const declaration=source.declarations[0];
+  if(declaration===undefined||!('body' in declaration)){
+    throw new Error('expected value declaration for parsed rw test');
+  }
+  const body=declaration.body;
+  equal(body.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics[0]?.kind,'rw');
     equal(body.tactics[1]?.kind,'rw');
@@ -633,8 +637,12 @@ console.log('ok - @proofscript/elab rw syntax reaches tactic AST');
     'h1 : BoxT(A) = B, h2 : WrapT(C) = D) : P := '+
     'by simp only [h1, ← h2];',
   );
-  const body=source.declarations[0]?.body;
-  equal(body?.kind,'by');
+  const declaration=source.declarations[0];
+  if(declaration===undefined||!('body' in declaration)){
+    throw new Error('expected value declaration for parsed simp test');
+  }
+  const body=declaration.body;
+  equal(body.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics[0]?.kind,'simp');
     if(body.tactics[0]?.kind==='simp'){

@@ -971,7 +971,10 @@ console.log('ok - psc verified structural recursion run filesystem pipeline');
     result.typeScript.includes('return ((x <= y) ? x : y);'),
     true,
   );
-  equal(result.emitted.javascript.includes('x <= y ? x : y'),true);
+  equal(
+    result.emitted.javascript.includes('(x <= y) ? x : y'),
+    true,
+  );
 }
 console.log('ok - psc verified proposition-based if pipeline');
 

@@ -6,7 +6,6 @@ import {
   type Expr,
   app,
   exprToString,
-  hasMVar,
   instantiate1,
   appView,
   fvar,
@@ -54,6 +53,33 @@ export interface ElaborateApplicationOptions {
   readonly localInstances?:readonly Expr[];
   readonly globalInstances?:readonly Expr[]|undefined;
   readonly classNames?:ReadonlySet<string>|undefined;
+}
+
+function hasExpressionMVar(expr:Expr):boolean {
+  const pending:Expr[]=[expr];
+  while(pending.length!==0){
+    const current=pending.pop()!;
+    switch(current.kind){
+      case 'mvar':return true;
+      case 'app':
+        pending.push(current.fn,current.arg);
+        break;
+      case 'lam':
+      case 'forall':
+        pending.push(current.type,current.body);
+        break;
+      case 'let':
+        pending.push(current.type,current.value,current.body);
+        break;
+      case 'mdata':
+      case 'proj':
+        pending.push(current.expr);
+        break;
+      default:
+        break;
+    }
+  }
+  return false;
 }
 
 function implicitKind(info:BinderInfo):ExprMetavarKind {
@@ -125,9 +151,9 @@ export function elaborateApplication({
   classNames=new Set(),
 }:ElaborateApplicationOptions):ElaboratedApplication {
   const checker=new TypeChecker(environment,localContext.clone());
-  if(hasMVar(metaContext.instantiate(fn))){
+  if(hasExpressionMVar(metaContext.instantiate(fn))){
     throw new Error(
-      'PS_ELAB_APP_FUNCTION_STUCK: function expression contains unresolved metavariables',
+      'PS_ELAB_APP_FUNCTION_STUCK: function expression contains unresolved expression metavariables',
     );
   }
 

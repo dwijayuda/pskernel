@@ -16,6 +16,9 @@ import {tryEraseRuntimeRecursorApplication} from './recursor-erasure.js';
 import {eraseRuntimeType} from './type-erasure.js';
 import {tryErasePrimitiveRuntimeApplication} from './primitive-app-erasure.js';
 import {tryEraseRawPosApplication} from './raw-pos-erasure.js';
+import {
+  tryEraseImportedStructureApplication,
+} from './imported-structure-erasure.js';
 
 export type RuntimeExprEraser=(
   expr:Expr,
@@ -53,6 +56,14 @@ export function eraseRuntimeApplication(
     erase,
   );
   if(rawPos!==undefined)return rawPos;
+
+  const importedStructure=tryEraseImportedStructureApplication(
+    expr,
+    scope,
+    environment,
+    erase,
+  );
+  if(importedStructure!==undefined)return importedStructure;
 
   if(view.fn.kind==='const'){
     const constructor=scope.inductivesByConstructor.get(

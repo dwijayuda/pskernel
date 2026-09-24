@@ -1,21 +1,21 @@
 import Ps.Core.Expr
 
 inductive PsDeclaration where
-  | axiom
+  | axiomDecl
       (name : PsName)
       (levelParams : List PsName)
       (type : PsExpr)
-  | definition
-      (name : PsName)
-      (levelParams : List PsName)
-      (type : PsExpr)
-      (value : PsExpr)
-  | theorem
+  | definitionDecl
       (name : PsName)
       (levelParams : List PsName)
       (type : PsExpr)
       (value : PsExpr)
-  | opaqueDef
+  | theoremDecl
+      (name : PsName)
+      (levelParams : List PsName)
+      (type : PsExpr)
+      (value : PsExpr)
+  | opaqueDecl
       (name : PsName)
       (levelParams : List PsName)
       (type : PsExpr)

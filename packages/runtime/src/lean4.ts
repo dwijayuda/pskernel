@@ -16,6 +16,12 @@ export type LeanChar=string;
 export type LeanString=string;
 export type LeanArray<T>=readonly T[];
 
+interface LeanListRuntimeValue<T> {
+  readonly kind:'constructor';
+  readonly name:'List.nil'|'List.cons';
+  readonly fields:readonly unknown[];
+}
+
 export const LEAN434_JS_RUNTIME_VERSION='0.1.0';
 export const LEAN434_SOURCE_VERSION='4.34.0';
 export const LEAN434_SOURCE_GITHASH='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
@@ -110,6 +116,45 @@ export const lean_usize_dec_eq=(a:LeanUSize,b:LeanUSize):boolean=>a===b;
  */
 export function lean_mk_empty_array_with_capacity<T>(_capacity:LeanNat):T[]{
   return [];
+}
+
+export function lean_array_mk<T>(list:LeanListRuntimeValue<T>):T[]{
+  const out:T[]=[];
+  let current:LeanListRuntimeValue<T>=list;
+  while(current.name==='List.cons'){
+    if(current.fields.length<2){
+      throw new TypeError('malformed Lean List.cons runtime value');
+    }
+    out.push(current.fields[0] as T);
+    current=current.fields[1] as LeanListRuntimeValue<T>;
+    if(
+      typeof current!=='object'
+      ||current===null
+      ||current.kind!=='constructor'
+      ||(current.name!=='List.nil'&&current.name!=='List.cons')
+    ){
+      throw new TypeError('malformed Lean List runtime tail');
+    }
+  }
+  return out;
+}
+
+export function lean_array_to_list<T>(
+  array:LeanArray<T>,
+):LeanListRuntimeValue<T>{
+  let out:LeanListRuntimeValue<T>={
+    kind:'constructor',
+    name:'List.nil',
+    fields:[],
+  };
+  for(let i=array.length-1;i>=0;i--){
+    out={
+      kind:'constructor',
+      name:'List.cons',
+      fields:[array[i],out],
+    };
+  }
+  return out;
 }
 
 export function lean_array_get_size<T>(array:LeanArray<T>):LeanNat{
@@ -337,6 +382,8 @@ export const LEAN434_JS_EXTERN_MANIFEST:readonly Lean434ExternDescriptor[]=[
   {leanSymbol:'lean_nat_dec_le',jsExport:'lean_nat_dec_le',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_nat_dec_lt',jsExport:'lean_nat_dec_lt',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_mk_empty_array_with_capacity',jsExport:'lean_mk_empty_array_with_capacity',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_array_mk',jsExport:'lean_array_mk',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_array_to_list',jsExport:'lean_array_to_list',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_get_size',jsExport:'lean_array_get_size',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_push',jsExport:'lean_array_push',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_fget',jsExport:'lean_array_fget',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
@@ -443,6 +490,20 @@ readonly Lean434DeclarationExternBinding[]=[
     leanDeclaration:'Nat.ble',
     leanSymbol:'lean_nat_dec_le',
     arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Array.mk',
+    leanSymbol:'lean_array_mk',
+    arity:2,
+    runtimeArgs:[1],
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Array.toList',
+    leanSymbol:'lean_array_to_list',
+    arity:2,
+    runtimeArgs:[1],
     upstreamSource:'Init/Prelude.lean',
   },
   {
@@ -597,6 +658,10 @@ new Map<string,Lean434JsExternImplementation>([
   ['lean_nat_dec_le',(a,b)=>lean_nat_dec_le(a as LeanNat,b as LeanNat)],
   ['lean_mk_empty_array_with_capacity',(capacity)=>
     lean_mk_empty_array_with_capacity(capacity as LeanNat)],
+  ['lean_array_mk',(list)=>
+    lean_array_mk(list as LeanListRuntimeValue<unknown>)],
+  ['lean_array_to_list',(array)=>
+    lean_array_to_list(array as LeanArray<unknown>)],
   ['lean_array_get_size',(array)=>
     lean_array_get_size(array as LeanArray<unknown>)],
   ['lean_array_push',(array,value)=>

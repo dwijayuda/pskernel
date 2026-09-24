@@ -32,3 +32,6 @@ def psBoolDecEqName : PsName :=
 
 def psIteName : PsName :=
   psRootName "ite"
+
+def psUnitUnitName : PsName :=
+  psNameAppendStr psUnitName "unit"

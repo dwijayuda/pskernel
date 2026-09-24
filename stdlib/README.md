@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain twenty pskernel-admitted theorems in total:
+The three modules now contain twenty-one pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -45,13 +45,13 @@ ProofScript source modules
 The end-to-end stdlib test now exercises:
 
 - `optionOrElse`;
-- `resultGetOrElse`;
+- `resultGetOrElse` and `resultMapError`;
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- twenty admitted stdlib theorems: twelve definitional laws use bounded
-  `rfl`, `optionOrElseNoneRight` and `resultToOptionMap` dogfood bounded
-  `cases`, `optionMapOrElse` dogfoods higher-order Option case analysis,
+- twenty-one admitted stdlib theorems: twelve definitional laws use bounded
+  `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
+  `resultToOptionMapError` dogfood bounded `cases`, `optionMapOrElse` dogfoods higher-order Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
   symmetry, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
@@ -155,6 +155,21 @@ functor implementation or special theorem rule.
 
 The adjacent `resultToOptionOk` computation theorem is definitional and is
 proved by bounded `rfl`.
+
+## Result error-map/Option compatibility
+
+`ProofScript.Data.Result.resultToOptionMapError` proves:
+
+```text
+resultToOption(resultMapError(f, value)) =
+resultToOption(value)
+```
+
+for every `PsResult`. This mirrors Lean 4.34's `Except.mapError` /
+`Except.toOption` behavior: mapping the error payload preserves successful
+values, while `toOption` discards the error payload entirely. The proof is
+bounded case analysis plus definitional reflexivity in both constructors, so
+the law adds no new proof rule or host-side Result semantics.
 
 ## Exact-search symmetry dogfood
 

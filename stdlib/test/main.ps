@@ -9,8 +9,10 @@ function asResult(x : Nat) : PsResult(Nat, Nat) :=
 function main(x : Nat) : Nat :=
   let mapped : PsResult(Nat, Nat) :=
     resultMap(inc, asResult(x));
+  let mappedError : PsResult(Nat, Nat) :=
+    resultMapError(inc, mapped);
   let resultValue : Nat :=
-    resultGetOrElse(mapped, 0);
+    resultGetOrElse(mappedError, 0);
   let option : PsOption(Nat) :=
     resultToOption(mapped);
   let chosen : PsOption(Nat) :=

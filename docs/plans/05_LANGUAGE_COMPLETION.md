@@ -468,7 +468,7 @@ Current stdlib checkpoint:
 - `PsResult`: value/error mapping, get-or-else, Option conversion plus checked laws;
 - `PsList`: map, append, length, head Option plus reflexivity/append reduction laws;
 - the dogfood project executes all three modules through verified TS/JS emission
-  with zero runtime extern assumptions and nine pskernel-admitted theorems.
+  with zero runtime extern assumptions and twenty-one pskernel-admitted theorems.
 
 Build libraries in ProofScript itself where practical:
 
@@ -711,8 +711,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     resultGetOrElse/resultToOption, structurally recursive listAppend/listMap,
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
-    optionOrElseNoneSymm, optionMapOrElse, listAppendNilRight,
-    listAppendAssoc, and listMapAppend. Twenty current stdlib theorems now
+    resultToOptionMapError, optionOrElseNoneSymm, optionMapOrElse,
+    listAppendNilRight,
+    listAppendAssoc, and listMapAppend. Twenty-one current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
     laws/utilities only when the proof/recursion surface supports them without
@@ -811,3 +812,12 @@ The companion `resultToOptionOk` theorem records the success-constructor
 computation by bounded rfl. Together with the existing error/simp laws, the
 Result→Option API now has checked computation behavior on both constructors and
 one generic cross-ADT naturality-style law.
+
+## Stdlib Result error-map/Option compatibility checkpoint
+
+`resultToOptionMapError` records the complementary error-channel law:
+mapping an error payload cannot affect Result→Option conversion. This follows
+the same constructor behavior as Lean 4.34 `Except.mapError` and
+`Except.toOption`. The ProofScript proof is exactly bounded `cases` plus
+`rfl` in each branch, so the checkpoint exercises the existing generic
+higher-order/case-analysis path without expanding tactic authority.

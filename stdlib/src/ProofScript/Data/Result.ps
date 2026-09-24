@@ -62,3 +62,9 @@ theorem resultToOptionMap {α : Type}{β : Type}{ε : Type}
 resultToOption(resultMap(f, value)) =
 optionMap(f, resultToOption(value)) :=
   by cases value; rfl; rfl;
+
+theorem resultToOptionMapError {α : Type}{ε : Type}{δ : Type}
+(f : ε -> δ, value : PsResult(α, ε)) :
+resultToOption(resultMapError(f, value)) =
+resultToOption(value) :=
+  by cases value; rfl; rfl;

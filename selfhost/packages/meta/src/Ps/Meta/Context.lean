@@ -115,45 +115,57 @@ def psExprFVarsInContext (localContext : PsLocalContext) : PsExpr -> Bool
   | .proj _ _ value => psExprFVarsInContext localContext value
   | _ => true
 
-def psMetaInstantiateWithFuel (context : PsMetaContext) : Nat -> PsExpr -> PsExpr
+def psMetaInstantiateStep
+    (context : PsMetaContext) : PsExpr -> PsExpr
+  | .mvar id =>
+      match psMetaFindAssignment context id with
+      | none => PsExpr.mvar id
+      | some value => value
+  | .app fn arg =>
+      PsExpr.app
+        (psMetaInstantiateStep context fn)
+        (psMetaInstantiateStep context arg)
+  | .lam name type body binder =>
+      PsExpr.lam
+        name
+        (psMetaInstantiateStep context type)
+        (psMetaInstantiateStep context body)
+        binder
+  | .forallE name type body binder =>
+      PsExpr.forallE
+        name
+        (psMetaInstantiateStep context type)
+        (psMetaInstantiateStep context body)
+        binder
+  | .letE name type value body =>
+      PsExpr.letE
+        name
+        (psMetaInstantiateStep context type)
+        (psMetaInstantiateStep context value)
+        (psMetaInstantiateStep context body)
+  | .proj typeName index value =>
+      PsExpr.proj
+        typeName
+        index
+        (psMetaInstantiateStep context value)
+  | expr => expr
+
+def psMetaInstantiateRounds
+    (context : PsMetaContext) :
+    Nat -> PsExpr -> PsExpr
   | 0, expr => expr
-  | fuel + 1, expr =>
-      match expr with
-      | .mvar id =>
-          match psMetaFindAssignment context id with
-          | none => expr
-          | some value => psMetaInstantiateWithFuel context fuel value
-      | .app fn arg =>
-          PsExpr.app
-            (psMetaInstantiateWithFuel context fuel fn)
-            (psMetaInstantiateWithFuel context fuel arg)
-      | .lam name type body binder =>
-          PsExpr.lam
-            name
-            (psMetaInstantiateWithFuel context fuel type)
-            (psMetaInstantiateWithFuel context fuel body)
-            binder
-      | .forallE name type body binder =>
-          PsExpr.forallE
-            name
-            (psMetaInstantiateWithFuel context fuel type)
-            (psMetaInstantiateWithFuel context fuel body)
-            binder
-      | .letE name type value body =>
-          PsExpr.letE
-            name
-            (psMetaInstantiateWithFuel context fuel type)
-            (psMetaInstantiateWithFuel context fuel value)
-            (psMetaInstantiateWithFuel context fuel body)
-      | .proj typeName index value =>
-          PsExpr.proj
-            typeName
-            index
-            (psMetaInstantiateWithFuel context fuel value)
-      | _ => expr
+  | remaining + 1, expr =>
+      psMetaInstantiateRounds
+        context
+        remaining
+        (psMetaInstantiateStep context expr)
 
 def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
-  let value := psMetaInstantiateWithFuel context (context.assignments.length + 1) expr
+  let value :=
+    psMetaInstantiateRounds
+      context
+      (context.assignments.length + 1)
+      expr
   psLevelInstantiateExpr context.levels value
 
 structure PsMetaFreshLevelResult where

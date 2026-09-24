@@ -64,8 +64,9 @@ export function emitVerifiedExpr(
         case 'bool.eq':return '('+left+' === '+right+')';
         case 'bool.ne':return '('+left+' !== '+right+')';
       }
-      const unreachable:never=expr.operation;
-      return unreachable;
+      throw new Error(
+        "PS_TS_INTRINSIC_UNSUPPORTED: '"+expr.operation+"'",
+      );
     }
     case 'call':
       return emitVerifiedExpr(expr.fn,brands,tags)+'('+

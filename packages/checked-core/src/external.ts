@@ -21,7 +21,7 @@ export interface CheckedCoreExternal {
 
 const importIdentifier=/^[A-Za-z_$][A-Za-z0-9_$]*$/u;
 const runtimePrimitives=new Set([
-  'Nat','Int','Bool','String','Unit',
+  'Nat','Int','Bool','Char','String','Unit',
 ]);
 
 function isRuntimePrimitive(

@@ -8,7 +8,13 @@
     "status": "checked-core-to-js-generic-structure+structural-recursion-mvp",
     "phase": "C",
     "trust": "untrusted-support",
-    "sourceLanguage": "typescript"
+    "sourceLanguage": "typescript+lean+proofscript-bootstrap",
+    "portableSourceRoots": [
+      "src/ProofScript"
+    ],
+    "pairedSources": true,
+    "bootstrapBuild": "../../selfhost/lakefile.lean",
+    "futureArtifactRoot": "dist/proofscript"
   },
   "exports": {
     ".": {
@@ -18,7 +24,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build --silent && node dist/test/index.test.js"
+    "test": "npm run build --silent && node dist/test/index.test.js",
+    "build:lean-bootstrap": "cd ../../selfhost && lake build ProofScriptCompiler"
   },
   "dependencies": {
     "lean-ts-kernel": "file:../..",

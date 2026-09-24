@@ -2,6 +2,7 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   TypeChecker,
   constant,
+  levelZero,
   mkAppN,
   type Expr,
 } from 'lean-ts-kernel';
@@ -34,14 +35,17 @@ function requirePrimitiveEqualityOperandType(
   context:V061CoreElabContext,
   checker:TypeChecker,
   operator:string,
-):{readonly type:Expr;readonly equalityName:string} {
+):{
+  readonly type:Expr;
+  readonly equalityName:'Nat.beq'|'BEq.beq';
+} {
   const natType=constant(requireV061NotationConstant(context,'Nat'));
   const expectedBool=boolType(context);
   if(checker.isDefEq(type,natType)){
     return {type:natType,equalityName:'Nat.beq'};
   }
   if(checker.isDefEq(type,expectedBool)){
-    return {type:expectedBool,equalityName:'Bool.beq'};
+    return {type:expectedBool,equalityName:'BEq.beq'};
   }
   throw new Error(
     "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+operator+
@@ -145,10 +149,40 @@ export function elaborateV061PrimitiveBooleanEqualityTerms(
       "' requires matching primitive operands",
     );
   }
-  const equality=mkAppN(
-    constant(requireV061NotationConstant(context,operand.equalityName)),
-    [left.term,right.term],
-  );
+  const equality=operand.equalityName==='Nat.beq'
+    ?mkAppN(
+      constant(requireV061NotationConstant(context,'Nat.beq')),
+      [left.term,right.term],
+    )
+    :mkAppN(
+      constant(
+        requireV061NotationConstant(context,'BEq.beq'),
+        [levelZero],
+      ),
+      [
+        expectedBool,
+        mkAppN(
+          constant(
+            requireV061NotationConstant(
+              context,
+              'instBEqOfDecidableEq',
+            ),
+            [levelZero],
+          ),
+          [
+            expectedBool,
+            constant(
+              requireV061NotationConstant(
+                context,
+                'instDecidableEqBool',
+              ),
+            ),
+          ],
+        ),
+        left.term,
+        right.term,
+      ],
+    );
   const equalityType=checker.check(equality);
   if(!checker.isDefEq(equalityType,expectedBool)){
     throw new Error(

@@ -1,6 +1,10 @@
 import ProofScript.Data.List
 import ProofScript.Data.Result
 import ProofScript.Data.Array
+import ProofScript.Data.Product
+import ProofScript.Data.Ordering
+import ProofScript.Data.Map
+import ProofScript.Data.Set
 import ProofScript.Text.Lexer
 
 function inc(x : Nat) : Nat := x + 1;
@@ -13,6 +17,9 @@ function asOption(x : Nat) : PsOption(Nat) :=
 
 function isNonZero(x : Nat) : Bool :=
   x != 0;
+
+function isOne(x : Nat) : Bool :=
+  x == 1;
 
 function main(x : Nat) : Nat :=
   let mapped : PsResult(Nat, Nat) :=
@@ -67,13 +74,47 @@ function main(x : Nat) : Nat :=
     if (lexerOk) { String.Internal.length(lexeme) - 1 } else { 1 };
   let arrayValues : Array(Nat) :=
     arrayPush(arrayPush(arrayEmptyWithCapacity(2), x), 1);
+  let arrayAtOne : PsOption(Nat) :=
+    arrayGet?(arrayValues, 1);
+  let arrayFoundOne : PsOption(Nat) :=
+    arrayFind?(isOne, arrayValues);
   let arraysOk : Bool :=
+    arraySize(arrayEmpty) == 0 &&
     arrayAny(isNonZero, arrayValues) &&
-    arrayAll(isNonZero, arrayValues);
+    arrayAll(isNonZero, arrayValues) &&
+    optionGetOrElse(arrayAtOne, 0) == 1 &&
+    optionGetOrElse(arrayFoundOne, 0) == 1;
   let arrayPenalty : Nat :=
     if (arraysOk) { 0 } else { 1 };
+  let pair : Prod(Nat, Nat) :=
+    product(x, 1);
+  let productOk : Bool :=
+    productFst(pair) == x &&
+    productSnd(pair) == 1;
+  let mapValues : PsMap(Nat, Nat) :=
+    mapInsert(
+      compareNat,
+      2,
+      20,
+      mapInsert(compareNat, 1, 10, mapEmpty)
+    );
+  let mapOk : Bool :=
+    mapContains(compareNat, 1, mapValues) &&
+    optionGetOrElse(mapGet?(compareNat, 2, mapValues), 0) == 20;
+  let setValues : PsSet(Nat) :=
+    setInsert(
+      compareNat,
+      2,
+      setInsert(compareNat, 1, setEmpty)
+    );
+  let setOk : Bool :=
+    setContains(compareNat, 1, setValues) &&
+    setContains(compareNat, 2, setValues);
+  let collectionPenalty : Nat :=
+    if (productOk && mapOk && setOk) { 0 } else { 1 };
   resultValue +
     selectedValue +
     listValue +
     lexerPenalty +
-    arrayPenalty;
+    arrayPenalty +
+    collectionPenalty;

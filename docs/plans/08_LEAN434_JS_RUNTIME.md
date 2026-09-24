@@ -167,7 +167,14 @@ Exit condition:
 > bounded corpus, while kernel checking remains unchanged when the optimization
 > is disabled.
 
-## R4 — Name / Level / Expr compatibility
+## R4 — Name / Level / Expr compatibility — **IN PROGRESS (Name slice complete)**
+
+Milestones reached 2026-09-25:
+
+- runtime Lean `Name` now has one canonical structural bridge to/from pskernel's existing `Name` model; no second trusted naming semantics were introduced;
+- the bridge covers `anonymous`, string components, and numeric components and fails closed on malformed runtime constructors;
+- real upstream `Lean.Name.appendCore` executes in JavaScript over bridged values and agrees structurally with pskernel `Name.append`;
+- GitHub Actions run `36060016293` passed the Name bridge, real Prelude execution, Environment registration, Parser.Types, ST/IO, metadata checks, and kernel regression together.
 
 Create the source-facing object model needed by Parser/Meta/Elab.
 
@@ -193,7 +200,9 @@ Milestones reached 2026-09-25:
 - real upstream `IO.mkRef`, `ST.Prim.Ref.get/set`, and the Lean-written
   `ST.Prim.Ref.modify` do/bind implementation execute in JS;
 - `IO.initializing` is scoped to initializer execution, preparing the
-  `registerEnvExtension` guard without weakening the kernel.
+  `registerEnvExtension` guard without weakening the kernel;
+- real upstream `Lean.registerEnvExtension` now executes end-to-end in the normal fast gate: Lean's own importing/environment refs initialize, the private `EnvExtension` constructor is derived from pskernel metadata rather than hard-coded, `unsafeCast` executes only as a runtime intrinsic, the registry array grows by exactly one, and the returned extension is the registered object;
+- GitHub Actions run `36059683889` passed that Environment gate plus Parser.Types, ST/IO, metadata/census checks, and kernel regression.
 
 Separate Lean's Environment responsibilities:
 
@@ -219,7 +228,9 @@ Milestones reached 2026-09-25:
 - runtime selection is source-backed through Lean's real `@[extern]` and
   `@[implemented_by]` metadata;
 - real Lean ST/IO source executes over the JS primitive boundary rather than a
-  TypeScript reimplementation of its bind/control logic.
+  TypeScript reimplementation of its bind/control logic;
+- `unsafeCast` is modeled as a source-verified runtime intrinsic with identity representation semantics after pskernel admission; its logical source body is never used as executable authority, and direct `Classical.choice` remains fail-closed;
+- generic metadata-driven `@[implemented_by]` execution can follow the real Lean implementation declaration without replacing the logical declaration or granting the implementation proof authority.
 
 Maintain a generated matrix:
 

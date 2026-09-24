@@ -48,6 +48,21 @@ test('Lean Expr equality memoizes repeated shared DAG pairs',()=>{
  for(let i=0;i<28;i++){a=app(a,a);b=app(b,b);}
  assert(exprLeanEq(a,b),'shared structurally equal expression DAGs must compare successfully');
 });
+test('Lean replacement primitives preserve shared DAG structure and cached loose-bvar skips',()=>{
+ let open:any=bvar(0),closed:any=constant(N.Nat);
+ for(let i=0;i<24;i++){open=app(open,open);closed=app(closed,closed);}
+ assert(hasLooseBVar(open)&&!hasLooseBVar(closed));
+ const value=constant(N.Nat),inst=instantiate(open,[value]),lifted=lift(open,1,0);
+ let a:any=inst,b:any=lifted;
+ for(let i=0;i<24;i++){
+   assert(a.kind==='app'&&a.fn===a.arg);
+   assert(b.kind==='app'&&b.fn===b.arg);
+   a=a.fn;b=b.fn;
+ }
+ assert(exprEq(a,value));assert(b.kind==='bvar'&&b.index===1);
+ assert(instantiate(closed,[value])===closed);
+});
+
 test('Lean private names preserve numeric private-index components',()=>{assert(!exprEq(constant(N.NatBitwiseUnaryProof1),constant(nameFromDotted('_private.Init.Data.Nat.Bitwise.Basic.0.Nat.bitwise._unary._proof_1'))));});
 test('LocalContext freshness never collides with reconstructed local IDs',()=>{const l=new LocalContext();l.addLocal('a@1',nameFromDotted('a'),sort(levelZero));assert(l.fresh('a')==='a@0');assert(l.fresh('a')==='a@2');});
 test('deep structural traversals avoid the JavaScript call stack',()=>{

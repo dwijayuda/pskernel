@@ -5,6 +5,7 @@ import {
   levelZero,
   mkAppN,
   nameFromDotted,
+  nameToString,
   natLit,
 } from '../dist/src/index.js';
 import {
@@ -130,20 +131,42 @@ register=evaluator.applyRuntimeValue(register,none);
 register=evaluator.applyRuntimeValue(register,mainOnly);
 
 const result=evaluator.runInitializerAction(register).value;
+const envExtensionInfo=replay.env.find(nameFromDotted('Lean.EnvExtension'));
+if(
+  envExtensionInfo===undefined
+  ||envExtensionInfo.kind!=='inductive'
+  ||envExtensionInfo.ctors.length!==1
+){
+  throw new Error('Lean.EnvExtension inductive metadata is unavailable');
+}
+const envExtensionCtor=nameToString(envExtensionInfo.ctors[0]);
+const envExtensionCtorInfo=replay.env.find(envExtensionInfo.ctors[0]);
+if(
+  envExtensionCtorInfo===undefined
+  ||envExtensionCtorInfo.kind!=='constructor'
+){
+  throw new Error('Lean.EnvExtension constructor metadata is unavailable');
+}
 if(
   typeof result!=='object'
   ||result===null
   ||Array.isArray(result)
   ||result.kind!=='constructor'
-  ||result.name!=='Lean.EnvExtension.mk'
+  ||result.name!==envExtensionCtor
 ){
+  const actual=
+    typeof result==='object'&&result!==null&&!Array.isArray(result)&&'kind' in result
+      ?String(result.kind)+('name' in result?':'+String(result.name):'')
+      :typeof result+':'+String(result);
   throw new Error(
-    'Lean.registerEnvExtension did not return Lean.EnvExtension.mk',
+    'Lean.registerEnvExtension returned '+actual+
+    ', expected constructor '+envExtensionCtor,
   );
 }
-if(result.fields.length!==4){
+if(result.fields.length!==envExtensionCtorInfo.numFields){
   throw new Error(
-    'Lean.EnvExtension.mk runtime field count mismatch: '+
+    envExtensionCtor+' runtime field count mismatch: expected '+
+    String(envExtensionCtorInfo.numFields)+', got '+
     String(result.fields.length),
   );
 }

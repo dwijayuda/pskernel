@@ -72,6 +72,8 @@ jobs:
 
       - run: npm ci --no-audit --no-fund
       - run: npm run build
+      - name: Direct kernel regression gate
+        run: npm run test:kernel
 
       - name: Shared canonical replay with per-shard diagnostics
         env:

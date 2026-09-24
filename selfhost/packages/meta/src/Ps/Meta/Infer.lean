@@ -93,7 +93,7 @@ def psInferStructureProjectionField
     (typeName : PsName)
     (target : PsExpr) :
     Nat -> Nat -> PsExpr -> Except PsInferError PsExpr
-  | _, _, cursor =>
+  | requestedIndex, fieldIndex, cursor =>
       match
           psWhnf
             environment
@@ -101,23 +101,21 @@ def psInferStructureProjectionField
             localContext
             cursor with
       | .forallE _ domain body _ =>
-          fun requestedIndex fieldIndex =>
-            if requestedIndex == fieldIndex then
-              Except.ok domain
-            else
-              psInferStructureProjectionField
-                environment
-                metaContext
-                localContext
-                typeName
-                target
-                requestedIndex
-                (fieldIndex + 1)
-                (psExprInstantiate1
-                  body
-                  (PsExpr.proj typeName fieldIndex target))
-      | _ =>
-          fun _ _ => Except.error PsInferError.projectionUnsupported
+          if requestedIndex == fieldIndex then
+            Except.ok domain
+          else
+            psInferStructureProjectionField
+              environment
+              metaContext
+              localContext
+              typeName
+              target
+              requestedIndex
+              (fieldIndex + 1)
+              (psExprInstantiate1
+                body
+                (PsExpr.proj typeName fieldIndex target))
+      | _ => Except.error PsInferError.projectionUnsupported
 
 def psInferProjectionType
     (environment : PsEnvironment)

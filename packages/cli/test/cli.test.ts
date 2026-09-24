@@ -961,19 +961,27 @@ console.log('ok - psc SH2 dual-source canonical Prod runtime');
     {
       entry:'src/main.ps',
       source:
+        'function inc(x : Nat) : Nat := x + 1; '+
+        'function add(acc : Nat, x : Nat) : Nat := acc + x; '+
         'function main(a : Nat, b : Nat) : Nat := '+
         'let xs : Array(Nat) := '+
         'Array.push(Array.push(Array.emptyWithCapacity(2), a), b); '+
-        'Array.getD(xs, 1, 0) + Array.size(xs);\n',
+        'let ys : Array(Nat) := Array.setIfInBounds(xs, 0, 10); '+
+        'let zs : Array(Nat) := Array.map(inc, ys); '+
+        'Array.foldl(add, 0, zs, 0, Array.size(zs));\n',
       sourceKind:'proofscript',
     },
     {
       entry:'src/main.lean',
       source:
+        'def inc (x : Nat) : Nat := x + 1; '+
+        'def add (acc : Nat) (x : Nat) : Nat := acc + x; '+
         'def main (a : Nat) (b : Nat) : Nat := '+
         'let xs : Array Nat := '+
         'Array.push (Array.push (Array.emptyWithCapacity 2) a) b; '+
-        'Array.getD xs 1 0 + Array.size xs\n',
+        'let ys : Array Nat := Array.setIfInBounds xs 0 10; '+
+        'let zs : Array Nat := Array.map inc ys; '+
+        'Array.foldl add 0 zs 0 (Array.size zs)\n',
       sourceKind:'lean-subset',
     },
   ] as const;
@@ -1003,7 +1011,7 @@ console.log('ok - psc SH2 dual-source canonical Prod runtime');
         verified:true,
         passthrough:['2','3'],
       });
-      equal(result.mainResult,'5');
+      equal(result.mainResult,'15');
       equal(result.semanticPipeline,'verified-core');
       equal(result.proofStatus,'kernel-verified');
       equal(result.sourceKind,item.sourceKind);

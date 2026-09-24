@@ -1,6 +1,8 @@
 import {
   constant,
   nameFromDotted,
+  nameToString,
+  type Name,
 } from 'lean-ts-kernel';
 import {
   Lean434EvaluationError,
@@ -93,18 +95,25 @@ export class Lean434InitializerRunner {
     return {executed,skipped};
   }
 
-  private ensureDeclaration(name:string,role:string):void{
-    const kernelName=nameFromDotted(name);
-    if(!this.evaluator.environment.has(kernelName)){
-      throw new Lean434EvaluationError(
-        role+" declaration is missing from pskernel environment: '"+
-        name+"'",
-      );
+  private resolveDeclarationName(name:string,role:string):Name{
+    const parsed=nameFromDotted(name);
+    if(
+      this.evaluator.environment.has(parsed)
+      &&nameToString(parsed)===name
+    ){
+      return parsed;
     }
+    for(const info of this.evaluator.environment.entries()){
+      if(nameToString(info.name)===name)return info.name;
+    }
+    throw new Lean434EvaluationError(
+      role+" declaration is missing from pskernel environment: '"+
+      name+"'",
+    );
   }
 
   private runEntry(entry:Lean434MetadataInitializer):void{
-    this.ensureDeclaration(
+    this.resolveDeclarationName(
       entry.declaration,
       'initializer target',
     );
@@ -119,9 +128,12 @@ export class Lean434InitializerRunner {
       );
     }
 
-    this.ensureDeclaration(actionName,'initializer action');
+    const actionKernelName=this.resolveDeclarationName(
+      actionName,
+      'initializer action',
+    );
     const action=this.evaluator.evaluate(
-      constant(nameFromDotted(actionName)),
+      constant(actionKernelName),
     );
     const result=this.evaluator.runIOAction(action);
 

@@ -40,6 +40,20 @@ export function parseVerifiedRuntimeArg(
         if(value==='true')return true;
         if(value==='false')return false;
         throw new Error("PS_RUN_ARG: Bool argument must be 'true' or 'false'");
+      case 'Char':{
+        const codePoint=value.codePointAt(0);
+        if(
+          codePoint===undefined
+          ||[...value].length!==1
+          ||(codePoint>=0xd800&&codePoint<=0xdfff)
+          ||codePoint>0x10ffff
+        ){
+          throw new Error(
+            "PS_RUN_ARG: Char argument must be exactly one Unicode scalar value",
+          );
+        }
+        return value;
+      }
       case 'String':
         return value;
       case 'Unit':

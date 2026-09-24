@@ -11,7 +11,10 @@ import {
   nameToString,
   strLit,
 } from '../dist/src/index.js';
-import {Lean434Evaluator} from '../packages/runtime/dist/src/lean4-eval.js';
+import {
+  Lean434EvaluationError,
+  Lean434Evaluator,
+} from '../packages/runtime/dist/src/lean4-eval.js';
 
 const fixture='oracle/fixtures/lean434-init-prelude.ndjson';
 if(!fs.existsSync(fixture)){
@@ -74,6 +77,27 @@ assertNatResult(
   }
   console.log(
     'ok - real Lean unsafeCast executes as runtime-only unsafe code = 42',
+  );
+}
+
+{
+  let failedClosed=false;
+  try{
+    evaluator.evaluate(constant(nameFromDotted('Classical.choice')));
+  }catch(error){
+    if(error instanceof Lean434EvaluationError){
+      failedClosed=true;
+    }else{
+      throw error;
+    }
+  }
+  if(!failedClosed){
+    throw new Error(
+      'Classical.choice unexpectedly gained direct JavaScript runtime semantics',
+    );
+  }
+  console.log(
+    'ok - Classical.choice remains noncomputable/fail-closed in JS runtime',
   );
 }
 

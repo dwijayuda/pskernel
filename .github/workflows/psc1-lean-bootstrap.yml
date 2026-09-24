@@ -95,6 +95,27 @@ jobs:
           echo "PSC1_CLI_PARITY_SMOKE: PASS"
 
 
+          cat > /tmp/psc1-do.lean <<'EOF'
+          def compilerPure {A : Type} (value : A) : A := value
+          def compilerBind {A : Type} {B : Type} (value : A) (next : A -> B) : B :=
+            next value
+          def doValue : Nat :=
+            do
+              let value : Nat <- compilerPure 7;
+              return value
+          EOF
+          cat > /tmp/psc1-do.ps <<'EOF'
+          def compilerPure{A : Type}(value : A) : A := value;
+          def compilerBind{A : Type}{B : Type}(value : A)(next : A -> B) : B := next(value);
+          def doValue : Nat := do { let value : Nat <- compilerPure(7); return value; };
+          EOF
+          lake exe psc1 typescript /tmp/psc1-do.lean > /tmp/psc1-do-lean.ts
+          lake exe psc1 typescript /tmp/psc1-do.ps > /tmp/psc1-do-ps.ts
+          cmp /tmp/psc1-do-lean.ts /tmp/psc1-do-ps.ts
+          grep -q 'export const doValue: bigint = compilerBind' /tmp/psc1-do-lean.ts
+          echo "PSC1_DO_DESUGARING: PASS"
+
+
           rm -rf /tmp/psc1-project
           mkdir -p /tmp/psc1-project
           cat > /tmp/psc1-project/Lib.lean <<'EOF'

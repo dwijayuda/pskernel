@@ -458,7 +458,8 @@ def psElabInductiveDeclaration
     (nameSyntax : PsSyntaxName)
     (params : List (PsSyntaxBinderHead × PsSyntaxTerm))
     (resultType : Option PsSyntaxTerm)
-    (constructors : List PsSyntaxInductiveConstructor) :
+    (constructors : List PsSyntaxInductiveConstructor)
+    (isStructure : Bool := false) :
     Except PsElabError PsElabDeclarationBatchResult :=
   match psSyntaxNameToName nameSyntax with
   | none => Except.error PsElabError.emptyName
@@ -529,6 +530,7 @@ def psElabInductiveDeclaration
                       numParams := parameterArgs.length
                       numIndices := 0
                       constructors := constructorNames
+                      isStructure := isStructure
                     }
                     let inductiveDeclaration :=
                       PsDeclaration.inductiveDecl info
@@ -583,6 +585,33 @@ def psElabInductiveDeclaration
 
 
 
+def psElabStructureDeclaration
+    (environment : PsEnvironment)
+    (name : PsSyntaxName)
+    (params : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (fields : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (span : PsSourceSpan) :
+    Except PsElabError PsElabDeclarationBatchResult :=
+  if fields.isEmpty then
+    Except.error PsElabError.unsupportedTerm
+  else
+    let constructorName : PsSyntaxName := {
+      segments := ["mk"]
+      span := span
+    }
+    let constructor : PsSyntaxInductiveConstructor := {
+      name := constructorName
+      fields := fields
+      span := span
+    }
+    psElabInductiveDeclaration
+      environment
+      name
+      params
+      none
+      [constructor]
+      true
+
 def psElabDeclaration
     (environment : PsEnvironment)
     (source : PsSyntaxDeclaration) :
@@ -606,6 +635,8 @@ def psElabDeclaration
         true
   | .inductiveDecl _ _ _ _ _ =>
       Except.error PsElabError.unsupportedTerm
+  | .structureDecl _ _ _ _ =>
+      Except.error PsElabError.unsupportedTerm
 
 def psElabDeclarationBatch
     (environment : PsEnvironment)
@@ -619,6 +650,14 @@ def psElabDeclarationBatch
         params
         resultType
         constructors
+        false
+  | .structureDecl name params fields span =>
+      psElabStructureDeclaration
+        environment
+        name
+        params
+        fields
+        span
   | _ =>
       match psElabDeclaration environment source with
       | Except.error error => Except.error error

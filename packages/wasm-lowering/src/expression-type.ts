@@ -46,10 +46,17 @@ export function expressionRuntimeType(
 
     case 'intrinsic':
       if(expr.operation.startsWith('bool.'))return 'bool';
-      return unsupported(
-        'PS_WASM_UNSUPPORTED_INTRINSIC',
-        "intrinsic '"+expr.operation+"' is not supported in W1",
-      );
+      switch(expr.operation){
+        case 'uint8.add':return 'uint8';
+        case 'uint16.add':return 'uint16';
+        case 'uint32.add':return 'uint32';
+        case 'uint64.add':return 'uint64';
+        default:
+          return unsupported(
+            'PS_WASM_UNSUPPORTED_INTRINSIC',
+            "intrinsic '"+expr.operation+"' is not supported in W2",
+          );
+      }
 
     case 'call':{
       if(expr.fn.kind!=='var'){

@@ -74,7 +74,24 @@ if(!fs.existsSync(preludeFixture)){
 const preludeReplay=new Lean4ExportReplay();
 preludeReplay.replay(fs.readFileSync(preludeFixture,'utf8'));
 const replay=new Lean4ExportReplay(preludeReplay.env);
-replay.replay(fs.readFileSync(fixture,'utf8'));
+const deltaText=fs.readFileSync(fixture,'utf8');
+console.log(JSON.stringify({
+  phase:'delta-input',
+  bytes:Buffer.byteLength(deltaText),
+  lines:deltaText.split(/\r?\n/u).filter(x=>x.length>0).length,
+}));
+const replayStats=replay.replay(deltaText,{
+  every:500,
+  onProgress:(stats)=>console.log(JSON.stringify({
+    phase:'delta-replay',
+    ...stats,
+  })),
+});
+console.log(JSON.stringify({
+  phase:'delta-replay-complete',
+  ...replayStats,
+  environmentConstants:replay.env.size,
+}));
 const metadata=new Lean434RuntimeMetadataIndex({
   ...document,
   initializers,

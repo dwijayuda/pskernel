@@ -215,6 +215,12 @@ export function eraseRuntimeExpr(
         "' survives in executable code",
       );
     case 'proj':{
+      if(
+        nameToString(expr.typeName)==='String.Pos.Raw'
+        &&expr.index===0
+      ){
+        return eraseRuntimeExpr(expr.expr,scope,environment);
+      }
       const structure=scope.structuresByType.get(nameKey(expr.typeName));
       if(structure===undefined){
         throw new Error(

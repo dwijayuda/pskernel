@@ -1,0 +1,38 @@
+name: Diagnostic MData long canonical prefix
+
+on:
+  push:
+    branches: [diagnostic/mdata-bucket-export]
+    paths:
+      - ".github/workflows/diagnostic-mdata-long-prefix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diagnostic-mdata-long-prefix
+  cancel-in-progress: true
+
+jobs:
+  prefix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Canonical Std stream throughput probe
+        env:
+          PSKERNEL_STD_HEAP_MIB: "5632"
+        run: node scripts/full-std-oracle.mjs

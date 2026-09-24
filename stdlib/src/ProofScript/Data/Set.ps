@@ -44,5 +44,5 @@ function setFold {α : Type}{β : Type}
 (f : β -> α -> β, init : β, values : PsSet(α)) : β :=
   match values with {
     | .empty => init;
-    | .entry value tail => setFold(f, f(init, value), tail);
+    | .entry value tail => f(setFold(f, init, tail), value);
   };

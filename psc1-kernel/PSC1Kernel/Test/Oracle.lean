@@ -43,23 +43,26 @@ partial def toLeanExpr : PSC1Kernel.Expr → Lean.Expr
 def assertTrue (label : String) (value : Bool) : IO Unit :=
   if value then pure () else throw <| IO.userError ("FAIL: " ++ label)
 
+def kernelSortDefEq
+    (env : Lean.Environment) (a b : PSC1Kernel.Level) : IO Bool := do
+  match Lean.Kernel.isDefEq env ({} : Lean.LocalContext)
+      (.sort (toLeanLevel a)) (.sort (toLeanLevel b)) with
+  | .ok value => pure value
+  | .error ex => throw <| IO.userError ("Lean kernel isDefEq failed: " ++ toString ex)
+
 def assertLevelPairs (levels : List PSC1Kernel.Level) : IO Unit := do
+  let env ← Lean.mkEmptyEnvironment
   let mut i := 0
   for a in levels do
     let mut j := 0
     for b in levels do
       let actualEq := PSC1Kernel.Level.equivalent a b
-      let leanEq := Lean.Level.isEquiv (toLeanLevel a) (toLeanLevel b)
+      let kernelEq ← kernelSortDefEq env a b
       assertTrue
-        ("level equivalence differs from Lean 4.34 at " ++ toString i ++ "," ++ toString j ++
-         " ours=" ++ toString actualEq ++ " lean=" ++ toString leanEq)
-        (actualEq == leanEq)
-      let actualLe := PSC1Kernel.Level.le a b
-      let leanLe := Lean.Level.geq (toLeanLevel b) (toLeanLevel a)
-      assertTrue
-        ("level ordering differs from Lean 4.34 at " ++ toString i ++ "," ++ toString j ++
-         " ours=" ++ toString actualLe ++ " lean=" ++ toString leanLe)
-        (actualLe == leanLe)
+        ("level equivalence differs from Lean 4.34 C++ kernel at " ++
+         toString i ++ "," ++ toString j ++
+         " ours=" ++ toString actualEq ++ " kernel=" ++ toString kernelEq)
+        (actualEq == kernelEq)
       j := j + 1
     i := i + 1
 

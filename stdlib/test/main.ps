@@ -1,5 +1,6 @@
 import ProofScript.Data.List
 import ProofScript.Data.Result
+import ProofScript.Data.Array
 import ProofScript.Text.Lexer
 
 function inc(x : Nat) : Nat := x + 1;
@@ -9,6 +10,9 @@ function asResult(x : Nat) : PsResult(Nat, Nat) :=
 
 function asOption(x : Nat) : PsOption(Nat) :=
   PsOption.some(x);
+
+function isNonZero(x : Nat) : Bool :=
+  x != 0;
 
 function main(x : Nat) : Nat :=
   let mapped : PsResult(Nat, Nat) :=
@@ -61,7 +65,15 @@ function main(x : Nat) : Nat :=
     spanByteLength(identifierSpan) == 2;
   let lexerPenalty : Nat :=
     if (lexerOk) { String.Internal.length(lexeme) - 1 } else { 1 };
+  let arrayValues : Array(Nat) :=
+    arrayPush(arrayPush(arrayEmptyWithCapacity(2), x), 1);
+  let arraysOk : Bool :=
+    arrayAny(isNonZero, arrayValues) &&
+    arrayAll(isNonZero, arrayValues);
+  let arrayPenalty : Nat :=
+    if (arraysOk) { 0 } else { 1 };
   resultValue +
     selectedValue +
     listValue +
-    lexerPenalty;
+    lexerPenalty +
+    arrayPenalty;

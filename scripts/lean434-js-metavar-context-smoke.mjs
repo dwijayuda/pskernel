@@ -68,13 +68,9 @@ const evaluator=new Lean434Evaluator(
   );
   modify=evaluator.applyRuntimeValue(modify,[1n,2n,3n]);
   modify=evaluator.applyRuntimeValue(modify,1n);
-  modify=evaluator.applyRuntimeValue(
-    modify,
-    evaluator.evaluate(constant(nameFromDotted('Nat.succ'))),
-  );
   const modified=evaluator.applyRuntimeValue(
     modify,
-    evaluator.evaluate(constant(nameFromDotted('Nat.zero'))),
+    evaluator.evaluate(constant(nameFromDotted('Nat.succ'))),
   );
   if(
     !Array.isArray(modified)

@@ -127,11 +127,129 @@ export function exprEq(a: Expr, b: Expr): boolean {
 /** Lean kernel Expr structural equality for the expression fields represented here.
  * Unlike exprEq, binder display names/info are intentionally ignored. MData payloads
  * participate in structural equality, exactly as Lean's kvmap payload does. */
+const leanExprHashCache=new WeakMap<object,number>();
+const leanLevelHashCache=new WeakMap<object,number>();
+
+function mixLeanHash(h:number,x:number):number{
+  h^=x>>>0;
+  return Math.imul(h,0x01000193)>>>0;
+}
+function hashLeanString(s:string):number{
+  let h=0x811c9dc5;
+  for(let i=0;i<s.length;i++)h=mixLeanHash(h,s.charCodeAt(i));
+  return h>>>0;
+}
+function leanLevelStructuralHash(root:Level):number{
+  const cached=leanLevelHashCache.get(root as object);if(cached!==undefined)return cached;
+  const todo:{l:Level;done:boolean}[]=[{l:root,done:false}];
+  while(todo.length){
+    const f=todo.pop()!,l=f.l;
+    if(leanLevelHashCache.has(l as object))continue;
+    if(!f.done){
+      todo.push({l,done:true});
+      if(l.kind==='succ')todo.push({l:l.of,done:false});
+      else if(l.kind==='max'||l.kind==='imax')todo.push({l:l.right,done:false},{l:l.left,done:false});
+      continue;
+    }
+    let h=hashLeanString(l.kind);
+    switch(l.kind){
+      case'zero':break;
+      case'param':case'mvar':h=mixLeanHash(h,hashLeanString(nameKey(l.name)));break;
+      case'succ':h=mixLeanHash(h,leanLevelHashCache.get(l.of as object)!);break;
+      case'max':case'imax':
+        h=mixLeanHash(h,leanLevelHashCache.get(l.left as object)!);
+        h=mixLeanHash(h,leanLevelHashCache.get(l.right as object)!);
+        break;
+    }
+    leanLevelHashCache.set(l as object,h>>>0);
+  }
+  return leanLevelHashCache.get(root as object)!;
+}
+
+/**
+ * Cached structural hash compatible with Lean kernel Expr equality.
+ *
+ * Lean 4.34 stores a hash in Expr.Data when each immutable expression node is
+ * constructed. TypeScript objects do not have that field, so keep the
+ * equivalent lifetime cache externally. The exact numeric hash need not match
+ * Lean's runtime hash; equal expressions must hash equally and the value must
+ * remain stable for the immutable Expr node.
+ */
+export function exprLeanHash(root:Expr):number{
+  const cached=leanExprHashCache.get(root as object);if(cached!==undefined)return cached;
+  const todo:{e:Expr;done:boolean}[]=[{e:root,done:false}];
+  while(todo.length){
+    const f=todo.pop()!,e=f.e;
+    if(leanExprHashCache.has(e as object))continue;
+    if(!f.done){
+      todo.push({e,done:true});
+      switch(e.kind){
+        case'app':todo.push({e:e.arg,done:false},{e:e.fn,done:false});break;
+        case'lam':case'forall':todo.push({e:e.body,done:false},{e:e.type,done:false});break;
+        case'let':todo.push({e:e.body,done:false},{e:e.value,done:false},{e:e.type,done:false});break;
+        case'mdata':case'proj':todo.push({e:e.expr,done:false});break;
+        default:break;
+      }
+      continue;
+    }
+    let h=hashLeanString(e.kind);
+    switch(e.kind){
+      case'bvar':h=mixLeanHash(h,e.index);break;
+      case'fvar':case'mvar':h=mixLeanHash(h,hashLeanString(e.id));break;
+      case'sort':h=mixLeanHash(h,leanLevelStructuralHash(e.level));break;
+      case'const':
+        h=mixLeanHash(h,hashLeanString(nameKey(e.name)));h=mixLeanHash(h,e.levels.length);
+        for(const l of e.levels)h=mixLeanHash(h,leanLevelStructuralHash(l));
+        break;
+      case'app':
+        h=mixLeanHash(mixLeanHash(h,leanExprHashCache.get(e.fn as object)!),leanExprHashCache.get(e.arg as object)!);
+        break;
+      case'lam':case'forall':
+        // Kernel equality ignores binder display names and BinderInfo.
+        h=mixLeanHash(mixLeanHash(h,leanExprHashCache.get(e.type as object)!),leanExprHashCache.get(e.body as object)!);
+        break;
+      case'let':
+        // Kernel equality ignores the display name but observes let_nondep.
+        h=mixLeanHash(h,e.nondep?1:0);
+        h=mixLeanHash(h,leanExprHashCache.get(e.type as object)!);
+        h=mixLeanHash(h,leanExprHashCache.get(e.value as object)!);
+        h=mixLeanHash(h,leanExprHashCache.get(e.body as object)!);
+        break;
+      case'lit':
+        h=mixLeanHash(h,hashLeanString(e.literal.kind));
+        h=mixLeanHash(h,hashLeanString(e.literal.kind==='nat'?e.literal.value.toString():e.literal.value));
+        break;
+      case'mdata':
+        // Lean's Expr.Data hash also ignores the metadata payload; equality
+        // checks the KVMap only after the hash/shape fast path.
+        h=mixLeanHash(h,leanExprHashCache.get(e.expr as object)!);
+        break;
+      case'proj':
+        h=mixLeanHash(h,hashLeanString(nameKey(e.typeName)));h=mixLeanHash(h,e.index);
+        h=mixLeanHash(h,leanExprHashCache.get(e.expr as object)!);
+        break;
+    }
+    leanExprHashCache.set(e as object,h>>>0);
+  }
+  return leanExprHashCache.get(root as object)!;
+}
+
 export function exprLeanEq(a:Expr,b:Expr):boolean{
+  const compared=new WeakMap<object,WeakSet<object>>();
+  const alreadyCompared=(x:Expr,y:Expr):boolean=>{
+    let ys=compared.get(x as object);
+    if(ys?.has(y as object))return true;
+    if(ys===undefined){ys=new WeakSet<object>();compared.set(x as object,ys);}
+    ys.add(y as object);
+    return false;
+  };
   const todo:[Expr,Expr][]=[[a,b]];
   while(todo.length){
     const [x,y]=todo.pop()!;
     if(x===y)continue;
+    // Lean 4.34 expr_eq_fn rejects different cached Expr.Data hashes before
+    // walking children. This is crucial for large proof terms.
+    if(exprLeanHash(x)!==exprLeanHash(y))return false;
     if(x.kind!==y.kind)return false;
     switch(x.kind){
       case'bvar':if(y.kind!=='bvar'||x.index!==y.index)return false;break;
@@ -144,18 +262,23 @@ export function exprLeanEq(a:Expr,b:Expr):boolean{
         break;
       case'app':
         if(y.kind!=='app')return false;
+        if(alreadyCompared(x,y))break;
+        // Lean compares application arguments before walking the function spine.
         todo.push([x.fn,y.fn],[x.arg,y.arg]);
         break;
       case'lam':
         if(y.kind!=='lam')return false;
+        if(alreadyCompared(x,y))break;
         todo.push([x.type,y.type],[x.body,y.body]);
         break;
       case'forall':
         if(y.kind!=='forall')return false;
+        if(alreadyCompared(x,y))break;
         todo.push([x.type,y.type],[x.body,y.body]);
         break;
       case'let':
         if(y.kind!=='let'||(x.nondep??false)!==(y.nondep??false))return false;
+        if(alreadyCompared(x,y))break;
         todo.push([x.type,y.type],[x.value,y.value],[x.body,y.body]);
         break;
       case'lit':
@@ -166,10 +289,12 @@ export function exprLeanEq(a:Expr,b:Expr):boolean{
         break;
       case'mdata':
         if(y.kind!=='mdata'||!metadataValueEq(x.data,y.data))return false;
+        if(alreadyCompared(x,y))break;
         todo.push([x.expr,y.expr]);
         break;
       case'proj':
         if(y.kind!=='proj'||!nameEq(x.typeName,y.typeName)||x.index!==y.index)return false;
+        if(alreadyCompared(x,y))break;
         todo.push([x.expr,y.expr]);
         break;
     }

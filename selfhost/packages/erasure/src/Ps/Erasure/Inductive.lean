@@ -62,6 +62,8 @@ def psPrepareInductiveParametersWithFuel
                 runtimeRecursors := scope.runtimeRecursors
                 runtimeStructures := scope.runtimeStructures
                 runtimeStructureConstructors := scope.runtimeStructureConstructors
+                runtimeExpressions := scope.runtimeExpressions
+                currentDefinition := scope.currentDefinition
               }
               psPrepareInductiveParametersWithFuel
                 environment
@@ -173,6 +175,8 @@ def psPrepareConstructorFieldsWithFuel
                     runtimeRecursors := scope.runtimeRecursors
                     runtimeStructures := scope.runtimeStructures
                     runtimeStructureConstructors := scope.runtimeStructureConstructors
+                runtimeExpressions := scope.runtimeExpressions
+                currentDefinition := scope.currentDefinition
                   }
                   psPrepareConstructorFieldsWithFuel
                     environment
@@ -271,6 +275,10 @@ def psPrepareRuntimeConstructors
                         sourceIndex := ctorInfo.numParams + field.sourceIndex
                         name := field.name
                         type := field.type
+                        recursive :=
+                          psErasureNatInList
+                            ctorInfo.recursiveFields
+                            field.sourceIndex
                       })
                   let runtimeInfo : PsRuntimeConstructorInfo := {
                     inductiveName := inductiveName

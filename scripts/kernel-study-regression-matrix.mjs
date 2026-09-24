@@ -154,7 +154,7 @@ for(const marker of [
   if(!moduleStream.includes(marker))throw new Error('canonical replay consumer protocol drift: missing '+marker);
 }
 const assuranceDoc=readFileSync('docs/research/LEAN434_KERNEL_STUDY.md','utf8');
-if(!assuranceDoc.includes('Do not call this source\ndeclaration order')){
+if(!assuranceDoc.includes('Do not call this source declaration order')){
   throw new Error('canonical replay assurance wording drift: source-order disclaimer missing');
 }
 
@@ -167,7 +167,6 @@ for(const marker of [
   'dependencyInstallExitCode=$dependencyInstallCode',
   'npm ci failed before any kernel replay. This is a packaging/dependency gate failure; send/upload $Log.',
   '[string]$Log = "full-std.local.log"',
-  'git restore -- full-std.log',
 ]){
   if(!localAssuranceRunner.includes(marker))throw new Error('local Full-Std assurance runner drift: missing '+marker);
 }

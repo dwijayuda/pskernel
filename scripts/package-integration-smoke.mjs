@@ -675,6 +675,79 @@ assert(
   'ProofScript.Data.Array declarations diverged',
 );
 
+const orderedDataModuleSource=[
+  'Option',
+  'Ordering',
+  'Map',
+  'Set',
+].map((name)=>readFileSync(
+  new URL(
+    '../stdlib/src/ProofScript/Data/'+name+'.ps',
+    import.meta.url,
+  ),
+  'utf8',
+).replace(/^import .*$/gmu,'')).join('\n');
+
+const orderedDataPs=compileVerifiedSource(
+  orderedDataModuleSource,
+  'proofscript-data-ordered.ts',
+  'ProofScript/Data/Ordered.ps',
+);
+const orderedDataLeanSource=
+  dualTargets.require('lean').print(orderedDataPs.surface);
+const orderedDataLean=compileVerifiedSource(
+  orderedDataLeanSource,
+  'proofscript-data-ordered.ts',
+  'ProofScript/Data/Ordered.lean',
+);
+const orderedDataPsSource=
+  dualTargets.require('ps').print(orderedDataLean.surface);
+const orderedDataPsRoundTrip=compileVerifiedSource(
+  orderedDataPsSource,
+  'proofscript-data-ordered.ts',
+  'ProofScript/Data/Ordered.roundtrip.ps',
+);
+
+assert(
+  orderedDataPs.canonicalSourceHash===orderedDataLean.canonicalSourceHash
+    &&orderedDataLean.canonicalSourceHash===
+      orderedDataPsRoundTrip.canonicalSourceHash,
+  'SH2 ordered-data dual-source canonical identity diverged',
+);
+assert(
+  semanticFingerprint(orderedDataPs.checkedCore.admissions)
+    ===semanticFingerprint(orderedDataLean.checkedCore.admissions)
+    &&semanticFingerprint(orderedDataLean.checkedCore.admissions)
+      ===semanticFingerprint(
+        orderedDataPsRoundTrip.checkedCore.admissions,
+      ),
+  'SH2 ordered-data checked-core fingerprint diverged',
+);
+assert(
+  semanticFingerprint(orderedDataPs.ir)
+    ===semanticFingerprint(orderedDataLean.ir)
+    &&semanticFingerprint(orderedDataLean.ir)
+      ===semanticFingerprint(orderedDataPsRoundTrip.ir),
+  'SH2 ordered-data compiler IR diverged',
+);
+assert(
+  orderedDataPs.typeScript===orderedDataLean.typeScript
+    &&orderedDataLean.typeScript===orderedDataPsRoundTrip.typeScript,
+  'SH2 ordered-data TypeScript diverged',
+);
+assert(
+  orderedDataPs.emitted.javascript===orderedDataLean.emitted.javascript
+    &&orderedDataLean.emitted.javascript===
+      orderedDataPsRoundTrip.emitted.javascript,
+  'SH2 ordered-data JavaScript diverged',
+);
+assert(
+  orderedDataPs.emitted.declaration===orderedDataLean.emitted.declaration
+    &&orderedDataLean.emitted.declaration===
+      orderedDataPsRoundTrip.emitted.declaration,
+  'SH2 ordered-data declarations diverged',
+);
+
 let unsupportedLeanRejected=false;
 try{
   compileVerifiedSource(

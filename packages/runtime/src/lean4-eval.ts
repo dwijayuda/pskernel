@@ -100,6 +100,7 @@ function primitive(
 function isCallable(value:Lean434RuntimeValue):value is Lean434CallableValue {
   return typeof value==='object'
     &&value!==null
+    &&!Array.isArray(value)
     &&(
       value.kind==='closure'
       ||value.kind==='primitive-function'
@@ -169,6 +170,7 @@ export class Lean434Evaluator {
         if(
           typeof target!=='object'
           ||target===null
+          ||Array.isArray(target)
           ||target.kind!=='constructor'
         ){
           throw new Lean434EvaluationError(
@@ -188,6 +190,7 @@ export class Lean434Evaluator {
         if(
           typeof fn==='object'
           &&fn!==null
+          &&!Array.isArray(fn)
           &&fn.kind==='type'
         ){
           // Type applications are runtime-erased. Retain only a symbolic token
@@ -370,6 +373,7 @@ export class Lean434Evaluator {
     if(
       typeof value==='object'
       &&value!==null
+      &&!Array.isArray(value)
       &&value.kind==='constructor'
     ){
       return value;

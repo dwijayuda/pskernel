@@ -236,6 +236,8 @@ jobs:
           set -euo pipefail
           lean --run oracle/replay-probe/DependencyExport.lean Lean.MetavarContext \
             --selected-after Init.Prelude \
+            Array.modify Array.set \
+            Lean.PersistentHashMap.insert Lean.PersistentHashMap.find? \
             Lean.assignExp \
             Lean.MetavarContext.getExprAssignmentExp \
             > lean434-metavar-context-bootstrap.ndjson

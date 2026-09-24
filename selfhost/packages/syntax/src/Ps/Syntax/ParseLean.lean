@@ -94,7 +94,7 @@ def psParseLeanBinder
           match psTokenCursorExpectText name.cursor ":" with
           | Except.error error => Except.error error
           | Except.ok afterColon =>
-              match psParseLeanTerm afterColon.cursor with
+              match psParseLeanSimpleApplication afterColon.cursor with
               | Except.error error => Except.error error
               | Except.ok type =>
                   match psParseBinderClosing opening type.cursor with
@@ -309,7 +309,7 @@ def psParseLeanDeclaration
                     match psTokenCursorExpectText binders.cursor ":" with
                     | Except.error error => Except.error error
                     | Except.ok afterColon =>
-                        match psParseLeanSimpleApplication afterColon.cursor with
+                        match psParseLeanTerm afterColon.cursor with
                         | Except.error error => Except.error error
                         | Except.ok type =>
                             match psTokenCursorExpectText type.cursor ":=" with

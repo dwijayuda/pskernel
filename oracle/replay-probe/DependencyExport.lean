@@ -662,6 +662,7 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   ])]).compress
   let _ ← (do
     modify fun (s : S) => { s with skipNonReplayable := true }
+    let mut rootStart := 0
     for idx in [0:buckets.size] do
       let roots : Array Name := buckets[idx]!
       unless roots.isEmpty do
@@ -676,10 +677,14 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
             ("module", moduleName.toString),
             ("index", idx),
             ("part", part),
-            ("roots", slice.size)
+            ("roots", slice.size),
+            ("rootStart", rootStart),
+            ("firstRoot", slice[0]!.toString),
+            ("lastRoot", slice[slice.size - 1]!.toString)
           ])]).compress
           dumpMeta
           for n in slice do dumpConstant env n
+          rootStart := rootStart + slice.size
           start := stop
           part := part + 1) |>.run {}
   pure ()

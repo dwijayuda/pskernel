@@ -15,6 +15,14 @@ lean_lib PsSyntax where
   srcDir := "packages/syntax/src"
   roots := #[`Ps.Syntax.Token]
 
+lean_lib PsCore where
+  srcDir := "packages/core/src"
+  roots := #[
+    `Ps.Core.Level,
+    `Ps.Core.Expr,
+    `Ps.Core.Declaration
+  ]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "src"

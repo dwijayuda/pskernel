@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "strategy": "verified-cosigner",
+  "checker": {
+    "repository": "leanprover/con-leche",
+    "commit": "ae0c0c4e4ce6a0081648aff03fe9c39d002c4526",
+    "toolchain": "leanprover/lean4:v4.33.0",
+    "mode": "--verified",
+    "theorem": "ConLeche.model_exists",
+    "corollary": "ConLeche.no_False_declaration",
+    "theoremFile": "ConLeche/MainTheorem.lean"
+  },
+  "pskernel": {
+    "requiredVerdict": "accept",
+    "target": "Lean 4.34.0",
+    "note": "pskernel remains the fast compatibility checker; formal soundness comes from the verified co-signer."
+  },
+  "claim": {
+    "whenBothAccept": "The stream is accepted by pskernel and by the pinned ConLeche verified checker; subject to ConLeche's stated SetTheory assumptions, the accepted ConLeche environment has a model.",
+    "doesNotClaim": [
+      "TypeScript implementation equivalence to Lean C++",
+      "complete Lean 4.34 behavioral equivalence",
+      "ConLeche completeness",
+      "formal verification of V8/Node/TypeScript runtime behavior"
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+name: Formal soundness co-sign smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/formal-soundness]
+    paths:
+      - ".github/workflows/formal-soundness-cosign.yml"
+      - "FORMAL_LOCK.json"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/formal-cosign.mjs"
+      - "src/core/**"
+      - "src/kernel/**"
+      - "src/integration/lean4export.ts"
+      - "oracle/fixtures/lean434-primitive-closure.ndjson"
+
+permissions:
+  contents: read
+
+jobs:
+  cosign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Install elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build pinned ConLeche verified checker
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/leanprover/con-leche.git /tmp/con-leche
+          cd /tmp/con-leche
+          git checkout ae0c0c4e4ce6a0081648aff03fe9c39d002c4526
+          lake build con-leche
+          echo "CONLECHE_BIN=/tmp/con-leche/.lake/build/bin/con-leche" >> "$GITHUB_ENV"
+      - name: Co-sign real Lean 4.34 primitive closure
+        env:
+          CONLECHE_JOBS: "2"
+        run: npm run formal:smoke

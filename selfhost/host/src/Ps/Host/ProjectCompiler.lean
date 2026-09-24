@@ -203,6 +203,60 @@ def psHostParseSource
       (IO.userError
         ("PSC1_PROJECT_SOURCE_KIND: " ++ path))
 
+def psHostSyntaxDeclarationName : PsSyntaxDeclaration -> String
+  | .definition name _ _ _ _ =>
+      match psSyntaxNameToName name with
+      | some value => psNameToString value
+      | none => "<definition>"
+  | .theoremDecl name _ _ _ _ =>
+      match psSyntaxNameToName name with
+      | some value => psNameToString value
+      | none => "<theorem>"
+  | .inductiveDecl name _ _ _ _ =>
+      match psSyntaxNameToName name with
+      | some value => psNameToString value
+      | none => "<inductive>"
+  | .structureDecl name _ _ _ =>
+      match psSyntaxNameToName name with
+      | some value => psNameToString value
+      | none => "<structure>"
+
+def psHostElabDeclarationsDetailed
+    (path : String)
+    (environment : PsEnvironment) :
+    List PsSyntaxDeclaration ->
+    List PsDeclaration ->
+    IO PsElabModuleResult
+  | [], declarationsRev =>
+      pure {
+        environment := environment
+        declarations := declarationsRev.reverse
+      }
+  | source :: rest, declarationsRev =>
+      match psElabDeclarationBatch environment source with
+      | Except.error error =>
+          throw
+            (IO.userError
+              ("PSC1_PROJECT_ELAB_FAILED: " ++ path ++
+                ": declaration=" ++ psHostSyntaxDeclarationName source ++
+                ": " ++ psHostElabErrorText error))
+      | Except.ok result =>
+          match psAddDeclarationList environment result.declarations with
+          | Except.error error =>
+              throw
+                (IO.userError
+                  ("PSC1_PROJECT_ELAB_FAILED: " ++ path ++
+                    ": declaration=" ++ psHostSyntaxDeclarationName source ++
+                    ": " ++ psHostElabErrorText error))
+          | Except.ok nextEnvironment =>
+              psHostElabDeclarationsDetailed
+                path
+                nextEnvironment
+                rest
+                (psPrependBatchReverse
+                  result.declarations
+                  declarationsRev)
+
 mutual
   partial def psHostLoadModuleWithFuel
       (fuel : Nat)
@@ -230,22 +284,18 @@ mutual
               (path :: stack)
               sourceModule.imports
               state
-          match
-              psElabModule
-                withImports.environment
-                sourceModule with
-          | Except.error error =>
-              throw
-                (IO.userError
-                  ("PSC1_PROJECT_ELAB_FAILED: " ++ path ++
-                    ": " ++ psHostElabErrorText error))
-          | Except.ok elaborated =>
-              pure {
-                environment := elaborated.environment
-                declarations :=
-                  withImports.declarations ++ elaborated.declarations
-                loadedPaths := path :: withImports.loadedPaths
-              }
+          let elaborated ←
+            psHostElabDeclarationsDetailed
+              path
+              withImports.environment
+              sourceModule.declarations
+              []
+          pure {
+            environment := elaborated.environment
+            declarations :=
+              withImports.declarations ++ elaborated.declarations
+            loadedPaths := path :: withImports.loadedPaths
+          }
 
   partial def psHostLoadImportsWithFuel
       (fuel : Nat)

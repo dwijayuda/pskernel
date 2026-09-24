@@ -1,0 +1,43 @@
+name: Diagnostic Int.DivMod canonical windows
+
+on:
+  push:
+    branches: [diagnostic/int-divmod-canonical-windows]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Window module start
+        env: { PSKERNEL_WORKER_TIMEOUT_MS: "30000", PSKERNEL_WORKER_HEAP_MIB: "2048" }
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22197 32 32 1
+      - name: Window part 11
+        env: { PSKERNEL_WORKER_TIMEOUT_MS: "30000", PSKERNEL_WORKER_HEAP_MIB: "2048" }
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22307 32 32 1
+      - name: Window part 36
+        env: { PSKERNEL_WORKER_TIMEOUT_MS: "30000", PSKERNEL_WORKER_HEAP_MIB: "2048" }
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22557 32 32 1
+      - name: Window part 61
+        env: { PSKERNEL_WORKER_TIMEOUT_MS: "30000", PSKERNEL_WORKER_HEAP_MIB: "2048" }
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22807 32 32 1
+      - name: Window part 86
+        env: { PSKERNEL_WORKER_TIMEOUT_MS: "30000", PSKERNEL_WORKER_HEAP_MIB: "2048" }
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 23057 32 32 1

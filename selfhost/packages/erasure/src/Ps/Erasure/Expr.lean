@@ -842,6 +842,13 @@ def psEraseRuntimeExprWithFuel
               environment
               scope
               fuel
+          let eraseAt :=
+            fun nextScope value =>
+              psEraseRuntimeExprWithFuel
+                environment
+                nextScope
+                fuel
+                value
           match psEraseIteApplication erase view with
           | Except.error error => Except.error error
           | Except.ok (some lowered) => Except.ok lowered
@@ -850,13 +857,6 @@ def psEraseRuntimeExprWithFuel
               | Except.error error => Except.error error
               | Except.ok (some lowered) => Except.ok lowered
               | Except.ok none =>
-                  let eraseAt :=
-                    fun nextScope value =>
-                      psEraseRuntimeExprWithFuel
-                        environment
-                        nextScope
-                        fuel
-                        value
                   match
                       psEraseRuntimeStructureApplication
                         environment
@@ -876,7 +876,7 @@ def psEraseRuntimeExprWithFuel
                       | Except.ok (some lowered) => Except.ok lowered
                       | Except.ok none =>
                           match
-                                  psEraseRuntimeRecursorApplication
+                              psEraseRuntimeRecursorApplication
                                 environment
                                 scope
                                 eraseAt

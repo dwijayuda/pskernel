@@ -326,6 +326,37 @@ console.log('ok - @proofscript/checked-core persistent admission codec');
 }
 console.log('ok - @proofscript/checked-core external admission codec');
 
+
+{
+  const base=new Environment();
+  const Char=nameFromDotted('Char');
+  const hostEchoChar=nameFromDotted('hostEchoChar');
+  base.add({
+    kind:'axiom',
+    name:Char,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  const checked=admitCheckedCoreAdmissions(base,[{
+    kind:'external',
+    declaration:{
+      kind:'axiom',
+      name:hostEchoChar,
+      levelParams:[],
+      type:forallE(
+        nameFromDotted('c'),
+        constant(Char),
+        constant(Char),
+      ),
+      isUnsafe:false,
+    },
+    binding:{source:'host-lib',importedName:'echoChar'},
+  }]);
+  equal(checked.externals.length,1);
+  equal(checked.environment.find(hostEchoChar)?.kind,'axiom');
+}
+console.log('ok - @proofscript/checked-core Char runtime external');
+
 {
   const base=new Environment();
   const Nat=nameFromDotted('Nat');

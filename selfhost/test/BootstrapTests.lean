@@ -788,6 +788,39 @@ def psTestProofScriptRejectSpacedCall : Bool :=
   | Except.error _ => true
   | Except.ok _ => false
 
+def psTestInductiveInfoEq
+    (left : PsInductiveInfo)
+    (right : PsInductiveInfo) : Bool :=
+  psNameEq left.name right.name
+    && psNameListEq left.levelParams right.levelParams
+    && psExprAlphaEq left.type right.type
+    && left.numParams == right.numParams
+    && left.numIndices == right.numIndices
+    && psNameListEq left.constructors right.constructors
+
+def psTestConstructorInfoEq
+    (left : PsConstructorInfo)
+    (right : PsConstructorInfo) : Bool :=
+  psNameEq left.name right.name
+    && psNameListEq left.levelParams right.levelParams
+    && psExprAlphaEq left.type right.type
+    && psNameEq left.inductiveName right.inductiveName
+    && left.constructorIndex == right.constructorIndex
+    && left.numParams == right.numParams
+    && left.numFields == right.numFields
+
+def psTestRecursorInfoEq
+    (left : PsRecursorInfo)
+    (right : PsRecursorInfo) : Bool :=
+  psNameEq left.name right.name
+    && psNameListEq left.levelParams right.levelParams
+    && psExprAlphaEq left.type right.type
+    && psNameListEq left.inductiveNames right.inductiveNames
+    && left.numParams == right.numParams
+    && left.numIndices == right.numIndices
+    && left.numMotives == right.numMotives
+    && left.numMinors == right.numMinors
+
 def psTestCoreDeclarationEq : PsDeclaration -> PsDeclaration -> Bool
   | PsDeclaration.axiomDecl leftName leftLevels leftType,
     PsDeclaration.axiomDecl rightName rightLevels rightType =>
@@ -812,6 +845,15 @@ def psTestCoreDeclarationEq : PsDeclaration -> PsDeclaration -> Bool
         && psNameListEq leftLevels rightLevels
         && psExprAlphaEq leftType rightType
         && psExprAlphaEq leftValue rightValue
+  | PsDeclaration.inductiveDecl leftInfo,
+    PsDeclaration.inductiveDecl rightInfo =>
+      psTestInductiveInfoEq leftInfo rightInfo
+  | PsDeclaration.constructorDecl leftInfo,
+    PsDeclaration.constructorDecl rightInfo =>
+      psTestConstructorInfoEq leftInfo rightInfo
+  | PsDeclaration.recursorDecl leftInfo,
+    PsDeclaration.recursorDecl rightInfo =>
+      psTestRecursorInfoEq leftInfo rightInfo
   | _, _ => false
 
 def psTestCoreDeclarationListsEq :
@@ -1781,6 +1823,76 @@ def psTestDualSourceInductiveFieldParse : Bool :=
         && psTestInductiveFieldShape proofScriptModule
   | _, _ => false
 
+def psTestSourceInductiveEnumShape
+    (result : PsElabModuleResult) : Bool :=
+  let choiceName := psTestName "Choice"
+  let leftName := psNameAppendStr choiceName "left"
+  let rightName := psNameAppendStr choiceName "right"
+  let recName := psNameAppendStr choiceName "rec"
+  let natType := PsExpr.constE psNatName []
+  match result.declarations with
+  | [
+      PsDeclaration.inductiveDecl inductiveInfo,
+      PsDeclaration.constructorDecl leftInfo,
+      PsDeclaration.constructorDecl rightInfo,
+      PsDeclaration.recursorDecl recInfo,
+      PsDeclaration.definitionDecl pickName [] pickType pickValue
+    ] =>
+      psNameEq inductiveInfo.name choiceName
+        && inductiveInfo.numParams == 0
+        && inductiveInfo.numIndices == 0
+        && psNameListEq
+          inductiveInfo.constructors
+          [leftName, rightName]
+        && psNameEq leftInfo.name leftName
+        && leftInfo.constructorIndex == 0
+        && leftInfo.numFields == 0
+        && psNameEq rightInfo.name rightName
+        && rightInfo.constructorIndex == 1
+        && rightInfo.numFields == 0
+        && psNameEq recInfo.name recName
+        && recInfo.numParams == 0
+        && recInfo.numIndices == 0
+        && recInfo.numMotives == 1
+        && recInfo.numMinors == 2
+        && psNameEq pickName (psTestName "pick")
+        && psExprAlphaEq pickType
+          (PsExpr.forallE
+            (psTestName "v")
+            (PsExpr.constE choiceName [])
+            natType
+            PsBinderInfo.explicit)
+        && match pickValue with
+           | PsExpr.lam _ _ body PsBinderInfo.explicit =>
+               let view := psExprAppView body
+               match view.head with
+               | PsExpr.constE name levels =>
+                   psNameEq name recName
+                     && levels.length == 1
+                     && view.args.length == 4
+               | _ => false
+           | _ => false
+  | _ => false
+
+def psTestDualSourceInductiveEnumElaboration : Bool :=
+  match
+      psParseLeanSource
+        "inductive Choice where | left | right\ndef pick (v : Choice) : Nat := match v with | Choice.left => 1 | Choice.right => 2",
+      psParseProofScriptSource
+        "inductive Choice where { | left; | right; }; def pick(v : Choice) : Nat := match v with { | Choice.left => 1; | Choice.right => 2 };" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestSourceInductiveEnumShape leanResult
+            && psTestSourceInductiveEnumShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1807,6 +1919,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "defeq beta under forall", passed := psTestDefEqBetaUnderForall },
   { name := "dual-source inductive enum parse", passed := psTestDualSourceInductiveEnumParse },
   { name := "dual-source inductive field parse", passed := psTestDualSourceInductiveFieldParse },
+  { name := "dual-source inductive enum elaboration", passed := psTestDualSourceInductiveEnumElaboration },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

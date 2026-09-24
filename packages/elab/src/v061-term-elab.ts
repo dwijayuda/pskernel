@@ -8,6 +8,7 @@ import {
   nameFromDotted,
   natLit,
   strLit,
+  type Expr,
 } from 'lean-ts-kernel';
 import {elaborateApplication} from './application.js';
 import {elaborateV061Constant} from './v061-constant-elab.js';
@@ -34,7 +35,7 @@ import {elaborateV061LetExpression} from './v061-let-elab.js';
 function resolveReference(
   name:string,
   context:V061CoreElabContext,
-):ReturnType<typeof constant>|ReturnType<typeof fvar> {
+):Expr {
   const local=context.locals.get(name);
   if(local!==undefined)return fvar(local);
   const full=nameFromDotted(name);

@@ -1,0 +1,16 @@
+{
+  "name": "@proofscript/project-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "role": "project-module-graph"
+  },
+  "dependencies": {
+    "@proofscript/foundation": "0.0.0-dev"
+  }
+}

@@ -1,5 +1,6 @@
 import ProofScript.Data.List
 import ProofScript.Data.Result
+import ProofScript.Text.Lexer
 
 function inc(x : Nat) : Nat := x + 1;
 
@@ -44,6 +45,17 @@ function main(x : Nat) : Nat :=
     listHeadOrElse(extended, 0);
   let selectedValue : Nat :=
     if (optionIsSome(chosen)) { optionValue } else { headValue };
+  let firstSpan : SourceSpan :=
+    nextSpan("𝒫x", rawPos(0));
+  let lexeme : String :=
+    sliceSpan("𝒫x", firstSpan);
+  let lexerOk : Bool :=
+    isAsciiIdentifierStart('A') &&
+    isAsciiIdentifierRest('9') &&
+    isAsciiWhitespace(' ');
+  let lexerPenalty : Nat :=
+    if (lexerOk) { String.Internal.length(lexeme) - 1 } else { 1 };
   resultValue +
     selectedValue +
-    listValue;
+    listValue +
+    lexerPenalty;

@@ -358,6 +358,19 @@ Exit:
 
 ### PSX1 — source recognition + parser
 
+Status: **implemented in source; executable root-gate evidence pending.**
+
+Landed checkpoint:
+
+- `.psx` resolves to semantic source kind `proofscript` with a JSX-enabled parse profile;
+- `.ps` remains JSX-disabled and fails with `PS_JSX_DISABLED`;
+- bounded JSX supports intrinsic/component elements, self-closing elements, fragments, text children, `{expression}` children, string attributes, and `{expression}` attributes;
+- the parser lowers JSX to reserved internal `$psx.*` syntax nodes that ordinary source cannot spell;
+- canonical ProofScript printing reconstructs JSX and is covered by parse/print/parse tests;
+- project resolution includes `.psx` and keeps duplicate-module ambiguity fail-closed;
+- LSP/VS Code recognize `.psx` as ordinary ProofScript;
+- Lean lowering and term elaboration explicitly reject JSX until PSX2 typed lowering lands.
+
 Add `.psx` recognition as ProofScript-with-JSX.
 
 Minimum syntax:

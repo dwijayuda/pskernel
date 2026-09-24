@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: lean434-js-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   runtime-compat:
     runs-on: ubuntu-latest

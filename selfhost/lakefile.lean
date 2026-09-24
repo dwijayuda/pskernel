@@ -5,7 +5,7 @@ package proofscriptSelfhost where
   srcDir := "src"
 
 lean_lib ProofScriptCompiler where
-  srcDir := "../packages/compiler/src"
+  srcDir := "../../packages/compiler/src"
   roots := #[`ProofScript.Compiler.Data]
 
 @[default_target]

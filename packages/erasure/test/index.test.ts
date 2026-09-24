@@ -834,7 +834,6 @@ console.log('ok - @proofscript/erasure generic structure metadata');
         name:hostInc,
         levelParams:[],
         type:fnType,
-        isUnsafe:true,
       },
       binding:{source:'host-lib',importedName:'inc'},
     },

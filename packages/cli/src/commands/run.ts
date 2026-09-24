@@ -5,7 +5,7 @@ import {
   type ProofScriptWasmHostValue,
 } from '@proofscript/compiler';
 import {buildCommand} from './build.js';
-import type {CommonArgs} from '../types.js';
+import type {CommonArgs,RunResult} from '../types.js';
 import {
   encodeVerifiedRuntimeResult,
   prepareVerifiedMainArguments,
@@ -38,7 +38,7 @@ function displayRuntimeValue(value:unknown):unknown {
   return typeof value==='bigint'?value.toString():value;
 }
 
-export async function runCommand(common:CommonArgs){
+export async function runCommand(common:CommonArgs):Promise<RunResult>{
   const target=common.buildTarget??'js';
   const build=await buildCommand(common);
 

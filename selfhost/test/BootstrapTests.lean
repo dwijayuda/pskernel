@@ -806,6 +806,62 @@ def psTestDualSourceTypedLambdaElaboration : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestLetDeclarationShape
+    (result : PsElabModuleResult) : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let oneName := psTestName "one"
+  let xName := psTestName "x"
+  let expectedValue :=
+    PsExpr.letE
+      xName
+      natType
+      (PsExpr.lit (PsLiteral.natural 1))
+      (PsExpr.bvar 0)
+  match result.declarations with
+  | [PsDeclaration.definitionDecl actualName [] actualType actualValue] =>
+      psNameEq actualName oneName
+        && psExprAlphaEq actualType natType
+        && psExprAlphaEq actualValue expectedValue
+  | _ => false
+
+def psTestDualSourceAnnotatedLet : Bool :=
+  match
+      psParseLeanSource
+        "def one : Nat := let x : Nat := 1; x",
+      psParseProofScriptSource
+        "def one : Nat := let x : Nat := 1; x;" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestLetDeclarationShape leanResult
+            && psTestLetDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
+def psTestDualSourceInferredLet : Bool :=
+  match
+      psParseLeanSource
+        "def one : Nat := let x := 1; x",
+      psParseProofScriptSource
+        "def one : Nat := let x := 1; x;" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestLetDeclarationShape leanResult
+            && psTestLetDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -820,6 +876,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source typed lambda elaboration", passed := psTestDualSourceTypedLambdaElaboration },
   { name := "dual-source Pi parse", passed := psTestDualSourcePiParse },
   { name := "dual-source Pi lambda declaration", passed := psTestDualSourcePiLambdaDeclaration },
+  { name := "dual-source annotated let", passed := psTestDualSourceAnnotatedLet },
+  { name := "dual-source inferred let", passed := psTestDualSourceInferredLet },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

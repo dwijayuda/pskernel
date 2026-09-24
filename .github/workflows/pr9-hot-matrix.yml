@@ -1,0 +1,46 @@
+name: PR9 hot-range matrix
+
+on:
+  push:
+    branches: [diagnostic/pr9-hot-matrix]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  range:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { start: 16484, count: 16 }
+          - { start: 18843, count: 16 }
+          - { start: 20000, count: 15 }
+          - { start: 22640, count: 16 }
+          - { start: 25000, count: 15 }
+          - { start: 27515, count: 16 }
+          - { start: 33015, count: 16 }
+          - { start: 36452, count: 16 }
+          - { start: 37609, count: 16 }
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Replay root range
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "60000"
+          PSKERNEL_WORKER_HEAP_MIB: "2048"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 ${{ matrix.start }} ${{ matrix.count }} ${{ matrix.count }} 1

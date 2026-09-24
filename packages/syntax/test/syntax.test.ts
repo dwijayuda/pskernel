@@ -130,6 +130,23 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
 }
 
 {
+  const proofScript=parseV061Module(
+    'def nested(x : Nat) : Nat := outer(inner(x), x + 1);',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const reparsed=parseV061LeanSubsetModule(lean);
+  equal(
+    lowerV061ModuleToProofScript(reparsed),
+    lowerV061ModuleToProofScript(proofScript),
+    'redundant Lean application grouping must not change canonical ProofScript',
+  );
+  equal(
+    lowerV061ModuleToProofScript(reparsed),
+    'def nested(x : Nat) : Nat := outer(inner(x), x + 1);\n',
+  );
+}
+
+{
   const source=[
     'structure Box(α : Type) where { value : α; };',
     'class Sized(α : Type) where { size : α -> Nat; };',

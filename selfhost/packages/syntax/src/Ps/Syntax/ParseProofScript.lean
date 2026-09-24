@@ -611,22 +611,153 @@ def psParseProofScriptTerm
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psParseProofScriptTermWithFuel (cursor.remaining.length + 1) cursor
 
+def psParseProofScriptInductiveConstructorsWithFuel
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (constructorsRev : List PsSyntaxInductiveConstructor) :
+    Except PsParseError
+      (PsParseResult (List PsSyntaxInductiveConstructor)) :=
+  match fuel with
+  | 0 => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      if psTokenCursorAtText cursor "}" then
+        Except.ok {
+          value := constructorsRev.reverse
+          cursor := cursor
+        }
+      else
+        match psTokenCursorExpectText cursor "|" with
+        | Except.error error => Except.error error
+        | Except.ok bar =>
+            match psTokenCursorExpectKind
+                bar.cursor
+                PsTokenKind.identifier with
+            | Except.error error => Except.error error
+            | Except.ok name =>
+                match psParseProofScriptBindersWithFuel
+                    name.cursor.remaining.length
+                    name.cursor
+                    [] with
+                | Except.error error => Except.error error
+                | Except.ok fields =>
+                    match psTokenCursorExpectText fields.cursor ";" with
+                    | Except.error error => Except.error error
+                    | Except.ok semi =>
+                        let sourceName : PsSyntaxName := {
+                          segments := [name.token.text]
+                          span := name.token.span
+                        }
+                        let constructor : PsSyntaxInductiveConstructor := {
+                          name := sourceName
+                          fields := fields.value
+                          span := {
+                            start := bar.token.span.start
+                            stop := semi.token.span.stop
+                          }
+                        }
+                        psParseProofScriptInductiveConstructorsWithFuel
+                          remaining
+                          semi.cursor
+                          (constructor :: constructorsRev)
+
+def psParseProofScriptInductiveDeclaration
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
+  match psTokenCursorExpectText cursor "inductive" with
+  | Except.error error => Except.error error
+  | Except.ok keyword =>
+      match psParseSyntaxName keyword.cursor with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          match psParseProofScriptBindersWithFuel
+              name.cursor.remaining.length
+              name.cursor
+              [] with
+          | Except.error error => Except.error error
+          | Except.ok params =>
+              let parseAfterResult
+                  (resultType : Option PsSyntaxTerm)
+                  (afterResult : PsTokenCursor) :=
+                match psTokenCursorExpectText afterResult "where" with
+                | Except.error error => Except.error error
+                | Except.ok afterWhere =>
+                    match psTokenCursorExpectText afterWhere.cursor "{" with
+                    | Except.error error => Except.error error
+                    | Except.ok afterOpen =>
+                        match psParseProofScriptInductiveConstructorsWithFuel
+                            afterOpen.cursor.remaining.length
+                            afterOpen.cursor
+                            [] with
+                        | Except.error error => Except.error error
+                        | Except.ok constructors =>
+                            match constructors.value with
+                            | [] =>
+                                match psTokenCursorPeek constructors.cursor with
+                                | none =>
+                                    Except.error
+                                      (PsParseError.unexpectedEnd
+                                        "inductive constructor")
+                                | some token =>
+                                    Except.error
+                                      (PsParseError.expectedText
+                                        "|"
+                                        token.text
+                                        token.span)
+                            | _ =>
+                                match psTokenCursorExpectText
+                                    constructors.cursor
+                                    "}" with
+                                | Except.error error => Except.error error
+                                | Except.ok close =>
+                                    let finalCursor :=
+                                      psParseOptionalSemicolon close.cursor
+                                    Except.ok {
+                                      value :=
+                                        PsSyntaxDeclaration.inductiveDecl
+                                          name.value
+                                          params.value
+                                          resultType
+                                          constructors.value
+                                          {
+                                            start := keyword.token.span.start
+                                            stop := close.token.span.stop
+                                          }
+                                      cursor := finalCursor
+                                    }
+              if psTokenCursorAtText params.cursor ":" then
+                match psTokenCursorAdvance params.cursor with
+                | none =>
+                    Except.error
+                      (PsParseError.unexpectedEnd "inductive result type")
+                | some afterColon =>
+                    match psParseProofScriptTerm afterColon.cursor with
+                    | Except.error error => Except.error error
+                    | Except.ok resultType =>
+                        parseAfterResult
+                          (some resultType.value)
+                          resultType.cursor
+              else
+                parseAfterResult none params.cursor
+
 def psParseProofScriptDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
   match psTokenCursorPeek cursor with
   | none => Except.error (PsParseError.unexpectedEnd "declaration")
   | some keyword =>
-      let isDefinition := keyword.text == "def"
-      let isTheorem := keyword.text == "theorem"
-      if !(isDefinition || isTheorem) then
-        Except.error
+      if keyword.text == "inductive" then
+        psParseProofScriptInductiveDeclaration cursor
+      else
+        let isDefinition := keyword.text == "def"
+        let isTheorem := keyword.text == "theorem"
+        if !(isDefinition || isTheorem) then
+          Except.error
           (PsParseError.expectedText
             "def or theorem"
             keyword.text
             keyword.span)
-      else
-        match psTokenCursorAdvance cursor with
+        else
+          match psTokenCursorAdvance cursor with
         | none => Except.error (PsParseError.unexpectedEnd "declaration name")
         | some afterKeyword =>
             match psParseSyntaxName afterKeyword.cursor with

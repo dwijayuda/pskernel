@@ -542,25 +542,33 @@ remain unsupported until a concrete ProofScript library requires them.
 
 ## Bounded exact-search checkpoint
 
-ProofScript now has a first deterministic `exact?` slice. It is an untrusted
-search procedure, not a proof authority.
+ProofScript has a deterministic, untrusted `exact?` search procedure. Search
+never becomes proof authority: every accepted candidate is still submitted
+through ordinary `exact` and pskernel.
 
 Candidate order is deterministic:
 
 1. local hypotheses, newest first;
 2. already-admitted environment constants, newest first.
 
-The environment phase considers only declarations with zero universe
-parameters and stops after 4096 candidates. A candidate is only accepted when
-its already-checkable type is definitionally equal to the goal. The selected
-term is then submitted through the ordinary `exact` transition and pskernel
-checker.
+For each candidate, the bounded search now mirrors the relevant part of Lean
+4.34 `librarySearchSymm`:
 
-This intentionally omits Lean's broader library-search machinery:
-discrimination-tree indexing, symmetry search, `Iff.mp`/`Iff.mpr`
-variants, applying lemmas with premises, `solveByElim` subgoal discharge,
-polymorphic level instantiation, `using`, configuration, `+all`, and
-`+grind`.
+1. try the original goal;
+2. if the goal is an ordinary `Eq`, try its symmetric target;
+3. if the symmetric trial closes with zero subgoals, reconstruct the requested
+   proof using the real polymorphic `Eq.symm`.
+
+Candidate application may instantiate ordinary implicit/default binders only
+when the goal determines every inserted argument. Trials run in isolated Meta
+contexts, must leave no unresolved expression/universe metavariables, and are
+kernel-checked before selection. Environment scanning remains bounded to 4096
+candidates.
+
+This still intentionally omits Lean's broader library-search machinery:
+discrimination-tree indexing/priorities, Iff.mp/Iff.mpr variants, strict or
+instance-implicit candidate synthesis, candidates that leave premises,
+`solveByElim` recursion, `using`, configuration, `+all`, and `+grind`.
 
 A failed candidate probe is side-effect-free. Once a candidate matches, any
 failure during actual assignment or parent-proof reconstruction propagates;

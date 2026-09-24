@@ -339,3 +339,13 @@ Lean's global simp environment. Both rules satisfy the current strict
 structural-decrease test and are pairwise non-overlapping. This is
 intentionally narrower than Lean 4.34's simplifier, while proof reconstruction
 continues through kernel-checked Eq transport.
+
+## Lean 4.34 exact-search symmetry checkpoint
+
+Pinned `Lean.Meta.Tactic.LibrarySearch.librarySearchSymm` searches both the
+original goal and a symmetry-transformed goal, interleaving candidates from the
+two searches. ProofScript now owns the smallest corresponding slice for
+ordinary `Eq`: deterministic local/environment candidates are tried directly
+and symmetrically, and a symmetric zero-subgoal hit is reconstructed with the
+real `Eq.symm`. This does not imply support for Lean's Iff direction search
+or recursive `solveByElim` discharge.

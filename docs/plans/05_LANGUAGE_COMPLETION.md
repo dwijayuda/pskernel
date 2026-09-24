@@ -686,8 +686,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 6. Validate and then broaden the landed bounded zero-subgoal `exact?` search
    only where Lean library-search semantics can be modeled explicitly. It now
    infers ordinary implicit/default candidate arguments when the goal resolves
-   all of them, while unresolved premises, strict/instance implicits,
-   solveByElim recursion, symmetry, and Iff search remain fail-closed.
+   all of them and performs bounded Eq symmetry search using real `Eq.symm`.
+   Unresolved premises, strict/instance implicits, solveByElim recursion, Iff
+   direction search, and broader indexed library search remain fail-closed.
 7. Continue DS5 from the landed mixed-source project + replay-gated persistent
    proofscript-module@2 artifact path. Source FFI, assurance, exact package-root
    policy, transitive package-lock v3 closure fingerprinting, and bounded public

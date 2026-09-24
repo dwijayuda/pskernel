@@ -294,7 +294,7 @@
       "path": "packages/elab",
       "phase": "B",
       "trust": "untrusted-support",
-      "status": "v061-zero-subgoal-exact-search+induction-branch-names+bounded-rfl+nested-expected-args+source-ffi-admission+imported-metadata+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
+      "status": "v061-exact-search-eq-symmetry+zero-subgoal-exact-search+induction-branch-names+bounded-rfl+nested-expected-args+source-ffi-admission+imported-metadata+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
       "packageName": "@proofscript/elab",
       "dependsOn": [
         "syntax",
@@ -307,8 +307,9 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "Bounded exact? now mirrors Lean librarySearchSymm for ordinary Eq goals: each local/environment candidate is tried against the original goal, then the symmetric Eq goal; a symmetric hit is reconstructed with the real polymorphic Eq.symm and admitted through ordinary exact/pskernel.",
+        "Eq symmetry does not relax the zero-subgoal rule. Iff direction search, strict/instance implicit candidate binders, unresolved premises, solveByElim recursion, configs/using/+all/+grind, and broad library indexing remain fail-closed.",
         "Bounded exact? now trials local/environment candidates in an isolated ExprMetaContext and may consume ordinary implicit/default binders when the goal determines every inserted argument; candidates that leave any premise metavariable unresolved are rejected.",
-        "Strict-implicit and instance-implicit candidate binders remain fail-closed in exact? until their Lean library-search/application semantics are modeled. No solveByElim recursion, symmetry search, Iff direction search, or subgoal generation is introduced.",
         "Environment candidates are no longer categorically restricted to zero universe parameters: trial constants receive fresh universe metavariables, but successful zero-subgoal candidates must resolve all of them before kernel checking.",
         "Bounded induction now preserves admitted constructor field binder names in each branch context when collision-free, using deterministic numeric suffixes on collisions. Direct recursive fields also receive a `<field>_ih` induction-hypothesis name.",
         "This naming layer changes only untrusted tactic-context lookup. Recursor minor binder order, branch target construction, proof lambda abstraction, and final pskernel checking are unchanged.",

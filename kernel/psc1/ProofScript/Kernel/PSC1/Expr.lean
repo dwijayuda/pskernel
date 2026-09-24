@@ -223,6 +223,41 @@ def lowerLooseBVars (e : Expr) (cutoff amount : Nat) : Expr :=
   else if cutoff < amount then e
   else lowerLooseBVarsCore e cutoff amount
 
+
+def mapLevels (params : List Name) (values : List Level) : List Level → List Level
+  | [] => []
+  | u :: us =>
+      Level.instantiateParams u params values :: mapLevels params values us
+
+/-- Kernel universe-parameter instantiation over expressions. -/
+def instantiateLevelParams (e : Expr) (params : List Name) (values : List Level) : Expr :=
+  match e with
+  | .bvar i => .bvar i
+  | .fvar n => .fvar n
+  | .mvar n => .mvar n
+  | .sort u => .sort (Level.instantiateParams u params values)
+  | .const n us => .const n (mapLevels params values us)
+  | .app f a =>
+      .app (instantiateLevelParams f params values) (instantiateLevelParams a params values)
+  | .lam n type body bi =>
+      .lam n
+        (instantiateLevelParams type params values)
+        (instantiateLevelParams body params values)
+        bi
+  | .forallE n type body bi =>
+      .forallE n
+        (instantiateLevelParams type params values)
+        (instantiateLevelParams body params values)
+        bi
+  | .letE n type value body nondep =>
+      .letE n
+        (instantiateLevelParams type params values)
+        (instantiateLevelParams value params values)
+        (instantiateLevelParams body params values)
+        nondep
+  | .lit l => .lit l
+  | .proj n i inner => .proj n i (instantiateLevelParams inner params values)
+
 end Expr
 
 end ProofScript.Kernel.PSC1

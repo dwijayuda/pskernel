@@ -31,14 +31,26 @@ import {
 
 function elaborateTypePositionApplication(
   fn:Expr,
-  args:readonly Expr[],
+  args:readonly V061TypeExpr[],
   context:V061CoreElabContext,
+  expected?:Expr,
 ):Expr {
+  const source={
+    length:args.length,
+    elaborate:(index:number,expectedType:Expr)=>({
+      term:elaborateV061TypePositionTerm(
+        args[index]!,
+        context,
+        expectedType,
+      ),
+    }),
+  };
   const applied=elaborateApplication({
     environment:context.environment,
     metaContext:context.metaContext,
     fn,
-    args,
+    args:source,
+    ...(expected===undefined?{}:{expectedType:expected}),
     localContext:context.localContext,
     localInstances:v061LocalInstanceTerms(context),
     globalInstances:context.globalInstances,
@@ -58,6 +70,7 @@ function elaborateTypePositionApplication(
 function elaborateV061TypePositionTerm(
   syntax:V061TypeExpr,
   context:V061CoreElabContext,
+  expected?:Expr,
 ):Expr {
   switch(syntax.kind){
     case 'nat':
@@ -68,7 +81,7 @@ function elaborateV061TypePositionTerm(
         context,
       );
     case 'group':
-      return elaborateV061TypePositionTerm(syntax.value,context);
+      return elaborateV061TypePositionTerm(syntax.value,context,expected);
     case 'named':{
       if(syntax.name==='Prop')return sort(levelZero);
       if(syntax.name==='Type')return sort(levelSucc(levelZero));
@@ -80,15 +93,21 @@ function elaborateV061TypePositionTerm(
           "PS_ELAB_UNKNOWN_TYPE_TERM: unknown name '"+syntax.name+"'",
         );
       }
-      return elaborateV061Constant(name,context);
+      const reference=elaborateV061Constant(name,context);
+      if(expected===undefined)return reference;
+      return elaborateTypePositionApplication(
+        reference,
+        [],
+        context,
+        expected,
+      );
     }
     case 'application':
       return elaborateTypePositionApplication(
         elaborateV061TypePositionTerm(syntax.fn,context),
-        syntax.args.map(
-          (arg)=>elaborateV061TypePositionTerm(arg,context),
-        ),
+        syntax.args,
         context,
+        expected,
       );
     case 'unary':{
       const checker=new TypeChecker(
@@ -147,11 +166,9 @@ function elaborateV061TypePositionTerm(
     case 'equality':
       return elaborateTypePositionApplication(
         elaborateV061Constant(nameFromDotted('Eq'),context),
-        [
-          elaborateV061TypePositionTerm(syntax.left,context),
-          elaborateV061TypePositionTerm(syntax.right,context),
-        ],
+        [syntax.left,syntax.right],
         context,
+        expected,
       );
     case 'dependentArrow':{
       const domain=elaborateV061Type(syntax.domain,context);

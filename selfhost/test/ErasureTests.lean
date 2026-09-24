@@ -282,6 +282,30 @@ def psTestDualSourceLeanNativePartialApplication : Bool :=
         && leanOutput.contains "=> addPair(1n,"
   | _, _ => false
 
+def psDebugPartialApplication : IO Unit := do
+  let leanSource :=
+    "def addPair (a : Nat) (b : Nat) : Nat := Nat.add a b\n" ++
+    "def addOne : Nat -> Nat := addPair 1"
+  let proofScriptSource :=
+    "def addPair(a : Nat)(b : Nat) : Nat := Nat.add(a, b); " ++
+    "def addOne : Nat -> Nat := addPair(1);"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      if psTestDualSourceLeanNativePartialApplication then
+        pure ()
+      else
+        IO.println ("PSC1_PARTIAL_APP_DEBUG_LEAN: " ++ leanOutput)
+        IO.println ("PSC1_PARTIAL_APP_DEBUG_PS: " ++ proofScriptOutput)
+  | Except.error leanError, Except.error psError =>
+      IO.println
+        ("PSC1_PARTIAL_APP_DEBUG_ERRORS: " ++ leanError ++ " / " ++ psError)
+  | Except.error leanError, Except.ok _ =>
+      IO.println ("PSC1_PARTIAL_APP_DEBUG_LEAN_ERROR: " ++ leanError)
+  | Except.ok _, Except.error psError =>
+      IO.println ("PSC1_PARTIAL_APP_DEBUG_PS_ERROR: " ++ psError)
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -313,6 +337,7 @@ def psRunErasureTests : List PsErasureNamedTest -> IO Bool
       pure (test.passed && restPassed)
 
 def main : IO Unit := do
+  psDebugPartialApplication
   let passed ← psRunErasureTests psErasureTests
   if passed then
     IO.println "PSC1_ERASURE_TESTS: PASS"

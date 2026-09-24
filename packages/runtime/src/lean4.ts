@@ -725,6 +725,79 @@ export function invokeLean434JsExtern(
 }
 
 
+export type Lean434IntrinsicAdapter='identity';
+
+export interface Lean434IntrinsicBinding {
+  readonly leanDeclaration:string;
+  /** Full kernel-expression arity, including erased type/proof arguments. */
+  readonly arity:number;
+  readonly runtimeArgs:readonly number[];
+  readonly adapter:Lean434IntrinsicAdapter;
+  readonly upstreamSource:string;
+}
+
+/**
+ * Runtime semantics that Lean's compiler treats specially even though the
+ * declaration has no @[extern] or @[implemented_by] attribute.
+ *
+ * Keep this list tiny and source-verified. These are execution overrides only:
+ * the logical declaration body is still admitted by pskernel.
+ */
+export const LEAN434_JS_INTRINSIC_BINDINGS:
+readonly Lean434IntrinsicBinding[]=[
+  {
+    leanDeclaration:'unsafeCast',
+    arity:3,
+    runtimeArgs:[2],
+    adapter:'identity',
+    upstreamSource:'Init/Prelude.lean',
+  },
+] as const;
+
+const intrinsicByDeclaration=new Map(
+  LEAN434_JS_INTRINSIC_BINDINGS.map(
+    (entry)=>[entry.leanDeclaration,entry] as const,
+  ),
+);
+
+export function findLean434JsIntrinsic(
+  leanDeclaration:string,
+):Lean434IntrinsicBinding|undefined{
+  return intrinsicByDeclaration.get(leanDeclaration);
+}
+
+export function invokeLean434JsIntrinsic(
+  binding:Lean434IntrinsicBinding,
+  args:readonly unknown[],
+):unknown{
+  if(args.length!==binding.arity){
+    throw new Error(
+      "Lean 4.34 intrinsic arity mismatch for '"+
+      binding.leanDeclaration+"'",
+    );
+  }
+  const runtimeArgs=binding.runtimeArgs.map((index)=>{
+    if(index<0||index>=args.length){
+      throw new Error(
+        "Lean 4.34 intrinsic runtime argument index out of range for '"+
+        binding.leanDeclaration+"'",
+      );
+    }
+    return args[index]!;
+  });
+  switch(binding.adapter){
+    case 'identity':
+      if(runtimeArgs.length!==1){
+        throw new Error(
+          "Lean 4.34 identity intrinsic requires one runtime argument: '"+
+          binding.leanDeclaration+"'",
+        );
+      }
+      return runtimeArgs[0];
+  }
+}
+
+
 export type Lean434ImplementedByAdapter='identity';
 
 export interface Lean434ImplementedByBinding {

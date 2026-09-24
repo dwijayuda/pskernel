@@ -20,6 +20,9 @@ lean_lib PsCore where
   roots := #[
     `Ps.Core.Level,
     `Ps.Core.Expr,
+    `Ps.Core.Abstract,
+    `Ps.Core.Builtin,
+    `Ps.Core.LevelSubst,
     `Ps.Core.Equality,
     `Ps.Core.Subst,
     `Ps.Core.Declaration

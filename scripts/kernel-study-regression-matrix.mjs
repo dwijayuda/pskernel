@@ -177,6 +177,20 @@ if(localAssuranceRunner.includes('& npm install --no-audit --no-fund')){
 if(localAssuranceRunner.includes('[string]$Log = "full-std.log"')){
   throw new Error('local Full-Std assurance runner drift: default evidence must not overwrite the tracked historical full-std.log');
 }
+for(const marker of [
+  '$trackedChanges = @(& git status --porcelain --untracked-files=no)',
+  '$nodeVersion = (& node --version).Trim()',
+  'Installing locked dependencies with npm ci...',
+  'Running full npm test gate...',
+  'Running bounded real-corpus gate...',
+  'Running Lean compiler-IR native reduction smoke...',
+  'Running canonical Init.Prelude module-stream preflight...',
+  'Running canonical Full Std replay...',
+  'exit $code',
+]){
+  const occurrences=localAssuranceRunner.split(marker).length-1;
+  if(occurrences!==1)throw new Error('local Full-Std assurance runner drift: expected exactly one occurrence of '+marker+', found '+occurrences);
+}
 const gitignore=readFileSync('.gitignore','utf8').split(/\r?\n/);
 if(!gitignore.includes('full-std.local.log')){
   throw new Error('local Full-Std assurance runner drift: full-std.local.log must remain ignored');

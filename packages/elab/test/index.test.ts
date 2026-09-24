@@ -934,10 +934,8 @@ console.log('ok - @proofscript/elab bounded Eq-only rfl tactic');
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();
-  addMinimalEqEnvironment(env);
-  const kernel=new Kernel(env);
   const Nat=nameFromDotted('Nat');
-  kernel.addAxiom({
+  env.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],
@@ -953,13 +951,14 @@ function makeNatNotationEnvironment():Environment {
     ),
   );
   for(const name of ['Nat.add','Nat.sub','Nat.mul']){
-    kernel.addAxiom({
+    env.add({
       kind:'axiom',
       name:nameFromDotted(name),
       levelParams:[],
       type:binaryType,
     });
   }
+  addMinimalEqEnvironment(env);
   return env;
 }
 {

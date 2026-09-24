@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
+import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {Lean4ExportReplay} from '../dist/src/integration/lean4export.js';
 
@@ -13,6 +14,8 @@ const jobs=jobsIdx>=0?args[jobsIdx+1]:(process.env.CONLECHE_JOBS||'1');
 if(!fileArg)throw new Error('usage: formal-cosign <file.ndjson> [--con-leche-bin PATH] [--jobs N]');
 const file=resolve(fileArg);
 if(!fs.existsSync(file))throw new Error('formal-cosign: file not found: '+file);
+const formalLock=JSON.parse(fs.readFileSync('FORMAL_LOCK.json','utf8'));
+const inputSha256=createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 
 async function pskernelAccept(path){
   const replay=new Lean4ExportReplay();
@@ -39,13 +42,13 @@ async function runConLeche(path){
 
 const ps=await pskernelAccept(file);
 if(!ps.ok){
-  console.log(JSON.stringify({certified:false,pskernel:'reject',conLeche:'not-run',file,error:ps.error},null,2));
+  console.log(JSON.stringify({certified:false,pskernel:'reject',conLeche:'not-run',file,inputSha256,error:ps.error},null,2));
   process.exit(1);
 }
 let cl;
 try{cl=await runConLeche(file);}
 catch(e){
-  console.log(JSON.stringify({certified:false,pskernel:'accept',conLeche:'unavailable',file,error:e instanceof Error?e.message:String(e)},null,2));
+  console.log(JSON.stringify({certified:false,pskernel:'accept',conLeche:'unavailable',file,inputSha256,error:e instanceof Error?e.message:String(e)},null,2));
   process.exit(3);
 }
 const verdict=cl.code===0?'accept':cl.code===2?'decline':cl.code===1?'reject':'error';
@@ -54,6 +57,15 @@ console.log(JSON.stringify({
   certified,
   assurance:'formal-soundness-cosign-v1',
   file,
+  inputSha256,
+  formalChecker:{
+    repository:formalLock.checker.repository,
+    commit:formalLock.checker.commit,
+    mode:formalLock.checker.mode,
+    theorem:formalLock.checker.theorem,
+    toolchain:formalLock.checker.toolchain
+  },
+  transport:formalLock.transport,
   pskernel:{verdict:'accept',constants:ps.constants,stats:ps.stats},
   conLeche:{verdict,exitCode:cl.code,signal:cl.signal,stdout:cl.stdout,stderr:cl.stderr},
   formalClaim:certified

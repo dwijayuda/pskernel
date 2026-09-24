@@ -16,6 +16,7 @@ import {
   TypeChecker,
 } from 'lean-ts-kernel';
 import {
+  LEAN434_WORLD_TOKEN,
   Lean434EvaluationError,
   Lean434Evaluator,
 } from '../src/lean4-eval.js';
@@ -28,6 +29,7 @@ import {ctor,nat,natAdd,natMul,natSub,uint8} from '../src/index.js';
 import {
   LEAN434_JS_EXTERN_MANIFEST,
   LEAN434_SOURCE_VERSION,
+  LeanRef,
   LeanRefEmptyError,
   findLean434JsExtern,
   findLean434JsImplementedBy,
@@ -427,3 +429,47 @@ console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility s
   equal(evaluator.evaluate(recExpr),5n);
 }
 console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressions');
+
+{
+  const evaluator=new Lean434Evaluator(new Environment());
+  const typeToken=evaluator.evaluate(sort(levelZero));
+
+  const mkRefAction=evaluator.evaluate(
+    mkAppN(
+      constant(nameFromDotted('ST.Prim.mkRef')),
+      [sort(levelZero),sort(levelZero),natLit(5n)],
+    ),
+  );
+  const firstRun=evaluator.runStateAction(mkRefAction);
+  const secondRun=evaluator.runStateAction(mkRefAction);
+  equal(firstRun.state,LEAN434_WORLD_TOKEN);
+  equal(secondRun.state,LEAN434_WORLD_TOKEN);
+  ok(firstRun.value instanceof LeanRef,'ST.Prim.mkRef did not allocate LeanRef');
+  ok(secondRun.value instanceof LeanRef,'second ST.Prim.mkRef did not allocate LeanRef');
+  ok(
+    !lean_st_ref_ptr_eq(firstRun.value,secondRun.value),
+    'running ST.Prim.mkRef twice must allocate distinct references',
+  );
+  equal(lean_st_ref_get(firstRun.value),5n);
+
+  let getFn=evaluator.evaluate(
+    constant(nameFromDotted('ST.Prim.Ref.get')),
+  );
+  getFn=evaluator.applyRuntimeValue(getFn,typeToken);
+  getFn=evaluator.applyRuntimeValue(getFn,typeToken);
+  const getAction=evaluator.applyRuntimeValue(getFn,firstRun.value);
+  equal(evaluator.runStateAction(getAction).value,5n);
+
+  let setFn=evaluator.evaluate(
+    constant(nameFromDotted('ST.Prim.Ref.set')),
+  );
+  setFn=evaluator.applyRuntimeValue(setFn,typeToken);
+  setFn=evaluator.applyRuntimeValue(setFn,typeToken);
+  setFn=evaluator.applyRuntimeValue(setFn,firstRun.value);
+  const setAction=evaluator.applyRuntimeValue(setFn,9n);
+  const setResult=evaluator.runStateAction(setAction);
+  equal(setResult.value,undefined);
+  equal(setResult.state,LEAN434_WORLD_TOKEN);
+  equal(lean_st_ref_get(firstRun.value),9n);
+}
+console.log('ok - Lean ST externs execute as deferred state actions');

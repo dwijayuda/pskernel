@@ -1263,6 +1263,34 @@ console.log('ok - @proofscript/elab parameterized verified match recursor elabor
 }
 console.log('ok - @proofscript/elab match branch Nat notation meta instantiation');
 
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'function chooseBool(flag : Bool) : Nat := '+
+    'match flag with { | true => 1; | false => 2; };',
+  ),env);
+  const definition=result.definitions.find(
+    (item)=>item.name.kind==='str'&&item.name.value==='chooseBool',
+  );
+  equal(definition?.value.kind,'lam');
+  if(definition?.value.kind==='lam'){
+    const checker=new TypeChecker(
+      result.environment,
+      new LocalContext(),
+    );
+    const onTrue=checker.whnf(
+      app(definition.value,constant(nameFromDotted('Bool.true'))),
+    );
+    const onFalse=checker.whnf(
+      app(definition.value,constant(nameFromDotted('Bool.false'))),
+    );
+    equal(exprEq(onTrue,natLit(1n)),true);
+    equal(exprEq(onFalse,natLit(2n)),true);
+  }
+}
+console.log('ok - @proofscript/elab verified Bool literal match recursor');
+
+
 
 
 {

@@ -28,12 +28,21 @@ function patternConstructorName(
   pattern:V061Pattern,
   inductive:Name,
 ):Name {
+  const inductiveText=nameToString(inductive);
+  if(pattern.kind==='bool'){
+    if(inductiveText!=='Bool'){
+      throw new Error(
+        'PS_ELAB_MATCH_PATTERN_UNSUPPORTED: Bool pattern cannot match '+
+        inductiveText,
+      );
+    }
+    return nameFromDotted(pattern.value?'Bool.true':'Bool.false');
+  }
   if(pattern.kind!=='constructor'){
     throw new Error(
-      'PS_ELAB_MATCH_PATTERN_UNSUPPORTED: verified ADT match requires constructor patterns',
+      'PS_ELAB_MATCH_PATTERN_UNSUPPORTED: verified match currently supports constructor or Bool literal patterns',
     );
   }
-  const inductiveText=nameToString(inductive);
   if(pattern.name.startsWith('.')){
     return nameFromDotted(inductiveText+pattern.name);
   }
@@ -126,6 +135,13 @@ export function elaborateV061MatchExpression(
   );
   const minors=inductive.ctors.map((constructor)=>{
     const alternative=byConstructor.get(nameToString(constructor))!;
+    if(alternative.pattern.kind==='bool'){
+      return elaborate(
+        alternative.body,
+        context,
+        expected,
+      ).term;
+    }
     return elaborateV061MatchMinor(
       alternative,
       constructor,

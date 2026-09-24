@@ -18,9 +18,11 @@ import {
 } from './v061-nat-notation-elab.js';
 import {
   elaborateV061BoolBinaryNotation,
-  elaborateV061PrimitiveBooleanEquality,
   isV061BoolBinary,
 } from './v061-bool-notation-elab.js';
+import {
+  elaborateV061PrimitiveBooleanEquality,
+} from './v061-primitive-equality-elab.js';
 import {
   requireV061NotationConstant,
   type V061TermElaborator,

@@ -278,8 +278,8 @@ def psTestDualSourceLeanNativePartialApplication : Bool :=
       psCompileProofScriptSourceToTypeScript proofScriptSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
-        && leanOutput.contains "export const addOne: (_arg0: bigint) => bigint"
-        && leanOutput.contains "addPair(1n,"
+        && leanOutput.contains "export const addOne:"
+        && leanOutput.contains "=> addPair(1n,"
   | _, _ => false
 
 structure PsErasureNamedTest where

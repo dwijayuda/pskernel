@@ -116,3 +116,30 @@ def psDecodeStringLiteral (text : String) : Option String :=
   | '"' :: rest =>
       psDecodeStringBodyWithFuel (rest.length + 1) rest []
   | _ => none
+
+def psDecodeCharacterEscape
+    (escaped : Char) : Option Char :=
+  match escaped with
+  | '\'' => some '\''
+  | '"' => some '"'
+  | '\\' => some '\\'
+  | 'n' => some '\n'
+  | 'r' => some '\r'
+  | 't' => some '\t'
+  | _ => none
+
+def psDecodeCharacterLiteral (text : String) : Option Char :=
+  match text.toList with
+  | '\'' :: char :: '\'' :: [] =>
+      some char
+  | '\'' :: '\\' :: escaped :: '\'' :: [] =>
+      psDecodeCharacterEscape escaped
+  | '\'' :: '\\' :: 'x' :: rest =>
+      match psDecodeEscapedChar 2 rest with
+      | some (char, ['\'']) => some char
+      | _ => none
+  | '\'' :: '\\' :: 'u' :: rest =>
+      match psDecodeEscapedChar 4 rest with
+      | some (char, ['\'']) => some char
+      | _ => none
+  | _ => none

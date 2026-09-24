@@ -45,13 +45,19 @@ def dumpDeclarationRuntimeMetadata (env : Environment) : IO (Array Json × Array
   let mut implementedBy := #[]
   for (name, _) in env.constants.map₁.toList do
     if let some data := getExternAttrData? env name then
+      let moduleIdx? := env.getModuleIdxFor? name
       externs := externs.push <| Json.mkObj [
         ("declaration", name.toString),
+        ("module", moduleIdx?.map (moduleNameForIdx env) |>.getD ""),
+        ("moduleIndex", moduleIdx?.map Json.mkNat |>.getD Json.null),
         ("entries", externDataJson data)
       ]
     if let some impl := Compiler.getImplementedBy? env name then
+      let moduleIdx? := env.getModuleIdxFor? name
       implementedBy := implementedBy.push <| Json.mkObj [
         ("declaration", name.toString),
+        ("module", moduleIdx?.map (moduleNameForIdx env) |>.getD ""),
+        ("moduleIndex", moduleIdx?.map Json.mkNat |>.getD Json.null),
         ("implementation", impl.toString)
       ]
   return (externs, implementedBy)

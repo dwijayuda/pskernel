@@ -50,6 +50,13 @@ lean_lib PsEnvironment where
     `Ps.Environment.Resolve
   ]
 
+lean_lib PsBridge where
+  srcDir := "packages/bridge/src"
+  roots := #[
+    `Ps.Bridge.Json,
+    `Ps.Bridge.CheckedAdmissions
+  ]
+
 lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
@@ -92,3 +99,7 @@ lean_exe psc1_tests where
 lean_exe psc1_translation_tests where
   srcDir := "test"
   root := `TranslationTests
+
+lean_exe psc1_bridge_tests where
+  srcDir := "test"
+  root := `BridgeTests

@@ -52,3 +52,7 @@ lean_lib PsMeta where
 lean_exe psc1 where
   srcDir := "src"
   root := `Main
+
+lean_exe psc1_tests where
+  srcDir := "test"
+  root := `BootstrapTests

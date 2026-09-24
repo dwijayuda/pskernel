@@ -1,6 +1,6 @@
 # ProofScript WebAssembly backend plan
 
-Status: **W2 fixed-width ABI + check/build/run implemented; executable CI evidence pending runner recovery**
+Status: **W2 closed on a fully green executable closure matrix; W3 Nat/Int BigInt work remains next**
 
 This plan adds WebAssembly as an execution backend for pskernel-admitted
 ProofScript programs. It does not change ProofScript logical semantics and does
@@ -34,10 +34,25 @@ Still intentionally unsupported:
 - fixed-width UInt arithmetic/comparison intrinsics until they exist explicitly in verified IR;
 - structures/ADTs, function values, and recursive runtime data until their Wasm representations land.
 
-GitHub Actions currently creates the PR job but terminates before any step is
-recorded (`steps: null`). Per repository anti-drift policy this is infrastructure
-evidence, not a passing or failing semantic gate. Keep the PR draft until an
-executing root gate is obtained.
+W2 closure is frozen at commit
+`f1f59a3b9e7018089743df3111f3ad21bc23c380`, validated by GitHub Actions
+workflow run `35978437272` on 2026-09-24. The executable closure matrix passed:
+
+- exact dependency install;
+- full package-graph build;
+- elaboration;
+- erasure;
+- package integration;
+- TypeScript backend;
+- WebAssembly backend;
+- root test suite;
+- workspace-lock anti-drift;
+- source-shape anti-drift;
+- architecture anti-drift.
+
+This checkpoint is the pre-`main`-integration W2 baseline. Any integration or
+W3 work must preserve the same gates before W2 is considered stable on the new
+HEAD.
 
 ## 1. Goals
 
@@ -281,7 +296,8 @@ Initial capability policy:
 | Bool | W1 supported |
 | Unit | W1 supported |
 | fixed-width UInt values/calls | W2 supported with JS ABI normalization |
-| fixed-width UInt arithmetic | blocked until verified IR intrinsics land |
+| fixed-width UInt addition | W2 supported with Lean-faithful modular wrapping |
+| remaining fixed-width UInt arithmetic/comparisons | blocked until explicit verified-IR intrinsics land |
 | Nat / Int | blocked until arbitrary-precision runtime lands |
 | String | blocked until runtime ABI lands |
 | structures | blocked until WasmGC/layout checkpoint |
@@ -422,9 +438,12 @@ Current W2 checkpoint supports runtime values and direct calls for:
 - logical ABI metadata retained separately from physical Wasm types;
 - JS-host normalization so UInt32/UInt64 high-bit results remain unsigned.
 
-Arithmetic/comparison intrinsics remain blocked until they exist in verified IR
-with explicit Lean-faithful semantics. Direct recursion and noncapturing
-function references remain later W2 work.
+Fixed-width UInt addition is implemented with Lean-faithful modular wrapping:
+UInt8/UInt16 normalize after addition, UInt32 uses i32 wrapping, and UInt64 uses
+i64 wrapping with unsigned host-ABI restoration. Other arithmetic/comparison
+intrinsics remain blocked until they exist explicitly in verified IR. Direct
+recursion and noncapturing function references remain later work rather than
+being silently approximated.
 
 Do not introduce Wasm-specific source types.
 
@@ -502,12 +521,13 @@ Add:
 
 ## 15. Immediate execution queue
 
-1. Obtain an actually executing root/CI gate; continue treating `steps: null`
-   jobs as infrastructure-only evidence.
-2. Define explicit verified-IR fixed-width UInt arithmetic/comparison intrinsics
-   before adding corresponding Wasm instructions.
-3. Design and implement the arbitrary-precision Nat/Int host ABI without
-   narrowing either type to i64.
-4. Add source-level UInt high-bit differential gates through `psc run --target wasm`.
+1. Integrate the current `main` branch into `feature/wasm-backend` through a
+   controlled merge and rerun the complete W2 closure matrix.
+2. Start W3a from `07_WASM_BIGINT_ABI.md`: implement the arbitrary-precision
+   Nat JS-host BigInt ABI without narrowing Nat to i64.
+3. Keep Int values represented safely, but keep Int arithmetic/literals
+   fail-closed until explicit verified-IR Int operations exist.
+4. Extend verified-IR fixed-width arithmetic/comparison intrinsics only with
+   explicit Lean-faithful semantics and differential evidence.
 5. Design WasmGC/layout lowering for structures and inductive ADTs.
 6. Add translation-validation/refinement evidence for VerifiedIR -> WasmIR.

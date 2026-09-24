@@ -5,7 +5,7 @@ inductive PsSet(α : Type) where {
   | entry(value : α, tail : PsSet(α));
 };
 
-function setEmpty {α : Type} : PsSet(α) :=
+def setEmpty {α : Type} : PsSet(α) :=
   PsSet.empty;
 
 function setIsEmpty {α : Type}(values : PsSet(α)) : Bool :=

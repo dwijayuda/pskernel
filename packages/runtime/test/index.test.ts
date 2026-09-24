@@ -1,6 +1,7 @@
 import {
   Environment,
   Kernel,
+  addPrimitiveInductive,
   app,
   bvar,
   constant,
@@ -169,32 +170,33 @@ console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility s
 
 {
   const environment=new Environment();
-  const kernel=new Kernel(environment);
   const Nat=nameFromDotted('Nat');
-  const NatAdd=nameFromDotted('Nat.add');
+  const NatZero=nameFromDotted('Nat.zero');
+  const NatSucc=nameFromDotted('Nat.succ');
   const x=nameFromDotted('x');
-  const y=nameFromDotted('y');
   const natType=constant(Nat);
-  kernel.addAxiom({
-    kind:'axiom',
-    name:Nat,
+
+  addPrimitiveInductive(environment,{
     levelParams:[],
-    type:sort(levelSucc(levelZero)),
-  });
-  kernel.addAxiom({
-    kind:'axiom',
-    name:NatAdd,
-    levelParams:[],
-    type:forallE(x,natType,forallE(y,natType,natType)),
+    numParams:0,
+    types:[{
+      name:Nat,
+      type:sort(levelSucc(levelZero)),
+      ctors:[
+        {name:NatZero,type:natType},
+        {name:NatSucc,type:forallE(x,natType,natType)},
+      ],
+    }],
   });
 
+  const kernel=new Kernel(environment);
   const fortyTwo=nameFromDotted('RuntimeTest.fortyTwo');
   kernel.addDefinition({
     kind:'definition',
     name:fortyTwo,
     levelParams:[],
     type:natType,
-    value:mkAppN(constant(NatAdd),[natLit(20n),natLit(22n)]),
+    value:app(constant(NatSucc),natLit(41n)),
     hints:{kind:'regular',height:1n},
     safety:'safe',
   });
@@ -208,7 +210,7 @@ console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility s
     value:lam(
       x,
       natType,
-      mkAppN(constant(NatAdd),[bvar(0),natLit(1n)]),
+      app(constant(NatSucc),bvar(0)),
     ),
     hints:{kind:'regular',height:1n},
     safety:'safe',

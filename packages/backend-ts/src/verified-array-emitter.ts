@@ -20,38 +20,38 @@ export function emitVerifiedArrayIntrinsic(
     return '[...('+emit(args[0]!)+'), '+emit(args[1]!)+']';
   }
   if(operation==='array.get'){
-    return '(<T>(__ps_a: readonly T[], __ps_i: bigint): T => '+
+    return '(<T>(__ps_a: T[], __ps_i: bigint): T => '+
       '__ps_a[Number(__ps_i)]!)('+
       emit(args[0]!)+', '+emit(args[1]!)+')';
   }
   if(operation==='array.getD'){
-    return '(<T>(__ps_a: readonly T[], __ps_i: bigint, '+
+    return '(<T>(__ps_a: T[], __ps_i: bigint, '+
       '__ps_fallback: T): T => '+
       '(__ps_i < BigInt(__ps_a.length) '+
       '? __ps_a[Number(__ps_i)]! : __ps_fallback))('+
       emit(args[0]!)+', '+emit(args[1]!)+', '+emit(args[2]!)+')';
   }
   if(operation==='array.set'){
-    return '(<T>(__ps_a: readonly T[], __ps_i: bigint, __ps_v: T): T[] => {'+
+    return '(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): T[] => {'+
       ' const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; '+
       'return __ps_out; })('+
       emit(args[0]!)+', '+emit(args[1]!)+', '+emit(args[2]!)+')';
   }
   if(operation==='array.setIfInBounds'){
-    return '(<T>(__ps_a: readonly T[], __ps_i: bigint, __ps_v: T): '+
-      'readonly T[] => { if (__ps_i >= BigInt(__ps_a.length)) return __ps_a; '+
+    return '(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): '+
+      'T[] => { if (__ps_i >= BigInt(__ps_a.length)) return __ps_a; '+
       'const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; '+
       'return __ps_out; })('+
       emit(args[0]!)+', '+emit(args[1]!)+', '+emit(args[2]!)+')';
   }
   if(operation==='array.map'){
-    return '(<A, B>(__ps_f: (__ps_x: A) => B, __ps_a: readonly A[]): B[] => '+
+    return '(<A, B>(__ps_f: (__ps_x: A) => B, __ps_a: A[]): B[] => '+
       '__ps_a.map((__ps_x) => __ps_f(__ps_x)))('+
       emit(args[0]!)+', '+emit(args[1]!)+')';
   }
   if(operation==='array.foldl'){
     return '(<A, B>(__ps_f: (__ps_b: B, __ps_x: A) => B, __ps_init: B, '+
-      '__ps_a: readonly A[], __ps_start: bigint, __ps_stop: bigint): B => {'+
+      '__ps_a: A[], __ps_start: bigint, __ps_stop: bigint): B => {'+
       ' const __ps_size = BigInt(__ps_a.length); '+
       'const __ps_end = __ps_stop <= __ps_size ? __ps_stop : __ps_size; '+
       'let __ps_acc = __ps_init; '+

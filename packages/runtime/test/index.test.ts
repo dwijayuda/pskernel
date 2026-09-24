@@ -145,6 +145,34 @@ equal(uint8(-1),255);
 equal(ctor('Some',1).tag,'Some');
 
 {
+  const evaluator=new Lean434Evaluator(new Environment());
+  let decLt=evaluator.evaluate(constant(nameFromDotted('Nat.decLt')));
+  decLt=evaluator.applyRuntimeValue(decLt,2n);
+  const yes=evaluator.applyRuntimeValue(decLt,3n);
+  ok(
+    typeof yes==='object'
+      &&yes!==null
+      &&!Array.isArray(yes)
+      &&yes.kind==='constructor'
+      &&yes.name==='Decidable.isTrue',
+    'Nat.decLt true result was not reboxed as Decidable.isTrue',
+  );
+
+  let decLtFalse=evaluator.evaluate(constant(nameFromDotted('Nat.decLt')));
+  decLtFalse=evaluator.applyRuntimeValue(decLtFalse,3n);
+  const no=evaluator.applyRuntimeValue(decLtFalse,2n);
+  ok(
+    typeof no==='object'
+      &&no!==null
+      &&!Array.isArray(no)
+      &&no.kind==='constructor'
+      &&no.name==='Decidable.isFalse',
+    'Nat.decLt false result was not reboxed as Decidable.isFalse',
+  );
+}
+console.log('ok - Nat.decLt extern reboxes machine booleans as Lean Decidable');
+
+{
   const kernelName=numName(
     strName(
       strName(anonymous,'Lean'),

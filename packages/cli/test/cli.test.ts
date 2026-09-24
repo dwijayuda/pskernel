@@ -510,6 +510,11 @@ console.log('ok - psc runtime lock rejects missing required transitive entry');
     });
     equal(checked.buildTarget,'wasm');
     equal(checked.wasmProfile,'proofscript-wasm32-mvp-js-v1');
+    equal(
+      checked.executionRuntime?.profile,
+      'proofscript-wasm32-mvp-js-v1',
+    );
+    equal(checked.executionRuntime?.bigintRuntime,undefined);
 
     const built=await buildCommand({
       project:directory,
@@ -519,6 +524,11 @@ console.log('ok - psc runtime lock rejects missing required transitive entry');
       passthrough:[],
     });
     equal(built.report.buildTarget,'wasm');
+    equal(
+      built.report.executionRuntime?.profile,
+      'proofscript-wasm32-mvp-js-v1',
+    );
+    equal(built.report.executionRuntime?.bigintRuntime,undefined);
     const artifacts=built.report.artifacts;
     if(artifacts.webassembly===undefined||artifacts.wat===undefined){
       throw new Error('verified Wasm build did not emit Wasm artifacts');
@@ -685,6 +695,50 @@ console.log('ok - psc verified Wasm W2 UInt CLI run ABI');
       passthrough:[],
     });
     equal(checked.wasmProfile,'proofscript-wasm32-ref-js-v1');
+    equal(
+      checked.executionRuntime?.profile,
+      'proofscript-wasm32-ref-js-v1',
+    );
+    equal(
+      checked.executionRuntime?.bigintRuntime,
+      'proofscript.bigint.v1',
+    );
+    equal(checked.executionRuntime?.bigintRuntimeMode,'js-host');
+
+    const built=await buildCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[],
+    });
+    equal(
+      built.report.executionRuntime?.profile,
+      'proofscript-wasm32-ref-js-v1',
+    );
+    equal(
+      built.report.executionRuntime?.bigintRuntime,
+      'proofscript.bigint.v1',
+    );
+    equal(built.report.executionRuntime?.bigintRuntimeMode,'js-host');
+    const manifest=JSON.parse(
+      await readFile(built.report.artifacts.manifest,'utf8'),
+    ) as {
+      executionRuntime?:{
+        profile?:string;
+        bigintRuntime?:string;
+        bigintRuntimeMode?:string;
+      };
+    };
+    equal(
+      manifest.executionRuntime?.profile,
+      'proofscript-wasm32-ref-js-v1',
+    );
+    equal(
+      manifest.executionRuntime?.bigintRuntime,
+      'proofscript.bigint.v1',
+    );
+    equal(manifest.executionRuntime?.bigintRuntimeMode,'js-host');
 
     const huge=((1n<<100n)+123456789n).toString();
     const result=await runCommand({
@@ -696,6 +750,12 @@ console.log('ok - psc verified Wasm W2 UInt CLI run ABI');
     });
     equal(result.mainResult,huge);
     equal(result.wasmProfile,'proofscript-wasm32-ref-js-v1');
+    equal(
+      result.executionRuntime?.profile,
+      'proofscript-wasm32-ref-js-v1',
+    );
+    equal(result.executionRuntime?.bigintRuntime,'proofscript.bigint.v1');
+    equal(result.executionRuntime?.bigintRuntimeMode,'js-host');
 
     let rejected=false;
     try{

@@ -8,6 +8,8 @@ import {
 import type {VerifiedIrExpr} from '@proofscript/compiler-ir/verified';
 import type {ErasureScope} from './model.js';
 
+import {tryEraseTextPrimitiveApplication} from './text-primitive-erasure.js';
+
 type RuntimeExprEraser=(
   expr:Expr,
   scope:ErasureScope,
@@ -24,25 +26,6 @@ const natIntrinsics=new Map<
   ['Nat.div','nat.div'],
   ['Nat.mod','nat.mod'],
   ['Nat.beq','nat.eq'],
-]);
-
-const textIntrinsics=new Map<
-  string,
-  {
-    readonly operation:
-      |'char.toNat'
-      |'string.push'
-      |'string.singleton'
-      |'string.length'
-      |'string.append';
-    readonly arity:1|2;
-  }
->([
-  ['Char.toNat',{operation:'char.toNat',arity:1}],
-  ['String.push',{operation:'string.push',arity:2}],
-  ['String.singleton',{operation:'string.singleton',arity:1}],
-  ['String.Internal.length',{operation:'string.length',arity:1}],
-  ['String.Internal.append',{operation:'string.append',arity:2}],
 ]);
 
 function namedApplication(
@@ -232,23 +215,13 @@ export function tryErasePrimitiveRuntimeApplication(
     };
   }
 
-  if(view.fn.kind==='const'){
-    const intrinsic=textIntrinsics.get(nameToString(view.fn.name));
-    if(intrinsic!==undefined){
-      if(view.args.length!==intrinsic.arity){
-        throw new Error(
-          "PS_ERASE_INTRINSIC_ARITY: '"+intrinsic.operation+
-          "' expects "+intrinsic.arity+" argument"+
-          (intrinsic.arity===1?'':'s'),
-        );
-      }
-      return {
-        kind:'intrinsic',
-        operation:intrinsic.operation,
-        args:view.args.map((arg)=>erase(arg,scope,environment)),
-      };
-    }
-  }
+  const textPrimitive=tryEraseTextPrimitiveApplication(
+    expr,
+    scope,
+    environment,
+    erase,
+  );
+  if(textPrimitive!==undefined)return textPrimitive;
 
   if(
     view.fn.kind==='const'

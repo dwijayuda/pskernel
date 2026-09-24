@@ -364,11 +364,19 @@ export function findLean434JsExtern(
 }
 
 
+export type Lean434ExternEffect='pure'|'st-action';
+
 export interface Lean434DeclarationExternBinding {
   readonly leanDeclaration:string;
   readonly leanSymbol:string;
   /** Full kernel-expression arity, including erased type/proof arguments. */
   readonly arity:number;
+  /**
+   * ST primitives are compiled as direct runtime calls in native Lean because
+   * the world token is erased. The source evaluator must re-wrap them as state
+   * actions so Lean-written ST/IO bind code observes the correct semantics.
+   */
+  readonly effect?:Lean434ExternEffect;
   /**
    * Indices from the full application argument list forwarded to the JS
    * extern. Omitted means every argument is runtime-relevant.
@@ -496,6 +504,54 @@ readonly Lean434DeclarationExternBinding[]=[
     leanSymbol:'lean_string_utf8_byte_size',
     arity:1,
     upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'ST.Prim.mkRef',
+    leanSymbol:'lean_st_mk_ref',
+    arity:3,
+    runtimeArgs:[2],
+    effect:'st-action',
+    upstreamSource:'Init/System/ST.lean',
+  },
+  {
+    leanDeclaration:'ST.Prim.Ref.get',
+    leanSymbol:'lean_st_ref_get',
+    arity:3,
+    runtimeArgs:[2],
+    effect:'st-action',
+    upstreamSource:'Init/System/ST.lean',
+  },
+  {
+    leanDeclaration:'ST.Prim.Ref.set',
+    leanSymbol:'lean_st_ref_set',
+    arity:4,
+    runtimeArgs:[2,3],
+    effect:'st-action',
+    upstreamSource:'Init/System/ST.lean',
+  },
+  {
+    leanDeclaration:'ST.Prim.Ref.swap',
+    leanSymbol:'lean_st_ref_swap',
+    arity:4,
+    runtimeArgs:[2,3],
+    effect:'st-action',
+    upstreamSource:'Init/System/ST.lean',
+  },
+  {
+    leanDeclaration:'ST.Prim.Ref.take',
+    leanSymbol:'lean_st_ref_take',
+    arity:3,
+    runtimeArgs:[2],
+    effect:'st-action',
+    upstreamSource:'Init/System/ST.lean',
+  },
+  {
+    leanDeclaration:'ST.Prim.Ref.ptrEq',
+    leanSymbol:'lean_st_ref_ptr_eq',
+    arity:4,
+    runtimeArgs:[2,3],
+    effect:'st-action',
+    upstreamSource:'Init/System/ST.lean',
   },
 ] as const;
 

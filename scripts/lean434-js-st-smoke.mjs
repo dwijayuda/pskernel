@@ -42,6 +42,37 @@ if(lean_st_ref_get(allocated)!==41n){
 console.log('ok - real Lean-written IO.mkRef executes over JS ST primitive');
 
 const worldType=constant(nameFromDotted('IO.RealWorld'));
+const worldToken=evaluator.evaluate(worldType);
+const natTypeToken=evaluator.evaluate(Nat);
+if(
+  typeof worldToken!=='object'||worldToken===null||
+  Array.isArray(worldToken)||worldToken.kind!=='type'
+){
+  throw new Error('IO.RealWorld was not erased to a runtime type token');
+}
+if(
+  typeof natTypeToken!=='object'||natTypeToken===null||
+  Array.isArray(natTypeToken)||natTypeToken.kind!=='type'
+){
+  throw new Error('Nat was not erased to a runtime type token');
+}
+console.log('ok - real Lean type constants erase to runtime type tokens');
+
+let manualGet=evaluator.evaluate(
+  constant(nameFromDotted('ST.Prim.Ref.get'),[levelZero,levelZero]),
+);
+manualGet=evaluator.applyRuntimeValue(manualGet,worldToken);
+manualGet=evaluator.applyRuntimeValue(manualGet,natTypeToken);
+manualGet=evaluator.applyRuntimeValue(manualGet,allocated);
+const manualGetValue=evaluator.runStateAction(manualGet).value;
+if(manualGetValue!==41n){
+  throw new Error(
+    'manual real Lean ST.Prim.Ref.get returned '+
+    String(manualGetValue)+' instead of 41',
+  );
+}
+console.log('ok - manual real Lean ST.Prim.Ref.get runtime application works');
+
 const getExpr=mkAppN(
   constant(nameFromDotted('ST.Prim.Ref.get'),[levelZero,levelZero]),
   [worldType,Nat,allocated],

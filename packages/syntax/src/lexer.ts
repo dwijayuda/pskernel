@@ -96,6 +96,81 @@ function readString(c: Cursor): {text:string;value:string;span:SourceSpan} {
   throw new SyntaxError('unterminated string literal',spanFrom(start,c.snapshot()));
 }
 
+
+function readCharacter(c: Cursor): {text:string;value:string;span:SourceSpan} {
+  const start=c.snapshot();
+  c.advanceAscii();
+  if(c.eof)throw new SyntaxError('unterminated character literal',spanFrom(start,c.snapshot()));
+
+  let value:string;
+  const first=c.advanceCodePoint();
+  if(first==="'"){
+    throw new SyntaxError('empty character literal',spanFrom(start,c.snapshot()));
+  }
+  if(first!=='\\'){
+    value=first;
+  }else{
+    if(c.eof)throw new SyntaxError('unterminated character escape',spanFrom(start,c.snapshot()));
+    const esc=c.advanceCodePoint();
+    if(esc==="'"||esc==='"'||esc==='\\')value=esc;
+    else if(esc==='n')value='\n';
+    else if(esc==='r')value='\r';
+    else if(esc==='t')value='\t';
+    else if(esc==='x'||esc==='u'){
+      const digits=esc==='x'?2:4;
+      const hexStart=c.snapshot();
+      let hex='';
+      for(let i=0;i<digits;i++){
+        if(c.eof){
+          throw new SyntaxError(
+            \`unterminated \${esc==='x'?'hex':'unicode'} character escape\`,
+            spanFrom(start,c.snapshot()),
+          );
+        }
+        const h=c.advanceCodePoint();
+        if(!/[0-9a-fA-F]/.test(h)){
+          throw new SyntaxError(
+            \`invalid \${esc==='x'?'hex':'unicode'} character escape\`,
+            spanFrom(hexStart,c.snapshot()),
+          );
+        }
+        hex+=h;
+      }
+      value=String.fromCodePoint(parseInt(hex,16));
+    }else{
+      throw new SyntaxError(
+        \`unsupported character escape \\\\\${esc}\`,
+        spanFrom(start,c.snapshot()),
+      );
+    }
+  }
+
+  const codePoint=value.codePointAt(0);
+  if(
+    codePoint===undefined
+    ||[...value].length!==1
+    ||(codePoint>=0xd800&&codePoint<=0xdfff)
+    ||codePoint>0x10ffff
+  ){
+    throw new SyntaxError(
+      'character literal must contain one Unicode scalar value',
+      spanFrom(start,c.snapshot()),
+    );
+  }
+  if(c.eof||c.peekCodePoint()!=="'"){
+    throw new SyntaxError(
+      'character literal must contain exactly one character',
+      spanFrom(start,c.snapshot()),
+    );
+  }
+  c.advanceAscii();
+  return {
+    text:c.source.slice(start.offset,c.offset),
+    value,
+    span:spanFrom(start,c.snapshot()),
+  };
+}
+
 function readNumber(c: Cursor): {text:string;span:SourceSpan} {
   const start=c.snapshot();
   if(c.startsWith('0x')||c.startsWith('0X')) {
@@ -146,6 +221,9 @@ export function lex(source: string): Token[] {
     if(ch==='"') {
       const s=readString(c);
       token={kind:'string',text:s.text,value:s.value,span:s.span,leadingTrivia,adjacentToPrevious};
+    } else if(ch==="'") {
+      const value=readCharacter(c);
+      token={kind:'char',text:value.text,value:value.value,span:value.span,leadingTrivia,adjacentToPrevious};
     } else if(/[0-9]/.test(ch)) {
       const n=readNumber(c);
       token={kind:'number',text:n.text,span:n.span,leadingTrivia,adjacentToPrevious};

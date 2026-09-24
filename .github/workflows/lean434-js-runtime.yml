@@ -208,8 +208,6 @@ jobs:
           test -s lean434-parser-types-bootstrap.ndjson
       - name: Execute real Lean.Parser.Types algorithms in JavaScript
         run: node scripts/lean434-js-parser-types-smoke.mjs lean434-parser-types-bootstrap.ndjson
-      - name: Probe Lean.Level computed-field declarations
-        run: lean --run oracle/replay-probe/LevelComputedFieldProbe.lean
       - name: Generate real Lean.Level bootstrap corpus
         shell: bash
         run: |

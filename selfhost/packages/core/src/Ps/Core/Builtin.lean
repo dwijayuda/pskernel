@@ -110,3 +110,36 @@ def psCharName : PsName :=
 
 def psCharOfNatName : PsName :=
   psNameAppendStr psCharName "ofNat"
+
+def psCharToNatName : PsName :=
+  psNameAppendStr psCharName "toNat"
+
+def psStringPushName : PsName :=
+  psNameAppendStr psStringName "push"
+
+def psStringSingletonName : PsName :=
+  psNameAppendStr psStringName "singleton"
+
+def psStringInternalName : PsName :=
+  psNameAppendStr psStringName "Internal"
+
+def psStringLengthName : PsName :=
+  psNameAppendStr psStringInternalName "length"
+
+def psStringAppendName : PsName :=
+  psNameAppendStr psStringInternalName "append"
+
+def psStringUtf8ByteSizeName : PsName :=
+  psNameAppendStr psStringName "utf8ByteSize"
+
+def psStringNextName : PsName :=
+  psNameAppendStr psStringInternalName "next"
+
+def psStringGetName : PsName :=
+  psNameAppendStr psStringInternalName "get"
+
+def psStringAtEndName : PsName :=
+  psNameAppendStr psStringInternalName "atEnd"
+
+def psStringExtractName : PsName :=
+  psNameAppendStr psStringInternalName "extract"

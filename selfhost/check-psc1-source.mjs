@@ -1,17 +1,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const root=path.resolve('src/ProofScript/Compiler');
+const roots=[
+  path.resolve('../packages/compiler/src/ProofScript'),
+];
 const files=[];
 
 function walk(dir){
+  if(!fs.existsSync(dir))return;
   for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
     const p=path.join(dir,entry.name);
     if(entry.isDirectory())walk(p);
     else if(entry.isFile()&&entry.name.endsWith('.lean'))files.push(p);
   }
 }
-walk(root);
+for(const root of roots)walk(root);
 
 const forbidden=[
   [/(^|\n)\s*import\s+Lean(?:\.|\s|$)/,'Lean implementation import'],
@@ -46,5 +49,9 @@ for(const file of files){
     }
   }
 }
+if(files.length===0){
+  console.error('PSC1_SOURCE_PROFILE: no portable Lean modules found');
+  failed=true;
+}
 if(failed)process.exit(1);
-console.log(`PSC1_SOURCE_PROFILE: PASS (${files.length} portable modules)`);
+console.log(`PSC1_SOURCE_PROFILE: PASS (${files.length} portable package modules)`);

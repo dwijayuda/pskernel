@@ -107,7 +107,9 @@ export function nameKey(n: Name): string {
   }
   for(let i=pending.length-1;i>=0;i--){
     const cur=pending[i]!;
-    key+=cur.kind==='str'?`/s:${cur.value.length}:${cur.value}`:`/n:${cur.value}`;
+    if(cur.kind==='str')key+=`/s:${cur.value.length}:${cur.value}`;
+    else if(cur.kind==='num')key+=`/n:${cur.value}`;
+    else throw new Error('internal Name key cache invariant');
     nameKeyCache.set(cur as object,key);
   }
   return key!;

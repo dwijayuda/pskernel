@@ -60,23 +60,23 @@
         "DS5.2 verified check/build/run recursively resolve logical imports from the entry source directory, topo-sort them through @proofscript/project, elaborate each module against exactly its transitive dependency admissions, then compile one combined pskernel-checked project.",
         "Mixed-source runtime regressions cover ProofScript -> Lean -> ProofScript transitive imports and Lean -> ProofScript imports; imported ordinary definitions execute through the same verified IR/TS/JS backend.",
         "Verified project reports expose moduleCount, deterministic moduleOrder, and per-module source kind/path/canonicalSourceHash.",
-        "DS3.3 adds a source-kind-neutral SHA-256 identity over canonical ProofScript printing of the shared parsed surface; verified and legacy check/build reports/manifests expose canonicalSourceHash.",
+        "DS3.3 adds a source-kind-neutral SHA-256 identity over canonical ProofScript printing of the shared parsed surface; both source kinds expose canonicalSourceHash through the single checked-core pipeline.",
         "Equivalent .ps and canonical supported .lean inputs are gated to produce the same canonicalSourceHash before semantic checking.",
         "DS4 integration compares pskernel checked-core admission fingerprints, verified compiler IR, TypeScript, JavaScript, and .d.ts across PS -> Lean and Lean -> PS round trips.",
         "DS4 also asserts unsupported Lean commands fail closed before checked core instead of entering a weaker semantic lane.",
         "Translate requires an explicit input file and exactly one target; --verified, --json, and runtime passthrough are rejected as category errors.",
         "Filesystem regressions cover `.ps -> canonical .lean -> canonical .ps` through the same frontend/target registries.",
-        "DS3.1 check/build/run/emit-lean select the source frontend from .ps/.lean paths while preserving the existing verified-vs-legacy pipeline choice; source kind never selects a weaker semantic checker.",
+        "DS3.1 check/build/run/emit-lean select the source frontend from .ps/.lean paths; source kind never selects a different or weaker semantic checker.",
         "Verified .lean filesystem run regression exercises Lean-subset parse -> shared elaboration -> pskernel -> checked core -> compiler IR -> TypeScript -> JavaScript -> runtime.",
         "Build artifact stems strip the actual entry extension, so main.lean emits main.ts/main.js rather than main.lean.ts.",
         "psc emit-lean now resolves input through the source frontend registry and output through the independent translation-target registry; it no longer hard-codes parseV061Module/lowerV061ModuleToLean.",
         "Verified filesystem execution now also covers a generic higher-order map plus structurally recursive length over a pskernel-admitted recursive list.",
         "CLI filesystem regression now executes a kernel-admitted recursive PsList plus structurally recursive length through emitted JavaScript and checks length(two elements) = 2.",
-        "psc run --verified now decodes arguments from verified IR types: primitive Nat/Int/Bool/String/Unit keep compact CLI forms, while supported structures/ADTs use a strict JSON ABI. Nested Nat/Int use decimal strings, ADTs use a $ctor field, and structured results are encoded back to the same JSON-safe shape.",
+        "psc run decodes arguments from checked-core-derived verified IR types: primitive Nat/Int/Bool/String/Unit keep compact CLI forms, while supported structures/ADTs use a strict JSON ABI. Nested Nat/Int use decimal strings, ADTs use a $ctor field, and structured results are encoded back to the same JSON-safe shape.",
         "ADT JSON inputs are rebuilt only through generated constructor exports, preserving verified runtime tags. Structure input is field-decoded according to pskernel-derived IR metadata; host JSON never becomes proof evidence.",
         "Function-typed, unknown, unresolved type-parameter, malformed field/constructor, and unsupported dependent runtime values remain fail-closed at the CLI ABI boundary.",
         "Verified CLI elaboration starts from the shared pskernel-admitted Lean 4.34 Init.Prelude environment and fails closed when that fixture cannot be loaded.",
-        "psc --verified uses the preferred source -> elaboration -> checked core -> erasure -> compiler IR -> TypeScript -> JavaScript architecture.",
+        "psc check/build/run use source -> elaboration -> pskernel -> checked core -> erasure -> verified compiler IR -> TypeScript -> JavaScript unconditionally.",
         "CLI regression now executes a temporary verified project end-to-end through emitted JavaScript and checks Nat main(21) = 42."
       ]
     },
@@ -677,9 +677,9 @@
     "typescript"
   ],
   "legacySoftwarePipeline": {
-    "status": "transitional",
-    "package": "language",
-    "rule": "no automatic fallback from verified-core compilation"
+    "status": "retired",
+    "retiredOn": "2026-09-24",
+    "rule": "must not be reintroduced; checked-core is the only semantic compiler path"
   },
   "activeLanguagePlan": "docs/plans/05_LANGUAGE_COMPLETION.md"
 }

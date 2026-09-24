@@ -22,6 +22,7 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero)
   let propType := PsExpr.sortE PsLevel.zero
   let natType := PsExpr.constE psNatName []
+  let intType := PsExpr.constE psIntName []
   let stringType := PsExpr.constE psStringName []
   let boolType := PsExpr.constE psBoolName []
   let unitType := PsExpr.constE psUnitName []
@@ -92,6 +93,28 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
           PsBinderInfo.instanceImplicit)
         PsBinderInfo.explicit)
       PsBinderInfo.implicit
+  let intOfNatType :=
+    PsExpr.forallE
+      nName
+      natType
+      intType
+      PsBinderInfo.explicit
+  let intUnaryType :=
+    PsExpr.forallE
+      aName
+      intType
+      intType
+      PsBinderInfo.explicit
+  let intBinaryType :=
+    PsExpr.forallE
+      aName
+      intType
+      (PsExpr.forallE
+        bName
+        intType
+        intType
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
   let charOfNatType :=
     PsExpr.forallE
       nName
@@ -104,36 +127,57 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
       (PsDeclaration.axiomDecl psNatName [] typeType)
   let env2 :=
     psPreludeAdd env1
-      (PsDeclaration.axiomDecl psStringName [] typeType)
+      (PsDeclaration.axiomDecl psIntName [] typeType)
   let env3 :=
     psPreludeAdd env2
-      (PsDeclaration.axiomDecl psBoolName [] typeType)
+      (PsDeclaration.axiomDecl psIntOfNatName [] intOfNatType)
   let env4 :=
     psPreludeAdd env3
-      (PsDeclaration.axiomDecl psBoolTrueName [] boolType)
+      (PsDeclaration.axiomDecl psIntNegSuccName [] intOfNatType)
   let env5 :=
     psPreludeAdd env4
-      (PsDeclaration.axiomDecl psBoolFalseName [] boolType)
+      (PsDeclaration.axiomDecl psIntNegName [] intUnaryType)
   let env6 :=
     psPreludeAdd env5
-      (PsDeclaration.axiomDecl psUnitName [] typeType)
+      (PsDeclaration.axiomDecl psIntAddName [] intBinaryType)
   let env7 :=
     psPreludeAdd env6
-      (PsDeclaration.axiomDecl psUnitUnitName [] unitType)
+      (PsDeclaration.axiomDecl psIntSubName [] intBinaryType)
   let env8 :=
     psPreludeAdd env7
-      (PsDeclaration.axiomDecl psCharName [] typeType)
+      (PsDeclaration.axiomDecl psIntMulName [] intBinaryType)
   let env9 :=
     psPreludeAdd env8
-      (PsDeclaration.axiomDecl psCharOfNatName [] charOfNatType)
+      (PsDeclaration.axiomDecl psStringName [] typeType)
   let env10 :=
     psPreludeAdd env9
-      (PsDeclaration.axiomDecl psEqName [uName] eqType)
+      (PsDeclaration.axiomDecl psBoolName [] typeType)
   let env11 :=
     psPreludeAdd env10
-      (PsDeclaration.axiomDecl psDecidableName [] decidableType)
+      (PsDeclaration.axiomDecl psBoolTrueName [] boolType)
   let env12 :=
     psPreludeAdd env11
+      (PsDeclaration.axiomDecl psBoolFalseName [] boolType)
+  let env13 :=
+    psPreludeAdd env12
+      (PsDeclaration.axiomDecl psUnitName [] typeType)
+  let env14 :=
+    psPreludeAdd env13
+      (PsDeclaration.axiomDecl psUnitUnitName [] unitType)
+  let env15 :=
+    psPreludeAdd env14
+      (PsDeclaration.axiomDecl psCharName [] typeType)
+  let env16 :=
+    psPreludeAdd env15
+      (PsDeclaration.axiomDecl psCharOfNatName [] charOfNatType)
+  let env17 :=
+    psPreludeAdd env16
+      (PsDeclaration.axiomDecl psEqName [uName] eqType)
+  let env18 :=
+    psPreludeAdd env17
+      (PsDeclaration.axiomDecl psDecidableName [] decidableType)
+  let env19 :=
+    psPreludeAdd env18
       (PsDeclaration.axiomDecl psBoolDecEqName [] boolDecEqType)
-  psPreludeAdd env12
+  psPreludeAdd env19
     (PsDeclaration.axiomDecl psIteName [uName] iteType)

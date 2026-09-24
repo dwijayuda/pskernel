@@ -7,6 +7,9 @@ on:
     paths:
       - .github/workflows/text-foundation-fixture.yml
       - scripts/generate-text-foundation-fixture.sh
+      - scripts/text-foundation-oracle.mjs
+      - packages/environment/src/**
+      - packages/environment/test/**
       - oracle/replay-probe/DependencyExport.lean
 
 permissions:

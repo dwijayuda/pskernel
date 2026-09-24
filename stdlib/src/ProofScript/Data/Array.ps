@@ -57,19 +57,23 @@ function arrayGet? {α : Type}
     )
   );
 
+function arrayFindStep {α : Type}
+(predicate : α -> Bool, found : PsOption(α), value : α) : PsOption(α) :=
+  match found with {
+    | .none =>
+      if (predicate(value)) {
+        PsOption.some(value)
+      } else {
+        PsOption.none
+      };
+    | .some existing => found;
+  };
+
 function arrayFind? {α : Type}
 (predicate : α -> Bool, xs : Array(α)) : PsOption(α) :=
   arrayFoldl(
     fun (found : PsOption(α)) (value : α) =>
-      match found with {
-        | .none =>
-          if (predicate(value)) {
-            PsOption.some(value)
-          } else {
-            PsOption.none
-          };
-        | .some existing => PsOption.some(existing);
-      },
+      arrayFindStep(predicate, found, value),
     PsOption.none,
     xs
   );

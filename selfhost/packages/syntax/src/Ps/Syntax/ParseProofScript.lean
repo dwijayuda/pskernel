@@ -752,64 +752,73 @@ def psParseProofScriptDeclaration
         let isTheorem := keyword.text == "theorem"
         if !(isDefinition || isTheorem) then
           Except.error
-          (PsParseError.expectedText
-            "def or theorem"
-            keyword.text
-            keyword.span)
+            (PsParseError.expectedText
+              "def, theorem, or inductive"
+              keyword.text
+              keyword.span)
         else
           match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "declaration name")
-        | some afterKeyword =>
-            match psParseSyntaxName afterKeyword.cursor with
-            | Except.error error => Except.error error
-            | Except.ok name =>
-                match psParseProofScriptBindersWithFuel
-                    name.cursor.remaining.length
-                    name.cursor
-                    [] with
-                | Except.error error => Except.error error
-                | Except.ok binders =>
-                    match psTokenCursorExpectText binders.cursor ":" with
-                    | Except.error error => Except.error error
-                    | Except.ok afterColon =>
-                        match psParseProofScriptTerm afterColon.cursor with
-                        | Except.error error => Except.error error
-                        | Except.ok type =>
-                            match psTokenCursorExpectText type.cursor ":=" with
-                            | Except.error error => Except.error error
-                            | Except.ok afterAssign =>
-                                match psParseProofScriptTerm afterAssign.cursor with
-                                | Except.error error => Except.error error
-                                | Except.ok value =>
-                                    match psTokenCursorExpectText value.cursor ";" with
-                                    | Except.error error => Except.error error
-                                    | Except.ok afterSemi =>
-                                        let span := {
-                                          start := keyword.span.start
-                                          stop := afterSemi.token.span.stop
-                                        }
-                                        if isDefinition then
-                                          Except.ok {
-                                            value :=
-                                              PsSyntaxDeclaration.definition
-                                                name.value
-                                                binders.value
-                                                type.value
-                                                value.value
-                                                span
-                                            cursor := afterSemi.cursor
+          | none =>
+              Except.error
+                (PsParseError.unexpectedEnd "declaration name")
+          | some afterKeyword =>
+              match psParseSyntaxName afterKeyword.cursor with
+              | Except.error error => Except.error error
+              | Except.ok name =>
+                  match psParseProofScriptBindersWithFuel
+                      name.cursor.remaining.length
+                      name.cursor
+                      [] with
+                  | Except.error error => Except.error error
+                  | Except.ok binders =>
+                      match psTokenCursorExpectText binders.cursor ":" with
+                      | Except.error error => Except.error error
+                      | Except.ok afterColon =>
+                          match psParseProofScriptTerm afterColon.cursor with
+                          | Except.error error => Except.error error
+                          | Except.ok type =>
+                              match psTokenCursorExpectText
+                                  type.cursor
+                                  ":=" with
+                              | Except.error error => Except.error error
+                              | Except.ok afterAssign =>
+                                  match psParseProofScriptTerm
+                                      afterAssign.cursor with
+                                  | Except.error error =>
+                                      Except.error error
+                                  | Except.ok value =>
+                                      match psTokenCursorExpectText
+                                          value.cursor
+                                          ";" with
+                                      | Except.error error =>
+                                          Except.error error
+                                      | Except.ok afterSemi =>
+                                          let span := {
+                                            start := keyword.span.start
+                                            stop := afterSemi.token.span.stop
                                           }
-                                        else
-                                          Except.ok {
-                                            value :=
-                                              PsSyntaxDeclaration.theoremDecl
-                                                name.value
-                                                binders.value
-                                                type.value
-                                                value.value
-                                                span
-                                            cursor := afterSemi.cursor
-                                          }
+                                          if isDefinition then
+                                            Except.ok {
+                                              value :=
+                                                PsSyntaxDeclaration.definition
+                                                  name.value
+                                                  binders.value
+                                                  type.value
+                                                  value.value
+                                                  span
+                                              cursor := afterSemi.cursor
+                                            }
+                                          else
+                                            Except.ok {
+                                              value :=
+                                                PsSyntaxDeclaration.theoremDecl
+                                                  name.value
+                                                  binders.value
+                                                  type.value
+                                                  value.value
+                                                  span
+                                              cursor := afterSemi.cursor
+                                            }
 
 def psParseProofScriptImportsWithFuel
     (fuel : Nat)

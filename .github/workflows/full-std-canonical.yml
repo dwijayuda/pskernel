@@ -4,7 +4,7 @@ name: Canonical Full Std replay
 on:
   workflow_dispatch:
   push:
-    branches: [main, kernel/lean434-study-hardening]
+    branches: [main, kernel/lean434-study-hardening, integration/kernel-lean434-main-sync]
     paths:
       - ".github/workflows/full-std-canonical.yml"
       - "package.json"

@@ -35,6 +35,7 @@ assert(
   pkg.activationEvents.includes('workspaceContains:psconfig.json'),
   'ProofScript workspace activation missing',
 );
+const compactSource=source.replace(/\s+/gu,'');
 for(const command of [
   'proofscript.showInfoview',
   'proofscript.restartServer',
@@ -42,13 +43,14 @@ for(const command of [
   'proofscript.convertToLean',
   'proofscript.convertToProofScript',
 ]){
-  assert(pkg.contributes.commands.some((item)=>item.command===command),'missing command '+command);
-  const registration=new RegExp(
-    "registerCommand\\\\(\\\\s*['\\\"]"+
-    command.replace(/[.*+?^$\{\}()|[\]\\]/g,'\\\\  assert(source.includes("registerCommand('"+command+"'"),'command not implemented '+command);')+
-    "['\\\"]",
+  assert(
+    pkg.contributes.commands.some((item)=>item.command===command),
+    'missing command '+command,
   );
-  assert(registration.test(source),'command not implemented '+command);
+  assert(
+    compactSource.includes("registerCommand('"+command+"'"),
+    'command not implemented '+command,
+  );
 }
 assert(source.includes('EXPECTED_PROTOCOL=2'),'protocol guard missing');
 assert(source.includes('proofscript/proofState'),'proof-state request missing');

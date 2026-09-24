@@ -20,7 +20,8 @@
           "proofscript"
         ],
         "extensions": [
-          ".ps"
+          ".ps",
+          ".psx"
         ],
         "configuration": "./language-configuration.json"
       },

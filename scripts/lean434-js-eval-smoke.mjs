@@ -58,6 +58,18 @@ assertNatResult(
   42n,
 );
 
+assertNatResult(
+  'real Lean unsafeCast logical body',
+  mkAppN(
+    constant(
+      nameFromDotted('unsafeCast'),
+      [levelSucc(levelZero),levelSucc(levelZero)],
+    ),
+    [constant(Nat),constant(Nat),natLit(42n)],
+  ),
+  42n,
+);
+
 const List=nameFromDotted('List');
 const ListNil=nameFromDotted('List.nil');
 const ListCons=nameFromDotted('List.cons');

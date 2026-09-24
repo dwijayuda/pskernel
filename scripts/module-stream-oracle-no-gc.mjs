@@ -52,12 +52,12 @@ try{
    }
    if(marker?.shard){
      if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;}
-     replay=new Lean4ExportReplay(shared,{nativeEvaluator});
-     current=marker.shard.module;shards++;
-     if(stopAfterShards>0&&shards>stopAfterShards){
+     if(stopAfterShards>0&&shards>=stopAfterShards){
        child.kill('SIGTERM');
        break;
      }
+     replay=new Lean4ExportReplay(shared,{nativeEvaluator});
+     current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);
      if(shards===1||shards%25===0)console.error(`[module-stream] shard=${shards}/${header?.plannedShards??'?'} module=${current} part=${marker.shard.part??0} roots=${marker.shard.roots??'?'} constants=${shared.size} rssMiB=${rss.toFixed(1)} heapMiB=${heap.toFixed(1)}`);
      continue;
@@ -69,7 +69,7 @@ try{
 }catch(e){fatal=e;child.kill('SIGTERM');}
 const code=await new Promise(r=>child.on('close',r));
 if(fatal)throw fatal;
-const stoppedEarly=stopAfterShards>0&&shards===stopAfterShards+1;
+const stoppedEarly=stopAfterShards>0&&shards===stopAfterShards;
 if(!stoppedEarly&&code!==0)throw new Error(`Lean exporter exited ${code}: ${stderr}`);
 if(stoppedEarly){
   console.log(JSON.stringify({ok:true,diagnostic:true,stoppedAfterShards:stopAfterShards,replayedConstants:shared.size,maxRssMiB:Number(maxRssMiB.toFixed(1)),maxHeapMiB:Number(maxHeapMiB.toFixed(1))},null,2));

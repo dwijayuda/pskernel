@@ -133,13 +133,12 @@ or exposed through an explicit ProofScript Lean-subset language mode.
 1. The kernel never imports an outer ProofScript package.
 2. Checked core cannot be created by trusting parser/compiler metadata; its
    declarations are replayed through pskernel.
-3. Erasure consumes checked core, never raw syntax or the legacy software HIR.
+3. Erasure consumes checked core, never raw syntax or an alternate software HIR.
 4. The verified compiler consumes checked core/verified IR, never source AST.
 5. TypeScript/JavaScript output has no authority over proof acceptance.
 6. Erased proof/type values may not survive in executable code. If they do,
    compilation fails closed.
-7. Unsupported elaboration/erasure never falls back automatically to the
-   legacy software checker.
+7. Unsupported elaboration/erasure fails closed; no alternate semantic checker exists.
 8. ProofScript conveniences may change syntax, not Lean-compatible meaning
    where dependent types, propositions, inductives, recursion, typeclasses,
    or theorem checking are involved.
@@ -180,7 +179,7 @@ function main(x : Nat) : Nat :=
 ```
 
 ```text
-psc run --verified -- 21
+psc run -- 21
 source
 -> shared Lean 4.34 Init.Prelude environment
 -> elaboration
@@ -667,7 +666,7 @@ filename extension
   -> existing semantic pipeline selection
 ```
 
-The source kind does not select a type system, proof checker, erasure strategy, or backend. In verified mode both source forms pass through the identical Meta/Elab, pskernel, checked-core, erasure, IR, and TypeScript/JavaScript path.
+The source kind does not select a type system, proof checker, erasure strategy, or backend. Both source forms pass through the identical Meta/Elab, pskernel, checked-core, erasure, IR, and TypeScript/JavaScript path.
 
 Build manifests/reports expose `sourceKind`, and output stems strip the actual input extension. Canonical translation command UX and canonical-source hashes remain DS3 follow-up work.
 
@@ -749,8 +748,7 @@ reconstructed from imported checked-core admissions, so DS5 does not yet claim
 cross-module record/projection or typeclass-synthesis parity. Ordinary imported
 definitions/theorems are the supported semantic slice.
 
-The legacy software checker does not gain an import implementation. Imports
-require the verified project pipeline and otherwise fail closed.
+Imports are owned only by the checked-core project pipeline; there is no alternate semantic import implementation.
 
 ## DS5 imported semantic metadata checkpoint
 

@@ -1,5 +1,5 @@
 import { ConstantInfo, DefinitionInfo, DefinitionSafety, ReducibilityHints, isUnsafeConstant } from '../core/declaration.js';
-import { Environment, KernelError } from '../core/environment.js';
+import { Environment, KernelError, deepFreezeKernelValue } from '../core/environment.js';
 import { Expr, app, appView, constant, exprEq, exprLeanEq, exprToString, forallE, fvar, getAppArgs, getAppFn, hasFVar, hasLooseBVar, instantiateExprLevels, lam, mkAppN, natLit, sort, stripMData } from '../core/expr.js';
 import { abstractFVar, instantiate, instantiate1 } from '../core/instantiate.js';
 import { Level, levelEquivalent, levelParamNames, levelSucc, levelToString, levelZero, mkIMax, normalizesToZero } from '../core/level.js';
@@ -31,7 +31,12 @@ export class TypeChecker {
   readonly state:KernelState;
   readonly lctx:LocalContext;
   constructor(readonly env:Environment,lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false,readonly nativeEvaluator?:NativeEvaluator){
+    // These values participate in memoized checker semantics. TypeScript
+    // readonly is compile-time only; preserve Lean's runtime immutability.
+    deepFreezeKernelValue(this.limits);
+    deepFreezeKernelValue(this.allowedLevelParams);
     this.lctx=lctx.clone();
+    deepFreezeKernelValue(this.lctx.entries());
     this.state=state??new KernelState();
     this.state.bindEnvironment(env);
     this.state.bindCheckerConfig({

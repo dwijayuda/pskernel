@@ -1,5 +1,6 @@
 import { Level, instantiateLevel, levelEqStructural, levelToString } from './level.js';
 import { Name, nameEq, nameFromDotted, nameKey, nameToString } from './name.js';
+import { deepFreezeKernelValue } from './runtime-immutable.js';
 
 export type BinderInfo = 'default' | 'implicit' | 'strictImplicit' | 'instImplicit';
 export type Literal = { readonly kind: 'nat'; readonly value: bigint } | { readonly kind: 'string'; readonly value: string };
@@ -190,6 +191,10 @@ function leanLevelCachedData(root:Level):LeanLevelCachedData{
  * the same immutable-node information in a process-lifetime WeakMap.
  */
 function leanExprCachedData(root:Expr):LeanExprCachedData{
+  // Lean Expr nodes are physically immutable. Enforce the same invariant at
+  // the exact point where process-lifetime Expr.Data is memoized, so callers
+  // cannot mutate an object after its hash/range/flags have been cached.
+  deepFreezeKernelValue(root);
   const cached=leanExprDataCache.get(root as object);if(cached!==undefined)return cached;
   const todo:{e:Expr;done:boolean}[]=[{e:root,done:false}];
   while(todo.length){

@@ -80,6 +80,27 @@ test('raw Environment storage deep-freezes nested kernel values',()=>{
  assert(exprEq(env.get(A).type,sort(levelZero)));
 });
 
+test('Expr.Data caches and TypeChecker inputs are runtime immutable',()=>{
+ const standalone:any=app(constant(N.Nat),constant(N.Nat));
+ assert(!hasLooseBVar(standalone));
+ assert(Object.isFrozen(standalone)&&Object.isFrozen(standalone.fn)&&Object.isFrozen(standalone.arg),'first Expr.Data cache must freeze the expression DAG');
+ assert(Reflect.set(standalone,'fn',constant(N.String))===false,'cached expression identity must not become stale through mutation');
+
+ const env=baseEnv(),A=nameFromDotted('Immutable.TypeChecker.A'),B=nameFromDotted('Immutable.TypeChecker.B');
+ env.add({kind:'axiom',name:A,levelParams:[],type:constant(N.Nat)});
+ env.add({kind:'axiom',name:B,levelParams:[],type:sort(levelZero)});
+ const query:any=constant(A),localType:any=constant(N.Nat),lctx=new LocalContext();
+ lctx.addLocal('immutable@0',nameFromDotted('x'),localType);
+ const limits:any={maxRecDepth:512,maxNatBytes:1024n},allowed:any=[nameFromDotted('u')];
+ const tc=new TypeChecker(env,lctx,undefined,limits,'safe',allowed);
+ assert(exprEq(tc.infer(query),constant(N.Nat)),'initial cached inference mismatch');
+ assert(Object.isFrozen(query)&&Reflect.set(query,'name',B)===false,'checker query must be immutable once cached');
+ assert(Object.isFrozen(limits)&&Reflect.set(limits,'maxRecDepth',0)===false,'checker limits must not change after cache configuration is bound');
+ assert(Object.isFrozen(allowed)&&Reflect.set(allowed,0,nameFromDotted('v'))===false,'allowed universe parameters must not change after cache configuration is bound');
+ const local:any=lctx.get('immutable@0');
+ assert(local&&Object.isFrozen(local)&&Object.isFrozen(localType)&&Reflect.set(localType,'name',N.String)===false,'shared local declarations/types must be immutable after checker construction');
+});
+
 test('Lean Expr equality memoizes repeated shared DAG pairs',()=>{
  let a:any=constant(N.Nat),b:any=constant(N.Nat);
  // Each level doubles the number of tree paths while retaining one shared child.

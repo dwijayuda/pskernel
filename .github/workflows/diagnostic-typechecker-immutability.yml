@@ -1,0 +1,21 @@
+name: Diagnostic TypeChecker immutable boundary
+
+on:
+  push:
+    branches: [diagnostic/typechecker-immutable-boundary]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:kernel
+      - run: node scripts/anti-drift.mjs

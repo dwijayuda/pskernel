@@ -39,7 +39,7 @@ def collectionMapLookup : Option String :=
   mapFindOption compareAlwaysEq 1 collectionMap
 
 def collectionSet : Set Nat :=
-  setInsert compareAlwaysEq 1 setEmpty
+  setInsert compareAlwaysEq 1 (setEmpty Unit.unit)
 
 def collectionSetContains : Bool :=
   setContains compareAlwaysEq 1 collectionSet

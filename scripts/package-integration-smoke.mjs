@@ -301,6 +301,17 @@ assert(
 );
 
 
+const verifiedExactSearchSymmetry=compileVerifiedSource(
+  'theorem exactSearchSymm'+
+  '(a : Nat, b : Nat, h : b = a) : a = b := by exact?;',
+  'verified-exact-search-symmetry.ts',
+);
+assert(
+  verifiedExactSearchSymmetry.checkedCore.theorems.length===1,
+  'bounded exact? Eq symmetry did not construct a pskernel-admitted proof',
+);
+
+
 const dualSourceCorpus=
   'structure Box(α : Type) where { value : α; } '+
   'class Sized(α : Type) where { size : α -> Nat; } '+

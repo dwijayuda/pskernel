@@ -5,15 +5,19 @@ import {
 import {ExprMetaContext} from '@proofscript/meta';
 import {
   TypeChecker,
+  appView,
   hasMVar,
   instantiate1,
   mkAppN,
+  nameEq,
+  nameFromDotted,
   type Expr,
 } from 'lean-ts-kernel';
 import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
 } from './v061-context.js';
+import {elaborateApplication} from './application.js';
 import {elaborateV061Constant} from './v061-constant-elab.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
 
@@ -101,6 +105,7 @@ function tryLocalCandidate(
   runtime:V061TacticRuntime,
   goal:TacticGoal<Expr>,
   term:Expr,
+  target:Expr,
 ):Expr|undefined {
   const parent=runtime.entry(goal).context;
   const context=isolatedContext(parent);
@@ -111,7 +116,7 @@ function tryLocalCandidate(
   try{
     return tryZeroSubgoalApplication(
       context,
-      runtime.expected(goal),
+      target,
       {term,type:checker.check(term)},
     );
   }catch{
@@ -123,6 +128,7 @@ function tryEnvironmentCandidate(
   runtime:V061TacticRuntime,
   goal:TacticGoal<Expr>,
   name:import('lean-ts-kernel').Name,
+  target:Expr,
 ):Expr|undefined {
   const parent=runtime.entry(goal).context;
   const context=isolatedContext(parent);
@@ -134,9 +140,74 @@ function tryEnvironmentCandidate(
     const term=elaborateV061Constant(name,context);
     return tryZeroSubgoalApplication(
       context,
-      runtime.expected(goal),
+      target,
       {term,type:checker.check(term)},
     );
+  }catch{
+    return undefined;
+  }
+}
+
+function symmetricEqualityTarget(
+  context:V061CoreElabContext,
+  target:Expr,
+):Expr|undefined {
+  const checker=new TypeChecker(
+    context.environment,
+    context.localContext.clone(),
+  );
+  const view=appView(checker.whnf(target));
+  if(
+    view.fn.kind!=='const'
+    ||!nameEq(view.fn.name,nameFromDotted('Eq'))
+    ||view.args.length!==3
+  )return undefined;
+  return mkAppN(
+    view.fn,
+    [view.args[0]!,view.args[2]!,view.args[1]!],
+  );
+}
+
+function wrapSymmetricEqualityProof(
+  runtime:V061TacticRuntime,
+  goal:TacticGoal<Expr>,
+  proof:Expr,
+):Expr|undefined {
+  const parent=runtime.entry(goal).context;
+  const context=isolatedContext(parent);
+  const checker=new TypeChecker(
+    context.environment,
+    context.localContext.clone(),
+  );
+  try{
+    const applied=elaborateApplication({
+      environment:context.environment,
+      metaContext:context.metaContext,
+      fn:elaborateV061Constant(
+        nameFromDotted('Eq.symm'),
+        context,
+      ),
+      args:[proof],
+      expectedType:runtime.expected(goal),
+      localContext:context.localContext,
+      globalInstances:context.globalInstances,
+      classNames:context.classes,
+    });
+    if(applied.pendingInstances.length!==0)return undefined;
+    context.metaContext.validateGroundAssignments();
+    const term=context.metaContext.instantiate(applied.term);
+    const type=context.metaContext.instantiate(applied.type);
+    if(
+      hasMVar(term)
+      ||hasMVar(type)
+      ||context.metaContext.levels.hasUnresolvedExpr(term)
+      ||context.metaContext.levels.hasUnresolvedExpr(type)
+    )return undefined;
+    const checkedType=checker.check(term);
+    return checker.isDefEq(
+      checkedType,
+      runtime.expected(goal),
+    )?term:undefined;
   }catch{
     return undefined;
   }
@@ -150,16 +221,43 @@ export function exactSearchV061Tactic(
     throw new Error('PS_ELAB_TACTIC_EXACT_SEARCH: no goal');
   }
 
+  const target=runtime.expected(goal);
+  const entry=runtime.entry(goal);
+  const symmetricTarget=symmetricEqualityTarget(entry.context,target);
+
   for(let index=goal.locals.length-1;index>=0;index-=1){
     const local=goal.locals[index]!;
     if(local.value===undefined)continue;
-    const candidate=tryLocalCandidate(runtime,goal,local.value);
-    if(candidate===undefined)continue;
-    closeWithCandidate(runtime,candidate);
+
+    const direct=tryLocalCandidate(
+      runtime,
+      goal,
+      local.value,
+      target,
+    );
+    if(direct!==undefined){
+      closeWithCandidate(runtime,direct);
+      return;
+    }
+
+    if(symmetricTarget===undefined)continue;
+    const symmetric=tryLocalCandidate(
+      runtime,
+      goal,
+      local.value,
+      symmetricTarget,
+    );
+    if(symmetric===undefined)continue;
+    const wrapped=wrapSymmetricEqualityProof(
+      runtime,
+      goal,
+      symmetric,
+    );
+    if(wrapped===undefined)continue;
+    closeWithCandidate(runtime,wrapped);
     return;
   }
 
-  const entry=runtime.entry(goal);
   const constants=entry.context.environment.entries();
   let visited=0;
 
@@ -174,18 +272,37 @@ export function exactSearchV061Tactic(
       );
     }
 
-    const candidate=tryEnvironmentCandidate(
+    const direct=tryEnvironmentCandidate(
       runtime,
       goal,
       info.name,
+      target,
     );
-    if(candidate===undefined)continue;
-    closeWithCandidate(runtime,candidate);
+    if(direct!==undefined){
+      closeWithCandidate(runtime,direct);
+      return;
+    }
+
+    if(symmetricTarget===undefined)continue;
+    const symmetric=tryEnvironmentCandidate(
+      runtime,
+      goal,
+      info.name,
+      symmetricTarget,
+    );
+    if(symmetric===undefined)continue;
+    const wrapped=wrapSymmetricEqualityProof(
+      runtime,
+      goal,
+      symmetric,
+    );
+    if(wrapped===undefined)continue;
+    closeWithCandidate(runtime,wrapped);
     return;
   }
 
   throw new Error(
     'PS_ELAB_TACTIC_EXACT_SEARCH: bounded exact? found no '+
-    'zero-subgoal local/environment candidate',
+    'zero-subgoal local/environment candidate, including Eq symmetry',
   );
 }

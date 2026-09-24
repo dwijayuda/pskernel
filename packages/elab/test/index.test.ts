@@ -723,6 +723,17 @@ console.log('ok - @proofscript/elab multi-rule simp-only syntax reaches tactic A
   }
   equal(rejected,true);
 }
+{
+  const symmetric=elaborateV061Declarations(parseV061Module(
+    'theorem searchEqSymm'+
+    '(a : Nat, b : Nat, h : b = a) : a = b := by exact?;',
+  ));
+  equal(symmetric.theorems.length,1);
+  equal(
+    symmetric.environment.find(nameFromDotted('searchEqSymm'))?.kind,
+    'theorem',
+  );
+}
 console.log('ok - @proofscript/elab bounded exact search');
 
 {

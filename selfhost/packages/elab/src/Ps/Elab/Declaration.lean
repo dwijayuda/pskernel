@@ -1,4 +1,5 @@
 import Ps.Core.Declaration
+import Ps.Core.Equality
 import Ps.Elab.Term
 
 structure PsElabDeclarationResult where
@@ -123,6 +124,67 @@ def psCloseElabImplicitBinders
           PsBinderInfo.implicit
       psCloseElabImplicitBinders metaContext rest closed
 
+def psExprListAlphaEq : List PsExpr -> List PsExpr -> Bool
+  | [], [] => true
+  | left :: leftRest, right :: rightRest =>
+      psExprAlphaEq left right
+        && psExprListAlphaEq leftRest rightRest
+  | _, _ => false
+
+def psElabIsDirectRecursiveField
+    (context : PsElabContext)
+    (inductiveName : PsName)
+    (parameterArgs : List PsExpr)
+    (type : PsExpr) : Bool :=
+  let reduced :=
+    psWhnf
+      context.environment
+      context.metaContext
+      context.localContext
+      type
+  let view := psExprAppView reduced
+  match view.head with
+  | .constE name _ =>
+      psNameEq name inductiveName
+        && view.args.length == parameterArgs.length
+        && psExprListAlphaEq view.args parameterArgs
+  | _ => false
+
+def psElabRecursiveFieldIndices
+    (context : PsElabContext)
+    (inductiveName : PsName)
+    (parameterArgs : List PsExpr) :
+    List PsElabTypedBinder ->
+    Nat ->
+    List Nat ->
+    Except PsElabError (List Nat)
+  | [], _, indicesRev => Except.ok indicesRev.reverse
+  | field :: rest, index, indicesRev =>
+      let direct :=
+        psElabIsDirectRecursiveField
+          context
+          inductiveName
+          parameterArgs
+          field.type
+      if direct then
+        psElabRecursiveFieldIndices
+          context
+          inductiveName
+          parameterArgs
+          rest
+          (index + 1)
+          (index :: indicesRev)
+      else if psExprHasConst inductiveName field.type then
+        Except.error PsElabError.unsupportedTerm
+      else
+        psElabRecursiveFieldIndices
+          context
+          inductiveName
+          parameterArgs
+          rest
+          (index + 1)
+          indicesRev
+
 def psElabInductiveConstructor
     (context : PsElabContext)
     (parameterBindersRev : List PsElabTypedBinder)
@@ -139,42 +201,47 @@ def psElabInductiveConstructor
           source.fields with
       | Except.error error => Except.error error
       | Except.ok fields =>
-          let recursiveField :=
-            fields.bindersRev.any
-              (fun field => psExprHasConst inductiveName field.type)
-          if recursiveField then
-            Except.error PsElabError.unsupportedTerm
-          else
-            let metaContext := fields.context.metaContext
-            let parameterArgs :=
-              psElabBinderArguments parameterBindersRev
-            let appliedInductive :=
-              psExprApplyMany
-                (PsExpr.constE inductiveName [])
+          let metaContext := fields.context.metaContext
+          let parameterArgs :=
+            psElabBinderArguments parameterBindersRev
+          match
+              psElabRecursiveFieldIndices
+                fields.context
+                inductiveName
                 parameterArgs
-            let fieldClosed :=
-              psCloseElabForallBinders
-                metaContext
-                fields.bindersRev
-                appliedInductive
-            let constructorType :=
-              psCloseElabImplicitBinders
-                metaContext
-                parameterBindersRev
-                fieldClosed
-            if psExprHasUnresolvedMeta constructorType then
-              Except.error PsElabError.unresolvedMetavariable
-            else
-              Except.ok
-                (PsDeclaration.constructorDecl {
-                  name := constructorName
-                  levelParams := []
-                  type := constructorType
-                  inductiveName := inductiveName
-                  constructorIndex := 0
-                  numParams := parameterArgs.length
-                  numFields := source.fields.length
-                })
+                fields.bindersRev.reverse
+                0
+                [] with
+          | Except.error error => Except.error error
+          | Except.ok recursiveFields =>
+              let appliedInductive :=
+                psExprApplyMany
+                  (PsExpr.constE inductiveName [])
+                  parameterArgs
+              let fieldClosed :=
+                psCloseElabForallBinders
+                  metaContext
+                  fields.bindersRev
+                  appliedInductive
+              let constructorType :=
+                psCloseElabImplicitBinders
+                  metaContext
+                  parameterBindersRev
+                  fieldClosed
+              if psExprHasUnresolvedMeta constructorType then
+                Except.error PsElabError.unresolvedMetavariable
+              else
+                Except.ok
+                  (PsDeclaration.constructorDecl {
+                    name := constructorName
+                    levelParams := []
+                    type := constructorType
+                    inductiveName := inductiveName
+                    constructorIndex := 0
+                    numParams := parameterArgs.length
+                    numFields := source.fields.length
+                    recursiveFields := recursiveFields
+                  })
 
 
 

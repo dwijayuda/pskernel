@@ -191,3 +191,20 @@ def psMetaAssign (context : PsMetaContext) (id : Nat) (value : PsExpr) : Option 
             }
           else
             none
+
+def psExprHasUnresolvedMeta : PsExpr -> Bool
+  | .mvar _ => true
+  | .sortE level => psLevelHasMVar level
+  | .constE _ levels => psLevelListHasMVar levels
+  | .app fn arg =>
+      psExprHasUnresolvedMeta fn || psExprHasUnresolvedMeta arg
+  | .lam _ type body _ =>
+      psExprHasUnresolvedMeta type || psExprHasUnresolvedMeta body
+  | .forallE _ type body _ =>
+      psExprHasUnresolvedMeta type || psExprHasUnresolvedMeta body
+  | .letE _ type value body =>
+      psExprHasUnresolvedMeta type
+        || psExprHasUnresolvedMeta value
+        || psExprHasUnresolvedMeta body
+  | .proj _ _ value => psExprHasUnresolvedMeta value
+  | _ => false

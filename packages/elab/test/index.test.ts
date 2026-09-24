@@ -685,6 +685,8 @@ console.log('ok - @proofscript/elab bounded exact search');
 
 
 function makeNatNotationEnvironment():Environment {
+  // Kernel primitive recognition is tested separately. This fixture models an
+  // already-admitted Nat environment so Elab tests only exercise notation.
   const env=new Environment();
   const Nat=nameFromDotted('Nat');
   const zero=nameFromDotted('Nat.zero');

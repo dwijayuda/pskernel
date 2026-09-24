@@ -1077,8 +1077,8 @@ console.log('ok - psc SH2 dual-source canonical Array runtime');
       'mapInsert(compareNat, a, 10, mapEmpty)); '+
       'let keys : PsSet(Nat) := '+
       'setInsert(compareNat, b, setInsert(compareNat, a, setEmpty)); '+
-      'if mapContains(compareNat, a, values) && '+
-      'setContains(compareNat, b, keys) then '+
+      'if (mapContains(compareNat, a, values) && '+
+      'setContains(compareNat, b, keys)) then '+
       'optionGetOrElse(mapGet?(compareNat, a, values), 0) + '+
       'mapFold(sumEntry, 0, values) + setFold(sumKey, 0, keys) '+
       'else 0;\n',

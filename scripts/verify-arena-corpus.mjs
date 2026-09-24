@@ -30,6 +30,6 @@ for(const [k,v] of Object.entries(lock.corpus)){
   if(k in counts&&counts[k]!==v)throw new Error(`Arena corpus count drift: ${k}=${counts[k]} expected ${v}`);
 }
 const allDigest=digest(rows),correctnessDigest=digest(correctness);
-if(allDigest!==lock.corpus.contentDigestSha256)throw new Error(`Arena corpus content drift: ${allDigest}`);
+if(allDigest!==lock.corpus.contentDigestSha256)throw new Error(`Arena corpus content drift: all=${allDigest} correctness=${correctnessDigest}`);
 if(correctnessDigest!==lock.corpus.correctnessDigestSha256)throw new Error(`Arena correctness content drift: ${correctnessDigest}`);
 console.log(JSON.stringify({ok:true,source:lock.source,counts,contentDigestSha256:allDigest,correctnessDigestSha256:correctnessDigest},null,2));

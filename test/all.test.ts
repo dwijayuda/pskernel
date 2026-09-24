@@ -1722,29 +1722,25 @@ test('primitive Nat.land rejects a malicious Nat.bitwise operator',()=>{
  throws(()=>addPrimitiveDefinition(env,{kind:'definition',name:N.NatLand,levelParams:[],type:ty,value:app(constant(N.NatBitwise),bad),hints:{kind:'regular',height:1n},safety:'safe'}));assert(!env.has(N.NatLand));
 });
 
-test('primitive Char.ofNat checks the exact type and Char prerequisite',()=>{
+test('Char.ofNat follows ordinary declaration admission like Lean 4.34',()=>{
  const env=primitiveNatEnv(),char0=nameFromDotted('char0');env.add({kind:'axiom',name:N.Char,levelParams:[],type:sort(levelSucc(levelZero))});env.add({kind:'axiom',name:char0,levelParams:[],type:constant(N.Char)});
  const ty=forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Char)),value=lam(nameFromDotted('n'),constant(N.Nat),constant(char0));
- addPrimitiveDefinition(env,{kind:'definition',name:N.CharOfNat,levelParams:[],type:ty,value,hints:{kind:'regular',height:1n},safety:'safe'});assert(env.has(N.CharOfNat));
+ const info={kind:'definition' as const,name:N.CharOfNat,levelParams:[],type:ty,value,hints:{kind:'regular' as const,height:1n},safety:'safe' as const};
+ throws(()=>addPrimitiveDefinition(env,info));
+ new Kernel(env).addDefinition(info);
+ assert(env.has(N.CharOfNat),'Char.ofNat must be admitted through the ordinary definition path');
 });
 
-test('primitive String.ofList validates full string-literal expansion prerequisites',()=>{
- const setup=(charMode:'missing'|'bad'|'good')=>{
-  const env=new Environment(),one=levelSucc(levelZero),uN=nameFromDotted('u'),u=levelParam(uN),TU=sort(levelSucc(u));
-  env.add({kind:'axiom',name:N.Nat,levelParams:[],type:sort(one)});
-  env.add({kind:'axiom',name:N.Char,levelParams:[],type:sort(one)});env.add({kind:'axiom',name:N.String,levelParams:[],type:sort(one)});
-  if(charMode!=='missing')env.add({kind:'axiom',name:N.CharOfNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(charMode==='good'?N.Char:N.Nat))});
-  const listTy=forallE(nameFromDotted('α'),TU,TU,'implicit');env.add({kind:'axiom',name:N.List,levelParams:[uN],type:listTy});
-  const listU=(x:any)=>app(constant(N.List,[u]),x);
-  env.add({kind:'axiom',name:N.ListNil,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,listU(bvar(0)),'implicit')});
-  env.add({kind:'axiom',name:N.ListCons,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,forallE(nameFromDotted('a'),bvar(0),forallE(nameFromDotted('as'),listU(bvar(1)),listU(bvar(2)))),'implicit')});
-  const listChar=app(constant(N.List,[levelZero]),constant(N.Char)),empty=nameFromDotted('emptyString');env.add({kind:'axiom',name:empty,levelParams:[],type:constant(N.String)});
-  const ty=forallE(nameFromDotted('xs'),listChar,constant(N.String)),value=lam(nameFromDotted('xs'),listChar,constant(empty));
-  const info={kind:'definition' as const,name:N.StringOfList,levelParams:[],type:ty,value,hints:{kind:'regular' as const,height:1n},safety:'safe' as const};
-  return {env,info};
- };
- for(const mode of ['missing','bad'] as const){const {env,info}=setup(mode);throws(()=>addPrimitiveDefinition(env,info));assert(!env.has(N.StringOfList),`String.ofList must reject ${mode} Char.ofNat prerequisite transactionally`);}
- const {env,info}=setup('good');addPrimitiveDefinition(env,info);assert(env.has(N.StringOfList));
+test('String.ofList follows ordinary declaration admission without synthetic Char.ofNat dependency',()=>{
+ const env=new Environment(),one=levelSucc(levelZero),uN=nameFromDotted('u'),u=levelParam(uN),TU=sort(levelSucc(u));
+ env.add({kind:'axiom',name:N.Char,levelParams:[],type:sort(one)});env.add({kind:'axiom',name:N.String,levelParams:[],type:sort(one)});
+ const listTy=forallE(nameFromDotted('α'),TU,TU,'implicit');env.add({kind:'axiom',name:N.List,levelParams:[uN],type:listTy});
+ const listChar=app(constant(N.List,[levelZero]),constant(N.Char)),empty=nameFromDotted('emptyString');env.add({kind:'axiom',name:empty,levelParams:[],type:constant(N.String)});
+ const ty=forallE(nameFromDotted('xs'),listChar,constant(N.String)),value=lam(nameFromDotted('xs'),listChar,constant(empty));
+ const info={kind:'definition' as const,name:N.StringOfList,levelParams:[],type:ty,value,hints:{kind:'regular' as const,height:1n},safety:'safe' as const};
+ throws(()=>addPrimitiveDefinition(env,info));
+ new Kernel(env).addDefinition(info);
+ assert(env.has(N.StringOfList),'String.ofList must not require Char.ofNat merely for declaration admission');
 });
 
 

@@ -5,7 +5,7 @@ def psDeclarationName : PsDeclaration -> PsName
   | .axiom name _ _ => name
   | .definition name _ _ _ => name
   | .theorem name _ _ _ => name
-  | .opaque name _ _ _ => name
+  | .opaqueDef name _ _ _ => name
 
 structure PsEnvironment where
   declarations : List PsDeclaration

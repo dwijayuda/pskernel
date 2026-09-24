@@ -8,14 +8,13 @@ import {
   exprToString,
   hasMVar,
   instantiate1,
-  appView,
   fvar,
-  nameToString,
 } from 'lean-ts-kernel';
 import {
   ExprMetaContext,
   type ExprMetavarKind,
 } from '@proofscript/meta';
+import {trySynthesizeLocalInstance} from './application-instances.js';
 
 export interface InsertedApplicationArgument {
   readonly binderInfo:BinderInfo;
@@ -104,43 +103,6 @@ function explicitArgument(
   return {term:args[index]!};
 }
 
-function targetClassName(
-  type:Expr,
-  checker:TypeChecker,
-):string|undefined {
-  const view=appView(checker.whnf(type));
-  return view.fn.kind==='const'
-    ?nameToString(view.fn.name)
-    :undefined;
-}
-
-function trySynthesizeLocalInstance(
-  target:Expr,
-  candidates:readonly Expr[],
-  classNames:ReadonlySet<string>,
-  metaContext:ExprMetaContext,
-  checker:TypeChecker,
-  localContext:LocalContext,
-):Expr|undefined {
-  const className=targetClassName(
-    metaContext.instantiate(target),
-    checker,
-  );
-  if(className===undefined||!classNames.has(className))return undefined;
-
-  for(const candidate of candidates){
-    let candidateType:Expr;
-    try{
-      candidateType=checker.check(candidate);
-    }catch{
-      continue;
-    }
-    if(metaContext.unify(candidateType,target,localContext)){
-      return candidate;
-    }
-  }
-  return undefined;
-}
 
 export function elaborateApplication({
   environment,

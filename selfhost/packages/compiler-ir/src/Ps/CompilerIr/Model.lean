@@ -34,6 +34,15 @@ inductive PsVerifiedIrIntrinsic where
   | natNe
   | natLe
   | natLt
+  | intOfNat
+  | intNegSucc
+  | intNeg
+  | intAdd
+  | intSub
+  | intMul
+  | intEq
+  | intLe
+  | intLt
   | boolNot
   | boolAnd
   | boolOr

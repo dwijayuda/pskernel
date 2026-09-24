@@ -227,17 +227,57 @@ console.log('ok - Lean runtime Level bridge preserves pskernel structure');
     'Lean Expr projection bridge round-trip mismatch',
   );
 
+  const keyString=strName(anonymous,'string');
+  const keyBool=strName(anonymous,'bool');
+  const keyName=strName(anonymous,'name');
+  const keyNat=strName(anonymous,'nat');
+  const keyInt=strName(anonymous,'int');
+  const keySyntax=strName(anonymous,'syntax');
+  const metadataExpr={
+    kind:'mdata' as const,
+    data:{
+      [nameKey(keyString)]:{kind:'string',value:'source-span'},
+      [nameKey(keyBool)]:{kind:'bool',value:true},
+      [nameKey(keyName)]:{
+        kind:'name',
+        value:numName(strName(anonymous,'decl'),4n),
+      },
+      [nameKey(keyNat)]:{kind:'nat',value:17n},
+      [nameKey(keyInt)]:{kind:'int',value:-9n},
+      [nameKey(keySyntax)]:{
+        kind:'syntax',
+        value:{
+          kind:'constructor',
+          name:'Lean.Syntax.missing',
+          fields:[],
+        },
+      },
+    },
+    expr:natLit(0n),
+  };
+  ok(
+    exprEq(
+      lean434RuntimeExprToKernel(
+        kernelExprToLean434Runtime(metadataExpr),
+      ),
+      metadataExpr,
+    ),
+    'Lean Expr mdata/KVMap bridge round-trip mismatch',
+  );
+
   throws(
     ()=>kernelExprToLean434Runtime({
       kind:'mdata',
-      data:{tag:'unsupported-until-kvmap-bridge'},
+      data:{
+        'not-a-structural-name-key':{kind:'nat',value:1n},
+      },
       expr:natLit(0n),
     }),
     Lean434ExprBridgeError,
-    'Expr.mdata must fail closed before canonical KVMap bridge exists',
+    'Expr.mdata must reject lossy/noncanonical metadata keys',
   );
 }
-console.log('ok - canonical logical Lean Expr bridge round-trips supported constructors');
+console.log('ok - canonical logical Lean Expr bridge round-trips all core constructors');
 
 // Lean 4.34 Nat and machine-integer compatibility.
 equal(LEAN434_SOURCE_VERSION,'4.34.0');

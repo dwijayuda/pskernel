@@ -1,6 +1,7 @@
 import {SyntaxError,type SourceSpan,type Token} from '../source.js';
 import {V061ParseContext,spanBetween} from './context.js';
 import {v061BinaryPrecedence} from './operators.js';
+import {startsV061DependentArrow} from './type-parser-lookahead.js';
 
 export type V061TypeExpr =
   | {readonly kind:'nat';readonly text:string;readonly span:SourceSpan}
@@ -72,34 +73,11 @@ function crossesLineBoundary(
     &&next.span.start.line>current.span.end.line;
 }
 
-function startsDependentArrow(context:V061ParseContext):boolean {
-  if(
-    !context.cursor.at('(')
-    ||context.cursor.peek(1).kind!=='identifier'
-    ||context.cursor.peek(2).text!==':'
-  )return false;
-
-  let depth=0;
-  for(let offset=0;;offset+=1){
-    const token=context.cursor.peek(offset);
-    if(token.kind==='eof')return false;
-    if(token.text==='('){
-      depth+=1;
-      continue;
-    }
-    if(token.text!==')')continue;
-    depth-=1;
-    if(depth!==0)continue;
-    const next=context.cursor.peek(offset+1);
-    return next.text==='->'||next.text==='→';
-  }
-}
-
 export function parseV061Type(
   context:V061ParseContext,
   options:V061TypeParseOptions={},
 ):V061TypeExpr {
-  if(startsDependentArrow(context)){
+  if(startsV061DependentArrow(context)){
     const open=context.cursor.consume();
     const name=context.cursor.expectKind('identifier','dependent binder name');
     context.cursor.expect(':');

@@ -6,6 +6,7 @@ import {
   createLeanEnvironmentProvider,
   requireLeanEnvironment,
 } from '../src/node.js';
+import {LEAN434_PINNED_GITHASH} from 'lean-ts-kernel/lean4export';
 
 function equal(actual:unknown,expected:unknown):void {
   if(actual!==expected){
@@ -17,7 +18,7 @@ function equal(actual:unknown,expected:unknown):void {
   const replayed=replayLeanEnvironment(
     JSON.stringify({
       meta:{
-        lean:{version:PROOFSCRIPT_LEAN_VERSION},
+        lean:{version:PROOFSCRIPT_LEAN_VERSION,githash:LEAN434_PINNED_GITHASH},
         format:{version:'3.1.0'},
       },
     })+'\n',

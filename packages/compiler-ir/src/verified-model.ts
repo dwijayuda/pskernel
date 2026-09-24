@@ -23,7 +23,9 @@ export type VerifiedIrIntrinsicOperation =
   |'nat.eq'|'nat.ne'|'nat.le'|'nat.lt'
   |'bool.not'|'bool.and'|'bool.or'|'bool.eq'|'bool.ne'
   |'char.ofNat'|'char.toNat'
-  |'string.push'|'string.singleton'|'string.length'|'string.append';
+  |'string.push'|'string.singleton'|'string.length'|'string.append'
+  |'string.utf8ByteSize'|'string.next'|'string.get'
+  |'string.atEnd'|'string.extract';
 
 export interface VerifiedIrStructureField {
   readonly name:string;

@@ -75,6 +75,8 @@ def checkLevelSample (u : KLevel) : IO Unit := do
   assertTrue "Level.isNotZero" (ProofScript.Kernel.PSC1.Level.isNotZero u == Lean.Level.isNeverZero lu)
   assertTrue "Level.normalizesToZero"
     (ProofScript.Kernel.PSC1.Level.normalizesToZero u == Lean.Level.isAlwaysZero lu)
+  assertTrue "Level.normalize"
+    (toLeanLevel (ProofScript.Kernel.PSC1.Level.normalize u) == Lean.Level.normalize lu)
 
 def sampleExpr : KExpr :=
   .lam (n "x") (.sort .zero)
@@ -139,6 +141,29 @@ def run : IO Unit := do
       (ProofScript.Kernel.PSC1.Level.mkIMax (.succ .zero) (.param (n "u")))
       (.param (n "u")))
 
+  let u : KLevel := .param (n "u")
+  let v : KLevel := .param (n "v")
+  let levelPairs : List (KLevel × KLevel) := [
+    (.zero, .zero),
+    (.succ .zero, .zero),
+    (.max u v, .max v u),
+    (.imax u v, .imax u v),
+    (.max v u, .max (.imax u v) u),
+    (.succ (.max u v), .max (.succ u) (.succ v)),
+    (.imax u (.succ v), .max u (.succ v))
+  ]
+  for p in levelPairs do
+    let a := p.1
+    let b := p.2
+    let la := toLeanLevel a
+    let lb := toLeanLevel b
+    assertTrue "Level.isEquivalent"
+      (ProofScript.Kernel.PSC1.Level.isEquivalent a b == Lean.Level.isEquiv la lb)
+    assertTrue "Level.geq"
+      (ProofScript.Kernel.PSC1.Level.geq a b == Lean.Level.geq la lb)
+    assertTrue "Level.geq reverse"
+      (ProofScript.Kernel.PSC1.Level.geq b a == Lean.Level.geq lb la)
+
   checkExprParity sampleExpr
   checkExprParity sampleLet
 
@@ -160,7 +185,7 @@ def run : IO Unit := do
   assertTrue "Expr.abstractFVar"
     (sameLeanExpr (toLeanExpr abstractedK) leanAbstracted)
 
-  IO.println "ok - PSC1 Lean kernel K0 direct Lean 4.34 parity"
+  IO.println "ok - PSC1 Lean kernel K0/K1 universe+expr parity"
 
 end ProofScript.Kernel.PSC1.Test
 

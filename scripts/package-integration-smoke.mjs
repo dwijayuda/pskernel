@@ -100,12 +100,21 @@ assert(exprEq(applied.type,constant(TestNat)),'application elaborator produced w
 const appliedType=new TypeChecker(kernelEnv,new LocalContext()).check(applied.term);
 assert(exprEq(appliedType,constant(TestNat)),'kernel rejected grounded elaborated application');
 
+let tacticAssignment;
 const tacticState=exact(
-  {goals:[{target:'Nat',locals:[]}],proofs:[]},
+  {goals:[{id:'integration.exact',target:'Nat',locals:[]}]},
   'zero',
-  {inferType:()=> 'Nat',isDefEq:(a,b)=>a===b},
+  {
+    inferType:()=> 'Nat',
+    isDefEq:(a,b)=>a===b,
+    assign:(goal,proof)=>{
+      assert(goal.id==='integration.exact','tactic exact assigned wrong goal');
+      tacticAssignment=proof;
+    },
+  },
 );
 assert(tacticState.goals.length===0,'tactic exact did not solve goal');
+assert(tacticAssignment==='zero','tactic exact did not assign proof');
 
 const irExpr={
   kind:'lambda',

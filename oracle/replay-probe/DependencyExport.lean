@@ -512,7 +512,7 @@ def flattenRoots (buckets : Array (Array Name)) : Array Name := Id.run do
     for n in bucket do roots := roots.push n
   return roots
 
-partial partial def dumpSelectedRootsSegmented
+partial def dumpSelectedRootsSegmented
     (env : Environment) (roots : List Name) (segmentRoots : Nat) : IO Unit := do
   if segmentRoots == 0 then
     throw <| IO.userError "selected segment size must be positive"
@@ -541,7 +541,7 @@ partial partial def dumpSelectedRootsSegmented
         inSegment := 0) |>.run {}
   pure ()
 
-def dumpRootRange (env : Environment) (target : Name) (start count : Nat) : IO Unit := do
+partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat) : IO Unit := do
   if count == 0 then throw <| IO.userError "root range count must be positive"
   let buckets := collectRootsByModule env
   let roots := flattenRoots buckets

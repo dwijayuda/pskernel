@@ -306,6 +306,26 @@ def psDebugPartialApplication : IO Unit := do
   | Except.ok _, Except.error psError =>
       IO.println ("PSC1_PARTIAL_APP_DEBUG_PS_ERROR: " ++ psError)
 
+def psTestDualSourceLeanNativeTextPrimitives : Bool :=
+  let leanSource :=
+    "def pushBang (s : String) : String := String.push s '!'\n" ++
+    "def firstChar (s : String) : Char := String.Internal.get s 0\n" ++
+    "def nextPos (s : String) (p : Nat) : Nat := String.Internal.next s p\n" ++
+    "def textBytes (s : String) : Nat := String.utf8ByteSize s"
+  let proofScriptSource :=
+    "def pushBang(s : String) : String := String.push(s, '!'); " ++
+    "def firstChar(s : String) : Char := String.Internal.get(s, 0); " ++
+    "def nextPos(s : String)(p : Nat) : Nat := String.Internal.next(s, p); " ++
+    "def textBytes(s : String) : Nat := String.utf8ByteSize(s);"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains "codePointAt"
+        && leanOutput.contains "let __ps_n = 0n"
+  | _, _ => false
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -323,7 +343,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native Array map", passed := psTestDualSourceLeanNativeArrayMap },
   { name := "dual-source Lean-native Array foldl", passed := psTestDualSourceLeanNativeArrayFoldl },
   { name := "dual-source Lean-native Array higher-order", passed := psTestDualSourceLeanNativeArrayHigherOrder },
-  { name := "dual-source Lean-native partial application", passed := psTestDualSourceLeanNativePartialApplication }
+  { name := "dual-source Lean-native partial application", passed := psTestDualSourceLeanNativePartialApplication },
+  { name := "dual-source Lean-native text primitives", passed := psTestDualSourceLeanNativeTextPrimitives }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

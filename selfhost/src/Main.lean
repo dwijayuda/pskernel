@@ -134,6 +134,24 @@ def psCliElaborateSource
   | Except.ok result =>
       pure result
 
+def psCliCheck
+    (inputPath : String) : IO Unit := do
+  let elaborated ← psCliElaborateSource inputPath
+  match psEncodeCheckedAdmissionsCanonical elaborated.declarations with
+  | Except.error _ =>
+      throw
+        (IO.userError
+          "PSC1_CHECK_FAILED: elaborated source is not persistable checked core")
+  | Except.ok _ =>
+      IO.println
+        ("PSC1_CHECK: PASS (" ++
+          toString elaborated.declarations.length ++
+          " declarations)")
+
+def psCliEmitLean
+    (inputPath : String) : IO Unit :=
+  psCliTranslate inputPath "lean"
+
 def psCliAdmissions
     (inputPath : String) : IO Unit := do
   let elaborated ← psCliElaborateSource inputPath
@@ -192,18 +210,24 @@ def psCliCompile
 def psCliUsage : String :=
   "ProofScript PSC1 Lean bootstrap\n" ++
   "usage:\n" ++
+  "  psc1 check <input.lean|input.ps>\n" ++
+  "  psc1 build <input.lean|input.ps> --out <output.ts>\n" ++
   "  psc1 translate <input.lean|input.ps> --to <lean|ps>\n" ++
+  "  psc1 emit-lean <input.lean|input.ps>\n" ++
   "  psc1 admissions <input.lean|input.ps>\n" ++
   "  psc1 typescript <input.lean|input.ps>\n" ++
-  "  psc1 build <input.lean|input.ps> --out <output.ts>\n" ++
   "  psc1 compile <input.lean|input.ps> --out <output.ts>"
 
 def main (args : List String) : IO Unit := do
   match args with
   | [] =>
       IO.println "ProofScript PSC1 Lean bootstrap"
+  | ["check", inputPath] =>
+      psCliCheck inputPath
   | ["translate", inputPath, "--to", target] =>
       psCliTranslate inputPath target
+  | ["emit-lean", inputPath] =>
+      psCliEmitLean inputPath
   | ["admissions", inputPath] =>
       psCliAdmissions inputPath
   | ["typescript", inputPath] =>

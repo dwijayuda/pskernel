@@ -1,0 +1,15 @@
+{
+  "format": "proofscript-lean434-js-bootstrap",
+  "formatVersion": 1,
+  "leanVersion": "4.34.0",
+  "sourceRoot": "study/lean4-4.34.0/src",
+  "policy": "Reuse upstream Lean source bodies unchanged where practical; prune or replace import edges only when they pull unrelated native/server/tooling infrastructure.",
+  "prunedImports": {
+    "Lean.Parser.Types": [
+      {
+        "module": "Lean.DocString.Extension",
+        "reason": "Lean.Parser.Types does not reference DocString.Extension symbols; the public import supplies docstring/tooling extension infrastructure that is not required by the parser data model or parser execution semantics."
+      }
+    ]
+  }
+}

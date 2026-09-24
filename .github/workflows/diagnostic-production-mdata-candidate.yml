@@ -31,7 +31,9 @@ jobs:
       - run: node scripts/anti-drift.mjs
       - run: npm run build
       - name: Compile exporter
-        run: "$LEAN434_BIN/lean" oracle/replay-probe/DependencyExport.lean
+        shell: bash
+        run: |
+          "$LEAN434_BIN/lean" oracle/replay-probe/DependencyExport.lean
       - name: Replay representative Int.DivMod window
         env:
           PSKERNEL_WORKER_TIMEOUT_MS: "30000"

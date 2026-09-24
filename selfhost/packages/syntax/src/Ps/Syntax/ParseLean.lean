@@ -25,6 +25,8 @@ def psLeanReservedApplicationToken (token : PsToken) : Bool :=
   token.text == "def"
     || token.text == "theorem"
     || token.text == "import"
+    || token.text == "inductive"
+    || token.text == "structure"
     || token.text == "where"
     || token.text == "then"
     || token.text == "else"
@@ -641,6 +643,170 @@ def psParseLeanInductiveConstructorsWithFuel
           cursor := cursor
         }
 
+def psLeanTopLevelDeclarationToken (token : PsToken) : Bool :=
+  token.text == "def"
+    || token.text == "theorem"
+    || token.text == "inductive"
+    || token.text == "structure"
+    || token.text == "import"
+
+def psSplitTokensThroughLine
+    (line : Nat) :
+    List PsToken -> List PsToken × List PsToken
+  | [] => ([], [])
+  | token :: rest =>
+      if
+          psTokenKindEq token.kind PsTokenKind.endOfInput
+            || token.span.start.line > line then
+        ([], token :: rest)
+      else
+        let tail := psSplitTokensThroughLine line rest
+        (token :: tail.1, tail.2)
+
+def psParseLeanStructureField
+    (cursor : PsTokenCursor) :
+    Except PsParseError
+      (PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :=
+  if psTokenCursorAtBinderStart cursor then
+    psParseLeanBinder cursor
+  else
+    match psTokenCursorExpectKind cursor PsTokenKind.identifier with
+    | Except.error error => Except.error error
+    | Except.ok name =>
+        match psTokenCursorExpectText name.cursor ":" with
+        | Except.error error => Except.error error
+        | Except.ok afterColon =>
+            match psTokenCursorPeek afterColon.cursor with
+            | none =>
+                Except.error
+                  (PsParseError.unexpectedEnd "structure field type")
+            | some firstType =>
+                let split :=
+                  psSplitTokensThroughLine
+                    firstType.span.start.line
+                    afterColon.cursor.remaining
+                match psParseLeanTerm { remaining := split.1 } with
+                | Except.error error => Except.error error
+                | Except.ok type =>
+                    if !psTokenCursorDone type.cursor then
+                      match psTokenCursorPeek type.cursor with
+                      | none =>
+                          Except.error
+                            (PsParseError.unexpectedEnd
+                              "end of structure field")
+                      | some token =>
+                          Except.error
+                            (PsParseError.expectedText
+                              "end of structure field"
+                              token.text
+                              token.span)
+                    else
+                      let fieldName : PsSyntaxName := {
+                        segments := [name.token.text]
+                        span := name.token.span
+                      }
+                      let head : PsSyntaxBinderHead := {
+                        name := fieldName
+                        kind := PsSyntaxBinderKind.explicit
+                        span := {
+                          start := name.token.span.start
+                          stop := (psSyntaxTermSpan type.value).stop
+                        }
+                      }
+                      Except.ok {
+                        value := (head, type.value)
+                        cursor := { remaining := split.2 }
+                      }
+
+def psParseLeanStructureFieldsWithFuel
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (fieldsRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) :
+    Except PsParseError
+      (PsParseResult
+        (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+  match fuel with
+  | 0 =>
+      Except.ok {
+        value := fieldsRev.reverse
+        cursor := cursor
+      }
+  | remaining + 1 =>
+      match psTokenCursorPeek cursor with
+      | none =>
+          Except.ok {
+            value := fieldsRev.reverse
+            cursor := cursor
+          }
+      | some token =>
+          if
+              psTokenKindEq token.kind PsTokenKind.endOfInput
+                || psLeanTopLevelDeclarationToken token then
+            Except.ok {
+              value := fieldsRev.reverse
+              cursor := cursor
+            }
+          else
+            match psParseLeanStructureField cursor with
+            | Except.error error => Except.error error
+            | Except.ok field =>
+                psParseLeanStructureFieldsWithFuel
+                  remaining
+                  field.cursor
+                  (field.value :: fieldsRev)
+
+def psParseLeanStructureDeclaration
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
+  match psTokenCursorExpectText cursor "structure" with
+  | Except.error error => Except.error error
+  | Except.ok keyword =>
+      match psParseSyntaxName keyword.cursor with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          match psParseLeanBindersWithFuel
+              name.cursor.remaining.length
+              name.cursor
+              [] with
+          | Except.error error => Except.error error
+          | Except.ok params =>
+              match psTokenCursorExpectText params.cursor "where" with
+              | Except.error error => Except.error error
+              | Except.ok afterWhere =>
+                  match
+                      psParseLeanStructureFieldsWithFuel
+                        afterWhere.cursor.remaining.length
+                        afterWhere.cursor
+                        [] with
+                  | Except.error error => Except.error error
+                  | Except.ok fields =>
+                      match fields.value.reverse with
+                      | [] =>
+                          match psTokenCursorPeek fields.cursor with
+                          | none =>
+                              Except.error
+                                (PsParseError.unexpectedEnd
+                                  "structure field")
+                          | some token =>
+                              Except.error
+                                (PsParseError.expectedText
+                                  "structure field"
+                                  token.text
+                                  token.span)
+                      | (lastHead, _) :: _ =>
+                          Except.ok {
+                            value :=
+                              PsSyntaxDeclaration.structureDecl
+                                name.value
+                                params.value
+                                fields.value
+                                {
+                                  start := keyword.token.span.start
+                                  stop := lastHead.span.stop
+                                }
+                            cursor := fields.cursor
+                          }
+
 def psParseLeanInductiveDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
@@ -723,13 +889,15 @@ def psParseLeanDeclaration
   | some keyword =>
       if keyword.text == "inductive" then
         psParseLeanInductiveDeclaration cursor
+      else if keyword.text == "structure" then
+        psParseLeanStructureDeclaration cursor
       else
         let isDefinition := keyword.text == "def"
         let isTheorem := keyword.text == "theorem"
         if !(isDefinition || isTheorem) then
           Except.error
             (PsParseError.expectedText
-              "def, theorem, or inductive"
+              "def, theorem, inductive, or structure"
               keyword.text
               keyword.span)
         else

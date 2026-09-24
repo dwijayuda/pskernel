@@ -90,6 +90,13 @@ jobs:
           cd selfhost
           lake exe psc1_bridge_tests
 
+      - name: Run Lean-native TypeScript backend tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_ts_tests
+
       - name: Run dual-source admission pipeline
         shell: bash
         run: |

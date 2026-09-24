@@ -19,6 +19,7 @@ import {
   compileVerifiedSource,
 } from '../packages/cli/dist/src/verified-pipeline.js';
 import {runCommand} from '../packages/cli/dist/src/commands/run.js';
+import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
@@ -470,6 +471,70 @@ assert(
     &&dualTextLean.emitted.declaration===
       dualTextPsRoundTrip.emitted.declaration,
   'SH1 PS/Lean text changed emitted TypeScript declarations',
+);
+
+const lexerModuleSource=readFileSync(
+  new URL('../stdlib/src/ProofScript/Text/Lexer.ps',import.meta.url),
+  'utf8',
+);
+const lexerModulePs=compileVerifiedSource(
+  lexerModuleSource,
+  'proofscript-text-lexer.ts',
+  'ProofScript/Text/Lexer.ps',
+);
+const lexerModuleLeanSource=
+  dualTargets.require('lean').print(lexerModulePs.surface);
+const lexerModuleLean=compileVerifiedSource(
+  lexerModuleLeanSource,
+  'proofscript-text-lexer.ts',
+  'ProofScript/Text/Lexer.lean',
+);
+const lexerModulePsSource=
+  dualTargets.require('ps').print(lexerModuleLean.surface);
+const lexerModulePsRoundTrip=compileVerifiedSource(
+  lexerModulePsSource,
+  'proofscript-text-lexer.ts',
+  'ProofScript/Text/Lexer.roundtrip.ps',
+);
+
+assert(
+  lexerModulePs.canonicalSourceHash===lexerModuleLean.canonicalSourceHash
+    &&lexerModuleLean.canonicalSourceHash===
+      lexerModulePsRoundTrip.canonicalSourceHash,
+  'ProofScript.Text.Lexer dual-source canonical identity diverged',
+);
+assert(
+  semanticFingerprint(lexerModulePs.checkedCore.admissions)
+    ===semanticFingerprint(lexerModuleLean.checkedCore.admissions)
+    &&semanticFingerprint(lexerModuleLean.checkedCore.admissions)
+      ===semanticFingerprint(
+        lexerModulePsRoundTrip.checkedCore.admissions,
+      ),
+  'ProofScript.Text.Lexer dual-source checked-core fingerprint diverged',
+);
+assert(
+  semanticFingerprint(lexerModulePs.ir)
+    ===semanticFingerprint(lexerModuleLean.ir)
+    &&semanticFingerprint(lexerModuleLean.ir)
+      ===semanticFingerprint(lexerModulePsRoundTrip.ir),
+  'ProofScript.Text.Lexer dual-source compiler IR diverged',
+);
+assert(
+  lexerModulePs.typeScript===lexerModuleLean.typeScript
+    &&lexerModuleLean.typeScript===lexerModulePsRoundTrip.typeScript,
+  'ProofScript.Text.Lexer dual-source TypeScript diverged',
+);
+assert(
+  lexerModulePs.emitted.javascript===lexerModuleLean.emitted.javascript
+    &&lexerModuleLean.emitted.javascript===
+      lexerModulePsRoundTrip.emitted.javascript,
+  'ProofScript.Text.Lexer dual-source JavaScript diverged',
+);
+assert(
+  lexerModulePs.emitted.declaration===lexerModuleLean.emitted.declaration
+    &&lexerModuleLean.emitted.declaration===
+      lexerModulePsRoundTrip.emitted.declaration,
+  'ProofScript.Text.Lexer dual-source declarations diverged',
 );
 
 let unsupportedLeanRejected=false;

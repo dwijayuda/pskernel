@@ -2,8 +2,8 @@ namespace PSC1Kernel
 
 inductive Name where
   | anonymous
-  | str (prefix : Name) (value : String)
-  | num (prefix : Name) (value : Nat)
+  | str (parent : Name) (value : String)
+  | num (parent : Name) (value : Nat)
 
 inductive NameComponent where
   | str (value : String)

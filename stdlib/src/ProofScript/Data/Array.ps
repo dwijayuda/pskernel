@@ -21,7 +21,7 @@ function arrayGetD {α : Type}
 function arraySet {α : Type}
 (xs : Array(α), index : Nat, value : α, h : index < Array.size(xs)) :
 Array(α) :=
-  Array.set(xs, index, value, h);
+  Array.setIfInBounds(xs, index, value);
 
 function arraySetIfInBounds {α : Type}
 (xs : Array(α), index : Nat, value : α) : Array(α) :=

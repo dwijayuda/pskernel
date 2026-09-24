@@ -27,7 +27,7 @@ function equal(actual:unknown,expected:unknown):void {
 }
 {
   const provider=createLeanEnvironmentProvider({
-    candidatePaths:['/definitely/missing/proofscript-prelude.ndjson'],
+    candidatePaths:['/definitely/missing/proofscript-foundation.ndjson'],
   });
   equal(provider.status().loaded,false);
   let failed=false;

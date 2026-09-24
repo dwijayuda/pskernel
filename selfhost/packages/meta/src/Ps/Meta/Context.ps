@@ -1,5 +1,6 @@
 import Ps.Core.Expr
 import Ps.Environment.LocalContext
+import Ps.Meta.LevelContext
 
 inductive PsMetaVarKind where {
   | natural;
@@ -23,6 +24,7 @@ structure PsMetaContext where {
   nextId : Nat;
   declarations : List(PsMetaVarDecl);
   assignments : List(PsMetaAssignment);
+  levels : PsLevelMetaContext;
 };
 
 structure PsMetaFreshResult where {
@@ -31,7 +33,12 @@ structure PsMetaFreshResult where {
 };
 
 def psMetaEmpty : PsMetaContext :=
-  { nextId := 0, declarations := [], assignments := [] };
+  {
+    nextId := 0,
+    declarations := [],
+    assignments := [],
+    levels := psLevelMetaEmpty
+  };
 
 def psMetaSnapshot(context : PsMetaContext) : PsMetaContext :=
   context;
@@ -84,7 +91,8 @@ def psMetaFresh(
     context := {
       nextId := id + 1,
       declarations := List.cons(declaration, context.declarations),
-      assignments := context.assignments
+      assignments := context.assignments,
+      levels := context.levels
     },
     expr := PsExpr.mvar(id)
   };
@@ -186,7 +194,8 @@ def psMetaAssign(context : PsMetaContext, id : Nat, value : PsExpr) : Option(PsM
               Option.some({
                 nextId := context.nextId,
                 declarations := context.declarations,
-                assignments := List.cons({ id := id, value := resolved }, context.assignments)
+                assignments := List.cons({ id := id, value := resolved }, context.assignments),
+                levels := context.levels
               })
             } else {
               Option.none

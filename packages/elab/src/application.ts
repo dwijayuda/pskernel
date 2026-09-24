@@ -32,6 +32,7 @@ export interface ElaboratedApplication {
 
 export interface ApplicationArgument {
   readonly term:Expr;
+  readonly type?:Expr;
   readonly allowUnresolvedMVar?:boolean;
 }
 
@@ -191,20 +192,27 @@ export function elaborateApplication({
       const argument=metaContext.instantiate(sourceArg);
 
       let actualType:Expr;
-      if(hasMVar(argument)){
-        if(
-          !supplied.allowUnresolvedMVar
-          ||argument.kind!=='mvar'
-        ){
+      if(hasExprMVar(argument)){
+        if(!supplied.allowUnresolvedMVar){
           throw new Error(
-            'PS_ELAB_APP_ARGUMENT_STUCK: explicit argument contains unresolved metavariables',
+            'PS_ELAB_APP_ARGUMENT_STUCK: explicit argument contains unresolved expression metavariables',
           );
         }
-        actualType=metaContext.instantiate(
-          metaContext.getDecl(argument).type,
-        );
+        if(supplied.type!==undefined){
+          actualType=metaContext.instantiate(supplied.type);
+        }else if(argument.kind==='mvar'){
+          actualType=metaContext.instantiate(
+            metaContext.getDecl(argument).type,
+          );
+        }else{
+          throw new Error(
+            'PS_ELAB_APP_ARGUMENT_STUCK: postponed compound argument requires its elaborated type',
+          );
+        }
       }else{
-        actualType=checker.check(argument);
+        actualType=supplied.type===undefined
+          ?checker.check(argument)
+          :metaContext.instantiate(supplied.type);
       }
 
       if(

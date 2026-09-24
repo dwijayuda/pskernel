@@ -4,7 +4,14 @@ import {baseReport,compileSource} from '../pipeline.js';
 import {compileVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
-import type {BuildResult,CommonArgs} from '../types.js';
+import type {
+  BuildResult,
+  CommonArgs,
+  UnverifiedBuildReport,
+  UnverifiedBuildResult,
+  VerifiedBuildReport,
+  VerifiedBuildResult,
+} from '../types.js';
 import {
   writeVerifiedModuleArtifacts,
 } from '../project-artifact-output.js';
@@ -15,6 +22,13 @@ import {
 } from '../runtime-dependencies.js';
 import {verifyRuntimeDependencyLock} from '../runtime-lock.js';
 
+export function buildCommand(
+  common:CommonArgs&{readonly verified:true},
+):Promise<VerifiedBuildResult>;
+export function buildCommand(
+  common:CommonArgs&{readonly verified:false},
+):Promise<UnverifiedBuildResult>;
+export function buildCommand(common:CommonArgs):Promise<BuildResult>;
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   if(common.verified){
     const input=await resolveInput(common);
@@ -54,7 +68,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       result.moduleArtifacts,
     );
 
-    const report={
+    const report:VerifiedBuildReport={
       ok:true,
       command:'build',
       ...baseReport(
@@ -127,7 +141,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const mapPath=join(outDir,stem+'.js.map');
   const manifestPath=join(outDir,stem+'.proofscript.json');
 
-  const report={
+  const report:UnverifiedBuildReport={
     ok:true,
     command:'build',
     ...baseReport(

@@ -748,6 +748,22 @@ this dependency order:
 12. term/declaration elaboration;
 13. compiler orchestration.
 
+Every SH8a module written in `.lean` must pass the continuous dual-source gate
+as it lands:
+
+```text
+module.lean -> canonical module.ps   -> parse/elab/check
+module.ps   -> canonical module.lean -> parse/elab/check
+```
+
+The translated `.ps` form must remain buildable throughout SH8a rather than
+being generated for the first time at SH10. At every completed compiler
+milestone, both source forms must still converge on the same checked-core and
+compiler-IR fingerprints and continue through TypeScript to executable
+JavaScript. This makes the eventual switch of the authoritative compiler source
+from `.lean` to `.ps` a source-of-truth transition, not a second compiler
+port.
+
 SH8a is the first self-hosting target. It does **not** require moving every
 existing theorem tactic into the self-hosted compiler before PSC1 can exist.
 The bootstrap compiler source itself should avoid depending on tactic features

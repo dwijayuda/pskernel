@@ -1,4 +1,5 @@
 import Ps.Foundation.Name
+import Ps.Syntax.Lexer
 import Ps.Core.Abstract
 import Ps.Core.Builtin
 import Ps.Core.Equality
@@ -296,8 +297,36 @@ def psTestLocalInstanceSynthesis : Bool :=
   | some value => psExprAlphaEq value (PsExpr.fvar pushed.id)
   | none => false
 
+
+def psTestLexerUtf8Offset : Bool :=
+  match psLex "𝒫x" with
+  | Except.error _ => false
+  | Except.ok tokens =>
+      match tokens with
+      | token :: eofToken :: [] =>
+          token.kind == PsTokenKind.identifier
+            && token.text == "𝒫x"
+            && token.span.start.byteOffset == 0
+            && token.span.stop.byteOffset == 5
+            && eofToken.kind == PsTokenKind.endOfInput
+            && eofToken.span.start.byteOffset == 5
+      | _ => false
+
+def psTestLexerNestedTrivia : Bool :=
+  match psLex "a /- x /- y -/ z -/ b" with
+  | Except.error _ => false
+  | Except.ok tokens =>
+      match tokens with
+      | first :: second :: eofToken :: [] =>
+          first.text == "a"
+            && second.text == "b"
+            && eofToken.kind == PsTokenKind.endOfInput
+      | _ => false
+
 def psBootstrapTests : Bool :=
-  psTestModuleGraph
+  psTestLexerUtf8Offset
+    && psTestLexerNestedTrivia
+    && psTestModuleGraph
     && psTestGlobalInstanceSynthesis
     && psTestGenericInstanceSynthesis
     && psTestDependentInstanceSynthesis

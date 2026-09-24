@@ -11,6 +11,7 @@ import {
   findLean434JsImplementedBy,
   invokeLean434JsExtern,
   invokeLean434JsImplementedBy,
+  type LeanRef,
 } from './lean4.js';
 import type {
   Lean434RuntimeMetadataIndex,
@@ -31,6 +32,13 @@ export interface Lean434ProofValue {
   readonly kind:'proof';
   readonly theorem:string;
 }
+
+export interface Lean434WorldTokenValue {
+  readonly kind:'world-token';
+}
+
+export const LEAN434_WORLD_TOKEN:Lean434WorldTokenValue=
+  Object.freeze({kind:'world-token'});
 
 interface Lean434ClosureValue {
   readonly kind:'closure';
@@ -72,15 +80,18 @@ export type Lean434CallableValue=
 export type Lean434RuntimeValue=
   |bigint|string|boolean|undefined
   |readonly Lean434RuntimeValue[]
+  |LeanRef<Lean434RuntimeValue>
   |Lean434ConstructorValue
   |Lean434TypeValue
   |Lean434ProofValue
+  |Lean434WorldTokenValue
   |Lean434CallableValue;
 
 type Lean434TaggedRuntimeValue=
   |Lean434ConstructorValue
   |Lean434TypeValue
   |Lean434ProofValue
+  |Lean434WorldTokenValue
   |Lean434CallableValue;
 
 function isTaggedRuntimeValue(
@@ -149,6 +160,37 @@ export class Lean434Evaluator {
 
   evaluate(expr:Expr):Lean434RuntimeValue {
     return this.evaluateWithLocals(expr,[]);
+  }
+
+  applyRuntimeValue(
+    fn:Lean434RuntimeValue,
+    arg:Lean434RuntimeValue,
+  ):Lean434RuntimeValue {
+    return this.apply(fn,arg);
+  }
+
+  runStateAction(
+    action:Lean434RuntimeValue,
+    state:Lean434RuntimeValue=LEAN434_WORLD_TOKEN,
+  ):{
+    readonly value:Lean434RuntimeValue;
+    readonly state:Lean434RuntimeValue;
+  }{
+    const result=this.apply(action,state);
+    if(
+      !isTaggedRuntimeValue(result)
+      ||result.kind!=='constructor'
+      ||result.name!=='ST.Out.mk'
+      ||result.fields.length<2
+    ){
+      throw new Lean434EvaluationError(
+        'Lean ST action did not return ST.Out.mk',
+      );
+    }
+    return {
+      value:result.fields[0]!,
+      state:result.fields[1]!,
+    };
   }
 
   private evaluateWithLocals(
@@ -292,6 +334,24 @@ export class Lean434Evaluator {
                 }
                 return args[index]!;
               });
+          if(runtimeBinding.effect==='st-action'){
+            return primitive(
+              name+'#state',
+              1,
+              (stateArgs)=>{
+                const state=stateArgs[0]!;
+                const value=invokeLean434JsExtern(
+                  runtimeBinding.leanSymbol,
+                  runtimeArgs,
+                ) as Lean434RuntimeValue;
+                return {
+                  kind:'constructor',
+                  name:'ST.Out.mk',
+                  fields:[value,state],
+                };
+              },
+            );
+          }
           return invokeLean434JsExtern(
             runtimeBinding.leanSymbol,
             runtimeArgs,

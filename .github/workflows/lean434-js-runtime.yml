@@ -234,7 +234,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lean --run oracle/replay-probe/DependencyExport.lean Oracle.ReplayProbe.RuntimeMapProbe \
+          lean -o Oracle/ReplayProbe/RuntimeMapProbe.olean \
+            Oracle/ReplayProbe/RuntimeMapProbe.lean
+          LEAN_PATH="$PWD:${LEAN_PATH:-}" \
+            lean --run oracle/replay-probe/DependencyExport.lean Oracle.ReplayProbe.RuntimeMapProbe \
             --selected-after Init.Prelude \
             Array.modify Array.set \
             Lean.PersistentHashMap.insert Lean.PersistentHashMap.find? \

@@ -541,11 +541,11 @@ assert(
 );
 assert(
   verifiedBoolLogic.typeScript.includes('return (a === b);'),
-  'verified Bool == did not lower through Bool.beq',
+  'verified Bool == did not lower through checked Bool equality',
 );
 assert(
   verifiedBoolLogic.typeScript.includes('return (a !== b);'),
-  'verified Bool != did not lower through Bool.not/Bool.beq',
+  'verified Bool != did not lower through checked Bool inequality',
 );
 assert(
   verifiedBoolLogic.typeScript.includes('||'),

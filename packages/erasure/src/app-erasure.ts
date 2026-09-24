@@ -2,6 +2,7 @@ import {
   Environment,
   TypeChecker,
   appView,
+  exprEq,
   instantiate1,
   nameKey,
   nameToString,
@@ -32,6 +33,37 @@ const natIntrinsics=new Map<
   ['Nat.mod','nat.mod'],
   ['Nat.beq','nat.eq'],
 ]);
+
+function namedApplication(
+  expr:Expr,
+  name:string,
+  arity:number,
+):ReturnType<typeof appView>|undefined {
+  const view=appView(expr);
+  return view.fn.kind==='const'
+    &&nameToString(view.fn.name)===name
+    &&view.args.length===arity
+    ?view
+    :undefined;
+}
+
+function synthesizedBoolEqualityOperands(
+  expr:Expr,
+):readonly [Expr,Expr]|undefined {
+  const disjunction=namedApplication(expr,'Bool.or',2);
+  if(disjunction===undefined)return undefined;
+  const direct=namedApplication(disjunction.args[0]!,'Bool.and',2);
+  const negated=namedApplication(disjunction.args[1]!,'Bool.and',2);
+  if(direct===undefined||negated===undefined)return undefined;
+  const leftNot=namedApplication(negated.args[0]!,'Bool.not',1);
+  const rightNot=namedApplication(negated.args[1]!,'Bool.not',1);
+  if(leftNot===undefined||rightNot===undefined)return undefined;
+  if(
+    !exprEq(direct.args[0]!,leftNot.args[0]!)
+    ||!exprEq(direct.args[1]!,rightNot.args[0]!)
+  )return undefined;
+  return [direct.args[0]!,direct.args[1]!];
+}
 
 function tryErasePrimitiveBoolRecursor(
   view:ReturnType<typeof appView>,
@@ -258,15 +290,12 @@ export function eraseRuntimeApplication(
         args:equality.args.map((arg)=>erase(arg,scope,environment)),
       };
     }
-    if(
-      equality.fn.kind==='const'
-      &&nameToString(equality.fn.name)==='Bool.beq'
-      &&equality.args.length===2
-    ){
+    const boolEquality=synthesizedBoolEqualityOperands(view.args[0]!);
+    if(boolEquality!==undefined){
       return {
         kind:'intrinsic',
         operation:'bool.ne',
-        args:equality.args.map((arg)=>erase(arg,scope,environment)),
+        args:boolEquality.map((arg)=>erase(arg,scope,environment)),
       };
     }
     return {
@@ -276,15 +305,12 @@ export function eraseRuntimeApplication(
     };
   }
 
-  if(
-    view.fn.kind==='const'
-    &&nameToString(view.fn.name)==='Bool.beq'
-    &&view.args.length===2
-  ){
+  const boolEquality=synthesizedBoolEqualityOperands(expr);
+  if(boolEquality!==undefined){
     return {
       kind:'intrinsic',
       operation:'bool.eq',
-      args:view.args.map((arg)=>erase(arg,scope,environment)),
+      args:boolEquality.map((arg)=>erase(arg,scope,environment)),
     };
   }
 

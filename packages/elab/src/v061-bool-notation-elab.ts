@@ -34,14 +34,18 @@ function requirePrimitiveEqualityOperandType(
   context:V061CoreElabContext,
   checker:TypeChecker,
   operator:string,
-):{readonly type:Expr;readonly equalityName:string} {
+):{
+  readonly kind:'nat'|'bool';
+  readonly type:Expr;
+  readonly equalityName?:'Nat.beq';
+} {
   const natType=constant(requireV061NotationConstant(context,'Nat'));
   const expectedBool=boolType(context);
   if(checker.isDefEq(type,natType)){
-    return {type:natType,equalityName:'Nat.beq'};
+    return {kind:'nat',type:natType,equalityName:'Nat.beq'};
   }
   if(checker.isDefEq(type,expectedBool)){
-    return {type:expectedBool,equalityName:'Bool.beq'};
+    return {kind:'bool',type:expectedBool};
   }
   throw new Error(
     "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+operator+
@@ -145,15 +149,38 @@ export function elaborateV061PrimitiveBooleanEqualityTerms(
       "' requires matching primitive operands",
     );
   }
-  const equality=mkAppN(
-    constant(requireV061NotationConstant(context,operand.equalityName)),
-    [left.term,right.term],
-  );
+  const equality=operand.kind==='nat'
+    ?mkAppN(
+      constant(requireV061NotationConstant(context,operand.equalityName!)),
+      [left.term,right.term],
+    )
+    :mkAppN(
+      constant(requireV061NotationConstant(context,'Bool.or')),
+      [
+        mkAppN(
+          constant(requireV061NotationConstant(context,'Bool.and')),
+          [left.term,right.term],
+        ),
+        mkAppN(
+          constant(requireV061NotationConstant(context,'Bool.and')),
+          [
+            mkAppN(
+              constant(requireV061NotationConstant(context,'Bool.not')),
+              [left.term],
+            ),
+            mkAppN(
+              constant(requireV061NotationConstant(context,'Bool.not')),
+              [right.term],
+            ),
+          ],
+        ),
+      ],
+    );
   const equalityType=checker.check(equality);
   if(!checker.isDefEq(equalityType,expectedBool)){
     throw new Error(
-      "PS_ELAB_EQUALITY_RESULT: '"+operand.equalityName+
-      "' did not produce Bool",
+      "PS_ELAB_EQUALITY_RESULT: bounded "+operand.kind+
+      " equality did not produce Bool",
     );
   }
   if(operator==='==')return {term:equality,type:equalityType};

@@ -211,9 +211,14 @@ division/modulo preserve Lean's total Nat semantics: division by zero yields
 
 The bounded primitive equality surface follows Lean's existing `==`/`!=`
 meaning rather than redefining it as propositional equality. Nat operands use
-`Nat.beq`; Bool operands use `Bool.beq`; both produce `Bool`. Inequality is
-`Bool.not` of the corresponding checked equality, matching Lean 4.34's
-`bne` definition. Generic `BEq` synthesis is intentionally not claimed.
+the real `Nat.beq`. Lean 4.34 supplies Bool `BEq` through the generic
+`DecidableEq` instance rather than a standalone `Bool.beq` constant, and
+the current bounded elaborator does not yet index Prelude instances. Bool
+equality is therefore reconstructed extensionally from the real
+`Bool.and`/`Bool.or`/`Bool.not` constants as XNOR, kernel-checked, then
+recognized by erasure as the existing `bool.eq` intrinsic. Inequality remains
+`Bool.not` of that checked equality, matching Lean's `bne` truth table.
+Generic `BEq` synthesis is intentionally not claimed.
 
 The same verified Bool lane now covers `!x`, `x && y`, and `x || y` through
 the actual Lean constants `Bool.not`, `Bool.and`, and `Bool.or`. Any

@@ -127,8 +127,19 @@ export function exprEq(a: Expr, b: Expr): boolean {
 /** Lean kernel Expr structural equality for the expression fields represented here.
  * Unlike exprEq, binder display names/info are intentionally ignored. MData payloads
  * participate in structural equality, exactly as Lean's kvmap payload does. */
-const leanExprHashCache=new WeakMap<object,number>();
-const leanLevelHashCache=new WeakMap<object,number>();
+interface LeanExprCachedData {
+  readonly hash:number;
+  readonly looseBVarRange:number;
+  readonly hasFVar:boolean;
+  readonly hasMVar:boolean;
+}
+interface LeanLevelCachedData {
+  readonly hash:number;
+  readonly hasMVar:boolean;
+}
+
+const leanExprDataCache=new WeakMap<object,LeanExprCachedData>();
+const leanLevelDataCache=new WeakMap<object,LeanLevelCachedData>();
 
 function mixLeanHash(h:number,x:number):number{
   h^=x>>>0;
@@ -139,48 +150,51 @@ function hashLeanString(s:string):number{
   for(let i=0;i<s.length;i++)h=mixLeanHash(h,s.charCodeAt(i));
   return h>>>0;
 }
-function leanLevelStructuralHash(root:Level):number{
-  const cached=leanLevelHashCache.get(root as object);if(cached!==undefined)return cached;
+function leanLevelCachedData(root:Level):LeanLevelCachedData{
+  const cached=leanLevelDataCache.get(root as object);if(cached!==undefined)return cached;
   const todo:{l:Level;done:boolean}[]=[{l:root,done:false}];
   while(todo.length){
     const f=todo.pop()!,l=f.l;
-    if(leanLevelHashCache.has(l as object))continue;
+    if(leanLevelDataCache.has(l as object))continue;
     if(!f.done){
       todo.push({l,done:true});
       if(l.kind==='succ')todo.push({l:l.of,done:false});
       else if(l.kind==='max'||l.kind==='imax')todo.push({l:l.right,done:false},{l:l.left,done:false});
       continue;
     }
-    let h=hashLeanString(l.kind);
+    let hash=hashLeanString(l.kind),hasMVar=false;
     switch(l.kind){
       case'zero':break;
-      case'param':case'mvar':h=mixLeanHash(h,hashLeanString(nameKey(l.name)));break;
-      case'succ':h=mixLeanHash(h,leanLevelHashCache.get(l.of as object)!);break;
-      case'max':case'imax':
-        h=mixLeanHash(h,leanLevelHashCache.get(l.left as object)!);
-        h=mixLeanHash(h,leanLevelHashCache.get(l.right as object)!);
-        break;
+      case'param':hash=mixLeanHash(hash,hashLeanString(nameKey(l.name)));break;
+      case'mvar':hash=mixLeanHash(hash,hashLeanString(nameKey(l.name)));hasMVar=true;break;
+      case'succ':{
+        const d=leanLevelDataCache.get(l.of as object)!;
+        hash=mixLeanHash(hash,d.hash);hasMVar=d.hasMVar;break;
+      }
+      case'max':case'imax':{
+        const left=leanLevelDataCache.get(l.left as object)!,right=leanLevelDataCache.get(l.right as object)!;
+        hash=mixLeanHash(hash,left.hash);hash=mixLeanHash(hash,right.hash);
+        hasMVar=left.hasMVar||right.hasMVar;break;
+      }
     }
-    leanLevelHashCache.set(l as object,h>>>0);
+    leanLevelDataCache.set(l as object,{hash:hash>>>0,hasMVar});
   }
-  return leanLevelHashCache.get(root as object)!;
+  return leanLevelDataCache.get(root as object)!;
 }
 
 /**
- * Cached structural hash compatible with Lean kernel Expr equality.
+ * External equivalent of Lean 4.34's immutable Expr.Data cache.
  *
- * Lean 4.34 stores a hash in Expr.Data when each immutable expression node is
- * constructed. TypeScript objects do not have that field, so keep the
- * equivalent lifetime cache externally. The exact numeric hash need not match
- * Lean's runtime hash; equal expressions must hash equally and the value must
- * remain stable for the immutable Expr node.
+ * Lean stores hash, loose-bvar range and variable flags directly in every Expr
+ * node. TypeScript's structural objects do not carry that ABI field, so retain
+ * the same immutable-node information in a process-lifetime WeakMap.
  */
-export function exprLeanHash(root:Expr):number{
-  const cached=leanExprHashCache.get(root as object);if(cached!==undefined)return cached;
+function leanExprCachedData(root:Expr):LeanExprCachedData{
+  const cached=leanExprDataCache.get(root as object);if(cached!==undefined)return cached;
   const todo:{e:Expr;done:boolean}[]=[{e:root,done:false}];
   while(todo.length){
     const f=todo.pop()!,e=f.e;
-    if(leanExprHashCache.has(e as object))continue;
+    if(leanExprDataCache.has(e as object))continue;
     if(!f.done){
       todo.push({e,done:true});
       switch(e.kind){
@@ -192,47 +206,69 @@ export function exprLeanHash(root:Expr):number{
       }
       continue;
     }
-    let h=hashLeanString(e.kind);
+    let hash=hashLeanString(e.kind),looseBVarRange=0,hasFVar=false,hasMVar=false;
     switch(e.kind){
-      case'bvar':h=mixLeanHash(h,e.index);break;
-      case'fvar':case'mvar':h=mixLeanHash(h,hashLeanString(e.id));break;
-      case'sort':h=mixLeanHash(h,leanLevelStructuralHash(e.level));break;
+      case'bvar':
+        hash=mixLeanHash(hash,e.index);looseBVarRange=e.index+1;break;
+      case'fvar':
+        hash=mixLeanHash(hash,hashLeanString(e.id));hasFVar=true;break;
+      case'mvar':
+        hash=mixLeanHash(hash,hashLeanString(e.id));hasMVar=true;break;
+      case'sort':{
+        const d=leanLevelCachedData(e.level);
+        hash=mixLeanHash(hash,d.hash);hasMVar=d.hasMVar;break;
+      }
       case'const':
-        h=mixLeanHash(h,hashLeanString(nameKey(e.name)));h=mixLeanHash(h,e.levels.length);
-        for(const l of e.levels)h=mixLeanHash(h,leanLevelStructuralHash(l));
+        hash=mixLeanHash(hash,hashLeanString(nameKey(e.name)));hash=mixLeanHash(hash,e.levels.length);
+        for(const l of e.levels){
+          const d=leanLevelCachedData(l);hash=mixLeanHash(hash,d.hash);hasMVar ||= d.hasMVar;
+        }
         break;
-      case'app':
-        h=mixLeanHash(mixLeanHash(h,leanExprHashCache.get(e.fn as object)!),leanExprHashCache.get(e.arg as object)!);
-        break;
-      case'lam':case'forall':
-        // Kernel equality ignores binder display names and BinderInfo.
-        h=mixLeanHash(mixLeanHash(h,leanExprHashCache.get(e.type as object)!),leanExprHashCache.get(e.body as object)!);
-        break;
-      case'let':
-        // Kernel equality ignores the display name but observes let_nondep.
-        h=mixLeanHash(h,e.nondep?1:0);
-        h=mixLeanHash(h,leanExprHashCache.get(e.type as object)!);
-        h=mixLeanHash(h,leanExprHashCache.get(e.value as object)!);
-        h=mixLeanHash(h,leanExprHashCache.get(e.body as object)!);
-        break;
+      case'app':{
+        const fn=leanExprDataCache.get(e.fn as object)!,arg=leanExprDataCache.get(e.arg as object)!;
+        hash=mixLeanHash(mixLeanHash(hash,fn.hash),arg.hash);
+        looseBVarRange=Math.max(fn.looseBVarRange,arg.looseBVarRange);
+        hasFVar=fn.hasFVar||arg.hasFVar;hasMVar=fn.hasMVar||arg.hasMVar;break;
+      }
+      case'lam':case'forall':{
+        const type=leanExprDataCache.get(e.type as object)!,body=leanExprDataCache.get(e.body as object)!;
+        hash=mixLeanHash(mixLeanHash(hash,type.hash),body.hash);
+        looseBVarRange=Math.max(type.looseBVarRange,Math.max(0,body.looseBVarRange-1));
+        hasFVar=type.hasFVar||body.hasFVar;hasMVar=type.hasMVar||body.hasMVar;break;
+      }
+      case'let':{
+        const type=leanExprDataCache.get(e.type as object)!,value=leanExprDataCache.get(e.value as object)!,body=leanExprDataCache.get(e.body as object)!;
+        hash=mixLeanHash(hash,e.nondep?1:0);
+        hash=mixLeanHash(hash,type.hash);hash=mixLeanHash(hash,value.hash);hash=mixLeanHash(hash,body.hash);
+        looseBVarRange=Math.max(type.looseBVarRange,value.looseBVarRange,Math.max(0,body.looseBVarRange-1));
+        hasFVar=type.hasFVar||value.hasFVar||body.hasFVar;hasMVar=type.hasMVar||value.hasMVar||body.hasMVar;break;
+      }
       case'lit':
-        h=mixLeanHash(h,hashLeanString(e.literal.kind));
-        h=mixLeanHash(h,hashLeanString(e.literal.kind==='nat'?e.literal.value.toString():e.literal.value));
+        hash=mixLeanHash(hash,hashLeanString(e.literal.kind));
+        hash=mixLeanHash(hash,hashLeanString(e.literal.kind==='nat'?e.literal.value.toString():e.literal.value));
         break;
-      case'mdata':
-        // Lean's Expr.Data hash also ignores the metadata payload; equality
-        // checks the KVMap only after the hash/shape fast path.
-        h=mixLeanHash(h,leanExprHashCache.get(e.expr as object)!);
-        break;
-      case'proj':
-        h=mixLeanHash(h,hashLeanString(nameKey(e.typeName)));h=mixLeanHash(h,e.index);
-        h=mixLeanHash(h,leanExprHashCache.get(e.expr as object)!);
-        break;
+      case'mdata':{
+        const d=leanExprDataCache.get(e.expr as object)!;
+        hash=mixLeanHash(hash,d.hash);looseBVarRange=d.looseBVarRange;hasFVar=d.hasFVar;hasMVar=d.hasMVar;break;
+      }
+      case'proj':{
+        const d=leanExprDataCache.get(e.expr as object)!;
+        hash=mixLeanHash(hash,hashLeanString(nameKey(e.typeName)));hash=mixLeanHash(hash,e.index);hash=mixLeanHash(hash,d.hash);
+        looseBVarRange=d.looseBVarRange;hasFVar=d.hasFVar;hasMVar=d.hasMVar;break;
+      }
     }
-    leanExprHashCache.set(e as object,h>>>0);
+    leanExprDataCache.set(e as object,{hash:hash>>>0,looseBVarRange,hasFVar,hasMVar});
   }
-  return leanExprHashCache.get(root as object)!;
+  return leanExprDataCache.get(root as object)!;
 }
+
+/**
+ * Cached structural hash compatible with Lean kernel Expr equality.
+ * The numeric value is internal to this port; equality-compatible stability is
+ * the requirement, while storage/lifetime mirrors Lean's Expr.Data.
+ */
+export function exprLeanHash(root:Expr):number{return leanExprCachedData(root).hash;}
+export function looseBVarRange(root:Expr):number{return leanExprCachedData(root).looseBVarRange;}
 
 export function exprLeanEq(a:Expr,b:Expr):boolean{
   const compared=new WeakMap<object,WeakSet<object>>();
@@ -407,51 +443,13 @@ export function inferImplicit(e: Expr, strict: boolean, numParams = Number.MAX_S
 }
 
 export function hasLooseBVar(e: Expr, depth=0): boolean {
-  const todo:{e:Expr;depth:number}[]=[{e,depth}];
-  while(todo.length){
-    const f=todo.pop()!,x=f.e;
-    switch(x.kind){
-      case'bvar':if(x.index>=f.depth)return true;break;
-      case'app':todo.push({e:x.fn,depth:f.depth},{e:x.arg,depth:f.depth});break;
-      case'lam':case'forall':todo.push({e:x.type,depth:f.depth},{e:x.body,depth:f.depth+1});break;
-      case'let':todo.push({e:x.type,depth:f.depth},{e:x.value,depth:f.depth},{e:x.body,depth:f.depth+1});break;
-      case'mdata':case'proj':todo.push({e:x.expr,depth:f.depth});break;
-      default:break;
-    }
-  }
-  return false;
+  return looseBVarRange(e)>depth;
 }
 export function hasFVar(e: Expr): boolean {
-  const todo:Expr[]=[e];
-  while(todo.length){
-    const x=todo.pop()!;
-    switch(x.kind){
-      case'fvar':return true;
-      case'app':todo.push(x.fn,x.arg);break;
-      case'lam':case'forall':todo.push(x.type,x.body);break;
-      case'let':todo.push(x.type,x.value,x.body);break;
-      case'mdata':case'proj':todo.push(x.expr);break;
-      default:break;
-    }
-  }
-  return false;
+  return leanExprCachedData(e).hasFVar;
 }
 export function hasMVar(e: Expr): boolean {
-  const todo:Expr[]=[e];
-  while(todo.length){
-    const x=todo.pop()!;
-    switch(x.kind){
-      case'mvar':return true;
-      case'sort':if(levelHasMVar(x.level))return true;break;
-      case'const':if(x.levels.some(levelHasMVar))return true;break;
-      case'app':todo.push(x.fn,x.arg);break;
-      case'lam':case'forall':todo.push(x.type,x.body);break;
-      case'let':todo.push(x.type,x.value,x.body);break;
-      case'mdata':case'proj':todo.push(x.expr);break;
-      default:break;
-    }
-  }
-  return false;
+  return leanExprCachedData(e).hasMVar;
 }
 
 export function instantiateExprLevels(e: Expr, params: readonly Name[], levels: readonly Level[]): Expr {

@@ -1,0 +1,32 @@
+inductive PsOrdering where {
+  | less;
+  | equal;
+  | greater;
+};
+
+function compareNat(a : Nat, b : Nat) : PsOrdering :=
+  if a < b then
+    PsOrdering.less
+  else
+    if a == b then PsOrdering.equal else PsOrdering.greater;
+
+function orderingIsLess(value : PsOrdering) : Bool :=
+  match value with {
+    | .less => true;
+    | .equal => false;
+    | .greater => false;
+  };
+
+function orderingIsEqual(value : PsOrdering) : Bool :=
+  match value with {
+    | .less => false;
+    | .equal => true;
+    | .greater => false;
+  };
+
+function orderingIsGreater(value : PsOrdering) : Bool :=
+  match value with {
+    | .less => false;
+    | .equal => false;
+    | .greater => true;
+  };

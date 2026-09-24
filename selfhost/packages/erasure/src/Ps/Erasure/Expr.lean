@@ -624,6 +624,105 @@ def psOpenMatchMinorFields
               Except.error PsErasureError.unsupportedRuntimeTerm
       | _ => Except.error PsErasureError.binderMismatch
 
+def psErasureFindStringIndex
+    (target : String) :
+    List String -> Nat -> Option Nat
+  | [], _ => none
+  | value :: rest, index =>
+      if value == target then
+        some index
+      else
+        psErasureFindStringIndex target rest (index + 1)
+
+def psErasureRecursiveCallArguments :
+    List String -> Nat -> String -> List PsVerifiedIrExpr
+  | [], _, _ => []
+  | _ :: rest, 0, recursiveName =>
+      PsVerifiedIrExpr.var recursiveName ::
+        rest.map (fun name => PsVerifiedIrExpr.var name)
+  | name :: rest, index + 1, recursiveName =>
+      PsVerifiedIrExpr.var name ::
+        psErasureRecursiveCallArguments
+          rest
+          index
+          recursiveName
+
+structure PsOpenMatchHypotheses where
+  scope : PsErasureScope
+  cursor : PsExpr
+
+def psOpenMatchMinorHypotheses
+    (recursiveParameterIndex : Option Nat)
+    (bindings : List PsVerifiedIrMatchBinding) :
+    List PsRuntimeConstructorField ->
+    PsOpenMatchHypotheses ->
+    Except PsErasureError PsOpenMatchHypotheses
+  | [], state => Except.ok state
+  | field :: rest, state =>
+      if !field.recursive then
+        psOpenMatchMinorHypotheses
+          recursiveParameterIndex
+          bindings
+          rest
+          state
+      else
+        match state.cursor with
+        | .lam name domain body binder =>
+            match bindings.find? (fun binding => binding.field == field.name) with
+            | none => Except.error PsErasureError.binderMismatch
+            | some binding =>
+                let pushed :=
+                  psLocalPushBinding
+                    state.scope.localContext
+                    name
+                    domain
+                    binder
+                let baseScope : PsErasureScope := {
+                  localContext := pushed.context
+                  runtimeLocals := state.scope.runtimeLocals
+                  typeLocals := state.scope.typeLocals
+                  erasedLocals := pushed.id :: state.scope.erasedLocals
+                  declarationNames := state.scope.declarationNames
+                  runtimeConstructors := state.scope.runtimeConstructors
+                  runtimeRecursors := state.scope.runtimeRecursors
+                  runtimeStructures := state.scope.runtimeStructures
+                  runtimeStructureConstructors :=
+                    state.scope.runtimeStructureConstructors
+                  runtimeExpressions := state.scope.runtimeExpressions
+                  currentDefinition := state.scope.currentDefinition
+                }
+                let nextScope :=
+                  match
+                      state.scope.currentDefinition,
+                      recursiveParameterIndex with
+                  | some current, some parameterIndex =>
+                      {
+                        baseScope with
+                        runtimeExpressions :=
+                          (pushed.id,
+                            PsVerifiedIrExpr.call
+                              (PsVerifiedIrExpr.var current.name)
+                              []
+                              (psErasureRecursiveCallArguments
+                                current.runtimeParameters
+                                parameterIndex
+                                binding.name)) ::
+                            baseScope.runtimeExpressions
+                      }
+                  | _, _ => baseScope
+                psOpenMatchMinorHypotheses
+                  recursiveParameterIndex
+                  bindings
+                  rest
+                  {
+                    scope := nextScope
+                    cursor :=
+                      psExprInstantiate1
+                        body
+                        (PsExpr.fvar pushed.id)
+                  }
+        | _ => Except.error PsErasureError.binderMismatch
+
 def psEraseMatchMinor
     (environment : PsEnvironment)
     (eraseAt :
@@ -632,6 +731,7 @@ def psEraseMatchMinor
       Except PsErasureError PsVerifiedIrExpr)
     (scope : PsErasureScope)
     (substitutions : List (String × PsVerifiedIrType))
+    (recursiveParameterIndex : Option Nat)
     (ctorInfo : PsRuntimeConstructorInfo)
     (minor : PsExpr) :
     Except PsErasureError PsErasedMatchMinor :=
@@ -647,14 +747,26 @@ def psEraseMatchMinor
         } with
   | Except.error error => Except.error error
   | Except.ok opened =>
-      match eraseAt opened.scope opened.cursor with
+      let bindings := opened.bindingsRev.reverse
+      match
+          psOpenMatchMinorHypotheses
+            recursiveParameterIndex
+            bindings
+            ctorInfo.fields
+            {
+              scope := opened.scope
+              cursor := opened.cursor
+            } with
       | Except.error error => Except.error error
-      | Except.ok body =>
-          Except.ok {
-            constructorName := ctorInfo.name
-            bindings := opened.bindingsRev.reverse
-            body := body
-          }
+      | Except.ok withHypotheses =>
+          match eraseAt withHypotheses.scope withHypotheses.cursor with
+          | Except.error error => Except.error error
+          | Except.ok body =>
+              Except.ok {
+                constructorName := ctorInfo.name
+                bindings := bindings
+                body := body
+              }
 
 def psEraseMatchAlternatives
     (environment : PsEnvironment)
@@ -664,6 +776,7 @@ def psEraseMatchAlternatives
       Except PsErasureError PsVerifiedIrExpr)
     (scope : PsErasureScope)
     (substitutions : List (String × PsVerifiedIrType))
+    (recursiveParameterIndex : Option Nat)
     (arguments : List PsExpr)
     (minorStart : Nat) :
     Nat ->
@@ -689,6 +802,7 @@ def psEraseMatchAlternatives
                 eraseAt
                 scope
                 substitutions
+                recursiveParameterIndex
                 ctorInfo
                 minor with
           | Except.error error => Except.error error
@@ -698,6 +812,7 @@ def psEraseMatchAlternatives
                 eraseAt
                 scope
                 substitutions
+                recursiveParameterIndex
                 arguments
                 minorStart
                 (index + 1)
@@ -752,12 +867,23 @@ def psEraseRuntimeRecursorApplication
                       match eraseAt scope major with
                       | Except.error error => Except.error error
                       | Except.ok scrutinee =>
+                          let recursiveParameterIndex :=
+                            match
+                                scope.currentDefinition,
+                                scrutinee with
+                            | some current, PsVerifiedIrExpr.var name =>
+                                psErasureFindStringIndex
+                                  name
+                                  current.runtimeParameters
+                                  0
+                            | _, _ => none
                           match
                               psEraseMatchAlternatives
                                 environment
                                 eraseAt
                                 scope
                                 substitutions
+                                recursiveParameterIndex
                                 view.args
                                 minorStart
                                 0
@@ -791,17 +917,23 @@ def psEraseRuntimeExprWithFuel
                 (PsVerifiedIrExpr.literal
                   (PsVerifiedIrLiteral.string value))
       | .fvar id =>
-          match psErasureLookupNat scope.runtimeLocals id with
-          | some name => Except.ok (PsVerifiedIrExpr.var name)
+          match
+              psErasureLookupRuntimeExpression
+                scope.runtimeExpressions
+                id with
+          | some runtimeExpr => Except.ok runtimeExpr
           | none =>
-              if
-                  psErasureNatInList scope.erasedLocals id
-                    || match psErasureLookupNat scope.typeLocals id with
-                       | some _ => true
-                       | none => false then
-                Except.error (PsErasureError.erasedLocalUsed id)
-              else
-                Except.error (PsErasureError.unknownLocal id)
+              match psErasureLookupNat scope.runtimeLocals id with
+              | some name => Except.ok (PsVerifiedIrExpr.var name)
+              | none =>
+                  if
+                      psErasureNatInList scope.erasedLocals id
+                        || match psErasureLookupNat scope.typeLocals id with
+                           | some _ => true
+                           | none => false then
+                    Except.error (PsErasureError.erasedLocalUsed id)
+                  else
+                    Except.error (PsErasureError.unknownLocal id)
       | .constE name _ =>
           match
               psErasureLookupConstructor

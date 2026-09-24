@@ -1,0 +1,34 @@
+name: Diagnostic Std release coverage c93
+
+on:
+  push:
+    branches: [diagnostic/std-release-coverage-c93]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "LEAN434_SRC=$GITHUB_WORKSPACE/study/lean4-4.34.0" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - name: Compile dependency exporter
+        shell: bash
+        run: |
+          "$LEAN434_BIN/lean" oracle/replay-probe/DependencyExport.lean
+      - run: npm run build
+      - run: npm run oracle:std-release

@@ -83,8 +83,21 @@ Write-Log "heapMiB=$HeapMiB stackKiB=$StackKiB"
 
 Write-Host "Installing locked dependencies with npm ci..."
 Write-Log "dependencyInstall=npm ci"
-& npm ci --no-audit --no-fund
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+Write-Log "dependencyInstallStarted=$(Get-Date -Format o)"
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+try {
+  & npm ci --no-audit --no-fund 2>&1 | ForEach-Object { Write-NativeLogLine $_ }
+  $dependencyInstallCode = $LASTEXITCODE
+} finally {
+  $ErrorActionPreference = $previousErrorActionPreference
+}
+Write-Log "dependencyInstallFinished=$(Get-Date -Format o)"
+Write-Log "dependencyInstallExitCode=$dependencyInstallCode"
+if ($dependencyInstallCode -ne 0) {
+  Write-Host "npm ci failed before any kernel replay. This is a packaging/dependency gate failure; send/upload $Log."
+  exit $dependencyInstallCode
+}
 
 $postInstallTrackedChanges = @(& git status --porcelain --untracked-files=no)
 if ($LASTEXITCODE -ne 0) {

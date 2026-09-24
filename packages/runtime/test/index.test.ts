@@ -484,6 +484,7 @@ console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility s
     typeof value==='object'
       &&value!==null
       &&!Array.isArray(value)
+      &&'kind' in value
       &&value.kind==='proof',
     'proposition-valued axiom was not erased to proof evidence',
   );

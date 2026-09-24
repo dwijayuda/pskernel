@@ -1382,7 +1382,7 @@ console.log('ok - psc verified recursive ADT match pipeline');
   );
   equal(
     result.typeScript.includes(
-      '1n + length(tail)',
+      '1n + length<T0>(tail)',
     ),
     true,
   );
@@ -1411,7 +1411,7 @@ console.log('ok - psc verified structural recursive function pipeline');
     true,
   );
   equal(
-    result.typeScript.includes('countFrom(base, tail)'),
+    result.typeScript.includes('countFrom<T0>(base, tail)'),
     true,
   );
   equal(
@@ -1485,7 +1485,7 @@ console.log('ok - psc verified invariant structural recursion run');
     ),
     true,
   );
-  equal(result.typeScript.includes('map(f, tail)'),true);
+  equal(result.typeScript.includes('map<T0, T1>(f, tail)'),true);
   equal(result.typeScript.includes('f(head)'),true);
   equal(result.emitted.javascript.includes('map(f, tail)'),true);
 }
@@ -1602,7 +1602,7 @@ console.log('ok - psc verified acyclic where source pipeline');
     ),
     true,
   );
-  equal(result.typeScript.includes('return reuse(inst, x);'),true);
+  equal(result.typeScript.includes('return reuse<T0>(inst, x);'),true);
   equal(result.emitted.javascript.includes('reuse(inst, x)'),true);
 }
 console.log('ok - psc verified local class instance pipeline');
@@ -1638,7 +1638,7 @@ console.log('ok - psc verified local class instance pipeline');
     true,
   );
   equal(
-    result.typeScript.includes('return get(boxedNat, x);'),
+    result.typeScript.includes('return get<bigint>(boxedNat, x);'),
     true,
   );
   equal(result.emitted.javascript.includes('get(boxedNat, x)'),true);

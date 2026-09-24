@@ -45,6 +45,18 @@ export function eraseRuntimeApplication(
   );
   if(recursor!==undefined)return recursor;
 
+  if(
+    view.fn.kind==='const'
+    &&nameToString(view.fn.name)==='String.Pos.Raw.mk'
+  ){
+    if(view.args.length!==1){
+      throw new Error(
+        "PS_ERASE_RAW_POS_CONSTRUCTOR_ARITY: expected one byteIdx argument",
+      );
+    }
+    return erase(view.args[0]!,scope,environment);
+  }
+
   if(view.fn.kind==='const'){
     const constructor=scope.inductivesByConstructor.get(
       nameKey(view.fn.name),

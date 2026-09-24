@@ -127,3 +127,54 @@ if(lean_st_ref_get(allocated)!==41n){
 console.log(
   'ok - real Lean-written ST.Prim.Ref.modify executes through Lean bind + JS refs',
 );
+
+const optimizedAllocated=evaluator.runIOAction(
+  evaluator.evaluate(
+    mkAppN(
+      constant(nameFromDotted('IO.mkRef'),[levelZero]),
+      [Nat,natLit(40n)],
+    ),
+  ),
+).value;
+if(!(optimizedAllocated instanceof LeanRef)){
+  throw new Error(
+    'optimized modify differential setup did not allocate a LeanRef',
+  );
+}
+
+let modifyUnsafeFn=evaluator.evaluate(
+  constant(
+    nameFromDotted('ST.Prim.Ref.modifyUnsafe'),
+    [levelZero,levelZero],
+  ),
+);
+modifyUnsafeFn=evaluator.applyRuntimeValue(modifyUnsafeFn,worldToken);
+modifyUnsafeFn=evaluator.applyRuntimeValue(
+  modifyUnsafeFn,
+  natTypeToken,
+);
+modifyUnsafeFn=evaluator.applyRuntimeValue(
+  modifyUnsafeFn,
+  optimizedAllocated,
+);
+const modifyUnsafeAction=evaluator.applyRuntimeValue(
+  modifyUnsafeFn,
+  increment,
+);
+const optimizedResult=evaluator.runStateAction(modifyUnsafeAction);
+if(optimizedResult.value!==undefined){
+  throw new Error(
+    'ST.Prim.Ref.modifyUnsafe did not return Unit-compatible runtime value',
+  );
+}
+const referenceValue=lean_st_ref_get(allocated);
+const optimizedValue=lean_st_ref_get(optimizedAllocated);
+if(referenceValue!==optimizedValue||optimizedValue!==41n){
+  throw new Error(
+    'implemented_by differential mismatch: reference='+
+    String(referenceValue)+', optimized='+String(optimizedValue),
+  );
+}
+console.log(
+  'ok - Ref.modify and @[implemented_by Ref.modifyUnsafe] agree on bounded corpus',
+);

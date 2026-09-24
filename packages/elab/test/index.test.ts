@@ -13,6 +13,7 @@ import {
   Kernel,
   LocalContext,
   TypeChecker,
+  addPrimitiveInductive,
   app,
   bvar,
   constant,
@@ -975,6 +976,30 @@ function makeNatNotationEnvironment():Environment {
   addMinimalEqEnvironment(env);
   return env;
 }
+
+function makeNatBoolNotationEnvironment():Environment {
+  const env=makeNatNotationEnvironment();
+  const Bool=nameFromDotted('Bool');
+  addPrimitiveInductive(env,{
+    levelParams:[],
+    numParams:0,
+    types:[{
+      name:Bool,
+      type:sort(levelSucc(levelZero)),
+      ctors:[
+        {
+          name:nameFromDotted('Bool.false'),
+          type:constant(Bool),
+        },
+        {
+          name:nameFromDotted('Bool.true'),
+          type:constant(Bool),
+        },
+      ],
+    }],
+  });
+  return env;
+}
 {
   const env=makeNatNotationEnvironment();
   const result=elaborateV061Declarations(parseV061Module(
@@ -1264,9 +1289,8 @@ console.log('ok - @proofscript/elab parameterized verified match recursor elabor
 console.log('ok - @proofscript/elab match branch Nat notation meta instantiation');
 
 {
-  const env=makeNatNotationEnvironment();
+  const env=makeNatBoolNotationEnvironment();
   const result=elaborateV061Declarations(parseV061Module(
-    'inductive Bool where { | false; | true; } '+
     'function chooseBool(flag : Bool) : Nat := '+
     'match flag with { | true => 1; | false => 2; };',
   ),env);

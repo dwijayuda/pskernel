@@ -50,3 +50,4 @@ export type {
   InductiveAdmissionOptions,
 } from './kernel/inductive/ordinary.js';
 export {addInductive} from './kernel/inductive/nested.js';
+export {addPrimitiveInductive} from './kernel/primitive.js';

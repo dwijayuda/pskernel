@@ -127,7 +127,7 @@ function equal(actual:unknown,expected:unknown):void {
   equal(status.loaded,true);
   equal(
     status.foundationSource?.endsWith(
-      'lean434-proofscript-text-foundation.ndjson',
+      'lean434-proofscript-selfhost-foundation.ndjson',
     ),
     true,
   );
@@ -137,8 +137,15 @@ function equal(actual:unknown,expected:unknown):void {
     true,
   );
   equal(environment.find(nameFromDotted('Char.toNat'))!==undefined,true);
+  equal(environment.find(nameFromDotted('Array.set'))!==undefined,true);
+  equal(
+    environment.find(nameFromDotted('Array.setIfInBounds'))!==undefined,
+    true,
+  );
+  equal(environment.find(nameFromDotted('Array.map'))!==undefined,true);
+  equal(environment.find(nameFromDotted('Array.foldl'))!==undefined,true);
 }
-console.log('ok - @proofscript/environment certified SH1 compiler base');
+console.log('ok - @proofscript/environment certified self-host compiler base');
 
 {
   const provider=createLeanEnvironmentProvider({

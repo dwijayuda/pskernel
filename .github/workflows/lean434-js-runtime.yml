@@ -40,6 +40,16 @@ jobs:
           set -euo pipefail
           npm run generate:lean434-runtime-metadata -- Init.Prelude --out lean434-init-runtime-metadata.json
           npm run generate:lean434-runtime-metadata -- Lean.Parser --out lean434-parser-runtime-metadata.json
+      - name: Generate real Lean ST/IO bootstrap corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExport.lean Init.System.IO \
+            IO.mkRef ST.Prim.Ref.modify \
+            > lean434-runtime-st-bootstrap.ndjson
+          test -s lean434-runtime-st-bootstrap.ndjson
+      - name: Execute real Lean-written ST/IO over JavaScript runtime
+        run: node scripts/lean434-js-st-smoke.mjs lean434-runtime-st-bootstrap.ndjson
       - name: Validate exported runtime sidecars in JavaScript
         run: |
           node --input-type=module -e "

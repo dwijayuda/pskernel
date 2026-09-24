@@ -1,0 +1,321 @@
+import Ps.Syntax.PrintCommon
+
+def psPrintProofScriptTermWithFuel :
+    Nat -> PsSyntaxTerm -> Except PsSourcePrintError String
+  | 0, _ => Except.error PsSourcePrintError.fuelExhausted
+  | remaining + 1, term =>
+      match term with
+      | .reference name =>
+          psPrintSyntaxName name
+      | .natural text _ =>
+          Except.ok text
+      | .string text _ =>
+          Except.ok text
+      | .character text _ =>
+          Except.ok text
+      | .bool value _ =>
+          Except.ok (if value then "true" else "false")
+      | .unit _ =>
+          Except.ok "()"
+      | .app fn args _ =>
+          if !psSyntaxTermSimpleForApplication fn then
+            Except.error PsSourcePrintError.unsupportedApplication
+          else
+            match psPrintProofScriptTermWithFuel remaining fn with
+            | Except.error error => Except.error error
+            | Except.ok printedFn =>
+                match args with
+                | [.unit _] =>
+                    Except.ok (printedFn ++ "()")
+                | _ =>
+                    if args.any (fun arg => !psSyntaxTermSimpleForApplication arg
+                      || match arg with | .unit _ => true | _ => false) then
+                      Except.error PsSourcePrintError.unsupportedApplication
+                    else
+                      match args.mapM
+                          (psPrintProofScriptTermWithFuel remaining) with
+                      | Except.error error => Except.error error
+                      | Except.ok printedArgs =>
+                          Except.ok
+                            (printedFn ++ "(" ++
+                              psPrintJoin ", " printedArgs ++ ")")
+      | .lambda binders body _ =>
+          let printBinder :=
+            fun binder =>
+              match binder with
+              | (head, type) =>
+                  match psPrintSyntaxName head.name with
+                  | Except.error error => Except.error error
+                  | Except.ok name =>
+                      match
+                          psPrintProofScriptTermWithFuel
+                            remaining
+                            type with
+                      | Except.error error => Except.error error
+                      | Except.ok printedType =>
+                          let delimiters :=
+                            psPrintBinderDelimiters head.kind
+                          Except.ok
+                            (delimiters.1 ++ name ++ " : " ++
+                              printedType ++ delimiters.2)
+          match binders.mapM printBinder with
+          | Except.error error => Except.error error
+          | Except.ok printedBinders =>
+              match
+                  psPrintProofScriptTermWithFuel remaining body with
+              | Except.error error => Except.error error
+              | Except.ok printedBody =>
+                  Except.ok
+                    ("fun " ++ psPrintJoin " " printedBinders ++
+                      " => " ++ printedBody)
+      | .forallE binders body _ =>
+          let printBinder :=
+            fun binder =>
+              match binder with
+              | (head, type) =>
+                  match psPrintSyntaxName head.name with
+                  | Except.error error => Except.error error
+                  | Except.ok name =>
+                      match
+                          psPrintProofScriptTermWithFuel
+                            remaining
+                            type with
+                      | Except.error error => Except.error error
+                      | Except.ok printedType =>
+                          let delimiters :=
+                            psPrintBinderDelimiters head.kind
+                          Except.ok
+                            (delimiters.1 ++ name ++ " : " ++
+                              printedType ++ delimiters.2)
+          match binders.mapM printBinder with
+          | Except.error error => Except.error error
+          | Except.ok printedBinders =>
+              match
+                  psPrintProofScriptTermWithFuel remaining body with
+              | Except.error error => Except.error error
+              | Except.ok printedBody =>
+                  Except.ok
+                    (psPrintArrowChain printedBinders printedBody)
+      | .letE name type value body _ =>
+          match psPrintSyntaxName name with
+          | Except.error error => Except.error error
+          | Except.ok printedName =>
+              let printType :=
+                match type with
+                | none => Except.ok ""
+                | some declaredType =>
+                    match
+                        psPrintProofScriptTermWithFuel
+                          remaining
+                          declaredType with
+                    | Except.error error => Except.error error
+                    | Except.ok printed =>
+                        Except.ok (" : " ++ printed)
+              match printType with
+              | Except.error error => Except.error error
+              | Except.ok printedType =>
+                  match
+                      psPrintProofScriptTermWithFuel
+                        remaining
+                        value with
+                  | Except.error error => Except.error error
+                  | Except.ok printedValue =>
+                      match
+                          psPrintProofScriptTermWithFuel
+                            remaining
+                            body with
+                      | Except.error error => Except.error error
+                      | Except.ok printedBody =>
+                          Except.ok
+                            ("let " ++ printedName ++ printedType ++
+                              " := " ++ printedValue ++
+                              "; " ++ printedBody)
+      | .ifE condition thenBranch elseBranch _ =>
+          match
+              psPrintProofScriptTermWithFuel
+                remaining
+                condition with
+          | Except.error error => Except.error error
+          | Except.ok printedCondition =>
+              match
+                  psPrintProofScriptTermWithFuel
+                    remaining
+                    thenBranch with
+              | Except.error error => Except.error error
+              | Except.ok printedThen =>
+                  match
+                      psPrintProofScriptTermWithFuel
+                        remaining
+                        elseBranch with
+                  | Except.error error => Except.error error
+                  | Except.ok printedElse =>
+                      Except.ok
+                        ("if (" ++ printedCondition ++
+                          ") { " ++ printedThen ++
+                          " } else { " ++ printedElse ++ " }")
+      | .matchE scrutinee alternatives _ =>
+          match
+              psPrintProofScriptTermWithFuel
+                remaining
+                scrutinee with
+          | Except.error error => Except.error error
+          | Except.ok printedScrutinee =>
+              let printAlternative :=
+                fun alternative =>
+                  match alternative with
+                  | (pattern, body, _) =>
+                      match psPrintPattern pattern with
+                      | Except.error error => Except.error error
+                      | Except.ok printedPattern =>
+                          match
+                              psPrintProofScriptTermWithFuel
+                                remaining
+                                body with
+                          | Except.error error => Except.error error
+                          | Except.ok printedBody =>
+                              Except.ok
+                                ("  | " ++ printedPattern ++
+                                  " => " ++ printedBody ++ ";")
+              match alternatives.mapM printAlternative with
+              | Except.error error => Except.error error
+              | Except.ok printedAlternatives =>
+                  Except.ok
+                    ("match " ++ printedScrutinee ++ " with {\n" ++
+                      psPrintJoin "\n" printedAlternatives ++
+                      "\n}")
+
+def psPrintProofScriptTerm
+    (term : PsSyntaxTerm) :
+    Except PsSourcePrintError String :=
+  psPrintProofScriptTermWithFuel 4096 term
+
+def psPrintProofScriptBinder
+    (binder : PsSyntaxBinderHead × PsSyntaxTerm) :
+    Except PsSourcePrintError String :=
+  match binder with
+  | (head, type) =>
+      match psPrintSyntaxName head.name with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          match psPrintProofScriptTerm type with
+          | Except.error error => Except.error error
+          | Except.ok printedType =>
+              let delimiters := psPrintBinderDelimiters head.kind
+              Except.ok
+                (delimiters.1 ++ name ++ " : " ++
+                  printedType ++ delimiters.2)
+
+def psPrintProofScriptConstructor
+    (constructor : PsSyntaxInductiveConstructor) :
+    Except PsSourcePrintError String :=
+  match psPrintSyntaxName constructor.name with
+  | Except.error error => Except.error error
+  | Except.ok name =>
+      match constructor.fields.mapM psPrintProofScriptBinder with
+      | Except.error error => Except.error error
+      | Except.ok fields =>
+          let suffix :=
+            if fields.isEmpty then ""
+            else " " ++ psPrintJoin " " fields
+          Except.ok ("  | " ++ name ++ suffix ++ ";")
+
+def psPrintProofScriptDeclaration
+    (declaration : PsSyntaxDeclaration) :
+    Except PsSourcePrintError String :=
+  match declaration with
+  | .definition name binders type value _ =>
+      match psPrintSyntaxName name with
+      | Except.error error => Except.error error
+      | Except.ok printedName =>
+          match binders.mapM psPrintProofScriptBinder with
+          | Except.error error => Except.error error
+          | Except.ok printedBinders =>
+              match psPrintProofScriptTerm type with
+              | Except.error error => Except.error error
+              | Except.ok printedType =>
+                  match psPrintProofScriptTerm value with
+                  | Except.error error => Except.error error
+                  | Except.ok printedValue =>
+                      let binderSuffix :=
+                        if printedBinders.isEmpty then ""
+                        else " " ++ psPrintJoin " " printedBinders
+                      Except.ok
+                        ("def " ++ printedName ++ binderSuffix ++
+                          " : " ++ printedType ++
+                          " := " ++ printedValue ++ ";")
+  | .theoremDecl name binders type value _ =>
+      match psPrintSyntaxName name with
+      | Except.error error => Except.error error
+      | Except.ok printedName =>
+          match binders.mapM psPrintProofScriptBinder with
+          | Except.error error => Except.error error
+          | Except.ok printedBinders =>
+              match psPrintProofScriptTerm type with
+              | Except.error error => Except.error error
+              | Except.ok printedType =>
+                  match psPrintProofScriptTerm value with
+                  | Except.error error => Except.error error
+                  | Except.ok printedValue =>
+                      let binderSuffix :=
+                        if printedBinders.isEmpty then ""
+                        else " " ++ psPrintJoin " " printedBinders
+                      Except.ok
+                        ("theorem " ++ printedName ++ binderSuffix ++
+                          " : " ++ printedType ++
+                          " := " ++ printedValue ++ ";")
+  | .inductiveDecl name params resultType constructors _ =>
+      match psPrintSyntaxName name with
+      | Except.error error => Except.error error
+      | Except.ok printedName =>
+          match params.mapM psPrintProofScriptBinder with
+          | Except.error error => Except.error error
+          | Except.ok printedParams =>
+              let printResult :=
+                match resultType with
+                | none => Except.ok ""
+                | some type =>
+                    match psPrintProofScriptTerm type with
+                    | Except.error error => Except.error error
+                    | Except.ok printed =>
+                        Except.ok (" : " ++ printed)
+              match printResult with
+              | Except.error error => Except.error error
+              | Except.ok printedResult =>
+                  match
+                      constructors.mapM
+                        psPrintProofScriptConstructor with
+                  | Except.error error => Except.error error
+                  | Except.ok printedConstructors =>
+                      let paramSuffix :=
+                        if printedParams.isEmpty then ""
+                        else " " ++ psPrintJoin " " printedParams
+                      Except.ok
+                        ("inductive " ++ printedName ++
+                          paramSuffix ++ printedResult ++
+                          " where {\n" ++
+                          psPrintJoin "\n" printedConstructors ++
+                          "\n};")
+
+def psPrintProofScriptModule
+    (module : PsSyntaxModule) :
+    Except PsSourcePrintError String :=
+  match module.imports.mapM
+      (fun sourceImport =>
+        match psPrintSyntaxName sourceImport.moduleName with
+        | Except.error error => Except.error error
+        | Except.ok name => Except.ok ("import " ++ name)) with
+  | Except.error error => Except.error error
+  | Except.ok imports =>
+      match
+          module.declarations.mapM
+            psPrintProofScriptDeclaration with
+      | Except.error error => Except.error error
+      | Except.ok declarations =>
+          let sections :=
+            (if imports.isEmpty then [] else [psPrintJoin "\n" imports]) ++
+            (if declarations.isEmpty then []
+             else [psPrintJoin "\n\n" declarations])
+          if sections.isEmpty then
+            Except.ok ""
+          else
+            Except.ok (psPrintJoin "\n\n" sections ++ "\n")

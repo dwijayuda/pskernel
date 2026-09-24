@@ -188,6 +188,7 @@ export function validateVerifiedIrExpr(expr:VerifiedIrExpr):void {
       return;
     case 'call':
       validateVerifiedIrExpr(expr.fn);
+      for(const typeArg of expr.typeArgs??[])validateType(typeArg);
       for(const arg of expr.args)validateVerifiedIrExpr(arg);
       return;
     case 'let':

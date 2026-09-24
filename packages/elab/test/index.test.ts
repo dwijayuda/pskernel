@@ -529,6 +529,23 @@ console.log('ok - @proofscript/elab expected-type lambda elaboration');
 
 
 {
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'function apply {α : Type}{β : Type}'+
+    '(f : α -> β, x : α) : β := f(x); '+
+    'function useAnnotatedLambda(x : TestNat) : TestNat := '+
+    'apply(fun (n : TestNat) => n, x);',
+  ),env);
+  equal(result.definitions.length,2);
+  equal(
+    result.environment.find(nameFromDotted('useAnnotatedLambda'))?.kind,
+    'definition',
+  );
+}
+console.log('ok - @proofscript/elab annotated lambda solves generic expected metas');
+
+
+{
   const result=elaborateV061Declarations(parseV061Module(
     'theorem letProof(P : Prop, h : P) : P := let x : P := h; x;',
   ));

@@ -571,7 +571,11 @@ assert(
   productModulePs.canonicalSourceHash===productModuleLean.canonicalSourceHash
     &&productModuleLean.canonicalSourceHash===
       productModulePsRoundTrip.canonicalSourceHash,
-  'ProofScript.Data.Product dual-source canonical identity diverged',
+  'ProofScript.Data.Product dual-source canonical identity diverged\n'+
+    '--- from ProofScript ---\n'+productModulePs.canonicalSource+
+    '--- from Lean ---\n'+productModuleLean.canonicalSource+
+    '--- round-trip ProofScript ---\n'+
+      productModulePsRoundTrip.canonicalSource,
 );
 assert(
   semanticFingerprint(productModulePs.checkedCore.admissions)

@@ -6,7 +6,7 @@ def psDeclarationName(declaration : PsDeclaration) : PsName :=
     | .axiom name levelParams type => name;
     | .definition name levelParams type value => name;
     | .theorem name levelParams type value => name;
-    | .opaque name levelParams type value => name;
+    | .opaqueDef name levelParams type value => name;
   };
 
 structure PsEnvironment where {

@@ -360,13 +360,6 @@ mutual
     if ← isEmitted name then return
     if ← isActive name then return
     for dep in semanticDeps name do dumpConstant env dep
-    -- Runtime-oriented diagnostic exports must also carry Lean's executable
-    -- implementation edge. The logical/kernel declaration stays authoritative,
-    -- but JavaScript execution of @[implemented_by] and generated `unsafe`
-    -- wrappers needs the implementation declaration to be present.
-    unless (← get).skipNonReplayable do
-      if let some impl := Compiler.getImplementedBy? env name then
-        dumpConstant env impl
     let ci ← findCI env name
     if (← get).skipNonReplayable && (ci.isUnsafe || ci.isPartial) then
       -- Lean.Kernel.Environment.replay excludes these constants from its
@@ -399,6 +392,13 @@ mutual
       setEmitted emitted
       clearActive iv.all
       closeDeclarationSegment
+      -- Computed fields attach @[implemented_by] to constructors/cases after
+      -- the logical inductive group already exists. Preserve that order:
+      -- first admit the logical group, then carry any executable overrides.
+      unless (← get).skipNonReplayable do
+        for emittedName in emitted do
+          if let some impl := Compiler.getImplementedBy? env emittedName then
+            dumpConstant env impl
     | .defnInfo dv =>
       if dv.safety == .safe then
         -- DefinitionVal.all is informational for safe definitions. Lean's
@@ -459,6 +459,14 @@ mutual
       setEmitted [name]
       clearActive [name]
       closeDeclarationSegment
+
+    -- Runtime-oriented diagnostic exports also carry Lean's executable
+    -- implementation edge, but only after the logical declaration has been
+    -- emitted. This prevents computed-field implementation inductives from
+    -- referring to logical inductives that have not been admitted yet.
+    unless (← get).skipNonReplayable do
+      if let some impl := Compiler.getImplementedBy? env name then
+        dumpConstant env impl
 
   partial def dumpConstants (env : Environment) (names : NameSet) : M Unit := do
     for n in names do dumpConstant env n

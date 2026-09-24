@@ -14,6 +14,8 @@ export function emitVerifiedType(type:VerifiedIrType):string {
           return 'bigint';
         case 'Bool':
           return 'boolean';
+        case 'Char':
+          return 'string';
         case 'String':
           return 'string';
         case 'Unit':

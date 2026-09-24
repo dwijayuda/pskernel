@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Runtime-oriented compiler IR and lowering/optimization passes.",
   "proofscript": {
-    "status": "verified-ir-external-imports+intrinsic-contract+software-where-ir-mvp",
+    "status": "verified-ir-external-imports+intrinsic-contract",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -26,8 +26,5 @@
   },
   "devDependencies": {
     "typescript": "5.8.3"
-  },
-  "dependencies": {
-    "@proofscript/language": "file:../language"
   }
 }

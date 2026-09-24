@@ -25,7 +25,10 @@ lean_lib PsCore where
 
 lean_lib PsEnvironment where
   srcDir := "packages/environment/src"
-  roots := #[`Ps.Environment.Basic]
+  roots := #[
+    `Ps.Environment.Basic,
+    `Ps.Environment.LocalContext
+  ]
 
 lean_lib PsMeta where
   srcDir := "packages/meta/src"

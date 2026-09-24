@@ -154,7 +154,10 @@ function emitFunctionBody(
   };
 }
 
-export function emitFrozenW2Bytes(input:WasmIrModule):Uint8Array {
+export function emitFrozenW2Bytes(
+  input:WasmIrModule,
+  optimize=false,
+):Uint8Array {
   if(input.profile!=='proofscript-wasm32-mvp-js-v1'){
     throw new Error('W2 compatibility oracle only accepts MVP profile');
   }
@@ -181,6 +184,12 @@ export function emitFrozenW2Bytes(input:WasmIrModule):Uint8Array {
 
   if(!module.validate()){
     throw new Error('W2 compatibility oracle produced invalid module');
+  }
+  if(optimize){
+    module.optimize();
+    if(!module.validate()){
+      throw new Error('W2 compatibility oracle optimization failed');
+    }
   }
   return module.emitBinary();
 }

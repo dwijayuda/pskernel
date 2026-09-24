@@ -3,6 +3,7 @@ import Ps.Foundation.Diagnostic
 import Ps.Syntax.Token
 import Ps.Core.Declaration
 import Ps.Environment.Basic
+import Ps.Environment.LocalContext
 import Ps.Meta.Context
 
 def main : IO Unit :=

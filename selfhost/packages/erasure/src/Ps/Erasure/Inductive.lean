@@ -175,8 +175,8 @@ def psPrepareConstructorFieldsWithFuel
                     runtimeRecursors := scope.runtimeRecursors
                     runtimeStructures := scope.runtimeStructures
                     runtimeStructureConstructors := scope.runtimeStructureConstructors
-                runtimeExpressions := scope.runtimeExpressions
-                currentDefinition := scope.currentDefinition
+                    runtimeExpressions := scope.runtimeExpressions
+                    currentDefinition := scope.currentDefinition
                   }
                   psPrepareConstructorFieldsWithFuel
                     environment

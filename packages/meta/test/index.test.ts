@@ -231,6 +231,33 @@ console.log('ok - @proofscript/meta Lean-style metavariable depth discipline');
 console.log('ok - @proofscript/meta structural application unification with rollback');
 
 {
+  const env=new Environment();
+  const meta=new ExprMetaContext(env);
+  const lctx=new LocalContext();
+  const P=nameFromDotted('P');
+  const pId=lctx.fresh('P');
+  lctx.addLocal(pId,P,sort(levelZero),'default');
+  const q=meta.mkFresh(sort(levelZero),lctx,'natural');
+  const candidate=forallE(
+    nameFromDotted('_'),
+    q,
+    q,
+    'default',
+  );
+  const target=forallE(
+    nameFromDotted('_'),
+    fvar(pId),
+    fvar(pId),
+    'default',
+  );
+  equal(meta.unify(candidate,target,lctx),true);
+  equal(exprEq(meta.instantiate(q),fvar(pId)),true);
+}
+console.log('ok - @proofscript/meta structural Pi unification');
+
+
+
+{
   const environment=new Environment();
   const context=new ExprMetaContext(environment);
   const universe=context.mkFreshLevel();

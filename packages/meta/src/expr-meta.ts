@@ -247,6 +247,12 @@ export class ExprMetaContext {
         &&this.unifyCore(lhs.arg,rhs.arg,localContext);
     }
 
+    if(lhs.kind==='forall'&&rhs.kind==='forall'){
+      if(lhs.binderInfo!==rhs.binderInfo)return false;
+      return this.unifyCore(lhs.type,rhs.type,localContext)
+        &&this.unifyCore(lhs.body,rhs.body,localContext);
+    }
+
     if(lhs.kind==='mdata'){
       return this.unifyCore(lhs.expr,rhs,localContext);
     }

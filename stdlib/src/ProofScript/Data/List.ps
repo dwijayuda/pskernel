@@ -34,6 +34,12 @@ function listHeadOption {α : Type}
     | .cons head tail => PsOption.some(head);
   };
 
+function listIsEmpty {α : Type}(xs : PsList(α)) : Bool :=
+  match xs with {
+    | .nil => true;
+    | .cons head tail => false;
+  };
+
 theorem listRefl {α : Type}
 (xs : PsList(α)) : xs = xs := by rfl;
 
@@ -77,3 +83,10 @@ listAppend(listMap(f, xs), listMap(f, ys)) :=
   rw [listMapCons(f, head, tail)];
   rw [listAppendCons(f(head), listMap(f, tail), listMap(f, ys))];
   rw [tail_ih];
+
+theorem listIsEmptyNil {α : Type} :
+listIsEmpty(PsList.nil) = true := by rfl;
+
+theorem listIsEmptyCons {α : Type}
+(head : α, tail : PsList(α)) :
+listIsEmpty(PsList.cons(head, tail)) = false := by rfl;

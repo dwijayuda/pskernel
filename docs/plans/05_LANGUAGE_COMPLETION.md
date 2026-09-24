@@ -466,9 +466,9 @@ Current stdlib checkpoint:
 
 - `PsOption`: map, bind, get-or-else, or-else, is-some plus reflexivity/computation laws;
 - `PsResult`: value/error mapping, bind, get-or-else, two-way Option conversion plus checked laws;
-- `PsList`: map, append, length, head Option plus reflexivity/append reduction laws;
+- `PsList`: map, append, length, head Option, is-empty plus checked computation/algebraic laws;
 - the dogfood project executes all three modules through verified TS/JS emission
-  with zero runtime extern assumptions and thirty-one pskernel-admitted theorems.
+  with zero runtime extern assumptions and thirty-three pskernel-admitted theorems.
 
 Build libraries in ProofScript itself where practical:
 
@@ -712,8 +712,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
     resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
-    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, listAppendNilRight,
-    listAppendAssoc, and listMapAppend. Thirty-one current stdlib theorems now
+    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, listIsEmptyNil, listIsEmptyCons, listAppendNilRight,
+    listAppendAssoc, and listMapAppend. Thirty-three current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
     laws/utilities only when the proof/recursion surface supports them without
@@ -736,6 +736,16 @@ Every development report should state:
 - next smallest milestone.
 
 Do not report invented completion percentages.
+
+## Stdlib List emptiness checkpoint
+
+`listIsEmpty` adds a small executable Bool helper entirely in ProofScript.
+Its `nil` and `cons` constructor equations are recorded by
+`listIsEmptyNil` / `listIsEmptyCons` with bounded Eq-only `rfl`.
+
+Runtime dogfood feeds the helper into an ordinary verified Bool `if`, so the
+stdlib now composes ADT matching with control flow while leaving elaboration,
+erasure, IR, and backend rules unchanged.
 
 ## Stdlib append associativity checkpoint
 

@@ -21,7 +21,7 @@ const matrix={
   'study/lean4-4.34.0/tests/elab/kernelImaxProp.lean':{kind:'direct',tests:['imax-normalized Prop inductive keeps Prop-only elimination','projection typing forbids extracting data from a proof']},
   'study/lean4-4.34.0/tests/elab/kernelImaxPropInductive.lean':{kind:'direct',tests:['imax-normalized Prop inductive keeps Prop-only elimination']},
   'study/lean4-4.34.0/tests/elab/kernelInterrupt.lean':{kind:'operational-resource',note:'cancellation/exception transport is operational behavior, not kernel term semantics'},
-  'study/lean4-4.34.0/tests/elab/kernelMaxRecDepth.lean':{kind:'direct',tests:['kernel recursion budget fails deterministically and succeeds when raised']},
+  'study/lean4-4.34.0/tests/elab/kernelMaxRecDepth.lean':{kind:'direct',tests:['kernel recursion budget matches Lean 4.34 unlimited and 16x semantics']},
   'study/lean4-4.34.0/tests/elab/kernelMutualDupName.lean':{kind:'direct',tests:['mutual definitions reject safe, mixed, duplicate, and non-transactional blocks']},
   'study/lean4-4.34.0/tests/elab/kernelNestedAuxName.lean':{kind:'direct',tests:['nested inductive admission rejects the reserved _nested auxiliary namespace','public ordinary admission rejects reserved _nested references but not sibling prefixes']},
   'study/lean4-4.34.0/tests/elab/kernelProjIdx.lean':{kind:'direct',tests:['projection indices reject negative, fractional, and uint32-overflow values']},

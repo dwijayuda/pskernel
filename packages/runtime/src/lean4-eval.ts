@@ -1,0 +1,337 @@
+import {
+  Environment,
+  instantiateExprLevels,
+  nameToString,
+  type Expr,
+} from 'lean-ts-kernel';
+import {
+  lean_nat_add,
+  lean_nat_div,
+  lean_nat_mod,
+  lean_nat_mul,
+  lean_nat_sub,
+} from './lean4.js';
+
+export interface Lean434ConstructorValue {
+  readonly kind:'constructor';
+  readonly name:string;
+  readonly fields:readonly Lean434RuntimeValue[];
+}
+
+export interface Lean434TypeValue {
+  readonly kind:'type';
+  readonly expr:Expr;
+}
+
+export interface Lean434ProofValue {
+  readonly kind:'proof';
+  readonly theorem:string;
+}
+
+interface Lean434ClosureValue {
+  readonly kind:'closure';
+  readonly body:Expr;
+  readonly locals:readonly Lean434RuntimeValue[];
+}
+
+interface Lean434PrimitiveFunction {
+  readonly kind:'primitive-function';
+  readonly name:string;
+  readonly arity:number;
+  readonly args:readonly Lean434RuntimeValue[];
+  readonly invoke:(args:readonly Lean434RuntimeValue[])=>Lean434RuntimeValue;
+}
+
+interface Lean434ConstructorFunction {
+  readonly kind:'constructor-function';
+  readonly name:string;
+  readonly numParams:number;
+  readonly arity:number;
+  readonly args:readonly Lean434RuntimeValue[];
+}
+
+export type Lean434CallableValue=
+  Lean434ClosureValue|Lean434PrimitiveFunction|Lean434ConstructorFunction;
+
+export type Lean434RuntimeValue=
+  |bigint|string|boolean|undefined
+  |Lean434ConstructorValue
+  |Lean434TypeValue
+  |Lean434ProofValue
+  |Lean434CallableValue;
+
+export class Lean434EvaluationError extends Error {
+  constructor(message:string){
+    super(message);
+    this.name='Lean434EvaluationError';
+  }
+}
+
+function expectNat(value:Lean434RuntimeValue,owner:string):bigint {
+  if(typeof value!=='bigint'){
+    throw new Lean434EvaluationError(owner+' expected Nat');
+  }
+  return value;
+}
+
+function primitive(
+  name:string,
+  arity:number,
+  invoke:(args:readonly Lean434RuntimeValue[])=>Lean434RuntimeValue,
+  args:readonly Lean434RuntimeValue[]=[],
+):Lean434PrimitiveFunction {
+  return {kind:'primitive-function',name,arity,args,invoke};
+}
+
+const primitiveConstants=new Map<
+  string,
+  ()=>Lean434RuntimeValue
+>([
+  ['Nat.add',()=>primitive('Nat.add',2,(args)=>
+    lean_nat_add(
+      expectNat(args[0]!,'Nat.add'),
+      expectNat(args[1]!,'Nat.add'),
+    )
+  )],
+  ['Nat.mul',()=>primitive('Nat.mul',2,(args)=>
+    lean_nat_mul(
+      expectNat(args[0]!,'Nat.mul'),
+      expectNat(args[1]!,'Nat.mul'),
+    )
+  )],
+  ['Nat.sub',()=>primitive('Nat.sub',2,(args)=>
+    lean_nat_sub(
+      expectNat(args[0]!,'Nat.sub'),
+      expectNat(args[1]!,'Nat.sub'),
+    )
+  )],
+  ['Nat.div',()=>primitive('Nat.div',2,(args)=>
+    lean_nat_div(
+      expectNat(args[0]!,'Nat.div'),
+      expectNat(args[1]!,'Nat.div'),
+    )
+  )],
+  ['Nat.mod',()=>primitive('Nat.mod',2,(args)=>
+    lean_nat_mod(
+      expectNat(args[0]!,'Nat.mod'),
+      expectNat(args[1]!,'Nat.mod'),
+    )
+  )],
+  ['Nat.succ',()=>primitive('Nat.succ',1,(args)=>
+    expectNat(args[0]!,'Nat.succ')+1n
+  )],
+]);
+
+function isCallable(value:Lean434RuntimeValue):value is Lean434CallableValue {
+  return typeof value==='object'
+    &&value!==null
+    &&(
+      value.kind==='closure'
+      ||value.kind==='primitive-function'
+      ||value.kind==='constructor-function'
+    );
+}
+
+function typeValue(expr:Expr):Lean434TypeValue {
+  return {kind:'type',expr};
+}
+
+/**
+ * Bootstrap evaluator for pskernel-admitted Lean expressions.
+ *
+ * This is executable support, not part of the trusted kernel. It intentionally
+ * starts small and fails closed on unsupported runtime constructs. pskernel
+ * remains responsible for type/declaration checking before expressions reach
+ * this evaluator.
+ */
+export class Lean434Evaluator {
+  constructor(readonly environment:Environment){}
+
+  evaluate(expr:Expr):Lean434RuntimeValue {
+    return this.evaluateWithLocals(expr,[]);
+  }
+
+  private evaluateWithLocals(
+    expr:Expr,
+    locals:readonly Lean434RuntimeValue[],
+  ):Lean434RuntimeValue {
+    switch(expr.kind){
+      case 'bvar':{
+        const value=locals[expr.index];
+        if(value===undefined&&expr.index>=locals.length){
+          throw new Lean434EvaluationError(
+            'loose bound variable #'+expr.index,
+          );
+        }
+        return value;
+      }
+      case 'fvar':
+        throw new Lean434EvaluationError(
+          'free variable '+expr.id+' is not executable in a closed term',
+        );
+      case 'mvar':
+        throw new Lean434EvaluationError(
+          'metavariable '+expr.id+' reached runtime',
+        );
+      case 'sort':
+      case 'forall':
+        return typeValue(expr);
+      case 'lit':
+        return expr.literal.kind==='nat'
+          ?expr.literal.value
+          :expr.literal.value;
+      case 'mdata':
+        return this.evaluateWithLocals(expr.expr,locals);
+      case 'lam':
+        return {kind:'closure',body:expr.body,locals:[...locals]};
+      case 'let':{
+        const value=this.evaluateWithLocals(expr.value,locals);
+        return this.evaluateWithLocals(expr.body,[value,...locals]);
+      }
+      case 'proj':{
+        const target=this.evaluateWithLocals(expr.expr,locals);
+        if(
+          typeof target!=='object'
+          ||target===null
+          ||target.kind!=='constructor'
+        ){
+          throw new Lean434EvaluationError(
+            'projection target is not a constructor value',
+          );
+        }
+        const field=target.fields[expr.index];
+        if(field===undefined&&expr.index>=target.fields.length){
+          throw new Lean434EvaluationError(
+            'projection field '+expr.index+' is out of bounds',
+          );
+        }
+        return field;
+      }
+      case 'app':{
+        const fn=this.evaluateWithLocals(expr.fn,locals);
+        if(
+          typeof fn==='object'
+          &&fn!==null
+          &&fn.kind==='type'
+        ){
+          // Type applications are runtime-erased. Retain only a symbolic token
+          // so polymorphic executable code can pass them through harmlessly.
+          return typeValue(expr);
+        }
+        const arg=this.evaluateWithLocals(expr.arg,locals);
+        return this.apply(fn,arg);
+      }
+      case 'const':
+        return this.evaluateConstant(expr,locals);
+    }
+  }
+
+  private evaluateConstant(
+    expr:Extract<Expr,{kind:'const'}>,
+    locals:readonly Lean434RuntimeValue[],
+  ):Lean434RuntimeValue {
+    const name=nameToString(expr.name);
+
+    if(name==='Nat.zero')return 0n;
+    if(name==='Bool.false')return false;
+    if(name==='Bool.true')return true;
+    if(name==='Unit.unit')return undefined;
+
+    const runtimePrimitive=primitiveConstants.get(name);
+    if(runtimePrimitive!==undefined)return runtimePrimitive();
+
+    const info=this.environment.find(expr.name);
+    if(info===undefined){
+      throw new Lean434EvaluationError(
+        "unknown runtime constant '"+name+"'",
+      );
+    }
+
+    switch(info.kind){
+      case 'definition':{
+        const body=instantiateExprLevels(
+          info.value,
+          info.levelParams,
+          expr.levels,
+        );
+        return this.evaluateWithLocals(body,locals);
+      }
+      case 'opaque':{
+        // Opaqueness controls kernel reduction. Lean still compiles the body
+        // for runtime execution, so the JS evaluator may execute it after the
+        // declaration itself has already been checked by pskernel.
+        const body=instantiateExprLevels(
+          info.value,
+          info.levelParams,
+          expr.levels,
+        );
+        return this.evaluateWithLocals(body,locals);
+      }
+      case 'theorem':
+        return {kind:'proof',theorem:name};
+      case 'inductive':
+        return typeValue(expr);
+      case 'constructor':{
+        if(name==='Nat.succ')return primitiveConstants.get('Nat.succ')!();
+        const arity=info.numParams+info.numFields;
+        if(arity===0){
+          return {kind:'constructor',name,fields:[]};
+        }
+        return {
+          kind:'constructor-function',
+          name,
+          numParams:info.numParams,
+          arity,
+          args:[],
+        };
+      }
+      case 'recursor':
+        throw new Lean434EvaluationError(
+          "recursor runtime evaluation is not implemented yet: '"+name+"'",
+        );
+      case 'axiom':
+        throw new Lean434EvaluationError(
+          "axiom has no JavaScript runtime implementation: '"+name+"'",
+        );
+      case 'quot':
+        throw new Lean434EvaluationError(
+          "quotient runtime evaluation is not implemented yet: '"+name+"'",
+        );
+    }
+  }
+
+  private apply(
+    fn:Lean434RuntimeValue,
+    arg:Lean434RuntimeValue,
+  ):Lean434RuntimeValue {
+    if(!isCallable(fn)){
+      throw new Lean434EvaluationError(
+        'attempted to apply a non-function runtime value',
+      );
+    }
+
+    if(fn.kind==='closure'){
+      return this.evaluateWithLocals(fn.body,[arg,...fn.locals]);
+    }
+
+    const args=[...fn.args,arg];
+    if(args.length<fn.arity){
+      return {...fn,args};
+    }
+    if(args.length>fn.arity){
+      throw new Lean434EvaluationError(
+        "runtime function '"+fn.name+"' received too many arguments",
+      );
+    }
+
+    if(fn.kind==='primitive-function'){
+      return fn.invoke(args);
+    }
+
+    return {
+      kind:'constructor',
+      name:fn.name,
+      fields:args.slice(fn.numParams),
+    };
+  }
+}

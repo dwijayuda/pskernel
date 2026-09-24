@@ -317,13 +317,18 @@ export class Lean434Evaluator {
       }
       case 'app':{
         const fn=this.evaluateWithLocals(expr.fn,locals);
-        if(
-          isTaggedRuntimeValue(fn)
-          &&fn.kind==='type'
-        ){
-          // Type applications are runtime-erased. Retain only a symbolic token
-          // so polymorphic executable code can pass them through harmlessly.
-          return typeValue(expr);
+        if(isTaggedRuntimeValue(fn)){
+          if(fn.kind==='type'){
+            // Type applications are runtime-erased. Retain only a symbolic
+            // token so polymorphic executable code can pass them through.
+            return typeValue(expr);
+          }
+          if(fn.kind==='proof'){
+            // Theorem/proof applications are erased at runtime. Once the head
+            // has reduced to proof evidence, none of its remaining arguments
+            // can affect executable behavior.
+            return fn;
+          }
         }
         const arg=this.evaluateWithLocals(expr.arg,locals);
         return this.apply(fn,arg);

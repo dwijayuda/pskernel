@@ -654,9 +654,10 @@ partial def dumpCanonicalRootRange (env : Environment) (target : Name) (start co
     ("firstRoot", firstRoot),
     ("lastRoot", lastRoot)
   ])]).compress
-  ((do
-    modify fun s => { s with skipNonReplayable := true }
-    for n in selected do dumpConstant env n) |>.run {}).run' {}
+  let _ ← (do
+    modify fun (s : S) => { s with skipNonReplayable := true }
+    for n in selected do dumpConstant env n) |>.run {}
+  pure ()
 
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let total := env.constants.map₁.size

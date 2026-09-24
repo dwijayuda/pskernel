@@ -1,4 +1,4 @@
-import {readdirSync,readFileSync,statSync} from 'node:fs';
+import {existsSync,readdirSync,readFileSync,statSync} from 'node:fs';
 import {join} from 'node:path';
 
 const roots=['study/lean4-4.34.0/tests/elab','study/lean4-4.34.0/tests/elab_fail'];
@@ -169,6 +169,64 @@ for(const marker of [
 }
 if(localAssuranceRunner.includes('& npm install --no-audit --no-fund')){
   throw new Error('local Full-Std assurance runner drift: mutable npm install must not replace npm ci');
+}
+
+const rootPackage=JSON.parse(readFileSync('package.json','utf8'));
+const workspaceLock=JSON.parse(readFileSync('package-lock.json','utf8'));
+const lockedRoot=workspaceLock.packages?.[''];
+if(!lockedRoot)throw new Error('workspace lock drift: root package entry is missing');
+const sortedRecord=(value)=>Object.fromEntries(Object.entries(value??{}).sort(([a],[b])=>a.localeCompare(b)));
+const sameRecord=(a,b)=>JSON.stringify(sortedRecord(a))===JSON.stringify(sortedRecord(b));
+if(JSON.stringify(lockedRoot.workspaces??[])!==JSON.stringify(rootPackage.workspaces??[])){
+  throw new Error('workspace lock drift: root workspaces do not match package.json');
+}
+if(!sameRecord(lockedRoot.devDependencies,rootPackage.devDependencies)){
+  throw new Error('workspace lock drift: root devDependencies do not match package.json');
+}
+const workspaceDirs=readdirSync('packages',{withFileTypes:true})
+  .filter((entry)=>entry.isDirectory()&&existsSync(join('packages',entry.name,'package.json')))
+  .map((entry)=>entry.name)
+  .sort();
+const expectedWorkspacePaths=[];
+let needsRootSelfLink=false;
+for(const dir of workspaceDirs){
+  const path='packages/'+dir;
+  expectedWorkspacePaths.push(path);
+  const manifest=JSON.parse(readFileSync(join(path,'package.json'),'utf8'));
+  const locked=workspaceLock.packages?.[path];
+  if(!locked)throw new Error('workspace lock drift: missing '+path);
+  if(locked.name!==manifest.name||locked.version!==manifest.version){
+    throw new Error('workspace lock drift: identity mismatch for '+path);
+  }
+  for(const field of ['dependencies','devDependencies','bin']){
+    if(!sameRecord(locked[field],manifest[field])){
+      throw new Error('workspace lock drift: '+field+' mismatch for '+path);
+    }
+  }
+  const link=workspaceLock.packages?.['node_modules/'+manifest.name];
+  if(!link||link.link!==true||link.resolved!==path){
+    throw new Error('workspace lock drift: missing npm workspace link for '+manifest.name);
+  }
+  if(manifest.dependencies?.['lean-ts-kernel']==='file:../..')needsRootSelfLink=true;
+}
+const lockedWorkspacePaths=Object.keys(workspaceLock.packages??{})
+  .filter((path)=>/^packages\/[^/]+$/.test(path))
+  .sort();
+if(JSON.stringify(lockedWorkspacePaths)!==JSON.stringify(expectedWorkspacePaths)){
+  throw new Error('workspace lock drift: workspace path set does not match packages/* manifests');
+}
+const linkedWorkspacePaths=Object.values(workspaceLock.packages??{})
+  .filter((entry)=>entry?.link===true&&typeof entry.resolved==='string'&&entry.resolved.startsWith('packages/'))
+  .map((entry)=>entry.resolved)
+  .sort();
+if(JSON.stringify(linkedWorkspacePaths)!==JSON.stringify(expectedWorkspacePaths)){
+  throw new Error('workspace lock drift: workspace link set is incomplete or stale');
+}
+if(needsRootSelfLink){
+  const selfLink=workspaceLock.packages?.['node_modules/lean-ts-kernel'];
+  if(!selfLink||selfLink.link!==true||selfLink.resolved!==''){
+    throw new Error('workspace lock drift: root self-link for lean-ts-kernel is missing');
+  }
 }
 
 const nativeEval=readFileSync('oracle/replay-probe/NativeEval.lean','utf8');

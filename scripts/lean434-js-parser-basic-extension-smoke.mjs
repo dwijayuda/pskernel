@@ -67,7 +67,13 @@ if(initializers.length!==4){
   throw new Error('expected exactly four selected initializer entries');
 }
 
-const replay=new Lean4ExportReplay();
+const preludeFixture='oracle/fixtures/lean434-init-prelude.ndjson';
+if(!fs.existsSync(preludeFixture)){
+  throw new Error('missing pinned Lean 4.34 Init.Prelude fixture');
+}
+const preludeReplay=new Lean4ExportReplay();
+preludeReplay.replay(fs.readFileSync(preludeFixture,'utf8'));
+const replay=new Lean4ExportReplay(preludeReplay.env);
 replay.replay(fs.readFileSync(fixture,'utf8'));
 const metadata=new Lean434RuntimeMetadataIndex({
   ...document,

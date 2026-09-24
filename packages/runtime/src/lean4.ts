@@ -440,7 +440,8 @@ type Lean434JsExternImplementation=
   (...args:readonly unknown[])=>unknown;
 
 const jsExternImplementations:
-ReadonlyMap<string,Lean434JsExternImplementation>=new Map([
+ReadonlyMap<string,Lean434JsExternImplementation>=
+new Map<string,Lean434JsExternImplementation>([
   ['lean_nat_add',(a,b)=>lean_nat_add(a as LeanNat,b as LeanNat)],
   ['lean_nat_mul',(a,b)=>lean_nat_mul(a as LeanNat,b as LeanNat)],
   ['lean_nat_sub',(a,b)=>lean_nat_sub(a as LeanNat,b as LeanNat)],

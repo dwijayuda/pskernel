@@ -471,9 +471,30 @@ console.log('ok - psc verified Nat source pipeline');
 
 
 {
+  const result=compileVerifiedSource(
+    'function toChar(n : Nat) : Char := Char.ofNat(n);',
+    'char.ts',
+  );
+  const declaration=result.ir.declarations[0]!;
+  equal(declaration.resultType.kind,'primitive');
+  if(declaration.resultType.kind==='primitive'){
+    equal(declaration.resultType.name,'Char');
+  }
+  equal(declaration.body.kind,'intrinsic');
+  if(declaration.body.kind==='intrinsic'){
+    equal(declaration.body.operation,'char.ofNat');
+  }
+  equal(result.typeScript.includes('String.fromCodePoint'),true);
+}
+console.log('ok - psc checked Char.ofNat source pipeline');
+
+
+{
   equal(parseVerifiedRuntimeArg('42',{kind:'primitive',name:'Nat'}),42n);
   equal(parseVerifiedRuntimeArg('-42',{kind:'primitive',name:'Int'}),-42n);
   equal(parseVerifiedRuntimeArg('true',{kind:'primitive',name:'Bool'}),true);
+  equal(parseVerifiedRuntimeArg('A',{kind:'primitive',name:'Char'}),'A');
+  equal(parseVerifiedRuntimeArg('🙂',{kind:'primitive',name:'Char'}),'🙂');
   equal(parseVerifiedRuntimeArg('hello',{kind:'primitive',name:'String'}),'hello');
   equal(parseVerifiedRuntimeArg('()',{kind:'primitive',name:'Unit'}),undefined);
   throws(
@@ -483,6 +504,10 @@ console.log('ok - psc verified Nat source pipeline');
   throws(
     ()=>parseVerifiedRuntimeArg('yes',{kind:'primitive',name:'Bool'}),
     /Bool argument/,
+  );
+  throws(
+    ()=>parseVerifiedRuntimeArg('ab',{kind:'primitive',name:'Char'}),
+    /Char argument/,
   );
   const args=prepareVerifiedMainArguments({
     name:'main',
@@ -498,6 +523,57 @@ console.log('ok - psc verified Nat source pipeline');
   equal(args[1],false);
 }
 console.log('ok - psc verified runtime ABI');
+
+
+{
+  const directory=await mkdtemp(join(tmpdir(),'proofscript-char-run-'));
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(n : Nat) : Char := Char.ofNat(n);\n',
+      'utf8',
+    );
+    const ascii=await runCommand({
+      project:directory,
+      json:true,
+      verified:false,
+      passthrough:['65'],
+    });
+    equal(ascii.mainResult,'A');
+    const nonBmp=await runCommand({
+      project:directory,
+      json:true,
+      verified:false,
+      passthrough:['128578'],
+    });
+    equal(nonBmp.mainResult,'🙂');
+    const invalid=await runCommand({
+      project:directory,
+      json:true,
+      verified:false,
+      passthrough:['55296'],
+    });
+    equal(invalid.mainResult,'\0');
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc Lean-faithful Char.ofNat runtime pipeline');
 
 
 {

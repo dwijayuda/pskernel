@@ -811,12 +811,12 @@ unsafe def main (args : List String) : IO Unit := do
     else if requestedRoots.length >= 4 && requestedRoots.head! == "--selected-segmented-after" then
       let baseModule := requestedRoots[1]!.toName
       let segmentRoots := requestedRoots[2]!.toNat!
-      let selected := requestedRoots.drop 3 |>.map String.toName
+      let selected ← resolveRootNames env (requestedRoots.drop 3)
       withImportModules #[{module := baseModule}] {} fun baseEnv => do
         dumpSelectedRootsSegmentedAfterBase env baseEnv baseModule selected segmentRoots
     else if requestedRoots.length >= 3 && requestedRoots.head! == "--selected-segmented" then
       let segmentRoots := requestedRoots[1]!.toNat!
-      let selected := requestedRoots.drop 2 |>.map String.toName
+      let selected ← resolveRootNames env (requestedRoots.drop 2)
       dumpSelectedRootsSegmented env selected segmentRoots
     else if requestedRoots.length == 3 && requestedRoots.head! == "--root-range" then
       let start := requestedRoots[1]!.toNat!

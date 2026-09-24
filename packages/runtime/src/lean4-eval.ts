@@ -527,8 +527,17 @@ export class Lean434Evaluator {
     arg:Lean434RuntimeValue,
   ):Lean434RuntimeValue {
     if(!isCallable(fn)){
+      let detail=typeof fn+':'+String(fn);
+      if(isTaggedRuntimeValue(fn)){
+        detail=fn.kind+
+          (fn.kind==='constructor'?':'+fn.name:'');
+      }else if(Array.isArray(fn)){
+        detail='array[length='+fn.length+']';
+      }else if(fn instanceof Object){
+        detail='object';
+      }
       throw new Lean434EvaluationError(
-        'attempted to apply a non-function runtime value',
+        'attempted to apply a non-function runtime value ('+detail+')',
       );
     }
 

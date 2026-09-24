@@ -20,6 +20,7 @@ lean_lib PsCore where
   roots := #[
     `Ps.Core.Level,
     `Ps.Core.Expr,
+    `Ps.Core.Subst,
     `Ps.Core.Declaration
   ]
 
@@ -27,8 +28,13 @@ lean_lib PsEnvironment where
   srcDir := "packages/environment/src"
   roots := #[
     `Ps.Environment.Basic,
-    `Ps.Environment.LocalContext
+    `Ps.Environment.LocalContext,
+    `Ps.Environment.Resolve
   ]
+
+lean_lib PsProject where
+  srcDir := "packages/project/src"
+  roots := #[`Ps.Project.ModuleGraph]
 
 lean_lib PsMeta where
   srcDir := "packages/meta/src"

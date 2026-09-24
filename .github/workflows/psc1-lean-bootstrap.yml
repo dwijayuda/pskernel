@@ -97,6 +97,13 @@ jobs:
           cd selfhost
           lake exe psc1_backend_ts_tests
 
+      - name: Run Lean-native erasure pipeline tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_erasure_tests
+
       - name: Run dual-source admission pipeline
         shell: bash
         run: |

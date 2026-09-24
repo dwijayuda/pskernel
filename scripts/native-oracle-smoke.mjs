@@ -40,7 +40,9 @@ def n : Nat := 20 + 22
 unsafe def bImpl : Bool := false
 
 @[implemented_by bImpl]
-def b : Bool := true
+def bSource : Bool := true
+
+def b : Bool := bSource
 
 end NativeEvalFixture
 `);
@@ -79,8 +81,10 @@ end NativeEvalFixture
     throw new Error(`native-oracle-smoke: Nat result mismatch: ${String(natResult.value)}`);
   }
 
-  // This is deliberately stronger than a simple Bool evaluation: the logical
-  // body is true while @[implemented_by] executes bImpl and must produce false.
+  // This is deliberately stronger than a simple Bool evaluation. Lean does not
+  // compile bSource itself because it has @[implemented_by]; instead compiler
+  // calls to bSource are rewritten to bImpl. The separately compiled b constant
+  // therefore executes false while its logical body unfolds through bSource to true.
   const boolResult=evaluator.evaluate(null,{
     kind:'bool',
     constant:nameFromDotted('NativeEvalFixture.b'),

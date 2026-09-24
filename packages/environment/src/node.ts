@@ -113,14 +113,14 @@ export function createLeanEnvironmentProvider(
       currentStatus={
         loaded:true,
         source,
-        foundationSource,
+        ...(foundationSource===undefined?{}:{foundationSource}),
         declarations:base.size,
       };
     }catch(error){
       currentStatus={
         loaded:false,
         source,
-        foundationSource,
+        ...(foundationSource===undefined?{}:{foundationSource}),
         message:
           'Failed to replay Lean compiler environment: '+
           (error instanceof Error?error.message:String(error)),

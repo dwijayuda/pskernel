@@ -137,6 +137,15 @@ def psElabString
         (PsExpr.lit (PsLiteral.string value))
         expected
 
+def psElabUnit
+    (context : PsElabContext)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  psElabResolvedTerm
+    context
+    (PsExpr.constE psUnitUnitName [])
+    expected
+
 def psElabBool
     (context : PsElabContext)
     (value : Bool)
@@ -601,6 +610,8 @@ def psElabTermWithFuel
           psElabNatural context text expected
       | .string text _ =>
           psElabString context text expected
+      | .unit _ =>
+          psElabUnit context expected
       | .bool value _ =>
           psElabBool context value expected
       | .lambda binders body _ =>

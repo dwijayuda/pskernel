@@ -1074,9 +1074,9 @@ console.log('ok - psc SH2 dual-source canonical Array runtime');
       'function main(a : Nat, b : Nat) : Nat := '+
       'let values : PsMap(Nat, Nat) := '+
       'mapInsert(compareNat, b, 20, '+
-      'mapInsert(compareNat, a, 10, mapEmpty)); '+
+      'mapInsert(compareNat, a, 10, PsMap.empty)); '+
       'let keys : PsSet(Nat) := '+
-      'setInsert(compareNat, b, setInsert(compareNat, a, setEmpty)); '+
+      'setInsert(compareNat, b, setInsert(compareNat, a, PsSet.empty)); '+
       'if (mapContains(compareNat, a, values) && '+
       'setContains(compareNat, b, keys)) { '+
       'optionGetOrElse(mapGet?(compareNat, a, values), 0) + '+

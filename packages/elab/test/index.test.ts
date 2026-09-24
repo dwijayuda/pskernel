@@ -1245,6 +1245,25 @@ console.log('ok - @proofscript/elab expected-type propagation into nested calls'
 }
 console.log('ok - @proofscript/elab parameterized verified match recursor elaboration');
 
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive MatchOption(α : Type) where { '+
+    '| none; | some(value : α); } '+
+    'function matchConstruct(value : MatchOption(Nat)) : MatchOption(Nat) := '+
+    'match value with { '+
+    '| .none => MatchOption.some(1); '+
+    '| .some x => MatchOption.some(x); };',
+  ),env);
+  equal(result.definitions.length,1);
+  equal(
+    result.environment.find(nameFromDotted('matchConstruct'))?.kind,
+    'definition',
+  );
+}
+console.log('ok - @proofscript/elab match branch constructor meta instantiation');
+
+
 
 {
   const env=makeNatNotationEnvironment();

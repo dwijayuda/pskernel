@@ -304,11 +304,11 @@ def psTestLexerUtf8Offset : Bool :=
   | Except.ok tokens =>
       match tokens with
       | token :: eofToken :: [] =>
-          token.kind == PsTokenKind.identifier
+          psTokenKindEq token.kind PsTokenKind.identifier
             && token.text == "𝒫x"
             && token.span.start.byteOffset == 0
             && token.span.stop.byteOffset == 5
-            && eofToken.kind == PsTokenKind.endOfInput
+            && psTokenKindEq eofToken.kind PsTokenKind.endOfInput
             && eofToken.span.start.byteOffset == 5
       | _ => false
 
@@ -320,7 +320,7 @@ def psTestLexerNestedTrivia : Bool :=
       | first :: second :: eofToken :: [] =>
           first.text == "a"
             && second.text == "b"
-            && eofToken.kind == PsTokenKind.endOfInput
+            && psTokenKindEq eofToken.kind PsTokenKind.endOfInput
       | _ => false
 
 def psBootstrapTests : Bool :=

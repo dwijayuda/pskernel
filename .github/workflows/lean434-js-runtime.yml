@@ -43,15 +43,64 @@ jobs:
         run: |
           set -euo pipefail
           npm run generate:lean434-runtime-metadata -- Init.Prelude --out lean434-init-runtime-metadata.json
+          npm run generate:lean434-runtime-metadata -- Lean.Environment --out lean434-environment-runtime-metadata.json
           npm run generate:lean434-runtime-metadata -- Lean.Parser.Types --out lean434-parser-types-runtime-metadata.json
           npm run generate:lean434-runtime-metadata -- Lean.Parser.Basic --out lean434-parser-basic-runtime-metadata.json
           npm run generate:lean434-runtime-metadata -- Lean.Parser --out lean434-parser-runtime-metadata.json
+      - name: Generate small Lean Environment extension corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t env_roots < <(node --input-type=module -e "
+            import fs from 'node:fs';
+            const d=JSON.parse(fs.readFileSync(
+              'lean434-environment-runtime-metadata.json','utf8'
+            ));
+            const entries=[
+              d.initializers.find(
+                x=>x.declaration.includes('ImportingFlag') &&
+                   x.declaration.endsWith('.importingRef')
+              ),
+              d.initializers.find(
+                x=>x.declaration.includes('EnvExtension.envExtensionsRef')
+              ),
+            ];
+            if(entries.some(x=>!x))process.exit(2);
+            for(const e of entries){
+              console.log(e.declaration);
+              if(e.initFunction)console.log(e.initFunction);
+            }
+          ")
+          lean --run oracle/replay-probe/DependencyExport.lean Lean.Environment \
+            --selected-after Init.Prelude "${env_roots[@]}" \
+            Lean.registerEnvExtension IO.mkRef \
+            Lean.EnvExtension.AsyncMode.mainOnly Option.none \
+            > lean434-environment-extension.ndjson
+          test -s lean434-environment-extension.ndjson
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const text=fs.readFileSync(
+              'lean434-environment-extension.ndjson','utf8'
+            );
+            const first=text.split(/\\r?\\n/u).find(x=>x.trim())??'';
+            JSON.parse(first);
+            console.log(JSON.stringify({
+              bytes:Buffer.byteLength(text),
+              lines:text.split(/\\r?\\n/u).filter(Boolean).length,
+            }));
+          "
+      - name: Execute real Lean registerEnvExtension in JavaScript
+        run: |
+          node scripts/lean434-js-env-extension-smoke.mjs \
+            lean434-environment-extension.ndjson \
+            lean434-environment-runtime-metadata.json
       - name: Report Lean.Parser runtime metadata
         run: |
           node scripts/lean434-runtime-metadata-report.mjs lean434-parser-types-runtime-metadata.json
           node scripts/lean434-runtime-metadata-report.mjs lean434-parser-basic-runtime-metadata.json
           node scripts/lean434-runtime-metadata-report.mjs lean434-parser-runtime-metadata.json
       - name: Generate Lean.Parser.Basic EnvExtension initializer corpus
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
@@ -105,6 +154,7 @@ jobs:
             }
           "
       - name: Upload Parser.Basic bootstrap inputs
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: lean434-parser-basic-bootstrap
@@ -120,6 +170,7 @@ jobs:
             lean434-parser-basic-env-extension.ndjson \
             lean434-parser-basic-runtime-metadata.json
       - name: Generate first Lean.Parser.Basic initializer corpus
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
@@ -140,6 +191,7 @@ jobs:
             > lean434-parser-basic-category-ref.ndjson
           test -s lean434-parser-basic-category-ref.ndjson
       - name: Execute first real Lean.Parser.Basic initializer in JavaScript
+        if: github.event_name == 'workflow_dispatch'
         run: |
           node scripts/lean434-js-parser-basic-init-smoke.mjs \
             lean434-parser-basic-category-ref.ndjson \
@@ -177,6 +229,7 @@ jobs:
             } from './packages/runtime/dist/src/lean4-metadata.js';
             for (const file of [
               'lean434-init-runtime-metadata.json',
+              'lean434-environment-runtime-metadata.json',
               'lean434-parser-types-runtime-metadata.json',
               'lean434-parser-basic-runtime-metadata.json',
               'lean434-parser-runtime-metadata.json',

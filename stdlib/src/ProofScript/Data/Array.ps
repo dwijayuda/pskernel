@@ -17,3 +17,20 @@ function arrayGet {α : Type}
 function arrayGetD {α : Type}
 (xs : Array(α), index : Nat, fallback : α) : α :=
   Array.getD(xs, index, fallback);
+
+function arraySet {α : Type}
+(xs : Array(α), index : Nat, value : α, h : index < Array.size(xs)) :
+Array(α) :=
+  Array.set(xs, index, value, h);
+
+function arraySetIfInBounds {α : Type}
+(xs : Array(α), index : Nat, value : α) : Array(α) :=
+  Array.setIfInBounds(xs, index, value);
+
+function arrayMap {α : Type}{β : Type}
+(f : α -> β, xs : Array(α)) : Array(β) :=
+  Array.map(f, xs);
+
+function arrayFoldl {α : Type}{β : Type}
+(f : β -> α -> β, init : β, xs : Array(α)) : β :=
+  Array.foldl(f, init, xs, 0, Array.size(xs));

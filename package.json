@@ -44,7 +44,8 @@
     "oracle:init-canonical": "npm run build --silent && node scripts/module-stream-oracle.mjs Init.Prelude",
     "test:kernel": "npm run check:oracle-syntax && npm run build && npm run test:oracle-tools && node dist/test/all.test.js",
     "check:kernel-oracle": "npm run oracle:official && npm run oracle:primitive && npm run oracle:defeq && npm run oracle:adversarial",
-    "check:kernel-corpus": "npm run check:kernel-oracle && npm run oracle:init && npm run oracle:std-parsec && npm run oracle:std-sat-cnf && npm run oracle:std-byteslice && npm run oracle:lean-rbmap && npm run oracle:lean-persistentarray && npm run oracle:lean-persistenthashmap"
+    "check:kernel-corpus": "npm run check:kernel-oracle && npm run oracle:init && npm run oracle:std-parsec && npm run oracle:std-sat-cnf && npm run oracle:std-byteslice && npm run oracle:lean-rbmap && npm run oracle:lean-persistentarray && npm run oracle:lean-persistenthashmap",
+    "oracle:std-release": "node scripts/std-release-profile.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

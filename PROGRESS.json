@@ -89,7 +89,7 @@
     "deep-structural-traversal-stack-hardening"
   ],
   "openGates": [
-    "full-Std-environment-replay",
+    "full-Std-release-assurance-profile",
     "full-Lean-environment-replay",
     "native-reduction-compiler-ir-provider",
     "formal-equivalence-proof"
@@ -98,10 +98,12 @@
     "full Lean compatibility",
     "formal equivalence",
     "100% complete",
-    "full Lean 4.34 native-reduction compatibility"
+    "full Lean 4.34 native-reduction compatibility",
+    "canonical Full Std passes unless the one-pass shared-environment Tier 5 gate succeeds"
   ],
   "lastVerifiedTestCount": 174,
   "notes": [
+    "Release-gate policy update: canonical Full Std remains a non-blocking gold/soak gate. The blocking Std release gate is now the bounded std-release-assurance-v1 profile: direct/anti-drift/corpora/native/canonical Init prerequisites plus exhaustive Init.Data.Int.DivMod.Lemmas roots 22197..23153 and stratified 64-root windows every 10,000 Std roots. This does not permit the claim that canonical Full Std passed.",
     "Lean 4.34 universe-ordering semantic fix: final C++ `is_geq_core` uses the `is_max(l1)` branch only as a positive shortcut; when both max branches fail it falls through to later imax/offset rules. The iterative TypeScript port incorrectly returned the failed OR as final false, rejecting Init.Prelude `Trans.mk` even though each component universe was dominated. `ac9653b6` restores the fallthrough; focused `max u v >= imax u v` and exact Trans universe regressions pass. GitHub Actions run 35965228367 verifies the direct suite at 174/174.",
     "Fresh executable checkpoint: after the repository was made public, GitHub-hosted Ubuntu runner allocation recovered. Run 35962003721 attempt 2 completed oracle syntax, TypeScript root build, kernel-study matrix, and direct kernel suite with 173/173 PASS and 0 failures at commit 6676b0a92b714979968edb0213e770f9600a7dce. The same root npm test later failed in unrelated packages/syntax frontend TypeScript code; this is not a kernel failure. A focused `test:kernel` gate now isolates hardening CI/assurance from unrelated package development.",
     "Execution refresh at bc2841a reached the anti-drift matrix after oracle syntax and TypeScript build, then stopped on a stale maxRecDepth regression name. Source audit found the mapped coverage still present as `kernel recursion budget matches Lean 4.34 unlimited and 16x semantics`; a09c167 aligns that mapping. A full static matrix audit then found and fixed two further stale assertions (source-order disclaimer line wrapping and obsolete `git restore -- full-std.log` recovery text) in d1e7c16. All current mapped test names and remaining static marker checks now resolve in source. lastVerifiedTestCount remains 170 pending executable rerun.",

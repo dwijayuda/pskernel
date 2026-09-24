@@ -36,7 +36,7 @@ jobs:
             echo "portable PSC1 kernel source must not import Lean implementation modules" >&2
             exit 1
           fi
-      - name: Compile PSC1 kernel K0 with Lean 4.34
+      - name: Compile PSC1 Lean kernel with Lean 4.34
         shell: bash
         run: |
           set -euo pipefail
@@ -45,6 +45,8 @@ jobs:
           lean -o kernel/psc1/ProofScript/Kernel/PSC1/Level.olean kernel/psc1/ProofScript/Kernel/PSC1/Level.lean
           lean -o kernel/psc1/ProofScript/Kernel/PSC1/Expr.olean kernel/psc1/ProofScript/Kernel/PSC1/Expr.lean
           lean -o kernel/psc1/ProofScript/Kernel/PSC1/Instantiate.olean kernel/psc1/ProofScript/Kernel/PSC1/Instantiate.lean
+          lean -o kernel/psc1/ProofScript/Kernel/PSC1/Environment.olean kernel/psc1/ProofScript/Kernel/PSC1/Environment.lean
+          lean -o kernel/psc1/ProofScript/Kernel/PSC1/TypeChecker.olean kernel/psc1/ProofScript/Kernel/PSC1/TypeChecker.lean
       - name: Run direct original-Lean parity tests
         shell: bash
         run: |

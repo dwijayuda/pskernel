@@ -79,7 +79,7 @@ function main(x : Nat) : Nat :=
   let arrayFoundOne : PsOption(Nat) :=
     arrayFind?(isOne, arrayValues);
   let arraysOk : Bool :=
-    arraySize(arrayEmpty) == 0 &&
+    arraySize(arrayEmptyWithCapacity(0)) == 0 &&
     arrayAny(isNonZero, arrayValues) &&
     arrayAll(isNonZero, arrayValues) &&
     optionGetOrElse(arrayAtOne, 0) == 1 &&
@@ -96,7 +96,7 @@ function main(x : Nat) : Nat :=
       compareNat,
       2,
       20,
-      mapInsert(compareNat, 1, 10, mapEmpty)
+      mapInsert(compareNat, 1, 10, PsMap.empty)
     );
   let mapOk : Bool :=
     mapContains(compareNat, 1, mapValues) &&
@@ -105,7 +105,7 @@ function main(x : Nat) : Nat :=
     setInsert(
       compareNat,
       2,
-      setInsert(compareNat, 1, setEmpty)
+      setInsert(compareNat, 1, PsSet.empty)
     );
   let setOk : Bool :=
     setContains(compareNat, 1, setValues) &&

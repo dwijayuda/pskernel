@@ -5,6 +5,7 @@ import type {
 import type {V061Pattern} from './pattern-parser.js';
 import {v061BinaryPrecedence} from './operators.js';
 import {lowerV061TypeToProofScript} from './proofscript-type-lowering.js';
+import {quoteV061Char} from './char-literal.js';
 
 const PRIMARY_PRECEDENCE=8;
 const UNARY_PRECEDENCE=7;
@@ -72,6 +73,7 @@ function expressionPrecedence(expr:V061Expr):number {
   switch(expr.kind){
     case 'nat':
     case 'string':
+    case 'char':
     case 'bool':
     case 'unit':
     case 'syntheticHole':
@@ -97,6 +99,9 @@ export function lowerV061ExprToProofScript(
       break;
     case 'string':
       rendered=JSON.stringify(expr.value);
+      break;
+    case 'char':
+      rendered=quoteV061Char(expr.value);
       break;
     case 'bool':
       rendered=expr.value?'true':'false';

@@ -10,7 +10,6 @@ import {
   levelSucc,
   levelZero,
   mkAppN,
-  nameAppend,
   nameEq,
   nameFromDotted,
   numName,

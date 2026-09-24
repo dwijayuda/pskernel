@@ -1,0 +1,66 @@
+import ProofScript.Data.Option
+import ProofScript.Data.Ordering
+
+inductive PsMap(κ : Type, ν : Type) where {
+  | empty;
+  | entry(key : κ, value : ν, tail : PsMap(κ, ν));
+};
+
+function mapEmpty {κ : Type}{ν : Type} : PsMap(κ, ν) :=
+  PsMap.empty;
+
+function mapIsEmpty {κ : Type}{ν : Type}
+(values : PsMap(κ, ν)) : Bool :=
+  match values with {
+    | .empty => true;
+    | .entry key value tail => false;
+  };
+
+function mapGet? {κ : Type}{ν : Type}
+(compare : κ -> κ -> PsOrdering, key : κ, values : PsMap(κ, ν)) :
+PsOption(ν) :=
+  match values with {
+    | .empty => PsOption.none;
+    | .entry current value tail =>
+      match compare(key, current) with {
+        | .less => PsOption.none;
+        | .equal => PsOption.some(value);
+        | .greater => mapGet?(compare, key, tail);
+      };
+  };
+
+function mapContains {κ : Type}{ν : Type}
+(compare : κ -> κ -> PsOrdering, key : κ, values : PsMap(κ, ν)) :
+Bool :=
+  optionIsSome(mapGet?(compare, key, values));
+
+function mapInsert {κ : Type}{ν : Type}
+(compare : κ -> κ -> PsOrdering, key : κ, value : ν,
+ values : PsMap(κ, ν)) : PsMap(κ, ν) :=
+  match values with {
+    | .empty => PsMap.entry(key, value, PsMap.empty);
+    | .entry current currentValue tail =>
+      match compare(key, current) with {
+        | .less =>
+          PsMap.entry(
+            key,
+            value,
+            PsMap.entry(current, currentValue, tail)
+          );
+        | .equal => PsMap.entry(key, value, tail);
+        | .greater =>
+          PsMap.entry(
+            current,
+            currentValue,
+            mapInsert(compare, key, value, tail)
+          );
+      };
+  };
+
+function mapFold {κ : Type}{ν : Type}{α : Type}
+(f : α -> κ -> ν -> α, init : α, values : PsMap(κ, ν)) : α :=
+  match values with {
+    | .empty => init;
+    | .entry key value tail =>
+      mapFold(f, f(init, key, value), tail);
+  };

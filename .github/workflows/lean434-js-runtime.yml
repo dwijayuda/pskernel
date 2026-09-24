@@ -40,5 +40,31 @@ jobs:
               })),
             },null,2));
           "
+      - name: Measure dependency-closed Lean source roots
+        run: |
+          node scripts/lean434-source-closure.mjs Lean.Parser > lean-parser-closure.json
+          node scripts/lean434-source-closure.mjs Lean.Meta.Basic > lean-meta-basic-closure.json
+          node scripts/lean434-source-closure.mjs Lean.Elab.Frontend > lean-elab-frontend-closure.json
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            for (const [name,file] of [
+              ['Lean.Parser','lean-parser-closure.json'],
+              ['Lean.Meta.Basic','lean-meta-basic-closure.json'],
+              ['Lean.Elab.Frontend','lean-elab-frontend-closure.json'],
+            ]) {
+              const r=JSON.parse(fs.readFileSync(file,'utf8'));
+              console.log(JSON.stringify({
+                root:name,
+                modules:r.totals.modules,
+                bytes:r.totals.bytes,
+                missingModules:r.totals.missingModules,
+                externSymbols:r.totals.externSymbols,
+                implementedExternSymbols:r.totals.implementedExternSymbols,
+                uncoveredExternSymbols:r.totals.uncoveredExternSymbols,
+                implementedByTargets:r.totals.implementedByTargets,
+                byTopLevel:r.byTopLevel,
+              }));
+            }
+          "
       - name: Check ProofScript architecture invariants
         run: npm run check:architecture

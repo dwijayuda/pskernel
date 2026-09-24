@@ -156,7 +156,7 @@ export function analyzeDocument(
 ):DocumentAnalysis {
   let module:V061Module;
   try{
-    module=sourceFrontends.require(snapshot.sourceKind).parse(snapshot.text);
+    module=sourceFrontends.forDocument(snapshot.sourceKind,snapshot.uri).parse(snapshot.text);
   }catch(error){
     if(error instanceof ProofScriptSyntaxError){
       return {

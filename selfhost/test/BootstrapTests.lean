@@ -1893,6 +1893,74 @@ def psTestDualSourceInductiveEnumElaboration : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestSourceInductiveFieldShape
+    (result : PsElabModuleResult) : Bool :=
+  let boxName := psTestName "BoxNat"
+  let ctorName := psNameAppendStr boxName "mk"
+  let recName := psNameAppendStr boxName "rec"
+  let natType := PsExpr.constE psNatName []
+  match result.declarations with
+  | [
+      PsDeclaration.inductiveDecl inductiveInfo,
+      PsDeclaration.constructorDecl ctorInfo,
+      PsDeclaration.recursorDecl recInfo,
+      PsDeclaration.definitionDecl unwrapName [] unwrapType unwrapValue
+    ] =>
+      psNameEq inductiveInfo.name boxName
+        && inductiveInfo.constructors.length == 1
+        && psNameEq ctorInfo.name ctorName
+        && ctorInfo.constructorIndex == 0
+        && ctorInfo.numFields == 1
+        && match ctorInfo.type with
+           | PsExpr.forallE
+               binderName
+               binderType
+               resultType
+               PsBinderInfo.explicit =>
+               psNameEq binderName (psTestName "x")
+                 && psExprAlphaEq binderType natType
+                 && psExprAlphaEq resultType
+                   (PsExpr.constE boxName [])
+           | _ => false
+        && psNameEq recInfo.name recName
+        && recInfo.numMinors == 1
+        && psNameEq unwrapName (psTestName "unwrap")
+        && match unwrapType, unwrapValue with
+           | PsExpr.forallE
+               _
+               domain
+               codomain
+               PsBinderInfo.explicit,
+             PsExpr.lam _ _ body PsBinderInfo.explicit =>
+               psExprAlphaEq domain (PsExpr.constE boxName [])
+                 && psExprAlphaEq codomain natType
+                 && match (psExprAppView body).head with
+                    | PsExpr.constE name levels =>
+                        psNameEq name recName
+                          && levels.length == 1
+                    | _ => false
+           | _, _ => false
+  | _ => false
+
+def psTestDualSourceInductiveFieldElaboration : Bool :=
+  match
+      psParseLeanSource
+        "inductive BoxNat where | mk (x : Nat)\ndef unwrap (v : BoxNat) : Nat := match v with | BoxNat.mk x => x",
+      psParseProofScriptSource
+        "inductive BoxNat where { | mk(x : Nat); }; def unwrap(v : BoxNat) : Nat := match v with { | BoxNat.mk x => x };" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestSourceInductiveFieldShape leanResult
+            && psTestSourceInductiveFieldShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1920,6 +1988,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source inductive enum parse", passed := psTestDualSourceInductiveEnumParse },
   { name := "dual-source inductive field parse", passed := psTestDualSourceInductiveFieldParse },
   { name := "dual-source inductive enum elaboration", passed := psTestDualSourceInductiveEnumElaboration },
+  { name := "dual-source inductive field elaboration", passed := psTestDualSourceInductiveFieldElaboration },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

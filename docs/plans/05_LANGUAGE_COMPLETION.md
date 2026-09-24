@@ -712,7 +712,7 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
     resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
-    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, resultIsOkOk, resultIsOkError, listIsEmptyNil, listIsEmptyCons, listHeadOrElseNil, listHeadOrElseCons, listAppendNilRight,
+    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, resultIsOkOk, resultIsOkError, listIsEmptyAppendNilLeft, listIsEmptyCons, listHeadOrElseNil, listHeadOrElseCons, listAppendNilRight,
     listAppendAssoc, and listMapAppend. Thirty-seven current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
@@ -748,8 +748,11 @@ coverage without any new elaborator or backend behavior.
 ## Stdlib List emptiness checkpoint
 
 `listIsEmpty` adds a small executable Bool helper entirely in ProofScript.
-Its `nil` and `cons` constructor equations are recorded by
-`listIsEmptyNil` / `listIsEmptyCons` with bounded Eq-only `rfl`.
+`listIsEmptyCons` records the direct `cons` computation equation, while
+`listIsEmptyAppendNilLeft` records the nil-left composition equation. Both
+close with bounded Eq-only `rfl`. The nil law uses a later `PsList(α)`
+argument to determine the element type rather than leaving a nullary generic
+constructor metavariable unconstrained.
 
 Runtime dogfood feeds the helper into an ordinary verified Bool `if`, so the
 stdlib now composes ADT matching with control flow while leaving elaboration,

@@ -75,9 +75,12 @@ path without changing the expected result.
 ## List emptiness checkpoint
 
 `ProofScript.Data.List.listIsEmpty` exposes the constructor distinction as a
-verified Bool: `nil -> true`, `cons -> false`. The computation theorems
-`listIsEmptyNil` and `listIsEmptyCons` are definitional Eq proofs closed by
-bounded `rfl`.
+verified Bool: `nil -> true`, `cons -> false`. The direct `cons`
+computation theorem `listIsEmptyCons` and the nil-left composition law
+`listIsEmptyAppendNilLeft` are definitional Eq proofs closed by bounded
+`rfl`. The latter intentionally lets its later list argument determine the
+generic element type instead of relying on an unconstrained polymorphic
+`PsList.nil`.
 
 The dogfood program now chooses between zero and `listLength` with a verified
 Bool `if` driven by `listIsEmpty`, composing ADT matching with the already

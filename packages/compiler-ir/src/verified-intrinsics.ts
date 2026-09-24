@@ -15,6 +15,7 @@ export const VERIFIED_IR_INTRINSIC_ARITY={
   'bool.or':2,
   'bool.eq':2,
   'bool.ne':2,
+  'char.ofNat':1,
 } as const satisfies Readonly<Record<VerifiedIrIntrinsicOperation,1|2>>;
 
 export function verifiedIrIntrinsicArity(

@@ -7,7 +7,9 @@ import {resolveInput} from '../input.js';
 import type {
   BuildResult,
   CommonArgs,
+  UnverifiedBuildReport,
   UnverifiedBuildResult,
+  VerifiedBuildReport,
   VerifiedBuildResult,
 } from '../types.js';
 import {
@@ -66,7 +68,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       result.moduleArtifacts,
     );
 
-    const report={
+    const report:VerifiedBuildReport={
       ok:true,
       command:'build',
       ...baseReport(
@@ -139,7 +141,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const mapPath=join(outDir,stem+'.js.map');
   const manifestPath=join(outDir,stem+'.proofscript.json');
 
-  const report={
+  const report:UnverifiedBuildReport={
     ok:true,
     command:'build',
     ...baseReport(

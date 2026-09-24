@@ -387,8 +387,7 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
       lock.packages[1]?.dependencies[0]?.target,
       'node_modules/helper-lib',
     );
-    const artifacts=result.artifacts as Record<string,string>;
-    const javascript=await readFile(artifacts.javascript,'utf8');
+    const javascript=await readFile(result.artifacts.javascript,'utf8');
     equal(
       javascript.includes('from "host-lib/feature"'),
       true,
@@ -577,9 +576,8 @@ console.log('ok - psc verified run filesystem pipeline');
         &&String(result.canonicalSourceHash).startsWith('sha256:'),
       true,
     );
-    const artifacts=result.artifacts as Record<string,string>;
-    equal(artifacts.typescript.endsWith('main.ts'),true);
-    equal(artifacts.javascript.endsWith('main.js'),true);
+    equal(result.artifacts.typescript.endsWith('main.ts'),true);
+    equal(result.artifacts.javascript.endsWith('main.js'),true);
   }finally{
     await rm(directory,{recursive:true,force:true});
   }
@@ -1569,14 +1567,11 @@ console.log('ok - psc mixed imports preserve structure/class/instance metadata')
       json:true,
       verified:true,
       passthrough:[],
-    }) as Record<string,unknown>;
+    });
     equal(first.moduleCacheHits,0);
     equal(first.moduleCacheMisses,2);
     equal(String(first.projectIntegrity).startsWith('sha256:'),true);
-    const firstSources=first.moduleSources as readonly {
-      readonly module:string;
-      readonly moduleIntegrity:string;
-    }[];
+    const firstSources=first.moduleSources;
     equal(
       firstSources.every((item)=>item.moduleIntegrity.startsWith('sha256:')),
       true,
@@ -1587,7 +1582,7 @@ console.log('ok - psc mixed imports preserve structure/class/instance metadata')
       json:true,
       verified:true,
       passthrough:[],
-    }) as Record<string,unknown>;
+    });
     equal(second.projectIntegrity,first.projectIntegrity);
     equal(second.moduleCacheHits,2);
     equal(second.moduleCacheMisses,0);
@@ -1602,7 +1597,7 @@ console.log('ok - psc mixed imports preserve structure/class/instance metadata')
       json:true,
       verified:true,
       passthrough:[],
-    }) as Record<string,unknown>;
+    });
     equal(third.moduleCacheHits,0);
     equal(third.moduleCacheMisses,2);
     equal(third.projectIntegrity===first.projectIntegrity,false);

@@ -462,6 +462,34 @@ console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility s
   );
   equal(evaluator.evaluate(recExpr),5n);
 }
+{
+  const environment=new Environment();
+  const kernel=new Kernel(environment);
+  const P=nameFromDotted('RuntimeTest.P');
+  const proof=nameFromDotted('RuntimeTest.proof');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:P,
+    levelParams:[],
+    type:sort(levelZero),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:proof,
+    levelParams:[],
+    type:constant(P),
+  });
+  const value=new Lean434Evaluator(environment).evaluate(constant(proof));
+  ok(
+    typeof value==='object'
+      &&value!==null
+      &&!Array.isArray(value)
+      &&value.kind==='proof',
+    'proposition-valued axiom was not erased to proof evidence',
+  );
+}
+console.log('ok - proposition-valued axioms erase without JS implementations');
+
 console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressions');
 
 {

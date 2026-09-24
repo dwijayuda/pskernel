@@ -345,18 +345,22 @@ def psBuildRecursorMinorBinders
 def psBuildInductiveRecursor
     (environment : PsEnvironment)
     (inductiveInfo : PsInductiveInfo)
-    (constructors : List PsDeclaration) :
+    (constructors : List PsDeclaration)
+    (parameterContext : PsElabContext)
+    (paramsRev : List PsElabTypedBinder)
+    (appliedInductive : PsExpr) :
     Except PsElabError PsDeclaration :=
   let universeName := psRootName "u"
-  let inductiveType := PsExpr.constE inductiveInfo.name []
+  let parameterArgs := psInductiveParameterArgs paramsRev
   let motiveName := psRootName "_motive"
   let motiveType :=
     PsExpr.forallE
       (psRootName "_major")
-      inductiveType
+      appliedInductive
       (PsExpr.sortE (PsLevel.param universeName))
       PsBinderInfo.explicit
-  let initial := psElabContextEmpty environment
+  let initial :=
+    psElabContextWithEnvironment parameterContext environment
   let motivePush :=
     psLocalPushBinding
       initial.localContext
@@ -367,6 +371,7 @@ def psBuildInductiveRecursor
     psElabContextWithLocal initial motivePush.context
   match psBuildRecursorMinorBinders
       motivePush.id
+      parameterArgs
       constructors
       motiveContext
       0
@@ -378,12 +383,12 @@ def psBuildInductiveRecursor
         psLocalPushBinding
           minors.context.localContext
           majorName
-          inductiveType
+          appliedInductive
           PsBinderInfo.explicit
       let majorBinder : PsElabTypedBinder := {
         id := majorPush.id
         name := majorName
-        type := inductiveType
+        type := appliedInductive
         binder := PsBinderInfo.explicit
       }
       let motiveBinder : PsElabTypedBinder := {
@@ -406,11 +411,16 @@ def psBuildInductiveRecursor
           minors.context.metaContext
           minors.bindersRev
           withMajor
-      let recursorType :=
+      let withMotive :=
         psCloseElabForallBinders
           minors.context.metaContext
           [motiveBinder]
           withMinors
+      let recursorType :=
+        psCloseElabForallBinders
+          minors.context.metaContext
+          (paramsRev.map psImplicitBinderCopy)
+          withMotive
       let recursorName :=
         psNameAppendStr inductiveInfo.name "rec"
       if psExprHasUnresolvedMeta recursorType then
@@ -422,11 +432,42 @@ def psBuildInductiveRecursor
             levelParams := [universeName]
             type := recursorType
             inductiveNames := [inductiveInfo.name]
-            numParams := 0
+            numParams := paramsRev.length
             numIndices := 0
             numMotives := 1
             numMinors := constructors.length
           })
+
+structure PsElabInductiveSortResult where
+  context : PsElabContext
+  sort : PsExpr
+
+def psElabInductiveResultSort
+    (context : PsElabContext)
+    (resultType : Option PsSyntaxTerm) :
+    Except PsElabError PsElabInductiveSortResult :=
+  match resultType with
+  | none =>
+      Except.ok {
+        context := context
+        sort := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+      }
+  | some source =>
+      match psElabTerm context source none with
+      | Except.error error => Except.error error
+      | Except.ok result =>
+          match psInferEnsureSort
+              result.context.environment
+              result.context.metaContext
+              result.context.localContext
+              result.term with
+          | Except.error error =>
+              Except.error (PsElabError.infer error)
+          | Except.ok _ =>
+              Except.ok {
+                context := result.context
+                sort := result.term
+              }
 
 def psElabInductiveDeclaration
     (environment : PsEnvironment)

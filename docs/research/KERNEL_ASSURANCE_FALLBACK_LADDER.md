@@ -190,11 +190,15 @@ profile** when all of the following are green on the same semantic tree:
 2. bounded real corpus ladder;
 3. native compiler-IR smoke;
 4. canonical Init.Prelude shared-environment preflight;
-5. all historically known-hot Std probes;
-6. exhaustive dependency-closed replay of `Init.Data.Int.DivMod.Lemmas`
+5. exhaustive dependency-closed replay of `Init.Data.Int.DivMod.Lemmas`
    canonical roots 22197..23153 (957 roots);
-7. stratified dependency-closed 64-root windows at every 10,000 roots across
+6. stratified dependency-closed 64-root windows at every 10,000 roots across
    the 114,029-root Std corpus.
+
+The historical `oracle:std-hot` sweep remains available as a diagnostic command,
+but it is not part of the blocking release profile because its coverage overlaps
+the bounded corpus and stratified-window evidence while adding disproportionate
+wall-clock cost.
 
 Command:
 

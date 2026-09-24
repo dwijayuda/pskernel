@@ -68,5 +68,4 @@ jobs:
         with: { node-version: 22 }
       - run: npm ci --no-audit --no-fund
       - run: npm run build
-      - run: npm run oracle:std-hot
       - run: npm run oracle:std-release

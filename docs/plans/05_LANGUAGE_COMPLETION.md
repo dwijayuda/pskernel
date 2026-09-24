@@ -466,9 +466,9 @@ Current stdlib checkpoint:
 
 - `PsOption`: map, bind, get-or-else, or-else, is-some plus reflexivity/computation laws;
 - `PsResult`: value/error mapping, bind, get-or-else, status checks, two-way Option conversion plus checked laws;
-- `PsList`: map, append, length, head Option, is-empty plus checked computation/algebraic laws;
+- `PsList`: map, append, length, head Option, head-or-else, is-empty plus checked computation/algebraic laws;
 - the dogfood project executes all three modules through verified TS/JS emission
-  with zero runtime extern assumptions and thirty-five pskernel-admitted theorems.
+  with zero runtime extern assumptions and thirty-seven pskernel-admitted theorems.
 
 Build libraries in ProofScript itself where practical:
 
@@ -712,8 +712,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
     resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
-    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, resultIsOkOk, resultIsOkError, listIsEmptyNil, listIsEmptyCons, listAppendNilRight,
-    listAppendAssoc, and listMapAppend. Thirty-five current stdlib theorems now
+    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, resultIsOkOk, resultIsOkError, listIsEmptyNil, listIsEmptyCons, listHeadOrElseNil, listHeadOrElseCons, listAppendNilRight,
+    listAppendAssoc, and listMapAppend. Thirty-seven current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
     laws/utilities only when the proof/recursion surface supports them without
@@ -736,6 +736,14 @@ Every development report should state:
 - next smallest milestone.
 
 Do not report invented completion percentages.
+
+## Stdlib List head fallback checkpoint
+
+`listHeadOrElse` adds direct head extraction with an explicit fallback. Its
+`nil` and `cons` equations are ordinary definitional equalities checked by
+bounded `rfl`. Runtime dogfood computes this value alongside the existing
+Option path and selects using `optionIsSome`, increasing library composition
+coverage without any new elaborator or backend behavior.
 
 ## Stdlib List emptiness checkpoint
 

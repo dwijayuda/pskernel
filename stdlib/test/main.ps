@@ -38,6 +38,12 @@ function main(x : Nat) : Nat :=
     listAppend(listMap(inc, xs), empty);
   let listValue : Nat :=
     if (listIsEmpty(extended)) { 0 } else { listLength(extended) };
+  let optionValue : Nat :=
+    optionGetOrElse(chosen, 0);
+  let headValue : Nat :=
+    listHeadOrElse(extended, 0);
+  let selectedValue : Nat :=
+    if (optionIsSome(chosen)) { optionValue } else { headValue };
   resultValue +
-    optionGetOrElse(chosen, 0) +
+    selectedValue +
     listValue;

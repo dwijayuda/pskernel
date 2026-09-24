@@ -40,6 +40,13 @@ function listIsEmpty {α : Type}(xs : PsList(α)) : Bool :=
     | .cons head tail => false;
   };
 
+function listHeadOrElse {α : Type}
+(xs : PsList(α), fallback : α) : α :=
+  match xs with {
+    | .nil => fallback;
+    | .cons head tail => head;
+  };
+
 theorem listRefl {α : Type}
 (xs : PsList(α)) : xs = xs := by rfl;
 
@@ -90,3 +97,11 @@ listIsEmpty(PsList.nil) = true := by rfl;
 theorem listIsEmptyCons {α : Type}
 (head : α, tail : PsList(α)) :
 listIsEmpty(PsList.cons(head, tail)) = false := by rfl;
+
+theorem listHeadOrElseNil {α : Type}
+(fallback : α) :
+listHeadOrElse(PsList.nil, fallback) = fallback := by rfl;
+
+theorem listHeadOrElseCons {α : Type}
+(head : α, tail : PsList(α), fallback : α) :
+listHeadOrElse(PsList.cons(head, tail), fallback) = head := by rfl;

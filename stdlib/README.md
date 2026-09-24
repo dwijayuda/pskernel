@@ -8,7 +8,7 @@ and compiled by the same verified project pipeline as user code.
 - `ProofScript.Data.Option`: `PsOption`, map/bind/get-or-else/or-else/is-some helpers.
 - `ProofScript.Data.Result`: `PsResult`, value/error mapping, bind, get-or-else,
   status checks, and two-way Option conversion.
-- `ProofScript.Data.List`: `PsList`, structural map/append/length/head/is-empty helpers.
+- `ProofScript.Data.List`: `PsList`, structural map/append/length/head/head-or-else/is-empty helpers.
 
 The `Ps*` type names are intentional and temporary. Lean's Prelude already
 owns `Option` and `List`, while the current verified runtime erasure only
@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain thirty-five pskernel-admitted theorems in total:
+The three modules now contain thirty-seven pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -48,8 +48,8 @@ The end-to-end stdlib test now exercises:
 - `resultBind`, `resultGetOrElse`, `resultMapError`, `resultIsOk`, and two-way Result/Option conversion;
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
-- `listLength` plus `listIsEmpty`-guarded runtime selection;
-- thirty-five admitted stdlib theorems: twenty-two definitional laws use bounded
+- `listLength`, `listIsEmpty`, and `listHeadOrElse` runtime composition;
+- thirty-seven admitted stdlib theorems: twenty-four definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
   `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`; `optionMapOrElse`, `optionGetOrElseOrElse`, and `optionGetOrElseMap` dogfood higher-order/helper composition through Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
@@ -59,6 +59,18 @@ The end-to-end stdlib test now exercises:
 - zero runtime external assumptions.
 
 For input `9`, the current dogfood `main` returns `22`.
+
+## List head fallback checkpoint
+
+`ProofScript.Data.List.listHeadOrElse` returns the first list element or an
+explicit fallback for `nil`. `listHeadOrElseNil` and
+`listHeadOrElseCons` record the two constructor equations as bounded
+Eq-only `rfl` proofs.
+
+The dogfood computes both the Option-based value and the direct list-head
+fallback, then selects through `optionIsSome`. This executes the new helper
+while also bringing the existing Option status query into the verified runtime
+path without changing the expected result.
 
 ## List emptiness checkpoint
 

@@ -73,7 +73,10 @@ const metadata=new Lean434RuntimeMetadataIndex({
   ...document,
   initializers,
 });
-const evaluator=new Lean434Evaluator(replay.env,{metadata});
+const evaluator=new Lean434Evaluator(
+  replay.env,
+  {metadata,maxSteps:200_000},
+);
 const runner=new Lean434InitializerRunner(evaluator,metadata);
 const executed=[];
 for(const entry of initializers){

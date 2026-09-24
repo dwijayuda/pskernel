@@ -256,20 +256,26 @@ Milestones reached 2026-09-25:
   `implemented_by` bindings; its runtime work is initialization;
 - the real builtin initializer for `Lean.Parser.categoryParserFnRef` executes
   in JS and stores a Lean-written parser closure in a JS-backed Lean `IO.Ref`;
-- the next active deep-assurance gate is
-  `Lean.Parser.categoryParserFnExtension`, which exercises upstream
-  `registerEnvExtension`;
-- empirical cost finding: the dependency-closed Parser.Basic EnvExtension delta
-  after `Init.Prelude` is about **38 MiB / 778,576 NDJSON records**
-  (workflow artifact `lean434-parser-basic-bootstrap`). Replaying that closure
-  through pskernel is intentionally **not** a per-commit gate. It remains a
-  manual `workflow_dispatch` assurance gate while ordinary branch CI uses the
-  smaller real-source Parser.Types, first Parser.Basic initializer, ST/IO,
-  metadata, and kernel gates;
-- this does not justify a safe host axiom for `registerEnvExtension`.
-  pskernel rejects safe declarations that depend on unsafe constants, so the
-  branch preserves that safety boundary rather than weakening it for runtime
-  convenience.
+- `Lean.registerEnvExtension` is now treated separately from the
+  parser-registry closure. A small normal-CI gate imports its real Lean
+  implementation plus `ImportingFlag.importingRef` and
+  `EnvExtension.envExtensionsRef`, then executes registration through the JS
+  runtime;
+- empirical artifact analysis shows the large Parser.Basic delta is **not**
+  caused mainly by `registerEnvExtension`: the closure is about
+  **39.6 MB / 778,576 NDJSON records**, and the environment/importing
+  prerequisites occupy only about **117 KB**. The jump to roughly **39.5 MB**
+  occurs when `Lean.Parser.categoryParserFnRef` pulls in the real parser
+  function closure;
+- consequently, the full `categoryParserFnRef` /
+  `categoryParserFnExtension` bootstrap remains a manual
+  `workflow_dispatch` deep-assurance gate, while ordinary pushes exercise the
+  small real Environment gate, Parser.Types algorithms, ST/IO, metadata, and
+  kernel regression gates;
+- this cost finding does not justify a safe host axiom for
+  `registerEnvExtension`. pskernel rejects safe declarations that depend on
+  unsafe constants, so the branch preserves that safety boundary rather than
+  weakening it for runtime convenience.
 
 Differential gates:
 

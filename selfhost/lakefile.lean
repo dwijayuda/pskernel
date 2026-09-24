@@ -13,7 +13,11 @@ lean_lib PsFoundation where
 
 lean_lib PsSyntax where
   srcDir := "packages/syntax/src"
-  roots := #[`Ps.Syntax.Token]
+  roots := #[
+    `Ps.Syntax.Token,
+    `Ps.Syntax.Cursor,
+    `Ps.Syntax.Lexer
+  ]
 
 lean_lib PsCore where
   srcDir := "packages/core/src"

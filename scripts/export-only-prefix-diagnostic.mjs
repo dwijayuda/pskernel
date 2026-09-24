@@ -5,7 +5,7 @@ import fs from 'node:fs';
 
 const stopAfter=Number(process.env.PSKERNEL_EXPORT_STOP_AFTER_SHARDS??'2400');
 if(!Number.isSafeInteger(stopAfter)||stopAfter<=0)throw new Error('invalid stopAfter');
-const candidates=[process.env.LEAN434_BIN,...(process.env.PATH??'').split(delimiter)].filter(Boolean).map(resolve);
+const candidates=[process.env.LEAN434_BIN,...(process.env.PATH??'').split(delimiter)].filter(Boolean).map(p=>resolve(p));
 const exe=process.platform==='win32'?'lean.exe':'lean';
 const bin=candidates.find(p=>fs.existsSync(join(p,exe)));
 if(!bin)throw new Error('Lean 4.34 not found');

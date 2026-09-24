@@ -1,4 +1,6 @@
-import ProofScript.Compiler.Data
+import Ps.Foundation.Name
+import Ps.Foundation.Diagnostic
+import Ps.Syntax.Token
 
 def main : IO Unit :=
   IO.println "ProofScript PSC1 Lean bootstrap"

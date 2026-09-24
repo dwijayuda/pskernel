@@ -40,6 +40,13 @@ function resultBind {α : Type}{β : Type}{ε : Type}
     | .error err => PsResult.error(err);
   };
 
+function resultFromOption {α : Type}{ε : Type}
+(value : PsOption(α), error : ε) : PsResult(α, ε) :=
+  match value with {
+    | .none => PsResult.error(error);
+    | .some x => PsResult.ok(x);
+  };
+
 theorem resultRefl {α : Type}{ε : Type}
 (value : PsResult(α, ε)) : value = value := by rfl;
 
@@ -95,3 +102,11 @@ resultBind(PsResult.ok(value), f) = f(value) := by rfl;
 theorem resultBindError {α : Type}{β : Type}{ε : Type}
 (error : ε, f : α -> PsResult(β, ε)) :
 resultBind(PsResult.error(error), f) = PsResult.error(error) := by rfl;
+
+theorem resultFromOptionNone {α : Type}{ε : Type}
+(error : ε) :
+resultFromOption(PsOption.none, error) = PsResult.error(error) := by rfl;
+
+theorem resultFromOptionSome {α : Type}{ε : Type}
+(value : α, error : ε) :
+resultFromOption(PsOption.some(value), error) = PsResult.ok(value) := by rfl;

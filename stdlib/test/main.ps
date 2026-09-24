@@ -16,8 +16,10 @@ function main(x : Nat) : Nat :=
     resultBind(mapped, asResult);
   let mappedError : PsResult(Nat, Nat) :=
     resultMapError(inc, reboundResult);
+  let roundTrippedResult : PsResult(Nat, Nat) :=
+    resultFromOption(resultToOption(mappedError), 0);
   let resultValue : Nat :=
-    resultGetOrElse(mappedError, 0);
+    resultGetOrElse(roundTrippedResult, 0);
   let option : PsOption(Nat) :=
     resultToOption(mapped);
   let rebound : PsOption(Nat) :=

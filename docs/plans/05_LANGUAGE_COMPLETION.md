@@ -465,10 +465,10 @@ Exit condition:
 Current stdlib checkpoint:
 
 - `PsOption`: map, bind, get-or-else, or-else, is-some plus reflexivity/computation laws;
-- `PsResult`: value/error mapping, bind, get-or-else, Option conversion plus checked laws;
+- `PsResult`: value/error mapping, bind, get-or-else, two-way Option conversion plus checked laws;
 - `PsList`: map, append, length, head Option plus reflexivity/append reduction laws;
 - the dogfood project executes all three modules through verified TS/JS emission
-  with zero runtime extern assumptions and twenty-nine pskernel-admitted theorems.
+  with zero runtime extern assumptions and thirty-one pskernel-admitted theorems.
 
 Build libraries in ProofScript itself where practical:
 
@@ -712,8 +712,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
     resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
-    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, listAppendNilRight,
-    listAppendAssoc, and listMapAppend. Twenty-nine current stdlib theorems now
+    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, listAppendNilRight,
+    listAppendAssoc, and listMapAppend. Thirty-one current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
     laws/utilities only when the proof/recursion surface supports them without
@@ -807,6 +807,17 @@ fallback before extraction is equal to applying the function after extraction.
 The theorem is generic in both element types and closes by bounded `cases`
 plus Eq-only `rfl`. It therefore strengthens the self-hosted Option law set
 without expanding tactics, elaboration, erasure, or backend semantics.
+
+## Stdlib Option-to-Result conversion checkpoint
+
+`resultFromOption` adds the reverse direction to the existing
+`resultToOption` bridge. It maps `none` to an explicit caller-supplied
+error and `some(value)` to `ok(value)`. The two constructor equations are
+ordinary definitional equalities checked with bounded `rfl`.
+
+The stdlib runtime dogfood now performs Result -> Option -> Result before
+extraction, exercising cross-module ADT construction/matching in both
+directions without introducing host conversion semantics.
 
 ## Stdlib Result bind checkpoint
 

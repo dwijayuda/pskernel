@@ -94,7 +94,7 @@ def psParseLeanBinder
           match psTokenCursorExpectText name.cursor ":" with
           | Except.error error => Except.error error
           | Except.ok afterColon =>
-              match psParseLeanSimpleApplication afterColon.cursor with
+              match psParseLeanTerm afterColon.cursor with
               | Except.error error => Except.error error
               | Except.ok type =>
                   match psParseBinderClosing opening type.cursor with
@@ -134,6 +134,68 @@ def psParseLeanBindersWithFuel
               (parsed.value :: bindersRev)
       else
         Except.ok { value := bindersRev.reverse, cursor := cursor }
+
+def psParseLeanArrowTail
+    (parseCodomain :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (domain : PsParseResult PsSyntaxTerm) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  if psTokenCursorAtArrow domain.cursor then
+    match psTokenCursorExpectArrow domain.cursor with
+    | Except.error error => Except.error error
+    | Except.ok afterArrow =>
+        match parseCodomain afterArrow.cursor with
+        | Except.error error => Except.error error
+        | Except.ok codomain =>
+            let domainSpan := psSyntaxTermSpan domain.value
+            let span := psSyntaxSpanJoin domainSpan (psSyntaxTermSpan codomain.value)
+            Except.ok {
+              value :=
+                PsSyntaxTerm.forallE
+                  [(psSyntaxAnonymousExplicitBinder domainSpan, domain.value)]
+                  codomain.value
+                  span
+              cursor := codomain.cursor
+            }
+  else
+    Except.ok domain
+
+def psParseLeanDependentArrowTail
+    (parseCodomain :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (binder :
+      PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  if psTokenCursorAtArrow binder.cursor then
+    match psTokenCursorExpectArrow binder.cursor with
+    | Except.error error => Except.error error
+    | Except.ok afterArrow =>
+        match parseCodomain afterArrow.cursor with
+        | Except.error error => Except.error error
+        | Except.ok codomain =>
+            Except.ok {
+              value :=
+                PsSyntaxTerm.forallE
+                  [binder.value]
+                  codomain.value
+                  {
+                    start := binder.value.1.span.start
+                    stop := (psSyntaxTermSpan codomain.value).stop
+                  }
+              cursor := codomain.cursor
+            }
+  else
+    Except.error
+      (PsParseError.expectedText
+        "->"
+        (match psTokenCursorPeek binder.cursor with
+         | none => ""
+         | some token => token.text)
+        (match psTokenCursorPeek binder.cursor with
+         | none => binder.value.1.span
+         | some token => token.span))
 
 def psParseLeanTermWithFuel :
     Nat ->
@@ -183,8 +245,34 @@ def psParseLeanTermWithFuel :
                                   }
                               cursor := body.cursor
                             }
+      else if psTokenCursorAtText cursor "(" then
+        match psParseLeanBinder cursor with
+        | Except.ok binder =>
+            if psTokenCursorAtArrow binder.cursor then
+              psParseLeanDependentArrowTail
+                (psParseLeanTermWithFuel remaining)
+                binder
+            else
+              match psParseLeanSimpleApplication cursor with
+              | Except.error error => Except.error error
+              | Except.ok domain =>
+                  psParseLeanArrowTail
+                    (psParseLeanTermWithFuel remaining)
+                    domain
+        | Except.error _ =>
+            match psParseLeanSimpleApplication cursor with
+            | Except.error error => Except.error error
+            | Except.ok domain =>
+                psParseLeanArrowTail
+                  (psParseLeanTermWithFuel remaining)
+                  domain
       else
-        psParseLeanSimpleApplication cursor
+        match psParseLeanSimpleApplication cursor with
+        | Except.error error => Except.error error
+        | Except.ok domain =>
+            psParseLeanArrowTail
+              (psParseLeanTermWithFuel remaining)
+              domain
 
 def psParseLeanTerm
     (cursor : PsTokenCursor) :

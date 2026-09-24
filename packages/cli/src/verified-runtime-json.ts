@@ -2,6 +2,11 @@ import type {
   VerifiedIrModule,
   VerifiedIrType,
 } from '@proofscript/compiler-ir/verified';
+import {
+  decodeVerifiedPrimitive,
+  encodeVerifiedPrimitive,
+  failVerifiedAbi as fail,
+} from './verified-runtime-primitives.js';
 
 export interface VerifiedRuntimeAbiContext {
   readonly module:VerifiedIrModule;
@@ -9,10 +14,6 @@ export interface VerifiedRuntimeAbiContext {
 }
 
 type TypeSubstitution=ReadonlyMap<string,VerifiedIrType>;
-
-function fail(message:string):never {
-  throw new Error('PS_RUN_VERIFIED_ABI: '+message);
-}
 
 function isRecord(value:unknown):value is Record<string,unknown> {
   return typeof value==='object'&&value!==null&&!Array.isArray(value);
@@ -56,47 +57,6 @@ function bindTypeParameters(
   return next;
 }
 
-function decodePrimitive(
-  value:unknown,
-  name:Extract<VerifiedIrType,{kind:'primitive'}>['name'],
-):unknown {
-  if(name==='Nat'){
-    if(typeof value!=='string'||!/^\d+$/u.test(value)){
-      fail('nested Nat values must be decimal JSON strings');
-    }
-    return BigInt(value);
-  }
-  if(name==='Int'){
-    if(typeof value!=='string'||!/^-?\d+$/u.test(value)){
-      fail('nested Int values must be decimal JSON strings');
-    }
-    return BigInt(value);
-  }
-  if(name==='Bool'){
-    if(typeof value!=='boolean')fail('nested Bool values must be JSON booleans');
-    return value;
-  }
-  if(name==='Char'){
-    if(typeof value!=='string')fail('nested Char values must be JSON strings');
-    const codePoint=value.codePointAt(0);
-    if(
-      codePoint===undefined
-      ||[...value].length!==1
-      ||(codePoint>=0xd800&&codePoint<=0xdfff)
-      ||codePoint>0x10ffff
-    ){
-      fail('nested Char values must contain exactly one Unicode scalar value');
-    }
-    return value;
-  }
-  if(name==='String'){
-    if(typeof value!=='string')fail('nested String values must be JSON strings');
-    return value;
-  }
-  if(value!==null)fail('nested Unit values must be JSON null');
-  return undefined;
-}
-
 function decodeValue(
   value:unknown,
   type:VerifiedIrType,
@@ -104,7 +64,7 @@ function decodeValue(
   substitution:TypeSubstitution=new Map(),
 ):unknown {
   const resolved=instantiateType(type,substitution);
-  if(resolved.kind==='primitive')return decodePrimitive(value,resolved.name);
+  if(resolved.kind==='primitive')return decodeVerifiedPrimitive(value,resolved.name);
   if(resolved.kind==='typeParameter'){
     fail("unresolved runtime type parameter '"+resolved.name+"'");
   }
@@ -197,41 +157,6 @@ function decodeValue(
   fail("runtime constructor '"+resolved.name+'.'+ctorName+"' is unavailable");
 }
 
-function encodePrimitive(
-  value:unknown,
-  name:Extract<VerifiedIrType,{kind:'primitive'}>['name'],
-):unknown {
-  if(name==='Nat'||name==='Int'){
-    if(typeof value!=='bigint'){
-      fail(name+' result did not use the verified bigint runtime representation');
-    }
-    return value.toString();
-  }
-  if(name==='Bool'){
-    if(typeof value!=='boolean')fail('Bool result is not a boolean');
-    return value;
-  }
-  if(name==='Char'){
-    if(typeof value!=='string')fail('Char result is not a string');
-    const codePoint=value.codePointAt(0);
-    if(
-      codePoint===undefined
-      ||[...value].length!==1
-      ||(codePoint>=0xd800&&codePoint<=0xdfff)
-      ||codePoint>0x10ffff
-    ){
-      fail('Char result is not exactly one Unicode scalar value');
-    }
-    return value;
-  }
-  if(name==='String'){
-    if(typeof value!=='string')fail('String result is not a string');
-    return value;
-  }
-  if(value!==undefined)fail('Unit result is not undefined');
-  return null;
-}
-
 function constructorName(
   value:Record<string,unknown>,
   inductive:string,
@@ -252,7 +177,7 @@ function encodeValue(
   substitution:TypeSubstitution=new Map(),
 ):unknown {
   const resolved=instantiateType(type,substitution);
-  if(resolved.kind==='primitive')return encodePrimitive(value,resolved.name);
+  if(resolved.kind==='primitive')return encodeVerifiedPrimitive(value,resolved.name);
   if(resolved.kind==='typeParameter'){
     fail("unresolved result type parameter '"+resolved.name+"'");
   }

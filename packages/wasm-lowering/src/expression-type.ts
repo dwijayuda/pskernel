@@ -47,6 +47,17 @@ export function expressionRuntimeType(
     case 'intrinsic':
       if(expr.operation.startsWith('bool.'))return 'bool';
       switch(expr.operation){
+        case 'nat.add':
+        case 'nat.sub':
+        case 'nat.mul':
+        case 'nat.div':
+        case 'nat.mod':
+          return 'nat';
+        case 'nat.eq':
+        case 'nat.ne':
+        case 'nat.le':
+        case 'nat.lt':
+          return 'bool';
         case 'uint8.add':return 'uint8';
         case 'uint16.add':return 'uint16';
         case 'uint32.add':return 'uint32';

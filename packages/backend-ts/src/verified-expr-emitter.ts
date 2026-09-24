@@ -75,11 +75,15 @@ export function emitVerifiedExpr(
         "PS_TS_INTRINSIC_UNSUPPORTED: '"+expr.operation+"'",
       );
     }
-    case 'call':
-      return emitVerifiedExpr(expr.fn,brands,tags)+'('+
+    case 'call':{
+      const generic=(expr.typeArgs??[]).length===0
+        ?''
+        :'<'+(expr.typeArgs??[]).map(emitVerifiedType).join(', ')+'>';
+      return emitVerifiedExpr(expr.fn,brands,tags)+generic+'('+
         expr.args.map((arg)=>
           emitVerifiedExpr(arg,brands,tags)
         ).join(', ')+')';
+    }
     case 'lambda':
       return '('+
         expr.parameters.map((parameter)=>

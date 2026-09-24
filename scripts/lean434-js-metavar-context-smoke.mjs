@@ -8,6 +8,7 @@ import {
   numName,
   strName,
   constant,
+  levelZero,
 } from '../dist/src/index.js';
 import {
   Lean434Evaluator,
@@ -60,7 +61,7 @@ const evaluator=new Lean434Evaluator(
 
 {
   let modify=evaluator.evaluate(
-    constant(nameFromDotted('Array.modify')),
+    constant(nameFromDotted('Array.modify'),[levelZero]),
   );
   modify=evaluator.applyRuntimeValue(
     modify,
@@ -119,7 +120,7 @@ console.log(JSON.stringify({phase:'metavar-context-assign-complete'}));
 
 {
   let nameBeq=evaluator.evaluate(
-    constant(nameFromDotted('Lean.Name.beq')),
+    constant(nameFromDotted('Name.beq')),
   );
   nameBeq=evaluator.applyRuntimeValue(nameBeq,mvarId.fields[0]);
   const sameName=evaluator.applyRuntimeValue(nameBeq,mvarId.fields[0]);

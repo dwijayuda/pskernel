@@ -1246,3 +1246,52 @@ the untrusted source/tactic context.
 
 The first standard-library consumer is `listAppendNilRight`, proved by
 induction plus checked rewrite steps rather than a host-side list theorem.
+
+## Full-stack web / PSX extension contract
+
+The active full-stack plan is `docs/plans/07_FULLSTACK_WEB_PSX.md`.
+
+ProofScript may support `.psx` without adding a new semantic language:
+
+```text
+.ps   -> ProofScript frontend (jsx=false) --+
+.psx  -> ProofScript frontend (jsx=true) ---+-> canonical surface
+.lean -> bounded Lean-subset frontend ------+
+```
+
+The source kind for both `.ps` and `.psx` remains ProofScript. The extension
+only enables JSX lexical/parser forms. JSX must be lowered to ordinary typed
+runtime terms before checked-core handoff; pskernel never receives JSX, React,
+DOM, Next.js, Vite, or bundler nodes.
+
+Planned web adapters remain outside the TCB:
+
+```text
+@proofscript/jsx
+      |
+      +--> @proofscript/react --> @proofscript/react-dom
+      |
+      +--> @proofscript/vite
+      |
+      +--> @proofscript/next
+      |
+      +--> @proofscript/web
+```
+
+React/Next/browser/Node/database values are runtime boundaries. They may be
+typed and tracked through checked external admissions, but external execution
+must not construct proofs or turn host behavior into kernel truth.
+
+A full application being **authored** in ProofScript therefore does not imply
+that the whole host runtime is formally verified. Assurance output must
+separate:
+
+1. pskernel-checked propositions/declarations;
+2. compiler/erasure/IR evidence;
+3. framework/runtime assumptions.
+
+Normal PSX/web development is forbidden from broadening `src/core/**` or
+`src/kernel/**` for framework convenience. A genuine kernel issue discovered
+by the web work must be isolated and fixed through the normal Lean-4.34
+compatibility process with its own regression.
+

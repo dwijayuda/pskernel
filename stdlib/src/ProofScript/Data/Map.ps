@@ -62,5 +62,5 @@ function mapFold {κ : Type}{ν : Type}{α : Type}
   match values with {
     | .empty => init;
     | .entry key value tail =>
-      mapFold(f, f(init, key, value), tail);
+      f(mapFold(f, init, tail), key, value);
   };

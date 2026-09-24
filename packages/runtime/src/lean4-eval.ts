@@ -1,5 +1,6 @@
 import {
   Environment,
+  TypeChecker,
   instantiateExprLevels,
   nameToString,
   type Expr,
@@ -479,6 +480,16 @@ export class Lean434Evaluator {
       throw new Lean434EvaluationError(
         "unknown runtime constant '"+name+"'",
       );
+    }
+
+    if(
+      'type' in info
+      &&this.checker.isProp(info.type)
+    ){
+      // All proof terms are erased from executable code. This includes
+      // ordinary theorems as well as unsafe proof placeholders such as
+      // lcProof that appear in compiler-oriented Array/List operations.
+      return {kind:'proof',theorem:name};
     }
 
     if(

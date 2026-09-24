@@ -21,6 +21,122 @@ def psParseLeanImport
             cursor := name.cursor
           }
 
+def psLeanReservedApplicationToken (token : PsToken) : Bool :=
+  token.text == "def"
+    || token.text == "theorem"
+    || token.text == "import"
+    || token.text == "where"
+    || token.text == "then"
+    || token.text == "else"
+
+def psLeanCanStartSimpleArgument (cursor : PsTokenCursor) : Bool :=
+  match psTokenCursorPeek cursor with
+  | none => false
+  | some token =>
+      !psLeanReservedApplicationToken token
+        && (psTokenKindEq token.kind PsTokenKind.identifier
+          || psTokenKindEq token.kind PsTokenKind.natural
+          || psTokenKindEq token.kind PsTokenKind.string
+          || psTokenKindEq token.kind PsTokenKind.character)
+
+def psParseLeanApplicationTailWithFuel
+    (fuel : Nat)
+    (current : PsSyntaxTerm)
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match fuel with
+  | 0 =>
+      Except.ok { value := current, cursor := cursor }
+  | remaining + 1 =>
+      if psLeanCanStartSimpleArgument cursor then
+        match psParseSimpleTerm cursor with
+        | Except.error error => Except.error error
+        | Except.ok argument =>
+            let span :=
+              psSyntaxSpanJoin
+                (psSyntaxTermSpan current)
+                (psSyntaxTermSpan argument.value)
+            let next :=
+              match current with
+              | .app fn args _ =>
+                  PsSyntaxTerm.app fn (args ++ [argument.value]) span
+              | _ =>
+                  PsSyntaxTerm.app current [argument.value] span
+            psParseLeanApplicationTailWithFuel
+              remaining
+              next
+              argument.cursor
+      else
+        Except.ok { value := current, cursor := cursor }
+
+def psParseLeanSimpleApplication
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match psParseSimpleTerm cursor with
+  | Except.error error => Except.error error
+  | Except.ok first =>
+      psParseLeanApplicationTailWithFuel
+        cursor.remaining.length
+        first.value
+        first.cursor
+
+def psParseLeanExplicitBinder
+    (cursor : PsTokenCursor) :
+    Except PsParseError
+      (PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :=
+  match psTokenCursorExpectText cursor "(" with
+  | Except.error error => Except.error error
+  | Except.ok open =>
+      match psTokenCursorExpectKind open.cursor PsTokenKind.identifier with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          match psTokenCursorExpectText name.cursor ":" with
+          | Except.error error => Except.error error
+          | Except.ok afterColon =>
+              match psParseLeanSimpleApplication afterColon.cursor with
+              | Except.error error => Except.error error
+              | Except.ok type =>
+                  match psTokenCursorExpectText type.cursor ")" with
+                  | Except.error error => Except.error error
+                  | Except.ok close =>
+                      let binderName : PsSyntaxName := {
+                        segments := [name.token.text]
+                        span := name.token.span
+                      }
+                      let binder : PsSyntaxBinderHead := {
+                        name := binderName
+                        kind := PsSyntaxBinderKind.explicit
+                        span := {
+                          start := open.token.span.start
+                          stop := close.token.span.stop
+                        }
+                      }
+                      Except.ok {
+                        value := (binder, type.value)
+                        cursor := close.cursor
+                      }
+
+def psParseLeanExplicitBindersWithFuel
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) :
+    Except PsParseError
+      (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+  match fuel with
+  | 0 =>
+      Except.ok { value := bindersRev.reverse, cursor := cursor }
+  | remaining + 1 =>
+      if psTokenCursorAtText cursor "(" then
+        match psParseLeanExplicitBinder cursor with
+        | Except.error error => Except.error error
+        | Except.ok parsed =>
+            psParseLeanExplicitBindersWithFuel
+              remaining
+              parsed.cursor
+              (parsed.value :: bindersRev)
+      else
+        Except.ok { value := bindersRev.reverse, cursor := cursor }
+
 def psParseLeanDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
@@ -42,44 +158,50 @@ def psParseLeanDeclaration
             match psParseSyntaxName afterKeyword.cursor with
             | Except.error error => Except.error error
             | Except.ok name =>
-                match psTokenCursorExpectText name.cursor ":" with
+                match psParseLeanExplicitBindersWithFuel
+                    name.cursor.remaining.length
+                    name.cursor
+                    [] with
                 | Except.error error => Except.error error
-                | Except.ok afterColon =>
-                    match psParseSimpleTerm afterColon.cursor with
+                | Except.ok binders =>
+                    match psTokenCursorExpectText binders.cursor ":" with
                     | Except.error error => Except.error error
-                    | Except.ok type =>
-                        match psTokenCursorExpectText type.cursor ":=" with
+                    | Except.ok afterColon =>
+                        match psParseLeanSimpleApplication afterColon.cursor with
                         | Except.error error => Except.error error
-                        | Except.ok afterAssign =>
-                            match psParseSimpleTerm afterAssign.cursor with
+                        | Except.ok type =>
+                            match psTokenCursorExpectText type.cursor ":=" with
                             | Except.error error => Except.error error
-                            | Except.ok value =>
-                                let span := {
-                                  start := keyword.span.start
-                                  stop := (psSyntaxTermSpan value.value).stop
-                                }
-                                if isDefinition then
-                                  Except.ok {
-                                    value :=
-                                      PsSyntaxDeclaration.definition
-                                        name.value
-                                        []
-                                        type.value
-                                        value.value
-                                        span
-                                    cursor := value.cursor
-                                  }
-                                else
-                                  Except.ok {
-                                    value :=
-                                      PsSyntaxDeclaration.theoremDecl
-                                        name.value
-                                        []
-                                        type.value
-                                        value.value
-                                        span
-                                    cursor := value.cursor
-                                  }
+                            | Except.ok afterAssign =>
+                                match psParseLeanSimpleApplication afterAssign.cursor with
+                                | Except.error error => Except.error error
+                                | Except.ok value =>
+                                    let span := {
+                                      start := keyword.span.start
+                                      stop := (psSyntaxTermSpan value.value).stop
+                                    }
+                                    if isDefinition then
+                                      Except.ok {
+                                        value :=
+                                          PsSyntaxDeclaration.definition
+                                            name.value
+                                            binders.value
+                                            type.value
+                                            value.value
+                                            span
+                                        cursor := value.cursor
+                                      }
+                                    else
+                                      Except.ok {
+                                        value :=
+                                          PsSyntaxDeclaration.theoremDecl
+                                            name.value
+                                            binders.value
+                                            type.value
+                                            value.value
+                                            span
+                                        cursor := value.cursor
+                                      }
 
 def psParseLeanImportsWithFuel
     (fuel : Nat)

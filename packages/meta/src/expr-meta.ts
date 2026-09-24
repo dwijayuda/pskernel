@@ -108,7 +108,10 @@ export class ExprMetaContext {
   ):void {
     const instantiatedValue=this.instantiate(value);
     const instantiatedType=this.instantiate(declaration.type);
-    if(hasMVar(instantiatedValue)||hasMVar(instantiatedType))return;
+    if(
+      collectMVarIds(instantiatedValue).size!==0
+      ||collectMVarIds(instantiatedType).size!==0
+    )return;
 
     const checker=new TypeChecker(
       this.environment,

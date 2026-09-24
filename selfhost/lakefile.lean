@@ -78,8 +78,13 @@ lean_lib PsBackendTs where
   roots := #[
     `Ps.BackendTs.Type,
     `Ps.BackendTs.Expr,
-    `Ps.BackendTs.Module,
-    `Ps.BackendTs.Compiler
+    `Ps.BackendTs.Module
+  ]
+
+lean_lib PsHost where
+  srcDir := "host/src"
+  roots := #[
+    `Ps.Host.TypeScriptCompiler
   ]
 
 lean_lib PsProject where

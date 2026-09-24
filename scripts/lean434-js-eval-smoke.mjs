@@ -58,17 +58,24 @@ assertNatResult(
   42n,
 );
 
-assertNatResult(
-  'real Lean unsafeCast logical body',
-  mkAppN(
+{
+  const unsafeCastExpr=mkAppN(
     constant(
       nameFromDotted('unsafeCast'),
       [levelSucc(levelZero),levelSucc(levelZero)],
     ),
     [constant(Nat),constant(Nat),natLit(42n)],
-  ),
-  42n,
-);
+  );
+  const value=evaluator.evaluate(unsafeCastExpr);
+  if(value!==42n){
+    throw new Error(
+      'real Lean unsafeCast runtime expected 42, got '+String(value),
+    );
+  }
+  console.log(
+    'ok - real Lean unsafeCast executes as runtime-only unsafe code = 42',
+  );
+}
 
 const List=nameFromDotted('List');
 const ListNil=nameFromDotted('List.nil');

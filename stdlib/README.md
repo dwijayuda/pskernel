@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain twenty-two pskernel-admitted theorems in total:
+The three modules now contain twenty-three pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,9 +49,9 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- twenty-two admitted stdlib theorems: twelve definitional laws use bounded
+- twenty-three admitted stdlib theorems: twelve definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
-  `resultToOptionMapError` and `resultMapMapError` dogfood bounded `cases`, `optionMapOrElse` dogfoods higher-order Option case analysis,
+  `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`, `optionMapOrElse` dogfoods higher-order Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
   symmetry, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
@@ -186,6 +186,21 @@ mapping changes only the error payload, so the operations commute. The proof is
 bounded constructor case analysis followed by kernel definitional reflexivity in
 both branches. This gives the stdlib a generic two-channel law without adding a
 new tactic, host-side Result semantics, or backend rewrite.
+
+## Result map/get-or-else compatibility
+
+`ProofScript.Data.Result.resultGetOrElseMap` proves:
+
+```text
+resultGetOrElse(resultMap(f, value), f(fallback)) =
+f(resultGetOrElse(value, fallback))
+```
+
+for every `PsResult`. On a successful value both sides reduce to `f(value)`;
+on an error both reduce to the mapped fallback. The proof is bounded constructor
+case analysis plus Eq-only definitional reflexivity, matching the constructor
+behavior of Lean 4.34 `Except.map` without adding a Result-specific tactic or
+runtime shortcut.
 
 ## Exact-search symmetry dogfood
 

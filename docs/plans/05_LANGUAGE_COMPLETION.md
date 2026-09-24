@@ -711,9 +711,9 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     resultGetOrElse/resultToOption, structurally recursive listAppend/listMap,
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
-    resultToOptionMapError, resultMapMapError, optionOrElseNoneSymm,
+    resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
     optionMapOrElse, listAppendNilRight,
-    listAppendAssoc, and listMapAppend. Twenty-two current stdlib theorems now
+    listAppendAssoc, and listMapAppend. Twenty-three current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
     laws/utilities only when the proof/recursion surface supports them without
@@ -777,6 +777,15 @@ order. The theorem is generic in all four involved types and both mapping
 functions. Its proof uses only bounded `cases` and Eq-only `rfl` on the two
 constructors, so it expands the ProofScript-authored library without expanding
 proof-search authority or relying on a host Result implementation.
+
+## Stdlib Result map/get-or-else checkpoint
+
+`resultGetOrElseMap` records the success-channel compatibility between
+`resultMap` and `resultGetOrElse`: mapping a Result and a fallback before
+extraction is equal to applying the same function after extraction. The theorem
+is generic in the source/result types and error type. Its proof is exactly
+bounded `cases` plus Eq-only `rfl`, so it exercises the existing
+higher-order Result surface without expanding proof-search authority.
 
 ## Bounded exact-search application checkpoint
 

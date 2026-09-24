@@ -74,3 +74,9 @@ theorem resultMapMapError {α : Type}{β : Type}{ε : Type}{δ : Type}
 resultMap(f, resultMapError(g, value)) =
 resultMapError(g, resultMap(f, value)) :=
   by cases value; rfl; rfl;
+
+theorem resultGetOrElseMap {α : Type}{β : Type}{ε : Type}
+(f : α -> β, value : PsResult(α, ε), fallback : α) :
+resultGetOrElse(resultMap(f, value), f(fallback)) =
+f(resultGetOrElse(value, fallback)) :=
+  by cases value; rfl; rfl;

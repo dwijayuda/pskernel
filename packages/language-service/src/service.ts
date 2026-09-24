@@ -3,7 +3,7 @@ import type {
   Position,
   ProofState,
   TextDocumentSnapshot,
-  type DocumentSourceKind,
+  DocumentSourceKind,
 } from './model.js';
 import {analyzeDocument,type AnalysisOptions} from './analyzer.js';
 import {

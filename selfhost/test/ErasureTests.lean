@@ -299,39 +299,13 @@ def psTestDualSourceLeanNativeTextPrimitives : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export function pushBang(s: string): string"
-        && leanOutput.contains "(s + \"!\")"
+        && leanOutput.contains "String.fromCodePoint(Number(__ps_n))"
+        && leanOutput.contains "33n"
         && leanOutput.contains "codePointAt(0)"
         && leanOutput.contains "export function nextPos(s: string, p: bigint): bigint"
         && leanOutput.contains "export function textBytes(s: string): bigint"
         && leanOutput.contains "const __ps_w = BigInt"
   | _, _ => false
-
-def psDebugTextPrimitives : IO Unit := do
-  let leanSource :=
-    "def pushBang (s : String) : String := String.push s '!'\n" ++
-    "def firstChar (s : String) : Char := String.Internal.get s 0\n" ++
-    "def nextPos (s : String) (p : Nat) : Nat := String.Internal.next s p\n" ++
-    "def textBytes (s : String) : Nat := String.utf8ByteSize s"
-  let proofScriptSource :=
-    "def pushBang(s : String) : String := String.push(s, '!'); " ++
-    "def firstChar(s : String) : Char := String.Internal.get(s, 0); " ++
-    "def nextPos(s : String)(p : Nat) : Nat := String.Internal.next(s, p); " ++
-    "def textBytes(s : String) : Nat := String.utf8ByteSize(s);"
-  match
-      psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
-  | Except.ok leanOutput, Except.ok proofScriptOutput =>
-      if psTestDualSourceLeanNativeTextPrimitives then
-        pure ()
-      else
-        IO.println ("PSC1_TEXT_DEBUG_LEAN: " ++ leanOutput)
-        IO.println ("PSC1_TEXT_DEBUG_PS: " ++ proofScriptOutput)
-  | Except.error leanError, Except.error psError =>
-      IO.println ("PSC1_TEXT_DEBUG_ERRORS: " ++ leanError ++ " / " ++ psError)
-  | Except.error leanError, Except.ok _ =>
-      IO.println ("PSC1_TEXT_DEBUG_LEAN_ERROR: " ++ leanError)
-  | Except.ok _, Except.error psError =>
-      IO.println ("PSC1_TEXT_DEBUG_PS_ERROR: " ++ psError)
 
 structure PsErasureNamedTest where
   name : String
@@ -365,7 +339,6 @@ def psRunErasureTests : List PsErasureNamedTest -> IO Bool
       pure (test.passed && restPassed)
 
 def main : IO Unit := do
-  psDebugTextPrimitives
   let passed ← psRunErasureTests psErasureTests
   if passed then
     IO.println "PSC1_ERASURE_TESTS: PASS"

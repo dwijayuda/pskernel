@@ -108,7 +108,7 @@ def checkExprParity (e : KExpr) : IO Unit := do
   assertTrue "Expr.instantiateRev"
     (sameLeanExpr (toLeanExpr instantiatedRevK) instantiatedRevLean)
 
-def main : IO Unit := do
+def run : IO Unit := do
   for u in levelSamples do
     checkLevelSample u
 
@@ -137,3 +137,6 @@ def main : IO Unit := do
   IO.println "ok - PSC1 Lean kernel K0 direct Lean 4.34 parity"
 
 end ProofScript.Kernel.PSC1.Test
+
+def main : IO Unit :=
+  ProofScript.Kernel.PSC1.Test.run

@@ -3,6 +3,8 @@ import {
   instantiateExprLevels,
   nameToString,
   type Expr,
+  type Level,
+  type RecursorInfo,
 } from 'lean-ts-kernel';
 import {
   lean_nat_add,
@@ -50,8 +52,20 @@ interface Lean434ConstructorFunction {
   readonly args:readonly Lean434RuntimeValue[];
 }
 
+interface Lean434RecursorFunction {
+  readonly kind:'recursor-function';
+  readonly name:string;
+  readonly levels:readonly Level[];
+  readonly info:RecursorInfo;
+  readonly arity:number;
+  readonly args:readonly Lean434RuntimeValue[];
+}
+
 export type Lean434CallableValue=
-  Lean434ClosureValue|Lean434PrimitiveFunction|Lean434ConstructorFunction;
+  |Lean434ClosureValue
+  |Lean434PrimitiveFunction
+  |Lean434ConstructorFunction
+  |Lean434RecursorFunction;
 
 export type Lean434RuntimeValue=
   |bigint|string|boolean|undefined
@@ -129,6 +143,7 @@ function isCallable(value:Lean434RuntimeValue):value is Lean434CallableValue {
       value.kind==='closure'
       ||value.kind==='primitive-function'
       ||value.kind==='constructor-function'
+      ||value.kind==='recursor-function'
     );
 }
 
@@ -285,10 +300,21 @@ export class Lean434Evaluator {
           args:[],
         };
       }
-      case 'recursor':
-        throw new Lean434EvaluationError(
-          "recursor runtime evaluation is not implemented yet: '"+name+"'",
-        );
+      case 'recursor':{
+        const majorIndex=
+          info.numParams+
+          info.numMotives+
+          info.numMinors+
+          info.numIndices;
+        return {
+          kind:'recursor-function',
+          name,
+          levels:[...expr.levels],
+          info,
+          arity:majorIndex+1,
+          args:[],
+        };
+      }
       case 'axiom':
         throw new Lean434EvaluationError(
           "axiom has no JavaScript runtime implementation: '"+name+"'",
@@ -328,10 +354,108 @@ export class Lean434Evaluator {
       return fn.invoke(args);
     }
 
+    if(fn.kind==='recursor-function'){
+      return this.evaluateRecursor(fn,args);
+    }
+
     return {
       kind:'constructor',
       name:fn.name,
       fields:args.slice(fn.numParams),
     };
+  }
+
+  private normalizeMajor(
+    value:Lean434RuntimeValue,
+    info:RecursorInfo,
+  ):Lean434ConstructorValue {
+    if(
+      typeof value==='object'
+      &&value!==null
+      &&value.kind==='constructor'
+    ){
+      return value;
+    }
+
+    if(typeof value==='bigint'){
+      const zero=info.rules.find(
+        (rule)=>nameToString(rule.ctor)==='Nat.zero',
+      );
+      const succ=info.rules.find(
+        (rule)=>nameToString(rule.ctor)==='Nat.succ',
+      );
+      if(zero!==undefined&&succ!==undefined){
+        return value===0n
+          ?{kind:'constructor',name:'Nat.zero',fields:[]}
+          :{
+              kind:'constructor',
+              name:'Nat.succ',
+              fields:[value-1n],
+            };
+      }
+    }
+
+    if(typeof value==='boolean'){
+      const ctor=value?'Bool.true':'Bool.false';
+      if(info.rules.some((rule)=>nameToString(rule.ctor)===ctor)){
+        return {kind:'constructor',name:ctor,fields:[]};
+      }
+    }
+
+    throw new Lean434EvaluationError(
+      "recursor '"+nameToString(info.name)+
+      "' major premise is not a supported constructor value",
+    );
+  }
+
+  private evaluateRecursor(
+    fn:Lean434RecursorFunction,
+    args:readonly Lean434RuntimeValue[],
+  ):Lean434RuntimeValue {
+    const info=fn.info;
+    const majorIndex=
+      info.numParams+
+      info.numMotives+
+      info.numMinors+
+      info.numIndices;
+    const major=this.normalizeMajor(args[majorIndex]!,info);
+    const rule=info.rules.find(
+      (candidate)=>nameToString(candidate.ctor)===major.name,
+    );
+    if(rule===undefined){
+      throw new Lean434EvaluationError(
+        "recursor '"+fn.name+
+        "' has no rule for constructor '"+major.name+"'",
+      );
+    }
+    if(major.fields.length<rule.nFields){
+      throw new Lean434EvaluationError(
+        "recursor '"+fn.name+
+        "' constructor field count mismatch for '"+major.name+"'",
+      );
+    }
+
+    const firstIndex=
+      info.numParams+
+      info.numMotives+
+      info.numMinors;
+    let value=this.evaluateWithLocals(
+      instantiateExprLevels(
+        rule.rhs,
+        info.levelParams,
+        fn.levels,
+      ),
+      [],
+    );
+
+    for(const arg of args.slice(0,firstIndex)){
+      value=this.apply(value,arg);
+    }
+    for(const field of major.fields.slice(
+      major.fields.length-rule.nFields,
+    )){
+      value=this.apply(value,field);
+    }
+    return value;
   }
 }

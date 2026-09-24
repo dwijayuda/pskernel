@@ -1,4 +1,5 @@
 import Ps.Core.Expr
+import Ps.Environment.LocalContext
 
 inductive PsMetaVarKind where {
   | natural;
@@ -9,8 +10,8 @@ inductive PsMetaVarKind where {
 structure PsMetaVarDecl where {
   id : Nat;
   type : PsExpr;
+  localContext : PsLocalContext;
   kind : PsMetaVarKind;
-  depth : Nat;
 };
 
 structure PsMetaAssignment where {
@@ -24,6 +25,11 @@ structure PsMetaContext where {
   assignments : List(PsMetaAssignment);
 };
 
+structure PsMetaFreshResult where {
+  context : PsMetaContext;
+  expr : PsExpr;
+};
+
 def psMetaEmpty : PsMetaContext :=
   { nextId := 0, declarations := [], assignments := [] };
 
@@ -32,3 +38,159 @@ def psMetaSnapshot(context : PsMetaContext) : PsMetaContext :=
 
 def psMetaRestore(current : PsMetaContext, snapshot : PsMetaContext) : PsMetaContext :=
   snapshot;
+
+def psMetaFindDeclInList(id : Nat, declarations : List(PsMetaVarDecl)) : Option(PsMetaVarDecl) :=
+  match declarations with {
+    | .nil => Option.none;
+    | .cons declaration rest =>
+      if (declaration.id == id) {
+        Option.some(declaration)
+      } else {
+        psMetaFindDeclInList(id, rest)
+      };
+  };
+
+def psMetaFindDecl(context : PsMetaContext, id : Nat) : Option(PsMetaVarDecl) :=
+  psMetaFindDeclInList(id, context.declarations);
+
+def psMetaFindAssignmentInList(id : Nat, assignments : List(PsMetaAssignment)) : Option(PsExpr) :=
+  match assignments with {
+    | .nil => Option.none;
+    | .cons assignment rest =>
+      if (assignment.id == id) {
+        Option.some(assignment.value)
+      } else {
+        psMetaFindAssignmentInList(id, rest)
+      };
+  };
+
+def psMetaFindAssignment(context : PsMetaContext, id : Nat) : Option(PsExpr) :=
+  psMetaFindAssignmentInList(id, context.assignments);
+
+def psMetaFresh(
+  context : PsMetaContext,
+  localContext : PsLocalContext,
+  type : PsExpr,
+  kind : PsMetaVarKind
+) : PsMetaFreshResult :=
+  let id : Nat := context.nextId;
+  let declaration : PsMetaVarDecl := {
+    id := id,
+    type := type,
+    localContext := localContext,
+    kind := kind
+  };
+  {
+    context := {
+      nextId := id + 1,
+      declarations := List.cons(declaration, context.declarations),
+      assignments := context.assignments
+    },
+    expr := PsExpr.mvar(id)
+  };
+
+def psExprContainsMVar(target : Nat, expr : PsExpr) : Bool :=
+  match expr with {
+    | .mvar id => id == target;
+    | .app fn arg => psExprContainsMVar(target, fn) || psExprContainsMVar(target, arg);
+    | .lam name type body binder =>
+      psExprContainsMVar(target, type) || psExprContainsMVar(target, body);
+    | .forallE name type body binder =>
+      psExprContainsMVar(target, type) || psExprContainsMVar(target, body);
+    | .letE name type value body =>
+      psExprContainsMVar(target, type)
+        || psExprContainsMVar(target, value)
+        || psExprContainsMVar(target, body);
+    | .proj typeName index value => psExprContainsMVar(target, value);
+    | _ => false;
+  };
+
+def psExprFVarsInContext(localContext : PsLocalContext, expr : PsExpr) : Bool :=
+  match expr with {
+    | .fvar id => psLocalContainsId(localContext, id);
+    | .app fn arg =>
+      psExprFVarsInContext(localContext, fn) && psExprFVarsInContext(localContext, arg);
+    | .lam name type body binder =>
+      psExprFVarsInContext(localContext, type) && psExprFVarsInContext(localContext, body);
+    | .forallE name type body binder =>
+      psExprFVarsInContext(localContext, type) && psExprFVarsInContext(localContext, body);
+    | .letE name type value body =>
+      psExprFVarsInContext(localContext, type)
+        && psExprFVarsInContext(localContext, value)
+        && psExprFVarsInContext(localContext, body);
+    | .proj typeName index value => psExprFVarsInContext(localContext, value);
+    | _ => true;
+  };
+
+def psMetaInstantiateWithFuel(context : PsMetaContext, fuel : Nat, expr : PsExpr) : PsExpr :=
+  match fuel with {
+    | 0 => expr;
+    | Nat.succ restFuel =>
+      match expr with {
+        | .mvar id =>
+          match psMetaFindAssignment(context, id) with {
+            | .none => expr;
+            | .some value => psMetaInstantiateWithFuel(context, restFuel, value);
+          };
+        | .app fn arg =>
+          PsExpr.app(
+            psMetaInstantiateWithFuel(context, restFuel, fn),
+            psMetaInstantiateWithFuel(context, restFuel, arg)
+          );
+        | .lam name type body binder =>
+          PsExpr.lam(
+            name,
+            psMetaInstantiateWithFuel(context, restFuel, type),
+            psMetaInstantiateWithFuel(context, restFuel, body),
+            binder
+          );
+        | .forallE name type body binder =>
+          PsExpr.forallE(
+            name,
+            psMetaInstantiateWithFuel(context, restFuel, type),
+            psMetaInstantiateWithFuel(context, restFuel, body),
+            binder
+          );
+        | .letE name type value body =>
+          PsExpr.letE(
+            name,
+            psMetaInstantiateWithFuel(context, restFuel, type),
+            psMetaInstantiateWithFuel(context, restFuel, value),
+            psMetaInstantiateWithFuel(context, restFuel, body)
+          );
+        | .proj typeName index value =>
+          PsExpr.proj(
+            typeName,
+            index,
+            psMetaInstantiateWithFuel(context, restFuel, value)
+          );
+        | _ => expr;
+      };
+  };
+
+def psMetaInstantiate(context : PsMetaContext, expr : PsExpr) : PsExpr :=
+  psMetaInstantiateWithFuel(context, context.assignments.length + 1, expr);
+
+def psMetaAssign(context : PsMetaContext, id : Nat, value : PsExpr) : Option(PsMetaContext) :=
+  match psMetaFindDecl(context, id) with {
+    | .none => Option.none;
+    | .some declaration =>
+      match psMetaFindAssignment(context, id) with {
+        | .some assigned => Option.none;
+        | .none =>
+          let resolved : PsExpr := psMetaInstantiate(context, value);
+          if (psExprContainsMVar(id, resolved)) {
+            Option.none
+          } else {
+            if (psExprFVarsInContext(declaration.localContext, resolved)) {
+              Option.some({
+                nextId := context.nextId,
+                declarations := context.declarations,
+                assignments := List.cons({ id := id, value := resolved }, context.assignments)
+              })
+            } else {
+              Option.none
+            }
+          };
+      };
+  };

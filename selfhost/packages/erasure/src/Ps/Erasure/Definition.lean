@@ -114,6 +114,8 @@ def psEraseOpenDefinitionWithFuel
                     erasedLocals :=
                       pushed.id :: scope.erasedLocals
                     declarationNames := scope.declarationNames
+                  runtimeConstructors := scope.runtimeConstructors
+                  runtimeRecursors := scope.runtimeRecursors
                   }
                   psEraseOpenDefinitionWithFuel
                     environment
@@ -133,6 +135,8 @@ def psEraseOpenDefinitionWithFuel
                     erasedLocals :=
                       pushed.id :: scope.erasedLocals
                     declarationNames := scope.declarationNames
+                  runtimeConstructors := scope.runtimeConstructors
+                  runtimeRecursors := scope.runtimeRecursors
                   }
                   psEraseOpenDefinitionWithFuel
                     environment
@@ -163,6 +167,8 @@ def psEraseOpenDefinitionWithFuel
                         typeLocals := scope.typeLocals
                         erasedLocals := scope.erasedLocals
                         declarationNames := scope.declarationNames
+                      runtimeConstructors := scope.runtimeConstructors
+                      runtimeRecursors := scope.runtimeRecursors
                       }
                       psEraseOpenDefinitionWithFuel
                         environment

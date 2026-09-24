@@ -902,6 +902,61 @@ console.log('ok - psc SH1 dual-source UTF-8 atEnd runtime');
 
 
 {
+  const sources=[
+    {
+      entry:'src/main.ps',
+      source:
+        'function main(a : Nat, b : Nat) : Nat := '+
+        'Prod.fst(Prod.mk(a, b)) + Prod.snd(Prod.mk(a, b));\n',
+      sourceKind:'proofscript',
+    },
+    {
+      entry:'src/main.lean',
+      source:
+        'def main (a : Nat) (b : Nat) : Nat := '+
+        'Prod.fst (Prod.mk a b) + Prod.snd (Prod.mk a b)\n',
+      sourceKind:'lean-subset',
+    },
+  ] as const;
+  for(const item of sources){
+    const directory=await mkdtemp(join(tmpdir(),'proofscript-sh2-prod-'));
+    try{
+      await mkdir(join(directory,'src'),{recursive:true});
+      await writeFile(
+        join(directory,'psconfig.json'),
+        JSON.stringify({
+          languageVersion:'0.7',
+          entry:item.entry,
+          compilerOptions:{
+            outDir:'dist',
+            emitTypeScript:true,
+            declaration:true,
+            sourceMap:true,
+          },
+        },null,2)+'\n',
+        'utf8',
+      );
+      await writeFile(join(directory,item.entry),item.source,'utf8');
+      clearVerifiedProjectModuleCache();
+      const result=await runCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:['2','3'],
+      });
+      equal(result.mainResult,'5');
+      equal(result.semanticPipeline,'verified-core');
+      equal(result.proofStatus,'kernel-verified');
+      equal(result.sourceKind,item.sourceKind);
+    }finally{
+      await rm(directory,{recursive:true,force:true});
+    }
+  }
+}
+console.log('ok - psc SH2 dual-source canonical Prod runtime');
+
+
+{
   const directory=await mkdtemp(
     join(tmpdir(),'proofscript-verified-structure-abi-'),
   );

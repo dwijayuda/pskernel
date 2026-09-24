@@ -49,7 +49,8 @@
     "check:kernel-corpus": "npm run check:kernel-oracle && npm run oracle:init && npm run oracle:std-parsec && npm run oracle:std-sat-cnf && npm run oracle:std-byteslice && npm run oracle:lean-rbmap && npm run oracle:lean-persistentarray && npm run oracle:lean-persistenthashmap",
     "oracle:text-foundation": "npm run build --silent && tsc -p packages/environment/tsconfig.json && node scripts/text-foundation-oracle.mjs",
     "oracle:selfhost-foundation": "npm run build --silent && tsc -p packages/environment/tsconfig.json && node scripts/selfhost-foundation-oracle.mjs",
-    "research:lean434-js-runtime": "node scripts/lean434-js-runtime-census.mjs"
+    "research:lean434-js-runtime": "node scripts/lean434-js-runtime-census.mjs",
+    "research:lean434-source-closure": "node scripts/lean434-source-closure.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

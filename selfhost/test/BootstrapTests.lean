@@ -2192,6 +2192,59 @@ def psTestDualSourceImplicitConstructorApplication : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psRecursiveListLeanSource : String :=
+  "inductive List1 (α : Type) where | nil | cons (head : α) (tail : List1 α)\n" ++
+  "def length1 (xs : List1 Nat) : Nat := " ++
+  "match xs with | List1.nil => 0 | List1.cons head tail => length1 tail"
+
+def psRecursiveListProofScriptSource : String :=
+  "inductive List1(α : Type) where { | nil; | cons(head : α)(tail : List1(α)); }; " ++
+  "def length1(xs : List1(Nat)) : Nat := " ++
+  "match xs with { | List1.nil => 0; | List1.cons head tail => length1(tail); };"
+
+def psTestDualSourceStructuralRecursion : Bool :=
+  match
+      psParseLeanSource psRecursiveListLeanSource,
+      psParseProofScriptSource psRecursiveListProofScriptSource with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestCoreDeclarationListsEq
+            leanResult.declarations
+            proofScriptResult.declarations
+            && match leanResult.declarations.reverse with
+               | PsDeclaration.definitionDecl _ _ _ value :: _ =>
+                   !psExprHasConst (psTestName "length1") value
+               | _ => false
+      | _, _ => false
+  | _, _ => false
+
+def psTestRejectNonDecreasingStructuralRecursion : Bool :=
+  let source :=
+    "inductive ListBad (α : Type) where | nil | cons (head : α) (tail : ListBad α)\n" ++
+    "def bad (xs : ListBad Nat) : Nat := " ++
+    "match xs with | ListBad.nil => 0 | ListBad.cons head tail => bad xs"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psTestNatEnvironment module with
+      | Except.error PsElabError.structuralRecursionNotDecreasing => true
+      | _ => false
+
+def psTestRejectChangedInvariantStructuralRecursion : Bool :=
+  let source :=
+    "inductive ListInv (α : Type) where | nil | cons (head : α) (tail : ListInv α)\n" ++
+    "def badInv (base : Nat) (xs : ListInv Nat) : Nat := " ++
+    "match xs with | ListInv.nil => base | ListInv.cons head tail => badInv head tail"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psTestNatEnvironment module with
+      | Except.error PsElabError.structuralRecursionInvariantArgument => true
+      | _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -2227,6 +2280,9 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "Lean implicit constructor application", passed := psTestLeanImplicitConstructorApplication },
   { name := "ProofScript implicit constructor application", passed := psTestProofScriptImplicitConstructorApplication },
   { name := "dual-source implicit constructor application", passed := psTestDualSourceImplicitConstructorApplication },
+  { name := "dual-source structural recursion", passed := psTestDualSourceStructuralRecursion },
+  { name := "reject non-decreasing structural recursion", passed := psTestRejectNonDecreasingStructuralRecursion },
+  { name := "reject changed invariant structural recursion", passed := psTestRejectChangedInvariantStructuralRecursion },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

@@ -769,8 +769,56 @@ console.log('ok - psc verified Wasm W3a Nat externref pass-through');
 }
 console.log('ok - psc verified Wasm W3a Nat literal runtime');
 
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-wasm-nat-add-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : Nat, y : Nat) : Nat := x + y;\n',
+      'utf8',
+    );
 
-
+    const huge=(1n<<100n)+123456789n;
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[huge.toString(),'987654321'],
+    });
+    equal(
+      result.mainResult,
+      (huge+987654321n).toString(),
+    );
+    equal(
+      result.wasmRuntimeImports?.some(
+        (item)=>item.name==='nat_add',
+      ),
+      true,
+    );
+    equal(result.wasmProfile,'proofscript-wasm32-ref-js-v1');
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Wasm W3a arbitrary-precision Nat addition');
 
 {
   const result=compileVerifiedSource(

@@ -88,7 +88,9 @@
     "projection-structure-application-soundness",
     "deep-structural-traversal-stack-hardening",
     "std-release-assurance-v1",
-    "lean-kernel-arena-pinned-correctness-170-of-170"
+    "lean-kernel-arena-pinned-correctness-170-of-170",
+    "formal-soundness-cosigner-v1-smoke",
+    "formal-soundness-cosigner-v1-init-prelude"
   ],
   "openGates": [],
   "prohibitedClaims": [
@@ -103,6 +105,8 @@
   ],
   "lastVerifiedTestCount": 181,
   "notes": [
+    "Formal soundness co-signer v1 COMPLETED as a research assurance milestone. GitHub Actions run 36060889198 job 107839268830 generated standard no-mdata lean4export 3.1.0 streams with pinned lean4export commit 076e8e57707e813375e8f9da8bf989799ace9680 on final Lean 4.34.0 and required both pskernel and pinned ConLeche ae0c0c4e4ce6a0081648aff03fe9c39d002c4526 --verified to accept the exact same bytes. Smoke: SHA-256 570c47cb02ea5e9e2cbc4767ec54741f7d638ba8ed9057c671777ff6cdf0ea02, ConLeche accepted 9 declarations. Init.Prelude: SHA-256 722f07cb6dad191bcdd176eb17fe77db8635dc53b364b4ad174081f7d340848d, pskernel replayed 64,110 lines / 1,824 declarations into 2,106 constants and ConLeche accepted all 1,824 declarations in verified mode. This is accepting-direction formal soundness/model evidence under ConLeche's stated SetTheory assumptions; it is NOT a proof that pskernel TypeScript is equivalent to Lean C++.",
+    "Formal strategy narrowed for value/cost: research/formal-soundness introduces a pinned ConLeche --verified co-signer. The near-term formal target is accepting-direction soundness/model existence for streams accepted by both checkers, not a proof that the TypeScript implementation is behaviorally equivalent to Lean C++.",
     "Production release-assurance gates CLOSED with the pinned Lean Kernel Arena correctness suite. GitHub Actions run 36055797753 job 107822257575 passed 170/170 non-performance Arena cases on the current kernel: 101 expected accepts, 69 expected rejects, 0 timeouts. The pinned Arena corpus is commit ae76435a5fb439571a28e19d74cd1e2e3ab69667 / run 35764541391; the full 193-case content digest is 7d1671a0ddc5e0b4c7d2f03ca64448b3a0a0a68446e13ebb2b916ef328493ec9 and the blocking 170-case correctness digest is e97fb00c846611df3b0233e545687f45df2ea241ac4cdeaa5c5705064c09a145. Monolithic Full Std/Full Lean, an independent native-IR provider, and formal equivalence remain research/soak milestones and are not claimed complete.",
     "Std release assurance v1 CLOSED on the immutable-admission semantic tree. GitHub Actions run 36050092606 prerequisite job 107803719685 passed exporter compile, direct kernel 181/181 (0 failures), anti-drift, the bounded kernel corpus/oracle ladder, exact Lean 4.34 official oracle, defeq differential 42/42, adversarial oracle 21 expected-success + 1 expected-rejection, native compiler-IR smoke, and canonical Init.Prelude. Coverage run 36050337720 attempt 2 job 107804383756 passed std-release-assurance-v1 over the 114,029-constant Std corpus: all 957 canonical Init.Data.Int.DivMod.Lemmas roots 22197..23153 plus twelve canonical 64-root stratified windows at 0, 10000, ..., 110000. Canonical one-pass Full Std remains an optional gold/soak gate and is NOT claimed to have passed.",
     "Release-gate policy update: canonical Full Std remains a non-blocking gold/soak gate. The blocking Std release gate is now the bounded std-release-assurance-v1 profile: direct/anti-drift/corpora/native/canonical Init prerequisites plus exhaustive Init.Data.Int.DivMod.Lemmas roots 22197..23153 and stratified 64-root windows every 10,000 Std roots. This does not permit the claim that canonical Full Std passed.",
@@ -273,6 +277,6 @@
     "canonical-full-Std-shared-environment-soak",
     "canonical-full-Lean-shared-environment-soak",
     "independent-native-reduction-compiler-ir-provider",
-    "formal-equivalence-proof"
+    "formal-behavioral-equivalence-optional"
   ]
 }

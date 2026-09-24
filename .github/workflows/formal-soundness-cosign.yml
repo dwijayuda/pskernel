@@ -1,0 +1,119 @@
+name: Formal soundness co-sign
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/formal-soundness]
+    paths:
+      - ".github/workflows/formal-soundness-cosign.yml"
+      - "FORMAL_LOCK.json"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/formal-cosign.mjs"
+      - "src/core/**"
+      - "src/kernel/**"
+      - "src/integration/lean4export.ts"
+      - "oracle/formal/Smoke.lean"
+
+concurrency:
+  group: formal-soundness-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cosign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Install elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Clone pinned ConLeche
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/leanprover/con-leche.git /tmp/con-leche
+          cd /tmp/con-leche
+          git checkout ae0c0c4e4ce6a0081648aff03fe9c39d002c4526
+      - uses: actions/cache@v4
+        with:
+          path: /tmp/con-leche/.lake
+          key: conleche-ae0c0c4e4ce6a0081648aff03fe9c39d002c4526-lean433-${{ runner.os }}
+      - name: Build pinned ConLeche verified checker
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/con-leche
+          lake build con-leche
+          echo "CONLECHE_BIN=/tmp/con-leche/.lake/build/bin/con-leche" >> "$GITHUB_ENV"
+
+      - name: Clone pinned lean4export
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/leanprover/lean4export.git /tmp/lean4export
+          cd /tmp/lean4export
+          git checkout 076e8e57707e813375e8f9da8bf989799ace9680
+          printf '%s\n' 'leanprover/lean4:v4.34.0' > lean-toolchain
+      - uses: actions/cache@v4
+        with:
+          path: /tmp/lean4export/.lake
+          key: lean4export-076e8e57707e813375e8f9da8bf989799ace9680-lean434-${{ runner.os }}
+      - name: Build pinned official lean4export for final Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/lean4export
+          lake build lean4export
+          echo "LEAN4EXPORT_BIN=/tmp/lean4export/.lake/build/bin/lean4export" >> "$GITHUB_ENV"
+
+      - name: Prepare final Lean 4.34 export workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/formal-smoke
+          mkdir -p /tmp/formal-smoke
+          cp oracle/formal/Smoke.lean /tmp/formal-smoke/FormalSmoke.lean
+          printf '%s\n' 'leanprover/lean4:v4.34.0' > /tmp/formal-smoke/lean-toolchain
+          cd /tmp/formal-smoke
+          elan run leanprover/lean4:v4.34.0 lean -o FormalSmoke.olean FormalSmoke.lean
+
+      - name: Generate standard no-mdata Lean 4.34 smoke export
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/formal-smoke
+          LEAN_PATH=/tmp/formal-smoke "$LEAN4EXPORT_BIN" FormalSmoke -- \
+            FormalSmoke.Box FormalSmoke.Box.mk FormalSmoke.unwrap \
+            FormalSmoke.unwrap_mk FormalSmoke.id FormalSmoke.id_eq \
+            > /tmp/formal-smoke.ndjson
+          grep -q '"format":{"version":"3.1.0"}' /tmp/formal-smoke.ndjson
+          ! grep -q '"mdata"' /tmp/formal-smoke.ndjson
+      - name: Co-sign standard Lean 4.34 smoke export
+        env:
+          CONLECHE_JOBS: "2"
+        run: npm run formal:cosign -- /tmp/formal-smoke.ndjson --con-leche-bin "$CONLECHE_BIN"
+
+      - name: Generate standard Lean 4.34 Init.Prelude export
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/formal-smoke
+          LEAN_PATH=/tmp/formal-smoke "$LEAN4EXPORT_BIN" Init.Prelude > /tmp/formal-init-prelude.ndjson
+          grep -q '"format":{"version":"3.1.0"}' /tmp/formal-init-prelude.ndjson
+          ! grep -q '"mdata"' /tmp/formal-init-prelude.ndjson
+      - name: Co-sign Lean 4.34 Init.Prelude
+        env:
+          CONLECHE_JOBS: "4"
+        run: npm run formal:cosign -- /tmp/formal-init-prelude.ndjson --con-leche-bin "$CONLECHE_BIN"

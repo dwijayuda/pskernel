@@ -33,7 +33,7 @@
     "check:source-shape": "node scripts/source-shape-check.mjs",
     "check:vscode": "node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs",
     "check:architecture": "node scripts/proofscript-architecture-check.mjs",
-    "check:oracle-syntax": "node --check scripts/module-stream-oracle.mjs && node --check scripts/full-std-oracle.mjs && node --check scripts/std-hot-oracle.mjs && node --check scripts/std-bisect-oracle.mjs && node --check scripts/std-bisect-oracle-test.mjs && node --check scripts/adaptive-root-oracle.mjs && node --check scripts/kernel-study-regression-matrix.mjs && node --check scripts/official-oracle.mjs && node --check scripts/defeq-differential.mjs && node --check scripts/adversarial-oracle.mjs && node --check scripts/native-oracle-smoke.mjs && node --check scripts/std-release-profile.mjs && node --check scripts/fetch-arena-corpus.mjs && node --check scripts/verify-arena-corpus.mjs",
+    "check:oracle-syntax": "node --check scripts/module-stream-oracle.mjs && node --check scripts/full-std-oracle.mjs && node --check scripts/std-hot-oracle.mjs && node --check scripts/std-bisect-oracle.mjs && node --check scripts/std-bisect-oracle-test.mjs && node --check scripts/adaptive-root-oracle.mjs && node --check scripts/kernel-study-regression-matrix.mjs && node --check scripts/official-oracle.mjs && node --check scripts/defeq-differential.mjs && node --check scripts/adversarial-oracle.mjs && node --check scripts/native-oracle-smoke.mjs && node --check scripts/std-release-profile.mjs && node --check scripts/fetch-arena-corpus.mjs && node --check scripts/verify-arena-corpus.mjs && node --check scripts/formal-cosign.mjs",
     "oracle:std-probe": "npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029 0 250 100 10",
     "oracle:std-range": "npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029",
     "oracle:std-hot": "npm run build --silent && node scripts/std-hot-oracle.mjs",
@@ -49,7 +49,8 @@
     "arena:fetch": "node scripts/fetch-arena-corpus.mjs .arena-tests",
     "arena:verify": "node scripts/verify-arena-corpus.mjs .arena-tests",
     "oracle:arena:pinned": "npm run build --silent && npm run arena:verify && node scripts/arena-static-oracle.mjs .arena-tests",
-    "oracle:arena:pinned-perf": "npm run build --silent && npm run arena:verify && node scripts/arena-static-oracle.mjs .arena-tests --include-perf"
+    "oracle:arena:pinned-perf": "npm run build --silent && npm run arena:verify && node scripts/arena-static-oracle.mjs .arena-tests --include-perf",
+    "formal:cosign": "npm run build --silent && node scripts/formal-cosign.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

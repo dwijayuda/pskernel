@@ -1,5 +1,5 @@
 import type {V061Module} from './ast.js';
-import {parseV061Module} from './declaration-parser.js';
+import {parseV061Module,parseV061PsxModule} from './declaration-parser.js';
 import {lowerV061ModuleToLean} from './lean-lowering.js';
 import {parseV061LeanSubsetModule} from './lean-subset-parser.js';
 import {lowerV061ModuleToProofScript} from './proofscript-lowering.js';
@@ -14,7 +14,7 @@ export interface SourceFrontend {
 
 export function sourceKindFromFileName(fileName:string):SourceKind {
   const normalized=fileName.toLowerCase();
-  if(normalized.endsWith('.ps'))return 'proofscript';
+  if(normalized.endsWith('.ps')||normalized.endsWith('.psx'))return 'proofscript';
   if(normalized.endsWith('.lean'))return 'lean-subset';
   throw new Error(
     "PS_FRONTEND_SOURCE_KIND: unsupported source extension for '"+fileName+"'",
@@ -49,13 +49,34 @@ export class SourceFrontendRegistry {
   }
 
   forFile(fileName:string):SourceFrontend {
-    return this.require(sourceKindFromFileName(fileName));
+    const kind=sourceKindFromFileName(fileName);
+    if(
+      kind==='proofscript'
+      &&fileName.toLowerCase().endsWith('.psx')
+    ){
+      return proofScriptJsxSourceFrontend;
+    }
+    return this.require(kind);
+  }
+
+  forDocument(kind:SourceKind,fileName:string):SourceFrontend {
+    const normalized=fileName.toLowerCase();
+    if(kind==='proofscript'&&normalized.endsWith('.psx')){
+      return proofScriptJsxSourceFrontend;
+    }
+    return this.require(kind);
   }
 }
 
 export const proofScriptSourceFrontend:SourceFrontend={
   kind:'proofscript',
   parse:parseV061Module,
+  print:lowerV061ModuleToProofScript,
+};
+
+export const proofScriptJsxSourceFrontend:SourceFrontend={
+  kind:'proofscript',
+  parse:parseV061PsxModule,
   print:lowerV061ModuleToProofScript,
 };
 

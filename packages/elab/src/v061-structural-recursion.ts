@@ -17,14 +17,15 @@ export function withStructuralRecursionContext(
   if(
     source.kind==='theorem'
     ||source.body.kind!=='match'
-    ||source.body.scrutinee.kind!=='reference'
   )return context;
+  const scrutinee=source.body.scrutinee;
+  if(scrutinee.kind!=='reference')return context;
 
   const explicit=source.params.filter(
     (parameter)=>(parameter.binderInfo??'default')==='default',
   );
   const recursiveParameterIndex=explicit.findIndex(
-    (parameter)=>parameter.name===source.body.scrutinee.name,
+    (parameter)=>parameter.name===scrutinee.name,
   );
   if(recursiveParameterIndex<0)return context;
 

@@ -176,8 +176,10 @@ def psSetConstructorIndex
   | _ => declaration
 
 def psElabInductiveConstructors
-    (environment : PsEnvironment)
-    (inductiveName : PsName) :
+    (context : PsElabContext)
+    (inductiveName : PsName)
+    (appliedInductive : PsExpr)
+    (paramsRev : List PsElabTypedBinder) :
     Nat ->
     List PsSyntaxInductiveConstructor ->
     List PsDeclaration ->
@@ -186,14 +188,18 @@ def psElabInductiveConstructors
       Except.ok declarationsRev.reverse
   | index, source :: rest, declarationsRev =>
       match psElabInductiveConstructor
-          environment
+          context
           inductiveName
+          appliedInductive
+          paramsRev
           source with
       | Except.error error => Except.error error
       | Except.ok declaration =>
           psElabInductiveConstructors
-            environment
+            context
             inductiveName
+            appliedInductive
+            paramsRev
             (index + 1)
             rest
             (psSetConstructorIndex index declaration :: declarationsRev)

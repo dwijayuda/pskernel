@@ -94,6 +94,24 @@ jobs:
           test -f /tmp/psc1-cli.js.map
           echo "PSC1_CLI_PARITY_SMOKE: PASS"
 
+
+          rm -rf /tmp/psc1-project
+          mkdir -p /tmp/psc1-project
+          cat > /tmp/psc1-project/Lib.lean <<'EOF'
+          def idNat (x : Nat) : Nat := x
+          EOF
+          cat > /tmp/psc1-project/Main.ps <<'EOF'
+          import Lib;
+          def two : Nat := idNat(2);
+          EOF
+          lake exe psc1 check /tmp/psc1-project/Main.ps
+          lake exe psc1 typescript /tmp/psc1-project/Main.ps > /tmp/psc1-project/Main.ts
+          grep -q 'export function idNat' /tmp/psc1-project/Main.ts
+          grep -q 'export const two' /tmp/psc1-project/Main.ts
+          lake exe psc1 build /tmp/psc1-project/Main.ps --out /tmp/psc1-project/Main.ts
+          test -f /tmp/psc1-project/Main.js
+          echo "PSC1_PROJECT_IMPORTS: PASS"
+
       - name: Run bootstrap semantic tests
         shell: bash
         run: |

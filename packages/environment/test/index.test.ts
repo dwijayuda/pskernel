@@ -76,7 +76,10 @@ function equal(actual:unknown,expected:unknown):void {
 {
   const meta=JSON.stringify({
     meta:{
-      lean:{version:PROOFSCRIPT_LEAN_VERSION},
+      lean:{
+        version:PROOFSCRIPT_LEAN_VERSION,
+        githash:LEAN434_PINNED_GITHASH,
+      },
       format:{version:'3.1.0'},
     },
   });

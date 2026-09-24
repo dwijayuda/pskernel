@@ -138,7 +138,7 @@ test('Lean 4.34 Trans constructor field universe is below its inductive result u
  assert(levelLe(field,result),'Lean 4.34 accepts Trans.mk field universe under the Trans result universe');
 });
 
-test('Lean 4.34 universe equivalence preserves kernel incompleteness',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));const lhs=mkMax(v,u),rhs=mkMax(mkIMax(u,v),u);assert(!levelEquivalent(lhs,rhs));assert(levelLe(lhs,rhs)&&!levelLe(rhs,lhs),'Lean 4.34 kernel geq remains intentionally incomplete on this semantically equal pair');});
+test('Lean 4.34 universe equivalence preserves kernel incompleteness',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));const lhs=mkMax(v,u),rhs=mkMax(mkIMax(u,v),u);assert(!levelEquivalent(lhs,rhs),'Lean 4.34 normalized structural equivalence remains intentionally incomplete on this pair');assert(levelLe(lhs,rhs)&&levelLe(rhs,lhs),'Lean 4.34 is_geq proves both directions after the max positive shortcut falls through to imax decomposition');});
 test('Lean structural equality includes MData payload while defeq ignores it',()=>{
  const a={kind:'mdata',data:{tag:'a'},expr:natLit(0)} as const;
  const b={kind:'mdata',data:{tag:'b'},expr:natLit(0)} as const;

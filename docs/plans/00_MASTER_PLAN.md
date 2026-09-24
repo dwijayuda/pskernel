@@ -2,6 +2,14 @@
 
 Status: living plan.
 
+> **Execution priority override (2026-09-24):** ProofScript package/infrastructure
+> expansion is subordinate to `07_SELF_HOSTING_FOUNDATION.md`. On `main`,
+> work must first retire the legacy semantic lane and close the language/runtime
+> features required to self-host the compiler. Existing package milestones remain
+> useful architecture references, but they are not permission to expand unrelated
+> infrastructure before the self-hosting foundation closes. TypeScript kernel
+> hardening continues separately on `kernel/lean434-study-hardening`.
+
 ## Design objective
 
 Build ProofScript as an npm-native verified programming/theorem-proving ecosystem around a small Lean-4.34-compatible TypeScript kernel.

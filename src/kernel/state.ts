@@ -1,6 +1,5 @@
 import { Environment, KernelError } from '../core/environment.js';
 import { Expr, exprLeanEq, exprLeanHash } from '../core/expr.js';
-import { Level } from '../core/level.js';
 import { LocalContext, LocalDecl } from '../core/local-context.js';
 import { Name, nameKey } from '../core/name.js';
 

@@ -269,17 +269,17 @@ export function exprLeanEq(a:Expr,b:Expr):boolean{
       case'lam':
         if(y.kind!=='lam')return false;
         if(alreadyCompared(x,y))break;
-        todo.push([x.type,y.type],[x.body,y.body]);
+        todo.push([x.body,y.body],[x.type,y.type]);
         break;
       case'forall':
         if(y.kind!=='forall')return false;
         if(alreadyCompared(x,y))break;
-        todo.push([x.type,y.type],[x.body,y.body]);
+        todo.push([x.body,y.body],[x.type,y.type]);
         break;
       case'let':
         if(y.kind!=='let'||(x.nondep??false)!==(y.nondep??false))return false;
         if(alreadyCompared(x,y))break;
-        todo.push([x.type,y.type],[x.value,y.value],[x.body,y.body]);
+        todo.push([x.body,y.body],[x.value,y.value],[x.type,y.type]);
         break;
       case'lit':
         if(y.kind!=='lit'||x.literal.kind!==y.literal.kind)return false;

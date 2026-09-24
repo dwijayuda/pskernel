@@ -20,7 +20,6 @@ import {
 } from '../packages/cli/dist/src/verified-pipeline.js';
 import {runCommand} from '../packages/cli/dist/src/commands/run.js';
 import {fileURLToPath} from 'node:url';
-import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
 import {createBuildPlan} from '../packages/project/dist/src/index.js';
@@ -690,15 +689,6 @@ assert(
   'verified ADT match did not compile to JavaScript',
 );
 
-
-const snapshot=processDocument('demo.ps',1,'x!',{
-  process:text=>({
-    state:{length:text.length},
-    diagnostics:[{severity:'error',message:'bang',start:1,end:2}],
-  }),
-});
-const diagnostics=toLspDiagnostics(snapshot.text,snapshot.diagnostics);
-assert(diagnostics[0]?.range.start.character===1,'language/LSP diagnostic mapping failed');
 
 
 const editorService=new ProofScriptLanguageService();

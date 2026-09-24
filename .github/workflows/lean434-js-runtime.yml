@@ -16,6 +16,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install pinned Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+          test "$("$HOME/.elan/bin/lean" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
       - run: npm ci --no-audit --no-fund
       - name: Build pskernel
         run: npm run build:src
@@ -23,6 +32,42 @@ jobs:
         run: npm --workspace @proofscript/runtime test
       - name: Execute real Lean 4.34 Init.Prelude through pskernel + JS runtime
         run: node scripts/lean434-js-eval-smoke.mjs
+      - name: Compile Lean-native runtime metadata exporter
+        run: lean oracle/replay-probe/RuntimeMetadataExport.lean
+      - name: Export real Lean runtime metadata sidecars
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run generate:lean434-runtime-metadata -- Init.Prelude --out lean434-init-runtime-metadata.json
+          npm run generate:lean434-runtime-metadata -- Lean.Parser --out lean434-parser-runtime-metadata.json
+      - name: Validate exported runtime sidecars in JavaScript
+        run: |
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            import {
+              Lean434RuntimeMetadataIndex,
+              parseLean434RuntimeMetadata,
+            } from './packages/runtime/dist/src/lean4-metadata.js';
+            for (const file of [
+              'lean434-init-runtime-metadata.json',
+              'lean434-parser-runtime-metadata.json',
+            ]) {
+              const doc=parseLean434RuntimeMetadata(
+                JSON.parse(fs.readFileSync(file,'utf8')),
+              );
+              const index=new Lean434RuntimeMetadataIndex(doc);
+              console.log(JSON.stringify({
+                module:doc.module,
+                externs:doc.externs.length,
+                implementedBy:doc.implementedBy.length,
+                initializers:doc.initializers.length,
+                modulesWithInitializers:[
+                  ...new Set(doc.initializers.map(x=>x.module)),
+                ].length,
+                hasNatAdd:index.externFor('Nat.add')!==undefined,
+              }));
+            }
+          "
       - name: Verify runtime manifest against pinned Lean source
         run: npm run check:lean434-runtime-manifest
       - name: Generate deterministic Lean 4.34 source/runtime census

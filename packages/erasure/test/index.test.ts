@@ -1,6 +1,7 @@
 import {
   Environment,
   Kernel,
+  addOrdinaryInductive,
   app,
   bvar,
   constant,
@@ -68,6 +69,80 @@ function equal(actual:unknown,expected:unknown):void {
   if(declaration.body.kind==='var')equal(declaration.body.name,'x');
 }
 console.log('ok - @proofscript/erasure generic identity');
+
+{
+  const base=new Environment();
+  const Bool=nameFromDotted('Bool');
+  const BoolFalse=nameFromDotted('Bool.false');
+  const BoolTrue=nameFromDotted('Bool.true');
+  const Nat=nameFromDotted('Nat');
+  base.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  addOrdinaryInductive(
+    base,
+    {
+      levelParams:[],
+      numParams:0,
+      types:[{
+        name:Bool,
+        type:sort(levelSucc(levelZero)),
+        ctors:[
+          {name:BoolFalse,type:constant(Bool)},
+          {name:BoolTrue,type:constant(Bool)},
+        ],
+      }],
+    },
+    {allowPrimitiveNames:true},
+  );
+
+  const choose=nameFromDotted('chooseBool');
+  const flag=nameFromDotted('flag');
+  const motive=lam(
+    nameFromDotted('_match'),
+    constant(Bool),
+    constant(Nat),
+  );
+  const checked=admitCheckedCoreModule(base,[{
+    kind:'definition',
+    name:choose,
+    levelParams:[],
+    type:forallE(flag,constant(Bool),constant(Nat)),
+    value:lam(
+      flag,
+      constant(Bool),
+      mkAppN(
+        constant(
+          nameFromDotted('Bool.rec'),
+          [levelSucc(levelZero)],
+        ),
+        [motive,natLit(2n),natLit(1n),bvar(0)],
+      ),
+    ),
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  }]);
+
+  const erased=eraseCheckedCoreModule(checked);
+  const declaration=erased.declarations[0]!;
+  equal(declaration.parameters.length,1);
+  equal(declaration.body.kind,'if');
+  if(declaration.body.kind==='if'){
+    equal(declaration.body.condition.kind,'var');
+    equal(declaration.body.thenBranch.kind,'literal');
+    equal(declaration.body.elseBranch.kind,'literal');
+    if(declaration.body.thenBranch.kind==='literal'){
+      equal(declaration.body.thenBranch.value,1n);
+    }
+    if(declaration.body.elseBranch.kind==='literal'){
+      equal(declaration.body.elseBranch.value,2n);
+    }
+  }
+}
+console.log('ok - @proofscript/erasure canonical Bool.rec lowering');
 
 
 {

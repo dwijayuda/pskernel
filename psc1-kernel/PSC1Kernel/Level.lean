@@ -230,6 +230,7 @@ mutual
         if Level.eq pa.1 pb.1 || pb.1.isZero then pa.2 ≥ pb.2
         else if pa.2 == pb.2 && pa.2 > 0 then Level.kernelGeqCore pa.1 pb.1
         else false
+end
 
 def Level.le (a b : Level) : Bool :=
   Level.kernelGeqCore (Level.normalize b) (Level.normalize a)

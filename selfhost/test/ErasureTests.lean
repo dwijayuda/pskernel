@@ -125,6 +125,29 @@ def psTestDualSourceLeanNativeMaybeMatch : Bool :=
         && leanOutput.contains "case \"some\": return"
   | _, _ => false
 
+def psTestDualSourceLeanNativeStructureProjection : Bool :=
+  let leanSource :=
+    "structure User where\n" ++
+    "  age : Nat\n" ++
+    "def user : User := User.mk 33\n" ++
+    "def ageOf (u : User) : Nat := u.age"
+  let proofScriptSource :=
+    "structure User where { age : Nat; }; " ++
+    "def user : User := User.mk(33); " ++
+    "def ageOf(u : User) : Nat := u.age;"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains "export interface User"
+        && leanOutput.contains "readonly age: bigint;"
+        && leanOutput.contains "export const user: User"
+        && leanOutput.contains "age: 33n"
+        && leanOutput.contains
+          "export function ageOf(u: User): bigint { return u.age; }"
+  | _, _ => false
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -134,7 +157,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native generic identity", passed := psTestDualSourceLeanNativeGenericIdentity },
   { name := "dual-source Lean-native let", passed := psTestDualSourceLeanNativeLet },
   { name := "dual-source Lean-native if", passed := psTestDualSourceLeanNativeIf },
-  { name := "dual-source Lean-native Maybe match", passed := psTestDualSourceLeanNativeMaybeMatch }
+  { name := "dual-source Lean-native Maybe match", passed := psTestDualSourceLeanNativeMaybeMatch },
+  { name := "dual-source Lean-native structure projection", passed := psTestDualSourceLeanNativeStructureProjection }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

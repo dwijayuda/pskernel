@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 170,
   "notes": [
+    "Postponed generated-metadata completeness fix: constructor and recursor replay now compare exported levelParams against regenerated metadata, matching Lean 4.34 ConstructorVal/RecursorVal BEq. A real Lean 4.34 fixture mutation regression rejects wrong constructor or recursor universe-parameter lists.",
     "Quot replay metadata parity hardening: regenerated Quot types are now compared with exprKernelMetadataEq/Lean Expr.eqv rather than strong binder-sensitive exprEq. This avoids false replay rejection from non-semantic binder annotations while preserving level-parameter/kind checks.",
     "MData/KVMap export parity fix: dumpMDataEqId now uses Lean 4.34 KVMap BEq (`xs[i]! == d`), whose equality is extensional map equality via subset both ways. The previous raw `.entries == .entries` list comparison could assign different `dataEq` ids to extensionally equal metadata maps with different entry order, making TypeScript Expr.eqv spuriously reject Lean-equal constructor/recursor metadata. Static anti-drift forbids the old comparison.",
     "Constructor replay metadata parity fix: Lean 4.34 checkPostponedConstructors compares ConstructorVal with derived BEq, whose Expr.eqv ignores binder names/annotations but observes MData. lean4export now uses exprKernelMetadataEq for constructor types, matching the already-correct recursor path. kernel-study-regression-matrix locks both call sites; direct source test count remains 171.",
@@ -251,7 +252,7 @@
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
   ],
-  "currentTreeExpectedDirectTests": 171,
+  "currentTreeExpectedDirectTests": 172,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "source direct-test count remains 171 / last executed direct checkpoint 170; constructor/Quot metadata and MData equality replay parity are source-locked; refreshed exact-checkout execution and Lean-backed canonical replay pending."
+  "currentTreeVerification": "source direct-test count is 172 / last executed direct checkpoint 170; new constructor/recursor levelParams replay regression plus earlier metadata fixes await refreshed exact-checkout execution; canonical Full Std remains open."
 }

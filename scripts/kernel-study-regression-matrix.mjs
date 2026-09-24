@@ -177,6 +177,12 @@ if(!replaySource.includes("if(!exprKernelMetadataEq(g.type,expectedType))throw n
 if(!replaySource.includes("if(!exprKernelMetadataEq(g.type,expectedType))throw new KernelError(\`generated recursor type mismatch")){
   throw new Error('recursor replay metadata comparator drift: Lean 4.34 RecursorVal BEq requires Expr.eqv');
 }
+if(!replaySource.includes("if(!namesEq(g.levelParams,expectedLevels)||!nameEq(g.induct")){
+  throw new Error('constructor replay metadata drift: ConstructorVal BEq includes levelParams');
+}
+if(!replaySource.includes("if(!namesEq(g.levelParams,expectedLevels))throw new KernelError(\`generated recursor levelParams mismatch")){
+  throw new Error('recursor replay metadata drift: RecursorVal BEq includes levelParams');
+}
 if(!replaySource.includes("!exprKernelMetadataEq(got.type,expectedType))throw new KernelError(\`exported Quot metadata mismatch")){
   throw new Error('Quot replay metadata comparator drift: generated Quot types must use Lean Expr.eqv');
 }

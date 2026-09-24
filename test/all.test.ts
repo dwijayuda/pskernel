@@ -1880,6 +1880,22 @@ test('real Lean 4.34 indexed recursor metadata matches exactly',()=>{
  assert(rec.kind==='recursor'&&rec.numParams===1&&rec.numIndices===1&&rec.rules.length===2);
 });
 
+test('lean4export rejects wrong generated constructor and recursor universe metadata',()=>{
+ const badCtor=lean434RealProbe.replace(
+   '"levelParams":[],"name":6,"numFields":0',
+   '"levelParams":[15],"name":6,"numFields":0'
+ );
+ assert(badCtor!==lean434RealProbe,'constructor mutation fixture marker must exist');
+ throws(()=>new Lean4ExportReplay().replay(badCtor));
+
+ const badRec=lean434RealProbe.replace(
+   '"levelParams":[15],"name":23,"numIndices":0',
+   '"levelParams":[],"name":23,"numIndices":0'
+ );
+ assert(badRec!==lean434RealProbe,'recursor mutation fixture marker must exist');
+ throws(()=>new Lean4ExportReplay().replay(badRec));
+});
+
 test('lean4export reconstructs partial mutual definition blocks from all metadata',()=>{
  const nd=[
   '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',

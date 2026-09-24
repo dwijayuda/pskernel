@@ -221,14 +221,17 @@ export class Lean4ExportReplay {
       const n=this.n(asIndex(field(c,'name','constructor'),'constructor.name')),g=this.env.get(n);
       if(g.kind!=='constructor')throw new KernelError(`generated '${nameToString(n)}' is not a constructor`);
       const expectedType=this.e(asIndex(field(c,'type','constructor'),'constructor.type'));
+      const expectedLevels=this.ns(field(c,'levelParams','constructor'),'constructor.levelParams');
       if(!exprKernelMetadataEq(g.type,expectedType))throw new KernelError(`generated constructor type mismatch for '${nameToString(n)}'\nTS: ${exprToString(g.type)}\nLean: ${exprToString(expectedType)}\nDiff: ${exprKernelMetadataDiff(g.type,expectedType)??'<unknown>'}`);
-      if(!nameEq(g.induct,this.n(asIndex(field(c,'induct','constructor'),'constructor.induct')))||g.cidx!==asUInt(field(c,'cidx','constructor'),'constructor.cidx')||g.numParams!==asUInt(field(c,'numParams','constructor'),'constructor.numParams')||g.numFields!==asUInt(field(c,'numFields','constructor'),'constructor.numFields')||!sameBool(g.isUnsafe,boolField(c,'isUnsafe','constructor')))throw new KernelError(`generated constructor metadata mismatch for '${nameToString(n)}'`);
+      if(!namesEq(g.levelParams,expectedLevels)||!nameEq(g.induct,this.n(asIndex(field(c,'induct','constructor'),'constructor.induct')))||g.cidx!==asUInt(field(c,'cidx','constructor'),'constructor.cidx')||g.numParams!==asUInt(field(c,'numParams','constructor'),'constructor.numParams')||g.numFields!==asUInt(field(c,'numFields','constructor'),'constructor.numFields')||!sameBool(g.isUnsafe,boolField(c,'isUnsafe','constructor')))throw new KernelError(`generated constructor metadata mismatch for '${nameToString(n)}'`);
     }
     for(const r of rvs){
       const n=this.n(asIndex(field(r,'name','recursor'),'recursor.name')),g=this.env.get(n);
       if(g.kind!=='recursor')throw new KernelError(`generated '${nameToString(n)}' is not a recursor`);
-      const expectedType=this.e(asIndex(field(r,'type','recursor'),'recursor.type')); 
+      const expectedType=this.e(asIndex(field(r,'type','recursor'),'recursor.type'));
+      const expectedLevels=this.ns(field(r,'levelParams','recursor'),'recursor.levelParams');
       if(!exprKernelMetadataEq(g.type,expectedType))throw new KernelError(`generated recursor type mismatch for '${nameToString(n)}'\nTS: ${exprToString(g.type)}\nLean: ${exprToString(expectedType)}\nDiff: ${exprKernelMetadataDiff(g.type,expectedType)??'<unknown>'}`);
+      if(!namesEq(g.levelParams,expectedLevels))throw new KernelError(`generated recursor levelParams mismatch for '${nameToString(n)}'`);
       if(g.numParams!==asUInt(field(r,'numParams','recursor'),'recursor.numParams'))throw new KernelError(`generated recursor numParams mismatch for '${nameToString(n)}'`);
       if(g.numIndices!==asUInt(field(r,'numIndices','recursor'),'recursor.numIndices'))throw new KernelError(`generated recursor numIndices mismatch for '${nameToString(n)}'`);
       if(g.numMotives!==asUInt(field(r,'numMotives','recursor'),'recursor.numMotives'))throw new KernelError(`generated recursor numMotives mismatch for '${nameToString(n)}'`);

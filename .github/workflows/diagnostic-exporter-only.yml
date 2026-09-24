@@ -21,6 +21,11 @@ jobs:
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
           lean_bin="$("$HOME/.elan/bin/elan" which lean)"
           echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - name: Compile diagnostic exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$LEAN434_BIN/lean" oracle/replay-probe/DependencyExport.lean
       - name: Export canonical Std stream without TypeScript replay
         shell: bash
         run: |

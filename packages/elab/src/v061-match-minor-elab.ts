@@ -74,7 +74,16 @@ export function elaborateV061MatchMinor(
   elaborate:MatchTermElaborator,
 ):Expr {
   const pattern=alternative.pattern;
-  if(pattern.kind!=='constructor')throw new Error('unreachable');
+  const binders=pattern.kind==='constructor'
+    ?pattern.binders
+    :pattern.kind==='bool'
+      ?[]
+      :undefined;
+  if(binders===undefined){
+    throw new Error(
+      'PS_ELAB_MATCH_PATTERN_UNSUPPORTED: verified ADT match requires constructor-compatible patterns',
+    );
+  }
   const constructor=context.environment.find(constructorName);
   if(constructor?.kind!=='constructor'){
     throw new Error(
@@ -90,11 +99,11 @@ export function elaborateV061MatchMinor(
       parameterArgs.length,
     );
   }
-  if(pattern.binders.length!==constructor.numFields){
+  if(binders.length!==constructor.numFields){
     throw new Error(
       "PS_ELAB_MATCH_ARITY: constructor '"+
       nameToString(constructorName)+"' binds "+
-      constructor.numFields+' fields, got '+pattern.binders.length,
+      constructor.numFields+' fields, got '+binders.length,
     );
   }
 
@@ -139,7 +148,7 @@ export function elaborateV061MatchMinor(
       );
     }
 
-    const sourceName=pattern.binders[index]!;
+    const sourceName=binders[index]!;
     if(branchContext.locals.has(sourceName)){
       throw new Error(
         "PS_ELAB_MATCH_BINDER_DUPLICATE: '"+sourceName+"'",

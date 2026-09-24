@@ -96,6 +96,103 @@ const valueExpr=natLit(42n);
 const runtimeExpr=kernelExprToLean434Runtime(valueExpr);
 const empty=emptyLean434MetavarContext();
 
+const emptyExprMap=
+  empty.kind==='constructor'?empty.fields[8]:undefined;
+if(
+  emptyExprMap?.kind!=='constructor'
+  ||emptyExprMap.name!=='Lean.PersistentHashMap.mk'
+){
+  throw new Error('empty MetavarContext eAssignment is not a PersistentHashMap');
+}
+
+let firstBucket=evaluator.evaluate(
+  constant(nameFromDotted('ProofScript.RuntimeProbe.firstBucketIndex')),
+);
+const bucket=evaluator.applyRuntimeValue(firstBucket,mvarId);
+if(typeof bucket!=='bigint'||bucket<0n||bucket>=32n){
+  throw new Error(
+    'real Lean PersistentHashMap produced invalid first bucket: '+String(bucket),
+  );
+}
+console.log(JSON.stringify({
+  phase:'metavar-context-map-bucket',
+  bucket:String(bucket),
+}));
+
+const emptyRoot=emptyExprMap.fields[0];
+if(
+  emptyRoot?.kind!=='constructor'
+  ||emptyRoot.name!=='Lean.PersistentHashMap.Node.entries'
+  ||!Array.isArray(emptyRoot.fields[0])
+){
+  throw new Error('empty expression map root is not an entries node');
+}
+const emptyEntries=emptyRoot.fields[0];
+
+let replaceNull=evaluator.evaluate(
+  constant(nameFromDotted('ProofScript.RuntimeProbe.replaceNullEntry')),
+);
+replaceNull=evaluator.applyRuntimeValue(replaceNull,emptyEntries);
+replaceNull=evaluator.applyRuntimeValue(replaceNull,bucket);
+replaceNull=evaluator.applyRuntimeValue(replaceNull,mvarId);
+const replacedEntries=evaluator.applyRuntimeValue(replaceNull,runtimeExpr);
+const replacedEntry=replacedEntries[Number(bucket)];
+if(
+  replacedEntry?.kind!=='constructor'
+  ||replacedEntry.name!=='Lean.PersistentHashMap.Entry.entry'
+){
+  throw new Error(
+    'real Lean Entry.null match/Array.modify did not produce Entry.entry',
+  );
+}
+console.log(
+  'ok - real Lean Entry.null match updates the expected hash-map bucket',
+);
+
+let insertMap=evaluator.evaluate(
+  constant(nameFromDotted('ProofScript.RuntimeProbe.insertExprMap')),
+);
+insertMap=evaluator.applyRuntimeValue(insertMap,emptyExprMap);
+insertMap=evaluator.applyRuntimeValue(insertMap,mvarId);
+const directlyInserted=evaluator.applyRuntimeValue(insertMap,runtimeExpr);
+const directRoot=
+  directlyInserted?.kind==='constructor'
+    ?directlyInserted.fields[0]
+    :undefined;
+const directEntries=
+  directRoot?.kind==='constructor'
+  &&directRoot.name==='Lean.PersistentHashMap.Node.entries'
+  &&Array.isArray(directRoot.fields[0])
+    ?directRoot.fields[0]
+    :undefined;
+const directEntry=directEntries?.[Number(bucket)];
+console.log(JSON.stringify({
+  phase:'metavar-context-direct-map-insert',
+  rootName:directRoot?.kind==='constructor'?directRoot.name:undefined,
+  bucket:String(bucket),
+  entryName:directEntry?.kind==='constructor'?directEntry.name:undefined,
+}));
+if(
+  directEntry?.kind!=='constructor'
+  ||directEntry.name!=='Lean.PersistentHashMap.Entry.entry'
+){
+  throw new Error(
+    'real Lean PersistentHashMap.insert did not populate its computed bucket',
+  );
+}
+
+let findMap=evaluator.evaluate(
+  constant(nameFromDotted('ProofScript.RuntimeProbe.findExprMap?')),
+);
+findMap=evaluator.applyRuntimeValue(findMap,directlyInserted);
+const directFound=evaluator.applyRuntimeValue(findMap,mvarId);
+if(lean434RuntimeOptionValue(directFound)===undefined){
+  throw new Error(
+    'real Lean PersistentHashMap.find? missed a directly inserted key',
+  );
+}
+console.log('ok - real Lean PersistentHashMap insert/find? round-trip in JS');
+
 console.log(JSON.stringify({phase:'metavar-context-initial-lookup-start'}));
 let getAssignment=evaluator.evaluate(
   constant(nameFromDotted('Lean.MetavarContext.getExprAssignmentExp')),

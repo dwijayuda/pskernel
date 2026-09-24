@@ -17,6 +17,61 @@ structure PsElabModuleResult where
   environment : PsEnvironment
   declarations : List PsDeclaration
 
+def psElabExplicitParameterIds :
+    List PsElabTypedBinder -> List Nat
+  | [] => []
+  | binder :: rest =>
+      match binder.binder with
+      | PsBinderInfo.explicit =>
+          binder.id :: psElabExplicitParameterIds rest
+      | _ =>
+          psElabExplicitParameterIds rest
+
+def psElabFindNatIndex
+    (target : Nat) :
+    List Nat -> Nat -> Option Nat
+  | [], _ => none
+  | value :: rest, index =>
+      if value == target then
+        some index
+      else
+        psElabFindNatIndex target rest (index + 1)
+
+def psElabStructuralRecursionFromSource
+    (functionName : PsName)
+    (bindersRev : List PsElabTypedBinder)
+    (body : PsSyntaxTerm)
+    (context : PsElabContext) :
+    Option PsElabStructuralRecursion :=
+  match body with
+  | .matchE (.reference scrutineeName) _ _ =>
+      match psSyntaxNameToName scrutineeName with
+      | none => none
+      | some sourceName =>
+          match
+              psResolveName
+                context.localContext
+                context.environment
+                sourceName with
+          | some (.local scrutineeId) =>
+              let explicitParameterIds :=
+                psElabExplicitParameterIds bindersRev.reverse
+              match
+                  psElabFindNatIndex
+                    scrutineeId
+                    explicitParameterIds
+                    0 with
+              | none => none
+              | some recursiveParameterIndex =>
+                  some {
+                    functionName := functionName
+                    explicitParameterIds := explicitParameterIds
+                    recursiveParameterIndex := recursiveParameterIndex
+                    calls := []
+                  }
+          | _ => none
+  | _ => none
+
 def psElabDeclarationParts
     (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
@@ -46,8 +101,19 @@ def psElabDeclarationParts
               | Except.error error =>
                   Except.error (PsElabError.infer error)
               | Except.ok _ =>
-                  match psElabTerm
+                  let valueContext :=
+                    if isTheorem then
                       typeResult.context
+                    else
+                      psElabContextWithStructuralRecursion
+                        typeResult.context
+                        (psElabStructuralRecursionFromSource
+                          name
+                          binderResult.bindersRev
+                          valueSyntax
+                          typeResult.context)
+                  match psElabTerm
+                      valueContext
                       valueSyntax
                       (some typeResult.term) with
                   | Except.error error => Except.error error

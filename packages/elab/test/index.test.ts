@@ -18,6 +18,7 @@ import {
   constant,
   exprEq,
   forallE,
+  levelParam,
   levelSucc,
   levelZero,
   mkAppN,
@@ -97,6 +98,41 @@ function makeApplicationEnvironment():{
   const checked=new TypeChecker(env,new LocalContext()).check(result.term);
   equal(exprEq(checked,constant(names.Nat)),true);
 }
+{
+  const {env,names}=makeApplicationEnvironment();
+  const kernel=new Kernel(env);
+  const polyId=nameFromDotted('Test.polyId');
+  const u=nameFromDotted('u');
+  const alpha=nameFromDotted('α');
+  const x=nameFromDotted('x');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:polyId,
+    levelParams:[u],
+    type:forallE(
+      alpha,
+      sort(levelParam(u)),
+      forallE(x,bvar(0),bvar(1),'default'),
+      'implicit',
+    ),
+  });
+
+  const meta=new ExprMetaContext(env);
+  const applied=elaborateApplication({
+    environment:env,
+    metaContext:meta,
+    fn:constant(polyId,[meta.mkFreshLevel()]),
+    args:[constant(names.zero)],
+  });
+  meta.validateGroundAssignments();
+  equal(applied.pendingInstances.length,0);
+  equal(applied.consumedExplicitArgs,1);
+  equal(exprEq(applied.type,constant(names.Nat)),true);
+  const checked=new TypeChecker(env,new LocalContext()).check(applied.term);
+  equal(exprEq(checked,constant(names.Nat)),true);
+}
+console.log('ok - @proofscript/elab universe-polymorphic application inference');
+
 {
   const {env,names}=makeApplicationEnvironment();
   const kernel=new Kernel(env);

@@ -1,9 +1,18 @@
 import {createInterface} from 'node:readline';
 import {Environment} from '../dist/src/core/environment.js';
+import {sort} from '../dist/src/core/expr.js';
+import {levelZero} from '../dist/src/core/level.js';
+import {nameFromDotted} from '../dist/src/core/name.js';
 import {Lean4ExportReplay} from '../dist/src/integration/lean4export.js';
 import {createLeanNativeEvaluator} from './lean-native-evaluator.mjs';
 
 const shared=new Environment();
+const pad=Number(process.env.PSKERNEL_PAD_CONSTANTS??'0');
+if(!Number.isSafeInteger(pad)||pad<0)throw new Error('invalid PSKERNEL_PAD_CONSTANTS');
+for(let i=0;i<pad;i++){
+  shared.add({kind:'axiom',name:nameFromDotted(`_diag.pad.C${i}`),levelParams:[],type:sort(levelZero)});
+}
+if(pad>0)console.error(`[env-size-diag] padded=${pad} constants=${shared.size}`);
 const nativeEvaluator=process.env.PSKERNEL_NATIVE_LEAN&&process.env.PSKERNEL_NATIVE_MODULE
   ?createLeanNativeEvaluator({lean:process.env.PSKERNEL_NATIVE_LEAN,moduleName:process.env.PSKERNEL_NATIVE_MODULE,cwd:process.cwd(),env:process.env})
   :undefined;

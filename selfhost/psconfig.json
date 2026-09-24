@@ -1,0 +1,14 @@
+{
+  "languageVersion": "0.7",
+  "entry": "src/ProofScript/Compiler/Data.lean",
+  "sourceRoots": [
+    "src"
+  ],
+  "runtimeDependencies": {},
+  "compilerOptions": {
+    "outDir": "dist",
+    "emitTypeScript": true,
+    "declaration": true,
+    "sourceMap": true
+  }
+}

@@ -509,10 +509,10 @@ def psElabIf
                       typeType with
                   | Except.error error =>
                       Except.error (PsElabError.infer error)
-                  | Except.ok universe =>
+                  | Except.ok universeLevel =>
                       let term :=
                         psExprApplyMany
-                          (PsExpr.constE psIteName [universe])
+                          (PsExpr.constE psIteName [universeLevel])
                           [
                             instantiatedType,
                             psMetaInstantiate metaContext conditionProp,

@@ -4,6 +4,7 @@ import {
   instantiateExprLevels,
   nameToString,
   type Expr,
+  type Name,
   type Level,
   type RecursorInfo,
 } from 'lean-ts-kernel';
@@ -193,6 +194,13 @@ export class Lean434Evaluator {
 
   get isInitializing():boolean{
     return this.initializationDepth>0;
+  }
+
+  private findEnvironmentName(exact:string):Name|undefined{
+    for(const info of this.environment.entries()){
+      if(nameToString(info.name)===exact)return info.name;
+    }
+    return undefined;
   }
 
   evaluate(expr:Expr):Lean434RuntimeValue {
@@ -436,6 +444,35 @@ export class Lean434Evaluator {
           implementedBy,
           args,
         ) as Lean434RuntimeValue,
+      );
+    }
+
+    if(metadataImplementedBy!==undefined){
+      if(metadataImplementedBy.implementation===name){
+        throw new Lean434EvaluationError(
+          "implemented_by metadata self-cycle for '"+name+"'",
+        );
+      }
+      const implName=this.findEnvironmentName(
+        metadataImplementedBy.implementation,
+      );
+      if(implName===undefined){
+        throw new Lean434EvaluationError(
+          "implemented_by runtime target is missing from the replayed "+
+          "environment: '"+name+"' -> '"+
+          metadataImplementedBy.implementation+"'",
+        );
+      }
+      // Lean has already checked the logical declaration independently.
+      // Runtime execution follows the implementation edge exactly as Lean's
+      // compiler does; this does not make the implementation proof evidence.
+      return this.evaluateConstant(
+        {
+          kind:'const',
+          name:implName,
+          levels:expr.levels,
+        },
+        locals,
       );
     }
 

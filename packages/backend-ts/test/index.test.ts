@@ -45,6 +45,44 @@ console.log('ok - @proofscript/backend-ts verified generic TypeScript emission')
     kind:'proofscript-verified-ir',
     declarations:[
       {
+        name:'genericIdentity',
+        typeParameters:[{name:'T0'}],
+        parameters:[{
+          name:'x',
+          type:{kind:'typeParameter',name:'T0'},
+        }],
+        resultType:{kind:'typeParameter',name:'T0'},
+        body:{kind:'var',name:'x'},
+      },
+      {
+        name:'useNatIdentity',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'Nat'},
+        }],
+        resultType:{kind:'primitive',name:'Nat'},
+        body:{
+          kind:'call',
+          fn:{kind:'var',name:'genericIdentity'},
+          typeArgs:[{kind:'primitive',name:'Nat'}],
+          args:[{kind:'var',name:'x'}],
+        },
+      },
+    ],
+  });
+  equal(source.includes('genericIdentity<bigint>(x)'),true);
+  const compiled=compileTypeScript(source,'verified-generic-call.ts');
+  equal(compiled.javascript.includes('genericIdentity(x)'),true);
+}
+console.log('ok - @proofscript/backend-ts explicit generic call type arguments');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    declarations:[
+      {
         name:'add',
         typeParameters:[],
         parameters:[

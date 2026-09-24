@@ -27,6 +27,36 @@ def psIntSubName : PsName :=
 def psIntMulName : PsName :=
   psNameAppendStr psIntName "mul"
 
+def psArrayName : PsName :=
+  psRootName "Array"
+
+def psArrayEmptyWithCapacityName : PsName :=
+  psNameAppendStr psArrayName "emptyWithCapacity"
+
+def psArraySizeName : PsName :=
+  psNameAppendStr psArrayName "size"
+
+def psArrayPushName : PsName :=
+  psNameAppendStr psArrayName "push"
+
+def psArrayGetInternalName : PsName :=
+  psNameAppendStr psArrayName "getInternal"
+
+def psArrayGetDName : PsName :=
+  psNameAppendStr psArrayName "getD"
+
+def psArraySetName : PsName :=
+  psNameAppendStr psArrayName "set"
+
+def psArraySetIfInBoundsName : PsName :=
+  psNameAppendStr psArrayName "setIfInBounds"
+
+def psArrayMapName : PsName :=
+  psNameAppendStr psArrayName "map"
+
+def psArrayFoldlName : PsName :=
+  psNameAppendStr psArrayName "foldl"
+
 def psStringName : PsName :=
   psRootName "String"
 

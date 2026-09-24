@@ -9,7 +9,7 @@ export function sourceKindFromLspDocument(
   if(languageId==='proofscript')return 'proofscript';
   if(languageId==='proofscript-lean')return 'lean-subset';
   const normalized=uri.toLowerCase();
-  if(normalized.endsWith('.ps'))return 'proofscript';
+  if(normalized.endsWith('.ps')||normalized.endsWith('.psx'))return 'proofscript';
   if(normalized.endsWith('.lean'))return 'lean-subset';
   throw new Error(
     "PS_LSP_SOURCE_KIND: unsupported document language '"+String(languageId)+

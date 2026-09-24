@@ -30,7 +30,9 @@ const child=spawn(lean,['--run','oracle/replay-probe/DependencyExport.lean',modu
 const rl=createInterface({input:child.stdout,crlfDelay:Infinity});
 let stderr='';child.stderr.setEncoding('utf8');child.stderr.on('data',d=>stderr+=d);
 const shared=new Environment();
-let replay=null,header=null,current=null,shards=0,totalLines=0,totalDecls=0,maxRssMiB=0,maxHeapMiB=0;
+const gcEveryShards=Number(process.env.PSKERNEL_GC_EVERY_SHARDS??'1');
+if(!Number.isSafeInteger(gcEveryShards)||gcEveryShards<0)throw new Error('invalid PSKERNEL_GC_EVERY_SHARDS');
+let replay=null,header=null,current=null,shards=0,totalLines=0,totalDecls=0,maxRssMiB=0,maxHeapMiB=0,totalGcMs=0,gcRuns=0;
 let fatal=null;
 try{
  for await(const line of rl){
@@ -50,7 +52,13 @@ try{
      continue;
    }
    if(marker?.shard){
-     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;global.gc?.();}
+     if(replay){
+       const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;
+       if(gcEveryShards>0&&shards%gcEveryShards===0&&global.gc){
+         const t0=performance.now();global.gc();const ms=performance.now()-t0;totalGcMs+=ms;gcRuns++;
+         if(gcRuns===1||gcRuns%10===0)console.error(`[module-stream] gc runs=${gcRuns} lastMs=${ms.toFixed(1)} totalMs=${totalGcMs.toFixed(1)} completedShards=${shards}`);
+       }
+     }
      replay=new Lean4ExportReplay(shared,{nativeEvaluator});
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);
@@ -104,5 +112,8 @@ console.log(JSON.stringify({
   rssMiB:Number((finalMem.rss/1048576).toFixed(1)),
   heapMiB:Number((finalMem.heapUsed/1048576).toFixed(1)),
   maxRssMiB:Number(maxRssMiB.toFixed(1)),
-  maxHeapMiB:Number(maxHeapMiB.toFixed(1))
+  maxHeapMiB:Number(maxHeapMiB.toFixed(1)),
+  gcEveryShards,
+  gcRuns,
+  totalGcMs:Number(totalGcMs.toFixed(1))
 },null,2));

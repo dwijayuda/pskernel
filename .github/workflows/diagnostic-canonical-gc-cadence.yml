@@ -1,0 +1,40 @@
+name: Diagnostic canonical GC cadence
+# trigger: canonical-gc-cadence-v1
+
+on:
+  push:
+    branches: [diagnostic/canonical-gc-cadence]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diagnostic-canonical-gc-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  std:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          lean_dir="$(dirname "$lean_bin")"
+          echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:kernel
+      - run: node scripts/anti-drift.mjs
+      - name: Canonical Full Std with sparse explicit GC
+        env:
+          PSKERNEL_STD_HEAP_MIB: "5632"
+          PSKERNEL_GC_EVERY_SHARDS: "100"
+        run: npm run oracle:std-full

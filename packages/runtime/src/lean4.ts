@@ -18,6 +18,7 @@ export type LeanArray<T>=readonly T[];
 
 export const LEAN434_JS_RUNTIME_VERSION='0.1.0';
 export const LEAN434_SOURCE_VERSION='4.34.0';
+export const LEAN434_SOURCE_GITHASH='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
 export const LEAN434_USIZE_BITS=64 as const;
 
 function assertNat(value:bigint,name:string):void{

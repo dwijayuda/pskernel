@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain twenty-four pskernel-admitted theorems in total:
+The three modules now contain twenty-five pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,9 +49,9 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- twenty-four admitted stdlib theorems: twelve definitional laws use bounded
+- twenty-five admitted stdlib theorems: twelve definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
-  `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`; `optionMapOrElse` and `optionGetOrElseOrElse` dogfood higher-order/helper composition through Option case analysis,
+  `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`; `optionMapOrElse`, `optionGetOrElseOrElse`, and `optionGetOrElseMap` dogfood higher-order/helper composition through Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
   symmetry, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
@@ -201,6 +201,21 @@ is absent, both sides reduce to extracting the fallback with the same default.
 The proof is bounded `cases` plus Eq-only `rfl`, following the constructor
 behavior of Lean 4.34's Option elimination/get-default operations and strict
 Option choice without adding new elaborator or runtime semantics.
+
+## Option map/get-or-else compatibility
+
+`ProofScript.Data.Option.optionGetOrElseMap` proves:
+
+```text
+optionGetOrElse(optionMap(f, value), f(fallback)) =
+f(optionGetOrElse(value, fallback))
+```
+
+for every `PsOption`. In the `some` branch both sides reduce to the mapped
+value; in the `none` branch both reduce to the mapped fallback. The proof is
+bounded `cases` followed by Eq-only `rfl`, matching Lean 4.34's
+constructor-level `Option.map` and `Option.getD` behavior without adding a
+special rewrite rule or runtime implementation.
 
 ## Result map/get-or-else compatibility
 

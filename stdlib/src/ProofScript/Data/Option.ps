@@ -61,3 +61,9 @@ theorem optionGetOrElseOrElse {α : Type}
 optionGetOrElse(optionOrElse(value, fallback), default) =
 optionGetOrElse(value, optionGetOrElse(fallback, default)) :=
   by cases value; rfl; rfl;
+
+theorem optionGetOrElseMap {α : Type}{β : Type}
+(f : α -> β, value : PsOption(α), fallback : α) :
+optionGetOrElse(optionMap(f, value), f(fallback)) =
+f(optionGetOrElse(value, fallback)) :=
+  by cases value; rfl; rfl;

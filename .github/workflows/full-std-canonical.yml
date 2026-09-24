@@ -1,15 +1,28 @@
 name: Canonical Full Std replay
-# trigger: canonical-std-v1
+# trigger: canonical-std-v2
 
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, kernel/lean434-study-hardening, integration/kernel-lean434-main-sync]
     paths:
       - ".github/workflows/full-std-canonical.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "ORACLE_LOCK.json"
+      - "oracle/replay-probe/**"
+      - "scripts/**"
+      - "src/core/**"
+      - "src/kernel/**"
+      - "src/integration/lean4export.ts"
+      - "test/all.test.ts"
 
 permissions:
   contents: read
+
+concurrency:
+  group: canonical-full-std-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   std:
@@ -17,6 +30,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
+
       - name: Install pinned Lean 4.34
         shell: bash
         run: |
@@ -24,12 +38,44 @@ jobs:
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lean" --githash
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          lean_dir="$(dirname "$lean_bin")"
+          test -x "$lean_dir/leanchecker"
+          echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
+          echo "LEAN434_SRC=$GITHUB_WORKSPACE/study/lean4-4.34.0" >> "$GITHUB_ENV"
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
-      - run: npm run build
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify exact Lean oracle identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="$(node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('ORACLE_LOCK.json','utf8')).leanCommit)")"
+          actual="$(lean --githash)"
+          test "$actual" = "$expected"
+
+      - name: Direct kernel gate
+        run: npm run test:kernel
+
+      - name: Kernel anti-drift gate
+        run: node scripts/anti-drift.mjs
+
+      - name: Bounded Lean 4.34 oracle and corpus ladder
+        run: npm run check:kernel-corpus
+
+      - name: Native compiler-IR smoke
+        run: npm run oracle:native-smoke
+
+      - name: Canonical Init.Prelude preflight
+        run: npm run oracle:init-canonical
+
       - name: Canonical one-pass Std replay
         env:
-          PSKERNEL_STD_HEAP_MIB: "6144"
+          PSKERNEL_STD_HEAP_MIB: "5632"
         run: npm run oracle:std-full

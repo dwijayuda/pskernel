@@ -686,7 +686,7 @@
     "forbidHandAuthoredMjs": true
   },
   "notes": [
-    "Lean 4.34 final removed deprecated in-kernel native reduction; no NativeEvaluator/native-ir kernel extension is part of the compatibility architecture.",
+    "Lean v4.34.0 retains the deprecated in-kernel Lean.reduceNat/Lean.reduceBool compiler-IR path. The root kernel exposes an explicit NativeEvaluator TCB boundary; no workspace native-ir provider is enabled yet.",
     "npm workspaces are enabled so package-name imports resolve from the single root install; the root lean-ts-kernel remains the TCB package and outer workspaces may depend on it, never the reverse.",
     "docs/PROOFSCRIPT_ARCHITECTURE.md plus scripts/proofscript-architecture-check.mjs define and enforce the canonical verified compiler dependency direction.",
     "The canonical integration regression now compiles multiple pskernel-admitted Nat functions, including a user-definition call, through verified IR to TypeScript/JavaScript.",

@@ -4,15 +4,17 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const lock = JSON.parse(readFileSync(join(root, 'ORACLE_LOCK.json'), 'utf8'));
 if (lock.lean !== '4.34.0') throw new Error('Oracle drift: Lean target changed');
+if (lock.leanTag !== 'v4.34.0') throw new Error('Oracle drift: Lean tag changed');
+if (lock.leanCommit !== '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b') throw new Error('Oracle drift: exact Lean v4.34.0 commit changed');
 if (lock.lean4export?.commit !== '076e8e57707e813375e8f9da8bf989799ace9680') throw new Error('Oracle drift: lean4export pin changed');
 if (lock.lean4export?.format !== '3.1.0') throw new Error('Oracle drift: lean4export format changed');
 if (lock.lean4export?.toolchain !== 'leanprover/lean4:v4.34.0') throw new Error('Oracle drift: lean4export toolchain changed');
-const forbidden = [/lean\s*4\.3[0-3]/i, /equivmanager/i, /NativeEvaluator/, /LeanReduce(?:Nat|Bool)/];
+const forbidden = [/lean\s*4\.3[0-3]/i, /equivmanager/i];
 function walk(p) { for (const n of readdirSync(p)) { const q=join(p,n); const s=statSync(q); if(s.isDirectory()) walk(q); else if(q.endsWith('.ts')) { const t=readFileSync(q,'utf8'); for(const r of forbidden) if(r.test(t)) throw new Error(`Anti-drift violation ${r} in ${q}`); } } }
 walk(join(root,'src'));
 
-// File URL pathnames are not filesystem paths on Windows (for example,
-// /C:/work/...); all repository scripts must convert file URLs explicitly.
+// URL.pathname is not a portable filesystem path on Windows; repository
+// scripts that derive paths from import.meta.url must use fileURLToPath().
 const unsafeFileUrlPathname=/import[.]meta[.]url\s*[)]\s*[.]pathname/;
 function forbidUnsafeScriptFileUrlPaths(p) {
   for (const n of readdirSync(p)) {
@@ -24,8 +26,16 @@ function forbidUnsafeScriptFileUrlPaths(p) {
   }
 }
 forbidUnsafeScriptFileUrlPaths(join(root,'scripts'));
-if (existsSync(join(root,'src','kernel','reduction','native.ts'))) throw new Error('Anti-drift violation: final Lean 4.34 has no native-reduction compatibility layer');
-if (existsSync(join(root,'packages','native-ir'))) throw new Error('Anti-drift violation: final Lean 4.34 has no native-ir kernel-extension package');
+const nativePath=join(root,'src','kernel','reduction','native.ts');
+if (!existsSync(nativePath)) throw new Error('Anti-drift violation: Lean v4.34.0 native-reduction boundary is missing');
+const nativeSource=readFileSync(nativePath,'utf8');
+for (const marker of ['NativeEvaluator','LeanReduceNat','LeanReduceBool'])
+  if (!nativeSource.includes(marker)) throw new Error(`Anti-drift violation: native-reduction boundary lost ${marker}`);
+const pinnedTypeChecker=join(root,'study','lean4-4.34.0','src','kernel','type_checker.cpp');
+if (!existsSync(pinnedTypeChecker)) throw new Error('Anti-drift violation: pinned Lean 4.34 type_checker.cpp is missing');
+const pinnedTypeCheckerSource=readFileSync(pinnedTypeChecker,'utf8');
+for (const marker of ['reduce_native','g_lean_reduce_nat','g_lean_reduce_bool'])
+  if (!pinnedTypeCheckerSource.includes(marker)) throw new Error(`Anti-drift violation: pinned Lean v4.34.0 oracle lost ${marker}`);
 
 const dependencyExporter=readFileSync(join(root,'oracle','replay-probe','DependencyExport.lean'),'utf8');
 for (const marker of [
@@ -38,6 +48,7 @@ for (const marker of [
 if (dependencyExporter.includes('| .defnInfo dv =>\n      let group := if dv.all.isEmpty then [dv.name] else dv.all')) {
   throw new Error('Anti-drift violation: safe definitions must not be grouped by informational DefinitionVal.all');
 }
+
 
 // Package implementation source is TypeScript-first. Runtime .js is generated
 // under dist; hand-authored .mjs in packages would reintroduce two source

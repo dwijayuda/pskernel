@@ -13,8 +13,14 @@ import { levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../dist/src/cor
 const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin'].filter(Boolean).map(p=>resolve(p));
 const bin=candidates.find(p=>fs.existsSync(join(p,'lean')));
 if(!bin) throw new Error('defeq-differential: set LEAN434_BIN to Lean 4.34.0 bin directory');
-const version=spawnSync(join(bin,'lean'),['--version'],{encoding:'utf8',timeout:5000}).stdout.trim();
-if(version!=='Lean (version 4.34.0, Release)') throw new Error(`defeq-differential: Lean version drift: ${version}`);
+const expectedVersion=/^Lean \(version 4\.34\.0(?:,|\)).*Release\)?$/;
+const expectedGitHash='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
+const versionRun=spawnSync(join(bin,'lean'),['--version'],{encoding:'utf8',timeout:5000});
+const version=versionRun.stdout.trim();
+if(versionRun.error||versionRun.status!==0||!expectedVersion.test(version)) throw new Error(`defeq-differential: Lean version drift/failure: ${versionRun.error?.message??versionRun.stderr??version}`);
+const hashRun=spawnSync(join(bin,'lean'),['--githash'],{encoding:'utf8',timeout:5000});
+const leanGitHash=hashRun.stdout.trim();
+if(hashRun.error||hashRun.status!==0||leanGitHash!==expectedGitHash) throw new Error(`defeq-differential: Lean git hash drift/failure: expected ${expectedGitHash}, got ${hashRun.error?.message??hashRun.stderr??leanGitHash}`);
 
 const replay=new Lean4ExportReplay();
 replay.replay(fs.readFileSync('oracle/fixtures/lean434-init-prelude.ndjson','utf8'));
@@ -25,6 +31,11 @@ const primitiveEnv=primitiveReplay.env;
 const N=s=>nameFromDotted(s), Nat=()=>constant(N('Nat')), Bool=()=>constant(N('Bool'));
 const oneLevel=levelSucc(levelZero);
 const arrow=(a,b)=>forallE(N('_'),a,b);
+// Init.Prelude dependency closure does not necessarily retain the deprecated
+// native-reduction helper declarations. Their exact result types are sufficient
+// here because execution is delegated through the explicit NativeEvaluator TCB boundary.
+if(!env.has(N('Lean.reduceNat'))) env.add({kind:'opaque',name:N('Lean.reduceNat'),levelParams:[],type:arrow(Nat(),Nat()),value:lam(N('n'),Nat(),bvar(0))});
+if(!env.has(N('Lean.reduceBool'))) env.add({kind:'opaque',name:N('Lean.reduceBool'),levelParams:[],type:arrow(Bool(),Bool()),value:lam(N('b'),Bool(),bvar(0))});
 const eqNat=(a,b)=>mkAppN(constant(N('Eq'),[oneLevel]),[Nat(),a,b]);
 const add=(a,b)=>app(app(constant(N('Nat.add')),a),b);
 const mkLocal=(decls,build)=>{const l=new LocalContext();const xs={};for(const [id,type] of decls){l.addLocal(id,N(id),type);xs[id]=fvar(id);}const tc=new TypeChecker(env,l);return build(tc,xs);};
@@ -78,6 +89,8 @@ const cases=[
  {name:'nat-recursor-depth3',expected:true,lean:'example : (Nat.rec (motive := fun _ => Nat) 0 (fun _ r => r + 1) 3) = 3 := rfl',ts:()=>{const motive=lam(N('_'),Nat(),Nat()),step=lam(N('_'),Nat(),lam(N('r'),Nat(),add(bvar(0),natLit(1))));return {tc:new TypeChecker(env),lhs:mkAppN(constant(N('Nat.rec'),[oneLevel]),[motive,natLit(0),step,natLit(3)]),rhs:natLit(3)};}},
  {name:'bool-and',expected:true,lean:'example : (true && false) = false := rfl',ts:()=>({tc:new TypeChecker(env),lhs:mkAppN(constant(N('Bool.and')),[constant(N('Bool.true')),constant(N('Bool.false'))]),rhs:constant(N('Bool.false'))})},
  {name:'nat-succ-literal',expected:true,lean:'example : (Nat.succ 2) = 3 := rfl',ts:()=>({tc:new TypeChecker(env),lhs:app(constant(N('Nat.succ')),natLit(2)),rhs:natLit(3)})},
+ {name:'native-reduce-nat-provider',expected:true,lean:'def NativeReduceNatV := 100000000000 + 100000000000\nexample : Lean.reduceNat NativeReduceNatV = 200000000000 := rfl',ts:()=>{const n=N('Diff.NativeReduceNatV');if(!env.has(n))env.add({kind:'definition',name:n,levelParams:[],type:Nat(),value:add(natLit(100000000000n),natLit(100000000000n)),hints:{kind:'regular',height:1n},safety:'safe'});const nativeEvaluator={evaluate(_env,request){return request.kind==='nat'&&request.constant===n?{kind:'nat',value:200000000000n}:null;}};return {tc:new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,nativeEvaluator),lhs:app(constant(N('Lean.reduceNat')),constant(n)),rhs:natLit(200000000000n)};}},
+ {name:'native-reduce-bool-provider',expected:true,lean:'def NativeReduceBoolV : Bool := 200000000001 <= 20000000000\nexample : Lean.reduceBool NativeReduceBoolV = false := rfl',ts:()=>{const n=N('Diff.NativeReduceBoolV');if(!env.has(n))env.add({kind:'definition',name:n,levelParams:[],type:Bool(),value:mkAppN(constant(N('Nat.ble')),[natLit(200000000001n),natLit(20000000000n)]),hints:{kind:'regular',height:1n},safety:'safe'});const nativeEvaluator={evaluate(_env,request){return request.kind==='bool'&&request.constant===n?{kind:'bool',value:false}:null;}};return {tc:new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,nativeEvaluator),lhs:app(constant(N('Lean.reduceBool')),constant(n)),rhs:constant(N('Bool.false'))};}},
  {name:'nat-unequal',expected:false,lean:'example : (2 : Nat) = 3 := rfl',ts:()=>({tc:new TypeChecker(env),lhs:natLit(2),rhs:natLit(3)})},
  {name:'lambda-unequal',expected:false,lean:'example : (fun x : Nat => x) = (fun _ : Nat => 0) := rfl',ts:()=>({tc:new TypeChecker(env),lhs:lam(N('x'),Nat(),bvar(0)),rhs:lam(N('_'),Nat(),natLit(0))})},
  {name:'eta-wrong-function',expected:false,lean:'example (f : Nat → Nat) : (fun _ => f 0) = f := rfl',ts:()=>mkLocal([['f',arrow(Nat(),Nat())]],(tc,x)=>({tc,lhs:lam(N('_'),Nat(),app(x.f,natLit(0))),rhs:x.f}))},

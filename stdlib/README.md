@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain twenty-three pskernel-admitted theorems in total:
+The three modules now contain twenty-four pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,9 +49,9 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- twenty-three admitted stdlib theorems: twelve definitional laws use bounded
+- twenty-four admitted stdlib theorems: twelve definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
-  `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`, `optionMapOrElse` dogfoods higher-order Option case analysis,
+  `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`; `optionMapOrElse` and `optionGetOrElseOrElse` dogfood higher-order/helper composition through Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
   symmetry, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
@@ -186,6 +186,21 @@ mapping changes only the error payload, so the operations commute. The proof is
 bounded constructor case analysis followed by kernel definitional reflexivity in
 both branches. This gives the stdlib a generic two-channel law without adding a
 new tactic, host-side Result semantics, or backend rewrite.
+
+## Option get-or-else/or-else compatibility
+
+`ProofScript.Data.Option.optionGetOrElseOrElse` proves:
+
+```text
+optionGetOrElse(optionOrElse(value, fallback), default) =
+optionGetOrElse(value, optionGetOrElse(fallback, default))
+```
+
+for every `PsOption`. A present value wins immediately; when the first value
+is absent, both sides reduce to extracting the fallback with the same default.
+The proof is bounded `cases` plus Eq-only `rfl`, following the constructor
+behavior of Lean 4.34's Option elimination/get-default operations and strict
+Option choice without adding new elaborator or runtime semantics.
 
 ## Result map/get-or-else compatibility
 

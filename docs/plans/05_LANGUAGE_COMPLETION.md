@@ -712,8 +712,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
     resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
-    optionMapOrElse, listAppendNilRight,
-    listAppendAssoc, and listMapAppend. Twenty-three current stdlib theorems now
+    optionMapOrElse, optionGetOrElseOrElse, listAppendNilRight,
+    listAppendAssoc, and listMapAppend. Twenty-four current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
     laws/utilities only when the proof/recursion surface supports them without
@@ -777,6 +777,15 @@ order. The theorem is generic in all four involved types and both mapping
 functions. Its proof uses only bounded `cases` and Eq-only `rfl` on the two
 constructors, so it expands the ProofScript-authored library without expanding
 proof-search authority or relying on a host Result implementation.
+
+## Stdlib Option get-or-else/or-else checkpoint
+
+`optionGetOrElseOrElse` links two existing Option helpers: extracting from
+`optionOrElse(value, fallback)` with a default equals extracting `value`
+with the extraction of `fallback` as its fallback value. The theorem is
+generic and closes by bounded `cases` plus Eq-only `rfl`. It adds a useful
+helper-composition law while keeping Option behavior entirely in
+ProofScript-authored definitions and pskernel-checked equality.
 
 ## Stdlib Result map/get-or-else checkpoint
 

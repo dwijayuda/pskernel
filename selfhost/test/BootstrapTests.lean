@@ -2017,6 +2017,79 @@ def psTestDualSourceTypePropElaboration : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestParametricInductiveShape
+    (result : PsElabModuleResult) : Bool :=
+  let maybeName := psTestName "Maybe"
+  let noneName := psNameAppendStr maybeName "none"
+  let someName := psNameAppendStr maybeName "some"
+  let recName := psNameAppendStr maybeName "rec"
+  let natType := PsExpr.constE psNatName []
+  let maybeNat :=
+    PsExpr.app (PsExpr.constE maybeName []) natType
+  match result.declarations with
+  | [
+      PsDeclaration.inductiveDecl inductiveInfo,
+      PsDeclaration.constructorDecl noneInfo,
+      PsDeclaration.constructorDecl someInfo,
+      PsDeclaration.recursorDecl recInfo,
+      PsDeclaration.definitionDecl
+        getName
+        []
+        getType
+        getValue
+    ] =>
+      psNameEq inductiveInfo.name maybeName
+        && inductiveInfo.numParams == 1
+        && inductiveInfo.numIndices == 0
+        && psNameListEq
+          inductiveInfo.constructors
+          [noneName, someName]
+        && psNameEq noneInfo.name noneName
+        && noneInfo.numParams == 1
+        && noneInfo.numFields == 0
+        && psNameEq someInfo.name someName
+        && someInfo.numParams == 1
+        && someInfo.numFields == 1
+        && psNameEq recInfo.name recName
+        && recInfo.numParams == 1
+        && recInfo.numMinors == 2
+        && psNameEq getName (psTestName "getOrZero")
+        && psExprAlphaEq
+          getType
+          (PsExpr.forallE
+            (psTestName "v")
+            maybeNat
+            natType
+            PsBinderInfo.explicit)
+        && match getValue with
+           | PsExpr.lam _ _ body PsBinderInfo.explicit =>
+               match (psExprAppView body).head with
+               | PsExpr.constE name levels =>
+                   psNameEq name recName
+                     && levels.length == 1
+               | _ => false
+           | _ => false
+  | _ => false
+
+def psTestDualSourceParametricInductive : Bool :=
+  match
+      psParseLeanSource
+        "inductive Maybe (α : Type) where | none | some (value : α)\ndef getOrZero (v : Maybe Nat) : Nat := match v with | Maybe.none => 0 | Maybe.some x => x",
+      psParseProofScriptSource
+        "inductive Maybe(α : Type) where { | none; | some(value : α); }; def getOrZero(v : Maybe(Nat)) : Nat := match v with { | Maybe.none => 0; | Maybe.some x => x };" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestParametricInductiveShape leanResult
+            && psTestParametricInductiveShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -2046,6 +2119,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source inductive enum elaboration", passed := psTestDualSourceInductiveEnumElaboration },
   { name := "dual-source inductive field elaboration", passed := psTestDualSourceInductiveFieldElaboration },
   { name := "dual-source Type Prop elaboration", passed := psTestDualSourceTypePropElaboration },
+  { name := "dual-source parametric inductive", passed := psTestDualSourceParametricInductive },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

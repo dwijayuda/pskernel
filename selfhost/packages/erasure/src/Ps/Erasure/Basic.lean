@@ -23,12 +23,34 @@ inductive PsErasureError where
   | unsupportedApplication
   | unknownConstant (name : PsName)
 
+structure PsRuntimeConstructorField where
+  sourceIndex : Nat
+  name : String
+  type : PsVerifiedIrType
+
+structure PsRuntimeConstructorInfo where
+  inductiveName : String
+  name : String
+  coreName : PsName
+  numParams : Nat
+  fields : List PsRuntimeConstructorField
+
+structure PsRuntimeInductiveInfo where
+  name : String
+  coreName : PsName
+  recursorName : PsName
+  numParams : Nat
+  typeParameters : List PsVerifiedIrTypeParameter
+  constructors : List PsRuntimeConstructorInfo
+
 structure PsErasureScope where
   localContext : PsLocalContext
   runtimeLocals : List (Nat × String)
   typeLocals : List (Nat × String)
   erasedLocals : List Nat
   declarationNames : List (PsName × String)
+  runtimeConstructors : List (PsName × PsRuntimeConstructorInfo)
+  runtimeRecursors : List (PsName × PsRuntimeInductiveInfo)
 
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :
@@ -39,6 +61,8 @@ def psErasureScopeEmpty
     typeLocals := []
     erasedLocals := []
     declarationNames := declarationNames
+    runtimeConstructors := []
+    runtimeRecursors := []
   }
 
 def psErasureLookupNat :
@@ -54,6 +78,24 @@ def psErasureLookupName :
   | entry :: rest, name =>
       if psNameEq entry.1 name then some entry.2
       else psErasureLookupName rest name
+
+def psErasureLookupConstructor :
+    List (PsName × PsRuntimeConstructorInfo) ->
+    PsName ->
+    Option PsRuntimeConstructorInfo
+  | [], _ => none
+  | entry :: rest, name =>
+      if psNameEq entry.1 name then some entry.2
+      else psErasureLookupConstructor rest name
+
+def psErasureLookupRecursor :
+    List (PsName × PsRuntimeInductiveInfo) ->
+    PsName ->
+    Option PsRuntimeInductiveInfo
+  | [], _ => none
+  | entry :: rest, name =>
+      if psNameEq entry.1 name then some entry.2
+      else psErasureLookupRecursor rest name
 
 def psErasureNatInList : List Nat -> Nat -> Bool
   | [], _ => false

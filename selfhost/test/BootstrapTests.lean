@@ -796,6 +796,7 @@ def psTestInductiveInfoEq
     && psExprAlphaEq left.type right.type
     && left.numParams == right.numParams
     && left.numIndices == right.numIndices
+    && left.isStructure == right.isStructure
     && psNameListEq left.constructors right.constructors
 
 def psTestConstructorInfoEq

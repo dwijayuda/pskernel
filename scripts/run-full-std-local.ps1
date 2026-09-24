@@ -1,7 +1,7 @@
 param(
   [int]$HeapMiB = 12288,
   [int]$StackKiB = 65500,
-  [string]$Log = "full-std.log",
+  [string]$Log = "full-std.local.log",
   [switch]$SkipTests,
   [switch]$SkipCorpora,
   [switch]$SkipNativeSmoke,

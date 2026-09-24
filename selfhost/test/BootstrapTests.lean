@@ -1414,6 +1414,130 @@ def psTestConstructorMatchPatternShape : Bool :=
                      && noneName.segments == ["Option", "none"]
                | _ => false
 
+def psTestChoiceEnvironment : PsEnvironment :=
+  let choiceName := psTestName "Choice"
+  let leftName := psNameAppendStr choiceName "left"
+  let rightName := psNameAppendStr choiceName "right"
+  let recName := psNameAppendStr choiceName "rec"
+  let uName := psTestName "u"
+  let motiveName := psTestName "motive"
+  let leftCaseName := psTestName "leftCase"
+  let rightCaseName := psTestName "rightCase"
+  let majorName := psTestName "major"
+  let choiceType := PsExpr.constE choiceName []
+  let choiceSort := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let motiveType :=
+    PsExpr.forallE
+      (psTestName "_choice")
+      choiceType
+      (PsExpr.sortE (PsLevel.param uName))
+      PsBinderInfo.explicit
+  let recursorType :=
+    PsExpr.forallE
+      motiveName
+      motiveType
+      (PsExpr.forallE
+        leftCaseName
+        (PsExpr.app (PsExpr.bvar 0) (PsExpr.constE leftName []))
+        (PsExpr.forallE
+          rightCaseName
+          (PsExpr.app (PsExpr.bvar 1) (PsExpr.constE rightName []))
+          (PsExpr.forallE
+            majorName
+            choiceType
+            (PsExpr.app (PsExpr.bvar 3) (PsExpr.bvar 0))
+            PsBinderInfo.explicit)
+          PsBinderInfo.explicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let indInfo : PsInductiveInfo := {
+    name := choiceName
+    levelParams := []
+    type := choiceSort
+    numParams := 0
+    numIndices := 0
+    constructors := [leftName, rightName]
+  }
+  let leftInfo : PsConstructorInfo := {
+    name := leftName
+    levelParams := []
+    type := choiceType
+    inductiveName := choiceName
+    constructorIndex := 0
+    numParams := 0
+    numFields := 0
+  }
+  let rightInfo : PsConstructorInfo := {
+    name := rightName
+    levelParams := []
+    type := choiceType
+    inductiveName := choiceName
+    constructorIndex := 1
+    numParams := 0
+    numFields := 0
+  }
+  let recInfo : PsRecursorInfo := {
+    name := recName
+    levelParams := [uName]
+    type := recursorType
+    inductiveNames := [choiceName]
+    numParams := 0
+    numIndices := 0
+    numMotives := 1
+    numMinors := 2
+  }
+  let env1 :=
+    psTestAddDeclaration
+      psTestNatEnvironment
+      (PsDeclaration.inductiveDecl indInfo)
+  let env2 :=
+    psTestAddDeclaration
+      env1
+      (PsDeclaration.constructorDecl leftInfo)
+  let env3 :=
+    psTestAddDeclaration
+      env2
+      (PsDeclaration.constructorDecl rightInfo)
+  psTestAddDeclaration
+    env3
+    (PsDeclaration.recursorDecl recInfo)
+
+def psTestBasicMatchDeclarationShape
+    (result : PsElabModuleResult) : Bool :=
+  let recName := psNameAppendStr (psTestName "Choice") "rec"
+  let natType := PsExpr.constE psNatName []
+  match result.declarations with
+  | [PsDeclaration.definitionDecl actualName [] actualType actualValue] =>
+      let view := psExprAppView actualValue
+      psNameEq actualName (psTestName "pick")
+        && psExprAlphaEq actualType natType
+        && match view.head with
+           | PsExpr.constE name levels =>
+               psNameEq name recName
+                 && levels.length == 1
+                 && view.args.length == 4
+           | _ => false
+  | _ => false
+
+def psTestDualSourceBasicMatchElaboration : Bool :=
+  match
+      psParseLeanSource
+        "def pick : Nat := match Choice.left with | Choice.left => 1 | Choice.right => 2",
+      psParseProofScriptSource
+        "def pick : Nat := match Choice.left with { | Choice.left => 1; | Choice.right => 2 };" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestChoiceEnvironment leanModule,
+          psElabModule psTestChoiceEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestBasicMatchDeclarationShape leanResult
+            && psTestBasicMatchDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1435,6 +1559,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "inductive metadata lookup", passed := psTestInductiveMetadataLookup },
   { name := "dual-source basic match parse", passed := psTestDualSourceBasicMatchParse },
   { name := "constructor match pattern parse", passed := psTestConstructorMatchPatternShape },
+  { name := "dual-source basic match elaboration", passed := psTestDualSourceBasicMatchElaboration },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

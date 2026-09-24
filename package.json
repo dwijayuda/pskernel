@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run test:outer && npm run build && node dist/test/all.test.js",
+    "test": "npm run test:outer && npm run test:kernel",
     "check": "npm run test && node scripts/anti-drift.mjs && npm run check:packages && node scripts/oracle-fingerprint.mjs",
     "replay": "npm run build --silent && node scripts/replay.mjs",
     "oracle:official": "node scripts/official-oracle.mjs",
@@ -34,7 +34,19 @@
     "check:vscode": "node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs",
     "check:architecture": "node scripts/proofscript-architecture-check.mjs",
     "build:src": "tsc -p tsconfig.src.json",
-    "test:outer": "npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages"
+    "test:outer": "npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages",
+    "check:oracle-syntax": "node --check scripts/module-stream-oracle.mjs && node --check scripts/full-std-oracle.mjs && node --check scripts/std-hot-oracle.mjs && node --check scripts/std-bisect-oracle.mjs && node --check scripts/std-bisect-oracle-test.mjs && node --check scripts/adaptive-root-oracle.mjs && node --check scripts/kernel-study-regression-matrix.mjs && node --check scripts/official-oracle.mjs && node --check scripts/defeq-differential.mjs && node --check scripts/adversarial-oracle.mjs && node --check scripts/native-oracle-smoke.mjs",
+    "oracle:std-probe": "npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029 0 250 100 10",
+    "oracle:std-range": "npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029",
+    "oracle:std-hot": "npm run build --silent && node scripts/std-hot-oracle.mjs",
+    "oracle:std-bisect": "npm run build --silent && node scripts/std-bisect-oracle.mjs",
+    "test:oracle-tools": "node scripts/std-bisect-oracle-test.mjs && node scripts/lean-native-evaluator-test.mjs && npm run test:kernel-study-matrix",
+    "oracle:native-smoke": "npm run build --silent && node scripts/native-oracle-smoke.mjs",
+    "test:kernel-study-matrix": "node scripts/kernel-study-regression-matrix.mjs",
+    "oracle:init-canonical": "npm run build --silent && node scripts/module-stream-oracle.mjs Init.Prelude",
+    "test:kernel": "npm run check:oracle-syntax && npm run build && npm run test:oracle-tools && node dist/test/all.test.js",
+    "check:kernel-oracle": "npm run oracle:official && npm run oracle:primitive && npm run oracle:defeq && npm run oracle:adversarial",
+    "check:kernel-corpus": "npm run check:kernel-oracle && npm run oracle:init && npm run oracle:std-parsec && npm run oracle:std-sat-cnf && npm run oracle:std-byteslice && npm run oracle:lean-rbmap && npm run oracle:lean-persistentarray && npm run oracle:lean-persistenthashmap"
   },
   "devDependencies": {
     "typescript": "5.8.3"
@@ -49,6 +61,10 @@
     "./lean4export": {
       "types": "./dist/src/integration/lean4export.d.ts",
       "import": "./dist/src/integration/lean4export.js"
+    },
+    "./native": {
+      "types": "./dist/src/kernel/reduction/native.d.ts",
+      "import": "./dist/src/kernel/reduction/native.js"
     }
   },
   "workspaces": [

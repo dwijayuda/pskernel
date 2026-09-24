@@ -1,21 +1,28 @@
-import { ConstantInfo, DefinitionInfo, ReducibilityHints } from '../core/declaration.js';
+import { ConstantInfo, DefinitionInfo, OpaqueInfo, ReducibilityHints } from '../core/declaration.js';
 import { Environment, KernelError } from '../core/environment.js';
 import { BinderInfo, Expr, app, bvar, constant, exprEq, exprKernelMetadataDiff, exprKernelMetadataEq, exprToString, forallE, lam, natLit, sort, strLit } from '../core/expr.js';
-import { Level, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../core/level.js';
+import { Level, levelIMaxRaw, levelMaxRaw, levelParam, levelSucc, levelZero } from '../core/level.js';
 import { Name, anonymous, nameEq, nameKey, nameToString, numName, strName } from '../core/name.js';
 import { Kernel } from '../kernel/kernel.js';
 import { addInductive } from '../kernel/inductive/nested.js';
 import { ConstructorDecl, InductiveDecl, addOrdinaryInductive } from '../kernel/inductive/ordinary.js';
 import { isPrimitiveName } from '../kernel/primitive-names.js';
-import { addPrimitiveDefinition, addPrimitiveInductive } from '../kernel/primitive.js';
+import { addPrimitiveDefinition, addPrimitiveInductive, addPrimitiveOpaque } from '../kernel/primitive.js';
 import { addQuot } from '../kernel/quotient.js';
 import { TypeChecker } from '../kernel/type-checker.js';
+import { NativeEvaluator } from '../kernel/reduction/native.js';
 import { ExactJson, JObject, asArray, asBigInt, asBoolean, asIndex, asObject, asString, field, maybeField, parseExactJson } from './exact-json.js';
+
+export const LEAN434_PINNED_GITHASH='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b' as const;
 
 export interface Lean4ExportOptions {
   /** Strict by default: an oracle-facing replay must be produced by the pinned Lean release. */
   readonly expectedLeanVersion?: string;
+  /** Exact source commit used to build the oracle binary. */
+  readonly expectedLeanGitHash?: string;
   readonly supportedFormatVersions?: readonly string[];
+  /** Optional Lean 4.34 compiler-IR evaluator. Configuring it extends the TCB. */
+  readonly nativeEvaluator?: NativeEvaluator;
 }
 export interface ReplayStats { readonly lines:number; readonly names:number; readonly levels:number; readonly expressions:number; readonly declarations:number }
 export interface ReplayProgressOptions { readonly every?:number; readonly onProgress?:(stats:ReplayStats)=>void }
@@ -54,10 +61,13 @@ export class Lean4ExportReplay {
   private readonly exprs=new DenseIndexTable<Expr>();
   private sawMeta=false; private lineNo=0; private decls=0;
   private readonly pendingMutual=new Map<string,{all:readonly Name[]; defs:Map<string,DefinitionInfo>}>();
-  private readonly expectedLeanVersion:string; private readonly formats:readonly string[];
+  private readonly expectedLeanVersion:string; private readonly expectedLeanGitHash:string; private readonly formats:readonly string[];
 
   constructor(env=new Environment(),options:Lean4ExportOptions={}){
-    this.env=env;this.kernel=new Kernel(env);this.expectedLeanVersion=options.expectedLeanVersion??'4.34.0';this.formats=options.supportedFormatVersions??['3.1.0'];
+    this.env=env;this.kernel=new Kernel(env,options.nativeEvaluator);
+    this.expectedLeanVersion=options.expectedLeanVersion??'4.34.0';
+    this.expectedLeanGitHash=options.expectedLeanGitHash??LEAN434_PINNED_GITHASH;
+    this.formats=options.supportedFormatVersions??['3.1.0'];
   }
 
   private stats():ReplayStats{return {lines:this.lineNo,names:this.names.size-1,levels:this.levels.size-1,expressions:this.exprs.size,declarations:this.decls};}
@@ -104,8 +114,9 @@ export class Lean4ExportReplay {
   private meta(m:JObject):void{
     if(this.sawMeta||this.lineNo!==1)throw new KernelError('duplicate or non-initial lean4export metadata');
     const lean=asObject(field(m,'lean','meta'),'meta.lean'),format=asObject(field(m,'format','meta'),'meta.format');
-    const lv=asString(field(lean,'version','meta.lean'),'meta.lean.version'),fv=asString(field(format,'version','meta.format'),'meta.format.version');
+    const lv=asString(field(lean,'version','meta.lean'),'meta.lean.version'),gh=asString(field(lean,'githash','meta.lean'),'meta.lean.githash'),fv=asString(field(format,'version','meta.format'),'meta.format.version');
     if(lv!==this.expectedLeanVersion)throw new KernelError(`lean4export Lean version ${lv} does not match pinned ${this.expectedLeanVersion}`);
+    if(gh!==this.expectedLeanGitHash)throw new KernelError(`lean4export Lean git hash ${gh||'<empty>'} does not match pinned ${this.expectedLeanGitHash}`);
     if(!this.formats.includes(fv))throw new KernelError(`unsupported lean4export format ${fv}; expected ${this.formats.join(' or ')}`);
     this.sawMeta=true;
   }
@@ -122,8 +133,8 @@ export class Lean4ExportReplay {
   private levelRecord(o:JObject):void{
     const i=asIndex(field(o,'il','Level'),'Level.il');let l:Level;
     if('succ' in o)l=levelSucc(this.l(asIndex(o.succ!,'Level.succ')));
-    else if('max' in o){const a=arrIndex(asArray(o.max!,'Level.max'),'Level.max');if(a.length!==2)throw new KernelError('Level.max requires two operands');l=mkMax(this.l(a[0]!),this.l(a[1]!));}
-    else if('imax' in o){const a=arrIndex(asArray(o.imax!,'Level.imax'),'Level.imax');if(a.length!==2)throw new KernelError('Level.imax requires two operands');l=mkIMax(this.l(a[0]!),this.l(a[1]!));}
+    else if('max' in o){const a=arrIndex(asArray(o.max!,'Level.max'),'Level.max');if(a.length!==2)throw new KernelError('Level.max requires two operands');l=levelMaxRaw(this.l(a[0]!),this.l(a[1]!));}
+    else if('imax' in o){const a=arrIndex(asArray(o.imax!,'Level.imax'),'Level.imax');if(a.length!==2)throw new KernelError('Level.imax requires two operands');l=levelIMaxRaw(this.l(a[0]!),this.l(a[1]!));}
     else if('param' in o)l=levelParam(this.n(asIndex(o.param!,'Level.param')));
     else throw new KernelError('invalid lean4export Level record');this.levels.add(i,l,'Level');
   }
@@ -134,11 +145,11 @@ export class Lean4ExportReplay {
     else if('const' in o){const c=asObject(o.const!,'Expr.const');e=constant(this.n(asIndex(field(c,'name','Expr.const'),'Expr.const.name')),this.ls(field(c,'us','Expr.const'),'Expr.const.us'));}
     else if('app' in o){const a=asObject(o.app!,'Expr.app');e=app(this.e(asIndex(field(a,'fn','Expr.app'),'Expr.app.fn')),this.e(asIndex(field(a,'arg','Expr.app'),'Expr.app.arg')));}
     else if('lam' in o||'forallE' in o){const key='lam' in o?'lam':'forallE',a=asObject(o[key]!,`Expr.${key}`),bi=asString(field(a,'binderInfo',`Expr.${key}`),`Expr.${key}.binderInfo`) as BinderInfo;if(!['default','implicit','strictImplicit','instImplicit'].includes(bi))throw new KernelError(`invalid binder info ${bi}`);const name=this.n(asIndex(field(a,'name',`Expr.${key}`),`Expr.${key}.name`)),type=this.e(asIndex(field(a,'type',`Expr.${key}`),`Expr.${key}.type`)),body=this.e(asIndex(field(a,'body',`Expr.${key}`),`Expr.${key}.body`));e=key==='lam'?lam(name,type,body,bi):forallE(name,type,body,bi);}
-    else if('letE' in o){const a=asObject(o.letE!,'Expr.letE');e={kind:'let',name:this.n(asIndex(field(a,'name','Expr.letE'),'Expr.letE.name')),type:this.e(asIndex(field(a,'type','Expr.letE'),'Expr.letE.type')),value:this.e(asIndex(field(a,'value','Expr.letE'),'Expr.letE.value')),body:this.e(asIndex(field(a,'body','Expr.letE'),'Expr.letE.body'))};}
-    else if('proj' in o){const a=asObject(o.proj!,'Expr.proj');e={kind:'proj',typeName:this.n(asIndex(field(a,'typeName','Expr.proj'),'Expr.proj.typeName')),index:asUInt(field(a,'idx','Expr.proj'),'Expr.proj.idx'),expr:this.e(asIndex(field(a,'struct','Expr.proj'),'Expr.proj.struct'))};}
-    else if('natVal' in o)e=natLit(BigInt(asString(o.natVal!,'Expr.natVal')));
+    else if('letE' in o){const a=asObject(o.letE!,'Expr.letE'),nv=maybeField(a,'nondep');e={kind:'let',name:this.n(asIndex(field(a,'name','Expr.letE'),'Expr.letE.name')),type:this.e(asIndex(field(a,'type','Expr.letE'),'Expr.letE.type')),value:this.e(asIndex(field(a,'value','Expr.letE'),'Expr.letE.value')),body:this.e(asIndex(field(a,'body','Expr.letE'),'Expr.letE.body')),nondep:nv===undefined?false:asBoolean(nv,'Expr.letE.nondep')};}
+    else if('proj' in o){const a=asObject(o.proj!,'Expr.proj');e={kind:'proj',typeName:this.n(asIndex(field(a,'typeName','Expr.proj'),'Expr.proj.typeName')),index:asUInt(field(a,'idx','Expr.proj'),'Expr.proj.idx',0xffffffffn),expr:this.e(asIndex(field(a,'struct','Expr.proj'),'Expr.proj.struct'))};}
+    else if('natVal' in o){const n=BigInt(asString(o.natVal!,'Expr.natVal'));if(n<0n)throw new KernelError('Expr.natVal must be nonnegative');e=natLit(n);}
     else if('strVal' in o)e=strLit(asString(o.strVal!,'Expr.strVal'));
-    else if('mdata' in o){const a=asObject(o.mdata!,'Expr.mdata'),data=asObject(field(a,'data','Expr.mdata'),'Expr.mdata.data');e={kind:'mdata',data,expr:this.e(asIndex(field(a,'expr','Expr.mdata'),'Expr.mdata.expr'))};}
+    else if('mdata' in o){const a=asObject(o.mdata!,'Expr.mdata'),eqv=maybeField(a,'dataEq'),data=eqv===undefined?asObject(field(a,'data','Expr.mdata'),'Expr.mdata.data'):{__leanKvEqId:asUInt(eqv,'Expr.mdata.dataEq')};e={kind:'mdata',data,expr:this.e(asIndex(field(a,'expr','Expr.mdata'),'Expr.mdata.expr'))};}
     else throw new KernelError('invalid lean4export Expr record');this.exprs.add(i,e,'Expr');
   }
 
@@ -149,7 +160,8 @@ export class Lean4ExportReplay {
   private addExportedDefinition(info:DefinitionInfo,all:readonly Name[]):void{
     // DefinitionVal.all is informational for ordinary defnDecl, including safe definitions.
     // Lean 4.34 Kernel.Environment.replay ignores it and replays the declaration from actual
-    // used constants. Only unsafe/partial mutualDefnDecl reconstruction needs a coherent group.
+    // used constants. Only the diagnostic reconstruction of unsafe/partial mutualDefnDecl
+    // below needs a coherent group list.
     if(info.safety==='safe'||all.length<=1){
       // A single unsafe definition has Lean's ordinary recursive-definition admission path.
       // A singleton partial that is actually self-recursive is handled by the mutual path below.
@@ -164,13 +176,25 @@ export class Lean4ExportReplay {
     if(g.defs.size===g.all.length){const defs=g.all.map(n=>g!.defs.get(nameKey(n))).filter((x):x is DefinitionInfo=>x!==undefined);if(defs.length!==g.all.length)throw new KernelError('exported mutual definition group is inconsistent');this.kernel.addMutualDefinitions(defs);this.pendingMutual.delete(key);}
   }
   private exprUsesName(e:Expr,n:Name):boolean{
-    switch(e.kind){case'const':return nameEq(e.name,n);case'app':return this.exprUsesName(e.fn,n)||this.exprUsesName(e.arg,n);case'lam':case'forall':return this.exprUsesName(e.type,n)||this.exprUsesName(e.body,n);case'let':return this.exprUsesName(e.type,n)||this.exprUsesName(e.value,n)||this.exprUsesName(e.body,n);case'mdata':return this.exprUsesName(e.expr,n);case'proj':return this.exprUsesName(e.expr,n);default:return false;}
+    const todo:Expr[]=[e];
+    while(todo.length){
+      const x=todo.pop()!;
+      switch(x.kind){
+        case'const':if(nameEq(x.name,n))return true;break;
+        case'app':todo.push(x.arg,x.fn);break;
+        case'lam':case'forall':todo.push(x.body,x.type);break;
+        case'let':todo.push(x.body,x.value,x.type);break;
+        case'mdata':case'proj':todo.push(x.expr);break;
+        default:break;
+      }
+    }
+    return false;
   }
   private declarationRecord(o:JObject):void{
     if('axiom' in o){const a=asObject(o.axiom!,'axiom');this.kernel.addAxiom({kind:'axiom',name:this.n(asIndex(field(a,'name','axiom'),'axiom.name')),levelParams:this.ns(field(a,'levelParams','axiom'),'axiom.levelParams'),type:this.e(asIndex(field(a,'type','axiom'),'axiom.type')),isUnsafe:boolField(a,'isUnsafe','axiom')});return;}
     if('def' in o){const a=asObject(o.def!,'def'),s=asString(field(a,'safety','def'),'def.safety');if(s!=='safe'&&s!=='unsafe'&&s!=='partial')throw new KernelError(`invalid definition safety ${s}`);const info:DefinitionInfo={kind:'definition',name:this.n(asIndex(field(a,'name','def'),'def.name')),levelParams:this.ns(field(a,'levelParams','def'),'def.levelParams'),type:this.e(asIndex(field(a,'type','def'),'def.type')),value:this.e(asIndex(field(a,'value','def'),'def.value')),hints:this.hints(field(a,'hints','def')),safety:s};const all=maybeField(a,'all')===undefined?[info.name]:this.ns(field(a,'all','def'),'def.all');this.addExportedDefinition(info,all);return;}
     if('thm' in o){const a=asObject(o.thm!,'thm');this.kernel.addTheorem({kind:'theorem',name:this.n(asIndex(field(a,'name','thm'),'thm.name')),levelParams:this.ns(field(a,'levelParams','thm'),'thm.levelParams'),type:this.e(asIndex(field(a,'type','thm'),'thm.type')),value:this.e(asIndex(field(a,'value','thm'),'thm.value'))});return;}
-    if('opaque' in o){const a=asObject(o.opaque!,'opaque');this.kernel.addOpaque({kind:'opaque',name:this.n(asIndex(field(a,'name','opaque'),'opaque.name')),levelParams:this.ns(field(a,'levelParams','opaque'),'opaque.levelParams'),type:this.e(asIndex(field(a,'type','opaque'),'opaque.type')),value:this.e(asIndex(field(a,'value','opaque'),'opaque.value')),isUnsafe:boolField(a,'isUnsafe','opaque')});return;}
+    if('opaque' in o){const a=asObject(o.opaque!,'opaque'),info:OpaqueInfo={kind:'opaque',name:this.n(asIndex(field(a,'name','opaque'),'opaque.name')),levelParams:this.ns(field(a,'levelParams','opaque'),'opaque.levelParams'),type:this.e(asIndex(field(a,'type','opaque'),'opaque.type')),value:this.e(asIndex(field(a,'value','opaque'),'opaque.value')),isUnsafe:boolField(a,'isUnsafe','opaque')};if(isPrimitiveName(info.name))addPrimitiveOpaque(this.env,info);else this.kernel.addOpaque(info);return;}
     if('quot' in o){this.quot(asObject(o.quot!,'quot'));return;}
     if('inductive' in o){this.inductive(asObject(o.inductive!,'inductive'));return;}
     throw new KernelError(`unknown lean4export declaration record at line ${this.lineNo}`);
@@ -178,7 +202,7 @@ export class Lean4ExportReplay {
 
   private quot(q:JObject):void{
     const name=this.n(asIndex(field(q,'name','quot'),'quot.name')),kind=asString(field(q,'kind','quot'),'quot.kind');if(!['type','ctor','lift','ind'].includes(kind))throw new KernelError(`invalid Quot kind ${kind}`);
-    if(!this.env.quotInitialized)addQuot(this.env);const got=this.env.get(name);const expectedType=this.e(asIndex(field(q,'type','quot'),'quot.type'));const expectedLevels=this.ns(field(q,'levelParams','quot'),'quot.levelParams');if(got.kind!=='quot'||got.quotKind!==kind||!namesEq(got.levelParams,expectedLevels)||!exprEq(got.type,expectedType))throw new KernelError(`exported Quot metadata mismatch for '${nameToString(name)}'\nTS: ${got.kind==='quot'?exprToString(got.type):'<not quot>'}\nLean: ${exprToString(expectedType)}`);
+    if(!this.env.quotInitialized)addQuot(this.env);const got=this.env.get(name);const expectedType=this.e(asIndex(field(q,'type','quot'),'quot.type'));const expectedLevels=this.ns(field(q,'levelParams','quot'),'quot.levelParams');if(got.kind!=='quot'||got.quotKind!==kind||!namesEq(got.levelParams,expectedLevels)||!exprKernelMetadataEq(got.type,expectedType))throw new KernelError(`exported Quot metadata mismatch for '${nameToString(name)}'\nTS: ${got.kind==='quot'?exprToString(got.type):'<not quot>'}\nLean: ${exprToString(expectedType)}\nDiff: ${got.kind==='quot'?exprKernelMetadataDiff(got.type,expectedType)??'<unknown>':'<not quot>'}`);
   }
 
   private inductive(g:JObject):void{
@@ -199,14 +223,17 @@ export class Lean4ExportReplay {
       const n=this.n(asIndex(field(c,'name','constructor'),'constructor.name')),g=this.env.get(n);
       if(g.kind!=='constructor')throw new KernelError(`generated '${nameToString(n)}' is not a constructor`);
       const expectedType=this.e(asIndex(field(c,'type','constructor'),'constructor.type'));
-      if(!exprEq(g.type,expectedType))throw new KernelError(`generated constructor type mismatch for '${nameToString(n)}'\nTS: ${exprToString(g.type)}\nLean: ${exprToString(expectedType)}\nDiff: ${exprKernelMetadataDiff(g.type,expectedType)??'<exact-expression mismatch>'}`);
-      if(!nameEq(g.induct,this.n(asIndex(field(c,'induct','constructor'),'constructor.induct')))||g.cidx!==asUInt(field(c,'cidx','constructor'),'constructor.cidx')||g.numParams!==asUInt(field(c,'numParams','constructor'),'constructor.numParams')||g.numFields!==asUInt(field(c,'numFields','constructor'),'constructor.numFields')||!sameBool(g.isUnsafe,boolField(c,'isUnsafe','constructor')))throw new KernelError(`generated constructor metadata mismatch for '${nameToString(n)}'`);
+      const expectedLevels=this.ns(field(c,'levelParams','constructor'),'constructor.levelParams');
+      if(!exprKernelMetadataEq(g.type,expectedType))throw new KernelError(`generated constructor type mismatch for '${nameToString(n)}'\nTS: ${exprToString(g.type)}\nLean: ${exprToString(expectedType)}\nDiff: ${exprKernelMetadataDiff(g.type,expectedType)??'<unknown>'}`);
+      if(!namesEq(g.levelParams,expectedLevels)||!nameEq(g.induct,this.n(asIndex(field(c,'induct','constructor'),'constructor.induct')))||g.cidx!==asUInt(field(c,'cidx','constructor'),'constructor.cidx')||g.numParams!==asUInt(field(c,'numParams','constructor'),'constructor.numParams')||g.numFields!==asUInt(field(c,'numFields','constructor'),'constructor.numFields')||!sameBool(g.isUnsafe,boolField(c,'isUnsafe','constructor')))throw new KernelError(`generated constructor metadata mismatch for '${nameToString(n)}'`);
     }
     for(const r of rvs){
       const n=this.n(asIndex(field(r,'name','recursor'),'recursor.name')),g=this.env.get(n);
       if(g.kind!=='recursor')throw new KernelError(`generated '${nameToString(n)}' is not a recursor`);
-      const expectedType=this.e(asIndex(field(r,'type','recursor'),'recursor.type')); 
+      const expectedType=this.e(asIndex(field(r,'type','recursor'),'recursor.type'));
+      const expectedLevels=this.ns(field(r,'levelParams','recursor'),'recursor.levelParams');
       if(!exprKernelMetadataEq(g.type,expectedType))throw new KernelError(`generated recursor type mismatch for '${nameToString(n)}'\nTS: ${exprToString(g.type)}\nLean: ${exprToString(expectedType)}\nDiff: ${exprKernelMetadataDiff(g.type,expectedType)??'<unknown>'}`);
+      if(!namesEq(g.levelParams,expectedLevels))throw new KernelError(`generated recursor levelParams mismatch for '${nameToString(n)}'`);
       if(g.numParams!==asUInt(field(r,'numParams','recursor'),'recursor.numParams'))throw new KernelError(`generated recursor numParams mismatch for '${nameToString(n)}'`);
       if(g.numIndices!==asUInt(field(r,'numIndices','recursor'),'recursor.numIndices'))throw new KernelError(`generated recursor numIndices mismatch for '${nameToString(n)}'`);
       if(g.numMotives!==asUInt(field(r,'numMotives','recursor'),'recursor.numMotives'))throw new KernelError(`generated recursor numMotives mismatch for '${nameToString(n)}'`);

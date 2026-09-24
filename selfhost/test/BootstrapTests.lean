@@ -16,6 +16,7 @@ import Ps.Meta.Reduce
 import Ps.Meta.Unify
 import Ps.Meta.SynthInstance
 import Ps.Project.ModuleGraph
+import Ps.Elab.Declaration
 
 def psTestNatEnvironment : PsEnvironment :=
   let declaration :=
@@ -428,11 +429,100 @@ def psTestProofScriptRejectSpacedCall : Bool :=
   | Except.error _ => true
   | Except.ok _ => false
 
+def psTestCoreDeclarationEq : PsDeclaration -> PsDeclaration -> Bool
+  | PsDeclaration.axiomDecl leftName leftLevels leftType,
+    PsDeclaration.axiomDecl rightName rightLevels rightType =>
+      psNameEq leftName rightName
+        && psNameListEq leftLevels rightLevels
+        && psExprAlphaEq leftType rightType
+  | PsDeclaration.definitionDecl leftName leftLevels leftType leftValue,
+    PsDeclaration.definitionDecl rightName rightLevels rightType rightValue =>
+      psNameEq leftName rightName
+        && psNameListEq leftLevels rightLevels
+        && psExprAlphaEq leftType rightType
+        && psExprAlphaEq leftValue rightValue
+  | PsDeclaration.theoremDecl leftName leftLevels leftType leftValue,
+    PsDeclaration.theoremDecl rightName rightLevels rightType rightValue =>
+      psNameEq leftName rightName
+        && psNameListEq leftLevels rightLevels
+        && psExprAlphaEq leftType rightType
+        && psExprAlphaEq leftValue rightValue
+  | PsDeclaration.opaqueDecl leftName leftLevels leftType leftValue,
+    PsDeclaration.opaqueDecl rightName rightLevels rightType rightValue =>
+      psNameEq leftName rightName
+        && psNameListEq leftLevels rightLevels
+        && psExprAlphaEq leftType rightType
+        && psExprAlphaEq leftValue rightValue
+  | _, _ => false
+
+def psTestCoreDeclarationListsEq :
+    List PsDeclaration -> List PsDeclaration -> Bool
+  | [], [] => true
+  | left :: leftRest, right :: rightRest =>
+      psTestCoreDeclarationEq left right
+        && psTestCoreDeclarationListsEq leftRest rightRest
+  | _, _ => false
+
+def psTestElaboratedBinderApplicationShape
+    (result : PsElabModuleResult) : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let idName := psTestName "id"
+  let oneName := psTestName "one"
+  let xName := psTestName "x"
+  let expectedIdType :=
+    PsExpr.forallE
+      xName
+      natType
+      natType
+      PsBinderInfo.explicit
+  let expectedIdValue :=
+    PsExpr.lam
+      xName
+      natType
+      (PsExpr.bvar 0)
+      PsBinderInfo.explicit
+  let expectedOneValue :=
+    PsExpr.app
+      (PsExpr.constE idName [])
+      (PsExpr.lit (PsLiteral.natural 1))
+  match result.declarations with
+  | [
+      PsDeclaration.definitionDecl actualIdName [] actualIdType actualIdValue,
+      PsDeclaration.definitionDecl actualOneName [] actualOneType actualOneValue
+    ] =>
+      psNameEq actualIdName idName
+        && psExprAlphaEq actualIdType expectedIdType
+        && psExprAlphaEq actualIdValue expectedIdValue
+        && psNameEq actualOneName oneName
+        && psExprAlphaEq actualOneType natType
+        && psExprAlphaEq actualOneValue expectedOneValue
+  | _ => false
+
+def psTestDualSourceCoreElaboration : Bool :=
+  match
+      psParseLeanSource
+        "def id (x : Nat) : Nat := x\ndef one : Nat := id 1",
+      psParseProofScriptSource
+        "def id(x : Nat) : Nat := x; def one : Nat := id(1);" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestElaboratedBinderApplicationShape leanResult
+            && psTestElaboratedBinderApplicationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
 
 def psBootstrapTestCases : List PsNamedTest := [
+  { name := "dual-source core elaboration", passed := psTestDualSourceCoreElaboration },
   { name := "dual-source simple parse", passed := psTestDualSourceSimpleParse },
   { name := "dual-source binder application parse", passed := psTestDualSourceBinderApplicationParse },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },

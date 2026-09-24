@@ -88,5 +88,8 @@ export function emitVerifiedTextIntrinsic(
   if(operation==='string.push'||operation==='string.append'){
     return '('+emit(args[0]!)+' + '+emit(args[1]!)+')';
   }
+  if(operation==='string.eq'){
+    return '('+emit(args[0]!)+' === '+emit(args[1]!)+')';
+  }
   return undefined;
 }

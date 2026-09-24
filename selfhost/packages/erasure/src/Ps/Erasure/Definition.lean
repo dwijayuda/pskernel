@@ -205,7 +205,27 @@ def psEraseOpenDefinitionWithFuel
                           name := parameterName
                           type := parameterType
                         } :: parametersRev)
-          | _ => Except.error PsErasureError.binderMismatch
+          | _ =>
+              match
+                  psEraseRuntimeType
+                    environment
+                    scope
+                    currentType with
+              | Except.error error => Except.error error
+              | Except.ok resultType =>
+                  match
+                      psEraseRuntimeExpr
+                        environment
+                        scope
+                        currentValue with
+                  | Except.error error => Except.error error
+                  | Except.ok body =>
+                      Except.ok {
+                        typeParameters := typeParametersRev.reverse
+                        parameters := parametersRev.reverse
+                        resultType := resultType
+                        body := body
+                      }
       | _ =>
           match
               psEraseRuntimeType

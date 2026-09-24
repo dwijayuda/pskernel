@@ -1,4 +1,4 @@
-import Lean.Level
+import Lean
 
 open Lean
 

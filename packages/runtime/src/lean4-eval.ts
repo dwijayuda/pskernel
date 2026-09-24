@@ -120,6 +120,12 @@ export class Lean434IOError extends Lean434EvaluationError {
 
 export interface Lean434EvaluatorOptions {
   readonly metadata?:Lean434RuntimeMetadataIndex;
+  /**
+   * Optional bootstrap/debug guard. Normal runtime execution is unbounded.
+   * When set, fail closed if expression/application evaluation exceeds the
+   * supplied number of evaluator steps.
+   */
+  readonly maxSteps?:number;
 }
 
 function expectNat(value:Lean434RuntimeValue,owner:string):bigint {
@@ -173,6 +179,7 @@ export class Lean434Evaluator {
     new Map<string,Lean434RuntimeValue>();
   private readonly checker:TypeChecker;
   private readonly constantStack:string[]=[];
+  private evaluationSteps=0;
   private initializationDepth=0;
 
   constructor(
@@ -188,6 +195,20 @@ export class Lean434Evaluator {
 
   evaluate(expr:Expr):Lean434RuntimeValue {
     return this.evaluateWithLocals(expr,[]);
+  }
+
+  private consumeStep(where:string):void{
+    const max=this.options.maxSteps;
+    if(max===undefined)return;
+    this.evaluationSteps+=1;
+    if(this.evaluationSteps<=max)return;
+    const trace=this.constantStack.length===0
+      ?''
+      :' via '+this.constantStack.join(' -> ');
+    throw new Lean434EvaluationError(
+      'Lean runtime evaluation step budget exceeded at '+where+
+      ' after '+String(max)+' steps'+trace,
+    );
   }
 
   applyRuntimeValue(
@@ -289,6 +310,7 @@ export class Lean434Evaluator {
     expr:Expr,
     locals:readonly Lean434RuntimeValue[],
   ):Lean434RuntimeValue {
+    this.consumeStep('expr:'+expr.kind);
     switch(expr.kind){
       case 'bvar':{
         const value=locals[expr.index];
@@ -592,6 +614,7 @@ export class Lean434Evaluator {
     fn:Lean434RuntimeValue,
     arg:Lean434RuntimeValue,
   ):Lean434RuntimeValue {
+    this.consumeStep('apply');
     if(!isCallable(fn)){
       let detail=typeof fn+':'+String(fn);
       if(isTaggedRuntimeValue(fn)){

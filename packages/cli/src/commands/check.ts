@@ -64,6 +64,7 @@ export async function checkCommand(common:CommonArgs):Promise<CheckReport>{
       ...(wasm===null?{}:{
         binaryenVersion:wasm.wasm.binaryenVersion,
         wasmProfile:wasm.wasm.profile,
+        executionRuntime:wasm.wasm.executionRuntime,
         wasmOptimized:wasm.wasm.optimized,
         wasmRuntimeImports:wasm.wasm.imports,
         wasmBigIntLiterals:wasm.wasm.bigintLiterals,

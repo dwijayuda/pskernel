@@ -3,7 +3,7 @@ import Ps.Core.Expr
 inductive PsKernelDefinitionSafety where
   | safe
   | unsafeDef
-  | partial
+  | partialDef
 
 inductive PsKernelReducibilityHints where
   | opaqueHint

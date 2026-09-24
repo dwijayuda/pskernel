@@ -1,4 +1,5 @@
 name: Diagnostic MData exporter equivalence
+# trigger: safe-mdata-bucket-v1
 
 on:
   push:

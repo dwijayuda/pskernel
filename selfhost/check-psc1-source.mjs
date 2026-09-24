@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const roots=[
-  path.resolve('../packages/compiler/src/ProofScript'),
+  path.resolve('packages'),
 ];
 const files=[];
 
@@ -54,4 +54,4 @@ if(files.length===0){
   failed=true;
 }
 if(failed)process.exit(1);
-console.log(`PSC1_SOURCE_PROFILE: PASS (${files.length} portable package modules)`);
+console.log(`PSC1_SOURCE_PROFILE: PASS (${files.length} portable self-host modules)`);

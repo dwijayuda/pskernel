@@ -34,7 +34,8 @@
     "check:vscode": "node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs",
     "check:architecture": "node scripts/proofscript-architecture-check.mjs",
     "build:src": "tsc -p tsconfig.src.json",
-    "test:outer": "npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages"
+    "test:outer": "npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages",
+    "oracle:text-foundation": "npm run build --silent && node scripts/text-foundation-oracle.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

@@ -275,6 +275,22 @@ export function eraseRuntimeApplication(
 
   if(
     view.fn.kind==='const'
+    &&nameToString(view.fn.name)==='Char.ofNat'
+  ){
+    if(view.args.length!==1){
+      throw new Error(
+        "PS_ERASE_INTRINSIC_ARITY: 'char.ofNat' expects one argument",
+      );
+    }
+    return {
+      kind:'intrinsic',
+      operation:'char.ofNat',
+      args:[erase(view.args[0]!,scope,environment)],
+    };
+  }
+
+  if(
+    view.fn.kind==='const'
     &&nameToString(view.fn.name)==='Bool.not'
     &&view.args.length===1
   ){

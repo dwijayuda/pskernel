@@ -8,7 +8,6 @@ import {
   hasLooseBVar,
   hasMVar,
 } from 'lean-ts-kernel';
-
 export type ExprMetavarKind='natural'|'synthetic'|'syntheticOpaque';
 
 export interface ExprMetavarDecl {
@@ -19,7 +18,6 @@ export interface ExprMetavarDecl {
   readonly depth:number;
   readonly index:number;
 }
-
 import {
   asMVarId,
   assertFVarsInScope,

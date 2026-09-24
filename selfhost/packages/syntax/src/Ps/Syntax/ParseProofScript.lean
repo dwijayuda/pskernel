@@ -660,6 +660,137 @@ def psParseProofScriptInductiveConstructorsWithFuel
                           semi.cursor
                           (constructor :: constructorsRev)
 
+def psParseProofScriptStructureField
+    (cursor : PsTokenCursor) :
+    Except PsParseError
+      (PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :=
+  if psTokenCursorAtBinderStart cursor then
+    match psParseProofScriptBinder cursor with
+    | Except.error error => Except.error error
+    | Except.ok field =>
+        match psTokenCursorExpectText field.cursor ";" with
+        | Except.error error => Except.error error
+        | Except.ok semi =>
+            Except.ok {
+              value := field.value
+              cursor := semi.cursor
+            }
+  else
+    match psTokenCursorExpectKind cursor PsTokenKind.identifier with
+    | Except.error error => Except.error error
+    | Except.ok name =>
+        match psTokenCursorExpectText name.cursor ":" with
+        | Except.error error => Except.error error
+        | Except.ok afterColon =>
+            match psParseProofScriptTerm afterColon.cursor with
+            | Except.error error => Except.error error
+            | Except.ok type =>
+                match psTokenCursorExpectText type.cursor ";" with
+                | Except.error error => Except.error error
+                | Except.ok semi =>
+                    let fieldName : PsSyntaxName := {
+                      segments := [name.token.text]
+                      span := name.token.span
+                    }
+                    let head : PsSyntaxBinderHead := {
+                      name := fieldName
+                      kind := PsSyntaxBinderKind.explicit
+                      span := {
+                        start := name.token.span.start
+                        stop := (psSyntaxTermSpan type.value).stop
+                      }
+                    }
+                    Except.ok {
+                      value := (head, type.value)
+                      cursor := semi.cursor
+                    }
+
+def psParseProofScriptStructureFieldsWithFuel
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (fieldsRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) :
+    Except PsParseError
+      (PsParseResult
+        (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+  match fuel with
+  | 0 => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      if psTokenCursorAtText cursor "}" then
+        Except.ok {
+          value := fieldsRev.reverse
+          cursor := cursor
+        }
+      else
+        match psParseProofScriptStructureField cursor with
+        | Except.error error => Except.error error
+        | Except.ok field =>
+            psParseProofScriptStructureFieldsWithFuel
+              remaining
+              field.cursor
+              (field.value :: fieldsRev)
+
+def psParseProofScriptStructureDeclaration
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
+  match psTokenCursorExpectText cursor "structure" with
+  | Except.error error => Except.error error
+  | Except.ok keyword =>
+      match psParseSyntaxName keyword.cursor with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          match psParseProofScriptBindersWithFuel
+              name.cursor.remaining.length
+              name.cursor
+              [] with
+          | Except.error error => Except.error error
+          | Except.ok params =>
+              match psTokenCursorExpectText params.cursor "where" with
+              | Except.error error => Except.error error
+              | Except.ok afterWhere =>
+                  match psTokenCursorExpectText afterWhere.cursor "{" with
+                  | Except.error error => Except.error error
+                  | Except.ok afterOpen =>
+                      match
+                          psParseProofScriptStructureFieldsWithFuel
+                            afterOpen.cursor.remaining.length
+                            afterOpen.cursor
+                            [] with
+                      | Except.error error => Except.error error
+                      | Except.ok fields =>
+                          match fields.value with
+                          | [] =>
+                              match psTokenCursorPeek fields.cursor with
+                              | none =>
+                                  Except.error
+                                    (PsParseError.unexpectedEnd
+                                      "structure field")
+                              | some token =>
+                                  Except.error
+                                    (PsParseError.expectedText
+                                      "structure field"
+                                      token.text
+                                      token.span)
+                          | _ =>
+                              match psTokenCursorExpectText
+                                  fields.cursor
+                                  "}" with
+                              | Except.error error => Except.error error
+                              | Except.ok close =>
+                                  let finalCursor :=
+                                    psParseOptionalSemicolon close.cursor
+                                  Except.ok {
+                                    value :=
+                                      PsSyntaxDeclaration.structureDecl
+                                        name.value
+                                        params.value
+                                        fields.value
+                                        {
+                                          start := keyword.token.span.start
+                                          stop := close.token.span.stop
+                                        }
+                                    cursor := finalCursor
+                                  }
+
 def psParseProofScriptInductiveDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
@@ -747,13 +878,15 @@ def psParseProofScriptDeclaration
   | some keyword =>
       if keyword.text == "inductive" then
         psParseProofScriptInductiveDeclaration cursor
+      else if keyword.text == "structure" then
+        psParseProofScriptStructureDeclaration cursor
       else
         let isDefinition := keyword.text == "def"
         let isTheorem := keyword.text == "theorem"
         if !(isDefinition || isTheorem) then
           Except.error
             (PsParseError.expectedText
-              "def, theorem, or inductive"
+              "def, theorem, inductive, or structure"
               keyword.text
               keyword.span)
         else

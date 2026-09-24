@@ -113,6 +113,23 @@ if(
   );
 }
 
+const retiredLegacyPaths=[
+  join(root,'packages','language'),
+  join(root,'packages','compiler-ir','src','software.ts'),
+  join(root,'packages','backend-ts','src','software-emitter.ts'),
+  join(root,'packages','backend-ts','src','software-emitter-support.ts'),
+  join(root,'packages','backend-ts','src','v061.ts'),
+  join(root,'packages','cli','src','pipeline.ts'),
+];
+for(const retiredPath of retiredLegacyPaths){
+  if(existsSync(retiredPath)){
+    throw new Error(
+      'architecture: retired legacy semantic path reintroduced at '+
+      retiredPath.slice(root.length),
+    );
+  }
+}
+
 const verifiedPipeline=readFileSync(
   join(root,'packages','cli','src','verified-pipeline.ts'),
   'utf8',

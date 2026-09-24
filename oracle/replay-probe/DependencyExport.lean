@@ -621,6 +621,44 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
         inSegment := 0) |>.run {}
   pure ()
 
+partial def dumpCanonicalRootRange (env : Environment) (target : Name) (start count : Nat) : IO Unit := do
+  if count == 0 then throw <| IO.userError "canonical root range count must be positive"
+  let buckets := collectCanonicalRootsByModule env
+  let roots := flattenRoots buckets
+  if roots.size != env.constants.map₁.size then
+    throw <| IO.userError s!"canonical root coverage mismatch: {roots.size} != {env.constants.map₁.size}"
+  if start >= roots.size then
+    throw <| IO.userError s!"canonical root range starts at {start}, but only {roots.size} roots exist"
+  let stop := min roots.size (start + count)
+  let selected := (roots.toList.drop start).take (stop - start)
+  dumpMeta
+  IO.println <| (Json.mkObj [("environment", Json.mkObj [
+    ("module", target.toString),
+    ("constants", roots.size),
+    ("rootOrder", "olean-module-constNames"),
+    ("rootOrderMeaning", "serialized-module-sequence"),
+    ("rootDedup", "first-serialized-occurrence"),
+    ("canonicalScope", "pskernel-project-protocol")
+  ])]).compress
+  let firstRoot :=
+    match selected with
+    | n :: _ => n.toString
+    | [] => ""
+  let lastRoot :=
+    match selected.getLast? with
+    | some n => n.toString
+    | none => ""
+  IO.println <| (Json.mkObj [("batch", Json.mkObj [
+    ("rootStart", start),
+    ("directRoots", selected.length),
+    ("firstRoot", firstRoot),
+    ("lastRoot", lastRoot)
+  ])]).compress
+  let _ ← (do
+    modify fun (s : S) => { s with skipNonReplayable := true }
+    for n in selected do dumpConstant env n) |>.run {}
+  pure ()
+
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let total := env.constants.map₁.size
   let mut replayable := 0
@@ -711,6 +749,10 @@ unsafe def main (args : List String) : IO Unit := do
       let start := requestedRoots[1]!.toNat!
       let count := requestedRoots[2]!.toNat!
       dumpRootRange env moduleName start count
+    else if requestedRoots.length == 3 && requestedRoots.head! == "--canonical-root-range" then
+      let start := requestedRoots[1]!.toNat!
+      let count := requestedRoots[2]!.toNat!
+      dumpCanonicalRootRange env moduleName start count
     else
       dumpMeta
       let _ ← (do

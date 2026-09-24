@@ -177,6 +177,48 @@ Disallowed claim:
 
 > canonical Full Std passes.
 
+## Release closure profile — bounded production gate
+
+Canonical Full Std remains the strongest behavioral soak test, but it is no longer
+a mandatory release blocker when the shared one-process replay is dominated by
+infrastructure/runtime cost rather than a semantic failure.
+
+A release may close the Std assurance blocker with the **Std release assurance
+profile** when all of the following are green on the same semantic tree:
+
+1. direct kernel suite and anti-drift;
+2. bounded real corpus ladder;
+3. native compiler-IR smoke;
+4. canonical Init.Prelude shared-environment preflight;
+5. exhaustive dependency-closed replay of `Init.Data.Int.DivMod.Lemmas`
+   canonical roots 22197..23153 (957 roots);
+6. stratified dependency-closed 64-root windows at every 10,000 roots across
+   the 114,029-root Std corpus.
+
+The historical `oracle:std-hot` sweep remains available as a diagnostic command,
+but it is not part of the blocking release profile because its coverage overlaps
+the bounded corpus and stratified-window evidence while adding disproportionate
+wall-clock cost.
+
+Command:
+
+```text
+npm run oracle:std-release
+```
+
+Allowed release claim:
+
+> Std release assurance profile passes against pinned Lean 4.34.
+
+Disallowed claim unless Tier 5 separately passes:
+
+> canonical Full Std one-pass shared-environment replay passes.
+
+The canonical Tier 5 job remains a non-blocking gold/soak gate and should still
+be run when infrastructure permits. This policy keeps claim discipline while
+preventing an expensive long-lived JavaScript process from indefinitely blocking
+the usable kernel.
+
 ## Tier 5 — canonical Full Std
 
 Before paying for the exhaustive stream, first validate the compiler-IR native

@@ -86,10 +86,10 @@
     "arena-static-correctness-170-of-170",
     "lean4export-sparse-index-compatibility",
     "projection-structure-application-soundness",
-    "deep-structural-traversal-stack-hardening"
+    "deep-structural-traversal-stack-hardening",
+    "std-release-assurance-v1"
   ],
   "openGates": [
-    "full-Std-environment-replay",
     "full-Lean-environment-replay",
     "native-reduction-compiler-ir-provider",
     "formal-equivalence-proof"
@@ -98,10 +98,13 @@
     "full Lean compatibility",
     "formal equivalence",
     "100% complete",
-    "full Lean 4.34 native-reduction compatibility"
+    "full Lean 4.34 native-reduction compatibility",
+    "canonical Full Std passes unless the one-pass shared-environment Tier 5 gate succeeds"
   ],
-  "lastVerifiedTestCount": 174,
+  "lastVerifiedTestCount": 181,
   "notes": [
+    "Std release assurance v1 CLOSED on the immutable-admission semantic tree. GitHub Actions run 36050092606 prerequisite job 107803719685 passed exporter compile, direct kernel 181/181 (0 failures), anti-drift, the bounded kernel corpus/oracle ladder, exact Lean 4.34 official oracle, defeq differential 42/42, adversarial oracle 21 expected-success + 1 expected-rejection, native compiler-IR smoke, and canonical Init.Prelude. Coverage run 36050337720 attempt 2 job 107804383756 passed std-release-assurance-v1 over the 114,029-constant Std corpus: all 957 canonical Init.Data.Int.DivMod.Lemmas roots 22197..23153 plus twelve canonical 64-root stratified windows at 0, 10000, ..., 110000. Canonical one-pass Full Std remains an optional gold/soak gate and is NOT claimed to have passed.",
+    "Release-gate policy update: canonical Full Std remains a non-blocking gold/soak gate. The blocking Std release gate is now the bounded std-release-assurance-v1 profile: direct/anti-drift/corpora/native/canonical Init prerequisites plus exhaustive Init.Data.Int.DivMod.Lemmas roots 22197..23153 and stratified 64-root windows every 10,000 Std roots. This does not permit the claim that canonical Full Std passed.",
     "Lean 4.34 universe-ordering semantic fix: final C++ `is_geq_core` uses the `is_max(l1)` branch only as a positive shortcut; when both max branches fail it falls through to later imax/offset rules. The iterative TypeScript port incorrectly returned the failed OR as final false, rejecting Init.Prelude `Trans.mk` even though each component universe was dominated. `ac9653b6` restores the fallthrough; focused `max u v >= imax u v` and exact Trans universe regressions pass. GitHub Actions run 35965228367 verifies the direct suite at 174/174.",
     "Fresh executable checkpoint: after the repository was made public, GitHub-hosted Ubuntu runner allocation recovered. Run 35962003721 attempt 2 completed oracle syntax, TypeScript root build, kernel-study matrix, and direct kernel suite with 173/173 PASS and 0 failures at commit 6676b0a92b714979968edb0213e770f9600a7dce. The same root npm test later failed in unrelated packages/syntax frontend TypeScript code; this is not a kernel failure. A focused `test:kernel` gate now isolates hardening CI/assurance from unrelated package development.",
     "Execution refresh at bc2841a reached the anti-drift matrix after oracle syntax and TypeScript build, then stopped on a stale maxRecDepth regression name. Source audit found the mapped coverage still present as `kernel recursion budget matches Lean 4.34 unlimited and 16x semantics`; a09c167 aligns that mapping. A full static matrix audit then found and fixed two further stale assertions (source-order disclaimer line wrapping and obsolete `git restore -- full-std.log` recovery text) in d1e7c16. All current mapped test names and remaining static marker checks now resolve in source. lastVerifiedTestCount remains 170 pending executable rerun.",
@@ -262,7 +265,7 @@
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
   ],
-  "currentTreeExpectedDirectTests": 174,
+  "currentTreeExpectedDirectTests": 181,
   "currentTreeExpectedDefeqDifferentialCases": 42,
   "currentTreeVerification": "GitHub Actions run 35965228367: focused kernel gate PASS 174/174, kernel anti-drift PASS, and Windows PowerShell assurance-runner syntax PASS at commit 8aeabcee849b8d87260e5eda52cf4d64314eb5bb. The added regression locks final Lean 4.34 is_geq max-positive-shortcut fallback needed by Trans.mk. Canonical Lean-backed replay is still in progress/open."
 }

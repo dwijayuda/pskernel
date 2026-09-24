@@ -256,3 +256,107 @@ def psSyntaxAnonymousExplicitBinder
     kind := PsSyntaxBinderKind.explicit
     span := span
   }
+
+def psSyntaxPatternSpan : PsSyntaxPattern -> PsSourceSpan
+  | .bool _ span => span
+  | .wildcard span => span
+  | .constructor _ _ span => span
+
+def psParsePatternBindersWithFuel
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (bindersRev : List PsSyntaxName) :
+    Except PsParseError (PsParseResult (List PsSyntaxName)) :=
+  match fuel with
+  | 0 =>
+      Except.ok {
+        value := bindersRev.reverse
+        cursor := cursor
+      }
+  | remaining + 1 =>
+      match psTokenCursorPeek cursor with
+      | none =>
+          Except.ok {
+            value := bindersRev.reverse
+            cursor := cursor
+          }
+      | some token =>
+          if psTokenKindEq token.kind PsTokenKind.identifier
+              && token.text != "true"
+              && token.text != "false" then
+            match psTokenCursorAdvance cursor with
+            | none =>
+                Except.ok {
+                  value := bindersRev.reverse
+                  cursor := cursor
+                }
+            | some read =>
+                let binder : PsSyntaxName := {
+                  segments := [token.text]
+                  span := token.span
+                }
+                psParsePatternBindersWithFuel
+                  remaining
+                  read.cursor
+                  (binder :: bindersRev)
+          else
+            Except.ok {
+              value := bindersRev.reverse
+              cursor := cursor
+            }
+
+def psParseBasicPattern
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxPattern) :=
+  match psTokenCursorPeek cursor with
+  | none => Except.error (PsParseError.unexpectedEnd "match pattern")
+  | some token =>
+      if token.text == "true" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "match pattern")
+        | some read =>
+            Except.ok {
+              value := PsSyntaxPattern.bool true token.span
+              cursor := read.cursor
+            }
+      else if token.text == "false" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "match pattern")
+        | some read =>
+            Except.ok {
+              value := PsSyntaxPattern.bool false token.span
+              cursor := read.cursor
+            }
+      else if token.text == "_" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "match pattern")
+        | some read =>
+            Except.ok {
+              value := PsSyntaxPattern.wildcard token.span
+              cursor := read.cursor
+            }
+      else
+        match psParseSyntaxName cursor with
+        | Except.error error => Except.error error
+        | Except.ok constructorName =>
+            match psParsePatternBindersWithFuel
+                constructorName.cursor.remaining.length
+                constructorName.cursor
+                [] with
+            | Except.error error => Except.error error
+            | Except.ok binders =>
+                let span :=
+                  match binders.value.reverse with
+                  | [] => constructorName.value.span
+                  | lastBinder :: _ =>
+                      psSyntaxSpanJoin
+                        constructorName.value.span
+                        lastBinder.span
+                Except.ok {
+                  value :=
+                    PsSyntaxPattern.constructor
+                      constructorName.value
+                      binders.value
+                      span
+                  cursor := binders.cursor
+                }

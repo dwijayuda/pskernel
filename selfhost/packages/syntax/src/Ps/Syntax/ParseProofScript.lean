@@ -435,26 +435,54 @@ def psParseProofScriptTermWithFuel :
                               cursor := body.cursor
                             }
       else if psTokenCursorAtText cursor "(" then
-        match psParseProofScriptBinder cursor with
-        | Except.ok binder =>
-            if psTokenCursorAtArrow binder.cursor then
-              psParseProofScriptDependentArrowTail
-                (psParseProofScriptTermWithFuel remaining)
-                binder
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "(")
+        | some opening =>
+            if psTokenCursorAtText opening.cursor ")" then
+              match psTokenCursorAdvance opening.cursor with
+              | none => Except.error (PsParseError.unexpectedEnd ")")
+              | some close =>
+                  Except.ok {
+                    value :=
+                      PsSyntaxTerm.unit {
+                        start := opening.token.span.start
+                        stop := close.token.span.stop
+                      }
+                    cursor := close.cursor
+                  }
             else
-              match psParseProofScriptSimpleApplication cursor with
-              | Except.error error => Except.error error
-              | Except.ok domain =>
-                  psParseProofScriptArrowTail
-                    (psParseProofScriptTermWithFuel remaining)
-                    domain
-        | Except.error _ =>
-            match psParseProofScriptSimpleApplication cursor with
-            | Except.error error => Except.error error
-            | Except.ok domain =>
-                psParseProofScriptArrowTail
-                  (psParseProofScriptTermWithFuel remaining)
-                  domain
+              match psParseProofScriptBinder cursor with
+              | Except.ok binder =>
+                  if psTokenCursorAtArrow binder.cursor then
+                    psParseProofScriptDependentArrowTail
+                      (psParseProofScriptTermWithFuel remaining)
+                      binder
+                  else
+                    match psParseProofScriptTermWithFuel remaining opening.cursor with
+                    | Except.error error => Except.error error
+                    | Except.ok grouped =>
+                        match psTokenCursorExpectText grouped.cursor ")" with
+                        | Except.error error => Except.error error
+                        | Except.ok close =>
+                            psParseProofScriptArrowTail
+                              (psParseProofScriptTermWithFuel remaining)
+                              {
+                                value := grouped.value
+                                cursor := close.cursor
+                              }
+              | Except.error _ =>
+                  match psParseProofScriptTermWithFuel remaining opening.cursor with
+                  | Except.error error => Except.error error
+                  | Except.ok grouped =>
+                      match psTokenCursorExpectText grouped.cursor ")" with
+                      | Except.error error => Except.error error
+                      | Except.ok close =>
+                          psParseProofScriptArrowTail
+                            (psParseProofScriptTermWithFuel remaining)
+                            {
+                              value := grouped.value
+                              cursor := close.cursor
+                            }
       else
         match psParseProofScriptSimpleApplication cursor with
         | Except.error error => Except.error error

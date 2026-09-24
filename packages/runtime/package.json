@@ -14,6 +14,10 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "import": "./dist/src/index.js"
+    },
+    "./lean4": {
+      "types": "./dist/src/lean4.d.ts",
+      "import": "./dist/src/lean4.js"
     }
   },
   "scripts": {

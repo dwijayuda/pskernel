@@ -125,11 +125,14 @@ export function eraseRuntimeApplication(
 
   const checker=new TypeChecker(environment,scope.localContext.clone());
   let fnType=checker.check(view.fn);
+  const typeArgs:import('@proofscript/compiler-ir/verified').VerifiedIrType[]=[];
   const runtimeArgs:VerifiedIrExpr[]=[];
   for(const arg of view.args){
     const binder=checker.ensureForall(checker.whnf(fnType));
     const kind=classifyBinder(binder.type,checker);
-    if(kind==='runtime'){
+    if(kind==='type'){
+      typeArgs.push(eraseRuntimeType(arg,scope,environment));
+    }else if(kind==='runtime'){
       runtimeArgs.push(erase(arg,scope,environment));
     }
     fnType=instantiate1(binder.body,arg);
@@ -138,5 +141,10 @@ export function eraseRuntimeApplication(
   const fn=erase(view.fn,scope,environment);
   return runtimeArgs.length===0
     ?fn
-    :{kind:'call',fn,args:runtimeArgs};
+    :{
+      kind:'call',
+      fn,
+      ...(typeArgs.length===0?{}:{typeArgs}),
+      args:runtimeArgs,
+    };
 }

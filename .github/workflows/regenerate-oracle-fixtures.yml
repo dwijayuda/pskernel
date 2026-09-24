@@ -49,6 +49,7 @@ jobs:
         run: |
           npm run oracle:primitive
           npm run oracle:init
+          npm run oracle:text-foundation
           npm run oracle:std-parsec
           npm run oracle:std-sat-cnf
           npm run oracle:std-byteslice
@@ -68,4 +69,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "test: regenerate Lean 4.34 oracle fixtures"
+          git fetch origin main
+          git rebase origin/main
           git push origin HEAD:main

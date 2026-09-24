@@ -15,6 +15,7 @@ import {
 import {tryEraseRuntimeRecursorApplication} from './recursor-erasure.js';
 import {eraseRuntimeType} from './type-erasure.js';
 import {tryErasePrimitiveRuntimeApplication} from './primitive-app-erasure.js';
+import {tryEraseRawPosConstructor} from './raw-pos-erasure.js';
 
 export type RuntimeExprEraser=(
   expr:Expr,
@@ -45,17 +46,13 @@ export function eraseRuntimeApplication(
   );
   if(recursor!==undefined)return recursor;
 
-  if(
-    view.fn.kind==='const'
-    &&nameToString(view.fn.name)==='String.Pos.Raw.mk'
-  ){
-    if(view.args.length!==1){
-      throw new Error(
-        "PS_ERASE_RAW_POS_CONSTRUCTOR_ARITY: expected one byteIdx argument",
-      );
-    }
-    return erase(view.args[0]!,scope,environment);
-  }
+  const rawPos=tryEraseRawPosConstructor(
+    expr,
+    scope,
+    environment,
+    erase,
+  );
+  if(rawPos!==undefined)return rawPos;
 
   if(view.fn.kind==='const'){
     const constructor=scope.inductivesByConstructor.get(

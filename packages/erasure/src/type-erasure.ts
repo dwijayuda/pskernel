@@ -40,7 +40,11 @@ export function eraseRuntimeType(
   }
 
   if(value.kind==='const'){
-    const primitive=primitives.get(nameToString(value.name));
+    const leanName=nameToString(value.name);
+    if(leanName==='String.Pos.Raw'){
+      return {kind:'primitive',name:'Nat'};
+    }
+    const primitive=primitives.get(leanName);
     if(primitive!==undefined)return primitive;
     const known=scope.declarationNames.get(nameKey(value.name));
     return {

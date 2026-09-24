@@ -96,12 +96,94 @@ def psWhnf
     (expr : PsExpr) : PsExpr :=
   psWhnfWithFuel environment metaContext localContext 256 expr
 
+def psDefEqReadOnlyWithEnvFuel
+    (environment : PsEnvironment)
+    (metaContext : PsMetaContext)
+    (localContext : PsLocalContext) :
+    Nat -> PsExpr -> PsExpr -> Bool
+  | 0, left, right =>
+      psExprAlphaEq
+        (psWhnf environment metaContext localContext left)
+        (psWhnf environment metaContext localContext right)
+  | remaining + 1, left, right =>
+      let leftValue :=
+        psWhnf environment metaContext localContext left
+      let rightValue :=
+        psWhnf environment metaContext localContext right
+      if psExprAlphaEq leftValue rightValue then
+        true
+      else
+        match leftValue, rightValue with
+        | .app leftFn leftArg, .app rightFn rightArg =>
+            psDefEqReadOnlyWithEnvFuel
+                environment
+                metaContext
+                localContext
+                remaining
+                leftFn
+                rightFn
+              && psDefEqReadOnlyWithEnvFuel
+                environment
+                metaContext
+                localContext
+                remaining
+                leftArg
+                rightArg
+        | .lam _ leftType leftBody _,
+          .lam _ rightType rightBody _ =>
+            psDefEqReadOnlyWithEnvFuel
+                environment
+                metaContext
+                localContext
+                remaining
+                leftType
+                rightType
+              && psDefEqReadOnlyWithEnvFuel
+                environment
+                metaContext
+                localContext
+                remaining
+                leftBody
+                rightBody
+        | .forallE _ leftType leftBody _,
+          .forallE _ rightType rightBody _ =>
+            psDefEqReadOnlyWithEnvFuel
+                environment
+                metaContext
+                localContext
+                remaining
+                leftType
+                rightType
+              && psDefEqReadOnlyWithEnvFuel
+                environment
+                metaContext
+                localContext
+                remaining
+                leftBody
+                rightBody
+        | .proj leftType leftIndex leftValue,
+          .proj rightType rightIndex rightValue =>
+            psNameEq leftType rightType
+              && leftIndex == rightIndex
+              && psDefEqReadOnlyWithEnvFuel
+                environment
+                metaContext
+                localContext
+                remaining
+                leftValue
+                rightValue
+        | _, _ => false
+
 def psDefEqReadOnlyWithEnv
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext)
     (left : PsExpr)
     (right : PsExpr) : Bool :=
-  let leftValue := psWhnf environment metaContext localContext left
-  let rightValue := psWhnf environment metaContext localContext right
-  psExprAlphaEq leftValue rightValue
+  psDefEqReadOnlyWithEnvFuel
+    environment
+    metaContext
+    localContext
+    256
+    left
+    right

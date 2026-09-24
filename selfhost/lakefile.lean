@@ -64,6 +64,12 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.Model
   ]
 
+lean_lib PsBackendTs where
+  srcDir := "packages/backend-ts/src"
+  roots := #[
+    `Ps.BackendTs.Type
+  ]
+
 lean_lib PsProject where
   srcDir := "packages/project/src"
   roots := #[`Ps.Project.ModuleGraph]

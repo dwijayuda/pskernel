@@ -610,7 +610,7 @@ def psExprHasConst (target : PsName) : PsExpr -> Bool
   | .proj _ _ value => psExprHasConst target value
   | _ => false
 
-def psNameListContains (names : List PsName) (target : PsName) : Bool :=
+def psMatchNameListContains (names : List PsName) (target : PsName) : Bool :=
   names.any (fun name => psNameEq name target)
 
 structure PsElabMatchAlternative where
@@ -674,7 +674,7 @@ def psElabPrepareMatchAlternatives
           pattern with
       | Except.error error => Except.error error
       | Except.ok ctorName =>
-          if !psNameListContains inductiveInfo.constructors ctorName then
+          if !psMatchNameListContains inductiveInfo.constructors ctorName then
             Except.error (PsElabError.matchConstructorUnknown ctorName)
           else
             match psElabMatchAlternativeFind ctorName alternativesRev with

@@ -45,7 +45,8 @@ if ($LASTEXITCODE -ne 0) {
   throw "Unable to inspect git working tree."
 }
 if ($trackedChanges.Count -ne 0) {
-  throw "Tracked working-tree changes are present. Commit/stash them before producing assurance evidence."
+  $dirtySummary = ($trackedChanges -join "; ")
+  throw "Tracked working-tree changes are present. Commit/stash them before producing assurance evidence. git status: $dirtySummary"
 }
 
 $nodeVersion = (& node --version).Trim()
@@ -79,9 +80,19 @@ Write-Log "leanGitHash=$leanGitHash"
 Write-Log "leanBin=$env:LEAN434_BIN"
 Write-Log "heapMiB=$HeapMiB stackKiB=$StackKiB"
 
-Write-Host "Installing dependencies..."
-& npm install --no-audit --no-fund
+Write-Host "Installing locked dependencies with npm ci..."
+Write-Log "dependencyInstall=npm ci"
+& npm ci --no-audit --no-fund
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+$postInstallTrackedChanges = @(& git status --porcelain --untracked-files=no)
+if ($LASTEXITCODE -ne 0) {
+  throw "Unable to inspect git working tree after npm ci."
+}
+if ($postInstallTrackedChanges.Count -ne 0) {
+  $dirtySummary = ($postInstallTrackedChanges -join "; ")
+  throw "npm ci changed tracked files; refusing assurance evidence. git status: $dirtySummary"
+}
 
 if (-not $SkipTests) {
   Write-Host "Running full npm test gate..."

@@ -640,11 +640,19 @@ partial def dumpCanonicalRootRange (env : Environment) (target : Name) (start co
     ("rootDedup", "first-serialized-occurrence"),
     ("canonicalScope", "pskernel-project-protocol")
   ])]).compress
+  let firstRoot :=
+    match selected with
+    | n :: _ => n.toString
+    | [] => ""
+  let lastRoot :=
+    match selected.getLast? with
+    | some n => n.toString
+    | none => ""
   IO.println <| (Json.mkObj [("batch", Json.mkObj [
     ("rootStart", start),
     ("directRoots", selected.length),
-    ("firstRoot", selected.head?.map Name.toString |>.getD ""),
-    ("lastRoot", selected.getLast?.map Name.toString |>.getD "")
+    ("firstRoot", firstRoot),
+    ("lastRoot", lastRoot)
   ])]).compress
   ((do
     modify fun s => { s with skipNonReplayable := true }

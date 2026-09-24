@@ -40,6 +40,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm ci --no-audit --no-fund
+      - name: Compile dependency exporter
+        run: "$LEAN434_BIN/lean" oracle/replay-probe/DependencyExport.lean
       - run: npm run test:kernel
       - run: node scripts/anti-drift.mjs
       - run: npm run check:kernel-corpus

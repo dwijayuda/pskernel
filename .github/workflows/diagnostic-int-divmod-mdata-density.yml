@@ -1,0 +1,49 @@
+name: Diagnostic Int.DivMod MData density
+
+on:
+  push:
+    branches: [diagnostic/int-divmod-mdata-density]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  density:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: slow-a
+            start: 22197
+            count: 110
+          - label: slow-b
+            start: 22307
+            count: 250
+          - label: slow-c
+            start: 22557
+            count: 250
+          - label: fast-d
+            start: 22807
+            count: 250
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - name: Export and count metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="/tmp/${{ matrix.label }}.ndjson"
+          "$LEAN434_BIN/lean" --run oracle/replay-probe/DependencyExport.lean Std --root-range "${{ matrix.start }}" "${{ matrix.count }}" > "$out"
+          bytes="$(wc -c < "$out")"
+          lines="$(wc -l < "$out")"
+          mdata="$(grep -c '"mdata"' "$out" || true)"
+          echo "label=${{ matrix.label }} start=${{ matrix.start }} count=${{ matrix.count }} bytes=$bytes lines=$lines mdataRecords=$mdata"

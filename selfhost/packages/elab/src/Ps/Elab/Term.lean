@@ -268,6 +268,66 @@ def psElabLambda
             }
             expected
 
+def psCloseElabForallBinders
+    (metaContext : PsMetaContext) :
+    List PsElabTypedBinder ->
+    PsExpr ->
+    PsExpr
+  | [], body => body
+  | binder :: rest, body =>
+      let binderType :=
+        psMetaInstantiate metaContext binder.type
+      let closedBody :=
+        PsExpr.forallE
+          binder.name
+          binderType
+          (psExprAbstractFVar binder.id body)
+          binder.binder
+      psCloseElabForallBinders
+        metaContext
+        rest
+        closedBody
+
+def psElabForall
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (context : PsElabContext)
+    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (body : PsSyntaxTerm)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match psElabTypedBinders elaborate context binders with
+  | Except.error error => Except.error error
+  | Except.ok binderResult =>
+      match elaborate binderResult.context body none with
+      | Except.error error => Except.error error
+      | Except.ok bodyResult =>
+          match psInferEnsureSort
+              bodyResult.context.environment
+              bodyResult.context.metaContext
+              bodyResult.context.localContext
+              bodyResult.type with
+          | Except.error error =>
+              Except.error (PsElabError.infer error)
+          | Except.ok _ =>
+              let metaContext := bodyResult.context.metaContext
+              let openBody :=
+                psMetaInstantiate metaContext bodyResult.term
+              let closed :=
+                psCloseElabForallBinders
+                  metaContext
+                  binderResult.bindersRev
+                  openBody
+              let outerContext :=
+                psElabContextWithMeta context metaContext
+              psElabResolvedTerm
+                outerContext
+                closed
+                expected
+
 def psBinderAcceptsExplicitArgument (binder : PsBinderInfo) : Bool :=
   match binder with
   | .explicit => true
@@ -328,6 +388,13 @@ def psElabTermWithFuel
           psElabNatural context text expected
       | .lambda binders body _ =>
           psElabLambda
+            (psElabTermWithFuel remaining)
+            context
+            binders
+            body
+            expected
+      | .forallE binders body _ =>
+          psElabForall
             (psElabTermWithFuel remaining)
             context
             binders

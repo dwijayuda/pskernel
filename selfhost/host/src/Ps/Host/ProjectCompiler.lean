@@ -117,6 +117,63 @@ def psHostLexErrorText : PsLexError -> String
       psHostSourcePosText span.start ++ ": unterminated character"
   | .fuelExhausted => "lexer fuel exhausted"
 
+def psHostInferErrorText : PsInferError -> String
+  | .fuelExhausted => "infer:fuelExhausted"
+  | .looseBoundVariable index =>
+      "infer:looseBoundVariable:" ++ toString index
+  | .unknownFreeVariable id =>
+      "infer:unknownFreeVariable:" ++ toString id
+  | .unknownMetavariable id =>
+      "infer:unknownMetavariable:" ++ toString id
+  | .unknownConstant name =>
+      "infer:unknownConstant:" ++ psNameToString name
+  | .incorrectUniverseArity name =>
+      "infer:incorrectUniverseArity:" ++ psNameToString name
+  | .expectedSort => "infer:expectedSort"
+  | .expectedFunction => "infer:expectedFunction"
+  | .applicationTypeMismatch => "infer:applicationTypeMismatch"
+  | .letTypeMismatch => "infer:letTypeMismatch"
+  | .projectionUnsupported => "infer:projectionUnsupported"
+
+def psHostElabErrorText : PsElabError -> String
+  | .fuelExhausted => "fuelExhausted"
+  | .emptyName => "emptyName"
+  | .unknownName name =>
+      "unknownName:" ++ psNameToString name
+  | .invalidNatural text => "invalidNatural:" ++ text
+  | .invalidString text => "invalidString:" ++ text
+  | .invalidCharacter text => "invalidCharacter:" ++ text
+  | .infer error => psHostInferErrorText error
+  | .typeMismatch => "typeMismatch"
+  | .implicitApplicationUnsupported =>
+      "implicitApplicationUnsupported"
+  | .unsupportedTerm => "unsupportedTerm"
+  | .matchExpectedType => "matchExpectedType"
+  | .matchScrutineeUnsupported => "matchScrutineeUnsupported"
+  | .matchInductiveUnsupported => "matchInductiveUnsupported"
+  | .matchParameterArity => "matchParameterArity"
+  | .matchPatternUnsupported => "matchPatternUnsupported"
+  | .matchConstructorUnknown name =>
+      "matchConstructorUnknown:" ++ psNameToString name
+  | .matchDuplicateConstructor name =>
+      "matchDuplicateConstructor:" ++ psNameToString name
+  | .matchNonExhaustive => "matchNonExhaustive"
+  | .matchRecursorUnsupported => "matchRecursorUnsupported"
+  | .matchRecursorLevels => "matchRecursorLevels"
+  | .matchConstructorArity name =>
+      "matchConstructorArity:" ++ psNameToString name
+  | .matchRecursiveFieldUnsupported name =>
+      "matchRecursiveFieldUnsupported:" ++ psNameToString name
+  | .duplicateDeclaration name =>
+      "duplicateDeclaration:" ++ psNameToString name
+  | .unresolvedMetavariable => "unresolvedMetavariable"
+  | .structuralRecursionArity => "structuralRecursionArity"
+  | .structuralRecursionNotDecreasing =>
+      "structuralRecursionNotDecreasing"
+  | .structuralRecursionInvariantArgument =>
+      "structuralRecursionInvariantArgument"
+  | .structuralRecursionInternal => "structuralRecursionInternal"
+
 def psHostParseSource
     (path source : String) : IO PsSyntaxModule := do
   if path.endsWith ".lean" then
@@ -177,10 +234,11 @@ mutual
               psElabModule
                 withImports.environment
                 sourceModule with
-          | Except.error _ =>
+          | Except.error error =>
               throw
                 (IO.userError
-                  ("PSC1_PROJECT_ELAB_FAILED: " ++ path))
+                  ("PSC1_PROJECT_ELAB_FAILED: " ++ path ++
+                    ": " ++ psHostElabErrorText error))
           | Except.ok elaborated =>
               pure {
                 environment := elaborated.environment

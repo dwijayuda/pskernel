@@ -195,6 +195,7 @@ def psCliUsage : String :=
   "  psc1 translate <input.lean|input.ps> --to <lean|ps>\n" ++
   "  psc1 admissions <input.lean|input.ps>\n" ++
   "  psc1 typescript <input.lean|input.ps>\n" ++
+  "  psc1 build <input.lean|input.ps> --out <output.ts>\n" ++
   "  psc1 compile <input.lean|input.ps> --out <output.ts>"
 
 def main (args : List String) : IO Unit := do
@@ -207,6 +208,8 @@ def main (args : List String) : IO Unit := do
       psCliAdmissions inputPath
   | ["typescript", inputPath] =>
       psCliTypeScript inputPath
+  | ["build", inputPath, "--out", outputPath] =>
+      psCliCompile inputPath outputPath
   | ["compile", inputPath, "--out", outputPath] =>
       psCliCompile inputPath outputPath
   | _ =>

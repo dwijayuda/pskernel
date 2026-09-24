@@ -120,6 +120,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       ...(wasm===null?{}:{
         binaryenVersion:wasm.wasm.binaryenVersion,
         wasmProfile:wasm.wasm.profile,
+        executionRuntime:wasm.wasm.executionRuntime,
         wasmOptimized:wasm.wasm.optimized,
         wasmExports:wasm.wasm.exports,
         wasmRuntimeImports:wasm.wasm.imports,

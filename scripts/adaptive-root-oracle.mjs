@@ -55,7 +55,8 @@ async function inspect(path){
 async function runWorker(path){
   const fd=openSync(path,'r');
   const child=spawn(process.execPath,['--expose-gc',`--max-old-space-size=${workerHeapMiB}`,'scripts/batch-replay-worker.mjs'],{
-    cwd:resolve('.'),stdio:[fd,'pipe','pipe']
+    cwd:resolve('.'),stdio:[fd,'pipe','pipe'],
+    env:{...envVars,PSKERNEL_NATIVE_LEAN:lean,PSKERNEL_NATIVE_MODULE:moduleName}
   });
   let out='',err='',timedOut=false,timer;
   const arm=()=>{clearTimeout(timer);timer=setTimeout(()=>{timedOut=true;child.kill('SIGKILL');},workerTimeoutMs);};

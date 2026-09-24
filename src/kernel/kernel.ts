@@ -5,19 +5,20 @@ import { Expr, exprToString } from '../core/expr.js';
 import { LocalContext } from '../core/local-context.js';
 import { Name, nameEq, nameToString } from '../core/name.js';
 import { TypeChecker } from './type-checker.js';
+import { NativeEvaluator } from './reduction/native.js';
 import { isPrimitiveName } from './primitive-names.js';
 
 function uniqueNames(xs:readonly Name[]):boolean{return xs.every((x,i)=>xs.findIndex(y=>nameEq(x,y))===i);}
-function tcFor(env:Environment,lparams:readonly Name[],safety:DefinitionSafety='safe'):TypeChecker{return new TypeChecker(env,new LocalContext(),undefined,undefined,safety,lparams,false);}
+function tcFor(env:Environment,lparams:readonly Name[],safety:DefinitionSafety='safe',nativeEvaluator?:NativeEvaluator):TypeChecker{return new TypeChecker(env,new LocalContext(),undefined,undefined,safety,lparams,false,nativeEvaluator);}
 
 export class Kernel {
   readonly env:Environment;
-  constructor(env=new Environment()){this.env=env;}
+  constructor(env=new Environment(),readonly nativeEvaluator?:NativeEvaluator){this.env=env;}
   private pre(name:Name,lparams:readonly Name[],type:Expr,safety:DefinitionSafety='safe'):TypeChecker{
     if(isPrimitiveName(name))throw new KernelError(`primitive '${nameToString(name)}' must go through primitive recognition`);
     if(this.env.has(name))throw new KernelError(`already declared '${nameToString(name)}'`);
     if(!uniqueNames(lparams))throw new KernelError(`duplicate universe parameter at '${nameToString(name)}'`);
-    ensureClosed(type,`type of ${nameToString(name)}`);const tc=tcFor(this.env,lparams,safety);tc.ensureSort(tc.check(type),type);return tc;
+    ensureClosed(type,`type of ${nameToString(name)}`);const tc=tcFor(this.env,lparams,safety,this.nativeEvaluator);tc.ensureSort(tc.check(type),type);return tc;
   }
   addAxiom(info:Extract<ConstantInfo,{kind:'axiom'}>):void{this.pre(info.name,info.levelParams,info.type,info.isUnsafe?'unsafe':'safe');this.env.add(info);}
   addDefinition(info:DefinitionInfo):void{
@@ -25,7 +26,7 @@ export class Kernel {
     const tc=this.pre(info.name,info.levelParams,info.type,checkingSafety);ensureClosed(info.value,`value of ${nameToString(info.name)}`);
     if(info.safety==='unsafe'){
       // Lean permits unsafe/meta definitions to be recursive: add to a transactional clone before checking the body.
-      const work=this.env.clone();work.add(info);const bodyTc=tcFor(work,info.levelParams,'unsafe');const vt=bodyTc.check(info.value);if(!bodyTc.isDefEq(vt,info.type))throw new KernelError(`definition '${nameToString(info.name)}' value has type ${exprToString(vt)}, expected ${exprToString(info.type)}`);
+      const work=this.env.clone();work.add(info);const bodyTc=tcFor(work,info.levelParams,'unsafe',this.nativeEvaluator);const vt=bodyTc.check(info.value);if(!bodyTc.isDefEq(vt,info.type))throw new KernelError(`definition '${nameToString(info.name)}' value has type ${exprToString(vt)}, expected ${exprToString(info.type)}`);
     }else{
       const vt=tc.check(info.value);if(!tc.isDefEq(vt,info.type))throw new KernelError(`definition '${nameToString(info.name)}' value has type ${exprToString(vt)}, expected ${exprToString(info.type)}`);
     }
@@ -46,7 +47,7 @@ export class Kernel {
       seen.push(v.name);this.pre(v.name,v.levelParams,v.type,safety);
     }
     const work=this.env.clone();for(const v of defs)work.add(v);
-    const tc=tcFor(work,lparams,safety);
+    const tc=tcFor(work,lparams,safety,this.nativeEvaluator);
     for(const v of defs){ensureClosed(v.value,`value of ${nameToString(v.name)}`);const vt=tc.check(v.value);if(!tc.isDefEq(vt,v.type))throw new KernelError(`definition '${nameToString(v.name)}' value has type ${exprToString(vt)}, expected ${exprToString(v.type)}`);}
     // Commit only after the entire block has checked, keeping admission transactional.
     for(const v of defs)this.env.add(v);

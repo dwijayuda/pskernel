@@ -1,8 +1,12 @@
 import {createInterface} from 'node:readline';
 import {Environment} from '../dist/src/core/environment.js';
 import {Lean4ExportReplay} from '../dist/src/integration/lean4export.js';
+import {createLeanNativeEvaluator} from './lean-native-evaluator.mjs';
 
 const shared=new Environment();
+const nativeEvaluator=process.env.PSKERNEL_NATIVE_LEAN&&process.env.PSKERNEL_NATIVE_MODULE
+  ?createLeanNativeEvaluator({lean:process.env.PSKERNEL_NATIVE_LEAN,moduleName:process.env.PSKERNEL_NATIVE_MODULE,cwd:process.cwd(),env:process.env})
+  :undefined;
 const rl=createInterface({input:process.stdin,crlfDelay:Infinity});
 let replay=null;
 let lines=0,names=0,levels=0,expressions=0,declarations=0,segments=0;
@@ -26,11 +30,11 @@ for await(const line of rl){
   if(marker?.environment||marker?.batch)continue;
   if(marker?.segment){
     finishSegment();
-    replay=new Lean4ExportReplay(shared);
+    replay=new Lean4ExportReplay(shared,{nativeEvaluator});
     segments++;
     continue;
   }
-  if(!replay)replay=new Lean4ExportReplay(shared); // backward-compatible unsegmented batches
+  if(!replay)replay=new Lean4ExportReplay(shared,{nativeEvaluator}); // backward-compatible unsegmented batches
   replay.replayLine(line);
   const rss=process.memoryUsage().rss/1048576;
   if(rss>maxRssMiB)maxRssMiB=rss;

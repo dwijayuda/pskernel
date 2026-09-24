@@ -38,7 +38,7 @@ property.
 
 ### Native compiler execution is not kernel definitional reduction
 
-Final Lean 4.34 removed the deprecated `Lean.reduceNat` / `Lean.reduceBool` in-kernel compiler-interpreter path entirely. pskernel therefore does not need a NativeEvaluator compatibility extension. Compiler IR belongs to the executable compiler/backend roadmap, while native proof tactics belong to meta/tactic tooling with explicit trust assumptions.
+Lean `v4.34.0` still contains the deprecated `Lean.reduceNat` / `Lean.reduceBool` in-kernel compiler-interpreter path. pskernel keeps only an explicit `NativeEvaluator` interface in the kernel boundary; an implementation capable of reproducing Lean's compiler-IR execution is an optional TCB extension and remains a separate compatibility gate. This is distinct from ProofScript's ordinary compiler/backend IR and from native proof tactics in meta/tactic tooling.
 
 ### Module persistence is a separate layer
 

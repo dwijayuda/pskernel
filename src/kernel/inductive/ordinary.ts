@@ -1,11 +1,11 @@
 import { ConstructorInfo, InductiveInfo, RecursorInfo, RecursorRule } from '../../core/declaration.js';
 import { ensureClosed } from '../../core/checks.js';
 import { Environment, KernelError } from '../../core/environment.js';
-import { BinderInfo, Expr, app, appView, constant, consumeTypeAnnotations, exprEq, exprToString, forallE, fvar, inferImplicit, instantiateExprLevels, lam, mkAppN, sort } from '../../core/expr.js';
+import { BinderInfo, Expr, app, appView, constant, consumeTypeAnnotations, exprEq, exprLeanEq, exprToString, forallE, fvar, inferImplicit, instantiateExprLevels, lam, mkAppN, sort } from '../../core/expr.js';
 import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
-import { Level, isNotZero, levelEquivalent, levelLe, levelParam, levelZero, normalizesToZero } from '../../core/level.js';
+import { Level, isNotZero, levelEqStructural, levelEquivalent, levelLe, levelParam, levelToString, levelZero, normalizesToZero } from '../../core/level.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
-import { Name, anonymous, nameAppendAfter, nameAppendIndexAfter, nameEq, nameFromDotted, nameKey, nameReplacePrefix, nameToString, strName } from '../../core/name.js';
+import { Name, anonymous, nameAppendAfter, nameAppendIndexAfter, nameEq, nameFromDotted, nameIsPrefixOf, nameKey, nameReplacePrefix, nameToString, strName } from '../../core/name.js';
 import { TypeChecker } from '../type-checker.js';
 import { isPrimitiveName } from '../primitive-names.js';
 
@@ -21,25 +21,115 @@ function addLocal(lctx:LocalContext,name:Name,type:Expr,bi:BinderInfo='default')
 function tc(env:Environment,lctx:LocalContext,isUnsafe=false,lparams?:readonly Name[]){return new TypeChecker(env,lctx,undefined,undefined,isUnsafe?'unsafe':'safe',lparams);}
 function stc(env:Environment,lctx:LocalContext,stats:Stats){return tc(env,lctx,stats.isUnsafe,stats.lparams);}
 function recName(n:Name):Name{return strName(n,'rec');}
-function hasConst(e:Expr,names:readonly Name[]):boolean{switch(e.kind){case'const':return names.some(n=>nameEq(n,e.name));case'app':return hasConst(e.fn,names)||hasConst(e.arg,names);case'lam':case'forall':return hasConst(e.type,names)||hasConst(e.body,names);case'let':return hasConst(e.type,names)||hasConst(e.value,names)||hasConst(e.body,names);case'mdata':return hasConst(e.expr,names);case'proj':return hasConst(e.expr,names);default:return false;}}
-function containsFVar(e:Expr,id:string):boolean{switch(e.kind){case'fvar':return e.id===id;case'app':return containsFVar(e.fn,id)||containsFVar(e.arg,id);case'lam':case'forall':return containsFVar(e.type,id)||containsFVar(e.body,id);case'let':return containsFVar(e.type,id)||containsFVar(e.value,id)||containsFVar(e.body,id);case'mdata':return containsFVar(e.expr,id);case'proj':return containsFVar(e.expr,id);default:return false;}}
+function hasConst(e:Expr,names:readonly Name[]):boolean{
+ const todo:Expr[]=[e];
+ while(todo.length){
+   const x=todo.pop()!;
+   switch(x.kind){
+     case'const':if(names.some(n=>nameEq(n,x.name)))return true;break;
+     case'app':todo.push(x.arg,x.fn);break;
+     case'lam':case'forall':todo.push(x.body,x.type);break;
+     case'let':todo.push(x.body,x.value,x.type);break;
+     case'mdata':case'proj':todo.push(x.expr);break;
+     default:break;
+   }
+ }
+ return false;
+}
+function containsFVar(e:Expr,id:string):boolean{
+ const todo:Expr[]=[e];
+ while(todo.length){
+   const x=todo.pop()!;
+   switch(x.kind){
+     case'fvar':if(x.id===id)return true;break;
+     case'app':todo.push(x.arg,x.fn);break;
+     case'lam':case'forall':todo.push(x.body,x.type);break;
+     case'let':todo.push(x.body,x.value,x.type);break;
+     case'mdata':case'proj':todo.push(x.expr);break;
+     default:break;
+   }
+ }
+ return false;
+}
 function arity(e:Expr):number{let n=0,x=e;while(x.kind==='forall'){n++;x=x.body;}return n;}
 function uniqueNames(xs:readonly Name[]):boolean{return xs.every((x,i)=>xs.findIndex(y=>nameEq(x,y))===i);}
 function mkBinder(kind:'forall'|'lam',v:OpenVar,body:Expr):Expr{const b=abstractFVar(body,v.id);return kind==='forall'?forallE(v.decl.userName,v.decl.type,b,v.decl.binderInfo):lam(v.decl.userName,v.decl.type,b,v.decl.binderInfo);}
 function closeMany(kind:'forall'|'lam',vs:readonly OpenVar[],body:Expr):Expr{let r=body;for(let i=vs.length-1;i>=0;i--)r=mkBinder(kind,vs[i]!,r);return r;}
-function validIndApp(work:Environment,stats:Stats,lctx:LocalContext,t:Expr):{idx:number;indices:readonly Expr[]}|null{
- const w=stc(work,lctx,stats).whnf(t),v=appView(w);if(v.fn.kind!=='const')return null;const idx=stats.names.findIndex(n=>nameEq(n,v.fn.kind==='const'?v.fn.name:n));if(idx<0)return null;const ni=stats.nindices[idx]!;if(v.args.length!==stats.params.length+ni)return null;
- for(let i=0;i<stats.params.length;i++)if(!stc(work,lctx,stats).isDefEq(v.args[i]!,stats.params[i]!.expr))return null;
+const reservedNestedName=nameFromDotted('_nested');
+function isReservedNestedName(n:Name):boolean{return nameIsPrefixOf(reservedNestedName,n);}
+function usesReservedNestedAux(e:Expr):boolean{
+ const todo:Expr[]=[e];
+ while(todo.length){
+   const x=todo.pop()!;
+   switch(x.kind){
+     case'const':if(isReservedNestedName(x.name))return true;break;
+     case'proj':if(isReservedNestedName(x.typeName))return true;todo.push(x.expr);break;
+     case'app':todo.push(x.arg,x.fn);break;
+     case'lam':case'forall':todo.push(x.body,x.type);break;
+     case'let':todo.push(x.body,x.value,x.type);break;
+     case'mdata':todo.push(x.expr);break;
+     default:break;
+   }
+ }
+ return false;
+}
+export function checkNoReservedNestedAux(d:InductiveDecl):void{
+ for(const it of d.types){
+   if(usesReservedNestedAux(it.type))throw new KernelError(`invalid declaration '${nameToString(it.name)}', it uses the reserved prefix '_nested'`);
+   for(const ctor of it.ctors)if(usesReservedNestedAux(ctor.type))throw new KernelError(`invalid declaration '${nameToString(ctor.name)}', it uses the reserved prefix '_nested'`);
+ }
+}
+
+/** Final Lean 4.34 syntactic uniform-occurrence check.
+ * This intentionally runs before WHNF/nested preprocessing because reduction can erase
+ * a malformed recursive occurrence before positivity checking sees it. */
+export function checkUniformInductiveOccurrences(d:InductiveDecl):void{
+ if(!Number.isSafeInteger(d.numParams)||d.numParams<0)throw new KernelError('invalid inductive datatype, number of parameters is invalid');
+ const names=d.types.map(x=>x.name),levels=d.levelParams.map(levelParam);
+ const isDeclared=(n:Name)=>names.some(x=>nameEq(x,n));
+ const levelsMatch=(xs:readonly Level[])=>xs.length===levels.length&&xs.every((x,i)=>levelEqStructural(x,levels[i]!));
+ const todo:{e:Expr;offset:number}[]=[];
+ for(let ti=d.types.length-1;ti>=0;ti--)for(let ci=d.types[ti]!.ctors.length-1;ci>=0;ci--)todo.push({e:d.types[ti]!.ctors[ci]!.type,offset:0});
+ while(todo.length){
+   const {e,offset}=todo.pop()!,av=appView(e);
+   if(av.fn.kind==='const'&&isDeclared(av.fn.name)&&av.args.length<=d.numParams){
+     let ok=av.args.length===d.numParams&&offset>=d.numParams&&levelsMatch(av.fn.levels);
+     for(let i=0;ok&&i<d.numParams;i++){const a=av.args[i]!;ok=a.kind==='bvar'&&a.index===offset-1-i;}
+     if(!ok)throw new KernelError(`invalid occurrence of datatype '${nameToString(av.fn.name)}' being declared: it must be applied to the parameters and universe levels of the mutual declaration`);
+     continue;
+   }
+   switch(e.kind){
+     case'app':todo.push({e:e.arg,offset},{e:e.fn,offset});break;
+     case'lam':case'forall':todo.push({e:e.body,offset:offset+1},{e:e.type,offset});break;
+     case'let':todo.push({e:e.body,offset:offset+1},{e:e.value,offset},{e:e.type,offset});break;
+     case'mdata':case'proj':todo.push({e:e.expr,offset});break;
+     default:break;
+   }
+ }
+}
+function validIndApp(_work:Environment,stats:Stats,_lctx:LocalContext,t:Expr):{idx:number;indices:readonly Expr[]}|null{
+ // Final Lean 4.34 is_valid_ind_app is intentionally structural here: callers
+ // WHNF recursive argument types where required, but constructor results
+ // themselves are not reduced into shape.
+ const v=appView(t),head=v.fn;if(head.kind!=='const')return null;
+ const idx=stats.names.findIndex(n=>nameEq(n,head.name));if(idx<0)return null;
+ if(!exprLeanEq(head,constant(stats.names[idx]!,stats.levels)))return null;
+ const ni=stats.nindices[idx]!;if(v.args.length!==stats.params.length+ni)return null;
+ for(let i=0;i<stats.params.length;i++)if(!exprLeanEq(v.args[i]!,stats.params[i]!.expr))return null;
  for(let i=stats.params.length;i<v.args.length;i++)if(hasConst(v.args[i]!,stats.names))return null;
  return {idx,indices:v.args.slice(stats.params.length)};
 }
 function checkPositivity(work:Environment,stats:Stats,lctx:LocalContext,t:Expr,ctor:Name,argNo:number):void{
- let w=stc(work,lctx,stats).whnf(t);if(!hasConst(w,stats.names))return;
- if(w.kind==='forall'){
+ let c=lctx,w=stc(work,c,stats).whnf(t);
+ while(hasConst(w,stats.names)){
+   if(w.kind!=='forall'){
+     if(!validIndApp(work,stats,c,w))throw new KernelError(`arg #${argNo} of '${nameToString(ctor)}' has a non-valid occurrence of the datatypes being declared`);
+     return;
+   }
    if(hasConst(w.type,stats.names))throw new KernelError(`arg #${argNo} of '${nameToString(ctor)}' has a non-positive occurrence`);
-   const c=lctx.clone(),v=addLocal(c,w.name,w.type,w.binderInfo);checkPositivity(work,stats,c,instantiate1(w.body,v.expr),ctor,argNo);return;
+   const next=c.clone(),v=addLocal(next,w.name,w.type,w.binderInfo);
+   c=next;w=stc(work,c,stats).whnf(instantiate1(w.body,v.expr));
  }
- if(!validIndApp(work,stats,lctx,w))throw new KernelError(`arg #${argNo} of '${nameToString(ctor)}' has a non-valid occurrence of the datatypes being declared`);
 }
 function openHeader(env:Environment,type:Expr,numParams:number,shared:readonly OpenVar[]|null,d:InductiveDecl):{lctx:LocalContext;params:OpenVar[];indices:OpenVar[];result:Expr}{
  const lctx=new LocalContext();const params:OpenVar[]=[];const indices:OpenVar[]=[];let t=tc(env,lctx,!!d.isUnsafe,d.levelParams).whnf(type);let i=0;
@@ -64,11 +154,11 @@ function declareTypes(work:Environment,d:InductiveDecl,stats:Stats):void{
 function checkConstructors(work:Environment,d:InductiveDecl,stats:Stats):void{
  const seen=new Set<string>();d.types.forEach((it,itIdx)=>it.ctors.forEach(ctor=>{
    const k=nameKey(ctor.name);if(seen.has(k))throw new KernelError(`duplicate constructor '${nameToString(ctor.name)}'`);seen.add(k);ensureClosed(ctor.type,`constructor ${nameToString(ctor.name)}`);tc(work,new LocalContext(),stats.isUnsafe,stats.lparams).check(ctor.type);
-   const lctx=new LocalContext();for(const p of stats.params)lctx.addLocal(p.id,p.decl.userName,p.decl.type,p.decl.binderInfo);let t=stc(work,lctx,stats).whnf(ctor.type);let i=0;
+   const lctx=new LocalContext();for(const p of stats.params)lctx.addLocal(p.id,p.decl.userName,p.decl.type,p.decl.binderInfo);let t=ctor.type,i=0;
    while(t.kind==='forall'){
-     if(i<stats.params.length){const p=stats.params[i]!;if(!stc(work,lctx,stats).isDefEq(t.type,p.decl.type))throw new KernelError(`arg #${i+1} of '${nameToString(ctor.name)}' does not match parameters`);t=stc(work,lctx,stats).whnf(instantiate1(t.body,p.expr));i++;continue;}
-     const s=stc(work,lctx,stats).ensureSort(stc(work,lctx,stats).infer(t.type,false),t.type).level;if(!normalizesToZero(stats.resultLevel)&&!levelLe(s,stats.resultLevel))throw new KernelError(`universe level of constructor field is too large in '${nameToString(ctor.name)}'`);
-     if(!d.isUnsafe)checkPositivity(work,stats,lctx,t.type,ctor.name,i+1);const v=addLocal(lctx,t.name,t.type,t.binderInfo);t=stc(work,lctx,stats).whnf(instantiate1(t.body,v.expr));i++;
+     if(i<stats.params.length){const p=stats.params[i]!;if(!stc(work,lctx,stats).isDefEq(t.type,p.decl.type))throw new KernelError(`arg #${i+1} of '${nameToString(ctor.name)}' does not match parameters`);t=instantiate1(t.body,p.expr);i++;continue;}
+     const s=stc(work,lctx,stats).ensureSort(stc(work,lctx,stats).infer(t.type,false),t.type).level;if(!normalizesToZero(stats.resultLevel)&&!levelLe(s,stats.resultLevel))throw new KernelError(`universe level of constructor field is too large in '${nameToString(ctor.name)}': field=${levelToString(s)} result=${levelToString(stats.resultLevel)}`);
+     if(!d.isUnsafe)checkPositivity(work,stats,lctx,t.type,ctor.name,i+1);const v=addLocal(lctx,t.name,t.type,t.binderInfo);t=instantiate1(t.body,v.expr);i++;
    }
    const appInfo=validIndApp(work,stats,lctx,t);if(!appInfo||appInfo.idx!==itIdx)throw new KernelError(`invalid return type for '${nameToString(ctor.name)}'`);
  }));
@@ -88,7 +178,7 @@ function openIndices(work:Environment,type:Expr,stats:Stats,lctx:LocalContext):O
 function recArgInfo(work:Environment,stats:Stats,base:LocalContext,arg:OpenVar):{target:number;indices:readonly Expr[];xs:readonly OpenVar[];applied:Expr}|null{
  const c=base.clone();let ty=stc(work,c,stats).whnf(arg.decl.type);const xs:OpenVar[]=[];let applied=arg.expr;while(ty.kind==='forall'){const x=addLocal(c,ty.name,ty.type,ty.binderInfo);xs.push(x);applied=app(applied,x.expr);ty=stc(work,c,stats).whnf(instantiate1(ty.body,x.expr));}const v=validIndApp(work,stats,c,ty);return v?{target:v.idx,indices:v.indices,xs,applied}:null;
 }
-function openCtorFields(work:Environment,stats:Stats,ctor:ConstructorDecl,base:LocalContext):{lctx:LocalContext;fields:OpenVar[];result:Expr}{const c=base.clone();let t=stc(work,c,stats).whnf(ctor.type),i=0;while(i<stats.params.length){if(t.kind!=='forall')throw new KernelError('constructor parameter mismatch');t=stc(work,c,stats).whnf(instantiate1(t.body,stats.params[i]!.expr));i++;}const fields:OpenVar[]=[];while(t.kind==='forall'){const x=addLocal(c,t.name,t.type,t.binderInfo);fields.push(x);t=stc(work,c,stats).whnf(instantiate1(t.body,x.expr));}return {lctx:c,fields,result:t};}
+function openCtorFields(_work:Environment,stats:Stats,ctor:ConstructorDecl,base:LocalContext):{lctx:LocalContext;fields:OpenVar[];result:Expr}{const c=base.clone();let t=ctor.type,i=0;while(i<stats.params.length){if(t.kind!=='forall')throw new KernelError('constructor parameter mismatch');t=instantiate1(t.body,stats.params[i]!.expr);i++;}const fields:OpenVar[]=[];while(t.kind==='forall'){const x=addLocal(c,t.name,t.type,t.binderInfo);fields.push(x);t=instantiate1(t.body,x.expr);}return {lctx:c,fields,result:t};}
 function generateRecursors(work:Environment,d:InductiveDecl,stats:Stats):{infos:RecursorInfo[];expectedRules:Map<string,readonly RuleBuild[]>}{
  const {level:elimLevel,name:elimName}=chooseElimLevel(work,d,stats);const recLevels=elimName?[elimLevel,...stats.levels]:stats.levels;const recLParams=elimName?[elimName,...d.levelParams]:d.levelParams;const base=new LocalContext();for(const p of stats.params)base.addLocal(p.id,p.decl.userName,p.decl.type,p.decl.binderInfo);
  const builds:RecBuild[]=[];const motiveVars:OpenVar[]=[];
@@ -112,12 +202,55 @@ function generateRecursors(work:Environment,d:InductiveDecl,stats:Stats):{infos:
  });
  return {infos,expectedRules};
 }
+/** Lean 4.34 PR #14808 defense-in-depth: validate the installed recursor through
+ * the real reducer, independently of the synthesis-side expected-rule calculation. */
+export function validateInstalledRecursorsByReduction(work:Environment,d:InductiveDecl):void{
+ const ctorLevels=d.levelParams.map(levelParam);
+ for(const it of d.types){
+   const ri=work.get(recName(it.name));if(ri.kind!=='recursor')throw new KernelError(`missing generated recursor '${nameToString(recName(it.name))}'`);
+   const base=new LocalContext();let baseTc=tc(work,base,!!d.isUnsafe,ri.levelParams);
+   baseTc.ensureSort(baseTc.check(ri.type),ri.type);
+   let rt=baseTc.whnf(ri.type);const pre:OpenVar[]=[];
+   const preCount=ri.numParams+ri.numMotives+ri.numMinors;
+   for(let i=0;i<preCount;i++){
+     rt=baseTc.whnf(rt);if(rt.kind!=='forall')throw new KernelError(`generated recursor '${nameToString(ri.name)}' has malformed binder metadata`);
+     const v=addLocal(base,rt.name,rt.type,rt.binderInfo);pre.push(v);
+     // TypeChecker snapshots LocalContext, so refresh after extending the recursor telescope.
+     baseTc=tc(work,base,!!d.isUnsafe,ri.levelParams);rt=baseTc.whnf(instantiate1(rt.body,v.expr));
+   }
+   const params=pre.slice(0,ri.numParams).map(x=>x.expr);
+   const recPre=mkAppN(constant(ri.name,ri.levelParams.map(levelParam)),pre.map(x=>x.expr));
+   for(const ctor of it.ctors){
+     const lctx=base.clone();let checker=tc(work,lctx,!!d.isUnsafe,ri.levelParams),ct=ctor.type;
+     for(let i=0;i<ri.numParams;i++){
+       ct=checker.whnf(ct);if(ct.kind!=='forall')throw new KernelError(`constructor '${nameToString(ctor.name)}' has fewer parameters than its recursor`);
+       ct=checker.whnf(instantiate1(ct.body,params[i]!));
+     }
+     const fields:OpenVar[]=[];
+     while((ct=checker.whnf(ct)).kind==='forall'){
+       const v=addLocal(lctx,ct.name,ct.type,ct.binderInfo);fields.push(v);
+       checker=tc(work,lctx,!!d.isUnsafe,ri.levelParams);ct=instantiate1(ct.body,v.expr);
+     }
+     ct=checker.whnf(ct);const result=appView(ct);
+     if(result.fn.kind!=='const'||!nameEq(result.fn.name,it.name)||result.args.length!==ri.numParams+ri.numIndices)
+       throw new KernelError(`constructor '${nameToString(ctor.name)}' result does not match generated recursor metadata`);
+     for(let i=0;i<ri.numParams;i++)if(!checker.isDefEq(result.args[i]!,params[i]!))
+       throw new KernelError(`constructor '${nameToString(ctor.name)}' parameter does not match generated recursor metadata`);
+     const indices=result.args.slice(ri.numParams),intro=mkAppN(constant(ctor.name,ctorLevels),[...params,...fields.map(x=>x.expr)]);
+     const lhs=mkAppN(recPre,[...indices,intro]),expected=checker.check(lhs),reduct=checker.whnf(lhs),actual=checker.check(reduct);
+     if(!checker.isDefEq(actual,expected))
+       throw new KernelError(`generated recursor computation rule for '${nameToString(ctor.name)}' is not type-preserving`);
+   }
+ }
+}
 function commit(from:Environment,to:Environment,originalKeys:Set<string>):void{for(const i of from.entries())if(!originalKeys.has(nameKey(i.name)))to.add(i);}
 
-/** Admit an ordinary (non-nested) inductive declaration and synthesize its constructors/recursors. */
-export interface InductiveAdmissionOptions { readonly allowPrimitiveNames?: boolean }
+interface InternalInductiveAdmissionOptions { readonly allowPrimitiveNames?: boolean; readonly allowReservedNestedAux?: boolean }
 
-export function addOrdinaryInductive(env:Environment,d:InductiveDecl,options:InductiveAdmissionOptions={}):void{
+/** Internal admission entry used only after a dedicated recognizer/preprocessor has justified a bypass. */
+export function addOrdinaryInductiveInternal(env:Environment,d:InductiveDecl,options:InternalInductiveAdmissionOptions={}):void{
+ if(!options.allowReservedNestedAux)checkNoReservedNestedAux(d);
+ checkUniformInductiveOccurrences(d);
  if(!options.allowPrimitiveNames){
    for(const it of d.types){if(isPrimitiveName(it.name))throw new KernelError(`primitive '${nameToString(it.name)}' must go through primitive recognition`);for(const c of it.ctors)if(isPrimitiveName(c.name))throw new KernelError(`primitive '${nameToString(c.name)}' must go through primitive recognition`);}
  }
@@ -125,7 +258,16 @@ export function addOrdinaryInductive(env:Environment,d:InductiveDecl,options:Ind
  const stage=<T>(label:string,f:()=>T):T=>{try{return f();}catch(e){const msg=e instanceof Error?e.message:String(e);throw new KernelError(`inductive ${label}: ${msg}`);}};
  const original=new Set(env.entries().map(x=>nameKey(x.name)));const work=env.clone();const stats=stage('header checking',()=>computeStats(work,d));stage('type declaration',()=>declareTypes(work,d,stats));stage('constructor checking',()=>checkConstructors(work,d,stats));stage('constructor declaration',()=>declareConstructors(work,d));
  const {infos,expectedRules}=stage('recursor synthesis',()=>generateRecursors(work,d,stats));for(const i of infos){if(work.has(i.name))throw new KernelError(`already declared '${nameToString(i.name)}'`);work.add(i);}
- // Defensive 4.34-style preservation checks: synthesized recursor types and every computation rule must typecheck.
- stage('recursor validation',()=>{for(const i of infos){const checker=new TypeChecker(work,new LocalContext(),undefined,undefined,d.isUnsafe?'unsafe':'safe',i.levelParams);stage(`recursor type ${nameToString(i.name)}`,()=>checker.ensureSort(checker.check(i.type),i.type));for(const rb of expectedRules.get(nameKey(i.name))??[]){stage(`recursor rule ${nameToString(rb.rule.ctor)}`,()=>{const got=checker.check(rb.rule.rhs);if(!checker.isDefEq(got,rb.expectedType))throw new KernelError(`recursor rule for '${nameToString(rb.rule.ctor)}' is not type preserving`);});}}});
+ // Defensive 4.34-style preservation checks: first verify synthesis-side rule types,
+ // then independently exercise each installed rule through the real recursor reducer (PR #14808).
+ stage('recursor validation',()=>{
+   for(const i of infos){const checker=new TypeChecker(work,new LocalContext(),undefined,undefined,d.isUnsafe?'unsafe':'safe',i.levelParams);stage(`recursor type ${nameToString(i.name)}`,()=>checker.ensureSort(checker.check(i.type),i.type));for(const rb of expectedRules.get(nameKey(i.name))??[]){stage(`recursor rule ${nameToString(rb.rule.ctor)}`,()=>{const got=checker.check(rb.rule.rhs);if(!checker.isDefEq(got,rb.expectedType))throw new KernelError(`recursor rule for '${nameToString(rb.rule.ctor)}' is not type preserving`);});}}
+   validateInstalledRecursorsByReduction(work,d);
+ });
  commit(work,env,original);
+}
+
+/** Public ordinary-inductive admission is deliberately fail-closed. */
+export function addOrdinaryInductive(env:Environment,d:InductiveDecl):void{
+ addOrdinaryInductiveInternal(env,d);
 }

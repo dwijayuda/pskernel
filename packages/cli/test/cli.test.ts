@@ -509,6 +509,41 @@ console.log('ok - psc checked character literal source pipeline');
 
 
 {
+  const result=compileVerifiedSource(
+    'function sameText(a : String, b : String) : Bool := a == b; '+
+    'function differentText(a : String, b : String) : Bool := a != b; '+
+    'function sameChar(a : Char, b : Char) : Bool := a == b;',
+    'text-equality.ts',
+  );
+  const same=result.ir.declarations.find(
+    (item)=>item.name==='sameText',
+  )?.body;
+  equal(same?.kind,'intrinsic');
+  if(same?.kind==='intrinsic'){
+    equal(same.operation,'string.eq');
+  }
+  const different=result.ir.declarations.find(
+    (item)=>item.name==='differentText',
+  )?.body;
+  equal(different?.kind,'intrinsic');
+  if(different?.kind==='intrinsic'){
+    equal(different.operation,'bool.not');
+  }
+  const char=result.ir.declarations.find(
+    (item)=>item.name==='sameChar',
+  )?.body;
+  equal(char?.kind,'intrinsic');
+  if(char?.kind==='intrinsic'){
+    equal(char.operation,'nat.eq');
+    equal(char.args[0]?.kind,'intrinsic');
+    equal(char.args[1]?.kind,'intrinsic');
+  }
+  equal(result.typeScript.includes('return (a === b);'),true);
+}
+console.log('ok - psc checked Char/String equality source pipeline');
+
+
+{
   equal(parseVerifiedRuntimeArg('42',{kind:'primitive',name:'Nat'}),42n);
   equal(parseVerifiedRuntimeArg('-42',{kind:'primitive',name:'Int'}),-42n);
   equal(parseVerifiedRuntimeArg('true',{kind:'primitive',name:'Bool'}),true);

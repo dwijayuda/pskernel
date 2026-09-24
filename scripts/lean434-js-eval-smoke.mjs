@@ -57,6 +57,38 @@ assertNatResult(
   42n,
 );
 
+const List=nameFromDotted('List');
+const ListNil=nameFromDotted('List.nil');
+const ListCons=nameFromDotted('List.cons');
+const listNat=mkAppN(
+  constant(List,[levelZero]),
+  [constant(Nat)],
+);
+const nilNat=mkAppN(
+  constant(ListNil,[levelZero]),
+  [constant(Nat)],
+);
+const twoNat=mkAppN(
+  constant(ListCons,[levelZero]),
+  [
+    constant(Nat),
+    natLit(10n),
+    mkAppN(
+      constant(ListCons,[levelZero]),
+      [constant(Nat),natLit(20n),nilNat],
+    ),
+  ],
+);
+const lengthTRAuxExpr=mkAppN(
+  constant(nameFromDotted('List.lengthTRAux'),[levelZero]),
+  [constant(Nat),twoNat,natLit(0n)],
+);
+assertNatResult(
+  'real recursive Lean List.lengthTRAux',
+  lengthTRAuxExpr,
+  2n,
+);
+
 console.log(
   'ok - pinned Lean 4.34 Init.Prelude executes through pskernel + JavaScript runtime',
 );

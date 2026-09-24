@@ -336,6 +336,34 @@ def psOpenConstructorFields
               binder := forallView.binder
             } :: bindersRev)
 
+def psWrapRecursiveHypotheses
+    (motiveId : Nat)
+    (fieldArgs : List PsExpr) :
+    List Nat -> PsExpr -> Except PsElabError PsExpr
+  | [], body => Except.ok body
+  | fieldIndex :: rest, body =>
+      match fieldArgs[fieldIndex]? with
+      | none => Except.error PsElabError.unsupportedTerm
+      | some recursiveValue =>
+          match
+              psWrapRecursiveHypotheses
+                motiveId
+                fieldArgs
+                rest
+                body with
+          | Except.error error => Except.error error
+          | Except.ok inner =>
+              Except.ok
+                (PsExpr.forallE
+                  (psNameAppendNum
+                    (psRootName "_ih")
+                    fieldIndex)
+                  (PsExpr.app
+                    (PsExpr.fvar motiveId)
+                    recursiveValue)
+                  inner
+                  PsBinderInfo.explicit)
+
 def psBuildInductiveMinorType
     (context : PsElabContext)
     (parameterArgs : List PsExpr)
@@ -366,11 +394,19 @@ def psBuildInductiveMinorType
                   (parameterArgs ++ fieldArgs)
               let body :=
                 PsExpr.app (PsExpr.fvar motiveId) intro
-              Except.ok
-                (psCloseElabForallBinders
-                  fields.context.metaContext
-                  fields.bindersRev
-                  body)
+              match
+                  psWrapRecursiveHypotheses
+                    motiveId
+                    fieldArgs
+                    info.recursiveFields
+                    body with
+              | Except.error error => Except.error error
+              | Except.ok withHypotheses =>
+                  Except.ok
+                    (psCloseElabForallBinders
+                      fields.context.metaContext
+                      fields.bindersRev
+                      withHypotheses)
   | _ => Except.error PsElabError.unsupportedTerm
 
 structure PsElabRecursorMinorsResult where

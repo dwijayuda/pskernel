@@ -728,61 +728,68 @@ def psParseLeanDeclaration
         let isTheorem := keyword.text == "theorem"
         if !(isDefinition || isTheorem) then
           Except.error
-          (PsParseError.expectedText
-            "def or theorem"
-            keyword.text
-            keyword.span)
+            (PsParseError.expectedText
+              "def, theorem, or inductive"
+              keyword.text
+              keyword.span)
         else
           match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "declaration name")
-        | some afterKeyword =>
-            match psParseSyntaxName afterKeyword.cursor with
-            | Except.error error => Except.error error
-            | Except.ok name =>
-                match psParseLeanBindersWithFuel
-                    name.cursor.remaining.length
-                    name.cursor
-                    [] with
-                | Except.error error => Except.error error
-                | Except.ok binders =>
-                    match psTokenCursorExpectText binders.cursor ":" with
-                    | Except.error error => Except.error error
-                    | Except.ok afterColon =>
-                        match psParseLeanTerm afterColon.cursor with
-                        | Except.error error => Except.error error
-                        | Except.ok type =>
-                            match psTokenCursorExpectText type.cursor ":=" with
-                            | Except.error error => Except.error error
-                            | Except.ok afterAssign =>
-                                match psParseLeanTerm afterAssign.cursor with
-                                | Except.error error => Except.error error
-                                | Except.ok value =>
-                                    let span := {
-                                      start := keyword.span.start
-                                      stop := (psSyntaxTermSpan value.value).stop
-                                    }
-                                    if isDefinition then
-                                      Except.ok {
-                                        value :=
-                                          PsSyntaxDeclaration.definition
-                                            name.value
-                                            binders.value
-                                            type.value
-                                            value.value
-                                            span
-                                        cursor := value.cursor
+          | none =>
+              Except.error
+                (PsParseError.unexpectedEnd "declaration name")
+          | some afterKeyword =>
+              match psParseSyntaxName afterKeyword.cursor with
+              | Except.error error => Except.error error
+              | Except.ok name =>
+                  match psParseLeanBindersWithFuel
+                      name.cursor.remaining.length
+                      name.cursor
+                      [] with
+                  | Except.error error => Except.error error
+                  | Except.ok binders =>
+                      match psTokenCursorExpectText binders.cursor ":" with
+                      | Except.error error => Except.error error
+                      | Except.ok afterColon =>
+                          match psParseLeanTerm afterColon.cursor with
+                          | Except.error error => Except.error error
+                          | Except.ok type =>
+                              match psTokenCursorExpectText
+                                  type.cursor
+                                  ":=" with
+                              | Except.error error => Except.error error
+                              | Except.ok afterAssign =>
+                                  match psParseLeanTerm
+                                      afterAssign.cursor with
+                                  | Except.error error =>
+                                      Except.error error
+                                  | Except.ok value =>
+                                      let span := {
+                                        start := keyword.span.start
+                                        stop :=
+                                          (psSyntaxTermSpan value.value).stop
                                       }
-                                    else
-                                      Except.ok {
-                                        value :=
-                                          PsSyntaxDeclaration.theoremDecl
-                                            name.value
-                                            binders.value
-                                            type.value
-                                            value.value
-                                            span
-                                        cursor := value.cursor
-                                      }
+                                      if isDefinition then
+                                        Except.ok {
+                                          value :=
+                                            PsSyntaxDeclaration.definition
+                                              name.value
+                                              binders.value
+                                              type.value
+                                              value.value
+                                              span
+                                          cursor := value.cursor
+                                        }
+                                      else
+                                        Except.ok {
+                                          value :=
+                                            PsSyntaxDeclaration.theoremDecl
+                                              name.value
+                                              binders.value
+                                              type.value
+                                              value.value
+                                              span
+                                          cursor := value.cursor
+                                        }
 
 def psParseLeanImportsWithFuel
     (fuel : Nat)

@@ -15,7 +15,6 @@
     "lean-ts-kernel": "file:../..",
     "@proofscript/module": "file:../module",
     "@proofscript/syntax": "file:../syntax",
-    "@proofscript/language": "file:../language",
     "@proofscript/backend-ts": "file:../backend-ts",
     "@proofscript/compiler-ir": "file:../compiler-ir",
     "@proofscript/elab": "file:../elab",

@@ -26,6 +26,10 @@
     "./lean4/metadata": {
       "types": "./dist/src/lean4-metadata.d.ts",
       "import": "./dist/src/lean4-metadata.js"
+    },
+    "./lean4/init": {
+      "types": "./dist/src/lean4-init.d.ts",
+      "import": "./dist/src/lean4-init.js"
     }
   },
   "scripts": {

@@ -1,4 +1,5 @@
 name: Final PR9 hotspot diagnostic
+# trigger: final-pr9-hotspot-v1
 
 on:
   push:

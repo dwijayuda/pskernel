@@ -99,6 +99,16 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
       'invalid declaration binding arity for '+binding.leanDeclaration,
     );
   }
+  if(
+    binding.effect!==undefined
+    &&binding.effect!=='pure'
+    &&binding.effect!=='st-action'
+  ){
+    throw new Error(
+      'invalid extern effect for '+binding.leanDeclaration+
+      ': '+String(binding.effect),
+    );
+  }
   if(binding.runtimeArgs!==undefined){
     const seenRuntimeArgs=new Set();
     for(const index of binding.runtimeArgs){
@@ -172,6 +182,7 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
     leanSymbol:binding.leanSymbol,
     arity:binding.arity,
     runtimeArgs:binding.runtimeArgs??null,
+    effect:binding.effect??'pure',
     upstreamSource:binding.upstreamSource,
   });
 }

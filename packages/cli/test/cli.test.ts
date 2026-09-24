@@ -23,6 +23,7 @@ import {emitLeanCommand} from '../src/commands/emit-lean.js';
 import {translateCommand} from '../src/commands/translate.js';
 import {verifyRuntimeDependencyLock} from '../src/runtime-lock.js';
 import {decodeModuleArtifact} from '@proofscript/module';
+import {nameFromDotted} from 'lean-ts-kernel';
 
 function equal(actual:unknown,expected:unknown):void{
   if(actual!==expected)throw new Error('expected '+String(expected)+', got '+String(actual));
@@ -1927,15 +1928,16 @@ console.log('ok - psc checked-module cache uses dependency integrity keys');
     ){
       throw new Error('missing module artifact metadata');
     }
+    const metadata=main.metadata as Record<string,unknown>;
     equal(
-      String(main.metadata.canonicalSourceHash).startsWith('sha256:'),
+      String(metadata.canonicalSourceHash).startsWith('sha256:'),
       true,
     );
     equal(
-      String(main.metadata.sourceCacheKey).startsWith('sha256:'),
+      String(metadata.sourceCacheKey).startsWith('sha256:'),
       true,
     );
-    equal('sourceKind' in main.metadata,false);
+    equal('sourceKind' in metadata,false);
   }finally{
     clearVerifiedProjectModuleCache();
     await rm(directory,{recursive:true,force:true});

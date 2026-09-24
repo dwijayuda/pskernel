@@ -38,6 +38,7 @@ export function lowerRuntimeLocal(
     case 'uint32':
     case 'uint64':
     case 'nat':
+    case 'int':
       return local;
   }
 }

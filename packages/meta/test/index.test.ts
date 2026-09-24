@@ -118,6 +118,46 @@ console.log('ok - @proofscript/meta Expr metavariable context');
 
 {
   const environment=new Environment();
+  const kernel=new Kernel(environment);
+  const Type=sort(levelSucc(levelZero));
+  const Nat=nameFromDotted('MetaFunctionNat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:Type,
+  });
+  const context=new ExprMetaContext(environment);
+  const domain=context.mkFresh(Type);
+  const codomain=context.mkFresh(Type);
+  const expected=forallE(
+    nameFromDotted('_'),
+    domain,
+    codomain,
+  );
+  const actual=forallE(
+    nameFromDotted('x'),
+    constant(Nat),
+    constant(Nat),
+  );
+  equal(context.unify(expected,actual),true);
+  equal(
+    exprEq(context.instantiate(domain),constant(Nat)),
+    true,
+  );
+  equal(
+    exprEq(context.instantiate(codomain),constant(Nat)),
+    true,
+  );
+  context.validateGroundAssignments();
+}
+console.log('ok - @proofscript/meta function-type metavariable unification');
+
+
+
+
+{
+  const environment=new Environment();
   const context=new ExprMetaContext(environment);
   const type=sort(levelSucc(levelZero));
   const meta=context.mkFresh(type);

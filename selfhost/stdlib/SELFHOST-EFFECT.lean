@@ -48,3 +48,23 @@ def effectRunRecovered
     (state : EffectState) :
     Result (Prod Nat EffectState) String :=
   effectRollbackRecovered.run context state
+
+def effectDoCount :
+    CompilerM EffectContext EffectState String Nat :=
+  do
+    let state : EffectState <- compilerGet Unit.unit;
+    return state.count
+
+def effectOrElse : CompilerM EffectContext EffectState String Nat :=
+  compilerOrElse effectFailure (compilerPure 9)
+
+def effectCheckpointThenRestoreNext
+    (saved : EffectState) :
+    CompilerM EffectContext EffectState String Unit :=
+  compilerRestore saved
+
+def effectCheckpointThenRestore :
+    CompilerM EffectContext EffectState String Unit :=
+  compilerBind
+    (compilerCheckpoint Unit.unit)
+    effectCheckpointThenRestoreNext

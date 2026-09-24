@@ -138,10 +138,11 @@ function runTactic(
     return;
   }
 
-  runtime.state=intro(
-    runtime.state,
-    tactic.name,
-    {
+  try{
+    runtime.state=intro(
+      runtime.state,
+      tactic.name,
+      {
       intro:(parentGoal,userName)=>{
         const parent=runtime.entry(parentGoal);
         const checker=new TypeChecker(
@@ -195,9 +196,14 @@ function runTactic(
             runtime.completeGoal(parentGoal,{term,type});
           },
         );
+        },
       },
-    },
-  );
+    );
+  }catch(error){
+    const detail=error instanceof Error?error.message:String(error);
+    if(detail.startsWith('PS_ELAB_TACTIC_INTRO:'))throw error;
+    throw new Error('PS_ELAB_TACTIC_INTRO: '+detail);
+  }
 }
 
 export function elaborateV061ByExpression(

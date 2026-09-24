@@ -73,11 +73,13 @@ if(manualGetValue!==41n){
 }
 console.log('ok - manual real Lean ST.Prim.Ref.get runtime application works');
 
-const getExpr=mkAppN(
+let getFn=evaluator.evaluate(
   constant(nameFromDotted('ST.Prim.Ref.get'),[levelZero,levelZero]),
-  [worldType,Nat,allocated],
 );
-const directGet=evaluator.runStateAction(evaluator.evaluate(getExpr)).value;
+getFn=evaluator.applyRuntimeValue(getFn,worldToken);
+getFn=evaluator.applyRuntimeValue(getFn,natTypeToken);
+const getAction=evaluator.applyRuntimeValue(getFn,allocated);
+const directGet=evaluator.runStateAction(getAction).value;
 if(directGet!==41n){
   throw new Error(
     'real Lean ST.Prim.Ref.get returned '+String(directGet)+' instead of 41',
@@ -85,18 +87,21 @@ if(directGet!==41n){
 }
 console.log('ok - real Lean ST.Prim.Ref.get extern mapping receives the ref');
 
-const setExpr=mkAppN(
+let setFn=evaluator.evaluate(
   constant(nameFromDotted('ST.Prim.Ref.set'),[levelZero,levelZero]),
-  [worldType,Nat,allocated,natLit(40n)],
 );
-evaluator.runStateAction(evaluator.evaluate(setExpr));
+setFn=evaluator.applyRuntimeValue(setFn,worldToken);
+setFn=evaluator.applyRuntimeValue(setFn,natTypeToken);
+setFn=evaluator.applyRuntimeValue(setFn,allocated);
+const setAction=evaluator.applyRuntimeValue(setFn,40n);
+evaluator.runStateAction(setAction);
 if(lean_st_ref_get(allocated)!==40n){
   throw new Error('real Lean ST.Prim.Ref.set did not update the ref');
 }
 console.log('ok - real Lean ST.Prim.Ref.set extern mapping receives the ref');
 
 const x=nameFromDotted('x');
-const increment=lam(
+const incrementExpr=lam(
   x,
   Nat,
   mkAppN(
@@ -104,16 +109,15 @@ const increment=lam(
     [bvar(0),natLit(1n)],
   ),
 );
-const modifyExpr=mkAppN(
+const increment=evaluator.evaluate(incrementExpr);
+
+let modifyFn=evaluator.evaluate(
   constant(nameFromDotted('ST.Prim.Ref.modify'),[levelZero,levelZero]),
-  [
-    worldType,
-    Nat,
-    allocated,
-    increment,
-  ],
 );
-const modifyAction=evaluator.evaluate(modifyExpr);
+modifyFn=evaluator.applyRuntimeValue(modifyFn,worldToken);
+modifyFn=evaluator.applyRuntimeValue(modifyFn,natTypeToken);
+modifyFn=evaluator.applyRuntimeValue(modifyFn,allocated);
+const modifyAction=evaluator.applyRuntimeValue(modifyFn,increment);
 evaluator.runStateAction(modifyAction);
 if(lean_st_ref_get(allocated)!==41n){
   throw new Error(

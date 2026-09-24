@@ -8,6 +8,10 @@ import {createLeanNativeEvaluator} from './lean-native-evaluator.mjs';
 
 const moduleName=process.argv[2]??'Init.Prelude';
 const expectedArg=process.argv[3];
+const diagnosticStopAfter=Number(process.env.PSKERNEL_DIAG_STOP_AFTER_SHARDS??'0');
+const gcEvery=Number(process.env.PSKERNEL_GC_EVERY_SHARDS??'1');
+if(!Number.isSafeInteger(diagnosticStopAfter)||diagnosticStopAfter<0)throw new Error('invalid diagnostic stop-after shard count');
+if(!Number.isSafeInteger(gcEvery)||gcEvery<0)throw new Error('invalid GC shard cadence');
 const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin',...(process.env.PATH??'').split(delimiter)].filter(Boolean).map(p=>resolve(p));
 const leanExe=process.platform==='win32'?'lean.exe':'lean';
 const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
@@ -31,7 +35,7 @@ const rl=createInterface({input:child.stdout,crlfDelay:Infinity});
 let stderr='';child.stderr.setEncoding('utf8');child.stderr.on('data',d=>stderr+=d);
 const shared=new Environment();
 let replay=null,header=null,current=null,shards=0,totalLines=0,totalDecls=0,maxRssMiB=0,maxHeapMiB=0;
-let fatal=null;
+let fatal=null,stoppedEarly=false;
 try{
  for await(const line of rl){
    if(fatal)break;
@@ -50,7 +54,15 @@ try{
      continue;
    }
    if(marker?.shard){
-     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;global.gc?.();}
+     if(replay){
+       const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;
+       if(gcEvery>0&&shards>0&&shards%gcEvery===0)global.gc?.();
+       if(diagnosticStopAfter>0&&shards>=diagnosticStopAfter){
+         stoppedEarly=true;
+         child.kill('SIGTERM');
+         break;
+       }
+     }
      replay=new Lean4ExportReplay(shared,{nativeEvaluator});
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);
@@ -64,8 +76,27 @@ try{
 }catch(e){fatal=e;child.kill('SIGTERM');}
 const code=await new Promise(r=>child.on('close',r));
 if(fatal)throw fatal;
-if(code!==0)throw new Error(`Lean exporter exited ${code}: ${stderr}`);
+if(!stoppedEarly&&code!==0)throw new Error(`Lean exporter exited ${code}: ${stderr}`);
 if(!header)throw new Error('missing environment header');
+if(stoppedEarly){
+  const finalMem=process.memoryUsage();
+  console.log(JSON.stringify({
+    ok:true,
+    diagnostic:true,
+    stoppedEarly:true,
+    module:moduleName,
+    shards,
+    replayedConstants:shared.size,
+    records:totalLines,
+    declarations:totalDecls,
+    gcEvery,
+    rssMiB:Number((finalMem.rss/1048576).toFixed(1)),
+    heapMiB:Number((finalMem.heapUsed/1048576).toFixed(1)),
+    maxRssMiB:Number(maxRssMiB.toFixed(1)),
+    maxHeapMiB:Number(maxHeapMiB.toFixed(1))
+  },null,2));
+  process.exit(0);
+}
 const expectedTotal=expectedArg?Number(expectedArg):Number(header.constants);
 const totalConstants=Number(header.constants);
 const replayableConstants=Number(header.replayableConstants);

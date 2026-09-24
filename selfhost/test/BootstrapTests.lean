@@ -486,6 +486,103 @@ def psTestDualSourceTypedLambdaParse : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestAnonymousPiShape
+    (parsed : PsParseResult PsSyntaxTerm) : Bool :=
+  psTokenCursorDone parsed.cursor
+    && match parsed.value with
+       | PsSyntaxTerm.forallE
+           [(binder, PsSyntaxTerm.reference domainName)]
+           (PsSyntaxTerm.reference bodyName)
+           _ =>
+           psTestSyntaxNameSingle binder.name "_"
+             && psSyntaxBinderKindEq
+               binder.kind
+               PsSyntaxBinderKind.explicit
+             && psTestSyntaxNameSingle domainName "Nat"
+             && psTestSyntaxNameSingle bodyName "Nat"
+       | _ => false
+
+def psTestNamedPiShape
+    (parsed : PsParseResult PsSyntaxTerm) : Bool :=
+  psTokenCursorDone parsed.cursor
+    && match parsed.value with
+       | PsSyntaxTerm.forallE
+           [(binder, PsSyntaxTerm.reference domainName)]
+           (PsSyntaxTerm.reference bodyName)
+           _ =>
+           psTestSyntaxNameSingle binder.name "x"
+             && psSyntaxBinderKindEq
+               binder.kind
+               PsSyntaxBinderKind.explicit
+             && psTestSyntaxNameSingle domainName "Nat"
+             && psTestSyntaxNameSingle bodyName "Nat"
+       | _ => false
+
+def psTestDualSourcePiParse : Bool :=
+  match
+      psLex "Nat -> Nat",
+      psLex "(x : Nat) -> Nat" with
+  | Except.ok arrowTokens, Except.ok dependentTokens =>
+      match
+          psParseLeanTerm (psTokenCursorFromTokens arrowTokens),
+          psParseProofScriptTerm (psTokenCursorFromTokens arrowTokens),
+          psParseLeanTerm (psTokenCursorFromTokens dependentTokens),
+          psParseProofScriptTerm (psTokenCursorFromTokens dependentTokens) with
+      | Except.ok leanArrow,
+        Except.ok proofScriptArrow,
+        Except.ok leanDependent,
+        Except.ok proofScriptDependent =>
+          psTestAnonymousPiShape leanArrow
+            && psTestAnonymousPiShape proofScriptArrow
+            && psTestNamedPiShape leanDependent
+            && psTestNamedPiShape proofScriptDependent
+      | _, _, _, _ => false
+  | _, _ => false
+
+def psTestPiLambdaDeclarationShape
+    (result : PsElabModuleResult) : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let idName := psTestName "id"
+  let anonymousName := psTestName "_"
+  let xName := psTestName "x"
+  let expectedType :=
+    PsExpr.forallE
+      anonymousName
+      natType
+      natType
+      PsBinderInfo.explicit
+  let expectedValue :=
+    PsExpr.lam
+      xName
+      natType
+      (PsExpr.bvar 0)
+      PsBinderInfo.explicit
+  match result.declarations with
+  | [PsDeclaration.definitionDecl actualName [] actualType actualValue] =>
+      psNameEq actualName idName
+        && psExprAlphaEq actualType expectedType
+        && psExprAlphaEq actualValue expectedValue
+  | _ => false
+
+def psTestDualSourcePiLambdaDeclaration : Bool :=
+  match
+      psParseLeanSource
+        "def id : Nat -> Nat := fun (x : Nat) => x",
+      psParseProofScriptSource
+        "def id : Nat -> Nat := fun (x : Nat) => x;" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestPiLambdaDeclarationShape leanResult
+            && psTestPiLambdaDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 def psTestProofScriptEmptyCallUsesUnit : Bool :=
   match psParseProofScriptSource "def u : Unit := f();" with
   | Except.error _ => false
@@ -724,6 +821,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source binder kinds parse", passed := psTestDualSourceBinderKindsParse },
   { name := "dual-source typed lambda parse", passed := psTestDualSourceTypedLambdaParse },
   { name := "dual-source typed lambda elaboration", passed := psTestDualSourceTypedLambdaElaboration },
+  { name := "dual-source Pi parse", passed := psTestDualSourcePiParse },
+  { name := "dual-source Pi lambda declaration", passed := psTestDualSourcePiLambdaDeclaration },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

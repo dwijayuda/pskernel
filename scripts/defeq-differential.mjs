@@ -13,7 +13,7 @@ import { levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../dist/src/cor
 const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin'].filter(Boolean).map(p=>resolve(p));
 const bin=candidates.find(p=>fs.existsSync(join(p,'lean')));
 if(!bin) throw new Error('defeq-differential: set LEAN434_BIN to Lean 4.34.0 bin directory');
-const expectedVersion=/^Lean \\(version 4\\.34\\.0(?:,|\\)).*Release\\)?$/;
+const expectedVersion=/^Lean \(version 4\.34\.0(?:,|\)).*Release\)?$/;
 const expectedGitHash='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
 const versionRun=spawnSync(join(bin,'lean'),['--version'],{encoding:'utf8',timeout:5000});
 const version=versionRun.stdout.trim();

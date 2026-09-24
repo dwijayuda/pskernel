@@ -10,6 +10,7 @@ import type {ErasureScope} from './model.js';
 
 import {tryEraseTextPrimitiveApplication} from './text-primitive-erasure.js';
 import {tryEraseCheckedControlApplication} from './condition-erasure.js';
+import {tryEraseArrayPrimitiveApplication} from './array-primitive-erasure.js';
 
 type RuntimeExprEraser=(
   expr:Expr,
@@ -98,6 +99,14 @@ export function tryErasePrimitiveRuntimeApplication(
     erase,
   );
   if(textPrimitive!==undefined)return textPrimitive;
+
+  const arrayPrimitive=tryEraseArrayPrimitiveApplication(
+    expr,
+    scope,
+    environment,
+    erase,
+  );
+  if(arrayPrimitive!==undefined)return arrayPrimitive;
 
   if(
     view.fn.kind==='const'

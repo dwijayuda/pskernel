@@ -48,9 +48,19 @@ checker. ConLeche is invoked only by explicit certification workflows.
 Build pskernel and provide the pinned `con-leche` binary:
 
 ```bash
-CONLECHE_BIN=/path/to/con-leche npm run formal:smoke
-npm run formal:cosign -- path/to/export.ndjson --con-leche-bin /path/to/con-leche
+npm run formal:cosign -- path/to/standard-export.ndjson --con-leche-bin /path/to/con-leche
 ```
+
+Certification transport is pinned separately in `FORMAL_LOCK.json`: official
+`lean4export` 3.1.0 at commit
+`076e8e57707e813375e8f9da8bf989799ace9680`, run with final Lean 4.34.0
+and its default metadata erasure. Official lean4export removes
+`Expr.mdata` by default because it should not affect type checking.
+
+pskernel's rich replay fixtures intentionally retain mdata to compare generated
+kernel metadata and are therefore a different assurance transport. They are not
+silently rewritten into formal inputs. The formal lane regenerates standard
+lean4export bytes directly from the source/module being certified.
 
 Exit codes:
 
@@ -97,3 +107,13 @@ that translation becomes a separately specified/proved boundary.
    pskernel certificates checked by a smaller verified verifier.
 
 Exact TypeScript↔C++ formal equivalence remains an optional research moonshot.
+
+
+## First transport experiment
+
+The first attempted smoke used the existing rich
+`lean434-primitive-closure.ndjson` replay fixture. pskernel accepted it, while
+ConLeche stopped at the first `Expr.mdata` record with a parser error. This is
+a transport mismatch, not a semantic reject/decline. The formal lane therefore
+uses official lean4export's default no-mdata stream instead of adding an
+unproved metadata-rewriting adapter.

@@ -103,6 +103,7 @@ def psElabContextWithEnvironment
     localContext := context.localContext
     instances := context.instances
     metaContext := context.metaContext
+    structuralRecursion := context.structuralRecursion
   }
 
 def psElabBinderArguments

@@ -1,4 +1,5 @@
 name: Diagnostic Int.DivMod adaptive replay
+# trigger: int-divmod-adaptive-v1
 
 on:
   push:

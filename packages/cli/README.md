@@ -69,6 +69,6 @@ roots:
 ```
 
 If `sourceRoots` is empty or omitted, imports resolve below the entry file's
-directory as before. With configured roots, psc searches all roots and both
-`.ps`/`.lean` for each logical module and requires exactly one match.
+directory as before. With configured roots, psc searches all roots across
+`.ps`/`.psx`/`.lean` for each logical module and requires exactly one match.
 Duplicate matches are errors; root ordering is not precedence.

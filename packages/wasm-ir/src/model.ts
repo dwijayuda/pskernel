@@ -69,7 +69,13 @@ export type WasmIrExpr =
     }
   | {
       readonly kind:'i32.binary';
-      readonly operation:'and'|'or'|'eq'|'ne';
+      readonly operation:'add'|'and'|'or'|'eq'|'ne';
+      readonly left:WasmIrExpr;
+      readonly right:WasmIrExpr;
+    }
+  | {
+      readonly kind:'i64.binary';
+      readonly operation:'add';
       readonly left:WasmIrExpr;
       readonly right:WasmIrExpr;
     };

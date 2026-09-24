@@ -1,0 +1,74 @@
+name: PSC1 Lean bootstrap
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - selfhost/psc1-lean-bootstrap
+    paths:
+      - selfhost/**
+      - docs/selfhost/PSC1_LEAN_BOOTSTRAP.md
+      - packages/syntax/**
+      - packages/elab/**
+      - packages/checked-core/**
+      - packages/erasure/**
+      - packages/compiler-ir/**
+      - packages/backend-ts/**
+      - packages/compiler/**
+      - packages/cli/**
+      - package.json
+      - package-lock.json
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Check official Lean source
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          lean selfhost/src/ProofScript/Compiler/Data.lean
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build current PSC0 packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run test:packages
+
+      - name: Check and build bootstrap Lean through PSC0
+        shell: bash
+        run: |
+          set -euo pipefail
+          node packages/cli/dist/bin/psc.js check -p selfhost
+          node packages/cli/dist/bin/psc.js build -p selfhost
+
+      - name: Gate canonical Lean and ProofScript parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node packages/cli/dist/bin/psc.js translate \
+            selfhost/src/ProofScript/Compiler/Data.lean --to ps \
+            > /tmp/Data.ps
+          node packages/cli/dist/bin/psc.js check /tmp/Data.ps
+          node packages/cli/dist/bin/psc.js translate /tmp/Data.ps --to lean \
+            > /tmp/Data.roundtrip.lean
+          diff -u selfhost/src/ProofScript/Compiler/Data.lean /tmp/Data.roundtrip.lean

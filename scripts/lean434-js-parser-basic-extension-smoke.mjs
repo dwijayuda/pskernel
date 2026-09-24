@@ -30,6 +30,10 @@ const document=parseLean434RuntimeMetadata(
   JSON.parse(fs.readFileSync(metadataFile,'utf8')),
 );
 
+const importingRefEntry=document.initializers.find(
+  x=>x.declaration.includes('ImportingFlag')&&
+    x.declaration.endsWith('.importingRef'),
+);
 const envRefEntry=document.initializers.find(
   x=>x.declaration.includes('EnvExtension.envExtensionsRef'),
 );
@@ -39,13 +43,19 @@ const categoryRefEntry=document.initializers.find(
 const categoryExtEntry=document.initializers.find(
   x=>x.declaration==='Lean.Parser.categoryParserFnExtension',
 );
-if(!envRefEntry||!categoryRefEntry||!categoryExtEntry){
+if(
+  !importingRefEntry
+  ||!envRefEntry
+  ||!categoryRefEntry
+  ||!categoryExtEntry
+){
   throw new Error(
     'missing required EnvExtension/Parser.Basic initializer metadata',
   );
 }
 
 const selectedSet=new Set([
+  importingRefEntry.declaration,
   envRefEntry.declaration,
   categoryRefEntry.declaration,
   categoryExtEntry.declaration,
@@ -53,8 +63,8 @@ const selectedSet=new Set([
 const initializers=document.initializers.filter(
   x=>selectedSet.has(x.declaration),
 );
-if(initializers.length!==3){
-  throw new Error('expected exactly three selected initializer entries');
+if(initializers.length!==4){
+  throw new Error('expected exactly four selected initializer entries');
 }
 
 const replay=new Lean4ExportReplay();
@@ -77,10 +87,20 @@ for(const entry of initializers){
   executed.push(...report.executed);
   console.log('end initializer - '+entry.declaration);
 }
-if(executed.length!==3){
+if(executed.length!==4){
   throw new Error(
-    'expected three initializer executions, got '+executed.length,
+    'expected four initializer executions, got '+executed.length,
   );
+}
+
+const importingRef=evaluator.getRuntimeGlobal(
+  importingRefEntry.declaration,
+);
+if(!(importingRef instanceof LeanRef)){
+  throw new Error('Lean.ImportingFlag.importingRef is not a LeanRef');
+}
+if(lean_st_ref_get(importingRef)!==false){
+  throw new Error('Lean.ImportingFlag.importingRef did not initialize false');
 }
 
 const envRef=evaluator.getRuntimeGlobal(envRefEntry.declaration);
@@ -124,7 +144,7 @@ if(!categoryExt.name.includes('EnvExtension')){
 }
 
 const second=runner.runSelected(initializers);
-if(second.executed.length!==0||second.skipped.length!==3){
+if(second.executed.length!==0||second.skipped.length!==4){
   throw new Error('selected Parser.Basic initializers did not run once');
 }
 

@@ -210,6 +210,26 @@ def psTestDualSourceLeanNativeArrayBasics : Bool :=
         && leanOutput.contains "99n"
   | _, _ => false
 
+def psTestDualSourceLeanNativeArrayHigherOrder : Bool :=
+  let leanSource :=
+    "def arrayFoldDemo (a : Nat) (b : Nat) : Nat := " ++
+    "let xs : Array Nat := Array.push (Array.push (Array.emptyWithCapacity 2) a) b; " ++
+    "let ys : Array Nat := Array.map (fun (x : Nat) => x) xs; " ++
+    "Array.foldl (fun (acc : Nat) (x : Nat) => acc) 0 ys 0 (Array.size ys)"
+  let proofScriptSource :=
+    "def arrayFoldDemo(a : Nat)(b : Nat) : Nat := " ++
+    "let xs : Array(Nat) := Array.push(Array.push(Array.emptyWithCapacity(2), a), b); " ++
+    "let ys : Array(Nat) := Array.map(fun (x : Nat) => x, xs); " ++
+    "Array.foldl(fun (acc : Nat)(x : Nat) => acc, 0, ys, 0, Array.size(ys));"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains ".map("
+        && leanOutput.contains "for (let __ps_i"
+  | _, _ => false
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -223,7 +243,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native structure projection", passed := psTestDualSourceLeanNativeStructureProjection },
   { name := "dual-source Lean-native structural recursion", passed := psTestDualSourceLeanNativeStructuralRecursion },
   { name := "dual-source Lean-native Int", passed := psTestDualSourceLeanNativeInt },
-  { name := "dual-source Lean-native Array basics", passed := psTestDualSourceLeanNativeArrayBasics }
+  { name := "dual-source Lean-native Array basics", passed := psTestDualSourceLeanNativeArrayBasics },
+  { name := "dual-source Lean-native Array higher-order", passed := psTestDualSourceLeanNativeArrayHigherOrder }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

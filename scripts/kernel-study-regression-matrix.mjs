@@ -162,6 +162,7 @@ const localAssuranceRunner=readFileSync('scripts/run-full-std-local.ps1','utf8')
 for(const marker of [
   '& npm ci --no-audit --no-fund',
   '& npm run test:kernel',
+  '& npm run check:kernel-corpus',
   'dependencyInstall=npm ci',
   'git status: $dirtySummary',
   'npm ci changed tracked files; refusing assurance evidence.',

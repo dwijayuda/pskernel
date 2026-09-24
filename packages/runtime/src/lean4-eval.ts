@@ -10,8 +10,10 @@ import {
 import {
   findLean434JsExternForDeclaration,
   findLean434JsImplementedBy,
+  findLean434JsIntrinsic,
   invokeLean434JsExtern,
   invokeLean434JsImplementedBy,
+  invokeLean434JsIntrinsic,
   type LeanRef,
 } from './lean4.js';
 import type {
@@ -398,6 +400,18 @@ export class Lean434Evaluator {
 
     if(this.runtimeGlobals.has(name)){
       return this.runtimeGlobals.get(name)!;
+    }
+
+    const intrinsic=findLean434JsIntrinsic(name);
+    if(intrinsic!==undefined){
+      return primitive(
+        name,
+        intrinsic.arity,
+        (args)=>invokeLean434JsIntrinsic(
+          intrinsic,
+          args,
+        ) as Lean434RuntimeValue,
+      );
     }
 
     const metadataImplementedBy=

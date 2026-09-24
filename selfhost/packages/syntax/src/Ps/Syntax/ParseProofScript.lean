@@ -150,7 +150,7 @@ def psParseProofScriptExplicitBinder
                         name := binderName
                         kind := PsSyntaxBinderKind.explicit
                         span := {
-                          start := open.token.span.start
+                          start := opening.token.span.start
                           stop := close.token.span.stop
                         }
                       }

@@ -34,3 +34,19 @@ function arrayMap {α : Type}{β : Type}
 function arrayFoldl {α : Type}{β : Type}
 (f : β -> α -> β, init : β, xs : Array(α)) : β :=
   Array.foldl(f, init, xs, 0, Array.size(xs));
+
+function arrayAny {α : Type}
+(predicate : α -> Bool, xs : Array(α)) : Bool :=
+  arrayFoldl(
+    fun (found : Bool) (value : α) => found || predicate(value),
+    false,
+    xs
+  );
+
+function arrayAll {α : Type}
+(predicate : α -> Bool, xs : Array(α)) : Bool :=
+  arrayFoldl(
+    fun (accepted : Bool) (value : α) => accepted && predicate(value),
+    true,
+    xs
+  );

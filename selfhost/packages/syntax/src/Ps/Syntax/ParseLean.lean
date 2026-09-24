@@ -31,6 +31,8 @@ def psLeanReservedApplicationToken (token : PsToken) : Bool :=
     || token.text == "fun"
     || token.text == "let"
     || token.text == "if"
+    || token.text == "match"
+    || token.text == "with"
 
 def psLeanCanStartSimpleArgument (cursor : PsTokenCursor) : Bool :=
   match psTokenCursorPeek cursor with
@@ -261,13 +263,105 @@ def psParseLeanDependentArrowTail
          | none => binder.value.1.span
          | some token => token.span))
 
+def psParseLeanMatchAlternativesWithFuel
+    (parseTerm :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (alternativesRev :
+      List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan)) :
+    Except PsParseError
+      (PsParseResult
+        (List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))) :=
+  match fuel with
+  | 0 =>
+      Except.ok {
+        value := alternativesRev.reverse
+        cursor := cursor
+      }
+  | remaining + 1 =>
+      if psTokenCursorAtText cursor "|" then
+        match psTokenCursorAdvance cursor with
+        | none =>
+            Except.error (PsParseError.unexpectedEnd "match pattern")
+        | some bar =>
+            match psParseBasicPattern bar.cursor with
+            | Except.error error => Except.error error
+            | Except.ok pattern =>
+                match psTokenCursorExpectText pattern.cursor "=>" with
+                | Except.error error => Except.error error
+                | Except.ok afterArrow =>
+                    match parseTerm afterArrow.cursor with
+                    | Except.error error => Except.error error
+                    | Except.ok body =>
+                        let span := {
+                          start := bar.token.span.start
+                          stop := (psSyntaxTermSpan body.value).stop
+                        }
+                        psParseLeanMatchAlternativesWithFuel
+                          parseTerm
+                          remaining
+                          body.cursor
+                          ((pattern.value, body.value, span) :: alternativesRev)
+      else
+        Except.ok {
+          value := alternativesRev.reverse
+          cursor := cursor
+        }
+
 def psParseLeanTermWithFuel :
     Nat ->
     PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxTerm)
   | 0, _ => Except.error PsParseError.fuelExhausted
   | remaining + 1, cursor =>
-      if psTokenCursorAtText cursor "if" then
+      if psTokenCursorAtText cursor "match" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "match scrutinee")
+        | some keyword =>
+            match psParseLeanTermWithFuel remaining keyword.cursor with
+            | Except.error error => Except.error error
+            | Except.ok scrutinee =>
+                match psTokenCursorExpectText scrutinee.cursor "with" with
+                | Except.error error => Except.error error
+                | Except.ok afterWith =>
+                    match psParseLeanMatchAlternativesWithFuel
+                        (psParseLeanTermWithFuel remaining)
+                        afterWith.cursor.remaining.length
+                        afterWith.cursor
+                        [] with
+                    | Except.error error => Except.error error
+                    | Except.ok alternatives =>
+                        match alternatives.value with
+                        | [] =>
+                            match psTokenCursorPeek alternatives.cursor with
+                            | none =>
+                                Except.error
+                                  (PsParseError.unexpectedEnd "match alternative")
+                            | some token =>
+                                Except.error
+                                  (PsParseError.expectedText
+                                    "|"
+                                    token.text
+                                    token.span)
+                        | _ =>
+                            let stop :=
+                              match alternatives.value.reverse with
+                              | [] => (psSyntaxTermSpan scrutinee.value).stop
+                              | (_, _, span) :: _ => span.stop
+                            Except.ok {
+                              value :=
+                                PsSyntaxTerm.matchE
+                                  scrutinee.value
+                                  alternatives.value
+                                  {
+                                    start := keyword.token.span.start
+                                    stop := stop
+                                  }
+                              cursor := alternatives.cursor
+                            }
+      else if psTokenCursorAtText cursor "if" then
         match psTokenCursorAdvance cursor with
         | none => Except.error (PsParseError.unexpectedEnd "if condition")
         | some keyword =>

@@ -49,6 +49,10 @@ console.log('ok - @proofscript/lsp proof-aware protocol surface');
     'lean-subset',
   );
   equal(
+    sourceKindFromLspDocument('proofscript','file:///App.psx'),
+    'proofscript',
+  );
+  equal(
     sourceKindFromLspDocument('lean4','file:///Main.lean'),
     'lean-subset',
   );
@@ -62,7 +66,23 @@ console.log('ok - @proofscript/lsp proof-aware protocol surface');
   equal(service.documentStatus('file:///Main.lean').sourceKind,'lean-subset');
   equal(service.documentStatus('file:///Main.lean').kernel,'verified');
 }
-console.log('ok - @proofscript/lsp dual-source document routing');
+console.log('ok - @proofscript/lsp dual-source document routing');\n\n
+{
+  const service=new ProofScriptLanguageService();
+  service.openDocument(
+    'file:///App.psx',
+    1,
+    'function View(name : String) : JSX.Element := <div>{name}</div>;',
+    'proofscript',
+  );
+  const status=service.documentStatus('file:///App.psx');
+  equal(status.sourceKind,'proofscript');
+  equal(status.frontend,'parsed');
+  equal(status.kernel,'unsupported');
+}
+console.log('ok - @proofscript/lsp PSX parser routing');
+
+
 
 import {
   mkdtempSync,

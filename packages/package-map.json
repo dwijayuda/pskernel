@@ -17,14 +17,13 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
+      "status": "verified-only+runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
         "module",
         "conformance",
         "syntax",
-        "language",
         "backend-ts",
         "compiler-ir",
         "elab",
@@ -35,6 +34,7 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "The legacy software checker path is retired. psc check/build/run always use source -> Meta/Elab -> pskernel -> checked core -> erasure -> verified IR -> TypeScript -> JavaScript.",
         "Named ESM extern sources may now use bounded npm package subpaths such as host-lib/feature. Runtime policy v2 records the authored source plus its pinned packageRoot; exact versions and lock roots are keyed by package root, not repeated per subpath.",
         "Package subpath resolution is deliberately delegated to the existing host resolvers: TypeScript bundler resolution checks package exports/types during compilation and Node ESM resolves the runtime import. ProofScript does not implement a parallel conditional-exports algorithm.",
         "Verified build/run now require a top-level package-lock.json lockfileVersion 3 whenever runtime externals are used. The CLI traverses the reachable direct/transitive npm package closure from declared runtime roots, fingerprints exact version/resolved/SRI metadata plus dependency edges, and reports it separately as runtimeDependencyLock.",
@@ -60,12 +60,10 @@
         "DS5.2 verified check/build/run recursively resolve logical imports from the entry source directory, topo-sort them through @proofscript/project, elaborate each module against exactly its transitive dependency admissions, then compile one combined pskernel-checked project.",
         "Mixed-source runtime regressions cover ProofScript -> Lean -> ProofScript transitive imports and Lean -> ProofScript imports; imported ordinary definitions execute through the same verified IR/TS/JS backend.",
         "Verified project reports expose moduleCount, deterministic moduleOrder, and per-module source kind/path/canonicalSourceHash.",
-        "Standalone verified source helpers reject imports without project context; the transitional legacy semantic lane rejects imports entirely rather than ignoring them.",
         "DS3.3 adds a source-kind-neutral SHA-256 identity over canonical ProofScript printing of the shared parsed surface; verified and legacy check/build reports/manifests expose canonicalSourceHash.",
         "Equivalent .ps and canonical supported .lean inputs are gated to produce the same canonicalSourceHash before semantic checking.",
         "DS4 integration compares pskernel checked-core admission fingerprints, verified compiler IR, TypeScript, JavaScript, and .d.ts across PS -> Lean and Lean -> PS round trips.",
         "DS4 also asserts unsupported Lean commands fail closed before checked core instead of entering a weaker semantic lane.",
-        "DS3.2 adds `psc translate <file> --to ps|lean` as a pure source frontend -> canonical AST -> target printer operation. It does not invoke verified or legacy semantic checking.",
         "Translate requires an explicit input file and exactly one target; --verified, --json, and runtime passthrough are rejected as category errors.",
         "Filesystem regressions cover `.ps -> canonical .lean -> canonical .ps` through the same frontend/target registries.",
         "DS3.1 check/build/run/emit-lean select the source frontend from .ps/.lean paths while preserving the existing verified-vs-legacy pipeline choice; source kind never selects a weaker semantic checker.",
@@ -79,8 +77,6 @@
         "Function-typed, unknown, unresolved type-parameter, malformed field/constructor, and unsupported dependent runtime values remain fail-closed at the CLI ABI boundary.",
         "Verified CLI elaboration starts from the shared pskernel-admitted Lean 4.34 Init.Prelude environment and fails closed when that fixture cannot be loaded.",
         "psc --verified uses the preferred source -> elaboration -> checked core -> erasure -> compiler IR -> TypeScript -> JavaScript architecture.",
-        "Verified mode never falls back to the legacy software checker after an elaboration/erasure error.",
-        "The legacy software path remains available without --verified only as a temporary compatibility lane while verified-core coverage expands.",
         "CLI regression now executes a temporary verified project end-to-end through emitted JavaScript and checks Nat main(21) = 42."
       ]
     },
@@ -469,20 +465,18 @@
       "path": "packages/compiler-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "verified-ir-external-imports+intrinsic-contract+software-where-ir-mvp",
+      "status": "verified-ir-external-imports+intrinsic-contract",
       "packageName": "@proofscript/compiler-ir",
       "dependsOn": [
-        "kernel",
-        "language"
+        "kernel"
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "The legacy software-HIR lowering is retired; compiler IR runtime semantics are represented only by the verified checked-core-derived IR path.",
         "Verified IR can carry typed external named ESM imports. Import local names share the declaration value namespace, source/import names are validated, and import types use the same VerifiedIrType model as checked executable declarations.",
         "External IR imports are runtime dependency metadata only; their presence does not constitute proof evidence or kernel admission.",
-        "Compiler IR now has a verified-core lane distinct from the transitional software-HIR lane.",
         "Verified IR separates compile-time type parameters from runtime parameters so dependent/type binders can be erased from JavaScript while retained in TypeScript declarations.",
         "The verified IR is runtime-oriented and intentionally does not reuse kernel Expr as code-generation IR.",
-        "Legacy software IR remains temporarily for coverage while verified-core erasure grows to structures, inductives, recursion, primitives, and effects.",
         "Verified IR has explicit Nat/Bool runtime intrinsics so Lean runtime semantics are represented intentionally instead of inferred from TypeScript operators.",
         "Verified intrinsic operation names and arities are defined by one typed compiler-IR contract. Validation consumes the same table, preventing backend-specific ad hoc arity assumptions.",
         "Verified IR preserves ProofScript primitive identities (Nat/Int/Bool/String/Unit); host TypeScript types are selected only by backend-ts. This keeps runtime/ABI semantics out of the backend type representation.",
@@ -512,7 +506,7 @@
       "path": "packages/backend-ts",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "verified-esm-imports+verified-core-typescript-mvp+software-where-typescript-mvp",
+      "status": "verified-esm-imports+verified-core-typescript-mvp",
       "packageName": "@proofscript/backend-ts",
       "dependsOn": [
         "compiler-ir",
@@ -520,12 +514,12 @@
       ],
       "sourceLanguage": "typescript",
       "notes": [
+        "The legacy software emitter is retired; backend-ts emits executable code only from the verified compiler IR path (plus its non-semantic generic emitter utilities).",
         "The verified TypeScript emitter emits typed-IR external imports as canonical named ESM imports before generated declarations; aliases preserve the IR local name.",
         "Backend imports consume explicit verified-IR metadata only and never infer proof assumptions from JavaScript/TypeScript packages.",
         "The preferred backend lane now accepts verified compiler IR produced after pskernel admission and erasure.",
         "Compile-time dependent type parameters are emitted as TypeScript generics for .ts/.d.ts while tsc removes them from JavaScript runtime code.",
         "The backend remains untrusted: TypeScript/JavaScript emission cannot affect theorem validity or kernel admission.",
-        "The legacy software-HIR emitter remains temporarily for language coverage until verified-core lowering reaches those constructs.",
         "Verified Nat/Bool intrinsic emission is exhaustive over the compiler-IR operation union. No catch-all fallback exists, so a newly introduced intrinsic must receive explicit backend semantics before TypeScript compilation succeeds.",
         "Verified Nat.add/Nat.mul emit bigint arithmetic; Nat.sub emits a single-evaluation saturating expression matching Lean Nat subtraction.",
         "backend-ts is the layer that maps semantic primitive IR types to host types: Nat/Int -> bigint, Bool -> boolean, String -> string, Unit -> undefined.",
@@ -563,28 +557,6 @@
         "The verified compiler now covers construction and elimination of non-recursive unindexed generic ADTs through kernel-admitted constructors/recursors.",
         "The verified compiler now carries direct recursive ADTs and primitive structurally recursive functions—with invariant runtime parameters—from pskernel recursors to ordinary TypeScript/JavaScript recursion.",
         "Canonical verified compilation now carries class dictionaries through the same structure IR/runtime representation; locally synthesized instances become ordinary checked runtime arguments."
-      ]
-    },
-    {
-      "name": "language",
-      "path": "packages/language",
-      "phase": "D",
-      "trust": "untrusted-support",
-      "status": "v061-where-checker-mvp",
-      "packageName": "@proofscript/language",
-      "dependsOn": [
-        "syntax",
-        "meta",
-        "elab",
-        "module"
-      ],
-      "sourceLanguage": "typescript",
-      "notes": [
-        "Software checking has dedicated structure, inductive, match, and where modules rather than one monolithic semantic switch.",
-        "Acyclic where helpers are predeclared for local scope, type-checked with outer captures, dependency-sorted, and retained explicitly in checked HIR.",
-        "Recursive/mutually recursive where cycles fail closed until Lean-compatible termination elaboration is integrated.",
-        "Proof acceptance remains a pskernel/elaborator responsibility outside this software checker.",
-        "The executable structure subset accepts explicit named fields only; parsed implicit fields fail closed until generic structure elaboration exists."
       ]
     },
     {
@@ -663,8 +635,7 @@
       "packageName": "@proofscript/project",
       "dependsOn": [
         "module",
-        "compiler-ir",
-        "language"
+        "compiler-ir"
       ],
       "sourceLanguage": "typescript",
       "notes": [

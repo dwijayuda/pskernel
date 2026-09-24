@@ -44,7 +44,8 @@ lean_lib PsMeta where
   srcDir := "packages/meta/src"
   roots := #[
     `Ps.Meta.Context,
-    `Ps.Meta.Reduce
+    `Ps.Meta.Reduce,
+    `Ps.Meta.Infer
   ]
 
 @[default_target]

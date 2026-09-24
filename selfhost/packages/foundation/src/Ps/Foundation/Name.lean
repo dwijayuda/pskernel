@@ -1,12 +1,12 @@
 inductive PsName where
   | anonymous
-  | str (prefix : PsName) (value : String)
-  | num (prefix : PsName) (value : Nat)
+  | str (parent : PsName) (value : String)
+  | num (parent : PsName) (value : Nat)
 
 def psNameDepth : PsName -> Nat
   | .anonymous => 0
-  | .str prefix _ => psNameDepth prefix + 1
-  | .num prefix _ => psNameDepth prefix + 1
+  | .str parent _ => psNameDepth parent + 1
+  | .num parent _ => psNameDepth parent + 1
 
 def psNameEq : PsName -> PsName -> Bool
   | .anonymous, .anonymous => true
@@ -16,8 +16,8 @@ def psNameEq : PsName -> PsName -> Bool
       psNameEq leftPrefix rightPrefix && leftValue == rightValue
   | _, _ => false
 
-def psNameAppendStr (prefix : PsName) (value : String) : PsName :=
-  PsName.str prefix value
+def psNameAppendStr (parent : PsName) (value : String) : PsName :=
+  PsName.str parent value
 
-def psNameAppendNum (prefix : PsName) (value : Nat) : PsName :=
-  PsName.num prefix value
+def psNameAppendNum (parent : PsName) (value : Nat) : PsName :=
+  PsName.num parent value

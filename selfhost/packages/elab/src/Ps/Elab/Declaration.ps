@@ -2,18 +2,6 @@ import Ps.Core.Abstract
 import Ps.Core.Declaration
 import Ps.Elab.Term
 
-structure PsElabBinder where {
-  id : Nat;
-  name : PsName;
-  type : PsExpr;
-  binder : PsBinderInfo;
-};
-
-structure PsElabBindersResult where {
-  context : PsElabContext;
-  bindersRev : List(PsElabBinder);
-};
-
 structure PsElabDeclarationResult where {
   declaration : PsDeclaration;
   metaContext : PsMetaContext;

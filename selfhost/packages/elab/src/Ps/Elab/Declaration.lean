@@ -260,31 +260,38 @@ def psOpenConstructorFields
 def psBuildInductiveMinorType
     (context : PsElabContext)
     (motiveId : Nat)
+    (parameterArgs : List PsExpr)
     (declaration : PsDeclaration) :
     Except PsElabError PsExpr :=
   match declaration with
   | .constructorDecl info =>
-      match psOpenConstructorFields
+      match psElabMatchApplyParameters
           context
-          info.numFields
-          info.type
-          [] with
+          parameterArgs
+          info.type with
       | Except.error error => Except.error error
-      | Except.ok fields =>
-          let fieldArgs :=
-            fields.bindersRev.reverse.map
-              (fun field => PsExpr.fvar field.id)
-          let intro :=
-            psExprApplyMany
-              (PsExpr.constE info.name [])
-              fieldArgs
-          let body :=
-            PsExpr.app (PsExpr.fvar motiveId) intro
-          Except.ok
-            (psCloseElabForallBinders
-              fields.context.metaContext
-              fields.bindersRev
-              body)
+      | Except.ok fieldCursor =>
+          match psOpenConstructorFields
+              context
+              info.numFields
+              fieldCursor
+              [] with
+          | Except.error error => Except.error error
+          | Except.ok fields =>
+              let fieldArgs :=
+                fields.bindersRev.reverse.map
+                  (fun field => PsExpr.fvar field.id)
+              let intro :=
+                psExprApplyMany
+                  (PsExpr.constE info.name [])
+                  (parameterArgs ++ fieldArgs)
+              let body :=
+                PsExpr.app (PsExpr.fvar motiveId) intro
+              Except.ok
+                (psCloseElabForallBinders
+                  fields.context.metaContext
+                  fields.bindersRev
+                  body)
   | _ => Except.error PsElabError.unsupportedTerm
 
 structure PsElabRecursorMinorsResult where

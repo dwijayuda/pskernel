@@ -360,6 +360,13 @@ mutual
     if ← isEmitted name then return
     if ← isActive name then return
     for dep in semanticDeps name do dumpConstant env dep
+    -- Runtime-oriented diagnostic exports must also carry Lean's executable
+    -- implementation edge. The logical/kernel declaration stays authoritative,
+    -- but JavaScript execution of @[implemented_by] and generated `unsafe`
+    -- wrappers needs the implementation declaration to be present.
+    unless (← get).skipNonReplayable do
+      if let some impl := Compiler.getImplementedBy? env name then
+        dumpConstant env impl
     let ci ← findCI env name
     if (← get).skipNonReplayable && (ci.isUnsafe || ci.isPartial) then
       -- Lean.Kernel.Environment.replay excludes these constants from its

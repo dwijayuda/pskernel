@@ -810,42 +810,45 @@ def psEraseRuntimeExprWithFuel
                       | Except.ok (some lowered) => Except.ok lowered
                       | Except.ok none =>
                           match
-                                  psInferType
-                            environment
-                            psMetaEmpty
-                            scope.localContext
-                            view.head with
-                      | Except.error _ =>
-                          Except.error PsErasureError.unsupportedApplication
-                      | Except.ok headType =>
-                          match erase view.head with
-                          | Except.error error => Except.error error
-                          | Except.ok loweredHead =>
-                              match
-                                  psEraseApplicationArguments
-                                    erase
-                                    environment
-                                    scope
-                                    headType
-                                    view.args
-                                    {
-                                      typeArgumentsRev := []
-                                      runtimeArgumentsRev := []
-                                    } with
-                              | Except.error error => Except.error error
-                              | Except.ok applied =>
-                                  let typeArguments :=
-                                    applied.typeArgumentsRev.reverse
-                                  let runtimeArguments :=
-                                    applied.runtimeArgumentsRev.reverse
-                                  if runtimeArguments.isEmpty then
-                                    Except.ok loweredHead
-                                  else
-                                    Except.ok
-                                      (PsVerifiedIrExpr.call
-                                        loweredHead
-                                        typeArguments
-                                        runtimeArguments)
+                              psInferType
+                                environment
+                                psMetaEmpty
+                                scope.localContext
+                                view.head with
+                          | Except.error _ =>
+                              Except.error
+                                PsErasureError.unsupportedApplication
+                          | Except.ok headType =>
+                              match erase view.head with
+                              | Except.error error =>
+                                  Except.error error
+                              | Except.ok loweredHead =>
+                                  match
+                                      psEraseApplicationArguments
+                                        erase
+                                        environment
+                                        scope
+                                        headType
+                                        view.args
+                                        {
+                                          typeArgumentsRev := []
+                                          runtimeArgumentsRev := []
+                                        } with
+                                  | Except.error error =>
+                                      Except.error error
+                                  | Except.ok applied =>
+                                      let typeArguments :=
+                                        applied.typeArgumentsRev.reverse
+                                      let runtimeArguments :=
+                                        applied.runtimeArgumentsRev.reverse
+                                      if runtimeArguments.isEmpty then
+                                        Except.ok loweredHead
+                                      else
+                                        Except.ok
+                                          (PsVerifiedIrExpr.call
+                                            loweredHead
+                                            typeArguments
+                                            runtimeArguments)
       | .lam name type body binder =>
           let kind :=
             psErasureClassifyBinder

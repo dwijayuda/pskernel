@@ -23,7 +23,10 @@ execute.
    semantic checker.
 7. Reuse is measured on real pinned Lean 4.34 source files.
 
-## R0 — source/runtime census
+## R0 — source/runtime census — **COMPLETE (baseline)**
+
+Completed 2026-09-25 on this branch. The deterministic scanner covers 1,576 pinned Lean files and the baseline is recorded in `docs/research/LEAN434_JS_RUNTIME_CENSUS_BASELINE.md`.
+
 
 Build an executable census over:
 
@@ -49,7 +52,12 @@ Exit condition:
 > The repository can regenerate a deterministic JSON census from the pinned
 > source snapshot.
 
-## R1 — core JS runtime contract
+## R1 — core JS runtime contract — **COMPLETE (first scoped slice)**
+
+Completed 2026-09-25 for the initial Nat/UInt/Array/String/ST.Ref surface. `@proofscript/runtime/lean4` exposes a versioned Lean 4.34 compatibility module with 32 explicit extern mappings. GitHub Actions run `36038614385` passed the runtime tests, census, and architecture gate.
+
+This does not mean the entire Lean runtime is complete; later runtime primitives are pulled in only by dependency-closed source tranches.
+
 
 Implement source-compatible runtime exports for the first primitive surface:
 
@@ -66,7 +74,10 @@ Exit condition:
 > Runtime tests cover value semantics, UTF-8 positions, array persistence and
 > ref identity/take/set behavior.
 
-## R2 — extern lowering
+## R2 — extern lowering — **NEXT**
+
+Research constraint discovered during R0/R1: an upstream `@[extern] def` must remain an ordinary pskernel-checked logical definition with a separate executable override. It must **not** be converted into the existing ProofScript `extern function` axiom form. The R2 representation therefore needs runtime-override sidecar metadata that erasure/backend code may consume without changing kernel admission.
+
 
 Extend the Lean-compatible frontend/lowering so a whitelisted upstream form
 

@@ -185,7 +185,7 @@ for(const marker of [
   'Running bounded real-corpus gate...',
   'Running Lean compiler-IR native reduction smoke...',
   'Running canonical Init.Prelude module-stream preflight...',
-  'Running canonical Full Std replay...',
+  'Running canonical Full Std replay.',
   'exit $code',
 ]){
   const occurrences=localAssuranceRunner.split(marker).length-1;

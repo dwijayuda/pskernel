@@ -104,6 +104,35 @@ jobs:
           cd selfhost
           lake exe psc1_erasure_tests
 
+      - name: Run Lean-native dual-source TypeScript to JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          cat > /tmp/psc1-native.lean <<'EOF'
+          def idNat (x : Nat) : Nat := x
+          EOF
+          cat > /tmp/psc1-native.ps <<'EOF'
+          def idNat(x : Nat) : Nat := x;
+          EOF
+          lake exe psc1 typescript /tmp/psc1-native.lean > /tmp/psc1-native-lean.ts
+          lake exe psc1 typescript /tmp/psc1-native.ps > /tmp/psc1-native-ps.ts
+          cmp /tmp/psc1-native-lean.ts /tmp/psc1-native-ps.ts
+          cd ..
+          npm ci --no-audit --no-fund
+          rm -rf /tmp/psc1-native-out
+          npx tsc /tmp/psc1-native-lean.ts \
+            --target ES2022 \
+            --module ES2022 \
+            --strict \
+            --declaration \
+            --sourceMap \
+            --skipLibCheck \
+            --outDir /tmp/psc1-native-out
+          test -f /tmp/psc1-native-out/psc1-native-lean.js
+          grep -q 'export function idNat' /tmp/psc1-native-out/psc1-native-lean.js
+          echo "PSC1_LEAN_NATIVE_TS_JS: PASS"
+
       - name: Run dual-source admission pipeline
         shell: bash
         run: |

@@ -1,0 +1,39 @@
+name: PR9 bounded kernel assurance
+
+on:
+  push:
+    branches: [diagnostic/pr9-bounded-assurance]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  assurance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          lean_dir="$(dirname "$lean_bin")"
+          echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - name: Direct kernel gate
+        run: npm run test:kernel
+      - name: Kernel anti-drift
+        run: node scripts/anti-drift.mjs
+      - name: Bounded Lean corpus ladder
+        run: npm run check:kernel-corpus
+      - name: Native compiler-IR smoke
+        run: npm run oracle:native-smoke
+      - name: Canonical Init.Prelude
+        run: npm run oracle:init-canonical

@@ -112,9 +112,10 @@ export function elaborateV061LambdaExpression(
   }
   if(
     expected!==undefined
-    &&!checker.isDefEq(
+    &&!context.metaContext.unify(
       context.metaContext.instantiate(resultType),
       context.metaContext.instantiate(expected),
+      context.localContext,
     )
   ){
     throw new Error(

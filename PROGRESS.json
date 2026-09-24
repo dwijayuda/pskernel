@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 170,
   "notes": [
+    "Windows local-assurance log hardening: run-full-std-local.ps1 now writes one UTF-8 (no BOM) log for metadata and streamed native-process output, echoing lines to the console without Tee-Object. This removes the mixed UTF-8/UTF-16 NUL-corruption seen in the previous full-std.log and makes the next local ladder run directly machine-readable.",
     "Build repair for shared-state hardening: exactOptionalPropertyTypes requires cache-config keys that are always passed to be declared as explicit `T | undefined`, not optional properties. Runtime policy is unchanged.",
     "Public checker-state cache hardening: KernelState now binds cache-affecting TypeChecker configuration (definition safety, allowed universe parameters including undefined-universe-ignore mode, recursion/Nat resource limits, and native evaluator identity). Reusing one state under incompatible settings fails closed instead of allowing permissive cached checked-inference/WHNF results to bypass stricter checks. Normal Kernel admission already used fresh states; this secures the public shared-state API.",
     "Local Full-Std runner now executes the assurance ladder in cost order by default: full npm test → bounded real corpora → canonical Init.Prelude preflight → canonical Full Std, logging each stage and stopping at the first failure. Skip switches are available only for targeted reruns.",
@@ -248,5 +249,5 @@
   ],
   "currentTreeExpectedDirectTests": 171,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "shared-state hardening source count remains 171; exactOptionalPropertyTypes build repair applied, refreshed execution pending"
+  "currentTreeVerification": "shared-state hardening source count remains 171; exactOptionalPropertyTypes build shape was source-audited/target-compiled, but refreshed full test execution is still pending. Local Full-Std runner now emits uniform UTF-8 evidence."
 }

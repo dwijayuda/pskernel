@@ -11,6 +11,9 @@ structure S where
   mdata : Array KVMap := #[]
   emitted : NameSet := {}
   active : NameSet := {}
+  segmented : Bool := false
+  segmentOpen : Bool := false
+  segmentIndex : Nat := 0
   /-- Canonical module-stream follows Lean.Kernel.Environment.replay and skips
       unsafe/partial ConstantInfo. Diagnostic export modes leave this false. -/
   skipNonReplayable : Bool := false
@@ -82,7 +85,43 @@ def dumpUparams (ps : List Name) : M Json := do
   for p in ps do discard <| dumpLevel (.param p)
   return (← ps.mapM dumpName).toJson
 
+def dumpMeta : IO Unit :=
+  IO.println <| (Json.mkObj [("meta", Json.mkObj [
+    ("exporter", Json.mkObj [("name", "dependency-closure"), ("version", "1")]),
+    ("lean", Json.mkObj [("githash", githash), ("version", versionString)]),
+    ("format", Json.mkObj [("version", "3.1.0")])
+  ])]).compress
+
+def resetInternTablesPreserveActive : M Unit :=
+  modify fun s => { s with
+    names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
+    levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
+    exprs := HashMap.emptyWithCapacity 256
+    -- Deliberately preserve mdata, emitted, active and segmentation state.
+    -- mdata equality IDs must remain stable across all segments.
+  }
+
+def ensureDeclarationSegment : M Unit := do
+  let s ← get
+  if s.segmented && !s.segmentOpen then
+    resetInternTablesPreserveActive
+    IO.println <| (Json.mkObj [("segment", Json.mkObj [
+      ("index", s.segmentIndex),
+      ("kind", "declaration")
+    ])]).compress
+    dumpMeta
+    modify fun s => { s with segmentOpen := true }
+
+def closeDeclarationSegment : M Unit := do
+  let s ← get
+  if s.segmented && s.segmentOpen then
+    modify fun s => { s with
+      segmentOpen := false
+      segmentIndex := s.segmentIndex + 1
+    }
+
 def dumpAxiom (ci : AxiomVal) : M Unit := do
+  ensureDeclarationSegment
   let obj := Json.mkObj [("axiom", Json.mkObj [
     ("name", ← dumpName ci.name),
     ("levelParams", ← dumpUparams ci.levelParams),
@@ -92,6 +131,7 @@ def dumpAxiom (ci : AxiomVal) : M Unit := do
   IO.println obj.compress
 
 def dumpTheorem (ci : TheoremVal) : M Unit := do
+  ensureDeclarationSegment
   let obj := Json.mkObj [("thm", Json.mkObj [
     ("name", ← dumpName ci.name),
     ("levelParams", ← dumpUparams ci.levelParams),
@@ -115,6 +155,7 @@ def safetyJson : DefinitionSafety → Json
 def dumpNames (ns : List Name) : M Json := return (← ns.mapM dumpName).toJson
 
 def dumpDefinition (ci : DefinitionVal) : M Unit := do
+  ensureDeclarationSegment
   let obj := Json.mkObj [("def", Json.mkObj [
     ("name", ← dumpName ci.name),
     ("levelParams", ← dumpUparams ci.levelParams),
@@ -183,6 +224,7 @@ def dumpInductiveGroup (env : Environment) (indName recName : Name) : M Unit := 
 
 
 def dumpOpaque (ci : OpaqueVal) : M Unit := do
+  ensureDeclarationSegment
   let obj := Json.mkObj [("opaque", Json.mkObj [
     ("name", ← dumpName ci.name),
     ("levelParams", ← dumpUparams ci.levelParams),
@@ -200,6 +242,7 @@ def quotKindJson : QuotKind → Json
   | .ind => "ind"
 
 def dumpQuot (ci : QuotVal) : M Unit := do
+  ensureDeclarationSegment
   let obj := Json.mkObj [("quot", Json.mkObj [
     ("name", ← dumpName ci.name),
     ("levelParams", ← dumpUparams ci.levelParams),
@@ -234,6 +277,7 @@ def recursorsFor (env : Environment) (all : List Name) : List RecursorVal := Id.
   return out
 
 def dumpInductiveGroupAll (env : Environment) (root : InductiveVal) : M (List Name) := do
+  ensureDeclarationSegment
   let mut types : Array Json := #[]
   let mut ctors : Array Json := #[]
   let mut emittedNames := root.all
@@ -347,6 +391,7 @@ mutual
       let emitted ← dumpInductiveGroupAll env iv
       setEmitted emitted
       clearActive iv.all
+      closeDeclarationSegment
     | .defnInfo dv =>
       if dv.safety == .safe then
         -- DefinitionVal.all is informational for safe definitions. Lean's
@@ -357,6 +402,7 @@ mutual
         dumpDefinition dv
         setEmitted [name]
         clearActive [name]
+        closeDeclarationSegment
       else
         -- Unsafe/partial mutual blocks are only reconstructed in diagnostic
         -- export modes. Canonical module-stream returns above before reaching
@@ -372,24 +418,28 @@ mutual
           dumpDefinition d
         setEmitted group
         clearActive group
+        closeDeclarationSegment
     | .axiomInfo av =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
       dumpAxiom av
       setEmitted [name]
       clearActive [name]
+      closeDeclarationSegment
     | .thmInfo tv =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
       dumpTheorem tv
       setEmitted [name]
       clearActive [name]
+      closeDeclarationSegment
     | .opaqueInfo ov =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
       dumpOpaque ov
       setEmitted [name]
       clearActive [name]
+      closeDeclarationSegment
     | .quotInfo qv =>
       -- Match Lean.Kernel.Environment.Replay exactly: any quotient record first
       -- replays Eq, because adding Declaration.quotDecl installs all four Quot
@@ -401,6 +451,7 @@ mutual
       dumpQuot qv
       setEmitted [name]
       clearActive [name]
+      closeDeclarationSegment
 
   partial def dumpConstants (env : Environment) (names : NameSet) : M Unit := do
     for n in names do dumpConstant env n
@@ -417,13 +468,6 @@ def resetInternTables : M Unit :=
     -- make distinct Lean KVMaps look structurally equal.
     active := {}
   }
-
-def dumpMeta : IO Unit :=
-  IO.println <| (Json.mkObj [("meta", Json.mkObj [
-    ("exporter", Json.mkObj [("name", "dependency-closure"), ("version", "1")]),
-    ("lean", Json.mkObj [("githash", githash), ("version", versionString)]),
-    ("format", Json.mkObj [("version", "3.1.0")])
-  ])]).compress
 
 def rootsForModule (env : Environment) (idx : ModuleIdx) : List Name := Id.run do
   let mut roots := []
@@ -570,31 +614,19 @@ def flattenRoots (buckets : Array (Array Name)) : Array Name := Id.run do
 
 partial def dumpSelectedRootsSegmented
     (env : Environment) (roots : List Name) (segmentRoots : Nat) : IO Unit := do
-  if segmentRoots == 0 then
-    throw <| IO.userError "selected segment size must be positive"
+  if segmentRoots != 1 then
+    throw <| IO.userError "selected declaration segmentation currently requires segment size 1"
   if roots.isEmpty then
     throw <| IO.userError "selected segmented export requires at least one root"
   IO.println <| (Json.mkObj [("environment", Json.mkObj [
     ("module", ""),
     ("selectedDirectRoots", roots.length),
-    ("segmentRoots", segmentRoots)
+    ("segmentation", "declaration")
   ])]).compress
   let _ ← (do
-    let mut segment : Nat := 0
-    let mut inSegment : Nat := 0
-    for n in roots do
-      if inSegment == 0 then
-        resetInternTables
-        IO.println <| (Json.mkObj [("segment", Json.mkObj [
-          ("index", segment),
-          ("maxDirectRoots", segmentRoots)
-        ])]).compress
-        dumpMeta
-      dumpConstant env n
-      inSegment := inSegment + 1
-      if inSegment == segmentRoots then
-        segment := segment + 1
-        inSegment := 0) |>.run {}
+    modify fun (s : S) => { s with segmented := true }
+    for n in roots do dumpConstant env n
+    closeDeclarationSegment) |>.run {}
   pure ()
 
 partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat) : IO Unit := do

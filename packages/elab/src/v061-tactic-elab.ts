@@ -132,11 +132,12 @@ function runTactic(
     return;
   }
 
-  runtime.state=intro(
-    runtime.state,
-    tactic.name,
-    {
-      intro:(parentGoal,userName)=>{
+  try{
+    runtime.state=intro(
+      runtime.state,
+      tactic.name,
+      {
+        intro:(parentGoal,userName)=>{
         const parent=runtime.entry(parentGoal);
         const checker=new TypeChecker(
           parent.context.environment,
@@ -165,33 +166,43 @@ function runTactic(
         };
         const nextExpected=instantiate1(functionType.body,fvar(id));
 
-        return runtime.createGoal(
-          nextContext,
-          nextExpected,
-          (body)=>{
-            const term=lam(
-              leanName,
-              functionType.type,
-              abstractFVar(body.term,id),
-              functionType.binderInfo,
-            );
-            const type=checker.check(term);
-            if(
-              !checker.isDefEq(
-                parent.context.metaContext.instantiate(type),
-                parent.context.metaContext.instantiate(parentGoal.target),
-              )
-            ){
-              throw new Error(
-                'PS_ELAB_TACTIC_INTRO: generated lambda does not match the goal',
+          return runtime.createGoal(
+            nextContext,
+            nextExpected,
+            (body)=>{
+              const term=lam(
+                leanName,
+                functionType.type,
+                abstractFVar(body.term,id),
+                functionType.binderInfo,
               );
-            }
-            runtime.completeGoal(parentGoal,{term,type});
-          },
-        );
+              const type=checker.check(term);
+              if(
+                !checker.isDefEq(
+                  parent.context.metaContext.instantiate(type),
+                  parent.context.metaContext.instantiate(parentGoal.target),
+                )
+              ){
+                throw new Error(
+                  'PS_ELAB_TACTIC_INTRO: generated lambda does not match the goal',
+                );
+              }
+              runtime.completeGoal(parentGoal,{term,type});
+            },
+          );
+        },
       },
-    },
-  );
+    );
+  }catch(error){
+    if(
+      error instanceof Error&&
+      error.message.startsWith('PS_ELAB_TACTIC_INTRO:')
+    )throw error;
+    throw new Error(
+      'PS_ELAB_TACTIC_INTRO: '+
+      (error instanceof Error?error.message:String(error)),
+    );
+  }
 }
 
 export function elaborateV061ByExpression(

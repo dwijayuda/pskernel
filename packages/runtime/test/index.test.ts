@@ -10,7 +10,12 @@ import {
   levelSucc,
   levelZero,
   mkAppN,
+  nameAppend,
+  nameEq,
   nameFromDotted,
+  numName,
+  strName,
+  anonymous,
   natLit,
   sort,
   TypeChecker,
@@ -20,6 +25,11 @@ import {
   Lean434EvaluationError,
   Lean434Evaluator,
 } from '../src/lean4-eval.js';
+import {
+  Lean434NameBridgeError,
+  kernelNameToLean434Runtime,
+  lean434RuntimeNameToKernel,
+} from '../src/lean4-name.js';
 import {
   Lean434RuntimeMetadataError,
   Lean434RuntimeMetadataIndex,
@@ -100,6 +110,29 @@ equal(natSub(nat(2),nat(5)),0n);
 equal(uint8(257),1);
 equal(uint8(-1),255);
 equal(ctor('Some',1).tag,'Some');
+
+{
+  const kernelName=numName(
+    strName(
+      strName(anonymous,'Lean'),
+      'Meta',
+    ),
+    17n,
+  );
+  const runtimeName=kernelNameToLean434Runtime(kernelName);
+  const roundTrip=lean434RuntimeNameToKernel(runtimeName);
+  ok(nameEq(roundTrip,kernelName),'Lean Name bridge round-trip mismatch');
+  throws(
+    ()=>lean434RuntimeNameToKernel({
+      kind:'constructor',
+      name:'Not.Lean.Name',
+      fields:[],
+    }),
+    Lean434NameBridgeError,
+    'invalid runtime Name constructor must fail closed',
+  );
+}
+console.log('ok - Lean runtime Name bridge preserves pskernel structure');
 
 // Lean 4.34 Nat and machine-integer compatibility.
 equal(LEAN434_SOURCE_VERSION,'4.34.0');

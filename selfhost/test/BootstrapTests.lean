@@ -2191,6 +2191,47 @@ def psTestDualSourceImplicitConstructorApplication : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestElabErrorTag (error : PsElabError) : String :=
+  match error with
+  | .fuelExhausted => "fuelExhausted"
+  | .emptyName => "emptyName"
+  | .unknownName _ => "unknownName"
+  | .invalidNatural _ => "invalidNatural"
+  | .invalidString _ => "invalidString"
+  | .invalidCharacter _ => "invalidCharacter"
+  | .infer _ => "infer"
+  | .typeMismatch => "typeMismatch"
+  | .implicitApplicationUnsupported => "implicitApplicationUnsupported"
+  | .unsupportedTerm => "unsupportedTerm"
+  | .matchExpectedType => "matchExpectedType"
+  | .matchScrutineeUnsupported => "matchScrutineeUnsupported"
+  | .matchInductiveUnsupported => "matchInductiveUnsupported"
+  | .matchParameterArity => "matchParameterArity"
+  | .matchPatternUnsupported => "matchPatternUnsupported"
+  | .matchConstructorUnknown _ => "matchConstructorUnknown"
+  | .matchDuplicateConstructor _ => "matchDuplicateConstructor"
+  | .matchNonExhaustive => "matchNonExhaustive"
+  | .matchRecursorUnsupported => "matchRecursorUnsupported"
+  | .matchRecursorLevels => "matchRecursorLevels"
+  | .matchConstructorArity _ => "matchConstructorArity"
+  | .matchRecursiveFieldUnsupported _ => "matchRecursiveFieldUnsupported"
+  | .duplicateDeclaration _ => "duplicateDeclaration"
+  | .unresolvedMetavariable => "unresolvedMetavariable"
+
+def psDebugImplicitConstructorApplication : IO Unit := do
+  match psParseLeanSource
+      "inductive Maybe (α : Type) where | none | some (value : α)\ndef present : Maybe Nat := Maybe.some 1\ndef absent : Maybe Nat := Maybe.none" with
+  | Except.error _ =>
+      IO.println "PSC1_IMPLICIT_APP_DEBUG: Lean parse failed"
+  | Except.ok module =>
+      match psElabModule psTestNatEnvironment module with
+      | Except.ok _ =>
+          IO.println "PSC1_IMPLICIT_APP_DEBUG: Lean elaboration succeeded"
+      | Except.error error =>
+          IO.println
+            ("PSC1_IMPLICIT_APP_DEBUG: Lean elaboration error=" ++
+              psTestElabErrorTag error)
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -2265,6 +2306,7 @@ def psRunNamedTests : List PsNamedTest -> IO Bool
       pure (test.passed && restPassed)
 
 def main : IO Unit := do
+  psDebugImplicitConstructorApplication
   let passed ← psRunNamedTests psBootstrapTestCases
   if passed then
     IO.println "PSC1_BOOTSTRAP_TESTS: PASS"

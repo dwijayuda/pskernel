@@ -221,7 +221,7 @@ export class Lean4ExportReplay {
       const n=this.n(asIndex(field(c,'name','constructor'),'constructor.name')),g=this.env.get(n);
       if(g.kind!=='constructor')throw new KernelError(`generated '${nameToString(n)}' is not a constructor`);
       const expectedType=this.e(asIndex(field(c,'type','constructor'),'constructor.type'));
-      if(!exprEq(g.type,expectedType))throw new KernelError(`generated constructor type mismatch for '${nameToString(n)}'\nTS: ${exprToString(g.type)}\nLean: ${exprToString(expectedType)}\nDiff: ${exprKernelMetadataDiff(g.type,expectedType)??'<exact-expression mismatch>'}`);
+      if(!exprKernelMetadataEq(g.type,expectedType))throw new KernelError(`generated constructor type mismatch for '${nameToString(n)}'\nTS: ${exprToString(g.type)}\nLean: ${exprToString(expectedType)}\nDiff: ${exprKernelMetadataDiff(g.type,expectedType)??'<unknown>'}`);
       if(!nameEq(g.induct,this.n(asIndex(field(c,'induct','constructor'),'constructor.induct')))||g.cidx!==asUInt(field(c,'cidx','constructor'),'constructor.cidx')||g.numParams!==asUInt(field(c,'numParams','constructor'),'constructor.numParams')||g.numFields!==asUInt(field(c,'numFields','constructor'),'constructor.numFields')||!sameBool(g.isUnsafe,boolField(c,'isUnsafe','constructor')))throw new KernelError(`generated constructor metadata mismatch for '${nameToString(n)}'`);
     }
     for(const r of rvs){

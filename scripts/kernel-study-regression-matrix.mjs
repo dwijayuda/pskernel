@@ -164,6 +164,14 @@ for(const forbidden of [
   if(nativeEval.includes(forbidden))throw new Error('native evaluator boundary drift: reference helper must use Kernel.whnf, found '+forbidden);
 }
 
+const replaySource=readFileSync('src/integration/lean4export.ts','utf8');
+if(!replaySource.includes("if(!exprKernelMetadataEq(g.type,expectedType))throw new KernelError(\`generated constructor type mismatch")){
+  throw new Error('constructor replay metadata comparator drift: Lean 4.34 ConstructorVal BEq requires Expr.eqv');
+}
+if(!replaySource.includes("if(!exprKernelMetadataEq(g.type,expectedType))throw new KernelError(\`generated recursor type mismatch")){
+  throw new Error('recursor replay metadata comparator drift: Lean 4.34 RecursorVal BEq requires Expr.eqv');
+}
+
 const counts={};
 for(const entry of [...Object.values(matrix),...Object.values(hardeningExtras)])counts[entry.kind]=(counts[entry.kind]??0)+1;
 console.log(JSON.stringify({

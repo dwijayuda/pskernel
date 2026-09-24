@@ -12,6 +12,7 @@ import Ps.Environment.LocalContext
 import Ps.Environment.Resolve
 import Ps.Meta.Context
 import Ps.Meta.Reduce
+import Ps.Meta.Infer
 import Ps.Project.ModuleGraph
 
 def main : IO Unit :=

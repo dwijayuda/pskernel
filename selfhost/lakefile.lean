@@ -43,6 +43,7 @@ lean_lib PsProject where
 lean_lib PsMeta where
   srcDir := "packages/meta/src"
   roots := #[
+    `Ps.Meta.LevelContext,
     `Ps.Meta.Context,
     `Ps.Meta.Reduce,
     `Ps.Meta.Infer

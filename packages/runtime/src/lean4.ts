@@ -731,7 +731,7 @@ readonly Lean434DeclarationExternBinding[]=[
     upstreamSource:'Init/Prelude.lean',
   },
   {
-    leanDeclaration:'Lean.Name.beq',
+    leanDeclaration:'Name.beq',
     leanSymbol:'lean_name_eq',
     arity:2,
     upstreamSource:'Init/Prelude.lean',

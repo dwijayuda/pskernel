@@ -1,0 +1,34 @@
+import Ps.Core.Expr
+
+inductive PsMetaVarKind where {
+  | natural;
+  | synthetic;
+  | syntheticOpaque;
+};
+
+structure PsMetaVarDecl where {
+  id : Nat;
+  type : PsExpr;
+  kind : PsMetaVarKind;
+  depth : Nat;
+};
+
+structure PsMetaAssignment where {
+  id : Nat;
+  value : PsExpr;
+};
+
+structure PsMetaContext where {
+  nextId : Nat;
+  declarations : List(PsMetaVarDecl);
+  assignments : List(PsMetaAssignment);
+};
+
+def psMetaEmpty : PsMetaContext :=
+  { nextId := 0, declarations := [], assignments := [] };
+
+def psMetaSnapshot(context : PsMetaContext) : PsMetaContext :=
+  context;
+
+def psMetaRestore(current : PsMetaContext, snapshot : PsMetaContext) : PsMetaContext :=
+  snapshot;

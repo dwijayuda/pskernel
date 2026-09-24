@@ -739,7 +739,7 @@ console.log('ok - psc verified Wasm W3a Nat externref pass-through');
     const huge='1267650600228229401496703205376';
     await writeFile(
       join(directory,'src','main.ps'),
-      'function main() : Nat := '+huge+';\n',
+      'function main(_seed : Nat) : Nat := '+huge+';\n',
       'utf8',
     );
 
@@ -759,7 +759,7 @@ console.log('ok - psc verified Wasm W3a Nat externref pass-through');
       json:true,
       verified:true,
       buildTarget:'wasm',
-      passthrough:[],
+      passthrough:['0'],
     });
     equal(result.mainResult,huge);
     equal(result.wasmBigIntLiterals?.[0]?.decimal,huge);

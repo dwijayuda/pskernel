@@ -309,8 +309,8 @@ export function normalizeLevel(l:Level):Level{
 type GeqFrame={
   a:Level;
   b:Level;
-  state:0|1|2;
-  op?:'and'|'or'|'single';
+  state:0|1|2|3;
+  op?:'and'|'or'|'or-fallback'|'single';
   secondA?:Level;
   secondB?:Level;
 };
@@ -331,7 +331,10 @@ function kernelGeq(a:Level,b:Level):boolean{
         stack.push({a:l1,b:norm(l2.left),state:0});continue;
       }
       if(l1.kind==='max'){
-        f.state=1;f.op='or';f.secondA=norm(l1.right);f.secondB=l2;
+        // Lean 4.34 uses this only as a positive shortcut:
+        // if neither max branch alone dominates l2, is_geq_core continues
+        // with the imax/offset rules for the original pair.
+        f.state=1;f.op='or-fallback';f.secondA=norm(l1.right);f.secondB=l2;
         stack.push({a:norm(l1.left),b:l2,state:0});continue;
       }
       if(l2.kind==='imax'){
@@ -355,10 +358,37 @@ function kernelGeq(a:Level,b:Level):boolean{
     if(f.state===1){
       if(f.op==='single'){stack.pop();continue;}
       if(f.op==='and'&&!last){last=false;stack.pop();continue;}
-      if(f.op==='or'&&last){last=true;stack.pop();continue;}
+      if((f.op==='or'||f.op==='or-fallback')&&last){last=true;stack.pop();continue;}
       f.state=2;
       stack.push({a:f.secondA!,b:f.secondB!,state:0});
       continue;
+    }
+    if(f.state===2&&f.op==='or-fallback'){
+      if(last){stack.pop();continue;}
+      // Both max branches failed. C++ does not return false here; it falls
+      // through to the remaining is_geq_core rules for the original pair.
+      f.state=3;
+      continue;
+    }
+    if(f.state===3){
+      const l1=f.a,l2=f.b;
+      if(l2.kind==='imax'){
+        f.state=1;f.op='and';f.secondA=l1;f.secondB=norm(l2.right);
+        stack.push({a:l1,b:norm(l2.left),state:0});continue;
+      }
+      if(l1.kind==='imax'){
+        f.state=1;f.op='single';
+        stack.push({a:norm(l1.right),b:l2,state:0});continue;
+      }
+      const p1=toOffset(l1),p2=toOffset(l2);
+      if(levelEqStructural(p1.base,p2.base)||isZero(p2.base)){
+        last=p1.offset>=p2.offset;stack.pop();continue;
+      }
+      if(p1.offset===p2.offset&&p1.offset>0n){
+        f.state=1;f.op='single';
+        stack.push({a:norm(p1.base),b:norm(p2.base),state:0});continue;
+      }
+      last=false;stack.pop();continue;
     }
     stack.pop();
   }

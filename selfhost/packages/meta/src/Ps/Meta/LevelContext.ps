@@ -1,0 +1,27 @@
+import Ps.Core.Equality
+import Ps.Core.Expr
+import Ps.Core.Level
+
+structure PsLevelAssignment where {
+  id : Nat;
+  value : PsLevel;
+};
+
+structure PsLevelMetaContext where {
+  nextId : Nat;
+  declarations : List(Nat);
+  assignments : List(PsLevelAssignment);
+};
+
+structure PsLevelFreshResult where {
+  context : PsLevelMetaContext;
+  level : PsLevel;
+};
+
+structure PsLevelUnifyResult where {
+  context : PsLevelMetaContext;
+  success : Bool;
+};
+
+def psLevelMetaEmpty : PsLevelMetaContext :=
+  { nextId := 0, declarations := [], assignments := [] };

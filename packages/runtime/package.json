@@ -22,6 +22,10 @@
     "./lean4/eval": {
       "types": "./dist/src/lean4-eval.d.ts",
       "import": "./dist/src/lean4-eval.js"
+    },
+    "./lean4/metadata": {
+      "types": "./dist/src/lean4-metadata.d.ts",
+      "import": "./dist/src/lean4-metadata.js"
     }
   },
   "scripts": {

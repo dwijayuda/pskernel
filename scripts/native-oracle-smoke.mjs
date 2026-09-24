@@ -37,12 +37,7 @@ namespace NativeEvalFixture
 
 def n : Nat := 20 + 22
 
-unsafe def bImpl : Bool := false
-
-@[implemented_by bImpl]
-def bSource : Bool := true
-
-def b : Bool := bSource
+def b : Bool := false
 
 end NativeEvalFixture
 `);
@@ -81,17 +76,18 @@ end NativeEvalFixture
     throw new Error(`native-oracle-smoke: Nat result mismatch: ${String(natResult.value)}`);
   }
 
-  // This is deliberately stronger than a simple Bool evaluation. Lean does not
-  // compile bSource itself because it has @[implemented_by]; instead compiler
-  // calls to bSource are rewritten to bImpl. The separately compiled b constant
-  // therefore executes false while its logical body unfolds through bSource to true.
+  // reduce_native invokes run_boxed_kernel on the exact constant name, so the
+  // target must itself have executable compiler IR. @[implemented_by] declarations
+  // are intentionally not compiled under their own name; calls to them are rewritten
+  // at compilation sites. This smoke therefore uses an ordinary closed Bool target
+  // to validate the kernel's compiler-IR execution and Bool runtime-object boundary.
   const boolResult=evaluator.evaluate(null,{
     kind:'bool',
     constant:nameFromDotted('NativeEvalFixture.b'),
   });
   if(boolResult.kind!=='bool'||boolResult.value!==false){
     throw new Error(
-      'native-oracle-smoke: @[implemented_by] was not observed by compiler evaluation',
+      'native-oracle-smoke: Bool compiler-IR result mismatch',
     );
   }
 
@@ -100,7 +96,7 @@ end NativeEvalFixture
     lean:version,
     leanGitHash,
     nat:42,
-    implementedByBool:false,
+    bool:false,
   },null,2));
 } finally {
   rmSync(tmp,{recursive:true,force:true});

@@ -1789,7 +1789,7 @@ console.log('ok - psc configured source roots resolve mixed-source imports');
     );
     await writeFile(
       join(directory,'lib-a','Shared.ps'),
-      'function id(x : Nat) : Nat := x;\n',
+      'function foundationIdentity(x : Nat) : Nat := x;\n',
       'utf8',
     );
     await writeFile(
@@ -1890,7 +1890,7 @@ console.log('ok - psc mixed-source module ambiguity fails closed');
     );
     await writeFile(
       join(directory,'src','main.ps'),
-      'import Data\nfunction main(x : Nat) : Nat := id(x);\n',
+      'import Data\nfunction main(x : Nat) : Nat := foundationIdentity(x);\n',
       'utf8',
     );
     await writeFile(

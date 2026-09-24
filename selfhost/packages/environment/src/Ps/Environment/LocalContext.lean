@@ -28,6 +28,11 @@ def psLocalDeclId : PsLocalDecl -> Nat
   | .binding id _ _ _ => id
   | .letDecl id _ _ _ => id
 
+
+def psLocalDeclType : PsLocalDecl -> PsExpr
+  | .binding _ _ type _ => type
+  | .letDecl _ _ type _ => type
+
 def psLocalDeclUserName : PsLocalDecl -> PsName
   | .binding _ userName _ _ => userName
   | .letDecl _ userName _ _ => userName

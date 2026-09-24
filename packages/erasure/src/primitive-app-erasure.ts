@@ -201,16 +201,39 @@ export function tryErasePrimitiveRuntimeApplication(
     &&nameToString(view.fn.name)==='ite'
     &&view.args.length===5
   ){
+    const condition=eraseVerifiedCondition(
+      view.args[1]!,
+      scope,
+      environment,
+      erase,
+    );
+    const thenBranch=erase(view.args[3]!,scope,environment);
+    const elseBranch=erase(view.args[4]!,scope,environment);
+    if(
+      thenBranch.kind==='literal'
+      &&thenBranch.value===true
+      &&elseBranch.kind==='literal'
+      &&elseBranch.value===false
+    ){
+      return condition;
+    }
+    if(
+      thenBranch.kind==='literal'
+      &&thenBranch.value===false
+      &&elseBranch.kind==='literal'
+      &&elseBranch.value===true
+    ){
+      return {
+        kind:'intrinsic',
+        operation:'bool.not',
+        args:[condition],
+      };
+    }
     return {
       kind:'if',
-      condition:eraseVerifiedCondition(
-        view.args[1]!,
-        scope,
-        environment,
-        erase,
-      ),
-      thenBranch:erase(view.args[3]!,scope,environment),
-      elseBranch:erase(view.args[4]!,scope,environment),
+      condition,
+      thenBranch,
+      elseBranch,
     };
   }
 

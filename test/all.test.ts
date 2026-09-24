@@ -43,6 +43,11 @@ test('deep Lean Name operations avoid the JavaScript call stack',()=>{
  const r=nameReplacePrefix(a,prefix,nameFromDotted('R'));
  assert(r!==null&&nameToString(r).startsWith('R.'),'deep Name prefix replacement/component extraction must be stack-safe');
 });
+test('Lean Expr equality memoizes repeated shared DAG pairs',()=>{
+ let a:any=constant(N.Nat),b:any=constant(N.Nat);
+ for(let i=0;i<28;i++){a=app(a,a);b=app(b,b);}
+ assert(exprLeanEq(a,b),'shared structurally equal expression DAGs must compare successfully');
+});
 test('Lean private names preserve numeric private-index components',()=>{assert(!exprEq(constant(N.NatBitwiseUnaryProof1),constant(nameFromDotted('_private.Init.Data.Nat.Bitwise.Basic.0.Nat.bitwise._unary._proof_1'))));});
 test('LocalContext freshness never collides with reconstructed local IDs',()=>{const l=new LocalContext();l.addLocal('a@1',nameFromDotted('a'),sort(levelZero));assert(l.fresh('a')==='a@0');assert(l.fresh('a')==='a@2');});
 test('deep structural traversals avoid the JavaScript call stack',()=>{

@@ -25,24 +25,38 @@ official Lean 4.34 elaborator + kernel
 native/Lean bootstrap compiler executable
 ```
 
-Future ProofScript path:
+Bootstrap source policy:
 
 ```text
-the same compiler.lean
-        |
-        | ProofScript frontend for supported .lean
-        v
-pskernel checked core
-        |
-        v
-verified IR -> TypeScript -> JavaScript
-
-compiler.lean <-> canonical compiler.ps
+compiler.lean
+    |
+    | official Lean 4.34 + Lake while bootstrapping
+    v
+Lean-hosted ProofScript compiler
 ```
 
-The architecture of the semantic compiler must therefore be valid for both
-source spellings. Lake is temporary build infrastructure, not a semantic
-dependency of ProofScript.
+During bootstrap, **`.lean` is the only handwritten compiler source**. Do not
+create or manually maintain paired `.ps` implementation files. The compiler
+must stay inside the planned PSC1-compatible Lean subset so that translation is
+possible later, but source duplication is deliberately avoided.
+
+After the compiler can perform the canonical translation itself:
+
+```text
+compiler.lean
+    |
+    | completed ProofScript compiler
+    v
+generated canonical compiler.ps
+    |
+    +-> parse / elaborate / check parity
+    +-> checked-core / IR parity
+    +-> TypeScript / JavaScript parity
+```
+
+The generated `.ps` tree then becomes a parity artifact and, at the later
+source-transition milestone, may become the authoritative source. Lake is
+temporary build infrastructure, not a semantic dependency of ProofScript.
 
 ## Why Lean + Lake first
 
@@ -245,10 +259,10 @@ the canonical/future ProofScript implementation. They should model the same
 responsibility instead of forming three unrelated designs.
 
 Some existing TypeScript basenames contain characters inconvenient for Lean
-module names, especially hyphens. When such a module is ported, normalize the
-basename once for all three sibling files (for example
-`v061-if-elab.ts -> V061IfElab.ts/.lean/.ps`) rather than introducing a
-different directory hierarchy for Lean.
+module names, especially hyphens. When such a module is ported, normalize the basename once for the TypeScript
+reference and handwritten Lean bootstrap source (for example
+`v061-if-elab.ts -> V061IfElab.lean`). A canonical `.ps` sibling is generated
+later by the completed compiler; it is not handwritten during bootstrap.
 
 Do **not** require every current package to become portable/self-hosted. Split
 packages into two classes.

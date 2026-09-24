@@ -60,6 +60,7 @@ jobs:
           rm -rf /tmp/formal-smoke
           mkdir -p /tmp/formal-smoke
           cp oracle/formal/Smoke.lean /tmp/formal-smoke/FormalSmoke.lean
+          printf '%s\n' 'leanprover/lean4:v4.34.0' > /tmp/formal-smoke/lean-toolchain
           cd /tmp/formal-smoke
           elan run leanprover/lean4:v4.34.0 lean -o FormalSmoke.olean FormalSmoke.lean
           LEAN_PATH=/tmp/formal-smoke "$LEAN4EXPORT_BIN" FormalSmoke -- \

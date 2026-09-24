@@ -23,6 +23,7 @@ import Ps.Meta.Infer
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
 import Ps.BackendTs.Module
+import Ps.BackendTs.Compiler
 import Ps.Project.ModuleGraph
 
 inductive PsCliSourceKind where
@@ -144,8 +145,8 @@ def psCliAdmissions
   | Except.ok encoded =>
       IO.print encoded
 
-def psCliTypeScript
-    (inputPath : String) : IO Unit := do
+def psCliCompileTypeScriptSource
+    (inputPath : String) : IO String := do
   let elaborated ← psCliElaborateSource inputPath
   let ir ←
     match
@@ -164,14 +165,37 @@ def psCliTypeScript
         (IO.userError
           "PSC1_CLI_TS_EMIT_FAILED: verified IR is outside the Lean-native TypeScript backend subset")
   | Except.ok output =>
-      IO.print output
+      pure output
+
+def psCliTypeScript
+    (inputPath : String) : IO Unit := do
+  IO.print (← psCliCompileTypeScriptSource inputPath)
+
+def psCliCompile
+    (inputPath outputPath : String) : IO Unit := do
+  if !outputPath.endsWith ".ts" then
+    throw
+      (IO.userError
+        "PSC1_CLI_OUTPUT_KIND: compile output must end in .ts")
+  let source ← psCliCompileTypeScriptSource inputPath
+  let result ← psWriteAndCompileTypeScript source outputPath
+  IO.println
+    ("PSC1_COMPILE: " ++ result.typeScriptPath ++
+      " -> " ++ result.javascriptPath)
+  IO.println
+    ("PSC1_DECLARATION: " ++ result.declarationPath)
+  IO.println
+    ("PSC1_SOURCE_MAP: " ++ result.sourceMapPath)
+  IO.println
+    ("PSC1_TYPESCRIPT: " ++ result.typescriptVersion)
 
 def psCliUsage : String :=
   "ProofScript PSC1 Lean bootstrap\n" ++
   "usage:\n" ++
   "  psc1 translate <input.lean|input.ps> --to <lean|ps>\n" ++
   "  psc1 admissions <input.lean|input.ps>\n" ++
-  "  psc1 typescript <input.lean|input.ps>"
+  "  psc1 typescript <input.lean|input.ps>\n" ++
+  "  psc1 compile <input.lean|input.ps> --out <output.ts>"
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -183,5 +207,7 @@ def main (args : List String) : IO Unit := do
       psCliAdmissions inputPath
   | ["typescript", inputPath] =>
       psCliTypeScript inputPath
+  | ["compile", inputPath, "--out", outputPath] =>
+      psCliCompile inputPath outputPath
   | _ =>
       throw (IO.userError psCliUsage)

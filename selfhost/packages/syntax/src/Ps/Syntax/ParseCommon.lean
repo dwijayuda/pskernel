@@ -227,3 +227,31 @@ def psTokenCursorAtBinderStart (cursor : PsTokenCursor) : Bool :=
   psTokenCursorAtText cursor "("
     || psTokenCursorAtText cursor "{"
     || psTokenCursorAtText cursor "["
+
+def psTokenCursorAtArrow (cursor : PsTokenCursor) : Bool :=
+  psTokenCursorAtText cursor "->" || psTokenCursorAtText cursor "→"
+
+def psTokenCursorExpectArrow
+    (cursor : PsTokenCursor) :
+    Except PsParseError PsTokenRead :=
+  match psTokenCursorPeek cursor with
+  | none => Except.error (PsParseError.unexpectedEnd "->")
+  | some token =>
+      if token.text == "->" || token.text == "→" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "->")
+        | some read => Except.ok read
+      else
+        Except.error
+          (PsParseError.expectedText "->" token.text token.span)
+
+def psSyntaxAnonymousExplicitBinder
+    (span : PsSourceSpan) : PsSyntaxBinderHead :=
+  {
+    name := {
+      segments := ["_"]
+      span := span
+    }
+    kind := PsSyntaxBinderKind.explicit
+    span := span
+  }

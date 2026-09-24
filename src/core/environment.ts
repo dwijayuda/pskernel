@@ -6,6 +6,7 @@ export class Environment {
   private readonly constants = new Map<string,ConstantInfo>();
   private _quotInitialized=false;
   private _revision=0;
+  private readonly transactions:{revision:number;quotInitialized:boolean;added:string[]}[]=[];
 
   get quotInitialized():boolean{return this._quotInitialized;}
   set quotInitialized(v:boolean){if(v!==this._quotInitialized){this._quotInitialized=v;this._revision++;}}
@@ -18,6 +19,30 @@ export class Environment {
     e._revision=this._revision;
     return e;
   }
+
+  /**
+   * Run a synchronous admission transaction without copying the accumulated environment.
+   * Additions remain visible while `f` runs and are committed on success. On failure,
+   * every addition plus the revision/Quot marker are restored exactly. Nested committed
+   * transactions are folded into their parent so an outer rollback remains atomic.
+   */
+  transaction<T>(f:()=>T):T{
+    const tx={revision:this._revision,quotInitialized:this._quotInitialized,added:[] as string[]};
+    this.transactions.push(tx);
+    try{
+      const result=f();
+      this.transactions.pop();
+      const parent=this.transactions[this.transactions.length-1];
+      if(parent)parent.added.push(...tx.added);
+      return result;
+    }catch(e){
+      this.transactions.pop();
+      for(let i=tx.added.length-1;i>=0;i--)this.constants.delete(tx.added[i]!);
+      this._quotInitialized=tx.quotInitialized;
+      this._revision=tx.revision;
+      throw e;
+    }
+  }
   has(n:Name):boolean{return this.constants.has(nameKey(n));}
   find(n:Name):ConstantInfo|undefined{return this.constants.get(nameKey(n));}
   get(n:Name):ConstantInfo{const r=this.find(n);if(!r)throw new KernelError(`unknown constant '${nameToString(n)}'`);return r;}
@@ -25,6 +50,7 @@ export class Environment {
     const k=nameKey(i.name);
     if(this.constants.has(k))throw new KernelError(`already declared '${nameToString(i.name)}'`);
     this.constants.set(k,i);
+    this.transactions[this.transactions.length-1]?.added.push(k);
     this._revision++;
   }
   get size():number{return this.constants.size;}

@@ -42,11 +42,11 @@ function defaultFoundationCandidates():readonly string[] {
     process.env.PROOFSCRIPT_LEAN_FOUNDATION??'',
     resolve(
       process.cwd(),
-      'oracle/fixtures/lean434-proofscript-text-foundation.ndjson',
+      'oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson',
     ),
     resolve(
       here,
-      '../../../../oracle/fixtures/lean434-proofscript-text-foundation.ndjson',
+      '../../../../oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson',
     ),
   ].filter((value)=>value.length>0);
 }
@@ -91,7 +91,7 @@ export function createLeanEnvironmentProvider(
         loaded:false,
         source,
         message:
-          'Lean 4.34 ProofScript foundation delta was not found; '+
+          'Lean 4.34 ProofScript self-host foundation delta was not found; '+
           'the verified compiler requires the pinned base plus foundation delta.',
       };
       return;

@@ -16,7 +16,9 @@ lean_lib PsSyntax where
   roots := #[
     `Ps.Syntax.Token,
     `Ps.Syntax.Cursor,
-    `Ps.Syntax.Lexer
+    `Ps.Syntax.Lexer,
+    `Ps.Syntax.Ast,
+    `Ps.Syntax.ParserState
   ]
 
 lean_lib PsCore where

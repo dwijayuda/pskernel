@@ -70,8 +70,9 @@ Already implemented on the preferred verified path:
   runtime ABI shapes;
 - proof-aware LSP/VS Code dogfood tooling.
 
-The legacy software checker/software-IR/backend lane is being retired as the
-first self-hosting prerequisite. No new foundation work may depend on it.
+The legacy software checker/software-IR/backend lane was retired on 2026-09-24
+as the first self-hosting prerequisite. The architecture gate forbids its
+reintroduction.
 
 Execution-evidence note (2026-09-23): current GitHub Actions push jobs are
 failing before any job step is created (`steps: null`). The source regressions
@@ -79,25 +80,23 @@ for the latest equality/apply/instance-search changes are therefore committed
 but do not count as executed root-gate evidence until `npm run check` (or an
 equivalent executing CI run) completes.
 
-## Milestone L0.5 — legacy path retirement (promoted from L8)
+## Milestone L0.5 — legacy path retirement — COMPLETED 2026-09-24 (promoted from L8)
 
 Purpose: remove the duplicate semantic/compiler lane before any new
 self-hosting foundation feature is added.
 
-Required:
+Completed:
 
-- `psc check/build/run` use verified checked-core semantics unconditionally;
-- remove the legacy software checker and its package dependency;
-- remove software-HIR lowering from compiler IR;
-- remove legacy software TypeScript emitters;
-- remove unverified CLI report/result variants;
-- retain no automatic fallback or compatibility checker;
-- add architecture gates that fail if a second semantic lane is reintroduced.
+- `psc check/build/run` use checked-core semantics unconditionally;
+- the legacy `@proofscript/language` checker package was deleted;
+- legacy software-HIR lowering was deleted from compiler IR;
+- legacy software TypeScript emitters were deleted;
+- unverified CLI report/result variants were deleted;
+- no automatic semantic fallback remains;
+- the architecture gate fails if any retired legacy path is reintroduced.
 
-Exit condition:
-
-- the checked-core path is the only ProofScript semantic compiler path on
-  `main`.
+Exit condition is met: the checked-core path is the only ProofScript semantic
+compiler path on `main`.
 
 ## Milestone L1 — verified language core closure
 
@@ -120,8 +119,7 @@ Exit condition:
 
 - the verified path covers the small pure core needed to implement its own
   standard data libraries;
-- no new tests are added only to the legacy software checker for these
-  constructs.
+- every new executable construct is gated only through the checked-core path.
 
 ## Milestone L2 — data, recursion, and dependent ADT closure
 
@@ -740,8 +738,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     laws/utilities only when the proof/recursion surface supports them without
     host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
-12. Make verified mode default once feature coverage surpasses the legacy lane.
-13. Retire the legacy software checker.
+12. Keep checked-core compilation as the only semantic lane.
+13. Reject any attempt to restore the retired software checker or software IR.
 
 ## Progress reporting format
 

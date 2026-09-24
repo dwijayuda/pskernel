@@ -261,6 +261,89 @@ function addMinimalEqEnvironment(env:Environment):void {
       'implicit',
     ),
   });
+  const u1Name=nameFromDotted('u1');
+  const u2Name=nameFromDotted('u2');
+  const u1=levelParam(u1Name);
+  const u2=levelParam(u2Name);
+  const motiveType=forallE(
+    nameFromDotted('_'),
+    bvar(1),
+    sort(u1),
+  );
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Eq.ndrec'),
+    levelParams:[u1Name,u2Name],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u2),
+      forallE(
+        nameFromDotted('a'),
+        bvar(0),
+        forallE(
+          nameFromDotted('motive'),
+          motiveType,
+          forallE(
+            nameFromDotted('m'),
+            app(bvar(0),bvar(1)),
+            forallE(
+              nameFromDotted('b'),
+              bvar(3),
+              forallE(
+                nameFromDotted('h'),
+                mkAppN(
+                  constant(Eq,[u2]),
+                  [bvar(4),bvar(3),bvar(0)],
+                ),
+                app(bvar(3),bvar(1)),
+              ),
+              'implicit',
+            ),
+          ),
+          'implicit',
+        ),
+        'implicit',
+      ),
+      'implicit',
+    ),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Eq.ndrec_symm'),
+    levelParams:[u1Name,u2Name],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u2),
+      forallE(
+        nameFromDotted('a'),
+        bvar(0),
+        forallE(
+          nameFromDotted('motive'),
+          motiveType,
+          forallE(
+            nameFromDotted('m'),
+            app(bvar(0),bvar(1)),
+            forallE(
+              nameFromDotted('b'),
+              bvar(3),
+              forallE(
+                nameFromDotted('h'),
+                mkAppN(
+                  constant(Eq,[u2]),
+                  [bvar(4),bvar(0),bvar(3)],
+                ),
+                app(bvar(3),bvar(1)),
+              ),
+              'implicit',
+            ),
+          ),
+          'implicit',
+        ),
+        'implicit',
+      ),
+      'implicit',
+    ),
+  });
 }
 
 function makeDefinitionEnvironment():Environment {

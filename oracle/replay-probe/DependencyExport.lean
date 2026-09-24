@@ -9,6 +9,7 @@ structure S where
   levels : HashMap Level Nat := HashMap.emptyWithCapacity 32 |>.insert .zero 0
   exprs : HashMap ExprStructEq Nat := HashMap.emptyWithCapacity 256
   mdata : Array KVMap := #[]
+  mdataBuckets : HashMap String (Array Nat) := HashMap.emptyWithCapacity 256
   emitted : NameSet := {}
   active : NameSet := {}
   /-- Canonical module-stream follows Lean.Kernel.Environment.replay and skips
@@ -37,14 +38,33 @@ def biJson : BinderInfo → Json
   modify fun s => setM s ((getM s).insert x i)
   return i
 
+def mdataBucketKey (d : KVMap) : String := Id.run do
+  let mut seen : NameSet := {}
+  let mut keyCount : Nat := 0
+  let mut keyHash : UInt64 := 0
+  for (k, _) in d do
+    unless seen.contains k do
+      seen := seen.insert k
+      keyCount := keyCount + 1
+      -- Only a necessary-equality fingerprint. KVMap.eqv uses lookup semantics,
+      -- so duplicate raw entries must not affect the bucket. Collisions are
+      -- always resolved by exact KVMap BEq below.
+      keyHash := keyHash + k.hash
+  return s!"{keyCount}:{keyHash}"
+
 def dumpMDataEqId (d : KVMap) : M Nat := do
-  let xs := (← get).mdata
-  for i in [0:xs.size] do
+  let key := mdataBucketKey d
+  let s ← get
+  let ids := s.mdataBuckets[key]?.getD #[]
+  for i in ids do
     -- Lean 4.34 Expr.eqv delegates MData comparison to KVMap's BEq, which
     -- is extensional map equality (subset both ways), not raw entry-list order.
-    if xs[i]! == d then return i
-  let i := xs.size
-  modify fun s => { s with mdata := s.mdata.push d }
+    if s.mdata[i]! == d then return i
+  let i := s.mdata.size
+  modify fun s => { s with
+    mdata := s.mdata.push d
+    mdataBuckets := s.mdataBuckets.insert key (ids.push i)
+  }
   return i
 
 def dumpName (n : Name) : M Nat := intern n "in" (·.names) ({ · with names := · }) do

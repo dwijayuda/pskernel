@@ -182,6 +182,10 @@ export function checkSoftwareExpr(
       throw new Error(
         'PS_CHECK_SYNTHETIC_HOLE: ?_ is proof-tactic syntax and is not executable software',
       );
+    case 'by':
+      throw new Error(
+        'PS_CHECK_PROOF_TERM: theorem proof blocks are verified by the pskernel elaboration path, not the legacy software checker',
+      );
     case 'group':return checkSoftwareExpr(expr.value,context,expected);
     case 'reference':{
       const local=context.locals.get(expr.name);

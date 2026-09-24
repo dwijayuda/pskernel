@@ -837,23 +837,25 @@ machinery such as arbitrary user syntax, macro/quotation systems, custom
 elaborators, generalized environment extensions, broad attribute registration
 and unsafe casts remains outside the frozen subset by default.
 
-Gate every supported bootstrap construct through the same `.lean` and `.ps`
-frontends and checked-core path.
+Gate every supported bootstrap construct through the authoritative `.lean`
+frontend and the canonical checked-core path. Where a ProofScript source parser
+already exists, keep focused source-string regressions for syntax/AST agreement,
+but do not create a handwritten `.ps` compiler or fixture tree during SH7.
 
-Maintain a **dual-source feature matrix** for the frozen subset. Each selected
+Maintain a **Lean-bootstrap feature matrix** for the frozen subset. Each selected
 feature must be green for:
 
 1. `.lean` parse -> shared AST -> canonical `.lean`;
-2. `.ps` parse -> shared AST -> canonical `.ps`;
-3. `.lean -> .ps` translation -> reparse;
-4. `.ps -> .lean` translation -> reparse;
-5. elaboration/checking from both source kinds;
-6. equal checked-core fingerprints;
-7. equal compiler-IR fingerprints;
-8. TypeScript emission from both source kinds;
-9. JavaScript execution from both source kinds.
+2. elaboration/checking through the owned semantic path;
+3. stable checked-core fingerprints;
+4. stable compiler-IR fingerprints;
+5. TypeScript emission;
+6. JavaScript execution.
 
-This matrix is a release gate, not documentation-only bookkeeping.
+The full generated `.lean -> .ps` / `.ps -> .lean` parity matrix is deferred
+until the completed SH8a compiler can generate canonical ProofScript source
+itself. That later matrix remains a release gate for source transition, but it
+is not a prerequisite for writing the Lean-authored compiler.
 
 Before freezing, add one multi-module **SELFHOST-FEATURE** fixture/skeleton that
 proves the minimal REQUIRED foundation composes rather than testing every
@@ -885,12 +887,10 @@ syntax, HKT transformers, `if h : P`, interpolation or method notation).
 Those gates protect existing support but their absence/failure-to-implement does
 not block PSC1 unless a REQUIRED compiler module adopts the feature.
 
-The fixture must execute all four portability/build directions end-to-end:
+The fixture is authored only as `SELFHOST-FEATURE.lean` during SH7 and must
+execute the real bootstrap path end-to-end:
 
 ```text
-SELFHOST-FEATURE.lean -> canonical .ps   -> reparse/check
-SELFHOST-FEATURE.ps   -> canonical .lean -> reparse/check
-
 SELFHOST-FEATURE.lean
 -> canonical source AST
 -> Lean-compatible Meta/Elab
@@ -901,27 +901,13 @@ SELFHOST-FEATURE.lean
 -> TypeScript
 -> tsc
 -> JavaScript
-
-SELFHOST-FEATURE.ps
--> canonical source AST
--> Lean-compatible Meta/Elab
--> pskernel admission
--> checked core
--> erasure
--> verified compiler IR
--> TypeScript
--> tsc
--> JavaScript
 ```
 
-The two build paths must produce the same checked-core/IR fingerprints and
-semantically equivalent generated TypeScript/JavaScript. Translation
-round-trips must also be canonical-idempotent:
-
-```text
-.lean -> .ps -> .lean -> canonical stability
-.ps   -> .lean -> .ps -> canonical stability
-```
+After SH8a produces a compiler capable of canonical Lean-to-ProofScript
+translation, generate `SELFHOST-FEATURE.ps` from this authoritative Lean
+fixture and add the reverse translation, fingerprint-equivalence and
+canonical-idempotence gates there. No handwritten ProofScript copy is maintained
+before that point.
 
 Freeze only after this gate passes. Do not start SH8 merely because every
 feature has an isolated parser or elaborator test.

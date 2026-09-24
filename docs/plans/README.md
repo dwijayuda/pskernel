@@ -16,13 +16,25 @@ Every package plan should identify:
 
 ## Current priority
 
-1. Finish pskernel Lean 4.34 assurance.
-2. Build package boundaries around the stable kernel API.
-3. Build portable checked-module distribution.
-4. Build conformance/export tooling.
-5. Build ProofScript syntax → meta → elaboration.
-6. Build compiler/runtime/TypeScript backend.
-7. Build incremental language service → LSP/project tooling.
+ProofScript work on `main` is now foundation-first:
+
+1. Retire the legacy software semantic lane so there is one checked-core path.
+2. Close the self-hosting text foundation: Char/String/source positions.
+3. Close compiler collections: Array/Map/Set plus the core data libraries.
+4. Close controlled effects: Except/State/Reader/do.
+5. Close compiler recursion: mutual/local recursive groups and executable partial definitions.
+6. Freeze the bounded Lean bootstrap subset.
+7. Implement the ProofScript compiler in supported `.lean`.
+8. Bootstrap to JavaScript, then translate/refactor the compiler to `.ps`.
+9. Establish reproducible and later verified self-hosting.
+
+Unrelated ProofScript infrastructure expansion is deferred until these gates
+close. The controlling plan is
+`07_SELF_HOSTING_FOUNDATION.md`.
+
+The TypeScript Lean 4.34 kernel assurance effort continues independently on
+`kernel/lean434-study-hardening`. Kernel changes are not to be made on
+`main` merely to unblock ProofScript compiler work.
 
 See:
 - `00_MASTER_PLAN.md`

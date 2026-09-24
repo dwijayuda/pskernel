@@ -256,9 +256,20 @@ Milestones reached 2026-09-25:
   `implemented_by` bindings; its runtime work is initialization;
 - the real builtin initializer for `Lean.Parser.categoryParserFnRef` executes
   in JS and stores a Lean-written parser closure in a JS-backed Lean `IO.Ref`;
-- the next active gate is
+- the next active deep-assurance gate is
   `Lean.Parser.categoryParserFnExtension`, which exercises upstream
-  `registerEnvExtension`.
+  `registerEnvExtension`;
+- empirical cost finding: the dependency-closed Parser.Basic EnvExtension delta
+  after `Init.Prelude` is about **38 MiB / 778,576 NDJSON records**
+  (workflow artifact `lean434-parser-basic-bootstrap`). Replaying that closure
+  through pskernel is intentionally **not** a per-commit gate. It remains a
+  manual `workflow_dispatch` assurance gate while ordinary branch CI uses the
+  smaller real-source Parser.Types, first Parser.Basic initializer, ST/IO,
+  metadata, and kernel gates;
+- this does not justify a safe host axiom for `registerEnvExtension`.
+  pskernel rejects safe declarations that depend on unsafe constants, so the
+  branch preserves that safety boundary rather than weakening it for runtime
+  convenience.
 
 Differential gates:
 

@@ -1,0 +1,14 @@
+import Ps.Core.Expr
+import Ps.Environment.LocalContext
+
+structure PsInstanceEntry where {
+  value : PsExpr;
+  type : PsExpr;
+};
+
+structure PsInstanceIndex where {
+  entries : List(PsInstanceEntry);
+};
+
+def psInstanceIndexEmpty : PsInstanceIndex :=
+  { entries := [] };

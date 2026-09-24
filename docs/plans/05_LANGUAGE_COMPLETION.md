@@ -466,9 +466,9 @@ Current stdlib checkpoint:
 
 - `PsOption`: map, bind, get-or-else, or-else, is-some plus reflexivity/computation laws;
 - `PsResult`: value/error mapping, bind, get-or-else, two-way Option conversion plus checked laws;
-- `PsList`: map, append, length, head Option plus reflexivity/append reduction laws;
+- `PsList`: map, append, reverse, length, head Option plus checked computation/algebraic laws;
 - the dogfood project executes all three modules through verified TS/JS emission
-  with zero runtime extern assumptions and thirty-one pskernel-admitted theorems.
+  with zero runtime extern assumptions and thirty-three pskernel-admitted theorems.
 
 Build libraries in ProofScript itself where practical:
 
@@ -712,8 +712,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
     resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
-    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, listAppendNilRight,
-    listAppendAssoc, and listMapAppend. Thirty-one current stdlib theorems now
+    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, listReverseNil, listReverseCons, listAppendNilRight,
+    listAppendAssoc, and listMapAppend. Thirty-three current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
     laws/utilities only when the proof/recursion surface supports them without
@@ -736,6 +736,18 @@ Every development report should state:
 - next smallest milestone.
 
 Do not report invented completion percentages.
+
+## Stdlib List reverse checkpoint
+
+The self-hosted List module now includes accumulator-based `listReverse`.
+Its helper structurally recurses on the source list and carries the accumulator
+as an invariant runtime parameter, staying within the already admitted
+structural-recursion subset. `listReverseNil` and `listReverseCons` record
+the first two definitional computation laws with bounded `rfl`.
+
+The runtime dogfood reverses the mapped/appended list before measuring it,
+providing an executable regression for this recursion shape without changing
+the compiler or backend.
 
 ## Stdlib append associativity checkpoint
 

@@ -114,6 +114,28 @@ console.log('ok - psc verified runtime external assurance');
   );
   try{
     await mkdir(join(directory,'src'),{recursive:true});
+    await mkdir(
+      join(directory,'stdlib','ProofScript','Data'),
+      {recursive:true},
+    );
+    for(const name of ['Option','Ordering','Map','Set']){
+      const source=await readFile(
+        join(
+          process.cwd(),
+          'stdlib',
+          'src',
+          'ProofScript',
+          'Data',
+          name+'.ps',
+        ),
+        'utf8',
+      );
+      await writeFile(
+        join(directory,'stdlib','ProofScript','Data',name+'.ps'),
+        source,
+        'utf8',
+      );
+    }
     await writeFile(
       join(directory,'psconfig.json'),
       JSON.stringify({
@@ -1032,10 +1054,7 @@ console.log('ok - psc SH2 dual-source canonical Array runtime');
       JSON.stringify({
         languageVersion:'0.7',
         entry:'src/main.ps',
-        sourceRoots:[
-          'src',
-          join(process.cwd(),'stdlib','src'),
-        ],
+        sourceRoots:['src','stdlib'],
         compilerOptions:{
           outDir:'dist',
           emitTypeScript:true,

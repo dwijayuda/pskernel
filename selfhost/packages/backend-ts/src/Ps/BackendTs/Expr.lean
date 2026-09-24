@@ -28,8 +28,8 @@ def psTsExprUsesNameWithFuel :
             || arguments.any
               (fun argument =>
                 psTsExprUsesNameWithFuel fuel argument name)
-      | .letE local value body =>
-          local == name
+      | .letE localName value body =>
+          localName == name
             || psTsExprUsesNameWithFuel fuel value name
             || psTsExprUsesNameWithFuel fuel body name
       | .ifE condition thenBranch elseBranch =>

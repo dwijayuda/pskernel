@@ -27,6 +27,15 @@ export interface LeanEnvironmentProviderOptions {
 function defaultCandidates():readonly string[] {
   const here=dirname(fileURLToPath(import.meta.url));
   return [
+    process.env.PROOFSCRIPT_LEAN_FOUNDATION??'',
+    resolve(
+      process.cwd(),
+      'oracle/fixtures/lean434-proofscript-text-foundation.ndjson',
+    ),
+    resolve(
+      here,
+      '../../../../oracle/fixtures/lean434-proofscript-text-foundation.ndjson',
+    ),
     process.env.PROOFSCRIPT_INIT_PRELUDE??'',
     resolve(process.cwd(),'oracle/fixtures/lean434-init-prelude.ndjson'),
     resolve(here,'../../../../oracle/fixtures/lean434-init-prelude.ndjson'),
@@ -52,7 +61,7 @@ export function createLeanEnvironmentProvider(
       currentStatus={
         loaded:false,
         message:
-          'Lean 4.34 Init.Prelude replay fixture was not found; '+
+          'Lean 4.34 ProofScript foundation/Init.Prelude replay fixture was not found; '+
           'the caller must fail closed or explicitly choose an empty environment.',
       };
       return;

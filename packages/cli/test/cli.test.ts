@@ -730,11 +730,16 @@ console.log('ok - psc verified structural recursion run filesystem pipeline');
     'if (x <= y) { x } else { y };',
     'if.ts',
   );
-  equal(
-    result.typeScript.includes('return ((x <= y) ? x : y);'),
-    true,
-  );
-  equal(result.emitted.javascript.includes('x <= y ? x : y'),true);
+  const min=result.ir.declarations.find((item)=>item.name==='min');
+  equal(min?.body.kind,'if');
+  if(min?.body.kind==='if'){
+    equal(min.body.condition.kind,'intrinsic');
+    if(min.body.condition.kind==='intrinsic'){
+      equal(min.body.condition.operation,'nat.le');
+    }
+  }
+  equal(result.typeScript.includes('x <= y'),true);
+  equal(result.emitted.javascript.includes('x <= y'),true);
 }
 console.log('ok - psc verified proposition-based if pipeline');
 

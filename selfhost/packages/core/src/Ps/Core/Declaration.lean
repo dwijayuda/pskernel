@@ -1,5 +1,32 @@
 import Ps.Core.Expr
 
+structure PsInductiveInfo where
+  name : PsName
+  levelParams : List PsName
+  type : PsExpr
+  numParams : Nat
+  numIndices : Nat
+  constructors : List PsName
+
+structure PsConstructorInfo where
+  name : PsName
+  levelParams : List PsName
+  type : PsExpr
+  inductiveName : PsName
+  constructorIndex : Nat
+  numParams : Nat
+  numFields : Nat
+
+structure PsRecursorInfo where
+  name : PsName
+  levelParams : List PsName
+  type : PsExpr
+  inductiveNames : List PsName
+  numParams : Nat
+  numIndices : Nat
+  numMotives : Nat
+  numMinors : Nat
+
 inductive PsDeclaration where
   | axiomDecl
       (name : PsName)
@@ -20,3 +47,9 @@ inductive PsDeclaration where
       (levelParams : List PsName)
       (type : PsExpr)
       (value : PsExpr)
+  | inductiveDecl
+      (info : PsInductiveInfo)
+  | constructorDecl
+      (info : PsConstructorInfo)
+  | recursorDecl
+      (info : PsRecursorInfo)

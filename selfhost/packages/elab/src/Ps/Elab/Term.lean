@@ -2,6 +2,7 @@ import Ps.Core.Abstract
 import Ps.Core.Subst
 import Ps.Environment.Resolve
 import Ps.Meta.Infer
+import Ps.Meta.SynthInstance
 import Ps.Meta.Unify
 import Ps.Syntax.Ast
 import Ps.Elab.Context
@@ -1091,44 +1092,184 @@ def psBinderAcceptsExplicitArgument (binder : PsBinderInfo) : Bool :=
   | .explicit => true
   | _ => false
 
+def psBinderIsStrictImplicit (binder : PsBinderInfo) : Bool :=
+  match binder with
+  | .strictImplicit => true
+  | _ => false
+
+def psBinderIsInstanceImplicit (binder : PsBinderInfo) : Bool :=
+  match binder with
+  | .instanceImplicit => true
+  | _ => false
+
+structure PsElabApplicationResult where
+  result : PsElabTermResult
+  pendingInstancesRev : List Nat
+
 def psElabApplyArgs
     (elaborate :
       PsElabContext ->
       PsSyntaxTerm ->
       Option PsExpr ->
-      Except PsElabError PsElabTermResult)
-    (current : PsElabTermResult) :
-    List PsSyntaxTerm -> Except PsElabError PsElabTermResult
-  | [] => Except.ok current
-  | argument :: rest =>
-      match psInferEnsureForall
+      Except PsElabError PsElabTermResult) :
+    PsElabTermResult ->
+    List PsSyntaxTerm ->
+    List Nat ->
+    Except PsElabError PsElabApplicationResult
+  | current, arguments, pendingInstancesRev =>
+      let currentType :=
+        psWhnf
           current.context.environment
           current.context.metaContext
           current.context.localContext
-          current.type with
-      | Except.error error =>
-          Except.error (PsElabError.infer error)
-      | Except.ok fnType =>
-          if psBinderAcceptsExplicitArgument fnType.binder then
-            match elaborate current.context argument (some fnType.domain) with
-            | Except.error error => Except.error error
-            | Except.ok elaboratedArgument =>
-                let nextTerm :=
-                  PsExpr.app current.term elaboratedArgument.term
-                let nextType :=
-                  psExprInstantiate1
-                    fnType.body
-                    elaboratedArgument.term
-                psElabApplyArgs
-                  elaborate
-                  {
-                    context := elaboratedArgument.context
-                    term := nextTerm
-                    type := nextType
-                  }
-                  rest
+          current.type
+      match currentType with
+      | PsExpr.forallE _ domain body binder =>
+          if psBinderAcceptsExplicitArgument binder then
+            match arguments with
+            | [] =>
+                Except.ok {
+                  result := current
+                  pendingInstancesRev := pendingInstancesRev
+                }
+            | argument :: rest =>
+                match elaborate
+                    current.context
+                    argument
+                    (some domain) with
+                | Except.error error => Except.error error
+                | Except.ok elaboratedArgument =>
+                    let nextTerm :=
+                      PsExpr.app
+                        current.term
+                        elaboratedArgument.term
+                    let nextType :=
+                      psExprInstantiate1
+                        body
+                        elaboratedArgument.term
+                    psElabApplyArgs
+                      elaborate
+                      {
+                        context := elaboratedArgument.context
+                        term := nextTerm
+                        type := nextType
+                      }
+                      rest
+                      pendingInstancesRev
+          else if psBinderIsStrictImplicit binder
+              && arguments.isEmpty then
+            Except.ok {
+              result := current
+              pendingInstancesRev := pendingInstancesRev
+            }
           else
-            Except.error PsElabError.implicitApplicationUnsupported
+            let kind :=
+              if psBinderIsInstanceImplicit binder then
+                PsMetaVarKind.synthetic
+              else
+                PsMetaVarKind.natural
+            let fresh :=
+              psMetaFresh
+                current.context.metaContext
+                current.context.localContext
+                domain
+                kind
+            let nextContext :=
+              psElabContextWithMeta
+                current.context
+                fresh.context
+            let nextResult : PsElabTermResult := {
+              context := nextContext
+              term := PsExpr.app current.term fresh.expr
+              type := psExprInstantiate1 body fresh.expr
+            }
+            let nextPending :=
+              if psBinderIsInstanceImplicit binder then
+                match fresh.expr with
+                | PsExpr.mvar id => id :: pendingInstancesRev
+                | _ => pendingInstancesRev
+              else
+                pendingInstancesRev
+            psElabApplyArgs
+              elaborate
+              nextResult
+              arguments
+              nextPending
+      | _ =>
+          if arguments.isEmpty then
+            Except.ok {
+              result := current
+              pendingInstancesRev := pendingInstancesRev
+            }
+          else
+            Except.error (PsElabError.infer PsInferError.expectedFunction)
+
+def psElabSolvePendingInstances :
+    PsElabTermResult ->
+    List Nat ->
+    Except PsElabError PsElabTermResult
+  | current, [] =>
+      let metaContext := current.context.metaContext
+      Except.ok {
+        context := current.context
+        term := psMetaInstantiate metaContext current.term
+        type := psMetaInstantiate metaContext current.type
+      }
+  | current, id :: rest =>
+      let metaContext := current.context.metaContext
+      match psMetaFindAssignment metaContext id with
+      | some _ =>
+          psElabSolvePendingInstances current rest
+      | none =>
+          match psMetaFindDecl metaContext id with
+          | none =>
+              Except.error PsElabError.implicitApplicationUnsupported
+          | some declaration =>
+              let target :=
+                psMetaInstantiate metaContext declaration.type
+              if psExprHasUnresolvedMeta target then
+                Except.error PsElabError.implicitApplicationUnsupported
+              else
+                let synthesized :=
+                  psSynthInstance
+                    current.context.environment
+                    current.context.localContext
+                    current.context.instances
+                    metaContext
+                    target
+                match synthesized.value with
+                | none =>
+                    Except.error PsElabError.implicitApplicationUnsupported
+                | some value =>
+                    match psMetaAssign
+                        synthesized.context
+                        id
+                        value with
+                    | none =>
+                        Except.error
+                          PsElabError.implicitApplicationUnsupported
+                    | some assigned =>
+                        psElabSolvePendingInstances
+                          {
+                            context :=
+                              psElabContextWithMeta
+                                current.context
+                                assigned
+                            term := current.term
+                            type := current.type
+                          }
+                          rest
+
+def psElabFinishApplication
+    (application : PsElabApplicationResult)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match psElabFinalizeExpected application.result expected with
+  | Except.error error => Except.error error
+  | Except.ok finalized =>
+      psElabSolvePendingInstances
+        finalized
+        application.pendingInstancesRev
 
 def psElabTermWithFuel
     (fuel : Nat)
@@ -1141,7 +1282,17 @@ def psElabTermWithFuel
   | remaining + 1 =>
       match term with
       | .reference name =>
-          psElabReference context name expected
+          match psElabReference context name none with
+          | Except.error error => Except.error error
+          | Except.ok reference =>
+              match psElabApplyArgs
+                  (psElabTermWithFuel remaining)
+                  reference
+                  []
+                  [] with
+              | Except.error error => Except.error error
+              | Except.ok application =>
+                  psElabFinishApplication application expected
       | .natural text _ =>
           psElabNatural context text expected
       | .string text _ =>
@@ -1197,10 +1348,11 @@ def psElabTermWithFuel
               match psElabApplyArgs
                   (psElabTermWithFuel remaining)
                   elaboratedFn
-                  args with
+                  args
+                  [] with
               | Except.error error => Except.error error
-              | Except.ok result =>
-                  psElabFinalizeExpected result expected
+              | Except.ok application =>
+                  psElabFinishApplication application expected
 
 def psElabTerm
     (context : PsElabContext)

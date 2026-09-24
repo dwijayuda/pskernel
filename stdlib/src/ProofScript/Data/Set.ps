@@ -1,0 +1,48 @@
+import ProofScript.Data.Ordering
+
+inductive PsSet(α : Type) where {
+  | empty;
+  | entry(value : α, tail : PsSet(α));
+};
+
+function setEmpty {α : Type} : PsSet(α) :=
+  PsSet.empty;
+
+function setIsEmpty {α : Type}(values : PsSet(α)) : Bool :=
+  match values with {
+    | .empty => true;
+    | .entry value tail => false;
+  };
+
+function setContains {α : Type}
+(compare : α -> α -> PsOrdering, value : α, values : PsSet(α)) : Bool :=
+  match values with {
+    | .empty => false;
+    | .entry current tail =>
+      match compare(value, current) with {
+        | .less => false;
+        | .equal => true;
+        | .greater => setContains(compare, value, tail);
+      };
+  };
+
+function setInsert {α : Type}
+(compare : α -> α -> PsOrdering, value : α, values : PsSet(α)) :
+PsSet(α) :=
+  match values with {
+    | .empty => PsSet.entry(value, PsSet.empty);
+    | .entry current tail =>
+      match compare(value, current) with {
+        | .less => PsSet.entry(value, PsSet.entry(current, tail));
+        | .equal => values;
+        | .greater =>
+          PsSet.entry(current, setInsert(compare, value, tail));
+      };
+  };
+
+function setFold {α : Type}{β : Type}
+(f : β -> α -> β, init : β, values : PsSet(α)) : β :=
+  match values with {
+    | .empty => init;
+    | .entry value tail => setFold(f, f(init, value), tail);
+  };

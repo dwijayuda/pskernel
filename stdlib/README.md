@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain twenty-one pskernel-admitted theorems in total:
+The three modules now contain twenty-two pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,9 +49,9 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- twenty-one admitted stdlib theorems: twelve definitional laws use bounded
+- twenty-two admitted stdlib theorems: twelve definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
-  `resultToOptionMapError` dogfood bounded `cases`, `optionMapOrElse` dogfoods higher-order Option case analysis,
+  `resultToOptionMapError` and `resultMapMapError` dogfood bounded `cases`, `optionMapOrElse` dogfoods higher-order Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
   symmetry, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
@@ -170,6 +170,22 @@ for every `PsResult`. This mirrors Lean 4.34's `Except.mapError` /
 values, while `toOption` discards the error payload entirely. The proof is
 bounded case analysis plus definitional reflexivity in both constructors, so
 the law adds no new proof rule or host-side Result semantics.
+
+
+## Result value/error map commutation
+
+`ProofScript.Data.Result.resultMapMapError` proves:
+
+```text
+resultMap(f, resultMapError(g, value)) =
+resultMapError(g, resultMap(f, value))
+```
+
+for every `PsResult`. Value mapping changes only the success payload and error
+mapping changes only the error payload, so the operations commute. The proof is
+bounded constructor case analysis followed by kernel definitional reflexivity in
+both branches. This gives the stdlib a generic two-channel law without adding a
+new tactic, host-side Result semantics, or backend rewrite.
 
 ## Exact-search symmetry dogfood
 

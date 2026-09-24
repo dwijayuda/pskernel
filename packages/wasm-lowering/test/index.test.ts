@@ -60,22 +60,39 @@ if(lowered.functions[0]?.body.kind==='i32.unary'){
 }
 console.log('ok - @proofscript/wasm-lowering W3a Nat externref pass-through');
 
-throws(
-  ()=>lowerVerifiedIrToWasm({
+{
+  const huge=1n<<100n;
+  const loweredLiterals=lowerVerifiedIrToWasm({
     kind:'proofscript-verified-ir',
-    declarations:[{
-      name:'oneNat',
-      typeParameters:[],
-      parameters:[],
-      resultType:{kind:'primitive',name:'Nat'},
-      body:{kind:'literal',value:1n},
-    }],
-  }),
-  (error:unknown)=>
-    error instanceof WasmLoweringError&&
-    error.code==='PS_WASM_UNSUPPORTED_NAT_INT_LITERAL',
-);
-console.log('ok - @proofscript/wasm-lowering W3a Nat literals remain fail closed');
+    declarations:[
+      {
+        name:'hugeNat',
+        typeParameters:[],
+        parameters:[],
+        resultType:{kind:'primitive',name:'Nat'},
+        body:{kind:'literal',value:huge},
+      },
+      {
+        name:'sameHugeNat',
+        typeParameters:[],
+        parameters:[],
+        resultType:{kind:'primitive',name:'Nat'},
+        body:{kind:'literal',value:huge},
+      },
+    ],
+  });
+  equal(loweredLiterals.profile,'proofscript-wasm32-ref-js-v1');
+  equal(loweredLiterals.imports?.length,1);
+  equal(loweredLiterals.imports?.[0]?.name,'literal');
+  equal(loweredLiterals.bigintLiterals?.length,1);
+  equal(loweredLiterals.bigintLiterals?.[0]?.kind,'nat');
+  equal(loweredLiterals.bigintLiterals?.[0]?.decimal,huge.toString());
+  equal(loweredLiterals.functions[0]?.body.kind,'call');
+  if(loweredLiterals.functions[0]?.body.kind==='call'){
+    equal(loweredLiterals.functions[0].body.target,'ps$bigint$literal');
+  }
+}
+console.log('ok - @proofscript/wasm-lowering W3a Nat literal table lowering');
 
 console.log('ok - @proofscript/wasm-lowering W1 semantic Bool lowering');
 

@@ -9,6 +9,7 @@ import {
 } from '@proofscript/wasm-ir';
 import {unsupported} from './errors.js';
 import {lowerRuntimeExpr} from './expression-lowering.js';
+import {createWasmRuntimeSupport} from './runtime-support.js';
 import {
   signatureOf,
   wasmResultType,
@@ -72,6 +73,7 @@ export function lowerVerifiedIrToWasm(
   for(const declaration of module.declarations){
     signatures.set(declaration.name,signatureOf(declaration));
   }
+  const support=createWasmRuntimeSupport();
 
   const functions:WasmIrFunction[]=module.declarations.map(
     (declaration)=>{
@@ -102,6 +104,7 @@ export function lowerVerifiedIrToWasm(
           signature.result,
           locals,
           signatures,
+          support,
         ),
       };
     },
@@ -110,6 +113,12 @@ export function lowerVerifiedIrToWasm(
   const wasm:WasmIrModule={
     kind:'proofscript-wasm-ir',
     profile:profileForSignatures(signatures),
+    ...(support.imports.size===0?{}:{
+      imports:[...support.imports.values()],
+    }),
+    ...(support.bigintLiterals.length===0?{}:{
+      bigintLiterals:[...support.bigintLiterals],
+    }),
     functions,
   };
   validateWasmIrModule(wasm);

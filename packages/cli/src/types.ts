@@ -67,6 +67,8 @@ export interface WasmTargetReportFields {
   readonly wasmProfile?:WasmEmitResult['profile'];
   readonly wasmOptimized?:WasmEmitResult['optimized'];
   readonly wasmExports?:WasmEmitResult['exports'];
+  readonly wasmRuntimeImports?:WasmEmitResult['imports'];
+  readonly wasmBigIntLiterals?:WasmEmitResult['bigintLiterals'];
 }
 
 export interface VerifiedCheckReport

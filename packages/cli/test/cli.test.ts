@@ -716,6 +716,60 @@ console.log('ok - psc verified Wasm W2 UInt CLI run ABI');
 }
 console.log('ok - psc verified Wasm W3a Nat externref pass-through');
 
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-wasm-nat-literal-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    const huge='1267650600228229401496703205376';
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main() : Nat := '+huge+';\n',
+      'utf8',
+    );
+
+    const checked=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[],
+    });
+    equal(checked.wasmProfile,'proofscript-wasm32-ref-js-v1');
+    equal(checked.wasmRuntimeImports?.[0]?.name,'literal');
+    equal(checked.wasmBigIntLiterals?.[0]?.decimal,huge);
+
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[],
+    });
+    equal(result.mainResult,huge);
+    equal(result.wasmBigIntLiterals?.[0]?.decimal,huge);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Wasm W3a Nat literal runtime');
+
+
 
 
 {

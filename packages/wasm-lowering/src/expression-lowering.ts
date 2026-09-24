@@ -19,6 +19,10 @@ import {
   type Signature,
 } from './type-lowering.js';
 import {lowerRuntimeLocal} from './local-lowering.js';
+import {
+  lowerNatLiteral,
+  type WasmRuntimeSupport,
+} from './runtime-support.js';
 
 function requireType(
   actual:RuntimeType,
@@ -38,10 +42,11 @@ function lowerUIntAdd(
   args:readonly VerifiedIrExpr[],
   locals:ReadonlyMap<string,RuntimeType>,
   signatures:ReadonlyMap<string,Signature>,
+  support:WasmRuntimeSupport,
 ):WasmIrExpr {
   const type=operation.slice(0,-4) as RuntimeValueType;
-  const left=lowerRuntimeExpr(args[0]!,type,locals,signatures),
-    right=lowerRuntimeExpr(args[1]!,type,locals,signatures);
+  const left=lowerRuntimeExpr(args[0]!,type,locals,signatures,support),
+    right=lowerRuntimeExpr(args[1]!,type,locals,signatures,support);
   if(type==='uint64'){
     return {kind:'i64.binary',operation:'add',left,right};
   }
@@ -59,12 +64,15 @@ export function lowerRuntimeExpr(
   expected:RuntimeType,
   locals:ReadonlyMap<string,RuntimeType>,
   signatures:ReadonlyMap<string,Signature>,
+  support:WasmRuntimeSupport,
 ):WasmIrExpr {
-  requireType(
-    expressionRuntimeType(expr,locals,signatures),
-    expected,
-    'expression',
-  );
+  const actualType=
+    expr.kind==='literal'&&
+    typeof expr.value==='bigint'&&
+    expected==='nat'
+      ?'nat'
+      :expressionRuntimeType(expr,locals,signatures);
+  requireType(actualType,expected,'expression');
 
   switch(expr.kind){
     case 'literal':
@@ -72,9 +80,12 @@ export function lowerRuntimeExpr(
         return {kind:'i32.const',value:expr.value?1:0};
       }
       if(expr.value===undefined)return {kind:'nop'};
+      if(typeof expr.value==='bigint'&&expected==='nat'){
+        return lowerNatLiteral(expr.value,support);
+      }
       return unsupported(
         'PS_WASM_UNSUPPORTED_LITERAL',
-        'literal is outside the W1 Bool/Unit subset',
+        'literal is outside the supported runtime subset',
       );
 
     case 'var':{
@@ -99,6 +110,7 @@ export function lowerRuntimeExpr(
               'bool',
               locals,
               signatures,
+              support,
             ),
           };
 
@@ -120,12 +132,14 @@ export function lowerRuntimeExpr(
               'bool',
               locals,
               signatures,
+              support,
             ),
             right:lowerRuntimeExpr(
               expr.args[1]!,
               'bool',
               locals,
               signatures,
+              support,
             ),
           };
         }
@@ -139,6 +153,7 @@ export function lowerRuntimeExpr(
             expr.args,
             locals,
             signatures,
+            support,
           );
 
         default:
@@ -177,6 +192,7 @@ export function lowerRuntimeExpr(
             signature.parameters[index]!,
             locals,
             signatures,
+            support,
           )
         ),
         result:wasmResultType(signature.result),
@@ -206,12 +222,14 @@ export function lowerRuntimeExpr(
           valueType,
           locals,
           signatures,
+          support,
         ),
         body:lowerRuntimeExpr(
           expr.body,
           expected,
           next,
           signatures,
+          support,
         ),
         result:wasmResultType(expected),
       };
@@ -225,18 +243,21 @@ export function lowerRuntimeExpr(
           'bool',
           locals,
           signatures,
+          support,
         ),
         thenBranch:lowerRuntimeExpr(
           expr.thenBranch,
           expected,
           locals,
           signatures,
+          support,
         ),
         elseBranch:lowerRuntimeExpr(
           expr.elseBranch,
           expected,
           locals,
           signatures,
+          support,
         ),
         result:wasmResultType(expected),
       };

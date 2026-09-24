@@ -122,6 +122,8 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
         wasmProfile:wasm.wasm.profile,
         wasmOptimized:wasm.wasm.optimized,
         wasmExports:wasm.wasm.exports,
+        wasmRuntimeImports:wasm.wasm.imports,
+        wasmBigIntLiterals:wasm.wasm.bigintLiterals,
       }),
     };
 

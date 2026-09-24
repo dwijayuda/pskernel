@@ -13,7 +13,7 @@ on:
       - "src/core/**"
       - "src/kernel/**"
       - "src/integration/lean4export.ts"
-      - "oracle/fixtures/lean434-primitive-closure.ndjson"
+      - "oracle/formal/Smoke.lean"
 
 permissions:
   contents: read
@@ -43,7 +43,35 @@ jobs:
           git checkout ae0c0c4e4ce6a0081648aff03fe9c39d002c4526
           lake build con-leche
           echo "CONLECHE_BIN=/tmp/con-leche/.lake/build/bin/con-leche" >> "$GITHUB_ENV"
-      - name: Co-sign real Lean 4.34 primitive closure
+      - name: Build pinned official lean4export for final Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/leanprover/lean4export.git /tmp/lean4export
+          cd /tmp/lean4export
+          git checkout 076e8e57707e813375e8f9da8bf989799ace9680
+          printf '%s\n' 'leanprover/lean4:v4.34.0' > lean-toolchain
+          lake build lean4export
+          echo "LEAN4EXPORT_BIN=/tmp/lean4export/.lake/build/bin/lean4export" >> "$GITHUB_ENV"
+      - name: Generate standard no-mdata Lean 4.34 smoke export
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/formal-smoke
+          mkdir -p /tmp/formal-smoke
+          cp oracle/formal/Smoke.lean /tmp/formal-smoke/FormalSmoke.lean
+          cd /tmp/formal-smoke
+          elan run leanprover/lean4:v4.34.0 lean -o FormalSmoke.olean FormalSmoke.lean
+          LEAN_PATH=/tmp/formal-smoke "$LEAN4EXPORT_BIN" FormalSmoke -- \
+            FormalSmoke.Box FormalSmoke.Box.mk FormalSmoke.unwrap \
+            FormalSmoke.unwrap_mk FormalSmoke.id FormalSmoke.id_eq \
+            > /tmp/formal-smoke.ndjson
+          test ! -z "$(grep -m1 '"format":{"version":"3.1.0"}' /tmp/formal-smoke.ndjson)"
+          if grep -q '"mdata"' /tmp/formal-smoke.ndjson; then
+            echo "formal transport unexpectedly contains mdata" >&2
+            exit 1
+          fi
+      - name: Co-sign standard Lean 4.34 smoke export
         env:
           CONLECHE_JOBS: "2"
-        run: npm run formal:smoke
+        run: npm run formal:cosign -- /tmp/formal-smoke.ndjson --con-leche-bin "$CONLECHE_BIN"

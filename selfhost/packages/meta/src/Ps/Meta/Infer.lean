@@ -92,8 +92,9 @@ def psInferStructureProjectionField
     (localContext : PsLocalContext)
     (typeName : PsName)
     (target : PsExpr) :
-    Nat -> Nat -> PsExpr -> Except PsInferError PsExpr
-  | requestedIndex, fieldIndex, cursor =>
+    Nat -> Nat -> Nat -> PsExpr -> Except PsInferError PsExpr
+  | 0, _, _, _ => Except.error PsInferError.fuelExhausted
+  | fuel + 1, requestedIndex, fieldIndex, cursor =>
       match
           psWhnf
             environment
@@ -110,6 +111,7 @@ def psInferStructureProjectionField
               localContext
               typeName
               target
+              fuel
               requestedIndex
               (fieldIndex + 1)
               (psExprInstantiate1
@@ -176,6 +178,7 @@ def psInferProjectionType
                               localContext
                               typeName
                               target
+                              4096
                               index
                               0
                               fieldCursor

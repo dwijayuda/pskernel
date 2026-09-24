@@ -14,15 +14,15 @@ inductive PsLiteral where {
 };
 
 inductive PsExpr where {
-  | bound(index : Nat);
-  | free(name : PsName);
-  | meta(name : PsName);
-  | sort(level : PsLevel);
-  | const(name : PsName, levels : List(PsLevel));
+  | bvar(index : Nat);
+  | fvar(name : PsName);
+  | mvar(name : PsName);
+  | sortE(level : PsLevel);
+  | constE(name : PsName, levels : List(PsLevel));
   | app(fn : PsExpr, arg : PsExpr);
   | lam(name : PsName, type : PsExpr, body : PsExpr, binder : PsBinderInfo);
   | forallE(name : PsName, type : PsExpr, body : PsExpr, binder : PsBinderInfo);
   | letE(name : PsName, type : PsExpr, value : PsExpr, body : PsExpr);
-  | literal(value : PsLiteral);
+  | lit(value : PsLiteral);
   | proj(typeName : PsName, index : Nat, value : PsExpr);
 };

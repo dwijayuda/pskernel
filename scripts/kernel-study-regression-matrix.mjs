@@ -275,14 +275,14 @@ if(nativeSmoke.includes("mkdtempSync(join(tmpdir()")){
   throw new Error('native smoke path drift: OS tmp is outside Lean project root');
 }
 for(const marker of [
-  '@[implemented_by bImpl]',
-  'def bSource : Bool := true',
-  'def b : Bool := bSource',
+  'def b : Bool := false',
+  'target must itself have executable compiler IR',
+  "constant:nameFromDotted('NativeEvalFixture.b')",
 ]){
-  if(!nativeSmoke.includes(marker))throw new Error('native smoke implemented_by fixture drift: missing '+marker);
+  if(!nativeSmoke.includes(marker))throw new Error('native smoke executable-IR fixture drift: missing '+marker);
 }
-if(nativeSmoke.includes('@[implemented_by bImpl]\ndef b : Bool := true')){
-  throw new Error('native smoke implemented_by fixture drift: reduceBool target itself must have compiler IR');
+if(nativeSmoke.includes('@[implemented_by bImpl]\ndef b : Bool')){
+  throw new Error('native smoke executable-IR fixture drift: reduceBool target itself must have compiler IR');
 }
 
 const dependencyExporter=readFileSync('oracle/replay-probe/DependencyExport.lean','utf8');

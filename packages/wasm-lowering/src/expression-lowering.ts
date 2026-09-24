@@ -76,8 +76,8 @@ function lowerUIntAdd(
   signatures:ReadonlyMap<string,Signature>,
 ):WasmIrExpr {
   const type=operation.slice(0,-4) as RuntimeValueType;
-  const left=lowerRuntimeExpr(args[0]!,type,locals,signatures);
-  const right=lowerRuntimeExpr(args[1]!,type,locals,signatures);
+  const left=lowerRuntimeExpr(args[0]!,type,locals,signatures),
+    right=lowerRuntimeExpr(args[1]!,type,locals,signatures);
   if(type==='uint64'){
     return {kind:'i64.binary',operation:'add',left,right};
   }
@@ -90,7 +90,6 @@ function lowerUIntAdd(
     right:{kind:'i32.const',value:type==='uint8'?0xff:0xffff},
   };
 }
-
 export function lowerRuntimeExpr(
   expr:VerifiedIrExpr,
   expected:RuntimeType,

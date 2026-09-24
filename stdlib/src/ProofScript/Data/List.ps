@@ -61,3 +61,19 @@ listAppend(xs, listAppend(ys, zs)) :=
   rw [listAppendCons(head, listAppend(tail, ys), zs)];
   rw [listAppendCons(head, tail, listAppend(ys, zs))];
   rw [tail_ih];
+
+theorem listMapCons {α : Type}{β : Type}
+(f : α -> β, head : α, tail : PsList(α)) :
+listMap(f, PsList.cons(head, tail)) =
+PsList.cons(f(head), listMap(f, tail)) := by rfl;
+
+theorem listMapAppend {α : Type}{β : Type}
+(f : α -> β, xs : PsList(α), ys : PsList(α)) :
+listMap(f, listAppend(xs, ys)) =
+listAppend(listMap(f, xs), listMap(f, ys)) :=
+  by induction xs; rfl;
+  rw [listAppendCons(head, tail, ys)];
+  rw [listMapCons(f, head, listAppend(tail, ys))];
+  rw [listMapCons(f, head, tail)];
+  rw [listAppendCons(f(head), listMap(f, tail), listMap(f, ys))];
+  rw [tail_ih];

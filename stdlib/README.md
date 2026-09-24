@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain twelve pskernel-admitted theorems in total:
+The three modules now contain fourteen pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,10 +49,10 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- twelve admitted stdlib theorems: nine definitional laws use bounded `rfl`,
+- fourteen admitted stdlib theorems: ten definitional laws use bounded `rfl`,
   `optionOrElseNoneRight` dogfoods bounded `cases`, while
-  `listAppendNilRight` and `listAppendAssoc` dogfood bounded induction plus
-  checked rewriting;
+  `listAppendNilRight`, `listAppendAssoc`, and `listMapAppend` dogfood
+  bounded induction plus checked rewriting;
 - zero runtime external assumptions.
 
 For input `9`, the current dogfood `main` returns `22`.
@@ -99,3 +99,19 @@ the recursive branch first rewrites with the checked `listAppendCons`
 computation law until the induction-hypothesis occurrence is explicit, then
 rewrites by `tail_ih`. The final equality is closed by the ordinary
 post-rewrite Eq-reflexivity path.
+
+## Map/append distributivity dogfood
+
+`ProofScript.Data.List.listMapAppend` proves:
+
+```text
+listMap(f, listAppend(xs, ys)) =
+listAppend(listMap(f, xs), listMap(f, ys))
+```
+
+This is a higher-order generic law: the quantified function `f : α -> β`
+survives induction as an ordinary surrounding local. The recursive branch uses
+the new definitional computation law `listMapCons`, the existing
+`listAppendCons`, and `tail_ih`. Every transformation is an ordinary
+kernel-checked equality rewrite; the theorem does not depend on a host List
+implementation or a hidden simplifier rule.

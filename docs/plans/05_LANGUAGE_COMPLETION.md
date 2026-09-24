@@ -702,11 +702,12 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 10. Expand the landed ProofScript-written standard-library foundation from
     PsOption/PsResult/PsList only when APIs are supported by the verified
     language itself. The current utility/law tranche includes optionOrElse,
-    resultGetOrElse, structurally recursive listAppend, six definitional
-    computation laws, universal Option case analysis, listAppendNilRight, and
-    listAppendAssoc. Twelve current stdlib theorems now dogfood bounded
-    rfl/cases/induction/rw proof paths; continue with stronger laws/utilities
-    only when the proof/recursion surface supports them without host shortcuts.
+    resultGetOrElse, structurally recursive listAppend/listMap, ten
+    definitional computation laws, universal Option case analysis,
+    listAppendNilRight, listAppendAssoc, and listMapAppend. Fourteen current
+    stdlib theorems now dogfood bounded rfl/cases/induction/rw proof paths;
+    continue with stronger laws/utilities only when the proof/recursion surface
+    supports them without host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.
@@ -740,3 +741,19 @@ steps are made explicit before the induction hypothesis is applied. A future
 Lean-faithful defeq/kabstract occurrence matcher may shorten this source proof,
 but the present theorem remains valid proof dogfood rather than a reason to
 weaken rewrite semantics.
+
+## Stdlib map/append checkpoint
+
+The standard library now includes the higher-order generic law
+`listMapAppend`. Its induction motive carries `f` and `ys` as ordinary
+surrounding locals; the recursive branch uses only checked computation laws and
+the generated `tail_ih`.
+
+The supporting `listMapCons` theorem is definitional and proved by bounded
+`rfl`. It exists because the current rewrite occurrence matcher is structural:
+making constructor computation explicit preserves the bounded rewrite contract
+instead of teaching one stdlib theorem a special unfolding path.
+
+This checkpoint gives the stdlib a first law that simultaneously exercises
+generic higher-order functions, recursive ADTs, induction, source-preserved
+constructor field names, and proof-producing rewriting.

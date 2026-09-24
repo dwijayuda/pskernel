@@ -18,7 +18,7 @@ export function translateDocumentSnapshot(
   snapshot:TextDocumentSnapshot,
   target:TranslationTarget,
 ):DocumentTranslation {
-  const surface=frontends.require(snapshot.sourceKind).parse(snapshot.text);
+  const surface=frontends.forDocument(snapshot.sourceKind,snapshot.uri).parse(snapshot.text);
   const printer=targets.require(target);
   return {
     target,

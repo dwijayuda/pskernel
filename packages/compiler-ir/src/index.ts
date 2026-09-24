@@ -72,6 +72,5 @@ export function freeVariables(expr:IrExpr):readonly string[]{
   return [...free].sort();
 }
 
-export * from './software.js';
 
 export * from './verified.js';

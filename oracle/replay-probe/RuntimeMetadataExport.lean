@@ -1,6 +1,7 @@
 import Lean.Compiler.ExternAttr
 import Lean.Compiler.ImplementedByAttr
 import Lean.Compiler.InitAttr
+import Lean.Compiler.Old
 import Lean.Environment
 
 open Lean
@@ -40,9 +41,11 @@ def moduleNameForIdx (env : Environment) (idx : Nat) : String :=
   | some name => name.toString
   | none => ""
 
-def dumpDeclarationRuntimeMetadata (env : Environment) : IO (Array Json × Array Json) := do
+def dumpDeclarationRuntimeMetadata
+    (env : Environment) : IO (Array Json × Array Json × Array Json) := do
   let mut externs := #[]
   let mut implementedBy := #[]
+  let mut runtimeTargets := #[]
   for (name, _) in env.constants.map₁.toList do
     if let some data := getExternAttrData? env name then
       let moduleIdx? := env.getModuleIdxFor? name
@@ -52,15 +55,32 @@ def dumpDeclarationRuntimeMetadata (env : Environment) : IO (Array Json × Array
         ("moduleIndex", moduleIdx?.map (fun idx => toJson idx.toNat) |>.getD Json.null),
         ("entries", externDataJson data)
       ]
+    let moduleIdx? := env.getModuleIdxFor? name
     if let some impl := Compiler.getImplementedBy? env name then
-      let moduleIdx? := env.getModuleIdxFor? name
       implementedBy := implementedBy.push <| Json.mkObj [
         ("declaration", name.toString),
         ("module", moduleIdx?.map (moduleNameForIdx env) |>.getD ""),
         ("moduleIndex", moduleIdx?.map (fun idx => toJson idx.toNat) |>.getD Json.null),
         ("implementation", impl.toString)
       ]
-  return (externs, implementedBy)
+      runtimeTargets := runtimeTargets.push <| Json.mkObj [
+        ("declaration", name.toString),
+        ("module", moduleIdx?.map (moduleNameForIdx env) |>.getD ""),
+        ("moduleIndex", moduleIdx?.map (fun idx => toJson idx.toNat) |>.getD Json.null),
+        ("kind", "implemented_by"),
+        ("implementation", impl.toString)
+      ]
+    else
+      let unsafeRec := Compiler.mkUnsafeRecName name
+      if env.find? unsafeRec |>.isSome then
+        runtimeTargets := runtimeTargets.push <| Json.mkObj [
+          ("declaration", name.toString),
+          ("module", moduleIdx?.map (moduleNameForIdx env) |>.getD ""),
+          ("moduleIndex", moduleIdx?.map (fun idx => toJson idx.toNat) |>.getD Json.null),
+          ("kind", "unsafe_rec"),
+          ("implementation", unsafeRec.toString)
+        ]
+  return (externs, implementedBy, runtimeTargets)
 
 def appendInitEntries
     (env : Environment)
@@ -99,7 +119,8 @@ unsafe def main (args : List String) : IO Unit := do
     throw <| IO.userError "usage: RuntimeMetadataExport <module>"
   let moduleName := args.head!.toName
   withImportModules #[{module := moduleName}] {} fun env => do
-    let (externs, implementedBy) ← dumpDeclarationRuntimeMetadata env
+    let (externs, implementedBy, runtimeTargets) ←
+      dumpDeclarationRuntimeMetadata env
     let initializers ← dumpInitializerMetadata env
     let result := Json.mkObj [
       ("format", "proofscript-lean434-runtime-metadata"),
@@ -111,6 +132,7 @@ unsafe def main (args : List String) : IO Unit := do
       ("module", moduleName.toString),
       ("externs", Json.arr externs),
       ("implementedBy", Json.arr implementedBy),
+      ("runtimeTargets", Json.arr runtimeTargets),
       ("initializers", Json.arr initializers)
     ]
     IO.println result.compress

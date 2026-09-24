@@ -47,3 +47,25 @@ function spanByteLength(span : SourceSpan) : Nat :=
 
 function sliceSpan(s : String, span : SourceSpan) : String :=
   String.Internal.extract(s, span.start, span.stop);
+
+function scanIdentifier2(s : String, start : String.Pos.Raw) : SourceSpan :=
+  if (String.Internal.atEnd(s, start)) {
+    sourceSpan(start, start)
+  } else {
+    let first : Char := String.Internal.get(s, start);
+    if (isAsciiIdentifierStart(first)) {
+      let afterFirst : String.Pos.Raw := String.Internal.next(s, start);
+      if (String.Internal.atEnd(s, afterFirst)) {
+        sourceSpan(start, afterFirst)
+      } else {
+        let second : Char := String.Internal.get(s, afterFirst);
+        if (isAsciiIdentifierRest(second)) {
+          sourceSpan(start, String.Internal.next(s, afterFirst))
+        } else {
+          sourceSpan(start, afterFirst)
+        }
+      }
+    } else {
+      sourceSpan(start, start)
+    }
+  };

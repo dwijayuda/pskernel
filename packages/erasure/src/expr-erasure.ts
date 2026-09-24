@@ -21,7 +21,7 @@ import {eraseRuntimeType} from './type-erasure.js';
 import {safeIdentifier} from './names.js';
 import {eraseRuntimeApplication} from './app-erasure.js';
 import {eraseRuntimeFVar} from './local-erasure.js';
-import {tryEraseRawPosProjection} from './raw-pos-erasure.js';
+import {eraseRuntimeProjection} from './projection-erasure.js';
 export interface OpenedDefinition {
   readonly typeParameters:readonly VerifiedIrTypeParameter[];
   readonly parameters:readonly VerifiedIrParameter[];
@@ -215,36 +215,13 @@ export function eraseRuntimeExpr(
         "PS_ERASE_TYPE_TERM_AT_RUNTIME: '"+expr.kind+
         "' survives in executable code",
       );
-    case 'proj':{
-      const rawPos=tryEraseRawPosProjection(
+    case 'proj':
+      return eraseRuntimeProjection(
         expr,
         scope,
         environment,
         eraseRuntimeExpr,
       );
-      if(rawPos!==undefined)return rawPos;
-      const structure=scope.structuresByType.get(nameKey(expr.typeName));
-      if(structure===undefined){
-        throw new Error(
-          "PS_ERASE_PROJECTION_STRUCTURE_UNSUPPORTED: '"+
-          nameToString(expr.typeName)+"'",
-        );
-      }
-      const field=structure.fields.find(
-        (item)=>item.projectionIndex===expr.index,
-      );
-      if(field===undefined){
-        throw new Error(
-          "PS_ERASE_PROJECTION_FIELD_UNSUPPORTED: structure '"+
-          structure.name+"' field index "+expr.index,
-        );
-      }
-      return {
-        kind:'projection',
-        target:eraseRuntimeExpr(expr.expr,scope,environment),
-        field:field.name,
-      };
-    }
   }
 }
 

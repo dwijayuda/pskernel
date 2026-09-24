@@ -1,6 +1,11 @@
+import ProofScript.Data.Option
+
 function arrayEmptyWithCapacity {α : Type}
 (capacity : Nat) : Array(α) :=
   Array.emptyWithCapacity(capacity);
+
+function arrayEmpty {α : Type} : Array(α) :=
+  Array.emptyWithCapacity(0);
 
 function arraySize {α : Type}
 (xs : Array(α)) : Nat :=
@@ -34,6 +39,40 @@ function arrayMap {α : Type}{β : Type}
 function arrayFoldl {α : Type}{β : Type}
 (f : β -> α -> β, init : β, xs : Array(α)) : β :=
   Array.foldl(f, init, xs, 0, Array.size(xs));
+
+function arrayGet? {α : Type}
+(xs : Array(α), index : Nat) : PsOption(α) :=
+  Prod.snd(
+    arrayFoldl(
+      fun (state : Prod(Nat, PsOption(α))) (value : α) =>
+        let current : Nat := Prod.fst(state);
+        let found : PsOption(α) := Prod.snd(state);
+        if (current == index) {
+          Prod.mk(current + 1, PsOption.some(value))
+        } else {
+          Prod.mk(current + 1, found)
+        },
+      Prod.mk(0, PsOption.none),
+      xs
+    )
+  );
+
+function arrayFind? {α : Type}
+(predicate : α -> Bool, xs : Array(α)) : PsOption(α) :=
+  arrayFoldl(
+    fun (found : PsOption(α)) (value : α) =>
+      match found with {
+        | .none =>
+          if (predicate(value)) {
+            PsOption.some(value)
+          } else {
+            PsOption.none
+          };
+        | .some existing => PsOption.some(existing);
+      },
+    PsOption.none,
+    xs
+  );
 
 function arrayAny {α : Type}
 (predicate : α -> Bool, xs : Array(α)) : Bool :=

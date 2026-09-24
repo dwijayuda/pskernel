@@ -19,6 +19,8 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Test Lean 4.34 JavaScript runtime compatibility slice
         run: npm --workspace @proofscript/runtime test
+      - name: Verify runtime manifest against pinned Lean source
+        run: npm run check:lean434-runtime-manifest
       - name: Generate deterministic Lean 4.34 source/runtime census
         run: |
           node scripts/lean434-js-runtime-census.mjs > lean434-js-runtime-census.json

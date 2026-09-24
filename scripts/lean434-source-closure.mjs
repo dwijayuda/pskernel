@@ -37,9 +37,67 @@ function normalizeRel(file){
   return path.relative(repoRoot,file).replaceAll(path.sep,'/');
 }
 
+function stripLeanComments(text){
+  let out='';
+  let blockDepth=0;
+  let lineComment=false;
+  let inString=false;
+  let escaped=false;
+  for(let i=0;i<text.length;i+=1){
+    const a=text[i];
+    const b=text[i+1];
+    if(lineComment){
+      if(a==='\n'){
+        lineComment=false;
+        out+='\n';
+      }else out+=' ';
+      continue;
+    }
+    if(blockDepth>0){
+      if(a==='/'&&b==='-'){
+        blockDepth+=1;
+        out+='  ';
+        i+=1;
+      }else if(a==='-'&&b==='/'){
+        blockDepth-=1;
+        out+='  ';
+        i+=1;
+      }else if(a==='\n')out+='\n';
+      else out+=' ';
+      continue;
+    }
+    if(inString){
+      out+=a;
+      if(escaped)escaped=false;
+      else if(a==='\\')escaped=true;
+      else if(a==='"')inString=false;
+      continue;
+    }
+    if(a==='"'){
+      inString=true;
+      out+=a;
+      continue;
+    }
+    if(a==='-'&&b==='-'){
+      lineComment=true;
+      out+='  ';
+      i+=1;
+      continue;
+    }
+    if(a==='/'&&b==='-'){
+      blockDepth=1;
+      out+='  ';
+      i+=1;
+      continue;
+    }
+    out+=a;
+  }
+  return out;
+}
+
 function parseImports(text){
   const out=[];
-  for(const line of text.split(/\r?\n/u)){
+  for(const line of stripLeanComments(text).split(/\r?\n/u)){
     const m=line.match(/^\s*(?:public\s+)?(?:meta\s+)?import(?:\s+all)?\s+([A-Za-z0-9_'.]+)/u);
     if(m)out.push(m[1]);
   }

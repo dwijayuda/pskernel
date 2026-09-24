@@ -125,7 +125,8 @@ jobs:
         run: |
           set -euo pipefail
           lean --run oracle/replay-probe/DependencyExport.lean Init.System.IO \
-            Nat Nat.add IO.RealWorld IO.mkRef ST.Prim.Ref.modify \
+            Nat Nat.add IO.RealWorld IO.mkRef \
+            ST.Prim.Ref.modify ST.Prim.Ref.modifyUnsafe \
             > lean434-runtime-st-bootstrap.ndjson
           test -s lean434-runtime-st-bootstrap.ndjson
       - name: Execute real Lean-written ST/IO over JavaScript runtime

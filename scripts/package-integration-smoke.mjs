@@ -415,7 +415,9 @@ const dualTextSourceCorpus=
   'def atEnd(s : String, p : String.Pos.Raw) : Bool := '+
   'String.Internal.atEnd(s, p); '+
   'def extractText(s : String, b : String.Pos.Raw, e : String.Pos.Raw) : String := '+
-  'String.Internal.extract(s, b, e);';
+  'String.Internal.extract(s, b, e); '+
+  'def sameText(a : String, b : String) : Bool := a == b; '+
+  'def sameChar(a : Char, b : Char) : Bool := a == b;';
 
 const dualTextPs=compileVerifiedSource(
   dualTextSourceCorpus,

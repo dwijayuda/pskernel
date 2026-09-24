@@ -34,11 +34,12 @@ function isReplayContainerMarker(line:string):boolean {
     ||line.startsWith('{"batch":');
 }
 
-export function replayLeanEnvironment(
+export function replayLeanEnvironmentInto(
+  baseEnvironment:Environment,
   text:string,
   expectedLeanVersion=PROOFSCRIPT_LEAN_VERSION,
 ):ReplayedLeanEnvironment {
-  const environment=new Environment();
+  const environment=baseEnvironment.clone();
   let replay:Lean4ExportReplay|undefined;
   let stats=emptyReplayStats;
 
@@ -73,4 +74,15 @@ export function replayLeanEnvironment(
   }
   finishSegment();
   return {environment,stats};
+}
+
+export function replayLeanEnvironment(
+  text:string,
+  expectedLeanVersion=PROOFSCRIPT_LEAN_VERSION,
+):ReplayedLeanEnvironment {
+  return replayLeanEnvironmentInto(
+    new Environment(),
+    text,
+    expectedLeanVersion,
+  );
 }

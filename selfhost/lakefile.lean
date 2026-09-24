@@ -69,6 +69,7 @@ lean_lib PsErasure where
   roots := #[
     `Ps.Erasure.Basic,
     `Ps.Erasure.Inductive,
+    `Ps.Erasure.Structure,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]

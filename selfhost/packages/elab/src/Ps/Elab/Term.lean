@@ -109,20 +109,32 @@ def psElabReference
     (sourceName : PsSyntaxName)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  match psSyntaxNameToName sourceName with
-  | none => Except.error PsElabError.emptyName
-  | some name =>
-      match psResolveName context.localContext context.environment name with
-      | none => Except.error (PsElabError.unknownName name)
-      | some resolved =>
-          match resolved with
-          | .local id =>
-              psElabResolvedTerm context (PsExpr.fvar id) expected
-          | .global globalName =>
-              psElabResolvedTerm
-                context
-                (PsExpr.constE globalName [])
-                expected
+  match sourceName.segments with
+  | ["Prop"] =>
+      psElabResolvedTerm
+        context
+        (PsExpr.sortE PsLevel.zero)
+        expected
+  | ["Type"] =>
+      psElabResolvedTerm
+        context
+        (PsExpr.sortE (PsLevel.succ PsLevel.zero))
+        expected
+  | _ =>
+      match psSyntaxNameToName sourceName with
+      | none => Except.error PsElabError.emptyName
+      | some name =>
+          match psResolveName context.localContext context.environment name with
+          | none => Except.error (PsElabError.unknownName name)
+          | some resolved =>
+              match resolved with
+              | .local id =>
+                  psElabResolvedTerm context (PsExpr.fvar id) expected
+              | .global globalName =>
+                  psElabResolvedTerm
+                    context
+                    (PsExpr.constE globalName [])
+                    expected
 
 def psElabNatural
     (context : PsElabContext)

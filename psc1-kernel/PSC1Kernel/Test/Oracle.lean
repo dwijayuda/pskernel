@@ -44,14 +44,24 @@ def assertTrue (label : String) (value : Bool) : IO Unit :=
   if value then pure () else throw <| IO.userError ("FAIL: " ++ label)
 
 def assertLevelPairs (levels : List PSC1Kernel.Level) : IO Unit := do
+  let mut i := 0
   for a in levels do
+    let mut j := 0
     for b in levels do
       let actualEq := PSC1Kernel.Level.equivalent a b
       let leanEq := Lean.Level.isEquiv (toLeanLevel a) (toLeanLevel b)
-      assertTrue "level equivalence differs from Lean 4.34" (actualEq == leanEq)
+      assertTrue
+        ("level equivalence differs from Lean 4.34 at " ++ toString i ++ "," ++ toString j ++
+         " ours=" ++ toString actualEq ++ " lean=" ++ toString leanEq)
+        (actualEq == leanEq)
       let actualLe := PSC1Kernel.Level.le a b
       let leanLe := Lean.Level.geq (toLeanLevel b) (toLeanLevel a)
-      assertTrue "level ordering differs from Lean 4.34" (actualLe == leanLe)
+      assertTrue
+        ("level ordering differs from Lean 4.34 at " ++ toString i ++ "," ++ toString j ++
+         " ours=" ++ toString actualLe ++ " lean=" ++ toString leanLe)
+        (actualLe == leanLe)
+      j := j + 1
+    i := i + 1
 
 def assertExprOracle : IO Unit := do
   let x : PSC1Kernel.Name := .str .anonymous "x"

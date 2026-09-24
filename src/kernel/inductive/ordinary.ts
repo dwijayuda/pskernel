@@ -3,7 +3,7 @@ import { ensureClosed } from '../../core/checks.js';
 import { Environment, KernelError } from '../../core/environment.js';
 import { BinderInfo, Expr, app, appView, constant, consumeTypeAnnotations, exprEq, exprLeanEq, exprToString, forallE, fvar, inferImplicit, instantiateExprLevels, lam, mkAppN, sort } from '../../core/expr.js';
 import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
-import { Level, isNotZero, levelEqStructural, levelEquivalent, levelLe, levelParam, levelZero, normalizesToZero } from '../../core/level.js';
+import { Level, isNotZero, levelEqStructural, levelEquivalent, levelLe, levelParam, levelToString, levelZero, normalizesToZero } from '../../core/level.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
 import { Name, anonymous, nameAppendAfter, nameAppendIndexAfter, nameEq, nameFromDotted, nameIsPrefixOf, nameKey, nameReplacePrefix, nameToString, strName } from '../../core/name.js';
 import { TypeChecker } from '../type-checker.js';
@@ -157,7 +157,7 @@ function checkConstructors(work:Environment,d:InductiveDecl,stats:Stats):void{
    const lctx=new LocalContext();for(const p of stats.params)lctx.addLocal(p.id,p.decl.userName,p.decl.type,p.decl.binderInfo);let t=ctor.type,i=0;
    while(t.kind==='forall'){
      if(i<stats.params.length){const p=stats.params[i]!;if(!stc(work,lctx,stats).isDefEq(t.type,p.decl.type))throw new KernelError(`arg #${i+1} of '${nameToString(ctor.name)}' does not match parameters`);t=instantiate1(t.body,p.expr);i++;continue;}
-     const s=stc(work,lctx,stats).ensureSort(stc(work,lctx,stats).infer(t.type,false),t.type).level;if(!normalizesToZero(stats.resultLevel)&&!levelLe(s,stats.resultLevel))throw new KernelError(`universe level of constructor field is too large in '${nameToString(ctor.name)}'`);
+     const s=stc(work,lctx,stats).ensureSort(stc(work,lctx,stats).infer(t.type,false),t.type).level;if(!normalizesToZero(stats.resultLevel)&&!levelLe(s,stats.resultLevel))throw new KernelError(`universe level of constructor field is too large in '${nameToString(ctor.name)}': field=${levelToString(s)} result=${levelToString(stats.resultLevel)}`);
      if(!d.isUnsafe)checkPositivity(work,stats,lctx,t.type,ctor.name,i+1);const v=addLocal(lctx,t.name,t.type,t.binderInfo);t=instantiate1(t.body,v.expr);i++;
    }
    const appInfo=validIndApp(work,stats,lctx,t);if(!appInfo||appInfo.idx!==itIdx)throw new KernelError(`invalid return type for '${nameToString(ctor.name)}'`);

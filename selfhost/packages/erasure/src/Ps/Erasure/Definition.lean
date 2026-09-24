@@ -96,11 +96,11 @@ def psEraseOpenDefinitionWithFuel
                   typeName
                   domain
                   binder
-              let variable := PsExpr.fvar pushed.id
+              let openedVariable := PsExpr.fvar pushed.id
               let nextType :=
-                psExprInstantiate1 typeBody variable
+                psExprInstantiate1 typeBody openedVariable
               let nextValue :=
-                psExprInstantiate1 valueBody variable
+                psExprInstantiate1 valueBody openedVariable
               match kind with
               | .type =>
                   let parameterName :=

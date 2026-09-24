@@ -1,3 +1,19 @@
+import {
+  Environment,
+  Kernel,
+  app,
+  bvar,
+  constant,
+  forallE,
+  lam,
+  levelSucc,
+  levelZero,
+  mkAppN,
+  nameFromDotted,
+  natLit,
+  sort,
+} from 'lean-ts-kernel';
+import {Lean434Evaluator} from '../src/lean4-eval.js';
 import {ctor,nat,natAdd,natMul,natSub,uint8} from '../src/index.js';
 import {
   LEAN434_JS_EXTERN_MANIFEST,
@@ -149,3 +165,60 @@ ok(
 );
 
 console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility slice');
+
+
+{
+  const environment=new Environment();
+  const kernel=new Kernel(environment);
+  const Nat=nameFromDotted('Nat');
+  const NatAdd=nameFromDotted('Nat.add');
+  const x=nameFromDotted('x');
+  const y=nameFromDotted('y');
+  const natType=constant(Nat);
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:NatAdd,
+    levelParams:[],
+    type:forallE(x,natType,forallE(y,natType,natType)),
+  });
+
+  const fortyTwo=nameFromDotted('RuntimeTest.fortyTwo');
+  kernel.addDefinition({
+    kind:'definition',
+    name:fortyTwo,
+    levelParams:[],
+    type:natType,
+    value:mkAppN(constant(NatAdd),[natLit(20n),natLit(22n)]),
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  });
+
+  const addOne=nameFromDotted('RuntimeTest.addOne');
+  kernel.addDefinition({
+    kind:'definition',
+    name:addOne,
+    levelParams:[],
+    type:forallE(x,natType,natType),
+    value:lam(
+      x,
+      natType,
+      mkAppN(constant(NatAdd),[bvar(0),natLit(1n)]),
+    ),
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  });
+
+  const evaluator=new Lean434Evaluator(environment);
+  equal(evaluator.evaluate(constant(fortyTwo)),42n);
+  equal(
+    evaluator.evaluate(app(constant(addOne),natLit(41n))),
+    42n,
+  );
+}
+console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressions');

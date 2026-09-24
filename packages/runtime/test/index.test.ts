@@ -13,6 +13,7 @@ import {
   nameFromDotted,
   natLit,
   sort,
+  TypeChecker,
 } from 'lean-ts-kernel';
 import {Lean434Evaluator} from '../src/lean4-eval.js';
 import {ctor,nat,natAdd,natMul,natSub,uint8} from '../src/index.js';
@@ -222,5 +223,28 @@ console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility s
     evaluator.evaluate(app(constant(addOne),natLit(41n))),
     42n,
   );
+
+  const NatRec=nameFromDotted('Nat.rec');
+  const ih=nameFromDotted('ih');
+  const motive=lam(
+    nameFromDotted('_n'),
+    natType,
+    natType,
+  );
+  const step=lam(
+    x,
+    natType,
+    lam(
+      ih,
+      natType,
+      app(constant(NatSucc),bvar(0)),
+    ),
+  );
+  const recExpr=mkAppN(
+    constant(NatRec,[levelSucc(levelZero)]),
+    [motive,natLit(0n),step,natLit(5n)],
+  );
+  equal(new TypeChecker(environment).check(recExpr).kind,'const');
+  equal(evaluator.evaluate(recExpr),5n);
 }
 console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressions');

@@ -1,5 +1,6 @@
 import Ps.Core.Expr
 import Ps.Environment.LocalContext
+import Ps.Meta.LevelContext
 
 inductive PsMetaVarKind where
   | natural
@@ -20,13 +21,19 @@ structure PsMetaContext where
   nextId : Nat
   declarations : List PsMetaVarDecl
   assignments : List PsMetaAssignment
+  levels : PsLevelMetaContext
 
 structure PsMetaFreshResult where
   context : PsMetaContext
   expr : PsExpr
 
 def psMetaEmpty : PsMetaContext :=
-  { nextId := 0, declarations := [], assignments := [] }
+  {
+    nextId := 0
+    declarations := []
+    assignments := []
+    levels := psLevelMetaEmpty
+  }
 
 def psMetaSnapshot (context : PsMetaContext) : PsMetaContext :=
   context
@@ -73,6 +80,7 @@ def psMetaFresh
       nextId := id + 1
       declarations := declaration :: context.declarations
       assignments := context.assignments
+      levels := context.levels
     }
     expr := PsExpr.mvar id
   }
@@ -145,7 +153,24 @@ def psMetaInstantiateWithFuel (context : PsMetaContext) : Nat -> PsExpr -> PsExp
       | _ => expr
 
 def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
-  psMetaInstantiateWithFuel context (context.assignments.length + 1) expr
+  let value := psMetaInstantiateWithFuel context (context.assignments.length + 1) expr
+  psLevelInstantiateExpr context.levels value
+
+structure PsMetaFreshLevelResult where
+  context : PsMetaContext
+  level : PsLevel
+
+def psMetaFreshLevel (context : PsMetaContext) : PsMetaFreshLevelResult :=
+  let fresh := psLevelMetaFresh context.levels
+  {
+    context := {
+      nextId := context.nextId
+      declarations := context.declarations
+      assignments := context.assignments
+      levels := fresh.context
+    }
+    level := fresh.level
+  }
 
 def psMetaAssign (context : PsMetaContext) (id : Nat) (value : PsExpr) : Option PsMetaContext :=
   match psMetaFindDecl context id with
@@ -162,6 +187,7 @@ def psMetaAssign (context : PsMetaContext) (id : Nat) (value : PsExpr) : Option 
               nextId := context.nextId
               declarations := context.declarations
               assignments := { id := id, value := resolved } :: context.assignments
+              levels := context.levels
             }
           else
             none

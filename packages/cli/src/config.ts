@@ -1,11 +1,47 @@
 
 import {readFile} from 'node:fs/promises';
 import {dirname,join,resolve} from 'node:path';
+import {
+  projectRuntimeDependenciesFromConfig,
+  projectSourceRootsFromConfig,
+} from '@proofscript/project/node';
+
+function cliSourceRootsFromConfig(value:unknown):readonly string[] {
+  try{
+    return projectSourceRootsFromConfig(value);
+  }catch(error){
+    const message=error instanceof Error?error.message:String(error);
+    throw new Error(
+      message.replace(
+        'PS_PROJECT_CONFIG_SOURCE_ROOTS',
+        'PS_CLI_CONFIG_SOURCE_ROOTS',
+      ),
+    );
+  }
+} 
+
+function cliRuntimeDependenciesFromConfig(
+  value:unknown,
+):Readonly<Record<string,string>> {
+  try{
+    return projectRuntimeDependenciesFromConfig(value);
+  }catch(error){
+    const message=error instanceof Error?error.message:String(error);
+    throw new Error(
+      message.replace(
+        'PS_PROJECT_CONFIG_RUNTIME_DEPENDENCIES',
+        'PS_CLI_CONFIG_RUNTIME_DEPENDENCIES',
+      ),
+    );
+  }
+}
 import {existsSync} from 'node:fs';
 
 export interface PsConfig {
   readonly languageVersion:'0.7';
   readonly entry:string;
+  readonly sourceRoots:readonly string[];
+  readonly runtimeDependencies:Readonly<Record<string,string>>;
   readonly compilerOptions:{
     readonly outDir:string;
     readonly emitTypeScript:boolean;
@@ -17,6 +53,8 @@ export interface PsConfig {
 export const DEFAULT_CONFIG:PsConfig={
   languageVersion:'0.7',
   entry:'src/main.ps',
+  sourceRoots:[],
+  runtimeDependencies:{},
   compilerOptions:{
     outDir:'dist',
     emitTypeScript:true,
@@ -59,6 +97,12 @@ export async function loadPsConfig(project?:string):Promise<LoadedPsConfig>{
   const config:PsConfig={
     languageVersion:'0.7',
     entry:typeof parsed.entry==='string'?parsed.entry:DEFAULT_CONFIG.entry,
+    sourceRoots:cliSourceRootsFromConfig(
+      (parsed as Partial<PsConfig>).sourceRoots,
+    ),
+    runtimeDependencies:cliRuntimeDependenciesFromConfig(
+      (parsed as Partial<PsConfig>).runtimeDependencies,
+    ),
     compilerOptions:{
       outDir:typeof compiler.outDir==='string'?compiler.outDir:DEFAULT_CONFIG.compilerOptions.outDir,
       emitTypeScript:typeof compiler.emitTypeScript==='boolean'?compiler.emitTypeScript:DEFAULT_CONFIG.compilerOptions.emitTypeScript,

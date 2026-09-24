@@ -2,6 +2,8 @@
 
 Status: **normative anti-drift architecture**.
 
+Reference research for this architecture follows `docs/STUDY_REFERENCE_POLICY.md`.
+
 ProofScript is a small general-purpose language for the JavaScript ecosystem
 with Lean-compatible dependent types, theorem proving, and formal
 verification. Surface syntax may be smaller and more familiar than Lean, but
@@ -9,11 +11,22 @@ semantic acceptance must not bypass Lean-compatible elaboration and pskernel.
 
 ## Canonical pipeline
 
+The semantic pipeline may accept more than one bounded source syntax, but source
+selection must end before semantic acceptance.
+
 ```text
-ProofScript source
-        |
-        v
-   syntax / names
+ .ps source          supported .lean source
+     |                       |
+     v                       v
+ProofScript parser      Lean-subset parser
+     |                       |
+     +----------+------------+
+                |
+                v
+      canonical surface module
+                |
+                v
+          syntax / names
         |
         +---- pinned Lean 4.34 environment
         |     (pskernel-admitted Init.Prelude)
@@ -39,12 +52,72 @@ checked dependent core
                   tsc -> JavaScript
 ```
 
+## Dual-source frontend contract
+
+The first DS1 checkpoint now makes source-kind ownership explicit. Extension
+recognition is independent of parser availability: `.ps` resolves to the
+registered ProofScript frontend, while `.lean` resolves to the
+`lean-subset` source kind but fails closed until the bounded Lean parser is
+registered. Merely recognizing a file extension never grants semantic support.
+
+
+ProofScript supports two intended authored source forms:
+
+- `.ps`: the primary small ProofScript syntax;
+- `.lean`: a documented Lean 4 subset whose constructs have an explicit
+  ProofScript/checked-core meaning.
+
+Both frontends lower into one canonical surface representation and then share
+the same name resolution, Meta/Elab, pskernel admission, checked core, erasure,
+compiler IR, TypeScript backend, and JavaScript emission. A supported `.lean`
+file must never bypass the ProofScript semantic pipeline by becoming trusted
+kernel data.
+
+The supported conversion graph is:
+
+```text
+.ps   -> canonical surface -> checked core -> TypeScript -> JavaScript
+.lean -> canonical surface -> checked core -> TypeScript -> JavaScript
+
+.ps   -> canonical surface -> canonical Lean-subset source
+.lean -> canonical surface -> canonical ProofScript source
+```
+
+Source-to-source conversion is semantic, not textual. The first implementation
+may normalize formatting, binder spelling, parentheses, and supported syntactic
+sugar, and may omit comments until a lossless concrete-syntax layer exists.
+Round-trip acceptance is defined by pskernel-admitted declarations and
+executable erasure/IR equivalence, not byte-identical source.
+
+The Lean frontend is intentionally fail-closed. Arbitrary Lean syntax
+extensions, macros, custom elaborators, commands, tactics, attributes, or
+metaprogramming are not implicitly accepted. A construct enters the psc Lean
+subset only when its parser ownership, canonical lowering, Lean-compatible
+meaning, pskernel gate, source translation behavior, and tooling behavior are
+specified.
+
+Mixed-source projects use one source-kind-independent module graph. A `.ps`
+module may import a supported `.lean` module and vice versa; imported
+declarations enter the same checked environment. Resolution must reject
+ambiguous duplicate module sources rather than silently choosing between
+`.ps` and `.lean`.
+
+Tooling follows the same rule. The language service records source kind and
+dispatches parsing through a frontend registry, after which diagnostics,
+kernel status, proof goals, navigation, completion, and hover use the shared
+semantic services. The VS Code extension must recognize both source kinds
+without unconditionally taking ownership of every `.lean` file from the
+official Lean extension; Lean-subset support should be workspace/setting aware
+or exposed through an explicit ProofScript Lean-subset language mode.
+
 ## Package ownership
 
 - `@proofscript/syntax`: source grammar and source ownership only.
 - `@proofscript/environment`: shared pinned Lean 4.34 environment replay used by compiler and tooling.
 - `@proofscript/meta` / `@proofscript/elab`: untrusted Lean-compatible
   elaboration.
+- `@proofscript/tactic`: untrusted ordered goal-state transitions. It owns no
+  proof acceptance; Meta/elaboration adapters construct and assign proof terms.
 - `@proofscript/checked-core`: stable boundary containing declarations
   re-admitted by pskernel.
 - `lean-ts-kernel`: proof/type acceptance authority and TCB.
@@ -330,3 +403,846 @@ it to the candidate must then be definitionally equal to the original goal.
 The produced term is an ordinary application rechecked by pskernel. Candidates
 requiring multiple generated goals or unresolved implicit-instance search fail
 closed until the tactic state supports those cases.
+
+## Dependent theorem/result surface checkpoint
+
+Declaration header elaboration now distinguishes a **type-position term** from
+the final requirement that a declaration type inhabit a sort. Nested named
+applications are elaborated with the same application/implicit-argument logic
+used elsewhere, so Lean-compatible propositions such as
+`Eq (Nat.succ a) a` can be stated without treating `Nat.succ a` as though it
+were itself a type.
+
+This does not make arbitrary runtime expressions valid types. After dependent
+arguments are elaborated, the complete parameter/result/annotation term is
+still checked by pskernel to inhabit a `Sort`.
+
+ProofScript source should use Lean-compatible `Eq a b` when spelling the
+constant directly; the carrier type is implicit. Native infix propositional
+`=` remains the preferred eventual surface and is still pending in the v0.6.1
+header grammar.
+
+## Propositional equality surface checkpoint
+
+The verified v0.6.1 header grammar now owns native non-associative
+propositional `=` in type/proposition position. It is not a separate
+ProofScript equality relation: the elaborator constructs the real polymorphic
+Lean `Eq` application and lets the shared Meta/application layer infer the
+implicit carrier type.
+
+Precedence is intentionally Lean-like for the supported slice:
+
+```text
+application  >  =  >  ->
+```
+
+Thus `Nat.succ(a) = a -> P` parses as
+`(Nat.succ(a) = a) -> P`. Chained equality requires parentheses.
+
+Boolean `==` remains a distinct runtime/BEq operation. No backend or parser
+shortcut equates `=` with `==`.
+
+## Theorem-position Nat term checkpoint
+
+The dependent header surface now reuses the ordinary Nat notation semantics for
+numeric literals and `+ - * / %`. Parsing uses the same operator precedence
+table as ordinary expressions, while header elaboration delegates Nat operation
+construction/checking to the same Nat notation module.
+
+This is deliberately not a generic operator overloading system. The supported
+header arithmetic is the existing verified Nat subset only. Lean-style
+typeclass-driven arithmetic notation remains fail-closed until the shared Meta
+layer owns it.
+
+To keep that sharing maintainable, notation elaboration is split into focused
+modules:
+
+```text
+v061-notation-support
+     ├── v061-nat-notation-elab
+     ├── v061-bool-notation-elab
+     └── v061-notation-elab       (small dispatcher/reflection)
+```
+
+The split restores the repository source-shape invariant without exemptions and
+keeps theorem-header and executable Nat arithmetic on one semantic path.
+
+## Nat relation theorem-surface checkpoint
+
+The theorem/result grammar now admits the verified Nat relation subset
+`< <= > >=`. These are propositions, not Boolean comparisons. The elaborator
+reuses the same `LE.le` / `LT.lt` construction and Nat instances used by
+ordinary relation expressions. Reverse spellings `>` and `>=` preserve the
+existing operand-swap semantics.
+
+Decidability remains separate: theorem statements do not require
+`Nat.decLt`/`Nat.decLe`; executable conditional elaboration adds those
+deciders only when execution needs them.
+
+This keeps the distinction intact:
+
+```text
+x <= y      : Prop
+x == y      : Bool
+x = y       : Prop
+```
+
+No theorem-only comparison relation has been introduced.
+
+## Bool-valued theorem-term checkpoint
+
+The theorem/result surface now admits the already-verified Bool term subset:
+Bool literals, unary `!`, `&&`, `||`, and bounded primitive `==`/`!=`
+for Nat and Bool. These constructs reuse the same term constructors and kernel
+checks as executable expressions.
+
+This does **not** turn Bool into Prop. For example:
+
+```text
+x == y             : Bool
+(x == y) = true    : Prop
+x = y              : Prop
+```
+
+The final declaration header remains required to inhabit a `Sort`, so a bare
+Bool-valued expression is rejected as a theorem result.
+
+Canonical Lean lowering also accounts for a source-precedence difference.
+ProofScript keeps its existing expression precedence where `==` binds tighter
+than the outer propositional `=`. Lean 4.34 declares both `=` and `==` at
+precedence 50, so lowering inserts parentheses such as:
+
+```text
+x == y = true
+  -> (x == y) = true
+```
+
+The type/proposition parser and Lean lowering are now separate modules, keeping
+parser growth below the repository source-shape ceiling.
+
+## Explicit dependent Pi checkpoint
+
+The verified type/proposition surface now supports the reference-backed form:
+
+```text
+(x : T) -> U
+```
+
+The binder is elaborated as an ordinary Lean-style dependent function:
+`T` is checked as a type, a fresh local `x : T` is introduced while
+elaborating `U`, and the resulting codomain is abstracted into kernel
+`forallE`.
+
+This is not a second function-type representation. Non-dependent `A -> B`
+continues to use the same kernel constructor with an anonymous binder.
+
+The first accepted source slice is explicit/default binding only. Implicit
+`{x : T}`, strict implicit `{{x : T}}`, and instance `[x : T]` Pi syntax
+remain unsupported until a concrete ProofScript library requires them.
+
+## Bounded exact-search checkpoint
+
+ProofScript has a deterministic, untrusted `exact?` search procedure. Search
+never becomes proof authority: every accepted candidate is still submitted
+through ordinary `exact` and pskernel.
+
+Candidate order is deterministic:
+
+1. local hypotheses, newest first;
+2. already-admitted environment constants, newest first.
+
+For each candidate, the bounded search now mirrors the relevant part of Lean
+4.34 `librarySearchSymm`:
+
+1. try the original goal;
+2. if the goal is an ordinary `Eq`, try its symmetric target;
+3. if the symmetric trial closes with zero subgoals, reconstruct the requested
+   proof using the real polymorphic `Eq.symm`.
+
+Candidate application may instantiate ordinary implicit/default binders only
+when the goal determines every inserted argument. Trials run in isolated Meta
+contexts, must leave no unresolved expression/universe metavariables, and are
+kernel-checked before selection. Environment scanning remains bounded to 4096
+candidates.
+
+This still intentionally omits Lean's broader library-search machinery:
+discrimination-tree indexing/priorities, Iff.mp/Iff.mpr variants, strict or
+instance-implicit candidate synthesis, candidates that leave premises,
+`solveByElim` recursion, `using`, configuration, `+all`, and `+grind`.
+
+A failed candidate probe is side-effect-free. Once a candidate matches, any
+failure during actual assignment or parent-proof reconstruction propagates;
+the search loop does not swallow it.
+
+## Canonical ProofScript printer checkpoint
+
+The DS1 frontend abstraction now includes both parsing and canonical printing:
+
+```text
+.ps text
+  -> proofscript frontend.parse
+  -> canonical V061 surface module
+  -> proofscript frontend.print
+  -> canonical .ps text
+```
+
+The printer is an untrusted source canonicalizer. It does not elaborate,
+type-check, admit declarations, erase proofs, or influence pskernel.
+
+Canonicalization is intentionally stronger than formatting preservation:
+declaration semicolons, grouped explicit parameters, D-call/type-call spelling,
+braced E-forms, and the currently implemented flat tactic sequence are
+normalized. Comments and original whitespace are not preserved at this stage.
+
+The executable syntax gate is canonical idempotence:
+
+```text
+print(parse(print(parse(source)))) == print(parse(source))
+```
+
+for representative declarations and expressions across the complete current
+parser AST.
+
+Canonical Lean lowering remains a target printer, not a registered Lean source
+frontend. A `lean-subset` frontend will be registered only when DS2 can parse
+the emitted supported Lean subset back into the same canonical surface module.
+
+## Translation-target dispatch checkpoint
+
+DS1 now separates **input frontend selection** from **output language
+selection**.
+
+```text
+input filename
+   -> SourceFrontendRegistry
+   -> canonical V061 surface module
+   -> TranslationTargetPrinterRegistry
+        ├── ps   -> canonical ProofScript
+        └── lean -> canonical supported Lean
+```
+
+The target registry uses user-facing translation targets `ps|lean`; it is not
+keyed by source frontend ownership. This matters because canonical Lean output
+already exists while Lean input parsing does not.
+
+`psc emit-lean` is the first CLI integration of this split. It selects the
+source frontend from the input path, parses once into the canonical surface,
+then independently requests the Lean target printer. A `.lean` input still
+fails with `PS_FRONTEND_UNAVAILABLE` until DS2 registers a bounded Lean
+parser.
+
+This completes DS1 without changing elaboration, checked-core semantics, proof
+authority, erasure, or backend behavior.
+
+## DS2.1 Lean value frontend checkpoint
+
+The syntax package now contains a **separate** bounded Lean-subset frontend for
+canonical value declarations. It is not implemented by feeding Lean text to the
+ProofScript declaration parser.
+
+Current accepted DS2.1 source shapes include:
+
+```text
+def name (x : T) ... : R := term
+theorem name (x : T) ... : P := by ...
+```
+
+with the already-owned dependent type/proposition syntax, named whitespace
+application, literals/operators, `fun`, `let`, Lean `if ... then ... else`,
+synthetic holes, and the current tactic subset.
+
+The parser lowers directly to the same v0.6.1 AST used by ProofScript. No proof,
+type, erasure, or runtime semantics are source-kind specific after that point.
+
+The `lean-subset` frontend remains **unregistered by default**. This is an
+intentional phase boundary: parser existence in DS2 must not silently turn into
+CLI acceptance from DS3.
+
+Unsupported Lean commands/terms produce `PS_LEAN_SUBSET_*` diagnostics rather
+than falling through to the ProofScript parser or approximating full Lean.
+
+## DS2.2 Lean declaration frontend checkpoint
+
+The bounded Lean-subset frontend now reads the canonical declaration families
+that the current ProofScript Lean target already emits:
+
+```text
+structure
+class
+instance
+inductive
+```
+
+and canonical structure/instance record values. These inputs produce the same
+existing v0.6.1 AST nodes as ProofScript input; there is no Lean-specific
+elaboration or proof path after parsing.
+
+Lean field layout required one explicit parsing boundary. Canonical
+structure/class fields are line-separated, while the shared type grammar uses
+whitespace for application. The type parser therefore exposes an opt-in
+`stopAtLineBreak` mode used by the Lean declaration frontend only. Default
+ProofScript parsing behavior is unchanged.
+
+The accepted declaration subset is intentionally narrower than full Lean 4.34:
+class/inductive binder shapes are limited to forms that can also be printed
+back into the current ProofScript grammar, explicit constructor result types are
+rejected, and namespaces/attributes/deriving/extends/custom commands remain
+outside the subset.
+
+The default source frontend registry still does not register `lean-subset`.
+Canonical `match` and `where` forms emitted by ProofScript remain the final
+DS2 parser gaps before DS3 can expose `.lean` through normal CLI source
+selection.
+
+## DS2 emitted-subset closure
+
+The bounded Lean frontend now parses every source form currently emitted by the
+canonical Lean target printer for the supported v0.6.1 surface. This includes
+declarations, records, match expressions, where declarations, and the landed
+tactic subset.
+
+The DS2 closure gate is source-semantic, not textual preservation:
+
+```text
+ProofScript source
+  -> canonical V061 AST
+  -> canonical Lean
+  -> Lean-subset parser
+  -> canonical V061 AST
+  -> canonical Lean / canonical ProofScript
+```
+
+The canonical outputs must be stable/equivalent for the supported subset.
+Comments, original formatting, and unsupported Lean extensions are not part of
+the contract.
+
+Even after DS2 closure, `lean-subset` remains absent from the default frontend
+registry. Enabling `.lean` for normal `psc check/build/run` is a separate DS3
+product decision and must still route into the identical elaboration, pskernel,
+checked-core, erasure, and backend pipeline.
+
+## DS3.1 dual-source compiler input checkpoint
+
+Normal source selection now recognizes both `.ps` and the documented bounded `.lean` subset through the same `SourceFrontendRegistry`.
+
+The boundary is intentionally narrow:
+
+```text
+filename extension
+  -> source frontend
+  -> shared V061 surface AST
+  -> existing semantic pipeline selection
+```
+
+The source kind does not select a type system, proof checker, erasure strategy, or backend. In verified mode both source forms pass through the identical Meta/Elab, pskernel, checked-core, erasure, IR, and TypeScript/JavaScript path.
+
+Build manifests/reports expose `sourceKind`, and output stems strip the actual input extension. Canonical translation command UX and canonical-source hashes remain DS3 follow-up work.
+
+## DS3.2 canonical source translation checkpoint
+
+`psc translate <file> --to ps|lean` now exposes the already-separated source frontend and translation target registries as a direct user workflow.
+
+```text
+input path
+  -> source frontend selected by extension
+  -> canonical V061 surface module
+  -> requested target printer (ps | lean)
+  -> canonical source text
+```
+
+The command is intentionally not a proof/check command. `--verified`, JSON reporting, and runtime passthrough are rejected rather than implying that translation changes semantic trust.
+
+`emit-lean` remains as a convenience alias-style workflow for canonical Lean output. The remaining DS3 product gate is manifest canonical-source hashing.
+
+## DS3/DS4 dual-source identity and semantic-equivalence checkpoint
+
+Source kind now ends at the shared surface boundary. The CLI computes a
+source-kind-neutral `canonicalSourceHash` by printing that shared surface in
+canonical ProofScript form and hashing the UTF-8 bytes with SHA-256.
+
+```text
+.ps ----\
+        -> shared surface -> canonical ProofScript -> SHA-256
+.lean --/
+```
+
+This identity is reported by check/build manifests and is equal for canonical
+supported sources with the same shared surface meaning.
+
+DS4 adds a stronger executable equivalence gate. For a representative supported
+corpus, ProofScript, canonical Lean, and Lean->ProofScript round-trip sources
+must produce identical pskernel checked-core admissions and identical verified
+compiler IR. Because backend input is identical, the gate also requires
+identical TypeScript, JavaScript, and declaration output.
+
+Unsupported Lean remains fail-closed before checked core. The equivalence gate
+therefore proves two bounded frontends converge; it does not broaden the
+documented Lean subset.
+
+## DS5 mixed-source verified-project checkpoint
+
+The first mixed-source module implementation keeps source ownership outside the
+TCB:
+
+```text
+entry .ps/.lean
+  -> parse import headers
+  -> logical module resolver
+  -> deterministic project DAG
+  -> per-module shared frontend parse
+  -> dependency-only pskernel environment
+  -> module checked-core admissions
+  -> deterministic combined checked core
+  -> erasure -> verified IR -> TypeScript -> JavaScript
+```
+
+A module is elaborated against the transitive closure of the modules it
+actually imports, not against a global mutable environment containing unrelated
+siblings. Dependency visibility is therefore explicit in the project graph.
+
+For the bounded MVP, logical `Foo.Bar` resolves relative to the entry
+directory to exactly one of `Foo/Bar.ps` or `Foo/Bar.lean`. Ambiguous dual
+sources, missing modules, and cycles fail before semantic compilation.
+
+The bundled checked core is created by replaying every local admission in
+topological order through pskernel. The source language of a module never
+changes the proof/type authority.
+
+Current limitation: same-file elaboration keeps untrusted metadata indexes for
+structures, classes, and global instances. Those indexes are not yet
+reconstructed from imported checked-core admissions, so DS5 does not yet claim
+cross-module record/projection or typeclass-synthesis parity. Ordinary imported
+definitions/theorems are the supported semantic slice.
+
+The legacy software checker does not gain an import implementation. Imports
+require the verified project pipeline and otherwise fail closed.
+
+## DS5 imported semantic metadata checkpoint
+
+A mixed-source project module is elaborated against two products of its
+transitive dependency closure:
+
+1. the pskernel-replayed dependency environment; and
+2. the validated checked-core metadata for structures, classes, and instances.
+
+The second product is an **elaboration seed**, not proof authority. Structure
+and class descriptors have already been checked against pskernel-generated
+constructors by checked core, and instance declarations have already passed
+checked-core class-target validation.
+
+Imported global instances are presented newest-admission-first, matching the
+existing same-file rule where each newly declared instance is prepended to the
+candidate list.
+
+This closes the semantic difference between same-file and imported usage for
+the current structure/class/global-instance subset while keeping module-local
+admissions separate for future artifact caching.
+
+## DS5 checked-module cache and integrity checkpoint
+
+The mixed-project pipeline now has an untrusted in-process module cache. A cache
+entry contains only the module's previously pskernel-admitted **local
+admissions**. Cache hits do not return a trusted environment: after resolving
+all modules, the complete ordered admission stream is replayed through checked
+core and pskernel as before.
+
+Module cache/integrity keys are SHA-256 hashes over canonical JSON containing:
+
+- cache schema;
+- pinned Lean/kernel compatibility descriptor;
+- logical module name;
+- source-kind-neutral canonical source hash;
+- sorted direct dependency module/integrity pairs.
+
+Because each dependency integrity already includes its own dependencies,
+invalidation is transitive. Project integrity hashes the entry module plus the
+deterministic topo-ordered module/integrity list.
+
+This checkpoint intentionally does **not** emit persistent `.psmodule`
+artifacts. The current module artifact v1 payload is Lean4Export 3.1.0 NDJSON,
+and ProofScript has no serializer from checked-core admissions back into that
+transport. Inventing one ad hoc would violate the artifact trust model. A
+persistent cache must first land a real replayable payload codec or a formally
+versioned new artifact payload.
+
+## DS5 configured source-root checkpoint
+
+Logical module resolution now accepts project-relative `sourceRoots` in
+`psconfig.json`.
+
+Rules:
+
+- empty/unset `sourceRoots` preserves the previous behavior: imports resolve
+  below the entry file's directory;
+- configured roots are resolved relative to `psconfig.json`;
+- every logical module path is searched under every configured root for both
+  `.ps` and `.lean`;
+- exactly one candidate is required;
+- more than one candidate is an ambiguity error, even when candidates live in
+  different roots or use different source kinds;
+- no root has implicit priority.
+
+This keeps resolution deterministic and makes mixed-source projects portable
+without coupling source-kind choice to import precedence.
+
+## DS6 source-kind-aware editor checkpoint
+
+Editor parsing now follows the same frontend boundary as the compiler.
+
+```text
+LSP document
+    |
+    +-- sourceKind=proofscript --> ProofScript frontend --+
+    |                                                    |
+    +-- sourceKind=lean-subset --> Lean subset frontend -+
+                                                         |
+                                                         v
+                                                   shared V061 AST
+                                                         |
+                                                         v
+                                              shared elab -> pskernel
+```
+
+The LSP source-kind mapping is transport metadata only; it does not create a
+second checker. Document edits preserve their initially selected source kind.
+
+VS Code deliberately avoids an unconditional `.lean` extension association.
+It exposes a `proofscript-lean` manual mode and an opt-in
+`proofscript.leanSubset.enable` provider path. The extension may attach
+ProofScript features to an existing Lean-owned document only when explicitly
+enabled in the ProofScript workspace.
+
+This checkpoint remains document-local. DS5 project/import semantics must be
+composed into the language service before cross-file/cross-language navigation
+can claim semantic project awareness.
+
+## JavaScript/npm FFI foundation
+
+The verified compiler IR now has an explicit external-import surface:
+
+```text
+checked executable meaning
+        |
+        v
+ verified IR
+   imports: [
+     { localName, source, importedName, type }
+   ]
+        |
+        v
+ TypeScript named ESM import
+```
+
+This layer is intentionally **runtime-only metadata**. An IR import does not
+create a pskernel theorem, definition, or proof witness. The TypeScript backend
+may emit it only because an earlier trusted semantic boundary has supplied a
+typed runtime dependency contract.
+
+The next frontend/checked-core FFI checkpoint must preserve three distinct
+facts:
+
+1. the source signature that ProofScript typechecks against;
+2. the runtime binding (npm/ESM source + exported symbol);
+3. the trust/assumption status exposed to users and assurance tooling.
+
+JavaScript execution must never be used to discharge a theorem. If an external signature is represented in the kernel environment to typecheck
+executable uses, its separate checked-core runtime-external metadata must be
+reported as an assumption and proof-producing result types must fail closed in
+the first FFI profile.
+
+The initial backend form is named ESM import only. Default imports, namespace
+imports, CommonJS, dynamic import, side-effect imports, and package-resolution
+policy remain later explicit extensions.
+
+## Replayable runtime-external admission checkpoint
+
+The FFI boundary now exists above verified IR as a checked-core admission:
+
+```text
+external signature
+   -> typed pskernel axiom
+   +  { source, importedName } runtime binding
+   -> checked-admission codec v2
+   -> proofscript-module@2 payload 1.1.0
+   -> replay through pskernel
+   -> erasure
+   -> typed verified IR ESM import
+```
+
+The runtime binding and the logical constant are deliberately distinct. The
+kernel admits only the declared type of the external as an opaque axiom; it
+never executes JavaScript to validate or discharge a proof. The first profile
+requires at least one explicit argument and primitive runtime argument/result
+types, so proof-valued and polymorphic extern signatures fail before admission.
+
+This permits verified code to call an opaque external function while proofs can
+use only its declared type, never facts learned from host execution. Assurance
+tooling must still report the external assumption separately from ordinary
+definitions/theorems and from other project axioms.
+
+Nominal, higher-order, proof-valued, polymorphic, or unknown external runtime
+types remain fail-closed until their ABI and assurance story are specified.
+
+Checked-admission persistence is versioned compatibly: codec v1 / payload
+1.0.0 remains readable; new external admissions require codec v2 / payload
+1.1.0. Artifact verification enforces that coupling.
+
+## Explicit source FFI and assurance checkpoint
+
+The first source-level JavaScript/npm FFI declaration is now an intentional
+post-v0.7 repository extension:
+
+```proofscript
+extern function hostInc(x : Nat) : Nat
+  from "host-lib"
+  import inc;
+```
+
+It records four separate facts: the ProofScript-local name, the checked logical
+signature, the ESM package/module source, and the named runtime export.
+
+The frontend does not trust this declaration directly. Its signature is
+elaborated through the ordinary declaration-header path, represented as a
+non-`unsafe` opaque axiom, paired with explicit runtime-binding metadata, and
+validated by the existing checked-core external invariant before admission.
+That invariant remains stricter than the source grammar: the first profile
+requires one or more explicit primitive runtime arguments and a primitive
+runtime result, rejecting proof-valued, polymorphic, nominal, and higher-order
+extern signatures.
+
+The two output views are deliberately different:
+
+- internal logical Lean lowering may render the signature as an `axiom`, so
+  verified checking/building can expose the logical assumption;
+- canonical ProofScript printing preserves the full ESM binding;
+- source translation to canonical Lean rejects extern-bearing modules because
+  a Lean source file cannot preserve the runtime binding metadata.
+
+Verified CLI reports now include a separate assurance record with:
+
+- pskernel-checked definition count;
+- pskernel-checked theorem count;
+- runtime-external assumption count;
+- each external's local name, module source, imported symbol, and logical
+  signature;
+- `proofEvidence=false` for every runtime external.
+
+Thus `proofStatus: kernel-verified` continues to describe the proof checking
+performed on internal theorems; it is not a claim that JavaScript/npm runtime
+bindings were proven correct. The next FFI checkpoint is deterministic package
+dependency policy and a real resolvable runtime-binding test.
+
+## Exact runtime dependency policy checkpoint
+
+Project-level FFI resolution is now explicit in `psconfig.json`:
+
+```json
+{
+  "runtimeDependencies": {
+    "host-lib": "1.0.0"
+  }
+}
+```
+
+This first profile accepts npm package **roots** with exact versions only.
+Verified `check` requires every admitted external source to be present in that
+map. Verified `build` and `run` additionally require
+`node_modules/<package>/package.json` to report the same package name and
+exact version before generated TypeScript is compiled.
+
+Runtime dependency identity is deliberately separate from semantic project
+identity:
+
+```text
+projectIntegrity
+  = source/dependency/kernel semantic identity
+
+runtimeDependencyPolicy.integrity
+  = exact direct host-package policy identity
+```
+
+Changing a host package version therefore changes the build/assurance policy
+fingerprint without pretending theorem meaning changed or that pskernel proved
+the package implementation.
+
+Verified build now compiles its in-memory TypeScript under the absolute
+`dist/<entry>.ts` path. TypeScript module resolution therefore starts from the
+same project/output tree that the emitted JavaScript will execute from. A
+no-network regression installs a temporary ESM package with matching `.d.ts`,
+executes a ProofScript `String -> String` external through Node, and verifies
+the host result while retaining `proofEvidence=false` in assurance.
+
+Still unsupported in this checkpoint:
+
+- semver ranges;
+- `node:` builtins;
+- default/namespace/CommonJS/dynamic imports;
+- package installation;
+- transitive lockfile integrity claims.
+
+Those require separate project/runtime policy decisions and do not expand the
+kernel trust boundary.
+
+## Transitive runtime lockfile assurance checkpoint
+
+Runtime externals now have three deliberately separate identities:
+
+```text
+projectIntegrity
+runtimeDependencyPolicy.integrity
+runtimeDependencyLock.integrity
+```
+
+The new runtime lock identity is computed only for verified build/run when
+externals are used. The CLI reads the project's top-level npm
+`package-lock.json` and currently requires `lockfileVersion: 3`. Starting
+from exact direct roots admitted by `runtimeDependencies`, it follows the
+lockfile's installed-tree locations using Node-style ancestor `node_modules`
+lookup and records the reachable closure.
+
+Each reachable lock package contributes:
+
+- package location;
+- inferred package root name;
+- exact lock version;
+- `resolved` source;
+- npm `sha512`/`sha1` SRI metadata;
+- required/optional reachability;
+- deterministic dependency, optional-dependency, and peer edges.
+
+Required transitive lock entries must resolve and required installed packages
+must expose the same package name/version as the closure. Optional-only
+branches may be absent. Symlink/link entries fail closed in this first profile.
+
+The lock closure remains **untrusted runtime assurance**. pskernel never reads
+it, checked-core admission does not depend on it, and changing it does not
+change theorem identity. In particular, lockfile SRI identifies the package
+artifact npm resolved; ProofScript does not claim to prove the behavior of that
+artifact or to re-hash every unpacked runtime file.
+
+## Public npm package-subpath checkpoint
+
+Named ESM runtime externs may now target a bounded public package subpath while
+the dependency identity remains the exact package root.
+
+```text
+external source: host-lib/feature
+package root:    host-lib
+configured pin:  host-lib@1.0.0
+lock root:       node_modules/host-lib
+```
+
+The host-resolution contract intentionally follows existing ecosystem
+ownership:
+
+- ProofScript classifies the package root, enforces the exact configured
+  version, and verifies the reachable package-lock closure;
+- TypeScript's current `Bundler` module resolution resolves the generated
+  import for type/declaration checking and follows `package.json.exports`;
+- Node ESM resolves the emitted runtime import and its conditional
+  `import`/default export target.
+
+ProofScript does not clone Node's `PACKAGE_EXPORTS_RESOLVE` algorithm. This is
+important for conditional exports: TypeScript may select a `types` branch for
+static checking while Node selects the runtime `import` branch. That host
+difference is part of the explicit FFI trust boundary, not a theorem semantic.
+
+The first subpath classifier is intentionally conservative and excludes
+relative/absolute sources, `node:` builtins, path traversal, empty segments,
+and nested `node_modules` segments. Only named ESM imports remain supported.
+
+## ProofScript-written standard-library checkpoint
+
+The repository now contains a self-hosted `stdlib/` ProofScript project.
+Standard-library definitions pass through exactly the same source/module,
+elaboration, pskernel, erasure, IR, TypeScript, and JavaScript path as user
+projects. There is no privileged stdlib checker or backend.
+
+The initial executable types are named `PsOption`, `PsResult`, and
+`PsList`. This prefix is intentionally transitional. Lean 4.34 Init already
+owns `Option` and `List`, but the current verified erasure layer derives
+runtime constructor/recursor metadata from inductives present in
+`CheckedCoreModule.inductives`, i.e. source/project admissions. Prelude
+inductives exist in the kernel environment but are not yet provenance-carrying
+runtime IR declarations.
+
+Therefore the first stdlib chooses source-owned runtime ADTs instead of either:
+
+- redeclaring/shadowing Lean Prelude constants; or
+- adding an unprincipled backend special case for built-in `Option`/`List`.
+
+The dogfood gate is intentionally cross-module and proof-bearing. It imports
+Option into Result/List, performs generic mapping and structural recursion,
+executes emitted JavaScript, and requires the stdlib's theorem declarations to
+be counted as pskernel-checked with no runtime external assumptions.
+
+## Expected-argument elaboration checkpoint
+
+The shared application engine already models Lean-style dependent application by
+exposing each explicit Pi binder's expected argument type. Source frontends now
+preserve that information instead of eagerly elaborating all call arguments.
+
+```text
+callee Pi binder
+  -> expected argument type
+  -> elaborate source argument against that expectation
+  -> unify / instantiate metas
+  -> continue telescope
+```
+
+This applies both to ordinary executable calls and theorem/type-position
+applications. It is especially important for constructors whose implicit
+parameters are not recoverable from their own explicit fields, such as a
+nullary generic constructor or one unused type parameter. In those cases the
+surrounding function parameter/result type may legitimately provide the missing
+constraint.
+
+The change stays entirely in untrusted Meta/Elab. pskernel still checks the
+fully instantiated application and remains the proof/type authority.
+
+## Bounded reflexivity tactic checkpoint
+
+ProofScript now exposes inherited Lean `rfl` syntax for the first faithful
+reflexivity slice:
+
+```text
+goal
+  -> whnf target
+  -> require Eq α lhs rhs
+  -> require lhs ≡ rhs by kernel definitional equality
+  -> build Eq.refl.{u} α lhs
+  -> pskernel checks proof type
+  -> close goal
+```
+
+The proof is an ordinary Lean core term. Tactic state gains no proof authority.
+The same helper is shared by standalone `rfl`, the cheap post-rewrite close in
+`rw`, and the terminal reflexivity attempt in bounded `simp only`.
+
+This is intentionally narrower than Lean 4.34 `MVarId.applyRfl`. Lean also
+special-cases `HEq` and searches a discrimination-tree-backed `@[refl]`
+environment extension for arbitrary reflexive relations. ProofScript does not
+yet own those environment/attribute semantics, so non-Eq reflexive goals fail
+closed instead of being approximated.
+
+## Induction branch naming checkpoint
+
+The bounded recursor-based induction implementation now keeps user-facing names
+for direct constructor fields. Given a constructor such as:
+
+```text
+| cons(head : α, tail : PsList(α))
+```
+
+the corresponding branch context exposes `head`, `tail`, and for the direct
+recursive field, `tail_ih`. Existing local-name collisions are resolved with
+deterministic numeric suffixes.
+
+This does not alter the core induction principle. The pskernel-generated
+recursor still determines the minor-premise telescope (all constructor fields,
+then direct recursive induction hypotheses), and the elaborator still
+lambda-abstracts exactly those locals into the minor proof. Names exist only in
+the untrusted source/tactic context.
+
+The first standard-library consumer is `listAppendNilRight`, proved by
+induction plus checked rewrite steps rather than a host-side list theorem.

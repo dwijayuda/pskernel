@@ -23,6 +23,14 @@
           ".ps"
         ],
         "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "proofscript-lean",
+        "aliases": [
+          "ProofScript Lean Subset",
+          "proofscript-lean"
+        ],
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
@@ -44,6 +52,14 @@
       {
         "command": "proofscript.serverInfo",
         "title": "ProofScript: Show Server Information"
+      },
+      {
+        "command": "proofscript.convertToLean",
+        "title": "ProofScript: Convert to Lean Subset"
+      },
+      {
+        "command": "proofscript.convertToProofScript",
+        "title": "ProofScript: Convert to ProofScript"
       }
     ],
     "configuration": {
@@ -56,6 +72,11 @@
           ],
           "default": null,
           "description": "Optional path to the ProofScript LSP entry script."
+        },
+        "proofscript.leanSubset.enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable ProofScript language-service features for .lean files in this ProofScript workspace without changing their VS Code language ownership."
         }
       }
     },
@@ -85,6 +106,10 @@
     "onView:proofscript.infoview",
     "onCommand:proofscript.showInfoview",
     "onCommand:proofscript.restartServer",
-    "onCommand:proofscript.serverInfo"
+    "onCommand:proofscript.serverInfo",
+    "onLanguage:proofscript-lean",
+    "workspaceContains:psconfig.json",
+    "onCommand:proofscript.convertToLean",
+    "onCommand:proofscript.convertToProofScript"
   ]
 }

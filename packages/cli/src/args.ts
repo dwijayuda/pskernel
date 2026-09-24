@@ -1,4 +1,5 @@
-import type {CommonArgs} from './types.js';
+import type {TranslationTarget} from '@proofscript/syntax';
+import type {CommonArgs,TranslateArgs} from './types.js';
 
 export function parseCommonArgs(args:readonly string[]):CommonArgs {
   const split=args.indexOf('--');
@@ -35,4 +36,61 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
     verified,
     passthrough,
   };
+}
+
+
+function parseTranslationTarget(value:string|undefined):TranslationTarget {
+  if(value==='ps'||value==='lean')return value;
+  if(value===undefined){
+    throw new Error('PS_CLI_TRANSLATE_TARGET: --to requires ps or lean');
+  }
+  throw new Error(
+    "PS_CLI_TRANSLATE_TARGET: unsupported target '"+value+
+    "'; expected ps or lean",
+  );
+}
+
+export function parseTranslateArgs(args:readonly string[]):TranslateArgs {
+  if(args.includes('--')){
+    throw new Error(
+      'PS_CLI_TRANSLATE_PASSTHROUGH: translate does not accept runtime arguments',
+    );
+  }
+  const commonArgs:string[]=[];
+  let target:TranslationTarget|undefined;
+  for(let index=0;index<args.length;index+=1){
+    const arg=args[index]!;
+    if(arg==='--to'){
+      if(target!==undefined){
+        throw new Error(
+          'PS_CLI_TRANSLATE_TARGET: --to may be specified only once',
+        );
+      }
+      target=parseTranslationTarget(args[++index]);
+      continue;
+    }
+    commonArgs.push(arg);
+  }
+  if(target===undefined){
+    throw new Error(
+      'PS_CLI_TRANSLATE_TARGET: translate requires --to ps or --to lean',
+    );
+  }
+  const common=parseCommonArgs(commonArgs);
+  if(common.entry===undefined){
+    throw new Error(
+      'PS_CLI_TRANSLATE_ENTRY: translate requires an explicit input file',
+    );
+  }
+  if(common.verified){
+    throw new Error(
+      'PS_CLI_TRANSLATE_VERIFIED: source translation does not use --verified',
+    );
+  }
+  if(common.json){
+    throw new Error(
+      'PS_CLI_TRANSLATE_JSON: source translation writes canonical source text',
+    );
+  }
+  return {...common,target};
 }

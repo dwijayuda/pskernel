@@ -14,17 +14,16 @@ export function withStructuralRecursionContext(
   source:V061ValueDeclaration,
   context:V061CoreElabContext,
 ):V061CoreElabContext {
-  if(
-    source.kind==='theorem'
-    ||source.body.kind!=='match'
-    ||source.body.scrutinee.kind!=='reference'
-  )return context;
+  if(source.kind==='theorem'||source.body.kind!=='match')return context;
+  const body=source.body;
+  if(body.scrutinee.kind!=='reference')return context;
+  const scrutineeName=body.scrutinee.name;
 
   const explicit=source.params.filter(
     (parameter)=>(parameter.binderInfo??'default')==='default',
   );
   const recursiveParameterIndex=explicit.findIndex(
-    (parameter)=>parameter.name===source.body.scrutinee.name,
+    (parameter)=>parameter.name===scrutineeName,
   );
   if(recursiveParameterIndex<0)return context;
 

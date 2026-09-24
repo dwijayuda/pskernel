@@ -1,3 +1,4 @@
+import type {SourceKind} from '@proofscript/syntax';
 export interface Position {
   readonly line:number;
   readonly character:number;
@@ -16,8 +17,11 @@ export interface ServiceDiagnostic {
   readonly phase:AnalysisPhase;
   readonly message:string;
 }
+export type DocumentSourceKind=SourceKind;
+
 export interface TextDocumentSnapshot {
   readonly uri:string;
+  readonly sourceKind:DocumentSourceKind;
   readonly version:number;
   readonly generation:number;
   readonly text:string;
@@ -42,8 +46,13 @@ export interface DeclarationStatus {
   readonly canonicalLean:string;
   readonly initialGoal?:ProofGoal;
 }
+export interface ProjectDocumentStatus {
+  readonly entryModule:string;
+  readonly moduleOrder:readonly string[];
+}
 export interface DocumentAnalysis {
   readonly uri:string;
+  readonly sourceKind:DocumentSourceKind;
   readonly version:number;
   readonly generation:number;
   readonly text:string;
@@ -52,6 +61,7 @@ export interface DocumentAnalysis {
   readonly diagnostics:readonly ServiceDiagnostic[];
   readonly declarations:readonly DeclarationStatus[];
   readonly canonicalLean?:string;
+  readonly project?:ProjectDocumentStatus;
 }
 export interface ProofState {
   readonly status:'closed'|'rejected'|'unavailable'|'none';

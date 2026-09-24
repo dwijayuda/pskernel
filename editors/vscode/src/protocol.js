@@ -1,16 +1,38 @@
-function isProofScript(document){
-  return document?.languageId==='proofscript';
+function leanFileName(document){
+  return String(
+    document?.fileName
+    ??document?.uri?.fsPath
+    ??document?.uri?.path
+    ??'',
+  ).toLowerCase();
+}
+
+function sourceLanguageId(document,leanSubsetEnabled=false){
+  if(document?.languageId==='proofscript')return 'proofscript';
+  if(document?.languageId==='proofscript-lean')return 'proofscript-lean';
+  if(leanSubsetEnabled&&leanFileName(document).endsWith('.lean')){
+    return 'proofscript-lean';
+  }
+  return undefined;
+}
+
+function isProofScript(document,leanSubsetEnabled=false){
+  return sourceLanguageId(document,leanSubsetEnabled)!==undefined;
 }
 
 function toProtocolPosition(position){
   return {line:position.line,character:position.character};
 }
 
-function openParams(document){
+function openParams(document,leanSubsetEnabled=false){
+  const languageId=sourceLanguageId(document,leanSubsetEnabled);
+  if(languageId===undefined){
+    throw new Error('document is outside ProofScript source ownership');
+  }
   return {
     textDocument:{
       uri:document.uri.toString(),
-      languageId:'proofscript',
+      languageId,
       version:document.version,
       text:document.getText(),
     },
@@ -57,6 +79,7 @@ module.exports={
   isProofScript,
   openParams,
   publishDiagnostics,
+  sourceLanguageId,
   toLocation,
   toProtocolPosition,
   toRange,

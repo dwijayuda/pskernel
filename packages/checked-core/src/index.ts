@@ -6,6 +6,7 @@ import {
   nameEq,
   nameKey,
   nameToString,
+  type AxiomInfo,
   type BinderInfo,
   type DefinitionInfo,
   type InductiveDecl,
@@ -13,6 +14,11 @@ import {
   type Name,
   type TheoremInfo,
 } from 'lean-ts-kernel';
+import {
+  validateCheckedCoreExternal,
+  type CheckedCoreExternal,
+  type CheckedCoreExternalBinding,
+} from './external.js';
 
 export type CheckedCoreDeclaration=DefinitionInfo|TheoremInfo;
 
@@ -40,6 +46,11 @@ export type CheckedCoreAdmission =
   | {
       readonly kind:'constant';
       readonly declaration:CheckedCoreDeclaration;
+    }
+  | {
+      readonly kind:'external';
+      readonly declaration:AxiomInfo;
+      readonly binding:CheckedCoreExternalBinding;
     }
   | {
       readonly kind:'inductive';
@@ -73,6 +84,7 @@ export interface CheckedCoreModule {
   readonly structures:readonly CheckedCoreStructure[];
   readonly classes:readonly CheckedCoreClass[];
   readonly instances:readonly CheckedCoreInstance[];
+  readonly externals:readonly CheckedCoreExternal[];
 }
 
 function validateStructure(
@@ -175,6 +187,7 @@ export function admitCheckedCoreAdmissions(
   const structures:CheckedCoreStructure[]=[];
   const classes:CheckedCoreClass[]=[];
   const instances:CheckedCoreInstance[]=[];
+  const externals:CheckedCoreExternal[]=[];
 
   for(const admission of admissions){
     if(
@@ -201,6 +214,17 @@ export function admitCheckedCoreAdmissions(
           classes.push(admission.structure);
         }
       }
+      continue;
+    }
+
+    if(admission.kind==='external'){
+      const external={
+        declaration:admission.declaration,
+        binding:admission.binding,
+      };
+      validateCheckedCoreExternal(external,environment);
+      kernel.addAxiom(admission.declaration);
+      externals.push(external);
       continue;
     }
 
@@ -236,6 +260,7 @@ export function admitCheckedCoreAdmissions(
     structures,
     classes,
     instances,
+    externals,
   };
 }
 
@@ -251,3 +276,6 @@ export function admitCheckedCoreModule(
     })),
   );
 }
+
+export * from './codec-admissions.js';
+export * from './external.js';

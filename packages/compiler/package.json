@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Orchestrates verified compilation from kernel-admitted checked core through erasure, compiler IR, TypeScript, and JavaScript.",
   "proofscript": {
-    "status": "checked-core-to-js-mvp",
+    "status": "checked-core-to-js-generic-structure+structural-recursion-mvp",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

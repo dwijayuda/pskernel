@@ -10,6 +10,7 @@ export type ProofScriptFeatureId =
   | 'D-DECL-SEMI'
   | 'D-CONST-ALIAS'
   | 'D-FUNCTION-ALIAS'
+  | 'D-EXTERN-FFI'
   | 'E-IF-BRACE'
   | 'E-STRUCT-BODY'
   | 'E-CLASS-BODY'

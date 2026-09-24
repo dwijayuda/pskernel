@@ -138,8 +138,16 @@ export interface VerifiedIrDeclaration {
   readonly body:VerifiedIrExpr;
 }
 
+export interface VerifiedIrExternalImport {
+  readonly localName:string;
+  readonly source:string;
+  readonly importedName:string;
+  readonly type:VerifiedIrType;
+}
+
 export interface VerifiedIrModule {
   readonly kind:'proofscript-verified-ir';
+  readonly imports?:readonly VerifiedIrExternalImport[];
   readonly structures?:readonly VerifiedIrStructure[];
   readonly inductives?:readonly VerifiedIrInductive[];
   readonly declarations:readonly VerifiedIrDeclaration[];

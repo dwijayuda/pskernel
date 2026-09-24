@@ -1,5 +1,6 @@
 import type {
-  V061ValueDeclaration,
+  V061Parameter,
+  V061TypeExpr,
 } from '@proofscript/syntax';
 import {
   Environment,
@@ -28,8 +29,13 @@ export interface V061ElaboratedHeader {
   readonly resultType:Expr;
 }
 
+export interface V061HeaderSource {
+  readonly params:readonly V061Parameter[];
+  readonly resultType:V061TypeExpr;
+}
+
 export function elaborateV061ValueHeader(
-  source:V061ValueDeclaration,
+  source:V061HeaderSource,
   environment:Environment,
   structures:ReadonlyMap<string,CheckedCoreStructure>=new Map(),
   classes:ReadonlySet<string>=new Set(),

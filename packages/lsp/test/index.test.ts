@@ -11,6 +11,9 @@ import {
   PROOFSCRIPT_LSP_PROTOCOL_VERSION,
   ProofScriptLanguageService,
   lspCapabilities,
+  sourceKindFromLspDocument,
+  createNodeProjectSourceHost,
+  diagnosticRefreshUris,
 } from '../src/index.js';
 
 {
@@ -23,6 +26,7 @@ import {
     capabilities.experimental.proofscriptProtocolVersion,
     PROOFSCRIPT_LSP_PROTOCOL_VERSION,
   );
+  equal(capabilities.experimental.translateDocument,true);
 }
 {
   const service=new ProofScriptLanguageService();
@@ -34,3 +38,104 @@ import {
   equal(service.documentStatus('file:///proof.ps').kernel,'verified');
 }
 console.log('ok - @proofscript/lsp proof-aware protocol surface');
+
+{
+  equal(
+    sourceKindFromLspDocument('proofscript','file:///main.ps'),
+    'proofscript',
+  );
+  equal(
+    sourceKindFromLspDocument('proofscript-lean','file:///Main.lean'),
+    'lean-subset',
+  );
+  equal(
+    sourceKindFromLspDocument('lean4','file:///Main.lean'),
+    'lean-subset',
+  );
+  const service=new ProofScriptLanguageService();
+  service.openDocument(
+    'file:///Main.lean',
+    1,
+    'theorem id (P : Prop) (h : P) : P := by assumption\n',
+    'lean-subset',
+  );
+  equal(service.documentStatus('file:///Main.lean').sourceKind,'lean-subset');
+  equal(service.documentStatus('file:///Main.lean').kernel,'verified');
+}
+console.log('ok - @proofscript/lsp dual-source document routing');
+
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
+
+{
+  const root=mkdtempSync(join(tmpdir(),'proofscript-lsp-project-'));
+  try{
+    mkdirSync(join(root,'src'),{recursive:true});
+    writeFileSync(
+      join(root,'psconfig.json'),
+      JSON.stringify({sourceRoots:['src']}),
+    );
+    const entryPath=join(root,'src','Main.ps');
+    const corePath=join(root,'src','Core.lean');
+    writeFileSync(entryPath,'import Core;');
+    writeFileSync(
+      corePath,
+      'theorem id (P : Prop) (h : P) : P := by assumption\n',
+    );
+    const host=createNodeProjectSourceHost();
+    const entry={
+      uri:pathToFileURL(entryPath).href,
+      sourceKind:'proofscript' as const,
+      version:1,
+      generation:1,
+      text:'import Core;',
+    };
+    equal(host.entryModule(entry),'Main');
+    const core=host.resolveImport(
+      entry,
+      {
+        uri:entry.uri,
+        sourceKind:entry.sourceKind,
+        text:entry.text,
+      },
+      'Core',
+    );
+    equal(core.sourceKind,'lean-subset');
+    equal(core.uri,pathToFileURL(corePath).href);
+  }finally{
+    rmSync(root,{recursive:true,force:true});
+  }
+}
+console.log('ok - @proofscript/lsp shared project source-root resolver');
+
+{
+  const service=new ProofScriptLanguageService();
+  service.openDocument(
+    'file:///convert.ps',
+    1,
+    'theorem id(P : Prop, h : P) : P := by assumption;',
+  );
+  const translated=service.translateDocument('file:///convert.ps','lean');
+  equal(translated.target,'lean');
+  equal(translated.extension,'.lean');
+}
+console.log('ok - @proofscript/lsp translation service surface');
+
+{
+  const uris=diagnosticRefreshUris([
+    'file:///Main.ps',
+    'file:///Core.lean',
+    'file:///Main.ps',
+  ]);
+  equal(uris.length,2);
+  equal(uris[0],'file:///Main.ps');
+  equal(uris[1],'file:///Core.lean');
+}
+console.log('ok - @proofscript/lsp importer diagnostic refresh targets');

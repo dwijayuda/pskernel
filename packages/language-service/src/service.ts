@@ -3,38 +3,85 @@ import type {
   Position,
   ProofState,
   TextDocumentSnapshot,
+  DocumentSourceKind,
 } from './model.js';
 import {analyzeDocument,type AnalysisOptions} from './analyzer.js';
+import {
+  buildProjectAnalysisContext,
+  type LanguageServiceProjectHost,
+} from './project-context.js';
+import {Environment} from 'lean-ts-kernel';
+import type {TranslationTarget} from '@proofscript/syntax';
+import {translateDocumentSnapshot} from './translation.js';
 import {offsetAt} from './positions.js';
 import {completionItems,definitionLocation,referenceLocations} from './navigation.js';
 
-export interface LanguageServiceOptions extends AnalysisOptions {}
+export interface LanguageServiceOptions extends AnalysisOptions {
+  readonly projectHost?:LanguageServiceProjectHost;
+}
 
 export class ProofScriptLanguageService {
   private readonly docs=new Map<string,TextDocumentSnapshot>();
   private readonly analyses=new Map<string,DocumentAnalysis>();
+  private readonly projectContexts=new Map<string,ReturnType<typeof buildProjectAnalysisContext>>();
   private generation=0;
 
   constructor(readonly options:LanguageServiceOptions={}){}
 
-  openDocument(uri:string,version:number,text:string):TextDocumentSnapshot {
-    const snapshot={uri,version,generation:++this.generation,text};
+  openDocument(
+    uri:string,
+    version:number,
+    text:string,
+    sourceKind:DocumentSourceKind='proofscript',
+  ):TextDocumentSnapshot {
+    const snapshot={
+      uri,
+      sourceKind,
+      version,
+      generation:++this.generation,
+      text,
+    };
     this.docs.set(uri,snapshot);
-    this.analyses.delete(uri);
+    this.analyses.clear();
+    this.projectContexts.clear();
     return snapshot;
   }
 
-  replaceDocument(uri:string,version:number,text:string):TextDocumentSnapshot {
-    return this.openDocument(uri,version,text);
+  replaceDocument(
+    uri:string,
+    version:number,
+    text:string,
+  ):TextDocumentSnapshot {
+    const current=this.docs.get(uri);
+    if(current===undefined){
+      throw new Error('document is not open: '+uri);
+    }
+    return this.openDocument(
+      uri,
+      version,
+      text,
+      current.sourceKind,
+    );
   }
 
   closeDocument(uri:string):void {
     this.docs.delete(uri);
-    this.analyses.delete(uri);
+    this.analyses.clear();
+    this.projectContexts.clear();
   }
 
   getDocument(uri:string):TextDocumentSnapshot|undefined {
     return this.docs.get(uri);
+  }
+
+  openDocumentUris():readonly string[] {
+    return [...this.docs.keys()];
+  }
+
+  translateDocument(uri:string,target:TranslationTarget){
+    const snapshot=this.docs.get(uri);
+    if(snapshot===undefined)throw new Error('document is not open: '+uri);
+    return translateDocumentSnapshot(snapshot,target);
   }
 
   analyze(uri:string):DocumentAnalysis {
@@ -46,7 +93,58 @@ export class ProofScriptLanguageService {
       &&cached.generation===snapshot.generation
       &&cached.version===snapshot.version
     )return cached;
-    const analysis=analyzeDocument(snapshot,this.options);
+    let options:AnalysisOptions=this.options;
+    if(this.options.projectHost!==undefined){
+      try{
+        const base=this.options.environmentFactory?.()??new Environment();
+        const project=buildProjectAnalysisContext(
+          snapshot,
+          base,
+          this.options.projectHost,
+          (target)=>this.docs.get(target),
+        );
+        this.projectContexts.set(uri,project);
+        options={
+          ...this.options,
+          environment:project.environment,
+          seed:project.seed,
+          project:{
+            entryModule:project.entryModule,
+            moduleOrder:project.moduleOrder,
+          },
+        };
+      }catch(error){
+        this.projectContexts.delete(uri);
+        const local=analyzeDocument(snapshot,this.options);
+        const message=error instanceof Error?error.message:String(error);
+        const analysis={
+          ...local,
+          kernel:'not-run' as const,
+          diagnostics:[{
+            range:{
+              start:{line:0,character:0},
+              end:{line:0,character:0},
+            },
+            severity:1 as const,
+            code:'PS_PROJECT_ANALYSIS_ERROR',
+            source:'proofscript' as const,
+            phase:'tooling' as const,
+            message,
+          }],
+          declarations:local.declarations.map((item)=>({
+            ...item,
+            kernel:'not-run' as const,
+            message,
+          })),
+        };
+        this.analyses.set(uri,analysis);
+        return analysis;
+      }
+    }
+    if(this.options.projectHost===undefined){
+      this.projectContexts.delete(uri);
+    }
+    const analysis=analyzeDocument(snapshot,options);
     this.analyses.set(uri,analysis);
     return analysis;
   }
@@ -56,11 +154,18 @@ export class ProofScriptLanguageService {
   }
 
   completions(uri:string,_position:Position){
-    return completionItems(this.analyze(uri));
+    return completionItems(
+      this.analyze(uri),
+      this.projectContexts.get(uri),
+    );
   }
 
   definition(uri:string,position:Position){
-    return definitionLocation(this.analyze(uri),position);
+    return definitionLocation(
+      this.analyze(uri),
+      position,
+      this.projectContexts.get(uri),
+    );
   }
 
   references(
@@ -72,6 +177,7 @@ export class ProofScriptLanguageService {
       this.analyze(uri),
       position,
       includeDeclaration,
+      this.projectContexts.get(uri),
     );
   }
 
@@ -159,6 +265,7 @@ export class ProofScriptLanguageService {
     const analysis=this.analyze(uri);
     return {
       uri,
+      sourceKind:analysis.sourceKind,
       version:analysis.version,
       generation:analysis.generation,
       frontend:analysis.frontend,
@@ -173,6 +280,9 @@ export class ProofScriptLanguageService {
       rejectedDeclarations:analysis.declarations.filter(
         (item)=>item.kernel==='rejected',
       ).length,
+      ...(analysis.project===undefined?{}:{
+        project:analysis.project,
+      }),
     };
   }
 }

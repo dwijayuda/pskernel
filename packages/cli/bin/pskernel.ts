@@ -53,7 +53,10 @@ async function run(argv:readonly string[]):Promise<Record<string,unknown>>{
       if(sub==='verify'){verifyModuleArtifact(artifact);return {ok:true,action:'module-verify',file:path,...moduleArtifactSummary(artifact)};}
       if(sub==='inspect')return {ok:true,action:'module-inspect',file:path,...moduleArtifactSummary(artifact)};
       const loaded=loadModuleArtifact(artifact);
-      return {ok:true,action:'module-check',file:path,module:loaded.module,integrity:loaded.integrity,stats:loaded.stats,constants:loaded.env.size};
+      const replay=loaded.payloadKind==='lean4export-ndjson'
+        ?{stats:loaded.stats}
+        :{admissions:loaded.admissions};
+      return {ok:true,action:'module-check',file:path,module:loaded.module,integrity:loaded.integrity,...replay,constants:loaded.env.size};
     }
     usage(2);
   }

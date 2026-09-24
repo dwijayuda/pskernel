@@ -20,7 +20,9 @@
     "@proofscript/compiler-ir": "file:../compiler-ir",
     "@proofscript/elab": "file:../elab",
     "@proofscript/compiler": "file:../compiler",
-    "@proofscript/environment": "file:../environment"
+    "@proofscript/environment": "file:../environment",
+    "@proofscript/checked-core": "file:../checked-core",
+    "@proofscript/project": "file:../project"
   },
   "devDependencies": {
     "@types/node": "22.15.3",
@@ -28,7 +30,7 @@
   },
   "description": "ProofScript developer CLI (psc) plus low-level pskernel replay/module commands.",
   "proofscript": {
-    "status": "psc-ux-mvp+verified-run-json-abi+kernel-tools",
+    "status": "runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
     "phase": "A",
     "trust": "untrusted-support",
     "futureName": "@proofscript/cli",

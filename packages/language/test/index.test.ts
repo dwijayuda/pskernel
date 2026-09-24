@@ -152,7 +152,7 @@ console.log('ok - @proofscript/language empty D-CALL Unit semantics');
     checkV061SoftwareModule(parseV061Module(
       'function choose(flag : Bool) : Nat := match flag with { | .some x => 1; | .none => 2; };',
     ));
-  }catch(error){unsupported=/PS_CHECK_MATCH_PATTERN_UNSUPPORTED/.test(String(error));}
+  }catch(error){unsupported=/PS_CHECK_MATCH_PATTERN/.test(String(error));}
   equal(unsupported,true);
 }
 console.log('ok - @proofscript/language exhaustive Bool match checker');

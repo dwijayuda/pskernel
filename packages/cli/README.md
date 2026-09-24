@@ -48,3 +48,27 @@ node bin/pskernel.mjs module check init-prelude.psmodule
 Artifacts with declared dependencies currently require dependency-integrity context through the library API; CLI dependency resolution is a later milestone.
 
 The CLI must not import implementation files from `src/kernel/**` directly.
+
+## Mixed-source project roots
+
+Verified mixed-source imports can be resolved from configured project-relative
+roots:
+
+```json
+{
+  "languageVersion": "0.7",
+  "entry": "app/main.ps",
+  "sourceRoots": ["src", "vendor"],
+  "compilerOptions": {
+    "outDir": "dist",
+    "emitTypeScript": true,
+    "declaration": true,
+    "sourceMap": true
+  }
+}
+```
+
+If `sourceRoots` is empty or omitted, imports resolve below the entry file's
+directory as before. With configured roots, psc searches all roots and both
+`.ps`/`.lean` for each logical module and requires exactly one match.
+Duplicate matches are errors; root ordering is not precedence.

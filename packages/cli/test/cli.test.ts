@@ -1,10 +1,28 @@
-import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {parseCommonArgs} from '../src/args.js';
-import {compileVerifiedSource} from '../src/verified-pipeline.js';
+import {parseCommonArgs,parseTranslateArgs} from '../src/args.js';
+import {
+  checkVerifiedSource,
+  compileVerifiedSource,
+} from '../src/verified-pipeline.js';
+import {verifiedAssuranceReport} from '../src/verified-assurance.js';
+import {clearVerifiedProjectModuleCache} from '../src/verified-project-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
 import {runCommand} from '../src/commands/run.js';
+import {buildCommand} from '../src/commands/build.js';
+import {checkCommand} from '../src/commands/check.js';
+import {emitLeanCommand} from '../src/commands/emit-lean.js';
+import {translateCommand} from '../src/commands/translate.js';
+import {verifyRuntimeDependencyLock} from '../src/runtime-lock.js';
+import {decodeModuleArtifact} from '@proofscript/module';
+import {nameFromDotted} from 'lean-ts-kernel';
 
 function equal(actual:unknown,expected:unknown):void{
   if(actual!==expected)throw new Error('expected '+String(expected)+', got '+String(actual));
@@ -33,6 +51,28 @@ function throws(fn:()=>unknown,pattern:RegExp):void{
 }
 throws(()=>parseCommonArgs(['--wat']),/PS_CLI_UNKNOWN_OPTION/);
 throws(()=>parseCommonArgs(['a.ps','b.ps']),/PS_CLI_USAGE/);
+{
+  const args=parseTranslateArgs(['src/main.lean','--to','ps','-p','demo']);
+  equal(args.entry,'src/main.lean');
+  equal(args.target,'ps');
+  equal(args.project,'demo');
+}
+throws(
+  ()=>parseTranslateArgs(['main.ps']),
+  /PS_CLI_TRANSLATE_TARGET/,
+);
+throws(
+  ()=>parseTranslateArgs(['--to','lean','-p','demo']),
+  /PS_CLI_TRANSLATE_ENTRY/,
+);
+throws(
+  ()=>parseTranslateArgs(['main.ps','--to','ts']),
+  /PS_CLI_TRANSLATE_TARGET/,
+);
+throws(
+  ()=>parseTranslateArgs(['main.ps','--to','lean','--verified']),
+  /PS_CLI_TRANSLATE_VERIFIED/,
+);
 console.log('ok - psc CLI argument/UX contract');
 
 
@@ -50,6 +90,370 @@ console.log('ok - psc CLI argument/UX contract');
   equal(result.emitted.javascript.includes('T0'),false);
 }
 console.log('ok - psc verified checked-core compiler pipeline');
+
+{
+  const checked=checkVerifiedSource(
+    'extern function hostInc(x : Nat) : Nat '+
+    'from "host-lib" import inc; '+
+    'function use(x : Nat) : Nat := hostInc(x);',
+  );
+  const assurance=verifiedAssuranceReport(checked.checkedCore);
+  equal(checked.checkedCore.externals.length,1);
+  equal(assurance.runtimeAssumptionCount,1);
+  equal(assurance.runtimeAssumptions[0]?.name,'hostInc');
+  equal(assurance.runtimeAssumptions[0]?.source,'host-lib');
+  equal(assurance.runtimeAssumptions[0]?.importedName,'inc');
+  equal(assurance.runtimeAssumptions[0]?.proofEvidence,false);
+  equal(assurance.runtimeExternalsAreProofEvidence,false);
+}
+console.log('ok - psc verified runtime external assurance');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-external-assurance-check-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        runtimeDependencies:{'host-lib':'1.0.0'},
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'extern function hostInc(x : Nat) : Nat '+
+      'from "host-lib" import inc; '+
+      'function use(x : Nat) : Nat := hostInc(x);\n',
+      'utf8',
+    );
+    const result=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    if(!('assurance' in result)){
+      throw new Error('verified check did not return assurance');
+    }
+    const assurance=result.assurance;
+    equal(assurance.runtimeAssumptionCount,1);
+    equal(assurance.kernelCheckedDefinitionCount,1);
+    equal(assurance.kernelCheckedTheoremCount,0);
+    equal(assurance.runtimeAssumptions[0]?.source,'host-lib');
+    equal(assurance.runtimeExternalsAreProofEvidence,false);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified project assurance reports source externals');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-external-policy-reject-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'extern function hostInc(x : Nat) : Nat '+
+      'from "host-lib" import inc;\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await checkCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:[],
+      });
+    }catch(error){
+      rejected=/PS_RUNTIME_DEPENDENCY_UNDECLARED/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified check rejects undeclared runtime dependency');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-external-runtime-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await mkdir(join(directory,'node_modules','host-lib'),{recursive:true});
+    await mkdir(join(directory,'node_modules','helper-lib'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        runtimeDependencies:{'host-lib':'1.0.0'},
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','package.json'),
+      JSON.stringify({
+        name:'host-lib',
+        version:'1.0.0',
+        type:'module',
+        main:'./index.js',
+        types:'./index.d.ts',
+        exports:{
+          '.':{
+            types:'./index.d.ts',
+            import:'./index.js',
+            default:'./index.js',
+          },
+          './feature':{
+            types:'./feature.d.ts',
+            import:'./feature.js',
+            default:'./feature.js',
+          },
+        },
+        dependencies:{'helper-lib':'2.0.0'},
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','index.js'),
+      'import { suffix } from "helper-lib"; '+
+      'export function shout(value) { return value + suffix; }\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','index.d.ts'),
+      'export declare function shout(value: string): string;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','feature.js'),
+      'import { suffix } from "helper-lib"; '+
+      'export function shout(value) { return value + suffix; }\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','host-lib','feature.d.ts'),
+      'export declare function shout(value: string): string;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','helper-lib','package.json'),
+      JSON.stringify({
+        name:'helper-lib',
+        version:'2.0.0',
+        type:'module',
+        main:'./index.js',
+        types:'./index.d.ts',
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','helper-lib','index.js'),
+      'export const suffix = "!";\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'node_modules','helper-lib','index.d.ts'),
+      'export declare const suffix: string;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'package-lock.json'),
+      JSON.stringify({
+        name:'proofscript-runtime-fixture',
+        version:'1.0.0',
+        lockfileVersion:3,
+        requires:true,
+        packages:{
+          '':{
+            name:'proofscript-runtime-fixture',
+            version:'1.0.0',
+            dependencies:{'host-lib':'1.0.0'},
+          },
+          'node_modules/host-lib':{
+            version:'1.0.0',
+            resolved:'https://registry.npmjs.org/host-lib/-/host-lib-1.0.0.tgz',
+            integrity:'sha512-aG9zdA==',
+            dependencies:{'helper-lib':'2.0.0'},
+          },
+          'node_modules/helper-lib':{
+            version:'2.0.0',
+            resolved:'https://registry.npmjs.org/helper-lib/-/helper-lib-2.0.0.tgz',
+            integrity:'sha512-aGVscGVy',
+          },
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'extern function hostShout(value : String) : String '+
+      'from "host-lib/feature" import shout; '+
+      'function main(value : String) : String := hostShout(value);\n',
+      'utf8',
+    );
+
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['hello'],
+    });
+    equal(result.mainResult,'hello!');
+    if(!('assurance' in result)){
+      throw new Error('verified run did not retain assurance');
+    }
+    equal(result.assurance.runtimeAssumptionCount,1);
+    equal(
+      result.assurance.runtimeAssumptions[0]?.expectedVersion,
+      '1.0.0',
+    );
+    equal(
+      result.assurance.runtimeExternalsAreProofEvidence,
+      false,
+    );
+    if(!('runtimeDependencyPolicy' in result)){
+      throw new Error('verified run did not retain runtime dependency policy');
+    }
+    equal(result.runtimeDependencyPolicy.used.length,1);
+    equal(
+      result.runtimeDependencyPolicy.integrity.startsWith('sha256:'),
+      true,
+    );
+    equal(
+      result.runtimeDependencyPolicy.schema,
+      'proofscript-runtime-dependencies-v2',
+    );
+    equal(
+      result.runtimeDependencyPolicy.used[0]?.source,
+      'host-lib/feature',
+    );
+    equal(
+      result.runtimeDependencyPolicy.used[0]?.packageRoot,
+      'host-lib',
+    );
+    equal(result.runtimeDependencyPolicy.used[0]?.version,'1.0.0');
+    if(!('runtimeDependencyLock' in result)){
+      throw new Error('verified run did not retain runtime dependency lock');
+    }
+    const lock=result.runtimeDependencyLock;
+    if(lock===null||typeof lock!=='object'){
+      throw new Error('verified run returned empty runtime dependency lock');
+    }
+    equal(lock.schema,'proofscript-runtime-lock-v2');
+    equal(lock.lockfileVersion,3);
+    equal(lock.roots[0]?.packageRoot,'host-lib');
+    equal(lock.integrity.startsWith('sha256:'),true);
+    equal(lock.roots.length,1);
+    equal(lock.packages.length,2);
+    equal(lock.packages[0]?.location,'node_modules/helper-lib');
+    equal(lock.packages[0]?.version,'2.0.0');
+    equal(lock.packages[1]?.location,'node_modules/host-lib');
+    equal(
+      lock.packages[1]?.dependencies[0]?.target,
+      'node_modules/helper-lib',
+    );
+    const javascript=await readFile(result.artifacts.javascript,'utf8');
+    equal(
+      javascript.includes('from "host-lib/feature"'),
+      true,
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified source FFI resolves exact package and runs');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-runtime-lock-missing-transitive-'),
+  );
+  try{
+    await mkdir(join(directory,'node_modules','host-lib'),{recursive:true});
+    await writeFile(
+      join(directory,'node_modules','host-lib','package.json'),
+      JSON.stringify({
+        name:'host-lib',
+        version:'1.0.0',
+      })+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'package-lock.json'),
+      JSON.stringify({
+        name:'lock-missing-transitive',
+        version:'1.0.0',
+        lockfileVersion:3,
+        packages:{
+          '':{},
+          'node_modules/host-lib':{
+            version:'1.0.0',
+            resolved:'https://registry.npmjs.org/host-lib/-/host-lib-1.0.0.tgz',
+            integrity:'sha512-aG9zdA==',
+            dependencies:{'helper-lib':'2.0.0'},
+          },
+        },
+      })+'\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await verifyRuntimeDependencyLock(
+        directory,
+        {
+          schema:'proofscript-runtime-dependencies-v2',
+          integrity:'sha256:test',
+          used:[{
+            source:'host-lib/feature',
+            packageRoot:'host-lib',
+            version:'1.0.0',
+          }],
+        },
+      );
+    }catch(error){
+      rejected=/PS_RUNTIME_LOCK_DEPENDENCY_MISSING/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc runtime lock rejects missing required transitive entry');
+
 
 
 {
@@ -133,6 +537,52 @@ console.log('ok - psc verified runtime ABI');
   }
 }
 console.log('ok - psc verified run filesystem pipeline');
+
+{
+  const directory=await mkdtemp(join(tmpdir(),'proofscript-lean-verified-run-'));
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.lean',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.lean'),
+      'def main (x : Nat) : Nat := x + x\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['21'],
+    });
+    equal(result.mainResult,'42');
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+    equal(result.sourceKind,'lean-subset');
+    equal(
+      typeof result.canonicalSourceHash==='string'
+        &&String(result.canonicalSourceHash).startsWith('sha256:'),
+      true,
+    );
+    equal(result.artifacts.typescript.endsWith('main.ts'),true);
+    equal(result.artifacts.javascript.endsWith('main.js'),true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Lean-subset run filesystem pipeline');
 
 
 {
@@ -751,3 +1201,714 @@ console.log('ok - psc verified local class instance pipeline');
   equal(result.emitted.javascript.includes('get(boxedNat, x)'),true);
 }
 console.log('ok - psc verified global class instance pipeline');
+
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-emit-lean-target-registry-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function add(x : Nat, y : Nat) : Nat := x + y;\n',
+      'utf8',
+    );
+    const lean=await emitLeanCommand({
+      project:directory,
+      json:false,
+      verified:false,
+      passthrough:[],
+    });
+    equal(
+      lean,
+      'def add (x : Nat) (y : Nat) : Nat := x + y\n',
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc emit-lean uses source/target dispatch');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-translate-roundtrip-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function add(x : Nat, y : Nat) : Nat := x + y;\n',
+      'utf8',
+    );
+    const lean=await translateCommand({
+      project:directory,
+      entry:'src/main.ps',
+      target:'lean',
+      json:false,
+      verified:false,
+      passthrough:[],
+    });
+    equal(
+      lean,
+      'def add (x : Nat) (y : Nat) : Nat := x + y\n',
+    );
+    await writeFile(
+      join(directory,'src','main.lean'),
+      lean,
+      'utf8',
+    );
+    const proofScript=await translateCommand({
+      project:directory,
+      entry:'src/main.lean',
+      target:'ps',
+      json:false,
+      verified:false,
+      passthrough:[],
+    });
+    equal(
+      proofScript,
+      'def add(x : Nat, y : Nat) : Nat := x + y;\n',
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc translate ps/lean canonical round-trip');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-canonical-source-hash-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    const psSource='function add(x : Nat, y : Nat) : Nat := x + y;\n';
+    await writeFile(
+      join(directory,'src','main.ps'),
+      psSource,
+      'utf8',
+    );
+    const psCheck=await checkCommand({
+      project:directory,
+      entry:'src/main.ps',
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    const lean=await translateCommand({
+      project:directory,
+      entry:'src/main.ps',
+      target:'lean',
+      json:false,
+      verified:false,
+      passthrough:[],
+    });
+    await writeFile(
+      join(directory,'src','main.lean'),
+      lean,
+      'utf8',
+    );
+    const leanCheck=await checkCommand({
+      project:directory,
+      entry:'src/main.lean',
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    equal(
+      psCheck.canonicalSourceHash,
+      leanCheck.canonicalSourceHash,
+    );
+    equal(
+      String(psCheck.canonicalSourceHash).startsWith('sha256:'),
+      true,
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc canonical source hash is source-kind neutral');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-mixed-ps-entry-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := double(x);\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'import Core\ndef double (x : Nat) : Nat := twice x\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Core.ps'),
+      'function twice(x : Nat) : Nat := x + x;\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['21'],
+    });
+    equal(result.mainResult,'42');
+    equal(
+      (result.moduleOrder as readonly string[]).join(','),
+      'Core,Data,main',
+    );
+    equal(result.moduleCount,3);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc mixed ProofScript -> Lean import run');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-mixed-lean-entry-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.lean',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.lean'),
+      'import Data\ndef main (x : Nat) : Nat := inc x\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.ps'),
+      'function inc(x : Nat) : Nat := x + 1;\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['41'],
+    });
+    equal(result.mainResult,'42');
+    equal(
+      (result.moduleOrder as readonly string[]).join(','),
+      'Data,main',
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc mixed Lean -> ProofScript import run');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-mixed-imported-metadata-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Core.ps'),
+      'structure Box(α : Type) where { value : α; } '+
+      'class Boxed(α : Type) where { value : α; } '+
+      'instance boxedNat : Boxed(Nat) := { value := 7 : Boxed(Nat) };\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'import Core\n'+
+      'def make (x : Nat) : Box Nat := { value := x : Box Nat }\n'+
+      'def unwrap (box : Box Nat) : Nat := box.value\n'+
+      'def get {α : Type} [inst : Boxed α] (x : α) : α := inst.value\n'+
+      'def read (x : Nat) : Nat := get x\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\n'+
+      'function main(x : Nat) : Nat := read(unwrap(make(x)));\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['21'],
+    });
+    equal(result.mainResult,'7');
+    equal(
+      (result.moduleOrder as readonly string[]).join(','),
+      'Core,Data,main',
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc mixed imports preserve structure/class/instance metadata');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-project-cache-integrity-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'def inc (x : Nat) : Nat := x + 1\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := inc(x);\n',
+      'utf8',
+    );
+
+    clearVerifiedProjectModuleCache();
+    const first=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    equal(first.moduleCacheHits,0);
+    equal(first.moduleCacheMisses,2);
+    equal(String(first.projectIntegrity).startsWith('sha256:'),true);
+    const firstSources=first.moduleSources;
+    equal(
+      firstSources.every((item)=>item.moduleIntegrity.startsWith('sha256:')),
+      true,
+    );
+
+    const second=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    equal(second.projectIntegrity,first.projectIntegrity);
+    equal(second.moduleCacheHits,2);
+    equal(second.moduleCacheMisses,0);
+
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'def inc (x : Nat) : Nat := x + 2\n',
+      'utf8',
+    );
+    const third=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    equal(third.moduleCacheHits,0);
+    equal(third.moduleCacheMisses,2);
+    equal(third.projectIntegrity===first.projectIntegrity,false);
+  }finally{
+    clearVerifiedProjectModuleCache();
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc checked-module cache uses dependency integrity keys');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-persistent-module-artifacts-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'def inc (x : Nat) : Nat := x + 1\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := inc(x);\n',
+      'utf8',
+    );
+
+    clearVerifiedProjectModuleCache();
+    const built=await buildCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:[],
+    });
+    const artifactRecords=(
+      built.report.artifacts as {
+        readonly modules:readonly {
+          readonly module:string;
+          readonly path:string;
+          readonly integrity:string;
+        }[];
+      }
+    ).modules;
+    equal(artifactRecords.length,2);
+
+    const decoded=new Map<string,ReturnType<typeof decodeModuleArtifact>>();
+    for(const record of artifactRecords){
+      const artifact=decodeModuleArtifact(
+        await readFile(record.path,'utf8'),
+      );
+      equal(artifact.version,2);
+      equal(artifact.integrity,record.integrity);
+      decoded.set(record.module,artifact);
+    }
+    const data=decoded.get('Data');
+    const main=decoded.get('main');
+    if(data===undefined||main===undefined){
+      throw new Error('missing emitted module artifact');
+    }
+    equal(main.dependencies.length,1);
+    equal(main.dependencies[0]?.module,'Data');
+    equal(main.dependencies[0]?.integrity,data.integrity);
+    equal(
+      main.metadata!==undefined
+      &&typeof main.metadata==='object'
+      &&!Array.isArray(main.metadata),
+      true,
+    );
+    if(
+      main.metadata===undefined
+      ||typeof main.metadata!=='object'
+      ||main.metadata===null
+      ||Array.isArray(main.metadata)
+    ){
+      throw new Error('missing module artifact metadata');
+    }
+    const metadata=main.metadata as Record<string,unknown>;
+    equal(
+      String(metadata.canonicalSourceHash).startsWith('sha256:'),
+      true,
+    );
+    equal(
+      String(metadata.sourceCacheKey).startsWith('sha256:'),
+      true,
+    );
+    equal('sourceKind' in metadata,false);
+  }finally{
+    clearVerifiedProjectModuleCache();
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc emits replay-gated checked-admission .psmodule v2 artifacts');
+
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-configured-source-roots-'),
+  );
+  try{
+    await mkdir(join(directory,'app'),{recursive:true});
+    await mkdir(join(directory,'lib','Util'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'app/main.ps',
+        sourceRoots:['lib'],
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'app','main.ps'),
+      'import Util.Math\nfunction main(x : Nat) : Nat := inc(x);\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'lib','Util','Math.lean'),
+      'def inc (x : Nat) : Nat := x + 1\n',
+      'utf8',
+    );
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['41'],
+    });
+    equal(result.mainResult,'42');
+    const roots=result.sourceRoots as readonly string[];
+    equal(roots.length,1);
+    equal(roots[0],join(directory,'lib'));
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc configured source roots resolve mixed-source imports');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-source-root-ambiguity-'),
+  );
+  try{
+    await mkdir(join(directory,'app'),{recursive:true});
+    await mkdir(join(directory,'lib-a'),{recursive:true});
+    await mkdir(join(directory,'lib-b'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'app/main.ps',
+        sourceRoots:['lib-a','lib-b'],
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'app','main.ps'),
+      'import Shared\nfunction main(x : Nat) : Nat := id(x);\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'lib-a','Shared.ps'),
+      'function id(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'lib-b','Shared.lean'),
+      'def id (x : Nat) : Nat := x\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await checkCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:[],
+      });
+    }catch(error){
+      rejected=/PS_PROJECT_SOURCE_AMBIGUITY/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc configured source roots reject duplicate logical modules');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-mixed-ambiguity-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.ps'),
+      'function a(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.lean'),
+      'def b (x : Nat) : Nat := x\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await checkCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:[],
+      });
+    }catch(error){
+      rejected=/PS_PROJECT_SOURCE_AMBIGUITY/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc mixed-source module ambiguity fails closed');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-imports-legacy-reject-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import Data\nfunction main(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','Data.ps'),
+      'function id(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+    let rejected=false;
+    try{
+      await checkCommand({
+        project:directory,
+        json:true,
+        verified:false,
+        passthrough:[],
+      });
+    }catch(error){
+      rejected=/PS_PROJECT_IMPORTS_REQUIRE_VERIFIED/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc imports fail closed on legacy semantic lane');
+
+

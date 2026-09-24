@@ -18,6 +18,7 @@ import {
   constant,
   exprEq,
   forallE,
+  levelParam,
   levelSucc,
   levelZero,
   mkAppN,
@@ -25,6 +26,15 @@ import {
   natLit,
   sort,
 } from 'lean-ts-kernel';
+function firstValueDeclarationBody(
+  module:ReturnType<typeof parseV061Module>,
+) {
+  const declaration=module.declarations[0];
+  return declaration!==undefined&&'body' in declaration
+    ?declaration.body
+    :undefined;
+}
+
 function equal(a:unknown,b:unknown):void{if(a!==b)throw new Error(`expected ${String(b)}, got ${String(a)}`);}
 {
   const term=elaborateChecked({elaborate:(surface:string)=>({term:surface.toUpperCase(),diagnostics:[]})},'x');
@@ -178,6 +188,164 @@ function makeApplicationEnvironment():{
 console.log('ok - @proofscript/elab Lean-style application elaboration');
 
 
+function addMinimalEqEnvironment(env:Environment):void {
+  const kernel=new Kernel(env);
+  const uName=nameFromDotted('u');
+  const u=levelParam(uName);
+  const Eq=nameFromDotted('Eq');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Eq,
+    levelParams:[uName],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u),
+      forallE(
+        nameFromDotted('_'),
+        bvar(0),
+        forallE(
+          nameFromDotted('_'),
+          bvar(1),
+          sort(levelZero),
+        ),
+      ),
+      'implicit',
+    ),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Eq.refl'),
+    levelParams:[uName],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u),
+      forallE(
+        nameFromDotted('a'),
+        bvar(0),
+        mkAppN(
+          constant(Eq,[u]),
+          [bvar(1),bvar(0),bvar(0)],
+        ),
+      ),
+      'implicit',
+    ),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Eq.symm'),
+    levelParams:[uName],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u),
+      forallE(
+        nameFromDotted('a'),
+        bvar(0),
+        forallE(
+          nameFromDotted('b'),
+          bvar(1),
+          forallE(
+            nameFromDotted('h'),
+            mkAppN(
+              constant(Eq,[u]),
+              [bvar(2),bvar(1),bvar(0)],
+            ),
+            mkAppN(
+              constant(Eq,[u]),
+              [bvar(3),bvar(1),bvar(2)],
+            ),
+          ),
+          'implicit',
+        ),
+        'implicit',
+      ),
+      'implicit',
+    ),
+  });
+  const u1Name=nameFromDotted('u1');
+  const u2Name=nameFromDotted('u2');
+  const u1=levelParam(u1Name);
+  const u2=levelParam(u2Name);
+  const motiveType=forallE(
+    nameFromDotted('_'),
+    bvar(1),
+    sort(u1),
+  );
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Eq.ndrec'),
+    levelParams:[u1Name,u2Name],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u2),
+      forallE(
+        nameFromDotted('a'),
+        bvar(0),
+        forallE(
+          nameFromDotted('motive'),
+          motiveType,
+          forallE(
+            nameFromDotted('m'),
+            app(bvar(0),bvar(1)),
+            forallE(
+              nameFromDotted('b'),
+              bvar(3),
+              forallE(
+                nameFromDotted('h'),
+                mkAppN(
+                  constant(Eq,[u2]),
+                  [bvar(4),bvar(3),bvar(0)],
+                ),
+                app(bvar(3),bvar(1)),
+              ),
+              'implicit',
+            ),
+          ),
+          'implicit',
+        ),
+        'implicit',
+      ),
+      'implicit',
+    ),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Eq.ndrec_symm'),
+    levelParams:[u1Name,u2Name],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u2),
+      forallE(
+        nameFromDotted('a'),
+        bvar(0),
+        forallE(
+          nameFromDotted('motive'),
+          motiveType,
+          forallE(
+            nameFromDotted('m'),
+            app(bvar(0),bvar(1)),
+            forallE(
+              nameFromDotted('b'),
+              bvar(3),
+              forallE(
+                nameFromDotted('h'),
+                mkAppN(
+                  constant(Eq,[u2]),
+                  [bvar(4),bvar(0),bvar(3)],
+                ),
+                app(bvar(3),bvar(1)),
+              ),
+              'implicit',
+            ),
+          ),
+          'implicit',
+        ),
+        'implicit',
+      ),
+      'implicit',
+    ),
+  });
+}
+
 function makeDefinitionEnvironment():Environment {
   const env=new Environment();
   const kernel=new Kernel(env);
@@ -196,7 +364,7 @@ function makeDefinitionEnvironment():Environment {
   });
   kernel.addAxiom({
     kind:'axiom',
-    name:nameFromDotted('Box'),
+    name:nameFromDotted('TestBox'),
     levelParams:[],
     type:forallE(
       nameFromDotted('α'),
@@ -291,7 +459,7 @@ console.log('ok - @proofscript/elab implicit declaration binders');
 {
   const env=makeDefinitionEnvironment();
   const result=elaborateV061Definitions(parseV061Module(
-    'function keepBox(x : Box(TestNat)) : Box(TestNat) := x;',
+    'function keepBox(x : TestBox(TestNat)) : TestBox(TestNat) := x;',
   ),env);
   const definition=result.definitions[0]!;
   equal(definition.type.kind,'forall');
@@ -452,19 +620,336 @@ console.log('ok - @proofscript/elab intro tactic proof-term construction');
   let failed=false;
   try{
     elaborateV061Declarations(parseV061Module(
-      'theorem badApply(P : Prop, h : P) : P := by apply h; assumption;',
+      'theorem badApply(P : Prop, Q : Prop, h : P) : Q := '+
+      'by apply h; assumption;',
     ));
   }catch(error){failed=/PS_ELAB_TACTIC_APPLY/.test(String(error));}
   equal(failed,true);
 }
 console.log('ok - @proofscript/elab bounded apply tactic proof-term construction');
 
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem applyTwo(P : Prop, Q : Prop, R : Prop, '+
+    'f : P -> Q -> R, hp : P, hq : Q) : R := '+
+    'by apply f; assumption; assumption;',
+  ));
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('applyTwo'))?.kind,
+    'theorem',
+  );
+}
+console.log('ok - @proofscript/elab ordered multi-goal apply tactic');
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem refinePremise(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
+    'by refine f(?_); assumption; '+
+    'theorem refineGoal(P : Prop, h : P) : P := '+
+    'by refine ?_; assumption;',
+  ));
+  equal(result.theorems.length,2);
+  equal(
+    result.environment.find(nameFromDotted('refinePremise'))?.kind,
+    'theorem',
+  );
+  equal(
+    result.environment.find(nameFromDotted('refineGoal'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem holeOutside(P : Prop) : P := ?_;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_SYNTHETIC_HOLE_OUTSIDE_REFINE/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded synthetic-hole refine tactic');
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive PropPair : Prop where { | mk(left : Prop, right : Prop); } '+
+    'theorem buildPair(P : Prop, Q : Prop) : PropPair := '+
+    'by constructor; assumption; assumption;',
+  ));
+  equal(result.inductives.length,1);
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('buildPair'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem badConstructor(P : Prop) : P := by constructor;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_CONSTRUCTOR/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded constructor via apply');
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive Choice where { | left; | right; } '+
+    'theorem chooseCases(P : Prop, h : P, c : Choice) : P := '+
+    'by cases c; assumption; assumption;',
+  ));
+  equal(result.inductives.length,1);
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('chooseCases'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem badCases(P : Prop, h : P) : P := by cases h; assumption;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_CASES/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded cases via recursor');
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive Wrap(α : Type) where { | mk(value : α); } '+
+    'theorem unwrapCase(P : Prop, h : P, w : Wrap(Prop)) : P := '+
+    'by cases w; assumption;',
+  ));
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('unwrapCase'))?.kind,
+    'theorem',
+  );
+}
+console.log('ok - @proofscript/elab parameterized bounded cases');
+
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive Chain where { | nil; | cons(tail : Chain); } '+
+    'theorem chainInduction(P : Prop, base : P, step : P -> P, xs : Chain) : P := '+
+    'by induction xs; assumption; apply step; assumption;',
+  ));
+  equal(result.inductives.length,1);
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('chainInduction'))?.kind,
+    'theorem',
+  );
+}
+{
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive PsListI(α : Type) where { '+
+    '| nil; | cons(head : α, tail : PsListI(α)); } '+
+    'theorem listInduction {α : Type}'+
+    '(P : Prop, base : P, step : P -> P, xs : PsListI(α)) : P := '+
+    'by induction xs; assumption; apply step; assumption;',
+  ));
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('listInduction'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'inductive ChoiceI where { | left; | right; } '+
+      'theorem badDependentContext'+
+      '(M : ChoiceI -> Prop, c : ChoiceI, h : M(c), P : Prop, hp : P) : P := '+
+      'by induction c; assumption; assumption;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_INDUCTION_DEPENDENT_CONTEXT/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded induction via recursor');
+
+{
+  const env=new Environment();
+  addMinimalEqEnvironment(env);
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive NamedList(α : Type) where { '+
+    '| nil; | cons(head : α, tail : NamedList(α)); } '+
+    'function appendNamed {α : Type}'+
+    '(xs : NamedList(α), ys : NamedList(α)) : NamedList(α) := '+
+    'match xs with { | .nil => ys; '+
+    '| .cons head tail => NamedList.cons(head, appendNamed(tail, ys)); }; '+
+    'theorem appendNamedCons {α : Type}'+
+    '(head : α, tail : NamedList(α), ys : NamedList(α)) : '+
+    'appendNamed(NamedList.cons(head, tail), ys) = '+
+    'NamedList.cons(head, appendNamed(tail, ys)) := by rfl; '+
+    'theorem appendNamedNilRight {α : Type}(xs : NamedList(α)) : '+
+    'appendNamed(xs, NamedList.nil) = xs := '+
+    'by induction xs; rfl; '+
+    'rw [appendNamedCons(head, tail, NamedList.nil)]; rw [tail_ih];',
+  ),env);
+  equal(result.theorems.length,2);
+  equal(
+    result.environment.find(nameFromDotted('appendNamedNilRight'))?.kind,
+    'theorem',
+  );
+}
+console.log('ok - @proofscript/elab induction preserves field/IH source names');
+
+{
+  const source=parseV061Module(
+    'theorem parsedRw(a : Nat, b : Nat, h : a = b) : a = b := '+
+    'by rw [h]; rw [← h]; assumption;',
+  );
+  const body=firstValueDeclarationBody(source);
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics[0]?.kind,'rw');
+    equal(body.tactics[1]?.kind,'rw');
+  }
+}
+console.log('ok - @proofscript/elab rw syntax reaches tactic AST');
+
+{
+  const source=parseV061Module(
+    'theorem parsedSimp(A : Type, B : Type, C : Type, D : Type, '+
+    'h1 : BoxT(A) = B, h2 : WrapT(C) = D) : P := '+
+    'by simp only [h1, ← h2];',
+  );
+  const body=firstValueDeclarationBody(source);
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics[0]?.kind,'simp');
+    if(body.tactics[0]?.kind==='simp'){
+      equal(body.tactics[0].rules.length,2);
+    }
+  }
+}
+console.log('ok - @proofscript/elab multi-rule simp-only syntax reaches tactic AST');
+
+{
+  const local=elaborateV061Declarations(parseV061Module(
+    'theorem localExactSearch(P : Prop, h : P) : P := by exact?;',
+  ));
+  equal(local.theorems.length,1);
+}
+{
+  const environment=elaborateV061Declarations(parseV061Module(
+    'theorem searchBase(P : Prop, h : P) : P := by assumption; '+
+    'theorem searchCopy : (P : Prop) -> P -> P := by exact?;',
+  ));
+  equal(environment.theorems.length,2);
+  equal(
+    environment.environment.find(nameFromDotted('searchCopy'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem searchMissing(P : Prop) : P := by exact?;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_EXACT_SEARCH/.test(String(error));
+  }
+  equal(rejected,true);
+}
+{
+  const localApplication=elaborateV061Declarations(parseV061Module(
+    'theorem searchLocalApply'+
+    '(P : Prop, f : (Q : Prop) -> Q -> Q) : P -> P := by exact?;',
+  ));
+  equal(localApplication.theorems.length,1);
+}
+{
+  const environmentApplication=elaborateV061Declarations(parseV061Module(
+    'theorem searchPoly {P : Prop} : P -> P := by intro h; exact h; '+
+    'theorem searchPolyUse(Q : Prop) : Q -> Q := by exact?;',
+  ));
+  equal(environmentApplication.theorems.length,2);
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem searchNoRecursive'+
+      '(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := by exact?;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_EXACT_SEARCH/.test(String(error));
+  }
+  equal(rejected,true);
+}
+{
+  const env=makeNatNotationEnvironment();
+  const direct=elaborateV061Declarations(parseV061Module(
+    'theorem directEqSymm'+
+    '(a : Nat, b : Nat, h : b = a) : a = b := Eq.symm(h);',
+  ),env);
+  equal(direct.theorems.length,1);
+  equal(
+    direct.environment.find(nameFromDotted('directEqSymm'))?.kind,
+    'theorem',
+  );
+}
+console.log('ok - @proofscript/elab direct polymorphic Eq.symm application');
+
+{
+  const env=makeNatNotationEnvironment();
+  const symmetric=elaborateV061Declarations(parseV061Module(
+    'theorem searchEqSymm'+
+    '(a : Nat, b : Nat, h : b = a) : a = b := by exact?;',
+  ),env);
+  equal(symmetric.theorems.length,1);
+  equal(
+    symmetric.environment.find(nameFromDotted('searchEqSymm'))?.kind,
+    'theorem',
+  );
+}
+console.log('ok - @proofscript/elab bounded exact search');
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'theorem rflSelf(n : Nat) : n = n := by rfl;',
+  ),env);
+  equal(result.theorems.length,1);
+  equal(
+    result.environment.find(nameFromDotted('rflSelf'))?.kind,
+    'theorem',
+  );
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem badRfl(P : Prop, h : P) : P := by rfl;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_RFL/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab bounded Eq-only rfl tactic');
+
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();
-  const kernel=new Kernel(env);
   const Nat=nameFromDotted('Nat');
-  kernel.addAxiom({
+  env.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],
@@ -480,13 +965,14 @@ function makeNatNotationEnvironment():Environment {
     ),
   );
   for(const name of ['Nat.add','Nat.sub','Nat.mul']){
-    kernel.addAxiom({
+    env.add({
       kind:'axiom',
       name:nameFromDotted(name),
       levelParams:[],
       type:binaryType,
     });
   }
+  addMinimalEqEnvironment(env);
   return env;
 }
 {
@@ -682,6 +1168,44 @@ console.log('ok - @proofscript/elab verified match recursor elaboration');
   equal(result.definitions.length,2);
 }
 console.log('ok - @proofscript/elab parameterized inductive constructor inference');
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive OptExpected(α : Type) where { | none; | some(value : α); } '+
+    'function chooseExpected {α : Type}'+
+    '(value : OptExpected(α), fallback : OptExpected(α)) : OptExpected(α) := '+
+    'match value with { | .none => fallback; | .some x => OptExpected.some(x); }; '+
+    'function useExpectedNone {α : Type}'+
+    '(fallback : OptExpected(α)) : OptExpected(α) := '+
+    'chooseExpected(OptExpected.none, fallback); '+
+    'theorem chooseExpectedNone {α : Type}'+
+    '(fallback : OptExpected(α)) : '+
+    'chooseExpected(OptExpected.none, fallback) = fallback := Eq.refl(fallback);',
+  ),env);
+  equal(result.definitions.length,2);
+  equal(result.theorems.length,1);
+}
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive DuoExpected(α : Type, ε : Type) where { '+
+    '| ok(value : α); | error(error : ε); } '+
+    'function duoOr {α : Type}{ε : Type}'+
+    '(value : DuoExpected(α, ε), fallback : DuoExpected(α, ε)) : DuoExpected(α, ε) := '+
+    'match value with { | .ok x => DuoExpected.ok(x); | .error err => fallback; }; '+
+    'function useExpectedOk {α : Type}{ε : Type}'+
+    '(value : α, fallback : DuoExpected(α, ε)) : DuoExpected(α, ε) := '+
+    'duoOr(DuoExpected.ok(value), fallback); '+
+    'theorem duoExpectedOk {α : Type}{ε : Type}'+
+    '(value : α, fallback : DuoExpected(α, ε)) : '+
+    'duoOr(DuoExpected.ok(value), fallback) = DuoExpected.ok(value) := by rfl;',
+  ),env);
+  equal(result.definitions.length,2);
+  equal(result.theorems.length,1);
+}
+console.log('ok - @proofscript/elab expected-type propagation into nested calls');
+
 
 
 {
@@ -966,3 +1490,60 @@ console.log('ok - @proofscript/elab local class instance synthesis');
   equal(result.environment.find(nameFromDotted('boxedNat'))?.kind,'definition');
 }
 console.log('ok - @proofscript/elab global class instance synthesis');
+
+{
+  const env=makeNatNotationEnvironment();
+  const dependency=elaborateV061Declarations(parseV061Module(
+    'structure Box(α : Type) where { value : α; } '+
+    'class Boxed(α : Type) where { value : α; } '+
+    'instance boxedNat : Boxed(Nat) := { value := 7 : Boxed(Nat) };',
+  ),env);
+  const result=elaborateV061Declarations(parseV061Module(
+    'function make(x : Nat) : Box(Nat) := { value := x : Box(Nat) }; '+
+    'function unwrap(box : Box(Nat)) : Nat := box.value; '+
+    'function get {α : Type}[inst : Boxed(α)](x : α) : α := inst.value; '+
+    'function read(x : Nat) : Nat := get(x);',
+  ),dependency.environment,dependency);
+  equal(result.definitions.length,4);
+  equal(
+    result.definitions.some((item)=>
+      item.name.kind==='str'&&item.name.value==='unwrap'
+    ),
+    true,
+  );
+  equal(
+    result.definitions.some((item)=>
+      item.name.kind==='str'&&item.name.value==='read'
+    ),
+    true,
+  );
+}
+console.log('ok - @proofscript/elab imported structure/class/instance metadata seed');
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'extern function hostInc(x : Nat) : Nat from "host-lib" import inc; '+
+    'function use(x : Nat) : Nat := hostInc(x);',
+  ),env);
+  equal(result.externals.length,1);
+  equal(result.externals[0]?.binding.source,'host-lib');
+  equal(result.externals[0]?.binding.importedName,'inc');
+  equal(result.definitions.length,1);
+}
+{
+  const env=makeNatNotationEnvironment();
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'extern function proofOracle(x : Nat) : Prop '+
+      'from "host-lib" import proofOracle;',
+    ),env);
+  }catch(error){
+    rejected=/checked-core external invariant/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab proof-valued external fails closed');
+
+console.log('ok - @proofscript/elab explicit runtime external admission');

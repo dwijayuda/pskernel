@@ -41,9 +41,12 @@ if(entry('kernel').dependsOn.length!==0){
   throw new Error('architecture: kernel must remain dependency root');
 }
 requireDeps('environment',['kernel']);
-requireDeps('cli',['environment']);
-requireDeps('lsp',['environment']);
+requireDeps('cli',['environment','project','checked-core']);
+requireDeps('lsp',['environment','project']);
+requireDeps('language-service',['checked-core','project']);
 requireDeps('checked-core',['kernel']);
+requireDeps('elab',['tactic']);
+forbidDeps('tactic',['elab']);
 forbidDeps('checked-core',[
   'syntax','meta','elab','language','erasure','compiler-ir','backend-ts',
 ]);
@@ -115,7 +118,7 @@ const verifiedPipeline=readFileSync(
   'utf8',
 );
 for(const required of [
-  'parseV061Module',
+  'createDefaultSourceFrontendRegistry',
   'elaborateV061Declarations',
   'compileCheckedCore',
 ]){

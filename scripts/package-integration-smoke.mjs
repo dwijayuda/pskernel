@@ -1,4 +1,9 @@
-import {lowerDCallSource,parseV061Module} from '../packages/syntax/dist/src/index.js';
+import {
+  createDefaultSourceFrontendRegistry,
+  createDefaultTranslationTargetPrinterRegistry,
+  lowerDCallSource,
+  parseV061Module,
+} from '../packages/syntax/dist/src/index.js';
 import {text,render} from '../packages/pretty/dist/src/index.js';
 import {ExprMetaContext,MetaVarContext,createGoal} from '../packages/meta/dist/src/index.js';
 import {elaborateApplication,elaborateChecked,elaborateV061Declarations} from '../packages/elab/dist/src/index.js';
@@ -9,7 +14,12 @@ import {eraseCheckedCoreModule} from '../packages/erasure/dist/src/index.js';
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
 import {compileTypeScript,emitModule,emitVerifiedTypeScript} from '../packages/backend-ts/dist/src/index.js';
 import {compileCheckedCore} from '../packages/compiler/dist/src/index.js';
-import {compileVerifiedSource} from '../packages/cli/dist/src/verified-pipeline.js';
+import {
+  checkVerifiedSource,
+  compileVerifiedSource,
+} from '../packages/cli/dist/src/verified-pipeline.js';
+import {runCommand} from '../packages/cli/dist/src/commands/run.js';
+import {fileURLToPath} from 'node:url';
 import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
@@ -18,6 +28,15 @@ import {verifyStream} from '../packages/browser/dist/src/index.js';
 
 function assert(condition,message){
   if(!condition)throw new Error('package integration smoke: '+message);
+}
+
+function semanticFingerprint(value){
+  return JSON.stringify(
+    value,
+    (_key,item)=>typeof item==='bigint'
+      ?{$bigint:item.toString()}
+      :item,
+  );
 }
 
 const lowered=lowerDCallSource('apply(f x, (y : Nat))');
@@ -167,6 +186,222 @@ const verifiedApply=compileVerifiedSource(
 assert(
   verifiedApply.checkedCore.theorems.length===1,
   'bounded apply did not construct a pskernel-admitted theorem proof term',
+);
+
+
+const verifiedRewrite=compileVerifiedSource(
+  'theorem rewriteForward(a : Nat, b : Nat, h : a = b) : '+
+  'a = b := by rw [h]; '+
+  'theorem rewriteReverse(a : Nat, b : Nat, h : a = b) : '+
+  'b = a := by rw [← h];',
+  'verified-rewrite.ts',
+);
+assert(
+  verifiedRewrite.checkedCore.theorems.length===2,
+  'bounded rw did not construct pskernel-admitted equality transport proofs',
+);
+
+
+const verifiedSimpOnly=compileVerifiedSource(
+  'inductive BoxT(α : Type) where { | mk; } '+
+  'inductive WrapT(α : Type) where { | mk; } '+
+  'inductive PairT(α : Type, β : Type) where { | mk; } '+
+  'theorem simplifyTypes'+
+  '(A : Type, B : Type, C : Type, D : Type, '+
+  'h1 : BoxT(A) = B, h2 : WrapT(C) = D) : '+
+  'PairT(BoxT(A), WrapT(C)) = PairT(B, D) := '+
+  'by simp only [h1, h2];',
+  'verified-simp-only.ts',
+);
+assert(
+  verifiedSimpOnly.checkedCore.theorems.length===1,
+  'bounded multi-rule simp only did not construct a pskernel-admitted proof',
+);
+
+
+const verifiedDependentTheoremType=compileVerifiedSource(
+  'theorem succRewrite(a : Nat, h : Nat.succ(a) = a) : '+
+  'Nat.succ(a) = a := by rw [h];',
+  'verified-dependent-theorem-type.ts',
+);
+assert(
+  verifiedDependentTheoremType.checkedCore.theorems.length===1,
+  'dependent term application in theorem result type was not admitted',
+);
+
+
+const verifiedArithmeticTheoremType=compileVerifiedSource(
+  'theorem addZeroAssumed(n : Nat, h : n + 0 = n) : '+
+  'n + 0 = n := by rw [h];',
+  'verified-arithmetic-theorem-type.ts',
+);
+assert(
+  verifiedArithmeticTheoremType.checkedCore.theorems.length===1,
+  'Nat arithmetic/literal theorem result syntax was not admitted',
+);
+
+
+const verifiedRelationTheoremType=compileVerifiedSource(
+  'theorem leAssumed(x : Nat, y : Nat, h : x <= y) : '+
+  'x <= y := by assumption; '+
+  'theorem gtAssumed(x : Nat, y : Nat, h : x > y) : '+
+  'x > y := by assumption;',
+  'verified-relation-theorem-type.ts',
+);
+assert(
+  verifiedRelationTheoremType.checkedCore.theorems.length===2,
+  'Nat relation theorem result syntax was not admitted',
+);
+
+
+const verifiedBoolTheoremTerms=compileVerifiedSource(
+  'theorem beqAssumed(x : Nat, y : Nat, h : x == y = true) : '+
+  'x == y = true := by assumption; '+
+  'theorem boolLogicAssumed(p : Bool, q : Bool, h : !p || q = true) : '+
+  '!p || q = true := by assumption;',
+  'verified-bool-theorem-terms.ts',
+);
+assert(
+  verifiedBoolTheoremTerms.checkedCore.theorems.length===2,
+  'Bool-valued theorem term syntax was not admitted inside propositions',
+);
+
+
+const verifiedDependentPi=compileVerifiedSource(
+  'theorem dependentPiReflexive'+
+  '(f : (x : Nat) -> x = x, n : Nat) : n = n := by exact f(n);',
+  'verified-dependent-pi.ts',
+);
+assert(
+  verifiedDependentPi.checkedCore.theorems.length===1,
+  'explicit dependent Pi binder was not admitted through checked core',
+);
+
+
+const verifiedExactSearch=compileVerifiedSource(
+  'theorem exactSearchBase(P : Prop, h : P) : P := by assumption; '+
+  'theorem exactSearchCopy : (P : Prop) -> P -> P := by exact?;',
+  'verified-exact-search.ts',
+);
+assert(
+  verifiedExactSearch.checkedCore.theorems.length===2,
+  'bounded exact? did not construct a pskernel-admitted proof',
+);
+
+
+const verifiedExactSearchApplication=compileVerifiedSource(
+  'theorem exactSearchPoly {P : Prop} : P -> P := '+
+  'by intro h; exact h; '+
+  'theorem exactSearchPolyUse(Q : Prop) : Q -> Q := by exact?;',
+  'verified-exact-search-application.ts',
+);
+assert(
+  verifiedExactSearchApplication.checkedCore.theorems.length===2,
+  'bounded exact? did not infer a zero-subgoal candidate argument',
+);
+
+
+const verifiedExactSearchSymmetry=compileVerifiedSource(
+  'theorem exactSearchSymm'+
+  '(a : Nat, b : Nat, h : b = a) : a = b := by exact?;',
+  'verified-exact-search-symmetry.ts',
+);
+assert(
+  verifiedExactSearchSymmetry.checkedCore.theorems.length===1,
+  'bounded exact? Eq symmetry did not construct a pskernel-admitted proof',
+);
+
+
+const dualSourceCorpus=
+  'structure Box(α : Type) where { value : α; } '+
+  'class Sized(α : Type) where { size : α -> Nat; } '+
+  'inductive Choice where { | left; | right; } '+
+  'instance sizedNat : Sized(Nat) := '+
+  '{ size := fun x => x : Sized(Nat) }; '+
+  'def choose(flag : Bool) : Nat := match flag with { '+
+  '| true => 1; | false => 2; }; '+
+  'def viaWhere(x : Nat) : Nat := helper(x) where { '+
+  'helper(y : Nat) : Nat := y + 1; }; '+
+  'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;';
+
+const dualFrontends=createDefaultSourceFrontendRegistry();
+const dualTargets=createDefaultTranslationTargetPrinterRegistry();
+
+const dualPs=compileVerifiedSource(
+  dualSourceCorpus,
+  'dual-source-equivalence.ts',
+  'dual-source-equivalence.ps',
+);
+const dualLeanSource=dualTargets.require('lean').print(dualPs.surface);
+const dualLean=compileVerifiedSource(
+  dualLeanSource,
+  'dual-source-equivalence.ts',
+  'dual-source-equivalence.lean',
+);
+const dualProofScriptSource=dualTargets.require('ps').print(dualLean.surface);
+const dualPsRoundTrip=compileVerifiedSource(
+  dualProofScriptSource,
+  'dual-source-equivalence.ts',
+  'dual-source-equivalence-roundtrip.ps',
+);
+
+assert(
+  dualFrontends.forFile('x.ps').kind==='proofscript'
+    &&dualFrontends.forFile('x.lean').kind==='lean-subset',
+  'dual-source frontend registry did not select both source kinds',
+);
+assert(
+  dualPs.canonicalSourceHash===dualLean.canonicalSourceHash
+    &&dualLean.canonicalSourceHash===dualPsRoundTrip.canonicalSourceHash,
+  'dual-source canonical source identity diverged',
+);
+assert(
+  dualProofScriptSource===dualPs.canonicalSource,
+  'Lean -> ProofScript translation did not recover canonical shared source',
+);
+assert(
+  semanticFingerprint(dualPs.checkedCore.admissions)
+    ===semanticFingerprint(dualLean.checkedCore.admissions)
+    &&semanticFingerprint(dualLean.checkedCore.admissions)
+      ===semanticFingerprint(dualPsRoundTrip.checkedCore.admissions),
+  'PS/Lean round-trip changed pskernel checked-core admissions',
+);
+assert(
+  semanticFingerprint(dualPs.ir)===semanticFingerprint(dualLean.ir)
+    &&semanticFingerprint(dualLean.ir)
+      ===semanticFingerprint(dualPsRoundTrip.ir),
+  'PS/Lean round-trip changed verified compiler IR',
+);
+assert(
+  dualPs.typeScript===dualLean.typeScript
+    &&dualLean.typeScript===dualPsRoundTrip.typeScript,
+  'PS/Lean round-trip changed emitted TypeScript',
+);
+assert(
+  dualPs.emitted.javascript===dualLean.emitted.javascript
+    &&dualLean.emitted.javascript===dualPsRoundTrip.emitted.javascript,
+  'PS/Lean round-trip changed emitted JavaScript',
+);
+assert(
+  dualPs.emitted.declaration===dualLean.emitted.declaration
+    &&dualLean.emitted.declaration===dualPsRoundTrip.emitted.declaration,
+  'PS/Lean round-trip changed emitted TypeScript declarations',
+);
+
+let unsupportedLeanRejected=false;
+try{
+  compileVerifiedSource(
+    'namespace Demo\ndef x : Nat := 0\nend Demo\n',
+    'unsupported-lean.ts',
+    'unsupported-lean.lean',
+  );
+}catch(error){
+  unsupportedLeanRejected=
+    /PS_LEAN_SUBSET_UNSUPPORTED_COMMAND/.test(String(error));
+}
+assert(
+  unsupportedLeanRejected,
+  'unsupported Lean command did not fail closed before checked core',
 );
 
 
@@ -695,3 +930,75 @@ assert(
   verifiedGlobalInstance.emitted.javascript.includes('get(boxedNat, x)'),
   'global instance dictionary call did not compile to JavaScript',
 );
+
+const verifiedExternalChecked=checkVerifiedSource(
+  'extern function hostInc(x : Nat) : Nat from "host-lib" import inc; '+
+  'function main(x : Nat) : Nat := hostInc(x);',
+);
+const verifiedExternalIr=eraseCheckedCoreModule(
+  verifiedExternalChecked.checkedCore,
+);
+const verifiedExternalTs=emitVerifiedTypeScript(verifiedExternalIr);
+assert(
+  verifiedExternalChecked.checkedCore.externals.length===1,
+  'source external was not represented in checked core',
+);
+assert(
+  verifiedExternalTs.includes(
+    'import { inc as hostInc } from "host-lib";',
+  ),
+  'source external did not lower to named ESM import',
+);
+assert(
+  verifiedExternalTs.includes('return hostInc(x);'),
+  'source external call did not survive verified TypeScript emission',
+);
+
+
+const verifiedRfl=compileVerifiedSource(
+  'theorem boundedRfl(n : Nat) : n + 0 = n := by rfl;',
+  'verified-rfl.ts',
+);
+assert(
+  verifiedRfl.checkedCore.theorems.length===1,
+  'bounded Eq-only rfl did not construct a pskernel-admitted theorem',
+);
+
+const stdlibDirectory=fileURLToPath(
+  new URL('../stdlib/',import.meta.url),
+);
+const stdlibRun=await runCommand({
+  project:stdlibDirectory,
+  json:true,
+  verified:true,
+  passthrough:['9'],
+});
+assert(
+  stdlibRun.mainResult==='22',
+  'ProofScript-written stdlib dogfood program did not return 22',
+);
+assert(
+  stdlibRun.moduleCount===4,
+  'ProofScript-written stdlib project did not load four modules',
+);
+const stdlibModules=new Set(stdlibRun.moduleOrder);
+for(const moduleName of [
+  'ProofScript.Data.Option',
+  'ProofScript.Data.Result',
+  'ProofScript.Data.List',
+  'main',
+]){
+  assert(
+    stdlibModules.has(moduleName),
+    'ProofScript-written stdlib project missed module '+moduleName,
+  );
+}
+assert(
+  stdlibRun.assurance?.kernelCheckedTheoremCount===37,
+  'ProofScript-written stdlib theorems were not admitted by pskernel',
+);
+assert(
+  stdlibRun.assurance?.runtimeAssumptionCount===0,
+  'ProofScript-written stdlib unexpectedly depends on runtime externals',
+);
+

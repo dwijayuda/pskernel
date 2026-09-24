@@ -10,6 +10,14 @@ export function asSoftwareType(
   nominalTypes:ReadonlySet<string>=EMPTY_NOMINALS,
 ):SoftwareType {
   switch(type.kind){
+    case 'nat':
+    case 'bool':
+    case 'unary':
+    case 'binary':
+    case 'dependentArrow':
+      throw new Error(
+        'PS_CHECK_DEPENDENT_TYPE_TERM_UNSUPPORTED: theorem/type terms require verified elaboration',
+      );
     case 'group':
       return asSoftwareType(type.value,nominalTypes);
     case 'named':
@@ -23,6 +31,10 @@ export function asSoftwareType(
     case 'application':
       throw new Error(
         'PS_CHECK_TYPE_APPLICATION_UNSUPPORTED: applied/generic types require elaboration',
+      );
+    case 'equality':
+      throw new Error(
+        'PS_CHECK_PROPOSITION_EQUALITY_UNSUPPORTED: proof propositions require verified elaboration',
       );
     case 'arrow':
       return {

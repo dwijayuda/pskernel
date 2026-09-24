@@ -5,254 +5,39 @@ import {
   levelSucc,
   levelZero,
   mkAppN,
-  nameFromDotted,
-  type Expr,
 } from 'lean-ts-kernel';
 import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
 } from './v061-context.js';
+import {
+  elaborateV061NatArithmeticExpression,
+  elaborateV061NatCondition,
+  isV061NatRelation,
+  type ElaboratedNatCondition,
+} from './v061-nat-notation-elab.js';
+import {
+  elaborateV061BoolBinaryNotation,
+  elaborateV061PrimitiveBooleanEquality,
+  isV061BoolBinary,
+} from './v061-bool-notation-elab.js';
+import {
+  requireV061NotationConstant,
+  type V061TermElaborator,
+} from './v061-notation-support.js';
 
-export type V061TermElaborator=(
-  expr:V061Expr,
-  context:V061CoreElabContext,
-  expected?:Expr,
-)=>ElaboratedCoreTerm;
-
-const natArithmetic=new Map<string,string>([
-  ['+','Nat.add'],
-  ['-','Nat.sub'],
-  ['*','Nat.mul'],
-  ['/','Nat.div'],
-  ['%','Nat.mod'],
-]);
-
-const boolBinary=new Map<string,string>([
-  ['&&','Bool.and'],
-  ['||','Bool.or'],
-]);
-
-type NatRelationKind='le'|'lt';
-const natRelations=new Map<
-  string,
-  {readonly kind:NatRelationKind;readonly reverse:boolean}
->([
-  ['<=',{kind:'le',reverse:false}],
-  ['>=',{kind:'le',reverse:true}],
-  ['<',{kind:'lt',reverse:false}],
-  ['>',{kind:'lt',reverse:true}],
-]);
-
-function requireConstant(
-  context:V061CoreElabContext,
-  name:string,
-):ReturnType<typeof nameFromDotted> {
-  const parsed=nameFromDotted(name);
-  if(context.environment.find(parsed)===undefined){
-    throw new Error(
-      "PS_ELAB_NAT_ENVIRONMENT: '"+name+
-      "' is unavailable in the elaboration environment",
-    );
-  }
-  return parsed;
-}
-
-function elaborateBoolOperands(
-  expr:Extract<V061Expr,{kind:'binary'}>,
-  context:V061CoreElabContext,
-  elaborate:V061TermElaborator,
-){
-  const boolType=constant(requireConstant(context,'Bool'));
-  const checker=new TypeChecker(
-    context.environment,
-    context.localContext.clone(),
-  );
-  const left=elaborate(expr.left,context,boolType);
-  const right=elaborate(expr.right,context,boolType);
-  if(
-    !checker.isDefEq(left.type,boolType)
-    ||!checker.isDefEq(right.type,boolType)
-  ){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_OPERAND_TYPE: operator '"+expr.operator+
-      "' requires Bool operands",
-    );
-  }
-  return {checker,boolType,left,right};
-}
-
-function elaborateNatOperands(
-  expr:Extract<V061Expr,{kind:'binary'}>,
-  context:V061CoreElabContext,
-  elaborate:V061TermElaborator,
-){
-  const natName=requireConstant(context,'Nat');
-  const natType=constant(natName);
-  const checker=new TypeChecker(
-    context.environment,
-    context.localContext.clone(),
-  );
-  const left=elaborate(expr.left,context,natType);
-  const right=elaborate(expr.right,context,natType);
-  if(
-    !checker.isDefEq(left.type,natType)
-    ||!checker.isDefEq(right.type,natType)
-  ){
-    throw new Error(
-      "PS_ELAB_NAT_NOTATION_OPERAND_TYPE: operator '"+expr.operator+
-      "' currently supports Nat operands only",
-    );
-  }
-  return {checker,natType,left,right};
-}
-
-export interface ElaboratedNatCondition extends ElaboratedCoreTerm {
-  readonly decider:Expr;
-}
-
-function elaboratePrimitiveBooleanEquality(
-  expr:Extract<V061Expr,{kind:'binary'}>,
-  context:V061CoreElabContext,
-  elaborate:V061TermElaborator,
-):ElaboratedCoreTerm {
-  const checker=new TypeChecker(
-    context.environment,
-    context.localContext.clone(),
-  );
-  const left=elaborate(expr.left,context);
-  const natType=constant(requireConstant(context,'Nat'));
-  const boolType=constant(requireConstant(context,'Bool'));
-  let operandType:Expr;
-  let equalityName:string;
-  if(checker.isDefEq(left.type,natType)){
-    operandType=natType;
-    equalityName='Nat.beq';
-  }else if(checker.isDefEq(left.type,boolType)){
-    operandType=boolType;
-    equalityName='Bool.beq';
-  }else{
-    throw new Error(
-      "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+expr.operator+
-      "' currently supports Nat or Bool operands",
-    );
-  }
-  const right=elaborate(expr.right,context,operandType);
-  if(!checker.isDefEq(right.type,operandType)){
-    throw new Error(
-      "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+expr.operator+
-      "' requires matching primitive operands",
-    );
-  }
-  const equality=mkAppN(
-    constant(requireConstant(context,equalityName)),
-    [left.term,right.term],
-  );
-  const equalityType=checker.check(equality);
-  if(!checker.isDefEq(equalityType,boolType)){
-    throw new Error(
-      "PS_ELAB_EQUALITY_RESULT: '"+equalityName+"' did not produce Bool",
-    );
-  }
-  if(expr.operator==='=='){
-    return {term:equality,type:equalityType};
-  }
-  if(expr.operator==='!='){
-    const term=mkAppN(
-      constant(requireConstant(context,'Bool.not')),
-      [equality],
-    );
-    const type=checker.check(term);
-    if(!checker.isDefEq(type,boolType)){
-      throw new Error(
-        "PS_ELAB_INEQUALITY_RESULT: 'Bool.not' did not produce Bool",
-      );
-    }
-    return {term,type};
-  }
-  throw new Error(
-    "PS_ELAB_EQUALITY_OPERATOR: unsupported operator '"+expr.operator+"'",
-  );
-}
-
-export function elaborateV061NatCondition(
-  expr:Extract<V061Expr,{kind:'binary'}>,
-  context:V061CoreElabContext,
-  elaborate:V061TermElaborator,
-):ElaboratedNatCondition {
-  if(expr.operator==='=='||expr.operator==='!='){
-    const equality=elaboratePrimitiveBooleanEquality(
-      expr,
-      context,
-      elaborate,
-    );
-    const checker=new TypeChecker(
-      context.environment,
-      context.localContext.clone(),
-    );
-    const boolType=constant(requireConstant(context,'Bool'));
-    const trueTerm=constant(requireConstant(context,'Bool.true'));
-    const term=mkAppN(
-      constant(
-        requireConstant(context,'Eq'),
-        [levelSucc(levelZero)],
-      ),
-      [boolType,equality.term,trueTerm],
-    );
-    const type=checker.check(term);
-    const decider=mkAppN(
-      constant(requireConstant(context,'Bool.decEq')),
-      [equality.term,trueTerm],
-    );
-    checker.check(decider);
-    return {term,type,decider};
-  }
-
-  const relation=natRelations.get(expr.operator);
-  if(relation===undefined){
-    throw new Error(
-      "PS_ELAB_CONDITION_UNSUPPORTED: operator '"+expr.operator+
-      "' is not a supported Nat proposition/boolean condition",
-    );
-  }
-  const {checker,natType,left,right}=elaborateNatOperands(
-    expr,
-    context,
-    elaborate,
-  );
-  const first=relation.reverse?right.term:left.term;
-  const second=relation.reverse?left.term:right.term;
-
-  const relationClass=relation.kind==='le'?'LE.le':'LT.lt';
-  const instance=relation.kind==='le'?'instLENat':'instLTNat';
-  const deciderName=relation.kind==='le'?'Nat.decLe':'Nat.decLt';
-  const term=mkAppN(
-    constant(requireConstant(context,relationClass),[levelZero]),
-    [
-      natType,
-      constant(requireConstant(context,instance)),
-      first,
-      second,
-    ],
-  );
-  const type=checker.check(term);
-  const decider=mkAppN(
-    constant(requireConstant(context,deciderName)),
-    [first,second],
-  );
-  checker.check(decider);
-  return {term,type,decider};
-}
+export type {V061TermElaborator} from './v061-notation-support.js';
+export {elaborateV061UnaryNotation} from './v061-bool-notation-elab.js';
 
 export function elaborateV061Condition(
   expr:V061Expr,
   context:V061CoreElabContext,
   elaborate:V061TermElaborator,
-):ElaboratedNatCondition {
-  if(expr.kind==='binary'&&natRelations.has(expr.operator)){
+):ElaboratedCoreTerm&{readonly decider:import('lean-ts-kernel').Expr} {
+  if(expr.kind==='binary'&&isV061NatRelation(expr.operator)){
     return elaborateV061NatCondition(expr,context,elaborate);
   }
-
-  const boolType=constant(requireConstant(context,'Bool'));
+  const boolType=constant(requireV061NotationConstant(context,'Bool'));
   const checked=elaborate(expr,context,boolType);
   const checker=new TypeChecker(
     context.environment,
@@ -263,105 +48,40 @@ export function elaborateV061Condition(
       'PS_ELAB_IF_CONDITION_BOOL: condition did not elaborate to Bool',
     );
   }
-  const trueTerm=constant(requireConstant(context,'Bool.true'));
+  const trueTerm=constant(requireV061NotationConstant(context,'Bool.true'));
   const term=mkAppN(
     constant(
-      requireConstant(context,'Eq'),
+      requireV061NotationConstant(context,'Eq'),
       [levelSucc(levelZero)],
     ),
     [boolType,checked.term,trueTerm],
   );
   const type=checker.check(term);
   const decider=mkAppN(
-    constant(requireConstant(context,'Bool.decEq')),
+    constant(requireV061NotationConstant(context,'Bool.decEq')),
     [checked.term,trueTerm],
   );
   checker.check(decider);
   return {term,type,decider};
 }
 
-export function elaborateV061UnaryNotation(
-  expr:Extract<V061Expr,{kind:'unary'}>,
-  context:V061CoreElabContext,
-  expected:Expr|undefined,
-  elaborate:V061TermElaborator,
-):ElaboratedCoreTerm {
-  const boolType=constant(requireConstant(context,'Bool'));
-  const checker=new TypeChecker(
-    context.environment,
-    context.localContext.clone(),
-  );
-  const operand=elaborate(expr.operand,context,boolType);
-  if(!checker.isDefEq(operand.type,boolType)){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_OPERAND_TYPE: operator '!' requires Bool",
-    );
-  }
-  if(
-    expected!==undefined
-    &&!checker.isDefEq(
-      context.metaContext.instantiate(expected),
-      boolType,
-    )
-  ){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_EXPECTED_TYPE: operator '!' produces Bool",
-    );
-  }
-  const term=mkAppN(
-    constant(requireConstant(context,'Bool.not')),
-    [operand.term],
-  );
-  const type=checker.check(term);
-  if(!checker.isDefEq(type,boolType)){
-    throw new Error(
-      "PS_ELAB_BOOL_NOTATION_RESULT: 'Bool.not' did not produce Bool",
-    );
-  }
-  return {term,type};
-}
-
 export function elaborateV061BinaryNotation(
   expr:Extract<V061Expr,{kind:'binary'}>,
   context:V061CoreElabContext,
-  expected:Expr|undefined,
+  expected:import('lean-ts-kernel').Expr|undefined,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
-  const boolConstant=boolBinary.get(expr.operator);
-  if(boolConstant!==undefined){
-    const {checker,boolType,left,right}=elaborateBoolOperands(
+  if(isV061BoolBinary(expr.operator)){
+    return elaborateV061BoolBinaryNotation(
       expr,
       context,
+      expected,
       elaborate,
     );
-    if(
-      expected!==undefined
-      &&!checker.isDefEq(
-        context.metaContext.instantiate(expected),
-        boolType,
-      )
-    ){
-      throw new Error(
-        "PS_ELAB_BOOL_NOTATION_EXPECTED_TYPE: operator '"+expr.operator+
-        "' produces Bool",
-      );
-    }
-    const term=mkAppN(
-      constant(requireConstant(context,boolConstant)),
-      [left.term,right.term],
-    );
-    const type=checker.check(term);
-    if(!checker.isDefEq(type,boolType)){
-      throw new Error(
-        "PS_ELAB_BOOL_NOTATION_RESULT: '"+boolConstant+
-        "' did not produce Bool",
-      );
-    }
-    return {term,type};
   }
 
   if(expr.operator==='=='||expr.operator==='!='){
-    const equality=elaboratePrimitiveBooleanEquality(
+    const equality=elaborateV061PrimitiveBooleanEquality(
       expr,
       context,
       elaborate,
@@ -385,8 +105,12 @@ export function elaborateV061BinaryNotation(
     return equality;
   }
 
-  if(natRelations.has(expr.operator)){
-    const condition=elaborateV061NatCondition(expr,context,elaborate);
+  if(isV061NatRelation(expr.operator)){
+    const condition=elaborateV061NatCondition(
+      expr,
+      context,
+      elaborate,
+    );
     const checker=new TypeChecker(
       context.environment,
       context.localContext.clone(),
@@ -403,43 +127,10 @@ export function elaborateV061BinaryNotation(
     return {term:condition.term,type:condition.type};
   }
 
-  const constantName=natArithmetic.get(expr.operator);
-  if(constantName===undefined){
-    throw new Error(
-      "PS_ELAB_NOTATION_UNSUPPORTED: operator '"+expr.operator+
-      "' requires Lean-compatible notation/typeclass elaboration",
-    );
-  }
-
-  const {checker,natType,left,right}=elaborateNatOperands(
+  return elaborateV061NatArithmeticExpression(
     expr,
     context,
+    expected,
     elaborate,
   );
-  if(
-    expected!==undefined
-    &&!checker.isDefEq(
-      context.metaContext.instantiate(expected),
-      natType,
-    )
-  ){
-    throw new Error(
-      "PS_ELAB_NAT_NOTATION_EXPECTED_TYPE: operator '"+expr.operator+
-      "' currently supports Nat results only",
-    );
-  }
-
-  const operationName=requireConstant(context,constantName);
-  const term=mkAppN(
-    constant(operationName),
-    [left.term,right.term],
-  );
-  const type=checker.check(term);
-  if(!checker.isDefEq(type,natType)){
-    throw new Error(
-      "PS_ELAB_NAT_NOTATION_RESULT: '"+constantName+
-      "' did not produce Nat",
-    );
-  }
-  return {term,type};
 }

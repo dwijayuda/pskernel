@@ -30,20 +30,78 @@ export interface ElaboratedApplication {
   readonly consumedExplicitArgs:number;
 }
 
+export interface ApplicationArgument {
+  readonly term:Expr;
+  readonly type?:Expr;
+  readonly allowUnresolvedMVar?:boolean;
+}
+
+export interface ApplicationArgumentSource {
+  readonly length:number;
+  elaborate(index:number,expectedType:Expr):ApplicationArgument;
+}
+
+export type ApplicationArguments=
+  | readonly Expr[]
+  | ApplicationArgumentSource;
+
 export interface ElaborateApplicationOptions {
   readonly environment:Environment;
   readonly metaContext:ExprMetaContext;
   readonly fn:Expr;
-  readonly args:readonly Expr[];
+  readonly args:ApplicationArguments;
   readonly expectedType?:Expr;
   readonly localContext?:LocalContext;
   readonly localInstances?:readonly Expr[];
-  readonly globalInstances?:readonly Expr[];
-  readonly classNames?:ReadonlySet<string>;
+  readonly globalInstances?:readonly Expr[]|undefined;
+  readonly classNames?:ReadonlySet<string>|undefined;
 }
 
 function implicitKind(info:BinderInfo):ExprMetavarKind {
   return info==='instImplicit'?'synthetic':'natural';
+}
+
+function isArgumentSource(
+  args:ApplicationArguments,
+):args is ApplicationArgumentSource {
+  return !Array.isArray(args);
+}
+
+function hasExprMVar(expr:Expr):boolean {
+  const todo:Expr[]=[expr];
+  while(todo.length>0){
+    const current=todo.pop()!;
+    switch(current.kind){
+      case 'mvar':
+        return true;
+      case 'app':
+        todo.push(current.fn,current.arg);
+        break;
+      case 'lam':
+      case 'forall':
+        todo.push(current.type,current.body);
+        break;
+      case 'let':
+        todo.push(current.type,current.value,current.body);
+        break;
+      case 'mdata':
+      case 'proj':
+        todo.push(current.expr);
+        break;
+      default:
+        break;
+    }
+  }
+  return false;
+}
+
+function explicitArgument(
+  args:ApplicationArguments,
+  index:number,
+  expectedType:Expr,
+):ApplicationArgument {
+  if(isArgumentSource(args))return args.elaborate(index,expectedType);
+  return {term:args[index]!};
 }
 
 function targetClassName(
@@ -96,9 +154,9 @@ export function elaborateApplication({
   classNames=new Set(),
 }:ElaborateApplicationOptions):ElaboratedApplication {
   const checker=new TypeChecker(environment,localContext.clone());
-  if(hasMVar(metaContext.instantiate(fn))){
+  if(hasExprMVar(metaContext.instantiate(fn))){
     throw new Error(
-      'PS_ELAB_APP_FUNCTION_STUCK: function expression contains unresolved metavariables',
+      'PS_ELAB_APP_FUNCTION_STUCK: function expression contains unresolved expression metavariables',
     );
   }
 
@@ -124,19 +182,49 @@ export function elaborateApplication({
 
     if(functionType.binderInfo==='default'){
       if(explicitIndex>=args.length)break;
-      const sourceArg=args[explicitIndex++]!;
+      const expectedArgumentType=metaContext.instantiate(functionType.type);
+      const supplied=explicitArgument(
+        args,
+        explicitIndex++,
+        expectedArgumentType,
+      );
+      const sourceArg=supplied.term;
       const argument=metaContext.instantiate(sourceArg);
-      if(hasMVar(argument)){
-        throw new Error(
-          'PS_ELAB_APP_ARGUMENT_STUCK: explicit argument contains unresolved metavariables',
-        );
+
+      let actualType:Expr;
+      if(hasExprMVar(argument)){
+        if(!supplied.allowUnresolvedMVar){
+          throw new Error(
+            'PS_ELAB_APP_ARGUMENT_STUCK: explicit argument contains unresolved expression metavariables',
+          );
+        }
+        if(supplied.type!==undefined){
+          actualType=metaContext.instantiate(supplied.type);
+        }else if(argument.kind==='mvar'){
+          actualType=metaContext.instantiate(
+            metaContext.getDecl(argument).type,
+          );
+        }else{
+          throw new Error(
+            'PS_ELAB_APP_ARGUMENT_STUCK: postponed compound argument requires its elaborated type',
+          );
+        }
+      }else{
+        actualType=supplied.type===undefined
+          ?checker.check(argument)
+          :metaContext.instantiate(supplied.type);
       }
 
-      const actualType=checker.check(argument);
-      const expectedType=metaContext.instantiate(functionType.type);
-      if(!metaContext.unify(actualType,expectedType,localContext)){
+      if(
+        !metaContext.unify(
+          actualType,
+          expectedArgumentType,
+          localContext,
+        )
+      ){
         throw new Error(
-          'PS_ELAB_APP_TYPE_MISMATCH: expected '+exprToString(expectedType)+
+          'PS_ELAB_APP_TYPE_MISMATCH: expected '+
+          exprToString(expectedArgumentType)+
           ', got '+exprToString(actualType),
         );
       }

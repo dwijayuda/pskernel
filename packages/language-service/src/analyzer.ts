@@ -1,19 +1,22 @@
 import {
   SyntaxError as ProofScriptSyntaxError,
+  createDefaultSourceFrontendRegistry,
   lowerV061ModuleToLean,
-  parseV061Module,
   type V061Declaration,
   type V061Module,
 } from '@proofscript/syntax';
 import {
   elaborateV061Declarations,
   elaborateV061ValueHeader,
+  type V061ElaborationSeed,
 } from '@proofscript/elab';
 import {
   Environment,
+  constant,
   exprToString,
   levelToString,
   normalizesToZero,
+  nameToString,
   type Expr,
 } from 'lean-ts-kernel';
 import type {
@@ -28,7 +31,15 @@ import {rangeFromOffsets} from './positions.js';
 
 export interface AnalysisOptions {
   readonly environmentFactory?:()=>Environment;
+  readonly environment?:Environment;
+  readonly seed?:V061ElaborationSeed;
+  readonly project?:{
+    readonly entryModule:string;
+    readonly moduleOrder:readonly string[];
+  };
 }
+
+const sourceFrontends=createDefaultSourceFrontendRegistry();
 
 function displayCoreExpr(
   expr:Expr,
@@ -51,10 +62,27 @@ function displayCoreExpr(
 function initialTheoremGoal(
   declaration:V061Declaration,
   environment:Environment,
+  seed:V061ElaborationSeed,
 ):ProofGoal|undefined {
   if(declaration.kind!=='theorem')return undefined;
   try{
-    const header=elaborateV061ValueHeader(declaration,environment);
+    const structures=new Map(
+      seed.structures.map((item)=>[nameToString(item.name),item]),
+    );
+    const classes=new Set(
+      seed.classes.map((item)=>nameToString(item.name)),
+    );
+    const globalInstances=seed.instances
+      .slice()
+      .reverse()
+      .map((item)=>constant(item.name));
+    const header=elaborateV061ValueHeader(
+      declaration,
+      environment,
+      structures,
+      classes,
+      globalInstances,
+    );
     const ids=new Map(
       header.parameters.map((parameter)=>[
         parameter.id,
@@ -128,7 +156,7 @@ export function analyzeDocument(
 ):DocumentAnalysis {
   let module:V061Module;
   try{
-    module=parseV061Module(snapshot.text);
+    module=sourceFrontends.require(snapshot.sourceKind).parse(snapshot.text);
   }catch(error){
     if(error instanceof ProofScriptSyntaxError){
       return {
@@ -154,19 +182,35 @@ export function analyzeDocument(
   }
 
   const canonicalLean=lowerV061ModuleToLean(module);
-  const environment=options.environmentFactory?.()??new Environment();
+  let environment=(
+    options.environment
+    ??options.environmentFactory?.()
+    ??new Environment()
+  ).clone();
+  let seed:V061ElaborationSeed=options.seed??{
+    structures:[],
+    classes:[],
+    instances:[],
+  };
   const declarations:DeclarationStatus[]=[];
   const diagnostics:ServiceDiagnostic[]=[];
 
   for(const declaration of module.declarations){
-    const initialGoal=initialTheoremGoal(declaration,environment);
+    const initialGoal=initialTheoremGoal(declaration,environment,seed);
     let kernel:DeclarationKernelStatus='not-run';
     let message:string|undefined;
     try{
-      elaborateV061Declarations(
+      const checked=elaborateV061Declarations(
         singleDeclarationModule(module,declaration),
         environment,
+        seed,
       );
+      environment=checked.environment;
+      seed={
+        structures:[...seed.structures,...checked.structures],
+        classes:[...seed.classes,...checked.classes],
+        instances:[...seed.instances,...checked.instances],
+      };
       kernel='verified';
     }catch(error){
       message=error instanceof Error?error.message:String(error);
@@ -215,5 +259,6 @@ export function analyzeDocument(
     diagnostics,
     declarations,
     canonicalLean,
+    ...(options.project===undefined?{}:{project:options.project}),
   };
 }

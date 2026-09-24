@@ -5,6 +5,13 @@ import {
   type ServiceDiagnostic,
 } from '@proofscript/language-service';
 import {createInitPreludeEnvironmentProvider} from './prelude-environment.js';
+import {sourceKindFromLspDocument} from './source-kind.js';
+import {createNodeProjectSourceHost} from './project-source-host.js';
+import {
+  PROOFSCRIPT_LSP_PROTOCOL_VERSION,
+  lspCapabilities,
+} from './capabilities.js';
+import {diagnosticRefreshUris} from './diagnostic-refresh.js';
 
 interface RpcMessage {
   readonly jsonrpc?:string;
@@ -13,28 +20,11 @@ interface RpcMessage {
   readonly params?:any;
 }
 
-export const PROOFSCRIPT_LSP_PROTOCOL_VERSION=1;
-
-export function lspCapabilities(){
-  return {
-    textDocumentSync:1,
-    hoverProvider:true,
-    completionProvider:{triggerCharacters:['.']},
-    definitionProvider:true,
-    referencesProvider:true,
-    documentSymbolProvider:true,
-    experimental:{
-      proofscriptProtocolVersion:PROOFSCRIPT_LSP_PROTOCOL_VERSION,
-      proofState:true,
-      documentStatus:true,
-    },
-  };
-}
-
 export class ProofScriptLanguageServer {
   private readonly prelude=createInitPreludeEnvironmentProvider();
   private readonly service=new ProofScriptLanguageService({
     environmentFactory:()=>this.prelude.create(),
+    projectHost:createNodeProjectSourceHost(),
   });
   private input=Buffer.alloc(0);
   private shutdownRequested=false;
@@ -97,8 +87,12 @@ export class ProofScriptLanguageServer {
             document.uri,
             document.version??0,
             document.text??'',
+            sourceKindFromLspDocument(
+              document.languageId,
+              document.uri,
+            ),
           );
-          this.publishDiagnostics(document.uri);
+          this.publishOpenDiagnostics();
           return;
         }
         case 'textDocument/didChange':{
@@ -109,7 +103,7 @@ export class ProofScriptLanguageServer {
             ?String(changes[changes.length-1]?.text??'')
             :(this.service.getDocument(uri)?.text??'');
           this.service.replaceDocument(uri,version,text);
-          this.publishDiagnostics(uri);
+          this.publishOpenDiagnostics();
           return;
         }
         case 'textDocument/didClose':{
@@ -119,6 +113,7 @@ export class ProofScriptLanguageServer {
             uri,
             diagnostics:[],
           });
+          this.publishOpenDiagnostics();
           return;
         }
         case 'textDocument/completion':
@@ -179,6 +174,15 @@ export class ProofScriptLanguageServer {
             this.service.documentStatus(message.params.textDocument.uri),
           );
           return;
+        case 'proofscript/translateDocument':
+          this.reply(
+            message.id,
+            this.service.translateDocument(
+              message.params.textDocument.uri,
+              message.params.target,
+            ),
+          );
+          return;
         case 'proofscript/serverInfo':
           this.reply(message.id,{
             protocolVersion:PROOFSCRIPT_LSP_PROTOCOL_VERSION,
@@ -186,6 +190,7 @@ export class ProofScriptLanguageServer {
             proofStateGranularity:'declaration',
             cursorSensitiveTacticSteps:false,
             editorEnvironment:this.prelude.status(),
+            projectAwareImports:true,
           });
           return;
         default:
@@ -199,6 +204,12 @@ export class ProofScriptLanguageServer {
       }else{
         this.log(messageOf(error));
       }
+    }
+  }
+
+  private publishOpenDiagnostics():void {
+    for(const uri of diagnosticRefreshUris(this.service.openDocumentUris())){
+      this.publishDiagnostics(uri);
     }
   }
 

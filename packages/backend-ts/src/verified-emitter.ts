@@ -19,6 +19,11 @@ export function emitVerifiedTypeScript(
   const tags=buildTagMap(module);
   const lines=[
     '// generated from pskernel-admitted ProofScript checked core',
+    ...(module.imports??[]).map((item)=>
+      'import { '+item.importedName+
+      (item.importedName===item.localName?'':' as '+item.localName)+
+      ' } from '+JSON.stringify(item.source)+';'
+    ),
     ...emitVerifiedStructures(module,brands),
     ...emitVerifiedInductives(module,tags),
   ];

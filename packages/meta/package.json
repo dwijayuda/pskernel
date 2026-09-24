@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Metavariables, unification, transparency, goals and instance synthesis.",
   "proofscript": {
-    "status": "expr-mvar-context-mvp",
+    "status": "expr+level-mvar-context-mvp",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

@@ -7,9 +7,11 @@ import {
   type DefinitionInfo,
   type Expr,
   type TheoremInfo,
+  nameToString,
 } from 'lean-ts-kernel';
 import {
   admitCheckedCoreAdmissions,
+  validateCheckedCoreExternal,
   type CheckedCoreAdmission,
   type CheckedCoreModule,
   type CheckedCoreStructure,
@@ -19,6 +21,7 @@ import {elaborateV061ClassDeclaration} from './v061-class-elab.js';
 import {elaborateV061InductiveDeclaration} from './v061-inductive-elab.js';
 import {elaborateV061ValueDeclaration} from './v061-value-declaration-elab.js';
 import {elaborateV061InstanceDeclaration} from './v061-instance-elab.js';
+import {elaborateV061ExternalDeclaration} from './v061-external-elab.js';
 
 function declarationFailure(
   name:string,
@@ -30,19 +33,63 @@ function declarationFailure(
 
 export type ElaboratedV061Module=CheckedCoreModule;
 
+export type V061ElaborationSeed=Pick<
+  CheckedCoreModule,
+  'structures'|'classes'|'instances'
+>;
+
+const EMPTY_V061_ELABORATION_SEED:V061ElaborationSeed={
+  structures:[],
+  classes:[],
+  instances:[],
+};
+
 export function elaborateV061Definitions(
   module:V061Module,
   environment=new Environment(),
+  seed:V061ElaborationSeed=EMPTY_V061_ELABORATION_SEED,
 ):ElaboratedV061Module {
   const baseEnvironment=environment.clone();
   const workEnvironment=environment.clone();
   const admissions:CheckedCoreAdmission[]=[];
-  const structures=new Map<string,CheckedCoreStructure>();
-  const classes=new Set<string>();
-  const globalInstances:Expr[]=[];
+  const structures=new Map<string,CheckedCoreStructure>(
+    seed.structures.map((item)=>[nameToString(item.name),item]),
+  );
+  const classes=new Set<string>(
+    seed.classes.map((item)=>nameToString(item.name)),
+  );
+  const globalInstances:Expr[]=[
+    ...seed.instances,
+  ].reverse().map((item)=>constant(item.name));
   const kernel=new Kernel(workEnvironment);
 
   for(const declaration of module.declarations){
+    if(declaration.kind==='external'){
+      try{
+        const info=elaborateV061ExternalDeclaration(
+          declaration,
+          workEnvironment,
+          structures,
+          classes,
+          globalInstances,
+        );
+        const external={
+          declaration:info,
+          binding:declaration.binding,
+        };
+        validateCheckedCoreExternal(external,workEnvironment);
+        kernel.addAxiom(info);
+        admissions.push({
+          kind:'external',
+          declaration:info,
+          binding:declaration.binding,
+        });
+      }catch(error){
+        throw declarationFailure(declaration.name,error);
+      }
+      continue;
+    }
+
     if(declaration.kind==='structure'){
       try{
         const result=elaborateV061StructureDeclaration(

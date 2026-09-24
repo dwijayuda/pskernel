@@ -32,17 +32,48 @@ export interface V061LambdaBinder {
 
 export type V061Tactic =
   | {readonly kind:'exact';readonly proof:V061Expr;readonly span:SourceSpan}
+  | {readonly kind:'exactSearch';readonly span:SourceSpan}
   | {readonly kind:'assumption';readonly span:SourceSpan}
+  | {readonly kind:'rfl';readonly span:SourceSpan}
+  | {readonly kind:'constructor';readonly span:SourceSpan}
+  | {
+      readonly kind:'cases';
+      readonly target:string;
+      readonly span:SourceSpan;
+    }
+  | {
+      readonly kind:'induction';
+      readonly target:string;
+      readonly span:SourceSpan;
+    }
+  | {
+      readonly kind:'rw';
+      readonly proof:V061Expr;
+      readonly symm:boolean;
+      readonly span:SourceSpan;
+    }
+  | {
+      readonly kind:'simp';
+      readonly rules:readonly {
+        readonly proof:V061Expr;
+        readonly symm:boolean;
+        readonly span:SourceSpan;
+      }[];
+      readonly span:SourceSpan;
+    }
   | {
       readonly kind:'apply';
       readonly proof:V061Expr;
-      readonly next:V061Tactic;
+      readonly span:SourceSpan;
+    }
+  | {
+      readonly kind:'refine';
+      readonly proof:V061Expr;
       readonly span:SourceSpan;
     }
   | {
       readonly kind:'intro';
       readonly name:string;
-      readonly next:V061Tactic;
       readonly span:SourceSpan;
     };
 
@@ -51,6 +82,7 @@ export type V061Expr =
   | {readonly kind:'string';readonly value:string;readonly span:SourceSpan}
   | {readonly kind:'bool';readonly value:boolean;readonly span:SourceSpan}
   | {readonly kind:'unit';readonly span:SourceSpan}
+  | {readonly kind:'syntheticHole';readonly span:SourceSpan}
   | {readonly kind:'reference';readonly name:string;readonly span:SourceSpan}
   | {readonly kind:'group';readonly value:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'call';readonly callee:string;readonly args:readonly V061Expr[];readonly span:SourceSpan}
@@ -58,7 +90,7 @@ export type V061Expr =
   | {readonly kind:'binary';readonly operator:string;readonly left:V061Expr;readonly right:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'if';readonly condition:V061Expr;readonly thenBranch:V061Expr;readonly elseBranch:V061Expr;readonly span:SourceSpan}
   | {readonly kind:'lambda';readonly binders:readonly V061LambdaBinder[];readonly body:V061Expr;readonly span:SourceSpan}
-  | {readonly kind:'by';readonly tactic:V061Tactic;readonly span:SourceSpan}
+  | {readonly kind:'by';readonly tactics:readonly V061Tactic[];readonly span:SourceSpan}
   | {
       readonly kind:'record';
       readonly fields:readonly V061RecordField[];
@@ -111,6 +143,19 @@ export interface V061WhereDeclaration {
   readonly span:SourceSpan;
 }
 
+export interface V061ExternalDeclaration {
+  readonly kind:'external';
+  readonly name:string;
+  readonly params:readonly V061Parameter[];
+  readonly resultType:V061TypeExpr;
+  readonly binding:{
+    readonly source:string;
+    readonly importedName:string;
+  };
+  readonly terminatedBySemicolon:boolean;
+  readonly span:SourceSpan;
+}
+
 export interface V061ValueDeclaration {
   readonly kind:'const'|'def'|'function'|'theorem';
   readonly name:string;
@@ -153,6 +198,7 @@ export interface V061StructureDeclaration {
 
 export type V061Declaration=
   | V061ValueDeclaration
+  | V061ExternalDeclaration
   | V061StructureDeclaration
   | V061ClassDeclaration
   | V061InstanceDeclaration
@@ -160,6 +206,7 @@ export type V061Declaration=
 
 export interface V061Module {
   readonly kind:'v061-module';
+  readonly imports?:readonly string[];
   readonly declarations:readonly V061Declaration[];
   readonly featureIds:readonly ProofScriptFeatureId[];
 }

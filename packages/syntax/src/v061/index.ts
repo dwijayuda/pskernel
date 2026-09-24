@@ -1,4 +1,5 @@
 export * from './type-parser.js';
+export * from './type-lowering.js';
 export * from './pattern-parser.js';
 export * from './record-parser.js';
 export * from './parameter-parser.js';
@@ -13,6 +14,15 @@ export * from './class-parser.js';
 export * from './inductive-parser.js';
 export * from './where-parser.js';
 export * from './declaration-parser.js';
+export * from './external-parser.js';
+export * from './module-import-parser.js';
+export * from './frontend.js';
+export * from './lean-subset-expression-parser.js';
+export * from './lean-subset-parser.js';
+export * from './translation-target.js';
+export * from './proofscript-type-lowering.js';
+export * from './proofscript-expression-lowering.js';
+export * from './proofscript-lowering.js';
 export * from './lean-lowering.js';
 
 export * from './instance-parser.js';

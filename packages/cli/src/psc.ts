@@ -1,5 +1,5 @@
 import {LEAN_SEMANTICS_VERSION,PROOFSCRIPT_SPEC_VERSION} from '@proofscript/syntax';
-import {parseCommonArgs} from './args.js';
+import {parseCommonArgs,parseTranslateArgs} from './args.js';
 import {HELP,PSC_VERSION} from './help.js';
 import {outputResult} from './output.js';
 import {buildCommand} from './commands/build.js';
@@ -8,6 +8,7 @@ import {cleanCommand} from './commands/clean.js';
 import {emitLeanCommand} from './commands/emit-lean.js';
 import {initCommand} from './commands/init.js';
 import {runCommand} from './commands/run.js';
+import {translateCommand} from './commands/translate.js';
 
 export {HELP,PSC_VERSION};
 
@@ -24,6 +25,13 @@ export async function runPsc(argv:readonly string[]):Promise<number>{
     }
     if(command==='init'){
       outputResult(await initCommand(rest),false);
+      return 0;
+    }
+
+    if(command==='translate'){
+      process.stdout.write(
+        await translateCommand(parseTranslateArgs(rest)),
+      );
       return 0;
     }
 

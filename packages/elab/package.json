@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript term/command/declaration elaboration into kernel declarations.",
   "proofscript": {
-    "status": "v061-record-projection+structure+nat-ite-elab-mvp",
+    "status": "v061-exact-search-eq-symmetry+zero-subgoal-exact-search+induction-branch-names+bounded-rfl+nested-expected-args+source-ffi-admission+imported-metadata+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"
@@ -27,6 +27,7 @@
     "lean-ts-kernel": "file:../..",
     "@proofscript/meta": "file:../meta",
     "@proofscript/syntax": "file:../syntax",
-    "@proofscript/checked-core": "file:../checked-core"
+    "@proofscript/checked-core": "file:../checked-core",
+    "@proofscript/tactic": "file:../tactic"
   }
 }

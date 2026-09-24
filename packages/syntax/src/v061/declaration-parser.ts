@@ -9,6 +9,8 @@ import {parseV061ClassDeclaration} from './class-parser.js';
 import {parseV061ParameterSequence} from './parameter-parser.js';
 import {parseV061WhereBlock} from './where-parser.js';
 import {parseV061InstanceDeclaration} from './instance-parser.js';
+import {parseV061ModuleImports} from './module-import-parser.js';
+import {parseV061ExternalDeclaration} from './external-parser.js';
 
 export class V061DeclarationParser {
   readonly context:V061ParseContext;
@@ -20,12 +22,26 @@ export class V061DeclarationParser {
   }
 
   parseModule():V061Module {
+    const imports=parseV061ModuleImports(this.context,{
+      allowSemicolon:true,
+      owner:'ProofScript',
+    });
     const declarations:V061Declaration[]=[];
-    while(!this.context.cursor.done)declarations.push(this.parseDeclaration());
-    return {kind:'v061-module',declarations,featureIds:[...this.context.features]};
+    while(!this.context.cursor.done){
+      declarations.push(this.parseDeclaration());
+    }
+    return {
+      kind:'v061-module',
+      ...(imports.length===0?{}:{imports}),
+      declarations,
+      featureIds:[...this.context.features],
+    };
   }
 
   private parseDeclaration():V061Declaration {
+    if(this.context.cursor.at('extern')){
+      return parseV061ExternalDeclaration(this.context);
+    }
     if(this.context.cursor.at('structure')){
       return parseV061StructureDeclaration(this.context);
     }

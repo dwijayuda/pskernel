@@ -18,7 +18,14 @@ import {
   significantTokens,
   parseV061Module,
   lowerV061ModuleToLean,
+  lowerV061ModuleToProofScript,
+  leanTranslationTarget,
   lowerV061TypeToLean,
+  sourceKindFromFileName,
+  createDefaultSourceFrontendRegistry,
+  createDefaultTranslationTargetPrinterRegistry,
+  parseV061LeanSubsetModule,
+  leanSubsetSourceFrontend,
 } from '../src/index.js';
 
 function assert(condition: unknown, message = 'assertion failed'): asserts condition {
@@ -36,11 +43,136 @@ function throws(f: () => unknown, pattern: RegExp): void {
   throw new Error(`expected function to throw ${pattern}`);
 }
 
+function firstDeclarationBody(
+  module:ReturnType<typeof parseV061Module>,
+) {
+  const declaration=module.declarations[0];
+  return declaration!==undefined&&'body' in declaration
+    ?declaration.body
+    :undefined;
+}
+
+function firstDeclarationResultType(
+  module:ReturnType<typeof parseV061Module>,
+) {
+  const declaration=module.declarations[0];
+  return declaration!==undefined&&'resultType' in declaration
+    ?declaration.resultType
+    :undefined;
+}
+
 equal(PROOFSCRIPT_SPEC_VERSION, '0.7.0');
 equal(LEAN_SEMANTICS_VERSION, '4.34.0');
 equal(LEAN_SEMANTICS_COMMIT, '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b');
 equal(LEAN434_INHERITED_FEATURE_IDS.length,4);
 assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
+
+{
+  equal(sourceKindFromFileName('main.ps'),'proofscript');
+  equal(sourceKindFromFileName('Main.lean'),'lean-subset');
+  equal(sourceKindFromFileName('UPPER.PS'),'proofscript');
+  throws(
+    ()=>sourceKindFromFileName('main.ts'),
+    /PS_FRONTEND_SOURCE_KIND/,
+  );
+
+  const registry=createDefaultSourceFrontendRegistry();
+  equal(registry.forFile('main.ps').kind,'proofscript');
+  equal(registry.forFile('Main.lean').kind,'lean-subset');
+  equal(
+    registry.forFile('main.ps')
+      .parse('def id(x : Nat) : Nat := x;')
+      .declarations.length,
+    1,
+  );
+  throws(
+    ()=>registry.register(leanSubsetSourceFrontend),
+    /PS_FRONTEND_DUPLICATE/,
+  );
+}
+
+
+{
+  const ps=parseV061Module(
+    'import Data.Core\nimport Logic\n'+
+    'def use(x : Nat) : Nat := x;',
+  );
+  equal(ps.imports?.join(','),'Data.Core,Logic');
+  equal(
+    lowerV061ModuleToProofScript(ps),
+    'import Data.Core\nimport Logic\n\ndef use(x : Nat) : Nat := x;\n',
+  );
+  equal(
+    lowerV061ModuleToLean(ps),
+    'import Data.Core\nimport Logic\n\ndef use (x : Nat) : Nat := x\n',
+  );
+
+  const lean=parseV061LeanSubsetModule(
+    'import Data.Core\nimport Logic\n\ndef use (x : Nat) : Nat := x\n',
+  );
+  equal(lean.imports?.join(','),'Data.Core,Logic');
+  equal(lowerV061ModuleToLean(lean),lowerV061ModuleToLean(ps));
+  equal(
+    lowerV061ModuleToProofScript(lean),
+    lowerV061ModuleToProofScript(ps),
+  );
+
+  throws(
+    ()=>parseV061LeanSubsetModule(
+      'import Data.Core;\ndef x : Nat := 0\n',
+    ),
+    /PS_LEAN_SUBSET_IMPORT_SEMICOLON/,
+  );
+  throws(
+    ()=>parseV061Module('import Data Core\ndef x : Nat := 0;'),
+    /PS_MODULE_IMPORT_FORM/,
+  );
+}
+
+{
+  const source=[
+    'structure Box(α : Type) where { value : α; };',
+    'class Sized(α : Type) where { size : α -> Nat; };',
+    'inductive Maybe(α : Type) where { | none; | some(value : α); };',
+    'function choose(x : Nat, y : Nat) : Nat := '+
+      'if (x < y) { x } else { y };',
+    'def identity {α : Type}(x : α) : α := x;',
+    'def unwrap(x : Maybe(Nat), fallback : Nat) : Nat := '+
+      'match x with { | .none => fallback; | .some value => value; };',
+    'def localDemo(x : Nat) : Nat := helper(x) where { '+
+      'helper(y : Nat) : Nat := y + 1; };',
+    'instance boxedNat : Box(Nat) := { value := 0 : Box(Nat) };',
+    'theorem reflViaSearch(P : Prop, h : P) : P := by exact?;',
+  ].join('\n');
+  const first=parseV061Module(source);
+  const printed=lowerV061ModuleToProofScript(first);
+  const second=parseV061Module(printed);
+  const printedAgain=lowerV061ModuleToProofScript(second);
+  equal(printedAgain,printed);
+  equal(
+    createDefaultSourceFrontendRegistry()
+      .forFile('canonical.ps')
+      .print(first),
+    printed,
+  );
+  equal(printed.includes('function choose(x : Nat, y : Nat)'),true);
+  equal(printed.includes('def identity {α : Type}(x : α)'),true);
+  equal(printed.includes('match x with { | .none => fallback;'),true);
+  equal(printed.includes('where {\n  helper(y : Nat)'),true);
+
+  const targets=createDefaultTranslationTargetPrinterRegistry();
+  equal(targets.require('ps').print(first),printed);
+  equal(
+    targets.require('lean').print(first),
+    lowerV061ModuleToLean(first),
+  );
+  equal(targets.require('ps').extension,'.ps');
+  equal(targets.require('lean').extension,'.lean');
+  throws(
+    ()=>targets.register(targets.require('ps')),
+    /PS_TRANSLATION_TARGET_DUPLICATE/,
+  );
+}
 
 {
   const tokens=significantTokens('f(x)');
@@ -160,7 +292,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   }
 }
 {
-  throws(()=>parseTermSubset('f(x)'),/term subset stopped before '\\('/);
+  throws(()=>parseTermSubset('f(x)'),/term subset stopped before/);
 }
 
 
@@ -278,7 +410,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(module.declarations.length,2);
   equal(module.declarations[0]?.kind,'const');
   equal(module.declarations[1]?.kind,'function');
-  equal(module.declarations[0]?.resultType.kind,'named');
+  equal(firstDeclarationResultType(module)?.kind,'named');
   equal(module.featureIds.includes('D-CONST-ALIAS'),true);
   equal(module.featureIds.includes('D-FUNCTION-ALIAS'),true);
   equal(module.featureIds.includes('D-EXPLICIT-PARAMS'),true);
@@ -300,7 +432,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 // v0.6.1 inherited lexical let term.
 {
   const module=parseV061Module('function incTwice(x : Nat) : Nat := let y : Nat := x + 1; y + 1;');
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'let');
   if(body?.kind==='let'){
     equal(body.name,'y');
@@ -316,7 +448,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 }
 {
   const module=parseV061Module('function shadow(x : Nat) : Nat := let x := x + 1; x;');
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'let');
   if(body?.kind==='let')equal(body.declaredType,undefined);
 }
@@ -325,7 +457,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 // v0.6.1 inherited function type syntax.
 {
   const module=parseV061Module('const increment : Nat -> Nat := 1;');
-  const type=module.declarations[0]?.resultType;
+  const type=firstDeclarationResultType(module);
   equal(type?.kind,'arrow');
   if(type?.kind==='arrow'){
     equal(lowerV061TypeToLean(type),'Nat -> Nat');
@@ -333,7 +465,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 }
 {
   const module=parseV061Module('const composeType : Nat -> Bool -> String := "x";');
-  const type=module.declarations[0]?.resultType;
+  const type=firstDeclarationResultType(module);
   equal(type?.kind,'arrow');
   if(type?.kind==='arrow')equal(type.codomain.kind,'arrow');
 }
@@ -342,7 +474,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 // v0.6.1 inherited lambda syntax.
 {
   const module=parseV061Module('const increment : Nat -> Nat := fun x => x + 1;');
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'lambda');
   if(body?.kind==='lambda'){
     equal(body.binders.length,1);
@@ -356,7 +488,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 }
 {
   const module=parseV061Module('const addFn : Nat -> Nat -> Nat := fun (x : Nat) (y : Nat) => x + y;');
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'lambda');
   if(body?.kind==='lambda'){
     equal(body.binders.length,2);
@@ -379,7 +511,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 // Empty D-CALL is Unit application, not zero-arity invocation.
 {
   const module=parseV061Module('function run(f : Unit -> Nat) : Nat := f();');
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'call');
   if(body?.kind==='call'){
     equal(body.args.length,1);
@@ -394,7 +526,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'function choose(flag : Bool) : Nat := match flag with { | true => 1; | false => 2; };',
   );
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'match');
   equal(module.featureIds.includes('E-MATCH-BODY'),true);
   if(body?.kind==='match'){
@@ -410,7 +542,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'function get(value : Bool) : Nat := match value with { | _ => 1; };',
   );
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'match');
   if(body?.kind==='match')equal(body.alternatives[0]?.pattern.kind,'wildcard');
 }
@@ -418,7 +550,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'function get(value : Bool) : Nat := match value with { | .some x => transform(x); | .none => 0; };',
   );
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'match');
   if(body?.kind==='match'){
     equal(body.alternatives[0]?.pattern.kind,'constructor');
@@ -677,9 +809,12 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'theorem exactProof(P : Prop, h : P) : P := by exact h;',
   );
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
-  if(body?.kind==='by')equal(body.tactic.kind,'exact');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'exact');
+  }
   equal(
     lowerV061ModuleToLean(module),
     'theorem exactProof (P : Prop) (h : P) : P := by exact h\n',
@@ -689,9 +824,12 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'theorem assumptionProof(P : Prop, h : P) : P := by assumption;',
   );
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
-  if(body?.kind==='by')equal(body.tactic.kind,'assumption');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'assumption');
+  }
 }
 
 
@@ -699,14 +837,15 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'theorem introProof(P : Prop) : P -> P := by intro h; assumption;',
   );
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
-    equal(body.tactic.kind,'intro');
-    if(body.tactic.kind==='intro'){
-      equal(body.tactic.name,'h');
-      equal(body.tactic.next.kind,'assumption');
+    equal(body.tactics.length,2);
+    equal(body.tactics[0]?.kind,'intro');
+    if(body.tactics[0]?.kind==='intro'){
+      equal(body.tactics[0].name,'h');
     }
+    equal(body.tactics[1]?.kind,'assumption');
   }
   equal(
     lowerV061ModuleToLean(module),
@@ -718,18 +857,257 @@ console.log('ok - @proofscript/syntax lexer MVP');
     'theorem applyProof(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
     'by apply f; assumption;',
   );
-  const body=module.declarations[0]?.body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
-    equal(body.tactic.kind,'apply');
-    if(body.tactic.kind==='apply'){
-      equal(body.tactic.proof.kind,'reference');
-      equal(body.tactic.next.kind,'assumption');
+    equal(body.tactics.length,2);
+    equal(body.tactics[0]?.kind,'apply');
+    if(body.tactics[0]?.kind==='apply'){
+      equal(body.tactics[0].proof.kind,'reference');
     }
+    equal(body.tactics[1]?.kind,'assumption');
   }
   equal(
     lowerV061ModuleToLean(module),
     'theorem applyProof (P : Prop) (Q : Prop) (f : P -> Q) (h : P) : Q := by apply f; assumption\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem refineProof(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
+    'by refine f(?_); assumption;',
+  );
+  const body=firstDeclarationBody(module);
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,2);
+    equal(body.tactics[0]?.kind,'refine');
+    if(body.tactics[0]?.kind==='refine'){
+      equal(body.tactics[0].proof.kind,'call');
+      if(body.tactics[0].proof.kind==='call'){
+        equal(body.tactics[0].proof.args[0]?.kind,'syntheticHole');
+      }
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem refineProof (P : Prop) (Q : Prop) (f : P -> Q) (h : P) : Q := by refine f ?_; assumption\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem ctorProof : Choice := by constructor;',
+  );
+  const body=firstDeclarationBody(module);
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'constructor');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem ctorProof : Choice := by constructor\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem casesProof(c : Choice) : P := by cases c; assumption; assumption;',
+  );
+  const body=firstDeclarationBody(module);
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,3);
+    equal(body.tactics[0]?.kind,'cases');
+    if(body.tactics[0]?.kind==='cases'){
+      equal(body.tactics[0].target,'c');
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem casesProof (c : Choice) : P := by cases c; assumption; assumption\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem inductionProof(xs : Chain) : P := '+
+    'by induction xs; assumption; assumption;',
+  );
+  const body=firstDeclarationBody(module);
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,3);
+    equal(body.tactics[0]?.kind,'induction');
+    if(body.tactics[0]?.kind==='induction'){
+      equal(body.tactics[0].target,'xs');
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem inductionProof (xs : Chain) : P := by induction xs; assumption; assumption\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;',
+  );
+  const body=firstDeclarationBody(module);
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'exactSearch');
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem exactSearchProof (P : Prop) (h : P) : P := by exact?\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem rflProof(n : Nat) : n + 0 = n := by rfl;',
+  );
+  const body=firstDeclarationBody(module);
+  equal(body?.kind,'by');
+  if(body?.kind==='by')equal(body.tactics[0]?.kind,'rfl');
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem rflProof (n : Nat) : n + 0 = n := by rfl\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem rwProof(a : Nat, b : Nat, h : a = b) : a = b := '+
+    'by rw [h]; rw [← h]; assumption;',
+  );
+  const body=firstDeclarationBody(module);
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,3);
+    equal(body.tactics[0]?.kind,'rw');
+    equal(body.tactics[1]?.kind,'rw');
+    if(body.tactics[0]?.kind==='rw')equal(body.tactics[0].symm,false);
+    if(body.tactics[1]?.kind==='rw')equal(body.tactics[1].symm,true);
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem rwProof (a : Nat) (b : Nat) (h : a = b) : a = b := '+
+    'by rw [h]; rw [← h]; assumption\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem succEq(a : Nat, h : Nat.succ(a) = a) : '+
+    'Nat.succ(a) = a := by rw [h];',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem succEq (a : Nat) (h : Nat.succ a = a) : '+
+    'Nat.succ a = a := by rw [h]\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem addZero(n : Nat, h : n + 0 = n) : n + 0 = n := by rw [h];',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem addZero (n : Nat) (h : n + 0 = n) : n + 0 = n := by rw [h]\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem leAssumed(x : Nat, y : Nat, h : x <= y) : '+
+    'x <= y := by assumption;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem leAssumed (x : Nat) (y : Nat) (h : x <= y) : '+
+    'x <= y := by assumption\n',
+  );
+}
+{
+  const module=parseV061Module(
+    'theorem reversedRelations(x : Nat, y : Nat, h1 : x > y, h2 : x >= y) : '+
+    'x > y := by assumption;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem reversedRelations (x : Nat) (y : Nat) (h1 : x > y) '+
+    '(h2 : x >= y) : x > y := by assumption\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem beqAssumed(x : Nat, y : Nat, h : x == y = true) : '+
+    'x == y = true := by assumption;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem beqAssumed (x : Nat) (y : Nat) (h : (x == y) = true) : '+
+    '(x == y) = true := by assumption\n',
+  );
+}
+{
+  const module=parseV061Module(
+    'theorem boolLogicAssumed(p : Bool, q : Bool, h : !p || q = true) : '+
+    '!p || q = true := by assumption;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem boolLogicAssumed (p : Bool) (q : Bool) '+
+    '(h : (!p || q) = true) : (!p || q) = true := by assumption\n',
+  );
+}
+
+throws(
+  ()=>parseV061Module(
+    'theorem badEq(a : Nat, b : Nat, c : Nat) : a = b = c := by assumption;',
+  ),
+  /propositional equality is non-associative/,
+);
+
+{
+  const module=parseV061Module(
+    'const depFn : (x : Nat) -> Fin(x) -> Nat := fun x => fun i => x;',
+  );
+  equal(
+    lowerV061ModuleToLean(module),
+    'def depFn : (x : Nat) -> Fin x -> Nat := fun x => fun i => x\n',
+  );
+}
+
+{
+  const module=parseV061Module(
+    'theorem simpProof(A : Type, B : Type, C : Type, D : Type, '+
+    'h1 : BoxT(A) = B, h2 : WrapT(C) = D) : P := '+
+    'by simp only [h1, ← h2];',
+  );
+  const body=firstDeclarationBody(module);
+  equal(body?.kind,'by');
+  if(body?.kind==='by'){
+    equal(body.tactics.length,1);
+    equal(body.tactics[0]?.kind,'simp');
+    if(body.tactics[0]?.kind==='simp'){
+      equal(body.tactics[0].rules.length,2);
+      equal(body.tactics[0].rules[0]?.symm,false);
+      equal(body.tactics[0].rules[1]?.symm,true);
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem simpProof (A : Type) (B : Type) (C : Type) (D : Type) '+
+    '(h1 : BoxT A = B) (h2 : WrapT C = D) : P := '+
+    'by simp only [h1, ← h2]\n',
   );
 }
 
@@ -765,4 +1143,266 @@ console.log('ok - @proofscript/syntax lexer MVP');
     'instance : Boxed Nat := { value := 0 : Boxed Nat }\n',
   );
 }
+{
+  const proofScript=parseV061Module(
+    'def choose(p : Bool, a : Nat, b : Nat) : Nat := '+
+    'if (p) { a } else { b }; '+
+    'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    'def choose(p : Bool, a : Nat, b : Nat) : Nat := if (p) { a } else { b };\n\n'+
+    'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;\n',
+  );
+}
+{
+  const lean=
+    'def applyTwo (f : Nat -> Nat) (x : Nat) : Nat := f x\n\n'+
+    'theorem rewriteProof (a : Nat) (b : Nat) (h : a = b) : a = b := '+
+    'by rw [h]\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
+
+{
+  const lean=
+    'def nested (x : Nat) : Nat := Nat.add (Nat.add x 1) 2\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
+{
+  const lean=
+    'def local (x : Nat) : Nat := let y : Nat := x; y\n\n'+
+    'def identity : Nat -> Nat := fun x => x\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
+{
+  const proofScript=parseV061Module(
+    'structure Box(α : Type) where { value : α; } '+
+    'class Sized(α : Type) where { size : α -> Nat; } '+
+    'instance sizedNat : Sized(Nat) := '+
+    '{ size := fun x => x : Sized(Nat) }; '+
+    'inductive Result(α : Type, ε : Type) where { '+
+    '| ok(value : α); | error(error : ε); }',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    lowerV061ModuleToProofScript(proofScript),
+  );
+}
+{
+  const lean=
+    'structure Box (α : Type) where\n'+
+    '  value : α\n\n'+
+    'class Sized (α : Type) where\n'+
+    '  size : α -> Nat\n\n'+
+    'instance sizedNat : Sized Nat := '+
+    '{ size := fun x => x : Sized Nat }\n\n'+
+    'inductive Result (α : Type) (ε : Type) where\n'+
+    '  | ok (value : α)\n'+
+    '  | error (error : ε)\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
+
+{
+  const lean=
+    'structure Context where\n'+
+    '  {α : Type}\n'+
+    '  [showα : ToString α]\n'+
+    '  value : α\n'+
+    '  count : Nat\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'structure');
+  if(declaration?.kind==='structure'){
+    equal(declaration.fields.length,4);
+    equal(declaration.fields[0]?.binderKind,'implicit');
+    equal(declaration.fields[1]?.binderKind,'instance');
+    equal(declaration.fields[2]?.name,'value');
+    equal(declaration.fields[3]?.name,'count');
+  }
+}
+{
+  const lean=
+    'inductive Marker : Type where\n'+
+    '  | mk\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'inductive');
+  if(declaration?.kind==='inductive'){
+    equal(declaration.resultType?.kind,'named');
+  }
+}
+{
+  const lean=
+    'instance : Sized Nat := { size := fun x => x : Sized Nat }\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'instance');
+  if(declaration?.kind==='instance')equal(declaration.anonymous,true);
+  equal(lowerV061ModuleToLean(parsed),lean);
+}
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'inductive Vector where\n  | nil : Vector\n',
+  ),
+  /PS_LEAN_SUBSET_CONSTRUCTOR_RESULT/,
+);
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'namespace Demo\ndef x : Nat := 0\nend Demo\n',
+  ),
+  /PS_LEAN_SUBSET_UNSUPPORTED_COMMAND/,
+);
+{
+  const proofScript=parseV061Module(
+    'def choose(flag : Bool) : Nat := match flag with { '+
+    '| true => 1; | false => 2; };',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    lowerV061ModuleToProofScript(proofScript),
+  );
+}
+{
+  const lean=
+    'def unwrap (x : Maybe) : Nat := match x with\n'+
+    '  | .some value => value\n'+
+    '  | .none => 0\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'def');
+  if(declaration?.kind==='def'){
+    equal(declaration.body.kind,'match');
+    if(declaration.body.kind==='match'){
+      equal(declaration.body.alternatives.length,2);
+      equal(declaration.body.alternatives[0]?.pattern.kind,'constructor');
+    }
+  }
+}
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'def bad (x : Nat) : Nat := match x with\n',
+  ),
+  /PS_LEAN_SUBSET_MATCH/,
+);
+{
+  const proofScript=parseV061Module(
+    'def f(x : Nat) : Nat := first(x) where { '+
+    'first(y : Nat) : Nat := second(y); '+
+    'second(z : Nat) : Nat := z; };',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    lowerV061ModuleToProofScript(proofScript),
+  );
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'def');
+  if(declaration?.kind==='def'){
+    equal(declaration.whereDeclarations?.length,2);
+  }
+}
+{
+  const lean=
+    'def chooseViaLocal (flag : Bool) : Nat := helper flag where\n'+
+    '  helper (value : Bool) : Nat := match value with\n'+
+    '  | true => 1\n'+
+    '  | false => 0\n';
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'def');
+  if(declaration?.kind==='def'){
+    equal(declaration.whereDeclarations?.[0]?.body.kind,'match');
+  }
+}
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'def bad (x : Nat) : Nat := x where\n'+
+    ' helper (y : Nat) : Nat := y\n',
+  ),
+  /PS_LEAN_SUBSET_WHERE_LAYOUT/,
+);
+{
+  const proofScript=parseV061Module(
+    'structure Box(α : Type) where { value : α; } '+
+    'class Sized(α : Type) where { size : α -> Nat; } '+
+    'inductive Choice where { | left; | right; } '+
+    'instance sizedNat : Sized(Nat) := '+
+    '{ size := fun x => x : Sized(Nat) }; '+
+    'def choose(flag : Bool) : Nat := match flag with { '+
+    '| true => 1; | false => 2; }; '+
+    'def viaWhere(x : Nat) : Nat := helper(x) where { '+
+    'helper(y : Nat) : Nat := y; }; '+
+    'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;',
+  );
+  const lean=lowerV061ModuleToLean(proofScript);
+  const parsed=parseV061LeanSubsetModule(lean);
+  equal(lowerV061ModuleToLean(parsed),lean);
+  equal(
+    lowerV061ModuleToProofScript(parsed),
+    lowerV061ModuleToProofScript(proofScript),
+  );
+}
+{
+  const registry=createDefaultSourceFrontendRegistry();
+  equal(registry.get('proofscript')?.kind,'proofscript');
+  equal(registry.get('lean-subset')?.kind,'lean-subset');
+  equal(leanSubsetSourceFrontend.kind,'lean-subset');
+}
+console.log('ok - @proofscript/syntax DS2 complete emitted-subset frontend');
+
+
+{
+  const module=parseV061Module(
+    'extern function hostInc(x : Nat) : Nat from "host-lib" import inc; '+
+    'function main(x : Nat) : Nat := hostInc(x);',
+  );
+  equal(module.declarations[0]?.kind,'external');
+  equal(module.featureIds.includes('D-EXTERN-FFI'),true);
+  equal(module.featureIds.includes('D-EXPLICIT-PARAMS'),true);
+  equal(module.featureIds.includes('D-DECL-SEMI'),true);
+  if(module.declarations[0]?.kind==='external'){
+    equal(module.declarations[0].binding.source,'host-lib');
+    equal(module.declarations[0].binding.importedName,'inc');
+  }
+  equal(
+    lowerV061ModuleToLean(module).startsWith(
+      'axiom hostInc (x : Nat) : Nat\n\ndef main',
+    ),
+    true,
+  );
+  equal(
+    lowerV061ModuleToProofScript(module).includes(
+      'extern function hostInc(x : Nat) : Nat from "host-lib" import inc;',
+    ),
+    true,
+  );
+  let rejected=false;
+  try{
+    leanTranslationTarget.print(module);
+  }catch(error){
+    rejected=/PS_TRANSLATE_EXTERNAL_RUNTIME_BINDING/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/syntax explicit runtime external declaration');
+
 console.log('ok - @proofscript/syntax inherited instance declarations');

@@ -11,6 +11,7 @@ import {
   strLit,
 } from 'lean-ts-kernel';
 import {elaborateApplication} from './application.js';
+import {elaborateV061Constant} from './v061-constant-elab.js';
 import type {
   ElaboratedCoreTerm,
   V061CoreElabContext,
@@ -41,7 +42,7 @@ function resolveReference(
   if(context.environment.find(full)===undefined){
     throw new Error("PS_ELAB_UNKNOWN_NAME: unknown name '"+name+"'");
   }
-  return constant(full);
+  return elaborateV061Constant(full,context);
 }
 
 export function elaborateV061Term(
@@ -83,9 +84,11 @@ export function elaborateV061Term(
         if(expected===undefined){
           return {term:reference,type:checker.check(reference)};
         }
-        throw new Error(
-          'PS_ELAB_REFERENCE_STUCK: unresolved implicit or instance arguments',
-        );
+        // An enclosing application may legitimately solve a nullary generic
+        // constructor's inserted metas from a later explicit argument/result.
+        // Keep them in the shared Meta context; the enclosing application and
+        // declaration still require full grounding before admission.
+        return {term:elaboratedTerm,type:elaboratedType};
       }
       return {term:elaboratedTerm,type:elaboratedType};
     }
@@ -108,6 +111,10 @@ export function elaborateV061Term(
       const term=resolveReference('Unit.unit',context);
       return {term,type:checker.check(term)};
     }
+    case 'syntheticHole':
+      throw new Error(
+        'PS_ELAB_SYNTHETIC_HOLE_OUTSIDE_REFINE: ?_ is accepted only by refine',
+      );
     case 'call':{
       const recursive=tryElaborateStructuralSelfCall(
         expr,
@@ -116,9 +123,21 @@ export function elaborateV061Term(
       );
       if(recursive!==undefined)return recursive;
       const fn=resolveReference(expr.callee,context);
-      const args=expr.args.map(
-        (arg)=>elaborateV061Term(arg,context).term,
-      );
+      const args={
+        length:expr.args.length,
+        elaborate:(index:number,expectedType:import('lean-ts-kernel').Expr)=>{
+          const argument=elaborateV061Term(
+            expr.args[index]!,
+            context,
+            expectedType,
+          );
+          return {
+            term:argument.term,
+            type:argument.type,
+            allowUnresolvedMVar:true,
+          };
+        },
+      };
       const result=elaborateApplication({
         environment:context.environment,
         metaContext:context.metaContext,
@@ -133,6 +152,12 @@ export function elaborateV061Term(
       const term=context.metaContext.instantiate(result.term);
       const type=context.metaContext.instantiate(result.type);
       if(hasMVar(term)||hasMVar(type)){
+        if(expected!==undefined){
+          // Nested calls may be constrained further by later sibling arguments
+          // in the enclosing application. Shared Meta assignments preserve
+          // those constraints; top-level applications still require grounding.
+          return {term,type};
+        }
         throw new Error(
           'PS_ELAB_UNSOLVED_METAVARS: application leaves unresolved implicit or instance obligations',
         );

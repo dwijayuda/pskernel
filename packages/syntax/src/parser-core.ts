@@ -49,7 +49,7 @@ export class TokenCursor {
     if(token.text!==text)throw new SyntaxError(`expected '${text}', got '${token.text}'`,token.span);
     return this.consume();
   }
-  expectKind(kind:Token['kind'],label=kind):Token{
+  expectKind(kind:Token['kind'],label:string=kind):Token{
     const token=this.peek();
     if(token.kind!==kind)throw new SyntaxError(`expected ${label}, got '${token.text}'`,token.span);
     return this.consume();

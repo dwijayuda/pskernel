@@ -15,6 +15,8 @@ import {
   fvar,
   levelSucc,
   levelZero,
+  mkAppN,
+  levelEqStructural,
   nameFromDotted,
   sort,
 } from 'lean-ts-kernel';
@@ -228,3 +230,112 @@ console.log('ok - @proofscript/meta Lean-style metavariable depth discipline');
   equal(context.isAssigned(meta),false);
 }
 console.log('ok - @proofscript/meta structural application unification with rollback');
+
+{
+  const env=new Environment();
+  const meta=new ExprMetaContext(env);
+  const lctx=new LocalContext();
+  const P=nameFromDotted('P');
+  const pId=lctx.fresh('P');
+  lctx.addLocal(pId,P,sort(levelZero),'default');
+  const q=meta.mkFresh(sort(levelZero),lctx,'natural');
+  const candidate=forallE(
+    nameFromDotted('_'),
+    q,
+    q,
+    'default',
+  );
+  const target=forallE(
+    nameFromDotted('_'),
+    fvar(pId),
+    fvar(pId),
+    'default',
+  );
+  equal(meta.unify(candidate,target,lctx),true);
+  equal(exprEq(meta.instantiate(q),fvar(pId)),true);
+}
+console.log('ok - @proofscript/meta structural Pi unification');
+
+{
+  const env=new Environment();
+  const kernel=new Kernel(env);
+  const U=sort(levelSucc(levelZero));
+  const Nat=nameFromDotted('MetaPolyNat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:U,
+  });
+
+  const lctx=new LocalContext();
+  lctx.addLocal('a',nameFromDotted('a'),constant(Nat),'default');
+  lctx.addLocal('b',nameFromDotted('b'),constant(Nat),'default');
+
+  const meta=new ExprMetaContext(env);
+  const universe=meta.mkFreshLevel();
+  const alpha=meta.mkFresh(sort(universe),lctx,'natural');
+  const leftValue=meta.mkFresh(alpha,lctx,'natural');
+  const rightValue=meta.mkFresh(alpha,lctx,'natural');
+  const Rel=nameFromDotted('MetaRel');
+  const left=mkAppN(
+    constant(Rel,[universe]),
+    [alpha,leftValue,rightValue],
+  );
+  const right=mkAppN(
+    constant(Rel,[levelSucc(levelZero)]),
+    [constant(Nat),fvar('b'),fvar('a')],
+  );
+
+  equal(meta.unify(left,right,lctx),true);
+  equal(exprEq(meta.instantiate(alpha),constant(Nat)),true);
+  equal(exprEq(meta.instantiate(leftValue),fvar('b')),true);
+  equal(exprEq(meta.instantiate(rightValue),fvar('a')),true);
+  meta.validateGroundAssignments();
+}
+console.log('ok - @proofscript/meta mixed universe/application unification');
+
+
+
+
+
+{
+  const environment=new Environment();
+  const context=new ExprMetaContext(environment);
+  const universe=context.mkFreshLevel();
+  const typeMeta=context.mkFresh(sort(universe));
+  context.assign(typeMeta,sort(levelZero));
+  const solved=context.instantiate(sort(universe));
+  equal(solved.kind,'sort');
+  if(solved.kind==='sort'){
+    equal(levelEqStructural(solved.level,levelSucc(levelZero)),true);
+  }
+  context.validateGroundAssignments();
+}
+{
+  const environment=new Environment();
+  const context=new ExprMetaContext(environment);
+  context.mkFreshLevel();
+  let unresolved=false;
+  try{context.validateGroundAssignments();}
+  catch(error){unresolved=/unresolved universe metavariable/.test(String(error));}
+  equal(unresolved,true);
+}
+{
+  const environment=new Environment();
+  const context=new ExprMetaContext(environment);
+  const universe=context.mkFreshLevel();
+  const left=app(sort(universe),sort(levelZero));
+  const right=app(
+    sort(levelSucc(levelZero)),
+    sort(levelSucc(levelZero)),
+  );
+  equal(context.unify(left,right),false);
+  let rolledBack=false;
+  try{context.validateGroundAssignments();}
+  catch(error){
+    rolledBack=/unresolved universe metavariable/.test(String(error));
+  }
+  equal(rolledBack,true);
+}
+console.log('ok - @proofscript/meta bounded universe metavariable solving');

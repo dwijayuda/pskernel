@@ -1,0 +1,127 @@
+import ProofScript.Data.Option
+
+inductive PsResult(α : Type, ε : Type) where {
+  | ok(value : α);
+  | error(error : ε);
+};
+
+function resultMap {α : Type}{β : Type}{ε : Type}
+(f : α -> β, value : PsResult(α, ε)) : PsResult(β, ε) :=
+  match value with {
+    | .ok x => PsResult.ok(f(x));
+    | .error err => PsResult.error(err);
+  };
+
+function resultMapError {α : Type}{ε : Type}{δ : Type}
+(f : ε -> δ, value : PsResult(α, ε)) : PsResult(α, δ) :=
+  match value with {
+    | .ok x => PsResult.ok(x);
+    | .error err => PsResult.error(f(err));
+  };
+
+function resultGetOrElse {α : Type}{ε : Type}
+(value : PsResult(α, ε), fallback : α) : α :=
+  match value with {
+    | .ok x => x;
+    | .error err => fallback;
+  };
+
+function resultToOption {α : Type}{ε : Type}
+(value : PsResult(α, ε)) : PsOption(α) :=
+  match value with {
+    | .ok x => PsOption.some(x);
+    | .error err => PsOption.none;
+  };
+
+function resultBind {α : Type}{β : Type}{ε : Type}
+(value : PsResult(α, ε), f : α -> PsResult(β, ε)) : PsResult(β, ε) :=
+  match value with {
+    | .ok x => f(x);
+    | .error err => PsResult.error(err);
+  };
+
+function resultFromOption {α : Type}{ε : Type}
+(value : PsOption(α), error : ε) : PsResult(α, ε) :=
+  match value with {
+    | .none => PsResult.error(error);
+    | .some x => PsResult.ok(x);
+  };
+
+function resultIsOk {α : Type}{ε : Type}
+(value : PsResult(α, ε)) : Bool :=
+  match value with {
+    | .ok x => true;
+    | .error err => false;
+  };
+
+theorem resultRefl {α : Type}{ε : Type}
+(value : PsResult(α, ε)) : value = value := by rfl;
+
+theorem resultGetOrElseOk {α : Type}{ε : Type}
+(value : α, fallback : α) :
+resultGetOrElse(PsResult.ok(value), fallback) = value := by rfl;
+
+theorem resultGetOrElseError {α : Type}{ε : Type}
+(error : ε, fallback : α) :
+resultGetOrElse(PsResult.error(error), fallback) = fallback := by rfl;
+
+theorem resultToOptionError {α : Type}{ε : Type}
+(error : ε) :
+resultToOption(PsResult.error(error)) = PsOption.none := by rfl;
+
+theorem resultToOptionErrorOrElse {α : Type}{ε : Type}
+(error : ε, fallback : PsOption(α)) :
+optionOrElse(resultToOption(PsResult.error(error)), fallback) = fallback :=
+  by simp only [resultToOptionError(error), optionOrElseNone(fallback)];
+
+theorem resultToOptionOk {α : Type}{ε : Type}
+(value : α) :
+resultToOption(PsResult.ok(value)) = PsOption.some(value) := by rfl;
+
+theorem resultToOptionMap {α : Type}{β : Type}{ε : Type}
+(f : α -> β, value : PsResult(α, ε)) :
+resultToOption(resultMap(f, value)) =
+optionMap(f, resultToOption(value)) :=
+  by cases value; rfl; rfl;
+
+theorem resultToOptionMapError {α : Type}{ε : Type}{δ : Type}
+(f : ε -> δ, value : PsResult(α, ε)) :
+resultToOption(resultMapError(f, value)) =
+resultToOption(value) :=
+  by cases value; rfl; rfl;
+
+theorem resultMapMapError {α : Type}{β : Type}{ε : Type}{δ : Type}
+(f : α -> β, g : ε -> δ, value : PsResult(α, ε)) :
+resultMap(f, resultMapError(g, value)) =
+resultMapError(g, resultMap(f, value)) :=
+  by cases value; rfl; rfl;
+
+theorem resultGetOrElseMap {α : Type}{β : Type}{ε : Type}
+(f : α -> β, value : PsResult(α, ε), fallback : α) :
+resultGetOrElse(resultMap(f, value), f(fallback)) =
+f(resultGetOrElse(value, fallback)) :=
+  by cases value; rfl; rfl;
+
+theorem resultBindOk {α : Type}{β : Type}{ε : Type}
+(value : α, f : α -> PsResult(β, ε)) :
+resultBind(PsResult.ok(value), f) = f(value) := by rfl;
+
+theorem resultBindError {α : Type}{β : Type}{ε : Type}
+(error : ε, f : α -> PsResult(β, ε)) :
+resultBind(PsResult.error(error), f) = PsResult.error(error) := by rfl;
+
+theorem resultFromOptionNone {α : Type}{ε : Type}
+(error : ε) :
+resultFromOption(PsOption.none, error) = PsResult.error(error) := by rfl;
+
+theorem resultFromOptionSome {α : Type}{ε : Type}
+(value : α, error : ε) :
+resultFromOption(PsOption.some(value), error) = PsResult.ok(value) := by rfl;
+
+theorem resultIsOkOk {α : Type}{ε : Type}
+(value : α) :
+resultIsOk(PsResult.ok(value)) = true := by rfl;
+
+theorem resultIsOkError {α : Type}{ε : Type}
+(error : ε) :
+resultIsOk(PsResult.error(error)) = false := by rfl;

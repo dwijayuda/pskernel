@@ -3,9 +3,9 @@
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
-  "description": "Small proof tactic layer built on meta/elaboration protocols.",
+  "description": "Untrusted ordered proof-goal state and tactic transition protocols.",
   "proofscript": {
-    "status": "foundation",
+    "status": "ordered-multigoal-refine-integrated",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

@@ -6,19 +6,21 @@ export const HELP=`ProofScript compiler
 
 Usage:
   psc init [dir] [--lib] [-y]
-  psc check [entry.ps] [-p, --project <path>] [--verified] [--json]
-  psc build [entry.ps] [-p, --project <path>] [--verified] [--json]
-  psc run [entry.ps] [-p, --project <path>] [--verified] [--json] [-- <args...>]
-  psc emit-lean [entry.ps] [-p, --project <path>]
+  psc check [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
+  psc build [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
+  psc run [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json] [-- <args...>]
+  psc translate <entry.ps|entry.lean> --to ps|lean [-p, --project <path>]
+  psc emit-lean [entry.ps|entry.lean] [-p, --project <path>]
   psc clean [-p, --project <path>]
   psc --version
   psc --help
 
 Commands:
   init       Create a ProofScript project and psconfig.json
-  check      Parse and type-check without writing build outputs
-  build      Compile to TypeScript, then let TypeScript emit JS/.d.ts
-  run        Build and invoke exported main with arguments after --
+  check      Parse .ps or supported .lean and type-check without outputs
+  build      Compile .ps or supported .lean to TypeScript then JS/.d.ts
+  run        Build .ps or supported .lean and invoke exported main
+  translate  Canonically translate supported .ps/.lean to ps or lean
   emit-lean  Print canonical Lean lowering for the supported reference slice
   clean      Remove the configured output directory
 

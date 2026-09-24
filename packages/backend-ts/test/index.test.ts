@@ -148,7 +148,6 @@ console.log('ok - @proofscript/backend-ts nominal structure TypeScript emission'
   const maybe={kind:'nominal',name:'MaybeNat'} as const;
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
-    inductives:[],
     structures:[],
     inductives:[{
       name:'MaybeNat',
@@ -618,3 +617,44 @@ console.log('ok - @proofscript/backend-ts verified generic ADT TypeScript emissi
   equal(compiled.declaration.includes('interface Box<T0>'),true);
 }
 console.log('ok - @proofscript/backend-ts generic structure TypeScript emission');
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    imports:[{
+      localName:'hostLength',
+      source:'host-lib',
+      importedName:'length',
+      type:{
+        kind:'function',
+        parameters:[{kind:'primitive',name:'String'}],
+        result:{kind:'primitive',name:'Nat'},
+      },
+    }],
+    declarations:[{
+      name:'main',
+      typeParameters:[],
+      parameters:[{
+        name:'value',
+        type:{kind:'primitive',name:'String'},
+      }],
+      resultType:{kind:'primitive',name:'Nat'},
+      body:{
+        kind:'call',
+        fn:{kind:'var',name:'hostLength'},
+        args:[{kind:'var',name:'value'}],
+      },
+    }],
+  });
+  equal(
+    source.includes('import { length as hostLength } from "host-lib";'),
+    true,
+  );
+  equal(
+    source.includes(
+      'export function main(value: string): bigint { return hostLength(value); }',
+    ),
+    true,
+  );
+}
+console.log('ok - @proofscript/backend-ts external ESM import emission');

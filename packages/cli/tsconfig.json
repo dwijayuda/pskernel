@@ -37,6 +37,15 @@
       ],
       "@proofscript/compiler-ir/verified": [
         "../compiler-ir/dist/src/verified.d.ts"
+      ],
+      "@proofscript/checked-core": [
+        "../checked-core/dist/src/index.d.ts"
+      ],
+      "@proofscript/project": [
+        "../project/dist/src/index.d.ts"
+      ],
+      "@proofscript/project/node": [
+        "../project/dist/src/node.d.ts"
       ]
     }
   },

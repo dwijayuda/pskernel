@@ -308,9 +308,8 @@ console.log('ok - @proofscript/erasure verified runtime structures');
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
   const Nat=nameFromDotted('Nat');
-  kernel.addAxiom({
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],
@@ -387,9 +386,8 @@ console.log('ok - @proofscript/erasure verified ADT constructors');
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
   const Nat=nameFromDotted('Nat');
-  kernel.addAxiom({
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],
@@ -498,9 +496,8 @@ console.log('ok - @proofscript/erasure verified ADT recursor match lowering');
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
   const Nat=nameFromDotted('Nat');
-  kernel.addAxiom({
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],
@@ -597,9 +594,8 @@ console.log('ok - @proofscript/erasure generic nonrecursive ADT constructor eras
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
   const Nat=nameFromDotted('Nat');
-  kernel.addAxiom({
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],

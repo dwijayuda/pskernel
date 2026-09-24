@@ -1870,7 +1870,7 @@ console.log('ok - psc mixed-source module ambiguity fails closed');
 
 {
   const directory=await mkdtemp(
-    join(tmpdir(),'proofscript-imports-legacy-reject-'),
+    join(tmpdir(),'proofscript-single-semantic-lane-'),
   );
   try{
     await mkdir(join(directory,'src'),{recursive:true});
@@ -1890,7 +1890,7 @@ console.log('ok - psc mixed-source module ambiguity fails closed');
     );
     await writeFile(
       join(directory,'src','main.ps'),
-      'import Data\nfunction main(x : Nat) : Nat := x;\n',
+      'import Data\nfunction main(x : Nat) : Nat := id(x);\n',
       'utf8',
     );
     await writeFile(
@@ -1898,22 +1898,19 @@ console.log('ok - psc mixed-source module ambiguity fails closed');
       'function id(x : Nat) : Nat := x;\n',
       'utf8',
     );
-    let rejected=false;
-    try{
-      await checkCommand({
-        project:directory,
-        json:true,
-        verified:false,
-        passthrough:[],
-      });
-    }catch(error){
-      rejected=/PS_PROJECT_IMPORTS_REQUIRE_VERIFIED/.test(String(error));
-    }
-    equal(rejected,true);
+    const result=await checkCommand({
+      project:directory,
+      json:true,
+      verified:false,
+      passthrough:[],
+    });
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+    equal(result.moduleCount,2);
   }finally{
     await rm(directory,{recursive:true,force:true});
   }
 }
-console.log('ok - psc imports fail closed on legacy semantic lane');
+console.log('ok - psc has one checked-core semantic lane');
 
 

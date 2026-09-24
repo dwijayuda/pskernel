@@ -463,7 +463,7 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
     psPreludeAdd envText8
       (PsDeclaration.axiomDecl psStringExtractName [] stringExtractType)
   let envArray0 :=
-    psPreludeAdd env16
+    psPreludeAdd envText9
       (PsDeclaration.axiomDecl psArrayName [] arrayType)
   let envArray1 :=
     psPreludeAdd envArray0

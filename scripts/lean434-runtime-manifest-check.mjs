@@ -162,11 +162,16 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
     'protected def ',
     'protected opaque ',
   ];
-  const foundDeclaration=sourceSpellings.some((spelling)=>
-    declarationKeywords.some(
-      (keyword)=>text.includes(keyword+spelling),
-    )
-  );
+  const externAttributeSpelling=
+    'attribute [extern "'+binding.leanSymbol+'"] '+
+    binding.leanDeclaration;
+  const foundDeclaration=
+    text.includes(externAttributeSpelling)
+    ||sourceSpellings.some((spelling)=>
+      declarationKeywords.some(
+        (keyword)=>text.includes(keyword+spelling),
+      )
+    );
   if(!foundDeclaration){
     throw new Error(
       'bound Lean declaration missing from upstream source: '+

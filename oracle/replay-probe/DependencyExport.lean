@@ -667,7 +667,7 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
       unless roots.isEmpty do
         let moduleName := env.header.moduleNames[idx]!
         let mut start := 0
-        let mut part := 0
+        let mut part : Nat := 0
         while start < roots.size do
           let stop := min roots.size (start + rootsPerShard)
           let slice := roots.extract start stop

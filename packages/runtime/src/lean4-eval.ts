@@ -151,6 +151,14 @@ function typeValue(expr:Expr):Lean434TypeValue {
   return {kind:'type',expr};
 }
 
+function declarationTypeReturnsSort(type:Expr):boolean{
+  let current=type;
+  while(current.kind==='forall'){
+    current=current.body;
+  }
+  return current.kind==='sort';
+}
+
 /**
  * Bootstrap evaluator for pskernel-admitted Lean expressions.
  *
@@ -434,6 +442,16 @@ export class Lean434Evaluator {
       throw new Lean434EvaluationError(
         "unknown runtime constant '"+name+"'",
       );
+    }
+
+    if(
+      'type' in info
+      &&declarationTypeReturnsSort(info.type)
+    ){
+      // Types and type families are erased from executable code. This also
+      // covers defined aliases such as IO.RealWorld, ST, BaseIO and EIO
+      // without unfolding their logical representations at runtime.
+      return typeValue(expr);
     }
 
     switch(info.kind){

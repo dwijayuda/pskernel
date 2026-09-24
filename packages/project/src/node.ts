@@ -142,8 +142,10 @@ export function resolveLogicalModuleSource(
   const candidates:string[]=[];
   for(const root of sourceRoots){
     const ps=join(root,relative+'.ps');
+    const psx=join(root,relative+'.psx');
     const lean=join(root,relative+'.lean');
     if(existsSync(ps))candidates.push(ps);
+    if(existsSync(psx))candidates.push(psx);
     if(existsSync(lean))candidates.push(lean);
   }
   if(candidates.length>1){
@@ -155,7 +157,7 @@ export function resolveLogicalModuleSource(
   }
   if(candidates.length===0){
     throw new Error(
-      "PS_PROJECT_SOURCE_MISSING: no .ps or .lean source for module '"+
+      "PS_PROJECT_SOURCE_MISSING: no .ps, .psx, or .lean source for module '"+
       module+"' below configured roots: "+
       sourceRoots.map((root)=>"'"+root+"'").join(', '),
     );

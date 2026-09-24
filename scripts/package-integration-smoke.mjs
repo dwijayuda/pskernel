@@ -347,8 +347,16 @@ const dualPsRoundTrip=compileVerifiedSource(
 
 assert(
   dualFrontends.forFile('x.ps').kind==='proofscript'
+    &&dualFrontends.forFile('x.psx').kind==='proofscript'
     &&dualFrontends.forFile('x.lean').kind==='lean-subset',
-  'dual-source frontend registry did not select both source kinds',
+  'source frontend registry did not select PS/PSX/Lean source profiles',
+);
+const psxSurface=dualFrontends.forFile('View.psx').parse(
+  'function View(name : String) : JSX.Element := <div>{name}</div>;',
+);
+assert(
+  psxSurface.featureIds.includes('E-JSX'),
+  'PSX frontend did not own JSX syntax',
 );
 assert(
   dualPs.canonicalSourceHash===dualLean.canonicalSourceHash

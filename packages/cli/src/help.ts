@@ -6,21 +6,21 @@ export const HELP=`ProofScript compiler
 
 Usage:
   psc init [dir] [--lib] [-y]
-  psc check [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
-  psc build [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
-  psc run [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json] [-- <args...>]
-  psc translate <entry.ps|entry.lean> --to ps|lean [-p, --project <path>]
-  psc emit-lean [entry.ps|entry.lean] [-p, --project <path>]
+  psc check [entry.ps|entry.psx|entry.lean] [-p, --project <path>] [--verified] [--json]
+  psc build [entry.ps|entry.psx|entry.lean] [-p, --project <path>] [--verified] [--json]
+  psc run [entry.ps|entry.psx|entry.lean] [-p, --project <path>] [--verified] [--json] [-- <args...>]
+  psc translate <entry.ps|entry.psx|entry.lean> --to ps|lean [-p, --project <path>]
+  psc emit-lean [entry.ps|entry.psx|entry.lean] [-p, --project <path>]
   psc clean [-p, --project <path>]
   psc --version
   psc --help
 
 Commands:
   init       Create a ProofScript project and psconfig.json
-  check      Parse .ps or supported .lean and type-check without outputs
-  build      Compile .ps or supported .lean to TypeScript then JS/.d.ts
-  run        Build .ps or supported .lean and invoke exported main
-  translate  Canonically translate supported .ps/.lean to ps or lean
+  check      Parse .ps/.psx or supported .lean; JSX semantic lowering is PSX2
+  build      Compile the currently supported semantic subset to TS then JS/.d.ts
+  run        Build the currently supported semantic subset and invoke main
+  translate  Canonically translate supported .ps/.psx/.lean to ps or lean
   emit-lean  Print canonical Lean lowering for the supported reference slice
   clean      Remove the configured output directory
 

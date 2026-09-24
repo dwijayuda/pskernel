@@ -16,7 +16,8 @@ export type ProofScriptFeatureId =
   | 'E-CLASS-BODY'
   | 'E-INDUCTIVE-BODY'
   | 'E-MATCH-BODY'
-  | 'E-WHERE-BODY';
+  | 'E-WHERE-BODY'
+  | 'E-JSX';
 
 export const LEAN434_INHERITED_FEATURE_IDS = [
   'L-LEAN434-ERASED-DO',

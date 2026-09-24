@@ -349,3 +349,80 @@ ordinary `Eq`: deterministic local/environment candidates are tried directly
 and symmetrically, and a symmetric zero-subgoal hit is reconstructed with the
 real `Eq.symm`. This does not imply support for Lean's Iff direction search
 or recursive `solveByElim` discharge.
+
+## Full-stack web / PSX reference policy
+
+The authoritative ProofScript v0.7 study reference does not define a JSX/PSX
+surface. The `.psx` work is therefore an explicit repository design extension,
+not a claim that JSX existed in v0.7.
+
+Reference precedence for this work:
+
+### ProofScript / proof semantics
+
+Unchanged:
+
+1. current repository architecture and executable gates;
+2. pinned Lean 4.34 sources for dependent/theorem semantics;
+3. ProofScript v0.7 for existing language intent.
+
+React/Next/Vite documentation never defines proof meaning.
+
+### JSX host behavior
+
+Primary local reference:
+
+- `study/typescriptlang/docs/handbook/jsx.html`
+
+Use it for established JSX host concepts such as automatic `react-jsx` /
+`react-jsxdev` runtime emission and JSX import-source conventions. TypeScript
+does not become the ProofScript type-theoretic authority.
+
+### React behavior
+
+Use current official React documentation for framework rules and integration:
+
+- https://react.dev/reference/rules
+- https://react.dev/reference/rules/rules-of-hooks
+- https://react.dev/reference/react/hooks
+- https://react.dev/learn/react-compiler
+
+When exact version-specific runtime behavior becomes implementation-critical,
+pin the supported React version/range and inspect that package source rather
+than extrapolating from prose.
+
+### Vite integration
+
+Use the official Vite plugin/features documentation:
+
+- https://vite.dev/guide/api-plugin
+- https://vite.dev/guide/features
+
+The preferred integration is a documented custom-file transform with source
+maps and normal module-graph participation, not a competing dev server.
+
+### Next.js integration
+
+Use current official App Router documentation:
+
+- https://nextjs.org/docs
+- https://nextjs.org/docs/app/getting-started/server-and-client-components
+- https://nextjs.org/docs/app/getting-started/route-handlers
+- https://nextjs.org/docs/app/api-reference/config/next-config-js/pageExtensions
+- https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack
+
+Preserve the host contracts rather than cloning them: Server Components are the
+App Router default, `"use client"` marks the client module boundary, Route
+Handlers use Web Request/Response, and supported Turbopack loader/extension
+configuration is the initial direct-integration mechanism.
+
+### Required conflict handling
+
+If framework convenience conflicts with ProofScript semantics:
+
+- ProofScript/pskernel semantics win;
+- keep the framework feature unsupported or adapt at the host boundary;
+- do not weaken proof checking;
+- record explicit runtime assumptions;
+- add an adapter-version compatibility test when host behavior changes.
+

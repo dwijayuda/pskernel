@@ -116,6 +116,11 @@ export function elaborateV061Term(
         'PS_ELAB_SYNTHETIC_HOLE_OUTSIDE_REFINE: ?_ is accepted only by refine',
       );
     case 'call':{
+      if(expr.callee.startsWith('$psx.')){
+        throw new Error(
+          'PS_ELAB_JSX_UNSUPPORTED: JSX syntax parsed successfully but typed JSX lowering is not implemented until PSX2',
+        );
+      }
       const recursive=tryElaborateStructuralSelfCall(
         expr,
         context,

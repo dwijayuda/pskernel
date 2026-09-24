@@ -9,6 +9,93 @@ import {lowerV061TypeToProofScript} from './proofscript-type-lowering.js';
 const PRIMARY_PRECEDENCE=8;
 const UNARY_PRECEDENCE=7;
 
+type V061CallExpr=Extract<V061Expr,{readonly kind:'call'}>;
+
+function psxStringArg(
+  expr:V061Expr|undefined,
+  label:string,
+):string {
+  if(expr?.kind!=='string'){
+    throw new Error(
+      'PS_PRINT_JSX_INTERNAL: expected string '+label,
+    );
+  }
+  return expr.value;
+}
+
+function asPsxCall(
+  expr:V061Expr|undefined,
+  callee:string,
+):V061CallExpr|undefined {
+  return expr?.kind==='call'&&expr.callee===callee
+    ?expr
+    :undefined;
+}
+
+function lowerPsxChild(expr:V061Expr):string {
+  const text=asPsxCall(expr,'$psx.text');
+  if(text!==undefined){
+    return psxStringArg(text.args[0],'text');
+  }
+  const expressionChild=asPsxCall(expr,'$psx.child');
+  if(expressionChild!==undefined){
+    const child=expressionChild.args[0];
+    if(child===undefined){
+      throw new Error('PS_PRINT_JSX_INTERNAL: missing expression child');
+    }
+    return '{'+lowerV061ExprToProofScript(child)+'}';
+  }
+  const element=
+    asPsxCall(expr,'$psx.element')
+    ??asPsxCall(expr,'$psx.fragment');
+  if(element!==undefined){
+    return lowerPsxCall(element);
+  }
+  throw new Error(
+    'PS_PRINT_JSX_INTERNAL: unexpected JSX child representation',
+  );
+}
+
+function lowerPsxCall(expr:V061CallExpr):string {
+  if(expr.callee==='$psx.fragment'){
+    return '<>'+expr.args.map(lowerPsxChild).join('')+'</>';
+  }
+  if(expr.callee!=='$psx.element'){
+    throw new Error(
+      "PS_PRINT_JSX_INTERNAL: unsupported internal call '"+expr.callee+"'",
+    );
+  }
+  const tag=psxStringArg(expr.args[0],'tag');
+  psxStringArg(expr.args[1],'tag kind');
+  const attributes:string[]=[];
+  const children:V061Expr[]=[];
+  for(const item of expr.args.slice(2)){
+    const attribute=asPsxCall(item,'$psx.attr');
+    if(attribute!==undefined){
+      const name=psxStringArg(attribute.args[0],'attribute name');
+      const value=attribute.args[1];
+      if(value===undefined){
+        throw new Error(
+          'PS_PRINT_JSX_INTERNAL: missing attribute value',
+        );
+      }
+      attributes.push(
+        name+'='+
+        (value.kind==='string'
+          ?JSON.stringify(value.value)
+          :'{'+lowerV061ExprToProofScript(value)+'}'),
+      );
+    }else{
+      children.push(item);
+    }
+  }
+  const attrs=attributes.length===0?'':' '+attributes.join(' ');
+  if(children.length===0)return '<'+tag+attrs+' />';
+  return '<'+tag+attrs+'>'+
+    children.map(lowerPsxChild).join('')+
+    '</'+tag+'>';
+}
+
 function wrap(
   rendered:string,
   precedence:number,
@@ -114,6 +201,10 @@ export function lowerV061ExprToProofScript(
       rendered='('+lowerV061ExprToProofScript(expr.value)+')';
       break;
     case 'call':{
+      if(expr.callee.startsWith('$psx.')){
+        rendered=lowerPsxCall(expr);
+        break;
+      }
       const args=
         expr.args.length===1&&expr.args[0]?.kind==='unit'
           ?''

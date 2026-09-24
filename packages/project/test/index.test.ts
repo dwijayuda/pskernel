@@ -135,6 +135,14 @@ import {
       join(root,'src','Core.lean'),
     );
     equal(projectSourceRootsFromConfig(['src','src']).length,1);
+    writeFileSync(
+      join(root,'src','Widget.psx'),
+      'function View(name : String) : JSX.Element := <div>{name}</div>;',
+    );
+    equal(
+      resolveLogicalModuleSource(resolution.sourceRoots,'Widget'),
+      join(root,'src','Widget.psx'),
+    );
   }finally{
     rmSync(root,{recursive:true,force:true});
   }

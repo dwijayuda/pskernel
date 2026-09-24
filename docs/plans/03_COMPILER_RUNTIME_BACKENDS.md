@@ -101,3 +101,42 @@ forms fail closed.
 
 The older `CheckedSoftwareModule -> SoftwareIrModule` path is transitional
 and must shrink as verified-core lowering expands.
+
+## Full-stack web / JSX backend extension
+
+Detailed execution plan:
+
+- `docs/plans/07_FULLSTACK_WEB_PSX.md`
+
+The TypeScript/JavaScript backend remains the primary host path. Web support
+extends it rather than creating a second compiler.
+
+The intended framework-neutral layering is:
+
+```text
+checked core
+  -> erasure
+  -> verified runtime IR
+  -> JSX/component lowering where applicable
+  -> ESM JavaScript / automatic JSX-runtime calls
+  -> Vite / Next.js / host runtime
+```
+
+Requirements:
+
+- JSX syntax is gone before checked-core/compiler trust boundaries that do not
+  explicitly own it;
+- React-specific runtime calls are introduced only in outer compiler/adapter
+  packages;
+- source maps preserve `.psx` locations;
+- direct Vite/Next loader output and any generated-shadow-tree fallback must
+  derive from the same checked core / verified IR;
+- React/Next/DOM/Node behavior is external runtime behavior, not a theorem
+  checker oracle;
+- compiler/runtime correctness claims remain distinct from source proof
+  checking.
+
+A generated `.tsx`/`.ts` shadow tree is permitted as a diagnostic/fallback
+integration strategy, but the target developer experience is direct
+`.ps`/`.psx` authoring through supported Vite/Turbopack transform hooks.
+

@@ -7,6 +7,7 @@ import {
   createLeanEnvironmentProvider,
   requireLeanEnvironment,
 } from '../src/node.js';
+import {nameFromDotted} from 'lean-ts-kernel';
 import {LEAN434_PINNED_GITHASH} from 'lean-ts-kernel/lean4export';
 
 function equal(actual:unknown,expected:unknown):void {
@@ -120,6 +121,25 @@ function equal(actual:unknown,expected:unknown):void {
   equal(replayed.environment.size,2);
   equal(replayed.stats.declarations,1);
 }
+{
+  const provider=createLeanEnvironmentProvider();
+  const status=provider.status();
+  equal(status.loaded,true);
+  equal(
+    status.foundationSource?.endsWith(
+      'lean434-proofscript-text-foundation.ndjson',
+    ),
+    true,
+  );
+  const environment=requireLeanEnvironment(provider);
+  equal(
+    environment.find(nameFromDotted('String.Internal.length'))!==undefined,
+    true,
+  );
+  equal(environment.find(nameFromDotted('Char.toNat'))!==undefined,true);
+}
+console.log('ok - @proofscript/environment certified SH1 compiler base');
+
 {
   const provider=createLeanEnvironmentProvider({
     candidatePaths:['/definitely/missing/proofscript-foundation.ndjson'],

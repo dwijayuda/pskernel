@@ -458,19 +458,34 @@ mutual
 end
 
 /--
+Return the declaration Lean's compiler executes for a reference to `name`
+when it differs from the logical declaration admitted by the kernel.
+
+Explicit `@[implemented_by]` replacements take priority. Otherwise recursive
+and partial definitions use the generated `_unsafe_rec` declaration, matching
+`Lean.Compiler.LCNF.getDeclInfo?`.
+-/
+def compilerRuntimeTarget? (env : Environment) (name : Name) : Option Name :=
+  if let some impl := Compiler.getImplementedBy? env name then
+    some impl
+  else
+    let unsafeRec := Compiler.mkUnsafeRecName name
+    if env.find? unsafeRec |>.isSome then some unsafeRec else none
+
+/--
 Diagnostic/runtime exports preserve Lean's compiler implementation graph, but
 only after the entire logical dependency closure has been emitted.
 
 This two-phase ordering is essential for computed fields. Their generated
 runtime inductives (for example `Lean.Level._impl`) can contain fields typed by
-the original logical inductive. Following `@[implemented_by]` while the
-logical declaration is still active can therefore serialize the implementation
-before its type dependency.
+the original logical inductive. Following runtime implementation edges while
+the logical declaration is still active can therefore serialize the
+implementation before its type dependency.
 
 Canonical kernel/module streams set `skipNonReplayable` and never enter this
 runtime-only phase.
 -/
-partial def dumpImplementedByClosure (env : Environment) : M Unit := do
+partial def dumpRuntimeImplementationClosure (env : Environment) : M Unit := do
   if (← get).skipNonReplayable then return
   let names :=
     (env.constants.map₁.toList.map (·.1)).toArray.qsort Name.quickLt
@@ -479,11 +494,12 @@ partial def dumpImplementedByClosure (env : Environment) : M Unit := do
     changed := false
     for name in names do
       if ← isEmitted name then
-        if let some impl := Compiler.getImplementedBy? env name then
+        if let some impl := compilerRuntimeTarget? env name then
           unless ← isEmitted impl do
             dumpConstant env impl
             unless ← isEmitted impl do
-              throw <| IO.userError s!"implemented_by target was not emitted: {name} -> {impl}"
+              throw <| IO.userError
+                s!"compiler runtime target was not emitted: {name} -> {impl}"
             changed := true
 
 
@@ -619,7 +635,7 @@ partial def dumpBatchStream (env : Environment) (target : Name) (maxRoots startB
             if inSegment == segmentRoots then
               segment := segment + 1
               inSegment := 0
-          dumpImplementedByClosure env) |>.run {}
+          dumpRuntimeImplementationClosure env) |>.run {}
         pure ()
   for idx in [0:buckets.size] do
     let roots := buckets[idx]!
@@ -656,7 +672,7 @@ partial def dumpSelectedRootsSegmented
   let _ ← (do
     modify fun (s : S) => { s with segmented := true }
     for n in roots do dumpConstant env n
-    dumpImplementedByClosure env
+    dumpRuntimeImplementationClosure env
     closeDeclarationSegment) |>.run {}
   pure ()
 
@@ -678,7 +694,7 @@ partial def dumpSelectedRootsAfterBase
   }
   let _ ← (do
     for n in roots do dumpConstant env n
-    dumpImplementedByClosure env) |>.run initial
+    dumpRuntimeImplementationClosure env) |>.run initial
   pure ()
 
 partial def dumpSelectedRootsSegmentedAfterBase
@@ -703,7 +719,7 @@ partial def dumpSelectedRootsSegmentedAfterBase
   }
   let _ ← (do
     for n in roots do dumpConstant env n
-    dumpImplementedByClosure env
+    dumpRuntimeImplementationClosure env
     closeDeclarationSegment) |>.run initial
   pure ()
 
@@ -758,7 +774,7 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
       if inSegment == segmentRoots then
         segment := segment + 1
         inSegment := 0
-    dumpImplementedByClosure env) |>.run {}
+    dumpRuntimeImplementationClosure env) |>.run {}
   pure ()
 
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
@@ -884,5 +900,5 @@ unsafe def main (args : List String) : IO Unit := do
       dumpMeta
       let _ ← (do
         for n in roots do dumpConstant env n
-        dumpImplementedByClosure env) |>.run {}
+        dumpRuntimeImplementationClosure env) |>.run {}
       pure ()

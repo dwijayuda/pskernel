@@ -1,4 +1,4 @@
-import { Level, instantiateLevel, levelEqStructural, levelHasMVar, levelToString } from './level.js';
+import { Level, instantiateLevel, levelEqStructural, levelToString } from './level.js';
 import { Name, nameEq, nameFromDotted, nameKey, nameToString } from './name.js';
 
 export type BinderInfo = 'default' | 'implicit' | 'strictImplicit' | 'instImplicit';

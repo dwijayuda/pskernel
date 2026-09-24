@@ -197,6 +197,221 @@ The important split is:
 - There is no second semantic type checker after elaboration. pskernel is the
   independent final admission authority.
 
+## npm-workspace topology is the long-term topology
+
+The existing `packages/*` npm-workspace structure is not temporary scaffolding.
+Keep the package boundaries that already express useful responsibilities and
+make the self-hosted compiler grow into those packages instead of creating a
+second permanent compiler tree.
+
+The current TypeScript implementation and the future Lean/ProofScript
+implementation should therefore converge structurally:
+
+```text
+packages/
+  syntax/
+  meta/
+  elab/
+  checked-core/
+  erasure/
+  compiler-ir/
+  backend-ts/
+  compiler/
+  module/
+  project/
+  runtime/
+  ...
+```
+
+Do **not** require every current package to become portable/self-hosted. Split
+packages into two classes.
+
+### Portable dual-source semantic/compiler packages
+
+These should eventually contain the canonical paired source forms and compile
+through both bootstrap lanes:
+
+- `syntax`
+- `meta`
+- `elab`
+- `checked-core`
+- `erasure`
+- `compiler-ir`
+- `backend-ts`
+- `compiler`
+- the semantic/data portion of `environment`, `module`, `project`, `pretty`,
+  `runtime` and `tactic` when used by PSC1
+
+Their long-term shape is:
+
+```text
+packages/syntax/
+  package.json
+  src/
+    ... existing TypeScript PSC0 implementation ...
+    ProofScript/
+      Syntax/
+        Foo.lean
+        Foo.ps
+  dist/
+    js/
+    types/
+    proofscript/
+```
+
+The exact subdirectory may evolve, but `.lean` and `.ps` counterparts should
+live in the **same npm package and same logical module tree**. They are two
+source spellings of one semantic module, not independent implementations.
+
+### Host/tooling packages
+
+Packages whose purpose is intrinsically Node/browser/editor/build integration
+may remain TypeScript:
+
+- `cli`
+- `lsp`
+- `language-service` host adapters
+- `browser` host adapters
+- npm/filesystem/project discovery adapters
+- VS Code/editor transport
+- TypeScript Compiler API invocation
+
+Portable logic should move downward into the semantic packages instead of
+forcing host APIs into PSC1.
+
+### Kernel package
+
+The independent TypeScript kernel stays a separate trust boundary. Its eventual
+npm identity should be:
+
+```text
+@proofscript/kernel
+```
+
+It does **not** become part of the self-hosted compiler implementation merely
+because it is distributed from the same monorepo.
+
+The present repository-root kernel layout is a bootstrap packaging detail.
+Moving or wrapping it under `packages/kernel` may happen later when that
+migration is low-risk; self-hosting must not be blocked on that directory move.
+
+## Dual build model
+
+During bootstrap the repository intentionally has two build systems over the
+same logical compiler packages.
+
+### Lean/Lake bootstrap build
+
+Lake compiles the `.lean` side:
+
+```text
+packages/*/src/**/Module.lean
+        |
+        v
+      Lake
+        |
+        v
+ official Lean 4.34
+        |
+        v
+ Lean-hosted PSC compiler
+```
+
+### JavaScript/ProofScript build
+
+The npm/JS build compiles either canonical source spelling through ProofScript:
+
+```text
+Module.ps   --\
+             +-> psc -> checked core -> IR -> Module.ts -> tsc -> Module.js
+Module.lean --/
+```
+
+Both source spellings must converge on the same checked-core and verified-IR
+identity for the supported subset.
+
+Long term Lake disappears from the normal user path, while the npm workspace
+and JS build remain:
+
+```text
+npm install
+  -> psc
+  -> .ps/.lean
+  -> .ts
+  -> .js
+```
+
+Lake remains only as an independent bootstrap/reference checker when useful.
+
+## Paired-source rule
+
+For a portable semantic module, the intended steady state is conceptually:
+
+```text
+packages/meta/src/ProofScript/Meta/Foo.lean
+packages/meta/src/ProofScript/Meta/Foo.ps
+```
+
+Both represent one module. They must not drift into two hand-maintained
+implementations.
+
+During the Lean-first bootstrap:
+
+1. `.lean` is authored first;
+2. canonical `.ps` is generated/updated from it;
+3. both are checked for semantic identity;
+4. after the self-host transition, `.ps` becomes authoritative and canonical
+   `.lean` becomes the generated/reference form.
+
+The repository may temporarily commit both forms because dual-kernel review and
+bootstrap reproducibility are valuable, but one form must always be designated
+authoritative for a given bootstrap stage.
+
+## Package-local outputs
+
+Keep generated output package-local, following npm expectations. A target shape
+is:
+
+```text
+packages/<name>/dist/
+  ts/            generated TypeScript
+  js/            JavaScript runtime
+  types/         .d.ts
+  proofscript/   checked module artifacts / manifests
+```
+
+The exact directory spelling can remain compatible with existing package
+scripts initially. The invariant is that generated files do not become semantic
+source and that npm packages can publish JS/types plus ProofScript checked
+artifacts from one package.
+
+## Package manifests and semantic manifests
+
+`package.json` remains the npm package/workspace manifest. Add a `proofscript`
+field over time rather than inventing a separate registry or package manager.
+
+```json
+{
+  "name": "@proofscript/syntax",
+  "proofscript": {
+    "sourceRoots": ["src"],
+    "artifactRoot": "dist/proofscript",
+    "modules": ["ProofScript.Syntax"]
+  }
+}
+```
+
+A ProofScript package may therefore ship:
+
+- `.ps` source;
+- canonical/reference `.lean` source when desired;
+- generated `.ts`/`.js`/`.d.ts`;
+- checked pskernel module artifacts;
+- semantic dependency/integrity metadata.
+
+npm owns distribution/version/install. ProofScript owns logical module identity,
+semantic compatibility and checked artifacts.
+
 ## Portable module layout
 
 Initial logical modules:
@@ -355,3 +570,9 @@ Do not use Lean-only conveniences merely because Lake permits them.
 
 The source should look structurally like code we are willing to maintain later
 as `.ps`.
+
+New bootstrap work should prefer the long-term `packages/*` responsibility
+boundaries. The existing `selfhost/src` tree is a seed/smoke area, not a new
+permanent parallel compiler architecture. Once the first paired package module
+is green, move subsequent semantic implementation into the corresponding npm
+workspace package.

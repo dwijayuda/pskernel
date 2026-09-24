@@ -27,7 +27,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run build
       - name: Compile exporter
-        run: lean oracle/replay-probe/DependencyExport.lean
+        run: "$LEAN434_BIN/lean" oracle/replay-probe/DependencyExport.lean
       - name: Replay representative Int.DivMod window
         env:
           PSKERNEL_WORKER_TIMEOUT_MS: "30000"

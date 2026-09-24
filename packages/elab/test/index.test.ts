@@ -686,13 +686,45 @@ console.log('ok - @proofscript/elab bounded exact search');
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();
-  const kernel=new Kernel(env);
   const Nat=nameFromDotted('Nat');
-  kernel.addAxiom({
-    kind:'axiom',
+  const zero=nameFromDotted('Nat.zero');
+  const succ=nameFromDotted('Nat.succ');
+  env.add({
+    kind:'inductive',
     name:Nat,
     levelParams:[],
     type:sort(levelSucc(levelZero)),
+    numParams:0,
+    numIndices:0,
+    all:[Nat],
+    ctors:[zero,succ],
+    numNested:0,
+    isRec:true,
+    isReflexive:false,
+  });
+  env.add({
+    kind:'constructor',
+    name:zero,
+    levelParams:[],
+    type:constant(Nat),
+    induct:Nat,
+    cidx:0,
+    numParams:0,
+    numFields:0,
+  });
+  env.add({
+    kind:'constructor',
+    name:succ,
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('n'),
+      constant(Nat),
+      constant(Nat),
+    ),
+    induct:Nat,
+    cidx:1,
+    numParams:0,
+    numFields:1,
   });
   const binaryType=forallE(
     nameFromDotted('x'),
@@ -704,7 +736,7 @@ function makeNatNotationEnvironment():Environment {
     ),
   );
   for(const name of ['Nat.add','Nat.sub','Nat.mul']){
-    kernel.addAxiom({
+    env.add({
       kind:'axiom',
       name:nameFromDotted(name),
       levelParams:[],

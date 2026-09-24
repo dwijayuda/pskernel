@@ -59,7 +59,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run oracle:text-foundation
 
       - uses: actions/upload-artifact@v4
@@ -83,6 +83,11 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'chore(sh1): pin Lean 4.34 text-foundation fixture'
           rm -f lean-version.txt
+          if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+            echo 'text-foundation fixture workflow left tracked changes outside the committed fixture:' >&2
+            git status --short --untracked-files=no >&2
+            exit 1
+          fi
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main

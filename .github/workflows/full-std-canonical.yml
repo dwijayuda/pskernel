@@ -39,6 +39,10 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           "$HOME/.elan/bin/lean" --version
           "$HOME/.elan/bin/lean" --githash
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          lean_dir="$(dirname "$lean_bin")"
+          test -x "$lean_dir/leanchecker"
+          echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
 
       - uses: actions/setup-node@v4
         with:

@@ -7,6 +7,23 @@ def psDeclarationName : PsDeclaration -> PsName
   | .theoremDecl name _ _ _ => name
   | .opaqueDecl name _ _ _ => name
 
+
+def psDeclarationLevelParams : PsDeclaration -> List PsName
+  | .axiomDecl _ levelParams _ => levelParams
+  | .definitionDecl _ levelParams _ _ => levelParams
+  | .theoremDecl _ levelParams _ _ => levelParams
+  | .opaqueDecl _ levelParams _ _ => levelParams
+
+def psDeclarationType : PsDeclaration -> PsExpr
+  | .axiomDecl _ _ type => type
+  | .definitionDecl _ _ type _ => type
+  | .theoremDecl _ _ type _ => type
+  | .opaqueDecl _ _ type _ => type
+
+def psDeclarationValue : PsDeclaration -> Option PsExpr
+  | .definitionDecl _ _ _ value => some value
+  | _ => none
+
 structure PsEnvironment where
   declarations : List PsDeclaration
 

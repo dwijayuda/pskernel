@@ -190,6 +190,56 @@ console.log('ok - @proofscript/erasure Nat intrinsic lowering');
 {
   const env=new Environment();
   const Nat=nameFromDotted('Nat');
+  const Char=nameFromDotted('Char');
+  const charOfNat=nameFromDotted('Char.ofNat');
+  env.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  env.add({
+    kind:'axiom',
+    name:Char,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  env.add({
+    kind:'axiom',
+    name:charOfNat,
+    levelParams:[],
+    type:forallE(nameFromDotted('n'),constant(Nat),constant(Char)),
+  });
+  const toChar=nameFromDotted('toChar');
+  const checked=admitCheckedCoreModule(env,[{
+    kind:'definition',
+    name:toChar,
+    levelParams:[],
+    type:forallE(nameFromDotted('n'),constant(Nat),constant(Char)),
+    value:lam(
+      nameFromDotted('n'),
+      constant(Nat),
+      app(constant(charOfNat),bvar(0)),
+    ),
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  }]);
+  const declaration=eraseCheckedCoreModule(checked).declarations[0]!;
+  equal(declaration.resultType.kind,'primitive');
+  if(declaration.resultType.kind==='primitive'){
+    equal(declaration.resultType.name,'Char');
+  }
+  equal(declaration.body.kind,'intrinsic');
+  if(declaration.body.kind==='intrinsic'){
+    equal(declaration.body.operation,'char.ofNat');
+  }
+}
+console.log('ok - @proofscript/erasure checked Char.ofNat lowering');
+
+
+{
+  const env=new Environment();
+  const Nat=nameFromDotted('Nat');
   env.add({
     kind:'axiom',
     name:Nat,

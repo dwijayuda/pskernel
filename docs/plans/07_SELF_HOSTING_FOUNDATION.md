@@ -281,11 +281,30 @@ JSON is a library/data-format requirement, not a new trusted language primitive.
 The first Array profile needs at least empty, size, get/get?, push, set, map,
 fold, monadic map/fold variants used by compiler code, any/all and find?.
 
+Add the cheap literal/constructor conveniences that materially reduce noise in
+compiler data code, provided they desugar directly to the same library
+constructors in both source frontends:
+
+- list literals such as `[]` and `[a, b, c]`;
+- array literals such as `#[]` and `#[a, b, c]`;
+- tuple/Prod literal and destructuring syntax when not already covered by SH4.5.
+
+These are USEFUL/CHEAP source forms, not new runtime primitives. They must
+round-trip `.lean <-> .ps` and lower to ordinary checked constructors.
+
+Prefer safe collection APIs such as `get?` in bootstrap code. A generalized
+Lean `GetElem`/proof-producing indexing framework is not an SH7 prerequisite;
+add only a bounded indexing notation if it can be implemented as cheap sugar
+over already-owned safe APIs without importing tactic-based bounds solving.
+
 The bootstrap Map/Set semantics must not silently inherit JavaScript identity
 semantics. Prefer a persistent ordered implementation requiring an explicit
 Lean-compatible ordering abstraction. Provide the bootstrap comparison
 foundation needed for compiler keys, including `BEq`/equality and `Ord`
 coverage for at least the primitive/name forms actually used by the compiler.
+Make the corresponding `Ordering` data/API explicit in the bootstrap library
+so map/set comparison is ordinary portable ProofScript/Lean code rather than a
+host-language callback convention.
 `Hashable`/hash maps may remain deferred until profiling or a concrete module
 requires them.
 
@@ -313,9 +332,11 @@ Implement the compiler-oriented effect foundation:
   requires them.
 
 The first bootstrap profile should also provide the monad-lifting operations
-actually needed by the selected Reader/State/Except stack. Do not reproduce
-Lean's full transformer/typeclass hierarchy unless the compiler workload
-requires it.
+actually needed by the selected Reader/State/Except stack. A bounded
+`MonadLift`/`MonadLiftT`-style layer for the concrete transformer stack is
+USEFUL/CHEAP when it removes repetitive manual lifting. Do not reproduce Lean's
+full transformer/typeclass hierarchy or its law library unless the compiler
+workload requires it.
 
 Add the small proof-aware control-flow forms that compiler code uses to carry
 branch facts without invoking a tactic engine:
@@ -325,6 +346,24 @@ branch facts without invoking a tactic engine:
 - ordinary proof-valued local bindings such as `have h : P := proof`;
 - `show T from e` or an equivalent cheap expected-type annotation form when
   it materially simplifies compiler/proof code.
+
+The bootstrap subset must own the **bounded Decidable closure** needed to make
+those forms real Lean-compatible terms rather than syntax-only conveniences:
+
+- synthesize a known `Decidable P` through the same bounded instance-search
+  mechanism used elsewhere in elaboration;
+- elaborate ordinary proposition-valued `if` through Lean-compatible `ite`;
+- elaborate proof-binding/dependent branches through Lean-compatible `dite`
+  when the branch result depends on the branch proof;
+- introduce the positive/negative branch proof only in the corresponding local
+  context;
+- roll back Meta assignments and instance-search state when Decidable synthesis
+  or a candidate branch elaboration fails;
+- fail closed when the required Decidable instance cannot be synthesized.
+
+This does **not** require ProofScript to implement the whole Lean Decidable
+ecosystem or automation for proving propositions. It owns only the bounded
+instance-driven semantics exercised by bootstrap code.
 
 These are term-elaboration features, not tactic automation. Branch hypotheses
 and `have` values must elaborate to ordinary proof terms that pskernel checks.
@@ -475,7 +514,17 @@ source relies on heavily and that materially reduce bootstrap rewrite risk:
 - `abbrev` when it can be supported without introducing a second semantic
   mechanism;
 - `opaque` when it can reuse pskernel's existing opacity semantics without a
-  second elaboration path.
+  second elaboration path;
+- simple string interpolation such as `s!"...{x}..."` when it can desugar to
+  owned String append/builder operations plus bounded `ToString` support;
+- `default` / `Inhabited` for compiler-state records when it can be provided
+  as ordinary typeclass/library functionality;
+- `Id.run` or an equivalent zero-cost identity runner when it makes
+  mutation-looking pure blocks (`let mut`, loops) substantially clearer.
+
+These are USEFUL/CHEAP conveniences. They must not become PSC1 blockers unless
+SELFHOST-FEATURE or real compiler modules use them and must not introduce macro
+or runtime machinery beyond their ordinary desugared terms.
 
 Include a bounded explicit universe surface in the census and bootstrap
 language when compiler/library definitions need universe polymorphism:
@@ -667,6 +716,8 @@ exercise at least:
 - Array plus ordered Map/Set and compiler-oriented traversal combinators such as
   `mapM` / indexed monadic traversal / folds;
 - canonical JSON parse/encode plus at least one SH6b request/response codec;
+- representative list/array literals and tuple construction/destructuring using
+  only desugared checked constructors;
 - qualified `Name`, namespaces/imports and explicit environment updates;
 - structures, structure updates, field/method notation, named arguments,
   grouped/unnamed binders and structure defaults;
@@ -683,9 +734,12 @@ exercise at least:
 - runtime-only guard/assert/panic/unreachable behavior with a regression proving
   it cannot be used as proof evidence;
 - higher-order/generic traversals;
-- implicit arguments, instance synthesis and postponed Meta constraints used by
+- implicit arguments, bounded `Decidable` synthesis, ordinary/dependent
+  `ite`/`dite`, instance synthesis and postponed Meta constraints used by
   the bootstrap subset;
-- diagnostics/fresh IDs;
+- diagnostics/fresh IDs and at least one formatted diagnostic assembled from
+  portable String operations; interpolation may be used only if its dual-source
+  desugaring is already green;
 - multi-module compilation;
 - the versioned SH6b pskernel bridge, using the canonical String/JSON bootstrap
   transport, for lookup, a ground kernel query and declaration/inductive
@@ -915,5 +969,8 @@ Before accepting any ProofScript infrastructure task, ask:
    metaprogramming subsystem that the compiler does not actually need?
 
 If the feature is neither REQUIRED nor justified as USEFUL/CHEAP by the census,
-defer it. Expensive extensibility machinery remains deferred until a concrete
-compiler requirement changes its classification.
+defer it. A USEFUL/CHEAP item is still not automatically a bootstrap blocker:
+prefer landing it when its implementation is local/desugaring-based and it
+removes repeated compiler-source boilerplate; otherwise leave it recorded and
+continue toward SELFHOST-FEATURE. Expensive extensibility machinery remains
+deferred until a concrete compiler requirement changes its classification.

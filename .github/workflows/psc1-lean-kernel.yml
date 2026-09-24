@@ -1,0 +1,53 @@
+name: PSC1 Lean kernel parity
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [kernel/psc1-lean434]
+    paths:
+      - ".github/workflows/psc1-lean-kernel.yml"
+      - "kernel/psc1/**"
+
+permissions:
+  contents: read
+
+jobs:
+  lean434:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify Lean oracle identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - name: Audit portable source imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R '^import Lean' kernel/psc1/ProofScript/Kernel/PSC1; then
+            echo "portable PSC1 kernel source must not import Lean implementation modules" >&2
+            exit 1
+          fi
+      - name: Compile PSC1 kernel K0 with Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LEAN_PATH="$PWD/kernel/psc1"
+          lean -o kernel/psc1/ProofScript/Kernel/PSC1/Name.olean kernel/psc1/ProofScript/Kernel/PSC1/Name.lean
+          lean -o kernel/psc1/ProofScript/Kernel/PSC1/Level.olean kernel/psc1/ProofScript/Kernel/PSC1/Level.lean
+          lean -o kernel/psc1/ProofScript/Kernel/PSC1/Expr.olean kernel/psc1/ProofScript/Kernel/PSC1/Expr.lean
+          lean -o kernel/psc1/ProofScript/Kernel/PSC1/Instantiate.olean kernel/psc1/ProofScript/Kernel/PSC1/Instantiate.lean
+      - name: Run direct original-Lean parity tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LEAN_PATH="$PWD/kernel/psc1"
+          lean --run kernel/psc1/test/CoreParity.lean

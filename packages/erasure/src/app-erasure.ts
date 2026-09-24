@@ -15,7 +15,7 @@ import {
 import {tryEraseRuntimeRecursorApplication} from './recursor-erasure.js';
 import {eraseRuntimeType} from './type-erasure.js';
 import {tryErasePrimitiveRuntimeApplication} from './primitive-app-erasure.js';
-import {tryEraseRawPosConstructor} from './raw-pos-erasure.js';
+import {tryEraseRawPosApplication} from './raw-pos-erasure.js';
 
 export type RuntimeExprEraser=(
   expr:Expr,

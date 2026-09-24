@@ -361,3 +361,111 @@ export function findLean434JsExtern(
 ):Lean434ExternDescriptor|undefined{
   return externBySymbol.get(leanSymbol);
 }
+
+
+export interface Lean434DeclarationExternBinding {
+  readonly leanDeclaration:string;
+  readonly leanSymbol:string;
+  readonly arity:number;
+  readonly upstreamSource:string;
+}
+
+/**
+ * High-level declaration bindings that are representation-compatible with the
+ * bootstrap JS evaluator today.
+ *
+ * This is intentionally stricter than LEAN434_JS_EXTERN_MANIFEST. A low-level
+ * Lean extern may use a native calling convention or optimized representation
+ * that is not yet identical to the evaluator's high-level runtime value.
+ */
+export const LEAN434_JS_DECL_EXTERN_BINDINGS:
+readonly Lean434DeclarationExternBinding[]=[
+  {
+    leanDeclaration:'Nat.add',
+    leanSymbol:'lean_nat_add',
+    arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Nat.mul',
+    leanSymbol:'lean_nat_mul',
+    arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Nat.sub',
+    leanSymbol:'lean_nat_sub',
+    arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Nat.div',
+    leanSymbol:'lean_nat_div',
+    arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Nat.modCore',
+    leanSymbol:'lean_nat_mod',
+    arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Nat.beq',
+    leanSymbol:'lean_nat_dec_eq',
+    arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Nat.ble',
+    leanSymbol:'lean_nat_dec_le',
+    arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+] as const;
+
+const declarationExternByName=new Map(
+  LEAN434_JS_DECL_EXTERN_BINDINGS.map(
+    (entry)=>[entry.leanDeclaration,entry] as const,
+  ),
+);
+
+export function findLean434JsExternForDeclaration(
+  leanDeclaration:string,
+):Lean434DeclarationExternBinding|undefined{
+  return declarationExternByName.get(leanDeclaration);
+}
+
+type Lean434JsExternImplementation=
+  (...args:readonly unknown[])=>unknown;
+
+const jsExternImplementations:
+ReadonlyMap<string,Lean434JsExternImplementation>=new Map([
+  ['lean_nat_add',(a,b)=>lean_nat_add(a as LeanNat,b as LeanNat)],
+  ['lean_nat_mul',(a,b)=>lean_nat_mul(a as LeanNat,b as LeanNat)],
+  ['lean_nat_sub',(a,b)=>lean_nat_sub(a as LeanNat,b as LeanNat)],
+  ['lean_nat_div',(a,b)=>lean_nat_div(a as LeanNat,b as LeanNat)],
+  ['lean_nat_mod',(a,b)=>lean_nat_mod(a as LeanNat,b as LeanNat)],
+  ['lean_nat_dec_eq',(a,b)=>lean_nat_dec_eq(a as LeanNat,b as LeanNat)],
+  ['lean_nat_dec_le',(a,b)=>lean_nat_dec_le(a as LeanNat,b as LeanNat)],
+]);
+
+export function invokeLean434JsExtern(
+  leanSymbol:string,
+  args:readonly unknown[],
+):unknown{
+  const descriptor=findLean434JsExtern(leanSymbol);
+  if(descriptor===undefined){
+    throw new Error(
+      "Lean 4.34 JS extern is not in the pinned manifest: '"+leanSymbol+"'",
+    );
+  }
+  const implementation=jsExternImplementations.get(leanSymbol);
+  if(implementation===undefined){
+    throw new Error(
+      "Lean 4.34 JS extern has no high-level evaluator adapter: '"+
+      leanSymbol+"'",
+    );
+  }
+  return implementation(...args);
+}

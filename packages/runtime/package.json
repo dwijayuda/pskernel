@@ -34,6 +34,10 @@
     "./lean4/name": {
       "types": "./dist/src/lean4-name.d.ts",
       "import": "./dist/src/lean4-name.js"
+    },
+    "./lean4/level": {
+      "types": "./dist/src/lean4-level.d.ts",
+      "import": "./dist/src/lean4-level.js"
     }
   },
   "scripts": {

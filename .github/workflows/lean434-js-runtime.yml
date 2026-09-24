@@ -44,12 +44,16 @@ jobs:
           "
       - name: Measure dependency-closed Lean source roots
         run: |
+          node scripts/lean434-source-closure.mjs Lean.Parser.Types > lean-parser-types-closure.json
+          node scripts/lean434-source-closure.mjs Lean.Parser.Basic > lean-parser-basic-closure.json
           node scripts/lean434-source-closure.mjs Lean.Parser > lean-parser-closure.json
           node scripts/lean434-source-closure.mjs Lean.Meta.Basic > lean-meta-basic-closure.json
           node scripts/lean434-source-closure.mjs Lean.Elab.Frontend > lean-elab-frontend-closure.json
           node --input-type=module -e "
             import fs from 'node:fs';
             for (const [name,file] of [
+              ['Lean.Parser.Types','lean-parser-types-closure.json'],
+              ['Lean.Parser.Basic','lean-parser-basic-closure.json'],
               ['Lean.Parser','lean-parser-closure.json'],
               ['Lean.Meta.Basic','lean-meta-basic-closure.json'],
               ['Lean.Elab.Frontend','lean-elab-frontend-closure.json'],
@@ -60,11 +64,14 @@ jobs:
                 modules:r.totals.modules,
                 bytes:r.totals.bytes,
                 missingModules:r.totals.missingModules,
+                prunedImportEdges:r.totals.prunedImportEdges,
                 externSymbols:r.totals.externSymbols,
                 implementedExternSymbols:r.totals.implementedExternSymbols,
                 uncoveredExternSymbols:r.totals.uncoveredExternSymbols,
                 implementedByTargets:r.totals.implementedByTargets,
                 byTopLevel:r.byTopLevel,
+                rootImports:r.rootsDetail[0],
+                missing:r.missingModules,
               }));
             }
           "

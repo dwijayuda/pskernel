@@ -102,7 +102,7 @@ Exit condition:
 
 ## R1 — core JS runtime contract — **COMPLETE (first scoped slice)**
 
-Completed 2026-09-25 for the initial Nat/UInt/Array/String/ST.Ref surface. `@proofscript/runtime/lean4` exposes a versioned Lean 4.34 compatibility module with 32 explicit extern mappings. GitHub Actions run `36038614385` passed the runtime tests, census, and architecture gate.
+Completed 2026-09-25 for the initial Nat/UInt/Array/String/ST.Ref surface. `@proofscript/runtime/lean4` exposes a versioned Lean 4.34 compatibility module with 30 explicit extern mappings. GitHub Actions run `36038614385` passed the runtime tests, census, and architecture gate.
 
 This does not mean the entire Lean runtime is complete; later runtime primitives are pulled in only by dependency-closed source tranches.
 

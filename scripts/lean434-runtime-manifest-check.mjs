@@ -175,19 +175,6 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
     );
   }
 
-  declarationBindings.push({'),
-    ).join('|')+
-    String.raw`)\\b`,
-    'u',
-  );
-  if(!declarationPattern.test(text)){
-    throw new Error(
-      'bound Lean declaration missing from upstream source: '+
-      binding.leanDeclaration+' @ '+binding.upstreamSource+
-      ' (checked source spellings: '+sourceSpellings.join(', ')+')',
-    );
-  }
-
   declarationBindings.push({
     leanDeclaration:binding.leanDeclaration,
     leanSymbol:binding.leanSymbol,

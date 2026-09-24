@@ -204,24 +204,51 @@ Keep the package boundaries that already express useful responsibilities and
 make the self-hosted compiler grow into those packages instead of creating a
 second permanent compiler tree.
 
-The current TypeScript implementation and the future Lean/ProofScript
-implementation should therefore converge structurally:
+The current TypeScript implementation is the physical skeleton for the
+self-hosted compiler. Do not create a parallel Lean/ProofScript source tree.
+For every portable compiler module, keep the three implementation/source
+spellings adjacent in the same directory whenever practical:
 
 ```text
 packages/
-  syntax/
-  meta/
-  elab/
-  checked-core/
-  erasure/
-  compiler-ir/
-  backend-ts/
-  compiler/
-  module/
-  project/
-  runtime/
-  ...
+  syntax/src/
+    Token.ts
+    Token.lean
+    Token.ps
+    Parser.ts
+    Parser.lean
+    Parser.ps
+
+  meta/src/
+    Unify.ts
+    Unify.lean
+    Unify.ps
+
+  elab/src/
+    Term.ts
+    Term.lean
+    Term.ps
+
+  compiler/src/
+    Compile.ts
+    Compile.lean
+    Compile.ps
 ```
+
+Think of the migration as **the current TypeScript implementation gradually
+becoming ProofScript**, with Lean as the bootstrap spelling of that same future
+ProofScript implementation.
+
+The existing TS file is initially the PSC0 behavioral oracle. The sibling
+`.lean` file is the Lean-hosted implementation. The sibling `.ps` file is
+the canonical/future ProofScript implementation. They should model the same
+responsibility instead of forming three unrelated designs.
+
+Some existing TypeScript basenames contain characters inconvenient for Lean
+module names, especially hyphens. When such a module is ported, normalize the
+basename once for all three sibling files (for example
+`v061-if-elab.ts -> V061IfElab.ts/.lean/.ps`) rather than introducing a
+different directory hierarchy for Lean.
 
 Do **not** require every current package to become portable/self-hosted. Split
 packages into two classes.
@@ -242,26 +269,30 @@ through both bootstrap lanes:
 - the semantic/data portion of `environment`, `module`, `project`, `pretty`,
   `runtime` and `tactic` when used by PSC1
 
-Their long-term shape is:
+Their long-term shape is deliberately flatter and follows the current
+TypeScript tree:
 
 ```text
 packages/syntax/
   package.json
   src/
-    ... existing TypeScript PSC0 implementation ...
-    ProofScript/
-      Syntax/
-        Foo.lean
-        Foo.ps
+    Foo.ts
+    Foo.lean
+    Foo.ps
+    Bar.ts
+    Bar.lean
+    Bar.ps
   dist/
+    ts/
     js/
     types/
     proofscript/
 ```
 
-The exact subdirectory may evolve, but `.lean` and `.ps` counterparts should
-live in the **same npm package and same logical module tree**. They are two
-source spellings of one semantic module, not independent implementations.
+The three sibling files are migration lanes for one logical module. During
+migration the handwritten `.ts` remains available as an executable oracle;
+after the `.ps` implementation becomes authoritative, TypeScript is normally
+generated into `dist/ts` rather than hand-maintained in `src`.
 
 ### Host/tooling packages
 
@@ -295,40 +326,64 @@ The present repository-root kernel layout is a bootstrap packaging detail.
 Moving or wrapping it under `packages/kernel` may happen later when that
 migration is low-risk; self-hosting must not be blocked on that directory move.
 
-## Dual build model
+## Two build systems, three source lanes
 
 During bootstrap the repository intentionally has two build systems over the
-same logical compiler packages.
+same package/file topology, plus the existing TypeScript implementation as a
+differential oracle.
 
-### Lean/Lake bootstrap build
-
-Lake compiles the `.lean` side:
-
-```text
-packages/*/src/**/Module.lean
-        |
-        v
-      Lake
-        |
-        v
- official Lean 4.34
-        |
-        v
- Lean-hosted PSC compiler
-```
-
-### JavaScript/ProofScript build
-
-The npm/JS build compiles either canonical source spelling through ProofScript:
+### Lane A — existing TypeScript / PSC0 oracle
 
 ```text
-Module.ps   --\
-             +-> psc -> checked core -> IR -> Module.ts -> tsc -> Module.js
-Module.lean --/
+Foo.ts -> tsc -> Foo.js
 ```
 
-Both source spellings must converge on the same checked-core and verified-IR
-identity for the supported subset.
+This is the current implementation. It remains executable while its behavior is
+migrated module-by-module.
+
+### Lane B — Lean/Lake bootstrap
+
+Lake compiles the sibling `.lean` implementation and ultimately produces the
+temporary Lean-hosted ProofScript compiler:
+
+```text
+Foo.lean
+   |
+   v
+official Lean 4.34 + Lake
+   |
+   v
+psc-lean
+```
+
+Lean is compiling **the ProofScript compiler implementation** here. Official
+Lean does not learn ProofScript syntax and does not directly compile `.ps`
+files.
+
+### Lane C — ProofScript transpilation
+
+As soon as the Lean-hosted compiler has the required frontend/backend slice, the
+same `psc-lean` executable accepts either source spelling:
+
+```text
+Foo.lean --\
+          +-> psc-lean -> checked core -> IR -> generated Foo.ts -> tsc -> Foo.js
+Foo.ps   --/
+```
+
+Thus a portable module can eventually be exercised three ways:
+
+```text
+handwritten Foo.ts -> JS₀
+Foo.lean -> psc-lean -> generated TS -> JS₁
+Foo.ps   -> psc-lean -> generated TS -> JS₂
+```
+
+The Lean and ProofScript lanes must converge on equal checked-core and
+verified-IR identities. During migration, JS₀ is a differential behavioral
+oracle; once the self-hosted implementation is authoritative, the handwritten
+source `.ts` can be retired while generated TypeScript remains a build
+artifact.
 
 Long term Lake disappears from the normal user path, while the npm workspace
 and JS build remain:
@@ -345,27 +400,36 @@ Lake remains only as an independent bootstrap/reference checker when useful.
 
 ## Paired-source rule
 
-For a portable semantic module, the intended steady state is conceptually:
+For a portable semantic module, the migration state is conceptually:
 
 ```text
-packages/meta/src/ProofScript/Meta/Foo.lean
-packages/meta/src/ProofScript/Meta/Foo.ps
+packages/meta/src/Foo.ts
+packages/meta/src/Foo.lean
+packages/meta/src/Foo.ps
 ```
 
-Both represent one module. They must not drift into two hand-maintained
-implementations.
+All three represent the same package responsibility. They must not evolve into
+three unrelated architectures.
 
 During the Lean-first bootstrap:
 
-1. `.lean` is authored first;
-2. canonical `.ps` is generated/updated from it;
-3. both are checked for semantic identity;
-4. after the self-host transition, `.ps` becomes authoritative and canonical
-   `.lean` becomes the generated/reference form.
+1. the existing `.ts` is the behavior/reference implementation;
+2. the sibling `.lean` implementation is written against PSC1 constraints
+   and built by Lake;
+3. sibling `.ps` is generated/maintained canonically from the portable Lean
+   form as soon as translation supports the module;
+4. `.lean` and `.ps` are required to elaborate to the same checked
+   semantics;
+5. generated TypeScript from either portable spelling is compared with the old
+   TS implementation at behavioral/API boundaries;
+6. after the self-host transition, `.ps` becomes authoritative, `.lean`
+   becomes its generated/reference Lean form, and handwritten semantic
+   `.ts` files are retired in favor of generated `dist/ts` output.
 
-The repository may temporarily commit both forms because dual-kernel review and
-bootstrap reproducibility are valuable, but one form must always be designated
-authoritative for a given bootstrap stage.
+The repository may temporarily commit all three forms because differential
+review, dual-kernel checking and bootstrap reproducibility are valuable, but the
+authority at each stage must be explicit: TS oracle -> Lean bootstrap -> PS
+self-host source.
 
 ## Package-local outputs
 
@@ -571,8 +635,8 @@ Do not use Lean-only conveniences merely because Lake permits them.
 The source should look structurally like code we are willing to maintain later
 as `.ps`.
 
-New bootstrap work should prefer the long-term `packages/*` responsibility
-boundaries. The existing `selfhost/src` tree is a seed/smoke area, not a new
-permanent parallel compiler architecture. Once the first paired package module
-is green, move subsequent semantic implementation into the corresponding npm
-workspace package.
+New bootstrap work should preserve the current `packages/*/src` physical
+layout as closely as possible. The existing `selfhost/src` tree is only the
+Lake executable/host seed, not a semantic source tree. Portable compiler code
+belongs beside its current TypeScript counterpart as sibling `.lean` and
+`.ps` files.

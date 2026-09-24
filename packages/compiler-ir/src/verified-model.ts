@@ -76,6 +76,7 @@ export type VerifiedIrExpr =
   | {
       readonly kind:'call';
       readonly fn:VerifiedIrExpr;
+      readonly typeArgs?:readonly VerifiedIrType[];
       readonly args:readonly VerifiedIrExpr[];
     }
   | {

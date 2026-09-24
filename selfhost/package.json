@@ -1,0 +1,13 @@
+{
+  "name": "@proofscript/selfhost-workspace",
+  "private": true,
+  "version": "0.0.0-dev",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build:lean": "lake build",
+    "check:source": "node check-psc1-source.mjs"
+  }
+}

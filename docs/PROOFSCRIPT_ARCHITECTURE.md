@@ -757,8 +757,10 @@ The command is intentionally not a proof/check command. `--verified`, JSON repor
 ## DS3/DS4 dual-source identity and semantic-equivalence checkpoint
 
 Source kind now ends at the shared surface boundary. The CLI computes a
-source-kind-neutral `canonicalSourceHash` by printing that shared surface in
-canonical ProofScript form and hashing the UTF-8 bytes with SHA-256.
+source-kind-neutral `canonicalSourceHash` by normalizing ProofScript-only
+`const`/`function` definition aliases to the shared `def` form, printing the
+resulting shared surface in canonical ProofScript form, and hashing the UTF-8
+bytes with SHA-256.
 
 ```text
 .ps ----\

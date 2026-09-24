@@ -271,7 +271,8 @@ Landed checkpoints:
 - `emit-lean` remains a compatible convenience workflow;
 - verified and legacy source parsing compute a SHA-256
   `canonicalSourceHash` from canonical ProofScript printing of the shared
-  surface AST;
+  surface AST after normalizing ProofScript-only `const`/`function` aliases
+  to the common `def` representation;
 - semantically equivalent canonical `.ps` and supported `.lean` inputs are
   gated to produce the same canonical-source hash.
 

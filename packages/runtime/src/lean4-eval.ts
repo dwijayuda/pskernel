@@ -171,12 +171,15 @@ function declarationTypeReturnsSort(type:Expr):boolean{
 export class Lean434Evaluator {
   private readonly runtimeGlobals=
     new Map<string,Lean434RuntimeValue>();
+  private readonly checker:TypeChecker;
   private initializationDepth=0;
 
   constructor(
     readonly environment:Environment,
     readonly options:Lean434EvaluatorOptions={},
-  ){}
+  ){
+    this.checker=new TypeChecker(environment);
+  }
 
   get isInitializing():boolean{
     return this.initializationDepth>0;

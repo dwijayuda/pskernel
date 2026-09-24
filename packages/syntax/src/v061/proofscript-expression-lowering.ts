@@ -116,8 +116,10 @@ export function lowerV061ExprToProofScript(
       rendered=expr.name;
       break;
     case 'group':
-      rendered='('+lowerV061ExprToProofScript(expr.value)+')';
-      break;
+      return lowerV061ExprToProofScript(
+        expr.value,
+        parentPrecedence,
+      );
     case 'call':{
       const args=
         expr.args.length===1&&expr.args[0]?.kind==='unit'

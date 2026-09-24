@@ -406,7 +406,7 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
       lock.packages[1]?.dependencies[0]?.target,
       'node_modules/helper-lib',
     );
-    const artifacts=result.artifacts as Record<string,string>;
+    const artifacts=result.artifacts;
     const javascript=await readFile(artifacts.javascript,'utf8');
     equal(
       javascript.includes('from "host-lib/feature"'),
@@ -812,7 +812,7 @@ console.log('ok - psc verified run filesystem pipeline');
         &&String(result.canonicalSourceHash).startsWith('sha256:'),
       true,
     );
-    const artifacts=result.artifacts as Record<string,string>;
+    const artifacts=result.artifacts;
     equal(artifacts.typescript.endsWith('main.ts'),true);
     equal(artifacts.javascript.endsWith('main.js'),true);
   }finally{

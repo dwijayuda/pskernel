@@ -33,9 +33,20 @@ function Require-Command([string]$Name) {
   }
 }
 
+Require-Command git
 Require-Command node
 Require-Command npm
 Require-Command lean
+
+$gitCommit = (& git rev-parse HEAD).Trim()
+$gitBranch = (& git rev-parse --abbrev-ref HEAD).Trim()
+$trackedChanges = @(& git status --porcelain --untracked-files=no)
+if ($LASTEXITCODE -ne 0) {
+  throw "Unable to inspect git working tree."
+}
+if ($trackedChanges.Count -ne 0) {
+  throw "Tracked working-tree changes are present. Commit/stash them before producing assurance evidence."
+}
 
 $nodeVersion = (& node --version).Trim()
 $leanCommand = Get-Command lean -ErrorAction Stop
@@ -59,6 +70,9 @@ $env:PSKERNEL_STD_STACK_KIB = "$StackKiB"
   $Utf8NoBom
 )
 Write-Log "started=$(Get-Date -Format o)"
+Write-Log "gitCommit=$gitCommit"
+Write-Log "gitBranch=$gitBranch"
+Write-Log "gitTrackedTree=clean"
 Write-Log "node=$nodeVersion"
 Write-Log "lean=$leanVersion"
 Write-Log "leanGitHash=$leanGitHash"

@@ -680,7 +680,8 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
             ("roots", slice.size),
             ("rootStart", rootStart),
             ("firstRoot", slice[0]!.toString),
-            ("lastRoot", slice[slice.size - 1]!.toString)
+            ("lastRoot", slice[slice.size - 1]!.toString),
+            ("rootNames", .arr <| slice.map fun n => .str n.toString)
           ])]).compress
           dumpMeta
           for n in slice do dumpConstant env n

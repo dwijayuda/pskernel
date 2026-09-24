@@ -1,3 +1,4 @@
+import Ps.Core.Abstract
 import Ps.Core.Subst
 import Ps.Environment.Resolve
 import Ps.Meta.Infer
@@ -122,6 +123,151 @@ def psElabNatural
         (PsExpr.lit (PsLiteral.natural value))
         expected
 
+structure PsElabTypedBinder where
+  id : Nat
+  name : PsName
+  type : PsExpr
+  binder : PsBinderInfo
+
+structure PsElabTypedBindersResult where
+  context : PsElabContext
+  bindersRev : List PsElabTypedBinder
+
+def psElabBinderKindToCore : PsSyntaxBinderKind -> PsBinderInfo
+  | .explicit => PsBinderInfo.explicit
+  | .implicit => PsBinderInfo.implicit
+  | .strictImplicit => PsBinderInfo.strictImplicit
+  | .instanceImplicit => PsBinderInfo.instanceImplicit
+
+def psElabTypedBindersAcc
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (context : PsElabContext) :
+    List (PsSyntaxBinderHead × PsSyntaxTerm) ->
+    List PsElabTypedBinder ->
+    Except PsElabError PsElabTypedBindersResult
+  | [], bindersRev =>
+      Except.ok {
+        context := context
+        bindersRev := bindersRev
+      }
+  | (head, sourceType) :: rest, bindersRev =>
+      match psSyntaxNameToName head.name with
+      | none => Except.error PsElabError.emptyName
+      | some name =>
+          match elaborate context sourceType none with
+          | Except.error error => Except.error error
+          | Except.ok typeResult =>
+              match psInferEnsureSort
+                  typeResult.context.environment
+                  typeResult.context.metaContext
+                  typeResult.context.localContext
+                  typeResult.type with
+              | Except.error error =>
+                  Except.error (PsElabError.infer error)
+              | Except.ok _ =>
+                  let binder := psElabBinderKindToCore head.kind
+                  let pushed :=
+                    psLocalPushBinding
+                      typeResult.context.localContext
+                      name
+                      typeResult.term
+                      binder
+                  let nextContext :=
+                    psElabContextWithLocal
+                      typeResult.context
+                      pushed.context
+                  psElabTypedBindersAcc
+                    elaborate
+                    nextContext
+                    rest
+                    ({
+                      id := pushed.id
+                      name := name
+                      type := typeResult.term
+                      binder := binder
+                    } :: bindersRev)
+
+def psElabTypedBinders
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (context : PsElabContext)
+    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm)) :
+    Except PsElabError PsElabTypedBindersResult :=
+  psElabTypedBindersAcc elaborate context binders []
+
+def psCloseElabTypedBinders
+    (metaContext : PsMetaContext) :
+    List PsElabTypedBinder ->
+    PsExpr ->
+    PsExpr ->
+    (PsExpr × PsExpr)
+  | [], value, type => (value, type)
+  | binder :: rest, value, type =>
+      let binderType :=
+        psMetaInstantiate metaContext binder.type
+      let closedValue :=
+        PsExpr.lam
+          binder.name
+          binderType
+          (psExprAbstractFVar binder.id value)
+          binder.binder
+      let closedType :=
+        PsExpr.forallE
+          binder.name
+          binderType
+          (psExprAbstractFVar binder.id type)
+          binder.binder
+      psCloseElabTypedBinders
+        metaContext
+        rest
+        closedValue
+        closedType
+
+def psElabLambda
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (context : PsElabContext)
+    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (body : PsSyntaxTerm)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match psElabTypedBinders elaborate context binders with
+  | Except.error error => Except.error error
+  | Except.ok binderResult =>
+      match elaborate binderResult.context body none with
+      | Except.error error => Except.error error
+      | Except.ok bodyResult =>
+          let metaContext := bodyResult.context.metaContext
+          let openTerm :=
+            psMetaInstantiate metaContext bodyResult.term
+          let openType :=
+            psMetaInstantiate metaContext bodyResult.type
+          let closed :=
+            psCloseElabTypedBinders
+              metaContext
+              binderResult.bindersRev
+              openTerm
+              openType
+          let outerContext :=
+            psElabContextWithMeta context metaContext
+          psElabFinalizeExpected
+            {
+              context := outerContext
+              term := closed.1
+              type := closed.2
+            }
+            expected
+
 def psBinderAcceptsExplicitArgument (binder : PsBinderInfo) : Bool :=
   match binder with
   | .explicit => true
@@ -180,6 +326,13 @@ def psElabTermWithFuel
           psElabReference context name expected
       | .natural text _ =>
           psElabNatural context text expected
+      | .lambda binders body _ =>
+          psElabLambda
+            (psElabTermWithFuel remaining)
+            context
+            binders
+            body
+            expected
       | .app fn args _ =>
           match psElabTermWithFuel remaining context fn none with
           | Except.error error => Except.error error

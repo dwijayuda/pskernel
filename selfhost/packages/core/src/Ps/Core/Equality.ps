@@ -1,0 +1,40 @@
+import Ps.Core.Expr
+
+def psBinderInfoEq(left : PsBinderInfo, right : PsBinderInfo) : Bool :=
+  match left with {
+    | .explicit => match right with { | .explicit => true; | _ => false; };
+    | .implicit => match right with { | .implicit => true; | _ => false; };
+    | .strictImplicit => match right with { | .strictImplicit => true; | _ => false; };
+    | .instanceImplicit => match right with { | .instanceImplicit => true; | _ => false; };
+  };
+
+def psLiteralEq(left : PsLiteral, right : PsLiteral) : Bool :=
+  match left with {
+    | .natural leftValue =>
+      match right with { | .natural rightValue => leftValue == rightValue; | _ => false; };
+    | .string leftValue =>
+      match right with { | .string rightValue => leftValue == rightValue; | _ => false; };
+  };
+
+def psLevelStructuralEq(left : PsLevel, right : PsLevel) : Bool :=
+  match left with {
+    | .zero => match right with { | .zero => true; | _ => false; };
+    | .succ leftValue =>
+      match right with { | .succ rightValue => psLevelStructuralEq(leftValue, rightValue); | _ => false; };
+    | .max leftA leftB =>
+      match right with {
+        | .max rightA rightB =>
+          psLevelStructuralEq(leftA, rightA) && psLevelStructuralEq(leftB, rightB);
+        | _ => false;
+      };
+    | .imax leftA leftB =>
+      match right with {
+        | .imax rightA rightB =>
+          psLevelStructuralEq(leftA, rightA) && psLevelStructuralEq(leftB, rightB);
+        | _ => false;
+      };
+    | .param leftName =>
+      match right with { | .param rightName => psNameEq(leftName, rightName); | _ => false; };
+    | .mvar leftId =>
+      match right with { | .mvar rightId => leftId == rightId; | _ => false; };
+  };

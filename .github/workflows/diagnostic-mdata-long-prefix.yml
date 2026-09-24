@@ -1,4 +1,5 @@
 name: Diagnostic MData long canonical prefix
+# trigger: safe-mdata-bucket-v1
 
 on:
   push:

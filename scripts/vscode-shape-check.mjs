@@ -48,7 +48,7 @@ for(const source of sources){
   }
 }
 const all=sources.map((source)=>source.text).join('\n');
-if(!all.includes('EXPECTED_PROTOCOL=1')){
+if(!all.includes('EXPECTED_PROTOCOL=2')){
   throw new Error('VS Code integration protocol guard drift');
 }
 if(!all.includes('proofscript/proofState')){

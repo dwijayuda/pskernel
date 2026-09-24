@@ -82,7 +82,7 @@ export class TermParser {
 
   private startsApplicationArgument(token:Token):boolean {
     if(token.leadingTrivia.length===0)return false;
-    return token.kind==='identifier'||token.kind==='number'||token.kind==='string'||token.text==='(';
+    return token.kind==='identifier'||token.kind==='number'||token.kind==='string'||token.kind==='char'||token.text==='(';
   }
 
   private parsePostfix():ParsedTerm {
@@ -111,7 +111,7 @@ export class TermParser {
 
   private parseAtom():ParsedTerm {
     const token=this.cursor.peek();
-    if(token.kind==='identifier'||token.kind==='number'||token.kind==='string'){
+    if(token.kind==='identifier'||token.kind==='number'||token.kind==='string'||token.kind==='char'){
       this.cursor.consume();
       return {expr:{kind:'atom',token,span:token.span},featureIds:[]};
     }

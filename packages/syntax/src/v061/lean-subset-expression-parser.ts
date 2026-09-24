@@ -16,7 +16,7 @@ const RESERVED_APPLICATION_HEADS=new Set([
 ]);
 
 function canStartLeanAtom(token:Token):boolean {
-  if(token.kind==='number'||token.kind==='string')return true;
+  if(token.kind==='number'||token.kind==='string'||token.kind==='char')return true;
   if(token.text==='('||token.text==='?'||token.text==='true'||token.text==='false'){
     return true;
   }
@@ -204,6 +204,14 @@ export class V061LeanSubsetExpressionParser {
       this.context.cursor.consume();
       return {
         kind:'string',
+        value:token.value??'',
+        span:token.span,
+      };
+    }
+    if(token.kind==='char'){
+      this.context.cursor.consume();
+      return {
+        kind:'char',
         value:token.value??'',
         span:token.span,
       };

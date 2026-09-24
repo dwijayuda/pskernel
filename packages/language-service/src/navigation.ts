@@ -101,7 +101,7 @@ export function completionItems(
       }
     }
   }
-  for(const label of ['Prop','Type','Nat','Int','Bool','String','Unit']){
+  for(const label of ['Prop','Type','Nat','Int','Bool','Char','String','Unit']){
     add({label,kind:7,detail:'Lean foundational type',source:'foundational'});
   }
   for(const label of [

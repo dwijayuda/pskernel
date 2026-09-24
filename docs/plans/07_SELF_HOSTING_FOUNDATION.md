@@ -101,7 +101,7 @@ Exit condition is met:
 
 > There is exactly one ProofScript semantic compiler path on `main`.
 
-## SH1 — executable text foundation
+## SH1 — executable text foundation — IN PROGRESS
 
 Finish Lean-compatible executable support for:
 
@@ -113,6 +113,33 @@ Finish Lean-compatible executable support for:
 - concatenation and an efficient builder strategy;
 - character classification needed by a lexer;
 - source-position/span data.
+
+Completed 2026-09-24:
+
+- `Char` is a first-class verified runtime primitive through checked core,
+  erasure, verified IR, TypeScript emission, CLI ABI, and explicit FFI;
+- the real Lean 4.34 `Char.ofNat` constant lowers to a verified intrinsic;
+- emitted JavaScript preserves Lean's Unicode-scalar rule, including NUL for
+  surrogate/out-of-range inputs;
+- executable regressions cover ASCII, non-BMP Unicode, and invalid scalar
+  behavior;
+- a dedicated Lean 4.34 text-foundation export recipe now roots only the
+  compiler-required Char/String/String.Pos.Raw operations instead of adopting
+  a broad Std environment.
+
+Current gate:
+
+- generate
+  `oracle/fixtures/lean434-proofscript-text-foundation.ndjson` with exact
+  Lean 4.34.0 using `scripts/generate-text-foundation-fixture.sh`;
+- replay it with `npm run oracle:text-foundation`;
+- only then add erasure/backend intrinsics for `Char.toNat`, character
+  classification, `String.length`, `String.append`, traversal, and raw
+  string positions.
+
+The normal environment provider prefers that pinned fixture when present and
+falls back to the existing `Init.Prelude` fixture during the transition.
+No synthetic standard-library axioms are permitted to bypass this gate.
 
 Exit test: a nontrivial lexer utility can be authored in supported `.lean`
 and `.ps` and run through verified JavaScript emission.

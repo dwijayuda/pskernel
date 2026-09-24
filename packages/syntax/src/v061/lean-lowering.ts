@@ -1,6 +1,7 @@
 import type {V061Expr,V061Module} from './ast.js';
 import {v061BinaryPrecedence} from './operators.js';
 import {lowerV061TypeToLean} from './type-lowering.js';
+import {quoteV061Char} from './char-literal.js';
 import {lowerV061PatternToLean} from './pattern-parser.js';
 
 function lowerV061ParameterToLean(
@@ -59,6 +60,7 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
   switch(expr.kind){
     case 'nat':return expr.text;
     case 'string':return JSON.stringify(expr.value);
+    case 'char':return quoteV061Char(expr.value);
     case 'bool':return expr.value?'true':'false';
     case 'unit':return '()';
     case 'syntheticHole':return '?_';
@@ -67,7 +69,7 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
     case 'call':{
       const args=expr.args.map((arg)=>{
         const rendered=lowerV061ExprToLean(arg);
-        return arg.kind==='reference'||arg.kind==='nat'||arg.kind==='string'||arg.kind==='bool'||arg.kind==='unit'||arg.kind==='syntheticHole'||arg.kind==='group'
+        return arg.kind==='reference'||arg.kind==='nat'||arg.kind==='string'||arg.kind==='char'||arg.kind==='bool'||arg.kind==='unit'||arg.kind==='syntheticHole'||arg.kind==='group'
           ? rendered
           : '('+rendered+')';
       });

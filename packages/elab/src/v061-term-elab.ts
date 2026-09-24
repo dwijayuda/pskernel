@@ -2,6 +2,7 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   LocalContext,
   TypeChecker,
+  app,
   constant,
   exprToString,
   fvar,
@@ -98,6 +99,19 @@ export function elaborateV061Term(
     }
     case 'string':{
       const term=strLit(expr.value);
+      return {term,type:checker.check(term)};
+    }
+    case 'char':{
+      const codePoint=expr.value.codePointAt(0);
+      if(codePoint===undefined||[...expr.value].length!==1){
+        throw new Error(
+          'PS_ELAB_CHAR_LITERAL: expected exactly one Unicode scalar value',
+        );
+      }
+      const term=app(
+        resolveReference('Char.ofNat',context),
+        natLit(BigInt(codePoint)),
+      );
       return {term,type:checker.check(term)};
     }
     case 'bool':{

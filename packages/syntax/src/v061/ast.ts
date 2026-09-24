@@ -80,6 +80,7 @@ export type V061Tactic =
 export type V061Expr =
   | {readonly kind:'nat';readonly text:string;readonly span:SourceSpan}
   | {readonly kind:'string';readonly value:string;readonly span:SourceSpan}
+  | {readonly kind:'char';readonly value:string;readonly span:SourceSpan}
   | {readonly kind:'bool';readonly value:boolean;readonly span:SourceSpan}
   | {readonly kind:'unit';readonly span:SourceSpan}
   | {readonly kind:'syntheticHole';readonly span:SourceSpan}

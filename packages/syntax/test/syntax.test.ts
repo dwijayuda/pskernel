@@ -221,6 +221,46 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
   equal(token?.value,'A\n☺');
 }
 {
+  const cases=[
+    ["'A'",'A'],
+    ["'\\n'",'\n'],
+    ["'\\''","'"],
+    ["'\\\\'",'\\'],
+    ["'\\x41'",'A'],
+    ["'\\u263A'",'☺'],
+    ["'🙂'",'🙂'],
+  ] as const;
+  for(const [source,expected] of cases){
+    const [token]=significantTokens(source);
+    equal(token?.kind,'char');
+    equal(token?.text,source);
+    equal(token?.value,expected);
+  }
+  throws(()=>lex("''"),/empty character literal/);
+  throws(()=>lex("'ab'"),/exactly one character/);
+  throws(()=>lex("'\\uD800'"),/Unicode scalar value/);
+}
+{
+  const ps=parseV061Module(
+    "function charLiteral(x : Nat) : Char := '🙂';",
+  );
+  const body=firstDeclarationBody(ps);
+  equal(body?.kind,'char');
+  if(body?.kind==='char')equal(body.value,'🙂');
+  equal(
+    lowerV061ModuleToLean(ps),
+    "def charLiteral (x : Nat) : Char := '🙂'\n",
+  );
+
+  const lean=parseV061LeanSubsetModule(
+    "def leanChar (x : Nat) : Char := '\\n'\n",
+  );
+  equal(
+    lowerV061ModuleToProofScript(lean),
+    "def leanChar(x : Nat) : Char := '\\n';\n",
+  );
+}
+{
   equal(significantTokens('0xff 0b1010 1_000').map(t=>t.text).join(' '),'0xff 0b1010 1_000');
   throws(()=>lex('0x_'),/hex literal requires digits/);
   throws(()=>lex('0b_'),/binary literal requires digits/);

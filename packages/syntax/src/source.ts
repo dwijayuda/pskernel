@@ -16,7 +16,7 @@ export interface Trivia {
   readonly span: SourceSpan;
 }
 
-export type TokenKind = 'identifier' | 'number' | 'string' | 'symbol' | 'eof';
+export type TokenKind = 'identifier' | 'number' | 'string' | 'char' | 'symbol' | 'eof';
 export interface Token {
   readonly kind: TokenKind;
   readonly text: string;

@@ -135,23 +135,6 @@ function checkNatXor(env:Environment,v:DefinitionInfo):void{
  eq(tc,app2(op,fal(),fal()),fal(),v,'xor false false = false');eq(tc,app2(op,tru(),fal()),tru(),v,'xor true false = true');
  eq(tc,app2(op,fal(),tru()),tru(),v,'xor false true = true');eq(tc,app2(op,tru(),tru()),fal(),v,'xor true true = false');
 }
-function checkCharOfNat(env:Environment,v:DefinitionInfo):void{
- requireDep(env,v,N.Nat);requireDep(env,v,N.Char);exactType(env,v,arrow(Nat(),constant(N.Char)));
- const tc=new TypeChecker(env);tc.ensureSort(tc.check(constant(N.Char)),constant(N.Char));
-}
-function checkStringOfList(env:Environment,v:DefinitionInfo):void{
- requireDep(env,v,N.Nat);requireDep(env,v,N.List);requireDep(env,v,N.ListNil);requireDep(env,v,N.ListCons);requireDep(env,v,N.Char);requireDep(env,v,N.CharOfNat);requireDep(env,v,N.String);
- const tc=new TypeChecker(env),u0=levelZero,chars=app(constant(N.List,[u0]),constant(N.Char));
- tc.ensureSort(tc.check(chars),chars);tc.ensureSort(tc.check(constant(N.Char)),constant(N.Char));
- const charOfNatTy=arrow(Nat(),constant(N.Char)),charOfNatGot=tc.check(constant(N.CharOfNat));
- if(!tc.isDefEq(charOfNatGot,charOfNatTy))throw new KernelError(`primitive '${nameToString(v.name)}' Char.ofNat prerequisite has unexpected type`);
- const nilTy=app(constant(N.List,[u0]),constant(N.Char));
- const consTy=arrow(constant(N.Char),arrow(chars,chars));
- const nilGot=tc.check(mkAppN(constant(N.ListNil,[u0]),[constant(N.Char)]));
- const consGot=tc.check(mkAppN(constant(N.ListCons,[u0]),[constant(N.Char)]));
- if(!tc.isDefEq(nilGot,nilTy)||!tc.isDefEq(consGot,consTy))throw new KernelError(`primitive '${nameToString(v.name)}' List Char prerequisites have unexpected types`);
- exactType(env,v,arrow(chars,constant(N.String)));
-}
 
 /**
  * Recognize and admit a primitive definition. Unsupported primitive recognizers fail closed.
@@ -179,8 +162,6 @@ export function addPrimitiveDefinition(env:Environment,v:DefinitionInfo):void{
  else if(nameEq(v.name,N.NatXor))checkNatXor(env,v);
  else if(nameEq(v.name,N.NatShiftLeft))checkNatShiftLeft(env,v);
  else if(nameEq(v.name,N.NatShiftRight))checkNatShiftRight(env,v);
- else if(nameEq(v.name,N.CharOfNat))checkCharOfNat(env,v);
- else if(nameEq(v.name,N.StringOfList))checkStringOfList(env,v);
  else throw new KernelError(`primitive recognizer for '${nameToString(v.name)}' is not implemented; refusing declaration`);
  env.add(v);
 }

@@ -24,7 +24,9 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
           lean_bin="$("$HOME/.elan/bin/elan" which lean)"
-          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          lean_dir="$(dirname "$lean_bin")"
+          echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
+          echo "$lean_dir" >> "$GITHUB_PATH"
       - name: Materialize baseline exporter
         shell: bash
         run: |

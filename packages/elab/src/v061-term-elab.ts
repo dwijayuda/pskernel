@@ -152,6 +152,12 @@ export function elaborateV061Term(
       const term=context.metaContext.instantiate(result.term);
       const type=context.metaContext.instantiate(result.type);
       if(hasMVar(term)||hasMVar(type)){
+        if(expected!==undefined){
+          // Nested calls may be constrained further by later sibling arguments
+          // in the enclosing application. Shared Meta assignments preserve
+          // those constraints; top-level applications still require grounding.
+          return {term,type};
+        }
         throw new Error(
           'PS_ELAB_UNSOLVED_METAVARS: application leaves unresolved implicit or instance obligations',
         );

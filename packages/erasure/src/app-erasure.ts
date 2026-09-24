@@ -22,6 +22,40 @@ export type RuntimeExprEraser=(
   environment:Environment,
 )=>VerifiedIrExpr;
 
+function canonicalBoolBeqOperands(
+  expr:Expr,
+):readonly [Expr,Expr]|undefined {
+  const view=appView(expr);
+  if(
+    view.fn.kind!=='const'
+    ||nameToString(view.fn.name)!=='BEq.beq'
+    ||view.args.length!==4
+  )return undefined;
+
+  const typeArg=view.args[0]!;
+  if(
+    typeArg.kind!=='const'
+    ||nameToString(typeArg.name)!=='Bool'
+  )return undefined;
+
+  const instance=appView(view.args[1]!);
+  if(
+    instance.fn.kind!=='const'
+    ||nameToString(instance.fn.name)!=='instBEqOfDecidableEq'
+    ||instance.args.length!==2
+  )return undefined;
+  const instanceType=instance.args[0]!;
+  const decidable=instance.args[1]!;
+  if(
+    instanceType.kind!=='const'
+    ||nameToString(instanceType.name)!=='Bool'
+    ||decidable.kind!=='const'
+    ||nameToString(decidable.name)!=='instDecidableEqBool'
+  )return undefined;
+
+  return [view.args[2]!,view.args[3]!];
+}
+
 function eraseVerifiedCondition(
   proposition:Expr,
   scope:ErasureScope,
@@ -199,15 +233,12 @@ export function eraseRuntimeApplication(
         args:equality.args.map((arg)=>erase(arg,scope,environment)),
       };
     }
-    if(
-      equality.fn.kind==='const'
-      &&nameToString(equality.fn.name)==='Bool.beq'
-      &&equality.args.length===2
-    ){
+    const boolOperands=canonicalBoolBeqOperands(view.args[0]!);
+    if(boolOperands!==undefined){
       return {
         kind:'intrinsic',
         operation:'bool.ne',
-        args:equality.args.map((arg)=>erase(arg,scope,environment)),
+        args:boolOperands.map((arg)=>erase(arg,scope,environment)),
       };
     }
     return {
@@ -217,15 +248,12 @@ export function eraseRuntimeApplication(
     };
   }
 
-  if(
-    view.fn.kind==='const'
-    &&nameToString(view.fn.name)==='Bool.beq'
-    &&view.args.length===2
-  ){
+  const boolEquality=canonicalBoolBeqOperands(expr);
+  if(boolEquality!==undefined){
     return {
       kind:'intrinsic',
       operation:'bool.eq',
-      args:view.args.map((arg)=>erase(arg,scope,environment)),
+      args:boolEquality.map((arg)=>erase(arg,scope,environment)),
     };
   }
 

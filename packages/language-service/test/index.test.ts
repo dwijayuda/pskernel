@@ -161,7 +161,12 @@ console.log('ok - @proofscript/language-service sequential document environment'
     'import Core; theorem use(P : Prop, h : P) : P := by exact id(P, h);',
   );
   const analysis=service.analyze('file:///Main.ps');
-  equal(analysis.kernel,'verified');
+  if(analysis.kernel!=='verified'){
+    throw new Error(
+      'mixed-source project analysis failed: '+
+      (analysis.diagnostics[0]?.message??analysis.kernel),
+    );
+  }
   equal(analysis.declarations[0]?.kernel,'verified');
   equal(analysis.project?.entryModule,'Main');
   equal(analysis.project?.moduleOrder.join(','),'Core,Main');

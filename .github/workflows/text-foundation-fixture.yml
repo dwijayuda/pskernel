@@ -71,8 +71,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin main
-          git rebase origin/main
           git add oracle/fixtures/lean434-proofscript-text-foundation.ndjson
           if git diff --cached --quiet; then
             echo 'text-foundation fixture already up to date'
@@ -81,4 +79,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'chore(sh1): pin Lean 4.34 text-foundation fixture'
+          git fetch origin main
+          git rebase origin/main
           git push origin HEAD:main

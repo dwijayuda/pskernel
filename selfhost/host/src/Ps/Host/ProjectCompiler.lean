@@ -103,72 +103,74 @@ def psHostParseSource
       (IO.userError
         ("PSC1_PROJECT_SOURCE_KIND: " ++ path))
 
-def psHostLoadImportsWithFuel
-    (fuel : Nat)
-    (root : String)
-    (stack : List String) :
-    List PsSyntaxImport ->
-    PsHostProjectState ->
-    IO PsHostProjectState
-  | [], state => pure state
-  | sourceImport :: rest, state => do
-      let dependency ←
-        psHostResolveImport root sourceImport.moduleName
-      let next ←
-        psHostLoadModuleWithFuel
+mutual
+  partial def psHostLoadModuleWithFuel
+      (fuel : Nat)
+      (root path : String)
+      (stack : List String)
+      (state : PsHostProjectState) :
+      IO PsHostProjectState := do
+    match fuel with
+    | 0 =>
+        throw (IO.userError "PSC1_PROJECT_FUEL_EXHAUSTED")
+    | remaining + 1 =>
+        if psHostListContainsString state.loadedPaths path then
+          pure state
+        else if psHostListContainsString stack path then
+          throw
+            (IO.userError
+              ("PSC1_PROJECT_DEPENDENCY_CYCLE: " ++ path))
+        else
+          let source ← IO.FS.readFile path
+          let sourceModule ← psHostParseSource path source
+          let withImports ←
+            psHostLoadImportsWithFuel
+              remaining
+              root
+              (path :: stack)
+              sourceModule.imports
+              state
+          match
+              psElabModule
+                withImports.environment
+                sourceModule with
+          | Except.error _ =>
+              throw
+                (IO.userError
+                  ("PSC1_PROJECT_ELAB_FAILED: " ++ path))
+          | Except.ok elaborated =>
+              pure {
+                environment := elaborated.environment
+                declarations :=
+                  withImports.declarations ++ elaborated.declarations
+                loadedPaths := path :: withImports.loadedPaths
+              }
+
+  partial def psHostLoadImportsWithFuel
+      (fuel : Nat)
+      (root : String)
+      (stack : List String) :
+      List PsSyntaxImport ->
+      PsHostProjectState ->
+      IO PsHostProjectState
+    | [], state => pure state
+    | sourceImport :: rest, state => do
+        let dependency ←
+          psHostResolveImport root sourceImport.moduleName
+        let next ←
+          psHostLoadModuleWithFuel
+            fuel
+            root
+            dependency
+            stack
+            state
+        psHostLoadImportsWithFuel
           fuel
           root
-          dependency
           stack
-          state
-      psHostLoadImportsWithFuel
-        fuel
-        root
-        stack
-        rest
-        next
-
-def psHostLoadModuleWithFuel
-    (fuel : Nat)
-    (root path : String)
-    (stack : List String)
-    (state : PsHostProjectState) :
-    IO PsHostProjectState := do
-  match fuel with
-  | 0 =>
-      throw (IO.userError "PSC1_PROJECT_FUEL_EXHAUSTED")
-  | remaining + 1 =>
-      if psHostListContainsString state.loadedPaths path then
-        pure state
-      else if psHostListContainsString stack path then
-        throw
-          (IO.userError
-            ("PSC1_PROJECT_DEPENDENCY_CYCLE: " ++ path))
-      else
-        let source ← IO.FS.readFile path
-        let sourceModule ← psHostParseSource path source
-        let withImports ←
-          psHostLoadImportsWithFuel
-            remaining
-            root
-            (path :: stack)
-            sourceModule.imports
-            state
-        match
-            psElabModule
-              withImports.environment
-              sourceModule with
-        | Except.error _ =>
-            throw
-              (IO.userError
-                ("PSC1_PROJECT_ELAB_FAILED: " ++ path))
-        | Except.ok elaborated =>
-            pure {
-              environment := elaborated.environment
-              declarations :=
-                withImports.declarations ++ elaborated.declarations
-              loadedPaths := path :: withImports.loadedPaths
-            }
+          rest
+          next
+end
 
 def psHostLoadProject
     (baseEnvironment : PsEnvironment)

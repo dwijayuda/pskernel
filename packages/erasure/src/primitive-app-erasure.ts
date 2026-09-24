@@ -118,19 +118,34 @@ function eraseVerifiedCondition(
       );
     }
     const typeArg=view.args[0]!;
-    const reflected=view.args[1]!;
-    const truth=view.args[2]!;
-    if(
-      typeArg.kind!=='const'
-      ||nameToString(typeArg.name)!=='Bool'
-      ||truth.kind!=='const'
-      ||nameToString(truth.name)!=='Bool.true'
-    ){
+    const left=view.args[1]!;
+    const right=view.args[2]!;
+    if(typeArg.kind!=='const'){
       throw new Error(
-        'PS_ERASE_CONDITION_UNSUPPORTED: expected checked Bool condition coerced to Prop',
+        'PS_ERASE_CONDITION_UNSUPPORTED: equality type is not constant',
       );
     }
-    return erase(reflected,scope,environment);
+    const equalityType=nameToString(typeArg.name);
+    if(equalityType==='String'){
+      return {
+        kind:'intrinsic',
+        operation:'string.eq',
+        args:[
+          erase(left,scope,environment),
+          erase(right,scope,environment),
+        ],
+      };
+    }
+    if(
+      equalityType!=='Bool'
+      ||right.kind!=='const'
+      ||nameToString(right.name)!=='Bool.true'
+    ){
+      throw new Error(
+        'PS_ERASE_CONDITION_UNSUPPORTED: equality condition is not executable yet',
+      );
+    }
+    return erase(left,scope,environment);
   }
   if(view.args.length!==4){
     throw new Error(

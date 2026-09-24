@@ -255,6 +255,18 @@ if(needsRootSelfLink){
   }
 }
 
+const defeqOracle=readFileSync('scripts/defeq-differential.mjs','utf8');
+for(const marker of [
+  'const expectedVersion=/^Lean',
+  "const expectedGitHash='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b'",
+  "spawnSync(join(bin,'lean'),['--githash']",
+]){
+  if(!defeqOracle.includes(marker))throw new Error('defeq oracle identity drift: missing '+marker);
+}
+if(defeqOracle.includes("version!=='Lean (version 4.34.0, Release)'")){
+  throw new Error('defeq oracle identity drift: exact abbreviated version banner is not portable across official binaries');
+}
+
 const nativeEval=readFileSync('oracle/replay-probe/NativeEval.lean','utf8');
 for(const marker of [
   'Kernel.whnf env {} e',

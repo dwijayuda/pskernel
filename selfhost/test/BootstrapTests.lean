@@ -456,6 +456,36 @@ def psTestDualSourceBinderKindsParse : Bool :=
         && psTestParsedBinderKinds proofScriptModule
   | _, _ => false
 
+def psTestTypedLambdaShape
+    (parsed : PsParseResult PsSyntaxTerm) : Bool :=
+  psTokenCursorDone parsed.cursor
+    && match parsed.value with
+       | PsSyntaxTerm.lambda
+           [binderEntry]
+           (PsSyntaxTerm.reference bodyName)
+           _ =>
+           psTestBinderEntry
+             binderEntry
+             "x"
+             PsSyntaxBinderKind.explicit
+             && psTestSyntaxNameSingle bodyName "x"
+       | _ => false
+
+def psTestDualSourceTypedLambdaParse : Bool :=
+  match
+      psLex "fun (x : Nat) => x",
+      psLex "fun (x : Nat) => x" with
+  | Except.ok leanTokens, Except.ok proofScriptTokens =>
+      match
+          psParseLeanTerm (psTokenCursorFromTokens leanTokens),
+          psParseProofScriptTerm
+            (psTokenCursorFromTokens proofScriptTokens) with
+      | Except.ok leanTerm, Except.ok proofScriptTerm =>
+          psTestTypedLambdaShape leanTerm
+            && psTestTypedLambdaShape proofScriptTerm
+      | _, _ => false
+  | _, _ => false
+
 def psTestProofScriptEmptyCallUsesUnit : Bool :=
   match psParseProofScriptSource "def u : Unit := f();" with
   | Except.error _ => false
@@ -648,6 +678,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source simple parse", passed := psTestDualSourceSimpleParse },
   { name := "dual-source binder application parse", passed := psTestDualSourceBinderApplicationParse },
   { name := "dual-source binder kinds parse", passed := psTestDualSourceBinderKindsParse },
+  { name := "dual-source typed lambda parse", passed := psTestDualSourceTypedLambdaParse },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

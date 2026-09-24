@@ -37,7 +37,7 @@ function checkBoolMatch(
     const source=expr.alternatives[index]!;
     let pattern:CheckedSoftwarePattern;
     if(source.pattern.kind==='constructor'){
-      throw new Error('PS_CHECK_MATCH_PATTERN: constructor pattern cannot match Bool');
+      throw new Error('PS_CHECK_MATCH_PATTERN_UNSUPPORTED: constructor pattern cannot match Bool');
     }
     if(source.pattern.kind==='wildcard'){
       if(seenWildcard)throw new Error('PS_CHECK_MATCH_DUPLICATE: duplicate wildcard alternative');

@@ -13,8 +13,8 @@ inductive PsLiteral where
 
 inductive PsExpr where
   | bvar (index : Nat)
-  | fvar (name : PsName)
-  | mvar (name : PsName)
+  | fvar (id : Nat)
+  | mvar (id : Nat)
   | sortE (level : PsLevel)
   | constE (name : PsName) (levels : List PsLevel)
   | app (fn : PsExpr) (arg : PsExpr)

@@ -42,6 +42,10 @@
     "./lean4/expr": {
       "types": "./dist/src/lean4-expr.d.ts",
       "import": "./dist/src/lean4-expr.js"
+    },
+    "./lean4/mctx": {
+      "types": "./dist/src/lean4-mctx.d.ts",
+      "import": "./dist/src/lean4-mctx.js"
     }
   },
   "scripts": {

@@ -86,6 +86,55 @@ assign=evaluator.applyRuntimeValue(assign,mvarId);
 const assigned=evaluator.applyRuntimeValue(assign,runtimeExpr);
 console.log(JSON.stringify({phase:'metavar-context-assign-complete'}));
 
+{
+  let nameBeq=evaluator.evaluate(
+    constant(nameFromDotted('Lean.Name.beq')),
+  );
+  nameBeq=evaluator.applyRuntimeValue(nameBeq,mvarId.fields[0]);
+  const sameName=evaluator.applyRuntimeValue(nameBeq,mvarId.fields[0]);
+  console.log(JSON.stringify({
+    phase:'metavar-context-name-beq',
+    sameName,
+  }));
+
+  const eAssignment=assigned?.kind==='constructor'
+    ?assigned.fields[8]
+    :undefined;
+  const root=
+    eAssignment?.kind==='constructor'
+      ?eAssignment.fields[0]
+      :undefined;
+  const entries=
+    root?.kind==='constructor'
+      &&root.name==='Lean.PersistentHashMap.Node.entries'
+      &&Array.isArray(root.fields[0])
+        ?root.fields[0]
+        :undefined;
+  const occupied=entries===undefined
+    ?[]
+    :entries.flatMap((entry,index)=>
+      entry?.kind==='constructor'
+      &&entry.name!=='Lean.PersistentHashMap.Entry.null'
+        ?[{index,name:entry.name,fields:entry.fields.length}]
+        :[]
+    );
+  console.log(JSON.stringify({
+    phase:'metavar-context-map-shape',
+    assignedKind:assigned?.kind,
+    assignedFields:assigned?.kind==='constructor'
+      ?assigned.fields.length
+      :undefined,
+    eAssignmentKind:eAssignment?.kind,
+    eAssignmentName:eAssignment?.kind==='constructor'
+      ?eAssignment.name
+      :undefined,
+    rootKind:root?.kind,
+    rootName:root?.kind==='constructor'?root.name:undefined,
+    entries:entries?.length,
+    occupied,
+  }));
+}
+
 console.log(JSON.stringify({phase:'metavar-context-post-lookup-start'}));
 let getAfter=evaluator.evaluate(
   constant(nameFromDotted('Lean.MetavarContext.getExprAssignmentExp')),

@@ -1,0 +1,41 @@
+name: Lean Arena release assurance
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [assurance/arena-release-gate]
+    paths:
+      - ".github/workflows/arena-release-assurance.yml"
+      - "ARENA_LOCK.json"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/arena-*.mjs"
+      - "scripts/fetch-arena-corpus.mjs"
+      - "scripts/verify-arena-corpus.mjs"
+      - "src/core/**"
+      - "src/kernel/**"
+      - "src/integration/lean4export.ts"
+      - "test/all.test.ts"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci --no-audit --no-fund
+      - name: Fetch exact pinned Arena corpus
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: npm run arena:fetch
+      - name: Run 170-case Arena correctness gate
+        env:
+          ARENA_WORKERS: "6"
+          ARENA_TIMEOUT_MS: "60000"
+        run: npm run oracle:arena:pinned

@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "source": {
+    "repository": "leanprover/lean-kernel-arena",
+    "commit": "a538455e201c1be48a11963cb83058649a36dc0e",
+    "workflowRun": 34974976650,
+    "artifactId": 10400234707,
+    "artifactName": "test-tarball",
+    "artifactExpiresAt": "2026-12-14T13:26:14Z",
+    "siteUrl": "https://arena.lean-lang.org/lean-arena-tests.tar.gz"
+  },
+  "corpus": {
+    "total": 193,
+    "good": 122,
+    "bad": 71,
+    "correctness": 170,
+    "performance": 23,
+    "contentDigestSha256": "dd6d45efbc1e5e059cbdf0b8ed067fed800a611b83986fcb8c09dc2496eff6fa",
+    "correctnessDigestSha256": "6a1e662137652df42cb1d6959d7f1a920b84930c6dbcd4bae384e6d8bfff5342",
+    "uploadedTarSha256": "294a97cc5054a69e60034531f19c3697aadfcca0806dd82f914599e12a9a5513"
+  },
+  "policy": {
+    "blocking": "170 non-performance good/bad correctness cases",
+    "optional": "23 performance cases",
+    "excluded": "Arena tests larger than 10 MiB are not in the downloadable corpus"
+  }
+}

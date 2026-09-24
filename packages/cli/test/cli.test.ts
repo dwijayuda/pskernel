@@ -1024,6 +1024,77 @@ console.log('ok - psc SH2 dual-source canonical Array runtime');
 
 
 {
+  const directory=await mkdtemp(join(tmpdir(),'proofscript-sh2-ordered-data-'));
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        sourceRoots:[
+          'src',
+          join(process.cwd(),'stdlib','src'),
+        ],
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'import ProofScript.Data.Map\n'+
+      'import ProofScript.Data.Set\n'+
+      'function sumEntry(acc : Nat, key : Nat, value : Nat) : Nat := '+
+      'acc + key + value; '+
+      'function sumKey(acc : Nat, key : Nat) : Nat := acc + key; '+
+      'function main(a : Nat, b : Nat) : Nat := '+
+      'let values : PsMap(Nat, Nat) := '+
+      'mapInsert(compareNat, b, 20, '+
+      'mapInsert(compareNat, a, 10, mapEmpty)); '+
+      'let keys : PsSet(Nat) := '+
+      'setInsert(compareNat, b, setInsert(compareNat, a, setEmpty)); '+
+      'if mapContains(compareNat, a, values) && '+
+      'setContains(compareNat, b, keys) then '+
+      'optionGetOrElse(mapGet?(compareNat, a, values), 0) + '+
+      'mapFold(sumEntry, 0, values) + setFold(sumKey, 0, keys) '+
+      'else 0;\n',
+      'utf8',
+    );
+    clearVerifiedProjectModuleCache();
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      passthrough:['2','3'],
+    });
+    equal(result.mainResult,'50');
+    equal(result.semanticPipeline,'verified-core');
+    equal(result.proofStatus,'kernel-verified');
+    equal(
+      result.moduleOrder.includes('ProofScript.Data.Map'),
+      true,
+    );
+    equal(
+      result.moduleOrder.includes('ProofScript.Data.Set'),
+      true,
+    );
+    equal(
+      result.moduleOrder.includes('ProofScript.Data.Ordering'),
+      true,
+    );
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc SH2 deterministic ordered Map/Set runtime');
+
+
+{
   const directory=await mkdtemp(
     join(tmpdir(),'proofscript-verified-structure-abi-'),
   );

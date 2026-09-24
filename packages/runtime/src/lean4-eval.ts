@@ -74,6 +74,21 @@ export type Lean434RuntimeValue=
   |Lean434ProofValue
   |Lean434CallableValue;
 
+type Lean434TaggedRuntimeValue=
+  |Lean434ConstructorValue
+  |Lean434TypeValue
+  |Lean434ProofValue
+  |Lean434CallableValue;
+
+function isTaggedRuntimeValue(
+  value:Lean434RuntimeValue,
+):value is Lean434TaggedRuntimeValue{
+  return typeof value==='object'
+    &&value!==null
+    &&!Array.isArray(value)
+    &&'kind' in value;
+}
+
 export class Lean434EvaluationError extends Error {
   constructor(message:string){
     super(message);
@@ -98,9 +113,7 @@ function primitive(
 }
 
 function isCallable(value:Lean434RuntimeValue):value is Lean434CallableValue {
-  return typeof value==='object'
-    &&value!==null
-    &&!Array.isArray(value)
+  return isTaggedRuntimeValue(value)
     &&(
       value.kind==='closure'
       ||value.kind==='primitive-function'
@@ -168,9 +181,7 @@ export class Lean434Evaluator {
       case 'proj':{
         const target=this.evaluateWithLocals(expr.expr,locals);
         if(
-          typeof target!=='object'
-          ||target===null
-          ||Array.isArray(target)
+          !isTaggedRuntimeValue(target)
           ||target.kind!=='constructor'
         ){
           throw new Lean434EvaluationError(
@@ -188,9 +199,7 @@ export class Lean434Evaluator {
       case 'app':{
         const fn=this.evaluateWithLocals(expr.fn,locals);
         if(
-          typeof fn==='object'
-          &&fn!==null
-          &&!Array.isArray(fn)
+          isTaggedRuntimeValue(fn)
           &&fn.kind==='type'
         ){
           // Type applications are runtime-erased. Retain only a symbolic token
@@ -371,9 +380,7 @@ export class Lean434Evaluator {
     info:RecursorInfo,
   ):Lean434ConstructorValue {
     if(
-      typeof value==='object'
-      &&value!==null
-      &&!Array.isArray(value)
+      isTaggedRuntimeValue(value)
       &&value.kind==='constructor'
     ){
       return value;

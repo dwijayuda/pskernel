@@ -97,10 +97,10 @@ def psParseProofScriptSimpleApplication
           && psProofScriptCallAdjacent first.value first.cursor then
         match psTokenCursorAdvance first.cursor with
         | none => Except.error (PsParseError.unexpectedEnd "(")
-        | some open =>
+        | some opening =>
             match psParseProofScriptCallArgsWithFuel
                 first.cursor.remaining.length
-                open.cursor
+                opening.cursor
                 [] with
             | Except.error error => Except.error error
             | Except.ok call =>
@@ -112,7 +112,7 @@ def psParseProofScriptSimpleApplication
                   match call.args with
                   | [] =>
                       [PsSyntaxTerm.unit {
-                        start := open.token.span.start
+                        start := opening.token.span.start
                         stop := call.closeSpan.stop
                       }]
                   | _ => call.args
@@ -129,8 +129,8 @@ def psParseProofScriptExplicitBinder
       (PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :=
   match psTokenCursorExpectText cursor "(" with
   | Except.error error => Except.error error
-  | Except.ok open =>
-      match psTokenCursorExpectKind open.cursor PsTokenKind.identifier with
+  | Except.ok opening =>
+      match psTokenCursorExpectKind opening.cursor PsTokenKind.identifier with
       | Except.error error => Except.error error
       | Except.ok name =>
           match psTokenCursorExpectText name.cursor ":" with

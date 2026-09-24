@@ -1,0 +1,37 @@
+name: Diagnostic Int.DivMod window sweep
+
+on:
+  push:
+    branches: [diagnostic/int-divmod-window-sweep]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    strategy:
+      fail-fast: false
+      matrix:
+        start: [22197, 22229, 22261, 22293, 22325, 22357, 22389, 22421, 22453, 22485, 22517, 22549, 22581, 22613, 22645, 22677, 22709, 22741, 22773, 22805]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Replay canonical 32-root window
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "2048"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 ${{ matrix.start }} 32 32 1

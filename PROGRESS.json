@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 170,
   "notes": [
+    "Execution refresh attempt at hardening HEAD 36802279 reached TypeScript build on the correct branch but stopped before direct tests: the new safe DefinitionVal.all regression passed a second diagnostic argument to the local one-argument throws helper. Commit 6e6ca8d removes only that extra test-helper argument; kernel semantics and the assertion remain unchanged. lastVerifiedTestCount stays 170 until the corrected tree is executed.",
     "Local assurance self-contamination fix: the PowerShell runner now defaults to gitignored `full-std.local.log` instead of the tracked historical `full-std.log`. A local git fixture reproduces the old failure (`M full-std.log`) and confirms that writing `full-std.local.log` leaves both tracked-only and ordinary git status clean. The kernel-study matrix locks the default/ignore policy. This is tooling/provenance hardening only; no replay gate is closed.",
     "Workspace lockfile assurance repair: the committed package-lock.json now covers all current packages/* workspaces, npm workspace links, the lean-ts-kernel root self-link, and pinned TypeScript/@types-node/undici-types entries. The exact reconstructed lock passed `npm ci --dry-run --offline` in a synthetic workspace matching the current manifests. kernel-study-regression-matrix now compares every workspace manifest against the lock, and run-full-std-local.ps1 logs/classifies dependency-install failures as pre-replay packaging failures. This closes only the packaging precondition exposed by the local EUSAGE failure; no Lean replay gate is closed.",
     "Safe DefinitionVal.all validation parity fix: Lean 4.34 replay ignores `all` for ordinary safe defnDecl, so lean4export no longer requires a safe definition to appear in its own all-list. The existing ordering regression now uses `all:[peer]` and `all:[]`; only unsafe/partial mutual diagnostic reconstruction requires a coherent self-containing group list.",
@@ -260,5 +261,5 @@
   ],
   "currentTreeExpectedDirectTests": 173,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "source direct-test count remains 173 / last executed direct checkpoint remains 170; safe DefinitionVal.all omission/empty-list parity is source-locked and needs refreshed execution. Canonical Lean-backed replay remains pending."
+  "currentTreeVerification": "source direct-test count remains 173 / last executed direct checkpoint remains 170; the safe DefinitionVal.all test-helper compile mismatch is fixed in source and needs refreshed execution. Canonical Lean-backed replay remains pending."
 }

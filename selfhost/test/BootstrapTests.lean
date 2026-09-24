@@ -31,6 +31,142 @@ def psTestNatEnvironment : PsEnvironment :=
 def psTestName (value : String) : PsName :=
   psRootName value
 
+def psTestAddDeclaration
+    (environment : PsEnvironment)
+    (declaration : PsDeclaration) : PsEnvironment :=
+  match psEnvironmentAdd environment declaration with
+  | some next => next
+  | none => environment
+
+def psTestConditionalEnvironment : PsEnvironment :=
+  let uName := psTestName "u"
+  let alphaName := psTestName "α"
+  let aName := psTestName "a"
+  let bName := psTestName "b"
+  let pName := psTestName "p"
+  let cName := psTestName "c"
+  let hName := psTestName "h"
+  let tName := psTestName "t"
+  let eName := psTestName "e"
+  let boolType := PsExpr.constE psBoolName []
+  let propType := PsExpr.sortE PsLevel.zero
+  let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let eqType :=
+    PsExpr.forallE
+      alphaName
+      (PsExpr.sortE (PsLevel.param uName))
+      (PsExpr.forallE
+        aName
+        (PsExpr.bvar 0)
+        (PsExpr.forallE
+          bName
+          (PsExpr.bvar 1)
+          propType
+          PsBinderInfo.explicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.implicit
+  let decidableType :=
+    PsExpr.forallE
+      pName
+      propType
+      typeType
+      PsBinderInfo.explicit
+  let eqAB :=
+    PsExpr.app
+      (PsExpr.app
+        (PsExpr.app
+          (PsExpr.constE
+            psEqName
+            [PsLevel.succ PsLevel.zero])
+          boolType)
+        (PsExpr.bvar 1))
+      (PsExpr.bvar 0)
+  let boolDecEqType :=
+    PsExpr.forallE
+      aName
+      boolType
+      (PsExpr.forallE
+        bName
+        boolType
+        (PsExpr.app
+          (PsExpr.constE psDecidableName [])
+          eqAB)
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let iteType :=
+    PsExpr.forallE
+      alphaName
+      (PsExpr.sortE (PsLevel.param uName))
+      (PsExpr.forallE
+        cName
+        propType
+        (PsExpr.forallE
+          hName
+          (PsExpr.app
+            (PsExpr.constE psDecidableName [])
+            (PsExpr.bvar 0))
+          (PsExpr.forallE
+            tName
+            (PsExpr.bvar 2)
+            (PsExpr.forallE
+              eName
+              (PsExpr.bvar 3)
+              (PsExpr.bvar 4)
+              PsBinderInfo.explicit)
+            PsBinderInfo.explicit)
+          PsBinderInfo.instanceImplicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.implicit
+  let env0 := psTestNatEnvironment
+  let env1 :=
+    psTestAddDeclaration
+      env0
+      (PsDeclaration.axiomDecl
+        psBoolName
+        []
+        typeType)
+  let env2 :=
+    psTestAddDeclaration
+      env1
+      (PsDeclaration.axiomDecl
+        psBoolTrueName
+        []
+        boolType)
+  let env3 :=
+    psTestAddDeclaration
+      env2
+      (PsDeclaration.axiomDecl
+        psBoolFalseName
+        []
+        boolType)
+  let env4 :=
+    psTestAddDeclaration
+      env3
+      (PsDeclaration.axiomDecl
+        psEqName
+        [uName]
+        eqType)
+  let env5 :=
+    psTestAddDeclaration
+      env4
+      (PsDeclaration.axiomDecl
+        psDecidableName
+        []
+        decidableType)
+  let env6 :=
+    psTestAddDeclaration
+      env5
+      (PsDeclaration.axiomDecl
+        psBoolDecEqName
+        []
+        boolDecEqType)
+  psTestAddDeclaration
+    env6
+    (PsDeclaration.axiomDecl
+      psIteName
+      [uName]
+      iteType)
+
 def psNameListEq : List PsName -> List PsName -> Bool
   | [], [] => true
   | left :: leftRest, right :: rightRest =>
@@ -862,6 +998,91 @@ def psTestDualSourceInferredLet : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestBoolLiteralDeclarationShape
+    (result : PsElabModuleResult) : Bool :=
+  let boolType := PsExpr.constE psBoolName []
+  let yesName := psTestName "yes"
+  match result.declarations with
+  | [PsDeclaration.definitionDecl actualName [] actualType actualValue] =>
+      psNameEq actualName yesName
+        && psExprAlphaEq actualType boolType
+        && psExprAlphaEq
+          actualValue
+          (PsExpr.constE psBoolTrueName [])
+  | _ => false
+
+def psTestDualSourceBoolLiteral : Bool :=
+  match
+      psParseLeanSource
+        "def yes : Bool := true",
+      psParseProofScriptSource
+        "def yes : Bool := true;" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestConditionalEnvironment leanModule,
+          psElabModule psTestConditionalEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestBoolLiteralDeclarationShape leanResult
+            && psTestBoolLiteralDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
+def psTestIfDeclarationShape
+    (result : PsElabModuleResult) : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let boolType := PsExpr.constE psBoolName []
+  let trueTerm := PsExpr.constE psBoolTrueName []
+  let condition :=
+    psExprApplyMany
+      (PsExpr.constE
+        psEqName
+        [PsLevel.succ PsLevel.zero])
+      [boolType, trueTerm, trueTerm]
+  let decider :=
+    psExprApplyMany
+      (PsExpr.constE psBoolDecEqName [])
+      [trueTerm, trueTerm]
+  let expectedValue :=
+    psExprApplyMany
+      (PsExpr.constE
+        psIteName
+        [PsLevel.succ PsLevel.zero])
+      [
+        natType,
+        condition,
+        decider,
+        PsExpr.lit (PsLiteral.natural 1),
+        PsExpr.lit (PsLiteral.natural 2)
+      ]
+  match result.declarations with
+  | [PsDeclaration.definitionDecl actualName [] actualType actualValue] =>
+      psNameEq actualName (psTestName "pick")
+        && psExprAlphaEq actualType natType
+        && psExprAlphaEq actualValue expectedValue
+  | _ => false
+
+def psTestDualSourceIf : Bool :=
+  match
+      psParseLeanSource
+        "def pick : Nat := if true then 1 else 2",
+      psParseProofScriptSource
+        "def pick : Nat := if (true) { 1 } else { 2 };" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestConditionalEnvironment leanModule,
+          psElabModule psTestConditionalEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestIfDeclarationShape leanResult
+            && psTestIfDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -878,6 +1099,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source Pi lambda declaration", passed := psTestDualSourcePiLambdaDeclaration },
   { name := "dual-source annotated let", passed := psTestDualSourceAnnotatedLet },
   { name := "dual-source inferred let", passed := psTestDualSourceInferredLet },
+  { name := "dual-source Bool literal", passed := psTestDualSourceBoolLiteral },
+  { name := "dual-source if", passed := psTestDualSourceIf },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

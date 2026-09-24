@@ -9,6 +9,20 @@ permissions:
   contents: read
 
 jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Map suspected canonical shards
+        run: lean --run oracle/replay-probe/DependencyExport.lean Std --shard-manifest 3780 80
+
   diagnose:
     runs-on: ubuntu-latest
     timeout-minutes: 45

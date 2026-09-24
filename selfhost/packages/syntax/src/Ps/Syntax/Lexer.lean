@@ -66,26 +66,36 @@ def psLexSkipBlockComment :
         start
         (psLexAdvanceChar position char)
 
-def psLexSkipTrivia :
-    List Char -> PsSourcePos -> Except PsLexError PsLexCursor
-  | [], position =>
+def psLexSkipTriviaWithFuel :
+    Nat -> List Char -> PsSourcePos -> Except PsLexError PsLexCursor
+  | 0, remaining, position =>
+      Except.ok { remaining := remaining, position := position }
+  | _ + 1, [], position =>
       Except.ok { remaining := [], position := position }
-  | '-' :: '-' :: rest, position =>
+  | fuel + 1, '-' :: '-' :: rest, position =>
       let afterPrefix := psLexAdvanceTwo position '-' '-'
       let cursor := psLexSkipLineComment rest afterPrefix
-      psLexSkipTrivia cursor.remaining cursor.position
-  | '/' :: '-' :: rest, position =>
+      psLexSkipTriviaWithFuel fuel cursor.remaining cursor.position
+  | fuel + 1, '/' :: '-' :: rest, position =>
       let start := position
       let afterPrefix := psLexAdvanceTwo position '/' '-'
       match psLexSkipBlockComment 1 rest start afterPrefix with
       | Except.error error => Except.error error
       | Except.ok cursor =>
-          psLexSkipTrivia cursor.remaining cursor.position
-  | char :: rest, position =>
+          psLexSkipTriviaWithFuel fuel cursor.remaining cursor.position
+  | fuel + 1, char :: rest, position =>
       if char.isWhitespace then
-        psLexSkipTrivia rest (psLexAdvanceChar position char)
+        psLexSkipTriviaWithFuel
+          fuel
+          rest
+          (psLexAdvanceChar position char)
       else
         Except.ok { remaining := char :: rest, position := position }
+
+def psLexSkipTrivia
+    (remaining : List Char)
+    (position : PsSourcePos) : Except PsLexError PsLexCursor :=
+  psLexSkipTriviaWithFuel (remaining.length + 1) remaining position
 
 def psLexIdentifierStart (char : Char) : Bool :=
   char.isAlpha || char == '_'

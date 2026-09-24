@@ -1,0 +1,24 @@
+name: Canonical Int.DivMod shard manifest
+
+on:
+  push:
+    branches: [diagnostic/canonical-int-divmod-manifest]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Print canonical target-module shards
+        run: lean --run oracle/replay-probe/CanonicalIntDivModManifest.lean

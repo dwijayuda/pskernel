@@ -37,6 +37,10 @@ theorem optionOrElseNone {α : Type}
 (fallback : PsOption(α)) :
 optionOrElse(PsOption.none, fallback) = fallback := by rfl;
 
+theorem optionOrElseNoneSymm {α : Type}
+(fallback : PsOption(α)) :
+fallback = optionOrElse(PsOption.none, fallback) := by exact?;
+
 theorem optionGetOrElseSome {α : Type}
 (value : α, fallback : α) :
 optionGetOrElse(PsOption.some(value), fallback) = value := by rfl;

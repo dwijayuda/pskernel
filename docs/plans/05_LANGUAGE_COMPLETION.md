@@ -711,10 +711,11 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     resultGetOrElse/resultToOption, structurally recursive listAppend/listMap,
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
-    listAppendNilRight, listAppendAssoc, and listMapAppend. Eighteen current
-    stdlib theorems now dogfood bounded rfl/cases/simp-only/induction/rw proof
-    paths; continue with stronger laws/utilities only when the proof/recursion
-    surface supports them without host shortcuts.
+    optionOrElseNoneSymm, listAppendNilRight, listAppendAssoc, and
+    listMapAppend. Nineteen current stdlib theorems now dogfood bounded
+    rfl/cases/simp-only/induction/rw/exact?-symmetry proof paths; continue with
+    stronger laws/utilities only when the proof/recursion surface supports them
+    without host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.

@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain eighteen pskernel-admitted theorems in total:
+The three modules now contain nineteen pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,9 +49,10 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- eighteen admitted stdlib theorems: twelve definitional laws use bounded
+- nineteen admitted stdlib theorems: twelve definitional laws use bounded
   `rfl`, `optionOrElseNoneRight` and `resultToOptionMap` dogfood bounded
-  `cases`, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
+  `cases`, `optionOrElseNoneSymm` dogfoods environment-candidate `exact?`
+  Eq symmetry, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
   `listMapAppend` dogfood bounded induction plus checked rewriting;
 - zero runtime external assumptions.
@@ -153,3 +154,24 @@ functor implementation or special theorem rule.
 
 The adjacent `resultToOptionOk` computation theorem is definitional and is
 proved by bounded `rfl`.
+
+## Exact-search symmetry dogfood
+
+`ProofScript.Data.Option.optionOrElseNoneSymm` proves the reverse orientation
+of the earlier definitional law:
+
+```text
+fallback = optionOrElse(PsOption.none, fallback)
+```
+
+using only:
+
+```text
+by exact?
+```
+
+The matching forward theorem `optionOrElseNone` is already in the environment.
+Direct candidate matching therefore fails on orientation; bounded library search
+tries the symmetric Eq target, infers the theorem's ordinary implicit/default
+arguments, then reconstructs the requested proof with the real polymorphic
+`Eq.symm`. The completed term is still checked by pskernel.

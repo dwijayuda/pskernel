@@ -154,13 +154,24 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
     &&value.length>0
     &&self.indexOf(value)===index
   );
-  const declarationPattern=new RegExp(
-    String.raw`\\b(?:def|opaque|abbrev|instance|protected\\s+def)\\s+(?:`+
-    sourceSpellings.map(
-      (value)=>value.replace(/[.*+?^$\\{\}()|[\\]\\]/g,'\\\\  if(!text.includes(binding.leanDeclaration)){
+  const declarationKeywords=[
+    'def ',
+    'opaque ',
+    'abbrev ',
+    'instance ',
+    'protected def ',
+    'protected opaque ',
+  ];
+  const foundDeclaration=sourceSpellings.some((spelling)=>
+    declarationKeywords.some(
+      (keyword)=>text.includes(keyword+spelling),
+    )
+  );
+  if(!foundDeclaration){
     throw new Error(
       'bound Lean declaration missing from upstream source: '+
-      binding.leanDeclaration+' @ '+binding.upstreamSource,
+      binding.leanDeclaration+' @ '+binding.upstreamSource+
+      ' (checked source spellings: '+sourceSpellings.join(', ')+')',
     );
   }
 

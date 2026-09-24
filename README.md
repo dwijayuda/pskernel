@@ -84,4 +84,4 @@ On Windows/PowerShell, the repository includes a helper that validates Node/Lean
 powershell -ExecutionPolicy Bypass -File scripts/run-full-std-local.ps1
 ```
 
-If memory is limited, override the heap, for example `-HeapMiB 8192`. On a machine with 24–32 GiB RAM, the default 12288 MiB is preferred. Send back `full-std.log` if the run fails or when it passes so the result can be recorded.
+If memory is limited, override the heap, for example `-HeapMiB 8192`. On a machine with 24–32 GiB RAM, the default 12288 MiB is preferred. Send back `full-std.local.log` if the run fails or when it passes so the result can be recorded. The local evidence file is gitignored so the assurance run cannot dirty the tracked source tree merely by logging.

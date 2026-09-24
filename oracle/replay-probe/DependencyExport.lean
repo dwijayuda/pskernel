@@ -308,12 +308,6 @@ def semanticDeps (n : Name) : List Name :=
     ["Nat.div.go".toName, "Nat.div_rec_fuel_lemma".toName, "Nat.lt_succ_self".toName] ++ natLeConditionDeps
   else if n == "Nat.mod".toName then
     ["Nat.modCore.go".toName, "Nat.div_rec_fuel_lemma".toName, "Nat.lt_succ_self".toName, "ite".toName] ++ natLeConditionDeps
-  else if n == "String.ofList".toName then
-    -- pskernel's primitive String.ofList recognizer validates Char.ofNat as a
-    -- bootstrap prerequisite for string-literal expansion. Lean's definition
-    -- of String.ofList does not mention Char.ofNat, so getUsedConstantsAsSet
-    -- cannot establish this ordering edge by itself.
-    ["Char.ofNat".toName]
   else
     []
 

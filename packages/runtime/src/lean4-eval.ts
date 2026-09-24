@@ -632,6 +632,22 @@ export class Lean434Evaluator {
       return value;
     }
 
+    if(
+      isTaggedRuntimeValue(value)
+      &&value.kind==='proof'
+      &&info.rules.length===1
+      &&info.rules[0]!.nFields===0
+    ){
+      // Executable Lean erases proof objects. For proof recursors whose only
+      // constructor carries no runtime fields (notably Eq.rec), the erased
+      // major premise can therefore be represented by that sole constructor.
+      return {
+        kind:'constructor',
+        name:nameToString(info.rules[0]!.ctor),
+        fields:[],
+      };
+    }
+
     if(typeof value==='bigint'){
       const zero=info.rules.find(
         (rule)=>nameToString(rule.ctor)==='Nat.zero',

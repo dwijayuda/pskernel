@@ -28,6 +28,9 @@ const module:WasmIrModule={
 
 const canonical=emitBinaryenWasm(module);
 const canonicalAgain=emitBinaryenWasm(module);
+equal(canonical.executionRuntime.profile,'proofscript-wasm32-mvp-js-v1');
+equal(canonical.executionRuntime.bigintRuntime,undefined);
+equal(canonical.executionRuntime.bigintRuntimeMode,undefined);
 ok(canonical.binary.length>0);
 ok(WebAssembly.validate(canonical.binary));
 equal(canonical.text,canonicalAgain.text);
@@ -238,6 +241,9 @@ const bigintIdentityModule:WasmIrModule={
   ],
 };
 const bigintArtifact=emitBinaryenWasm(bigintIdentityModule);
+equal(bigintArtifact.executionRuntime.profile,'proofscript-wasm32-ref-js-v1');
+equal(bigintArtifact.executionRuntime.bigintRuntime,'proofscript.bigint.v1');
+equal(bigintArtifact.executionRuntime.bigintRuntimeMode,'js-host');
 ok(WebAssembly.validate(bigintArtifact.binary));
 const bigintHost=instantiateProofScriptWasm(bigintArtifact);
 const hugeNat=(1n<<100n)+123456789n;

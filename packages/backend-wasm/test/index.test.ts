@@ -290,12 +290,13 @@ throws(
 console.log('ok - @proofscript/backend-wasm W3 reserved bigint literal runtime');
 
 {
+  const internalName=(name:string)=>
+    ['ps','bigint',name].join(String.fromCharCode(36));
   const runtimeImport=(
     name:string,
     result:'externref'|'i32',
   ):WasmIrFunctionImport=>({
-    internalName:'ps$bigint
-+name,
+    internalName:internalName(name),
     module:'proofscript.bigint.v1',
     name,
     parameters:['externref','externref'],
@@ -316,8 +317,7 @@ console.log('ok - @proofscript/backend-wasm W3 reserved bigint literal runtime')
     exportName:name,
     body:{
       kind:'call',
-      target:'ps$bigint
-+imported,
+      target:internalName(imported),
       args:[
         {kind:'local',name:'a',type:'externref'},
         {kind:'local',name:'b',type:'externref'},

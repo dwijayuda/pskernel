@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Binaryen-backed emission of validated ProofScript WasmIR.",
   "proofscript": {
-    "status": "w2-binaryen-fixed-width-js-abi",
+    "status": "w3a-binaryen-nat-bigint-js-abi",
     "phase": "C",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript"

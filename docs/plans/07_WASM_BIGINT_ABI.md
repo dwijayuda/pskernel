@@ -1,20 +1,20 @@
 # ProofScript WebAssembly arbitrary-precision ABI
 
-Status: **W3a implementation in progress. Nat externref values, literals, and
-all currently defined verified Nat intrinsics execute through the versioned JS
-BigInt runtime. Full W3a closure still requires the complete differential
-corpus and acceptance matrix below.**
+Status: **W3a Nat BigInt ABI is closed on executable evidence. W3b Int
+value transport is next; Int literals and arithmetic remain fail-closed until
+verified IR semantics exist.**
 
 This document refines W3 from `06_WASM_BACKEND.md`. It defines how
 ProofScript/Lean arbitrary-precision `Nat` and `Int` values can cross the
 WebAssembly boundary without narrowing them to machine integers.
 
-## 0. Validated W3a runtime checkpoint
+## 0. W3a closure checkpoint
 
-Commit `c79b62b2375166dbca0911282ef489de53486d4e` is the first fully green
-checkpoint with arbitrary-precision Nat runtime operations enabled.
+W3a code closure is frozen at commit
+`b989a1aa3020eaf292693f5b81e14d9ccdd0f283`, validated by GitHub Actions
+WASM closure run `36021848894` on 2026-09-24.
 
-GitHub Actions WASM closure run `36018296565` passed:
+The full closure matrix passed:
 
 - exact dependency install;
 - full package-graph build;
@@ -23,24 +23,33 @@ GitHub Actions WASM closure run `36018296565` passed:
 - package integration;
 - TypeScript backend;
 - WebAssembly backend;
-- root suite, including CLI arbitrary-precision Nat addition;
+- root suite;
 - workspace-lock anti-drift;
 - source-shape anti-drift;
 - architecture anti-drift.
 
-Implemented at this checkpoint:
+W3a evidence now covers:
 
-- Nat parameters/results remain physical `externref` and semantic JS `bigint`;
-- deterministic Nat literal-table construction;
-- reserved `proofscript.bigint.v1` runtime imports;
-- `nat.add`, `nat.sub`, `nat.mul`, `nat.div`, `nat.mod`, `nat.eq`, `nat.ne`,
-  `nat.le`, and `nat.lt` lowering;
-- Lean-faithful subtraction, division-by-zero, and modulo-by-zero behavior;
-- non-negative Nat validation at exported ABI and internal runtime boundaries;
-- canonical and optimized Binaryen execution coverage for the Nat runtime.
+- Nat parameters/results as physical `externref` and semantic JS `bigint`;
+- deterministic Nat literal-table construction and reserved
+  `proofscript.bigint.v1` imports;
+- every currently defined verified Nat intrinsic:
+  `add/sub/mul/div/mod/eq/ne/le/lt`;
+- Lean-faithful Nat subtraction, division-by-zero, and modulo-by-zero behavior;
+- non-negative Nat validation at exported and internal runtime boundaries;
+- canonical and optimized Binaryen execution;
+- TS-vs-WASM differential execution over the required machine-boundary and
+  huge-value corpus through `10^100`;
+- direct calls, `let`, and `if` carrying Nat values;
+- `psc check/build/run --verified --target wasm` with arbitrary-precision Nat;
+- explicit manifest `executionRuntime` metadata for the JS-host BigInt ABI;
+- executable W2 MVP byte compatibility against the frozen post-integration W2
+  emitter at `0a7b08c699c867d20a598a15588a71bf237595bb`.
 
-This is not yet the W3a completion checkpoint. The required TS-vs-WASM
-differential corpus in section 11 remains the next blocking acceptance work.
+All 13 acceptance gates in section 12 are therefore satisfied for W3a.
+The next milestone is W3b: admit Int parameters/results through the same
+`externref` / JS `bigint` transport while keeping Int literals and arithmetic
+blocked until explicit verified-IR operations exist.
 
 ## 1. Non-negotiable semantic rule
 
@@ -368,7 +377,7 @@ x % 0 = x
 
 ## 12. Acceptance gates
 
-W3a is not complete until all are green:
+W3a closure at `b989a1aa3020eaf292693f5b81e14d9ccdd0f283` / run `36021848894` satisfied all of the following:
 
 1. `@proofscript/wasm-ir` validates externref/import/literal-table invariants;
 2. `@proofscript/wasm-lowering` lowers real verified Nat source without i64 narrowing;

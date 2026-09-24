@@ -1,6 +1,6 @@
 # ProofScript WebAssembly backend plan
 
-Status: **W2 closed on a fully green executable closure matrix; W3 Nat/Int BigInt work remains next**
+Status: **W3a Nat BigInt ABI closed on a fully green executable closure matrix; W3b Int value transport is next**
 
 This plan adds WebAssembly as an execution backend for pskernel-admitted
 ProofScript programs. It does not change ProofScript logical semantics and does
@@ -15,6 +15,9 @@ Implemented on `feature/wasm-backend`:
 - Binaryen 132.0.0 emitter with explicit MVP feature profile;
 - Bool/Unit first-order functions, calls, let, if, and Bool intrinsics;
 - UInt8/UInt16/UInt32/UInt64 runtime values with physical i32/i64 lowering;
+- W3a arbitrary-precision Nat values via `externref` backed by JS `bigint`;
+- deterministic Nat literal tables and the reserved `proofscript.bigint.v1` runtime;
+- Lean-faithful verified Nat `add/sub/mul/div/mod/eq/ne/le/lt` execution;
 - semantic Bool and narrow-UInt normalization before raw Wasm use;
 - logical Wasm export ABI metadata plus a JS host adapter that restores unsigned UInt32/UInt64 values;
 - canonical and optimized Binaryen validation tests;
@@ -22,11 +25,13 @@ Implemented on `feature/wasm-backend`:
 - `@proofscript/compiler` checked-core -> Wasm orchestration;
 - `psc check/build/run --verified --target wasm`;
 - `.wasm` and `.wat` build artifacts plus Binaryen/profile/export-ABI manifest metadata;
+- explicit W3 execution-runtime metadata in `psc check/build/run` reports and manifests;
+- TS/Wasm differential Nat corpus plus frozen W2 MVP byte-compatibility regression;
 - full npm workspace lock repair and a workspace-lock anti-drift gate.
 
 Still intentionally unsupported:
 
-- runtime Nat/Int until arbitrary-precision semantics are preserved;
+- Int runtime values until W3b admits the shared arbitrary-precision `externref` representation;
 - String/Char ABI;
 - structures and inductive ADTs;
 - generic runtime values and closures;
@@ -62,6 +67,13 @@ checkpoint is `0a7b08c699c867d20a598a15588a71bf237595bb`, validated by:
 - TypeScript kernel CI run `35980377525`: root tests and anti-drift passed.
 
 W3 work starts from this post-integration checkpoint.
+
+W3a Nat closure is frozen at commit
+`b989a1aa3020eaf292693f5b81e14d9ccdd0f283`, validated by WASM closure run
+`36021848894`. All W3a acceptance gates are green, including the required
+TS-vs-WASM Nat corpus, CLI/manifest runtime metadata, optimized/unoptimized
+agreement, Nat call/let/if composition, and executable W2 MVP byte
+compatibility. W3b Int value transport is the next milestone.
 
 ## 1. Goals
 
@@ -207,8 +219,8 @@ Planned representation matrix:
 | UInt64 | i64 | after verified-IR support |
 | Char | i32 with Unicode-scalar invariant | later |
 | Float | f64, only after Lean/runtime differential evidence | later |
-| Nat | arbitrary-precision runtime value | MUST NOT narrow to i64 |
-| Int | arbitrary-precision runtime value | MUST NOT narrow to i64 |
+| Nat | externref -> JS bigint | W3a closed; arbitrary precision, non-negative |
+| Int | externref -> JS bigint | W3b next; literals/arithmetic remain blocked |
 | String | runtime/reference representation | later |
 | USize | target-platform dependent | fail closed initially |
 | structures / ADTs | Wasm GC or explicit runtime layout | later |
@@ -227,10 +239,12 @@ Int -> i64
 
 as a general representation.
 
-The first executable Nat/Int strategy should be a JS-hosted arbitrary-precision
-runtime using JavaScript `BigInt` behind explicit Wasm imports/references.
-A later standalone runtime may replace this with a native big-integer
-representation without changing source semantics.
+W3a implements Nat with a JS-hosted arbitrary-precision runtime using
+JavaScript `BigInt` behind explicit Wasm imports/references. W3b will reuse the
+same physical representation for Int values. Int literals/arithmetic remain
+blocked until their verified-IR semantics are explicit. A later standalone
+runtime may replace the JS host with a native big-integer representation
+without changing source semantics.
 
 Boundary regressions MUST include at least:
 

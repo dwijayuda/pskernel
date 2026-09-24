@@ -40,7 +40,7 @@ def psTypeScriptVersion : IO String := do
         ("PSC1_TSC_VERSION_FAILED:\n" ++ output.stderr))
   let raw := output.stdout.trimAscii.toString
   if raw.startsWith "Version " then
-    pure (raw.drop 8)
+    pure (raw.drop 8).toString
   else
     pure raw
 

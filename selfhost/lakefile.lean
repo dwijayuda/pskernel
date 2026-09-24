@@ -67,7 +67,9 @@ lean_lib PsCompilerIr where
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
   roots := #[
-    `Ps.BackendTs.Type
+    `Ps.BackendTs.Type,
+    `Ps.BackendTs.Expr,
+    `Ps.BackendTs.Module
   ]
 
 lean_lib PsProject where
@@ -110,3 +112,7 @@ lean_exe psc1_translation_tests where
 lean_exe psc1_bridge_tests where
   srcDir := "test"
   root := `BridgeTests
+
+lean_exe psc1_backend_ts_tests where
+  srcDir := "test"
+  root := `BackendTsTests

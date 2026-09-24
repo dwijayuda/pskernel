@@ -303,3 +303,94 @@ console.log('ok - @proofscript/compiler TS/Wasm Nat differential corpus');
   }
 }
 console.log('ok - @proofscript/compiler Nat call/let/if composition');
+
+{
+  const int={kind:'primitive',name:'Int'} as const;
+  const bool={kind:'primitive',name:'Bool'} as const;
+  const ir:VerifiedIrModule={
+    kind:'proofscript-verified-ir',
+    declarations:[
+      {
+        name:'idInt',
+        typeParameters:[],
+        parameters:[{name:'x',type:int}],
+        resultType:int,
+        body:{kind:'var',name:'x'},
+      },
+      {
+        name:'letInt',
+        typeParameters:[],
+        parameters:[{name:'x',type:int}],
+        resultType:int,
+        body:{
+          kind:'let',
+          name:'y',
+          value:{kind:'var',name:'x'},
+          body:{kind:'var',name:'y'},
+        },
+      },
+      {
+        name:'chooseInt',
+        typeParameters:[],
+        parameters:[
+          {name:'condition',type:bool},
+          {name:'a',type:int},
+          {name:'b',type:int},
+        ],
+        resultType:int,
+        body:{
+          kind:'if',
+          condition:{kind:'var',name:'condition'},
+          thenBranch:{kind:'var',name:'a'},
+          elseBranch:{kind:'var',name:'b'},
+        },
+      },
+      {
+        name:'callInt',
+        typeParameters:[],
+        parameters:[{name:'x',type:int}],
+        resultType:int,
+        body:{
+          kind:'call',
+          fn:{kind:'var',name:'idInt'},
+          args:[{kind:'var',name:'x'}],
+        },
+      },
+    ],
+  };
+
+  const tsSource=emitVerifiedTypeScript(ir);
+  const tsEmitted=compileTypeScript(tsSource,'wasm-int-values.ts');
+  const tsModule=await import(
+    'data:text/javascript;base64,'+
+    Buffer.from(tsEmitted.javascript,'utf8').toString('base64'),
+  ) as Record<string,unknown>;
+
+  const wasmIr=lowerVerifiedIrToWasm(ir);
+  equal(wasmIr.profile,'proofscript-wasm32-ref-js-v1');
+  equal(wasmIr.imports?.length??0,0);
+  const wasm=instantiateProofScriptWasm(emitBinaryenWasm(wasmIr));
+  const optimized=instantiateProofScriptWasm(
+    emitBinaryenWasm(wasmIr,{optimize:true}),
+  );
+  const negative=-((1n<<100n)+123456789n);
+  const positive=(1n<<100n)+987654321n;
+  const cases=[
+    ['idInt',[negative]],
+    ['idInt',[0n]],
+    ['idInt',[positive]],
+    ['letInt',[negative]],
+    ['chooseInt',[true,negative,positive]],
+    ['chooseInt',[false,negative,positive]],
+    ['callInt',[positive]],
+  ] as const;
+
+  for(const [name,args] of cases){
+    const tsFn=tsModule[name] as ((...values:unknown[])=>unknown)|undefined;
+    if(tsFn===undefined)throw new Error('missing TypeScript Int export '+name);
+    const expected=tsFn(...args);
+    equal(wasm.exports[name]?.(...args),expected);
+    equal(optimized.exports[name]?.(...args),expected);
+  }
+}
+console.log('ok - @proofscript/compiler W3b Int value composition');

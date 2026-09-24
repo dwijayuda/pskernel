@@ -778,6 +778,69 @@ console.log('ok - psc verified Wasm W3a Nat externref pass-through');
 
 {
   const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-wasm-int-pass-through-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : Int) : Int := x;\n',
+      'utf8',
+    );
+
+    const checked=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[],
+    });
+    equal(checked.wasmProfile,'proofscript-wasm32-ref-js-v1');
+    equal(
+      checked.executionRuntime?.bigintRuntime,
+      'proofscript.bigint.v1',
+    );
+    equal(checked.executionRuntime?.bigintRuntimeMode,'js-host');
+    equal(checked.wasmRuntimeImports?.length??0,0);
+
+    const values=[
+      -((1n<<100n)+123456789n),
+      0n,
+      (1n<<100n)+987654321n,
+    ];
+    for(const value of values){
+      const result=await runCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        buildTarget:'wasm',
+        passthrough:[value.toString()],
+      });
+      equal(result.mainResult,value.toString());
+      equal(result.wasmProfile,'proofscript-wasm32-ref-js-v1');
+    }
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Wasm W3b Int externref pass-through');
+
+{
+  const directory=await mkdtemp(
     join(tmpdir(),'proofscript-wasm-nat-literal-'),
   );
   try{

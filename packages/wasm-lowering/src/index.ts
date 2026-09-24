@@ -38,7 +38,9 @@ function profileForSignatures(
   for(const signature of signatures.values()){
     if(
       signature.result==='nat'||
-      signature.parameters.includes('nat')
+      signature.result==='int'||
+      signature.parameters.includes('nat')||
+      signature.parameters.includes('int')
     ){
       return PROOFSCRIPT_WASM_REF_PROFILE;
     }

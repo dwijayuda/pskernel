@@ -8,7 +8,7 @@ import {unsupported} from './errors.js';
 export type RuntimeValueType=
   |'bool'
   |'uint8'|'uint16'|'uint32'|'uint64'
-  |'nat';
+  |'nat'|'int';
 export type RuntimeType=RuntimeValueType|null;
 
 export interface Signature {
@@ -28,6 +28,7 @@ export function wasmValueType(
     case 'uint64':
       return 'i64';
     case 'nat':
+    case 'int':
       return 'externref';
   }
 }
@@ -66,10 +67,7 @@ export function lowerRuntimeType(
         case 'Nat':
           return 'nat';
         case 'Int':
-          return unsupported(
-            'PS_WASM_UNSUPPORTED_INT_RUNTIME',
-            'Int is arbitrary precision and must not be narrowed to i64',
-          );
+          return 'int';
         case 'String':
           return unsupported(
             'PS_WASM_UNSUPPORTED_STRING_RUNTIME',

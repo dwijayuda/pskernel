@@ -64,6 +64,45 @@ if(lowered.functions[0]?.body.kind==='i32.unary'){
 console.log('ok - @proofscript/wasm-lowering W3a Nat externref pass-through');
 
 {
+  const loweredInt=lowerVerifiedIrToWasm({
+    kind:'proofscript-verified-ir',
+    declarations:[{
+      name:'idInt',
+      typeParameters:[],
+      parameters:[{
+        name:'x',
+        type:{kind:'primitive',name:'Int'},
+      }],
+      resultType:{kind:'primitive',name:'Int'},
+      body:{kind:'var',name:'x'},
+    }],
+  });
+  equal(loweredInt.profile,'proofscript-wasm32-ref-js-v1');
+  equal(loweredInt.functions[0]?.parameters[0]?.type,'externref');
+  equal(loweredInt.functions[0]?.result,'externref');
+  equal(loweredInt.functions[0]?.abi.parameters[0],'int');
+  equal(loweredInt.functions[0]?.abi.result,'int');
+  equal(loweredInt.functions[0]?.body.kind,'local');
+
+  throws(
+    ()=>lowerVerifiedIrToWasm({
+      kind:'proofscript-verified-ir',
+      declarations:[{
+        name:'intLiteral',
+        typeParameters:[],
+        parameters:[],
+        resultType:{kind:'primitive',name:'Int'},
+        body:{kind:'literal',value:1n},
+      }],
+    }),
+    (error:unknown)=>
+      error instanceof WasmLoweringError&&
+      error.code==='PS_WASM_UNSUPPORTED_NAT_INT_LITERAL',
+  );
+}
+console.log('ok - @proofscript/wasm-lowering W3b Int value transport only');
+
+{
   const huge=1n<<100n;
   const loweredLiterals=lowerVerifiedIrToWasm({
     kind:'proofscript-verified-ir',

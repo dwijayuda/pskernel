@@ -108,6 +108,51 @@ jobs:
           grep -q '"format":"proofscript-checked-admissions"' /tmp/lean-admissions.json
           echo "PSC1_ADMISSIONS_PIPELINE: PASS"
 
+
+      - name: Replay Lean admissions through pskernel to JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          npx tsc -p packages/environment/tsconfig.json
+          npx tsc -p packages/checked-core/tsconfig.json
+          npx tsc -p packages/compiler-ir/tsconfig.json
+          npx tsc -p packages/erasure/tsconfig.json
+          npx tsc -p packages/backend-ts/tsconfig.json
+          npx tsc -p packages/compiler/tsconfig.json
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {
+            admitCheckedCoreAdmissions,
+            decodeCheckedCoreAdmissions,
+          } from './packages/checked-core/dist/src/index.js';
+          import {
+            createLeanEnvironmentProvider,
+            requireLeanEnvironment,
+          } from './packages/environment/dist/src/node.js';
+          import {compileCheckedCore} from './packages/compiler/dist/src/index.js';
+
+          const payload=JSON.parse(
+            readFileSync('/tmp/lean-admissions.json','utf8'),
+          );
+          const admissions=decodeCheckedCoreAdmissions(payload);
+          const base=requireLeanEnvironment(createLeanEnvironmentProvider());
+          const checked=admitCheckedCoreAdmissions(base,admissions);
+          const compiled=compileCheckedCore(checked,'psc1-sample.ts');
+
+          writeFileSync('/tmp/psc1-sample.ts',compiled.typeScript);
+          writeFileSync('/tmp/psc1-sample.js',compiled.emitted.javascript);
+
+          if(!compiled.typeScript.includes('export function idNat')){
+            throw new Error('PSC1_TS_OUTPUT_MISSING_IDNAT');
+          }
+          if(!compiled.emitted.javascript.includes('export function idNat')){
+            throw new Error('PSC1_JS_OUTPUT_MISSING_IDNAT');
+          }
+          console.log('PSC1_VERIFIED_TS_JS_PIPELINE: PASS');
+          NODE
+
   psc0-compatibility:
     # This lane measures the currently implemented TS frontend/compiler against
     # the PSC1-constrained Lean source. It is deliberately non-blocking while

@@ -15,6 +15,7 @@ import {
   invokeLean434JsExtern,
   invokeLean434JsImplementedBy,
   invokeLean434JsIntrinsic,
+  type Lean434DeclarationExternBinding,
   type LeanRef,
 } from './lean4.js';
 import type {
@@ -159,6 +160,34 @@ function isCallable(value:Lean434RuntimeValue):value is Lean434CallableValue {
 
 function typeValue(expr:Expr):Lean434TypeValue {
   return {kind:'type',expr};
+}
+
+function adaptExternResult(
+  declaration:string,
+  binding:Lean434DeclarationExternBinding,
+  value:unknown,
+):Lean434RuntimeValue{
+  switch(binding.resultAdapter??'identity'){
+    case 'identity':
+      return value as Lean434RuntimeValue;
+    case 'decidable':
+      if(typeof value!=='boolean'){
+        throw new Lean434EvaluationError(
+          "Decidable extern adapter expected boolean for '"+declaration+"'",
+        );
+      }
+      return {
+        kind:'constructor',
+        name:value?'Decidable.isTrue':'Decidable.isFalse',
+        // Runtime evidence is deliberately opaque. It is never admitted into
+        // pskernel; the source declaration's logical model remains the proof
+        // authority.
+        fields:[{
+          kind:'proof',
+          theorem:'runtime-extern:'+declaration,
+        }],
+      };
+  }
 }
 
 function declarationTypeReturnsSort(type:Expr):boolean{
@@ -537,10 +566,14 @@ export class Lean434Evaluator {
               1,
               (stateArgs)=>{
                 const state=stateArgs[0]!;
-                const value=invokeLean434JsExtern(
-                  runtimeBinding.leanSymbol,
-                  runtimeArgs,
-                ) as Lean434RuntimeValue;
+                const value=adaptExternResult(
+                  name,
+                  runtimeBinding,
+                  invokeLean434JsExtern(
+                    runtimeBinding.leanSymbol,
+                    runtimeArgs,
+                  ),
+                );
                 return {
                   kind:'constructor',
                   name:'ST.Out.mk',
@@ -549,10 +582,14 @@ export class Lean434Evaluator {
               },
             );
           }
-          return invokeLean434JsExtern(
-            runtimeBinding.leanSymbol,
-            runtimeArgs,
-          ) as Lean434RuntimeValue;
+          return adaptExternResult(
+            name,
+            runtimeBinding,
+            invokeLean434JsExtern(
+              runtimeBinding.leanSymbol,
+              runtimeArgs,
+            ),
+          );
         },
       );
     }

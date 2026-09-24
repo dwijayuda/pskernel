@@ -94,6 +94,7 @@ function allocateLocals(
         visit(node.operand);
         return;
       case 'i32.binary':
+      case 'i64.binary':
         visit(node.left);
         visit(node.right);
         return;
@@ -167,12 +168,18 @@ function emitFunctionBody(
         const left=emit(expr.left,env);
         const right=emit(expr.right,env);
         switch(expr.operation){
+          case 'add':return module.i32.add(left,right);
           case 'and':return module.i32.and(left,right);
           case 'or':return module.i32.or(left,right);
           case 'eq':return module.i32.eq(left,right);
           case 'ne':return module.i32.ne(left,right);
         }
       }
+      case 'i64.binary':
+        return module.i64.add(
+          emit(expr.left,env),
+          emit(expr.right,env),
+        );
     }
   };
 

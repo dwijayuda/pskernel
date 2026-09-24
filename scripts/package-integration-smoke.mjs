@@ -543,6 +543,68 @@ assert(
   'ProofScript.Text.Lexer dual-source declarations diverged',
 );
 
+const productModuleSource=readFileSync(
+  new URL('../stdlib/src/ProofScript/Data/Product.ps',import.meta.url),
+  'utf8',
+);
+const productModulePs=compileVerifiedSource(
+  productModuleSource,
+  'proofscript-data-product.ts',
+  'ProofScript/Data/Product.ps',
+);
+const productModuleLeanSource=
+  dualTargets.require('lean').print(productModulePs.surface);
+const productModuleLean=compileVerifiedSource(
+  productModuleLeanSource,
+  'proofscript-data-product.ts',
+  'ProofScript/Data/Product.lean',
+);
+const productModulePsSource=
+  dualTargets.require('ps').print(productModuleLean.surface);
+const productModulePsRoundTrip=compileVerifiedSource(
+  productModulePsSource,
+  'proofscript-data-product.ts',
+  'ProofScript/Data/Product.roundtrip.ps',
+);
+
+assert(
+  productModulePs.canonicalSourceHash===productModuleLean.canonicalSourceHash
+    &&productModuleLean.canonicalSourceHash===
+      productModulePsRoundTrip.canonicalSourceHash,
+  'ProofScript.Data.Product dual-source canonical identity diverged',
+);
+assert(
+  semanticFingerprint(productModulePs.checkedCore.admissions)
+    ===semanticFingerprint(productModuleLean.checkedCore.admissions)
+    &&semanticFingerprint(productModuleLean.checkedCore.admissions)
+      ===semanticFingerprint(productModulePsRoundTrip.checkedCore.admissions),
+  'ProofScript.Data.Product checked-core fingerprint diverged',
+);
+assert(
+  semanticFingerprint(productModulePs.ir)
+    ===semanticFingerprint(productModuleLean.ir)
+    &&semanticFingerprint(productModuleLean.ir)
+      ===semanticFingerprint(productModulePsRoundTrip.ir),
+  'ProofScript.Data.Product compiler IR diverged',
+);
+assert(
+  productModulePs.typeScript===productModuleLean.typeScript
+    &&productModuleLean.typeScript===productModulePsRoundTrip.typeScript,
+  'ProofScript.Data.Product TypeScript diverged',
+);
+assert(
+  productModulePs.emitted.javascript===productModuleLean.emitted.javascript
+    &&productModuleLean.emitted.javascript===
+      productModulePsRoundTrip.emitted.javascript,
+  'ProofScript.Data.Product JavaScript diverged',
+);
+assert(
+  productModulePs.emitted.declaration===productModuleLean.emitted.declaration
+    &&productModuleLean.emitted.declaration===
+      productModulePsRoundTrip.emitted.declaration,
+  'ProofScript.Data.Product declarations diverged',
+);
+
 let unsupportedLeanRejected=false;
 try{
   compileVerifiedSource(

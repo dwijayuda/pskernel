@@ -132,7 +132,7 @@ def compilerRollbackRun
   | Result.ok pair => Result.ok pair
   | Result.error error =>
       let recovery : CompilerM Context State Error Value :=
-        handler error
+        handler error;
       recovery.run context state
 
 def compilerRollback

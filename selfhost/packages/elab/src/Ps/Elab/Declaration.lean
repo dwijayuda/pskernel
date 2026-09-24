@@ -476,57 +476,93 @@ def psElabInductiveDeclaration
     (resultType : Option PsSyntaxTerm)
     (constructors : List PsSyntaxInductiveConstructor) :
     Except PsElabError PsElabDeclarationBatchResult :=
-  if !params.isEmpty || resultType.isSome then
-    Except.error PsElabError.unsupportedTerm
-  else
-    match psSyntaxNameToName nameSyntax with
-    | none => Except.error PsElabError.emptyName
-    | some name =>
-        let constructorNames :=
-          constructors.map
-            (fun source =>
-              match psSyntaxConstructorCoreName name source.name with
-              | some constructorName => constructorName
-              | none => name)
-        let info : PsInductiveInfo := {
-          name := name
-          levelParams := []
-          type := PsExpr.sortE (PsLevel.succ PsLevel.zero)
-          numParams := 0
-          numIndices := 0
-          constructors := constructorNames
-        }
-        let inductiveDeclaration :=
-          PsDeclaration.inductiveDecl info
-        match psEnvironmentAdd environment inductiveDeclaration with
-        | none =>
-            Except.error (PsElabError.duplicateDeclaration name)
-        | some withInductive =>
-            match psElabInductiveConstructors
-                withInductive
-                name
-                0
-                constructors
-                [] with
-            | Except.error error => Except.error error
-            | Except.ok constructorDeclarations =>
-                match psAddDeclarationList
-                    withInductive
-                    constructorDeclarations with
-                | Except.error error => Except.error error
-                | Except.ok withConstructors =>
-                    match psBuildInductiveRecursor
-                        withConstructors
-                        info
-                        constructorDeclarations with
+  match psSyntaxNameToName nameSyntax with
+  | none => Except.error PsElabError.emptyName
+  | some name =>
+      let initial := psElabContextEmpty environment
+      match psElabTypedBinders
+          (fun context term expected => psElabTerm context term expected)
+          initial
+          params with
+      | Except.error error => Except.error error
+      | Except.ok parameterResult =>
+          match psElabInductiveResultSort
+              parameterResult.context
+              resultType with
+          | Except.error error => Except.error error
+          | Except.ok sortResult =>
+              let metaContext := sortResult.context.metaContext
+              let inductiveType :=
+                psCloseElabForallBinders
+                  metaContext
+                  parameterResult.bindersRev
+                  sortResult.sort
+              if psExprHasUnresolvedMeta inductiveType then
+                Except.error PsElabError.unresolvedMetavariable
+              else
+                let constructorNames :=
+                  constructors.map
+                    (fun source =>
+                      match psSyntaxConstructorCoreName name source.name with
+                      | some constructorName => constructorName
+                      | none => name)
+                let info : PsInductiveInfo := {
+                  name := name
+                  levelParams := []
+                  type := inductiveType
+                  numParams := parameterResult.bindersRev.length
+                  numIndices := 0
+                  constructors := constructorNames
+                }
+                let inductiveDeclaration :=
+                  PsDeclaration.inductiveDecl info
+                let parameterArgs :=
+                  psInductiveParameterArgs parameterResult.bindersRev
+                let appliedInductive :=
+                  psExprApplyMany
+                    (PsExpr.constE name [])
+                    parameterArgs
+                match psEnvironmentAdd
+                    environment
+                    inductiveDeclaration with
+                | none =>
+                    Except.error
+                      (PsElabError.duplicateDeclaration name)
+                | some withInductive =>
+                    let constructorContext :=
+                      psElabContextWithEnvironment
+                        sortResult.context
+                        withInductive
+                    match psElabInductiveConstructors
+                        constructorContext
+                        name
+                        appliedInductive
+                        parameterResult.bindersRev
+                        0
+                        constructors
+                        [] with
                     | Except.error error => Except.error error
-                    | Except.ok recursor =>
-                        Except.ok {
-                          declarations :=
-                            [inductiveDeclaration]
-                              ++ constructorDeclarations
-                              ++ [recursor]
-                        }
+                    | Except.ok constructorDeclarations =>
+                        match psAddDeclarationList
+                            withInductive
+                            constructorDeclarations with
+                        | Except.error error => Except.error error
+                        | Except.ok withConstructors =>
+                            match psBuildInductiveRecursor
+                                withConstructors
+                                info
+                                constructorDeclarations
+                                sortResult.context
+                                parameterResult.bindersRev
+                                appliedInductive with
+                            | Except.error error => Except.error error
+                            | Except.ok recursor =>
+                                Except.ok {
+                                  declarations :=
+                                    [inductiveDeclaration]
+                                      ++ constructorDeclarations
+                                      ++ [recursor]
+                                }
 
 def psElabDeclaration
     (environment : PsEnvironment)

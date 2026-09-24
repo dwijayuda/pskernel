@@ -29,12 +29,9 @@ export class Environment {
   transaction<T>(f:()=>T):T{
     const tx={revision:this._revision,quotInitialized:this._quotInitialized,added:[] as string[]};
     this.transactions.push(tx);
+    let result:T;
     try{
-      const result=f();
-      this.transactions.pop();
-      const parent=this.transactions[this.transactions.length-1];
-      if(parent)parent.added.push(...tx.added);
-      return result;
+      result=f();
     }catch(e){
       this.transactions.pop();
       for(let i=tx.added.length-1;i>=0;i--)this.constants.delete(tx.added[i]!);
@@ -42,6 +39,10 @@ export class Environment {
       this._revision=tx.revision;
       throw e;
     }
+    this.transactions.pop();
+    const parent=this.transactions[this.transactions.length-1];
+    if(parent)for(const k of tx.added)parent.added.push(k);
+    return result;
   }
   has(n:Name):boolean{return this.constants.has(nameKey(n));}
   find(n:Name):ConstantInfo|undefined{return this.constants.get(nameKey(n));}

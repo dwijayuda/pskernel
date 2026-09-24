@@ -8,7 +8,7 @@ and compiled by the same verified project pipeline as user code.
 - `ProofScript.Data.Option`: `PsOption`, map/bind/get-or-else/or-else/is-some helpers.
 - `ProofScript.Data.Result`: `PsResult`, value/error mapping, bind, get-or-else,
   and two-way Option conversion.
-- `ProofScript.Data.List`: `PsList`, structural map/append/reverse/length/head helpers.
+- `ProofScript.Data.List`: `PsList`, structural map/append/length/head helpers.
 
 The `Ps*` type names are intentional and temporary. Lean's Prelude already
 owns `Option` and `List`, while the current verified runtime erasure only
@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain thirty-three pskernel-admitted theorems in total:
+The three modules now contain thirty-one pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -47,9 +47,9 @@ The end-to-end stdlib test now exercises:
 - `optionBind` and `optionOrElse`;
 - `resultBind`, `resultGetOrElse`, `resultMapError`, and two-way Result/Option conversion;
 - generic `listMap`;
-- structurally recursive `listAppend` and accumulator-based `listReverse`;
+- structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- thirty-three admitted stdlib theorems: twenty definitional laws use bounded
+- thirty-one admitted stdlib theorems: eighteen definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
   `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`; `optionMapOrElse`, `optionGetOrElseOrElse`, and `optionGetOrElseMap` dogfood higher-order/helper composition through Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
@@ -59,19 +59,6 @@ The end-to-end stdlib test now exercises:
 - zero runtime external assumptions.
 
 For input `9`, the current dogfood `main` returns `22`.
-
-## List reverse checkpoint
-
-`ProofScript.Data.List.listReverse` is implemented in ProofScript via
-`listReverseAux(xs, acc)`. The first argument decreases structurally while
-the accumulator is an invariant runtime parameter, reusing the same admitted
-structural-recursion shape already exercised by `listAppend`.
-
-The computation laws `listReverseNil` and `listReverseCons` close by
-bounded Eq-only `rfl`. The dogfood program now reverses its mapped/appended
-list before taking its length, so accumulator-style structural recursion runs
-through checked core, erasure, verified IR, TypeScript, and JavaScript without
-a backend list primitive.
 
 ## First inductive library law
 

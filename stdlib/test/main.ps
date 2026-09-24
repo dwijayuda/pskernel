@@ -32,8 +32,6 @@ function main(x : Nat) : Nat :=
     PsList.nil;
   let extended : PsList(Nat) :=
     listAppend(listMap(inc, xs), empty);
-  let reversed : PsList(Nat) :=
-    listReverse(extended);
   resultValue +
     optionGetOrElse(chosen, 0) +
-    listLength(reversed);
+    listLength(extended);

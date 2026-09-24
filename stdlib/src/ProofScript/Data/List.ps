@@ -34,17 +34,6 @@ function listHeadOption {α : Type}
     | .cons head tail => PsOption.some(head);
   };
 
-function listReverseAux {α : Type}
-(xs : PsList(α), acc : PsList(α)) : PsList(α) :=
-  match xs with {
-    | .nil => acc;
-    | .cons head tail =>
-      listReverseAux(tail, PsList.cons(head, acc));
-  };
-
-function listReverse {α : Type}(xs : PsList(α)) : PsList(α) :=
-  listReverseAux(xs, PsList.nil);
-
 theorem listRefl {α : Type}
 (xs : PsList(α)) : xs = xs := by rfl;
 
@@ -88,11 +77,3 @@ listAppend(listMap(f, xs), listMap(f, ys)) :=
   rw [listMapCons(f, head, tail)];
   rw [listAppendCons(f(head), listMap(f, tail), listMap(f, ys))];
   rw [tail_ih];
-
-theorem listReverseNil {α : Type} :
-listReverse(PsList.nil) = PsList.nil := by rfl;
-
-theorem listReverseCons {α : Type}
-(head : α, tail : PsList(α)) :
-listReverse(PsList.cons(head, tail)) =
-listReverseAux(tail, PsList.cons(head, PsList.nil)) := by rfl;

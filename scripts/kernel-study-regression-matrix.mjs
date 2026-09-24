@@ -166,11 +166,19 @@ for(const marker of [
   'npm ci changed tracked files; refusing assurance evidence.',
   'dependencyInstallExitCode=$dependencyInstallCode',
   'npm ci failed before any kernel replay. This is a packaging/dependency gate failure; send/upload $Log.',
+  '[string]$Log = "full-std.local.log"',
 ]){
   if(!localAssuranceRunner.includes(marker))throw new Error('local Full-Std assurance runner drift: missing '+marker);
 }
 if(localAssuranceRunner.includes('& npm install --no-audit --no-fund')){
   throw new Error('local Full-Std assurance runner drift: mutable npm install must not replace npm ci');
+}
+if(localAssuranceRunner.includes('[string]$Log = "full-std.log"')){
+  throw new Error('local Full-Std assurance runner drift: default evidence must not overwrite the tracked historical full-std.log');
+}
+const gitignore=readFileSync('.gitignore','utf8').split(/\r?\n/);
+if(!gitignore.includes('full-std.local.log')){
+  throw new Error('local Full-Std assurance runner drift: full-std.local.log must remain ignored');
 }
 
 const rootPackage=JSON.parse(readFileSync('package.json','utf8'));

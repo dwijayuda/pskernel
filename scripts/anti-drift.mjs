@@ -12,6 +12,20 @@ if (lock.lean4export?.toolchain !== 'leanprover/lean4:v4.34.0') throw new Error(
 const forbidden = [/lean\s*4\.3[0-3]/i, /equivmanager/i];
 function walk(p) { for (const n of readdirSync(p)) { const q=join(p,n); const s=statSync(q); if(s.isDirectory()) walk(q); else if(q.endsWith('.ts')) { const t=readFileSync(q,'utf8'); for(const r of forbidden) if(r.test(t)) throw new Error(`Anti-drift violation ${r} in ${q}`); } } }
 walk(join(root,'src'));
+
+// URL.pathname is not a portable filesystem path on Windows; repository
+// scripts that derive paths from import.meta.url must use fileURLToPath().
+const unsafeFileUrlPathname=/import[.]meta[.]url\s*[)]\s*[.]pathname/;
+function forbidUnsafeScriptFileUrlPaths(p) {
+  for (const n of readdirSync(p)) {
+    const q=join(p,n); const s=statSync(q);
+    if (s.isDirectory()) forbidUnsafeScriptFileUrlPaths(q);
+    else if ((q.endsWith('.mjs')||q.endsWith('.js')) && unsafeFileUrlPathname.test(readFileSync(q,'utf8'))) {
+      throw new Error('Anti-drift violation: use fileURLToPath for import.meta.url filesystem paths in ' + q);
+    }
+  }
+}
+forbidUnsafeScriptFileUrlPaths(join(root,'scripts'));
 const nativePath=join(root,'src','kernel','reduction','native.ts');
 if (!existsSync(nativePath)) throw new Error('Anti-drift violation: Lean v4.34.0 native-reduction boundary is missing');
 const nativeSource=readFileSync(nativePath,'utf8');

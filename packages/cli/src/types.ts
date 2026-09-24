@@ -78,8 +78,7 @@ export interface BuildResult {
   readonly jsPath:string;
 }
 
-export interface RunResult
-  extends Omit<BuildReport,'command'> {
+export interface RunResult extends BuildReport {
   readonly command:'run';
   readonly mainResult:unknown;
 }

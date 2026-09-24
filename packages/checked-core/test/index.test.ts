@@ -1,6 +1,7 @@
 import {
   Environment,
   constant,
+  forallE,
   levelSucc,
   levelZero,
   nameFromDotted,

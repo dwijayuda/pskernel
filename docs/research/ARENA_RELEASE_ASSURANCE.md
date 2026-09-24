@@ -51,3 +51,25 @@ and it does not imply a monolithic Full Lean replay passed.
 The native evaluator remains an optional TCB extension and fails closed when no
 provider/result is configured, so lack of an independent provider is not a
 soundness hole in the default checker.
+
+
+## Executed evidence
+
+Current blocking evidence:
+
+- pskernel branch: `assurance/arena-release-gate`;
+- GitHub Actions run: `36055797753`;
+- job: `107822257575`;
+- result: **170/170 PASS**;
+- expected accept: **101/101**;
+- expected reject: **69/69**;
+- timeouts: **0**;
+- Arena source commit: `ae76435a5fb439571a28e19d74cd1e2e3ab69667`;
+- Arena source run: `35764541391`;
+- compact corpus: **193** cases;
+- blocking correctness subset: **170** cases;
+- correctness content digest: `e97fb00c846611df3b0233e545687f45df2ea241ac4cdeaa5c5705064c09a145`.
+
+The corpus is content-pinned in the repository; CI downloads it and refuses to
+run if normalized per-file fingerprints differ. This keeps the source data out
+of the normal source tree while making the test input reproducible.

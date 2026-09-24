@@ -3,7 +3,7 @@ import ProofScript.Data.Map
 structure Set (α : Type) where
   entries : Map α Unit
 
-def setEmpty {α : Type} : Set α :=
+def setEmpty {α : Type} (unit : Unit) : Set α :=
   Set.mk Map.empty
 
 def setContains {α : Type}

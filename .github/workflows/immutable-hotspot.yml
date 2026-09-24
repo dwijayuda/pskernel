@@ -1,0 +1,38 @@
+name: Immutable hotspot diagnostic
+
+on:
+  push:
+    branches: [diagnostic/immutable-hotspot]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hotspot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Replay former hotspot A
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "2048"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 37184 32 32 1
+      - name: Replay former hotspot B
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "2048"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 37216 32 32 1

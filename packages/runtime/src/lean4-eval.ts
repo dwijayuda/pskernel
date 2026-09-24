@@ -424,6 +424,8 @@ export class Lean434Evaluator {
 
     const metadataImplementedBy=
       this.options.metadata?.implementedByFor(name);
+    const metadataRuntimeTarget=
+      this.options.metadata?.runtimeTargetFor(name);
     const implementedBy=findLean434JsImplementedBy(name);
     if(implementedBy!==undefined){
       if(
@@ -447,25 +449,34 @@ export class Lean434Evaluator {
       );
     }
 
-    if(metadataImplementedBy!==undefined){
-      if(metadataImplementedBy.implementation===name){
+    const compilerRuntimeTarget=
+      metadataRuntimeTarget
+      ??(metadataImplementedBy===undefined
+        ?undefined
+        :{
+            declaration:name,
+            kind:'implemented_by' as const,
+            implementation:metadataImplementedBy.implementation,
+          });
+    if(compilerRuntimeTarget!==undefined){
+      if(compilerRuntimeTarget.implementation===name){
         throw new Lean434EvaluationError(
-          "implemented_by metadata self-cycle for '"+name+"'",
+          "compiler runtime metadata self-cycle for '"+name+"'",
         );
       }
       const implName=this.findEnvironmentName(
-        metadataImplementedBy.implementation,
+        compilerRuntimeTarget.implementation,
       );
       if(implName===undefined){
         throw new Lean434EvaluationError(
-          "implemented_by runtime target is missing from the replayed "+
-          "environment: '"+name+"' -> '"+
-          metadataImplementedBy.implementation+"'",
+          "compiler runtime target is missing from the replayed environment: '"+
+          name+"' -> '"+compilerRuntimeTarget.implementation+
+          "' ("+compilerRuntimeTarget.kind+")",
         );
       }
       // Lean has already checked the logical declaration independently.
-      // Runtime execution follows the implementation edge exactly as Lean's
-      // compiler does; this does not make the implementation proof evidence.
+      // Runtime execution follows the compiler target exactly as Lean does;
+      // this does not make the implementation proof evidence.
       return this.evaluateConstant(
         {
           kind:'const',

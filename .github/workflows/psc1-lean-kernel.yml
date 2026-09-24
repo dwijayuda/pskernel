@@ -1,0 +1,31 @@
+name: PSC1 Lean kernel oracle
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [kernel/psc1-lean-reference]
+    paths:
+      - ".github/workflows/psc1-lean-kernel.yml"
+      - "psc1-kernel/**"
+
+permissions:
+  contents: read
+
+jobs:
+  lean434:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build PSC1 kernel source with Lean 4.34
+        working-directory: psc1-kernel
+        run: lake build
+      - name: Differential foundational oracle against Lean 4.34
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/Oracle.lean

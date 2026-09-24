@@ -3,10 +3,10 @@ import Ps.Core.Declaration
 
 def psDeclarationName(declaration : PsDeclaration) : PsName :=
   match declaration with {
-    | .axiom name levelParams type => name;
-    | .definition name levelParams type value => name;
-    | .theorem name levelParams type value => name;
-    | .opaqueDef name levelParams type value => name;
+    | .axiomDecl name levelParams type => name;
+    | .definitionDecl name levelParams type value => name;
+    | .theoremDecl name levelParams type value => name;
+    | .opaqueDecl name levelParams type value => name;
   };
 
 structure PsEnvironment where {

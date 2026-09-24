@@ -1,0 +1,18 @@
+import Ps.Foundation.Name
+import Ps.Foundation.Source
+
+structure PsSyntaxName where {
+  segments : List(String);
+  span : PsSourceSpan;
+};
+
+inductive PsSyntaxBinderKind where {
+  | explicit;
+  | implicit;
+  | strictImplicit;
+  | instanceImplicit;
+};
+
+/* PsSyntaxBinder / PsSyntaxTerm are mutually referential in the Lean bootstrap
+   spelling. The canonical .ps mirror will be regenerated when the PSC1
+   frontend owns the same source-AST subset. */

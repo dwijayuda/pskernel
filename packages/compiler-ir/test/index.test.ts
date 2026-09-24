@@ -63,6 +63,11 @@ console.log('ok - @proofscript/compiler-ir verified Nat intrinsic');
 {
   equal(VERIFIED_IR_INTRINSIC_ARITY['bool.not'],1);
   equal(VERIFIED_IR_INTRINSIC_ARITY['char.ofNat'],1);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['char.toNat'],1);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['string.singleton'],1);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['string.length'],1);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['string.push'],2);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['string.append'],2);
   equal(VERIFIED_IR_INTRINSIC_ARITY['nat.sub'],2);
   let invalid=false;
   try{

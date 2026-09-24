@@ -59,9 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           npm ci --no-audit --no-fund
-          npm run build --silent
-          tsc -p packages/environment/tsconfig.json
-          node scripts/selfhost-foundation-oracle.mjs
+          npm run oracle:selfhost-foundation
 
       - uses: actions/upload-artifact@v4
         with:

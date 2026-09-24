@@ -46,6 +46,14 @@ run_export lean434-proofscript-text-foundation.ndjson oracle/replay-probe/Depend
   String.push String.singleton \
   String.Internal.length String.Internal.append \
   String.Internal.next String.Internal.get String.Internal.atEnd String.Internal.extract
+
+run_export lean434-proofscript-selfhost-foundation.ndjson oracle/replay-probe/DependencyExport.lean Lean \
+  --selected-segmented-after Init.Prelude 1 \
+  Char.toNat \
+  String.push String.singleton \
+  String.Internal.length String.Internal.append \
+  String.Internal.next String.Internal.get String.Internal.atEnd String.Internal.extract \
+  Array.set Array.setIfInBounds Array.map Array.foldl
 run_export lean434-std-parsec-roots.ndjson oracle/replay-probe/StdParsecRootsExport.lean
 run_export lean434-std-sat-cnf-roots.ndjson oracle/replay-probe/StdSatCNFRootsExport.lean
 run_export lean434-std-byteslice-roots.ndjson oracle/replay-probe/StdByteSliceRootsExport.lean

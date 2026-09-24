@@ -127,10 +127,10 @@ def eqv : Expr → Expr → Bool
   | .sort a, .sort b => Level.beq a b
   | .const an aus, .const bn bus => Name.beq an bn && levelListBeq aus bus
   | .app af aa, .app bf ba => eqv aa ba && eqv af bf
-  | .lam _ at ab _, .lam _ bt bb _ => eqv at bt && eqv ab bb
-  | .forallE _ at ab _, .forallE _ bt bb _ => eqv at bt && eqv ab bb
-  | .letE _ at av ab an, .letE _ bt bv bb bn =>
-      eqv at bt && eqv av bv && eqv ab bb && an == bn
+  | .lam _ aty ab _, .lam _ bty bb _ => eqv aty bty && eqv ab bb
+  | .forallE _ aty ab _, .forallE _ bty bb _ => eqv aty bty && eqv ab bb
+  | .letE _ aty av ab an, .letE _ bty bv bb bn =>
+      eqv aty bty && eqv av bv && eqv ab bb && an == bn
   | .lit a, .lit b => literalBeq a b
   | .proj an ai ae, .proj bn bi be =>
       eqv ae be && Name.beq an bn && ai == bi
@@ -147,12 +147,12 @@ def equal : Expr → Expr → Bool
   | .sort a, .sort b => Level.beq a b
   | .const an aus, .const bn bus => Name.beq an bn && levelListBeq aus bus
   | .app af aa, .app bf ba => equal aa ba && equal af bf
-  | .lam an at ab abi, .lam bn bt bb bbi =>
-      equal at bt && equal ab bb && Name.beq an bn && binderInfoBeq abi bbi
-  | .forallE an at ab abi, .forallE bn bt bb bbi =>
-      equal at bt && equal ab bb && Name.beq an bn && binderInfoBeq abi bbi
-  | .letE an at av ab anondep, .letE bn bt bv bb bnondep =>
-      equal at bt && equal av bv && equal ab bb &&
+  | .lam an aty ab abi, .lam bn bty bb bbi =>
+      equal aty bty && equal ab bb && Name.beq an bn && binderInfoBeq abi bbi
+  | .forallE an aty ab abi, .forallE bn bty bb bbi =>
+      equal aty bty && equal ab bb && Name.beq an bn && binderInfoBeq abi bbi
+  | .letE an aty av ab anondep, .letE bn bty bv bb bnondep =>
+      equal aty bty && equal av bv && equal ab bb &&
       anondep == bnondep && Name.beq an bn
   | .lit a, .lit b => literalBeq a b
   | .proj an ai ae, .proj bn bi be =>

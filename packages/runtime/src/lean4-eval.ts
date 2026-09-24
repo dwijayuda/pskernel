@@ -7,11 +7,8 @@ import {
   type RecursorInfo,
 } from 'lean-ts-kernel';
 import {
-  lean_nat_add,
-  lean_nat_div,
-  lean_nat_mod,
-  lean_nat_mul,
-  lean_nat_sub,
+  findLean434JsExternForDeclaration,
+  invokeLean434JsExtern,
 } from './lean4.js';
 
 export interface Lean434ConstructorValue {
@@ -96,45 +93,6 @@ function primitive(
 ):Lean434PrimitiveFunction {
   return {kind:'primitive-function',name,arity,args,invoke};
 }
-
-const primitiveConstants=new Map<
-  string,
-  ()=>Lean434RuntimeValue
->([
-  ['Nat.add',()=>primitive('Nat.add',2,(args)=>
-    lean_nat_add(
-      expectNat(args[0]!,'Nat.add'),
-      expectNat(args[1]!,'Nat.add'),
-    )
-  )],
-  ['Nat.mul',()=>primitive('Nat.mul',2,(args)=>
-    lean_nat_mul(
-      expectNat(args[0]!,'Nat.mul'),
-      expectNat(args[1]!,'Nat.mul'),
-    )
-  )],
-  ['Nat.sub',()=>primitive('Nat.sub',2,(args)=>
-    lean_nat_sub(
-      expectNat(args[0]!,'Nat.sub'),
-      expectNat(args[1]!,'Nat.sub'),
-    )
-  )],
-  ['Nat.div',()=>primitive('Nat.div',2,(args)=>
-    lean_nat_div(
-      expectNat(args[0]!,'Nat.div'),
-      expectNat(args[1]!,'Nat.div'),
-    )
-  )],
-  ['Nat.mod',()=>primitive('Nat.mod',2,(args)=>
-    lean_nat_mod(
-      expectNat(args[0]!,'Nat.mod'),
-      expectNat(args[1]!,'Nat.mod'),
-    )
-  )],
-  ['Nat.succ',()=>primitive('Nat.succ',1,(args)=>
-    expectNat(args[0]!,'Nat.succ')+1n
-  )],
-]);
 
 function isCallable(value:Lean434RuntimeValue):value is Lean434CallableValue {
   return typeof value==='object'
@@ -252,8 +210,17 @@ export class Lean434Evaluator {
     if(name==='Bool.true')return true;
     if(name==='Unit.unit')return undefined;
 
-    const runtimePrimitive=primitiveConstants.get(name);
-    if(runtimePrimitive!==undefined)return runtimePrimitive();
+    const runtimeBinding=findLean434JsExternForDeclaration(name);
+    if(runtimeBinding!==undefined){
+      return primitive(
+        name,
+        runtimeBinding.arity,
+        (args)=>invokeLean434JsExtern(
+          runtimeBinding.leanSymbol,
+          args,
+        ) as Lean434RuntimeValue,
+      );
+    }
 
     const info=this.environment.find(expr.name);
     if(info===undefined){
@@ -287,7 +254,11 @@ export class Lean434Evaluator {
       case 'inductive':
         return typeValue(expr);
       case 'constructor':{
-        if(name==='Nat.succ')return primitiveConstants.get('Nat.succ')!();
+        if(name==='Nat.succ'){
+          return primitive('Nat.succ',1,(args)=>
+            expectNat(args[0]!,'Nat.succ')+1n
+          );
+        }
         const arity=info.numParams+info.numFields;
         if(arity===0){
           return {kind:'constructor',name,fields:[]};

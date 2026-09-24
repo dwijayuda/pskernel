@@ -110,6 +110,13 @@ export class Lean434EvaluationError extends Error {
   }
 }
 
+export class Lean434IOError extends Lean434EvaluationError {
+  constructor(readonly value:Lean434RuntimeValue){
+    super('Lean IO action returned EST.Out.error');
+    this.name='Lean434IOError';
+  }
+}
+
 export interface Lean434EvaluatorOptions {
   readonly metadata?:Lean434RuntimeMetadataIndex;
 }
@@ -153,6 +160,9 @@ function typeValue(expr:Expr):Lean434TypeValue {
  * this evaluator.
  */
 export class Lean434Evaluator {
+  private readonly runtimeGlobals=
+    new Map<string,Lean434RuntimeValue>();
+
   constructor(
     readonly environment:Environment,
     readonly options:Lean434EvaluatorOptions={},
@@ -191,6 +201,55 @@ export class Lean434Evaluator {
       value:result.fields[0]!,
       state:result.fields[1]!,
     };
+  }
+
+  runIOAction(
+    action:Lean434RuntimeValue,
+    state:Lean434RuntimeValue=LEAN434_WORLD_TOKEN,
+  ):{
+    readonly value:Lean434RuntimeValue;
+    readonly state:Lean434RuntimeValue;
+  }{
+    const result=this.apply(action,state);
+    if(
+      !isTaggedRuntimeValue(result)
+      ||result.kind!=='constructor'
+      ||result.fields.length<2
+    ){
+      throw new Lean434EvaluationError(
+        'Lean IO action did not return an ST/EST result',
+      );
+    }
+    if(result.name==='ST.Out.mk'||result.name==='EST.Out.ok'){
+      return {
+        value:result.fields[0]!,
+        state:result.fields[1]!,
+      };
+    }
+    if(result.name==='EST.Out.error'){
+      throw new Lean434IOError(result.fields[0]!);
+    }
+    throw new Lean434EvaluationError(
+      "Lean IO action returned unsupported constructor '"+
+      result.name+"'",
+    );
+  }
+
+  setRuntimeGlobal(
+    declaration:string,
+    value:Lean434RuntimeValue,
+  ):void{
+    this.runtimeGlobals.set(declaration,value);
+  }
+
+  getRuntimeGlobal(
+    declaration:string,
+  ):Lean434RuntimeValue|undefined{
+    return this.runtimeGlobals.get(declaration);
+  }
+
+  hasRuntimeGlobal(declaration:string):boolean{
+    return this.runtimeGlobals.has(declaration);
   }
 
   private evaluateWithLocals(
@@ -276,6 +335,10 @@ export class Lean434Evaluator {
     if(name==='Bool.false')return false;
     if(name==='Bool.true')return true;
     if(name==='Unit.unit')return undefined;
+
+    if(this.runtimeGlobals.has(name)){
+      return this.runtimeGlobals.get(name)!;
+    }
 
     const metadataImplementedBy=
       this.options.metadata?.implementedByFor(name);

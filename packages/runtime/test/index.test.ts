@@ -5,6 +5,8 @@ import {
   app,
   bvar,
   constant,
+  exprEq,
+  fvar,
   forallE,
   lam,
   levelEqStructural,
@@ -17,11 +19,13 @@ import {
   mkAppN,
   nameEq,
   nameFromDotted,
+  nameKey,
   numName,
   strName,
   anonymous,
   natLit,
   sort,
+  strLit,
   TypeChecker,
 } from 'lean-ts-kernel';
 import {
@@ -29,6 +33,11 @@ import {
   Lean434EvaluationError,
   Lean434Evaluator,
 } from '../src/lean4-eval.js';
+import {
+  Lean434ExprBridgeError,
+  kernelExprToLean434Runtime,
+  lean434RuntimeExprToKernel,
+} from '../src/lean4-expr.js';
 import {
   Lean434LevelBridgeError,
   kernelLevelToLean434Runtime,
@@ -167,6 +176,68 @@ console.log('ok - Lean runtime Name bridge preserves pskernel structure');
   );
 }
 console.log('ok - Lean runtime Level bridge preserves pskernel structure');
+
+// Lean.Expr and pskernel Expr share one structural model. The bridge keeps
+// elaboration-only FVar/MVar Names lossless by storing pskernel nameKey strings.
+{
+  const idName=numName(strName(anonymous,'_f'),17n);
+  const metaName=strName(strName(anonymous,'goal'),'m');
+  const binder=numName(strName(anonymous,'x'),3n);
+  const type=sort(levelSucc(levelParam(strName(anonymous,'u'))));
+  const fn=constant(
+    strName(strName(anonymous,'Demo'),'f'),
+    [levelParam(strName(anonymous,'u'))],
+  );
+  const expression={
+    kind:'let' as const,
+    name:binder,
+    type,
+    value:strLit('proofscript'),
+    body:forallE(
+      binder,
+      type,
+      app(
+        app(fn,fvar(nameKey(idName))),
+        {kind:'mvar' as const,id:nameKey(metaName)},
+      ),
+      'implicit',
+    ),
+    nondep:true,
+  };
+  const runtime=kernelExprToLean434Runtime(expression);
+  const roundTrip=lean434RuntimeExprToKernel(runtime);
+  ok(
+    exprEq(roundTrip,expression),
+    'Lean Expr bridge round-trip changed structural expression data',
+  );
+
+  const projected={
+    kind:'proj' as const,
+    typeName:nameFromDotted('Prod'),
+    index:1,
+    expr:natLit(7n),
+  };
+  ok(
+    exprEq(
+      lean434RuntimeExprToKernel(
+        kernelExprToLean434Runtime(projected),
+      ),
+      projected,
+    ),
+    'Lean Expr projection bridge round-trip mismatch',
+  );
+
+  throws(
+    ()=>kernelExprToLean434Runtime({
+      kind:'mdata',
+      data:{tag:'unsupported-until-kvmap-bridge'},
+      expr:natLit(0n),
+    }),
+    Lean434ExprBridgeError,
+    'Expr.mdata must fail closed before canonical KVMap bridge exists',
+  );
+}
+console.log('ok - canonical logical Lean Expr bridge round-trips supported constructors');
 
 // Lean 4.34 Nat and machine-integer compatibility.
 equal(LEAN434_SOURCE_VERSION,'4.34.0');

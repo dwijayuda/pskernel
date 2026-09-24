@@ -21,7 +21,11 @@ lean_lib PsSyntax where
     `Ps.Syntax.ParserState,
     `Ps.Syntax.ParseCommon,
     `Ps.Syntax.ParseLean,
-    `Ps.Syntax.ParseProofScript
+    `Ps.Syntax.ParseProofScript,
+    `Ps.Syntax.PrintCommon,
+    `Ps.Syntax.PrintLean,
+    `Ps.Syntax.PrintProofScript,
+    `Ps.Syntax.Translate
   ]
 
 lean_lib PsCore where
@@ -78,3 +82,7 @@ lean_exe psc1 where
 lean_exe psc1_tests where
   srcDir := "test"
   root := `BootstrapTests
+
+lean_exe psc1_translation_tests where
+  srcDir := "test"
+  root := `TranslationTests

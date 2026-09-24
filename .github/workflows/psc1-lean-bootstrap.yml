@@ -250,6 +250,29 @@ jobs:
           grep -q 'lengthR(tail)' /tmp/psc1-recursive-lean.js
           echo "PSC1_LEAN_NATIVE_RECURSION_TSC_PIPELINE: PASS"
 
+
+          cat > /tmp/psc1-int.lean <<'EOF'
+          def intOne : Int := 1
+          def intCalc (x : Int) : Int :=
+            Int.sub (Int.add x (Int.ofNat 2)) (Int.neg (Int.ofNat 3))
+          EOF
+          cat > /tmp/psc1-int.ps <<'EOF'
+          def intOne : Int := 1;
+          def intCalc(x : Int) : Int :=
+            Int.sub(Int.add(x, Int.ofNat(2)), Int.neg(Int.ofNat(3)));
+          EOF
+          lake exe psc1 typescript /tmp/psc1-int.lean > /tmp/psc1-int-lean.ts
+          lake exe psc1 typescript /tmp/psc1-int.ps > /tmp/psc1-int-ps.ts
+          cmp /tmp/psc1-int-lean.ts /tmp/psc1-int-ps.ts
+          rm -f /tmp/psc1-int-lean.js /tmp/psc1-int-lean.d.ts /tmp/psc1-int-lean.js.map
+          lake exe psc1 build /tmp/psc1-int.lean --out /tmp/psc1-int-lean.ts
+          test -f /tmp/psc1-int-lean.js
+          test -f /tmp/psc1-int-lean.d.ts
+          test -f /tmp/psc1-int-lean.js.map
+          grep -q 'export const intOne' /tmp/psc1-int-lean.js
+          grep -q 'export function intCalc' /tmp/psc1-int-lean.js
+          echo "PSC1_LEAN_NATIVE_INT_TSC_PIPELINE: PASS"
+
       - name: Run dual-source admission pipeline
         shell: bash
         run: |

@@ -15,6 +15,7 @@ structure PsParseResult(α : Type) where {
 };
 
 inductive PsParseError where {
+  | fuelExhausted;
   | unexpectedEnd(expected : String);
   | expectedText(expected : String, actual : String, span : PsSourceSpan);
   | expectedKind(expected : PsTokenKind, actual : PsTokenKind, span : PsSourceSpan);

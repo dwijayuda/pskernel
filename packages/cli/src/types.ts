@@ -65,6 +65,7 @@ export interface WasmTargetReportFields {
   readonly buildTarget:BuildTarget;
   readonly binaryenVersion?:WasmEmitResult['binaryenVersion'];
   readonly wasmProfile?:WasmEmitResult['profile'];
+  readonly executionRuntime?:WasmEmitResult['executionRuntime'];
   readonly wasmOptimized?:WasmEmitResult['optimized'];
   readonly wasmExports?:WasmEmitResult['exports'];
   readonly wasmRuntimeImports?:WasmEmitResult['imports'];

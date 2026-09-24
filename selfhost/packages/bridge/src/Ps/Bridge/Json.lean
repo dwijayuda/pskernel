@@ -39,7 +39,7 @@ def psJsonEscapeChar (char : Char) : String :=
   else if value == 92 then
     "\\\\"
   else if value < 32 then
-    psJsonEscapeControl value
+    psJsonEscapeControl value.toNat
   else
     String.ofList [char]
 

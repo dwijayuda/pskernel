@@ -1,5 +1,5 @@
 import Lean
-import ProofScript.Kernel.PSC1.Instantiate
+import ProofScript.Kernel.PSC1.TypeChecker
 
 namespace ProofScript.Kernel.PSC1.Test
 
@@ -124,6 +124,69 @@ def checkExprParity (e : KExpr) : IO Unit := do
   let instantiatedRevLean := Lean.Expr.instantiateRev le substLean
   assertTrue "Expr.instantiateRev"
     (sameLeanExpr (toLeanExpr instantiatedRevK) instantiatedRevLean)
+
+
+def expectKernelType (label : String) (e : KExpr) : Lean.CoreM Unit := do
+  let .ok ours := ProofScript.Kernel.PSC1.TypeChecker.check {} e
+    | throwError "PSC1 checker rejected {label}"
+  let .ok leanType := Lean.Kernel.check (← getEnv) {} (toLeanExpr e)
+    | throwError "Lean 4.34 kernel rejected {label}"
+  unless Lean.Expr.equal (toLeanExpr ours) leanType do
+    throwError "PSC1/Lean inferred-type mismatch at {label}: ours={toLeanExpr ours}, lean={leanType}"
+
+def expectKernelReject (label : String) (e : KExpr) : Lean.CoreM Unit := do
+  let oursRejected :=
+    match ProofScript.Kernel.PSC1.TypeChecker.check {} e with
+    | .ok _ => false
+    | .error _ => true
+  let leanRejected :=
+    match Lean.Kernel.check (← getEnv) {} (toLeanExpr e) with
+    | .ok _ => false
+    | .error _ => true
+  unless oursRejected == leanRejected do
+    throwError "PSC1/Lean acceptance mismatch at {label}"
+
+def expectKernelDefEq (label : String) (a b : KExpr) : Lean.CoreM Unit := do
+  let .ok ours := ProofScript.Kernel.PSC1.TypeChecker.isDefEq {} a b
+    | throwError "PSC1 defeq failed operationally at {label}"
+  let .ok leanEq := Lean.Kernel.isDefEq (← getEnv) {} (toLeanExpr a) (toLeanExpr b)
+    | throwError "Lean kernel defeq failed operationally at {label}"
+  unless ours == leanEq do
+    throwError "PSC1/Lean defeq mismatch at {label}: ours={ours}, lean={leanEq}"
+
+def runTypeCheckerParity : Lean.CoreM Unit := do
+  let sort0 : KExpr := .sort .zero
+  let sort1 : KExpr := .sort (.succ .zero)
+
+  expectKernelType "sort" sort0
+
+  let idType : KExpr :=
+    .forallE (n "A") sort1
+      (.forallE (n "x") (.bvar 0) (.bvar 1) .default)
+      .default
+  expectKernelType "dependent forall" idType
+
+  let idTerm : KExpr :=
+    .lam (n "A") sort1
+      (.lam (n "x") (.bvar 0) (.bvar 0) .default)
+      .default
+  expectKernelType "dependent lambda" idTerm
+
+  let betaFn : KExpr :=
+    .lam (n "X") sort1 (.bvar 0) .default
+  let betaApp : KExpr := .app betaFn sort0
+  expectKernelType "beta application" betaApp
+  expectKernelDefEq "beta reduction" betaApp sort0
+
+  let letTerm : KExpr :=
+    .letE (n "X") sort1 sort0 (.bvar 0) false
+  expectKernelType "let" letTerm
+  expectKernelDefEq "zeta reduction" letTerm sort0
+
+  let badApp : KExpr := .app (.lam (n "p") sort0 (.bvar 0) .default) sort0
+  expectKernelReject "bad application" badApp
+
+#eval runTypeCheckerParity
 
 def run : IO Unit := do
   for u in levelSamples do

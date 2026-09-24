@@ -148,6 +148,25 @@ def psTestDualSourceLeanNativeStructureProjection : Bool :=
           "export function ageOf(u: User): bigint { return u.age; }"
   | _, _ => false
 
+def psTestDualSourceLeanNativeStructuralRecursion : Bool :=
+  let leanSource :=
+    "inductive ListR (α : Type) where | nil | cons (head : α) (tail : ListR α)\n" ++
+    "def lengthR (xs : ListR Nat) : Nat := " ++
+    "match xs with | ListR.nil => 0 | ListR.cons head tail => lengthR tail"
+  let proofScriptSource :=
+    "inductive ListR(α : Type) where { | nil; | cons(head : α)(tail : ListR(α)); }; " ++
+    "def lengthR(xs : ListR(Nat)) : Nat := " ++
+    "match xs with { | ListR.nil => 0; | ListR.cons head tail => lengthR(tail); };"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains "export type ListR<T0>"
+        && leanOutput.contains "export function lengthR(xs: ListR<bigint>): bigint"
+        && leanOutput.contains "lengthR(tail)"
+  | _, _ => false
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -158,7 +177,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native let", passed := psTestDualSourceLeanNativeLet },
   { name := "dual-source Lean-native if", passed := psTestDualSourceLeanNativeIf },
   { name := "dual-source Lean-native Maybe match", passed := psTestDualSourceLeanNativeMaybeMatch },
-  { name := "dual-source Lean-native structure projection", passed := psTestDualSourceLeanNativeStructureProjection }
+  { name := "dual-source Lean-native structure projection", passed := psTestDualSourceLeanNativeStructureProjection },
+  { name := "dual-source Lean-native structural recursion", passed := psTestDualSourceLeanNativeStructuralRecursion }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

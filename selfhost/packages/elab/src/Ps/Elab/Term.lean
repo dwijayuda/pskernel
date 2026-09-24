@@ -662,6 +662,8 @@ def psElabTermWithFuel
             thenBranch
             elseBranch
             expected
+      | .matchE _ _ _ =>
+          Except.error PsElabError.unsupportedTerm
       | .app fn args _ =>
           match psElabTermWithFuel remaining context fn none with
           | Except.error error => Except.error error

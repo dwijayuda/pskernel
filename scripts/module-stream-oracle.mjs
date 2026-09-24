@@ -50,7 +50,9 @@ try{
      continue;
    }
    if(marker?.shard){
-     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;global.gc?.();}
+     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;}
+     // Let V8 schedule GC naturally. Forcing a full collection every 10-root shard
+     // makes canonical replay superlinearly expensive as the live Environment grows.
      replay=new Lean4ExportReplay(shared,{nativeEvaluator});
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);

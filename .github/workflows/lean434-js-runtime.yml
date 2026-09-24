@@ -45,6 +45,18 @@ jobs:
         run: |
           node scripts/lean434-runtime-metadata-report.mjs lean434-parser-types-runtime-metadata.json
           node scripts/lean434-runtime-metadata-report.mjs lean434-parser-runtime-metadata.json
+      - name: Generate real Lean.Parser.Types bootstrap corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExport.lean Lean.Parser.Types \
+            Lean.Parser.FirstTokens.toOptional \
+            Lean.Parser.FirstTokens.seq \
+            Lean.Parser.FirstTokens.merge \
+            > lean434-parser-types-bootstrap.ndjson
+          test -s lean434-parser-types-bootstrap.ndjson
+      - name: Execute real Lean.Parser.Types algorithms in JavaScript
+        run: node scripts/lean434-js-parser-types-smoke.mjs lean434-parser-types-bootstrap.ndjson
       - name: Generate real Lean ST/IO bootstrap corpus
         shell: bash
         run: |

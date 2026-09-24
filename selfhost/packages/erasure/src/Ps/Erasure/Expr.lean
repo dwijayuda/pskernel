@@ -598,6 +598,8 @@ def psOpenMatchMinorFields
                 runtimeRecursors := state.scope.runtimeRecursors
                 runtimeStructures := state.scope.runtimeStructures
                 runtimeStructureConstructors := state.scope.runtimeStructureConstructors
+                runtimeExpressions := state.scope.runtimeExpressions
+                currentDefinition := state.scope.currentDefinition
               }
               psOpenMatchMinorFields
                 environment
@@ -959,6 +961,8 @@ def psEraseRuntimeExprWithFuel
                     runtimeRecursors := scope.runtimeRecursors
                     runtimeStructures := scope.runtimeStructures
                     runtimeStructureConstructors := scope.runtimeStructureConstructors
+                    runtimeExpressions := scope.runtimeExpressions
+                    currentDefinition := scope.currentDefinition
                   }
                   match
                       psEraseRuntimeExprWithFuel
@@ -998,6 +1002,8 @@ def psEraseRuntimeExprWithFuel
                 runtimeRecursors := scope.runtimeRecursors
                 runtimeStructures := scope.runtimeStructures
                 runtimeStructureConstructors := scope.runtimeStructureConstructors
+                runtimeExpressions := scope.runtimeExpressions
+                currentDefinition := scope.currentDefinition
               }
               psEraseRuntimeExprWithFuel
                 environment
@@ -1015,6 +1021,8 @@ def psEraseRuntimeExprWithFuel
                 runtimeRecursors := scope.runtimeRecursors
                 runtimeStructures := scope.runtimeStructures
                 runtimeStructureConstructors := scope.runtimeStructureConstructors
+                runtimeExpressions := scope.runtimeExpressions
+                currentDefinition := scope.currentDefinition
               }
               psEraseRuntimeExprWithFuel
                 environment
@@ -1059,6 +1067,8 @@ def psEraseRuntimeExprWithFuel
                     runtimeRecursors := scope.runtimeRecursors
                     runtimeStructures := scope.runtimeStructures
                     runtimeStructureConstructors := scope.runtimeStructureConstructors
+                    runtimeExpressions := scope.runtimeExpressions
+                    currentDefinition := scope.currentDefinition
                   }
                   match
                       psEraseRuntimeExprWithFuel

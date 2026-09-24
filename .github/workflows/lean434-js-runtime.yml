@@ -62,6 +62,10 @@ jobs:
             ));
             const entries=[
               d.initializers.find(
+                x=>x.declaration.includes('ImportingFlag') &&
+                   x.declaration.endsWith('.importingRef')
+              ),
+              d.initializers.find(
                 x=>x.declaration.includes('EnvExtension.envExtensionsRef')
               ),
               d.initializers.find(

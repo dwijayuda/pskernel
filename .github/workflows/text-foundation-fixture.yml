@@ -1,0 +1,82 @@
+name: ProofScript text foundation fixture
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/text-foundation-fixture.yml
+      - scripts/generate-text-foundation-fixture.sh
+      - oracle/replay-probe/DependencyExport.lean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: proofscript-text-foundation-fixture
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Verify Lean version
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version | tee lean-version.txt
+          lean --version | head -n1 | grep -F 'Lean (version 4.34.0,'
+
+      - name: Generate exact text foundation closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/generate-text-foundation-fixture.sh
+          test -s oracle/fixtures/lean434-proofscript-text-foundation.ndjson
+          wc -l oracle/fixtures/lean434-proofscript-text-foundation.ndjson
+          du -h oracle/fixtures/lean434-proofscript-text-foundation.ndjson
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate pskernel replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm run oracle:text-foundation
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lean434-proofscript-text-foundation
+          path: |
+            oracle/fixtures/lean434-proofscript-text-foundation.ndjson
+            lean-version.txt
+          retention-days: 7
+
+      - name: Commit pinned fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add oracle/fixtures/lean434-proofscript-text-foundation.ndjson
+          if git diff --cached --quiet; then
+            echo 'text-foundation fixture already up to date'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(sh1): pin Lean 4.34 text-foundation fixture'
+          git push origin HEAD:main

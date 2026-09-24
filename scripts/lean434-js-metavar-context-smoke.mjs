@@ -35,7 +35,17 @@ const prelude=new Lean4ExportReplay();
 prelude.replay(fs.readFileSync(preludeFixture,'utf8'));
 const replay=new Lean4ExportReplay(prelude.env);
 const delta=fs.readFileSync(fixture,'utf8');
-const stats=replay.replay(delta);
+console.log(JSON.stringify({
+  phase:'metavar-context-delta-replay-start',
+  bytes:Buffer.byteLength(delta),
+}));
+const stats=replay.replay(delta,{
+  every:500,
+  onProgress:(progress)=>console.log(JSON.stringify({
+    phase:'metavar-context-delta-replay-progress',
+    ...progress,
+  })),
+});
 console.log(JSON.stringify({
   phase:'metavar-context-delta-replay',
   declarations:stats.declarations,
@@ -54,30 +64,36 @@ const valueExpr=natLit(42n);
 const runtimeExpr=kernelExprToLean434Runtime(valueExpr);
 const empty=emptyLean434MetavarContext();
 
+console.log(JSON.stringify({phase:'metavar-context-initial-lookup-start'}));
 let getAssignment=evaluator.evaluate(
   constant(nameFromDotted('Lean.MetavarContext.getExprAssignmentExp')),
 );
 getAssignment=evaluator.applyRuntimeValue(getAssignment,empty);
 let before=evaluator.applyRuntimeValue(getAssignment,mvarId);
+console.log(JSON.stringify({phase:'metavar-context-initial-lookup-complete'}));
 if(lean434RuntimeOptionValue(before)!==undefined){
   throw new Error(
     'empty Lean.MetavarContext unexpectedly contained an expression assignment',
   );
 }
 
+console.log(JSON.stringify({phase:'metavar-context-assign-start'}));
 let assign=evaluator.evaluate(
   constant(nameFromDotted('Lean.assignExp')),
 );
 assign=evaluator.applyRuntimeValue(assign,empty);
 assign=evaluator.applyRuntimeValue(assign,mvarId);
 const assigned=evaluator.applyRuntimeValue(assign,runtimeExpr);
+console.log(JSON.stringify({phase:'metavar-context-assign-complete'}));
 
+console.log(JSON.stringify({phase:'metavar-context-post-lookup-start'}));
 let getAfter=evaluator.evaluate(
   constant(nameFromDotted('Lean.MetavarContext.getExprAssignmentExp')),
 );
 getAfter=evaluator.applyRuntimeValue(getAfter,assigned);
 const queried=evaluator.applyRuntimeValue(getAfter,mvarId);
 const runtimeAssigned=lean434RuntimeOptionValue(queried);
+console.log(JSON.stringify({phase:'metavar-context-post-lookup-complete'}));
 if(runtimeAssigned===undefined){
   throw new Error(
     'real Lean.assignExp did not persist the assignment',

@@ -99,6 +99,28 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
       'invalid declaration binding arity for '+binding.leanDeclaration,
     );
   }
+  if(binding.runtimeArgs!==undefined){
+    const seenRuntimeArgs=new Set();
+    for(const index of binding.runtimeArgs){
+      if(
+        !Number.isInteger(index)
+        ||index<0
+        ||index>=binding.arity
+      ){
+        throw new Error(
+          'invalid runtime argument index for '+
+          binding.leanDeclaration+': '+String(index),
+        );
+      }
+      if(seenRuntimeArgs.has(index)){
+        throw new Error(
+          'duplicate runtime argument index for '+
+          binding.leanDeclaration+': '+String(index),
+        );
+      }
+      seenRuntimeArgs.add(index);
+    }
+  }
 
   const upstream=path.join(
     repoRoot,
@@ -123,6 +145,7 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
     leanDeclaration:binding.leanDeclaration,
     leanSymbol:binding.leanSymbol,
     arity:binding.arity,
+    runtimeArgs:binding.runtimeArgs??null,
     upstreamSource:binding.upstreamSource,
   });
 }

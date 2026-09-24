@@ -134,11 +134,17 @@ for(const marker of [
 ]){
   if(!exporter.includes(marker))throw new Error('canonical replay exporter protocol drift: missing '+marker);
 }
-if(!exporter.includes('if xs[i]! == d then return i')){
-  throw new Error('MData equality-id drift: exporter must use Lean KVMap BEq, not entry-list identity');
+for(const marker of [
+  'mdataBuckets : HashMap String (Array Nat)',
+  'let mut seen : NameSet := {}',
+  'unless seen.contains k do',
+  'if s.mdata[i]! == d then return i',
+  'mdataBuckets := s.mdataBuckets.insert key (ids.push i)',
+]){
+  if(!exporter.includes(marker))throw new Error('MData equality-id drift: missing bucketed Lean KVMap BEq invariant '+marker);
 }
-if(exporter.includes('xs[i]!.entries == d.entries')){
-  throw new Error('MData equality-id drift: raw KVMap entry-list equality is stricter than Lean 4.34 BEq');
+if(exporter.includes('xs[i]!.entries == d.entries')||exporter.includes('return s!"{d.size}:')){
+  throw new Error('MData equality-id drift: bucket fingerprint must respect extensional KVMap BEq, including duplicate raw keys');
 }
 const moduleStream=readFileSync('scripts/module-stream-oracle.mjs','utf8');
 for(const marker of [

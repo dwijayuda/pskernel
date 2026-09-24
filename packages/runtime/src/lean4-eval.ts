@@ -172,6 +172,7 @@ export class Lean434Evaluator {
   private readonly runtimeGlobals=
     new Map<string,Lean434RuntimeValue>();
   private readonly checker:TypeChecker;
+  private readonly constantStack:string[]=[];
   private initializationDepth=0;
 
   constructor(
@@ -512,7 +513,12 @@ export class Lean434Evaluator {
           info.levelParams,
           expr.levels,
         );
-        return this.evaluateWithLocals(body,locals);
+        this.constantStack.push(name);
+        try{
+          return this.evaluateWithLocals(body,locals);
+        }finally{
+          this.constantStack.pop();
+        }
       }
       case 'opaque':{
         // Opaqueness controls kernel reduction. Lean still compiles the body
@@ -523,7 +529,12 @@ export class Lean434Evaluator {
           info.levelParams,
           expr.levels,
         );
-        return this.evaluateWithLocals(body,locals);
+        this.constantStack.push(name);
+        try{
+          return this.evaluateWithLocals(body,locals);
+        }finally{
+          this.constantStack.pop();
+        }
       }
       case 'theorem':
         return {kind:'proof',theorem:name};
@@ -562,10 +573,14 @@ export class Lean434Evaluator {
           args:[],
         };
       }
-      case 'axiom':
+      case 'axiom':{
+        const trace=this.constantStack.length===0
+          ?''
+          :' via '+this.constantStack.join(' -> ');
         throw new Lean434EvaluationError(
-          "axiom has no JavaScript runtime implementation: '"+name+"'",
+          "axiom has no JavaScript runtime implementation: '"+name+"'"+trace,
         );
+      }
       case 'quot':
         throw new Lean434EvaluationError(
           "quotient runtime evaluation is not implemented yet: '"+name+"'",

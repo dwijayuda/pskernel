@@ -72,6 +72,79 @@ console.log('ok - @proofscript/erasure generic identity');
 
 
 {
+  const env=new Environment();
+  const Nat=nameFromDotted('Nat');
+  const NatAdd=nameFromDotted('Nat.add');
+  const natType=constant(Nat);
+  const binary=forallE(
+    nameFromDotted('x'),
+    natType,
+    forallE(nameFromDotted('y'),natType,natType),
+  );
+  env.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  env.add({
+    kind:'axiom',
+    name:NatAdd,
+    levelParams:[],
+    type:binary,
+  });
+  const consumer=forallE(
+    nameFromDotted('f'),
+    binary,
+    natType,
+  );
+  const checked=admitCheckedCoreModule(env,[{
+    kind:'definition',
+    name:nameFromDotted('useBinary'),
+    levelParams:[],
+    type:forallE(nameFromDotted('consume'),consumer,natType),
+    value:lam(
+      nameFromDotted('consume'),
+      consumer,
+      app(
+        bvar(0),
+        lam(
+          nameFromDotted('x'),
+          natType,
+          lam(
+            nameFromDotted('y'),
+            natType,
+            mkAppN(constant(NatAdd),[bvar(1),bvar(0)]),
+          ),
+        ),
+      ),
+    ),
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  }]);
+  const declaration=eraseCheckedCoreModule(checked).declarations[0]!;
+  equal(declaration.parameters[0]?.type.kind,'function');
+  if(declaration.parameters[0]?.type.kind==='function'){
+    equal(declaration.parameters[0].type.parameters.length,1);
+    const callback=declaration.parameters[0].type.parameters[0];
+    equal(callback?.kind,'function');
+    if(callback?.kind==='function'){
+      equal(callback.parameters.length,2);
+    }
+  }
+  equal(declaration.body.kind,'call');
+  if(declaration.body.kind==='call'){
+    const callback=declaration.body.args[0];
+    equal(callback?.kind,'lambda');
+    if(callback?.kind==='lambda'){
+      equal(callback.parameters.length,2);
+    }
+  }
+}
+console.log('ok - @proofscript/erasure flattened runtime callback convention');
+
+
+{
   const alpha=nameFromDotted('α');
   const P=nameFromDotted('P');
   const h=nameFromDotted('h');

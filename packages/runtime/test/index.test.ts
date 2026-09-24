@@ -484,6 +484,17 @@ console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressi
 console.log('ok - Lean ST externs execute as deferred state actions');
 
 {
+  const evaluator=new Lean434Evaluator(new Environment());
+  const initializing=evaluator.evaluate(
+    constant(nameFromDotted('IO.initializing')),
+  );
+  equal(evaluator.runIOAction(initializing).value,false);
+  equal(evaluator.runInitializerAction(initializing).value,true);
+  equal(evaluator.runIOAction(initializing).value,false);
+}
+console.log('ok - IO.initializing is scoped to Lean initializer execution');
+
+{
   const environment=new Environment();
   const kernel=new Kernel(environment);
   const target=nameFromDotted('RuntimeInit.value');

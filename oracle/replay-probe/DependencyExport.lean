@@ -570,7 +570,9 @@ def flattenRoots (buckets : Array (Array Name)) : Array Name := Id.run do
 
 partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat) : IO Unit := do
   if count == 0 then throw <| IO.userError "root range count must be positive"
-  let buckets := collectRootsByModule env
+  -- Diagnostic branch: use the exact same canonical serialized module root
+  -- sequence as dumpModuleStream so numeric root ranges map to the gold gate.
+  let buckets := collectCanonicalRootsByModule env
   let roots := flattenRoots buckets
   if roots.size != env.constants.map₁.size then
     throw <| IO.userError s!"root coverage mismatch: {roots.size} != {env.constants.map₁.size}"

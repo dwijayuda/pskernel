@@ -27,7 +27,10 @@ export function lowerV061TypeToProofScript(
     case 'named':
       return type.name;
     case 'group':
-      return '('+lowerV061TypeToProofScript(type.value)+')';
+      return lowerV061TypeToProofScript(
+        type.value,
+        parentPrecedence,
+      );
     case 'application':{
       const rendered=
         lowerV061TypeToProofScript(type.fn,APPLICATION_PRECEDENCE)+

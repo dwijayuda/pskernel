@@ -16,6 +16,11 @@ export const VERIFIED_IR_INTRINSIC_ARITY={
   'bool.eq':2,
   'bool.ne':2,
   'char.ofNat':1,
+  'char.toNat':1,
+  'string.push':2,
+  'string.singleton':1,
+  'string.length':1,
+  'string.append':2,
 } as const satisfies Readonly<Record<VerifiedIrIntrinsicOperation,1|2>>;
 
 export function verifiedIrIntrinsicArity(

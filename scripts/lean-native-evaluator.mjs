@@ -12,6 +12,8 @@ export function createLeanNativeEvaluator({lean,moduleName,cwd=process.cwd(),env
       const key=`${request.kind}:${constant}`;
       const cached=cache.get(key);
       if(cached!==undefined)return cached;
+      const startedAt=Date.now();
+      if(env.PSKERNEL_NATIVE_DIAG==='1')console.error(`[native-diag] MISS ${key}`);
       const r=runner(
         lean,
         ['--run','oracle/replay-probe/NativeEval.lean',moduleName,request.kind,constant],
@@ -39,6 +41,7 @@ export function createLeanNativeEvaluator({lean,moduleName,cwd=process.cwd(),env
         result={kind:'bool',value:payload.value};
       }
       cache.set(key,result);
+      if(env.PSKERNEL_NATIVE_DIAG==='1')console.error(`[native-diag] DONE ${key} ms=${Date.now()-startedAt}`);
       return result;
     },
   };

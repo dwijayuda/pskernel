@@ -1,0 +1,33 @@
+name: Diagnostic TypeScript replay timing
+
+on:
+  push:
+    branches: [diagnostic/ts-replay-timing]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  timing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: TypeScript replay timing through slow region
+        env:
+          PSKERNEL_STD_HEAP_MIB: "5632"
+          PSKERNEL_NATIVE_DIAG: "1"
+        run: npm run oracle:std-full

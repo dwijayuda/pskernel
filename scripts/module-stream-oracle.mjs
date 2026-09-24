@@ -31,6 +31,7 @@ const rl=createInterface({input:child.stdout,crlfDelay:Infinity});
 let stderr='';child.stderr.setEncoding('utf8');child.stderr.on('data',d=>stderr+=d);
 const shared=new Environment();
 let replay=null,header=null,current=null,shards=0,totalLines=0,totalDecls=0,maxRssMiB=0,maxHeapMiB=0;
+let shardStartedAt=0,shardStartLines=0,shardStartDecls=0,shardStartConstants=0;
 let fatal=null;
 try{
  for await(const line of rl){
@@ -50,8 +51,14 @@ try{
      continue;
    }
    if(marker?.shard){
-     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;global.gc?.();}
+     if(replay){
+       const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;
+       const elapsedMs=Date.now()-shardStartedAt;
+       console.error(`[ts-replay-diag] shard=${shards} module=${current} ms=${elapsedMs} lines=${totalLines-shardStartLines} decls=${totalDecls-shardStartDecls} constantsDelta=${shared.size-shardStartConstants} constants=${shared.size}`);
+       global.gc?.();
+     }
      replay=new Lean4ExportReplay(shared,{nativeEvaluator});
+     shardStartedAt=Date.now();shardStartLines=totalLines;shardStartDecls=totalDecls;shardStartConstants=shared.size;
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);
      if(shards===1||shards%25===0)console.error(`[module-stream] shard=${shards}/${header?.plannedShards??'?'} module=${current} part=${marker.shard.part??0} roots=${marker.shard.roots??'?'} constants=${shared.size} rssMiB=${rss.toFixed(1)} heapMiB=${heap.toFixed(1)}`);
@@ -60,7 +67,11 @@ try{
    if(!replay)throw new Error(`record before first shard: ${line.slice(0,120)}`);
    try{replay.replayLine(line);}catch(e){throw new Error(`module ${current}: ${e instanceof Error?e.message:String(e)}`);}
  }
- if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;}
+ if(replay){
+   const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;
+   const elapsedMs=Date.now()-shardStartedAt;
+   console.error(`[ts-replay-diag] shard=${shards} module=${current} ms=${elapsedMs} lines=${totalLines-shardStartLines} decls=${totalDecls-shardStartDecls} constantsDelta=${shared.size-shardStartConstants} constants=${shared.size}`);
+ }
 }catch(e){fatal=e;child.kill('SIGTERM');}
 const code=await new Promise(r=>child.on('close',r));
 if(fatal)throw fatal;

@@ -187,9 +187,18 @@ Current gate:
   classification, `String.length`, `String.append`, traversal, and raw
   string positions.
 
-The normal environment provider prefers that pinned fixture when present and
-falls back to the existing `Init.Prelude` fixture during the transition.
-No synthetic standard-library axioms are permitted to bypass this gate.
+The raw text-foundation dependency closure is an **assurance input**, not the
+normal compiler hot-path environment. Replaying the 17+ MiB closure in every
+`psc` process exceeded the ordinary Node heap during CLI tests, so the normal
+provider continues to use the pinned `Init.Prelude` base unless an explicit
+`PROOFSCRIPT_LEAN_FOUNDATION` path is supplied.
+
+After exact replay is green, derive a compact, versioned pskernel-certified
+foundation interface/base for the selected roots and fingerprint it to the
+exact Lean 4.34 assurance closure. The compact artifact must preserve the
+kernel-facing types/metadata needed by elaboration and the SH6b bridge without
+making the raw dependency closure a startup dependency. No synthetic
+standard-library axioms are permitted to bypass the exact-replay gate.
 
 Exit test: a nontrivial lexer utility can be authored in supported `.lean`
 and `.ps` and run through verified JavaScript emission.

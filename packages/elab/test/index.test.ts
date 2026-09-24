@@ -895,6 +895,20 @@ console.log('ok - @proofscript/elab multi-rule simp-only syntax reaches tactic A
 }
 {
   const env=makeNatNotationEnvironment();
+  const direct=elaborateV061Declarations(parseV061Module(
+    'theorem directEqSymm'+
+    '(a : Nat, b : Nat, h : b = a) : a = b := Eq.symm(h);',
+  ),env);
+  equal(direct.theorems.length,1);
+  equal(
+    direct.environment.find(nameFromDotted('directEqSymm'))?.kind,
+    'theorem',
+  );
+}
+console.log('ok - @proofscript/elab direct polymorphic Eq.symm application');
+
+{
+  const env=makeNatNotationEnvironment();
   const symmetric=elaborateV061Declarations(parseV061Module(
     'theorem searchEqSymm'+
     '(a : Nat, b : Nat, h : b = a) : a = b := by exact?;',

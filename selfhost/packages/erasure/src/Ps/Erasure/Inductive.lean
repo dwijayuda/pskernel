@@ -60,6 +60,8 @@ def psPrepareInductiveParametersWithFuel
                 declarationNames := scope.declarationNames
                 runtimeConstructors := scope.runtimeConstructors
                 runtimeRecursors := scope.runtimeRecursors
+                runtimeStructures := scope.runtimeStructures
+                runtimeStructureConstructors := scope.runtimeStructureConstructors
               }
               psPrepareInductiveParametersWithFuel
                 environment
@@ -169,6 +171,8 @@ def psPrepareConstructorFieldsWithFuel
                     declarationNames := scope.declarationNames
                     runtimeConstructors := scope.runtimeConstructors
                     runtimeRecursors := scope.runtimeRecursors
+                    runtimeStructures := scope.runtimeStructures
+                    runtimeStructureConstructors := scope.runtimeStructureConstructors
                   }
                   psPrepareConstructorFieldsWithFuel
                     environment

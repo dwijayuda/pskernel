@@ -1,4 +1,5 @@
 import Ps.Kernel.Validation
+import Ps.Kernel.Level
 
 def psKernelTestName (value : String) : PsName :=
   PsName.str PsName.anonymous value
@@ -63,6 +64,53 @@ def main : IO Unit := do
   psKernelTestExpect
     (!psKernelExprClosed [] (PsExpr.sortE (PsLevel.param u)))
     "undeclared universe parameter must be rejected"
+
+
+  let levelU := PsLevel.param u
+  let levelV := PsLevel.param (psKernelTestName "v")
+  psKernelTestExpect
+    (psLevelStructuralEq
+      (psKernelLevelMkMax PsLevel.zero levelU)
+      levelU)
+    "smart max must absorb zero"
+
+  psKernelTestExpect
+    (psKernelLevelEquivalent
+      (PsLevel.max levelU levelV)
+      (PsLevel.max levelV levelU))
+    "kernel level normalization must make max commutative"
+
+  psKernelTestExpect
+    (psKernelLevelEquivalent
+      (psKernelLevelMkIMax levelU PsLevel.zero)
+      PsLevel.zero)
+    "imax u 0 must normalize to zero"
+
+  let levelVSucc := PsLevel.succ levelV
+  psKernelTestExpect
+    (psKernelLevelEquivalent
+      (psKernelLevelMkIMax levelU levelVSucc)
+      (psKernelLevelMkMax levelU levelVSucc))
+    "imax u (v+1) must agree with max u (v+1)"
+
+  psKernelTestExpect
+    (psKernelLevelLe
+      (psKernelLevelMkIMax levelU levelV)
+      (PsLevel.max levelU levelV))
+    "final-4.34 max shortcut must fall through before imax decomposition"
+
+  let incompleteLeft := psKernelLevelMkMax levelV levelU
+  let incompleteRight :=
+    psKernelLevelMkMax
+      (psKernelLevelMkIMax levelU levelV)
+      levelU
+  psKernelTestExpect
+    (!psKernelLevelEquivalent incompleteLeft incompleteRight)
+    "final-4.34 normalized structural equivalence must remain incomplete"
+  psKernelTestExpect
+    (psKernelLevelLe incompleteLeft incompleteRight
+      && psKernelLevelLe incompleteRight incompleteLeft)
+    "final-4.34 level order must still prove both directions"
 
   let base : PsKernelBaseInfo := {
     name := a

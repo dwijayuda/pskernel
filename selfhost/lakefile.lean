@@ -45,6 +45,7 @@ lean_lib PsKernel where
   srcDir := "packages/kernel/src"
   roots := #[
     `Ps.Kernel.Model,
+    `Ps.Kernel.Level,
     `Ps.Kernel.Environment,
     `Ps.Kernel.Validation
   ]

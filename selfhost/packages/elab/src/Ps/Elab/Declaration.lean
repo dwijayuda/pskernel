@@ -94,18 +94,43 @@ def psSyntaxConstructorCoreName
   | [segment] => some (psNameAppendStr inductiveName segment)
   | _ => none
 
+def psElabContextWithEnvironment
+    (context : PsElabContext)
+    (environment : PsEnvironment) : PsElabContext :=
+  {
+    environment := environment
+    localContext := context.localContext
+    instances := context.instances
+    metaContext := context.metaContext
+  }
+
+def psImplicitBinderCopy
+    (binder : PsElabTypedBinder) : PsElabTypedBinder :=
+  {
+    id := binder.id
+    name := binder.name
+    type := binder.type
+    binder := PsBinderInfo.implicit
+  }
+
+def psInductiveParameterArgs
+    (paramsRev : List PsElabTypedBinder) : List PsExpr :=
+  paramsRev.reverse.map (fun param => PsExpr.fvar param.id)
+
 def psElabInductiveConstructor
-    (environment : PsEnvironment)
+    (context : PsElabContext)
     (inductiveName : PsName)
+    (appliedInductive : PsExpr)
+    (paramsRev : List PsElabTypedBinder)
     (source : PsSyntaxInductiveConstructor) :
     Except PsElabError PsDeclaration :=
   match psSyntaxConstructorCoreName inductiveName source.name with
   | none => Except.error PsElabError.emptyName
   | some constructorName =>
-      let initial := psElabContextEmpty environment
       match psElabTypedBinders
-          (fun context term expected => psElabTerm context term expected)
-          initial
+          (fun nextContext term expected =>
+            psElabTerm nextContext term expected)
+          context
           source.fields with
       | Except.error error => Except.error error
       | Except.ok fields =>
@@ -116,11 +141,16 @@ def psElabInductiveConstructor
             Except.error PsElabError.unsupportedTerm
           else
             let metaContext := fields.context.metaContext
-            let constructorType :=
+            let withFields :=
               psCloseElabForallBinders
                 metaContext
                 fields.bindersRev
-                (PsExpr.constE inductiveName [])
+                appliedInductive
+            let constructorType :=
+              psCloseElabForallBinders
+                metaContext
+                (paramsRev.map psImplicitBinderCopy)
+                withFields
             if psExprHasUnresolvedMeta constructorType then
               Except.error PsElabError.unresolvedMetavariable
             else
@@ -131,7 +161,7 @@ def psElabInductiveConstructor
                   type := constructorType
                   inductiveName := inductiveName
                   constructorIndex := 0
-                  numParams := 0
+                  numParams := paramsRev.length
                   numFields := source.fields.length
                 })
 

@@ -668,6 +668,50 @@ def psTestDualSourceBinderKindsElaboration : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestElaboratedTypedLambdaShape
+    (result : PsElabTermResult) : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let xName := psTestName "x"
+  let expectedTerm :=
+    PsExpr.lam
+      xName
+      natType
+      (PsExpr.bvar 0)
+      PsBinderInfo.explicit
+  let expectedType :=
+    PsExpr.forallE
+      xName
+      natType
+      natType
+      PsBinderInfo.explicit
+  result.context.localContext.nextId == 0
+    && result.context.localContext.declarations.isEmpty
+    && psExprAlphaEq result.term expectedTerm
+    && psExprAlphaEq result.type expectedType
+
+def psTestDualSourceTypedLambdaElaboration : Bool :=
+  match
+      psLex "fun (x : Nat) => x",
+      psLex "fun (x : Nat) => x" with
+  | Except.ok leanTokens, Except.ok proofScriptTokens =>
+      match
+          psParseLeanTerm (psTokenCursorFromTokens leanTokens),
+          psParseProofScriptTerm
+            (psTokenCursorFromTokens proofScriptTokens) with
+      | Except.ok leanTerm, Except.ok proofScriptTerm =>
+          let initial := psElabContextEmpty psTestNatEnvironment
+          match
+              psElabTerm initial leanTerm.value,
+              psElabTerm initial proofScriptTerm.value with
+          | Except.ok leanResult, Except.ok proofScriptResult =>
+              psTestElaboratedTypedLambdaShape leanResult
+                && psTestElaboratedTypedLambdaShape proofScriptResult
+                && psExprAlphaEq leanResult.term proofScriptResult.term
+                && psExprAlphaEq leanResult.type proofScriptResult.type
+          | _, _ => false
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -679,6 +723,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source binder application parse", passed := psTestDualSourceBinderApplicationParse },
   { name := "dual-source binder kinds parse", passed := psTestDualSourceBinderKindsParse },
   { name := "dual-source typed lambda parse", passed := psTestDualSourceTypedLambdaParse },
+  { name := "dual-source typed lambda elaboration", passed := psTestDualSourceTypedLambdaElaboration },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

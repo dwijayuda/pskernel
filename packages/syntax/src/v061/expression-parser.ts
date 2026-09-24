@@ -164,6 +164,10 @@ export class V061ExpressionParser {
       this.context.cursor.consume();
       return {kind:'string',value:token.value??'',span:token.span};
     }
+    if(token.kind==='char'){
+      this.context.cursor.consume();
+      return {kind:'char',value:token.value??'',span:token.span};
+    }
     if(token.text==='true'||token.text==='false'){
       this.context.cursor.consume();
       return {kind:'bool',value:token.text==='true',span:token.span};

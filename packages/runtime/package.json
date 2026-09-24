@@ -30,6 +30,10 @@
     "./lean4/init": {
       "types": "./dist/src/lean4-init.d.ts",
       "import": "./dist/src/lean4-init.js"
+    },
+    "./lean4/name": {
+      "types": "./dist/src/lean4-name.d.ts",
+      "import": "./dist/src/lean4-name.js"
     }
   },
   "scripts": {

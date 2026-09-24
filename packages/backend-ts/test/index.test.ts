@@ -1,5 +1,4 @@
-import {compileTypeScript,emitExpression,emitModule,emitVerifiedTypeScript,emitV061TypeScript} from '../src/index.js';
-import {lowerCheckedSoftwareModule} from '@proofscript/compiler-ir';
+import {compileTypeScript,emitExpression,emitModule,emitVerifiedTypeScript} from '../src/index.js';
 function equal(a:unknown,b:unknown):void{if(a!==b)throw new Error(`expected ${String(b)}, got ${String(a)}`);}
 equal(emitExpression({kind:'literal',value:3n}),'3n');
 equal(emitExpression({kind:'call',fn:{kind:'var',name:'f'},args:[{kind:'literal',value:1}]}),'f(1)');

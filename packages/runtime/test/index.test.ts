@@ -444,20 +444,26 @@ console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressi
   const secondRun=evaluator.runStateAction(mkRefAction);
   equal(firstRun.state,LEAN434_WORLD_TOKEN);
   equal(secondRun.state,LEAN434_WORLD_TOKEN);
-  ok(firstRun.value instanceof LeanRef,'ST.Prim.mkRef did not allocate LeanRef');
-  ok(secondRun.value instanceof LeanRef,'second ST.Prim.mkRef did not allocate LeanRef');
+  const firstRef=firstRun.value;
+  const secondRef=secondRun.value;
+  if(!(firstRef instanceof LeanRef)){
+    throw new Error('ST.Prim.mkRef did not allocate LeanRef');
+  }
+  if(!(secondRef instanceof LeanRef)){
+    throw new Error('second ST.Prim.mkRef did not allocate LeanRef');
+  }
   ok(
-    !lean_st_ref_ptr_eq(firstRun.value,secondRun.value),
+    !lean_st_ref_ptr_eq(firstRef,secondRef),
     'running ST.Prim.mkRef twice must allocate distinct references',
   );
-  equal(lean_st_ref_get(firstRun.value),5n);
+  equal(lean_st_ref_get(firstRef),5n);
 
   let getFn=evaluator.evaluate(
     constant(nameFromDotted('ST.Prim.Ref.get')),
   );
   getFn=evaluator.applyRuntimeValue(getFn,typeToken);
   getFn=evaluator.applyRuntimeValue(getFn,typeToken);
-  const getAction=evaluator.applyRuntimeValue(getFn,firstRun.value);
+  const getAction=evaluator.applyRuntimeValue(getFn,firstRef);
   equal(evaluator.runStateAction(getAction).value,5n);
 
   let setFn=evaluator.evaluate(
@@ -465,11 +471,11 @@ console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressi
   );
   setFn=evaluator.applyRuntimeValue(setFn,typeToken);
   setFn=evaluator.applyRuntimeValue(setFn,typeToken);
-  setFn=evaluator.applyRuntimeValue(setFn,firstRun.value);
+  setFn=evaluator.applyRuntimeValue(setFn,firstRef);
   const setAction=evaluator.applyRuntimeValue(setFn,9n);
   const setResult=evaluator.runStateAction(setAction);
   equal(setResult.value,undefined);
   equal(setResult.state,LEAN434_WORLD_TOKEN);
-  equal(lean_st_ref_get(firstRun.value),9n);
+  equal(lean_st_ref_get(firstRef),9n);
 }
 console.log('ok - Lean ST externs execute as deferred state actions');

@@ -304,10 +304,17 @@ export const lean_st_ref_take=<T>(ref:LeanRef<T>):T=>ref.take();
 export const lean_st_ref_ptr_eq=<T,U>(a:LeanRef<T>,b:LeanRef<U>):boolean=>
   (a as unknown)===(b as unknown);
 
+/**
+ * Direct host query outside the evaluator/initializer runner.
+ * Evaluated Lean code receives the scoped value from Lean434Evaluator instead.
+ */
+export const lean_io_initializing=():boolean=>false;
+
 export type Lean434ExternCategory=
   |'pure-primitive'
   |'persistent-value'
-  |'mutable-state';
+  |'mutable-state'
+  |'host-state';
 
 export interface Lean434ExternDescriptor{
   readonly leanSymbol:string;
@@ -351,6 +358,7 @@ export const LEAN434_JS_EXTERN_MANIFEST:readonly Lean434ExternDescriptor[]=[
   {leanSymbol:'lean_st_ref_swap',jsExport:'lean_st_ref_swap',category:'mutable-state',upstreamSource:'Init/System/ST.lean'},
   {leanSymbol:'lean_st_ref_take',jsExport:'lean_st_ref_take',category:'mutable-state',upstreamSource:'Init/System/ST.lean'},
   {leanSymbol:'lean_st_ref_ptr_eq',jsExport:'lean_st_ref_ptr_eq',category:'mutable-state',upstreamSource:'Init/System/ST.lean'},
+  {leanSymbol:'lean_io_initializing',jsExport:'lean_io_initializing',category:'host-state',upstreamSource:'Init/System/IO.lean'},
 ] as const;
 
 const externBySymbol=new Map(
@@ -553,6 +561,13 @@ readonly Lean434DeclarationExternBinding[]=[
     effect:'st-action',
     upstreamSource:'Init/System/ST.lean',
   },
+  {
+    leanDeclaration:'IO.initializing',
+    leanSymbol:'lean_io_initializing',
+    arity:0,
+    effect:'st-action',
+    upstreamSource:'Init/System/IO.lean',
+  },
 ] as const;
 
 const declarationExternByName=new Map(
@@ -621,6 +636,7 @@ new Map<string,Lean434JsExternImplementation>([
       a as LeanRef<unknown>,
       b as LeanRef<unknown>,
     )],
+  ['lean_io_initializing',()=>lean_io_initializing()],
 ]);
 
 export function invokeLean434JsExtern(

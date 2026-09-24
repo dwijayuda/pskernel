@@ -18,6 +18,18 @@ inductive PsElabError where
   | typeMismatch
   | implicitApplicationUnsupported
   | unsupportedTerm
+  | matchExpectedType
+  | matchScrutineeUnsupported
+  | matchInductiveUnsupported
+  | matchParameterArity
+  | matchPatternUnsupported
+  | matchConstructorUnknown (name : PsName)
+  | matchDuplicateConstructor (name : PsName)
+  | matchNonExhaustive
+  | matchRecursorUnsupported
+  | matchRecursorLevels
+  | matchConstructorArity (name : PsName)
+  | matchRecursiveFieldUnsupported (name : PsName)
   | duplicateDeclaration (name : PsName)
   | unresolvedMetavariable
 
@@ -565,6 +577,503 @@ def psElabIf
                         term
                         expected
 
+structure PsExprAppView where
+  head : PsExpr
+  args : List PsExpr
+
+def psExprAppViewAcc
+    (expr : PsExpr)
+    (args : List PsExpr) : PsExprAppView :=
+  match expr with
+  | .app fn argument =>
+      psExprAppViewAcc fn (argument :: args)
+  | _ => {
+      head := expr
+      args := args
+    }
+
+def psExprAppView (expr : PsExpr) : PsExprAppView :=
+  psExprAppViewAcc expr []
+
+def psExprHasConst (target : PsName) : PsExpr -> Bool
+  | .constE name _ => psNameEq name target
+  | .app fn argument =>
+      psExprHasConst target fn || psExprHasConst target argument
+  | .lam _ type body _ =>
+      psExprHasConst target type || psExprHasConst target body
+  | .forallE _ type body _ =>
+      psExprHasConst target type || psExprHasConst target body
+  | .letE _ type value body =>
+      psExprHasConst target type
+        || psExprHasConst target value
+        || psExprHasConst target body
+  | .proj _ _ value => psExprHasConst target value
+  | _ => false
+
+def psNameListContains (names : List PsName) (target : PsName) : Bool :=
+  names.any (fun name => psNameEq name target)
+
+structure PsElabMatchAlternative where
+  constructorName : PsName
+  pattern : PsSyntaxPattern
+  body : PsSyntaxTerm
+  span : PsSourceSpan
+
+def psElabMatchAlternativeFind
+    (name : PsName) :
+    List PsElabMatchAlternative -> Option PsElabMatchAlternative
+  | [] => none
+  | alternative :: rest =>
+      if psNameEq alternative.constructorName name then
+        some alternative
+      else
+        psElabMatchAlternativeFind name rest
+
+def psElabMatchPatternConstructorName
+    (inductiveName : PsName)
+    (pattern : PsSyntaxPattern) :
+    Except PsElabError PsName :=
+  match pattern with
+  | .bool value _ =>
+      if psNameEq inductiveName psBoolName then
+        Except.ok (if value then psBoolTrueName else psBoolFalseName)
+      else
+        Except.error PsElabError.matchPatternUnsupported
+  | .wildcard _ =>
+      Except.error PsElabError.matchPatternUnsupported
+  | .constructor syntaxName _ _ =>
+      match syntaxName.segments with
+      | [] => Except.error PsElabError.matchPatternUnsupported
+      | [segment] =>
+          Except.ok (psNameAppendStr inductiveName segment)
+      | _ =>
+          match psSyntaxNameToName syntaxName with
+          | none => Except.error PsElabError.matchPatternUnsupported
+          | some name => Except.ok name
+
+def psElabPrepareMatchAlternatives
+    (inductiveInfo : PsInductiveInfo) :
+    List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan) ->
+    List PsElabMatchAlternative ->
+    Except PsElabError (List PsElabMatchAlternative)
+  | [], alternativesRev =>
+      let alternatives := alternativesRev.reverse
+      let exhaustive :=
+        inductiveInfo.constructors.all
+          (fun ctorName =>
+            match psElabMatchAlternativeFind ctorName alternatives with
+            | some _ => true
+            | none => false)
+      if exhaustive then
+        Except.ok alternatives
+      else
+        Except.error PsElabError.matchNonExhaustive
+  | (pattern, body, span) :: rest, alternativesRev =>
+      match psElabMatchPatternConstructorName
+          inductiveInfo.name
+          pattern with
+      | Except.error error => Except.error error
+      | Except.ok ctorName =>
+          if !psNameListContains inductiveInfo.constructors ctorName then
+            Except.error (PsElabError.matchConstructorUnknown ctorName)
+          else
+            match psElabMatchAlternativeFind ctorName alternativesRev with
+            | some _ =>
+                Except.error
+                  (PsElabError.matchDuplicateConstructor ctorName)
+            | none =>
+                psElabPrepareMatchAlternatives
+                  inductiveInfo
+                  rest
+                  ({
+                    constructorName := ctorName
+                    pattern := pattern
+                    body := body
+                    span := span
+                  } :: alternativesRev)
+
+structure PsElabMatchField where
+  id : Nat
+  name : PsName
+  type : PsExpr
+  binder : PsBinderInfo
+
+structure PsElabMatchFieldsResult where
+  context : PsElabContext
+  fieldsRev : List PsElabMatchField
+
+def psElabMatchApplyParameters
+    (context : PsElabContext) :
+    List PsExpr -> PsExpr -> Except PsElabError PsExpr
+  | [], cursor => Except.ok cursor
+  | parameter :: rest, cursor =>
+      match psInferEnsureForall
+          context.environment
+          context.metaContext
+          context.localContext
+          cursor with
+      | Except.error error =>
+          Except.error (PsElabError.infer error)
+      | Except.ok forallView =>
+          psElabMatchApplyParameters
+            context
+            rest
+            (psExprInstantiate1 forallView.body parameter)
+
+def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
+  | [] => false
+  | name :: rest =>
+      let coreName := psSyntaxNameToName name
+      let duplicated :=
+        rest.any
+          (fun candidate =>
+            match coreName, psSyntaxNameToName candidate with
+            | some left, some right => psNameEq left right
+            | _, _ => false)
+      duplicated || psSyntaxNameListHasDuplicate rest
+
+def psElabMatchFields
+    (context : PsElabContext)
+    (inductiveName : PsName) :
+    PsExpr ->
+    List PsSyntaxName ->
+    List PsElabMatchField ->
+    Except PsElabError PsElabMatchFieldsResult
+  | cursor, [], fieldsRev =>
+      Except.ok {
+        context := context
+        fieldsRev := fieldsRev
+      }
+  | cursor, binderSyntax :: rest, fieldsRev =>
+      match psInferEnsureForall
+          context.environment
+          context.metaContext
+          context.localContext
+          cursor with
+      | Except.error error =>
+          Except.error (PsElabError.infer error)
+      | Except.ok forallView =>
+          let fieldType :=
+            psWhnf
+              context.environment
+              context.metaContext
+              context.localContext
+              forallView.domain
+          if psExprHasConst inductiveName fieldType then
+            Except.error
+              (PsElabError.matchRecursiveFieldUnsupported inductiveName)
+          else
+            match psSyntaxNameToName binderSyntax with
+            | none => Except.error PsElabError.emptyName
+            | some binderName =>
+                let pushed :=
+                  psLocalPushBinding
+                    context.localContext
+                    binderName
+                    forallView.domain
+                    forallView.binder
+                let nextContext :=
+                  psElabContextWithLocal context pushed.context
+                psElabMatchFields
+                  nextContext
+                  inductiveName
+                  (psExprInstantiate1
+                    forallView.body
+                    (PsExpr.fvar pushed.id))
+                  rest
+                  ({
+                    id := pushed.id
+                    name := binderName
+                    type := forallView.domain
+                    binder := forallView.binder
+                  } :: fieldsRev)
+
+def psCloseElabMatchFields
+    (metaContext : PsMetaContext) :
+    List PsElabMatchField -> PsExpr -> PsExpr
+  | [], term => term
+  | field :: rest, term =>
+      let closed :=
+        PsExpr.lam
+          field.name
+          (psMetaInstantiate metaContext field.type)
+          (psExprAbstractFVar field.id term)
+          field.binder
+      psCloseElabMatchFields metaContext rest closed
+
+structure PsElabMatchMinorResult where
+  context : PsElabContext
+  term : PsExpr
+
+def psElabMatchMinor
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (context : PsElabContext)
+    (inductiveInfo : PsInductiveInfo)
+    (inductiveLevels : List PsLevel)
+    (parameterArgs : List PsExpr)
+    (expectedType : PsExpr)
+    (alternative : PsElabMatchAlternative) :
+    Except PsElabError PsElabMatchMinorResult :=
+  match alternative.pattern with
+  | .bool _ _ =>
+      match elaborate context alternative.body (some expectedType) with
+      | Except.error error => Except.error error
+      | Except.ok bodyResult =>
+          Except.ok {
+            context := bodyResult.context
+            term := bodyResult.term
+          }
+  | .wildcard _ =>
+      Except.error PsElabError.matchPatternUnsupported
+  | .constructor _ binders _ =>
+      match psEnvironmentFindConstructor
+          context.environment
+          alternative.constructorName with
+      | none =>
+          Except.error
+            (PsElabError.matchConstructorUnknown
+              alternative.constructorName)
+      | some ctorInfo =>
+          if !psNameEq ctorInfo.inductiveName inductiveInfo.name then
+            Except.error
+              (PsElabError.matchConstructorUnknown
+                alternative.constructorName)
+          else if ctorInfo.numParams != parameterArgs.length then
+            Except.error PsElabError.matchParameterArity
+          else if ctorInfo.numFields != binders.length then
+            Except.error
+              (PsElabError.matchConstructorArity
+                alternative.constructorName)
+          else if psSyntaxNameListHasDuplicate binders then
+            Except.error
+              (PsElabError.matchConstructorArity
+                alternative.constructorName)
+          else if ctorInfo.levelParams.length != inductiveLevels.length then
+            Except.error PsElabError.matchRecursorLevels
+          else
+            let ctorType :=
+              psExprInstantiateLevelParams
+                ctorInfo.levelParams
+                inductiveLevels
+                ctorInfo.type
+            match psElabMatchApplyParameters
+                context
+                parameterArgs
+                ctorType with
+            | Except.error error => Except.error error
+            | Except.ok fieldCursor =>
+                match psElabMatchFields
+                    context
+                    inductiveInfo.name
+                    fieldCursor
+                    binders
+                    [] with
+                | Except.error error => Except.error error
+                | Except.ok fieldResult =>
+                    match elaborate
+                        fieldResult.context
+                        alternative.body
+                        (some expectedType) with
+                    | Except.error error => Except.error error
+                    | Except.ok bodyResult =>
+                        let metaContext := bodyResult.context.metaContext
+                        let closed :=
+                          psCloseElabMatchFields
+                            metaContext
+                            fieldResult.fieldsRev
+                            (psMetaInstantiate
+                              metaContext
+                              bodyResult.term)
+                        Except.ok {
+                          context :=
+                            psElabContextWithMeta
+                              context
+                              metaContext
+                          term := closed
+                        }
+
+structure PsElabMatchMinorsResult where
+  context : PsElabContext
+  minors : List PsExpr
+
+def psElabMatchMinors
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (inductiveInfo : PsInductiveInfo)
+    (inductiveLevels : List PsLevel)
+    (parameterArgs : List PsExpr)
+    (expectedType : PsExpr)
+    (alternatives : List PsElabMatchAlternative) :
+    PsElabContext ->
+    List PsName ->
+    Except PsElabError PsElabMatchMinorsResult
+  | context, [] =>
+      Except.ok {
+        context := context
+        minors := []
+      }
+  | context, ctorName :: rest =>
+      match psElabMatchAlternativeFind ctorName alternatives with
+      | none => Except.error PsElabError.matchNonExhaustive
+      | some alternative =>
+          match psElabMatchMinor
+              elaborate
+              context
+              inductiveInfo
+              inductiveLevels
+              parameterArgs
+              expectedType
+              alternative with
+          | Except.error error => Except.error error
+          | Except.ok minor =>
+              match psElabMatchMinors
+                  elaborate
+                  inductiveInfo
+                  inductiveLevels
+                  parameterArgs
+                  expectedType
+                  alternatives
+                  minor.context
+                  rest with
+              | Except.error error => Except.error error
+              | Except.ok tail =>
+                  Except.ok {
+                    context := tail.context
+                    minors := minor.term :: tail.minors
+                  }
+
+def psElabMatch
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (context : PsElabContext)
+    (scrutineeSyntax : PsSyntaxTerm)
+    (alternativesSyntax :
+      List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match expected with
+  | none => Except.error PsElabError.matchExpectedType
+  | some expectedType =>
+      match elaborate context scrutineeSyntax none with
+      | Except.error error => Except.error error
+      | Except.ok scrutineeResult =>
+          let scrutineeType :=
+            psWhnf
+              scrutineeResult.context.environment
+              scrutineeResult.context.metaContext
+              scrutineeResult.context.localContext
+              scrutineeResult.type
+          let typeView := psExprAppView scrutineeType
+          match typeView.head with
+          | .constE inductiveName inductiveLevels =>
+              match psEnvironmentFindInductive
+                  scrutineeResult.context.environment
+                  inductiveName with
+              | none =>
+                  Except.error PsElabError.matchScrutineeUnsupported
+              | some inductiveInfo =>
+                  if inductiveInfo.numIndices != 0 then
+                    Except.error PsElabError.matchInductiveUnsupported
+                  else if typeView.args.length != inductiveInfo.numParams then
+                    Except.error PsElabError.matchParameterArity
+                  else
+                    match psElabPrepareMatchAlternatives
+                        inductiveInfo
+                        alternativesSyntax
+                        [] with
+                    | Except.error error => Except.error error
+                    | Except.ok alternatives =>
+                        let recursorName :=
+                          psNameAppendStr inductiveInfo.name "rec"
+                        match psEnvironmentFindRecursor
+                            scrutineeResult.context.environment
+                            recursorName with
+                        | none =>
+                            Except.error PsElabError.matchRecursorUnsupported
+                        | some recInfo =>
+                            if recInfo.numParams != inductiveInfo.numParams
+                                || recInfo.numIndices != 0
+                                || recInfo.numMotives != 1
+                                || recInfo.numMinors
+                                  != inductiveInfo.constructors.length then
+                              Except.error
+                                PsElabError.matchRecursorUnsupported
+                            else
+                              let instantiatedExpected :=
+                                psMetaInstantiate
+                                  scrutineeResult.context.metaContext
+                                  expectedType
+                              match psInferType
+                                  scrutineeResult.context.environment
+                                  scrutineeResult.context.metaContext
+                                  scrutineeResult.context.localContext
+                                  instantiatedExpected with
+                              | Except.error error =>
+                                  Except.error (PsElabError.infer error)
+                              | Except.ok expectedTypeType =>
+                                  match psInferEnsureSort
+                                      scrutineeResult.context.environment
+                                      scrutineeResult.context.metaContext
+                                      scrutineeResult.context.localContext
+                                      expectedTypeType with
+                                  | Except.error error =>
+                                      Except.error (PsElabError.infer error)
+                                  | Except.ok resultLevel =>
+                                      let recursorLevels :=
+                                        if recInfo.levelParams.length == 0 then
+                                          []
+                                        else if recInfo.levelParams.length == 1 then
+                                          [resultLevel]
+                                        else
+                                          []
+                                      if recInfo.levelParams.length > 1 then
+                                        Except.error
+                                          PsElabError.matchRecursorLevels
+                                      else
+                                        match psElabMatchMinors
+                                            elaborate
+                                            inductiveInfo
+                                            inductiveLevels
+                                            typeView.args
+                                            instantiatedExpected
+                                            alternatives
+                                            scrutineeResult.context
+                                            inductiveInfo.constructors with
+                                        | Except.error error =>
+                                            Except.error error
+                                        | Except.ok minors =>
+                                            let motive :=
+                                              PsExpr.lam
+                                                (psRootName "_match")
+                                                scrutineeType
+                                                instantiatedExpected
+                                                PsBinderInfo.explicit
+                                            let recursorTerm :=
+                                              psExprApplyMany
+                                                (PsExpr.constE
+                                                  recursorName
+                                                  recursorLevels)
+                                                (typeView.args
+                                                  ++ [motive]
+                                                  ++ minors.minors
+                                                  ++ [scrutineeResult.term])
+                                            psElabResolvedTerm
+                                              minors.context
+                                              recursorTerm
+                                              (some instantiatedExpected)
+          | _ =>
+              Except.error PsElabError.matchScrutineeUnsupported
+
 def psBinderAcceptsExplicitArgument (binder : PsBinderInfo) : Bool :=
   match binder with
   | .explicit => true
@@ -662,8 +1171,13 @@ def psElabTermWithFuel
             thenBranch
             elseBranch
             expected
-      | .matchE _ _ _ =>
-          Except.error PsElabError.unsupportedTerm
+      | .matchE scrutinee alternatives _ =>
+          psElabMatch
+            (psElabTermWithFuel remaining)
+            context
+            scrutinee
+            alternatives
+            expected
       | .app fn args _ =>
           match psElabTermWithFuel remaining context fn none with
           | Except.error error => Except.error error

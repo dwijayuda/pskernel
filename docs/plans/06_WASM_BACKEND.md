@@ -50,9 +50,18 @@ workflow run `35978437272` on 2026-09-24. The executable closure matrix passed:
 - source-shape anti-drift;
 - architecture anti-drift.
 
-This checkpoint is the pre-`main`-integration W2 baseline. Any integration or
-W3 work must preserve the same gates before W2 is considered stable on the new
-HEAD.
+This checkpoint is the pre-`main`-integration W2 baseline.
+
+Current `main` was then integrated through merge commit
+`46dfe88dd447b9a699a2a8ac21b97e79a0f01aa1`. The post-integration W2
+checkpoint is `0a7b08c699c867d20a598a15588a71bf237595bb`, validated by:
+
+- WASM closure workflow run `35980372915`: build graph, elaboration, erasure,
+  package integration, TypeScript backend, WebAssembly backend, root suite,
+  workspace-lock, source-shape, and architecture all passed;
+- TypeScript kernel CI run `35980377525`: root tests and anti-drift passed.
+
+W3 work starts from this post-integration checkpoint.
 
 ## 1. Goals
 

@@ -1,5 +1,6 @@
 import binaryen from 'binaryen';
 import {
+  PROOFSCRIPT_BIGINT_RUNTIME_MODULE,
   validateWasmIrModule,
   type WasmAbiValueType,
   type WasmBigIntLiteral,
@@ -35,12 +36,19 @@ export interface WasmExportAbi {
   readonly result:WasmAbiValueType|null;
 }
 
+export interface WasmExecutionRuntime {
+  readonly profile:WasmIrModule['profile'];
+  readonly bigintRuntime?:typeof PROOFSCRIPT_BIGINT_RUNTIME_MODULE;
+  readonly bigintRuntimeMode?:'js-host';
+}
+
 export interface WasmEmitResult {
   readonly binary:Uint8Array;
   readonly text:string;
   readonly optimized:boolean;
   readonly binaryenVersion:typeof BINARYEN_VERSION;
   readonly profile:WasmIrModule['profile'];
+  readonly executionRuntime:WasmExecutionRuntime;
   readonly imports:readonly WasmIrFunctionImport[];
   readonly bigintLiterals:readonly WasmBigIntLiteral[];
   readonly exports:readonly WasmExportAbi[];
@@ -193,6 +201,19 @@ function emitFunctionBody(
   };
 }
 
+function executionRuntimeForProfile(
+  profile:WasmIrModule['profile'],
+):WasmExecutionRuntime {
+  if(profile==='proofscript-wasm32-ref-js-v1'){
+    return {
+      profile,
+      bigintRuntime:PROOFSCRIPT_BIGINT_RUNTIME_MODULE,
+      bigintRuntimeMode:'js-host',
+    };
+  }
+  return {profile};
+}
+
 export function emitBinaryenWasm(
   input:WasmIrModule,
   options:WasmEmitOptions={},
@@ -246,6 +267,7 @@ export function emitBinaryenWasm(
     optimized:options.optimize===true,
     binaryenVersion:BINARYEN_VERSION,
     profile:input.profile,
+    executionRuntime:executionRuntimeForProfile(input.profile),
     imports:[...(input.imports??[])],
     bigintLiterals:[...(input.bigintLiterals??[])],
     exports:input.functions.flatMap((fn)=>

@@ -76,6 +76,13 @@ jobs:
           cd selfhost
           lake exe psc1_tests
 
+      - name: Run source translation tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_translation_tests
+
   psc0-compatibility:
     # This lane measures the currently implemented TS frontend/compiler against
     # the PSC1-constrained Lean source. It is deliberately non-blocking while

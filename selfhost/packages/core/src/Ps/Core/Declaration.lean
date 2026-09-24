@@ -7,6 +7,7 @@ structure PsInductiveInfo where
   numParams : Nat
   numIndices : Nat
   constructors : List PsName
+  isStructure : Bool := false
 
 structure PsConstructorInfo where
   name : PsName

@@ -18,7 +18,14 @@ export type Expr =
   | { readonly kind: 'mdata'; readonly data: Readonly<Record<string, unknown>>; readonly expr: Expr }
   | { readonly kind: 'proj'; readonly typeName: Name; readonly index: number; readonly expr: Expr };
 
-export const bvar = (index: number): Expr => ({ kind: 'bvar', index });
+const LEAN_MAX_LOOSE_BVAR_RANGE=0x0f_ffff;
+function checkedBVarIndex(index:number):number{
+  if(!Number.isInteger(index)||index<0)throw new Error('invalid bound variable index');
+  // Lean Expr.Data reserves 20 bits for looseBVarRange, which is index + 1.
+  if(index>=LEAN_MAX_LOOSE_BVAR_RANGE)throw new Error('too many bound variables');
+  return index;
+}
+export const bvar = (index: number): Expr => ({ kind: 'bvar', index:checkedBVarIndex(index) });
 export const fvar = (id: string): Expr => ({ kind: 'fvar', id });
 export const sort = (level: Level): Expr => ({ kind: 'sort', level });
 export const constant = (name: Name, levels: readonly Level[] = []): Expr => ({ kind: 'const', name, levels });
@@ -214,6 +221,7 @@ function leanExprCachedData(root:Expr):LeanExprCachedData{
     let hash=hashLeanString(e.kind),looseBVarRange=0,hasFVar=false,hasMVar=false;
     switch(e.kind){
       case'bvar':
+        checkedBVarIndex(e.index);
         hash=mixLeanHash(hash,e.index);looseBVarRange=e.index+1;break;
       case'fvar':
         hash=mixLeanHash(hash,hashLeanString(e.id));hasFVar=true;break;

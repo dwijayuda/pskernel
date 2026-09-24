@@ -109,6 +109,16 @@ test('Lean Expr equality memoizes repeated shared DAG pairs',()=>{
  for(let i=0;i<28;i++){a=app(a,a);b=app(b,b);}
  assert(exprLeanEq(a,b),'shared structurally equal expression DAGs must compare successfully');
 });
+test('bound-variable indices honor Lean Expr.Data 20-bit loose range',()=>{
+ const max=bvar(1_048_574);
+ assert(hasLooseBVar(max),'largest representable Lean bvar index must remain usable');
+ throws(()=>bvar(1_048_575));
+ throws(()=>bvar(-1));
+ throws(()=>bvar(1.5));
+ throws(()=>hasLooseBVar({kind:'bvar',index:1_048_575} as any));
+ throws(()=>hasLooseBVar({kind:'bvar',index:-1} as any));
+});
+
 test('Lean replacement primitives preserve shared DAG structure and cached loose-bvar skips',()=>{
  let open:any=bvar(0),closed:any=constant(N.Nat);
  for(let i=0;i<24;i++){open=app(open,open);closed=app(closed,closed);}

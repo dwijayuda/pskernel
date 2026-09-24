@@ -6,7 +6,7 @@ inductive PsLevel where
   | max (left : PsLevel) (right : PsLevel)
   | imax (left : PsLevel) (right : PsLevel)
   | param (name : PsName)
-  | mvar (name : PsName)
+  | mvar (id : Nat)
 
 def psLevelSucc (level : PsLevel) : PsLevel :=
   PsLevel.succ level

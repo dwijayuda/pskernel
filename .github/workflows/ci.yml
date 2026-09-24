@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 22
       - run: npm ci --no-audit --no-fund
-      - run: npm run test:kernel
+      - run: npm test
       - run: node scripts/anti-drift.mjs
 
   powershell-syntax:

@@ -16,6 +16,19 @@ on:
       - "src/kernel/**"
       - "src/integration/lean4export.ts"
       - "test/all.test.ts"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/full-std-canonical.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "ORACLE_LOCK.json"
+      - "oracle/replay-probe/**"
+      - "scripts/**"
+      - "src/core/**"
+      - "src/kernel/**"
+      - "src/integration/lean4export.ts"
+      - "test/all.test.ts"
 
 permissions:
   contents: read

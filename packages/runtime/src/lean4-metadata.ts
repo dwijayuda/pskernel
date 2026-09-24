@@ -19,6 +19,12 @@ export interface Lean434MetadataImplementedBy {
   readonly implementation:string;
 }
 
+export interface Lean434MetadataRuntimeTarget {
+  readonly declaration:string;
+  readonly kind:'implemented_by'|'unsafe_rec';
+  readonly implementation:string;
+}
+
 export interface Lean434MetadataInitializer {
   readonly module:string;
   readonly moduleIndex:number;
@@ -39,6 +45,7 @@ export interface Lean434RuntimeMetadataDocument {
   readonly module:string;
   readonly externs:readonly Lean434MetadataExtern[];
   readonly implementedBy:readonly Lean434MetadataImplementedBy[];
+  readonly runtimeTargets:readonly Lean434MetadataRuntimeTarget[];
   readonly initializers:readonly Lean434MetadataInitializer[];
 }
 
@@ -180,6 +187,24 @@ function parseImplementedBy(
   };
 }
 
+function parseRuntimeTarget(
+  value:unknown,
+  where:string,
+):Lean434MetadataRuntimeTarget{
+  const object=record(value,where);
+  const kind=stringField(object,'kind',where);
+  if(kind!=='implemented_by'&&kind!=='unsafe_rec'){
+    throw new Lean434RuntimeMetadataError(
+      where+".kind must be 'implemented_by' or 'unsafe_rec'",
+    );
+  }
+  return {
+    declaration:stringField(object,'declaration',where),
+    kind,
+    implementation:stringField(object,'implementation',where),
+  };
+}
+
 function parseInitializer(
   value:unknown,
   where:string,
@@ -280,6 +305,16 @@ export function parseLean434RuntimeMetadata(
       'metadata.implementedBy['+index+']',
     ),
   );
+  const runtimeTargets=(
+    object.runtimeTargets===undefined
+      ?[]
+      :arrayField(object,'runtimeTargets','metadata')
+  ).map(
+    (entry,index)=>parseRuntimeTarget(
+      entry,
+      'metadata.runtimeTargets['+index+']',
+    ),
+  );
   const rawInitializers=arrayField(
     object,
     'initializers',
@@ -298,6 +333,10 @@ export function parseLean434RuntimeMetadata(
   assertUnique(
     implementedBy.map((entry)=>entry.declaration),
     'implemented_by declaration',
+  );
+  assertUnique(
+    runtimeTargets.map((entry)=>entry.declaration),
+    'runtime target declaration',
   );
 
   // Lean combines regular initializer entries from .olean and .ir, removing
@@ -326,6 +365,7 @@ export function parseLean434RuntimeMetadata(
     module:stringField(object,'module','metadata'),
     externs,
     implementedBy,
+    runtimeTargets,
     initializers,
   };
 }
@@ -334,6 +374,8 @@ export class Lean434RuntimeMetadataIndex{
   readonly externsByDeclaration:ReadonlyMap<string,Lean434MetadataExtern>;
   readonly implementedByByDeclaration:
     ReadonlyMap<string,Lean434MetadataImplementedBy>;
+  readonly runtimeTargetsByDeclaration:
+    ReadonlyMap<string,Lean434MetadataRuntimeTarget>;
 
   constructor(readonly document:Lean434RuntimeMetadataDocument){
     this.externsByDeclaration=new Map(
@@ -343,6 +385,11 @@ export class Lean434RuntimeMetadataIndex{
     );
     this.implementedByByDeclaration=new Map(
       document.implementedBy.map(
+        (entry)=>[entry.declaration,entry] as const,
+      ),
+    );
+    this.runtimeTargetsByDeclaration=new Map(
+      document.runtimeTargets.map(
         (entry)=>[entry.declaration,entry] as const,
       ),
     );
@@ -358,6 +405,12 @@ export class Lean434RuntimeMetadataIndex{
     declaration:string,
   ):Lean434MetadataImplementedBy|undefined{
     return this.implementedByByDeclaration.get(declaration);
+  }
+
+  runtimeTargetFor(
+    declaration:string,
+  ):Lean434MetadataRuntimeTarget|undefined{
+    return this.runtimeTargetsByDeclaration.get(declaration);
   }
 
   initializersForModule(

@@ -243,8 +243,6 @@ export function validateInstalledRecursorsByReduction(work:Environment,d:Inducti
    }
  }
 }
-function commit(from:Environment,to:Environment,originalKeys:Set<string>):void{for(const i of from.entries())if(!originalKeys.has(nameKey(i.name)))to.add(i);}
-
 interface InternalInductiveAdmissionOptions { readonly allowPrimitiveNames?: boolean; readonly allowReservedNestedAux?: boolean }
 
 /** Internal admission entry used only after a dedicated recognizer/preprocessor has justified a bypass. */
@@ -256,15 +254,17 @@ export function addOrdinaryInductiveInternal(env:Environment,d:InductiveDecl,opt
  }
  if(d.numNested&&d.numNested!==0)throw new KernelError('nested inductive declaration must go through nested-inductive preprocessing');if(!uniqueNames(d.types.map(x=>x.name)))throw new KernelError('duplicate inductive type name');
  const stage=<T>(label:string,f:()=>T):T=>{try{return f();}catch(e){const msg=e instanceof Error?e.message:String(e);throw new KernelError(`inductive ${label}: ${msg}`);}};
- const original=new Set(env.entries().map(x=>nameKey(x.name)));const work=env.clone();const stats=stage('header checking',()=>computeStats(work,d));stage('type declaration',()=>declareTypes(work,d,stats));stage('constructor checking',()=>checkConstructors(work,d,stats));stage('constructor declaration',()=>declareConstructors(work,d));
- const {infos,expectedRules}=stage('recursor synthesis',()=>generateRecursors(work,d,stats));for(const i of infos){if(work.has(i.name))throw new KernelError(`already declared '${nameToString(i.name)}'`);work.add(i);}
- // Defensive 4.34-style preservation checks: first verify synthesis-side rule types,
- // then independently exercise each installed rule through the real recursor reducer (PR #14808).
- stage('recursor validation',()=>{
-   for(const i of infos){const checker=new TypeChecker(work,new LocalContext(),undefined,undefined,d.isUnsafe?'unsafe':'safe',i.levelParams);stage(`recursor type ${nameToString(i.name)}`,()=>checker.ensureSort(checker.check(i.type),i.type));for(const rb of expectedRules.get(nameKey(i.name))??[]){stage(`recursor rule ${nameToString(rb.rule.ctor)}`,()=>{const got=checker.check(rb.rule.rhs);if(!checker.isDefEq(got,rb.expectedType))throw new KernelError(`recursor rule for '${nameToString(rb.rule.ctor)}' is not type preserving`);});}}
-   validateInstalledRecursorsByReduction(work,d);
+ env.transaction(()=>{
+   const work=env;
+   const stats=stage('header checking',()=>computeStats(work,d));stage('type declaration',()=>declareTypes(work,d,stats));stage('constructor checking',()=>checkConstructors(work,d,stats));stage('constructor declaration',()=>declareConstructors(work,d));
+   const {infos,expectedRules}=stage('recursor synthesis',()=>generateRecursors(work,d,stats));for(const i of infos){if(work.has(i.name))throw new KernelError(`already declared '${nameToString(i.name)}'`);work.add(i);}
+   // Defensive 4.34-style preservation checks: first verify synthesis-side rule types,
+   // then independently exercise each installed rule through the real recursor reducer (PR #14808).
+   stage('recursor validation',()=>{
+     for(const i of infos){const checker=new TypeChecker(work,new LocalContext(),undefined,undefined,d.isUnsafe?'unsafe':'safe',i.levelParams);stage(`recursor type ${nameToString(i.name)}`,()=>checker.ensureSort(checker.check(i.type),i.type));for(const rb of expectedRules.get(nameKey(i.name))??[]){stage(`recursor rule ${nameToString(rb.rule.ctor)}`,()=>{const got=checker.check(rb.rule.rhs);if(!checker.isDefEq(got,rb.expectedType))throw new KernelError(`recursor rule for '${nameToString(rb.rule.ctor)}' is not type preserving`);});}}
+     validateInstalledRecursorsByReduction(work,d);
+   });
  });
- commit(work,env,original);
 }
 
 /** Public ordinary-inductive admission is deliberately fail-closed. */

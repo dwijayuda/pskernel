@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain sixteen pskernel-admitted theorems in total:
+The three modules now contain eighteen pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,9 +49,9 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- sixteen admitted stdlib theorems: eleven definitional laws use bounded
-  `rfl`, `optionOrElseNoneRight` dogfoods bounded `cases`,
-  `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
+- eighteen admitted stdlib theorems: twelve definitional laws use bounded
+  `rfl`, `optionOrElseNoneRight` and `resultToOptionMap` dogfood bounded
+  `cases`, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
   `listMapAppend` dogfood bounded induction plus checked rewriting;
 - zero runtime external assumptions.
@@ -136,3 +136,20 @@ expression-size metric, and their lhs patterns are non-overlapping. The first
 rule exposes `PsOption.none`; the second removes `optionOrElse`. This gives
 the end-to-end stdlib project a genuine multi-rule simplifier regression without
 weakening the simplifier's termination/orientation contract.
+
+## Result/Option map compatibility
+
+`ProofScript.Data.Result.resultToOptionMap` proves:
+
+```text
+resultToOption(resultMap(f, value)) =
+optionMap(f, resultToOption(value))
+```
+
+for every `PsResult`. The proof is bounded case analysis followed by
+definitional reflexivity in both constructors. This is the first stdlib law
+linking the higher-order Result mapper to the Option mapper; it uses no host
+functor implementation or special theorem rule.
+
+The adjacent `resultToOptionOk` computation theorem is definitional and is
+proved by bounded `rfl`.

@@ -708,12 +708,12 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     PsOption/PsResult/PsList only when APIs are supported by the verified
     language itself. The current utility/law tranche includes optionOrElse,
     resultGetOrElse/resultToOption, structurally recursive listAppend/listMap,
-    eleven definitional computation laws, universal Option case analysis,
-    a Result/Option multi-rule simp law, listAppendNilRight, listAppendAssoc,
-    and listMapAppend. Sixteen current stdlib theorems now dogfood bounded
-    rfl/cases/simp-only/induction/rw proof paths; continue with stronger
-    laws/utilities only when the proof/recursion surface supports them without
-    host shortcuts.
+    twelve definitional computation laws, universal Option/Result case-analysis
+    laws, a Result/Option multi-rule simp law, resultToOptionMap,
+    listAppendNilRight, listAppendAssoc, and listMapAppend. Eighteen current
+    stdlib theorems now dogfood bounded rfl/cases/simp-only/induction/rw proof
+    paths; continue with stronger laws/utilities only when the proof/recursion
+    surface supports them without host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.
@@ -795,3 +795,16 @@ This keeps the simplifier's evidence boundary visible: there is no global simp
 set, hidden unfolding, or theorem-specific shortcut. Each change still flows
 through the same Eq transport proof reconstruction used by bounded `rw`, with
 the final reflexive target closed by the Eq-only rfl helper.
+
+## Stdlib Result/Option map compatibility checkpoint
+
+The standard library now proves `resultToOptionMap`: converting a mapped
+Result to Option is equal to mapping the converted Option. The proof is
+constructor case analysis plus definitional equality, so it exercises generic
+higher-order functions across two source-owned ADTs without introducing any
+library-specific proof rule.
+
+The companion `resultToOptionOk` theorem records the success-constructor
+computation by bounded rfl. Together with the existing error/simp laws, the
+Result→Option API now has checked computation behavior on both constructors and
+one generic cross-ADT naturality-style law.

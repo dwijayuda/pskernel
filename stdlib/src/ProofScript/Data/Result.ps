@@ -52,3 +52,13 @@ theorem resultToOptionErrorOrElse {α : Type}{ε : Type}
 (error : ε, fallback : PsOption(α)) :
 optionOrElse(resultToOption(PsResult.error(error)), fallback) = fallback :=
   by simp only [resultToOptionError(error), optionOrElseNone(fallback)];
+
+theorem resultToOptionOk {α : Type}{ε : Type}
+(value : α) :
+resultToOption(PsResult.ok(value)) = PsOption.some(value) := by rfl;
+
+theorem resultToOptionMap {α : Type}{β : Type}{ε : Type}
+(f : α -> β, value : PsResult(α, ε)) :
+resultToOption(resultMap(f, value)) =
+optionMap(f, resultToOption(value)) :=
+  by cases value; rfl; rfl;

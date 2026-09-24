@@ -627,6 +627,7 @@ export function findLean434JsExtern(
 
 
 export type Lean434ExternEffect='pure'|'st-action';
+export type Lean434ExternResultAdapter='identity'|'decidable';
 
 export interface Lean434DeclarationExternBinding {
   readonly leanDeclaration:string;
@@ -639,6 +640,11 @@ export interface Lean434DeclarationExternBinding {
    * actions so Lean-written ST/IO bind code observes the correct semantics.
    */
   readonly effect?:Lean434ExternEffect;
+  /**
+   * Adapter from the low-level primitive ABI back to the Lean source-level
+   * runtime representation. Omitted means identity.
+   */
+  readonly resultAdapter?:Lean434ExternResultAdapter;
   /**
    * Indices from the full application argument list forwarded to the JS
    * extern. Omitted means every argument is runtime-relevant.
@@ -697,6 +703,13 @@ readonly Lean434DeclarationExternBinding[]=[
     leanDeclaration:'Nat.ble',
     leanSymbol:'lean_nat_dec_le',
     arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Nat.decLt',
+    leanSymbol:'lean_nat_dec_lt',
+    arity:2,
+    resultAdapter:'decidable',
     upstreamSource:'Init/Prelude.lean',
   },
   {
@@ -978,6 +991,7 @@ new Map<string,Lean434JsExternImplementation>([
   ['lean_nat_mod',(a,b)=>lean_nat_mod(a as LeanNat,b as LeanNat)],
   ['lean_nat_dec_eq',(a,b)=>lean_nat_dec_eq(a as LeanNat,b as LeanNat)],
   ['lean_nat_dec_le',(a,b)=>lean_nat_dec_le(a as LeanNat,b as LeanNat)],
+  ['lean_nat_dec_lt',(a,b)=>lean_nat_dec_lt(a as LeanNat,b as LeanNat)],
   ['lean_uint64_of_nat',(value)=>
     lean_uint64_of_nat(value as LeanNat)],
   ['lean_uint64_mix_hash',(a,b)=>

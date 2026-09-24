@@ -20,24 +20,24 @@ def infoJson (env : Environment) (name : Name) : Json :=
       ("missing", true)
     ]
   | some ci =>
-    let base := [
-      ("name", name.toString),
-      ("kind", constantKind ci),
-      ("type", reprStr ci.type),
-      ("isUnsafe", ci.isUnsafe)
+    let base : List (String × Json) := [
+      ("name", toJson name.toString),
+      ("kind", toJson (constantKind ci)),
+      ("type", toJson (reprStr ci.type)),
+      ("isUnsafe", toJson ci.isUnsafe)
     ]
     match ci with
     | .inductInfo iv =>
       Json.mkObj <| base ++ [
-        ("ctors", Json.arr <| iv.ctors.toArray.map (fun n => n.toString)),
-        ("numParams", iv.numParams),
-        ("numIndices", iv.numIndices)
+        ("ctors", Json.arr <| iv.ctors.toArray.map (fun n => toJson n.toString)),
+        ("numParams", toJson iv.numParams),
+        ("numIndices", toJson iv.numIndices)
       ]
     | .ctorInfo cv =>
       Json.mkObj <| base ++ [
-        ("induct", cv.induct.toString),
-        ("numParams", cv.numParams),
-        ("numFields", cv.numFields)
+        ("induct", toJson cv.induct.toString),
+        ("numParams", toJson cv.numParams),
+        ("numFields", toJson cv.numFields)
       ]
     | _ => Json.mkObj base
 

@@ -8,6 +8,7 @@ import type {
   WasmIrFunctionImport,
   WasmIrModule,
 } from '@proofscript/wasm-ir';
+import {emitFrozenW2Bytes} from './w2-compat.js';
 
 const module:WasmIrModule={
   kind:'proofscript-wasm-ir',
@@ -38,6 +39,10 @@ equal(
   Buffer.from(canonical.binary).toString('hex'),
   Buffer.from(canonicalAgain.binary).toString('hex'),
 );
+equal(
+  Buffer.from(canonical.binary).toString('hex'),
+  Buffer.from(emitFrozenW2Bytes(module)).toString('hex'),
+);
 
 const compiled=new WebAssembly.Module(canonical.binary);
 const instance=new WebAssembly.Instance(compiled,{});
@@ -56,6 +61,10 @@ const optimizedNot=optimizedInstance.exports.not;
 ok(typeof optimizedNot==='function');
 equal((optimizedNot as (value:number)=>number)(0),1);
 equal((optimizedNot as (value:number)=>number)(1),0);
+equal(
+  Buffer.from(optimized.binary).toString('hex'),
+  Buffer.from(emitFrozenW2Bytes(module,true)).toString('hex'),
+);
 
 console.log('ok - @proofscript/backend-wasm Binaryen W1 execution');
 
@@ -110,6 +119,10 @@ const unsignedModule:WasmIrModule={
   ],
 };
 const unsignedArtifact=emitBinaryenWasm(unsignedModule);
+equal(
+  Buffer.from(unsignedArtifact.binary).toString('hex'),
+  Buffer.from(emitFrozenW2Bytes(unsignedModule)).toString('hex'),
+);
 const unsignedHost=instantiateProofScriptWasm(unsignedArtifact);
 equal(unsignedHost.exports.id8?.(0xff),0xff);
 equal(unsignedHost.exports.id16?.(0xffff),0xffff);
@@ -211,12 +224,17 @@ const uintAddModule:WasmIrModule={
   ],
 };
 const uintAddArtifact=emitBinaryenWasm(uintAddModule);
+equal(
+  Buffer.from(uintAddArtifact.binary).toString('hex'),
+  Buffer.from(emitFrozenW2Bytes(uintAddModule)).toString('hex'),
+);
 const uintAddHost=instantiateProofScriptWasm(uintAddArtifact);
 equal(uintAddHost.exports.add8?.(0xff,1),0);
 equal(uintAddHost.exports.add16?.(0xffff,1),0);
 equal(uintAddHost.exports.add32?.(0xffffffff,1),0);
 equal(uintAddHost.exports.add64?.(0xffffffffffffffffn,1n),0n);
 console.log('ok - @proofscript/backend-wasm modular fixed-width UInt addition');
+console.log('ok - @proofscript/backend-wasm W2 MVP bytes remain frozen');
 
 const bigintIdentityModule:WasmIrModule={
   kind:'proofscript-wasm-ir',

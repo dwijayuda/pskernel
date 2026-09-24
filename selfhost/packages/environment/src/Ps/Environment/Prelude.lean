@@ -277,6 +277,88 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
         intType
         PsBinderInfo.explicit)
       PsBinderInfo.explicit
+  let charToNatType :=
+    PsExpr.forallE
+      cName
+      charType
+      natType
+      PsBinderInfo.explicit
+  let stringPushType :=
+    PsExpr.forallE
+      (psRootName "s")
+      stringType
+      (PsExpr.forallE
+        cName
+        charType
+        stringType
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let stringSingletonType :=
+    PsExpr.forallE
+      cName
+      charType
+      stringType
+      PsBinderInfo.explicit
+  let stringUnaryNatType :=
+    PsExpr.forallE
+      (psRootName "s")
+      stringType
+      natType
+      PsBinderInfo.explicit
+  let stringBinaryType :=
+    PsExpr.forallE
+      (psRootName "a")
+      stringType
+      (PsExpr.forallE
+        (psRootName "b")
+        stringType
+        stringType
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let stringPositionType :=
+    PsExpr.forallE
+      (psRootName "s")
+      stringType
+      (PsExpr.forallE
+        nName
+        natType
+        natType
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let stringGetType :=
+    PsExpr.forallE
+      (psRootName "s")
+      stringType
+      (PsExpr.forallE
+        nName
+        natType
+        charType
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let stringAtEndType :=
+    PsExpr.forallE
+      (psRootName "s")
+      stringType
+      (PsExpr.forallE
+        nName
+        natType
+        boolType
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let stringExtractType :=
+    PsExpr.forallE
+      (psRootName "s")
+      stringType
+      (PsExpr.forallE
+        (psRootName "start")
+        natType
+        (PsExpr.forallE
+          (psRootName "stop")
+          natType
+          stringType
+          PsBinderInfo.explicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
   let charOfNatType :=
     PsExpr.forallE
       nName
@@ -350,6 +432,36 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let env16 :=
     psPreludeAdd env15
       (PsDeclaration.axiomDecl psCharOfNatName [] charOfNatType)
+  let envText0 :=
+    psPreludeAdd env16
+      (PsDeclaration.axiomDecl psCharToNatName [] charToNatType)
+  let envText1 :=
+    psPreludeAdd envText0
+      (PsDeclaration.axiomDecl psStringPushName [] stringPushType)
+  let envText2 :=
+    psPreludeAdd envText1
+      (PsDeclaration.axiomDecl psStringSingletonName [] stringSingletonType)
+  let envText3 :=
+    psPreludeAdd envText2
+      (PsDeclaration.axiomDecl psStringLengthName [] stringUnaryNatType)
+  let envText4 :=
+    psPreludeAdd envText3
+      (PsDeclaration.axiomDecl psStringAppendName [] stringBinaryType)
+  let envText5 :=
+    psPreludeAdd envText4
+      (PsDeclaration.axiomDecl psStringUtf8ByteSizeName [] stringUnaryNatType)
+  let envText6 :=
+    psPreludeAdd envText5
+      (PsDeclaration.axiomDecl psStringNextName [] stringPositionType)
+  let envText7 :=
+    psPreludeAdd envText6
+      (PsDeclaration.axiomDecl psStringGetName [] stringGetType)
+  let envText8 :=
+    psPreludeAdd envText7
+      (PsDeclaration.axiomDecl psStringAtEndName [] stringAtEndType)
+  let envText9 :=
+    psPreludeAdd envText8
+      (PsDeclaration.axiomDecl psStringExtractName [] stringExtractType)
   let envArray0 :=
     psPreludeAdd env16
       (PsDeclaration.axiomDecl psArrayName [] arrayType)

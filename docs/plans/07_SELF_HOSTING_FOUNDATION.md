@@ -61,8 +61,58 @@ The study inventory shows recurrent use of:
   `unsafe`, `implemented_by`, and other facilities that are not automatically
   required by ProofScript.
 
-ProofScript must implement the smallest coherent subset needed by its own
-compiler, not clone every facility in that list.
+### Lean implementation-language coverage policy
+
+The self-hosting foundation is no longer defined as the absolute smallest
+feature set discovered one blocker at a time. Before SH7 freezes the bootstrap
+subset, ProofScript must perform a systematic feature census of the Lean 4.34
+implementation sources used as references, including at least:
+
+- `study/lean4-4.34.0/src/Init/`;
+- `study/lean4-4.34.0/src/Lean/Parser/`;
+- `study/lean4-4.34.0/src/Lean/Meta/`;
+- `study/lean4-4.34.0/src/Lean/Elab/`;
+- `study/lean4-4.34.0/src/Lean/Compiler/`.
+
+The census must cover both source-language constructs and recurring library /
+effect abstractions. At minimum it must record use of declarations, recursion,
+pattern forms, `do`, mutable-looking Lean syntax, loops, binders, universes,
+classes/instances, collections, names, source positions, monad transformers,
+comparison/hash abstractions, parser control and Meta-state operations.
+
+Each discovered facility is classified into one of four buckets:
+
+1. **REQUIRED** — needed by the ProofScript compiler or an unavoidable
+   prerequisite abstraction. Implement before SH7 freezes.
+2. **USEFUL/CHEAP** — broadly used by Lean to implement compiler code and
+   feasible without a disproportionately large subsystem. Implement before SH7
+   when doing so materially improves compiler authoring and reduces rewrite
+   risk.
+3. **DEFERRED/EXPENSIVE** — legitimate Lean functionality whose implementation
+   would pull in a large metaprogramming/extensibility subsystem that the
+   ProofScript compiler does not need. Record it and keep it fail-closed.
+4. **HOST-BOUNDARY** — behavior that is genuinely supplied by Node/npm/the
+   filesystem/TypeScript API rather than ProofScript semantics. Keep it behind
+   typed adapters.
+
+The default rule is therefore:
+
+> Implement the practical Lean implementation-language subset: all broadly
+> useful Lean constructs exercised by Lean's own implementation that are
+> feasible at reasonable cost, plus every feature required by the ProofScript
+> compiler. Do not require a concrete blocker for every USEFUL/CHEAP feature.
+
+This broadening applies to ordinary implementation-language facilities, not to
+the whole Lean metaprogramming platform. In particular, arbitrary user syntax,
+macros/quotations, custom parser categories, custom elaborators, environment
+extensions, broad attribute registration, compile-time interpreter machinery,
+`implemented_by`, and unrestricted unsafe escape hatches remain deferred
+unless a later compiler module demonstrates a hard requirement.
+
+The preferred implementation strategy remains: desugar convenient source
+constructs into the small Lean-compatible checked core rather than enlarging
+pskernel. `for`, `while`, mutable-looking locals and similar features must
+not introduce JavaScript-specific semantic authority.
 
 ## Foundation completion rule
 
@@ -151,17 +201,30 @@ Provide verified, generic:
 - `Array α`;
 - `Map K V`;
 - `Set α`;
+- `Prod α β` / tuple support and the ordinary `fst` / `snd` operations;
+- `Sum α β` when the compiler data model benefits from it;
 - the already-landed Option/Result/List APIs needed by compiler code.
 
 The first Array profile needs at least empty, size, get/get?, push, set, map,
-fold, any/all and find?. Map/Set may initially use a persistent tree
-implementation in ProofScript; a faster runtime representation may be added
-later without changing their semantic API.
+fold, monadic map/fold variants used by compiler code, any/all and find?.
+
+The bootstrap Map/Set semantics must not silently inherit JavaScript identity
+semantics. Prefer a persistent ordered implementation requiring an explicit
+Lean-compatible ordering abstraction. Provide the bootstrap comparison
+foundation needed for compiler keys, including `BEq`/equality and `Ord`
+coverage for at least the primitive/name forms actually used by the compiler.
+`Hashable`/hash maps may remain deferred until profiling or a concrete module
+requires them.
+
+Map/Set may initially use a persistent tree implementation in ProofScript; a
+faster runtime representation may be added later without changing their
+semantic API.
 
 Exit test: AST/name-table transformations use no TypeScript collection
-semantics.
+semantics, tuple-returning compiler utilities are ordinary ProofScript values,
+and map/set key behavior is deterministic and specified.
 
-## SH3 — controlled effects
+## SH3 — controlled effects, transactional state and bootstrap Meta support
 
 Implement the compiler-oriented effect foundation:
 
@@ -170,44 +233,106 @@ Implement the compiler-oriented effect foundation:
 - `Reader` / `ReaderT`;
 - usable Lean-compatible `do` notation;
 - bind/pure sequencing;
-- `OptionT` or additional transformers only when an actual compiler module
+- `OptionT` or additional transformers when the census or a compiler module
   requires them.
 
-Do not add arbitrary JavaScript statement semantics merely to mimic
-TypeScript mutation.
+Also provide transactional state operations required by parsers and
+elaboration:
 
-Exit test: parser state and a small name-resolution pass are written without
-host-language mutation semantics.
+- checkpoint/save;
+- rollback/restore;
+- commit;
+- isolated trial/alternative execution;
+- deterministic error recovery.
 
-## SH4 — recursion closure
+A failed parser, coercion, unification or instance-search alternative must not
+leak assignments/state into the next candidate.
+
+Before SH7, move the bootstrap-critical subset of Meta/Elab support into this
+foundation instead of leaving all of it as post-foundation language work. This
+includes, to the extent exercised by the compiler source:
+
+- implicit argument insertion and expected-type propagation;
+- universe metavariables/constraints required by bootstrap declarations;
+- postponed constraints;
+- bounded higher-order pattern unification;
+- transparency-sensitive reduction where needed by elaboration;
+- Lean-compatible coercion insertion for the supported subset;
+- instance synthesis with priorities and recursion control;
+- imported instance indexes;
+- `outParam` / `semiOutParam` only if the bootstrap libraries actually
+  require them.
+
+Do not add arbitrary JavaScript statement semantics merely to mimic TypeScript
+mutation. These facilities remain ordinary ProofScript/Lean-compatible effect
+and Meta abstractions outside the kernel TCB.
+
+Exit test: parser state, a small name-resolution pass, and a candidate-based
+Meta/unification probe can all be authored in supported `.lean` and `.ps`,
+including rollback after a deliberately failing candidate, with no host-language
+mutation semantics or leaked metavariable assignments.
+
+## SH4 — recursion, iteration and executable control closure
 
 Finish the executable recursion forms needed by compiler algorithms:
 
 - mutual recursive definitions;
+- mutual inductive declarations where compiler data requires them;
 - recursive local `where` / `let rec` groups;
 - multiple structural recursive parameters where Lean semantics justify them;
+- bounded well-founded recursion when structural recursion is insufficient and
+  the Lean semantics are owned;
 - Lean-faithful executable `partial def` for algorithms whose termination is
   intentionally outside proof computation.
 
-Structural recursion remains preferred. `partial` must never become a route
-for manufacturing trusted proof evidence.
+Implement the practical Lean iteration conveniences identified by the census
+when they can be desugared without enlarging the trusted core:
 
-Exit test: mutually recursive expression/type parsing and a fixed-point-style
-compiler utility run through the verified backend.
+- `let mut`;
+- `for`;
+- `while`;
+- `break` / `continue` where needed by the supported loop model.
 
-## SH5 — names, environments and bootstrap data model
+These are Lean-style source conveniences, not JavaScript mutation semantics.
+
+Structural recursion remains preferred. The exact `partial` trust boundary
+must be executable and mechanically enforced: partial code may execute, but it
+must not gain trusted definitional/proof authority that Lean 4.34 would deny.
+Dependencies from trusted proof/type computation into partial implementation
+behavior must remain fail-closed according to the pinned Lean model.
+
+Because the TypeScript/JavaScript backend is the bootstrap execution target,
+compiler-critical tail recursion/iteration must also have a stack-safety
+strategy. Prefer tail-recursion-to-loop lowering and verified/library iterators;
+use trampolining only when a concrete algorithm requires it.
+
+Exit test: mutually recursive expression/type parsing, a fixed-point-style
+compiler utility, and a large compiler-style traversal run through the verified
+backend without host mutation shortcuts or JavaScript stack overflow in the
+covered profile.
+
+## SH5 — names, modules, environments and bootstrap data model
 
 Provide stable ProofScript-authored models for:
 
 - qualified names;
-- source spans;
+- module/import identities and deterministic module ordering;
+- namespaces and qualified lookup;
+- the minimal public/private visibility model needed by the compiler;
+- source positions/spans;
 - tokens;
 - syntax/AST nodes used by the bounded compiler;
-- diagnostics;
+- diagnostics and fresh identifiers;
 - explicit environments and compiler state.
 
+Freeze the canonical source-position representation before parser/LSP work
+spreads. Prefer UTF-8 byte offsets for compiler/source-map identity, with
+explicit conversion at JavaScript UTF-16 and LSP line/column boundaries.
+
 Avoid Lean implementation-only mechanisms such as environment extensions when
-ordinary explicit data structures are sufficient.
+ordinary explicit data structures are sufficient. Do not pull in sections,
+open-scoped machinery or generalized environment extensions unless the feature
+census shows that the ProofScript compiler itself needs them.
 
 ## SH6 — host capability boundary
 
@@ -224,23 +349,75 @@ The bootstrap compiler may call typed host capabilities for:
 These adapters may remain TypeScript. They are runtime assumptions, never
 proof evidence, and must not own language semantics.
 
-## SH7 — freeze the Lean bootstrap subset
+## SH7 — census, prove compiler readiness, then freeze the Lean bootstrap subset
 
-Before writing the compiler, freeze the exact `.lean` subset accepted for
-bootstrap source.
+Before writing the real compiler, complete the Lean implementation-language
+feature census and freeze the exact `.lean` subset accepted for bootstrap
+source.
 
-It should include every construct used by the compiler and intentionally omit
-unneeded Lean implementation machinery such as arbitrary user syntax,
-macros/quotations, custom elaborators, environment extensions, broad
-attributes, and unsafe casts.
+The census artifact must record, for every relevant Lean construct or recurring
+abstraction:
+
+- representative source locations in the pinned Lean 4.34 tree;
+- whether the ProofScript compiler is expected to use it;
+- current ProofScript implementation status;
+- REQUIRED / USEFUL-CHEAP / DEFERRED-EXPENSIVE / HOST-BOUNDARY classification;
+- the owning SH milestone and executable acceptance gate.
+
+The frozen subset should include the practical implementation-language
+facilities selected by the census, including all compiler-required constructs
+and broadly useful low/medium-cost Lean conveniences that materially reduce
+self-host rewrite risk. It must intentionally omit expensive, unnecessary Lean
+implementation machinery such as arbitrary user syntax, macro/quotation
+systems, custom elaborators, generalized environment extensions, broad
+attribute registration and unsafe casts.
 
 Gate every supported bootstrap construct through the same `.lean` and `.ps`
 frontends and checked-core path.
 
-Exit condition:
+Before freezing, add one multi-module **SELFHOST-FEATURE** fixture/skeleton that
+uses the foundation together rather than as isolated unit features. It must
+exercise at least:
 
-> A complete ProofScript compiler implementation can be expressed in the
-> frozen supported Lean subset without adding another semantic pipeline.
+- nontrivial `String`/`Char` lexer-style traversal and source positions;
+- Array plus ordered Map/Set;
+- qualified `Name`, namespaces/imports and explicit environment updates;
+- structures, generic/dependent ADTs and pattern matching;
+- `Prod`/tuple-returning utilities;
+- structural, mutual and local recursion plus a controlled `partial` case;
+- `do`, Reader/State/Except and transactional rollback;
+- practical iteration syntax selected by the census;
+- higher-order/generic traversals;
+- implicit arguments, instance synthesis and postponed Meta constraints used by
+  the bootstrap subset;
+- diagnostics/fresh IDs;
+- multi-module compilation.
+
+The fixture must execute end-to-end:
+
+```text
+supported .lean and .ps
+-> canonical source AST
+-> Lean-compatible Meta/Elab
+-> pskernel admission
+-> checked core
+-> erasure
+-> verified compiler IR
+-> TypeScript
+-> tsc
+-> JavaScript
+```
+
+Freeze only after this gate passes. Do not start SH8 merely because every
+feature has an isolated parser or elaborator test.
+
+Exit conditions:
+
+> A complete ProofScript compiler implementation can be expressed naturally in
+> the frozen supported Lean subset without adding another semantic pipeline.
+
+> The SELFHOST-FEATURE fixture demonstrates that the selected features compose
+> across multiple modules through the real verified JavaScript path.
 
 ## SH8 — implement the compiler in .lean
 
@@ -330,11 +507,17 @@ Unless demanded by an SH gate, defer:
 
 Before accepting any ProofScript infrastructure task, ask:
 
-1. Which SH milestone does it close?
-2. Which concrete compiler module is blocked without it?
+1. Which SH milestone or Lean feature-census bucket justifies it?
+2. Is it REQUIRED by a compiler module, or is it a broadly useful
+   USEFUL/CHEAP Lean implementation-language feature that reduces self-host
+   rewrite risk?
 3. Can the need be satisfied as a ProofScript library instead of a language
    primitive?
 4. Can host-specific behavior remain a thin TypeScript adapter?
 5. Does the change preserve the single checked-core semantic path?
+6. Would implementing it require importing a disproportionately large Lean
+   metaprogramming subsystem that the compiler does not actually need?
 
-If there is no concrete answer to (1) or (2), defer the work.
+If the feature is neither REQUIRED nor justified as USEFUL/CHEAP by the census,
+defer it. Expensive extensibility machinery remains deferred until a concrete
+compiler requirement changes its classification.

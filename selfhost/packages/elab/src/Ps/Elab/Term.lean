@@ -123,6 +123,17 @@ def psElabNatural
         (PsExpr.lit (PsLiteral.natural value))
         expected
 
+def psElabBool
+    (context : PsElabContext)
+    (value : Bool)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  let name := if value then psBoolTrueName else psBoolFalseName
+  psElabResolvedTerm
+    context
+    (PsExpr.constE name [])
+    expected
+
 structure PsElabTypedBinder where
   id : Nat
   name : PsName
@@ -490,6 +501,8 @@ def psElabTermWithFuel
           psElabReference context name expected
       | .natural text _ =>
           psElabNatural context text expected
+      | .bool value _ =>
+          psElabBool context value expected
       | .lambda binders body _ =>
           psElabLambda
             (psElabTermWithFuel remaining)

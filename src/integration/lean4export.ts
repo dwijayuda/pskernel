@@ -15,6 +15,16 @@ import { ExactJson, JObject, asArray, asBigInt, asBoolean, asIndex, asObject, as
 
 export const LEAN434_PINNED_GITHASH='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b' as const;
 
+export interface ReplayDeclarationEvent {
+  readonly line:number;
+  readonly kind:string;
+  readonly name:string;
+  readonly envSize:number;
+}
+export interface ReplayDeclarationFinishEvent extends ReplayDeclarationEvent {
+  readonly elapsedMs:number;
+}
+
 export interface Lean4ExportOptions {
   /** Strict by default: an oracle-facing replay must be produced by the pinned Lean release. */
   readonly expectedLeanVersion?: string;
@@ -23,6 +33,9 @@ export interface Lean4ExportOptions {
   readonly supportedFormatVersions?: readonly string[];
   /** Optional Lean 4.34 compiler-IR evaluator. Configuring it extends the TCB. */
   readonly nativeEvaluator?: NativeEvaluator;
+  /** Diagnostic-only lifecycle hooks; they do not participate in kernel semantics. */
+  readonly onDeclarationStart?: (event:ReplayDeclarationEvent)=>void;
+  readonly onDeclarationFinish?: (event:ReplayDeclarationFinishEvent)=>void;
 }
 export interface ReplayStats { readonly lines:number; readonly names:number; readonly levels:number; readonly expressions:number; readonly declarations:number }
 export interface ReplayProgressOptions { readonly every?:number; readonly onProgress?:(stats:ReplayStats)=>void }
@@ -62,12 +75,16 @@ export class Lean4ExportReplay {
   private sawMeta=false; private lineNo=0; private decls=0;
   private readonly pendingMutual=new Map<string,{all:readonly Name[]; defs:Map<string,DefinitionInfo>}>();
   private readonly expectedLeanVersion:string; private readonly expectedLeanGitHash:string; private readonly formats:readonly string[];
+  private readonly onDeclarationStart:Lean4ExportOptions['onDeclarationStart'];
+  private readonly onDeclarationFinish:Lean4ExportOptions['onDeclarationFinish'];
 
   constructor(env=new Environment(),options:Lean4ExportOptions={}){
     this.env=env;this.kernel=new Kernel(env,options.nativeEvaluator);
     this.expectedLeanVersion=options.expectedLeanVersion??'4.34.0';
     this.expectedLeanGitHash=options.expectedLeanGitHash??LEAN434_PINNED_GITHASH;
     this.formats=options.supportedFormatVersions??['3.1.0'];
+    this.onDeclarationStart=options.onDeclarationStart;
+    this.onDeclarationFinish=options.onDeclarationFinish;
   }
 
   private stats():ReplayStats{return {lines:this.lineNo,names:this.names.size-1,levels:this.levels.size-1,expressions:this.exprs.size,declarations:this.decls};}
@@ -108,7 +125,10 @@ export class Lean4ExportReplay {
     if('meta' in o){this.meta(asObject(o.meta!,`line ${this.lineNo}.meta`));return;}
     if(!this.sawMeta)throw new KernelError('lean4export metadata must be the first record');
     if('in' in o){this.nameRecord(o);return;}if('il' in o){this.levelRecord(o);return;}if('ie' in o){this.exprRecord(o);return;}
-    this.declarationRecord(o);this.decls++;
+    const diag=this.declarationDiagnostic(o),started=Date.now();
+    if(diag)this.onDeclarationStart?.({line:this.lineNo,...diag,envSize:this.env.size});
+    try{this.declarationRecord(o);this.decls++;}
+    finally{if(diag)this.onDeclarationFinish?.({line:this.lineNo,...diag,envSize:this.env.size,elapsedMs:Date.now()-started});}
   }
 
   private meta(m:JObject):void{
@@ -190,6 +210,26 @@ export class Lean4ExportReplay {
     }
     return false;
   }
+  private declarationDiagnostic(o:JObject):{kind:string;name:string}|null{
+    const named=(kind:string,v:ExactJson,where:string):{kind:string;name:string}=>{
+      const a=asObject(v,where);
+      return {kind,name:nameToString(this.n(asIndex(field(a,'name',where),`${where}.name`)))};
+    };
+    if('axiom' in o)return named('axiom',o.axiom!,'axiom');
+    if('def' in o)return named('def',o.def!,'def');
+    if('thm' in o)return named('thm',o.thm!,'thm');
+    if('opaque' in o)return named('opaque',o.opaque!,'opaque');
+    if('quot' in o)return named('quot',o.quot!,'quot');
+    if('inductive' in o){
+      const g=asObject(o.inductive!,'inductive');
+      const tvs=asArray(field(g,'types','inductive'),'inductive.types');
+      if(tvs.length===0)return {kind:'inductive',name:'<empty>'};
+      const first=asObject(tvs[0]!,'inductive.types[0]');
+      return {kind:'inductive',name:nameToString(this.n(asIndex(field(first,'name','inductive.types[0]'),'inductive.types[0].name')))};
+    }
+    return null;
+  }
+
   private declarationRecord(o:JObject):void{
     if('axiom' in o){const a=asObject(o.axiom!,'axiom');this.kernel.addAxiom({kind:'axiom',name:this.n(asIndex(field(a,'name','axiom'),'axiom.name')),levelParams:this.ns(field(a,'levelParams','axiom'),'axiom.levelParams'),type:this.e(asIndex(field(a,'type','axiom'),'axiom.type')),isUnsafe:boolField(a,'isUnsafe','axiom')});return;}
     if('def' in o){const a=asObject(o.def!,'def'),s=asString(field(a,'safety','def'),'def.safety');if(s!=='safe'&&s!=='unsafe'&&s!=='partial')throw new KernelError(`invalid definition safety ${s}`);const info:DefinitionInfo={kind:'definition',name:this.n(asIndex(field(a,'name','def'),'def.name')),levelParams:this.ns(field(a,'levelParams','def'),'def.levelParams'),type:this.e(asIndex(field(a,'type','def'),'def.type')),value:this.e(asIndex(field(a,'value','def'),'def.value')),hints:this.hints(field(a,'hints','def')),safety:s};const all=maybeField(a,'all')===undefined?[info.name]:this.ns(field(a,'all','def'),'def.all');this.addExportedDefinition(info,all);return;}

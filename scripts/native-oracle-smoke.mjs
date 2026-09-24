@@ -1,6 +1,5 @@
 import {spawnSync} from 'node:child_process';
 import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
-import {tmpdir} from 'node:os';
 import {delimiter,join,resolve} from 'node:path';
 import fs from 'node:fs';
 import {createLeanNativeEvaluator} from './lean-native-evaluator.mjs';
@@ -28,7 +27,7 @@ if(hashRun.error||hashRun.status!==0||leanGitHash!==expectedGitHash){
   throw new Error('native-oracle-smoke: Lean git hash drift/failure: expected '+expectedGitHash+', got '+(hashRun.error?.message??hashRun.stderr??leanGitHash));
 }
 
-const tmp=mkdtempSync(join(tmpdir(),'pskernel-native-smoke-'));
+const tmp=mkdtempSync(join(resolve('.'),'.pskernel-native-smoke-'));
 try{
   const source=join(tmp,'NativeEvalFixture.lean');
   const olean=join(tmp,'NativeEvalFixture.olean');

@@ -74,12 +74,14 @@ function main(x : Nat) : Nat :=
     if (lexerOk) { String.Internal.length(lexeme) - 1 } else { 1 };
   let arrayValues : Array(Nat) :=
     arrayPush(arrayPush(arrayEmptyWithCapacity(2), x), 1);
+  let emptyArray : Array(Nat) :=
+    arrayEmptyWithCapacity(0);
   let arrayAtOne : PsOption(Nat) :=
     arrayGet?(arrayValues, 1);
   let arrayFoundOne : PsOption(Nat) :=
     arrayFind?(isOne, arrayValues);
   let arraysOk : Bool :=
-    arraySize(arrayEmptyWithCapacity(0)) == 0 &&
+    arraySize(emptyArray) == 0 &&
     arrayAny(isNonZero, arrayValues) &&
     arrayAll(isNonZero, arrayValues) &&
     optionGetOrElse(arrayAtOne, 0) == 1 &&

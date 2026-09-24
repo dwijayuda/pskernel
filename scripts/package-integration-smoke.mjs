@@ -1118,7 +1118,7 @@ assert(
   'structural recursive function lost its verified generic signature',
 );
 assert(
-  verifiedLength.typeScript.includes('1n + length(tail)'),
+  verifiedLength.typeScript.includes('1n + length<T0>(tail)'),
   'recursor induction hypothesis did not lower to structural runtime self-call',
 );
 assert(
@@ -1137,7 +1137,7 @@ const verifiedCountFrom=compileVerifiedSource(
   'verified-count-from.ts',
 );
 assert(
-  verifiedCountFrom.typeScript.includes('countFrom(base, tail)'),
+  verifiedCountFrom.typeScript.includes('countFrom<T0>(base, tail)'),
   'recursor IH did not preserve invariant runtime parameters in self-call',
 );
 assert(
@@ -1162,7 +1162,7 @@ assert(
   'higher-order generic recursive signature was not preserved',
 );
 assert(
-  verifiedGenericMap.typeScript.includes('map(f, tail)'),
+  verifiedGenericMap.typeScript.includes('map<T0, T1>(f, tail)'),
   'generic map IH did not lower to a structural self-call',
 );
 assert(
@@ -1188,7 +1188,7 @@ assert(
   'class-constrained function lost its runtime dictionary parameter',
 );
 assert(
-  verifiedClassLocalInstance.typeScript.includes('return reuse(inst, x);'),
+  verifiedClassLocalInstance.typeScript.includes('return reuse<T0>(inst, x);'),
   'local class instance synthesis did not become an ordinary runtime dictionary call',
 );
 
@@ -1207,7 +1207,7 @@ assert(
   'global instance metadata did not survive checked-core admission',
 );
 assert(
-  verifiedGlobalInstance.typeScript.includes('return get(boxedNat, x);'),
+  verifiedGlobalInstance.typeScript.includes('return get<bigint>(boxedNat, x);'),
   'global instance synthesis did not become an ordinary checked dictionary call',
 );
 assert(

@@ -83,7 +83,7 @@ jobs:
           ")
           printf 'Parser.Basic initializer root: %s\n' "${init_roots[@]}"
           lean --run oracle/replay-probe/DependencyExport.lean Lean.Parser.Basic \
-            "${init_roots[@]}" \
+            --selected-after Init.Prelude "${init_roots[@]}" \
             > lean434-parser-basic-env-extension.ndjson
           test -s lean434-parser-basic-env-extension.ndjson
       - name: Execute real Lean registerEnvExtension for Parser.Basic

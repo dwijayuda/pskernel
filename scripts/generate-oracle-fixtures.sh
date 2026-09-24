@@ -40,11 +40,12 @@ run_export() {
 run_export lean434-init-prelude.ndjson oracle/replay-probe/FullExport.lean
 run_export lean434-primitive-closure.ndjson oracle/replay-probe/DependencyExport.lean Init Nat.mod Nat.div Nat.gcd Nat.bitwise Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight
 
-run_export lean434-proofscript-text-foundation.ndjson oracle/replay-probe/DependencyExport.lean Init.Data.String.Length \
-  Char.ofNat Char.toNat Char.isWhitespace Char.isUpper Char.isLower Char.isAlpha Char.isDigit Char.isAlphanum \
-  String.push String.singleton String.append String.length String.utf8ByteSize String.rawStartPos String.rawEndPos \
-  String.Pos.Raw.get 'String.Pos.Raw.get?' String.Pos.Raw.next "String.Pos.Raw.next'" String.Pos.Raw.atEnd \
-  String.Pos.Raw.extract String.Pos.Raw.prev
+run_export lean434-proofscript-text-foundation.ndjson oracle/replay-probe/DependencyExport.lean Init.Data.String.Bootstrap \
+  --selected-segmented 1 \
+  Char.toNat \
+  String.push String.singleton \
+  String.Internal.length String.Internal.append \
+  String.Internal.next String.Internal.get String.Internal.atEnd String.Internal.extract
 run_export lean434-std-parsec-roots.ndjson oracle/replay-probe/StdParsecRootsExport.lean
 run_export lean434-std-sat-cnf-roots.ndjson oracle/replay-probe/StdSatCNFRootsExport.lean
 run_export lean434-std-byteslice-roots.ndjson oracle/replay-probe/StdByteSliceRootsExport.lean

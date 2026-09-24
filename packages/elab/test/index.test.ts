@@ -508,14 +508,14 @@ console.log('ok - @proofscript/elab bounded synthetic-hole refine tactic');
 {
   const result=elaborateV061Declarations(parseV061Module(
     'inductive PropPair where { | mk(left : Prop, right : Prop); } '+
-    'theorem buildPair(P : Prop, Q : Prop) : PropPair := '+
+    'function buildPair(P : Prop, Q : Prop) : PropPair := '+
     'by constructor; assumption; assumption;',
   ));
   equal(result.inductives.length,1);
-  equal(result.theorems.length,1);
+  equal(result.definitions.length,1);
   equal(
     result.environment.find(nameFromDotted('buildPair'))?.kind,
-    'theorem',
+    'definition',
   );
 }
 {

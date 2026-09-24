@@ -227,8 +227,8 @@ deepEqual(
   cast=evaluator.applyRuntimeValue(cast,evaluator.evaluate(sort(levelZero)));
   cast=evaluator.applyRuntimeValue(cast,evaluator.evaluate(sort(levelZero)));
   equal(
-    evaluator.applyRuntimeValue(cast,natLit(37n) as unknown as never),
-    natLit(37n) as unknown as never,
+    evaluator.applyRuntimeValue(cast,37n),
+    37n,
   );
 }
 

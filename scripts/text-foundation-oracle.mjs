@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {resolve} from 'node:path';
-import {Lean4ExportReplay} from '../dist/src/integration/lean4export.js';
+import {replayLeanEnvironment} from '../packages/environment/dist/src/index.js';
 import {nameFromDotted} from '../dist/src/core/name.js';
 
 const file=resolve(
@@ -13,8 +13,8 @@ if(!fs.existsSync(file)){
   );
 }
 
-const replay=new Lean4ExportReplay();
-const stats=replay.replay(fs.readFileSync(file,'utf8'));
+const replay=replayLeanEnvironment(fs.readFileSync(file,'utf8'));
+const stats=replay.stats;
 const required=[
   'Char.ofNat',
   'Char.toNat',
@@ -40,7 +40,7 @@ const required=[
   'String.Pos.Raw.prev',
 ];
 for(const name of required){
-  if(replay.env.find(nameFromDotted(name))===undefined){
+  if(replay.environment.find(nameFromDotted(name))===undefined){
     throw new Error('text-foundation fixture missing '+name);
   }
 }
@@ -49,6 +49,6 @@ console.log(JSON.stringify({
   ok:true,
   file,
   stats,
-  constants:replay.env.entries().length,
+  constants:replay.environment.entries().length,
   required:required.length,
 },null,2));

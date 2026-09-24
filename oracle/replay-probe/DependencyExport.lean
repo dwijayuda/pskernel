@@ -568,6 +568,35 @@ def flattenRoots (buckets : Array (Array Name)) : Array Name := Id.run do
     for n in bucket do roots := roots.push n
   return roots
 
+partial def dumpSelectedRootsSegmented
+    (env : Environment) (roots : List Name) (segmentRoots : Nat) : IO Unit := do
+  if segmentRoots == 0 then
+    throw <| IO.userError "selected segment size must be positive"
+  if roots.isEmpty then
+    throw <| IO.userError "selected segmented export requires at least one root"
+  IO.println <| (Json.mkObj [("environment", Json.mkObj [
+    ("module", ""),
+    ("selectedDirectRoots", roots.length),
+    ("segmentRoots", segmentRoots)
+  ])]).compress
+  let _ ← (do
+    let mut segment : Nat := 0
+    let mut inSegment : Nat := 0
+    for n in roots do
+      if inSegment == 0 then
+        resetInternTables
+        IO.println <| (Json.mkObj [("segment", Json.mkObj [
+          ("index", segment),
+          ("maxDirectRoots", segmentRoots)
+        ])]).compress
+        dumpMeta
+      dumpConstant env n
+      inSegment := inSegment + 1
+      if inSegment == segmentRoots then
+        segment := segment + 1
+        inSegment := 0) |>.run {}
+  pure ()
+
 partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat) : IO Unit := do
   if count == 0 then throw <| IO.userError "root range count must be positive"
   let buckets := collectRootsByModule env
@@ -707,6 +736,10 @@ unsafe def main (args : List String) : IO Unit := do
       let start := requestedRoots[2]!.toNat!
       let count := requestedRoots[3]!.toNat!
       dumpBatchStream env moduleName maxRoots start count
+    else if requestedRoots.length >= 3 && requestedRoots.head! == "--selected-segmented" then
+      let segmentRoots := requestedRoots[1]!.toNat!
+      let selected := requestedRoots.drop 2 |>.map String.toName
+      dumpSelectedRootsSegmented env selected segmentRoots
     else if requestedRoots.length == 3 && requestedRoots.head! == "--root-range" then
       let start := requestedRoots[1]!.toNat!
       let count := requestedRoots[2]!.toNat!

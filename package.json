@@ -47,7 +47,7 @@
     "test:kernel": "npm run check:oracle-syntax && npm run build && npm run test:oracle-tools && node dist/test/all.test.js",
     "check:kernel-oracle": "npm run oracle:official && npm run oracle:primitive && npm run oracle:defeq && npm run oracle:adversarial",
     "check:kernel-corpus": "npm run check:kernel-oracle && npm run oracle:init && npm run oracle:std-parsec && npm run oracle:std-sat-cnf && npm run oracle:std-byteslice && npm run oracle:lean-rbmap && npm run oracle:lean-persistentarray && npm run oracle:lean-persistenthashmap",
-    "oracle:text-foundation": "npm run build --silent && node scripts/text-foundation-oracle.mjs"
+    "oracle:text-foundation": "npm run build --silent && tsc -p packages/environment/tsconfig.json && node scripts/text-foundation-oracle.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

@@ -194,16 +194,6 @@ function makeDefinitionEnvironment():Environment {
     levelParams:[],
     type:constant(TestNat),
   });
-  kernel.addAxiom({
-    kind:'axiom',
-    name:nameFromDotted('Box'),
-    levelParams:[],
-    type:forallE(
-      nameFromDotted('α'),
-      sort(levelSucc(levelZero)),
-      sort(levelSucc(levelZero)),
-    ),
-  });
   return env;
 }
 
@@ -290,6 +280,17 @@ console.log('ok - @proofscript/elab implicit declaration binders');
 
 {
   const env=makeDefinitionEnvironment();
+  const kernel=new Kernel(env);
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Box'),
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(levelSucc(levelZero)),
+      sort(levelSucc(levelZero)),
+    ),
+  });
   const result=elaborateV061Definitions(parseV061Module(
     'function keepBox(x : Box(TestNat)) : Box(TestNat) := x;',
   ),env);

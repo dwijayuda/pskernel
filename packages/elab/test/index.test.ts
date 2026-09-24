@@ -18,6 +18,7 @@ import {
   constant,
   exprEq,
   forallE,
+  levelParam,
   levelSucc,
   levelZero,
   mkAppN,
@@ -186,6 +187,81 @@ function makeApplicationEnvironment():{
 }
 console.log('ok - @proofscript/elab Lean-style application elaboration');
 
+
+function addMinimalEqEnvironment(env:Environment):void {
+  const kernel=new Kernel(env);
+  const uName=nameFromDotted('u');
+  const u=levelParam(uName);
+  const Eq=nameFromDotted('Eq');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Eq,
+    levelParams:[uName],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u),
+      forallE(
+        nameFromDotted('_'),
+        bvar(0),
+        forallE(
+          nameFromDotted('_'),
+          bvar(1),
+          sort(levelZero),
+        ),
+      ),
+      'implicit',
+    ),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Eq.refl'),
+    levelParams:[uName],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u),
+      forallE(
+        nameFromDotted('a'),
+        bvar(0),
+        mkAppN(
+          constant(Eq,[u]),
+          [bvar(1),bvar(0),bvar(0)],
+        ),
+      ),
+      'implicit',
+    ),
+  });
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Eq.symm'),
+    levelParams:[uName],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(u),
+      forallE(
+        nameFromDotted('a'),
+        bvar(0),
+        forallE(
+          nameFromDotted('b'),
+          bvar(1),
+          forallE(
+            nameFromDotted('h'),
+            mkAppN(
+              constant(Eq,[u]),
+              [bvar(2),bvar(1),bvar(0)],
+            ),
+            mkAppN(
+              constant(Eq,[u]),
+              [bvar(3),bvar(1),bvar(2)],
+            ),
+          ),
+          'implicit',
+        ),
+        'implicit',
+      ),
+      'implicit',
+    ),
+  });
+}
 
 function makeDefinitionEnvironment():Environment {
   const env=new Environment();
@@ -623,6 +699,8 @@ console.log('ok - @proofscript/elab parameterized bounded cases');
 console.log('ok - @proofscript/elab bounded induction via recursor');
 
 {
+  const env=new Environment();
+  addMinimalEqEnvironment(env);
   const result=elaborateV061Declarations(parseV061Module(
     'inductive NamedList(α : Type) where { '+
     '| nil; | cons(head : α, tail : NamedList(α)); } '+
@@ -638,7 +716,7 @@ console.log('ok - @proofscript/elab bounded induction via recursor');
     'appendNamed(xs, NamedList.nil) = xs := '+
     'by induction xs; rfl; '+
     'rw [appendNamedCons(head, tail, NamedList.nil)]; rw [tail_ih];',
-  ));
+  ),env);
   equal(result.theorems.length,2);
   equal(
     result.environment.find(nameFromDotted('appendNamedNilRight'))?.kind,
@@ -733,10 +811,11 @@ console.log('ok - @proofscript/elab multi-rule simp-only syntax reaches tactic A
   equal(rejected,true);
 }
 {
+  const env=makeNatNotationEnvironment();
   const symmetric=elaborateV061Declarations(parseV061Module(
     'theorem searchEqSymm'+
     '(a : Nat, b : Nat, h : b = a) : a = b := by exact?;',
-  ));
+  ),env);
   equal(symmetric.theorems.length,1);
   equal(
     symmetric.environment.find(nameFromDotted('searchEqSymm'))?.kind,
@@ -772,6 +851,7 @@ console.log('ok - @proofscript/elab bounded Eq-only rfl tactic');
 
 function makeNatNotationEnvironment():Environment {
   const env=new Environment();
+  addMinimalEqEnvironment(env);
   const kernel=new Kernel(env);
   const Nat=nameFromDotted('Nat');
   kernel.addAxiom({

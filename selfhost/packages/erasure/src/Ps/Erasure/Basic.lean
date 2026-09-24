@@ -79,6 +79,8 @@ def psErasureScopeEmpty
     declarationNames := declarationNames
     runtimeConstructors := []
     runtimeRecursors := []
+    runtimeStructures := []
+    runtimeStructureConstructors := []
   }
 
 def psErasureLookupNat :
@@ -338,6 +340,8 @@ def psEraseRuntimeTypeWithFuel
                 declarationNames := scope.declarationNames
                 runtimeConstructors := scope.runtimeConstructors
                 runtimeRecursors := scope.runtimeRecursors
+                runtimeStructures := scope.runtimeStructures
+                runtimeStructureConstructors := scope.runtimeStructureConstructors
               }
               match
                   psEraseRuntimeTypeWithFuel

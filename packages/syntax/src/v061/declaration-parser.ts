@@ -1,6 +1,6 @@
 import {SyntaxError} from '../source.js';
 import type {V061Declaration,V061Module,V061ValueDeclaration} from './ast.js';
-import {V061ParseContext,spanBetween} from './context.js';
+import {V061ParseContext,spanBetween,type V061ParseOptions} from './context.js';
 import {V061ExpressionParser} from './expression-parser.js';
 import {parseV061Type} from './type-parser.js';
 import {parseV061StructureDeclaration} from './structure-parser.js';
@@ -16,8 +16,8 @@ export class V061DeclarationParser {
   readonly context:V061ParseContext;
   readonly expressions:V061ExpressionParser;
 
-  constructor(source:string){
-    this.context=new V061ParseContext(source);
+  constructor(source:string,options:V061ParseOptions={}){
+    this.context=new V061ParseContext(source,undefined,options);
     this.expressions=new V061ExpressionParser(this.context);
   }
 
@@ -129,6 +129,13 @@ export class V061DeclarationParser {
   }
 }
 
-export function parseV061Module(source:string):V061Module {
-  return new V061DeclarationParser(source).parseModule();
+export function parseV061Module(
+  source:string,
+  options:V061ParseOptions={},
+):V061Module {
+  return new V061DeclarationParser(source,options).parseModule();
+}
+
+export function parseV061PsxModule(source:string):V061Module {
+  return parseV061Module(source,{jsx:true});
 }

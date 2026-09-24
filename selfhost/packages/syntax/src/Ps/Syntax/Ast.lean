@@ -55,6 +55,11 @@ inductive PsSyntaxTerm where
       (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
       (span : PsSourceSpan)
 
+structure PsSyntaxInductiveConstructor where
+  name : PsSyntaxName
+  fields : List (PsSyntaxBinderHead × PsSyntaxTerm)
+  span : PsSourceSpan
+
 structure PsSyntaxImport where
   moduleName : PsSyntaxName
   span : PsSourceSpan
@@ -71,6 +76,12 @@ inductive PsSyntaxDeclaration where
       (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | inductiveDecl
+      (name : PsSyntaxName)
+      (params : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (resultType : Option PsSyntaxTerm)
+      (constructors : List PsSyntaxInductiveConstructor)
       (span : PsSourceSpan)
 
 structure PsSyntaxModule where

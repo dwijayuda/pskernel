@@ -33,6 +33,7 @@ lean_lib PsEnvironment where
   roots := #[
     `Ps.Environment.Basic,
     `Ps.Environment.LocalContext,
+    `Ps.Environment.Instances,
     `Ps.Environment.Resolve
   ]
 
@@ -47,6 +48,7 @@ lean_lib PsMeta where
     `Ps.Meta.Context,
     `Ps.Meta.Reduce,
     `Ps.Meta.Unify,
+    `Ps.Meta.SynthInstance,
     `Ps.Meta.Infer
   ]
 

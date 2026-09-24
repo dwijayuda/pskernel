@@ -12,6 +12,9 @@ import {
   invokeLean434JsExtern,
   invokeLean434JsImplementedBy,
 } from './lean4.js';
+import type {
+  Lean434RuntimeMetadataIndex,
+} from './lean4-metadata.js';
 
 export interface Lean434ConstructorValue {
   readonly kind:'constructor';
@@ -96,6 +99,10 @@ export class Lean434EvaluationError extends Error {
   }
 }
 
+export interface Lean434EvaluatorOptions {
+  readonly metadata?:Lean434RuntimeMetadataIndex;
+}
+
 function expectNat(value:Lean434RuntimeValue,owner:string):bigint {
   if(typeof value!=='bigint'){
     throw new Lean434EvaluationError(owner+' expected Nat');
@@ -135,7 +142,10 @@ function typeValue(expr:Expr):Lean434TypeValue {
  * this evaluator.
  */
 export class Lean434Evaluator {
-  constructor(readonly environment:Environment){}
+  constructor(
+    readonly environment:Environment,
+    readonly options:Lean434EvaluatorOptions={},
+  ){}
 
   evaluate(expr:Expr):Lean434RuntimeValue {
     return this.evaluateWithLocals(expr,[]);
@@ -225,8 +235,21 @@ export class Lean434Evaluator {
     if(name==='Bool.true')return true;
     if(name==='Unit.unit')return undefined;
 
+    const metadataImplementedBy=
+      this.options.metadata?.implementedByFor(name);
     const implementedBy=findLean434JsImplementedBy(name);
     if(implementedBy!==undefined){
+      if(
+        metadataImplementedBy!==undefined
+        &&metadataImplementedBy.implementation!==
+          implementedBy.implementation
+      ){
+        throw new Lean434EvaluationError(
+          "implemented_by metadata mismatch for '"+name+"': expected '"+
+          implementedBy.implementation+"', got '"+
+          metadataImplementedBy.implementation+"'",
+        );
+      }
       return primitive(
         name,
         implementedBy.arity,
@@ -237,8 +260,24 @@ export class Lean434Evaluator {
       );
     }
 
+    const metadataExtern=this.options.metadata?.externFor(name);
     const runtimeBinding=findLean434JsExternForDeclaration(name);
     if(runtimeBinding!==undefined){
+      if(metadataExtern!==undefined){
+        const selected=metadataExtern.entries.find(
+          (entry)=>entry.kind==='standard'&&entry.backend==='all',
+        );
+        if(
+          selected===undefined
+          ||selected.kind!=='standard'
+          ||selected.symbol!==runtimeBinding.leanSymbol
+        ){
+          throw new Lean434EvaluationError(
+            "extern metadata mismatch for '"+name+"': expected '"+
+            runtimeBinding.leanSymbol+"'",
+          );
+        }
+      }
       return primitive(
         name,
         runtimeBinding.arity,
@@ -258,6 +297,12 @@ export class Lean434Evaluator {
             runtimeArgs,
           ) as Lean434RuntimeValue;
         },
+      );
+    }
+
+    if(metadataExtern!==undefined){
+      throw new Lean434EvaluationError(
+        "Lean extern declaration has no supported JS adapter: '"+name+"'",
       );
     }
 

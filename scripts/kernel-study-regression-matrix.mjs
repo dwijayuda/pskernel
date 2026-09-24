@@ -274,6 +274,16 @@ if(!nativeSmoke.includes("mkdtempSync(join(resolve('.'),'.pskernel-native-smoke-
 if(nativeSmoke.includes("mkdtempSync(join(tmpdir()")){
   throw new Error('native smoke path drift: OS tmp is outside Lean project root');
 }
+for(const marker of [
+  '@[implemented_by bImpl]',
+  'def bSource : Bool := true',
+  'def b : Bool := bSource',
+]){
+  if(!nativeSmoke.includes(marker))throw new Error('native smoke implemented_by fixture drift: missing '+marker);
+}
+if(nativeSmoke.includes('@[implemented_by bImpl]\ndef b : Bool := true')){
+  throw new Error('native smoke implemented_by fixture drift: reduceBool target itself must have compiler IR');
+}
 
 const nativeEval=readFileSync('oracle/replay-probe/NativeEval.lean','utf8');
 for(const marker of [

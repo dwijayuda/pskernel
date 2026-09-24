@@ -12,7 +12,10 @@ import type {
 export type ErasedBinderKind='type'|'proof'|'runtime';
 
 export interface RuntimeStructureField {
+  /** Position in the constructor application, including erased parameters. */
   readonly sourceIndex:number;
+  /** Logical structure field index used by kernel projection expressions. */
+  readonly projectionIndex:number;
   readonly name:string;
   readonly type:VerifiedIrType;
 }
@@ -26,7 +29,10 @@ export interface RuntimeStructureInfo {
   readonly fields:readonly RuntimeStructureField[];
 }
 
-export interface RuntimeConstructorField extends RuntimeStructureField {
+export interface RuntimeConstructorField {
+  readonly sourceIndex:number;
+  readonly name:string;
+  readonly type:VerifiedIrType;
   readonly recursive:boolean;
 }
 

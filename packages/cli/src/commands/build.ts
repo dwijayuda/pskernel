@@ -5,7 +5,14 @@ import {compileCheckedCoreToWasm} from '@proofscript/compiler';
 import {compileVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
-import type {BuildReport,BuildResult,CommonArgs} from '../types.js';
+import type {
+  BuildResult,
+  CommonArgs,
+  UnverifiedBuildReport,
+  UnverifiedBuildResult,
+  VerifiedBuildReport,
+  VerifiedBuildResult,
+} from '../types.js';
 import {
   writeVerifiedModuleArtifacts,
 } from '../project-artifact-output.js';
@@ -16,6 +23,13 @@ import {
 } from '../runtime-dependencies.js';
 import {verifyRuntimeDependencyLock} from '../runtime-lock.js';
 
+export function buildCommand(
+  common:CommonArgs&{readonly verified:true},
+):Promise<VerifiedBuildResult>;
+export function buildCommand(
+  common:CommonArgs&{readonly verified:false},
+):Promise<UnverifiedBuildResult>;
+export function buildCommand(common:CommonArgs):Promise<BuildResult>;
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const target=common.buildTarget??'js';
   if(target==='wasm'&&!common.verified){
@@ -47,10 +61,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     await mkdir(outDir,{recursive:true});
 
     const tsPath=join(outDir,stem+'.ts');
-    const result=compileVerifiedSourceProject(
-      project,
-      tsPath,
-    );
+    const result=compileVerifiedSourceProject(project,tsPath);
     const jsPath=join(outDir,stem+'.js');
     const dtsPath=join(outDir,stem+'.d.ts');
     const leanPath=join(outDir,stem+'.lean');
@@ -66,7 +77,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       result.moduleArtifacts,
     );
 
-    const report:BuildReport={
+    const report:VerifiedBuildReport={
       ok:true,
       command:'build',
       ...baseReport(
@@ -119,11 +130,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       writeFile(jsPath,result.emitted.javascript,'utf8'),
       writeFile(dtsPath,result.emitted.declaration,'utf8'),
       writeFile(leanPath,result.lean,'utf8'),
-      writeFile(
-        manifestPath,
-        JSON.stringify(report,null,2)+'\n',
-        'utf8',
-      ),
+      writeFile(manifestPath,JSON.stringify(report,null,2)+'\n','utf8'),
     ];
     if(result.emitted.sourceMap!==undefined){
       writes.push(writeFile(mapPath,result.emitted.sourceMap,'utf8'));
@@ -144,12 +151,11 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const input=await resolveInput(common);
   const extension=extname(input.sourcePath);
   const stem=basename(input.sourcePath,extension);
-  const result=compileSource(
-    input.source,
-    stem+'.ts',
-    input.sourcePath,
+  const result=compileSource(input.source,stem+'.ts',input.sourcePath);
+  const outDir=resolve(
+    input.loaded.directory,
+    input.loaded.config.compilerOptions.outDir,
   );
-  const outDir=resolve(input.loaded.directory,input.loaded.config.compilerOptions.outDir);
   await mkdir(outDir,{recursive:true});
 
   const tsPath=join(outDir,stem+'.ts');
@@ -159,7 +165,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const mapPath=join(outDir,stem+'.js.map');
   const manifestPath=join(outDir,stem+'.proofscript.json');
 
-  const report:BuildReport={
+  const report:UnverifiedBuildReport={
     ok:true,
     command:'build',
     ...baseReport(
@@ -190,7 +196,9 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     writeFile(leanPath,result.lean,'utf8'),
     writeFile(manifestPath,JSON.stringify(report,null,2)+'\n','utf8'),
   ];
-  if(result.emitted.sourceMap!==undefined)writes.push(writeFile(mapPath,result.emitted.sourceMap,'utf8'));
+  if(result.emitted.sourceMap!==undefined){
+    writes.push(writeFile(mapPath,result.emitted.sourceMap,'utf8'));
+  }
   await Promise.all(writes);
   return {report,checked:result.checked,jsPath};
 }

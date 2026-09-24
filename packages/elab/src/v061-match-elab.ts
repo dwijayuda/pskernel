@@ -174,12 +174,15 @@ export function elaborateV061MatchExpression(
     );
   }
 
-  const term=mkAppN(
-    constant(recursorName,levels),
-    [...parameterArgs,motive,...minors,scrutinee.term],
+  const term=context.metaContext.instantiate(
+    mkAppN(
+      constant(recursorName,levels),
+      [...parameterArgs,motive,...minors,scrutinee.term],
+    ),
   );
+  const resultType=context.metaContext.instantiate(expected);
   const type=checker.check(term);
-  if(!checker.isDefEq(type,expected)){
+  if(!checker.isDefEq(type,resultType)){
     throw new Error(
       'PS_ELAB_MATCH_RESULT_TYPE: generated recursor application does not match expected type',
     );

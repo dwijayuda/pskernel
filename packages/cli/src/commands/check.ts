@@ -3,11 +3,23 @@ import {compileCheckedCoreToWasm} from '@proofscript/compiler';
 import {checkVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
-import type {CommonArgs} from '../types.js';
+import type {
+  CheckReport,
+  CommonArgs,
+  UnverifiedCheckReport,
+  VerifiedCheckReport,
+} from '../types.js';
 import {verifiedAssuranceReport} from '../verified-assurance.js';
 import {assertRuntimeDependencyPolicy} from '../runtime-dependencies.js';
 
-export async function checkCommand(common:CommonArgs){
+export function checkCommand(
+  common:CommonArgs&{readonly verified:true},
+):Promise<VerifiedCheckReport>;
+export function checkCommand(
+  common:CommonArgs&{readonly verified:false},
+):Promise<UnverifiedCheckReport>;
+export function checkCommand(common:CommonArgs):Promise<CheckReport>;
+export async function checkCommand(common:CommonArgs):Promise<CheckReport>{
   const target=common.buildTarget??'js';
   if(target==='wasm'&&!common.verified){
     throw new Error(
@@ -56,10 +68,7 @@ export async function checkCommand(common:CommonArgs){
       }),
     };
   }
-  const result=checkSource(
-    input.source,
-    input.sourcePath,
-  );
+  const result=checkSource(input.source,input.sourcePath);
   return {
     ok:true,
     command:'check',

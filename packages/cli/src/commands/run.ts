@@ -5,7 +5,12 @@ import {
   type ProofScriptWasmHostValue,
 } from '@proofscript/compiler';
 import {buildCommand} from './build.js';
-import type {CommonArgs,RunResult} from '../types.js';
+import type {
+  CommonArgs,
+  RunReport,
+  UnverifiedRunReport,
+  VerifiedRunReport,
+} from '../types.js';
 import {
   encodeVerifiedRuntimeResult,
   prepareVerifiedMainArguments,
@@ -38,7 +43,14 @@ function displayRuntimeValue(value:unknown):unknown {
   return typeof value==='bigint'?value.toString():value;
 }
 
-export async function runCommand(common:CommonArgs):Promise<RunResult>{
+export function runCommand(
+  common:CommonArgs&{readonly verified:true},
+):Promise<VerifiedRunReport>;
+export function runCommand(
+  common:CommonArgs&{readonly verified:false},
+):Promise<UnverifiedRunReport>;
+export function runCommand(common:CommonArgs):Promise<RunReport>;
+export async function runCommand(common:CommonArgs):Promise<RunReport>{
   const target=common.buildTarget??'js';
   const build=await buildCommand(common);
 
@@ -82,10 +94,11 @@ export async function runCommand(common:CommonArgs):Promise<RunResult>{
     }
     return {
       ...build.report,
-      command:'run',
+      command:'run' as const,
       mainResult:displayed,
     };
   }
+
   const mod=await import(
     pathToFileURL(build.jsPath).href+'?v='+Date.now()
   ) as Record<string,unknown>;
@@ -162,7 +175,7 @@ export async function runCommand(common:CommonArgs):Promise<RunResult>{
 
   return {
     ...build.report,
-    command:'run',
+    command:'run' as const,
     mainResult:displayed,
   };
 }

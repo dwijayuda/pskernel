@@ -104,29 +104,6 @@ def psElabContextWithEnvironment
     metaContext := context.metaContext
   }
 
-def psImplicitBinderCopy
-    (binder : PsElabTypedBinder) : PsElabTypedBinder :=
-  {
-    id := binder.id
-    name := binder.name
-    type := binder.type
-    binder := PsBinderInfo.implicit
-  }
-
-def psInductiveParameterArgs
-    (paramsRev : List PsElabTypedBinder) : List PsExpr :=
-  paramsRev.reverse.map (fun param => PsExpr.fvar param.id)
-
-def psElabContextWithEnvironment
-    (context : PsElabContext)
-    (environment : PsEnvironment) : PsElabContext :=
-  {
-    environment := environment
-    localContext := context.localContext
-    instances := context.instances
-    metaContext := context.metaContext
-  }
-
 def psElabBinderArguments
     (bindersRev : List PsElabTypedBinder) : List PsExpr :=
   bindersRev.reverse.map (fun binder => PsExpr.fvar binder.id)

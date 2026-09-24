@@ -10,6 +10,7 @@ import Ps.Core.Abstract
 import Ps.Environment.Basic
 import Ps.Environment.LocalContext
 import Ps.Environment.Resolve
+import Ps.Meta.LevelContext
 import Ps.Meta.Context
 import Ps.Meta.Reduce
 import Ps.Meta.Infer

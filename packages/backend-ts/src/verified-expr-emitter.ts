@@ -22,6 +22,12 @@ export function emitVerifiedExpr(
     case 'var':
       return expr.name;
     case 'intrinsic':{
+      if(expr.operation==='char.ofNat'){
+        const value=emitVerifiedExpr(expr.args[0]!,brands,tags);
+        return '((__ps_n: bigint) => '+
+          '((__ps_n < 0xd800n || (__ps_n > 0xdfffn && __ps_n < 0x110000n)) '+
+          '? String.fromCodePoint(Number(__ps_n)) : "\\0"))('+value+')';
+      }
       if(expr.operation==='bool.not'){
         return '(!'+emitVerifiedExpr(expr.args[0]!,brands,tags)+')';
       }

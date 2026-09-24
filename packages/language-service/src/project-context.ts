@@ -112,7 +112,7 @@ export function buildProjectAnalysisContext(
       }
       return;
     }
-    const surface=frontends.require(source.sourceKind).parse(source.text);
+    const surface=frontends.forDocument(source.sourceKind,source.uri).parse(source.text);
     loaded.set(module,{
       module,
       sourcePath:source.uri,

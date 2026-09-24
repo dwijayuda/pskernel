@@ -9,17 +9,21 @@ function rawPos(byteIdx : Nat) : String.Pos.Raw :=
 function rawPosByteIdx(pos : String.Pos.Raw) : Nat :=
   String.Pos.Raw.byteIdx(pos);
 
+function natInRange(n : Nat, lower : Nat, upper : Nat) : Bool :=
+  if (lower <= n) {
+    if (n <= upper) { true } else { false }
+  } else {
+    false
+  };
+
 function isAsciiDigit(c : Char) : Bool :=
-  let n : Nat := Char.toNat(c);
-  n >= 48 && n <= 57;
+  natInRange(Char.toNat(c), 48, 57);
 
 function isAsciiLower(c : Char) : Bool :=
-  let n : Nat := Char.toNat(c);
-  n >= 97 && n <= 122;
+  natInRange(Char.toNat(c), 97, 122);
 
 function isAsciiUpper(c : Char) : Bool :=
-  let n : Nat := Char.toNat(c);
-  n >= 65 && n <= 90;
+  natInRange(Char.toNat(c), 65, 90);
 
 function isAsciiIdentifierStart(c : Char) : Bool :=
   let n : Nat := Char.toNat(c);

@@ -1,16 +1,5 @@
-import Ps.Core.Abstract
 import Ps.Core.Declaration
 import Ps.Elab.Term
-
-structure PsElabBinder where
-  id : Nat
-  name : PsName
-  type : PsExpr
-  binder : PsBinderInfo
-
-structure PsElabBindersResult where
-  context : PsElabContext
-  bindersRev : List PsElabBinder
 
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
@@ -79,7 +68,7 @@ def psElabBinders
     Except PsElabError PsElabBindersResult :=
   psElabBindersAcc context binders []
 
-def psCloseElabBinders
+def psCloseElabTypedBinders
     (metaContext : PsMetaContext) :
     List PsElabBinder ->
     PsExpr ->
@@ -119,7 +108,7 @@ def psElabDeclarationParts
   | none => Except.error PsElabError.emptyName
   | some name =>
       let initial := psElabContextEmpty environment
-      match psElabBinders initial binders with
+      match psElabTypedBinders psElabTerm initial binders with
       | Except.error error => Except.error error
       | Except.ok binderResult =>
           match psElabTerm binderResult.context typeSyntax none with

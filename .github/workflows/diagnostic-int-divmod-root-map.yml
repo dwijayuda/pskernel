@@ -1,0 +1,32 @@
+name: Diagnostic Int.DivMod root map
+
+on:
+  push:
+    branches: [diagnostic/int-divmod-root-map]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Map candidate roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-map 21500 2500 > /tmp/root-map.ndjson
+          grep '"module":"Init.Data.Int.DivMod.Lemmas"' /tmp/root-map.ndjson | head -n 5 || true
+          echo '--- tail ---'
+          grep '"module":"Init.Data.Int.DivMod.Lemmas"' /tmp/root-map.ndjson | tail -n 5 || true
+          echo '--- module transitions ---'
+          awk -F'"' '/rootMap/ {module=$8; if (module != prev) {print $0; prev=module}}' /tmp/root-map.ndjson | grep -B3 -A3 'Init.Data.Int.DivMod.Lemmas' || true

@@ -7,6 +7,11 @@ import {
   constant,
   forallE,
   lam,
+  levelEqStructural,
+  levelIMaxRaw,
+  levelMVar,
+  levelMaxRaw,
+  levelParam,
   levelSucc,
   levelZero,
   mkAppN,
@@ -24,6 +29,11 @@ import {
   Lean434EvaluationError,
   Lean434Evaluator,
 } from '../src/lean4-eval.js';
+import {
+  Lean434LevelBridgeError,
+  kernelLevelToLean434Runtime,
+  lean434RuntimeLevelToKernel,
+} from '../src/lean4-level.js';
 import {
   Lean434NameBridgeError,
   kernelNameToLean434Runtime,
@@ -132,6 +142,31 @@ equal(ctor('Some',1).tag,'Some');
   );
 }
 console.log('ok - Lean runtime Name bridge preserves pskernel structure');
+
+{
+  const u=levelParam(strName(anonymous,'u'));
+  const m=levelMVar(strName(anonymous,'m'));
+  const kernelLevel=levelIMaxRaw(
+    levelMaxRaw(levelSucc(u),m),
+    levelSucc(levelZero),
+  );
+  const runtimeLevel=kernelLevelToLean434Runtime(kernelLevel);
+  const roundTrip=lean434RuntimeLevelToKernel(runtimeLevel);
+  ok(
+    levelEqStructural(roundTrip,kernelLevel),
+    'Lean Level bridge round-trip mismatch',
+  );
+  throws(
+    ()=>lean434RuntimeLevelToKernel({
+      kind:'constructor',
+      name:'Not.Lean.Level',
+      fields:[],
+    }),
+    Lean434LevelBridgeError,
+    'invalid runtime Level constructor must fail closed',
+  );
+}
+console.log('ok - Lean runtime Level bridge preserves pskernel structure');
 
 // Lean 4.34 Nat and machine-integer compatibility.
 equal(LEAN434_SOURCE_VERSION,'4.34.0');

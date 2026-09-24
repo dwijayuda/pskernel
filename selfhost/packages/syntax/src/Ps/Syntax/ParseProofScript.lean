@@ -123,11 +123,11 @@ def psParseProofScriptSimpleApplication
       else
         Except.ok first
 
-def psParseProofScriptExplicitBinder
+def psParseProofScriptBinder
     (cursor : PsTokenCursor) :
     Except PsParseError
       (PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :=
-  match psTokenCursorExpectText cursor "(" with
+  match psParseBinderOpening cursor with
   | Except.error error => Except.error error
   | Except.ok opening =>
       match psTokenCursorExpectKind opening.cursor PsTokenKind.identifier with
@@ -139,27 +139,24 @@ def psParseProofScriptExplicitBinder
               match psParseProofScriptSimpleApplication afterColon.cursor with
               | Except.error error => Except.error error
               | Except.ok type =>
-                  match psTokenCursorExpectText type.cursor ")" with
+                  match psParseBinderClosing opening type.cursor with
                   | Except.error error => Except.error error
-                  | Except.ok close =>
+                  | Except.ok closing =>
                       let binderName : PsSyntaxName := {
                         segments := [name.token.text]
                         span := name.token.span
                       }
                       let binder : PsSyntaxBinderHead := {
                         name := binderName
-                        kind := PsSyntaxBinderKind.explicit
-                        span := {
-                          start := opening.token.span.start
-                          stop := close.token.span.stop
-                        }
+                        kind := opening.kind
+                        span := closing.value
                       }
                       Except.ok {
                         value := (binder, type.value)
-                        cursor := close.cursor
+                        cursor := closing.cursor
                       }
 
-def psParseProofScriptExplicitBindersWithFuel
+def psParseProofScriptBindersWithFuel
     (fuel : Nat)
     (cursor : PsTokenCursor)
     (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) :
@@ -169,11 +166,11 @@ def psParseProofScriptExplicitBindersWithFuel
   | 0 =>
       Except.ok { value := bindersRev.reverse, cursor := cursor }
   | remaining + 1 =>
-      if psTokenCursorAtText cursor "(" then
-        match psParseProofScriptExplicitBinder cursor with
+      if psTokenCursorAtBinderStart cursor then
+        match psParseProofScriptBinder cursor with
         | Except.error error => Except.error error
         | Except.ok parsed =>
-            psParseProofScriptExplicitBindersWithFuel
+            psParseProofScriptBindersWithFuel
               remaining
               parsed.cursor
               (parsed.value :: bindersRev)
@@ -201,7 +198,7 @@ def psParseProofScriptDeclaration
             match psParseSyntaxName afterKeyword.cursor with
             | Except.error error => Except.error error
             | Except.ok name =>
-                match psParseProofScriptExplicitBindersWithFuel
+                match psParseProofScriptBindersWithFuel
                     name.cursor.remaining.length
                     name.cursor
                     [] with

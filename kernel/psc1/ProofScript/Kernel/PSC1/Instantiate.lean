@@ -65,11 +65,11 @@ def instantiateRev (e : Expr) (subst : List Expr) : Expr :=
 
 /--
 Single-free-variable abstraction, matching the n=1 case of Lean 4.34
-`abstract.cpp`.
+`abstract.cpp`. Existing bound variables are preserved; only the matching
+free variable is replaced using the current binder offset.
 -/
 def abstractFVarAt : Expr → Name → Nat → Expr
-  | .bvar i, target, depth =>
-      if i >= depth then .bvar (i + 1) else .bvar i
+  | .bvar i, _, _ => .bvar i
   | .fvar n, target, depth =>
       if Name.beq n target then .bvar depth else .fvar n
   | .mvar n, _, _ => .mvar n

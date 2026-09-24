@@ -27,6 +27,148 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let boolType := PsExpr.constE psBoolName []
   let unitType := PsExpr.constE psUnitName []
   let charType := PsExpr.constE psCharName []
+  let arrayOf :=
+    fun alpha => PsExpr.app (PsExpr.constE psArrayName []) alpha
+  let arrayType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      typeType
+      PsBinderInfo.explicit
+  let arrayEmptyType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        nName
+        natType
+        (arrayOf (PsExpr.bvar 1))
+        PsBinderInfo.explicit)
+      PsBinderInfo.implicit
+  let arraySizeType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        aName
+        (arrayOf (PsExpr.bvar 0))
+        natType
+        PsBinderInfo.explicit)
+      PsBinderInfo.implicit
+  let arrayPushType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        aName
+        (arrayOf (PsExpr.bvar 0))
+        (PsExpr.forallE
+          bName
+          (PsExpr.bvar 1)
+          (arrayOf (PsExpr.bvar 2))
+          PsBinderInfo.explicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.implicit
+  let arrayGetDType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        aName
+        (arrayOf (PsExpr.bvar 0))
+        (PsExpr.forallE
+          nName
+          natType
+          (PsExpr.forallE
+            bName
+            (PsExpr.bvar 2)
+            (PsExpr.bvar 3)
+            PsBinderInfo.explicit)
+          PsBinderInfo.explicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.implicit
+  let arraySetIfInBoundsType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        aName
+        (arrayOf (PsExpr.bvar 0))
+        (PsExpr.forallE
+          nName
+          natType
+          (PsExpr.forallE
+            bName
+            (PsExpr.bvar 2)
+            (arrayOf (PsExpr.bvar 3))
+            PsBinderInfo.explicit)
+          PsBinderInfo.explicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.implicit
+  let alphaToBeta :=
+    PsExpr.forallE
+      aName
+      (PsExpr.bvar 1)
+      (PsExpr.bvar 1)
+      PsBinderInfo.explicit
+  let arrayMapType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        bName
+        typeType
+        (PsExpr.forallE
+          (psRootName "f")
+          alphaToBeta
+          (PsExpr.forallE
+            aName
+            (arrayOf (PsExpr.bvar 2))
+            (arrayOf (PsExpr.bvar 2))
+            PsBinderInfo.explicit)
+          PsBinderInfo.explicit)
+        PsBinderInfo.implicit)
+      PsBinderInfo.implicit
+  let foldFunctionType :=
+    PsExpr.forallE
+      aName
+      (PsExpr.bvar 0)
+      (PsExpr.forallE
+        bName
+        (PsExpr.bvar 2)
+        (PsExpr.bvar 2)
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let arrayFoldlType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        bName
+        typeType
+        (PsExpr.forallE
+          (psRootName "f")
+          foldFunctionType
+          (PsExpr.forallE
+            (psRootName "init")
+            (PsExpr.bvar 2)
+            (PsExpr.forallE
+              aName
+              (arrayOf (PsExpr.bvar 3))
+              (PsExpr.forallE
+                (psRootName "start")
+                natType
+                (PsExpr.forallE
+                  (psRootName "stop")
+                  natType
+                  (PsExpr.bvar 5)
+                  PsBinderInfo.explicit)
+                PsBinderInfo.explicit)
+              PsBinderInfo.explicit)
+            PsBinderInfo.explicit)
+          PsBinderInfo.explicit)
+        PsBinderInfo.implicit)
+      PsBinderInfo.implicit
   let eqType :=
     PsExpr.forallE
       alphaName
@@ -170,8 +312,34 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let env16 :=
     psPreludeAdd env15
       (PsDeclaration.axiomDecl psCharOfNatName [] charOfNatType)
-  let env17 :=
+  let envArray0 :=
     psPreludeAdd env16
+      (PsDeclaration.axiomDecl psArrayName [] arrayType)
+  let envArray1 :=
+    psPreludeAdd envArray0
+      (PsDeclaration.axiomDecl
+        psArrayEmptyWithCapacityName [] arrayEmptyType)
+  let envArray2 :=
+    psPreludeAdd envArray1
+      (PsDeclaration.axiomDecl psArraySizeName [] arraySizeType)
+  let envArray3 :=
+    psPreludeAdd envArray2
+      (PsDeclaration.axiomDecl psArrayPushName [] arrayPushType)
+  let envArray4 :=
+    psPreludeAdd envArray3
+      (PsDeclaration.axiomDecl psArrayGetDName [] arrayGetDType)
+  let envArray5 :=
+    psPreludeAdd envArray4
+      (PsDeclaration.axiomDecl
+        psArraySetIfInBoundsName [] arraySetIfInBoundsType)
+  let envArray6 :=
+    psPreludeAdd envArray5
+      (PsDeclaration.axiomDecl psArrayMapName [] arrayMapType)
+  let envArray7 :=
+    psPreludeAdd envArray6
+      (PsDeclaration.axiomDecl psArrayFoldlName [] arrayFoldlType)
+  let env17 :=
+    psPreludeAdd envArray7
       (PsDeclaration.axiomDecl psEqName [uName] eqType)
   let env18 :=
     psPreludeAdd env17

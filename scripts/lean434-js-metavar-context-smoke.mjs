@@ -14,6 +14,10 @@ import {
   Lean434Evaluator,
 } from '../packages/runtime/dist/src/lean4-eval.js';
 import {
+  Lean434RuntimeMetadataIndex,
+  parseLean434RuntimeMetadata,
+} from '../packages/runtime/dist/src/lean4-metadata.js';
+import {
   kernelExprToLean434Runtime,
   lean434RuntimeExprToKernel,
 } from '../packages/runtime/dist/src/lean4-expr.js';
@@ -24,8 +28,15 @@ import {
 } from '../packages/runtime/dist/src/lean4-mctx.js';
 
 const fixture=process.argv[2]??'lean434-metavar-context-bootstrap.ndjson';
+const metadataFixture=
+  process.argv[3]??'lean434-metavar-context-runtime-metadata.json';
 if(!fs.existsSync(fixture)){
   throw new Error('missing generated Lean.MetavarContext fixture: '+fixture);
+}
+if(!fs.existsSync(metadataFixture)){
+  throw new Error(
+    'missing Lean.MetavarContext runtime metadata: '+metadataFixture,
+  );
 }
 const preludeFixture='oracle/fixtures/lean434-init-prelude.ndjson';
 if(!fs.existsSync(preludeFixture)){
@@ -54,9 +65,20 @@ console.log(JSON.stringify({
   bytes:Buffer.byteLength(delta),
 }));
 
+const metadata=new Lean434RuntimeMetadataIndex(
+  parseLean434RuntimeMetadata(
+    JSON.parse(fs.readFileSync(metadataFixture,'utf8')),
+  ),
+);
+const insertAuxImpl=
+  metadata.implementedByFor('Lean.PersistentHashMap.insertAux');
+console.log(JSON.stringify({
+  phase:'metavar-context-runtime-metadata',
+  insertAuxImplementedBy:insertAuxImpl?.implementation??null,
+}));
 const evaluator=new Lean434Evaluator(
   replay.env,
-  {maxSteps:250_000},
+  {maxSteps:250_000,metadata},
 );
 
 {

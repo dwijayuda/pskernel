@@ -205,6 +205,25 @@ def psPrintProofScriptBinder
                 (delimiters.1 ++ name ++ " : " ++
                   printedType ++ delimiters.2)
 
+def psPrintProofScriptStructureField
+    (field : PsSyntaxBinderHead × PsSyntaxTerm) :
+    Except PsSourcePrintError String :=
+  match field with
+  | (head, type) =>
+      match psPrintSyntaxName head.name with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          match psPrintProofScriptTerm type with
+          | Except.error error => Except.error error
+          | Except.ok printedType =>
+              let value :=
+                match head.kind with
+                | .explicit => name ++ " : " ++ printedType
+                | .implicit => "{" ++ name ++ " : " ++ printedType ++ "}"
+                | .strictImplicit => "{{" ++ name ++ " : " ++ printedType ++ "}}"
+                | .instanceImplicit => "[" ++ name ++ " : " ++ printedType ++ "]"
+              Except.ok ("  " ++ value ++ ";")
+
 def psPrintProofScriptConstructor
     (constructor : PsSyntaxInductiveConstructor) :
     Except PsSourcePrintError String :=
@@ -295,6 +314,23 @@ def psPrintProofScriptDeclaration
                           " where {\n" ++
                           psPrintJoin "\n" printedConstructors ++
                           "\n};")
+  | .structureDecl name params fields _ =>
+      match psPrintSyntaxName name with
+      | Except.error error => Except.error error
+      | Except.ok printedName =>
+          match params.mapM psPrintProofScriptBinder with
+          | Except.error error => Except.error error
+          | Except.ok printedParams =>
+              match fields.mapM psPrintProofScriptStructureField with
+              | Except.error error => Except.error error
+              | Except.ok printedFields =>
+                  let paramSuffix :=
+                    if printedParams.isEmpty then ""
+                    else " " ++ psPrintJoin " " printedParams
+                  Except.ok
+                    ("structure " ++ printedName ++ paramSuffix ++
+                      " where {\n" ++ psPrintJoin "\n" printedFields ++
+                      "\n};")
 
 def psPrintProofScriptModule
     (module : PsSyntaxModule) :

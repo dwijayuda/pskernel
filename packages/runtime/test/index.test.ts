@@ -511,6 +511,80 @@ console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility s
 }
 console.log('ok - proposition-valued axioms erase without JS implementations');
 
+{
+  const environment=new Environment();
+  const Nat=nameFromDotted('Nat');
+  const NatZero=nameFromDotted('Nat.zero');
+  const NatSucc=nameFromDotted('Nat.succ');
+  const x=nameFromDotted('x');
+  const natType=constant(Nat);
+  addPrimitiveInductive(environment,{
+    levelParams:[],
+    numParams:0,
+    types:[{
+      name:Nat,
+      type:sort(levelSucc(levelZero)),
+      ctors:[
+        {name:NatZero,type:natType},
+        {name:NatSucc,type:forallE(x,natType,natType)},
+      ],
+    }],
+  });
+  const kernel=new Kernel(environment);
+  const wrapper=nameFromDotted('RuntimeTest.logicalWrapper');
+  const implementation=nameFromDotted('RuntimeTest.unsafeImplementation');
+  const functionType=forallE(x,natType,natType);
+  kernel.addOpaque({
+    kind:'opaque',
+    name:wrapper,
+    levelParams:[],
+    type:functionType,
+    value:lam(x,natType,natLit(0n)),
+    isUnsafe:false,
+  });
+  kernel.addDefinition({
+    kind:'definition',
+    name:implementation,
+    levelParams:[],
+    type:functionType,
+    value:lam(x,natType,bvar(0)),
+    hints:{kind:'regular',height:1n},
+    safety:'unsafe',
+  });
+
+  const metadata=parseLean434RuntimeMetadata({
+    format:'proofscript-lean434-runtime-metadata',
+    formatVersion:1,
+    lean:{
+      version:'4.34.0',
+      githash:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
+    },
+    module:'RuntimeTest',
+    externs:[],
+    implementedBy:[{
+      declaration:'RuntimeTest.logicalWrapper',
+      implementation:'RuntimeTest.unsafeImplementation',
+    }],
+    initializers:[],
+  });
+  const logicalOnly=new Lean434Evaluator(environment);
+  equal(
+    logicalOnly.evaluate(app(constant(wrapper),natLit(42n))),
+    0n,
+  );
+  const executable=new Lean434Evaluator(
+    environment,
+    {metadata:new Lean434RuntimeMetadataIndex(metadata)},
+  );
+  equal(
+    executable.evaluate(app(constant(wrapper),natLit(42n))),
+    42n,
+  );
+}
+console.log(
+  'ok - generic implemented_by executes runtime target without changing logical body',
+);
+
 console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressions');
 
 {

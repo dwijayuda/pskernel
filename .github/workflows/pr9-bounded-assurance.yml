@@ -23,6 +23,7 @@ jobs:
           lean_bin="$("$HOME/.elan/bin/elan" which lean)"
           lean_dir="$(dirname "$lean_bin")"
           echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
+          echo "LEAN434_SRC=$GITHUB_WORKSPACE/study/lean4-4.34.0" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: 22

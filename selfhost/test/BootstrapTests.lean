@@ -1203,6 +1203,32 @@ def psTestDualSourceUnit : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestLeanParenthesizedApplication : Bool :=
+  match psParseLeanSource
+      "def id (x : Nat) : Nat := x\ndef one : Nat := id (id 1)" with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psTestNatEnvironment module with
+      | Except.error _ => false
+      | Except.ok result =>
+          let idName := psTestName "id"
+          let natType := PsExpr.constE psNatName []
+          let oneValue :=
+            PsExpr.app
+              (PsExpr.constE idName [])
+              (PsExpr.app
+                (PsExpr.constE idName [])
+                (PsExpr.lit (PsLiteral.natural 1)))
+          match result.declarations with
+          | [
+              PsDeclaration.definitionDecl _ [] _ _,
+              PsDeclaration.definitionDecl oneName [] oneType actualValue
+            ] =>
+              psNameEq oneName (psTestName "one")
+                && psExprAlphaEq oneType natType
+                && psExprAlphaEq actualValue oneValue
+          | _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1225,6 +1251,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },
   { name := "dual-source Unit", passed := psTestDualSourceUnit },
+  { name := "Lean parenthesized application", passed := psTestLeanParenthesizedApplication },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

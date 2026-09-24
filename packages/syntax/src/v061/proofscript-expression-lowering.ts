@@ -38,6 +38,8 @@ function lowerTactic(tactic:V061Tactic):string {
       return 'exact?';
     case 'assumption':
       return 'assumption';
+    case 'rfl':
+      return 'rfl';
     case 'constructor':
       return 'constructor';
     case 'cases':

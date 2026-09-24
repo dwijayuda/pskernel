@@ -21,6 +21,7 @@ function leanTypeTermBinaryPrecedence(operator:string):number {
     case '||':
       return 30;
   }
+  throw new Error('unsupported type-term binary operator: '+operator);
 }
 
 export function lowerV061TypeToLean(

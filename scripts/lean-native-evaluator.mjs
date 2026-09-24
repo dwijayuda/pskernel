@@ -1,9 +1,10 @@
 import {spawnSync} from 'node:child_process';
 import {nameToString} from '../dist/src/core/name.js';
 
-export function createLeanNativeEvaluator({lean,moduleName,cwd=process.cwd(),env=process.env,runner=spawnSync}){
+export function createLeanNativeEvaluator({lean,moduleName,cwd=process.cwd(),env=process.env,runner=spawnSync,timeoutMs=Number(env.PSKERNEL_NATIVE_TIMEOUT_MS??'60000')}){
   if(typeof lean!=='string'||lean.length===0)throw new Error('native oracle: lean executable is required');
   if(typeof moduleName!=='string'||moduleName.length===0)throw new Error('native oracle: module name is required');
+  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000)throw new Error(`native oracle: invalid timeoutMs ${timeoutMs}`);
   const cache=new Map();
   return {
     evaluate(_kernelEnv,request){
@@ -14,9 +15,9 @@ export function createLeanNativeEvaluator({lean,moduleName,cwd=process.cwd(),env
       const r=runner(
         lean,
         ['--run','oracle/replay-probe/NativeEval.lean',moduleName,request.kind,constant],
-        {cwd,env,encoding:'utf8',maxBuffer:16*1024*1024},
+        {cwd,env,encoding:'utf8',maxBuffer:16*1024*1024,timeout:timeoutMs,killSignal:'SIGKILL'},
       );
-      if(r.error)throw r.error;
+      if(r.error)throw new Error(`native oracle execution failed for ${key}: ${r.error.message}`,{cause:r.error});
       if(r.status!==0||r.signal){
         throw new Error(
           `native oracle failed for ${key}: code=${r.status} signal=${r.signal??'none'}\n${r.stderr??''}`,

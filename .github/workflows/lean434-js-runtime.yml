@@ -104,6 +104,15 @@ jobs:
               throw error;
             }
           "
+      - name: Upload Parser.Basic bootstrap inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: lean434-parser-basic-bootstrap
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            lean434-parser-basic-env-extension.ndjson
+            lean434-parser-basic-runtime-metadata.json
       - name: Execute real Lean registerEnvExtension for Parser.Basic
         run: |
           node scripts/lean434-js-parser-basic-extension-smoke.mjs \

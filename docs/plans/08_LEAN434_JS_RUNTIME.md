@@ -11,6 +11,54 @@ It is intentionally isolated from `main` and from
 API, but it must not weaken or rewrite kernel semantics just to make Lean source
 execute.
 
+## Branch scope after architecture review
+
+This branch does **not** continue the existing TypeScript ProofScript frontend as
+the long-term Lean-on-JS implementation.
+
+The intended permanent implementation surface is:
+
+```text
+study/lean4-4.34.0/src/**/*.lean
+        |
+        v
+small bootstrap loader / source driver
+        |
+        +----------------------+
+        |                      |
+        v                      v
+     pskernel           @proofscript/runtime/lean4
+        |                      |
+        +----------+-----------+
+                   |
+                   v
+               JavaScript
+```
+
+Repository policy for this branch:
+
+- `src/core`, `src/kernel`, and their public kernel facade remain the trusted
+  kernel implementation;
+- `packages/runtime` is the JavaScript execution/runtime compatibility layer;
+- pinned upstream/adapted `.lean` source is the implementation source for
+  Parser, Meta, Elab, and eventually compiler logic;
+- small scripts/bootstrap drivers are allowed when they exist only to bring the
+  Lean-written stack up;
+- existing TypeScript packages such as `syntax`, `meta`, `elab`,
+  `checked-core`, `erasure`, `compiler-ir`, and `compiler` are **not**
+  to be expanded for this experiment. They may be consulted as references and
+  test oracles, but they are not the target architecture;
+- do not mass-delete those packages yet: deletion would create a very large,
+  low-information branch diff and make comparison with `main` harder. Once
+  the Lean-written bootstrap path reaches an independent gate, unused packages
+  can be pruned from this branch in one deliberate cleanup;
+- no change in the runtime may grant proof authority. pskernel remains the
+  declaration checker.
+
+A small bootstrap driver is still necessary before the Lean-written parser and
+elaborator can compile themselves. That bootstrap is infrastructure, not a
+second language implementation.
+
 ## Permanent invariants
 
 1. pskernel remains the only trust boundary for declaration admission.

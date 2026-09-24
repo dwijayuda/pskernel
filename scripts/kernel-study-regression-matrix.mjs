@@ -59,7 +59,7 @@ const hardeningExtras={
   'study/lean4-4.34.0/tests/elab/reduceBool.lean':{
     kind:'direct-native-boundary',
     tests:['explicit native evaluator controls Lean.reduceNat and Lean.reduceBool results'],
-    note:'upstream smoke for Lean.reduceNat/Lean.reduceBool; direct TS provider test locks returned Nat/Bool behavior while native-oracle-smoke locks compiler execution and @[implemented_by]',
+    note:'upstream smoke for Lean.reduceNat/Lean.reduceBool; direct TS provider test locks returned Nat/Bool behavior while native-oracle-smoke locks exact-name compiler-IR execution for ordinary closed Nat/Bool constants',
   },
   'study/lean4-4.34.0/tests/elab/issue_14576.lean':{
     kind:'direct-invariant-plus-oracle',

@@ -776,6 +776,18 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
           part := part + 1) |>.run {}
   pure ()
 
+def resolveRootName (env : Environment) (text : String) : IO Name := do
+  let parsed := text.toName
+  if !parsed.isAnonymous && env.contains parsed then
+    return parsed
+  for (name, _) in env.constants.map₁.toList do
+    if name.toString == text then
+      return name
+  throw <| IO.userError s!"missing constant {text}"
+
+def resolveRootNames (env : Environment) (texts : List String) : IO (List Name) :=
+  texts.mapM (resolveRootName env)
+
 unsafe def main (args : List String) : IO Unit := do
   initSearchPath (← findSysroot)
   if args.length < 2 then
@@ -783,9 +795,6 @@ unsafe def main (args : List String) : IO Unit := do
   let moduleName := args.head!.toName
   let requestedRoots := args.tail!
   withImportModules #[{module := moduleName}] {} fun env => do
-    let roots :=
-      if requestedRoots == ["--all"] then env.constants.map₁.toList.map (·.1)
-      else requestedRoots.map String.toName
     if requestedRoots == ["--module-stream"] then
       dumpModuleStream env moduleName
     else if requestedRoots.length == 2 && requestedRoots.head! == "--batch-manifest" then
@@ -814,6 +823,11 @@ unsafe def main (args : List String) : IO Unit := do
       let count := requestedRoots[2]!.toNat!
       dumpRootRange env moduleName start count
     else
+      let roots ←
+        if requestedRoots == ["--all"] then
+          pure <| env.constants.map₁.toList.map (·.1)
+        else
+          resolveRootNames env requestedRoots
       dumpMeta
       let _ ← (do
         for n in roots do dumpConstant env n) |>.run {}

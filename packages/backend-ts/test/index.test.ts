@@ -201,6 +201,78 @@ console.log('ok - @proofscript/backend-ts Lean-faithful Char.ofNat emission');
           ],
         },
       },
+      {
+        name:'byteSize',
+        typeParameters:[],
+        parameters:[{name:'s',type:{kind:'primitive',name:'String'}}],
+        resultType:{kind:'primitive',name:'Nat'},
+        body:{
+          kind:'intrinsic',
+          operation:'string.utf8ByteSize',
+          args:[{kind:'var',name:'s'}],
+        },
+      },
+      {
+        name:'nextPos',
+        typeParameters:[],
+        parameters:[
+          {name:'s',type:{kind:'primitive',name:'String'}},
+          {name:'p',type:{kind:'primitive',name:'Nat'}},
+        ],
+        resultType:{kind:'primitive',name:'Nat'},
+        body:{
+          kind:'intrinsic',
+          operation:'string.next',
+          args:[{kind:'var',name:'s'},{kind:'var',name:'p'}],
+        },
+      },
+      {
+        name:'getAt',
+        typeParameters:[],
+        parameters:[
+          {name:'s',type:{kind:'primitive',name:'String'}},
+          {name:'p',type:{kind:'primitive',name:'Nat'}},
+        ],
+        resultType:{kind:'primitive',name:'Char'},
+        body:{
+          kind:'intrinsic',
+          operation:'string.get',
+          args:[{kind:'var',name:'s'},{kind:'var',name:'p'}],
+        },
+      },
+      {
+        name:'atEnd',
+        typeParameters:[],
+        parameters:[
+          {name:'s',type:{kind:'primitive',name:'String'}},
+          {name:'p',type:{kind:'primitive',name:'Nat'}},
+        ],
+        resultType:{kind:'primitive',name:'Bool'},
+        body:{
+          kind:'intrinsic',
+          operation:'string.atEnd',
+          args:[{kind:'var',name:'s'},{kind:'var',name:'p'}],
+        },
+      },
+      {
+        name:'extractText',
+        typeParameters:[],
+        parameters:[
+          {name:'s',type:{kind:'primitive',name:'String'}},
+          {name:'b',type:{kind:'primitive',name:'Nat'}},
+          {name:'e',type:{kind:'primitive',name:'Nat'}},
+        ],
+        resultType:{kind:'primitive',name:'String'},
+        body:{
+          kind:'intrinsic',
+          operation:'string.extract',
+          args:[
+            {kind:'var',name:'s'},
+            {kind:'var',name:'b'},
+            {kind:'var',name:'e'},
+          ],
+        },
+      },
     ],
   });
   equal(source.includes('BigInt(__ps_c.codePointAt(0) ?? 0)'),true);
@@ -214,6 +286,10 @@ console.log('ok - @proofscript/backend-ts Lean-faithful Char.ofNat emission');
   equal(source.includes(
     'export function appendText(a: string, b: string): string { return (a + b); }',
   ),true);
+  equal(source.includes('codePointAt(0)'),true);
+  equal(source.includes('return __ps_p + __ps_w'),true);
+  equal(source.includes('return "A"'),true);
+  equal(source.includes('__ps_b >= __ps_e'),true);
   const compiled=compileTypeScript(source,'verified-text.ts');
   equal(
     compiled.declaration.includes('charCode(c: string): bigint'),

@@ -144,102 +144,30 @@ or exposed through an explicit ProofScript Lean-subset language mode.
    where dependent types, propositions, inductives, recursion, typeclasses,
    or theorem checking are involved.
 
-## Transitional legacy software path
+## Single semantic compiler path
 
-The existing `@proofscript/language` software checker and
-`software.ts` compiler-IR lane remain temporarily because they cover more
-ordinary programming constructs than the verified-core lane today.
+The former `@proofscript/language` software checker and `software.ts`
+compiler-IR lane are retired as an early self-hosting prerequisite. They must
+not be used as compatibility fallbacks or as staging areas for new language
+semantics.
 
-They are **not** the target architecture and must not gain new foundational
-semantics that compete with Meta/Elab/pskernel.
+The only ProofScript semantic compiler path is:
 
-Migration policy:
-
-1. add/repair the construct in Lean-compatible syntax/meta/elab;
-2. obtain a pskernel-admitted checked-core declaration;
-3. implement semantics-preserving erasure/lowering;
-4. move backend/runtime coverage to verified IR;
-5. only then retire the corresponding legacy software path.
-
-## Current executable proof of architecture
-
-The current vertical regression includes:
-
-```proofscript
-function identity {α : Type}(x : α) : α := x;
+```text
+.ps / supported .lean
+-> shared source frontend
+-> Lean-compatible Meta / Elab
+-> pskernel admission
+-> @proofscript/checked-core
+-> @proofscript/erasure
+-> verified @proofscript/compiler-ir
+-> @proofscript/backend-ts
+-> TypeScript Compiler API
+-> JavaScript
 ```
 
-It is:
-
-1. parsed as ProofScript;
-2. dependently elaborated;
-3. re-admitted into `@proofscript/checked-core` by pskernel;
-4. erased so `α` is absent at runtime;
-5. lowered to verified compiler IR;
-6. emitted as TypeScript equivalent to
-   `identity<T0>(x: T0): T0`;
-7. compiled by TypeScript to JavaScript `identity(x)`;
-8. emitted to `.d.ts` with the generic type preserved.
-
-This is the reference direction for all future language/compiler work.
-
-A dedicated composition regression also locks that the same checked path can
-nest ordinary functional constructs rather than supporting them only in
-isolation: an outer `let` binds a lambda whose body is a checked Bool `if`,
-and the let body performs a verified ADT `match` whose branches call that
-local function. The expected verified-IR shape is asserted directly as
-`let -> lambda(if) -> match` before TypeScript emission.
-
-
-## Verified Nat programming checkpoint
-
-The canonical path now also covers composing ordinary checked functions:
-
-```proofscript
-function add(x : Nat, y : Nat) : Nat := x + y;
-
-function twice(x : Nat) : Nat :=
-  add(x, x);
-```
-
-For the current bounded notation milestone, `+`, `-`, `*`, `/`, and `%`
-are accepted only at `Nat`. Elaboration produces the real Lean constants
-`Nat.add`, `Nat.sub`, `Nat.mul`, `Nat.div`, and `Nat.mod`; erasure then
-maps those checked applications to explicit verified-IR intrinsics. Runtime
-division/modulo preserve Lean's total Nat semantics: division by zero yields
-`0`, while modulo by zero returns the dividend.
-
-The bounded primitive equality surface follows Lean's existing `==`/`!=`
-meaning rather than redefining it as propositional equality. Nat operands use
-the real `Nat.beq`. Lean 4.34 supplies Bool `BEq` through the generic
-`DecidableEq` instance rather than a standalone `Bool.beq` constant, and
-the current bounded elaborator does not yet index Prelude instances. Bool
-equality is therefore reconstructed extensionally from the real
-`Bool.and`/`Bool.or`/`Bool.not` constants as XNOR, kernel-checked, then
-recognized by erasure as the existing `bool.eq` intrinsic. Inequality remains
-`Bool.not` of that checked equality, matching Lean's `bne` truth table.
-Generic `BEq` synthesis is intentionally not claimed.
-
-The same verified Bool lane now covers `!x`, `x && y`, and `x || y` through
-the actual Lean constants `Bool.not`, `Bool.and`, and `Bool.or`. Any
-supported expression already checked to have type `Bool` may be used as an
-`if` condition. The frontend reflects that Bool to the proposition
-`Eq Bool condition true` with `Bool.decEq`; proposition-native Nat ordering
-conditions continue through `LE.le`/`LT.lt` with their Nat instances and
-checked deciders. Only after pskernel admission does erasure lower these
-checked forms to boolean verified-IR conditions.
-
-This is intentionally narrower than pretending to have Lean's general
-`HAdd`/typeclass notation or generic `BEq` synthesis already. General
-overloaded notation must wait for the real typeclass-synthesis layer.
-
-
-Verified runtime intrinsics have one shared compiler-IR contract for operation
-identity and arity. Validation consumes that contract, and backend-ts emits the
-operation union exhaustively. There is no catch-all emission fallback: adding a
-new verified intrinsic without defining its backend semantics is a TypeScript
-compile-time error rather than silently changing meaning.
-
+Host adapters may remain TypeScript, but they must not own ProofScript type,
+proof, elaboration, erasure, or compiler-IR semantics.
 
 ## Verified execution checkpoint
 

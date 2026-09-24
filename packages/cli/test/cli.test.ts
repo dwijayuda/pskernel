@@ -752,6 +752,121 @@ console.log('ok - psc SH1 dual-source Unicode String.length runtime');
 
 
 {
+  const sources=[
+    {
+      entry:'src/main.ps',
+      source:
+        'function main(s : String, p : String.Pos.Raw) : String := '+
+        'String.Internal.append('+
+        'String.Internal.extract(s, String.Internal.next(s, p), '+
+        'String.Pos.Raw.mk(String.utf8ByteSize(s))), '+
+        'String.singleton(String.Internal.get(s, String.Internal.next(s, p))));\n',
+      sourceKind:'proofscript',
+    },
+    {
+      entry:'src/main.lean',
+      source:
+        'def main (s : String) (p : String.Pos.Raw) : String := '+
+        'String.Internal.append '+
+        '(String.Internal.extract s (String.Internal.next s p) '+
+        '(String.Pos.Raw.mk (String.utf8ByteSize s))) '+
+        '(String.singleton (String.Internal.get s (String.Internal.next s p)))\n',
+      sourceKind:'lean-subset',
+    },
+  ] as const;
+  for(const item of sources){
+    const directory=await mkdtemp(join(tmpdir(),'proofscript-sh1-raw-pos-'));
+    try{
+      await mkdir(join(directory,'src'),{recursive:true});
+      await writeFile(
+        join(directory,'psconfig.json'),
+        JSON.stringify({
+          languageVersion:'0.7',
+          entry:item.entry,
+          compilerOptions:{
+            outDir:'dist',
+            emitTypeScript:true,
+            declaration:true,
+            sourceMap:true,
+          },
+        },null,2)+'\n',
+        'utf8',
+      );
+      await writeFile(join(directory,item.entry),item.source,'utf8');
+      clearVerifiedProjectModuleCache();
+      const result=await runCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:['𝒫x','0'],
+      });
+      equal(result.mainResult,'xx');
+      equal(result.semanticPipeline,'verified-core');
+      equal(result.proofStatus,'kernel-verified');
+      equal(result.sourceKind,item.sourceKind);
+    }finally{
+      await rm(directory,{recursive:true,force:true});
+    }
+  }
+}
+console.log('ok - psc SH1 dual-source UTF-8 next/get/extract runtime');
+
+{
+  const sources=[
+    {
+      entry:'src/main.ps',
+      source:
+        'function main(s : String, p : String.Pos.Raw) : Bool := '+
+        'String.Internal.atEnd(s, p);\n',
+      sourceKind:'proofscript',
+    },
+    {
+      entry:'src/main.lean',
+      source:
+        'def main (s : String) (p : String.Pos.Raw) : Bool := '+
+        'String.Internal.atEnd s p\n',
+      sourceKind:'lean-subset',
+    },
+  ] as const;
+  for(const item of sources){
+    const directory=await mkdtemp(join(tmpdir(),'proofscript-sh1-at-end-'));
+    try{
+      await mkdir(join(directory,'src'),{recursive:true});
+      await writeFile(
+        join(directory,'psconfig.json'),
+        JSON.stringify({
+          languageVersion:'0.7',
+          entry:item.entry,
+          compilerOptions:{
+            outDir:'dist',
+            emitTypeScript:true,
+            declaration:true,
+            sourceMap:true,
+          },
+        },null,2)+'\n',
+        'utf8',
+      );
+      await writeFile(join(directory,item.entry),item.source,'utf8');
+      clearVerifiedProjectModuleCache();
+      const result=await runCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:['𝒫x','5'],
+      });
+      equal(result.mainResult,true);
+      equal(result.semanticPipeline,'verified-core');
+      equal(result.proofStatus,'kernel-verified');
+      equal(result.sourceKind,item.sourceKind);
+    }finally{
+      await rm(directory,{recursive:true,force:true});
+    }
+  }
+}
+console.log('ok - psc SH1 dual-source UTF-8 atEnd runtime');
+
+
+{
   const directory=await mkdtemp(
     join(tmpdir(),'proofscript-verified-structure-abi-'),
   );

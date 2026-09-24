@@ -26,6 +26,25 @@ const natIntrinsics=new Map<
   ['Nat.beq','nat.eq'],
 ]);
 
+const textIntrinsics=new Map<
+  string,
+  {
+    readonly operation:
+      |'char.toNat'
+      |'string.push'
+      |'string.singleton'
+      |'string.length'
+      |'string.append';
+    readonly arity:1|2;
+  }
+>([
+  ['Char.toNat',{operation:'char.toNat',arity:1}],
+  ['String.push',{operation:'string.push',arity:2}],
+  ['String.singleton',{operation:'string.singleton',arity:1}],
+  ['String.Internal.length',{operation:'string.length',arity:1}],
+  ['String.Internal.append',{operation:'string.append',arity:2}],
+]);
+
 function namedApplication(
   expr:Expr,
   name:string,
@@ -211,6 +230,24 @@ export function tryErasePrimitiveRuntimeApplication(
       operation:'char.ofNat',
       args:[erase(view.args[0]!,scope,environment)],
     };
+  }
+
+  if(view.fn.kind==='const'){
+    const intrinsic=textIntrinsics.get(nameToString(view.fn.name));
+    if(intrinsic!==undefined){
+      if(view.args.length!==intrinsic.arity){
+        throw new Error(
+          "PS_ERASE_INTRINSIC_ARITY: '"+intrinsic.operation+
+          "' expects "+intrinsic.arity+" argument"+
+          (intrinsic.arity===1?'':'s'),
+        );
+      }
+      return {
+        kind:'intrinsic',
+        operation:intrinsic.operation,
+        args:view.args.map((arg)=>erase(arg,scope,environment)),
+      };
+    }
   }
 
   if(

@@ -157,17 +157,14 @@ export function elaborateApplication({
       'PS_ELAB_APP_FUNCTION_STUCK: function expression contains unresolved expression metavariables',
     );
   }
-
   let term=fn;
   let type=checker.check(metaContext.instantiate(fn));
   let explicitIndex=0;
   const inserted:InsertedApplicationArgument[]=[];
   const pendingInstances:Expr[]=[];
-
   while(true){
     const instantiatedType=metaContext.instantiate(type);
     const functionType=checker.whnf(instantiatedType);
-
     if(functionType.kind!=='forall'){
       if(explicitIndex<args.length){
         throw new Error(
@@ -177,7 +174,6 @@ export function elaborateApplication({
       }
       break;
     }
-
     if(functionType.binderInfo==='default'){
       if(explicitIndex>=args.length)break;
       const expectedArgumentType=metaContext.instantiate(functionType.type);
@@ -188,7 +184,6 @@ export function elaborateApplication({
       );
       const sourceArg=supplied.term;
       const argument=metaContext.instantiate(sourceArg);
-
       let actualType:Expr;
       if(hasMVar(argument)){
         if(
@@ -205,7 +200,6 @@ export function elaborateApplication({
       }else{
         actualType=checker.check(argument);
       }
-
       if(
         !metaContext.unify(
           actualType,
@@ -219,17 +213,14 @@ export function elaborateApplication({
           ', got '+exprToString(actualType),
         );
       }
-
       term=app(term,sourceArg);
       type=instantiate1(functionType.body,sourceArg);
       continue;
     }
-
     if(
       functionType.binderInfo==='strictImplicit'
       &&explicitIndex>=args.length
     )break;
-
     const expectedType=metaContext.instantiate(functionType.type);
     const implicit=metaContext.mkFresh(
       expectedType,
@@ -263,7 +254,6 @@ export function elaborateApplication({
       }
     }
   }
-
   if(expectedType!==undefined){
     const actual=metaContext.instantiate(type);
     const expected=metaContext.instantiate(expectedType);
@@ -274,7 +264,6 @@ export function elaborateApplication({
       );
     }
   }
-
   const unresolvedInstances:Expr[]=[];
   for(const pending of pendingInstances){
     if(metaContext.isAssigned(pending))continue;
@@ -299,7 +288,6 @@ export function elaborateApplication({
     }
     metaContext.assign(pending,synthesized);
   }
-
   return {
     term:metaContext.instantiate(term),
     type:metaContext.instantiate(type),

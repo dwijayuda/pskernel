@@ -266,7 +266,6 @@ export function elaborateV061PrimitiveBooleanEquality(
     context,
   );
 }
-
 export function elaborateV061BoolBinaryNotation(
   expr:Extract<V061Expr,{kind:'binary'}>,
   context:V061CoreElabContext,
@@ -284,7 +283,6 @@ export function elaborateV061BoolBinaryNotation(
     expected,
   );
 }
-
 export function elaborateV061UnaryNotation(
   expr:Extract<V061Expr,{kind:'unary'}>,
   context:V061CoreElabContext,

@@ -101,7 +101,6 @@ function eraseVerifiedCondition(
       'PS_ERASE_CONDITION_UNSUPPORTED: relation instance is not constant',
     );
   }
-
   const instanceName=nameToString(instance.name);
   let operation:'nat.le'|'nat.lt';
   if(head==='LE.le'&&instanceName==='instLENat'){
@@ -114,7 +113,6 @@ function eraseVerifiedCondition(
       "' with instance '"+instanceName+"' is not executable yet",
     );
   }
-
   return {
     kind:'intrinsic',
     operation,
@@ -124,7 +122,6 @@ function eraseVerifiedCondition(
     ],
   };
 }
-
 export function eraseRuntimeApplication(
   expr:Extract<Expr,{kind:'app'}>,
   scope:ErasureScope,
@@ -139,7 +136,6 @@ export function eraseRuntimeApplication(
     erase,
   );
   if(recursor!==undefined)return recursor;
-
   if(view.fn.kind==='const'){
     const constructor=scope.inductivesByConstructor.get(
       nameKey(view.fn.name),
@@ -170,7 +166,6 @@ export function eraseRuntimeApplication(
         })),
       };
     }
-
     const structure=scope.structuresByConstructor.get(
       nameKey(view.fn.name),
     );
@@ -197,7 +192,6 @@ export function eraseRuntimeApplication(
       };
     }
   }
-
   if(
     view.fn.kind==='const'
     &&nameToString(view.fn.name)==='ite'
@@ -215,7 +209,6 @@ export function eraseRuntimeApplication(
       elseBranch:erase(view.args[4]!,scope,environment),
     };
   }
-
   if(
     view.fn.kind==='const'
     &&nameToString(view.fn.name)==='Bool.not'
@@ -247,7 +240,6 @@ export function eraseRuntimeApplication(
       args:[erase(view.args[0]!,scope,environment)],
     };
   }
-
   const boolEquality=canonicalBoolBeqOperands(expr);
   if(boolEquality!==undefined){
     return {
@@ -256,7 +248,6 @@ export function eraseRuntimeApplication(
       args:boolEquality.map((arg)=>erase(arg,scope,environment)),
     };
   }
-
   if(
     view.fn.kind==='const'
     &&(nameToString(view.fn.name)==='Bool.and'
@@ -271,7 +262,6 @@ export function eraseRuntimeApplication(
       args:view.args.map((arg)=>erase(arg,scope,environment)),
     };
   }
-
   if(view.fn.kind==='const'){
     const intrinsic=verifiedBinaryRuntimeIntrinsic(
       nameToString(view.fn.name),
@@ -290,7 +280,6 @@ export function eraseRuntimeApplication(
       };
     }
   }
-
   const checker=new TypeChecker(environment,scope.localContext.clone());
   let fnType=checker.check(view.fn);
   const runtimeArgs:VerifiedIrExpr[]=[];
@@ -302,7 +291,6 @@ export function eraseRuntimeApplication(
     }
     fnType=instantiate1(binder.body,arg);
   }
-
   const fn=erase(view.fn,scope,environment);
   return runtimeArgs.length===0
     ?fn

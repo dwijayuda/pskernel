@@ -1,0 +1,28 @@
+import Ps.Foundation.Name
+import Ps.Core.Level
+
+inductive PsBinderInfo where {
+  | explicit;
+  | implicit;
+  | strictImplicit;
+  | instanceImplicit;
+};
+
+inductive PsLiteral where {
+  | natural(value : Nat);
+  | string(value : String);
+};
+
+inductive PsExpr where {
+  | bound(index : Nat);
+  | free(name : PsName);
+  | meta(name : PsName);
+  | sort(level : PsLevel);
+  | const(name : PsName, levels : List(PsLevel));
+  | app(fn : PsExpr, arg : PsExpr);
+  | lam(name : PsName, type : PsExpr, body : PsExpr, binder : PsBinderInfo);
+  | forallE(name : PsName, type : PsExpr, body : PsExpr, binder : PsBinderInfo);
+  | letE(name : PsName, type : PsExpr, value : PsExpr, body : PsExpr);
+  | literal(value : PsLiteral);
+  | proj(typeName : PsName, index : Nat, value : PsExpr);
+};

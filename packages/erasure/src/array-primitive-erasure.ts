@@ -19,7 +19,11 @@ interface ArrayPrimitiveSpec {
     |'array.size'
     |'array.push'
     |'array.get'
-    |'array.getD';
+    |'array.getD'
+    |'array.set'
+    |'array.setIfInBounds'
+    |'array.map'
+    |'array.foldl';
   readonly totalArity:number;
   readonly runtimeIndices:readonly number[];
 }
@@ -63,6 +67,38 @@ const ARRAY_PRIMITIVES=new Map<string,ArrayPrimitiveSpec>([
       operation:'array.getD',
       totalArity:4,
       runtimeIndices:[1,2,3],
+    },
+  ],
+  [
+    'Array.set',
+    {
+      operation:'array.set',
+      totalArity:5,
+      runtimeIndices:[1,2,3],
+    },
+  ],
+  [
+    'Array.setIfInBounds',
+    {
+      operation:'array.setIfInBounds',
+      totalArity:4,
+      runtimeIndices:[1,2,3],
+    },
+  ],
+  [
+    'Array.map',
+    {
+      operation:'array.map',
+      totalArity:4,
+      runtimeIndices:[2,3],
+    },
+  ],
+  [
+    'Array.foldl',
+    {
+      operation:'array.foldl',
+      totalArity:7,
+      runtimeIndices:[2,3,4,5,6],
     },
   ],
 ]);

@@ -337,6 +337,108 @@ console.log('ok - @proofscript/backend-ts verified String equality emission');
 
 
 {
+  const arrayT0={kind:'named',name:'Array',args:[
+    {kind:'typeParameter',name:'T0'},
+  ]} as const;
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    declarations:[
+      {
+        name:'arrayEmpty',
+        typeParameters:[{name:'T0'}],
+        parameters:[{
+          name:'capacity',
+          type:{kind:'primitive',name:'Nat'},
+        }],
+        resultType:arrayT0,
+        body:{
+          kind:'intrinsic',
+          operation:'array.emptyWithCapacity',
+          args:[{kind:'var',name:'capacity'}],
+        },
+      },
+      {
+        name:'arraySize',
+        typeParameters:[{name:'T0'}],
+        parameters:[{name:'xs',type:arrayT0}],
+        resultType:{kind:'primitive',name:'Nat'},
+        body:{
+          kind:'intrinsic',
+          operation:'array.size',
+          args:[{kind:'var',name:'xs'}],
+        },
+      },
+      {
+        name:'arrayPush',
+        typeParameters:[{name:'T0'}],
+        parameters:[
+          {name:'xs',type:arrayT0},
+          {name:'value',type:{kind:'typeParameter',name:'T0'}},
+        ],
+        resultType:arrayT0,
+        body:{
+          kind:'intrinsic',
+          operation:'array.push',
+          args:[
+            {kind:'var',name:'xs'},
+            {kind:'var',name:'value'},
+          ],
+        },
+      },
+      {
+        name:'arrayGet',
+        typeParameters:[{name:'T0'}],
+        parameters:[
+          {name:'xs',type:arrayT0},
+          {name:'index',type:{kind:'primitive',name:'Nat'}},
+        ],
+        resultType:{kind:'typeParameter',name:'T0'},
+        body:{
+          kind:'intrinsic',
+          operation:'array.get',
+          args:[
+            {kind:'var',name:'xs'},
+            {kind:'var',name:'index'},
+          ],
+        },
+      },
+      {
+        name:'arrayGetD',
+        typeParameters:[{name:'T0'}],
+        parameters:[
+          {name:'xs',type:arrayT0},
+          {name:'index',type:{kind:'primitive',name:'Nat'}},
+          {name:'fallback',type:{kind:'typeParameter',name:'T0'}},
+        ],
+        resultType:{kind:'typeParameter',name:'T0'},
+        body:{
+          kind:'intrinsic',
+          operation:'array.getD',
+          args:[
+            {kind:'var',name:'xs'},
+            {kind:'var',name:'index'},
+            {kind:'var',name:'fallback'},
+          ],
+        },
+      },
+    ],
+  });
+  equal(source.includes('return [...(xs), value];'),true);
+  equal(source.includes('return BigInt((xs).length);'),true);
+  equal(source.includes('__ps_a[Number(__ps_i)]!'),true);
+  equal(source.includes('__ps_i < BigInt(__ps_a.length)'),true);
+  const compiled=compileTypeScript(source,'verified-array.ts');
+  equal(
+    compiled.declaration.includes(
+      'arrayPush<T0>(xs: Array<T0>, value: T0): Array<T0>',
+    ),
+    true,
+  );
+}
+console.log('ok - @proofscript/backend-ts canonical Array intrinsic emission');
+
+
+{
   const source=emitVerifiedTypeScript({
     kind:'proofscript-verified-ir',
     structures:[{

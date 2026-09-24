@@ -19,6 +19,7 @@ const primitives=new Map<string,VerifiedIrType>([
   ['Nat',{kind:'primitive',name:'Nat'}],
   ['Int',{kind:'primitive',name:'Int'}],
   ['Bool',{kind:'primitive',name:'Bool'}],
+  ['Char',{kind:'primitive',name:'Char'}],
   ['String',{kind:'primitive',name:'String'}],
   ['Unit',{kind:'primitive',name:'Unit'}],
 ]);

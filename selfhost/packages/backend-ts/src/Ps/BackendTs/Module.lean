@@ -57,8 +57,8 @@ def psTsBuildSymbolMap
 def psTsModuleTopLevelNames
     (module : PsVerifiedIrModule) : List String :=
   module.declarations.map (fun declaration => declaration.name)
-    ++ module.structures.map (fun structure => structureInfo.name)
-    ++ module.inductives.map (fun inductive => inductiveInfo.name)
+    ++ module.structures.map (fun structureItem => structureItem.name)
+    ++ module.inductives.map (fun inductiveItem => inductiveItem.name)
 
 def psTsBuildBrandMap
     (module : PsVerifiedIrModule) :
@@ -66,7 +66,7 @@ def psTsBuildBrandMap
   let state :=
     psTsBuildSymbolMap
       "__ps$brand$"
-      (module.structures.map (fun structure => structureInfo.name))
+      (module.structures.map (fun structureItem => structureItem.name))
       {
         used := psTsModuleTopLevelNames module
         nextIndex := 0
@@ -80,7 +80,7 @@ def psTsBuildTagMap
   let state :=
     psTsBuildSymbolMap
       "__ps$tag$"
-      (module.inductives.map (fun inductive => inductiveInfo.name))
+      (module.inductives.map (fun inductiveItem => inductiveItem.name))
       {
         used := psTsModuleTopLevelNames module
         nextIndex := 0

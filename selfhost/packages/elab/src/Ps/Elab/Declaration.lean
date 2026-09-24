@@ -9,93 +9,6 @@ structure PsElabModuleResult where
   environment : PsEnvironment
   declarations : List PsDeclaration
 
-def psSyntaxBinderKindToCore : PsSyntaxBinderKind -> PsBinderInfo
-  | .explicit => PsBinderInfo.explicit
-  | .implicit => PsBinderInfo.implicit
-  | .strictImplicit => PsBinderInfo.strictImplicit
-  | .instanceImplicit => PsBinderInfo.instanceImplicit
-
-def psElabBindersAcc
-    (context : PsElabContext) :
-    List (PsSyntaxBinderHead × PsSyntaxTerm) ->
-    List PsElabBinder ->
-    Except PsElabError PsElabBindersResult
-  | [], bindersRev =>
-      Except.ok {
-        context := context
-        bindersRev := bindersRev
-      }
-  | (head, sourceType) :: rest, bindersRev =>
-      match psSyntaxNameToName head.name with
-      | none => Except.error PsElabError.emptyName
-      | some name =>
-          match psElabTerm context sourceType none with
-          | Except.error error => Except.error error
-          | Except.ok typeResult =>
-              match psInferEnsureSort
-                  typeResult.context.environment
-                  typeResult.context.metaContext
-                  typeResult.context.localContext
-                  typeResult.type with
-              | Except.error error =>
-                  Except.error (PsElabError.infer error)
-              | Except.ok _ =>
-                  let binder :=
-                    psSyntaxBinderKindToCore head.kind
-                  let pushed :=
-                    psLocalPushBinding
-                      typeResult.context.localContext
-                      name
-                      typeResult.term
-                      binder
-                  let nextContext :=
-                    psElabContextWithLocal
-                      typeResult.context
-                      pushed.context
-                  psElabBindersAcc
-                    nextContext
-                    rest
-                    ({
-                      id := pushed.id
-                      name := name
-                      type := typeResult.term
-                      binder := binder
-                    } :: bindersRev)
-
-def psElabBinders
-    (context : PsElabContext)
-    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm)) :
-    Except PsElabError PsElabBindersResult :=
-  psElabBindersAcc context binders []
-
-def psCloseElabTypedBinders
-    (metaContext : PsMetaContext) :
-    List PsElabBinder ->
-    PsExpr ->
-    PsExpr ->
-    (PsExpr × PsExpr)
-  | [], value, type => (value, type)
-  | binder :: rest, value, type =>
-      let binderType :=
-        psMetaInstantiate metaContext binder.type
-      let closedValue :=
-        PsExpr.lam
-          binder.name
-          binderType
-          (psExprAbstractFVar binder.id value)
-          binder.binder
-      let closedType :=
-        PsExpr.forallE
-          binder.name
-          binderType
-          (psExprAbstractFVar binder.id type)
-          binder.binder
-      psCloseElabBinders
-        metaContext
-        rest
-        closedValue
-        closedType
-
 def psElabDeclarationParts
     (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
@@ -134,7 +47,7 @@ def psElabDeclarationParts
                       let openType :=
                         psMetaInstantiate metaContext typeResult.term
                       let closed :=
-                        psCloseElabBinders
+                        psCloseElabTypedBinders
                           metaContext
                           binderResult.bindersRev
                           openValue

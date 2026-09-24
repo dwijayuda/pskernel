@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 170,
   "notes": [
+    "Execution refresh at bc2841a reached the anti-drift matrix after oracle syntax and TypeScript build, then stopped on a stale maxRecDepth regression name. Source audit found the mapped coverage still present as `kernel recursion budget matches Lean 4.34 unlimited and 16x semantics`; a09c167 aligns that mapping. A full static matrix audit then found and fixed two further stale assertions (source-order disclaimer line wrapping and obsolete `git restore -- full-std.log` recovery text) in d1e7c16. All current mapped test names and remaining static marker checks now resolve in source. lastVerifiedTestCount remains 170 pending executable rerun.",
     "Execution refresh attempt at hardening HEAD 36802279 reached TypeScript build on the correct branch but stopped before direct tests: the new safe DefinitionVal.all regression passed a second diagnostic argument to the local one-argument throws helper. Commit 6e6ca8d removes only that extra test-helper argument; kernel semantics and the assertion remain unchanged. lastVerifiedTestCount stays 170 until the corrected tree is executed.",
     "Local assurance self-contamination fix: the PowerShell runner now defaults to gitignored `full-std.local.log` instead of the tracked historical `full-std.log`. A local git fixture reproduces the old failure (`M full-std.log`) and confirms that writing `full-std.local.log` leaves both tracked-only and ordinary git status clean. The kernel-study matrix locks the default/ignore policy. This is tooling/provenance hardening only; no replay gate is closed.",
     "Workspace lockfile assurance repair: the committed package-lock.json now covers all current packages/* workspaces, npm workspace links, the lean-ts-kernel root self-link, and pinned TypeScript/@types-node/undici-types entries. The exact reconstructed lock passed `npm ci --dry-run --offline` in a synthetic workspace matching the current manifests. kernel-study-regression-matrix now compares every workspace manifest against the lock, and run-full-std-local.ps1 logs/classifies dependency-install failures as pre-replay packaging failures. This closes only the packaging precondition exposed by the local EUSAGE failure; no Lean replay gate is closed.",
@@ -261,5 +262,5 @@
   ],
   "currentTreeExpectedDirectTests": 173,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "source direct-test count remains 173 / last executed direct checkpoint remains 170; the safe DefinitionVal.all test-helper compile mismatch is fixed in source and needs refreshed execution. Canonical Lean-backed replay remains pending."
+  "currentTreeVerification": "source direct-test count remains 173 / last executed direct checkpoint remains 170; anti-drift matrix stale-name/marker issues found by the refresh attempt are source-fixed and need refreshed execution. Canonical Lean-backed replay remains pending."
 }

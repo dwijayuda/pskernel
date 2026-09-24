@@ -114,6 +114,24 @@ def psTsEmitIntrinsicFromPrinted
       Except.ok ("(" ++ left ++ " <= " ++ right ++ ")")
   | .natLt, [left, right] =>
       Except.ok ("(" ++ left ++ " < " ++ right ++ ")")
+  | .intOfNat, [value] =>
+      Except.ok value
+  | .intNegSucc, [value] =>
+      Except.ok ("(-(" ++ value ++ " + 1n))")
+  | .intNeg, [value] =>
+      Except.ok ("(-(" ++ value ++ "))")
+  | .intAdd, [left, right] =>
+      Except.ok ("(" ++ left ++ " + " ++ right ++ ")")
+  | .intSub, [left, right] =>
+      Except.ok ("(" ++ left ++ " - " ++ right ++ ")")
+  | .intMul, [left, right] =>
+      Except.ok ("(" ++ left ++ " * " ++ right ++ ")")
+  | .intEq, [left, right] =>
+      Except.ok ("(" ++ left ++ " === " ++ right ++ ")")
+  | .intLe, [left, right] =>
+      Except.ok ("(" ++ left ++ " <= " ++ right ++ ")")
+  | .intLt, [left, right] =>
+      Except.ok ("(" ++ left ++ " < " ++ right ++ ")")
   | .boolNot, [value] =>
       Except.ok ("(!" ++ value ++ ")")
   | .boolAnd, [left, right] =>

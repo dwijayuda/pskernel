@@ -405,6 +405,57 @@ def psTestDualSourceBinderApplicationParse : Bool :=
         && psTestParsedBinderApplicationShape proofScriptModule
   | _, _ => false
 
+def psSyntaxBinderKindEq
+    (left : PsSyntaxBinderKind)
+    (right : PsSyntaxBinderKind) : Bool :=
+  match left, right with
+  | .explicit, .explicit => true
+  | .implicit, .implicit => true
+  | .strictImplicit, .strictImplicit => true
+  | .instanceImplicit, .instanceImplicit => true
+  | _, _ => false
+
+def psTestBinderEntry
+    (entry : PsSyntaxBinderHead × PsSyntaxTerm)
+    (expectedName : String)
+    (expectedKind : PsSyntaxBinderKind) : Bool :=
+  match entry with
+  | (binder, PsSyntaxTerm.reference typeName) =>
+      psTestSyntaxNameSingle binder.name expectedName
+        && psSyntaxBinderKindEq binder.kind expectedKind
+        && psTestSyntaxNameSingle typeName "Nat"
+  | _ => false
+
+def psTestParsedBinderKinds (module : PsSyntaxModule) : Bool :=
+  match module.declarations with
+  | [
+      PsSyntaxDeclaration.definition
+        name
+        [explicitBinder, implicitBinder, strictBinder, instanceBinder]
+        (PsSyntaxTerm.reference resultType)
+        (PsSyntaxTerm.reference valueName)
+        _
+    ] =>
+      psTestSyntaxNameSingle name "binders"
+        && psTestBinderEntry explicitBinder "x" PsSyntaxBinderKind.explicit
+        && psTestBinderEntry implicitBinder "y" PsSyntaxBinderKind.implicit
+        && psTestBinderEntry strictBinder "z" PsSyntaxBinderKind.strictImplicit
+        && psTestBinderEntry instanceBinder "w" PsSyntaxBinderKind.instanceImplicit
+        && psTestSyntaxNameSingle resultType "Nat"
+        && psTestSyntaxNameSingle valueName "x"
+  | _ => false
+
+def psTestDualSourceBinderKindsParse : Bool :=
+  match
+      psParseLeanSource
+        "def binders (x : Nat) {y : Nat} {{z : Nat}} [w : Nat] : Nat := x",
+      psParseProofScriptSource
+        "def binders(x : Nat){y : Nat}{{z : Nat}}[w : Nat] : Nat := x;" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      psTestParsedBinderKinds leanModule
+        && psTestParsedBinderKinds proofScriptModule
+  | _, _ => false
+
 def psTestProofScriptEmptyCallUsesUnit : Bool :=
   match psParseProofScriptSource "def u : Unit := f();" with
   | Except.error _ => false
@@ -525,6 +576,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source core elaboration", passed := psTestDualSourceCoreElaboration },
   { name := "dual-source simple parse", passed := psTestDualSourceSimpleParse },
   { name := "dual-source binder application parse", passed := psTestDualSourceBinderApplicationParse },
+  { name := "dual-source binder kinds parse", passed := psTestDualSourceBinderKindsParse },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

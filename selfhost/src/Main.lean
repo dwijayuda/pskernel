@@ -21,6 +21,8 @@ import Ps.Meta.Unify
 import Ps.Meta.SynthInstance
 import Ps.Meta.Infer
 import Ps.Elab.Declaration
+import Ps.Erasure.Definition
+import Ps.BackendTs.Module
 import Ps.Project.ModuleGraph
 
 inductive PsCliSourceKind where
@@ -83,8 +85,8 @@ def psCliTranslate
   | Except.ok output =>
       IO.print output
 
-def psCliAdmissions
-    (inputPath : String) : IO Unit := do
+def psCliElaborateSource
+    (inputPath : String) : IO PsElabModuleResult := do
   let sourceKind ←
     match psCliSourceKindFromPath inputPath with
     | none =>
@@ -100,37 +102,40 @@ def psCliAdmissions
         match psParseLeanSource source with
         | Except.error _ =>
             Except.error "Lean parse failed"
-        | Except.ok module =>
-            Except.ok module
+        | Except.ok sourceModule =>
+            Except.ok sourceModule
     | .proofScript =>
         match psParseProofScriptSource source with
         | Except.error _ =>
             Except.error "ProofScript parse failed"
-        | Except.ok module =>
-            Except.ok module
-  let module ←
+        | Except.ok sourceModule =>
+            Except.ok sourceModule
+  let sourceModule ←
     match parsed with
     | Except.error message =>
         throw
           (IO.userError
             ("PSC1_CLI_PARSE_FAILED: " ++ message))
-    | Except.ok module =>
-        pure module
-  if !module.imports.isEmpty then
+    | Except.ok sourceModule =>
+        pure sourceModule
+  if !sourceModule.imports.isEmpty then
     throw
       (IO.userError
         "PSC1_CLI_IMPORT_CONTEXT_REQUIRED: imports require the project pipeline")
-  let elaborated ←
-    match
-        psElabModule
-          psBootstrapPreludeEnvironment
-          module with
-    | Except.error _ =>
-        throw
-          (IO.userError
-            "PSC1_CLI_ELAB_FAILED: source is outside the supported bootstrap subset")
-    | Except.ok result =>
-        pure result
+  match
+      psElabModule
+        psBootstrapPreludeEnvironment
+        sourceModule with
+  | Except.error _ =>
+      throw
+        (IO.userError
+          "PSC1_CLI_ELAB_FAILED: source is outside the supported bootstrap subset")
+  | Except.ok result =>
+      pure result
+
+def psCliAdmissions
+    (inputPath : String) : IO Unit := do
+  let elaborated ← psCliElaborateSource inputPath
   match psEncodeCheckedAdmissionsText elaborated.declarations with
   | Except.error _ =>
       throw
@@ -139,11 +144,34 @@ def psCliAdmissions
   | Except.ok encoded =>
       IO.print encoded
 
+def psCliTypeScript
+    (inputPath : String) : IO Unit := do
+  let elaborated ← psCliElaborateSource inputPath
+  let ir ←
+    match
+        psEraseCoreModule
+          elaborated.environment
+          elaborated.declarations with
+    | Except.error _ =>
+        throw
+          (IO.userError
+            "PSC1_CLI_ERASURE_FAILED: executable source is outside the Lean-native backend subset")
+    | Except.ok ir =>
+        pure ir
+  match psTsEmitModule ir with
+  | Except.error _ =>
+      throw
+        (IO.userError
+          "PSC1_CLI_TS_EMIT_FAILED: verified IR is outside the Lean-native TypeScript backend subset")
+  | Except.ok output =>
+      IO.print output
+
 def psCliUsage : String :=
   "ProofScript PSC1 Lean bootstrap\n" ++
   "usage:\n" ++
   "  psc1 translate <input.lean|input.ps> --to <lean|ps>\n" ++
-  "  psc1 admissions <input.lean|input.ps>"
+  "  psc1 admissions <input.lean|input.ps>\n" ++
+  "  psc1 typescript <input.lean|input.ps>"
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -153,5 +181,7 @@ def main (args : List String) : IO Unit := do
       psCliTranslate inputPath target
   | ["admissions", inputPath] =>
       psCliAdmissions inputPath
+  | ["typescript", inputPath] =>
+      psCliTypeScript inputPath
   | _ =>
       throw (IO.userError psCliUsage)

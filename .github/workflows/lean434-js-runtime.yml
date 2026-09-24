@@ -218,6 +218,17 @@ jobs:
           test -s lean434-level-bootstrap.ndjson
       - name: Execute real Lean.Level algorithm in JavaScript
         run: node scripts/lean434-js-level-smoke.mjs lean434-level-bootstrap.ndjson
+      - name: Generate real Lean.Expr bootstrap corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExport.lean Lean.Expr \
+            --selected-after Init.Prelude \
+            Lean.Expr.getAppFn Lean.Expr.getAppNumArgs \
+            > lean434-expr-bootstrap.ndjson
+          test -s lean434-expr-bootstrap.ndjson
+      - name: Execute real Lean.Expr algorithms in JavaScript
+        run: node scripts/lean434-js-expr-smoke.mjs lean434-expr-bootstrap.ndjson
       - name: Generate real Lean ST/IO bootstrap corpus
         shell: bash
         run: |

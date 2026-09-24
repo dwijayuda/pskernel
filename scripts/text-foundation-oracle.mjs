@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {resolve} from 'node:path';
-import {replayLeanEnvironment} from '../packages/environment/dist/src/index.js';
+import {replayLeanEnvironment,replayLeanEnvironmentInto} from '../packages/environment/dist/src/index.js';
 import {nameFromDotted} from '../dist/src/core/name.js';
 
 const file=resolve(
@@ -13,7 +13,15 @@ if(!fs.existsSync(file)){
   );
 }
 
-const replay=replayLeanEnvironment(fs.readFileSync(file,'utf8'));
+const preludeFile=resolve('oracle/fixtures/lean434-init-prelude.ndjson');
+if(!fs.existsSync(preludeFile)){
+  throw new Error('missing pinned Lean 4.34 Init.Prelude fixture: '+preludeFile);
+}
+const prelude=replayLeanEnvironment(fs.readFileSync(preludeFile,'utf8'));
+const replay=replayLeanEnvironmentInto(
+  prelude.environment,
+  fs.readFileSync(file,'utf8'),
+);
 const stats=replay.stats;
 const required=[
   'Char.toNat',
@@ -36,6 +44,8 @@ console.log(JSON.stringify({
   ok:true,
   file,
   stats,
+  baseConstants:prelude.environment.entries().length,
   constants:replay.environment.entries().length,
+  addedConstants:replay.environment.entries().length-prelude.environment.entries().length,
   required:required.length,
 },null,2));

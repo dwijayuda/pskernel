@@ -20,14 +20,16 @@ jobs:
           cache: npm
       - name: Install exact dependencies
         run: npm ci
+      - name: Build package graph
+        run: npm run build:package-integration
       - name: Elaboration
-        run: npm --workspace @proofscript/elab test
+        run: node packages/elab/dist/test/index.test.js
       - name: Erasure
-        run: npm --workspace @proofscript/erasure test
+        run: node packages/erasure/dist/test/index.test.js
       - name: Package integration
-        run: npm run test:package-integration
+        run: npm run test:package-integration:raw
       - name: TypeScript backend
-        run: npm --workspace @proofscript/backend-ts test
+        run: node packages/backend-ts/dist/test/index.test.js
       - name: WebAssembly backend
         run: npm run test:wasm
       - name: Root suite

@@ -130,6 +130,7 @@ test('Lean 4.34 Trans constructor field universe is below its inductive result u
  const u1=levelParam(nameFromDotted('u_1')),u2=levelParam(nameFromDotted('u_2')),u3=levelParam(nameFromDotted('u_3'));
  const one=levelSucc(levelZero);
  const result=levelMaxRaw(levelMaxRaw(levelMaxRaw(levelMaxRaw(levelMaxRaw(levelMaxRaw(one,u),u1),u2),u3),v),w);
+ assert(levelLe(mkIMax(u,v),levelMaxRaw(u,v)),'Lean max-geq shortcut must fall through before decomposing an imax target');
  const field=mkIMax(u1,mkIMax(u2,mkIMax(u3,mkIMax(u,mkIMax(v,w)))));
  for(const [name,x] of [['u',u],['v',v],['w',w],['u_1',u1],['u_2',u2],['u_3',u3]] as const){
    assert(levelLe(x,result),`Trans result universe must dominate ${name}`);

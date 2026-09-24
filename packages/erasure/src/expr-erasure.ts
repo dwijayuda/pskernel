@@ -177,8 +177,13 @@ export function eraseRuntimeExpr(
         },
         environment,
       );
-      return parameters.length===0
-        ?body
+      if(parameters.length===0)return body;
+      return body.kind==='lambda'
+        ?{
+            kind:'lambda',
+            parameters:[...parameters,...body.parameters],
+            body:body.body,
+          }
         :{kind:'lambda',parameters,body};
     }
     case 'let':{

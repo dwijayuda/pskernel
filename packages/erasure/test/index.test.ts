@@ -240,6 +240,169 @@ console.log('ok - @proofscript/erasure checked Char.ofNat lowering');
 {
   const env=new Environment();
   const Nat=nameFromDotted('Nat');
+  const Char=nameFromDotted('Char');
+  const StringType=nameFromDotted('String');
+  for(const name of [Nat,Char,StringType]){
+    env.add({
+      kind:'axiom',
+      name,
+      levelParams:[],
+      type:sort(levelSucc(levelZero)),
+    });
+  }
+
+  const charToNat=nameFromDotted('Char.toNat');
+  const stringPush=nameFromDotted('String.push');
+  const stringSingleton=nameFromDotted('String.singleton');
+  const stringLength=nameFromDotted('String.Internal.length');
+  const stringAppend=nameFromDotted('String.Internal.append');
+
+  env.add({
+    kind:'axiom',
+    name:charToNat,
+    levelParams:[],
+    type:forallE(nameFromDotted('c'),constant(Char),constant(Nat)),
+  });
+  env.add({
+    kind:'axiom',
+    name:stringPush,
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('s'),
+      constant(StringType),
+      forallE(nameFromDotted('c'),constant(Char),constant(StringType)),
+    ),
+  });
+  env.add({
+    kind:'axiom',
+    name:stringSingleton,
+    levelParams:[],
+    type:forallE(nameFromDotted('c'),constant(Char),constant(StringType)),
+  });
+  env.add({
+    kind:'axiom',
+    name:stringLength,
+    levelParams:[],
+    type:forallE(nameFromDotted('s'),constant(StringType),constant(Nat)),
+  });
+  env.add({
+    kind:'axiom',
+    name:stringAppend,
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('a'),
+      constant(StringType),
+      forallE(nameFromDotted('b'),constant(StringType),constant(StringType)),
+    ),
+  });
+
+  const checked=admitCheckedCoreModule(env,[
+    {
+      kind:'definition',
+      name:nameFromDotted('charCode'),
+      levelParams:[],
+      type:forallE(nameFromDotted('c'),constant(Char),constant(Nat)),
+      value:lam(
+        nameFromDotted('c'),
+        constant(Char),
+        app(constant(charToNat),bvar(0)),
+      ),
+      hints:{kind:'regular',height:1n},
+      safety:'safe',
+    },
+    {
+      kind:'definition',
+      name:nameFromDotted('oneChar'),
+      levelParams:[],
+      type:forallE(nameFromDotted('c'),constant(Char),constant(StringType)),
+      value:lam(
+        nameFromDotted('c'),
+        constant(Char),
+        app(constant(stringSingleton),bvar(0)),
+      ),
+      hints:{kind:'regular',height:1n},
+      safety:'safe',
+    },
+    {
+      kind:'definition',
+      name:nameFromDotted('textLength'),
+      levelParams:[],
+      type:forallE(nameFromDotted('s'),constant(StringType),constant(Nat)),
+      value:lam(
+        nameFromDotted('s'),
+        constant(StringType),
+        app(constant(stringLength),bvar(0)),
+      ),
+      hints:{kind:'regular',height:1n},
+      safety:'safe',
+    },
+    {
+      kind:'definition',
+      name:nameFromDotted('pushChar'),
+      levelParams:[],
+      type:forallE(
+        nameFromDotted('s'),
+        constant(StringType),
+        forallE(nameFromDotted('c'),constant(Char),constant(StringType)),
+      ),
+      value:lam(
+        nameFromDotted('s'),
+        constant(StringType),
+        lam(
+          nameFromDotted('c'),
+          constant(Char),
+          mkAppN(constant(stringPush),[bvar(1),bvar(0)]),
+        ),
+      ),
+      hints:{kind:'regular',height:1n},
+      safety:'safe',
+    },
+    {
+      kind:'definition',
+      name:nameFromDotted('appendText'),
+      levelParams:[],
+      type:forallE(
+        nameFromDotted('a'),
+        constant(StringType),
+        forallE(nameFromDotted('b'),constant(StringType),constant(StringType)),
+      ),
+      value:lam(
+        nameFromDotted('a'),
+        constant(StringType),
+        lam(
+          nameFromDotted('b'),
+          constant(StringType),
+          mkAppN(constant(stringAppend),[bvar(1),bvar(0)]),
+        ),
+      ),
+      hints:{kind:'regular',height:1n},
+      safety:'safe',
+    },
+  ]);
+
+  const erased=eraseCheckedCoreModule(checked);
+  const expected=new Map([
+    ['charCode','char.toNat'],
+    ['oneChar','string.singleton'],
+    ['textLength','string.length'],
+    ['pushChar','string.push'],
+    ['appendText','string.append'],
+  ]);
+  for(const declaration of erased.declarations){
+    const operation=expected.get(declaration.name);
+    if(operation===undefined)continue;
+    equal(declaration.body.kind,'intrinsic');
+    if(declaration.body.kind==='intrinsic'){
+      equal(declaration.body.operation,operation);
+    }
+  }
+}
+console.log('ok - @proofscript/erasure certified text intrinsic lowering');
+
+
+{
+  const env=new Environment();
+  const Nat=nameFromDotted('Nat');
   env.add({
     kind:'axiom',
     name:Nat,

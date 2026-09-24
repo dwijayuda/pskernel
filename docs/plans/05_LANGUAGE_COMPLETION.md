@@ -2,6 +2,13 @@
 
 Status: **active anti-drift execution plan**
 
+> **Self-hosting priority override (2026-09-24):** this plan is now subordinate
+> to `07_SELF_HOSTING_FOUNDATION.md`. New ProofScript infrastructure work is
+> paused unless it closes a self-hosting foundation gate. Legacy semantic-path
+> retirement is promoted ahead of L1-L7 so all new foundation work lands on the
+> one checked-core compiler path. Kernel hardening continues separately on
+> `kernel/lean434-study-hardening`.
+
 Goal:
 
 > Build a small, coherent general-purpose language for the JavaScript
@@ -63,14 +70,34 @@ Already implemented on the preferred verified path:
   runtime ABI shapes;
 - proof-aware LSP/VS Code dogfood tooling.
 
-The legacy `@proofscript/language` software checker remains transitional and
-must not receive new foundational semantics.
+The legacy software checker/software-IR/backend lane is being retired as the
+first self-hosting prerequisite. No new foundation work may depend on it.
 
 Execution-evidence note (2026-09-23): current GitHub Actions push jobs are
 failing before any job step is created (`steps: null`). The source regressions
 for the latest equality/apply/instance-search changes are therefore committed
 but do not count as executed root-gate evidence until `npm run check` (or an
 equivalent executing CI run) completes.
+
+## Milestone L0.5 — legacy path retirement (promoted from L8)
+
+Purpose: remove the duplicate semantic/compiler lane before any new
+self-hosting foundation feature is added.
+
+Required:
+
+- `psc check/build/run` use verified checked-core semantics unconditionally;
+- remove the legacy software checker and its package dependency;
+- remove software-HIR lowering from compiler IR;
+- remove legacy software TypeScript emitters;
+- remove unverified CLI report/result variants;
+- retain no automatic fallback or compatibility checker;
+- add architecture gates that fail if a second semantic lane is reintroduced.
+
+Exit condition:
+
+- the checked-core path is the only ProofScript semantic compiler path on
+  `main`.
 
 ## Milestone L1 — verified language core closure
 
@@ -487,19 +514,13 @@ Exit condition:
 
 - ordinary users can write useful programs without importing Lean internals.
 
-## Milestone L8 — legacy path retirement
+## Milestone L8 — retired from this position
 
-Retire the legacy software checker only after verified-core regressions cover
-its useful behavior.
-
-Required before deletion:
-
-- feature-by-feature migration matrix;
-- psc verified path is the default;
-- old path is behind an explicit legacy flag for one transition period;
-- no package outside legacy tests depends on `@proofscript/language` for
-  semantic checking;
-- architecture gate prevents reintroduction.
+This milestone was promoted to **L0.5** by the self-hosting foundation plan.
+Keeping a duplicate software checker until late in the roadmap would force new
+foundation work to target two semantic paths and increase rewrite risk. L8 is
+therefore intentionally empty; legacy retirement must complete before new
+self-hosting language/runtime work proceeds.
 
 ## Milestone L9 — production hardening
 

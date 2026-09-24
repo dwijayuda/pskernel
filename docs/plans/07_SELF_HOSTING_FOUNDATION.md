@@ -84,10 +84,11 @@ Each discovered facility is classified into one of four buckets:
 
 1. **REQUIRED** — needed by the ProofScript compiler or an unavoidable
    prerequisite abstraction. Implement before SH7 freezes.
-2. **USEFUL/CHEAP** — broadly used by Lean to implement compiler code and
-   feasible without a disproportionately large subsystem. Implement before SH7
-   when doing so materially improves compiler authoring and reduces rewrite
-   risk.
+2. **USEFUL/CHEAP / OPTIONAL-PSC1** — broadly useful or convenient Lean
+   implementation facilities that are feasible at reasonable cost. Keep them
+   in the plan and implement them opportunistically, but they do **not** block
+   SH7, PSC1, or the first self-hosting claim unless an actual compiler module
+   or frozen acceptance fixture is changed to depend on them.
 3. **DEFERRED/EXPENSIVE** — legitimate Lean functionality whose implementation
    would pull in a large metaprogramming/extensibility subsystem that the
    ProofScript compiler does not need. Record it and keep it fail-closed.
@@ -97,10 +98,10 @@ Each discovered facility is classified into one of four buckets:
 
 The default rule is therefore:
 
-> Implement the practical Lean implementation-language subset: all broadly
-> useful Lean constructs exercised by Lean's own implementation that are
-> feasible at reasonable cost, plus every feature required by the ProofScript
-> compiler. Do not require a concrete blocker for every USEFUL/CHEAP feature.
+> Implement the smallest practical language that can express the ProofScript
+> compiler and preserve the required ProofScript semantics. REQUIRED features
+> close PSC1; USEFUL/CHEAP features remain available plan items but are
+> optional/non-blocking until real compiler code demonstrates a requirement.
 
 This broadening applies to ordinary implementation-language facilities, not to
 the whole Lean metaprogramming platform. In particular, arbitrary user syntax,
@@ -113,6 +114,94 @@ The preferred implementation strategy remains: desugar convenient source
 constructs into the small Lean-compatible checked core rather than enlarging
 pskernel. `for`, `while`, mutable-looking locals and similar features must
 not introduce JavaScript-specific semantic authority.
+
+### PSC1 minimality / Go-like freeze policy
+
+PSC1 follows a deliberately small-language policy: prefer one canonical
+mechanism for each problem, and move reusable abstractions into ordinary
+libraries instead of making them independent language requirements.
+
+**PSC1 completion is defined only by the REQUIRED bootstrap capability set.**
+An optional feature may be unfinished without preventing SH7 freeze, PSC1,
+PSC2, or promotion of `.ps` as the compiler source of truth.
+
+Already implemented features are **not removed** by this policy. Optionality
+changes only milestone/blocking status. An already-supported feature remains
+supported and must not be silently weakened.
+
+The preferred canonical choices for the first bootstrap are:
+
+- ordinary functions/lambdas for computation and higher-order behavior;
+- structures and inductives for data;
+- one ordinary `match` mechanism for elimination;
+- structural recursion plus a controlled executable `partial def` boundary;
+- `Option` for absence and `Result`/`Except`-style values for recoverable
+  errors;
+- one concrete `CompilerM`-style context/state/error abstraction for compiler
+  effects;
+- `List`, `Array`, ordered `Map` and ordered `Set` as the standard
+  bootstrap collection families;
+- libraries for traversal/combinators instead of adding parallel language
+  mechanisms;
+- thin host capabilities only at explicit boundaries.
+
+The **minimal REQUIRED PSC1 language/capability set** is:
+
+- definitions, functions, lambdas, application and `let`;
+- ordinary `if` and basic single-scrutinee `match`;
+- structures, inductives, constructors and projections;
+- the primitive/runtime foundation actually needed by the compiler:
+  `Nat`, `Int`, `Bool`, `Char`, `String`, `Unit`;
+- `List`, `Option`, `Result`/`Except`, `Prod`, `Array`, ordered
+  `Map`/`Set`, plus the bounded operations exercised by compiler code;
+- dependent function types / `Prop` / kernel proof terms and the universe,
+  implicit-argument, metavariable and definitional-equality machinery required
+  to preserve ProofScript's dependent semantics;
+- the bounded class/instance and `Decidable` machinery actually exercised by
+  the frozen compiler/language subset;
+- structural recursion and controlled executable `partial def`;
+- a concrete reader/state/error compiler effect with `do`, `pure`, `bind`,
+  error recovery and transactional rollback;
+- imports/modules, qualified names, deterministic name resolution, compiler
+  environments, AST/tokens/spans/diagnostics;
+- the canonical JSON codec and versioned pskernel bridge;
+- canonical `.lean <-> .ps` translation and equal checked-core/IR behavior;
+- verified lowering through TypeScript to JavaScript.
+
+The following remain in the plan but are **OPTIONAL/NON-BLOCKING for PSC1**
+unless real compiler code proves otherwise:
+
+- generic `ReaderT`, `StateT`, `ExceptT`, `OptionT`, generic `Monad`
+  transformer stacks and automatic `MonadLift`;
+- precise TypeScript HKT encodings;
+- `Sum` when the compiler data model does not need it;
+- list/array literal syntax, tuple destructuring sugar and generic `GetElem`;
+- mutual inductive declarations;
+- mutual/local recursion syntax when the same algorithm can use top-level
+  helpers or one structural dispatcher;
+- multiple structural-recursion convenience and general well-founded
+  termination elaboration;
+- `let mut`, reassignment, `for`, `while`, `break` and `continue`
+  when library folds/recursion are sufficient;
+- rich/nested/multi-scrutinee pattern syntax, `if let`, let-patterns and
+  do-patterns when explicit nested `match` is sufficient;
+- method-style notation, structure-update sugar, named/default arguments,
+  grouped binders, unnamed instance binders and structure field defaults;
+- `abbrev`, source-level `opaque`, interpolation, `Inhabited`/`default`
+  conveniences and `Id.run`;
+- explicit user-written universe commands/syntax when inferred/bounded
+  universes suffice;
+- broad visibility/section/open-scoped conveniences beyond the module/name
+  behavior actually required by the compiler.
+
+A convenience may still land before PSC1 when it is local, obviously
+desugaring-only, and reduces repeated compiler boilerplate. It simply does not
+become a finish criterion.
+
+When there are two plausible ways to solve the same bootstrap problem, prefer
+the one that reuses an existing semantic mechanism. Add a new REQUIRED language
+feature only after demonstrating that the compiler cannot be written
+reasonably using the frozen core/library vocabulary.
 
 ## Foundation completion rule
 
@@ -237,15 +326,17 @@ Exit condition is met:
 
 ## SH2 — compiler collections — IN PROGRESS
 
-Provide verified, generic:
+Required PSC1 collection/data foundation:
 
 - `Array α`;
-- `Map K V`;
-- `Set α`;
-- `Prod α β` / tuple support and the ordinary `fst` / `snd` operations;
-- `Sum α β` when the compiler data model benefits from it;
+- ordered `Map K V`;
+- ordered `Set α`;
+- `Prod α β` and the ordinary `fst` / `snd` operations;
 - a self-hostable canonical JSON value/codec library used by SH6b;
 - the already-landed Option/Result/List APIs needed by compiler code.
+
+`Sum α β` remains planned but is OPTIONAL/NON-BLOCKING when the compiler data
+model can use an ordinary purpose-specific inductive instead.
 
 The JSON foundation must provide the bounded functionality needed by the
 pskernel protocol without depending on host-side object semantics:
@@ -262,16 +353,17 @@ JSON is a library/data-format requirement, not a new trusted language primitive.
 The first Array profile needs at least empty, size, get/get?, push, set, map,
 fold, monadic map/fold variants used by compiler code, any/all and find?.
 
-Add the cheap literal/constructor conveniences that materially reduce noise in
-compiler data code, provided they desugar directly to the same library
-constructors in both source frontends:
+Optional cheap literal/constructor conveniences may be added when they
+materially reduce noise in compiler data code and desugar directly to the same
+library constructors in both source frontends:
 
 - list literals such as `[]` and `[a, b, c]`;
 - array literals such as `#[]` and `#[a, b, c]`;
 - tuple/Prod literal and destructuring syntax when not already covered by SH4.5.
 
-These are USEFUL/CHEAP source forms, not new runtime primitives. They must
-round-trip `.lean <-> .ps` and lower to ordinary checked constructors.
+These are USEFUL/CHEAP source forms, not new runtime primitives and not PSC1
+finish criteria. If implemented, they must round-trip `.lean <-> .ps` and
+lower to ordinary checked constructors.
 
 Prefer safe collection APIs such as `get?` in bootstrap code. A generalized
 Lean `GetElem`/proof-producing indexing framework is not an SH7 prerequisite;
@@ -457,32 +549,32 @@ test, not as a prerequisite for the concrete lane.
 
 ## SH4 — recursion, iteration and executable control closure
 
-Finish the executable recursion forms needed by compiler algorithms:
+Required PSC1 recursion/control closure:
 
-- mutual recursive definitions;
-- mutual inductive declarations where compiler data requires them;
-- recursive local `where` / `let rec` groups;
-- multiple structural recursive parameters where Lean semantics justify them;
-- bounded well-founded recursion when structural recursion is insufficient and
-  the Lean semantics are owned;
+- structural recursion sufficient for compiler data traversals;
 - Lean-faithful executable `partial def` for algorithms whose termination is
   intentionally outside proof computation.
 
-Implement the practical Lean iteration conveniences identified by the census
-when they can be desugared without enlarging the trusted core:
+Keep the following planned but OPTIONAL/NON-BLOCKING unless a real compiler
+module demonstrates that the simpler core is unreasonable:
 
-- `let mut`;
-- reassignment of such locals inside the bounded control-flow model;
-- `for`;
-- `while`;
-- `break` / `continue` where needed by the supported loop model.
+- mutual recursive definitions;
+- mutual inductive declarations;
+- recursive local `where` / `let rec` groups;
+- multiple structural-recursion conveniences;
+- bounded/general well-founded recursion elaboration;
+- `let mut` and reassignment;
+- `for` and `while`;
+- `break` / `continue`.
 
-Back `for` with a deliberately small Lean-compatible iteration abstraction
-instead of hard-coding Array-only loop semantics. The bootstrap profile should
-cover the concrete containers used by compiler code, expected to include at
-least List, Array, ordered Map/Set entries and simple Nat ranges. A bounded
-`ForIn`-style library interface is preferred; the full Lean iterator
-hierarchy is not required.
+Prefer ordinary structural recursion, top-level helper functions and library
+fold/traversal operations before promoting another control form to REQUIRED.
+
+If `for` is implemented before PSC1, back it with a deliberately small
+Lean-compatible iteration abstraction instead of hard-coding Array-only loop
+semantics. A bounded `ForIn`-style library interface may cover only the
+containers actually used. Neither `for` nor a generic iterator hierarchy is
+required to finish PSC1.
 
 These are Lean-style source conveniences, not JavaScript mutation semantics.
 
@@ -512,23 +604,25 @@ covered profile.
 
 ## SH4.5 — pattern-language closure
 
-The current flat single-scrutinee constructor-pattern subset is not sufficient
-for natural compiler implementation. Before SH7 freezes, add the bounded
-Lean-compatible pattern forms actually needed by parser/Meta/compiler code:
+PSC1 requires one ordinary, deterministic single-scrutinee `match` path over
+the constructors/literals needed by compiler data. Richer pattern syntax remains
+planned but OPTIONAL/NON-BLOCKING:
 
 - nested constructor patterns;
 - tuple / `Prod` patterns;
 - multi-scrutinee `match`;
-- wildcard and literal patterns at nested positions;
+- wildcard and literal patterns at nested positions beyond the required basic
+  matcher;
 - `if let`;
 - ordinary `let` pattern destructuring;
-- pattern binds in `do` where required by the selected effect subset;
-- deterministic failure/exhaustiveness behavior for the supported forms.
+- pattern binds in `do`.
 
-Prefer desugaring richer source patterns into ordinary checked eliminators and
-lets. Do not implement Lean's complete dependent pattern compiler merely for
-surface parity. Indexed/dependent pattern features remain workload-driven and
-must fail closed until their elaboration semantics are owned.
+Compiler code may express the same logic using explicit nested `match`
+expressions until these conveniences land. When implemented, richer patterns
+must desugar into ordinary checked eliminators and lets. Do not implement Lean's
+complete dependent pattern compiler merely for surface parity. Indexed/dependent
+pattern features remain workload-driven and must fail closed until their
+elaboration semantics are owned.
 
 Exit test: a parser/AST transformation module can destructure nested compiler
 data, use multi-scrutinee matches and `if let`/let-patterns, and execute through
@@ -548,8 +642,9 @@ Provide stable ProofScript-authored models for:
 - diagnostics and fresh identifiers;
 - explicit environments and compiler state.
 
-Also finish the cheap implementation-language ergonomics that Lean compiler
-source relies on heavily and that materially reduce bootstrap rewrite risk:
+Keep the following cheap implementation-language ergonomics in the plan, but
+treat them as OPTIONAL/NON-BLOCKING for PSC1 unless compiler code actually
+depends on them:
 
 - field/projection notation;
 - bounded method-style notation when it deterministically resolves to an
@@ -573,12 +668,14 @@ source relies on heavily and that materially reduce bootstrap rewrite risk:
 - `Id.run` or an equivalent zero-cost identity runner when it makes
   mutation-looking pure blocks (`let mut`, loops) substantially clearer.
 
-These are USEFUL/CHEAP conveniences. They must not become PSC1 blockers unless
-SELFHOST-FEATURE or real compiler modules use them and must not introduce macro
-or runtime machinery beyond their ordinary desugared terms.
+These are USEFUL/CHEAP conveniences, not PSC1 finish criteria. Already-landed
+support remains supported. New support should be added only when cheap or
+actually used, and must not introduce macro or runtime machinery beyond the
+ordinary desugared terms.
 
-Include a bounded explicit universe surface in the census and bootstrap
-language when compiler/library definitions need universe polymorphism:
+Keep a bounded explicit universe surface in the census as OPTIONAL/NON-BLOCKING
+source syntax, promoting only the pieces that compiler/library definitions
+actually require:
 
 - `universe u v`;
 - `Type u` / `Sort u`;
@@ -733,13 +830,17 @@ abstraction:
 - REQUIRED / USEFUL-CHEAP / DEFERRED-EXPENSIVE / HOST-BOUNDARY classification;
 - the owning SH milestone and executable acceptance gate.
 
-The frozen subset should include the practical implementation-language
-facilities selected by the census, including all compiler-required constructs
-and broadly useful low/medium-cost Lean conveniences that materially reduce
-self-host rewrite risk. It must intentionally omit expensive, unnecessary Lean
-implementation machinery such as arbitrary user syntax, macro/quotation
-systems, custom elaborators, generalized environment extensions, broad
-attribute registration and unsafe casts.
+The frozen PSC1 subset contains **only the REQUIRED capability set** from the
+PSC1 minimality policy plus any optional facility that real compiler source has
+actually adopted by freeze time. Merely being USEFUL/CHEAP, present in Lean, or
+already listed in an SH milestone does not make a feature a freeze requirement.
+
+Optional features stay documented and may already be implemented; they are not
+removed. Their incomplete status cannot block SH7/PSC1 unless a required
+compiler module depends on them. Expensive, unnecessary Lean implementation
+machinery such as arbitrary user syntax, macro/quotation systems, custom
+elaborators, generalized environment extensions, broad attribute registration
+and unsafe casts remains outside the frozen subset by default.
 
 Gate every supported bootstrap construct through the same `.lean` and `.ps`
 frontends and checked-core path.
@@ -760,43 +861,34 @@ feature must be green for:
 This matrix is a release gate, not documentation-only bookkeeping.
 
 Before freezing, add one multi-module **SELFHOST-FEATURE** fixture/skeleton that
-uses the foundation together rather than as isolated unit features. It must
-exercise at least:
+proves the minimal REQUIRED foundation composes rather than testing every
+planned convenience. It must exercise at least:
 
 - nontrivial `String`/`Char` lexer-style traversal and source positions;
-- Array plus ordered Map/Set and compiler-oriented traversal combinators such as
-  `mapM` / indexed monadic traversal / folds;
+- `List`, `Array`, ordered `Map`/`Set` and only the traversal
+  combinators actually needed by the fixture/compiler;
 - canonical JSON parse/encode plus at least one SH6b request/response codec;
-- representative list/array literals and tuple construction/destructuring using
-  only desugared checked constructors;
-- qualified `Name`, namespaces/imports and explicit environment updates;
-- structures, structure updates, field/method notation, named arguments,
-  grouped/unnamed binders and structure defaults;
-- dependent/proof-binding `if h : P`, proof-valued `have`, and the selected
-  expected-type/show form;
-- generic/dependent ADTs and the SH4.5 pattern subset, including nested and
-  multi-scrutinee patterns plus `if let`/let-patterns;
-- `Prod`/tuple-returning and tuple-destructuring utilities;
-- structural, mutual and local recursion plus a controlled `partial` case;
-- `do`, the concrete Reader/State/Except semantics, `return`,
+- qualified `Name`, imports/modules and explicit environment updates;
+- structures, inductives, constructors, projections and ordinary `match`;
+- `Prod`/tuple-returning utilities without requiring tuple-destructuring
+  syntax;
+- structural recursion plus one controlled `partial` case;
+- `do` with the concrete Reader/State/Except semantics, `return`,
   failure/alternative handling and transactional rollback;
-- the SH3-HKT erasure probe when it remains cheap; SELFHOST-FEATURE must not
-  depend on generic HKT transformers when that probe is not yet green;
-- practical iteration syntax and the bounded iteration abstraction selected by
-  the census;
-- runtime-only guard/assert/panic/unreachable behavior with a regression proving
-  it cannot be used as proof evidence;
-- higher-order/generic traversals;
-- implicit arguments, bounded `Decidable` synthesis, ordinary/dependent
-  `ite`/`dite`, instance synthesis and postponed Meta constraints used by
-  the bootstrap subset;
-- diagnostics/fresh IDs and at least one formatted diagnostic assembled from
-  portable String operations; interpolation may be used only if its dual-source
-  desugaring is already green;
+- higher-order/generic traversal where the compiler truly needs it;
+- implicit arguments, the bounded class/instance/`Decidable`/Meta behavior
+  actually required by the frozen language subset;
+- diagnostics/fresh IDs assembled from portable String operations;
 - multi-module compilation;
 - the versioned SH6b pskernel bridge, using the canonical String/JSON bootstrap
   transport, for lookup, a ground kernel query and declaration/inductive
   admission.
+
+Maintain a separate **SELFHOST-OPTIONAL** matrix for conveniences that happen to
+be implemented before PSC1 (for example literals, richer patterns, mutation
+syntax, HKT transformers, `if h : P`, interpolation or method notation).
+Those gates protect existing support but their absence/failure-to-implement does
+not block PSC1 unless a REQUIRED compiler module adopts the feature.
 
 The fixture must execute all four portability/build directions end-to-end:
 
@@ -1017,9 +1109,8 @@ Unless demanded by an SH gate, defer:
 Before accepting any ProofScript infrastructure task, ask:
 
 1. Which SH milestone or Lean feature-census bucket justifies it?
-2. Is it REQUIRED by a compiler module, or is it a broadly useful
-   USEFUL/CHEAP Lean implementation-language feature that reduces self-host
-   rewrite risk?
+2. Is it REQUIRED by a compiler module? If it is merely USEFUL/CHEAP, can it
+   remain optional without delaying self-hosting?
 3. Can the need be satisfied as a ProofScript library instead of a language
    primitive?
 4. Can host-specific behavior remain a thin TypeScript adapter?
@@ -1030,9 +1121,10 @@ Before accepting any ProofScript infrastructure task, ask:
    can PSC1 use the same semantics through a simpler concrete representation
    while keeping the source/kernel model compatible with a later generic form?
 
-If the feature is neither REQUIRED nor justified as USEFUL/CHEAP by the census,
-defer it. A USEFUL/CHEAP item is still not automatically a bootstrap blocker:
-prefer landing it when its implementation is local/desugaring-based and it
-removes repeated compiler-source boilerplate; otherwise leave it recorded and
-continue toward SELFHOST-FEATURE. Expensive extensibility machinery remains
-deferred until a concrete compiler requirement changes its classification.
+If the feature is not REQUIRED, it does not block PSC1. Keep useful features in
+the plan, land them opportunistically when local/desugaring-based, and preserve
+already-landed support, but continue toward SELFHOST-FEATURE instead of waiting
+for optional completeness. Promote an optional item to REQUIRED only when a
+real compiler module or frozen semantic obligation cannot reasonably avoid it.
+Expensive extensibility machinery remains deferred until a concrete compiler
+requirement changes its classification.

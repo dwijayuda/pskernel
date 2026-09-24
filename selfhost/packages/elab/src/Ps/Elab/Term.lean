@@ -33,6 +33,10 @@ inductive PsElabError where
   | matchRecursiveFieldUnsupported (name : PsName)
   | duplicateDeclaration (name : PsName)
   | unresolvedMetavariable
+  | structuralRecursionArity
+  | structuralRecursionNotDecreasing
+  | structuralRecursionInvariantArgument
+  | structuralRecursionInternal
 
 structure PsElabTermResult where
   context : PsElabContext
@@ -927,40 +931,94 @@ def psElabMatchFields
       | Except.error error =>
           Except.error (PsElabError.infer error)
       | Except.ok forallView =>
-          let fieldType :=
-            psWhnf
-              context.environment
-              context.metaContext
+          match psSyntaxNameToName binderSyntax with
+          | none => Except.error PsElabError.emptyName
+          | some binderName =>
+              let pushed :=
+                psLocalPushBinding
+                  context.localContext
+                  binderName
+                  forallView.domain
+                  forallView.binder
+              let nextContext :=
+                psElabContextWithLocal context pushed.context
+              psElabMatchFields
+                nextContext
+                inductiveName
+                (psExprInstantiate1
+                  forallView.body
+                  (PsExpr.fvar pushed.id))
+                rest
+                ({
+                  id := pushed.id
+                  name := binderName
+                  type := forallView.domain
+                  binder := forallView.binder
+                } :: fieldsRev)
+
+def psElabMatchFieldAt :
+    List PsElabMatchField -> Nat -> Option PsElabMatchField
+  | [], _ => none
+  | field :: rest, 0 => some field
+  | _ :: rest, index + 1 =>
+      psElabMatchFieldAt rest index
+
+structure PsElabMatchHypothesesResult where
+  context : PsElabContext
+  hypothesesRev : List PsElabMatchField
+
+def psElabPushRecursiveHypotheses
+    (expectedType : PsExpr)
+    (fields : List PsElabMatchField) :
+    List Nat ->
+    PsElabContext ->
+    List PsElabMatchField ->
+    Except PsElabError PsElabMatchHypothesesResult
+  | [], context, hypothesesRev =>
+      Except.ok {
+        context := context
+        hypothesesRev := hypothesesRev
+      }
+  | fieldIndex :: rest, context, hypothesesRev =>
+      match psElabMatchFieldAt fields fieldIndex with
+      | none => Except.error PsElabError.structuralRecursionInternal
+      | some field =>
+          let hypothesisName :=
+            psNameAppendNum
+              (psRootName "_ih")
+              fieldIndex
+          let pushed :=
+            psLocalPushBinding
               context.localContext
-              forallView.domain
-          if psExprHasConst inductiveName fieldType then
-            Except.error
-              (PsElabError.matchRecursiveFieldUnsupported inductiveName)
-          else
-            match psSyntaxNameToName binderSyntax with
-            | none => Except.error PsElabError.emptyName
-            | some binderName =>
-                let pushed :=
-                  psLocalPushBinding
-                    context.localContext
-                    binderName
-                    forallView.domain
-                    forallView.binder
-                let nextContext :=
-                  psElabContextWithLocal context pushed.context
-                psElabMatchFields
-                  nextContext
-                  inductiveName
-                  (psExprInstantiate1
-                    forallView.body
-                    (PsExpr.fvar pushed.id))
-                  rest
-                  ({
-                    id := pushed.id
-                    name := binderName
-                    type := forallView.domain
-                    binder := forallView.binder
-                  } :: fieldsRev)
+              hypothesisName
+              expectedType
+              PsBinderInfo.explicit
+          let withLocal :=
+            psElabContextWithLocal
+              context
+              pushed.context
+          let withRecursion :=
+            match context.structuralRecursion with
+            | none => withLocal
+            | some recursion =>
+                psElabContextWithStructuralRecursion
+                  withLocal
+                  (some {
+                    recursion with
+                    calls :=
+                      (field.id, pushed.id) :: recursion.calls
+                  })
+          psElabPushRecursiveHypotheses
+            expectedType
+            fields
+            rest
+            withRecursion
+            ({
+              id := pushed.id
+              name := hypothesisName
+              type := expectedType
+              binder := PsBinderInfo.explicit
+            } :: hypothesesRev)
 
 def psCloseElabMatchFields
     (metaContext : PsMetaContext) :
@@ -1048,27 +1106,43 @@ def psElabMatchMinor
                     [] with
                 | Except.error error => Except.error error
                 | Except.ok fieldResult =>
-                    match elaborate
-                        fieldResult.context
-                        alternative.body
-                        (some expectedType) with
+                    let fields :=
+                      fieldResult.fieldsRev.reverse
+                    match
+                        psElabPushRecursiveHypotheses
+                          expectedType
+                          fields
+                          ctorInfo.recursiveFields
+                          fieldResult.context
+                          [] with
                     | Except.error error => Except.error error
-                    | Except.ok bodyResult =>
-                        let metaContext := bodyResult.context.metaContext
-                        let closed :=
-                          psCloseElabMatchFields
-                            metaContext
-                            fieldResult.fieldsRev
-                            (psMetaInstantiate
-                              metaContext
-                              bodyResult.term)
-                        Except.ok {
-                          context :=
-                            psElabContextWithMeta
-                              context
-                              metaContext
-                          term := closed
-                        }
+                    | Except.ok hypotheses =>
+                        match elaborate
+                            hypotheses.context
+                            alternative.body
+                            (some expectedType) with
+                        | Except.error error => Except.error error
+                        | Except.ok bodyResult =>
+                            let metaContext := bodyResult.context.metaContext
+                            let withHypotheses :=
+                              psCloseElabMatchFields
+                                metaContext
+                                hypotheses.hypothesesRev
+                                (psMetaInstantiate
+                                  metaContext
+                                  bodyResult.term)
+                            let closed :=
+                              psCloseElabMatchFields
+                                metaContext
+                                fieldResult.fieldsRev
+                                withHypotheses
+                            Except.ok {
+                              context :=
+                                psElabContextWithMeta
+                                  context
+                                  metaContext
+                              term := closed
+                            }
 
 structure PsElabMatchMinorsResult where
   context : PsElabContext
@@ -1455,6 +1529,103 @@ def psElabFinishApplication
         finalized
         application.pendingInstancesRev
 
+def psElabSyntaxLocalId
+    (context : PsElabContext) :
+    PsSyntaxTerm -> Option Nat
+  | .reference sourceName =>
+      match psSyntaxNameToName sourceName with
+      | none => none
+      | some name =>
+          match
+              psResolveName
+                context.localContext
+                context.environment
+                name with
+          | some (.local id) => some id
+          | _ => none
+  | _ => none
+
+def psElabValidateStructuralCall
+    (context : PsElabContext)
+    (recursion : PsElabStructuralRecursion) :
+    Nat ->
+    List PsSyntaxTerm ->
+    Option Nat ->
+    Except PsElabError Nat
+  | _, [], some hypothesisId => Except.ok hypothesisId
+  | _, [], none => Except.error PsElabError.structuralRecursionInternal
+  | index, argument :: rest, hypothesisId =>
+      match psElabSyntaxLocalId context argument with
+      | none =>
+          if index == recursion.recursiveParameterIndex then
+            Except.error PsElabError.structuralRecursionNotDecreasing
+          else
+            Except.error PsElabError.structuralRecursionInvariantArgument
+      | some argumentId =>
+          if index == recursion.recursiveParameterIndex then
+            match
+                psElabStructuralRecursionFindCall
+                  recursion.calls
+                  argumentId with
+            | none =>
+                Except.error PsElabError.structuralRecursionNotDecreasing
+            | some nextHypothesisId =>
+                psElabValidateStructuralCall
+                  context
+                  recursion
+                  (index + 1)
+                  rest
+                  (some nextHypothesisId)
+          else
+            match recursion.explicitParameterIds[index]? with
+            | none => Except.error PsElabError.structuralRecursionArity
+            | some originalId =>
+                if argumentId == originalId then
+                  psElabValidateStructuralCall
+                    context
+                    recursion
+                    (index + 1)
+                    rest
+                    hypothesisId
+                else
+                  Except.error
+                    PsElabError.structuralRecursionInvariantArgument
+
+def psTryElabStructuralSelfCall
+    (context : PsElabContext)
+    (fn : PsSyntaxTerm)
+    (arguments : List PsSyntaxTerm)
+    (expected : Option PsExpr) :
+    Except PsElabError (Option PsElabTermResult) :=
+  match context.structuralRecursion, fn with
+  | some recursion, .reference sourceName =>
+      match psSyntaxNameToName sourceName with
+      | some calledName =>
+          if !psNameEq calledName recursion.functionName then
+            Except.ok none
+          else if
+              arguments.length != recursion.explicitParameterIds.length then
+            Except.error PsElabError.structuralRecursionArity
+          else
+            match
+                psElabValidateStructuralCall
+                  context
+                  recursion
+                  0
+                  arguments
+                  none with
+            | Except.error error => Except.error error
+            | Except.ok hypothesisId =>
+                match
+                    psElabResolvedTerm
+                      context
+                      (PsExpr.fvar hypothesisId)
+                      expected with
+                | Except.error error => Except.error error
+                | Except.ok result => Except.ok (some result)
+      | none => Except.ok none
+  | _, _ => Except.ok none
+
 def psElabTermWithFuel
     (fuel : Nat)
     (context : PsElabContext)
@@ -1526,17 +1697,26 @@ def psElabTermWithFuel
             alternatives
             expected
       | .app fn args _ =>
-          match psElabTermWithFuel remaining context fn none with
+          match
+              psTryElabStructuralSelfCall
+                context
+                fn
+                args
+                expected with
           | Except.error error => Except.error error
-          | Except.ok elaboratedFn =>
-              match psElabApplyArgs
-                  (psElabTermWithFuel remaining)
-                  elaboratedFn
-                  args
-                  [] with
+          | Except.ok (some result) => Except.ok result
+          | Except.ok none =>
+              match psElabTermWithFuel remaining context fn none with
               | Except.error error => Except.error error
-              | Except.ok application =>
-                  psElabFinishApplication application expected
+              | Except.ok elaboratedFn =>
+                  match psElabApplyArgs
+                      (psElabTermWithFuel remaining)
+                      elaboratedFn
+                      args
+                      [] with
+                  | Except.error error => Except.error error
+                  | Except.ok application =>
+                      psElabFinishApplication application expected
 
 def psElabTerm
     (context : PsElabContext)

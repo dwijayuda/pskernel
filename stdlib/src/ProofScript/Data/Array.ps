@@ -4,9 +4,6 @@ function arrayEmptyWithCapacity {α : Type}
 (capacity : Nat) : Array(α) :=
   Array.emptyWithCapacity(capacity);
 
-def arrayEmpty {α : Type} : Array(α) :=
-  Array.emptyWithCapacity(0);
-
 function arraySize {α : Type}
 (xs : Array(α)) : Nat :=
   Array.size(xs);

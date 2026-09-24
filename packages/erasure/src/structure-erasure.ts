@@ -134,6 +134,7 @@ export function prepareRuntimeStructures(
       }
       fields.push({
         sourceIndex:constructor.numParams+sourceField.index,
+        projectionIndex:sourceField.index,
         name:fieldName,
         type,
       });

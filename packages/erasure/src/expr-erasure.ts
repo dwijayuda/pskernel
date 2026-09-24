@@ -223,7 +223,7 @@ export function eraseRuntimeExpr(
         );
       }
       const field=structure.fields.find(
-        (item)=>item.sourceIndex===expr.index,
+        (item)=>item.projectionIndex===expr.index,
       );
       if(field===undefined){
         throw new Error(

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-const root = new URL('..', import.meta.url).pathname;
+import { fileURLToPath } from 'node:url';
+const root = fileURLToPath(new URL('..', import.meta.url));
 const lock = JSON.parse(readFileSync(join(root, 'ORACLE_LOCK.json'), 'utf8'));
 if (lock.lean !== '4.34.0') throw new Error('Oracle drift: Lean target changed');
 if (lock.lean4export?.commit !== '076e8e57707e813375e8f9da8bf989799ace9680') throw new Error('Oracle drift: lean4export pin changed');

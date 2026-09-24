@@ -129,41 +129,55 @@ console.log(JSON.stringify({phase:'metavar-context-assign-complete'}));
     sameName,
   }));
 
-  const eAssignment=assigned?.kind==='constructor'
-    ?assigned.fields[8]
-    :undefined;
-  const root=
-    eAssignment?.kind==='constructor'
-      ?eAssignment.fields[0]
-      :undefined;
-  const entries=
-    root?.kind==='constructor'
-      &&root.name==='Lean.PersistentHashMap.Node.entries'
-      &&Array.isArray(root.fields[0])
-        ?root.fields[0]
+  const summarizeMap=(value)=>{
+    const root=value?.kind==='constructor'
+      &&value.name==='Lean.PersistentHashMap.mk'
+        ?value.fields[0]
         :undefined;
-  const occupied=entries===undefined
-    ?[]
-    :entries.flatMap((entry,index)=>
-      entry?.kind==='constructor'
-      &&entry.name!=='Lean.PersistentHashMap.Entry.null'
-        ?[{index,name:entry.name,fields:entry.fields.length}]
-        :[]
-    );
+    const entries=
+      root?.kind==='constructor'
+        &&root.name==='Lean.PersistentHashMap.Node.entries'
+        &&Array.isArray(root.fields[0])
+          ?root.fields[0]
+          :undefined;
+    const occupied=entries===undefined
+      ?[]
+      :entries.flatMap((entry,index)=>
+        entry?.kind==='constructor'
+        &&entry.name!=='Lean.PersistentHashMap.Entry.null'
+          ?[{index,name:entry.name,fields:entry.fields.length}]
+          :[]
+      );
+    return {
+      valueKind:value?.kind,
+      valueName:value?.kind==='constructor'?value.name:undefined,
+      rootKind:root?.kind,
+      rootName:root?.kind==='constructor'?root.name:undefined,
+      entries:entries?.length,
+      occupied,
+      samples:entries?.slice(0,4).map((entry)=>(
+        entry?.kind==='constructor'
+          ?{kind:entry.kind,name:entry.name,fields:entry.fields.length}
+          :{kind:typeof entry}
+      )),
+    };
+  };
+  const mapFields=[4,5,6,7,8,9].map((index)=>({
+    index,
+    before:summarizeMap(
+      empty?.kind==='constructor'?empty.fields[index]:undefined,
+    ),
+    after:summarizeMap(
+      assigned?.kind==='constructor'?assigned.fields[index]:undefined,
+    ),
+  }));
   console.log(JSON.stringify({
     phase:'metavar-context-map-shape',
     assignedKind:assigned?.kind,
     assignedFields:assigned?.kind==='constructor'
       ?assigned.fields.length
       :undefined,
-    eAssignmentKind:eAssignment?.kind,
-    eAssignmentName:eAssignment?.kind==='constructor'
-      ?eAssignment.name
-      :undefined,
-    rootKind:root?.kind,
-    rootName:root?.kind==='constructor'?root.name:undefined,
-    entries:entries?.length,
-    occupied,
+    mapFields,
   }));
 }
 

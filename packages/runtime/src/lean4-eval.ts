@@ -68,6 +68,7 @@ export type Lean434CallableValue=
 
 export type Lean434RuntimeValue=
   |bigint|string|boolean|undefined
+  |readonly Lean434RuntimeValue[]
   |Lean434ConstructorValue
   |Lean434TypeValue
   |Lean434ProofValue
@@ -229,10 +230,22 @@ export class Lean434Evaluator {
       return primitive(
         name,
         runtimeBinding.arity,
-        (args)=>invokeLean434JsExtern(
-          runtimeBinding.leanSymbol,
-          args,
-        ) as Lean434RuntimeValue,
+        (args)=>{
+          const runtimeArgs=runtimeBinding.runtimeArgs===undefined
+            ?args
+            :runtimeBinding.runtimeArgs.map((index)=>{
+                if(index<0||index>=args.length){
+                  throw new Lean434EvaluationError(
+                    "runtime argument index out of range for '"+name+"'",
+                  );
+                }
+                return args[index]!;
+              });
+          return invokeLean434JsExtern(
+            runtimeBinding.leanSymbol,
+            runtimeArgs,
+          ) as Lean434RuntimeValue;
+        },
       );
     }
 

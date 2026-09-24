@@ -1,6 +1,7 @@
 import {
   PROOFSCRIPT_LEAN_VERSION,
   replayLeanEnvironment,
+  replayLeanEnvironmentInto,
 } from '../src/index.js';
 import {
   createLeanEnvironmentProvider,
@@ -71,6 +72,50 @@ function equal(actual:unknown,expected:unknown):void {
   const replayed=replayLeanEnvironment(segmented);
   equal(replayed.environment.size,2);
   equal(replayed.stats.declarations,2);
+}
+{
+  const meta=JSON.stringify({
+    meta:{
+      lean:{version:PROOFSCRIPT_LEAN_VERSION},
+      format:{version:'3.1.0'},
+    },
+  });
+  const base=replayLeanEnvironment([
+    meta,
+    JSON.stringify({in:1,str:{pre:0,str:'Base'}}),
+    JSON.stringify({il:1,succ:0}),
+    JSON.stringify({ie:0,sort:1}),
+    JSON.stringify({
+      axiom:{
+        name:1,
+        levelParams:[],
+        type:0,
+        isUnsafe:false,
+      },
+    }),
+  ].join('\n')+'\n');
+  const delta=[
+    JSON.stringify({environment:{
+      module:'Fixture',
+      baseModule:'BaseFixture',
+    }}),
+    JSON.stringify({segment:{index:0,kind:'declaration'}}),
+    meta,
+    JSON.stringify({in:1,str:{pre:0,str:'Base'}}),
+    JSON.stringify({in:2,str:{pre:0,str:'Delta'}}),
+    JSON.stringify({ie:0,const:{name:1,us:[]}}),
+    JSON.stringify({
+      axiom:{
+        name:2,
+        levelParams:[],
+        type:0,
+        isUnsafe:false,
+      },
+    }),
+  ].join('\n')+'\n';
+  const replayed=replayLeanEnvironmentInto(base.environment,delta);
+  equal(replayed.environment.size,2);
+  equal(replayed.stats.declarations,1);
 }
 {
   const provider=createLeanEnvironmentProvider({

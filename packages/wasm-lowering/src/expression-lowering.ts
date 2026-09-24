@@ -110,25 +110,11 @@ export function lowerRuntimeExpr(
         case 'nat.eq':
         case 'nat.ne':
         case 'nat.le':
-        case 'nat.lt':
-          return lowerNatIntrinsic(
-            expr.operation,
-            lowerRuntimeExpr(
-              expr.args[0]!,
-              'nat',
-              locals,
-              signatures,
-              support,
-            ),
-            lowerRuntimeExpr(
-              expr.args[1]!,
-              'nat',
-              locals,
-              signatures,
-              support,
-            ),
-            support,
-          );
+        case 'nat.lt':{
+          const left=lowerRuntimeExpr(expr.args[0]!,'nat',locals,signatures,support);
+          const right=lowerRuntimeExpr(expr.args[1]!,'nat',locals,signatures,support);
+          return lowerNatIntrinsic(expr.operation,left,right,support);
+        }
 
         case 'bool.not':
           return {

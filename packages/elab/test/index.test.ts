@@ -1270,15 +1270,15 @@ console.log('ok - @proofscript/elab parameterized inductive constructor inferenc
   const result=elaborateV061Declarations(parseV061Module(
     'inductive DuoExpected(α : Type, ε : Type) where { '+
     '| ok(value : α); | error(error : ε); } '+
-    'function duoGetOr {α : Type}{ε : Type}'+
-    '(value : DuoExpected(α, ε), fallback : α) : α := '+
-    'match value with { | .ok x => x; | .error err => fallback; }; '+
+    'function duoOr {α : Type}{ε : Type}'+
+    '(value : DuoExpected(α, ε), fallback : DuoExpected(α, ε)) : DuoExpected(α, ε) := '+
+    'match value with { | .ok x => DuoExpected.ok(x); | .error err => fallback; }; '+
     'function useExpectedOk {α : Type}{ε : Type}'+
-    '(value : α, fallback : α) : α := '+
-    'duoGetOr(DuoExpected.ok(value), fallback); '+
+    '(value : α, fallback : DuoExpected(α, ε)) : DuoExpected(α, ε) := '+
+    'duoOr(DuoExpected.ok(value), fallback); '+
     'theorem duoExpectedOk {α : Type}{ε : Type}'+
-    '(value : α, fallback : α) : '+
-    'duoGetOr(DuoExpected.ok(value), fallback) = value := Eq.refl(value);',
+    '(value : α, fallback : DuoExpected(α, ε)) : '+
+    'duoOr(DuoExpected.ok(value), fallback) = DuoExpected.ok(value) := by rfl;',
   ),env);
   equal(result.definitions.length,2);
   equal(result.theorems.length,1);

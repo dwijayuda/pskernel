@@ -305,9 +305,8 @@ console.log('ok - @proofscript/erasure semantic primitive type identity');
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
-  const Nat=nameFromDotted('TestNat');
-  kernel.addAxiom({
+  const Nat=nameFromDotted('Nat');
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],

@@ -10,6 +10,20 @@ if (lock.lean4export?.toolchain !== 'leanprover/lean4:v4.34.0') throw new Error(
 const forbidden = [/lean\s*4\.3[0-3]/i, /equivmanager/i, /NativeEvaluator/, /LeanReduce(?:Nat|Bool)/];
 function walk(p) { for (const n of readdirSync(p)) { const q=join(p,n); const s=statSync(q); if(s.isDirectory()) walk(q); else if(q.endsWith('.ts')) { const t=readFileSync(q,'utf8'); for(const r of forbidden) if(r.test(t)) throw new Error(`Anti-drift violation ${r} in ${q}`); } } }
 walk(join(root,'src'));
+
+// File URL pathnames are not filesystem paths on Windows (for example,
+// /C:/work/...); all repository scripts must convert file URLs explicitly.
+const unsafeFileUrlPathname=/import\\.meta\\.url\\s*\\)\\s*\\.pathname/;
+function forbidUnsafeScriptFileUrlPaths(p) {
+  for (const n of readdirSync(p)) {
+    const q=join(p,n); const s=statSync(q);
+    if (s.isDirectory()) forbidUnsafeScriptFileUrlPaths(q);
+    else if ((q.endsWith('.mjs')||q.endsWith('.js')) && unsafeFileUrlPathname.test(readFileSync(q,'utf8'))) {
+      throw new Error('Anti-drift violation: use fileURLToPath for import.meta.url filesystem paths in ' + q);
+    }
+  }
+}
+forbidUnsafeScriptFileUrlPaths(join(root,'scripts'));
 if (existsSync(join(root,'src','kernel','reduction','native.ts'))) throw new Error('Anti-drift violation: final Lean 4.34 has no native-reduction compatibility layer');
 if (existsSync(join(root,'packages','native-ir'))) throw new Error('Anti-drift violation: final Lean 4.34 has no native-ir kernel-extension package');
 

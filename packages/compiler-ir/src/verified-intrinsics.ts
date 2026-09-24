@@ -21,10 +21,15 @@ export const VERIFIED_IR_INTRINSIC_ARITY={
   'string.singleton':1,
   'string.length':1,
   'string.append':2,
-} as const satisfies Readonly<Record<VerifiedIrIntrinsicOperation,1|2>>;
+  'string.utf8ByteSize':1,
+  'string.next':2,
+  'string.get':2,
+  'string.atEnd':2,
+  'string.extract':3,
+} as const satisfies Readonly<Record<VerifiedIrIntrinsicOperation,1|2|3>>;
 
 export function verifiedIrIntrinsicArity(
   operation:VerifiedIrIntrinsicOperation,
-):1|2 {
+):1|2|3 {
   return VERIFIED_IR_INTRINSIC_ARITY[operation];
 }

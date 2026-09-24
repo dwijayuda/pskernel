@@ -82,22 +82,65 @@ def psHostResolveImport
       (IO.userError
         ("PSC1_PROJECT_SOURCE_MISSING: " ++ relative))
 
+def psHostTokenKindText : PsTokenKind -> String
+  | .identifier => "identifier"
+  | .natural => "natural"
+  | .string => "string"
+  | .character => "character"
+  | .symbol => "symbol"
+  | .endOfInput => "end-of-input"
+
+def psHostSourcePosText (position : PsSourcePos) : String :=
+  toString position.line ++ ":" ++ toString position.column
+
+def psHostParseErrorText : PsParseError -> String
+  | .fuelExhausted => "parser fuel exhausted"
+  | .unexpectedEnd expected =>
+      "unexpected end; expected " ++ expected
+  | .expectedText expected actual span =>
+      psHostSourcePosText span.start ++
+        ": expected '" ++ expected ++
+        "', got '" ++ actual ++ "'"
+  | .expectedKind expected actual span =>
+      psHostSourcePosText span.start ++
+        ": expected " ++ psHostTokenKindText expected ++
+        ", got " ++ psHostTokenKindText actual
+
+def psHostLexErrorText : PsLexError -> String
+  | .unterminatedBlockComment span =>
+      psHostSourcePosText span.start ++ ": unterminated block comment"
+  | .unterminatedString span =>
+      psHostSourcePosText span.start ++ ": unterminated string"
+  | .newlineInString span =>
+      psHostSourcePosText span.start ++ ": newline in string"
+  | .unterminatedCharacter span =>
+      psHostSourcePosText span.start ++ ": unterminated character"
+  | .fuelExhausted => "lexer fuel exhausted"
+
 def psHostParseSource
     (path source : String) : IO PsSyntaxModule := do
   if path.endsWith ".lean" then
     match psParseLeanSource source with
     | Except.ok sourceModule => pure sourceModule
-    | Except.error _ =>
+    | Except.error error =>
+        let detail :=
+          match error with
+          | .lex lexError => psHostLexErrorText lexError
+          | .parse parseError => psHostParseErrorText parseError
         throw
           (IO.userError
-            ("PSC1_PROJECT_PARSE_FAILED: " ++ path))
+            ("PSC1_PROJECT_PARSE_FAILED: " ++ path ++ ": " ++ detail))
   else if path.endsWith ".ps" then
     match psParseProofScriptSource source with
     | Except.ok sourceModule => pure sourceModule
-    | Except.error _ =>
+    | Except.error error =>
+        let detail :=
+          match error with
+          | .lex lexError => psHostLexErrorText lexError
+          | .parse parseError => psHostParseErrorText parseError
         throw
           (IO.userError
-            ("PSC1_PROJECT_PARSE_FAILED: " ++ path))
+            ("PSC1_PROJECT_PARSE_FAILED: " ++ path ++ ": " ++ detail))
   else
     throw
       (IO.userError

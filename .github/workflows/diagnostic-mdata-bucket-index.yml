@@ -30,7 +30,8 @@ jobs:
       - run: node scripts/anti-drift.mjs
       - name: Compile/export smoke with indexed MData equality ids
         shell: bash
-        run: "$LEAN434_BIN/lean" --run oracle/replay-probe/DependencyExport.lean Init.Prelude --module-stream > /dev/null
+        run: |
+          "$LEAN434_BIN/lean" --run oracle/replay-probe/DependencyExport.lean Init.Prelude --module-stream > /dev/null
       - name: Time-box canonical replay with original GC cadence
         shell: bash
         env:

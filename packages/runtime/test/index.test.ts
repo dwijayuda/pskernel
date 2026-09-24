@@ -15,7 +15,10 @@ import {
   sort,
   TypeChecker,
 } from 'lean-ts-kernel';
-import {Lean434Evaluator} from '../src/lean4-eval.js';
+import {
+  Lean434EvaluationError,
+  Lean434Evaluator,
+} from '../src/lean4-eval.js';
 import {
   Lean434RuntimeMetadataError,
   Lean434RuntimeMetadataIndex,
@@ -263,6 +266,77 @@ equal(
     }),
     Lean434RuntimeMetadataError,
     'runtime metadata githash drift must fail closed',
+  );
+
+  const metadataEvaluator=new Lean434Evaluator(
+    new Environment(),
+    {metadata:index},
+  );
+  equal(
+    metadataEvaluator.evaluate(
+      mkAppN(
+        constant(nameFromDotted('Nat.add')),
+        [natLit(2n),natLit(3n)],
+      ),
+    ),
+    5n,
+  );
+  equal(
+    metadataEvaluator.evaluate(
+      app(
+        constant(nameFromDotted('TSyntaxArray.raw')),
+        natLit(9n),
+      ),
+    ),
+    9n,
+  );
+
+  const wrongExtern=parseLean434RuntimeMetadata({
+    ...metadata,
+    externs:[
+      {
+        declaration:'Nat.add',
+        entries:[
+          {kind:'standard',backend:'all',symbol:'lean_nat_mul'},
+        ],
+      },
+    ],
+  });
+  throws(
+    ()=>new Lean434Evaluator(
+      new Environment(),
+      {metadata:new Lean434RuntimeMetadataIndex(wrongExtern)},
+    ).evaluate(
+      mkAppN(
+        constant(nameFromDotted('Nat.add')),
+        [natLit(2n),natLit(3n)],
+      ),
+    ),
+    Lean434EvaluationError,
+    'extern sidecar mismatch must fail closed',
+  );
+
+  const wrongImplementedBy=parseLean434RuntimeMetadata({
+    ...metadata,
+    implementedBy:[
+      {
+        declaration:'TSyntaxArray.raw',
+        implementation:'Wrong.rawImpl',
+      },
+    ],
+  });
+  throws(
+    ()=>new Lean434Evaluator(
+      new Environment(),
+      {metadata:new Lean434RuntimeMetadataIndex(wrongImplementedBy)},
+    ).evaluate(
+      app(
+        constant(nameFromDotted('TSyntaxArray.raw')),
+        natLit(1n),
+      ),
+    ),
+    Lean434EvaluationError,
+    'implemented_by sidecar mismatch must fail closed',
   );
 }
 console.log('ok - Lean 4.34 runtime metadata loader validates and deduplicates');

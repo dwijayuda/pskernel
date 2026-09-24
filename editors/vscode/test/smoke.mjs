@@ -43,7 +43,12 @@ for(const command of [
   'proofscript.convertToProofScript',
 ]){
   assert(pkg.contributes.commands.some((item)=>item.command===command),'missing command '+command);
-  assert(source.includes("registerCommand('"+command+"'"),'command not implemented '+command);
+  const registration=new RegExp(
+    "registerCommand\\\\(\\\\s*['\\\"]"+
+    command.replace(/[.*+?^$\{\}()|[\]\\]/g,'\\\\  assert(source.includes("registerCommand('"+command+"'"),'command not implemented '+command);')+
+    "['\\\"]",
+  );
+  assert(registration.test(source),'command not implemented '+command);
 }
 assert(source.includes('EXPECTED_PROTOCOL=2'),'protocol guard missing');
 assert(source.includes('proofscript/proofState'),'proof-state request missing');

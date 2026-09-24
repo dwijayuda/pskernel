@@ -329,3 +329,13 @@ Lean-style metavariable experimentation without allowing failed search
 candidates to mutate the live elaboration state. Strict/instance implicit
 search, symmetry/Iff alternatives, relevance indexing, and recursive
 `solveByElim` remain explicit future work.
+
+## Stdlib simplifier dogfood checkpoint
+
+The bounded simplifier is now exercised by
+`ProofScript.Data.List.listAppendNilRight` in the end-to-end stdlib project.
+The proof uses an explicit two-rule `simp only` set rather than Lean's global
+simp environment. This is intentionally narrower than Lean 4.34's simplifier:
+the current structural-decrease/orientation and non-overlap restrictions remain
+part of the accepted subset, while proof reconstruction continues through
+kernel-checked Eq transport.

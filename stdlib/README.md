@@ -51,7 +51,8 @@ The end-to-end stdlib test now exercises:
 - `listLength`;
 - fourteen admitted stdlib theorems: ten definitional laws use bounded `rfl`,
   `optionOrElseNoneRight` dogfoods bounded `cases`, while
-  `listAppendNilRight`, `listAppendAssoc`, and `listMapAppend` dogfood
+  `listAppendNilRight` dogfoods bounded induction plus proof-producing
+  `simp only`, while `listAppendAssoc` and `listMapAppend` dogfood
   bounded induction plus checked rewriting;
 - zero runtime external assumptions.
 
@@ -67,9 +68,13 @@ listAppend(xs, PsList.nil) = xs
 ```
 
 It uses bounded induction. Constructor fields retain their source names in the
-recursive branch and the recursive field `tail` exposes `tail_ih`. The proof
-then rewrites with the checked constructor computation law and that induction
-hypothesis. No host theorem or compiler shortcut is involved.
+recursive branch and the recursive field `tail` exposes `tail_ih`. The
+recursive branch now runs
+`simp only [listAppendCons(head, tail, PsList.nil), tail_ih]`.
+Both simplification rules are explicit checked Eq proofs; the bounded
+simplifier reconstructs each equality transport and closes the resulting
+reflexive Eq through the kernel-backed rfl path. No global simp database, host
+theorem, or compiler shortcut is involved.
 
 ## First universal case-analysis law
 

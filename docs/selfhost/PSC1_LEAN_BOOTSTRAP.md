@@ -476,6 +476,52 @@ A ProofScript package may therefore ship:
 npm owns distribution/version/install. ProofScript owns logical module identity,
 semantic compatibility and checked artifacts.
 
+## Migration workspace policy
+
+The branch may use a separate `selfhost/packages/*` workspace while the new
+architecture is still proving itself. This workspace is an **isolation
+boundary**, not a competing long-term package system.
+
+It should preserve the eventual npm responsibilities:
+
+```text
+selfhost/packages/foundation  -> future shared low-level package/library
+selfhost/packages/syntax      -> @proofscript/syntax
+selfhost/packages/project     -> @proofscript/project / module graph
+selfhost/packages/core        -> kernel-facing expression/declaration data
+selfhost/packages/meta        -> @proofscript/meta
+selfhost/packages/elab        -> @proofscript/elab
+selfhost/packages/checked     -> @proofscript/checked-core
+selfhost/packages/ir          -> @proofscript/compiler-ir
+selfhost/packages/backend-ts  -> @proofscript/backend-ts
+selfhost/packages/compiler    -> @proofscript/compiler
+```
+
+Inside a migration package, use adjacent source spellings with the same
+responsibility:
+
+```text
+src/Name.lean
+src/Name.ps
+
+src/Token.lean
+src/Token.ps
+```
+
+Do not copy the current TypeScript file count or filenames merely for parity.
+Use the existing TypeScript implementation as behavioral evidence and harvest
+working algorithms/tests, but consolidate or split modules according to the
+cleanest semantic responsibility.
+
+Likewise, do not copy Lean 4's directory tree. Borrow its strongest boundaries:
+kernel-facing expression data, environment, metavariable context, Meta
+operations, elaboration, and parser state. Leave out extensibility machinery
+that PSC1 does not need.
+
+When a self-host package reaches behavioral parity and a stable API, merge it
+into the corresponding root npm workspace package. Until then, keeping it under
+`selfhost/packages` avoids destabilizing the current PSC0 implementation.
+
 ## Portable module layout
 
 Initial logical modules:

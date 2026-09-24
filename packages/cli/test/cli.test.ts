@@ -15,6 +15,7 @@ import {
 import {verifiedAssuranceReport} from '../src/verified-assurance.js';
 import {clearVerifiedProjectModuleCache} from '../src/verified-project-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
+import {decodeVerifiedJsonArgument} from '../src/verified-runtime-json.js';
 import {runCommand} from '../src/commands/run.js';
 import {buildCommand} from '../src/commands/build.js';
 import {checkCommand} from '../src/commands/check.js';
@@ -716,6 +717,22 @@ console.log('ok - psc verified Nat source pipeline');
   equal(args[1],false);
 }
 console.log('ok - psc verified runtime ABI');
+
+{
+  const decoded=decodeVerifiedJsonArgument(
+    '"-42"',
+    {kind:'primitive',name:'Int'},
+    {
+      module:{
+        kind:'proofscript-verified-ir',
+        declarations:[],
+      },
+      runtimeExports:{},
+    },
+  );
+  equal(decoded,-42n);
+}
+console.log('ok - psc verified nested JSON Int ABI');
 
 
 {

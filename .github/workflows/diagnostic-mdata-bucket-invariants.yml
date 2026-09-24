@@ -23,4 +23,6 @@ jobs:
           echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
           echo "$lean_dir" >> "$GITHUB_PATH"
       - name: Check bucket invariants
-        run: "$LEAN434_BIN/lean" --run oracle/replay-probe/MDataBucketInvariant.lean
+        shell: bash
+        run: |
+          "$LEAN434_BIN/lean" --run oracle/replay-probe/MDataBucketInvariant.lean

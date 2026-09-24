@@ -36,7 +36,8 @@
     "test:wasm": "tsc -p packages/syntax/tsconfig.json && tsc -p packages/language/tsconfig.json && tsc -p packages/compiler-ir/tsconfig.json && tsc -p packages/wasm-ir/tsconfig.json && node packages/wasm-ir/dist/test/index.test.js && tsc -p packages/wasm-lowering/tsconfig.json && node packages/wasm-lowering/dist/test/index.test.js && tsc -p packages/backend-wasm/tsconfig.json && node packages/backend-wasm/dist/test/index.test.js",
     "check:workspace-lock": "node scripts/workspace-lock-check.mjs",
     "build:package-integration": "npm run build && tsc -p packages/syntax/tsconfig.json && tsc -p packages/language/tsconfig.json && tsc -p packages/browser/tsconfig.json && tsc -p packages/pretty/tsconfig.json && tsc -p packages/meta/tsconfig.json && tsc -p packages/environment/tsconfig.json && tsc -p packages/checked-core/tsconfig.json && tsc -p packages/tactic/tsconfig.json && tsc -p packages/elab/tsconfig.json && tsc -p packages/compiler-ir/tsconfig.json && tsc -p packages/erasure/tsconfig.json && tsc -p packages/runtime/tsconfig.json && tsc -p packages/backend-ts/tsconfig.json && tsc -p packages/wasm-ir/tsconfig.json && tsc -p packages/wasm-lowering/tsconfig.json && tsc -p packages/backend-wasm/tsconfig.json && tsc -p packages/compiler/tsconfig.json && tsc -p packages/project/tsconfig.json && tsc -p packages/language-service/tsconfig.json && tsc -p packages/lsp/tsconfig.json && tsc -p packages/module/tsconfig.json && tsc -p packages/cli/tsconfig.json",
-    "test:package-integration:raw": "node scripts/package-integration-smoke.mjs"
+    "test:package-integration:raw": "node scripts/package-integration-smoke.mjs",
+    "test:language": "tsc -p packages/syntax/tsconfig.json && tsc -p packages/language/tsconfig.json && node packages/language/dist/test/index.test.js"
   },
   "devDependencies": {
     "typescript": "5.8.3"

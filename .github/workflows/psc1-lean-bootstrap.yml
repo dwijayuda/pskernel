@@ -124,7 +124,11 @@ jobs:
           grep -q 'export interface Prod' /tmp/psc1-collections.ts
           grep -q 'export type Result' /tmp/psc1-collections.ts
           grep -q 'export type List' /tmp/psc1-collections.ts
+          grep -q 'export type Map' /tmp/psc1-collections.ts
+          grep -q 'export interface Set' /tmp/psc1-collections.ts
           grep -q 'export function listLength' /tmp/psc1-collections.ts
+          grep -q 'export function mapInsert' /tmp/psc1-collections.ts
+          grep -q 'export function setInsert' /tmp/psc1-collections.ts
           rm -f /tmp/psc1-collections.js /tmp/psc1-collections.d.ts /tmp/psc1-collections.js.map
           lake exe psc1 build stdlib/SELFHOST-COLLECTIONS.lean --out /tmp/psc1-collections.ts
           test -f /tmp/psc1-collections.js

@@ -122,9 +122,11 @@ Exit condition:
 > Runtime tests cover value semantics, UTF-8 positions, array persistence and
 > ref identity/take/set behavior.
 
-## R2 — extern lowering — **NEXT**
+## R2 — extern lowering — **COMPLETE (first source-backed slice)**
 
-Research constraint discovered during R0/R1: an upstream `@[extern] def` must remain an ordinary pskernel-checked logical definition with a separate executable override. It must **not** be converted into the existing ProofScript `extern function` axiom form. The R2 representation therefore needs runtime-override sidecar metadata that erasure/backend code may consume without changing kernel admission.
+Research constraint discovered during R0/R1: an upstream `@[extern] def` must remain an ordinary pskernel-checked logical definition with a separate executable override. It must **not** be converted into the existing ProofScript `extern function` axiom form.
+
+Completed first slice 2026-09-25: `@proofscript/runtime/lean4` now has a source-verified declaration-to-extern binding layer. The evaluator resolves real pskernel-admitted `Nat.add` through `Nat.add -> lean_nat_add -> JS implementation`; GitHub Actions run `36041968767` executes the pinned Lean 4.34 `Init.Prelude` declaration and obtains `42`. The manifest checker verifies the declaration and extern symbol against the pinned source. Runtime argument erasure for polymorphic/proof-carrying externs is explicit metadata and fails closed when malformed.
 
 
 Extend the Lean-compatible frontend/lowering so a whitelisted upstream form
@@ -145,9 +147,13 @@ Exit condition:
 > At least one real upstream Init declaration keeps its original extern
 > attribute and executes through the JS runtime after pskernel admission.
 
-## R3 — implemented_by policy
+## R3 — implemented_by policy — **IN PROGRESS (metadata/execution slice complete)**
 
 Parse/preserve the selected `implemented_by` attribute.
+
+Completed first slice 2026-09-25: source-verified bindings for parser-relevant `TSyntaxArray.raw -> TSyntaxArray.rawImpl` and `TSyntaxArray.mk -> TSyntaxArray.mkImpl` execute as representation-preserving identity adapters in JS. GitHub Actions run `36042195601` gates the adapters, while the manifest checker verifies the original `@[implemented_by ...]` attributes against pinned Lean 4.34 source. pskernel admission remains unchanged.
+
+R3 remains open because the original differential exit condition still requires at least one ordinary reference/optimized pair whose executable behavior can be compared on a bounded corpus. `TSyntaxArray.raw/mk` are intentionally opaque runtime-representation bridges, so they are not suitable for that equivalence gate.
 
 Execution order:
 

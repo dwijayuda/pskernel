@@ -5,7 +5,7 @@ and compiled by the same verified project pipeline as user code.
 
 ## Current modules
 
-- `ProofScript.Data.Option`: `PsOption`, map/get-or-else/or-else/is-some helpers.
+- `ProofScript.Data.Option`: `PsOption`, map/bind/get-or-else/or-else/is-some helpers.
 - `ProofScript.Data.Result`: `PsResult`, value/error mapping, get-or-else,
   and Option conversion.
 - `ProofScript.Data.List`: `PsList`, structural map/append/length/head helpers.
@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain twenty-five pskernel-admitted theorems in total:
+The three modules now contain twenty-seven pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -44,12 +44,12 @@ ProofScript source modules
 
 The end-to-end stdlib test now exercises:
 
-- `optionOrElse`;
+- `optionBind` and `optionOrElse`;
 - `resultGetOrElse` and `resultMapError`;
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- twenty-five admitted stdlib theorems: twelve definitional laws use bounded
+- twenty-seven admitted stdlib theorems: fourteen definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
   `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`; `optionMapOrElse`, `optionGetOrElseOrElse`, and `optionGetOrElseMap` dogfood higher-order/helper composition through Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
@@ -201,6 +201,25 @@ is absent, both sides reduce to extracting the fallback with the same default.
 The proof is bounded `cases` plus Eq-only `rfl`, following the constructor
 behavior of Lean 4.34's Option elimination/get-default operations and strict
 Option choice without adding new elaborator or runtime semantics.
+
+## Option bind checkpoint
+
+`ProofScript.Data.Option.optionBind` now provides the standard Option
+sequencing operation:
+
+```text
+optionBind(value, f)
+```
+
+It follows Lean 4.34 `Option.bind` constructor behavior exactly for this
+source-owned ADT: `none` stays `none`, while `some(value)` continues with
+`f(value)`. The adjacent `optionBindNone` and `optionBindSome` theorems
+are both definitional and close with bounded Eq-only `rfl`.
+
+The dogfood program routes its Result-derived Option through `optionBind`
+before fallback selection, so the executable source -> checked core -> erasure
+-> verified IR -> TypeScript -> JavaScript path now exercises higher-order
+Option sequencing as well as mapping.
 
 ## Option map/get-or-else compatibility
 

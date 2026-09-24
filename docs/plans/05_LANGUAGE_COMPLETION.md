@@ -464,11 +464,11 @@ Exit condition:
 
 Current stdlib checkpoint:
 
-- `PsOption`: map, get-or-else, or-else, is-some plus reflexivity/computation laws;
+- `PsOption`: map, bind, get-or-else, or-else, is-some plus reflexivity/computation laws;
 - `PsResult`: value/error mapping, get-or-else, Option conversion plus checked laws;
 - `PsList`: map, append, length, head Option plus reflexivity/append reduction laws;
 - the dogfood project executes all three modules through verified TS/JS emission
-  with zero runtime extern assumptions and twenty-five pskernel-admitted theorems.
+  with zero runtime extern assumptions and twenty-seven pskernel-admitted theorems.
 
 Build libraries in ProofScript itself where practical:
 
@@ -712,8 +712,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
     resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
-    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, listAppendNilRight,
-    listAppendAssoc, and listMapAppend. Twenty-five current stdlib theorems now
+    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, listAppendNilRight,
+    listAppendAssoc, and listMapAppend. Twenty-seven current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
     laws/utilities only when the proof/recursion surface supports them without
@@ -786,6 +786,18 @@ with the extraction of `fallback` as its fallback value. The theorem is
 generic and closes by bounded `cases` plus Eq-only `rfl`. It adds a useful
 helper-composition law while keeping Option behavior entirely in
 ProofScript-authored definitions and pskernel-checked equality.
+
+## Stdlib Option bind checkpoint
+
+The self-hosted Option module now includes `optionBind`, following the
+constructor equations of Lean 4.34 `Option.bind`: absence short-circuits and
+presence applies the continuation. `optionBindNone` and `optionBindSome`
+are checked as ordinary definitional equalities with bounded `rfl`.
+
+The stdlib runtime dogfood also passes a Result-derived Option through this
+higher-order helper before fallback extraction. This expands practical library
+coverage while reusing the existing generic ADT, higher-order application,
+match, erasure, IR, and TypeScript paths unchanged.
 
 ## Stdlib Option map/get-or-else checkpoint
 

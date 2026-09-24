@@ -6,6 +6,9 @@ function inc(x : Nat) : Nat := x + 1;
 function asResult(x : Nat) : PsResult(Nat, Nat) :=
   PsResult.ok(x);
 
+function asOption(x : Nat) : PsOption(Nat) :=
+  PsOption.some(x);
+
 function main(x : Nat) : Nat :=
   let mapped : PsResult(Nat, Nat) :=
     resultMap(inc, asResult(x));
@@ -15,8 +18,10 @@ function main(x : Nat) : Nat :=
     resultGetOrElse(mappedError, 0);
   let option : PsOption(Nat) :=
     resultToOption(mapped);
+  let rebound : PsOption(Nat) :=
+    optionBind(option, asOption);
   let chosen : PsOption(Nat) :=
-    optionOrElse(option, PsOption.some(0));
+    optionOrElse(rebound, PsOption.some(0));
   let xs : PsList(Nat) :=
     PsList.cons(x, PsList.cons(x, PsList.nil));
   let empty : PsList(Nat) :=

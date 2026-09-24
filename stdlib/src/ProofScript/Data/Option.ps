@@ -30,6 +30,13 @@ function optionIsSome {α : Type}(value : PsOption(α)) : Bool :=
     | .some x => true;
   };
 
+function optionBind {α : Type}{β : Type}
+(value : PsOption(α), f : α -> PsOption(β)) : PsOption(β) :=
+  match value with {
+    | .none => PsOption.none;
+    | .some x => f(x);
+  };
+
 theorem optionRefl {α : Type}
 (value : PsOption(α)) : value = value := by rfl;
 
@@ -67,3 +74,11 @@ theorem optionGetOrElseMap {α : Type}{β : Type}
 optionGetOrElse(optionMap(f, value), f(fallback)) =
 f(optionGetOrElse(value, fallback)) :=
   by cases value; rfl; rfl;
+
+theorem optionBindNone {α : Type}{β : Type}
+(f : α -> PsOption(β)) :
+optionBind(PsOption.none, f) = PsOption.none := by rfl;
+
+theorem optionBindSome {α : Type}{β : Type}
+(value : α, f : α -> PsOption(β)) :
+optionBind(PsOption.some(value), f) = f(value) := by rfl;

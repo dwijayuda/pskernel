@@ -1,0 +1,44 @@
+import Ps.Foundation.Name
+import Ps.Core.Declaration
+
+def psDeclarationName(declaration : PsDeclaration) : PsName :=
+  match declaration with {
+    | .axiom name levelParams type => name;
+    | .definition name levelParams type value => name;
+    | .theorem name levelParams type value => name;
+    | .opaque name levelParams type value => name;
+  };
+
+structure PsEnvironment where {
+  declarations : List(PsDeclaration);
+};
+
+def psEnvironmentEmpty : PsEnvironment :=
+  { declarations := [] };
+
+def psEnvironmentFindInList(name : PsName, declarations : List(PsDeclaration)) : Option(PsDeclaration) :=
+  match declarations with {
+    | .nil => Option.none;
+    | .cons declaration rest =>
+      if (psNameEq(name, psDeclarationName(declaration))) {
+        Option.some(declaration)
+      } else {
+        psEnvironmentFindInList(name, rest)
+      };
+  };
+
+def psEnvironmentFind(environment : PsEnvironment, name : PsName) : Option(PsDeclaration) :=
+  psEnvironmentFindInList(name, environment.declarations);
+
+def psEnvironmentContains(environment : PsEnvironment, name : PsName) : Bool :=
+  match psEnvironmentFind(environment, name) with {
+    | .none => false;
+    | .some declaration => true;
+  };
+
+def psEnvironmentAdd(environment : PsEnvironment, declaration : PsDeclaration) : Option(PsEnvironment) :=
+  if (psEnvironmentContains(environment, psDeclarationName(declaration))) {
+    Option.none
+  } else {
+    Option.some({ declarations := PsDeclaration.cons(declaration, environment.declarations) })
+  };

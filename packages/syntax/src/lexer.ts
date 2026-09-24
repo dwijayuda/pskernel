@@ -123,14 +123,14 @@ function readCharacter(c: Cursor): {text:string;value:string;span:SourceSpan} {
       for(let i=0;i<digits;i++){
         if(c.eof){
           throw new SyntaxError(
-            \`unterminated \${esc==='x'?'hex':'unicode'} character escape\`,
+            `unterminated ${esc==='x'?'hex':'unicode'} character escape`,
             spanFrom(start,c.snapshot()),
           );
         }
         const h=c.advanceCodePoint();
         if(!/[0-9a-fA-F]/.test(h)){
           throw new SyntaxError(
-            \`invalid \${esc==='x'?'hex':'unicode'} character escape\`,
+            `invalid ${esc==='x'?'hex':'unicode'} character escape`,
             spanFrom(hexStart,c.snapshot()),
           );
         }
@@ -139,7 +139,7 @@ function readCharacter(c: Cursor): {text:string;value:string;span:SourceSpan} {
       value=String.fromCodePoint(parseInt(hex,16));
     }else{
       throw new SyntaxError(
-        \`unsupported character escape \\\\\${esc}\`,
+        `unsupported character escape \\${esc}`,
         spanFrom(start,c.snapshot()),
       );
     }

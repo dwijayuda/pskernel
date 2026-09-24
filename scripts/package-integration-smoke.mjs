@@ -289,6 +289,18 @@ assert(
 );
 
 
+const verifiedExactSearchApplication=compileVerifiedSource(
+  'theorem exactSearchPoly {P : Prop} : P -> P := '+
+  'by intro h; exact h; '+
+  'theorem exactSearchPolyUse(Q : Prop) : Q -> Q := by exact?;',
+  'verified-exact-search-application.ts',
+);
+assert(
+  verifiedExactSearchApplication.checkedCore.theorems.length===2,
+  'bounded exact? did not infer a zero-subgoal candidate argument',
+);
+
+
 const dualSourceCorpus=
   'structure Box(α : Type) where { value : α; } '+
   'class Sized(α : Type) where { size : α -> Nat; } '+

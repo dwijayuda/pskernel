@@ -697,6 +697,32 @@ console.log('ok - @proofscript/elab multi-rule simp-only syntax reaches tactic A
   }
   equal(rejected,true);
 }
+{
+  const localApplication=elaborateV061Declarations(parseV061Module(
+    'theorem searchLocalApply'+
+    '(P : Prop, f : (Q : Prop) -> Q -> Q) : P -> P := by exact?;',
+  ));
+  equal(localApplication.theorems.length,1);
+}
+{
+  const environmentApplication=elaborateV061Declarations(parseV061Module(
+    'theorem searchPoly {P : Prop} : P -> P := by intro h; exact h; '+
+    'theorem searchPolyUse(Q : Prop) : Q -> Q := by exact?;',
+  ));
+  equal(environmentApplication.theorems.length,2);
+}
+{
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'theorem searchNoRecursive'+
+      '(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := by exact?;',
+    ));
+  }catch(error){
+    rejected=/PS_ELAB_TACTIC_EXACT_SEARCH/.test(String(error));
+  }
+  equal(rejected,true);
+}
 console.log('ok - @proofscript/elab bounded exact search');
 
 {

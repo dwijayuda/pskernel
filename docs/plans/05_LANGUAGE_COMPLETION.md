@@ -681,8 +681,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    the current Nat/Bool/propositional forms cover the reference-backed
    foundation. Add lambdas/match only when a concrete specification needs them.
 6. Validate and then broaden the landed bounded zero-subgoal `exact?` search
-   only where Lean library-search semantics can be modeled explicitly; do not
-   silently turn it into recursive automation.
+   only where Lean library-search semantics can be modeled explicitly. It now
+   infers ordinary implicit/default candidate arguments when the goal resolves
+   all of them, while unresolved premises, strict/instance implicits,
+   solveByElim recursion, symmetry, and Iff search remain fail-closed.
 7. Continue DS5 from the landed mixed-source project + replay-gated persistent
    proofscript-module@2 artifact path. Source FFI, assurance, exact package-root
    policy, transitive package-lock v3 closure fingerprinting, and bounded public
@@ -757,3 +759,22 @@ instead of teaching one stdlib theorem a special unfolding path.
 This checkpoint gives the stdlib a first law that simultaneously exercises
 generic higher-order functions, recursive ADTs, induction, source-preserved
 constructor field names, and proof-producing rewriting.
+
+## Bounded exact-search application checkpoint
+
+The zero-subgoal `exact?` subset now trials candidates with a fresh isolated
+Meta context. Ordinary implicit/default binders may be instantiated with
+metavariables and are accepted only when unification with the target determines
+every inserted argument. This admits candidates such as a polymorphic
+`{P : Prop} -> P -> P` theorem for a concrete `Q -> Q` goal without
+creating a proof subgoal.
+
+A candidate that would require a premise remains rejected even if another local
+hypothesis could solve that premise. This is deliberate: Lean 4.34's full
+`exact?` delegates subsidiary goals to `solveByElim`, and ProofScript has
+not implemented that search contract yet.
+
+Candidate trials are isolated from the real theorem Meta context, so failed
+search alternatives cannot leak assignments. Universe parameters are no longer
+skipped categorically, but all trial universe metavariables must be resolved
+before the candidate is kernel-checked and accepted.

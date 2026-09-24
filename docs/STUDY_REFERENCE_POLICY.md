@@ -314,3 +314,18 @@ implement Lean's full `with | ctor ... =>` alternative grammar, so the current
 small step preserves constructor binder names by default and names a direct
 recursive hypothesis `<field>_ih`. This is a source-context convenience only;
 recursor semantics remain unchanged.
+
+## Lean library-search zero-subgoal application checkpoint
+
+Pinned Lean 4.34 `Lean.Meta.Tactic.LibrarySearch` applies candidate lemmas and
+then uses `solveByElim` for generated subsidiary goals. The current
+ProofScript `exact?` broadening implements only the prefix of that behavior
+that creates **no remaining goals**: candidate implicit/default arguments may
+be inferred from the target, but every inserted metavariable must be resolved
+by target unification itself.
+
+Candidate application is trialed in an isolated ExprMetaContext. This preserves
+Lean-style metavariable experimentation without allowing failed search
+candidates to mutate the live elaboration state. Strict/instance implicit
+search, symmetry/Iff alternatives, relevance indexing, and recursive
+`solveByElim` remain explicit future work.

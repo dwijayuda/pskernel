@@ -662,7 +662,7 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   ])]).compress
   let _ ← (do
     modify fun (s : S) => { s with skipNonReplayable := true }
-    let mut rootStart := 0
+    let mut rootStart : Nat := 0
     for idx in [0:buckets.size] do
       let roots : Array Name := buckets[idx]!
       unless roots.isEmpty do
@@ -693,14 +693,14 @@ partial def dumpShardManifest (env : Environment) (target : Name) (requestedStar
   let buckets := collectCanonicalRootsByModule env
   let rootsPerShard : Nat := 10
   let requestedStop := requestedStart + requestedCount
-  let mut shardIndex := 0
-  let mut rootStart := 0
+  let mut shardIndex : Nat := 0
+  let mut rootStart : Nat := 0
   for idx in [0:buckets.size] do
     let roots : Array Name := buckets[idx]!
     unless roots.isEmpty do
       let moduleName := env.header.moduleNames[idx]!
-      let mut start := 0
-      let mut part := 0
+      let mut start : Nat := 0
+      let mut part : Nat := 0
       while start < roots.size do
         let stop := min roots.size (start + rootsPerShard)
         let slice := roots.extract start stop

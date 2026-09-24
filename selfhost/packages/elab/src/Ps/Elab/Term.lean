@@ -105,6 +105,166 @@ def psElabResolvedTerm
         { context := context, term := term, type := type }
         expected
 
+def psElabProjectionApplyParameters
+    (context : PsElabContext) :
+    List PsExpr -> PsExpr -> Except PsElabError PsExpr
+  | [], cursor => Except.ok cursor
+  | parameter :: rest, cursor =>
+      match
+          psInferEnsureForall
+            context.environment
+            context.metaContext
+            context.localContext
+            cursor with
+      | Except.error error =>
+          Except.error (PsElabError.infer error)
+      | Except.ok forallView =>
+          psElabProjectionApplyParameters
+            context
+            rest
+            (psExprInstantiate1 forallView.body parameter)
+
+def psElabFindStructureField
+    (context : PsElabContext)
+    (typeName : PsName)
+    (target : PsExpr)
+    (fieldName : String) :
+    Nat -> Nat -> PsExpr -> Except PsElabError Nat
+  | _, 0, _ => Except.error PsElabError.unsupportedTerm
+  | index, remaining + 1, cursor =>
+      match
+          psInferEnsureForall
+            context.environment
+            context.metaContext
+            context.localContext
+            cursor with
+      | Except.error error =>
+          Except.error (PsElabError.infer error)
+      | Except.ok forallView =>
+          if psNameLastComponent forallView.name == fieldName then
+            Except.ok index
+          else
+            psElabFindStructureField
+              context
+              typeName
+              target
+              fieldName
+              (index + 1)
+              remaining
+              (psExprInstantiate1
+                forallView.body
+                (PsExpr.proj typeName index target))
+
+def psElabProjectionStep
+    (context : PsElabContext)
+    (current : PsElabTermResult)
+    (fieldName : String) :
+    Except PsElabError PsElabTermResult :=
+  let reducedType :=
+    psWhnf
+      context.environment
+      current.context.metaContext
+      current.context.localContext
+      current.type
+  let view := psInferAppView reducedType
+  match view.head with
+  | .constE typeName _ =>
+      match psEnvironmentFindInductive current.context.environment typeName with
+      | none => Except.error PsElabError.unsupportedTerm
+      | some info =>
+          if
+              !info.isStructure
+                || info.numIndices != 0
+                || view.args.length != info.numParams then
+            Except.error PsElabError.unsupportedTerm
+          else
+            match info.constructors with
+            | [constructorName] =>
+                match
+                    psEnvironmentFindConstructor
+                      current.context.environment
+                      constructorName with
+                | none => Except.error PsElabError.unsupportedTerm
+                | some constructorInfo =>
+                    match
+                        psElabProjectionApplyParameters
+                          current.context
+                          view.args
+                          constructorInfo.type with
+                    | Except.error error => Except.error error
+                    | Except.ok fieldCursor =>
+                        match
+                            psElabFindStructureField
+                              current.context
+                              typeName
+                              current.term
+                              fieldName
+                              0
+                              constructorInfo.numFields
+                              fieldCursor with
+                        | Except.error error => Except.error error
+                        | Except.ok index =>
+                            psElabResolvedTerm
+                              current.context
+                              (PsExpr.proj
+                                typeName
+                                index
+                                current.term)
+                              none
+            | _ => Except.error PsElabError.unsupportedTerm
+  | _ => Except.error PsElabError.unsupportedTerm
+
+def psElabProjectionChain
+    (context : PsElabContext) :
+    PsElabTermResult ->
+    List String ->
+    Except PsElabError PsElabTermResult
+  | current, [] => Except.ok current
+  | current, field :: rest =>
+      match psElabProjectionStep context current field with
+      | Except.error error => Except.error error
+      | Except.ok projected =>
+          psElabProjectionChain
+            projected.context
+            projected
+            rest
+
+def psElabProjectionReference
+    (context : PsElabContext)
+    (sourceName : PsSyntaxName)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match sourceName.segments with
+  | base :: field :: rest =>
+      let baseName :=
+        psNameAppendStr PsName.anonymous base
+      match
+          psResolveName
+            context.localContext
+            context.environment
+            baseName with
+      | none => Except.error (PsElabError.unknownName baseName)
+      | some resolved =>
+          let baseTerm :=
+            match resolved with
+            | .local id => PsExpr.fvar id
+            | .global name => PsExpr.constE name []
+          match psElabResolvedTerm context baseTerm none with
+          | Except.error error => Except.error error
+          | Except.ok baseResult =>
+              match
+                  psElabProjectionChain
+                    context
+                    baseResult
+                    (field :: rest) with
+              | Except.error error => Except.error error
+              | Except.ok projected =>
+                  psElabFinalizeExpected projected expected
+  | _ =>
+      match psSyntaxNameToName sourceName with
+      | none => Except.error PsElabError.emptyName
+      | some name => Except.error (PsElabError.unknownName name)
+
 def psElabReference
     (context : PsElabContext)
     (sourceName : PsSyntaxName)
@@ -126,7 +286,8 @@ def psElabReference
       | none => Except.error PsElabError.emptyName
       | some name =>
           match psResolveName context.localContext context.environment name with
-          | none => Except.error (PsElabError.unknownName name)
+          | none =>
+              psElabProjectionReference context sourceName expected
           | some resolved =>
               match resolved with
               | .local id =>

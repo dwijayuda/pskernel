@@ -1,0 +1,35 @@
+name: Diagnostic cached Name keys
+# trigger: name-key-cache-v1
+
+on:
+  push:
+    branches: [diagnostic/name-key-cache]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:kernel
+      - run: node scripts/anti-drift.mjs
+      - name: Benchmark first 120 Int.DivMod roots with cached Name keys
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "45000"
+          PSKERNEL_WORKER_HEAP_MIB: "3072"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22197 120 10 1

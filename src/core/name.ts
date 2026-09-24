@@ -85,11 +85,19 @@ export function nameEq(a: Name, b: Name): boolean {
   }
 }
 
+const nameKeyCache=new WeakMap<object,string>();
+
 export function nameKey(n: Name): string {
+  const cached=nameKeyCache.get(n as object);
+  if(cached!==undefined)return cached;
   const parts:string[]=['a'];
   for(const c of components(n))
     parts.push(c.k===0?`/s:${(c.v as string).length}:${c.v as string}`:`/n:${c.v as bigint}`);
-  return parts.join('');
+  const key=parts.join('');
+  // Lean Names are immutable. Cache only constructor/frozen roots here so
+  // ad-hoc mutable JS objects cannot create stale environment/hash keys.
+  if(Object.isFrozen(n))nameKeyCache.set(n as object,key);
+  return key;
 }
 
 function leanStringCmp(a:string,b:string):-1|0|1{

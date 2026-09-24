@@ -5,10 +5,11 @@ inductive PsOrdering where {
 };
 
 function compareNat(a : Nat, b : Nat) : PsOrdering :=
-  if a < b then
+  if (a < b) {
     PsOrdering.less
-  else
-    if a == b then PsOrdering.equal else PsOrdering.greater;
+  } else {
+    if (a == b) { PsOrdering.equal } else { PsOrdering.greater }
+  };
 
 function orderingIsLess(value : PsOrdering) : Bool :=
   match value with {

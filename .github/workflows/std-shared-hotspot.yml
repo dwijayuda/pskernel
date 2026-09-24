@@ -79,4 +79,6 @@ jobs:
           PSKERNEL_STD_STACK_KIB: "65500"
           PSKERNEL_LOG_EVERY_SHARD: "1"
           PSKERNEL_NATIVE_TIMEOUT_MS: "60000"
+          PSKERNEL_LOG_DECLARATIONS: "1"
+          PSKERNEL_LOG_DECLARATIONS_MIN_ENV: "34000"
         run: node scripts/full-std-oracle.mjs

@@ -1,0 +1,22 @@
+name: Diagnostic PR13 validation
+
+on:
+  push:
+    branches: [diagnostic/pr13-validation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:kernel
+      - run: node scripts/anti-drift.mjs
+      - run: npm run check:oracle-syntax

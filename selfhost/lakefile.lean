@@ -78,7 +78,8 @@ lean_lib PsBackendTs where
   roots := #[
     `Ps.BackendTs.Type,
     `Ps.BackendTs.Expr,
-    `Ps.BackendTs.Module
+    `Ps.BackendTs.Module,
+    `Ps.BackendTs.Compiler
   ]
 
 lean_lib PsProject where

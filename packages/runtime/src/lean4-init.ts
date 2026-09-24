@@ -74,6 +74,12 @@ export class Lean434InitializerRunner {
     );
   }
 
+  runSelected(
+    entries:readonly Lean434MetadataInitializer[],
+  ):Lean434InitializerReport{
+    return this.runEntries(entries);
+  }
+
   private runEntries(
     entries:readonly Lean434MetadataInitializer[],
   ):Lean434InitializerReport{

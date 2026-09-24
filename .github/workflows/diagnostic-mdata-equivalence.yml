@@ -28,16 +28,16 @@ jobs:
           lean_dir="$(dirname "$lean_bin")"
           echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
           echo "$lean_dir" >> "$GITHUB_PATH"
-      - name: Materialize baseline exporter
+      - name: Verify frozen baseline blob
         shell: bash
         run: |
           set -euo pipefail
-          git show b1026742d2d76306323abab3d7534403a37e25d2:oracle/replay-probe/DependencyExport.lean > /tmp/DependencyExportBaseline.lean
+          test "$(git hash-object oracle/replay-probe/DependencyExportBaseline.lean)" = "5cf4c55a1959e18300989032243b0db615f7107f"
       - name: Compare representative export bytes
         shell: bash
         run: |
           set -euo pipefail
-          "$LEAN434_BIN/lean" --run /tmp/DependencyExportBaseline.lean Std --root-range 22557 32 > /tmp/baseline.ndjson
+          "$LEAN434_BIN/lean" --run oracle/replay-probe/DependencyExportBaseline.lean Std --root-range 22557 32 > /tmp/baseline.ndjson
           "$LEAN434_BIN/lean" --run oracle/replay-probe/DependencyExport.lean Std --root-range 22557 32 > /tmp/bucketed.ndjson
           cmp /tmp/baseline.ndjson /tmp/bucketed.ndjson
           wc -c /tmp/baseline.ndjson

@@ -53,6 +53,25 @@ test('kernel admission freezes caller-owned declarations and expression DAGs',()
  const stored=env.get(D);assert(stored.kind==='definition'&&exprEq(stored.value,natLit(0)),'environment must retain the checked value after hostile mutation attempts');
 });
 
+test('kernel freezes declarations before native-evaluator callbacks can mutate them',()=>{
+ const env=baseEnv(),Reduce=N.LeanReduceNat,C=nameFromDotted('Immutable.Native.C'),F=nameFromDotted('Immutable.Native.F'),X=nameFromDotted('Immutable.Native.X'),D=nameFromDotted('Immutable.Native.D');
+ env.add({kind:'axiom',name:Reduce,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'axiom',name:C,levelParams:[],type:constant(N.Nat)});
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),sort(levelZero))});
+ const reduced=app(constant(Reduce),constant(C));
+ env.add({kind:'axiom',name:X,levelParams:[],type:app(constant(F),reduced)});
+ const info:any={kind:'definition',name:D,levelParams:[],type:app(constant(F),natLit(0)),value:constant(X),hints:{kind:'regular',height:1n},safety:'safe'};
+ let mutationResult:boolean|undefined;
+ const native:NativeEvaluator={evaluate(_env,request){
+   if(request.kind!=='nat'||!nameEq(request.constant,C))return null;
+   mutationResult=Reflect.set(info,'value',strLit('hostile mutation'));
+   return {kind:'nat',value:0n};
+ }};
+ new Kernel(env,native).addDefinition(info);
+ assert(mutationResult===false,'declaration must already be frozen when native evaluation runs');
+ const stored=env.get(D);assert(stored.kind==='definition'&&stored.value.kind==='const'&&nameEq(stored.value.name,X),'native callback must not alter the admitted body');
+});
+
 test('raw Environment storage deep-freezes nested kernel values',()=>{
  const env=new Environment(),A=nameFromDotted('Immutable.axiom'),type:any=sort(levelZero),info:any={kind:'axiom',name:A,levelParams:[],type};
  env.add(info);

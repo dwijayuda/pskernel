@@ -62,6 +62,7 @@ console.log('ok - @proofscript/compiler-ir verified Nat intrinsic');
 
 {
   equal(VERIFIED_IR_INTRINSIC_ARITY['bool.not'],1);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['char.ofNat'],1);
   equal(VERIFIED_IR_INTRINSIC_ARITY['nat.sub'],2);
   let invalid=false;
   try{

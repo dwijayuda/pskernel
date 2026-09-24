@@ -39,9 +39,12 @@ jobs:
         run: |
           set -euo pipefail
           npm run generate:lean434-runtime-metadata -- Init.Prelude --out lean434-init-runtime-metadata.json
+          npm run generate:lean434-runtime-metadata -- Lean.Parser.Types --out lean434-parser-types-runtime-metadata.json
           npm run generate:lean434-runtime-metadata -- Lean.Parser --out lean434-parser-runtime-metadata.json
-      - name: Report direct Lean.Parser runtime metadata
-        run: node scripts/lean434-runtime-metadata-report.mjs lean434-parser-runtime-metadata.json
+      - name: Report Lean.Parser runtime metadata
+        run: |
+          node scripts/lean434-runtime-metadata-report.mjs lean434-parser-types-runtime-metadata.json
+          node scripts/lean434-runtime-metadata-report.mjs lean434-parser-runtime-metadata.json
       - name: Generate real Lean ST/IO bootstrap corpus
         shell: bash
         run: |
@@ -62,6 +65,7 @@ jobs:
             } from './packages/runtime/dist/src/lean4-metadata.js';
             for (const file of [
               'lean434-init-runtime-metadata.json',
+              'lean434-parser-types-runtime-metadata.json',
               'lean434-parser-runtime-metadata.json',
             ]) {
               const doc=parseLean434RuntimeMetadata(

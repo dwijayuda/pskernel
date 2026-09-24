@@ -36,6 +36,7 @@ import {
   LeanRefEmptyError,
   findLean434JsExtern,
   findLean434JsImplementedBy,
+  findLean434JsIntrinsic,
   invokeLean434JsImplementedBy,
   lean_array_fget,
   lean_array_mk,
@@ -211,6 +212,25 @@ ok(
   LEAN434_JS_EXTERN_MANIFEST.every((entry)=>entry.leanSymbol.length>0&&entry.jsExport.length>0),
   'extern manifest contains an empty symbol',
 );
+
+const unsafeCastBinding=findLean434JsIntrinsic('unsafeCast');
+ok(unsafeCastBinding!==undefined,'missing unsafeCast intrinsic binding');
+equal(unsafeCastBinding!.arity,3);
+deepEqual(
+  unsafeCastBinding!.runtimeArgs,
+  [2],
+  'unsafeCast intrinsic must erase source/target type arguments',
+);
+{
+  const evaluator=new Lean434Evaluator(new Environment());
+  let cast=evaluator.evaluate(constant(nameFromDotted('unsafeCast')));
+  cast=evaluator.applyRuntimeValue(cast,evaluator.evaluate(sort(levelZero)));
+  cast=evaluator.applyRuntimeValue(cast,evaluator.evaluate(sort(levelZero)));
+  equal(
+    evaluator.applyRuntimeValue(cast,natLit(37n) as unknown as never),
+    natLit(37n) as unknown as never,
+  );
+}
 
 const rawBinding=findLean434JsImplementedBy('TSyntaxArray.raw');
 ok(rawBinding!==undefined,'missing TSyntaxArray.raw implemented_by binding');

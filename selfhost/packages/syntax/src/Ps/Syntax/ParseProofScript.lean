@@ -136,7 +136,7 @@ def psParseProofScriptBinder
           match psTokenCursorExpectText name.cursor ":" with
           | Except.error error => Except.error error
           | Except.ok afterColon =>
-              match psParseProofScriptTerm afterColon.cursor with
+              match psParseProofScriptSimpleApplication afterColon.cursor with
               | Except.error error => Except.error error
               | Except.ok type =>
                   match psParseBinderClosing opening type.cursor with
@@ -351,7 +351,7 @@ def psParseProofScriptDeclaration
                     match psTokenCursorExpectText binders.cursor ":" with
                     | Except.error error => Except.error error
                     | Except.ok afterColon =>
-                        match psParseProofScriptSimpleApplication afterColon.cursor with
+                        match psParseProofScriptTerm afterColon.cursor with
                         | Except.error error => Except.error error
                         | Except.ok type =>
                             match psTokenCursorExpectText type.cursor ":=" with

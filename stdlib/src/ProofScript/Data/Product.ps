@@ -1,0 +1,27 @@
+function product {α : Type}{β : Type}
+(first : α, second : β) : Prod(α, β) :=
+  Prod.mk(first, second);
+
+function productFst {α : Type}{β : Type}
+(value : Prod(α, β)) : α :=
+  Prod.fst(value);
+
+function productSnd {α : Type}{β : Type}
+(value : Prod(α, β)) : β :=
+  Prod.snd(value);
+
+function productSwap {α : Type}{β : Type}
+(value : Prod(α, β)) : Prod(β, α) :=
+  Prod.mk(Prod.snd(value), Prod.fst(value));
+
+theorem productFstMk {α : Type}{β : Type}
+(first : α, second : β) :
+productFst(product(first, second)) = first := by rfl;
+
+theorem productSndMk {α : Type}{β : Type}
+(first : α, second : β) :
+productSnd(product(first, second)) = second := by rfl;
+
+theorem productSwapMk {α : Type}{β : Type}
+(first : α, second : β) :
+productSwap(product(first, second)) = product(second, first) := by rfl;

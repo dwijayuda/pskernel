@@ -192,6 +192,29 @@ def psTestUnitEnvironment : PsEnvironment :=
       []
       unitType)
 
+def psTestCharEnvironment : PsEnvironment :=
+  let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let natType := PsExpr.constE psNatName []
+  let charType := PsExpr.constE psCharName []
+  let nName := psTestName "n"
+  let env1 :=
+    psTestAddDeclaration
+      psTestNatEnvironment
+      (PsDeclaration.axiomDecl
+        psCharName
+        []
+        typeType)
+  psTestAddDeclaration
+    env1
+    (PsDeclaration.axiomDecl
+      psCharOfNatName
+      []
+      (PsExpr.forallE
+        nName
+        natType
+        charType
+        PsBinderInfo.explicit))
+
 def psNameListEq : List PsName -> List PsName -> Bool
   | [], [] => true
   | left :: leftRest, right :: rightRest =>
@@ -1229,6 +1252,46 @@ def psTestLeanParenthesizedApplication : Bool :=
                 && psExprAlphaEq actualValue oneValue
           | _ => false
 
+def psTestCharLiteralDeclarationShape
+    (result : PsElabModuleResult) : Bool :=
+  let charType := PsExpr.constE psCharName []
+  let expectedValue :=
+    PsExpr.app
+      (PsExpr.constE psCharOfNatName [])
+      (PsExpr.lit (PsLiteral.natural 955))
+  match result.declarations with
+  | [PsDeclaration.definitionDecl actualName [] actualType actualValue] =>
+      psNameEq actualName (psTestName "letter")
+        && psExprAlphaEq actualType charType
+        && psExprAlphaEq actualValue expectedValue
+  | _ => false
+
+def psTestDualSourceCharLiteral : Bool :=
+  match
+      psParseLeanSource
+        "def letter : Char := '\\u03bb'",
+      psParseProofScriptSource
+        "def letter : Char := '\\u03bb';" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestCharEnvironment leanModule,
+          psElabModule psTestCharEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestCharLiteralDeclarationShape leanResult
+            && psTestCharLiteralDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
+def psTestRejectInvalidCharacterEscapes : Bool :=
+  match
+      psDecodeCharacterLiteral "'\\uD800'",
+      psDecodeCharacterLiteral "'\\q'" with
+  | none, none => true
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1252,6 +1315,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },
   { name := "dual-source Unit", passed := psTestDualSourceUnit },
   { name := "Lean parenthesized application", passed := psTestLeanParenthesizedApplication },
+  { name := "dual-source Char literal", passed := psTestDualSourceCharLiteral },
+  { name := "reject invalid Char escapes", passed := psTestRejectInvalidCharacterEscapes },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

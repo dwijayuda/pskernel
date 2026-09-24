@@ -145,10 +145,54 @@ export function lowerRuntimeExpr(
           };
         }
 
+        case 'uint8.add':
+        case 'uint16.add':
+        case 'uint32.add':{
+          const type=expr.operation==='uint8.add'
+            ?'uint8'
+            :expr.operation==='uint16.add'
+              ?'uint16'
+              :'uint32';
+          const added:WasmIrExpr={
+            kind:'i32.binary',
+            operation:'add',
+            left:lowerRuntimeExpr(expr.args[0]!,type,locals,signatures),
+            right:lowerRuntimeExpr(expr.args[1]!,type,locals,signatures),
+          };
+          if(type==='uint32')return added;
+          return {
+            kind:'i32.binary',
+            operation:'and',
+            left:added,
+            right:{
+              kind:'i32.const',
+              value:type==='uint8'?0xff:0xffff,
+            },
+          };
+        }
+
+        case 'uint64.add':
+          return {
+            kind:'i64.binary',
+            operation:'add',
+            left:lowerRuntimeExpr(
+              expr.args[0]!,
+              'uint64',
+              locals,
+              signatures,
+            ),
+            right:lowerRuntimeExpr(
+              expr.args[1]!,
+              'uint64',
+              locals,
+              signatures,
+            ),
+          };
+
         default:
           return unsupported(
             'PS_WASM_UNSUPPORTED_INTRINSIC',
-            "intrinsic '"+expr.operation+"' is not supported in W1",
+            "intrinsic '"+expr.operation+"' is not supported in W2",
           );
       }
 

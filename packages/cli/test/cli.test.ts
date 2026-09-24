@@ -490,6 +490,25 @@ console.log('ok - psc checked Char.ofNat source pipeline');
 
 
 {
+  const result=compileVerifiedSource(
+    "function literal(n : Nat) : Char := '🙂';",
+    'char-literal.ts',
+  );
+  const declaration=result.ir.declarations[0]!;
+  equal(declaration.resultType.kind,'primitive');
+  if(declaration.resultType.kind==='primitive'){
+    equal(declaration.resultType.name,'Char');
+  }
+  equal(declaration.body.kind,'intrinsic');
+  if(declaration.body.kind==='intrinsic'){
+    equal(declaration.body.operation,'char.ofNat');
+  }
+  equal(result.typeScript.includes('128578n'),true);
+}
+console.log('ok - psc checked character literal source pipeline');
+
+
+{
   equal(parseVerifiedRuntimeArg('42',{kind:'primitive',name:'Nat'}),42n);
   equal(parseVerifiedRuntimeArg('-42',{kind:'primitive',name:'Int'}),-42n);
   equal(parseVerifiedRuntimeArg('true',{kind:'primitive',name:'Bool'}),true);
@@ -569,6 +588,18 @@ console.log('ok - psc verified runtime ABI');
       passthrough:['55296'],
     });
     equal(invalid.mainResult,'\0');
+    await writeFile(
+      join(directory,'src','main.ps'),
+      "function main(n : Nat) : Char := '\\n';\n",
+      'utf8',
+    );
+    const literal=await runCommand({
+      project:directory,
+      json:true,
+      verified:false,
+      passthrough:['0'],
+    });
+    equal(literal.mainResult,'\n');
   }finally{
     await rm(directory,{recursive:true,force:true});
   }

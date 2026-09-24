@@ -310,10 +310,30 @@ def psElabNatural
   match psParseNaturalText text with
   | none => Except.error (PsElabError.invalidNatural text)
   | some value =>
-      psElabResolvedTerm
-        context
-        (PsExpr.lit (PsLiteral.natural value))
-        expected
+      let natural := PsExpr.lit (PsLiteral.natural value)
+      match expected with
+      | some expectedType =>
+          let reducedExpected :=
+            psWhnf
+              context.environment
+              context.metaContext
+              context.localContext
+              expectedType
+          match reducedExpected with
+          | .constE name _ =>
+              if psNameEq name psIntName then
+                psElabResolvedTerm
+                  context
+                  (PsExpr.app
+                    (PsExpr.constE psIntOfNatName [])
+                    natural)
+                  expected
+              else
+                psElabResolvedTerm context natural expected
+          | _ =>
+              psElabResolvedTerm context natural expected
+      | none =>
+          psElabResolvedTerm context natural none
 
 def psElabString
     (context : PsElabContext)

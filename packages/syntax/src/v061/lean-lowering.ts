@@ -65,6 +65,11 @@ export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {
     case 'reference':return expr.name;
     case 'group':return '('+lowerV061ExprToLean(expr.value)+')';
     case 'call':{
+      if(expr.callee.startsWith('$psx.')){
+        throw new Error(
+          'PS_LEAN_LOWERING_JSX_UNSUPPORTED: JSX requires PSX2 typed lowering before Lean output',
+        );
+      }
       const args=expr.args.map((arg)=>{
         const rendered=lowerV061ExprToLean(arg);
         return arg.kind==='reference'||arg.kind==='nat'||arg.kind==='string'||arg.kind==='bool'||arg.kind==='unit'||arg.kind==='syntheticHole'||arg.kind==='group'

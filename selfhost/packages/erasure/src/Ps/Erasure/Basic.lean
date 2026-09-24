@@ -41,6 +41,7 @@ structure PsRuntimeConstructorField where
   sourceIndex : Nat
   name : String
   type : PsVerifiedIrType
+  recursive : Bool := false
 
 structure PsRuntimeConstructorInfo where
   inductiveName : String
@@ -57,6 +58,10 @@ structure PsRuntimeInductiveInfo where
   typeParameters : List PsVerifiedIrTypeParameter
   constructors : List PsRuntimeConstructorInfo
 
+structure PsErasureCurrentDefinition where
+  name : String
+  runtimeParameters : List String
+
 structure PsErasureScope where
   localContext : PsLocalContext
   runtimeLocals : List (Nat × String)
@@ -67,6 +72,8 @@ structure PsErasureScope where
   runtimeRecursors : List (PsName × PsRuntimeInductiveInfo)
   runtimeStructures : List (PsName × PsRuntimeStructureInfo) := []
   runtimeStructureConstructors : List (PsName × PsRuntimeStructureInfo) := []
+  runtimeExpressions : List (Nat × PsVerifiedIrExpr) := []
+  currentDefinition : Option PsErasureCurrentDefinition := none
 
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :
@@ -81,7 +88,16 @@ def psErasureScopeEmpty
     runtimeRecursors := []
     runtimeStructures := []
     runtimeStructureConstructors := []
+    runtimeExpressions := []
+    currentDefinition := none
   }
+
+def psErasureLookupRuntimeExpression :
+    List (Nat × PsVerifiedIrExpr) -> Nat -> Option PsVerifiedIrExpr
+  | [], _ => none
+  | entry :: rest, id =>
+      if entry.1 == id then some entry.2
+      else psErasureLookupRuntimeExpression rest id
 
 def psErasureLookupNat :
     List (Nat × String) -> Nat -> Option String

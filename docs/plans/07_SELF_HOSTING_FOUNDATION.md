@@ -215,30 +215,41 @@ Completed 2026-09-24:
   behavior;
 - a dedicated Lean 4.34 text-foundation export recipe now roots only the
   compiler-required Char/String/String.Pos.Raw operations instead of adopting
-  a broad Std environment.
+  a broad Std environment;
+- the oversized 17+ MiB public-String closure was replaced by an exact
+  `Init.Prelude` delta. Exact Lean 4.34 generation plus pskernel replay is
+  green at 5,799 replay lines, 48 declaration records and 50 constants added
+  to the 2,324-constant Prelude base;
+- the pinned delta is about 240 KiB and is composed onto `Init.Prelude` by the
+  normal verified compiler environment provider, avoiding the previous Node
+  heap failure while preserving exact kernel-facing declarations;
+- checked-core -> erasure -> verified-IR -> TypeScript support is green for
+  `Char.toNat`, `String.push`, `String.singleton`,
+  `String.Internal.length`, and `String.Internal.append`;
+- the SH1 text slice passes continuous dual-source parity: canonical
+  `.ps -> .lean -> .ps` sources converge on equal checked admissions, compiler
+  IR, TypeScript, JavaScript and declarations;
+- executable `.ps` and `.lean` regressions both evaluate the Unicode string
+  `"𝒫x"` to Lean code-point length 2.
 
 Current gate:
 
-- generate
-  `oracle/fixtures/lean434-proofscript-text-foundation.ndjson` with exact
-  Lean 4.34.0 using `scripts/generate-text-foundation-fixture.sh`;
-- replay it with `npm run oracle:text-foundation`;
-- only then add erasure/backend intrinsics for `Char.toNat`, character
-  classification, `String.length`, `String.append`, traversal, and raw
-  string positions.
+- represent executable `String.Pos.Raw` by its exact erased payload, the UTF-8
+  byte-offset `Nat`, while retaining the real Lean structure in checked core;
+- add verified runtime lowering for `String.utf8ByteSize`,
+  `String.Internal.next`, `String.Internal.get`,
+  `String.Internal.atEnd`, and `String.Internal.extract`;
+- build character-classification helpers as portable ProofScript/Lean library
+  code over `Char.toNat` where possible rather than proliferating backend
+  primitives;
+- add source-position/span utilities and a nontrivial lexer-style dual-source
+  fixture exercising ASCII plus multi-byte Unicode traversal and slicing.
 
-The raw text-foundation dependency closure is an **assurance input**, not the
-normal compiler hot-path environment. Replaying the 17+ MiB closure in every
-`psc` process exceeded the ordinary Node heap during CLI tests, so the normal
-provider continues to use the pinned `Init.Prelude` base unless an explicit
-`PROOFSCRIPT_LEAN_FOUNDATION` path is supplied.
-
-After exact replay is green, derive a compact, versioned pskernel-certified
-foundation interface/base for the selected roots and fingerprint it to the
-exact Lean 4.34 assurance closure. The compact artifact must preserve the
-kernel-facing types/metadata needed by elaboration and the SH6b bridge without
-making the raw dependency closure a startup dependency. No synthetic
-standard-library axioms are permitted to bypass the exact-replay gate.
+The original oversized dependency closure remains historical assurance evidence,
+not a compiler startup artifact. The compact pinned delta is the certified SH1
+compiler-base extension and must continue to regenerate from exact Lean 4.34
+and replay successfully over the pinned `Init.Prelude` base. No synthetic
+standard-library axioms may bypass this gate.
 
 Exit test: a nontrivial lexer utility can be authored in supported `.lean`
 and `.ps` and run through verified JavaScript emission.

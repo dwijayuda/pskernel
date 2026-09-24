@@ -366,6 +366,9 @@ def psPrepareRuntimeInductive
                     runtimeRecursors :=
                       (recursorName, runtimeInfo) ::
                         scope.runtimeRecursors
+                    runtimeStructures := scope.runtimeStructures
+                    runtimeStructureConstructors :=
+                      scope.runtimeStructureConstructors
                   }
                   let irConstructors :=
                     constructors.map
@@ -406,20 +409,28 @@ def psPrepareRuntimeInductives
   | declaration :: rest, scope, irRev =>
       match declaration with
       | .inductiveDecl info =>
-          match
-              psPrepareRuntimeInductive
-                environment
-                declarations
-                scope
-                info with
-          | Except.error error => Except.error error
-          | Except.ok prepared =>
-              psPrepareRuntimeInductives
-                environment
-                declarations
-                rest
-                prepared.scope
-                (prepared.ir :: irRev)
+          if info.isStructure then
+            psPrepareRuntimeInductives
+              environment
+              declarations
+              rest
+              scope
+              irRev
+          else
+            match
+                psPrepareRuntimeInductive
+                  environment
+                  declarations
+                  scope
+                  info with
+            | Except.error error => Except.error error
+            | Except.ok prepared =>
+                psPrepareRuntimeInductives
+                  environment
+                  declarations
+                  rest
+                  prepared.scope
+                  (prepared.ir :: irRev)
       | _ =>
           psPrepareRuntimeInductives
             environment

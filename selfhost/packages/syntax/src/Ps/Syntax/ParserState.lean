@@ -7,6 +7,10 @@ structure PsTokenRead where
   token : PsToken
   cursor : PsTokenCursor
 
+structure PsParseResult (α : Type) where
+  value : α
+  cursor : PsTokenCursor
+
 inductive PsParseError where
   | unexpectedEnd (expected : String)
   | expectedText (expected : String) (actual : String) (span : PsSourceSpan)

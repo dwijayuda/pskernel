@@ -40,5 +40,5 @@ def psEnvironmentAdd(environment : PsEnvironment, declaration : PsDeclaration) :
   if (psEnvironmentContains(environment, psDeclarationName(declaration))) {
     Option.none
   } else {
-    Option.some({ declarations := PsDeclaration.cons(declaration, environment.declarations) })
+    Option.some({ declarations := List.cons(declaration, environment.declarations) })
   };

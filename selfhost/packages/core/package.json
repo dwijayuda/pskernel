@@ -1,0 +1,16 @@
+{
+  "name": "@proofscript/core",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "role": "kernel-facing-core"
+  },
+  "dependencies": {
+    "@proofscript/foundation": "0.0.0-dev"
+  }
+}

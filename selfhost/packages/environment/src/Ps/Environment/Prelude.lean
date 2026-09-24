@@ -235,6 +235,26 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
           PsBinderInfo.instanceImplicit)
         PsBinderInfo.explicit)
       PsBinderInfo.implicit
+  let natBinaryType :=
+    PsExpr.forallE
+      aName
+      natType
+      (PsExpr.forallE
+        bName
+        natType
+        natType
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let natBeqType :=
+    PsExpr.forallE
+      aName
+      natType
+      (PsExpr.forallE
+        bName
+        natType
+        boolType
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
   let intOfNatType :=
     PsExpr.forallE
       nName
@@ -267,8 +287,26 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let env1 :=
     psPreludeAdd env0
       (PsDeclaration.axiomDecl psNatName [] typeType)
-  let env2 :=
+  let envNat1 :=
     psPreludeAdd env1
+      (PsDeclaration.axiomDecl psNatAddName [] natBinaryType)
+  let envNat2 :=
+    psPreludeAdd envNat1
+      (PsDeclaration.axiomDecl psNatSubName [] natBinaryType)
+  let envNat3 :=
+    psPreludeAdd envNat2
+      (PsDeclaration.axiomDecl psNatMulName [] natBinaryType)
+  let envNat4 :=
+    psPreludeAdd envNat3
+      (PsDeclaration.axiomDecl psNatDivName [] natBinaryType)
+  let envNat5 :=
+    psPreludeAdd envNat4
+      (PsDeclaration.axiomDecl psNatModName [] natBinaryType)
+  let envNat6 :=
+    psPreludeAdd envNat5
+      (PsDeclaration.axiomDecl psNatBeqName [] natBeqType)
+  let env2 :=
+    psPreludeAdd envNat6
       (PsDeclaration.axiomDecl psIntName [] typeType)
   let env3 :=
     psPreludeAdd env2

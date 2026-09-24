@@ -85,8 +85,7 @@ def psCliUsage : String :=
   "usage:\n" ++
   "  psc1 translate <input.lean|input.ps> --to <lean|ps>"
 
-def main : IO Unit := do
-  let args ← IO.getArgs
+def main (args : List String) : IO Unit := do
   match args with
   | [] =>
       IO.println "ProofScript PSC1 Lean bootstrap"

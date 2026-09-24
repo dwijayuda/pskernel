@@ -269,7 +269,7 @@ Landed checkpoints:
 - `psc translate <file> --to ps|lean` performs source frontend -> canonical
   AST -> target printer conversion without implying proof/check authority;
 - `emit-lean` remains a compatible convenience workflow;
-- verified and legacy source parsing compute a SHA-256
+- both registered source frontends compute a SHA-256
   `canonicalSourceHash` from canonical ProofScript printing of the shared
   surface AST after normalizing ProofScript-only `const`/`function` aliases
   to the common `def` representation;
@@ -344,8 +344,8 @@ Landed DS5.1/DS5.2:
   dependency direction;
 - project reports expose module order/count and per-module source kind/path/
   canonical hash;
-- imports are verified-only in this checkpoint; the transitional legacy lane
-  fails closed instead of silently ignoring dependency semantics.
+- imports are handled only by the checked-core project pipeline; no alternate
+  semantic lane exists to ignore dependency semantics.
 - dependency closure replay now also seeds imported structure/class/global-
   instance elaborator metadata from the already pskernel-validated checked
   module. Cross-module record construction/projection and instance synthesis

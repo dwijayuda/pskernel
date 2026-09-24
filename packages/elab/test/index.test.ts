@@ -25,6 +25,15 @@ import {
   natLit,
   sort,
 } from 'lean-ts-kernel';
+function firstValueDeclarationBody(
+  module:ReturnType<typeof parseV061Module>,
+) {
+  const declaration=module.declarations[0];
+  return declaration!==undefined&&'body' in declaration
+    ?declaration.body
+    :undefined;
+}
+
 function equal(a:unknown,b:unknown):void{if(a!==b)throw new Error(`expected ${String(b)}, got ${String(a)}`);}
 {
   const term=elaborateChecked({elaborate:(surface:string)=>({term:surface.toUpperCase(),diagnostics:[]})},'x');
@@ -643,7 +652,7 @@ console.log('ok - @proofscript/elab induction preserves field/IH source names');
     'theorem parsedRw(a : Nat, b : Nat, h : a = b) : a = b := '+
     'by rw [h]; rw [← h]; assumption;',
   );
-  const body=source.declarations[0]?.body;
+  const body=firstValueDeclarationBody(source);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics[0]?.kind,'rw');
@@ -658,7 +667,7 @@ console.log('ok - @proofscript/elab rw syntax reaches tactic AST');
     'h1 : BoxT(A) = B, h2 : WrapT(C) = D) : P := '+
     'by simp only [h1, ← h2];',
   );
-  const body=source.declarations[0]?.body;
+  const body=firstValueDeclarationBody(source);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics[0]?.kind,'simp');

@@ -2,6 +2,7 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   LocalContext,
   TypeChecker,
+  constant,
   exprToString,
   fvar,
   hasMVar,

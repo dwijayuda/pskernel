@@ -33,7 +33,7 @@ export function elaborateV061Condition(
   expr:V061Expr,
   context:V061CoreElabContext,
   elaborate:V061TermElaborator,
-):ElaboratedNatCondition {
+):ElaboratedCoreTerm&{readonly decider:import('lean-ts-kernel').Expr} {
   if(expr.kind==='binary'&&isV061NatRelation(expr.operator)){
     return elaborateV061NatCondition(expr,context,elaborate);
   }

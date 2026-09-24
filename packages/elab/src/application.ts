@@ -52,8 +52,8 @@ export interface ElaborateApplicationOptions {
   readonly expectedType?:Expr;
   readonly localContext?:LocalContext;
   readonly localInstances?:readonly Expr[];
-  readonly globalInstances?:readonly Expr[];
-  readonly classNames?:ReadonlySet<string>;
+  readonly globalInstances?:readonly Expr[]|undefined;
+  readonly classNames?:ReadonlySet<string>|undefined;
 }
 
 function implicitKind(info:BinderInfo):ExprMetavarKind {

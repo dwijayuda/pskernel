@@ -5,11 +5,13 @@ import Ps.Core.Equality
 import Ps.Core.Expr
 import Ps.Environment.Basic
 import Ps.Environment.LocalContext
+import Ps.Environment.Instances
 import Ps.Meta.Context
 import Ps.Meta.Infer
 import Ps.Meta.LevelContext
 import Ps.Meta.Reduce
 import Ps.Meta.Unify
+import Ps.Meta.SynthInstance
 import Ps.Project.ModuleGraph
 
 def psTestNatEnvironment : PsEnvironment :=
@@ -177,8 +179,129 @@ def psTestBinderInfoIgnoredByUnify : Bool :=
       right
   result.success
 
+
+def psTestClassC : PsName :=
+  psTestName "C"
+
+def psTestClassD : PsName :=
+  psTestName "D"
+
+def psTestClassApp (className : PsName) (argument : PsExpr) : PsExpr :=
+  PsExpr.app (PsExpr.constE className []) argument
+
+def psTestGlobalInstanceSynthesis : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let target := psTestClassApp psTestClassC natType
+  let instanceValue := PsExpr.constE (psTestName "instCNat") []
+  let index :=
+    psInstanceIndexAdd
+      psInstanceIndexEmpty
+      { value := instanceValue, type := target }
+  let result :=
+    psSynthInstance
+      psEnvironmentEmpty
+      psLocalEmpty
+      index
+      psMetaEmpty
+      target
+  match result.value with
+  | some value => psExprAlphaEq value instanceValue
+  | none => false
+
+def psTestGenericInstanceSynthesis : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let alphaName := psTestName "alpha"
+  let target := psTestClassApp psTestClassC natType
+  let instanceHead := PsExpr.constE (psTestName "instC") []
+  let instanceType :=
+    PsExpr.forallE
+      alphaName
+      (PsExpr.sortE (PsLevel.succ PsLevel.zero))
+      (psTestClassApp psTestClassC (PsExpr.bvar 0))
+      PsBinderInfo.implicit
+  let index :=
+    psInstanceIndexAdd
+      psInstanceIndexEmpty
+      { value := instanceHead, type := instanceType }
+  let result :=
+    psSynthInstance
+      psEnvironmentEmpty
+      psLocalEmpty
+      index
+      psMetaEmpty
+      target
+  let expected := PsExpr.app instanceHead natType
+  match result.value with
+  | some value => psExprAlphaEq value expected
+  | none => false
+
+def psTestDependentInstanceSynthesis : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let alphaName := psTestName "alpha"
+  let instanceName := psTestName "instD"
+  let dNatValue := PsExpr.constE (psTestName "dNat") []
+  let cFromDHead := PsExpr.constE (psTestName "cFromD") []
+  let dNatType := psTestClassApp psTestClassD natType
+  let cNatType := psTestClassApp psTestClassC natType
+  let genericType :=
+    PsExpr.forallE
+      alphaName
+      (PsExpr.sortE (PsLevel.succ PsLevel.zero))
+      (PsExpr.forallE
+        instanceName
+        (psTestClassApp psTestClassD (PsExpr.bvar 0))
+        (psTestClassApp psTestClassC (PsExpr.bvar 1))
+        PsBinderInfo.instanceImplicit)
+      PsBinderInfo.implicit
+  let index0 :=
+    psInstanceIndexAdd
+      psInstanceIndexEmpty
+      { value := dNatValue, type := dNatType }
+  let index :=
+    psInstanceIndexAdd
+      index0
+      { value := cFromDHead, type := genericType }
+  let result :=
+    psSynthInstance
+      psEnvironmentEmpty
+      psLocalEmpty
+      index
+      psMetaEmpty
+      cNatType
+  let expected :=
+    PsExpr.app
+      (PsExpr.app cFromDHead natType)
+      dNatValue
+  match result.value with
+  | some value => psExprAlphaEq value expected
+  | none => false
+
+def psTestLocalInstanceSynthesis : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let target := psTestClassApp psTestClassC natType
+  let pushed :=
+    psLocalPushBinding
+      psLocalEmpty
+      (psTestName "localC")
+      target
+      PsBinderInfo.instanceImplicit
+  let result :=
+    psSynthInstance
+      psEnvironmentEmpty
+      pushed.context
+      psInstanceIndexEmpty
+      psMetaEmpty
+      target
+  match result.value with
+  | some value => psExprAlphaEq value (PsExpr.fvar pushed.id)
+  | none => false
+
 def psBootstrapTests : Bool :=
   psTestModuleGraph
+    && psTestGlobalInstanceSynthesis
+    && psTestGenericInstanceSynthesis
+    && psTestDependentInstanceSynthesis
+    && psTestLocalInstanceSynthesis
     && psTestTransactionalUnify
     && psTestBinderInfoIgnoredByUnify
     && psTestLevelMetaUnify

@@ -470,3 +470,67 @@ export function invokeLean434JsExtern(
   }
   return implementation(...args);
 }
+
+
+export type Lean434ImplementedByAdapter='identity';
+
+export interface Lean434ImplementedByBinding {
+  readonly leanDeclaration:string;
+  readonly implementation:string;
+  readonly arity:number;
+  readonly adapter:Lean434ImplementedByAdapter;
+  readonly upstreamSource:string;
+}
+
+/**
+ * Selected high-level @[implemented_by] bindings whose runtime representation
+ * is understood by the JS bootstrap evaluator.
+ *
+ * These bindings affect execution only. The logical declaration admitted by
+ * pskernel is unchanged.
+ */
+export const LEAN434_JS_IMPLEMENTED_BY_BINDINGS:
+readonly Lean434ImplementedByBinding[]=[
+  {
+    leanDeclaration:'TSyntaxArray.raw',
+    implementation:'TSyntaxArray.rawImpl',
+    arity:1,
+    adapter:'identity',
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'TSyntaxArray.mk',
+    implementation:'TSyntaxArray.mkImpl',
+    arity:1,
+    adapter:'identity',
+    upstreamSource:'Init/Prelude.lean',
+  },
+] as const;
+
+const implementedByByDeclaration=new Map(
+  LEAN434_JS_IMPLEMENTED_BY_BINDINGS.map(
+    (entry)=>[entry.leanDeclaration,entry] as const,
+  ),
+);
+
+export function findLean434JsImplementedBy(
+  leanDeclaration:string,
+):Lean434ImplementedByBinding|undefined{
+  return implementedByByDeclaration.get(leanDeclaration);
+}
+
+export function invokeLean434JsImplementedBy(
+  binding:Lean434ImplementedByBinding,
+  args:readonly unknown[],
+):unknown{
+  if(args.length!==binding.arity){
+    throw new Error(
+      "Lean 4.34 implemented_by arity mismatch for '"+
+      binding.leanDeclaration+"'",
+    );
+  }
+  switch(binding.adapter){
+    case 'identity':
+      return args[0];
+  }
+}

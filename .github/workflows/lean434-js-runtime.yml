@@ -1,0 +1,44 @@
+name: Lean 4.34 JavaScript runtime experiment
+
+on:
+  push:
+    branches: [runtime/lean434-js-runtime]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-compat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - name: Test Lean 4.34 JavaScript runtime compatibility slice
+        run: npm --workspace @proofscript/runtime test
+      - name: Generate deterministic Lean 4.34 source/runtime census
+        run: |
+          npm run research:lean434-js-runtime > lean434-js-runtime-census.json
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const r=JSON.parse(fs.readFileSync('lean434-js-runtime-census.json','utf8'));
+            console.log(JSON.stringify({
+              format:r.format,
+              leanVersion:r.leanVersion,
+              files:r.totals.files,
+              bytes:r.totals.bytes,
+              externSymbols:r.totals.externSymbols.length,
+              features:r.totals.features,
+              targets:r.targets.map(t=>({
+                name:t.name,
+                files:t.files,
+                bytes:t.bytes,
+                externSymbols:t.externSymbols.length,
+              })),
+            },null,2));
+          "
+      - name: Check ProofScript architecture invariants
+        run: npm run check:architecture

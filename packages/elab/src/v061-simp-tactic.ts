@@ -6,6 +6,7 @@ import {
   rewriteExprSize,
 } from './v061-rewrite-occurrence.js';
 import {
+  elaborateV061RewriteProof,
   equalityView,
   rewriteV061Equality,
 } from './v061-rewrite-tactic.js';
@@ -35,7 +36,11 @@ function elaborateRules(
     entry.context.localContext.clone(),
   );
   const result=rules.map((source)=>{
-    const equality=elaborate(source.proof,entry.context);
+    const equality=elaborateV061RewriteProof(
+      source.proof,
+      entry.context,
+      elaborate,
+    );
     const rule=equalityView(
       checker,
       entry.context.metaContext.instantiate(equality.type),

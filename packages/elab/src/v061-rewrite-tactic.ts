@@ -9,12 +9,18 @@ import {
   constant,
   instantiate1,
   lam,
+  levelZero,
   mkAppN,
   nameEq,
   nameFromDotted,
+  hasMVar,
+  sort,
   type Expr,
 } from 'lean-ts-kernel';
-import type {ElaboratedCoreTerm} from './v061-context.js';
+import type {
+  ElaboratedCoreTerm,
+  V061CoreElabContext,
+} from './v061-context.js';
 import type {V061TermElaborator} from './v061-tactic-elab.js';
 import {abstractExactRewriteOccurrences} from './v061-rewrite-occurrence.js';
 import {
@@ -57,6 +63,49 @@ export interface RewriteV061Options {
   readonly failIfNoOccurrence?:boolean;
 }
 
+export function elaborateV061RewriteProof(
+  proofExpr:V061Expr,
+  context:V061CoreElabContext,
+  elaborate:V061TermElaborator,
+):ElaboratedCoreTerm {
+  const expected=context.metaContext.mkFresh(
+    sort(levelZero),
+    context.localContext,
+  );
+  return elaborate(proofExpr,context,expected);
+}
+
+function trySpecializeRewritePattern(
+  value:Expr,
+  pattern:Expr,
+  context:V061CoreElabContext,
+):boolean {
+  if(context.metaContext.unify(
+    pattern,
+    value,
+    context.localContext,
+  ))return true;
+
+  switch(value.kind){
+    case 'app':
+      return trySpecializeRewritePattern(value.fn,pattern,context)
+        ||trySpecializeRewritePattern(value.arg,pattern,context);
+    case 'lam':
+    case 'forall':
+      return trySpecializeRewritePattern(value.type,pattern,context)
+        ||trySpecializeRewritePattern(value.body,pattern,context);
+    case 'let':
+      return trySpecializeRewritePattern(value.type,pattern,context)
+        ||trySpecializeRewritePattern(value.value,pattern,context)
+        ||trySpecializeRewritePattern(value.body,pattern,context);
+    case 'mdata':
+    case 'proj':
+      return trySpecializeRewritePattern(value.expr,pattern,context);
+    default:
+      return false;
+  }
+}
+
 export function rewriteV061Equality(
   runtime:V061TacticRuntime,
   equality:ElaboratedCoreTerm,
@@ -69,19 +118,37 @@ export function rewriteV061Equality(
     entry.context.environment,
     entry.context.localContext.clone(),
   );
-  const rule=equalityView(
+  let rule=equalityView(
     checker,
     entry.context.metaContext.instantiate(equality.type),
   );
-
-  const pattern=symm?rule.rhs:rule.lhs;
-  const replacement=symm?rule.lhs:rule.rhs;
+  let pattern=symm?rule.rhs:rule.lhs;
   const target=runtime.expected(goal);
-  const abstraction=abstractExactRewriteOccurrences(target,pattern);
+  let abstraction=abstractExactRewriteOccurrences(target,pattern);
+
+  if(!abstraction.found){
+    if(trySpecializeRewritePattern(target,pattern,entry.context)){
+      rule=equalityView(
+        checker,
+        entry.context.metaContext.instantiate(equality.type),
+      );
+      pattern=symm?rule.rhs:rule.lhs;
+      abstraction=abstractExactRewriteOccurrences(target,pattern);
+    }
+  }
   if(!abstraction.found){
     if(options.failIfNoOccurrence===false)return false;
     throw new Error(
       'PS_ELAB_TACTIC_RW_OCCURRENCE: rewrite pattern does not occur structurally in the goal',
+    );
+  }
+
+  const replacement=symm?rule.lhs:rule.rhs;
+  const proofTerm=entry.context.metaContext.instantiate(equality.term);
+  const proofType=entry.context.metaContext.instantiate(equality.type);
+  if(hasMVar(proofTerm)||hasMVar(proofType)){
+    throw new Error(
+      'PS_ELAB_TACTIC_RW_UNSOLVED: rewrite rule remains underconstrained after matching',
     );
   }
 
@@ -125,7 +192,7 @@ export function rewriteV061Equality(
           motive,
           proof.term,
           pattern,
-          equality.term,
+          proofTerm,
         ],
       );
       const type=checker.check(term);
@@ -153,6 +220,10 @@ export function rewriteV061Tactic(
 ):void {
   const goal=getMainGoal(runtime.state);
   const entry=runtime.entry(goal);
-  const equality=elaborate(proofExpr,entry.context);
+  const equality=elaborateV061RewriteProof(
+    proofExpr,
+    entry.context,
+    elaborate,
+  );
   rewriteV061Equality(runtime,equality,symm);
 }

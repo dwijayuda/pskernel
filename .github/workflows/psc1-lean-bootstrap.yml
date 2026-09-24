@@ -120,13 +120,48 @@ jobs:
           lake exe psc1 typescript /tmp/psc1-native.ps > /tmp/psc1-native-ps.ts
           cmp /tmp/psc1-native-lean.ts /tmp/psc1-native-ps.ts
           rm -f /tmp/psc1-native-lean.js /tmp/psc1-native-lean.d.ts /tmp/psc1-native-lean.js.map
-          lake exe psc1 compile /tmp/psc1-native.lean --out /tmp/psc1-native-lean.ts
+          lake exe psc1 build /tmp/psc1-native.lean --out /tmp/psc1-native-lean.ts
           test -f /tmp/psc1-native-lean.js
           test -f /tmp/psc1-native-lean.d.ts
           test -f /tmp/psc1-native-lean.js.map
           grep -q 'export function idNat' /tmp/psc1-native-lean.js
           grep -q 'declare function idNat' /tmp/psc1-native-lean.d.ts
           echo "PSC1_LEAN_NATIVE_TSC_PIPELINE: PASS"
+
+          cat > /tmp/psc1-adt.lean <<'EOF'
+          inductive Maybe (α : Type) where
+            | none
+            | some (value : α)
+
+          def present : Maybe Nat := Maybe.some 1
+          def getOrZero (m : Maybe Nat) : Nat :=
+            match m with
+            | Maybe.none => 0
+            | Maybe.some value => value
+          EOF
+          cat > /tmp/psc1-adt.ps <<'EOF'
+          inductive Maybe(α : Type) where {
+            | none;
+            | some(value : α);
+          };
+          def present : Maybe(Nat) := Maybe.some(1);
+          def getOrZero(m : Maybe(Nat)) : Nat :=
+            match m with {
+              | Maybe.none => 0;
+              | Maybe.some value => value;
+            };
+          EOF
+          lake exe psc1 typescript /tmp/psc1-adt.lean > /tmp/psc1-adt-lean.ts
+          lake exe psc1 typescript /tmp/psc1-adt.ps > /tmp/psc1-adt-ps.ts
+          cmp /tmp/psc1-adt-lean.ts /tmp/psc1-adt-ps.ts
+          rm -f /tmp/psc1-adt-lean.js /tmp/psc1-adt-lean.d.ts /tmp/psc1-adt-lean.js.map
+          lake exe psc1 build /tmp/psc1-adt.lean --out /tmp/psc1-adt-lean.ts
+          test -f /tmp/psc1-adt-lean.js
+          test -f /tmp/psc1-adt-lean.d.ts
+          test -f /tmp/psc1-adt-lean.js.map
+          grep -q 'export const Maybe' /tmp/psc1-adt-lean.js
+          grep -q 'export function getOrZero' /tmp/psc1-adt-lean.js
+          echo "PSC1_LEAN_NATIVE_ADT_TSC_PIPELINE: PASS"
 
       - name: Run dual-source admission pipeline
         shell: bash

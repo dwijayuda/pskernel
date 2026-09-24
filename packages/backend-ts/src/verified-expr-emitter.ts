@@ -11,6 +11,7 @@ import type {
 } from './verified-symbols.js';
 import {emitVerifiedMatch} from './verified-match-emitter.js';
 import {emitVerifiedTextIntrinsic} from './verified-text-emitter.js';
+import {emitVerifiedArrayIntrinsic} from './verified-array-emitter.js';
 
 export function emitVerifiedExpr(
   expr:VerifiedIrExpr,
@@ -35,6 +36,12 @@ export function emitVerifiedExpr(
         (arg)=>emitVerifiedExpr(arg,brands,tags),
       );
       if(textIntrinsic!==undefined)return textIntrinsic;
+      const arrayIntrinsic=emitVerifiedArrayIntrinsic(
+        expr.operation,
+        expr.args,
+        (arg)=>emitVerifiedExpr(arg,brands,tags),
+      );
+      if(arrayIntrinsic!==undefined)return arrayIntrinsic;
       if(expr.operation==='bool.not'){
         return '(!'+emitVerifiedExpr(expr.args[0]!,brands,tags)+')';
       }

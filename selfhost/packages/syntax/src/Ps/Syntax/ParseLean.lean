@@ -86,8 +86,8 @@ def psParseLeanExplicitBinder
       (PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :=
   match psTokenCursorExpectText cursor "(" with
   | Except.error error => Except.error error
-  | Except.ok open =>
-      match psTokenCursorExpectKind open.cursor PsTokenKind.identifier with
+  | Except.ok opening =>
+      match psTokenCursorExpectKind opening.cursor PsTokenKind.identifier with
       | Except.error error => Except.error error
       | Except.ok name =>
           match psTokenCursorExpectText name.cursor ":" with
@@ -107,7 +107,7 @@ def psParseLeanExplicitBinder
                         name := binderName
                         kind := PsSyntaxBinderKind.explicit
                         span := {
-                          start := open.token.span.start
+                          start := opening.token.span.start
                           stop := close.token.span.stop
                         }
                       }

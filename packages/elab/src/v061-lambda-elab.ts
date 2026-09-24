@@ -67,12 +67,10 @@ export function elaborateV061LambdaExpression(
     }
     if(
       expectedForall!==undefined
-      &&!new TypeChecker(
-        bodyContext.environment,
-        bodyContext.localContext.clone(),
-      ).isDefEq(
+      &&!bodyContext.metaContext.unify(
         bodyContext.metaContext.instantiate(binderType),
         bodyContext.metaContext.instantiate(expectedForall.type),
+        bodyContext.localContext,
       )
     ){
       throw new Error(

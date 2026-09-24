@@ -86,6 +86,24 @@ jobs:
             --selected-after Init.Prelude "${init_roots[@]}" \
             > lean434-parser-basic-env-extension.ndjson
           test -s lean434-parser-basic-env-extension.ndjson
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const file='lean434-parser-basic-env-extension.ndjson';
+            const text=fs.readFileSync(file,'utf8');
+            const first=text.split(/\\r?\\n/u).find(x=>x.trim().length>0)??'';
+            try {
+              const parsed=JSON.parse(first);
+              console.log(JSON.stringify({
+                firstRecord:Object.keys(parsed),
+                bytes:Buffer.byteLength(text),
+                lines:text.split(/\\r?\\n/u).length,
+              }));
+            } catch (error) {
+              console.error('invalid delta first line:', JSON.stringify(first.slice(0,240)));
+              console.error('first bytes:', JSON.stringify([...Buffer.from(text).subarray(0,80)]));
+              throw error;
+            }
+          "
       - name: Execute real Lean registerEnvExtension for Parser.Basic
         run: |
           node scripts/lean434-js-parser-basic-extension-smoke.mjs \

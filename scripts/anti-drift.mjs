@@ -13,7 +13,7 @@ walk(join(root,'src'));
 
 // File URL pathnames are not filesystem paths on Windows (for example,
 // /C:/work/...); all repository scripts must convert file URLs explicitly.
-const unsafeFileUrlPathname=/import\\.meta\\.url\\s*\\)\\s*\\.pathname/;
+const unsafeFileUrlPathname=/import[.]meta[.]url\s*[)]\s*[.]pathname/;
 function forbidUnsafeScriptFileUrlPaths(p) {
   for (const n of readdirSync(p)) {
     const q=join(p,n); const s=statSync(q);

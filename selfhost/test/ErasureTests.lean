@@ -266,6 +266,22 @@ def psTestDualSourceLeanNativeArrayHigherOrder : Bool :=
         && leanOutput.contains "for (let __ps_i"
   | _, _ => false
 
+def psTestDualSourceLeanNativePartialApplication : Bool :=
+  let leanSource :=
+    "def addPair (a : Nat) (b : Nat) : Nat := Nat.add a b\n" ++
+    "def addOne : Nat -> Nat := addPair 1"
+  let proofScriptSource :=
+    "def addPair(a : Nat)(b : Nat) : Nat := Nat.add(a, b); " ++
+    "def addOne : Nat -> Nat := addPair(1);"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains "export const addOne: (_arg0: bigint) => bigint"
+        && leanOutput.contains "addPair(1n,"
+  | _, _ => false
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -282,7 +298,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native Array basics", passed := psTestDualSourceLeanNativeArrayBasics },
   { name := "dual-source Lean-native Array map", passed := psTestDualSourceLeanNativeArrayMap },
   { name := "dual-source Lean-native Array foldl", passed := psTestDualSourceLeanNativeArrayFoldl },
-  { name := "dual-source Lean-native Array higher-order", passed := psTestDualSourceLeanNativeArrayHigherOrder }
+  { name := "dual-source Lean-native Array higher-order", passed := psTestDualSourceLeanNativeArrayHigherOrder },
+  { name := "dual-source Lean-native partial application", passed := psTestDualSourceLeanNativePartialApplication }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

@@ -1,0 +1,31 @@
+name: Diagnostic exporter prefix Baseline
+# trigger: exporter-prefix-baseline-v1
+
+on:
+  push:
+    branches: [diagnostic/exporter-prefix-baseline]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Export first 23154 diagnostic roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          start=$(date +%s)
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 0 23154 > /dev/null
+          stop=$(date +%s)
+          echo "BASELINE_EXPORT_SECONDS=$((stop-start))"

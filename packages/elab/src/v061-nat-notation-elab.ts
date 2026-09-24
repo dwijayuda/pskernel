@@ -89,9 +89,10 @@ export function elaborateV061NatArithmeticTerms(
   }
   if(
     expected!==undefined
-    &&!checker.isDefEq(
+    &&!context.metaContext.unify(
       context.metaContext.instantiate(expected),
       natType,
+      context.localContext,
     )
   ){
     throw new Error(

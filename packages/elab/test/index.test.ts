@@ -1253,7 +1253,7 @@ console.log('ok - @proofscript/elab parameterized verified match recursor elabor
     'function matchConstruct(value : MatchOption(Nat)) : MatchOption(Nat) := '+
     'match value with { '+
     '| .none => MatchOption.some(1); '+
-    '| .some x => MatchOption.some(x); };',
+    '| .some x => MatchOption.some(x + 1); };',
   ),env);
   equal(result.definitions.length,1);
   equal(
@@ -1261,7 +1261,7 @@ console.log('ok - @proofscript/elab parameterized verified match recursor elabor
     'definition',
   );
 }
-console.log('ok - @proofscript/elab match branch constructor meta instantiation');
+console.log('ok - @proofscript/elab match branch Nat notation meta instantiation');
 
 
 

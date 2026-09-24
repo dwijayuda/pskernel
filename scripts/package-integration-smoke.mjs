@@ -716,8 +716,14 @@ assert(
   ).status==='closed',
   'verified theorem should expose closed declaration-level proof state',
 );
-assert(PROOFSCRIPT_LSP_PROTOCOL_VERSION===1,'LSP protocol drift');
-assert(lspCapabilities().hoverProvider===true,'LSP hover capability missing');
+assert(PROOFSCRIPT_LSP_PROTOCOL_VERSION===2,'LSP protocol drift');
+const integrationLspCapabilities=lspCapabilities();
+assert(
+  integrationLspCapabilities.experimental?.proofscriptProtocolVersion===
+    PROOFSCRIPT_LSP_PROTOCOL_VERSION,
+  'LSP advertised protocol version drift',
+);
+assert(integrationLspCapabilities.hoverProvider===true,'LSP hover capability missing');
 
 const plan=createBuildPlan([
   {name:'app',dependencies:['core']},

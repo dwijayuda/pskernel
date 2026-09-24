@@ -320,23 +320,45 @@ and map/set key behavior is deterministic and specified.
 
 Implement the compiler-oriented effect foundation:
 
-- `Except` / error propagation;
-- `State` / `StateT`;
-- `Reader` / `ReaderT`;
+- `Except`-style error propagation;
+- state semantics equivalent to the subset needed from `State` / `StateT`;
+- read-only context semantics equivalent to the subset needed from `Reader` /
+  `ReaderT`;
 - usable Lean-compatible `do` notation;
 - bind/pure sequencing;
 - Lean-compatible `return` inside `do`;
 - `throw` / `tryCatch` and bounded `failure` / `orElse` behavior;
 - cheap control-flow combinators such as `when` / `unless`;
-- `OptionT` or additional transformers when the census or a compiler module
-  requires them.
+- additional transformer-style behavior only when the census or a compiler
+  module demonstrates that the concrete bootstrap effect API is insufficient.
 
-The first bootstrap profile should also provide the monad-lifting operations
-actually needed by the selected Reader/State/Except stack. A bounded
-`MonadLift`/`MonadLiftT`-style layer for the concrete transformer stack is
-USEFUL/CHEAP when it removes repetitive manual lifting. Do not reproduce Lean's
-full transformer/typeclass hierarchy or its law library unless the compiler
-workload requires it.
+For PSC1, **the semantics are required; a generic higher-kinded transformer
+hierarchy is not**. A concrete compiler effect can be used as the bootstrap
+representation, conceptually:
+
+```text
+CompilerM α :=
+  CompilerContext ->
+  CompilerState ->
+  Result CompilerError (α × CompilerState)
+```
+
+or an equivalent checked representation with the same reader/state/error
+behavior. The source API should still expose the familiar operations needed by
+compiler code (`read`, `withReader`, `get`, `set`, `modify`, `throw`,
+`tryCatch`, `failure`, `orElse`, checkpoint/restore, `pure`, `bind`) so
+switching to generic transformers later does not require rewriting compiler
+algorithms.
+
+Keep Lean's generic `ReaderT`, `StateT`, `ExceptT`, `OptionT`,
+`MonadLift` and ordinary `Monad` concepts in the language model; do not
+delete or redefine them merely because TypeScript lacks native higher-kinded
+types. Their **generic executable backend support is non-blocking for PSC1**.
+`OptionT` and automatic `MonadLift` remain optional conveniences unless
+real compiler code needs them.
+
+Do not reproduce Lean's full transformer/typeclass/law hierarchy merely for
+bootstrap ergonomics.
 
 Add the small proof-aware control-flow forms that compiler code uses to carry
 branch facts without invoking a tactic engine:
@@ -367,6 +389,46 @@ instance-driven semantics exercised by bootstrap code.
 
 These are term-elaboration features, not tactic automation. Branch hypotheses
 and `have` values must elaborate to ordinary proof terms that pskernel checks.
+
+### SH3-HKT — cheap higher-kinded erasure experiment, non-blocking for PSC1
+
+Before deciding whether the bootstrap compiler should directly use generic
+Lean-style transformer definitions, add one deliberately small executable gate
+for higher-kinded type parameters such as:
+
+```lean
+m : Type -> Type
+```
+
+The experiment must preserve the source/kernel semantics while keeping the
+TypeScript backend simple:
+
+1. recognize binders whose **type inhabits a Sort** as type-level binders even
+   when that binder type is itself a function kind such as `Type -> Type`;
+2. erase those higher-kinded binders from JavaScript runtime arguments;
+3. permit runtime types headed by an erased type constructor, such as `m α`,
+   to use a conservative verified-IR/TypeScript representation when no precise
+   TypeScript type exists;
+4. recursively erase type/proof binders inside runtime function types, so
+   operations such as polymorphic `pure` and `bind` become ordinary runtime
+   functions;
+5. compile a tiny generic `Monad` plus `ReaderT`/`StateT`/`ExceptT`
+   exercise through checked core -> erasure -> verified IR -> TypeScript ->
+   JavaScript;
+6. run the same gate from canonical `.lean` and `.ps` and require equal
+   checked-core/IR fingerprints and equivalent JavaScript behavior.
+
+The initial TypeScript representation may use `unknown` (or a dedicated
+opaque-runtime type) at HKT-dependent annotation positions **after pskernel
+checking**. This is a loss of host type precision, not a loss of ProofScript
+soundness; TypeScript remains an untrusted backend.
+
+Do **not** implement a TypeScript HKT encoding, URI-to-kind registry, higher-kinded
+generic framework, or similar host-type machinery before PSC1. If this bounded
+erasure experiment stays local and green, generic `ReaderT`/`StateT`/
+`ExceptT` may be used by bootstrap code. If it expands into a large backend
+project, use the concrete `CompilerM` profile and defer precise generic HKT
+emission until after PSC2.
 
 Also provide transactional state operations required by parsers and
 elaboration:
@@ -403,6 +465,14 @@ Exit test: parser state, a small name-resolution pass, and a candidate-based
 Meta/unification probe can all be authored in supported `.lean` and `.ps`,
 including rollback after a deliberately failing candidate, with no host-language
 mutation semantics or leaked metavariable assignments.
+
+Also add a **SELFHOST-EFFECT** dual-source regression. It must implement a
+compiler-like context/state/error computation with `pure`, `bind`, read,
+get/modify, failure, recovery and rollback, compile to JavaScript, and
+demonstrate that PSC1 does not require higher-kinded type applications to
+survive into verified IR. When SH3-HKT is green, run the same behavioral
+fixture through the generic transformer spelling as an additional equivalence
+test, not as a prerequisite for the concrete lane.
 
 ## SH4 — recursion, iteration and executable control closure
 
@@ -727,8 +797,10 @@ exercise at least:
   multi-scrutinee patterns plus `if let`/let-patterns;
 - `Prod`/tuple-returning and tuple-destructuring utilities;
 - structural, mutual and local recursion plus a controlled `partial` case;
-- `do`, Reader/State/Except, `return`, failure/alternative handling and
-  transactional rollback;
+- `do`, the concrete Reader/State/Except semantics, `return`,
+  failure/alternative handling and transactional rollback;
+- the SH3-HKT erasure probe when it remains cheap; SELFHOST-FEATURE must not
+  depend on generic HKT transformers when that probe is not yet green;
 - practical iteration syntax and the bounded iteration abstraction selected by
   the census;
 - runtime-only guard/assert/panic/unreachable behavior with a regression proving
@@ -934,6 +1006,12 @@ Unless demanded by an SH gate, defer:
 - large proof automation such as `omega`, `aesop`, `grind`, `linarith`,
   `ring`, `native_decide`, or full Lean `simp` before SH8a/PSC2 stability;
 - generalized dependent-pattern compilation beyond the bootstrap need;
+- precise TypeScript higher-kinded-type encodings or a generic HKT host
+  framework; bootstrap may erase HKT-dependent host annotations conservatively;
+- generic transformer-stack convenience beyond the bounded SH3-HKT probe,
+  including `OptionT`, broad `MonadLift` derivation, `MonadControl`,
+  `StateRefT`, `EStateM` and transformer-law hierarchies, unless a real
+  compiler module requires them;
 - full Lean iterator hierarchy;
 - broad HashMap/Hashable adoption before correctness-oriented ordered
   collections prove insufficient;
@@ -967,6 +1045,9 @@ Before accepting any ProofScript infrastructure task, ask:
 5. Does the change preserve the single checked-core semantic path?
 6. Would implementing it require importing a disproportionately large Lean
    metaprogramming subsystem that the compiler does not actually need?
+7. If the feature exists mainly to mirror Lean's generic implementation style,
+   can PSC1 use the same semantics through a simpler concrete representation
+   while keeping the source/kernel model compatible with a later generic form?
 
 If the feature is neither REQUIRED nor justified as USEFUL/CHEAP by the census,
 defer it. A USEFUL/CHEAP item is still not automatically a bootstrap blocker:

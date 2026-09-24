@@ -8,15 +8,15 @@ inductive ReducibilityHints where
   | regular (height : Nat)
 
 inductive DefinitionSafety where
-  | unsafe
-  | safe
-  | partial
+  | unsafeDef
+  | safeDef
+  | partialDef
 
 inductive ConstantKind where
-  | axiom
-  | definition
-  | theorem
-  | opaque
+  | axiomK
+  | definitionK
+  | theoremK
+  | opaqueK
 
 structure ConstantInfo where
   name : Name
@@ -24,16 +24,21 @@ structure ConstantInfo where
   type : Expr
   value : Option Expr := none
   hints : ReducibilityHints := .opaque
-  safety : DefinitionSafety := .safe
-  kind : ConstantKind := .axiom
+  safety : DefinitionSafety := .safeDef
+  kind : ConstantKind := .axiomK
 
 structure Environment where
   constants : List ConstantInfo := []
 
 namespace Environment
 
+def findIn : List ConstantInfo → Name → Option ConstantInfo
+  | [], _ => none
+  | c :: cs, target =>
+      if Name.beq c.name target then some c else findIn cs target
+
 def find? (env : Environment) (target : Name) : Option ConstantInfo :=
-  env.constants.find? (fun c => Name.beq c.name target)
+  findIn env.constants target
 
 def contains (env : Environment) (target : Name) : Bool :=
   (find? env target).isSome
@@ -45,7 +50,7 @@ def unfoldableValue? (env : Environment) (target : Name) : Option (List Name × 
   match find? env target with
   | some info =>
       match info.kind, info.value with
-      | .definition, some value => some (info.levelParams, value)
+      | .definitionK, some value => some (info.levelParams, value)
       | _, _ => none
   | none => none
 

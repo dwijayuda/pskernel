@@ -609,6 +609,72 @@ assert(
   'ProofScript.Data.Product declarations diverged',
 );
 
+const arrayModuleSource=readFileSync(
+  new URL('../stdlib/src/ProofScript/Data/Array.ps',import.meta.url),
+  'utf8',
+);
+const arrayModulePs=compileVerifiedSource(
+  arrayModuleSource,
+  'proofscript-data-array.ts',
+  'ProofScript/Data/Array.ps',
+);
+const arrayModuleLeanSource=
+  dualTargets.require('lean').print(arrayModulePs.surface);
+const arrayModuleLean=compileVerifiedSource(
+  arrayModuleLeanSource,
+  'proofscript-data-array.ts',
+  'ProofScript/Data/Array.lean',
+);
+const arrayModulePsSource=
+  dualTargets.require('ps').print(arrayModuleLean.surface);
+const arrayModulePsRoundTrip=compileVerifiedSource(
+  arrayModulePsSource,
+  'proofscript-data-array.ts',
+  'ProofScript/Data/Array.roundtrip.ps',
+);
+
+assert(
+  arrayModulePs.canonicalSourceHash===arrayModuleLean.canonicalSourceHash
+    &&arrayModuleLean.canonicalSourceHash===
+      arrayModulePsRoundTrip.canonicalSourceHash,
+  'ProofScript.Data.Array dual-source canonical identity diverged\n'+
+    '--- from ProofScript ---\n'+arrayModulePs.canonicalSource+
+    '--- from Lean ---\n'+arrayModuleLean.canonicalSource+
+    '--- round-trip ProofScript ---\n'+
+      arrayModulePsRoundTrip.canonicalSource,
+);
+assert(
+  semanticFingerprint(arrayModulePs.checkedCore.admissions)
+    ===semanticFingerprint(arrayModuleLean.checkedCore.admissions)
+    &&semanticFingerprint(arrayModuleLean.checkedCore.admissions)
+      ===semanticFingerprint(arrayModulePsRoundTrip.checkedCore.admissions),
+  'ProofScript.Data.Array checked-core fingerprint diverged',
+);
+assert(
+  semanticFingerprint(arrayModulePs.ir)
+    ===semanticFingerprint(arrayModuleLean.ir)
+    &&semanticFingerprint(arrayModuleLean.ir)
+      ===semanticFingerprint(arrayModulePsRoundTrip.ir),
+  'ProofScript.Data.Array compiler IR diverged',
+);
+assert(
+  arrayModulePs.typeScript===arrayModuleLean.typeScript
+    &&arrayModuleLean.typeScript===arrayModulePsRoundTrip.typeScript,
+  'ProofScript.Data.Array TypeScript diverged',
+);
+assert(
+  arrayModulePs.emitted.javascript===arrayModuleLean.emitted.javascript
+    &&arrayModuleLean.emitted.javascript===
+      arrayModulePsRoundTrip.emitted.javascript,
+  'ProofScript.Data.Array JavaScript diverged',
+);
+assert(
+  arrayModulePs.emitted.declaration===arrayModuleLean.emitted.declaration
+    &&arrayModuleLean.emitted.declaration===
+      arrayModulePsRoundTrip.emitted.declaration,
+  'ProofScript.Data.Array declarations diverged',
+);
+
 let unsupportedLeanRejected=false;
 try{
   compileVerifiedSource(

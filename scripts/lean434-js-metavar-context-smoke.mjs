@@ -66,7 +66,7 @@ if(lean434RuntimeOptionValue(before)!==undefined){
 }
 
 let assign=evaluator.evaluate(
-  constant(nameFromDotted('Lean.MetavarContext.assignExp')),
+  constant(nameFromDotted('Lean.assignExp')),
 );
 assign=evaluator.applyRuntimeValue(assign,empty);
 assign=evaluator.applyRuntimeValue(assign,mvarId);
@@ -80,7 +80,7 @@ const queried=evaluator.applyRuntimeValue(getAfter,mvarId);
 const runtimeAssigned=lean434RuntimeOptionValue(queried);
 if(runtimeAssigned===undefined){
   throw new Error(
-    'real Lean.MetavarContext.assignExp did not persist the assignment',
+    'real Lean.assignExp did not persist the assignment',
   );
 }
 const actual=lean434RuntimeExprToKernel(runtimeAssigned);
@@ -102,7 +102,7 @@ if(lean434RuntimeOptionValue(originalStillEmpty)!==undefined){
 }
 
 console.log(
-  'ok - real Lean.MetavarContext.assignExp/getExprAssignmentExp execute in JS',
+  'ok - real Lean.assignExp/getExprAssignmentExp execute in JS',
 );
 console.log(
   'ok - Lean metavariable assignment preserves PersistentHashMap value semantics',

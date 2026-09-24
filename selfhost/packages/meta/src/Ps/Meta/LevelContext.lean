@@ -175,3 +175,14 @@ def psLevelInstantiateExpr (context : PsLevelMetaContext) : PsExpr -> PsExpr
   | .proj typeName index value =>
       PsExpr.proj typeName index (psLevelInstantiateExpr context value)
   | expr => expr
+
+def psLevelHasMVar : PsLevel -> Bool
+  | .mvar _ => true
+  | .succ value => psLevelHasMVar value
+  | .max left right => psLevelHasMVar left || psLevelHasMVar right
+  | .imax left right => psLevelHasMVar left || psLevelHasMVar right
+  | _ => false
+
+def psLevelListHasMVar : List PsLevel -> Bool
+  | [] => false
+  | level :: rest => psLevelHasMVar level || psLevelListHasMVar rest

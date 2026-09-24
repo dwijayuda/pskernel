@@ -124,6 +124,112 @@ console.log('ok - @proofscript/backend-ts Lean-faithful Char.ofNat emission');
 {
   const source=emitVerifiedTypeScript({
     kind:'proofscript-verified-ir',
+    declarations:[
+      {
+        name:'charCode',
+        typeParameters:[],
+        parameters:[{
+          name:'c',
+          type:{kind:'primitive',name:'Char'},
+        }],
+        resultType:{kind:'primitive',name:'Nat'},
+        body:{
+          kind:'intrinsic',
+          operation:'char.toNat',
+          args:[{kind:'var',name:'c'}],
+        },
+      },
+      {
+        name:'oneChar',
+        typeParameters:[],
+        parameters:[{
+          name:'c',
+          type:{kind:'primitive',name:'Char'},
+        }],
+        resultType:{kind:'primitive',name:'String'},
+        body:{
+          kind:'intrinsic',
+          operation:'string.singleton',
+          args:[{kind:'var',name:'c'}],
+        },
+      },
+      {
+        name:'textLength',
+        typeParameters:[],
+        parameters:[{
+          name:'s',
+          type:{kind:'primitive',name:'String'},
+        }],
+        resultType:{kind:'primitive',name:'Nat'},
+        body:{
+          kind:'intrinsic',
+          operation:'string.length',
+          args:[{kind:'var',name:'s'}],
+        },
+      },
+      {
+        name:'pushChar',
+        typeParameters:[],
+        parameters:[
+          {name:'s',type:{kind:'primitive',name:'String'}},
+          {name:'c',type:{kind:'primitive',name:'Char'}},
+        ],
+        resultType:{kind:'primitive',name:'String'},
+        body:{
+          kind:'intrinsic',
+          operation:'string.push',
+          args:[
+            {kind:'var',name:'s'},
+            {kind:'var',name:'c'},
+          ],
+        },
+      },
+      {
+        name:'appendText',
+        typeParameters:[],
+        parameters:[
+          {name:'a',type:{kind:'primitive',name:'String'}},
+          {name:'b',type:{kind:'primitive',name:'String'}},
+        ],
+        resultType:{kind:'primitive',name:'String'},
+        body:{
+          kind:'intrinsic',
+          operation:'string.append',
+          args:[
+            {kind:'var',name:'a'},
+            {kind:'var',name:'b'},
+          ],
+        },
+      },
+    ],
+  });
+  equal(source.includes('BigInt(__ps_c.codePointAt(0) ?? 0)'),true);
+  equal(source.includes('BigInt(Array.from(__ps_s).length)'),true);
+  equal(source.includes(
+    'export function oneChar(c: string): string { return c; }',
+  ),true);
+  equal(source.includes(
+    'export function pushChar(s: string, c: string): string { return (s + c); }',
+  ),true);
+  equal(source.includes(
+    'export function appendText(a: string, b: string): string { return (a + b); }',
+  ),true);
+  const compiled=compileTypeScript(source,'verified-text.ts');
+  equal(
+    compiled.declaration.includes('charCode(c: string): bigint'),
+    true,
+  );
+  equal(
+    compiled.declaration.includes('textLength(s: string): bigint'),
+    true,
+  );
+}
+console.log('ok - @proofscript/backend-ts certified text intrinsic emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
     structures:[{
       name:'User',
       fields:[{

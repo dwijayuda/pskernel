@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ProofScript v0.7 source positions, trivia-preserving tokens, lexical errors, and feature identifiers.",
   "proofscript": {
-    "status": "v061-bounded-rfl+source-ffi+ds5-import-headers+lean-ds3-registered-frontend+translation-target-dispatch+canonical-ps-printer+frontend-registry+exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
+    "status": "psx1-bounded-jsx-parser+v061-bounded-rfl+source-ffi+ds5-import-headers+lean-ds3-registered-frontend+translation-target-dispatch+canonical-ps-printer+frontend-registry+exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface",
     "phase": "B",
     "trust": "untrusted-support",
     "sourceLanguage": "typescript",
@@ -24,7 +24,8 @@
       "E-INDUCTIVE-BODY",
       "E-WHERE-BODY",
       "E-CLASS-BODY",
-      "D-EXTERN-FFI"
+      "D-EXTERN-FFI",
+      "E-JSX"
     ]
   },
   "exports": {

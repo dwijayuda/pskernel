@@ -1,0 +1,42 @@
+name: Std hotspot exporter ranges
+
+on:
+  push:
+    branches: [diagnostic/std-shared-hotspot]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - start: 37184
+            count: 16
+          - start: 37200
+            count: 16
+          - start: 37216
+            count: 16
+          - start: 37232
+            count: 16
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Export root slice only
+        shell: bash
+        run: |
+          set -euo pipefail
+          start=$(date +%s)
+          timeout --kill-after=5s 60s lean --run oracle/replay-probe/DependencyExport.lean Std --root-range ${{ matrix.start }} ${{ matrix.count }} > /dev/null
+          stop=$(date +%s)
+          echo "export_seconds=$((stop-start)) start=${{ matrix.start }} count=${{ matrix.count }}"

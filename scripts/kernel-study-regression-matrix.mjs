@@ -161,6 +161,7 @@ if(!assuranceDoc.includes('Do not call this source declaration order')){
 const localAssuranceRunner=readFileSync('scripts/run-full-std-local.ps1','utf8');
 for(const marker of [
   '& npm ci --no-audit --no-fund',
+  '& npm run test:kernel',
   'dependencyInstall=npm ci',
   'git status: $dirtySummary',
   'npm ci changed tracked files; refusing assurance evidence.',
@@ -180,7 +181,7 @@ for(const marker of [
   '$trackedChanges = @(& git status --porcelain --untracked-files=no)',
   '$nodeVersion = (& node --version).Trim()',
   'Installing locked dependencies with npm ci...',
-  'Running full npm test gate...',
+  'Running kernel test gate...',
   'Running bounded real-corpus gate...',
   'Running Lean compiler-IR native reduction smoke...',
   'Running canonical Init.Prelude module-stream preflight...',

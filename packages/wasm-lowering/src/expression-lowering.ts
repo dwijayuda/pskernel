@@ -69,6 +69,28 @@ function lowerLocal(
   }
 }
 
+function lowerUIntAdd(
+  operation:'uint8.add'|'uint16.add'|'uint32.add'|'uint64.add',
+  args:readonly VerifiedIrExpr[],
+  locals:ReadonlyMap<string,RuntimeType>,
+  signatures:ReadonlyMap<string,Signature>,
+):WasmIrExpr {
+  const type=operation.slice(0,-4) as RuntimeValueType;
+  const left=lowerRuntimeExpr(args[0]!,type,locals,signatures);
+  const right=lowerRuntimeExpr(args[1]!,type,locals,signatures);
+  if(type==='uint64'){
+    return {kind:'i64.binary',operation:'add',left,right};
+  }
+  const added:WasmIrExpr={kind:'i32.binary',operation:'add',left,right};
+  if(type==='uint32')return added;
+  return {
+    kind:'i32.binary',
+    operation:'and',
+    left:added,
+    right:{kind:'i32.const',value:type==='uint8'?0xff:0xffff},
+  };
+}
+
 export function lowerRuntimeExpr(
   expr:VerifiedIrExpr,
   expected:RuntimeType,
@@ -147,47 +169,14 @@ export function lowerRuntimeExpr(
 
         case 'uint8.add':
         case 'uint16.add':
-        case 'uint32.add':{
-          const type=expr.operation==='uint8.add'
-            ?'uint8'
-            :expr.operation==='uint16.add'
-              ?'uint16'
-              :'uint32';
-          const added:WasmIrExpr={
-            kind:'i32.binary',
-            operation:'add',
-            left:lowerRuntimeExpr(expr.args[0]!,type,locals,signatures),
-            right:lowerRuntimeExpr(expr.args[1]!,type,locals,signatures),
-          };
-          if(type==='uint32')return added;
-          return {
-            kind:'i32.binary',
-            operation:'and',
-            left:added,
-            right:{
-              kind:'i32.const',
-              value:type==='uint8'?0xff:0xffff,
-            },
-          };
-        }
-
+        case 'uint32.add':
         case 'uint64.add':
-          return {
-            kind:'i64.binary',
-            operation:'add',
-            left:lowerRuntimeExpr(
-              expr.args[0]!,
-              'uint64',
-              locals,
-              signatures,
-            ),
-            right:lowerRuntimeExpr(
-              expr.args[1]!,
-              'uint64',
-              locals,
-              signatures,
-            ),
-          };
+          return lowerUIntAdd(
+            expr.operation,
+            expr.args,
+            locals,
+            signatures,
+          );
 
         default:
           return unsupported(

@@ -1352,6 +1352,68 @@ def psTestInductiveMetadataLookup : Bool :=
         && recursor.numMinors == 1
   | _, _, _ => false
 
+def psTestBasicMatchShape
+    (parsed : PsParseResult PsSyntaxTerm) : Bool :=
+  psTokenCursorDone parsed.cursor
+    && match parsed.value with
+       | PsSyntaxTerm.matchE
+           (PsSyntaxTerm.bool true _)
+           [
+             (PsSyntaxPattern.bool true _, PsSyntaxTerm.natural "1" _, _),
+             (PsSyntaxPattern.bool false _, PsSyntaxTerm.natural "2" _, _)
+           ]
+           _ => true
+       | _ => false
+
+def psTestDualSourceBasicMatchParse : Bool :=
+  match
+      psLex "match true with | true => 1 | false => 2",
+      psLex "match true with { | true => 1; | false => 2 }" with
+  | Except.ok leanTokens, Except.ok proofScriptTokens =>
+      match
+          psParseLeanTerm (psTokenCursorFromTokens leanTokens),
+          psParseProofScriptTerm
+            (psTokenCursorFromTokens proofScriptTokens) with
+      | Except.ok leanTerm, Except.ok proofScriptTerm =>
+          psTestBasicMatchShape leanTerm
+            && psTestBasicMatchShape proofScriptTerm
+      | _, _ => false
+  | _, _ => false
+
+def psTestConstructorMatchPatternShape : Bool :=
+  match psLex "match x with | Option.some y => y | Option.none => 0" with
+  | Except.error _ => false
+  | Except.ok tokens =>
+      match psParseLeanTerm (psTokenCursorFromTokens tokens) with
+      | Except.error _ => false
+      | Except.ok parsed =>
+          psTokenCursorDone parsed.cursor
+            && match parsed.value with
+               | PsSyntaxTerm.matchE
+                   (PsSyntaxTerm.reference scrutinee)
+                   [
+                     (
+                       PsSyntaxPattern.constructor
+                         someName
+                         [binder]
+                         _,
+                       PsSyntaxTerm.reference bodyName,
+                       _
+                     ),
+                     (
+                       PsSyntaxPattern.constructor noneName [] _,
+                       PsSyntaxTerm.natural "0" _,
+                       _
+                     )
+                   ]
+                   _ =>
+                   psTestSyntaxNameSingle scrutinee "x"
+                     && someName.segments == ["Option", "some"]
+                     && psTestSyntaxNameSingle binder "y"
+                     && psTestSyntaxNameSingle bodyName "y"
+                     && noneName.segments == ["Option", "none"]
+               | _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1371,6 +1433,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source Bool literal", passed := psTestDualSourceBoolLiteral },
   { name := "dual-source if", passed := psTestDualSourceIf },
   { name := "inductive metadata lookup", passed := psTestInductiveMetadataLookup },
+  { name := "dual-source basic match parse", passed := psTestDualSourceBasicMatchParse },
+  { name := "constructor match pattern parse", passed := psTestConstructorMatchPatternShape },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

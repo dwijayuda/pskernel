@@ -188,6 +188,34 @@ jobs:
           grep -q 'export function getOrZero' /tmp/psc1-adt-lean.js
           echo "PSC1_LEAN_NATIVE_ADT_TSC_PIPELINE: PASS"
 
+
+          cat > /tmp/psc1-structure.lean <<'EOF'
+          structure User where
+            age : Nat
+
+          def user : User := User.mk 33
+          def ageOf (u : User) : Nat := u.age
+          EOF
+          cat > /tmp/psc1-structure.ps <<'EOF'
+          structure User where {
+            age : Nat;
+          };
+          def user : User := User.mk(33);
+          def ageOf(u : User) : Nat := u.age;
+          EOF
+          lake exe psc1 typescript /tmp/psc1-structure.lean > /tmp/psc1-structure-lean.ts
+          lake exe psc1 typescript /tmp/psc1-structure.ps > /tmp/psc1-structure-ps.ts
+          cmp /tmp/psc1-structure-lean.ts /tmp/psc1-structure-ps.ts
+          rm -f /tmp/psc1-structure-lean.js /tmp/psc1-structure-lean.d.ts /tmp/psc1-structure-lean.js.map
+          lake exe psc1 build /tmp/psc1-structure.lean --out /tmp/psc1-structure-lean.ts
+          test -f /tmp/psc1-structure-lean.js
+          test -f /tmp/psc1-structure-lean.d.ts
+          test -f /tmp/psc1-structure-lean.js.map
+          grep -q 'export const user' /tmp/psc1-structure-lean.js
+          grep -q 'export function ageOf' /tmp/psc1-structure-lean.js
+          grep -q 'readonly age' /tmp/psc1-structure-lean.d.ts
+          echo "PSC1_LEAN_NATIVE_STRUCTURE_TSC_PIPELINE: PASS"
+
       - name: Run dual-source admission pipeline
         shell: bash
         run: |

@@ -68,6 +68,7 @@ async function runWorker(path){
   closeSync(fd);
   if(code===0&&!signal&&!timedOut){
     let summary;try{summary=JSON.parse(out.trim());}catch{throw new Error(`invalid worker summary: ${out}\n${err}`);}
+    if(err)process.stderr.write(err);
     return {ok:true,summary};
   }
   const oom=/heap out of memory|Allocation failed|Reached heap limit|CALL_AND_RETRY_LAST/i.test(err)||signal==='SIGABRT';

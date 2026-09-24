@@ -212,15 +212,19 @@ def psTestDualSourceLeanNativeArrayBasics : Bool :=
 
 def psTestDualSourceLeanNativeArrayHigherOrder : Bool :=
   let leanSource :=
+    "def arrayId (x : Nat) : Nat := x\n" ++
+    "def arrayKeepLeft (acc : Nat) (x : Nat) : Nat := acc\n" ++
     "def arrayFoldDemo (a : Nat) (b : Nat) : Nat := " ++
     "let xs : Array Nat := Array.push (Array.push (Array.emptyWithCapacity 2) a) b; " ++
-    "let ys : Array Nat := Array.map (fun (x : Nat) => x) xs; " ++
-    "Array.foldl (fun (acc : Nat) (x : Nat) => acc) 0 ys 0 (Array.size ys)"
+    "let ys : Array Nat := Array.map arrayId xs; " ++
+    "Array.foldl arrayKeepLeft 0 ys 0 (Array.size ys)"
   let proofScriptSource :=
+    "def arrayId(x : Nat) : Nat := x; " ++
+    "def arrayKeepLeft(acc : Nat)(x : Nat) : Nat := acc; " ++
     "def arrayFoldDemo(a : Nat)(b : Nat) : Nat := " ++
     "let xs : Array(Nat) := Array.push(Array.push(Array.emptyWithCapacity(2), a), b); " ++
-    "let ys : Array(Nat) := Array.map(fun (x : Nat) => x, xs); " ++
-    "Array.foldl(fun (acc : Nat)(x : Nat) => acc, 0, ys, 0, Array.size(ys));"
+    "let ys : Array(Nat) := Array.map(arrayId, xs); " ++
+    "Array.foldl(arrayKeepLeft, 0, ys, 0, Array.size(ys));"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with

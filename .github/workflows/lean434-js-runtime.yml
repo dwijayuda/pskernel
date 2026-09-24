@@ -230,6 +230,20 @@ jobs:
           test -s lean434-expr-bootstrap.ndjson
       - name: Execute real Lean.Expr algorithms in JavaScript
         run: node scripts/lean434-js-expr-smoke.mjs lean434-expr-bootstrap.ndjson
+      - name: Generate real Lean.MetavarContext bootstrap corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExport.lean Lean.MetavarContext \
+            --selected-after Init.Prelude \
+            Lean.MetavarContext.assignExp \
+            Lean.MetavarContext.getExprAssignmentExp \
+            > lean434-metavar-context-bootstrap.ndjson
+          test -s lean434-metavar-context-bootstrap.ndjson
+      - name: Execute real Lean.MetavarContext assignment in JavaScript
+        run: |
+          node scripts/lean434-js-metavar-context-smoke.mjs \
+            lean434-metavar-context-bootstrap.ndjson
       - name: Generate real Lean ST/IO bootstrap corpus
         shell: bash
         run: |

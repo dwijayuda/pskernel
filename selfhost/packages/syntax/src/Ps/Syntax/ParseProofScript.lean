@@ -79,13 +79,22 @@ def psParseProofScriptCallArgsWithFuel
                     cursor := close.cursor
                   }
 
+def psProofScriptCallAdjacent
+    (term : PsSyntaxTerm)
+    (cursor : PsTokenCursor) : Bool :=
+  match psTokenCursorPeek cursor with
+  | none => false
+  | some token =>
+      token.span.start.byteOffset == (psSyntaxTermSpan term).stop.byteOffset
+
 def psParseProofScriptSimpleApplication
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match psParseSimpleTerm cursor with
   | Except.error error => Except.error error
   | Except.ok first =>
-      if psTokenCursorAtText first.cursor "(" then
+      if psTokenCursorAtText first.cursor "("
+          && psProofScriptCallAdjacent first.value first.cursor then
         match psTokenCursorAdvance first.cursor with
         | none => Except.error (PsParseError.unexpectedEnd "(")
         | some open =>
@@ -99,8 +108,16 @@ def psParseProofScriptSimpleApplication
                   start := (psSyntaxTermSpan first.value).start
                   stop := call.closeSpan.stop
                 }
+                let args :=
+                  match call.args with
+                  | [] =>
+                      [PsSyntaxTerm.unit {
+                        start := open.token.span.start
+                        stop := call.closeSpan.stop
+                      }]
+                  | _ => call.args
                 Except.ok {
-                  value := PsSyntaxTerm.app first.value call.args span
+                  value := PsSyntaxTerm.app first.value args span
                   cursor := call.cursor
                 }
       else

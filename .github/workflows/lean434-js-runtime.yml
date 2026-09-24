@@ -21,7 +21,7 @@ jobs:
         run: npm --workspace @proofscript/runtime test
       - name: Generate deterministic Lean 4.34 source/runtime census
         run: |
-          npm run research:lean434-js-runtime > lean434-js-runtime-census.json
+          node scripts/lean434-js-runtime-census.mjs > lean434-js-runtime-census.json
           node --input-type=module -e "
             import fs from 'node:fs';
             const r=JSON.parse(fs.readFileSync('lean434-js-runtime-census.json','utf8'));

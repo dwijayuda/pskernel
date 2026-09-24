@@ -90,6 +90,24 @@ jobs:
           cd selfhost
           lake exe psc1_bridge_tests
 
+      - name: Run dual-source admission pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          cat > /tmp/psc1-sample.lean <<'EOF'
+          def idNat (x : Nat) : Nat := x
+          EOF
+          cat > /tmp/psc1-sample.ps <<'EOF'
+          def idNat(x : Nat) : Nat := x;
+          EOF
+          lake exe psc1 admissions /tmp/psc1-sample.lean > /tmp/lean-admissions.json
+          lake exe psc1 admissions /tmp/psc1-sample.ps > /tmp/ps-admissions.json
+          cmp /tmp/lean-admissions.json /tmp/ps-admissions.json
+          node -e "JSON.parse(require('node:fs').readFileSync('/tmp/lean-admissions.json','utf8'))"
+          grep -q '"format":"proofscript-checked-admissions"' /tmp/lean-admissions.json
+          echo "PSC1_ADMISSIONS_PIPELINE: PASS"
+
   psc0-compatibility:
     # This lane measures the currently implemented TS frontend/compiler against
     # the PSC1-constrained Lean source. It is deliberately non-blocking while

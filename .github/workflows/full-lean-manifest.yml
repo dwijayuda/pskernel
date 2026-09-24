@@ -23,4 +23,6 @@ jobs:
           "$HOME/.elan/bin/lean" --version
           "$HOME/.elan/bin/lean" --githash
       - name: Full Lean environment manifest
-        run: "$HOME/.elan/bin/lean" --run oracle/replay-probe/DependencyExport.lean Lean --batch-manifest 1000
+        shell: bash
+        run: |
+          "$HOME/.elan/bin/lean" --run oracle/replay-probe/DependencyExport.lean Lean --batch-manifest 1000

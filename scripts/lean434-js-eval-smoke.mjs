@@ -2,19 +2,28 @@ import fs from 'node:fs';
 import {
   Lean4ExportReplay,
   TypeChecker,
+  anonymous,
   constant,
   levelSucc,
   levelZero,
   mkAppN,
+  nameAppend,
+  nameEq,
   nameFromDotted,
-  natLit,
   nameToString,
+  natLit,
+  numName,
+  strName,
   strLit,
 } from '../dist/src/index.js';
 import {
   Lean434EvaluationError,
   Lean434Evaluator,
 } from '../packages/runtime/dist/src/lean4-eval.js';
+import {
+  kernelNameToLean434Runtime,
+  lean434RuntimeNameToKernel,
+} from '../packages/runtime/dist/src/lean4-name.js';
 
 const fixture='oracle/fixtures/lean434-init-prelude.ndjson';
 if(!fs.existsSync(fixture)){
@@ -98,6 +107,33 @@ assertNatResult(
   }
   console.log(
     'ok - Classical.choice remains noncomputable/fail-closed in JS runtime',
+  );
+}
+
+{
+  const prefix=strName(strName(anonymous,'Lean'),'Meta');
+  const suffix=numName(strName(anonymous,'tmp'),7n);
+  let appendCore=evaluator.evaluate(
+    constant(nameFromDotted('Lean.Name.appendCore')),
+  );
+  appendCore=evaluator.applyRuntimeValue(
+    appendCore,
+    kernelNameToLean434Runtime(prefix),
+  );
+  const appendedRuntime=evaluator.applyRuntimeValue(
+    appendCore,
+    kernelNameToLean434Runtime(suffix),
+  );
+  const appended=lean434RuntimeNameToKernel(appendedRuntime);
+  const expected=nameAppend(prefix,suffix);
+  if(!nameEq(appended,expected)){
+    throw new Error(
+      'real Lean Name.appendCore disagrees with pskernel structural append: '+
+      nameToString(appended)+' != '+nameToString(expected),
+    );
+  }
+  console.log(
+    'ok - real Lean Name.appendCore executes through canonical pskernel Name bridge',
   );
 }
 

@@ -9,6 +9,7 @@ import {
   nameFromDotted,
   natLit,
   nameToString,
+  strLit,
 } from '../dist/src/index.js';
 import {Lean434Evaluator} from '../packages/runtime/dist/src/lean4-eval.js';
 
@@ -87,6 +88,32 @@ assertNatResult(
   'real recursive Lean List.lengthTRAux',
   lengthTRAuxExpr,
   2n,
+);
+
+const emptyArrayNat=mkAppN(
+  constant(nameFromDotted('Array.emptyWithCapacity'),[levelZero]),
+  [constant(Nat),natLit(4n)],
+);
+const pushedArrayNat=mkAppN(
+  constant(nameFromDotted('Array.push'),[levelZero]),
+  [constant(Nat),emptyArrayNat,natLit(7n)],
+);
+assertNatResult(
+  'real Lean Array.size after extern-backed push',
+  mkAppN(
+    constant(nameFromDotted('Array.size'),[levelZero]),
+    [constant(Nat),pushedArrayNat],
+  ),
+  1n,
+);
+
+assertNatResult(
+  'real Lean String.utf8ByteSize extern',
+  mkAppN(
+    constant(nameFromDotted('String.utf8ByteSize')),
+    [strLit('L∃∀N')],
+  ),
+  8n,
 );
 
 console.log(

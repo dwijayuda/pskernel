@@ -49,12 +49,9 @@ function wasmExprUsesExternref(
         expr.operand,
       );
     case 'i32.binary':
-      return wasmExprUsesExternref(
-        expr.left,
-      )||
-        wasmExprUsesExternref(
-          expr.right,
-        );
+    case 'i64.binary':
+      return wasmExprUsesExternref(expr.left)||
+        wasmExprUsesExternref(expr.right);
   }
 }
 

@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain eleven pskernel-admitted theorems in total:
+The three modules now contain twelve pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,9 +49,10 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- eleven admitted stdlib theorems: nine definitional laws use bounded `rfl`,
-  `optionOrElseNoneRight` dogfoods bounded `cases`, and
-  `listAppendNilRight` dogfoods bounded induction plus checked rewriting;
+- twelve admitted stdlib theorems: nine definitional laws use bounded `rfl`,
+  `optionOrElseNoneRight` dogfoods bounded `cases`, while
+  `listAppendNilRight` and `listAppendAssoc` dogfood bounded induction plus
+  checked rewriting;
 - zero runtime external assumptions.
 
 For input `9`, the current dogfood `main` returns `22`.
@@ -81,3 +82,20 @@ optionOrElse(value, PsOption.none) = value
 for every `PsOption` using `by cases value; rfl; rfl`. This deliberately
 exercises the pskernel-recursors-based bounded `cases` path on a non-recursive
 ADT. Both branches are discharged by ordinary definitional equality.
+
+## Append associativity dogfood
+
+`ProofScript.Data.List.listAppendAssoc` proves:
+
+```text
+listAppend(listAppend(xs, ys), zs) =
+listAppend(xs, listAppend(ys, zs))
+```
+
+The proof follows the same induction principle as Lean's `List.append_assoc`.
+Because the current bounded `rw` intentionally matches exact structural
+occurrences rather than Lean's fuller definitional/kabstract occurrence search,
+the recursive branch first rewrites with the checked `listAppendCons`
+computation law until the induction-hypothesis occurrence is explicit, then
+rewrites by `tail_ih`. The final equality is closed by the ordinary
+post-rewrite Eq-reflexivity path.

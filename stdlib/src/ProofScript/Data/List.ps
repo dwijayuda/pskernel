@@ -51,3 +51,13 @@ theorem listAppendNilRight {α : Type}
 listAppend(xs, PsList.nil) = xs :=
   by induction xs; rfl;
   rw [listAppendCons(head, tail, PsList.nil)]; rw [tail_ih];
+
+theorem listAppendAssoc {α : Type}
+(xs : PsList(α), ys : PsList(α), zs : PsList(α)) :
+listAppend(listAppend(xs, ys), zs) =
+listAppend(xs, listAppend(ys, zs)) :=
+  by induction xs; rfl;
+  rw [listAppendCons(head, tail, ys)];
+  rw [listAppendCons(head, listAppend(tail, ys), zs)];
+  rw [listAppendCons(head, tail, listAppend(ys, zs))];
+  rw [tail_ih];

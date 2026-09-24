@@ -703,8 +703,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     PsOption/PsResult/PsList only when APIs are supported by the verified
     language itself. The current utility/law tranche includes optionOrElse,
     resultGetOrElse, structurally recursive listAppend, six definitional
-    computation laws, universal Option case analysis, and the inductive
-    listAppendNilRight law. Eleven current stdlib theorems now dogfood bounded
+    computation laws, universal Option case analysis, listAppendNilRight, and
+    listAppendAssoc. Twelve current stdlib theorems now dogfood bounded
     rfl/cases/induction/rw proof paths; continue with stronger laws/utilities
     only when the proof/recursion surface supports them without host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
@@ -725,3 +725,18 @@ Every development report should state:
 - next smallest milestone.
 
 Do not report invented completion percentages.
+
+## Stdlib append associativity checkpoint
+
+The standard library now includes `listAppendAssoc`, derived from the same
+inductive structure used by Lean's `List.append_assoc`. The bounded proof
+does not add a library-specific theorem rule: it uses `induction`, the
+already-checked `listAppendCons` computation theorem, the recursive
+`tail_ih`, and ordinary kernel-checked equality transport/reflexivity.
+
+This law deliberately exposes the current `rw` boundary. Since bounded
+rewriting uses exact structural occurrence abstraction, constructor computation
+steps are made explicit before the induction hypothesis is applied. A future
+Lean-faithful defeq/kabstract occurrence matcher may shorten this source proof,
+but the present theorem remains valid proof dogfood rather than a reason to
+weaken rewrite semantics.

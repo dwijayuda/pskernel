@@ -6,6 +6,7 @@ import {
   type Expr,
   app,
   exprToString,
+  hasMVar,
   instantiate1,
   appView,
   fvar,

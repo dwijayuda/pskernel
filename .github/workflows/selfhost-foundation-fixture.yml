@@ -1,0 +1,90 @@
+name: ProofScript self-host foundation fixture
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/selfhost-foundation-fixture.yml
+      - scripts/generate-selfhost-foundation-fixture.sh
+      - scripts/selfhost-foundation-oracle.mjs
+      - oracle/replay-probe/DependencyExport.lean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: proofscript-selfhost-foundation-fixture
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Verify Lean pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version | tee lean-version.txt
+          lean --version | head -n1 | grep -F 'Lean (version 4.34.0,'
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - name: Generate exact self-host foundation delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/generate-selfhost-foundation-fixture.sh
+          test -s oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson
+          wc -l oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson
+          du -h oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate pskernel replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build --silent
+          tsc -p packages/environment/tsconfig.json
+          node scripts/selfhost-foundation-oracle.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lean434-proofscript-selfhost-foundation
+          path: |
+            oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson
+            lean-version.txt
+          retention-days: 7
+
+      - name: Commit pinned fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson
+          if git diff --cached --quiet; then
+            echo 'self-host foundation fixture already up to date'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(selfhost): pin Lean 4.34 self-host foundation fixture'
+          git reset --hard HEAD
+          git clean -fd
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main

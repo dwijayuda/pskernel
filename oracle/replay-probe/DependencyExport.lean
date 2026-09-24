@@ -639,7 +639,7 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let directRoots := buckets.foldl (init := 0) fun n roots => n + roots.size
   if directRoots != total then
     throw <| IO.userError s!"canonical module root coverage mismatch: {directRoots} != {total}"
-  let rootsPerShard : Nat := 10
+  let rootsPerShard : Nat := 50
   let mut plannedShards := 0
   for roots in buckets do
     unless roots.isEmpty do

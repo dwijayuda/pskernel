@@ -1,0 +1,30 @@
+name: Capped module stream shard50
+
+on:
+  push:
+    branches: [diagnostic/module-stream-shard50]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shard50:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Replay first 500 shard50 canonical shards with explicit GC
+        run: node --expose-gc --max-old-space-size=5632 --stack-size=65500 scripts/diagnostic-capped-module-stream.mjs 500 gc

@@ -1,7 +1,8 @@
 module
 
 prelude
-import Lean.MetavarContext
+public import Lean.MetavarContext
+public import Lean.Data.PersistentHashMap
 
 public section
 

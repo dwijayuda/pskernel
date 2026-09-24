@@ -208,6 +208,16 @@ jobs:
           test -s lean434-parser-types-bootstrap.ndjson
       - name: Execute real Lean.Parser.Types algorithms in JavaScript
         run: node scripts/lean434-js-parser-types-smoke.mjs lean434-parser-types-bootstrap.ndjson
+      - name: Generate real Lean.Level bootstrap corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExport.lean Lean.Level \
+            --selected-after Init.Prelude Lean.Level.addOffset \
+            > lean434-level-bootstrap.ndjson
+          test -s lean434-level-bootstrap.ndjson
+      - name: Execute real Lean.Level algorithm in JavaScript
+        run: node scripts/lean434-js-level-smoke.mjs lean434-level-bootstrap.ndjson
       - name: Generate real Lean ST/IO bootstrap corpus
         shell: bash
         run: |

@@ -2,6 +2,7 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   TypeChecker,
   constant,
+  hasMVar,
   levelZero,
   mkAppN,
   nameFromDotted,
@@ -56,8 +57,16 @@ function elaborateNatOperands(
   const left=elaborate(expr.left,context,natType);
   const right=elaborate(expr.right,context,natType);
   if(
-    !checker.isDefEq(left.type,natType)
-    ||!checker.isDefEq(right.type,natType)
+    !context.metaContext.unify(
+      left.type,
+      natType,
+      context.localContext,
+    )
+    ||!context.metaContext.unify(
+      right.type,
+      natType,
+      context.localContext,
+    )
   ){
     throw new Error(
       "PS_ELAB_NAT_NOTATION_OPERAND_TYPE: operator '"+expr.operator+
@@ -87,8 +96,16 @@ export function elaborateV061NatArithmeticTerms(
     context.localContext.clone(),
   );
   if(
-    !checker.isDefEq(left.type,natType)
-    ||!checker.isDefEq(right.type,natType)
+    !context.metaContext.unify(
+      left.type,
+      natType,
+      context.localContext,
+    )
+    ||!context.metaContext.unify(
+      right.type,
+      natType,
+      context.localContext,
+    )
   ){
     throw new Error(
       "PS_ELAB_NAT_NOTATION_OPERAND_TYPE: operator '"+operator+
@@ -97,9 +114,10 @@ export function elaborateV061NatArithmeticTerms(
   }
   if(
     expected!==undefined
-    &&!checker.isDefEq(
-      context.metaContext.instantiate(expected),
+    &&!context.metaContext.unify(
+      expected,
       natType,
+      context.localContext,
     )
   ){
     throw new Error(
@@ -133,11 +151,12 @@ export function elaborateV061NatArithmeticExpression(
       context.localContext.clone(),
     );
     const expectedType=context.metaContext.instantiate(expected);
-    for(const [typeName,constantName] of fixedUIntAddition){
-      const runtimeName=nameFromDotted(typeName);
-      if(context.environment.find(runtimeName)===undefined)continue;
-      const runtimeType=constant(runtimeName);
-      if(!checker.isDefEq(expectedType,runtimeType))continue;
+    if(!hasMVar(expectedType)){
+      for(const [typeName,constantName] of fixedUIntAddition){
+        const runtimeName=nameFromDotted(typeName);
+        if(context.environment.find(runtimeName)===undefined)continue;
+        const runtimeType=constant(runtimeName);
+        if(!checker.isDefEq(expectedType,runtimeType))continue;
       const left=elaborate(expr.left,context,runtimeType);
       const right=elaborate(expr.right,context,runtimeType);
       if(
@@ -162,7 +181,8 @@ export function elaborateV061NatArithmeticExpression(
           "' did not produce "+typeName,
         );
       }
-      return {term,type};
+        return {term,type};
+      }
     }
   }
 
@@ -209,8 +229,16 @@ export function elaborateV061NatRelationTerms(
     context.localContext.clone(),
   );
   if(
-    !checker.isDefEq(left.type,natType)
-    ||!checker.isDefEq(right.type,natType)
+    !context.metaContext.unify(
+      left.type,
+      natType,
+      context.localContext,
+    )
+    ||!context.metaContext.unify(
+      right.type,
+      natType,
+      context.localContext,
+    )
   ){
     throw new Error(
       "PS_ELAB_NAT_NOTATION_OPERAND_TYPE: operator '"+operator+

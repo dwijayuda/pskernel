@@ -4,6 +4,7 @@ import {
   constant,
   levelZero,
   mkAppN,
+  nameFromDotted,
   type Expr,
 } from 'lean-ts-kernel';
 import type {
@@ -133,9 +134,9 @@ export function elaborateV061NatArithmeticExpression(
     );
     const expectedType=context.metaContext.instantiate(expected);
     for(const [typeName,constantName] of fixedUIntAddition){
-      const runtimeType=constant(
-        requireV061NotationConstant(context,typeName),
-      );
+      const runtimeName=nameFromDotted(typeName);
+      if(context.environment.find(runtimeName)===undefined)continue;
+      const runtimeType=constant(runtimeName);
       if(!checker.isDefEq(expectedType,runtimeType))continue;
       const left=elaborate(expr.left,context,runtimeType);
       const right=elaborate(expr.right,context,runtimeType);

@@ -1,0 +1,6 @@
+name = "psc1-kernel"
+version = "0.1.0"
+defaultTargets = ["PSC1Kernel"]
+
+[[lean_lib]]
+name = "PSC1Kernel"

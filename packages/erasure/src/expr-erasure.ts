@@ -21,6 +21,7 @@ import {eraseRuntimeType} from './type-erasure.js';
 import {safeIdentifier} from './names.js';
 import {eraseRuntimeApplication} from './app-erasure.js';
 import {eraseRuntimeFVar} from './local-erasure.js';
+import {tryEraseRawPosProjection} from './raw-pos-erasure.js';
 export interface OpenedDefinition {
   readonly typeParameters:readonly VerifiedIrTypeParameter[];
   readonly parameters:readonly VerifiedIrParameter[];
@@ -215,12 +216,13 @@ export function eraseRuntimeExpr(
         "' survives in executable code",
       );
     case 'proj':{
-      if(
-        nameToString(expr.typeName)==='String.Pos.Raw'
-        &&expr.index===0
-      ){
-        return eraseRuntimeExpr(expr.expr,scope,environment);
-      }
+      const rawPos=tryEraseRawPosProjection(
+        expr,
+        scope,
+        environment,
+        eraseRuntimeExpr,
+      );
+      if(rawPos!==undefined)return rawPos;
       const structure=scope.structuresByType.get(nameKey(expr.typeName));
       if(structure===undefined){
         throw new Error(

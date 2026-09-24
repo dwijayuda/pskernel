@@ -282,6 +282,30 @@ def psTestDualSourceLeanNativePartialApplication : Bool :=
         && leanOutput.contains "=> addPair(1n,"
   | _, _ => false
 
+def psTestDualSourceLeanNativeTextPrimitives : Bool :=
+  let leanSource :=
+    "def pushBang (s : String) : String := String.push s '!'\n" ++
+    "def firstChar (s : String) : Char := String.Internal.get s 0\n" ++
+    "def nextPos (s : String) (p : Nat) : Nat := String.Internal.next s p\n" ++
+    "def textBytes (s : String) : Nat := String.utf8ByteSize s"
+  let proofScriptSource :=
+    "def pushBang(s : String) : String := String.push(s, '!'); " ++
+    "def firstChar(s : String) : Char := String.Internal.get(s, 0); " ++
+    "def nextPos(s : String)(p : Nat) : Nat := String.Internal.next(s, p); " ++
+    "def textBytes(s : String) : Nat := String.utf8ByteSize(s);"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains "export function pushBang(s: string): string"
+        && leanOutput.contains "(s + \"!\")"
+        && leanOutput.contains "codePointAt(0)"
+        && leanOutput.contains "export function nextPos(s: string, p: bigint): bigint"
+        && leanOutput.contains "export function textBytes(s: string): bigint"
+        && leanOutput.contains "const __ps_w = BigInt"
+  | _, _ => false
+
 def psDebugTextPrimitives : IO Unit := do
   let leanSource :=
     "def pushBang (s : String) : String := String.push s '!'\n" ++

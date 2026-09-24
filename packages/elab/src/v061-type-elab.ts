@@ -25,9 +25,11 @@ import {
 import {
   elaborateV061BoolBinaryTerms,
   elaborateV061BoolNotTerm,
-  elaborateV061PrimitiveBooleanEqualityTerms,
   isV061BoolBinary,
 } from './v061-bool-notation-elab.js';
+import {
+  elaborateV061PrimitiveBooleanEqualityTerms,
+} from './v061-primitive-equality-elab.js';
 
 function elaborateTypePositionApplication(
   fn:Expr,

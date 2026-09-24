@@ -9,11 +9,13 @@ import Ps.Core.Builtin
 import Ps.Core.Abstract
 import Ps.Environment.Basic
 import Ps.Environment.LocalContext
+import Ps.Environment.Instances
 import Ps.Environment.Resolve
 import Ps.Meta.LevelContext
 import Ps.Meta.Context
 import Ps.Meta.Reduce
 import Ps.Meta.Unify
+import Ps.Meta.SynthInstance
 import Ps.Meta.Infer
 import Ps.Project.ModuleGraph
 

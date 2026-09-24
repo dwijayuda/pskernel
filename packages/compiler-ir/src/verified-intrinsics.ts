@@ -27,6 +27,11 @@ export const VERIFIED_IR_INTRINSIC_ARITY={
   'string.atEnd':2,
   'string.extract':3,
   'string.eq':2,
+  'array.emptyWithCapacity':1,
+  'array.size':1,
+  'array.push':2,
+  'array.get':2,
+  'array.getD':3,
 } as const satisfies Readonly<Record<VerifiedIrIntrinsicOperation,1|2|3>>;
 
 export function verifiedIrIntrinsicArity(

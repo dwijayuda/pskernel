@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w2-check-build-run",
+      "status": "runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w3a-nat-check-build-run",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -83,7 +83,8 @@
         "The legacy software path remains available without --verified only as a temporary compatibility lane while verified-core coverage expands.",
         "CLI regression now executes a temporary verified project end-to-end through emitted JavaScript and checks Nat main(21) = 42.",
         "Wasm W1 target adds `psc check/build --verified --target wasm`; check performs target-capability lowering in memory, build emits .wasm/.wat alongside canonical TS/JS evidence, and Wasm run remains fail-closed.",
-        "W2 Wasm check/build/run uses the verified compiler path and semantic JS host ABI; unsupported runtime features fail closed."
+        "W2 Wasm check/build/run uses the verified compiler path and semantic JS host ABI; unsupported runtime features fail closed.",
+        "W3a check/build/run accepts arbitrary-precision Nat for the Wasm target, records the proofscript-wasm32-ref-js-v1 JS-host BigInt execution runtime in reports/manifests, and keeps unsupported Wasm features fail-closed."
       ]
     },
     {
@@ -543,7 +544,7 @@
       "path": "packages/backend-wasm",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w2-binaryen-fixed-width-js-abi",
+      "status": "w3a-binaryen-nat-bigint-js-abi",
       "packageName": "@proofscript/backend-wasm",
       "dependsOn": [
         "wasm-ir"
@@ -551,7 +552,8 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Binaryen 132.0.0 is an exact-pinned untrusted emitter/validator dependency.",
-        "W2 emits raw canonical Wasm plus a JS host adapter that restores unsigned ProofScript values across the signed WebAssembly JS i32/i64 bridge."
+        "W2 emits raw canonical Wasm plus a JS host adapter that restores unsigned ProofScript values across the signed WebAssembly JS i32/i64 bridge.",
+        "W3a uses the reserved proofscript.bigint.v1 JS-host runtime for arbitrary-precision Nat operations, reports executionRuntime metadata, and retains an executable frozen-W2 MVP byte oracle."
       ]
     },
     {
@@ -559,7 +561,7 @@
       "path": "packages/wasm-lowering",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w2-fixed-width-uint-lowering",
+      "status": "w3a-nat-bigint-lowering",
       "packageName": "@proofscript/wasm-lowering",
       "dependsOn": [
         "compiler-ir",
@@ -568,7 +570,7 @@
       "sourceLanguage": "typescript",
       "notes": [
         "Lowering consumes only verified compiler IR; fixed-width UInt values lower to i32/i64 with UInt8/UInt16 boundary masking.",
-        "Nat and Int explicitly reject rather than narrowing arbitrary-precision Lean semantics to i64."
+        "W3a preserves arbitrary-precision Nat as externref/JS bigint, including verified Nat arithmetic/comparison intrinsics; Int value transport remains the W3b step and Int literals/arithmetic stay fail-closed."
       ]
     },
     {
@@ -576,13 +578,14 @@
       "path": "packages/wasm-ir",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "w2-fixed-width-abi-ir",
+      "status": "w3a-bigint-ref-abi-ir",
       "packageName": "@proofscript/wasm-ir",
       "dependsOn": [],
       "sourceLanguage": "typescript",
       "notes": [
         "ProofScript-owned typed WasmIR is independent of Binaryen and carries no proof authority.",
-        "W2 preserves logical Bool/UInt8/UInt16/UInt32/UInt64 ABI types separately from physical i32/i64 representation."
+        "W2 preserves logical Bool/UInt8/UInt16/UInt32/UInt64 ABI types separately from physical i32/i64 representation.",
+        "W3a adds the reference-types profile, logical Nat/Int ABI identities, versioned internal BigInt imports, and deterministic bigint literal metadata without introducing Binaryen types upstream."
       ]
     },
     {
@@ -590,7 +593,7 @@
       "path": "packages/compiler",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "checked-core-to-js-generic-structure+structural-recursion+wasm-w2-mvp",
+      "status": "checked-core-to-js-generic-structure+structural-recursion+wasm-w3a-nat",
       "packageName": "@proofscript/compiler",
       "dependsOn": [
         "checked-core",
@@ -615,7 +618,8 @@
         "The verified compiler now carries direct recursive ADTs and primitive structurally recursive functions—with invariant runtime parameters—from pskernel recursors to ordinary TypeScript/JavaScript recursion.",
         "Canonical verified compilation now carries class dictionaries through the same structure IR/runtime representation; locally synthesized instances become ordinary checked runtime arguments.",
         "W1 exposes checked-core -> erasure -> verified IR -> WasmIR -> Binaryen orchestration; unsupported Wasm runtime features remain fail-closed.",
-        "W2 preserves fixed-width UInt semantics across the JS-hosted Wasm ABI while keeping raw Wasm bit representations i32/i64."
+        "W2 preserves fixed-width UInt semantics across the JS-hosted Wasm ABI while keeping raw Wasm bit representations i32/i64.",
+        "W3a carries pskernel-derived Nat values through externref Wasm, with TS/Wasm differential execution over machine boundaries and huge values plus Nat call/let/if composition."
       ]
     },
     {

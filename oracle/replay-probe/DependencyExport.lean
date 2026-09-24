@@ -672,6 +672,7 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
           let stop := min roots.size (start + rootsPerShard)
           let slice := roots.extract start stop
           resetInternTables
+          IO.eprintln s!"[exporter-only] module={moduleName} part={part} roots={slice.size}"
           IO.println <| (Json.mkObj [("shard", Json.mkObj [
             ("module", moduleName.toString),
             ("index", idx),

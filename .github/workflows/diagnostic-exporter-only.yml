@@ -1,0 +1,29 @@
+name: Diagnostic exporter-only throughput
+
+on:
+  push:
+    branches: [diagnostic/exporter-only-throughput]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - name: Export canonical Std stream without TypeScript replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$LEAN434_BIN:$PATH"
+          "$LEAN434_BIN/lean" --run oracle/replay-probe/DependencyExport.lean Std --module-stream > /dev/null

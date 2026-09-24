@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain fourteen pskernel-admitted theorems in total:
+The three modules now contain sixteen pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,11 +49,11 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- fourteen admitted stdlib theorems: ten definitional laws use bounded `rfl`,
-  `optionOrElseNoneRight` dogfoods bounded `cases`, while
-  `listAppendNilRight` dogfoods bounded induction plus proof-producing
-  `simp only`, while `listAppendAssoc` and `listMapAppend` dogfood
-  bounded induction plus checked rewriting;
+- sixteen admitted stdlib theorems: eleven definitional laws use bounded
+  `rfl`, `optionOrElseNoneRight` dogfoods bounded `cases`,
+  `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
+  `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
+  `listMapAppend` dogfood bounded induction plus checked rewriting;
 - zero runtime external assumptions.
 
 For input `9`, the current dogfood `main` returns `22`.
@@ -68,13 +68,9 @@ listAppend(xs, PsList.nil) = xs
 ```
 
 It uses bounded induction. Constructor fields retain their source names in the
-recursive branch and the recursive field `tail` exposes `tail_ih`. The
-recursive branch now runs
-`simp only [listAppendCons(head, tail, PsList.nil), tail_ih]`.
-Both simplification rules are explicit checked Eq proofs; the bounded
-simplifier reconstructs each equality transport and closes the resulting
-reflexive Eq through the kernel-backed rfl path. No global simp database, host
-theorem, or compiler shortcut is involved.
+recursive branch and the recursive field `tail` exposes `tail_ih`. The proof
+rewrites with the checked constructor computation law and that induction
+hypothesis. No host theorem or compiler shortcut is involved.
 
 ## First universal case-analysis law
 
@@ -120,3 +116,23 @@ the new definitional computation law `listMapCons`, the existing
 `listAppendCons`, and `tail_ih`. Every transformation is an ordinary
 kernel-checked equality rewrite; the theorem does not depend on a host List
 implementation or a hidden simplifier rule.
+
+## Result/Option simp-only integration law
+
+`ProofScript.Data.Result.resultToOptionErrorOrElse` proves:
+
+```text
+optionOrElse(resultToOption(PsResult.error(error)), fallback) = fallback
+```
+
+with exactly:
+
+```text
+simp only [resultToOptionError(error), optionOrElseNone(fallback)]
+```
+
+Both selected rewrite directions strictly decrease the current structural
+expression-size metric, and their lhs patterns are non-overlapping. The first
+rule exposes `PsOption.none`; the second removes `optionOrElse`. This gives
+the end-to-end stdlib project a genuine multi-rule simplifier regression without
+weakening the simplifier's termination/orientation contract.

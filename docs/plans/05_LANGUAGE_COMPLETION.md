@@ -675,10 +675,11 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    types, so library-driven constructor inference should reuse that path
    instead of adding syntax-specific inference.
 4. Validate the landed Eq-only `rfl` / bounded multi-rule `simp only`
-   proof reconstruction. The stdlib now dogfoods explicit two-rule
-   `simp only` inside the inductive `listAppendNilRight` proof. Do not
-   broaden `rfl` to HEq or arbitrary reflexive relations before equivalent
-   Lean `@[refl]` indexing semantics are owned.
+   proof reconstruction. The stdlib now dogfoods a strictly-decreasing,
+   non-overlapping two-rule `simp only` chain in the Result/Option integration
+   law `resultToOptionErrorOrElse`. Do not broaden `rfl` to HEq or
+   arbitrary reflexive relations before equivalent Lean `@[refl]` indexing
+   semantics are owned.
 5. Keep theorem-statement syntax evidence-driven; explicit dependent Pi plus
    the current Nat/Bool/propositional forms cover the reference-backed
    foundation. Add lambdas/match only when a concrete specification needs them.
@@ -706,12 +707,13 @@ semantic priorities while making mixed-source modules possible when L5 begins.
 10. Expand the landed ProofScript-written standard-library foundation from
     PsOption/PsResult/PsList only when APIs are supported by the verified
     language itself. The current utility/law tranche includes optionOrElse,
-    resultGetOrElse, structurally recursive listAppend/listMap, ten
-    definitional computation laws, universal Option case analysis,
-    listAppendNilRight, listAppendAssoc, and listMapAppend. Fourteen current
-    stdlib theorems now dogfood bounded rfl/cases/induction/rw proof paths;
-    continue with stronger laws/utilities only when the proof/recursion surface
-    supports them without host shortcuts.
+    resultGetOrElse/resultToOption, structurally recursive listAppend/listMap,
+    eleven definitional computation laws, universal Option case analysis,
+    a Result/Option multi-rule simp law, listAppendNilRight, listAppendAssoc,
+    and listMapAppend. Sixteen current stdlib theorems now dogfood bounded
+    rfl/cases/simp-only/induction/rw proof paths; continue with stronger
+    laws/utilities only when the proof/recursion surface supports them without
+    host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.
@@ -783,13 +785,13 @@ before the candidate is kernel-checked and accepted.
 
 ## Stdlib simp-only proof checkpoint
 
-`listAppendNilRight` now validates bounded multi-rule `simp only` inside the
-real verified stdlib project. Its recursive branch supplies exactly two Eq
-proofs: the constructor computation law and the induction hypothesis. The rules
-are structurally non-overlapping and decreasing, so they fit the current
-bounded simplifier contract.
+`resultToOptionErrorOrElse` now validates bounded multi-rule `simp only`
+inside the real verified stdlib project. Its two explicit Eq rules are
+`resultToOptionError(error)` and `optionOrElseNone(fallback)`. Both
+directions strictly reduce structural expression size and the selected lhs
+patterns are non-overlapping, matching the current bounded simplifier contract.
 
 This keeps the simplifier's evidence boundary visible: there is no global simp
-set, no hidden unfolding, and no theorem-specific shortcut. Each change still
-flows through the same Eq transport proof reconstruction used by bounded
-`rw`, with the final reflexive target closed by the Eq-only rfl helper.
+set, hidden unfolding, or theorem-specific shortcut. Each change still flows
+through the same Eq transport proof reconstruction used by bounded `rw`, with
+the final reflexive target closed by the Eq-only rfl helper.

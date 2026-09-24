@@ -43,3 +43,12 @@ resultGetOrElse(PsResult.ok(value), fallback) = value := by rfl;
 theorem resultGetOrElseError {α : Type}{ε : Type}
 (error : ε, fallback : α) :
 resultGetOrElse(PsResult.error(error), fallback) = fallback := by rfl;
+
+theorem resultToOptionError {α : Type}{ε : Type}
+(error : ε) :
+resultToOption(PsResult.error(error)) = PsOption.none := by rfl;
+
+theorem resultToOptionErrorOrElse {α : Type}{ε : Type}
+(error : ε, fallback : PsOption(α)) :
+optionOrElse(resultToOption(PsResult.error(error)), fallback) = fallback :=
+  by simp only [resultToOptionError(error), optionOrElseNone(fallback)];

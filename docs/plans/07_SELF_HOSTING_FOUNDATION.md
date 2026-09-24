@@ -222,6 +222,37 @@ A runtime language feature is complete only when it executes through:
 
 A parser-only or backend-only implementation does not close a foundation gate.
 
+### TypeScript / JavaScript backend invariant
+
+For the Lean-authored compiler implementation, TypeScript is the final compiler
+output language. **Do not add a separate Lean-authored JavaScript emitter.**
+JavaScript, declarations, and source maps are produced by the pinned installed
+TypeScript compiler (`tsc`) from the emitted `.ts`, matching the existing
+TypeScript compiler implementation's backend contract.
+
+Required backend behavior is therefore:
+
+```text
+supported .lean or .ps
+-> shared source-neutral AST
+-> Lean-compatible elaboration / checked core
+-> verified erasure / compiler IR
+-> Lean-authored TypeScript emitter
+-> installed pinned tsc
+-> .js + .d.ts + .js.map
+```
+
+The host wrapper must use the repository-installed TypeScript version rather than
+implicitly downloading another compiler. Its compile settings should remain
+aligned with the TypeScript implementation: ES2022 target/module, Bundler module
+resolution, strict checking, declarations, source maps, no emit on error, and
+skip-lib-check.
+
+The Lean-hosted CLI should converge on the established `psc` user workflow:
+`check`, `build`, `run`, `translate`, and `emit-lean`. Bootstrap-only diagnostic
+commands such as checked-admission or raw-TypeScript emission may remain, but
+must not become a second semantic compilation path.
+
 ### Staged source portability invariant
 
 During the Lean bootstrap and SH8a compiler implementation, **`.lean` is the

@@ -70,6 +70,7 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
 {
   equal(sourceKindFromFileName('main.ps'),'proofscript');
   equal(sourceKindFromFileName('Main.lean'),'lean-subset');
+  equal(sourceKindFromFileName('App.psx'),'proofscript');
   equal(sourceKindFromFileName('UPPER.PS'),'proofscript');
   throws(
     ()=>sourceKindFromFileName('main.ts'),
@@ -78,6 +79,7 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
 
   const registry=createDefaultSourceFrontendRegistry();
   equal(registry.forFile('main.ps').kind,'proofscript');
+  equal(registry.forFile('App.psx').kind,'proofscript');
   equal(registry.forFile('Main.lean').kind,'lean-subset');
   equal(
     registry.forFile('main.ps')
@@ -88,6 +90,50 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
   throws(
     ()=>registry.register(leanSubsetSourceFrontend),
     /PS_FRONTEND_DUPLICATE/,
+  );
+}
+
+
+{
+  const source=
+    'function View(name : String) : JSX.Element := '+
+    '<div className="greeting">Hello {name}<span>{name}</span></div>;';
+  const registry=createDefaultSourceFrontendRegistry();
+  const parsed=registry.forFile('View.psx').parse(source);
+  equal(parsed.featureIds.includes('E-JSX'),true);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'function');
+  if(declaration?.kind==='function'){
+    equal(declaration.body.kind,'call');
+    if(declaration.body.kind==='call'){
+      equal(declaration.body.callee,'$psx.element');
+    }
+  }
+  const printed=lowerV061ModuleToProofScript(parsed);
+  equal(printed,source+'\n');
+  equal(
+    lowerV061ModuleToProofScript(
+      registry.forFile('View.psx').parse(printed),
+    ),
+    printed,
+  );
+  throws(
+    ()=>parseV061Module(source),
+    /PS_JSX_DISABLED/,
+  );
+  throws(
+    ()=>lowerV061ModuleToLean(parsed),
+    /PS_LEAN_LOWERING_JSX_UNSUPPORTED/,
+  );
+
+  const selfClosing=registry.forFile('Button.psx').parse(
+    'function ButtonView(name : String) : JSX.Element := '+
+    '<Button label={name} />;',
+  );
+  equal(
+    lowerV061ModuleToProofScript(selfClosing),
+    'function ButtonView(name : String) : JSX.Element := '+
+      '<Button label={name} />;\n',
   );
 }
 

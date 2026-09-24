@@ -23,6 +23,20 @@ inductive PsErasureError where
   | unsupportedApplication
   | unknownConstant (name : PsName)
 
+structure PsRuntimeStructureField where
+  sourceIndex : Nat
+  projectionIndex : Nat
+  name : String
+  type : PsVerifiedIrType
+
+structure PsRuntimeStructureInfo where
+  name : String
+  coreName : PsName
+  constructorName : PsName
+  numParams : Nat
+  typeParameters : List PsVerifiedIrTypeParameter
+  fields : List PsRuntimeStructureField
+
 structure PsRuntimeConstructorField where
   sourceIndex : Nat
   name : String
@@ -51,6 +65,8 @@ structure PsErasureScope where
   declarationNames : List (PsName × String)
   runtimeConstructors : List (PsName × PsRuntimeConstructorInfo)
   runtimeRecursors : List (PsName × PsRuntimeInductiveInfo)
+  runtimeStructures : List (PsName × PsRuntimeStructureInfo) := []
+  runtimeStructureConstructors : List (PsName × PsRuntimeStructureInfo) := []
 
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :
@@ -78,6 +94,15 @@ def psErasureLookupName :
   | entry :: rest, name =>
       if psNameEq entry.1 name then some entry.2
       else psErasureLookupName rest name
+
+def psErasureLookupStructure :
+    List (PsName × PsRuntimeStructureInfo) ->
+    PsName ->
+    Option PsRuntimeStructureInfo
+  | [], _ => none
+  | entry :: rest, name =>
+      if psNameEq entry.1 name then some entry.2
+      else psErasureLookupStructure rest name
 
 def psErasureLookupConstructor :
     List (PsName × PsRuntimeConstructorInfo) ->

@@ -9,6 +9,9 @@ structure S where
   levels : HashMap Level Nat := HashMap.emptyWithCapacity 32 |>.insert .zero 0
   exprs : HashMap ExprStructEq Nat := HashMap.emptyWithCapacity 256
   mdata : Array KVMap := #[]
+  /-- Equality-safe coarse index for MData ids. The bucket key is only a hint;
+      exact Lean KVMap BEq still resolves every collision. -/
+  mdataBuckets : HashMap String (Array Nat) := HashMap.emptyWithCapacity 64
   emitted : NameSet := {}
   active : NameSet := {}
   /-- Canonical module-stream follows Lean.Kernel.Environment.replay and skips
@@ -37,14 +40,46 @@ def biJson : BinderInfo → Json
   modify fun s => setM s ((getM s).insert x i)
   return i
 
+def dataValueCtorTag : DataValue → String
+  | .ofString _ => "s"
+  | .ofBool _   => "b"
+  | .ofName _   => "n"
+  | .ofNat _    => "u"
+  | .ofInt _    => "i"
+  | .ofSyntax _ => "x"
+
+/-- Coarse equality invariant for KVMap BEq.
+Equal maps have the same extensional key set and equal values, hence the same
+value constructor tag at each key. The string may collide for unequal maps;
+dumpMDataEqId always resolves such collisions with the exact KVMap BEq below. -/
+def mdataBucketKey (d : KVMap) : String := Id.run do
+  let mut seen : NameSet := {}
+  let mut items : Array (Name × String) := #[]
+  for (k, v) in d.entries do
+    unless seen.contains k do
+      seen := seen.insert k
+      items := items.push (k, dataValueCtorTag v)
+  items := items.qsort fun a b => Name.quickLt a.1 b.1
+  let mut out := ""
+  for (k, tag) in items do
+    out := out ++ "|" ++ toString k ++ ":" ++ tag
+  return out
+
 def dumpMDataEqId (d : KVMap) : M Nat := do
-  let xs := (← get).mdata
-  for i in [0:xs.size] do
+  let s ← get
+  let xs := s.mdata
+  let key := mdataBucketKey d
+  let ids := (s.mdataBuckets[key]?).getD #[]
+  for i in ids do
     -- Lean 4.34 Expr.eqv delegates MData comparison to KVMap's BEq, which
     -- is extensional map equality (subset both ways), not raw entry-list order.
     if xs[i]! == d then return i
   let i := xs.size
-  modify fun s => { s with mdata := s.mdata.push d }
+  modify fun s =>
+    let ids := (s.mdataBuckets[key]?).getD #[]
+    { s with
+      mdata := s.mdata.push d
+      mdataBuckets := s.mdataBuckets.insert key (ids.push i) }
   return i
 
 def dumpName (n : Name) : M Nat := intern n "in" (·.names) ({ · with names := · }) do

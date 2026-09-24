@@ -1,0 +1,46 @@
+name: Diagnostic MData bucket index
+# trigger: mdata-bucket-index-v1
+
+on:
+  push:
+    branches: [diagnostic/mdata-bucket-index]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:kernel
+      - run: node scripts/anti-drift.mjs
+      - name: Compile/export smoke with indexed MData equality ids
+        shell: bash
+        run: lean --run oracle/replay-probe/DependencyExport.lean Init.Prelude --module-stream > /dev/null
+      - name: Time-box canonical replay with original GC cadence
+        shell: bash
+        env:
+          PSKERNEL_STD_HEAP_MIB: "5632"
+        run: |
+          set +e
+          timeout --signal=TERM 720s npm run oracle:std-full
+          code=$?
+          if [ "$code" -eq 124 ] || [ "$code" -eq 143 ]; then
+            echo "MDATA_PROFILE_TIMEBOX_REACHED"
+            exit 0
+          fi
+          exit "$code"

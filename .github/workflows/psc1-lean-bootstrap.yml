@@ -69,6 +69,31 @@ jobs:
           cd selfhost
           lake exe psc1
 
+      - name: Run CLI parity smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          cd selfhost
+          cat > /tmp/psc1-cli.lean <<'EOF'
+          def idNat (x : Nat) : Nat := x
+          EOF
+          cat > /tmp/psc1-cli.ps <<'EOF'
+          def idNat(x : Nat) : Nat := x;
+          EOF
+          lake exe psc1 check /tmp/psc1-cli.lean
+          lake exe psc1 check /tmp/psc1-cli.ps
+          lake exe psc1 emit-lean /tmp/psc1-cli.ps > /tmp/psc1-cli-emitted.lean
+          lake exe psc1 translate /tmp/psc1-cli.lean --to ps > /tmp/psc1-cli-translated.ps
+          grep -q 'def idNat' /tmp/psc1-cli-emitted.lean
+          grep -q 'def idNat' /tmp/psc1-cli-translated.ps
+          rm -f /tmp/psc1-cli.js /tmp/psc1-cli.d.ts /tmp/psc1-cli.js.map
+          lake exe psc1 build /tmp/psc1-cli.lean --out /tmp/psc1-cli.ts
+          test -f /tmp/psc1-cli.js
+          test -f /tmp/psc1-cli.d.ts
+          test -f /tmp/psc1-cli.js.map
+          echo "PSC1_CLI_PARITY_SMOKE: PASS"
+
       - name: Run bootstrap semantic tests
         shell: bash
         run: |

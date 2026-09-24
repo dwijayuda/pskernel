@@ -328,6 +328,110 @@ def psElabForall
                 closed
                 expected
 
+def psElabLetAfterValue
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (outerContext : PsElabContext)
+    (name : PsName)
+    (bindingType : PsExpr)
+    (valueResult : PsElabTermResult)
+    (body : PsSyntaxTerm)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  let pushed :=
+    psLocalPushLet
+      valueResult.context.localContext
+      name
+      bindingType
+      valueResult.term
+  let bodyContext :=
+    psElabContextWithLocal
+      valueResult.context
+      pushed.context
+  match elaborate bodyContext body expected with
+  | Except.error error => Except.error error
+  | Except.ok bodyResult =>
+      let metaContext := bodyResult.context.metaContext
+      let closedBindingType :=
+        psMetaInstantiate metaContext bindingType
+      let closedValue :=
+        psMetaInstantiate metaContext valueResult.term
+      let openBody :=
+        psMetaInstantiate metaContext bodyResult.term
+      let closedBody :=
+        psExprAbstractFVar pushed.id openBody
+      let term :=
+        PsExpr.letE
+          name
+          closedBindingType
+          closedValue
+          closedBody
+      let restoredContext :=
+        psElabContextWithMeta outerContext metaContext
+      psElabResolvedTerm
+        restoredContext
+        term
+        expected
+
+def psElabLet
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (context : PsElabContext)
+    (nameSyntax : PsSyntaxName)
+    (declaredType : Option PsSyntaxTerm)
+    (value : PsSyntaxTerm)
+    (body : PsSyntaxTerm)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match psSyntaxNameToName nameSyntax with
+  | none => Except.error PsElabError.emptyName
+  | some name =>
+      match declaredType with
+      | none =>
+          match elaborate context value none with
+          | Except.error error => Except.error error
+          | Except.ok valueResult =>
+              psElabLetAfterValue
+                elaborate
+                context
+                name
+                valueResult.type
+                valueResult
+                body
+                expected
+      | some sourceType =>
+          match elaborate context sourceType none with
+          | Except.error error => Except.error error
+          | Except.ok typeResult =>
+              match psInferEnsureSort
+                  typeResult.context.environment
+                  typeResult.context.metaContext
+                  typeResult.context.localContext
+                  typeResult.type with
+              | Except.error error =>
+                  Except.error (PsElabError.infer error)
+              | Except.ok _ =>
+                  match elaborate
+                      typeResult.context
+                      value
+                      (some typeResult.term) with
+                  | Except.error error => Except.error error
+                  | Except.ok valueResult =>
+                      psElabLetAfterValue
+                        elaborate
+                        context
+                        name
+                        typeResult.term
+                        valueResult
+                        body
+                        expected
+
 def psBinderAcceptsExplicitArgument (binder : PsBinderInfo) : Bool :=
   match binder with
   | .explicit => true
@@ -398,6 +502,15 @@ def psElabTermWithFuel
             (psElabTermWithFuel remaining)
             context
             binders
+            body
+            expected
+      | .letE name declaredType value body _ =>
+          psElabLet
+            (psElabTermWithFuel remaining)
+            context
+            name
+            declaredType
+            value
             body
             expected
       | .app fn args _ =>

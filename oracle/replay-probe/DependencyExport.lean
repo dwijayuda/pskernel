@@ -566,7 +566,7 @@ partial def dumpSelectedRootsSegmented
     ("segmentation", "declaration")
   ])]).compress
   let _ ← (do
-    modify fun s => { s with segmented := true }
+    modify fun (s : S) => { s with segmented := true }
     for n in roots do dumpConstant env n
     closeDeclarationSegment) |>.run {}
   pure ()

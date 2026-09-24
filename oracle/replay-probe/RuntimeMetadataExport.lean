@@ -49,7 +49,7 @@ def dumpDeclarationRuntimeMetadata (env : Environment) : IO (Array Json × Array
       externs := externs.push <| Json.mkObj [
         ("declaration", name.toString),
         ("module", moduleIdx?.map (moduleNameForIdx env) |>.getD ""),
-        ("moduleIndex", moduleIdx?.map (fun idx => toJson idx) |>.getD Json.null),
+        ("moduleIndex", moduleIdx?.map (fun idx => toJson idx.toNat) |>.getD Json.null),
         ("entries", externDataJson data)
       ]
     if let some impl := Compiler.getImplementedBy? env name then
@@ -57,7 +57,7 @@ def dumpDeclarationRuntimeMetadata (env : Environment) : IO (Array Json × Array
       implementedBy := implementedBy.push <| Json.mkObj [
         ("declaration", name.toString),
         ("module", moduleIdx?.map (moduleNameForIdx env) |>.getD ""),
-        ("moduleIndex", moduleIdx?.map (fun idx => toJson idx) |>.getD Json.null),
+        ("moduleIndex", moduleIdx?.map (fun idx => toJson idx.toNat) |>.getD Json.null),
         ("implementation", impl.toString)
       ]
   return (externs, implementedBy)

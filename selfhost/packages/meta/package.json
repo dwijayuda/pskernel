@@ -8,7 +8,8 @@
     "sourceRoots": [
       "src"
     ],
-    "role": "meta"
+    "role": "meta",
+    "universeMeta": "separate-context"
   },
   "dependencies": {
     "@proofscript/core": "0.0.0-dev",

@@ -1106,17 +1106,20 @@ structure PsElabApplicationResult where
   result : PsElabTermResult
   pendingInstancesRev : List Nat
 
-def psElabApplyArgs
+def psElabApplyArgsWithFuel
     (elaborate :
       PsElabContext ->
       PsSyntaxTerm ->
       Option PsExpr ->
       Except PsElabError PsElabTermResult) :
+    Nat ->
     PsElabTermResult ->
     List PsSyntaxTerm ->
     List Nat ->
     Except PsElabError PsElabApplicationResult
-  | current, arguments, pendingInstancesRev =>
+  | 0, _, _, _ =>
+      Except.error PsElabError.fuelExhausted
+  | fuel + 1, current, arguments, pendingInstancesRev =>
       let currentType :=
         psWhnf
           current.context.environment
@@ -1147,8 +1150,9 @@ def psElabApplyArgs
                       psExprInstantiate1
                         body
                         elaboratedArgument.term
-                    psElabApplyArgs
+                    psElabApplyArgsWithFuel
                       elaborate
+                      fuel
                       {
                         context := elaboratedArgument.context
                         term := nextTerm
@@ -1190,8 +1194,9 @@ def psElabApplyArgs
                 | _ => pendingInstancesRev
               else
                 pendingInstancesRev
-            psElabApplyArgs
+            psElabApplyArgsWithFuel
               elaborate
+              fuel
               nextResult
               arguments
               nextPending
@@ -1203,6 +1208,24 @@ def psElabApplyArgs
             }
           else
             Except.error (PsElabError.infer PsInferError.expectedFunction)
+
+
+def psElabApplyArgs
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (current : PsElabTermResult)
+    (arguments : List PsSyntaxTerm)
+    (pendingInstancesRev : List Nat) :
+    Except PsElabError PsElabApplicationResult :=
+  psElabApplyArgsWithFuel
+    elaborate
+    4096
+    current
+    arguments
+    pendingInstancesRev
 
 def psElabSolvePendingInstances :
     PsElabTermResult ->

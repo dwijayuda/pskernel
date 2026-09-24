@@ -10,6 +10,7 @@ import {
   instantiate1,
   appView,
   fvar,
+  hasMVar,
   nameToString,
 } from 'lean-ts-kernel';
 import {

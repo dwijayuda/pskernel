@@ -1,4 +1,3 @@
-import Ps.Foundation.Name
 import Ps.Foundation.Source
 
 structure PsSyntaxName where
@@ -11,9 +10,8 @@ inductive PsSyntaxBinderKind where
   | strictImplicit
   | instanceImplicit
 
-structure PsSyntaxBinder where
+structure PsSyntaxBinderHead where
   name : PsSyntaxName
-  type : PsSyntaxTerm
   kind : PsSyntaxBinderKind
   span : PsSourceSpan
 
@@ -25,8 +23,14 @@ inductive PsSyntaxTerm where
   | bool (value : Bool) (span : PsSourceSpan)
   | unit (span : PsSourceSpan)
   | app (fn : PsSyntaxTerm) (args : List PsSyntaxTerm) (span : PsSourceSpan)
-  | lambda (binders : List PsSyntaxBinder) (body : PsSyntaxTerm) (span : PsSourceSpan)
-  | forallE (binders : List PsSyntaxBinder) (body : PsSyntaxTerm) (span : PsSourceSpan)
+  | lambda
+      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (body : PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | forallE
+      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (body : PsSyntaxTerm)
+      (span : PsSourceSpan)
   | letE
       (name : PsSyntaxName)
       (type : Option PsSyntaxTerm)
@@ -46,13 +50,13 @@ structure PsSyntaxImport where
 inductive PsSyntaxDeclaration where
   | definition
       (name : PsSyntaxName)
-      (binders : List PsSyntaxBinder)
+      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
       (span : PsSourceSpan)
-  | theorem
+  | theoremDecl
       (name : PsSyntaxName)
-      (binders : List PsSyntaxBinder)
+      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
       (span : PsSourceSpan)

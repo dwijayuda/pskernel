@@ -12,6 +12,7 @@ structure PsParseResult (α : Type) where
   cursor : PsTokenCursor
 
 inductive PsParseError where
+  | fuelExhausted
   | unexpectedEnd (expected : String)
   | expectedText (expected : String) (actual : String) (span : PsSourceSpan)
   | expectedKind

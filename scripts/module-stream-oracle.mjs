@@ -8,6 +8,8 @@ import {createLeanNativeEvaluator} from './lean-native-evaluator.mjs';
 
 const moduleName=process.argv[2]??'Init.Prelude';
 const expectedArg=process.argv[3];
+const logEveryShard=Number(process.env.PSKERNEL_LOG_EVERY_SHARD??'25');
+if(!Number.isSafeInteger(logEveryShard)||logEveryShard<1)throw new Error(`module-stream-oracle: invalid PSKERNEL_LOG_EVERY_SHARD ${process.env.PSKERNEL_LOG_EVERY_SHARD}`);
 const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin',...(process.env.PATH??'').split(delimiter)].filter(Boolean).map(p=>resolve(p));
 const leanExe=process.platform==='win32'?'lean.exe':'lean';
 const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
@@ -54,7 +56,7 @@ try{
      replay=new Lean4ExportReplay(shared,{nativeEvaluator});
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);
-     if(shards===1||shards%25===0)console.error(`[module-stream] shard=${shards}/${header?.plannedShards??'?'} module=${current} part=${marker.shard.part??0} roots=${marker.shard.roots??'?'} constants=${shared.size} rssMiB=${rss.toFixed(1)} heapMiB=${heap.toFixed(1)}`);
+     if(shards===1||shards%logEveryShard===0)console.error(`[module-stream] shard=${shards}/${header?.plannedShards??'?'} module=${current} part=${marker.shard.part??0} roots=${marker.shard.roots??'?'} constants=${shared.size} rssMiB=${rss.toFixed(1)} heapMiB=${heap.toFixed(1)}`);
      continue;
    }
    if(!replay)throw new Error(`record before first shard: ${line.slice(0,120)}`);

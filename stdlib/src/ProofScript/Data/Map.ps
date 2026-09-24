@@ -6,9 +6,6 @@ inductive PsMap(κ : Type, ν : Type) where {
   | entry(key : κ, value : ν, tail : PsMap(κ, ν));
 };
 
-def mapEmpty {κ : Type}{ν : Type} : PsMap(κ, ν) :=
-  PsMap.empty;
-
 function mapIsEmpty {κ : Type}{ν : Type}
 (values : PsMap(κ, ν)) : Bool :=
   match values with {

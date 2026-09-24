@@ -5,7 +5,7 @@ import {compileCheckedCoreToWasm} from '@proofscript/compiler';
 import {compileVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
-import type {BuildResult,CommonArgs} from '../types.js';
+import type {BuildReport,BuildResult,CommonArgs} from '../types.js';
 import {
   writeVerifiedModuleArtifacts,
 } from '../project-artifact-output.js';
@@ -66,7 +66,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       result.moduleArtifacts,
     );
 
-    const report={
+    const report:BuildReport={
       ok:true,
       command:'build',
       ...baseReport(
@@ -159,7 +159,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   const mapPath=join(outDir,stem+'.js.map');
   const manifestPath=join(outDir,stem+'.proofscript.json');
 
-  const report={
+  const report:BuildReport={
     ok:true,
     command:'build',
     ...baseReport(

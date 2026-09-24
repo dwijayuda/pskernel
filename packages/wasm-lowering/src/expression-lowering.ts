@@ -20,6 +20,7 @@ import {
 } from './type-lowering.js';
 import {lowerRuntimeLocal} from './local-lowering.js';
 import {
+  lowerNatIntrinsic,
   lowerNatLiteral,
   type WasmRuntimeSupport,
 } from './runtime-support.js';
@@ -101,6 +102,34 @@ export function lowerRuntimeExpr(
 
     case 'intrinsic':
       switch(expr.operation){
+        case 'nat.add':
+        case 'nat.sub':
+        case 'nat.mul':
+        case 'nat.div':
+        case 'nat.mod':
+        case 'nat.eq':
+        case 'nat.ne':
+        case 'nat.le':
+        case 'nat.lt':
+          return lowerNatIntrinsic(
+            expr.operation,
+            lowerRuntimeExpr(
+              expr.args[0]!,
+              'nat',
+              locals,
+              signatures,
+              support,
+            ),
+            lowerRuntimeExpr(
+              expr.args[1]!,
+              'nat',
+              locals,
+              signatures,
+              support,
+            ),
+            support,
+          );
+
         case 'bool.not':
           return {
             kind:'i32.unary',

@@ -28,6 +28,7 @@ def psLeanReservedApplicationToken (token : PsToken) : Bool :=
     || token.text == "where"
     || token.text == "then"
     || token.text == "else"
+    || token.text == "fun"
 
 def psLeanCanStartSimpleArgument (cursor : PsTokenCursor) : Bool :=
   match psTokenCursorPeek cursor with
@@ -134,6 +135,62 @@ def psParseLeanBindersWithFuel
       else
         Except.ok { value := bindersRev.reverse, cursor := cursor }
 
+def psParseLeanTermWithFuel :
+    Nat ->
+    PsTokenCursor ->
+    Except PsParseError (PsParseResult PsSyntaxTerm)
+  | 0, _ => Except.error PsParseError.fuelExhausted
+  | remaining + 1, cursor =>
+      if psTokenCursorAtText cursor "fun" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "lambda binder")
+        | some keyword =>
+            match psParseLeanBindersWithFuel
+                keyword.cursor.remaining.length
+                keyword.cursor
+                [] with
+            | Except.error error => Except.error error
+            | Except.ok binders =>
+                match binders.value with
+                | [] =>
+                    match psTokenCursorPeek binders.cursor with
+                    | none =>
+                        Except.error
+                          (PsParseError.unexpectedEnd "lambda binder")
+                    | some token =>
+                        Except.error
+                          (PsParseError.expectedText
+                            "typed lambda binder"
+                            token.text
+                            token.span)
+                | _ =>
+                    match psTokenCursorExpectText binders.cursor "=>" with
+                    | Except.error error => Except.error error
+                    | Except.ok afterArrow =>
+                        match psParseLeanTermWithFuel
+                            remaining
+                            afterArrow.cursor with
+                        | Except.error error => Except.error error
+                        | Except.ok body =>
+                            Except.ok {
+                              value :=
+                                PsSyntaxTerm.lambda
+                                  binders.value
+                                  body.value
+                                  {
+                                    start := keyword.token.span.start
+                                    stop := (psSyntaxTermSpan body.value).stop
+                                  }
+                              cursor := body.cursor
+                            }
+      else
+        psParseLeanSimpleApplication cursor
+
+def psParseLeanTerm
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  psParseLeanTermWithFuel (cursor.remaining.length + 1) cursor
+
 def psParseLeanDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
@@ -170,7 +227,7 @@ def psParseLeanDeclaration
                             match psTokenCursorExpectText type.cursor ":=" with
                             | Except.error error => Except.error error
                             | Except.ok afterAssign =>
-                                match psParseLeanSimpleApplication afterAssign.cursor with
+                                match psParseLeanTerm afterAssign.cursor with
                                 | Except.error error => Except.error error
                                 | Except.ok value =>
                                     let span := {

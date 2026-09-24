@@ -133,3 +133,97 @@ def psParseSimpleTerm
       else
         Except.error
           (PsParseError.expectedText "term" token.text token.span)
+
+structure PsSyntaxBinderOpening where
+  kind : PsSyntaxBinderKind
+  start : PsSourcePos
+  closeText : String
+  closeCount : Nat
+  cursor : PsTokenCursor
+
+def psParseBinderOpening
+    (cursor : PsTokenCursor) :
+    Except PsParseError PsSyntaxBinderOpening :=
+  match psTokenCursorPeek cursor with
+  | none => Except.error (PsParseError.unexpectedEnd "binder")
+  | some token =>
+      if token.text == "(" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "binder")
+        | some opening =>
+            Except.ok {
+              kind := PsSyntaxBinderKind.explicit
+              start := opening.token.span.start
+              closeText := ")"
+              closeCount := 1
+              cursor := opening.cursor
+            }
+      else if token.text == "{" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "binder")
+        | some first =>
+            if psTokenCursorAtText first.cursor "{" then
+              match psTokenCursorAdvance first.cursor with
+              | none => Except.error (PsParseError.unexpectedEnd "binder")
+              | some second =>
+                  Except.ok {
+                    kind := PsSyntaxBinderKind.strictImplicit
+                    start := first.token.span.start
+                    closeText := "}"
+                    closeCount := 2
+                    cursor := second.cursor
+                  }
+            else
+              Except.ok {
+                kind := PsSyntaxBinderKind.implicit
+                start := first.token.span.start
+                closeText := "}"
+                closeCount := 1
+                cursor := first.cursor
+              }
+      else if token.text == "[" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "binder")
+        | some opening =>
+            Except.ok {
+              kind := PsSyntaxBinderKind.instanceImplicit
+              start := opening.token.span.start
+              closeText := "]"
+              closeCount := 1
+              cursor := opening.cursor
+            }
+      else
+        Except.error
+          (PsParseError.expectedText "binder" token.text token.span)
+
+def psParseBinderClosing
+    (opening : PsSyntaxBinderOpening)
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSourceSpan) :=
+  match psTokenCursorExpectText cursor opening.closeText with
+  | Except.error error => Except.error error
+  | Except.ok firstClose =>
+      if opening.closeCount == 2 then
+        match psTokenCursorExpectText firstClose.cursor opening.closeText with
+        | Except.error error => Except.error error
+        | Except.ok secondClose =>
+            Except.ok {
+              value := {
+                start := opening.start
+                stop := secondClose.token.span.stop
+              }
+              cursor := secondClose.cursor
+            }
+      else
+        Except.ok {
+          value := {
+            start := opening.start
+            stop := firstClose.token.span.stop
+          }
+          cursor := firstClose.cursor
+        }
+
+def psTokenCursorAtBinderStart (cursor : PsTokenCursor) : Bool :=
+  psTokenCursorAtText cursor "("
+    || psTokenCursorAtText cursor "{"
+    || psTokenCursorAtText cursor "["

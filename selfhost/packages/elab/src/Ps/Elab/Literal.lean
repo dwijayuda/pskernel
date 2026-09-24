@@ -78,39 +78,41 @@ def psDecodeEscapedChar
       else
         none
 
-def psDecodeStringBody :
-    List Char -> List Char -> Option String
-  | [], _ => none
-  | '"' :: [], charsRev =>
+def psDecodeStringBodyWithFuel :
+    Nat -> List Char -> List Char -> Option String
+  | 0, _, _ => none
+  | _ + 1, [], _ => none
+  | _ + 1, '"' :: [], charsRev =>
       some (String.ofList charsRev.reverse)
-  | '"' :: _ :: _, _ => none
-  | '\\' :: '"' :: rest, charsRev =>
-      psDecodeStringBody rest ('"' :: charsRev)
-  | '\\' :: '\\' :: rest, charsRev =>
-      psDecodeStringBody rest ('\\' :: charsRev)
-  | '\\' :: 'n' :: rest, charsRev =>
-      psDecodeStringBody rest ('\n' :: charsRev)
-  | '\\' :: 'r' :: rest, charsRev =>
-      psDecodeStringBody rest ('\r' :: charsRev)
-  | '\\' :: 't' :: rest, charsRev =>
-      psDecodeStringBody rest ('\t' :: charsRev)
-  | '\\' :: '0' :: rest, charsRev =>
-      psDecodeStringBody rest (Char.ofNat 0 :: charsRev)
-  | '\\' :: 'x' :: rest, charsRev =>
+  | _ + 1, '"' :: _ :: _, _ => none
+  | fuel + 1, '\\' :: '"' :: rest, charsRev =>
+      psDecodeStringBodyWithFuel fuel rest ('"' :: charsRev)
+  | fuel + 1, '\\' :: '\\' :: rest, charsRev =>
+      psDecodeStringBodyWithFuel fuel rest ('\\' :: charsRev)
+  | fuel + 1, '\\' :: 'n' :: rest, charsRev =>
+      psDecodeStringBodyWithFuel fuel rest ('\n' :: charsRev)
+  | fuel + 1, '\\' :: 'r' :: rest, charsRev =>
+      psDecodeStringBodyWithFuel fuel rest ('\r' :: charsRev)
+  | fuel + 1, '\\' :: 't' :: rest, charsRev =>
+      psDecodeStringBodyWithFuel fuel rest ('\t' :: charsRev)
+  | fuel + 1, '\\' :: '0' :: rest, charsRev =>
+      psDecodeStringBodyWithFuel fuel rest (Char.ofNat 0 :: charsRev)
+  | fuel + 1, '\\' :: 'x' :: rest, charsRev =>
       match psDecodeEscapedChar 2 rest with
       | none => none
       | some (char, tail) =>
-          psDecodeStringBody tail (char :: charsRev)
-  | '\\' :: 'u' :: rest, charsRev =>
+          psDecodeStringBodyWithFuel fuel tail (char :: charsRev)
+  | fuel + 1, '\\' :: 'u' :: rest, charsRev =>
       match psDecodeEscapedChar 4 rest with
       | none => none
       | some (char, tail) =>
-          psDecodeStringBody tail (char :: charsRev)
-  | '\\' :: _ :: _, _ => none
-  | char :: rest, charsRev =>
-      psDecodeStringBody rest (char :: charsRev)
+          psDecodeStringBodyWithFuel fuel tail (char :: charsRev)
+  | _ + 1, '\\' :: _ :: _, _ => none
+  | fuel + 1, char :: rest, charsRev =>
+      psDecodeStringBodyWithFuel fuel rest (char :: charsRev)
 
 def psDecodeStringLiteral (text : String) : Option String :=
   match text.toList with
-  | '"' :: rest => psDecodeStringBody rest []
+  | '"' :: rest =>
+      psDecodeStringBodyWithFuel (rest.length + 1) rest []
   | _ => none

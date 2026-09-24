@@ -16,25 +16,6 @@ export class Lean434NameBridgeError extends Error{
   }
 }
 
-function constructor(
-  value:Lean434RuntimeValue,
-  expected:string,
-):Lean434ConstructorValue{
-  if(
-    typeof value!=='object'
-    ||value===null
-    ||Array.isArray(value)
-    ||!('kind' in value)
-    ||value.kind!=='constructor'
-    ||value.name!==expected
-  ){
-    throw new Lean434NameBridgeError(
-      "expected Lean runtime constructor '"+expected+"'",
-    );
-  }
-  return value;
-}
-
 /**
  * Convert an executable Lean.Name value produced by the JS evaluator into the
  * structurally identical pskernel Name model.
@@ -132,15 +113,4 @@ export function kernelNameToLean434Runtime(
         ],
       };
   }
-}
-
-/** Validate that a runtime value is a Lean.Name without allocating a kernel copy. */
-export function assertLean434RuntimeName(
-  value:Lean434RuntimeValue,
-):Lean434ConstructorValue{
-  const name=lean434RuntimeNameToKernel(value);
-  return constructor(
-    kernelNameToLean434Runtime(name),
-    kernelNameToLean434Runtime(name).name,
-  );
 }

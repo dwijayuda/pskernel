@@ -1,0 +1,45 @@
+structure SourceSpan where {
+  start : String.Pos.Raw;
+  stop : String.Pos.Raw;
+};
+
+function rawPos(byteIdx : Nat) : String.Pos.Raw :=
+  String.Pos.Raw.mk(byteIdx);
+
+function rawPosByteIdx(pos : String.Pos.Raw) : Nat :=
+  String.Pos.Raw.byteIdx(pos);
+
+function isAsciiDigit(c : Char) : Bool :=
+  let n : Nat := Char.toNat(c);
+  n >= 48 && n <= 57;
+
+function isAsciiLower(c : Char) : Bool :=
+  let n : Nat := Char.toNat(c);
+  n >= 97 && n <= 122;
+
+function isAsciiUpper(c : Char) : Bool :=
+  let n : Nat := Char.toNat(c);
+  n >= 65 && n <= 90;
+
+function isAsciiIdentifierStart(c : Char) : Bool :=
+  let n : Nat := Char.toNat(c);
+  isAsciiLower(c) || isAsciiUpper(c) || n == 95;
+
+function isAsciiIdentifierRest(c : Char) : Bool :=
+  isAsciiIdentifierStart(c) || isAsciiDigit(c);
+
+function isAsciiWhitespace(c : Char) : Bool :=
+  let n : Nat := Char.toNat(c);
+  n == 32 || n == 9 || n == 10 || n == 13;
+
+function sourceSpan(start : String.Pos.Raw, stop : String.Pos.Raw) : SourceSpan :=
+  { start := start, stop := stop : SourceSpan };
+
+function nextSpan(s : String, start : String.Pos.Raw) : SourceSpan :=
+  sourceSpan(start, String.Internal.next(s, start));
+
+function spanByteLength(span : SourceSpan) : Nat :=
+  rawPosByteIdx(span.stop) - rawPosByteIdx(span.start);
+
+function sliceSpan(s : String, span : SourceSpan) : String :=
+  String.Internal.extract(s, span.start, span.stop);

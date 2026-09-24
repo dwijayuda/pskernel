@@ -1,3 +1,4 @@
+import Ps.Core.Abstract
 import Ps.Core.Subst
 import Ps.Environment.Resolve
 import Ps.Meta.Infer
@@ -24,6 +25,26 @@ structure PsElabTermResult where {
   term : PsExpr;
   type : PsExpr;
 };
+
+structure PsElabTypedBinder where {
+  id : Nat;
+  name : PsName;
+  type : PsExpr;
+  binder : PsBinderInfo;
+};
+
+structure PsElabTypedBindersResult where {
+  context : PsElabContext;
+  bindersRev : List(PsElabTypedBinder);
+};
+
+def psElabBinderKindToCore(kind : PsSyntaxBinderKind) : PsBinderInfo :=
+  match kind with {
+    | .explicit => PsBinderInfo.explicit;
+    | .implicit => PsBinderInfo.implicit;
+    | .strictImplicit => PsBinderInfo.strictImplicit;
+    | .instanceImplicit => PsBinderInfo.instanceImplicit;
+  };
 
 /* Term.lean is authoritative during the Lean-first bootstrap. This sibling
    fixes the future PSC1 package/API shape; canonical implementation text will

@@ -101,6 +101,100 @@ def psPrepareInstance
     []
     128
 
+def psSolvePreparedInstanceArguments
+    (synthesize : PsMetaContext -> PsExpr -> PsSynthInstanceResult) :
+    List PsPreparedInstanceArgument ->
+    PsMetaContext ->
+    PsSolveInstanceArgsResult
+  | [], current =>
+      { context := current, success := true }
+  | argument :: rest, current =>
+      match argument.expr with
+      | .mvar id =>
+          match psMetaFindAssignment current id with
+          | some _ =>
+              psSolvePreparedInstanceArguments synthesize rest current
+          | none =>
+              if argument.isInstance then
+                let targetType := psMetaInstantiate current argument.type
+                let synthesized := synthesize current targetType
+                match synthesized.value with
+                | none => { context := current, success := false }
+                | some instanceValue =>
+                    match psMetaAssign synthesized.context id instanceValue with
+                    | none => { context := current, success := false }
+                    | some next =>
+                        psSolvePreparedInstanceArguments synthesize rest next
+              else
+                { context := current, success := false }
+      | _ =>
+          psSolvePreparedInstanceArguments synthesize rest current
+
+def psTryInstanceCandidate
+    (environment : PsEnvironment)
+    (localContext : PsLocalContext)
+    (original : PsMetaContext)
+    (target : PsExpr)
+    (synthesize : PsMetaContext -> PsExpr -> PsSynthInstanceResult)
+    (entry : PsInstanceEntry) : PsSynthInstanceResult :=
+  let prepared :=
+    psPrepareInstance environment localContext original entry
+  if !prepared.success then
+    psSynthFailure original
+  else
+    let targetResult :=
+      psUnify
+        environment
+        localContext
+        prepared.context
+        prepared.resultType
+        target
+    if !targetResult.success then
+      psSynthFailure original
+    else
+      let solved :=
+        psSolvePreparedInstanceArguments
+          synthesize
+          prepared.arguments
+          targetResult.context
+      if !solved.success then
+        psSynthFailure original
+      else
+        let finalValue :=
+          psMetaInstantiate solved.context prepared.value
+        if psExprHasUnresolvedMeta finalValue then
+          psSynthFailure original
+        else
+          psSynthSuccess solved.context finalValue
+
+def psTryInstanceCandidates
+    (environment : PsEnvironment)
+    (localContext : PsLocalContext)
+    (original : PsMetaContext)
+    (target : PsExpr)
+    (synthesize : PsMetaContext -> PsExpr -> PsSynthInstanceResult) :
+    List PsInstanceEntry -> PsSynthInstanceResult
+  | [] => psSynthFailure original
+  | entry :: rest =>
+      let attempt :=
+        psTryInstanceCandidate
+          environment
+          localContext
+          original
+          target
+          synthesize
+          entry
+      match attempt.value with
+      | some _ => attempt
+      | none =>
+          psTryInstanceCandidates
+            environment
+            localContext
+            original
+            target
+            synthesize
+            rest
+
 def psSynthInstanceWithFuel
     (environment : PsEnvironment)
     (localContext : PsLocalContext)
@@ -109,101 +203,22 @@ def psSynthInstanceWithFuel
     Nat -> PsExpr -> PsSynthInstanceResult
   | 0, _ => psSynthFailure context
   | fuel + 1, target =>
+      let synthesize :=
+        fun nextContext nextTarget =>
+          psSynthInstanceWithFuel
+            environment
+            localContext
+            index
+            nextContext
+            fuel
+            nextTarget
       psTryInstanceCandidates
         environment
         localContext
-        index
         context
-        fuel
         target
+        synthesize
         (psAllInstanceEntries localContext index)
-where
-  psSolvePreparedArguments
-      (arguments : List PsPreparedInstanceArgument)
-      (current : PsMetaContext) : PsSolveInstanceArgsResult :=
-    match arguments with
-    | [] => { context := current, success := true }
-    | argument :: rest =>
-        match argument.expr with
-        | .mvar id =>
-            match psMetaFindAssignment current id with
-            | some _ =>
-                psSolvePreparedArguments rest current
-            | none =>
-                if argument.isInstance then
-                  let targetType := psMetaInstantiate current argument.type
-                  let synthesized :=
-                    psSynthInstanceWithFuel
-                      environment
-                      localContext
-                      index
-                      current
-                      fuel
-                      targetType
-                  match synthesized.value with
-                  | none => { context := current, success := false }
-                  | some instanceValue =>
-                      match psMetaAssign synthesized.context id instanceValue with
-                      | none => { context := current, success := false }
-                      | some next => psSolvePreparedArguments rest next
-                else
-                  { context := current, success := false }
-        | _ => psSolvePreparedArguments rest current
-
-  psTryInstanceCandidate
-      (entry : PsInstanceEntry)
-      (original : PsMetaContext) : PsSynthInstanceResult :=
-    let prepared :=
-      psPrepareInstance environment localContext original entry
-    if !prepared.success then
-      psSynthFailure original
-    else
-      let targetResult :=
-        psUnify
-          environment
-          localContext
-          prepared.context
-          prepared.resultType
-          target
-      if !targetResult.success then
-        psSynthFailure original
-      else
-        let solved :=
-          psSolvePreparedArguments
-            prepared.arguments
-            targetResult.context
-        if !solved.success then
-          psSynthFailure original
-        else
-          let finalValue :=
-            psMetaInstantiate solved.context prepared.value
-          if psExprHasUnresolvedMeta finalValue then
-            psSynthFailure original
-          else
-            psSynthSuccess solved.context finalValue
-
-  psTryInstanceCandidates
-      (environment : PsEnvironment)
-      (localContext : PsLocalContext)
-      (index : PsInstanceIndex)
-      (original : PsMetaContext)
-      (fuel : Nat)
-      (target : PsExpr) :
-      List PsInstanceEntry -> PsSynthInstanceResult
-    | [] => psSynthFailure original
-    | entry :: rest =>
-        let attempt := psTryInstanceCandidate entry original
-        match attempt.value with
-        | some _ => attempt
-        | none =>
-            psTryInstanceCandidates
-              environment
-              localContext
-              index
-              original
-              fuel
-              target
-              rest
 
 def psSynthInstance
     (environment : PsEnvironment)

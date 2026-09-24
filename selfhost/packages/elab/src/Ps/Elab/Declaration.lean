@@ -101,6 +101,8 @@ def psElabDeclaration
         type
         value
         true
+  | .inductiveDecl _ _ _ _ _ =>
+      Except.error PsElabError.unsupportedTerm
 
 def psElabDeclarations
     (environment : PsEnvironment) :

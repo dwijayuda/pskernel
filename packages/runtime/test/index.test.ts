@@ -16,6 +16,11 @@ import {
   TypeChecker,
 } from 'lean-ts-kernel';
 import {Lean434Evaluator} from '../src/lean4-eval.js';
+import {
+  Lean434RuntimeMetadataError,
+  Lean434RuntimeMetadataIndex,
+  parseLean434RuntimeMetadata,
+} from '../src/lean4-metadata.js';
 import {ctor,nat,natAdd,natMul,natSub,uint8} from '../src/index.js';
 import {
   LEAN434_JS_EXTERN_MANIFEST,
@@ -181,6 +186,86 @@ equal(
   invokeLean434JsImplementedBy(mkBinding!,[rawPayload]),
   rawPayload,
 );
+
+{
+  const metadata=parseLean434RuntimeMetadata({
+    format:'proofscript-lean434-runtime-metadata',
+    formatVersion:1,
+    lean:{
+      version:'4.34.0',
+      githash:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
+    },
+    module:'Lean.Parser',
+    externs:[
+      {
+        declaration:'Nat.add',
+        entries:[
+          {kind:'standard',backend:'all',symbol:'lean_nat_add'},
+        ],
+      },
+    ],
+    implementedBy:[
+      {
+        declaration:'TSyntaxArray.raw',
+        implementation:'TSyntaxArray.rawImpl',
+      },
+    ],
+    initializers:[
+      {
+        module:'Lean.Parser.Extension',
+        moduleIndex:4,
+        kind:'regular',
+        source:'olean',
+        declaration:'exampleInit',
+        initFunction:'exampleInitFn',
+        ioUnit:false,
+      },
+      {
+        module:'Lean.Parser.Extension',
+        moduleIndex:4,
+        kind:'regular',
+        source:'ir',
+        declaration:'exampleInit',
+        initFunction:'exampleInitFn',
+        ioUnit:false,
+      },
+      {
+        module:'Lean.Parser.Extension',
+        moduleIndex:4,
+        kind:'builtin',
+        source:'olean',
+        declaration:'unitInit',
+        initFunction:null,
+        ioUnit:true,
+      },
+    ],
+  });
+  equal(metadata.initializers.length,2);
+  equal(metadata.initializers[0]?.source,'olean');
+  equal(metadata.initializers[1]?.declaration,'unitInit');
+  const index=new Lean434RuntimeMetadataIndex(metadata);
+  equal(
+    index.externFor('Nat.add')?.entries[0]?.kind,
+    'standard',
+  );
+  equal(
+    index.implementedByFor('TSyntaxArray.raw')?.implementation,
+    'TSyntaxArray.rawImpl',
+  );
+  equal(
+    index.initializersForModule('Lean.Parser.Extension').length,
+    2,
+  );
+  throws(
+    ()=>parseLean434RuntimeMetadata({
+      ...metadata,
+      lean:{...metadata.lean,githash:'wrong'},
+    }),
+    Lean434RuntimeMetadataError,
+    'runtime metadata githash drift must fail closed',
+  );
+}
+console.log('ok - Lean 4.34 runtime metadata loader validates and deduplicates');
 
 console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility slice');
 

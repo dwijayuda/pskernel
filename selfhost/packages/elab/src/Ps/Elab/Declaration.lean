@@ -299,7 +299,8 @@ structure PsElabRecursorMinorsResult where
   bindersRev : List PsElabTypedBinder
 
 def psBuildRecursorMinorBinders
-    (motiveId : Nat) :
+    (motiveId : Nat)
+    (parameterArgs : List PsExpr) :
     List PsDeclaration ->
     PsElabContext ->
     Nat ->
@@ -314,6 +315,7 @@ def psBuildRecursorMinorBinders
       match psBuildInductiveMinorType
           context
           motiveId
+          parameterArgs
           declaration with
       | Except.error error => Except.error error
       | Except.ok minorType =>
@@ -329,6 +331,7 @@ def psBuildRecursorMinorBinders
             psElabContextWithLocal context pushed.context
           psBuildRecursorMinorBinders
             motiveId
+            parameterArgs
             rest
             nextContext
             (index + 1)

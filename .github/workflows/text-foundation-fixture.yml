@@ -42,7 +42,7 @@ jobs:
           lean --version | tee lean-version.txt
           lean --version | head -n1 | grep -F 'Lean (version 4.34.0,'
 
-      - name: Generate exact text foundation closure
+      - name: Generate exact text foundation delta
         shell: bash
         run: |
           set -euo pipefail
@@ -82,6 +82,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'chore(sh1): pin Lean 4.34 text-foundation fixture'
+          rm -f lean-version.txt
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main

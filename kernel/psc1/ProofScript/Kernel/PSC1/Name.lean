@@ -1,4 +1,5 @@
 import Init
+import Init.Data.Ord.String
 
 namespace ProofScript.Kernel.PSC1
 
@@ -19,6 +20,26 @@ def beq : Name → Name → Bool
   | .str p₁ s₁, .str p₂ s₂ => beq p₁ p₂ && s₁ == s₂
   | .num p₁ n₁, .num p₂ n₂ => beq p₁ p₂ && n₁ == n₂
   | _, _ => false
+
+
+/-- Exact lexicographic component order used by Lean 4.34 `Name.cmp`. -/
+def cmp : Name → Name → Ordering
+  | .anonymous, .anonymous => .eq
+  | .anonymous, _ => .lt
+  | _, .anonymous => .gt
+  | .num p₁ i₁, .num p₂ i₂ =>
+      match cmp p₁ p₂ with
+      | .eq => compare i₁ i₂
+      | ord => ord
+  | .num _ _, .str _ _ => .lt
+  | .str _ _, .num _ _ => .gt
+  | .str p₁ s₁, .str p₂ s₂ =>
+      match cmp p₁ p₂ with
+      | .eq => compare s₁ s₂
+      | ord => ord
+
+def lt (a b : Name) : Bool :=
+  cmp a b == .lt
 
 end Name
 

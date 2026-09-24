@@ -23,6 +23,7 @@ function leanTypeTermBinaryPrecedence(operator:string):number {
     default:
       throw new Error('unsupported type binary operator '+operator);
   }
+  throw new Error('unsupported type-term binary operator: '+operator);
 }
 
 export function lowerV061TypeToLean(

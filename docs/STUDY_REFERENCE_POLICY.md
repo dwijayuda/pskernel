@@ -273,3 +273,79 @@ ProofScript therefore records/pins the package **root** and leaves public
 subpath resolution to those host tools. This is a host interoperability
 decision only; neither resolver nor package exports metadata influences
 pskernel proof admission.
+
+## Stdlib reference policy
+
+The first ProofScript-written stdlib tranche uses the v0.7 language reference
+for intended surface examples and Lean 4.34 `Init.Data.Option` /
+`Init.Data.List` as semantic/API inspiration. Lean source is a reference, not
+code to copy wholesale: only operations that the current verified ProofScript
+language can express without semantic shortcuts should enter `stdlib/`.
+
+Because the current runtime erasure owns metadata only for checked-project
+inductive admissions, the initial executable stdlib uses source-owned
+`PsOption`/`PsList` rather than claiming that Prelude `Option`/`List`
+already compile through verified IR. That limitation should be removed by an
+explicit checked-runtime-metadata design, not by weakening erasure provenance.
+
+## Lean 4.34 reflexivity evidence
+
+The bounded standalone `rfl` checkpoint was derived from:
+
+- `study/lean4-4.34.0/src/Lean/Meta/Tactic/Refl.lean`, where core equality
+  reflexivity checks definitional equality and assigns `Eq.refl`;
+- `study/lean4-4.34.0/src/Lean/Meta/Tactic/Rfl.lean`, where full Lean
+  `applyRfl` extends that behavior to `HEq` and relations registered in a
+  discrimination-tree-backed `@[refl]` environment extension;
+- `study/lean4-4.34.0/src/Lean/Elab/Tactic/Rfl.lean`, which exposes the tactic
+  layer without moving proof authority out of Meta/kernel checking.
+
+ProofScript currently implements only the first Eq case and explicitly records
+the remaining HEq/`@[refl]` behavior as unsupported rather than silently
+claiming full Lean `rfl` parity.
+
+## Lean induction naming evidence
+
+The induction branch naming checkpoint follows the pinned Lean 4.34 induction
+implementation. `Lean.Meta.MVarId.induction` exposes the introduced minor
+premise fields, while the elaborator supports user-facing alternative variable
+names around those fields. ProofScript's bounded flat tactic syntax does not yet
+implement Lean's full `with | ctor ... =>` alternative grammar, so the current
+small step preserves constructor binder names by default and names a direct
+recursive hypothesis `<field>_ih`. This is a source-context convenience only;
+recursor semantics remain unchanged.
+
+## Lean library-search zero-subgoal application checkpoint
+
+Pinned Lean 4.34 `Lean.Meta.Tactic.LibrarySearch` applies candidate lemmas and
+then uses `solveByElim` for generated subsidiary goals. The current
+ProofScript `exact?` broadening implements only the prefix of that behavior
+that creates **no remaining goals**: candidate implicit/default arguments may
+be inferred from the target, but every inserted metavariable must be resolved
+by target unification itself.
+
+Candidate application is trialed in an isolated ExprMetaContext. This preserves
+Lean-style metavariable experimentation without allowing failed search
+candidates to mutate the live elaboration state. Strict/instance implicit
+search, symmetry/Iff alternatives, relevance indexing, and recursive
+`solveByElim` remain explicit future work.
+
+## Stdlib simplifier dogfood checkpoint
+
+The bounded simplifier is now exercised by
+`ProofScript.Data.Result.resultToOptionErrorOrElse` in the end-to-end stdlib
+project. The proof uses an explicit two-rule `simp only` set rather than
+Lean's global simp environment. Both rules satisfy the current strict
+structural-decrease test and are pairwise non-overlapping. This is
+intentionally narrower than Lean 4.34's simplifier, while proof reconstruction
+continues through kernel-checked Eq transport.
+
+## Lean 4.34 exact-search symmetry checkpoint
+
+Pinned `Lean.Meta.Tactic.LibrarySearch.librarySearchSymm` searches both the
+original goal and a symmetry-transformed goal, interleaving candidates from the
+two searches. ProofScript now owns the smallest corresponding slice for
+ordinary `Eq`: deterministic local/environment candidates are tried directly
+and symmetrically, and a symmetric zero-subgoal hit is reconstructed with the
+real `Eq.symm`. This does not imply support for Lean's Iff direction search
+or recursive `solveByElim` discharge.

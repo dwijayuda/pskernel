@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node dist/test/all.test.js && npm run test:packages && npm run test:package-integration:raw",
+    "test": "npm run test:outer && npm run build && node dist/test/all.test.js",
     "check": "npm run test && node scripts/anti-drift.mjs && npm run check:packages && node scripts/oracle-fingerprint.mjs",
     "replay": "npm run build --silent && node scripts/replay.mjs",
     "oracle:official": "node scripts/official-oracle.mjs",
@@ -33,6 +33,8 @@
     "check:source-shape": "node scripts/source-shape-check.mjs",
     "check:vscode": "node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs",
     "check:architecture": "node scripts/proofscript-architecture-check.mjs",
+    "build:src": "tsc -p tsconfig.src.json",
+    "test:outer": "npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages",
     "test:wasm": "tsc -p packages/syntax/tsconfig.json && tsc -p packages/language/tsconfig.json && tsc -p packages/compiler-ir/tsconfig.json && tsc -p packages/wasm-ir/tsconfig.json && node packages/wasm-ir/dist/test/index.test.js && tsc -p packages/wasm-lowering/tsconfig.json && node packages/wasm-lowering/dist/test/index.test.js && tsc -p packages/backend-wasm/tsconfig.json && node packages/backend-wasm/dist/test/index.test.js",
     "check:workspace-lock": "node scripts/workspace-lock-check.mjs",
     "build:package-integration": "npm run build && tsc -p packages/syntax/tsconfig.json && tsc -p packages/language/tsconfig.json && tsc -p packages/browser/tsconfig.json && tsc -p packages/pretty/tsconfig.json && tsc -p packages/meta/tsconfig.json && tsc -p packages/environment/tsconfig.json && tsc -p packages/checked-core/tsconfig.json && tsc -p packages/tactic/tsconfig.json && tsc -p packages/elab/tsconfig.json && tsc -p packages/compiler-ir/tsconfig.json && tsc -p packages/erasure/tsconfig.json && tsc -p packages/runtime/tsconfig.json && tsc -p packages/backend-ts/tsconfig.json && tsc -p packages/wasm-ir/tsconfig.json && tsc -p packages/wasm-lowering/tsconfig.json && tsc -p packages/backend-wasm/tsconfig.json && tsc -p packages/compiler/tsconfig.json && tsc -p packages/project/tsconfig.json && tsc -p packages/language-service/tsconfig.json && tsc -p packages/lsp/tsconfig.json && tsc -p packages/module/tsconfig.json && tsc -p packages/cli/tsconfig.json",

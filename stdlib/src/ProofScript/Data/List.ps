@@ -1,0 +1,107 @@
+import ProofScript.Data.Option
+
+inductive PsList(α : Type) where {
+  | nil;
+  | cons(head : α, tail : PsList(α));
+};
+
+function listMap {α : Type}{β : Type}
+(f : α -> β, xs : PsList(α)) : PsList(β) :=
+  match xs with {
+    | .nil => PsList.nil;
+    | .cons head tail =>
+      PsList.cons(f(head), listMap(f, tail));
+  };
+
+function listAppend {α : Type}
+(xs : PsList(α), ys : PsList(α)) : PsList(α) :=
+  match xs with {
+    | .nil => ys;
+    | .cons head tail =>
+      PsList.cons(head, listAppend(tail, ys));
+  };
+
+function listLength {α : Type}(xs : PsList(α)) : Nat :=
+  match xs with {
+    | .nil => 0;
+    | .cons head tail => 1 + listLength(tail);
+  };
+
+function listHeadOption {α : Type}
+(xs : PsList(α)) : PsOption(α) :=
+  match xs with {
+    | .nil => PsOption.none;
+    | .cons head tail => PsOption.some(head);
+  };
+
+function listIsEmpty {α : Type}(xs : PsList(α)) : Bool :=
+  match xs with {
+    | .nil => true;
+    | .cons head tail => false;
+  };
+
+function listHeadOrElse {α : Type}
+(xs : PsList(α), fallback : α) : α :=
+  match xs with {
+    | .nil => fallback;
+    | .cons head tail => head;
+  };
+
+theorem listRefl {α : Type}
+(xs : PsList(α)) : xs = xs := by rfl;
+
+theorem listAppendNilLeft {α : Type}
+(ys : PsList(α)) :
+listAppend(PsList.nil, ys) = ys := by rfl;
+
+theorem listAppendCons {α : Type}
+(head : α, tail : PsList(α), ys : PsList(α)) :
+listAppend(PsList.cons(head, tail), ys) =
+PsList.cons(head, listAppend(tail, ys)) := by rfl;
+
+theorem listAppendNilRight {α : Type}
+(xs : PsList(α)) :
+listAppend(xs, PsList.nil) = xs :=
+  by induction xs; rfl;
+  rw [listAppendCons(head, tail, PsList.nil)]; rw [tail_ih];
+
+theorem listAppendAssoc {α : Type}
+(xs : PsList(α), ys : PsList(α), zs : PsList(α)) :
+listAppend(listAppend(xs, ys), zs) =
+listAppend(xs, listAppend(ys, zs)) :=
+  by induction xs; rfl;
+  rw [listAppendCons(head, tail, ys)];
+  rw [listAppendCons(head, listAppend(tail, ys), zs)];
+  rw [listAppendCons(head, tail, listAppend(ys, zs))];
+  rw [tail_ih];
+
+theorem listMapCons {α : Type}{β : Type}
+(f : α -> β, head : α, tail : PsList(α)) :
+listMap(f, PsList.cons(head, tail)) =
+PsList.cons(f(head), listMap(f, tail)) := by rfl;
+
+theorem listMapAppend {α : Type}{β : Type}
+(f : α -> β, xs : PsList(α), ys : PsList(α)) :
+listMap(f, listAppend(xs, ys)) =
+listAppend(listMap(f, xs), listMap(f, ys)) :=
+  by induction xs; rfl;
+  rw [listAppendCons(head, tail, ys)];
+  rw [listMapCons(f, head, listAppend(tail, ys))];
+  rw [listMapCons(f, head, tail)];
+  rw [listAppendCons(f(head), listMap(f, tail), listMap(f, ys))];
+  rw [tail_ih];
+
+theorem listIsEmptyNil {α : Type} :
+listIsEmpty(PsList.nil) = true := by rfl;
+
+theorem listIsEmptyCons {α : Type}
+(head : α, tail : PsList(α)) :
+listIsEmpty(PsList.cons(head, tail)) = false := by rfl;
+
+theorem listHeadOrElseNil {α : Type}
+(fallback : α) :
+listHeadOrElse(PsList.nil, fallback) = fallback := by rfl;
+
+theorem listHeadOrElseCons {α : Type}
+(head : α, tail : PsList(α), fallback : α) :
+listHeadOrElse(PsList.cons(head, tail), fallback) = head := by rfl;

@@ -23,6 +23,8 @@ import {
   checkVerifiedSource,
   compileVerifiedSource,
 } from '../packages/cli/dist/src/verified-pipeline.js';
+import {runCommand} from '../packages/cli/dist/src/commands/run.js';
+import {fileURLToPath} from 'node:url';
 import {processDocument} from '../packages/language/dist/src/index.js';
 import {PROOFSCRIPT_LSP_PROTOCOL_VERSION,createInitPreludeEnvironmentProvider,lspCapabilities,toLspDiagnostics} from '../packages/lsp/dist/src/index.js';
 import {ProofScriptLanguageService} from '../packages/language-service/dist/src/index.js';
@@ -298,6 +300,29 @@ const verifiedExactSearch=compileVerifiedSource(
 assert(
   verifiedExactSearch.checkedCore.theorems.length===2,
   'bounded exact? did not construct a pskernel-admitted proof',
+);
+
+
+const verifiedExactSearchApplication=compileVerifiedSource(
+  'theorem exactSearchPoly {P : Prop} : P -> P := '+
+  'by intro h; exact h; '+
+  'theorem exactSearchPolyUse(Q : Prop) : Q -> Q := by exact?;',
+  'verified-exact-search-application.ts',
+);
+assert(
+  verifiedExactSearchApplication.checkedCore.theorems.length===2,
+  'bounded exact? did not infer a zero-subgoal candidate argument',
+);
+
+
+const verifiedExactSearchSymmetry=compileVerifiedSource(
+  'theorem exactSearchSymm'+
+  '(a : Nat, b : Nat, h : b = a) : a = b := by exact?;',
+  'verified-exact-search-symmetry.ts',
+);
+assert(
+  verifiedExactSearchSymmetry.checkedCore.theorems.length===1,
+  'bounded exact? Eq symmetry did not construct a pskernel-admitted proof',
 );
 
 
@@ -1061,3 +1086,52 @@ assert(
   verifiedExternalTs.includes('return hostInc(x);'),
   'source external call did not survive verified TypeScript emission',
 );
+
+
+const verifiedRfl=compileVerifiedSource(
+  'theorem boundedRfl(n : Nat) : n + 0 = n := by rfl;',
+  'verified-rfl.ts',
+);
+assert(
+  verifiedRfl.checkedCore.theorems.length===1,
+  'bounded Eq-only rfl did not construct a pskernel-admitted theorem',
+);
+
+const stdlibDirectory=fileURLToPath(
+  new URL('../stdlib/',import.meta.url),
+);
+const stdlibRun=await runCommand({
+  project:stdlibDirectory,
+  json:true,
+  verified:true,
+  passthrough:['9'],
+});
+assert(
+  stdlibRun.mainResult==='22',
+  'ProofScript-written stdlib dogfood program did not return 22',
+);
+assert(
+  stdlibRun.moduleCount===4,
+  'ProofScript-written stdlib project did not load four modules',
+);
+const stdlibModules=new Set(stdlibRun.moduleOrder);
+for(const moduleName of [
+  'ProofScript.Data.Option',
+  'ProofScript.Data.Result',
+  'ProofScript.Data.List',
+  'main',
+]){
+  assert(
+    stdlibModules.has(moduleName),
+    'ProofScript-written stdlib project missed module '+moduleName,
+  );
+}
+assert(
+  stdlibRun.assurance?.kernelCheckedTheoremCount===37,
+  'ProofScript-written stdlib theorems were not admitted by pskernel',
+);
+assert(
+  stdlibRun.assurance?.runtimeAssumptionCount===0,
+  'ProofScript-written stdlib unexpectedly depends on runtime externals',
+);
+

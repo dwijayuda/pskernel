@@ -163,10 +163,11 @@ Tactic order:
 4. constructor;
 5. cases;
 6. induction;
-7. rewrite — bounded current-goal equality transport landed;
-8. simp with a small explicit theorem set — bounded non-overlapping multi-rule simp-only sets landed;
-9. exact? / assumption-style search only after deterministic core tactics;
-10. add cursor-sensitive LSP proof-state snapshots on top of the same goal model.
+7. rfl — bounded Eq-only definitional reflexivity landed;
+8. rewrite — bounded current-goal equality transport landed;
+9. simp with a small explicit theorem set — bounded non-overlapping multi-rule simp-only sets landed;
+10. exact? / assumption-style search only after deterministic core tactics;
+11. add cursor-sensitive LSP proof-state snapshots on top of the same goal model.
 
 The low-level multi-goal foundation follows Lean 4.34's separation: tactic state
 tracks an ordered list of metavariable goals, while Meta owns metavariable
@@ -213,8 +214,12 @@ recursive fields. The motive is obtained by abstracting the major premise from
 the current goal; constructor fields are introduced first, followed by one
 induction hypothesis per direct recursive field, exactly matching pskernel's
 generated minor binder order. Each IH has the motive instantiated at that
-recursive field. Indexed families, higher-order/nested recursive arguments,
-local-let majors, and dependent surrounding locals remain fail-closed.
+recursive field. Default branch contexts now preserve source constructor field
+names when possible and expose direct recursive hypotheses as `<field>_ih`,
+with deterministic collision suffixes. This is naming only; recursor/proof
+construction is unchanged. Indexed families, higher-order/nested recursive
+arguments, local-let majors, and dependent surrounding locals remain
+fail-closed.
 
 Universe-polymorphic Prelude constants are a prerequisite for equality tactics.
 The Meta layer now creates fresh level metavariables for declaration universe
@@ -229,10 +234,17 @@ rewrite construction rather than mutating goal text: it recognizes a real
 Prelude `Eq` proof, abstracts exact structural occurrences of the selected
 side into a motive, creates the rewritten child goal, and reconstructs the
 parent proof with kernel-checked `Eq.ndrec_symm` (forward) or `Eq.ndrec`
-(reverse). The bounded `rw` macro behavior also follows Lean's documented
-`rewrite; try (with_reducible rfl)` shape for equality goals: after transport,
-an `Eq` target whose sides are definitionally equal is closed with the real
-polymorphic `Eq.refl`. This is not yet a general standalone `rfl` tactic.
+(reverse). Standalone bounded `rfl` is now landed for the common Lean equality case:
+the goal must reduce to `Eq α lhs rhs`, `lhs` and `rhs` must be
+definitionally equal, and the tactic constructs the real polymorphic
+`Eq.refl` before pskernel rechecks it. The same helper is used by the
+post-rewrite reflexivity attempt and by `simp only` when simplification
+reaches an equality fixed point. Full Lean `rfl` also supports `HEq` and
+arbitrary relations registered with `@[refl]`; those remain fail-closed until
+the corresponding attribute/discrimination-tree semantics exist.
+
+The bounded `rw` macro behavior therefore follows Lean's documented
+`rewrite; try (with_reducible rfl)` shape for the supported Eq slice.
 Multiple rules, locations, occurrence selectors, iff rewriting,
 definitional/kabstract occurrence matching, broader reflexive relations, and
 extra theorem-argument synthesis remain fail-closed until their Meta behavior
@@ -450,6 +462,14 @@ Exit condition:
 
 ## Milestone L7 — standard library and ecosystem
 
+Current stdlib checkpoint:
+
+- `PsOption`: map, bind, get-or-else, or-else, is-some plus reflexivity/computation laws;
+- `PsResult`: value/error mapping, bind, get-or-else, status checks, two-way Option conversion plus checked laws;
+- `PsList`: map, append, length, head Option, head-or-else, is-empty plus checked computation/algebraic laws;
+- the dogfood project executes all three modules through verified TS/JS emission
+  with zero runtime extern assumptions and thirty-seven pskernel-admitted theorems.
+
 Build libraries in ProofScript itself where practical:
 
 - Option / Result;
@@ -595,6 +615,49 @@ The bounded source classifier rejects relative/absolute paths, `node:`
 builtins, traversal segments, empty segments, and nested `node_modules`
 segments. Default/namespace/CommonJS/dynamic imports remain unsupported.
 
+### ProofScript-written standard-library foundation
+
+The first self-hosted standard-library project is now source code under
+`stdlib/`, not a TypeScript helper library:
+
+```text
+ProofScript.Data.Option  -> PsOption
+ProofScript.Data.Result  -> PsResult
+ProofScript.Data.List    -> PsList
+```
+
+The first APIs deliberately stay inside already verified language features:
+
+- generic inductive types and constructors;
+- pattern matching through admitted recursors;
+- higher-order generic map;
+- direct structural recursion for list map/length;
+- cross-module checked metadata;
+- primitive Bool/Nat results;
+- ordinary theorem declarations checked by pskernel.
+
+The repository integration gate runs `stdlib/test/main.ps` through the full
+verified multi-module project pipeline and JavaScript runtime. The gate checks
+the runtime result, module graph, kernel-checked theorem count, and absence of
+runtime FFI assumptions.
+
+The `Ps*` names are a temporary semantic boundary, not a new type-theory
+choice. Lean Init already defines `Option` and `List`, but verified runtime
+erasure currently constructs executable ADT metadata from inductives admitted
+by the checked source project. Until Prelude inductive runtime metadata can be
+reused without weakening erasure provenance, the stdlib does not shadow Lean's
+built-in names and does not special-case them in the backend.
+
+The next stdlib work should prefer:
+
+1. small executable helpers that exercise real user needs;
+2. pskernel-checked algebraic laws when the proof surface can express them
+   faithfully;
+3. migration/aliasing toward canonical Lean names only after verified runtime
+   metadata for Prelude inductives has an explicit provenance story.
+
+It should not grow a parallel TypeScript runtime semantics layer.
+
 ## Immediate execution queue
 
 Do not reorder without repository evidence. The dual-source L4.5 frontend
@@ -607,14 +670,25 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    Nat +,-,*,/,%, Nat/Bool ==/!=, and Bool !/&&/|| paths only where
    Lean-compatible meaning is explicit.
 3. Extend the landed postponed global-instance lookup toward parameterized
-   instances/priorities only as ProofScript libraries require them.
-4. Validate the landed bounded multi-rule simp-only proof reconstruction.
+   instances/priorities only as ProofScript libraries require them. Nested
+   ordinary/theorem call arguments now already receive Pi-binder expected
+   types, so library-driven constructor inference should reuse that path
+   instead of adding syntax-specific inference.
+4. Validate the landed Eq-only `rfl` / bounded multi-rule `simp only`
+   proof reconstruction. The stdlib now dogfoods a strictly-decreasing,
+   non-overlapping two-rule `simp only` chain in the Result/Option integration
+   law `resultToOptionErrorOrElse`. Do not broaden `rfl` to HEq or
+   arbitrary reflexive relations before equivalent Lean `@[refl]` indexing
+   semantics are owned.
 5. Keep theorem-statement syntax evidence-driven; explicit dependent Pi plus
    the current Nat/Bool/propositional forms cover the reference-backed
    foundation. Add lambdas/match only when a concrete specification needs them.
 6. Validate and then broaden the landed bounded zero-subgoal `exact?` search
-   only where Lean library-search semantics can be modeled explicitly; do not
-   silently turn it into recursive automation.
+   only where Lean library-search semantics can be modeled explicitly. It now
+   infers ordinary implicit/default candidate arguments when the goal resolves
+   all of them and performs bounded Eq symmetry search using real `Eq.symm`.
+   Unresolved premises, strict/instance implicits, solveByElim recursion, Iff
+   direction search, and broader indexed library search remain fail-closed.
 7. Continue DS5 from the landed mixed-source project + replay-gated persistent
    proofscript-module@2 artifact path. Source FFI, assurance, exact package-root
    policy, transitive package-lock v3 closure fingerprinting, and bounded public
@@ -631,7 +705,19 @@ semantic priorities while making mixed-source modules possible when L5 begins.
    admission, end-to-end named ESM binding, transitive package-lock v3 closure,
    and bounded public package subpaths. Hold the host import surface here until
    a standard-library/application need justifies another ABI form.
-10. Start the ProofScript-written standard library.
+10. Expand the landed ProofScript-written standard-library foundation from
+    PsOption/PsResult/PsList only when APIs are supported by the verified
+    language itself. The current utility/law tranche includes optionOrElse,
+    resultGetOrElse/resultToOption, structurally recursive listAppend/listMap,
+    twelve definitional computation laws, universal Option/Result case-analysis
+    laws, a Result/Option multi-rule simp law, resultToOptionMap,
+    resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
+    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, resultIsOkOk, resultIsOkError, listIsEmptyNil, listIsEmptyCons, listHeadOrElseNil, listHeadOrElseCons, listAppendNilRight,
+    listAppendAssoc, and listMapAppend. Thirty-seven current stdlib theorems now
+    dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
+    paths, including higher-order Option case analysis; continue with stronger
+    laws/utilities only when the proof/recursion surface supports them without
+    host shortcuts.
 11. Expand recursion/dependent ADTs only with pskernel-backed theory gates.
 12. Make verified mode default once feature coverage surpasses the legacy lane.
 13. Retire the legacy software checker.
@@ -650,3 +736,186 @@ Every development report should state:
 - next smallest milestone.
 
 Do not report invented completion percentages.
+
+## Stdlib List head fallback checkpoint
+
+`listHeadOrElse` adds direct head extraction with an explicit fallback. Its
+`nil` and `cons` equations are ordinary definitional equalities checked by
+bounded `rfl`. Runtime dogfood computes this value alongside the existing
+Option path and selects using `optionIsSome`, increasing library composition
+coverage without any new elaborator or backend behavior.
+
+## Stdlib List emptiness checkpoint
+
+`listIsEmpty` adds a small executable Bool helper entirely in ProofScript.
+Its `nil` and `cons` constructor equations are recorded by
+`listIsEmptyNil` / `listIsEmptyCons` with bounded Eq-only `rfl`.
+
+Runtime dogfood feeds the helper into an ordinary verified Bool `if`, so the
+stdlib now composes ADT matching with control flow while leaving elaboration,
+erasure, IR, and backend rules unchanged.
+
+## Stdlib append associativity checkpoint
+
+The standard library now includes `listAppendAssoc`, derived from the same
+inductive structure used by Lean's `List.append_assoc`. The bounded proof
+does not add a library-specific theorem rule: it uses `induction`, the
+already-checked `listAppendCons` computation theorem, the recursive
+`tail_ih`, and ordinary kernel-checked equality transport/reflexivity.
+
+This law deliberately exposes the current `rw` boundary. Since bounded
+rewriting uses exact structural occurrence abstraction, constructor computation
+steps are made explicit before the induction hypothesis is applied. A future
+Lean-faithful defeq/kabstract occurrence matcher may shorten this source proof,
+but the present theorem remains valid proof dogfood rather than a reason to
+weaken rewrite semantics.
+
+## Stdlib map/append checkpoint
+
+The standard library now includes the higher-order generic law
+`listMapAppend`. Its induction motive carries `f` and `ys` as ordinary
+surrounding locals; the recursive branch uses only checked computation laws and
+the generated `tail_ih`.
+
+The supporting `listMapCons` theorem is definitional and proved by bounded
+`rfl`. It exists because the current rewrite occurrence matcher is structural:
+making constructor computation explicit preserves the bounded rewrite contract
+instead of teaching one stdlib theorem a special unfolding path.
+
+This checkpoint gives the stdlib a first law that simultaneously exercises
+generic higher-order functions, recursive ADTs, induction, source-preserved
+constructor field names, and proof-producing rewriting.
+
+
+## Stdlib Result value/error map commutation checkpoint
+
+`resultMapMapError` records that the two independent Result channels commute:
+mapping a success value and mapping an error payload may be performed in either
+order. The theorem is generic in all four involved types and both mapping
+functions. Its proof uses only bounded `cases` and Eq-only `rfl` on the two
+constructors, so it expands the ProofScript-authored library without expanding
+proof-search authority or relying on a host Result implementation.
+
+## Stdlib Option get-or-else/or-else checkpoint
+
+`optionGetOrElseOrElse` links two existing Option helpers: extracting from
+`optionOrElse(value, fallback)` with a default equals extracting `value`
+with the extraction of `fallback` as its fallback value. The theorem is
+generic and closes by bounded `cases` plus Eq-only `rfl`. It adds a useful
+helper-composition law while keeping Option behavior entirely in
+ProofScript-authored definitions and pskernel-checked equality.
+
+## Stdlib Option bind checkpoint
+
+The self-hosted Option module now includes `optionBind`, following the
+constructor equations of Lean 4.34 `Option.bind`: absence short-circuits and
+presence applies the continuation. `optionBindNone` and `optionBindSome`
+are checked as ordinary definitional equalities with bounded `rfl`.
+
+The stdlib runtime dogfood also passes a Result-derived Option through this
+higher-order helper before fallback extraction. This expands practical library
+coverage while reusing the existing generic ADT, higher-order application,
+match, erasure, IR, and TypeScript paths unchanged.
+
+## Stdlib Option map/get-or-else checkpoint
+
+`optionGetOrElseMap` records the expected compatibility between the generic
+Option mapper and fallback extraction: mapping both the contained value and
+fallback before extraction is equal to applying the function after extraction.
+The theorem is generic in both element types and closes by bounded `cases`
+plus Eq-only `rfl`. It therefore strengthens the self-hosted Option law set
+without expanding tactics, elaboration, erasure, or backend semantics.
+
+## Stdlib Result status checkpoint
+
+`resultIsOk` adds a Bool-valued Result query with constructor equations
+`resultIsOkOk` and `resultIsOkError`, both definitional `rfl` proofs.
+The runtime dogfood uses it as the condition for Result extraction, composing
+the self-hosted Result ADT with already verified Bool control flow and adding
+no special compiler behavior.
+
+## Stdlib Option-to-Result conversion checkpoint
+
+`resultFromOption` adds the reverse direction to the existing
+`resultToOption` bridge. It maps `none` to an explicit caller-supplied
+error and `some(value)` to `ok(value)`. The two constructor equations are
+ordinary definitional equalities checked with bounded `rfl`.
+
+The stdlib runtime dogfood now performs Result -> Option -> Result before
+extraction, exercising cross-module ADT construction/matching in both
+directions without introducing host conversion semantics.
+
+## Stdlib Result bind checkpoint
+
+The self-hosted Result module now includes `resultBind`, matching Lean 4.34
+`Except.bind` on the equivalent two-channel constructor behavior. Successful
+values continue through the supplied function; errors propagate unchanged.
+`resultBindOk` and `resultBindError` are ordinary definitional equalities
+checked with bounded `rfl`.
+
+Runtime dogfood routes a mapped Result through this helper before error mapping,
+so higher-order Result sequencing is covered by the existing checked-core,
+erasure, verified IR, and TypeScript path rather than by a backend shortcut.
+
+## Stdlib Result map/get-or-else checkpoint
+
+`resultGetOrElseMap` records the success-channel compatibility between
+`resultMap` and `resultGetOrElse`: mapping a Result and a fallback before
+extraction is equal to applying the same function after extraction. The theorem
+is generic in the source/result types and error type. Its proof is exactly
+bounded `cases` plus Eq-only `rfl`, so it exercises the existing
+higher-order Result surface without expanding proof-search authority.
+
+## Bounded exact-search application checkpoint
+
+The zero-subgoal `exact?` subset now trials candidates with a fresh isolated
+Meta context. Ordinary implicit/default binders may be instantiated with
+metavariables and are accepted only when unification with the target determines
+every inserted argument. This admits candidates such as a polymorphic
+`{P : Prop} -> P -> P` theorem for a concrete `Q -> Q` goal without
+creating a proof subgoal.
+
+A candidate that would require a premise remains rejected even if another local
+hypothesis could solve that premise. This is deliberate: Lean 4.34's full
+`exact?` delegates subsidiary goals to `solveByElim`, and ProofScript has
+not implemented that search contract yet.
+
+Candidate trials are isolated from the real theorem Meta context, so failed
+search alternatives cannot leak assignments. Universe parameters are no longer
+skipped categorically, but all trial universe metavariables must be resolved
+before the candidate is kernel-checked and accepted.
+
+## Stdlib simp-only proof checkpoint
+
+`resultToOptionErrorOrElse` now validates bounded multi-rule `simp only`
+inside the real verified stdlib project. Its two explicit Eq rules are
+`resultToOptionError(error)` and `optionOrElseNone(fallback)`. Both
+directions strictly reduce structural expression size and the selected lhs
+patterns are non-overlapping, matching the current bounded simplifier contract.
+
+This keeps the simplifier's evidence boundary visible: there is no global simp
+set, hidden unfolding, or theorem-specific shortcut. Each change still flows
+through the same Eq transport proof reconstruction used by bounded `rw`, with
+the final reflexive target closed by the Eq-only rfl helper.
+
+## Stdlib Result/Option map compatibility checkpoint
+
+The standard library now proves `resultToOptionMap`: converting a mapped
+Result to Option is equal to mapping the converted Option. The proof is
+constructor case analysis plus definitional equality, so it exercises generic
+higher-order functions across two source-owned ADTs without introducing any
+library-specific proof rule.
+
+The companion `resultToOptionOk` theorem records the success-constructor
+computation by bounded rfl. Together with the existing error/simp laws, the
+Result→Option API now has checked computation behavior on both constructors and
+one generic cross-ADT naturality-style law.
+
+## Stdlib Result error-map/Option compatibility checkpoint
+
+`resultToOptionMapError` records the complementary error-channel law:
+mapping an error payload cannot affect Result→Option conversion. This follows
+the same constructor behavior as Lean 4.34 `Except.mapError` and
+`Except.toOption`. The ProofScript proof is exactly bounded `cases` plus
+`rfl` in each branch, so the checkpoint exercises the existing generic
+higher-order/case-analysis path without expanding tactic authority.

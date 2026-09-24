@@ -24,6 +24,7 @@ import {casesV061Tactic} from './v061-cases-tactic.js';
 import {constructorV061Tactic} from './v061-constructor-tactic.js';
 import {inductionV061Tactic} from './v061-induction-tactic.js';
 import {refineV061Tactic} from './v061-refine-tactic.js';
+import {rflV061Tactic} from './v061-rfl-tactic.js';
 import {rewriteV061Tactic} from './v061-rewrite-tactic.js';
 import {simpOnlyV061Tactic} from './v061-simp-tactic.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
@@ -87,6 +88,11 @@ function runTactic(
     return;
   }
 
+  if(tactic.kind==='rfl'){
+    rflV061Tactic(runtime);
+    return;
+  }
+
   if(tactic.kind==='constructor'){
     constructorV061Tactic(runtime);
     return;
@@ -137,7 +143,7 @@ function runTactic(
       runtime.state,
       tactic.name,
       {
-        intro:(parentGoal,userName)=>{
+      intro:(parentGoal,userName)=>{
         const parent=runtime.entry(parentGoal);
         const checker=new TypeChecker(
           parent.context.environment,
@@ -166,42 +172,37 @@ function runTactic(
         };
         const nextExpected=instantiate1(functionType.body,fvar(id));
 
-          return runtime.createGoal(
-            nextContext,
-            nextExpected,
-            (body)=>{
-              const term=lam(
-                leanName,
-                functionType.type,
-                abstractFVar(body.term,id),
-                functionType.binderInfo,
+        return runtime.createGoal(
+          nextContext,
+          nextExpected,
+          (body)=>{
+            const term=lam(
+              leanName,
+              functionType.type,
+              abstractFVar(body.term,id),
+              functionType.binderInfo,
+            );
+            const type=checker.check(term);
+            if(
+              !checker.isDefEq(
+                parent.context.metaContext.instantiate(type),
+                parent.context.metaContext.instantiate(parentGoal.target),
+              )
+            ){
+              throw new Error(
+                'PS_ELAB_TACTIC_INTRO: generated lambda does not match the goal',
               );
-              const type=checker.check(term);
-              if(
-                !checker.isDefEq(
-                  parent.context.metaContext.instantiate(type),
-                  parent.context.metaContext.instantiate(parentGoal.target),
-                )
-              ){
-                throw new Error(
-                  'PS_ELAB_TACTIC_INTRO: generated lambda does not match the goal',
-                );
-              }
-              runtime.completeGoal(parentGoal,{term,type});
-            },
-          );
+            }
+            runtime.completeGoal(parentGoal,{term,type});
+          },
+        );
         },
       },
     );
   }catch(error){
-    if(
-      error instanceof Error&&
-      error.message.startsWith('PS_ELAB_TACTIC_INTRO:')
-    )throw error;
-    throw new Error(
-      'PS_ELAB_TACTIC_INTRO: '+
-      (error instanceof Error?error.message:String(error)),
-    );
+    const detail=error instanceof Error?error.message:String(error);
+    if(detail.startsWith('PS_ELAB_TACTIC_INTRO:'))throw error;
+    throw new Error('PS_ELAB_TACTIC_INTRO: '+detail);
   }
 }
 

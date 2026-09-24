@@ -109,8 +109,8 @@ export class ExprMetaContext {
     const instantiatedValue=this.instantiate(value);
     const instantiatedType=this.instantiate(declaration.type);
     if(
-      collectMVarIds(instantiatedValue).size!==0
-      ||collectMVarIds(instantiatedType).size!==0
+      collectMVarIds(instantiatedValue).size>0
+      ||collectMVarIds(instantiatedType).size>0
     )return;
 
     const checker=new TypeChecker(
@@ -231,6 +231,10 @@ export class ExprMetaContext {
     if(lhs.kind==='sort'&&rhs.kind==='sort'){
       return this.levels.unify(lhs.level,rhs.level);
     }
+    if(lhs.kind==='app'&&rhs.kind==='app'){
+      return this.unifyCore(lhs.fn,rhs.fn,localContext)
+        &&this.unifyCore(lhs.arg,rhs.arg,localContext);
+    }
     if(
       (lhs.kind==='forall'&&rhs.kind==='forall')
       ||(lhs.kind==='lam'&&rhs.kind==='lam')
@@ -244,21 +248,17 @@ export class ExprMetaContext {
         &&this.unifyCore(lhs.value,rhs.value,localContext)
         &&this.unifyCore(lhs.body,rhs.body,localContext);
     }
-    if(
-      this.levels.hasUnresolvedExpr(lhs)
-      ||this.levels.hasUnresolvedExpr(rhs)
-    ){
-      return this.levels.unifyExprLevels(lhs,rhs);
-    }
-    if(lhs.kind==='app'&&rhs.kind==='app'){
-      return this.unifyCore(lhs.fn,rhs.fn,localContext)
-        &&this.unifyCore(lhs.arg,rhs.arg,localContext);
-    }
     if(lhs.kind==='mdata'){
       return this.unifyCore(lhs.expr,rhs,localContext);
     }
     if(rhs.kind==='mdata'){
       return this.unifyCore(lhs,rhs.expr,localContext);
+    }
+    if(
+      this.levels.hasUnresolvedExpr(lhs)
+      ||this.levels.hasUnresolvedExpr(rhs)
+    ){
+      return this.levels.unifyExprLevels(lhs,rhs);
     }
     if(hasMVar(lhs)||hasMVar(rhs))return false;
     try{

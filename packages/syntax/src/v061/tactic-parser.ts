@@ -6,7 +6,7 @@ export interface V061TacticExpressionParser {
 }
 
 const TACTIC_HEADS=new Set([
-  'exact','exact?','assumption','apply','refine','constructor','cases','induction','rw','simp','intro',
+  'exact','exact?','assumption','rfl','apply','refine','constructor','cases','induction','rw','simp','intro',
 ]);
 
 function isTacticHead(text:string):boolean {
@@ -37,6 +37,11 @@ function parseTactic(
   if(tacticToken.text==='assumption'){
     const token=context.cursor.consume();
     return {kind:'assumption',span:token.span};
+  }
+
+  if(tacticToken.text==='rfl'){
+    const token=context.cursor.consume();
+    return {kind:'rfl',span:token.span};
   }
 
   if(tacticToken.text==='constructor'){
@@ -141,7 +146,7 @@ function parseTactic(
   }
 
   throw new SyntaxError(
-    "kernel-facing tactic subset supports 'exact', bounded 'exact?', 'assumption', 'apply', 'refine', 'constructor', 'cases', 'induction', 'rw', 'simp only', and 'intro', got '"+
+    "kernel-facing tactic subset supports 'exact', bounded 'exact?', 'assumption', bounded Eq-only 'rfl', 'apply', 'refine', 'constructor', 'cases', 'induction', 'rw', 'simp only', and 'intro', got '"+
     tacticToken.text+"'",
     tacticToken.span,
   );

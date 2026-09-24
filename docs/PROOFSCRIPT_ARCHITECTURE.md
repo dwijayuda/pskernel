@@ -601,25 +601,33 @@ remain unsupported until a concrete ProofScript library requires them.
 
 ## Bounded exact-search checkpoint
 
-ProofScript now has a first deterministic `exact?` slice. It is an untrusted
-search procedure, not a proof authority.
+ProofScript has a deterministic, untrusted `exact?` search procedure. Search
+never becomes proof authority: every accepted candidate is still submitted
+through ordinary `exact` and pskernel.
 
 Candidate order is deterministic:
 
 1. local hypotheses, newest first;
 2. already-admitted environment constants, newest first.
 
-The environment phase considers only declarations with zero universe
-parameters and stops after 4096 candidates. A candidate is only accepted when
-its already-checkable type is definitionally equal to the goal. The selected
-term is then submitted through the ordinary `exact` transition and pskernel
-checker.
+For each candidate, the bounded search now mirrors the relevant part of Lean
+4.34 `librarySearchSymm`:
 
-This intentionally omits Lean's broader library-search machinery:
-discrimination-tree indexing, symmetry search, `Iff.mp`/`Iff.mpr`
-variants, applying lemmas with premises, `solveByElim` subgoal discharge,
-polymorphic level instantiation, `using`, configuration, `+all`, and
-`+grind`.
+1. try the original goal;
+2. if the goal is an ordinary `Eq`, try its symmetric target;
+3. if the symmetric trial closes with zero subgoals, reconstruct the requested
+   proof using the real polymorphic `Eq.symm`.
+
+Candidate application may instantiate ordinary implicit/default binders only
+when the goal determines every inserted argument. Trials run in isolated Meta
+contexts, must leave no unresolved expression/universe metavariables, and are
+kernel-checked before selection. Environment scanning remains bounded to 4096
+candidates.
+
+This still intentionally omits Lean's broader library-search machinery:
+discrimination-tree indexing/priorities, Iff.mp/Iff.mpr variants, strict or
+instance-implicit candidate synthesis, candidates that leave premises,
+`solveByElim` recursion, `using`, configuration, `+all`, and `+grind`.
 
 A failed candidate probe is side-effect-free. Once a candidate matches, any
 failure during actual assignment or parent-proof reconstruction propagates;
@@ -1201,3 +1209,99 @@ difference is part of the explicit FFI trust boundary, not a theorem semantic.
 The first subpath classifier is intentionally conservative and excludes
 relative/absolute sources, `node:` builtins, path traversal, empty segments,
 and nested `node_modules` segments. Only named ESM imports remain supported.
+
+## ProofScript-written standard-library checkpoint
+
+The repository now contains a self-hosted `stdlib/` ProofScript project.
+Standard-library definitions pass through exactly the same source/module,
+elaboration, pskernel, erasure, IR, TypeScript, and JavaScript path as user
+projects. There is no privileged stdlib checker or backend.
+
+The initial executable types are named `PsOption`, `PsResult`, and
+`PsList`. This prefix is intentionally transitional. Lean 4.34 Init already
+owns `Option` and `List`, but the current verified erasure layer derives
+runtime constructor/recursor metadata from inductives present in
+`CheckedCoreModule.inductives`, i.e. source/project admissions. Prelude
+inductives exist in the kernel environment but are not yet provenance-carrying
+runtime IR declarations.
+
+Therefore the first stdlib chooses source-owned runtime ADTs instead of either:
+
+- redeclaring/shadowing Lean Prelude constants; or
+- adding an unprincipled backend special case for built-in `Option`/`List`.
+
+The dogfood gate is intentionally cross-module and proof-bearing. It imports
+Option into Result/List, performs generic mapping and structural recursion,
+executes emitted JavaScript, and requires the stdlib's theorem declarations to
+be counted as pskernel-checked with no runtime external assumptions.
+
+## Expected-argument elaboration checkpoint
+
+The shared application engine already models Lean-style dependent application by
+exposing each explicit Pi binder's expected argument type. Source frontends now
+preserve that information instead of eagerly elaborating all call arguments.
+
+```text
+callee Pi binder
+  -> expected argument type
+  -> elaborate source argument against that expectation
+  -> unify / instantiate metas
+  -> continue telescope
+```
+
+This applies both to ordinary executable calls and theorem/type-position
+applications. It is especially important for constructors whose implicit
+parameters are not recoverable from their own explicit fields, such as a
+nullary generic constructor or one unused type parameter. In those cases the
+surrounding function parameter/result type may legitimately provide the missing
+constraint.
+
+The change stays entirely in untrusted Meta/Elab. pskernel still checks the
+fully instantiated application and remains the proof/type authority.
+
+## Bounded reflexivity tactic checkpoint
+
+ProofScript now exposes inherited Lean `rfl` syntax for the first faithful
+reflexivity slice:
+
+```text
+goal
+  -> whnf target
+  -> require Eq α lhs rhs
+  -> require lhs ≡ rhs by kernel definitional equality
+  -> build Eq.refl.{u} α lhs
+  -> pskernel checks proof type
+  -> close goal
+```
+
+The proof is an ordinary Lean core term. Tactic state gains no proof authority.
+The same helper is shared by standalone `rfl`, the cheap post-rewrite close in
+`rw`, and the terminal reflexivity attempt in bounded `simp only`.
+
+This is intentionally narrower than Lean 4.34 `MVarId.applyRfl`. Lean also
+special-cases `HEq` and searches a discrimination-tree-backed `@[refl]`
+environment extension for arbitrary reflexive relations. ProofScript does not
+yet own those environment/attribute semantics, so non-Eq reflexive goals fail
+closed instead of being approximated.
+
+## Induction branch naming checkpoint
+
+The bounded recursor-based induction implementation now keeps user-facing names
+for direct constructor fields. Given a constructor such as:
+
+```text
+| cons(head : α, tail : PsList(α))
+```
+
+the corresponding branch context exposes `head`, `tail`, and for the direct
+recursive field, `tail_ih`. Existing local-name collisions are resolved with
+deterministic numeric suffixes.
+
+This does not alter the core induction principle. The pskernel-generated
+recursor still determines the minor-premise telescope (all constructor fields,
+then direct recursive induction hypotheses), and the elaborator still
+lambda-abstracts exactly those locals into the minor proof. Names exist only in
+the untrusted source/tactic context.
+
+The first standard-library consumer is `listAppendNilRight`, proved by
+induction plus checked rewrite steps rather than a host-side list theorem.

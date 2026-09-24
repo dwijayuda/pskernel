@@ -1,0 +1,49 @@
+import ProofScript.Data.List
+import ProofScript.Data.Result
+
+function inc(x : Nat) : Nat := x + 1;
+
+function asResult(x : Nat) : PsResult(Nat, Nat) :=
+  PsResult.ok(x);
+
+function asOption(x : Nat) : PsOption(Nat) :=
+  PsOption.some(x);
+
+function main(x : Nat) : Nat :=
+  let mapped : PsResult(Nat, Nat) :=
+    resultMap(inc, asResult(x));
+  let reboundResult : PsResult(Nat, Nat) :=
+    resultBind(mapped, asResult);
+  let mappedError : PsResult(Nat, Nat) :=
+    resultMapError(inc, reboundResult);
+  let roundTrippedResult : PsResult(Nat, Nat) :=
+    resultFromOption(resultToOption(mappedError), 0);
+  let resultValue : Nat :=
+    if (resultIsOk(roundTrippedResult)) {
+      resultGetOrElse(roundTrippedResult, 0)
+    } else {
+      0
+    };
+  let option : PsOption(Nat) :=
+    resultToOption(mapped);
+  let rebound : PsOption(Nat) :=
+    optionBind(option, asOption);
+  let chosen : PsOption(Nat) :=
+    optionOrElse(rebound, PsOption.some(0));
+  let xs : PsList(Nat) :=
+    PsList.cons(x, PsList.cons(x, PsList.nil));
+  let empty : PsList(Nat) :=
+    PsList.nil;
+  let extended : PsList(Nat) :=
+    listAppend(listMap(inc, xs), empty);
+  let listValue : Nat :=
+    if (listIsEmpty(extended)) { 0 } else { listLength(extended) };
+  let optionValue : Nat :=
+    optionGetOrElse(chosen, 0);
+  let headValue : Nat :=
+    listHeadOrElse(extended, 0);
+  let selectedValue : Nat :=
+    if (optionIsSome(chosen)) { optionValue } else { headValue };
+  resultValue +
+    selectedValue +
+    listValue;

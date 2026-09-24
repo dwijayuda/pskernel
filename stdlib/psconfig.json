@@ -1,0 +1,14 @@
+{
+  "languageVersion": "0.7",
+  "entry": "test/main.ps",
+  "sourceRoots": [
+    "src"
+  ],
+  "runtimeDependencies": {},
+  "compilerOptions": {
+    "outDir": "dist",
+    "emitTypeScript": true,
+    "declaration": true,
+    "sourceMap": true
+  }
+}

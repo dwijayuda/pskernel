@@ -43,18 +43,22 @@ function throws(f: () => unknown, pattern: RegExp): void {
   throw new Error(`expected function to throw ${pattern}`);
 }
 
-function valueDeclaration(
+function firstDeclarationBody(
   module:ReturnType<typeof parseV061Module>,
-  index:number,
-){
-  const declaration=module.declarations[index];
-  assert(declaration!==undefined,'missing declaration '+index);
-  if(!('body' in declaration)||!('resultType' in declaration)){
-    throw new Error(
-      'expected value declaration at '+index+', got '+declaration.kind,
-    );
-  }
-  return declaration;
+) {
+  const declaration=module.declarations[0];
+  return declaration!==undefined&&'body' in declaration
+    ?declaration.body
+    :undefined;
+}
+
+function firstDeclarationResultType(
+  module:ReturnType<typeof parseV061Module>,
+) {
+  const declaration=module.declarations[0];
+  return declaration!==undefined&&'resultType' in declaration
+    ?declaration.resultType
+    :undefined;
 }
 
 equal(PROOFSCRIPT_SPEC_VERSION, '0.7.0');
@@ -406,7 +410,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(module.declarations.length,2);
   equal(module.declarations[0]?.kind,'const');
   equal(module.declarations[1]?.kind,'function');
-  equal(valueDeclaration(module,0).resultType.kind,'named');
+  equal(firstDeclarationResultType(module)?.kind,'named');
   equal(module.featureIds.includes('D-CONST-ALIAS'),true);
   equal(module.featureIds.includes('D-FUNCTION-ALIAS'),true);
   equal(module.featureIds.includes('D-EXPLICIT-PARAMS'),true);
@@ -428,7 +432,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 // v0.6.1 inherited lexical let term.
 {
   const module=parseV061Module('function incTwice(x : Nat) : Nat := let y : Nat := x + 1; y + 1;');
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'let');
   if(body?.kind==='let'){
     equal(body.name,'y');
@@ -444,7 +448,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 }
 {
   const module=parseV061Module('function shadow(x : Nat) : Nat := let x := x + 1; x;');
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'let');
   if(body?.kind==='let')equal(body.declaredType,undefined);
 }
@@ -453,7 +457,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 // v0.6.1 inherited function type syntax.
 {
   const module=parseV061Module('const increment : Nat -> Nat := 1;');
-  const type=valueDeclaration(module,0).resultType;
+  const type=firstDeclarationResultType(module);
   equal(type?.kind,'arrow');
   if(type?.kind==='arrow'){
     equal(lowerV061TypeToLean(type),'Nat -> Nat');
@@ -461,7 +465,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 }
 {
   const module=parseV061Module('const composeType : Nat -> Bool -> String := "x";');
-  const type=valueDeclaration(module,0).resultType;
+  const type=firstDeclarationResultType(module);
   equal(type?.kind,'arrow');
   if(type?.kind==='arrow')equal(type.codomain.kind,'arrow');
 }
@@ -470,7 +474,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 // v0.6.1 inherited lambda syntax.
 {
   const module=parseV061Module('const increment : Nat -> Nat := fun x => x + 1;');
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'lambda');
   if(body?.kind==='lambda'){
     equal(body.binders.length,1);
@@ -484,7 +488,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 }
 {
   const module=parseV061Module('const addFn : Nat -> Nat -> Nat := fun (x : Nat) (y : Nat) => x + y;');
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'lambda');
   if(body?.kind==='lambda'){
     equal(body.binders.length,2);
@@ -507,7 +511,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 // Empty D-CALL is Unit application, not zero-arity invocation.
 {
   const module=parseV061Module('function run(f : Unit -> Nat) : Nat := f();');
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'call');
   if(body?.kind==='call'){
     equal(body.args.length,1);
@@ -522,7 +526,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'function choose(flag : Bool) : Nat := match flag with { | true => 1; | false => 2; };',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'match');
   equal(module.featureIds.includes('E-MATCH-BODY'),true);
   if(body?.kind==='match'){
@@ -538,7 +542,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'function get(value : Bool) : Nat := match value with { | _ => 1; };',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'match');
   if(body?.kind==='match')equal(body.alternatives[0]?.pattern.kind,'wildcard');
 }
@@ -546,7 +550,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'function get(value : Bool) : Nat := match value with { | .some x => transform(x); | .none => 0; };',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'match');
   if(body?.kind==='match'){
     equal(body.alternatives[0]?.pattern.kind,'constructor');
@@ -805,7 +809,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'theorem exactProof(P : Prop, h : P) : P := by exact h;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,1);
@@ -820,7 +824,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'theorem assumptionProof(P : Prop, h : P) : P := by assumption;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,1);
@@ -833,7 +837,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'theorem introProof(P : Prop) : P -> P := by intro h; assumption;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,2);
@@ -853,7 +857,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
     'theorem applyProof(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
     'by apply f; assumption;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,2);
@@ -874,7 +878,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
     'theorem refineProof(P : Prop, Q : Prop, f : P -> Q, h : P) : Q := '+
     'by refine f(?_); assumption;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,2);
@@ -896,7 +900,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'theorem ctorProof : Choice := by constructor;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,1);
@@ -912,7 +916,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'theorem casesProof(c : Choice) : P := by cases c; assumption; assumption;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,3);
@@ -932,7 +936,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
     'theorem inductionProof(xs : Chain) : P := '+
     'by induction xs; assumption; assumption;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,3);
@@ -951,7 +955,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const module=parseV061Module(
     'theorem exactSearchProof(P : Prop, h : P) : P := by exact?;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,1);
@@ -965,10 +969,23 @@ console.log('ok - @proofscript/syntax lexer MVP');
 
 {
   const module=parseV061Module(
+    'theorem rflProof(n : Nat) : n + 0 = n := by rfl;',
+  );
+  const body=firstDeclarationBody(module);
+  equal(body?.kind,'by');
+  if(body?.kind==='by')equal(body.tactics[0]?.kind,'rfl');
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem rflProof (n : Nat) : n + 0 = n := by rfl\n',
+  );
+}
+
+{
+  const module=parseV061Module(
     'theorem rwProof(a : Nat, b : Nat, h : a = b) : a = b := '+
     'by rw [h]; rw [← h]; assumption;',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,3);
@@ -1075,7 +1092,7 @@ throws(
     'h1 : BoxT(A) = B, h2 : WrapT(C) = D) : P := '+
     'by simp only [h1, ← h2];',
   );
-  const body=valueDeclaration(module,0).body;
+  const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
     equal(body.tactics.length,1);

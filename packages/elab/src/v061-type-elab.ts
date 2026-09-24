@@ -37,13 +37,30 @@ function elaborateTypePositionApplication(
 ):Expr {
   const source={
     length:args.length,
-    elaborate:(index:number,expectedType:Expr)=>({
-      term:elaborateV061TypePositionTerm(
+    elaborate:(index:number,expectedType:Expr)=>{
+      const term=elaborateV061TypePositionTerm(
         args[index]!,
         context,
         expectedType,
-      ),
-    }),
+      );
+      const instantiated=context.metaContext.instantiate(term);
+      if(!hasMVar(instantiated)){
+        const checker=new TypeChecker(
+          context.environment,
+          context.localContext.clone(),
+        );
+        return {
+          term,
+          type:checker.check(instantiated),
+          allowUnresolvedMVar:true,
+        };
+      }
+      return {
+        term,
+        type:expectedType,
+        allowUnresolvedMVar:true,
+      };
+    },
   };
   const applied=elaborateApplication({
     environment:context.environment,
@@ -59,6 +76,13 @@ function elaborateTypePositionApplication(
   const term=context.metaContext.instantiate(applied.term);
   const resultType=context.metaContext.instantiate(applied.type);
   if(hasMVar(term)||hasMVar(resultType)){
+    if(expected!==undefined){
+      // The enclosing Pi binder has already constrained this application's
+      // result. Keep shared metas postponed so later sibling arguments can
+      // finish solving them; elaborateV061Type still requires a ground term
+      // before a declaration type is admitted.
+      return term;
+    }
     throw new Error(
       'PS_ELAB_TYPE_APPLICATION_STUCK: unresolved implicit/instance '+
       'arguments in '+exprToString(term),

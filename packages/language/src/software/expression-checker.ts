@@ -184,7 +184,7 @@ export function checkSoftwareExpr(
       );
     case 'by':
       throw new Error(
-        'PS_CHECK_PROOF_TERM: by-tactic syntax is not executable software',
+        'PS_CHECK_PROOF_TERM: theorem proof blocks are verified by the pskernel elaboration path, not the legacy software checker',
       );
     case 'group':return checkSoftwareExpr(expr.value,context,expected);
     case 'reference':{

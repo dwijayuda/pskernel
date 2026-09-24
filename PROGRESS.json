@@ -101,6 +101,7 @@
   ],
   "lastVerifiedTestCount": 97,
   "notes": [
+    "Safe DefinitionVal.all replay parity correction is source-locked: Lean 4.34 Kernel.Environment.replay ignores all for safe defnInfo and replays actual used constants before one defnDecl. The importer no longer requires safe all self-membership, and DependencyExport emits safe definitions independently. Direct regression added; refreshed execution is still required.",
     "Final-4.34 native-reduction correction is committed but awaits the refreshed CI/differential run before being promoted into the verified gate list.",
     "Lean 4.34 final alignment correction: upstream commit 2a7175c74ba17b160299accd7e6ea6984d7ea86f removed Lean.reduceBool/Lean.reduceNat, ofReduceBool/ofReduceNat, Lean.trustCompiler, and all in-kernel native compiler-IR reduction. pskernel removed NativeEvaluator/native-reduction special handling and retired the native-IR compatibility gate.",
     "Deep-expression robustness hardening keeps 97/97 direct tests and 170/170 Arena correctness green: hasMVar, lift, and instantiate now use explicit traversal stacks, and isolated heavy oracle workers use a larger JavaScript stack while the kernel maxRecDepth limit remains authoritative.",
@@ -168,7 +169,7 @@
     "Real Lean 4.34 replay fixture now includes universe-polymorphic MiniList α and singleton in addition to MiniNat; exact generated recursor metadata, universe parameter ordering, and inferred implicit binders match the official .olean environment.",
     "Real Lean 4.34 replay fixture now includes indexed MiniVec α : MiniNat → Type u. The TS kernel exactly reproduces numParams/numIndices, indexed motive/recursor metadata, constructor rules, and accepts a vecOne definition over the generated indexed family."
   ],
-  "currentTreeExpectedDirectTests": 96,
+  "currentTreeExpectedDirectTests": 97,
   "currentTreeExpectedDefeqDifferentialCases": 40,
-  "currentTreeVerification": "pending refreshed execution after final-4.34 native-reduction correction"
+  "currentTreeVerification": "source direct-test count is 97; final-4.34 native-removal and safe DefinitionVal.all parity corrections remain pending refreshed execution because GitHub Actions is failing before runner steps are created"
 }

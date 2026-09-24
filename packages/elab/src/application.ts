@@ -32,6 +32,7 @@ export interface ElaboratedApplication {
 
 export interface ApplicationArgument {
   readonly term:Expr;
+  readonly type?:Expr;
   readonly allowUnresolvedMVar?:boolean;
 }
 
@@ -43,7 +44,6 @@ export interface ApplicationArgumentSource {
 export type ApplicationArguments=
   | readonly Expr[]
   | ApplicationArgumentSource;
-
 export interface ElaborateApplicationOptions {
   readonly environment:Environment;
   readonly metaContext:ExprMetaContext;
@@ -55,26 +55,34 @@ export interface ElaborateApplicationOptions {
   readonly globalInstances?:readonly Expr[]|undefined;
   readonly classNames?:ReadonlySet<string>|undefined;
 }
-
-function hasExpressionMVar(expr:Expr):boolean {
-  const pending:Expr[]=[expr];
-  while(pending.length!==0){
-    const current=pending.pop()!;
+function implicitKind(info:BinderInfo):ExprMetavarKind {
+  return info==='instImplicit'?'synthetic':'natural';
+}
+function isArgumentSource(
+  args:ApplicationArguments,
+):args is ApplicationArgumentSource {
+  return !Array.isArray(args);
+}
+function hasExprMVar(expr:Expr):boolean {
+  const todo:Expr[]=[expr];
+  while(todo.length>0){
+    const current=todo.pop()!;
     switch(current.kind){
-      case 'mvar':return true;
+      case 'mvar':
+        return true;
       case 'app':
-        pending.push(current.fn,current.arg);
+        todo.push(current.fn,current.arg);
         break;
       case 'lam':
       case 'forall':
-        pending.push(current.type,current.body);
+        todo.push(current.type,current.body);
         break;
       case 'let':
-        pending.push(current.type,current.value,current.body);
+        todo.push(current.type,current.value,current.body);
         break;
       case 'mdata':
       case 'proj':
-        pending.push(current.expr);
+        todo.push(current.expr);
         break;
       default:
         break;
@@ -82,17 +90,6 @@ function hasExpressionMVar(expr:Expr):boolean {
   }
   return false;
 }
-
-function implicitKind(info:BinderInfo):ExprMetavarKind {
-  return info==='instImplicit'?'synthetic':'natural';
-}
-
-function isArgumentSource(
-  args:ApplicationArguments,
-):args is ApplicationArgumentSource {
-  return !Array.isArray(args);
-}
-
 function explicitArgument(
   args:ApplicationArguments,
   index:number,
@@ -101,7 +98,6 @@ function explicitArgument(
   if(isArgumentSource(args))return args.elaborate(index,expectedType);
   return {term:args[index]!};
 }
-
 function targetClassName(
   type:Expr,
   checker:TypeChecker,
@@ -111,7 +107,6 @@ function targetClassName(
     ?nameToString(view.fn.name)
     :undefined;
 }
-
 function trySynthesizeLocalInstance(
   target:Expr,
   candidates:readonly Expr[],
@@ -125,7 +120,6 @@ function trySynthesizeLocalInstance(
     checker,
   );
   if(className===undefined||!classNames.has(className))return undefined;
-
   for(const candidate of candidates){
     let candidateType:Expr;
     try{
@@ -139,7 +133,6 @@ function trySynthesizeLocalInstance(
   }
   return undefined;
 }
-
 export function elaborateApplication({
   environment,
   metaContext,
@@ -152,7 +145,7 @@ export function elaborateApplication({
   classNames=new Set(),
 }:ElaborateApplicationOptions):ElaboratedApplication {
   const checker=new TypeChecker(environment,localContext.clone());
-  if(hasExpressionMVar(metaContext.instantiate(fn))){
+  if(hasExprMVar(metaContext.instantiate(fn))){
     throw new Error(
       'PS_ELAB_APP_FUNCTION_STUCK: function expression contains unresolved expression metavariables',
     );
@@ -185,20 +178,27 @@ export function elaborateApplication({
       const sourceArg=supplied.term;
       const argument=metaContext.instantiate(sourceArg);
       let actualType:Expr;
-      if(hasMVar(argument)){
-        if(
-          !supplied.allowUnresolvedMVar
-          ||argument.kind!=='mvar'
-        ){
+      if(hasExprMVar(argument)){
+        if(!supplied.allowUnresolvedMVar){
           throw new Error(
-            'PS_ELAB_APP_ARGUMENT_STUCK: explicit argument contains unresolved metavariables',
+            'PS_ELAB_APP_ARGUMENT_STUCK: explicit argument contains unresolved expression metavariables',
           );
         }
-        actualType=metaContext.instantiate(
-          metaContext.getDecl(argument).type,
-        );
+        if(supplied.type!==undefined){
+          actualType=metaContext.instantiate(supplied.type);
+        }else if(argument.kind==='mvar'){
+          actualType=metaContext.instantiate(
+            metaContext.getDecl(argument).type,
+          );
+        }else{
+          throw new Error(
+            'PS_ELAB_APP_ARGUMENT_STUCK: postponed compound argument requires its elaborated type',
+          );
+        }
       }else{
-        actualType=checker.check(argument);
+        actualType=supplied.type===undefined
+          ?checker.check(argument)
+          :metaContext.instantiate(supplied.type);
       }
       if(
         !metaContext.unify(

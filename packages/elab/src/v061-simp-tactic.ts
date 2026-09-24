@@ -8,8 +8,8 @@ import {
 import {
   equalityView,
   rewriteV061Equality,
-  tryCloseV061CheapEqRfl,
 } from './v061-rewrite-tactic.js';
+import {tryCloseV061EqRfl} from './v061-rfl-tactic.js';
 import type {V061TermElaborator} from './v061-tactic-elab.js';
 import {V061TacticRuntime} from './v061-tactic-runtime.js';
 
@@ -101,7 +101,7 @@ export function simpOnlyV061Tactic(
       }
     }
     if(!changedInPass){
-      tryCloseV061CheapEqRfl(runtime);
+      tryCloseV061EqRfl(runtime);
       return;
     }
   }

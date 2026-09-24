@@ -2,7 +2,8 @@ import type {ProofScriptFeatureId} from '../features.js';
 import {lex} from '../lexer.js';
 import {TokenCursor} from '../parser-core.js';
 import type {SourceSpan,Token} from '../source.js';
-export interface Spanned {readonly span:SourceSpan}
+
+export type Spanned={readonly span:SourceSpan};
 
 export function spanBetween(first:Spanned,last:Spanned):SourceSpan {
   return {start:first.span.start,end:last.span.end};

@@ -2,13 +2,13 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   LocalContext,
   TypeChecker,
+  constant,
   exprToString,
   fvar,
   hasMVar,
   nameFromDotted,
   natLit,
   strLit,
-  type Expr,
 } from 'lean-ts-kernel';
 import {elaborateApplication} from './application.js';
 import {elaborateV061Constant} from './v061-constant-elab.js';
@@ -35,7 +35,7 @@ import {elaborateV061LetExpression} from './v061-let-elab.js';
 function resolveReference(
   name:string,
   context:V061CoreElabContext,
-):Expr {
+):ReturnType<typeof constant>|ReturnType<typeof fvar> {
   const local=context.locals.get(name);
   if(local!==undefined)return fvar(local);
   const full=nameFromDotted(name);
@@ -84,9 +84,11 @@ export function elaborateV061Term(
         if(expected===undefined){
           return {term:reference,type:checker.check(reference)};
         }
-        throw new Error(
-          'PS_ELAB_REFERENCE_STUCK: unresolved implicit or instance arguments',
-        );
+        // An enclosing application may legitimately solve a nullary generic
+        // constructor's inserted metas from a later explicit argument/result.
+        // Keep them in the shared Meta context; the enclosing application and
+        // declaration still require full grounding before admission.
+        return {term:elaboratedTerm,type:elaboratedType};
       }
       return {term:elaboratedTerm,type:elaboratedType};
     }
@@ -123,13 +125,18 @@ export function elaborateV061Term(
       const fn=resolveReference(expr.callee,context);
       const args={
         length:expr.args.length,
-        elaborate:(index:number,expectedType:import('lean-ts-kernel').Expr)=>({
-          term:elaborateV061Term(
+        elaborate:(index:number,expectedType:import('lean-ts-kernel').Expr)=>{
+          const argument=elaborateV061Term(
             expr.args[index]!,
             context,
             expectedType,
-          ).term,
-        }),
+          );
+          return {
+            term:argument.term,
+            type:argument.type,
+            allowUnresolvedMVar:true,
+          };
+        },
       };
       const result=elaborateApplication({
         environment:context.environment,

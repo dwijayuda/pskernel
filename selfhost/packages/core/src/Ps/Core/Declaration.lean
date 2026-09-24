@@ -17,6 +17,7 @@ structure PsConstructorInfo where
   constructorIndex : Nat
   numParams : Nat
   numFields : Nat
+  recursiveFields : List Nat := []
 
 structure PsRecursorInfo where
   name : PsName

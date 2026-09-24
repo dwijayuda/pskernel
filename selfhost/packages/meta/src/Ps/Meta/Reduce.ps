@@ -1,5 +1,6 @@
 import Ps.Core.Equality
 import Ps.Core.Subst
+import Ps.Environment.Basic
 import Ps.Environment.LocalContext
 import Ps.Meta.Context
 
@@ -63,4 +64,23 @@ def psDefEqReadOnly(
 ) : Bool :=
   let leftValue : PsExpr := psWhnfCore(metaContext, localContext, left);
   let rightValue : PsExpr := psWhnfCore(metaContext, localContext, right);
+  psExprAlphaEq(leftValue, rightValue);
+
+def psWhnf(
+  environment : PsEnvironment,
+  metaContext : PsMetaContext,
+  localContext : PsLocalContext,
+  expr : PsExpr
+) : PsExpr :=
+  psWhnfCore(metaContext, localContext, expr);
+
+def psDefEqReadOnlyWithEnv(
+  environment : PsEnvironment,
+  metaContext : PsMetaContext,
+  localContext : PsLocalContext,
+  left : PsExpr,
+  right : PsExpr
+) : Bool :=
+  let leftValue : PsExpr := psWhnf(environment, metaContext, localContext, left);
+  let rightValue : PsExpr := psWhnf(environment, metaContext, localContext, right);
   psExprAlphaEq(leftValue, rightValue);

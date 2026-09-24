@@ -7,7 +7,7 @@ and compiled by the same verified project pipeline as user code.
 
 - `ProofScript.Data.Option`: `PsOption`, map/bind/get-or-else/or-else/is-some helpers.
 - `ProofScript.Data.Result`: `PsResult`, value/error mapping, bind, get-or-else,
-  and two-way Option conversion.
+  status checks, and two-way Option conversion.
 - `ProofScript.Data.List`: `PsList`, structural map/append/length/head/is-empty helpers.
 
 The `Ps*` type names are intentional and temporary. Lean's Prelude already
@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain thirty-three pskernel-admitted theorems in total:
+The three modules now contain thirty-five pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -45,11 +45,11 @@ ProofScript source modules
 The end-to-end stdlib test now exercises:
 
 - `optionBind` and `optionOrElse`;
-- `resultBind`, `resultGetOrElse`, `resultMapError`, and two-way Result/Option conversion;
+- `resultBind`, `resultGetOrElse`, `resultMapError`, `resultIsOk`, and two-way Result/Option conversion;
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength` plus `listIsEmpty`-guarded runtime selection;
-- thirty-three admitted stdlib theorems: twenty definitional laws use bounded
+- thirty-five admitted stdlib theorems: twenty-two definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
   `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`; `optionMapOrElse`, `optionGetOrElseOrElse`, and `optionGetOrElseMap` dogfood higher-order/helper composition through Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
@@ -246,6 +246,17 @@ value; in the `none` branch both reduce to the mapped fallback. The proof is
 bounded `cases` followed by Eq-only `rfl`, matching Lean 4.34's
 constructor-level `Option.map` and `Option.getD` behavior without adding a
 special rewrite rule or runtime implementation.
+
+## Result status checkpoint
+
+`ProofScript.Data.Result.resultIsOk` exposes Result constructor status as
+Bool: `ok -> true`, `error -> false`. The computation theorems
+`resultIsOkOk` and `resultIsOkError` are definitional Eq proofs closed by
+bounded `rfl`.
+
+The dogfood program now guards Result extraction with `resultIsOk`, composing
+Result matching with the existing verified Bool control-flow path while keeping
+the error channel explicit.
 
 ## Option-to-Result conversion checkpoint
 

@@ -47,6 +47,13 @@ function resultFromOption {α : Type}{ε : Type}
     | .some x => PsResult.ok(x);
   };
 
+function resultIsOk {α : Type}{ε : Type}
+(value : PsResult(α, ε)) : Bool :=
+  match value with {
+    | .ok x => true;
+    | .error err => false;
+  };
+
 theorem resultRefl {α : Type}{ε : Type}
 (value : PsResult(α, ε)) : value = value := by rfl;
 
@@ -110,3 +117,11 @@ resultFromOption(PsOption.none, error) = PsResult.error(error) := by rfl;
 theorem resultFromOptionSome {α : Type}{ε : Type}
 (value : α, error : ε) :
 resultFromOption(PsOption.some(value), error) = PsResult.ok(value) := by rfl;
+
+theorem resultIsOkOk {α : Type}{ε : Type}
+(value : α) :
+resultIsOk(PsResult.ok(value)) = true := by rfl;
+
+theorem resultIsOkError {α : Type}{ε : Type}
+(error : ε) :
+resultIsOk(PsResult.error(error)) = false := by rfl;

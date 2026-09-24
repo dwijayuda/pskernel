@@ -19,7 +19,11 @@ function main(x : Nat) : Nat :=
   let roundTrippedResult : PsResult(Nat, Nat) :=
     resultFromOption(resultToOption(mappedError), 0);
   let resultValue : Nat :=
-    resultGetOrElse(roundTrippedResult, 0);
+    if (resultIsOk(roundTrippedResult)) {
+      resultGetOrElse(roundTrippedResult, 0)
+    } else {
+      0
+    };
   let option : PsOption(Nat) :=
     resultToOption(mapped);
   let rebound : PsOption(Nat) :=

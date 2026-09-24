@@ -8,7 +8,9 @@ import {
 } from 'lean-ts-kernel';
 import {
   findLean434JsExternForDeclaration,
+  findLean434JsImplementedBy,
   invokeLean434JsExtern,
+  invokeLean434JsImplementedBy,
 } from './lean4.js';
 
 export interface Lean434ConstructorValue {
@@ -209,6 +211,18 @@ export class Lean434Evaluator {
     if(name==='Bool.false')return false;
     if(name==='Bool.true')return true;
     if(name==='Unit.unit')return undefined;
+
+    const implementedBy=findLean434JsImplementedBy(name);
+    if(implementedBy!==undefined){
+      return primitive(
+        name,
+        implementedBy.arity,
+        (args)=>invokeLean434JsImplementedBy(
+          implementedBy,
+          args,
+        ) as Lean434RuntimeValue,
+      );
+    }
 
     const runtimeBinding=findLean434JsExternForDeclaration(name);
     if(runtimeBinding!==undefined){

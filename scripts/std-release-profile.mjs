@@ -26,13 +26,15 @@ function run(cmd,args,extraEnv={}){
 
 await run(process.execPath,['scripts/adaptive-root-oracle.mjs','Std',String(expected),String(fullModule[0]),String(fullModule[1]),'32','1'],{
   PSKERNEL_WORKER_TIMEOUT_MS:'30000',
-  PSKERNEL_WORKER_HEAP_MIB:'2048'
+  PSKERNEL_WORKER_HEAP_MIB:'2048',
+  PSKERNEL_CANONICAL_ROOTS:'1'
 });
 
 for(const [start,count] of windows){
   await run(process.execPath,['scripts/adaptive-root-oracle.mjs','Std',String(expected),String(start),String(count),'32','1'],{
     PSKERNEL_WORKER_TIMEOUT_MS:'30000',
-    PSKERNEL_WORKER_HEAP_MIB:'2048'
+    PSKERNEL_WORKER_HEAP_MIB:'2048',
+    PSKERNEL_CANONICAL_ROOTS:'1'
   });
 }
 console.log(JSON.stringify({

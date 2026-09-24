@@ -28,6 +28,17 @@ if(hashRun.error||hashRun.status!==0||leanGitHash!==LEAN434_PINNED_GITHASH){
   throw new Error(`module-stream-oracle: Lean git hash drift/failure: expected ${LEAN434_PINNED_GITHASH}, got ${hashRun.error?.message??hashRun.stderr??leanGitHash}`);
 }
 const nativeEvaluator=createLeanNativeEvaluator({lean,moduleName,cwd:resolve('.'),env:envVars});
+const logDeclarations=process.env.PSKERNEL_LOG_DECLARATIONS==='1';
+const logDeclarationsMinEnv=Number(process.env.PSKERNEL_LOG_DECLARATIONS_MIN_ENV??'0');
+if(!Number.isSafeInteger(logDeclarationsMinEnv)||logDeclarationsMinEnv<0)throw new Error('invalid PSKERNEL_LOG_DECLARATIONS_MIN_ENV');
+const declarationHooks=logDeclarations?{
+  onDeclarationStart:e=>{
+    if(e.envSize>=logDeclarationsMinEnv)console.error(`[module-stream] declaration-start line=${e.line} kind=${e.kind} name=${e.name} constants=${e.envSize}`);
+  },
+  onDeclarationFinish:e=>{
+    if(e.envSize>=logDeclarationsMinEnv)console.error(`[module-stream] declaration-finish line=${e.line} kind=${e.kind} name=${e.name} constants=${e.envSize} elapsedMs=${e.elapsedMs}`);
+  },
+}:{};
 const child=spawn(lean,['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--module-stream'],{cwd:resolve('.'),env:envVars,stdio:['ignore','pipe','pipe']});
 const rl=createInterface({input:child.stdout,crlfDelay:Infinity});
 let stderr='';child.stderr.setEncoding('utf8');child.stderr.on('data',d=>stderr+=d);
@@ -53,7 +64,7 @@ try{
    }
    if(marker?.shard){
      if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;global.gc?.();}
-     replay=new Lean4ExportReplay(shared,{nativeEvaluator});
+     replay=new Lean4ExportReplay(shared,{nativeEvaluator,...declarationHooks});
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);
      if(shards===1||shards%logEveryShard===0)console.error(`[module-stream] shard=${shards}/${header?.plannedShards??'?'} module=${current} part=${marker.shard.part??0} roots=${marker.shard.roots??'?'} rootStart=${marker.shard.rootStart??'?'} firstRoot=${marker.shard.firstRoot??'?'} lastRoot=${marker.shard.lastRoot??'?'} constants=${shared.size} rssMiB=${rss.toFixed(1)} heapMiB=${heap.toFixed(1)}`);

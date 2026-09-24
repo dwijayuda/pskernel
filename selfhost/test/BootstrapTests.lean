@@ -2134,6 +2134,24 @@ def psTestImplicitConstructorApplicationShape
         && psExprAlphaEq absentValue expectedAbsent
   | _ => false
 
+def psTestLeanImplicitConstructorElaborates : Bool :=
+  match psParseLeanSource
+      "inductive Maybe (α : Type) where | none | some (value : α)\ndef present : Maybe Nat := Maybe.some 1\ndef absent : Maybe Nat := Maybe.none" with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psTestNatEnvironment module with
+      | Except.ok _ => true
+      | Except.error _ => false
+
+def psTestProofScriptImplicitConstructorElaborates : Bool :=
+  match psParseProofScriptSource
+      "inductive Maybe(α : Type) where { | none; | some(value : α); }; def present : Maybe(Nat) := Maybe.some(1); def absent : Maybe(Nat) := Maybe.none;" with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psTestNatEnvironment module with
+      | Except.ok _ => true
+      | Except.error _ => false
+
 def psTestLeanImplicitConstructorApplication : Bool :=
   match psParseLeanSource
       "inductive Maybe (α : Type) where | none | some (value : α)\ndef present : Maybe Nat := Maybe.some 1\ndef absent : Maybe Nat := Maybe.none" with
@@ -2203,6 +2221,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source inductive field elaboration", passed := psTestDualSourceInductiveFieldElaboration },
   { name := "dual-source Type Prop elaboration", passed := psTestDualSourceTypePropElaboration },
   { name := "dual-source parametric inductive", passed := psTestDualSourceParametricInductive },
+  { name := "Lean implicit constructor elaborates", passed := psTestLeanImplicitConstructorElaborates },
+  { name := "ProofScript implicit constructor elaborates", passed := psTestProofScriptImplicitConstructorElaborates },
   { name := "Lean implicit constructor application", passed := psTestLeanImplicitConstructorApplication },
   { name := "ProofScript implicit constructor application", passed := psTestProofScriptImplicitConstructorApplication },
   { name := "dual-source implicit constructor application", passed := psTestDualSourceImplicitConstructorApplication },

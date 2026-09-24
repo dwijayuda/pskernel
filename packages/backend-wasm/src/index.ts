@@ -12,6 +12,17 @@ export const BINARYEN_VERSION='132.0.0' as const;
 export const PROOFSCRIPT_WASM_BINARYEN_FEATURES=
   binaryen.Features.MVP;
 
+function binaryenFeaturesForProfile(
+  profile:WasmIrModule['profile'],
+):number {
+  switch(profile){
+    case 'proofscript-wasm32-mvp-js-v1':
+      return binaryen.Features.MVP;
+    case 'proofscript-wasm32-ref-js-v1':
+      return binaryen.Features.ReferenceTypes;
+  }
+}
+
 export interface WasmEmitOptions {
   readonly optimize?:boolean;
 }
@@ -43,6 +54,7 @@ function binaryenType(type:WasmValueType):number {
     case 'i64':return binaryen.i64;
     case 'f32':return binaryen.f32;
     case 'f64':return binaryen.f64;
+    case 'externref':return binaryen.externref;
   }
 }
 

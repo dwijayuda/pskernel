@@ -1,0 +1,37 @@
+name: Int.DivMod hotspot map
+
+on:
+  push:
+    branches: [diagnostic/int-divmod-hotspot-map]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Map candidate global roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          for start in 20000 20500 21000 21500 22000 22500 23000 23500 24000 24500 25000; do
+            echo "=== ROOT $start ==="
+            lean --run oracle/replay-probe/DependencyExport.lean Std --root-range "$start" 1 | grep '"batch"' | head -n 1
+          done

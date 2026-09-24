@@ -310,6 +310,29 @@ where
 def geq (a b : Level) : Bool :=
   isGeqCore (normalize a) (normalize b)
 
+
+def findParam : Name → List Name → List Level → Option Level
+  | _, [], _ => none
+  | _, _, [] => none
+  | target, p :: ps, v :: vs =>
+      if Name.beq target p then some v else findParam target ps vs
+
+/--
+Lean 4.34 kernel level-parameter substitution. Rebuilt max/imax nodes use the
+kernel smart constructors, matching `instantiate` + `update_max`.
+-/
+def instantiateParams (u : Level) (params : List Name) (values : List Level) : Level :=
+  match u with
+  | .zero => .zero
+  | .succ a => .succ (instantiateParams a params values)
+  | .max a b => mkMax (instantiateParams a params values) (instantiateParams b params values)
+  | .imax a b => mkIMax (instantiateParams a params values) (instantiateParams b params values)
+  | .param n =>
+      match findParam n params values with
+      | some v => v
+      | none => u
+  | .mvar n => .mvar n
+
 end Level
 
 end ProofScript.Kernel.PSC1

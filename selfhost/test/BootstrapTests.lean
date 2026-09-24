@@ -1538,6 +1538,159 @@ def psTestDualSourceBasicMatchElaboration : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestBoxNatEnvironment : PsEnvironment :=
+  let boxName := psTestName "BoxNat"
+  let ctorName := psNameAppendStr boxName "mk"
+  let recName := psNameAppendStr boxName "rec"
+  let uName := psTestName "u"
+  let motiveName := psTestName "motive"
+  let minorName := psTestName "minor"
+  let fieldName := psTestName "x"
+  let majorName := psTestName "major"
+  let natType := PsExpr.constE psNatName []
+  let boxType := PsExpr.constE boxName []
+  let boxSort := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let ctorType :=
+    PsExpr.forallE
+      fieldName
+      natType
+      boxType
+      PsBinderInfo.explicit
+  let motiveType :=
+    PsExpr.forallE
+      (psTestName "_box")
+      boxType
+      (PsExpr.sortE (PsLevel.param uName))
+      PsBinderInfo.explicit
+  let minorType :=
+    PsExpr.forallE
+      fieldName
+      natType
+      (PsExpr.app
+        (PsExpr.bvar 1)
+        (PsExpr.app
+          (PsExpr.constE ctorName [])
+          (PsExpr.bvar 0)))
+      PsBinderInfo.explicit
+  let recursorType :=
+    PsExpr.forallE
+      motiveName
+      motiveType
+      (PsExpr.forallE
+        minorName
+        minorType
+        (PsExpr.forallE
+          majorName
+          boxType
+          (PsExpr.app (PsExpr.bvar 2) (PsExpr.bvar 0))
+          PsBinderInfo.explicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let boxInfo : PsInductiveInfo := {
+    name := boxName
+    levelParams := []
+    type := boxSort
+    numParams := 0
+    numIndices := 0
+    constructors := [ctorName]
+  }
+  let ctorInfo : PsConstructorInfo := {
+    name := ctorName
+    levelParams := []
+    type := ctorType
+    inductiveName := boxName
+    constructorIndex := 0
+    numParams := 0
+    numFields := 1
+  }
+  let recInfo : PsRecursorInfo := {
+    name := recName
+    levelParams := [uName]
+    type := recursorType
+    inductiveNames := [boxName]
+    numParams := 0
+    numIndices := 0
+    numMotives := 1
+    numMinors := 1
+  }
+  let env1 :=
+    psTestAddDeclaration
+      psTestNatEnvironment
+      (PsDeclaration.inductiveDecl boxInfo)
+  let env2 :=
+    psTestAddDeclaration
+      env1
+      (PsDeclaration.constructorDecl ctorInfo)
+  psTestAddDeclaration
+    env2
+    (PsDeclaration.recursorDecl recInfo)
+
+def psTestFieldMatchDeclarationShape
+    (result : PsElabModuleResult) : Bool :=
+  let boxName := psTestName "BoxNat"
+  let recName := psNameAppendStr boxName "rec"
+  let natType := PsExpr.constE psNatName []
+  let boxType := PsExpr.constE boxName []
+  match result.declarations with
+  | [
+      PsDeclaration.definitionDecl
+        actualName
+        []
+        actualType
+        actualValue
+    ] =>
+      let expectedType :=
+        PsExpr.forallE
+          (psTestName "v")
+          boxType
+          natType
+          PsBinderInfo.explicit
+      psNameEq actualName (psTestName "unwrap")
+        && psExprAlphaEq actualType expectedType
+        && match actualValue with
+           | PsExpr.lam _ _ body PsBinderInfo.explicit =>
+               let view := psExprAppView body
+               match view.head with
+               | PsExpr.constE name levels =>
+                   psNameEq name recName
+                     && levels.length == 1
+                     && view.args.length == 3
+                     && match view.args with
+                        | [_motive, minor, _major] =>
+                            match minor with
+                            | PsExpr.lam
+                                binderName
+                                binderType
+                                binderBody
+                                PsBinderInfo.explicit =>
+                                psNameEq binderName (psTestName "x")
+                                  && psExprAlphaEq binderType natType
+                                  && psExprAlphaEq binderBody (PsExpr.bvar 0)
+                            | _ => false
+                        | _ => false
+               | _ => false
+           | _ => false
+  | _ => false
+
+def psTestDualSourceFieldMatchElaboration : Bool :=
+  match
+      psParseLeanSource
+        "def unwrap (v : BoxNat) : Nat := match v with | BoxNat.mk x => x",
+      psParseProofScriptSource
+        "def unwrap(v : BoxNat) : Nat := match v with { | BoxNat.mk x => x };" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestBoxNatEnvironment leanModule,
+          psElabModule psTestBoxNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestFieldMatchDeclarationShape leanResult
+            && psTestFieldMatchDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1560,6 +1713,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source basic match parse", passed := psTestDualSourceBasicMatchParse },
   { name := "constructor match pattern parse", passed := psTestConstructorMatchPatternShape },
   { name := "dual-source basic match elaboration", passed := psTestDualSourceBasicMatchElaboration },
+  { name := "dual-source field match elaboration", passed := psTestDualSourceFieldMatchElaboration },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

@@ -188,6 +188,26 @@ def psTestDualSourceLeanNativeInt : Bool :=
         && leanOutput.contains "(-(3n))"
   | _, _ => false
 
+def psDebugIntCompilation : IO Unit := do
+  let leanSource :=
+    "def intOne : Int := 1\n" ++
+    "def intCalc (x : Int) : Int := " ++
+    "Int.sub (Int.add x (Int.ofNat 2)) (Int.neg (Int.ofNat 3))"
+  let proofScriptSource :=
+    "def intOne : Int := 1; " ++
+    "def intCalc(x : Int) : Int := " ++
+    "Int.sub(Int.add(x, Int.ofNat(2)), Int.neg(Int.ofNat(3)));"
+  match psCompileLeanSourceToTypeScript leanSource with
+  | Except.error stage =>
+      IO.println ("PSC1_INT_DEBUG_LEAN_ERROR: " ++ stage)
+  | Except.ok output =>
+      IO.println ("PSC1_INT_DEBUG_LEAN_TS: " ++ output)
+  match psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.error stage =>
+      IO.println ("PSC1_INT_DEBUG_PS_ERROR: " ++ stage)
+  | Except.ok output =>
+      IO.println ("PSC1_INT_DEBUG_PS_TS: " ++ output)
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -214,6 +234,7 @@ def psRunErasureTests : List PsErasureNamedTest -> IO Bool
       pure (test.passed && restPassed)
 
 def main : IO Unit := do
+  psDebugIntCompilation
   let passed ← psRunErasureTests psErasureTests
   if passed then
     IO.println "PSC1_ERASURE_TESTS: PASS"

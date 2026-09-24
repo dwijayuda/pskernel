@@ -1,14 +1,14 @@
 inductive PsName where {
   | anonymous;
-  | str(prefix : PsName, value : String);
-  | num(prefix : PsName, value : Nat);
+  | str(parent : PsName, value : String);
+  | num(parent : PsName, value : Nat);
 };
 
 def psNameDepth(name : PsName) : Nat :=
   match name with {
     | .anonymous => 0;
-    | .str prefix value => psNameDepth(prefix) + 1;
-    | .num prefix value => psNameDepth(prefix) + 1;
+    | .str parent value => psNameDepth(parent) + 1;
+    | .num parent value => psNameDepth(parent) + 1;
   };
 
 def psNameEq(left : PsName, right : PsName) : Bool :=
@@ -16,27 +16,27 @@ def psNameEq(left : PsName, right : PsName) : Bool :=
     | .anonymous =>
       match right with {
         | .anonymous => true;
-        | .str prefix value => false;
-        | .num prefix value => false;
+        | .str parent value => false;
+        | .num parent value => false;
       };
     | .str leftPrefix leftValue =>
       match right with {
         | .anonymous => false;
         | .str rightPrefix rightValue =>
           psNameEq(leftPrefix, rightPrefix) && leftValue == rightValue;
-        | .num prefix value => false;
+        | .num parent value => false;
       };
     | .num leftPrefix leftValue =>
       match right with {
         | .anonymous => false;
-        | .str prefix value => false;
+        | .str parent value => false;
         | .num rightPrefix rightValue =>
           psNameEq(leftPrefix, rightPrefix) && leftValue == rightValue;
       };
   };
 
-def psNameAppendStr(prefix : PsName, value : String) : PsName :=
-  PsName.str(prefix, value);
+def psNameAppendStr(parent : PsName, value : String) : PsName :=
+  PsName.str(parent, value);
 
-def psNameAppendNum(prefix : PsName, value : Nat) : PsName :=
-  PsName.num(prefix, value);
+def psNameAppendNum(parent : PsName, value : Nat) : PsName :=
+  PsName.num(parent, value);

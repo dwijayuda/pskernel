@@ -167,6 +167,14 @@ def psTestConditionalEnvironment : PsEnvironment :=
       [uName]
       iteType)
 
+def psTestStringEnvironment : PsEnvironment :=
+  psTestAddDeclaration
+    psTestNatEnvironment
+    (PsDeclaration.axiomDecl
+      psStringName
+      []
+      (PsExpr.sortE (PsLevel.succ PsLevel.zero)))
+
 def psNameListEq : List PsName -> List PsName -> Bool
   | [], [] => true
   | left :: leftRest, right :: rightRest =>
@@ -1083,6 +1091,45 @@ def psTestDualSourceIf : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestStringLiteralDeclarationShape
+    (result : PsElabModuleResult) : Bool :=
+  let stringType := PsExpr.constE psStringName []
+  let expectedValue := "A\nBAλ"
+  match result.declarations with
+  | [PsDeclaration.definitionDecl actualName [] actualType actualValue] =>
+      psNameEq actualName (psTestName "message")
+        && psExprAlphaEq actualType stringType
+        && psExprAlphaEq
+          actualValue
+          (PsExpr.lit (PsLiteral.string expectedValue))
+  | _ => false
+
+def psTestDualSourceStringLiteral : Bool :=
+  match
+      psParseLeanSource
+        "def message : String := \"A\\nB\\x41\\u03bb\"",
+      psParseProofScriptSource
+        "def message : String := \"A\\nB\\x41\\u03bb\";" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestStringEnvironment leanModule,
+          psElabModule psTestStringEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestStringLiteralDeclarationShape leanResult
+            && psTestStringLiteralDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
+def psTestRejectInvalidStringEscapes : Bool :=
+  match
+      psDecodeStringLiteral "\"\\uD800\"",
+      psDecodeStringLiteral "\"\\q\"" with
+  | none, none => true
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1101,6 +1148,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source inferred let", passed := psTestDualSourceInferredLet },
   { name := "dual-source Bool literal", passed := psTestDualSourceBoolLiteral },
   { name := "dual-source if", passed := psTestDualSourceIf },
+  { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
+  { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

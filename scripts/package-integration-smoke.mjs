@@ -609,10 +609,16 @@ assert(
   'ProofScript.Data.Product declarations diverged',
 );
 
-const arrayModuleSource=readFileSync(
-  new URL('../stdlib/src/ProofScript/Data/Array.ps',import.meta.url),
+const arrayModuleSource=[
+  'Option',
+  'Array',
+].map((name)=>readFileSync(
+  new URL(
+    '../stdlib/src/ProofScript/Data/'+name+'.ps',
+    import.meta.url,
+  ),
   'utf8',
-);
+).replace(/^import .*$/gmu,'')).join('\n');
 const arrayModulePs=compileVerifiedSource(
   arrayModuleSource,
   'proofscript-data-array.ts',

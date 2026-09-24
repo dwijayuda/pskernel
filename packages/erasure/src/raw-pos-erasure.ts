@@ -13,20 +13,22 @@ type RuntimeExprEraser=(
   environment:Environment,
 )=>VerifiedIrExpr;
 
-export function tryEraseRawPosConstructor(
+export function tryEraseRawPosApplication(
   expr:Extract<Expr,{kind:'app'}>,
   scope:ErasureScope,
   environment:Environment,
   erase:RuntimeExprEraser,
 ):VerifiedIrExpr|undefined {
   const view=appView(expr);
+  if(view.fn.kind!=='const')return undefined;
+  const name=nameToString(view.fn.name);
   if(
-    view.fn.kind!=='const'
-    ||nameToString(view.fn.name)!=='String.Pos.Raw.mk'
+    name!=='String.Pos.Raw.mk'
+    &&name!=='String.Pos.Raw.byteIdx'
   )return undefined;
   if(view.args.length!==1){
     throw new Error(
-      'PS_ERASE_RAW_POS_CONSTRUCTOR_ARITY: expected one byteIdx argument',
+      'PS_ERASE_RAW_POS_ABI_ARITY: expected one byte-index payload',
     );
   }
   return erase(view.args[0]!,scope,environment);

@@ -108,6 +108,15 @@ for(const [path,entry] of [...Object.entries(matrix),...Object.entries(hardening
 }
 
 const exporter=readFileSync('oracle/replay-probe/DependencyExport.lean','utf8');
+const safeAllMarkers=[
+  'if dv.safety == .safe then',
+  'DefinitionVal.all is informational for safe definitions',
+  'dumpDefinition dv',
+];
+for(const m of safeAllMarkers){
+  if(!exporter.includes(m))throw new Error('safe DefinitionVal.all replay drift: missing '+m);
+}
+
 for(const marker of [
   '("rootOrderMeaning", "serialized-module-sequence")',
   '("rootDedup", "first-serialized-occurrence")',

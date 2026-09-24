@@ -230,6 +230,19 @@ equality/disequality of compiler-reduced Nat definitions, symmetric reduction to
 the executable check that the external provider actually observes
 `@[implemented_by]`; it still requires the pinned Lean runtime.
 
+### Safe definition `all` metadata during replay
+
+`DefinitionVal.all` records the user mutual block but Lean 4.34 explicitly
+documents that this field is not used by the kernel. In
+`Kernel.Environment.replay`, a safe `.defnInfo` is handled independently:
+its actual used constants are replayed first, then one `.defnDecl` is added.
+Only unsafe/partial mutual declarations need block reconstruction, and canonical
+replay skips those constants entirely.
+
+The exporter therefore must not use a safe definition's `all` list as an
+execution/dependency group. Doing so can suppress a real dependency between safe
+siblings and emit them in informational-list order instead of dependency order.
+
 ### Gate 1 — canonical Full Std
 
 Use the project-canonical single-stream replay as the release gate, not

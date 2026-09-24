@@ -348,17 +348,30 @@ mutual
       setEmitted emitted
       clearActive iv.all
     | .defnInfo dv =>
-      let group := if dv.all.isEmpty then [dv.name] else dv.all
-      setActive group
-      for n in group do
-        let some (.defnInfo _) := env.find? n | throw <| IO.userError s!"mutual definition member {n} missing"
-        let ci ← findCI env n
+      if dv.safety == .safe then
+        -- DefinitionVal.all is informational for safe definitions. Lean's
+        -- Kernel.Environment.replay ignores it: each safe defnInfo recursively
+        -- replays its actual used constants, then adds one defnDecl.
+        setActive [name]
         dumpConstants env ci.getUsedConstantsAsSet
-      for n in group do
-        let some (.defnInfo d) := env.find? n | throw <| IO.userError s!"mutual definition member {n} missing"
-        dumpDefinition d
-      setEmitted group
-      clearActive group
+        dumpDefinition dv
+        setEmitted [name]
+        clearActive [name]
+      else
+        -- Unsafe/partial mutual blocks are only reconstructed in diagnostic
+        -- export modes. Canonical module-stream returns above before reaching
+        -- this branch, matching Kernel.Environment.replay's skip policy.
+        let group := if dv.all.isEmpty then [dv.name] else dv.all
+        setActive group
+        for n in group do
+          let some (.defnInfo _) := env.find? n | throw <| IO.userError s!"mutual definition member {n} missing"
+          let ci ← findCI env n
+          dumpConstants env ci.getUsedConstantsAsSet
+        for n in group do
+          let some (.defnInfo d) := env.find? n | throw <| IO.userError s!"mutual definition member {n} missing"
+          dumpDefinition d
+        setEmitted group
+        clearActive group
     | .axiomInfo av =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet

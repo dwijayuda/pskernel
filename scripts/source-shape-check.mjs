@@ -3,7 +3,7 @@ import {join,relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('..',import.meta.url));
-const scopes=['syntax','meta','environment','checked-core','elab','language','language-service','erasure','compiler-ir','backend-ts','compiler','lsp','cli'];
+const scopes=['syntax','meta','environment','checked-core','elab','language-service','erasure','compiler-ir','backend-ts','compiler','lsp','cli'];
 const maxLines=300;
 const maxLineLength=320;
 const violations=[];

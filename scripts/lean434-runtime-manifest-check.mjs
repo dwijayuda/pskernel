@@ -24,6 +24,9 @@ if(!Array.isArray(runtime.LEAN434_JS_EXTERN_MANIFEST)){
 if(!Array.isArray(runtime.LEAN434_JS_DECL_EXTERN_BINDINGS)){
   throw new Error('missing LEAN434_JS_DECL_EXTERN_BINDINGS');
 }
+if(!Array.isArray(runtime.LEAN434_JS_IMPLEMENTED_BY_BINDINGS)){
+  throw new Error('missing LEAN434_JS_IMPLEMENTED_BY_BINDINGS');
+}
 
 const seen=new Set();
 const checked=[];
@@ -124,12 +127,60 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
   });
 }
 
+const seenImplementedBy=new Set();
+const implementedByBindings=[];
+for(const binding of runtime.LEAN434_JS_IMPLEMENTED_BY_BINDINGS){
+  if(seenImplementedBy.has(binding.leanDeclaration)){
+    throw new Error(
+      'duplicate Lean implemented_by binding: '+binding.leanDeclaration,
+    );
+  }
+  seenImplementedBy.add(binding.leanDeclaration);
+  if(!Number.isInteger(binding.arity)||binding.arity<0){
+    throw new Error(
+      'invalid implemented_by arity for '+binding.leanDeclaration,
+    );
+  }
+  const upstream=path.join(
+    repoRoot,
+    'study','lean4-4.34.0','src',
+    ...binding.upstreamSource.split('/'),
+  );
+  if(!fs.existsSync(upstream)){
+    throw new Error(
+      'implemented_by upstream source missing: '+binding.upstreamSource,
+    );
+  }
+  const text=fs.readFileSync(upstream,'utf8');
+  if(!text.includes('@[implemented_by '+binding.implementation)){
+    throw new Error(
+      'implemented_by attribute missing from upstream source: '+
+      binding.leanDeclaration+' -> '+binding.implementation,
+    );
+  }
+  if(!text.includes(binding.leanDeclaration)){
+    throw new Error(
+      'implemented_by declaration missing from upstream source: '+
+      binding.leanDeclaration,
+    );
+  }
+  implementedByBindings.push({
+    leanDeclaration:binding.leanDeclaration,
+    implementation:binding.implementation,
+    arity:binding.arity,
+    adapter:binding.adapter,
+    upstreamSource:binding.upstreamSource,
+  });
+}
+
 process.stdout.write(JSON.stringify({
   format:'proofscript-lean434-runtime-manifest-check',
   leanVersion:runtime.LEAN434_SOURCE_VERSION,
   runtimeVersion:runtime.LEAN434_JS_RUNTIME_VERSION,
   mappings:checked.length,
   declarationBindings:declarationBindings.length,
+  implementedByBindings:implementedByBindings.length,
   entries:checked,
   bindings:declarationBindings,
+  implementedBy:implementedByBindings,
 },null,2)+'\n');

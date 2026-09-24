@@ -1,4 +1,5 @@
 import Ps.Erasure.Expr
+import Ps.Erasure.Inductive
 
 structure PsOpenedErasedDefinition where
   typeParameters : List PsVerifiedIrTypeParameter
@@ -298,18 +299,27 @@ def psEraseCoreModule
     (declarations : List PsDeclaration) :
     Except PsErasureError PsVerifiedIrModule :=
   let names := psErasureDeclarationNames declarations
-  let scope := psErasureScopeEmpty names
+  let baseScope := psErasureScopeEmpty names
   match
-      psEraseDefinitionsLoop
+      psPrepareRuntimeInductives
         environment
-        scope
         declarations
+        declarations
+        baseScope
         [] with
   | Except.error error => Except.error error
-  | Except.ok lowered =>
-      Except.ok {
-        imports := []
-        structures := []
-        inductives := []
-        declarations := lowered
-      }
+  | Except.ok prepared =>
+      match
+          psEraseDefinitionsLoop
+            environment
+            prepared.scope
+            declarations
+            [] with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            imports := []
+            structures := []
+            inductives := prepared.ir
+            declarations := lowered
+          }

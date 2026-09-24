@@ -1,4 +1,3 @@
-import type {CheckedSoftwareModule,SoftwareType} from '@proofscript/language';
 import type {VerifiedIrModule} from '@proofscript/compiler-ir/verified';
 import type {TranslationTarget} from '@proofscript/syntax';
 import type {LoadedPsConfig} from './config.js';
@@ -11,6 +10,10 @@ export interface CommonArgs {
   readonly entry?:string;
   readonly project?:string;
   readonly json:boolean;
+  /**
+   * Deprecated compatibility marker. check/build/run always use the
+   * pskernel-admitted checked-core path.
+   */
   readonly verified:boolean;
   readonly passthrough:readonly string[];
 }
@@ -63,13 +66,7 @@ extends CliBaseReport,VerifiedProjectReportFields {
   readonly command:'check';
 }
 
-export interface UnverifiedCheckReport extends CliBaseReport {
-  readonly ok:true;
-  readonly command:'check';
-  readonly proofStatus:'software-typechecked-only';
-}
-
-export type CheckReport=VerifiedCheckReport|UnverifiedCheckReport;
+export type CheckReport=VerifiedCheckReport;
 
 export interface CliBuildArtifacts {
   readonly typescript:string;
@@ -92,45 +89,17 @@ extends CliBaseReport,VerifiedProjectReportFields {
   readonly typescriptVersion:string;
 }
 
-export interface UnverifiedBuildReport extends CliBaseReport {
-  readonly ok:true;
-  readonly command:'build';
-  readonly proofStatus:'software-typechecked-only';
-  readonly outputDirectory:string;
-  readonly artifacts:CliBuildArtifacts;
-  readonly typescriptVersion:string;
-  readonly proofStatusDetail:string;
-}
-
 export interface VerifiedBuildResult {
   readonly report:VerifiedBuildReport;
   readonly verifiedIr:VerifiedIrModule;
-  readonly checked?:never;
   readonly jsPath:string;
 }
 
-export interface UnverifiedBuildResult {
-  readonly report:UnverifiedBuildReport;
-  readonly checked:CheckedSoftwareModule;
-  readonly verifiedIr?:never;
-  readonly jsPath:string;
-}
-
-export type BuildResult=VerifiedBuildResult|UnverifiedBuildResult;
+export type BuildResult=VerifiedBuildResult;
 
 export type VerifiedRunReport=Omit<VerifiedBuildReport,'command'>&{
   readonly command:'run';
   readonly mainResult:unknown;
 };
 
-export type UnverifiedRunReport=Omit<UnverifiedBuildReport,'command'>&{
-  readonly command:'run';
-  readonly mainResult:unknown;
-};
-
-export type RunReport=VerifiedRunReport|UnverifiedRunReport;
-
-export interface RuntimeArgument {
-  readonly text:string;
-  readonly type:SoftwareType;
-}
+export type RunReport=VerifiedRunReport;

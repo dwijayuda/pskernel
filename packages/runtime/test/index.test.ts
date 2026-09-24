@@ -22,6 +22,8 @@ import {
   LEAN434_SOURCE_VERSION,
   LeanRefEmptyError,
   findLean434JsExtern,
+  findLean434JsImplementedBy,
+  invokeLean434JsImplementedBy,
   lean_array_fget,
   lean_array_fset,
   lean_array_get_size,
@@ -164,6 +166,20 @@ equal(findLean434JsExtern('not_a_real_lean_extern'),undefined);
 ok(
   LEAN434_JS_EXTERN_MANIFEST.every((entry)=>entry.leanSymbol.length>0&&entry.jsExport.length>0),
   'extern manifest contains an empty symbol',
+);
+
+const rawBinding=findLean434JsImplementedBy('TSyntaxArray.raw');
+ok(rawBinding!==undefined,'missing TSyntaxArray.raw implemented_by binding');
+const rawPayload=[{kind:'syntax'}];
+equal(
+  invokeLean434JsImplementedBy(rawBinding!,[rawPayload]),
+  rawPayload,
+);
+const mkBinding=findLean434JsImplementedBy('TSyntaxArray.mk');
+ok(mkBinding!==undefined,'missing TSyntaxArray.mk implemented_by binding');
+equal(
+  invokeLean434JsImplementedBy(mkBinding!,[rawPayload]),
+  rawPayload,
 );
 
 console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility slice');

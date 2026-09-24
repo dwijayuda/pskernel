@@ -5,7 +5,7 @@ const root=path.resolve(import.meta.dirname,'..');
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
 const sourceFiles=fs.readdirSync(path.join(root,'src')).filter((name)=>name.endsWith('.js')).sort();
 const source=sourceFiles.map((name)=>fs.readFileSync(path.join(root,'src',name),'utf8')).join('\n');
-const compactSource=source.replace(/\\s+/gu,'');
+const compactSource=source.replace(/\s+/gu,'');
 const runner=fs.readFileSync(path.join(root,'server/run-lsp.mjs'),'utf8');
 
 function assert(value,message){

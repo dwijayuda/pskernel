@@ -234,12 +234,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lean --run oracle/replay-probe/DependencyExport.lean Lean.MetavarContext \
+          lean --run oracle/replay-probe/DependencyExport.lean Oracle.ReplayProbe.RuntimeMapProbe \
             --selected-after Init.Prelude \
             Array.modify Array.set \
             Lean.PersistentHashMap.insert Lean.PersistentHashMap.find? \
             Lean.assignExp \
             Lean.MetavarContext.getExprAssignmentExp \
+            ProofScript.RuntimeProbe.firstBucketIndex \
+            ProofScript.RuntimeProbe.replaceNullEntry \
+            ProofScript.RuntimeProbe.insertExprMap \
+            ProofScript.RuntimeProbe.findExprMap? \
             > lean434-metavar-context-bootstrap.ndjson
           test -s lean434-metavar-context-bootstrap.ndjson
       - name: Execute real Lean.MetavarContext assignment in JavaScript

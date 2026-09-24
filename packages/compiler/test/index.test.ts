@@ -211,3 +211,95 @@ console.log('ok - @proofscript/compiler Wasm path fails closed after checked cor
   equal(wasmHost.exports.modNat?.(1n<<100n,0n),1n<<100n);
 }
 console.log('ok - @proofscript/compiler TS/Wasm Nat differential corpus');
+
+{
+  const nat={kind:'primitive',name:'Nat'} as const;
+  const bool={kind:'primitive',name:'Bool'} as const;
+  const compositionIr:VerifiedIrModule={
+    kind:'proofscript-verified-ir',
+    declarations:[
+      {
+        name:'incNat',
+        typeParameters:[],
+        parameters:[{name:'x',type:nat}],
+        resultType:nat,
+        body:{
+          kind:'intrinsic',
+          operation:'nat.add',
+          args:[
+            {kind:'var',name:'x'},
+            {kind:'literal',value:1n},
+          ],
+        },
+      },
+      {
+        name:'letNat',
+        typeParameters:[],
+        parameters:[{name:'x',type:nat}],
+        resultType:nat,
+        body:{
+          kind:'let',
+          name:'y',
+          value:{kind:'var',name:'x'},
+          body:{kind:'var',name:'y'},
+        },
+      },
+      {
+        name:'chooseNat',
+        typeParameters:[],
+        parameters:[
+          {name:'condition',type:bool},
+          {name:'a',type:nat},
+          {name:'b',type:nat},
+        ],
+        resultType:nat,
+        body:{
+          kind:'if',
+          condition:{kind:'var',name:'condition'},
+          thenBranch:{kind:'var',name:'a'},
+          elseBranch:{kind:'var',name:'b'},
+        },
+      },
+      {
+        name:'callNat',
+        typeParameters:[],
+        parameters:[{name:'x',type:nat}],
+        resultType:nat,
+        body:{
+          kind:'call',
+          fn:{kind:'var',name:'incNat'},
+          args:[{kind:'var',name:'x'}],
+        },
+      },
+    ],
+  };
+
+  const tsSource=emitVerifiedTypeScript(compositionIr);
+  const tsEmitted=compileTypeScript(tsSource,'wasm-nat-composition.ts');
+  const tsModule=await import(
+    'data:text/javascript;base64,'+
+    Buffer.from(tsEmitted.javascript,'utf8').toString('base64'),
+  ) as Record<string,(...args:never[])=>unknown>;
+
+  const wasmIr=lowerVerifiedIrToWasm(compositionIr);
+  const wasm=instantiateProofScriptWasm(emitBinaryenWasm(wasmIr));
+  const optimized=instantiateProofScriptWasm(
+    emitBinaryenWasm(wasmIr,{optimize:true}),
+  );
+  const huge=(1n<<100n)+99n;
+
+  const cases=[
+    ['incNat',[huge]],
+    ['letNat',[huge]],
+    ['chooseNat',[true,huge,7n]],
+    ['chooseNat',[false,huge,7n]],
+    ['callNat',[huge]],
+  ] as const;
+
+  for(const [name,args] of cases){
+    const expected=(tsModule[name] as (...values:unknown[])=>unknown)(...args);
+    equal(wasm.exports[name]?.(...args),expected);
+    equal(optimized.exports[name]?.(...args),expected);
+  }
+}
+console.log('ok - @proofscript/compiler Nat call/let/if composition');

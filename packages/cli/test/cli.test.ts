@@ -651,6 +651,72 @@ console.log('ok - psc verified Wasm W2 build/run target');
 }
 console.log('ok - psc verified Wasm W2 UInt CLI run ABI');
 
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-wasm-nat-pass-through-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : Nat) : Nat := x;\n',
+      'utf8',
+    );
+
+    const checked=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[],
+    });
+    equal(checked.wasmProfile,'proofscript-wasm32-ref-js-v1');
+
+    const huge=((1n<<100n)+123456789n).toString();
+    const result=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[huge],
+    });
+    equal(result.mainResult,huge);
+    equal(result.wasmProfile,'proofscript-wasm32-ref-js-v1');
+
+    let rejected=false;
+    try{
+      await runCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        buildTarget:'wasm',
+        passthrough:['-1'],
+      });
+    }catch(error){
+      rejected=/Nat argument cannot be negative/.test(String(error));
+    }
+    equal(rejected,true);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Wasm W3a Nat externref pass-through');
+
+
 
 {
   const result=compileVerifiedSource(

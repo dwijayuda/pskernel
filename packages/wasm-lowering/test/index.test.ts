@@ -37,11 +37,11 @@ if(lowered.functions[0]?.body.kind==='i32.unary'){
   }
 }
 
-throws(
-  ()=>lowerVerifiedIrToWasm({
+{
+  const loweredNat=lowerVerifiedIrToWasm({
     kind:'proofscript-verified-ir',
     declarations:[{
-      name:'badNat',
+      name:'idNat',
       typeParameters:[],
       parameters:[{
         name:'x',
@@ -50,11 +50,32 @@ throws(
       resultType:{kind:'primitive',name:'Nat'},
       body:{kind:'var',name:'x'},
     }],
+  });
+  equal(loweredNat.profile,'proofscript-wasm32-ref-js-v1');
+  equal(loweredNat.functions[0]?.parameters[0]?.type,'externref');
+  equal(loweredNat.functions[0]?.result,'externref');
+  equal(loweredNat.functions[0]?.abi.parameters[0],'nat');
+  equal(loweredNat.functions[0]?.abi.result,'nat');
+  equal(loweredNat.functions[0]?.body.kind,'local');
+}
+console.log('ok - @proofscript/wasm-lowering W3a Nat externref pass-through');
+
+throws(
+  ()=>lowerVerifiedIrToWasm({
+    kind:'proofscript-verified-ir',
+    declarations:[{
+      name:'oneNat',
+      typeParameters:[],
+      parameters:[],
+      resultType:{kind:'primitive',name:'Nat'},
+      body:{kind:'literal',value:1n},
+    }],
   }),
   (error:unknown)=>
     error instanceof WasmLoweringError&&
-    error.code==='PS_WASM_UNSUPPORTED_NAT_RUNTIME',
+    error.code==='PS_WASM_UNSUPPORTED_NAT_INT_LITERAL',
 );
+console.log('ok - @proofscript/wasm-lowering W3a Nat literals remain fail closed');
 
 console.log('ok - @proofscript/wasm-lowering W1 semantic Bool lowering');
 

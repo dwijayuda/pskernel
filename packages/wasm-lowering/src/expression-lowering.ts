@@ -65,6 +65,7 @@ function lowerLocal(
       };
     case 'uint32':
     case 'uint64':
+    case 'nat':
       return local;
   }
 }

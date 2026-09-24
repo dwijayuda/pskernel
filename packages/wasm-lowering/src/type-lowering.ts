@@ -7,7 +7,8 @@ import {unsupported} from './errors.js';
 
 export type RuntimeValueType=
   |'bool'
-  |'uint8'|'uint16'|'uint32'|'uint64';
+  |'uint8'|'uint16'|'uint32'|'uint64'
+  |'nat';
 export type RuntimeType=RuntimeValueType|null;
 
 export interface Signature {
@@ -26,6 +27,8 @@ export function wasmValueType(
       return 'i32';
     case 'uint64':
       return 'i64';
+    case 'nat':
+      return 'externref';
   }
 }
 
@@ -61,10 +64,7 @@ export function lowerRuntimeType(
           }
           return null;
         case 'Nat':
-          return unsupported(
-            'PS_WASM_UNSUPPORTED_NAT_RUNTIME',
-            'Nat is arbitrary precision and must not be narrowed to i64',
-          );
+          return 'nat';
         case 'Int':
           return unsupported(
             'PS_WASM_UNSUPPORTED_INT_RUNTIME',

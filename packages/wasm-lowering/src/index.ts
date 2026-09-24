@@ -28,6 +28,22 @@ export {
 
 export const PROOFSCRIPT_WASM_PROFILE=
   'proofscript-wasm32-mvp-js-v1' as const;
+export const PROOFSCRIPT_WASM_REF_PROFILE=
+  'proofscript-wasm32-ref-js-v1' as const;
+
+function profileForSignatures(
+  signatures:ReadonlyMap<string,Signature>,
+):WasmIrModule['profile'] {
+  for(const signature of signatures.values()){
+    if(
+      signature.result==='nat'||
+      signature.parameters.includes('nat')
+    ){
+      return PROOFSCRIPT_WASM_REF_PROFILE;
+    }
+  }
+  return PROOFSCRIPT_WASM_PROFILE;
+}
 
 export function lowerVerifiedIrToWasm(
   module:VerifiedIrModule,
@@ -93,7 +109,7 @@ export function lowerVerifiedIrToWasm(
 
   const wasm:WasmIrModule={
     kind:'proofscript-wasm-ir',
-    profile:PROOFSCRIPT_WASM_PROFILE,
+    profile:profileForSignatures(signatures),
     functions,
   };
   validateWasmIrModule(wasm);

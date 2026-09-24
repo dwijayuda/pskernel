@@ -364,6 +364,7 @@ mutual
       let emitted ← dumpInductiveGroupAll env iv
       setEmitted emitted
       clearActive iv.all
+      closeDeclarationSegment
     | .defnInfo dv =>
       if dv.safety == .safe then
         -- DefinitionVal.all is informational for safe definitions. Lean 4.34
@@ -374,6 +375,7 @@ mutual
         dumpDefinition dv
         setEmitted [name]
         clearActive [name]
+        closeDeclarationSegment
       else
         -- Unsafe/partial mutual definitions are retained for diagnostic export
         -- modes where DefinitionVal.all is the only preserved grouping metadata.
@@ -388,30 +390,35 @@ mutual
           dumpDefinition d
         setEmitted group
         clearActive group
+        closeDeclarationSegment
     | .axiomInfo av =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
       dumpAxiom av
       setEmitted [name]
       clearActive [name]
+      closeDeclarationSegment
     | .thmInfo tv =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
       dumpTheorem tv
       setEmitted [name]
       clearActive [name]
+      closeDeclarationSegment
     | .opaqueInfo ov =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
       dumpOpaque ov
       setEmitted [name]
       clearActive [name]
+      closeDeclarationSegment
     | .quotInfo qv =>
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
       dumpQuot qv
       setEmitted [name]
       clearActive [name]
+      closeDeclarationSegment
 
   partial def dumpConstants (env : Environment) (names : NameSet) : M Unit := do
     for n in names do dumpConstant env n
@@ -549,31 +556,19 @@ def flattenRoots (buckets : Array (Array Name)) : Array Name := Id.run do
 
 partial def dumpSelectedRootsSegmented
     (env : Environment) (roots : List Name) (segmentRoots : Nat) : IO Unit := do
-  if segmentRoots == 0 then
-    throw <| IO.userError "selected segment size must be positive"
+  if segmentRoots != 1 then
+    throw <| IO.userError "selected declaration segmentation currently requires segment size 1"
   if roots.isEmpty then
     throw <| IO.userError "selected segmented export requires at least one root"
   IO.println <| (Json.mkObj [("environment", Json.mkObj [
     ("module", ""),
     ("selectedDirectRoots", roots.length),
-    ("segmentRoots", segmentRoots)
+    ("segmentation", "declaration")
   ])]).compress
   let _ ← (do
-    let mut segment : Nat := 0
-    let mut inSegment : Nat := 0
-    for n in roots do
-      if inSegment == 0 then
-        resetInternTables
-        IO.println <| (Json.mkObj [("segment", Json.mkObj [
-          ("index", segment),
-          ("maxDirectRoots", segmentRoots)
-        ])]).compress
-        dumpMeta
-      dumpConstant env n
-      inSegment := inSegment + 1
-      if inSegment == segmentRoots then
-        segment := segment + 1
-        inSegment := 0) |>.run {}
+    modify fun s => { s with segmented := true }
+    for n in roots do dumpConstant env n
+    closeDeclarationSegment) |>.run {}
   pure ()
 
 partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat) : IO Unit := do

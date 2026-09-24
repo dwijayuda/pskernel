@@ -37,15 +37,30 @@ function elaborateTypePositionApplication(
 ):Expr {
   const source={
     length:args.length,
-    elaborate:(index:number,expectedType:Expr)=>({
-      term:elaborateV061TypePositionTerm(
+    elaborate:(index:number,expectedType:Expr)=>{
+      const term=elaborateV061TypePositionTerm(
         args[index]!,
         context,
         expectedType,
-      ),
-      type:expectedType,
-      allowUnresolvedMVar:true,
-    }),
+      );
+      const instantiated=context.metaContext.instantiate(term);
+      if(!hasMVar(instantiated)){
+        const checker=new TypeChecker(
+          context.environment,
+          context.localContext.clone(),
+        );
+        return {
+          term,
+          type:checker.check(instantiated),
+          allowUnresolvedMVar:true,
+        };
+      }
+      return {
+        term,
+        type:expectedType,
+        allowUnresolvedMVar:true,
+      };
+    },
   };
   const applied=elaborateApplication({
     environment:context.environment,

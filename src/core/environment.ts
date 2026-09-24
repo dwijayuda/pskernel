@@ -1,7 +1,10 @@
 import { ConstantInfo } from './declaration.js';
 import { Name, nameKey, nameToString } from './name.js';
+import { deepFreezeKernelValue } from './runtime-immutable.js';
+export { deepFreezeKernelValue } from './runtime-immutable.js';
 
 export class KernelError extends Error { constructor(message:string){super(message);this.name='KernelError';} }
+
 export class Environment {
   private readonly constants = new Map<string,ConstantInfo>();
   private _quotInitialized=false;
@@ -22,6 +25,7 @@ export class Environment {
   find(n:Name):ConstantInfo|undefined{return this.constants.get(nameKey(n));}
   get(n:Name):ConstantInfo{const r=this.find(n);if(!r)throw new KernelError(`unknown constant '${nameToString(n)}'`);return r;}
   add(i:ConstantInfo):void{
+    deepFreezeKernelValue(i);
     const k=nameKey(i.name);
     if(this.constants.has(k))throw new KernelError(`already declared '${nameToString(i.name)}'`);
     this.constants.set(k,i);

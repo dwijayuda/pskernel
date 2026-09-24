@@ -1,6 +1,6 @@
 import { ConstructorInfo, InductiveInfo, RecursorInfo, RecursorRule } from '../../core/declaration.js';
 import { ensureClosed } from '../../core/checks.js';
-import { Environment, KernelError } from '../../core/environment.js';
+import { Environment, KernelError, deepFreezeKernelValue } from '../../core/environment.js';
 import { BinderInfo, Expr, app, appView, constant, consumeTypeAnnotations, exprEq, exprLeanEq, exprToString, forallE, fvar, inferImplicit, instantiateExprLevels, lam, mkAppN, sort } from '../../core/expr.js';
 import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
 import { Level, isNotZero, levelEqStructural, levelEquivalent, levelLe, levelParam, levelToString, levelZero, normalizesToZero } from '../../core/level.js';
@@ -269,5 +269,6 @@ export function addOrdinaryInductiveInternal(env:Environment,d:InductiveDecl,opt
 
 /** Public ordinary-inductive admission is deliberately fail-closed. */
 export function addOrdinaryInductive(env:Environment,d:InductiveDecl):void{
+ deepFreezeKernelValue(d);
  addOrdinaryInductiveInternal(env,d);
 }

@@ -43,6 +43,64 @@ test('deep Lean Name operations avoid the JavaScript call stack',()=>{
  const r=nameReplacePrefix(a,prefix,nameFromDotted('R'));
  assert(r!==null&&nameToString(r).startsWith('R.'),'deep Name prefix replacement/component extraction must be stack-safe');
 });
+test('kernel admission freezes caller-owned declarations and expression DAGs',()=>{
+ const env=baseEnv(),k=new Kernel(env),D=nameFromDotted('Immutable.def');
+ const value:any=natLit(0),info:any={kind:'definition',name:D,levelParams:[],type:constant(N.Nat),value,hints:{kind:'regular',height:1n},safety:'safe'};
+ k.addDefinition(info);
+ assert(Object.isFrozen(info)&&Object.isFrozen(info.type)&&Object.isFrozen(info.value),'admitted declaration graph must be runtime immutable');
+ assert(Reflect.set(info,'value',strLit('mutated'))===false,'caller must not be able to replace an admitted definition body');
+ assert(Reflect.set(value.literal,'value',1n)===false,'caller must not be able to mutate an admitted expression leaf');
+ const stored=env.get(D);assert(stored.kind==='definition'&&exprEq(stored.value,natLit(0)),'environment must retain the checked value after hostile mutation attempts');
+});
+
+test('kernel freezes declarations before native-evaluator callbacks can mutate them',()=>{
+ const env=baseEnv(),Reduce=N.LeanReduceNat,C=nameFromDotted('Immutable.Native.C'),F=nameFromDotted('Immutable.Native.F'),X=nameFromDotted('Immutable.Native.X'),D=nameFromDotted('Immutable.Native.D');
+ env.add({kind:'axiom',name:Reduce,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'axiom',name:C,levelParams:[],type:constant(N.Nat)});
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),sort(levelZero))});
+ const reduced=app(constant(Reduce),constant(C));
+ env.add({kind:'axiom',name:X,levelParams:[],type:app(constant(F),reduced)});
+ const info:any={kind:'definition',name:D,levelParams:[],type:app(constant(F),natLit(0)),value:constant(X),hints:{kind:'regular',height:1n},safety:'safe'};
+ let mutationResult:boolean|undefined;
+ const native:NativeEvaluator={evaluate(_env,request){
+   if(request.kind!=='nat'||!nameEq(request.constant,C))return null;
+   mutationResult=Reflect.set(info,'value',strLit('hostile mutation'));
+   return {kind:'nat',value:0n};
+ }};
+ new Kernel(env,native).addDefinition(info);
+ assert(mutationResult===false,'declaration must already be frozen when native evaluation runs');
+ const stored=env.get(D);assert(stored.kind==='definition'&&stored.value.kind==='const'&&nameEq(stored.value.name,X),'native callback must not alter the admitted body');
+});
+
+test('raw Environment storage deep-freezes nested kernel values',()=>{
+ const env=new Environment(),A=nameFromDotted('Immutable.axiom'),type:any=sort(levelZero),info:any={kind:'axiom',name:A,levelParams:[],type};
+ env.add(info);
+ assert(Object.isFrozen(info)&&Object.isFrozen(type)&&Object.isFrozen(type.level));
+ assert(Reflect.set(type,'level',levelSucc(levelZero))===false);
+ assert(exprEq(env.get(A).type,sort(levelZero)));
+});
+
+test('Expr.Data caches and TypeChecker inputs are runtime immutable',()=>{
+ const standalone:any=app(constant(N.Nat),constant(N.Nat));
+ assert(!hasLooseBVar(standalone));
+ assert(Object.isFrozen(standalone)&&Object.isFrozen(standalone.fn)&&Object.isFrozen(standalone.arg),'first Expr.Data cache must freeze the expression DAG');
+ assert(Reflect.set(standalone,'fn',constant(N.String))===false,'cached expression identity must not become stale through mutation');
+
+ const env=baseEnv(),A=nameFromDotted('Immutable.TypeChecker.A'),B=nameFromDotted('Immutable.TypeChecker.B');
+ env.add({kind:'axiom',name:A,levelParams:[],type:constant(N.Nat)});
+ env.add({kind:'axiom',name:B,levelParams:[],type:sort(levelZero)});
+ const query:any=constant(A),localType:any=constant(N.Nat),lctx=new LocalContext();
+ lctx.addLocal('immutable@0',nameFromDotted('x'),localType);
+ const limits:any={maxRecDepth:512,maxNatBytes:1024n},allowed:any=[nameFromDotted('u')];
+ const tc=new TypeChecker(env,lctx,undefined,limits,'safe',allowed);
+ assert(exprEq(tc.infer(query),constant(N.Nat)),'initial cached inference mismatch');
+ assert(Object.isFrozen(query)&&Reflect.set(query,'name',B)===false,'checker query must be immutable once cached');
+ assert(Object.isFrozen(limits)&&Reflect.set(limits,'maxRecDepth',0)===false,'checker limits must not change after cache configuration is bound');
+ assert(Object.isFrozen(allowed)&&Reflect.set(allowed,0,nameFromDotted('v'))===false,'allowed universe parameters must not change after cache configuration is bound');
+ const local:any=lctx.get('immutable@0');
+ assert(local&&Object.isFrozen(local)&&Object.isFrozen(localType)&&Reflect.set(localType,'name',N.String)===false,'shared local declarations/types must be immutable after checker construction');
+});
+
 test('Lean Expr equality memoizes repeated shared DAG pairs',()=>{
  let a:any=constant(N.Nat),b:any=constant(N.Nat);
  // Each level doubles the number of tree paths while retaining one shared child.
@@ -51,6 +109,16 @@ test('Lean Expr equality memoizes repeated shared DAG pairs',()=>{
  for(let i=0;i<28;i++){a=app(a,a);b=app(b,b);}
  assert(exprLeanEq(a,b),'shared structurally equal expression DAGs must compare successfully');
 });
+test('bound-variable indices honor Lean Expr.Data 20-bit loose range',()=>{
+ const max=bvar(1_048_574);
+ assert(hasLooseBVar(max),'largest representable Lean bvar index must remain usable');
+ throws(()=>bvar(1_048_575));
+ throws(()=>bvar(-1));
+ throws(()=>bvar(1.5));
+ throws(()=>hasLooseBVar({kind:'bvar',index:1_048_575} as any));
+ throws(()=>hasLooseBVar({kind:'bvar',index:-1} as any));
+});
+
 test('Lean replacement primitives preserve shared DAG structure and cached loose-bvar skips',()=>{
  let open:any=bvar(0),closed:any=constant(N.Nat);
  for(let i=0;i<24;i++){open=app(open,open);closed=app(closed,closed);}

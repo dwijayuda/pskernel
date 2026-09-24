@@ -5,11 +5,13 @@ import {Environment} from 'lean-ts-kernel';
 import {
   PROOFSCRIPT_LEAN_VERSION,
   replayLeanEnvironment,
+  replayLeanEnvironmentInto,
 } from './index.js';
 
 export interface LeanEnvironmentStatus {
   readonly loaded:boolean;
   readonly source?:string;
+  readonly foundationSource?:string;
   readonly message?:string;
   readonly declarations?:number;
 }
@@ -21,16 +23,31 @@ export interface LeanEnvironmentProvider {
 
 export interface LeanEnvironmentProviderOptions {
   readonly candidatePaths?:readonly string[];
+  readonly foundationCandidatePaths?:readonly string[];
   readonly expectedLeanVersion?:string;
 }
 
-function defaultCandidates():readonly string[] {
+function defaultBaseCandidates():readonly string[] {
   const here=dirname(fileURLToPath(import.meta.url));
   return [
-    process.env.PROOFSCRIPT_LEAN_FOUNDATION??'',
     process.env.PROOFSCRIPT_INIT_PRELUDE??'',
     resolve(process.cwd(),'oracle/fixtures/lean434-init-prelude.ndjson'),
     resolve(here,'../../../../oracle/fixtures/lean434-init-prelude.ndjson'),
+  ].filter((value)=>value.length>0);
+}
+
+function defaultFoundationCandidates():readonly string[] {
+  const here=dirname(fileURLToPath(import.meta.url));
+  return [
+    process.env.PROOFSCRIPT_LEAN_FOUNDATION??'',
+    resolve(
+      process.cwd(),
+      'oracle/fixtures/lean434-proofscript-text-foundation.ndjson',
+    ),
+    resolve(
+      here,
+      '../../../../oracle/fixtures/lean434-proofscript-text-foundation.ndjson',
+    ),
   ].filter((value)=>value.length>0);
 }
 
@@ -47,7 +64,7 @@ export function createLeanEnvironmentProvider(
   const ensure=():void=>{
     if(attempted)return;
     attempted=true;
-    const candidates=options.candidatePaths??defaultCandidates();
+    const candidates=options.candidatePaths??defaultBaseCandidates();
     const source=candidates.find((path)=>existsSync(path));
     if(source===undefined){
       currentStatus={
@@ -59,23 +76,53 @@ export function createLeanEnvironmentProvider(
       return;
     }
 
+    const expectedLeanVersion=
+      options.expectedLeanVersion??PROOFSCRIPT_LEAN_VERSION;
+    const foundationCandidates=
+      options.foundationCandidatePaths
+      ??(options.candidatePaths===undefined
+        ?defaultFoundationCandidates()
+        :[]);
+    const foundationSource=foundationCandidates.find(
+      (path)=>existsSync(path),
+    );
+    if(foundationCandidates.length>0&&foundationSource===undefined){
+      currentStatus={
+        loaded:false,
+        source,
+        message:
+          'Lean 4.34 ProofScript foundation delta was not found; '+
+          'the verified compiler requires the pinned base plus foundation delta.',
+      };
+      return;
+    }
+
     try{
       const replayed=replayLeanEnvironment(
         readFileSync(source,'utf8'),
-        options.expectedLeanVersion??PROOFSCRIPT_LEAN_VERSION,
+        expectedLeanVersion,
       );
-      base=replayed.environment;
+      const completed=foundationSource===undefined
+        ?replayed
+        :replayLeanEnvironmentInto(
+          replayed.environment,
+          readFileSync(foundationSource,'utf8'),
+          expectedLeanVersion,
+        );
+      base=completed.environment;
       currentStatus={
         loaded:true,
         source,
+        foundationSource,
         declarations:base.size,
       };
     }catch(error){
       currentStatus={
         loaded:false,
         source,
+        foundationSource,
         message:
-          'Failed to replay Lean environment: '+
+          'Failed to replay Lean compiler environment: '+
           (error instanceof Error?error.message:String(error)),
       };
     }

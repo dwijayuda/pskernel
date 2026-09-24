@@ -23,29 +23,33 @@ function psxStringArg(
   return expr.value;
 }
 
-function isPsxCall(
+function asPsxCall(
   expr:V061Expr|undefined,
   callee:string,
-):expr is V061CallExpr {
-  return expr?.kind==='call'&&expr.callee===callee;
+):V061CallExpr|undefined {
+  return expr?.kind==='call'&&expr.callee===callee
+    ?expr
+    :undefined;
 }
 
 function lowerPsxChild(expr:V061Expr):string {
-  if(isPsxCall(expr,'$psx.text')){
-    return psxStringArg(expr.args[0],'text');
+  const text=asPsxCall(expr,'$psx.text');
+  if(text!==undefined){
+    return psxStringArg(text.args[0],'text');
   }
-  if(isPsxCall(expr,'$psx.child')){
-    const child=expr.args[0];
+  const expressionChild=asPsxCall(expr,'$psx.child');
+  if(expressionChild!==undefined){
+    const child=expressionChild.args[0];
     if(child===undefined){
       throw new Error('PS_PRINT_JSX_INTERNAL: missing expression child');
     }
     return '{'+lowerV061ExprToProofScript(child)+'}';
   }
-  if(
-    isPsxCall(expr,'$psx.element')
-    ||isPsxCall(expr,'$psx.fragment')
-  ){
-    return lowerPsxCall(expr);
+  const element=
+    asPsxCall(expr,'$psx.element')
+    ??asPsxCall(expr,'$psx.fragment');
+  if(element!==undefined){
+    return lowerPsxCall(element);
   }
   throw new Error(
     'PS_PRINT_JSX_INTERNAL: unexpected JSX child representation',
@@ -66,9 +70,10 @@ function lowerPsxCall(expr:V061CallExpr):string {
   const attributes:string[]=[];
   const children:V061Expr[]=[];
   for(const item of expr.args.slice(2)){
-    if(isPsxCall(item,'$psx.attr')){
-      const name=psxStringArg(item.args[0],'attribute name');
-      const value=item.args[1];
+    const attribute=asPsxCall(item,'$psx.attr');
+    if(attribute!==undefined){
+      const name=psxStringArg(attribute.args[0],'attribute name');
+      const value=attribute.args[1];
       if(value===undefined){
         throw new Error(
           'PS_PRINT_JSX_INTERNAL: missing attribute value',

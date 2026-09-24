@@ -43,7 +43,7 @@ def instantiateConstValue (env : Environment) (name : Name) (levels : List Level
   | some info =>
       if info.levelParams.length == levels.length then
         match info.kind, info.value with
-        | .definition, some value =>
+        | .definitionK, some value =>
             some (Expr.instantiateLevelParams value info.levelParams levels)
         | _, _ => none
       else

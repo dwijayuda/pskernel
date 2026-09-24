@@ -353,6 +353,26 @@ JSON is a library/data-format requirement, not a new trusted language primitive.
 The first Array profile needs at least empty, size, get/get?, push, set, map,
 fold, monadic map/fold variants used by compiler code, any/all and find?.
 
+
+Collection checkpoint completed 2026-09-25:
+
+- canonical Lean `Prod` is executable and continuously dual-source gated;
+- owned `Array` wrappers cover capacity-zero empty construction, size,
+  `get`, safe `get?`, push, set/set-if-in-bounds, map, fold, any/all, and
+  `find?`; monadic variants remain tied to the SH3 effect foundation;
+- owned `PsOrdering`, deterministic ordered `PsMap`, and deterministic
+  ordered `PsSet` are ProofScript/Lean library code with no JavaScript
+  identity semantics;
+- the real `stdlib` project imports and executes Product/Array/Map/Set plus
+  Option/Result/List/Lexer through the verified project pipeline;
+- per-module `.ps -> .lean -> .ps` semantic/IR/TS/JS parity gates remain
+  active, and the expanded stdlib project is green under normal CI.
+
+JSON is now the remaining blocking SH2 data foundation. Its recursive value
+model and schema interfaces belong to SH2; recursive encoder/parser bodies may
+use the recursion/effect machinery closed by SH3/SH4, but must remain owned
+ProofScript/Lean library code rather than host JSON semantics.
+
 Optional cheap literal/constructor conveniences may be added when they
 materially reduce noise in compiler data code and desugar directly to the same
 library constructors in both source frontends:

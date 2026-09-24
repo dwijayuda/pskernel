@@ -96,6 +96,21 @@ def checkExprParity (e : KExpr) : IO Unit := do
   assertTrue "Expr.liftLooseBVars"
     (sameLeanExpr (toLeanExpr liftedK) liftedLean)
 
+
+  let loweredK := ProofScript.Kernel.PSC1.Expr.lowerLooseBVars
+    (ProofScript.Kernel.PSC1.Expr.liftLooseBVars e 0 2) 2 2
+  let loweredLean := Lean.Expr.lowerLooseBVars
+    (Lean.Expr.liftLooseBVars le 0 2) 2 2
+  assertTrue "Expr.lowerLooseBVars"
+    (sameLeanExpr (toLeanExpr loweredK) loweredLean)
+
+  assertTrue "Expr.hasLooseBVar 0"
+    (ProofScript.Kernel.PSC1.Expr.hasLooseBVar e 0 ==
+      Lean.Expr.hasLooseBVar le 0)
+  assertTrue "Expr.hasLooseBVar 1"
+    (ProofScript.Kernel.PSC1.Expr.hasLooseBVar e 1 ==
+      Lean.Expr.hasLooseBVar le 1)
+
   let substK : List KExpr := [.bvar 0, .const (n "C") []]
   let substLean := (substK.map toLeanExpr).toArray
   let instantiatedK := ProofScript.Kernel.PSC1.Expr.instantiate e substK
@@ -126,6 +141,17 @@ def run : IO Unit := do
 
   checkExprParity sampleExpr
   checkExprParity sampleLet
+
+  let binderA : KExpr :=
+    .lam (n "x") (.sort .zero) (.bvar 0) .default
+  let binderB : KExpr :=
+    .lam (n "different") (.sort .zero) (.bvar 0) .implicit
+  assertTrue "Expr.eqv ignores binder metadata"
+    (ProofScript.Kernel.PSC1.Expr.eqv binderA binderB ==
+      Lean.Expr.eqv (toLeanExpr binderA) (toLeanExpr binderB))
+  assertTrue "Expr.equal compares binder metadata"
+    (ProofScript.Kernel.PSC1.Expr.equal binderA binderB ==
+      Lean.Expr.equal (toLeanExpr binderA) (toLeanExpr binderB))
 
   let fv := n "free"
   let abstractedK := ProofScript.Kernel.PSC1.Expr.abstractFVar (.app (.fvar fv) (.bvar 0)) fv

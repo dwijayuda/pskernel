@@ -3,7 +3,11 @@ import {
   emitBinaryenWasm,
   instantiateProofScriptWasm,
 } from '../src/index.js';
-import type {WasmIrModule} from '@proofscript/wasm-ir';
+import type {
+  WasmIrFunction,
+  WasmIrFunctionImport,
+  WasmIrModule,
+} from '@proofscript/wasm-ir';
 
 const module:WasmIrModule={
   kind:'proofscript-wasm-ir',
@@ -284,4 +288,102 @@ throws(
   /PS_WASM_JS_ABI_RESERVED_IMPORT_COLLISION/u,
 );
 console.log('ok - @proofscript/backend-wasm W3 reserved bigint literal runtime');
+
+{
+  const runtimeImport=(
+    name:string,
+    result:'externref'|'i32',
+  ):WasmIrFunctionImport=>({
+    internalName:'ps$bigint
++name,
+    module:'proofscript.bigint.v1',
+    name,
+    parameters:['externref','externref'],
+    result,
+  });
+  const runtimeFunction=(
+    name:string,
+    imported:string,
+    result:'nat'|'bool',
+  ):WasmIrFunction=>({
+    name,
+    parameters:[
+      {name:'a',type:'externref'},
+      {name:'b',type:'externref'},
+    ],
+    result:result==='nat'?'externref':'i32',
+    abi:{parameters:['nat','nat'],result},
+    exportName:name,
+    body:{
+      kind:'call',
+      target:'ps$bigint
++imported,
+      args:[
+        {kind:'local',name:'a',type:'externref'},
+        {kind:'local',name:'b',type:'externref'},
+      ],
+      result:result==='nat'?'externref':'i32',
+    },
+  });
+  const valueOps=[
+    ['addNat','nat_add'],
+    ['subNat','nat_sub'],
+    ['mulNat','nat_mul'],
+    ['divNat','nat_div'],
+    ['modNat','nat_mod'],
+  ] as const;
+  const compareOps=[
+    ['eqNat','nat_eq'],
+    ['neNat','nat_ne'],
+    ['leNat','nat_le'],
+    ['ltNat','nat_lt'],
+  ] as const;
+  const natOpsModule:WasmIrModule={
+    kind:'proofscript-wasm-ir',
+    profile:'proofscript-wasm32-ref-js-v1',
+    imports:[
+      ...valueOps.map(([,name])=>runtimeImport(name,'externref')),
+      ...compareOps.map(([,name])=>runtimeImport(name,'i32')),
+    ],
+    functions:[
+      ...valueOps.map(([name,imported])=>
+        runtimeFunction(name,imported,'nat')
+      ),
+      ...compareOps.map(([name,imported])=>
+        runtimeFunction(name,imported,'bool')
+      ),
+    ],
+  };
+  const artifact=emitBinaryenWasm(natOpsModule);
+  const host=instantiateProofScriptWasm(artifact);
+  const huge=(1n<<100n)+123456789n;
+  equal(host.exports.addNat?.(huge,7n),huge+7n);
+  equal(host.exports.subNat?.(1n,2n),0n);
+  equal(host.exports.subNat?.(huge,7n),huge-7n);
+  equal(host.exports.mulNat?.(huge,3n),huge*3n);
+  equal(host.exports.divNat?.(huge,0n),0n);
+  equal(host.exports.divNat?.(huge,3n),huge/3n);
+  equal(host.exports.modNat?.(huge,0n),huge);
+  equal(host.exports.modNat?.(huge,3n),huge%3n);
+  equal(host.exports.eqNat?.(huge,huge),true);
+  equal(host.exports.neNat?.(huge,huge+1n),true);
+  equal(host.exports.leNat?.(huge,huge),true);
+  equal(host.exports.ltNat?.(huge,huge+1n),true);
+
+  const rawAdd=host.raw.exports.addNat;
+  ok(typeof rawAdd==='function');
+  throws(
+    ()=>(rawAdd as (a:unknown,b:unknown)=>unknown)(-1n,1n),
+    /PS_WASM_BIGINT_NAT_RANGE/u,
+  );
+
+  const optimizedHost=instantiateProofScriptWasm(
+    emitBinaryenWasm(natOpsModule,{optimize:true}),
+  );
+  equal(optimizedHost.exports.addNat?.(huge,7n),huge+7n);
+  equal(optimizedHost.exports.subNat?.(1n,2n),0n);
+  equal(optimizedHost.exports.divNat?.(huge,0n),0n);
+  equal(optimizedHost.exports.modNat?.(huge,0n),huge);
+}
+console.log('ok - @proofscript/backend-wasm W3a Nat bigint runtime semantics');
 

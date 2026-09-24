@@ -74,6 +74,11 @@ console.log('ok - @proofscript/compiler-ir verified Nat intrinsic');
   equal(VERIFIED_IR_INTRINSIC_ARITY['string.atEnd'],2);
   equal(VERIFIED_IR_INTRINSIC_ARITY['string.extract'],3);
   equal(VERIFIED_IR_INTRINSIC_ARITY['string.eq'],2);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['array.emptyWithCapacity'],1);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['array.size'],1);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['array.push'],2);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['array.get'],2);
+  equal(VERIFIED_IR_INTRINSIC_ARITY['array.getD'],3);
   equal(VERIFIED_IR_INTRINSIC_ARITY['nat.sub'],2);
   let invalid=false;
   try{

@@ -9,9 +9,6 @@
       "@proofscript/compiler-ir": [
         "../compiler-ir/dist/src/index.d.ts"
       ],
-      "@proofscript/language": [
-        "../language/dist/src/index.d.ts"
-      ],
       "@proofscript/syntax": [
         "../syntax/dist/src/index.d.ts"
       ],

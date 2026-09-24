@@ -53,6 +53,9 @@ const result={
   topExternModules:groupCount(doc.externs,'module').slice(0,20),
   topImplementedByModules:groupCount(doc.implementedBy,'module').slice(0,20),
   topInitializerModules:groupCount(doc.initializers,'module').slice(0,20),
+  exactTargetExternSample:exactExterns.slice(0,40),
+  exactTargetImplementedBySample:exactImplementedBy.slice(0,40),
+  exactTargetInitializerSample:exactInitializers.slice(0,80),
   parserExternSample:parserExterns.slice(0,40).map(x=>({
     declaration:x.declaration,
     module:x.module,

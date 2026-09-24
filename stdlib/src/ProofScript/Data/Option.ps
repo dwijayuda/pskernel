@@ -49,3 +49,9 @@ theorem optionOrElseNoneRight {α : Type}
 (value : PsOption(α)) :
 optionOrElse(value, PsOption.none) = value :=
   by cases value; rfl; rfl;
+
+theorem optionMapOrElse {α : Type}{β : Type}
+(f : α -> β, value : PsOption(α), fallback : PsOption(α)) :
+optionMap(f, optionOrElse(value, fallback)) =
+optionOrElse(optionMap(f, value), optionMap(f, fallback)) :=
+  by cases value; rfl; rfl;

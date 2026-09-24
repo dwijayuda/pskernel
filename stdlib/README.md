@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain nineteen pskernel-admitted theorems in total:
+The three modules now contain twenty pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -49,10 +49,11 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- nineteen admitted stdlib theorems: twelve definitional laws use bounded
+- twenty admitted stdlib theorems: twelve definitional laws use bounded
   `rfl`, `optionOrElseNoneRight` and `resultToOptionMap` dogfood bounded
-  `cases`, `optionOrElseNoneSymm` dogfoods environment-candidate `exact?`
-  Eq symmetry, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
+  `cases`, `optionMapOrElse` dogfoods higher-order Option case analysis,
+  `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
+  symmetry, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
   `listMapAppend` dogfood bounded induction plus checked rewriting;
 - zero runtime external assumptions.
@@ -175,3 +176,19 @@ Direct candidate matching therefore fails on orientation; bounded library search
 tries the symmetric Eq target, infers the theorem's ordinary implicit/default
 arguments, then reconstructs the requested proof with the real polymorphic
 `Eq.symm`. The completed term is still checked by pskernel.
+
+## Option map/orElse compatibility
+
+`ProofScript.Data.Option.optionMapOrElse` proves:
+
+```text
+optionMap(f, optionOrElse(value, fallback)) =
+optionOrElse(optionMap(f, value), optionMap(f, fallback))
+```
+
+for every Option value and fallback. The proof is exactly
+`by cases value; rfl; rfl`. Both constructor branches reduce through the
+ProofScript-authored Option definitions and close by kernel definitional
+equality. The law therefore exercises a higher-order function argument across
+bounded case analysis without adding a host functor implementation or a new
+proof rule.

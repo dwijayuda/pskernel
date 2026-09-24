@@ -1961,6 +1961,62 @@ def psTestDualSourceInductiveFieldElaboration : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestSortDeclarationShape
+    (result : PsElabModuleResult) : Bool :=
+  let typeSort := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let propSort := PsExpr.sortE PsLevel.zero
+  match result.declarations with
+  | [
+      PsDeclaration.definitionDecl
+        idName
+        []
+        idType
+        idValue,
+      PsDeclaration.definitionDecl
+        propName
+        []
+        propType
+        propValue
+    ] =>
+      psNameEq idName (psTestName "idType")
+        && psExprAlphaEq
+          idType
+          (PsExpr.forallE
+            (psTestName "α")
+            typeSort
+            typeSort
+            PsBinderInfo.explicit)
+        && psExprAlphaEq
+          idValue
+          (PsExpr.lam
+            (psTestName "α")
+            typeSort
+            (PsExpr.bvar 0)
+            PsBinderInfo.explicit)
+        && psNameEq propName (psTestName "P")
+        && psExprAlphaEq propType typeSort
+        && psExprAlphaEq propValue propSort
+  | _ => false
+
+def psTestDualSourceTypePropElaboration : Bool :=
+  match
+      psParseLeanSource
+        "def idType (α : Type) : Type := α\ndef P : Type := Prop",
+      psParseProofScriptSource
+        "def idType(α : Type) : Type := α; def P : Type := Prop;" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestSortDeclarationShape leanResult
+            && psTestSortDeclarationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1989,6 +2045,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source inductive field parse", passed := psTestDualSourceInductiveFieldParse },
   { name := "dual-source inductive enum elaboration", passed := psTestDualSourceInductiveEnumElaboration },
   { name := "dual-source inductive field elaboration", passed := psTestDualSourceInductiveFieldElaboration },
+  { name := "dual-source Type Prop elaboration", passed := psTestDualSourceTypePropElaboration },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

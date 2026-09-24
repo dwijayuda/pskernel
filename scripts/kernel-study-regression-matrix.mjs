@@ -164,6 +164,8 @@ for(const marker of [
   'dependencyInstall=npm ci',
   'git status: $dirtySummary',
   'npm ci changed tracked files; refusing assurance evidence.',
+  'dependencyInstallExitCode=$dependencyInstallCode',
+  'npm ci failed before any kernel replay. This is a packaging/dependency gate failure; send/upload $Log.',
 ]){
   if(!localAssuranceRunner.includes(marker))throw new Error('local Full-Std assurance runner drift: missing '+marker);
 }

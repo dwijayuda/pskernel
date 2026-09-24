@@ -2,166 +2,356 @@
 
 Branch: `selfhost/psc1-lean-bootstrap`
 
-This branch starts the first real ProofScript self-host experiment. It is
-isolated from `main` until the bootstrap lane proves useful.
+This branch starts the first real ProofScript self-host implementation. The
+bootstrap host is **official Lean 4.34 + Lake**, not the current TypeScript
+ProofScript compiler.
 
-## Goal
+The TypeScript implementation remains valuable as a behavioral oracle and
+architecture reference, but the new compiler source is written as if the PSC1
+language specification were already fully implemented.
 
-Build the ProofScript compiler first in the supported Lean subset, continuously
-translate that source to canonical `.ps`, and eventually reach:
+## Bootstrap model
+
+Temporary host:
 
 ```text
-compiler.lean --PSC0--> compiler.ts --tsc--> PSC1.js
-compiler.lean --PSC1--> compiler.ts --tsc--> PSC2.js
-
-compiler.lean --translate--> compiler.ps
-compiler.ps   --PSC1--> PSC2-ps.js
+PSC1-constrained compiler.lean
+        |
+        | lake build
+        v
+official Lean 4.34 elaborator + kernel
+        |
+        v
+native/Lean bootstrap compiler executable
 ```
 
-PSC0 is the current TypeScript implementation. The first self-hosting claim is
-not made until PSC2 is stable.
+Future ProofScript path:
 
-## What to copy and what not to copy
+```text
+the same compiler.lean
+        |
+        | ProofScript frontend for supported .lean
+        v
+pskernel checked core
+        |
+        v
+verified IR -> TypeScript -> JavaScript
 
-Use the current TypeScript implementation as the executable behavioral oracle,
-not as a file-for-file porting template.
+compiler.lean <-> canonical compiler.ps
+```
 
-Use Lean 4.34 as the semantic/design reference for:
-- core expressions and declarations;
-- elaboration architecture;
-- parser state and diagnostics;
-- environments/names;
-- Meta state, unification and instance search;
-- compiler bootstrap discipline.
+The architecture of the semantic compiler must therefore be valid for both
+source spellings. Lake is temporary build infrastructure, not a semantic
+dependency of ProofScript.
 
-Do not reproduce Lean's broad macro/metaprogramming platform unless the PSC1
-compiler actually needs it.
+## Why Lean + Lake first
 
-Port **semantic responsibilities**, not npm package boundaries.
+Using official Lean first lets compiler implementation proceed from the PSC1
+spec instead of waiting for PSC0 to implement every PSC1 source feature.
 
-## Bootstrap module architecture
+It also gives every portable semantic module an immediate independent check by
+the official Lean elaborator/kernel.
 
-The intended self-hosted compiler modules are:
+PSC0 remains useful for:
+- differential behavior tests;
+- harvesting algorithms and regressions;
+- measuring which planned PSC1 features PSC0 still lacks;
+- checking the currently supported intersection when possible.
+
+PSC0 compatibility is informative during this branch, not the authority that
+defines what PSC1 source may contain.
+
+## Source authority
+
+Portable compiler source must stay inside the intersection of:
+
+1. semantics promised by the PSC1 specification;
+2. constructs we are willing to support in canonical `.ps`;
+3. ordinary Lean syntax accepted by official Lean 4.34.
+
+The fact that Lean accepts a construct does not make it part of PSC1.
+
+Portable semantic modules must not depend on Lean's implementation APIs,
+metaprogramming framework, macro system, unsafe escape hatches, or IO.
+
+A lightweight source-profile audit guards against accidental dependencies such
+as `Lean.*`, `Std.*`, `unsafe`, `syntax`, `macro`, `elab`,
+`implemented_by`, `extern`, `run_tac`, and direct `IO` in portable
+compiler modules.
+
+Host wrappers may use Lean IO because they are explicitly outside the portable
+semantic compiler.
+
+## Architectural references
+
+Use the three existing implementations for different lessons.
+
+### ProofScript TypeScript implementation
+
+Treat the current packages as the behavioral oracle:
+
+```text
+syntax
+environment / project
+meta
+elab
+checked-core
+erasure
+compiler-ir
+backend-ts
+cli
+```
+
+Do not mechanically port npm package boundaries or TypeScript helper classes.
+
+### Lean 4.34
+
+Use Lean for dependent-language architecture:
+
+- explicit environment and declaration admission;
+- parser state and deterministic recovery;
+- Meta state and transactional metavariable assignments;
+- elaboration as construction of kernel-checkable terms;
+- a small kernel-facing core separated from the rich frontend;
+- bootstrap staging and fixed-point discipline.
+
+Do not copy Lean's macros, quotations, arbitrary custom elaborators,
+environment-extension ecosystem, broad tactic platform, or transformer stack
+unless ProofScript later demonstrates a real need.
+
+### TypeScript compiler
+
+Use TypeScript's traditional phase separation as a practical organizational
+lesson:
+
+```text
+SourceFile / Program
+  -> parse
+  -> bind/name graph
+  -> check
+  -> transform/emit
+```
+
+ProofScript should borrow the clean idea of a project/program graph and a
+separate name-binding/indexing phase, not TypeScript's structural type system or
+JavaScript-compatibility complexity.
+
+## Chosen hybrid architecture
+
+The self-hosted semantic compiler is organized around these boundaries:
+
+```text
+Host / Project
+      |
+      v
+Source text
+      |
+      v
+Lexer
+      |
+      v
+Parser
+      |
+      v
+Syntax AST
+      |
+      v
+ModuleGraph + Resolver
+      |
+      v
+Environment
+      |
+      v
+Meta
+      |
+      v
+Elaborator
+      |
+      v
+Lean-compatible Core
+      |
+      v
+KernelBridge / pskernel
+      |
+      v
+CheckedCore
+      |
+      v
+Erasure
+      |
+      v
+VerifiedIR
+      |
+      v
+TypeScript emitter
+```
+
+The important split is:
+
+- **ModuleGraph/Resolver** borrows the useful TypeScript Binder/Program idea:
+  imports, declaration identities, qualified names, duplicate detection and
+  deterministic module ordering.
+- **Meta/Elab** follows Lean's model: expected types, metavariables,
+  definitional equality, implicit insertion, instance synthesis and creation of
+  kernel-checkable terms.
+- There is no second semantic type checker after elaboration. pskernel is the
+  independent final admission authority.
+
+## Portable module layout
+
+Initial logical modules:
 
 1. `ProofScript.Compiler.Data`
    - SourcePos / Span / Diagnostic
-   - small compiler-owned enums and records
 2. `ProofScript.Compiler.Name`
-   - qualified names and deterministic name operations
-3. `ProofScript.Compiler.Json`
-   - canonical JSON value/parser/encoder used by the kernel bridge
-4. `ProofScript.Compiler.KernelCodec`
-   - Name/Level/Expr/declaration request/response codecs
-5. `ProofScript.Compiler.CheckedCore`
-   - compiler-owned checked-core data view; no second checker
-6. `ProofScript.Compiler.IR`
-   - the small verified executable IR
-7. `ProofScript.Compiler.Erase`
-   - checked core -> executable IR
-8. `ProofScript.Compiler.EmitTS`
-   - verified IR -> deterministic TypeScript text
-9. `ProofScript.Compiler.Lexer`
-   - String/Char/UTF-8 source traversal
-10. `ProofScript.Compiler.Syntax`
-    - canonical source AST
-11. `ProofScript.Compiler.Parser`
-    - bounded .ps and supported-.lean parsing
-12. `ProofScript.Compiler.Environment`
-    - imports, declarations, names and instance indexes
-13. `ProofScript.Compiler.Meta`
-    - metavariables, rollback, bounded unification/instance synthesis
-14. `ProofScript.Compiler.Elab`
-    - source AST -> Lean-compatible core terms
-15. `ProofScript.Compiler.Driver`
-    - orchestration only
+   - qualified compiler names
+3. `ProofScript.Compiler.Collections`
+   - only compiler-specific helpers missing from the small standard library
+4. `ProofScript.Compiler.Json`
+   - canonical JSON value/parser/encoder
+5. `ProofScript.Compiler.KernelCodec`
+   - versioned pskernel request/response data
+6. `ProofScript.Compiler.Syntax`
+   - tokens and canonical source AST
+7. `ProofScript.Compiler.ModuleGraph`
+   - module/import graph and deterministic ordering
+8. `ProofScript.Compiler.Resolver`
+   - declarations, qualified lookup and duplicate/ambiguity handling
+9. `ProofScript.Compiler.Core`
+   - Lean-compatible kernel-facing expression/declaration data
+10. `ProofScript.Compiler.Meta`
+    - metavariables, constraints, rollback and bounded unification
+11. `ProofScript.Compiler.Elab`
+    - source AST -> Core
+12. `ProofScript.Compiler.CheckedCore`
+    - admitted declaration/module identities; no second checker
+13. `ProofScript.Compiler.IR`
+    - small executable verified IR
+14. `ProofScript.Compiler.Erase`
+    - CheckedCore -> VerifiedIR
+15. `ProofScript.Compiler.EmitTS`
+    - deterministic VerifiedIR -> TypeScript
+16. `ProofScript.Compiler.Driver`
+    - semantic orchestration
 
-These are logical modules. They may be merged when keeping fewer modules makes
-the language/compiler simpler.
+Physical files may combine logical modules when that makes the implementation
+smaller. PSC1 should not recreate Lean's directory count.
 
-## Explicit external boundaries
+## Host boundary
 
-The first self-hosted compiler does not rewrite these in Lean/ProofScript:
+The following remain host adapters, not portable semantic compiler modules:
 
-- pskernel itself;
-- filesystem/path/process APIs;
-- npm/Node resolution;
+- filesystem/path/process arguments;
+- Lake during the Lean bootstrap era;
+- npm/Node package resolution;
 - TypeScript compiler invocation;
-- JavaScript execution.
+- JavaScript execution;
+- transport to the independent TypeScript pskernel.
 
-They remain versioned host capabilities. The kernel boundary is initially the
-canonical String/JSON protocol from SH6b.
+The initial kernel transport remains the versioned canonical String/JSON
+protocol. This avoids making portable compiler source depend on TypeScript
+classes.
 
-## Source discipline
+## Development order
 
-Every self-hosted semantic compiler module starts in supported `.lean`, but it
-must remain inside the intersection of:
-
-1. official Lean 4.34 syntax/semantics;
-2. ProofScript's supported Lean frontend;
-3. the PSC1 required language subset.
-
-Until namespace support enters the frozen subset, bootstrap declarations use
-globally unique `Ps*` names instead of depending on Lean namespaces.
-
-Do not add a language feature just because a compiler module would be prettier
-with it. Prefer the PSC1 core or a library helper. Promote an optional feature
-only when the implementation becomes unreasonable without it.
-
-## Per-module admission gate
-
-A module is considered landed only when the applicable stages are green:
+Now that Lean itself can build the compiler, we do not need to order work around
+what PSC0 can already execute. Instead use dependency order:
 
 ```text
-module.lean
-  -> official Lean 4.34 check
-  -> ProofScript .lean parse/elaborate
-  -> pskernel checked core
-  -> canonical module.ps
-  -> ProofScript .ps parse/elaborate
-  -> same checked-core fingerprint
-  -> same verified-IR fingerprint
-  -> TypeScript emission
-  -> JavaScript execution when executable
+Data / Name
+  -> collections needed by compiler
+  -> JSON / KernelCodec
+  -> Syntax
+  -> ModuleGraph / Resolver
+  -> Core
+  -> Meta
+  -> Elab
+  -> CheckedCore
+  -> IR
+  -> Erase
+  -> EmitTS
+  -> Driver
 ```
 
-At the beginning, some later stages may not yet be expressible by the existing
-PSC0 frontend. Such a missing capability is recorded as a concrete blocker;
-the compiler module is not rewritten around a hidden TypeScript semantic path.
+Lexer/parser may start once the Syntax/Text foundation is ready. They no longer
+need to wait until emitter work is complete.
 
-## Implementation order
+However, keep interfaces narrow enough that pure backend work and frontend work
+can progress independently.
 
-Do not start with the parser.
+## Build stages
 
-The cheapest bootstrap path is:
+### L0 — Lean-hosted compiler source
 
 ```text
-Data
--> Name / JSON / kernel codec
--> CheckedCore data view
--> Verified IR
--> TypeScript text builder/emitter
--> erasure
--> lexer
--> source AST/parser
--> environment/name resolution
--> Meta
--> elaboration
--> driver
+compiler.lean --Lean 4.34/Lake--> psc-lean
 ```
 
-This lets us self-host pure data and deterministic transformations first, while
-the current TypeScript parser/elaborator continues to compile those modules.
+Required:
+- `lake build` succeeds;
+- portable source profile passes;
+- compiler modules avoid Lean implementation APIs.
 
-## First checkpoint
+### L1 — usable Lean-hosted ProofScript compiler
 
-The first checkpoint is intentionally small:
+The executable can parse/elaborate the frozen PSC1 source subset and communicate
+with pskernel.
 
-- branch exists from an exact `main` commit;
-- one canonical `.lean` compiler-data module;
-- official Lean 4.34 accepts it;
-- PSC0 checks/builds it through pskernel and verified TS/JS;
-- `.lean -> .ps -> .lean` is canonical-stable;
-- no new kernel semantics and no new language feature are introduced.
+### L2 — ProofScript compiles the same Lean source
 
-Only after that gate should the branch begin moving real compiler behavior out
-of TypeScript.
+```text
+compiler.lean --PSC0/compatible ProofScript compiler--> compiler.ts/js
+```
+
+This becomes required only after the necessary PSC1 source features exist in
+the ProofScript compiler implementation.
+
+### L3 — first self-host
+
+```text
+compiler.lean --PSC1--> PSC2
+```
+
+Require stable checked-core/IR fingerprints and equivalent output.
+
+### L4 — source transition
+
+```text
+compiler.lean <-> compiler.ps
+compiler.ps --PSC1--> next compiler
+```
+
+Canonical Lean and ProofScript forms must represent the same compiler
+semantics.
+
+## Verification trajectory
+
+Lean hosting gives an immediate extra assurance layer:
+
+```text
+portable compiler.lean
+        |
+        +-> official Lean kernel accepts it
+        |
+        +-> later pskernel accepts the same semantic declarations
+```
+
+That still proves only that the compiler and its explicit proofs are
+well-formed. Compiler correctness remains a separate goal.
+
+After ordinary self-hosting, add semantic-preservation theorems for:
+- erasure;
+- primitive/ADT lowering;
+- recursion lowering;
+- VerifiedIR transformations;
+- TypeScript emission subset.
+
+## Immediate rule
+
+Do not wait for PSC0 feature completion to write compiler modules that are
+already legal PSC1 and ordinary Lean.
+
+Do not use Lean-only conveniences merely because Lake permits them.
+
+The source should look structurally like code we are willing to maintain later
+as `.ps`.

@@ -533,6 +533,7 @@ export const LEAN434_JS_EXTERN_MANIFEST:readonly Lean434ExternDescriptor[]=[
   {leanSymbol:'lean_nat_dec_lt',jsExport:'lean_nat_dec_lt',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_uint64_of_nat',jsExport:'lean_uint64_of_nat',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_uint64_mix_hash',jsExport:'lean_uint64_mix_hash',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_uint64_to_nat',jsExport:'lean_uint64_to_nat',category:'pure-primitive',upstreamSource:'Init/Data/UInt/BasicAux.lean'},
   {leanSymbol:'lean_string_hash',jsExport:'lean_string_hash',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_uint64_to_usize',jsExport:'lean_uint64_to_usize',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
   {leanSymbol:'lean_usize_of_nat',jsExport:'lean_usize_of_nat',category:'pure-primitive',upstreamSource:'Init/Data/UInt/BasicAux.lean'},
@@ -664,6 +665,18 @@ readonly Lean434DeclarationExternBinding[]=[
     arity:2,
     runtimeArgs:[0],
     upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'UInt64.ofNat',
+    leanSymbol:'lean_uint64_of_nat',
+    arity:1,
+    upstreamSource:'Init/Data/UInt/BasicAux.lean',
+  },
+  {
+    leanDeclaration:'UInt64.toNat',
+    leanSymbol:'lean_uint64_to_nat',
+    arity:1,
+    upstreamSource:'Init/Data/UInt/BasicAux.lean',
   },
   {
     leanDeclaration:'mixHash',
@@ -923,6 +936,8 @@ new Map<string,Lean434JsExternImplementation>([
     lean_uint64_of_nat(value as LeanNat)],
   ['lean_uint64_mix_hash',(a,b)=>
     lean_uint64_mix_hash(a as LeanUInt64,b as LeanUInt64)],
+  ['lean_uint64_to_nat',(value)=>
+    lean_uint64_to_nat(value as LeanUInt64)],
   ['lean_string_hash',(value)=>
     lean_string_hash(value as LeanString)],
   ['lean_uint64_to_usize',(value)=>

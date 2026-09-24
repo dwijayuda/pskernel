@@ -97,6 +97,7 @@ import {
   lean_uint32_of_nat,
   lean_uint64_of_nat,
   lean_uint64_mix_hash,
+  lean_uint64_to_nat,
   lean_uint64_to_usize,
   lean_string_hash,
   lean_usize_add,
@@ -314,6 +315,7 @@ equal(lean_string_hash('Lean'),0x363612ab7bff2817n);
 equal(lean_string_hash('Lean.Meta'),0xeb3f489f8510f0f9n);
 equal(lean_string_hash('L∃∀N'),0xc7156d079377e18dn);
 equal(lean_string_hash('_m'),0xf83dea072f02119bn);
+equal(lean_uint64_to_nat(0xffffffffffffffffn),0xffffffffffffffffn);
 equal(lean_uint64_to_usize((1n<<64n)+5n),5n);
 equal(lean_usize_add((1n<<64n)-1n,2n),1n);
 equal(lean_usize_sub(0n,1n),(1n<<64n)-1n);

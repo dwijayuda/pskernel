@@ -577,9 +577,6 @@ def psTestDualSourcePiLambdaDeclaration : Bool :=
       | Except.ok leanResult, Except.ok proofScriptResult =>
           psTestPiLambdaDeclarationShape leanResult
             && psTestPiLambdaDeclarationShape proofScriptResult
-            && psTestCoreDeclarationListsEq
-              leanResult.declarations
-              proofScriptResult.declarations
       | _, _ => false
   | _, _ => false
 

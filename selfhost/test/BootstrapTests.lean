@@ -404,6 +404,30 @@ def psTestDualSourceBinderApplicationParse : Bool :=
         && psTestParsedBinderApplicationShape proofScriptModule
   | _, _ => false
 
+def psTestProofScriptEmptyCallUsesUnit : Bool :=
+  match psParseProofScriptSource "def u : Unit := f();" with
+  | Except.error _ => false
+  | Except.ok module =>
+      match module.declarations with
+      | [
+          PsSyntaxDeclaration.definition
+            _
+            []
+            _
+            (PsSyntaxTerm.app
+              (PsSyntaxTerm.reference fnName)
+              [PsSyntaxTerm.unit _]
+              _)
+            _
+        ] =>
+          psTestSyntaxNameSingle fnName "f"
+      | _ => false
+
+def psTestProofScriptRejectSpacedCall : Bool :=
+  match psParseProofScriptSource "def u : Nat := f (1);" with
+  | Except.error _ => true
+  | Except.ok _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -411,6 +435,8 @@ structure PsNamedTest where
 def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source simple parse", passed := psTestDualSourceSimpleParse },
   { name := "dual-source binder application parse", passed := psTestDualSourceBinderApplicationParse },
+  { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
+  { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },
   { name := "lexer nested trivia", passed := psTestLexerNestedTrivia },
   { name := "module graph", passed := psTestModuleGraph },

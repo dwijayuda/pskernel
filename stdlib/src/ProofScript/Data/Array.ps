@@ -1,0 +1,19 @@
+function arrayEmptyWithCapacity {α : Type}
+(capacity : Nat) : Array(α) :=
+  Array.emptyWithCapacity(capacity);
+
+function arraySize {α : Type}
+(xs : Array(α)) : Nat :=
+  Array.size(xs);
+
+function arrayPush {α : Type}
+(xs : Array(α), value : α) : Array(α) :=
+  Array.push(xs, value);
+
+function arrayGet {α : Type}
+(xs : Array(α), index : Nat, h : index < Array.size(xs)) : α :=
+  Array.getInternal(xs, index, h);
+
+function arrayGetD {α : Type}
+(xs : Array(α), index : Nat, fallback : α) : α :=
+  Array.getD(xs, index, fallback);

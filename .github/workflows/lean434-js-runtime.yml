@@ -225,6 +225,7 @@ jobs:
           lean --run oracle/replay-probe/DependencyExport.lean Lean.Expr \
             --selected-after Init.Prelude \
             Lean.Expr.getAppFn Lean.Expr.getAppNumArgs \
+            Lean.Expr.consumeMData \
             > lean434-expr-bootstrap.ndjson
           test -s lean434-expr-bootstrap.ndjson
       - name: Execute real Lean.Expr algorithms in JavaScript

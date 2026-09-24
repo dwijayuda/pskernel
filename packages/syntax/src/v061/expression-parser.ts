@@ -6,6 +6,7 @@ import {parseV061Type} from './type-parser.js';
 import {parseV061Pattern} from './pattern-parser.js';
 import {parseV061RecordExpression} from './record-parser.js';
 import {parseV061ByExpression} from './tactic-parser.js';
+import {parseV061JsxExpression} from './jsx-parser.js';
 
 export class V061ExpressionParser {
   constructor(readonly context:V061ParseContext){}
@@ -24,6 +25,15 @@ export class V061ExpressionParser {
   }
 
   private parsePrefix():V061Expr {
+    if(this.context.cursor.at('<')){
+      if(!this.context.jsxEnabled){
+        throw new SyntaxError(
+          'PS_JSX_DISABLED: JSX syntax is available only in .psx files',
+          this.context.cursor.peek().span,
+        );
+      }
+      return parseV061JsxExpression(this.context,this);
+    }
     if(this.context.cursor.at('by'))return parseV061ByExpression(this.context,this);
     if(this.context.cursor.at('match'))return this.parseMatch();
     if(this.context.cursor.at('fun'))return this.parseLambda();

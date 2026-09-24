@@ -235,6 +235,22 @@ export class ExprMetaContext {
     if(lhs.kind==='sort'&&rhs.kind==='sort'){
       return this.levels.unify(lhs.level,rhs.level);
     }
+
+    if(
+      (lhs.kind==='forall'&&rhs.kind==='forall')
+      ||(lhs.kind==='lam'&&rhs.kind==='lam')
+    ){
+      if(lhs.binderInfo!==rhs.binderInfo)return false;
+      return this.unifyCore(lhs.type,rhs.type,localContext)
+        &&this.unifyCore(lhs.body,rhs.body,localContext);
+    }
+
+    if(lhs.kind==='let'&&rhs.kind==='let'){
+      return this.unifyCore(lhs.type,rhs.type,localContext)
+        &&this.unifyCore(lhs.value,rhs.value,localContext)
+        &&this.unifyCore(lhs.body,rhs.body,localContext);
+    }
+
     if(
       this.levels.hasUnresolvedExpr(lhs)
       ||this.levels.hasUnresolvedExpr(rhs)

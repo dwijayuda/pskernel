@@ -149,6 +149,48 @@ def psParseLeanSimpleApplication
         first.value
         first.cursor
 
+def psParseLeanBinderTypeWithFuel :
+    Nat ->
+    PsTokenCursor ->
+    Except PsParseError (PsParseResult PsSyntaxTerm)
+  | 0, _ => Except.error PsParseError.fuelExhausted
+  | remaining + 1, cursor =>
+      match psParseLeanSimpleApplication cursor with
+      | Except.error error => Except.error error
+      | Except.ok domain =>
+          if psTokenCursorAtArrow domain.cursor then
+            match psTokenCursorExpectArrow domain.cursor with
+            | Except.error error => Except.error error
+            | Except.ok afterArrow =>
+                match
+                    psParseLeanBinderTypeWithFuel
+                      remaining
+                      afterArrow.cursor with
+                | Except.error error => Except.error error
+                | Except.ok codomain =>
+                    let domainSpan := psSyntaxTermSpan domain.value
+                    Except.ok {
+                      value :=
+                        PsSyntaxTerm.forallE
+                          [(psSyntaxAnonymousExplicitBinder
+                            domainSpan,
+                            domain.value)]
+                          codomain.value
+                          (psSyntaxSpanJoin
+                            domainSpan
+                            (psSyntaxTermSpan codomain.value))
+                      cursor := codomain.cursor
+                    }
+          else
+            Except.ok domain
+
+def psParseLeanBinderType
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  psParseLeanBinderTypeWithFuel
+    (cursor.remaining.length + 1)
+    cursor
+
 def psParseLeanBinder
     (cursor : PsTokenCursor) :
     Except PsParseError
@@ -162,7 +204,7 @@ def psParseLeanBinder
           match psTokenCursorExpectText name.cursor ":" with
           | Except.error error => Except.error error
           | Except.ok afterColon =>
-              match psParseLeanSimpleApplication afterColon.cursor with
+              match psParseLeanBinderType afterColon.cursor with
               | Except.error error => Except.error error
               | Except.ok type =>
                   match psParseBinderClosing opening type.cursor with

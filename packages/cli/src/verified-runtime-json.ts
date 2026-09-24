@@ -76,6 +76,19 @@ function decodePrimitive(
     if(typeof value!=='boolean')fail('nested Bool values must be JSON booleans');
     return value;
   }
+  if(name==='Char'){
+    if(typeof value!=='string')fail('nested Char values must be JSON strings');
+    const codePoint=value.codePointAt(0);
+    if(
+      codePoint===undefined
+      ||[...value].length!==1
+      ||(codePoint>=0xd800&&codePoint<=0xdfff)
+      ||codePoint>0x10ffff
+    ){
+      fail('nested Char values must contain exactly one Unicode scalar value');
+    }
+    return value;
+  }
   if(name==='String'){
     if(typeof value!=='string')fail('nested String values must be JSON strings');
     return value;
@@ -196,6 +209,19 @@ function encodePrimitive(
   }
   if(name==='Bool'){
     if(typeof value!=='boolean')fail('Bool result is not a boolean');
+    return value;
+  }
+  if(name==='Char'){
+    if(typeof value!=='string')fail('Char result is not a string');
+    const codePoint=value.codePointAt(0);
+    if(
+      codePoint===undefined
+      ||[...value].length!==1
+      ||(codePoint>=0xd800&&codePoint<=0xdfff)
+      ||codePoint>0x10ffff
+    ){
+      fail('Char result is not exactly one Unicode scalar value');
+    }
     return value;
   }
   if(name==='String'){

@@ -6,9 +6,9 @@ export const HELP=`ProofScript compiler
 
 Usage:
   psc init [dir] [--lib] [-y]
-  psc check [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
-  psc build [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json]
-  psc run [entry.ps|entry.lean] [-p, --project <path>] [--verified] [--json] [-- <args...>]
+  psc check [entry.ps|entry.lean] [-p, --project <path>] [--json]
+  psc build [entry.ps|entry.lean] [-p, --project <path>] [--json]
+  psc run [entry.ps|entry.lean] [-p, --project <path>] [--json] [-- <args...>]
   psc translate <entry.ps|entry.lean> --to ps|lean [-p, --project <path>]
   psc emit-lean [entry.ps|entry.lean] [-p, --project <path>]
   psc clean [-p, --project <path>]
@@ -17,18 +17,22 @@ Usage:
 
 Commands:
   init       Create a ProofScript project and psconfig.json
-  check      Parse .ps or supported .lean and type-check without outputs
-  build      Compile .ps or supported .lean to TypeScript then JS/.d.ts
-  run        Build .ps or supported .lean and invoke exported main
+  check      Parse .ps or supported .lean and check through pskernel
+  build      Checked core -> verified IR -> TypeScript -> JS/.d.ts
+  run        Build through the checked-core path and invoke exported main
   translate  Canonically translate supported .ps/.lean to ps or lean
   emit-lean  Print canonical Lean lowering for the supported reference slice
   clean      Remove the configured output directory
 
-Verified compiler:
-  --verified  source -> Lean-compatible elaboration -> pskernel checked core
-              -> erasure -> compiler IR -> TypeScript -> JavaScript
-  No automatic fallback to the legacy software checker.
-  run --verified accepts primitive main parameters directly:
+Compiler pipeline:
+  source -> Lean-compatible elaboration -> pskernel checked core
+         -> erasure -> verified compiler IR -> TypeScript -> JavaScript
+
+  There is no legacy software checker or automatic fallback. The historical
+  --verified flag is accepted only as a deprecated compatibility marker and
+  does not select a different semantic path.
+
+  run accepts primitive main parameters directly:
   Nat, Int, Bool, String, Unit.
   Supported structure/ADT parameters use the checked JSON ABI:
   nested Nat/Int are decimal strings; ADTs use {"$ctor":"name",...fields}.

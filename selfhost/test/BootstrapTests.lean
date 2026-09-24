@@ -1292,6 +1292,66 @@ def psTestRejectInvalidCharacterEscapes : Bool :=
   | none, none => true
   | _, _ => false
 
+def psTestInductiveMetadataLookup : Bool :=
+  let boxName := psTestName "Box"
+  let ctorName := psNameAppendStr boxName "mk"
+  let recName := psNameAppendStr boxName "rec"
+  let boxType := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let inductiveInfo : PsInductiveInfo := {
+    name := boxName
+    levelParams := []
+    type := boxType
+    numParams := 0
+    numIndices := 0
+    constructors := [ctorName]
+  }
+  let constructorInfo : PsConstructorInfo := {
+    name := ctorName
+    levelParams := []
+    type := PsExpr.constE boxName []
+    inductiveName := boxName
+    constructorIndex := 0
+    numParams := 0
+    numFields := 0
+  }
+  let recursorInfo : PsRecursorInfo := {
+    name := recName
+    levelParams := []
+    type := PsExpr.constE boxName []
+    inductiveNames := [boxName]
+    numParams := 0
+    numIndices := 0
+    numMotives := 1
+    numMinors := 1
+  }
+  let env1 :=
+    psTestAddDeclaration
+      psEnvironmentEmpty
+      (PsDeclaration.inductiveDecl inductiveInfo)
+  let env2 :=
+    psTestAddDeclaration
+      env1
+      (PsDeclaration.constructorDecl constructorInfo)
+  let env3 :=
+    psTestAddDeclaration
+      env2
+      (PsDeclaration.recursorDecl recursorInfo)
+  match
+      psEnvironmentFindInductive env3 boxName,
+      psEnvironmentFindConstructor env3 ctorName,
+      psEnvironmentFindRecursor env3 recName with
+  | some inductive, some constructor, some recursor =>
+      psNameEq inductive.name boxName
+        && inductive.numParams == 0
+        && inductive.numIndices == 0
+        && inductive.constructors.length == 1
+        && psNameEq constructor.inductiveName boxName
+        && constructor.constructorIndex == 0
+        && constructor.numFields == 0
+        && recursor.numMotives == 1
+        && recursor.numMinors == 1
+  | _, _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1310,6 +1370,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source inferred let", passed := psTestDualSourceInferredLet },
   { name := "dual-source Bool literal", passed := psTestDualSourceBoolLiteral },
   { name := "dual-source if", passed := psTestDualSourceIf },
+  { name := "inductive metadata lookup", passed := psTestInductiveMetadataLookup },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

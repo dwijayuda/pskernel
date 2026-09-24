@@ -2,7 +2,8 @@ export type WasmValueType='i32'|'i64'|'f32'|'f64'|'externref';
 
 export type WasmAbiValueType=
   |'bool'
-  |'uint8'|'uint16'|'uint32'|'uint64'\n  |'nat'|'int';
+  |'uint8'|'uint16'|'uint32'|'uint64'
+  |'nat'|'int';
 
 export interface WasmIrAbiSignature {
   readonly parameters:readonly WasmAbiValueType[];
@@ -20,6 +21,9 @@ export function wasmAbiPhysicalType(
       return 'i32';
     case 'uint64':
       return 'i64';
+    case 'nat':
+    case 'int':
+      return 'externref';
   }
 }
 
@@ -76,7 +80,9 @@ export interface WasmIrFunction {
 
 export interface WasmIrModule {
   readonly kind:'proofscript-wasm-ir';
-  readonly profile:\n    |'proofscript-wasm32-mvp-js-v1'\n    |'proofscript-wasm32-ref-js-v1';
+  readonly profile:
+    |'proofscript-wasm32-mvp-js-v1'
+    |'proofscript-wasm32-ref-js-v1';
   readonly functions:readonly WasmIrFunction[];
 }
 
@@ -232,7 +238,10 @@ export function validateWasmIrModule(module:WasmIrModule):true {
   if(module.kind!=='proofscript-wasm-ir'){
     throw new Error('PS_WASM_IR_INVALID_MODULE_KIND');
   }
-  if(module.profile!=='proofscript-wasm32-mvp-js-v1'){
+  if(
+    module.profile!=='proofscript-wasm32-mvp-js-v1'&&
+    module.profile!=='proofscript-wasm32-ref-js-v1'
+  ){
     throw new Error('PS_WASM_IR_UNSUPPORTED_PROFILE');
   }
 
@@ -295,6 +304,17 @@ export function validateWasmIrModule(module:WasmIrModule):true {
     );
     const bodyType=wasmIrExprType(fn.body,locals,functions);
     expectType(bodyType,fn.result,'function '+fn.name);
+    if(
+      module.profile==='proofscript-wasm32-mvp-js-v1'&&(
+        fn.result==='externref'||
+        fn.parameters.some((parameter)=>parameter.type==='externref')||
+        wasmExprUsesExternref(fn.body)
+      )
+    ){
+      throw new Error(
+        'PS_WASM_IR_REFERENCE_TYPE_REQUIRES_REF_PROFILE: '+fn.name,
+      );
+    }
   }
   return true;
 }

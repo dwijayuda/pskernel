@@ -38,6 +38,10 @@
     "./lean4/level": {
       "types": "./dist/src/lean4-level.d.ts",
       "import": "./dist/src/lean4-level.js"
+    },
+    "./lean4/expr": {
+      "types": "./dist/src/lean4-expr.d.ts",
+      "import": "./dist/src/lean4-expr.js"
     }
   },
   "scripts": {

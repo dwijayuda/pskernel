@@ -1,0 +1,30 @@
+import Ps.Core.Subst
+import Ps.Environment.Resolve
+import Ps.Meta.Infer
+import Ps.Meta.Unify
+import Ps.Syntax.Ast
+import Ps.Elab.Context
+import Ps.Elab.Literal
+
+inductive PsElabError where {
+  | fuelExhausted;
+  | emptyName;
+  | unknownName(name : PsName);
+  | invalidNatural(text : String);
+  | infer(error : PsInferError);
+  | typeMismatch;
+  | implicitApplicationUnsupported;
+  | unsupportedTerm;
+  | duplicateDeclaration(name : PsName);
+  | unresolvedMetavariable;
+};
+
+structure PsElabTermResult where {
+  context : PsElabContext;
+  term : PsExpr;
+  type : PsExpr;
+};
+
+/* Term.lean is authoritative during the Lean-first bootstrap. This sibling
+   fixes the future PSC1 package/API shape; canonical implementation text will
+   replace it when the self-hosted translator owns this slice. */

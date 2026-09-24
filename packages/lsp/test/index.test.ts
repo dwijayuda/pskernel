@@ -66,7 +66,8 @@ console.log('ok - @proofscript/lsp proof-aware protocol surface');
   equal(service.documentStatus('file:///Main.lean').sourceKind,'lean-subset');
   equal(service.documentStatus('file:///Main.lean').kernel,'verified');
 }
-console.log('ok - @proofscript/lsp dual-source document routing');\n\n
+console.log('ok - @proofscript/lsp dual-source document routing');
+
 {
   const service=new ProofScriptLanguageService();
   service.openDocument(

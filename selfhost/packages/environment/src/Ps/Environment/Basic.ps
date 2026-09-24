@@ -9,6 +9,29 @@ def psDeclarationName(declaration : PsDeclaration) : PsName :=
     | .opaqueDecl name levelParams type value => name;
   };
 
+
+def psDeclarationLevelParams(declaration : PsDeclaration) : List(PsName) :=
+  match declaration with {
+    | .axiomDecl name levelParams type => levelParams;
+    | .definitionDecl name levelParams type value => levelParams;
+    | .theoremDecl name levelParams type value => levelParams;
+    | .opaqueDecl name levelParams type value => levelParams;
+  };
+
+def psDeclarationType(declaration : PsDeclaration) : PsExpr :=
+  match declaration with {
+    | .axiomDecl name levelParams type => type;
+    | .definitionDecl name levelParams type value => type;
+    | .theoremDecl name levelParams type value => type;
+    | .opaqueDecl name levelParams type value => type;
+  };
+
+def psDeclarationValue(declaration : PsDeclaration) : Option(PsExpr) :=
+  match declaration with {
+    | .definitionDecl name levelParams type value => Option.some(value);
+    | _ => Option.none;
+  };
+
 structure PsEnvironment where {
   declarations : List(PsDeclaration);
 };

@@ -2,6 +2,8 @@ import ProofScript.Data.Option
 import ProofScript.Data.Prod
 import ProofScript.Data.Result
 import ProofScript.Data.List
+import ProofScript.Data.Map
+import ProofScript.Data.Set
 
 def collectionOption : Option Nat :=
   optionMap (fun (x : Nat) => x) (Option.some 1)
@@ -23,3 +25,18 @@ def collectionLength : Nat :=
 
 def collectionMapped : List Nat :=
   listMap (fun (x : Nat) => x) collectionList
+
+def compareAlwaysEq (left : Nat) (right : Nat) : Ordering :=
+  Ordering.eq
+
+def collectionMap : Map Nat String :=
+  mapInsert compareAlwaysEq 1 "one" Map.empty
+
+def collectionMapLookup : Option String :=
+  mapFindOption compareAlwaysEq 1 collectionMap
+
+def collectionSet : Set Nat :=
+  setInsert compareAlwaysEq 1 setEmpty
+
+def collectionSetContains : Bool :=
+  setContains compareAlwaysEq 1 collectionSet

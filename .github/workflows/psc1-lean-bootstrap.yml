@@ -136,6 +136,25 @@ jobs:
           test -f /tmp/psc1-collections.js.map
           echo "PSC1_COLLECTIONS_COMPOSITION: PASS"
 
+      - name: Run concrete compiler effect composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          cd selfhost
+          lake exe psc1 check stdlib/SELFHOST-EFFECT.lean
+          lake exe psc1 typescript stdlib/SELFHOST-EFFECT.lean > /tmp/psc1-effect.ts
+          grep -q 'export interface CompilerM' /tmp/psc1-effect.ts
+          grep -q 'export function compilerBind' /tmp/psc1-effect.ts
+          grep -q 'export function compilerRollback' /tmp/psc1-effect.ts
+          grep -q 'export const effectRecovered' /tmp/psc1-effect.ts
+          rm -f /tmp/psc1-effect.js /tmp/psc1-effect.d.ts /tmp/psc1-effect.js.map
+          lake exe psc1 build stdlib/SELFHOST-EFFECT.lean --out /tmp/psc1-effect.ts
+          test -f /tmp/psc1-effect.js
+          test -f /tmp/psc1-effect.d.ts
+          test -f /tmp/psc1-effect.js.map
+          echo "PSC1_EFFECT_COMPOSITION: PASS"
+
       - name: Run bootstrap semantic tests
         shell: bash
         run: |

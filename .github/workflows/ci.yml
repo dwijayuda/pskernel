@@ -19,7 +19,11 @@ jobs:
         with:
           node-version: 22
       - run: npm ci --no-audit --no-fund
-      - run: npm run test:kernel
+      - name: Full repository gate
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+        run: npm test
+      - name: Focused kernel assurance gate
+        run: npm run test:kernel
       - run: node scripts/anti-drift.mjs
 
   powershell-syntax:

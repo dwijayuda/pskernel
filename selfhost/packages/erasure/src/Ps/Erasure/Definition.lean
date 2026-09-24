@@ -117,6 +117,8 @@ def psEraseOpenDefinitionWithFuel
                     declarationNames := scope.declarationNames
                     runtimeConstructors := scope.runtimeConstructors
                     runtimeRecursors := scope.runtimeRecursors
+                    runtimeStructures := scope.runtimeStructures
+                    runtimeStructureConstructors := scope.runtimeStructureConstructors
                   }
                   psEraseOpenDefinitionWithFuel
                     environment
@@ -138,6 +140,8 @@ def psEraseOpenDefinitionWithFuel
                     declarationNames := scope.declarationNames
                     runtimeConstructors := scope.runtimeConstructors
                     runtimeRecursors := scope.runtimeRecursors
+                    runtimeStructures := scope.runtimeStructures
+                    runtimeStructureConstructors := scope.runtimeStructureConstructors
                   }
                   psEraseOpenDefinitionWithFuel
                     environment
@@ -170,6 +174,8 @@ def psEraseOpenDefinitionWithFuel
                         declarationNames := scope.declarationNames
                         runtimeConstructors := scope.runtimeConstructors
                         runtimeRecursors := scope.runtimeRecursors
+                        runtimeStructures := scope.runtimeStructures
+                        runtimeStructureConstructors := scope.runtimeStructureConstructors
                       }
                       psEraseOpenDefinitionWithFuel
                         environment

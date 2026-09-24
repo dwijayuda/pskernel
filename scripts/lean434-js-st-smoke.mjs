@@ -41,6 +41,29 @@ if(lean_st_ref_get(allocated)!==41n){
 }
 console.log('ok - real Lean-written IO.mkRef executes over JS ST primitive');
 
+const worldType=constant(nameFromDotted('IO.RealWorld'));
+const getExpr=mkAppN(
+  constant(nameFromDotted('ST.Prim.Ref.get'),[levelZero,levelZero]),
+  [worldType,Nat,allocated],
+);
+const directGet=evaluator.runStateAction(evaluator.evaluate(getExpr)).value;
+if(directGet!==41n){
+  throw new Error(
+    'real Lean ST.Prim.Ref.get returned '+String(directGet)+' instead of 41',
+  );
+}
+console.log('ok - real Lean ST.Prim.Ref.get extern mapping receives the ref');
+
+const setExpr=mkAppN(
+  constant(nameFromDotted('ST.Prim.Ref.set'),[levelZero,levelZero]),
+  [worldType,Nat,allocated,natLit(40n)],
+);
+evaluator.runStateAction(evaluator.evaluate(setExpr));
+if(lean_st_ref_get(allocated)!==40n){
+  throw new Error('real Lean ST.Prim.Ref.set did not update the ref');
+}
+console.log('ok - real Lean ST.Prim.Ref.set extern mapping receives the ref');
+
 const x=nameFromDotted('x');
 const increment=lam(
   x,
@@ -53,7 +76,7 @@ const increment=lam(
 const modifyExpr=mkAppN(
   constant(nameFromDotted('ST.Prim.Ref.modify'),[levelZero,levelZero]),
   [
-    constant(nameFromDotted('IO.RealWorld')),
+    worldType,
     Nat,
     allocated,
     increment,
@@ -61,7 +84,7 @@ const modifyExpr=mkAppN(
 );
 const modifyAction=evaluator.evaluate(modifyExpr);
 evaluator.runStateAction(modifyAction);
-if(lean_st_ref_get(allocated)!==42n){
+if(lean_st_ref_get(allocated)!==41n){
   throw new Error(
     'real Lean ST.Prim.Ref.modify did not execute get/bind/set semantics',
   );

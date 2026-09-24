@@ -9,6 +9,8 @@ structure S where
   levels : HashMap Level Nat := HashMap.emptyWithCapacity 32 |>.insert .zero 0
   exprs : HashMap ExprStructEq Nat := HashMap.emptyWithCapacity 256
   mdata : Array KVMap := #[]
+  mdataBuckets : HashMap String (Array Nat) := HashMap.emptyWithCapacity 256
+  mdataComparisons : Nat := 0
   emitted : NameSet := {}
   active : NameSet := {}
   /-- Canonical module-stream follows Lean.Kernel.Environment.replay and skips
@@ -37,14 +39,27 @@ def biJson : BinderInfo → Json
   modify fun s => setM s ((getM s).insert x i)
   return i
 
+def mdataBucketKey (d : KVMap) : String := Id.run do
+  let mut keyHash : UInt64 := 0
+  for (k, _) in d do
+    -- Only a necessary-equality fingerprint. Collisions are resolved by KVMap BEq.
+    keyHash := keyHash + k.hash
+  return s!"{d.size}:{keyHash}"
+
 def dumpMDataEqId (d : KVMap) : M Nat := do
-  let xs := (← get).mdata
-  for i in [0:xs.size] do
+  let key := mdataBucketKey d
+  let s ← get
+  let ids := s.mdataBuckets[key]?.getD #[]
+  for i in ids do
+    modify fun s => { s with mdataComparisons := s.mdataComparisons + 1 }
     -- Lean 4.34 Expr.eqv delegates MData comparison to KVMap's BEq, which
     -- is extensional map equality (subset both ways), not raw entry-list order.
-    if xs[i]! == d then return i
-  let i := xs.size
-  modify fun s => { s with mdata := s.mdata.push d }
+    if s.mdata[i]! == d then return i
+  let i := s.mdata.size
+  modify fun s => { s with
+    mdata := s.mdata.push d
+    mdataBuckets := s.mdataBuckets.insert key (ids.push i)
+  }
   return i
 
 def dumpName (n : Name) : M Nat := intern n "in" (·.names) ({ · with names := · }) do
@@ -681,7 +696,10 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
           dumpMeta
           for n in slice do dumpConstant env n
           start := stop
-          part := part + 1) |>.run {}
+          part := part + 1
+          let s ← get
+          if plannedShards > 0 && (part % 25 == 0) then
+            IO.eprintln s!"[mdata-diag] module={moduleName} part={part} mdata={s.mdata.size} comparisons={s.mdataComparisons}") |>.run {}
   pure ()
 
 unsafe def main (args : List String) : IO Unit := do

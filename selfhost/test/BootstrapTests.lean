@@ -175,6 +175,23 @@ def psTestStringEnvironment : PsEnvironment :=
       []
       (PsExpr.sortE (PsLevel.succ PsLevel.zero)))
 
+def psTestUnitEnvironment : PsEnvironment :=
+  let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let unitType := PsExpr.constE psUnitName []
+  let env1 :=
+    psTestAddDeclaration
+      psTestNatEnvironment
+      (PsDeclaration.axiomDecl
+        psUnitName
+        []
+        typeType)
+  psTestAddDeclaration
+    env1
+    (PsDeclaration.axiomDecl
+      psUnitUnitName
+      []
+      unitType)
+
 def psNameListEq : List PsName -> List PsName -> Bool
   | [], [] => true
   | left :: leftRest, right :: rightRest =>
@@ -1130,6 +1147,62 @@ def psTestRejectInvalidStringEscapes : Bool :=
   | none, none => true
   | _, _ => false
 
+def psTestDualSourceGrouping : Bool :=
+  match
+      psParseLeanSource
+        "def one : Nat := (((1)))",
+      psParseProofScriptSource
+        "def one : Nat := (((1)));" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          match leanResult.declarations, proofScriptResult.declarations with
+          | [PsDeclaration.definitionDecl leanName [] leanType leanValue],
+            [PsDeclaration.definitionDecl proofName [] proofType proofValue] =>
+              psNameEq leanName (psTestName "one")
+                && psNameEq proofName (psTestName "one")
+                && psExprAlphaEq leanType (PsExpr.constE psNatName [])
+                && psExprAlphaEq proofType (PsExpr.constE psNatName [])
+                && psExprAlphaEq
+                  leanValue
+                  (PsExpr.lit (PsLiteral.natural 1))
+                && psExprAlphaEq
+                  proofValue
+                  (PsExpr.lit (PsLiteral.natural 1))
+          | _, _ => false
+      | _, _ => false
+  | _, _ => false
+
+def psTestDualSourceUnit : Bool :=
+  match
+      psParseLeanSource
+        "def u : Unit := ()",
+      psParseProofScriptSource
+        "def u : Unit := ();" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestUnitEnvironment leanModule,
+          psElabModule psTestUnitEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          match leanResult.declarations, proofScriptResult.declarations with
+          | [PsDeclaration.definitionDecl leanName [] leanType leanValue],
+            [PsDeclaration.definitionDecl proofName [] proofType proofValue] =>
+              psNameEq leanName (psTestName "u")
+                && psNameEq proofName (psTestName "u")
+                && psExprAlphaEq leanType (PsExpr.constE psUnitName [])
+                && psExprAlphaEq proofType (PsExpr.constE psUnitName [])
+                && psExprAlphaEq
+                  leanValue
+                  (PsExpr.constE psUnitUnitName [])
+                && psExprAlphaEq
+                  proofValue
+                  (PsExpr.constE psUnitUnitName [])
+          | _, _ => false
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1150,6 +1223,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source if", passed := psTestDualSourceIf },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
+  { name := "dual-source grouping", passed := psTestDualSourceGrouping },
+  { name := "dual-source Unit", passed := psTestDualSourceUnit },
   { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
   { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },

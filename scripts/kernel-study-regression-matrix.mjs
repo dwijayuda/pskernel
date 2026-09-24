@@ -125,6 +125,12 @@ for(const marker of [
 ]){
   if(!exporter.includes(marker))throw new Error('canonical replay exporter protocol drift: missing '+marker);
 }
+if(!exporter.includes('if xs[i]! == d then return i')){
+  throw new Error('MData equality-id drift: exporter must use Lean KVMap BEq, not entry-list identity');
+}
+if(exporter.includes('xs[i]!.entries == d.entries')){
+  throw new Error('MData equality-id drift: raw KVMap entry-list equality is stricter than Lean 4.34 BEq');
+}
 const moduleStream=readFileSync('scripts/module-stream-oracle.mjs','utf8');
 for(const marker of [
   "header.rootOrderMeaning!=='serialized-module-sequence'",

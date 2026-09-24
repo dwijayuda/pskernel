@@ -40,7 +40,9 @@ def biJson : BinderInfo → Json
 def dumpMDataEqId (d : KVMap) : M Nat := do
   let xs := (← get).mdata
   for i in [0:xs.size] do
-    if xs[i]!.entries == d.entries then return i
+    -- Lean 4.34 Expr.eqv delegates MData comparison to KVMap's BEq, which
+    -- is extensional map equality (subset both ways), not raw entry-list order.
+    if xs[i]! == d then return i
   let i := xs.size
   modify fun s => { s with mdata := s.mdata.push d }
   return i

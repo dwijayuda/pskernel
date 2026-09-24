@@ -265,6 +265,12 @@ binder display names and binder annotations are ignored, while `mdata`
 placement/payload participates in equality. The importer comparator is locked to
 that behavior; it is separate from kernel definitional equality.
 
+MData equality ids in the export stream use Lean's `KVMap` BEq directly.
+`KVMap.eqv` is extensional map equality (subset in both directions), so raw
+`entries` list order must not affect the id. This matters because the TypeScript
+wire representation uses that id to preserve Lean's metadata equality relation
+across shards.
+
 The latest checked-in `full-std.log` did not produce semantic evidence: it
 failed before replay because `scripts/module-stream-oracle.mjs` contained a
 literal `\\n` before the final `console.log`, which made the module invalid

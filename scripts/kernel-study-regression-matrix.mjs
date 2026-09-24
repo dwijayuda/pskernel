@@ -158,6 +158,19 @@ if(!assuranceDoc.includes('Do not call this source\ndeclaration order')){
   throw new Error('canonical replay assurance wording drift: source-order disclaimer missing');
 }
 
+const localAssuranceRunner=readFileSync('scripts/run-full-std-local.ps1','utf8');
+for(const marker of [
+  '& npm ci --no-audit --no-fund',
+  'dependencyInstall=npm ci',
+  'git status: $dirtySummary',
+  'npm ci changed tracked files; refusing assurance evidence.',
+]){
+  if(!localAssuranceRunner.includes(marker))throw new Error('local Full-Std assurance runner drift: missing '+marker);
+}
+if(localAssuranceRunner.includes('& npm install --no-audit --no-fund')){
+  throw new Error('local Full-Std assurance runner drift: mutable npm install must not replace npm ci');
+}
+
 const nativeEval=readFileSync('oracle/replay-probe/NativeEval.lean','utf8');
 for(const marker of [
   'Kernel.whnf env {} e',

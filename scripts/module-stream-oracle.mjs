@@ -8,6 +8,7 @@ import {createLeanNativeEvaluator} from './lean-native-evaluator.mjs';
 
 const moduleName=process.argv[2]??'Init.Prelude';
 const expectedArg=process.argv[3];
+const diagnosticRootsPerShard=Number(process.env.PSKERNEL_ROOTS_PER_SHARD??'0');
 const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin',...(process.env.PATH??'').split(delimiter)].filter(Boolean).map(p=>resolve(p));
 const leanExe=process.platform==='win32'?'lean.exe':'lean';
 const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
@@ -26,7 +27,8 @@ if(hashRun.error||hashRun.status!==0||leanGitHash!==LEAN434_PINNED_GITHASH){
   throw new Error(`module-stream-oracle: Lean git hash drift/failure: expected ${LEAN434_PINNED_GITHASH}, got ${hashRun.error?.message??hashRun.stderr??leanGitHash}`);
 }
 const nativeEvaluator=createLeanNativeEvaluator({lean,moduleName,cwd:resolve('.'),env:envVars});
-const child=spawn(lean,['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--module-stream'],{cwd:resolve('.'),env:envVars,stdio:['ignore','pipe','pipe']});
+const exporterArgs=diagnosticRootsPerShard>0?['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--module-stream-roots',String(diagnosticRootsPerShard)]:['--run','oracle/replay-probe/DependencyExport.lean',moduleName,'--module-stream'];
+const child=spawn(lean,exporterArgs,{cwd:resolve('.'),env:envVars,stdio:['ignore','pipe','pipe']});
 const rl=createInterface({input:child.stdout,crlfDelay:Infinity});
 let stderr='';child.stderr.setEncoding('utf8');child.stderr.on('data',d=>stderr+=d);
 const shared=new Environment();
@@ -50,7 +52,7 @@ try{
      continue;
    }
    if(marker?.shard){
-     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;global.gc?.();}
+     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;}
      replay=new Lean4ExportReplay(shared,{nativeEvaluator});
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);

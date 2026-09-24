@@ -1,0 +1,45 @@
+name: Diagnostic canonical shard matrix
+
+on:
+  push:
+    branches: [diagnostic/canonical-shard-matrix]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    strategy:
+      fail-fast: false
+      matrix:
+        roots: [10, 50, 100, 250]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Time-box canonical replay
+        shell: bash
+        env:
+          PSKERNEL_ROOTS_PER_SHARD: "${{ matrix.roots }}"
+        run: |
+          set +e
+          timeout --signal=TERM 180s node --max-old-space-size=5632 --stack-size=65500 scripts/module-stream-oracle.mjs Std 114029
+          code=$?
+          if [ "$code" -eq 124 ] || [ "$code" -eq 143 ]; then
+            echo "SHARD_MATRIX_TIMEBOX_REACHED roots=${{ matrix.roots }}"
+            exit 0
+          fi
+          exit "$code"

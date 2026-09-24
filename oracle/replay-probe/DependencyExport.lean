@@ -621,7 +621,8 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
         inSegment := 0) |>.run {}
   pure ()
 
-partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
+partial def dumpModuleStream (env : Environment) (target : Name) (rootsPerShard : Nat := 10) : IO Unit := do
+  if rootsPerShard == 0 then throw <| IO.userError "module stream shard size must be positive"
   let total := env.constants.map₁.size
   let mut replayable := 0
   let mut skippedUnsafe := 0
@@ -639,7 +640,6 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let directRoots := buckets.foldl (init := 0) fun n roots => n + roots.size
   if directRoots != total then
     throw <| IO.userError s!"canonical module root coverage mismatch: {directRoots} != {total}"
-  let rootsPerShard : Nat := 10
   let mut plannedShards := 0
   for roots in buckets do
     unless roots.isEmpty do
@@ -696,6 +696,8 @@ unsafe def main (args : List String) : IO Unit := do
       else requestedRoots.map String.toName
     if requestedRoots == ["--module-stream"] then
       dumpModuleStream env moduleName
+    else if requestedRoots.length == 2 && requestedRoots.head! == "--module-stream-roots" then
+      dumpModuleStream env moduleName requestedRoots[1]!.toNat!
     else if requestedRoots.length == 2 && requestedRoots.head! == "--batch-manifest" then
       let maxRoots := requestedRoots.tail!.head! |>.toNat!
       dumpBatchManifest env moduleName maxRoots

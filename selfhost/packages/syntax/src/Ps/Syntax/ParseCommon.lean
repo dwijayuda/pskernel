@@ -16,6 +16,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .forallE _ _ span => span
   | .letE _ _ _ _ span => span
   | .ifE _ _ _ span => span
+  | .matchE _ _ span => span
 
 def psParseSyntaxNameTail
     (segmentsRev : List String)

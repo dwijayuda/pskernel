@@ -210,6 +210,38 @@ def psTestDualSourceLeanNativeArrayBasics : Bool :=
         && leanOutput.contains "99n"
   | _, _ => false
 
+def psTestDualSourceLeanNativeArrayMap : Bool :=
+  let leanSource :=
+    "def arrayIdOnly (x : Nat) : Nat := x\n" ++
+    "def arrayMapDemo (xs : Array Nat) : Array Nat := Array.map arrayIdOnly xs"
+  let proofScriptSource :=
+    "def arrayIdOnly(x : Nat) : Nat := x; " ++
+    "def arrayMapDemo(xs : Array(Nat)) : Array(Nat) := Array.map(arrayIdOnly, xs);"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains "__ps_a.map"
+  | _, _ => false
+
+def psTestDualSourceLeanNativeArrayFoldl : Bool :=
+  let leanSource :=
+    "def arrayKeepLeftOnly (acc : Nat) (x : Nat) : Nat := acc\n" ++
+    "def arrayFoldOnly (xs : Array Nat) : Nat := " ++
+    "Array.foldl arrayKeepLeftOnly 0 xs 0 (Array.size xs)"
+  let proofScriptSource :=
+    "def arrayKeepLeftOnly(acc : Nat)(x : Nat) : Nat := acc; " ++
+    "def arrayFoldOnly(xs : Array(Nat)) : Nat := " ++
+    "Array.foldl(arrayKeepLeftOnly, 0, xs, 0, Array.size(xs));"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains "for (let __ps_i"
+  | _, _ => false
+
 def psTestDualSourceLeanNativeArrayHigherOrder : Bool :=
   let leanSource :=
     "def arrayId (x : Nat) : Nat := x\n" ++
@@ -248,6 +280,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native structural recursion", passed := psTestDualSourceLeanNativeStructuralRecursion },
   { name := "dual-source Lean-native Int", passed := psTestDualSourceLeanNativeInt },
   { name := "dual-source Lean-native Array basics", passed := psTestDualSourceLeanNativeArrayBasics },
+  { name := "dual-source Lean-native Array map", passed := psTestDualSourceLeanNativeArrayMap },
+  { name := "dual-source Lean-native Array foldl", passed := psTestDualSourceLeanNativeArrayFoldl },
   { name := "dual-source Lean-native Array higher-order", passed := psTestDualSourceLeanNativeArrayHigherOrder }
 ]
 

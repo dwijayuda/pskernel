@@ -285,6 +285,14 @@ if(nativeSmoke.includes('@[implemented_by bImpl]\ndef b : Bool := true')){
   throw new Error('native smoke implemented_by fixture drift: reduceBool target itself must have compiler IR');
 }
 
+const dependencyExporter=readFileSync('oracle/replay-probe/DependencyExport.lean','utf8');
+for(const marker of [
+  'else if n == "String.ofList".toName then',
+  '["Char.ofNat".toName]',
+]){
+  if(!dependencyExporter.includes(marker))throw new Error('primitive replay semantic dependency drift: missing '+marker);
+}
+
 const nativeEval=readFileSync('oracle/replay-probe/NativeEval.lean','utf8');
 for(const marker of [
   'Kernel.whnf env {} e',

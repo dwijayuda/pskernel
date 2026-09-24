@@ -18,6 +18,46 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .ifE _ _ _ span => span
   | .matchE _ _ span => span
 
+def psSyntaxSyntheticName
+    (text : String)
+    (span : PsSourceSpan) : PsSyntaxName :=
+  {
+    segments := [text]
+    span := span
+  }
+
+def psSyntaxSyntheticReference
+    (text : String)
+    (span : PsSourceSpan) : PsSyntaxTerm :=
+  PsSyntaxTerm.reference (psSyntaxSyntheticName text span)
+
+def psSyntaxCompilerPure
+    (value : PsSyntaxTerm)
+    (span : PsSourceSpan) : PsSyntaxTerm :=
+  PsSyntaxTerm.app
+    (psSyntaxSyntheticReference "compilerPure" span)
+    [value]
+    span
+
+def psSyntaxCompilerBind
+    (binder : PsSyntaxBinderHead)
+    (binderType : PsSyntaxTerm)
+    (action : PsSyntaxTerm)
+    (body : PsSyntaxTerm)
+    (span : PsSourceSpan) : PsSyntaxTerm :=
+  let lambda :=
+    PsSyntaxTerm.lambda
+      [(binder, binderType)]
+      body
+      {
+        start := binder.span.start
+        stop := (psSyntaxTermSpan body).stop
+      }
+  PsSyntaxTerm.app
+    (psSyntaxSyntheticReference "compilerBind" span)
+    [action, lambda]
+    span
+
 def psParseSyntaxNameTail
     (segmentsRev : List String)
     (start : PsSourcePos)

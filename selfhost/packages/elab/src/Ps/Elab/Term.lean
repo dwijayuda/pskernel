@@ -673,7 +673,6 @@ def psElabTermWithFuel
               | Except.error error => Except.error error
               | Except.ok result =>
                   psElabFinalizeExpected result expected
-      | _ => Except.error PsElabError.unsupportedTerm
 
 def psElabTerm
     (context : PsElabContext)

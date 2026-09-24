@@ -230,9 +230,8 @@ console.log('ok - @proofscript/erasure semantic primitive type identity');
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
-  const Nat=nameFromDotted('TestNat');
-  kernel.addAxiom({
+  const Nat=nameFromDotted('Nat');
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],
@@ -308,9 +307,8 @@ console.log('ok - @proofscript/erasure verified runtime structures');
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
-  const Nat=nameFromDotted('TestNat');
-  kernel.addAxiom({
+  const Nat=nameFromDotted('Nat');
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],
@@ -387,9 +385,8 @@ console.log('ok - @proofscript/erasure verified ADT constructors');
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
-  const Nat=nameFromDotted('TestNat');
-  kernel.addAxiom({
+  const Nat=nameFromDotted('Nat');
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],
@@ -498,9 +495,8 @@ console.log('ok - @proofscript/erasure verified ADT recursor match lowering');
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
-  const Nat=nameFromDotted('GenericNat');
-  kernel.addAxiom({
+  const Nat=nameFromDotted('Nat');
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],
@@ -597,9 +593,8 @@ console.log('ok - @proofscript/erasure generic nonrecursive ADT constructor eras
 
 {
   const base=new Environment();
-  const kernel=new Kernel(base);
-  const Nat=nameFromDotted('MatchNat');
-  kernel.addAxiom({
+  const Nat=nameFromDotted('Nat');
+  base.add({
     kind:'axiom',
     name:Nat,
     levelParams:[],

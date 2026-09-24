@@ -974,8 +974,8 @@ console.log('ok - psc SH2 dual-source canonical Prod runtime');
     {
       entry:'src/main.lean',
       source:
-        'def inc (x : Nat) : Nat := x + 1; '+
-        'def add (acc : Nat) (x : Nat) : Nat := acc + x; '+
+        'def inc (x : Nat) : Nat := x + 1\n'+
+        'def add (acc : Nat) (x : Nat) : Nat := acc + x\n'+
         'def main (a : Nat) (b : Nat) : Nat := '+
         'let xs : Array Nat := '+
         'Array.push (Array.push (Array.emptyWithCapacity 2) a) b; '+

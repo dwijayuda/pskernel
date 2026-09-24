@@ -880,8 +880,8 @@ def psEraseRuntimeExprWithFuel
                     typeLocals := scope.typeLocals
                     erasedLocals := scope.erasedLocals
                     declarationNames := scope.declarationNames
-                  runtimeConstructors := scope.runtimeConstructors
-                  runtimeRecursors := scope.runtimeRecursors
+                    runtimeConstructors := scope.runtimeConstructors
+                    runtimeRecursors := scope.runtimeRecursors
                   }
                   match
                       psEraseRuntimeExprWithFuel
@@ -917,8 +917,8 @@ def psEraseRuntimeExprWithFuel
                   (pushed.id, typeName) :: scope.typeLocals
                 erasedLocals := pushed.id :: scope.erasedLocals
                 declarationNames := scope.declarationNames
-              runtimeConstructors := scope.runtimeConstructors
-              runtimeRecursors := scope.runtimeRecursors
+                runtimeConstructors := scope.runtimeConstructors
+                runtimeRecursors := scope.runtimeRecursors
               }
               psEraseRuntimeExprWithFuel
                 environment
@@ -932,8 +932,8 @@ def psEraseRuntimeExprWithFuel
                 typeLocals := scope.typeLocals
                 erasedLocals := pushed.id :: scope.erasedLocals
                 declarationNames := scope.declarationNames
-              runtimeConstructors := scope.runtimeConstructors
-              runtimeRecursors := scope.runtimeRecursors
+                runtimeConstructors := scope.runtimeConstructors
+                runtimeRecursors := scope.runtimeRecursors
               }
               psEraseRuntimeExprWithFuel
                 environment
@@ -974,8 +974,8 @@ def psEraseRuntimeExprWithFuel
                     typeLocals := scope.typeLocals
                     erasedLocals := scope.erasedLocals
                     declarationNames := scope.declarationNames
-                  runtimeConstructors := scope.runtimeConstructors
-                  runtimeRecursors := scope.runtimeRecursors
+                    runtimeConstructors := scope.runtimeConstructors
+                    runtimeRecursors := scope.runtimeRecursors
                   }
                   match
                       psEraseRuntimeExprWithFuel

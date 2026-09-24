@@ -170,11 +170,16 @@ function declarationTypeReturnsSort(type:Expr):boolean{
 export class Lean434Evaluator {
   private readonly runtimeGlobals=
     new Map<string,Lean434RuntimeValue>();
+  private initializationDepth=0;
 
   constructor(
     readonly environment:Environment,
     readonly options:Lean434EvaluatorOptions={},
   ){}
+
+  get isInitializing():boolean{
+    return this.initializationDepth>0;
+  }
 
   evaluate(expr:Expr):Lean434RuntimeValue {
     return this.evaluateWithLocals(expr,[]);
@@ -209,6 +214,21 @@ export class Lean434Evaluator {
       value:result.fields[0]!,
       state:result.fields[1]!,
     };
+  }
+
+  runInitializerAction(
+    action:Lean434RuntimeValue,
+    state:Lean434RuntimeValue=LEAN434_WORLD_TOKEN,
+  ):{
+    readonly value:Lean434RuntimeValue;
+    readonly state:Lean434RuntimeValue;
+  }{
+    this.initializationDepth++;
+    try{
+      return this.runIOAction(action,state);
+    }finally{
+      this.initializationDepth--;
+    }
   }
 
   runIOAction(
@@ -396,6 +416,18 @@ export class Lean434Evaluator {
           );
         }
       }
+      if(runtimeBinding.leanSymbol==='lean_io_initializing'){
+        return primitive(
+          name+'#state',
+          1,
+          (stateArgs)=>({
+            kind:'constructor',
+            name:'ST.Out.mk',
+            fields:[this.isInitializing,stateArgs[0]!],
+          }),
+        );
+      }
+
       return primitive(
         name,
         runtimeBinding.arity,

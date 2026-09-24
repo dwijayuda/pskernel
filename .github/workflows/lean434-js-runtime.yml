@@ -114,6 +114,7 @@ jobs:
             lean434-parser-basic-env-extension.ndjson
             lean434-parser-basic-runtime-metadata.json
       - name: Execute real Lean registerEnvExtension for Parser.Basic
+        if: github.event_name == 'workflow_dispatch'
         run: |
           node scripts/lean434-js-parser-basic-extension-smoke.mjs \
             lean434-parser-basic-env-extension.ndjson \

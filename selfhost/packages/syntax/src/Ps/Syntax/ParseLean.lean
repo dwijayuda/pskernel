@@ -368,26 +368,54 @@ def psParseLeanTermWithFuel :
                               cursor := body.cursor
                             }
       else if psTokenCursorAtText cursor "(" then
-        match psParseLeanBinder cursor with
-        | Except.ok binder =>
-            if psTokenCursorAtArrow binder.cursor then
-              psParseLeanDependentArrowTail
-                (psParseLeanTermWithFuel remaining)
-                binder
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "(")
+        | some opening =>
+            if psTokenCursorAtText opening.cursor ")" then
+              match psTokenCursorAdvance opening.cursor with
+              | none => Except.error (PsParseError.unexpectedEnd ")")
+              | some close =>
+                  Except.ok {
+                    value :=
+                      PsSyntaxTerm.unit {
+                        start := opening.token.span.start
+                        stop := close.token.span.stop
+                      }
+                    cursor := close.cursor
+                  }
             else
-              match psParseLeanSimpleApplication cursor with
-              | Except.error error => Except.error error
-              | Except.ok domain =>
-                  psParseLeanArrowTail
-                    (psParseLeanTermWithFuel remaining)
-                    domain
-        | Except.error _ =>
-            match psParseLeanSimpleApplication cursor with
-            | Except.error error => Except.error error
-            | Except.ok domain =>
-                psParseLeanArrowTail
-                  (psParseLeanTermWithFuel remaining)
-                  domain
+              match psParseLeanBinder cursor with
+              | Except.ok binder =>
+                  if psTokenCursorAtArrow binder.cursor then
+                    psParseLeanDependentArrowTail
+                      (psParseLeanTermWithFuel remaining)
+                      binder
+                  else
+                    match psParseLeanTermWithFuel remaining opening.cursor with
+                    | Except.error error => Except.error error
+                    | Except.ok grouped =>
+                        match psTokenCursorExpectText grouped.cursor ")" with
+                        | Except.error error => Except.error error
+                        | Except.ok close =>
+                            psParseLeanArrowTail
+                              (psParseLeanTermWithFuel remaining)
+                              {
+                                value := grouped.value
+                                cursor := close.cursor
+                              }
+              | Except.error _ =>
+                  match psParseLeanTermWithFuel remaining opening.cursor with
+                  | Except.error error => Except.error error
+                  | Except.ok grouped =>
+                      match psTokenCursorExpectText grouped.cursor ")" with
+                      | Except.error error => Except.error error
+                      | Except.ok close =>
+                          psParseLeanArrowTail
+                            (psParseLeanTermWithFuel remaining)
+                            {
+                              value := grouped.value
+                              cursor := close.cursor
+                            }
       else
         match psParseLeanSimpleApplication cursor with
         | Except.error error => Except.error error

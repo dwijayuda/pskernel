@@ -2,6 +2,8 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   TypeChecker,
   constant,
+  levelSucc,
+  levelZero,
   mkAppN,
   type Expr,
 } from 'lean-ts-kernel';
@@ -35,7 +37,7 @@ function requirePrimitiveEqualityOperandType(
   checker:TypeChecker,
   operator:string,
 ):{
-  readonly kind:'nat'|'bool';
+  readonly kind:'nat'|'bool'|'char'|'string';
   readonly type:Expr;
   readonly equalityName?:'Nat.beq';
 } {
@@ -47,9 +49,21 @@ function requirePrimitiveEqualityOperandType(
   if(checker.isDefEq(type,expectedBool)){
     return {kind:'bool',type:expectedBool};
   }
+  const charType=constant(
+    requireV061NotationConstant(context,'Char'),
+  );
+  if(checker.isDefEq(type,charType)){
+    return {kind:'char',type:charType};
+  }
+  const stringType=constant(
+    requireV061NotationConstant(context,'String'),
+  );
+  if(checker.isDefEq(type,stringType)){
+    return {kind:'string',type:stringType};
+  }
   throw new Error(
     "PS_ELAB_EQUALITY_OPERAND_TYPE: operator '"+operator+
-    "' currently supports Nat or Bool operands",
+    "' currently supports Nat, Bool, Char, or String operands",
   );
 }
 
@@ -149,12 +163,14 @@ export function elaborateV061PrimitiveBooleanEqualityTerms(
       "' requires matching primitive operands",
     );
   }
-  const equality=operand.kind==='nat'
-    ?mkAppN(
+  let equality:Expr;
+  if(operand.kind==='nat'){
+    equality=mkAppN(
       constant(requireV061NotationConstant(context,operand.equalityName!)),
       [left.term,right.term],
-    )
-    :mkAppN(
+    );
+  }else if(operand.kind==='bool'){
+    equality=mkAppN(
       constant(requireV061NotationConstant(context,'Bool.or')),
       [
         mkAppN(
@@ -176,6 +192,44 @@ export function elaborateV061PrimitiveBooleanEqualityTerms(
         ),
       ],
     );
+  }else if(operand.kind==='char'){
+    const toNat=constant(
+      requireV061NotationConstant(context,'Char.toNat'),
+    );
+    equality=mkAppN(
+      constant(requireV061NotationConstant(context,'Nat.beq')),
+      [
+        mkAppN(toNat,[left.term]),
+        mkAppN(toNat,[right.term]),
+      ],
+    );
+  }else{
+    const proposition=mkAppN(
+      constant(
+        requireV061NotationConstant(context,'Eq'),
+        [levelSucc(levelZero)],
+      ),
+      [operand.type,left.term,right.term],
+    );
+    const decider=mkAppN(
+      constant(requireV061NotationConstant(context,'String.decEq')),
+      [left.term,right.term],
+    );
+    checker.check(decider);
+    equality=mkAppN(
+      constant(
+        requireV061NotationConstant(context,'ite'),
+        [checker.getSortLevel(expectedBool)],
+      ),
+      [
+        expectedBool,
+        proposition,
+        decider,
+        constant(requireV061NotationConstant(context,'Bool.true')),
+        constant(requireV061NotationConstant(context,'Bool.false')),
+      ],
+    );
+  }
   const equalityType=checker.check(equality);
   if(!checker.isDefEq(equalityType,expectedBool)){
     throw new Error(

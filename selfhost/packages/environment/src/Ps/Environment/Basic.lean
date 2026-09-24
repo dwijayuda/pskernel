@@ -2,10 +2,10 @@ import Ps.Foundation.Name
 import Ps.Core.Declaration
 
 def psDeclarationName : PsDeclaration -> PsName
-  | .axiom name _ _ => name
-  | .definition name _ _ _ => name
-  | .theorem name _ _ _ => name
-  | .opaqueDef name _ _ _ => name
+  | .axiomDecl name _ _ => name
+  | .definitionDecl name _ _ _ => name
+  | .theoremDecl name _ _ _ => name
+  | .opaqueDecl name _ _ _ => name
 
 structure PsEnvironment where
   declarations : List PsDeclaration

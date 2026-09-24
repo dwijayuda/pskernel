@@ -1340,11 +1340,11 @@ def psTestInductiveMetadataLookup : Bool :=
       psEnvironmentFindInductive env3 boxName,
       psEnvironmentFindConstructor env3 ctorName,
       psEnvironmentFindRecursor env3 recName with
-  | some inductive, some constructor, some recursor =>
-      psNameEq inductive.name boxName
-        && inductive.numParams == 0
-        && inductive.numIndices == 0
-        && inductive.constructors.length == 1
+  | some inductiveInfo, some constructor, some recursor =>
+      psNameEq inductiveInfo.name boxName
+        && inductiveInfo.numParams == 0
+        && inductiveInfo.numIndices == 0
+        && inductiveInfo.constructors.length == 1
         && psNameEq constructor.inductiveName boxName
         && constructor.constructorIndex == 0
         && constructor.numFields == 0

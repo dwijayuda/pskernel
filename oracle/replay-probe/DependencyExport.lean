@@ -635,6 +635,20 @@ def environmentConstantNames (env : Environment) : NameSet := Id.run do
     names := names.insert name
   return names
 
+partial def dumpSelectedRootsAfterBase
+    (env base : Environment)
+    (baseModule : Name)
+    (roots : List Name) : IO Unit := do
+  if roots.isEmpty then
+    throw <| IO.userError "selected-after-base export requires at least one root"
+  dumpMeta
+  let initial : S := {
+    emitted := environmentConstantNames base
+  }
+  let _ ← (do
+    for n in roots do dumpConstant env n) |>.run initial
+  pure ()
+
 partial def dumpSelectedRootsSegmentedAfterBase
     (env base : Environment)
     (baseModule : Name)
@@ -808,6 +822,11 @@ unsafe def main (args : List String) : IO Unit := do
       let start := requestedRoots[2]!.toNat!
       let count := requestedRoots[3]!.toNat!
       dumpBatchStream env moduleName maxRoots start count
+    else if requestedRoots.length >= 3 && requestedRoots.head! == "--selected-after" then
+      let baseModule := requestedRoots[1]!.toName
+      let selected ← resolveRootNames env (requestedRoots.drop 2)
+      withImportModules #[{module := baseModule}] {} fun baseEnv => do
+        dumpSelectedRootsAfterBase env baseEnv baseModule selected
     else if requestedRoots.length >= 4 && requestedRoots.head! == "--selected-segmented-after" then
       let baseModule := requestedRoots[1]!.toName
       let segmentRoots := requestedRoots[2]!.toNat!

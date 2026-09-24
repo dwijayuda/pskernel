@@ -3,6 +3,7 @@ import {
   Lean4ExportReplay,
   TypeChecker,
   constant,
+  levelSucc,
   levelZero,
   mkAppN,
   nameFromDotted,
@@ -50,7 +51,7 @@ assertNatResult(
 assertNatResult(
   'real Lean-written id definition',
   mkAppN(
-    constant(nameFromDotted('id'),[levelZero]),
+    constant(nameFromDotted('id'),[levelSucc(levelZero)]),
     [constant(Nat),natLit(42n)],
   ),
   42n,

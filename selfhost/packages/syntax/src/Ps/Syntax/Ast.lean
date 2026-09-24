@@ -15,52 +15,45 @@ structure PsSyntaxBinderHead where
   kind : PsSyntaxBinderKind
   span : PsSourceSpan
 
-mutual
-  inductive PsSyntaxPattern where
-    | bool (value : Bool) (span : PsSourceSpan)
-    | wildcard (span : PsSourceSpan)
-    | constructor
-        (name : PsSyntaxName)
-        (binders : List PsSyntaxName)
-        (span : PsSourceSpan)
+inductive PsSyntaxPattern where
+  | bool (value : Bool) (span : PsSourceSpan)
+  | wildcard (span : PsSourceSpan)
+  | constructor
+      (name : PsSyntaxName)
+      (binders : List PsSyntaxName)
+      (span : PsSourceSpan)
 
-  structure PsSyntaxMatchAlternative where
-    pattern : PsSyntaxPattern
-    body : PsSyntaxTerm
-    span : PsSourceSpan
-
-  inductive PsSyntaxTerm where
-    | reference (name : PsSyntaxName)
-    | natural (text : String) (span : PsSourceSpan)
-    | string (text : String) (span : PsSourceSpan)
-    | character (text : String) (span : PsSourceSpan)
-    | bool (value : Bool) (span : PsSourceSpan)
-    | unit (span : PsSourceSpan)
-    | app (fn : PsSyntaxTerm) (args : List PsSyntaxTerm) (span : PsSourceSpan)
-    | lambda
-        (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
-        (body : PsSyntaxTerm)
-        (span : PsSourceSpan)
-    | forallE
-        (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
-        (body : PsSyntaxTerm)
-        (span : PsSourceSpan)
-    | letE
-        (name : PsSyntaxName)
-        (type : Option PsSyntaxTerm)
-        (value : PsSyntaxTerm)
-        (body : PsSyntaxTerm)
-        (span : PsSourceSpan)
-    | ifE
-        (condition : PsSyntaxTerm)
-        (thenBranch : PsSyntaxTerm)
-        (elseBranch : PsSyntaxTerm)
-        (span : PsSourceSpan)
-    | matchE
-        (scrutinee : PsSyntaxTerm)
-        (alternatives : List PsSyntaxMatchAlternative)
-        (span : PsSourceSpan)
-end
+inductive PsSyntaxTerm where
+  | reference (name : PsSyntaxName)
+  | natural (text : String) (span : PsSourceSpan)
+  | string (text : String) (span : PsSourceSpan)
+  | character (text : String) (span : PsSourceSpan)
+  | bool (value : Bool) (span : PsSourceSpan)
+  | unit (span : PsSourceSpan)
+  | app (fn : PsSyntaxTerm) (args : List PsSyntaxTerm) (span : PsSourceSpan)
+  | lambda
+      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (body : PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | forallE
+      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (body : PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | letE
+      (name : PsSyntaxName)
+      (type : Option PsSyntaxTerm)
+      (value : PsSyntaxTerm)
+      (body : PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | ifE
+      (condition : PsSyntaxTerm)
+      (thenBranch : PsSyntaxTerm)
+      (elseBranch : PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | matchE
+      (scrutinee : PsSyntaxTerm)
+      (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+      (span : PsSourceSpan)
 
 structure PsSyntaxImport where
   moduleName : PsSyntaxName

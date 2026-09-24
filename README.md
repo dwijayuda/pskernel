@@ -2,7 +2,7 @@
 
 An independent TypeScript reimplementation of the **Lean 4.34.0 trusted kernel**, developed for ProofScript kernel research.
 
-This repository is intentionally version-pinned. Lean 4.34.0 is the compatibility oracle; Lean4Lean is a secondary implementation/verification guide. The project does **not** claim full Lean compatibility or formal equivalence until the remaining gates in `PROGRESS.json` are closed.
+This repository is intentionally version-pinned. Lean 4.34.0 is the compatibility oracle; Lean4Lean is a secondary implementation/verification guide. The documented **production release-assurance profile is complete**, including the pinned Lean Kernel Arena correctness gate. This does **not** claim full Lean compatibility or formal equivalence; stronger monolithic replay, independent native-IR, and proof milestones remain explicitly tracked as research/soak work in `PROGRESS.json`.
 
 ## Current verified surface
 
@@ -57,14 +57,25 @@ Do not silently broaden acceptance to make a corpus pass. A Lean/TypeScript mism
 
 ### Arena correctness suite
 
-The external Lean Kernel Arena static corpus can be checked without vendoring it into this repository:
+The release gate pins the compact Lean Kernel Arena corpus by source revision and
+content fingerprints in `ARENA_LOCK.json`:
 
 ```bash
-npm run build
-node scripts/arena-static-oracle.mjs /path/to/extracted-arena-tests
+npm run arena:fetch
+npm run oracle:arena:pinned
 ```
 
-By default this checks correctness/adversarial cases and excludes `perf/`. Arena files are replayed using their recorded Lean version only at the test-harness boundary; this is cross-version compatibility evidence, not a replacement for the pinned Lean 4.34 oracle. Heavy Arena workers use an enlarged JS stack (`ARENA_STACK_KIB`, default 65500) while pskernel's own recursion budget remains the semantic guard.
+The blocking gate checks **170 non-performance cases** and currently passes
+**170/170: 101 expected accepts, 69 expected rejects, 0 timeouts** (GitHub
+Actions run `36055797753`). The remaining 23 `perf/` cases are optional via
+`npm run oracle:arena:pinned-perf`.
+
+Arena fixtures deliberately come from several Lean releases. The Arena-only
+adapter therefore reads and enforces each fixture's own recorded Lean version
+and git hash. Production lean4export replay remains strictly pinned to final
+Lean 4.34.0.
+
+See `docs/research/ARENA_RELEASE_ASSURANCE.md` for the release/soak boundary.
 
 ### Canonical full Std replay
 

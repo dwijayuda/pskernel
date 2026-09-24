@@ -1,0 +1,39 @@
+name: Diagnostic production MData exporter candidate
+
+on:
+  push:
+    branches: [kernel/mdata-exporter-throughput]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          lean_dir="$(dirname "$lean_bin")"
+          echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
+          echo "$lean_dir" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:kernel
+      - run: node scripts/anti-drift.mjs
+      - run: npm run build
+      - name: Compile exporter
+        run: "$LEAN434_BIN/lean" oracle/replay-probe/DependencyExport.lean
+      - name: Replay representative Int.DivMod window
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "2048"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22557 32 32 1

@@ -403,7 +403,18 @@ const dualTextSourceCorpus=
   'def oneChar(c : Char) : String := String.singleton(c); '+
   'def textLength(s : String) : Nat := String.Internal.length(s); '+
   'def pushChar(s : String, c : Char) : String := String.push(s, c); '+
-  'def appendText(a : String, b : String) : String := String.Internal.append(a, b);';
+  'def appendText(a : String, b : String) : String := String.Internal.append(a, b); '+
+  'def mkPos(n : Nat) : String.Pos.Raw := String.Pos.Raw.mk(n); '+
+  'def posByte(p : String.Pos.Raw) : Nat := String.Pos.Raw.byteIdx(p); '+
+  'def byteSize(s : String) : Nat := String.utf8ByteSize(s); '+
+  'def nextPos(s : String, p : String.Pos.Raw) : String.Pos.Raw := '+
+  'String.Internal.next(s, p); '+
+  'def getAt(s : String, p : String.Pos.Raw) : Char := '+
+  'String.Internal.get(s, p); '+
+  'def atEnd(s : String, p : String.Pos.Raw) : Bool := '+
+  'String.Internal.atEnd(s, p); '+
+  'def extractText(s : String, b : String.Pos.Raw, e : String.Pos.Raw) : String := '+
+  'String.Internal.extract(s, b, e);';
 
 const dualTextPs=compileVerifiedSource(
   dualTextSourceCorpus,

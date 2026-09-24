@@ -1907,11 +1907,11 @@ test('lean4export treats safe DefinitionVal.all as informational, not a mutual k
   '{"ie":1,"sort":0}',
   '{"ie":2,"const":{"name":2,"us":[]}}'
  ];
- const a='{"def":{"name":1,"levelParams":[],"type":0,"value":2,"hints":{"regular":1},"safety":"safe","all":[1,2]}}';
- const b='{"def":{"name":2,"levelParams":[],"type":0,"value":1,"hints":{"regular":1},"safety":"safe","all":[1,2]}}';
+ const a='{"def":{"name":1,"levelParams":[],"type":0,"value":2,"hints":{"regular":1},"safety":"safe","all":[2]}}';
+ const b='{"def":{"name":2,"levelParams":[],"type":0,"value":1,"hints":{"regular":1},"safety":"safe","all":[]}}';
  throws(()=>new Lean4ExportReplay().replay([...pre,a,b].join('\n')),'safe all-list must not defer A until B arrives');
  const r=new Lean4ExportReplay();r.replay([...pre,b,a].join('\n'));
- assert(r.env.has(nameFromDotted('SafeAllA'))&&r.env.has(nameFromDotted('SafeAllB')),'dependency-first safe definitions with shared all metadata must replay independently');
+ assert(r.env.has(nameFromDotted('SafeAllA'))&&r.env.has(nameFromDotted('SafeAllB')),'dependency-first safe definitions must replay even when informational all metadata omits self or is empty');
 });
 
 test('lean4export reconstructs partial mutual definition blocks from all metadata',()=>{

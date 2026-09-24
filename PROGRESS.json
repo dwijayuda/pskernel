@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 170,
   "notes": [
+    "Safe DefinitionVal.all validation parity fix: Lean 4.34 replay ignores `all` for ordinary safe defnDecl, so lean4export no longer requires a safe definition to appear in its own all-list. The existing ordering regression now uses `all:[peer]` and `all:[]`; only unsafe/partial mutual diagnostic reconstruction requires a coherent self-containing group list.",
     "Local assurance ladder now runs `oracle:native-smoke` after bounded corpora and before canonical Init.Prelude/Full Std. This validates the corrected compiler-IR NativeEval provider as a cheap fail-fast gate; `-SkipNativeSmoke` exists only for targeted reruns.",
     "Local assurance dependency-install hardening: run-full-std-local.ps1 now uses `npm ci` against the committed lockfile, reports the exact tracked dirty status when the provenance precondition fails, and rechecks tracked cleanliness immediately after dependency installation. The kernel-study matrix locks this policy so assurance runs cannot silently revert to mutable `npm install`. No replay gate is closed by this tooling-only change.",
     "Safe DefinitionVal.all replay parity fix: Lean 4.34 stores `all` as informational metadata and Kernel.Environment.replay ignores it for safe defnInfo. DependencyExport now replays safe definitions individually from `getUsedConstantsAsSet`; only unsafe/partial diagnostic exports reconstruct mutual groups. Added a direct importer regression proving out-of-order safe peers with shared `all` must fail while dependency-first order succeeds, plus a static exporter anti-drift lock.",
@@ -257,5 +258,5 @@
   ],
   "currentTreeExpectedDirectTests": 173,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "source direct-test count remains 173 / last executed direct checkpoint 170; local assurance ladder now includes native compiler-IR smoke before canonical replay. Fresh pinned-Lean execution remains the next required evidence."
+  "currentTreeVerification": "source direct-test count remains 173 / last executed direct checkpoint remains 170; safe DefinitionVal.all omission/empty-list parity is source-locked and needs refreshed execution. Canonical Lean-backed replay remains pending."
 }

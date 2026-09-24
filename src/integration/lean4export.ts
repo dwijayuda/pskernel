@@ -158,15 +158,17 @@ export class Lean4ExportReplay {
     const o=asObject(v,'def.hints'),h=asBigInt(field(o,'regular','def.hints'),'def.hints.regular');if(h<0n||h>0xffffffffn)throw new KernelError('definition height is outside UInt32');return {kind:'regular',height:h};
   }
   private addExportedDefinition(info:DefinitionInfo,all:readonly Name[]):void{
-    // `all` is informational in ConstantInfo, but for partial/unsafe multi-member blocks it is
-    // the only information lean4export preserves from Declaration.mutualDefnDecl.
-    if(!all.some(n=>nameEq(n,info.name)))throw new KernelError(`exported definition '${nameToString(info.name)}' is missing from its all-list`);
+    // DefinitionVal.all is informational for ordinary defnDecl, including safe definitions.
+    // Lean 4.34 Kernel.Environment.replay ignores it and replays the declaration from actual
+    // used constants. Only the diagnostic reconstruction of unsafe/partial mutualDefnDecl
+    // below needs a coherent group list.
     if(info.safety==='safe'||all.length<=1){
       // A single unsafe definition has Lean's ordinary recursive-definition admission path.
       // A singleton partial that is actually self-recursive is handled by the mutual path below.
       const selfRef=info.safety==='partial'&&this.exprUsesName(info.value,info.name);
       if(!selfRef){if(isPrimitiveName(info.name))addPrimitiveDefinition(this.env,info);else this.kernel.addDefinition(info);return;}
     }
+    if(!all.some(n=>nameEq(n,info.name)))throw new KernelError(`exported mutual definition '${nameToString(info.name)}' is missing from its all-list`);
     if(isPrimitiveName(info.name))throw new KernelError(`primitive '${nameToString(info.name)}' cannot be a mutual definition member`);
     const key=all.map(nameKey).join('|');let g=this.pendingMutual.get(key);
     if(!g){g={all:[...all],defs:new Map()};this.pendingMutual.set(key,g);}else if(!namesEq(g.all,all))throw new KernelError('inconsistent exported mutual definition all-list');

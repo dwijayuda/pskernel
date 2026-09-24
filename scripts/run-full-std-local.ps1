@@ -138,7 +138,7 @@ if (-not $SkipCorpora) {
   $previousErrorActionPreference = $ErrorActionPreference
   $ErrorActionPreference = "Continue"
   try {
-    & npm run check:corpus 2>&1 | ForEach-Object { Write-NativeLogLine $_ }
+    & npm run check:kernel-corpus 2>&1 | ForEach-Object { Write-NativeLogLine $_ }
     $corporaCode = $LASTEXITCODE
   } finally {
     $ErrorActionPreference = $previousErrorActionPreference

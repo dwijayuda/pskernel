@@ -50,6 +50,12 @@ lean_lib PsEnvironment where
     `Ps.Environment.Resolve
   ]
 
+lean_lib PsCompilerIr where
+  srcDir := "packages/compiler-ir/src"
+  roots := [
+    `Ps.CompilerIr.Model
+  ]
+
 lean_lib PsProject where
   srcDir := "packages/project/src"
   roots := #[`Ps.Project.ModuleGraph]

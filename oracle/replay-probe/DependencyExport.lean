@@ -689,6 +689,44 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
           part := part + 1) |>.run {}
   pure ()
 
+partial def dumpShardManifest (env : Environment) (target : Name) (requestedStart requestedCount : Nat) : IO Unit := do
+  let buckets := collectCanonicalRootsByModule env
+  let rootsPerShard : Nat := 10
+  let requestedStop := requestedStart + requestedCount
+  let mut shardIndex := 0
+  let mut rootStart := 0
+  for idx in [0:buckets.size] do
+    let roots : Array Name := buckets[idx]!
+    unless roots.isEmpty do
+      let moduleName := env.header.moduleNames[idx]!
+      let mut start := 0
+      let mut part := 0
+      while start < roots.size do
+        let stop := min roots.size (start + rootsPerShard)
+        let slice := roots.extract start stop
+        if shardIndex >= requestedStart && shardIndex < requestedStop then
+          IO.println <| (Json.mkObj [("shard", Json.mkObj [
+            ("shardIndex", shardIndex),
+            ("module", moduleName.toString),
+            ("index", idx),
+            ("part", part),
+            ("roots", slice.size),
+            ("rootStart", rootStart),
+            ("firstRoot", slice[0]!.toString),
+            ("lastRoot", slice[slice.size - 1]!.toString)
+          ])]).compress
+        shardIndex := shardIndex + 1
+        rootStart := rootStart + slice.size
+        start := stop
+        part := part + 1
+  IO.println <| (Json.mkObj [("manifest", Json.mkObj [
+    ("module", target.toString),
+    ("shards", shardIndex),
+    ("roots", rootStart),
+    ("requestedStart", requestedStart),
+    ("requestedCount", requestedCount)
+  ])]).compress
+
 unsafe def main (args : List String) : IO Unit := do
   initSearchPath (← findSysroot)
   if args.length < 2 then
@@ -701,6 +739,10 @@ unsafe def main (args : List String) : IO Unit := do
       else requestedRoots.map String.toName
     if requestedRoots == ["--module-stream"] then
       dumpModuleStream env moduleName
+    else if requestedRoots.length == 3 && requestedRoots.head! == "--shard-manifest" then
+      let start := requestedRoots[1]!.toNat!
+      let count := requestedRoots[2]!.toNat!
+      dumpShardManifest env moduleName start count
     else if requestedRoots.length == 2 && requestedRoots.head! == "--batch-manifest" then
       let maxRoots := requestedRoots.tail!.head! |>.toNat!
       dumpBatchManifest env moduleName maxRoots

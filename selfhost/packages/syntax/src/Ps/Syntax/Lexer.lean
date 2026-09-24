@@ -201,6 +201,11 @@ def psLexReadStringBody :
         start
         (char :: charsRev)
 
+def psLexHexDigit (char : Char) : Bool :=
+  ('0' <= char && char <= '9')
+    || ('a' <= char && char <= 'f')
+    || ('A' <= char && char <= 'F')
+
 def psLexReadCharacterBody :
     List Char -> PsSourcePos -> PsSourcePos -> List Char ->
     Except PsLexError PsLexRead
@@ -210,14 +215,66 @@ def psLexReadCharacterBody :
   | '\n' :: _, position, start, _ =>
       Except.error
         (PsLexError.unterminatedCharacter (psLexSpan start position))
-  | '\\' :: escaped :: '\'' :: rest, position, _, charsRev =>
-      let afterSlash := psLexAdvanceChar position '\\'
-      let afterEscape := psLexAdvanceChar afterSlash escaped
-      let stop := psLexAdvanceChar afterEscape '\''
-      Except.ok {
-        cursor := { remaining := rest, position := stop }
-        charsRev := '\'' :: escaped :: '\\' :: charsRev
-      }
+  | '\\' :: 'x' :: first :: second :: '\'' :: rest,
+      position, start, charsRev =>
+      if psLexHexDigit first && psLexHexDigit second then
+        let afterSlash := psLexAdvanceChar position '\\'
+        let afterX := psLexAdvanceChar afterSlash 'x'
+        let afterFirst := psLexAdvanceChar afterX first
+        let afterSecond := psLexAdvanceChar afterFirst second
+        let stop := psLexAdvanceChar afterSecond '\''
+        Except.ok {
+          cursor := { remaining := rest, position := stop }
+          charsRev :=
+            '\'' :: second :: first :: 'x' :: '\\' :: charsRev
+        }
+      else
+        Except.error
+          (PsLexError.unterminatedCharacter
+            (psLexSpan start position))
+  | '\\' :: 'u' :: first :: second :: third :: fourth :: '\'' :: rest,
+      position, start, charsRev =>
+      if
+          psLexHexDigit first
+            && psLexHexDigit second
+            && psLexHexDigit third
+            && psLexHexDigit fourth then
+        let afterSlash := psLexAdvanceChar position '\\'
+        let afterU := psLexAdvanceChar afterSlash 'u'
+        let afterFirst := psLexAdvanceChar afterU first
+        let afterSecond := psLexAdvanceChar afterFirst second
+        let afterThird := psLexAdvanceChar afterSecond third
+        let afterFourth := psLexAdvanceChar afterThird fourth
+        let stop := psLexAdvanceChar afterFourth '\''
+        Except.ok {
+          cursor := { remaining := rest, position := stop }
+          charsRev :=
+            '\'' :: fourth :: third :: second :: first
+              :: 'u' :: '\\' :: charsRev
+        }
+      else
+        Except.error
+          (PsLexError.unterminatedCharacter
+            (psLexSpan start position))
+  | '\\' :: escaped :: '\'' :: rest, position, start, charsRev =>
+      if
+          escaped == '\''
+            || escaped == '"'
+            || escaped == '\\'
+            || escaped == 'n'
+            || escaped == 'r'
+            || escaped == 't' then
+        let afterSlash := psLexAdvanceChar position '\\'
+        let afterEscape := psLexAdvanceChar afterSlash escaped
+        let stop := psLexAdvanceChar afterEscape '\''
+        Except.ok {
+          cursor := { remaining := rest, position := stop }
+          charsRev := '\'' :: escaped :: '\\' :: charsRev
+        }
+      else
+        Except.error
+          (PsLexError.unterminatedCharacter
+            (psLexSpan start position))
   | char :: '\'' :: rest, position, _, charsRev =>
       let afterChar := psLexAdvanceChar position char
       let stop := psLexAdvanceChar afterChar '\''

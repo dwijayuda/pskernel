@@ -12,6 +12,7 @@ inductive PsElabError where
   | emptyName
   | unknownName (name : PsName)
   | invalidNatural (text : String)
+  | invalidString (text : String)
   | infer (error : PsInferError)
   | typeMismatch
   | implicitApplicationUnsupported
@@ -121,6 +122,19 @@ def psElabNatural
       psElabResolvedTerm
         context
         (PsExpr.lit (PsLiteral.natural value))
+        expected
+
+def psElabString
+    (context : PsElabContext)
+    (text : String)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match psDecodeStringLiteral text with
+  | none => Except.error (PsElabError.invalidString text)
+  | some value =>
+      psElabResolvedTerm
+        context
+        (PsExpr.lit (PsLiteral.string value))
         expected
 
 def psElabBool
@@ -585,6 +599,8 @@ def psElabTermWithFuel
           psElabReference context name expected
       | .natural text _ =>
           psElabNatural context text expected
+      | .string text _ =>
+          psElabString context text expected
       | .bool value _ =>
           psElabBool context value expected
       | .lambda binders body _ =>

@@ -9,6 +9,9 @@ structure S where
   levels : HashMap Level Nat := HashMap.emptyWithCapacity 32 |>.insert .zero 0
   exprs : HashMap ExprStructEq Nat := HashMap.emptyWithCapacity 256
   mdata : Array KVMap := #[]
+  /-- Collision-safe acceleration for global MData equality ids. The fingerprint
+      only selects candidates; exact KVMap BEq remains authoritative. -/
+  mdataBuckets : HashMap UInt64 (Array Nat) := {}
   emitted : NameSet := {}
   active : NameSet := {}
   /-- Canonical module-stream follows Lean.Kernel.Environment.replay and skips
@@ -37,14 +40,28 @@ def biJson : BinderInfo → Json
   modify fun s => setM s ((getM s).insert x i)
   return i
 
+def mdataFingerprint (d : KVMap) : UInt64 := Id.run do
+  -- KVMap equality is order-insensitive. Use only commutative facts that every
+  -- equal map must share: size and the multiset of keys. Values intentionally
+  -- stay out of the fingerprint; exact KVMap BEq below handles them.
+  let mut h : UInt64 := hash d.size
+  for (k, _) in d do
+    h := h + hash k
+  return h
+
 def dumpMDataEqId (d : KVMap) : M Nat := do
-  let xs := (← get).mdata
-  for i in [0:xs.size] do
+  let h := mdataFingerprint d
+  let s ← get
+  let ids := (s.mdataBuckets[h]?).getD #[]
+  for i in ids do
     -- Lean 4.34 Expr.eqv delegates MData comparison to KVMap's BEq, which
     -- is extensional map equality (subset both ways), not raw entry-list order.
-    if xs[i]! == d then return i
-  let i := xs.size
-  modify fun s => { s with mdata := s.mdata.push d }
+    if s.mdata[i]! == d then return i
+  let i := s.mdata.size
+  modify fun s => { s with
+    mdata := s.mdata.push d
+    mdataBuckets := s.mdataBuckets.insert h (ids.push i)
+  }
   return i
 
 def dumpName (n : Name) : M Nat := intern n "in" (·.names) ({ · with names := · }) do

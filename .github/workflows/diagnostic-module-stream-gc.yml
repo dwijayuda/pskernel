@@ -1,8 +1,8 @@
-name: Diagnostic module-stream automatic GC
+name: Diagnostic module-stream MData buckets
 
 on:
   push:
-    branches: [diagnostic/module-stream-auto-gc]
+    branches: [diagnostic/module-stream-mdata-buckets]
   workflow_dispatch:
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
           node-version: 22
       - run: npm ci --no-audit --no-fund
       - run: npm run build
-      - name: Canonical prefix through shard 2400 with automatic GC only
+      - name: Canonical prefix through shard 2400 with MData buckets
         env:
           PSKERNEL_STD_HEAP_MIB: "5632"
           PSKERNEL_GC_EVERY_SHARDS: "0"

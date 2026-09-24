@@ -1,0 +1,36 @@
+name: Diagnostic no-GC checkpoints
+
+on:
+  push:
+    branches: [diagnostic/no-gc-checkpoints]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checkpoint:
+    strategy:
+      fail-fast: false
+      matrix:
+        shards: [2275, 2300, 2325, 2350]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Replay no-GC checkpoint
+        env:
+          PSKERNEL_STOP_AFTER_SHARDS: "${{ matrix.shards }}"
+        run: node --expose-gc --max-old-space-size=5632 --stack-size=65500 scripts/module-stream-oracle-no-gc.mjs Std 114029

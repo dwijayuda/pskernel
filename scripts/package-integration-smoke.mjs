@@ -398,6 +398,69 @@ assert(
   'PS/Lean round-trip changed emitted TypeScript declarations',
 );
 
+const dualTextSourceCorpus=
+  'def charCode(c : Char) : Nat := Char.toNat(c); '+
+  'def oneChar(c : Char) : String := String.singleton(c); '+
+  'def textLength(s : String) : Nat := String.Internal.length(s); '+
+  'def pushChar(s : String, c : Char) : String := String.push(s, c); '+
+  'def appendText(a : String, b : String) : String := String.Internal.append(a, b);';
+
+const dualTextPs=compileVerifiedSource(
+  dualTextSourceCorpus,
+  'dual-text-equivalence.ts',
+  'dual-text-equivalence.ps',
+);
+const dualTextLeanSource=dualTargets.require('lean').print(dualTextPs.surface);
+const dualTextLean=compileVerifiedSource(
+  dualTextLeanSource,
+  'dual-text-equivalence.ts',
+  'dual-text-equivalence.lean',
+);
+const dualTextPsSource=dualTargets.require('ps').print(dualTextLean.surface);
+const dualTextPsRoundTrip=compileVerifiedSource(
+  dualTextPsSource,
+  'dual-text-equivalence.ts',
+  'dual-text-equivalence-roundtrip.ps',
+);
+
+assert(
+  dualTextPs.canonicalSourceHash===dualTextLean.canonicalSourceHash
+    &&dualTextLean.canonicalSourceHash===
+      dualTextPsRoundTrip.canonicalSourceHash,
+  'SH1 PS/Lean text canonical source identity diverged',
+);
+assert(
+  semanticFingerprint(dualTextPs.checkedCore.admissions)
+    ===semanticFingerprint(dualTextLean.checkedCore.admissions)
+    &&semanticFingerprint(dualTextLean.checkedCore.admissions)
+      ===semanticFingerprint(dualTextPsRoundTrip.checkedCore.admissions),
+  'SH1 PS/Lean text changed pskernel checked-core admissions',
+);
+assert(
+  semanticFingerprint(dualTextPs.ir)
+    ===semanticFingerprint(dualTextLean.ir)
+    &&semanticFingerprint(dualTextLean.ir)
+      ===semanticFingerprint(dualTextPsRoundTrip.ir),
+  'SH1 PS/Lean text changed verified compiler IR',
+);
+assert(
+  dualTextPs.typeScript===dualTextLean.typeScript
+    &&dualTextLean.typeScript===dualTextPsRoundTrip.typeScript,
+  'SH1 PS/Lean text changed emitted TypeScript',
+);
+assert(
+  dualTextPs.emitted.javascript===dualTextLean.emitted.javascript
+    &&dualTextLean.emitted.javascript===
+      dualTextPsRoundTrip.emitted.javascript,
+  'SH1 PS/Lean text changed emitted JavaScript',
+);
+assert(
+  dualTextPs.emitted.declaration===dualTextLean.emitted.declaration
+    &&dualTextLean.emitted.declaration===
+      dualTextPsRoundTrip.emitted.declaration,
+  'SH1 PS/Lean text changed emitted TypeScript declarations',
+);
+
 let unsupportedLeanRejected=false;
 try{
   compileVerifiedSource(

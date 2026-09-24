@@ -22,6 +22,10 @@ structure PsSynthInstanceResult where
   context : PsMetaContext
   value : Option PsExpr
 
+structure PsSolveInstanceArgsResult where
+  context : PsMetaContext
+  success : Bool
+
 def psSynthFailure (context : PsMetaContext) : PsSynthInstanceResult :=
   { context := context, value := none }
 
@@ -116,10 +120,9 @@ def psSynthInstanceWithFuel
 where
   psSolvePreparedArguments
       (arguments : List PsPreparedInstanceArgument)
-      (current : PsMetaContext) : PsSynthInstanceResult :=
+      (current : PsMetaContext) : PsSolveInstanceArgsResult :=
     match arguments with
-    | [] =>
-        psSynthSuccess current (PsExpr.lit (PsLiteral.natural 0))
+    | [] => { context := current, success := true }
     | argument :: rest =>
         match argument.expr with
         | .mvar id =>
@@ -138,13 +141,13 @@ where
                       fuel
                       targetType
                   match synthesized.value with
-                  | none => psSynthFailure current
+                  | none => { context := current, success := false }
                   | some instanceValue =>
                       match psMetaAssign synthesized.context id instanceValue with
-                      | none => psSynthFailure current
+                      | none => { context := current, success := false }
                       | some next => psSolvePreparedArguments rest next
                 else
-                  psSynthFailure current
+                  { context := current, success := false }
         | _ => psSolvePreparedArguments rest current
 
   psTryInstanceCandidate
@@ -169,15 +172,15 @@ where
           psSolvePreparedArguments
             prepared.arguments
             targetResult.context
-        match solved.value with
-        | none => psSynthFailure original
-        | some _ =>
-            let finalValue :=
-              psMetaInstantiate solved.context prepared.value
-            if psExprHasUnresolvedMeta finalValue then
-              psSynthFailure original
-            else
-              psSynthSuccess solved.context finalValue
+        if !solved.success then
+          psSynthFailure original
+        else
+          let finalValue :=
+            psMetaInstantiate solved.context prepared.value
+          if psExprHasUnresolvedMeta finalValue then
+            psSynthFailure original
+          else
+            psSynthSuccess solved.context finalValue
 
   psTryInstanceCandidates
       (environment : PsEnvironment)

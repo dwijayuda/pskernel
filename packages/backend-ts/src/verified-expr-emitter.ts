@@ -10,6 +10,7 @@ import type {
   TagMap,
 } from './verified-symbols.js';
 import {emitVerifiedMatch} from './verified-match-emitter.js';
+import {emitVerifiedTextIntrinsic} from './verified-text-emitter.js';
 
 export function emitVerifiedExpr(
   expr:VerifiedIrExpr,
@@ -28,19 +29,12 @@ export function emitVerifiedExpr(
           '((__ps_n < 0xd800n || (__ps_n > 0xdfffn && __ps_n < 0x110000n)) '+
           '? String.fromCodePoint(Number(__ps_n)) : "\\0"))('+value+')';
       }
-      if(expr.operation==='char.toNat'){
-        const value=emitVerifiedExpr(expr.args[0]!,brands,tags);
-        return '((__ps_c: string) => BigInt(__ps_c.codePointAt(0) ?? 0))('+
-          value+')';
-      }
-      if(expr.operation==='string.singleton'){
-        return emitVerifiedExpr(expr.args[0]!,brands,tags);
-      }
-      if(expr.operation==='string.length'){
-        const value=emitVerifiedExpr(expr.args[0]!,brands,tags);
-        return '((__ps_s: string) => BigInt(Array.from(__ps_s).length))('+
-          value+')';
-      }
+      const textIntrinsic=emitVerifiedTextIntrinsic(
+        expr.operation,
+        expr.args,
+        (arg)=>emitVerifiedExpr(arg,brands,tags),
+      );
+      if(textIntrinsic!==undefined)return textIntrinsic;
       if(expr.operation==='bool.not'){
         return '(!'+emitVerifiedExpr(expr.args[0]!,brands,tags)+')';
       }
@@ -69,8 +63,6 @@ export function emitVerifiedExpr(
         case 'bool.or':return '('+left+' || '+right+')';
         case 'bool.eq':return '('+left+' === '+right+')';
         case 'bool.ne':return '('+left+' !== '+right+')';
-        case 'string.push':return '('+left+' + '+right+')';
-        case 'string.append':return '('+left+' + '+right+')';
       }
       const unreachable:never=expr.operation;
       return unreachable;

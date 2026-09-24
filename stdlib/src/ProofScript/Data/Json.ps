@@ -1,0 +1,65 @@
+import ProofScript.Data.List
+import ProofScript.Data.Map
+
+inductive PsJson where {
+  | null;
+  | bool(value : Bool);
+  | integer(text : String);
+  | string(value : String);
+  | array(values : PsList(PsJson));
+  | object(values : PsMap(String, PsJson));
+};
+
+function jsonIsNull(value : PsJson) : Bool :=
+  match value with {
+    | .null => true;
+    | .bool item => false;
+    | .integer text => false;
+    | .string text => false;
+    | .array values => false;
+    | .object values => false;
+  };
+
+function jsonAsString(value : PsJson) : PsOption(String) :=
+  match value with {
+    | .null => PsOption.none;
+    | .bool item => PsOption.none;
+    | .integer text => PsOption.none;
+    | .string text => PsOption.some(text);
+    | .array values => PsOption.none;
+    | .object values => PsOption.none;
+  };
+
+function jsonAsIntegerText(value : PsJson) : PsOption(String) :=
+  match value with {
+    | .null => PsOption.none;
+    | .bool item => PsOption.none;
+    | .integer text => PsOption.some(text);
+    | .string text => PsOption.none;
+    | .array values => PsOption.none;
+    | .object values => PsOption.none;
+  };
+
+function jsonArrayLength(value : PsJson) : PsOption(Nat) :=
+  match value with {
+    | .null => PsOption.none;
+    | .bool item => PsOption.none;
+    | .integer text => PsOption.none;
+    | .string text => PsOption.none;
+    | .array values => PsOption.some(listLength(values));
+    | .object values => PsOption.none;
+  };
+
+function jsonObjectGet?(
+  compare : String -> String -> PsOrdering,
+  key : String,
+  value : PsJson
+) : PsOption(PsJson) :=
+  match value with {
+    | .null => PsOption.none;
+    | .bool item => PsOption.none;
+    | .integer text => PsOption.none;
+    | .string text => PsOption.none;
+    | .array values => PsOption.none;
+    | .object values => mapGet?(compare, key, values);
+  };

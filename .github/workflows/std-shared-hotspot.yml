@@ -1,0 +1,43 @@
+name: Std shared hotspot diagnostic
+
+on:
+  push:
+    branches: [diagnostic/std-shared-hotspot]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          lean_dir="$(dirname "$lean_bin")"
+          test -x "$lean_dir/leanchecker"
+          echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
+          echo "LEAN434_SRC=$GITHUB_WORKSPACE/study/lean4-4.34.0" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+
+      - name: Shared canonical replay with per-shard diagnostics
+        env:
+          PSKERNEL_STD_HEAP_MIB: "5632"
+          PSKERNEL_STD_STACK_KIB: "65500"
+          PSKERNEL_LOG_EVERY_SHARD: "1"
+          PSKERNEL_NATIVE_TIMEOUT_MS: "60000"
+        run: node scripts/full-std-oracle.mjs

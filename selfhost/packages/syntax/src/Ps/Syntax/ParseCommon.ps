@@ -19,6 +19,20 @@ def psSyntaxTermSpan(term : PsSyntaxTerm) : PsSourceSpan :=
     | .ifE condition thenBranch elseBranch span => span;
   };
 
+
+def psTokenCursorAtArrow(cursor : PsTokenCursor) : Bool :=
+  psTokenCursorAtText(cursor, "->") || psTokenCursorAtText(cursor, "→");
+
+def psSyntaxAnonymousExplicitBinder(span : PsSourceSpan) : PsSyntaxBinderHead :=
+  {
+    name := {
+      segments := ["_"],
+      span := span
+    },
+    kind := PsSyntaxBinderKind.explicit,
+    span := span
+  };
+
 /* The canonical .ps spelling of the recursive qualified-name parser will be
    regenerated once the PSC1 frontend owns generic Except/parse-result syntax.
    The Lean spelling is authoritative during this bootstrap slice. */

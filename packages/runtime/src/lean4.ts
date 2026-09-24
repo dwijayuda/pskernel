@@ -155,6 +155,45 @@ export function lean_string_hash(value:LeanString):LeanUInt64{
   return murmurHash64A(utf8Bytes(value),11n);
 }
 
+export function lean_name_eq(a:unknown,b:unknown):boolean{
+  if(a===b)return true;
+  const isName=(value:unknown):value is {
+    readonly kind:'constructor';
+    readonly name:string;
+    readonly fields:readonly unknown[];
+  }=>typeof value==='object'
+    &&value!==null
+    &&!Array.isArray(value)
+    &&'kind' in value
+    &&'name' in value
+    &&'fields' in value
+    &&(value as {kind?:unknown}).kind==='constructor'
+    &&Array.isArray((value as {fields?:unknown}).fields);
+  if(!isName(a)||!isName(b))return false;
+  if(a.name!==b.name)return false;
+  switch(a.name){
+    case 'Lean.Name.anonymous':
+      return a.fields.length===0&&b.fields.length===0;
+    case 'Lean.Name.str':
+      return a.fields.length===2
+        &&b.fields.length===2
+        &&typeof a.fields[1]==='string'
+        &&typeof b.fields[1]==='string'
+        &&a.fields[1]===b.fields[1]
+        &&lean_name_eq(a.fields[0],b.fields[0]);
+    case 'Lean.Name.num':
+      return a.fields.length===2
+        &&b.fields.length===2
+        &&typeof a.fields[1]==='bigint'
+        &&typeof b.fields[1]==='bigint'
+        &&a.fields[1]===b.fields[1]
+        &&lean_name_eq(a.fields[0],b.fields[0]);
+    default:
+      return false;
+  }
+}
+
+
 export const lean_uint64_to_usize=(value:LeanUInt64):LeanUSize=>
   normalizeUSize(value);
 export const lean_usize_to_uint64=(value:LeanUSize):LeanUInt64=>
@@ -535,6 +574,7 @@ export const LEAN434_JS_EXTERN_MANIFEST:readonly Lean434ExternDescriptor[]=[
   {leanSymbol:'lean_uint64_mix_hash',jsExport:'lean_uint64_mix_hash',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_uint64_to_nat',jsExport:'lean_uint64_to_nat',category:'pure-primitive',upstreamSource:'Init/Data/UInt/BasicAux.lean'},
   {leanSymbol:'lean_string_hash',jsExport:'lean_string_hash',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_name_eq',jsExport:'lean_name_eq',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_uint64_to_usize',jsExport:'lean_uint64_to_usize',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
   {leanSymbol:'lean_usize_of_nat',jsExport:'lean_usize_of_nat',category:'pure-primitive',upstreamSource:'Init/Data/UInt/BasicAux.lean'},
   {leanSymbol:'lean_usize_to_nat',jsExport:'lean_usize_to_nat',category:'pure-primitive',upstreamSource:'Init/Data/UInt/BasicAux.lean'},
@@ -688,6 +728,12 @@ readonly Lean434DeclarationExternBinding[]=[
     leanDeclaration:'String.hash',
     leanSymbol:'lean_string_hash',
     arity:1,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Lean.Name.beq',
+    leanSymbol:'lean_name_eq',
+    arity:2,
     upstreamSource:'Init/Prelude.lean',
   },
   {
@@ -940,6 +986,7 @@ new Map<string,Lean434JsExternImplementation>([
     lean_uint64_to_nat(value as LeanUInt64)],
   ['lean_string_hash',(value)=>
     lean_string_hash(value as LeanString)],
+  ['lean_name_eq',(a,b)=>lean_name_eq(a,b)],
   ['lean_uint64_to_usize',(value)=>
     lean_uint64_to_usize(value as LeanUInt64)],
   ['lean_usize_of_nat',(value)=>

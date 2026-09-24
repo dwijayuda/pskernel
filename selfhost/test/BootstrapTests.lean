@@ -568,12 +568,83 @@ def psTestDualSourceCoreElaboration : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestElaboratedBinderKindsShape
+    (result : PsElabModuleResult) : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let name := psTestName "binders"
+  let xName := psTestName "x"
+  let yName := psTestName "y"
+  let zName := psTestName "z"
+  let wName := psTestName "w"
+  let expectedType :=
+    PsExpr.forallE
+      xName
+      natType
+      (PsExpr.forallE
+        yName
+        natType
+        (PsExpr.forallE
+          zName
+          natType
+          (PsExpr.forallE
+            wName
+            natType
+            natType
+            PsBinderInfo.instanceImplicit)
+          PsBinderInfo.strictImplicit)
+        PsBinderInfo.implicit)
+      PsBinderInfo.explicit
+  let expectedValue :=
+    PsExpr.lam
+      xName
+      natType
+      (PsExpr.lam
+        yName
+        natType
+        (PsExpr.lam
+          zName
+          natType
+          (PsExpr.lam
+            wName
+            natType
+            (PsExpr.bvar 3)
+            PsBinderInfo.instanceImplicit)
+          PsBinderInfo.strictImplicit)
+        PsBinderInfo.implicit)
+      PsBinderInfo.explicit
+  match result.declarations with
+  | [PsDeclaration.definitionDecl actualName [] actualType actualValue] =>
+      psNameEq actualName name
+        && psExprAlphaEq actualType expectedType
+        && psExprAlphaEq actualValue expectedValue
+  | _ => false
+
+def psTestDualSourceBinderKindsElaboration : Bool :=
+  match
+      psParseLeanSource
+        "def binders (x : Nat) {y : Nat} {{z : Nat}} [w : Nat] : Nat := x",
+      psParseProofScriptSource
+        "def binders(x : Nat){y : Nat}{{z : Nat}}[w : Nat] : Nat := x;" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestElaboratedBinderKindsShape leanResult
+            && psTestElaboratedBinderKindsShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
 
 def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source core elaboration", passed := psTestDualSourceCoreElaboration },
+  { name := "dual-source binder kinds elaboration", passed := psTestDualSourceBinderKindsElaboration },
   { name := "dual-source simple parse", passed := psTestDualSourceSimpleParse },
   { name := "dual-source binder application parse", passed := psTestDualSourceBinderApplicationParse },
   { name := "dual-source binder kinds parse", passed := psTestDualSourceBinderKindsParse },

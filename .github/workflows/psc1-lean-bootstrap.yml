@@ -216,6 +216,40 @@ jobs:
           grep -q 'readonly age' /tmp/psc1-structure-lean.d.ts
           echo "PSC1_LEAN_NATIVE_STRUCTURE_TSC_PIPELINE: PASS"
 
+
+          cat > /tmp/psc1-recursive.lean <<'EOF'
+          inductive ListR (α : Type) where
+            | nil
+            | cons (head : α) (tail : ListR α)
+
+          def lengthR (xs : ListR Nat) : Nat :=
+            match xs with
+            | ListR.nil => 0
+            | ListR.cons head tail => lengthR tail
+          EOF
+          cat > /tmp/psc1-recursive.ps <<'EOF'
+          inductive ListR(α : Type) where {
+            | nil;
+            | cons(head : α)(tail : ListR(α));
+          };
+          def lengthR(xs : ListR(Nat)) : Nat :=
+            match xs with {
+              | ListR.nil => 0;
+              | ListR.cons head tail => lengthR(tail);
+            };
+          EOF
+          lake exe psc1 typescript /tmp/psc1-recursive.lean > /tmp/psc1-recursive-lean.ts
+          lake exe psc1 typescript /tmp/psc1-recursive.ps > /tmp/psc1-recursive-ps.ts
+          cmp /tmp/psc1-recursive-lean.ts /tmp/psc1-recursive-ps.ts
+          rm -f /tmp/psc1-recursive-lean.js /tmp/psc1-recursive-lean.d.ts /tmp/psc1-recursive-lean.js.map
+          lake exe psc1 build /tmp/psc1-recursive.lean --out /tmp/psc1-recursive-lean.ts
+          test -f /tmp/psc1-recursive-lean.js
+          test -f /tmp/psc1-recursive-lean.d.ts
+          test -f /tmp/psc1-recursive-lean.js.map
+          grep -q 'export function lengthR' /tmp/psc1-recursive-lean.js
+          grep -q 'lengthR(tail)' /tmp/psc1-recursive-lean.js
+          echo "PSC1_LEAN_NATIVE_RECURSION_TSC_PIPELINE: PASS"
+
       - name: Run dual-source admission pipeline
         shell: bash
         run: |

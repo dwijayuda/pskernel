@@ -1335,8 +1335,8 @@ assert(
   'ProofScript-written stdlib dogfood program did not return 22',
 );
 assert(
-  stdlibRun.moduleCount===6,
-  'ProofScript-written stdlib project did not load six modules',
+  stdlibRun.moduleCount===10,
+  'ProofScript-written stdlib project did not load ten modules',
 );
 const stdlibModules=new Set(stdlibRun.moduleOrder);
 for(const moduleName of [
@@ -1344,6 +1344,10 @@ for(const moduleName of [
   'ProofScript.Data.Result',
   'ProofScript.Data.List',
   'ProofScript.Data.Array',
+  'ProofScript.Data.Product',
+  'ProofScript.Data.Ordering',
+  'ProofScript.Data.Map',
+  'ProofScript.Data.Set',
   'ProofScript.Text.Lexer',
   'main',
 ]){
@@ -1353,7 +1357,7 @@ for(const moduleName of [
   );
 }
 assert(
-  stdlibRun.assurance?.kernelCheckedTheoremCount===37,
+  stdlibRun.assurance?.kernelCheckedTheoremCount===40,
   'ProofScript-written stdlib theorems were not admitted by pskernel',
 );
 assert(

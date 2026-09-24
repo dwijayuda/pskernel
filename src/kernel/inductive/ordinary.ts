@@ -214,7 +214,9 @@ export function validateInstalledRecursorsByReduction(work:Environment,d:Inducti
    const preCount=ri.numParams+ri.numMotives+ri.numMinors;
    for(let i=0;i<preCount;i++){
      rt=baseTc.whnf(rt);if(rt.kind!=='forall')throw new KernelError(`generated recursor '${nameToString(ri.name)}' has malformed binder metadata`);
-     const v=addLocal(base,rt.name,rt.type,rt.binderInfo);pre.push(v);\n     // TypeChecker snapshots LocalContext, so refresh after extending the recursor telescope.\n     baseTc=tc(work,base,!!d.isUnsafe,ri.levelParams);rt=baseTc.whnf(instantiate1(rt.body,v.expr));
+     const v=addLocal(base,rt.name,rt.type,rt.binderInfo);pre.push(v);
+     // TypeChecker snapshots LocalContext, so refresh after extending the recursor telescope.
+     baseTc=tc(work,base,!!d.isUnsafe,ri.levelParams);rt=baseTc.whnf(instantiate1(rt.body,v.expr));
    }
    const params=pre.slice(0,ri.numParams).map(x=>x.expr);
    const recPre=mkAppN(constant(ri.name,ri.levelParams.map(levelParam)),pre.map(x=>x.expr));
@@ -226,7 +228,8 @@ export function validateInstalledRecursorsByReduction(work:Environment,d:Inducti
      }
      const fields:OpenVar[]=[];
      while((ct=checker.whnf(ct)).kind==='forall'){
-       const v=addLocal(lctx,ct.name,ct.type,ct.binderInfo);fields.push(v);\n       checker=tc(work,lctx,!!d.isUnsafe,ri.levelParams);ct=instantiate1(ct.body,v.expr);
+       const v=addLocal(lctx,ct.name,ct.type,ct.binderInfo);fields.push(v);
+       checker=tc(work,lctx,!!d.isUnsafe,ri.levelParams);ct=instantiate1(ct.body,v.expr);
      }
      ct=checker.whnf(ct);const result=appView(ct);
      if(result.fn.kind!=='const'||!nameEq(result.fn.name,it.name)||result.args.length!==ri.numParams+ri.numIndices)

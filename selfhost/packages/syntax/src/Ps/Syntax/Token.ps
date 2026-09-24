@@ -9,6 +9,40 @@ inductive PsTokenKind where {
   | endOfInput;
 };
 
+def psTokenKindEq(left : PsTokenKind, right : PsTokenKind) : Bool :=
+  match left with {
+    | .identifier =>
+      match right with {
+        | .identifier => true;
+        | _ => false;
+      };
+    | .natural =>
+      match right with {
+        | .natural => true;
+        | _ => false;
+      };
+    | .string =>
+      match right with {
+        | .string => true;
+        | _ => false;
+      };
+    | .character =>
+      match right with {
+        | .character => true;
+        | _ => false;
+      };
+    | .symbol =>
+      match right with {
+        | .symbol => true;
+        | _ => false;
+      };
+    | .endOfInput =>
+      match right with {
+        | .endOfInput => true;
+        | _ => false;
+      };
+  };
+
 structure PsToken where {
   kind : PsTokenKind;
   text : String;

@@ -1266,6 +1266,7 @@ console.log('ok - @proofscript/elab match branch Nat notation meta instantiation
 {
   const env=makeNatNotationEnvironment();
   const result=elaborateV061Declarations(parseV061Module(
+    'inductive Bool where { | false; | true; } '+
     'function chooseBool(flag : Bool) : Nat := '+
     'match flag with { | true => 1; | false => 2; };',
   ),env);

@@ -693,6 +693,65 @@ console.log('ok - psc verified Lean-subset run filesystem pipeline');
 
 
 {
+  const cases=[
+    {
+      entry:'src/main.ps',
+      source:
+        'function main(s : String) : Nat := '+
+        'String.Internal.length(s);\n',
+      sourceKind:'proofscript',
+    },
+    {
+      entry:'src/main.lean',
+      source:'def main (s : String) : Nat := String.Internal.length s\n',
+      sourceKind:'lean-subset',
+    },
+  ] as const;
+  for(const item of cases){
+    const directory=await mkdtemp(
+      join(tmpdir(),'proofscript-sh1-text-run-'),
+    );
+    try{
+      await mkdir(join(directory,'src'),{recursive:true});
+      await writeFile(
+        join(directory,'psconfig.json'),
+        JSON.stringify({
+          languageVersion:'0.7',
+          entry:item.entry,
+          compilerOptions:{
+            outDir:'dist',
+            emitTypeScript:true,
+            declaration:true,
+            sourceMap:true,
+          },
+        },null,2)+'\n',
+        'utf8',
+      );
+      await writeFile(
+        join(directory,item.entry),
+        item.source,
+        'utf8',
+      );
+      clearVerifiedProjectModuleCache();
+      const result=await runCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        passthrough:['𝒫x'],
+      });
+      equal(result.mainResult,'2');
+      equal(result.semanticPipeline,'verified-core');
+      equal(result.proofStatus,'kernel-verified');
+      equal(result.sourceKind,item.sourceKind);
+    }finally{
+      await rm(directory,{recursive:true,force:true});
+    }
+  }
+}
+console.log('ok - psc SH1 dual-source Unicode String.length runtime');
+
+
+{
   const directory=await mkdtemp(
     join(tmpdir(),'proofscript-verified-structure-abi-'),
   );

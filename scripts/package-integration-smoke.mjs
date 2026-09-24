@@ -1118,7 +1118,7 @@ assert(
   'structural recursive function lost its verified generic signature',
 );
 assert(
-  verifiedLength.typeScript.includes('1n + length<T0>(tail)'),
+  verifiedLength.typeScript.includes('1n + length(tail)'),
   'recursor induction hypothesis did not lower to structural runtime self-call',
 );
 assert(
@@ -1137,7 +1137,7 @@ const verifiedCountFrom=compileVerifiedSource(
   'verified-count-from.ts',
 );
 assert(
-  verifiedCountFrom.typeScript.includes('countFrom<T0>(base, tail)'),
+  verifiedCountFrom.typeScript.includes('countFrom(base, tail)'),
   'recursor IH did not preserve invariant runtime parameters in self-call',
 );
 assert(
@@ -1162,7 +1162,7 @@ assert(
   'higher-order generic recursive signature was not preserved',
 );
 assert(
-  verifiedGenericMap.typeScript.includes('map<T0, T1>(f, tail)'),
+  verifiedGenericMap.typeScript.includes('map(f, tail)'),
   'generic map IH did not lower to a structural self-call',
 );
 assert(

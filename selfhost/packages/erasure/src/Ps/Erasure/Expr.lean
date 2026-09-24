@@ -3,6 +3,7 @@ import Ps.Erasure.Basic
 structure PsErasureAppliedArguments where
   typeArgumentsRev : List PsVerifiedIrType
   runtimeArgumentsRev : List PsVerifiedIrExpr
+  remainingType : PsExpr
 
 def psEraseApplicationArguments
     (erase :
@@ -13,7 +14,12 @@ def psEraseApplicationArguments
     List PsExpr ->
     PsErasureAppliedArguments ->
     Except PsErasureError PsErasureAppliedArguments
-  | _, [], state => Except.ok state
+  | functionType, [], state =>
+      Except.ok {
+        typeArgumentsRev := state.typeArgumentsRev
+        runtimeArgumentsRev := state.runtimeArgumentsRev
+        remainingType := functionType
+      }
   | functionType, argument :: rest, state =>
       match
           psWhnf
@@ -42,6 +48,7 @@ def psEraseApplicationArguments
                         erasedType :: state.typeArgumentsRev
                       runtimeArgumentsRev :=
                         state.runtimeArgumentsRev
+                      remainingType := state.remainingType
                     }
           | .proof =>
               psEraseApplicationArguments
@@ -66,8 +73,145 @@ def psEraseApplicationArguments
                         state.typeArgumentsRev
                       runtimeArgumentsRev :=
                         erasedArgument :: state.runtimeArgumentsRev
+                      remainingType := state.remainingType
                     }
       | _ => Except.error PsErasureError.unsupportedApplication
+
+def psEraseFinishApplicationWithFuel
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (fn : PsVerifiedIrExpr)
+    (typeArguments : List PsVerifiedIrType) :
+    Nat ->
+    PsExpr ->
+    List PsVerifiedIrParameter ->
+    List PsVerifiedIrExpr ->
+    Except PsErasureError PsVerifiedIrExpr
+  | 0, _, _, _ =>
+      Except.error PsErasureError.fuelExhausted
+  | fuel + 1, functionType, parametersRev, runtimeArguments =>
+      match
+          psWhnf
+            environment
+            psMetaEmpty
+            scope.localContext
+            functionType with
+      | .forallE name domain body binder =>
+          match
+              psErasureClassifyBinder
+                environment
+                scope.localContext
+                domain with
+          | .type =>
+              Except.error PsErasureError.unsupportedApplication
+          | .proof =>
+              let pushed :=
+                psLocalPushBinding
+                  scope.localContext
+                  name
+                  domain
+                  binder
+              let nextScope : PsErasureScope := {
+                localContext := pushed.context
+                runtimeLocals := scope.runtimeLocals
+                typeLocals := scope.typeLocals
+                erasedLocals := pushed.id :: scope.erasedLocals
+                declarationNames := scope.declarationNames
+                runtimeConstructors := scope.runtimeConstructors
+                runtimeRecursors := scope.runtimeRecursors
+                runtimeStructures := scope.runtimeStructures
+                runtimeStructureConstructors :=
+                  scope.runtimeStructureConstructors
+                runtimeExpressions := scope.runtimeExpressions
+                currentDefinition := scope.currentDefinition
+              }
+              psEraseFinishApplicationWithFuel
+                environment
+                nextScope
+                fn
+                typeArguments
+                fuel
+                (psExprInstantiate1
+                  body
+                  (PsExpr.fvar pushed.id))
+                parametersRev
+                runtimeArguments
+          | .runtime =>
+              match psEraseRuntimeType environment scope domain with
+              | Except.error error => Except.error error
+              | Except.ok parameterType =>
+                  let pushed :=
+                    psLocalPushBinding
+                      scope.localContext
+                      name
+                      domain
+                      binder
+                  let parameterName :=
+                    psErasureSafeIdentifier
+                      (psNameToString name ++ "$" ++ toString pushed.id)
+                      ("arg$" ++ toString pushed.id)
+                  let nextScope : PsErasureScope := {
+                    localContext := pushed.context
+                    runtimeLocals :=
+                      (pushed.id, parameterName) :: scope.runtimeLocals
+                    typeLocals := scope.typeLocals
+                    erasedLocals := scope.erasedLocals
+                    declarationNames := scope.declarationNames
+                    runtimeConstructors := scope.runtimeConstructors
+                    runtimeRecursors := scope.runtimeRecursors
+                    runtimeStructures := scope.runtimeStructures
+                    runtimeStructureConstructors :=
+                      scope.runtimeStructureConstructors
+                    runtimeExpressions := scope.runtimeExpressions
+                    currentDefinition := scope.currentDefinition
+                  }
+                  psEraseFinishApplicationWithFuel
+                    environment
+                    nextScope
+                    fn
+                    typeArguments
+                    fuel
+                    (psExprInstantiate1
+                      body
+                      (PsExpr.fvar pushed.id))
+                    ({
+                      name := parameterName
+                      type := parameterType
+                    } :: parametersRev)
+                    (runtimeArguments ++
+                      [PsVerifiedIrExpr.var parameterName])
+      | _ =>
+          let body :=
+            if runtimeArguments.isEmpty then
+              fn
+            else
+              PsVerifiedIrExpr.call
+                fn
+                typeArguments
+                runtimeArguments
+          match parametersRev.reverse with
+          | [] => Except.ok body
+          | parameters =>
+              Except.ok
+                (PsVerifiedIrExpr.lambda parameters body)
+
+def psEraseFinishApplication
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (fn : PsVerifiedIrExpr)
+    (typeArguments : List PsVerifiedIrType)
+    (runtimeArguments : List PsVerifiedIrExpr)
+    (remainingType : PsExpr) :
+    Except PsErasureError PsVerifiedIrExpr :=
+  psEraseFinishApplicationWithFuel
+    environment
+    scope
+    fn
+    typeArguments
+    4096
+    remainingType
+    []
+    runtimeArguments
 
 def psEraseMappedIntrinsic
     (erase :
@@ -1081,6 +1225,7 @@ def psEraseRuntimeExprWithFuel
                                             {
                                               typeArgumentsRev := []
                                               runtimeArgumentsRev := []
+                                              remainingType := headType
                                             } with
                                       | Except.error error =>
                                           Except.error error
@@ -1089,14 +1234,13 @@ def psEraseRuntimeExprWithFuel
                                             applied.typeArgumentsRev.reverse
                                           let runtimeArguments :=
                                             applied.runtimeArgumentsRev.reverse
-                                          if runtimeArguments.isEmpty then
-                                            Except.ok loweredHead
-                                          else
-                                            Except.ok
-                                              (PsVerifiedIrExpr.call
-                                                loweredHead
-                                                typeArguments
-                                                runtimeArguments)
+                                          psEraseFinishApplication
+                                            environment
+                                            scope
+                                            loweredHead
+                                            typeArguments
+                                            runtimeArguments
+                                            applied.remainingType
       | .lam name type body binder =>
           let kind :=
             psErasureClassifyBinder

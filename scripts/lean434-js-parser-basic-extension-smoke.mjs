@@ -65,10 +65,21 @@ const metadata=new Lean434RuntimeMetadataIndex({
 });
 const evaluator=new Lean434Evaluator(replay.env,{metadata});
 const runner=new Lean434InitializerRunner(evaluator,metadata);
-const report=runner.runAll();
-if(report.executed.length!==3){
+const executed=[];
+for(const entry of initializers){
+  console.log('begin initializer - '+entry.declaration);
+  const report=runner.runSelected([entry]);
+  if(report.executed.length!==1||report.skipped.length!==0){
+    throw new Error(
+      'initializer did not execute exactly once: '+entry.declaration,
+    );
+  }
+  executed.push(...report.executed);
+  console.log('end initializer - '+entry.declaration);
+}
+if(executed.length!==3){
   throw new Error(
-    'expected three initializer executions, got '+report.executed.length,
+    'expected three initializer executions, got '+executed.length,
   );
 }
 
@@ -112,7 +123,7 @@ if(!categoryExt.name.includes('EnvExtension')){
   );
 }
 
-const second=runner.runAll();
+const second=runner.runSelected(initializers);
 if(second.executed.length!==0||second.skipped.length!==3){
   throw new Error('selected Parser.Basic initializers did not run once');
 }

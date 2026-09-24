@@ -191,70 +191,51 @@ Exit condition is met:
 
 > There is exactly one ProofScript semantic compiler path on `main`.
 
-## SH1 — executable text foundation — IN PROGRESS
+## SH1 — executable text foundation — COMPLETED 2026-09-24
 
-Finish Lean-compatible executable support for:
+Lean-compatible executable text support is now sufficient for bootstrap compiler
+work and remains on the single verified semantic lane.
 
-- `Char`;
-- `String` traversal and character access;
-- length/position operations;
-- slicing/substrings;
-- comparison;
-- concatenation and an efficient builder strategy;
-- character classification needed by a lexer;
-- source-position/span data.
-
-Completed 2026-09-24:
+Closed evidence:
 
 - `Char` is a first-class verified runtime primitive through checked core,
   erasure, verified IR, TypeScript emission, CLI ABI, and explicit FFI;
-- the real Lean 4.34 `Char.ofNat` constant lowers to a verified intrinsic;
-- emitted JavaScript preserves Lean's Unicode-scalar rule, including NUL for
-  surrogate/out-of-range inputs;
-- executable regressions cover ASCII, non-BMP Unicode, and invalid scalar
-  behavior;
-- a dedicated Lean 4.34 text-foundation export recipe now roots only the
-  compiler-required Char/String/String.Pos.Raw operations instead of adopting
-  a broad Std environment;
-- the oversized 17+ MiB public-String closure was replaced by an exact
-  `Init.Prelude` delta. Exact Lean 4.34 generation plus pskernel replay is
-  green at 5,799 replay lines, 48 declaration records and 50 constants added
-  to the 2,324-constant Prelude base;
-- the pinned delta is about 240 KiB and is composed onto `Init.Prelude` by the
-  normal verified compiler environment provider, avoiding the previous Node
-  heap failure while preserving exact kernel-facing declarations;
-- checked-core -> erasure -> verified-IR -> TypeScript support is green for
-  `Char.toNat`, `String.push`, `String.singleton`,
-  `String.Internal.length`, and `String.Internal.append`;
-- the SH1 text slice passes continuous dual-source parity: canonical
-  `.ps -> .lean -> .ps` sources converge on equal checked admissions, compiler
-  IR, TypeScript, JavaScript and declarations;
-- executable `.ps` and `.lean` regressions both evaluate the Unicode string
-  `"𝒫x"` to Lean code-point length 2.
-
-Current gate:
-
-- represent executable `String.Pos.Raw` by its exact erased payload, the UTF-8
-  byte-offset `Nat`, while retaining the real Lean structure in checked core;
-- add verified runtime lowering for `String.utf8ByteSize`,
+- `Char.ofNat` and `Char.toNat` lower through checked Lean constants, with
+  Unicode-scalar behavior covered by executable regressions;
+- the exact Lean 4.34 text-foundation delta is pinned and reproducibly replayed
+  over `Init.Prelude`, while remaining small enough for the normal compiler
+  environment;
+- `String.push`, `String.singleton`, `String.Internal.length`,
+  `String.Internal.append`, `String.utf8ByteSize`,
   `String.Internal.next`, `String.Internal.get`,
-  `String.Internal.atEnd`, and `String.Internal.extract`;
-- build character-classification helpers as portable ProofScript/Lean library
-  code over `Char.toNat` where possible rather than proliferating backend
-  primitives;
-- add source-position/span utilities and a nontrivial lexer-style dual-source
-  fixture exercising ASCII plus multi-byte Unicode traversal and slicing.
+  `String.Internal.atEnd`, and `String.Internal.extract` execute through
+  checked core -> erasure -> verified IR -> TypeScript -> JavaScript;
+- `String.Pos.Raw` retains its real Lean checked-core structure and erases to
+  its exact runtime payload, the UTF-8 byte-offset `Nat`; constructor and
+  `byteIdx` projection round-trip through the verified compiler;
+- primitive `Char` and `String` Boolean equality are checked in Lean terms
+  and normalized after checking to verified equality intrinsics;
+- executable dual-source regressions cover code-point length and UTF-8
+  next/get/extract/atEnd behavior on multi-byte Unicode;
+- `stdlib/src/ProofScript/Text/Lexer.ps` now provides portable
+  `SourceSpan`, ASCII digit/identifier/whitespace classification, raw-position
+  helpers, slicing, and a nontrivial identifier scanner;
+- that lexer module is continuously gated through canonical
+  `.ps -> .lean -> .ps` translation with equal checked-core and compiler-IR
+  fingerprints and equal TypeScript/JavaScript/declaration output;
+- full `npm test` and `anti-drift` are green at the SH1 closeout head.
 
-The original oversized dependency closure remains historical assurance evidence,
-not a compiler startup artifact. The compact pinned delta is the certified SH1
-compiler-base extension and must continue to regenerate from exact Lean 4.34
-and replay successfully over the pinned `Init.Prelude` base. No synthetic
-standard-library axioms may bypass this gate.
+The compact pinned Lean delta remains part of SH1 assurance and must continue
+to regenerate from exact Lean 4.34. No synthetic standard-library axioms may
+replace that evidence.
 
-Exit test: a nontrivial lexer utility can be authored in supported `.lean`
-and `.ps` and run through verified JavaScript emission.
+Exit condition is met:
 
-## SH2 — compiler collections
+> A nontrivial lexer utility is authored in ProofScript, translated to the
+> supported Lean subset, admitted by pskernel, and emitted through verified
+> JavaScript with dual-source semantic parity.
+
+## SH2 — compiler collections — IN PROGRESS
 
 Provide verified, generic:
 

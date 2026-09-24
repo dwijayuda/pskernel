@@ -1002,37 +1002,6 @@ function makeNatNotationEnvironment():Environment {
     name:Nat,
     levelParams:[],
     type:sort(levelSucc(levelZero)),
-    numParams:0,
-    numIndices:0,
-    all:[Nat],
-    ctors:[zero,succ],
-    numNested:0,
-    isRec:true,
-    isReflexive:false,
-  });
-  env.add({
-    kind:'constructor',
-    name:zero,
-    levelParams:[],
-    type:constant(Nat),
-    induct:Nat,
-    cidx:0,
-    numParams:0,
-    numFields:0,
-  });
-  env.add({
-    kind:'constructor',
-    name:succ,
-    levelParams:[],
-    type:forallE(
-      nameFromDotted('n'),
-      constant(Nat),
-      constant(Nat),
-    ),
-    induct:Nat,
-    cidx:1,
-    numParams:0,
-    numFields:1,
   });
   const binaryType=forallE(
     nameFromDotted('x'),

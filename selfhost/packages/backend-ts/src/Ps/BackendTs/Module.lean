@@ -6,19 +6,19 @@ structure PsTsFreshNameResult where
 
 def psTsFreshInternalWithFuel
     (used : List String)
-    (prefix : String) :
+    (namePrefix : String) :
     Nat -> Nat -> PsTsFreshNameResult
   | index, 0 =>
       {
-        name := prefix ++ "overflow"
+        name := namePrefix ++ "overflow"
         nextIndex := index + 1
       }
   | index, attempts + 1 =>
-      let candidate := prefix ++ toString index
+      let candidate := namePrefix ++ toString index
       if used.contains candidate then
         psTsFreshInternalWithFuel
           used
-          prefix
+          namePrefix
           (index + 1)
           attempts
       else
@@ -29,9 +29,9 @@ def psTsFreshInternalWithFuel
 
 def psTsFreshInternal
     (used : List String)
-    (prefix : String)
+    (namePrefix : String)
     (index : Nat) : PsTsFreshNameResult :=
-  psTsFreshInternalWithFuel used prefix index 4096
+  psTsFreshInternalWithFuel used namePrefix index 4096
 
 structure PsTsSymbolMapState where
   used : List String
@@ -39,14 +39,14 @@ structure PsTsSymbolMapState where
   entriesRev : List (String × String)
 
 def psTsBuildSymbolMap
-    (prefix : String) :
+    (namePrefix : String) :
     List String -> PsTsSymbolMapState -> PsTsSymbolMapState
   | [], state => state
   | name :: rest, state =>
       let fresh :=
-        psTsFreshInternal state.used prefix state.nextIndex
+        psTsFreshInternal state.used namePrefix state.nextIndex
       psTsBuildSymbolMap
-        prefix
+        namePrefix
         rest
         {
           used := fresh.name :: state.used
@@ -57,8 +57,8 @@ def psTsBuildSymbolMap
 def psTsModuleTopLevelNames
     (module : PsVerifiedIrModule) : List String :=
   module.declarations.map (fun declaration => declaration.name)
-    ++ module.structures.map (fun structure => structure.name)
-    ++ module.inductives.map (fun inductive => inductive.name)
+    ++ module.structures.map (fun structure => structureInfo.name)
+    ++ module.inductives.map (fun inductive => inductiveInfo.name)
 
 def psTsBuildBrandMap
     (module : PsVerifiedIrModule) :
@@ -66,7 +66,7 @@ def psTsBuildBrandMap
   let state :=
     psTsBuildSymbolMap
       "__ps$brand$"
-      (module.structures.map (fun structure => structure.name))
+      (module.structures.map (fun structure => structureInfo.name))
       {
         used := psTsModuleTopLevelNames module
         nextIndex := 0
@@ -80,7 +80,7 @@ def psTsBuildTagMap
   let state :=
     psTsBuildSymbolMap
       "__ps$tag$"
-      (module.inductives.map (fun inductive => inductive.name))
+      (module.inductives.map (fun inductive => inductiveInfo.name))
       {
         used := psTsModuleTopLevelNames module
         nextIndex := 0
@@ -99,11 +99,11 @@ def psTsGenericNames
 
 def psTsEmitStructure
     (brands : List (String × String))
-    (structure : PsVerifiedIrStructure) :
+    (structureInfo : PsVerifiedIrStructure) :
     Except PsTsEmitError (List String) :=
-  match psTsLookup brands structure.name with
+  match psTsLookup brands structureInfo.name with
   | none =>
-      Except.error (PsTsEmitError.unknownStructure structure.name)
+      Except.error (PsTsEmitError.unknownStructure structureInfo.name)
   | some brand =>
       let printField :=
         fun field =>
@@ -112,22 +112,22 @@ def psTsEmitStructure
           | Except.ok type =>
               Except.ok
                 ("readonly " ++ field.name ++ ": " ++ type ++ ";")
-      match structure.fields.mapM printField with
+      match structureInfo.fields.mapM printField with
       | Except.error error => Except.error error
       | Except.ok fields =>
           let generic :=
-            psTsGenericNames structure.typeParameters
+            psTsGenericNames structureInfo.typeParameters
           Except.ok [
             "const " ++ brand ++ ": unique symbol = Symbol(" ++
-              psJsonQuote ("ProofScript." ++ structure.name) ++ ");",
-            "export interface " ++ structure.name ++ generic ++
+              psJsonQuote ("ProofScript." ++ structureInfo.name) ++ ");",
+            "export interface " ++ structureInfo.name ++ generic ++
               " { readonly [" ++ brand ++ "]: true; " ++
               psTsJoin " " fields ++ " }"
           ]
 
 def psTsEmitConstructorVariant
     (tag : String)
-    (constructor : PsVerifiedIrConstructor) :
+    (constructorInfo : PsVerifiedIrConstructor) :
     Except PsTsEmitError String :=
   let printField :=
     fun field =>
@@ -136,26 +136,26 @@ def psTsEmitConstructorVariant
       | Except.ok type =>
           Except.ok
             ("readonly " ++ field.name ++ ": " ++ type ++ ";")
-  match constructor.fields.mapM printField with
+  match constructorInfo.fields.mapM printField with
   | Except.error error => Except.error error
   | Except.ok fields =>
       Except.ok
         ("{ readonly [" ++ tag ++ "]: " ++
-          psJsonQuote constructor.name ++ "; " ++
+          psJsonQuote constructorInfo.name ++ "; " ++
           psTsJoin " " fields ++ " }")
 
 def psTsEmitConstructorValue
     (tag : String)
-    (inductive : PsVerifiedIrInductive)
-    (constructor : PsVerifiedIrConstructor) :
+    (inductiveInfo : PsVerifiedIrInductive)
+    (constructorInfo : PsVerifiedIrConstructor) :
     Except PsTsEmitError String :=
-  let generic := psTsGenericNames inductive.typeParameters
-  let resultType := inductive.name ++ generic
-  if inductive.typeParameters.isEmpty && constructor.fields.isEmpty then
+  let generic := psTsGenericNames inductiveInfo.typeParameters
+  let resultType := inductiveInfo.name ++ generic
+  if inductiveInfo.typeParameters.isEmpty && constructorInfo.fields.isEmpty then
     Except.ok
-      ("  " ++ psJsonQuote constructor.name ++
+      ("  " ++ psJsonQuote constructorInfo.name ++
         ": { [" ++ tag ++ "]: " ++
-        psJsonQuote constructor.name ++ " } as " ++
+        psJsonQuote constructorInfo.name ++ " } as " ++
         resultType ++ ",")
   else
     let printParameter :=
@@ -164,11 +164,11 @@ def psTsEmitConstructorValue
         | Except.error error => Except.error error
         | Except.ok type =>
             Except.ok type
-    match constructor.fields.mapM printParameter with
+    match constructorInfo.fields.mapM printParameter with
     | Except.error error => Except.error error
     | Except.ok fieldTypes =>
         let parameterNames :=
-          List.range constructor.fields.length
+          List.range constructorInfo.fields.length
             |>.map (fun index => "__field" ++ toString index)
         let parameters :=
           parameterNames.zip fieldTypes
@@ -176,7 +176,7 @@ def psTsEmitConstructorValue
               (fun entry =>
                 entry.1 ++ ": " ++ entry.2)
         let fields :=
-          constructor.fields.zip parameterNames
+          constructorInfo.fields.zip parameterNames
             |>.map
               (fun entry =>
                 entry.1.name ++ ": " ++ entry.2)
@@ -184,40 +184,40 @@ def psTsEmitConstructorValue
           if fields.isEmpty then ""
           else ", " ++ psTsJoin ", " fields
         Except.ok
-          ("  " ++ psJsonQuote constructor.name ++ ": " ++ generic ++
+          ("  " ++ psJsonQuote constructorInfo.name ++ ": " ++ generic ++
             "(" ++ psTsJoin ", " parameters ++ "): " ++
             resultType ++ " => ({ [" ++ tag ++ "]: " ++
-            psJsonQuote constructor.name ++ suffix ++
+            psJsonQuote constructorInfo.name ++ suffix ++
             " } as " ++ resultType ++ "),")
 
 def psTsEmitInductive
     (tags : List (String × String))
-    (inductive : PsVerifiedIrInductive) :
+    (inductiveInfo : PsVerifiedIrInductive) :
     Except PsTsEmitError (List String) :=
-  match psTsLookup tags inductive.name with
+  match psTsLookup tags inductiveInfo.name with
   | none =>
-      Except.error (PsTsEmitError.unknownInductive inductive.name)
+      Except.error (PsTsEmitError.unknownInductive inductiveInfo.name)
   | some tag =>
-      match inductive.constructors.mapM
+      match inductiveInfo.constructors.mapM
           (psTsEmitConstructorVariant tag) with
       | Except.error error => Except.error error
       | Except.ok variants =>
-          match inductive.constructors.mapM
-              (psTsEmitConstructorValue tag inductive) with
+          match inductiveInfo.constructors.mapM
+              (psTsEmitConstructorValue tag inductiveInfo) with
           | Except.error error => Except.error error
           | Except.ok constructorValues =>
               let generic :=
-                psTsGenericNames inductive.typeParameters
+                psTsGenericNames inductiveInfo.typeParameters
               let typeLine :=
-                "export type " ++ inductive.name ++ generic ++
+                "export type " ++ inductiveInfo.name ++ generic ++
                   " =\n  | " ++ psTsJoin "\n  | " variants ++ ";"
               Except.ok
                 ([
                   "const " ++ tag ++ ": unique symbol = Symbol(" ++
                     psJsonQuote
-                      ("ProofScript." ++ inductive.name ++ ".tag") ++ ");",
+                      ("ProofScript." ++ inductiveInfo.name ++ ".tag") ++ ");",
                   typeLine,
-                  "export const " ++ inductive.name ++ " = {"
+                  "export const " ++ inductiveInfo.name ++ " = {"
                 ] ++ constructorValues ++ ["} as const;"])
 
 def psTsEmitImport

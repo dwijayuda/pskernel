@@ -606,6 +606,21 @@ new Map<string,Lean434JsExternImplementation>([
     lean_string_length(value as LeanString)],
   ['lean_string_utf8_byte_size',(value)=>
     lean_string_utf8_byte_size(value as LeanString)],
+  ['lean_st_mk_ref',(value)=>
+    lean_st_mk_ref(value)],
+  ['lean_st_ref_get',(ref)=>
+    lean_st_ref_get(ref as LeanRef<unknown>)],
+  ['lean_st_ref_set',(ref,value)=>
+    lean_st_ref_set(ref as LeanRef<unknown>,value)],
+  ['lean_st_ref_swap',(ref,value)=>
+    lean_st_ref_swap(ref as LeanRef<unknown>,value)],
+  ['lean_st_ref_take',(ref)=>
+    lean_st_ref_take(ref as LeanRef<unknown>)],
+  ['lean_st_ref_ptr_eq',(a,b)=>
+    lean_st_ref_ptr_eq(
+      a as LeanRef<unknown>,
+      b as LeanRef<unknown>,
+    )],
 ]);
 
 export function invokeLean434JsExtern(

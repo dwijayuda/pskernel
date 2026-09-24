@@ -135,7 +135,7 @@ export class Lean434InitializerRunner {
     const action=this.evaluator.evaluate(
       constant(actionKernelName),
     );
-    const result=this.evaluator.runIOAction(action);
+    const result=this.evaluator.runInitializerAction(action);
 
     if(!entry.ioUnit){
       this.evaluator.setRuntimeGlobal(

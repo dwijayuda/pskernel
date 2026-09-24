@@ -2,6 +2,11 @@ import PSC1Kernel.Expr
 
 namespace PSC1Kernel
 
+def listGet? : List α → Nat → Option α
+  | [], _ => none
+  | x :: _, 0 => some x
+  | _ :: xs, n + 1 => listGet? xs n
+
 partial def Expr.liftLooseBVars (e : Expr) (start amount : Nat) : Expr :=
   if amount == 0 then e
   else
@@ -39,7 +44,7 @@ partial def Expr.instantiateAt
     if i < s then e
     else
       let relative := i - s
-      match subst.get? relative with
+      match listGet? subst relative with
       | some replacement => replacement.liftLooseBVars 0 offset
       | none => .bvar (i - subst.length)
   | .app f a =>

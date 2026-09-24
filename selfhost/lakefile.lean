@@ -52,7 +52,7 @@ lean_lib PsEnvironment where
 
 lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
-  roots := [
+  roots := #[
     `Ps.CompilerIr.Model
   ]
 

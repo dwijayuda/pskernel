@@ -5,6 +5,12 @@ inductive PsKernelOrder where
   | equal
   | greater
 
+instance psKernelOrderInhabited : Inhabited PsKernelOrder where
+  default := PsKernelOrder.equal
+
+instance psKernelLevelInhabited : Inhabited PsLevel where
+  default := PsLevel.zero
+
 inductive PsKernelNameComponent where
   | text (value : String)
   | numeral (value : Nat)
@@ -14,7 +20,7 @@ structure PsKernelLevelOffset where
   offset : Nat
 
 structure PsKernelExplicitSplit where
-  prefix : List PsLevel
+  explicitLevels : List PsLevel
   rest : List PsLevel
 
 def psKernelNatCompare (left : Nat) (right : Nat) : PsKernelOrder :=
@@ -252,13 +258,13 @@ def psKernelLevelSort : List PsLevel -> List PsLevel
       psKernelLevelInsertSorted level (psKernelLevelSort rest)
 
 def psKernelLevelSplitExplicit : List PsLevel -> PsKernelExplicitSplit
-  | [] => { prefix := [], rest := [] }
+  | [] => { explicitLevels := [], rest := [] }
   | level :: rest =>
       if psKernelLevelIsExplicit level then
         let split := psKernelLevelSplitExplicit rest
-        { prefix := level :: split.prefix, rest := split.rest }
+        { explicitLevels := level :: split.explicitLevels, rest := split.rest }
       else
-        { prefix := [], rest := level :: rest }
+        { explicitLevels := [], rest := level :: rest }
 
 def psKernelLevelLast : List PsLevel -> Option PsLevel
   | [] => none
@@ -277,7 +283,7 @@ def psKernelLevelAnyOffsetAtLeast
 def psKernelLevelPrepareSortedMax
     (levels : List PsLevel) : List PsLevel :=
   let split := psKernelLevelSplitExplicit levels
-  match psKernelLevelLast split.prefix with
+  match psKernelLevelLast split.explicitLevels with
   | none => split.rest
   | some explicitLevel =>
       let explicitOffset := (psKernelLevelToOffset explicitLevel).offset

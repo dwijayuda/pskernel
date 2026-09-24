@@ -177,13 +177,35 @@ The direct TypeScript suite passes **97/97** cases. In addition to corpus and di
 The official Lean 4.34 adversarial oracle passes **21 expected-success + 1 expected-rejection** kernel regression files. This includes projection metadata checks, reserved nested names, duplicate mutual declarations, imax/Prop elimination behavior, non-transitive algorithmic-defeq cache regressions, recursion/heartbeat limits, kernel error recovery, proposition detection, string-cost behavior, Fin fold kernel reduction, and rejection of the Quot-name-collision exploit.
 
 
-## Arena static correctness
+## Lean Kernel Arena release correctness
 
-An external Lean Kernel Arena corpus runner is available via `scripts/arena-static-oracle.mjs`. The current verified non-performance sweep is **170/170** expected verdicts. This gate found and regression-locked two issues: checking the structure argument during projection typing, and supporting valid sparse/out-of-order lean4export intern IDs. Performance benchmarks are tracked separately from semantic correctness.
+The compact external Lean Kernel Arena corpus is pinned by `ARENA_LOCK.json`.
+The current blocking non-performance sweep passed **170/170** expected verdicts
+in GitHub Actions run `36055797753`, job `107822257575`:
 
-## Full Std release gate
+- 101 expected accepts;
+- 69 expected rejects;
+- 0 timeouts.
 
-The preferred exhaustive Std path is the canonical module-order stream (`npm run oracle:std-full`), which checks each declaration once into a shared environment and discards replay-local intern tables/caches between module shards. Dependency-closure batching remains diagnostic tooling for isolating failures, not the primary release-completion definition.
+The pinned full compact corpus contains 193 cases. Its content digest is
+`7d1671a0ddc5e0b4c7d2f03ca64448b3a0a0a68446e13ebb2b916ef328493ec9`;
+the blocking 170-case correctness digest is
+`e97fb00c846611df3b0233e545687f45df2ea241ac4cdeaa5c5705064c09a145`.
+
+Arena cases may record older Lean versions; only the Arena adapter accepts each
+fixture's exact recorded version/git hash. The production replay boundary remains
+pinned to final Lean 4.34.0.
+
+## Release assurance versus soak/research
+
+The production release-assurance profile is closed by direct kernel/anti-drift,
+official differential/adversarial tests, bounded real Lean/Std corpora,
+`std-release-assurance-v1`, and the pinned Arena 170-case correctness gate.
+
+Monolithic canonical Full Std and Full Lean shared-environment replays remain
+valuable soak tests but are not release blockers. The independent compiler-IR
+native provider and formal-equivalence proof are research milestones. None of
+those stronger results is implied by the release-assurance status.
 
 
 ### Deep-term runtime hardening

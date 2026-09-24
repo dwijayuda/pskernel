@@ -21,8 +21,13 @@ const textIntrinsics=new Map<
       |'string.push'
       |'string.singleton'
       |'string.length'
-      |'string.append';
-    readonly arity:1|2;
+      |'string.append'
+      |'string.utf8ByteSize'
+      |'string.next'
+      |'string.get'
+      |'string.atEnd'
+      |'string.extract';
+    readonly arity:1|2|3;
   }
 >([
   ['Char.toNat',{operation:'char.toNat',arity:1}],
@@ -30,6 +35,11 @@ const textIntrinsics=new Map<
   ['String.singleton',{operation:'string.singleton',arity:1}],
   ['String.Internal.length',{operation:'string.length',arity:1}],
   ['String.Internal.append',{operation:'string.append',arity:2}],
+  ['String.utf8ByteSize',{operation:'string.utf8ByteSize',arity:1}],
+  ['String.Internal.next',{operation:'string.next',arity:2}],
+  ['String.Internal.get',{operation:'string.get',arity:2}],
+  ['String.Internal.atEnd',{operation:'string.atEnd',arity:2}],
+  ['String.Internal.extract',{operation:'string.extract',arity:3}],
 ]);
 
 export function tryEraseTextPrimitiveApplication(

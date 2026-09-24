@@ -233,8 +233,16 @@ Implement the compiler-oriented effect foundation:
 - `Reader` / `ReaderT`;
 - usable Lean-compatible `do` notation;
 - bind/pure sequencing;
+- Lean-compatible `return` inside `do`;
+- `throw` / `tryCatch` and bounded `failure` / `orElse` behavior;
+- cheap control-flow combinators such as `when` / `unless`;
 - `OptionT` or additional transformers when the census or a compiler module
   requires them.
+
+The first bootstrap profile should also provide the monad-lifting operations
+actually needed by the selected Reader/State/Except stack. Do not reproduce
+Lean's full transformer/typeclass hierarchy unless the compiler workload
+requires it.
 
 Also provide transactional state operations required by parsers and
 elaboration:
@@ -289,9 +297,17 @@ Implement the practical Lean iteration conveniences identified by the census
 when they can be desugared without enlarging the trusted core:
 
 - `let mut`;
+- reassignment of such locals inside the bounded control-flow model;
 - `for`;
 - `while`;
 - `break` / `continue` where needed by the supported loop model.
+
+Back `for` with a deliberately small Lean-compatible iteration abstraction
+instead of hard-coding Array-only loop semantics. The bootstrap profile should
+cover the concrete containers used by compiler code, expected to include at
+least List, Array, ordered Map/Set entries and simple Nat ranges. A bounded
+`ForIn`-style library interface is preferred; the full Lean iterator
+hierarchy is not required.
 
 These are Lean-style source conveniences, not JavaScript mutation semantics.
 
@@ -311,6 +327,30 @@ compiler utility, and a large compiler-style traversal run through the verified
 backend without host mutation shortcuts or JavaScript stack overflow in the
 covered profile.
 
+## SH4.5 — pattern-language closure
+
+The current flat single-scrutinee constructor-pattern subset is not sufficient
+for natural compiler implementation. Before SH7 freezes, add the bounded
+Lean-compatible pattern forms actually needed by parser/Meta/compiler code:
+
+- nested constructor patterns;
+- tuple / `Prod` patterns;
+- multi-scrutinee `match`;
+- wildcard and literal patterns at nested positions;
+- `if let`;
+- ordinary `let` pattern destructuring;
+- pattern binds in `do` where required by the selected effect subset;
+- deterministic failure/exhaustiveness behavior for the supported forms.
+
+Prefer desugaring richer source patterns into ordinary checked eliminators and
+lets. Do not implement Lean's complete dependent pattern compiler merely for
+surface parity. Indexed/dependent pattern features remain workload-driven and
+must fail closed until their elaboration semantics are owned.
+
+Exit test: a parser/AST transformation module can destructure nested compiler
+data, use multi-scrutinee matches and `if let`/let-patterns, and execute through
+the checked-core JavaScript path with no TypeScript-side pattern semantics.
+
 ## SH5 — names, modules, environments and bootstrap data model
 
 Provide stable ProofScript-authored models for:
@@ -325,6 +365,26 @@ Provide stable ProofScript-authored models for:
 - diagnostics and fresh identifiers;
 - explicit environments and compiler state.
 
+Also finish the cheap implementation-language ergonomics that Lean compiler
+source relies on heavily and that materially reduce bootstrap rewrite risk:
+
+- field/projection notation;
+- bounded method-style notation when it deterministically resolves to an
+  ordinary declaration application;
+- structure update syntax such as `{ s with field := value }`;
+- named arguments;
+- default arguments where the census shows repeated compiler use;
+- `abbrev` when it can be supported without introducing a second semantic
+  mechanism.
+
+These conveniences must elaborate/desugar into the same ordinary core terms;
+they do not receive independent runtime semantics.
+
+The name-resolution gate must specify and test at least local shadowing,
+namespace lookup, fully-qualified lookup, imported declarations, private-name
+handling, constructor resolution, projection/method resolution, instance-index
+lookup, and deterministic ambiguity rejection.
+
 Freeze the canonical source-position representation before parser/LSP work
 spreads. Prefer UTF-8 byte offsets for compiler/source-map identity, with
 explicit conversion at JavaScript UTF-16 and LSP line/column boundaries.
@@ -334,9 +394,11 @@ ordinary explicit data structures are sufficient. Do not pull in sections,
 open-scoped machinery or generalized environment extensions unless the feature
 census shows that the ProofScript compiler itself needs them.
 
-## SH6 — host capability boundary
+## SH6 — host capability and independent-kernel boundary
 
 Keep host-specific effects thin and explicit.
+
+### SH6a — ordinary host capabilities
 
 The bootstrap compiler may call typed host capabilities for:
 
@@ -348,6 +410,46 @@ The bootstrap compiler may call typed host capabilities for:
 
 These adapters may remain TypeScript. They are runtime assumptions, never
 proof evidence, and must not own language semantics.
+
+### SH6b — versioned pskernel bridge
+
+Before SH7 freezes, define and executable-gate the interface between the
+self-hosted compiler and the independent TypeScript pskernel.
+
+The self-hosted Meta/Elab layer must not depend directly on arbitrary mutable
+TypeScript class internals. Prefer versioned, ProofScript-owned canonical data /
+codec representations for the kernel-facing subset, including at least:
+
+- `Name`;
+- universe `Level`;
+- kernel `Expr`;
+- declaration and inductive-declaration payloads;
+- environment/constant metadata required by elaboration;
+- checked-module/admission identities.
+
+Provide the smallest explicit bridge operations needed by the self-hosted
+compiler, expected to include:
+
+- load/open the pinned base environment;
+- deterministic constant lookup;
+- ground expression type checking/inference where the compiler deliberately
+  delegates to the independent checker;
+- ground definitional-equality queries where needed;
+- definition/theorem admission;
+- inductive admission and retrieval of generated constructor/recursor metadata;
+- replay/validation of checked-core module admissions.
+
+Meta unification, candidate search, coercion policy, instance synthesis and
+source elaboration remain self-hosted compiler semantics. The bridge must not
+silently turn pskernel into a hidden second elaborator.
+
+The bridge protocol/version must be fingerprinted or otherwise compatibility
+checked so PSC1 cannot accidentally run against an incompatible kernel API.
+
+Exit test: a compiler module authored in supported `.lean` and `.ps` can
+construct kernel data, perform lookup/check/admission through the bridge, obtain
+the resulting checked metadata, and continue verified compilation without
+importing pskernel's TypeScript implementation classes directly.
 
 ## SH7 — census, prove compiler readiness, then freeze the Lean bootstrap subset
 
@@ -380,18 +482,25 @@ uses the foundation together rather than as isolated unit features. It must
 exercise at least:
 
 - nontrivial `String`/`Char` lexer-style traversal and source positions;
-- Array plus ordered Map/Set;
+- Array plus ordered Map/Set and compiler-oriented traversal combinators such as
+  `mapM` / indexed monadic traversal / folds;
 - qualified `Name`, namespaces/imports and explicit environment updates;
-- structures, generic/dependent ADTs and pattern matching;
-- `Prod`/tuple-returning utilities;
+- structures, structure updates, field/method notation and named arguments;
+- generic/dependent ADTs and the SH4.5 pattern subset, including nested and
+  multi-scrutinee patterns plus `if let`/let-patterns;
+- `Prod`/tuple-returning and tuple-destructuring utilities;
 - structural, mutual and local recursion plus a controlled `partial` case;
-- `do`, Reader/State/Except and transactional rollback;
-- practical iteration syntax selected by the census;
+- `do`, Reader/State/Except, `return`, failure/alternative handling and
+  transactional rollback;
+- practical iteration syntax and the bounded iteration abstraction selected by
+  the census;
 - higher-order/generic traversals;
 - implicit arguments, instance synthesis and postponed Meta constraints used by
   the bootstrap subset;
 - diagnostics/fresh IDs;
-- multi-module compilation.
+- multi-module compilation;
+- the versioned SH6b pskernel bridge for lookup, a ground kernel query and
+  declaration/inductive admission.
 
 The fixture must execute end-to-end:
 
@@ -419,27 +528,44 @@ Exit conditions:
 > The SELFHOST-FEATURE fixture demonstrates that the selected features compose
 > across multiple modules through the real verified JavaScript path.
 
-## SH8 — implement the compiler in .lean
+## SH8a — implement the core compiler in .lean
 
 Implement compiler-owned semantics in bounded Lean source, in approximately
 this dependency order:
 
 1. Name / SourcePos / Span / diagnostics;
 2. canonical AST/data model;
-3. verified compiler IR model;
-4. pretty printer and TypeScript source builder;
-5. erasure/lowering;
-6. TypeScript emitter;
-7. lexer;
-8. parser;
-9. environment/name resolution;
-10. Meta;
-11. elaboration;
-12. compiler orchestration.
+3. pskernel bridge data/codec client;
+4. verified compiler IR model;
+5. pretty printer and TypeScript source builder;
+6. erasure/lowering;
+7. TypeScript emitter;
+8. lexer;
+9. parser;
+10. environment/name resolution;
+11. Meta;
+12. term/declaration elaboration;
+13. compiler orchestration.
+
+SH8a is the first self-hosting target. It does **not** require moving every
+existing theorem tactic into the self-hosted compiler before PSC1 can exist.
+The bootstrap compiler source itself should avoid depending on tactic features
+that have not yet moved.
 
 The TypeScript pskernel remains the independent admission authority. Node,
 filesystem, TypeScript-API and similar host adapters remain outside the
 self-hosted semantic compiler.
+
+## SH8b — self-host the supported theorem/tactic frontend
+
+After the SH8a compiler can bootstrap, move the currently supported
+ProofScript theorem/tactic elaboration onto the self-hosted Meta/Elab
+infrastructure, preserving the existing rule that tactics construct ordinary
+kernel proof terms and pskernel remains final authority.
+
+SH8b should cover the tactic subset that ProofScript claims at that point; it
+does not require full Lean tactic parity. Tactic self-hosting must not block the
+first PSC0 -> PSC1 -> PSC2 core-compiler bootstrap.
 
 ## SH9 — bootstrap in JavaScript
 
@@ -456,7 +582,9 @@ Require equality of checked-core/IR fingerprints and normalized generated
 TypeScript. With a pinned toolchain, byte-stable JavaScript is preferred when
 practical.
 
-Do not claim self-hosting merely because PSC1 executes.
+Do not claim self-hosting merely because PSC1 executes. The first core
+self-hosting claim requires PSC2 stability for SH8a; full current-language
+self-hosting additionally requires the applicable SH8b tactic/frontend gate.
 
 ## SH10 — move the compiler to .ps
 
@@ -490,7 +618,14 @@ Unless demanded by an SH gate, defer:
 - new browser/LSP/editor features;
 - extra package-manager features;
 - full Lean syntax/macros/metaprogramming;
-- tactic breadth unrelated to compiler verification;
+- generalized dependent-pattern compilation beyond the bootstrap need;
+- full Lean iterator hierarchy;
+- broad HashMap/Hashable adoption before correctness-oriented ordered
+  collections prove insufficient;
+- full well-founded termination elaboration unless a compiler module requires
+  it;
+- tactic breadth unrelated to the currently supported ProofScript theorem
+  frontend;
 - broad npm binding generation;
 - kernel rewrite in ProofScript.
 

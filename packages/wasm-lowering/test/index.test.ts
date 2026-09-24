@@ -157,3 +157,54 @@ console.log('ok - @proofscript/wasm-lowering validates input IR');
   equal(loweredUInt.functions[3]?.body.kind,'local');
 }
 console.log('ok - @proofscript/wasm-lowering fixed-width UInt pass-through');
+
+{
+  const primitive=(name:'UInt8'|'UInt16'|'UInt32'|'UInt64')=>({
+    kind:'primitive' as const,
+    name,
+  });
+  const add=(
+    name:string,
+    type:'UInt8'|'UInt16'|'UInt32'|'UInt64',
+    operation:'uint8.add'|'uint16.add'|'uint32.add'|'uint64.add',
+  )=>({
+    name,
+    typeParameters:[],
+    parameters:[
+      {name:'a',type:primitive(type)},
+      {name:'b',type:primitive(type)},
+    ],
+    resultType:primitive(type),
+    body:{
+      kind:'intrinsic' as const,
+      operation,
+      args:[
+        {kind:'var' as const,name:'a'},
+        {kind:'var' as const,name:'b'},
+      ],
+    },
+  });
+  const loweredAdd=lowerVerifiedIrToWasm({
+    kind:'proofscript-verified-ir',
+    declarations:[
+      add('add8','UInt8','uint8.add'),
+      add('add16','UInt16','uint16.add'),
+      add('add32','UInt32','uint32.add'),
+      add('add64','UInt64','uint64.add'),
+    ],
+  });
+  equal(loweredAdd.functions[0]?.body.kind,'i32.binary');
+  equal(loweredAdd.functions[1]?.body.kind,'i32.binary');
+  equal(loweredAdd.functions[2]?.body.kind,'i32.binary');
+  equal(loweredAdd.functions[3]?.body.kind,'i64.binary');
+  if(loweredAdd.functions[0]?.body.kind==='i32.binary'){
+    equal(loweredAdd.functions[0].body.operation,'and');
+  }
+  if(loweredAdd.functions[2]?.body.kind==='i32.binary'){
+    equal(loweredAdd.functions[2].body.operation,'add');
+  }
+  if(loweredAdd.functions[3]?.body.kind==='i64.binary'){
+    equal(loweredAdd.functions[3].body.operation,'add');
+  }
+}
+console.log('ok - @proofscript/wasm-lowering modular fixed-width UInt addition');

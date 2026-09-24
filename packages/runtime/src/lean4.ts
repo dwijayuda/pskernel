@@ -47,6 +47,156 @@ function normalizeUIntNumber(value:bigint,bits:8|16|32):number{
   return Number(value&uintMask(bits));
 }
 
+const UINT64_MASK=uintMask(64);
+
+function normalizeUInt64(value:bigint):LeanUInt64{
+  return value&UINT64_MASK;
+}
+
+function normalizeUSize(value:bigint):LeanUSize{
+  return value&uintMask(LEAN434_USIZE_BITS);
+}
+
+/**
+ * Exact Lean 4.34 runtime/hash.h `hash(uint64,uint64)` semantics.
+ */
+export function lean_uint64_mix_hash(
+  hValue:LeanUInt64,
+  kValue:LeanUInt64,
+):LeanUInt64{
+  const m=0xc6a4a7935bd1e995n;
+  const r=47n;
+  let h=normalizeUInt64(hValue);
+  let k=normalizeUInt64(kValue);
+  k=normalizeUInt64(k*m);
+  k=normalizeUInt64(k^(k>>r));
+  k=normalizeUInt64(k^m);
+  h=normalizeUInt64(h^k);
+  h=normalizeUInt64(h*m);
+  return h;
+}
+
+function utf8Bytes(value:LeanString):number[]{
+  const out:number[]=[];
+  for(const char of value){
+    const cp=char.codePointAt(0)!;
+    if(cp<=0x7f){
+      out.push(cp);
+    }else if(cp<=0x7ff){
+      out.push(
+        0xc0|(cp>>6),
+        0x80|(cp&0x3f),
+      );
+    }else if(cp<=0xffff){
+      out.push(
+        0xe0|(cp>>12),
+        0x80|((cp>>6)&0x3f),
+        0x80|(cp&0x3f),
+      );
+    }else{
+      out.push(
+        0xf0|(cp>>18),
+        0x80|((cp>>12)&0x3f),
+        0x80|((cp>>6)&0x3f),
+        0x80|(cp&0x3f),
+      );
+    }
+  }
+  return out;
+}
+
+/**
+ * Exact MurmurHash64A implementation used by Lean 4.34 runtime/hash.cpp.
+ */
+function murmurHash64A(
+  bytes:readonly number[],
+  seed:LeanUInt64,
+):LeanUInt64{
+  const m=0xc6a4a7935bd1e995n;
+  const r=47n;
+  let h=normalizeUInt64(
+    normalizeUInt64(seed)
+      ^normalizeUInt64(BigInt(bytes.length)*m),
+  );
+  let offset=0;
+  while(offset+8<=bytes.length){
+    let k=0n;
+    for(let i=0;i<8;i++){
+      k|=BigInt(bytes[offset+i]!)<<BigInt(i*8);
+    }
+    offset+=8;
+    k=normalizeUInt64(k*m);
+    k=normalizeUInt64(k^(k>>r));
+    k=normalizeUInt64(k*m);
+    h=normalizeUInt64(h^k);
+    h=normalizeUInt64(h*m);
+  }
+
+  const remaining=bytes.length-offset;
+  for(let i=0;i<remaining;i++){
+    h=normalizeUInt64(
+      h^(BigInt(bytes[offset+i]!)<<BigInt(i*8)),
+    );
+  }
+  if(remaining>0){
+    h=normalizeUInt64(h*m);
+  }
+  h=normalizeUInt64(h^(h>>r));
+  h=normalizeUInt64(h*m);
+  h=normalizeUInt64(h^(h>>r));
+  return h;
+}
+
+/**
+ * Exact Lean 4.34 `lean_string_hash`: MurmurHash64A over UTF-8 bytes,
+ * seeded with 11.
+ */
+export function lean_string_hash(value:LeanString):LeanUInt64{
+  return murmurHash64A(utf8Bytes(value),11n);
+}
+
+export const lean_uint64_to_usize=(value:LeanUInt64):LeanUSize=>
+  normalizeUSize(value);
+export const lean_usize_to_uint64=(value:LeanUSize):LeanUInt64=>
+  normalizeUInt64(value);
+
+export const lean_usize_add=(a:LeanUSize,b:LeanUSize):LeanUSize=>
+  normalizeUSize(a+b);
+export const lean_usize_sub=(a:LeanUSize,b:LeanUSize):LeanUSize=>
+  normalizeUSize(a-b);
+export const lean_usize_mul=(a:LeanUSize,b:LeanUSize):LeanUSize=>
+  normalizeUSize(a*b);
+export const lean_usize_div=(a:LeanUSize,b:LeanUSize):LeanUSize=>{
+  const lhs=normalizeUSize(a);
+  const rhs=normalizeUSize(b);
+  return rhs===0n?0n:lhs/rhs;
+};
+export const lean_usize_mod=(a:LeanUSize,b:LeanUSize):LeanUSize=>{
+  const lhs=normalizeUSize(a);
+  const rhs=normalizeUSize(b);
+  return rhs===0n?lhs:lhs%rhs;
+};
+export const lean_usize_land=(a:LeanUSize,b:LeanUSize):LeanUSize=>
+  normalizeUSize(a&b);
+export const lean_usize_lor=(a:LeanUSize,b:LeanUSize):LeanUSize=>
+  normalizeUSize(a|b);
+export const lean_usize_xor=(a:LeanUSize,b:LeanUSize):LeanUSize=>
+  normalizeUSize(a^b);
+export const lean_usize_shift_left=(
+  a:LeanUSize,
+  b:LeanUSize,
+):LeanUSize=>{
+  const shift=normalizeUSize(b)%BigInt(LEAN434_USIZE_BITS);
+  return normalizeUSize(normalizeUSize(a)<<shift);
+};
+export const lean_usize_shift_right=(
+  a:LeanUSize,
+  b:LeanUSize,
+):LeanUSize=>{
+  const shift=normalizeUSize(b)%BigInt(LEAN434_USIZE_BITS);
+  return normalizeUSize(a)>>shift;
+};
+
 export function lean_nat_add(a:LeanNat,b:LeanNat):LeanNat{
   assertNat(a,'lean_nat_add lhs');
   assertNat(b,'lean_nat_add rhs');
@@ -381,6 +531,22 @@ export const LEAN434_JS_EXTERN_MANIFEST:readonly Lean434ExternDescriptor[]=[
   {leanSymbol:'lean_nat_dec_eq',jsExport:'lean_nat_dec_eq',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_nat_dec_le',jsExport:'lean_nat_dec_le',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_nat_dec_lt',jsExport:'lean_nat_dec_lt',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_uint64_of_nat',jsExport:'lean_uint64_of_nat',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_uint64_mix_hash',jsExport:'lean_uint64_mix_hash',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_string_hash',jsExport:'lean_string_hash',category:'pure-primitive',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_uint64_to_usize',jsExport:'lean_uint64_to_usize',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
+  {leanSymbol:'lean_usize_of_nat',jsExport:'lean_usize_of_nat',category:'pure-primitive',upstreamSource:'Init/Data/UInt/BasicAux.lean'},
+  {leanSymbol:'lean_usize_to_nat',jsExport:'lean_usize_to_nat',category:'pure-primitive',upstreamSource:'Init/Data/UInt/BasicAux.lean'},
+  {leanSymbol:'lean_usize_add',jsExport:'lean_usize_add',category:'pure-primitive',upstreamSource:'Init/Data/UInt/BasicAux.lean'},
+  {leanSymbol:'lean_usize_sub',jsExport:'lean_usize_sub',category:'pure-primitive',upstreamSource:'Init/Data/UInt/BasicAux.lean'},
+  {leanSymbol:'lean_usize_mul',jsExport:'lean_usize_mul',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
+  {leanSymbol:'lean_usize_div',jsExport:'lean_usize_div',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
+  {leanSymbol:'lean_usize_mod',jsExport:'lean_usize_mod',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
+  {leanSymbol:'lean_usize_land',jsExport:'lean_usize_land',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
+  {leanSymbol:'lean_usize_lor',jsExport:'lean_usize_lor',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
+  {leanSymbol:'lean_usize_xor',jsExport:'lean_usize_xor',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
+  {leanSymbol:'lean_usize_shift_left',jsExport:'lean_usize_shift_left',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
+  {leanSymbol:'lean_usize_shift_right',jsExport:'lean_usize_shift_right',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
   {leanSymbol:'lean_mk_empty_array_with_capacity',jsExport:'lean_mk_empty_array_with_capacity',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_mk',jsExport:'lean_array_mk',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_to_list',jsExport:'lean_array_to_list',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
@@ -491,6 +657,103 @@ readonly Lean434DeclarationExternBinding[]=[
     leanSymbol:'lean_nat_dec_le',
     arity:2,
     upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'UInt64.ofNatLT',
+    leanSymbol:'lean_uint64_of_nat',
+    arity:2,
+    runtimeArgs:[0],
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'mixHash',
+    leanSymbol:'lean_uint64_mix_hash',
+    arity:2,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'String.hash',
+    leanSymbol:'lean_string_hash',
+    arity:1,
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'UInt64.toUSize',
+    leanSymbol:'lean_uint64_to_usize',
+    arity:1,
+    upstreamSource:'Init/Data/UInt/Basic.lean',
+  },
+  {
+    leanDeclaration:'USize.ofNat',
+    leanSymbol:'lean_usize_of_nat',
+    arity:1,
+    upstreamSource:'Init/Data/UInt/BasicAux.lean',
+  },
+  {
+    leanDeclaration:'USize.toNat',
+    leanSymbol:'lean_usize_to_nat',
+    arity:1,
+    upstreamSource:'Init/Data/UInt/BasicAux.lean',
+  },
+  {
+    leanDeclaration:'USize.add',
+    leanSymbol:'lean_usize_add',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/BasicAux.lean',
+  },
+  {
+    leanDeclaration:'USize.sub',
+    leanSymbol:'lean_usize_sub',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/BasicAux.lean',
+  },
+  {
+    leanDeclaration:'USize.mul',
+    leanSymbol:'lean_usize_mul',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/Basic.lean',
+  },
+  {
+    leanDeclaration:'USize.div',
+    leanSymbol:'lean_usize_div',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/Basic.lean',
+  },
+  {
+    leanDeclaration:'USize.mod',
+    leanSymbol:'lean_usize_mod',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/Basic.lean',
+  },
+  {
+    leanDeclaration:'USize.land',
+    leanSymbol:'lean_usize_land',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/Basic.lean',
+  },
+  {
+    leanDeclaration:'USize.lor',
+    leanSymbol:'lean_usize_lor',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/Basic.lean',
+  },
+  {
+    leanDeclaration:'USize.xor',
+    leanSymbol:'lean_usize_xor',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/Basic.lean',
+  },
+  {
+    leanDeclaration:'USize.shiftLeft',
+    leanSymbol:'lean_usize_shift_left',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/Basic.lean',
+  },
+  {
+    leanDeclaration:'USize.shiftRight',
+    leanSymbol:'lean_usize_shift_right',
+    arity:2,
+    upstreamSource:'Init/Data/UInt/Basic.lean',
   },
   {
     leanDeclaration:'Array.mk',
@@ -656,6 +919,38 @@ new Map<string,Lean434JsExternImplementation>([
   ['lean_nat_mod',(a,b)=>lean_nat_mod(a as LeanNat,b as LeanNat)],
   ['lean_nat_dec_eq',(a,b)=>lean_nat_dec_eq(a as LeanNat,b as LeanNat)],
   ['lean_nat_dec_le',(a,b)=>lean_nat_dec_le(a as LeanNat,b as LeanNat)],
+  ['lean_uint64_of_nat',(value)=>
+    lean_uint64_of_nat(value as LeanNat)],
+  ['lean_uint64_mix_hash',(a,b)=>
+    lean_uint64_mix_hash(a as LeanUInt64,b as LeanUInt64)],
+  ['lean_string_hash',(value)=>
+    lean_string_hash(value as LeanString)],
+  ['lean_uint64_to_usize',(value)=>
+    lean_uint64_to_usize(value as LeanUInt64)],
+  ['lean_usize_of_nat',(value)=>
+    lean_usize_of_nat(value as LeanNat)],
+  ['lean_usize_to_nat',(value)=>
+    lean_usize_to_nat(value as LeanUSize)],
+  ['lean_usize_add',(a,b)=>
+    lean_usize_add(a as LeanUSize,b as LeanUSize)],
+  ['lean_usize_sub',(a,b)=>
+    lean_usize_sub(a as LeanUSize,b as LeanUSize)],
+  ['lean_usize_mul',(a,b)=>
+    lean_usize_mul(a as LeanUSize,b as LeanUSize)],
+  ['lean_usize_div',(a,b)=>
+    lean_usize_div(a as LeanUSize,b as LeanUSize)],
+  ['lean_usize_mod',(a,b)=>
+    lean_usize_mod(a as LeanUSize,b as LeanUSize)],
+  ['lean_usize_land',(a,b)=>
+    lean_usize_land(a as LeanUSize,b as LeanUSize)],
+  ['lean_usize_lor',(a,b)=>
+    lean_usize_lor(a as LeanUSize,b as LeanUSize)],
+  ['lean_usize_xor',(a,b)=>
+    lean_usize_xor(a as LeanUSize,b as LeanUSize)],
+  ['lean_usize_shift_left',(a,b)=>
+    lean_usize_shift_left(a as LeanUSize,b as LeanUSize)],
+  ['lean_usize_shift_right',(a,b)=>
+    lean_usize_shift_right(a as LeanUSize,b as LeanUSize)],
   ['lean_mk_empty_array_with_capacity',(capacity)=>
     lean_mk_empty_array_with_capacity(capacity as LeanNat)],
   ['lean_array_mk',(list)=>

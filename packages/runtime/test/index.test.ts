@@ -96,6 +96,19 @@ import {
   lean_uint8_of_nat,
   lean_uint32_of_nat,
   lean_uint64_of_nat,
+  lean_uint64_mix_hash,
+  lean_uint64_to_usize,
+  lean_string_hash,
+  lean_usize_add,
+  lean_usize_div,
+  lean_usize_land,
+  lean_usize_lor,
+  lean_usize_mod,
+  lean_usize_mul,
+  lean_usize_shift_left,
+  lean_usize_shift_right,
+  lean_usize_sub,
+  lean_usize_xor,
 } from '../src/lean4.js';
 
 function equal(a:unknown,b:unknown):void{
@@ -291,6 +304,29 @@ equal(lean_nat_mod(7n,0n),7n);
 equal(lean_uint8_of_nat(257n),1);
 equal(lean_uint32_of_nat((1n<<32n)+3n),3);
 equal(lean_uint64_of_nat((1n<<64n)+5n),5n);
+
+// Exact Lean 4.34 native hash/machine-word reference vectors.
+equal(lean_uint64_mix_hash(0n,0n),0x35a98f4d286a90b9n);
+equal(lean_uint64_mix_hash(11n,17n),0x38533b237ca05f09n);
+equal(lean_uint64_mix_hash(1723n,42n),0xe41a13be750cad62n);
+equal(lean_string_hash(''),0x89133354f2041b41n);
+equal(lean_string_hash('Lean'),0x363612ab7bff2817n);
+equal(lean_string_hash('Lean.Meta'),0xeb3f489f8510f0f9n);
+equal(lean_string_hash('L∃∀N'),0xc7156d079377e18dn);
+equal(lean_string_hash('_m'),0xf83dea072f02119bn);
+equal(lean_uint64_to_usize((1n<<64n)+5n),5n);
+equal(lean_usize_add((1n<<64n)-1n,2n),1n);
+equal(lean_usize_sub(0n,1n),(1n<<64n)-1n);
+equal(lean_usize_mul(1n<<63n,2n),0n);
+equal(lean_usize_div(7n,2n),3n);
+equal(lean_usize_div(7n,0n),0n);
+equal(lean_usize_mod(7n,3n),1n);
+equal(lean_usize_mod(7n,0n),7n);
+equal(lean_usize_land(0xffn,0x0fn),0x0fn);
+equal(lean_usize_lor(0xf0n,0x0fn),0xffn);
+equal(lean_usize_xor(0xffn,0x0fn),0xf0n);
+equal(lean_usize_shift_left(1n,65n),2n);
+equal(lean_usize_shift_right(8n,65n),4n);
 
 // Lean Array has value semantics even though the native runtime may optimize
 // unique arrays using destructive updates.

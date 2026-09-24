@@ -666,7 +666,7 @@ partial def dumpSelectedRootsAfterBase
     throw <| IO.userError "selected-after-base export requires at least one root"
   dumpMeta
   let initial : S := {
-    emitted := replayedBaseConstantNames base
+    emitted := environmentConstantNames base
   }
   let _ ← (do
     for n in roots do dumpConstant env n) |>.run initial
@@ -689,7 +689,7 @@ partial def dumpSelectedRootsSegmentedAfterBase
     ("segmentation", "declaration-delta")
   ])]).compress
   let initial : S := {
-    emitted := replayedBaseConstantNames base
+    emitted := environmentConstantNames base
     segmented := true
   }
   let _ ← (do

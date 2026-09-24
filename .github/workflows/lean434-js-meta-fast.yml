@@ -1,0 +1,66 @@
+name: Lean 4.34 Meta bootstrap fast gate
+
+on:
+  push:
+    branches: [runtime/lean434-js-runtime]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lean434-js-meta-fast-\${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  meta-bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install pinned Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+          test "$("$HOME/.elan/bin/lean" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - run: npm ci --no-audit --no-fund
+      - name: Build pskernel
+        run: npm run build:src
+      - name: Build and test runtime
+        run: npm --workspace @proofscript/runtime test
+      - name: Export Lean.MetavarContext runtime metadata
+        run: |
+          npm run generate:lean434-runtime-metadata -- \
+            Lean.MetavarContext \
+            --out lean434-metavar-context-runtime-metadata.json
+      - name: Generate focused Lean.MetavarContext corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean -o Oracle/ReplayProbe/RuntimeMapProbe.olean \
+            Oracle/ReplayProbe/RuntimeMapProbe.lean
+          LEAN_PATH="$PWD:\${LEAN_PATH:-}" \
+            lean --run oracle/replay-probe/DependencyExport.lean \
+            Oracle.ReplayProbe.RuntimeMapProbe \
+            --selected-after Init.Prelude \
+            Array.modify Array.set \
+            Lean.PersistentHashMap.insert Lean.PersistentHashMap.find? \
+            Lean.assignExp \
+            Lean.MetavarContext.getExprAssignmentExp \
+            ProofScript.RuntimeProbe.firstBucketIndex \
+            ProofScript.RuntimeProbe.replaceNullEntry \
+            ProofScript.RuntimeProbe.insertExprMap \
+            ProofScript.RuntimeProbe.findExprMap? \
+            > lean434-metavar-context-bootstrap.ndjson
+          test -s lean434-metavar-context-bootstrap.ndjson
+      - name: Execute real Lean.MetavarContext assignment in JavaScript
+        run: |
+          node scripts/lean434-js-metavar-context-smoke.mjs \
+            lean434-metavar-context-bootstrap.ndjson \
+            lean434-metavar-context-runtime-metadata.json

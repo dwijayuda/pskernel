@@ -629,6 +629,37 @@ partial def dumpSelectedRootsSegmented
     closeDeclarationSegment) |>.run {}
   pure ()
 
+def environmentConstantNames (env : Environment) : NameSet := Id.run do
+  let mut names : NameSet := {}
+  for (name, _) in env.constants.map₁.toList do
+    names := names.insert name
+  return names
+
+partial def dumpSelectedRootsSegmentedAfterBase
+    (env base : Environment)
+    (baseModule : Name)
+    (roots : List Name)
+    (segmentRoots : Nat) : IO Unit := do
+  if segmentRoots != 1 then
+    throw <| IO.userError "selected declaration segmentation currently requires segment size 1"
+  if roots.isEmpty then
+    throw <| IO.userError "selected segmented export requires at least one root"
+  IO.println <| (Json.mkObj [("environment", Json.mkObj [
+    ("module", ""),
+    ("baseModule", baseModule.toString),
+    ("baseConstants", base.constants.map₁.size),
+    ("selectedDirectRoots", roots.length),
+    ("segmentation", "declaration-delta")
+  ])]).compress
+  let initial : S := {
+    emitted := environmentConstantNames base
+    segmented := true
+  }
+  let _ ← (do
+    for n in roots do dumpConstant env n
+    closeDeclarationSegment) |>.run initial
+  pure ()
+
 partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat) : IO Unit := do
   if count == 0 then throw <| IO.userError "root range count must be positive"
   let buckets := collectRootsByModule env
@@ -768,6 +799,12 @@ unsafe def main (args : List String) : IO Unit := do
       let start := requestedRoots[2]!.toNat!
       let count := requestedRoots[3]!.toNat!
       dumpBatchStream env moduleName maxRoots start count
+    else if requestedRoots.length >= 4 && requestedRoots.head! == "--selected-segmented-after" then
+      let baseModule := requestedRoots[1]!.toName
+      let segmentRoots := requestedRoots[2]!.toNat!
+      let selected := requestedRoots.drop 3 |>.map String.toName
+      withImportModules #[{module := baseModule}] {} fun baseEnv => do
+        dumpSelectedRootsSegmentedAfterBase env baseEnv baseModule selected segmentRoots
     else if requestedRoots.length >= 3 && requestedRoots.head! == "--selected-segmented" then
       let segmentRoots := requestedRoots[1]!.toNat!
       let selected := requestedRoots.drop 2 |>.map String.toName

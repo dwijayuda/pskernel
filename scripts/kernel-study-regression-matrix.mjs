@@ -167,6 +167,7 @@ for(const marker of [
   'dependencyInstallExitCode=$dependencyInstallCode',
   'npm ci failed before any kernel replay. This is a packaging/dependency gate failure; send/upload $Log.',
   '[string]$Log = "full-std.local.log"',
+  'git restore -- full-std.log',
 ]){
   if(!localAssuranceRunner.includes(marker))throw new Error('local Full-Std assurance runner drift: missing '+marker);
 }

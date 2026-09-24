@@ -24,12 +24,12 @@ mkdir -p oracle/fixtures
 tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
 
-if ! lean --run oracle/replay-probe/DependencyExport.lean Init.Data.String.Length \
+if ! lean --run oracle/replay-probe/DependencyExport.lean Init.Data.String.Bootstrap \
   --selected-segmented 1 \
-  Char.ofNat Char.toNat Char.isWhitespace Char.isUpper Char.isLower Char.isAlpha Char.isDigit Char.isAlphanum \
-  String.push String.singleton String.append String.length String.utf8ByteSize String.rawStartPos String.rawEndPos \
-  String.Pos.Raw.get 'String.Pos.Raw.get?' String.Pos.Raw.next "String.Pos.Raw.next'" String.Pos.Raw.atEnd \
-  String.Pos.Raw.extract String.Pos.Raw.prev \
+  Char.toNat \
+  String.push String.singleton \
+  String.Internal.length String.Internal.append \
+  String.Internal.next String.Internal.get String.Internal.atEnd String.Internal.extract
   > "$tmp"; then
   echo "generate-text-foundation-fixture: Lean export failed" >&2
   cat "$tmp" >&2

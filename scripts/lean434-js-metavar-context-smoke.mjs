@@ -58,6 +58,41 @@ const evaluator=new Lean434Evaluator(
   {maxSteps:250_000},
 );
 
+{
+  let modify=evaluator.evaluate(
+    constant(nameFromDotted('Array.modify')),
+  );
+  modify=evaluator.applyRuntimeValue(
+    modify,
+    evaluator.evaluate(constant(nameFromDotted('Nat'))),
+  );
+  modify=evaluator.applyRuntimeValue(modify,[1n,2n,3n]);
+  modify=evaluator.applyRuntimeValue(modify,1n);
+  modify=evaluator.applyRuntimeValue(
+    modify,
+    evaluator.evaluate(constant(nameFromDotted('Nat.succ'))),
+  );
+  const modified=evaluator.applyRuntimeValue(
+    modify,
+    evaluator.evaluate(constant(nameFromDotted('Nat.zero'))),
+  );
+  if(
+    !Array.isArray(modified)
+    ||modified.length!==3
+    ||modified[0]!==1n
+    ||modified[1]!==3n
+    ||modified[2]!==3n
+  ){
+    throw new Error(
+      'real Lean Array.modify did not update a JS-backed Lean array: '+
+      JSON.stringify(modified,(_,v)=>typeof v==='bigint'?String(v)+'n':v),
+    );
+  }
+  console.log(
+    'ok - real Lean Array.modify updates through Array.set JS primitive',
+  );
+}
+
 const mvarName=numName(strName(anonymous,'_m'),7n);
 const mvarId=lean434RuntimeMVarId(mvarName);
 const valueExpr=natLit(42n);

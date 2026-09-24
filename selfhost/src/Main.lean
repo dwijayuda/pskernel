@@ -23,7 +23,7 @@ import Ps.Meta.Infer
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
 import Ps.BackendTs.Module
-import Ps.BackendTs.Compiler
+import Ps.Host.TypeScriptCompiler
 import Ps.Project.ModuleGraph
 
 inductive PsCliSourceKind where

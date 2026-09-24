@@ -1,6 +1,7 @@
 import {
   Environment,
   Kernel,
+  addPrimitiveInductive,
   app,
   bvar,
   constant,
@@ -226,6 +227,91 @@ console.log('ok - @proofscript/erasure Nat intrinsic lowering');
   }
 }
 console.log('ok - @proofscript/erasure semantic primitive type identity');
+
+{
+  const env=new Environment();
+  const Nat=nameFromDotted('Nat');
+  const Bool=nameFromDotted('Bool');
+  env.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  addPrimitiveInductive(env,{
+    levelParams:[],
+    numParams:0,
+    types:[{
+      name:Bool,
+      type:sort(levelSucc(levelZero)),
+      ctors:[
+        {
+          name:nameFromDotted('Bool.false'),
+          type:constant(Bool),
+        },
+        {
+          name:nameFromDotted('Bool.true'),
+          type:constant(Bool),
+        },
+      ],
+    }],
+  });
+
+  const choose=nameFromDotted('chooseBool');
+  const motive=lam(
+    nameFromDotted('_match'),
+    constant(Bool),
+    constant(Nat),
+  );
+  const value=lam(
+    nameFromDotted('flag'),
+    constant(Bool),
+    mkAppN(
+      constant(
+        nameFromDotted('Bool.rec'),
+        [levelSucc(levelZero)],
+      ),
+      [
+        motive,
+        natLit(2n),
+        natLit(1n),
+        bvar(0),
+      ],
+    ),
+  );
+  const checked=admitCheckedCoreModule(env,[{
+    kind:'definition',
+    name:choose,
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('flag'),
+      constant(Bool),
+      constant(Nat),
+    ),
+    value,
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  }]);
+
+  const declaration=eraseCheckedCoreModule(checked).declarations[0]!;
+  equal(declaration.body.kind,'if');
+  if(declaration.body.kind==='if'){
+    equal(declaration.body.condition.kind,'var');
+    if(declaration.body.condition.kind==='var'){
+      equal(declaration.body.condition.name,'flag');
+    }
+    equal(declaration.body.thenBranch.kind,'literal');
+    if(declaration.body.thenBranch.kind==='literal'){
+      equal(declaration.body.thenBranch.value,1n);
+    }
+    equal(declaration.body.elseBranch.kind,'literal');
+    if(declaration.body.elseBranch.kind==='literal'){
+      equal(declaration.body.elseBranch.value,2n);
+    }
+  }
+}
+console.log('ok - @proofscript/erasure primitive Bool recursor lowering');
+
 
 
 {

@@ -33,6 +33,46 @@ const natIntrinsics=new Map<
   ['Nat.beq','nat.eq'],
 ]);
 
+function tryErasePrimitiveBoolRecursor(
+  view:ReturnType<typeof appView>,
+  scope:ErasureScope,
+  environment:Environment,
+  erase:RuntimeExprEraser,
+):VerifiedIrExpr|undefined {
+  if(
+    view.fn.kind!=='const'
+    ||nameToString(view.fn.name)!=='Bool.rec'
+  )return undefined;
+
+  const recursor=environment.find(view.fn.name);
+  if(
+    recursor?.kind!=='recursor'
+    ||recursor.numParams!==0
+    ||recursor.numIndices!==0
+    ||recursor.numMotives!==1
+    ||recursor.numMinors!==2
+    ||recursor.rules.length!==2
+    ||nameToString(recursor.rules[0]!.ctor)!=='Bool.false'
+    ||nameToString(recursor.rules[1]!.ctor)!=='Bool.true'
+  ){
+    throw new Error(
+      'PS_ERASE_BOOL_RECURSOR_METADATA: Bool.rec does not match the admitted primitive Bool recursor',
+    );
+  }
+  if(view.fn.levels.length!==1||view.args.length!==4){
+    throw new Error(
+      'PS_ERASE_BOOL_RECURSOR_ARITY: expected motive, false branch, true branch, and major',
+    );
+  }
+
+  return {
+    kind:'if',
+    condition:erase(view.args[3]!,scope,environment),
+    thenBranch:erase(view.args[2]!,scope,environment),
+    elseBranch:erase(view.args[1]!,scope,environment),
+  };
+}
+
 function eraseVerifiedCondition(
   proposition:Expr,
   scope:ErasureScope,
@@ -109,6 +149,14 @@ export function eraseRuntimeApplication(
   erase:RuntimeExprEraser,
 ):VerifiedIrExpr {
   const view=appView(expr);
+  const primitiveBoolRecursor=tryErasePrimitiveBoolRecursor(
+    view,
+    scope,
+    environment,
+    erase,
+  );
+  if(primitiveBoolRecursor!==undefined)return primitiveBoolRecursor;
+
   const recursor=tryEraseRuntimeRecursorApplication(
     expr,
     scope,

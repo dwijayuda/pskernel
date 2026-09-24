@@ -1691,6 +1691,33 @@ def psTestDualSourceFieldMatchElaboration : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestDefEqBetaUnderForall : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let left :=
+    PsExpr.forallE
+      (psTestName "x")
+      natType
+      (PsExpr.app
+        (PsExpr.lam
+          (psTestName "_")
+          natType
+          natType
+          PsBinderInfo.explicit)
+        (PsExpr.bvar 0))
+      PsBinderInfo.explicit
+  let right :=
+    PsExpr.forallE
+      (psTestName "x")
+      natType
+      natType
+      PsBinderInfo.explicit
+  psDefEqReadOnlyWithEnv
+    psTestNatEnvironment
+    psMetaEmpty
+    psLocalEmpty
+    left
+    right
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1714,6 +1741,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "constructor match pattern parse", passed := psTestConstructorMatchPatternShape },
   { name := "dual-source basic match elaboration", passed := psTestDualSourceBasicMatchElaboration },
   { name := "dual-source field match elaboration", passed := psTestDualSourceFieldMatchElaboration },
+  { name := "defeq beta under forall", passed := psTestDefEqBetaUnderForall },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

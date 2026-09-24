@@ -102,6 +102,7 @@
   ],
   "lastVerifiedTestCount": 170,
   "notes": [
+    "Quot replay metadata parity hardening: regenerated Quot types are now compared with exprKernelMetadataEq/Lean Expr.eqv rather than strong binder-sensitive exprEq. This avoids false replay rejection from non-semantic binder annotations while preserving level-parameter/kind checks.",
     "MData/KVMap export parity fix: dumpMDataEqId now uses Lean 4.34 KVMap BEq (`xs[i]! == d`), whose equality is extensional map equality via subset both ways. The previous raw `.entries == .entries` list comparison could assign different `dataEq` ids to extensionally equal metadata maps with different entry order, making TypeScript Expr.eqv spuriously reject Lean-equal constructor/recursor metadata. Static anti-drift forbids the old comparison.",
     "Constructor replay metadata parity fix: Lean 4.34 checkPostponedConstructors compares ConstructorVal with derived BEq, whose Expr.eqv ignores binder names/annotations but observes MData. lean4export now uses exprKernelMetadataEq for constructor types, matching the already-correct recursor path. kernel-study-regression-matrix locks both call sites; direct source test count remains 171.",
     "Local assurance provenance hardening: run-full-std-local.ps1 now requires git, fails closed if tracked working-tree changes are present, and records the exact pskernel git commit/branch plus `gitTrackedTree=clean` in the UTF-8 evidence log. This ties any future Full-Std result to reproducible source, not just Lean/Node versions.",
@@ -252,5 +253,5 @@
   ],
   "currentTreeExpectedDirectTests": 171,
   "currentTreeExpectedDefeqDifferentialCases": 42,
-  "currentTreeVerification": "source direct-test count remains 171 / last executed direct checkpoint 170; constructor metadata and MData equality-id replay parity fixes are source-locked; refreshed exact-checkout execution and Lean-backed canonical replay pending."
+  "currentTreeVerification": "source direct-test count remains 171 / last executed direct checkpoint 170; constructor/Quot metadata and MData equality replay parity are source-locked; refreshed exact-checkout execution and Lean-backed canonical replay pending."
 }

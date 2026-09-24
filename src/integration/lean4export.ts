@@ -200,7 +200,7 @@ export class Lean4ExportReplay {
 
   private quot(q:JObject):void{
     const name=this.n(asIndex(field(q,'name','quot'),'quot.name')),kind=asString(field(q,'kind','quot'),'quot.kind');if(!['type','ctor','lift','ind'].includes(kind))throw new KernelError(`invalid Quot kind ${kind}`);
-    if(!this.env.quotInitialized)addQuot(this.env);const got=this.env.get(name);const expectedType=this.e(asIndex(field(q,'type','quot'),'quot.type'));const expectedLevels=this.ns(field(q,'levelParams','quot'),'quot.levelParams');if(got.kind!=='quot'||got.quotKind!==kind||!namesEq(got.levelParams,expectedLevels)||!exprEq(got.type,expectedType))throw new KernelError(`exported Quot metadata mismatch for '${nameToString(name)}'\nTS: ${got.kind==='quot'?exprToString(got.type):'<not quot>'}\nLean: ${exprToString(expectedType)}`);
+    if(!this.env.quotInitialized)addQuot(this.env);const got=this.env.get(name);const expectedType=this.e(asIndex(field(q,'type','quot'),'quot.type'));const expectedLevels=this.ns(field(q,'levelParams','quot'),'quot.levelParams');if(got.kind!=='quot'||got.quotKind!==kind||!namesEq(got.levelParams,expectedLevels)||!exprKernelMetadataEq(got.type,expectedType))throw new KernelError(`exported Quot metadata mismatch for '${nameToString(name)}'\nTS: ${got.kind==='quot'?exprToString(got.type):'<not quot>'}\nLean: ${exprToString(expectedType)}\nDiff: ${got.kind==='quot'?exprKernelMetadataDiff(got.type,expectedType)??'<unknown>':'<not quot>'}`);
   }
 
   private inductive(g:JObject):void{

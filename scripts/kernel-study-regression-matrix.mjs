@@ -177,6 +177,9 @@ if(!replaySource.includes("if(!exprKernelMetadataEq(g.type,expectedType))throw n
 if(!replaySource.includes("if(!exprKernelMetadataEq(g.type,expectedType))throw new KernelError(\`generated recursor type mismatch")){
   throw new Error('recursor replay metadata comparator drift: Lean 4.34 RecursorVal BEq requires Expr.eqv');
 }
+if(!replaySource.includes("!exprKernelMetadataEq(got.type,expectedType))throw new KernelError(\`exported Quot metadata mismatch")){
+  throw new Error('Quot replay metadata comparator drift: generated Quot types must use Lean Expr.eqv');
+}
 
 const counts={};
 for(const entry of [...Object.values(matrix),...Object.values(hardeningExtras)])counts[entry.kind]=(counts[entry.kind]??0)+1;

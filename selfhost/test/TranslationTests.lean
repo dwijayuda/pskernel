@@ -47,7 +47,41 @@ def psTestProofScriptLeanProofScriptRoundTrip : Bool :=
           | Except.ok leanAgain =>
               leanAgain == lean
 
+def psTranslationStructureLeanFixture : String :=
+  "structure User where\n" ++
+  "  age : Nat\n\n" ++
+  "def ageOf (u : User) : Nat := u.age"
+
+def psTranslationStructureProofScriptFixture : String :=
+  "structure User where {\n" ++
+  "  age : Nat;\n" ++
+  "};\n\n" ++
+  "def ageOf (u : User) : Nat := u.age;"
+
+def psTestStructureTranslationRoundTrip : Bool :=
+  match
+      psTranslateLeanToProofScript
+        psTranslationStructureLeanFixture,
+      psTranslateProofScriptToLean
+        psTranslationStructureProofScriptFixture with
+  | Except.ok proofScript, Except.ok lean =>
+      match
+          psTranslateProofScriptToLean proofScript,
+          psTranslateLeanToProofScript lean with
+      | Except.ok leanAgain, Except.ok proofScriptAgain =>
+          leanAgain == lean
+            && proofScriptAgain == proofScript
+      | _, _ => false
+  | _, _ => false
+
 def main : IO Unit := do
+  if psTestStructureTranslationRoundTrip then
+    IO.println
+      "PSC1_TRANSLATION_PASS: structure .lean <-> .ps"
+  else
+    throw
+      (IO.userError
+        "PSC1_TRANSLATION_FAIL: structure .lean <-> .ps")
   if psTestLeanProofScriptLeanRoundTrip then
     IO.println
       "PSC1_TRANSLATION_PASS: .lean -> .ps -> .lean"

@@ -1,6 +1,6 @@
 # Formal soundness v1 — verified co-signer
 
-Status: research implementation, intentionally cheaper than TypeScript/C++
+Status: **v1 executed and green**; intentionally cheaper than TypeScript/C++
 formal equivalence.
 
 ## Goal
@@ -97,16 +97,55 @@ No adapter is allowed to rewrite a rejected/declined stream into an accepted one
 while preserving the certification claim. If format translation is ever needed,
 that translation becomes a separately specified/proved boundary.
 
-## Next cheapest milestones
+## Executed evidence
 
-1. Green co-sign smoke on a small real Lean 4.34 export.
-2. Measure how much of the existing pskernel corpus ConLeche accepts.
-3. Define the **ProofScript Formal Core** as the intersection that both accept.
-4. Add `psc certify` around this protocol.
-5. Only if valuable later, replace repeated co-checking with proof-producing
-   pskernel certificates checked by a smaller verified verifier.
+Pinned proof-backed co-signing is green in GitHub Actions run `36060889198`,
+job `107839268830`.
 
-Exact TypeScript↔C++ formal equivalence remains an optional research moonshot.
+### Minimal final-Lean-4.34 smoke
+
+- source: `oracle/formal/Smoke.lean`;
+- standard lean4export 3.1.0 stream SHA-256:
+  `570c47cb02ea5e9e2cbc4767ec54741f7d638ba8ed9057c671777ff6cdf0ea02`;
+- pskernel: **accept**;
+- pinned ConLeche `--verified`: **accept**, 9 declarations.
+
+### Final Lean 4.34 Init.Prelude
+
+- standard lean4export 3.1.0 stream SHA-256:
+  `722f07cb6dad191bcdd176eb17fe77db8635dc53b364b4ad174081f7d340848d`;
+- stream: **64,110 lines**, **1,824 declarations**;
+- pskernel: **accept**, resulting environment **2,106 constants**;
+- pinned ConLeche `--verified`: **accept**, all **1,824 declarations**;
+- ConLeche additionally reports one in-process modeled inductive block,
+  `Lean.Syntax`, with 30 generated records checked by its declaration fold.
+
+For those exact streams, ConLeche's `model_exists` theorem applies to the
+verified checker's acceptance under its stated `SetTheory` assumptions. This
+is a genuine machine-checked formal soundness result for the co-signed streams.
+
+It is still not a theorem about the TypeScript implementation itself.
+
+## Cost-based stopping point
+
+This is the intended v1 stopping point. The next product-facing step is to put
+this protocol behind `psc certify` once the ProofScript compiler has a stable
+standard lean4export/certification artifact boundary.
+
+We deliberately do **not** start a second formal kernel or attempt arbitrary
+TypeScript↔C++ equivalence now. Additional corpus census work is optional and
+should be done only when it changes the definition of the ProofScript Formal
+Core.
+
+Possible later milestones, in increasing cost:
+
+1. define the **ProofScript Formal Core** as the features/artifacts routinely
+   accepted by both pskernel and the pinned verified checker;
+2. add `psc certify` around this protocol;
+3. optionally make pskernel proof-producing so a smaller verifier checks
+   certificates instead of rechecking full streams;
+4. treat exact TypeScript↔C++ behavioral equivalence as an optional research
+   moonshot.
 
 
 ## First transport experiment

@@ -41,7 +41,7 @@ run_export lean434-init-prelude.ndjson oracle/replay-probe/FullExport.lean
 run_export lean434-primitive-closure.ndjson oracle/replay-probe/DependencyExport.lean Init Nat.mod Nat.div Nat.gcd Nat.bitwise Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight
 
 run_export lean434-proofscript-text-foundation.ndjson oracle/replay-probe/DependencyExport.lean Init.Data.String.Bootstrap \
-  --selected-segmented 1 \
+  --selected-segmented-after Init.Prelude 1 \
   Char.toNat \
   String.push String.singleton \
   String.Internal.length String.Internal.append \

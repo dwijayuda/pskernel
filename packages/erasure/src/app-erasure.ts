@@ -46,7 +46,7 @@ export function eraseRuntimeApplication(
   );
   if(recursor!==undefined)return recursor;
 
-  const rawPos=tryEraseRawPosConstructor(
+  const rawPos=tryEraseRawPosApplication(
     expr,
     scope,
     environment,

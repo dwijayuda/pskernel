@@ -4,7 +4,12 @@ import {baseReport,compileSource} from '../pipeline.js';
 import {compileVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
-import type {BuildResult,CommonArgs} from '../types.js';
+import type {
+  BuildResult,
+  CommonArgs,
+  UnverifiedBuildResult,
+  VerifiedBuildResult,
+} from '../types.js';
 import {
   writeVerifiedModuleArtifacts,
 } from '../project-artifact-output.js';
@@ -15,6 +20,13 @@ import {
 } from '../runtime-dependencies.js';
 import {verifyRuntimeDependencyLock} from '../runtime-lock.js';
 
+export function buildCommand(
+  common:CommonArgs&{readonly verified:true},
+):Promise<VerifiedBuildResult>;
+export function buildCommand(
+  common:CommonArgs&{readonly verified:false},
+):Promise<UnverifiedBuildResult>;
+export function buildCommand(common:CommonArgs):Promise<BuildResult>;
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
   if(common.verified){
     const input=await resolveInput(common);

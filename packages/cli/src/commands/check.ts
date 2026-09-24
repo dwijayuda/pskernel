@@ -2,11 +2,23 @@ import {baseReport,checkSource} from '../pipeline.js';
 import {checkVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
-import type {CommonArgs} from '../types.js';
+import type {
+  CheckReport,
+  CommonArgs,
+  UnverifiedCheckReport,
+  VerifiedCheckReport,
+} from '../types.js';
 import {verifiedAssuranceReport} from '../verified-assurance.js';
 import {assertRuntimeDependencyPolicy} from '../runtime-dependencies.js';
 
-export async function checkCommand(common:CommonArgs){
+export function checkCommand(
+  common:CommonArgs&{readonly verified:true},
+):Promise<VerifiedCheckReport>;
+export function checkCommand(
+  common:CommonArgs&{readonly verified:false},
+):Promise<UnverifiedCheckReport>;
+export function checkCommand(common:CommonArgs):Promise<CheckReport>;
+export async function checkCommand(common:CommonArgs):Promise<CheckReport>{
   const input=await resolveInput(common);
   if(common.verified){
     const project=await resolveSourceProject(input);

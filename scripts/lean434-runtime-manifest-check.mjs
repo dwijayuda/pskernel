@@ -134,10 +134,36 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
       binding.leanDeclaration+' -> '+binding.leanSymbol,
     );
   }
-  if(!text.includes(binding.leanDeclaration)){
+  const parts=binding.leanDeclaration.split('.');
+  const sourceSpellings=[
+    binding.leanDeclaration,
+    parts.slice(-2).join('.'),
+    parts.at(-1),
+  ].filter((value,index,self)=>
+    typeof value==='string'
+    &&value.length>0
+    &&self.indexOf(value)===index
+  );
+  const declarationPattern=new RegExp(
+    String.raw`\\b(?:def|opaque|abbrev|instance|protected\\s+def)\\s+(?:`+
+    sourceSpellings.map(
+      (value)=>value.replace(/[.*+?^$\\{\}()|[\\]\\]/g,'\\\\  if(!text.includes(binding.leanDeclaration)){
     throw new Error(
       'bound Lean declaration missing from upstream source: '+
       binding.leanDeclaration+' @ '+binding.upstreamSource,
+    );
+  }
+
+  declarationBindings.push({'),
+    ).join('|')+
+    String.raw`)\\b`,
+    'u',
+  );
+  if(!declarationPattern.test(text)){
+    throw new Error(
+      'bound Lean declaration missing from upstream source: '+
+      binding.leanDeclaration+' @ '+binding.upstreamSource+
+      ' (checked source spellings: '+sourceSpellings.join(', ')+')',
     );
   }
 

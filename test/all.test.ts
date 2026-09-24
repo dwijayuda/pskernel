@@ -1160,6 +1160,22 @@ test('nested inductive preserves constructor-specific parameter BinderInfo throu
  const ci=env.get(Node);assert(ci.kind==='constructor');assert(ci.type.kind==='forall'&&ci.type.binderInfo==='implicit');eqExpr(ci.type,ctorTy);
 });
 
+test('environment transaction rolls back additions and metadata atomically',()=>{
+ const env=new Environment(),A=nameFromDotted('Txn.A'),B=nameFromDotted('Txn.B'),C=nameFromDotted('Txn.C'),T=sort(levelSucc(levelZero));
+ env.add({kind:'axiom',name:A,levelParams:[],type:T});
+ const size=env.size,revision=env.revision,quot=env.quotInitialized;
+ throws(()=>env.transaction(()=>{
+   env.add({kind:'axiom',name:B,levelParams:[],type:T});
+   env.quotInitialized=!quot;
+   env.transaction(()=>{env.add({kind:'axiom',name:C,levelParams:[],type:T});});
+   throw new Error('rollback');
+ }));
+ assert(env.size===size&&env.revision===revision&&env.quotInitialized===quot,'failed transaction must restore environment metadata');
+ assert(env.has(A)&&!env.has(B)&&!env.has(C),'failed outer transaction must roll back nested committed additions');
+ env.transaction(()=>{env.add({kind:'axiom',name:B,levelParams:[],type:T});});
+ assert(env.has(B)&&env.size===size+1&&env.revision===revision+1,'successful transaction must commit additions normally');
+});
+
 test('public ordinary admission rejects reserved _nested references but not sibling prefixes',()=>{
  const env=baseEnv(),I=nameFromDotted('ReservedOrdinary'),Mk=nameFromDotted('ReservedOrdinary.mk'),aux=nameFromDotted('_nested.KNHost_1');
  const badTy=forallE(nameFromDotted('x'),constant(aux),constant(I));

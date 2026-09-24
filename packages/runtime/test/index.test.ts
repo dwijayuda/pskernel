@@ -38,6 +38,8 @@ import {
   findLean434JsImplementedBy,
   invokeLean434JsImplementedBy,
   lean_array_fget,
+  lean_array_mk,
+  lean_array_to_list,
   lean_array_fset,
   lean_array_get_size,
   lean_array_push,
@@ -115,6 +117,35 @@ equal(lean_uint64_of_nat((1n<<64n)+5n),5n);
 // unique arrays using destructive updates.
 const empty=lean_mk_empty_array_with_capacity<number>(64n);
 deepEqual(empty,[],'empty Lean array mismatch');
+const listRuntime={
+  kind:'constructor' as const,
+  name:'List.cons' as const,
+  fields:[
+    10,
+    {
+      kind:'constructor' as const,
+      name:'List.cons' as const,
+      fields:[
+        20,
+        {
+          kind:'constructor' as const,
+          name:'List.nil' as const,
+          fields:[],
+        },
+      ],
+    },
+  ],
+};
+deepEqual(
+  lean_array_mk<number>(listRuntime),
+  [10,20],
+  'lean_array_mk List-to-array bridge mismatch',
+);
+deepEqual(
+  lean_array_to_list([10,20]),
+  listRuntime,
+  'lean_array_to_list array-to-List bridge mismatch',
+);
 const one=lean_array_push(empty,10);
 const two=lean_array_push(one,20);
 equal(lean_array_get_size(two),2n);

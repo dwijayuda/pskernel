@@ -1,14 +1,16 @@
 import { Environment } from '../src/core/environment.js';
-import { app, bvar, constant, exprEq, exprKernelMetadataEq, exprKey, forallE, fvar, hasMVar, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
-import { levelEquivalent, levelMVar, levelParam, levelSucc, levelZero, mkIMax, mkMax } from '../src/core/level.js';
-import { nameFromDotted, nameToString } from '../src/core/name.js';
+import { app, bvar, constant, consumeTypeAnnotations, exprEq, exprKernelMetadataEq,exprLeanEq, exprKey, forallE, fvar, hasFVar, hasLooseBVar, hasMVar, inferImplicit, instantiateExprLevels, lam, mkAppN, natLit, sort, strLit } from '../src/core/expr.js';
+import { instantiateLevel, levelEqStructural, levelEquivalent, levelHasMVar, levelIMaxRaw, levelLe, levelMaxRaw, levelMVar, levelParam, levelParamNames, levelSucc, levelZero, mkIMax, mkMax, normalizesToZero } from '../src/core/level.js';
+import { nameAppend, nameCmp, nameEq, nameFromDotted, nameIsPrefixOf, nameKey, nameReplacePrefix, nameToString, strName } from '../src/core/name.js';
 import { LocalContext } from '../src/core/local-context.js';
-import { instantiate, lift } from '../src/core/instantiate.js';
+import { abstractFVar, instantiate, lift } from '../src/core/instantiate.js';
 import { Kernel } from '../src/kernel/kernel.js';
 import { N } from '../src/kernel/names.js';
 import { TypeChecker } from '../src/kernel/type-checker.js';
+import { NativeEvaluator } from '../src/kernel/reduction/native.js';
+import { asNat } from '../src/kernel/reduction/nat.js';
 import { KernelState } from '../src/kernel/state.js';
-import { addOrdinaryInductive } from '../src/kernel/inductive/ordinary.js';
+import { addOrdinaryInductive, checkNoReservedNestedAux, checkUniformInductiveOccurrences, validateInstalledRecursorsByReduction } from '../src/kernel/inductive/ordinary.js';
 import { addQuot } from '../src/kernel/quotient.js';
 import { addInductive } from '../src/kernel/inductive/nested.js';
 
@@ -31,26 +33,370 @@ function baseEnv():Environment{
  return e;
 }
 
-test('Name numeric and string components remain distinct',()=>{const a={kind:'str',prefix:nameFromDotted('X'),value:'1'} as const,b={kind:'num',prefix:nameFromDotted('X'),value:1n} as const;assert(JSON.stringify(a,(_k,v)=>typeof v==='bigint'?v.toString():v)!==JSON.stringify(b,(_k,v)=>typeof v==='bigint'?v.toString():v));});
+test('Name numeric and string components remain distinct',()=>{const prefix=nameFromDotted('X'),a={kind:'str',prefix,value:'1'} as const,b={kind:'num',prefix,value:1n} as const;assert(JSON.stringify(a,(_k,v)=>typeof v==='bigint'?v.toString():v)!==JSON.stringify(b,(_k,v)=>typeof v==='bigint'?v.toString():v));assert(nameCmp(b,a)<0&&nameCmp(a,b)>0,'Lean Name order places numeral components before string components');const bmp={kind:'str',prefix,value:'\uE000'} as const,astral={kind:'str',prefix,value:'\u{10000}'} as const;assert(nameCmp(bmp,astral)<0&&nameCmp(astral,bmp)>0,'Lean Name string order follows UTF-8/scalar order rather than JavaScript UTF-16 code-unit order');const nested=nameFromDotted('_nested'),singleDot=strName(nameFromDotted(''),'_nested.fake');assert(nameIsPrefixOf(nested,nameFromDotted('_nested.real'))&&!nameIsPrefixOf(nested,singleDot),'Lean Name prefix checks are structural, not rendered-string prefixes');assert(nameEq(nameAppend(nested,nameFromDotted('Pkg.Box')),nameFromDotted('_nested.Pkg.Box')),'Lean Name concatenation preserves suffix components');});
+test('deep Lean Name operations avoid the JavaScript call stack',()=>{
+ let a:any=nameFromDotted(''),b:any=nameFromDotted(''),prefix:any=null;
+ for(let i=0;i<12000;i++){a={kind:'str',prefix:a,value:'x'};b={kind:'str',prefix:b,value:'x'};if(i===5999)prefix=a;}
+ assert(nameEq(a,b),'deep structural Name equality must be stack-safe');
+ assert(nameCmp(a,b)===0,'deep Name comparison must be stack-safe');
+ assert(nameKey(a).startsWith('a/s:1:x'),'deep Name key generation must be stack-safe');
+ const r=nameReplacePrefix(a,prefix,nameFromDotted('R'));
+ assert(r!==null&&nameToString(r).startsWith('R.'),'deep Name prefix replacement/component extraction must be stack-safe');
+});
 test('Lean private names preserve numeric private-index components',()=>{assert(!exprEq(constant(N.NatBitwiseUnaryProof1),constant(nameFromDotted('_private.Init.Data.Nat.Bitwise.Basic.0.Nat.bitwise._unary._proof_1'))));});
 test('LocalContext freshness never collides with reconstructed local IDs',()=>{const l=new LocalContext();l.addLocal('a@1',nameFromDotted('a'),sort(levelZero));assert(l.fresh('a')==='a@0');assert(l.fresh('a')==='a@2');});
 test('deep structural traversals avoid the JavaScript call stack',()=>{
  let e:any=bvar(0);
- for(let i=0;i<6000;i++)e=lam(nameFromDotted('x'),constant(N.Nat),e);
- assert(!hasMVar(e));
+ for(let i=0;i<12000;i++)e=lam(nameFromDotted('x'),constant(N.Nat),e);
+ assert(!hasMVar(e));assert(!hasFVar(e));assert(!hasLooseBVar(e));
+ const eClone=lift(e,0,0);assert(eClone===e,'zero lift must preserve Lean node identity');assert(exprEq(e,eClone),'deep strong expression equality must be stack-safe');assert(exprKernelMetadataEq(e,eClone),'deep generated-metadata equality must be stack-safe');
+ const deepKey=exprKey(e);assert(deepKey.startsWith('L(')&&deepKey.endsWith('b0'+')'.repeat(12000)),'deep nested-inductive expression keys must be stack-safe');
  const lifted=lift(e,1,0);
  const inst=instantiate(lifted,[natLit(0)]);
- assert(lifted.kind==='lam'&&inst.kind==='lam');
+ assert(lifted===e&&inst===e,'lift/instantiate must reuse a closed expression when no loose bvar changes');
+ assert(abstractFVar(e,'absent@0')===e,'abstractFVar reconstruction must reuse an unchanged closed tree');
+
+ const id='deep@0';let withFVar:any=fvar(id);
+ for(let i=0;i<12000;i++)withFVar=lam(nameFromDotted('x'),constant(N.Nat),withFVar);
+ assert(hasFVar(withFVar),'deep free-variable scan must find the leaf without recursion overflow');
+ const tcScan:any=new TypeChecker(baseEnv());assert(tcScan.containsFVar(withFVar,id),'checker-specific deep free-variable scan must be stack-safe');assert(!tcScan.containsFVar(withFVar,'other@0'));
+ const abstracted=abstractFVar(withFVar,id);
+ assert(abstracted.kind==='lam'&&!hasFVar(abstracted),'deep abstraction must be stack-safe and close the free variable');
+
+ const u=nameFromDotted('deep.level');let withLevel:any=sort(levelParam(u));
+ for(let i=0;i<12000;i++)withLevel=lam(nameFromDotted('x'),constant(N.Nat),withLevel);
+ const levelInst=instantiateExprLevels(withLevel,[u],[levelZero]);
+ assert(levelInst.kind==='lam','deep expression-level universe instantiation must be stack-safe');
+
+ const deepDecl:any={levelParams:[],numParams:0,types:[{name:nameFromDotted('DeepScan'),type:sort(levelZero),ctors:[{name:nameFromDotted('DeepScan.mk'),type:e}]}]};
+ checkNoReservedNestedAux(deepDecl);checkUniformInductiveOccurrences(deepDecl);
+
+ let annotated:any=constant(N.Nat),outParam=constant(nameFromDotted('outParam'));
+ for(let i=0;i<12000;i++)annotated=app(outParam,annotated);
+ assert(exprEq(consumeTypeAnnotations(annotated),constant(N.Nat)),'deep leading type annotations must be consumed without recursion overflow');
+
+ let deepPi:any=constant(N.Nat);
+ for(let i=0;i<2048;i++)deepPi=forallE(nameFromDotted('x'),constant(N.Nat),deepPi);
+ const inferredPi=inferImplicit(deepPi,true,2048);
+ assert(inferredPi===deepPi,'recursor implicit inference reuses an unchanged binder spine like Lean update_binding');
 });
+test('universe metavariables remain distinct symbolic atoms',()=>{
+ const n=nameFromDotted('u'),u=levelMVar(n),v=levelMVar(nameFromDotted('v')),p=levelParam(n);
+ assert(levelEquivalent(u,u),'a universe metavariable is equivalent to itself');
+ assert(!levelEquivalent(u,v),'distinct universe metavariables must not collapse');
+ assert(!levelEquivalent(u,p),'a metavariable and parameter with the same Name remain distinct kinds');
+ assert(levelEquivalent(mkMax(u,v),mkMax(v,u)),'max remains commutative with universe metavariables');
+});
+
+test('mkMax matches Lean structural absorption shortcuts',()=>{
+ const u=levelParam(nameFromDotted('absorb.u')),v=levelParam(nameFromDotted('absorb.v'));
+ const uv=mkMax(u,v);
+ assert(levelEqStructural(mkMax(u,uv),uv),'max u (max u v) must return the existing rhs node shape');
+ assert(levelEqStructural(mkMax(uv,u),uv),'max (max u v) u must return the existing lhs node shape');
+});
+
+test('deep structural universe equality is stack-safe',()=>{
+ let a:any=levelZero,b:any=levelZero;
+ for(let i=0;i<20000;i++){a=levelSucc(a);b=levelSucc(b);}
+ assert(levelEqStructural(a,b),'deep structural universe equality must not overflow the JavaScript stack');
+ assert(levelEquivalent(a,b),'deep universe normalization/equivalence must not overflow the JavaScript stack');
+ const deepLevelExprKey=exprKey(sort(a));
+ assert(deepLevelExprKey.startsWith('Ss(')&&deepLevelExprKey.endsWith(')'.repeat(20000)),'expression keys must encode deep universe levels without recursive JSON serialization');
+
+ const uN=nameFromDotted('deep.u');let p:any=levelParam(uN),m:any=levelMVar(nameFromDotted('deep.m'));
+ for(let i=0;i<20000;i++){p=levelSucc(p);m=levelSucc(m);}
+ assert(levelParamNames(p).some(n=>nameToString(n)==='deep.u'),'deep level parameter scan must reach the leaf');
+ assert(!levelHasMVar(p)&&levelHasMVar(m),'deep universe metavariable scan must be stack-safe');
+ assert(!normalizesToZero(p),'successor towers cannot normalize to zero');
+ assert(levelEqStructural(instantiateLevel(p,[uN],[levelZero]),a),'deep universe instantiation must be stack-safe');
+
+ const rawMax=levelMaxRaw(levelZero,levelZero),rawIMax=levelIMaxRaw(levelZero,levelZero);
+ assert(instantiateLevel(rawMax,[],[])===rawMax,'empty universe substitution preserves raw max identity instead of simplifying it');
+ assert(instantiateLevel(rawIMax,[nameFromDotted('unused')],[levelZero])===rawIMax,'unmatched universe substitution preserves raw imax identity instead of simplifying it');
+ const rawExpr=sort(rawMax);
+ assert(instantiateExprLevels(rawExpr,[],[])===rawExpr,'empty expression-level universe substitution preserves expression identity');
+ const untouched=lam(nameFromDotted('x'),sort(rawMax),constant(N.Nat));
+ assert(instantiateExprLevels(untouched,[nameFromDotted('unused')],[levelZero])===untouched,'unmatched expression-level universe substitution preserves the original tree');
+
+ const st=new KernelState();st.infer.set(sort(a),constant(N.Nat));
+ assert(st.infer.has(sort(b)),'structural expression caches must compare deep universe levels without recursion overflow');
+});
+
 test('universe max commutative semantically',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));assert(levelEquivalent(mkMax(u,v),mkMax(v,u)));});
 test('imax u 0 = 0',()=>{const u=levelParam(nameFromDotted('u'));assert(levelEquivalent(mkIMax(u,levelZero),levelZero));});
 test('imax u (v+1) = max u (v+1)',()=>{const u=levelParam(nameFromDotted('u')),v=levelSucc(levelParam(nameFromDotted('v')));assert(levelEquivalent(mkIMax(u,v),mkMax(u,v)));});
+test('Lean 4.34 Trans constructor field universe is below its inductive result universe',()=>{
+ const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v')),w=levelParam(nameFromDotted('w'));
+ const u1=levelParam(nameFromDotted('u_1')),u2=levelParam(nameFromDotted('u_2')),u3=levelParam(nameFromDotted('u_3'));
+ const one=levelSucc(levelZero);
+ const result=levelMaxRaw(levelMaxRaw(levelMaxRaw(levelMaxRaw(levelMaxRaw(levelMaxRaw(one,u),u1),u2),u3),v),w);
+ assert(levelLe(mkIMax(u,v),levelMaxRaw(u,v)),'Lean max-geq shortcut must fall through before decomposing an imax target');
+ const field=mkIMax(u1,mkIMax(u2,mkIMax(u3,mkIMax(u,mkIMax(v,w)))));
+ for(const [name,x] of [['u',u],['v',v],['w',w],['u_1',u1],['u_2',u2],['u_3',u3]] as const){
+   assert(levelLe(x,result),`Trans result universe must dominate ${name}`);
+ }
+ assert(levelLe(field,result),'Lean 4.34 accepts Trans.mk field universe under the Trans result universe');
+});
+
+test('Lean 4.34 universe equivalence preserves kernel incompleteness',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));const lhs=mkMax(v,u),rhs=mkMax(mkIMax(u,v),u);assert(!levelEquivalent(lhs,rhs),'Lean 4.34 normalized structural equivalence remains intentionally incomplete on this pair');assert(levelLe(lhs,rhs)&&levelLe(rhs,lhs),'Lean 4.34 is_geq proves both directions after the max positive shortcut falls through to imax decomposition');});
+test('Lean structural equality includes MData payload while defeq ignores it',()=>{
+ const a={kind:'mdata',data:{tag:'a'},expr:natLit(0)} as const;
+ const b={kind:'mdata',data:{tag:'b'},expr:natLit(0)} as const;
+ assert(!exprLeanEq(a,b),'Lean Expr structural equality compares MData payloads');
+ assert(!exprEq(a,b),'strong core expression equality compares MData payloads');
+ assert(new TypeChecker(baseEnv()).isDefEq(a,b),'kernel definitional equality intentionally ignores MData payloads');
+});
+
 test('infer identity lambda',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));const ty=tc.check(id);eqExpr(ty,forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat)));});
+test('WHNF beta reduction consumes wide lambda spines in one substitution batch',()=>{
+ const n=512;let fn:any=bvar(n-1);
+ for(let i=0;i<n;i++)fn=lam(nameFromDotted('x'+i),constant(N.Nat),fn);
+ const args=Array.from({length:n},(_,i)=>natLit(i+1));
+ eqExpr(new TypeChecker(baseEnv()).whnf(mkAppN(fn,args)),args[0]);
+});
+
 test('beta reduction',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));eqExpr(tc.whnf(app(id,natLit(3))),natLit(3));});
+test('kernel memo tables share entries across Lean-structurally equal clones',()=>{
+ const st=new KernelState();
+ const a=app(constant(N.NatSucc),natLit(0)),aClone=app(constant(N.NatSucc),natLit(0));
+ st.whnf.set(a,natLit(1));
+ assert(st.whnf.has(aClone),'expr_map cache lookup must use Lean structural equality, not object identity');
+ eqExpr(st.whnf.get(aClone)!,natLit(1));
+ const x=constant(nameFromDotted('CacheClone.x')),y=constant(nameFromDotted('CacheClone.y'));
+ const xClone=constant(nameFromDotted('CacheClone.x')),yClone=constant(nameFromDotted('CacheClone.y'));
+ st.success.add(st.pair(x,y));
+ assert(st.success.has(st.pair(xClone,yClone)),'defeq success cache must recognize structurally equal cloned pairs');
+ assert(st.success.has(st.pair(yClone,xClone)),'defeq pair cache remains symmetric like Lean hash-canonicalized pairs');
+});
+
+test('checker state is locked to one immutable environment revision',()=>{
+ const env=baseEnv(),st=new KernelState(),tc=new TypeChecker(env,new LocalContext(),st),A=nameFromDotted('EnvRevision.A');
+ eqExpr(tc.check(natLit(0)),constant(N.Nat));
+ env.add({kind:'axiom',name:A,levelParams:[],type:constant(N.Nat)});
+ throws(()=>tc.check(constant(A)));
+ const fresh=new TypeChecker(env);
+ eqExpr(fresh.check(constant(A)),constant(N.Nat));
+ throws(()=>new TypeChecker(env.clone(),new LocalContext(),st));
+});
+
+test('type checker snapshots caller-owned local contexts',()=>{
+ const env=baseEnv(),lctx=new LocalContext(),id='snapshot@0';
+ lctx.addLocal(id,nameFromDotted('x'),constant(N.Nat));
+ const tc=new TypeChecker(env,lctx);
+ lctx.addLocal(id,nameFromDotted('x'),sort(levelZero));
+ eqExpr(tc.check(fvar(id)),constant(N.Nat));
+});
+
+test('shared checker state rejects incompatible cache-affecting checker configuration',()=>{
+ const env=baseEnv();
+ const unsafeName=nameFromDotted('StateMode.unsafe');
+ env.add({kind:'axiom',name:unsafeName,levelParams:[],type:constant(N.Nat),isUnsafe:true});
+
+ const safetyState=new KernelState();
+ new TypeChecker(env,new LocalContext(),safetyState,undefined,'unsafe').check(constant(unsafeName));
+ throws(()=>new TypeChecker(env,new LocalContext(),safetyState,undefined,'safe'));
+
+ const u=nameFromDotted('StateMode.u'),v=nameFromDotted('StateMode.v');
+ const levelState=new KernelState();
+ new TypeChecker(env,new LocalContext(),levelState,undefined,'safe',[u]);
+ throws(()=>new TypeChecker(env,new LocalContext(),levelState,undefined,'safe',[v]));
+
+ const limitsState=new KernelState();
+ new TypeChecker(env,new LocalContext(),limitsState,{maxRecDepth:512,maxNatBytes:1024n});
+ throws(()=>new TypeChecker(env,new LocalContext(),limitsState,{maxRecDepth:512,maxNatBytes:8n}));
+
+ const nativeA:NativeEvaluator={evaluate(){return {kind:'nat',value:1n};}};
+ const nativeB:NativeEvaluator={evaluate(){return {kind:'nat',value:1n};}};
+ const nativeState=new KernelState();
+ new TypeChecker(env,new LocalContext(),nativeState,undefined,'safe',undefined,false,nativeA);
+ throws(()=>new TypeChecker(env,new LocalContext(),nativeState,undefined,'safe',undefined,false,nativeB));
+});
+
+test('shared checker state rejects incompatible FVar rebinding',()=>{
+ const env=baseEnv(),st=new KernelState(),a=new LocalContext(),b=new LocalContext(),id='shared@0';
+ a.addLocal(id,nameFromDotted('x'),constant(N.Nat));
+ new TypeChecker(env,a,st);
+ b.addLocal(id,nameFromDotted('x'),sort(levelZero));
+ throws(()=>new TypeChecker(env,b,st));
+});
+
+test('checker-state local name generator stays unique across independent local contexts',()=>{
+ const st=new KernelState(),a=new LocalContext(),b=new LocalContext();
+ const x=st.freshLocal('x',a),y=st.freshLocal('x',b);
+ assert(x!==y,'Lean-style checker state must never recycle fvar ids across sibling contexts');
+ assert(x.startsWith('_kernel_fresh@')&&y.startsWith('_kernel_fresh@'),'kernel-generated fvars use a reserved internal namespace');
+});
+
+test('structural WHNF cache preserves Lean is_eqp progress distinction',()=>{
+ const tc=new TypeChecker(baseEnv()),S=nameFromDotted('Eqp.Fake');
+ const a={kind:'proj',typeName:S,index:0,expr:natLit(0)} as const;
+ const b={kind:'proj',typeName:S,index:0,expr:natLit(0)} as const;
+ const first=tc.whnfCore(a),second=tc.whnfCore(b);
+ assert(first===a,'first unreduced projection is cached as its original object');
+ assert(second===a&&second!==b,'structural cache hit may return another equal object, so defeq progress must use object identity like is_eqp');
+});
+
+test('Lean structural equality and cache lookup are stack-safe on deep clones',()=>{
+ const ty=constant(N.Nat);let a:any=natLit(0),b:any=natLit(0);
+ for(let i=0;i<12000;i++){
+   a=lam(nameFromDotted('a'+i),ty,a,'default');
+   b=lam(nameFromDotted('b'+i),ty,b,'implicit');
+ }
+ assert(exprLeanEq(a,b),'deep binder metadata-insensitive structural equality must not overflow the JS stack');
+ const st=new KernelState();st.infer.set(a,ty);
+ assert(st.infer.has(b),'deep structurally equal clones must hit Lean-style expression caches');
+});
+
+test('kernel structural cache keys ignore binder display metadata like Lean expr_map',()=>{
+ const st=new KernelState(),ty=constant(N.Nat),body=bvar(0);
+ const a=lam(nameFromDotted('left'),ty,body,'default');
+ const b=lam(nameFromDotted('right'),ty,body,'implicit');
+ st.infer.set(a,constant(N.Nat));
+ assert(st.infer.has(b),'Lean expr_map equality ignores binder names and BinderInfo');
+ eqExpr(st.infer.get(b)!,constant(N.Nat));
+});
+
 test('defeq success cache remains pair-local and never gains transitive closure',()=>{
  const st=new KernelState(),a=constant(nameFromDotted('Cache.a')),b=constant(nameFromDotted('Cache.b')),c=constant(nameFromDotted('Cache.c'));
  st.success.add(st.pair(a,b));st.success.add(st.pair(b,c));
  assert(!st.success.has(st.pair(a,c)),'Lean 4.34 defeq cache must not transitively close successful algorithmic comparisons');
+});
+
+test('cached public defeq still enters the Lean recursion guard',()=>{
+ const env=baseEnv(),st=new KernelState(),a=natLit(0),b=natLit(0),tc=new TypeChecker(env,undefined,st,{maxRecDepth:1,maxNatBytes:134217728n});
+ st.success.add(st.pair(a,b));
+ st.recDepth=16;
+ throws(()=>tc.isDefEq(a,b));
+ st.recDepth=0;
+ assert(tc.isDefEq(a,b),'cached success remains available once the guarded core can be entered');
+});
+
+test('internal defeq core success does not populate the public success cache',()=>{
+ const env=baseEnv(),K=nameFromDotted('CoreCache.K'),uN=nameFromDotted('u'),u=levelParam(uN);
+ env.add({kind:'axiom',name:K,levelParams:[uN],type:sort(u)});
+ const a=constant(K,[mkMax(u,u)]),b=constant(K,[u]),tc=new TypeChecker(env),pair=tc.state.pair(a,b);
+ assert((tc as any).isDefEqCore(a,b),'equivalent universe arguments on the same constant are core-definitionally equal');
+ assert(!tc.state.success.has(pair),'core-only success must remain cache-neutral until the public wrapper is used');
+ assert(tc.isDefEq(a,b),'public wrapper must preserve the same result');
+ assert(tc.state.success.has(pair),'public successful query must populate the success cache');
+});
+
+test('lazy delta ignores definitions with malformed universe arity',()=>{
+ const env=baseEnv(),uN=nameFromDotted('u'),u=levelParam(uN),A=nameFromDotted('DeltaArity.A'),B=nameFromDotted('DeltaArity.B');
+ env.add({kind:'definition',name:A,levelParams:[uN],type:sort(u),value:sort(levelZero),hints:{kind:'abbrev'},safety:'safe'});
+ env.add({kind:'definition',name:B,levelParams:[uN],type:sort(u),value:sort(levelZero),hints:{kind:'regular',height:1n},safety:'safe'});
+ const tc=new TypeChecker(env),a=constant(A),b=constant(B);
+ throws(()=>tc.isDefEq(a,b));
+ assert((tc as any).deltaTarget(a)===null&&(tc as any).deltaTarget(b)===null,'Lean is_delta requires exact universe arity even though public defeq rejects the malformed constants earlier');
+});
+
+test('lazy delta reduction has no arbitrary 512-step semantic cap',()=>{
+ const env=baseEnv(),count=600;
+ for(let i=count;i>=0;i--){
+   const n=nameFromDotted('LongDelta.D'+i),value=i===count?natLit(0):constant(nameFromDotted('LongDelta.D'+(i+1)));
+   env.add({kind:'definition',name:n,levelParams:[],type:constant(N.Nat),value,hints:{kind:'regular',height:BigInt(count-i+1)},safety:'safe'});
+ }
+ const tc=new TypeChecker(env);
+ assert(tc.isDefEq(constant(nameFromDotted('LongDelta.D0')),natLit(0)),'Lean lazy delta must continue past 512 definition steps');
+});
+
+test('public defeq failures do not populate Lean lazy-delta failure cache',()=>{
+ const tc=new TypeChecker(baseEnv()),a=natLit(0),b=natLit(1),pair=tc.state.pair(a,b);
+ assert(!tc.isDefEq(a,b),'distinct Nat literals are not definitionally equal');
+ assert(!tc.state.failure.has(pair),'Lean 4.34 public defeq wrapper must not cache arbitrary failures');
+});
+
+test('defeq caches the original pair after delta proves equality',()=>{
+ const env=baseEnv(),A=nameFromDotted('Cache.deltaA'),B=nameFromDotted('Cache.deltaB'),k=new Kernel(env);
+ for(const n of [A,B])k.addDefinition({kind:'definition',name:n,levelParams:[],type:constant(N.Nat),value:natLit(7),hints:{kind:'regular',height:1n},safety:'safe'});
+ const a=constant(A),b=constant(B),tc=new TypeChecker(env);
+ assert(tc.isDefEq(a,b),'equal definitions should be definitionally equal');
+ assert(tc.state.success.has(tc.state.pair(a,b)),'Lean 4.34 caches every successful public defeq query at the original pair');
+});
+
+test('defeq compares application heads before rejecting arity mismatch',()=>{
+ const env=baseEnv(),F=nameFromDotted('Cache.curriedF'),fn=constant(F);
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('a'),constant(N.Nat),forallE(nameFromDotted('b'),constant(N.Nat),constant(N.Nat)))});
+ const oneArg=app(fn,natLit(0)),twoArgs=app(app(fn,natLit(0)),natLit(1)),tc=new TypeChecker(env);
+ assert(!tc.state.success.has(tc.state.pair(fn,fn)),'precondition: head pair must not already be cached');
+ assert(!tc.isDefEq(oneArg,twoArgs),'different application arities are not definitionally equal');
+ assert(tc.state.success.has(tc.state.pair(fn,fn)),'Lean 4.34 compares and caches equal heads before noticing the arity mismatch');
+});
+
+test('reducible Prop sort remains proof-only through inductive and projection checking',()=>{
+ const env=baseEnv(),Gate=nameFromDotted('EnsureSort.Gate'),Carrier=nameFromDotted('EnsureSort.Carrier'),I=nameFromDotted('EnsureSort.Owner'),Mk=nameFromDotted('EnsureSort.Owner.mk'),p=nameFromDotted('EnsureSort.proof');
+ const k=new Kernel(env);
+ k.addDefinition({kind:'definition',name:Gate,levelParams:[],type:sort(levelSucc(levelZero)),value:sort(levelZero),hints:{kind:'abbrev'},safety:'safe'});
+ k.addAxiom({kind:'axiom',name:Carrier,levelParams:[],type:constant(Gate)});
+ assert(new TypeChecker(env).isProp(constant(Carrier)),'isProp must WHNF the inferred Gate type to Sort 0 before reading its universe level');
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:constant(Gate),ctors:[{name:Mk,type:forallE(nameFromDotted('bit'),constant(N.Bool),constant(I))}]}]});
+ const ri=env.get(nameFromDotted('EnsureSort.Owner.rec'));
+ assert(ri.kind==='recursor'&&ri.levelParams.length===0,'a reducible Prop result sort must not gain large elimination');
+ env.add({kind:'axiom',name:p,levelParams:[],type:constant(I)});
+ throws(()=>new TypeChecker(env).check({kind:'proj',typeName:I,index:0,expr:constant(p)}));
+});
+
+test('isProp requires the inferred type to reduce to a Sort',()=>{
+ const tc=new TypeChecker(baseEnv());
+ throws(()=>tc.isProp(natLit(0)));
+});
+
+test('Lean structural equality uses extensional KVMap MData equality',()=>{
+ const x=natLit(0);
+ const a={kind:'mdata',data:{alpha:1,beta:true},expr:x} as const;
+ const same={kind:'mdata',data:{alpha:1,beta:true},expr:x} as const;
+ const reordered={kind:'mdata',data:{beta:true,alpha:1},expr:x} as const;
+ const different={kind:'mdata',data:{alpha:1,beta:false},expr:x} as const;
+ assert(exprLeanEq(a,same),'identical metadata payloads remain structurally equal');
+ assert(exprLeanEq(a,reordered),'Lean KVMap equality is extensional and ignores entry insertion order');
+ assert(!exprLeanEq(a,different),'different MData bindings must remain structurally distinct');
+ const st=new KernelState();st.infer.set(a,constant(N.Nat));assert(st.infer.has(reordered),'structural expression caches must share reordered but KVMap-equal metadata');
+ assert(new TypeChecker(baseEnv()).isDefEq(a,reordered),'kernel defeq intentionally ignores MData placement/payloads too');
+ assert(new TypeChecker(baseEnv()).isDefEq(a,different),'kernel defeq intentionally ignores MData payloads');
+});
+
+test('Lean structural equality preserves let nondep while defeq zeta-reduces it away',()=>{
+ const name=nameFromDotted('x'),ty=sort(levelSucc(levelZero)),value=sort(levelZero),body=sort(levelZero);
+ const dep={kind:'let',name,type:ty,value,body,nondep:false} as const;
+ const nondep={kind:'let',name,type:ty,value,body,nondep:true} as const;
+ assert(!exprLeanEq(dep,nondep),'Lean Expr == compares let_nondep');
+ assert(new TypeChecker(baseEnv()).isDefEq(dep,nondep),'let_nondep is structural metadata, not a type-theoretic distinction after zeta');
+});
+
+test('lean4export opaque MData equality ids survive replay',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"in":1,"str":{"pre":0,"str":"MetaA"}}',
+  '{"in":2,"str":{"pre":0,"str":"MetaB"}}',
+  '{"ie":0,"sort":0}',
+  '{"ie":1,"mdata":{"dataEq":0,"expr":0}}',
+  '{"ie":2,"mdata":{"dataEq":1,"expr":0}}',
+  '{"axiom":{"name":1,"levelParams":[],"type":1,"isUnsafe":false}}',
+  '{"axiom":{"name":2,"levelParams":[],"type":2,"isUnsafe":false}}'
+ ].join('\n');
+ const r=new Lean4ExportReplay();r.replay(nd);
+ const a=r.env.get(nameFromDotted('MetaA')),b=r.env.get(nameFromDotted('MetaB'));
+ assert(a.kind==='axiom'&&b.kind==='axiom');
+ assert(!exprLeanEq(a.type,b.type),'distinct exported KVMap equality ids remain structurally distinct');
+ assert(new TypeChecker(r.env).isDefEq(a.type,b.type),'defeq still ignores metadata after replay');
+});
+
+test('Lean structural expression equality ignores binder annotations',()=>{
+ const ty=constant(N.Nat),body=bvar(0);
+ const a=lam(nameFromDotted('x'),ty,body,'default'),b=lam(nameFromDotted('y'),ty,body,'implicit');
+ assert(!exprEq(a,b),'exact expression equality retains binder metadata');
+ assert(exprLeanEq(a,b),'Lean kernel Expr == ignores binder names and BinderInfo');
+ const tc=new TypeChecker(baseEnv());assert(tc.isDefEq(a,b),'defeq quick path must follow Lean structural equality');
+});
+
+test('binder defeq flattens wide Pi chains within Lean kernel depth budget',()=>{
+ let a:any=constant(N.Nat),b:any=constant(N.Nat);
+ for(let i=0;i<200;i++){
+   a=forallE(nameFromDotted('left'+i),constant(N.Nat),a);
+   b=forallE(nameFromDotted('right'+i),constant(N.Nat),b);
+ }
+ const tc=new TypeChecker(baseEnv(),undefined,undefined,{maxRecDepth:1,maxNatBytes:134217728n});
+ assert(tc.isDefEq(a,b),'binder display names must not matter and wide binder chains must not consume one recursion frame each');
 });
 
 test('proof irrelevance compares arbitrary proofs of the same proposition',()=>{
@@ -58,39 +404,213 @@ test('proof irrelevance compares arbitrary proofs of the same proposition',()=>{
  const lctx=new LocalContext();lctx.addLocal('p@0',nameFromDotted('p'),constant(P));lctx.addLocal('q@0',nameFromDotted('q'),constant(P));
  const tc=new TypeChecker(env,lctx);assert(tc.isDefEq(fvar('p@0'),fvar('q@0')));
 });
+test('Nat optimized reduction requires exact level-free primitive heads',()=>{
+ const env=baseEnv(),tc=new TypeChecker(env);
+ const malformedAdd=app(app(constant(N.NatAdd,[levelZero]),natLit(1)),natLit(2));
+ eqExpr(tc.whnf(malformedAdd),malformedAdd);
+ const malformedZero=constant(N.NatZero,[levelZero]);
+ const malformedSucc=app(constant(N.NatSucc,[levelZero]),natLit(0));
+ assert(!(tc as any).isNatZeroExpr(malformedZero),'Nat.zero with universe arguments is not Lean kernel zero');
+ assert((tc as any).natPredExpr(malformedSucc)===null,'Nat.succ with universe arguments is not a Lean kernel successor');
+ const ctorOne=app(constant(N.NatSucc),constant(N.NatZero));
+ assert(asNat(ctorOne)===null,'the literal fast path itself must not reinterpret Nat.succ constructor syntax');
+ const succOfCtorZero=app(constant(N.NatSucc),ctorOne);
+ eqExpr(tc.whnf(succOfCtorZero),natLit(2),'Lean WHNF reduces the operand first, then the exact literal fast path consumes the resulting numeral');
+ const addCtor=app(app(constant(N.NatAdd),ctorOne),natLit(2));
+ eqExpr(tc.whnf(addCtor),natLit(3),'binary Nat reduction likewise WHNFs constructor-form operands before literal extraction');
+});
+
 test('Nat.add reduction uses exact bigint',()=>{const tc=new TypeChecker(baseEnv());const e=app(app(constant(N.NatAdd),natLit(9007199254740993n)),natLit(7));eqExpr(tc.whnf(e),natLit(9007199254741000n));});
 test('Nat literal and count limits follow explicit Lean kernel limits',()=>{
- const env=baseEnv(),limits={maxRecDepth:4096,maxNatBytes:2n},tc=new TypeChecker(env,undefined,undefined,limits);
- tc.check(natLit(65535));throws(()=>tc.check(natLit(65536)));
+ const env=baseEnv(),limits={maxRecDepth:512,maxNatBytes:8n},tc=new TypeChecker(env,undefined,undefined,limits);
+ tc.check(natLit(0));tc.check(natLit((1n<<64n)-1n));throws(()=>tc.check(natLit(1n<<64n)));
+ const belowWord=new TypeChecker(env,undefined,undefined,{maxRecDepth:512,maxNatBytes:7n});
+ throws(()=>belowWord.check(natLit(0)));
  const normal=new TypeChecker(env);throws(()=>normal.whnf(app(app(constant(N.NatPow),natLit(2)),natLit(0x1_0000_0000n))));
  throws(()=>normal.whnf(app(app(constant(N.NatShiftLeft),natLit(1)),natLit(0x1_0000_0000n))));
 });
+test('Nat resource limits cover final-4.34 growth checkpoints',()=>{
+ const env=baseEnv(),tc=new TypeChecker(env,undefined,undefined,{maxRecDepth:512,maxNatBytes:8n});
+ const whnf=(name:any,a:bigint,b?:bigint)=>{
+   const head=constant(name);
+   return tc.whnf(b===undefined?app(head,natLit(a)):app(app(head,natLit(a)),natLit(b)));
+ };
+ // One 64-bit limb is still within the 8-byte budget.
+ eqExpr(whnf(N.NatSucc,(1n<<63n)-1n),natLit(1n<<63n));
+ eqExpr(whnf(N.NatAdd,1n<<62n,1n<<62n),natLit(1n<<63n));
+ eqExpr(whnf(N.NatMul,1n<<31n,1n<<31n),natLit(1n<<62n));
+
+ // Crossing into a second 64-bit limb is rejected at every v4.34 growth point.
+ throws(()=>whnf(N.NatSucc,(1n<<64n)-1n));
+ throws(()=>whnf(N.NatAdd,1n<<63n,1n<<63n));
+ throws(()=>whnf(N.NatSub,1n<<65n,0n));
+ throws(()=>whnf(N.NatMul,1n<<32n,1n<<32n));
+ throws(()=>whnf(N.NatPow,2n,64n));
+ throws(()=>whnf(N.NatShiftLeft,1n,64n));
+});
+
 test('Nat.pow reduction',()=>{const tc=new TypeChecker(baseEnv());eqExpr(tc.whnf(app(app(constant(N.NatPow),natLit(2)),natLit(20))),natLit(1048576));});
-test('kernel recursion budget fails deterministically and succeeds when raised',()=>{
- const env=baseEnv();let deep:any=constant(N.NatZero);for(let i=0;i<20;i++)deep=app(constant(N.NatSucc),deep);
- const low=new TypeChecker(env,undefined,undefined,{maxRecDepth:8,maxNatBytes:134217728n});let message='';try{low.check(deep);}catch(e){message=e instanceof Error?e.message:String(e);}
- assert(message.includes('deep recursion'),'low maxRecDepth must fail with deterministic kernel recursion error');
- const high=new TypeChecker(env,undefined,undefined,{maxRecDepth:64,maxNatBytes:134217728n});eqExpr(high.check(deep),constant(N.Nat));
+test('WHNF application spines do not consume one recursion frame per argument',()=>{
+ const env=baseEnv(),F=nameFromDotted('WideApp.f');env.add({kind:'axiom',name:F,levelParams:[],type:sort(levelSucc(levelZero))});
+ let term:any=constant(F);for(let i=0;i<1000;i++)term=app(term,natLit(i));
+ const tc=new TypeChecker(env,undefined,undefined,{maxRecDepth:2,maxNatBytes:134217728n});
+ eqExpr(tc.whnfCore(term),term);
 });
-test('Lean 4.34 profile removes deprecated in-kernel native-reduction declarations',()=>{
+
+test('WHNF recursion budget matches Lean core placement',()=>{
+ const env=baseEnv(),zeroBudget=new TypeChecker(env,undefined,undefined,{maxRecDepth:0,maxNatBytes:134217728n}),oneBudget=new TypeChecker(env,undefined,undefined,{maxRecDepth:1,maxNatBytes:134217728n});
+ eqExpr(zeroBudget.whnf(natLit(3)),natLit(3));
+ eqExpr(zeroBudget.whnf(sort(levelZero)),sort(levelZero));
+ eqExpr(oneBudget.whnf(constant(N.NatZero)),constant(N.NatZero));
+});
+
+test('kernel recursion budget matches Lean 4.34 unlimited and 16x semantics',()=>{
+ const env=baseEnv();let deep:any=constant(N.NatZero);for(let i=0;i<24;i++)deep=app(constant(N.NatSucc),deep);
+ const unlimited=new TypeChecker(env,undefined,undefined,{maxRecDepth:0,maxNatBytes:134217728n});eqExpr(unlimited.check(deep),constant(N.Nat));
+ const low=new TypeChecker(env,undefined,undefined,{maxRecDepth:1,maxNatBytes:134217728n});let message='';try{low.check(deep);}catch(e){message=e instanceof Error?e.message:String(e);}
+ assert(message.includes('deep recursion'),'configured maxRecDepth 1 must allow 16 kernel frames and then fail');
+ const high=new TypeChecker(env,undefined,undefined,{maxRecDepth:2,maxNatBytes:134217728n});eqExpr(high.check(deep),constant(N.Nat));
+});
+
+test('inference binder spines share depth without charging one frame per binder',()=>{
+ const env=baseEnv(),limits={maxRecDepth:1,maxNatBytes:134217728n},tc=new TypeChecker(env,undefined,undefined,limits);
+ let lambda:any=natLit(0),pi:any=constant(N.Nat),letChain:any=natLit(0);
+ for(let i=0;i<100;i++){
+   lambda=lam(nameFromDotted('x'+i),constant(N.Nat),lambda);
+   pi=forallE(nameFromDotted('p'+i),constant(N.Nat),pi);
+   letChain={kind:'let',name:nameFromDotted('l'+i),type:constant(N.Nat),value:natLit(i),body:letChain};
+ }
+ tc.check(lambda);tc.check(pi);eqExpr(tc.check(letChain),constant(N.Nat));
+});
+
+test('infer-only application spine does not consume one recursion frame per argument',()=>{
+ const env=baseEnv(),F=nameFromDotted('InferOnly.wide');let fType:any=constant(N.Nat);
+ for(let i=0;i<1000;i++)fType=forallE(nameFromDotted('a'+i),constant(N.Nat),fType);
+ env.add({kind:'axiom',name:F,levelParams:[],type:fType});
+ let term:any=constant(F);for(let i=0;i<1000;i++)term=app(term,natLit(i));
+ const tc=new TypeChecker(env,undefined,undefined,{maxRecDepth:1,maxNatBytes:134217728n});
+ eqExpr(tc.infer(term,true),constant(N.Nat));
+});
+test('native reduction fails closed by default even when the logical body normalizes',()=>{
+ const env=baseEnv(),vNat=nameFromDotted('Native.vNat'),vBool=nameFromDotted('Native.vBool');
+ env.add({kind:'axiom',name:N.LeanReduceBool,levelParams:[],type:forallE(nameFromDotted('b'),constant(N.Bool),constant(N.Bool))});
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'definition',name:vNat,levelParams:[],type:constant(N.Nat),value:natLit(1),hints:{kind:'regular',height:1n},safety:'safe'});
+ env.add({kind:'definition',name:vBool,levelParams:[],type:constant(N.Bool),value:constant(N.BoolTrue),hints:{kind:'regular',height:1n},safety:'safe'});
+ const tc=new TypeChecker(env);
+ throws(()=>tc.whnf(app(constant(N.LeanReduceNat),constant(vNat))));
+ throws(()=>tc.whnf(app(constant(N.LeanReduceBool),constant(vBool))));
+});
+test('explicit native evaluator controls Lean.reduceNat and Lean.reduceBool results',()=>{
+ const env=baseEnv(),vNat=nameFromDotted('Native.vNatProvider'),vBool=nameFromDotted('Native.vBoolProvider');
+ env.add({kind:'axiom',name:N.LeanReduceBool,levelParams:[],type:forallE(nameFromDotted('b'),constant(N.Bool),constant(N.Bool))});
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'definition',name:vNat,levelParams:[],type:constant(N.Nat),value:natLit(1),hints:{kind:'regular',height:1n},safety:'safe'});
+ env.add({kind:'definition',name:vBool,levelParams:[],type:constant(N.Bool),value:constant(N.BoolTrue),hints:{kind:'regular',height:1n},safety:'safe'});
+ const evaluator:NativeEvaluator={evaluate(_env,request){const n=nameToString(request.constant);if(n==='Native.vNatProvider')return {kind:'nat',value:7n};if(n==='Native.vBoolProvider')return {kind:'bool',value:false};return null;}};
+ const tc=new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,evaluator);
+ eqExpr(tc.whnf(app(constant(N.LeanReduceNat),constant(vNat))),natLit(7));
+ eqExpr(tc.whnf(app(constant(N.LeanReduceBool),constant(vBool))),constant(N.BoolFalse));
+});
+test('native reduction matches Lean kernel1 defeq cases after delta unfolding',()=>{
  const env=baseEnv();
- for(const n of ['Lean.reduceNat','Lean.reduceBool','Lean.ofReduceNat','Lean.ofReduceBool','Lean.trustCompiler'])
-   assert(!env.has(nameFromDotted(n)),`${n} must not be part of the final Lean 4.34 profile`);
+ env.add({kind:'axiom',name:N.LeanReduceBool,levelParams:[],type:forallE(nameFromDotted('b'),constant(N.Bool),constant(N.Bool))});
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ const v1=nameFromDotted('Native.Kernel1.v1'),v2=nameFromDotted('Native.Kernel1.v2'),v3=nameFromDotted('Native.Kernel1.v3'),v4=nameFromDotted('Native.Kernel1.v4'),v5=nameFromDotted('Native.Kernel1.v5');
+ for(const n of [v1,v2,v3,v5])env.add({kind:'axiom',name:n,levelParams:[],type:constant(N.Nat)});
+ env.add({kind:'axiom',name:v4,levelParams:[],type:constant(N.Bool)});
+ const c1=nameFromDotted('Native.Kernel1.c1'),c2=nameFromDotted('Native.Kernel1.c2'),c3=nameFromDotted('Native.Kernel1.c3'),c4=nameFromDotted('Native.Kernel1.c4'),c5=nameFromDotted('Native.Kernel1.c5');
+ const def=(name:any,type:any,value:any)=>env.add({kind:'definition',name,levelParams:[],type,value,hints:{kind:'regular',height:1n},safety:'safe'});
+ def(c1,constant(N.Nat),app(constant(N.LeanReduceNat),constant(v1)));
+ def(c2,constant(N.Nat),app(constant(N.LeanReduceNat),constant(v2)));
+ def(c3,constant(N.Nat),app(constant(N.LeanReduceNat),constant(v3)));
+ def(c4,constant(N.Bool),app(constant(N.LeanReduceBool),constant(v4)));
+ def(c5,constant(N.Nat),app(constant(N.LeanReduceNat),constant(v5)));
+ const values=new Map([
+  [nameToString(v1),{kind:'nat',value:200000000000n} as const],
+  [nameToString(v2),{kind:'nat',value:200000000000n} as const],
+  [nameToString(v3),{kind:'nat',value:200000000001n} as const],
+  [nameToString(v4),{kind:'bool',value:false} as const],
+  [nameToString(v5),{kind:'nat',value:0n} as const],
+ ]);
+ const evaluator:NativeEvaluator={evaluate(_env,request){return values.get(nameToString(request.constant))??null;}};
+ const tc=new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,evaluator);
+ assert(tc.isDefEq(constant(c1),constant(c2)),'kernel1 c1/c2 native Nat values must be definitionally equal');
+ assert(!tc.isDefEq(constant(c1),constant(c3)),'kernel1 c1/c3 native Nat values must differ');
+ assert(tc.isDefEq(constant(c5),constant(N.NatZero)),'kernel1 native zero must equal Nat.zero');
+ assert(tc.isDefEq(constant(N.NatZero),constant(c5)),'kernel1 Nat.zero equality must be symmetric');
+ assert(!tc.isDefEq(constant(c4),constant(N.BoolTrue)),'kernel1 native false must not equal Bool.true');
 });
-test('historical Lean.reduceNat name is not a kernel reduction opcode',()=>{
- const env=baseEnv(),reduceNat=nameFromDotted('Lean.reduceNat'),v=nameFromDotted('NativeCompat.userValue');
- env.add({kind:'axiom',name:reduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
- env.add({kind:'definition',name:v,levelParams:[],type:constant(N.Nat),value:natLit(7),hints:{kind:'regular',height:1n},safety:'safe'});
- const e=app(constant(reduceNat),constant(v)),w=new TypeChecker(env).whnf(e);
- eqExpr(w,e);
+
+test('native reduction marker must be the exact level-free Lean constant',()=>{
+ const env=baseEnv(),v=nameFromDotted('Native.levelMarker');let calls=0;
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'axiom',name:v,levelParams:[],type:constant(N.Nat)});
+ const evaluator:NativeEvaluator={evaluate(){calls++;return {kind:'nat',value:9n};}};
+ const malformed=app(constant(N.LeanReduceNat,[levelZero]),constant(v));
+ const tc=new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,evaluator);
+ eqExpr(tc.whnf(malformed),malformed);
+ assert(calls===0,'malformed universe arguments on the marker must not enter the native TCB provider');
 });
-test('defeq treats historical native-reduction names as ordinary opaque applications',()=>{
- const env=baseEnv(),reduceBool=nameFromDotted('Lean.reduceBool'),v=nameFromDotted('NativeCompat.boolValue');
- env.add({kind:'axiom',name:reduceBool,levelParams:[],type:forallE(nameFromDotted('b'),constant(N.Bool),constant(N.Bool))});
- env.add({kind:'definition',name:v,levelParams:[],type:constant(N.Bool),value:constant(N.BoolTrue),hints:{kind:'regular',height:1n},safety:'safe'});
- const tc=new TypeChecker(env),e=app(constant(reduceBool),constant(v));
- assert(!tc.isDefEq(e,constant(N.BoolFalse)),'historical native-reduction application must remain opaque');
+
+test('native evaluator results are shape-checked at the kernel boundary',()=>{
+ const env=baseEnv(),v=nameFromDotted('Native.badProvider');
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'opaque',name:v,levelParams:[],type:constant(N.Nat),value:natLit(0)});
+ const wrong:NativeEvaluator={evaluate(){return {kind:'bool',value:true};}};
+ const negative:NativeEvaluator={evaluate(){return {kind:'nat',value:-1n};}};
+ throws(()=>new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,wrong).whnf(app(constant(N.LeanReduceNat),constant(v))));
+ throws(()=>new TypeChecker(env,undefined,undefined,undefined,'safe',undefined,false,negative).whnf(app(constant(N.LeanReduceNat),constant(v))));
 });
+test('kernel admission threads native evaluator into definitional equality',()=>{
+ const env=baseEnv(),one=levelSucc(levelZero);
+ const v=nameFromDotted('Native.kernelV'),F=nameFromDotted('Native.F'),x=nameFromDotted('Native.x'),d=nameFromDotted('Native.d');
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'axiom',name:v,levelParams:[],type:constant(N.Nat)});
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),sort(one))});
+ env.add({kind:'axiom',name:x,levelParams:[],type:app(constant(F),natLit(7))});
+ const info={kind:'definition',name:d,levelParams:[],type:app(constant(F),app(constant(N.LeanReduceNat),constant(v))),value:constant(x),hints:{kind:'regular',height:1n},safety:'safe'} as const;
+ throws(()=>new Kernel(env.clone()).addDefinition(info));
+ const evaluator:NativeEvaluator={evaluate(_env,request){return request.kind==='nat'&&nameToString(request.constant)==='Native.kernelV'?{kind:'nat',value:7n}:null;}};
+ const work=env.clone();new Kernel(work,evaluator).addDefinition(info);assert(work.has(d),'kernel admission must preserve the configured native evaluator');
+});
+test('lean4export replay threads the explicit native evaluator into its kernel',()=>{
+ const evaluator:NativeEvaluator={evaluate(){return null;}};
+ const replay=new Lean4ExportReplay(baseEnv(),{nativeEvaluator:evaluator});
+ assert(replay.kernel.nativeEvaluator===evaluator,'replay kernel must retain NativeEvaluator identity');
+});
+
+test('literal inference matches Lean trusted-prelude behavior',()=>{
+ const env=new Environment(),tc=new TypeChecker(env);
+ eqExpr(tc.check(natLit(0)),constant(N.Nat));
+ eqExpr(tc.check(strLit('x')),constant(N.String));
+ assert(!env.has(N.Nat)&&!env.has(N.String),'literal inference must not synthesize or require prelude declarations');
+});
+
+test('infer-only application does not inspect a closed ill-typed argument',()=>{
+ const env=baseEnv(),F=nameFromDotted('InferOnly.f');
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat))});
+ const badArg=app(natLit(0),natLit(1)),term=app(constant(F),badArg),tc=new TypeChecker(env);
+ eqExpr(tc.infer(term,true),constant(N.Nat));
+ throws(()=>tc.check(term));
+});
+
+test('infer-only let does not inspect its closed ill-typed value',()=>{
+ const tc=new TypeChecker(baseEnv()),badValue=app(natLit(0),natLit(1));
+ const term={kind:'let',name:nameFromDotted('x'),type:constant(N.Nat),value:badValue,body:natLit(0)} as const;
+ eqExpr(tc.infer(term,true),constant(N.Nat));
+ throws(()=>tc.check(term));
+});
+
+test('dependent let inference preserves the let in the resulting type',()=>{
+ const env=baseEnv(),P=nameFromDotted('InferLet.P'),g=nameFromDotted('InferLet.g'),one=levelSucc(levelZero);
+ env.add({kind:'axiom',name:P,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),sort(one))});
+ env.add({kind:'axiom',name:g,levelParams:[],type:forallE(nameFromDotted('n'),constant(N.Nat),app(constant(P),bvar(0)))});
+ const term={kind:'let',name:nameFromDotted('n'),type:constant(N.Nat),value:natLit(3),body:app(constant(g),bvar(0))} as const;
+ const expected={kind:'let',name:nameFromDotted('n'),type:constant(N.Nat),value:natLit(3),body:app(constant(P),bvar(0))} as const;
+ const tc=new TypeChecker(env);eqExpr(tc.infer(term,true),expected);eqExpr(tc.check(term),expected);
+});
+
 test('application checker rejects wrong argument',()=>{const tc=new TypeChecker(baseEnv());const id=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));throws(()=>tc.check(app(id,constant(N.BoolTrue))));});
 test('eagerReduce enables Lean 4.34 eager defeq for application arguments with syntactic fvars',()=>{
  const env=baseEnv(),one=levelSucc(levelZero),F=nameFromDotted('Eager.F');
@@ -111,8 +631,22 @@ test('theorem declarations do not delta unfold in Lean 4.34',()=>{
  k.addTheorem({kind:'theorem',name:th,levelParams:[],type:constant(P),value:constant(pr)});
  const tc=new TypeChecker(env);assert(tc.unfold(constant(th))===null,'theorem proof must not participate in delta reduction');
 });
+test('opaque admission rejects dangling free variables transactionally',()=>{
+ const env=baseEnv(),k=new Kernel(env),nm=nameFromDotted('opaqueDanglingFVar');
+ const natToNat=forallE(nameFromDotted('h'),constant(N.Nat),constant(N.Nat));
+ const identity=lam(nameFromDotted('h'),constant(N.Nat),bvar(0));
+ const cachePrimingType=app(lam(nameFromDotted('_'),natToNat,constant(N.Nat)),identity);
+ throws(()=>k.addOpaque({kind:'opaque',name:nm,levelParams:[],type:cachePrimingType,value:fvar('_kernel_fresh@2')}));
+ assert(!env.has(nm),'rejected opaque declaration must not mutate the environment');
+});
+
 test('opaque declarations do not delta unfold',()=>{const env=baseEnv(),k=new Kernel(env),nm=nameFromDotted('opaqueNat');k.addOpaque({kind:'opaque',name:nm,levelParams:[],type:constant(N.Nat),value:natLit(4)});const tc=new TypeChecker(env);eqExpr(tc.whnf(constant(nm)),constant(nm));});
 test('loose bvars rejected',()=>{const tc=new TypeChecker(baseEnv());throws(()=>tc.check(bvar(0)));});
+test('infer-only rejects loose bvars even inside skipped application arguments',()=>{
+ const env=baseEnv(),F=nameFromDotted('InferLoose.f');
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat))});
+ throws(()=>new TypeChecker(env).infer(app(constant(F),bvar(0)),true));
+});
 
 
 test('Prop inductive only large-eliminates when non-Prop constructor fields occur as direct result arguments',()=>{
@@ -131,6 +665,113 @@ test('ordinary recursive inductive synthesizes constructors and recursor',()=>{
  const ii=env.get(I);assert(ii.kind==='inductive'&&ii.isRec);const ri=env.get(nameFromDotted('MyNat.rec'));assert(ri.kind==='recursor'&&ri.rules.length===2);
  const tc=new TypeChecker(env);tc.check(ri.type);
 });
+test('constructor result shape is structural like Lean 4.34',()=>{
+ const env=baseEnv(),I=nameFromDotted('CtorShape.I'),Mk=nameFromDotted('CtorShape.I.mk'),T=sort(levelSucc(levelZero));
+ const wrapped=app(lam(nameFromDotted('_'),constant(N.Nat),constant(I)),natLit(0));
+ throws(()=>addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:T,ctors:[{name:Mk,type:wrapped}]}]}));
+ assert(!env.has(I)&&!env.has(Mk),'beta-reducing a constructor result into the inductive type must not make an invalid structural result admissible');
+});
+
+test('inductive uniformity is checked before WHNF can erase a bad occurrence',()=>{
+ const env=baseEnv(),I=nameFromDotted('BadUniform'),Mk=nameFromDotted('BadUniform.mk'),one=levelSucc(levelZero),Type=sort(one);
+ const indTy=forallE(nameFromDotted('α'),Type,Type,'implicit');
+ const badOccurrence=app(constant(I),constant(N.Nat));
+ const erased=app(lam(nameFromDotted('_'),Type,constant(N.Nat)),badOccurrence);
+ const ctorTy=forallE(nameFromDotted('α'),Type,forallE(nameFromDotted('hidden'),erased,app(constant(I),bvar(1))),'implicit');
+ throws(()=>addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{name:I,type:indTy,ctors:[{name:Mk,type:ctorTy}]}]}));
+ assert(!env.has(I)&&!env.has(Mk),'non-uniform occurrence rejection must be transactional');
+});
+
+test('nested fixed parameters are checked even when auxiliary preprocessing drops them',()=>{
+ const env=baseEnv(),one=levelSucc(levelZero),Type=sort(one);
+ const Box=nameFromDotted('NestedCheck.Box'),BoxMk=nameFromDotted('NestedCheck.Box.mk');
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{
+   name:Box,
+   type:forallE(nameFromDotted('α'),Type,Type,'implicit'),
+   ctors:[{name:BoxMk,type:forallE(nameFromDotted('α'),Type,app(constant(Box),bvar(0)),'implicit')}]
+ }]});
+
+ const Bad=nameFromDotted('NestedCheck.Bad'),BadMk=nameFromDotted('NestedCheck.Bad.mk');
+ const badFixed=app(lam(nameFromDotted('_'),constant(N.Nat),constant(Bad)),constant(N.BoolTrue));
+ const ctorTy=forallE(nameFromDotted('field'),app(constant(Box),badFixed),constant(Bad));
+ throws(()=>addInductive(env,{levelParams:[],numParams:0,types:[{name:Bad,type:Type,ctors:[{name:BadMk,type:ctorTy}]}]}));
+ assert(!env.has(Bad)&&!env.has(BadMk),'ill-typed nested fixed parameter must be rejected transactionally');
+});
+
+test('nested auxiliary dedup follows Lean structural MData equality',()=>{
+ const env=baseEnv(),Type=sort(levelSucc(levelZero));
+ const Box=nameFromDotted('NestedMData.Box'),BoxMk=nameFromDotted('NestedMData.Box.mk');
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{
+   name:Box,
+   type:forallE(nameFromDotted('α'),Type,Type,'implicit'),
+   ctors:[{name:BoxMk,type:forallE(nameFromDotted('α'),Type,app(constant(Box),bvar(0)),'implicit')}]
+ }]});
+ const I=nameFromDotted('NestedMData.I'),Mk=nameFromDotted('NestedMData.I.mk');
+ const fixedA={kind:'mdata',data:{tag:'a'},expr:constant(I)} as const;
+ const fixedB={kind:'mdata',data:{tag:'b'},expr:constant(I)} as const;
+ const ctorTy=forallE(nameFromDotted('a'),app(constant(Box),fixedA),
+   forallE(nameFromDotted('b'),app(constant(Box),fixedB),constant(I)));
+ addInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:Type,ctors:[{name:Mk,type:ctorTy}]}]});
+ const ii=env.get(I);
+ assert(ii.kind==='inductive'&&ii.numNested===2,'Lean structural nested-family dedup must keep distinct MData payloads separate');
+});
+
+test('nested declarations reject FVars and MVars before preprocessing can erase them',()=>{
+ const env=baseEnv(),one=levelSucc(levelZero),Type=sort(one);
+ const Box=nameFromDotted('NestedClosed.Box'),BoxMk=nameFromDotted('NestedClosed.Box.mk');
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{
+   name:Box,
+   type:forallE(nameFromDotted('α'),Type,Type,'implicit'),
+   ctors:[{name:BoxMk,type:forallE(nameFromDotted('α'),Type,app(constant(Box),bvar(0)),'implicit')}]
+ }]});
+
+ const checkBad=(suffix:string,payload:any)=>{
+   const I=nameFromDotted('NestedClosed.'+suffix),Mk=nameFromDotted('NestedClosed.'+suffix+'.mk');
+   const fixed=app(lam(nameFromDotted('_'),constant(N.Nat),constant(I)),payload);
+   const ctorTy=forallE(nameFromDotted('field'),app(constant(Box),fixed),constant(I));
+   throws(()=>addInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:Type,ctors:[{name:Mk,type:ctorTy}]}]}));
+   assert(!env.has(I)&&!env.has(Mk),'invalid nested declaration must commit nothing');
+ };
+ checkBad('Free',fvar('dangling-nested-fvar'));
+ checkBad('Meta',{kind:'mvar',id:'?nested'} as const);
+});
+
+test('nested inductive uniformity is checked before preprocessing can drop bad parameters',()=>{
+ const env=baseEnv(),T=sort(levelSucc(levelZero));
+ const W=nameFromDotted('UniformNested.W'),W0=nameFromDotted('UniformNested.W.zero');
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:W,type:T,ctors:[{name:W0,type:constant(W)}]}]});
+ const L=nameFromDotted('UniformNested.L'),LMk=nameFromDotted('UniformNested.L.mk');
+ const lTy=forallE(nameFromDotted('α'),T,T,'implicit'),l=(x:any)=>app(constant(L),x);
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{name:L,type:lTy,ctors:[{name:LMk,type:forallE(nameFromDotted('α'),T,l(bvar(0)),'implicit')}]}]});
+ const E=nameFromDotted('UniformNested.E'),EMk=nameFromDotted('UniformNested.E.mk');
+ const e=(w:any)=>app(constant(E),w);
+ const eTy=forallE(nameFromDotted('w'),constant(W),T);
+ const badNested=l(e(constant(W0)));
+ const ctorTy=forallE(nameFromDotted('w'),constant(W),forallE(nameFromDotted('xs'),badNested,e(bvar(1))));
+ throws(()=>addInductive(env,{levelParams:[],numParams:1,types:[{name:E,type:eTy,ctors:[{name:EMk,type:ctorTy}]}]}));
+ assert(!env.has(E)&&!env.has(EMk),'nested non-uniform occurrence must be rejected before auxiliary preprocessing');
+});
+
+test('inductive uniformity requires exact declaration universe arguments',()=>{
+ const env=baseEnv(),U=nameFromDotted('UniformLevels.U'),Mk=nameFromDotted('UniformLevels.U.mk');
+ const uN=nameFromDotted('u'),vN=nameFromDotted('v'),u=levelParam(uN),v=levelParam(vN),T=sort(levelSucc(levelZero));
+ const uTy=forallE(nameFromDotted('p'),T,T);
+ const good=(p:any)=>app(constant(U,[u,v]),p),bad=(p:any)=>app(constant(U,[v,u]),p);
+ const ctorTy=forallE(nameFromDotted('p'),T,forallE(nameFromDotted('hidden'),bad(bvar(0)),good(bvar(1))));
+ throws(()=>addOrdinaryInductive(env,{levelParams:[uN,vN],numParams:1,types:[{name:U,type:uTy,ctors:[{name:Mk,type:ctorTy}]}]}));
+ assert(!env.has(U)&&!env.has(Mk),'swapped recursive universe parameters must reject transactionally');
+});
+
+test('uniform occurrence accepts a constructor parameter whose type is definitionally equal',()=>{
+ const env=baseEnv(),Alias=nameFromDotted('UniformDefeq.Alias'),V=nameFromDotted('UniformDefeq.V'),Mk=nameFromDotted('UniformDefeq.V.mk');
+ const T=sort(levelSucc(levelZero)),k=new Kernel(env);
+ k.addDefinition({kind:'definition',name:Alias,levelParams:[],type:sort(levelSucc(levelSucc(levelZero))),value:T,hints:{kind:'abbrev'},safety:'safe'});
+ const vTy=forallE(nameFromDotted('p'),T,T),v=(p:any)=>app(constant(V),p);
+ const ctorTy=forallE(nameFromDotted('p'),constant(Alias),forallE(nameFromDotted('self'),v(bvar(0)),v(bvar(1))));
+ addOrdinaryInductive(env,{levelParams:[],numParams:1,types:[{name:V,type:vTy,ctors:[{name:Mk,type:ctorTy}]}]});
+ assert(env.has(V)&&env.has(Mk),'definitionally equal constructor parameter domains must remain accepted');
+});
+
 test('ordinary inductive rejects negative recursive occurrence',()=>{
  const env=baseEnv(),I=nameFromDotted('Bad'),c=nameFromDotted('Bad.mk');
  const neg=forallE(nameFromDotted('f'),forallE(nameFromDotted('x'),constant(I),constant(N.Nat)),constant(I));
@@ -192,6 +833,31 @@ test('imax-normalized Prop inductive keeps Prop-only elimination',()=>{
  const ri=env.get(nameFromDotted('ImaxPropData.rec'));assert(ri.kind==='recursor'&&ri.levelParams.length===0,'imax-normalized Prop must not gain large elimination');
 });
 
+test('imax-normalized Prop agrees with Sort 0 on K-target recursor metadata',()=>{
+ const env=baseEnv(),P=nameFromDotted('ImaxK.Prop'),PMk=nameFromDotted('ImaxK.Prop.mk'),Q=nameFromDotted('ImaxK.Zero'),QMk=nameFromDotted('ImaxK.Zero.mk');
+ const imaxProp=sort(mkIMax(levelSucc(levelZero),levelZero));
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:P,type:imaxProp,ctors:[{name:PMk,type:constant(P)}]}]});
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:Q,type:sort(levelZero),ctors:[{name:QMk,type:constant(Q)}]}]});
+ const pr=env.get(nameFromDotted('ImaxK.Prop.rec')),qr=env.get(nameFromDotted('ImaxK.Zero.rec'));
+ assert(pr.kind==='recursor'&&qr.kind==='recursor');
+ assert(pr.k===qr.k&&pr.k,'normalized-Prop and syntactic-Prop nullary structures must agree on K reduction');
+ assert(pr.levelParams.length===qr.levelParams.length,'normalized-Prop and syntactic-Prop recursors must agree on elimination universes');
+});
+
+test('recursor structure eta never projects data from an imax-normalized proof',()=>{
+ const env=baseEnv(),I=nameFromDotted('ImaxEta.ProofBox'),Mk=nameFromDotted('ImaxEta.ProofBox.mk'),p=nameFromDotted('ImaxEta.p'),R=nameFromDotted('ImaxEta.ProofBox.rec');
+ const imaxProp=sort(mkIMax(levelSucc(levelZero),levelZero));
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:imaxProp,ctors:[{name:Mk,type:forallE(nameFromDotted('b'),constant(N.Bool),constant(I))}]}]});
+ env.add({kind:'axiom',name:p,levelParams:[],type:constant(I)});
+ const ri=env.get(R);assert(ri.kind==='recursor'&&!ri.k&&ri.levelParams.length===0);
+ const motive=lam(nameFromDotted('_'),constant(I),constant(I));
+ const minor=lam(nameFromDotted('_b'),constant(N.Bool),constant(p));
+ const term=mkAppN(constant(R),[motive,minor,constant(p)]);
+ const tc=new TypeChecker(env);
+ assert(tc.isDefEq(tc.check(term),constant(I)),'Lean infer_app may leave the motive application as a beta redex, but its type must be definitionally I');
+ eqExpr(tc.whnf(term),term,'Prop-valued structure major must remain opaque; eta expansion would illegally project its Bool field');
+});
+
 test('Prop inductive cannot large-eliminate when data field occurs only inside an index expression',()=>{
  const env=baseEnv(),I=nameFromDotted('NestedIndexProp'),mk=nameFromDotted('NestedIndexProp.mk');
  const ty=forallE(nameFromDotted('n'),constant(N.Nat),sort(levelZero));
@@ -241,6 +907,13 @@ test('projection reduction never crosses an unrelated structure name',()=>{
  throws(()=>tc.check(wrong));
 });
 
+test('defeq enters native-reduction hook and fails closed instead of returning false',()=>{
+ const env=baseEnv(),closedNat=nameFromDotted('closedNatDefEq');
+ env.add({kind:'axiom',name:N.LeanReduceNat,levelParams:[],type:forallE(nameFromDotted('x'),sort(levelSucc(levelZero)),constant(N.Nat))});
+ env.add({kind:'axiom',name:closedNat,levelParams:[],type:sort(levelSucc(levelZero))});
+ const tc=new TypeChecker(env);throws(()=>tc.isDefEq(app(constant(N.LeanReduceNat),constant(closedNat)),natLit(0)));
+});
+
 test('projection-headed application reduces through a functional structure field',()=>{
  const env=baseEnv(),I=nameFromDotted('FnBox'),mk=nameFromDotted('FnBox.mk'),box=nameFromDotted('fnBoxValue'),fnTy=forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat));
  const ctorTy=forallE(nameFromDotted('fn'),fnTy,constant(I));
@@ -248,6 +921,29 @@ test('projection-headed application reduces through a functional structure field
  const k=new Kernel(env);k.addDefinition({kind:'definition',name:box,levelParams:[],type:constant(I),value:app(constant(mk),lam(nameFromDotted('x'),constant(N.Nat),bvar(0))),hints:{kind:'regular',height:1n},safety:'safe'});
  const projected={kind:'proj',typeName:I,index:0,expr:constant(box)} as const;
  eqExpr(new TypeChecker(env).whnf(app(projected,natLit(3))),natLit(3));
+});
+
+test('string-literal expansion requires direct level-free String.ofList',()=>{
+ const tc=new TypeChecker(baseEnv()),lit=strLit('x');
+ const wrongLevel=app(constant(N.StringOfList,[levelZero]),natLit(0));
+ const overapplied=app(app(constant(N.StringOfList),natLit(0)),natLit(1));
+ assert((tc as any).tryStringLitExpansionCore(lit,wrongLevel)===null,'universe-instantiated String.ofList must not trigger expansion');
+ assert((tc as any).tryStringLitExpansionCore(lit,overapplied)===null,'overapplied String.ofList must not trigger expansion');
+});
+
+test('string literal projection reduces through String.ofList like Lean strLitProj',()=>{
+ const env=new Environment(),one=levelSucc(levelZero),uN=nameFromDotted('u'),u=levelParam(uN),TU=sort(levelSucc(u));
+ env.add({kind:'axiom',name:N.Char,levelParams:[],type:sort(one)});
+ env.add({kind:'inductive',name:N.List,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,TU,'implicit'),numParams:1,numIndices:0,all:[N.List],ctors:[N.ListNil,N.ListCons],numNested:0,isRec:true,isReflexive:false});
+ const listU=(x:any)=>app(constant(N.List,[u]),x);
+ env.add({kind:'constructor',name:N.ListNil,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,listU(bvar(0)),'implicit'),induct:N.List,cidx:0,numParams:1,numFields:0});
+ env.add({kind:'constructor',name:N.ListCons,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,forallE(nameFromDotted('a'),bvar(0),forallE(nameFromDotted('as'),listU(bvar(1)),listU(bvar(2)))),'implicit'),induct:N.List,cidx:1,numParams:1,numFields:2});
+ const listChar=app(constant(N.List,[levelZero]),constant(N.Char)),StringMk=nameFromDotted('String.mk');
+ env.add({kind:'inductive',name:N.String,levelParams:[],type:sort(one),numParams:0,numIndices:0,all:[N.String],ctors:[StringMk],numNested:0,isRec:false,isReflexive:false});
+ env.add({kind:'constructor',name:StringMk,levelParams:[],type:forallE(nameFromDotted('data'),listChar,constant(N.String)),induct:N.String,cidx:0,numParams:0,numFields:1});
+ env.add({kind:'definition',name:N.StringOfList,levelParams:[],type:forallE(nameFromDotted('data'),listChar,constant(N.String)),value:lam(nameFromDotted('data'),listChar,app(constant(StringMk),bvar(0))),hints:{kind:'regular',height:1n},safety:'safe'});
+ const got=new TypeChecker(env).whnf({kind:'proj',typeName:N.String,index:0,expr:strLit('')});
+ eqExpr(got,mkAppN(constant(N.ListNil,[levelZero]),[constant(N.Char)]),'empty string projection must reduce through String.ofList to List.nil Char');
 });
 
 test('defeq expands string literals exactly through String.ofList',()=>{
@@ -288,6 +984,11 @@ test('defeq compares projections after lazy delta even when other structure fiel
  assert(!tc.isDefEq({kind:'proj',typeName:I,index:1,expr:constant(a)},{kind:'proj',typeName:I,index:1,expr:constant(b)}),'different projected fields must remain distinct');
 });
 
+test('eta probe returns false instead of throwing for a non-function rhs',()=>{
+ const tc=new TypeChecker(baseEnv()),lhs=lam(nameFromDotted('x'),constant(N.Nat),bvar(0));
+ assert(!tc.isDefEq(lhs,natLit(0)),'Lean eta probing must treat a non-function rhs as simply not definitionally equal');
+});
+
 test('defeq implements structure eta through projections',()=>{
  const env=baseEnv(),I=nameFromDotted('PairN'),mk=nameFromDotted('PairN.mk'),p=nameFromDotted('pairNValue');
  const ctorTy=forallE(nameFromDotted('fst'),constant(N.Nat),forallE(nameFromDotted('snd'),constant(N.Nat),constant(I)));
@@ -313,10 +1014,60 @@ test('non-recursive structure recursor uses kernel eta expansion',()=>{
  eqExpr(new TypeChecker(env).whnf(term),expected);
 });
 
+test('recursor reduction fails closed on universe arity mismatch',()=>{
+ const env=baseEnv(),I=nameFromDotted('RecLevel.I'),C=nameFromDotted('RecLevel.I.mk'),R=nameFromDotted('RecLevel.I.rec'),uN=nameFromDotted('u');
+ env.add({kind:'inductive',name:I,levelParams:[],type:sort(levelSucc(levelZero)),numParams:0,numIndices:0,all:[I],ctors:[C],numNested:0,isRec:false,isReflexive:false});
+ env.add({kind:'constructor',name:C,levelParams:[],type:constant(I),induct:I,cidx:0,numParams:0,numFields:0});
+ env.add({kind:'recursor',name:R,levelParams:[uN],type:forallE(nameFromDotted('t'),constant(I),constant(N.Nat)),all:[I],numParams:0,numIndices:0,numMotives:0,numMinors:0,rules:[{ctor:C,nFields:0,rhs:natLit(7)}],k:false});
+ const bad=app(constant(R),constant(C)),good=app(constant(R,[levelZero]),constant(C)),tc=new TypeChecker(env);
+ eqExpr(tc.whnf(bad),bad,'wrong recursor universe arity must remain stuck');
+ eqExpr(tc.whnf(good),natLit(7),'correct recursor universe arity must still reduce');
+});
+
 test('recursor reduction converts String literals through String.ofList',()=>{
  const env=baseEnv(),R=nameFromDotted('String.testRec'),xsTy=constant(N.Nat);
  env.add({kind:'recursor',name:R,levelParams:[],type:forallE(nameFromDotted('s'),constant(N.String),constant(N.Nat)),all:[N.String],numParams:0,numIndices:0,numMotives:0,numMinors:0,k:false,rules:[{ctor:N.StringOfList,nFields:1,rhs:lam(nameFromDotted('xs'),xsTy,natLit(77))}]});
  eqExpr(new TypeChecker(env).whnf(app(constant(R),strLit('A🙂'))),natLit(77));
+});
+
+test('independent recursor validation rejects corrupted field-count metadata',()=>{
+ const env=baseEnv(),I=nameFromDotted('RecValidate.Nat'),Z=nameFromDotted('RecValidate.Nat.zero'),S=nameFromDotted('RecValidate.Nat.succ');
+ const decl={levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[
+   {name:Z,type:constant(I)},
+   {name:S,type:forallE(nameFromDotted('n'),constant(I),constant(I))}
+ ]}]} as const;
+ addOrdinaryInductive(env,decl);
+ validateInstalledRecursorsByReduction(env,decl);
+
+ const rn=nameFromDotted('RecValidate.Nat.rec'),ri=env.get(rn);assert(ri.kind==='recursor');
+ const bad=new Environment();bad.quotInitialized=env.quotInitialized;
+ for(const info of env.entries())if(nameToString(info.name)!==nameToString(rn))bad.add(info);
+ bad.add({...ri,rules:ri.rules.map(r=>nameToString(r.ctor)===nameToString(S)?{...r,nFields:0}:r)});
+ const stored=bad.get(rn);assert(stored.kind==='recursor');
+ const checker=new TypeChecker(bad);for(const rule of stored.rules)checker.check(rule.rhs);
+ throws(()=>validateInstalledRecursorsByReduction(bad,decl));
+});
+
+test('independent recursor validation rejects a well-typed under-applied minor rule',()=>{
+ const env=baseEnv(),I=nameFromDotted('RecValidate.Under'),Z=nameFromDotted('RecValidate.Under.zero'),S=nameFromDotted('RecValidate.Under.succ');
+ const decl={levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[
+   {name:Z,type:constant(I)},
+   {name:S,type:forallE(nameFromDotted('n'),constant(I),constant(I))}
+ ]}]} as const;
+ addOrdinaryInductive(env,decl);
+ const rn=nameFromDotted('RecValidate.Under.rec'),ri=env.get(rn);assert(ri.kind==='recursor');
+ const stripFinalApp=(e:any):any=>{
+   if(e.kind==='lam')return {...e,body:stripFinalApp(e.body)};
+   if(e.kind==='app')return e.fn;
+   throw new Error('expected generated recursive rule to end in an application');
+ };
+ const bad=new Environment();bad.quotInitialized=env.quotInitialized;
+ for(const info of env.entries())if(nameToString(info.name)!==nameToString(rn))bad.add(info);
+ bad.add({...ri,rules:ri.rules.map(r=>nameToString(r.ctor)===nameToString(S)?{...r,rhs:stripFinalApp(r.rhs)}:r)});
+ const stored=bad.get(rn);assert(stored.kind==='recursor');
+ const checker=new TypeChecker(bad);
+ for(const rule of stored.rules)checker.check(rule.rhs);
+ throws(()=>validateInstalledRecursorsByReduction(bad,decl));
 });
 
 test('generated recursive recursor computes by iota',()=>{
@@ -329,6 +1080,17 @@ test('generated recursive recursor computes by iota',()=>{
  const term=app(app(app(app(rec,motive),natLit(0)),succMinor),major);
  const tc=new TypeChecker(env);eqExpr(tc.whnf(term),natLit(1));
 });
+test('Quot bootstrap accepts alpha-renamed Eq.refl universe parameter like Lean 4.34',()=>{
+ const env=new Environment(),eqU=nameFromDotted('eqU'),reflU=nameFromDotted('reflU');
+ const arrow=(a:any,b:any)=>forallE(nameFromDotted('_'),a,b);
+ const eqType=forallE(nameFromDotted('DifferentEqBinder'),sort(levelParam(eqU)),arrow(bvar(0),arrow(bvar(1),sort(levelZero))),'default');
+ const reflType=forallE(nameFromDotted('DifferentReflBinder'),sort(levelParam(reflU)),
+   forallE(nameFromDotted('DifferentValueBinder'),bvar(0),mkAppN(constant(N.Eq,[levelParam(reflU)]),[bvar(1),bvar(0),bvar(0)])),'strictImplicit');
+ env.add({kind:'inductive',name:N.Eq,levelParams:[eqU],type:eqType,numParams:0,numIndices:0,all:[N.Eq],ctors:[N.EqRefl],numNested:0,isRec:false,isReflexive:false});
+ env.add({kind:'constructor',name:N.EqRefl,levelParams:[reflU],type:reflType,induct:N.Eq,cidx:0,numParams:0,numFields:0});
+ addQuot(env);assert(env.quotInitialized,'Eq/Eq.refl universe names and Pi binder metadata are ignored by the same structural equality used by Lean 4.34');
+});
+
 test('Quot bootstrap requires exact Eq shape and lift reduces',()=>{
  const env=baseEnv(),uN=nameFromDotted('u'),u=levelParam(uN),anon=nameFromDotted('_');const arrow=(a:any,b:any)=>forallE(anon,a,b);
  const eqTy=forallE(nameFromDotted('α'),sort(u),arrow(bvar(0),arrow(bvar(1),sort(levelZero))),'implicit');
@@ -342,6 +1104,33 @@ test('Quot bootstrap requires exact Eq shape and lift reduces',()=>{
 });
 test('Quot bootstrap fails closed on malformed Eq',()=>{const env=baseEnv();env.add({kind:'axiom',name:N.Eq,levelParams:[],type:sort(levelSucc(levelZero))});throws(()=>addQuot(env));assert(!env.quotInitialized);});
 
+
+test('Quot recursors reject over-applied Quot.mk majors',()=>{
+ const env=baseEnv(),one=levelSucc(levelZero);
+ // Reduction only depends on quotient initialization and the primitive names; use
+ // compact declarations here to exercise malformed reduction directly.
+ env.quotInitialized=true;
+ const alpha=constant(N.Nat),rel=lam(nameFromDotted('a'),alpha,lam(nameFromDotted('b'),alpha,sort(levelZero)));
+ const q=mkAppN(constant(N.QuotMk,[one]),[alpha,rel,natLit(3),natLit(99)]);
+ const lift=mkAppN(constant(N.QuotLift,[one,one]),[alpha,rel,alpha,lam(nameFromDotted('x'),alpha,bvar(0)),constant(N.BoolTrue),q]);
+ const ind=mkAppN(constant(N.QuotInd,[one]),[alpha,rel,lam(nameFromDotted('_'),alpha,sort(levelZero)),lam(nameFromDotted('x'),alpha,constant(N.BoolTrue)),q]);
+ const tc=new TypeChecker(env);
+ eqExpr(tc.whnf(lift),lift,'Quot.lift must not reduce an over-applied Quot.mk');
+ eqExpr(tc.whnf(ind),ind,'Quot.ind must not reduce an over-applied Quot.mk');
+});
+
+test('Quot bootstrap rejects occupied primitive names without overwriting them',()=>{
+ const env=baseEnv(),uN=nameFromDotted('u'),u=levelParam(uN),anon=nameFromDotted('_');const arrow=(a:any,b:any)=>forallE(anon,a,b);
+ const eqTy=forallE(nameFromDotted('α'),sort(u),arrow(bvar(0),arrow(bvar(1),sort(levelZero))),'implicit');
+ const reflTy=forallE(nameFromDotted('α'),sort(u),forallE(nameFromDotted('a'),bvar(0),app(app(app(constant(N.Eq,[u]),bvar(1)),bvar(0)),bvar(0))),'implicit');
+ env.add({kind:'inductive',name:N.Eq,levelParams:[uN],type:eqTy,numParams:2,numIndices:1,all:[N.Eq],ctors:[N.EqRefl],numNested:0,isRec:false,isReflexive:false});
+ env.add({kind:'constructor',name:N.EqRefl,levelParams:[uN],type:reflTy,induct:N.Eq,cidx:0,numParams:2,numFields:0});
+ const plantedType=sort(levelZero);env.add({kind:'axiom',name:N.QuotLift,levelParams:[],type:plantedType});
+ throws(()=>addQuot(env));
+ assert(!env.quotInitialized,'failed quotient initialization must not flip the initialized flag');
+ const planted=env.get(N.QuotLift);assert(planted.kind==='axiom'&&exprEq(planted.type,plantedType),'pre-existing Quot.lift must not be overwritten');
+ assert(!env.has(N.Quot)&&!env.has(N.QuotMk)&&!env.has(N.QuotInd),'quotient bootstrap must reject collisions before inserting any primitive');
+});
 
 test('nested inductive through Box is transformed and restored',()=>{
  const env=baseEnv(),Box=nameFromDotted('Box'),BoxMk=nameFromDotted('Box.mk'),Tree=nameFromDotted('Tree'),Node=nameFromDotted('Tree.node'),T=sort(levelSucc(levelZero));
@@ -371,6 +1160,20 @@ test('nested inductive preserves constructor-specific parameter BinderInfo throu
  const ci=env.get(Node);assert(ci.kind==='constructor');assert(ci.type.kind==='forall'&&ci.type.binderInfo==='implicit');eqExpr(ci.type,ctorTy);
 });
 
+test('public ordinary admission rejects reserved _nested references but not sibling prefixes',()=>{
+ const env=baseEnv(),I=nameFromDotted('ReservedOrdinary'),Mk=nameFromDotted('ReservedOrdinary.mk'),aux=nameFromDotted('_nested.KNHost_1');
+ const badTy=forallE(nameFromDotted('x'),constant(aux),constant(I));
+ throws(()=>addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[{name:Mk,type:badTy}]}]}));
+ assert(!env.has(I)&&!env.has(Mk),'public ordinary admission must reject reserved nested auxiliaries transactionally');
+
+ const okEnv=baseEnv(),Payload=nameFromDotted('_nestedX.Payload'),DotPayload=strName(nameFromDotted(''),'_nested.fake'),J=nameFromDotted('ReservedSibling'),JMk=nameFromDotted('ReservedSibling.mk');
+ okEnv.add({kind:'axiom',name:Payload,levelParams:[],type:sort(levelSucc(levelZero))});
+ okEnv.add({kind:'axiom',name:DotPayload,levelParams:[],type:sort(levelSucc(levelZero))});
+ const goodTy=forallE(nameFromDotted('x'),constant(Payload),forallE(nameFromDotted('y'),constant(DotPayload),constant(J)));
+ addOrdinaryInductive(okEnv,{levelParams:[],numParams:0,types:[{name:J,type:sort(levelSucc(levelZero)),ctors:[{name:JMk,type:goodTy}]}]});
+ assert(okEnv.has(J)&&okEnv.has(JMk),'only structural _nested descendants are reserved; _nestedX and a single string component containing a dot remain legal');
+});
+
 test('nested inductive admission rejects the reserved _nested auxiliary namespace',()=>{
  const env=baseEnv(),I=nameFromDotted('ReservedNested'),Mk=nameFromDotted('ReservedNested.mk'),aux=nameFromDotted('_nested.KNHost_1');
  const badConstTy=forallE(nameFromDotted('x'),constant(aux),constant(I));
@@ -396,7 +1199,7 @@ test('unsafe nested inductive preserves unsafe checking through restoration hard
 
 
 
-import { addPrimitiveDefinition, addPrimitiveInductive, canonicalNatAddValue } from '../src/kernel/primitive.js';
+import { addPrimitiveDefinition, addPrimitiveInductive, addPrimitiveOpaque, canonicalNatAddValue } from '../src/kernel/primitive.js';
 import { closeLambda, inspectNatWellFounded, inspectNatWfOuter, probeNatWellFounded, probeNatWellFoundedRecursiveCall } from '../src/kernel/primitive/wf.js';
 import { probeNatBitwiseEquation } from '../src/kernel/primitive/bitwise.js';
 import { buildNatDecEqModel, checkBoolCondition, checkNatEqCondition, checkNatLeCondition } from '../src/kernel/primitive/condition.js';
@@ -652,6 +1455,8 @@ test('Nat = primitive condition verifier checks reflection plus ite/dite control
 
 test('primitive Nat.mod checks bounded wrapper and go fuel equations',()=>{
  const env=primitiveNatBoolEnv();addBoolConditionScaffold(env);addNatLeConditionScaffold(env);const v=addBoundedNatFuelFixture(env,'mod');addPrimitiveDefinition(env,v);assert(env.has(N.NatMod));
+ const lctx=new LocalContext(),id=lctx.fresh('n');lctx.addLocal(id,nameFromDotted('n'),constant(N.Nat));const n=fvar(id),tc=new TypeChecker(env,lctx);
+ assert(tc.isDefEq(app(app(constant(N.NatMod),natLit(0)),n),natLit(0)),'Lean nat_mod_defeq: 0 % n must reduce definitionally to 0 for a variable divisor');
  const bad=primitiveNatBoolEnv();addBoolConditionScaffold(bad);addNatLeConditionScaffold(bad);const bv=addBoundedNatFuelFixture(bad,'mod',true);throws(()=>addPrimitiveDefinition(bad,bv));
 });
 
@@ -677,14 +1482,39 @@ test('whnfCore cache follows Lean 4.34 cheap/full and direct-iota boundaries',()
  tc.whnfCore(beta,true,true);
  assert(Number(tc.state.whnfCore.size)===0,'cheap WHNF must not populate the full whnfCore cache');
  eqExpr(tc.whnfCore(beta),natLit(3));
- assert(tc.state.whnfCore.has(tc.state.exprId(beta)),'full beta WHNF should cache the original expression');
+ assert(tc.state.whnfCore.has(beta),'full beta WHNF should cache the original expression');
 
  const tc2=new TypeChecker(env);
  const motive=lam(nameFromDotted('_'),constant(N.Nat),constant(N.Nat));
  const step=lam(nameFromDotted('_n'),constant(N.Nat),lam(nameFromDotted('ih'),constant(N.Nat),bvar(0)));
  const rec=mkAppN(constant(nameFromDotted('Nat.rec'),[one]),[motive,natLit(17),step,constant(N.NatZero)]);
  eqExpr(tc2.whnfCore(rec),natLit(17));
- assert(!tc2.state.whnfCore.has(tc2.state.exprId(rec)),'Lean 4.34 returns directly after recursor iota instead of caching the original recursor application');
+ assert(!tc2.state.whnfCore.has(rec),'Lean 4.34 returns directly after recursor iota instead of caching the original recursor application');
+});
+
+test('whnfCore easy, stuck-app, and projection cache boundaries match Lean 4.34',()=>{
+ const env=baseEnv(),F=nameFromDotted('WhnfBoundary.f'),D=nameFromDotted('WhnfBoundary.d'),Fake=nameFromDotted('WhnfBoundary.Fake');
+ env.add({kind:'axiom',name:F,levelParams:[],type:forallE(nameFromDotted('x'),constant(N.Nat),constant(N.Nat))});
+ env.add({kind:'definition',name:D,levelParams:[],type:constant(N.Nat),value:natLit(3),hints:{kind:'regular',height:1n},safety:'safe'});
+ const tc=new TypeChecker(env),easy=constant(F),stuck=app(easy,natLit(1)),proj={kind:'proj',typeName:Fake,index:0,expr:constant(D)} as const;
+ eqExpr(tc.whnfCore(easy),easy);
+ assert(!tc.state.whnfCore.has(easy),'easy whnfCore cases bypass the cache');
+ eqExpr(tc.whnfCore(stuck),stuck);
+ assert(!tc.state.whnfCore.has(stuck),'stuck applications return directly without whnfCore caching');
+ eqExpr(tc.whnfCore(proj),proj);
+ assert(tc.state.whnfCore.has(proj),'unreduced projections are cached as the original projection node');
+});
+
+test('cheap projection WHNF never reuses a full-mode cache entry',()=>{
+ const env=baseEnv(),I=nameFromDotted('CheapProjBox'),Mk=nameFromDotted('CheapProjBox.mk'),box=nameFromDotted('cheapProjBoxValue');
+ const ctorTy=forallE(nameFromDotted('field'),constant(N.Nat),constant(I));
+ addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:I,type:sort(levelSucc(levelZero)),ctors:[{name:Mk,type:ctorTy}]}]});
+ const k=new Kernel(env);k.addDefinition({kind:'definition',name:box,levelParams:[],type:constant(I),value:app(constant(Mk),natLit(7)),hints:{kind:'regular',height:1n},safety:'safe'});
+ const proj={kind:'proj',typeName:I,index:0,expr:constant(box)} as const,tc=new TypeChecker(env);
+ eqExpr(tc.whnfCore(proj,false,false),natLit(7));
+ assert(tc.state.whnfCore.has(proj),'full projection WHNF should cache its reduced field');
+ const cheap=tc.whnfCore(proj,false,true);
+ assert(cheap.kind==='proj'&&exprEq(cheap.expr,constant(box)),'cheap projection WHNF must ignore the full-mode cache and leave the hidden structure opaque');
 });
 
 test('well-founded primitive outer recognizer validates Lean fix/fix.go skeleton',()=>{
@@ -815,6 +1645,30 @@ test('Nat.bitwise equation probe checks nested conditions and recursive target',
  const bad=makeBitwiseEquationProbe(true);throws(()=>probeNatBitwiseEquation(bad.tc,bad.P,bad.f,bad.n,bad.m));
 });
 
+test('eagerReduce primitive admission locks the polymorphic identity semantics',()=>{
+ const env=new Environment(),u=nameFromDotted('u'),alpha=nameFromDotted('α'),a=nameFromDotted('a');
+ const ty=forallE(alpha,sort(levelParam(u)),forallE(a,bvar(0),bvar(1),'default'),'implicit');
+ const good=lam(alpha,sort(levelParam(u)),lam(a,bvar(0),bvar(0),'default'),'implicit');
+ addPrimitiveDefinition(env,{kind:'definition',name:N.EagerReduce,levelParams:[u],type:ty,value:good,hints:{kind:'regular',height:1n},safety:'safe'});
+ assert(env.has(N.EagerReduce));
+ const badEnv=new Environment(),bad=lam(alpha,sort(levelParam(u)),lam(a,bvar(0),bvar(1),'default'),'implicit');
+ throws(()=>addPrimitiveDefinition(badEnv,{kind:'definition',name:N.EagerReduce,levelParams:[u],type:ty,value:bad,hints:{kind:'regular',height:1n},safety:'safe'}));
+ assert(!badEnv.has(N.EagerReduce));
+});
+
+test('native reduction marker opaques require canonical Bool/Nat endofunction types',()=>{
+ const env=baseEnv(),n=nameFromDotted('n'),b=nameFromDotted('b');
+ addPrimitiveOpaque(env,{kind:'opaque',name:N.LeanReduceNat,levelParams:[],type:forallE(n,constant(N.Nat),constant(N.Nat)),value:lam(n,constant(N.Nat),bvar(0)),isUnsafe:false});
+ addPrimitiveOpaque(env,{kind:'opaque',name:N.LeanReduceBool,levelParams:[],type:forallE(b,constant(N.Bool),constant(N.Bool)),value:lam(b,constant(N.Bool),bvar(0)),isUnsafe:false});
+ assert(env.has(N.LeanReduceNat)&&env.has(N.LeanReduceBool));
+ const bad=baseEnv();
+ throws(()=>addPrimitiveOpaque(bad,{kind:'opaque',name:N.LeanReduceNat,levelParams:[],type:forallE(b,constant(N.Bool),constant(N.Bool)),value:lam(b,constant(N.Bool),bvar(0)),isUnsafe:false}));
+ assert(!bad.has(N.LeanReduceNat));
+ const ordinary=baseEnv();
+ throws(()=>new Kernel(ordinary).addOpaque({kind:'opaque',name:N.LeanReduceNat,levelParams:[],type:forallE(n,constant(N.Nat),constant(N.Nat)),value:lam(n,constant(N.Nat),bvar(0)),isUnsafe:false}));
+ assert(!ordinary.has(N.LeanReduceNat));
+});
+
 test('reserved primitive names cannot enter through ordinary declaration paths',()=>{
  const env=new Environment(),T=sort(levelSucc(levelZero));
  throws(()=>addOrdinaryInductive(env,{levelParams:[],numParams:0,types:[{name:N.Nat,type:T,ctors:[{name:N.NatZero,type:constant(N.Nat)},{name:N.NatSucc,type:forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Nat))}]}]}));
@@ -868,22 +1722,25 @@ test('primitive Nat.land rejects a malicious Nat.bitwise operator',()=>{
  throws(()=>addPrimitiveDefinition(env,{kind:'definition',name:N.NatLand,levelParams:[],type:ty,value:app(constant(N.NatBitwise),bad),hints:{kind:'regular',height:1n},safety:'safe'}));assert(!env.has(N.NatLand));
 });
 
-test('primitive Char.ofNat checks the exact type and Char prerequisite',()=>{
+test('Char.ofNat follows ordinary declaration admission like Lean 4.34',()=>{
  const env=primitiveNatEnv(),char0=nameFromDotted('char0');env.add({kind:'axiom',name:N.Char,levelParams:[],type:sort(levelSucc(levelZero))});env.add({kind:'axiom',name:char0,levelParams:[],type:constant(N.Char)});
  const ty=forallE(nameFromDotted('n'),constant(N.Nat),constant(N.Char)),value=lam(nameFromDotted('n'),constant(N.Nat),constant(char0));
- addPrimitiveDefinition(env,{kind:'definition',name:N.CharOfNat,levelParams:[],type:ty,value,hints:{kind:'regular',height:1n},safety:'safe'});assert(env.has(N.CharOfNat));
+ const info={kind:'definition' as const,name:N.CharOfNat,levelParams:[],type:ty,value,hints:{kind:'regular' as const,height:1n},safety:'safe' as const};
+ throws(()=>addPrimitiveDefinition(env,info));
+ new Kernel(env).addDefinition(info);
+ assert(env.has(N.CharOfNat),'Char.ofNat must be admitted through the ordinary definition path');
 });
 
-test('primitive String.ofList validates List Char constructor prerequisites',()=>{
+test('String.ofList follows ordinary declaration admission without synthetic Char.ofNat dependency',()=>{
  const env=new Environment(),one=levelSucc(levelZero),uN=nameFromDotted('u'),u=levelParam(uN),TU=sort(levelSucc(u));
  env.add({kind:'axiom',name:N.Char,levelParams:[],type:sort(one)});env.add({kind:'axiom',name:N.String,levelParams:[],type:sort(one)});
  const listTy=forallE(nameFromDotted('α'),TU,TU,'implicit');env.add({kind:'axiom',name:N.List,levelParams:[uN],type:listTy});
- const listU=(x:any)=>app(constant(N.List,[u]),x);
- env.add({kind:'axiom',name:N.ListNil,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,listU(bvar(0)),'implicit')});
- env.add({kind:'axiom',name:N.ListCons,levelParams:[uN],type:forallE(nameFromDotted('α'),TU,forallE(nameFromDotted('a'),bvar(0),forallE(nameFromDotted('as'),listU(bvar(1)),listU(bvar(2)))),'implicit')});
  const listChar=app(constant(N.List,[levelZero]),constant(N.Char)),empty=nameFromDotted('emptyString');env.add({kind:'axiom',name:empty,levelParams:[],type:constant(N.String)});
  const ty=forallE(nameFromDotted('xs'),listChar,constant(N.String)),value=lam(nameFromDotted('xs'),listChar,constant(empty));
- addPrimitiveDefinition(env,{kind:'definition',name:N.StringOfList,levelParams:[],type:ty,value,hints:{kind:'regular',height:1n},safety:'safe'});assert(env.has(N.StringOfList));
+ const info={kind:'definition' as const,name:N.StringOfList,levelParams:[],type:ty,value,hints:{kind:'regular' as const,height:1n},safety:'safe' as const};
+ throws(()=>addPrimitiveDefinition(env,info));
+ new Kernel(env).addDefinition(info);
+ assert(env.has(N.StringOfList),'String.ofList must not require Char.ofNat merely for declaration admission');
 });
 
 
@@ -955,9 +1812,30 @@ test('exact JSON parser preserves integers beyond JavaScript safe range',()=>{
  const v=parseExactJson('{"n":9007199254740993123456789}');assert(typeof v==='object'&&v!==null&&!Array.isArray(v));assert((v as any).n===9007199254740993123456789n);
 });
 
+test('lean4export preserves raw max and imax level syntax',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"in":1,"str":{"pre":0,"str":"u"}}',
+  '{"in":2,"str":{"pre":0,"str":"RawMax"}}',
+  '{"in":3,"str":{"pre":0,"str":"RawIMax"}}',
+  '{"il":1,"param":1}',
+  '{"il":2,"max":[0,1]}',
+  '{"il":3,"imax":[0,1]}',
+  '{"ie":0,"sort":2}',
+  '{"ie":1,"sort":3}',
+  '{"axiom":{"name":2,"levelParams":[1],"type":0,"isUnsafe":false}}',
+  '{"axiom":{"name":3,"levelParams":[1],"type":1,"isUnsafe":false}}'
+ ].join('\n');
+ const r=new Lean4ExportReplay(),st=r.replay(nd);
+ assert(st.declarations===2);
+ const a=r.env.get(nameFromDotted('RawMax')),b=r.env.get(nameFromDotted('RawIMax'));
+ assert(a.type.kind==='sort'&&a.type.level.kind==='max','raw exported Level.max must not be simplified during replay');
+ assert(b.type.kind==='sort'&&b.type.level.kind==='imax','raw exported Level.imax must not be simplified during replay');
+});
+
 test('lean4export replay admits a version-pinned axiom stream',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"A"}}',
   '{"il":1,"succ":0}',
   '{"ie":0,"sort":1}',
@@ -970,7 +1848,7 @@ test('lean4export replay admits a version-pinned axiom stream',()=>{
 
 test('lean4export incremental line replay matches bulk replay',()=>{
  const lines=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"A"}}',
   '{"il":1,"succ":0}',
   '{"ie":0,"sort":1}',
@@ -1011,8 +1889,24 @@ test('real Lean 4.34 indexed recursor metadata matches exactly',()=>{
  assert(rec.kind==='recursor'&&rec.numParams===1&&rec.numIndices===1&&rec.rules.length===2);
 });
 
+test('lean4export rejects wrong generated constructor and recursor universe metadata',()=>{
+ const badCtor=lean434RealProbe.replace(
+   '"levelParams":[],"name":6,"numFields":0',
+   '"levelParams":[15],"name":6,"numFields":0'
+ );
+ assert(badCtor!==lean434RealProbe,'constructor mutation fixture marker must exist');
+ throws(()=>new Lean4ExportReplay().replay(badCtor));
+
+ const badRec=lean434RealProbe.replace(
+   '"levelParams":[15],"name":23,"numIndices":0',
+   '"levelParams":[],"name":23,"numIndices":0'
+ );
+ assert(badRec!==lean434RealProbe,'recursor mutation fixture marker must exist');
+ throws(()=>new Lean4ExportReplay().replay(badRec));
+});
+
 test('lean4export treats safe DefinitionVal.all as informational, not a mutual kernel block',()=>{
- const meta='{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}';
+ const meta='{"meta":{"exporter":{"name":"handcrafted","version":"0.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}';
  const pre=[
   meta,
   '{"in":1,"str":{"pre":0,"str":"SafeAllA"}}',
@@ -1031,7 +1925,7 @@ test('lean4export treats safe DefinitionVal.all as informational, not a mutual k
 
 test('lean4export reconstructs partial mutual definition blocks from all metadata',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"A"}}','{"in":2,"str":{"pre":0,"str":"B"}}',
   '{"ie":0,"sort":0}','{"ie":1,"const":{"name":1,"us":[]}}','{"ie":2,"const":{"name":2,"us":[]}}',
   '{"def":{"name":2,"levelParams":[],"type":0,"value":1,"hints":{"regular":1},"safety":"partial","all":[1,2]}}',
@@ -1042,23 +1936,27 @@ test('lean4export reconstructs partial mutual definition blocks from all metadat
 
 test('lean4export rejects an incomplete mutual definition group',()=>{
  const nd=[
-  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
   '{"in":1,"str":{"pre":0,"str":"A"}}','{"in":2,"str":{"pre":0,"str":"B"}}',
   '{"ie":0,"sort":0}','{"ie":1,"const":{"name":1,"us":[]}}',
   '{"def":{"name":1,"levelParams":[],"type":0,"value":1,"hints":{"regular":1},"safety":"partial","all":[1,2]}}'
  ].join('\n');throws(()=>new Lean4ExportReplay().replay(nd));
 });
 
-test('kernel metadata equivalence ignores binder display names but retains annotations',()=>{
+test('kernel metadata equivalence matches Lean Expr BEq used by replay',()=>{
  const a=forallE(nameFromDotted('a'),sort(levelZero),bvar(0),'default');
- const renamed=forallE(nameFromDotted('x'),sort(levelZero),bvar(0),'default');
- const implicit=forallE(nameFromDotted('x'),sort(levelZero),bvar(0),'implicit');
- assert(exprKernelMetadataEq(a,renamed),'binder display names are non-semantic');
- assert(!exprKernelMetadataEq(a,implicit),'binder annotations must remain significant');
+ const renamedImplicit=forallE(nameFromDotted('x'),sort(levelZero),bvar(0),'implicit');
+ assert(exprKernelMetadataEq(a,renamedImplicit),'Lean Expr BEq ignores binder names and annotations');
+ const mdA={kind:'mdata',data:{tag:'a'},expr:a} as const;
+ const mdSame={kind:'mdata',data:{tag:'a'},expr:renamedImplicit} as const;
+ const mdDiff={kind:'mdata',data:{tag:'b'},expr:renamedImplicit} as const;
+ assert(exprKernelMetadataEq(mdA,mdSame),'equal mdata payloads must preserve alpha-equivalence');
+ assert(!exprKernelMetadataEq(mdA,a),'Lean Expr BEq observes mdata placement');
+ assert(!exprKernelMetadataEq(mdA,mdDiff),'Lean Expr BEq observes mdata payloads');
 });
 
 test('lean4export replay accepts sparse and out-of-order intern indices',()=>{
- const meta='{"meta":{"exporter":{"name":"handcrafted","version":"0.1.0"},"lean":{"githash":"test","version":"4.34.0"},"format":{"version":"3.1.0"}}}';
+ const meta='{"meta":{"exporter":{"name":"handcrafted","version":"0.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}';
  const sparse=[meta,'{"in":2,"str":{"pre":0,"str":"foo"}}','{"ie":4,"sort":0}','{"axiom":{"isUnsafe":false,"levelParams":[],"name":2,"type":4}}'].join('\n');
  const a=new Lean4ExportReplay();a.replay(sparse);assert(a.env.entries().length===1);
  const outOfOrder=[meta,'{"in":1,"str":{"pre":0,"str":"foo"}}','{"il":2,"succ":0}','{"il":1,"succ":2}','{"ie":0,"sort":1}','{"axiom":{"isUnsafe":false,"levelParams":[],"name":1,"type":0}}'].join('\n');
@@ -1067,8 +1965,28 @@ test('lean4export replay accepts sparse and out-of-order intern indices',()=>{
  throws(()=>new Lean4ExportReplay().replay(duplicate));
 });
 
+test('lean4export rejects negative Nat literals at the wire boundary',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"ie":0,"natVal":"-1"}'
+ ].join('\n');
+ throws(()=>new Lean4ExportReplay().replay(nd));
+});
+
+test('lean4export rejects projection indices above UInt32 before number conversion',()=>{
+ const nd=[
+  '{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"},"format":{"version":"3.1.0"}}}',
+  '{"in":1,"str":{"pre":0,"str":"S"}}',
+  '{"ie":0,"proj":{"typeName":1,"idx":4294967296,"struct":999}}'
+ ].join('\n');
+ throws(()=>new Lean4ExportReplay().replay(nd));
+});
+
 test('lean4export replay rejects version drift before declarations',()=>{
- const nd='{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"test","version":"4.33.0"},"format":{"version":"3.1.0"}}}';throws(()=>new Lean4ExportReplay().replay(nd));
+ const nd='{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.33.0"},"format":{"version":"3.1.0"}}}';throws(()=>new Lean4ExportReplay().replay(nd));
+});
+test('lean4export replay rejects git-hash drift before declarations',()=>{
+ const nd='{"meta":{"exporter":{"name":"lean4export","version":"3.1.0"},"lean":{"githash":"0000000000000000000000000000000000000000","version":"4.34.0"},"format":{"version":"3.1.0"}}}';throws(()=>new Lean4ExportReplay().replay(nd));
 });
 
 console.log(`# pass ${pass}`);console.log(`# fail ${fail}`);if(fail)throw new Error(`${fail} tests failed`);

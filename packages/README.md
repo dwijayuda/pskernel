@@ -1,61 +1,72 @@
-# Package scaffolds
+# ProofScript packages
 
-This directory contains **private package boundaries**, not a live npm workspace yet.
+The repository uses npm workspaces for `packages/*`. These packages are the
+bootstrap implementation around the independent TypeScript Lean 4.34 kernel.
 
-The root pskernel build remains independent while Lean 4.34 Full Std certification is active. Do not add root `workspaces` or make the trusted kernel depend on packages here until an explicit migration plan is approved.
+## Execution priority
+
+ProofScript package work is governed by
+`docs/plans/07_SELF_HOSTING_FOUNDATION.md`.
+
+Until the self-hosting foundation closes, do not expand package infrastructure
+merely for completeness. New work must either close a self-hosting gate, supply
+a standard-library prerequisite required by the compiler, or maintain an
+existing gate.
+
+The former `@proofscript/language` software checker was retired on
+2026-09-24. There is one semantic compiler path:
+
+```text
+.ps / supported .lean
+-> syntax
+-> Meta / Elab
+-> pskernel admission
+-> checked core
+-> erasure
+-> verified compiler IR
+-> TypeScript
+-> tsc
+-> JavaScript
+```
 
 ## Status source of truth
 
-See `package-map.json` for:
-- package name/path
-- phase
-- trust classification
-- scaffold/implementation status
-- intended dependency direction
+See `package-map.json` for package path, phase, trust classification,
+implementation status, and dependency direction.
 
-## Current implementation state
+Current package groups include:
 
-- `cli/` — user-facing `psc` UX MVP plus the low-level `pskernel` replay/module commands.
-- `module/` — MVP checked-module artifact implementation.
-- `conformance/` — MVP Arena-style conformance runner.
-- `lean4export/` — MVP pinned Lean exporter transport.
-- `browser/` — cancellation-aware streaming verification foundation.
-- `syntax/` — v0.7 lexer/parser foundation with D-CALL MVP.
-- `pretty/`, `meta/`, `elab/`, `tactic/` — Phase-B TypeScript foundations with executable tests.
-- `compiler-ir/`, `runtime/`, `backend-ts/` — Phase-C foundations with IR/runtime/emission tests.
-- `language/`, `lsp/`, `project/` — Phase-D foundations for snapshots, protocol mapping, and build planning.
+- kernel ecosystem: `cli`, `module`, `conformance`, `lean4export`, `browser`;
+- frontend: `syntax`, `pretty`, `meta`, `elab`, `tactic`, `environment`;
+- checked compiler: `checked-core`, `erasure`, `compiler-ir`, `runtime`,
+  `backend-ts`, `compiler`;
+- tooling: `language-service`, `lsp`, `project`.
 
 ## Trust rule
 
-A support package may construct, serialize, elaborate, compile, transport, display, or orchestrate declarations, but it does not make them trusted. Logical authority remains pskernel admission.
+A support package may parse, elaborate, compile, transport, display, or
+orchestrate declarations, but it does not make them trusted. Logical authority
+remains pskernel admission.
 
-Final Lean 4.34 has no in-kernel native compiler-evaluation extension. Compiler/backend packages remain outside the kernel TCB unless a future feature explicitly documents otherwise.
+The TypeScript kernel stays independently checkable and must not depend on
+outer ProofScript packages.
 
-## When to enable workspaces
+## Source language policy during bootstrap
 
-Only after:
-1. canonical Full Std is closed or the current kernel API is otherwise frozen for the transition;
-2. package names are intentionally chosen;
-3. dependency cycles are reviewed;
-4. root build/test behavior is reproduced under the workspace layout.
+TypeScript remains the bootstrap and host implementation language while the
+SH1-SH7 foundation is being closed.
 
-Until then, manifests are architectural scaffolds rather than installable release packages.
+New **semantic** compiler logic should be designed so it can move to the frozen
+Lean bootstrap subset and then to ProofScript without redesign. TypeScript is
+also expected to remain for explicit host adapters such as Node filesystem,
+npm/module resolution, the TypeScript Compiler API, and VS Code transport.
 
+Once SH7 closes, compiler-owned semantics migrate in the order defined by the
+self-hosting plan: bounded `.lean` first, then `.ps`.
 
-## Source language policy
+## Cross-package gates
 
-Package implementation source is **TypeScript-first**.
-
-- Author package code as `.ts`.
-- Compile to ESM `.js` under `dist/`.
-- Do not add hand-authored `.mjs` under `packages/` without an explicit architecture exception.
-- Root `scripts/*.mjs` are separate oracle/CI scripts and are not covered by this package-source rule.
-
-The root anti-drift check enforces this policy so new packages cannot silently bypass strict TypeScript checking.
-
-
-## Cross-package foundation gate
-
-`npm run test:packages` compiles and executes each standalone foundation without enabling npm workspaces. After those builds, `npm run test:package-integration` runs a root-level smoke pipeline across syntax, pretty, meta, elaboration, tactics, compiler IR, runtime, TS backend, language snapshots, LSP mapping, project planning, and browser verification.
-
-This is an integration gate for package architecture, not a claim that the Phase B/C/D exit criteria are complete.
+`npm run test:packages` compiles/tests the workspace packages.
+`npm run test:package-integration` exercises the cross-package checked-core
+pipeline. `npm run check:architecture` enforces dependency direction and
+rejects reintroduction of the retired legacy semantic path.

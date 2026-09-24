@@ -31,7 +31,7 @@ def compilerBindRun
   | Result.error error => Result.error error
   | Result.ok pair =>
       let continuation : CompilerM Context State Error B :=
-        next pair.fst
+        next pair.fst;
       continuation.run context pair.snd
 
 def compilerBind
@@ -112,7 +112,7 @@ def compilerTryCatchRun
   | Result.ok pair => Result.ok pair
   | Result.error error =>
       let recovery : CompilerM Context State Error Value :=
-        handler error
+        handler error;
       recovery.run context state
 
 def compilerTryCatch

@@ -70,11 +70,11 @@ def levelSamples : List KLevel :=
 
 def checkLevelSample (u : KLevel) : IO Unit := do
   let lu := toLeanLevel u
-  assertTrue "Level.depth" (KLevel.depth u == Lean.Level.depth lu)
-  assertTrue "Level.isExplicit" (KLevel.isExplicit u == Lean.Level.isExplicit lu)
-  assertTrue "Level.isNotZero" (KLevel.isNotZero u == Lean.Level.isNeverZero lu)
+  assertTrue "Level.depth" (ProofScript.Kernel.PSC1.Level.depth u == Lean.Level.depth lu)
+  assertTrue "Level.isExplicit" (ProofScript.Kernel.PSC1.Level.isExplicit u == Lean.Level.isExplicit lu)
+  assertTrue "Level.isNotZero" (ProofScript.Kernel.PSC1.Level.isNotZero u == Lean.Level.isNeverZero lu)
   assertTrue "Level.normalizesToZero"
-    (KLevel.normalizesToZero u == Lean.Level.isAlwaysZero lu)
+    (ProofScript.Kernel.PSC1.Level.normalizesToZero u == Lean.Level.isAlwaysZero lu)
 
 def sampleExpr : KExpr :=
   .lam (n "x") (.sort .zero)
@@ -91,19 +91,19 @@ def sameLeanExpr (a b : Lean.Expr) : Bool :=
 
 def checkExprParity (e : KExpr) : IO Unit := do
   let le := toLeanExpr e
-  let liftedK := KExpr.liftLooseBVars e 0 2
+  let liftedK := ProofScript.Kernel.PSC1.Expr.liftLooseBVars e 0 2
   let liftedLean := Lean.Expr.liftLooseBVars le 0 2
   assertTrue "Expr.liftLooseBVars"
     (sameLeanExpr (toLeanExpr liftedK) liftedLean)
 
   let substK : List KExpr := [.bvar 0, .const (n "C") []]
   let substLean := (substK.map toLeanExpr).toArray
-  let instantiatedK := KExpr.instantiate e substK
+  let instantiatedK := ProofScript.Kernel.PSC1.Expr.instantiate e substK
   let instantiatedLean := Lean.Expr.instantiate le substLean
   assertTrue "Expr.instantiate"
     (sameLeanExpr (toLeanExpr instantiatedK) instantiatedLean)
 
-  let instantiatedRevK := KExpr.instantiateRev e substK
+  let instantiatedRevK := ProofScript.Kernel.PSC1.Expr.instantiateRev e substK
   let instantiatedRevLean := Lean.Expr.instantiateRev le substLean
   assertTrue "Expr.instantiateRev"
     (sameLeanExpr (toLeanExpr instantiatedRevK) instantiatedRevLean)
@@ -113,22 +113,22 @@ def main : IO Unit := do
     checkLevelSample u
 
   assertTrue "mkMax explicit"
-    (KLevel.beq (KLevel.mkMax (.succ .zero) (.succ (.succ .zero)))
+    (ProofScript.Kernel.PSC1.Level.beq (ProofScript.Kernel.PSC1.Level.mkMax (.succ .zero) (.succ (.succ .zero)))
       (.succ (.succ .zero)))
   assertTrue "mkMax zero"
-    (KLevel.beq (KLevel.mkMax .zero (.param (n "u"))) (.param (n "u")))
+    (ProofScript.Kernel.PSC1.Level.beq (ProofScript.Kernel.PSC1.Level.mkMax .zero (.param (n "u"))) (.param (n "u")))
   assertTrue "mkIMax rhs zero"
-    (KLevel.beq (KLevel.mkIMax (.param (n "u")) .zero) .zero)
+    (ProofScript.Kernel.PSC1.Level.beq (ProofScript.Kernel.PSC1.Level.mkIMax (.param (n "u")) .zero) .zero)
   assertTrue "mkIMax lhs one"
-    (KLevel.beq
-      (KLevel.mkIMax (.succ .zero) (.param (n "u")))
+    (ProofScript.Kernel.PSC1.Level.beq
+      (ProofScript.Kernel.PSC1.Level.mkIMax (.succ .zero) (.param (n "u")))
       (.param (n "u")))
 
   checkExprParity sampleExpr
   checkExprParity sampleLet
 
   let fv := n "free"
-  let abstractedK := KExpr.abstractFVar (.app (.fvar fv) (.bvar 0)) fv
+  let abstractedK := ProofScript.Kernel.PSC1.Expr.abstractFVar (.app (.fvar fv) (.bvar 0)) fv
   let leanSource := Lean.Expr.app (.fvar ⟨toLeanName fv⟩) (.bvar 0)
   let leanAbstracted := Lean.Expr.abstract leanSource #[.fvar ⟨toLeanName fv⟩]
   assertTrue "Expr.abstractFVar"

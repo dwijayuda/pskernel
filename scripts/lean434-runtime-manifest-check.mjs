@@ -21,6 +21,9 @@ if(runtime.LEAN434_SOURCE_VERSION!=='4.34.0'){
 if(!Array.isArray(runtime.LEAN434_JS_EXTERN_MANIFEST)){
   throw new Error('missing LEAN434_JS_EXTERN_MANIFEST');
 }
+if(!Array.isArray(runtime.LEAN434_JS_DECL_EXTERN_BINDINGS)){
+  throw new Error('missing LEAN434_JS_DECL_EXTERN_BINDINGS');
+}
 
 const seen=new Set();
 const checked=[];
@@ -64,10 +67,69 @@ for(const entry of runtime.LEAN434_JS_EXTERN_MANIFEST){
   });
 }
 
+const manifestBySymbol=new Map(
+  runtime.LEAN434_JS_EXTERN_MANIFEST.map((entry)=>[entry.leanSymbol,entry]),
+);
+const seenDeclarations=new Set();
+const declarationBindings=[];
+for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
+  if(seenDeclarations.has(binding.leanDeclaration)){
+    throw new Error(
+      'duplicate Lean declaration extern binding: '+binding.leanDeclaration,
+    );
+  }
+  seenDeclarations.add(binding.leanDeclaration);
+  const descriptor=manifestBySymbol.get(binding.leanSymbol);
+  if(descriptor===undefined){
+    throw new Error(
+      'declaration binding references unknown extern symbol: '+
+      binding.leanDeclaration+' -> '+binding.leanSymbol,
+    );
+  }
+  if(descriptor.upstreamSource!==binding.upstreamSource){
+    throw new Error(
+      'declaration binding source mismatch for '+binding.leanDeclaration,
+    );
+  }
+  if(!Number.isInteger(binding.arity)||binding.arity<0){
+    throw new Error(
+      'invalid declaration binding arity for '+binding.leanDeclaration,
+    );
+  }
+
+  const upstream=path.join(
+    repoRoot,
+    'study','lean4-4.34.0','src',
+    ...binding.upstreamSource.split('/'),
+  );
+  const text=fs.readFileSync(upstream,'utf8');
+  if(!text.includes('"'+binding.leanSymbol+'"')){
+    throw new Error(
+      'bound extern symbol missing from upstream source: '+
+      binding.leanDeclaration+' -> '+binding.leanSymbol,
+    );
+  }
+  if(!text.includes(binding.leanDeclaration)){
+    throw new Error(
+      'bound Lean declaration missing from upstream source: '+
+      binding.leanDeclaration+' @ '+binding.upstreamSource,
+    );
+  }
+
+  declarationBindings.push({
+    leanDeclaration:binding.leanDeclaration,
+    leanSymbol:binding.leanSymbol,
+    arity:binding.arity,
+    upstreamSource:binding.upstreamSource,
+  });
+}
+
 process.stdout.write(JSON.stringify({
   format:'proofscript-lean434-runtime-manifest-check',
   leanVersion:runtime.LEAN434_SOURCE_VERSION,
   runtimeVersion:runtime.LEAN434_JS_RUNTIME_VERSION,
   mappings:checked.length,
+  declarationBindings:declarationBindings.length,
   entries:checked,
+  bindings:declarationBindings,
 },null,2)+'\n');

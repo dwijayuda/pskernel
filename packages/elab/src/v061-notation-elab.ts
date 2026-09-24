@@ -5,6 +5,7 @@ import {
   levelSucc,
   levelZero,
   mkAppN,
+  type Expr,
 } from 'lean-ts-kernel';
 import type {
   ElaboratedCoreTerm,
@@ -14,7 +15,6 @@ import {
   elaborateV061NatArithmeticExpression,
   elaborateV061NatCondition,
   isV061NatRelation,
-  type ElaboratedNatCondition,
 } from './v061-nat-notation-elab.js';
 import {
   elaborateV061BoolBinaryNotation,
@@ -29,11 +29,15 @@ import {
 export type {V061TermElaborator} from './v061-notation-support.js';
 export {elaborateV061UnaryNotation} from './v061-bool-notation-elab.js';
 
+interface ElaboratedCondition extends ElaboratedCoreTerm {
+  readonly decider:Expr;
+}
+
 export function elaborateV061Condition(
   expr:V061Expr,
   context:V061CoreElabContext,
   elaborate:V061TermElaborator,
-):ElaboratedNatCondition {
+):ElaboratedCondition {
   if(expr.kind==='binary'&&isV061NatRelation(expr.operator)){
     return elaborateV061NatCondition(expr,context,elaborate);
   }

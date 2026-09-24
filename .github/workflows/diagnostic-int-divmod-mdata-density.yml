@@ -41,6 +41,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export PATH="$LEAN434_BIN:$PATH"
           out="/tmp/${{ matrix.label }}.ndjson"
           "$LEAN434_BIN/lean" --run oracle/replay-probe/DependencyExport.lean Std --root-range "${{ matrix.start }}" "${{ matrix.count }}" > "$out"
           bytes="$(wc -c < "$out")"

@@ -119,7 +119,46 @@ def psErasePrimitiveApplication
             | Except.ok result => Except.ok (some result)
           else
             Except.error PsErasureError.unsupportedApplication
-      if text == "Nat.add" then
+      if text == "Int.ofNat" then
+        if view.args.length == 1 then
+          match
+              psEraseMappedIntrinsic
+                erase
+                PsVerifiedIrIntrinsic.intOfNat
+                view.args with
+          | Except.error error => Except.error error
+          | Except.ok result => Except.ok (some result)
+        else
+          Except.error PsErasureError.unsupportedApplication
+      else if text == "Int.negSucc" then
+        if view.args.length == 1 then
+          match
+              psEraseMappedIntrinsic
+                erase
+                PsVerifiedIrIntrinsic.intNegSucc
+                view.args with
+          | Except.error error => Except.error error
+          | Except.ok result => Except.ok (some result)
+        else
+          Except.error PsErasureError.unsupportedApplication
+      else if text == "Int.neg" then
+        if view.args.length == 1 then
+          match
+              psEraseMappedIntrinsic
+                erase
+                PsVerifiedIrIntrinsic.intNeg
+                view.args with
+          | Except.error error => Except.error error
+          | Except.ok result => Except.ok (some result)
+        else
+          Except.error PsErasureError.unsupportedApplication
+      else if text == "Int.add" then
+        binary PsVerifiedIrIntrinsic.intAdd
+      else if text == "Int.sub" then
+        binary PsVerifiedIrIntrinsic.intSub
+      else if text == "Int.mul" then
+        binary PsVerifiedIrIntrinsic.intMul
+      else if text == "Nat.add" then
         binary PsVerifiedIrIntrinsic.natAdd
       else if text == "Nat.sub" then
         binary PsVerifiedIrIntrinsic.natSub

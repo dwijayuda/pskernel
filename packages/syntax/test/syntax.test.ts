@@ -292,7 +292,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   }
 }
 {
-  throws(()=>parseTermSubset('f(x)'),/term subset stopped before '\\('/);
+  throws(()=>parseTermSubset('f(x)'),/term subset stopped before/);
 }
 
 

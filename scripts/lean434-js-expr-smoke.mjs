@@ -1,11 +1,14 @@
 import fs from 'node:fs';
 import {
   Lean4ExportReplay,
+  anonymous,
   constant,
   exprEq,
   mkAppN,
   nameFromDotted,
+  nameKey,
   natLit,
+  strName,
 } from '../dist/src/index.js';
 import {
   Lean434Evaluator,
@@ -63,4 +66,31 @@ if(argc!==2n){
 }
 console.log(
   'ok - real Lean.Expr.getAppNumArgs executes on bridged pskernel Expr',
+);
+
+const metadataSource={
+  kind:'mdata',
+  data:{
+    [nameKey(strName(anonymous,'source'))]:{
+      kind:'string',
+      value:'expr-smoke',
+    },
+  },
+  expr:source,
+};
+let consumeMData=evaluator.evaluate(
+  constant(nameFromDotted('Lean.Expr.consumeMData')),
+);
+const consumedRuntime=evaluator.applyRuntimeValue(
+  consumeMData,
+  kernelExprToLean434Runtime(metadataSource),
+);
+const consumed=lean434RuntimeExprToKernel(consumedRuntime);
+if(!exprEq(consumed,source)){
+  throw new Error(
+    'real Lean.Expr.consumeMData failed to remove bridged KVMap metadata',
+  );
+}
+console.log(
+  'ok - real Lean.Expr.consumeMData executes over canonical KVMap metadata bridge',
 );

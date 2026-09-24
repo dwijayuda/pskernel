@@ -63,6 +63,7 @@ function collectExprDependencies(
   switch(expr.kind){
     case 'nat':
     case 'string':
+    case 'char':
     case 'bool':
     case 'unit':
       return;

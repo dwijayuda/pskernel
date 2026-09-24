@@ -27,7 +27,7 @@ jobs:
       - name: Erasure
         run: node packages/erasure/dist/test/index.test.js
       - name: Package integration
-        run: npm run test:package-integration:raw
+        run: npm run test:package-integration:raw:raw
       - name: TypeScript backend
         run: node packages/backend-ts/dist/test/index.test.js
       - name: WebAssembly backend

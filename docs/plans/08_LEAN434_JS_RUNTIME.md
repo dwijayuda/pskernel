@@ -167,14 +167,20 @@ Exit condition:
 > bounded corpus, while kernel checking remains unchanged when the optimization
 > is disabled.
 
-## R4 — Name / Level / Expr compatibility — **IN PROGRESS (Name slice complete)**
+## R4 — Name / Level / Expr compatibility — **IN PROGRESS (Name + Level + core Expr slices complete)**
 
 Milestones reached 2026-09-25:
 
 - runtime Lean `Name` now has one canonical structural bridge to/from pskernel's existing `Name` model; no second trusted naming semantics were introduced;
 - the bridge covers `anonymous`, string components, and numeric components and fails closed on malformed runtime constructors;
 - real upstream `Lean.Name.appendCore` executes in JavaScript over bridged values and agrees structurally with pskernel `Name.append`;
-- GitHub Actions run `36060016293` passed the Name bridge, real Prelude execution, Environment registration, Parser.Types, ST/IO, metadata checks, and kernel regression together.
+- GitHub Actions run `36060016293` passed the Name bridge, real Prelude execution, Environment registration, Parser.Types, ST/IO, metadata checks, and kernel regression together;
+- runtime Lean `Level` now has a canonical structural bridge for zero/succ/max/imax/param/mvar, reusing the Name bridge for level metavariable and parameter identifiers;
+- real upstream `Lean.Level.addOffset` executes through the bridge and agrees structurally with pskernel `Level.addOffset`;
+- computed-field runtime helpers are exported in a second `implemented_by` phase only after the complete logical dependency closure, fixing the real `Lean.Level._impl` dependency cycle without changing canonical kernel/module streams;
+- runtime Lean `Expr` now has a canonical logical-constructor bridge for bvar/fvar/mvar/sort/const/app/lam/forall/let/lit/proj. FVarId/MVarId preserve full structural Name identity using pskernel Name keys rather than display strings;
+- real upstream `Lean.Expr.getAppFn` and `Lean.Expr.getAppNumArgs` execute on bridged pskernel expressions after pskernel replay; GitHub Actions run `36063161272` passed this Expr gate together with Environment, Parser.Types, Level, ST/IO, metadata/census, and kernel regression;
+- `Expr.mdata` remains fail-closed until the Lean `KVMap` metadata representation is bridged canonically.
 
 Create the source-facing object model needed by Parser/Meta/Elab.
 

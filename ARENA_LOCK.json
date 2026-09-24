@@ -2,11 +2,11 @@
   "schema": 1,
   "source": {
     "repository": "leanprover/lean-kernel-arena",
-    "commit": "a538455e201c1be48a11963cb83058649a36dc0e",
-    "workflowRun": 34974976650,
-    "artifactId": 10400234707,
+    "commit": "ae76435a5fb439571a28e19d74cd1e2e3ab69667",
+    "workflowRun": 35764541391,
+    "artifactId": 10712869614,
     "artifactName": "test-tarball",
-    "artifactExpiresAt": "2026-12-14T13:26:14Z",
+    "artifactExpiresAt": "2026-12-21T18:02:17Z",
     "siteUrl": "https://arena.lean-lang.org/lean-arena-tests.tar.gz"
   },
   "corpus": {
@@ -15,9 +15,8 @@
     "bad": 71,
     "correctness": 170,
     "performance": 23,
-    "contentDigestSha256": "dd6d45efbc1e5e059cbdf0b8ed067fed800a611b83986fcb8c09dc2496eff6fa",
-    "correctnessDigestSha256": "6a1e662137652df42cb1d6959d7f1a920b84930c6dbcd4bae384e6d8bfff5342",
-    "uploadedTarSha256": "294a97cc5054a69e60034531f19c3697aadfcca0806dd82f914599e12a9a5513"
+    "contentDigestSha256": "7d1671a0ddc5e0b4c7d2f03ca64448b3a0a0a68446e13ebb2b916ef328493ec9",
+    "correctnessDigestSha256": "e97fb00c846611df3b0233e545687f45df2ea241ac4cdeaa5c5705064c09a145"
   },
   "policy": {
     "blocking": "170 non-performance good/bad correctness cases",

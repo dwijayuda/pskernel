@@ -28,6 +28,12 @@ export interface ResolvedInput {
   readonly source:string;
 }
 
+export interface BuildModuleArtifact {
+  readonly module:string;
+  readonly path:string;
+  readonly integrity:string;
+}
+
 export interface BuildArtifacts {
   readonly typescript:string;
   readonly javascript:string;
@@ -35,14 +41,14 @@ export interface BuildArtifacts {
   readonly sourceMap:string|null;
   readonly lean:string;
   readonly manifest:string;
-  readonly modules?:readonly string[];
+  readonly modules?:readonly BuildModuleArtifact[];
   readonly webassembly?:string;
   readonly wat?:string;
 }
 
 export interface BuildReport extends Record<string,unknown> {
   readonly ok:boolean;
-  readonly command:'build';
+  readonly command:string;
   readonly source:string;
   readonly declarations:number;
   readonly featureIds:readonly string[];

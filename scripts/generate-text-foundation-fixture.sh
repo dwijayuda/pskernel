@@ -26,7 +26,7 @@ err="$(mktemp)"
 trap 'rm -f "$tmp" "$err"' EXIT
 
 if ! lean --run oracle/replay-probe/DependencyExport.lean Init.Data.String.Bootstrap \
-  --selected-segmented 1 \
+  --selected-segmented-after Init.Prelude 1 \
   Char.toNat \
   String.push String.singleton \
   String.Internal.length String.Internal.append \

@@ -80,7 +80,7 @@ def assertExprOracle : IO Unit := do
   let nestedLean := (toLeanExpr nested).instantiate #[toLeanExpr replacement]
   assertTrue "nested instantiate differs from Lean 4.34" (toLeanExpr nestedOurs == nestedLean)
 
-def main : IO Unit := do
+def run : IO Unit := do
   let u : PSC1Kernel.Name := .str .anonymous "u"
   let v : PSC1Kernel.Name := .str .anonymous "v"
   let U : PSC1Kernel.Level := .param u
@@ -104,3 +104,5 @@ def main : IO Unit := do
   IO.println "PSC1Kernel Lean 4.34 foundational oracle: PASS"
 
 end PSC1Kernel.Test
+
+def main : IO Unit := PSC1Kernel.Test.run

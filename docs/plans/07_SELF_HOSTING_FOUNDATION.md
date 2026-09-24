@@ -253,6 +253,18 @@ actually needed by the selected Reader/State/Except stack. Do not reproduce
 Lean's full transformer/typeclass hierarchy unless the compiler workload
 requires it.
 
+Add the small proof-aware control-flow forms that compiler code uses to carry
+branch facts without invoking a tactic engine:
+
+- dependent/proof-binding conditionals such as `if h : P then ... else ...`
+  and the anonymous-proof form `if _ : P then ... else ...`;
+- ordinary proof-valued local bindings such as `have h : P := proof`;
+- `show T from e` or an equivalent cheap expected-type annotation form when
+  it materially simplifies compiler/proof code.
+
+These are term-elaboration features, not tactic automation. Branch hypotheses
+and `have` values must elaborate to ordinary proof terms that pskernel checks.
+
 Also provide transactional state operations required by parsers and
 elaboration:
 
@@ -319,6 +331,14 @@ least List, Array, ordered Map/Set entries and simple Nat ranges. A bounded
 hierarchy is not required.
 
 These are Lean-style source conveniences, not JavaScript mutation semantics.
+
+Also provide an explicit runtime-only failure/assertion vocabulary for compiler
+invariants, expected to cover the useful roles of Lean's `guard`, `assert!`,
+`panic!`, and `unreachable!` without necessarily copying their exact APIs.
+These operations may abort/fail executable code, but they must never manufacture
+proof terms, discharge propositions, or add trusted definitional authority.
+Prefer typed `Except`/failure where recovery is expected and reserve
+panic/unreachable forms for internal impossible-state assertions.
 
 Structural recursion remains preferred. The exact `partial` trust boundary
 must be executable and mechanically enforced: partial code may execute, but it
@@ -455,10 +475,52 @@ silently turn pskernel into a hidden second elaborator.
 The bridge protocol/version must be fingerprinted or otherwise compatibility
 checked so PSC1 cannot accidentally run against an incompatible kernel API.
 
+#### Initial SH6b transport
+
+Do not block SH6b on a generalized structured FFI. The current checked-core FFI
+is intentionally first-order and primitive-valued, so the first bridge should
+use a versioned canonical text transport that fits that boundary.
+
+Preferred initial shape:
+
+```text
+ProofScript compiler
+    |
+    | canonical request JSON : String
+    v
+single narrow pskernel bridge extern
+    |
+    | canonical response JSON : String
+    v
+ProofScript compiler
+```
+
+A minimal API may therefore begin as an operation equivalent to
+`kernelRequest : String -> String`, with a schema-discriminated request/response
+protocol. The schema must:
+
+- carry an explicit protocol version and pskernel/foundation fingerprint;
+- define canonical encodings for Name, Level, Expr, declarations, inductives,
+  errors and checked metadata;
+- reject unknown versions, unknown variants, malformed payloads and incomplete
+  metadata deterministically;
+- preserve integer/string/universe/name information exactly rather than relying
+  on JavaScript object identity;
+- keep each semantic operation explicit in the request tag (lookup, infer/check,
+  defeq, definition/theorem admission, inductive admission, checked replay);
+- return structured diagnostics rather than depending on thrown host exceptions
+  for ordinary kernel rejection.
+
+Once self-hosting is stable, a typed/binary/structured ABI may replace this
+transport for performance, but it must preserve the same versioned semantic
+contract. The JSON/String bridge is a bootstrap transport, not a new semantic
+authority.
+
 Exit test: a compiler module authored in supported `.lean` and `.ps` can
-construct kernel data, perform lookup/check/admission through the bridge, obtain
-the resulting checked metadata, and continue verified compilation without
-importing pskernel's TypeScript implementation classes directly.
+encode a canonical request, cross the primitive String bridge, decode the
+versioned response, perform lookup/check/admission, obtain the resulting checked
+metadata, and continue verified compilation without importing pskernel's
+TypeScript implementation classes directly.
 
 ## SH7 — census, prove compiler readiness, then freeze the Lean bootstrap subset
 
@@ -495,6 +557,8 @@ exercise at least:
   `mapM` / indexed monadic traversal / folds;
 - qualified `Name`, namespaces/imports and explicit environment updates;
 - structures, structure updates, field/method notation and named arguments;
+- dependent/proof-binding `if h : P`, proof-valued `have`, and the selected
+  expected-type/show form;
 - generic/dependent ADTs and the SH4.5 pattern subset, including nested and
   multi-scrutinee patterns plus `if let`/let-patterns;
 - `Prod`/tuple-returning and tuple-destructuring utilities;
@@ -503,13 +567,16 @@ exercise at least:
   transactional rollback;
 - practical iteration syntax and the bounded iteration abstraction selected by
   the census;
+- runtime-only guard/assert/panic/unreachable behavior with a regression proving
+  it cannot be used as proof evidence;
 - higher-order/generic traversals;
 - implicit arguments, instance synthesis and postponed Meta constraints used by
   the bootstrap subset;
 - diagnostics/fresh IDs;
 - multi-module compilation;
-- the versioned SH6b pskernel bridge for lookup, a ground kernel query and
-  declaration/inductive admission.
+- the versioned SH6b pskernel bridge, using the canonical String/JSON bootstrap
+  transport, for lookup, a ground kernel query and declaration/inductive
+  admission.
 
 The fixture must execute end-to-end:
 
@@ -561,6 +628,13 @@ existing theorem tactic into the self-hosted compiler before PSC1 can exist.
 The bootstrap compiler source itself should avoid depending on tactic features
 that have not yet moved.
 
+Do not add broad proof automation merely to make the bootstrap compiler pleasant
+to write. Prefer ordinary terms, `have`, proof-binding conditionals, safe APIs
+such as optional/bounds-checked collection access, structural recursion, and the
+controlled `partial` boundary. In particular, tactics comparable to `omega`,
+`aesop`, `grind`, `linarith`, `ring`, broad `solve_by_elim`, or a full
+simp engine are not SH8a prerequisites.
+
 The TypeScript pskernel remains the independent admission authority. Node,
 filesystem, TypeScript-API and similar host adapters remain outside the
 self-hosted semantic compiler.
@@ -575,6 +649,25 @@ kernel proof terms and pskernel remains final authority.
 SH8b should cover the tactic subset that ProofScript claims at that point; it
 does not require full Lean tactic parity. Tactic self-hosting must not block the
 first PSC0 -> PSC1 -> PSC2 core-compiler bootstrap.
+
+After PSC2 core stability, prioritize **Meta capability before tactic-name
+breadth**. The preferred order is:
+
+1. general term holes and stronger implicit/instance handling in
+   `apply`/`refine`;
+2. dependent/indexed-context support for `cases` and `induction`;
+3. small proof-structuring operations such as `change`, `subst`,
+   `generalize`, `by_cases`, `by_contra`/ex-falso and
+   `unfold`/`dsimp`;
+4. `simpa` and a larger deterministic simplifier once the supporting
+   Meta/indexing semantics are owned;
+5. large automation only when it serves a concrete ProofScript verification
+   workload.
+
+Do not implement `omega`, `aesop`, `grind`, `linarith`, `ring`,
+`native_decide`, or full Lean `simp` solely for self-hosting. They remain
+post-bootstrap features unless an independently justified language goal
+requires them.
 
 ## SH9 — bootstrap in JavaScript
 
@@ -627,6 +720,8 @@ Unless demanded by an SH gate, defer:
 - new browser/LSP/editor features;
 - extra package-manager features;
 - full Lean syntax/macros/metaprogramming;
+- large proof automation such as `omega`, `aesop`, `grind`, `linarith`,
+  `ring`, `native_decide`, or full Lean `simp` before SH8a/PSC2 stability;
 - generalized dependent-pattern compilation beyond the bootstrap need;
 - full Lean iterator hierarchy;
 - broad HashMap/Hashable adoption before correctness-oriented ordered

@@ -109,12 +109,12 @@ if ($postInstallTrackedChanges.Count -ne 0) {
 }
 
 if (-not $SkipTests) {
-  Write-Host "Running full npm test gate..."
+  Write-Host "Running kernel test gate..."
   Write-Log "testsStarted=$(Get-Date -Format o)"
   $previousErrorActionPreference = $ErrorActionPreference
   $ErrorActionPreference = "Continue"
   try {
-    & npm test 2>&1 | ForEach-Object { Write-NativeLogLine $_ }
+    & npm run test:kernel 2>&1 | ForEach-Object { Write-NativeLogLine $_ }
     $testCode = $LASTEXITCODE
   } finally {
     $ErrorActionPreference = $previousErrorActionPreference
@@ -122,12 +122,12 @@ if (-not $SkipTests) {
   Write-Log "testsFinished=$(Get-Date -Format o)"
   Write-Log "testsExitCode=$testCode"
   if ($testCode -ne 0) {
-    Write-Host "npm test failed. Full Std was not started; send/upload $Log."
+    Write-Host "Kernel test gate failed. Full Std was not started; send/upload $Log."
     exit $testCode
   }
-  Write-Host "npm test PASS."
+  Write-Host "Kernel test gate PASS."
 } else {
-  Write-Host "Skipping npm test; building pskernel..."
+  Write-Host "Skipping kernel test gate; building pskernel..."
   & npm run build
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }

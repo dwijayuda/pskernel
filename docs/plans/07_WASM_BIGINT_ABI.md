@@ -1,11 +1,46 @@
 # ProofScript WebAssembly arbitrary-precision ABI
 
-Status: **W3 design contract; implementation must remain fail-closed until the
-acceptance gates in this document execute successfully.**
+Status: **W3a implementation in progress. Nat externref values, literals, and
+all currently defined verified Nat intrinsics execute through the versioned JS
+BigInt runtime. Full W3a closure still requires the complete differential
+corpus and acceptance matrix below.**
 
 This document refines W3 from `06_WASM_BACKEND.md`. It defines how
 ProofScript/Lean arbitrary-precision `Nat` and `Int` values can cross the
 WebAssembly boundary without narrowing them to machine integers.
+
+## 0. Validated W3a runtime checkpoint
+
+Commit `c79b62b2375166dbca0911282ef489de53486d4e` is the first fully green
+checkpoint with arbitrary-precision Nat runtime operations enabled.
+
+GitHub Actions WASM closure run `36018296565` passed:
+
+- exact dependency install;
+- full package-graph build;
+- elaboration;
+- erasure;
+- package integration;
+- TypeScript backend;
+- WebAssembly backend;
+- root suite, including CLI arbitrary-precision Nat addition;
+- workspace-lock anti-drift;
+- source-shape anti-drift;
+- architecture anti-drift.
+
+Implemented at this checkpoint:
+
+- Nat parameters/results remain physical `externref` and semantic JS `bigint`;
+- deterministic Nat literal-table construction;
+- reserved `proofscript.bigint.v1` runtime imports;
+- `nat.add`, `nat.sub`, `nat.mul`, `nat.div`, `nat.mod`, `nat.eq`, `nat.ne`,
+  `nat.le`, and `nat.lt` lowering;
+- Lean-faithful subtraction, division-by-zero, and modulo-by-zero behavior;
+- non-negative Nat validation at exported ABI and internal runtime boundaries;
+- canonical and optimized Binaryen execution coverage for the Nat runtime.
+
+This is not yet the W3a completion checkpoint. The required TS-vs-WASM
+differential corpus in section 11 remains the next blocking acceptance work.
 
 ## 1. Non-negotiable semantic rule
 

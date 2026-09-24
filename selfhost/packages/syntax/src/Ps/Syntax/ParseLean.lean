@@ -30,6 +30,7 @@ def psLeanReservedApplicationToken (token : PsToken) : Bool :=
     || token.text == "else"
     || token.text == "fun"
     || token.text == "let"
+    || token.text == "if"
 
 def psLeanCanStartSimpleArgument (cursor : PsTokenCursor) : Bool :=
   match psTokenCursorPeek cursor with
@@ -204,7 +205,38 @@ def psParseLeanTermWithFuel :
     Except PsParseError (PsParseResult PsSyntaxTerm)
   | 0, _ => Except.error PsParseError.fuelExhausted
   | remaining + 1, cursor =>
-      if psTokenCursorAtText cursor "let" then
+      if psTokenCursorAtText cursor "if" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "if condition")
+        | some keyword =>
+            match psParseLeanTermWithFuel remaining keyword.cursor with
+            | Except.error error => Except.error error
+            | Except.ok condition =>
+                match psTokenCursorExpectText condition.cursor "then" with
+                | Except.error error => Except.error error
+                | Except.ok afterThen =>
+                    match psParseLeanTermWithFuel remaining afterThen.cursor with
+                    | Except.error error => Except.error error
+                    | Except.ok thenBranch =>
+                        match psTokenCursorExpectText thenBranch.cursor "else" with
+                        | Except.error error => Except.error error
+                        | Except.ok afterElse =>
+                            match psParseLeanTermWithFuel remaining afterElse.cursor with
+                            | Except.error error => Except.error error
+                            | Except.ok elseBranch =>
+                                Except.ok {
+                                  value :=
+                                    PsSyntaxTerm.ifE
+                                      condition.value
+                                      thenBranch.value
+                                      elseBranch.value
+                                      {
+                                        start := keyword.token.span.start
+                                        stop := (psSyntaxTermSpan elseBranch.value).stop
+                                      }
+                                  cursor := elseBranch.cursor
+                                }
+      else if psTokenCursorAtText cursor "let" then
         match psTokenCursorAdvance cursor with
         | none => Except.error (PsParseError.unexpectedEnd "let binding name")
         | some keyword =>

@@ -43,6 +43,24 @@ test('deep Lean Name operations avoid the JavaScript call stack',()=>{
  const r=nameReplacePrefix(a,prefix,nameFromDotted('R'));
  assert(r!==null&&nameToString(r).startsWith('R.'),'deep Name prefix replacement/component extraction must be stack-safe');
 });
+test('kernel admission freezes caller-owned declarations and expression DAGs',()=>{
+ const env=baseEnv(),k=new Kernel(env),D=nameFromDotted('Immutable.def');
+ const value:any=natLit(0),info:any={kind:'definition',name:D,levelParams:[],type:constant(N.Nat),value,hints:{kind:'regular',height:1n},safety:'safe'};
+ k.addDefinition(info);
+ assert(Object.isFrozen(info)&&Object.isFrozen(info.type)&&Object.isFrozen(info.value),'admitted declaration graph must be runtime immutable');
+ assert(Reflect.set(info,'value',strLit('mutated'))===false,'caller must not be able to replace an admitted definition body');
+ assert(Reflect.set(value.literal,'value',1n)===false,'caller must not be able to mutate an admitted expression leaf');
+ const stored=env.get(D);assert(stored.kind==='definition'&&exprEq(stored.value,natLit(0)),'environment must retain the checked value after hostile mutation attempts');
+});
+
+test('raw Environment storage deep-freezes nested kernel values',()=>{
+ const env=new Environment(),A=nameFromDotted('Immutable.axiom'),type:any=sort(levelZero),info:any={kind:'axiom',name:A,levelParams:[],type};
+ env.add(info);
+ assert(Object.isFrozen(info)&&Object.isFrozen(type)&&Object.isFrozen(type.level));
+ assert(Reflect.set(type,'level',levelSucc(levelZero))===false);
+ assert(exprEq(env.get(A).type,sort(levelZero)));
+});
+
 test('Lean Expr equality memoizes repeated shared DAG pairs',()=>{
  let a:any=constant(N.Nat),b:any=constant(N.Nat);
  // Each level doubles the number of tree paths while retaining one shared child.

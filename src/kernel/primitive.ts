@@ -1,6 +1,6 @@
 import { DefinitionInfo, OpaqueInfo } from '../core/declaration.js';
 import { ensureClosed } from '../core/checks.js';
-import { Environment, KernelError } from '../core/environment.js';
+import { Environment, KernelError, deepFreezeKernelValue } from '../core/environment.js';
 import { Expr, app, appView, bvar, constant, exprEq, forallE, fvar, lam, mkAppN, sort } from '../core/expr.js';
 import { levelParam, levelSucc, levelZero } from '../core/level.js';
 import { LocalContext } from '../core/local-context.js';
@@ -38,6 +38,7 @@ function app2(f:Expr,a:Expr,b:Expr):Expr{return app(app(f,a),b);}
 
 /** Exact recognizer for the two inductives with kernel/runtime primitive status. */
 export function addPrimitiveInductive(env:Environment,d:InductiveDecl):void{
+ deepFreezeKernelValue(d);
  if(d.isUnsafe||d.levelParams.length!==0||d.numParams!==0||d.types.length!==1||d.numNested)
    throw new KernelError('invalid primitive inductive declaration shape');
  const it=d.types[0]!;
@@ -75,6 +76,7 @@ function checkEagerReduce(env:Environment,v:DefinitionInfo):void{
 /** Admit final-Lean native-reduction marker declarations without allowing an
  * arbitrary opaque declaration to acquire their name-sensitive kernel meaning. */
 export function addPrimitiveOpaque(env:Environment,v:OpaqueInfo):void{
+ deepFreezeKernelValue(v);
  const isNat=nameEq(v.name,N.LeanReduceNat),isBool=nameEq(v.name,N.LeanReduceBool);
  if(!isNat&&!isBool)throw new KernelError(`primitive opaque recognizer for '${nameToString(v.name)}' is not implemented; refusing declaration`);
  if(env.has(v.name))throw new KernelError(`already declared '${nameToString(v.name)}'`);
@@ -142,6 +144,7 @@ function checkNatXor(env:Environment,v:DefinitionInfo):void{
  * reduction keyed by that name cannot make a malicious body pass its own equations.
  */
 export function addPrimitiveDefinition(env:Environment,v:DefinitionInfo):void{
+ deepFreezeKernelValue(v);
  if(!isPrimitiveName(v.name))throw new KernelError(`'${nameToString(v.name)}' is not a reserved primitive`);
  if(env.has(v.name))throw new KernelError(`already declared '${nameToString(v.name)}'`);
  if(nameEq(v.name,N.EagerReduce)){checkEagerReduce(env,v);env.add(v);return;}

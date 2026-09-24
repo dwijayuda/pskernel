@@ -1,6 +1,6 @@
 import { ConstantInfo, DefinitionInfo, DefinitionSafety, OpaqueInfo, TheoremInfo } from '../core/declaration.js';
 import { ensureClosed } from '../core/checks.js';
-import { Environment, KernelError } from '../core/environment.js';
+import { Environment, KernelError, deepFreezeKernelValue } from '../core/environment.js';
 import { Expr, exprToString } from '../core/expr.js';
 import { LocalContext } from '../core/local-context.js';
 import { Name, nameEq, nameToString } from '../core/name.js';
@@ -20,8 +20,9 @@ export class Kernel {
     if(!uniqueNames(lparams))throw new KernelError(`duplicate universe parameter at '${nameToString(name)}'`);
     ensureClosed(type,`type of ${nameToString(name)}`);const tc=tcFor(this.env,lparams,safety,this.nativeEvaluator);tc.ensureSort(tc.check(type),type);return tc;
   }
-  addAxiom(info:Extract<ConstantInfo,{kind:'axiom'}>):void{this.pre(info.name,info.levelParams,info.type,info.isUnsafe?'unsafe':'safe');this.env.add(info);}
+  addAxiom(info:Extract<ConstantInfo,{kind:'axiom'}>):void{deepFreezeKernelValue(info);this.pre(info.name,info.levelParams,info.type,info.isUnsafe?'unsafe':'safe');this.env.add(info);}
   addDefinition(info:DefinitionInfo):void{
+    deepFreezeKernelValue(info);
     const checkingSafety:DefinitionSafety=info.safety==='unsafe'?'unsafe':'safe';
     const tc=this.pre(info.name,info.levelParams,info.type,checkingSafety);ensureClosed(info.value,`value of ${nameToString(info.name)}`);
     if(info.safety==='unsafe'){
@@ -35,6 +36,7 @@ export class Kernel {
 
   /** Lean 4.34 mutual definition admission. Mutual blocks are reserved for unsafe or partial definitions. */
   addMutualDefinitions(defs:readonly DefinitionInfo[]):void{
+    deepFreezeKernelValue(defs);
     if(defs.length===0)throw new KernelError('invalid empty mutual definition');
     const safety=defs[0]!.safety;if(safety==='safe')throw new KernelError('invalid mutual definition, declaration is not tagged as unsafe/partial');
     const lparams=defs[0]!.levelParams;
@@ -52,6 +54,6 @@ export class Kernel {
     // Commit only after the entire block has checked, keeping admission transactional.
     for(const v of defs)this.env.add(v);
   }
-  addTheorem(info:TheoremInfo):void{const tc=this.pre(info.name,info.levelParams,info.type,'safe');if(!tc.isProp(info.type))throw new KernelError(`theorem '${nameToString(info.name)}' type is not a proposition`);ensureClosed(info.value,`proof of ${nameToString(info.name)}`);const vt=tc.check(info.value);if(!tc.isDefEq(vt,info.type))throw new KernelError(`theorem '${nameToString(info.name)}' proof type mismatch`);this.env.add(info);}
-  addOpaque(info:OpaqueInfo):void{const tc=this.pre(info.name,info.levelParams,info.type,'safe');ensureClosed(info.value,`opaque value of ${nameToString(info.name)}`);const vt=tc.check(info.value);if(!tc.isDefEq(vt,info.type))throw new KernelError(`opaque '${nameToString(info.name)}' value type mismatch`);this.env.add(info);}
+  addTheorem(info:TheoremInfo):void{deepFreezeKernelValue(info);const tc=this.pre(info.name,info.levelParams,info.type,'safe');if(!tc.isProp(info.type))throw new KernelError(`theorem '${nameToString(info.name)}' type is not a proposition`);ensureClosed(info.value,`proof of ${nameToString(info.name)}`);const vt=tc.check(info.value);if(!tc.isDefEq(vt,info.type))throw new KernelError(`theorem '${nameToString(info.name)}' proof type mismatch`);this.env.add(info);}
+  addOpaque(info:OpaqueInfo):void{deepFreezeKernelValue(info);const tc=this.pre(info.name,info.levelParams,info.type,'safe');ensureClosed(info.value,`opaque value of ${nameToString(info.name)}`);const vt=tc.check(info.value);if(!tc.isDefEq(vt,info.type))throw new KernelError(`opaque '${nameToString(info.name)}' value type mismatch`);this.env.add(info);}
 }

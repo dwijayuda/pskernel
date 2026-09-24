@@ -1,6 +1,6 @@
 import { ensureClosed } from '../../core/checks.js';
 import { ConstantInfo, ConstructorInfo, InductiveInfo, RecursorInfo, RecursorRule } from '../../core/declaration.js';
-import { Environment, KernelError } from '../../core/environment.js';
+import { Environment, KernelError, deepFreezeKernelValue } from '../../core/environment.js';
 import { BinderInfo, Expr, app, appView, constant, exprKey, exprLeanEq, fvar, forallE, instantiateExprLevels, lam, mkAppN } from '../../core/expr.js';
 import { abstractFVar, instantiate1 } from '../../core/instantiate.js';
 import { LocalContext, LocalDecl } from '../../core/local-context.js';
@@ -147,6 +147,7 @@ function copyAuxRecursors(transformed:Environment,finalEnv:Environment,d:Inducti
 
 /** Lean-style nested-inductive preprocessing -> ordinary mutual induction -> restoration/hardening. */
 export function addInductive(env:Environment,d:InductiveDecl):void{
+ deepFreezeKernelValue(d);
  checkNoReservedNestedAux(d);
  // Final Lean 4.34 #14607: reject FVars/MVars before nested preprocessing can
  // erase or rewrite the part of a declaration that contains them.

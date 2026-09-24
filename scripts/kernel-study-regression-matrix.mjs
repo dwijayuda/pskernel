@@ -134,10 +134,13 @@ for(const marker of [
 ]){
   if(!exporter.includes(marker))throw new Error('canonical replay exporter protocol drift: missing '+marker);
 }
-if(!exporter.includes('if xs[i]! == d then return i')){
-  throw new Error('MData equality-id drift: exporter must use Lean KVMap BEq, not entry-list identity');
+if(!exporter.includes('if s.mdata[i]! == d then return i')){
+  throw new Error('MData equality-id drift: indexed exporter must still use Lean KVMap BEq inside candidate buckets');
 }
-if(exporter.includes('xs[i]!.entries == d.entries')){
+if(!exporter.includes('mdataBuckets := s.mdataBuckets.insert key (candidates.push i)')){
+  throw new Error('MData equality-id drift: candidate index must preserve insertion-order IDs');
+}
+if(exporter.includes('.entries == d.entries')){
   throw new Error('MData equality-id drift: raw KVMap entry-list equality is stricter than Lean 4.34 BEq');
 }
 const moduleStream=readFileSync('scripts/module-stream-oracle.mjs','utf8');

@@ -267,6 +267,14 @@ if(defeqOracle.includes("version!=='Lean (version 4.34.0, Release)'")){
   throw new Error('defeq oracle identity drift: exact abbreviated version banner is not portable across official binaries');
 }
 
+const nativeSmoke=readFileSync('scripts/native-oracle-smoke.mjs','utf8');
+if(!nativeSmoke.includes("mkdtempSync(join(resolve('.'),'.pskernel-native-smoke-'))")){
+  throw new Error('native smoke path drift: Lean fixture must stay inside the project root');
+}
+if(nativeSmoke.includes("mkdtempSync(join(tmpdir()")){
+  throw new Error('native smoke path drift: OS tmp is outside Lean project root');
+}
+
 const nativeEval=readFileSync('oracle/replay-probe/NativeEval.lean','utf8');
 for(const marker of [
   'Kernel.whnf env {} e',

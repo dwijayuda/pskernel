@@ -11,3 +11,22 @@
 
 9. The export boundary is pinned too: lean4export commit `076e8e57707e813375e8f9da8bf989799ace9680`, NDJSON format `3.1.0`, and Lean toolchain `v4.34.0`. Corpus evidence from another exporter/toolchain is not compatibility evidence for this target.
 10. Oracle construction is reproducible from the uploaded Lean 4.34.0 source. Locally built binaries are tools for differential evidence, never a replacement specification.
+
+## ProofScript foundation priority
+
+11. On `main`, the controlling ProofScript execution plan is
+    `docs/plans/07_SELF_HOSTING_FOUNDATION.md`.
+12. Until SH0-SH10 close, unrelated ProofScript infrastructure expansion is
+    deferred. A new language/runtime feature needs a concrete self-hosted
+    compiler blocker or standard-library prerequisite.
+13. The legacy software checker/software IR/backend lane must be removed early
+    and must not be reintroduced. ProofScript has one semantic compiler path:
+    source -> Meta/Elab -> pskernel -> checked core -> erasure -> verified IR.
+14. TypeScript kernel assurance work belongs on
+    `kernel/lean434-study-hardening`. ProofScript foundation work on `main`
+    must not weaken or broaden kernel semantics merely to make the compiler
+    easier to implement.
+15. Host-specific Node/npm/TypeScript/VS Code integration may remain TypeScript
+    when it is an explicit capability boundary and owns no ProofScript language
+    semantics.
+

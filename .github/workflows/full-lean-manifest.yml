@@ -1,0 +1,26 @@
+name: Full Lean manifest diagnostic
+
+on:
+  push:
+    branches: [diagnostic/full-lean-manifest]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          lean --version
+          lean --githash
+      - name: Full Lean environment manifest
+        run: lean --run oracle/replay-probe/DependencyExport.lean Lean --batch-manifest 1000

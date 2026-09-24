@@ -66,6 +66,34 @@ function isArgumentSource(
   return !Array.isArray(args);
 }
 
+function hasExprMVar(expr:Expr):boolean {
+  const todo:Expr[]=[expr];
+  while(todo.length>0){
+    const current=todo.pop()!;
+    switch(current.kind){
+      case 'mvar':
+        return true;
+      case 'app':
+        todo.push(current.fn,current.arg);
+        break;
+      case 'lam':
+      case 'forall':
+        todo.push(current.type,current.body);
+        break;
+      case 'let':
+        todo.push(current.type,current.value,current.body);
+        break;
+      case 'mdata':
+      case 'proj':
+        todo.push(current.expr);
+        break;
+      default:
+        break;
+    }
+  }
+  return false;
+}
+
 function explicitArgument(
   args:ApplicationArguments,
   index:number,
@@ -125,9 +153,9 @@ export function elaborateApplication({
   classNames=new Set(),
 }:ElaborateApplicationOptions):ElaboratedApplication {
   const checker=new TypeChecker(environment,localContext.clone());
-  if(hasMVar(metaContext.instantiate(fn))){
+  if(hasExprMVar(metaContext.instantiate(fn))){
     throw new Error(
-      'PS_ELAB_APP_FUNCTION_STUCK: function expression contains unresolved metavariables',
+      'PS_ELAB_APP_FUNCTION_STUCK: function expression contains unresolved expression metavariables',
     );
   }
 

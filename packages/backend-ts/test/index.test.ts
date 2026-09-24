@@ -148,7 +148,6 @@ console.log('ok - @proofscript/backend-ts nominal structure TypeScript emission'
   const maybe={kind:'nominal',name:'MaybeNat'} as const;
   const source=emitV061TypeScript(lowerCheckedSoftwareModule({
     kind:'checked-v061-software-module',
-    inductives:[],
     structures:[],
     inductives:[{
       name:'MaybeNat',

@@ -9,6 +9,7 @@ import Ps.Meta.Context
 import Ps.Meta.Infer
 import Ps.Meta.LevelContext
 import Ps.Meta.Reduce
+import Ps.Meta.Unify
 import Ps.Project.ModuleGraph
 
 def psTestNatEnvironment : PsEnvironment :=
@@ -129,8 +130,57 @@ def psTestLevelMetaUnify : Bool :=
   else
     false
 
+
+def psTestTransactionalUnify : Bool :=
+  let natTerm := PsExpr.constE psNatName []
+  let boolTerm := PsExpr.constE psBoolName []
+  let fresh :=
+    psMetaFresh
+      psMetaEmpty
+      psLocalEmpty
+      (PsExpr.sortE (PsLevel.succ PsLevel.zero))
+      PsMetaVarKind.natural
+  match fresh.expr with
+  | .mvar id =>
+      let left := PsExpr.app fresh.expr natTerm
+      let right := PsExpr.app (PsExpr.constE (psTestName "F") []) boolTerm
+      let result :=
+        psUnify
+          psEnvironmentEmpty
+          psLocalEmpty
+          fresh.context
+          left
+          right
+      !result.success && result.context.assignments.length == fresh.context.assignments.length
+  | _ => false
+
+def psTestBinderInfoIgnoredByUnify : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let left :=
+    PsExpr.forallE
+      (psTestName "x")
+      natType
+      natType
+      PsBinderInfo.explicit
+  let right :=
+    PsExpr.forallE
+      (psTestName "y")
+      natType
+      natType
+      PsBinderInfo.implicit
+  let result :=
+    psUnify
+      psEnvironmentEmpty
+      psLocalEmpty
+      psMetaEmpty
+      left
+      right
+  result.success
+
 def psBootstrapTests : Bool :=
   psTestModuleGraph
+    && psTestTransactionalUnify
+    && psTestBinderInfoIgnoredByUnify
     && psTestLevelMetaUnify
     && psTestScopedMetaAssignment
     && psTestRejectOutOfScopeMetaAssignment

@@ -235,13 +235,6 @@ export class ExprMetaContext {
     if(lhs.kind==='sort'&&rhs.kind==='sort'){
       return this.levels.unify(lhs.level,rhs.level);
     }
-    if(
-      this.levels.hasUnresolvedExpr(lhs)
-      ||this.levels.hasUnresolvedExpr(rhs)
-    ){
-      return this.levels.unifyExprLevels(lhs,rhs);
-    }
-
     if(lhs.kind==='app'&&rhs.kind==='app'){
       return this.unifyCore(lhs.fn,rhs.fn,localContext)
         &&this.unifyCore(lhs.arg,rhs.arg,localContext);
@@ -258,6 +251,13 @@ export class ExprMetaContext {
     }
     if(rhs.kind==='mdata'){
       return this.unifyCore(lhs,rhs.expr,localContext);
+    }
+
+    if(
+      this.levels.hasUnresolvedExpr(lhs)
+      ||this.levels.hasUnresolvedExpr(rhs)
+    ){
+      return this.levels.unifyExprLevels(lhs,rhs);
     }
 
     if(hasMVar(lhs)||hasMVar(rhs))return false;

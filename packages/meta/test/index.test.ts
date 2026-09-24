@@ -15,6 +15,7 @@ import {
   fvar,
   levelSucc,
   levelZero,
+  mkAppN,
   levelEqStructural,
   nameFromDotted,
   sort,
@@ -254,6 +255,47 @@ console.log('ok - @proofscript/meta structural application unification with roll
   equal(exprEq(meta.instantiate(q),fvar(pId)),true);
 }
 console.log('ok - @proofscript/meta structural Pi unification');
+
+{
+  const env=new Environment();
+  const kernel=new Kernel(env);
+  const U=sort(levelSucc(levelZero));
+  const Nat=nameFromDotted('MetaPolyNat');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:U,
+  });
+
+  const lctx=new LocalContext();
+  lctx.addLocal('a',nameFromDotted('a'),constant(Nat),'default');
+  lctx.addLocal('b',nameFromDotted('b'),constant(Nat),'default');
+
+  const meta=new ExprMetaContext(env);
+  const universe=meta.mkFreshLevel();
+  const alpha=meta.mkFresh(sort(universe),lctx,'natural');
+  const leftValue=meta.mkFresh(alpha,lctx,'natural');
+  const rightValue=meta.mkFresh(alpha,lctx,'natural');
+  const Rel=nameFromDotted('MetaRel');
+  const left=mkAppN(
+    constant(Rel,[universe]),
+    [alpha,leftValue,rightValue],
+  );
+  const right=mkAppN(
+    constant(Rel,[levelSucc(levelZero)]),
+    [constant(Nat),fvar('b'),fvar('a')],
+  );
+
+  equal(meta.unify(left,right,lctx),true);
+  equal(exprEq(meta.instantiate(alpha),constant(Nat)),true);
+  equal(exprEq(meta.instantiate(leftValue),fvar('b')),true);
+  equal(exprEq(meta.instantiate(rightValue),fvar('a')),true);
+  meta.validateGroundAssignments();
+}
+console.log('ok - @proofscript/meta mixed universe/application unification');
+
+
 
 
 

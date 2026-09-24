@@ -515,7 +515,7 @@ console.log('ok - @proofscript/elab bounded synthetic-hole refine tactic');
 
 {
   const result=elaborateV061Declarations(parseV061Module(
-    'inductive PropPair where { | mk(left : Prop, right : Prop); } '+
+    'inductive PropPair : Prop where { | mk(left : Prop, right : Prop); } '+
     'theorem buildPair(P : Prop, Q : Prop) : PropPair := '+
     'by constructor; assumption; assumption;',
   ));

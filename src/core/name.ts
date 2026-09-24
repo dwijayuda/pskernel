@@ -1,3 +1,4 @@
+import { deepFreezeKernelValue } from './runtime-immutable.js';
 export type Name =
   | { readonly kind: 'anonymous' }
   | { readonly kind: 'str'; readonly prefix: Name; readonly value: string }
@@ -85,11 +86,31 @@ export function nameEq(a: Name, b: Name): boolean {
   }
 }
 
+const nameKeyCache=new WeakMap<object,string>();
+nameKeyCache.set(anonymous as object,'a');
+
 export function nameKey(n: Name): string {
-  const parts:string[]=['a'];
-  for(const c of components(n))
-    parts.push(c.k===0?`/s:${(c.v as string).length}:${c.v as string}`:`/n:${c.v as bigint}`);
-  return parts.join('');
+  // Lean Names are immutable. Freeze arbitrary public TS values before caching
+  // so identity-keyed host acceleration cannot become stale after mutation.
+  deepFreezeKernelValue(n);
+  const hit=nameKeyCache.get(n as object);
+  if(hit!==undefined)return hit;
+  const pending:Name[]=[];
+  let x=n;
+  let key:string|undefined;
+  while(true){
+    const cached=nameKeyCache.get(x as object);
+    if(cached!==undefined){key=cached;break;}
+    if(x.kind==='anonymous'){key='a';nameKeyCache.set(x as object,key);break;}
+    pending.push(x);
+    x=x.prefix;
+  }
+  for(let i=pending.length-1;i>=0;i--){
+    const cur=pending[i]!;
+    key+=cur.kind==='str'?`/s:${cur.value.length}:${cur.value}`:`/n:${cur.value}`;
+    nameKeyCache.set(cur as object,key);
+  }
+  return key!;
 }
 
 function leanStringCmp(a:string,b:string):-1|0|1{

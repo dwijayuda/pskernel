@@ -104,8 +104,39 @@ function elaborateV061TypePositionTerm(
         nameFromDotted(syntax.value?'Bool.true':'Bool.false'),
         context,
       );
-    case 'group':
-      return elaborateV061TypePositionTerm(syntax.value,context,expected);
+    case 'group':{
+      if(syntax.ascribedType===undefined){
+        return elaborateV061TypePositionTerm(syntax.value,context,expected);
+      }
+      const ascribed=elaborateV061Type(syntax.ascribedType,context);
+      const term=elaborateV061TypePositionTerm(
+        syntax.value,
+        context,
+        ascribed,
+      );
+      const instantiated=context.metaContext.instantiate(term);
+      if(hasMVar(instantiated)){
+        throw new Error(
+          'PS_ELAB_TYPE_ASCRIPTION_STUCK: ascribed term contains unresolved metavariables',
+        );
+      }
+      const checker=new TypeChecker(
+        context.environment,
+        context.localContext.clone(),
+      );
+      const actual=checker.check(instantiated);
+      if(!context.metaContext.unify(
+        actual,
+        ascribed,
+        context.localContext,
+      )){
+        throw new Error(
+          'PS_ELAB_TYPE_ASCRIPTION_MISMATCH: expected '+
+          exprToString(ascribed)+', got '+exprToString(actual),
+        );
+      }
+      return context.metaContext.instantiate(term);
+    }
     case 'named':{
       if(syntax.name==='Prop')return sort(levelZero);
       if(syntax.name==='Type')return sort(levelSucc(levelZero));

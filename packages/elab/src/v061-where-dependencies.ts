@@ -19,6 +19,9 @@ function collectTypeDependencies(
       return;
     case 'group':
       collectTypeDependencies(type.value,names,out,bound);
+      if(type.ascribedType!==undefined){
+        collectTypeDependencies(type.ascribedType,names,out,bound);
+      }
       return;
     case 'application':
       collectTypeDependencies(type.fn,names,out,bound);

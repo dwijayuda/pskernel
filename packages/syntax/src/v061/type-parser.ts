@@ -47,7 +47,12 @@ export type V061TypeExpr =
       readonly codomain:V061TypeExpr;
       readonly span:SourceSpan;
     }
-  | {readonly kind:'group';readonly value:V061TypeExpr;readonly span:SourceSpan};
+  | {
+      readonly kind:'group';
+      readonly value:V061TypeExpr;
+      readonly ascribedType?:V061TypeExpr;
+      readonly span:SourceSpan;
+    };
 
 export interface V061TypeParseOptions {
   readonly stopAtLineBreak?:boolean;
@@ -276,10 +281,14 @@ function parseAtomicType(
   if(token.text==='('){
     const open=context.cursor.consume();
     const value=parseV061Type(context,options);
+    const ascribedType=context.cursor.consumeIf(':')
+      ?parseV061Type(context,options)
+      :undefined;
     const close=context.cursor.expect(')');
     return {
       kind:'group',
       value,
+      ...(ascribedType===undefined?{}:{ascribedType}),
       span:{start:open.span.start,end:close.span.end},
     };
   }

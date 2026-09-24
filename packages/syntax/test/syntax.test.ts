@@ -454,6 +454,34 @@ console.log('ok - @proofscript/syntax lexer MVP');
 }
 
 
+// v0.7 type-position ascription preserves Lean-style expected-type information.
+{
+  const module=parseV061Module(
+    'theorem typedNil {α : Type} : '+
+    'listIsEmpty((PsList.nil : PsList(α))) = true := by rfl;',
+  );
+  const type=firstDeclarationResultType(module);
+  equal(type?.kind,'equality');
+  if(type?.kind==='equality'&&type.left.kind==='application'){
+    const argument=type.left.args[0];
+    equal(argument?.kind,'group');
+    if(argument?.kind==='group'){
+      equal(argument.ascribedType?.kind,'application');
+    }
+  }
+  equal(
+    lowerV061ModuleToLean(module),
+    'theorem typedNil {α : Type} : '+
+    'listIsEmpty (PsList.nil : PsList α) = true := by\n  rfl\n',
+  );
+  equal(
+    lowerV061ModuleToProofScript(module),
+    'theorem typedNil {α : Type} : '+
+    'listIsEmpty((PsList.nil : PsList(α))) = true := by rfl;\n',
+  );
+}
+
+
 // v0.6.1 inherited function type syntax.
 {
   const module=parseV061Module('const increment : Nat -> Nat := 1;');

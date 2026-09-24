@@ -311,8 +311,8 @@ def psEraseRuntimeTypeWithFuel
                 typeLocals := scope.typeLocals
                 erasedLocals := scope.erasedLocals
                 declarationNames := scope.declarationNames
-              runtimeConstructors := scope.runtimeConstructors
-              runtimeRecursors := scope.runtimeRecursors
+                runtimeConstructors := scope.runtimeConstructors
+                runtimeRecursors := scope.runtimeRecursors
               }
               match
                   psEraseRuntimeTypeWithFuel

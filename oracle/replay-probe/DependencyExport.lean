@@ -9,6 +9,10 @@ structure S where
   levels : HashMap Level Nat := HashMap.emptyWithCapacity 32 |>.insert .zero 0
   exprs : HashMap ExprStructEq Nat := HashMap.emptyWithCapacity 256
   mdata : Array KVMap := #[]
+  /-- Fast candidate index for cross-shard KVMap equality IDs. The fingerprint
+      is only a bucket selector; exact Lean KVMap BEq still decides equality,
+      so collisions cannot change IDs or semantics. -/
+  mdataBuckets : HashMap String (Array Nat) := HashMap.emptyWithCapacity 64
   emitted : NameSet := {}
   active : NameSet := {}
   /-- Canonical module-stream follows Lean.Kernel.Environment.replay and skips
@@ -37,14 +41,36 @@ def biJson : BinderInfo → Json
   modify fun s => setM s ((getM s).insert x i)
   return i
 
+def mdataFingerprint (d : KVMap) : String := Id.run do
+  -- KVMap BEq is extensional and entry order is not observable. Build a
+  -- deterministic coarse key from first-value-per-key bindings. Equal maps
+  -- necessarily receive the same fingerprint; unequal maps may collide and
+  -- are distinguished by the exact BEq check in dumpMDataEqId.
+  let mut keys : Array Name := #[]
+  for (k, _) in d.entries do
+    unless keys.any (fun k' => k' == k) do
+      keys := keys.push k
+  keys := keys.qsort Name.quickLt
+  let mut out := ""
+  for k in keys do
+    if let some v := d.find k then
+      out := out ++ reprStr k ++ "=" ++ reprStr v ++ ";"
+  return out
+
 def dumpMDataEqId (d : KVMap) : M Nat := do
-  let xs := (← get).mdata
-  for i in [0:xs.size] do
+  let key := mdataFingerprint d
+  let s ← get
+  let candidates := (s.mdataBuckets[key]?).getD #[]
+  for i in candidates do
     -- Lean 4.34 Expr.eqv delegates MData comparison to KVMap's BEq, which
     -- is extensional map equality (subset both ways), not raw entry-list order.
-    if xs[i]! == d then return i
-  let i := xs.size
-  modify fun s => { s with mdata := s.mdata.push d }
+    if s.mdata[i]! == d then return i
+  let i := s.mdata.size
+  modify fun s => {
+    s with
+    mdata := s.mdata.push d
+    mdataBuckets := s.mdataBuckets.insert key (candidates.push i)
+  }
   return i
 
 def dumpName (n : Name) : M Nat := intern n "in" (·.names) ({ · with names := · }) do

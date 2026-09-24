@@ -47,7 +47,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 if ($trackedChanges.Count -ne 0) {
   $dirtySummary = ($trackedChanges -join "; ")
-  if ($trackedChanges.Count -eq 1 -and $trackedChanges[0] -match 'full-std\.log
+  throw "Tracked working-tree changes are present. Commit/stash them before producing assurance evidence. git status: $dirtySummary"
+}
 
 $nodeVersion = (& node --version).Trim()
 $leanCommand = Get-Command lean -ErrorAction Stop

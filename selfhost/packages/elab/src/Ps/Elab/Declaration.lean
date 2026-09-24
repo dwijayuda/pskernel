@@ -21,7 +21,10 @@ def psElabDeclarationParts
   | none => Except.error PsElabError.emptyName
   | some name =>
       let initial := psElabContextEmpty environment
-      match psElabTypedBinders psElabTerm initial binders with
+      match psElabTypedBinders
+          (fun context term expected => psElabTerm context term expected)
+          initial
+          binders with
       | Except.error error => Except.error error
       | Except.ok binderResult =>
           match psElabTerm binderResult.context typeSyntax none with

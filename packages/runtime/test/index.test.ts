@@ -244,7 +244,11 @@ console.log('ok - @proofscript/runtime foundation + Lean 4.34 JS compatibility s
     constant(NatRec,[levelSucc(levelZero)]),
     [motive,natLit(0n),step,natLit(5n)],
   );
-  equal(new TypeChecker(environment).check(recExpr).kind,'const');
+  const recChecker=new TypeChecker(environment);
+  ok(
+    recChecker.isDefEq(recChecker.check(recExpr),natType),
+    'Nat.rec result type is not definitionally Nat',
+  );
   equal(evaluator.evaluate(recExpr),5n);
 }
 console.log('ok - @proofscript/runtime evaluates pskernel-admitted Lean expressions');

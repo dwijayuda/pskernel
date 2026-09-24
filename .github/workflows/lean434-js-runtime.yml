@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: lean434-js-runtime-${{ github.ref }}
+  group: lean434-js-runtime-fast-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

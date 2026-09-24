@@ -167,7 +167,7 @@ Exit condition:
 > bounded corpus, while kernel checking remains unchanged when the optimization
 > is disabled.
 
-## R4 — Name / Level / Expr compatibility — **IN PROGRESS (Name + Level + core Expr slices complete)**
+## R4 — Name / Level / Expr compatibility — **COMPLETE (logical object-model slice)**
 
 Milestones reached 2026-09-25:
 
@@ -180,7 +180,8 @@ Milestones reached 2026-09-25:
 - computed-field runtime helpers are exported in a second `implemented_by` phase only after the complete logical dependency closure, fixing the real `Lean.Level._impl` dependency cycle without changing canonical kernel/module streams;
 - runtime Lean `Expr` now has a canonical logical-constructor bridge for bvar/fvar/mvar/sort/const/app/lam/forall/let/lit/proj. FVarId/MVarId preserve full structural Name identity using pskernel Name keys rather than display strings;
 - real upstream `Lean.Expr.getAppFn` and `Lean.Expr.getAppNumArgs` execute on bridged pskernel expressions after pskernel replay; GitHub Actions run `36063161272` passed this Expr gate together with Environment, Parser.Types, Level, ST/IO, metadata/census, and kernel regression;
-- `Expr.mdata` remains fail-closed until the Lean `KVMap` metadata representation is bridged canonically.
+- Lean `Expr.mdata` now crosses the boundary through a canonical `KVMap` encoding: structural Name keys plus tagged `DataValue` payloads for String/Bool/Name/Nat/Int/Syntax; duplicate/lossy keys fail closed;
+- real upstream `Lean.Expr.consumeMData` executes over pskernel-originated KVMap metadata; GitHub Actions run `36063838695` passes the complete logical Expr bridge together with all earlier runtime/kernel gates.
 
 Create the source-facing object model needed by Parser/Meta/Elab.
 

@@ -32,10 +32,14 @@ export const VERIFIED_IR_INTRINSIC_ARITY={
   'array.push':2,
   'array.get':2,
   'array.getD':3,
-} as const satisfies Readonly<Record<VerifiedIrIntrinsicOperation,1|2|3>>;
+  'array.set':3,
+  'array.setIfInBounds':3,
+  'array.map':2,
+  'array.foldl':5,
+} as const satisfies Readonly<Record<VerifiedIrIntrinsicOperation,1|2|3|5>>;
 
 export function verifiedIrIntrinsicArity(
   operation:VerifiedIrIntrinsicOperation,
-):1|2|3 {
+):1|2|3|5 {
   return VERIFIED_IR_INTRINSIC_ARITY[operation];
 }

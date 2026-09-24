@@ -70,11 +70,14 @@ const metadata=new Lean434RuntimeMetadataIndex(
     JSON.parse(fs.readFileSync(metadataFixture,'utf8')),
   ),
 );
-const insertAuxImpl=
+const insertAuxImplementedBy=
   metadata.implementedByFor('Lean.PersistentHashMap.insertAux');
+const insertAuxRuntimeTarget=
+  metadata.runtimeTargetFor('Lean.PersistentHashMap.insertAux');
 console.log(JSON.stringify({
   phase:'metavar-context-runtime-metadata',
-  insertAuxImplementedBy:insertAuxImpl?.implementation??null,
+  insertAuxImplementedBy:insertAuxImplementedBy?.implementation??null,
+  insertAuxRuntimeTarget:insertAuxRuntimeTarget??null,
 }));
 const evaluator=new Lean434Evaluator(
   replay.env,

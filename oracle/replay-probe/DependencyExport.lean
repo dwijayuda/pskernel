@@ -40,11 +40,18 @@ def biJson : BinderInfo → Json
   return i
 
 def mdataBucketKey (d : KVMap) : String := Id.run do
+  let mut seen : NameSet := {}
+  let mut keyCount : Nat := 0
   let mut keyHash : UInt64 := 0
   for (k, _) in d do
-    -- Only a necessary-equality fingerprint. Collisions are resolved by KVMap BEq.
-    keyHash := keyHash + k.hash
-  return s!"{d.size}:{keyHash}"
+    unless seen.contains k do
+      seen := seen.insert k
+      keyCount := keyCount + 1
+      -- Only a necessary-equality fingerprint. KVMap.eqv uses lookup semantics,
+      -- so duplicate raw entries must not affect the bucket. Collisions are
+      -- always resolved by exact KVMap BEq below.
+      keyHash := keyHash + k.hash
+  return s!"{keyCount}:{keyHash}"
 
 def dumpMDataEqId (d : KVMap) : M Nat := do
   let key := mdataBucketKey d

@@ -25,15 +25,15 @@ def psNameAppendNum (parent : PsName) (value : Nat) : PsName :=
 def psNameToString : PsName -> String
   | .anonymous => ""
   | .str parent value =>
-      let prefix := psNameToString parent
-      if prefix.isEmpty then
+      let prefixText := psNameToString parent
+      if prefixText.isEmpty then
         value
       else
-        prefix ++ "." ++ value
+        prefixText ++ "." ++ value
   | .num parent value =>
-      let prefix := psNameToString parent
+      let prefixText := psNameToString parent
       let suffix := toString value
-      if prefix.isEmpty then
+      if prefixText.isEmpty then
         suffix
       else
-        prefix ++ "." ++ suffix
+        prefixText ++ "." ++ suffix

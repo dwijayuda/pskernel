@@ -59,7 +59,7 @@ def dumpDeclarationRuntimeMetadata (env : Environment) : IO (Array Json × Array
 def appendInitEntries
     (env : Environment)
     (moduleIdx : Nat)
-    (kind : String)
+    (kind source : String)
     (entries : Array (Name × Name))
     (out : Array Json) : Array Json :=
   entries.foldl (init := out) fun out (decl, initFn) =>
@@ -67,6 +67,7 @@ def appendInitEntries
       ("module", moduleNameForIdx env moduleIdx),
       ("moduleIndex", moduleIdx),
       ("kind", kind),
+      ("source", source),
       ("declaration", decl.toString),
       ("initFunction", if initFn.isAnonymous then Json.null else initFn.toString),
       ("ioUnit", initFn.isAnonymous)
@@ -76,27 +77,14 @@ def dumpInitializerMetadata (env : Environment) : IO (Array Json) := do
   let mut initializers := #[]
   for moduleIdx in [0:env.header.moduleNames.size] do
     let builtinEntries := builtinInitAttr.ext.getModuleEntries env moduleIdx
-    initializers := appendInitEntries env moduleIdx "builtin" builtinEntries initializers
+    initializers :=
+      appendInitEntries env moduleIdx "builtin" "olean" builtinEntries initializers
     let regularEntries := regularInitAttr.ext.getModuleEntries env moduleIdx
-    initializers := appendInitEntries env moduleIdx "regular" regularEntries initializers
+    initializers :=
+      appendInitEntries env moduleIdx "regular" "olean" regularEntries initializers
     let regularIREntries := regularInitAttr.ext.getModuleIREntries env moduleIdx
-    for (decl, initFn) in regularIREntries do
-      let duplicate := initializers.any fun item =>
-        item.getObjVal? "moduleIndex" == some moduleIdx.toJson
-          && item.getObjVal? "kind" == some ("regular" : Json)
-          && item.getObjVal? "declaration" == some (decl.toString : Json)
-          && item.getObjVal? "initFunction" ==
-            some (if initFn.isAnonymous then Json.null else (initFn.toString : Json))
-      unless duplicate do
-        initializers := initializers.push <| Json.mkObj [
-          ("module", moduleNameForIdx env moduleIdx),
-          ("moduleIndex", moduleIdx),
-          ("kind", "regular"),
-          ("declaration", decl.toString),
-          ("initFunction", if initFn.isAnonymous then Json.null else initFn.toString),
-          ("ioUnit", initFn.isAnonymous),
-          ("source", "ir")
-        ]
+    initializers :=
+      appendInitEntries env moduleIdx "regular" "ir" regularIREntries initializers
   return initializers
 
 unsafe def main (args : List String) : IO Unit := do

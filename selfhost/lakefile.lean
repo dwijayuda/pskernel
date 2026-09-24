@@ -46,6 +46,7 @@ lean_lib PsMeta where
     `Ps.Meta.LevelContext,
     `Ps.Meta.Context,
     `Ps.Meta.Reduce,
+    `Ps.Meta.Unify,
     `Ps.Meta.Infer
   ]
 

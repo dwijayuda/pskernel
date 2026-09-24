@@ -87,15 +87,23 @@ export function eraseRuntimeType(
       localContext:nextContext,
       runtimeLocals,
     };
-    return {
-      kind:'function',
-      parameters:[eraseRuntimeType(value.type,scope,environment)],
-      result:eraseRuntimeType(
-        instantiate1(value.body,fvar(id)),
-        openedScope,
-        environment,
-      ),
-    };
+    const parameter=eraseRuntimeType(value.type,scope,environment);
+    const result=eraseRuntimeType(
+      instantiate1(value.body,fvar(id)),
+      openedScope,
+      environment,
+    );
+    return result.kind==='function'
+      ?{
+          kind:'function',
+          parameters:[parameter,...result.parameters],
+          result:result.result,
+        }
+      :{
+          kind:'function',
+          parameters:[parameter],
+          result,
+        };
   }
 
   return {kind:'unknown'};

@@ -112,6 +112,16 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
       ': '+String(binding.effect),
     );
   }
+  if(
+    binding.resultAdapter!==undefined
+    &&binding.resultAdapter!=='identity'
+    &&binding.resultAdapter!=='decidable'
+  ){
+    throw new Error(
+      'invalid extern result adapter for '+binding.leanDeclaration+
+      ': '+String(binding.resultAdapter),
+    );
+  }
   if(binding.runtimeArgs!==undefined){
     const seenRuntimeArgs=new Set();
     for(const index of binding.runtimeArgs){
@@ -189,6 +199,7 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
     arity:binding.arity,
     runtimeArgs:binding.runtimeArgs??null,
     effect:binding.effect??'pure',
+    resultAdapter:binding.resultAdapter??'identity',
     upstreamSource:binding.upstreamSource,
   });
 }

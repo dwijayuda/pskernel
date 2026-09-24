@@ -1,0 +1,29 @@
+name: Diagnostic exporter-only prefix 2400
+
+on:
+  push:
+    branches: [diagnostic/mdata-export-prefix-2400]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prefix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          lean_dir="$(dirname "$lean_bin")"
+          echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Export canonical prefix through shard 2400
+        run: node scripts/export-prefix-diagnostic.mjs

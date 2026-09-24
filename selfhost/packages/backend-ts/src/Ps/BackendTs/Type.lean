@@ -25,6 +25,12 @@ def psTsEmitPrimitiveType
   | .string => "string"
   | .unit => "undefined"
 
+def psTsIndexTypes : Nat -> List String -> List String
+  | _, [] => []
+  | index, value :: rest =>
+      ("_arg" ++ toString index ++ ": " ++ value) ::
+        psTsIndexTypes (index + 1) rest
+
 def psTsEmitTypeWithFuel :
     Nat -> PsVerifiedIrType -> Except PsTsEmitError String
   | 0, _ => Except.error PsTsEmitError.fuelExhausted
@@ -42,10 +48,7 @@ def psTsEmitTypeWithFuel :
               | Except.error error => Except.error error
               | Except.ok printedResult =>
                   let indexed :=
-                    printedParameters.zipWith
-                      (List.range printedParameters.length)
-                      (fun value index =>
-                        "_arg" ++ toString index ++ ": " ++ value)
+                    psTsIndexTypes 0 printedParameters
                   Except.ok
                     ("(" ++ psTsJoin ", " indexed ++
                       ") => " ++ printedResult)

@@ -80,11 +80,11 @@ def psParseLeanSimpleApplication
         first.value
         first.cursor
 
-def psParseLeanExplicitBinder
+def psParseLeanBinder
     (cursor : PsTokenCursor) :
     Except PsParseError
       (PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :=
-  match psTokenCursorExpectText cursor "(" with
+  match psParseBinderOpening cursor with
   | Except.error error => Except.error error
   | Except.ok opening =>
       match psTokenCursorExpectKind opening.cursor PsTokenKind.identifier with
@@ -96,27 +96,24 @@ def psParseLeanExplicitBinder
               match psParseLeanSimpleApplication afterColon.cursor with
               | Except.error error => Except.error error
               | Except.ok type =>
-                  match psTokenCursorExpectText type.cursor ")" with
+                  match psParseBinderClosing opening type.cursor with
                   | Except.error error => Except.error error
-                  | Except.ok close =>
+                  | Except.ok closing =>
                       let binderName : PsSyntaxName := {
                         segments := [name.token.text]
                         span := name.token.span
                       }
                       let binder : PsSyntaxBinderHead := {
                         name := binderName
-                        kind := PsSyntaxBinderKind.explicit
-                        span := {
-                          start := opening.token.span.start
-                          stop := close.token.span.stop
-                        }
+                        kind := opening.kind
+                        span := closing.value
                       }
                       Except.ok {
                         value := (binder, type.value)
-                        cursor := close.cursor
+                        cursor := closing.cursor
                       }
 
-def psParseLeanExplicitBindersWithFuel
+def psParseLeanBindersWithFuel
     (fuel : Nat)
     (cursor : PsTokenCursor)
     (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) :
@@ -126,11 +123,11 @@ def psParseLeanExplicitBindersWithFuel
   | 0 =>
       Except.ok { value := bindersRev.reverse, cursor := cursor }
   | remaining + 1 =>
-      if psTokenCursorAtText cursor "(" then
-        match psParseLeanExplicitBinder cursor with
+      if psTokenCursorAtBinderStart cursor then
+        match psParseLeanBinder cursor with
         | Except.error error => Except.error error
         | Except.ok parsed =>
-            psParseLeanExplicitBindersWithFuel
+            psParseLeanBindersWithFuel
               remaining
               parsed.cursor
               (parsed.value :: bindersRev)
@@ -158,7 +155,7 @@ def psParseLeanDeclaration
             match psParseSyntaxName afterKeyword.cursor with
             | Except.error error => Except.error error
             | Except.ok name =>
-                match psParseLeanExplicitBindersWithFuel
+                match psParseLeanBindersWithFuel
                     name.cursor.remaining.length
                     name.cursor
                     [] with

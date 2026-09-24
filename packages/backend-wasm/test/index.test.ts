@@ -135,6 +135,82 @@ throws(
 );
 console.log('ok - @proofscript/backend-wasm JS ABI restores unsigned semantics');
 
+const uintAddModule:WasmIrModule={
+  kind:'proofscript-wasm-ir',
+  profile:'proofscript-wasm32-mvp-js-v1',
+  functions:[
+    {
+      name:'add8',
+      parameters:[{name:'a',type:'i32'},{name:'b',type:'i32'}],
+      result:'i32',
+      abi:{parameters:['uint8','uint8'],result:'uint8'},
+      exportName:'add8',
+      body:{
+        kind:'i32.binary',
+        operation:'and',
+        left:{
+          kind:'i32.binary',
+          operation:'add',
+          left:{kind:'local',name:'a',type:'i32'},
+          right:{kind:'local',name:'b',type:'i32'},
+        },
+        right:{kind:'i32.const',value:0xff},
+      },
+    },
+    {
+      name:'add16',
+      parameters:[{name:'a',type:'i32'},{name:'b',type:'i32'}],
+      result:'i32',
+      abi:{parameters:['uint16','uint16'],result:'uint16'},
+      exportName:'add16',
+      body:{
+        kind:'i32.binary',
+        operation:'and',
+        left:{
+          kind:'i32.binary',
+          operation:'add',
+          left:{kind:'local',name:'a',type:'i32'},
+          right:{kind:'local',name:'b',type:'i32'},
+        },
+        right:{kind:'i32.const',value:0xffff},
+      },
+    },
+    {
+      name:'add32',
+      parameters:[{name:'a',type:'i32'},{name:'b',type:'i32'}],
+      result:'i32',
+      abi:{parameters:['uint32','uint32'],result:'uint32'},
+      exportName:'add32',
+      body:{
+        kind:'i32.binary',
+        operation:'add',
+        left:{kind:'local',name:'a',type:'i32'},
+        right:{kind:'local',name:'b',type:'i32'},
+      },
+    },
+    {
+      name:'add64',
+      parameters:[{name:'a',type:'i64'},{name:'b',type:'i64'}],
+      result:'i64',
+      abi:{parameters:['uint64','uint64'],result:'uint64'},
+      exportName:'add64',
+      body:{
+        kind:'i64.binary',
+        operation:'add',
+        left:{kind:'local',name:'a',type:'i64'},
+        right:{kind:'local',name:'b',type:'i64'},
+      },
+    },
+  ],
+};
+const uintAddArtifact=emitBinaryenWasm(uintAddModule);
+const uintAddHost=instantiateProofScriptWasm(uintAddArtifact);
+equal(uintAddHost.exports.add8?.(0xff,1),0);
+equal(uintAddHost.exports.add16?.(0xffff,1),0);
+equal(uintAddHost.exports.add32?.(0xffffffff,1),0);
+equal(uintAddHost.exports.add64?.(0xffffffffffffffffn,1n),0n);
+console.log('ok - @proofscript/backend-wasm modular fixed-width UInt addition');
+
 const bigintIdentityModule:WasmIrModule={
   kind:'proofscript-wasm-ir',
   profile:'proofscript-wasm32-ref-js-v1',

@@ -49,6 +49,141 @@ def psInferEnsureForall
       }
   | _ => Except.error PsInferError.expectedFunction
 
+structure PsInferAppView where
+  head : PsExpr
+  args : List PsExpr
+
+def psInferAppViewAcc : PsExpr -> List PsExpr -> PsInferAppView
+  | .app fn arg, args =>
+      psInferAppViewAcc fn (arg :: args)
+  | head, args =>
+      { head := head, args := args }
+
+def psInferAppView (expr : PsExpr) : PsInferAppView :=
+  psInferAppViewAcc expr []
+
+def psInferApplyStructureParameters
+    (environment : PsEnvironment)
+    (metaContext : PsMetaContext)
+    (localContext : PsLocalContext) :
+    PsExpr ->
+    List PsExpr ->
+    Except PsInferError PsExpr
+  | cursor, [] => Except.ok cursor
+  | cursor, argument :: rest =>
+      match
+          psWhnf
+            environment
+            metaContext
+            localContext
+            cursor with
+      | .forallE _ _ body _ =>
+          psInferApplyStructureParameters
+            environment
+            metaContext
+            localContext
+            (psExprInstantiate1 body argument)
+            rest
+      | _ => Except.error PsInferError.projectionUnsupported
+
+def psInferStructureProjectionField
+    (environment : PsEnvironment)
+    (metaContext : PsMetaContext)
+    (localContext : PsLocalContext)
+    (typeName : PsName)
+    (target : PsExpr) :
+    Nat -> Nat -> PsExpr -> Except PsInferError PsExpr
+  | _, _, cursor =>
+      match
+          psWhnf
+            environment
+            metaContext
+            localContext
+            cursor with
+      | .forallE _ domain body _ =>
+          fun requestedIndex fieldIndex =>
+            if requestedIndex == fieldIndex then
+              Except.ok domain
+            else
+              psInferStructureProjectionField
+                environment
+                metaContext
+                localContext
+                typeName
+                target
+                requestedIndex
+                (fieldIndex + 1)
+                (psExprInstantiate1
+                  body
+                  (PsExpr.proj typeName fieldIndex target))
+      | _ =>
+          fun _ _ => Except.error PsInferError.projectionUnsupported
+
+def psInferProjectionType
+    (environment : PsEnvironment)
+    (metaContext : PsMetaContext)
+    (localContext : PsLocalContext)
+    (targetType : PsExpr)
+    (typeName : PsName)
+    (index : Nat)
+    (target : PsExpr) :
+    Except PsInferError PsExpr :=
+  let view :=
+    psInferAppView
+      (psWhnf
+        environment
+        metaContext
+        localContext
+        targetType)
+  match view.head with
+  | .constE actualName _ =>
+      if !psNameEq actualName typeName then
+        Except.error PsInferError.projectionUnsupported
+      else
+        match psEnvironmentFindInductive environment typeName with
+        | none => Except.error PsInferError.projectionUnsupported
+        | some info =>
+            if
+                !info.isStructure
+                  || info.numIndices != 0
+                  || view.args.length != info.numParams then
+              Except.error PsInferError.projectionUnsupported
+            else
+              match info.constructors with
+              | [constructorName] =>
+                  match
+                      psEnvironmentFindConstructor
+                        environment
+                        constructorName with
+                  | none =>
+                      Except.error PsInferError.projectionUnsupported
+                  | some constructorInfo =>
+                      if
+                          constructorInfo.numParams != info.numParams
+                            || index >= constructorInfo.numFields then
+                        Except.error PsInferError.projectionUnsupported
+                      else
+                        match
+                            psInferApplyStructureParameters
+                              environment
+                              metaContext
+                              localContext
+                              constructorInfo.type
+                              view.args with
+                        | Except.error error => Except.error error
+                        | Except.ok fieldCursor =>
+                            psInferStructureProjectionField
+                              environment
+                              metaContext
+                              localContext
+                              typeName
+                              target
+                              index
+                              0
+                              fieldCursor
+              | _ => Except.error PsInferError.projectionUnsupported
+  | _ => Except.error PsInferError.projectionUnsupported
+
 def psInferTypeWithFuel
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -179,8 +314,24 @@ def psInferTypeWithFuel
                           (psExprInstantiate1 body value)
                       else
                         Except.error PsInferError.letTypeMismatch
-      | .proj _ _ _ =>
-          Except.error PsInferError.projectionUnsupported
+      | .proj typeName index target =>
+          match
+              psInferTypeWithFuel
+                environment
+                metaContext
+                localContext
+                fuel
+                target with
+          | Except.error error => Except.error error
+          | Except.ok targetType =>
+              psInferProjectionType
+                environment
+                metaContext
+                localContext
+                targetType
+                typeName
+                index
+                target
 
 def psInferDefaultFuel : Nat :=
   4096

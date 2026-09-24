@@ -11,6 +11,30 @@ def psNameDepth(name : PsName) : Nat :=
     | .num prefix value => psNameDepth(prefix) + 1;
   };
 
+def psNameEq(left : PsName, right : PsName) : Bool :=
+  match left with {
+    | .anonymous =>
+      match right with {
+        | .anonymous => true;
+        | .str prefix value => false;
+        | .num prefix value => false;
+      };
+    | .str leftPrefix leftValue =>
+      match right with {
+        | .anonymous => false;
+        | .str rightPrefix rightValue =>
+          psNameEq(leftPrefix, rightPrefix) && leftValue == rightValue;
+        | .num prefix value => false;
+      };
+    | .num leftPrefix leftValue =>
+      match right with {
+        | .anonymous => false;
+        | .str prefix value => false;
+        | .num rightPrefix rightValue =>
+          psNameEq(leftPrefix, rightPrefix) && leftValue == rightValue;
+      };
+  };
+
 def psNameAppendStr(prefix : PsName, value : String) : PsName :=
   PsName.str(prefix, value);
 

@@ -623,7 +623,7 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
 
 partial def dumpRootMap (env : Environment) (target : Name) (start count : Nat) : IO Unit := do
   if count == 0 then throw <| IO.userError "root map count must be positive"
-  let buckets := collectRootsByModule env
+  let buckets := collectCanonicalRootsByModule env
   let roots := flattenRoots buckets
   if roots.size != env.constants.map₁.size then
     throw <| IO.userError s!"root coverage mismatch: {roots.size} != {env.constants.map₁.size}"

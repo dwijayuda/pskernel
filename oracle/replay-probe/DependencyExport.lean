@@ -642,22 +642,6 @@ def environmentConstantNames (env : Environment) : NameSet := Id.run do
     names := names.insert name
   return names
 
-/--
-Names actually present after canonical pskernel replay of a Lean environment.
-
-Lean.Kernel.Environment.replay deliberately skips unsafe/partial constants.
-Runtime delta exports use a canonical pskernel base, so pre-marking those skipped
-constants as already emitted would create false dependencies: an executable
-runtime helper could be omitted from the delta even though it is absent from the
-replayed base.
--/
-def replayedBaseConstantNames (env : Environment) : NameSet := Id.run do
-  let mut names : NameSet := {}
-  for (name, ci) in env.constants.map₁.toList do
-    unless ci.isUnsafe || ci.isPartial do
-      names := names.insert name
-  return names
-
 partial def dumpSelectedRootsAfterBase
     (env base : Environment)
     (_baseModule : Name)

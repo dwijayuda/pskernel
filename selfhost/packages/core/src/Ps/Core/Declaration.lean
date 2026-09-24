@@ -1,0 +1,14 @@
+import Ps.Core.Expr
+
+inductive PsDeclarationKind where
+  | definition
+  | theorem
+  | opaque
+  | axiom
+
+structure PsDeclaration where
+  name : PsName
+  levelParams : List PsName
+  type : PsExpr
+  value : PsExpr
+  kind : PsDeclarationKind

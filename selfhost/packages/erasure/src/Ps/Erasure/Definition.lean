@@ -182,7 +182,16 @@ def psEraseOpenDefinitionWithFuel
                         runtimeStructures := scope.runtimeStructures
                         runtimeStructureConstructors := scope.runtimeStructureConstructors
                         runtimeExpressions := scope.runtimeExpressions
-                        currentDefinition := scope.currentDefinition
+                        currentDefinition :=
+                          match scope.currentDefinition with
+                          | none => none
+                          | some current =>
+                              some {
+                                current with
+                                runtimeParameters :=
+                                  current.runtimeParameters ++
+                                    [parameterName]
+                              }
                       }
                       psEraseOpenDefinitionWithFuel
                         environment
@@ -243,23 +252,30 @@ def psEraseDefinition
   if psErasureIsProp environment psLocalEmpty type then
     Except.ok none
   else
+    let outputName :=
+      match psErasureLookupName
+          scope.declarationNames
+          name with
+      | some known => known
+      | none =>
+          psErasureSafeIdentifier
+            (psNameToString name)
+            "decl"
+    let definitionScope : PsErasureScope := {
+      scope with
+      currentDefinition := some {
+        name := outputName
+        runtimeParameters := []
+      }
+    }
     match
         psEraseOpenDefinition
           environment
-          scope
+          definitionScope
           type
           value with
     | Except.error error => Except.error error
     | Except.ok opened =>
-        let outputName :=
-          match psErasureLookupName
-              scope.declarationNames
-              name with
-          | some known => known
-          | none =>
-              psErasureSafeIdentifier
-                (psNameToString name)
-                "decl"
         Except.ok
           (some {
             name := outputName

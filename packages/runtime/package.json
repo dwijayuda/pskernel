@@ -18,6 +18,10 @@
     "./lean4": {
       "types": "./dist/src/lean4.d.ts",
       "import": "./dist/src/lean4.js"
+    },
+    "./lean4/eval": {
+      "types": "./dist/src/lean4-eval.d.ts",
+      "import": "./dist/src/lean4-eval.js"
     }
   },
   "scripts": {
@@ -26,5 +30,8 @@
   },
   "devDependencies": {
     "typescript": "5.8.3"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../.."
   }
 }

@@ -33,6 +33,13 @@ function resultToOption {α : Type}{ε : Type}
     | .error err => PsOption.none;
   };
 
+function resultBind {α : Type}{β : Type}{ε : Type}
+(value : PsResult(α, ε), f : α -> PsResult(β, ε)) : PsResult(β, ε) :=
+  match value with {
+    | .ok x => f(x);
+    | .error err => PsResult.error(err);
+  };
+
 theorem resultRefl {α : Type}{ε : Type}
 (value : PsResult(α, ε)) : value = value := by rfl;
 
@@ -80,3 +87,11 @@ theorem resultGetOrElseMap {α : Type}{β : Type}{ε : Type}
 resultGetOrElse(resultMap(f, value), f(fallback)) =
 f(resultGetOrElse(value, fallback)) :=
   by cases value; rfl; rfl;
+
+theorem resultBindOk {α : Type}{β : Type}{ε : Type}
+(value : α, f : α -> PsResult(β, ε)) :
+resultBind(PsResult.ok(value), f) = f(value) := by rfl;
+
+theorem resultBindError {α : Type}{β : Type}{ε : Type}
+(error : ε, f : α -> PsResult(β, ε)) :
+resultBind(PsResult.error(error), f) = PsResult.error(error) := by rfl;

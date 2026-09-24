@@ -6,7 +6,7 @@ and compiled by the same verified project pipeline as user code.
 ## Current modules
 
 - `ProofScript.Data.Option`: `PsOption`, map/bind/get-or-else/or-else/is-some helpers.
-- `ProofScript.Data.Result`: `PsResult`, value/error mapping, get-or-else,
+- `ProofScript.Data.Result`: `PsResult`, value/error mapping, bind, get-or-else,
   and Option conversion.
 - `ProofScript.Data.List`: `PsList`, structural map/append/length/head helpers.
 
@@ -16,7 +16,7 @@ assigns executable representations to inductives admitted by the checked
 source project. The stdlib therefore does not shadow Lean's built-ins or add
 an erasure special case.
 
-The three modules now contain twenty-seven pskernel-admitted theorems in total:
+The three modules now contain twenty-nine pskernel-admitted theorems in total:
 baseline reflexivity plus definitional computation laws for Option, Result, and
 List helpers. These laws now deliberately use bounded `by rfl`, which constructs the same
 ordinary `Eq.refl` proof term and relies on kernel definitional equality; the
@@ -45,11 +45,11 @@ ProofScript source modules
 The end-to-end stdlib test now exercises:
 
 - `optionBind` and `optionOrElse`;
-- `resultGetOrElse` and `resultMapError`;
+- `resultBind`, `resultGetOrElse`, and `resultMapError`;
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`;
-- twenty-seven admitted stdlib theorems: fourteen definitional laws use bounded
+- twenty-nine admitted stdlib theorems: sixteen definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
   `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`; `optionMapOrElse`, `optionGetOrElseOrElse`, and `optionGetOrElseMap` dogfood higher-order/helper composition through Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
@@ -235,6 +235,23 @@ value; in the `none` branch both reduce to the mapped fallback. The proof is
 bounded `cases` followed by Eq-only `rfl`, matching Lean 4.34's
 constructor-level `Option.map` and `Option.getD` behavior without adding a
 special rewrite rule or runtime implementation.
+
+## Result bind checkpoint
+
+`ProofScript.Data.Result.resultBind` provides success-channel sequencing:
+
+```text
+resultBind(value, f)
+```
+
+It mirrors Lean 4.34 `Except.bind` for the source-owned Result ADT: an
+`ok(value)` continues with `f(value)`, while an `error(error)` propagates
+the same error unchanged. `resultBindOk` and `resultBindError` are
+definitional computation laws proved by bounded Eq-only `rfl`.
+
+The stdlib dogfood now sends its mapped Result through `resultBind` before
+error mapping and extraction, exercising higher-order Result sequencing through
+the existing verified compilation path without any host Result implementation.
 
 ## Result map/get-or-else compatibility
 

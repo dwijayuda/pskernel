@@ -12,8 +12,10 @@ function asOption(x : Nat) : PsOption(Nat) :=
 function main(x : Nat) : Nat :=
   let mapped : PsResult(Nat, Nat) :=
     resultMap(inc, asResult(x));
+  let reboundResult : PsResult(Nat, Nat) :=
+    resultBind(mapped, asResult);
   let mappedError : PsResult(Nat, Nat) :=
-    resultMapError(inc, mapped);
+    resultMapError(inc, reboundResult);
   let resultValue : Nat :=
     resultGetOrElse(mappedError, 0);
   let option : PsOption(Nat) :=

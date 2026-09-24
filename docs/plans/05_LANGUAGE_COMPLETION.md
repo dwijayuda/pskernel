@@ -465,10 +465,10 @@ Exit condition:
 Current stdlib checkpoint:
 
 - `PsOption`: map, bind, get-or-else, or-else, is-some plus reflexivity/computation laws;
-- `PsResult`: value/error mapping, get-or-else, Option conversion plus checked laws;
+- `PsResult`: value/error mapping, bind, get-or-else, Option conversion plus checked laws;
 - `PsList`: map, append, length, head Option plus reflexivity/append reduction laws;
 - the dogfood project executes all three modules through verified TS/JS emission
-  with zero runtime extern assumptions and twenty-seven pskernel-admitted theorems.
+  with zero runtime extern assumptions and twenty-nine pskernel-admitted theorems.
 
 Build libraries in ProofScript itself where practical:
 
@@ -712,8 +712,8 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     twelve definitional computation laws, universal Option/Result case-analysis
     laws, a Result/Option multi-rule simp law, resultToOptionMap,
     resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
-    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, listAppendNilRight,
-    listAppendAssoc, and listMapAppend. Twenty-seven current stdlib theorems now
+    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, listAppendNilRight,
+    listAppendAssoc, and listMapAppend. Twenty-nine current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
     laws/utilities only when the proof/recursion surface supports them without
@@ -807,6 +807,18 @@ fallback before extraction is equal to applying the function after extraction.
 The theorem is generic in both element types and closes by bounded `cases`
 plus Eq-only `rfl`. It therefore strengthens the self-hosted Option law set
 without expanding tactics, elaboration, erasure, or backend semantics.
+
+## Stdlib Result bind checkpoint
+
+The self-hosted Result module now includes `resultBind`, matching Lean 4.34
+`Except.bind` on the equivalent two-channel constructor behavior. Successful
+values continue through the supplied function; errors propagate unchanged.
+`resultBindOk` and `resultBindError` are ordinary definitional equalities
+checked with bounded `rfl`.
+
+Runtime dogfood routes a mapped Result through this helper before error mapping,
+so higher-order Result sequencing is covered by the existing checked-core,
+erasure, verified IR, and TypeScript path rather than by a backend shortcut.
 
 ## Stdlib Result map/get-or-else checkpoint
 

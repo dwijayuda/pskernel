@@ -1,0 +1,34 @@
+name: Diagnostic canonical prefix through shard 2400
+
+on:
+  push:
+    branches: [diagnostic/mdata-prefix-2400]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prefix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          lean_dir="$(dirname "$lean_bin")"
+          echo "LEAN434_BIN=$lean_dir" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Replay canonical shared prefix through shard 2400
+        env:
+          PSKERNEL_DIAGNOSTIC_STOP_AFTER_SHARDS: "2400"
+          PSKERNEL_STD_HEAP_MIB: "5632"
+        run: node --expose-gc --max-old-space-size=5632 --stack-size=65500 scripts/module-stream-prefix-diagnostic.mjs Std 114029

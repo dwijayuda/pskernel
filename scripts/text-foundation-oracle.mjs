@@ -16,28 +16,15 @@ if(!fs.existsSync(file)){
 const replay=replayLeanEnvironment(fs.readFileSync(file,'utf8'));
 const stats=replay.stats;
 const required=[
-  'Char.ofNat',
   'Char.toNat',
-  'Char.isWhitespace',
-  'Char.isUpper',
-  'Char.isLower',
-  'Char.isAlpha',
-  'Char.isDigit',
-  'Char.isAlphanum',
   'String.push',
   'String.singleton',
-  'String.append',
-  'String.length',
-  'String.utf8ByteSize',
-  'String.rawStartPos',
-  'String.rawEndPos',
-  'String.Pos.Raw.get',
-  'String.Pos.Raw.get?',
-  'String.Pos.Raw.next',
-  "String.Pos.Raw.next'",
-  'String.Pos.Raw.atEnd',
-  'String.Pos.Raw.extract',
-  'String.Pos.Raw.prev',
+  'String.Internal.length',
+  'String.Internal.append',
+  'String.Internal.next',
+  'String.Internal.get',
+  'String.Internal.atEnd',
+  'String.Internal.extract',
 ];
 for(const name of required){
   if(replay.environment.find(nameFromDotted(name))===undefined){

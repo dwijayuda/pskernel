@@ -177,6 +177,62 @@ def psParseProofScriptBindersWithFuel
       else
         Except.ok { value := bindersRev.reverse, cursor := cursor }
 
+def psParseProofScriptTermWithFuel :
+    Nat ->
+    PsTokenCursor ->
+    Except PsParseError (PsParseResult PsSyntaxTerm)
+  | 0, _ => Except.error PsParseError.fuelExhausted
+  | remaining + 1, cursor =>
+      if psTokenCursorAtText cursor "fun" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "lambda binder")
+        | some keyword =>
+            match psParseProofScriptBindersWithFuel
+                keyword.cursor.remaining.length
+                keyword.cursor
+                [] with
+            | Except.error error => Except.error error
+            | Except.ok binders =>
+                match binders.value with
+                | [] =>
+                    match psTokenCursorPeek binders.cursor with
+                    | none =>
+                        Except.error
+                          (PsParseError.unexpectedEnd "lambda binder")
+                    | some token =>
+                        Except.error
+                          (PsParseError.expectedText
+                            "typed lambda binder"
+                            token.text
+                            token.span)
+                | _ =>
+                    match psTokenCursorExpectText binders.cursor "=>" with
+                    | Except.error error => Except.error error
+                    | Except.ok afterArrow =>
+                        match psParseProofScriptTermWithFuel
+                            remaining
+                            afterArrow.cursor with
+                        | Except.error error => Except.error error
+                        | Except.ok body =>
+                            Except.ok {
+                              value :=
+                                PsSyntaxTerm.lambda
+                                  binders.value
+                                  body.value
+                                  {
+                                    start := keyword.token.span.start
+                                    stop := (psSyntaxTermSpan body.value).stop
+                                  }
+                              cursor := body.cursor
+                            }
+      else
+        psParseProofScriptSimpleApplication cursor
+
+def psParseProofScriptTerm
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  psParseProofScriptTermWithFuel (cursor.remaining.length + 1) cursor
+
 def psParseProofScriptDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
@@ -213,7 +269,7 @@ def psParseProofScriptDeclaration
                             match psTokenCursorExpectText type.cursor ":=" with
                             | Except.error error => Except.error error
                             | Except.ok afterAssign =>
-                                match psParseProofScriptSimpleApplication afterAssign.cursor with
+                                match psParseProofScriptTerm afterAssign.cursor with
                                 | Except.error error => Except.error error
                                 | Except.ok value =>
                                     match psTokenCursorExpectText value.cursor ";" with

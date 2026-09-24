@@ -19,6 +19,10 @@ function groupCount(items,key){
     .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
 }
 
+const exactExterns=doc.externs.filter(x=>x.module===doc.module);
+const exactImplementedBy=doc.implementedBy.filter(x=>x.module===doc.module);
+const exactInitializers=doc.initializers.filter(x=>x.module===doc.module);
+
 const parserExterns=doc.externs.filter(
   x=>typeof x.module==='string'&&x.module.startsWith('Lean.Parser'),
 );
@@ -35,6 +39,11 @@ const result={
     externs:doc.externs.length,
     implementedBy:doc.implementedBy.length,
     initializers:doc.initializers.length,
+  },
+  exactTargetModule:{
+    externs:exactExterns.length,
+    implementedBy:exactImplementedBy.length,
+    initializers:exactInitializers.length,
   },
   directLeanParser:{
     externs:parserExterns.length,

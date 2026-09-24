@@ -501,7 +501,11 @@ assert(
   lexerModulePs.canonicalSourceHash===lexerModuleLean.canonicalSourceHash
     &&lexerModuleLean.canonicalSourceHash===
       lexerModulePsRoundTrip.canonicalSourceHash,
-  'ProofScript.Text.Lexer dual-source canonical identity diverged',
+  'ProofScript.Text.Lexer dual-source canonical identity diverged\n'+
+    '--- from ProofScript ---\n'+lexerModulePs.canonicalSource+
+    '--- from Lean ---\n'+lexerModuleLean.canonicalSource+
+    '--- round-trip ProofScript ---\n'+
+      lexerModulePsRoundTrip.canonicalSource,
 );
 assert(
   semanticFingerprint(lexerModulePs.checkedCore.admissions)

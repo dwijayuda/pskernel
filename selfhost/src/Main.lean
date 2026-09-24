@@ -24,6 +24,7 @@ import Ps.Elab.Declaration
 import Ps.Erasure.Definition
 import Ps.BackendTs.Module
 import Ps.Host.TypeScriptCompiler
+import Ps.Host.ProjectCompiler
 import Ps.Project.ModuleGraph
 
 inductive PsCliSourceKind where
@@ -87,52 +88,10 @@ def psCliTranslate
       IO.print output
 
 def psCliElaborateSource
-    (inputPath : String) : IO PsElabModuleResult := do
-  let sourceKind ←
-    match psCliSourceKindFromPath inputPath with
-    | none =>
-        throw
-          (IO.userError
-            ("PSC1_CLI_SOURCE_KIND: expected .lean or .ps input, got " ++
-              inputPath))
-    | some kind => pure kind
-  let source ← IO.FS.readFile inputPath
-  let parsed :=
-    match sourceKind with
-    | .lean =>
-        match psParseLeanSource source with
-        | Except.error _ =>
-            Except.error "Lean parse failed"
-        | Except.ok sourceModule =>
-            Except.ok sourceModule
-    | .proofScript =>
-        match psParseProofScriptSource source with
-        | Except.error _ =>
-            Except.error "ProofScript parse failed"
-        | Except.ok sourceModule =>
-            Except.ok sourceModule
-  let sourceModule ←
-    match parsed with
-    | Except.error message =>
-        throw
-          (IO.userError
-            ("PSC1_CLI_PARSE_FAILED: " ++ message))
-    | Except.ok sourceModule =>
-        pure sourceModule
-  if !sourceModule.imports.isEmpty then
-    throw
-      (IO.userError
-        "PSC1_CLI_IMPORT_CONTEXT_REQUIRED: imports require the project pipeline")
-  match
-      psElabModule
-        psBootstrapPreludeEnvironment
-        sourceModule with
-  | Except.error _ =>
-      throw
-        (IO.userError
-          "PSC1_CLI_ELAB_FAILED: source is outside the supported bootstrap subset")
-  | Except.ok result =>
-      pure result
+    (inputPath : String) : IO PsElabModuleResult :=
+  psHostLoadProject
+    psBootstrapPreludeEnvironment
+    inputPath
 
 def psCliCheck
     (inputPath : String) : IO Unit := do

@@ -63,7 +63,7 @@ the parser algorithms themselves do not require a large native-runtime shim.
 the targeted trees. This makes Init/runtime compatibility the correct place to
 spend early effort.
 
-The first runtime manifest implements 32 explicit mappings. That number is not
+The first runtime manifest implements 30 explicit mappings. That number is not
 a "4.4% completion" metric: many of the 720 symbols are irrelevant to the
 compiler bootstrap, platform-specific, optimization-only, duplicated API
 surfaces, or candidates for deferral/replacement. Runtime work should follow a

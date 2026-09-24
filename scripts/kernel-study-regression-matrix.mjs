@@ -267,6 +267,16 @@ if(defeqOracle.includes("version!=='Lean (version 4.34.0, Release)'")){
   throw new Error('defeq oracle identity drift: exact abbreviated version banner is not portable across official binaries');
 }
 
+const nativeEvaluatorHarness=readFileSync('scripts/lean-native-evaluator.mjs','utf8');
+for(const marker of [
+  "PSKERNEL_NATIVE_TIMEOUT_MS??'60000'",
+  "timeout:timeoutMs",
+  "killSignal:'SIGKILL'",
+  'native oracle execution failed for ${key}',
+]){
+  if(!nativeEvaluatorHarness.includes(marker))throw new Error('native evaluator timeout drift: missing '+marker);
+}
+
 const nativeSmoke=readFileSync('scripts/native-oracle-smoke.mjs','utf8');
 if(!nativeSmoke.includes("mkdtempSync(join(resolve('.'),'.pskernel-native-smoke-'))")){
   throw new Error('native smoke path drift: Lean fixture must stay inside the project root');

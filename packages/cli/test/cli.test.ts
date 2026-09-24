@@ -519,10 +519,10 @@ console.log('ok - psc runtime lock rejects missing required transitive entry');
       passthrough:[],
     });
     equal(built.report.buildTarget,'wasm');
-    const artifacts=built.report.artifacts as {
-      readonly webassembly:string;
-      readonly wat:string;
-    };
+    const artifacts=built.report.artifacts;
+    if(artifacts.webassembly===undefined||artifacts.wat===undefined){
+      throw new Error('verified Wasm build did not emit Wasm artifacts');
+    }
     const wasm=new Uint8Array(
       await readFile(artifacts.webassembly),
     );
@@ -1651,7 +1651,7 @@ console.log('ok - psc canonical source hash is source-kind neutral');
     });
     equal(result.mainResult,'42');
     equal(
-      (result.moduleOrder as readonly string[]).join(','),
+      result.moduleOrder?.join(','),
       'Core,Data,main',
     );
     equal(result.moduleCount,3);
@@ -1699,7 +1699,7 @@ console.log('ok - psc mixed ProofScript -> Lean import run');
     });
     equal(result.mainResult,'42');
     equal(
-      (result.moduleOrder as readonly string[]).join(','),
+      result.moduleOrder?.join(','),
       'Data,main',
     );
   }finally{
@@ -1758,7 +1758,7 @@ console.log('ok - psc mixed Lean -> ProofScript import run');
     });
     equal(result.mainResult,'7');
     equal(
-      (result.moduleOrder as readonly string[]).join(','),
+      result.moduleOrder?.join(','),
       'Core,Data,main',
     );
   }finally{
@@ -1886,15 +1886,10 @@ console.log('ok - psc checked-module cache uses dependency integrity keys');
       verified:true,
       passthrough:[],
     });
-    const artifactRecords=(
-      built.report.artifacts as {
-        readonly modules:readonly {
-          readonly module:string;
-          readonly path:string;
-          readonly integrity:string;
-        }[];
-      }
-    ).modules;
+    const artifactRecords=built.report.artifacts.modules;
+    if(artifactRecords===undefined){
+      throw new Error('verified build did not emit module artifacts');
+    }
     equal(artifactRecords.length,2);
 
     const decoded=new Map<string,ReturnType<typeof decodeModuleArtifact>>();
@@ -1985,7 +1980,10 @@ console.log('ok - psc emits replay-gated checked-admission .psmodule v2 artifact
       passthrough:['41'],
     });
     equal(result.mainResult,'42');
-    const roots=result.sourceRoots as readonly string[];
+    const roots=result.sourceRoots;
+    if(roots===undefined){
+      throw new Error('verified run did not retain configured source roots');
+    }
     equal(roots.length,1);
     equal(roots[0],join(directory,'lib'));
   }finally{

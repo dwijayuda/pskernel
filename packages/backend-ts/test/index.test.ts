@@ -306,6 +306,39 @@ console.log('ok - @proofscript/backend-ts certified text intrinsic emission');
 {
   const source=emitVerifiedTypeScript({
     kind:'proofscript-verified-ir',
+    declarations:[{
+      name:'sameText',
+      typeParameters:[],
+      parameters:[
+        {name:'a',type:{kind:'primitive',name:'String'}},
+        {name:'b',type:{kind:'primitive',name:'String'}},
+      ],
+      resultType:{kind:'primitive',name:'Bool'},
+      body:{
+        kind:'intrinsic',
+        operation:'string.eq',
+        args:[
+          {kind:'var',name:'a'},
+          {kind:'var',name:'b'},
+        ],
+      },
+    }],
+  });
+  equal(
+    source.includes(
+      'export function sameText(a: string, b: string): boolean { return (a === b); }',
+    ),
+    true,
+  );
+  const compiled=compileTypeScript(source,'verified-string-eq.ts');
+  equal(compiled.javascript.includes('return (a === b);'),true);
+}
+console.log('ok - @proofscript/backend-ts verified String equality emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
     structures:[{
       name:'User',
       fields:[{

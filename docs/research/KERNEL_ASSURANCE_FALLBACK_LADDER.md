@@ -179,15 +179,23 @@ Disallowed claim:
 
 ## Tier 5 — canonical Full Std
 
-Before paying for the exhaustive stream, validate the exact same canonical
-module-stream protocol on the much smaller `Init.Prelude` environment:
+Before paying for the exhaustive stream, first validate the compiler-IR native
+provider used by `Lean.reduceNat` / `Lean.reduceBool`:
+
+```text
+npm run oracle:native-smoke
+```
+
+Then validate the exact same canonical module-stream protocol on the much
+smaller `Init.Prelude` environment:
 
 ```text
 npm run oracle:init-canonical
 ```
 
-This preflight checks the pinned Lean exporter, `.olean` module constant
-ordering, stream markers, shared pskernel environment, and importer. It is a
+The native smoke checks the explicit compiler-IR TCB extension before any large
+replay. The canonical preflight then checks the pinned Lean exporter, `.olean`
+module constant ordering, stream markers, shared pskernel environment, and importer. It is a
 diagnostic preflight only and **does not close** the Full Std gate.
 
 Gold behavioral gate:

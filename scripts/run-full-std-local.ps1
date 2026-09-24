@@ -4,6 +4,7 @@ param(
   [string]$Log = "full-std.log",
   [switch]$SkipTests,
   [switch]$SkipCorpora,
+  [switch]$SkipNativeSmoke,
   [switch]$SkipPreflight
 )
 
@@ -136,6 +137,26 @@ if (-not $SkipCorpora) {
     exit $corporaCode
   }
   Write-Host "Bounded real-corpus gate PASS."
+}
+
+if (-not $SkipNativeSmoke) {
+  Write-Host "Running Lean compiler-IR native reduction smoke..."
+  Write-Log "nativeSmokeStarted=$(Get-Date -Format o)"
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    & npm run oracle:native-smoke 2>&1 | ForEach-Object { Write-NativeLogLine $_ }
+    $nativeSmokeCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+  Write-Log "nativeSmokeFinished=$(Get-Date -Format o)"
+  Write-Log "nativeSmokeExitCode=$nativeSmokeCode"
+  if ($nativeSmokeCode -ne 0) {
+    Write-Host "Native compiler-IR smoke failed. Canonical replay was not started; send/upload $Log."
+    exit $nativeSmokeCode
+  }
+  Write-Host "Native compiler-IR smoke PASS."
 }
 
 if (-not $SkipPreflight) {

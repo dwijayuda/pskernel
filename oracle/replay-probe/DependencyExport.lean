@@ -661,7 +661,7 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
     ("canonicalScope", "pskernel-project-protocol")
   ])]).compress
   let _ ← (do
-    modify fun s => { s with skipNonReplayable := true }
+    modify fun (s : S) => { s with skipNonReplayable := true }
     for idx in [0:buckets.size] do
       let roots : Array Name := buckets[idx]!
       unless roots.isEmpty do

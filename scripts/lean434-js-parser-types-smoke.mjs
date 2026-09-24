@@ -34,12 +34,26 @@ function expectCtor(value,name,label){
 
 const epsilon=constant(nameFromDotted('Lean.Parser.FirstTokens.epsilon'));
 const unknown=constant(nameFromDotted('Lean.Parser.FirstTokens.unknown'));
+const epsilonValue=evaluator.evaluate(epsilon);
+const unknownValue=evaluator.evaluate(unknown);
+expectCtor(
+  epsilonValue,
+  'Lean.Parser.FirstTokens.epsilon',
+  'FirstTokens.epsilon value',
+);
+expectCtor(
+  unknownValue,
+  'Lean.Parser.FirstTokens.unknown',
+  'FirstTokens.unknown value',
+);
+console.log('ok - real Lean.Parser.FirstTokens constructors execute in JS');
 
-const optionalEpsilon=evaluator.evaluate(
-  mkAppN(
-    constant(nameFromDotted('Lean.Parser.FirstTokens.toOptional')),
-    [epsilon],
-  ),
+const toOptionalFn=evaluator.evaluate(
+  constant(nameFromDotted('Lean.Parser.FirstTokens.toOptional')),
+);
+const optionalEpsilon=evaluator.applyRuntimeValue(
+  toOptionalFn,
+  epsilonValue,
 );
 expectCtor(
   optionalEpsilon,
@@ -48,12 +62,11 @@ expectCtor(
 );
 console.log('ok - real Lean.Parser.FirstTokens.toOptional executes in JS');
 
-const seqEpsilonUnknown=evaluator.evaluate(
-  mkAppN(
-    constant(nameFromDotted('Lean.Parser.FirstTokens.seq')),
-    [epsilon,unknown],
-  ),
+let seqFn=evaluator.evaluate(
+  constant(nameFromDotted('Lean.Parser.FirstTokens.seq')),
 );
+seqFn=evaluator.applyRuntimeValue(seqFn,epsilonValue);
+const seqEpsilonUnknown=evaluator.applyRuntimeValue(seqFn,unknownValue);
 expectCtor(
   seqEpsilonUnknown,
   'Lean.Parser.FirstTokens.unknown',
@@ -61,12 +74,11 @@ expectCtor(
 );
 console.log('ok - real Lean.Parser.FirstTokens.seq executes in JS');
 
-const merged=evaluator.evaluate(
-  mkAppN(
-    constant(nameFromDotted('Lean.Parser.FirstTokens.merge')),
-    [epsilon,unknown],
-  ),
+let mergeFn=evaluator.evaluate(
+  constant(nameFromDotted('Lean.Parser.FirstTokens.merge')),
 );
+mergeFn=evaluator.applyRuntimeValue(mergeFn,epsilonValue);
+const merged=evaluator.applyRuntimeValue(mergeFn,unknownValue);
 expectCtor(
   merged,
   'Lean.Parser.FirstTokens.unknown',

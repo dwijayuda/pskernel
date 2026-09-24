@@ -1,6 +1,9 @@
 import {
+  PROOFSCRIPT_BIGINT_RUNTIME_MODULE,
   wasmAbiPhysicalType,
+  type WasmBigIntLiteral,
   type WasmIrExpr,
+  type WasmIrFunctionImport,
   type WasmIrModule,
 } from './model.js';
 import {
@@ -55,6 +58,42 @@ function wasmExprUsesExternref(
   }
 }
 
+function validateBigIntLiteral(
+  literal:WasmBigIntLiteral,
+):void {
+  const pattern=literal.kind==='nat'
+    ?/^(?:0|[1-9]\d*)$/u
+    :/^(?:0|-?[1-9]\d*)$/u;
+  if(!pattern.test(literal.decimal)){
+    throw new Error(
+      'PS_WASM_IR_BIGINT_LITERAL_CANONICAL: '+
+      literal.kind+' '+literal.decimal,
+    );
+  }
+}
+
+function validateBigIntImport(
+  imported:WasmIrFunctionImport,
+):void {
+  if(imported.module!==PROOFSCRIPT_BIGINT_RUNTIME_MODULE){
+    throw new Error('PS_WASM_IR_INTERNAL_IMPORT_MODULE');
+  }
+  if(imported.name!=='literal'){
+    throw new Error(
+      "PS_WASM_IR_BIGINT_IMPORT_UNSUPPORTED: '"+imported.name+"'",
+    );
+  }
+  if(
+    imported.parameters.length!==1||
+    imported.parameters[0]!=='i32'||
+    imported.result!=='externref'
+  ){
+    throw new Error(
+      'PS_WASM_IR_BIGINT_IMPORT_SIGNATURE: literal',
+    );
+  }
+}
+
 export function validateWasmIrModule(
   module:WasmIrModule,
 ):true {
@@ -82,6 +121,52 @@ export function validateWasmIrModule(
       WasmIrFunctionSignature
     >();
   const exportNames=new Set<string>();
+
+  for(const imported of module.imports??[]){
+    assertWasmIrName(imported.internalName,'IMPORT_NAME');
+    validateBigIntImport(imported);
+    if(functions.has(imported.internalName)){
+      throw new Error(
+        "PS_WASM_IR_DUPLICATE_FUNCTION: '"+
+        imported.internalName+"'",
+      );
+    }
+    functions.set(imported.internalName,{
+      parameters:imported.parameters,
+      result:imported.result,
+    });
+    if(
+      module.profile==='proofscript-wasm32-mvp-js-v1'&&(
+        imported.result==='externref'||
+        imported.parameters.includes('externref')
+      )
+    ){
+      throw new Error(
+        'PS_WASM_IR_REFERENCE_TYPE_REQUIRES_REF_PROFILE: '+
+        imported.internalName,
+      );
+    }
+  }
+
+  const literalKeys=new Set<string>();
+  for(const literal of module.bigintLiterals??[]){
+    validateBigIntLiteral(literal);
+    const key=literal.kind+':'+literal.decimal;
+    if(literalKeys.has(key)){
+      throw new Error(
+        'PS_WASM_IR_DUPLICATE_BIGINT_LITERAL: '+key,
+      );
+    }
+    literalKeys.add(key);
+  }
+  if(
+    module.profile==='proofscript-wasm32-mvp-js-v1'&&
+    (module.bigintLiterals?.length??0)>0
+  ){
+    throw new Error(
+      'PS_WASM_IR_REFERENCE_TYPE_REQUIRES_REF_PROFILE: bigint literals',
+    );
+  }
 
   for(const fn of module.functions){
     assertWasmIrName(

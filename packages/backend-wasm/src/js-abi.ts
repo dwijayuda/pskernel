@@ -1,6 +1,10 @@
-import type {
-  WasmAbiValueType,
+import {
+  PROOFSCRIPT_BIGINT_RUNTIME_MODULE,
+  type WasmAbiValueType,
+  type WasmBigIntLiteral,
+  type WasmIrFunctionImport,
 } from '@proofscript/wasm-ir';
+import {createProofScriptBigIntRuntime} from './bigint-runtime.js';
 
 export type ProofScriptWasmHostValue=
   |boolean
@@ -10,6 +14,8 @@ export type ProofScriptWasmHostValue=
 
 export interface ProofScriptWasmExecutableArtifact {
   readonly binary:Uint8Array;
+  readonly imports?:readonly WasmIrFunctionImport[];
+  readonly bigintLiterals?:readonly WasmBigIntLiteral[];
   readonly exports:readonly {
     readonly name:string;
     readonly parameters:readonly WasmAbiValueType[];
@@ -131,9 +137,34 @@ export function instantiateProofScriptWasm(
   artifact:ProofScriptWasmExecutableArtifact,
   imports:WebAssembly.Imports={},
 ):ProofScriptWasmHostInstance {
+  const internalImports=(artifact.imports??[]).filter(
+    (imported)=>imported.module===PROOFSCRIPT_BIGINT_RUNTIME_MODULE,
+  );
+  let resolvedImports=imports;
+  if(internalImports.length>0){
+    if(
+      Object.prototype.hasOwnProperty.call(
+        imports,
+        PROOFSCRIPT_BIGINT_RUNTIME_MODULE,
+      )
+    ){
+      throw new Error(
+        'PS_WASM_JS_ABI_RESERVED_IMPORT_COLLISION: '+
+        PROOFSCRIPT_BIGINT_RUNTIME_MODULE,
+      );
+    }
+    resolvedImports={
+      ...imports,
+      [PROOFSCRIPT_BIGINT_RUNTIME_MODULE]:
+        createProofScriptBigIntRuntime(
+          internalImports,
+          artifact.bigintLiterals??[],
+        ),
+    };
+  }
   const raw=new WebAssembly.Instance(
     new WebAssembly.Module(artifact.binary),
-    imports,
+    resolvedImports,
   );
   const exports:Record<
     string,

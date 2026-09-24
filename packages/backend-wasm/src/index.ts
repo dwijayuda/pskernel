@@ -2,8 +2,10 @@ import binaryen from 'binaryen';
 import {
   validateWasmIrModule,
   type WasmAbiValueType,
+  type WasmBigIntLiteral,
   type WasmIrExpr,
   type WasmIrFunction,
+  type WasmIrFunctionImport,
   type WasmIrModule,
   type WasmValueType,
 } from '@proofscript/wasm-ir';
@@ -39,6 +41,8 @@ export interface WasmEmitResult {
   readonly optimized:boolean;
   readonly binaryenVersion:typeof BINARYEN_VERSION;
   readonly profile:WasmIrModule['profile'];
+  readonly imports:readonly WasmIrFunctionImport[];
+  readonly bigintLiterals:readonly WasmBigIntLiteral[];
   readonly exports:readonly WasmExportAbi[];
 }
 
@@ -197,6 +201,20 @@ export function emitBinaryenWasm(
   const module=new binaryen.Module();
   module.setFeatures(binaryenFeaturesForProfile(input.profile));
 
+  for(const imported of input.imports??[]){
+    module.addFunctionImport(
+      imported.internalName,
+      imported.module,
+      imported.name,
+      binaryen.createType(
+        imported.parameters.map(binaryenType),
+      ),
+      imported.result===null
+        ?binaryen.none
+        :binaryenType(imported.result),
+    );
+  }
+
   for(const fn of input.functions){
     const emitted=emitFunctionBody(module,fn);
     module.addFunction(
@@ -228,6 +246,8 @@ export function emitBinaryenWasm(
     optimized:options.optimize===true,
     binaryenVersion:BINARYEN_VERSION,
     profile:input.profile,
+    imports:[...(input.imports??[])],
+    bigintLiterals:[...(input.bigintLiterals??[])],
     exports:input.functions.flatMap((fn)=>
       fn.exportName===undefined
         ?[]

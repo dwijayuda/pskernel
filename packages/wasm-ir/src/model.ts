@@ -6,6 +6,22 @@ export type WasmAbiValueType=
   |'uint8'|'uint16'|'uint32'|'uint64'
   |'nat'|'int';
 
+export const PROOFSCRIPT_BIGINT_RUNTIME_MODULE=
+  'proofscript.bigint.v1' as const;
+
+export interface WasmBigIntLiteral {
+  readonly kind:'nat'|'int';
+  readonly decimal:string;
+}
+
+export interface WasmIrFunctionImport {
+  readonly internalName:string;
+  readonly module:typeof PROOFSCRIPT_BIGINT_RUNTIME_MODULE;
+  readonly name:string;
+  readonly parameters:readonly WasmValueType[];
+  readonly result:WasmValueType|null;
+}
+
 export interface WasmIrAbiSignature {
   readonly parameters:readonly WasmAbiValueType[];
   readonly result:WasmAbiValueType|null;
@@ -94,5 +110,7 @@ export interface WasmIrModule {
   readonly profile:
     |'proofscript-wasm32-mvp-js-v1'
     |'proofscript-wasm32-ref-js-v1';
+  readonly imports?:readonly WasmIrFunctionImport[];
+  readonly bigintLiterals?:readonly WasmBigIntLiteral[];
   readonly functions:readonly WasmIrFunction[];
 }

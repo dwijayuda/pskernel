@@ -244,3 +244,44 @@ throws(
   /PS_WASM_JS_ABI_NAT_RANGE/u,
 );
 console.log('ok - @proofscript/backend-wasm W3 externref bigint identity scaffold');
+
+const hugeLiteral=1267650600228229401496703205376n;
+const bigintLiteralModule:WasmIrModule={
+  kind:'proofscript-wasm-ir',
+  profile:'proofscript-wasm32-ref-js-v1',
+  imports:[{
+    internalName:'ps$bigint$literal',
+    module:'proofscript.bigint.v1',
+    name:'literal',
+    parameters:['i32'],
+    result:'externref',
+  }],
+  bigintLiterals:[{kind:'nat',decimal:hugeLiteral.toString()}],
+  functions:[{
+    name:'hugeNat',
+    parameters:[],
+    result:'externref',
+    abi:{parameters:[],result:'nat'},
+    exportName:'hugeNat',
+    body:{
+      kind:'call',
+      target:'ps$bigint$literal',
+      args:[{kind:'i32.const',value:0}],
+      result:'externref',
+    },
+  }],
+};
+const bigintLiteralArtifact=emitBinaryenWasm(bigintLiteralModule);
+ok(WebAssembly.validate(bigintLiteralArtifact.binary));
+equal(bigintLiteralArtifact.bigintLiterals[0]?.decimal,hugeLiteral.toString());
+const bigintLiteralHost=instantiateProofScriptWasm(bigintLiteralArtifact);
+equal(bigintLiteralHost.exports.hugeNat?.(),hugeLiteral);
+throws(
+  ()=>instantiateProofScriptWasm(
+    bigintLiteralArtifact,
+    {'proofscript.bigint.v1':{literal:()=>0n}},
+  ),
+  /PS_WASM_JS_ABI_RESERVED_IMPORT_COLLISION/u,
+);
+console.log('ok - @proofscript/backend-wasm W3 reserved bigint literal runtime');
+

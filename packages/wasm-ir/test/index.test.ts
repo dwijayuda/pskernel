@@ -78,3 +78,49 @@ throws(
 );
 
 console.log('ok - @proofscript/wasm-ir W3 Reference Types profile guard');
+
+const natLiteralModule:WasmIrModule={
+  kind:'proofscript-wasm-ir',
+  profile:'proofscript-wasm32-ref-js-v1',
+  imports:[{
+    internalName:'ps$bigint$literal',
+    module:'proofscript.bigint.v1',
+    name:'literal',
+    parameters:['i32'],
+    result:'externref',
+  }],
+  bigintLiterals:[{kind:'nat',decimal:'1267650600228229401496703205376'}],
+  functions:[{
+    name:'hugeNat',
+    parameters:[],
+    result:'externref',
+    abi:{parameters:[],result:'nat'},
+    exportName:'hugeNat',
+    body:{
+      kind:'call',
+      target:'ps$bigint$literal',
+      args:[{kind:'i32.const',value:0}],
+      result:'externref',
+    },
+  }],
+};
+equal(validateWasmIrModule(natLiteralModule),true);
+throws(
+  ()=>validateWasmIrModule({
+    ...natLiteralModule,
+    bigintLiterals:[
+      {kind:'nat',decimal:'1'},
+      {kind:'nat',decimal:'1'},
+    ],
+  }),
+  /PS_WASM_IR_DUPLICATE_BIGINT_LITERAL/u,
+);
+throws(
+  ()=>validateWasmIrModule({
+    ...natLiteralModule,
+    bigintLiterals:[{kind:'nat',decimal:'01'}],
+  }),
+  /PS_WASM_IR_BIGINT_LITERAL_CANONICAL/u,
+);
+console.log('ok - @proofscript/wasm-ir W3 canonical bigint literal table');
+

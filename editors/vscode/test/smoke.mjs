@@ -12,6 +12,7 @@ function assert(value,message){
 }
 
 assert(pkg.contributes.languages[0].extensions.includes('.ps'),'missing .ps language');
+assert(pkg.contributes.languages[0].extensions.includes('.psx'),'missing .psx language');
 const leanMode=pkg.contributes.languages.find(
   (item)=>item.id==='proofscript-lean',
 );

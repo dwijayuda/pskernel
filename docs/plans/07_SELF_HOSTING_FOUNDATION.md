@@ -433,17 +433,18 @@ real compiler code needs them.
 Do not reproduce Lean's full transformer/typeclass/law hierarchy merely for
 bootstrap ergonomics.
 
-Add the small proof-aware control-flow forms that compiler code uses to carry
-branch facts without invoking a tactic engine:
+Keep the following proof-aware control-flow forms in the plan as
+OPTIONAL/NON-BLOCKING conveniences unless the frozen compiler/language subset
+actually uses them:
 
 - dependent/proof-binding conditionals such as `if h : P then ... else ...`
   and the anonymous-proof form `if _ : P then ... else ...`;
 - ordinary proof-valued local bindings such as `have h : P := proof`;
-- `show T from e` or an equivalent cheap expected-type annotation form when
-  it materially simplifies compiler/proof code.
+- `show T from e` or an equivalent cheap expected-type annotation form.
 
-The bootstrap subset must own the **bounded Decidable closure** needed to make
-those forms real Lean-compatible terms rather than syntax-only conveniences:
+When these forms are supported, the implementation must own the **bounded
+Decidable closure** needed to make them real Lean-compatible terms rather than
+syntax-only conveniences:
 
 - synthesize a known `Decidable P` through the same bounded instance-search
   mechanism used elsewhere in elaboration;
@@ -597,10 +598,11 @@ compiler-critical tail recursion/iteration must also have a stack-safety
 strategy. Prefer tail-recursion-to-loop lowering and verified/library iterators;
 use trampolining only when a concrete algorithm requires it.
 
-Exit test: mutually recursive expression/type parsing, a fixed-point-style
-compiler utility, and a large compiler-style traversal run through the verified
-backend without host mutation shortcuts or JavaScript stack overflow in the
-covered profile.
+PSC1 exit test: a structurally recursive parser/compiler traversal, one
+controlled `partial def` utility, and a large compiler-style traversal run
+through the verified backend without host mutation shortcuts or JavaScript
+stack overflow in the covered profile. Mutual/local recursion and loop syntax
+receive separate optional gates when implemented.
 
 ## SH4.5 — pattern-language closure
 
@@ -624,9 +626,11 @@ complete dependent pattern compiler merely for surface parity. Indexed/dependent
 pattern features remain workload-driven and must fail closed until their
 elaboration semantics are owned.
 
-Exit test: a parser/AST transformation module can destructure nested compiler
-data, use multi-scrutinee matches and `if let`/let-patterns, and execute through
-the checked-core JavaScript path with no TypeScript-side pattern semantics.
+PSC1 exit test: a parser/AST transformation module can express its logic using
+the required ordinary single-scrutinee `match` path and execute through the
+checked-core JavaScript path with no TypeScript-side pattern semantics. Richer
+nested/multi-scrutinee/`if let`/let-pattern syntax receives optional
+round-trip and execution gates when implemented.
 
 ## SH5 — names, modules, environments and bootstrap data model
 

@@ -1,0 +1,148 @@
+name: Int.DivMod parallel isolation
+
+on:
+  push:
+    branches: [diagnostic/int-divmod-parallel]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  r22200:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Adaptive replay roots 22200-22400
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "4096"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22200 200 50 5
+
+  r22400:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Adaptive replay roots 22400-22600
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "4096"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22400 200 50 5
+
+  r22600:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Adaptive replay roots 22600-22800
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "4096"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22600 200 50 5
+
+  r22800:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Adaptive replay roots 22800-23000
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "4096"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 22800 200 50 5
+
+  r23000:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Adaptive replay roots 23000-23200
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "4096"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 23000 200 50 5
+
+  r23200:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Adaptive replay roots 23200-23400
+        env:
+          PSKERNEL_WORKER_TIMEOUT_MS: "30000"
+          PSKERNEL_WORKER_HEAP_MIB: "4096"
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 23200 200 50 5

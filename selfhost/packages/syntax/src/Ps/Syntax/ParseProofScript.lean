@@ -36,6 +36,9 @@ structure PsProofScriptCallArgs where
   cursor : PsTokenCursor
 
 def psParseProofScriptCallArgsWithFuel
+    (parseArgument :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
     (fuel : Nat)
     (cursor : PsTokenCursor)
     (argsRev : List PsSyntaxTerm) :
@@ -58,7 +61,7 @@ def psParseProofScriptCallArgsWithFuel
               cursor := close.cursor
             }
       else
-        match psParseSimpleTerm cursor with
+        match parseArgument cursor with
         | Except.error error => Except.error error
         | Except.ok argument =>
             if psTokenCursorAtText argument.cursor "," then
@@ -66,6 +69,7 @@ def psParseProofScriptCallArgsWithFuel
               | none => Except.error (PsParseError.unexpectedEnd "term")
               | some comma =>
                   psParseProofScriptCallArgsWithFuel
+                    parseArgument
                     remaining
                     comma.cursor
                     (argument.value :: argsRev)
@@ -87,41 +91,53 @@ def psProofScriptCallAdjacent
   | some token =>
       token.span.start.byteOffset == (psSyntaxTermSpan term).stop.byteOffset
 
+def psParseProofScriptSimpleApplicationWithFuel
+    (fuel : Nat)
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match fuel with
+  | 0 => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      match psParseSimpleTerm cursor with
+      | Except.error error => Except.error error
+      | Except.ok first =>
+          if psTokenCursorAtText first.cursor "("
+              && psProofScriptCallAdjacent first.value first.cursor then
+            match psTokenCursorAdvance first.cursor with
+            | none => Except.error (PsParseError.unexpectedEnd "(")
+            | some opening =>
+                match psParseProofScriptCallArgsWithFuel
+                    (psParseProofScriptSimpleApplicationWithFuel remaining)
+                    remaining
+                    opening.cursor
+                    [] with
+                | Except.error error => Except.error error
+                | Except.ok call =>
+                    let span := {
+                      start := (psSyntaxTermSpan first.value).start
+                      stop := call.closeSpan.stop
+                    }
+                    let args :=
+                      match call.args with
+                      | [] =>
+                          [PsSyntaxTerm.unit {
+                            start := opening.token.span.start
+                            stop := call.closeSpan.stop
+                          }]
+                      | _ => call.args
+                    Except.ok {
+                      value := PsSyntaxTerm.app first.value args span
+                      cursor := call.cursor
+                    }
+          else
+            Except.ok first
+
 def psParseProofScriptSimpleApplication
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  match psParseSimpleTerm cursor with
-  | Except.error error => Except.error error
-  | Except.ok first =>
-      if psTokenCursorAtText first.cursor "("
-          && psProofScriptCallAdjacent first.value first.cursor then
-        match psTokenCursorAdvance first.cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "(")
-        | some opening =>
-            match psParseProofScriptCallArgsWithFuel
-                first.cursor.remaining.length
-                opening.cursor
-                [] with
-            | Except.error error => Except.error error
-            | Except.ok call =>
-                let span := {
-                  start := (psSyntaxTermSpan first.value).start
-                  stop := call.closeSpan.stop
-                }
-                let args :=
-                  match call.args with
-                  | [] =>
-                      [PsSyntaxTerm.unit {
-                        start := opening.token.span.start
-                        stop := call.closeSpan.stop
-                      }]
-                  | _ => call.args
-                Except.ok {
-                  value := PsSyntaxTerm.app first.value args span
-                  cursor := call.cursor
-                }
-      else
-        Except.ok first
+  psParseProofScriptSimpleApplicationWithFuel
+    (cursor.remaining.length + 1)
+    cursor
 
 def psParseProofScriptBinder
     (cursor : PsTokenCursor) :

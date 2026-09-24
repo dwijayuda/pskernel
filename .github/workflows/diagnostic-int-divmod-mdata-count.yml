@@ -1,0 +1,32 @@
+name: Diagnostic Int.DivMod MData count
+# trigger: int-divmod-mdata-count-v1
+
+on:
+  push:
+    branches: [diagnostic/int-divmod-mdata-count]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Count MData records in diagnostic root range
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 22197 957 > /tmp/int-divmod.ndjson
+          echo "physical_lines=$(wc -l < /tmp/int-divmod.ndjson)"
+          echo "mdata_expr_records=$(grep -c '\"mdata\"' /tmp/int-divmod.ndjson || true)"
+          echo "distinct_dataeq_ids=$(grep -o '\"dataEq\":[0-9]*' /tmp/int-divmod.ndjson | sort -u | wc -l)"
+          echo "max_dataeq_id=$(grep -o '\"dataEq\":[0-9]*' /tmp/int-divmod.ndjson | sed 's/.*://' | sort -n | tail -1)"

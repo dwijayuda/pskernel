@@ -35,3 +35,9 @@ def psIteName : PsName :=
 
 def psUnitUnitName : PsName :=
   psNameAppendStr psUnitName "unit"
+
+def psCharName : PsName :=
+  psRootName "Char"
+
+def psCharOfNatName : PsName :=
+  psNameAppendStr psCharName "ofNat"

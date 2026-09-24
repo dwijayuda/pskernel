@@ -1262,14 +1262,15 @@ assert(
   'ProofScript-written stdlib dogfood program did not return 22',
 );
 assert(
-  stdlibRun.moduleCount===5,
-  'ProofScript-written stdlib project did not load five modules',
+  stdlibRun.moduleCount===6,
+  'ProofScript-written stdlib project did not load six modules',
 );
 const stdlibModules=new Set(stdlibRun.moduleOrder);
 for(const moduleName of [
   'ProofScript.Data.Option',
   'ProofScript.Data.Result',
   'ProofScript.Data.List',
+  'ProofScript.Data.Array',
   'ProofScript.Text.Lexer',
   'main',
 ]){

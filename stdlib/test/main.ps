@@ -49,10 +49,16 @@ function main(x : Nat) : Nat :=
     nextSpan("𝒫x", rawPos(0));
   let lexeme : String :=
     sliceSpan("𝒫x", firstSpan);
+  let identifierSpan : SourceSpan :=
+    scanIdentifier2("Az!", rawPos(0));
+  let identifierLexeme : String :=
+    sliceSpan("Az!", identifierSpan);
   let lexerOk : Bool :=
     isAsciiIdentifierStart('A') &&
     isAsciiIdentifierRest('9') &&
-    isAsciiWhitespace(' ');
+    isAsciiWhitespace(' ') &&
+    String.Internal.length(identifierLexeme) == 2 &&
+    spanByteLength(identifierSpan) == 2;
   let lexerPenalty : Nat :=
     if (lexerOk) { String.Internal.length(lexeme) - 1 } else { 1 };
   resultValue +

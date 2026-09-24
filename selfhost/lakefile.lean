@@ -41,6 +41,14 @@ lean_lib PsCore where
     `Ps.Core.Declaration
   ]
 
+lean_lib PsKernel where
+  srcDir := "packages/kernel/src"
+  roots := #[
+    `Ps.Kernel.Model,
+    `Ps.Kernel.Environment,
+    `Ps.Kernel.Validation
+  ]
+
 lean_lib PsEnvironment where
   srcDir := "packages/environment/src"
   roots := #[
@@ -120,6 +128,10 @@ lean_exe psc1 where
 lean_exe psc1_tests where
   srcDir := "test"
   root := `BootstrapTests
+
+lean_exe psc1_kernel_tests where
+  srcDir := "test"
+  root := `KernelBootstrapTests
 
 lean_exe psc1_translation_tests where
   srcDir := "test"

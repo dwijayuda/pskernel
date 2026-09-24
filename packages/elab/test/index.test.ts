@@ -1019,6 +1019,27 @@ console.log('ok - @proofscript/elab parameterized verified match recursor elabor
 {
   const env=makeNatNotationEnvironment();
   const result=elaborateV061Declarations(parseV061Module(
+    'inductive PsOptionMatch(α : Type) where { '+
+    '| none; | some(value : α); } '+
+    'function main(value : PsOptionMatch(Nat)) : PsOptionMatch(Nat) := '+
+    'match value with { '+
+    '| .none => PsOptionMatch.some(1); '+
+    '| .some x => PsOptionMatch.some(x + 1); };',
+  ),env);
+  equal(result.definitions.length,1);
+  equal(
+    result.environment.find(nameFromDotted('main'))?.kind,
+    'definition',
+  );
+}
+console.log('ok - @proofscript/elab generic ADT constructor match');
+
+
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
     'inductive PsList(α : Type) where { '+
     '| nil; | cons(head : α, tail : PsList(α)); } '+
     'function headOr {α : Type}'+

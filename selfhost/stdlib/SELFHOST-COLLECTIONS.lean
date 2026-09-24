@@ -5,8 +5,11 @@ import ProofScript.Data.List
 import ProofScript.Data.Map
 import ProofScript.Data.Set
 
+def collectionIdentityNat (x : Nat) : Nat :=
+  x
+
 def collectionOption : Option Nat :=
-  optionMap (fun (x : Nat) => x) (Option.some 1)
+  optionMap collectionIdentityNat (Option.some 1)
 
 def collectionPair : Prod Nat Bool :=
   product 2 true
@@ -24,7 +27,7 @@ def collectionLength : Nat :=
   listLength collectionList
 
 def collectionMapped : List Nat :=
-  listMap (fun (x : Nat) => x) collectionList
+  listMap collectionIdentityNat collectionList
 
 def compareAlwaysEq (left : Nat) (right : Nat) : Ordering :=
   Ordering.eq

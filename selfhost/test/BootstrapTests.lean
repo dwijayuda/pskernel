@@ -350,12 +350,67 @@ def psTestDualSourceSimpleParse : Bool :=
         && psTestParsedModuleShape proofScriptModule
   | _, _ => false
 
+def psTestBinderKindExplicit (binder : PsSyntaxBinderHead) : Bool :=
+  match binder.kind with
+  | PsSyntaxBinderKind.explicit => true
+  | _ => false
+
+def psTestParsedBinderApplicationShape (module : PsSyntaxModule) : Bool :=
+  match module.declarations with
+  | [
+      PsSyntaxDeclaration.definition
+        idName
+        [(binder, binderType)]
+        idType
+        idValue
+        _,
+      PsSyntaxDeclaration.definition
+        oneName
+        []
+        oneType
+        oneValue
+        _
+    ] =>
+      psTestSyntaxNameSingle idName "id"
+        && psTestSyntaxNameSingle binder.name "x"
+        && psTestBinderKindExplicit binder
+        && psTestSyntaxNameSingle oneName "one"
+        && match binderType, idType, idValue, oneType, oneValue with
+           | PsSyntaxTerm.reference binderTypeName,
+             PsSyntaxTerm.reference idTypeName,
+             PsSyntaxTerm.reference idValueName,
+             PsSyntaxTerm.reference oneTypeName,
+             PsSyntaxTerm.app
+               (PsSyntaxTerm.reference callName)
+               [PsSyntaxTerm.natural argumentText _]
+               _ =>
+               psTestSyntaxNameSingle binderTypeName "Nat"
+                 && psTestSyntaxNameSingle idTypeName "Nat"
+                 && psTestSyntaxNameSingle idValueName "x"
+                 && psTestSyntaxNameSingle oneTypeName "Nat"
+                 && psTestSyntaxNameSingle callName "id"
+                 && argumentText == "1"
+           | _, _, _, _, _ => false
+  | _ => false
+
+def psTestDualSourceBinderApplicationParse : Bool :=
+  match
+      psParseLeanSource
+        "def id (x : Nat) : Nat := x\ndef one : Nat := id 1",
+      psParseProofScriptSource
+        "def id(x : Nat) : Nat := x; def one : Nat := id(1);" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      psTestParsedBinderApplicationShape leanModule
+        && psTestParsedBinderApplicationShape proofScriptModule
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
 
 def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source simple parse", passed := psTestDualSourceSimpleParse },
+  { name := "dual-source binder application parse", passed := psTestDualSourceBinderApplicationParse },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },
   { name := "lexer nested trivia", passed := psTestLexerNestedTrivia },
   { name := "module graph", passed := psTestModuleGraph },

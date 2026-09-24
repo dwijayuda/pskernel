@@ -203,23 +203,28 @@ export function wasmIrExprType(
 
     case 'i32.binary':
       expectWasmIrType(
-        wasmIrExprType(
-          expr.left,
-          locals,
-          functions,
-        ),
+        wasmIrExprType(expr.left,locals,functions),
         'i32',
         expr.operation+' left operand',
       );
       expectWasmIrType(
-        wasmIrExprType(
-          expr.right,
-          locals,
-          functions,
-        ),
+        wasmIrExprType(expr.right,locals,functions),
         'i32',
         expr.operation+' right operand',
       );
       return 'i32';
+
+    case 'i64.binary':
+      expectWasmIrType(
+        wasmIrExprType(expr.left,locals,functions),
+        'i64',
+        expr.operation+' left operand',
+      );
+      expectWasmIrType(
+        wasmIrExprType(expr.right,locals,functions),
+        'i64',
+        expr.operation+' right operand',
+      );
+      return 'i64';
   }
 }

@@ -1,0 +1,41 @@
+name: Diagnostic MData output equivalence
+# trigger: mdata-output-equivalence-v1
+
+on:
+  push:
+    branches: [diagnostic/mdata-output-equivalence]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compare Init.Prelude canonical stream
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExportBaseline.lean Init.Prelude --module-stream > /tmp/old-init.ndjson
+          lean --run oracle/replay-probe/DependencyExport.lean Init.Prelude --module-stream > /tmp/new-init.ndjson
+          cmp /tmp/old-init.ndjson /tmp/new-init.ndjson
+          sha256sum /tmp/old-init.ndjson /tmp/new-init.ndjson
+      - name: Compare metadata-heavy Int.DivMod range
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExportBaseline.lean Std --root-range 22197 957 > /tmp/old-divmod.ndjson
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 22197 957 > /tmp/new-divmod.ndjson
+          cmp /tmp/old-divmod.ndjson /tmp/new-divmod.ndjson
+          sha256sum /tmp/old-divmod.ndjson /tmp/new-divmod.ndjson
+          echo "old_bytes=$(wc -c < /tmp/old-divmod.ndjson)"
+          echo "new_bytes=$(wc -c < /tmp/new-divmod.ndjson)"

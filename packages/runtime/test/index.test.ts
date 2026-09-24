@@ -500,6 +500,13 @@ equal(
         implementation:'TSyntaxArray.rawImpl',
       },
     ],
+    runtimeTargets:[
+      {
+        declaration:'RuntimeTest.partial',
+        kind:'unsafe_rec',
+        implementation:'RuntimeTest.partial._unsafe_rec',
+      },
+    ],
     initializers:[
       {
         module:'Lean.Parser.Extension',
@@ -541,6 +548,14 @@ equal(
   equal(
     index.implementedByFor('TSyntaxArray.raw')?.implementation,
     'TSyntaxArray.rawImpl',
+  );
+  equal(
+    index.runtimeTargetFor('RuntimeTest.partial')?.kind,
+    'unsafe_rec',
+  );
+  equal(
+    index.runtimeTargetFor('RuntimeTest.partial')?.implementation,
+    'RuntimeTest.partial._unsafe_rec',
   );
   equal(
     index.initializersForModule('Lean.Parser.Extension').length,

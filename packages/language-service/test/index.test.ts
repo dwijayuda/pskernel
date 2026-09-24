@@ -158,7 +158,7 @@ console.log('ok - @proofscript/language-service sequential document environment'
   service.openDocument(
     'file:///Main.ps',
     1,
-    'import Core; theorem use(P : Prop, h : P) : P := by exact id(P, h);',
+    'import Core;\ntheorem use(P : Prop, h : P) : P := by exact id(P, h);',
   );
   const analysis=service.analyze('file:///Main.ps');
   if(analysis.kernel!=='verified'){
@@ -193,7 +193,7 @@ console.log('ok - @proofscript/language-service project failure is fail-closed')
 
 {
   const mainText=
-    'import Core; theorem use(P : Prop, h : P) : P := by exact id(P, h);';
+    'import Core;\ntheorem use(P : Prop, h : P) : P := by exact id(P, h);';
   const coreText=
     'theorem id (P : Prop) (h : P) : P := by assumption\n';
   const service=new ProofScriptLanguageService({
@@ -282,7 +282,7 @@ console.log('ok - @proofscript/language-service document translation');
   service.openDocument(
     mainUri,
     1,
-    'import Core; theorem use(P : Prop, h : P) : P := by exact id(P, h);',
+    'import Core;\ntheorem use(P : Prop, h : P) : P := by exact id(P, h);',
   );
   equal(service.analyze(mainUri).kernel,'verified');
 

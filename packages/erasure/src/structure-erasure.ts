@@ -18,6 +18,9 @@ import {
 import {safeIdentifier} from './names.js';
 import {eraseRuntimeType} from './type-erasure.js';
 import {prepareInductiveParameters} from './inductive-parameter-erasure.js';
+import {
+  prepareImportedRuntimeStructures,
+} from './imported-structure-erasure.js';
 
 export interface PreparedRuntimeStructures {
   readonly ir:readonly VerifiedIrStructure[];
@@ -171,6 +174,21 @@ export function prepareRuntimeStructures(
         type:field.type,
       })),
     });
+  }
+
+  for(const imported of prepareImportedRuntimeStructures(module)){
+    if(
+      byType.has(imported.info.typeKey)
+      ||byConstructor.has(imported.info.constructorKey)
+    ){
+      throw new Error(
+        "PS_ERASE_IMPORTED_STRUCTURE_COLLISION: '"+
+        imported.info.name+"'",
+      );
+    }
+    byType.set(imported.info.typeKey,imported.info);
+    byConstructor.set(imported.info.constructorKey,imported.info);
+    ir.push(imported.ir);
   }
 
   return {ir,byType,byConstructor};

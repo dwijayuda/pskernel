@@ -20,6 +20,7 @@ lean_lib PsCore where
   roots := #[
     `Ps.Core.Level,
     `Ps.Core.Expr,
+    `Ps.Core.Equality,
     `Ps.Core.Subst,
     `Ps.Core.Declaration
   ]
@@ -38,7 +39,10 @@ lean_lib PsProject where
 
 lean_lib PsMeta where
   srcDir := "packages/meta/src"
-  roots := #[`Ps.Meta.Context]
+  roots := #[
+    `Ps.Meta.Context,
+    `Ps.Meta.Reduce
+  ]
 
 @[default_target]
 lean_exe psc1 where

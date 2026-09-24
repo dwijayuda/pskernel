@@ -208,3 +208,42 @@ That plan defines acceptance gates for verified-core closure, dependent ADTs
 and recursion, Meta/Elab convergence, theorem prover v1, npm/JS interop,
 controlled effects, standard library work, legacy-path retirement, and
 production hardening.
+
+## Phase F — full-stack web / PSX
+
+Active plan:
+
+- `docs/plans/07_FULLSTACK_WEB_PSX.md`
+
+Objective:
+
+> Make a complete React/Next.js application authorable with `.ps` and
+> `.psx` only, while preserving the existing pskernel trust boundary and
+> reporting React/Next/Node/browser/database behavior as explicit external
+> runtime assumptions.
+
+Planned packages:
+
+- `@proofscript/jsx`
+- `@proofscript/react`
+- `@proofscript/react-dom`
+- `@proofscript/web`
+- `@proofscript/vite`
+- `@proofscript/next`
+
+Architectural rules:
+
+- `.psx` is ProofScript with JSX parsing enabled, not a second type theory;
+- JSX/React/Next constructs remain outside pskernel;
+- normal web work must not change `src/core/**` or `src/kernel/**`;
+- external runtime functions never become proof evidence;
+- framework adapters use supported host extension points instead of forking
+  React, Next.js, Vite, or their runtimes;
+- the first flagship target is a Next.js App Router application with no
+  hand-written application `.ts`/`.tsx` files.
+
+The staged execution order is PSX parser/lowering -> React -> Vite -> Web APIs
+-> Next App Router -> Route Handlers -> server/client/effect diagnostics ->
+complete reference app. The full acceptance gates and research rationale live
+in the dedicated plan.
+

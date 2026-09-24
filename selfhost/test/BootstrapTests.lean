@@ -2090,6 +2090,69 @@ def psTestDualSourceParametricInductive : Bool :=
       | _, _ => false
   | _, _ => false
 
+
+def psTestImplicitConstructorApplicationShape
+    (result : PsElabModuleResult) : Bool :=
+  let maybeName := psTestName "Maybe"
+  let noneName := psNameAppendStr maybeName "none"
+  let someName := psNameAppendStr maybeName "some"
+  let natType := PsExpr.constE psNatName []
+  let maybeNat :=
+    PsExpr.app (PsExpr.constE maybeName []) natType
+  let expectedPresent :=
+    PsExpr.app
+      (PsExpr.app
+        (PsExpr.constE someName [])
+        natType)
+      (PsExpr.lit (PsLiteral.natural 1))
+  let expectedAbsent :=
+    PsExpr.app
+      (PsExpr.constE noneName [])
+      natType
+  match result.declarations with
+  | [
+      PsDeclaration.inductiveDecl _,
+      PsDeclaration.constructorDecl _,
+      PsDeclaration.constructorDecl _,
+      PsDeclaration.recursorDecl _,
+      PsDeclaration.definitionDecl
+        presentName
+        []
+        presentType
+        presentValue,
+      PsDeclaration.definitionDecl
+        absentName
+        []
+        absentType
+        absentValue
+    ] =>
+      psNameEq presentName (psTestName "present")
+        && psExprAlphaEq presentType maybeNat
+        && psExprAlphaEq presentValue expectedPresent
+        && psNameEq absentName (psTestName "absent")
+        && psExprAlphaEq absentType maybeNat
+        && psExprAlphaEq absentValue expectedAbsent
+  | _ => false
+
+def psTestDualSourceImplicitConstructorApplication : Bool :=
+  match
+      psParseLeanSource
+        "inductive Maybe (α : Type) where | none | some (value : α)\ndef present : Maybe Nat := Maybe.some 1\ndef absent : Maybe Nat := Maybe.none",
+      psParseProofScriptSource
+        "inductive Maybe(α : Type) where { | none; | some(value : α); }; def present : Maybe(Nat) := Maybe.some(1); def absent : Maybe(Nat) := Maybe.none;" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestImplicitConstructorApplicationShape leanResult
+            && psTestImplicitConstructorApplicationShape proofScriptResult
+            && psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -2120,6 +2183,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source inductive field elaboration", passed := psTestDualSourceInductiveFieldElaboration },
   { name := "dual-source Type Prop elaboration", passed := psTestDualSourceTypePropElaboration },
   { name := "dual-source parametric inductive", passed := psTestDualSourceParametricInductive },
+  { name := "dual-source implicit constructor application", passed := psTestDualSourceImplicitConstructorApplication },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

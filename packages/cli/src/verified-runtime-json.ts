@@ -67,7 +67,7 @@ function decodePrimitive(
     return BigInt(value);
   }
   if(name==='Int'){
-    if(typeof value!=='string'||!^-?\d+$/u.test(value)){
+    if(typeof value!=='string'||!/^-?\d+$/u.test(value)){
       fail('nested Int values must be decimal JSON strings');
     }
     return BigInt(value);

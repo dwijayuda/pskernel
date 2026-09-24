@@ -350,25 +350,44 @@ def psTestDualSourceSimpleParse : Bool :=
         && psTestParsedModuleShape proofScriptModule
   | _, _ => false
 
-def psBootstrapTests : Bool :=
-  psTestDualSourceSimpleParse
-    && psTestLexerUtf8Offset
-    && psTestLexerNestedTrivia
-    && psTestModuleGraph
-    && psTestGlobalInstanceSynthesis
-    && psTestGenericInstanceSynthesis
-    && psTestDependentInstanceSynthesis
-    && psTestLocalInstanceSynthesis
-    && psTestTransactionalUnify
-    && psTestBinderInfoIgnoredByUnify
-    && psTestLevelMetaUnify
-    && psTestScopedMetaAssignment
-    && psTestRejectOutOfScopeMetaAssignment
-    && psTestBetaWhnf
-    && psTestInferIdentity
+structure PsNamedTest where
+  name : String
+  passed : Bool
 
-def main : IO Unit :=
-  if psBootstrapTests then
+def psBootstrapTestCases : List PsNamedTest := [
+  { name := "dual-source simple parse", passed := psTestDualSourceSimpleParse },
+  { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },
+  { name := "lexer nested trivia", passed := psTestLexerNestedTrivia },
+  { name := "module graph", passed := psTestModuleGraph },
+  { name := "global instance synthesis", passed := psTestGlobalInstanceSynthesis },
+  { name := "generic instance synthesis", passed := psTestGenericInstanceSynthesis },
+  { name := "dependent instance synthesis", passed := psTestDependentInstanceSynthesis },
+  { name := "local instance synthesis", passed := psTestLocalInstanceSynthesis },
+  { name := "transactional unification", passed := psTestTransactionalUnify },
+  { name := "binder-info unification", passed := psTestBinderInfoIgnoredByUnify },
+  { name := "level metavariable unification", passed := psTestLevelMetaUnify },
+  { name := "scoped metavariable assignment", passed := psTestScopedMetaAssignment },
+  { name := "reject out-of-scope assignment", passed := psTestRejectOutOfScopeMetaAssignment },
+  { name := "beta WHNF", passed := psTestBetaWhnf },
+  { name := "infer identity", passed := psTestInferIdentity }
+]
+
+def psBootstrapTests : Bool :=
+  psBootstrapTestCases.all (fun test => test.passed)
+
+def psRunNamedTests : List PsNamedTest -> IO Bool
+  | [] => pure true
+  | test :: rest => do
+      if test.passed then
+        IO.println ("PSC1_TEST_PASS: " ++ test.name)
+      else
+        IO.println ("PSC1_TEST_FAIL: " ++ test.name)
+      let restPassed ← psRunNamedTests rest
+      pure (test.passed && restPassed)
+
+def main : IO Unit := do
+  let passed ← psRunNamedTests psBootstrapTestCases
+  if passed then
     IO.println "PSC1_BOOTSTRAP_TESTS: PASS"
   else
     throw (IO.userError "PSC1_BOOTSTRAP_TESTS: FAIL")

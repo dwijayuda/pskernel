@@ -153,7 +153,9 @@ equal(ctor('Some',1).tag,'Some');
     typeof yes==='object'
       &&yes!==null
       &&!Array.isArray(yes)
+      &&'kind' in yes
       &&yes.kind==='constructor'
+      &&'name' in yes
       &&yes.name==='Decidable.isTrue',
     'Nat.decLt true result was not reboxed as Decidable.isTrue',
   );
@@ -165,7 +167,9 @@ equal(ctor('Some',1).tag,'Some');
     typeof no==='object'
       &&no!==null
       &&!Array.isArray(no)
+      &&'kind' in no
       &&no.kind==='constructor'
+      &&'name' in no
       &&no.name==='Decidable.isFalse',
     'Nat.decLt false result was not reboxed as Decidable.isFalse',
   );

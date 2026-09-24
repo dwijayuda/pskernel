@@ -35,7 +35,7 @@
     "check:architecture": "node scripts/proofscript-architecture-check.mjs",
     "build:src": "tsc -p tsconfig.src.json",
     "test:outer": "npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages",
-    "oracle:text-foundation": "npm run build --silent && node scripts/text-foundation-oracle.mjs"
+    "oracle:text-foundation": "npm run build --silent && tsc -p packages/environment/tsconfig.json && node scripts/text-foundation-oracle.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

@@ -68,6 +68,7 @@ lean_lib PsErasure where
   srcDir := "packages/erasure/src"
   roots := #[
     `Ps.Erasure.Basic,
+    `Ps.Erasure.Inductive,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]

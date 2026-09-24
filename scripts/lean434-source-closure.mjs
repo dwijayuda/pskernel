@@ -2,12 +2,32 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const repoRoot=process.cwd();
-const sourceRoot=path.join(repoRoot,'study','lean4-4.34.0','src');
+const bootstrapConfigPath=path.join(
+  repoRoot,'packages','runtime','lean434-bootstrap.json',
+);
+const bootstrapConfig=JSON.parse(
+  fs.readFileSync(bootstrapConfigPath,'utf8'),
+);
+if(
+  bootstrapConfig.format!=='proofscript-lean434-js-bootstrap'
+  ||bootstrapConfig.formatVersion!==1
+  ||bootstrapConfig.leanVersion!=='4.34.0'
+){
+  throw new Error('invalid Lean 4.34 JS bootstrap configuration');
+}
+const sourceRoot=path.join(repoRoot,...bootstrapConfig.sourceRoot.split('/'));
 
 const roots=process.argv.slice(2);
 const requestedRoots=roots.length===0
   ?['Lean.Parser','Lean.Meta.Basic','Lean.Elab.Frontend']
   :roots;
+
+const prunedImportsByModule=new Map(
+  Object.entries(bootstrapConfig.prunedImports??{}).map(([moduleName,items])=>[
+    moduleName,
+    new Map(items.map((item)=>[item.module,item.reason])),
+  ]),
+);
 
 function modulePath(moduleName){
   return path.join(sourceRoot,...moduleName.split('.'))+'.lean';
@@ -69,6 +89,7 @@ const implementedExterns=new Set(
 
 const visited=new Map();
 const missing=new Set();
+const appliedPrunes=[];
 const stack=[...requestedRoots].reverse();
 
 while(stack.length){
@@ -80,7 +101,18 @@ while(stack.length){
     continue;
   }
   const text=fs.readFileSync(file,'utf8');
-  const imports=parseImports(text);
+  const rawImports=parseImports(text);
+  const configuredPrunes=prunedImportsByModule.get(moduleName)??new Map();
+  for(const [dep,reason] of configuredPrunes){
+    if(!rawImports.includes(dep)){
+      throw new Error(
+        'bootstrap import prune drift: '+moduleName+
+        ' no longer imports '+dep,
+      );
+    }
+    appliedPrunes.push({module:moduleName,import:dep,reason});
+  }
+  const imports=rawImports.filter((dep)=>!configuredPrunes.has(dep));
   const externSymbols=extractExternSymbols(text);
   const implementedBy=extractImplementedBy(text);
   const features=Object.fromEntries(
@@ -90,7 +122,9 @@ while(stack.length){
     module:moduleName,
     path:normalizeRel(file),
     bytes:Buffer.byteLength(text),
+    rawImports,
     imports,
+    prunedImports:rawImports.filter((dep)=>configuredPrunes.has(dep)),
     externSymbols,
     implementedBy,
     features,
@@ -122,24 +156,40 @@ for(const item of modules){
 
 const report={
   format:'proofscript-lean434-source-closure',
-  formatVersion:1,
+  formatVersion:2,
   leanVersion:'4.34.0',
+  bootstrapConfig:normalizeRel(bootstrapConfigPath),
   roots:requestedRoots,
   totals:{
     modules:modules.length,
     bytes,
     missingModules:missing.size,
+    prunedImportEdges:appliedPrunes.length,
     externSymbols:externSymbols.length,
     implementedExternSymbols:coveredExternSymbols.length,
     uncoveredExternSymbols:uncoveredExternSymbols.length,
     implementedByTargets:allImplementedBy.size,
   },
   byTopLevel,
+  appliedPrunes:appliedPrunes.sort((a,b)=>
+    (a.module+'.'+a.import).localeCompare(b.module+'.'+b.import)
+  ),
   externCoverage:{
     implemented:coveredExternSymbols,
     missing:uncoveredExternSymbols,
   },
   missingModules:[...missing].sort(),
+  rootsDetail:requestedRoots.map((root)=>{
+    const item=visited.get(root);
+    return item===undefined
+      ?{module:root,missing:true}
+      :{
+          module:root,
+          rawImports:item.rawImports,
+          imports:item.imports,
+          prunedImports:item.prunedImports,
+        };
+  }),
   modules,
 };
 

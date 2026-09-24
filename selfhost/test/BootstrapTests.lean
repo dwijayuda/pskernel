@@ -1718,6 +1718,69 @@ def psTestDefEqBetaUnderForall : Bool :=
     left
     right
 
+def psTestInductiveEnumShape
+    (module : PsSyntaxModule) : Bool :=
+  match module.declarations with
+  | [
+      PsSyntaxDeclaration.inductiveDecl
+        name
+        []
+        none
+        [leftCtor, rightCtor]
+        _
+    ] =>
+      psTestSyntaxNameSingle name "Choice"
+        && psTestSyntaxNameSingle leftCtor.name "left"
+        && leftCtor.fields.isEmpty
+        && psTestSyntaxNameSingle rightCtor.name "right"
+        && rightCtor.fields.isEmpty
+  | _ => false
+
+def psTestDualSourceInductiveEnumParse : Bool :=
+  match
+      psParseLeanSource
+        "inductive Choice where | left | right",
+      psParseProofScriptSource
+        "inductive Choice where { | left; | right; };" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      psTestInductiveEnumShape leanModule
+        && psTestInductiveEnumShape proofScriptModule
+  | _, _ => false
+
+def psTestInductiveFieldShape
+    (module : PsSyntaxModule) : Bool :=
+  match module.declarations with
+  | [
+      PsSyntaxDeclaration.inductiveDecl
+        name
+        []
+        none
+        [constructor]
+        _
+    ] =>
+      psTestSyntaxNameSingle name "BoxNat"
+        && psTestSyntaxNameSingle constructor.name "mk"
+        && match constructor.fields with
+           | [(binder, PsSyntaxTerm.reference typeName)] =>
+               psTestSyntaxNameSingle binder.name "x"
+                 && psSyntaxBinderKindEq
+                   binder.kind
+                   PsSyntaxBinderKind.explicit
+                 && psTestSyntaxNameSingle typeName "Nat"
+           | _ => false
+  | _ => false
+
+def psTestDualSourceInductiveFieldParse : Bool :=
+  match
+      psParseLeanSource
+        "inductive BoxNat where | mk (x : Nat)",
+      psParseProofScriptSource
+        "inductive BoxNat where { | mk(x : Nat); };" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      psTestInductiveFieldShape leanModule
+        && psTestInductiveFieldShape proofScriptModule
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -1742,6 +1805,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source basic match elaboration", passed := psTestDualSourceBasicMatchElaboration },
   { name := "dual-source field match elaboration", passed := psTestDualSourceFieldMatchElaboration },
   { name := "defeq beta under forall", passed := psTestDefEqBetaUnderForall },
+  { name := "dual-source inductive enum parse", passed := psTestDualSourceInductiveEnumParse },
+  { name := "dual-source inductive field parse", passed := psTestDualSourceInductiveFieldParse },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },
   { name := "reject invalid String escapes", passed := psTestRejectInvalidStringEscapes },
   { name := "dual-source grouping", passed := psTestDualSourceGrouping },

@@ -8,11 +8,15 @@ structure S where
   names : HashMap Name Nat := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
   levels : HashMap Level Nat := HashMap.emptyWithCapacity 32 |>.insert .zero 0
   exprs : HashMap ExprStructEq Nat := HashMap.emptyWithCapacity 256
+  mdata : Array KVMap := #[]
   emitted : NameSet := {}
   active : NameSet := {}
   segmented : Bool := false
   segmentOpen : Bool := false
   segmentIndex : Nat := 0
+  /-- Canonical module-stream follows Lean.Kernel.Environment.replay and skips
+      unsafe/partial ConstantInfo. Diagnostic export modes leave this false. -/
+  skipNonReplayable : Bool := false
 
 abbrev M := StateT S IO
 
@@ -36,6 +40,16 @@ def biJson : BinderInfo → Json
   modify fun s => setM s ((getM s).insert x i)
   return i
 
+def dumpMDataEqId (d : KVMap) : M Nat := do
+  let xs := (← get).mdata
+  for i in [0:xs.size] do
+    -- Lean 4.34 Expr.eqv delegates MData comparison to KVMap's BEq, which
+    -- is extensional map equality (subset both ways), not raw entry-list order.
+    if xs[i]! == d then return i
+  let i := xs.size
+  modify fun s => { s with mdata := s.mdata.push d }
+  return i
+
 def dumpName (n : Name) : M Nat := intern n "in" (·.names) ({ · with names := · }) do
   match n with
   | .anonymous => unreachable!
@@ -55,14 +69,14 @@ def dumpLevel (l : Level) : M Nat := intern l "il" (·.levels) ({ · with levels
 partial def dumpExpr (e : Expr) : M Nat := intern (ExprStructEq.mk e) "ie" (·.exprs) ({ · with exprs := · }) do
   match e with
   | .fvar .. | .mvar .. => throw <| IO.userError "free/meta variable in kernel export"
-  | .mdata _ b => return .mkObj [("mdata", .mkObj [("data", .mkObj []), ("expr", ← dumpExpr b)])]
+  | .mdata d b => return .mkObj [("mdata", .mkObj [("dataEq", ← dumpMDataEqId d), ("expr", ← dumpExpr b)])]
   | .bvar i => return .mkObj [("bvar", i)]
   | .sort l => return .mkObj [("sort", ← dumpLevel l)]
   | .const n us => return .mkObj [("const", .mkObj [("name", ← dumpName n), ("us", (← us.mapM dumpLevel).toJson)])]
   | .app f a => return .mkObj [("app", .mkObj [("fn", ← dumpExpr f), ("arg", ← dumpExpr a)])]
   | .lam n d b bi => return .mkObj [("lam", .mkObj [("name", ← dumpName n), ("type", ← dumpExpr d), ("body", ← dumpExpr b), ("binderInfo", biJson bi)])]
   | .forallE n d b bi => return .mkObj [("forallE", .mkObj [("name", ← dumpName n), ("type", ← dumpExpr d), ("body", ← dumpExpr b), ("binderInfo", biJson bi)])]
-  | .letE n d v b _ => return .mkObj [("letE", .mkObj [("name", ← dumpName n), ("type", ← dumpExpr d), ("value", ← dumpExpr v), ("body", ← dumpExpr b)])]
+  | .letE n d v b nondep => return .mkObj [("letE", .mkObj [("name", ← dumpName n), ("type", ← dumpExpr d), ("value", ← dumpExpr v), ("body", ← dumpExpr b), ("nondep", nondep)])]
   | .proj s i a => return .mkObj [("proj", .mkObj [("typeName", ← dumpName s), ("idx", i), ("struct", ← dumpExpr a)])]
   | .lit (.natVal n) => return .mkObj [("natVal", s!"{n}")]
   | .lit (.strVal s) => return .mkObj [("strVal", s)]
@@ -83,6 +97,8 @@ def resetInternTablesPreserveActive : M Unit :=
     names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
     levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
     exprs := HashMap.emptyWithCapacity 256
+    -- Deliberately preserve mdata, emitted, active and segmentation state.
+    -- mdata equality IDs must remain stable across all segments.
   }
 
 def ensureDeclarationSegment : M Unit := do
@@ -345,6 +361,17 @@ mutual
     if ← isActive name then return
     for dep in semanticDeps name do dumpConstant env dep
     let ci ← findCI env name
+    if (← get).skipNonReplayable && (ci.isUnsafe || ci.isPartial) then
+      -- Lean.Kernel.Environment.replay excludes these constants from its
+      -- `remaining` work set. Mark mutual definition peers together so a
+      -- partial/unsafe block cannot be emitted piecemeal by later roots.
+      match ci with
+      | .defnInfo dv =>
+        let group := if dv.all.isEmpty then [dv.name] else dv.all
+        setEmitted group
+      | _ =>
+        setEmitted [name]
+      return
     match ci with
     | .ctorInfo cv => dumpConstant env cv.induct
     | .recInfo rv =>
@@ -367,9 +394,9 @@ mutual
       closeDeclarationSegment
     | .defnInfo dv =>
       if dv.safety == .safe then
-        -- DefinitionVal.all is informational for safe definitions. Lean 4.34
-        -- Kernel.Environment.replay recursively processes actual dependencies
-        -- and then adds this one defnDecl; it does not reconstruct a safe mutual block.
+        -- DefinitionVal.all is informational for safe definitions. Lean's
+        -- Kernel.Environment.replay ignores it: each safe defnInfo recursively
+        -- replays its actual used constants, then adds one defnDecl.
         setActive [name]
         dumpConstants env ci.getUsedConstantsAsSet
         dumpDefinition dv
@@ -377,8 +404,9 @@ mutual
         clearActive [name]
         closeDeclarationSegment
       else
-        -- Unsafe/partial mutual definitions are retained for diagnostic export
-        -- modes where DefinitionVal.all is the only preserved grouping metadata.
+        -- Unsafe/partial mutual blocks are only reconstructed in diagnostic
+        -- export modes. Canonical module-stream returns above before reaching
+        -- this branch, matching Kernel.Environment.replay's skip policy.
         let group := if dv.all.isEmpty then [dv.name] else dv.all
         setActive group
         for n in group do
@@ -413,6 +441,11 @@ mutual
       clearActive [name]
       closeDeclarationSegment
     | .quotInfo qv =>
+      -- Match Lean.Kernel.Environment.Replay exactly: any quotient record first
+      -- replays Eq, because adding Declaration.quotDecl installs all four Quot
+      -- constants and Quot.lift/Quot.ind depend on Eq even when the current root
+      -- (for example Quot or Quot.mk) does not mention Eq in its own type.
+      dumpConstant env `Eq
       setActive [name]
       dumpConstants env ci.getUsedConstantsAsSet
       dumpQuot qv
@@ -430,6 +463,9 @@ def resetInternTables : M Unit :=
     names := HashMap.emptyWithCapacity 64 |>.insert .anonymous 0
     levels := HashMap.emptyWithCapacity 32 |>.insert .zero 0
     exprs := HashMap.emptyWithCapacity 256
+    -- Keep mdata equality identities stable across module-stream shards. The TS
+    -- replay shares one Environment across shards, so restarting these IDs could
+    -- make distinct Lean KVMaps look structurally equal.
     active := {}
   }
 
@@ -446,6 +482,28 @@ def collectRootsByModule (env : Environment) : Array (Array Name) := Id.run do
       buckets := buckets.modify idx (fun xs => xs.push n)
   for idx in [0:buckets.size] do
     buckets := buckets.set! idx (buckets[idx]!.qsort Name.quickLt)
+  return buckets
+
+/-- Project-canonical release-gate root seeding.
+Lean 4.34 stores the serialized constant sequence actually loaded for each imported
+module in `EnvironmentHeader.moduleData[idx].constNames`. This is not claimed to be
+source declaration order: exported .olean parts may be name-sorted, and Lean's own
+`Kernel.Environment.replay` seeds a NameSet and recursively replays dependencies.
+Use the serialized module sequence only as a deterministic exhaustive root order;
+`dumpConstant` emits dependencies first and the shared `emitted` set ensures each
+declaration is exported once. Keep `collectRootsByModule` above stable for
+diagnostic root-range numbering. -/
+def collectCanonicalRootsByModule (env : Environment) : Array (Array Name) := Id.run do
+  let mut buckets := Array.replicate env.header.moduleNames.size #[]
+  let mut seen : NameSet := {}
+  for idx in [0:buckets.size] do
+    if let some data := env.header.moduleData[idx]? then
+      let mut roots := #[]
+      for n in data.constNames do
+        unless seen.contains n do
+          seen := seen.insert n
+          roots := roots.push n
+      buckets := buckets.set! idx roots
   return buckets
 
 def batchSizes (buckets : Array (Array Name)) (maxRoots : Nat) : Array Nat := Id.run do
@@ -626,7 +684,22 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
 
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let total := env.constants.map₁.size
-  let buckets := collectRootsByModule env
+  let mut replayable := 0
+  let mut skippedUnsafe := 0
+  let mut skippedPartial := 0
+  for (_, ci) in env.constants.map₁.toList do
+    if ci.isUnsafe then
+      skippedUnsafe := skippedUnsafe + 1
+    else if ci.isPartial then
+      skippedPartial := skippedPartial + 1
+    else
+      replayable := replayable + 1
+  if replayable + skippedUnsafe + skippedPartial != total then
+    throw <| IO.userError "canonical replay accounting mismatch"
+  let buckets := collectCanonicalRootsByModule env
+  let directRoots := buckets.foldl (init := 0) fun n roots => n + roots.size
+  if directRoots != total then
+    throw <| IO.userError s!"canonical module root coverage mismatch: {directRoots} != {total}"
   let rootsPerShard : Nat := 10
   let mut plannedShards := 0
   for roots in buckets do
@@ -635,11 +708,21 @@ partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   IO.println <| (Json.mkObj [("environment", Json.mkObj [
     ("module", target.toString),
     ("constants", total),
+    ("replayableConstants", replayable),
+    ("skippedUnsafe", skippedUnsafe),
+    ("skippedPartial", skippedPartial),
+    ("replayPolicy", "Lean.Kernel.Environment.replay"),
     ("modules", env.header.moduleNames.size),
     ("plannedShards", plannedShards),
-    ("rootsPerShard", rootsPerShard)
+    ("rootsPerShard", rootsPerShard),
+    ("rootOrder", "olean-module-constNames"),
+    ("rootOrderMeaning", "serialized-module-sequence"),
+    ("rootDedup", "first-serialized-occurrence"),
+    ("emissionOrder", "dependency-first"),
+    ("canonicalScope", "pskernel-project-protocol")
   ])]).compress
   let _ ← (do
+    modify fun (s : S) => { s with skipNonReplayable := true }
     for idx in [0:buckets.size] do
       let roots : Array Name := buckets[idx]!
       unless roots.isEmpty do

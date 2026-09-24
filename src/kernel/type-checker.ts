@@ -1,19 +1,21 @@
 import { ConstantInfo, DefinitionInfo, DefinitionSafety, ReducibilityHints, isUnsafeConstant } from '../core/declaration.js';
 import { Environment, KernelError } from '../core/environment.js';
-import { Expr, app, appView, constant, exprEq, exprToString, forallE, fvar, getAppArgs, getAppFn, hasFVar, instantiateExprLevels, lam, mkAppN, natLit, sort, stripMData } from '../core/expr.js';
-import { abstractFVar, instantiate1 } from '../core/instantiate.js';
-import { Level, levelEquivalent, levelParamNames, levelSucc, levelToString, mkIMax, normalizesToZero } from '../core/level.js';
+import { Expr, app, appView, constant, exprEq, exprLeanEq, exprToString, forallE, fvar, getAppArgs, getAppFn, hasFVar, hasLooseBVar, instantiateExprLevels, lam, mkAppN, natLit, sort, stripMData } from '../core/expr.js';
+import { abstractFVar, instantiate, instantiate1 } from '../core/instantiate.js';
+import { Level, levelEquivalent, levelParamNames, levelSucc, levelToString, levelZero, mkIMax, normalizesToZero } from '../core/level.js';
 import { LocalContext } from '../core/local-context.js';
 import { nameEq, nameToString } from '../core/name.js';
 import { N } from './names.js';
 import { checkNatSize, LEAN_NAT_MAX_SIZE_DEFAULT, reduceNatApp } from './reduction/nat.js';
 import { stringLitToConstructor } from './reduction/literals.js';
+import { NativeEvaluator, reduceNative } from './reduction/native.js';
 import { reduceQuot } from './reduction/quot.js';
 import { reduceRecursor } from './reduction/recursor.js';
 import { KernelState } from './state.js';
 
 export interface KernelLimits { readonly maxRecDepth:number; readonly maxNatBytes:bigint; }
-const DEFAULT_LIMITS:KernelLimits={maxRecDepth:4096,maxNatBytes:LEAN_NAT_MAX_SIZE_DEFAULT};
+const DEFAULT_LIMITS:KernelLimits={maxRecDepth:512,maxNatBytes:LEAN_NAT_MAX_SIZE_DEFAULT};
+const LEAN_KERNEL_REC_DEPTH_FACTOR=16;
 
 function deltaInfo(i:ConstantInfo|undefined): DefinitionInfo|null {
   // Lean 4.34: only DefinitionVal has a delta-reducible value. Theorems and opaque constants do not.
@@ -27,21 +29,120 @@ function cmpHint(a:ReducibilityHints,b:ReducibilityHints):number{
 
 export class TypeChecker {
   readonly state:KernelState;
-  private depth=0;
-  constructor(readonly env:Environment,readonly lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false){this.state=state??new KernelState();}
-  private rec<T>(f:()=>T):T{if(++this.depth>this.limits.maxRecDepth){this.depth--;throw new KernelError('deep recursion');}try{return f();}finally{this.depth--;}}
+  readonly lctx:LocalContext;
+  constructor(readonly env:Environment,lctx=new LocalContext(),state?:KernelState,readonly limits:KernelLimits=DEFAULT_LIMITS,readonly definitionSafety:DefinitionSafety='safe',readonly allowedLevelParams?:readonly import('../core/name.js').Name[],private eagerReduce=false,readonly nativeEvaluator?:NativeEvaluator){
+    this.lctx=lctx.clone();
+    this.state=state??new KernelState();
+    this.state.bindEnvironment(env);
+    this.state.bindCheckerConfig({
+      definitionSafety:this.definitionSafety,
+      allowedLevelParams:this.allowedLevelParams,
+      maxRecDepth:this.limits.maxRecDepth,
+      maxNatBytes:this.limits.maxNatBytes,
+      nativeEvaluator:this.nativeEvaluator,
+    });
+    this.state.bindLocalContext(this.lctx);
+  }
+  private rec<T>(f:()=>T):T{
+    this.state.bindEnvironment(this.env);
+    this.state.recDepth++;
+    const max=this.limits.maxRecDepth;
+    if(max>0&&this.state.recDepth>max*LEAN_KERNEL_REC_DEPTH_FACTOR){
+      this.state.recDepth--;
+      throw new KernelError('deep recursion');
+    }
+    try{return f();}finally{this.state.recDepth--;}
+  }
   private checkLevel(l:Level):void{if(!this.allowedLevelParams)return;for(const p of levelParamNames(l))if(!this.allowedLevelParams.some(q=>nameEq(p,q)))throw new KernelError(`invalid reference to undefined universe level parameter '${nameToString(p)}'`);}
-  private withLocal<T>(name:string,type:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLocal(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce));}
-  private withLet<T>(name:string,type:Expr,value:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=c.fresh(name);c.addLet(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type,value);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce));}
+  private withLocal<T>(name:string,type:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=this.state.freshLocal(name,c);c.addLocal(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}
+  private withLet<T>(name:string,type:Expr,value:Expr,k:(id:string,tc:TypeChecker)=>T):T{const c=this.lctx.clone(),id=this.state.freshLocal(name,c);c.addLet(id,{kind:'str',prefix:{kind:'anonymous'},value:name},type,value);return k(id,new TypeChecker(this.env,c,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator));}
   private isEagerReduceExpr(e:Expr):boolean{const v=appView(e);return v.fn.kind==='const'&&nameEq(v.fn.name,N.EagerReduce)&&v.args.length===2;}
   private withEagerReduction<T>(k:()=>T):T{const old=this.eagerReduce;this.eagerReduce=true;try{return k();}finally{this.eagerReduce=old;}}
 
-  check(e:Expr):Expr { if(this.hasLoose(e))throw new KernelError('type checker does not support loose bound variables'); return this.infer(e,false); }
-  infer(e:Expr,inferOnly=true):Expr{return this.rec(()=>this.inferCore(e,inferOnly));}
-  private hasLoose(e:Expr):boolean{const go=(x:Expr,d:number):boolean=>{switch(x.kind){case'bvar':return x.index>=d;case'app':return go(x.fn,d)||go(x.arg,d);case'lam':case'forall':return go(x.type,d)||go(x.body,d+1);case'let':return go(x.type,d)||go(x.value,d)||go(x.body,d+1);case'mdata':return go(x.expr,d);case'proj':return go(x.expr,d);default:return false;}};return go(e,0);}
+  private child(lctx:LocalContext):TypeChecker{return new TypeChecker(this.env,lctx,this.state,this.limits,this.definitionSafety,this.allowedLevelParams,this.eagerReduce,this.nativeEvaluator);}
+  private instantiateRev(e:Expr,xs:readonly Expr[]):Expr{return xs.length===0?e:instantiate(e,[...xs].reverse());}
+  private cheapBetaReduce(e:Expr):Expr{
+    if(e.kind!=='app')return e;
+    const av=appView(e);let fn=av.fn;if(fn.kind!=='lam')return e;
+    let i=0;while(fn.kind==='lam'&&i<av.args.length){i++;fn=fn.body;}
+    if(!hasLooseBVar(fn))return mkAppN(fn,av.args.slice(i));
+    if(fn.kind==='bvar'&&fn.index<i)return mkAppN(av.args[i-fn.index-1]!,av.args.slice(i));
+    return e;
+  }
+  private closePiLocals(vs:readonly {id:string;name:import('../core/name.js').Name;type:Expr;binderInfo:import('../core/expr.js').BinderInfo}[],body:Expr):Expr{
+    let r=body;
+    for(let i=vs.length-1;i>=0;i--){const v=vs[i]!;r=forallE(v.name,v.type,abstractFVar(r,v.id),v.binderInfo);}
+    return r;
+  }
+  private inferLambdaSpine(e:Extract<Expr,{kind:'lam'}>,inferOnly:boolean):Expr{
+    const lctx=this.lctx.clone(),vs:{id:string;name:import('../core/name.js').Name;type:Expr;binderInfo:import('../core/expr.js').BinderInfo;expr:Expr}[]=[];let cur:Expr=e;
+    while(cur.kind==='lam'){
+      const type=this.instantiateRev(cur.type,vs.map(v=>v.expr));
+      if(!inferOnly){const tc=this.child(lctx);tc.ensureSort(tc.infer(type,false),type);}
+      const id=this.state.freshLocal(nameToString(cur.name),lctx);lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,name:cur.name,type,binderInfo:cur.binderInfo,expr:fvar(id)});cur=cur.body;
+    }
+    const body=this.instantiateRev(cur,vs.map(v=>v.expr));const r=this.cheapBetaReduce(this.child(lctx).infer(body,inferOnly));
+    return this.closePiLocals(vs,r);
+  }
+  private inferPiSpine(e:Extract<Expr,{kind:'forall'}>,inferOnly:boolean):Expr{
+    const lctx=this.lctx.clone(),vs:{id:string;expr:Expr}[]=[];const levels:Level[]=[];let cur:Expr=e;
+    while(cur.kind==='forall'){
+      const type=this.instantiateRev(cur.type,vs.map(v=>v.expr)),tc=this.child(lctx),s=tc.ensureSort(tc.infer(type,inferOnly),type);levels.push(s.level);
+      const id=this.state.freshLocal(nameToString(cur.name),lctx);lctx.addLocal(id,cur.name,type,cur.binderInfo);vs.push({id,expr:fvar(id)});cur=cur.body;
+    }
+    const body=this.instantiateRev(cur,vs.map(v=>v.expr)),tc=this.child(lctx),s=tc.ensureSort(tc.infer(body,inferOnly),body);let level=s.level;
+    for(let i=levels.length-1;i>=0;i--)level=mkIMax(levels[i]!,level);
+    return sort(level);
+  }
+  private inferLetSpine(e:Extract<Expr,{kind:'let'}>,inferOnly:boolean):Expr{
+    const lctx=this.lctx.clone(),vs:{id:string;name:import('../core/name.js').Name;type:Expr;value:Expr;expr:Expr}[]=[];let cur:Expr=e;
+    while(cur.kind==='let'){
+      const open=vs.map(v=>v.expr),type=this.instantiateRev(cur.type,open),value=this.instantiateRev(cur.value,open);
+      if(!inferOnly){const tc=this.child(lctx);tc.ensureSort(tc.infer(type,false),type);const vt=tc.infer(value,false);if(!tc.isDefEq(vt,type))throw new KernelError('let value type mismatch');}
+      const id=this.state.freshLocal(nameToString(cur.name),lctx);lctx.addLet(id,cur.name,type,value);vs.push({id,name:cur.name,type,value,expr:fvar(id)});cur=cur.body;
+    }
+    const body=this.instantiateRev(cur,vs.map(v=>v.expr));let r=this.cheapBetaReduce(this.child(lctx).infer(body,inferOnly));
+    for(let i=vs.length-1;i>=0;i--){const v=vs[i]!;if(this.containsFVar(r,v.id))r={kind:'let',name:v.name,type:v.type,value:v.value,body:abstractFVar(r,v.id)};}
+    return r;
+  }
+  private inferAppOnlySpine(e:Extract<Expr,{kind:'app'}>):Expr{
+    const av=appView(e);let type=this.infer(av.fn,true),j=0;
+    // Match Lean 4.34 infer_app: consume syntactic Pi binders without eagerly
+    // instantiating them, and instantiate the accumulated argument slice only
+    // when a non-Pi head must be exposed.
+    for(let i=0;i<av.args.length;i++){
+      if(type.kind==='forall'){
+        type=type.body;
+      }else{
+        type=this.instantiateRev(type,av.args.slice(j,i));
+        type=this.ensureForall(type,e).body;
+        j=i;
+      }
+    }
+    return this.instantiateRev(type,av.args.slice(j));
+  }
+
+  check(e:Expr):Expr { return this.infer(e,false); }
+  infer(e:Expr,inferOnly=true):Expr{if(this.hasLoose(e))throw new KernelError('type checker does not support loose bound variables');return this.rec(()=>this.inferCore(e,inferOnly));}
+  private hasLoose(e:Expr):boolean{return hasLooseBVar(e);}
+  private containsFVar(e:Expr,id:string):boolean{
+    const todo:Expr[]=[e];
+    while(todo.length){
+      const x=todo.pop()!;
+      switch(x.kind){
+        case'fvar':if(x.id===id)return true;break;
+        case'app':todo.push(x.arg,x.fn);break;
+        case'lam':case'forall':todo.push(x.body,x.type);break;
+        case'let':todo.push(x.body,x.value,x.type);break;
+        case'mdata':case'proj':todo.push(x.expr);break;
+        default:break;
+      }
+    }
+    return false;
+  }
 
   private inferCore(e:Expr,inferOnly:boolean):Expr{
-    const key=this.state.exprId(e),cache=inferOnly?this.state.infer:this.state.checkedInfer,cached=cache.get(key);if(cached)return cached;
+    const cache=inferOnly?this.state.infer:this.state.checkedInfer,cached=cache.get(e);if(cached)return cached;
     let r:Expr;
     switch(e.kind){
       case'bvar':throw new KernelError('loose bound variable in type checker');
@@ -49,35 +150,34 @@ export class TypeChecker {
       case'fvar':{const d=this.lctx.get(e.id);if(!d)throw new KernelError(`unknown free variable ${e.id}`);r=d.type;break;}
       case'sort':if(!inferOnly)this.checkLevel(e.level);r=sort(levelSucc(e.level));break;
       case'const':{const i=this.env.get(e.name);if(e.levels.length!==i.levelParams.length)throw new KernelError(`incorrect number of universe levels at ${nameToString(e.name)}`);if(!inferOnly){if(isUnsafeConstant(i)&&this.definitionSafety!=='unsafe')throw new KernelError(`invalid declaration, it uses unsafe declaration '${nameToString(e.name)}'`);if(i.kind==='definition'&&i.safety==='partial'&&this.definitionSafety==='safe')throw new KernelError(`invalid declaration, safe declaration must not contain partial declaration '${nameToString(e.name)}'`);for(const l of e.levels)this.checkLevel(l);}r=instantiateExprLevels(i.type,i.levelParams,e.levels);break;}
-      case'lit':{if(e.literal.kind==='nat')checkNatSize(e.literal.value,this.limits.maxNatBytes,'Nat');const n=e.literal.kind==='nat'?N.Nat:N.String;if(!inferOnly)this.env.get(n);r=constant(n);break;}
+      case'lit':{
+        if(e.literal.kind==='nat')checkNatSize(e.literal.value,this.limits.maxNatBytes,'Nat');
+        // Final Lean 4.34 trusts the prelude here: infer_lit returns Nat/String
+        // directly and does not verify that the literal type is present in env.
+        r=constant(e.literal.kind==='nat'?N.Nat:N.String);break;
+      }
       case'mdata':r=this.infer(e.expr,inferOnly);break;
       case'app':{
-        const ft=this.ensureForall(this.infer(e.fn,inferOnly),e);const at=this.infer(e.arg,inferOnly);
-        if(!inferOnly){const ok=this.isEagerReduceExpr(e.arg)?this.withEagerReduction(()=>this.isDefEq(ft.type,at)):this.isDefEq(ft.type,at);if(!ok){const ef=ft.type.kind==='sort'?` Sort.${levelToString(ft.type.level)}`:'';const af=at.kind==='sort'?` Sort.${levelToString(at.level)}`:'';throw new KernelError(`application type mismatch in ${exprToString(e)}: expected ${exprToString(ft.type)}${ef}, got ${exprToString(at)}${af} for argument ${exprToString(e.arg)}`);}}
+        if(inferOnly){r=this.inferAppOnlySpine(e);break;}
+        const ft=this.ensureForall(this.infer(e.fn,false),e),at=this.infer(e.arg,false);const ok=this.isEagerReduceExpr(e.arg)?this.withEagerReduction(()=>this.isDefEq(at,ft.type)):this.isDefEq(at,ft.type);
+        if(!ok){const ef=ft.type.kind==='sort'?` Sort.${levelToString(ft.type.level)}`:'';const af=at.kind==='sort'?` Sort.${levelToString(at.level)}`:'';throw new KernelError(`application type mismatch in ${exprToString(e)}: expected ${exprToString(ft.type)}${ef}, got ${exprToString(at)}${af} for argument ${exprToString(e.arg)}`);}
         r=instantiate1(ft.body,e.arg);break;
       }
       case'lam':{
-        try{if(!inferOnly)this.ensureSort(this.infer(e.type,inferOnly),e.type);
-        r=this.withLocal('x',e.type,(id,tc)=>{const bt=tc.infer(instantiate1(e.body,fvar(id)),inferOnly);return forallE(e.name,e.type,abstractFVar(bt,id),e.binderInfo);});}catch(err){const msg=err instanceof Error?err.message:String(err);throw new KernelError(`lambda binder ${nameToString(e.name)} : ${exprToString(e.type)}: ${msg}`);}break;
+        try{r=this.inferLambdaSpine(e,inferOnly);}catch(err){const msg=err instanceof Error?err.message:String(err);throw new KernelError(`lambda binder ${nameToString(e.name)} : ${exprToString(e.type)}: ${msg}`);}break;
       }
       case'forall':{
-        try{const s1=this.ensureSort(this.infer(e.type,inferOnly),e.type);
-        const s2=this.withLocal('x',e.type,(id,tc)=>tc.ensureSort(tc.infer(instantiate1(e.body,fvar(id)),inferOnly),e.body));
-        r=sort(mkIMax(s1.level,s2.level));}catch(err){const msg=err instanceof Error?err.message:String(err);throw new KernelError(`forall binder ${nameToString(e.name)} : ${exprToString(e.type)}: ${msg}`);}break;
+        try{r=this.inferPiSpine(e,inferOnly);}catch(err){const msg=err instanceof Error?err.message:String(err);throw new KernelError(`forall binder ${nameToString(e.name)} : ${exprToString(e.type)}: ${msg}`);}break;
       }
-      case'let':{
-        if(!inferOnly)this.ensureSort(this.infer(e.type,inferOnly),e.type);const vt=this.infer(e.value,inferOnly);if(!inferOnly&&!this.isDefEq(vt,e.type))throw new KernelError('let value type mismatch');
-        // Instantiating the value is definitionally equal to retaining the local let and avoids leaking an fvar.
-        r=this.infer(instantiate1(e.body,e.value),inferOnly);break;
-      }
+      case'let':r=this.inferLetSpine(e,inferOnly);break;
       case'proj':r=this.inferProj(e,inferOnly);break;
     }
-    cache.set(key,r);return r;
+    cache.set(e,r);return r;
   }
 
   ensureSort(t:Expr,origin=t):Extract<Expr,{kind:'sort'}>{const w=this.whnf(t);if(w.kind!=='sort')throw new KernelError(`expected sort at ${exprToString(origin)}, got ${exprToString(w)}`);return w;}
   ensureForall(t:Expr,origin=t):Extract<Expr,{kind:'forall'}>{const w=this.whnf(t);if(w.kind!=='forall')throw new KernelError(`expected function type at ${exprToString(origin)}, got ${exprToString(w)}`);return w;}
-  getSortLevel(e:Expr):Level{return this.ensureSort(this.whnf(this.infer(e)),e).level;}
+  getSortLevel(e:Expr):Level{return this.ensureSort(this.infer(e),e).level;}
   isProp(e:Expr):boolean{return normalizesToZero(this.getSortLevel(e));}
 
   private validProjIndex(index:number):boolean{return Number.isInteger(index)&&index>=0&&index<=0xffff_ffff;}
@@ -99,47 +199,108 @@ export class TypeChecker {
     const field=this.ensureForall(this.whnf(ct)).type;if(propStructure&&!this.isProp(field))throw new KernelError('invalid projection: cannot eliminate proof into data');return field;
   }
 
+  private deltaTarget(e:Expr):DefinitionInfo|null{
+    const fn=getAppFn(e);if(fn.kind!=='const')return null;
+    const i=deltaInfo(this.env.find(fn.name));
+    return i&&fn.levels.length===i.levelParams.length?i:null;
+  }
+
   unfold(e:Expr):Expr|null{
+    this.state.bindEnvironment(this.env);
     const av=appView(e);if(av.fn.kind!=='const')return null;const i=deltaInfo(this.env.find(av.fn.name));if(!i||av.fn.levels.length!==i.levelParams.length)return null;
-    const value=instantiateExprLevels(i.value,i.levelParams,av.fn.levels);return mkAppN(value,av.args);
+    let value:Expr;
+    if(av.fn.levels.length>0){
+      const cached=this.state.unfold.get(av.fn);
+      if(cached)value=cached;
+      else{value=instantiateExprLevels(i.value,i.levelParams,av.fn.levels);this.state.unfold.set(av.fn,value);}
+    }else{
+      value=instantiateExprLevels(i.value,i.levelParams,av.fn.levels);
+    }
+    return mkAppN(value,av.args);
   }
 
   whnfCore(e:Expr,cheapRec=false,cheapProj=false):Expr{return this.rec(()=>{
-    const key=this.state.exprId(e),cached=this.state.whnfCore.get(key);if(cached)return cached;
-    let x=e,cacheOriginal=true;
-    const done=(r:Expr):Expr=>{if(!cheapRec&&!cheapProj&&cacheOriginal)this.state.whnfCore.set(key,r);return r;};
-    while(true){
-      if(x.kind==='mdata'){x=x.expr;continue;}
-      if(x.kind==='let'){x=instantiate1(x.body,x.value);continue;}
-      if(x.kind==='fvar'){const d=this.lctx.get(x.id);if(d?.kind==='let'){x=d.value;continue;}return done(x);}
-      if(x.kind==='app'){
-        const f=this.whnfCore(x.fn,cheapRec,cheapProj);if(f.kind==='lam'){x=instantiate1(f.body,x.arg);continue;} // overwritten below
-        if(!exprEq(f,x.fn))x=app(f,x.arg);
-        const q=this.env.quotInitialized?reduceQuot(x,y=>this.whnf(y)):null;if(q){if(exprEq(x,e))cacheOriginal=false;x=q;continue;}
-        const rr=reduceRecursor(this.env,x,y=>cheapRec?this.whnfCore(y,cheapRec,cheapProj):this.whnf(y),y=>this.infer(y),(a,b)=>this.isDefEq(a,b),y=>this.isProp(y));if(rr){if(exprEq(x,e))cacheOriginal=false;x=rr;continue;}
-        return done(x);
-      }
-      if(x.kind==='proj'){
-        const s=cheapProj?this.whnfCore(x.expr,cheapRec,cheapProj):this.whnf(x.expr);const v=this.reduceProjCore(s,x.typeName,x.index);
-        if(v){x=v;continue;}return done({...x,expr:s});
-      }
-      return done(x);
+    // Final Lean 4.34 handles these before the whnfCore cache lookup.
+    switch(e.kind){
+      case'bvar':case'sort':case'mvar':case'forall':case'const':case'lam':case'lit':return e;
+      case'mdata':return this.whnfCore(e.expr,cheapRec,cheapProj);
+      case'fvar':{const d=this.lctx.get(e.id);if(!d||d.kind!=='let')return e;break;}
+      case'app':case'let':case'proj':break;
     }
+
+    if(!cheapRec&&!cheapProj){const cached=this.state.whnfCore.get(e);if(cached)return cached;}
+    let r:Expr;
+
+    switch(e.kind){
+      case'fvar':{
+        const d=this.lctx.get(e.id);
+        if(!d||d.kind!=='let')return e;
+        // Lean's whnf_fvar returns directly, so the fvar itself is not cached.
+        return this.whnfCore(d.value,cheapRec,cheapProj);
+      }
+      case'proj':{
+        const major=cheapProj?this.whnfCore(e.expr,cheapRec,cheapProj):this.whnf(e.expr);
+        const reduced=this.reduceProjCore(major,e.typeName,e.index);
+        r=reduced?this.whnfCore(reduced,cheapRec,cheapProj):e;
+        break;
+      }
+      case'app':{
+        const av=appView(e),f0=av.fn,f=this.whnfCore(f0,cheapRec,cheapProj);
+        if(f.kind==='lam'){
+          let head:Extract<Expr,{kind:'lam'}>=f,m=1;
+          while(m<av.args.length&&head.body.kind==='lam'){head=head.body;m++;}
+          const consumed=[...av.args.slice(0,m)].reverse();
+          const body=instantiate(head.body,consumed);
+          r=this.whnfCore(mkAppN(body,av.args.slice(m)),cheapRec,cheapProj);
+        }else if(exprLeanEq(f,f0)){
+          const q=this.env.quotInitialized?reduceQuot(e,y=>this.whnf(y)):null;
+          if(q)return this.whnfCore(q,cheapRec,cheapProj);
+          const rr=reduceRecursor(this.env,e,y=>cheapRec?this.whnfCore(y,cheapRec,cheapProj):this.whnf(y),y=>this.infer(y),(a,b)=>this.isDefEq(a,b),y=>this.isProp(y));
+          if(rr)return this.whnfCore(rr,cheapRec,cheapProj);
+          // C++ returns stuck applications directly rather than caching them.
+          return e;
+        }else{
+          r=this.whnfCore(mkAppN(f,av.args),cheapRec,cheapProj);
+        }
+        break;
+      }
+      case'let':
+        r=this.whnfCore(instantiate1(e.body,e.value),cheapRec,cheapProj);
+        break;
+      default:
+        throw new Error('internal whnfCore case');
+    }
+
+    if(!cheapRec&&!cheapProj)this.state.whnfCore.set(e,r);
+    return r;
   });}
 
-  whnf(e:Expr):Expr{return this.rec(()=>{
-    const k=this.state.exprId(e),c=this.state.whnf.get(k);if(c)return c;let x=e;
-    for(let fuel=0;fuel<100000;fuel++){
-      const c0=this.whnfCore(x);if(!exprEq(c0,x)){x=c0;continue;}
-      const nr=reduceNatApp(this.env,x,y=>this.whnf(y),this.limits.maxNatBytes);if(nr){x=nr;continue;}
-      const u=this.unfold(x);if(u){x=u;continue;}
-      this.state.whnf.set(k,x);return x;
+  whnf(e:Expr):Expr{
+    this.state.bindEnvironment(this.env);
+    // Lean 4.34 returns these cases before the WHNF cache lookup.
+    switch(e.kind){
+      case'bvar':case'sort':case'mvar':case'forall':case'lit':return e;
+      case'mdata':return this.whnf(e.expr);
+      case'fvar':{const d=this.lctx.get(e.id);if(!d||d.kind!=='let')return e;break;}
+      case'lam':case'app':case'const':case'let':case'proj':break;
     }
-    throw new KernelError('WHNF fuel exhausted');
-  });}
+    const cached=this.state.whnf.get(e);if(cached)return cached;
+    // The early-return switch narrows `e`; keep the mutable reduction cursor at the full Expr type.
+    let t:Expr=e;
+    while(true){
+      const t1=this.whnfCore(t);
+      const native=reduceNative(this.env,t1,this.nativeEvaluator);
+      if(native){this.state.whnf.set(e,native);return native;}
+      const nr=reduceNatApp(this.env,t1,y=>this.whnf(y),this.limits.maxNatBytes);
+      if(nr){this.state.whnf.set(e,nr);return nr;}
+      const u=this.unfold(t1);
+      if(u){t=u;continue;}
+      this.state.whnf.set(e,t1);return t1;
+    }
+  }
 
   private quick(a:Expr,b:Expr):boolean|null{
-    if(exprEq(a,b)||this.state.success.has(this.state.pair(a,b)))return true;
+    if(exprLeanEq(a,b)||this.state.success.has(this.state.pair(a,b)))return true;
     if(a.kind===b.kind){switch(a.kind){
       case'sort':return b.kind==='sort'&&levelEquivalent(a.level,b.level);
       case'lit':return b.kind==='lit'&&exprEq(a,b);
@@ -148,8 +309,24 @@ export class TypeChecker {
     }}return null;
   }
   private defEqBinder(a:Extract<Expr,{kind:'lam'|'forall'}>,b:Extract<Expr,{kind:'lam'|'forall'}>):boolean{
-    if(!this.isDefEq(a.type,b.type))return false;
-    return this.withLocal('x',b.type,(id,tc)=>tc.isDefEq(instantiate1(a.body,fvar(id)),instantiate1(b.body,fvar(id))));
+    const kind=a.kind,lctx=this.lctx.clone(),subst:Expr[]=[];let t:Expr=a,s:Expr=b;
+    do{
+      const tb=t as Extract<Expr,{kind:'lam'|'forall'}>,sb=s as Extract<Expr,{kind:'lam'|'forall'}>;let sType:Expr|undefined;
+      if(!exprLeanEq(tb.type,sb.type)){
+        sType=this.instantiateRev(sb.type,subst);const tType=this.instantiateRev(tb.type,subst);
+        if(!this.child(lctx).isDefEq(tType,sType))return false;
+      }
+      if(hasLooseBVar(tb.body)||hasLooseBVar(sb.body)){
+        sType??=this.instantiateRev(sb.type,subst);
+        const id=this.state.freshLocal(nameToString(sb.name),lctx);lctx.addLocal(id,sb.name,sType,sb.binderInfo);subst.push(fvar(id));
+      }else{
+        // Lean uses a persistent internal don't-care term here; the value is never
+        // observed because neither remaining body contains the corresponding bvar.
+        subst.push(sort(levelZero));
+      }
+      t=tb.body;s=sb.body;
+    }while(t.kind===kind&&s.kind===kind);
+    return this.child(lctx).isDefEq(this.instantiateRev(t,subst),this.instantiateRev(s,subst));
   }
   private proofIrrel(a:Expr,b:Expr):boolean|null{
     // Lean proof irrelevance applies when the *type* of a is a proposition.
@@ -161,7 +338,11 @@ export class TypeChecker {
   }
   private tryEta(a:Expr,b:Expr):boolean{
     if(a.kind!=='lam'||b.kind==='lam')return false;
-    const bt=this.ensureForall(this.whnf(this.infer(b)));const eta=lam(bt.name,bt.type,app(b,{kind:'bvar',index:0}),bt.binderInfo);return this.isDefEq(a,eta);
+    const bt=this.whnf(this.infer(b));
+    // Lean 4.34's eta probe is optional: a non-function type means "not eta-equal",
+    // not a kernel type error.
+    if(bt.kind!=='forall')return false;
+    const eta=lam(bt.name,bt.type,app(b,{kind:'bvar',index:0}),bt.binderInfo);return this.isDefEq(a,eta);
   }
   /** Lean 4.34 structure eta: if s is the unique constructor application, compare its fields with projections of t. */
   private tryStructEtaCore(t:Expr,s:Expr):boolean{
@@ -174,8 +355,8 @@ export class TypeChecker {
   private tryStructEta(a:Expr,b:Expr):boolean{return this.tryStructEtaCore(a,b)||this.tryStructEtaCore(b,a);}
   private tryStringLitExpansionCore(t:Expr,s:Expr):boolean|null{
     if(t.kind!=='lit'||t.literal.kind!=='string'||s.kind!=='app')return null;
-    const sf=getAppFn(s);if(sf.kind!=='const'||!nameEq(sf.name,N.StringOfList))return null;
-    return this.isDefEq(this.whnf(stringLitToConstructor(t)),s);
+    const sf=s.fn;if(sf.kind!=='const'||sf.levels.length!==0||!nameEq(sf.name,N.StringOfList))return null;
+    return this.isDefEqCore(this.whnf(stringLitToConstructor(t)),s);
   }
   private tryStringLitExpansion(t:Expr,s:Expr):boolean|null{
     const r=this.tryStringLitExpansionCore(t,s);return r!==null?r:this.tryStringLitExpansionCore(s,t);
@@ -184,17 +365,17 @@ export class TypeChecker {
     const ty=this.whnf(this.infer(t)),head=getAppFn(ty);if(head.kind!=='const')return false;
     const ii=this.env.find(head.name);if(ii?.kind!=='inductive'||ii.isRec||ii.numIndices!==0||ii.ctors.length!==1)return false;
     const ci=this.env.find(ii.ctors[0]!);if(ci?.kind!=='constructor'||ci.numFields!==0)return false;
-    return this.isDefEq(ty,this.infer(s));
+    return this.isDefEqCore(ty,this.infer(s));
   }
-  private isNatZeroExpr(e:Expr):boolean{return (e.kind==='const'&&nameEq(e.name,N.NatZero))||(e.kind==='lit'&&e.literal.kind==='nat'&&e.literal.value===0n);}
+  private isNatZeroExpr(e:Expr):boolean{return (e.kind==='const'&&e.levels.length===0&&nameEq(e.name,N.NatZero))||(e.kind==='lit'&&e.literal.kind==='nat'&&e.literal.value===0n);}
   private natPredExpr(e:Expr):Expr|null{
     if(e.kind==='lit'&&e.literal.kind==='nat'&&e.literal.value>0n)return natLit(e.literal.value-1n);
-    const av=appView(e);return av.fn.kind==='const'&&nameEq(av.fn.name,N.NatSucc)&&av.args.length===1?av.args[0]!:null;
+    const av=appView(e);return av.fn.kind==='const'&&av.fn.levels.length===0&&nameEq(av.fn.name,N.NatSucc)&&av.args.length===1?av.args[0]!:null;
   }
   private defEqOffset(a:Expr,b:Expr):boolean|null{
-    if(this.isNatZeroExpr(a)&&this.isNatZeroExpr(b))return true;const pa=this.natPredExpr(a),pb=this.natPredExpr(b);return pa&&pb?this.isDefEq(pa,pb):null;
+    if(this.isNatZeroExpr(a)&&this.isNatZeroExpr(b))return true;const pa=this.natPredExpr(a),pb=this.natPredExpr(b);return pa&&pb?this.isDefEqCore(pa,pb):null;
   }
-  private tryUnfoldProjApp(e:Expr):Expr|null{const f=getAppFn(e);if(f.kind!=='proj')return null;const n=this.whnfCore(e,false,false);return exprEq(n,e)?null:n;}
+  private tryUnfoldProjApp(e:Expr):Expr|null{const f=getAppFn(e);if(f.kind!=='proj')return null;const n=this.whnfCore(e,false,false);return exprLeanEq(n,e)?null:n;}
   private reduceProjCore(e:Expr,typeName:import('../core/name.js').Name,index:number):Expr|null{
     if(!this.validProjIndex(index))return null;
     if(e.kind==='lit'&&e.literal.kind==='string')e=this.whnf(stringLitToConstructor(e));
@@ -205,26 +386,28 @@ export class TypeChecker {
   /** Lean 4.34 `lazy_delta_proj_reduction`: unfold the structure values lazily before comparing a field. */
   private lazyDeltaProjReduction(a:Expr,b:Expr,typeName:import('../core/name.js').Name,index:number):boolean{
     let x=a,y=b;
-    const finish=()=>{const px=this.reduceProjCore(x,typeName,index),py=this.reduceProjCore(y,typeName,index);return px&&py?this.isDefEq(px,py):this.isDefEq(x,y);};
-    for(let i=0;i<512;i++){
+    const finish=()=>{const px=this.reduceProjCore(x,typeName,index),py=this.reduceProjCore(y,typeName,index);return px&&py?this.isDefEqCore(px,py):this.isDefEqCore(x,y);};
+    while(true){
       const d=this.deltaStep(x,y);if(!d)return finish();if(d.equal)return true;x=d.a;y=d.b;
       const q=this.quick(x,y);if(q===true)return true;if(q===false)return finish();
     }
-    return finish();
   }
   private isDefEqArgs(a:Expr,b:Expr):boolean{
     let x=a,y=b;while(x.kind==='app'&&y.kind==='app'){if(!this.isDefEq(x.arg,y.arg))return false;x=x.fn;y=y.fn;}return x.kind!=='app'&&y.kind!=='app';
   }
   private defEqApp(a:Expr,b:Expr):boolean{
-    const av=appView(a),bv=appView(b);if(av.args.length!==bv.args.length)return false;if(!this.isDefEq(av.fn,bv.fn))return false;for(let i=0;i<av.args.length;i++)if(!this.isDefEq(av.args[i]!,bv.args[i]!))return false;return true;
+    const av=appView(a),bv=appView(b);
+    // Match Lean 4.34 evaluation order exactly: compare heads before rejecting arity mismatch.
+    // Defeq is intentionally incomplete, so observable cache/evaluation history is part of parity.
+    if(!this.isDefEq(av.fn,bv.fn))return false;if(av.args.length!==bv.args.length)return false;for(let i=0;i<av.args.length;i++)if(!this.isDefEq(av.args[i]!,bv.args[i]!))return false;return true;
   }
   private deltaStep(a:Expr,b:Expr):{a:Expr;b:Expr;equal?:boolean}|null{
-    const af=getAppFn(a),bf=getAppFn(b);const ai=af.kind==='const'?deltaInfo(this.env.find(af.name)):null,bi=bf.kind==='const'?deltaInfo(this.env.find(bf.name)):null;
+    const af=getAppFn(a),bf=getAppFn(b),ai=this.deltaTarget(a),bi=this.deltaTarget(b);
     if(!ai&&!bi)return null;
     if(ai&&!bi){const bp=this.tryUnfoldProjApp(b);if(bp)return {a,b:bp};const u=this.unfold(a);return u?{a:this.whnfCore(u,false,true),b}:null;}
     if(!ai&&bi){const ap=this.tryUnfoldProjApp(a);if(ap)return {a:ap,b};const u=this.unfold(b);return u?{a,b:this.whnfCore(u,false,true)}:null;}
     const c=cmpHint(hint(ai!),hint(bi!));if(c<0){const u=this.unfold(a)!;return {a:this.whnfCore(u,false,true),b};}if(c>0){const u=this.unfold(b)!;return {a,b:this.whnfCore(u,false,true)};}
-    if(a.kind==='app'&&b.kind==='app'&&nameEq(ai!.name,bi!.name)&&hint(ai!).kind==='regular'){
+    if(a.kind==='app'&&b.kind==='app'&&ai===bi&&hint(ai!).kind==='regular'){
       const pair=this.state.pair(a,b);if(!this.state.failure.has(pair)){
         const al=af.kind==='const'?af.levels:[],bl=bf.kind==='const'?bf.levels:[];
         if(al.length===bl.length&&al.every((l,i)=>levelEquivalent(l,bl[i]!))&&this.isDefEqArgs(a,b))return {a,b,equal:true};
@@ -234,25 +417,45 @@ export class TypeChecker {
     const ua=this.unfold(a),ub=this.unfold(b);return ua&&ub?{a:this.whnfCore(ua,false,true),b:this.whnfCore(ub,false,true)}:null;
   }
 
-  isDefEq(a:Expr,b:Expr):boolean{return this.rec(()=>{
+  private isDefEqCore(a:Expr,b:Expr):boolean{return this.rec(()=>{
     const q=this.quick(a,b);if(q!==null)return q;
-    // Lean 4.34 reflection fast path for ordinary kernel-reducible terms; native compiler evaluation is not a kernel reduction feature in final 4.34.
-    if((!hasFVar(a)||this.eagerReduce)&&b.kind==='const'&&nameEq(b.name,N.BoolTrue)){const w=this.whnf(a);if(w.kind==='const'&&nameEq(w.name,N.BoolTrue)){this.state.success.add(this.state.pair(a,b));return true;}}
-    let x=this.whnfCore(a,false,true),y=this.whnfCore(b,false,true);const q2=this.quick(x,y);if(q2!==null)return q2;
-    const pi=this.proofIrrel(x,y);if(pi!==null)return pi;
-    for(let i=0;i<512;i++){
-      const off=this.defEqOffset(x,y);if(off!==null)return off;
-      if(((!hasFVar(x)&&!hasFVar(y))||this.eagerReduce)){const rx=reduceNatApp(this.env,x,z=>this.whnf(z),this.limits.maxNatBytes);if(rx)return this.isDefEq(rx,y);const ry=reduceNatApp(this.env,y,z=>this.whnf(z),this.limits.maxNatBytes);if(ry)return this.isDefEq(x,ry);}
-      const d=this.deltaStep(x,y);if(!d)break;if(d.equal){this.state.success.add(this.state.pair(a,b));return true;}x=d.a;y=d.b;const z=this.quick(x,y);if(z!==null)return z;
+    // Lean 4.34 reflection fast path: fully reduce a closed lhs when rhs is Bool.true.
+    if((!hasFVar(a)||this.eagerReduce)&&b.kind==='const'&&nameEq(b.name,N.BoolTrue)){
+      const w=this.whnf(a);if(w.kind==='const'&&nameEq(w.name,N.BoolTrue))return true;
     }
-    if(x.kind==='const'&&y.kind==='const'&&nameEq(x.name,y.name)&&x.levels.length===y.levels.length&&x.levels.every((l,i)=>levelEquivalent(l,y.levels[i]!))){this.state.success.add(this.state.pair(a,b));return true;}
+    let x=this.whnfCore(a,false,true),y=this.whnfCore(b,false,true);
+    if(x!==a||y!==b){const q2=this.quick(x,y);if(q2!==null)return q2;}
+    const pi=this.proofIrrel(x,y);if(pi!==null)return pi;
+    while(true){
+      const off=this.defEqOffset(x,y);if(off!==null)return off;
+      if(((!hasFVar(x)&&!hasFVar(y))||this.eagerReduce)){
+        const rx=reduceNatApp(this.env,x,z=>this.whnf(z),this.limits.maxNatBytes);if(rx)return this.isDefEqCore(rx,y);
+        const ry=reduceNatApp(this.env,y,z=>this.whnf(z),this.limits.maxNatBytes);if(ry)return this.isDefEqCore(x,ry);
+      }
+      // Lean 4.34 checks native reduction after Nat reduction and before lazy delta, regardless of fvars.
+      const nx=reduceNative(this.env,x,this.nativeEvaluator);if(nx)return this.isDefEqCore(nx,y);
+      const ny=reduceNative(this.env,y,this.nativeEvaluator);if(ny)return this.isDefEqCore(x,ny);
+      const d=this.deltaStep(x,y);if(!d)break;if(d.equal)return true;x=d.a;y=d.b;
+      const z=this.quick(x,y);if(z!==null)return z;
+    }
+    if(x.kind==='const'&&y.kind==='const'&&nameEq(x.name,y.name)&&x.levels.length===y.levels.length&&x.levels.every((l,i)=>levelEquivalent(l,y.levels[i]!)))return true;
     if(x.kind==='fvar'&&y.kind==='fvar'&&x.id===y.id)return true;
     if(x.kind==='proj'&&y.kind==='proj'&&nameEq(x.typeName,y.typeName)&&x.index===y.index&&this.lazyDeltaProjReduction(x.expr,y.expr,x.typeName,x.index))return true;
-    const xx=this.whnfCore(x,false,false),yy=this.whnfCore(y,false,false);if(!exprEq(xx,x)||!exprEq(yy,y))return this.isDefEq(xx,yy);
-    if(x.kind==='app'&&y.kind==='app'&&this.defEqApp(x,y)){this.state.success.add(this.state.pair(a,b));return true;}
-    if(this.tryEta(x,y)||this.tryEta(y,x)||this.tryStructEta(x,y)){this.state.success.add(this.state.pair(a,b));return true;}
-    const str=this.tryStringLitExpansion(x,y);if(str!==null){if(str)this.state.success.add(this.state.pair(a,b));return str;}
-    if(this.isDefEqUnitLike(x,y)){this.state.success.add(this.state.pair(a,b));return true;}
+    const xx=this.whnfCore(x,false,false),yy=this.whnfCore(y,false,false);if(xx!==x||yy!==y)return this.isDefEqCore(xx,yy);
+    if(x.kind==='app'&&y.kind==='app'&&this.defEqApp(x,y))return true;
+    if(this.tryEta(x,y)||this.tryEta(y,x)||this.tryStructEta(x,y))return true;
+    const str=this.tryStringLitExpansion(x,y);if(str!==null)return str;
+    if(this.isDefEqUnitLike(x,y))return true;
     return false;
   });}
+
+  isDefEq(a:Expr,b:Expr):boolean{
+    const pair=this.state.pair(a,b);
+    // Final Lean 4.34 always enters is_def_eq_core first; quick_is_def_eq inside
+    // the guarded core consults the positive cache. Do not bypass recursion-depth
+    // accounting at the public wrapper.
+    const r=this.isDefEqCore(a,b);
+    if(r)this.state.success.add(pair);
+    return r;
+  }
 }

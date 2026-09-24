@@ -6,19 +6,29 @@ import { N } from '../names.js';
 export const LEAN_NAT_MAX_SIZE_DEFAULT = 128n * 1024n * 1024n;
 export const UINT32_MAX = 0xffff_ffffn;
 
-/** Lean's size metric is the storage size of the natural in bytes. */
+/** Lean 4.34's 64-bit runtime storage metric (lean_nat_size_in_bytes).
+ * Scalar Nats occupy one machine word. Heap MPZ values are rounded to whole
+ * 64-bit limbs, not to the mathematical minimum byte length. */
+export const LEAN_RUNTIME_WORD_BYTES=8n;
+export const LEAN_MAX_SMALL_NAT=(1n<<63n)-1n;
 export function natSizeInBytes(n:bigint):bigint{
   if(n<0n)throw new KernelError('Nat cannot be negative');
-  if(n===0n)return 1n;
-  const hex=n.toString(16);return BigInt(Math.ceil(hex.length/2));
+  if(n<=LEAN_MAX_SMALL_NAT)return LEAN_RUNTIME_WORD_BYTES;
+  const bits=BigInt(n.toString(2).length);
+  const limbs=(bits+63n)/64n;
+  return limbs*LEAN_RUNTIME_WORD_BYTES;
 }
 export function checkNatSize(n:bigint,maxBytes:bigint,op='Nat numeral'):void{
   if(natSizeInBytes(n)>maxBytes)throw new KernelError(`the kernel refused a \`${op}\` numeral because its size exceeds the maximum; increase the LEAN_NAT_MAX_SIZE environment variable to allow it`);
 }
+/** Final Lean 4.34 `is_nat_lit_ext` / `get_nat_val` boundary:
+ * optimized Nat evaluation recognizes only literal numerals and the level-free
+ * constant `Nat.zero`. Constructor syntax such as `Nat.succ Nat.zero` is not
+ * reinterpreted as a literal by this fast path. */
 export function asNat(e:Expr):bigint|null{
   if(e.kind==='lit'&&e.literal.kind==='nat')return e.literal.value;
-  if(e.kind==='const'&&nameEq(e.name,N.NatZero))return 0n;
-  const {fn,args}=appView(e);if(fn.kind==='const'&&nameEq(fn.name,N.NatSucc)&&args.length===1){const n=asNat(args[0]!);return n===null?null:n+1n;} return null;
+  if(e.kind==='const'&&e.levels.length===0&&nameEq(e.name,N.NatZero))return 0n;
+  return null;
 }
 function boolExpr(v:boolean):Expr{return constant(v?N.BoolTrue:N.BoolFalse);}
 function gcd(a:bigint,b:bigint):bigint{while(b!==0n){const t=a%b;a=b;b=t;}return a;}
@@ -42,7 +52,7 @@ function shiftRight(v:bigint,shift:bigint):bigint{
 }
 
 export function reduceNatApp(_env:Environment,e:Expr,whnf:(x:Expr)=>Expr,maxBytes:bigint=LEAN_NAT_MAX_SIZE_DEFAULT):Expr|null{
-  const {fn,args}=appView(e);if(fn.kind!=='const')return null;
+  const {fn,args}=appView(e);if(fn.kind!=='const'||fn.levels.length!==0)return null;
   const unarySucc=():Expr|null=>{if(args.length!==1)return null;const a=asNat(whnf(args[0]!));if(a===null)return null;const r=a+1n;checkNatSize(r,maxBytes,'Nat.succ');return natLit(r);};
   const binary=(f:(a:bigint,b:bigint)=>bigint,op:string,checkResult=false):Expr|null=>{if(args.length!==2)return null;const a=asNat(whnf(args[0]!)),b=asNat(whnf(args[1]!));if(a===null||b===null)return null;const r=f(a,b);if(checkResult)checkNatSize(r,maxBytes,op);return natLit(r);};
   if(nameEq(fn.name,N.NatSucc))return unarySucc();

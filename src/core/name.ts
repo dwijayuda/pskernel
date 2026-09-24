@@ -24,48 +24,98 @@ export function nameAppendIndexAfter(n: Name, idx: bigint | number): Name {
 }
 
 /** Lean `Name.replacePrefix`: replace an ancestor prefix while preserving structural string/number suffix components. */
+type NameComponent={readonly k:0|1;readonly v:string|bigint};
+
+function components(n:Name,out:NameComponent[]=[]):NameComponent[]{
+  const rev:NameComponent[]=[];
+  let x=n;
+  while(x.kind!=='anonymous'){
+    rev.push(x.kind==='str'?{k:0,v:x.value}:{k:1,v:x.value});
+    x=x.prefix;
+  }
+  for(let i=rev.length-1;i>=0;i--)out.push(rev[i]!);
+  return out;
+}
+
+export function nameIsPrefixOf(prefix:Name,n:Name):boolean{
+  const ps=components(prefix),ns=components(n);
+  if(ps.length>ns.length)return false;
+  for(let i=0;i<ps.length;i++){
+    const a=ps[i]!,b=ns[i]!;
+    if(a.k!==b.k||a.v!==b.v)return false;
+  }
+  return true;
+}
+
+/** Lean C++ `operator+(Name, Name)`: append suffix components structurally. */
+export function nameAppend(prefix:Name,suffix:Name):Name{
+  let r=prefix;
+  for(const c of components(suffix))
+    r=c.k===0?strName(r,c.v as string):numName(r,c.v as bigint);
+  return r;
+}
+
 export function nameReplacePrefix(n: Name, prefix: Name, replacement: Name = anonymous): Name | null {
-  if (nameEq(n, prefix)) return replacement;
-  if (n.kind === 'anonymous') return null;
-  const p = nameReplacePrefix(n.prefix, prefix, replacement);
-  if (p === null) return null;
-  return n.kind === 'str' ? strName(p, n.value) : numName(p, n.value);
+  const ns=components(n),ps=components(prefix);
+  if(ps.length>ns.length)return null;
+  for(let i=0;i<ps.length;i++){
+    const a=ns[i]!,b=ps[i]!;
+    if(a.k!==b.k||a.v!==b.v)return null;
+  }
+  let r=replacement;
+  for(let i=ps.length;i<ns.length;i++){
+    const c=ns[i]!;
+    r=c.k===0?strName(r,c.v as string):numName(r,c.v as bigint);
+  }
+  return r;
 }
 
 export function nameEq(a: Name, b: Name): boolean {
-  if (a === b) return true;
-  if (a.kind !== b.kind) return false;
-  switch (a.kind) {
-    case 'anonymous': return true;
-    case 'str': return b.kind === 'str' && a.value === b.value && nameEq(a.prefix, b.prefix);
-    case 'num': return b.kind === 'num' && a.value === b.value && nameEq(a.prefix, b.prefix);
+  let x=a,y=b;
+  while(true){
+    if(x===y)return true;
+    if(x.kind!==y.kind)return false;
+    if(x.kind==='anonymous')return true;
+    if(x.kind==='str'){
+      if(y.kind!=='str'||x.value!==y.value)return false;
+      x=x.prefix;y=y.prefix;continue;
+    }
+    if(y.kind!=='num'||x.value!==y.value)return false;
+    x=x.prefix;y=y.prefix;
   }
 }
 
 export function nameKey(n: Name): string {
-  switch (n.kind) {
-    case 'anonymous': return 'a';
-    case 'str': return `${nameKey(n.prefix)}/s:${n.value.length}:${n.value}`;
-    case 'num': return `${nameKey(n.prefix)}/n:${n.value}`;
+  const parts:string[]=['a'];
+  for(const c of components(n))
+    parts.push(c.k===0?`/s:${(c.v as string).length}:${c.v as string}`:`/n:${c.v as bigint}`);
+  return parts.join('');
+}
+
+function leanStringCmp(a:string,b:string):-1|0|1{
+  const ai=a[Symbol.iterator](),bi=b[Symbol.iterator]();
+  while(true){
+    const x=ai.next(),y=bi.next();
+    if(x.done||y.done){
+      if(x.done&&y.done)return 0;
+      return x.done?-1:1;
+    }
+    const xc=x.value.codePointAt(0)!,yc=y.value.codePointAt(0)!;
+    if(xc!==yc)return xc<yc?-1:1;
   }
 }
 
-function components(n: Name, out: Array<{ k: 0 | 1; v: string | bigint }> = []): Array<{ k: 0 | 1; v: string | bigint }> {
-  if (n.kind === 'anonymous') return out;
-  components(n.prefix, out);
-  out.push(n.kind === 'str' ? { k: 0, v: n.value } : { k: 1, v: n.value });
-  return out;
-}
-
+/** Final Lean C++ Name order: NUMERAL components precede STRING components,
+ * and strings use UTF-8 byte order (equivalent to scalar-value order for valid strings). */
 export function nameCmp(a: Name, b: Name): -1 | 0 | 1 {
   if (nameEq(a, b)) return 0;
   const as = components(a), bs = components(b);
   const n = Math.min(as.length, bs.length);
   for (let i = 0; i < n; i++) {
     const x = as[i]!, y = bs[i]!;
-    if (x.k !== y.k) return x.k < y.k ? -1 : 1;
+    if (x.k !== y.k) return x.k < y.k ? 1 : -1; // Lean: NUMERAL components sort before STRING components
     if (typeof x.v === 'string' && typeof y.v === 'string') {
-      if (x.v !== y.v) return x.v < y.v ? -1 : 1;
+      const c=leanStringCmp(x.v,y.v);if(c!==0)return c;
     } else if (typeof x.v === 'bigint' && typeof y.v === 'bigint' && x.v !== y.v) {
       return x.v < y.v ? -1 : 1;
     }

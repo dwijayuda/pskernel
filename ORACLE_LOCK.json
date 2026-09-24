@@ -7,5 +7,8 @@
     "commit": "076e8e57707e813375e8f9da8bf989799ace9680",
     "format": "3.1.0",
     "toolchain": "leanprover/lean4:v4.34.0"
-  }
+  },
+  "leanTag": "v4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "nativeReduction": "Lean.reduceBool/Lean.reduceNat compiler-IR boundary is present in v4.34.0; pskernel models it through an explicit NativeEvaluator TCB provider and fails closed without one."
 }

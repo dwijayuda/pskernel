@@ -1,4 +1,4 @@
-import { Name, nameCmp, nameEq, nameKey, nameToString } from './name.js';
+import { Name, nameCmp, nameEq, nameToString } from './name.js';
 
 export type Level =
   | { readonly kind: 'zero' }
@@ -13,58 +13,99 @@ export const levelSucc = (of: Level): Level => Object.freeze({ kind: 'succ', of 
 export const levelParam = (name: Name): Level => Object.freeze({ kind: 'param', name });
 export const levelMVar = (name: Name): Level => Object.freeze({ kind: 'mvar', name });
 
+/** Raw constructors used when reconstructing serialized Lean kernel syntax.
+ * Unlike mkMax/mkIMax, these do not perform definitional simplification. */
+export const levelMaxRaw = (left:Level,right:Level):Level => Object.freeze({kind:'max',left,right});
+export const levelIMaxRaw = (left:Level,right:Level):Level => Object.freeze({kind:'imax',left,right});
+
 export function levelEqStructural(a: Level, b: Level): boolean {
-  if (a === b) return true;
-  if (a.kind !== b.kind) return false;
-  switch (a.kind) {
-    case 'zero': return true;
-    case 'succ': return b.kind === 'succ' && levelEqStructural(a.of, b.of);
-    case 'max': return b.kind === 'max' && levelEqStructural(a.left, b.left) && levelEqStructural(a.right, b.right);
-    case 'imax': return b.kind === 'imax' && levelEqStructural(a.left, b.left) && levelEqStructural(a.right, b.right);
-    case 'param': return b.kind === 'param' && nameEq(a.name, b.name);
-    case 'mvar': return b.kind === 'mvar' && nameEq(a.name, b.name);
+  const todo:[Level,Level][]=[[a,b]];
+  while(todo.length){
+    const [x,y]=todo.pop()!;
+    if(x===y)continue;
+    if(x.kind!==y.kind)return false;
+    switch(x.kind){
+      case'zero':break;
+      case'param':case'mvar':
+        if((y.kind!=='param'&&y.kind!=='mvar')||!nameEq(x.name,y.name))return false;
+        break;
+      case'succ':
+        if(y.kind!=='succ')return false;
+        todo.push([x.of,y.of]);
+        break;
+      case'max':
+        if(y.kind!=='max')return false;
+        todo.push([x.left,y.left],[x.right,y.right]);
+        break;
+      case'imax':
+        if(y.kind!=='imax')return false;
+        todo.push([x.left,y.left],[x.right,y.right]);
+        break;
+    }
   }
+  return true;
 }
 
 
 export function levelHasMVar(l: Level): boolean {
-  switch(l.kind){
-    case 'mvar': return true;
-    case 'succ': return levelHasMVar(l.of);
-    case 'max': case 'imax': return levelHasMVar(l.left)||levelHasMVar(l.right);
-    case 'zero': case 'param': return false;
+  const todo:Level[]=[l];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'mvar':return true;
+      case'succ':todo.push(x.of);break;
+      case'max':case'imax':todo.push(x.right,x.left);break;
+      case'zero':case'param':break;
+    }
   }
+  return false;
 }
 export function levelParamNames(l: Level, out: Name[]=[]): readonly Name[] {
-  switch(l.kind){
-    case 'param': if(!out.some(n=>nameEq(n,l.name)))out.push(l.name); break;
-    case 'succ': levelParamNames(l.of,out); break;
-    case 'max': case 'imax': levelParamNames(l.left,out);levelParamNames(l.right,out);break;
-    case 'zero': case 'mvar': break;
+  const todo:Level[]=[l];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'param':if(!out.some(n=>nameEq(n,x.name)))out.push(x.name);break;
+      case'succ':todo.push(x.of);break;
+      case'max':case'imax':todo.push(x.right,x.left);break;
+      case'zero':case'mvar':break;
+    }
   }
   return out;
 }
 export function isZero(l: Level): boolean { return l.kind === 'zero'; }
 export function isNotZero(l: Level): boolean {
-  switch (l.kind) {
-    case 'zero': case 'param': case 'mvar': return false;
-    case 'succ': return true;
-    case 'max': return isNotZero(l.left) || isNotZero(l.right);
-    case 'imax': return isNotZero(l.right);
+  const todo:Level[]=[l];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'succ':return true;
+      case'max':todo.push(x.right,x.left);break;
+      case'imax':todo.push(x.right);break;
+      case'zero':case'param':case'mvar':break;
+    }
   }
+  return false;
 }
 export function normalizesToZero(l: Level): boolean {
-  switch (l.kind) {
-    case 'zero': return true;
-    case 'param': case 'mvar': case 'succ': return false;
-    case 'max': return normalizesToZero(l.left) && normalizesToZero(l.right);
-    case 'imax': return normalizesToZero(l.right);
+  const todo:Level[]=[l];
+  while(todo.length){
+    const x=todo.pop()!;
+    switch(x.kind){
+      case'zero':break;
+      case'param':case'mvar':case'succ':return false;
+      case'max':todo.push(x.right,x.left);break;
+      case'imax':todo.push(x.right);break;
+    }
   }
+  return true;
 }
 export function mkMax(a: Level, b: Level): Level {
   if (levelEqStructural(a, b)) return a;
   if (isZero(a)) return b;
   if (isZero(b)) return a;
+  if (b.kind==='max'&&(levelEqStructural(b.left,a)||levelEqStructural(b.right,a))) return b;
+  if (a.kind==='max'&&(levelEqStructural(a.left,b)||levelEqStructural(a.right,b))) return a;
   const oa = toOffset(a), ob = toOffset(b);
   if (levelEqStructural(oa.base, ob.base)) return oa.offset >= ob.offset ? a : b;
   return Object.freeze({ kind: 'max', left: a, right: b });
@@ -85,139 +126,291 @@ export function addOffset(l: Level, k: bigint): Level {
   let r = l; for (let i = 0n; i < k; i++) r = levelSucc(r); return r;
 }
 
-export function instantiateLevel(l: Level, params: readonly Name[], values: readonly Level[]): Level {
-  switch (l.kind) {
-    case 'zero': return l;
-    case 'succ': return levelSucc(instantiateLevel(l.of, params, values));
-    case 'max': return mkMax(instantiateLevel(l.left, params, values), instantiateLevel(l.right, params, values));
-    case 'imax': return mkIMax(instantiateLevel(l.left, params, values), instantiateLevel(l.right, params, values));
-    case 'mvar': return l;
-    case 'param': {
-      const i = params.findIndex(p => nameEq(p, l.name));
-      return i >= 0 ? values[i]! : l;
+export function instantiateLevel(root: Level, params: readonly Name[], values: readonly Level[]): Level {
+  // Lean's level instantiate/update helpers preserve the original node whenever
+  // substitution leaves its children unchanged. This matters for raw serialized
+  // max/imax syntax: smart constructors are used only after an actual change.
+  if(params.length===0)return root;
+  const done=new WeakMap<object,Level>();
+  const todo:{l:Level;done:boolean}[]=[{l:root,done:false}];
+  while(todo.length){
+    const f=todo.pop()!,l=f.l;
+    if(done.has(l as object))continue;
+    if(!f.done){
+      todo.push({l,done:true});
+      if(l.kind==='succ')todo.push({l:l.of,done:false});
+      else if(l.kind==='max'||l.kind==='imax')todo.push({l:l.right,done:false},{l:l.left,done:false});
+      continue;
     }
+    let r:Level;
+    switch(l.kind){
+      case'zero':case'mvar':r=l;break;
+      case'param':{
+        const i=params.findIndex(p=>nameEq(p,l.name));
+        r=i>=0?values[i]!:l;
+        break;
+      }
+      case'succ':{
+        const of=done.get(l.of as object)!;
+        r=of===l.of?l:levelSucc(of);
+        break;
+      }
+      case'max':{
+        const left=done.get(l.left as object)!,right=done.get(l.right as object)!;
+        r=left===l.left&&right===l.right?l:mkMax(left,right);
+        break;
+      }
+      case'imax':{
+        const left=done.get(l.left as object)!,right=done.get(l.right as object)!;
+        r=left===l.left&&right===l.right?l:mkIMax(left,right);
+        break;
+      }
+    }
+    done.set(l as object,r);
+  }
+  return done.get(root as object)!;
+}
+
+const levelKindRank:Record<Level['kind'],number>={zero:0,succ:1,max:2,imax:3,param:4,mvar:5};
+
+function isExplicitLevel(l:Level):boolean{
+  let x=l;
+  while(x.kind==='succ')x=x.of;
+  return x.kind==='zero';
+}
+
+/** Flatten only syntactic max nodes, preserving Lean's left-to-right order. */
+function pushMaxArgs(root:Level,out:Level[]):void{
+  const todo:Level[]=[root];
+  while(todo.length){
+    const l=todo.pop()!;
+    if(l.kind==='max')todo.push(l.right,l.left);
+    else out.push(l);
   }
 }
 
-interface VarNode { readonly name: Name; readonly offset: bigint }
-interface Node { readonly constant: bigint; readonly vars: readonly VarNode[] }
-interface Entry { readonly path: readonly Name[]; readonly node: Node }
-type Norm = Entry[];
-const emptyNode = (): Node => ({ constant: 0n, vars: [] });
-const pathEq = (a: readonly Name[], b: readonly Name[]) => a.length === b.length && a.every((x, i) => nameEq(x, b[i]!));
-const pathKey = (p: readonly Name[]) => p.map(nameKey).join('|');
-function subset(a: readonly Name[], b: readonly Name[]): boolean {
-  let i = 0, j = 0;
-  while (i < a.length) {
-    if (j >= b.length) return false;
-    const c = nameCmp(a[i]!, b[j]!);
-    if (c < 0) return false;
-    if (c === 0) i++;
-    j++;
-  }
-  return true;
-}
-function orderedInsert(a: Name, xs: readonly Name[]): readonly Name[] | null {
-  const out: Name[] = [];
-  let inserted = false;
-  for (const x of xs) {
-    const c = nameCmp(a, x);
-    if (c === 0) return null;
-    if (!inserted && c < 0) { out.push(a); inserted = true; }
-    out.push(x);
-  }
-  if (!inserted) out.push(a);
-  return out;
-}
-function addVarTo(vars: readonly VarNode[], name: Name, offset: bigint): readonly VarNode[] {
-  const out: VarNode[] = []; let done = false;
-  for (const v of vars) {
-    const c = nameCmp(name, v.name);
-    if (!done && c < 0) { out.push({ name, offset }); done = true; }
-    if (c === 0) { out.push({ name, offset: offset > v.offset ? offset : v.offset }); done = true; }
-    else out.push(v);
-  }
-  if (!done) out.push({ name, offset });
-  return out;
-}
-function alter(norm: Norm, path: readonly Name[], f: (n: Node | undefined) => Node | undefined): Norm {
-  const k = pathKey(path); const out: Norm = []; let found = false;
-  for (const e of norm) {
-    if (pathKey(e.path) === k && pathEq(e.path, path)) { found = true; const n = f(e.node); if (n) out.push({ path, node: n }); }
-    else out.push(e);
-  }
-  if (!found) { const n = f(undefined); if (n) out.push({ path, node: n }); }
-  return out;
-}
-function addConst(norm: Norm, k: bigint, path: readonly Name[]): Norm {
-  if (k === 0n || (k === 1n && path.length > 0)) return norm;
-  return alter(norm, path, n => ({ constant: n ? (n.constant > k ? n.constant : k) : k, vars: n?.vars ?? [] }));
-}
-function addVar(norm: Norm, v: Name, k: bigint, path: readonly Name[]): Norm {
-  return alter(norm, path, n => ({ constant: n?.constant ?? 0n, vars: addVarTo(n?.vars ?? [], v, k) }));
-}
-function addNode(norm: Norm, v: Name, k: bigint, path: readonly Name[]): Norm { return addVar(norm, v, k, path); }
-function normalizeAux(l: Level, path: readonly Name[], k: bigint, acc: Norm): Norm {
-  switch (l.kind) {
-    case 'zero': return addConst(acc, k, path);
-    case 'succ': return normalizeAux(l.of, path, k + 1n, acc);
-    case 'max': return normalizeAux(l.right, path, k, normalizeAux(l.left, path, k, acc));
-    case 'imax': {
-      const r = l.right;
-      if (r.kind === 'zero') return addConst(acc, k, path);
-      if (r.kind === 'succ') return normalizeAux(r.of, path, k + 1n, normalizeAux(l.left, path, k, acc));
-      if (r.kind === 'max') return normalizeAux(mkIMax(l.left, r.right), path, k, normalizeAux(mkIMax(l.left, r.left), path, k, acc));
-      if (r.kind === 'imax') return normalizeAux(mkIMax(r.left, r.right), path, k, normalizeAux(mkIMax(l.left, r.right), path, k, acc));
-      if (r.kind === 'mvar') return acc;
-      const v = r.name;
-      const path2 = orderedInsert(v, path);
-      if (path2) return normalizeAux(l.left, path2, k, addNode(addConst(acc, k, path), v, k, path2));
-      const a2 = k === 0n ? acc : addVar(acc, v, k, path);
-      return normalizeAux(l.left, path, k, a2);
+/** Final Lean 4.34 C++ `is_norm_lt`, expressed iteratively for stack safety. */
+function normCmp(a:Level,b:Level):number{
+  const todo:[Level,Level][]=[[a,b]];
+  while(todo.length){
+    const [x,y]=todo.pop()!;
+    if(levelEqStructural(x,y))continue;
+    const px=toOffset(x),py=toOffset(y),bx=px.base,by=py.base;
+    if(levelEqStructural(bx,by)){
+      if(px.offset<py.offset)return -1;
+      if(px.offset>py.offset)return 1;
+      continue;
     }
-    case 'mvar': return acc;
-    case 'param': {
-      const path2 = orderedInsert(l.name, path);
-      if (path2) return addNode(addConst(acc, k, path), l.name, k, path2);
-      return k === 0n ? acc : addVar(acc, l.name, k, path);
+    const kx=levelKindRank[bx.kind],ky=levelKindRank[by.kind];
+    if(kx!==ky)return kx<ky?-1:1;
+    switch(bx.kind){
+      case'param':
+        if(by.kind!=='param')return kx<ky?-1:1;
+        return nameCmp(bx.name,by.name);
+      case'mvar':
+        if(by.kind!=='mvar')return kx<ky?-1:1;
+        return nameCmp(bx.name,by.name);
+      case'max':
+        if(by.kind!=='max')return kx<ky?-1:1;
+        if(!levelEqStructural(bx.left,by.left)){todo.push([bx.left,by.left]);continue;}
+        todo.push([bx.right,by.right]);continue;
+      case'imax':
+        if(by.kind!=='imax')return kx<ky?-1:1;
+        if(!levelEqStructural(bx.left,by.left)){todo.push([bx.left,by.left]);continue;}
+        todo.push([bx.right,by.right]);continue;
+      case'zero':
+      case'succ':
+        // `toOffset` removes Succ, and unequal Zero bases are impossible.
+        continue;
     }
   }
+  return 0;
 }
-function subsumeVars(a: readonly VarNode[], b: readonly VarNode[]): readonly VarNode[] {
-  const out: VarNode[] = []; let j = 0;
-  for (const x of a) {
-    while (j < b.length && nameCmp(b[j]!.name, x.name) < 0) j++;
-    if (j < b.length && nameEq(x.name, b[j]!.name) && x.offset <= b[j]!.offset) continue;
-    out.push(x);
+
+function normalizeLevelWithMemo(root:Level,memo:WeakMap<object,Level>):Level{
+  const cached=memo.get(root as object);if(cached!==undefined)return cached;
+  type Task={l:Level;done:boolean;leaves?:Level[]};
+  const todo:Task[]=[{l:root,done:false}];
+  while(todo.length){
+    const task=todo.pop()!,l=task.l;
+    if(memo.has(l as object))continue;
+    const p=toOffset(l),base=p.base;
+    if(base.kind==='zero'||base.kind==='param'||base.kind==='mvar'){
+      // This is exactly the C++ fast path: zero/param/mvar with any outer Succ
+      // offset is already normalized and is returned unchanged.
+      memo.set(l as object,l);
+      continue;
+    }
+    if(!task.done){
+      if(base.kind==='imax'){
+        todo.push({l,done:true});
+        todo.push({l:base.right,done:false},{l:base.left,done:false});
+      }else if(base.kind==='max'){
+        const leaves:Level[]=[];pushMaxArgs(base,leaves);
+        todo.push({l,done:true,leaves});
+        for(let i=leaves.length-1;i>=0;i--)todo.push({l:leaves[i]!,done:false});
+      }
+      continue;
+    }
+    if(base.kind==='imax'){
+      const lhs=memo.get(base.left as object)!,rhs=memo.get(base.right as object)!;
+      // Deliberately do not re-normalize if mkIMax turns into a max. Final
+      // Lean 4.34 does the same, and this incompleteness is observable.
+      memo.set(l as object,addOffset(mkIMax(lhs,rhs),p.offset));
+      continue;
+    }
+
+    const args:Level[]=[];
+    for(const leaf of task.leaves!){
+      const n=memo.get(leaf as object)!;
+      pushMaxArgs(n,args);
+    }
+    args.sort(normCmp);
+
+    let i=0;
+    if(isExplicitLevel(args[i]!)){
+      while(i+1<args.length&&isExplicitLevel(args[i+1]!))i++;
+      const k=toOffset(args[i]!).offset;
+      let j=i+1;
+      while(j<args.length&&toOffset(args[j]!).offset<k)j++;
+      if(j<args.length)i++;
+    }
+
+    const rargs:Level[]=[args[i]!];
+    let prev=toOffset(args[i]!);
+    i++;
+    for(;i<args.length;i++){
+      const curr=toOffset(args[i]!);
+      if(levelEqStructural(prev.base,curr.base)){
+        if(prev.offset<curr.offset){
+          prev=curr;
+          rargs.pop();
+          rargs.push(args[i]!);
+        }
+      }else{
+        prev=curr;
+        rargs.push(args[i]!);
+      }
+    }
+
+    const shifted=rargs.map(a=>addOffset(a,p.offset));
+    let r=shifted[shifted.length-1]!;
+    for(let j=shifted.length-2;j>=0;j--)r=mkMax(shifted[j]!,r);
+    memo.set(l as object,r);
   }
-  return out;
+  return memo.get(root as object)!;
 }
-function subsumeBy(a: Node, b: Node, same: boolean): Node {
-  let constant = a.constant;
-  const maxVar = b.vars.reduce((m, x) => x.offset > m ? x.offset : m, 0n);
-  if (!(constant === 0n || ((same || constant > b.constant) && (b.vars.length === 0 || constant > maxVar + 1n)))) constant = 0n;
-  return { constant, vars: same || b.vars.length === 0 ? a.vars : subsumeVars(a.vars, b.vars) };
+
+/** Exact final Lean 4.34 C++ kernel level normalizer, kept iterative for deep levels. */
+export function normalizeLevel(l:Level):Level{
+  return normalizeLevelWithMemo(l,new WeakMap<object,Level>());
 }
-function nodeEmpty(n: Node): boolean { return n.constant === 0n && n.vars.length === 0; }
-function subsumption(norm: Norm): Norm {
-  const out: Norm = [];
-  for (const e of norm) {
-    let n = e.node;
-    for (const d of norm) if (subset(d.path, e.path)) n = subsumeBy(n, d.node, d.path.length === e.path.length);
-    if (!nodeEmpty(n)) out.push({ path: e.path, node: n });
+
+type GeqFrame={
+  a:Level;
+  b:Level;
+  state:0|1|2|3;
+  op?:'and'|'or'|'or-fallback'|'single';
+  secondA?:Level;
+  secondB?:Level;
+};
+
+/** Final Lean 4.34 `is_geq`: normalize first, then use the kernel's incomplete search. */
+function kernelGeq(a:Level,b:Level):boolean{
+  const memo=new WeakMap<object,Level>();
+  const norm=(l:Level)=>normalizeLevelWithMemo(l,memo);
+  const stack:GeqFrame[]=[{a:norm(a),b:norm(b),state:0}];
+  let last=false;
+  while(stack.length){
+    const f=stack[stack.length-1]!;
+    if(f.state===0){
+      const l1=f.a,l2=f.b;
+      if(levelEqStructural(l1,l2)||isZero(l2)){last=true;stack.pop();continue;}
+      if(l2.kind==='max'){
+        f.state=1;f.op='and';f.secondA=l1;f.secondB=norm(l2.right);
+        stack.push({a:l1,b:norm(l2.left),state:0});continue;
+      }
+      if(l1.kind==='max'){
+        // Lean 4.34 uses this only as a positive shortcut:
+        // if neither max branch alone dominates l2, is_geq_core continues
+        // with the imax/offset rules for the original pair.
+        f.state=1;f.op='or-fallback';f.secondA=norm(l1.right);f.secondB=l2;
+        stack.push({a:norm(l1.left),b:l2,state:0});continue;
+      }
+      if(l2.kind==='imax'){
+        f.state=1;f.op='and';f.secondA=l1;f.secondB=norm(l2.right);
+        stack.push({a:l1,b:norm(l2.left),state:0});continue;
+      }
+      if(l1.kind==='imax'){
+        f.state=1;f.op='single';
+        stack.push({a:norm(l1.right),b:l2,state:0});continue;
+      }
+      const p1=toOffset(l1),p2=toOffset(l2);
+      if(levelEqStructural(p1.base,p2.base)||isZero(p2.base)){
+        last=p1.offset>=p2.offset;stack.pop();continue;
+      }
+      if(p1.offset===p2.offset&&p1.offset>0n){
+        f.state=1;f.op='single';
+        stack.push({a:norm(p1.base),b:norm(p2.base),state:0});continue;
+      }
+      last=false;stack.pop();continue;
+    }
+    if(f.state===1){
+      if(f.op==='single'){stack.pop();continue;}
+      if(f.op==='and'&&!last){last=false;stack.pop();continue;}
+      if((f.op==='or'||f.op==='or-fallback')&&last){last=true;stack.pop();continue;}
+      f.state=2;
+      stack.push({a:f.secondA!,b:f.secondB!,state:0});
+      continue;
+    }
+    if(f.state===2&&f.op==='or-fallback'){
+      if(last){stack.pop();continue;}
+      // Both max branches failed. C++ does not return false here; it falls
+      // through to the remaining is_geq_core rules for the original pair.
+      f.state=3;
+      continue;
+    }
+    if(f.state===3){
+      const l1=f.a,l2=f.b;
+      if(l2.kind==='imax'){
+        f.state=1;f.op='and';f.secondA=l1;f.secondB=norm(l2.right);
+        stack.push({a:l1,b:norm(l2.left),state:0});continue;
+      }
+      if(l1.kind==='imax'){
+        f.state=1;f.op='single';
+        stack.push({a:norm(l1.right),b:l2,state:0});continue;
+      }
+      const p1=toOffset(l1),p2=toOffset(l2);
+      if(levelEqStructural(p1.base,p2.base)||isZero(p2.base)){
+        last=p1.offset>=p2.offset;stack.pop();continue;
+      }
+      if(p1.offset===p2.offset&&p1.offset>0n){
+        f.state=1;f.op='single';
+        stack.push({a:norm(p1.base),b:norm(p2.base),state:0});continue;
+      }
+      last=false;stack.pop();continue;
+    }
+    stack.pop();
   }
-  return out;
+  return last;
 }
-export function normalizeLevel(l: Level): Norm { return subsumption(normalizeAux(l, [], 0n, [])); }
-function normLe(a: Norm, b: Norm): boolean {
-  return a.every(e => {
-    let n = e.node;
-    for (const d of b) if (subset(d.path, e.path)) { n = subsumeBy(n, d.node, false); if (nodeEmpty(n)) return true; }
-    return nodeEmpty(n);
-  });
+
+/** Lean kernel `a ≤ b`, implemented as final-4.34 `is_geq(b, a)`. */
+export function levelLe(a:Level,b:Level):boolean{return kernelGeq(b,a);}
+
+/**
+ * Final Lean 4.34 `is_equivalent`.
+ *
+ * Keep the kernel's intentional incompleteness: do not fall back to the
+ * stronger Lean4Lean complete decision procedure, because doing so accepts
+ * universe equalities that the target C++ kernel rejects.
+ */
+export function levelEquivalent(a:Level,b:Level):boolean{
+  if(levelEqStructural(a,b))return true;
+  const memo=new WeakMap<object,Level>();
+  return levelEqStructural(normalizeLevelWithMemo(a,memo),normalizeLevelWithMemo(b,memo));
 }
-export function levelLe(a: Level, b: Level): boolean { return normLe(normalizeLevel(a), normalizeLevel(b)); }
-export function levelEquivalent(a: Level, b: Level): boolean { return levelLe(a, b) && levelLe(b, a); }
+
 export function levelToString(l: Level): string {
   switch (l.kind) {
     case 'zero': return '0'; case 'succ': return `(${levelToString(l.of)}+1)`;

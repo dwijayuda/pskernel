@@ -25,12 +25,21 @@ export function reduceRecursor(env:Environment,e:Expr,whnf:(x:Expr)=>Expr,infer:
  const {fn,args}=appView(e);if(fn.kind!=='const')return null;const ri=env.find(fn.name);if(!ri||ri.kind!=='recursor')return null;
  const majorIdx=ri.numParams+ri.numMotives+ri.numMinors+ri.numIndices;if(args.length<=majorIdx)return null;const major=args[majorIdx]!;
  let mw=major;
- if(ri.k){const ty=whnf(infer(major));const tv=appView(ty);if(tv.fn.kind==='const'){const tvName=tv.fn.name;if(ri.all.some(n=>nameEq(n,tvName))){const ctor=firstCtor(env,tvName);if(ctor){const ci=env.find(ctor);if(ci?.kind==='constructor'){const candidate=mkAppN(constant(ctor,tv.fn.levels),tv.args.slice(0,ci.numParams));if(isDefEq(ty,infer(candidate)))mw=candidate;}}}}}
+ if(ri.k){
+   const ty=whnf(infer(major)),tv=appView(ty),ind=majorInduct(ri);
+   if(ind&&tv.fn.kind==='const'&&nameEq(tv.fn.name,ind)){
+     const ctor=firstCtor(env,ind);
+     if(ctor){const ci=env.find(ctor);if(ci?.kind==='constructor'){const candidate=mkAppN(constant(ctor,tv.fn.levels),tv.args.slice(0,ci.numParams));if(isDefEq(ty,infer(candidate)))mw=candidate;}}
+   }
+ }
  mw=whnf(mw);
  if(mw.kind==='lit'&&mw.literal.kind==='nat')mw=natToCtor(mw.literal.value);
  else if(mw.kind==='lit'&&mw.literal.kind==='string')mw=whnf(stringLitToConstructor(mw));
  else mw=toCtorWhenStructure(env,ri,mw,whnf,infer,isProp);
  const mv=appView(mw);if(mv.fn.kind!=='const')return null;const mvName=mv.fn.name;const rule=ri.rules.find(r=>nameEq(r.ctor,mvName));if(!rule||mv.args.length<rule.nFields)return null;
+ // Final Lean 4.34 refuses recursor reduction when the recursor constant has
+ // the wrong number of universe arguments.
+ if(fn.levels.length!==ri.levelParams.length)return null;
  let rhs=instantiateExprLevels(rule.rhs,ri.levelParams,fn.levels);const firstIndex=ri.numParams+ri.numMotives+ri.numMinors;rhs=mkAppN(rhs,args.slice(0,firstIndex));
  // Nested inductives can make constructor and recursor parameter counts differ, so derive
  // the constructor parameter prefix from the actual major application as Lean does.

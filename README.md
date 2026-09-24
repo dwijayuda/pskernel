@@ -6,11 +6,11 @@ This repository is intentionally version-pinned. Lean 4.34.0 is the compatibilit
 
 ## Current verified surface
 
-The current implementation includes Lean core names/levels/expressions, substitution and local contexts, type inference, WHNF and kernel reduction, algorithmic definitional equality, quotients, ordinary/mutual/indexed/nested inductives, recursor generation/reduction, Lean 4.34 primitive recognition, `lean4export` 3.1.0 replay, resource limits, and identity-keyed kernel caches.
+The current implementation includes Lean core names/levels/expressions, substitution and local contexts, type inference, WHNF and kernel reduction, algorithmic definitional equality, quotients, ordinary/mutual/indexed/nested inductives, recursor generation/reduction, Lean 4.34 primitive recognition, `lean4export` 3.1.0 replay, resource limits, and Lean-structural kernel caches with an identity fast path.
 
 The pinned regression stack includes:
 
-- 97 TypeScript kernel/unit tests
+- 155 TypeScript kernel/unit tests in the current source tree (last executed direct-suite checkpoint: 97; refreshed execution is pending)
 - official Lean 4.34 fresh-module checking
 - official Lean 4.34 adversarial kernel regressions (21 expected-success + 1 expected-rejection)
 - official-vs-TypeScript definitional-equality differential cases (42/42)
@@ -49,7 +49,7 @@ For the official adversarial source-file oracle, set `LEAN434_SRC` to a Lean 4.3
 - `scripts/` — oracle, corpus, differential, and anti-drift gates
 - `docs/ANTI_DRIFT.md` — scope and compatibility rules
 
-Final Lean 4.34 removes the deprecated in-kernel `Lean.reduceNat` / `Lean.reduceBool` compiler-interpreter reduction path. pskernel therefore has no NativeEvaluator/native-reduction kernel extension in the 4.34 profile.
+Lean `v4.34.0` still implements the deprecated in-kernel `Lean.reduceNat` / `Lean.reduceBool` compiler-IR path. pskernel models that boundary with an explicit, shape-checked `NativeEvaluator`; without a configured provider these operations fail closed rather than guessing from logical bodies.
 
 Do not silently broaden acceptance to make a corpus pass. A Lean/TypeScript mismatch must be isolated and fixed at the semantic layer that differs from Lean 4.34.0.
 
@@ -84,4 +84,4 @@ On Windows/PowerShell, the repository includes a helper that validates Node/Lean
 powershell -ExecutionPolicy Bypass -File scripts/run-full-std-local.ps1
 ```
 
-If memory is limited, override the heap, for example `-HeapMiB 8192`. On a machine with 24–32 GiB RAM, the default 12288 MiB is preferred. Send back `full-std.log` if the run fails or when it passes so the result can be recorded.
+If memory is limited, override the heap, for example `-HeapMiB 8192`. On a machine with 24–32 GiB RAM, the default 12288 MiB is preferred. Send back `full-std.local.log` if the run fails or when it passes so the result can be recorded. The local evidence file is gitignored so the assurance run cannot dirty the tracked source tree merely by logging.

@@ -14,5 +14,6 @@ export const N={
  Quot:nameFromDotted('Quot'),QuotMk:nameFromDotted('Quot.mk'),QuotLift:nameFromDotted('Quot.lift'),QuotInd:nameFromDotted('Quot.ind'),
  WfNatFix:nameFromDotted('WellFounded.Nat.fix'),WfNatFixGo:nameFromDotted('WellFounded.Nat.fix.go'),WfNatEager:nameFromDotted('WellFounded.Nat.eager'),
  EagerReduce:nameFromDotted('eagerReduce'),
+ LeanReduceBool:nameFromDotted('Lean.reduceBool'),LeanReduceNat:nameFromDotted('Lean.reduceNat'),
  AccRec:nameFromDotted('Acc.rec'),AccIntro:nameFromDotted('Acc.intro')
 } as const;

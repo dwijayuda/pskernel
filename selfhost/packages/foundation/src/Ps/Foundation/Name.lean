@@ -37,3 +37,8 @@ def psNameToString : PsName -> String
         suffix
       else
         prefixText ++ "." ++ suffix
+
+def psNameLastComponent : PsName -> String
+  | .anonymous => ""
+  | .str _ value => value
+  | .num _ value => toString value

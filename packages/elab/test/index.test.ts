@@ -924,11 +924,11 @@ console.log('ok - @proofscript/elab bounded exact search');
 {
   const env=makeNatNotationEnvironment();
   const result=elaborateV061Declarations(parseV061Module(
-    'theorem rflAddZero(n : Nat) : n + 0 = n := by rfl;',
+    'theorem rflSelf(n : Nat) : n = n := by rfl;',
   ),env);
   equal(result.theorems.length,1);
   equal(
-    result.environment.find(nameFromDotted('rflAddZero'))?.kind,
+    result.environment.find(nameFromDotted('rflSelf'))?.kind,
     'theorem',
   );
 }

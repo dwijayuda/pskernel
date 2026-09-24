@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node dist/test/all.test.js && npm run test:packages && npm run test:package-integration",
+    "test": "npm run test:outer && npm run build && node dist/test/all.test.js",
     "check": "npm run test && node scripts/anti-drift.mjs && npm run check:packages && node scripts/oracle-fingerprint.mjs",
     "replay": "npm run build --silent && node scripts/replay.mjs",
     "oracle:official": "node scripts/official-oracle.mjs",
@@ -32,7 +32,9 @@
     "test:package-integration": "node scripts/package-integration-smoke.mjs",
     "check:source-shape": "node scripts/source-shape-check.mjs",
     "check:vscode": "node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs",
-    "check:architecture": "node scripts/proofscript-architecture-check.mjs"
+    "check:architecture": "node scripts/proofscript-architecture-check.mjs",
+    "build:src": "tsc -p tsconfig.src.json",
+    "test:outer": "npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages"
   },
   "devDependencies": {
     "typescript": "5.8.3"

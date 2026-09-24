@@ -156,3 +156,54 @@ def compilerWithReader
     (transform : Context -> Context) :
     CompilerM Context State Error Value :=
   CompilerM.mk (compilerWithReaderRun value transform)
+
+def compilerFailure
+    {Context : Type} {State : Type} {Error : Type} {Value : Type}
+    (error : Error) : CompilerM Context State Error Value :=
+  compilerThrow error
+
+def compilerOrElseRun
+    {Context : Type} {State : Type} {Error : Type} {Value : Type}
+    (value : CompilerM Context State Error Value)
+    (fallback : CompilerM Context State Error Value)
+    (context : Context)
+    (state : State) : Result (Prod Value State) Error :=
+  match value.run context state with
+  | Result.ok pair => Result.ok pair
+  | Result.error error => fallback.run context state
+
+def compilerOrElse
+    {Context : Type} {State : Type} {Error : Type} {Value : Type}
+    (value : CompilerM Context State Error Value)
+    (fallback : CompilerM Context State Error Value) :
+    CompilerM Context State Error Value :=
+  CompilerM.mk (compilerOrElseRun value fallback)
+
+def compilerCheckpoint
+    {Context : Type} {State : Type} {Error : Type}
+    (unit : Unit) : CompilerM Context State Error State :=
+  compilerGet unit
+
+def compilerRestore
+    {Context : Type} {State : Type} {Error : Type}
+    (saved : State) : CompilerM Context State Error Unit :=
+  compilerSet saved
+
+def compilerCommit
+    {Context : Type} {State : Type} {Error : Type}
+    (unit : Unit) : CompilerM Context State Error Unit :=
+  compilerPure unit
+
+def compilerWhen
+    {Context : Type} {State : Type} {Error : Type}
+    (condition : Bool)
+    (action : CompilerM Context State Error Unit) :
+    CompilerM Context State Error Unit :=
+  if condition then action else compilerPure Unit.unit
+
+def compilerUnless
+    {Context : Type} {State : Type} {Error : Type}
+    (condition : Bool)
+    (action : CompilerM Context State Error Unit) :
+    CompilerM Context State Error Unit :=
+  if condition then compilerPure Unit.unit else action

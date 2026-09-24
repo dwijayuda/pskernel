@@ -1,5 +1,7 @@
 import Ps.Foundation.Name
 import Ps.Syntax.Lexer
+import Ps.Syntax.ParseLean
+import Ps.Syntax.ParseProofScript
 import Ps.Core.Abstract
 import Ps.Core.Builtin
 import Ps.Core.Equality
@@ -323,8 +325,34 @@ def psTestLexerNestedTrivia : Bool :=
             && psTokenKindEq eofToken.kind PsTokenKind.endOfInput
       | _ => false
 
+def psTestSyntaxNameSingle (name : PsSyntaxName) (expected : String) : Bool :=
+  match name.segments with
+  | [segment] => segment == expected
+  | _ => false
+
+def psTestParsedModuleShape (module : PsSyntaxModule) : Bool :=
+  match module.imports, module.declarations with
+  | [importDecl], [PsSyntaxDeclaration.definition name [] type value _] =>
+      psTestSyntaxNameSingle importDecl.moduleName "A"
+        && psTestSyntaxNameSingle name "x"
+        && match type, value with
+           | PsSyntaxTerm.reference typeName, PsSyntaxTerm.natural text _ =>
+               psTestSyntaxNameSingle typeName "Nat" && text == "1"
+           | _, _ => false
+  | _, _ => false
+
+def psTestDualSourceSimpleParse : Bool :=
+  match
+      psParseLeanSource "import A\ndef x : Nat := 1",
+      psParseProofScriptSource "import A; def x : Nat := 1;" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      psTestParsedModuleShape leanModule
+        && psTestParsedModuleShape proofScriptModule
+  | _, _ => false
+
 def psBootstrapTests : Bool :=
-  psTestLexerUtf8Offset
+  psTestDualSourceSimpleParse
+    && psTestLexerUtf8Offset
     && psTestLexerNestedTrivia
     && psTestModuleGraph
     && psTestGlobalInstanceSynthesis

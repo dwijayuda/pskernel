@@ -870,19 +870,61 @@ console.log('ok - @proofscript/erasure recursive ADT metadata erasure');
       }],
     }],
   };
-  const checked=admitCheckedCoreAdmissions(new Environment(),[{
-    kind:'structure',
-    declaration,
-    structure:{
-      name:Box,
-      constructor:BoxMk,
-      fields:[{name:'value',index:0,binderInfo:'default'}],
+  const Get=nameFromDotted('getBox');
+  const boxAlpha=app(constant(Box),bvar(0));
+  const checked=admitCheckedCoreAdmissions(new Environment(),[
+    {
+      kind:'structure',
+      declaration,
+      structure:{
+        name:Box,
+        constructor:BoxMk,
+        fields:[{name:'value',index:0,binderInfo:'default'}],
+      },
     },
-  }]);
+    {
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:Get,
+        levelParams:[],
+        type:forallE(
+          Alpha,
+          sort(levelSucc(levelZero)),
+          forallE(
+            nameFromDotted('box'),
+            boxAlpha,
+            bvar(1),
+          ),
+          'implicit',
+        ),
+        value:lam(
+          Alpha,
+          sort(levelSucc(levelZero)),
+          lam(
+            nameFromDotted('box'),
+            boxAlpha,
+            {
+              kind:'proj',
+              typeName:Box,
+              index:0,
+              expr:bvar(0),
+            },
+          ),
+          'implicit',
+        ),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+  ]);
   const erased=eraseCheckedCoreModule(checked);
   equal(erased.structures?.[0]?.name,'Box');
   equal(erased.structures?.[0]?.typeParameters?.length,1);
   equal(erased.structures?.[0]?.fields[0]?.type.kind,'typeParameter');
+  const get=erased.declarations.find((item)=>item.name==='getBox');
+  equal(get?.body.kind,'projection');
+  if(get?.body.kind==='projection')equal(get.body.field,'value');
 }
 console.log('ok - @proofscript/erasure generic structure metadata');
 

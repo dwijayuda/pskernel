@@ -222,45 +222,36 @@ A runtime language feature is complete only when it executes through:
 
 A parser-only or backend-only implementation does not close a foundation gate.
 
-### Dual-source portability invariant
+### Staged source portability invariant
 
-Self-hosting features are complete only when they remain portable across both
-owned source surfaces. The bootstrap compiler must never become a Lean-only
-implementation that is translated to ProofScript only after the architecture
-has already diverged.
+During the Lean bootstrap and SH8a compiler implementation, **`.lean` is the
+only handwritten compiler source**. Do not create, update, or review paired
+`.ps` implementation files by hand. The bootstrap source must still stay
+inside the frozen PSC1-compatible Lean subset and must use the same canonical
+AST, elaboration, checked-core, and compiler-IR semantics that the eventual
+ProofScript source will use.
 
-For every feature admitted to the frozen bootstrap subset, continuously gate:
+Dual-surface behavior may still be tested with in-memory/source fixtures where
+the ProofScript frontend already exists. That tests the language design without
+creating a second maintained compiler tree.
 
-```text
-supported .lean
-  -> canonical shared AST
-  -> canonical .ps
-  -> parse/elaborate/check
-
-supported .ps
-  -> canonical shared AST
-  -> canonical .lean
-  -> parse/elaborate/check
-```
-
-and independently gate both source forms through:
+Canonical source translation becomes a required compiler capability **after the
+Lean-authored compiler is complete enough to perform that translation itself**.
+At that point generate the ProofScript tree from the authoritative Lean tree:
 
 ```text
-.lean -> Meta/Elab -> pskernel -> checked core -> IR -> .ts -> .js
-.ps   -> Meta/Elab -> pskernel -> checked core -> IR -> .ts -> .js
+compiler.lean
+  -> completed compiler
+  -> generated canonical compiler.ps
+  -> parse / elaborate / check
+  -> equal checked-core and compiler-IR fingerprints
+  -> equivalent TypeScript / JavaScript
 ```
 
-The requirement is semantic/canonical equivalence, not preservation of original
-whitespace/comments. After canonicalization, translated sources must reparse to
-the same owned AST semantics, and both source paths must converge on equal
-checked-core and compiler-IR fingerprints. Normalized TypeScript must also match
-unless a documented source-location-only difference makes byte equality
-inappropriate; executable JavaScript behavior must remain equivalent.
-
-A feature that exists only in the `.lean` parser, only in the `.ps` parser,
-only in one printer, or only in one backend path is **not self-host-foundation
-complete**. Unsupported constructs must fail closed in both translation
-directions rather than being silently erased or approximated.
+Only compiler-generated `.ps` is used for the initial parity campaign. Once
+that generated tree is stable, the reverse `.ps -> .lean` direction and
+canonical-idempotence gates are enabled. Unsupported constructs must continue
+to fail closed rather than being silently erased or approximated.
 
 ## SH0 — remove the legacy semantic lane — COMPLETED 2026-09-24
 
@@ -962,21 +953,25 @@ this dependency order:
 12. term/declaration elaboration;
 13. compiler orchestration.
 
-Every SH8a module written in `.lean` must pass the continuous dual-source gate
-as it lands:
+Every SH8a compiler module is authored and reviewed only in `.lean`. It must
+pass the official Lean 4.34 build, the portable source-profile audit, and the
+owned ProofScript semantic path for every feature that path already supports.
+Do **not** hand-author or manually synchronize `module.ps` siblings during
+SH8a.
+
+The compiler architecture, AST, names, elaboration, checked-core contracts and
+IR must nevertheless stay source-neutral. When SH8a has produced a complete
+enough compiler to translate its own frozen Lean subset, run the first
+compiler-produced source transition over the whole compiler tree:
 
 ```text
-module.lean -> canonical module.ps   -> parse/elab/check
-module.ps   -> canonical module.lean -> parse/elab/check
+module.lean -> completed compiler -> generated canonical module.ps
 ```
 
-The translated `.ps` form must remain buildable throughout SH8a rather than
-being generated for the first time at SH10. At every completed compiler
-milestone, both source forms must still converge on the same checked-core and
-compiler-IR fingerprints and continue through TypeScript to executable
-JavaScript. This makes the eventual switch of the authoritative compiler source
-from `.lean` to `.ps` a source-of-truth transition, not a second compiler
-port.
+Then gate the generated ProofScript corpus against the Lean corpus for
+parse/elaboration behavior, checked-core and compiler-IR fingerprints, and
+TypeScript/JavaScript behavior. This makes `.ps` a compiler output before it
+ever becomes a maintained source.
 
 SH8a is the first self-hosting target. It does **not** require moving every
 existing theorem tactic into the self-hosted compiler before PSC1 can exist.
@@ -1045,10 +1040,11 @@ self-hosting additionally requires the applicable SH8b tactic/frontend gate.
 
 ## SH10 — make .ps the authoritative compiler source
 
-Because SH7-SH9 continuously maintain `.lean <-> .ps` parity, SH10 is **not**
-a one-time compiler translation project. Promote the already-green canonical
-ProofScript form to the primary maintained source and keep canonical Lean as a
-supported generated/translated representation.
+SH10 starts from the compiler-generated canonical `.ps` tree produced from
+the completed Lean-authored compiler. First close the full parity campaign and
+reverse-translation/idempotence gates; then promote the green ProofScript form
+to the primary maintained source and keep canonical Lean as a supported
+generated/translated representation.
 
 The target condition is:
 

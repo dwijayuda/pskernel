@@ -472,7 +472,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(
     lowerV061ModuleToLean(module),
     'theorem typedNil {α : Type} : '+
-    'listIsEmpty (PsList.nil : PsList α) = true := by\n  rfl\n',
+    'listIsEmpty (PsList.nil : PsList α) = true := by rfl\n',
   );
   equal(
     lowerV061ModuleToProofScript(module),

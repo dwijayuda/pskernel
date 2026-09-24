@@ -64,6 +64,14 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.Model
   ]
 
+lean_lib PsErasure where
+  srcDir := "packages/erasure/src"
+  roots := #[
+    `Ps.Erasure.Basic,
+    `Ps.Erasure.Expr,
+    `Ps.Erasure.Definition
+  ]
+
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
   roots := #[
@@ -116,3 +124,7 @@ lean_exe psc1_bridge_tests where
 lean_exe psc1_backend_ts_tests where
   srcDir := "test"
   root := `BackendTsTests
+
+lean_exe psc1_erasure_tests where
+  srcDir := "test"
+  root := `ErasureTests

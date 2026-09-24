@@ -41,6 +41,19 @@ export interface AnalysisOptions {
 
 const sourceFrontends=createDefaultSourceFrontendRegistry();
 
+
+function canonicalLeanForDisplay(module:V061Module):string {
+  try{
+    return lowerV061ModuleToLean(module);
+  }catch(error){
+    const message=error instanceof Error?error.message:String(error);
+    if(message.includes('PS_LEAN_LOWERING_JSX_UNSUPPORTED')){
+      return '-- PSX2 typed JSX lowering pending';
+    }
+    throw error;
+  }
+}
+
 function displayCoreExpr(
   expr:Expr,
   ids:ReadonlyMap<string,string>,
@@ -181,7 +194,7 @@ export function analyzeDocument(
     throw error;
   }
 
-  const canonicalLean=lowerV061ModuleToLean(module);
+  const canonicalLean=canonicalLeanForDisplay(module);
   let environment=(
     options.environment
     ??options.environmentFactory?.()
@@ -238,7 +251,7 @@ export function analyzeDocument(
       kernel,
       ...(message===undefined?{}:{message}),
       ...(initialGoal===undefined?{}:{initialGoal}),
-      canonicalLean:lowerV061ModuleToLean(
+      canonicalLean:canonicalLeanForDisplay(
         singleDeclarationModule(module,declaration),
       ).trim(),
     });

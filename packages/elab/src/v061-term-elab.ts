@@ -121,9 +121,16 @@ export function elaborateV061Term(
       );
       if(recursive!==undefined)return recursive;
       const fn=resolveReference(expr.callee,context);
-      const args=expr.args.map(
-        (arg)=>elaborateV061Term(arg,context).term,
-      );
+      const args={
+        length:expr.args.length,
+        elaborate:(index:number,expectedType:import('lean-ts-kernel').Expr)=>({
+          term:elaborateV061Term(
+            expr.args[index]!,
+            context,
+            expectedType,
+          ).term,
+        }),
+      };
       const result=elaborateApplication({
         environment:context.environment,
         metaContext:context.metaContext,

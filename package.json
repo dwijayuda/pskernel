@@ -50,8 +50,7 @@
     "arena:verify": "node scripts/verify-arena-corpus.mjs .arena-tests",
     "oracle:arena:pinned": "npm run build --silent && npm run arena:verify && node scripts/arena-static-oracle.mjs .arena-tests",
     "oracle:arena:pinned-perf": "npm run build --silent && npm run arena:verify && node scripts/arena-static-oracle.mjs .arena-tests --include-perf",
-    "formal:cosign": "npm run build --silent && node scripts/formal-cosign.mjs",
-    "formal:smoke": "npm run formal:cosign -- oracle/fixtures/lean434-primitive-closure.ndjson"
+    "formal:cosign": "npm run build --silent && node scripts/formal-cosign.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

@@ -24,13 +24,17 @@ mkdir -p oracle/fixtures
 tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
 
-lean --run oracle/replay-probe/DependencyExport.lean Init.Data.String.Length \
+if ! lean --run oracle/replay-probe/DependencyExport.lean Init.Data.String.Length \
   --selected-segmented 1 \
   Char.ofNat Char.toNat Char.isWhitespace Char.isUpper Char.isLower Char.isAlpha Char.isDigit Char.isAlphanum \
   String.push String.singleton String.append String.length String.utf8ByteSize String.rawStartPos String.rawEndPos \
   String.Pos.Raw.get 'String.Pos.Raw.get?' String.Pos.Raw.next "String.Pos.Raw.next'" String.Pos.Raw.atEnd \
   String.Pos.Raw.extract String.Pos.Raw.prev \
-  > "$tmp"
+  > "$tmp"; then
+  echo "generate-text-foundation-fixture: Lean export failed" >&2
+  cat "$tmp" >&2
+  exit 1
+fi
 
 mv "$tmp" oracle/fixtures/lean434-proofscript-text-foundation.ndjson
 trap - EXIT

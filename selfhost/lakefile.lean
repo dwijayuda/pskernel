@@ -61,6 +61,15 @@ lean_lib PsMeta where
     `Ps.Meta.Infer
   ]
 
+lean_lib PsElab where
+  srcDir := "packages/elab/src"
+  roots := #[
+    `Ps.Elab.Context,
+    `Ps.Elab.Literal,
+    `Ps.Elab.Term,
+    `Ps.Elab.Declaration
+  ]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "src"

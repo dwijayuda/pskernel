@@ -132,6 +132,184 @@ def mkIMax (u v : Level) : Level :=
     | .succ .zero => v
     | _ => if beq u v then u else .imax u v
 
+
+def addOffset : Level → Nat → Level
+  | u, 0 => u
+  | u, n + 1 => addOffset (.succ u) n
+
+def getOffset : Level → Nat
+  | .succ u => getOffset u + 1
+  | _ => 0
+
+def getLevelOffset : Level → Level
+  | .succ u => getLevelOffset u
+  | u => u
+
+def ctorRank : Level → Nat
+  | .zero => 0
+  | .param _ => 1
+  | .mvar _ => 2
+  | .succ _ => 3
+  | .max _ _ => 4
+  | .imax _ _ => 5
+
+/--
+Total order used by the Lean 4.34 kernel universe normalizer.
+This follows `src/kernel/level.cpp:is_norm_lt`.
+-/
+def normLtAux : Level → Nat → Level → Nat → Bool
+  | .succ a, ka, b, kb => normLtAux a (ka + 1) b kb
+  | a, ka, .succ b, kb => normLtAux a ka b (kb + 1)
+  | a@(.max a₁ a₂), ka, b@(.max b₁ b₂), kb =>
+      if beq a b then ka < kb
+      else if !beq a₁ b₁ then normLtAux a₁ 0 b₁ 0
+      else normLtAux a₂ 0 b₂ 0
+  | a@(.imax a₁ a₂), ka, b@(.imax b₁ b₂), kb =>
+      if beq a b then ka < kb
+      else if !beq a₁ b₁ then normLtAux a₁ 0 b₁ 0
+      else normLtAux a₂ 0 b₂ 0
+  | .param a, ka, .param b, kb =>
+      if Name.beq a b then ka < kb else Name.lt a b
+  | .mvar a, ka, .mvar b, kb =>
+      if Name.beq a b then ka < kb else Name.lt a b
+  | a, ka, b, kb =>
+      if beq a b then ka < kb else ctorRank a < ctorRank b
+
+def normLt (a b : Level) : Bool :=
+  normLtAux a 0 b 0
+
+def insertSorted (x : Level) : List Level → List Level
+  | [] => [x]
+  | y :: ys =>
+      if normLt x y then x :: y :: ys
+      else y :: insertSorted x ys
+
+def sortLevels : List Level → List Level
+  | [] => []
+  | x :: xs => insertSorted x (sortLevels xs)
+
+def flattenMax : Level → List Level
+  | .max a b => flattenMax a ++ flattenMax b
+  | u => [u]
+
+def splitExplicit : List Level → List Level × List Level
+  | [] => ([], [])
+  | x :: xs =>
+      if isExplicit x then
+        let p := splitExplicit xs
+        (x :: p.1, p.2)
+      else
+        ([], x :: xs)
+
+def last? {α : Type} : List α → Option α
+  | [] => none
+  | [x] => some x
+  | _ :: xs => last? xs
+
+def anyOffsetGe : List Level → Nat → Bool
+  | [], _ => false
+  | x :: xs, k => getOffset x >= k || anyOffsetGe xs k
+
+def selectExplicitPrefix (xs : List Level) : List Level :=
+  let p := splitExplicit xs
+  match last? p.1 with
+  | none => p.2
+  | some e =>
+      if anyOffsetGe p.2 (getOffset e) then p.2
+      else e :: p.2
+
+def collapseSameBase : List Level → List Level
+  | [] => []
+  | x :: xs =>
+      let rec loop (best : Level) : List Level → List Level
+        | [] => [best]
+        | y :: ys =>
+            if beq (getLevelOffset best) (getLevelOffset y) then
+              loop y ys
+            else
+              best :: loop y ys
+      loop x xs
+
+def mkMaxList : List Level → Level
+  | [] => .zero
+  | [x] => x
+  | x :: xs => mkMax x (mkMaxList xs)
+
+def isAlreadyNormalizedCheap : Level → Bool
+  | .zero => true
+  | .param _ => true
+  | .mvar _ => true
+  | .succ u => isAlreadyNormalizedCheap u
+  | _ => false
+
+/--
+Exact Lean-4.34-kernel universe normal form, expressed with portable lists
+instead of the C++ temporary buffers/Lean Array qsort implementation.
+-/
+partial def normalize (u : Level) : Level :=
+  if isAlreadyNormalizedCheap u then
+    u
+  else
+    let outer := getOffset u
+    match getLevelOffset u with
+    | .imax a b =>
+        addOffset (mkIMax (normalize a) (normalize b)) outer
+    | .max a b =>
+        let raw := flattenMax a ++ flattenMax b
+        let normalized := raw.map normalize
+        let flattened := normalized.foldl
+          (fun acc x => acc ++ flattenMax x) []
+        let sorted := sortLevels flattened
+        let selected := selectExplicitPrefix sorted
+        let collapsed := collapseSameBase selected
+        let shifted := collapsed.map (fun x => addOffset x outer)
+        mkMaxList shifted
+    | other => addOffset other outer
+
+def isEquivalent (a b : Level) : Bool :=
+  beq a b || beq (normalize a) (normalize b)
+
+/--
+Final Lean 4.34 kernel `is_geq`.
+The max-left case is only a positive shortcut. If both branches fail, the
+algorithm deliberately falls through to the remaining imax/offset rules.
+-/
+partial def isGeqCore (a b : Level) : Bool :=
+  if beq a b || isZero b then
+    true
+  else
+    match b with
+    | .max b₁ b₂ => isGeq a b₁ && isGeq a b₂
+    | _ =>
+        match a with
+        | .max a₁ a₂ =>
+            if isGeq a₁ b || isGeq a₂ b then
+              true
+            else
+              isGeqCoreRest a b
+        | _ => isGeqCoreRest a b
+where
+  isGeqCoreRest (a b : Level) : Bool :=
+    match b with
+    | .imax b₁ b₂ => isGeq a b₁ && isGeq a b₂
+    | _ =>
+        match a with
+        | .imax _ a₂ => isGeq a₂ b
+        | _ =>
+            let pa := toOffset a
+            let pb := toOffset b
+            if beq pa.1 pb.1 || isZero pb.1 then
+              pa.2 >= pb.2
+            else if pa.2 == pb.2 && pa.2 > 0 then
+              isGeq pa.1 pb.1
+            else
+              false
+  isGeq (a b : Level) : Bool :=
+    isGeqCore (normalize a) (normalize b)
+
+def geq (a b : Level) : Bool :=
+  isGeqCore (normalize a) (normalize b)
+
 end Level
 
 end ProofScript.Kernel.PSC1

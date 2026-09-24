@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 const expected=114029;
 const leanExe=process.platform==='win32'?'lean.exe':'lean';
-const candidates=[process.env.LEAN434_BIN,...(process.env.PATH??'').split(delimiter)].filter(Boolean).map(resolve);
+const candidates=[process.env.LEAN434_BIN,...(process.env.PATH??'').split(delimiter)].filter(Boolean).map(p=>resolve(p));
 const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
 if(!bin)throw new Error('std-release-profile: Lean 4.34 not found');
 const lean=join(bin,leanExe);

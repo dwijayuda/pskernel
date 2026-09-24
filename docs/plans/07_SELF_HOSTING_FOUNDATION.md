@@ -133,6 +133,46 @@ A runtime language feature is complete only when it executes through:
 
 A parser-only or backend-only implementation does not close a foundation gate.
 
+### Dual-source portability invariant
+
+Self-hosting features are complete only when they remain portable across both
+owned source surfaces. The bootstrap compiler must never become a Lean-only
+implementation that is translated to ProofScript only after the architecture
+has already diverged.
+
+For every feature admitted to the frozen bootstrap subset, continuously gate:
+
+```text
+supported .lean
+  -> canonical shared AST
+  -> canonical .ps
+  -> parse/elaborate/check
+
+supported .ps
+  -> canonical shared AST
+  -> canonical .lean
+  -> parse/elaborate/check
+```
+
+and independently gate both source forms through:
+
+```text
+.lean -> Meta/Elab -> pskernel -> checked core -> IR -> .ts -> .js
+.ps   -> Meta/Elab -> pskernel -> checked core -> IR -> .ts -> .js
+```
+
+The requirement is semantic/canonical equivalence, not preservation of original
+whitespace/comments. After canonicalization, translated sources must reparse to
+the same owned AST semantics, and both source paths must converge on equal
+checked-core and compiler-IR fingerprints. Normalized TypeScript must also match
+unless a documented source-location-only difference makes byte equality
+inappropriate; executable JavaScript behavior must remain equivalent.
+
+A feature that exists only in the `.lean` parser, only in the `.ps` parser,
+only in one printer, or only in one backend path is **not self-host-foundation
+complete**. Unsupported constructs must fail closed in both translation
+directions rather than being silently erased or approximated.
+
 ## SH0 — remove the legacy semantic lane — COMPLETED 2026-09-24
 
 This gate is promoted ahead of all new foundation work.
@@ -212,7 +252,20 @@ Provide verified, generic:
 - `Set α`;
 - `Prod α β` / tuple support and the ordinary `fst` / `snd` operations;
 - `Sum α β` when the compiler data model benefits from it;
+- a self-hostable canonical JSON value/codec library used by SH6b;
 - the already-landed Option/Result/List APIs needed by compiler code.
+
+The JSON foundation must provide the bounded functionality needed by the
+pskernel protocol without depending on host-side object semantics:
+
+- JSON value representation;
+- deterministic parser with structured errors;
+- canonical encoder;
+- object lookup/building using the owned Map/association semantics;
+- exact string escaping/unescaping and integer handling required by the bridge;
+- schema-level codecs for versioned compiler/kernel payloads.
+
+JSON is a library/data-format requirement, not a new trusted language primitive.
 
 The first Array profile needs at least empty, size, get/get?, push, set, map,
 fold, monadic map/fold variants used by compiler code, any/all and find?.
@@ -403,8 +456,29 @@ source relies on heavily and that materially reduce bootstrap rewrite risk:
 - structure update syntax such as `{ s with field := value }`;
 - named arguments;
 - default arguments where the census shows repeated compiler use;
+- grouped binders such as `(x y : T)` and `{α β : Type}`;
+- unnamed instance binders such as `[Monad m]`, represented internally with
+  deterministic generated names when a name is required;
+- structure field defaults such as `field : T := default` and the bounded
+  empty/default structure construction they justify;
 - `abbrev` when it can be supported without introducing a second semantic
-  mechanism.
+  mechanism;
+- `opaque` when it can reuse pskernel's existing opacity semantics without a
+  second elaboration path.
+
+Include a bounded explicit universe surface in the census and bootstrap
+language when compiler/library definitions need universe polymorphism:
+
+- `universe u v`;
+- `Type u` / `Sort u`;
+- explicit constant levels such as `Foo.{u}`;
+- the small level-expression subset actually exercised by bootstrap code.
+
+Do not implement Lean's complete universe command/scoping convenience layer
+merely for syntax parity. If the first compiler can remain in the ordinary
+`Type` profile, explicit universe syntax may stay USEFUL/CHEAP rather than a
+PSC1 blocker, but any universe syntax that is accepted must round-trip through
+both `.lean` and `.ps` and elaborate to the same level expressions.
 
 These conveniences must elaborate/desugar into the same ordinary core terms;
 they do not receive independent runtime semantics.
@@ -439,6 +513,15 @@ The bootstrap compiler may call typed host capabilities for:
 
 These adapters may remain TypeScript. They are runtime assumptions, never
 proof evidence, and must not own language semantics.
+
+Host capability bindings used by the self-hosted compiler must be
+**source-neutral**. Do not make the portable compiler depend on a `.ps`-only
+`extern` declaration whose npm/runtime metadata is lost by `.ps -> .lean`
+translation. Prefer a versioned capability manifest/adapter registration outside
+the translated semantic source, from which both frontends receive the same
+logical declarations. If source-level extern syntax is later admitted to the
+bootstrap corpus, its binding metadata must survive both translation directions
+through a source-neutral sidecar/artifact; silent metadata loss is forbidden.
 
 ### SH6b — versioned pskernel bridge
 
@@ -514,7 +597,9 @@ protocol. The schema must:
 Once self-hosting is stable, a typed/binary/structured ABI may replace this
 transport for performance, but it must preserve the same versioned semantic
 contract. The JSON/String bridge is a bootstrap transport, not a new semantic
-authority.
+authority. Its JSON parser, encoder and schema codecs must themselves be
+expressible in the frozen dual-source subset so the bridge client can live in
+both `.lean` and `.ps`.
 
 Exit test: a compiler module authored in supported `.lean` and `.ps` can
 encode a canonical request, cross the primitive String bridge, decode the
@@ -548,6 +633,21 @@ attribute registration and unsafe casts.
 Gate every supported bootstrap construct through the same `.lean` and `.ps`
 frontends and checked-core path.
 
+Maintain a **dual-source feature matrix** for the frozen subset. Each selected
+feature must be green for:
+
+1. `.lean` parse -> shared AST -> canonical `.lean`;
+2. `.ps` parse -> shared AST -> canonical `.ps`;
+3. `.lean -> .ps` translation -> reparse;
+4. `.ps -> .lean` translation -> reparse;
+5. elaboration/checking from both source kinds;
+6. equal checked-core fingerprints;
+7. equal compiler-IR fingerprints;
+8. TypeScript emission from both source kinds;
+9. JavaScript execution from both source kinds.
+
+This matrix is a release gate, not documentation-only bookkeeping.
+
 Before freezing, add one multi-module **SELFHOST-FEATURE** fixture/skeleton that
 uses the foundation together rather than as isolated unit features. It must
 exercise at least:
@@ -555,8 +655,10 @@ exercise at least:
 - nontrivial `String`/`Char` lexer-style traversal and source positions;
 - Array plus ordered Map/Set and compiler-oriented traversal combinators such as
   `mapM` / indexed monadic traversal / folds;
+- canonical JSON parse/encode plus at least one SH6b request/response codec;
 - qualified `Name`, namespaces/imports and explicit environment updates;
-- structures, structure updates, field/method notation and named arguments;
+- structures, structure updates, field/method notation, named arguments,
+  grouped/unnamed binders and structure defaults;
 - dependent/proof-binding `if h : P`, proof-valued `have`, and the selected
   expected-type/show form;
 - generic/dependent ADTs and the SH4.5 pattern subset, including nested and
@@ -578,10 +680,13 @@ exercise at least:
   transport, for lookup, a ground kernel query and declaration/inductive
   admission.
 
-The fixture must execute end-to-end:
+The fixture must execute all four portability/build directions end-to-end:
 
 ```text
-supported .lean and .ps
+SELFHOST-FEATURE.lean -> canonical .ps   -> reparse/check
+SELFHOST-FEATURE.ps   -> canonical .lean -> reparse/check
+
+SELFHOST-FEATURE.lean
 -> canonical source AST
 -> Lean-compatible Meta/Elab
 -> pskernel admission
@@ -591,6 +696,26 @@ supported .lean and .ps
 -> TypeScript
 -> tsc
 -> JavaScript
+
+SELFHOST-FEATURE.ps
+-> canonical source AST
+-> Lean-compatible Meta/Elab
+-> pskernel admission
+-> checked core
+-> erasure
+-> verified compiler IR
+-> TypeScript
+-> tsc
+-> JavaScript
+```
+
+The two build paths must produce the same checked-core/IR fingerprints and
+semantically equivalent generated TypeScript/JavaScript. Translation
+round-trips must also be canonical-idempotent:
+
+```text
+.lean -> .ps -> .lean -> canonical stability
+.ps   -> .lean -> .ps -> canonical stability
 ```
 
 Freeze only after this gate passes. Do not start SH8 merely because every
@@ -688,20 +813,25 @@ Do not claim self-hosting merely because PSC1 executes. The first core
 self-hosting claim requires PSC2 stability for SH8a; full current-language
 self-hosting additionally requires the applicable SH8b tactic/frontend gate.
 
-## SH10 — move the compiler to .ps
+## SH10 — make .ps the authoritative compiler source
 
-Use the dual-source frontend/translation machinery to convert the frozen
-bootstrap implementation to canonical ProofScript, then maintain/refactor the
-compiler primarily in `.ps`.
+Because SH7-SH9 continuously maintain `.lean <-> .ps` parity, SH10 is **not**
+a one-time compiler translation project. Promote the already-green canonical
+ProofScript form to the primary maintained source and keep canonical Lean as a
+supported generated/translated representation.
 
 The target condition is:
 
 ```text
-compiler.ps --PSC1--> PSC2
-compiler.ps --PSC2--> PSC3
+compiler.ps   --PSC1--> PSC2
+compiler.ps   --PSC2--> PSC3
+compiler.ps   --translate--> compiler.lean
+compiler.lean --translate--> compiler.ps
 ```
 
-with the same semantic/bootstrap equivalence gates.
+with the same checked-core/IR/TS/JS equivalence gates. Neither direction may
+silently drop a language feature, proof term, module/import relation, universe
+annotation, or host-capability association.
 
 ## SH11 — verified self-hosting
 

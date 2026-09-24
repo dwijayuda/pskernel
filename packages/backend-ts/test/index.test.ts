@@ -92,6 +92,38 @@ console.log('ok - @proofscript/backend-ts verified Nat intrinsic emission');
 {
   const source=emitVerifiedTypeScript({
     kind:'proofscript-verified-ir',
+    declarations:[{
+      name:'toChar',
+      typeParameters:[],
+      parameters:[{
+        name:'n',
+        type:{kind:'primitive',name:'Nat'},
+      }],
+      resultType:{kind:'primitive',name:'Char'},
+      body:{
+        kind:'intrinsic',
+        operation:'char.ofNat',
+        args:[{kind:'var',name:'n'}],
+      },
+    }],
+  });
+  equal(source.includes('String.fromCodePoint(Number(__ps_n))'),true);
+  equal(source.includes(': "\\0"'),true);
+  equal(
+    source.includes(
+      '__ps_n < 0xd800n || (__ps_n > 0xdfffn && __ps_n < 0x110000n)',
+    ),
+    true,
+  );
+  const compiled=compileTypeScript(source,'verified-char.ts');
+  equal(compiled.declaration.includes('toChar(n: bigint): string'),true);
+}
+console.log('ok - @proofscript/backend-ts Lean-faithful Char.ofNat emission');
+
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
     structures:[{
       name:'User',
       fields:[{

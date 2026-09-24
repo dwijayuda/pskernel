@@ -135,6 +135,24 @@ assertNatResult(
   console.log(
     'ok - real Lean Name.appendCore executes through canonical pskernel Name bridge',
   );
+
+  const hashedName=numName(strName(anonymous,'_m'),7n);
+  let nameHash=evaluator.evaluate(
+    constant(nameFromDotted('Lean.Name.hash')),
+  );
+  const hashValue=evaluator.applyRuntimeValue(
+    nameHash,
+    kernelNameToLean434Runtime(hashedName),
+  );
+  if(hashValue!==0xc730ff6f7220d648n){
+    throw new Error(
+      'real Lean Name.hash disagrees with Lean 4.34 runtime reference: '+
+      String(hashValue),
+    );
+  }
+  console.log(
+    'ok - real Lean Name.hash executes through native-compatible JS hash leaves',
+  );
 }
 
 const List=nameFromDotted('List');

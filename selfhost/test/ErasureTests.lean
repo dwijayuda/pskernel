@@ -167,6 +167,27 @@ def psTestDualSourceLeanNativeStructuralRecursion : Bool :=
         && leanOutput.contains "lengthR(tail)"
   | _, _ => false
 
+def psTestDualSourceLeanNativeInt : Bool :=
+  let leanSource :=
+    "def intOne : Int := 1\n" ++
+    "def intCalc (x : Int) : Int := " ++
+    "Int.sub (Int.add x (Int.ofNat 2)) (Int.neg (Int.ofNat 3))"
+  let proofScriptSource :=
+    "def intOne : Int := 1; " ++
+    "def intCalc(x : Int) : Int := " ++
+    "Int.sub(Int.add(x, Int.ofNat(2)), Int.neg(Int.ofNat(3)));"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains "export const intOne: bigint = 1n;"
+        && leanOutput.contains
+          "export function intCalc(x: bigint): bigint"
+        && leanOutput.contains "(x + 2n)"
+        && leanOutput.contains "(-(3n))"
+  | _, _ => false
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -178,7 +199,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native if", passed := psTestDualSourceLeanNativeIf },
   { name := "dual-source Lean-native Maybe match", passed := psTestDualSourceLeanNativeMaybeMatch },
   { name := "dual-source Lean-native structure projection", passed := psTestDualSourceLeanNativeStructureProjection },
-  { name := "dual-source Lean-native structural recursion", passed := psTestDualSourceLeanNativeStructuralRecursion }
+  { name := "dual-source Lean-native structural recursion", passed := psTestDualSourceLeanNativeStructuralRecursion },
+  { name := "dual-source Lean-native Int", passed := psTestDualSourceLeanNativeInt }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

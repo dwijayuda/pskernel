@@ -125,6 +125,18 @@ test('deep structural universe equality is stack-safe',()=>{
 test('universe max commutative semantically',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));assert(levelEquivalent(mkMax(u,v),mkMax(v,u)));});
 test('imax u 0 = 0',()=>{const u=levelParam(nameFromDotted('u'));assert(levelEquivalent(mkIMax(u,levelZero),levelZero));});
 test('imax u (v+1) = max u (v+1)',()=>{const u=levelParam(nameFromDotted('u')),v=levelSucc(levelParam(nameFromDotted('v')));assert(levelEquivalent(mkIMax(u,v),mkMax(u,v)));});
+test('Lean 4.34 Trans constructor field universe is below its inductive result universe',()=>{
+ const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v')),w=levelParam(nameFromDotted('w'));
+ const u1=levelParam(nameFromDotted('u_1')),u2=levelParam(nameFromDotted('u_2')),u3=levelParam(nameFromDotted('u_3'));
+ const one=levelSucc(levelZero);
+ const result=levelMaxRaw(levelMaxRaw(levelMaxRaw(levelMaxRaw(levelMaxRaw(levelMaxRaw(one,u),u1),u2),u3),v),w);
+ const field=mkIMax(u1,mkIMax(u2,mkIMax(u3,mkIMax(u,mkIMax(v,w)))));
+ for(const [name,x] of [['u',u],['v',v],['w',w],['u_1',u1],['u_2',u2],['u_3',u3]] as const){
+   assert(levelLe(x,result),`Trans result universe must dominate ${name}`);
+ }
+ assert(levelLe(field,result),'Lean 4.34 accepts Trans.mk field universe under the Trans result universe');
+});
+
 test('Lean 4.34 universe equivalence preserves kernel incompleteness',()=>{const u=levelParam(nameFromDotted('u')),v=levelParam(nameFromDotted('v'));const lhs=mkMax(v,u),rhs=mkMax(mkIMax(u,v),u);assert(!levelEquivalent(lhs,rhs));assert(levelLe(lhs,rhs)&&!levelLe(rhs,lhs),'Lean 4.34 kernel geq remains intentionally incomplete on this semantically equal pair');});
 test('Lean structural equality includes MData payload while defeq ignores it',()=>{
  const a={kind:'mdata',data:{tag:'a'},expr:natLit(0)} as const;

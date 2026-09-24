@@ -8,6 +8,12 @@ import {createLeanNativeEvaluator} from './lean-native-evaluator.mjs';
 
 const moduleName=process.argv[2]??'Init.Prelude';
 const expectedArg=process.argv[3];
+// Forced full GC used to run after every 10-root shard. With the process-wide
+// Lean Expr.Data WeakMap caches this can turn GC into the dominant cost.
+// Let V8 collect normally by default; constrained runners may opt into a
+// periodic explicit collection without changing replay semantics.
+const gcEvery=Number(process.env.PSKERNEL_GC_EVERY_SHARDS??'0');
+if(!Number.isSafeInteger(gcEvery)||gcEvery<0)throw new Error('invalid PSKERNEL_GC_EVERY_SHARDS');
 const candidates=[process.env.LEAN434_BIN,'/mnt/data/work/lean4src/lean4-4.34.0/build/release/stage1/bin',...(process.env.PATH??'').split(delimiter)].filter(Boolean).map(p=>resolve(p));
 const leanExe=process.platform==='win32'?'lean.exe':'lean';
 const bin=candidates.find(p=>fs.existsSync(join(p,leanExe)));
@@ -50,7 +56,10 @@ try{
      continue;
    }
    if(marker?.shard){
-     if(replay){const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;global.gc?.();}
+     if(replay){
+       const s=replay.finish();totalLines+=s.lines;totalDecls+=s.declarations;replay=null;
+       if(gcEvery>0&&shards>0&&shards%gcEvery===0)global.gc?.();
+     }
      replay=new Lean4ExportReplay(shared,{nativeEvaluator});
      current=marker.shard.module;shards++;
      const mem=process.memoryUsage(),rss=mem.rss/1048576,heap=mem.heapUsed/1048576;maxRssMiB=Math.max(maxRssMiB,rss);maxHeapMiB=Math.max(maxHeapMiB,heap);

@@ -10,6 +10,10 @@ and compiled by the same verified project pipeline as user code.
   status checks, and two-way Option conversion.
 - `ProofScript.Data.List`: `PsList`, structural map/append/length/head/head-or-else/is-empty helpers.
 
+- `ProofScript.Text.Lexer`: portable ASCII lexer character classes plus
+  `String.Pos.Raw` byte-position and `SourceSpan` helpers, authored in
+  ProofScript over the certified Lean 4.34 text foundation.
+
 The `Ps*` type names are intentional and temporary. Lean's Prelude already
 owns `Option` and `List`, while the current verified runtime erasure only
 assigns executable representations to inductives admitted by the checked
@@ -56,6 +60,7 @@ The end-to-end stdlib test now exercises:
   symmetry, `optionGetOrElseNoneSome` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
   `listMapAppend` dogfood bounded induction plus checked rewriting;
+- portable lexer classification and a non-BMP UTF-8 first-character span;
 - zero runtime external assumptions.
 
 For input `9`, the current dogfood `main` returns `22`.

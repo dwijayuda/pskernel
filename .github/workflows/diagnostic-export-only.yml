@@ -1,0 +1,29 @@
+name: Diagnostic exporter-only MData buckets
+
+on:
+  push:
+    branches: [diagnostic/exporter-only-mdata-buckets]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exporter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Export canonical prefix without TS replay
+        env:
+          PSKERNEL_EXPORT_STOP_AFTER_SHARDS: "2400"
+        run: node scripts/export-only-prefix-diagnostic.mjs

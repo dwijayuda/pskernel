@@ -637,7 +637,7 @@ def environmentConstantNames (env : Environment) : NameSet := Id.run do
 
 partial def dumpSelectedRootsAfterBase
     (env base : Environment)
-    (baseModule : Name)
+    (_baseModule : Name)
     (roots : List Name) : IO Unit := do
   if roots.isEmpty then
     throw <| IO.userError "selected-after-base export requires at least one root"

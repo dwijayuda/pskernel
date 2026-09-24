@@ -69,14 +69,14 @@ console.log(JSON.stringify({
   levelDeclarations:levelOrder,
 },null,2));
 const logicalIndex=order.indexOf('inductive:Lean.Level');
-const implIndex=order.indexOf('inductive:Lean.Level_impl');
+const implIndex=order.indexOf('inductive:Lean.Level._impl');
 if(
   logicalIndex>=0
   &&implIndex>=0
   &&logicalIndex>implIndex
 ){
   throw new Error(
-    'Lean.Level_impl was exported before logical Lean.Level',
+    'Lean.Level._impl was exported before logical Lean.Level',
   );
 }
 

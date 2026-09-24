@@ -27,6 +27,9 @@ if(!Array.isArray(runtime.LEAN434_JS_DECL_EXTERN_BINDINGS)){
 if(!Array.isArray(runtime.LEAN434_JS_IMPLEMENTED_BY_BINDINGS)){
   throw new Error('missing LEAN434_JS_IMPLEMENTED_BY_BINDINGS');
 }
+if(!Array.isArray(runtime.LEAN434_JS_INTRINSIC_BINDINGS)){
+  throw new Error('missing LEAN434_JS_INTRINSIC_BINDINGS');
+}
 
 const seen=new Set();
 const checked=[];
@@ -190,6 +193,72 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
   });
 }
 
+const seenIntrinsics=new Set();
+const intrinsicBindings=[];
+for(const binding of runtime.LEAN434_JS_INTRINSIC_BINDINGS){
+  if(seenIntrinsics.has(binding.leanDeclaration)){
+    throw new Error(
+      'duplicate Lean intrinsic binding: '+binding.leanDeclaration,
+    );
+  }
+  seenIntrinsics.add(binding.leanDeclaration);
+  if(!Number.isInteger(binding.arity)||binding.arity<0){
+    throw new Error(
+      'invalid intrinsic arity for '+binding.leanDeclaration,
+    );
+  }
+  if(!Array.isArray(binding.runtimeArgs)){
+    throw new Error(
+      'intrinsic runtimeArgs missing for '+binding.leanDeclaration,
+    );
+  }
+  const seenArgs=new Set();
+  for(const index of binding.runtimeArgs){
+    if(
+      !Number.isInteger(index)
+      ||index<0
+      ||index>=binding.arity
+      ||seenArgs.has(index)
+    ){
+      throw new Error(
+        'invalid intrinsic runtime argument map for '+
+        binding.leanDeclaration,
+      );
+    }
+    seenArgs.add(index);
+  }
+  if(binding.adapter!=='identity'){
+    throw new Error(
+      'unsupported intrinsic adapter for '+binding.leanDeclaration+
+      ': '+String(binding.adapter),
+    );
+  }
+  const upstream=path.join(
+    repoRoot,
+    'study','lean4-4.34.0','src',
+    ...binding.upstreamSource.split('/'),
+  );
+  if(!fs.existsSync(upstream)){
+    throw new Error(
+      'intrinsic upstream source missing: '+binding.upstreamSource,
+    );
+  }
+  const source=fs.readFileSync(upstream,'utf8');
+  if(!source.includes('unsafe def '+binding.leanDeclaration)){
+    throw new Error(
+      'intrinsic declaration missing from upstream source: '+
+      binding.leanDeclaration+' @ '+binding.upstreamSource,
+    );
+  }
+  intrinsicBindings.push({
+    leanDeclaration:binding.leanDeclaration,
+    arity:binding.arity,
+    runtimeArgs:binding.runtimeArgs,
+    adapter:binding.adapter,
+    upstreamSource:binding.upstreamSource,
+  });
+}
+
 const seenImplementedBy=new Set();
 const implementedByBindings=[];
 for(const binding of runtime.LEAN434_JS_IMPLEMENTED_BY_BINDINGS){
@@ -243,7 +312,9 @@ process.stdout.write(JSON.stringify({
   mappings:checked.length,
   declarationBindings:declarationBindings.length,
   implementedByBindings:implementedByBindings.length,
+  intrinsicBindings:intrinsicBindings.length,
   entries:checked,
   bindings:declarationBindings,
+  intrinsics:intrinsicBindings,
   implementedBy:implementedByBindings,
 },null,2)+'\n');

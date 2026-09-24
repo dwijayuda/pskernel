@@ -27,6 +27,18 @@ forbidUnsafeScriptFileUrlPaths(join(root,'scripts'));
 if (existsSync(join(root,'src','kernel','reduction','native.ts'))) throw new Error('Anti-drift violation: final Lean 4.34 has no native-reduction compatibility layer');
 if (existsSync(join(root,'packages','native-ir'))) throw new Error('Anti-drift violation: final Lean 4.34 has no native-ir kernel-extension package');
 
+const dependencyExporter=readFileSync(join(root,'oracle','replay-probe','DependencyExport.lean'),'utf8');
+for (const marker of [
+  'if dv.safety == .safe then',
+  'dumpConstants env ci.getUsedConstantsAsSet',
+  'dumpDefinition dv',
+]) {
+  if (!dependencyExporter.includes(marker)) throw new Error('Anti-drift violation: safe DefinitionVal.all replay contract lost ' + marker);
+}
+if (dependencyExporter.includes('| .defnInfo dv =>\n      let group := if dv.all.isEmpty then [dv.name] else dv.all')) {
+  throw new Error('Anti-drift violation: safe definitions must not be grouped by informational DefinitionVal.all');
+}
+
 // Package implementation source is TypeScript-first. Runtime .js is generated
 // under dist; hand-authored .mjs in packages would reintroduce two source
 // languages and bypass strict tsc checking.

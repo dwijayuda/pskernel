@@ -7,6 +7,7 @@ import Ps.Environment.Basic
 import Ps.Environment.LocalContext
 import Ps.Meta.Context
 import Ps.Meta.Infer
+import Ps.Meta.LevelContext
 import Ps.Meta.Reduce
 import Ps.Project.ModuleGraph
 
@@ -116,8 +117,21 @@ def psTestInferIdentity : Bool :=
   | Except.error _ => false
   | Except.ok actual => psExprAlphaEq actual expected
 
+
+def psTestLevelMetaUnify : Bool :=
+  let fresh := psLevelMetaFresh psLevelMetaEmpty
+  let target := PsLevel.succ PsLevel.zero
+  let unified := psLevelUnify fresh.context fresh.level target
+  if unified.success then
+    psLevelStructuralEq
+      (psLevelInstantiate unified.context fresh.level)
+      target
+  else
+    false
+
 def psBootstrapTests : Bool :=
   psTestModuleGraph
+    && psTestLevelMetaUnify
     && psTestScopedMetaAssignment
     && psTestRejectOutOfScopeMetaAssignment
     && psTestBetaWhnf

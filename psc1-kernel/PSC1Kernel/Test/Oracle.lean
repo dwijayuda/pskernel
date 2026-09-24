@@ -48,7 +48,7 @@ def kernelSortDefEq
   match Lean.Kernel.isDefEq env ({} : Lean.LocalContext)
       (.sort (toLeanLevel a)) (.sort (toLeanLevel b)) with
   | .ok value => pure value
-  | .error ex => throw <| IO.userError ("Lean kernel isDefEq failed: " ++ toString ex)
+  | .error _ => throw <| IO.userError "Lean kernel isDefEq failed"
 
 def assertLevelPairs (levels : List PSC1Kernel.Level) : IO Unit := do
   let env ← Lean.mkEmptyEnvironment

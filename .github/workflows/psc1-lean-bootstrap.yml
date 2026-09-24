@@ -112,6 +112,26 @@ jobs:
           test -f /tmp/psc1-project/Main.js
           echo "PSC1_PROJECT_IMPORTS: PASS"
 
+      - name: Run Lean bootstrap collections composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          cd selfhost
+          lake exe psc1 check stdlib/SELFHOST-COLLECTIONS.lean
+          lake exe psc1 typescript stdlib/SELFHOST-COLLECTIONS.lean > /tmp/psc1-collections.ts
+          grep -q 'export type Option' /tmp/psc1-collections.ts
+          grep -q 'export interface Prod' /tmp/psc1-collections.ts
+          grep -q 'export type Result' /tmp/psc1-collections.ts
+          grep -q 'export type List' /tmp/psc1-collections.ts
+          grep -q 'export function listLength' /tmp/psc1-collections.ts
+          rm -f /tmp/psc1-collections.js /tmp/psc1-collections.d.ts /tmp/psc1-collections.js.map
+          lake exe psc1 build stdlib/SELFHOST-COLLECTIONS.lean --out /tmp/psc1-collections.ts
+          test -f /tmp/psc1-collections.js
+          test -f /tmp/psc1-collections.d.ts
+          test -f /tmp/psc1-collections.js.map
+          echo "PSC1_COLLECTIONS_COMPOSITION: PASS"
+
       - name: Run bootstrap semantic tests
         shell: bash
         run: |

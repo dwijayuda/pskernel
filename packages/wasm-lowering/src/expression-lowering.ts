@@ -18,6 +18,7 @@ import {
   type RuntimeValueType,
   type Signature,
 } from './type-lowering.js';
+import {lowerRuntimeLocal} from './local-lowering.js';
 
 function requireType(
   actual:RuntimeType,
@@ -29,44 +30,6 @@ function requireType(
       'PS_WASM_TYPE_MISMATCH',
       label+' expected '+String(expected)+' but got '+String(actual),
     );
-  }
-}
-
-function lowerLocal(
-  name:string,
-  type:RuntimeValueType,
-):WasmIrExpr {
-  const local:WasmIrExpr={
-    kind:'local',
-    name,
-    type:wasmValueType(type),
-  };
-  switch(type){
-    case 'bool':
-      return {
-        kind:'i32.binary',
-        operation:'ne',
-        left:local,
-        right:{kind:'i32.const',value:0},
-      };
-    case 'uint8':
-      return {
-        kind:'i32.binary',
-        operation:'and',
-        left:local,
-        right:{kind:'i32.const',value:0xff},
-      };
-    case 'uint16':
-      return {
-        kind:'i32.binary',
-        operation:'and',
-        left:local,
-        right:{kind:'i32.const',value:0xffff},
-      };
-    case 'uint32':
-    case 'uint64':
-    case 'nat':
-      return local;
   }
 }
 
@@ -122,7 +85,7 @@ export function lowerRuntimeExpr(
           "runtime local '"+expr.name+"' is unavailable",
         );
       }
-      return lowerLocal(expr.name,type);
+      return lowerRuntimeLocal(expr.name,type);
     }
 
     case 'intrinsic':

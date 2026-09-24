@@ -32,13 +32,17 @@ def psTscExecutable : String :=
 def psTypeScriptVersion : IO String := do
   let output ← IO.Process.output {
     cmd := psTscExecutable
-    args := #["tsc", "--version"]
+    args := #["--no-install", "tsc", "--version"]
   }
   if output.exitCode != 0 then
     throw
       (IO.userError
         ("PSC1_TSC_VERSION_FAILED:\n" ++ output.stderr))
-  pure output.stdout.trimAscii.toString
+  let raw := output.stdout.trimAscii.toString
+  if raw.startsWith "Version " then
+    pure (raw.drop 8)
+  else
+    pure raw
 
 def psCompileTypeScriptFile
     (typeScriptPath : String) :
@@ -46,6 +50,7 @@ def psCompileTypeScriptFile
   let output ← IO.Process.output {
     cmd := psTscExecutable
     args := #[
+      "--no-install",
       "tsc",
       typeScriptPath,
       "--target", "ES2022",
@@ -55,7 +60,8 @@ def psCompileTypeScriptFile
       "--declaration",
       "--sourceMap",
       "--noEmitOnError",
-      "--skipLibCheck"
+      "--skipLibCheck",
+      "--pretty", "false"
     ]
   }
   let diagnostics :=

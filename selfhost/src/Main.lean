@@ -13,6 +13,7 @@ import Ps.Environment.Resolve
 import Ps.Meta.LevelContext
 import Ps.Meta.Context
 import Ps.Meta.Reduce
+import Ps.Meta.Unify
 import Ps.Meta.Infer
 import Ps.Project.ModuleGraph
 

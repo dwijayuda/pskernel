@@ -182,7 +182,18 @@ Exit condition:
 > Real Lean-written expression traversal/manipulation code can run in JS and its
 > candidate declaration can be re-admitted by pskernel.
 
-## R5 — Environment facade
+## R5 — Environment facade — **IN PROGRESS**
+
+Milestones reached 2026-09-25:
+
+- Lean-native runtime sidecars now export ordered initializer metadata from the
+  pinned 4.34 environment;
+- the JS initializer runner stores initialized globals outside pskernel and
+  resolves generated/private Lean names by exact environment name;
+- real upstream `IO.mkRef`, `ST.Prim.Ref.get/set`, and the Lean-written
+  `ST.Prim.Ref.modify` do/bind implementation execute in JS;
+- `IO.initializing` is scoped to initializer execution, preparing the
+  `registerEnvExtension` guard without weakening the kernel.
 
 Separate Lean's Environment responsibilities:
 
@@ -196,9 +207,19 @@ Exit condition:
 > A reused Meta/Elab function can read/update ordinary environment extension
 > state while declaration admission still flows through pskernel.
 
-## R6 — reusable Init tranche
+## R6 — reusable Init tranche — **IN PROGRESS (executable foundation proven)**
 
 Compile actual upstream files, not manually translated equivalents.
+
+Milestones reached 2026-09-25:
+
+- pinned `Init.Prelude` definitions execute after pskernel replay:
+  `Nat.add`, polymorphic `id`, recursive `List.lengthTRAux`, Array and
+  UTF-8 String paths;
+- runtime selection is source-backed through Lean's real `@[extern]` and
+  `@[implemented_by]` metadata;
+- real Lean ST/IO source executes over the JS primitive boundary rather than a
+  TypeScript reimplementation of its bind/control logic.
 
 Maintain a generated matrix:
 
@@ -221,9 +242,23 @@ Exit condition:
 > A nontrivial dependency-closed Init tranche executes as JS with a recorded
 > reuse ratio and no native Lean runtime.
 
-## R7 — Parser tranche
+## R7 — Parser tranche — **IN PROGRESS (first upstream algorithms + initializer running)**
 
 Reuse/adapt the Lean parser implementation.
+
+Milestones reached 2026-09-25:
+
+- `Lean.Parser.Types` has 0 direct extern declarations and 0 direct
+  `implemented_by` bindings in the pinned environment;
+- real upstream `Lean.Parser.FirstTokens.toOptional`, `seq`, and `merge`
+  execute through pskernel + the JS evaluator;
+- `Lean.Parser.Basic` has 0 direct extern declarations and 0 direct
+  `implemented_by` bindings; its runtime work is initialization;
+- the real builtin initializer for `Lean.Parser.categoryParserFnRef` executes
+  in JS and stores a Lean-written parser closure in a JS-backed Lean `IO.Ref`;
+- the next active gate is
+  `Lean.Parser.categoryParserFnExtension`, which exercises upstream
+  `registerEnvExtension`.
 
 Differential gates:
 

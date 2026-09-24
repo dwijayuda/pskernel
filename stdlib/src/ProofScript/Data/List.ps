@@ -92,7 +92,7 @@ listAppend(listMap(f, xs), listMap(f, ys)) :=
   rw [tail_ih];
 
 theorem listIsEmptyNil {α : Type} :
-listIsEmpty(PsList.nil) = true := by rfl;
+listIsEmpty((PsList.nil : PsList(α))) = true := by rfl;
 
 theorem listIsEmptyCons {α : Type}
 (head : α, tail : PsList(α)) :

@@ -1,5 +1,9 @@
 import {pathToFileURL} from 'node:url';
 import type {SoftwareType} from '@proofscript/language';
+import {
+  instantiateProofScriptWasm,
+  type ProofScriptWasmHostValue,
+} from '@proofscript/compiler';
 import {buildCommand} from './build.js';
 import type {
   CommonArgs,
@@ -47,7 +51,54 @@ export function runCommand(
 ):Promise<UnverifiedRunReport>;
 export function runCommand(common:CommonArgs):Promise<RunReport>;
 export async function runCommand(common:CommonArgs):Promise<RunReport>{
+  const target=common.buildTarget??'js';
   const build=await buildCommand(common);
+
+  if(target==='wasm'){
+    if(!common.verified||build.verifiedIr===undefined||build.wasm===undefined){
+      throw new Error(
+        'PS_CLI_WASM_RUN_METADATA: verified Wasm build metadata is unavailable',
+      );
+    }
+    const main=build.verifiedIr.declarations.find(
+      (declaration)=>declaration.name==='main',
+    );
+    if(main===undefined){
+      throw new Error(
+        "PS_RUN_NO_MAIN: no executable declaration named 'main'",
+      );
+    }
+    const args=prepareVerifiedMainArguments(
+      main,
+      common.passthrough,
+    ) as readonly ProofScriptWasmHostValue[];
+    const instance=instantiateProofScriptWasm(build.wasm);
+    const fn=instance.exports.main;
+    if(fn===undefined){
+      throw new Error(
+        'PS_RUN_MAIN_EXPORT: generated Wasm module does not export callable main',
+      );
+    }
+    const value=fn(...args);
+    const displayed=encodeVerifiedRuntimeResult(
+      value,
+      main.resultType,
+      build.verifiedIr,
+    );
+    if(value!==undefined&&!common.json){
+      console.log(
+        typeof displayed==='object'&&displayed!==null
+          ?JSON.stringify(displayed)
+          :displayed,
+      );
+    }
+    return {
+      ...build.report,
+      command:'run' as const,
+      mainResult:displayed,
+    };
+  }
+
   const mod=await import(
     pathToFileURL(build.jsPath).href+'?v='+Date.now()
   ) as Record<string,unknown>;

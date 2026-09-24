@@ -12,6 +12,12 @@ export function emitVerifiedType(type:VerifiedIrType):string {
         case 'Nat':
         case 'Int':
           return 'bigint';
+        case 'UInt8':
+        case 'UInt16':
+        case 'UInt32':
+          return 'number';
+        case 'UInt64':
+          return 'bigint';
         case 'Bool':
           return 'boolean';
         case 'String':

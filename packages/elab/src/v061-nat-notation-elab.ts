@@ -2,8 +2,10 @@ import type {V061Expr} from '@proofscript/syntax';
 import {
   TypeChecker,
   constant,
+  hasMVar,
   levelZero,
   mkAppN,
+  nameFromDotted,
   type Expr,
 } from 'lean-ts-kernel';
 import type {
@@ -21,6 +23,13 @@ const natArithmetic=new Map<string,string>([
   ['*','Nat.mul'],
   ['/','Nat.div'],
   ['%','Nat.mod'],
+]);
+
+const fixedUIntAddition=new Map<string,string>([
+  ['UInt8','UInt8.add'],
+  ['UInt16','UInt16.add'],
+  ['UInt32','UInt32.add'],
+  ['UInt64','UInt64.add'],
 ]);
 
 type NatRelationKind='le'|'lt';
@@ -48,8 +57,16 @@ function elaborateNatOperands(
   const left=elaborate(expr.left,context,natType);
   const right=elaborate(expr.right,context,natType);
   if(
-    !checker.isDefEq(left.type,natType)
-    ||!checker.isDefEq(right.type,natType)
+    !context.metaContext.unify(
+      left.type,
+      natType,
+      context.localContext,
+    )
+    ||!context.metaContext.unify(
+      right.type,
+      natType,
+      context.localContext,
+    )
   ){
     throw new Error(
       "PS_ELAB_NAT_NOTATION_OPERAND_TYPE: operator '"+expr.operator+
@@ -79,8 +96,16 @@ export function elaborateV061NatArithmeticTerms(
     context.localContext.clone(),
   );
   if(
-    !checker.isDefEq(left.type,natType)
-    ||!checker.isDefEq(right.type,natType)
+    !context.metaContext.unify(
+      left.type,
+      natType,
+      context.localContext,
+    )
+    ||!context.metaContext.unify(
+      right.type,
+      natType,
+      context.localContext,
+    )
   ){
     throw new Error(
       "PS_ELAB_NAT_NOTATION_OPERAND_TYPE: operator '"+operator+
@@ -90,7 +115,7 @@ export function elaborateV061NatArithmeticTerms(
   if(
     expected!==undefined
     &&!context.metaContext.unify(
-      context.metaContext.instantiate(expected),
+      expected,
       natType,
       context.localContext,
     )
@@ -120,6 +145,47 @@ export function elaborateV061NatArithmeticExpression(
   expected:Expr|undefined,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
+  if(expr.operator==='+'&&expected!==undefined){
+    const checker=new TypeChecker(
+      context.environment,
+      context.localContext.clone(),
+    );
+    const expectedType=context.metaContext.instantiate(expected);
+    if(!hasMVar(expectedType)){
+      for(const [typeName,constantName] of fixedUIntAddition){
+        const runtimeName=nameFromDotted(typeName);
+        if(context.environment.find(runtimeName)===undefined)continue;
+        const runtimeType=constant(runtimeName);
+        if(!checker.isDefEq(expectedType,runtimeType))continue;
+      const left=elaborate(expr.left,context,runtimeType);
+      const right=elaborate(expr.right,context,runtimeType);
+      if(
+        !checker.isDefEq(left.type,runtimeType)
+        ||!checker.isDefEq(right.type,runtimeType)
+      ){
+        throw new Error(
+          "PS_ELAB_UINT_ADD_OPERAND_TYPE: operator '+' at "+typeName+
+          ' requires matching fixed-width operands',
+        );
+      }
+      const term=mkAppN(
+        constant(
+          requireV061NotationConstant(context,constantName),
+        ),
+        [left.term,right.term],
+      );
+      const type=checker.check(term);
+      if(!checker.isDefEq(type,runtimeType)){
+        throw new Error(
+          "PS_ELAB_UINT_ADD_RESULT: '"+constantName+
+          "' did not produce "+typeName,
+        );
+      }
+        return {term,type};
+      }
+    }
+  }
+
   const {left,right}=elaborateNatOperands(expr,context,elaborate);
   return elaborateV061NatArithmeticTerms(
     expr.operator,
@@ -163,8 +229,16 @@ export function elaborateV061NatRelationTerms(
     context.localContext.clone(),
   );
   if(
-    !checker.isDefEq(left.type,natType)
-    ||!checker.isDefEq(right.type,natType)
+    !context.metaContext.unify(
+      left.type,
+      natType,
+      context.localContext,
+    )
+    ||!context.metaContext.unify(
+      right.type,
+      natType,
+      context.localContext,
+    )
   ){
     throw new Error(
       "PS_ELAB_NAT_NOTATION_OPERAND_TYPE: operator '"+operator+

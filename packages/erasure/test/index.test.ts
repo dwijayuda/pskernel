@@ -1,6 +1,7 @@
 import {
   Environment,
   Kernel,
+  addOrdinaryInductive,
   app,
   bvar,
   constant,
@@ -68,6 +69,80 @@ function equal(actual:unknown,expected:unknown):void {
   if(declaration.body.kind==='var')equal(declaration.body.name,'x');
 }
 console.log('ok - @proofscript/erasure generic identity');
+
+{
+  const base=new Environment();
+  const Bool=nameFromDotted('Bool');
+  const BoolFalse=nameFromDotted('Bool.false');
+  const BoolTrue=nameFromDotted('Bool.true');
+  const Nat=nameFromDotted('Nat');
+  base.add({
+    kind:'axiom',
+    name:Nat,
+    levelParams:[],
+    type:sort(levelSucc(levelZero)),
+  });
+  addOrdinaryInductive(
+    base,
+    {
+      levelParams:[],
+      numParams:0,
+      types:[{
+        name:Bool,
+        type:sort(levelSucc(levelZero)),
+        ctors:[
+          {name:BoolFalse,type:constant(Bool)},
+          {name:BoolTrue,type:constant(Bool)},
+        ],
+      }],
+    },
+    {allowPrimitiveNames:true},
+  );
+
+  const choose=nameFromDotted('chooseBool');
+  const flag=nameFromDotted('flag');
+  const motive=lam(
+    nameFromDotted('_match'),
+    constant(Bool),
+    constant(Nat),
+  );
+  const checked=admitCheckedCoreModule(base,[{
+    kind:'definition',
+    name:choose,
+    levelParams:[],
+    type:forallE(flag,constant(Bool),constant(Nat)),
+    value:lam(
+      flag,
+      constant(Bool),
+      mkAppN(
+        constant(
+          nameFromDotted('Bool.rec'),
+          [levelSucc(levelZero)],
+        ),
+        [motive,natLit(2n),natLit(1n),bvar(0)],
+      ),
+    ),
+    hints:{kind:'regular',height:1n},
+    safety:'safe',
+  }]);
+
+  const erased=eraseCheckedCoreModule(checked);
+  const declaration=erased.declarations[0]!;
+  equal(declaration.parameters.length,1);
+  equal(declaration.body.kind,'if');
+  if(declaration.body.kind==='if'){
+    equal(declaration.body.condition.kind,'var');
+    equal(declaration.body.thenBranch.kind,'literal');
+    equal(declaration.body.elseBranch.kind,'literal');
+    if(declaration.body.thenBranch.kind==='literal'){
+      equal(declaration.body.thenBranch.value,1n);
+    }
+    if(declaration.body.elseBranch.kind==='literal'){
+      equal(declaration.body.elseBranch.value,2n);
+    }
+  }
+}
+console.log('ok - @proofscript/erasure canonical Bool.rec lowering');
 
 
 {
@@ -794,19 +869,61 @@ console.log('ok - @proofscript/erasure recursive ADT metadata erasure');
       }],
     }],
   };
-  const checked=admitCheckedCoreAdmissions(new Environment(),[{
-    kind:'structure',
-    declaration,
-    structure:{
-      name:Box,
-      constructor:BoxMk,
-      fields:[{name:'value',index:0,binderInfo:'default'}],
+  const Get=nameFromDotted('getBox');
+  const boxAlpha=app(constant(Box),bvar(0));
+  const checked=admitCheckedCoreAdmissions(new Environment(),[
+    {
+      kind:'structure',
+      declaration,
+      structure:{
+        name:Box,
+        constructor:BoxMk,
+        fields:[{name:'value',index:0,binderInfo:'default'}],
+      },
     },
-  }]);
+    {
+      kind:'constant',
+      declaration:{
+        kind:'definition',
+        name:Get,
+        levelParams:[],
+        type:forallE(
+          Alpha,
+          sort(levelSucc(levelZero)),
+          forallE(
+            nameFromDotted('box'),
+            boxAlpha,
+            bvar(1),
+          ),
+          'implicit',
+        ),
+        value:lam(
+          Alpha,
+          sort(levelSucc(levelZero)),
+          lam(
+            nameFromDotted('box'),
+            boxAlpha,
+            {
+              kind:'proj',
+              typeName:Box,
+              index:0,
+              expr:bvar(0),
+            },
+          ),
+          'implicit',
+        ),
+        hints:{kind:'regular',height:1n},
+        safety:'safe',
+      },
+    },
+  ]);
   const erased=eraseCheckedCoreModule(checked);
   equal(erased.structures?.[0]?.name,'Box');
   equal(erased.structures?.[0]?.typeParameters?.length,1);
   equal(erased.structures?.[0]?.fields[0]?.type.kind,'typeParameter');
+  const get=erased.declarations.find((item)=>item.name==='getBox');
+  equal(get?.body.kind,'projection');
+  if(get?.body.kind==='projection')equal(get.body.field,'value');
 }
 console.log('ok - @proofscript/erasure generic structure metadata');
 
@@ -834,6 +951,7 @@ console.log('ok - @proofscript/erasure generic structure metadata');
         name:hostInc,
         levelParams:[],
         type:fnType,
+        isUnsafe:false,
       },
       binding:{source:'host-lib',importedName:'inc'},
     },

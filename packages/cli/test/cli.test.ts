@@ -15,6 +15,7 @@ import {
 import {verifiedAssuranceReport} from '../src/verified-assurance.js';
 import {clearVerifiedProjectModuleCache} from '../src/verified-project-pipeline.js';
 import {parseVerifiedRuntimeArg,prepareVerifiedMainArguments} from '../src/verified-runtime.js';
+import {decodeVerifiedJsonArgument} from '../src/verified-runtime-json.js';
 import {runCommand} from '../src/commands/run.js';
 import {buildCommand} from '../src/commands/build.js';
 import {checkCommand} from '../src/commands/check.js';
@@ -41,6 +42,7 @@ function throws(fn:()=>unknown,pattern:RegExp):void{
   equal(args.project,'demo');
   equal(args.json,true);
   equal(args.verified,true);
+  equal(args.buildTarget,'js');
   equal(args.passthrough.join(','),'41,true');
 }
 {
@@ -48,7 +50,18 @@ function throws(fn:()=>unknown,pattern:RegExp):void{
   equal(args.project,'psconfig.json');
   equal(args.json,false);
   equal(args.verified,false);
+  equal(args.buildTarget,'js');
 }
+{
+  const args=parseCommonArgs([
+    'src/main.ps','--verified','--target','wasm',
+  ]);
+  equal(args.buildTarget,'wasm');
+}
+throws(
+  ()=>parseCommonArgs(['--target','wat']),
+  /PS_CLI_BUILD_TARGET/,
+);
 throws(()=>parseCommonArgs(['--wat']),/PS_CLI_UNKNOWN_OPTION/);
 throws(()=>parseCommonArgs(['a.ps','b.ps']),/PS_CLI_USAGE/);
 {
@@ -72,6 +85,12 @@ throws(
 throws(
   ()=>parseTranslateArgs(['main.ps','--to','lean','--verified']),
   /PS_CLI_TRANSLATE_VERIFIED/,
+);
+throws(
+  ()=>parseTranslateArgs([
+    'main.ps','--to','lean','--target','wasm',
+  ]),
+  /PS_CLI_TRANSLATE_BUILD_TARGET/,
 );
 console.log('ok - psc CLI argument/UX contract');
 
@@ -387,7 +406,8 @@ console.log('ok - psc verified check rejects undeclared runtime dependency');
       lock.packages[1]?.dependencies[0]?.target,
       'node_modules/helper-lib',
     );
-    const javascript=await readFile(result.artifacts.javascript,'utf8');
+    const artifacts=result.artifacts;
+    const javascript=await readFile(artifacts.javascript,'utf8');
     equal(
       javascript.includes('from "host-lib/feature"'),
       true,
@@ -457,6 +477,182 @@ console.log('ok - psc runtime lock rejects missing required transitive entry');
 
 
 {
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-wasm-build-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : Bool) : Bool := !x;\n',
+      'utf8',
+    );
+    const checked=await checkCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[],
+    });
+    equal(checked.buildTarget,'wasm');
+    equal(checked.wasmProfile,'proofscript-wasm32-mvp-js-v1');
+
+    const built=await buildCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:[],
+    });
+    equal(built.report.buildTarget,'wasm');
+    const artifacts=built.report.artifacts;
+    if(artifacts.webassembly===undefined||artifacts.wat===undefined){
+      throw new Error('verified Wasm build did not emit Wasm artifacts');
+    }
+    const wasm=new Uint8Array(
+      await readFile(artifacts.webassembly),
+    );
+    equal(WebAssembly.validate(wasm),true);
+    equal(
+      (await readFile(artifacts.wat,'utf8')).includes('(module'),
+      true,
+    );
+
+    let legacyRejected=false;
+    try{
+      await buildCommand({
+        project:directory,
+        json:true,
+        verified:false,
+        buildTarget:'wasm',
+        passthrough:[],
+      });
+    }catch(error){
+      legacyRejected=/PS_CLI_WASM_REQUIRES_VERIFIED/.test(
+        String(error),
+      );
+    }
+    equal(legacyRejected,true);
+
+    const runTrue=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:['true'],
+    });
+    equal(runTrue.mainResult,false);
+    const runFalse=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:['false'],
+    });
+    equal(runFalse.mainResult,true);
+
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : UInt32) : UInt32 := x;\n',
+      'utf8',
+    );
+    const runUInt32=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:['4294967295'],
+    });
+    equal(runUInt32.mainResult,4294967295);
+
+    await writeFile(
+      join(directory,'src','main.ps'),
+      'function main(x : UInt64) : UInt64 := x;\n',
+      'utf8',
+    );
+    const runUInt64=await runCommand({
+      project:directory,
+      json:true,
+      verified:true,
+      buildTarget:'wasm',
+      passthrough:['18446744073709551615'],
+    });
+    equal(runUInt64.mainResult,'18446744073709551615');
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Wasm W2 build/run target');
+
+{
+  const directory=await mkdtemp(
+    join(tmpdir(),'proofscript-wasm-uint-run-'),
+  );
+  try{
+    await mkdir(join(directory,'src'),{recursive:true});
+    await writeFile(
+      join(directory,'psconfig.json'),
+      JSON.stringify({
+        languageVersion:'0.7',
+        entry:'src/main.ps',
+        compilerOptions:{
+          outDir:'dist',
+          emitTypeScript:true,
+          declaration:true,
+          sourceMap:true,
+        },
+      },null,2)+'\n',
+      'utf8',
+    );
+
+    const cases=[
+      {type:'UInt8',input:'255',expected:255},
+      {type:'UInt16',input:'65535',expected:65535},
+      {type:'UInt32',input:'4294967295',expected:4294967295},
+      {
+        type:'UInt64',
+        input:'18446744073709551615',
+        expected:'18446744073709551615',
+      },
+    ] as const;
+
+    for(const item of cases){
+      await writeFile(
+        join(directory,'src','main.ps'),
+        'function main(x : '+item.type+') : '+item.type+' := x;\n',
+        'utf8',
+      );
+      const result=await runCommand({
+        project:directory,
+        json:true,
+        verified:true,
+        buildTarget:'wasm',
+        passthrough:[item.input],
+      });
+      equal(result.mainResult,item.expected);
+    }
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+}
+console.log('ok - psc verified Wasm W2 UInt CLI run ABI');
+
+
+{
   const result=compileVerifiedSource(
     'function add(x : Nat, y : Nat) : Nat := x + y; '+
     'function twice(x : Nat) : Nat := add(x, x);',
@@ -474,6 +670,19 @@ console.log('ok - psc verified Nat source pipeline');
   equal(parseVerifiedRuntimeArg('42',{kind:'primitive',name:'Nat'}),42n);
   equal(parseVerifiedRuntimeArg('-42',{kind:'primitive',name:'Int'}),-42n);
   equal(parseVerifiedRuntimeArg('true',{kind:'primitive',name:'Bool'}),true);
+  equal(parseVerifiedRuntimeArg('255',{kind:'primitive',name:'UInt8'}),255);
+  equal(parseVerifiedRuntimeArg('65535',{kind:'primitive',name:'UInt16'}),65535);
+  equal(
+    parseVerifiedRuntimeArg('4294967295',{kind:'primitive',name:'UInt32'}),
+    4294967295,
+  );
+  equal(
+    parseVerifiedRuntimeArg(
+      '18446744073709551615',
+      {kind:'primitive',name:'UInt64'},
+    ),
+    18446744073709551615n,
+  );
   equal(parseVerifiedRuntimeArg('hello',{kind:'primitive',name:'String'}),'hello');
   equal(parseVerifiedRuntimeArg('()',{kind:'primitive',name:'Unit'}),undefined);
   throws(
@@ -483,6 +692,17 @@ console.log('ok - psc verified Nat source pipeline');
   throws(
     ()=>parseVerifiedRuntimeArg('yes',{kind:'primitive',name:'Bool'}),
     /Bool argument/,
+  );
+  throws(
+    ()=>parseVerifiedRuntimeArg('256',{kind:'primitive',name:'UInt8'}),
+    /outside/,
+  );
+  throws(
+    ()=>parseVerifiedRuntimeArg(
+      '18446744073709551616',
+      {kind:'primitive',name:'UInt64'},
+    ),
+    /outside/,
   );
   const args=prepareVerifiedMainArguments({
     name:'main',
@@ -498,6 +718,22 @@ console.log('ok - psc verified Nat source pipeline');
   equal(args[1],false);
 }
 console.log('ok - psc verified runtime ABI');
+
+{
+  const decoded=decodeVerifiedJsonArgument(
+    '"-42"',
+    {kind:'primitive',name:'Int'},
+    {
+      module:{
+        kind:'proofscript-verified-ir',
+        declarations:[],
+      },
+      runtimeExports:{},
+    },
+  );
+  equal(decoded,-42n);
+}
+console.log('ok - psc verified nested JSON Int ABI');
 
 
 {
@@ -576,8 +812,9 @@ console.log('ok - psc verified run filesystem pipeline');
         &&String(result.canonicalSourceHash).startsWith('sha256:'),
       true,
     );
-    equal(result.artifacts.typescript.endsWith('main.ts'),true);
-    equal(result.artifacts.javascript.endsWith('main.js'),true);
+    const artifacts=result.artifacts;
+    equal(artifacts.typescript.endsWith('main.ts'),true);
+    equal(artifacts.javascript.endsWith('main.js'),true);
   }finally{
     await rm(directory,{recursive:true,force:true});
   }
@@ -1419,7 +1656,7 @@ console.log('ok - psc canonical source hash is source-kind neutral');
     });
     equal(result.mainResult,'42');
     equal(
-      (result.moduleOrder as readonly string[]).join(','),
+      result.moduleOrder?.join(','),
       'Core,Data,main',
     );
     equal(result.moduleCount,3);
@@ -1467,7 +1704,7 @@ console.log('ok - psc mixed ProofScript -> Lean import run');
     });
     equal(result.mainResult,'42');
     equal(
-      (result.moduleOrder as readonly string[]).join(','),
+      result.moduleOrder?.join(','),
       'Data,main',
     );
   }finally{
@@ -1526,7 +1763,7 @@ console.log('ok - psc mixed Lean -> ProofScript import run');
     });
     equal(result.mainResult,'7');
     equal(
-      (result.moduleOrder as readonly string[]).join(','),
+      result.moduleOrder?.join(','),
       'Core,Data,main',
     );
   }finally{
@@ -1651,15 +1888,10 @@ console.log('ok - psc checked-module cache uses dependency integrity keys');
       verified:true,
       passthrough:[],
     });
-    const artifactRecords=(
-      built.report.artifacts as {
-        readonly modules:readonly {
-          readonly module:string;
-          readonly path:string;
-          readonly integrity:string;
-        }[];
-      }
-    ).modules;
+    const artifactRecords=built.report.artifacts.modules;
+    if(artifactRecords===undefined){
+      throw new Error('verified build did not emit module artifacts');
+    }
     equal(artifactRecords.length,2);
 
     const decoded=new Map<string,ReturnType<typeof decodeModuleArtifact>>();
@@ -1750,7 +1982,10 @@ console.log('ok - psc emits replay-gated checked-admission .psmodule v2 artifact
       passthrough:['41'],
     });
     equal(result.mainResult,'42');
-    const roots=result.sourceRoots as readonly string[];
+    const roots=result.sourceRoots;
+    if(roots===undefined){
+      throw new Error('verified run did not retain configured source roots');
+    }
     equal(roots.length,1);
     equal(roots[0],join(directory,'lib'));
   }finally{

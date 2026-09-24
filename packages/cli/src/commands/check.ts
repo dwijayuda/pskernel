@@ -1,4 +1,5 @@
 import {baseReport,checkSource} from '../pipeline.js';
+import {compileCheckedCoreToWasm} from '@proofscript/compiler';
 import {checkVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
@@ -19,6 +20,12 @@ export function checkCommand(
 ):Promise<UnverifiedCheckReport>;
 export function checkCommand(common:CommonArgs):Promise<CheckReport>;
 export async function checkCommand(common:CommonArgs):Promise<CheckReport>{
+  const target=common.buildTarget??'js';
+  if(target==='wasm'&&!common.verified){
+    throw new Error(
+      'PS_CLI_WASM_REQUIRES_VERIFIED: --target wasm requires --verified',
+    );
+  }
   const input=await resolveInput(common);
   if(common.verified){
     const project=await resolveSourceProject(input);
@@ -27,6 +34,9 @@ export async function checkCommand(common:CommonArgs):Promise<CheckReport>{
       input.loaded.config.runtimeDependencies,
     );
     const result=checkVerifiedSourceProject(project);
+    const wasm=target==='wasm'
+      ?compileCheckedCoreToWasm(result.checkedCore)
+      :null;
     return {
       ok:true,
       command:'check',
@@ -50,12 +60,15 @@ export async function checkCommand(common:CommonArgs):Promise<CheckReport>{
         input.loaded.config.runtimeDependencies,
       ),
       runtimeDependencyPolicy,
+      buildTarget:target,
+      ...(wasm===null?{}:{
+        binaryenVersion:wasm.wasm.binaryenVersion,
+        wasmProfile:wasm.wasm.profile,
+        wasmOptimized:wasm.wasm.optimized,
+      }),
     };
   }
-  const result=checkSource(
-    input.source,
-    input.sourcePath,
-  );
+  const result=checkSource(input.source,input.sourcePath);
   return {
     ok:true,
     command:'check',

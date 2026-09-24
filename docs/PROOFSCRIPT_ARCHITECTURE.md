@@ -44,12 +44,15 @@ checked dependent core
                          |
                          v
                     compiler IR
-                         |
-                         v
-                   TypeScript
-                         |
-                         v
-                  tsc -> JavaScript
+                     /       \
+                    v         v
+              TypeScript    Wasm lowering
+                    |         |
+                    v         v
+             tsc -> JS      WasmIR
+                              |
+                              v
+                         Binaryen -> .wasm
 ```
 
 ## Dual-source frontend contract
@@ -124,7 +127,10 @@ or exposed through an explicit ProofScript Lean-subset language mode.
 - `@proofscript/erasure`: removes type/proof-only content from checked core.
 - `@proofscript/compiler-ir`: runtime-oriented executable representation.
 - `@proofscript/backend-ts`: verified IR to TypeScript text.
-- `@proofscript/compiler`: orchestration from checked core to TS/JS.
+- `@proofscript/wasm-ir`: ProofScript-owned typed WebAssembly-oriented IR.
+- `@proofscript/wasm-lowering`: fail-closed verified IR to WasmIR representation lowering.
+- `@proofscript/backend-wasm`: Binaryen-backed WasmIR validation/emission and JS-host ABI; outside the TCB.
+- `@proofscript/compiler`: orchestration from checked core to TS/JS or supported Wasm.
 - TypeScript Compiler API: TypeScript type-checking/emission to JavaScript,
   declarations, and source maps.
 
@@ -135,7 +141,7 @@ or exposed through an explicit ProofScript Lean-subset language mode.
    declarations are replayed through pskernel.
 3. Erasure consumes checked core, never raw syntax or the legacy software HIR.
 4. The verified compiler consumes checked core/verified IR, never source AST.
-5. TypeScript/JavaScript output has no authority over proof acceptance.
+5. TypeScript/JavaScript and WebAssembly output have no authority over proof acceptance.
 6. Erased proof/type values may not survive in executable code. If they do,
    compilation fails closed.
 7. Unsupported elaboration/erasure never falls back automatically to the
@@ -143,6 +149,59 @@ or exposed through an explicit ProofScript Lean-subset language mode.
 8. ProofScript conveniences may change syntax, not Lean-compatible meaning
    where dependent types, propositions, inductives, recursion, typeclasses,
    or theorem checking are involved.
+
+
+## WebAssembly backend checkpoint
+
+WebAssembly is an alternate execution backend after the same pskernel-admitted
+checked core and verified erasure used by TypeScript. It is not a second
+semantic pipeline:
+
+```text
+checked core
+    -> verified erasure
+    -> verified compiler IR
+       |                 |
+       v                 v
+ TypeScript backend   wasm-lowering
+       |                 |
+       v                 v
+ JavaScript            WasmIR
+                         |
+                         v
+                  Binaryen -> .wasm
+```
+
+W2 supports Bool and fixed-width UInt8/16/32/64 first-order runtime values and
+direct calls, plus Unit results. UInt8/UInt16 are normalized at their narrow
+boundaries; UInt32/UInt64 retain the exact i32/i64 bit representation. A
+separate JS-host ABI restores unsigned ProofScript values because the
+WebAssembly JavaScript interface observes i32/i64 as signed Number/BigInt
+values. The raw WebAssembly instance remains available separately.
+
+Fixed-width arithmetic/comparison intrinsics are not invented in the backend;
+they remain unsupported until the verified compiler IR has explicit
+Lean-faithful operations. Runtime Nat/Int are rejected until an
+arbitrary-precision ABI exists and must never be silently narrowed to i64.
+String, structures, ADTs, generic runtime values, closures, and WebAssembly FFI
+also fail closed until their representations are specified.
+
+`psc check/build/run --verified --target wasm` uses this same verified path.
+Build emits canonical TypeScript/JavaScript evidence alongside `.wasm` and
+`.wat`; run crosses the semantic JS-host ABI rather than exposing signed raw
+integer values as ProofScript UInt results.
+
+The checked-core/verified-IR external import surface remains an explicit runtime
+trust boundary. W2 rejects non-empty verified IR imports with
+`PS_WASM_UNSUPPORTED_EXTERNAL_IMPORTS` until a WebAssembly FFI ABI is defined;
+it does not reinterpret Lean declaration safety, npm runtime policy, or runtime
+lock assurance to make emission succeed.
+
+Binaryen is untrusted compiler infrastructure. Its validator establishes
+WebAssembly validity, not equivalence to ProofScript semantics. The
+ProofScript-owned WasmIR boundary exists so later differential,
+translation-validation, and formal-refinement work can target a stable,
+versioned representation.
 
 ## Transitional legacy software path
 

@@ -20,6 +20,8 @@ function leanTypeTermBinaryPrecedence(operator:string):number {
       return 35;
     case '||':
       return 30;
+    default:
+      throw new Error('unsupported type binary operator '+operator);
   }
   throw new Error('unsupported type-term binary operator: '+operator);
 }
@@ -36,7 +38,10 @@ export function lowerV061TypeToLean(
     case 'named':
       return type.name;
     case 'group':
-      return '('+lowerV061TypeToLean(type.value)+')';
+      return type.ascribedType===undefined
+        ?'('+lowerV061TypeToLean(type.value)+')'
+        :'('+lowerV061TypeToLean(type.value)+' : '+
+          lowerV061TypeToLean(type.ascribedType)+')';
     case 'application':{
       const precedence=80;
       const rendered=lowerV061TypeToLean(type.fn,precedence)+' '+

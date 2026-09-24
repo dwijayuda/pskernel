@@ -3,7 +3,9 @@ export type VerifiedIrType =
   | {readonly kind:'typeParameter';readonly name:string}
   | {
       readonly kind:'primitive';
-      readonly name:'Nat'|'Int'|'Bool'|'String'|'Unit';
+      readonly name:
+        |'Nat'|'Int'|'Bool'|'String'|'Unit'
+        |'UInt8'|'UInt16'|'UInt32'|'UInt64';
     }
   | {
       readonly kind:'function';
@@ -21,6 +23,7 @@ export type VerifiedIrLiteral=bigint|string|boolean|undefined;
 export type VerifiedIrIntrinsicOperation =
   |'nat.add'|'nat.sub'|'nat.mul'|'nat.div'|'nat.mod'
   |'nat.eq'|'nat.ne'|'nat.le'|'nat.lt'
+  |'uint8.add'|'uint16.add'|'uint32.add'|'uint64.add'
   |'bool.not'|'bool.and'|'bool.or'|'bool.eq'|'bool.ne';
 
 export interface VerifiedIrStructureField {

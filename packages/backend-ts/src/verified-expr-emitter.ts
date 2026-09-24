@@ -46,6 +46,14 @@ export function emitVerifiedExpr(
         case 'nat.ne':return '('+left+' !== '+right+')';
         case 'nat.le':return '('+left+' <= '+right+')';
         case 'nat.lt':return '('+left+' < '+right+')';
+        case 'uint8.add':
+          return '(('+left+' + '+right+') % 256)';
+        case 'uint16.add':
+          return '(('+left+' + '+right+') % 65536)';
+        case 'uint32.add':
+          return '(('+left+' + '+right+') >>> 0)';
+        case 'uint64.add':
+          return 'BigInt.asUintN(64, '+left+' + '+right+')';
         case 'bool.and':return '('+left+' && '+right+')';
         case 'bool.or':return '('+left+' || '+right+')';
         case 'bool.eq':return '('+left+' === '+right+')';

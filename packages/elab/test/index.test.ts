@@ -110,6 +110,41 @@ function makeApplicationEnvironment():{
 {
   const {env,names}=makeApplicationEnvironment();
   const kernel=new Kernel(env);
+  const polyId=nameFromDotted('Test.polyId');
+  const u=nameFromDotted('u');
+  const alpha=nameFromDotted('α');
+  const x=nameFromDotted('x');
+  kernel.addAxiom({
+    kind:'axiom',
+    name:polyId,
+    levelParams:[u],
+    type:forallE(
+      alpha,
+      sort(levelParam(u)),
+      forallE(x,bvar(0),bvar(1),'default'),
+      'implicit',
+    ),
+  });
+
+  const meta=new ExprMetaContext(env);
+  const applied=elaborateApplication({
+    environment:env,
+    metaContext:meta,
+    fn:constant(polyId,[meta.mkFreshLevel()]),
+    args:[constant(names.zero)],
+  });
+  meta.validateGroundAssignments();
+  equal(applied.pendingInstances.length,0);
+  equal(applied.consumedExplicitArgs,1);
+  equal(exprEq(applied.type,constant(names.Nat)),true);
+  const checked=new TypeChecker(env,new LocalContext()).check(applied.term);
+  equal(exprEq(checked,constant(names.Nat)),true);
+}
+console.log('ok - @proofscript/elab universe-polymorphic application inference');
+
+{
+  const {env,names}=makeApplicationEnvironment();
+  const kernel=new Kernel(env);
   const fn=nameFromDotted('Test.withInst');
   kernel.addAxiom({
     kind:'axiom',
@@ -458,6 +493,17 @@ console.log('ok - @proofscript/elab implicit declaration binders');
 
 {
   const env=makeDefinitionEnvironment();
+  const kernel=new Kernel(env);
+  kernel.addAxiom({
+    kind:'axiom',
+    name:nameFromDotted('Box'),
+    levelParams:[],
+    type:forallE(
+      nameFromDotted('α'),
+      sort(levelSucc(levelZero)),
+      sort(levelSucc(levelZero)),
+    ),
+  });
   const result=elaborateV061Definitions(parseV061Module(
     'function keepBox(x : TestBox(TestNat)) : TestBox(TestNat) := x;',
   ),env);
@@ -675,14 +721,14 @@ console.log('ok - @proofscript/elab bounded synthetic-hole refine tactic');
 {
   const result=elaborateV061Declarations(parseV061Module(
     'inductive PropPair : Prop where { | mk(left : Prop, right : Prop); } '+
-    'theorem buildPair(P : Prop, Q : Prop) : PropPair := '+
+    'function buildPair(P : Prop, Q : Prop) : PropPair := '+
     'by constructor; assumption; assumption;',
   ));
   equal(result.inductives.length,1);
-  equal(result.theorems.length,1);
+  equal(result.definitions.length,1);
   equal(
     result.environment.find(nameFromDotted('buildPair'))?.kind,
-    'theorem',
+    'definition',
   );
 }
 {
@@ -947,6 +993,8 @@ console.log('ok - @proofscript/elab bounded Eq-only rfl tactic');
 
 
 function makeNatNotationEnvironment():Environment {
+  // Kernel primitive recognition is tested separately. This fixture models an
+  // already-admitted Nat environment so Elab tests only exercise notation.
   const env=new Environment();
   const Nat=nameFromDotted('Nat');
   env.add({
@@ -1262,6 +1310,26 @@ console.log('ok - @proofscript/elab parameterized verified match recursor elabor
   );
 }
 console.log('ok - @proofscript/elab match branch Nat notation meta instantiation');
+
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
+    'inductive PsOptionMatch(α : Type) where { '+
+    '| none; | some(value : α); } '+
+    'function main(value : PsOptionMatch(Nat)) : PsOptionMatch(Nat) := '+
+    'match value with { '+
+    '| .none => PsOptionMatch.some(1); '+
+    '| .some x => PsOptionMatch.some(x + 1); };',
+  ),env);
+  equal(result.definitions.length,1);
+  equal(
+    result.environment.find(nameFromDotted('main'))?.kind,
+    'definition',
+  );
+}
+console.log('ok - @proofscript/elab generic ADT constructor match');
+
 
 
 

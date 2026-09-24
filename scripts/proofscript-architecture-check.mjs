@@ -49,14 +49,33 @@ requireDeps('elab',['tactic']);
 forbidDeps('tactic',['elab']);
 forbidDeps('checked-core',[
   'syntax','meta','elab','language','erasure','compiler-ir','backend-ts',
+  'wasm-ir','wasm-lowering','backend-wasm',
 ]);
 requireDeps('erasure',['checked-core','compiler-ir','kernel']);
-forbidDeps('erasure',['syntax','meta','elab','language','backend-ts','cli']);
+forbidDeps('erasure',[
+  'syntax','meta','elab','language','backend-ts','wasm-ir',
+  'wasm-lowering','backend-wasm','cli',
+]);
 requireDeps('compiler',[
   'checked-core','erasure','compiler-ir','backend-ts','kernel',
+  'wasm-lowering','backend-wasm',
 ]);
 forbidDeps('compiler',['syntax','meta','elab','language','cli']);
 forbidDeps('backend-ts',['syntax','meta','elab','language','checked-core']);
+forbidDeps('compiler-ir',['wasm-ir','wasm-lowering','backend-wasm']);
+if(entry('wasm-ir').dependsOn.length!==0){
+  throw new Error('architecture: wasm-ir must remain backend-neutral');
+}
+requireDeps('wasm-lowering',['compiler-ir','wasm-ir']);
+forbidDeps('wasm-lowering',[
+  'kernel','checked-core','erasure','backend-ts','backend-wasm',
+  'syntax','meta','elab','language',
+]);
+requireDeps('backend-wasm',['wasm-ir']);
+forbidDeps('backend-wasm',[
+  'kernel','checked-core','erasure','compiler-ir','wasm-lowering',
+  'backend-ts','syntax','meta','elab','language',
+]);
 
 function sourceFiles(dir){
   if(!existsSync(dir))return [];
@@ -100,6 +119,16 @@ forbidImports(join(root,'packages','compiler','src'),[
   "@proofscript/language",
 ]);
 
+for(const pkg of [
+  'wasm-ir','wasm-lowering','checked-core','erasure','compiler-ir',
+  'backend-ts','compiler',
+]){
+  forbidImports(join(root,'packages',pkg,'src'),[
+    "from 'binaryen'",
+    'from "binaryen"',
+  ]);
+}
+
 const expectedPipeline=[
   'syntax','environment','meta','elab','checked-core',
   'erasure','compiler-ir','backend-ts','typescript',
@@ -110,6 +139,20 @@ if(
   throw new Error(
     'architecture: preferredPipeline drift; expected '+
     expectedPipeline.join(' -> '),
+  );
+}
+
+const expectedWasmPipeline=[
+  'syntax','environment','meta','elab','checked-core','erasure',
+  'compiler-ir','wasm-lowering','wasm-ir','backend-wasm',
+  'binaryen','webassembly',
+];
+if(
+  JSON.stringify(map.wasmPipeline)!==JSON.stringify(expectedWasmPipeline)
+){
+  throw new Error(
+    'architecture: wasmPipeline drift; expected '+
+    expectedWasmPipeline.join(' -> '),
   );
 }
 
@@ -154,5 +197,5 @@ if(verifiedEmitter.includes("from '@proofscript/compiler-ir';")){
 
 console.log(
   'proofscript-architecture: PASS '+
-  '(source -> elab -> checked-core -> erasure -> IR -> TS -> JS)',
+  '(verified IR -> TS/JS and verified IR -> WasmIR -> Binaryen/Wasm)',
 );

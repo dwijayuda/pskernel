@@ -1,6 +1,7 @@
 import {mkdir,writeFile} from 'node:fs/promises';
 import {basename,extname,join,resolve} from 'node:path';
 import {baseReport,compileSource} from '../pipeline.js';
+import {compileCheckedCoreToWasm} from '@proofscript/compiler';
 import {compileVerifiedSourceProject} from '../verified-project-pipeline.js';
 import {resolveSourceProject} from '../project-sources.js';
 import {resolveInput} from '../input.js';
@@ -30,6 +31,12 @@ export function buildCommand(
 ):Promise<UnverifiedBuildResult>;
 export function buildCommand(common:CommonArgs):Promise<BuildResult>;
 export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
+  const target=common.buildTarget??'js';
+  if(target==='wasm'&&!common.verified){
+    throw new Error(
+      'PS_CLI_WASM_REQUIRES_VERIFIED: --target wasm requires --verified',
+    );
+  }
   if(common.verified){
     const input=await resolveInput(common);
     const extension=extname(input.sourcePath);
@@ -54,15 +61,17 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     await mkdir(outDir,{recursive:true});
 
     const tsPath=join(outDir,stem+'.ts');
-    const result=compileVerifiedSourceProject(
-      project,
-      tsPath,
-    );
+    const result=compileVerifiedSourceProject(project,tsPath);
     const jsPath=join(outDir,stem+'.js');
     const dtsPath=join(outDir,stem+'.d.ts');
     const leanPath=join(outDir,stem+'.lean');
     const mapPath=join(outDir,stem+'.js.map');
     const manifestPath=join(outDir,stem+'.proofscript.json');
+    const wasmPath=join(outDir,stem+'.wasm');
+    const watPath=join(outDir,stem+'.wat');
+    const wasm=target==='wasm'
+      ?compileCheckedCoreToWasm(result.checkedCore)
+      :null;
     const moduleArtifactFiles=await writeVerifiedModuleArtifacts(
       outDir,
       result.moduleArtifacts,
@@ -92,6 +101,7 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       ),
       runtimeDependencyPolicy,
       runtimeDependencyLock,
+      buildTarget:target,
       outputDirectory:outDir,
       artifacts:{
         typescript:tsPath,
@@ -101,8 +111,18 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
         lean:leanPath,
         manifest:manifestPath,
         modules:moduleArtifactFiles,
+        ...(wasm===null?{}:{
+          webassembly:wasmPath,
+          wat:watPath,
+        }),
       },
       typescriptVersion:result.emitted.typescriptVersion,
+      ...(wasm===null?{}:{
+        binaryenVersion:wasm.wasm.binaryenVersion,
+        wasmProfile:wasm.wasm.profile,
+        wasmOptimized:wasm.wasm.optimized,
+        wasmExports:wasm.wasm.exports,
+      }),
     };
 
     const writes=[
@@ -110,28 +130,32 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
       writeFile(jsPath,result.emitted.javascript,'utf8'),
       writeFile(dtsPath,result.emitted.declaration,'utf8'),
       writeFile(leanPath,result.lean,'utf8'),
-      writeFile(
-        manifestPath,
-        JSON.stringify(report,null,2)+'\n',
-        'utf8',
-      ),
+      writeFile(manifestPath,JSON.stringify(report,null,2)+'\n','utf8'),
     ];
     if(result.emitted.sourceMap!==undefined){
       writes.push(writeFile(mapPath,result.emitted.sourceMap,'utf8'));
     }
+    if(wasm!==null){
+      writes.push(writeFile(wasmPath,wasm.wasm.binary));
+      writes.push(writeFile(watPath,wasm.wasm.text,'utf8'));
+    }
     await Promise.all(writes);
-    return {report,verifiedIr:result.ir,jsPath};
+    return {
+      report,
+      verifiedIr:result.ir,
+      ...(wasm===null?{}:{wasm:wasm.wasm}),
+      jsPath,
+    };
   }
 
   const input=await resolveInput(common);
   const extension=extname(input.sourcePath);
   const stem=basename(input.sourcePath,extension);
-  const result=compileSource(
-    input.source,
-    stem+'.ts',
-    input.sourcePath,
+  const result=compileSource(input.source,stem+'.ts',input.sourcePath);
+  const outDir=resolve(
+    input.loaded.directory,
+    input.loaded.config.compilerOptions.outDir,
   );
-  const outDir=resolve(input.loaded.directory,input.loaded.config.compilerOptions.outDir);
   await mkdir(outDir,{recursive:true});
 
   const tsPath=join(outDir,stem+'.ts');
@@ -172,7 +196,9 @@ export async function buildCommand(common:CommonArgs):Promise<BuildResult>{
     writeFile(leanPath,result.lean,'utf8'),
     writeFile(manifestPath,JSON.stringify(report,null,2)+'\n','utf8'),
   ];
-  if(result.emitted.sourceMap!==undefined)writes.push(writeFile(mapPath,result.emitted.sourceMap,'utf8'));
+  if(result.emitted.sourceMap!==undefined){
+    writes.push(writeFile(mapPath,result.emitted.sourceMap,'utf8'));
+  }
   await Promise.all(writes);
   return {report,checked:result.checked,jsPath};
 }

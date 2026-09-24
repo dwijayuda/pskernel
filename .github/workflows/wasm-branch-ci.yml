@@ -1,0 +1,42 @@
+name: WASM branch closure
+
+on:
+  push:
+    branches: [feature/wasm-backend]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install exact dependencies
+        run: npm ci
+      - name: Build package graph
+        run: npm run build:package-integration
+      - name: Elaboration
+        run: node packages/elab/dist/test/index.test.js
+      - name: Erasure
+        run: node packages/erasure/dist/test/index.test.js
+      - name: Package integration
+        run: npm run test:package-integration:raw
+      - name: TypeScript backend
+        run: node packages/backend-ts/dist/test/index.test.js
+      - name: WebAssembly backend
+        run: npm run test:wasm
+      - name: Root suite
+        run: npm test
+      - name: Workspace lock
+        run: npm run check:workspace-lock
+      - name: Source shape
+        run: npm run check:source-shape
+      - name: Architecture
+        run: npm run check:architecture

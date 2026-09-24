@@ -21,6 +21,7 @@ import {safeIdentifier} from './names.js';
 import {eraseRuntimeType} from './type-erasure.js';
 import {substituteVerifiedType} from './verified-type-substitution.js';
 import type {RuntimeExprEraser} from './app-erasure.js';
+import {tryEraseBoolRecursorApplication} from './bool-recursor-erasure.js';
 
 function freshBranchName(
   raw:string,
@@ -181,6 +182,14 @@ export function tryEraseRuntimeRecursorApplication(
 ):VerifiedIrExpr|undefined {
   const view=appView(expr);
   if(view.fn.kind!=='const')return undefined;
+
+  const boolRecursor=tryEraseBoolRecursorApplication(
+    view,
+    scope,
+    environment,
+    erase,
+  );
+  if(boolRecursor!==undefined)return boolRecursor;
 
   const inductive:RuntimeInductiveInfo|undefined=
     scope.inductivesByRecursor.get(nameKey(view.fn.name));

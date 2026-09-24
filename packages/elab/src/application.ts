@@ -44,7 +44,6 @@ export interface ApplicationArgumentSource {
 export type ApplicationArguments=
   | readonly Expr[]
   | ApplicationArgumentSource;
-
 export interface ElaborateApplicationOptions {
   readonly environment:Environment;
   readonly metaContext:ExprMetaContext;
@@ -56,17 +55,14 @@ export interface ElaborateApplicationOptions {
   readonly globalInstances?:readonly Expr[]|undefined;
   readonly classNames?:ReadonlySet<string>|undefined;
 }
-
 function implicitKind(info:BinderInfo):ExprMetavarKind {
   return info==='instImplicit'?'synthetic':'natural';
 }
-
 function isArgumentSource(
   args:ApplicationArguments,
 ):args is ApplicationArgumentSource {
   return !Array.isArray(args);
 }
-
 function hasExprMVar(expr:Expr):boolean {
   const todo:Expr[]=[expr];
   while(todo.length>0){
@@ -94,7 +90,6 @@ function hasExprMVar(expr:Expr):boolean {
   }
   return false;
 }
-
 function explicitArgument(
   args:ApplicationArguments,
   index:number,
@@ -103,7 +98,6 @@ function explicitArgument(
   if(isArgumentSource(args))return args.elaborate(index,expectedType);
   return {term:args[index]!};
 }
-
 function targetClassName(
   type:Expr,
   checker:TypeChecker,
@@ -113,7 +107,6 @@ function targetClassName(
     ?nameToString(view.fn.name)
     :undefined;
 }
-
 function trySynthesizeLocalInstance(
   target:Expr,
   candidates:readonly Expr[],
@@ -127,7 +120,6 @@ function trySynthesizeLocalInstance(
     checker,
   );
   if(className===undefined||!classNames.has(className))return undefined;
-
   for(const candidate of candidates){
     let candidateType:Expr;
     try{
@@ -141,7 +133,6 @@ function trySynthesizeLocalInstance(
   }
   return undefined;
 }
-
 export function elaborateApplication({
   environment,
   metaContext,
@@ -159,17 +150,14 @@ export function elaborateApplication({
       'PS_ELAB_APP_FUNCTION_STUCK: function expression contains unresolved expression metavariables',
     );
   }
-
   let term=fn;
   let type=checker.check(metaContext.instantiate(fn));
   let explicitIndex=0;
   const inserted:InsertedApplicationArgument[]=[];
   const pendingInstances:Expr[]=[];
-
   while(true){
     const instantiatedType=metaContext.instantiate(type);
     const functionType=checker.whnf(instantiatedType);
-
     if(functionType.kind!=='forall'){
       if(explicitIndex<args.length){
         throw new Error(
@@ -179,7 +167,6 @@ export function elaborateApplication({
       }
       break;
     }
-
     if(functionType.binderInfo==='default'){
       if(explicitIndex>=args.length)break;
       const expectedArgumentType=metaContext.instantiate(functionType.type);
@@ -190,7 +177,6 @@ export function elaborateApplication({
       );
       const sourceArg=supplied.term;
       const argument=metaContext.instantiate(sourceArg);
-
       let actualType:Expr;
       if(hasExprMVar(argument)){
         if(!supplied.allowUnresolvedMVar){
@@ -214,7 +200,6 @@ export function elaborateApplication({
           ?checker.check(argument)
           :metaContext.instantiate(supplied.type);
       }
-
       if(
         !metaContext.unify(
           actualType,
@@ -228,17 +213,14 @@ export function elaborateApplication({
           ', got '+exprToString(actualType),
         );
       }
-
       term=app(term,sourceArg);
       type=instantiate1(functionType.body,sourceArg);
       continue;
     }
-
     if(
       functionType.binderInfo==='strictImplicit'
       &&explicitIndex>=args.length
     )break;
-
     const expectedType=metaContext.instantiate(functionType.type);
     const implicit=metaContext.mkFresh(
       expectedType,
@@ -272,7 +254,6 @@ export function elaborateApplication({
       }
     }
   }
-
   if(expectedType!==undefined){
     const actual=metaContext.instantiate(type);
     const expected=metaContext.instantiate(expectedType);
@@ -283,7 +264,6 @@ export function elaborateApplication({
       );
     }
   }
-
   const unresolvedInstances:Expr[]=[];
   for(const pending of pendingInstances){
     if(metaContext.isAssigned(pending))continue;
@@ -308,7 +288,6 @@ export function elaborateApplication({
     }
     metaContext.assign(pending,synthesized);
   }
-
   return {
     term:metaContext.instantiate(term),
     type:metaContext.instantiate(type),

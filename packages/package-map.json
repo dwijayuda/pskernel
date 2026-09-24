@@ -17,7 +17,7 @@
       "path": "packages/cli",
       "phase": "A",
       "trust": "untrusted-support",
-      "status": "runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
+      "status": "runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache+wasm-w2-check-build-run",
       "packageName": "pskernel-cli",
       "dependsOn": [
         "kernel",
@@ -81,7 +81,9 @@
         "psc --verified uses the preferred source -> elaboration -> checked core -> erasure -> compiler IR -> TypeScript -> JavaScript architecture.",
         "Verified mode never falls back to the legacy software checker after an elaboration/erasure error.",
         "The legacy software path remains available without --verified only as a temporary compatibility lane while verified-core coverage expands.",
-        "CLI regression now executes a temporary verified project end-to-end through emitted JavaScript and checks Nat main(21) = 42."
+        "CLI regression now executes a temporary verified project end-to-end through emitted JavaScript and checks Nat main(21) = 42.",
+        "Wasm W1 target adds `psc check/build --verified --target wasm`; check performs target-capability lowering in memory, build emits .wasm/.wat alongside canonical TS/JS evidence, and Wasm run remains fail-closed.",
+        "W2 Wasm check/build/run uses the verified compiler path and semantic JS host ABI; unsupported runtime features fail closed."
       ]
     },
     {
@@ -537,18 +539,67 @@
       ]
     },
     {
+      "name": "backend-wasm",
+      "path": "packages/backend-wasm",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "w2-binaryen-fixed-width-js-abi",
+      "packageName": "@proofscript/backend-wasm",
+      "dependsOn": [
+        "wasm-ir"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Binaryen 132.0.0 is an exact-pinned untrusted emitter/validator dependency.",
+        "W2 emits raw canonical Wasm plus a JS host adapter that restores unsigned ProofScript values across the signed WebAssembly JS i32/i64 bridge."
+      ]
+    },
+    {
+      "name": "wasm-lowering",
+      "path": "packages/wasm-lowering",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "w2-fixed-width-uint-lowering",
+      "packageName": "@proofscript/wasm-lowering",
+      "dependsOn": [
+        "compiler-ir",
+        "wasm-ir"
+      ],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "Lowering consumes only verified compiler IR; fixed-width UInt values lower to i32/i64 with UInt8/UInt16 boundary masking.",
+        "Nat and Int explicitly reject rather than narrowing arbitrary-precision Lean semantics to i64."
+      ]
+    },
+    {
+      "name": "wasm-ir",
+      "path": "packages/wasm-ir",
+      "phase": "C",
+      "trust": "untrusted-support",
+      "status": "w2-fixed-width-abi-ir",
+      "packageName": "@proofscript/wasm-ir",
+      "dependsOn": [],
+      "sourceLanguage": "typescript",
+      "notes": [
+        "ProofScript-owned typed WasmIR is independent of Binaryen and carries no proof authority.",
+        "W2 preserves logical Bool/UInt8/UInt16/UInt32/UInt64 ABI types separately from physical i32/i64 representation."
+      ]
+    },
+    {
       "name": "compiler",
       "path": "packages/compiler",
       "phase": "C",
       "trust": "untrusted-support",
-      "status": "checked-core-to-js-generic-structure+structural-recursion-mvp",
+      "status": "checked-core-to-js-generic-structure+structural-recursion+wasm-w2-mvp",
       "packageName": "@proofscript/compiler",
       "dependsOn": [
         "checked-core",
         "erasure",
         "compiler-ir",
         "backend-ts",
-        "kernel"
+        "kernel",
+        "wasm-lowering",
+        "backend-wasm"
       ],
       "sourceLanguage": "typescript",
       "notes": [
@@ -562,7 +613,9 @@
         "The compiler is untrusted with respect to theorem validity; pskernel admission has already occurred before this package runs.",
         "The verified compiler now covers construction and elimination of non-recursive unindexed generic ADTs through kernel-admitted constructors/recursors.",
         "The verified compiler now carries direct recursive ADTs and primitive structurally recursive functions—with invariant runtime parameters—from pskernel recursors to ordinary TypeScript/JavaScript recursion.",
-        "Canonical verified compilation now carries class dictionaries through the same structure IR/runtime representation; locally synthesized instances become ordinary checked runtime arguments."
+        "Canonical verified compilation now carries class dictionaries through the same structure IR/runtime representation; locally synthesized instances become ordinary checked runtime arguments.",
+        "W1 exposes checked-core -> erasure -> verified IR -> WasmIR -> Binaryen orchestration; unsupported Wasm runtime features remain fail-closed.",
+        "W2 preserves fixed-width UInt semantics across the JS-hosted Wasm ABI while keeping raw Wasm bit representations i32/i64."
       ]
     },
     {
@@ -692,7 +745,8 @@
     "The canonical integration regression now compiles multiple pskernel-admitted Nat functions, including a user-definition call, through verified IR to TypeScript/JavaScript.",
     "The canonical verified integration regression now includes a pskernel-admitted structure whose constructor and projection lower through verified IR to branded TypeScript/JavaScript.",
     "The canonical verified integration regression now includes an unparameterized pskernel-admitted ADT and zero-/one-field constructor values compiled through tagged verified IR to TypeScript/JavaScript.",
-    "The active language completion plan is docs/plans/05_LANGUAGE_COMPLETION.md; new language work must satisfy its source-to-kernel-to-runtime or source-to-kernel proof acceptance gates."
+    "The active language completion plan is docs/plans/05_LANGUAGE_COMPLETION.md; new language work must satisfy its source-to-kernel-to-runtime or source-to-kernel proof acceptance gates.",
+    "WebAssembly W1 is an alternate untrusted execution backend: verified IR -> wasm-lowering -> ProofScript WasmIR -> Binaryen. It does not change the kernel TCB."
   ],
   "preferredPipeline": [
     "syntax",
@@ -710,5 +764,19 @@
     "package": "language",
     "rule": "no automatic fallback from verified-core compilation"
   },
-  "activeLanguagePlan": "docs/plans/05_LANGUAGE_COMPLETION.md"
+  "activeLanguagePlan": "docs/plans/05_LANGUAGE_COMPLETION.md",
+  "wasmPipeline": [
+    "syntax",
+    "environment",
+    "meta",
+    "elab",
+    "checked-core",
+    "erasure",
+    "compiler-ir",
+    "wasm-lowering",
+    "wasm-ir",
+    "backend-wasm",
+    "binaryen",
+    "webassembly"
+  ]
 }

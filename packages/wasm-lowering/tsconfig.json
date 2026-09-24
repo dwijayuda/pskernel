@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@proofscript/compiler-ir/verified": [
+        "../compiler-ir/dist/src/verified.d.ts"
+      ],
+      "@proofscript/wasm-ir": [
+        "../wasm-ir/dist/src/index.d.ts"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
+}

@@ -14,6 +14,7 @@ import {
 } from './model.js';
 import {tryEraseRuntimeRecursorApplication} from './recursor-erasure.js';
 import {eraseRuntimeType} from './type-erasure.js';
+import {verifiedBinaryRuntimeIntrinsic} from './runtime-intrinsics.js';
 
 export type RuntimeExprEraser=(
   expr:Expr,
@@ -21,17 +22,39 @@ export type RuntimeExprEraser=(
   environment:Environment,
 )=>VerifiedIrExpr;
 
-const natIntrinsics=new Map<
-  string,
-  'nat.add'|'nat.sub'|'nat.mul'|'nat.div'|'nat.mod'|'nat.eq'
->([
-  ['Nat.add','nat.add'],
-  ['Nat.sub','nat.sub'],
-  ['Nat.mul','nat.mul'],
-  ['Nat.div','nat.div'],
-  ['Nat.mod','nat.mod'],
-  ['Nat.beq','nat.eq'],
-]);
+function canonicalBoolBeqOperands(
+  expr:Expr,
+):readonly [Expr,Expr]|undefined {
+  const view=appView(expr);
+  if(
+    view.fn.kind!=='const'
+    ||nameToString(view.fn.name)!=='BEq.beq'
+    ||view.args.length!==4
+  )return undefined;
+
+  const typeArg=view.args[0]!;
+  if(
+    typeArg.kind!=='const'
+    ||nameToString(typeArg.name)!=='Bool'
+  )return undefined;
+
+  const instance=appView(view.args[1]!);
+  if(
+    instance.fn.kind!=='const'
+    ||nameToString(instance.fn.name)!=='instBEqOfDecidableEq'
+    ||instance.args.length!==2
+  )return undefined;
+  const instanceType=instance.args[0]!;
+  const decidable=instance.args[1]!;
+  if(
+    instanceType.kind!=='const'
+    ||nameToString(instanceType.name)!=='Bool'
+    ||decidable.kind!=='const'
+    ||nameToString(decidable.name)!=='instDecidableEqBool'
+  )return undefined;
+
+  return [view.args[2]!,view.args[3]!];
+}
 
 function eraseVerifiedCondition(
   proposition:Expr,
@@ -78,7 +101,6 @@ function eraseVerifiedCondition(
       'PS_ERASE_CONDITION_UNSUPPORTED: relation instance is not constant',
     );
   }
-
   const instanceName=nameToString(instance.name);
   let operation:'nat.le'|'nat.lt';
   if(head==='LE.le'&&instanceName==='instLENat'){
@@ -91,7 +113,6 @@ function eraseVerifiedCondition(
       "' with instance '"+instanceName+"' is not executable yet",
     );
   }
-
   return {
     kind:'intrinsic',
     operation,
@@ -101,7 +122,6 @@ function eraseVerifiedCondition(
     ],
   };
 }
-
 export function eraseRuntimeApplication(
   expr:Extract<Expr,{kind:'app'}>,
   scope:ErasureScope,
@@ -116,7 +136,6 @@ export function eraseRuntimeApplication(
     erase,
   );
   if(recursor!==undefined)return recursor;
-
   if(view.fn.kind==='const'){
     const constructor=scope.inductivesByConstructor.get(
       nameKey(view.fn.name),
@@ -147,7 +166,6 @@ export function eraseRuntimeApplication(
         })),
       };
     }
-
     const structure=scope.structuresByConstructor.get(
       nameKey(view.fn.name),
     );
@@ -174,7 +192,6 @@ export function eraseRuntimeApplication(
       };
     }
   }
-
   if(
     view.fn.kind==='const'
     &&nameToString(view.fn.name)==='ite'
@@ -192,7 +209,6 @@ export function eraseRuntimeApplication(
       elseBranch:erase(view.args[4]!,scope,environment),
     };
   }
-
   if(
     view.fn.kind==='const'
     &&nameToString(view.fn.name)==='Bool.not'
@@ -210,15 +226,12 @@ export function eraseRuntimeApplication(
         args:equality.args.map((arg)=>erase(arg,scope,environment)),
       };
     }
-    if(
-      equality.fn.kind==='const'
-      &&nameToString(equality.fn.name)==='Bool.beq'
-      &&equality.args.length===2
-    ){
+    const boolOperands=canonicalBoolBeqOperands(view.args[0]!);
+    if(boolOperands!==undefined){
       return {
         kind:'intrinsic',
         operation:'bool.ne',
-        args:equality.args.map((arg)=>erase(arg,scope,environment)),
+        args:boolOperands.map((arg)=>erase(arg,scope,environment)),
       };
     }
     return {
@@ -227,19 +240,14 @@ export function eraseRuntimeApplication(
       args:[erase(view.args[0]!,scope,environment)],
     };
   }
-
-  if(
-    view.fn.kind==='const'
-    &&nameToString(view.fn.name)==='Bool.beq'
-    &&view.args.length===2
-  ){
+  const boolEquality=canonicalBoolBeqOperands(expr);
+  if(boolEquality!==undefined){
     return {
       kind:'intrinsic',
       operation:'bool.eq',
-      args:view.args.map((arg)=>erase(arg,scope,environment)),
+      args:boolEquality.map((arg)=>erase(arg,scope,environment)),
     };
   }
-
   if(
     view.fn.kind==='const'
     &&(nameToString(view.fn.name)==='Bool.and'
@@ -254,9 +262,10 @@ export function eraseRuntimeApplication(
       args:view.args.map((arg)=>erase(arg,scope,environment)),
     };
   }
-
   if(view.fn.kind==='const'){
-    const intrinsic=natIntrinsics.get(nameToString(view.fn.name));
+    const intrinsic=verifiedBinaryRuntimeIntrinsic(
+      nameToString(view.fn.name),
+    );
     if(intrinsic!==undefined){
       if(view.args.length!==2){
         throw new Error(
@@ -271,7 +280,6 @@ export function eraseRuntimeApplication(
       };
     }
   }
-
   const checker=new TypeChecker(environment,scope.localContext.clone());
   let fnType=checker.check(view.fn);
   const runtimeArgs:VerifiedIrExpr[]=[];
@@ -283,7 +291,6 @@ export function eraseRuntimeApplication(
     }
     fnType=instantiate1(binder.body,arg);
   }
-
   const fn=erase(view.fn,scope,environment);
   return runtimeArgs.length===0
     ?fn

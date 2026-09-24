@@ -28,7 +28,10 @@ function declarationFailure(
   error:unknown,
 ):Error {
   const detail=error instanceof Error?error.message:String(error);
-  return new Error("PS_ELAB_DECL_FAILED: '"+name+"': "+detail);
+  return new Error(
+    "PS_ELAB_DECL_FAILED: '"+name+"': "+detail,
+    {cause:error},
+  );
 }
 
 export type ElaboratedV061Module=CheckedCoreModule;

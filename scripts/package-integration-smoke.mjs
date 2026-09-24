@@ -14,6 +14,11 @@ import {eraseCheckedCoreModule} from '../packages/erasure/dist/src/index.js';
 import {nat,natAdd} from '../packages/runtime/dist/src/index.js';
 import {compileTypeScript,emitModule,emitVerifiedTypeScript} from '../packages/backend-ts/dist/src/index.js';
 import {compileCheckedCore} from '../packages/compiler/dist/src/index.js';
+import {lowerVerifiedIrToWasm} from '../packages/wasm-lowering/dist/src/index.js';
+import {
+  emitBinaryenWasm,
+  instantiateProofScriptWasm,
+} from '../packages/backend-wasm/dist/src/index.js';
 import {
   checkVerifiedSource,
   compileVerifiedSource,
@@ -97,12 +102,21 @@ assert(exprEq(applied.type,constant(TestNat)),'application elaborator produced w
 const appliedType=new TypeChecker(kernelEnv,new LocalContext()).check(applied.term);
 assert(exprEq(appliedType,constant(TestNat)),'kernel rejected grounded elaborated application');
 
+let tacticAssignment;
 const tacticState=exact(
-  {goals:[{target:'Nat',locals:[]}],proofs:[]},
+  {goals:[{id:'integration.exact',target:'Nat',locals:[]}]},
   'zero',
-  {inferType:()=> 'Nat',isDefEq:(a,b)=>a===b},
+  {
+    inferType:()=> 'Nat',
+    isDefEq:(a,b)=>a===b,
+    assign:(goal,proof)=>{
+      assert(goal.id==='integration.exact','tactic exact assigned wrong goal');
+      tacticAssignment=proof;
+    },
+  },
 );
 assert(tacticState.goals.length===0,'tactic exact did not solve goal');
+assert(tacticAssignment==='zero','tactic exact did not assign proof');
 
 const irExpr={
   kind:'lambda',
@@ -549,6 +563,125 @@ assert(
   'verified composed Bool condition did not reach TypeScript',
 );
 
+const verifiedWasmBool=compileVerifiedSource(
+  'function wasmNot(a : Bool) : Bool := !a; '+
+  'function wasmDoubleNot(a : Bool) : Bool := wasmNot(wasmNot(a)); '+
+  'function wasmLogic(a : Bool, b : Bool) : Bool := !a || (a && b); '+
+  'function wasmSame(a : Bool, b : Bool) : Bool := a == b; '+
+  'function wasmDifferent(a : Bool, b : Bool) : Bool := a != b;',
+  'verified-wasm-bool.ts',
+);
+const verifiedWasmIr=lowerVerifiedIrToWasm(verifiedWasmBool.ir);
+const verifiedWasmArtifact=emitBinaryenWasm(verifiedWasmIr);
+assert(
+  WebAssembly.validate(verifiedWasmArtifact.binary),
+  'verified Bool Wasm artifact failed host validation',
+);
+const verifiedWasmInstance=new WebAssembly.Instance(
+  new WebAssembly.Module(verifiedWasmArtifact.binary),
+  {},
+);
+const verifiedJsModule=await import(
+  'data:text/javascript;base64,'+
+  Buffer.from(verifiedWasmBool.emitted.javascript).toString('base64')
+);
+for(const ai of [0,1,2,-1]){
+  for(const bi of [0,1,2,-1]){
+    const a=ai!==0;
+    const b=bi!==0;
+    assert(
+      verifiedWasmInstance.exports.wasmNot(ai)===
+        (verifiedJsModule.wasmNot(a)?1:0),
+      'verified direct Bool call JS/Wasm mismatch',
+    );
+    assert(
+      verifiedWasmInstance.exports.wasmDoubleNot(ai)===
+        (verifiedJsModule.wasmDoubleNot(a)?1:0),
+      'verified nested direct Bool call JS/Wasm mismatch',
+    );
+    assert(
+      verifiedWasmInstance.exports.wasmLogic(ai,bi)===
+        (verifiedJsModule.wasmLogic(a,b)?1:0),
+      'verified Bool logic JS/Wasm differential mismatch',
+    );
+    assert(
+      verifiedWasmInstance.exports.wasmSame(ai,bi)===
+        (verifiedJsModule.wasmSame(a,b)?1:0),
+      'verified Bool equality JS/Wasm differential mismatch',
+    );
+    assert(
+      verifiedWasmInstance.exports.wasmDifferent(ai,bi)===
+        (verifiedJsModule.wasmDifferent(a,b)?1:0),
+      'verified Bool inequality JS/Wasm differential mismatch',
+    );
+  }
+}
+console.log('ok - verified Bool source differential JS/Wasm execution');
+
+
+const verifiedUInt=compileVerifiedSource(
+  'function id8(x : UInt8) : UInt8 := x; '+
+  'function id16(x : UInt16) : UInt16 := x; '+
+  'function id32(x : UInt32) : UInt32 := x; '+
+  'function id64(x : UInt64) : UInt64 := x;',
+  'verified-wasm-uint.ts',
+);
+assert(
+  verifiedUInt.typeScript.includes(
+    'function id8(x: number): number',
+  ),
+  'verified UInt8 did not reach TypeScript as a fixed-width host number',
+);
+assert(
+  verifiedUInt.typeScript.includes(
+    'function id64(x: bigint): bigint',
+  ),
+  'verified UInt64 did not reach TypeScript as bigint',
+);
+const verifiedUIntWasm=emitBinaryenWasm(
+  lowerVerifiedIrToWasm(verifiedUInt.ir),
+);
+assert(
+  WebAssembly.validate(verifiedUIntWasm.binary),
+  'verified UInt Wasm artifact failed host validation',
+);
+const uintInstance=new WebAssembly.Instance(
+  new WebAssembly.Module(verifiedUIntWasm.binary),
+  {},
+);
+assert(uintInstance.exports.id8(255)===255,'UInt8 identity mismatch');
+assert(uintInstance.exports.id8(257)===1,'UInt8 boundary mask mismatch');
+assert(uintInstance.exports.id16(65535)===65535,'UInt16 identity mismatch');
+assert(uintInstance.exports.id16(65537)===1,'UInt16 boundary mask mismatch');
+assert(
+  (uintInstance.exports.id32(-1)>>>0)===0xffffffff,
+  'UInt32 bit-pattern mismatch',
+);
+assert(
+  BigInt.asUintN(64,uintInstance.exports.id64(-1n))===
+    0xffffffffffffffffn,
+  'UInt64 bit-pattern mismatch',
+);
+const uintHost=instantiateProofScriptWasm(verifiedUIntWasm);
+assert(
+  uintHost.exports.id8(0xff)===0xff,
+  'UInt8 JS ABI did not preserve unsigned semantic value',
+);
+assert(
+  uintHost.exports.id16(0xffff)===0xffff,
+  'UInt16 JS ABI did not preserve unsigned semantic value',
+);
+assert(
+  uintHost.exports.id32(0xffffffff)===0xffffffff,
+  'UInt32 JS ABI did not preserve unsigned semantic value',
+);
+assert(
+  uintHost.exports.id64(0xffffffffffffffffn)===
+    0xffffffffffffffffn,
+  'UInt64 JS ABI did not preserve unsigned semantic value',
+);
+console.log('ok - verified fixed-width UInt source -> JS/Wasm pipeline');
+
 
 const verifiedComposition=compileVerifiedSource(
   'inductive ComposeOption(α : Type) where { '+
@@ -705,7 +838,7 @@ assert(
   ).status==='closed',
   'verified theorem should expose closed declaration-level proof state',
 );
-assert(PROOFSCRIPT_LSP_PROTOCOL_VERSION===1,'LSP protocol drift');
+assert(PROOFSCRIPT_LSP_PROTOCOL_VERSION===2,'LSP protocol drift');
 assert(lspCapabilities().hoverProvider===true,'LSP hover capability missing');
 
 const plan=createBuildPlan([

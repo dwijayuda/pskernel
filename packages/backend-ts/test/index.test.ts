@@ -658,3 +658,84 @@ console.log('ok - @proofscript/backend-ts generic structure TypeScript emission'
   );
 }
 console.log('ok - @proofscript/backend-ts external ESM import emission');
+
+{
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    declarations:[
+      {
+        name:'id8',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'UInt8'},
+        }],
+        resultType:{kind:'primitive',name:'UInt8'},
+        body:{kind:'var',name:'x'},
+      },
+      {
+        name:'id64',
+        typeParameters:[],
+        parameters:[{
+          name:'x',
+          type:{kind:'primitive',name:'UInt64'},
+        }],
+        resultType:{kind:'primitive',name:'UInt64'},
+        body:{kind:'var',name:'x'},
+      },
+    ],
+  });
+  equal(source.includes('id8(x: number): number'),true);
+  equal(source.includes('id64(x: bigint): bigint'),true);
+  const compiled=compileTypeScript(source,'verified-uint.ts');
+  equal(compiled.javascript.includes('function id8(x)'),true);
+  equal(compiled.javascript.includes('function id64(x)'),true);
+}
+console.log('ok - @proofscript/backend-ts verified fixed-width UInt types');
+
+{
+  const type=(name:'UInt8'|'UInt16'|'UInt32'|'UInt64')=>({
+    kind:'primitive' as const,
+    name,
+  });
+  const add=(
+    name:string,
+    primitive:'UInt8'|'UInt16'|'UInt32'|'UInt64',
+    operation:'uint8.add'|'uint16.add'|'uint32.add'|'uint64.add',
+  )=>({
+    name,
+    typeParameters:[],
+    parameters:[
+      {name:'a',type:type(primitive)},
+      {name:'b',type:type(primitive)},
+    ],
+    resultType:type(primitive),
+    body:{
+      kind:'intrinsic' as const,
+      operation,
+      args:[
+        {kind:'var' as const,name:'a'},
+        {kind:'var' as const,name:'b'},
+      ],
+    },
+  });
+  const source=emitVerifiedTypeScript({
+    kind:'proofscript-verified-ir',
+    declarations:[
+      add('add8','UInt8','uint8.add'),
+      add('add16','UInt16','uint16.add'),
+      add('add32','UInt32','uint32.add'),
+      add('add64','UInt64','uint64.add'),
+    ],
+  });
+  const compiled=compileTypeScript(source,'verified-uint-add.ts');
+  const mod=await import(
+    'data:text/javascript;charset=utf-8,'+
+    encodeURIComponent(compiled.javascript)
+  ) as Record<string,(a:number|bigint,b:number|bigint)=>number|bigint>;
+  equal(mod.add8?.(255,1),0);
+  equal(mod.add16?.(65535,1),0);
+  equal(mod.add32?.(4294967295,1),0);
+  equal(mod.add64?.(18446744073709551615n,1n),0n);
+}
+console.log('ok - @proofscript/backend-ts modular fixed-width UInt addition');

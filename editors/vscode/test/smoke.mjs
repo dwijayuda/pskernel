@@ -3,7 +3,13 @@ import path from 'node:path';
 
 const root=path.resolve(import.meta.dirname,'..');
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
-const sourceFiles=['extension.js','rpc-client.js','infoview.js','protocol.js'];
+const sourceFiles=[
+  'extension.js',
+  'language-providers.js',
+  'rpc-client.js',
+  'infoview.js',
+  'protocol.js',
+];
 const source=sourceFiles.map((name)=>fs.readFileSync(path.join(root,'src',name),'utf8')).join('\n');
 const runner=fs.readFileSync(path.join(root,'server/run-lsp.mjs'),'utf8');
 
@@ -29,6 +35,7 @@ assert(
   pkg.activationEvents.includes('workspaceContains:psconfig.json'),
   'ProofScript workspace activation missing',
 );
+const compactSource=source.replace(/\s+/gu,'');
 for(const command of [
   'proofscript.showInfoview',
   'proofscript.restartServer',
@@ -36,8 +43,14 @@ for(const command of [
   'proofscript.convertToLean',
   'proofscript.convertToProofScript',
 ]){
-  assert(pkg.contributes.commands.some((item)=>item.command===command),'missing command '+command);
-  assert(source.includes("registerCommand('"+command+"'"),'command not implemented '+command);
+  assert(
+    pkg.contributes.commands.some((item)=>item.command===command),
+    'missing command '+command,
+  );
+  assert(
+    compactSource.includes("registerCommand('"+command+"'"),
+    'command not implemented '+command,
+  );
 }
 assert(source.includes('EXPECTED_PROTOCOL=2'),'protocol guard missing');
 assert(source.includes('proofscript/proofState'),'proof-state request missing');

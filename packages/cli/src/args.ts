@@ -1,5 +1,5 @@
 import type {TranslationTarget} from '@proofscript/syntax';
-import type {CommonArgs,TranslateArgs} from './types.js';
+import type {BuildTarget,CommonArgs,TranslateArgs} from './types.js';
 
 export function parseCommonArgs(args:readonly string[]):CommonArgs {
   const split=args.indexOf('--');
@@ -9,6 +9,7 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
   let project:string|undefined;
   let json=false;
   let verified=false;
+  let buildTarget:BuildTarget='js';
 
   for(let i=0;i<own.length;i+=1){
     const arg=own[i]!;
@@ -20,6 +21,20 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
       json=true;
     }else if(arg==='--verified'){
       verified=true;
+    }else if(arg==='--target'){
+      const value=own[++i];
+      if(value===undefined){
+        throw new Error(
+          'PS_CLI_OPTION_VALUE: --target requires js or wasm',
+        );
+      }
+      if(value!=='js'&&value!=='wasm'){
+        throw new Error(
+          "PS_CLI_BUILD_TARGET: unsupported target '"+value+
+          "'; expected js or wasm",
+        );
+      }
+      buildTarget=value;
     }else if(arg.startsWith('-')){
       throw new Error("PS_CLI_UNKNOWN_OPTION: unknown option '"+arg+"'");
     }else if(entry===undefined){
@@ -34,6 +49,7 @@ export function parseCommonArgs(args:readonly string[]):CommonArgs {
     ...(project===undefined?{}:{project}),
     json,
     verified,
+    buildTarget,
     passthrough,
   };
 }
@@ -85,6 +101,12 @@ export function parseTranslateArgs(args:readonly string[]):TranslateArgs {
   if(common.verified){
     throw new Error(
       'PS_CLI_TRANSLATE_VERIFIED: source translation does not use --verified',
+    );
+  }
+  if(common.buildTarget==='wasm'){
+    throw new Error(
+      'PS_CLI_TRANSLATE_BUILD_TARGET: source translation does not use '+
+      '--target wasm',
     );
   }
   if(common.json){

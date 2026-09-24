@@ -16,7 +16,7 @@ let pass=0,fail=0;
 function test(name:string,f:()=>void){try{f();console.log(`ok ${++pass} - ${name}`);}catch(e){fail++;console.error(`not ok - ${name}`);console.error(e);}}
 function assert(x:unknown,msg='assertion failed'):asserts x{if(!x)throw new Error(msg);}
 function eqExpr(a:ReturnType<typeof sort>|any,b:any,msg='expressions differ'){assert(exprEq(a,b),msg);}
-function throws(f:()=>void){let yes=false;try{f();}catch{yes=true;}assert(yes,'expected exception');}
+function throws(f:()=>void,msg='expected exception'){let yes=false;try{f();}catch{yes=true;}assert(yes,msg);}
 
 function baseEnv():Environment{
  const e=new Environment();const one=levelSucc(levelZero);

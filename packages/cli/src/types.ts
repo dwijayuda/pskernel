@@ -1,17 +1,21 @@
 import type {CheckedSoftwareModule,SoftwareType} from '@proofscript/language';
 import type {VerifiedIrModule} from '@proofscript/compiler-ir/verified';
 import type {TranslationTarget} from '@proofscript/syntax';
+import type {WasmEmitResult} from '@proofscript/compiler';
 import type {LoadedPsConfig} from './config.js';
 import type {VerifiedAssuranceReport} from './verified-assurance.js';
 import type {RuntimeDependencyPolicyReport} from './runtime-dependencies.js';
 import type {RuntimeDependencyLockReport} from './runtime-lock-format.js';
 import type {WrittenModuleArtifact} from './project-artifact-output.js';
 
+export type BuildTarget='js'|'wasm';
+
 export interface CommonArgs {
   readonly entry?:string;
   readonly project?:string;
   readonly json:boolean;
   readonly verified:boolean;
+  readonly buildTarget?:BuildTarget;
   readonly passthrough:readonly string[];
 }
 
@@ -57,8 +61,16 @@ export interface VerifiedProjectReportFields {
   readonly runtimeDependencyPolicy:RuntimeDependencyPolicyReport;
 }
 
+export interface WasmTargetReportFields {
+  readonly buildTarget:BuildTarget;
+  readonly binaryenVersion?:WasmEmitResult['binaryenVersion'];
+  readonly wasmProfile?:WasmEmitResult['profile'];
+  readonly wasmOptimized?:WasmEmitResult['optimized'];
+  readonly wasmExports?:WasmEmitResult['exports'];
+}
+
 export interface VerifiedCheckReport
-extends CliBaseReport,VerifiedProjectReportFields {
+extends CliBaseReport,VerifiedProjectReportFields,WasmTargetReportFields {
   readonly ok:true;
   readonly command:'check';
 }
@@ -81,13 +93,15 @@ export interface CliBuildArtifacts {
 }
 
 export interface VerifiedBuildReport
-extends CliBaseReport,VerifiedProjectReportFields {
+extends CliBaseReport,VerifiedProjectReportFields,WasmTargetReportFields {
   readonly ok:true;
   readonly command:'build';
   readonly runtimeDependencyLock:RuntimeDependencyLockReport|null;
   readonly outputDirectory:string;
   readonly artifacts:CliBuildArtifacts&{
     readonly modules:readonly WrittenModuleArtifact[];
+    readonly webassembly?:string;
+    readonly wat?:string;
   };
   readonly typescriptVersion:string;
 }
@@ -105,6 +119,7 @@ export interface UnverifiedBuildReport extends CliBaseReport {
 export interface VerifiedBuildResult {
   readonly report:VerifiedBuildReport;
   readonly verifiedIr:VerifiedIrModule;
+  readonly wasm?:WasmEmitResult;
   readonly checked?:never;
   readonly jsPath:string;
 }
@@ -113,6 +128,7 @@ export interface UnverifiedBuildResult {
   readonly report:UnverifiedBuildReport;
   readonly checked:CheckedSoftwareModule;
   readonly verifiedIr?:never;
+  readonly wasm?:never;
   readonly jsPath:string;
 }
 

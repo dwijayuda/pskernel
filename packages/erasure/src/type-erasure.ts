@@ -21,6 +21,10 @@ const primitives=new Map<string,VerifiedIrType>([
   ['Bool',{kind:'primitive',name:'Bool'}],
   ['String',{kind:'primitive',name:'String'}],
   ['Unit',{kind:'primitive',name:'Unit'}],
+  ['UInt8',{kind:'primitive',name:'UInt8'}],
+  ['UInt16',{kind:'primitive',name:'UInt16'}],
+  ['UInt32',{kind:'primitive',name:'UInt32'}],
+  ['UInt64',{kind:'primitive',name:'UInt64'}],
 ]);
 
 export function eraseRuntimeType(

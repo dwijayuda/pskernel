@@ -164,7 +164,7 @@ console.log('ok - @proofscript/language-service sequential document environment'
   if(analysis.kernel!=='verified'){
     throw new Error(
       'mixed-source project analysis failed: '+
-      (analysis.diagnostics[0]?.message??analysis.kernel),
+      JSON.stringify(analysis.diagnostics),
     );
   }
   equal(analysis.declarations[0]?.kernel,'verified');

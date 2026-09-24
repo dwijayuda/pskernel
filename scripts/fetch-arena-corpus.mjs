@@ -15,8 +15,28 @@ async function download(url,file,headers={}){
   const buf=Buffer.from(await r.arrayBuffer());
   await new Promise((res,rej)=>{const w=createWriteStream(file);w.on('error',rej);w.on('finish',res);w.end(buf);});
 }
+function extractAndVerify(source){
+  rmSync(out,{recursive:true,force:true});mkdirSync(out,{recursive:true});
+  const t=spawnSync('tar',['-xzf',archive,'-C',out],{stdio:'inherit'});
+  if(t.status!==0)throw new Error('tar extraction failed');
+  const v=spawnSync(process.execPath,['scripts/verify-arena-corpus.mjs',out],{stdio:'inherit'});
+  if(v.status!==0)throw new Error(source+' corpus does not match ARENA_LOCK.json');
+  console.log(JSON.stringify({ok:true,out,source},null,2));
+}
 
-let got=false;
+let siteError=null;
+try{
+  // The downloadable Arena bundle is the exact 122-good/71-bad compact corpus
+  // represented by this lock. Its tar metadata may be regenerated; identity is
+  // checked after extraction using normalized per-file content fingerprints.
+  await download(lock.source.siteUrl,archive);
+  extractAndVerify('arena-site-content-match');
+  process.exit(0);
+}catch(e){
+  siteError=e;
+  console.error('[arena-fetch] site bundle unavailable or changed:',e instanceof Error?e.message:String(e));
+}
+
 const token=process.env.GITHUB_TOKEN||process.env.GH_TOKEN;
 if(token){
   try{
@@ -28,15 +48,12 @@ if(token){
     if(uz.status!==0)throw new Error('unzip artifact failed');
     const candidate=join(tmp,'lean-arena-tests.tar.gz');
     if(!existsSync(candidate))throw new Error('artifact missing lean-arena-tests.tar.gz');
-    const cp=spawnSync(process.execPath,['-e',`require('fs').copyFileSync(${JSON.stringify(candidate)},${JSON.stringify(archive)})`],{stdio:'inherit'});
+    const cp=spawnSync('cp',[candidate,archive],{stdio:'inherit'});
     if(cp.status!==0)throw new Error('copy artifact tarball failed');
-    got=true;
-  }catch(e){console.error('[arena-fetch] exact artifact unavailable, trying pinned-content site fallback:',e instanceof Error?e.message:String(e));}
+    extractAndVerify('github-actions-artifact-content-match');
+    process.exit(0);
+  }catch(e){
+    console.error('[arena-fetch] historical artifact also does not match:',e instanceof Error?e.message:String(e));
+  }
 }
-if(!got)await download(lock.source.siteUrl,archive);
-rmSync(out,{recursive:true,force:true});mkdirSync(out,{recursive:true});
-const t=spawnSync('tar',['-xzf',archive,'-C',out],{stdio:'inherit'});
-if(t.status!==0)throw new Error('tar extraction failed');
-const v=spawnSync(process.execPath,['scripts/verify-arena-corpus.mjs',out],{stdio:'inherit'});
-if(v.status!==0)throw new Error('downloaded Arena corpus does not match ARENA_LOCK.json');
-console.log(JSON.stringify({ok:true,out,source:got?'github-actions-artifact':'arena-site-content-match'},null,2));
+throw siteError??new Error('unable to fetch pinned Arena corpus');

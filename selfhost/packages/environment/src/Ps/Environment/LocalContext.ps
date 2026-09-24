@@ -25,6 +25,13 @@ def psLocalDeclId(declaration : PsLocalDecl) : Nat :=
     | .letDecl id userName type value => id;
   };
 
+
+def psLocalDeclType(declaration : PsLocalDecl) : PsExpr :=
+  match declaration with {
+    | .binding id userName type binder => type;
+    | .letDecl id userName type value => type;
+  };
+
 def psLocalDeclUserName(declaration : PsLocalDecl) : PsName :=
   match declaration with {
     | .binding id userName type binder => userName;

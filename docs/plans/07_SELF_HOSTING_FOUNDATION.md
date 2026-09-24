@@ -83,22 +83,21 @@ A runtime language feature is complete only when it executes through:
 
 A parser-only or backend-only implementation does not close a foundation gate.
 
-## SH0 — remove the legacy semantic lane
+## SH0 — remove the legacy semantic lane — COMPLETED 2026-09-24
 
 This gate is promoted ahead of all new foundation work.
 
-Required:
+Completed:
 
 - `psc check/build/run` use the checked-core path unconditionally;
-- delete the legacy `@proofscript/language` software checker;
-- delete legacy software-HIR lowering from compiler IR;
-- delete legacy software TypeScript emitters;
-- remove unverified CLI result/report paths;
-- retain source parsing/printing only through the shared frontends;
-- architecture gates reject reintroduction of a second semantic checker or
-  software IR.
+- the legacy `@proofscript/language` software checker was deleted;
+- legacy software-HIR lowering was deleted from compiler IR;
+- legacy software TypeScript emitters were deleted;
+- unverified CLI result/report paths were removed;
+- source parsing/printing remains in the shared source frontends;
+- the architecture gate rejects the retired package/files if they reappear.
 
-Exit condition:
+Exit condition is met:
 
 > There is exactly one ProofScript semantic compiler path on `main`.
 

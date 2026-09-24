@@ -392,13 +392,6 @@ mutual
       setEmitted emitted
       clearActive iv.all
       closeDeclarationSegment
-      -- Computed fields attach @[implemented_by] to constructors/cases after
-      -- the logical inductive group already exists. Preserve that order:
-      -- first admit the logical group, then carry any executable overrides.
-      unless (← get).skipNonReplayable do
-        for emittedName in emitted do
-          if let some impl := Compiler.getImplementedBy? env emittedName then
-            dumpConstant env impl
     | .defnInfo dv =>
       if dv.safety == .safe then
         -- DefinitionVal.all is informational for safe definitions. Lean's
@@ -460,17 +453,38 @@ mutual
       clearActive [name]
       closeDeclarationSegment
 
-    -- Runtime-oriented diagnostic exports also carry Lean's executable
-    -- implementation edge, but only after the logical declaration has been
-    -- emitted. This prevents computed-field implementation inductives from
-    -- referring to logical inductives that have not been admitted yet.
-    unless (← get).skipNonReplayable do
-      if let some impl := Compiler.getImplementedBy? env name then
-        dumpConstant env impl
-
   partial def dumpConstants (env : Environment) (names : NameSet) : M Unit := do
     for n in names do dumpConstant env n
 end
+
+/--
+Diagnostic/runtime exports preserve Lean's compiler implementation graph, but
+only after the entire logical dependency closure has been emitted.
+
+This two-phase ordering is essential for computed fields. Their generated
+runtime inductives (for example `Lean.Level._impl`) can contain fields typed by
+the original logical inductive. Following `@[implemented_by]` while the
+logical declaration is still active can therefore serialize the implementation
+before its type dependency.
+
+Canonical kernel/module streams set `skipNonReplayable` and never enter this
+runtime-only phase.
+-/
+partial def dumpImplementedByClosure (env : Environment) : M Unit := do
+  if (← get).skipNonReplayable then return
+  let names :=
+    (env.constants.map₁.toList.map (·.1)).toArray.qsort Name.quickLt
+  let mut changed := true
+  while changed do
+    changed := false
+    for name in names do
+      if ← isEmitted name then
+        if let some impl := Compiler.getImplementedBy? env name then
+          unless ← isEmitted impl do
+            dumpConstant env impl
+            unless ← isEmitted impl do
+              throw <| IO.userError s!"implemented_by target was not emitted: {name} -> {impl}"
+            changed := true
 
 
 def resetInternTables : M Unit :=
@@ -604,7 +618,8 @@ partial def dumpBatchStream (env : Environment) (target : Name) (maxRoots startB
             inSegment := inSegment + 1
             if inSegment == segmentRoots then
               segment := segment + 1
-              inSegment := 0) |>.run {}
+              inSegment := 0
+          dumpImplementedByClosure env) |>.run {}
         pure ()
   for idx in [0:buckets.size] do
     let roots := buckets[idx]!
@@ -641,6 +656,7 @@ partial def dumpSelectedRootsSegmented
   let _ ← (do
     modify fun (s : S) => { s with segmented := true }
     for n in roots do dumpConstant env n
+    dumpImplementedByClosure env
     closeDeclarationSegment) |>.run {}
   pure ()
 
@@ -661,7 +677,8 @@ partial def dumpSelectedRootsAfterBase
     emitted := environmentConstantNames base
   }
   let _ ← (do
-    for n in roots do dumpConstant env n) |>.run initial
+    for n in roots do dumpConstant env n
+    dumpImplementedByClosure env) |>.run initial
   pure ()
 
 partial def dumpSelectedRootsSegmentedAfterBase
@@ -686,6 +703,7 @@ partial def dumpSelectedRootsSegmentedAfterBase
   }
   let _ ← (do
     for n in roots do dumpConstant env n
+    dumpImplementedByClosure env
     closeDeclarationSegment) |>.run initial
   pure ()
 
@@ -739,7 +757,8 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
       inSegment := inSegment + 1
       if inSegment == segmentRoots then
         segment := segment + 1
-        inSegment := 0) |>.run {}
+        inSegment := 0
+    dumpImplementedByClosure env) |>.run {}
   pure ()
 
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
@@ -864,5 +883,6 @@ unsafe def main (args : List String) : IO Unit := do
           resolveRootNames env requestedRoots
       dumpMeta
       let _ ← (do
-        for n in roots do dumpConstant env n) |>.run {}
+        for n in roots do dumpConstant env n
+        dumpImplementedByClosure env) |>.run {}
       pure ()

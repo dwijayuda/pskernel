@@ -709,10 +709,10 @@ semantic priorities while making mixed-source modules possible when L5 begins.
     PsOption/PsResult/PsList only when APIs are supported by the verified
     language itself. The current utility/law tranche includes optionOrElse,
     resultGetOrElse/resultToOption, structurally recursive listAppend/listMap,
-    twelve definitional computation laws, universal Option/Result case-analysis
-    laws, a Result/Option multi-rule simp law, resultToOptionMap,
+    checked computation/composition laws, universal Option/Result case-analysis
+    laws, an Option multi-rule simp law, resultToOptionMap,
     resultToOptionMapError, resultMapMapError, resultGetOrElseMap, optionOrElseNoneSymm,
-    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, resultBindOk, resultBindError, resultFromOptionNone, resultFromOptionSome, resultIsOkOk, resultIsOkError, listIsEmptyAppendNilLeft, listIsEmptyCons, listHeadOrElseNil, listHeadOrElseCons, listAppendNilRight,
+    optionMapOrElse, optionGetOrElseOrElse, optionGetOrElseMap, optionBindNone, optionBindSome, optionGetOrElseNoneSome, resultBindOk, resultBindError, resultGetOrElseFromSome, resultToOptionFromSome, resultGetOrElseFromNone, resultFromOptionSome, resultIsOkMap, resultIsOkMapError, listIsEmptyAppendNilLeft, listIsEmptyCons, listHeadOrElseNil, listHeadOrElseCons, listAppendNilRight,
     listAppendAssoc, and listMapAppend. Thirty-seven current stdlib theorems now
     dogfood bounded rfl/cases/simp-only/induction/rw/exact?-symmetry proof
     paths, including higher-order Option case analysis; continue with stronger
@@ -831,20 +831,22 @@ without expanding tactics, elaboration, erasure, or backend semantics.
 
 ## Stdlib Result status checkpoint
 
-`resultIsOk` adds a Bool-valued Result query with constructor equations
-`resultIsOkOk` and `resultIsOkError`, both definitional `rfl` proofs.
-The runtime dogfood uses it as the condition for Result extraction, composing
-the self-hosted Result ADT with already verified Bool control flow and adding
-no special compiler behavior.
+`resultIsOk` adds a Bool-valued Result query. `resultIsOkMap` and
+`resultIsOkMapError` prove by bounded `cases` that mapping either payload
+channel preserves status. These laws keep all Result type parameters constrained
+by ordinary terms instead of relying on an uninferable phantom constructor
+parameter. Runtime dogfood still uses `resultIsOk` as the condition for
+Result extraction.
 
 ## Stdlib Option-to-Result conversion checkpoint
 
 `resultFromOption` adds the reverse direction to the existing
-`resultToOption` bridge. It maps `none` to an explicit caller-supplied
-error and `some(value)` to `ok(value)`. The two constructor equations are
-ordinary definitional equalities checked with bounded `rfl`.
+`resultToOption` bridge. `resultFromOptionSome` records the direct success
+conversion. `resultGetOrElseFromNone` observes the absent/error path through an
+explicit fallback, which also constrains the otherwise-phantom success type.
+Both are ordinary definitional equalities checked with bounded `rfl`.
 
-The stdlib runtime dogfood now performs Result -> Option -> Result before
+The stdlib runtime dogfood performs Result -> Option -> Result before
 extraction, exercising cross-module ADT construction/matching in both
 directions without introducing host conversion semantics.
 
@@ -890,16 +892,15 @@ before the candidate is kernel-checked and accepted.
 
 ## Stdlib simp-only proof checkpoint
 
-`resultToOptionErrorOrElse` now validates bounded multi-rule `simp only`
-inside the real verified stdlib project. Its two explicit Eq rules are
-`resultToOptionError(error)` and `optionOrElseNone(fallback)`. Both
-directions strictly reduce structural expression size and the selected lhs
-patterns are non-overlapping, matching the current bounded simplifier contract.
+`optionGetOrElseNoneSome` validates bounded multi-rule `simp only` inside
+the real verified stdlib project. Its explicit Eq rules are
+`optionOrElseNone(PsOption.some(value))` and
+`optionGetOrElseSome(value, default)`. Both directions strictly reduce
+structural expression size and the lhs patterns are non-overlapping.
 
 This keeps the simplifier's evidence boundary visible: there is no global simp
-set, hidden unfolding, or theorem-specific shortcut. Each change still flows
-through the same Eq transport proof reconstruction used by bounded `rw`, with
-the final reflexive target closed by the Eq-only rfl helper.
+set, hidden unfolding, or theorem-specific shortcut, and every generic
+parameter is determined by an ordinary source term.
 
 ## Stdlib Result/Option map compatibility checkpoint
 

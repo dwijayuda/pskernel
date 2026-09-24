@@ -332,13 +332,14 @@ search, symmetry/Iff alternatives, relevance indexing, and recursive
 
 ## Stdlib simplifier dogfood checkpoint
 
-The bounded simplifier is now exercised by
-`ProofScript.Data.Result.resultToOptionErrorOrElse` in the end-to-end stdlib
-project. The proof uses an explicit two-rule `simp only` set rather than
-Lean's global simp environment. Both rules satisfy the current strict
-structural-decrease test and are pairwise non-overlapping. This is
-intentionally narrower than Lean 4.34's simplifier, while proof reconstruction
-continues through kernel-checked Eq transport.
+The bounded simplifier is exercised by
+`ProofScript.Data.Option.optionGetOrElseNoneSome` in the end-to-end stdlib
+project. The proof uses the explicit rules `optionOrElseNone` and
+`optionGetOrElseSome` rather than Lean's global simp environment. Both rules
+satisfy the current strict structural-decrease test, are pairwise
+non-overlapping, and have all generic parameters constrained by ordinary value
+terms. This remains intentionally narrower than Lean 4.34's simplifier, while
+proof reconstruction continues through kernel-checked Eq transport.
 
 ## Lean 4.34 exact-search symmetry checkpoint
 

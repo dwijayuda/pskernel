@@ -49,11 +49,11 @@ The end-to-end stdlib test now exercises:
 - generic `listMap`;
 - structurally recursive `listAppend` with an invariant second list;
 - `listLength`, `listIsEmpty`, and `listHeadOrElse` runtime composition;
-- thirty-seven admitted stdlib theorems: twenty-four definitional laws use bounded
+- thirty-seven admitted stdlib theorems: twenty-two definitional laws use bounded
   `rfl`, `optionOrElseNoneRight`, `resultToOptionMap`, and
   `resultToOptionMapError`, `resultMapMapError`, and `resultGetOrElseMap` dogfood bounded `cases`; `optionMapOrElse`, `optionGetOrElseOrElse`, and `optionGetOrElseMap` dogfood higher-order/helper composition through Option case analysis,
   `optionOrElseNoneSymm` dogfoods environment-candidate `exact?` Eq
-  symmetry, `resultToOptionErrorOrElse` dogfoods proof-producing multi-rule
+  symmetry, `optionGetOrElseNoneSome` dogfoods proof-producing multi-rule
   `simp only`, and `listAppendNilRight` / `listAppendAssoc` /
   `listMapAppend` dogfood bounded induction plus checked rewriting;
 - zero runtime external assumptions.
@@ -145,25 +145,22 @@ the new definitional computation law `listMapCons`, the existing
 kernel-checked equality rewrite; the theorem does not depend on a host List
 implementation or a hidden simplifier rule.
 
-## Result/Option simp-only integration law
+## Option simp-only integration law
 
-`ProofScript.Data.Result.resultToOptionErrorOrElse` proves:
-
-```text
-optionOrElse(resultToOption(PsResult.error(error)), fallback) = fallback
-```
-
-with exactly:
+`ProofScript.Data.Option.optionGetOrElseNoneSome` proves:
 
 ```text
-simp only [resultToOptionError(error), optionOrElseNone(fallback)]
+optionGetOrElse(
+  optionOrElse(PsOption.none, PsOption.some(value)),
+  default
+) = value
 ```
 
-Both selected rewrite directions strictly decrease the current structural
-expression-size metric, and their lhs patterns are non-overlapping. The first
-rule exposes `PsOption.none`; the second removes `optionOrElse`. This gives
-the end-to-end stdlib project a genuine multi-rule simplifier regression without
-weakening the simplifier's termination/orientation contract.
+with exactly the two checked rules `optionOrElseNone` and
+`optionGetOrElseSome`. Both directions strictly reduce the current structural
+expression-size metric and their lhs patterns are non-overlapping. This keeps a
+genuine multi-rule `simp only` regression in the end-to-end stdlib while every
+generic type parameter is constrained by an ordinary value term.
 
 ## Result/Option map compatibility
 
@@ -179,8 +176,9 @@ definitional reflexivity in both constructors. This is the first stdlib law
 linking the higher-order Result mapper to the Option mapper; it uses no host
 functor implementation or special theorem rule.
 
-The adjacent `resultToOptionOk` computation theorem is definitional and is
-proved by bounded `rfl`.
+`resultToOptionFromSome` records the corresponding checked success
+round-trip through `resultFromOption`; the explicit error value constrains the
+otherwise-phantom error type and the theorem closes by bounded `rfl`.
 
 ## Result error-map/Option compatibility
 
@@ -265,11 +263,12 @@ special rewrite rule or runtime implementation.
 ## Result status checkpoint
 
 `ProofScript.Data.Result.resultIsOk` exposes Result constructor status as
-Bool: `ok -> true`, `error -> false`. The computation theorems
-`resultIsOkOk` and `resultIsOkError` are definitional Eq proofs closed by
-bounded `rfl`.
+Bool. The generic laws `resultIsOkMap` and `resultIsOkMapError` prove by
+bounded constructor cases that mapping either payload channel preserves that
+status. This avoids underconstrained direct constructor statements where the
+opposite Result type parameter is phantom.
 
-The dogfood program now guards Result extraction with `resultIsOk`, composing
+The dogfood program guards Result extraction with `resultIsOk`, composing
 Result matching with the existing verified Bool control-flow path while keeping
 the error channel explicit.
 
@@ -283,11 +282,13 @@ none    -> error(error)
 some(x) -> ok(x)
 ```
 
-The constructor equations are recorded as `resultFromOptionNone` and
-`resultFromOptionSome`, each proved by bounded Eq-only `rfl`. The dogfood
-program now round-trips its mapped Result through Option and back before value
-extraction, so both conversion directions are exercised through verified
-compilation and JavaScript execution.
+`resultFromOptionSome` records the direct success conversion. For the absent
+case, `resultGetOrElseFromNone` observes the resulting error through an
+explicit fallback; that fallback also provides the otherwise-phantom success
+type. Both close by bounded Eq-only `rfl`. The dogfood program round-trips its
+mapped Result through Option and back before value extraction, so both
+conversion directions are exercised through verified compilation and
+JavaScript execution.
 
 ## Result bind checkpoint
 
@@ -308,7 +309,9 @@ the existing verified compilation path without any host Result implementation.
 
 ## Result map/get-or-else compatibility
 
-`ProofScript.Data.Result.resultGetOrElseMap` proves:
+`resultGetOrElseFromSome` first records the success path through
+`resultFromOption`, using the explicit error value to constrain both Result
+parameters. `ProofScript.Data.Result.resultGetOrElseMap` then proves:
 
 ```text
 resultGetOrElse(resultMap(f, value), f(fallback)) =

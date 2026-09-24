@@ -57,26 +57,27 @@ function resultIsOk {α : Type}{ε : Type}
 theorem resultRefl {α : Type}{ε : Type}
 (value : PsResult(α, ε)) : value = value := by rfl;
 
-theorem resultGetOrElseOk {α : Type}{ε : Type}
-(value : α, fallback : α) :
-resultGetOrElse(PsResult.ok(value), fallback) = value := by rfl;
+theorem resultGetOrElseFromSome {α : Type}{ε : Type}
+(value : α, error : ε, fallback : α) :
+resultGetOrElse(
+  resultFromOption(PsOption.some(value), error),
+  fallback
+) = value := by rfl;
 
 theorem resultGetOrElseError {α : Type}{ε : Type}
 (error : ε, fallback : α) :
 resultGetOrElse(PsResult.error(error), fallback) = fallback := by rfl;
 
-theorem resultToOptionError {α : Type}{ε : Type}
-(error : ε) :
-resultToOption(PsResult.error(error)) = PsOption.none := by rfl;
-
 theorem resultToOptionErrorOrElse {α : Type}{ε : Type}
 (error : ε, fallback : PsOption(α)) :
 optionOrElse(resultToOption(PsResult.error(error)), fallback) = fallback :=
-  by simp only [resultToOptionError(error), optionOrElseNone(fallback)];
+  by rfl;
 
-theorem resultToOptionOk {α : Type}{ε : Type}
-(value : α) :
-resultToOption(PsResult.ok(value)) = PsOption.some(value) := by rfl;
+theorem resultToOptionFromSome {α : Type}{ε : Type}
+(value : α, error : ε) :
+resultToOption(
+  resultFromOption(PsOption.some(value), error)
+) = PsOption.some(value) := by rfl;
 
 theorem resultToOptionMap {α : Type}{β : Type}{ε : Type}
 (f : α -> β, value : PsResult(α, ε)) :
@@ -110,18 +111,23 @@ theorem resultBindError {α : Type}{β : Type}{ε : Type}
 (error : ε, f : α -> PsResult(β, ε)) :
 resultBind(PsResult.error(error), f) = PsResult.error(error) := by rfl;
 
-theorem resultFromOptionNone {α : Type}{ε : Type}
-(error : ε) :
-resultFromOption(PsOption.none, error) = PsResult.error(error) := by rfl;
+theorem resultGetOrElseFromNone {α : Type}{ε : Type}
+(error : ε, fallback : α) :
+resultGetOrElse(
+  resultFromOption(PsOption.none, error),
+  fallback
+) = fallback := by rfl;
 
 theorem resultFromOptionSome {α : Type}{ε : Type}
 (value : α, error : ε) :
 resultFromOption(PsOption.some(value), error) = PsResult.ok(value) := by rfl;
 
-theorem resultIsOkOk {α : Type}{ε : Type}
-(value : α) :
-resultIsOk(PsResult.ok(value)) = true := by rfl;
+theorem resultIsOkMap {α : Type}{β : Type}{ε : Type}
+(f : α -> β, value : PsResult(α, ε)) :
+resultIsOk(resultMap(f, value)) = resultIsOk(value) :=
+  by cases value; rfl; rfl;
 
-theorem resultIsOkError {α : Type}{ε : Type}
-(error : ε) :
-resultIsOk(PsResult.error(error)) = false := by rfl;
+theorem resultIsOkMapError {α : Type}{ε : Type}{δ : Type}
+(f : ε -> δ, value : PsResult(α, ε)) :
+resultIsOk(resultMapError(f, value)) = resultIsOk(value) :=
+  by cases value; rfl; rfl;

@@ -366,7 +366,13 @@ export function findLean434JsExtern(
 export interface Lean434DeclarationExternBinding {
   readonly leanDeclaration:string;
   readonly leanSymbol:string;
+  /** Full kernel-expression arity, including erased type/proof arguments. */
   readonly arity:number;
+  /**
+   * Indices from the full application argument list forwarded to the JS
+   * extern. Omitted means every argument is runtime-relevant.
+   */
+  readonly runtimeArgs?:readonly number[];
   readonly upstreamSource:string;
 }
 
@@ -422,6 +428,74 @@ readonly Lean434DeclarationExternBinding[]=[
     arity:2,
     upstreamSource:'Init/Prelude.lean',
   },
+  {
+    leanDeclaration:'Array.mkEmpty',
+    leanSymbol:'lean_mk_empty_array_with_capacity',
+    arity:2,
+    runtimeArgs:[1],
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Array.emptyWithCapacity',
+    leanSymbol:'lean_mk_empty_array_with_capacity',
+    arity:2,
+    runtimeArgs:[1],
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Array.size',
+    leanSymbol:'lean_array_get_size',
+    arity:2,
+    runtimeArgs:[1],
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Array.getInternalBorrowed',
+    leanSymbol:'lean_array_fget_borrowed',
+    arity:4,
+    runtimeArgs:[1,2],
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Array.getInternal',
+    leanSymbol:'lean_array_fget',
+    arity:4,
+    runtimeArgs:[1,2],
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Array.push',
+    leanSymbol:'lean_array_push',
+    arity:3,
+    runtimeArgs:[1,2],
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
+    leanDeclaration:'Array.set',
+    leanSymbol:'lean_array_fset',
+    arity:5,
+    runtimeArgs:[1,2,3],
+    upstreamSource:'Init/Data/Array/Set.lean',
+  },
+  {
+    leanDeclaration:'Array.set!',
+    leanSymbol:'lean_array_set',
+    arity:4,
+    runtimeArgs:[1,2,3],
+    upstreamSource:'Init/Data/Array/Set.lean',
+  },
+  {
+    leanDeclaration:'String.length',
+    leanSymbol:'lean_string_length',
+    arity:1,
+    upstreamSource:'Init/Data/String/Length.lean',
+  },
+  {
+    leanDeclaration:'String.utf8ByteSize',
+    leanSymbol:'lean_string_utf8_byte_size',
+    arity:1,
+    upstreamSource:'Init/Prelude.lean',
+  },
 ] as const;
 
 const declarationExternByName=new Map(
@@ -449,6 +523,32 @@ new Map<string,Lean434JsExternImplementation>([
   ['lean_nat_mod',(a,b)=>lean_nat_mod(a as LeanNat,b as LeanNat)],
   ['lean_nat_dec_eq',(a,b)=>lean_nat_dec_eq(a as LeanNat,b as LeanNat)],
   ['lean_nat_dec_le',(a,b)=>lean_nat_dec_le(a as LeanNat,b as LeanNat)],
+  ['lean_mk_empty_array_with_capacity',(capacity)=>
+    lean_mk_empty_array_with_capacity(capacity as LeanNat)],
+  ['lean_array_get_size',(array)=>
+    lean_array_get_size(array as LeanArray<unknown>)],
+  ['lean_array_push',(array,value)=>
+    lean_array_push(array as LeanArray<unknown>,value)],
+  ['lean_array_fget',(array,index)=>
+    lean_array_fget(array as LeanArray<unknown>,index as LeanNat)],
+  ['lean_array_fget_borrowed',(array,index)=>
+    lean_array_fget_borrowed(array as LeanArray<unknown>,index as LeanNat)],
+  ['lean_array_fset',(array,index,value)=>
+    lean_array_fset(
+      array as LeanArray<unknown>,
+      index as LeanNat,
+      value,
+    )],
+  ['lean_array_set',(array,index,value)=>
+    lean_array_set(
+      array as LeanArray<unknown>,
+      index as LeanNat,
+      value,
+    )],
+  ['lean_string_length',(value)=>
+    lean_string_length(value as LeanString)],
+  ['lean_string_utf8_byte_size',(value)=>
+    lean_string_utf8_byte_size(value as LeanString)],
 ]);
 
 export function invokeLean434JsExtern(

@@ -20,8 +20,8 @@ Build ProofScript as an npm-native verified programming/theorem-proving ecosyste
   -> TypeScript -> tsc -> JavaScript.
 - @proofscript/checked-core is the only frontend/compiler semantic handoff and
   is constructed by pskernel re-admission.
-- The legacy software checker is transitional coverage only; it must not become
-  a second type theory or automatic fallback.
+- The legacy software checker/software-IR lane is retired. No second semantic
+  checker or fallback lane may be reintroduced.
 
 - pskernel stays small and independently checkable.
 - Parser, elaborator, tactics, compiler, LSP, browser hosting and project tooling stay outside the default TCB.
@@ -85,7 +85,6 @@ Exit criteria:
 ### Phase D — language tooling
 
 Packages:
-- `@proofscript/language`
 - `@proofscript/lsp`
 - `@proofscript/project`
 
@@ -121,9 +120,9 @@ cli -> module/kernel/conformance
 browser -> module/kernel
 conformance -> kernel
 
-language -> syntax/meta/elab/module
-lsp -> language
-project -> module/compiler/language/npm
+language-service -> syntax/meta/elab/checked-core/project
+lsp -> language-service
+project -> module/compiler/npm
 
 ```
 
@@ -157,11 +156,10 @@ Current outer-package foundation status:
 - `@proofscript/compiler-ir`: foundation
 - `@proofscript/runtime`: foundation
 - `@proofscript/backend-ts`: foundation
-- `@proofscript/language`: foundation
 - `@proofscript/lsp`: foundation
 - `@proofscript/project`: foundation
 
-The root `test:packages` gate compiles and executes these TypeScript foundations without enabling npm workspaces. Existing Phase-A module/conformance/export/CLI packages retain their separate MVP/prototype status.
+The root `test:packages` gate compiles and executes the workspace foundations. The retired software checker is not part of this graph.
 
 
 ## PSC-LANG-1 vertical compiler checkpoint
@@ -172,8 +170,10 @@ The first reference-backed language slice now follows:
 ProofScript v0.7 track
   + v0.6.1 compiler-ready surface baseline
 → syntax AST
-→ initial software type checker
-→ canonical Lean source
+→ Lean-compatible Meta / Elab
+→ pskernel admission
+→ checked core
+→ erasure / verified compiler IR
 → TypeScript source
 → TypeScript Compiler API
 → JavaScript / .d.ts / source map
@@ -201,9 +201,9 @@ slice:
 -> .js / .d.ts / source map
 ```
 
-`psc check --verified` and `psc build --verified` expose this path without
-fallback. The previous software checker/compiler lane remains temporary until
-verified-core coverage catches up.
+`psc check`, `psc build`, and `psc run` now use this path unconditionally.
+The former `--verified` option is only a deprecated compatibility marker; it no
+longer selects a different semantic pipeline.
 
 
 ## Active language completion execution plan
@@ -214,5 +214,5 @@ The concrete language-completion/anti-drift sequence is maintained in:
 
 That plan defines acceptance gates for verified-core closure, dependent ADTs
 and recursion, Meta/Elab convergence, theorem prover v1, npm/JS interop,
-controlled effects, standard library work, legacy-path retirement, and
-production hardening.
+controlled effects, standard library work, and production hardening. Execution
+priority is overridden by `07_SELF_HOSTING_FOUNDATION.md`.

@@ -44,6 +44,7 @@ jobs:
           set -euo pipefail
           npm run generate:lean434-runtime-metadata -- Init.Prelude --out lean434-init-runtime-metadata.json
           npm run generate:lean434-runtime-metadata -- Lean.Environment --out lean434-environment-runtime-metadata.json
+          npm run generate:lean434-runtime-metadata -- Lean.MetavarContext --out lean434-metavar-context-runtime-metadata.json
           npm run generate:lean434-runtime-metadata -- Lean.Parser.Types --out lean434-parser-types-runtime-metadata.json
           npm run generate:lean434-runtime-metadata -- Lean.Parser.Basic --out lean434-parser-basic-runtime-metadata.json
           npm run generate:lean434-runtime-metadata -- Lean.Parser --out lean434-parser-runtime-metadata.json
@@ -252,7 +253,8 @@ jobs:
       - name: Execute real Lean.MetavarContext assignment in JavaScript
         run: |
           node scripts/lean434-js-metavar-context-smoke.mjs \
-            lean434-metavar-context-bootstrap.ndjson
+            lean434-metavar-context-bootstrap.ndjson \
+            lean434-metavar-context-runtime-metadata.json
       - name: Generate real Lean ST/IO bootstrap corpus
         shell: bash
         run: |

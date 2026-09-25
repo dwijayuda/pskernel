@@ -158,6 +158,39 @@ function isCallable(value:Lean434RuntimeValue):value is Lean434CallableValue {
     );
 }
 
+function describeRuntimeValue(
+  value:Lean434RuntimeValue,
+):string{
+  if(value===undefined)return 'undefined';
+  if(typeof value==='bigint')return 'bigint('+String(value)+')';
+  if(typeof value==='string')return 'string';
+  if(typeof value==='boolean')return 'boolean('+String(value)+')';
+  if(Array.isArray(value))return 'array(length='+String(value.length)+')';
+  if(isTaggedRuntimeValue(value)){
+    if(value.kind==='constructor'){
+      return "constructor("+value.name+", fields="+String(value.fields.length)+")";
+    }
+    if(value.kind==='primitive-function'){
+      return "primitive-function("+value.name+", args="+
+        String(value.args.length)+"/"+String(value.arity)+")";
+    }
+    if(value.kind==='constructor-function'){
+      return "constructor-function("+value.name+", args="+
+        String(value.args.length)+"/"+String(value.arity)+")";
+    }
+    if(value.kind==='recursor-function'){
+      return "recursor-function("+value.name+", args="+
+        String(value.args.length)+"/"+String(value.arity)+")";
+    }
+    if(value.kind==='closure')return 'closure';
+    if(value.kind==='type')return 'type';
+    if(value.kind==='proof')return "proof("+value.theorem+")";
+    if(value.kind==='world-token')return 'world-token';
+  }
+  if(value instanceof LeanRef)return 'LeanRef';
+  return 'unknown-runtime-value';
+}
+
 function typeValue(expr:Expr):Lean434TypeValue {
   return {kind:'type',expr};
 }
@@ -812,7 +845,8 @@ export class Lean434Evaluator {
 
     throw new Lean434EvaluationError(
       "recursor '"+nameToString(info.name)+
-      "' major premise is not a supported constructor value",
+      "' major premise is not a supported constructor value: "+
+      describeRuntimeValue(value),
     );
   }
 

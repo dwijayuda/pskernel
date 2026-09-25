@@ -3,6 +3,7 @@ import Ps.BackendWasm.Binary
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat
+import Ps.BackendWasm.RuntimeInt
 import Ps.BackendWasm.RuntimeArray
 
 inductive PsWasmLowerError where
@@ -2660,7 +2661,8 @@ def psWasmLowerModule
   | Except.ok specialized =>
       let arrayAugmented :=
         psWasmAugmentArrayHigherOrderRuntime specialized
-      let augmented := psWasmAugmentNatRuntime arrayAugmented
+      let natAugmented := psWasmAugmentNatRuntime arrayAugmented
+      let augmented := psWasmAugmentIntRuntime natAugmented
       match psWasmLowerSpecializedModule profile augmented with
       | Except.error error => Except.error error
       | Except.ok lowered =>

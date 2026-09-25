@@ -168,5 +168,20 @@ jobs:
               throw new Error('PSC1_WASM_RUNTIME_NAT_RESULT:' + name);
             }
           }
+          if (instance.exports.arraySizeAfterPush() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_SIZE_RESULT');
+          }
+          if (instance.exports.arrayGetAfterPush() !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_GET_RESULT');
+          }
+          if (instance.exports.arrayGetDFallback() !== 99) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_GETD_RESULT');
+          }
+          if (instance.exports.arraySetPersistent() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_SET_PERSISTENT_RESULT');
+          }
+          if (instance.exports.arraySetIfOutOfBounds() !== 10) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_SET_IF_OOB_RESULT');
+          }
           console.log('PSC1_WASM3_INTEGRATION: PASS');
           NODE

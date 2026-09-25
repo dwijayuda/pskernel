@@ -449,6 +449,133 @@ def psRustEmitIntrinsicFromPrinted
               (psRustConcat2 right "))"))
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity =>
+      match arguments with
+      | List.cons capacity List.nil =>
+          Except.ok
+            (psRustConcat3
+              "__ps_array_empty_with_capacity(&("
+              capacity
+              "))")
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arraySize =>
+      match arguments with
+      | List.cons value List.nil =>
+          Except.ok
+            (psRustConcat3
+              "__ps_array_size(&("
+              value
+              "))")
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arrayPush =>
+      match arguments with
+      | List.cons array (List.cons value List.nil) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_array_push(&("
+              array
+              "), &("
+              (psRustConcat2 value "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arrayGet =>
+      match arguments with
+      | List.cons array (List.cons index List.nil) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_array_get(&("
+              array
+              "), &("
+              (psRustConcat2 index "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arrayGetD =>
+      match arguments with
+      | List.cons array
+          (List.cons index
+            (List.cons fallback List.nil)) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_array_get_d(&("
+              array
+              "), &("
+              (psRustConcat4
+                index
+                "), &("
+                fallback
+                "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arraySet =>
+      match arguments with
+      | List.cons array
+          (List.cons index
+            (List.cons value List.nil)) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_array_set(&("
+              array
+              "), &("
+              (psRustConcat4
+                index
+                "), &("
+                value
+                "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arraySetIfInBounds =>
+      match arguments with
+      | List.cons array
+          (List.cons index
+            (List.cons value List.nil)) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_array_set_if_in_bounds(&("
+              array
+              "), &("
+              (psRustConcat4
+                index
+                "), &("
+                value
+                "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arrayMap =>
+      match arguments with
+      | List.cons fnValue (List.cons array List.nil) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_array_map("
+              fnValue
+              ", &("
+              (psRustConcat2 array "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arrayFoldl =>
+      match arguments with
+      | List.cons fnValue
+          (List.cons init
+            (List.cons array
+              (List.cons start
+                (List.cons stop List.nil)))) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_array_foldl("
+              fnValue
+              ", &("
+              (psRustConcat4
+                init
+                "), &("
+                array
+                (psRustConcat4
+                  "), &("
+                  start
+                  "), &("
+                  (psRustConcat2 stop "))"))))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
   | _ =>
       Except.error PsRustEmitError.unsupportedIntrinsic
 

@@ -9,6 +9,9 @@ inductive PsCheckedAdmissionCodecError where
   | mismatchedConstructor (name : PsName)
   | unsupportedDeclaration
 
+def psCheckedAdmissionBoolNot (value : Bool) : Bool :=
+  if value then false else true
+
 def psCheckedAdmissionJsonField
     (key value : String) : Prod String String :=
   Prod.mk key value
@@ -257,7 +260,7 @@ def psEncodeCodecConstructor
       Except.error
         (PsCheckedAdmissionCodecError.missingConstructor constructorName)
   | some info =>
-      if !psNameEq info.inductiveName inductiveName then
+      if psCheckedAdmissionBoolNot (psNameEq info.inductiveName inductiveName) then
         Except.error
           (PsCheckedAdmissionCodecError.mismatchedConstructor constructorName)
       else

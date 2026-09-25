@@ -325,3 +325,252 @@ def psWasmBuildArrayRuntime
                                                   setIfFunction
                                                 ]
                                               }
+
+
+def psWasmArrayElementTypesContain
+    (types : List PsVerifiedIrType)
+    (candidate : PsVerifiedIrType) : Bool :=
+  match psWasmIrTypeKey candidate with
+  | none => false
+  | some candidateKey =>
+      types.any
+        (fun existing =>
+          match psWasmIrTypeKey existing with
+          | none => false
+          | some key => key == candidateKey)
+
+def psWasmInsertArrayElementType
+    (types : List PsVerifiedIrType)
+    (candidate : PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  if psWasmArrayElementTypesContain types candidate then
+    types
+  else
+    types ++ [candidate]
+
+def psWasmCollectArrayTypesFromTypeWithFuel :
+    Nat ->
+    PsVerifiedIrType ->
+    List PsVerifiedIrType ->
+    List PsVerifiedIrType
+  | 0, _, types => types
+  | fuel + 1, type, types =>
+      match type with
+      | .named "Array" [elementType] =>
+          psWasmCollectArrayTypesFromTypeWithFuel
+            fuel
+            elementType
+            (psWasmInsertArrayElementType types elementType)
+      | .named _ arguments =>
+          arguments.foldl
+            (fun state argument =>
+              psWasmCollectArrayTypesFromTypeWithFuel
+                fuel argument state)
+            types
+      | .function parameters result =>
+          let withParameters :=
+            parameters.foldl
+              (fun state parameter =>
+                psWasmCollectArrayTypesFromTypeWithFuel
+                  fuel parameter state)
+              types
+          psWasmCollectArrayTypesFromTypeWithFuel
+            fuel result withParameters
+      | _ => types
+
+def psWasmCollectArrayTypesFromType
+    (type : PsVerifiedIrType)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  psWasmCollectArrayTypesFromTypeWithFuel 64 type types
+
+def psWasmCollectArrayTypesFromIntrinsic
+    (operation : PsVerifiedIrIntrinsic)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  match operation with
+  | .arrayEmptyWithCapacity elementType =>
+      psWasmInsertArrayElementType types elementType
+  | .arraySize elementType =>
+      psWasmInsertArrayElementType types elementType
+  | .arrayPush elementType =>
+      psWasmInsertArrayElementType types elementType
+  | .arrayGet elementType =>
+      psWasmInsertArrayElementType types elementType
+  | .arrayGetD elementType =>
+      psWasmInsertArrayElementType types elementType
+  | .arraySet elementType =>
+      psWasmInsertArrayElementType types elementType
+  | .arraySetIfInBounds elementType =>
+      psWasmInsertArrayElementType types elementType
+  | .arrayMap sourceType targetType =>
+      psWasmInsertArrayElementType
+        (psWasmInsertArrayElementType types sourceType)
+        targetType
+  | .arrayFoldl elementType accumulatorType =>
+      psWasmCollectArrayTypesFromType
+        accumulatorType
+        (psWasmInsertArrayElementType types elementType)
+  | _ => types
+
+def psWasmCollectArrayTypesFromExprWithFuel :
+    Nat ->
+    PsVerifiedIrExpr ->
+    List PsVerifiedIrType ->
+    List PsVerifiedIrType
+  | 0, _, types => types
+  | fuel + 1, expr, types =>
+      let collect :=
+        fun nested state =>
+          psWasmCollectArrayTypesFromExprWithFuel
+            fuel nested state
+      match expr with
+      | .literal _ => types
+      | .var _ => types
+      | .intrinsic operation arguments =>
+          arguments.foldl
+            (fun state argument => collect argument state)
+            (psWasmCollectArrayTypesFromIntrinsic operation types)
+      | .lambda parameters resultType body =>
+          let withParameters :=
+            parameters.foldl
+              (fun state parameter =>
+                psWasmCollectArrayTypesFromType
+                  parameter.type state)
+              types
+          let withResult :=
+            psWasmCollectArrayTypesFromType
+              resultType withParameters
+          collect body withResult
+      | .call fn typeArguments arguments =>
+          let withFn := collect fn types
+          let withTypes :=
+            typeArguments.foldl
+              (fun state type =>
+                psWasmCollectArrayTypesFromType type state)
+              withFn
+          arguments.foldl
+            (fun state argument => collect argument state)
+            withTypes
+      | .letE _ type value body =>
+          let withType :=
+            psWasmCollectArrayTypesFromType type types
+          let withValue := collect value withType
+          collect body withValue
+      | .ifE condition thenBranch elseBranch =>
+          let withCondition := collect condition types
+          let withThen := collect thenBranch withCondition
+          collect elseBranch withThen
+      | .record _ typeArguments fields =>
+          let withTypes :=
+            typeArguments.foldl
+              (fun state type =>
+                psWasmCollectArrayTypesFromType type state)
+              types
+          fields.foldl
+            (fun state field => collect field.2 state)
+            withTypes
+      | .projection _ typeArguments target _ =>
+          let withTypes :=
+            typeArguments.foldl
+              (fun state type =>
+                psWasmCollectArrayTypesFromType type state)
+              types
+          collect target withTypes
+      | .constructor _ _ typeArguments fields =>
+          let withTypes :=
+            typeArguments.foldl
+              (fun state type =>
+                psWasmCollectArrayTypesFromType type state)
+              types
+          fields.foldl
+            (fun state field => collect field.2 state)
+            withTypes
+      | .matchE _ typeArguments scrutinee alternatives =>
+          let withTypes :=
+            typeArguments.foldl
+              (fun state type =>
+                psWasmCollectArrayTypesFromType type state)
+              types
+          let withScrutinee := collect scrutinee withTypes
+          alternatives.foldl
+            (fun state alternative =>
+              let withBindings :=
+                alternative.2.1.foldl
+                  (fun inner binding =>
+                    psWasmCollectArrayTypesFromType
+                      binding.type inner)
+                  state
+              collect alternative.2.2 withBindings)
+            withScrutinee
+
+def psWasmCollectModuleArrayElementTypes
+    (module : PsVerifiedIrModule) :
+    List PsVerifiedIrType :=
+  let fromImports :=
+    module.imports.foldl
+      (fun state importInfo =>
+        psWasmCollectArrayTypesFromType
+          importInfo.type state)
+      []
+  let fromStructures :=
+    module.structures.foldl
+      (fun state structureInfo =>
+        structureInfo.fields.foldl
+          (fun inner field =>
+            psWasmCollectArrayTypesFromType
+              field.type inner)
+          state)
+      fromImports
+  let fromInductives :=
+    module.inductives.foldl
+      (fun state inductiveInfo =>
+        inductiveInfo.constructors.foldl
+          (fun inner constructorInfo =>
+            constructorInfo.fields.foldl
+              (fun fieldsState field =>
+                psWasmCollectArrayTypesFromType
+                  field.type fieldsState)
+              inner)
+          state)
+      fromStructures
+  module.declarations.foldl
+    (fun state declaration =>
+      let withParameters :=
+        declaration.parameters.foldl
+          (fun inner parameter =>
+            psWasmCollectArrayTypesFromType
+              parameter.type inner)
+          state
+      let withResult :=
+        psWasmCollectArrayTypesFromType
+          declaration.resultType
+          withParameters
+      psWasmCollectArrayTypesFromExprWithFuel
+        4096
+        declaration.body
+        withResult)
+    fromInductives
+
+def psWasmBuildArrayRuntimes
+    (profile : PsWasmTargetProfile) :
+    List PsVerifiedIrType ->
+    Option PsWasmArrayRuntime
+  | [] =>
+      some {
+        structures := []
+        functions := []
+      }
+  | elementType :: rest =>
+      match psWasmBuildArrayRuntime profile elementType with
+      | none => none
+      | some runtime =>
+          match psWasmBuildArrayRuntimes profile rest with
+          | none => none
+          | some runtimeRest =>
+              some {
+                structures :=
+                  runtime.structures ++ runtimeRest.structures
+                functions :=
+                  runtime.functions ++ runtimeRest.functions
+              }

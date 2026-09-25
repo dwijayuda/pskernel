@@ -26,8 +26,58 @@ export class V061LeanSubsetParser {
       owner:'Lean subset',
     });
     const declarations:V061Declaration[]=[];
+    const namespacePath:string[]=[];
     while(!this.context.cursor.done){
-      declarations.push(this.parseDeclaration());
+      if(this.context.cursor.at('namespace')){
+        this.context.cursor.consume();
+        const name=this.context.cursor.expectKind(
+          'identifier',
+          'Lean namespace name',
+        );
+        namespacePath.push(...name.text.split('.'));
+        continue;
+      }
+      if(
+        this.context.cursor.at('end')
+        &&this.context.cursor.peek(1).kind==='identifier'
+      ){
+        const endToken=this.context.cursor.consume();
+        const name=this.context.cursor.consume();
+        const parts=name.text.split('.');
+        const start=namespacePath.length-parts.length;
+        const matches=start>=0&&parts.every(
+          (part,index)=>namespacePath[start+index]===part,
+        );
+        if(!matches){
+          throw new SyntaxError(
+            "PS_LEAN_SUBSET_NAMESPACE_END: 'end "+name.text+
+            "' does not close the active namespace '"+
+            namespacePath.join('.')+"'",
+            endToken.span,
+          );
+        }
+        namespacePath.splice(start,parts.length);
+        continue;
+      }
+
+      const declaration=this.parseDeclaration();
+      const qualifiedName=[...namespacePath,declaration.name]
+        .filter((part)=>part.length>0)
+        .join('.');
+      declarations.push({
+        ...declaration,
+        name:qualifiedName,
+        ...(namespacePath.length===0
+          ?{}
+          :{namespacePath:[...namespacePath]}),
+      });
+    }
+    if(namespacePath.length!==0){
+      throw new SyntaxError(
+        "PS_LEAN_SUBSET_NAMESPACE_UNCLOSED: namespace '"+
+        namespacePath.join('.')+"' is not closed",
+        this.context.cursor.peek().span,
+      );
     }
     return {
       kind:'v061-module',

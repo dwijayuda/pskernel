@@ -84,6 +84,13 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Module
   ]
 
+lean_lib PsBackendWasm where
+  srcDir := "packages/backend-wasm/src"
+  roots := #[
+    `Ps.BackendWasm.Model,
+    `Ps.BackendWasm.Type
+  ]
+
 lean_lib PsCompiler where
   srcDir := "packages/compiler/src"
   roots := #[
@@ -144,6 +151,10 @@ lean_exe psc1_bridge_tests where
 lean_exe psc1_backend_ts_tests where
   srcDir := "test"
   root := `BackendTsTests
+
+lean_exe psc1_backend_wasm_tests where
+  srcDir := "test"
+  root := `BackendWasmTests
 
 lean_exe psc1_erasure_tests where
   srcDir := "test"

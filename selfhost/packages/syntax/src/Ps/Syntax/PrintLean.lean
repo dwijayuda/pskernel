@@ -107,7 +107,8 @@ def psPrintLeanTermWithFuel
             match smaller fn with
             | Except.error error => Except.error error
             | Except.ok printedFn =>
-                let printArgument :=
+                let printArgument :
+                    PsSyntaxTerm -> Except PsSourcePrintError String :=
                   fun (arg : PsSyntaxTerm) =>
                     match smaller arg with
                     | Except.error error => Except.error error

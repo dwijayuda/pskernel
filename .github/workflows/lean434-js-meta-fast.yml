@@ -52,6 +52,8 @@ jobs:
             Array.modify Array.set \
             Lean.PersistentHashMap.insert Lean.PersistentHashMap.find? \
             Lean.assignExp \
+            Lean.assignLevelMVarExp Lean.getLevelMVarAssignmentExp \
+            Lean.instantiateLevelMVarsImp \
             Lean.MetavarContext.getExprAssignmentExp \
             ProofScript.RuntimeProbe.firstBucketIndex \
             ProofScript.RuntimeProbe.replaceNullEntry \

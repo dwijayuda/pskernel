@@ -460,17 +460,13 @@ partial def recursorMajorInduct?
     | _, _ => none
   go recursor.base.type majorIdx
 
+/--
+Final Lean 4.34 K-conversion guard for expression metavariables.
+This deliberately ignores universe metavariables: C++ uses
+`has_expr_mvar` / `has_expr_metavar`, not `has_mvar`.
+-/
 partial def exprHasMVarForK : Expr → Bool
   | .mvar _ => true
-  | .sort level =>
-      match level with
-      | .mvar _ => true
-      | _ => false
-  | .const _ levels =>
-      levels.any fun level =>
-        match level with
-        | .mvar _ => true
-        | _ => false
   | .app fn arg =>
       exprHasMVarForK fn || exprHasMVarForK arg
   | .lam _ type body _ | .forallE _ type body _ =>
@@ -480,7 +476,7 @@ partial def exprHasMVarForK : Expr → Bool
         exprHasMVarForK value ||
         exprHasMVarForK body
   | .mdata _ body | .proj _ _ body => exprHasMVarForK body
-  | .bvar _ | .fvar _ | .lit _ => false
+  | .bvar _ | .fvar _ | .sort _ | .const _ _ | .lit _ => false
 
 partial def toConstructorWhenK
     (ctx : CheckerContext)

@@ -1,4 +1,5 @@
 import Ps.Bridge.Json
+import Ps.Foundation.Name
 
 def psRustIdentifierConcat2
     (left right : String) : String :=

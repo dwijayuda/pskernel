@@ -63,65 +63,91 @@ def psLexSkipLineComment
           rest
           (psLexAdvanceChar position char)
 
+def psLexSkipBlockCommentWithFuel
+    (fuel : Nat)
+    (depth : Nat)
+    (remaining : List Char)
+    (start : PsSourcePos)
+    (position : PsSourcePos) :
+    Except PsLexError PsLexCursor :=
+  match fuel with
+  | 0 =>
+      Except.error
+        (PsLexError.unterminatedBlockComment
+          (psLexSpan start position))
+  | remainingFuel + 1 =>
+      match remaining with
+      | List.nil =>
+          Except.error
+            (PsLexError.unterminatedBlockComment
+              (psLexSpan start position))
+      | List.cons first rest =>
+          match rest with
+          | List.nil =>
+              psLexSkipBlockCommentWithFuel
+                remainingFuel
+                depth
+                List.nil
+                start
+                (psLexAdvanceChar position first)
+          | List.cons second tail =>
+              if psLexCharEq first '/' then
+                if psLexCharEq second '-' then
+                  psLexSkipBlockCommentWithFuel
+                    remainingFuel
+                    (Nat.add depth 1)
+                    tail
+                    start
+                    (psLexAdvanceTwo position first second)
+                else
+                  psLexSkipBlockCommentWithFuel
+                    remainingFuel
+                    depth
+                    rest
+                    start
+                    (psLexAdvanceChar position first)
+              else if psLexCharEq first '-' then
+                if psLexCharEq second '/' then
+                  if Nat.beq depth 1 then
+                    Except.ok {
+                      remaining := tail
+                      position :=
+                        psLexAdvanceTwo position first second
+                    }
+                  else
+                    psLexSkipBlockCommentWithFuel
+                      remainingFuel
+                      (Nat.sub depth 1)
+                      tail
+                      start
+                      (psLexAdvanceTwo position first second)
+                else
+                  psLexSkipBlockCommentWithFuel
+                    remainingFuel
+                    depth
+                    rest
+                    start
+                    (psLexAdvanceChar position first)
+              else
+                psLexSkipBlockCommentWithFuel
+                  remainingFuel
+                  depth
+                  rest
+                  start
+                  (psLexAdvanceChar position first)
+
 def psLexSkipBlockComment
     (depth : Nat)
     (remaining : List Char)
     (start : PsSourcePos)
     (position : PsSourcePos) :
     Except PsLexError PsLexCursor :=
-  match remaining with
-  | List.nil =>
-      Except.error
-        (PsLexError.unterminatedBlockComment
-          (psLexSpan start position))
-  | List.cons first rest =>
-      match rest with
-      | List.nil =>
-          psLexSkipBlockComment
-            depth
-            List.nil
-            start
-            (psLexAdvanceChar position first)
-      | List.cons second tail =>
-          if psLexCharEq first '/' then
-            if psLexCharEq second '-' then
-              psLexSkipBlockComment
-                (Nat.add depth 1)
-                tail
-                start
-                (psLexAdvanceTwo position first second)
-            else
-              psLexSkipBlockComment
-                depth
-                rest
-                start
-                (psLexAdvanceChar position first)
-          else if psLexCharEq first '-' then
-            if psLexCharEq second '/' then
-              if Nat.beq depth 1 then
-                Except.ok {
-                  remaining := tail
-                  position :=
-                    psLexAdvanceTwo position first second
-                }
-              else
-                psLexSkipBlockComment
-                  (Nat.sub depth 1)
-                  tail
-                  start
-                  (psLexAdvanceTwo position first second)
-            else
-              psLexSkipBlockComment
-                depth
-                rest
-                start
-                (psLexAdvanceChar position first)
-          else
-            psLexSkipBlockComment
-              depth
-              rest
-              start
-              (psLexAdvanceChar position first)
+  psLexSkipBlockCommentWithFuel
+    (Nat.add (List.length remaining) 1)
+    depth
+    remaining
+    start
+    position
 
 def psLexSkipTriviaWithFuel
     (fuel : Nat)

@@ -189,6 +189,77 @@ def psTestBackendRustStringIntrinsics : Bool :=
       output.contains "__ps_string_push(&(value), __ps_char_of_nat(&(__ps_nat_lit(\"33\"))))"
         && output.contains "__ps_string_utf8_byte_size(&(value))"
 
+def psBackendRustArrayModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "arraySizeDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "xs"
+            type :=
+              PsVerifiedIrType.named
+                "Array"
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arraySize
+            [PsVerifiedIrExpr.var "xs"]
+      },
+      {
+        name := "arrayIdOnly"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "arrayMapDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "xs"
+            type :=
+              PsVerifiedIrType.named
+                "Array"
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.named
+            "Array"
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayMap
+            [
+              PsVerifiedIrExpr.var "arrayIdOnly",
+              PsVerifiedIrExpr.var "xs"
+            ]
+      }
+    ]
+  }
+
+def psTestBackendRustArrayIntrinsics : Bool :=
+  match psRustEmitModule psBackendRustArrayModule with
+  | Except.error _ => false
+  | Except.ok output =>
+      output.contains "pub fn arraySizeDemo(xs: Vec<PsNat>) -> PsNat"
+        && output.contains "__ps_array_size(&(xs))"
+        && output.contains "__ps_array_map(arrayIdOnly, &(xs))"
+
 def psBackendRustValueModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -219,6 +290,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "Nat intrinsic", passed := psTestBackendRustIntrinsic },
   { name := "structure and inductive", passed := psTestBackendRustAdt },
   { name := "Char and String intrinsics", passed := psTestBackendRustStringIntrinsics },
+  { name := "Array intrinsics", passed := psTestBackendRustArrayIntrinsics },
   { name := "unsupported value is explicit", passed := psTestBackendRustRejectsValue }
 ]
 

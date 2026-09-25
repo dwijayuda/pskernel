@@ -123,10 +123,51 @@ structure PsBackendTsNamedTest where
   name : String
   passed : Bool
 
+def psBackendTsMachineLiteralModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "u32Max"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.machineInteger
+              PsVerifiedIrMachineIntegerType.uint32
+              4294967295)
+      },
+      {
+        name := "u64Value"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint64
+        body :=
+          PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.machineInteger
+              PsVerifiedIrMachineIntegerType.uint64
+              42)
+      }
+    ]
+  }
+
+def psTestBackendTsMachineLiterals : Bool :=
+  match psTsEmitModule psBackendTsMachineLiteralModule with
+  | Except.error _ => false
+  | Except.ok output =>
+      output.contains "export const u32Max: number = 4294967295;"
+        && output.contains "export const u64Value: bigint = 42n;"
+
 def psBackendTsTests : List PsBackendTsNamedTest := [
   { name := "identity module", passed := psTestBackendTsIdentity },
   { name := "generic inductive", passed := psTestBackendTsInductive },
-  { name := "Nat intrinsic", passed := psTestBackendTsIntrinsic }
+  { name := "Nat intrinsic", passed := psTestBackendTsIntrinsic },
+  { name := "machine integer literals", passed := psTestBackendTsMachineLiterals }
 ]
 
 def psRunBackendTsTests : List PsBackendTsNamedTest -> IO Bool

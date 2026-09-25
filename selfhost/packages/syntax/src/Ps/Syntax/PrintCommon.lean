@@ -14,7 +14,10 @@ def psPrintCommonConcat3
   let firstTwo := psPrintCommonConcat2 first second;
   psPrintCommonConcat2 firstTwo third
 
-def psPrintJoin (separator : String) : List String -> String
+def psPrintJoin
+    (separator : String)
+    (values : List String) : String :=
+  match values with
   | List.nil => ""
   | List.cons value rest =>
       match rest with

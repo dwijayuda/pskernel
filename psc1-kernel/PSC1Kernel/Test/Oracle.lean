@@ -162,6 +162,33 @@ def assertProjectionOracle : IO Unit := do
   let badReduce := PSC1Kernel.reduceProjCore ctx T 0 value
   assertTrue "reduceProjCore ignored structure name" badReduce.isNone
 
+  let hugeIndex : Nat := 4294967296
+  let hugeProj : PSC1Kernel.Expr := .proj S hugeIndex value
+  let oursHugeRejects :=
+    match PSC1Kernel.infer ctx hugeProj with
+    | .ok _ => false
+    | .error _ => true
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.inductDecl [] 0 [{
+      name := toLeanName S
+      type := toLeanExpr type0
+      ctors := [{
+        name := toLeanName Smk
+        type := toLeanExpr ctorSType
+      }]
+    }] false) with
+    | .ok e => pure e
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected projection-index oracle inductive"
+  let leanEnv := Lean.Environment.ofKernelEnv lean1
+  let leanHugeRejects :=
+    match Lean.Kernel.check leanEnv ({} : Lean.LocalContext) (toLeanExpr hugeProj) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue "uint32 projection-index rejection differs from Lean 4.34"
+    (oursHugeRejects == leanHugeRejects && leanHugeRejects)
+
 def natConst (field : String) : PSC1Kernel.Expr :=
   .const (.str (.str .anonymous "Nat") field) []
 

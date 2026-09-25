@@ -89,10 +89,27 @@ def psEncodeCodecBinderInfo (binder : PsBinderInfo) : String :=
   | .strictImplicit => "strictImplicit"
   | .instanceImplicit => "instImplicit"
 
+def psEncodeCodecLevelList
+    (levels : List PsLevel) :
+    Except PsCheckedAdmissionCodecError (List String) :=
+  match levels with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons level rest =>
+      match psEncodeCodecLevel level with
+      | Except.error error =>
+          Except.error error
+      | Except.ok encodedHead =>
+          match psEncodeCodecLevelList rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encodedTail =>
+              Except.ok (List.cons encodedHead encodedTail)
+
 def psEncodeCodecLevels
     (levels : List PsLevel) :
     Except PsCheckedAdmissionCodecError String :=
-  match levels.mapM psEncodeCodecLevel with
+  match psEncodeCodecLevelList levels with
   | Except.error error => Except.error error
   | Except.ok encoded => Except.ok (psJsonArray encoded)
 
@@ -253,12 +270,42 @@ def psEncodeCodecConstructor
                 psCheckedAdmissionJsonField "t" (encodedType)
               ])
 
+def psEncodeCodecConstructors
+    (allDeclarations : List PsDeclaration)
+    (inductiveName : PsName)
+    (constructors : List PsName) :
+    Except PsCheckedAdmissionCodecError (List String) :=
+  match constructors with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons constructorName rest =>
+      match
+          psEncodeCodecConstructor
+            allDeclarations
+            inductiveName
+            constructorName with
+      | Except.error error =>
+          Except.error error
+      | Except.ok encodedHead =>
+          match
+              psEncodeCodecConstructors
+                allDeclarations
+                inductiveName
+                rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encodedTail =>
+              Except.ok (List.cons encodedHead encodedTail)
+
 def psEncodeCodecInductive
     (allDeclarations : List PsDeclaration)
     (info : PsInductiveInfo) :
     Except PsCheckedAdmissionCodecError String :=
-  match info.constructors.mapM
-      (psEncodeCodecConstructor allDeclarations info.name) with
+  match
+      psEncodeCodecConstructors
+        allDeclarations
+        info.name
+        info.constructors with
   | Except.error error => Except.error error
   | Except.ok encodedConstructors =>
       match psEncodeCodecExpr info.type with

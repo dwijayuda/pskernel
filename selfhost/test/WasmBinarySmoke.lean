@@ -139,6 +139,38 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
             (PsVerifiedIrExpr.var "whenTrue")
             (PsVerifiedIrExpr.var "whenFalse")
       }
+,
+      {
+        name := "letPlusOne"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.letE
+            "saved"
+            (PsVerifiedIrType.primitive
+              PsVerifiedIrPrimitiveType.uint32)
+            (PsVerifiedIrExpr.var "value")
+            (PsVerifiedIrExpr.intrinsic
+              (PsVerifiedIrIntrinsic.machineIntBinary
+                PsVerifiedIrMachineIntegerType.uint32
+                PsVerifiedIrIntegerBinaryOp.add)
+              [
+                PsVerifiedIrExpr.var "saved",
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.machineInteger
+                    PsVerifiedIrMachineIntegerType.uint32
+                    1)
+              ])
+      }
     ]
   }
 

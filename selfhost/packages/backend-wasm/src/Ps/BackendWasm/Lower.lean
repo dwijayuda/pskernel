@@ -657,6 +657,7 @@ def psWasmLowerIfWith
 def psWasmLowerExprWithFuel
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
+    (inductives : List PsVerifiedIrInductive)
     (bindings : List (String × Nat))
     (expected : Option PsWasmValueType) :
     Nat ->
@@ -671,6 +672,7 @@ def psWasmLowerExprWithFuel
           psWasmLowerExprWithFuel
             profile
             structures
+            inductives
             bindings
             expectedType
             fuel
@@ -735,6 +737,7 @@ def psWasmLowerExprWithFuel
                       psWasmLowerExprWithFuel
                         profile
                         structures
+                        inductives
                         bodyBindings
                         expected
                         fuel
@@ -814,17 +817,19 @@ def psWasmLowerExprWithFuel
 def psWasmLowerExpr
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
+    (inductives : List PsVerifiedIrInductive)
     (bindings : List (String × Nat))
     (expected : Option PsWasmValueType)
     (state : PsWasmLowerState)
     (expr : PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   psWasmLowerExprWithFuel
-    profile structures bindings expected 4096 state expr
+    profile structures inductives bindings expected 4096 state expr
 
 def psWasmLowerDeclaration
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
+    (inductives : List PsVerifiedIrInductive)
     (declaration : PsVerifiedIrDeclaration) :
     Except PsWasmLowerError PsWasmFunction :=
   match psWasmLowerParameterTypes profile declaration.parameters with
@@ -846,6 +851,7 @@ def psWasmLowerDeclaration
                   psWasmLowerExpr
                     profile
                     structures
+                    inductives
                     bindings
                     expected
                     initialState
@@ -862,15 +868,16 @@ def psWasmLowerDeclaration
 
 def psWasmLowerDeclarations
     (profile : PsWasmTargetProfile)
-    (structures : List PsVerifiedIrStructure) :
+    (structures : List PsVerifiedIrStructure)
+    (inductives : List PsVerifiedIrInductive) :
     List PsVerifiedIrDeclaration ->
     Except PsWasmLowerError (List PsWasmFunction)
   | [] => Except.ok []
   | declaration :: rest =>
-      match psWasmLowerDeclaration profile structures declaration with
+      match psWasmLowerDeclaration profile structures inductives declaration with
       | Except.error error => Except.error error
       | Except.ok lowered =>
-          match psWasmLowerDeclarations profile structures rest with
+          match psWasmLowerDeclarations profile structures inductives rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok (lowered :: loweredRest)

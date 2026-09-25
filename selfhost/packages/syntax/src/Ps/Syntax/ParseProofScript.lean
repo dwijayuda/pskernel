@@ -205,35 +205,36 @@ def psParseProofScriptBinderTypeWithFuel
       fun (_cursor : PsTokenCursor) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
+      let smaller :
+          PsTokenCursor ->
+          Except PsParseError (PsParseResult PsSyntaxTerm) :=
+        psParseProofScriptBinderTypeWithFuel remaining;
       fun (cursor : PsTokenCursor) =>
         match psParseProofScriptSimpleApplication cursor with
-      | Except.error error => Except.error error
-      | Except.ok domain =>
-          if psTokenCursorAtArrow domain.cursor then
-            match psTokenCursorExpectArrow domain.cursor with
-            | Except.error error => Except.error error
-            | Except.ok afterArrow =>
-                match
-                    psParseProofScriptBinderTypeWithFuel
-                      remaining
-                      afterArrow.cursor with
-                | Except.error error => Except.error error
-                | Except.ok codomain =>
-                    let domainSpan := psSyntaxTermSpan domain.value;
-                    Except.ok {
-                      value :=
-                        PsSyntaxTerm.forallE
-                          [Prod.mk
-                            (psSyntaxAnonymousExplicitBinder domainSpan)
-                            domain.value]
-                          codomain.value
-                          (psSyntaxSpanJoin
-                            domainSpan
-                            (psSyntaxTermSpan codomain.value))
-                      cursor := codomain.cursor
-                    }
-          else
-            Except.ok domain
+        | Except.error error => Except.error error
+        | Except.ok domain =>
+            if psTokenCursorAtArrow domain.cursor then
+              match psTokenCursorExpectArrow domain.cursor with
+              | Except.error error => Except.error error
+              | Except.ok afterArrow =>
+                  match smaller afterArrow.cursor with
+                  | Except.error error => Except.error error
+                  | Except.ok codomain =>
+                      let domainSpan := psSyntaxTermSpan domain.value;
+                      Except.ok {
+                        value :=
+                          PsSyntaxTerm.forallE
+                            [Prod.mk
+                              (psSyntaxAnonymousExplicitBinder domainSpan)
+                              domain.value]
+                            codomain.value
+                            (psSyntaxSpanJoin
+                              domainSpan
+                              (psSyntaxTermSpan codomain.value))
+                        cursor := codomain.cursor
+                      }
+            else
+              Except.ok domain
 
 def psParseProofScriptBinderType
     (cursor : PsTokenCursor) :

@@ -8,6 +8,10 @@ on:
       - ".github/workflows/psc1-lean-kernel.yml"
       - "psc1-kernel/**"
 
+concurrency:
+  group: psc1-lean-kernel-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -26,6 +30,14 @@ jobs:
       - name: Build PSC1 kernel source with Lean 4.34
         working-directory: psc1-kernel
         run: lake build
+      - name: Build oracle-only structure fixture
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .lake/build/lib/lean/PSC1Kernel/Test
+          lake env lean PSC1Kernel/Test/StructureFixture.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/Test/StructureFixture.olean
       - name: Differential foundational oracle against Lean 4.34
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/Oracle.lean

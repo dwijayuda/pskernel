@@ -1307,9 +1307,15 @@ def psParseLeanTermWithFuel :
                                     token.span)
                         | _ =>
                             let stop :=
-                              match psParseListReverse alternatives.value with
-                              | [] => psLeanTermStop scrutinee.value
-                              | (_, _, span) :: _ => span.stop
+                              match
+                                  psParseListReverse
+                                    alternatives.value with
+                              | List.nil =>
+                                  psLeanTermStop scrutinee.value
+                              | List.cons alternative _ =>
+                                  let bodyAndSpan := alternative.2;
+                                  let span := bodyAndSpan.2;
+                                  span.stop;
                             Except.ok {
                               value :=
                                 PsSyntaxTerm.matchE

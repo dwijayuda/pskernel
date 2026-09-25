@@ -1188,24 +1188,27 @@ def psParseLeanDoWithFuel
                                     | Except.error error => Except.error error
                                     | Except.ok body =>
                                         let nameSyntax : PsSyntaxName := {
-                                          segments := [name.token.text]
+                                          segments :=
+                                            List.cons
+                                              name.token.text
+                                              List.nil
                                           span := name.token.span
-                                        }
+                                        };
+                                        let binderStop :=
+                                          psLeanTermStop binderType.value;
                                         let binder : PsSyntaxBinderHead := {
                                           name := nameSyntax
                                           kind := PsSyntaxBinderKind.explicit
                                           span := {
                                             start := name.token.span.start
-                                            stop :=
-                                              (psSyntaxTermSpan
-                                                binderType.value).stop
+                                            stop := binderStop
                                           }
-                                        }
-                                        let span := {
+                                        };
+                                        let span : PsSourceSpan := {
                                           start := start
                                           stop :=
                                             psLeanTermStop body.value
-                                        }
+                                        };
                                         Except.ok {
                                           value :=
                                             psSyntaxCompilerBind

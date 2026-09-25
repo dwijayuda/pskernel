@@ -203,6 +203,17 @@ def psRustCoverageType
     (type : PsVerifiedIrType) : PsRustCoverage :=
   psRustCoverageTypeWithFuel 4096 coverage type
 
+def psRustCoverageParameterList :
+    PsRustCoverage ->
+    List PsVerifiedIrParameter ->
+    PsRustCoverage
+  | coverage, List.nil =>
+      coverage
+  | coverage, List.cons parameter rest =>
+      psRustCoverageParameterList
+        (psRustCoverageType coverage parameter.type)
+        rest
+
 def psRustCoverageFoldExprListWith
     (visit :
       PsRustCoverage ->
@@ -409,17 +420,6 @@ def psRustCoverageExpr
     (coverage : PsRustCoverage)
     (expr : PsVerifiedIrExpr) : PsRustCoverage :=
   psRustCoverageExprWithFuel 4096 coverage expr
-
-def psRustCoverageParameterList :
-    PsRustCoverage ->
-    List PsVerifiedIrParameter ->
-    PsRustCoverage
-  | coverage, List.nil =>
-      coverage
-  | coverage, List.cons parameter rest =>
-      psRustCoverageParameterList
-        (psRustCoverageType coverage parameter.type)
-        rest
 
 def psRustCoverageStructureFieldList :
     PsRustCoverage ->

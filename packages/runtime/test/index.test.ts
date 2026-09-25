@@ -67,6 +67,7 @@ import {
   findLean434JsIntrinsic,
   invokeLean434JsImplementedBy,
   lean_array_fget,
+  lean_array_get,
   lean_array_mk,
   lean_array_to_list,
   lean_array_fset,
@@ -414,6 +415,8 @@ const one=lean_array_push(empty,10);
 const two=lean_array_push(one,20);
 equal(lean_array_get_size(two),2n);
 equal(lean_array_fget(two,1n),20);
+equal(lean_array_get(777,two,1n),20);
+equal(lean_array_get(777,two,9n),777);
 const changed=lean_array_fset(two,0n,99);
 deepEqual(two,[10,20],'lean_array_fset mutated its input');
 deepEqual(changed,[99,20],'lean_array_fset result mismatch');

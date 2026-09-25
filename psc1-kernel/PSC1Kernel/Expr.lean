@@ -62,7 +62,7 @@ names and binder annotations on lambda/forall/let nodes are deliberately
 ignored; they are not part of kernel alpha-equivalence. Metadata payloads
 remain structural.
 -/
-partial def Expr.eqCore : Expr → Expr → Bool
+def Expr.eqCore : Expr → Expr → Bool
   | .bvar a, .bvar b => a == b
   | .fvar a, .fvar b => Name.eq a b
   | .mvar a, .mvar b => Name.eq a b

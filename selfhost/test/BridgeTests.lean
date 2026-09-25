@@ -35,6 +35,58 @@ def psTestCanonicalTextNewline : Bool :=
 def psTestJsonEscaping : Bool :=
   psJsonQuote "a\n\"b\\c" == "\"a\\n\\\"b\\\\c\""
 
+def psTestJsonParserCanonicalPayload : Bool :=
+  match psJsonParse psBridgeExpectedDefinitionPayload with
+  | Except.error _ => false
+  | Except.ok value =>
+      match
+          psJsonGetField value "format",
+          psJsonGetField value "version",
+          psJsonGetField value "admissions" with
+      | some format, some version, some admissions =>
+          psJsonAsString format == some "proofscript-checked-admissions"
+            && psJsonAsNumberText version == some "2"
+            && match psJsonAsArray admissions with
+               | some [_] => true
+               | _ => false
+      | _, _, _ => false
+
+def psTestJsonParserEscapesAndNested : Bool :=
+  match
+      psJsonParse
+        "{\"a\":[true,false,null,-12],\"s\":\"x\\ny\\u0021\"}" with
+  | Except.error _ => false
+  | Except.ok value =>
+      match
+          psJsonGetField value "a",
+          psJsonGetField value "s" with
+      | some arrayValue, some stringValue =>
+          psJsonAsString stringValue == some "x\ny!"
+            && match psJsonAsArray arrayValue with
+               | some [
+                   PsJsonValue.bool true,
+                   PsJsonValue.bool false,
+                   PsJsonValue.nullE,
+                   PsJsonValue.number "-12"
+                 ] => true
+               | _ => false
+      | _, _ => false
+
+def psTestJsonParserRejectsInvalid : Bool :=
+  let trailing :=
+    match psJsonParse "{\"x\":1} junk" with
+    | Except.error PsJsonParseError.trailingInput => true
+    | _ => false
+  let invalidNumber :=
+    match psJsonParse "{\"x\":01}" with
+    | Except.error PsJsonParseError.invalidNumber => true
+    | _ => false
+  let invalidEscape :=
+    match psJsonParse "{\"x\":\"\\q\"}" with
+    | Except.error PsJsonParseError.invalidEscape => true
+    | _ => false
+  trailing && invalidNumber && invalidEscape
+
 def psTestRejectFreeVariable : Bool :=
   let declaration :=
     PsDeclaration.definitionDecl
@@ -157,6 +209,9 @@ def psBridgeTests : List PsBridgeNamedTest := [
   { name := "canonical definition payload", passed := psTestCanonicalDefinitionPayload },
   { name := "canonical text newline", passed := psTestCanonicalTextNewline },
   { name := "JSON escaping", passed := psTestJsonEscaping },
+  { name := "JSON parser canonical payload", passed := psTestJsonParserCanonicalPayload },
+  { name := "JSON parser escapes and nested values", passed := psTestJsonParserEscapesAndNested },
+  { name := "JSON parser rejects malformed input", passed := psTestJsonParserRejectsInvalid },
   { name := "reject free variable", passed := psTestRejectFreeVariable },
   { name := "reject expression metavariable", passed := psTestRejectExpressionMetavariable },
   { name := "reject universe metavariable", passed := psTestRejectUniverseMetavariable },

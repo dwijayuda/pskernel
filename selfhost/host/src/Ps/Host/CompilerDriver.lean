@@ -96,19 +96,13 @@ def psHostCompilerAdmissions
 def psHostCompilerTypeScriptSource
     (inputPath : String) : IO String := do
   let elaborated ← psHostCompilerElaborateProject inputPath
-  match psCompilerCheckElaborated elaborated with
+  match psCompilerTypeScriptFromElaborated elaborated with
   | Except.error _ =>
       throw
         (IO.userError
-          "PSC1_CHECK_FAILED: elaborated source is not persistable checked core")
-  | Except.ok _ =>
-      match psCompilerTypeScriptFromElaborated elaborated with
-      | Except.error _ =>
-          throw
-            (IO.userError
-              "PSC1_CLI_TS_EMIT_FAILED: verified source is outside the executable TypeScript backend subset")
-      | Except.ok output =>
-          pure output
+          "PSC1_CLI_TS_EMIT_FAILED: source is outside the executable TypeScript backend subset")
+  | Except.ok output =>
+      pure output
 
 def psHostCompilerTypeScript
     (inputPath : String) : IO Unit := do

@@ -1,0 +1,204 @@
+name: PSC1 env array index kernel validation oracle
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [perf/psc1-env-array-index]
+    paths:
+      - ".github/workflows/psc1-env-array-index.yml"
+      - "psc1-kernel/**"
+      - "oracle/replay-probe/MiniExport.lean"
+      - "oracle/replay-probe/ReplayProbe.lean"
+      - "oracle/replay-probe/NativeEval.lean"
+      - "oracle/replay-probe/NativeMapFixture.lean"
+      - "scripts/psc1-lean-native-map.mjs"
+      - "scripts/psc1-lean-native-targets.mjs"
+      - "oracle/fixtures/psc1-native-discovery-smoke.ndjson"
+      - "oracle/fixtures/lean434-init-prelude.ndjson"
+      - "oracle/fixtures/lean434-primitive-closure.ndjson"
+      - "oracle/fixtures/lean434-proofscript-text-foundation.ndjson"
+      - "oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson"
+      - "oracle/fixtures/lean434-std-sat-cnf-roots.ndjson"
+      - "oracle/fixtures/lean434-std-parsec-roots.ndjson"
+      - "oracle/fixtures/lean434-std-byteslice-roots.ndjson"
+      - "oracle/fixtures/lean434-lean-rbmap-roots.ndjson"
+      - "oracle/fixtures/lean434-lean-persistentarray-roots.ndjson"
+      - "oracle/fixtures/lean434-lean-persistenthashmap-roots.ndjson"
+
+concurrency:
+  group: psc1-lean-kernel-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lean434:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate K8 bounded acceptance manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f psc1-kernel/K8_ACCEPTANCE.md
+          grep -Fq "BOUNDED SEMANTIC BASELINE COMPLETE" psc1-kernel/README.md
+          for fixture in \
+            lean434-std-sat-cnf-roots.ndjson \
+            lean434-std-parsec-roots.ndjson \
+            lean434-std-byteslice-roots.ndjson \
+            lean434-lean-rbmap-roots.ndjson \
+            lean434-lean-persistentarray-roots.ndjson \
+            lean434-lean-persistenthashmap-roots.ndjson
+          do
+            test -f "oracle/fixtures/$fixture"
+            grep -Fq "$fixture" .github/workflows/psc1-lean-kernel.yml
+            grep -Fq "$fixture" psc1-kernel/K8_ACCEPTANCE.md
+          done
+          grep -Fq "kernelInterrupt.lean':{kind:'operational-resource'" scripts/kernel-study-regression-matrix.mjs
+          grep -Fq "kernel_maxheartbeats.lean':{kind:'operational-resource'" scripts/kernel-study-regression-matrix.mjs
+      - name: Install Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build PSC1 kernel source with Lean 4.34
+        working-directory: psc1-kernel
+        run: lake build
+
+      - name: Build compiled replay executable
+        working-directory: psc1-kernel
+        run: lake build psc1_replay
+      - name: Build oracle-only structure fixture
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .lake/build/lib/lean/PSC1Kernel/Test
+          lake env lean PSC1Kernel/Test/StructureFixture.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/Test/StructureFixture.olean
+      - name: Differential foundational oracle against Lean 4.34
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/Oracle.lean
+      - name: Smoke Eq.rec K fail-closed behavior
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/KFailClosedSmoke.lean
+      - name: Smoke infer-only/check split
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/InferOnlySmoke.lean
+      - name: Smoke portable native replay map
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/NativeMapSmoke.lean
+
+      - name: Discover native marker targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/psc1-lean-native-targets.mjs \
+            --input oracle/fixtures/psc1-native-discovery-smoke.ndjson \
+            --out psc1-kernel/.lake/build/native-targets.txt
+          printf '%s\n' \
+            'bool:PSC1NativeMapFixture.b' \
+            'nat:PSC1NativeMapFixture.n' \
+            > psc1-kernel/.lake/build/native-targets.expected.txt
+          diff -u \
+            psc1-kernel/.lake/build/native-targets.expected.txt \
+            psc1-kernel/.lake/build/native-targets.txt
+
+      - name: Generate native map from Lean compiler IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean oracle/replay-probe/NativeMapFixture.lean \
+            -o oracle/replay-probe/NativeMapFixture.olean
+          LEAN_PATH="$PWD/oracle/replay-probe" \
+            node scripts/psc1-lean-native-map.mjs \
+              --module NativeMapFixture \
+              --out psc1-kernel/.lake/build/native-map.tsv \
+              --requests-file psc1-kernel/.lake/build/native-targets.txt
+
+      - name: Smoke generated compiler-IR native map through kernel
+        working-directory: psc1-kernel
+        run: |
+          lake env lean --run PSC1Kernel/Test/NativeMapSmoke.lean \
+            .lake/build/native-map.tsv
+      - name: Generate pinned Lean4Export mini stream
+        working-directory: oracle/replay-probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean ReplayProbe.lean -o ReplayProbe.olean
+          LEAN_PATH=. lean --run MiniExport.lean > ../../psc1-kernel/.lake/build/lean434-mini-export.ndjson
+      - name: Replay pinned Lean4Export mini stream with PSC1 kernel
+        working-directory: psc1-kernel
+        run: .lake/build/bin/psc1_replay .lake/build/lean434-mini-export.ndjson
+      - name: Replay canonical Lean 4.34 Init.Prelude stream
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 600s .lake/build/bin/psc1_replay ../oracle/fixtures/lean434-init-prelude.ndjson
+      - name: Replay K8 primitive-closure corpus
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 600s .lake/build/bin/psc1_replay ../oracle/fixtures/lean434-primitive-closure.ndjson
+      - name: Replay K8 ProofScript delta corpora
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 900s .lake/build/bin/psc1_replay \
+            --base ../oracle/fixtures/lean434-init-prelude.ndjson \
+            ../oracle/fixtures/lean434-proofscript-text-foundation.ndjson \
+            ../oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson
+      - name: Replay K8 standalone small corpora
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          for fixture in \
+            lean434-std-sat-cnf-roots.ndjson \
+            lean434-std-parsec-roots.ndjson \
+            lean434-lean-persistenthashmap-roots.ndjson
+          do
+            echo "== replay $fixture =="
+            timeout 600s .lake/build/bin/psc1_replay "../oracle/fixtures/$fixture"
+          done
+
+  k8-large:
+    name: K8 large corpus (${{ matrix.fixture }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        fixture:
+          - lean434-std-byteslice-roots.ndjson
+          - lean434-lean-rbmap-roots.ndjson
+          - lean434-lean-persistentarray-roots.ndjson
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build PSC1 kernel source with Lean 4.34
+        working-directory: psc1-kernel
+        run: lake build
+
+      - name: Build compiled replay executable
+        working-directory: psc1-kernel
+        run: lake build psc1_replay
+      - name: Replay bounded corpus
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "== replay ${{ matrix.fixture }} =="
+          timeout 1800s .lake/build/bin/psc1_replay "../oracle/fixtures/${{ matrix.fixture }}"

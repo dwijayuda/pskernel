@@ -1,46 +1,82 @@
 import Ps.Core.Expr
 
-def psExprAbstractFVarAt (target : Nat) (depth : Nat) (expr : PsExpr) : PsExpr :=
+def psExprAbstractFVarAtWorker
+    (target : Nat)
+    (expr : PsExpr) : Nat -> PsExpr :=
   match expr with
   | .bvar index =>
-      PsExpr.bvar index
+      fun depth => PsExpr.bvar index
   | .fvar id =>
-      if Nat.beq id target then
-        PsExpr.bvar depth
-      else
-        PsExpr.fvar id
+      fun depth =>
+        if Nat.beq id target then
+          PsExpr.bvar depth
+        else
+          PsExpr.fvar id
   | .mvar id =>
-      PsExpr.mvar id
+      fun depth => PsExpr.mvar id
   | .sortE level =>
-      PsExpr.sortE level
+      fun depth => PsExpr.sortE level
   | .constE name levels =>
-      PsExpr.constE name levels
+      fun depth => PsExpr.constE name levels
   | .app fn arg =>
-      PsExpr.app
-        (psExprAbstractFVarAt target depth fn)
-        (psExprAbstractFVarAt target depth arg)
+      let abstractFn : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target fn;
+      let abstractArg : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target arg;
+      fun depth =>
+        PsExpr.app
+          (abstractFn depth)
+          (abstractArg depth)
   | .lam name type body binder =>
-      PsExpr.lam
-        name
-        (psExprAbstractFVarAt target depth type)
-        (psExprAbstractFVarAt target (Nat.succ depth) body)
-        binder
+      let abstractType : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target type;
+      let abstractBody : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target body;
+      fun depth =>
+        PsExpr.lam
+          name
+          (abstractType depth)
+          (abstractBody (Nat.succ depth))
+          binder
   | .forallE name type body binder =>
-      PsExpr.forallE
-        name
-        (psExprAbstractFVarAt target depth type)
-        (psExprAbstractFVarAt target (Nat.succ depth) body)
-        binder
+      let abstractType : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target type;
+      let abstractBody : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target body;
+      fun depth =>
+        PsExpr.forallE
+          name
+          (abstractType depth)
+          (abstractBody (Nat.succ depth))
+          binder
   | .letE name type value body =>
-      PsExpr.letE
-        name
-        (psExprAbstractFVarAt target depth type)
-        (psExprAbstractFVarAt target depth value)
-        (psExprAbstractFVarAt target (Nat.succ depth) body)
+      let abstractType : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target type;
+      let abstractValue : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target value;
+      let abstractBody : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target body;
+      fun depth =>
+        PsExpr.letE
+          name
+          (abstractType depth)
+          (abstractValue depth)
+          (abstractBody (Nat.succ depth))
   | .lit value =>
-      PsExpr.lit value
+      fun depth => PsExpr.lit value
   | .proj typeName index value =>
-      PsExpr.proj typeName index (psExprAbstractFVarAt target depth value)
+      let abstractValue : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target value;
+      fun depth =>
+        PsExpr.proj typeName index (abstractValue depth)
+
+def psExprAbstractFVarAt
+    (target : Nat)
+    (depth : Nat)
+    (expr : PsExpr) : PsExpr :=
+  let abstracted : Nat -> PsExpr :=
+    psExprAbstractFVarAtWorker target expr;
+  abstracted depth
 
 def psExprAbstractFVar (target : Nat) (expr : PsExpr) : PsExpr :=
   psExprAbstractFVarAt target 0 expr

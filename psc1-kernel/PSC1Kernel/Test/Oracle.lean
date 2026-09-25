@@ -200,6 +200,48 @@ def natBinary
     (a b : PSC1Kernel.Expr) : PSC1Kernel.Expr :=
   .app (.app (natConst field) a) b
 
+def assertNatOffsetOracle : IO Unit := do
+  let NatN := PSC1Kernel.kernelNatName
+  let Succ := PSC1Kernel.kernelNatSuccName
+  let ghost : PSC1Kernel.Name := .str (.str .anonymous "Offset") "ghost"
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let succType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "n") natT natT .default
+
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.axiomInfo {
+    base := mkBase NatN type1
+    isUnsafe := false
+  })
+  let env := env1.addUnchecked (.axiomInfo {
+    base := mkBase Succ succType
+    isUnsafe := false
+  })
+  let lctx := PSC1Kernel.LocalContext.empty.addLocal ghost ghost natT .default
+  let ctx : PSC1Kernel.CheckerContext :=
+    { (PSC1Kernel.CheckerContext.empty env) with lctx := lctx }
+
+  let ignored : PSC1Kernel.Expr :=
+    .letE (.str .anonymous "_g") natT (.fvar ghost) (.lit (.nat 4)) false
+  let lhs : PSC1Kernel.Expr := .app (.const Succ []) ignored
+  let rhs : PSC1Kernel.Expr := .lit (.nat 5)
+  let ours ← exceptToIO "PSC1 Nat offset defeq" (PSC1Kernel.isDefEq ctx lhs rhs)
+
+  Lean.initSearchPath (← Lean.findSysroot)
+  let leanEnv ← Lean.importModules #[{ module := `Init.Prelude }] {}
+  let ghostId : Lean.FVarId := ⟨toLeanName ghost⟩
+  let leanLctx : Lean.LocalContext :=
+    ({} : Lean.LocalContext).mkLocalDecl
+      ghostId (toLeanName ghost) (toLeanExpr natT) .default
+  let lean ←
+    match Lean.Kernel.isDefEq leanEnv leanLctx (toLeanExpr lhs) (toLeanExpr rhs) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean 4.34 Nat offset oracle failed"
+
+  assertTrue "Nat offset defeq differs from Lean 4.34" (ours == lean)
+  assertTrue "Lean 4.34 should strip Nat.succ/literal offsets before fvar-sensitive reduction" lean
+
 def assertEagerReduceOracle : IO Unit := do
   let NatN := PSC1Kernel.kernelNatName
   let Add := PSC1Kernel.kernelNatAddName
@@ -1181,6 +1223,7 @@ def run : IO Unit := do
   assertLevelPairs levels
   assertExprOracle
   assertWhnfLayering
+  assertNatOffsetOracle
   assertEagerReduceOracle
   assertNatReductionOracle
   assertFunctionEtaOracle

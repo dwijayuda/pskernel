@@ -1048,91 +1048,48 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
       }
 ,
       {
-        name := "intLiteralNegativeShape"
+        name := "intLiteralNegativeValue"
         typeParameters := []
         parameters := []
-        resultType := psWasmSmokeBoolType
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32
         body :=
-          PsVerifiedIrExpr.matchE
-            "ProofScript.Int"
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var psWasmIntRuntimeToI32BoundedName)
             []
-            (psWasmSmokeInt (-5))
+            [psWasmSmokeInt (-5)]
+      },
+      {
+        name := "intAddMixedValue"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var psWasmIntRuntimeToI32BoundedName)
+            []
             [
-              ("ofNat", [], PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false)),
-              (
-                "negSucc",
-                [{
-                  field := "value"
-                  name := "n"
-                  type := psWasmSmokeNatType
-                }],
-                psWasmSmokeNatEq
-                  (PsVerifiedIrExpr.var "n")
-                  (psWasmSmokeNat 4)
-              )
+              psWasmSmokeIntBinary
+                PsVerifiedIrIntrinsic.intAdd
+                (-5)
+                7
             ]
       },
       {
-        name := "intLiteralPositiveShape"
+        name := "intNegValue"
         typeParameters := []
         parameters := []
-        resultType := psWasmSmokeBoolType
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32
         body :=
-          PsVerifiedIrExpr.matchE
-            "ProofScript.Int"
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var psWasmIntRuntimeToI32BoundedName)
             []
-            (psWasmSmokeInt 7)
             [
-              (
-                "ofNat",
-                [{
-                  field := "value"
-                  name := "n"
-                  type := psWasmSmokeNatType
-                }],
-                psWasmSmokeNatEq
-                  (PsVerifiedIrExpr.var "n")
-                  (psWasmSmokeNat 7)
-              ),
-              ("negSucc", [], PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))
-            ]
-      },
-      {
-        name := "intEqNegativeSelf"
-        typeParameters := []
-        parameters := []
-        resultType := psWasmSmokeBoolType
-        body :=
-          psWasmSmokeIntEq
-            (psWasmSmokeInt (-5))
-            (psWasmSmokeInt (-5))
-      },
-      {
-        name := "intAddMixedShape"
-        typeParameters := []
-        parameters := []
-        resultType := psWasmSmokeBoolType
-        body :=
-          PsVerifiedIrExpr.matchE
-            "ProofScript.Int"
-            []
-            (psWasmSmokeIntBinary
-              PsVerifiedIrIntrinsic.intAdd
-              (-5)
-              7)
-            [
-              (
-                "ofNat",
-                [{
-                  field := "value"
-                  name := "n"
-                  type := psWasmSmokeNatType
-                }],
-                psWasmSmokeNatEq
-                  (PsVerifiedIrExpr.var "n")
-                  (psWasmSmokeNat 2)
-              ),
-              ("negSucc", [], PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.intNeg
+                [psWasmSmokeInt (-5)]
             ]
       },
       {

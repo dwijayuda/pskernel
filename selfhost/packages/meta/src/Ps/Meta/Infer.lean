@@ -177,40 +177,45 @@ def psInferProjectionType
               Except.error PsInferError.projectionUnsupported
             else
               match info.constructors with
-              | List.cons constructorName List.nil =>
-                  match
-                      psEnvironmentFindConstructor
-                        environment
-                        constructorName with
-                  | none =>
+              | List.nil =>
+                  Except.error PsInferError.projectionUnsupported
+              | List.cons constructorName remainingConstructors =>
+                  match remainingConstructors with
+                  | List.nil =>
+                      match
+                          psEnvironmentFindConstructor
+                            environment
+                            constructorName with
+                      | none =>
+                          Except.error PsInferError.projectionUnsupported
+                      | some constructorInfo =>
+                          if
+                              psInferBoolOr
+                                (psInferNatNe constructorInfo.numParams info.numParams)
+                                (Nat.ble constructorInfo.numFields index) then
+                            Except.error PsInferError.projectionUnsupported
+                          else
+                            match
+                                psInferApplyStructureParameters
+                                  environment
+                                  metaContext
+                                  localContext
+                                  constructorInfo.type
+                                  view.args with
+                            | Except.error error => Except.error error
+                            | Except.ok fieldCursor =>
+                                psInferStructureProjectionField
+                                  environment
+                                  metaContext
+                                  localContext
+                                  typeName
+                                  target
+                                  4096
+                                  index
+                                  0
+                                  fieldCursor
+                  | List.cons _ _ =>
                       Except.error PsInferError.projectionUnsupported
-                  | some constructorInfo =>
-                      if
-                          psInferBoolOr
-                            (psInferNatNe constructorInfo.numParams info.numParams)
-                            (Nat.ble constructorInfo.numFields index) then
-                        Except.error PsInferError.projectionUnsupported
-                      else
-                        match
-                            psInferApplyStructureParameters
-                              environment
-                              metaContext
-                              localContext
-                              constructorInfo.type
-                              view.args with
-                        | Except.error error => Except.error error
-                        | Except.ok fieldCursor =>
-                            psInferStructureProjectionField
-                              environment
-                              metaContext
-                              localContext
-                              typeName
-                              target
-                              4096
-                              index
-                              0
-                              fieldCursor
-              | _ => Except.error PsInferError.projectionUnsupported
   | _ => Except.error PsInferError.projectionUnsupported
 
 def psInferTypeWithFuel

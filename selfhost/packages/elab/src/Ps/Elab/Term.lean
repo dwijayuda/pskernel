@@ -1007,6 +1007,13 @@ def psElabMatchAlternativeFind
       else
         psElabMatchAlternativeFind name rest
 
+def psElabMatchAlternativeCovered
+    (alternatives : List PsElabMatchAlternative)
+    (ctorName : PsName) : Bool :=
+  match psElabMatchAlternativeFind ctorName alternatives with
+  | some _ => true
+  | none => false
+
 def psElabFillWildcardAlternatives
     (pattern : PsSyntaxPattern)
     (body : PsSyntaxTerm)
@@ -1072,11 +1079,9 @@ def psElabPrepareMatchAlternatives
   | [] =>
       let alternatives := List.reverse alternativesRev;
       let exhaustive :=
-        List.all inductiveInfo.constructors
-          (fun (ctorName : PsName) =>
-            match psElabMatchAlternativeFind ctorName alternatives with
-            | some _ => true
-            | none => false);
+        List.all
+          inductiveInfo.constructors
+          (psElabMatchAlternativeCovered alternatives);
       if exhaustive then
         Except.ok alternatives
       else

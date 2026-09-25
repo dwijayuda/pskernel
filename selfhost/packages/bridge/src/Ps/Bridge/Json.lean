@@ -140,15 +140,20 @@ def psJsonEscapeChar (char : Char) : String :=
   else
     psJsonStringOfChars (List.cons char List.nil)
 
-def psJsonEscapeChars : List Char -> String
-  | [] => ""
-  | char :: rest =>
+def psJsonEscapeChars (chars : List Char) : String :=
+  match chars with
+  | List.nil =>
+      ""
+  | List.cons char rest =>
       psJsonConcat2 (psJsonEscapeChar char) (psJsonEscapeChars rest)
 
 def psJsonQuote (value : String) : String :=
   psJsonConcat3 "\"" (psJsonEscapeChars (psJsonStringToChars value)) "\""
 
-def psJsonJoin (separator : String) : List String -> String
+def psJsonJoin
+    (separator : String)
+    (values : List String) : String :=
+  match values with
   | List.nil =>
       ""
   | List.cons value rest =>
@@ -164,8 +169,9 @@ def psJsonArray (values : List String) : String :=
 def psJsonField (key value : String) : String :=
   psJsonConcat3 (psJsonQuote key) ":" value
 
-def psJsonMapObjectFields :
-    List (String × String) -> List String
+def psJsonMapObjectFields
+    (fields : List (String × String)) : List String :=
+  match fields with
   | List.nil =>
       List.nil
   | List.cons field rest =>

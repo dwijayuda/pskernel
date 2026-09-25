@@ -158,6 +158,10 @@ lean_exe psc1_backend_wasm_tests where
   srcDir := "test"
   root := `BackendWasmTests
 
+lean_exe psc1_backend_wasm_binary_smoke where
+  srcDir := "test"
+  root := `WasmBinarySmoke
+
 lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests

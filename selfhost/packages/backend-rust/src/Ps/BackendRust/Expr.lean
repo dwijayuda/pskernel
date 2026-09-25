@@ -788,21 +788,24 @@ def psRustEmitExprWithFuel :
               psRustEmitIntrinsicFromPrinted
                 operation
                 printedArguments
-      | PsVerifiedIrExpr.lambda parameters body =>
-          match psRustEmitParameterList parameters with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedParameters =>
-              match emitNested body with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok printedBody =>
-                  Except.ok
-                    (psRustConcat4
-                      "|"
-                      (psRustJoin ", " printedParameters)
-                      "| "
-                      printedBody)
+      | PsVerifiedIrExpr.lambda parameters resultType body =>
+          if psRustTypeContainsFunction resultType then
+            Except.error PsRustEmitError.lambdaFunctionResultUnsupported
+          else
+            match psRustEmitParameterList parameters with
+            | Except.error error =>
+                Except.error error
+            | Except.ok printedParameters =>
+                match emitNested body with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok printedBody =>
+                    Except.ok
+                      (psRustConcat4
+                        "|"
+                        (psRustJoin ", " printedParameters)
+                        "| "
+                        printedBody)
       | PsVerifiedIrExpr.call fn _ arguments =>
           match emitNested fn with
           | Except.error error =>

@@ -1,4 +1,5 @@
 import PSC1Kernel.Level
+import Std.Data.HashSet.Basic
 
 namespace PSC1Kernel
 
@@ -50,23 +51,101 @@ Lean 4.34 `Expr.eqv`-compatible structural equality. Binder display names and
 binder annotations on lambda/forall/let nodes are deliberately ignored; they
 are not part of kernel alpha-equivalence. Metadata payloads remain structural.
 -/
-partial def Expr.eq : Expr → Expr → Bool
+private partial def Expr.eqSpec : Expr → Expr → Bool
   | .bvar a, .bvar b => a == b
   | .fvar a, .fvar b => Name.eq a b
   | .mvar a, .mvar b => Name.eq a b
   | .sort a, .sort b => Level.eq a b
   | .const n₁ ls₁, .const n₂ ls₂ => Name.eq n₁ n₂ && Level.listEq ls₁ ls₂
-  | .app f₁ a₁, .app f₂ a₂ => Expr.eq f₁ f₂ && Expr.eq a₁ a₂
+  | .app f₁ a₁, .app f₂ a₂ => Expr.eqSpec f₁ f₂ && Expr.eqSpec a₁ a₂
   | .lam _ t₁ b₁ _, .lam _ t₂ b₂ _ =>
-    Expr.eq t₁ t₂ && Expr.eq b₁ b₂
+    Expr.eqSpec t₁ t₂ && Expr.eqSpec b₁ b₂
   | .forallE _ t₁ b₁ _, .forallE _ t₂ b₂ _ =>
-    Expr.eq t₁ t₂ && Expr.eq b₁ b₂
+    Expr.eqSpec t₁ t₂ && Expr.eqSpec b₁ b₂
   | .letE _ t₁ v₁ b₁ d₁, .letE _ t₂ v₂ b₂ d₂ =>
-    Expr.eq t₁ t₂ && Expr.eq v₁ v₂ && Expr.eq b₁ b₂ && d₁ == d₂
+    Expr.eqSpec t₁ t₂ && Expr.eqSpec v₁ v₂ && Expr.eqSpec b₁ b₂ && d₁ == d₂
   | .lit a, .lit b => Literal.eq a b
-  | .mdata m₁ e₁, .mdata m₂ e₂ => m₁ == m₂ && Expr.eq e₁ e₂
-  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ => Name.eq n₁ n₂ && i₁ == i₂ && Expr.eq e₁ e₂
+  | .mdata m₁ e₁, .mdata m₂ e₂ => m₁ == m₂ && Expr.eqSpec e₁ e₂
+  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
+    Name.eq n₁ n₂ && i₁ == i₂ && Expr.eqSpec e₁ e₂
   | _, _ => false
+
+private abbrev ExprEqPairCache := Std.HashSet (USize × USize)
+
+private unsafe def exprEqPairKey (a b : Expr) : USize × USize :=
+  let pa := ptrAddrUnsafe a
+  let pb := ptrAddrUnsafe b
+  if pa ≤ pb then (pa, pb) else (pb, pa)
+
+/--
+Runtime implementation of Lean 4.34-style expression structural equality.
+
+The logical specification remains `Expr.eqSpec`. At runtime we additionally
+use pointer identity and memoize already-compared expression pairs, matching the
+two critical DAG-sharing fast paths used by Lean's C++ `expr_eq_fn`. The cache
+only skips a pair after the same acyclic pair has already been entered, so it
+does not change the structural-equality result.
+-/
+private unsafe partial def Expr.eqRuntimeGo
+    (left right : Expr)
+    (seen : ExprEqPairCache) : Bool × ExprEqPairCache :=
+  if ptrEq left right then
+    (true, seen)
+  else
+    let key := exprEqPairKey left right
+    if seen.contains key then
+      (true, seen)
+    else
+      let seen := seen.insert key
+      match left, right with
+      | .bvar a, .bvar b => (a == b, seen)
+      | .fvar a, .fvar b => (Name.eq a b, seen)
+      | .mvar a, .mvar b => (Name.eq a b, seen)
+      | .sort a, .sort b => (Level.eq a b, seen)
+      | .const n₁ ls₁, .const n₂ ls₂ =>
+          (Name.eq n₁ n₂ && Level.listEq ls₁ ls₂, seen)
+      | .app f₁ a₁, .app f₂ a₂ =>
+          let (argsEq, seen) := Expr.eqRuntimeGo a₁ a₂ seen
+          if !argsEq then
+            (false, seen)
+          else
+            Expr.eqRuntimeGo f₁ f₂ seen
+      | .lam _ t₁ b₁ _, .lam _ t₂ b₂ _
+      | .forallE _ t₁ b₁ _, .forallE _ t₂ b₂ _ =>
+          let (typesEq, seen) := Expr.eqRuntimeGo t₁ t₂ seen
+          if !typesEq then
+            (false, seen)
+          else
+            Expr.eqRuntimeGo b₁ b₂ seen
+      | .letE _ t₁ v₁ b₁ d₁, .letE _ t₂ v₂ b₂ d₂ =>
+          let (typesEq, seen) := Expr.eqRuntimeGo t₁ t₂ seen
+          if !typesEq then
+            (false, seen)
+          else
+            let (valuesEq, seen) := Expr.eqRuntimeGo v₁ v₂ seen
+            if !valuesEq then
+              (false, seen)
+            else
+              let (bodiesEq, seen) := Expr.eqRuntimeGo b₁ b₂ seen
+              (bodiesEq && d₁ == d₂, seen)
+      | .lit a, .lit b => (Literal.eq a b, seen)
+      | .mdata m₁ e₁, .mdata m₂ e₂ =>
+          let (exprsEq, seen) := Expr.eqRuntimeGo e₁ e₂ seen
+          (exprsEq && m₁ == m₂, seen)
+      | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
+          if !Name.eq n₁ n₂ || i₁ != i₂ then
+            (false, seen)
+          else
+            Expr.eqRuntimeGo e₁ e₂ seen
+      | _, _ => (false, seen)
+
+private unsafe def Expr.eqRuntime (left right : Expr) : Bool :=
+  let seen : ExprEqPairCache := Std.HashSet.emptyWithCapacity 64
+  (Expr.eqRuntimeGo left right seen).1
+
+@[implemented_by Expr.eqRuntime]
+partial def Expr.eq (left right : Expr) : Bool :=
+  Expr.eqSpec left right
 
 /--
 Lean 4.34 `Expr.equal`-compatible binder-aware structural equality. Use this

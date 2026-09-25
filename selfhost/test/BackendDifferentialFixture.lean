@@ -159,6 +159,126 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                   ])))
       },
       {
+        name := "diffU8Wrap"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+          },
+          {
+            name := "y"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.uint8
+              PsVerifiedIrIntegerBinaryOp.add)
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.var "y"
+            ]
+      },
+      {
+        name := "diffI16Mul"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int16
+          },
+          {
+            name := "y"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int16
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int16
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.int16
+              PsVerifiedIrIntegerBinaryOp.mul)
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.var "y"
+            ]
+      },
+      {
+        name := "diffU32Lt"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "y"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntCompare
+              PsVerifiedIrMachineIntegerType.uint32
+              PsVerifiedIrIntegerCompareOp.lt)
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.var "y"
+            ]
+      },
+      {
+        name := "diffF32Add"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
+          },
+          {
+            name := "y"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.floatBinary
+              PsVerifiedIrFloatingType.float32
+              PsVerifiedIrFloatBinaryOp.add)
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.var "y"
+            ]
+      },
+      {
+        name := "diffF64Div"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float
+          },
+          {
+            name := "y"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.floatBinary
+              PsVerifiedIrFloatingType.float
+              PsVerifiedIrFloatBinaryOp.div)
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.var "y"
+            ]
+      },
+      {
         name := "diffNat"
         typeParameters := []
         parameters := [

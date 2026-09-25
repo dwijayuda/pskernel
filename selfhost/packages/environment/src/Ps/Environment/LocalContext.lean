@@ -88,7 +88,7 @@ def psLocalPushLet
   let declaration := PsLocalDecl.letDecl id userName type value;
   {
     context := {
-      nextId := id + 1
+      nextId := Nat.succ id
       declarations := declaration :: context.declarations
     }
     id := id

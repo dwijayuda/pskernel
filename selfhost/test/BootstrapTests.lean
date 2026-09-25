@@ -2269,7 +2269,9 @@ def psTestDualSourcePartialDefinition : Bool :=
                | [declaration@(PsDeclaration.partialDecl name [] type value)] =>
                    psNameEq name (psTestName "loop")
                      && psExprHasConst (psTestName "loop") value
-                     && psDeclarationValue declaration == none
+                     && (match psDeclarationValue declaration with
+                         | none => true
+                         | some _ => false)
                      && match type with
                         | PsExpr.forallE _ _ _ PsBinderInfo.explicit => true
                         | _ => false

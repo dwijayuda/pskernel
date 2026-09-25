@@ -107,6 +107,272 @@ jobs:
             lake exe psc1 rust-coverage packages/compiler/src/Ps/Compiler.lean \
               | tee /tmp/psc-rust-compiler-coverage.txt
             grep -q '^PSC1_RUST_COVERAGE_FEATURE_COUNT:' /tmp/psc-rust-compiler-coverage.txt
+            grep -q '^PSC1_RUST_COVERAGE_UNSUPPORTED_COUNT: 0
+
+            rm -rf /tmp/psc-rust-compiler
+            mkdir -p /tmp/psc-rust-compiler/src
+            lake exe psc1 rust packages/compiler/src/Ps/Compiler.lean \
+              > /tmp/psc-rust-compiler/src/lib.rs
+            cat > /tmp/psc-rust-compiler/Cargo.toml <<'EOF'
+          [package]
+          name = "psc-rust-compiler-gate"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          num-bigint = "0.4"
+          num-traits = "0.2"
+          EOF
+            cargo check --manifest-path /tmp/psc-rust-compiler/Cargo.toml
+
+            echo "PSC1_RUST_COMPILER_COVERAGE: PASS"
+            echo "PSC1_RUST_REAL_COMPILER_CARGO_CHECK: PASS"
+          else
+            echo "PSC1_RUST_COMPILER_COVERAGE: BLOCKED_BY_SELFHOST_SOURCE_CLOSURE"
+            echo "PSC1_RUST_REAL_COMPILER_CARGO_CHECK: BLOCKED_BY_SELFHOST_SOURCE_CLOSURE"
+          fi
+
+      - name: Run Rust backend emitter tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_rust_tests
+          lake exe psc1_backend_rust_source_tests
+
+      - name: Differential TS and Rust semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+
+          rm -rf /tmp/psc-diff-ts /tmp/psc-diff-rust
+          mkdir -p /tmp/psc-diff-ts /tmp/psc-diff-rust/src
+
+          lake exe psc1_backend_diff_fixture ts > /tmp/psc-diff-ts/module.ts
+          lake exe psc1_backend_diff_fixture rust > /tmp/psc-diff-rust/src/lib.rs
+
+          npx --yes --package=typescript@5.8.3 tsc --version | grep -q "Version 5.8.3"
+          npx --yes --package=typescript@5.8.3 tsc \
+            /tmp/psc-diff-ts/module.ts \
+            --target ES2022 \
+            --module commonjs \
+            --strict \
+            --skipLibCheck \
+            --outDir /tmp/psc-diff-ts
+
+          cat > /tmp/psc-diff-ts/run.cjs <<'EOF'
+          const m = require("./module.js");
+          const lines = [
+            "nat_lt=" + m.diffNat(2n, 5n).toString(),
+            "nat_ge=" + m.diffNat(9n, 4n).toString(),
+            "int=" + m.diffInt(7n, 2n).toString(),
+            "projection=" + m.diffProjection(11n, 22n).toString(),
+            "u8_wrap=" + m.diffU8Wrap(250, 10).toString(),
+            "i16_wrap=" + m.diffI16Mul(200, 200).toString(),
+            "u32_lt=" + m.diffU32Lt(4000000000, 10).toString(),
+            "f32_add=" + m.diffF32Add(Math.fround(16777216), Math.fround(1)).toString(),
+            "f64_div=" + m.diffF64Div(7.5, 2.5).toString(),
+            "string=" + m.diffString("é").toString(),
+            "array=" + m.diffArray(7n, 8n).toString(),
+            "capture=" + m.diffCapture(5n, 7n).toString(),
+            "capture_array=" + m.diffCaptureArray(5n).toString(),
+            "maybe_some=" + m.diffMaybe(5n, 99n, true).toString(),
+            "maybe_none=" + m.diffMaybe(5n, 99n, false).toString(),
+          ];
+          process.stdout.write(lines.join("\n") + "\n");
+          EOF
+          node /tmp/psc-diff-ts/run.cjs > /tmp/psc-diff-ts.out
+
+          cat > /tmp/psc-diff-rust/Cargo.toml <<'EOF'
+          [package]
+          name = "psc-diff-rust"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          num-bigint = "0.4"
+          num-traits = "0.2"
+          EOF
+
+          cat > /tmp/psc-diff-rust/src/main.rs <<'EOF'
+          use num_bigint::{BigInt, BigUint};
+          use psc_diff_rust::{
+              diffArray,
+              diffCapture,
+              diffCaptureArray,
+              diffF32Add,
+              diffF64Div,
+              diffI16Mul,
+              diffInt,
+              diffMaybe,
+              diffNat,
+              diffProjection,
+              diffString,
+              diffU32Lt,
+              diffU8Wrap,
+          };
+
+          fn n(value: u32) -> BigUint {
+              BigUint::from(value)
+          }
+
+          fn i(value: i32) -> BigInt {
+              BigInt::from(value)
+          }
+
+          fn main() {
+              println!("nat_lt={}", diffNat(n(2), n(5)));
+              println!("nat_ge={}", diffNat(n(9), n(4)));
+              println!("int={}", diffInt(i(7), i(2)));
+              println!("projection={}", diffProjection(n(11), n(22)));
+              println!("u8_wrap={}", diffU8Wrap(250u8, 10u8));
+              println!("i16_wrap={}", diffI16Mul(200i16, 200i16));
+              println!("u32_lt={}", diffU32Lt(4_000_000_000u32, 10u32));
+              println!("f32_add={}", diffF32Add(16_777_216.0f32, 1.0f32));
+              println!("f64_div={}", diffF64Div(7.5f64, 2.5f64));
+              println!("string={}", diffString(String::from("é")));
+              println!("array={}", diffArray(n(7), n(8)));
+              println!("capture={}", diffCapture(n(5), n(7)));
+              println!("capture_array={}", diffCaptureArray(n(5)));
+              println!("maybe_some={}", diffMaybe(n(5), n(99), true));
+              println!("maybe_none={}", diffMaybe(n(5), n(99), false));
+          }
+          EOF
+
+          cargo run --quiet --manifest-path /tmp/psc-diff-rust/Cargo.toml \
+            > /tmp/psc-diff-rust.out
+
+          cat > /tmp/psc-diff-expected.out <<'EOF'
+          nat_lt=7
+          nat_ge=5
+          int=-5
+          projection=11
+          u8_wrap=4
+          i16_wrap=-25536
+          u32_lt=false
+          f32_add=16777216
+          f64_div=3
+          string=3
+          array=8
+          capture=12
+          capture_array=7
+          maybe_some=5
+          maybe_none=99
+          EOF
+
+          diff -u /tmp/psc-diff-expected.out /tmp/psc-diff-ts.out
+          diff -u /tmp/psc-diff-expected.out /tmp/psc-diff-rust.out
+          diff -u /tmp/psc-diff-ts.out /tmp/psc-diff-rust.out
+          cat /tmp/psc-diff-rust.out
+          echo "PSC1_BACKEND_TS_RUST_DIFFERENTIAL: PASS"
+
+      - name: Compile generated Rust fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          rm -rf /tmp/psc-rust-fixture
+          mkdir -p /tmp/psc-rust-fixture/src
+          lake exe psc1_backend_rust_fixture > /tmp/psc-rust-fixture/src/lib.rs
+          lake exe psc1_backend_rust_fixture > /tmp/psc-rust-fixture/lib.second.rs
+          cmp /tmp/psc-rust-fixture/src/lib.rs /tmp/psc-rust-fixture/lib.second.rs
+          echo "PSC1_BACKEND_RUST_DETERMINISTIC_SOURCE: PASS"
+
+          cat > /tmp/psc-rust-fixture/Cargo.toml <<'EOF'
+          [package]
+          name = "psc-rust-fixture"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          num-bigint = "0.4"
+          num-traits = "0.2"
+          EOF
+
+          cargo check --manifest-path /tmp/psc-rust-fixture/Cargo.toml
+
+      - name: Execute generated Rust semantic smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/psc-rust-fixture/tests
+          cat > /tmp/psc-rust-fixture/tests/runtime.rs <<'EOF'
+          use num_bigint::BigUint;
+          use psc_rust_fixture::{
+              addGlobalOne,
+              arrayDemo,
+              arrayFoldOnly,
+              arrayMapDemo,
+              countDown,
+              genericArrayId,
+              idFloat,
+              idFloat32,
+              idISize,
+              idInt16,
+              idInt32,
+              idInt64,
+              idInt8,
+              idUInt16,
+              idUInt32,
+              idUInt64,
+              idUInt8,
+              idUSize,
+              one,
+              pairLeft,
+              plusOne,
+              pushBang,
+              shadowOne,
+              unwrapOr,
+              utf8Size,
+              wrapNat,
+              Maybe,
+              Pair,
+          };
+
+          fn n(value: u32) -> BigUint {
+              BigUint::from(value)
+          }
+
+          #[test]
+          fn generated_semantics_smoke() {
+              assert_eq!(countDown(n(8)), n(0));
+              assert_eq!(one(), n(1));
+              assert_eq!(addGlobalOne(n(41)), n(42));
+              assert_eq!(shadowOne(n(7)), n(7));
+              assert_eq!(idUInt8(255u8), 255u8);
+              assert_eq!(idUInt16(65535u16), 65535u16);
+              assert_eq!(idUInt32(4_000_000_000u32), 4_000_000_000u32);
+              assert_eq!(idUInt64(18_000_000_000u64), 18_000_000_000u64);
+              assert_eq!(idUSize(123usize), 123usize);
+              assert_eq!(idInt8(-12i8), -12i8);
+              assert_eq!(idInt16(-1234i16), -1234i16);
+              assert_eq!(idInt32(-123456i32), -123456i32);
+              assert_eq!(idInt64(-123456789i64), -123456789i64);
+              assert_eq!(idISize(-123isize), -123isize);
+              assert_eq!(idFloat(1.25f64), 1.25f64);
+              assert_eq!(idFloat32(1.25f32), 1.25f32);
+              assert_eq!(plusOne(n(41)), n(42));
+              assert_eq!(pairLeft(Pair { left: n(11), right: n(22) }), n(11));
+              assert_eq!(pushBang(String::from("hi")), "hi!");
+              assert_eq!(utf8Size(String::from("é")), n(2));
+              assert_eq!(
+                  arrayMapDemo(vec![n(1), n(2)]),
+                  vec![n(1), n(2)],
+              );
+              assert_eq!(
+                  genericArrayId(vec![String::from("a"), String::from("b")]),
+                  vec![String::from("a"), String::from("b")],
+              );
+              assert_eq!(arrayFoldOnly(vec![n(4), n(5)]), n(0));
+              assert_eq!(arrayDemo(n(7), n(8)), n(8));
+              assert_eq!(unwrapOr(wrapNat(n(5)), n(99)), n(5));
+              assert_eq!(unwrapOr(Maybe::none {}, n(99)), n(99));
+          }
+          EOF
+          cd selfhost
+          cargo test --manifest-path /tmp/psc-rust-fixture/Cargo.toml
+ /tmp/psc-rust-compiler-coverage.txt
 
             rm -rf /tmp/psc-rust-compiler
             mkdir -p /tmp/psc-rust-compiler/src

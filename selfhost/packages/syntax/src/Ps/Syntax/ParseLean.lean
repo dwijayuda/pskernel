@@ -758,14 +758,14 @@ def psParseLeanDependentArrowTail
 def psLeanPatternBinderName
     (token : PsToken)
     (fallback : String) : PsSyntaxName :=
+  let segment :=
+    if psStringEq token.text "_" then
+      fallback
+    else
+      token.text;
   {
     segments :=
-      List.cons
-        (if psStringEq token.text "_" then
-          fallback
-        else
-          token.text)
-        List.nil
+      List.cons segment List.nil
     span := token.span
   }
 

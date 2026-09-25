@@ -503,7 +503,7 @@ def assertDeclarationAdmissionOracle : IO Unit := do
     { base := pBase, isUnsafe := false }
 
   let ours0 : PSC1Kernel.Environment := .empty
-  let lean0 ← Lean.mkEmptyEnvironment
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
   let ours1 ← exceptToIO "PSC1 add axiom" (PSC1Kernel.Kernel.addAxiom ours0 pAxiom)
   let lean1 ←
     match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {

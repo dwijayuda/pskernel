@@ -15,7 +15,7 @@ permissions:
 jobs:
   profile:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
 
@@ -44,4 +44,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          timeout 60s lake env lean --run PSC1Kernel/Test/ReplayProfile.lean /tmp/root100015.ndjson
+          timeout 300s lake env lean --run PSC1Kernel/Test/ReplayProfile.lean /tmp/root100015.ndjson

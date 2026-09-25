@@ -787,15 +787,18 @@ def psTestWasmRecursiveListLowering : Bool :=
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
+    functionTypes := []
     functions := [
       {
         name := "answer"
+        typeName := none
         parameters := []
         results := [PsWasmValueType.i32]
         locals := []
         body := [PsWasmInstruction.i32Const 42]
       }
     ]
+    functionRefs := []
     exports := [("answer", "answer")]
   }
 

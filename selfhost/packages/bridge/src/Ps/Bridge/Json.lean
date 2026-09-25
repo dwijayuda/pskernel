@@ -796,20 +796,31 @@ inductive PsJsonKeyOrder where
   | eq
   | gt
 
-def psJsonCompareCharLists :
-    List Char -> List Char -> PsJsonKeyOrder
-  | [], [] => PsJsonKeyOrder.eq
-  | [], _ :: _ => PsJsonKeyOrder.lt
-  | _ :: _, [] => PsJsonKeyOrder.gt
-  | left :: leftRest, right :: rightRest =>
-      let leftValue : Nat := psJsonCharCode left;
-      let rightValue : Nat := psJsonCharCode right;
-      if Nat.blt leftValue rightValue then
-        PsJsonKeyOrder.lt
-      else if Nat.blt rightValue leftValue then
-        PsJsonKeyOrder.gt
-      else
-        psJsonCompareCharLists leftRest rightRest
+def psJsonCompareCharLists
+    (leftChars : List Char) :
+    List Char -> PsJsonKeyOrder :=
+  match leftChars with
+  | List.nil =>
+      fun (rightChars : List Char) =>
+        match rightChars with
+        | List.nil => PsJsonKeyOrder.eq
+        | List.cons _ _ => PsJsonKeyOrder.lt
+  | List.cons left leftRest =>
+      let smaller : List Char -> PsJsonKeyOrder :=
+        psJsonCompareCharLists leftRest;
+      fun (rightChars : List Char) =>
+        match rightChars with
+        | List.nil =>
+            PsJsonKeyOrder.gt
+        | List.cons right rightRest =>
+            let leftValue : Nat := psJsonCharCode left;
+            let rightValue : Nat := psJsonCharCode right;
+            if Nat.blt leftValue rightValue then
+              PsJsonKeyOrder.lt
+            else if Nat.blt rightValue leftValue then
+              PsJsonKeyOrder.gt
+            else
+              smaller rightRest
 
 def psJsonCompareKeys
     (left right : String) : PsJsonKeyOrder :=

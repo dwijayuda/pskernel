@@ -920,8 +920,9 @@ def psElabInductiveDeclaration
             match resultType with
             | none =>
                 Except.ok
-                  (parameters.context,
-                    PsExpr.sortE (PsLevel.succ PsLevel.zero))
+                  (Prod.mk
+                    parameters.context
+                    (PsExpr.sortE (PsLevel.succ PsLevel.zero)))
             | some sourceType =>
                 match psElabTerm
                     parameters.context

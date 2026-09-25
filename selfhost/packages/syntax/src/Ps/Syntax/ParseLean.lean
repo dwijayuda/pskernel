@@ -2169,7 +2169,7 @@ partial def psLeanLowerEquationClauses
         none
       else
         let lowerAlternative :=
-          fun pattern =>
+          fun (pattern : PsSyntaxPattern) =>
             let branchClauses :=
               psLeanEquationClausesForBranch
                 pattern

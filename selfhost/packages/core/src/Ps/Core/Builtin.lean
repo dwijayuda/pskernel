@@ -51,6 +51,12 @@ def psIntSubName : PsName :=
 def psIntMulName : PsName :=
   psNameAppendStr psIntName "mul"
 
+def psListName : PsName :=
+  psRootName "List"
+
+def psOptionName : PsName :=
+  psRootName "Option"
+
 def psProdName : PsName :=
   psRootName "Prod"
 

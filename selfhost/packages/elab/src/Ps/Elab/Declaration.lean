@@ -357,7 +357,9 @@ def psAddDeclarationList
   | declaration :: rest =>
       let name := psDeclarationName declaration
       let nextResult :=
-        if psNameEq name psProdName then
+        if psNameEq name psProdName
+            || psNameEq name psListName
+            || psNameEq name psOptionName then
           psEnvironmentAddReplacingAxiom
             environment
             declaration

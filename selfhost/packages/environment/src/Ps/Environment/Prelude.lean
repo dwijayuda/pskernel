@@ -27,6 +27,12 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let boolType := PsExpr.constE psBoolName []
   let unitType := PsExpr.constE psUnitName []
   let charType := PsExpr.constE psCharName []
+  let unaryTypeConstructorType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      typeType
+      PsBinderInfo.explicit
   let prodType :=
     PsExpr.forallE
       alphaName
@@ -478,8 +484,16 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let envText9 :=
     psPreludeAdd envText8
       (PsDeclaration.axiomDecl psStringExtractName [] stringExtractType)
-  let envProd0 :=
+  let envList0 :=
     psPreludeAdd envText9
+      (PsDeclaration.axiomDecl
+        psListName [] unaryTypeConstructorType)
+  let envOption0 :=
+    psPreludeAdd envList0
+      (PsDeclaration.axiomDecl
+        psOptionName [] unaryTypeConstructorType)
+  let envProd0 :=
+    psPreludeAdd envOption0
       (PsDeclaration.axiomDecl psProdName [] prodType)
   let envArray0 :=
     psPreludeAdd envProd0

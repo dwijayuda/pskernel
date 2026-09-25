@@ -1476,6 +1476,16 @@ def psTestLeanNestedMatchDedentParse : Bool :=
                    _ => true
                | _ => false
 
+def psTestPreludeCollectionTypeConstructors : Bool :=
+  psEnvironmentContains psBootstrapPreludeEnvironment psListName
+    && psEnvironmentContains psBootstrapPreludeEnvironment psOptionName
+    && match
+        psEnvironmentFind psBootstrapPreludeEnvironment psListName,
+        psEnvironmentFind psBootstrapPreludeEnvironment psOptionName with
+       | some (PsDeclaration.axiomDecl _ _ _),
+         some (PsDeclaration.axiomDecl _ _ _) => true
+       | _, _ => false
+
 def psTestLeanProductInsideApplicationParse : Bool :=
   let source := "List (Nat × String)"
   match psLex source with
@@ -2373,6 +2383,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source Bool literal", passed := psTestDualSourceBoolLiteral },
   { name := "dual-source if", passed := psTestDualSourceIf },
   { name := "inductive metadata lookup", passed := psTestInductiveMetadataLookup },
+  { name := "bootstrap List/Option type constructors", passed := psTestPreludeCollectionTypeConstructors },
   { name := "Lean product inside application parse", passed := psTestLeanProductInsideApplicationParse },
   { name := "dual-source basic match parse", passed := psTestDualSourceBasicMatchParse },
   { name := "Lean nested match dedent parse", passed := psTestLeanNestedMatchDedentParse },

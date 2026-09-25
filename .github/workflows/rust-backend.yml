@@ -174,6 +174,12 @@ jobs:
             "u32_lt=" + m.diffU32Lt(4000000000, 10).toString(),
             "f32_add=" + m.diffF32Add(Math.fround(16777216), Math.fround(1)).toString(),
             "f64_div=" + m.diffF64Div(7.5, 2.5).toString(),
+            "string_length=" + m.diffStringLength("aé😀").toString(),
+            "string_next=" + m.diffStringNext("éx", 0n).toString(),
+            "string_get=" + m.diffStringGet("éx", 2n),
+            "string_at_end=" + m.diffStringAtEnd("é", 2n).toString(),
+            "string_extract=" + m.diffStringExtract("aéz", 1n, 3n),
+            "string_eq=" + m.diffStringEq("hé", "hé").toString(),
             "string=" + m.diffString("é").toString(),
             "array=" + m.diffArray(7n, 8n).toString(),
             "reuse_capture=" + m.diffReuseCapture(5n).toString(),
@@ -213,6 +219,12 @@ jobs:
               diffReuseCapture,
               diffReuseString,
               diffString,
+              diffStringAtEnd,
+              diffStringEq,
+              diffStringExtract,
+              diffStringGet,
+              diffStringLength,
+              diffStringNext,
               diffU32Lt,
               diffU8Wrap,
           };
@@ -236,6 +248,12 @@ jobs:
               println!("u32_lt={}", diffU32Lt(4_000_000_000u32, 10u32));
               println!("f32_add={}", diffF32Add(16_777_216.0f32, 1.0f32));
               println!("f64_div={}", diffF64Div(7.5f64, 2.5f64));
+              println!("string_length={}", diffStringLength(String::from("aé😀")));
+              println!("string_next={}", diffStringNext(String::from("éx"), n(0)));
+              println!("string_get={}", diffStringGet(String::from("éx"), n(2)));
+              println!("string_at_end={}", diffStringAtEnd(String::from("é"), n(2)));
+              println!("string_extract={}", diffStringExtract(String::from("aéz"), n(1), n(3)));
+              println!("string_eq={}", diffStringEq(String::from("hé"), String::from("hé")));
               println!("string={}", diffString(String::from("é")));
               println!("array={}", diffArray(n(7), n(8)));
               println!("reuse_capture={}", diffReuseCapture(n(5)));
@@ -260,6 +278,12 @@ jobs:
           u32_lt=false
           f32_add=16777216
           f64_div=3
+          string_length=3
+          string_next=2
+          string_get=x
+          string_at_end=true
+          string_extract=é
+          string_eq=true
           string=3
           array=8
           reuse_capture=13

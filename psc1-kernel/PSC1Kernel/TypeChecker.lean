@@ -1221,6 +1221,7 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
     let _ ← ensureSort ctx typeType
     let (fresh, child) := ctx.withLocal name type binderInfo
     let bodyType ← infer child (body.instantiate1 (.fvar fresh))
+    let bodyType := bodyType.cheapBetaReduce
     .ok (.forallE name type (bodyType.abstractFVars [fresh]) binderInfo)
   | .forallE name type body binderInfo => do
     let typeType ← infer ctx type
@@ -1239,9 +1240,9 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
     else
       let (fresh, child) := ctx.withLet name type value
       let bodyType ← infer child (body.instantiate1 (.fvar fresh))
-      -- Lean 4.34 closes a used let-local as a let binder in the inferred
-      -- type. Returning only an abstraction would leave its bvar loose and
-      -- let an enclosing binder capture it.
+      let bodyType := bodyType.cheapBetaReduce
+      -- Lean 4.34 cheap-beta-reduces the inferred let body type before
+      -- closing the let-local back into the result.
       .ok (.letE name type value (bodyType.abstractFVars [fresh]) nondep)
   | .proj typeName idx struct => inferProj ctx typeName idx struct
 

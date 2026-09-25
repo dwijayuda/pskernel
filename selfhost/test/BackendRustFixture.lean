@@ -42,6 +42,90 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
     ]
     declarations := [
       {
+        name := "idUInt8"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8 }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idUInt16"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint16 }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint16
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idUInt32"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32 }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idUInt64"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint64 }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint64
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idUSize"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.usize }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.usize
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idInt8"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int8 }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int8
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idInt16"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int16 }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int16
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idInt32"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32 }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idInt64"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int64 }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int64
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idISize"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.isize }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.isize
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idFloat"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "idFloat32"
+        typeParameters := []
+        parameters := [{ name := "x", type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32 }]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
         name := "one"
         typeParameters := []
         parameters := []

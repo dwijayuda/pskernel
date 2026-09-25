@@ -88,7 +88,8 @@ lean_lib PsHost where
   srcDir := "host/src"
   roots := #[
     `Ps.Host.TypeScriptCompiler,
-    `Ps.Host.ProjectCompiler
+    `Ps.Host.ProjectCompiler,
+    `Ps.Host.KernelBridge
   ]
 
 lean_lib PsProject where
@@ -139,3 +140,7 @@ lean_exe psc1_backend_ts_tests where
 lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests
+
+lean_exe psc1_bridge_host_tests where
+  srcDir := "test"
+  root := `BridgeHostTests

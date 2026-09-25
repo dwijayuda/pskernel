@@ -30,6 +30,7 @@ inductive PsWasmInstruction where
   | localSet (index : Nat)
   | call (name : String)
   | return_
+  | drop
   | ifStart (result : Option PsWasmValueType)
   | else_
   | end_

@@ -951,8 +951,17 @@ def psElabInductiveDeclaration
                 psMetaInstantiate
                   headerContext.metaContext
                   openResultType;
-              match instantiatedResultType with
-              | PsExpr.sortE (PsLevel.succ PsLevel.zero) =>
+              let resultTypeIsSortOne :=
+                match instantiatedResultType with
+                | PsExpr.sortE level =>
+                    match level with
+                    | PsLevel.succ innerLevel =>
+                        match innerLevel with
+                        | PsLevel.zero => true
+                        | _ => false
+                    | _ => false
+                | _ => false;
+              if resultTypeIsSortOne then
                   let inductiveType :=
                     psCloseElabForallBinders
                       headerContext.metaContext
@@ -1032,7 +1041,7 @@ def psElabInductiveDeclaration
                                             constructorDeclarations)
                                           (List.cons recursor List.nil)
                                     }
-              | _ =>
+              else
                   Except.error PsElabError.unsupportedTerm
 
 

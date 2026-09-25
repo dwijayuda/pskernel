@@ -579,11 +579,11 @@ def psRustCoverageReport
   let featureLines :=
     psRustCoverageLines
       "PSC1_RUST_COVERAGE_FEATURE: "
-      psRustCoverageReverse coverage.features;
+      (psRustCoverageReverse coverage.features);
   let namedTypeLines :=
     psRustCoverageLines
       "PSC1_RUST_COVERAGE_NAMED_TYPE: "
-      psRustCoverageReverse coverage.namedTypes;
+      (psRustCoverageReverse coverage.namedTypes);
   psRustConcat2
     (psRustJoin
       "\n"
@@ -591,11 +591,11 @@ def psRustCoverageReport
         (List.cons
           (psRustConcat2
             "PSC1_RUST_COVERAGE_FEATURE_COUNT: "
-            (toString psRustCoverageLength coverage.features))
+            (toString (psRustCoverageLength coverage.features)))
           featureLines)
         (List.cons
           (psRustConcat2
             "PSC1_RUST_COVERAGE_NAMED_TYPE_COUNT: "
-            (toString psRustCoverageLength coverage.namedTypes))
+            (toString (psRustCoverageLength coverage.namedTypes)))
           namedTypeLines)))
     "\n"

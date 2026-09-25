@@ -21,7 +21,7 @@ const RESERVED_APPLICATION_HEADS=new Set([
 function canStartLeanAtom(token:Token):boolean {
   if(token.kind==='number'||token.kind==='string'||token.kind==='char')return true;
   if(
-    token.text==='('||token.text==='?'||token.text==='.'||
+    token.text==='('||token.text==='['||token.text==='?'||token.text==='.'||
     token.text==='true'||token.text==='false'
   ){
     return true;
@@ -101,6 +101,33 @@ export class V061LeanSubsetExpressionParser {
       args,
       span:{start:first.span.start,end:args[args.length-1]!.span.end},
     };
+  }
+
+  private parseListLiteral():V061Expr {
+    const open=this.context.cursor.expect('[');
+    const items:V061Expr[]=[];
+    if(!this.context.cursor.at(']')){
+      while(true){
+        items.push(this.parse());
+        if(!this.context.cursor.consumeIf(','))break;
+      }
+    }
+    const close=this.context.cursor.expect(']');
+    let result:V061Expr={
+      kind:'reference',
+      name:'List.nil',
+      span:{start:open.span.start,end:close.span.end},
+    };
+    for(let index=items.length-1;index>=0;index-=1){
+      const item=items[index]!;
+      result={
+        kind:'call',
+        callee:'List.cons',
+        args:[item,result],
+        span:{start:item.span.start,end:close.span.end},
+      };
+    }
+    return result;
   }
 
   private parseLambda():V061Expr {
@@ -221,6 +248,9 @@ export class V061LeanSubsetExpressionParser {
         value:token.value??'',
         span:token.span,
       };
+    }
+    if(token.text==='['){
+      return this.parseListLiteral();
     }
     if(token.text==='.'){
       const dot=this.context.cursor.consume();

@@ -6,6 +6,19 @@ def psJsonConcat3
     (first second third : String) : String :=
   psJsonConcat2 first (psJsonConcat2 second third)
 
+def psJsonCharCode (char : Char) : Nat :=
+  char.val.toNat
+
+def psJsonCharEq (left right : Char) : Bool :=
+  Nat.beq (psJsonCharCode left) (psJsonCharCode right)
+
+def psJsonNatInRange
+    (value lower upper : Nat) : Bool :=
+  if Nat.ble lower value then
+    Nat.ble value upper
+  else
+    false
+
 def psJsonHexDigit (value : Nat) : String :=
   if Nat.beq value 0 then "0"
   else if Nat.beq value 1 then "1"
@@ -115,10 +128,14 @@ structure PsJsonParseResult where
   rest : List Char
 
 def psJsonWhitespace (char : Char) : Bool :=
-  char == ' '
-    || char == '\n'
-    || char == '\r'
-    || char == '\t'
+  if psJsonCharEq char ' ' then
+    true
+  else if psJsonCharEq char '\n' then
+    true
+  else if psJsonCharEq char '\r' then
+    true
+  else
+    psJsonCharEq char '\t'
 
 def psJsonSkipWhitespace : List Char -> List Char
   | [] => []
@@ -129,13 +146,13 @@ def psJsonSkipWhitespace : List Char -> List Char
         char :: rest
 
 def psJsonHexValue (char : Char) : Option Nat :=
-  let value := char.val.toNat
-  if value >= 48 && value <= 57 then
-    some (value - 48)
-  else if value >= 65 && value <= 70 then
-    some (value - 55)
-  else if value >= 97 && value <= 102 then
-    some (value - 87)
+  let value : Nat := psJsonCharCode char;
+  if psJsonNatInRange value 48 57 then
+    some (Nat.sub value 48)
+  else if psJsonNatInRange value 65 70 then
+    some (Nat.sub value 55)
+  else if psJsonNatInRange value 97 102 then
+    some (Nat.sub value 87)
   else
     none
 
@@ -206,8 +223,8 @@ def psJsonParseStringChars :
         psJsonParseStringChars fuel rest (char :: charsRev)
 
 def psJsonDigit (char : Char) : Bool :=
-  let value := char.val.toNat
-  value >= 48 && value <= 57
+  let value : Nat := psJsonCharCode char;
+  psJsonNatInRange value 48 57
 
 def psJsonTakeDigits :
     List Char -> List Char -> List Char × List Char

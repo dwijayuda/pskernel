@@ -331,6 +331,21 @@ def psTestBackendRustScalarTypes : Bool :=
     && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.float == "f64"
     && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.float32 == "f32"
 
+def psTestBackendRustIdentifiers : Bool :=
+  psStringEq (psRustIdentifier "type") "r#type"
+    && psStringEq (psRustIdentifier "fn") "r#fn"
+    && psStringEq (psRustIdentifier "self") "__ps_kw_self"
+    && psStringEq (psRustIdentifier "Self") "__ps_kw_Self"
+    && psStringEq
+      (psRustIdentifier "value$1")
+      "__psr_value_u36_1"
+    && psStringEq
+      (psRustIdentifier "9value")
+      "__psr_9value"
+    && psStringEq
+      (psRustIdentifier "__psr_value")
+      "__psr___psr_value"
+
 structure PsBackendRustNamedTest where
   name : String
   passed : Bool
@@ -342,7 +357,8 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "Char and String intrinsics", passed := psTestBackendRustStringIntrinsics },
   { name := "Array intrinsics", passed := psTestBackendRustArrayIntrinsics },
   { name := "top-level values and shadowing", passed := psTestBackendRustValues },
-  { name := "frozen PSC1 scalar mappings", passed := psTestBackendRustScalarTypes }
+  { name := "frozen PSC1 scalar mappings", passed := psTestBackendRustScalarTypes },
+  { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers }
 ]
 
 def psRunBackendRustTests : List PsBackendRustNamedTest -> IO Bool

@@ -244,7 +244,7 @@ jobs:
             Lean.PersistentHashMap.insert Lean.PersistentHashMap.find? \
             Lean.assignExp \
             Lean.assignLevelMVarExp Lean.getLevelMVarAssignmentExp \
-            Lean.instantiateLevelMVarsImp Lean.instantiateExprMVarsImp \
+            Lean.instantiateLevelMVarsImp Lean.instantiateExprMVarsImp Lean.instantiateMVarsCore \
             Lean.MetavarContext.getExprAssignmentExp \
             Lean.MetavarContext.getDelayedMVarAssignmentExp \
             ProofScript.RuntimeProbe.firstBucketIndex \

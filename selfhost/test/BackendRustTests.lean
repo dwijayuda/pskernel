@@ -364,6 +364,46 @@ def psTestBackendRustIdentifiers : Bool :=
       (psRustIdentifier "__psr_value")
       "__psr___psr_value"
 
+def psBackendRustFirstOrderCallbackModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "applyNatCallback"
+        typeParameters := []
+        parameters := [
+          {
+            name := "f"
+            type :=
+              PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+          },
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "f")
+            []
+            [PsVerifiedIrExpr.var "x"]
+      }
+    ]
+  }
+
+def psTestBackendRustFirstOrderCallback : Bool :=
+  match psRustEmitModule psBackendRustFirstOrderCallbackModule with
+  | Except.error _ =>
+      false
+  | Except.ok output =>
+      output.contains
+        "pub fn applyNatCallback(f: impl Fn(PsNat) -> PsNat, x: PsNat) -> PsNat"
+
 def psBackendRustFunctionStorageModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -602,6 +642,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "frozen PSC1 scalar mappings", passed := psTestBackendRustScalarTypes },
   { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers },
   { name := "reject generic top-level values", passed := psTestBackendRustRejectsGenericValue },
+  { name := "accept first-order callback parameters", passed := psTestBackendRustFirstOrderCallback },
   { name := "reject function-valued results", passed := psTestBackendRustRejectsFunctionResult },
   { name := "reject stored function values", passed := psTestBackendRustRejectsFunctionStorage },
   { name := "reject nested function parameters", passed := psTestBackendRustRejectsNestedFunctionParameter },

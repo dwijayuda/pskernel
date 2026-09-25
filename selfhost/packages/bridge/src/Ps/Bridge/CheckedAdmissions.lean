@@ -12,7 +12,7 @@ inductive PsCheckedAdmissionCodecError where
 def psEncodeCodecName : PsName -> String
   | .anonymous =>
       psJsonObject [
-        ("k", psJsonQuote "a")
+        Prod.mk "k" (psJsonQuote "a")
       ]
   | .str parent value =>
       psJsonObject [

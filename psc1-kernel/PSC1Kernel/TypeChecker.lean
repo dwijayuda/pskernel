@@ -44,6 +44,25 @@ def CheckerContext.withLet
   let lctx := ctx.lctx.addLet fresh userName type value
   (fresh, { ctx with lctx := lctx })
 
+def reduceProjCore
+    (ctx : CheckerContext)
+    (typeName : Name)
+    (idx : Nat)
+    (struct : Expr) : Option Expr :=
+  let fn := struct.getAppFn
+  let args := struct.getAppArgs
+  match fn with
+  | .const ctorName _ =>
+    match ctx.env.find? ctorName with
+    | some (.ctorInfo ctor) =>
+      if !Name.eq ctor.induct typeName then
+        none
+      else
+        listGet? args (ctor.numParams + idx)
+    | _ => none
+  | _ => none
+
+
 partial def whnf (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with
   | .mdata _ body => whnf ctx body
@@ -131,24 +150,6 @@ partial def ensureForall
   | .forallE name domain body binderInfo => .ok (name, domain, body, binderInfo)
   | _ => .error "expected function type"
 
-
-def reduceProjCore
-    (ctx : CheckerContext)
-    (typeName : Name)
-    (idx : Nat)
-    (struct : Expr) : Option Expr :=
-  let fn := struct.getAppFn
-  let args := struct.getAppArgs
-  match fn with
-  | .const ctorName _ =>
-    match ctx.env.find? ctorName with
-    | some (.ctorInfo ctor) =>
-      if !Name.eq ctor.induct typeName then
-        none
-      else
-        listGet? args (ctor.numParams + idx)
-    | _ => none
-  | _ => none
 
 mutual
 
@@ -243,7 +244,7 @@ partial def inferProj
       else
         let some (.ctorInfo ctor) := ctx.env.find? ctorName
           | .error "invalid projection: constructor metadata missing"
-        let mut r := ctor.base.type.instantiateLevelParams ctor.base.levelParams inductLevels
+        let r0 := ctor.base.type.instantiateLevelParams ctor.base.levelParams inductLevels
         let rec applyParams (i : Nat) (r : Expr) : Except String Expr := do
           if i < induct.numParams then
             let r' ← whnf ctx r
@@ -254,7 +255,7 @@ partial def inferProj
             applyParams (i + 1) (body.instantiate1 arg)
           else
             .ok r
-        r ← applyParams 0 r
+        let r1 ← applyParams 0 r0
         let propType ← isProp ctx type
         let rec skipFields (i : Nat) (r : Expr) : Except String Expr := do
           if i < idx then
@@ -274,9 +275,9 @@ partial def inferProj
               skipFields (i + 1) body
           else
             .ok r
-        r ← skipFields 0 r
-        let r ← whnf ctx r
-        let .forallE _ domain _ _ := r
+        let r2 ← skipFields 0 r1
+        let r3 ← whnf ctx r2
+        let .forallE _ domain _ _ := r3
           | .error "invalid projection index"
         if propType then
           let domainProp ← isProp ctx domain

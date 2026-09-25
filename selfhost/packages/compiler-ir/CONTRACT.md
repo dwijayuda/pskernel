@@ -28,6 +28,11 @@ Backend representation belongs after this boundary.
   binary encoding;
 - target-specific object layout, calling convention or allocation policy.
 
+Machine integer literals carry their PSC machine-integer type in VerifiedIR.
+The literal value must already denote the PSC semantic value produced by
+elaboration/erasure; backend code must not infer its width from surrounding
+TypeScript, Rust or Wasm representation.
+
 ## Backend structure
 
 ```text

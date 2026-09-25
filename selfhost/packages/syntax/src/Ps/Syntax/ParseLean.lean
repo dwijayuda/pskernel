@@ -1098,7 +1098,7 @@ def psParseLeanMatchAlternativesWithFuel
         cursor := cursor
       }
   | some token =>
-      if token.text == "|" then
+      if psStringEq token.text "|" then
         psParseLeanMatchAlternativesAtColumnWithFuel
           parseTerm
           token.span.start.column
@@ -2350,9 +2350,9 @@ def psParseLeanDeclaration
   match psTokenCursorPeek cursor with
   | none => Except.error (PsParseError.unexpectedEnd "declaration")
   | some keyword =>
-      if keyword.text == "inductive" then
+      if psStringEq keyword.text "inductive" then
         psParseLeanInductiveDeclaration cursor
-      else if keyword.text == "structure" then
+      else if psStringEq keyword.text "structure" then
         psParseLeanStructureDeclaration cursor
       else
         let isPartial := psStringEq keyword.text "partial";

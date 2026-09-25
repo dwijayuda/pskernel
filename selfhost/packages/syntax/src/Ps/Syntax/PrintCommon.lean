@@ -35,6 +35,27 @@ def psPrintSyntaxName (name : PsSyntaxName) :
   | List.nil => Except.error PsSourcePrintError.emptyName
   | List.cons _ _ => Except.ok (psPrintJoin "." segments)
 
+def psPrintSyntaxNames
+    (names : List PsSyntaxName) :
+    Except PsSourcePrintError (List String) :=
+  match names with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons name rest =>
+      let printedHeadResult :=
+        psPrintSyntaxName name;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintSyntaxNames rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintBinderDelimiters
     (kind : PsSyntaxBinderKind) : Prod String String :=
   match kind with
@@ -60,9 +81,8 @@ def psPrintPattern
       match printedNameResult with
       | Except.error error => Except.error error
       | Except.ok printedName =>
-          let printedBindersResult :
-              Except PsSourcePrintError (List String) :=
-            binders.mapM psPrintSyntaxName;
+          let printedBindersResult :=
+            psPrintSyntaxNames binders;
           match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>

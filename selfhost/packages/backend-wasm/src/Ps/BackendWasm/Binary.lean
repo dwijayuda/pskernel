@@ -256,6 +256,8 @@ def psWasmEncodeInstruction
     (instruction : PsWasmInstruction) :
     Except PsWasmEncodeError (List UInt8) :=
   match instruction with
+  | .unreachable => Except.ok [psWasmByte 0]
+  | .drop => Except.ok [psWasmByte 26]
   | .localGet index =>
       Except.ok (psWasmByte 32 :: psWasmEncodeUleb index)
   | .localSet index =>

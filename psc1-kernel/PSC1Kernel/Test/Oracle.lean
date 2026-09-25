@@ -313,7 +313,7 @@ def assertEagerReduceOracle : IO Unit := do
     (PSC1Kernel.Expr.eq oursWrapped natT)
 
   Lean.initSearchPath (← Lean.findSysroot)
-  let leanPrelude ← Lean.importModules #[{ module := `Init.Prelude }] {}
+  let leanPrelude ← Lean.importModules #[{ module := `Init.Core }] {}
   let lean0 := leanPrelude.toKernelEnv
   let lean1 ←
     match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {

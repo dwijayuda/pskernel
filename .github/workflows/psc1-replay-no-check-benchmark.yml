@@ -1,0 +1,46 @@
+name: PSC1 replay no-check benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [diagnostic/psc1-replay-no-check]
+    paths:
+      - ".github/workflows/psc1-replay-no-check-benchmark.yml"
+      - "psc1-kernel/**"
+
+permissions:
+  contents: read
+
+jobs:
+  root100015:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build replay executable
+        working-directory: psc1-kernel
+        run: lake build psc1_replay
+      - name: Replay root 100015 without declaration checking
+        shell: bash
+        env:
+          PSC1_LEAN_STD_CHUNK: "1"
+          PSC1_LEAN_EXPORT_TIMEOUT_MS: "180000"
+          PSC1_LEAN_REPLAY_TIMEOUT_MS: "600000"
+          PSC1_LEAN_REPLAY_BIN: "psc1-kernel/.lake/build/bin/psc1_replay"
+        run: |
+          set -euo pipefail
+          start=$(date +%s)
+          node scripts/psc1-lean-std-release-profile.mjs --label root-100015-no-check --start 100015 --count 1 --chunk 1
+          stop=$(date +%s)
+          echo "elapsed_seconds=$((stop-start))"

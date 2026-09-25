@@ -951,7 +951,7 @@ def psExprAppViewAcc
     (args : List PsExpr) : PsExprAppView :=
   match expr with
   | .app fn argument =>
-      psExprAppViewAcc fn (argument :: args)
+      psExprAppViewAcc fn (List.cons argument args)
   | _ => {
       head := expr
       args := args

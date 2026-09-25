@@ -38,7 +38,7 @@ same claim.
 A value has a type.
 
 ```proofscript
-const answer : Nat := 42;
+const answer: Nat := 42;
 ```
 
 Here:
@@ -51,7 +51,7 @@ Here:
 PSC1 keeps `:=` because it is different from equality.
 
 ```proofscript
-theorem answerIsAnswer : answer = answer := by rfl;
+theorem answerIsAnswer: answer = answer := by rfl;
 ```
 
 In the theorem, `=` means propositional equality.
@@ -59,7 +59,7 @@ In the theorem, `=` means propositional equality.
 ## Functions
 
 ```proofscript
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
@@ -84,9 +84,9 @@ A higher-order function can accept another function as a value:
 
 ```proofscript
 function applyTwice(
-  f : Nat -> Nat,
-  x : Nat
-) : Nat :=
+  f: Nat -> Nat,
+  x: Nat
+): Nat :=
   f(f(x));
 ```
 
@@ -95,9 +95,9 @@ function applyTwice(
 Use `let` for lexical binding:
 
 ```proofscript
-function main(x : Nat) : Nat :=
-  let y : Nat := x + 1;
-  let z : Nat := y * 2;
+function main(x: Nat): Nat :=
+  let y: Nat := x + 1;
+  let z: Nat := y * 2;
   z;
 ```
 
@@ -106,7 +106,7 @@ A PSC1 `let` is not automatically a mutable JavaScript variable.
 ## Booleans and conditionals
 
 ```proofscript
-function maxNat(x : Nat, y : Nat) : Nat :=
+function maxNat(x: Nat, y: Nat): Nat :=
   if (x >= y) {
     x
   } else {
@@ -124,14 +124,14 @@ An inductive type lists the ways a value can be constructed.
 ```proofscript
 inductive MaybeNat where {
   | none;
-  | some(value : Nat);
+  | some(value: Nat);
 };
 ```
 
 Consume it with `match`:
 
 ```proofscript
-function getOrElse(value : MaybeNat, fallback : Nat) : Nat :=
+function getOrElse(value: MaybeNat, fallback: Nat): Nat :=
   match value with {
     | .none => fallback;
     | .some x => x;
@@ -146,7 +146,7 @@ This explicit data model is why PSC1 does not need implicit
 A type parameter can be implicit:
 
 ```proofscript
-function identity {α : Type}(x : α) : α :=
+function identity {α: Type}(x: α): α :=
   x;
 ```
 
@@ -159,7 +159,7 @@ PSC1 can express a result type that depends on a value.
 A function type such as:
 
 ```proofscript
-(x : Nat) -> Fin x -> Nat
+(x: Nat) -> Fin x -> Nat
 ```
 
 contains the value `x` inside a later type.
@@ -172,7 +172,7 @@ API needs to state a stronger relationship than ordinary generics can express.
 A proposition is a type in `Prop`. A proof is a value of that proposition.
 
 ```proofscript
-theorem selfEq {α : Type}(x : α) : x = x := by rfl;
+theorem selfEq {α: Type}(x: α): x = x := by rfl;
 ```
 
 The tactic `rfl` constructs a proof of reflexive equality. The tactic itself

@@ -181,6 +181,17 @@ def psWasmEncodeInstruction
       | some index =>
           Except.ok (psWasmByte 16 :: psWasmEncodeUleb index)
   | .return_ => Except.ok [psWasmByte 15]
+  | .ifStart result =>
+      match result with
+      | none =>
+          Except.ok [psWasmByte 4, psWasmByte 64]
+      | some valueType =>
+          match psWasmEncodeValueType valueType with
+          | Except.error error => Except.error error
+          | Except.ok encodedType =>
+              Except.ok [psWasmByte 4, encodedType]
+  | .else_ => Except.ok [psWasmByte 5]
+  | .end_ => Except.ok [psWasmByte 11]
   | .i32Const value =>
       Except.ok
         (psWasmByte 65 :: psWasmEncodeI32Constant value)

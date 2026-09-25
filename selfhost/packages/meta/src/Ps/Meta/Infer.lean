@@ -177,7 +177,7 @@ def psInferProjectionType
               Except.error PsInferError.projectionUnsupported
             else
               match info.constructors with
-              | constructorName :: [] =>
+              | List.cons constructorName [] =>
                   match
                       psEnvironmentFindConstructor
                         environment

@@ -272,35 +272,41 @@ def psElabProjectionReference
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match sourceName.segments with
-  | base :: field :: rest =>
-      let baseName :=
-        psNameAppendStr PsName.anonymous base
-      match
-          psResolveName
-            context.localContext
-            context.environment
-            baseName with
-      | none => Except.error (PsElabError.unknownName baseName)
-      | some resolved =>
-          let baseTerm :=
-            match resolved with
-            | .local id => PsExpr.fvar id
-            | .global name => PsExpr.constE name []
-          match psElabResolvedTerm context baseTerm none with
-          | Except.error error => Except.error error
-          | Except.ok baseResult =>
-              match
-                  psElabProjectionChain
-                    context
-                    baseResult
-                    (field :: rest) with
-              | Except.error error => Except.error error
-              | Except.ok projected =>
-                  psElabFinalizeExpected projected expected
-  | _ =>
+  | List.nil =>
       match psSyntaxNameToName sourceName with
       | none => Except.error PsElabError.emptyName
       | some name => Except.error (PsElabError.unknownName name)
+  | List.cons base tail =>
+      match tail with
+      | List.nil =>
+          match psSyntaxNameToName sourceName with
+          | none => Except.error PsElabError.emptyName
+          | some name => Except.error (PsElabError.unknownName name)
+      | List.cons field rest =>
+          let baseName :=
+            psNameAppendStr PsName.anonymous base;
+          match
+              psResolveName
+                context.localContext
+                context.environment
+                baseName with
+          | none => Except.error (PsElabError.unknownName baseName)
+          | some resolved =>
+              let baseTerm :=
+                match resolved with
+                | .local id => PsExpr.fvar id
+                | .global name => PsExpr.constE name [];
+              match psElabResolvedTerm context baseTerm none with
+              | Except.error error => Except.error error
+              | Except.ok baseResult =>
+                  match
+                      psElabProjectionChain
+                        context
+                        baseResult
+                        (List.cons field rest) with
+                  | Except.error error => Except.error error
+                  | Except.ok projected =>
+                      psElabFinalizeExpected projected expected
 
 def psElabReference
     (context : PsElabContext)

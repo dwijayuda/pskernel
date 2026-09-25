@@ -1165,8 +1165,13 @@ def psElabPartialDeclaration
                                 openValue
                                 finalOpenType;
                             if
-                                psExprHasUnresolvedMeta (Prod.fst closed)
-                                  || psExprHasUnresolvedMeta (Prod.snd closed) then
+                                psExprHasUnresolvedMeta
+                                  (Prod.fst closed) then
+                              Except.error
+                                PsElabError.unresolvedMetavariable
+                            else if
+                                psExprHasUnresolvedMeta
+                                  (Prod.snd closed) then
                               Except.error
                                 PsElabError.unresolvedMetavariable
                             else

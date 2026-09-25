@@ -54,7 +54,9 @@ def psLevelInstantiateParams
 
 def psLevelListInstantiateParams
     (parameters : List PsName)
-    (arguments : List PsLevel) : List PsLevel -> List PsLevel
+    (arguments : List PsLevel)
+    (levels : List PsLevel) : List PsLevel :=
+  match levels with
   | [] => []
   | level :: rest =>
       List.cons

@@ -561,6 +561,9 @@ jobs:
           set -euo pipefail
           cd selfhost
 
+          echo "PSC1_COMPILER_PROJECT_CHECK: SELFHOST-COMPILER.lean"
+          lake exe psc1 check SELFHOST-COMPILER.lean
+
           sources=(
             packages/foundation/src/Ps/Foundation/Diagnostic.lean
             packages/syntax/src/Ps/Syntax/Ast.lean

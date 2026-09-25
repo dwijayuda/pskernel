@@ -20,7 +20,7 @@ def psExprLiftBVars (amount : Nat) (cutoff : Nat) : PsExpr -> PsExpr
       PsExpr.forallE
         name
         (psExprLiftBVars amount cutoff type)
-        (psExprLiftBVars amount (cutoff + 1) body)
+        (psExprLiftBVars amount (Nat.succ cutoff) body)
         binder
   | .letE name type value body =>
       PsExpr.letE

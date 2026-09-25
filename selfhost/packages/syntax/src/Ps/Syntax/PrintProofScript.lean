@@ -1,9 +1,7 @@
 import Ps.Syntax.PrintCommon
 
 def psPrintProofScriptBoolNot (value : Bool) : Bool :=
-  match value with
-  | true => false
-  | false => true
+  if value then false else true
 
 def psPrintProofScriptTermWithFuel :
     Nat -> PsSyntaxTerm -> Except PsSourcePrintError String

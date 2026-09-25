@@ -154,6 +154,52 @@ def psPrintLeanMapConstructors
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
+def psPrintLeanMapImports
+    (printImport :
+      PsSyntaxImport -> Except PsSourcePrintError String)
+    (imports : List PsSyntaxImport) :
+    Except PsSourcePrintError (List String) :=
+  match imports with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons sourceImport rest =>
+      let printedHeadResult :=
+        printImport sourceImport;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintLeanMapImports printImport rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
+def psPrintLeanMapDeclarations
+    (printDeclaration :
+      PsSyntaxDeclaration -> Except PsSourcePrintError String)
+    (declarations : List PsSyntaxDeclaration) :
+    Except PsSourcePrintError (List String) :=
+  match declarations with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons declaration rest =>
+      let printedHeadResult :=
+        printDeclaration declaration;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintLeanMapDeclarations printDeclaration rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintLeanTermWithFuel
     (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
@@ -618,10 +664,18 @@ def psPrintLeanModule
       | Except.error error => Except.error error
       | Except.ok name =>
           Except.ok (psPrintLeanConcat2 "import " name);
-  match module.imports.mapM printImport with
+  let importsResult :
+      Except PsSourcePrintError (List String) :=
+    psPrintLeanMapImports printImport module.imports;
+  match importsResult with
   | Except.error error => Except.error error
   | Except.ok imports =>
-      match module.declarations.mapM psPrintLeanDeclaration with
+      let declarationsResult :
+          Except PsSourcePrintError (List String) :=
+        psPrintLeanMapDeclarations
+          psPrintLeanDeclaration
+          module.declarations;
+      match declarationsResult with
       | Except.error error => Except.error error
       | Except.ok declarations =>
           let importSections :=

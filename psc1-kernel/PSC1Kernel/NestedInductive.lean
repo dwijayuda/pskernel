@@ -244,7 +244,9 @@ def simpleNestedCtorName
 def simpleNestedEnsureFamily
     (env : Environment)
     (declLevels : List Name)
+    (canonicalParams currentParams : List OpenBinder)
     (template : Expr)
+    (fixedCurrent : List Expr)
     (state : SimpleNestedMapState) :
     Except String (SimpleNestedAuxFamily × SimpleNestedMapState) := do
   match simpleNestedFindFamily? template state.aux with
@@ -260,16 +262,18 @@ def simpleNestedEnsureFamily
             throw "nested outer inductive metadata is inconsistent"
       | _ =>
           throw "nested outer mutual families are not yet supported"
-      let args := template.getAppArgs
-      if args.length != outer.numParams then
+      let canonicalFixed := template.getAppArgs
+      if canonicalFixed.length != outer.numParams ||
+          fixedCurrent.length != outer.numParams then
         throw "nested template does not contain exactly the fixed outer parameters"
       let (auxName, fresh') :=
         simpleNestedFreshAuxName env state.aux outerName state.fresh
       let outerType0 :=
         outer.base.type.instantiateLevelParams
           outer.base.levelParams outerLevels
-      let auxType ←
-        simpleNestedInstantiateFirstParams outerType0 args
+      let auxTypeOpen ←
+        simpleNestedInstantiateFirstParams outerType0 fixedCurrent
+      let auxType := closeOpenBinders currentParams auxTypeOpen
       let rec makeAuxCtors :
           List Name → Except String (List SimpleConstructorDecl ×
             List SimpleNestedAuxCtorMap)
@@ -282,8 +286,9 @@ def simpleNestedEnsureFamily
             let ctorType0 :=
               outerCtor.base.type.instantiateLevelParams
                 outerCtor.base.levelParams outerLevels
-            let auxCtorType ←
-              simpleNestedInstantiateFirstParams ctorType0 args
+            let auxCtorOpen ←
+              simpleNestedInstantiateFirstParams ctorType0 fixedCurrent
+            let auxCtorType := closeOpenBinders currentParams auxCtorOpen
             let (laterCtors, laterMap) ← makeAuxCtors rest
             pure (
               { name := auxCtorName, type := auxCtorType } :: laterCtors,
@@ -296,7 +301,7 @@ def simpleNestedEnsureFamily
         auxName := auxName
         outerName := outerName
         outerLevels := outerLevels
-        fixedParams := args
+        fixedParams := canonicalFixed
         nestedTemplate := template
         ctorMap := ctorMap
       }
@@ -305,6 +310,7 @@ def simpleNestedEnsureFamily
         type := auxType
         ctors := auxCtors
       }
+      let _ := canonicalParams
       pure (family, {
         aux := state.aux ++ [family]
         fresh := fresh'
@@ -320,6 +326,7 @@ partial def simpleNestedMapExpr
     (env : Environment)
     (declLevels : List Name)
     (newNames : List Name)
+    (canonicalParams currentParams : List OpenBinder)
     (e : Expr)
     (state : SimpleNestedMapState) :
     Except String (Expr × SimpleNestedMapState) := do
@@ -332,14 +339,22 @@ partial def simpleNestedMapExpr
           if args.length >= outer.numParams then
             let fixed := args.take outer.numParams
             if fixed.any (simpleNestedHasNew newNames) then
+              let canonicalFixed :=
+                fixed.map fun arg =>
+                  simpleNestedRebaseParams
+                    arg currentParams canonicalParams
               let template :=
-                applyArgs (.const outerName outerLevels) fixed
+                applyArgs (.const outerName outerLevels) canonicalFixed
               let (family, state') ←
-                simpleNestedEnsureFamily env declLevels template state
+                simpleNestedEnsureFamily
+                  env declLevels canonicalParams currentParams
+                  template fixed state
               let auxLevels := declLevels.map Level.param
               return (
                 applyArgs (.const family.auxName auxLevels)
-                  (args.drop outer.numParams),
+                  (currentParams.map
+                    (fun param => Expr.fvar param.internalName) ++
+                    args.drop outer.numParams),
                 state')
       | _ => pure ()
   | _ => pure ()
@@ -347,37 +362,48 @@ partial def simpleNestedMapExpr
   match e with
   | .app f a => do
       let (f', state1) ←
-        simpleNestedMapExpr env declLevels newNames f state
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams f state
       let (a', state2) ←
-        simpleNestedMapExpr env declLevels newNames a state1
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams a state1
       pure (.app f' a', state2)
   | .lam name type body binderInfo => do
       let (type', state1) ←
-        simpleNestedMapExpr env declLevels newNames type state
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams type state
       let (body', state2) ←
-        simpleNestedMapExpr env declLevels newNames body state1
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams body state1
       pure (.lam name type' body' binderInfo, state2)
   | .forallE name type body binderInfo => do
       let (type', state1) ←
-        simpleNestedMapExpr env declLevels newNames type state
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams type state
       let (body', state2) ←
-        simpleNestedMapExpr env declLevels newNames body state1
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams body state1
       pure (.forallE name type' body' binderInfo, state2)
   | .letE name type value body nondep => do
       let (type', state1) ←
-        simpleNestedMapExpr env declLevels newNames type state
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams type state
       let (value', state2) ←
-        simpleNestedMapExpr env declLevels newNames value state1
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams value state1
       let (body', state3) ←
-        simpleNestedMapExpr env declLevels newNames body state2
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams body state2
       pure (.letE name type' value' body' nondep, state3)
   | .mdata metadata body => do
       let (body', state') ←
-        simpleNestedMapExpr env declLevels newNames body state
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams body state
       pure (.mdata metadata body', state')
   | .proj typeName index body => do
       let (body', state') ←
-        simpleNestedMapExpr env declLevels newNames body state
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams body state
       pure (.proj typeName index body', state')
   | .bvar _ | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ =>
       pure (e, state)
@@ -386,23 +412,33 @@ def simpleNestedMapConstructors
     (env : Environment)
     (declLevels : List Name)
     (newNames : List Name)
+    (canonicalParams : List OpenBinder)
+    (numParams : Nat)
     (ctors : List SimpleConstructorDecl)
     (state : SimpleNestedMapState) :
     Except String (List SimpleConstructorDecl × SimpleNestedMapState) := do
   match ctors with
   | [] => pure ([], state)
   | ctor :: rest => do
-      let (type', state1) ←
-        simpleNestedMapExpr env declLevels newNames ctor.type state
+      let (currentParams, body) ←
+        simpleNestedOpenConstructorParams ctor.type numParams
+      let (body', state1) ←
+        simpleNestedMapExpr
+          env declLevels newNames canonicalParams currentParams
+          body state
+      let type' := closeOpenBinders currentParams body'
       let (later, state2) ←
         simpleNestedMapConstructors
-          env declLevels newNames rest state1
+          env declLevels newNames canonicalParams numParams
+          rest state1
       pure ({ ctor with type := type' } :: later, state2)
 
 partial def simpleNestedProcessQueue
     (env : Environment)
     (declLevels : List Name)
     (newNames : List Name)
+    (canonicalParams : List OpenBinder)
+    (numParams : Nat)
     (pending : List SimpleMutualTypeDecl)
     (done : List SimpleMutualTypeDecl)
     (state : SimpleNestedMapState) :
@@ -413,10 +449,11 @@ partial def simpleNestedProcessQueue
       let state0 := { state with created := [] }
       let (ctors', state1) ←
         simpleNestedMapConstructors
-          env declLevels newNames type.ctors state0
+          env declLevels newNames canonicalParams numParams
+          type.ctors state0
       let mapped := { type with ctors := ctors' }
       simpleNestedProcessQueue
-        env declLevels newNames
+        env declLevels newNames canonicalParams numParams
         (rest ++ state1.created)
         (done ++ [mapped])
         { state1 with created := [] }

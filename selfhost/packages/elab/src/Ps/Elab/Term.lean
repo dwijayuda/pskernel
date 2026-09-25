@@ -1991,14 +1991,18 @@ def psSyntaxRecordHasField
     (name : String) : Bool :=
   List.any fields (psSyntaxRecordFieldMatchesName name)
 
+def psSyntaxRecordHasNamedField
+    (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+    (name : String) : Bool :=
+  psSyntaxRecordHasField fields name
+
 def psSyntaxRecordFieldsMatch
     (fields :
       List (Prod PsSyntaxName PsSyntaxTerm))
     (names : List String) : Bool :=
   psElabBoolAnd
     (Nat.beq (List.length fields) (List.length names))
-    (List.all names
-      (fun (name : String) => psSyntaxRecordHasField fields name))
+    (List.all names (psSyntaxRecordHasNamedField fields))
 
 def psSyntaxRecordFindField
     (fields : List (Prod PsSyntaxName PsSyntaxTerm))

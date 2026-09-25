@@ -73,7 +73,7 @@ def psLocalPushBinding
   let declaration := PsLocalDecl.binding id userName type binder;
   {
     context := {
-      nextId := id + 1
+      nextId := Nat.succ id
       declarations := declaration :: context.declarations
     }
     id := id

@@ -1,6 +1,18 @@
 inductive PsVerifiedIrPrimitiveType where
   | nat
   | int
+  | uint8
+  | uint16
+  | uint32
+  | uint64
+  | usize
+  | int8
+  | int16
+  | int32
+  | int64
+  | isize
+  | float
+  | float32
   | bool
   | char
   | string

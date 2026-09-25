@@ -24,6 +24,12 @@ def psNatModName : PsName :=
 def psNatBeqName : PsName :=
   psNameAppendStr psNatName "beq"
 
+def psNatBleName : PsName :=
+  psNameAppendStr psNatName "ble"
+
+def psNatBltName : PsName :=
+  psNameAppendStr psNatName "blt"
+
 def psIntName : PsName :=
   psRootName "Int"
 

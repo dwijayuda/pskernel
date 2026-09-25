@@ -77,9 +77,11 @@ def Expr.instantiate (e : Expr) (subst : List Expr) : Expr :=
 def Expr.instantiate1 (e replacement : Expr) : Expr :=
   e.instantiate [replacement]
 
-def Expr.reverseList : List Expr → List Expr
-  | [] => []
-  | x :: xs => Expr.reverseList xs ++ [x]
+def Expr.reverseList (values : List Expr) : List Expr :=
+  let rec go : List Expr → List Expr → List Expr
+    | [], acc => acc
+    | x :: xs, acc => go xs (x :: acc)
+  go values []
 
 def Expr.instantiateRev (e : Expr) (subst : List Expr) : Expr :=
   e.instantiate (Expr.reverseList subst)

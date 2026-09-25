@@ -265,6 +265,18 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
   | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ => do
     if !Name.eq n₁ n₂ || i₁ != i₂ then return false
     isDefEq ctx e₁ e₂
+  | .lam _ _ _ _, other => do
+    let otherType ← whnf ctx (← infer ctx other)
+    match otherType with
+    | .forallE name domain _ binderInfo =>
+      isDefEq ctx a' (.lam name domain (.app other (.bvar 0)) binderInfo)
+    | _ => return false
+  | other, .lam _ _ _ _ => do
+    let otherType ← whnf ctx (← infer ctx other)
+    match otherType with
+    | .forallE name domain _ binderInfo =>
+      isDefEq ctx (.lam name domain (.app other (.bvar 0)) binderInfo) b'
+    | _ => return false
   | _, _ => return false
 
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=

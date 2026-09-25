@@ -31,10 +31,8 @@ import {
 function assert(condition: unknown, message = 'assertion failed'): asserts condition {
   if (!condition) throw new Error(message);
 }
-let equalAssertionIndex=0;
 function equal(actual: unknown, expected: unknown, message = ''): void {
-  equalAssertionIndex+=1;
-  if (actual !== expected) throw new Error(`${message ? message + ': ' : ''}expected ${String(expected)}, got ${String(actual)} @equal#${equalAssertionIndex}`);
+  if (actual !== expected) throw new Error(`${message ? message + ': ' : ''}expected ${String(expected)}, got ${String(actual)}`);
 }
 function throws(f: () => unknown, pattern: RegExp): void {
   try { f(); } catch (error) {
@@ -217,10 +215,10 @@ assert(LEAN434_INHERITED_FEATURE_IDS.includes('L-LEAN434-ERASED-DO'));
 }
 {
   const tokens=significantTokens('x -- note\n y');
-  equal(tokens.length,2,'diag-line-220');
+  equal(tokens.length,2);
   equal(tokens[1]!.leadingTrivia[0]?.kind,'whitespace');
   equal(tokens[1]!.leadingTrivia[1]?.kind,'line-comment');
-  equal(tokens[1]!.span.start.line,2,'diag-line-223');
+  equal(tokens[1]!.span.start.line,2);
 }
 {
   const tokens=significantTokens('x//y');
@@ -304,7 +302,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(cursor.peek().text,'f');
   const f=cursor.expectKind('identifier');
   const open=cursor.expect('(');
-  equal(cursor.position,2,'diag-line-307');
+  equal(cursor.position,2);
   const mark=cursor.mark();
   equal(cursor.expectKind('identifier').text,'x');
   cursor.reset(mark);
@@ -329,7 +327,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const term=parseTermSubset('f x y');
   equal(term.kind,'application');
   if(term.kind==='application'){
-    equal(term.args.length,2,'diag-line-332');
+    equal(term.args.length,2);
     equal(term.span.start.offset,0);
     equal(term.span.end.offset,5);
   }
@@ -345,7 +343,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const term=parseTermSubset('(f x, g y)');
   equal(term.kind,'tuple');
   if(term.kind==='tuple'){
-    equal(term.items.length,2,'diag-line-348');
+    equal(term.items.length,2);
     equal(term.items[0]?.kind,'application');
     equal(term.items[1]?.kind,'application');
   }
@@ -466,7 +464,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
 // v0.6.1 compiler-ready declaration slice.
 {
   const module=parseV061Module('const answer : Nat := 42; function add(x : Nat, y : Nat) : Nat := x + y;');
-  equal(module.declarations.length,2,'diag-line-469');
+  equal(module.declarations.length,2);
   equal(module.declarations[0]?.kind,'const');
   equal(module.declarations[1]?.kind,'function');
   equal(firstDeclarationResultType(module)?.kind,'named');
@@ -550,7 +548,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const body=firstDeclarationBody(module);
   equal(body?.kind,'lambda');
   if(body?.kind==='lambda'){
-    equal(body.binders.length,2,'diag-line-553');
+    equal(body.binders.length,2);
     equal(body.binders[0]?.type?.kind,'named');
     equal(body.binders[1]?.type?.kind,'named');
   }
@@ -589,7 +587,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(body?.kind,'match');
   equal(module.featureIds.includes('E-MATCH-BODY'),true);
   if(body?.kind==='match'){
-    equal(body.alternatives.length,2,'diag-line-592');
+    equal(body.alternatives.length,2);
     equal(body.alternatives[0]?.pattern.kind,'bool');
   }
   equal(
@@ -630,7 +628,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(declaration?.kind,'structure');
   equal(module.featureIds.includes('E-STRUCT-BODY'),true);
   if(declaration?.kind==='structure'){
-    equal(declaration.fields.length,2,'diag-line-633');
+    equal(declaration.fields.length,2);
     equal(declaration.fields[0]?.name,'name');
     equal(declaration.fields[1]?.name,'age');
   }
@@ -666,7 +664,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   if(declaration?.kind==='const'){
     equal(declaration.body.kind,'record');
     if(declaration.body.kind==='record'){
-      equal(declaration.body.fields.length,2,'diag-line-669');
+      equal(declaration.body.fields.length,2);
       equal(declaration.body.fields[0]?.name,'name');
       equal(declaration.body.type.kind,'named');
     }
@@ -687,7 +685,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   equal(declaration?.kind,'inductive');
   equal(module.featureIds.includes('E-INDUCTIVE-BODY'),true);
   if(declaration?.kind==='inductive'){
-    equal(declaration.constructors.length,2,'diag-line-690');
+    equal(declaration.constructors.length,2);
     equal(declaration.constructors[0]?.name,'red');
     equal(declaration.constructors[1]?.name,'blue');
   }
@@ -703,7 +701,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const declaration=module.declarations[0];
   equal(declaration?.kind,'inductive');
   if(declaration?.kind==='inductive'){
-    equal(declaration.params.length,2,'diag-line-706');
+    equal(declaration.params.length,2);
     equal(declaration.constructors[0]?.params.length,1);
     equal(declaration.constructors[1]?.params.length,1);
   }
@@ -899,7 +897,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
-    equal(body.tactics.length,2,'diag-line-902');
+    equal(body.tactics.length,2);
     equal(body.tactics[0]?.kind,'intro');
     if(body.tactics[0]?.kind==='intro'){
       equal(body.tactics[0].name,'h');
@@ -919,7 +917,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
-    equal(body.tactics.length,2,'diag-line-922');
+    equal(body.tactics.length,2);
     equal(body.tactics[0]?.kind,'apply');
     if(body.tactics[0]?.kind==='apply'){
       equal(body.tactics[0].proof.kind,'reference');
@@ -940,7 +938,7 @@ console.log('ok - @proofscript/syntax lexer MVP');
   const body=firstDeclarationBody(module);
   equal(body?.kind,'by');
   if(body?.kind==='by'){
-    equal(body.tactics.length,2,'diag-line-943');
+    equal(body.tactics.length,2);
     equal(body.tactics[0]?.kind,'refine');
     if(body.tactics[0]?.kind==='refine'){
       equal(body.tactics[0].proof.kind,'call');
@@ -1157,7 +1155,7 @@ throws(
     equal(body.tactics.length,1);
     equal(body.tactics[0]?.kind,'simp');
     if(body.tactics[0]?.kind==='simp'){
-      equal(body.tactics[0].rules.length,2,'diag-line-1160');
+      equal(body.tactics[0].rules.length,2);
       equal(body.tactics[0].rules[0]?.symm,false);
       equal(body.tactics[0].rules[1]?.symm,true);
     }
@@ -1326,7 +1324,7 @@ throws(
     'end Inner\n'+
     'end Demo\n',
   );
-  equal(parsed.declarations.length,2,'diag-line-1329');
+  equal(parsed.declarations.length,2);
   equal(parsed.declarations[0]?.name,'Demo.x');
   equal(parsed.declarations[1]?.name,'Demo.Inner.y');
   equal(parsed.declarations[0]?.namespacePath?.join('.'),'Demo');
@@ -1385,13 +1383,13 @@ throws(
   const declaration=parsed.declarations[0];
   equal(declaration?.kind,'def');
   if(declaration?.kind==='def'){
-    equal(declaration.params.length,2,'diag-line-1388');
+    equal(declaration.params.length,2);
     equal(declaration.params[0]?.name,'_eq_arg_0');
     equal(declaration.params[1]?.name,'_eq_arg_1');
     equal(declaration.resultType.kind,'named');
     equal(declaration.body.kind,'match');
     if(declaration.body.kind==='match'){
-      equal(declaration.body.alternatives.length,2,'diag-line-1394');
+      equal(declaration.body.alternatives.length,2);
       equal(declaration.body.alternatives[0]?.pattern.kind,'bool');
       equal(declaration.body.alternatives[1]?.pattern.kind,'wildcard');
       equal(declaration.body.alternatives[0]?.body.kind,'match');
@@ -1442,7 +1440,7 @@ throws(
   if(declaration?.kind==='def'){
     equal(declaration.body.kind,'match');
     if(declaration.body.kind==='match'){
-      equal(declaration.body.alternatives.length,2,'diag-line-1445');
+      equal(declaration.body.alternatives.length,2);
       equal(declaration.body.alternatives[0]?.pattern.kind,'constructor');
     }
   }
@@ -1469,7 +1467,7 @@ throws(
   const declaration=parsed.declarations[0];
   equal(declaration?.kind,'def');
   if(declaration?.kind==='def'){
-    equal(declaration.whereDeclarations?.length,2,'diag-line-1472');
+    equal(declaration.whereDeclarations?.length,2);
   }
 }
 {

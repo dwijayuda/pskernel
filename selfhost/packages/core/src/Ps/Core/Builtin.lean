@@ -42,6 +42,42 @@ def psNatBltName : PsName :=
 def psIntName : PsName :=
   psRootName "Int"
 
+def psUInt8Name : PsName :=
+  psRootName "UInt8"
+
+def psUInt16Name : PsName :=
+  psRootName "UInt16"
+
+def psUInt32Name : PsName :=
+  psRootName "UInt32"
+
+def psUInt64Name : PsName :=
+  psRootName "UInt64"
+
+def psUSizeName : PsName :=
+  psRootName "USize"
+
+def psInt8Name : PsName :=
+  psRootName "Int8"
+
+def psInt16Name : PsName :=
+  psRootName "Int16"
+
+def psInt32Name : PsName :=
+  psRootName "Int32"
+
+def psInt64Name : PsName :=
+  psRootName "Int64"
+
+def psISizeName : PsName :=
+  psRootName "ISize"
+
+def psFloatName : PsName :=
+  psRootName "Float"
+
+def psFloat32Name : PsName :=
+  psRootName "Float32"
+
 def psIntOfNatName : PsName :=
   psNameAppendStr psIntName "ofNat"
 

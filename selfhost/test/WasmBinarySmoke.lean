@@ -40,6 +40,26 @@ def psWasmSmokeNatEq
     PsVerifiedIrIntrinsic.natEq
     [left, right]
 
+def psWasmSmokeIntType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int
+
+def psWasmSmokeInt
+    (value : Int) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.integer value)
+
+def psWasmSmokeIntBinary
+    (operation : PsVerifiedIrIntrinsic)
+    (left right : Int) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    operation
+    [psWasmSmokeInt left, psWasmSmokeInt right]
+
+def psWasmSmokeIntEq
+    (left right : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.intEq
+    [left, right]
+
 def psWasmSmokeArrayU32Type : PsVerifiedIrType :=
   PsVerifiedIrType.named "Array" [psWasmSmokeU32Type]
 
@@ -1025,6 +1045,92 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natLt
             [psWasmSmokeNat 3, psWasmSmokeNat 5]
+      }
+,
+      {
+        name := "intAddMixed"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeIntEq
+            (psWasmSmokeIntBinary
+              PsVerifiedIrIntrinsic.intAdd
+              (-5)
+              7)
+            (psWasmSmokeInt 2)
+      },
+      {
+        name := "intSubNegative"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeIntEq
+            (psWasmSmokeIntBinary
+              PsVerifiedIrIntrinsic.intSub
+              3
+              8)
+            (psWasmSmokeInt (-5))
+      },
+      {
+        name := "intMulNegative"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeIntEq
+            (psWasmSmokeIntBinary
+              PsVerifiedIrIntrinsic.intMul
+              (-4)
+              3)
+            (psWasmSmokeInt (-12))
+      },
+      {
+        name := "intNegExact"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeIntEq
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intNeg
+              [psWasmSmokeInt (-5)])
+            (psWasmSmokeInt 5)
+      },
+      {
+        name := "intOrderNegative"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.intLt
+            [psWasmSmokeInt (-7), psWasmSmokeInt (-3)]
+      },
+      {
+        name := "intOfNatExact"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeIntEq
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intOfNat
+              [psWasmSmokeNat 9])
+            (psWasmSmokeInt 9)
+      },
+      {
+        name := "intNegSuccExact"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeIntEq
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intNegSucc
+              [psWasmSmokeNat 4])
+            (psWasmSmokeInt (-5))
       }
 ,
       {

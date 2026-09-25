@@ -126,6 +126,11 @@ function lowerDeclaration(decl:V061Declaration):string {
       ' := '+lowerV061ExprToProofScript(decl.body)+';';
   }
 
+  if(decl.partial){
+    throw new Error(
+      'PS_PRINT_PARTIAL_UNSUPPORTED: partial Lean definitions are not yet canonical ProofScript syntax',
+    );
+  }
   const params=lowerParameterSequence(decl.params);
   const base=
     decl.kind+' '+decl.name+params+

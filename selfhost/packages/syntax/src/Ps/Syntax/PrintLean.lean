@@ -27,6 +27,13 @@ def psPrintLeanConcat6
   let abcde := psPrintLeanConcat5 a b c d e;
   psPrintLeanConcat2 abcde f
 
+def psPrintLeanSpaceJoinedSuffix
+    (values : List String) : String :=
+  match values with
+  | List.nil => ""
+  | List.cons _ _ =>
+      psPrintLeanConcat2 " " (psPrintJoin " " values)
+
 def psPrintLeanMapRecordFields
     (printField :
       Prod PsSyntaxName PsSyntaxTerm ->
@@ -448,8 +455,7 @@ def psPrintLeanDeclaration
                   | Except.error error => Except.error error
                   | Except.ok printedValue =>
                       let binderSuffix :=
-                        if printedBinders.isEmpty then ""
-                        else psPrintLeanConcat2 " " (psPrintJoin " " printedBinders);
+                        psPrintLeanSpaceJoinedSuffix printedBinders;
                       Except.ok
                         (psPrintLeanConcat6
                           "def "
@@ -475,8 +481,7 @@ def psPrintLeanDeclaration
                   | Except.error error => Except.error error
                   | Except.ok printedValue =>
                       let binderSuffix :=
-                        if printedBinders.isEmpty then ""
-                        else psPrintLeanConcat2 " " (psPrintJoin " " printedBinders);
+                        psPrintLeanSpaceJoinedSuffix printedBinders;
                       Except.ok
                         (psPrintLeanConcat6
                           "partial def "
@@ -502,8 +507,7 @@ def psPrintLeanDeclaration
                   | Except.error error => Except.error error
                   | Except.ok printedValue =>
                       let binderSuffix :=
-                        if printedBinders.isEmpty then ""
-                        else psPrintLeanConcat2 " " (psPrintJoin " " printedBinders);
+                        psPrintLeanSpaceJoinedSuffix printedBinders;
                       Except.ok
                         (psPrintLeanConcat6
                           "theorem "
@@ -537,8 +541,7 @@ def psPrintLeanDeclaration
                   | Except.error error => Except.error error
                   | Except.ok printedConstructors =>
                       let paramSuffix :=
-                        if printedParams.isEmpty then ""
-                        else psPrintLeanConcat2 " " (psPrintJoin " " printedParams);
+                        psPrintLeanSpaceJoinedSuffix printedParams;
                       Except.ok
                         (psPrintLeanConcat6
                           "inductive "
@@ -566,8 +569,7 @@ def psPrintLeanDeclaration
               | Except.error error => Except.error error
               | Except.ok printedFields =>
                   let paramSuffix :=
-                    if printedParams.isEmpty then ""
-                    else psPrintLeanConcat2 " " (psPrintJoin " " printedParams);
+                    psPrintLeanSpaceJoinedSuffix printedParams;
                   Except.ok
                     (psPrintLeanConcat5
                       "structure "

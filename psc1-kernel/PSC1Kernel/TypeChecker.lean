@@ -1099,6 +1099,28 @@ partial def typeCheckerExprDiffAt
 partial def typeCheckerExprDiff (left right : Expr) : String :=
   (typeCheckerExprDiffAt "root" left right).getD "no structural difference"
 
+partial def typeCheckerWhnfSpineDiff
+    (ctx : CheckerContext)
+    (left right : Expr)
+    (depth : Nat := 0) : Except String String := do
+  if depth > 16 then
+    return "binder-aware diff exceeded depth"
+  let leftWhnf ← whnf ctx left
+  let rightWhnf ← whnf ctx right
+  match leftWhnf, rightWhnf with
+  | .forallE _ leftDomain leftBody leftBi,
+      .forallE rightName rightDomain rightBody rightBi =>
+      let (fresh, child) := ctx.withLocal rightName rightDomain rightBi
+      let leftOpened := leftBody.instantiate1 (.fvar fresh)
+      let rightOpened := rightBody.instantiate1 (.fvar fresh)
+      typeCheckerWhnfSpineDiff child leftOpened rightOpened (depth + 1)
+  | _, _ =>
+      return (
+        "depth=" ++ toString depth ++
+        "; left=" ++ typeCheckerExprHead leftWhnf ++
+        "; right=" ++ typeCheckerExprHead rightWhnf ++
+        "; diff=" ++ typeCheckerExprDiff leftWhnf rightWhnf)
+
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with
   | .bvar _ => .error "loose bound variable in type checker"
@@ -1150,6 +1172,8 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
     if !ok then
       let domainWhnf ← whnf eqCtx domain
       let argTypeWhnf ← whnf eqCtx argType
+      let spineDiff ←
+        typeCheckerWhnfSpineDiff eqCtx domain argType
       .error (
         "application type mismatch while applying " ++
         typeCheckerExprHead fn ++
@@ -1161,7 +1185,8 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
         "; full-whnf expected " ++ typeCheckerExprHead domainWhnf ++
         "; full-whnf argument " ++ typeCheckerExprHead argTypeWhnf ++
         "; full-whnf diff: " ++
-        typeCheckerExprDiff domainWhnf argTypeWhnf)
+        typeCheckerExprDiff domainWhnf argTypeWhnf ++
+        "; binder-aware whnf: " ++ spineDiff)
     else
       .ok (body.instantiate1 arg)
   | .lam name type body binderInfo => do

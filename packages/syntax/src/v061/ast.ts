@@ -163,6 +163,7 @@ export interface V061ExternalDeclaration extends V061NamespaceScoped {
 
 export interface V061ValueDeclaration extends V061NamespaceScoped {
   readonly kind:'const'|'def'|'function'|'theorem';
+  readonly partial?:boolean;
   readonly name:string;
   readonly params:readonly V061Parameter[];
   readonly resultType:V061TypeExpr;

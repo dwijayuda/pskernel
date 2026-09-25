@@ -5,7 +5,7 @@ on:
   push:
     branches: [diagnostic/psc1-expr-eq-cache-progress]
     paths:
-      - ".github/workflows/psc1-root-100015-progress.yml"
+      - ".github/workflows/psc1-expr-eq-cache-progress.yml"
       - "psc1-kernel/PSC1Kernel/Test/ReplayFile.lean"
       - "psc1-kernel/**"
       - "oracle/replay-probe/DependencyExport.lean"

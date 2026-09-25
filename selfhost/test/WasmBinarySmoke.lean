@@ -40,6 +40,37 @@ def psWasmSmokeNatEq
     PsVerifiedIrIntrinsic.natEq
     [left, right]
 
+def psWasmSmokeArrayU32Type : PsVerifiedIrType :=
+  PsVerifiedIrType.named "Array" [psWasmSmokeU32Type]
+
+def psWasmSmokeU32
+    (value : Int) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.literal
+    (PsVerifiedIrLiteral.machineInteger
+      PsVerifiedIrMachineIntegerType.uint32
+      value)
+
+def psWasmSmokeArrayEmptyU32
+    (capacity : Nat) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    (PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+      psWasmSmokeU32Type)
+    [psWasmSmokeNat capacity]
+
+def psWasmSmokeArrayPushU32
+    (array value : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    (PsVerifiedIrIntrinsic.arrayPush
+      psWasmSmokeU32Type)
+    [array, value]
+
+def psWasmSmokeArrayGetU32
+    (array index : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    (PsVerifiedIrIntrinsic.arrayGet
+      psWasmSmokeU32Type)
+    [array, index]
+
 def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -986,6 +1017,123 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natLt
             [psWasmSmokeNat 3, psWasmSmokeNat 5]
+      }
+,
+      {
+        name := "arraySizeAfterPush"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (PsVerifiedIrExpr.intrinsic
+              (PsVerifiedIrIntrinsic.arraySize
+                psWasmSmokeU32Type)
+              [
+                psWasmSmokeArrayPushU32
+                  (psWasmSmokeArrayEmptyU32 8)
+                  (psWasmSmokeU32 42)
+              ])
+            (psWasmSmokeNat 1)
+      },
+      {
+        name := "arrayGetAfterPush"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          psWasmSmokeArrayGetU32
+            (psWasmSmokeArrayPushU32
+              (psWasmSmokeArrayEmptyU32 4)
+              (psWasmSmokeU32 42))
+            (psWasmSmokeNat 0)
+      },
+      {
+        name := "arrayGetDFallback"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.arrayGetD
+              psWasmSmokeU32Type)
+            [
+              psWasmSmokeArrayPushU32
+                (psWasmSmokeArrayEmptyU32 1)
+                (psWasmSmokeU32 10),
+              psWasmSmokeNat 5,
+              psWasmSmokeU32 99
+            ]
+      },
+      {
+        name := "arraySetPersistent"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          PsVerifiedIrExpr.letE
+            "original"
+            psWasmSmokeArrayU32Type
+            (psWasmSmokeArrayPushU32
+              (psWasmSmokeArrayEmptyU32 1)
+              (psWasmSmokeU32 10))
+            (PsVerifiedIrExpr.letE
+              "updated"
+              psWasmSmokeArrayU32Type
+              (PsVerifiedIrExpr.intrinsic
+                (PsVerifiedIrIntrinsic.arraySet
+                  psWasmSmokeU32Type)
+                [
+                  PsVerifiedIrExpr.var "original",
+                  psWasmSmokeNat 0,
+                  psWasmSmokeU32 42
+                ])
+              (PsVerifiedIrExpr.intrinsic
+                (PsVerifiedIrIntrinsic.machineIntCompare
+                  PsVerifiedIrMachineIntegerType.uint32
+                  PsVerifiedIrIntegerCompareOp.eq)
+                [
+                  PsVerifiedIrExpr.intrinsic
+                    (PsVerifiedIrIntrinsic.machineIntBinary
+                      PsVerifiedIrMachineIntegerType.uint32
+                      PsVerifiedIrIntegerBinaryOp.add)
+                    [
+                      psWasmSmokeArrayGetU32
+                        (PsVerifiedIrExpr.var "original")
+                        (psWasmSmokeNat 0),
+                      psWasmSmokeArrayGetU32
+                        (PsVerifiedIrExpr.var "updated")
+                        (psWasmSmokeNat 0)
+                    ],
+                  psWasmSmokeU32 52
+                ]))
+      },
+      {
+        name := "arraySetIfOutOfBounds"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.letE
+            "original"
+            psWasmSmokeArrayU32Type
+            (psWasmSmokeArrayPushU32
+              (psWasmSmokeArrayEmptyU32 1)
+              (psWasmSmokeU32 10))
+            (PsVerifiedIrExpr.letE
+              "unchanged"
+              psWasmSmokeArrayU32Type
+              (PsVerifiedIrExpr.intrinsic
+                (PsVerifiedIrIntrinsic.arraySetIfInBounds
+                  psWasmSmokeU32Type)
+                [
+                  PsVerifiedIrExpr.var "original",
+                  psWasmSmokeNat 5,
+                  psWasmSmokeU32 42
+                ])
+              (psWasmSmokeArrayGetU32
+                (PsVerifiedIrExpr.var "unchanged")
+                (psWasmSmokeNat 0)))
       }
     ]
   }

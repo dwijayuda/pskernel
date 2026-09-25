@@ -3,7 +3,7 @@ import Ps.Core.Expr
 def psExprLiftBVars (amount : Nat) (cutoff : Nat) : PsExpr -> PsExpr
   | .bvar index =>
       if Nat.ble cutoff index then
-        PsExpr.bvar (index + amount)
+        PsExpr.bvar (Nat.add index amount)
       else
         PsExpr.bvar index
   | .app fn arg =>

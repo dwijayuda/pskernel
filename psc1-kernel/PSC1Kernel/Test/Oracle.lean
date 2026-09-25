@@ -1077,6 +1077,49 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "generated simple recursor selected wrong on minor"
     (PSC1Kernel.Expr.eq oursOn onMinor)
 
+  -- Empty non-Prop datatypes generate a recursor with zero minors/rules.
+  let Void : PSC1Kernel.Name := .str .anonymous "OracleVoid"
+  let VoidRec : PSC1Kernel.Name := .str Void "rec"
+  let voidType : PSC1Kernel.Expr := .sort (.succ .zero)
+  let oursVoid ← exceptToIO
+    "PSC1 empty simple inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive .empty {
+      levelParams := []
+      name := Void
+      type := voidType
+      ctors := []
+      isUnsafe := false
+    })
+  let leanVoid0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanVoid1 ←
+    match Lean.Kernel.Environment.addDecl leanVoid0 {} (.inductDecl [] 0 [{
+      name := toLeanName Void
+      type := toLeanExpr voidType
+      ctors := []
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected empty simple inductive oracle"
+  for name in [Void, VoidRec] do
+    let some oursInfo := oursVoid.find? name
+      | throw <| IO.userError "PSC1 empty inductive metadata missing"
+    let some leanInfo := leanVoid1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 empty inductive metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("empty inductive generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursVoid.find? VoidRec with
+  | some (.recInfo info) =>
+      assertTrue "empty inductive recursor unexpectedly has minors"
+        (info.numMinors == 0)
+      assertTrue "empty inductive recursor unexpectedly has rules"
+        info.rules.isEmpty
+  | _ =>
+      throw <| IO.userError "PSC1 empty inductive recursor metadata missing"
+
   -- Next K5 slice: non-recursive constructor fields.
   let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
   let natT : PSC1Kernel.Expr := .const NatN []

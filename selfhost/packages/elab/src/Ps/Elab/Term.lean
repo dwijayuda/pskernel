@@ -1916,15 +1916,16 @@ def psElabSolvePendingInstances
                         Except.error
                           PsElabError.implicitApplicationUnsupported
                     | some assigned =>
+                        let assignedResult : PsElabTermResult := {
+                          context :=
+                            psElabContextWithMeta
+                              current.context
+                              assigned
+                          term := current.term
+                          type := current.type
+                        };
                         psElabSolvePendingInstances
-                          {
-                            context :=
-                              psElabContextWithMeta
-                                current.context
-                                assigned
-                            term := current.term
-                            type := current.type
-                          }
+                          assignedResult
                           rest
 
 def psElabFinishApplication

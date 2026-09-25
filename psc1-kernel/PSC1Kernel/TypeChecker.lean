@@ -582,6 +582,22 @@ def appHeadLevelsEquivalent (a b : Expr) : Bool :=
 
 mutual
 
+partial def isDefEqBinding
+    (ctx : CheckerContext)
+    (leftName : Name)
+    (leftDomain leftBody : Expr)
+    (leftBinderInfo : BinderInfo)
+    (rightName : Name)
+    (rightDomain rightBody : Expr)
+    (rightBinderInfo : BinderInfo) : Except String Bool := do
+  if !(← isDefEq ctx leftDomain rightDomain) then
+    return false
+  let (fresh, child) :=
+    ctx.withLocal rightName rightDomain rightBinderInfo
+  let leftOpened := leftBody.instantiate1 (.fvar fresh)
+  let rightOpened := rightBody.instantiate1 (.fvar fresh)
+  isDefEq child leftOpened rightOpened
+
 partial def isDefEqArgs
     (ctx : CheckerContext)
     (left right : Expr) : Except String Bool := do
@@ -692,6 +708,16 @@ partial def lazyDeltaProjReduction
 partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := do
   if Expr.eq a b then return true
 
+  -- Lean 4.34 handles binding expressions in the quick-defeq phase by
+  -- opening both bodies with the same fresh local. Binder names/annotations
+  -- are not part of definitional equality.
+  match a, b with
+  | .lam ln ld lb lbi, .lam rn rd rb rbi =>
+      return ← isDefEqBinding ctx ln ld lb lbi rn rd rb rbi
+  | .forallE ln ld lb lbi, .forallE rn rd rb rbi =>
+      return ← isDefEqBinding ctx ln ld lb lbi rn rd rb rbi
+  | _, _ => pure ()
+
   -- Final Lean 4.34 reflection fast path. eagerReduce deliberately extends
   -- this path to expressions containing free variables.
   if !a.hasFVar || ctx.eagerReduce then
@@ -712,6 +738,12 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
   match quickReducedDefEq aCore bCore with
   | some value => return value
   | none => pure ()
+  match aCore, bCore with
+  | .lam ln ld lb lbi, .lam rn rd rb rbi =>
+      return ← isDefEqBinding ctx ln ld lb lbi rn rd rb rbi
+  | .forallE ln ld lb lbi, .forallE rn rd rb rbi =>
+      return ← isDefEqBinding ctx ln ld lb lbi rn rd rb rbi
+  | _, _ => pure ()
 
   -- Final Lean 4.34 applies proof irrelevance before lazy delta.
   let aType ← infer ctx aCore
@@ -750,12 +782,12 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
     let hf ← isDefEq ctx f₁ f₂
     if hf then
       if ← isDefEq ctx a₁ a₂ then return true
-  | .forallE _ d₁ body₁ _, .forallE _ d₂ body₂ _ => do
-    if ← isDefEq ctx d₁ d₂ then
-      if ← isDefEq ctx body₁ body₂ then return true
-  | .lam _ d₁ body₁ _, .lam _ d₂ body₂ _ => do
-    if ← isDefEq ctx d₁ d₂ then
-      if ← isDefEq ctx body₁ body₂ then return true
+  | .forallE n₁ d₁ body₁ bi₁, .forallE n₂ d₂ body₂ bi₂ => do
+    if ← isDefEqBinding ctx n₁ d₁ body₁ bi₁ n₂ d₂ body₂ bi₂ then
+      return true
+  | .lam n₁ d₁ body₁ bi₁, .lam n₂ d₂ body₂ bi₂ => do
+    if ← isDefEqBinding ctx n₁ d₁ body₁ bi₁ n₂ d₂ body₂ bi₂ then
+      return true
   | .lam _ _ _ _, other => do
     let otherType ← whnf ctx (← infer ctx other)
     match otherType with

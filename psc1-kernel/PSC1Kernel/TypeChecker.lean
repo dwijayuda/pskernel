@@ -752,9 +752,7 @@ partial def toConstructorWhenStructure
     | return major
   if !ctx.env.isNonRecStructure inductName then
     return major
-  let some rawType ← inferKMajorType? ctx major
-    | return major
-  let majorType ← whnf ctx rawType
+  let majorType ← whnf ctx (← infer ctx major)
   let .const typeName levels := majorType.getAppFn
     | return major
   if !Name.eq typeName inductName then

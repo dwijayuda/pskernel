@@ -2005,7 +2005,6 @@ def psLeanPatternHeadEq
             leftName.segments
             rightName.segments
       | _ => false
-  | _ => false
 
 def psLeanPatternListContainsHead
     (patterns : List PsSyntaxPattern)

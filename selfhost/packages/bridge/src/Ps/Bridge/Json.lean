@@ -864,12 +864,18 @@ def psJsonInsertObjectField
     Except PsJsonEncodeError (List (String × PsJsonValue)) :=
   psJsonInsertObjectFieldInto fields field
 
-def psJsonSortObjectFields :
-    List (String × PsJsonValue) ->
-    Except PsJsonEncodeError (List (String × PsJsonValue))
-  | [] => Except.ok []
-  | field :: rest =>
-      match psJsonSortObjectFields rest with
+def psJsonSortObjectFields
+    (fields : List (String × PsJsonValue)) :
+    Except PsJsonEncodeError (List (String × PsJsonValue)) :=
+  match fields with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons field rest =>
+      let smaller :
+          Except PsJsonEncodeError
+            (List (String × PsJsonValue)) :=
+        psJsonSortObjectFields rest;
+      match smaller with
       | Except.error error => Except.error error
       | Except.ok sortedRest =>
           psJsonInsertObjectField field sortedRest

@@ -5,7 +5,7 @@ This page gives the shortest useful tour of PSC1.
 ## Define values
 
 ```proofscript
-const answer : Nat := 42;
+const answer: Nat := 42;
 ```
 
 `const` is a parameterless alias of the ordinary definition mechanism.
@@ -13,7 +13,7 @@ const answer : Nat := 42;
 ## Define functions
 
 ```proofscript
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
@@ -26,15 +26,15 @@ add(20, 22)
 ## Use local bindings
 
 ```proofscript
-function doubleAfterIncrement(x : Nat) : Nat :=
-  let y : Nat := x + 1;
+function doubleAfterIncrement(x: Nat): Nat :=
+  let y: Nat := x + 1;
   y * 2;
 ```
 
 ## Choose with `if`
 
 ```proofscript
-function maxNat(x : Nat, y : Nat) : Nat :=
+function maxNat(x: Nat, y: Nat): Nat :=
   if (x >= y) {
     x
   } else {
@@ -47,17 +47,17 @@ The braces contain expressions, not generic statements.
 ## Define data
 
 ```proofscript
-inductive PsOption(α : Type) where {
+inductive PsOption(α: Type) where {
   | none;
-  | some(value : α);
+  | some(value: α);
 };
 ```
 
 ## Pattern match
 
 ```proofscript
-function optionGetOrElse {α : Type}
-(value : PsOption(α), fallback : α) : α :=
+function optionGetOrElse {α: Type}
+(value: PsOption(α), fallback: α): α :=
   match value with {
     | .none => fallback;
     | .some x => x;
@@ -67,7 +67,7 @@ function optionGetOrElse {α : Type}
 ## Write generic functions
 
 ```proofscript
-function identity {α : Type}(x : α) : α :=
+function identity {α: Type}(x: α): α :=
   x;
 ```
 
@@ -82,7 +82,7 @@ Nat -> Nat
 PSC1 also supports dependent function types in its core profile:
 
 ```proofscript
-(x : Nat) -> Fin x -> Nat
+(x: Nat) -> Fin x -> Nat
 ```
 
 Later argument types can depend on earlier values.
@@ -90,7 +90,7 @@ Later argument types can depend on earlier values.
 ## Prove a proposition
 
 ```proofscript
-theorem selfEq {α : Type}(x : α) : x = x := by rfl;
+theorem selfEq {α: Type}(x: α): x = x := by rfl;
 ```
 
 `=` is propositional equality.
@@ -98,7 +98,7 @@ theorem selfEq {α : Type}(x : α) : x = x := by rfl;
 For Bool-valued equality, use the supported `==` behavior:
 
 ```proofscript
-function isOne(x : Nat) : Bool :=
+function isOne(x: Nat): Bool :=
   x == 1;
 ```
 
@@ -107,12 +107,12 @@ function isOne(x : Nat) : Bool :=
 The stdlib currently uses source like:
 
 ```proofscript
-inductive PsList(α : Type) where {
+inductive PsList(α: Type) where {
   | nil;
-  | cons(head : α, tail : PsList(α));
+  | cons(head: α, tail: PsList(α));
 };
 
-function listLength {α : Type}(xs : PsList(α)) : Nat :=
+function listLength {α: Type}(xs: PsList(α)): Nat :=
   match xs with {
     | .nil => 0;
     | .cons head tail => 1 + listLength(tail);
@@ -137,7 +137,7 @@ Ambiguity is an error; root order is not a hidden precedence rule.
 Current bounded form:
 
 ```proofscript
-extern function hostShout(value : String) : String
+extern function hostShout(value: String): String
   from "host-lib"
   import shout;
 ```
@@ -167,9 +167,9 @@ my-app/
 The generated entry is currently equivalent to:
 
 ```proofscript
-const answer : Nat := 42;
-function main(x : Nat) : Nat :=
-  let y : Nat := x + answer;
+const answer: Nat := 42;
+function main(x: Nat): Nat :=
+  let y: Nat := x + answer;
   y;
 ```
 

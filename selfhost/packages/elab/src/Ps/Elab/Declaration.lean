@@ -276,52 +276,74 @@ def psElabIsDirectRecursiveField
       context.environment
       context.metaContext
       context.localContext
-      type
-  let view := psExprAppView reduced
+      type;
+  let view := psExprAppView reduced;
   match view.head with
   | .constE name _ =>
-      psNameEq name inductiveName
-        && view.args.length == parameterArgs.length
-        && psExprListAlphaEq view.args parameterArgs
+      if psNameEq name inductiveName then
+        if Nat.beq view.args.length parameterArgs.length then
+          psExprListAlphaEq view.args parameterArgs
+        else
+          false
+      else
+        false
   | _ => false
 
-def psElabNestedRecursiveFieldTypeSupportedWithFuel :
-    Nat -> PsName -> PsExpr -> Bool
-  | 0, _, _ => false
-  | remaining + 1, inductiveName, type =>
-      if !psExprHasConst inductiveName type then
-        true
-      else
-        let view := psExprAppView type
-        match view.head with
-        | .constE name _ =>
-            if psNameEq name inductiveName then
-              true
-            else if psNameEq name psListName
-                || psNameEq name psOptionName
-                || psNameEq name psArrayName then
-              match view.args with
-              | [argument] =>
-                  psElabNestedRecursiveFieldTypeSupportedWithFuel
-                    remaining
-                    inductiveName
-                    argument
-              | _ => false
-            else if psNameEq name psProdName then
-              match view.args with
-              | [left, right] =>
-                  psElabNestedRecursiveFieldTypeSupportedWithFuel
-                      remaining
-                      inductiveName
-                      left
-                    && psElabNestedRecursiveFieldTypeSupportedWithFuel
-                      remaining
-                      inductiveName
-                      right
-              | _ => false
-            else
-              false
-        | _ => false
+def psElabContainerRecursiveName (name : PsName) : Bool :=
+  if psNameEq name psListName then
+    true
+  else if psNameEq name psOptionName then
+    true
+  else
+    psNameEq name psArrayName
+
+def psElabNestedRecursiveFieldTypeSupportedWithFuel
+    (fuel : Nat) : PsName -> PsExpr -> Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun (_inductiveName : PsName) (_type : PsExpr) => false
+  | Nat.succ remaining =>
+      let smaller : PsName -> PsExpr -> Bool :=
+        psElabNestedRecursiveFieldTypeSupportedWithFuel remaining;
+      fun (inductiveName : PsName) (type : PsExpr) =>
+        if psExprHasConst inductiveName type then
+          let view := psExprAppView type;
+          match view.head with
+          | .constE name _ =>
+              if psNameEq name inductiveName then
+                true
+              else if psElabContainerRecursiveName name then
+                match view.args with
+                | List.nil =>
+                    false
+                | List.cons argument rest =>
+                    match rest with
+                    | List.nil =>
+                        smaller inductiveName argument
+                    | List.cons _ _ =>
+                        false
+              else if psNameEq name psProdName then
+                match view.args with
+                | List.nil =>
+                    false
+                | List.cons left rest =>
+                    match rest with
+                    | List.nil =>
+                        false
+                    | List.cons right tail =>
+                        match tail with
+                        | List.nil =>
+                            if smaller inductiveName left then
+                              smaller inductiveName right
+                            else
+                              false
+                        | List.cons _ _ =>
+                            false
+              else
+                false
+          | _ => false
+        else
+          true
 
 def psElabNestedRecursiveFieldTypeSupported
     (inductiveName : PsName)

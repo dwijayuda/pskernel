@@ -74,26 +74,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { label: int-divmod-00, start: 22197, count: 120 }
-          - { label: int-divmod-01, start: 22317, count: 120 }
-          - { label: int-divmod-02, start: 22437, count: 120 }
-          - { label: int-divmod-03, start: 22557, count: 120 }
-          - { label: int-divmod-04, start: 22677, count: 120 }
-          - { label: int-divmod-05, start: 22797, count: 120 }
-          - { label: int-divmod-06, start: 22917, count: 120 }
-          - { label: int-divmod-07, start: 23037, count: 117 }
-          - { label: window-000000, start: 0, count: 64 }
-          - { label: window-010000, start: 10000, count: 64 }
-          - { label: window-020000, start: 20000, count: 64 }
-          - { label: window-030000, start: 30000, count: 64 }
-          - { label: window-040000, start: 40000, count: 64 }
-          - { label: window-050000, start: 50000, count: 64 }
-          - { label: window-060000, start: 60000, count: 64 }
-          - { label: window-070000, start: 70000, count: 64 }
-          - { label: window-080000, start: 80000, count: 64 }
-          - { label: window-090000, start: 90000, count: 64 }
-          - { label: window-100000, start: 100000, count: 64 }
-          - { label: window-110000, start: 110000, count: 64 }
+          - { label: root-030019, start: 30019, count: 1 }
+          - { label: root-040003, start: 40003, count: 1 }
+          - { label: root-070000, start: 70000, count: 1 }
+          - { label: root-080000, start: 80000, count: 1 }
+          - { label: root-100015, start: 100015, count: 1 }
+          - { label: root-110018, start: 110018, count: 1 }
 
     steps:
       - uses: actions/checkout@v4

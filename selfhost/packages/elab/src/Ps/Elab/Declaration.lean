@@ -950,7 +950,7 @@ def psElabInductiveDeclaration
               let instantiatedResultType :=
                 psMetaInstantiate
                   headerContext.metaContext
-                  openResultType
+                  openResultType;
               match instantiatedResultType with
               | PsExpr.sortE (PsLevel.succ PsLevel.zero) =>
                   let inductiveType :=

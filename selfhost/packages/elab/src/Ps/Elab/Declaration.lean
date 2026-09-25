@@ -1001,7 +1001,7 @@ def psElabInductiveDeclaration
                       numIndices := 0
                       constructors := constructorNames
                       isStructure := isStructure
-                    }
+                    };
                     let inductiveDeclaration :=
                       PsDeclaration.inductiveDecl info
                     let withInductiveResult :=

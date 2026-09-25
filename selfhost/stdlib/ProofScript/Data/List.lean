@@ -41,13 +41,11 @@ def listHeadOrElse {α : Type}
   | List.cons head tail => head
 
 
-def listReverseAcc {α : Type}
-    (xs : List α)
-    (acc : List α) : List α :=
-  match xs with
-  | List.nil => acc
-  | List.cons head tail =>
-      listReverseAcc tail (List.cons head acc)
 
 def listReverse {α : Type} (xs : List α) : List α :=
-  listReverseAcc xs List.nil
+  match xs with
+  | List.nil => List.nil
+  | List.cons head tail =>
+      listAppend
+        (listReverse tail)
+        (List.cons head List.nil)

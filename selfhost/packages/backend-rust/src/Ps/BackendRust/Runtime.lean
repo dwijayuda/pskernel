@@ -27,4 +27,13 @@ def psRustRuntimePrelude : String :=
   "fn __ps_string_get(value: &String, position: &PsNat) -> char { let mut index = PsNat::zero(); for c in value.chars() { if &index == position { return c; } if &index > position { return 'A'; } index += PsNat::from(c.len_utf8()); } 'A' }\n" ++
   "fn __ps_string_at_end(value: &String, position: &PsNat) -> bool { position >= &PsNat::from(value.len()) }\n" ++
   "fn __ps_string_extract(value: &String, begin: &PsNat, end: &PsNat) -> String { if begin >= end { return String::new(); } let mut index = PsNat::zero(); let mut started = false; let mut out = String::new(); for c in value.chars() { let width = PsNat::from(c.len_utf8()); if !started { if &index == begin { started = true; } else { index += width; continue; } } if &index == end { return out; } out.push(c); index += width; } out }\n" ++
-  "fn __ps_string_eq(left: &String, right: &String) -> bool { left == right }\n"
+  "fn __ps_string_eq(left: &String, right: &String) -> bool { left == right }\n" ++
+  "fn __ps_array_empty_with_capacity<T>(_capacity: &PsNat) -> Vec<T> { Vec::new() }\n" ++
+  "fn __ps_array_size<T>(value: &Vec<T>) -> PsNat { PsNat::from(value.len()) }\n" ++
+  "fn __ps_array_push<T: Clone>(array: &Vec<T>, value: &T) -> Vec<T> { let mut out = array.clone(); out.push(value.clone()); out }\n" ++
+  "fn __ps_array_get<T: Clone>(array: &Vec<T>, index: &PsNat) -> T { let i = index.to_usize().expect(\"proved Array index fits usize\"); array[i].clone() }\n" ++
+  "fn __ps_array_get_d<T: Clone>(array: &Vec<T>, index: &PsNat, fallback: &T) -> T { if index >= &PsNat::from(array.len()) { fallback.clone() } else { array[index.to_usize().expect(\"bounded Array index fits usize\")].clone() } }\n" ++
+  "fn __ps_array_set<T: Clone>(array: &Vec<T>, index: &PsNat, value: &T) -> Vec<T> { let mut out = array.clone(); let i = index.to_usize().expect(\"proved Array index fits usize\"); out[i] = value.clone(); out }\n" ++
+  "fn __ps_array_set_if_in_bounds<T: Clone>(array: &Vec<T>, index: &PsNat, value: &T) -> Vec<T> { if index >= &PsNat::from(array.len()) { array.clone() } else { let mut out = array.clone(); let i = index.to_usize().expect(\"bounded Array index fits usize\"); out[i] = value.clone(); out } }\n" ++
+  "fn __ps_array_map<A: Clone, B>(f: fn(A) -> B, array: &Vec<A>) -> Vec<B> { array.iter().cloned().map(f).collect() }\n" ++
+  "fn __ps_array_foldl<A: Clone, B: Clone>(f: fn(B, A) -> B, init: &B, array: &Vec<A>, start: &PsNat, stop: &PsNat) -> B { let size = PsNat::from(array.len()); let end = if stop <= &size { stop.clone() } else { size }; let mut index = start.clone(); let mut acc = init.clone(); while index < end { let i = index.to_usize().expect(\"bounded Array fold index fits usize\"); acc = f(acc, array[i].clone()); index += PsNat::from(1u8); } acc }\n"

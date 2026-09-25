@@ -1,4 +1,5 @@
 import Init.Data.Nat.Bitwise.Basic
+import Init.Data.String.Basic
 import PSC1Kernel.Environment
 import PSC1Kernel.LocalContext
 import PSC1Kernel.Instantiate
@@ -82,6 +83,24 @@ def kernelNatShiftLeftName : Name :=
 def kernelNatShiftRightName : Name :=
   .str kernelNatName "shiftRight"
 
+def kernelCharName : Name :=
+  .str .anonymous "Char"
+
+def kernelListName : Name :=
+  .str .anonymous "List"
+
+def kernelListNilName : Name :=
+  .str kernelListName "nil"
+
+def kernelListConsName : Name :=
+  .str kernelListName "cons"
+
+def kernelStringOfListName : Name :=
+  .str kernelStringName "ofList"
+
+def kernelCharOfNatName : Name :=
+  .str kernelCharName "ofNat"
+
 def natLiteralValue? : Expr → Option Nat
   | .lit (.nat value) => some value
   | .const name levels =>
@@ -131,6 +150,32 @@ def checkCountArg (op : String) (count : Nat) : Except String Unit :=
 
 def boolExpr (value : Bool) : Expr :=
   .const (if value then kernelBoolTrueName else kernelBoolFalseName) []
+
+/--
+Final Lean 4.34 string-literal expansion used by recursor/projection reduction
+and the special string-literal definitional-equality case.
+-/
+def stringLitToConstructor (value : String) : Expr :=
+  let charType : Expr := .const kernelCharName []
+  let listNil : Expr :=
+    .app (.const kernelListNilName [.zero]) charType
+  let listCons : Expr :=
+    .app (.const kernelListConsName [.zero]) charType
+  let charOfNat : Expr := .const kernelCharOfNatName []
+  let chars : List Char := value.toList
+  let data :=
+    chars.foldr
+      (fun c rest =>
+        .app
+          (.app listCons (.app charOfNat (.lit (.nat c.toNat))))
+          rest)
+      listNil
+  .app (.const kernelStringOfListName []) data
+
+def isStringOfListApp : Expr → Bool
+  | .app (.const name levels) _ =>
+      levels.length == 0 && Name.eq name kernelStringOfListName
+  | _ => false
 
 def reduceNatBinary (op : Name) (a b : Nat) : Except String (Option Expr) := do
   if Name.eq op kernelNatAddName then
@@ -572,6 +617,9 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
   | _, _ => pure ()
 
   if ← tryEtaStruct ctx aFull bFull then return true
+  match ← tryStringLitExpansion ctx aFull bFull with
+  | some value => return value
+  | none => pure ()
   if ← isDefEqUnitLike ctx aFull bFull then return true
   return false
 
@@ -600,6 +648,25 @@ partial def tryEtaStruct
     (t s : Expr) : Except String Bool := do
   if ← tryEtaStructCore ctx t s then return true
   tryEtaStructCore ctx s t
+
+partial def tryStringLitExpansionCore
+    (ctx : CheckerContext)
+    (t s : Expr) : Except String (Option Bool) := do
+  match t with
+  | .lit (.str value) =>
+      if isStringOfListApp s then
+        let expanded ← whnf ctx (stringLitToConstructor value)
+        return some (← isDefEq ctx expanded s)
+      else
+        return none
+  | _ => return none
+
+partial def tryStringLitExpansion
+    (ctx : CheckerContext)
+    (t s : Expr) : Except String (Option Bool) := do
+  match ← tryStringLitExpansionCore ctx t s with
+  | some value => return some value
+  | none => tryStringLitExpansionCore ctx s t
 
 partial def isDefEqUnitLike
     (ctx : CheckerContext)

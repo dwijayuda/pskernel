@@ -8,6 +8,10 @@ import {
   numName,
   strName,
   constant,
+  levelEqStructural,
+  levelMVar,
+  levelMaxRaw,
+  levelSucc,
   levelZero,
 } from '../dist/src/index.js';
 import {
@@ -23,9 +27,14 @@ import {
 } from '../packages/runtime/dist/src/lean4-expr.js';
 import {
   emptyLean434MetavarContext,
+  lean434RuntimeLMVarId,
   lean434RuntimeMVarId,
   lean434RuntimeOptionValue,
 } from '../packages/runtime/dist/src/lean4-mctx.js';
+import {
+  kernelLevelToLean434Runtime,
+  lean434RuntimeLevelToKernel,
+} from '../packages/runtime/dist/src/lean4-level.js';
 
 const fixture=process.argv[2]??'lean434-metavar-context-bootstrap.ndjson';
 const metadataFixture=
@@ -112,6 +121,79 @@ const evaluator=new Lean434Evaluator(
   }
   console.log(
     'ok - real Lean Array.modify updates through Array.set JS primitive',
+  );
+}
+
+{
+  const u1=numName(strName(anonymous,'_u'),1n);
+  const u2=numName(strName(anonymous,'_u'),2n);
+  const lmvar1=lean434RuntimeLMVarId(u1);
+  const lmvar2=lean434RuntimeLMVarId(u2);
+  const zero=kernelLevelToLean434Runtime(levelZero);
+  const succZero=kernelLevelToLean434Runtime(levelSucc(levelZero));
+  const mvar2=kernelLevelToLean434Runtime(levelMVar(u2));
+
+  const assignLevel=(mctx,lmvar,value)=>{
+    let fn=evaluator.evaluate(
+      constant(nameFromDotted('Lean.assignLevelMVarExp')),
+    );
+    fn=evaluator.applyRuntimeValue(fn,mctx);
+    fn=evaluator.applyRuntimeValue(fn,lmvar);
+    return evaluator.applyRuntimeValue(fn,value);
+  };
+  let levelMctx=assignLevel(empty,lmvar2,succZero);
+  levelMctx=assignLevel(levelMctx,lmvar1,mvar2);
+
+  const input=kernelLevelToLean434Runtime(
+    levelMaxRaw(
+      levelMVar(u1),
+      levelSucc(levelMVar(u2)),
+    ),
+  );
+  let instantiate=evaluator.evaluate(
+    constant(nameFromDotted('Lean.instantiateLevelMVarsImp')),
+  );
+  instantiate=evaluator.applyRuntimeValue(instantiate,levelMctx);
+  const result=evaluator.applyRuntimeValue(instantiate,input);
+  if(
+    result?.kind!=='constructor'
+    ||result.name!=='Prod.mk'
+    ||result.fields.length!==2
+  ){
+    throw new Error(
+      'Lean.instantiateLevelMVarsImp did not return MetavarContext × Level',
+    );
+  }
+  const normalized=lean434RuntimeLevelToKernel(result.fields[1]);
+  const expected=levelMaxRaw(
+    levelSucc(levelZero),
+    levelSucc(levelSucc(levelZero)),
+  );
+  if(!levelEqStructural(normalized,expected)){
+    throw new Error(
+      'Lean.instantiateLevelMVarsImp returned the wrong normalized Level',
+    );
+  }
+
+  let getLevel=evaluator.evaluate(
+    constant(nameFromDotted('Lean.getLevelMVarAssignmentExp')),
+  );
+  getLevel=evaluator.applyRuntimeValue(getLevel,result.fields[0]);
+  const u1Assignment=evaluator.applyRuntimeValue(getLevel,lmvar1);
+  const u1Runtime=lean434RuntimeOptionValue(u1Assignment);
+  if(
+    u1Runtime===undefined
+    ||!levelEqStructural(
+      lean434RuntimeLevelToKernel(u1Runtime),
+      levelSucc(levelZero),
+    )
+  ){
+    throw new Error(
+      'Lean.instantiateLevelMVarsImp did not write back normalized assignment',
+    );
+  }
+  console.log(
+    'ok - native Lean instantiateLevelMVarsImp normalizes and writes back in JS',
   );
 }
 

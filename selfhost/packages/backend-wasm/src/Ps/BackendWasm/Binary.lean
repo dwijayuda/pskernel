@@ -137,7 +137,7 @@ def psWasmFindHeapTypeIndex
       match psWasmFindArrayIndex arrays name with
       | none => none
       | some index =>
-      some (structures.length + arrays.length + index)
+          some (structures.length + index)
 
 def psWasmEncodeValueType
     (structures : List PsWasmStructType)

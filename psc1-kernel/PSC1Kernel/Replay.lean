@@ -17,8 +17,8 @@ structure Meta where
   formatVersion : String
 
 inductive NameNode where
-  | str (prefix : Nat) (value : String)
-  | num (prefix : Nat) (value : Nat)
+  | str (parent : Nat) (value : String)
+  | num (parent : Nat) (value : Nat)
 
 structure NameRecord where
   index : Nat
@@ -102,16 +102,16 @@ structure InductiveRecord where
   numNested : Nat
 
 inductive Record where
-  | meta (value : Meta)
-  | name (value : NameRecord)
-  | level (value : LevelRecord)
-  | expr (value : ExprRecord)
-  | axiom (value : AxiomRecord)
-  | definition (value : DefinitionRecord)
-  | theorem (value : TheoremRecord)
-  | opaque (value : OpaqueRecord)
-  | quot (value : QuotRecord)
-  | inductive (value : InductiveRecord)
+  | metaR (value : Meta)
+  | nameR (value : NameRecord)
+  | levelR (value : LevelRecord)
+  | exprR (value : ExprRecord)
+  | axiomR (value : AxiomRecord)
+  | definitionR (value : DefinitionRecord)
+  | theoremR (value : TheoremRecord)
+  | opaqueR (value : OpaqueRecord)
+  | quotR (value : QuotRecord)
+  | inductiveR (value : InductiveRecord)
 
 structure PendingMutual where
   all : List Name
@@ -228,10 +228,10 @@ def State.addNameRecord
     (record : NameRecord) : Except String State := do
   let value ←
     match record.node with
-    | .str prefix text =>
-        pure (.str (← state.nameAt prefix) text)
-    | .num prefix value =>
-        pure (.num (← state.nameAt prefix) value)
+    | .str parent text =>
+        pure (.str (← state.nameAt parent) text)
+    | .num parent value =>
+        pure (.num (← state.nameAt parent) value)
   let names ← addIndex "Name" record.index value state.names
   pure { state with names := names }
 
@@ -450,7 +450,7 @@ def State.addDeclaration
     (state : State)
     (record : Record) : Except String State := do
   match record with
-  | .axiom value => do
+  | .axiomR value => do
       let env ← Kernel.addAxiom state.env {
         base := {
           name := ← state.nameAt value.name
@@ -460,9 +460,9 @@ def State.addDeclaration
         isUnsafe := value.isUnsafe
       }
       pure { state with env := env }
-  | .definition value =>
+  | .definitionR value =>
       state.addDefinitionRecord value
-  | .theorem value => do
+  | .theoremR value => do
       let env ← Kernel.addTheorem state.env {
         base := {
           name := ← state.nameAt value.name
@@ -472,7 +472,7 @@ def State.addDeclaration
         value := ← state.exprAt value.value
       }
       pure { state with env := env }
-  | .opaque value => do
+  | .opaqueR value => do
       let env ← Kernel.addOpaque state.env {
         base := {
           name := ← state.nameAt value.name
@@ -483,7 +483,7 @@ def State.addDeclaration
         isUnsafe := value.isUnsafe
       }
       pure { state with env := env }
-  | .quot value => do
+  | .quotR value => do
       let env ←
         if state.env.quotInitialized then pure state.env
         else Kernel.addQuot state.env
@@ -506,7 +506,7 @@ def State.addDeclaration
       unless kindOk do
         throw "exported Quot kind mismatch"
       pure { state with env := env }
-  | .inductive value =>
+  | .inductiveR value =>
       state.addInductiveRecord value
   | _ => throw "internal replay declaration dispatch error"
 
@@ -514,7 +514,7 @@ def State.replay
     (state : State)
     (record : Record) : Except String State := do
   match record with
-  | .meta value =>
+  | .metaR value =>
       if state.records != 0 || state.sawMeta then
         throw "duplicate or non-initial lean4export metadata"
       unless value.leanVersion == pinnedLeanVersion do
@@ -528,17 +528,17 @@ def State.replay
         sawMeta := true
         records := state.records + 1
       }
-  | .name value => do
+  | .nameR value => do
       unless state.sawMeta do
         throw "lean4export metadata must be the first record"
       let next ← state.addNameRecord value
       pure { next with records := state.records + 1 }
-  | .level value => do
+  | .levelR value => do
       unless state.sawMeta do
         throw "lean4export metadata must be the first record"
       let next ← state.addLevelRecord value
       pure { next with records := state.records + 1 }
-  | .expr value => do
+  | .exprR value => do
       unless state.sawMeta do
         throw "lean4export metadata must be the first record"
       let next ← state.addExprRecord value

@@ -1041,7 +1041,7 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   for name in [Enum, Off, On, Rec] do
     let some oursInfo := ours.find? name
       | throw <| IO.userError "PSC1 simple inductive metadata missing"
-    let some leanInfo := leanEnv.find? (toLeanName name)
+    let some leanInfo := lean1.find? (toLeanName name)
       | throw <| IO.userError (
           "Lean 4.34 simple inductive metadata missing: " ++
           (toLeanName name).toString)

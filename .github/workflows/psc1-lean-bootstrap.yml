@@ -81,8 +81,8 @@ jobs:
           set -euo pipefail
           cd selfhost
 
-          echo "PSC1_COMPILER_PROJECT_CHECK: SELFHOST-COMPILER.lean"
-          lake exe psc1 check SELFHOST-COMPILER.lean
+          echo "PSC1_COMPILER_PROJECT_CHECK: packages/compiler/src/Ps/Compiler.lean"
+          lake exe psc1 check packages/compiler/src/Ps/Compiler.lean
 
           sources=(
             packages/foundation/src/Ps/Foundation/Diagnostic.lean
@@ -92,6 +92,7 @@ jobs:
             packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean
             packages/erasure/src/Ps/Erasure/Definition.lean
             packages/backend-ts/src/Ps/BackendTs/Module.lean
+            packages/compiler/src/Ps/Compiler/Api.lean
           )
 
           for source in "${sources[@]}"; do

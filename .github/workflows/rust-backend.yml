@@ -1,0 +1,89 @@
+name: Rust backend
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - backend/rust-native
+    paths:
+      - selfhost/packages/backend-rust/**
+      - selfhost/packages/compiler-ir/**
+      - selfhost/packages/bridge/**
+      - selfhost/test/BackendRustTests.lean
+      - selfhost/test/BackendRustFixture.lean
+      - selfhost/lakefile.lean
+      - selfhost/package.json
+      - selfhost/scripts/check-workspace.mjs
+      - selfhost/check-psc1-source.mjs
+      - docs/plans/08_RUST_BACKEND_NATIVE.md
+      - .github/workflows/rust-backend.yml
+
+permissions:
+  contents: read
+
+jobs:
+  rust-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh             | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify toolchains
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+          rustc --version
+          cargo --version
+
+      - name: Check workspace and PSC1 source profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          node selfhost/scripts/check-workspace.mjs
+          cd selfhost
+          node check-psc1-source.mjs
+
+      - name: Build Rust backend in Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build PsBackendRust psc1_backend_rust_tests psc1_backend_rust_fixture
+
+      - name: Run Rust backend emitter tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_rust_tests
+
+      - name: Compile generated Rust fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          mkdir -p /tmp/psc-rust-fixture/src
+          lake exe psc1_backend_rust_fixture > /tmp/psc-rust-fixture/src/lib.rs
+          cat > /tmp/psc-rust-fixture/Cargo.toml <<'EOF'
+          [package]
+          name = "psc-rust-fixture"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          num-bigint = "0.4"
+          num-traits = "0.2"
+          EOF
+          cargo check --manifest-path /tmp/psc-rust-fixture/Cargo.toml

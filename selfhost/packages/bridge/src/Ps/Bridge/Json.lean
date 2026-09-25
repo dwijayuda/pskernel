@@ -51,6 +51,20 @@ def psJsonStringToChars (value : String) : List Char :=
     value
     0
 
+def psJsonStringOfCharsAcc
+    (chars : List Char) : String -> String :=
+  match chars with
+  | List.nil =>
+      fun (acc : String) => acc
+  | List.cons head tail =>
+      let smaller : String -> String :=
+        psJsonStringOfCharsAcc tail;
+      fun (acc : String) =>
+        smaller (String.push acc head)
+
+def psJsonStringOfChars (chars : List Char) : String :=
+  psJsonStringOfCharsAcc chars ""
+
 def psJsonCharListEq
     (left : List Char) : List Char -> Bool :=
   match left with
@@ -124,7 +138,7 @@ def psJsonEscapeChar (char : Char) : String :=
   else if Nat.blt value 32 then
     psJsonEscapeControl value
   else
-    String.ofList [char]
+    psJsonStringOfChars (List.cons char List.nil)
 
 def psJsonEscapeChars : List Char -> String
   | [] => ""
@@ -298,7 +312,7 @@ def psJsonParseStringChars :
       if psJsonCharEq char '"' then
         Except.ok
           (Prod.mk
-            (String.ofList (psJsonReverseChars charsRev))
+            (psJsonStringOfChars (psJsonReverseChars charsRev))
             rest)
       else if psJsonCharEq char '\\' then
         match rest with
@@ -378,7 +392,7 @@ def psJsonParseNumber
             if hasMore then
               Except.error PsJsonParseError.invalidNumber
             else
-              let body := String.ofList (List.cons first more);
+              let body := psJsonStringOfChars (List.cons first more);
               let text :=
                 if negative then psJsonConcat2 "-" body else body;
               Except.ok {
@@ -386,7 +400,7 @@ def psJsonParseNumber
                 rest := afterDigits
               }
           else
-            let body := String.ofList (List.cons first more);
+            let body := psJsonStringOfChars (List.cons first more);
             let text :=
               if negative then psJsonConcat2 "-" body else body;
             Except.ok {

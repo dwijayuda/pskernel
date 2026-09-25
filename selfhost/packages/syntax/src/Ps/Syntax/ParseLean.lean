@@ -2378,39 +2378,58 @@ def psLeanEquationBinderName
   | _ => head.name
 
 def psLeanPrepareEquationBindersAcc
-    (remaining : Nat)
-    (index : Nat)
-    (available :
-      List
-        (Prod PsSyntaxBinderHead PsSyntaxTerm))
-    (bindersRev :
-      List
-        (Prod PsSyntaxBinderHead PsSyntaxTerm))
-    (namesRev : List PsSyntaxName) :
+    (remaining : Nat) :
+    Nat ->
+    List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
+    List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
+    List PsSyntaxName ->
     Option
       (Prod
         (List
           (Prod PsSyntaxBinderHead PsSyntaxTerm))
         (List PsSyntaxName)) :=
-  if Nat.beq remaining 0 then
-    Option.some (Prod.mk (psParseListReverse bindersRev) (psParseListReverse namesRev))
-  else
-    match available with
-    | [] => Option.none
-    | List.cons binder rest =>
-        let name :=
-          psLeanEquationBinderName index binder.fst;
-        let head : PsSyntaxBinderHead := {
-          name := name
-          kind := binder.fst.kind
-          span := binder.fst.span
-        };
-        psLeanPrepareEquationBindersAcc
-          (Nat.sub remaining 1)
-          (Nat.add index 1)
-          rest
-          (List.cons (Prod.mk head binder.snd) bindersRev)
-          (List.cons name namesRev)
+  match remaining with
+  | 0 =>
+      fun
+        (_index : Nat)
+        (_available : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+        (bindersRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+        (namesRev : List PsSyntaxName) =>
+        Option.some
+          (Prod.mk
+            (psParseListReverse bindersRev)
+            (psParseListReverse namesRev))
+  | smallerRemaining + 1 =>
+      let smaller :
+          Nat ->
+          List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
+          List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
+          List PsSyntaxName ->
+          Option
+            (Prod
+              (List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+              (List PsSyntaxName)) :=
+        psLeanPrepareEquationBindersAcc smallerRemaining;
+      fun
+        (index : Nat)
+        (available : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+        (bindersRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+        (namesRev : List PsSyntaxName) =>
+        match available with
+        | [] => Option.none
+        | List.cons binder rest =>
+            let name :=
+              psLeanEquationBinderName index binder.fst;
+            let head : PsSyntaxBinderHead := {
+              name := name
+              kind := binder.fst.kind
+              span := binder.fst.span
+            };
+            smaller
+              (Nat.add index 1)
+              rest
+              (List.cons (Prod.mk head binder.snd) bindersRev)
+              (List.cons name namesRev)
 
 def psLeanEquationClausesHaveArity
     (arity : Nat)

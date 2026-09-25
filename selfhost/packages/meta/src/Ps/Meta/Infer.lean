@@ -53,11 +53,17 @@ structure PsInferAppView where
   head : PsExpr
   args : List PsExpr
 
-def psInferAppViewAcc : PsExpr -> List PsExpr -> PsInferAppView
-  | .app fn arg, args =>
+def psInferAppViewAcc
+    (expr : PsExpr)
+    (args : List PsExpr) : PsInferAppView :=
+  match expr with
+  | .app fn arg =>
       psInferAppViewAcc fn (arg :: args)
-  | head, args =>
-      { head := head, args := args }
+  | head =>
+      {
+        head := head
+        args := args
+      }
 
 def psInferAppView (expr : PsExpr) : PsInferAppView :=
   psInferAppViewAcc expr []
@@ -65,12 +71,14 @@ def psInferAppView (expr : PsExpr) : PsInferAppView :=
 def psInferApplyStructureParameters
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
-    (localContext : PsLocalContext) :
-    PsExpr ->
-    List PsExpr ->
-    Except PsInferError PsExpr
-  | cursor, [] => Except.ok cursor
-  | cursor, argument :: rest =>
+    (localContext : PsLocalContext)
+    (cursor : PsExpr)
+    (arguments : List PsExpr) :
+    Except PsInferError PsExpr :=
+  match arguments with
+  | [] =>
+      Except.ok cursor
+  | argument :: rest =>
       match
           psWhnf
             environment
@@ -84,17 +92,24 @@ def psInferApplyStructureParameters
             localContext
             (psExprInstantiate1 body argument)
             rest
-      | _ => Except.error PsInferError.projectionUnsupported
+      | _ =>
+          Except.error PsInferError.projectionUnsupported
 
 def psInferStructureProjectionField
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext)
     (typeName : PsName)
-    (target : PsExpr) :
-    Nat -> Nat -> Nat -> PsExpr -> Except PsInferError PsExpr
-  | 0, _, _, _ => Except.error PsInferError.fuelExhausted
-  | fuel + 1, requestedIndex, fieldIndex, cursor =>
+    (target : PsExpr)
+    (remainingFuel : Nat)
+    (requestedIndex : Nat)
+    (fieldIndex : Nat)
+    (cursor : PsExpr) :
+    Except PsInferError PsExpr :=
+  match remainingFuel with
+  | 0 =>
+      Except.error PsInferError.fuelExhausted
+  | fuel + 1 =>
       match
           psWhnf
             environment
@@ -102,7 +117,7 @@ def psInferStructureProjectionField
             localContext
             cursor with
       | .forallE _ domain body _ =>
-          if requestedIndex == fieldIndex then
+          if Nat.beq requestedIndex fieldIndex then
             Except.ok domain
           else
             psInferStructureProjectionField
@@ -113,11 +128,12 @@ def psInferStructureProjectionField
               target
               fuel
               requestedIndex
-              (fieldIndex + 1)
+              (Nat.succ fieldIndex)
               (psExprInstantiate1
                 body
                 (PsExpr.proj typeName fieldIndex target))
-      | _ => Except.error PsInferError.projectionUnsupported
+      | _ =>
+          Except.error PsInferError.projectionUnsupported
 
 def psInferProjectionType
     (environment : PsEnvironment)

@@ -65,7 +65,7 @@ partial def replaySegmentedLinesFrom
         else if isReplaySegmentMarker trimmed then
           let (shared', totals') ←
             finishReplaySegment shared current totals
-          go shared' (some (Replay.State.empty shared maxRecDepth maxNatSize nativeEvaluator' maxRecDepth maxNatSize nativeEvaluator)) totals'
+          go shared' (some (Replay.State.empty shared' maxRecDepth maxNatSize nativeEvaluator)) totals'
             (lineNo + 1) rest
         else
           let state :=

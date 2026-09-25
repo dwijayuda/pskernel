@@ -17,6 +17,29 @@ def psWasmSmokeTypeA : PsVerifiedIrType :=
 def psWasmSmokeGenericListA : PsVerifiedIrType :=
   PsVerifiedIrType.named "GenericList" [psWasmSmokeTypeA]
 
+def psWasmSmokeNatType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+
+def psWasmSmokeBoolType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+
+def psWasmSmokeNat
+    (value : Nat) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural value)
+
+def psWasmSmokeNatBinary
+    (operation : PsVerifiedIrIntrinsic)
+    (left right : Nat) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    operation
+    [psWasmSmokeNat left, psWasmSmokeNat right]
+
+def psWasmSmokeNatEq
+    (left right : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.natEq
+    [left, right]
+
 def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -861,6 +884,108 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                   )
                 ]
             ]
+      }
+,
+      {
+        name := "natAddExact"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeNatBinary
+              PsVerifiedIrIntrinsic.natAdd
+              5
+              7)
+            (psWasmSmokeNat 12)
+      },
+      {
+        name := "natSubSaturates"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeNatBinary
+              PsVerifiedIrIntrinsic.natSub
+              3
+              5)
+            (psWasmSmokeNat 0)
+      },
+      {
+        name := "natMulExact"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeNatBinary
+              PsVerifiedIrIntrinsic.natMul
+              4
+              3)
+            (psWasmSmokeNat 12)
+      },
+      {
+        name := "natDivExact"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeNatBinary
+              PsVerifiedIrIntrinsic.natDiv
+              13
+              5)
+            (psWasmSmokeNat 2)
+      },
+      {
+        name := "natDivZero"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeNatBinary
+              PsVerifiedIrIntrinsic.natDiv
+              13
+              0)
+            (psWasmSmokeNat 0)
+      },
+      {
+        name := "natModExact"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeNatBinary
+              PsVerifiedIrIntrinsic.natMod
+              13
+              5)
+            (psWasmSmokeNat 3)
+      },
+      {
+        name := "natModZero"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeNatBinary
+              PsVerifiedIrIntrinsic.natMod
+              13
+              0)
+            (psWasmSmokeNat 13)
+      },
+      {
+        name := "natOrder"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natLt
+            [psWasmSmokeNat 3, psWasmSmokeNat 5]
       }
     ]
   }

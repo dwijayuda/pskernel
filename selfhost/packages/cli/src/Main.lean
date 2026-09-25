@@ -4,14 +4,14 @@ def psCliUsage : String :=
   "ProofScript PSC1 Lean bootstrap\n" ++
   "usage:\n" ++
   "  psc1 check <input.lean|input.ps>\n" ++
-  "  psc1 build <input.lean|input.ps> --out <output.ts>\n" ++
+  "  psc1 build <input.lean|input.ps> --out <output.js|output.ts>\n" ++
   "  psc1 translate <input.lean|input.ps> --to <lean|ps>\n" ++
   "  psc1 translate <input.lean|input.ps> --to <lean|ps> --out <output>\n" ++
   "  psc1 emit-lean <input.lean|input.ps> [--out <output.lean>]\n" ++
   "  psc1 emit-ps <input.lean|input.ps> [--out <output.ps>]\n" ++
   "  psc1 admissions <input.lean|input.ps>\n" ++
   "  psc1 typescript <input.lean|input.ps>\n" ++
-  "  psc1 compile <input.lean|input.ps> --out <output.ts>"
+  "  psc1 compile <input.lean|input.ps> --out <output.js|output.ts>"
 
 def main (args : List String) : IO Unit := do
   match args with

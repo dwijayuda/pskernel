@@ -1,0 +1,71 @@
+name: PSC1 environment fast hash benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [diagnostic/psc1-env-fast-hash]
+    paths:
+      - ".github/workflows/psc1-env-array-index-benchmark.yml"
+      - "psc1-kernel/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - name: Build and run differential oracle
+        working-directory: psc1-kernel
+        run: |
+          lake build
+          lake build psc1_replay
+          mkdir -p .lake/build/lib/lean/PSC1Kernel/Test
+          lake env lean PSC1Kernel/Test/StructureFixture.lean -o .lake/build/lib/lean/PSC1Kernel/Test/StructureFixture.olean
+          lake env lean --run PSC1Kernel/Test/Oracle.lean
+
+  root100015:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build replay executable
+        working-directory: psc1-kernel
+        run: lake build psc1_replay
+      - name: Replay root 100015
+        shell: bash
+        env:
+          PSC1_LEAN_STD_CHUNK: "1"
+          PSC1_LEAN_EXPORT_TIMEOUT_MS: "180000"
+          PSC1_LEAN_REPLAY_TIMEOUT_MS: "900000"
+          PSC1_LEAN_REPLAY_BIN: "psc1-kernel/.lake/build/bin/psc1_replay"
+        run: |
+          set -euo pipefail
+          start=$(date +%s)
+          node scripts/psc1-lean-std-release-profile.mjs --label root-100015-fast-hash --start 100015 --count 1 --chunk 1
+          stop=$(date +%s)
+          echo "elapsed_seconds=$((stop-start))"

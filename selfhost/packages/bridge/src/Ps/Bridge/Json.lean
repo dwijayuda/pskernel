@@ -60,10 +60,14 @@ def psJsonQuote (value : String) : String :=
   psJsonConcat3 "\"" (psJsonEscapeChars value.toList) "\""
 
 def psJsonJoin (separator : String) : List String -> String
-  | [] => ""
-  | [value] => value
-  | value :: rest =>
-      psJsonConcat3 value separator (psJsonJoin separator rest)
+  | List.nil =>
+      ""
+  | List.cons value rest =>
+      match rest with
+      | List.nil =>
+          value
+      | List.cons _ _ =>
+          psJsonConcat3 value separator (psJsonJoin separator rest)
 
 def psJsonArray (values : List String) : String :=
   psJsonConcat3 "[" (psJsonJoin "," values) "]"
@@ -71,11 +75,20 @@ def psJsonArray (values : List String) : String :=
 def psJsonField (key value : String) : String :=
   psJsonConcat3 (psJsonQuote key) ":" value
 
+def psJsonMapObjectFields :
+    List (String × String) -> List String
+  | List.nil =>
+      List.nil
+  | List.cons field rest =>
+      List.cons
+        (psJsonField (Prod.fst field) (Prod.snd field))
+        (psJsonMapObjectFields rest)
+
 def psJsonObject (sortedFields : List (String × String)) : String :=
-  let fields :=
-    sortedFields.map
-      (fun field => psJsonField field.1 field.2)
-  psJsonConcat3 "{" (psJsonJoin "," fields) "}"
+  psJsonConcat3
+    "{"
+    (psJsonJoin "," (psJsonMapObjectFields sortedFields))
+    "}"
 
 
 

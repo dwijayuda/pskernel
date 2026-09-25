@@ -2385,6 +2385,33 @@ def psTestDualSourcePartialDefinition : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestLambdaMatchExpectedType : Bool :=
+  let source :=
+    "inductive LambdaFlag where | off | on\n" ++
+    "def chooseLambda : LambdaFlag -> Nat := " ++
+    "fun (x : LambdaFlag) => " ++
+    "match x with | LambdaFlag.off => 0 | LambdaFlag.on => 1"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psBootstrapPreludeEnvironment module with
+      | Except.ok _ => true
+      | Except.error _ => false
+
+def psTestTwoArgumentEquationDefinition : Bool :=
+  let source :=
+    "inductive EquationTag where | a | b\n" ++
+    "def equationTagEq : EquationTag -> EquationTag -> Bool\n" ++
+    "  | .a, .a => true\n" ++
+    "  | .b, .b => true\n" ++
+    "  | _, _ => false"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psBootstrapPreludeEnvironment module with
+      | Except.ok _ => true
+      | Except.error _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -2397,6 +2424,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source binder kinds parse", passed := psTestDualSourceBinderKindsParse },
   { name := "dual-source typed lambda parse", passed := psTestDualSourceTypedLambdaParse },
   { name := "dual-source typed lambda elaboration", passed := psTestDualSourceTypedLambdaElaboration },
+  { name := "lambda match uses expected type", passed := psTestLambdaMatchExpectedType },
+  { name := "two-argument equation definition", passed := psTestTwoArgumentEquationDefinition },
   { name := "dual-source Pi parse", passed := psTestDualSourcePiParse },
   { name := "dual-source Pi lambda declaration", passed := psTestDualSourcePiLambdaDeclaration },
   { name := "dual-source annotated let", passed := psTestDualSourceAnnotatedLet },

@@ -1071,6 +1071,30 @@ console.log('ok - @proofscript/elab bounded Nat notation');
 }
 console.log('ok - @proofscript/elab Lean equation clauses via recursors');
 
+{
+  const env=makeDefinitionEnvironment();
+  const seeded=elaborateV061Declarations(parseV061Module(
+    'inductive List(α : Type) where { '+
+    '| nil; | cons(head : α, tail : List(α)); } '+
+    'inductive NameComponent where { '+
+    '| str(value : TestNat); | num(value : TestNat); }',
+  ),env).environment;
+  const result=elaborateV061Declarations(
+    parseV061LeanSubsetModule(
+      'def emptyComponents : List NameComponent := []\n'+
+      'def oneComponent (value : TestNat) : List NameComponent := [.str value]\n',
+    ),
+    seeded,
+  );
+  equal(result.definitions.length,2);
+  const empty=result.definitions[0]!;
+  const one=result.definitions[1]!;
+  equal(containsNamedConstant(empty.value,'List.nil'),true);
+  equal(containsNamedConstant(one.value,'List.cons'),true);
+  equal(containsNamedConstant(one.value,'NameComponent.str'),true);
+}
+console.log('ok - @proofscript/elab Lean list literal + constructor shorthand');
+
 
 {
   const env=makeDefinitionEnvironment();

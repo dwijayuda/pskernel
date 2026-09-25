@@ -18,5 +18,8 @@
   "dependencies": {
     "@proofscript/compiler-next": "0.0.0-dev",
     "@proofscript/bootstrap-host": "0.0.0-dev"
+  },
+  "bin": {
+    "psc": "./bin/psc.mjs"
   }
 }

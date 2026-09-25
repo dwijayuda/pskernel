@@ -8,7 +8,11 @@
     "sourceRoots": [
       "src"
     ],
-    "role": "elaboration"
+    "role": "elaboration",
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist"
   },
   "dependencies": {
     "@proofscript/syntax-next": "0.0.0-dev",

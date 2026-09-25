@@ -30,6 +30,9 @@ if(!Array.isArray(runtime.LEAN434_JS_IMPLEMENTED_BY_BINDINGS)){
 if(!Array.isArray(runtime.LEAN434_JS_INTRINSIC_BINDINGS)){
   throw new Error('missing LEAN434_JS_INTRINSIC_BINDINGS');
 }
+if(!Array.isArray(runtime.LEAN434_JS_EVALUATOR_EXTERN_BINDINGS)){
+  throw new Error('missing LEAN434_JS_EVALUATOR_EXTERN_BINDINGS');
+}
 
 const seen=new Set();
 const checked=[];
@@ -199,6 +202,65 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
   });
 }
 
+const seenEvaluatorExterns=new Set();
+const evaluatorExternBindings=[];
+for(const binding of runtime.LEAN434_JS_EVALUATOR_EXTERN_BINDINGS){
+  if(seenEvaluatorExterns.has(binding.leanDeclaration)){
+    throw new Error(
+      'duplicate Lean evaluator extern binding: '+binding.leanDeclaration,
+    );
+  }
+  seenEvaluatorExterns.add(binding.leanDeclaration);
+  if(!Number.isInteger(binding.arity)||binding.arity<0){
+    throw new Error(
+      'invalid evaluator extern arity for '+binding.leanDeclaration,
+    );
+  }
+  if(binding.adapter!=='instantiate-level-mvars'){
+    throw new Error(
+      'unsupported evaluator extern adapter for '+
+      binding.leanDeclaration+': '+String(binding.adapter),
+    );
+  }
+  const upstream=path.join(
+    repoRoot,
+    'study','lean4-4.34.0','src',
+    ...binding.upstreamSource.split('/'),
+  );
+  if(!fs.existsSync(upstream)){
+    throw new Error(
+      'evaluator extern upstream source missing: '+binding.upstreamSource,
+    );
+  }
+  const source=fs.readFileSync(upstream,'utf8');
+  if(!source.includes('"'+binding.leanSymbol+'"')){
+    throw new Error(
+      'evaluator extern symbol missing from upstream source: '+
+      binding.leanDeclaration+' -> '+binding.leanSymbol,
+    );
+  }
+  const shortName=binding.leanDeclaration.split('.').at(-1);
+  if(
+    typeof shortName!=='string'
+    ||!(
+      source.includes('opaque '+shortName)
+      ||source.includes('def '+shortName)
+    )
+  ){
+    throw new Error(
+      'evaluator extern declaration missing from upstream source: '+
+      binding.leanDeclaration,
+    );
+  }
+  evaluatorExternBindings.push({
+    leanDeclaration:binding.leanDeclaration,
+    leanSymbol:binding.leanSymbol,
+    arity:binding.arity,
+    adapter:binding.adapter,
+    upstreamSource:binding.upstreamSource,
+  });
+}
+
 const seenIntrinsics=new Set();
 const intrinsicBindings=[];
 for(const binding of runtime.LEAN434_JS_INTRINSIC_BINDINGS){
@@ -319,8 +381,10 @@ process.stdout.write(JSON.stringify({
   declarationBindings:declarationBindings.length,
   implementedByBindings:implementedByBindings.length,
   intrinsicBindings:intrinsicBindings.length,
+  evaluatorExternBindings:evaluatorExternBindings.length,
   entries:checked,
   bindings:declarationBindings,
   intrinsics:intrinsicBindings,
+  evaluatorExterns:evaluatorExternBindings,
   implementedBy:implementedByBindings,
 },null,2)+'\n');

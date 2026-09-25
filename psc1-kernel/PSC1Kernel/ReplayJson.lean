@@ -485,8 +485,17 @@ def decodeInductive (root : Json) : Except String Replay.Record := do
     numNested := maxNat nestedCounts
   })
 
+def recordKindCount (root : Json) : Nat :=
+  let has (key : String) : Nat :=
+    if (field? root key).isSome then 1 else 0
+  has "meta" + has "in" + has "il" + has "ie" +
+    has "axiom" + has "def" + has "thm" + has "opaque" +
+    has "quot" + has "inductive"
+
 def decodeJson (root : Json) : Except String Replay.Record := do
   let _ ← asObject root "line"
+  unless recordKindCount root == 1 do
+    throw "lean4export line must contain exactly one record kind"
   if (field? root "meta").isSome then
     decodeMeta root
   else if (field? root "in").isSome then

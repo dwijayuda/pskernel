@@ -543,15 +543,34 @@ partial def inferKMajorType?
   | .lit (.str _) => return some (.const kernelStringName [])
   | .mdata _ body => inferKMajorType? ctx body
   | .app fn arg => do
+      let sourceInfoCasesOn : Name :=
+        .str (.str (.str .anonymous "Lean") "SourceInfo") "casesOn"
+      let debugCasesOn :=
+        match major.getAppFn with
+        | .const name _ => Name.eq name sourceInfoCasesOn
+        | _ => false
+      let argc := major.getAppNumArgs
       let some fnType ← inferKMajorType? ctx fn
-        | return none
+        | if debugCasesOn then
+            throw ("K casesOn debug: function inference failed at args=" ++ toString argc)
+          else
+            return none
       let fnType' ← whnf ctx fnType
       let .forallE _ domain body _ := fnType'
-        | return none
+        | if debugCasesOn then
+            throw ("K casesOn debug: function type not forall at args=" ++ toString argc)
+          else
+            return none
       let some argType ← inferKMajorType? ctx arg
-        | return none
+        | if debugCasesOn then
+            throw ("K casesOn debug: argument inference failed at args=" ++ toString argc)
+          else
+            return none
       unless ← kTypesEq ctx domain argType do
-        return none
+        if debugCasesOn then
+          throw ("K casesOn debug: argument type mismatch at args=" ++ toString argc)
+        else
+          return none
       return some (body.instantiate1 arg)
   | .lam .. => inferKLambdaSpine ctx major
   | .forallE .. => inferKForallSpine ctx major

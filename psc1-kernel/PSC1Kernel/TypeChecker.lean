@@ -67,6 +67,11 @@ partial def whnf (ctx : CheckerContext) (e : Expr) : Except String Expr :=
           .ok e
       | none => .ok e
     | none => .ok e
+  | .proj typeName idx struct => do
+    let struct' ← whnf ctx struct
+    match reduceProjCore ctx typeName idx struct' with
+    | some value => whnf ctx value
+    | none => .ok e
   | .app fn arg => do
     let fn' ← whnf ctx fn
     match fn' with
@@ -107,6 +112,9 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
     let hd ← isDefEq ctx d₁ d₂
     if !hd then return false
     isDefEq ctx b₁ b₂
+  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ => do
+    if !Name.eq n₁ n₂ || i₁ != i₂ then return false
+    isDefEq ctx e₁ e₂
   | _, _ => return false
 
 partial def ensureSort (ctx : CheckerContext) (e : Expr) : Except String Level := do
@@ -122,6 +130,27 @@ partial def ensureForall
   match reduced with
   | .forallE name domain body binderInfo => .ok (name, domain, body, binderInfo)
   | _ => .error "expected function type"
+
+
+def reduceProjCore
+    (ctx : CheckerContext)
+    (typeName : Name)
+    (idx : Nat)
+    (struct : Expr) : Option Expr :=
+  let fn := struct.getAppFn
+  let args := struct.getAppArgs
+  match fn with
+  | .const ctorName _ =>
+    match ctx.env.find? ctorName with
+    | some (.ctorInfo ctor) =>
+      if !Name.eq ctor.induct typeName then
+        none
+      else
+        listGet? args (ctor.numParams + idx)
+    | _ => none
+  | _ => none
+
+mutual
 
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with
@@ -182,7 +211,84 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
       let (fresh, child) := ctx.withLet name type value
       let bodyType ← infer child (body.instantiate1 (.fvar fresh))
       .ok (bodyType.abstractFVars [fresh])
-  | .proj _ _ _ => .error "projection inference not implemented in K2"
+  | .proj typeName idx struct => inferProj ctx typeName idx struct
+
+partial def getSortLevel (ctx : CheckerContext) (e : Expr) : Except String Level := do
+  let type ← infer ctx e
+  ensureSort ctx type
+
+partial def isProp (ctx : CheckerContext) (e : Expr) : Except String Bool := do
+  let level ← getSortLevel ctx e
+  .ok (Level.normalizesToZero level)
+
+partial def inferProj
+    (ctx : CheckerContext)
+    (typeName : Name)
+    (idx : Nat)
+    (struct : Expr) : Except String Expr := do
+  let type ← whnf ctx (← infer ctx struct)
+  let fn := type.getAppFn
+  let args := type.getAppArgs
+  let (.const inductName inductLevels) := fn
+    | .error "invalid projection: projected expression type is not an inductive application"
+  if !Name.eq inductName typeName then
+    .error "invalid projection: structure type mismatch"
+  else
+    let some (.inductInfo induct) := ctx.env.find? inductName
+      | .error "invalid projection: structure name is not inductive"
+    match induct.ctors with
+    | [ctorName] =>
+      if args.length != induct.numParams + induct.numIndices then
+        .error "invalid projection: inductive type is not fully applied"
+      else
+        let some (.ctorInfo ctor) := ctx.env.find? ctorName
+          | .error "invalid projection: constructor metadata missing"
+        let mut r := ctor.base.type.instantiateLevelParams ctor.base.levelParams inductLevels
+        let rec applyParams (i : Nat) (r : Expr) : Except String Expr := do
+          if i < induct.numParams then
+            let r' ← whnf ctx r
+            let .forallE _ _ body _ := r'
+              | .error "invalid projection: constructor parameter is not a forall"
+            let some arg := listGet? args i
+              | .error "invalid projection: missing structure parameter"
+            applyParams (i + 1) (body.instantiate1 arg)
+          else
+            .ok r
+        r ← applyParams 0 r
+        let propType ← isProp ctx type
+        let rec skipFields (i : Nat) (r : Expr) : Except String Expr := do
+          if i < idx then
+            let r' ← whnf ctx r
+            let .forallE _ domain body _ := r'
+              | .error "invalid projection index"
+            if body.hasLooseBVar then
+              if propType then
+                let domainProp ← isProp ctx domain
+                if !domainProp then
+                  .error "invalid projection: proof structure depends on data field"
+                else
+                  skipFields (i + 1) (body.instantiate1 (.proj inductName i struct))
+              else
+                skipFields (i + 1) (body.instantiate1 (.proj inductName i struct))
+            else
+              skipFields (i + 1) body
+          else
+            .ok r
+        r ← skipFields 0 r
+        let r ← whnf ctx r
+        let .forallE _ domain _ _ := r
+          | .error "invalid projection index"
+        if propType then
+          let domainProp ← isProp ctx domain
+          if !domainProp then
+            .error "invalid projection: proof structure field is not a proposition"
+          else
+            .ok domain
+        else
+          .ok domain
+    | _ => .error "invalid projection: inductive must have exactly one constructor"
+
+end
 
 def check (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   infer ctx e

@@ -80,9 +80,9 @@ def psWasmFloatingValueType
 def psWasmFindStructure :
     List PsVerifiedIrStructure -> String -> Option PsVerifiedIrStructure
   | [], _ => none
-  | structure :: rest, name =>
-      if structure.name == name then
-        some structure
+  | structInfo :: rest, name =>
+      if structInfo.name == name then
+        some structInfo
       else
         psWasmFindStructure rest name
 
@@ -100,10 +100,10 @@ def psWasmFindStructureFieldLoop
           fieldName (index + 1) rest
 
 def psWasmFindStructureField
-    (structure : PsVerifiedIrStructure)
+    (structInfo : PsVerifiedIrStructure)
     (fieldName : String) :
     Option (Nat × PsVerifiedIrStructureField) :=
-  psWasmFindStructureFieldLoop fieldName 0 structure.fields
+  psWasmFindStructureFieldLoop fieldName 0 structInfo.fields
 
 def psWasmFindRecordField :
     List (String × PsVerifiedIrExpr) ->
@@ -159,16 +159,16 @@ def psWasmLowerStructureFields
 
 def psWasmLowerStructure
     (profile : PsWasmTargetProfile)
-    (structure : PsVerifiedIrStructure) :
+    (structInfo : PsVerifiedIrStructure) :
     Except PsWasmLowerError PsWasmStructType :=
-  match structure.typeParameters with
+  match structInfo.typeParameters with
   | _ :: _ => Except.error PsWasmLowerError.unsupportedType
   | [] =>
-      match psWasmLowerStructureFields profile structure.fields with
+      match psWasmLowerStructureFields profile structInfo.fields with
       | Except.error error => Except.error error
       | Except.ok fields =>
           Except.ok {
-            name := structure.name
+            name := structInfo.name
             fields := fields
           }
 
@@ -177,8 +177,8 @@ def psWasmLowerStructures
     List PsVerifiedIrStructure ->
     Except PsWasmLowerError (List PsWasmStructType)
   | [] => Except.ok []
-  | structure :: rest =>
-      match psWasmLowerStructure profile structure with
+  | structInfo :: rest =>
+      match psWasmLowerStructure profile structInfo with
       | Except.error error => Except.error error
       | Except.ok lowered =>
           match psWasmLowerStructures profile rest with
@@ -257,7 +257,7 @@ def psWasmLowerRecordFieldsWith
       PsWasmLowerState ->
       PsVerifiedIrExpr ->
         Except PsWasmLowerError PsWasmLoweredExpr)
-    (structure : PsVerifiedIrStructure)
+    (structInfo : PsVerifiedIrStructure)
     (fields : List (String × PsVerifiedIrExpr)) :
     PsWasmLowerState ->
     List PsVerifiedIrStructureField ->
@@ -272,7 +272,7 @@ def psWasmLowerRecordFieldsWith
       | none =>
           Except.error
             (PsWasmLowerError.missingRecordField
-              structure.name field.name)
+              structInfo.name field.name)
       | some value =>
           match psWasmValueTypeOfIrType? profile field.type with
           | none => Except.error PsWasmLowerError.unsupportedType
@@ -284,7 +284,7 @@ def psWasmLowerRecordFieldsWith
                       psWasmLowerRecordFieldsWith
                         profile
                         lower
-                        structure
+                        structInfo
                         fields
                         lowered.state
                         rest with
@@ -554,8 +554,8 @@ def psWasmLowerExprWithFuel
           | none =>
               Except.error
                 (PsWasmLowerError.unknownStructure structureName)
-          | some structure =>
-              match structure.typeParameters with
+          | some structInfo =>
+              match structInfo.typeParameters with
               | _ :: _ =>
                   Except.error PsWasmLowerError.unsupportedType
               | [] =>
@@ -563,10 +563,10 @@ def psWasmLowerExprWithFuel
                       psWasmLowerRecordFieldsWith
                         profile
                         lower
-                        structure
+                        structInfo
                         fields
                         state
-                        structure.fields with
+                        structInfo.fields with
                   | Except.error error => Except.error error
                   | Except.ok lowered =>
                       Except.ok {
@@ -580,8 +580,8 @@ def psWasmLowerExprWithFuel
           | none =>
               Except.error
                 (PsWasmLowerError.unknownStructure structureName)
-          | some structure =>
-              match psWasmFindStructureField structure fieldName with
+          | some structInfo =>
+              match psWasmFindStructureField structInfo fieldName with
               | none =>
                   Except.error
                     (PsWasmLowerError.unknownStructureField

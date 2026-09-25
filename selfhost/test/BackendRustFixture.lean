@@ -142,6 +142,42 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
             [PsVerifiedIrExpr.var "text"]
       },
       {
+        name := "genericId"
+        typeParameters := [{ name := "A" }]
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.typeParameter "A"
+          }
+        ]
+        resultType := PsVerifiedIrType.typeParameter "A"
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "genericArrayId"
+        typeParameters := [{ name := "A" }]
+        parameters := [
+          {
+            name := "xs"
+            type :=
+              PsVerifiedIrType.named
+                "Array"
+                [PsVerifiedIrType.typeParameter "A"]
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.named
+            "Array"
+            [PsVerifiedIrType.typeParameter "A"]
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayMap
+            [
+              PsVerifiedIrExpr.var "genericId",
+              PsVerifiedIrExpr.var "xs"
+            ]
+      },
+      {
         name := "arrayIdOnly"
         typeParameters := []
         parameters := [

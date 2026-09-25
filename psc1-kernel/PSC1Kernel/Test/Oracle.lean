@@ -209,7 +209,12 @@ def assertNatReductionOracle : IO Unit := do
     ("mod-zero", natBinary "mod" (.lit (.nat 11)) (.lit (.nat 0))),
     ("div-zero", natBinary "div" (.lit (.nat 11)) (.lit (.nat 0))),
     ("beq-true", natBinary "beq" (.lit (.nat 11)) (.lit (.nat 11))),
-    ("ble-false", natBinary "ble" (.lit (.nat 12)) (.lit (.nat 11)))
+    ("ble-false", natBinary "ble" (.lit (.nat 12)) (.lit (.nat 11))),
+    ("land", natBinary "land" (.lit (.nat 6)) (.lit (.nat 3))),
+    ("lor", natBinary "lor" (.lit (.nat 4)) (.lit (.nat 3))),
+    ("xor", natBinary "xor" (.lit (.nat 6)) (.lit (.nat 3))),
+    ("shift-left", natBinary "shiftLeft" (.lit (.nat 3)) (.lit (.nat 4))),
+    ("shift-right", natBinary "shiftRight" (.lit (.nat 48)) (.lit (.nat 4)))
   ]
   for item in cases do
     let label := item.1

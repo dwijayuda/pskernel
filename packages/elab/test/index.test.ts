@@ -1095,6 +1095,31 @@ console.log('ok - @proofscript/elab Lean equation clauses via recursors');
 }
 console.log('ok - @proofscript/elab Lean list literal + constructor shorthand');
 
+{
+  const env=makeDefinitionEnvironment();
+  const seededResult=elaborateV061Declarations(parseV061Module(
+    'inductive List(α : Type) where { '+
+    '| nil; | cons(head : α, tail : List(α)); } '+
+    'inductive NameComponent where { '+
+    '| str(value : TestNat); | num(value : TestNat); } '+
+    'function List.append {α : Type}(xs : List(α), ys : List(α)) : List(α) := ys;',
+  ),env);
+  const result=elaborateV061Declarations(
+    parseV061LeanSubsetModule(
+      'def appendStringComponent '+
+      '(xs : List NameComponent) (value : TestNat) : List NameComponent := '+
+      'xs ++ [.str value]\n',
+    ),
+    seededResult.environment,
+  );
+  equal(result.definitions.length,1);
+  const definition=result.definitions[0]!;
+  equal(containsNamedConstant(definition.value,'List.append'),true);
+  equal(containsNamedConstant(definition.value,'List.cons'),true);
+  equal(containsNamedConstant(definition.value,'NameComponent.str'),true);
+}
+console.log('ok - @proofscript/elab Lean list append + literal shorthand');
+
 
 {
   const env=makeDefinitionEnvironment();

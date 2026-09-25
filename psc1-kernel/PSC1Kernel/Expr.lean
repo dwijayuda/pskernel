@@ -45,6 +45,17 @@ def Level.listEq : List Level → List Level → Bool
   | a :: as, b :: bs => Level.eq a b && Level.listEq as bs
   | _, _ => false
 
+theorem Literal.eqSelf : ∀ value : Literal, Literal.eq value value = true
+  | .nat value => by simp [Literal.eq]
+  | .str value => by simp [Literal.eq]
+
+theorem Level.listEqSelf : ∀ levels : List Level, Level.listEq levels levels = true
+  | [] => rfl
+  | level :: rest => by
+      simp only [Level.listEq]
+      rw [Level.eqSelf level, Level.listEqSelf rest]
+      rfl
+
 /--
 Lean 4.34 `Expr.eqv`-compatible structural equality core. Binder display
 names and binder annotations on lambda/forall/let nodes are deliberately
@@ -70,29 +81,48 @@ partial def Expr.eqCore : Expr → Expr → Bool
     Name.eq n₁ n₂ && i₁ == i₂ && Expr.eqCore e₁ e₂
   | _, _ => false
 
-private theorem Expr.eqCoreSelf : ∀ e : Expr, Expr.eqCore e e = true := by
-  intro e
-  induction e with
-  | bvar index => simp [Expr.eqCore]
-  | fvar name => simp [Expr.eqCore, Name.eq]
-  | mvar name => simp [Expr.eqCore, Name.eq]
-  | sort level => simp [Expr.eqCore, Level.eq]
-  | const name levels =>
-      simp [Expr.eqCore, Name.eq, Level.listEq]
-  | app fn arg fnIH argIH =>
-      simp [Expr.eqCore, fnIH, argIH]
-  | lam name type body binderInfo typeIH bodyIH =>
-      simp [Expr.eqCore, typeIH, bodyIH]
-  | forallE name type body binderInfo typeIH bodyIH =>
-      simp [Expr.eqCore, typeIH, bodyIH]
-  | letE name type value body nondep typeIH valueIH bodyIH =>
-      simp [Expr.eqCore, typeIH, valueIH, bodyIH]
-  | lit value =>
-      cases value <;> simp [Expr.eqCore, Literal.eq]
-  | mdata metadata expr exprIH =>
-      simp [Expr.eqCore, exprIH]
-  | proj typeName index expr exprIH =>
-      simp [Expr.eqCore, Name.eq, exprIH]
+private theorem Expr.eqCoreSelf : ∀ e : Expr, Expr.eqCore e e = true
+  | .bvar index => by simp [Expr.eqCore]
+  | .fvar name => by
+      simp only [Expr.eqCore]
+      exact Name.eqSelf name
+  | .mvar name => by
+      simp only [Expr.eqCore]
+      exact Name.eqSelf name
+  | .sort level => by
+      simp only [Expr.eqCore]
+      exact Level.eqSelf level
+  | .const name levels => by
+      simp only [Expr.eqCore]
+      rw [Name.eqSelf name, Level.listEqSelf levels]
+      rfl
+  | .app fn arg => by
+      simp only [Expr.eqCore]
+      rw [Expr.eqCoreSelf fn, Expr.eqCoreSelf arg]
+      rfl
+  | .lam name type body binderInfo => by
+      simp only [Expr.eqCore]
+      rw [Expr.eqCoreSelf type, Expr.eqCoreSelf body]
+      rfl
+  | .forallE name type body binderInfo => by
+      simp only [Expr.eqCore]
+      rw [Expr.eqCoreSelf type, Expr.eqCoreSelf body]
+      rfl
+  | .letE name type value body nondep => by
+      simp only [Expr.eqCore]
+      rw [Expr.eqCoreSelf type, Expr.eqCoreSelf value, Expr.eqCoreSelf body]
+      simp
+  | .lit value => by
+      simp only [Expr.eqCore]
+      exact Literal.eqSelf value
+  | .mdata metadata expr => by
+      simp only [Expr.eqCore]
+      rw [Expr.eqCoreSelf expr]
+      simp
+  | .proj typeName index expr => by
+      simp only [Expr.eqCore]
+      rw [Name.eqSelf typeName, Expr.eqCoreSelf expr]
+      simp
 
 /--
 Semantically this is exactly `Expr.eqCore`. `withPtrEq` has a pure fallback

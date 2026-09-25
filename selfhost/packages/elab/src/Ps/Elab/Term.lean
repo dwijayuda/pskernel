@@ -903,15 +903,23 @@ def psExprAppView (expr : PsExpr) : PsExprAppView :=
 def psExprHasConst (target : PsName) : PsExpr -> Bool
   | .constE name _ => psNameEq name target
   | .app fn argument =>
-      psExprHasConst target fn || psExprHasConst target argument
+      psElabBoolOr
+        (psExprHasConst target fn)
+        (psExprHasConst target argument)
   | .lam _ type body _ =>
-      psExprHasConst target type || psExprHasConst target body
+      psElabBoolOr
+        (psExprHasConst target type)
+        (psExprHasConst target body)
   | .forallE _ type body _ =>
-      psExprHasConst target type || psExprHasConst target body
+      psElabBoolOr
+        (psExprHasConst target type)
+        (psExprHasConst target body)
   | .letE _ type value body =>
-      psExprHasConst target type
-        || psExprHasConst target value
-        || psExprHasConst target body
+      psElabBoolOr
+        (psExprHasConst target type)
+        (psElabBoolOr
+          (psExprHasConst target value)
+          (psExprHasConst target body))
   | .proj _ _ value => psExprHasConst target value
   | _ => false
 
@@ -1067,9 +1075,14 @@ def psElabMatchApplyParameters
 def psSyntaxNameIsWildcardBinder
     (name : PsSyntaxName) : Bool :=
   match name.segments with
-  | List.cons segment List.nil =>
-      psStringEq segment "_"
-  | _ => false
+  | List.nil =>
+      false
+  | List.cons segment rest =>
+      match rest with
+      | List.nil =>
+          psStringEq segment "_"
+      | List.cons _ _ =>
+          false
 
 def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
   | List.nil => false
@@ -1084,9 +1097,15 @@ def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
               if psSyntaxNameIsWildcardBinder candidate then
                 false
               else
-                match coreName, psSyntaxNameToName candidate with
-                | some left, some right => psNameEq left right
-                | _, _ => false);
+                match coreName with
+                | none =>
+                    false
+                | some left =>
+                    match psSyntaxNameToName candidate with
+                    | none =>
+                        false
+                    | some right =>
+                        psNameEq left right);
         if duplicated then
           true
         else
@@ -1487,12 +1506,18 @@ def psElabMatch
                         | none =>
                             Except.error PsElabError.matchRecursorUnsupported
                         | some recInfo =>
-                            if psElabNatNe recInfo.numParams inductiveInfo.numParams
-                                || psElabNatNe recInfo.numIndices 0
-                                || psElabNatNe recInfo.numMotives 1
-                                || psElabNatNe
-                                  recInfo.numMinors
-                                  inductiveInfo.constructors.length then
+                            if
+                                psElabBoolOr
+                                  (psElabNatNe
+                                    recInfo.numParams
+                                    inductiveInfo.numParams)
+                                  (psElabBoolOr
+                                    (psElabNatNe recInfo.numIndices 0)
+                                    (psElabBoolOr
+                                      (psElabNatNe recInfo.numMotives 1)
+                                      (psElabNatNe
+                                        recInfo.numMinors
+                                        inductiveInfo.constructors.length))) then
                               Except.error
                                 PsElabError.matchRecursorUnsupported
                             else
@@ -1816,9 +1841,10 @@ def psSyntaxRecordFieldsMatch
     (fields :
       List (Prod PsSyntaxName PsSyntaxTerm))
     (names : List String) : Bool :=
-  Nat.beq fields.length names.length
-    && names.all
-      (fun name => psSyntaxRecordHasField fields name)
+  psElabBoolAnd
+    (Nat.beq fields.length names.length)
+    (names.all
+      (fun name => psSyntaxRecordHasField fields name))
 
 def psSyntaxRecordFindField :
     List (Prod PsSyntaxName PsSyntaxTerm) ->
@@ -2098,34 +2124,41 @@ def psTryElabStructuralSelfCall
     (arguments : List PsSyntaxTerm)
     (expected : Option PsExpr) :
     Except PsElabError (Option PsElabTermResult) :=
-  match context.structuralRecursion, fn with
-  | some recursion, .reference sourceName =>
-      match psSyntaxNameToName sourceName with
-      | some calledName =>
-          if psElabBoolNot (psNameEq calledName recursion.functionName) then
-            Except.ok none
-          else if
-              psElabNatNe arguments.length recursion.explicitParameterIds.length then
-            Except.error PsElabError.structuralRecursionArity
-          else
-            match
-                psElabValidateStructuralCall
-                  context
-                  recursion
-                  0
-                  arguments
-                  none with
-            | Except.error error => Except.error error
-            | Except.ok hypothesisId =>
+  match context.structuralRecursion with
+  | none =>
+      Except.ok none
+  | some recursion =>
+      match fn with
+      | .reference sourceName =>
+          match psSyntaxNameToName sourceName with
+          | some calledName =>
+              if psElabBoolNot (psNameEq calledName recursion.functionName) then
+                Except.ok none
+              else if
+                  psElabNatNe
+                    arguments.length
+                    recursion.explicitParameterIds.length then
+                Except.error PsElabError.structuralRecursionArity
+              else
                 match
-                    psElabResolvedTerm
+                    psElabValidateStructuralCall
                       context
-                      (PsExpr.fvar hypothesisId)
-                      expected with
+                      recursion
+                      0
+                      arguments
+                      none with
                 | Except.error error => Except.error error
-                | Except.ok result => Except.ok (some result)
-      | none => Except.ok none
-  | _, _ => Except.ok none
+                | Except.ok hypothesisId =>
+                    match
+                        psElabResolvedTerm
+                          context
+                          (PsExpr.fvar hypothesisId)
+                          expected with
+                    | Except.error error => Except.error error
+                    | Except.ok result => Except.ok (some result)
+          | none => Except.ok none
+      | _ =>
+          Except.ok none
 
 def psElabTermWithFuel
     (fuel : Nat)

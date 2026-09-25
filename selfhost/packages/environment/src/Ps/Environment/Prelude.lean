@@ -387,8 +387,14 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let envNat6 :=
     psPreludeAdd envNat5
       (PsDeclaration.axiomDecl psNatBeqName [] natBeqType)
-  let env2 :=
+  let envNat7 :=
     psPreludeAdd envNat6
+      (PsDeclaration.axiomDecl psNatBleName [] natBeqType)
+  let envNat8 :=
+    psPreludeAdd envNat7
+      (PsDeclaration.axiomDecl psNatBltName [] natBeqType)
+  let env2 :=
+    psPreludeAdd envNat8
       (PsDeclaration.axiomDecl psIntName [] typeType)
   let env3 :=
     psPreludeAdd env2

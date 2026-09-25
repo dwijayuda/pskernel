@@ -157,6 +157,10 @@ lean_exe psc1_backend_rust_tests where
   srcDir := "test"
   root := `BackendRustTests
 
+lean_exe psc1_backend_rust_fixture where
+  srcDir := "test"
+  root := `BackendRustFixture
+
 lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests

@@ -84,11 +84,19 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Module
   ]
 
+lean_lib PsCompiler where
+  srcDir := "packages/compiler/src"
+  roots := #[
+    `Ps.Compiler,
+    `Ps.Compiler.Api
+  ]
+
 lean_lib PsHost where
   srcDir := "host/src"
   roots := #[
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
+    `Ps.Host.CompilerDriver,
     `Ps.Host.KernelBridge
   ]
 
@@ -118,7 +126,7 @@ lean_lib PsElab where
 
 @[default_target]
 lean_exe psc1 where
-  srcDir := "src"
+  srcDir := "packages/cli/src"
   root := `Main
 
 lean_exe psc1_tests where

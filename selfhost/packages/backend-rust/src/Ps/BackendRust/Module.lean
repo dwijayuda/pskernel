@@ -196,6 +196,12 @@ def psRustEmitDeclarationParameterList
           | Except.ok printedRest =>
               Except.ok (List.cons rendered printedRest)
 
+def psRustTypeIsFunction
+    (type : PsVerifiedIrType) : Bool :=
+  match type with
+  | PsVerifiedIrType.function _ _ => true
+  | _ => false
+
 def psRustDeclarationIsGenericValue
     (declaration : PsVerifiedIrDeclaration) : Bool :=
   match declaration.parameters with
@@ -213,6 +219,9 @@ def psRustEmitDeclaration
   if psRustDeclarationIsGenericValue declaration then
     Except.error
       (PsRustEmitError.genericValueUnsupported declaration.name)
+  else if psRustTypeIsFunction declaration.resultType then
+    Except.error
+      (PsRustEmitError.functionResultUnsupported declaration.name)
   else
     match psRustEmitDeclarationParameterList declaration.parameters with
     | Except.error error =>

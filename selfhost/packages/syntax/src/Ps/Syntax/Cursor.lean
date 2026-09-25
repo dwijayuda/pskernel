@@ -16,13 +16,13 @@ def psLexCursorFromString (source : String) : PsLexCursor :=
 
 def psLexCursorDone (cursor : PsLexCursor) : Bool :=
   match cursor.remaining with
-  | [] => true
-  | _ => false
+  | List.nil => true
+  | List.cons head tail => false
 
 def psLexCursorPeek (cursor : PsLexCursor) : Option Char :=
   match cursor.remaining with
-  | [] => none
-  | char :: _ => some char
+  | List.nil => Option.none
+  | List.cons char rest => Option.some char
 
 def psLexAdvancePosition (position : PsSourcePos) (char : Char) : PsSourcePos :=
   if char == '\n' then
@@ -40,9 +40,9 @@ def psLexAdvancePosition (position : PsSourcePos) (char : Char) : PsSourcePos :=
 
 def psLexCursorAdvance (cursor : PsLexCursor) : Option PsLexStep :=
   match cursor.remaining with
-  | [] => none
-  | char :: rest =>
-      some {
+  | List.nil => Option.none
+  | List.cons char rest =>
+      Option.some {
         char := char
         cursor := {
           remaining := rest
@@ -52,5 +52,8 @@ def psLexCursorAdvance (cursor : PsLexCursor) : Option PsLexStep :=
 
 def psLexCursorPeekSecond (cursor : PsLexCursor) : Option Char :=
   match cursor.remaining with
-  | _ :: second :: _ => some second
-  | _ => none
+  | List.nil => Option.none
+  | List.cons first rest =>
+      match rest with
+      | List.nil => Option.none
+      | List.cons second tail => Option.some second

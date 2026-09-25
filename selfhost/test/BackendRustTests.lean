@@ -135,6 +135,60 @@ def psTestBackendRustAdt : Bool :=
         && output.contains "pub enum Maybe<A> { none {}, some { value: A } }"
         && output.contains "Maybe::some { value: x }"
 
+def psBackendRustStringModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "pushBang"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringPush
+            [
+              PsVerifiedIrExpr.var "value",
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.charOfNat
+                [
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 33)
+                ]
+            ]
+      },
+      {
+        name := "utf8Size"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringUtf8ByteSize
+            [PsVerifiedIrExpr.var "value"]
+      }
+    ]
+  }
+
+def psTestBackendRustStringIntrinsics : Bool :=
+  match psRustEmitModule psBackendRustStringModule with
+  | Except.error _ => false
+  | Except.ok output =>
+      output.contains "__ps_string_push(&(value), __ps_char_of_nat(&(__ps_nat_lit(\"33\"))))"
+        && output.contains "__ps_string_utf8_byte_size(&(value))"
+
 def psBackendRustValueModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -164,6 +218,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "identity module", passed := psTestBackendRustIdentity },
   { name := "Nat intrinsic", passed := psTestBackendRustIntrinsic },
   { name := "structure and inductive", passed := psTestBackendRustAdt },
+  { name := "Char and String intrinsics", passed := psTestBackendRustStringIntrinsics },
   { name := "unsupported value is explicit", passed := psTestBackendRustRejectsValue }
 ]
 

@@ -7,6 +7,7 @@ on:
       - backend/wasm3-owned
       - integrate/wasm3-owned
       - backend/wasm3-gc-adts
+      - backend/wasm3-closures
       - integrate/wasm3-gc-adts
     paths:
       - selfhost/**

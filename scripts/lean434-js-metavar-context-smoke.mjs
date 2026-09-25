@@ -94,10 +94,11 @@ console.log(JSON.stringify({
   insertAuxImplementedBy:insertAuxImplementedBy?.implementation??null,
   insertAuxRuntimeTarget:insertAuxRuntimeTarget??null,
 }));
-const evaluator=new Lean434Evaluator(
+const makeEvaluator=()=>new Lean434Evaluator(
   replay.env,
   {maxSteps:250_000,metadata},
 );
+const evaluator=makeEvaluator();
 const empty=emptyLean434MetavarContext();
 
 {
@@ -345,6 +346,9 @@ const empty=emptyLean434MetavarContext();
   }
 
   {
+    // Keep this native-boundary smoke isolated from the cumulative interpreter
+    // budget used by the preceding real Lean map/assignment checks.
+    const evaluator=makeEvaluator();
     const zetaName=numName(strName(anonymous,'_m'),13n);
     const zetaId=lean434RuntimeMVarId(zetaName);
     const natType=constant(nameFromDotted('Nat'));
@@ -418,6 +422,9 @@ const empty=emptyLean434MetavarContext();
   }
 
   {
+    // Delayed assignment exercises another interpreted PersistentHashMap path;
+    // use the same strict per-scenario budget instead of inflating maxSteps.
+    const evaluator=makeEvaluator();
     const delayedName=numName(strName(anonymous,'_m'),11n);
     const pendingName=numName(strName(anonymous,'_m'),12n);
     const fvarName=numName(strName(anonymous,'_f'),1n);
@@ -506,6 +513,8 @@ const empty=emptyLean434MetavarContext();
   }
 
   {
+    // Nested delayed resolution is intentionally its own budgeted scenario.
+    const evaluator=makeEvaluator();
     // Small source-derived nested-delayed case.  This exercises the same
     // substitution composition that Lean's instantiateMVarsShadow test relies
     // on, without pulling the whole MetaM test harness into this bootstrap

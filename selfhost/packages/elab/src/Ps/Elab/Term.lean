@@ -502,18 +502,17 @@ def psElabTypedBindersAcc
                     psElabContextWithLocal
                       typeResult.context
                       pushed.context;
+                  let binderEntry : PsElabTypedBinder := {
+                    id := pushed.id
+                    name := name
+                    type := typeResult.term
+                    binder := binder
+                  };
                   psElabTypedBindersAcc
                     elaborate
                     nextContext
                     rest
-                    (List.cons
-                      {
-                        id := pushed.id
-                        name := name
-                        type := typeResult.term
-                        binder := binder
-                      }
-                      bindersRev)
+                    (List.cons binderEntry bindersRev)
 
 def psElabTypedBinders
     (elaborate :

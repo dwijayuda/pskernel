@@ -1461,12 +1461,21 @@ def psWasmLowerExpr
   psWasmLowerExprWithFuel
     profile structures inductives bindings expected 4096 state expr
 
+structure PsWasmLoweredFunction where
+  function : PsWasmFunction
+  state : PsWasmLowerState
+
+structure PsWasmLoweredFunctions where
+  functions : List PsWasmFunction
+  state : PsWasmLowerState
+
 def psWasmLowerDeclaration
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
+    (generationState : PsWasmLowerState)
     (declaration : PsVerifiedIrDeclaration) :
-    Except PsWasmLowerError PsWasmFunction :=
+    Except PsWasmLowerError PsWasmLoweredFunction :=
   match psWasmLowerParameterTypes profile declaration.parameters with
   | Except.error error => Except.error error
   | Except.ok parameters =>
@@ -1481,6 +1490,16 @@ def psWasmLowerDeclaration
               let initialState : PsWasmLowerState := {
                 nextLocalIndex := declaration.parameters.length
                 localTypes := []
+                currentDefinition := declaration.name
+                nextLambdaId := 0
+                generatedStructures :=
+                  generationState.generatedStructures
+                generatedFunctionTypes :=
+                  generationState.generatedFunctionTypes
+                generatedFunctions :=
+                  generationState.generatedFunctions
+                generatedFunctionRefs :=
+                  generationState.generatedFunctionRefs
               }
               match
                   psWasmLowerExpr
@@ -1494,29 +1513,53 @@ def psWasmLowerDeclaration
               | Except.error error => Except.error error
               | Except.ok lowered =>
                   Except.ok {
-                    name := declaration.name
-                    typeName := none
-                    parameters := parameters
-                    results := results
-                    locals := lowered.state.localTypes
-                    body := lowered.instructions
+                    function := {
+                      name := declaration.name
+                      typeName := none
+                      parameters := parameters
+                      results := results
+                      locals := lowered.state.localTypes
+                      body := lowered.instructions
+                    }
+                    state := lowered.state
                   }
 
 def psWasmLowerDeclarations
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive) :
+    PsWasmLowerState ->
     List PsVerifiedIrDeclaration ->
-    Except PsWasmLowerError (List PsWasmFunction)
-  | [] => Except.ok []
-  | declaration :: rest =>
-      match psWasmLowerDeclaration profile structures inductives declaration with
+    Except PsWasmLowerError PsWasmLoweredFunctions
+  | state, [] =>
+      Except.ok {
+        functions := []
+        state := state
+      }
+  | state, declaration :: rest =>
+      match
+          psWasmLowerDeclaration
+            profile
+            structures
+            inductives
+            state
+            declaration with
       | Except.error error => Except.error error
       | Except.ok lowered =>
-          match psWasmLowerDeclarations profile structures inductives rest with
+          match
+              psWasmLowerDeclarations
+                profile
+                structures
+                inductives
+                lowered.state
+                rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok {
+                functions :=
+                  lowered.function :: loweredRest.functions
+                state := loweredRest.state
+              }
 
 def psWasmExportsOfDeclarations :
     List PsVerifiedIrDeclaration -> List (String × String)
@@ -1544,19 +1587,48 @@ def psWasmLowerModule
         match psWasmLowerInductives profile module.inductives with
         | Except.error error => Except.error error
         | Except.ok inductiveTypes =>
+            let semanticFunctionTypes :=
+              psWasmCollectModuleFunctionTypes module
             match
-                psWasmLowerDeclarations
+                psWasmLowerClosureSignatures
                   profile
-                  module.structures
-                  module.inductives
-                  module.declarations with
+                  semanticFunctionTypes with
             | Except.error error => Except.error error
-            | Except.ok functions =>
-                Except.ok {
-                  structures := structures ++ inductiveTypes
-                  functionTypes := []
-                  functions := functions
-                  functionRefs := []
-                  exports :=
-                    psWasmExportsOfDeclarations module.declarations
+            | Except.ok closureSignatures =>
+                let initialState : PsWasmLowerState := {
+                  nextLocalIndex := 0
+                  localTypes := []
+                  currentDefinition := ""
+                  nextLambdaId := 0
+                  generatedStructures := []
+                  generatedFunctionTypes := []
+                  generatedFunctions := []
+                  generatedFunctionRefs := []
                 }
+                match
+                    psWasmLowerDeclarations
+                      profile
+                      module.structures
+                      module.inductives
+                      initialState
+                      module.declarations with
+                | Except.error error => Except.error error
+                | Except.ok lowered =>
+                    Except.ok {
+                      structures :=
+                        structures
+                          ++ inductiveTypes
+                          ++ closureSignatures.1
+                          ++ lowered.state.generatedStructures
+                      functionTypes :=
+                        closureSignatures.2
+                          ++ lowered.state.generatedFunctionTypes
+                      functions :=
+                        lowered.functions
+                          ++ lowered.state.generatedFunctions
+                      functionRefs :=
+                        lowered.state.generatedFunctionRefs
+                      exports :=
+                        psWasmExportsOfDeclarations
+                          module.declarations
+                    }

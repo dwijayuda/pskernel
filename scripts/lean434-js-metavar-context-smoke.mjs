@@ -3,7 +3,9 @@ import {
   Lean4ExportReplay,
   anonymous,
   app,
+  bvar,
   exprEq,
+  lam,
   nameFromDotted,
   natLit,
   numName,
@@ -284,6 +286,60 @@ const empty=emptyLean434MetavarContext();
   console.log(
     'ok - native Lean instantiateExprMVarsImp resolves direct mvar chains in JS',
   );
+
+  {
+    const betaName=numName(strName(anonymous,'_m'),10n);
+    const betaId=lean434RuntimeMVarId(betaName);
+    const betaValue=kernelExprToLean434Runtime(
+      lam(
+        nameFromDotted('x'),
+        constant(nameFromDotted('Nat')),
+        bvar(0),
+      ),
+    );
+    let betaAssign=evaluator.evaluate(
+      constant(nameFromDotted('Lean.assignExp')),
+    );
+    betaAssign=evaluator.applyRuntimeValue(betaAssign,empty);
+    betaAssign=evaluator.applyRuntimeValue(betaAssign,betaId);
+    const betaMctx=evaluator.applyRuntimeValue(betaAssign,betaValue);
+    const betaTarget={
+      kind:'constructor',
+      name:'Lean.Expr.app',
+      fields:[
+        {
+          kind:'constructor',
+          name:'Lean.Expr.mvar',
+          fields:[betaId],
+        },
+        kernelExprToLean434Runtime(natLit(42n)),
+      ],
+    };
+    let betaInstantiate=evaluator.evaluate(
+      constant(nameFromDotted('Lean.instantiateExprMVarsImp')),
+    );
+    betaInstantiate=evaluator.applyRuntimeValue(betaInstantiate,betaMctx);
+    const betaResult=evaluator.applyRuntimeValue(
+      betaInstantiate,
+      betaTarget,
+    );
+    if(
+      betaResult?.kind!=='constructor'
+      ||betaResult.name!=='Prod.mk'
+      ||betaResult.fields.length!==2
+      ||!exprEq(
+        lean434RuntimeExprToKernel(betaResult.fields[1]),
+        natLit(42n),
+      )
+    ){
+      throw new Error(
+        'Lean.instantiateExprMVarsImp did not beta-reduce assigned mvar application',
+      );
+    }
+    console.log(
+      'ok - native Lean instantiateExprMVarsImp beta-reduces assigned mvar applications',
+    );
+  }
 
   const coreEvaluator=new Lean434Evaluator(
     replay.env,

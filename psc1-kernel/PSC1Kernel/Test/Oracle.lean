@@ -3234,7 +3234,7 @@ def assertReplayCoreOracle : IO Unit := do
   assertTrue "replay Level count mismatch"
     (stats.levels == 1)
   assertTrue "replay Expr count mismatch"
-    (stats.expressions == 11)
+    (stats.expressions == 12)
 
   let A : PSC1Kernel.Name := .str .anonymous "ReplayA"
   let Id : PSC1Kernel.Name := .str .anonymous "ReplayId"
@@ -3248,21 +3248,9 @@ def assertReplayCoreOracle : IO Unit := do
     assertTrue "replay omitted an admitted declaration"
       (final.env.contains name)
 
-  -- The first mutual record must remain pending until its partner arrives.
-  let prefixRecords := records.take (records.length - 2)
-  let partial ← exceptToIO
-    "PSC1 incomplete mutual replay setup"
-    (let rec go
-        (state : PSC1Kernel.Replay.State)
-        (items : List PSC1Kernel.Replay.Record) :
-        Except String PSC1Kernel.Replay.State := do
-      match items with
-      | [] => pure state
-      | item :: rest => go (← state.replay item) rest
-     go PSC1Kernel.Replay.State.empty prefixRecords)
-  -- This prefix already contains both mutual members; construct a direct
-  -- one-member pending stream to verify finish rejects incomplete groups.
-  let pendingRecords := records.take 21
+  -- Stop immediately after the first mutual definition to verify finish
+  -- rejects an incomplete exported group.
+  let pendingRecords := records.take 24
   let pending ← exceptToIO
     "PSC1 pending mutual replay setup"
     (let rec go
@@ -3273,7 +3261,6 @@ def assertReplayCoreOracle : IO Unit := do
       | [] => pure state
       | item :: rest => go (← state.replay item) rest
      go PSC1Kernel.Replay.State.empty pendingRecords)
-  let _ := partial
   match pending.finish with
   | .ok _ =>
       throw <| IO.userError "replay finish accepted an incomplete mutual group"

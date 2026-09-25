@@ -1,3 +1,11 @@
+def psJsonConcat2
+    (left right : String) : String :=
+  String.Internal.append left right
+
+def psJsonConcat3
+    (first second third : String) : String :=
+  psJsonConcat2 first (psJsonConcat2 second third)
+
 def psJsonHexDigit (value : Nat) : String :=
   if Nat.beq value 0 then "0"
   else if Nat.beq value 1 then "1"
@@ -17,9 +25,10 @@ def psJsonHexDigit (value : Nat) : String :=
   else "f"
 
 def psJsonEscapeControl (value : Nat) : String :=
-  "\\u00" ++
-    psJsonHexDigit (value / 16) ++
-    psJsonHexDigit (value % 16)
+  psJsonConcat3
+    "\\u00"
+    (psJsonHexDigit (Nat.div value 16))
+    (psJsonHexDigit (Nat.mod value 16))
 
 def psJsonEscapeChar (char : Char) : String :=
   let value := char.val
@@ -45,28 +54,28 @@ def psJsonEscapeChar (char : Char) : String :=
 def psJsonEscapeChars : List Char -> String
   | [] => ""
   | char :: rest =>
-      psJsonEscapeChar char ++ psJsonEscapeChars rest
+      psJsonConcat2 (psJsonEscapeChar char) (psJsonEscapeChars rest)
 
 def psJsonQuote (value : String) : String :=
-  "\"" ++ psJsonEscapeChars value.toList ++ "\""
+  psJsonConcat3 "\"" (psJsonEscapeChars value.toList) "\""
 
 def psJsonJoin (separator : String) : List String -> String
   | [] => ""
   | [value] => value
   | value :: rest =>
-      value ++ separator ++ psJsonJoin separator rest
+      psJsonConcat3 value separator (psJsonJoin separator rest)
 
 def psJsonArray (values : List String) : String :=
-  "[" ++ psJsonJoin "," values ++ "]"
+  psJsonConcat3 "[" (psJsonJoin "," values) "]"
 
 def psJsonField (key value : String) : String :=
-  psJsonQuote key ++ ":" ++ value
+  psJsonConcat3 (psJsonQuote key) ":" value
 
 def psJsonObject (sortedFields : List (String × String)) : String :=
   let fields :=
     sortedFields.map
       (fun field => psJsonField field.1 field.2)
-  "{" ++ psJsonJoin "," fields ++ "}"
+  psJsonConcat3 "{" (psJsonJoin "," fields) "}"
 
 
 
@@ -209,7 +218,7 @@ def psJsonParseNumber
             Except.error PsJsonParseError.invalidNumber
           else
             let body := String.ofList (first :: more)
-            let text := if negative then "-" ++ body else body
+            let text := if negative then psJsonConcat2 "-" body else body
             Except.ok {
               value := PsJsonValue.number text
               rest := taken.2
@@ -543,4 +552,4 @@ def psJsonEncodeCanonicalText
     Except PsJsonEncodeError String :=
   match psJsonEncodeCanonical value with
   | Except.error error => Except.error error
-  | Except.ok encoded => Except.ok (encoded ++ "\n")
+  | Except.ok encoded => Except.ok (psJsonConcat2 encoded "\n")

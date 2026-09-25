@@ -77,6 +77,19 @@ partial def Expr.hasLooseAt (e : Expr) (offset : Nat) : Bool :=
 def Expr.hasLooseBVar (e : Expr) : Bool :=
   e.hasLooseAt 0
 
+partial def Expr.getAppFn : Expr → Expr
+  | .app fn _ => fn.getAppFn
+  | e => e
+
+def Expr.getAppArgs (e : Expr) : List Expr :=
+  let rec go : Expr → List Expr → List Expr
+    | .app fn arg, args => go fn (arg :: args)
+    | _, args => args
+  go e []
+
+def Expr.getAppNumArgs (e : Expr) : Nat :=
+  e.getAppArgs.length
+
 partial def Expr.hasFVar (e : Expr) : Bool :=
   match e with
   | .fvar _ => true

@@ -10,7 +10,7 @@ cross-backend behavior.
 A function such as:
 
 ```proofscript
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 

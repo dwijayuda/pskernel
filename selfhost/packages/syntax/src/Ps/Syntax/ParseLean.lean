@@ -1232,6 +1232,395 @@ def psParseLeanInductiveDeclaration
               else
                 parseAfterResult none params.cursor
 
+structure PsLeanEquationClause where
+  patterns : List PsSyntaxPattern
+  body : PsSyntaxTerm
+  span : PsSourceSpan
+
+def psParseLeanEquationPatternsWithFuel
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (patternsRev : List PsSyntaxPattern) :
+    Except PsParseError
+      (PsParseResult (List PsSyntaxPattern)) :=
+  match fuel with
+  | 0 => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      match psParseBasicPattern cursor with
+      | Except.error error => Except.error error
+      | Except.ok pattern =>
+          let nextPatterns := pattern.value :: patternsRev
+          if psTokenCursorAtText pattern.cursor "," then
+            match psTokenCursorAdvance pattern.cursor with
+            | none =>
+                Except.error
+                  (PsParseError.unexpectedEnd "equation pattern")
+            | some afterComma =>
+                psParseLeanEquationPatternsWithFuel
+                  remaining
+                  afterComma.cursor
+                  nextPatterns
+          else
+            Except.ok {
+              value := nextPatterns.reverse
+              cursor := pattern.cursor
+            }
+
+def psParseLeanEquationClausesWithFuel
+    (parseTerm :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (clausesRev : List PsLeanEquationClause) :
+    Except PsParseError
+      (PsParseResult (List PsLeanEquationClause)) :=
+  match fuel with
+  | 0 => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      if !psTokenCursorAtText cursor "|" then
+        Except.ok {
+          value := clausesRev.reverse
+          cursor := cursor
+        }
+      else
+        match psTokenCursorAdvance cursor with
+        | none =>
+            Except.error
+              (PsParseError.unexpectedEnd "equation pattern")
+        | some bar =>
+            match
+                psParseLeanEquationPatternsWithFuel
+                  bar.cursor.remaining.length
+                  bar.cursor
+                  [] with
+            | Except.error error => Except.error error
+            | Except.ok patterns =>
+                match
+                    psTokenCursorExpectText
+                      patterns.cursor
+                      "=>" with
+                | Except.error error => Except.error error
+                | Except.ok afterArrow =>
+                    match parseTerm afterArrow.cursor with
+                    | Except.error error => Except.error error
+                    | Except.ok body =>
+                        let clause : PsLeanEquationClause := {
+                          patterns := patterns.value
+                          body := body.value
+                          span := {
+                            start := bar.token.span.start
+                            stop := (psSyntaxTermSpan body.value).stop
+                          }
+                        }
+                        psParseLeanEquationClausesWithFuel
+                          parseTerm
+                          remaining
+                          body.cursor
+                          (clause :: clausesRev)
+
+def psLeanPatternIsWildcard
+    (pattern : PsSyntaxPattern) : Bool :=
+  match pattern with
+  | .wildcard _ => true
+  | _ => false
+
+def psLeanPatternHeadEq
+    (left : PsSyntaxPattern)
+    (right : PsSyntaxPattern) : Bool :=
+  match left, right with
+  | .bool leftValue _, .bool rightValue _ =>
+      leftValue == rightValue
+  | .wildcard _, .wildcard _ => true
+  | .constructor leftName _ _,
+      .constructor rightName _ _ =>
+      leftName.segments == rightName.segments
+  | _, _ => false
+
+def psLeanPatternListContainsHead
+    (patterns : List PsSyntaxPattern)
+    (target : PsSyntaxPattern) : Bool :=
+  patterns.any
+    (fun pattern =>
+      psLeanPatternHeadEq pattern target)
+
+def psLeanEquationHeadPatternsAcc
+    (clauses : List PsLeanEquationClause)
+    (patternsRev : List PsSyntaxPattern) :
+    List PsSyntaxPattern :=
+  match clauses with
+  | [] => patternsRev.reverse
+  | clause :: rest =>
+      match clause.patterns with
+      | [] =>
+          psLeanEquationHeadPatternsAcc rest patternsRev
+      | pattern :: _ =>
+          if
+              psLeanPatternListContainsHead
+                patternsRev
+                pattern then
+            psLeanEquationHeadPatternsAcc rest patternsRev
+          else
+            psLeanEquationHeadPatternsAcc
+              rest
+              (pattern :: patternsRev)
+
+def psLeanEquationHeadPatterns
+    (clauses : List PsLeanEquationClause) :
+    List PsSyntaxPattern :=
+  psLeanEquationHeadPatternsAcc clauses []
+
+def psLeanEquationClauseForBranch
+    (branch : PsSyntaxPattern)
+    (clause : PsLeanEquationClause) :
+    Option PsLeanEquationClause :=
+  match clause.patterns with
+  | [] => none
+  | pattern :: rest =>
+      let applicable :=
+        if psLeanPatternIsWildcard branch then
+          psLeanPatternIsWildcard pattern
+        else
+          psLeanPatternIsWildcard pattern
+            || psLeanPatternHeadEq pattern branch
+      if applicable then
+        some {
+          patterns := rest
+          body := clause.body
+          span := clause.span
+        }
+      else
+        none
+
+def psLeanEquationClausesForBranchAcc
+    (branch : PsSyntaxPattern)
+    (clauses : List PsLeanEquationClause)
+    (resultRev : List PsLeanEquationClause) :
+    List PsLeanEquationClause :=
+  match clauses with
+  | [] => resultRev.reverse
+  | clause :: rest =>
+      match
+          psLeanEquationClauseForBranch
+            branch
+            clause with
+      | none =>
+          psLeanEquationClausesForBranchAcc
+            branch
+            rest
+            resultRev
+      | some stripped =>
+          psLeanEquationClausesForBranchAcc
+            branch
+            rest
+            (stripped :: resultRev)
+
+def psLeanEquationClausesForBranch
+    (branch : PsSyntaxPattern)
+    (clauses : List PsLeanEquationClause) :
+    List PsLeanEquationClause :=
+  psLeanEquationClausesForBranchAcc branch clauses []
+
+def psLeanFirstCompletedEquation
+    (clauses : List PsLeanEquationClause) :
+    Option PsLeanEquationClause :=
+  match clauses with
+  | [] => none
+  | clause :: rest =>
+      if clause.patterns.isEmpty then
+        some clause
+      else
+        psLeanFirstCompletedEquation rest
+
+partial def psLeanLowerEquationClauses
+    (arguments : List PsSyntaxName)
+    (clauses : List PsLeanEquationClause) :
+    Option PsSyntaxTerm :=
+  match arguments with
+  | [] =>
+      match psLeanFirstCompletedEquation clauses with
+      | none => none
+      | some clause => some clause.body
+  | argument :: rest =>
+      let patterns :=
+        psLeanEquationHeadPatterns clauses
+      if patterns.isEmpty then
+        none
+      else
+        let lowerAlternative :=
+          fun pattern =>
+            let branchClauses :=
+              psLeanEquationClausesForBranch
+                pattern
+                clauses
+            match
+                psLeanLowerEquationClauses
+                  rest
+                  branchClauses with
+            | none => none
+            | some body =>
+                some
+                  (pattern,
+                    body,
+                    psSyntaxSpanJoin
+                      (psSyntaxPatternSpan pattern)
+                      (psSyntaxTermSpan body))
+        match patterns.mapM lowerAlternative with
+        | none => none
+        | some alternatives =>
+            match alternatives.reverse with
+            | [] => none
+            | (_, body, _) :: _ =>
+                some
+                  (PsSyntaxTerm.matchE
+                    (PsSyntaxTerm.reference argument)
+                    alternatives
+                    {
+                      start := argument.span.start
+                      stop := (psSyntaxTermSpan body).stop
+                    })
+
+def psLeanFlattenForallBinders
+    (type : PsSyntaxTerm) :
+    Prod
+      (List
+        (Prod PsSyntaxBinderHead PsSyntaxTerm))
+      PsSyntaxTerm :=
+  match type with
+  | .forallE binders body _ =>
+      let tail := psLeanFlattenForallBinders body
+      (binders ++ tail.1, tail.2)
+  | _ => ([], type)
+
+def psLeanEquationBinderName
+    (index : Nat)
+    (head : PsSyntaxBinderHead) :
+    PsSyntaxName :=
+  if head.name.segments == ["_"] then
+    {
+      segments := ["_eq" ++ toString index]
+      span := head.name.span
+    }
+  else
+    head.name
+
+def psLeanPrepareEquationBindersAcc
+    (remaining : Nat)
+    (index : Nat)
+    (available :
+      List
+        (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (bindersRev :
+      List
+        (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (namesRev : List PsSyntaxName) :
+    Option
+      (Prod
+        (List
+          (Prod PsSyntaxBinderHead PsSyntaxTerm))
+        (List PsSyntaxName)) :=
+  if remaining == 0 then
+    some (bindersRev.reverse, namesRev.reverse)
+  else
+    match available with
+    | [] => none
+    | binder :: rest =>
+        let name :=
+          psLeanEquationBinderName index binder.1
+        let head : PsSyntaxBinderHead := {
+          name := name
+          kind := binder.1.kind
+          span := binder.1.span
+        }
+        psLeanPrepareEquationBindersAcc
+          (Nat.sub remaining 1)
+          (Nat.add index 1)
+          rest
+          ((head, binder.2) :: bindersRev)
+          (name :: namesRev)
+
+def psLeanEquationArity
+    (clauses : List PsLeanEquationClause) :
+    Option Nat :=
+  match clauses with
+  | [] => none
+  | clause :: rest =>
+      let arity := clause.patterns.length
+      if
+          rest.all
+            (fun next =>
+              next.patterns.length == arity) then
+        some arity
+      else
+        none
+
+def psLeanLowerEquationValue
+    (type : PsSyntaxTerm)
+    (clauses : List PsLeanEquationClause) :
+    Option PsSyntaxTerm :=
+  match psLeanEquationArity clauses with
+  | none => none
+  | some arity =>
+      let flattened :=
+        psLeanFlattenForallBinders type
+      match
+          psLeanPrepareEquationBindersAcc
+            arity
+            0
+            flattened.1
+            []
+            [] with
+      | none => none
+      | some prepared =>
+          match
+              psLeanLowerEquationClauses
+                prepared.2
+                clauses with
+          | none => none
+          | some body =>
+              match clauses with
+              | [] => none
+              | first :: _ =>
+                  some
+                    (PsSyntaxTerm.lambda
+                      prepared.1
+                      body
+                      {
+                        start := first.span.start
+                        stop := (psSyntaxTermSpan body).stop
+                      })
+
+def psFinishLeanValueDeclaration
+    (keyword : PsToken)
+    (isPartial : Bool)
+    (isDefinition : Bool)
+    (name : PsSyntaxName)
+    (binders :
+      List
+        (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (type : PsSyntaxTerm)
+    (value : PsSyntaxTerm)
+    (cursor : PsTokenCursor) :
+    PsParseResult PsSyntaxDeclaration :=
+  let span := {
+    start := keyword.span.start
+    stop := (psSyntaxTermSpan value).stop
+  }
+  let declaration :=
+    if isPartial then
+      PsSyntaxDeclaration.partialDefinition
+        name binders type value span
+    else if isDefinition then
+      PsSyntaxDeclaration.definition
+        name binders type value span
+    else
+      PsSyntaxDeclaration.theoremDecl
+        name binders type value span
+  {
+    value := declaration
+    cursor := cursor
+  }
+
 def psParseLeanDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
@@ -1287,34 +1676,78 @@ def psParseLeanDeclaration
                           match psParseLeanTerm afterColon.cursor with
                           | Except.error error => Except.error error
                           | Except.ok type =>
-                              match psTokenCursorExpectText
-                                  type.cursor
-                                  ":=" with
-                              | Except.error error => Except.error error
-                              | Except.ok afterAssign =>
-                                  match psParseLeanTerm
-                                      afterAssign.cursor with
-                                  | Except.error error =>
-                                      Except.error error
-                                  | Except.ok value =>
-                                      let span := {
-                                        start := keyword.span.start
-                                        stop := (psSyntaxTermSpan value.value).stop
-                                      }
-                                      let declaration :=
-                                        if isPartial then
-                                          PsSyntaxDeclaration.partialDefinition
-                                            name.value binders.value type.value value.value span
-                                        else if isDefinition then
-                                          PsSyntaxDeclaration.definition
-                                            name.value binders.value type.value value.value span
-                                        else
-                                          PsSyntaxDeclaration.theoremDecl
-                                            name.value binders.value type.value value.value span
-                                      Except.ok {
-                                        value := declaration
-                                        cursor := value.cursor
-                                      }
+                              if psTokenCursorAtText type.cursor ":=" then
+                                match psTokenCursorAdvance type.cursor with
+                                | none =>
+                                    Except.error
+                                      (PsParseError.unexpectedEnd
+                                        "declaration value")
+                                | some afterAssign =>
+                                    match
+                                        psParseLeanTerm
+                                          afterAssign.cursor with
+                                    | Except.error error =>
+                                        Except.error error
+                                    | Except.ok value =>
+                                        Except.ok
+                                          (psFinishLeanValueDeclaration
+                                            keyword
+                                            isPartial
+                                            isDefinition
+                                            name.value
+                                            binders.value
+                                            type.value
+                                            value.value
+                                            value.cursor)
+                              else if psTokenCursorAtText type.cursor "|" then
+                                match
+                                    psParseLeanEquationClausesWithFuel
+                                      psParseLeanTerm
+                                      type.cursor.remaining.length
+                                      type.cursor
+                                      [] with
+                                | Except.error error =>
+                                    Except.error error
+                                | Except.ok clauses =>
+                                    match
+                                        psLeanLowerEquationValue
+                                          type.value
+                                          clauses.value with
+                                    | none =>
+                                        match psTokenCursorPeek type.cursor with
+                                        | none =>
+                                            Except.error
+                                              (PsParseError.unexpectedEnd
+                                                "supported equation clauses")
+                                        | some token =>
+                                            Except.error
+                                              (PsParseError.expectedText
+                                                "supported equation clauses"
+                                                token.text
+                                                token.span)
+                                    | some value =>
+                                        Except.ok
+                                          (psFinishLeanValueDeclaration
+                                            keyword
+                                            isPartial
+                                            isDefinition
+                                            name.value
+                                            binders.value
+                                            type.value
+                                            value
+                                            clauses.cursor)
+                              else
+                                match psTokenCursorPeek type.cursor with
+                                | none =>
+                                    Except.error
+                                      (PsParseError.unexpectedEnd
+                                        ":= or equation clause")
+                                | some token =>
+                                    Except.error
+                                      (PsParseError.expectedText
+                                        ":= or equation clause"
+                                        token.text
+                                        token.span)
 
 
 def psParseLeanImportsWithFuel

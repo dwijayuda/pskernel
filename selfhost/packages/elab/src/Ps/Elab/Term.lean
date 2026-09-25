@@ -431,7 +431,7 @@ def psElabBool
     (value : Bool)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let name := if value then psBoolTrueName else psBoolFalseName
+  let name := if value then psBoolTrueName else psBoolFalseName;
   psElabResolvedTerm
     context
     (PsExpr.constE name [])

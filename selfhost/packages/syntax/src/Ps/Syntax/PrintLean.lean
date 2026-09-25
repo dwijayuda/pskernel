@@ -412,7 +412,12 @@ def psPrintLeanConstructor
   match psPrintSyntaxName constructor.name with
   | Except.error error => Except.error error
   | Except.ok name =>
-      match constructor.fields.mapM psPrintLeanBinder with
+      let fieldsResult :
+          Except PsSourcePrintError (List String) :=
+        psPrintLeanMapBinders
+          psPrintLeanBinder
+          constructor.fields;
+      match fieldsResult with
       | Except.error error => Except.error error
       | Except.ok fields =>
           let suffix :=

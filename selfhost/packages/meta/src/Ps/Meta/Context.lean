@@ -42,10 +42,10 @@ def psMetaRestore (_current : PsMetaContext) (snapshot : PsMetaContext) : PsMeta
   snapshot
 
 def psMetaFindDeclInList (id : Nat) : List PsMetaVarDecl -> Option PsMetaVarDecl
-  | [] => none
+  | [] => Option.none
   | declaration :: rest =>
       if declaration.id == id then
-        some declaration
+        Option.some declaration
       else
         psMetaFindDeclInList id rest
 
@@ -53,10 +53,10 @@ def psMetaFindDecl (context : PsMetaContext) (id : Nat) : Option PsMetaVarDecl :
   psMetaFindDeclInList id context.declarations
 
 def psMetaFindAssignmentInList (id : Nat) : List PsMetaAssignment -> Option PsExpr
-  | [] => none
+  | [] => Option.none
   | assignment :: rest =>
       if assignment.id == id then
-        some assignment.value
+        Option.some assignment.value
       else
         psMetaFindAssignmentInList id rest
 
@@ -119,8 +119,8 @@ def psMetaInstantiateStep
     (context : PsMetaContext) : PsExpr -> PsExpr
   | .mvar id =>
       match psMetaFindAssignment context id with
-      | none => PsExpr.mvar id
-      | some value => value
+      | Option.none => PsExpr.mvar id
+      | Option.some value => value
   | .app fn arg =>
       PsExpr.app
         (psMetaInstantiateStep context fn)
@@ -186,23 +186,23 @@ def psMetaFreshLevel (context : PsMetaContext) : PsMetaFreshLevelResult :=
 
 def psMetaAssign (context : PsMetaContext) (id : Nat) (value : PsExpr) : Option PsMetaContext :=
   match psMetaFindDecl context id with
-  | none => none
-  | some declaration =>
+  | Option.none => Option.none
+  | Option.some declaration =>
       match psMetaFindAssignment context id with
-      | some _ => none
-      | none =>
+      | Option.some _ => Option.none
+      | Option.none =>
           let resolved := psMetaInstantiate context value
           if psExprContainsMVar id resolved then
-            none
+            Option.none
           else if psExprFVarsInContext declaration.localContext resolved then
-            some {
+            Option.some {
               nextId := context.nextId
               declarations := context.declarations
               assignments := List.cons { id := id, value := resolved } context.assignments
               levels := context.levels
             }
           else
-            none
+            Option.none
 
 def psExprHasUnresolvedMeta : PsExpr -> Bool
   | .mvar _ => true

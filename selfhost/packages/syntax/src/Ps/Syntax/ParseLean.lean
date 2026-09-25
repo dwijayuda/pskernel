@@ -1623,7 +1623,7 @@ def psParseLeanInductiveConstructorsWithFuel
                     psParseLeanInductiveConstructorsWithFuel
                       remaining
                       fields.cursor
-                      (constructor :: constructorsRev)
+                      (List.cons constructor constructorsRev)
       else
         Except.ok {
           value := psParseListReverse constructorsRev
@@ -1808,19 +1808,21 @@ def psParseLeanStructureDeclaration
                                   "structure field"
                                   token.text
                                   token.span)
-                      | (lastHead, _) :: _ =>
-                          Except.ok {
-                            value :=
-                              PsSyntaxDeclaration.structureDecl
-                                name.value
-                                params.value
-                                fields.value
-                                {
-                                  start := keyword.token.span.start
-                                  stop := lastHead.span.stop
-                                }
-                            cursor := fields.cursor
-                          }
+                      | List.cons lastField _ =>
+                          match lastField with
+                          | Prod.mk lastHead _ =>
+                              Except.ok {
+                                value :=
+                                  PsSyntaxDeclaration.structureDecl
+                                    name.value
+                                    params.value
+                                    fields.value
+                                    {
+                                      start := keyword.token.span.start
+                                      stop := lastHead.span.stop
+                                    }
+                                cursor := fields.cursor
+                              }
 
 def psParseLeanInductiveDeclaration
     (cursor : PsTokenCursor) :
@@ -1866,7 +1868,7 @@ def psParseLeanInductiveDeclaration
                             let stop :=
                               match psParseListReverse constructors.value with
                               | [] => name.value.span.stop
-                              | constructor :: _ =>
+                              | List.cons constructor _ =>
                                   constructor.span.stop
                             Except.ok {
                               value :=
@@ -1913,7 +1915,7 @@ def psParseLeanEquationPatternsWithFuel
       match psParseLeanPattern cursor with
       | Except.error error => Except.error error
       | Except.ok pattern =>
-          let nextPatterns := pattern.value :: patternsRev
+          let nextPatterns := List.cons pattern.value patternsRev;
           if psTokenCursorAtText pattern.cursor "," then
             match psTokenCursorAdvance pattern.cursor with
             | none =>
@@ -1981,7 +1983,7 @@ def psParseLeanEquationClausesWithFuel
                           parseTerm
                           remaining
                           body.cursor
-                          (clause :: clausesRev)
+                          (List.cons clause clausesRev)
 
 def psLeanPatternIsWildcard
     (pattern : PsSyntaxPattern) : Bool :=
@@ -2061,11 +2063,11 @@ def psLeanEquationHeadPatternsAcc
     List PsSyntaxPattern :=
   match clauses with
   | [] => psParseListReverse patternsRev
-  | clause :: rest =>
+  | List.cons clause rest =>
       match clause.patterns with
       | [] =>
           psLeanEquationHeadPatternsAcc rest patternsRev
-      | pattern :: _ =>
+      | List.cons pattern _ =>
           if
               psLeanPatternListContainsHead
                 patternsRev
@@ -2074,7 +2076,7 @@ def psLeanEquationHeadPatternsAcc
           else
             psLeanEquationHeadPatternsAcc
               rest
-              (pattern :: patternsRev)
+              (List.cons pattern patternsRev)
 
 def psLeanEquationHeadPatterns
     (clauses : List PsLeanEquationClause) :
@@ -2087,7 +2089,7 @@ def psLeanEquationClauseForBranch
     Option PsLeanEquationClause :=
   match clause.patterns with
   | [] => none
-  | pattern :: rest =>
+  | List.cons pattern rest =>
       let applicable :=
         if psLeanPatternIsWildcard branch then
           psLeanPatternIsWildcard pattern
@@ -2112,7 +2114,7 @@ def psLeanEquationClausesForBranchAcc
     List PsLeanEquationClause :=
   match clauses with
   | [] => psParseListReverse resultRev
-  | clause :: rest =>
+  | List.cons clause rest =>
       match
           psLeanEquationClauseForBranch
             branch
@@ -2126,7 +2128,7 @@ def psLeanEquationClausesForBranchAcc
           psLeanEquationClausesForBranchAcc
             branch
             rest
-            (stripped :: resultRev)
+            (List.cons stripped resultRev)
 
 def psLeanEquationClausesForBranch
     (branch : PsSyntaxPattern)
@@ -2139,7 +2141,7 @@ def psLeanFirstCompletedEquation
     Option PsLeanEquationClause :=
   match clauses with
   | [] => none
-  | clause :: rest =>
+  | List.cons clause rest =>
       if clause.patterns.isEmpty then
         some clause
       else
@@ -2154,7 +2156,7 @@ partial def psLeanLowerEquationClauses
       match psLeanFirstCompletedEquation clauses with
       | none => none
       | some clause => some clause.body
-  | argument :: rest =>
+  | List.cons argument rest =>
       let patterns :=
         psLeanEquationHeadPatterns clauses
       if patterns.isEmpty then
@@ -2183,15 +2185,19 @@ partial def psLeanLowerEquationClauses
         | some alternatives =>
             match psParseListReverse alternatives with
             | [] => none
-            | (_, body, _) :: _ =>
-                some
-                  (PsSyntaxTerm.matchE
-                    (PsSyntaxTerm.reference argument)
-                    alternatives
-                    {
-                      start := argument.span.start
-                      stop := psLeanTermStop body
-                    })
+            | List.cons alternative _ =>
+                match alternative with
+                | Prod.mk _ bodyAndSpan =>
+                    match bodyAndSpan with
+                    | Prod.mk body _ =>
+                        some
+                          (PsSyntaxTerm.matchE
+                            (PsSyntaxTerm.reference argument)
+                            alternatives
+                            {
+                              start := argument.span.start
+                              stop := psLeanTermStop body
+                            })
 
 def psLeanFlattenForallBinders
     (type : PsSyntaxTerm) :
@@ -2245,7 +2251,7 @@ def psLeanPrepareEquationBindersAcc
   else
     match available with
     | [] => none
-    | binder :: rest =>
+    | List.cons binder rest =>
         let name :=
           psLeanEquationBinderName index binder.fst
         let head : PsSyntaxBinderHead := {
@@ -2257,8 +2263,8 @@ def psLeanPrepareEquationBindersAcc
           (Nat.sub remaining 1)
           (Nat.add index 1)
           rest
-          ((head, binder.snd) :: bindersRev)
-          (name :: namesRev)
+          (List.cons (Prod.mk head binder.snd) bindersRev)
+          (List.cons name namesRev)
 
 def psLeanEquationClausesHaveArity
     (arity : Nat) :
@@ -2314,7 +2320,7 @@ def psLeanLowerEquationValue
           | some body =>
               match clauses with
               | [] => none
-              | first :: _ =>
+              | List.cons first _ =>
                   some
                     (PsSyntaxTerm.lambda
                       prepared.fst
@@ -2509,7 +2515,7 @@ def psParseLeanImportsWithFuel
             psParseLeanImportsWithFuel
               remaining
               parsed.cursor
-              (parsed.value :: importsRev)
+              (List.cons parsed.value importsRev)
       else
         Except.ok {
           value := psParseListReverse importsRev
@@ -2553,7 +2559,7 @@ def psParseLeanDeclarationsWithFuel
             psParseLeanDeclarationsWithFuel
               remaining
               parsed.cursor
-              (parsed.value :: declarationsRev)
+              (List.cons parsed.value declarationsRev)
 
 def psParseLeanTokens
     (tokens : List PsToken) :

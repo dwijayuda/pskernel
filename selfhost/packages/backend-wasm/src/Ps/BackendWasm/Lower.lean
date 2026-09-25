@@ -867,17 +867,19 @@ def psWasmLowerExprWithFuel
   | 0, _, _ =>
       Except.error PsWasmLowerError.unsupportedExpression
   | fuel + 1, state, expr =>
-      let lower :=
-        fun expectedType nestedState nestedExpr =>
+      let lowerWithBindings :=
+        fun nextBindings expectedType nestedState nestedExpr =>
           psWasmLowerExprWithFuel
             profile
             structures
             inductives
-            bindings
+            nextBindings
             expectedType
             fuel
             nestedState
             nestedExpr
+      let lower :=
+        lowerWithBindings bindings
       match expr with
       | .literal literal =>
           match literal with
@@ -1057,6 +1059,49 @@ def psWasmLowerExprWithFuel
                                         constructorName)]
                                 state := lowered.state
                               }
+      | .matchE inductiveName scrutinee alternatives =>
+          match psWasmFindInductive inductives inductiveName with
+          | none =>
+              Except.error
+                (PsWasmLowerError.unknownInductive inductiveName)
+          | some inductiveInfo =>
+              match inductiveInfo.typeParameters with
+              | _ :: _ =>
+                  Except.error PsWasmLowerError.unsupportedType
+              | [] =>
+                  match
+                      lower
+                        (some (PsWasmValueType.refT inductiveName))
+                        state
+                        scrutinee with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredScrutinee =>
+                      let allocated :=
+                        psWasmAddLocal
+                          loweredScrutinee.state
+                          (PsWasmValueType.refT inductiveName)
+                      let scrutineeLocal := allocated.1
+                      let nextState := allocated.2
+                      match
+                          psWasmLowerMatchAlternativesWith
+                            profile
+                            inductiveInfo
+                            scrutineeLocal
+                            lowerWithBindings
+                            bindings
+                            expected
+                            nextState
+                            alternatives with
+                      | Except.error error => Except.error error
+                      | Except.ok loweredMatch =>
+                          Except.ok {
+                            instructions :=
+                              loweredScrutinee.instructions ++
+                                [PsWasmInstruction.localSet
+                                  scrutineeLocal] ++
+                                loweredMatch.instructions
+                            state := loweredMatch.state
+                          }
       | .ifE condition thenBranch elseBranch =>
           psWasmLowerIfWith
             lower state expected condition thenBranch elseBranch

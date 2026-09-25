@@ -1215,19 +1215,10 @@ export class Lean434Evaluator {
             'Lean.MetavarContext.getExprAssignmentExp',
           );
           if(assigned===undefined){
-            const delayed=this.optionPayload(
-              this.applyLeanConstant(
-                'Lean.MetavarContext.getDelayedMVarAssignmentExp',
-                [mctx,mvarId],
-              ),
-              'Lean.MetavarContext.getDelayedMVarAssignmentExp',
-            );
-            if(delayed!==undefined){
-              throw new Lean434EvaluationError(
-                'lean_instantiate_expr_mvars delayed assignments are not '+
-                'supported by the current JS runtime slice',
-              );
-            }
+            // Pass 1 of Lean's native instantiate_mvars leaves unassigned and
+            // delayed-assigned bare metavariables in place. Delayed
+            // assignments are resolved only when encountered as a sufficiently
+            // applied function in the application case below.
             return {mctx,expr};
           }
           const normalized=visit(mctx,assigned);
@@ -1282,6 +1273,129 @@ export class Lean434Evaluator {
               'Lean.Expr.app field count mismatch',
             );
           }
+
+          const spine=this.runtimeExprAppView(expr);
+          if(
+            isTaggedRuntimeValue(spine.fn)
+            &&spine.fn.kind==='constructor'
+            &&spine.fn.name==='Lean.Expr.mvar'
+            &&spine.fn.fields.length===1
+          ){
+            const mvarId=spine.fn.fields[0]!;
+            const directAssignment=this.optionPayload(
+              this.applyLeanConstant(
+                'Lean.MetavarContext.getExprAssignmentExp',
+                [mctx,mvarId],
+              ),
+              'Lean.MetavarContext.getExprAssignmentExp',
+            );
+            if(directAssignment===undefined){
+              const delayed=this.optionPayload(
+                this.applyLeanConstant(
+                  'Lean.MetavarContext.getDelayedMVarAssignmentExp',
+                  [mctx,mvarId],
+                ),
+                'Lean.MetavarContext.getDelayedMVarAssignmentExp',
+              );
+              if(delayed!==undefined){
+                let nextMctx=mctx;
+                const normalizedArgs:Lean434RuntimeValue[]=[];
+                for(const argExpr of spine.args){
+                  const normalized=visit(nextMctx,argExpr);
+                  nextMctx=normalized.mctx;
+                  normalizedArgs.push(normalized.expr);
+                }
+
+                if(
+                  !isTaggedRuntimeValue(delayed)
+                  ||delayed.kind!=='constructor'
+                  ||delayed.name!=='Lean.DelayedMetavarAssignment.mk'
+                  ||delayed.fields.length!==2
+                ){
+                  throw new Lean434EvaluationError(
+                    'delayed metavariable assignment has malformed runtime shape',
+                  );
+                }
+                const fvars=delayed.fields[0]!;
+                const pendingId=delayed.fields[1]!;
+                if(!Array.isArray(fvars)){
+                  throw new Lean434EvaluationError(
+                    'delayed metavariable fvars are not a runtime Array',
+                  );
+                }
+
+                if(fvars.length<=normalizedArgs.length){
+                  const pendingAssignment=this.optionPayload(
+                    this.applyLeanConstant(
+                      'Lean.MetavarContext.getExprAssignmentExp',
+                      [nextMctx,pendingId],
+                    ),
+                    'Lean.MetavarContext.getExprAssignmentExp',
+                  );
+                  if(pendingAssignment!==undefined){
+                    const normalizedPending=visit(
+                      nextMctx,
+                      pendingAssignment,
+                    );
+                    nextMctx=normalizedPending.mctx;
+                    if(normalizedPending.expr!==pendingAssignment){
+                      nextMctx=this.applyLeanConstant(
+                        'Lean.assignExp',
+                        [nextMctx,pendingId,normalizedPending.expr],
+                      );
+                    }
+
+                    // The native implementation crosses into delayed
+                    // substitution only when the pending assignment is
+                    // resolvable. For the first JS slice, "resolvable" means
+                    // normalization leaves no expression metavariables. Nested
+                    // delayed applications that can be resolved are normalized
+                    // recursively by visit above.
+                    if(!this.runtimeExprHasMVar(normalizedPending.expr)){
+                      const substitution=
+                        new Map<string,Lean434RuntimeValue>();
+                      for(let index=0;index<fvars.length;index+=1){
+                        const fvarExpr=fvars[index]!;
+                        if(
+                          !isTaggedRuntimeValue(fvarExpr)
+                          ||fvarExpr.kind!=='constructor'
+                          ||fvarExpr.name!=='Lean.Expr.fvar'
+                          ||fvarExpr.fields.length!==1
+                        ){
+                          throw new Lean434EvaluationError(
+                            'delayed metavariable fvar list contains a non-fvar',
+                          );
+                        }
+                        const key=this.runtimeIdStructuralKey(
+                          fvarExpr.fields[0]!,
+                          'Lean.FVarId.mk',
+                        );
+                        substitution.set(key,normalizedArgs[index]!);
+                      }
+                      const substituted=this.substituteRuntimeExprFVars(
+                        normalizedPending.expr,
+                        substitution,
+                      );
+                      const reduced=this.betaApplyRuntimeExpr(
+                        substituted,
+                        normalizedArgs.slice(fvars.length),
+                      );
+                      return visit(nextMctx,reduced);
+                    }
+                  }
+                }
+
+                return {
+                  mctx:nextMctx,
+                  expr:this.runtimeExprMkAppN(
+                    spine.fn,
+                    normalizedArgs,
+                  ),
+                };
+              }
+            }
+          }
+
           const originalFn=expr.fields[0]!;
           const fn=visit(mctx,originalFn);
           const arg=visit(fn.mctx,expr.fields[1]!);

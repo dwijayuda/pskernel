@@ -225,29 +225,7 @@ partial def replaySegmentedLinesFromProgress
                 else
                   liftReplayResult path lineNo (state.replay record)
             | _ =>
-              if lineNo == 190660 then
-                match record with
-              | .exprR value =>
-                  match value.node with
-                  | .app fn arg => do
-                      IO.println s!"PSC1 Lean replay TARGET-APP begin index={value.index} fn={fn} arg={arg}"
-                      let fnExpr ← liftReplayResult path lineNo (state.exprAt fn)
-                      IO.println "PSC1 Lean replay TARGET-APP fn-lookup-ok"
-                      let argExpr ← liftReplayResult path lineNo (state.exprAt arg)
-                      IO.println "PSC1 Lean replay TARGET-APP arg-lookup-ok"
-                      let exprs ← liftReplayResult path lineNo
-                        (state.exprs.add "Expr" value.index (.app fnExpr argExpr))
-                      IO.println s!"PSC1 Lean replay TARGET-APP table-add-ok dense={exprs.dense.size} sparse={exprs.sparse.length}"
-                      let records := state.records + 1
-                      let next := { state with exprs := exprs, records := records }
-                      IO.println "PSC1 Lean replay TARGET-APP state-rebuild-ok"
-                      pure next
-                  | _ =>
-                      liftReplayResult path lineNo (state.replay record)
-              | _ =>
-                  liftReplayResult path lineNo (state.replay record)
-            else
-              liftReplayResult path lineNo (state.replay record)
+                liftReplayResult path lineNo (state.replay record)
           if lineNo >= 190530 && lineNo <= 190680 then
             IO.println s!"PSC1 Lean replay RECORD-END line={lineNo} namesDense={next.names.dense.size} namesSparse={next.names.sparse.length} levelsDense={next.levels.dense.size} levelsSparse={next.levels.sparse.length} exprsDense={next.exprs.dense.size} exprsSparse={next.exprs.sparse.length} env={next.env.size}"
           if progressEvery > 0 then

@@ -128,11 +128,12 @@ partial def analyzeSimpleMutualRecursiveArgument
       | .forallE userName argDomain body binderInfo =>
           if simpleMutualContainsConst targets argDomain then
             throw "mutual inductive field has a non-positive recursive occurrence"
-          let (fresh, child) := ctx.withLocal userName argDomain binderInfo
+          let localDomain := argDomain.consumeTypeAnnotations
+          let (fresh, child) := ctx.withLocal userName localDomain binderInfo
           let arg : OpenBinder := {
             internalName := fresh
             userName := userName
-            type := argDomain
+            type := localDomain
             binderInfo := binderInfo
           }
           analyzeSimpleMutualRecursiveArgument
@@ -166,11 +167,12 @@ partial def openSimpleMutualConstructorFields
       unless Level.le fieldLevel resultLevel ||
           Level.normalizesToZero resultLevel do
         throw "mutual inductive constructor field universe is too large"
-      let (fresh, child) := ctx.withLocal userName domain binderInfo
+      let localDomain := domain.consumeTypeAnnotations
+      let (fresh, child) := ctx.withLocal userName localDomain binderInfo
       let field : OpenBinder := {
         internalName := fresh
         userName := userName
-        type := domain
+        type := localDomain
         binderInfo := binderInfo
       }
       let recursive? ←

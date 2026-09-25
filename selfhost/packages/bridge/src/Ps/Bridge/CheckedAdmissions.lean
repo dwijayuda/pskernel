@@ -331,8 +331,8 @@ def psBridgeFindRegularHeight :
     List (PsName × Nat) -> PsName -> Nat
   | [], _ => 0
   | entry :: rest, name =>
-      if psNameEq entry.1 name then
-        entry.2
+      if psNameEq (Prod.fst entry) name then
+        Prod.snd entry
       else
         psBridgeFindRegularHeight rest name
 

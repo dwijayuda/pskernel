@@ -347,7 +347,15 @@ def psBridgeFindRegularHeight :
         psBridgeFindRegularHeight rest name
 
 def psBridgeNatMax (left right : Nat) : Nat :=
-  if left < right then right else left
+  match left with
+  | Nat.zero =>
+      right
+  | Nat.succ leftPred =>
+      match right with
+      | Nat.zero =>
+          left
+      | Nat.succ rightPred =>
+          Nat.succ (psBridgeNatMax leftPred rightPred)
 
 def psBridgeExprMaxRegularHeight
     (heights : List (PsName × Nat)) : PsExpr -> Nat
@@ -449,7 +457,7 @@ def psEncodeCheckedAdmissionsLoop
       match declaration with
       | .definitionDecl name levelParams type value =>
           let height :=
-            psBridgeExprMaxRegularHeight state.heights value + 1;
+            Nat.succ (psBridgeExprMaxRegularHeight state.heights value);
           match
               psEncodeCodecDefinition
                 name
@@ -544,4 +552,4 @@ def psEncodeCheckedAdmissionsText
     Except PsCheckedAdmissionCodecError String :=
   match psEncodeCheckedAdmissionsCanonical declarations with
   | Except.error error => Except.error error
-  | Except.ok encoded => Except.ok (encoded ++ "\n")
+  | Except.ok encoded => Except.ok (String.Internal.append encoded "\n")

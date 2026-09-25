@@ -489,6 +489,55 @@ def psCloseElabTypedBinders
         closedValue
         closedType
 
+def psElabLambdaExpectedBody
+    (context : PsElabContext)
+    (binders : List PsElabTypedBinder) :
+    PsExpr -> Except PsElabError PsExpr
+  | expectedType =>
+      match binders with
+      | [] => Except.ok expectedType
+      | binder :: rest =>
+          match
+              psInferEnsureForall
+                context.environment
+                context.metaContext
+                context.localContext
+                expectedType with
+          | Except.error error =>
+              Except.error (PsElabError.infer error)
+          | Except.ok forallView =>
+              if
+                  !psDefEqReadOnlyWithEnv
+                    context.environment
+                    context.metaContext
+                    context.localContext
+                    binder.type
+                    forallView.domain then
+                Except.error PsElabError.typeMismatch
+              else
+                psElabLambdaExpectedBody
+                  context
+                  rest
+                  (psExprInstantiate1
+                    forallView.body
+                    (PsExpr.fvar binder.id))
+
+def psElabLambdaBodyExpected
+    (context : PsElabContext)
+    (binders : List PsElabTypedBinder)
+    (expected : Option PsExpr) :
+    Except PsElabError (Option PsExpr) :=
+  match expected with
+  | none => Except.ok none
+  | some expectedType =>
+      match
+          psElabLambdaExpectedBody
+            context
+            binders
+            expectedType with
+      | Except.error error => Except.error error
+      | Except.ok bodyType => Except.ok (some bodyType)
+
 def psElabLambda
     (elaborate :
       PsElabContext ->
@@ -503,29 +552,36 @@ def psElabLambda
   match psElabTypedBinders elaborate context binders with
   | Except.error error => Except.error error
   | Except.ok binderResult =>
-      match elaborate binderResult.context body none with
+      match
+          psElabLambdaBodyExpected
+            binderResult.context
+            binderResult.bindersRev.reverse
+            expected with
       | Except.error error => Except.error error
-      | Except.ok bodyResult =>
-          let metaContext := bodyResult.context.metaContext
-          let openTerm :=
-            psMetaInstantiate metaContext bodyResult.term
-          let openType :=
-            psMetaInstantiate metaContext bodyResult.type
-          let closed :=
-            psCloseElabTypedBinders
-              metaContext
-              binderResult.bindersRev
-              openTerm
-              openType
-          let outerContext :=
-            psElabContextWithMeta context metaContext
-          psElabFinalizeExpected
-            {
-              context := outerContext
-              term := closed.1
-              type := closed.2
-            }
-            expected
+      | Except.ok bodyExpected =>
+          match elaborate binderResult.context body bodyExpected with
+          | Except.error error => Except.error error
+          | Except.ok bodyResult =>
+              let metaContext := bodyResult.context.metaContext
+              let openTerm :=
+                psMetaInstantiate metaContext bodyResult.term
+              let openType :=
+                psMetaInstantiate metaContext bodyResult.type
+              let closed :=
+                psCloseElabTypedBinders
+                  metaContext
+                  binderResult.bindersRev
+                  openTerm
+                  openType
+              let outerContext :=
+                psElabContextWithMeta context metaContext
+              psElabFinalizeExpected
+                {
+                  context := outerContext
+                  term := closed.1
+                  type := closed.2
+                }
+                expected
 
 def psCloseElabForallBinders
     (metaContext : PsMetaContext) :

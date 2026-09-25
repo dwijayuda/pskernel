@@ -3,17 +3,32 @@
   "private": true,
   "version": "0.0.0-dev",
   "type": "module",
+  "bin": {
+    "psc": "./bin/psc.mjs"
+  },
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build:lean": "lake build",
+    "psc": "node bin/psc.mjs",
     "check:source": "node check-psc1-source.mjs",
-    "selfhost:emit-ps": "node scripts/bootstrap-project.mjs SELFHOST-COMPILER.lean out/bootstrap/workspace",
-    "selfhost:build-bootstrap-js": "lake exe psc1 build out/bootstrap/workspace/SELFHOST-COMPILER.ps --out out/bootstrap/compiler.ts",
-    "selfhost:bootstrap": "npm run selfhost:emit-ps && npm run selfhost:build-bootstrap-js",
-    "selfhost:next": "node scripts/compile-with-generated.mjs out/bootstrap/compiler.js out/bootstrap/workspace/SELFHOST-COMPILER.ps out/next/compiler.ts",
-    "selfhost:compare": "node scripts/compare-selfhost.mjs out/bootstrap/compiler.ts out/next/compiler.ts",
-    "selfhost:fixed-point": "npm run selfhost:bootstrap && npm run selfhost:next && npm run selfhost:compare"
+    "build:lean": "lake build",
+    "bootstrap:lean": "npm run check:source && npm run build:lean",
+    "bootstrap:check": "lake exe psc1 check SELFHOST-COMPILER.lean",
+    "bootstrap:emit": "node scripts/bootstrap-project.mjs SELFHOST-COMPILER.lean dist/bootstrap/workspace",
+    "bootstrap:compiler": "lake exe psc1 build dist/bootstrap/workspace/SELFHOST-COMPILER.ps --out dist/bootstrap/compiler.ts",
+    "bootstrap": "npm run bootstrap:lean && npm run bootstrap:check && npm run bootstrap:emit && npm run bootstrap:compiler",
+    "selfhost": "node scripts/compile-with-generated.mjs dist/bootstrap/compiler.js dist/bootstrap/workspace/SELFHOST-COMPILER.ps dist/next/compiler.ts",
+    "verify:selfhost": "node scripts/compare-selfhost.mjs dist/bootstrap/compiler.ts dist/next/compiler.ts",
+    "fixed-point": "npm run bootstrap && npm run selfhost && npm run verify:selfhost",
+    "selfhost:emit-ps": "npm run bootstrap:emit",
+    "selfhost:build-bootstrap-js": "npm run bootstrap:compiler",
+    "selfhost:bootstrap": "npm run bootstrap",
+    "selfhost:next": "npm run selfhost",
+    "selfhost:compare": "npm run verify:selfhost",
+    "selfhost:fixed-point": "npm run fixed-point"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
   }
 }

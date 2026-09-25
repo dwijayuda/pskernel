@@ -547,6 +547,55 @@ def assertNativeEvaluatorBoundary : IO Unit := do
   assertTrue "missing native provider must leave marker reduction unavailable"
     (PSC1Kernel.Expr.eq closedResult natExpr)
 
+def assertNatSizeLimitOracle : IO Unit := do
+  let half : Nat := Nat.shiftLeft 1 63
+  let big : Nat := half + half
+  assertTrue "Nat size model expected one 64-bit limb at 2^63"
+    (PSC1Kernel.natSizeInBytes half == 8)
+  assertTrue "Nat size model expected two 64-bit limbs at 2^64"
+    (PSC1Kernel.natSizeInBytes big == 16)
+
+  let defaultCtx :=
+    PSC1Kernel.CheckerContext.empty PSC1Kernel.Environment.empty
+  assertTrue "default Nat size limit differs from final Lean 4.34"
+    (defaultCtx.maxNatSize == PSC1Kernel.leanNatMaxSizeDefault)
+
+  let smallCtx : PSC1Kernel.CheckerContext :=
+    { defaultCtx with maxNatSize := 8 }
+  let largeCtx : PSC1Kernel.CheckerContext :=
+    { defaultCtx with maxNatSize := 16 }
+
+  let smallLiteralRejects :=
+    match PSC1Kernel.check smallCtx (.lit (.nat big)) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue "configured Nat limit did not reject an oversized literal"
+    smallLiteralRejects
+
+  let largeLiteralAccepts :=
+    match PSC1Kernel.check largeCtx (.lit (.nat big)) with
+    | .ok _ => true
+    | .error _ => false
+  assertTrue "configured Nat limit rejected an in-limit literal"
+    largeLiteralAccepts
+
+  let addExpr : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs
+      (.const PSC1Kernel.kernelNatAddName [])
+      [.lit (.nat half), .lit (.nat half)]
+  let smallReductionRejects :=
+    match PSC1Kernel.whnf smallCtx addExpr with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue "configured Nat limit did not reject an oversized reduction result"
+    smallReductionRejects
+
+  let largeReduced ← exceptToIO
+    "PSC1 configurable Nat-size reduction"
+    (PSC1Kernel.whnf largeCtx addExpr)
+  assertTrue "configured Nat limit changed an accepted Nat reduction"
+    (PSC1Kernel.Expr.eq largeReduced (.lit (.nat big)))
+
 def assertNatReductionOracle : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let ctx := PSC1Kernel.CheckerContext.empty .empty
@@ -4529,6 +4578,7 @@ def run : IO Unit := do
   assertEagerReduceOracle
   assertNativeEvaluatorBoundary
   assertNatReductionOracle
+  assertNatSizeLimitOracle
   assertFunctionEtaOracle
   assertLazyDeltaOracle
   assertProjectionLazyDeltaOracle

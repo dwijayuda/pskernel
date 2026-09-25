@@ -328,15 +328,19 @@ def psParseProofScriptArrowTail
         | Except.error error => Except.error error
         | Except.ok codomain =>
             let domainSpan := psSyntaxTermSpan domain.value;
+            let domainBinder :
+                Prod PsSyntaxBinderHead PsSyntaxTerm :=
+              Prod.mk
+                (psSyntaxAnonymousExplicitBinder domainSpan)
+                domain.value;
+            let binders :
+                List (Prod PsSyntaxBinderHead PsSyntaxTerm) :=
+              List.cons domainBinder List.nil;
             let span := psSyntaxSpanJoin domainSpan (psSyntaxTermSpan codomain.value);
             Except.ok {
               value :=
                 PsSyntaxTerm.forallE
-                  (List.cons
-                    (Prod.mk
-                      (psSyntaxAnonymousExplicitBinder domainSpan)
-                      domain.value)
-                    List.nil)
+                  binders
                   codomain.value
                   span
               cursor := codomain.cursor

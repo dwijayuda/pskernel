@@ -3,6 +3,7 @@ import Ps.BackendWasm.Binary
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat
+import Ps.BackendWasm.RuntimeArray
 
 inductive PsWasmLowerError where
   | unsupportedType
@@ -2080,15 +2081,23 @@ def psWasmLowerSpecializedModule
         match psWasmLowerInductives profile module.inductives with
         | Except.error error => Except.error error
         | Except.ok inductiveTypes =>
-            let semanticFunctionTypes :=
-              psWasmCollectModuleFunctionTypes module
+            let semanticArrayTypes :=
+              psWasmCollectModuleArrayElementTypes module
             match
-                psWasmLowerClosureSignatures
+                psWasmLowerArrayTypes?
                   profile
-                  semanticFunctionTypes with
-            | Except.error error => Except.error error
-            | Except.ok closureSignatures =>
-                let initialState : PsWasmLowerState := {
+                  semanticArrayTypes with
+            | none => Except.error PsWasmLowerError.unsupportedType
+            | some arrays =>
+                let semanticFunctionTypes :=
+                  psWasmCollectModuleFunctionTypes module
+                match
+                    psWasmLowerClosureSignatures
+                      profile
+                      semanticFunctionTypes with
+                | Except.error error => Except.error error
+                | Except.ok closureSignatures =>
+                    let initialState : PsWasmLowerState := {
                   nextLocalIndex := 0
                   localTypes := []
                   currentDefinition := ""
@@ -2113,7 +2122,7 @@ def psWasmLowerSpecializedModule
                           ++ inductiveTypes
                           ++ closureSignatures.1
                           ++ lowered.state.generatedStructures
-                      arrays := []
+                      arrays := arrays
                       functionTypes :=
                         closureSignatures.2
                           ++ lowered.state.generatedFunctionTypes

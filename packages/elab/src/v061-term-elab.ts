@@ -1,4 +1,5 @@
 import type {V061Expr} from '@proofscript/syntax';
+import type {Expr} from 'lean-ts-kernel';
 import {
   LocalContext,
   TypeChecker,

@@ -1173,13 +1173,25 @@ def psParseLeanDoWithFuel
     (parseTerm :
       PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
-    (fuel : Nat)
-    (start : PsSourcePos)
-    (cursor : PsTokenCursor) :
+    (fuel : Nat) :
+    PsSourcePos ->
+    PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match fuel with
-  | 0 => Except.error PsParseError.fuelExhausted
+  | 0 =>
+      fun
+        (_start : PsSourcePos)
+        (_cursor : PsTokenCursor) =>
+        Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
+      let smaller :
+          PsSourcePos ->
+          PsTokenCursor ->
+          Except PsParseError (PsParseResult PsSyntaxTerm) :=
+        psParseLeanDoWithFuel parseTerm remaining;
+      fun
+        (start : PsSourcePos)
+        (cursor : PsTokenCursor) =>
       if psTokenCursorAtText cursor "return" then
         match psTokenCursorAdvance cursor with
         | Option.none =>
@@ -1237,9 +1249,7 @@ def psParseLeanDoWithFuel
                                 | Except.error error => Except.error error
                                 | Except.ok afterSemi =>
                                     match
-                                        psParseLeanDoWithFuel
-                                          parseTerm
-                                          remaining
+                                        smaller
                                           start
                                           afterSemi.cursor with
                                     | Except.error error => Except.error error

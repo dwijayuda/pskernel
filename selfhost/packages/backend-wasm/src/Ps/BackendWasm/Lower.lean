@@ -188,6 +188,143 @@ def psWasmLowerStructures
           | Except.ok loweredRest =>
               Except.ok (lowered :: loweredRest)
 
+def psWasmConstructorTypeName
+    (inductiveName constructorName : String) : String :=
+  inductiveName ++ "$" ++ constructorName
+
+def psWasmFindInductive :
+    List PsVerifiedIrInductive -> String -> Option PsVerifiedIrInductive
+  | [], _ => none
+  | inductiveInfo :: rest, name =>
+      if inductiveInfo.name == name then
+        some inductiveInfo
+      else
+        psWasmFindInductive rest name
+
+def psWasmFindConstructor :
+    List PsVerifiedIrConstructor -> String -> Option PsVerifiedIrConstructor
+  | [], _ => none
+  | constructorInfo :: rest, name =>
+      if constructorInfo.name == name then
+        some constructorInfo
+      else
+        psWasmFindConstructor rest name
+
+def psWasmFindConstructorFieldLoop
+    (fieldName : String) :
+    Nat ->
+    List PsVerifiedIrConstructorField ->
+    Option (Nat × PsVerifiedIrConstructorField)
+  | _, [] => none
+  | index, field :: rest =>
+      if field.name == fieldName then
+        some (index, field)
+      else
+        psWasmFindConstructorFieldLoop
+          fieldName (index + 1) rest
+
+def psWasmFindConstructorField
+    (constructorInfo : PsVerifiedIrConstructor)
+    (fieldName : String) :
+    Option (Nat × PsVerifiedIrConstructorField) :=
+  psWasmFindConstructorFieldLoop
+    fieldName
+    0
+    constructorInfo.fields
+
+def psWasmLowerConstructorField
+    (profile : PsWasmTargetProfile)
+    (field : PsVerifiedIrConstructorField) :
+    Except PsWasmLowerError PsWasmStructField :=
+  match psWasmStorageTypeOfIrType? profile field.type with
+  | none => Except.error PsWasmLowerError.unsupportedType
+  | some storageType =>
+      Except.ok {
+        name := field.name
+        storageType := storageType
+      }
+
+def psWasmLowerConstructorFields
+    (profile : PsWasmTargetProfile) :
+    List PsVerifiedIrConstructorField ->
+    Except PsWasmLowerError (List PsWasmStructField)
+  | [] => Except.ok []
+  | field :: rest =>
+      match psWasmLowerConstructorField profile field with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          match psWasmLowerConstructorFields profile rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok (lowered :: loweredRest)
+
+def psWasmLowerInductiveConstructors
+    (profile : PsWasmTargetProfile)
+    (inductiveInfo : PsVerifiedIrInductive) :
+    List PsVerifiedIrConstructor ->
+    Except PsWasmLowerError (List PsWasmStructType)
+  | [] => Except.ok []
+  | constructorInfo :: rest =>
+      match
+          psWasmLowerConstructorFields
+            profile
+            constructorInfo.fields with
+      | Except.error error => Except.error error
+      | Except.ok fields =>
+          let lowered : PsWasmStructType := {
+            name :=
+              psWasmConstructorTypeName
+                inductiveInfo.name
+                constructorInfo.name
+            superType := some inductiveInfo.name
+            isFinal := true
+            fields := fields
+          }
+          match
+              psWasmLowerInductiveConstructors
+                profile
+                inductiveInfo
+                rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok (lowered :: loweredRest)
+
+def psWasmLowerInductive
+    (profile : PsWasmTargetProfile)
+    (inductiveInfo : PsVerifiedIrInductive) :
+    Except PsWasmLowerError (List PsWasmStructType) :=
+  match inductiveInfo.typeParameters with
+  | _ :: _ => Except.error PsWasmLowerError.unsupportedType
+  | [] =>
+      let base : PsWasmStructType := {
+        name := inductiveInfo.name
+        superType := none
+        isFinal := false
+        fields := []
+      }
+      match
+          psWasmLowerInductiveConstructors
+            profile
+            inductiveInfo
+            inductiveInfo.constructors with
+      | Except.error error => Except.error error
+      | Except.ok constructors =>
+          Except.ok (base :: constructors)
+
+def psWasmLowerInductives
+    (profile : PsWasmTargetProfile) :
+    List PsVerifiedIrInductive ->
+    Except PsWasmLowerError (List PsWasmStructType)
+  | [] => Except.ok []
+  | inductiveInfo :: rest =>
+      match psWasmLowerInductive profile inductiveInfo with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          match psWasmLowerInductives profile rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok (lowered ++ loweredRest)
+
 def psWasmParameterBindingsLoop :
     Nat -> List PsVerifiedIrParameter -> List (String × Nat)
   | _, [] => []

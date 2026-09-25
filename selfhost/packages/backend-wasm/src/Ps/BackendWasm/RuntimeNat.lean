@@ -510,16 +510,20 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     }
   ]
 
-def psWasmNatLiteralInstructions :
-    Nat -> List PsWasmInstruction
-  | 0 => [PsWasmInstruction.structNew psWasmNatZeroName]
-  | value =>
+def psWasmNatLiteralInstructionsWithFuel :
+    Nat -> Nat -> List PsWasmInstruction
+  | 0, _ =>
+      [PsWasmInstruction.structNew psWasmNatZeroName]
+  | _ + 1, 0 =>
+      [PsWasmInstruction.structNew psWasmNatZeroName]
+  | fuel + 1, value =>
       let half := value / 2
       let low := value % 2
-      psWasmNatLiteralInstructions half ++
+      psWasmNatLiteralInstructionsWithFuel fuel half ++
         [PsWasmInstruction.structNew
           (if low == 0 then psWasmNatBit0Name
            else psWasmNatBit1Name)]
-termination_by value => value
-decreasing_by
-  omega
+
+def psWasmNatLiteralInstructions
+    (value : Nat) : List PsWasmInstruction :=
+  psWasmNatLiteralInstructionsWithFuel (value + 1) value

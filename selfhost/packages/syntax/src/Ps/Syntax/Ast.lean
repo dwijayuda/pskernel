@@ -30,6 +30,9 @@ inductive PsSyntaxTerm where
   | character (text : String) (span : PsSourceSpan)
   | bool (value : Bool) (span : PsSourceSpan)
   | unit (span : PsSourceSpan)
+  | record
+      (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+      (span : PsSourceSpan)
   | app (fn : PsSyntaxTerm) (args : List PsSyntaxTerm) (span : PsSourceSpan)
   | lambda
       (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))

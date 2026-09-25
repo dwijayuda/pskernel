@@ -17,6 +17,22 @@ def psPrintProofScriptTermWithFuel :
           Except.ok (if value then "true" else "false")
       | .unit _ =>
           Except.ok "()"
+      | .record fields _ =>
+          let printField :=
+            fun field =>
+              match psPrintSyntaxName field.1 with
+              | Except.error error => Except.error error
+              | Except.ok name =>
+                  match psPrintProofScriptTermWithFuel remaining field.2 with
+                  | Except.error error => Except.error error
+                  | Except.ok value =>
+                      Except.ok
+                        (name ++ " := " ++ value)
+          match fields.mapM printField with
+          | Except.error error => Except.error error
+          | Except.ok printedFields =>
+              Except.ok
+                ("{ " ++ psPrintJoin ", " printedFields ++ " }")
       | .app fn args _ =>
           if !psSyntaxTermSimpleForApplication fn then
             Except.error PsSourcePrintError.unsupportedApplication

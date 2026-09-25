@@ -752,6 +752,10 @@ def psParseProofScriptTermWithFuel :
                                   }
                               cursor := body.cursor
                             }
+      else if psTokenCursorAtText cursor "{" then
+        psParseRecordLiteral
+          (psParseProofScriptTermWithFuel remaining)
+          cursor
       else if psTokenCursorAtText cursor "(" then
         match psTokenCursorAdvance cursor with
         | none => Except.error (PsParseError.unexpectedEnd "(")

@@ -11,6 +11,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .character _ span => span
   | .bool _ span => span
   | .unit span => span
+  | .record _ span => span
   | .app _ _ span => span
   | .lambda _ _ span => span
   | .forallE _ _ span => span
@@ -115,6 +116,110 @@ def psParseSyntaxName
             PsTokenKind.identifier
             token.kind
             token.span)
+
+def psTokenCursorStartsNamedAssignment
+    (cursor : PsTokenCursor) : Bool :=
+  match cursor.remaining with
+  | name :: assign :: _ =>
+      psTokenKindEq name.kind PsTokenKind.identifier
+        && assign.text == ":="
+  | _ => false
+
+def psParseRecordFieldsWithFuel
+    (parseTerm :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (fieldsRev :
+      List (Prod PsSyntaxName PsSyntaxTerm)) :
+    Except PsParseError
+      (PsParseResult
+        (List (Prod PsSyntaxName PsSyntaxTerm))) :=
+  match fuel with
+  | 0 => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      if psTokenCursorAtText cursor "}" then
+        Except.ok {
+          value := fieldsRev.reverse
+          cursor := cursor
+        }
+      else
+        match psParseSyntaxName cursor with
+        | Except.error error => Except.error error
+        | Except.ok name =>
+            match psTokenCursorExpectText name.cursor ":=" with
+            | Except.error error => Except.error error
+            | Except.ok afterAssign =>
+                match parseTerm afterAssign.cursor with
+                | Except.error error => Except.error error
+                | Except.ok value =>
+                    let nextField :=
+                      (name.value, value.value)
+                    if psTokenCursorAtText value.cursor "," then
+                      match psTokenCursorAdvance value.cursor with
+                      | none =>
+                          Except.error
+                            (PsParseError.unexpectedEnd
+                              "record field")
+                      | some afterComma =>
+                          psParseRecordFieldsWithFuel
+                            parseTerm
+                            remaining
+                            afterComma.cursor
+                            (nextField :: fieldsRev)
+                    else if
+                        psTokenCursorAtText value.cursor "}"
+                          || psTokenCursorStartsNamedAssignment
+                            value.cursor then
+                      psParseRecordFieldsWithFuel
+                        parseTerm
+                        remaining
+                        value.cursor
+                        (nextField :: fieldsRev)
+                    else
+                      match psTokenCursorPeek value.cursor with
+                      | none =>
+                          Except.error
+                            (PsParseError.unexpectedEnd
+                              ", or }")
+                      | some token =>
+                          Except.error
+                            (PsParseError.expectedText
+                              ", or }"
+                              token.text
+                              token.span)
+
+def psParseRecordLiteral
+    (parseTerm :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match psTokenCursorExpectText cursor "{" with
+  | Except.error error => Except.error error
+  | Except.ok opening =>
+      match
+          psParseRecordFieldsWithFuel
+            parseTerm
+            opening.cursor.remaining.length
+            opening.cursor
+            [] with
+      | Except.error error => Except.error error
+      | Except.ok fields =>
+          match psTokenCursorExpectText fields.cursor "}" with
+          | Except.error error => Except.error error
+          | Except.ok close =>
+              Except.ok {
+                value :=
+                  PsSyntaxTerm.record
+                    fields.value
+                    {
+                      start := opening.token.span.start
+                      stop := close.token.span.stop
+                    }
+                cursor := close.cursor
+              }
 
 def psParseSimpleTerm
     (cursor : PsTokenCursor) :

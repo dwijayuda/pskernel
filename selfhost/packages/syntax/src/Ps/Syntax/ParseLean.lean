@@ -42,6 +42,7 @@ def psLeanCanStartSimpleArgument (cursor : PsTokenCursor) : Bool :=
   | none => false
   | some token =>
       !psLeanReservedApplicationToken token
+        && !psTokenCursorStartsNamedAssignment cursor
         && (token.text == "("
           || psTokenKindEq token.kind PsTokenKind.identifier
           || psTokenKindEq token.kind PsTokenKind.natural
@@ -593,6 +594,48 @@ def psParseLeanDoWithFuel
                 token.text
                 token.span)
 
+def psParseLeanRecordApplicationTailWithFuel
+    (parseTerm :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat)
+    (current : PsSyntaxTerm)
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match fuel with
+  | 0 => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      if psTokenCursorAtText cursor "{" then
+        match psParseRecordLiteral parseTerm cursor with
+        | Except.error error => Except.error error
+        | Except.ok argument =>
+            let span :=
+              psSyntaxSpanJoin
+                (psSyntaxTermSpan current)
+                (psSyntaxTermSpan argument.value)
+            let next :=
+              match current with
+              | .app fn args _ =>
+                  PsSyntaxTerm.app
+                    fn
+                    (args ++ [argument.value])
+                    span
+              | _ =>
+                  PsSyntaxTerm.app
+                    current
+                    [argument.value]
+                    span
+            psParseLeanRecordApplicationTailWithFuel
+              parseTerm
+              remaining
+              next
+              argument.cursor
+      else
+        Except.ok {
+          value := current
+          cursor := cursor
+        }
+
 def psParseLeanTermWithFuel :
     Nat ->
     PsTokenCursor ->
@@ -815,6 +858,10 @@ def psParseLeanTermWithFuel :
                                   }
                               cursor := body.cursor
                             }
+      else if psTokenCursorAtText cursor "{" then
+        psParseRecordLiteral
+          (psParseLeanTermWithFuel remaining)
+          cursor
       else if psTokenCursorAtText cursor "(" then
         match psTokenCursorAdvance cursor with
         | none => Except.error (PsParseError.unexpectedEnd "(")
@@ -868,9 +915,17 @@ def psParseLeanTermWithFuel :
         match psParseLeanProductWithFuel remaining cursor with
         | Except.error error => Except.error error
         | Except.ok domain =>
-            psParseLeanArrowTail
-              (psParseLeanTermWithFuel remaining)
-              domain
+            match
+                psParseLeanRecordApplicationTailWithFuel
+                  (psParseLeanTermWithFuel remaining)
+                  remaining
+                  domain.value
+                  domain.cursor with
+            | Except.error error => Except.error error
+            | Except.ok withRecords =>
+                psParseLeanArrowTail
+                  (psParseLeanTermWithFuel remaining)
+                  withRecords
 
 def psParseLeanTerm
     (cursor : PsTokenCursor) :

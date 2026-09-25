@@ -38,6 +38,36 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
               PsVerifiedIrExpr.var "right"
             ]
       }
+,
+      {
+        name := "addF32"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.float32
+          },
+          {
+            name := "right"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.float32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.floatBinary
+              PsVerifiedIrFloatingType.float32
+              PsVerifiedIrFloatBinaryOp.add)
+            [
+              PsVerifiedIrExpr.var "left",
+              PsVerifiedIrExpr.var "right"
+            ]
+      }
     ]
   }
 

@@ -11,6 +11,7 @@ structure CheckerContext where
   lctx : LocalContext
   levelParams : List Name
   safety : DefinitionSafety
+  eagerReduce : Bool
 
 def CheckerContext.empty (env : Environment) : CheckerContext :=
   {
@@ -18,6 +19,7 @@ def CheckerContext.empty (env : Environment) : CheckerContext :=
     lctx := .empty
     levelParams := []
     safety := .safe
+    eagerReduce := false
   }
 
 def kernelNatName : Name :=
@@ -34,6 +36,9 @@ def kernelBoolTrueName : Name :=
 
 def kernelBoolFalseName : Name :=
   .str kernelBoolName "false"
+
+def kernelEagerReduceName : Name :=
+  .str .anonymous "eagerReduce"
 
 def kernelNatZeroName : Name :=
   .str kernelNatName "zero"
@@ -100,6 +105,12 @@ def kernelStringOfListName : Name :=
 
 def kernelCharOfNatName : Name :=
   .str kernelCharName "ofNat"
+
+def isEagerReduceExpr (e : Expr) : Bool :=
+  match e.getAppFn with
+  | .const name _ =>
+      Name.eq name kernelEagerReduceName && e.getAppNumArgs == 2
+  | _ => false
 
 def natLiteralValue? : Expr → Option Nat
   | .lit (.nat value) => some value
@@ -529,7 +540,7 @@ partial def lazyDeltaReduction
     | some value => return .decided value
     | none => pure ()
 
-    if !a.hasFVar && !b.hasFVar then
+    if (!a.hasFVar && !b.hasFVar) || ctx.eagerReduce then
       let ar ← reduceNat ctx a
       match ar with
       | some value => return .decided (← isDefEq ctx value b)
@@ -571,6 +582,21 @@ partial def lazyDeltaProjReduction
 
 partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := do
   if Expr.eq a b then return true
+
+  -- Final Lean 4.34 reflection fast path. eagerReduce deliberately extends
+  -- this path to expressions containing free variables.
+  if !a.hasFVar || ctx.eagerReduce then
+    match b with
+    | .const name levels =>
+        if levels.length == 0 && Name.eq name kernelBoolTrueName then
+          let reduced ← whnf ctx a
+          match reduced with
+          | .const reducedName reducedLevels =>
+              if reducedLevels.length == 0 &&
+                  Name.eq reducedName kernelBoolTrueName then
+                return true
+          | _ => pure ()
+    | _ => pure ()
 
   let aCore ← whnfCore ctx a true
   let bCore ← whnfCore ctx b true
@@ -733,7 +759,12 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
     let fnType ← infer ctx fn
     let (_, domain, body, _) ← ensureForall ctx fnType
     let argType ← infer ctx arg
-    let ok ← isDefEq ctx argType domain
+    let eqCtx :=
+      if isEagerReduceExpr arg then
+        { ctx with eagerReduce := true }
+      else
+        ctx
+    let ok ← isDefEq eqCtx argType domain
     if !ok then
       .error "application type mismatch"
     else

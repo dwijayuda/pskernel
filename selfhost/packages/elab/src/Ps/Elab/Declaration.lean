@@ -234,9 +234,13 @@ def psElabContextWithEnvironment
     structuralRecursion := context.structuralRecursion
   }
 
+def psElabBinderArgument
+    (binder : PsElabTypedBinder) : PsExpr :=
+  PsExpr.fvar binder.id
+
 def psElabBinderArguments
     (bindersRev : List PsElabTypedBinder) : List PsExpr :=
-  bindersRev.reverse.map (fun binder => PsExpr.fvar binder.id)
+  bindersRev.reverse.map psElabBinderArgument
 
 def psCloseElabImplicitBinders
     (metaContext : PsMetaContext) :

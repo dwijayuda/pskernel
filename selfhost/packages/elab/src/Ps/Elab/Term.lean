@@ -1967,7 +1967,7 @@ def psElabTakeForallNames
           match psElabTakeForallNames nextRemaining body with
           | none => none
           | some rest =>
-              some (psNameLastComponent name :: rest)
+              some (List.cons (psNameLastComponent name) rest)
       | _ => none
 
 def psSyntaxRecordFieldName

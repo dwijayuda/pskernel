@@ -10,9 +10,9 @@ familiar** from **semantics that are intentionally different**.
 ## Familiar-looking declarations
 
 ```proofscript
-const answer : Nat := 42;
+const answer: Nat := 42;
 
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
@@ -42,11 +42,11 @@ This is one of the most important differences.
 Example:
 
 ```proofscript
-const one : Nat := 1;
+const one: Nat := 1;
 
-theorem oneIsOne : one = one := by rfl;
+theorem oneIsOne: one = one := by rfl;
 
-function isOne(x : Nat) : Bool :=
+function isOne(x: Nat): Bool :=
   x == 1;
 ```
 
@@ -83,9 +83,9 @@ Use explicit algebraic data.
 The PSC1 stdlib currently dogfoods a ProofScript-owned option type:
 
 ```proofscript
-inductive PsOption(α : Type) where {
+inductive PsOption(α: Type) where {
   | none;
-  | some(value : α);
+  | some(value: α);
 };
 ```
 
@@ -99,7 +99,7 @@ PSC1 structures and inductives are checked declarations.
 
 ```proofscript
 structure User where {
-  age : Nat;
+  age: Nat;
 }
 ```
 
@@ -119,7 +119,7 @@ function identity<T>(x: T): T
 PSC1:
 
 ```proofscript
-function identity {α : Type}(x : α) : α :=
+function identity {α: Type}(x: α): α :=
   x;
 ```
 
@@ -127,7 +127,7 @@ The PSC1 binder syntax is intentionally Lean-oriented because the same
 mechanism extends to dependent types:
 
 ```proofscript
-(x : Nat) -> Fin x -> Nat
+(x: Nat) -> Fin x -> Nat
 ```
 
 Replacing these binders with `<T>` would hide an important semantic
@@ -146,9 +146,9 @@ type Result<T, E> =
 PSC1 uses an inductive:
 
 ```proofscript
-inductive PsResult(α : Type, ε : Type) where {
-  | ok(value : α);
-  | error(error : ε);
+inductive PsResult(α: Type, ε: Type) where {
+  | ok(value: α);
+  | error(error: ε);
 };
 ```
 
@@ -225,7 +225,7 @@ That is why:
 The current bounded FFI form is:
 
 ```proofscript
-extern function hostShout(value : String) : String
+extern function hostShout(value: String): String
   from "host-lib"
   import shout;
 ```

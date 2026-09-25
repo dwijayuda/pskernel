@@ -15,6 +15,17 @@ def Name.eq : Name → Name → Bool
   | .num p₁ n₁, .num p₂ n₂ => n₁ == n₂ && Name.eq p₁ p₂
   | _, _ => false
 
+theorem Name.eqSelf : ∀ name : Name, Name.eq name name = true
+  | .anonymous => rfl
+  | .str parent value => by
+      simp only [Name.eq]
+      rw [Name.eqSelf parent]
+      simp
+  | .num parent value => by
+      simp only [Name.eq]
+      rw [Name.eqSelf parent]
+      simp
+
 def Name.appendAfter (name : Name) (suffix : String) : Name :=
   match name with
   | .str parent value => .str parent (value ++ suffix)

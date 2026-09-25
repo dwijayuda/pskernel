@@ -599,7 +599,7 @@ def psElabLambdaExpectedBody
                   context.metaContext
                   binder.type
                   forallView.domain;
-              if !unified.success then
+              if psElabBoolNot unified.success then
                 Except.error PsElabError.typeMismatch
               else
                 let nextContext :=

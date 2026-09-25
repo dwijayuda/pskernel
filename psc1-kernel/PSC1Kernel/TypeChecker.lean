@@ -685,67 +685,48 @@ partial def toConstructorWhenK
     (ctx : CheckerContext)
     (recursor : RecursorInfo)
     (major : Expr) : Except String Expr := do
-  let eqRec : Name := .str (.str .anonymous "Eq") "rec"
-  let debugEq := Name.eq recursor.base.name eqRec
   let some majorInduct := recursorMajorInduct? recursor
-    | if debugEq then throw "Eq.rec K debug: missing major inductive" else return major
+    | return major
   let some rawType ← inferKMajorType? ctx major
-    | if debugEq then
-        match major with
-        | .bvar index =>
-            throw ("Eq.rec K debug: major type inference failed; major=bvar " ++ toString index)
-        | .fvar name =>
-            if (ctx.lctx.find? name).isSome then
-              throw "Eq.rec K debug: major type inference failed; major=fvar-known"
-            else
-              throw "Eq.rec K debug: major type inference failed; major=fvar-missing"
-        | .app _ _ =>
-            let head :=
-              match major.getAppFn with
-              | .const name _ => kDebugNameString name
-              | .fvar name => "fvar:" ++ kDebugNameString name
-              | .bvar index => "bvar:" ++ toString index
-              | _ => "non-constant"
-            throw ("Eq.rec K debug: major type inference failed; major=app args=" ++
-              toString major.getAppNumArgs ++ "; head=" ++ head)
-        | .lam .. => throw "Eq.rec K debug: major type inference failed; major=lambda"
-        | .forallE .. => throw "Eq.rec K debug: major type inference failed; major=forall"
-        | .letE .. => throw "Eq.rec K debug: major type inference failed; major=let"
-        | .proj _ _ _ => throw "Eq.rec K debug: major type inference failed; major=projection"
-        | .const _ _ => throw "Eq.rec K debug: major type inference failed; major=const"
-        | .sort _ => throw "Eq.rec K debug: major type inference failed; major=sort"
-        | .mvar _ => throw "Eq.rec K debug: major type inference failed; major=mvar"
-        | .lit _ => throw "Eq.rec K debug: major type inference failed; major=literal"
-        | .mdata _ _ => throw "Eq.rec K debug: major type inference failed; major=mdata"
-      else
-        return major
+    | return major
   let appType ← whnf ctx rawType
   let .const typeInduct typeLevels := appType.getAppFn
-    | if debugEq then throw "Eq.rec K debug: major type head is not constant" else return major
+    | return major
   if !Name.eq typeInduct majorInduct then
-    if debugEq then throw "Eq.rec K debug: major inductive mismatch" else return major
+    return major
+
+  -- Final Lean 4.34 only blocks K conversion when expression metavariables
+  -- occur in indices. Metavariables confined to parameters are allowed.
   if exprHasMVarForK appType then
-    if debugEq then throw "Eq.rec K debug: major type has metavariables" else return major
+    let indexedArgs := appType.getAppArgs.drop recursor.numParams
+    if indexedArgs.any exprHasMVarForK then
+      return major
+
   let some (.inductInfo induct) := ctx.env.find? typeInduct
-    | if debugEq then throw "Eq.rec K debug: inductive metadata missing" else return major
+    | return major
   let ctorName :: _ := induct.ctors
-    | if debugEq then throw "Eq.rec K debug: no constructor" else return major
+    | return major
   let some (.ctorInfo ctor) := ctx.env.find? ctorName
-    | if debugEq then throw "Eq.rec K debug: constructor metadata missing" else return major
-  if ctor.numFields != 0 || ctor.numParams != recursor.numParams then
-    if debugEq then throw "Eq.rec K debug: constructor arity mismatch" else return major
-  if ctor.base.levelParams.length != typeLevels.length then
-    if debugEq then throw "Eq.rec K debug: constructor universe arity mismatch" else return major
+    | return major
+  if ctor.numFields != 0 then
+    return major
+
+  -- Lean's mk_nullary_cnstr takes exactly the recursor parameters from the
+  -- major type and applies them to the first constructor.
   let params := appType.getAppArgs.take recursor.numParams
   if params.length != recursor.numParams then
-    if debugEq then throw "Eq.rec K debug: parameter arity mismatch" else return major
-  let ctorType0 :=
-    ctor.base.type.instantiateLevelParams ctor.base.levelParams typeLevels
-  let some ctorType ← consumeKConstructorParams ctx ctorType0 params
-    | if debugEq then throw "Eq.rec K debug: constructor parameter consumption failed" else return major
-  unless ← kTypesEq ctx ctorType appType do
-    if debugEq then throw "Eq.rec K debug: constructor result type mismatch" else return major
-  pure (applyArgs (.const ctorName typeLevels) params)
+    return major
+  let ctorApp := applyArgs (.const ctorName typeLevels) params
+
+  -- This helper predates the full mutually-recursive defeq engine, so it uses
+  -- the K-local type inference/equality path here. Crucially, failure is
+  -- fail-closed exactly like final Lean: leave the major unchanged, never
+  -- reject the term merely because K conversion was unavailable.
+  let some ctorType ← inferKMajorType? ctx ctorApp
+    | return major
+  unless ← kTypesEq ctx appType ctorType do
+    return major
+  pure ctorApp
 
 partial def isConstructorApp
     (env : Environment)

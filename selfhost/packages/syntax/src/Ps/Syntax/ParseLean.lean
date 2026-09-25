@@ -150,13 +150,58 @@ def psParseLeanSimpleApplication
         first.value
         first.cursor
 
-def psParseLeanBinderTypeWithFuel :
+def psParseLeanProductWithFuel :
     Nat ->
     PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxTerm)
   | 0, _ => Except.error PsParseError.fuelExhausted
   | remaining + 1, cursor =>
       match psParseLeanSimpleApplication cursor with
+      | Except.error error => Except.error error
+      | Except.ok left =>
+          if psTokenCursorAtText left.cursor "×" then
+            match psTokenCursorAdvance left.cursor with
+            | none => Except.error (PsParseError.unexpectedEnd "product type")
+            | some afterProduct =>
+                match
+                    psParseLeanProductWithFuel
+                      remaining
+                      afterProduct.cursor with
+                | Except.error error => Except.error error
+                | Except.ok right =>
+                    let span :=
+                      psSyntaxSpanJoin
+                        (psSyntaxTermSpan left.value)
+                        (psSyntaxTermSpan right.value)
+                    let prodName : PsSyntaxName := {
+                      segments := ["Prod"]
+                      span := afterProduct.token.span
+                    }
+                    Except.ok {
+                      value :=
+                        PsSyntaxTerm.app
+                          (PsSyntaxTerm.reference prodName)
+                          [left.value, right.value]
+                          span
+                      cursor := right.cursor
+                    }
+          else
+            Except.ok left
+
+def psParseLeanProduct
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  psParseLeanProductWithFuel
+    (cursor.remaining.length + 1)
+    cursor
+
+def psParseLeanBinderTypeWithFuel :
+    Nat ->
+    PsTokenCursor ->
+    Except PsParseError (PsParseResult PsSyntaxTerm)
+  | 0, _ => Except.error PsParseError.fuelExhausted
+  | remaining + 1, cursor =>
+      match psParseLeanProductWithFuel remaining cursor with
       | Except.error error => Except.error error
       | Except.ok domain =>
           if psTokenCursorAtArrow domain.cursor then
@@ -743,7 +788,7 @@ def psParseLeanTermWithFuel :
                               cursor := close.cursor
                             }
       else
-        match psParseLeanSimpleApplication cursor with
+        match psParseLeanProductWithFuel remaining cursor with
         | Except.error error => Except.error error
         | Except.ok domain =>
             psParseLeanArrowTail

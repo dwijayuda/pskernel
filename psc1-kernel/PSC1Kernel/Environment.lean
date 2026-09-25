@@ -15,7 +15,7 @@ Portable declaration-index bucket count. A fixed-size Array keeps bucket
 selection O(1) while each bucket still uses structural Name.eq for collision
 resolution. This stays straightforward to lower through PSC1/TypeScript.
 -/
-def environmentBucketCount : Nat := 256
+def environmentBucketCount : Nat := 4096
 
 def stringBucketHashCore : List Char → Nat → Nat
   | [], acc => acc

@@ -80,6 +80,132 @@ partial def simpleNestedInstantiateFirstParams
       | _ =>
           throw "ill-formed nested inductive parameter instantiation"
 
+def simpleNestedLookupRebase
+    (name : Name)
+    (from to : List OpenBinder) : Option Expr :=
+  let rec go : List OpenBinder → List OpenBinder → Option Expr
+    | f :: fs, t :: ts =>
+        if Name.eq f.internalName name then
+          some (.fvar t.internalName)
+        else
+          go fs ts
+    | _, _ => none
+  go from to
+
+partial def simpleNestedRebaseParams
+    (e : Expr)
+    (from to : List OpenBinder) : Expr :=
+  match e with
+  | .fvar name =>
+      (simpleNestedLookupRebase name from to).getD e
+  | .app fn arg =>
+      .app
+        (simpleNestedRebaseParams fn from to)
+        (simpleNestedRebaseParams arg from to)
+  | .lam name type body binderInfo =>
+      .lam name
+        (simpleNestedRebaseParams type from to)
+        (simpleNestedRebaseParams body from to)
+        binderInfo
+  | .forallE name type body binderInfo =>
+      .forallE name
+        (simpleNestedRebaseParams type from to)
+        (simpleNestedRebaseParams body from to)
+        binderInfo
+  | .letE name type value body nondep =>
+      .letE name
+        (simpleNestedRebaseParams type from to)
+        (simpleNestedRebaseParams value from to)
+        (simpleNestedRebaseParams body from to)
+        nondep
+  | .mdata metadata body =>
+      .mdata metadata (simpleNestedRebaseParams body from to)
+  | .proj typeName index body =>
+      .proj typeName index (simpleNestedRebaseParams body from to)
+  | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => e
+
+partial def simpleNestedOpenConstructorParams
+    (type : Expr)
+    (count : Nat)
+    (index : Nat := 0)
+    (rev : List OpenBinder := []) :
+    Except String (List OpenBinder × Expr) := do
+  if count == 0 then
+    pure (rev.reverse, type)
+  else
+    match type with
+    | .forallE userName domain body binderInfo =>
+        let internalName := .num (simpleInternalName "nestedCtorParam") index
+        let binder : OpenBinder := {
+          internalName := internalName
+          userName := userName
+          type := domain
+          binderInfo := binderInfo
+        }
+        simpleNestedOpenConstructorParams
+          (body.instantiate1 (.fvar internalName))
+          (count - 1) (index + 1) (binder :: rev)
+    | _ =>
+        throw "nested preprocessing constructor parameter mismatch"
+
+inductive SimpleNestedBinderKind where
+  | forallK
+  | lambdaK
+
+partial def simpleNestedOpenRestorationParams
+    (e : Expr)
+    (count : Nat)
+    (kind? : Option SimpleNestedBinderKind := none)
+    (index : Nat := 0)
+    (rev : List OpenBinder := []) :
+    Except String (SimpleNestedBinderKind × List OpenBinder × Expr) := do
+  if count == 0 then
+    pure (kind?.getD .forallK, rev.reverse, e)
+  else
+    match e with
+    | .forallE userName domain body binderInfo =>
+        match kind? with
+        | some .lambdaK =>
+            throw "restored nested binders mix forall and lambda"
+        | _ =>
+            let internalName := .num (simpleInternalName "nestedRestoreParam") index
+            let binder : OpenBinder := {
+              internalName := internalName
+              userName := userName
+              type := domain
+              binderInfo := binderInfo
+            }
+            simpleNestedOpenRestorationParams
+              (body.instantiate1 (.fvar internalName))
+              (count - 1) (some .forallK) (index + 1)
+              (binder :: rev)
+    | .lam userName domain body binderInfo =>
+        match kind? with
+        | some .forallK =>
+            throw "restored nested binders mix forall and lambda"
+        | _ =>
+            let internalName := .num (simpleInternalName "nestedRestoreParam") index
+            let binder : OpenBinder := {
+              internalName := internalName
+              userName := userName
+              type := domain
+              binderInfo := binderInfo
+            }
+            simpleNestedOpenRestorationParams
+              (body.instantiate1 (.fvar internalName))
+              (count - 1) (some .lambdaK) (index + 1)
+              (binder :: rev)
+    | _ =>
+        throw "failed to restore nested inductive parameters"
+
+def simpleNestedCloseRestoration
+    (kind : SimpleNestedBinderKind)
+    (params : List OpenBinder)
+    (body : Expr) : Expr :=
+  match kind with
+  | .forallK => closeOpenBinders params body
+  | .lambdaK => closeOpenLambdas params body
+
 def simpleNestedFindFamily?
     (template : Expr) : List SimpleNestedAuxFamily →
       Option SimpleNestedAuxFamily

@@ -1,6 +1,6 @@
 import {spawnSync} from 'node:child_process';
 import {delimiter,dirname,join,resolve} from 'node:path';
-import {writeFileSync} from 'node:fs';
+import {readFileSync,writeFileSync} from 'node:fs';
 import fs from 'node:fs';
 
 const args=process.argv.slice(2);
@@ -13,7 +13,11 @@ function take(name){
 }
 const moduleName=take('--module');
 const out=take('--out');
-const requests=args;
+const requestsFile=args.includes('--requests-file')?take('--requests-file'):null;
+const fileRequests=requestsFile
+  ?readFileSync(requestsFile,'utf8').split(/\r?\n/).map(x=>x.trim()).filter(Boolean)
+  :[];
+const requests=[...fileRequests,...args];
 if(requests.length===0)throw new Error('expected at least one nat:Name or bool:Name request');
 
 const leanExe=process.platform==='win32'?'lean.exe':'lean';

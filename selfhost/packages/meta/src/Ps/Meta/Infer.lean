@@ -150,7 +150,7 @@ def psInferProjectionType
         environment
         metaContext
         localContext
-        targetType)
+        targetType);
   match view.head with
   | .constE actualName _ =>
       if !psNameEq actualName typeName then

@@ -2613,6 +2613,33 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
       throw <| IO.userError "simple inductive admission accepted unsupported functional recursion"
   | .error _ => pure ()
 
+def assertNestedReservedNameOracle : IO Unit := do
+  -- Lean 4.34 reserves the _nested namespace for temporary types created by
+  -- nested-inductive elimination. User declarations must not be able to name
+  -- or reference those auxiliaries.
+  let Host : PSC1Kernel.Name := .str .anonymous "OracleNestedReserved"
+  let HostMk : PSC1Kernel.Name := .str Host "mk"
+  let reserved : PSC1Kernel.Name :=
+    .str (.str .anonymous "_nested") "OracleNestedReserved_1"
+  let hostT : PSC1Kernel.Expr := .const Host []
+  let ctorT : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "x") (.const reserved []) hostT .default
+  let decl : PSC1Kernel.Kernel.SimpleMutualInductiveDecl := {
+    levelParams := []
+    numParams := 0
+    types := [{
+      name := Host
+      type := .sort .zero
+      ctors := [{ name := HostMk, type := ctorT }]
+    }]
+    isUnsafe := false
+  }
+  match PSC1Kernel.Kernel.addSimpleNestedInductive .empty decl with
+  | .ok _ =>
+      throw <| IO.userError
+        "nested admission accepted a declaration using the reserved _nested namespace"
+  | .error _ => pure ()
+
 def assertNestedInductiveAdmissionOracle : IO Unit := do
   let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
   let natT : PSC1Kernel.Expr := .const NatN []
@@ -4215,6 +4242,7 @@ def run : IO Unit := do
   assertProjectionOracle
   assertArenaProjectionStructureSoundnessOracle
   assertSimpleInductiveAdmissionOracle
+  assertNestedReservedNameOracle
   assertNestedInductiveAdmissionOracle
   assertParameterizedNestedInductiveAdmissionOracle
   assertUniverseNestedInductiveAdmissionOracle

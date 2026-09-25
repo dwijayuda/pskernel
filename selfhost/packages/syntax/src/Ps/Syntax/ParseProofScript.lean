@@ -1118,7 +1118,11 @@ def psParseProofScriptInductiveDeclaration
               [] with
           | Except.error error => Except.error error
           | Except.ok params =>
-              let parseAfterResult :=
+              let parseAfterResult :
+                  Option PsSyntaxTerm ->
+                  PsTokenCursor ->
+                  Except PsParseError
+                    (PsParseResult PsSyntaxDeclaration) :=
                 fun
                   (resultType : Option PsSyntaxTerm)
                   (afterResult : PsTokenCursor) =>
@@ -1153,7 +1157,7 @@ def psParseProofScriptInductiveDeclaration
                                     "}" with
                                 | Except.error error => Except.error error
                                 | Except.ok close =>
-                                    let finalCursor :=
+                                    let finalCursor : PsTokenCursor :=
                                       psParseOptionalSemicolon close.cursor;
                                     Except.ok {
                                       value :=

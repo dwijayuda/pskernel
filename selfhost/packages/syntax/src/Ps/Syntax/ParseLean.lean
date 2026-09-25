@@ -570,7 +570,7 @@ def psParseLeanBinderGroup
   | Except.ok opening =>
       match
           psParseLeanBinderNamesWithFuel
-            opening.cursor.remaining.length
+            psParseListLength opening.cursor.remaining
             opening.cursor
             List.nil with
       | Except.error error => Except.error error
@@ -659,7 +659,7 @@ def psParseLeanBindersWithFuel
       (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
   match fuel with
   | 0 =>
-      Except.ok { value := bindersRev.reverse, cursor := cursor }
+      Except.ok { value := psParseListReverse bindersRev, cursor := cursor }
   | remaining + 1 =>
       if psTokenCursorAtBinderStart cursor then
         match psParseLeanBinderGroup cursor with
@@ -673,7 +673,7 @@ def psParseLeanBindersWithFuel
                 bindersRev)
       else
         Except.ok {
-          value := bindersRev.reverse
+          value := psParseListReverse bindersRev
           cursor := cursor
         }
 
@@ -927,14 +927,14 @@ def psParseLeanMatchAlternativesAtColumnWithFuel
   match fuel with
   | 0 =>
       Except.ok {
-        value := alternativesRev.reverse
+        value := psParseListReverse alternativesRev
         cursor := cursor
       }
   | remaining + 1 =>
       match psTokenCursorPeek cursor with
       | none =>
           Except.ok {
-            value := alternativesRev.reverse
+            value := psParseListReverse alternativesRev
             cursor := cursor
           }
       | some token =>
@@ -969,7 +969,7 @@ def psParseLeanMatchAlternativesAtColumnWithFuel
                               ((pattern.value, body.value, span) :: alternativesRev)
           else
             Except.ok {
-              value := alternativesRev.reverse
+              value := psParseListReverse alternativesRev
               cursor := cursor
             }
 
@@ -987,7 +987,7 @@ def psParseLeanMatchAlternativesWithFuel
   match psTokenCursorPeek cursor with
   | none =>
       Except.ok {
-        value := alternativesRev.reverse
+        value := psParseListReverse alternativesRev
         cursor := cursor
       }
   | some token =>
@@ -1001,7 +1001,7 @@ def psParseLeanMatchAlternativesWithFuel
           alternativesRev
       else
         Except.ok {
-          value := alternativesRev.reverse
+          value := psParseListReverse alternativesRev
           cursor := cursor
         }
 
@@ -1178,7 +1178,7 @@ def psParseLeanTermWithFuel :
                 | Except.ok afterWith =>
                     match psParseLeanMatchAlternativesWithFuel
                         (psParseLeanTermWithFuel remaining)
-                        afterWith.cursor.remaining.length
+                        psParseListLength afterWith.cursor.remaining
                         afterWith.cursor
                         [] with
                     | Except.error error => Except.error error
@@ -1197,7 +1197,7 @@ def psParseLeanTermWithFuel :
                                     token.span)
                         | _ =>
                             let stop :=
-                              match alternatives.value.reverse with
+                              match psParseListReverse alternatives.value with
                               | [] => (psSyntaxTermSpan scrutinee.value).stop
                               | (_, _, span) :: _ => span.stop
                             Except.ok {
@@ -1336,7 +1336,7 @@ def psParseLeanTermWithFuel :
         | none => Except.error (PsParseError.unexpectedEnd "lambda binder")
         | some keyword =>
             match psParseLeanBindersWithFuel
-                keyword.cursor.remaining.length
+                psParseListLength keyword.cursor.remaining
                 keyword.cursor
                 [] with
             | Except.error error => Except.error error
@@ -1454,7 +1454,7 @@ def psParseLeanTermWithFuel :
 def psParseLeanTerm
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  psParseLeanTermWithFuel (cursor.remaining.length + 1) cursor
+  psParseLeanTermWithFuel (psParseListLength cursor.remaining + 1) cursor
 
 def psParseLeanInductiveConstructorsWithFuel
     (fuel : Nat)
@@ -1465,7 +1465,7 @@ def psParseLeanInductiveConstructorsWithFuel
   match fuel with
   | 0 =>
       Except.ok {
-        value := constructorsRev.reverse
+        value := psParseListReverse constructorsRev
         cursor := cursor
       }
   | remaining + 1 =>
@@ -1481,7 +1481,7 @@ def psParseLeanInductiveConstructorsWithFuel
             | Except.error error => Except.error error
             | Except.ok name =>
                 match psParseLeanBindersWithFuel
-                    name.cursor.remaining.length
+                    name.psParseListLength cursor.remaining
                     name.cursor
                     [] with
                 | Except.error error => Except.error error
@@ -1491,7 +1491,7 @@ def psParseLeanInductiveConstructorsWithFuel
                       span := name.token.span
                     }
                     let stop :=
-                      match fields.value.reverse with
+                      match psParseListReverse fields.value with
                       | [] => name.token.span.stop
                       | (head, _) :: _ => head.span.stop
                     let constructor : PsSyntaxInductiveConstructor := {
@@ -1508,7 +1508,7 @@ def psParseLeanInductiveConstructorsWithFuel
                       (constructor :: constructorsRev)
       else
         Except.ok {
-          value := constructorsRev.reverse
+          value := psParseListReverse constructorsRev
           cursor := cursor
         }
 
@@ -1598,14 +1598,14 @@ def psParseLeanStructureFieldsWithFuel
   match fuel with
   | 0 =>
       Except.ok {
-        value := fieldsRev.reverse
+        value := psParseListReverse fieldsRev
         cursor := cursor
       }
   | remaining + 1 =>
       match psTokenCursorPeek cursor with
       | none =>
           Except.ok {
-            value := fieldsRev.reverse
+            value := psParseListReverse fieldsRev
             cursor := cursor
           }
       | some token =>
@@ -1613,7 +1613,7 @@ def psParseLeanStructureFieldsWithFuel
               psTokenKindEq token.kind PsTokenKind.endOfInput
                 || psLeanTopLevelDeclarationToken token then
             Except.ok {
-              value := fieldsRev.reverse
+              value := psParseListReverse fieldsRev
               cursor := cursor
             }
           else
@@ -1635,7 +1635,7 @@ def psParseLeanStructureDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
-              name.cursor.remaining.length
+              name.psParseListLength cursor.remaining
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1645,12 +1645,12 @@ def psParseLeanStructureDeclaration
               | Except.ok afterWhere =>
                   match
                       psParseLeanStructureFieldsWithFuel
-                        afterWhere.cursor.remaining.length
+                        afterWhere.psParseListLength cursor.remaining
                         afterWhere.cursor
                         [] with
                   | Except.error error => Except.error error
                   | Except.ok fields =>
-                      match fields.value.reverse with
+                      match psParseListReverse fields.value with
                       | [] =>
                           match psTokenCursorPeek fields.cursor with
                           | none =>
@@ -1687,7 +1687,7 @@ def psParseLeanInductiveDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
-              name.cursor.remaining.length
+              name.psParseListLength cursor.remaining
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1699,7 +1699,7 @@ def psParseLeanInductiveDeclaration
                 | Except.error error => Except.error error
                 | Except.ok afterWhere =>
                     match psParseLeanInductiveConstructorsWithFuel
-                        afterWhere.cursor.remaining.length
+                        afterWhere.psParseListLength cursor.remaining
                         afterWhere.cursor
                         [] with
                     | Except.error error => Except.error error
@@ -1719,7 +1719,7 @@ def psParseLeanInductiveDeclaration
                                     token.span)
                         | _ =>
                             let stop :=
-                              match constructors.value.reverse with
+                              match psParseListReverse constructors.value with
                               | [] => name.value.span.stop
                               | constructor :: _ =>
                                   constructor.span.stop
@@ -1781,7 +1781,7 @@ def psParseLeanEquationPatternsWithFuel
                   nextPatterns
           else
             Except.ok {
-              value := nextPatterns.reverse
+              value := psParseListReverse nextPatterns
               cursor := pattern.cursor
             }
 
@@ -1799,7 +1799,7 @@ def psParseLeanEquationClausesWithFuel
   | remaining + 1 =>
       if !psTokenCursorAtText cursor "|" then
         Except.ok {
-          value := clausesRev.reverse
+          value := psParseListReverse clausesRev
           cursor := cursor
         }
       else
@@ -1810,7 +1810,7 @@ def psParseLeanEquationClausesWithFuel
         | some bar =>
             match
                 psParseLeanEquationPatternsWithFuel
-                  bar.cursor.remaining.length
+                  bar.psParseListLength cursor.remaining
                   bar.cursor
                   [] with
             | Except.error error => Except.error error
@@ -1868,7 +1868,7 @@ def psLeanEquationHeadPatternsAcc
     (patternsRev : List PsSyntaxPattern) :
     List PsSyntaxPattern :=
   match clauses with
-  | [] => patternsRev.reverse
+  | [] => psParseListReverse patternsRev
   | clause :: rest =>
       match clause.patterns with
       | [] =>
@@ -1917,7 +1917,7 @@ def psLeanEquationClausesForBranchAcc
     (resultRev : List PsLeanEquationClause) :
     List PsLeanEquationClause :=
   match clauses with
-  | [] => resultRev.reverse
+  | [] => psParseListReverse resultRev
   | clause :: rest =>
       match
           psLeanEquationClauseForBranch
@@ -1987,7 +1987,7 @@ partial def psLeanLowerEquationClauses
         match patterns.mapM lowerAlternative with
         | none => none
         | some alternatives =>
-            match alternatives.reverse with
+            match psParseListReverse alternatives with
             | [] => none
             | (_, body, _) :: _ =>
                 some
@@ -2039,7 +2039,7 @@ def psLeanPrepareEquationBindersAcc
           (Prod PsSyntaxBinderHead PsSyntaxTerm))
         (List PsSyntaxName)) :=
   if remaining == 0 then
-    some (bindersRev.reverse, namesRev.reverse)
+    some (psParseListReverse bindersRev, psParseListReverse namesRev)
   else
     match available with
     | [] => none
@@ -2064,11 +2064,11 @@ def psLeanEquationArity
   match clauses with
   | [] => none
   | clause :: rest =>
-      let arity := clause.patterns.length
+      let arity := psParseListLength clause.patterns
       if
           rest.all
             (fun next =>
-              next.patterns.length == arity) then
+              psParseListLength next.patterns == arity) then
         some arity
       else
         none
@@ -2184,7 +2184,7 @@ def psParseLeanDeclaration
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseLeanBindersWithFuel
-                      name.cursor.remaining.length
+                      name.psParseListLength cursor.remaining
                       name.cursor
                       [] with
                   | Except.error error => Except.error error
@@ -2222,7 +2222,7 @@ def psParseLeanDeclaration
                                 match
                                     psParseLeanEquationClausesWithFuel
                                       psParseLeanTerm
-                                      type.cursor.remaining.length
+                                      type.psParseListLength cursor.remaining
                                       type.cursor
                                       [] with
                                 | Except.error error =>
@@ -2277,7 +2277,7 @@ def psParseLeanImportsWithFuel
   match fuel with
   | 0 =>
       Except.ok {
-        value := importsRev.reverse
+        value := psParseListReverse importsRev
         cursor := cursor
       }
   | remaining + 1 =>
@@ -2291,7 +2291,7 @@ def psParseLeanImportsWithFuel
               (parsed.value :: importsRev)
       else
         Except.ok {
-          value := importsRev.reverse
+          value := psParseListReverse importsRev
           cursor := cursor
         }
 
@@ -2304,13 +2304,13 @@ def psParseLeanDeclarationsWithFuel
   | 0 =>
       if psTokenCursorDone cursor then
         Except.ok {
-          value := declarationsRev.reverse
+          value := psParseListReverse declarationsRev
           cursor := cursor
         }
       else
         match psTokenCursorPeek cursor with
         | none => Except.ok {
-            value := declarationsRev.reverse
+            value := psParseListReverse declarationsRev
             cursor := cursor
           }
         | some token =>
@@ -2322,7 +2322,7 @@ def psParseLeanDeclarationsWithFuel
   | remaining + 1 =>
       if psTokenCursorDone cursor then
         Except.ok {
-          value := declarationsRev.reverse
+          value := psParseListReverse declarationsRev
           cursor := cursor
         }
       else
@@ -2338,11 +2338,11 @@ def psParseLeanTokens
     (tokens : List PsToken) :
     Except PsParseError PsSyntaxModule :=
   let cursor := psTokenCursorFromTokens tokens
-  match psParseLeanImportsWithFuel tokens.length cursor [] with
+  match psParseLeanImportsWithFuel psParseListLength tokens cursor [] with
   | Except.error error => Except.error error
   | Except.ok imports =>
       match psParseLeanDeclarationsWithFuel
-          tokens.length
+          psParseListLength tokens
           imports.cursor
           [] with
       | Except.error error => Except.error error

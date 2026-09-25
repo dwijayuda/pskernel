@@ -75,6 +75,27 @@ def psWasmIsUSize64Add : List PsWasmInstruction -> Bool
   | .i64Add :: [] => true
   | _ => false
 
+def psWasmIsUInt8Literal : List PsWasmInstruction -> Bool
+  | .i32Const value :: .i32Const mask :: .i32And :: [] =>
+      value == 255 && mask == 255
+  | _ => false
+
+def psWasmIsUInt64Literal : List PsWasmInstruction -> Bool
+  | .i64Const value :: [] => value == 42
+  | _ => false
+
+def psTestWasmMachineIntegerLiterals : Bool :=
+  psWasmIsUInt8Literal
+      (psWasmLowerMachineIntegerLiteral
+        psWasmProfile32
+        .uint8
+        255)
+    && psWasmIsUInt64Literal
+      (psWasmLowerMachineIntegerLiteral
+        psWasmProfile32
+        .uint64
+        42)
+
 def psTestWasmMachineIntegerOps : Bool :=
   psWasmIsUInt8Add
       (psWasmLowerMachineIntegerBinary
@@ -175,6 +196,7 @@ def main : IO Unit := do
   if psTestWasmScalarLowering
       && psTestWasmWordProfiles
       && psTestWasmMachineIntegerOps
+      && psTestWasmMachineIntegerLiterals
       && psTestWasmUleb
       && psTestWasmBinaryModule then
     IO.println "PSC1_BACKEND_WASM_TESTS: PASS"

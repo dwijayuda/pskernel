@@ -43,8 +43,8 @@ def psLevelMetaFresh (context : PsLevelMetaContext) : PsLevelFreshResult :=
   let id := context.nextId
   {
     context := {
-      nextId := id + 1
-      declarations := id :: context.declarations
+      nextId := Nat.succ id
+      declarations := List.cons id context.declarations
       assignments := context.assignments
     }
     level := PsLevel.mvar id
@@ -101,7 +101,7 @@ def psLevelAssign
           some {
             nextId := context.nextId
             declarations := context.declarations
-            assignments := { id := id, value := resolved } :: context.assignments
+            assignments := List.cons { id := id, value := resolved } context.assignments
           }
   else
     none

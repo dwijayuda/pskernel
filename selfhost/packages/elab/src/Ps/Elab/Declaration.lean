@@ -1119,19 +1119,19 @@ def psElabPartialDeclaration
               | Except.error error =>
                   Except.error (PsElabError.infer error)
               | Except.ok _ =>
-                  let typeMeta := typeResult.context.metaContext
+                  let typeMeta := typeResult.context.metaContext;
                   let openType :=
-                    psMetaInstantiate typeMeta typeResult.term
+                    psMetaInstantiate typeMeta typeResult.term;
                   let closedType :=
                     psCloseElabForallBinders
                       typeMeta
                       binderResult.bindersRev
-                      openType
+                      openType;
                   if psExprHasUnresolvedMeta closedType then
                     Except.error PsElabError.unresolvedMetavariable
                   else
                     let selfHeader :=
-                      PsDeclaration.axiomDecl name [] closedType
+                      PsDeclaration.axiomDecl name [] closedType;
                     match psEnvironmentAdd environment selfHeader with
                     | none =>
                         Except.error
@@ -1140,7 +1140,7 @@ def psElabPartialDeclaration
                         let valueContext :=
                           psElabContextWithEnvironment
                             typeResult.context
-                            withSelf
+                            withSelf;
                         match
                             psElabTerm
                               valueContext
@@ -1149,11 +1149,11 @@ def psElabPartialDeclaration
                         | Except.error error => Except.error error
                         | Except.ok valueResult =>
                             let metaContext :=
-                              valueResult.context.metaContext
+                              valueResult.context.metaContext;
                             let openValue :=
                               psMetaInstantiate
                                 metaContext
-                                valueResult.term
+                                valueResult.term;
                             let finalOpenType :=
                               psMetaInstantiate
                                 metaContext

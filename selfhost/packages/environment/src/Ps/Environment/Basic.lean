@@ -90,6 +90,30 @@ def psEnvironmentContains (environment : PsEnvironment) (name : PsName) : Bool :
   | none => false
   | some _ => true
 
+def psEnvironmentRemoveName
+    (name : PsName) : List PsDeclaration -> List PsDeclaration
+  | [] => []
+  | declaration :: rest =>
+      if psNameEq name (psDeclarationName declaration) then
+        psEnvironmentRemoveName name rest
+      else
+        declaration :: psEnvironmentRemoveName name rest
+
+def psEnvironmentAddReplacingAxiom
+    (environment : PsEnvironment)
+    (declaration : PsDeclaration) : Option PsEnvironment :=
+  let name := psDeclarationName declaration
+  match psEnvironmentFind environment name with
+  | none =>
+      some { declarations := declaration :: environment.declarations }
+  | some (.axiomDecl _ _ _) =>
+      some {
+        declarations :=
+          declaration ::
+            psEnvironmentRemoveName name environment.declarations
+      }
+  | some _ => none
+
 def psEnvironmentAdd (environment : PsEnvironment) (declaration : PsDeclaration) : Option PsEnvironment :=
   if psEnvironmentContains environment (psDeclarationName declaration) then
     none

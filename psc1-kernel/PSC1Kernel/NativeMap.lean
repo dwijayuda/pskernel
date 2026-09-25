@@ -10,7 +10,7 @@ structure NativeMapEntry where
   name : Name
   value : NativeMapValue
 
-def nativeMapNamePart (prefix : Name) (part : String) : Name :=
+def nativeMapNamePart (parent : Name) (part : String) : Name :=
   match part.toNat? with
   | some index => .num prefix index
   | none => .str prefix part
@@ -19,12 +19,12 @@ def nativeMapName (text : String) : Except String Name := do
   if text.isEmpty then
     throw "native map name is empty"
   let parts := text.splitOn "."
-  let rec go (prefix : Name) : List String → Except String Name
-    | [] => pure prefix
+  let rec go (parent : Name) : List String → Except String Name
+    | [] => pure parent
     | part :: rest => do
         if part.isEmpty then
           throw ("native map name has an empty segment: " ++ text)
-        go (nativeMapNamePart prefix part) rest
+        go (nativeMapNamePart parent part) rest
   go .anonymous parts
 
 def nativeMapFind?

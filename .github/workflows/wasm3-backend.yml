@@ -114,6 +114,9 @@ jobs:
           if (instance.exports.smallSigned(-123) !== -123) {
             throw new Error('PSC1_WASM_RUNTIME_GC_PACKED_I16_RESULT');
           }
+          if (instance.exports.smallUnsigned(65535) !== 65535) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_PACKED_U16_RESULT');
+          }
           if (instance.exports.someValue(42) !== 42) {
             throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_SOME_RESULT');
           }

@@ -16,6 +16,7 @@ on:
       - selfhost/scripts/check-workspace.mjs
       - selfhost/check-psc1-source.mjs
       - docs/plans/08_RUST_BACKEND_NATIVE.md
+      - selfhost/rust-toolchain.toml
       - .github/workflows/rust-backend.yml
 
 permissions:
@@ -46,6 +47,8 @@ jobs:
           test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
           rustc --version
           cargo --version
+          rustc --version | grep -q '^rustc 1.98.1 '
+          cargo --version | grep -q '^cargo 1.98.1 '
 
       - name: Check workspace and PSC1 source profile
         shell: bash
@@ -61,6 +64,15 @@ jobs:
           set -euo pipefail
           cd selfhost
           lake build PsBackendRust psc1_backend_rust_tests psc1_backend_rust_fixture
+
+      - name: Probe Rust backend with PSC1 frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Type.lean
+          lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Expr.lean
+          lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Module.lean
 
       - name: Run Rust backend emitter tests
         shell: bash

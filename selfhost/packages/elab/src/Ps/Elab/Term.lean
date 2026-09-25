@@ -1022,12 +1022,13 @@ def psElabFillWildcardAlternatives
         match psElabMatchAlternativeFind ctorName alternativesRev with
         | some _ => alternativesRev
         | none =>
-            {
+            let alternative : PsElabMatchAlternative := {
               constructorName := ctorName
               pattern := pattern
               body := body
               span := span
-            } :: alternativesRev;
+            };
+            List.cons alternative alternativesRev;
       psElabFillWildcardAlternatives
         pattern
         body

@@ -133,15 +133,19 @@ inductive PsVerifiedIrIntrinsic where
   | stringAtEnd
   | stringExtract
   | stringEq
-  | arrayEmptyWithCapacity
-  | arraySize
-  | arrayPush
-  | arrayGet
-  | arrayGetD
-  | arraySet
-  | arraySetIfInBounds
+  | arrayEmptyWithCapacity (elementType : PsVerifiedIrType)
+  | arraySize (elementType : PsVerifiedIrType)
+  | arrayPush (elementType : PsVerifiedIrType)
+  | arrayGet (elementType : PsVerifiedIrType)
+  | arrayGetD (elementType : PsVerifiedIrType)
+  | arraySet (elementType : PsVerifiedIrType)
+  | arraySetIfInBounds (elementType : PsVerifiedIrType)
   | arrayMap
+      (sourceType : PsVerifiedIrType)
+      (targetType : PsVerifiedIrType)
   | arrayFoldl
+      (elementType : PsVerifiedIrType)
+      (accumulatorType : PsVerifiedIrType)
 
 structure PsVerifiedIrParameter where
   name : String

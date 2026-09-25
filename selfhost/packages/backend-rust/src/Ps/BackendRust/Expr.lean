@@ -50,20 +50,24 @@ def psRustEmitParameterList
   | List.nil =>
       Except.ok List.nil
   | List.cons parameter rest =>
-      match psRustEmitType parameter.type with
-      | Except.error error =>
-          Except.error error
-      | Except.ok printedType =>
-          let rendered :=
-            psRustConcat3
-              (psRustIdentifier parameter.name)
-              ": "
-              printedType;
-          match psRustEmitParameterList rest with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedRest =>
-              Except.ok (List.cons rendered printedRest)
+      if psRustTypeContainsFunction parameter.type then
+        Except.error
+          (PsRustEmitError.lambdaFunctionParameterUnsupported parameter.name)
+      else
+        match psRustEmitType parameter.type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok printedType =>
+            let rendered :=
+              psRustConcat3
+                (psRustIdentifier parameter.name)
+                ": "
+                printedType;
+            match psRustEmitParameterList rest with
+            | Except.error error =>
+                Except.error error
+            | Except.ok printedRest =>
+                Except.ok (List.cons rendered printedRest)
 
 def psRustEmitMachineIntegerBinary
     (operation : PsVerifiedIrIntegerBinaryOp)

@@ -163,6 +163,32 @@ def psTestBackendTsMachineLiterals : Bool :=
       output.contains "export const u32Max: number = 4294967295;"
         && output.contains "export const u64Value: bigint = 42n;"
 
+def psBackendTsTargetWordLiteralModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "word"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.usize
+        body :=
+          PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.machineInteger
+              PsVerifiedIrMachineIntegerType.usize
+              42)
+      }
+    ]
+  }
+
+def psTestBackendTsTargetWordLiteralFailsClosed : Bool :=
+  match psTsEmitModule psBackendTsTargetWordLiteralModule with
+  | Except.error PsTsEmitError.targetWordSizeRequired => true
+  | _ => false
+
 def psBackendTsSharedNumericModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -242,6 +268,7 @@ def psBackendTsTests : List PsBackendTsNamedTest := [
   { name := "generic inductive", passed := psTestBackendTsInductive },
   { name := "Nat intrinsic", passed := psTestBackendTsIntrinsic },
   { name := "machine integer literals", passed := psTestBackendTsMachineLiterals },
+  { name := "target word literal fails closed", passed := psTestBackendTsTargetWordLiteralFailsClosed },
   { name := "shared numeric intrinsics", passed := psTestBackendTsSharedNumericIntrinsics }
 ]
 

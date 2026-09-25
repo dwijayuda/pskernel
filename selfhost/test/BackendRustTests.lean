@@ -364,6 +364,43 @@ def psTestBackendRustIdentifiers : Bool :=
       (psRustIdentifier "__psr_value")
       "__psr___psr_value"
 
+def psBackendRustLambdaFunctionParameterExpr : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.lambda
+    [
+      {
+        name := "f"
+        type :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+      }
+    ]
+    (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0))
+
+def psBackendRustLambdaFunctionParameterModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "lambdaFunctionParameter"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body := psBackendRustLambdaFunctionParameterExpr
+      }
+    ]
+  }
+
+def psTestBackendRustRejectsLambdaFunctionParameter : Bool :=
+  match psRustEmitExpr psBackendRustLambdaFunctionParameterExpr with
+  | Except.error
+      (PsRustEmitError.lambdaFunctionParameterUnsupported name) =>
+      psStringEq name "f"
+  | _ =>
+      false
+
 def psBackendRustFirstOrderCallbackModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -602,6 +639,13 @@ def psTestBackendRustCoverageFunctionResult : Bool :=
     coverage.unsupported
     "declaration:functionResult"
 
+def psTestBackendRustCoverageLambdaFunctionParameter : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustLambdaFunctionParameterModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "expr:lambdaFunctionParameter"
+
 def psTestBackendRustCoverageFunctionStorage : Bool :=
   let coverage :=
     psRustCoverageModule psBackendRustFunctionStorageModule;
@@ -643,6 +687,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers },
   { name := "reject generic top-level values", passed := psTestBackendRustRejectsGenericValue },
   { name := "accept first-order callback parameters", passed := psTestBackendRustFirstOrderCallback },
+  { name := "reject function-typed lambda parameters", passed := psTestBackendRustRejectsLambdaFunctionParameter },
   { name := "reject function-valued results", passed := psTestBackendRustRejectsFunctionResult },
   { name := "reject stored function values", passed := psTestBackendRustRejectsFunctionStorage },
   { name := "reject nested function parameters", passed := psTestBackendRustRejectsNestedFunctionParameter },
@@ -651,6 +696,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "coverage rejects unknown runtime types", passed := psTestBackendRustCoverageUnknownType },
   { name := "coverage rejects generic values", passed := psTestBackendRustCoverageGenericValue },
   { name := "coverage rejects function results", passed := psTestBackendRustCoverageFunctionResult },
+  { name := "coverage rejects lambda function parameters", passed := psTestBackendRustCoverageLambdaFunctionParameter },
   { name := "coverage rejects function storage", passed := psTestBackendRustCoverageFunctionStorage },
   { name := "coverage rejects nested function parameters", passed := psTestBackendRustCoverageNestedFunctionParameter },
   { name := "coverage report is CI-stable", passed := psTestBackendRustCoverageReport }

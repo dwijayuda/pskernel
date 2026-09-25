@@ -119,7 +119,11 @@ export interface V061InductiveConstructor {
   readonly span:SourceSpan;
 }
 
-export interface V061InductiveDeclaration {
+export interface V061NamespaceScoped {
+  readonly namespacePath?:readonly string[];
+}
+
+export interface V061InductiveDeclaration extends V061NamespaceScoped {
   readonly kind:'inductive';
   readonly name:string;
   readonly params:readonly V061Parameter[];
@@ -144,7 +148,7 @@ export interface V061WhereDeclaration {
   readonly span:SourceSpan;
 }
 
-export interface V061ExternalDeclaration {
+export interface V061ExternalDeclaration extends V061NamespaceScoped {
   readonly kind:'external';
   readonly name:string;
   readonly params:readonly V061Parameter[];
@@ -157,7 +161,7 @@ export interface V061ExternalDeclaration {
   readonly span:SourceSpan;
 }
 
-export interface V061ValueDeclaration {
+export interface V061ValueDeclaration extends V061NamespaceScoped {
   readonly kind:'const'|'def'|'function'|'theorem';
   readonly name:string;
   readonly params:readonly V061Parameter[];
@@ -168,7 +172,7 @@ export interface V061ValueDeclaration {
   readonly span:SourceSpan;
 }
 
-export interface V061InstanceDeclaration {
+export interface V061InstanceDeclaration extends V061NamespaceScoped {
   readonly kind:'instance';
   readonly name:string;
   readonly anonymous:boolean;
@@ -179,7 +183,7 @@ export interface V061InstanceDeclaration {
   readonly span:SourceSpan;
 }
 
-export interface V061ClassDeclaration {
+export interface V061ClassDeclaration extends V061NamespaceScoped {
   readonly kind:'class';
   readonly name:string;
   readonly params:readonly V061Parameter[];
@@ -188,7 +192,7 @@ export interface V061ClassDeclaration {
   readonly span:SourceSpan;
 }
 
-export interface V061StructureDeclaration {
+export interface V061StructureDeclaration extends V061NamespaceScoped {
   readonly kind:'structure';
   readonly name:string;
   readonly params:readonly V061Parameter[];

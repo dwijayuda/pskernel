@@ -8,6 +8,7 @@ inductive PsTsEmitError where
   | unknownStructure (name : String)
   | unknownInductive (name : String)
   | genericValueUnsupported (name : String)
+  | targetWordSizeRequired
 
 def psTsJoin (separator : String) : List String -> String
   | [] => ""

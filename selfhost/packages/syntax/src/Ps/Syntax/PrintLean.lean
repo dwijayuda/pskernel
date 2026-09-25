@@ -130,6 +130,30 @@ def psPrintLeanMapAlternatives
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
+def psPrintLeanMapConstructors
+    (printConstructor :
+      PsSyntaxInductiveConstructor ->
+        Except PsSourcePrintError String)
+    (constructors : List PsSyntaxInductiveConstructor) :
+    Except PsSourcePrintError (List String) :=
+  match constructors with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons constructor rest =>
+      let printedHeadResult :=
+        printConstructor constructor;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintLeanMapConstructors printConstructor rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintLeanTermWithFuel
     (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
@@ -538,7 +562,12 @@ def psPrintLeanDeclaration
               match printResult with
               | Except.error error => Except.error error
               | Except.ok printedResult =>
-                  match constructors.mapM psPrintLeanConstructor with
+                  let printedConstructorsResult :
+                      Except PsSourcePrintError (List String) :=
+                    psPrintLeanMapConstructors
+                      psPrintLeanConstructor
+                      constructors;
+                  match printedConstructorsResult with
                   | Except.error error => Except.error error
                   | Except.ok printedConstructors =>
                       let paramSuffix :=

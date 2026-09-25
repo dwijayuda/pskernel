@@ -375,7 +375,7 @@ def psTsEmitExprWithFuel
   | fuel + 1, expr =>
       match expr with
       | .literal literal =>
-          Except.ok (psTsEmitLiteral literal)
+          psTsEmitLiteral literal
       | .var name =>
           Except.ok name
       | .intrinsic operation arguments =>

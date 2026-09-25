@@ -48,11 +48,11 @@ remains the handwritten source. Canonical `.ps` files are generated.
 
 ## Generated layout
 
-All generated self-host artifacts live under the ignored `selfhost/out/`
+All generated self-host artifacts live under the ignored `selfhost/dist/`
 directory:
 
 ```text
-selfhost/out/
+selfhost/dist/
   bootstrap/
     workspace/
       SELFHOST-COMPILER.ps
@@ -79,27 +79,26 @@ continue to resolve without special self-host-only import rules.
 From `selfhost/`:
 
 ```bash
-# 0. Native bootstrap compiler and source-profile check
-npm run build:lean
-npm run check:source
+# One-time Lean/Lake bootstrap:
+npm run bootstrap
 
-# 1. Generate the canonical modular .ps compiler workspace.
-npm run selfhost:emit-ps
+# Use generated compiler.js to compile the same .ps workspace again:
+npm run selfhost
 
-# 2. Use the Lean-hosted bootstrap compiler to compile that .ps project to JS.
-npm run selfhost:build-bootstrap-js
+# Verify deterministic fixed point:
+npm run verify:selfhost
 
-# Steps 1 + 2.
-npm run selfhost:bootstrap
+# Entire chain:
+npm run fixed-point
 
-# 3. Use generated compiler.js to compile the same .ps workspace again.
-npm run selfhost:next
+# Stable front door (same operations):
+npm run psc -- bootstrap
+npm run psc -- selfhost
+npm run psc -- verify-selfhost
+npm run psc -- fixed-point
 
-# 4. Require deterministic TypeScript fixed point.
-npm run selfhost:compare
-
-# Entire chain.
-npm run selfhost:fixed-point
+# Compile any generated ProofScript project with compiler.js:
+npm run psc -- build dist/bootstrap/workspace/SELFHOST-COMPILER.ps --out dist/next/compiler.ts
 ```
 
 The low-level CLI also supports explicit translation artifacts:
@@ -122,19 +121,19 @@ whole portable compiler project is inside the PSC1 source subset.
 
 ### Canonical ProofScript workspace
 
-`selfhost:emit-ps` walks the import graph from `SELFHOST-COMPILER.lean` and
+`bootstrap:emit` walks the import graph from `SELFHOST-COMPILER.lean` and
 translates every reachable portable source to a mirrored `.ps` workspace.
 No generated `.ps` file should be edited manually.
 
 ### Bootstrap JavaScript compiler
 
-`selfhost:build-bootstrap-js` loads the generated `.ps` project and produces
-`out/bootstrap/compiler.js`. Lean/Lake is still present only because the
+`bootstrap:compiler` loads the generated `.ps` project and produces
+`dist/bootstrap/compiler.js`. Lean/Lake is still present only because the
 bootstrap executable itself is Lean-hosted.
 
 ### JavaScript self-host
 
-`selfhost:next` dynamically loads `out/bootstrap/compiler.js`. The Node host
+`selfhost` dynamically loads `dist/bootstrap/compiler.js`. The Node host
 flattens the generated module graph in dependency order, then calls exports from
 the generated compiler:
 
@@ -145,12 +144,12 @@ the generated compiler:
 - `psTsEmitModule`
 
 The resulting TypeScript is compiled by `tsc` to
-`out/next/compiler.js`. Lean/Lake is not used in this stage.
+`dist/next/compiler.js`. Lean/Lake is not used in this stage.
 
 ### Fixed point
 
-`selfhost:compare` requires `out/bootstrap/compiler.ts` and
-`out/next/compiler.ts` to be byte-for-byte identical and reports their SHA-256.
+`verify:selfhost` requires `dist/bootstrap/compiler.ts` and
+`dist/next/compiler.ts` to be byte-for-byte identical and reports their SHA-256.
 Later we can strengthen this with checked-core and IR fingerprints as separate
 artifacts, but TypeScript fixed-point equality is the first executable closure
 gate.

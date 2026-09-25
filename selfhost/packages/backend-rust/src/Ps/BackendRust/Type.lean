@@ -10,6 +10,7 @@ inductive PsRustEmitError where
   | valueDeclarationUnsupported (name : String)
   | unknownStructure (name : String)
   | unknownInductive (name : String)
+  | namedTypeArity (name : String)
 
 def psRustConcat2 (a b : String) : String :=
   String.Internal.append a b
@@ -141,16 +142,25 @@ def psRustEmitTypeWithFuel :
           | Except.error error =>
               Except.error error
           | Except.ok printedArguments =>
-              match printedArguments with
-              | List.nil =>
-                  Except.ok name
-              | List.cons _ _ =>
-                  Except.ok
-                    (psRustConcat4
-                      name
-                      "<"
-                      (psRustJoin ", " printedArguments)
-                      ">")
+              if psStringEq name "Array" then
+                match printedArguments with
+                | List.cons elementType List.nil =>
+                    Except.ok
+                      (psRustConcat3 "Vec<" elementType ">")
+                | _ =>
+                    Except.error
+                      (PsRustEmitError.namedTypeArity name)
+              else
+                match printedArguments with
+                | List.nil =>
+                    Except.ok name
+                | List.cons _ _ =>
+                    Except.ok
+                      (psRustConcat4
+                        name
+                        "<"
+                        (psRustJoin ", " printedArguments)
+                        ">")
 
 def psRustEmitType
     (type : PsVerifiedIrType) :

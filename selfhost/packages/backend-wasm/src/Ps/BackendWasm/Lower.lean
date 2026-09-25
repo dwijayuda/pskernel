@@ -1445,6 +1445,236 @@ def psWasmLowerMatchAlternativesWith
                             state := loweredRest.state
                           }
 
+def psWasmLowerCaptureFields
+    (profile : PsWasmTargetProfile) :
+    List PsWasmBinding ->
+    Except PsWasmLowerError (List PsWasmStructField)
+  | [] => Except.ok []
+  | capture :: rest =>
+      match psWasmStorageTypeOfIrType? profile capture.type with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some storageType =>
+          match psWasmLowerCaptureFields profile rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok
+                ({
+                  name := capture.name
+                  storageType := storageType
+                } :: loweredRest)
+
+def psWasmPrepareCaptureBindings
+    (profile : PsWasmTargetProfile)
+    (subtypeName : String) :
+    Nat ->
+    PsWasmLowerState ->
+    List PsWasmBinding ->
+    Except PsWasmLowerError PsWasmLoweredBindings
+  | _, state, [] =>
+      Except.ok {
+        instructions := []
+        bindings := []
+        state := state
+      }
+  | fieldIndex, state, capture :: rest =>
+      match psWasmValueTypeOfIrType? profile capture.type with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some valueType =>
+          let allocated := psWasmAddLocal state valueType
+          let localIndex := allocated.1
+          let nextState := allocated.2
+          match
+              psWasmPrepareCaptureBindings
+                profile
+                subtypeName
+                (fieldIndex + 1)
+                nextState
+                rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok {
+                instructions :=
+                  [
+                    PsWasmInstruction.localGet 0,
+                    PsWasmInstruction.refCast subtypeName,
+                    psWasmStructGetInstruction
+                      subtypeName
+                      fieldIndex
+                      capture.type,
+                    PsWasmInstruction.localSet localIndex
+                  ]
+                    ++ loweredRest.instructions
+                bindings :=
+                  {
+                    name := capture.name
+                    index := localIndex
+                    type := capture.type
+                  } :: loweredRest.bindings
+                state := loweredRest.state
+              }
+
+def psWasmCaptureConstructionInstructions :
+    List PsWasmBinding -> List PsWasmInstruction
+  | [] => []
+  | capture :: rest =>
+      PsWasmInstruction.localGet capture.index ::
+        psWasmCaptureConstructionInstructions rest
+
+def psWasmAdvanceLambdaId
+    (state : PsWasmLowerState) : PsWasmLowerState :=
+  {
+    nextLocalIndex := state.nextLocalIndex
+    localTypes := state.localTypes
+    currentDefinition := state.currentDefinition
+    nextLambdaId := state.nextLambdaId + 1
+    generatedStructures := state.generatedStructures
+    generatedFunctionTypes := state.generatedFunctionTypes
+    generatedFunctions := state.generatedFunctions
+    generatedFunctionRefs := state.generatedFunctionRefs
+  }
+
+def psWasmAddGeneratedLambda
+    (outerState : PsWasmLowerState)
+    (generatedState : PsWasmLowerState)
+    (subtype : PsWasmStructType)
+    (function : PsWasmFunction) :
+    PsWasmLowerState :=
+  psWasmStateRestoreOuterLocals
+    outerState
+    {
+      nextLocalIndex := generatedState.nextLocalIndex
+      localTypes := generatedState.localTypes
+      currentDefinition := generatedState.currentDefinition
+      nextLambdaId := generatedState.nextLambdaId
+      generatedStructures :=
+        generatedState.generatedStructures ++ [subtype]
+      generatedFunctionTypes :=
+        generatedState.generatedFunctionTypes
+      generatedFunctions :=
+        generatedState.generatedFunctions ++ [function]
+      generatedFunctionRefs :=
+        generatedState.generatedFunctionRefs ++ [function.name]
+    }
+
+def psWasmLowerLambdaWith
+    (profile : PsWasmTargetProfile)
+    (bindings : List PsWasmBinding)
+    (lowerWithBindings :
+      List PsWasmBinding ->
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (parameters : List PsVerifiedIrParameter)
+    (resultType : PsVerifiedIrType)
+    (body : PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  let parameterTypes :=
+    parameters.map (fun parameter => parameter.type)
+  let functionType :=
+    PsVerifiedIrType.function parameterTypes resultType
+  match psWasmClosureBaseName functionType with
+  | none => Except.error PsWasmLowerError.unsupportedType
+  | some baseName =>
+      match psWasmClosureCodeTypeName functionType with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some codeTypeName =>
+          match psWasmLowerIrTypeList profile parameterTypes with
+          | Except.error error => Except.error error
+          | Except.ok loweredParameters =>
+              match psWasmLowerResultType profile resultType with
+              | Except.error error => Except.error error
+              | Except.ok results =>
+                  match psWasmExpectedResultType results with
+                  | Except.error error => Except.error error
+                  | Except.ok expected =>
+                      let lambdaId := state.nextLambdaId
+                      let lambdaName :=
+                        state.currentDefinition
+                          ++ "$lambda$"
+                          ++ toString lambdaId
+                      let subtypeName :=
+                        baseName ++ "$" ++ lambdaName
+                      let captures :=
+                        psWasmCollectCaptures
+                          bindings
+                          parameters
+                          body
+                      match psWasmLowerCaptureFields profile captures with
+                      | Except.error error => Except.error error
+                      | Except.ok captureFields =>
+                          let subtype : PsWasmStructType := {
+                            name := subtypeName
+                            superType := some baseName
+                            isFinal := true
+                            fields :=
+                              {
+                                name := "code"
+                                storageType :=
+                                  PsWasmStorageType.value
+                                    PsWasmValueType.funcRef
+                              } :: captureFields
+                          }
+                          let advancedState :=
+                            psWasmAdvanceLambdaId state
+                          let nestedState :=
+                            psWasmStateForNestedFunction
+                              advancedState
+                              (parameters.length + 1)
+                          match
+                              psWasmPrepareCaptureBindings
+                                profile
+                                subtypeName
+                                1
+                                nestedState
+                                captures with
+                          | Except.error error => Except.error error
+                          | Except.ok preparedCaptures =>
+                              let parameterBindings :=
+                                psWasmParameterBindingsFrom
+                                  1
+                                  parameters
+                              let bodyBindings :=
+                                parameterBindings
+                                  ++ preparedCaptures.bindings
+                              match
+                                  lowerWithBindings
+                                    bodyBindings
+                                    expected
+                                    preparedCaptures.state
+                                    body with
+                              | Except.error error => Except.error error
+                              | Except.ok loweredBody =>
+                                  let generatedFunction : PsWasmFunction := {
+                                    name := lambdaName
+                                    typeName := some codeTypeName
+                                    parameters :=
+                                      PsWasmValueType.refT baseName ::
+                                        loweredParameters
+                                    results := results
+                                    locals :=
+                                      loweredBody.state.localTypes
+                                    body :=
+                                      preparedCaptures.instructions
+                                        ++ loweredBody.instructions
+                                  }
+                                  let finalState :=
+                                    psWasmAddGeneratedLambda
+                                      state
+                                      loweredBody.state
+                                      subtype
+                                      generatedFunction
+                                  Except.ok {
+                                    instructions :=
+                                      [PsWasmInstruction.refFunc lambdaName]
+                                        ++ psWasmCaptureConstructionInstructions
+                                          captures
+                                        ++ [PsWasmInstruction.structNew
+                                          subtypeName]
+                                    state := finalState
+                                  }
+
 def psWasmLowerExprWithFuel
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
@@ -1503,6 +1733,15 @@ def psWasmLowerExprWithFuel
                 instructions := [PsWasmInstruction.localGet index]
                 state := state
               }
+      | .lambda parameters resultType body =>
+          psWasmLowerLambdaWith
+            profile
+            bindings
+            lowerWithBindings
+            state
+            parameters
+            resultType
+            body
       | .intrinsic operation arguments =>
           psWasmLowerIntrinsicWith
             profile lower state operation arguments

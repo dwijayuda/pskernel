@@ -272,14 +272,50 @@ def psBackendRustValueModule : PsVerifiedIrModule :=
         parameters := []
         resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
         body := PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)
+      },
+      {
+        name := "addGlobalOne"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natAdd
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.var "one"
+            ]
+      },
+      {
+        name := "shadowOne"
+        typeParameters := []
+        parameters := [
+          {
+            name := "one"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body := PsVerifiedIrExpr.var "one"
       }
     ]
   }
 
-def psTestBackendRustRejectsValue : Bool :=
+def psTestBackendRustValues : Bool :=
   match psRustEmitModule psBackendRustValueModule with
-  | Except.error (PsRustEmitError.valueDeclarationUnsupported _) => true
-  | _ => false
+  | Except.error _ => false
+  | Except.ok output =>
+      output.contains
+          "pub fn one() -> PsNat { __ps_nat_lit(\"1\") }"
+        && output.contains
+          "__ps_nat_add(&(x), &((one)()))"
+        && output.contains
+          "pub fn shadowOne(one: PsNat) -> PsNat { one }"
 
 structure PsBackendRustNamedTest where
   name : String
@@ -291,7 +327,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "structure and inductive", passed := psTestBackendRustAdt },
   { name := "Char and String intrinsics", passed := psTestBackendRustStringIntrinsics },
   { name := "Array intrinsics", passed := psTestBackendRustArrayIntrinsics },
-  { name := "unsupported value is explicit", passed := psTestBackendRustRejectsValue }
+  { name := "top-level values and shadowing", passed := psTestBackendRustValues }
 ]
 
 def psRunBackendRustTests : List PsBackendRustNamedTest -> IO Bool

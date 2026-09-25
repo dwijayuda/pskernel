@@ -176,6 +176,7 @@ jobs:
             "f64_div=" + m.diffF64Div(7.5, 2.5).toString(),
             "string=" + m.diffString("é").toString(),
             "array=" + m.diffArray(7n, 8n).toString(),
+            "reuse_capture=" + m.diffReuseCapture(5n).toString(),
             "capture=" + m.diffCapture(5n, 7n).toString(),
             "capture_array=" + m.diffCaptureArray(5n).toString(),
             "maybe_some=" + m.diffMaybe(5n, 99n, true).toString(),
@@ -209,6 +210,7 @@ jobs:
               diffMaybe,
               diffNat,
               diffProjection,
+              diffReuseCapture,
               diffReuseString,
               diffString,
               diffU32Lt,
@@ -236,6 +238,7 @@ jobs:
               println!("f64_div={}", diffF64Div(7.5f64, 2.5f64));
               println!("string={}", diffString(String::from("é")));
               println!("array={}", diffArray(n(7), n(8)));
+              println!("reuse_capture={}", diffReuseCapture(n(5)));
               println!("capture={}", diffCapture(n(5), n(7)));
               println!("capture_array={}", diffCaptureArray(n(5)));
               println!("maybe_some={}", diffMaybe(n(5), n(99), true));
@@ -259,6 +262,7 @@ jobs:
           f64_div=3
           string=3
           array=8
+          reuse_capture=13
           capture=12
           capture_array=7
           maybe_some=5

@@ -1,0 +1,69 @@
+name: PSC1 segmented Std replay prototype
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [perf/psc1-segmented-std-replay]
+    paths:
+      - ".github/workflows/psc1-segmented-std-replay.yml"
+      - "oracle/replay-probe/DependencyExport.lean"
+      - "scripts/psc1-lean-std-release-profile.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  segmented-root:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build exporter and PSC1 replay executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean oracle/replay-probe/DependencyExport.lean
+          cd psc1-kernel
+          lake build
+          lake build psc1_replay
+      - name: Compare ordinary and segmented root 30019
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 30019 1 > /tmp/plain.ndjson
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range-segmented 30019 1 > /tmp/seg.ndjson
+          echo "plain-bytes=$(wc -c < /tmp/plain.ndjson) plain-lines=$(wc -l < /tmp/plain.ndjson)"
+          echo "seg-bytes=$(wc -c < /tmp/seg.ndjson) seg-lines=$(wc -l < /tmp/seg.ndjson)"
+          plain="$(psc1-kernel/.lake/build/bin/psc1_replay /tmp/plain.ndjson)"
+          seg="$(psc1-kernel/.lake/build/bin/psc1_replay /tmp/seg.ndjson)"
+          echo "$plain"
+          echo "$seg"
+          plain_decl="$(printf '%s\n' "$plain" | sed -n 's/.*declarations=\([0-9][0-9]*\).*/\1/p')"
+          seg_decl="$(printf '%s\n' "$seg" | sed -n 's/.*declarations=\([0-9][0-9]*\).*/\1/p')"
+          test -n "$plain_decl"
+          test "$plain_decl" = "$seg_decl"
+      - name: Replay root 100015 with declaration segmentation
+        shell: bash
+        env:
+          PSC1_LEAN_STD_CHUNK: "1"
+          PSC1_LEAN_EXPORT_TIMEOUT_MS: "300000"
+          PSC1_LEAN_REPLAY_TIMEOUT_MS: "600000"
+          PSC1_LEAN_REPLAY_BIN: "psc1-kernel/.lake/build/bin/psc1_replay"
+          PSC1_LEAN_SEGMENT_DECLARATIONS: "1"
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'seg-root100015-elapsed=%e seg-root100015-maxrss-kb=%M' \
+            node scripts/psc1-lean-std-release-profile.mjs \
+              --label root-100015-segmented --start 100015 --count 1 --chunk 1

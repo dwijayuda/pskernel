@@ -406,59 +406,75 @@ def psParseLeanListPattern
         PsParseError
         (PsParseResult PsSyntaxPattern)) :=
   match cursor.remaining with
-  | opening :: closing :: rest =>
-      if opening.text == "[" && closing.text == "]" then
-        let span :=
-          psSyntaxSpanJoin opening.span closing.span
-        let name : PsSyntaxName := {
-          segments := ["List", "nil"]
-          span := span
-        }
-        some
-          (Except.ok {
-            value :=
-              PsSyntaxPattern.constructor
-                name
-                []
-                span
-            cursor := { remaining := rest }
-          })
-      else
-        none
-  | first :: cons :: second :: rest =>
-      if
-          cons.text == "::"
-            && psTokenKindEq
-              first.kind
-              PsTokenKind.identifier
-            && psTokenKindEq
-              second.kind
-              PsTokenKind.identifier then
-        let span :=
-          psSyntaxSpanJoin first.span second.span
-        let name : PsSyntaxName := {
-          segments := ["List", "cons"]
-          span := span
-        }
-        some
-          (Except.ok {
-            value :=
-              PsSyntaxPattern.constructor
-                name
-                [
-                  psLeanPatternBinderName
-                    first
-                    "_listHead",
-                  psLeanPatternBinderName
-                    second
-                    "_listTail"
-                ]
-                span
-            cursor := { remaining := rest }
-          })
-      else
-        none
-  | _ => none
+  | List.nil => none
+  | List.cons first afterFirst =>
+      match afterFirst with
+      | List.nil => none
+      | List.cons second afterSecond =>
+          if first.text == "[" && second.text == "]" then
+            let span :=
+              psSyntaxSpanJoin first.span second.span
+            let name : PsSyntaxName := {
+              segments :=
+                List.cons
+                  "List"
+                  (List.cons "nil" List.nil)
+              span := span
+            }
+            some
+              (Except.ok {
+                value :=
+                  PsSyntaxPattern.constructor
+                    name
+                    List.nil
+                    span
+                cursor := { remaining := afterSecond }
+              })
+          else if second.text == "::" then
+            match afterSecond with
+            | List.nil => none
+            | List.cons third rest =>
+                if
+                    psTokenKindEq
+                      first.kind
+                      PsTokenKind.identifier
+                      && psTokenKindEq
+                        third.kind
+                        PsTokenKind.identifier then
+                  let span :=
+                    psSyntaxSpanJoin first.span third.span
+                  let name : PsSyntaxName := {
+                    segments :=
+                      List.cons
+                        "List"
+                        (List.cons "cons" List.nil)
+                    span := span
+                  }
+                  let headBinder :=
+                    psLeanPatternBinderName
+                      first
+                      "_listHead"
+                  let tailBinder :=
+                    psLeanPatternBinderName
+                      third
+                      "_listTail"
+                  some
+                    (Except.ok {
+                      value :=
+                        PsSyntaxPattern.constructor
+                          name
+                          (List.cons
+                            headBinder
+                            (List.cons
+                              tailBinder
+                              List.nil))
+                          span
+                      cursor := { remaining := rest }
+                    })
+                else
+                  none
+          else
+            none
 
 def psParseLeanPattern
     (cursor : PsTokenCursor) :

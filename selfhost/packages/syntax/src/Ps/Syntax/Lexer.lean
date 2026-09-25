@@ -30,6 +30,13 @@ def psLexAdvanceTwo
     (second : Char) : PsSourcePos :=
   psLexAdvanceChar (psLexAdvanceChar position first) second
 
+
+def psLexListLength {α : Type} (xs : List α) : Nat :=
+  match xs with
+  | List.nil => 0
+  | List.cons _ tail =>
+      Nat.add 1 (psLexListLength tail)
+
 def psLexCharEq (left : Char) (right : Char) : Bool :=
   Nat.beq (Char.toNat left) (Char.toNat right)
 
@@ -152,7 +159,7 @@ def psLexSkipBlockComment
     (position : PsSourcePos) :
     Except PsLexError PsLexCursor :=
   psLexSkipBlockCommentWithFuel
-    (Nat.add (listLength remaining) 1)
+    (Nat.add (psLexListLength remaining) 1)
     depth
     remaining
     start
@@ -251,7 +258,7 @@ def psLexSkipTriviaWithFuel
 def psLexSkipTrivia
     (remaining : List Char)
     (position : PsSourcePos) : Except PsLexError PsLexCursor :=
-  psLexSkipTriviaWithFuel (Nat.add (listLength remaining) 1) remaining position
+  psLexSkipTriviaWithFuel (Nat.add (psLexListLength remaining) 1) remaining position
 
 def psLexLetterLike (char : Char) : Bool :=
   let code : Nat := Char.toNat char;
@@ -458,7 +465,7 @@ def psLexReadStringBody
     (charsRev : List Char) :
     Except PsLexError PsLexRead :=
   psLexReadStringBodyWithFuel
-    (Nat.add (listLength remaining) 1)
+    (Nat.add (psLexListLength remaining) 1)
     remaining
     position
     start

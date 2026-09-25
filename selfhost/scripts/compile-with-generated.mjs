@@ -17,6 +17,7 @@ const packageBySection = new Map([
   ["Elab", "elab"],
   ["Bridge", "bridge"],
   ["CompilerIr", "compiler-ir"],
+  ["Compiler", "compiler"],
   ["Erasure", "erasure"],
   ["BackendTs", "backend-ts"],
 ]);

@@ -56,7 +56,8 @@ lean_lib PsBridge where
   roots := #[
     `Ps.Bridge.Json,
     `Ps.Bridge.CheckedAdmissions,
-    `Ps.Bridge.Codec
+    `Ps.Bridge.Codec,
+    `Ps.Bridge.Protocol
   ]
 
 lean_lib PsCompilerIr where

@@ -8,6 +8,7 @@ inductive PsTsEmitError where
   | unknownStructure (name : String)
   | unknownInductive (name : String)
   | genericValueUnsupported (name : String)
+  | targetWordSizeRequired
 
 def psTsJoin (separator : String) : List String -> String
   | [] => ""
@@ -80,11 +81,30 @@ def psTsEmitType
     Except PsTsEmitError String :=
   psTsEmitTypeWithFuel 4096 type
 
+def psTsMachineIntegerUsesBigInt :
+    PsVerifiedIrMachineIntegerType -> Bool
+  | .uint64 => true
+  | .int64 => true
+  | .usize => true
+  | .isize => true
+  | _ => false
+
 def psTsEmitLiteral
-    (literal : PsVerifiedIrLiteral) : String :=
+    (literal : PsVerifiedIrLiteral) :
+    Except PsTsEmitError String :=
   match literal with
-  | .natural value => toString value ++ "n"
-  | .integer value => toString value ++ "n"
-  | .string value => psJsonQuote value
-  | .bool value => if value then "true" else "false"
-  | .unit => "undefined"
+  | .natural value => Except.ok (toString value ++ "n")
+  | .integer value => Except.ok (toString value ++ "n")
+  | .machineInteger type value =>
+      match type with
+      | .usize => Except.error PsTsEmitError.targetWordSizeRequired
+      | .isize => Except.error PsTsEmitError.targetWordSizeRequired
+      | _ =>
+          if psTsMachineIntegerUsesBigInt type then
+            Except.ok (toString value ++ "n")
+          else
+            Except.ok (toString value)
+  | .string value => Except.ok (psJsonQuote value)
+  | .bool value =>
+      Except.ok (if value then "true" else "false")
+  | .unit => Except.ok "undefined"

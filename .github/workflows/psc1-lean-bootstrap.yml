@@ -197,6 +197,10 @@ jobs:
           cd selfhost
           lake exe psc1 check stdlib/SELFHOST-EFFECT.lean
           lake exe psc1 typescript stdlib/SELFHOST-EFFECT.lean > /tmp/psc1-effect.ts
+          lake exe psc1 translate stdlib/SELFHOST-EFFECT.lean --to ps > stdlib/SELFHOST-EFFECT.generated.ps
+          lake exe psc1 check stdlib/SELFHOST-EFFECT.generated.ps
+          lake exe psc1 typescript stdlib/SELFHOST-EFFECT.generated.ps > /tmp/psc1-effect-ps.ts
+          cmp /tmp/psc1-effect.ts /tmp/psc1-effect-ps.ts
           grep -q 'export interface CompilerM' /tmp/psc1-effect.ts
           grep -q 'export function compilerBind' /tmp/psc1-effect.ts
           grep -q 'export function compilerRollback' /tmp/psc1-effect.ts

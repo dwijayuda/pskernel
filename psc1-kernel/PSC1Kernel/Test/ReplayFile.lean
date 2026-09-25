@@ -1,5 +1,4 @@
 import PSC1Kernel
-import PSC1Kernel.Test.NativeMap
 
 open PSC1Kernel
 
@@ -126,12 +125,12 @@ def main (args : List String) : IO Unit := do
       let (baseEnv, _) ← replayFileFrom .empty basePath
       replayTargets baseEnv (target :: rest)
   | ["--native-map", mapPath, path] => do
-      let provider ← PSC1Kernel.Test.loadNativeMap mapPath
+      let provider ← PSC1Kernel.NativeMap.loadNativeMap mapPath
       let (_, totals) ←
         replayFileFrom .empty path 0 leanNatMaxSizeDefault (some provider)
       printReplayTotals path totals
   | "--native-map" :: mapPath :: "--base" :: basePath :: target :: rest => do
-      let provider ← PSC1Kernel.Test.loadNativeMap mapPath
+      let provider ← PSC1Kernel.NativeMap.loadNativeMap mapPath
       let (baseEnv, _) ←
         replayFileFrom .empty basePath 0 leanNatMaxSizeDefault (some provider)
       replayTargets

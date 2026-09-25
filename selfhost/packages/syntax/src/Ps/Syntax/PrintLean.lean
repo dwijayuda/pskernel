@@ -301,7 +301,9 @@ def psPrintLeanTermWithFuel
           match smaller scrutinee with
           | Except.error error => Except.error error
           | Except.ok printedScrutinee =>
-              let printAlternative :=
+              let printAlternative :
+                  Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan) ->
+                    Except PsSourcePrintError String :=
                 fun (alternative : Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) =>
                   match alternative with
                   | Prod.mk pattern bodyAndSpan =>

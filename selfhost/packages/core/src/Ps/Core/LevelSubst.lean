@@ -4,13 +4,18 @@ def psFindLevelArgument
     (parameters : List PsName)
     (arguments : List PsLevel)
     (target : PsName) : Option PsLevel :=
-  match parameters, arguments with
-  | parameter :: parameterRest, argument :: argumentRest =>
-      if psNameEq parameter target then
-        some argument
-      else
-        psFindLevelArgument parameterRest argumentRest target
-  | _, _ => none
+  match parameters with
+  | [] =>
+      none
+  | parameter :: parameterRest =>
+      match arguments with
+      | [] =>
+          none
+      | argument :: argumentRest =>
+          if psNameEq parameter target then
+            some argument
+          else
+            psFindLevelArgument parameterRest argumentRest target
 
 def psLevelInstantiateParams
     (parameters : List PsName)

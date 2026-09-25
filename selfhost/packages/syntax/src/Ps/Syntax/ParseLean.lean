@@ -49,6 +49,9 @@ def psLeanCanStartSimpleArgument (cursor : PsTokenCursor) : Bool :=
           || psTokenKindEq token.kind PsTokenKind.character)
 
 def psParseLeanApplicationTailWithFuel
+    (parseParenthesized :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
     (fuel : Nat)
     (current : PsSyntaxTerm)
     (cursor : PsTokenCursor) :
@@ -82,42 +85,38 @@ def psParseLeanApplicationTailWithFuel
                       | _ =>
                           PsSyntaxTerm.app current [argument] span
                     psParseLeanApplicationTailWithFuel
+                      parseParenthesized
                       remaining
                       next
                       close.cursor
               else
-                match psParseSimpleTerm opening.cursor with
+                match parseParenthesized opening.cursor with
                 | Except.error error => Except.error error
-                | Except.ok first =>
-                    match psParseLeanApplicationTailWithFuel
-                        remaining
-                        first.value
-                        first.cursor with
+                | Except.ok inner =>
+                    match psTokenCursorExpectText inner.cursor ")" with
                     | Except.error error => Except.error error
-                    | Except.ok inner =>
-                        match psTokenCursorExpectText inner.cursor ")" with
-                        | Except.error error => Except.error error
-                        | Except.ok close =>
-                            let span :=
-                              psSyntaxSpanJoin
-                                (psSyntaxTermSpan current)
-                                (psSyntaxTermSpan inner.value)
-                            let next :=
-                              match current with
-                              | .app fn args _ =>
-                                  PsSyntaxTerm.app
-                                    fn
-                                    (args ++ [inner.value])
-                                    span
-                              | _ =>
-                                  PsSyntaxTerm.app
-                                    current
-                                    [inner.value]
-                                    span
-                            psParseLeanApplicationTailWithFuel
-                              remaining
-                              next
-                              close.cursor
+                    | Except.ok close =>
+                        let span :=
+                          psSyntaxSpanJoin
+                            (psSyntaxTermSpan current)
+                            (psSyntaxTermSpan inner.value)
+                        let next :=
+                          match current with
+                          | .app fn args _ =>
+                              PsSyntaxTerm.app
+                                fn
+                                (args ++ [inner.value])
+                                span
+                          | _ =>
+                              PsSyntaxTerm.app
+                                current
+                                [inner.value]
+                                span
+                        psParseLeanApplicationTailWithFuel
+                          parseParenthesized
+                          remaining
+                          next
+                          close.cursor
         else
           match psParseSimpleTerm cursor with
           | Except.error error => Except.error error
@@ -133,22 +132,49 @@ def psParseLeanApplicationTailWithFuel
                 | _ =>
                     PsSyntaxTerm.app current [argument.value] span
               psParseLeanApplicationTailWithFuel
+                parseParenthesized
                 remaining
                 next
                 argument.cursor
       else
         Except.ok { value := current, cursor := cursor }
 
+def psParseLeanApplicationWithFuel
+    (parseParenthesized :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat)
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match fuel with
+  | 0 => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      match psParseSimpleTerm cursor with
+      | Except.error error => Except.error error
+      | Except.ok first =>
+          psParseLeanApplicationTailWithFuel
+            parseParenthesized
+            remaining
+            first.value
+            first.cursor
+
+def psParseLeanSimpleApplicationWithFuel :
+    Nat ->
+    PsTokenCursor ->
+    Except PsParseError (PsParseResult PsSyntaxTerm)
+  | 0, _ => Except.error PsParseError.fuelExhausted
+  | remaining + 1, cursor =>
+      psParseLeanApplicationWithFuel
+        (psParseLeanSimpleApplicationWithFuel remaining)
+        (remaining + 1)
+        cursor
+
 def psParseLeanSimpleApplication
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  match psParseSimpleTerm cursor with
-  | Except.error error => Except.error error
-  | Except.ok first =>
-      psParseLeanApplicationTailWithFuel
-        cursor.remaining.length
-        first.value
-        first.cursor
+  psParseLeanSimpleApplicationWithFuel
+    (cursor.remaining.length + 1)
+    cursor
 
 def psParseLeanProductWithFuel :
     Nat ->
@@ -156,7 +182,11 @@ def psParseLeanProductWithFuel :
     Except PsParseError (PsParseResult PsSyntaxTerm)
   | 0, _ => Except.error PsParseError.fuelExhausted
   | remaining + 1, cursor =>
-      match psParseLeanSimpleApplication cursor with
+      match
+          psParseLeanApplicationWithFuel
+            (psParseLeanProductWithFuel remaining)
+            (remaining + 1)
+            cursor with
       | Except.error error => Except.error error
       | Except.ok left =>
           if psTokenCursorAtText left.cursor "×" then

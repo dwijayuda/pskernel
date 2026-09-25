@@ -1476,6 +1476,34 @@ def psTestLeanNestedMatchDedentParse : Bool :=
                    _ => true
                | _ => false
 
+def psTestLeanProductInsideApplicationParse : Bool :=
+  let source := "List (Nat × String)"
+  match psLex source with
+  | Except.error _ => false
+  | Except.ok tokens =>
+      match psParseLeanTerm (psTokenCursorFromTokens tokens) with
+      | Except.error _ => false
+      | Except.ok parsed =>
+          psTokenCursorDone parsed.cursor
+            && match parsed.value with
+               | PsSyntaxTerm.app
+                   (PsSyntaxTerm.reference listName)
+                   [
+                     PsSyntaxTerm.app
+                       (PsSyntaxTerm.reference prodName)
+                       [
+                         PsSyntaxTerm.reference natName,
+                         PsSyntaxTerm.reference stringName
+                       ]
+                       _
+                   ]
+                   _ =>
+                   listName.segments == ["List"]
+                     && prodName.segments == ["Prod"]
+                     && natName.segments == ["Nat"]
+                     && stringName.segments == ["String"]
+               | _ => false
+
 def psTestConstructorMatchPatternShape : Bool :=
   match psLex "match x with | Option.some y => y | Option.none => 0" with
   | Except.error _ => false
@@ -2345,6 +2373,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source Bool literal", passed := psTestDualSourceBoolLiteral },
   { name := "dual-source if", passed := psTestDualSourceIf },
   { name := "inductive metadata lookup", passed := psTestInductiveMetadataLookup },
+  { name := "Lean product inside application parse", passed := psTestLeanProductInsideApplicationParse },
   { name := "dual-source basic match parse", passed := psTestDualSourceBasicMatchParse },
   { name := "Lean nested match dedent parse", passed := psTestLeanNestedMatchDedentParse },
   { name := "constructor match pattern parse", passed := psTestConstructorMatchPatternShape },

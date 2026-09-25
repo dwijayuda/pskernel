@@ -9,6 +9,9 @@ on:
       - selfhost/packages/backend-rust/**
       - selfhost/packages/compiler-ir/**
       - selfhost/packages/bridge/**
+      - selfhost/packages/compiler/**
+      - selfhost/host/**
+      - selfhost/packages/cli/**
       - selfhost/test/BackendRustTests.lean
       - selfhost/test/BackendRustFixture.lean
       - selfhost/lakefile.lean
@@ -74,10 +77,24 @@ jobs:
             lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Type.lean
             lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Expr.lean
             lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Module.lean
+            lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Coverage.lean
             echo "PSC1_BACKEND_RUST_SOURCE_PROBE: PASS"
           else
             echo "PSC1_BACKEND_RUST_SOURCE_PROBE: BLOCKED_BY_SHARED_COMPILER_IR"
             echo "Rust backend remains constrained by the portable source-profile gate."
+          fi
+
+      - name: Census real compiler IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          if lake exe psc1 check packages/compiler/src/Ps/Compiler.lean; then
+            lake exe psc1 rust-coverage packages/compiler/src/Ps/Compiler.lean               | tee /tmp/psc-rust-compiler-coverage.txt
+            grep -q '^PSC1_RUST_COVERAGE_FEATURE_COUNT:' /tmp/psc-rust-compiler-coverage.txt
+            echo "PSC1_RUST_COMPILER_COVERAGE: PASS"
+          else
+            echo "PSC1_RUST_COMPILER_COVERAGE: BLOCKED_BY_SELFHOST_SOURCE_CLOSURE"
           fi
 
       - name: Run Rust backend emitter tests

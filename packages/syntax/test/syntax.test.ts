@@ -1347,6 +1347,34 @@ throws(
   /PS_LEAN_SUBSET_NAMESPACE_UNCLOSED/,
 );
 {
+  const source=
+    'namespace Demo\n'+
+    'partial def loop (n : Nat) : Nat := loop n\n'+
+    'end Demo\n';
+  const parsed=parseV061LeanSubsetModule(source);
+  equal(parsed.declarations.length,1);
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'def');
+  if(declaration?.kind==='def'){
+    equal(declaration.partial,true);
+    equal(declaration.name,'Demo.loop');
+  }
+  equal(
+    lowerV061ModuleToLean(parsed),
+    'partial def Demo.loop (n : Nat) : Nat := loop n\n',
+  );
+  throws(
+    ()=>lowerV061ModuleToProofScript(parsed),
+    /PS_PRINT_PARTIAL_UNSUPPORTED/,
+  );
+}
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'partial theorem bad : Nat := 0\n',
+  ),
+  /PS_LEAN_SUBSET_PARTIAL/,
+);
+{
   const proofScript=parseV061Module(
     'def choose(flag : Bool) : Nat := match flag with { '+
     '| true => 1; | false => 2; };',

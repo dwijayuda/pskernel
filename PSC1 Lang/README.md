@@ -103,6 +103,10 @@ The PSC1 folder now also contains a TypeScript-inspired documentation stack:
 - [handbook/README.md](./handbook/README.md) — 13-chapter progressive PSC1 Handbook;
 - [reference/README.md](./reference/README.md) — quick lookup for language surface, CLI, and psconfig;
 - [TYPESCRIPT_DOCS_HANDBOOK_STUDY.md](./TYPESCRIPT_DOCS_HANDBOOK_STUDY.md) — analysis of the TypeScript documentation architecture and how it maps to PSC1.
+- [programming-in-proofscript/README.md](./programming-in-proofscript/README.md) — programming-first PSC1 book inspired by the structure of Functional Programming in Lean;
+- [theorem-proving-in-proofscript/README.md](./theorem-proving-in-proofscript/README.md) — proof-first PSC1 book grounded in the current bounded tactic/kernel story;
+- [language-manual/README.md](./language-manual/README.md) — lookup-oriented PSC1 manual modeled on the useful category split of the Lean Language Reference;
+- [LEAN_PROGRAMMING_THEOREM_REFERENCE_STUDY.md](./LEAN_PROGRAMMING_THEOREM_REFERENCE_STUDY.md) — research map from the three Lean documentation corpora to PSC1.
 
 The Handbook is explanatory rather than normative. When a handbook example and
 an exact language/conformance document appear to disagree, use the normative

@@ -38,6 +38,15 @@ For the compiler, project file, and normal workflow:
 
 Then read the [PSC1 Handbook](../handbook/README.md) from top to bottom.
 
+For a programming-first path modeled on the strongest ideas from Functional
+Programming in Lean, use [Programming in ProofScript PSC1](../programming-in-proofscript/README.md).
+
+For systematic proof development, use
+[Theorem Proving in ProofScript PSC1](../theorem-proving-in-proofscript/README.md).
+
+For detailed lookup by language category, use the
+[PSC1 Language Manual](../language-manual/README.md).
+
 ## What these docs assume
 
 PSC1 is a small dependently typed programming and verification language with:

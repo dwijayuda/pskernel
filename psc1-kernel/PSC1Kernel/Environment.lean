@@ -15,7 +15,7 @@ Portable declaration-index bucket count.  This is deliberately a small fixed
 number rather than a host HashMap so the same source remains straightforward
 to lower through PSC1/TypeScript.
 -/
-def environmentBucketCount : Nat := 256
+def environmentBucketCount : Nat := 4096
 
 def stringBucketHashCore : List Char → Nat → Nat
   | [], acc => acc
@@ -35,14 +35,10 @@ def Name.bucketHash : Name → Nat
       (parent.bucketHash * 33 + (value % environmentBucketCount) + 17) %
         environmentBucketCount
 
-abbrev EnvironmentBucket := Nat × List ConstantInfo
+abbrev EnvironmentIndex := Array (List ConstantInfo)
 
-def findEnvironmentBucket?
-    (key : Nat) : List EnvironmentBucket → Option (List ConstantInfo)
-  | [] => none
-  | (candidate, values) :: rest =>
-      if candidate == key then some values
-      else findEnvironmentBucket? key rest
+def emptyEnvironmentIndex : EnvironmentIndex :=
+  Array.replicate environmentBucketCount []
 
 def findConstantInBucket?
     (name : Name) : List ConstantInfo → Option ConstantInfo
@@ -53,19 +49,22 @@ def findConstantInBucket?
 
 def insertEnvironmentBucket
     (key : Nat)
-    (info : ConstantInfo) : List EnvironmentBucket → List EnvironmentBucket
-  | [] => [(key, [info])]
-  | (candidate, values) :: rest =>
-      if candidate == key then
-        (candidate, info :: values) :: rest
-      else
-        (candidate, values) :: insertEnvironmentBucket key info rest
+    (info : ConstantInfo)
+    (index : EnvironmentIndex) : EnvironmentIndex :=
+  let values := index[key]!
+  index.set! key (info :: values)
 
-def buildEnvironmentIndex : List ConstantInfo → List EnvironmentBucket
-  | [] => []
+partial def buildEnvironmentIndexFrom
+    (values : List ConstantInfo)
+    (index : EnvironmentIndex) : EnvironmentIndex :=
+  match values with
+  | [] => index
   | info :: rest =>
       insertEnvironmentBucket info.name.bucketHash info
-        (buildEnvironmentIndex rest)
+        (buildEnvironmentIndexFrom rest index)
+
+def buildEnvironmentIndex (values : List ConstantInfo) : EnvironmentIndex :=
+  buildEnvironmentIndexFrom values emptyEnvironmentIndex
 
 def replaceEnvironmentConstant
     (target : Name)
@@ -84,23 +83,21 @@ structure Environment where
   Derived lookup index.  Entries are still validated with structural Name.eq,
   so bucket collisions cannot change lookup semantics.
   -/
-  constantIndex : List EnvironmentBucket := []
+  constantIndex : EnvironmentIndex := #[]
   quotInitialized : Bool
 
 def Environment.empty : Environment :=
-  { constants := [], constantIndex := [], quotInitialized := false }
+  { constants := [], constantIndex := emptyEnvironmentIndex, quotInitialized := false }
 
 def Environment.find? (env : Environment) (name : Name) : Option ConstantInfo :=
-  match findEnvironmentBucket? name.bucketHash env.constantIndex with
-  | some values => findConstantInBucket? name values
-  | none =>
-      -- Preserve correctness for explicitly constructed legacy environments
-      -- that omit the derived index. Normal indexed environments do not take
-      -- this fallback on bucket misses.
-      if env.constantIndex.isEmpty && !env.constants.isEmpty then
-        findConstantInBucket? name env.constants
-      else
-        none
+  if env.constantIndex.size == environmentBucketCount then
+    match env.constantIndex[name.bucketHash]? with
+    | some values => findConstantInBucket? name values
+    | none => none
+  else
+    -- Preserve correctness for explicitly constructed legacy environments
+    -- that omit the derived index.
+    findConstantInBucket? name env.constants
 
 def Environment.contains (env : Environment) (name : Name) : Bool :=
   env.find? name |>.isSome
@@ -118,10 +115,15 @@ def Environment.isNonRecStructure (env : Environment) (name : Name) : Bool :=
   | _ => false
 
 def Environment.addUnchecked (env : Environment) (info : ConstantInfo) : Environment :=
+  let index :=
+    if env.constantIndex.size == environmentBucketCount then
+      env.constantIndex
+    else
+      buildEnvironmentIndex env.constants
   { env with
     constants := info :: env.constants
     constantIndex :=
-      insertEnvironmentBucket info.name.bucketHash info env.constantIndex }
+      insertEnvironmentBucket info.name.bucketHash info index }
 
 def Environment.replaceUnchecked
     (env : Environment)

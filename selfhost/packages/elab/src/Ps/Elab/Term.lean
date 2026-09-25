@@ -473,7 +473,9 @@ def psElabTypedBindersAcc
         context := context
         bindersRev := bindersRev
       }
-  | (head, sourceType) :: rest, bindersRev =>
+  | List.cons entry rest, bindersRev =>
+      let head := Prod.fst entry;
+      let sourceType := Prod.snd entry;
       match psSyntaxNameToName head.name with
       | none => Except.error PsElabError.emptyName
       | some name =>
@@ -498,17 +500,19 @@ def psElabTypedBindersAcc
                   let nextContext :=
                     psElabContextWithLocal
                       typeResult.context
-                      pushed.context
+                      pushed.context;
                   psElabTypedBindersAcc
                     elaborate
                     nextContext
                     rest
-                    ({
-                      id := pushed.id
-                      name := name
-                      type := typeResult.term
-                      binder := binder
-                    } :: bindersRev)
+                    (List.cons
+                      {
+                        id := pushed.id
+                        name := name
+                        type := typeResult.term
+                        binder := binder
+                      }
+                      bindersRev)
 
 def psElabTypedBinders
     (elaborate :

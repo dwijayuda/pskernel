@@ -214,8 +214,31 @@ def psSyntaxConstructorCoreName
     (inductiveName : PsName)
     (sourceName : PsSyntaxName) : Option PsName :=
   match sourceName.segments with
-  | [segment] => some (psNameAppendStr inductiveName segment)
-  | _ => none
+  | List.nil =>
+      Option.none
+  | List.cons segment rest =>
+      match rest with
+      | List.nil =>
+          Option.some (psNameAppendStr inductiveName segment)
+      | List.cons _ _ =>
+          Option.none
+
+def psElabInductiveConstructorNames
+    (inductiveName : PsName)
+    (sources : List PsSyntaxInductiveConstructor) : List PsName :=
+  match sources with
+  | List.nil => List.nil
+  | List.cons source rest =>
+      let currentName :=
+        match
+            psSyntaxConstructorCoreName
+              inductiveName
+              source.name with
+        | Option.some constructorName => constructorName
+        | Option.none => inductiveName;
+      List.cons
+        currentName
+        (psElabInductiveConstructorNames inductiveName rest)
 
 def psElabContextWithEnvironment
     (context : PsElabContext)
@@ -228,9 +251,13 @@ def psElabContextWithEnvironment
     structuralRecursion := context.structuralRecursion
   }
 
+def psElabBinderArgument
+    (binder : PsElabTypedBinder) : PsExpr :=
+  PsExpr.fvar binder.id
+
 def psElabBinderArguments
     (bindersRev : List PsElabTypedBinder) : List PsExpr :=
-  bindersRev.reverse.map (fun binder => PsExpr.fvar binder.id)
+  bindersRev.reverse.map psElabBinderArgument
 
 def psCloseElabImplicitBinders
     (metaContext : PsMetaContext) :
@@ -238,20 +265,22 @@ def psCloseElabImplicitBinders
   | [], body => body
   | binder :: rest, body =>
       let binderType :=
-        psMetaInstantiate metaContext binder.type
+        psMetaInstantiate metaContext binder.type;
       let closed :=
         PsExpr.forallE
           binder.name
           binderType
           (psExprAbstractFVar binder.id body)
-          PsBinderInfo.implicit
+          PsBinderInfo.implicit;
       psCloseElabImplicitBinders metaContext rest closed
 
 def psExprListAlphaEq : List PsExpr -> List PsExpr -> Bool
   | [], [] => true
   | left :: leftRest, right :: rightRest =>
-      psExprAlphaEq left right
-        && psExprListAlphaEq leftRest rightRest
+      if psExprAlphaEq left right then
+        psExprListAlphaEq leftRest rightRest
+      else
+        false
   | _, _ => false
 
 def psElabIsDirectRecursiveField
@@ -264,52 +293,74 @@ def psElabIsDirectRecursiveField
       context.environment
       context.metaContext
       context.localContext
-      type
-  let view := psExprAppView reduced
+      type;
+  let view := psExprAppView reduced;
   match view.head with
   | .constE name _ =>
-      psNameEq name inductiveName
-        && view.args.length == parameterArgs.length
-        && psExprListAlphaEq view.args parameterArgs
+      if psNameEq name inductiveName then
+        if Nat.beq view.args.length parameterArgs.length then
+          psExprListAlphaEq view.args parameterArgs
+        else
+          false
+      else
+        false
   | _ => false
 
-def psElabNestedRecursiveFieldTypeSupportedWithFuel :
-    Nat -> PsName -> PsExpr -> Bool
-  | 0, _, _ => false
-  | remaining + 1, inductiveName, type =>
-      if !psExprHasConst inductiveName type then
-        true
-      else
-        let view := psExprAppView type
-        match view.head with
-        | .constE name _ =>
-            if psNameEq name inductiveName then
-              true
-            else if psNameEq name psListName
-                || psNameEq name psOptionName
-                || psNameEq name psArrayName then
-              match view.args with
-              | [argument] =>
-                  psElabNestedRecursiveFieldTypeSupportedWithFuel
-                    remaining
-                    inductiveName
-                    argument
-              | _ => false
-            else if psNameEq name psProdName then
-              match view.args with
-              | [left, right] =>
-                  psElabNestedRecursiveFieldTypeSupportedWithFuel
-                      remaining
-                      inductiveName
-                      left
-                    && psElabNestedRecursiveFieldTypeSupportedWithFuel
-                      remaining
-                      inductiveName
-                      right
-              | _ => false
-            else
-              false
-        | _ => false
+def psElabContainerRecursiveName (name : PsName) : Bool :=
+  if psNameEq name psListName then
+    true
+  else if psNameEq name psOptionName then
+    true
+  else
+    psNameEq name psArrayName
+
+def psElabNestedRecursiveFieldTypeSupportedWithFuel
+    (fuel : Nat) : PsName -> PsExpr -> Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun (_inductiveName : PsName) (_type : PsExpr) => false
+  | Nat.succ remaining =>
+      let smaller : PsName -> PsExpr -> Bool :=
+        psElabNestedRecursiveFieldTypeSupportedWithFuel remaining;
+      fun (inductiveName : PsName) (type : PsExpr) =>
+        if psExprHasConst inductiveName type then
+          let view := psExprAppView type;
+          match view.head with
+          | .constE name _ =>
+              if psNameEq name inductiveName then
+                true
+              else if psElabContainerRecursiveName name then
+                match view.args with
+                | List.nil =>
+                    false
+                | List.cons argument rest =>
+                    match rest with
+                    | List.nil =>
+                        smaller inductiveName argument
+                    | List.cons _ _ =>
+                        false
+              else if psNameEq name psProdName then
+                match view.args with
+                | List.nil =>
+                    false
+                | List.cons left rest =>
+                    match rest with
+                    | List.nil =>
+                        false
+                    | List.cons right tail =>
+                        match tail with
+                        | List.nil =>
+                            if smaller inductiveName left then
+                              smaller inductiveName right
+                            else
+                              false
+                        | List.cons _ _ =>
+                            false
+              else
+                false
+          | _ => false
+        else
+          true
 
 def psElabNestedRecursiveFieldTypeSupported
     (inductiveName : PsName)
@@ -319,51 +370,78 @@ def psElabNestedRecursiveFieldTypeSupported
     inductiveName
     type
 
-def psElabRecursiveFieldIndices
+def psElabReverseNatListAcc
+    (values : List Nat) : List Nat -> List Nat :=
+  match values with
+  | List.nil =>
+      fun (acc : List Nat) => acc
+  | List.cons head tail =>
+      let smaller : List Nat -> List Nat :=
+        psElabReverseNatListAcc tail;
+      fun (acc : List Nat) =>
+        smaller (List.cons head acc)
+
+def psElabReverseNatList (values : List Nat) : List Nat :=
+  psElabReverseNatListAcc values List.nil
+
+def psElabRecursiveFieldIndicesWorker
     (context : PsElabContext)
     (inductiveName : PsName)
-    (parameterArgs : List PsExpr) :
-    List PsElabTypedBinder ->
+    (parameterArgs : List PsExpr)
+    (fields : List PsElabTypedBinder) :
     Nat ->
     List Nat ->
-    Except PsElabError (List Nat)
-  | [], _, indicesRev => Except.ok indicesRev.reverse
-  | field :: rest, index, indicesRev =>
-      let direct :=
-        psElabIsDirectRecursiveField
+    Except PsElabError (List Nat) :=
+  match fields with
+  | List.nil =>
+      fun (_index : Nat) (indicesRev : List Nat) =>
+        Except.ok (psElabReverseNatList indicesRev)
+  | List.cons field rest =>
+      let smaller :
+          Nat ->
+          List Nat ->
+          Except PsElabError (List Nat) :=
+        psElabRecursiveFieldIndicesWorker
           context
           inductiveName
           parameterArgs
-          field.type
-      if direct then
-        psElabRecursiveFieldIndices
-          context
-          inductiveName
-          parameterArgs
-          rest
-          (index + 1)
-          (index :: indicesRev)
-      else if psExprHasConst inductiveName field.type then
-        if psElabNestedRecursiveFieldTypeSupported
-            inductiveName
-            field.type then
-          psElabRecursiveFieldIndices
+          rest;
+      fun (index : Nat) (indicesRev : List Nat) =>
+        let direct :=
+          psElabIsDirectRecursiveField
             context
             inductiveName
             parameterArgs
-            rest
-            (index + 1)
-            indicesRev
+            field.type;
+        if direct then
+          smaller
+            (Nat.succ index)
+            (List.cons index indicesRev)
+        else if psExprHasConst inductiveName field.type then
+          if psElabNestedRecursiveFieldTypeSupported
+              inductiveName
+              field.type then
+            smaller (Nat.succ index) indicesRev
+          else
+            Except.error PsElabError.unsupportedTerm
         else
-          Except.error PsElabError.unsupportedTerm
-      else
-        psElabRecursiveFieldIndices
-          context
-          inductiveName
-          parameterArgs
-          rest
-          (index + 1)
-          indicesRev
+          smaller (Nat.succ index) indicesRev
+
+def psElabRecursiveFieldIndices
+    (context : PsElabContext)
+    (inductiveName : PsName)
+    (parameterArgs : List PsExpr)
+    (fields : List PsElabTypedBinder)
+    (index : Nat)
+    (indicesRev : List Nat) :
+    Except PsElabError (List Nat) :=
+  psElabRecursiveFieldIndicesWorker
+    context
+    inductiveName
+    parameterArgs
+    fields
+    index
+    indicesRev
 
 def psElabInductiveConstructor
     (context : PsElabContext)
@@ -375,15 +453,14 @@ def psElabInductiveConstructor
   | none => Except.error PsElabError.emptyName
   | some constructorName =>
       match psElabTypedBinders
-          (fun nextContext term expected =>
-            psElabTerm nextContext term expected)
+          psElabDeclarationTermCallback
           context
           source.fields with
       | Except.error error => Except.error error
       | Except.ok fields =>
-          let metaContext := fields.context.metaContext
+          let metaContext := fields.context.metaContext;
           let parameterArgs :=
-            psElabBinderArguments parameterBindersRev
+            psElabBinderArguments parameterBindersRev;
           match
               psElabRecursiveFieldIndices
                 fields.context
@@ -397,31 +474,31 @@ def psElabInductiveConstructor
               let appliedInductive :=
                 psExprApplyMany
                   (PsExpr.constE inductiveName [])
-                  parameterArgs
+                  parameterArgs;
               let fieldClosed :=
                 psCloseElabForallBinders
                   metaContext
                   fields.bindersRev
-                  appliedInductive
+                  appliedInductive;
               let constructorType :=
                 psCloseElabImplicitBinders
                   metaContext
                   parameterBindersRev
-                  fieldClosed
+                  fieldClosed;
               if psExprHasUnresolvedMeta constructorType then
                 Except.error PsElabError.unresolvedMetavariable
               else
                 Except.ok
-                  (PsDeclaration.constructorDecl {
-                    name := constructorName
-                    levelParams := []
-                    type := constructorType
-                    inductiveName := inductiveName
-                    constructorIndex := 0
-                    numParams := parameterArgs.length
-                    numFields := source.fields.length
-                    recursiveFields := recursiveFields
-                  })
+                  (PsDeclaration.constructorDecl
+                    (PsConstructorInfo.mk
+                      constructorName
+                      List.nil
+                      constructorType
+                      inductiveName
+                      0
+                      parameterArgs.length
+                      source.fields.length
+                      recursiveFields))
 
 
 
@@ -430,9 +507,16 @@ def psSetConstructorIndex
     (declaration : PsDeclaration) : PsDeclaration :=
   match declaration with
   | .constructorDecl info =>
-      PsDeclaration.constructorDecl {
-        info with constructorIndex := index
-      }
+      PsDeclaration.constructorDecl
+        (PsConstructorInfo.mk
+          info.name
+          info.levelParams
+          info.type
+          info.inductiveName
+          index
+          info.numParams
+          info.numFields
+          info.recursiveFields)
   | _ => declaration
 
 def psElabInductiveConstructors
@@ -457,81 +541,160 @@ def psElabInductiveConstructors
             context
             parameterBindersRev
             inductiveName
-            (index + 1)
+            (Nat.succ index)
             rest
-            (psSetConstructorIndex index declaration :: declarationsRev)
+            (List.cons
+              (psSetConstructorIndex index declaration)
+              declarationsRev)
 
 
 
 def psEnvironmentAddOwnedBootstrapDeclaration
     (environment : PsEnvironment)
     (declaration : PsDeclaration) : Option PsEnvironment :=
-  let name := psDeclarationName declaration
-  if psNameEq name psProdName
-      || psNameEq name psListName
-      || psNameEq name psOptionName then
-    psEnvironmentAddReplacingAxiom
-      environment
-      declaration
+  let name := psDeclarationName declaration;
+  if psNameEq name psProdName then
+    psEnvironmentAddReplacingAxiom environment declaration
+  else if psNameEq name psListName then
+    psEnvironmentAddReplacingAxiom environment declaration
+  else if psNameEq name psOptionName then
+    psEnvironmentAddReplacingAxiom environment declaration
   else
     psEnvironmentAdd environment declaration
 
-def psAddDeclarationList
-    (environment : PsEnvironment) :
-    List PsDeclaration -> Except PsElabError PsEnvironment
-  | [] => Except.ok environment
-  | declaration :: rest =>
-      let name := psDeclarationName declaration
-      let nextResult :=
-        psEnvironmentAddOwnedBootstrapDeclaration
-          environment
-          declaration
-      match nextResult with
-      | none =>
-          Except.error
-            (PsElabError.duplicateDeclaration name)
-      | some next =>
-          psAddDeclarationList next rest
+def psAddDeclarationListWorker
+    (declarations : List PsDeclaration) :
+    PsEnvironment -> Except PsElabError PsEnvironment :=
+  match declarations with
+  | List.nil =>
+      fun (environment : PsEnvironment) =>
+        Except.ok environment
+  | List.cons declaration rest =>
+      let smaller :
+          PsEnvironment -> Except PsElabError PsEnvironment :=
+        psAddDeclarationListWorker rest;
+      fun (environment : PsEnvironment) =>
+        let name := psDeclarationName declaration;
+        let nextResult :=
+          psEnvironmentAddOwnedBootstrapDeclaration
+            environment
+            declaration;
+        match nextResult with
+        | none =>
+            Except.error
+              (PsElabError.duplicateDeclaration name)
+        | some next =>
+            smaller next
 
-def psOpenConstructorFields
-    (context : PsElabContext) :
-    Nat ->
+def psAddDeclarationList
+    (environment : PsEnvironment)
+    (declarations : List PsDeclaration) :
+    Except PsElabError PsEnvironment :=
+  psAddDeclarationListWorker declarations environment
+
+def psOpenConstructorFieldsWorker
+    (fuel : Nat) :
+    PsElabContext ->
     PsExpr ->
     List PsElabTypedBinder ->
-    Except PsElabError PsElabConstructorBuildResult
-  | 0, _, bindersRev =>
-      Except.ok {
-        context := context
-        bindersRev := bindersRev
-      }
-  | remaining + 1, cursor, bindersRev =>
-      match psInferEnsureForall
-          context.environment
-          context.metaContext
-          context.localContext
-          cursor with
-      | Except.error error => Except.error (PsElabError.infer error)
-      | Except.ok forallView =>
-          let pushed :=
-            psLocalPushBinding
-              context.localContext
-              forallView.name
-              forallView.domain
-              forallView.binder
-          let nextContext :=
-            psElabContextWithLocal context pushed.context
-          psOpenConstructorFields
-            nextContext
-            remaining
-            (psExprInstantiate1
-              forallView.body
-              (PsExpr.fvar pushed.id))
-            ({
-              id := pushed.id
-              name := forallView.name
-              type := forallView.domain
-              binder := forallView.binder
-            } :: bindersRev)
+    Except PsElabError PsElabConstructorBuildResult :=
+  match fuel with
+  | Nat.zero =>
+      fun (context : PsElabContext)
+          (_cursor : PsExpr)
+          (bindersRev : List PsElabTypedBinder) =>
+        Except.ok
+          (PsElabConstructorBuildResult.mk
+            context
+            bindersRev)
+  | Nat.succ remaining =>
+      let smaller :
+          PsElabContext ->
+          PsExpr ->
+          List PsElabTypedBinder ->
+          Except PsElabError PsElabConstructorBuildResult :=
+        psOpenConstructorFieldsWorker remaining;
+      fun (context : PsElabContext)
+          (cursor : PsExpr)
+          (bindersRev : List PsElabTypedBinder) =>
+        match psInferEnsureForall
+            context.environment
+            context.metaContext
+            context.localContext
+            cursor with
+        | Except.error error =>
+            Except.error (PsElabError.infer error)
+        | Except.ok forallView =>
+            let pushed :=
+              psLocalPushBinding
+                context.localContext
+                forallView.name
+                forallView.domain
+                forallView.binder;
+            let nextContext :=
+              psElabContextWithLocal context pushed.context;
+            smaller
+              nextContext
+              (psExprInstantiate1
+                forallView.body
+                (PsExpr.fvar pushed.id))
+              (List.cons
+                (PsElabTypedBinder.mk
+                  pushed.id
+                  forallView.name
+                  forallView.domain
+                  forallView.binder)
+                bindersRev)
+
+def psOpenConstructorFields
+    (context : PsElabContext)
+    (fuel : Nat)
+    (cursor : PsExpr)
+    (bindersRev : List PsElabTypedBinder) :
+    Except PsElabError PsElabConstructorBuildResult :=
+  psOpenConstructorFieldsWorker
+    fuel
+    context
+    cursor
+    bindersRev
+
+def psElabExprAt
+    (values : List PsExpr) : Nat -> Option PsExpr :=
+  match values with
+  | List.nil =>
+      fun (_index : Nat) => Option.none
+  | List.cons head tail =>
+      let smaller : Nat -> Option PsExpr :=
+        psElabExprAt tail;
+      fun (index : Nat) =>
+        match index with
+        | Nat.zero =>
+            Option.some head
+        | Nat.succ rest =>
+            smaller rest
+
+def psElabAppendExprs
+    (left : List PsExpr) : List PsExpr -> List PsExpr :=
+  match left with
+  | List.nil =>
+      fun (right : List PsExpr) => right
+  | List.cons head tail =>
+      let smaller : List PsExpr -> List PsExpr :=
+        psElabAppendExprs tail;
+      fun (right : List PsExpr) =>
+        List.cons head (smaller right)
+
+def psElabAppendDeclarations
+    (left : List PsDeclaration) :
+    List PsDeclaration -> List PsDeclaration :=
+  match left with
+  | List.nil =>
+      fun (right : List PsDeclaration) => right
+  | List.cons head tail =>
+      let smaller : List PsDeclaration -> List PsDeclaration :=
+        psElabAppendDeclarations tail;
+      fun (right : List PsDeclaration) =>
+        List.cons head (smaller right)
 
 def psWrapRecursiveHypotheses
     (motiveId : Nat)
@@ -539,7 +702,7 @@ def psWrapRecursiveHypotheses
     List Nat -> PsExpr -> Except PsElabError PsExpr
   | [], body => Except.ok body
   | fieldIndex :: rest, body =>
-      match fieldArgs[fieldIndex]? with
+      match psElabExprAt fieldArgs fieldIndex with
       | none => Except.error PsElabError.unsupportedTerm
       | some recursiveValue =>
           match
@@ -583,14 +746,13 @@ def psBuildInductiveMinorType
           | Except.error error => Except.error error
           | Except.ok fields =>
               let fieldArgs :=
-                fields.bindersRev.reverse.map
-                  (fun field => PsExpr.fvar field.id)
+                psElabBinderArguments fields.bindersRev;
               let intro :=
                 psExprApplyMany
                   (PsExpr.constE info.name [])
-                  (parameterArgs ++ fieldArgs)
+                  (psElabAppendExprs parameterArgs fieldArgs);
               let body :=
-                PsExpr.app (PsExpr.fvar motiveId) intro
+                PsExpr.app (PsExpr.fvar motiveId) intro;
               match
                   psWrapRecursiveHypotheses
                     motiveId
@@ -632,27 +794,28 @@ def psBuildRecursorMinorBinders
       | Except.error error => Except.error error
       | Except.ok minorType =>
           let minorName :=
-            psNameAppendNum (psRootName "_minor") index
+            psNameAppendNum (psRootName "_minor") index;
           let pushed :=
             psLocalPushBinding
               context.localContext
               minorName
               minorType
-              PsBinderInfo.explicit
+              PsBinderInfo.explicit;
           let nextContext :=
-            psElabContextWithLocal context pushed.context
+            psElabContextWithLocal context pushed.context;
           psBuildRecursorMinorBinders
             parameterArgs
             motiveId
             rest
             nextContext
-            (index + 1)
-            ({
-              id := pushed.id
-              name := minorName
-              type := minorType
-              binder := PsBinderInfo.explicit
-            } :: bindersRev)
+            (Nat.succ index)
+            (List.cons
+              (PsElabTypedBinder.mk
+                pushed.id
+                minorName
+                minorType
+                PsBinderInfo.explicit)
+              bindersRev)
 
 def psBuildInductiveRecursor
     (context : PsElabContext)
@@ -660,98 +823,97 @@ def psBuildInductiveRecursor
     (inductiveInfo : PsInductiveInfo)
     (constructors : List PsDeclaration) :
     Except PsElabError PsDeclaration :=
-  let universeName := psRootName "u"
+  let universeName := psRootName "u";
   let parameterArgs :=
-    psElabBinderArguments parameterBindersRev
+    psElabBinderArguments parameterBindersRev;
   let inductiveType :=
     psExprApplyMany
-      (PsExpr.constE inductiveInfo.name [])
-      parameterArgs
-  let motiveName := psRootName "_motive"
+      (PsExpr.constE inductiveInfo.name List.nil)
+      parameterArgs;
+  let motiveName := psRootName "_motive";
   let motiveType :=
     PsExpr.forallE
       (psRootName "_major")
       inductiveType
       (PsExpr.sortE (PsLevel.param universeName))
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let motivePush :=
     psLocalPushBinding
       context.localContext
       motiveName
       motiveType
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let motiveContext :=
-    psElabContextWithLocal context motivePush.context
+    psElabContextWithLocal context motivePush.context;
   match psBuildRecursorMinorBinders
       parameterArgs
       motivePush.id
       constructors
       motiveContext
       0
-      [] with
-  | Except.error error => Except.error error
+      List.nil with
+  | Except.error error =>
+      Except.error error
   | Except.ok minors =>
-      let majorName := psRootName "_major"
+      let majorName := psRootName "_major";
       let majorPush :=
         psLocalPushBinding
           minors.context.localContext
           majorName
           inductiveType
-          PsBinderInfo.explicit
-      let majorBinder : PsElabTypedBinder := {
-        id := majorPush.id
-        name := majorName
-        type := inductiveType
-        binder := PsBinderInfo.explicit
-      }
-      let motiveBinder : PsElabTypedBinder := {
-        id := motivePush.id
-        name := motiveName
-        type := motiveType
-        binder := PsBinderInfo.explicit
-      }
+          PsBinderInfo.explicit;
+      let majorBinder : PsElabTypedBinder :=
+        PsElabTypedBinder.mk
+          majorPush.id
+          majorName
+          inductiveType
+          PsBinderInfo.explicit;
+      let motiveBinder : PsElabTypedBinder :=
+        PsElabTypedBinder.mk
+          motivePush.id
+          motiveName
+          motiveType
+          PsBinderInfo.explicit;
       let body :=
         PsExpr.app
           (PsExpr.fvar motivePush.id)
-          (PsExpr.fvar majorPush.id)
+          (PsExpr.fvar majorPush.id);
       let withMajor :=
         psCloseElabForallBinders
           minors.context.metaContext
-          [majorBinder]
-          body
+          (List.cons majorBinder List.nil)
+          body;
       let withMinors :=
         psCloseElabForallBinders
           minors.context.metaContext
           minors.bindersRev
-          withMajor
+          withMajor;
       let withMotive :=
         psCloseElabForallBinders
           minors.context.metaContext
-          [motiveBinder]
-          withMinors
+          (List.cons motiveBinder List.nil)
+          withMinors;
       let recursorType :=
         psCloseElabImplicitBinders
           minors.context.metaContext
           parameterBindersRev
-          withMotive
+          withMotive;
       let recursorName :=
-        psNameAppendStr inductiveInfo.name "rec"
+        psNameAppendStr inductiveInfo.name "rec";
       if psExprHasUnresolvedMeta recursorType then
         Except.error PsElabError.unresolvedMetavariable
       else
         Except.ok
-          (PsDeclaration.recursorDecl {
-            name := recursorName
-            levelParams := [universeName]
-            type := recursorType
-            inductiveNames := [inductiveInfo.name]
-            numParams := parameterArgs.length
-            numIndices := 0
-            numMotives := 1
-            numMinors := constructors.length
-          })
-
-
+          (PsDeclaration.recursorDecl
+            (PsRecursorInfo.mk
+              recursorName
+              (List.cons universeName List.nil)
+              recursorType
+              (List.cons inductiveInfo.name List.nil)
+              parameterArgs.length
+              0
+              1
+              constructors.length))
 
 def psElabInductiveDeclaration
     (environment : PsEnvironment)
@@ -759,15 +921,14 @@ def psElabInductiveDeclaration
     (params : List (PsSyntaxBinderHead × PsSyntaxTerm))
     (resultType : Option PsSyntaxTerm)
     (constructors : List PsSyntaxInductiveConstructor)
-    (isStructure : Bool := false) :
+    (isStructure : Bool) :
     Except PsElabError PsElabDeclarationBatchResult :=
   match psSyntaxNameToName nameSyntax with
   | none => Except.error PsElabError.emptyName
   | some name =>
       let initial := psElabContextEmpty environment;
       match psElabTypedBinders
-          (fun context term expected =>
-            psElabTerm context term expected)
+          psElabDeclarationTermCallback
           initial
           params with
       | Except.error error => Except.error error
@@ -776,8 +937,9 @@ def psElabInductiveDeclaration
             match resultType with
             | none =>
                 Except.ok
-                  (parameters.context,
-                    PsExpr.sortE (PsLevel.succ PsLevel.zero))
+                  (Prod.mk
+                    parameters.context
+                    (PsExpr.sortE (PsLevel.succ PsLevel.zero)))
             | some sourceType =>
                 match psElabTerm
                     parameters.context
@@ -794,35 +956,43 @@ def psElabInductiveDeclaration
                         Except.error (PsElabError.infer error)
                     | Except.ok _ =>
                         Except.ok
-                          (elaborated.context, elaborated.term)
+                          (Prod.mk
+                            elaborated.context
+                            elaborated.term);
           match result with
           | Except.error error => Except.error error
-          | Except.ok (headerContext, openResultType) =>
+          | Except.ok headerResult =>
+              let headerContext := Prod.fst headerResult;
+              let openResultType := Prod.snd headerResult;
               let instantiatedResultType :=
                 psMetaInstantiate
                   headerContext.metaContext
-                  openResultType
-              match instantiatedResultType with
-              | PsExpr.sortE (PsLevel.succ PsLevel.zero) =>
+                  openResultType;
+              let resultTypeIsSortOne :=
+                match instantiatedResultType with
+                | PsExpr.sortE level =>
+                    match level with
+                    | PsLevel.succ innerLevel =>
+                        match innerLevel with
+                        | PsLevel.zero => true
+                        | _ => false
+                    | _ => false
+                | _ => false;
+              if resultTypeIsSortOne then
                   let inductiveType :=
                     psCloseElabForallBinders
                       headerContext.metaContext
                       parameters.bindersRev
-                      instantiatedResultType
+                      instantiatedResultType;
                   if psExprHasUnresolvedMeta inductiveType then
                     Except.error PsElabError.unresolvedMetavariable
                   else
                     let constructorNames :=
-                      constructors.map
-                        (fun source =>
-                          match
-                              psSyntaxConstructorCoreName
-                                name
-                                source.name with
-                          | some constructorName => constructorName
-                          | none => name)
+                      psElabInductiveConstructorNames
+                        name
+                        constructors;
                     let parameterArgs :=
-                      psElabBinderArguments parameters.bindersRev
+                      psElabBinderArguments parameters.bindersRev;
                     let info : PsInductiveInfo := {
                       name := name
                       levelParams := []
@@ -831,9 +1001,9 @@ def psElabInductiveDeclaration
                       numIndices := 0
                       constructors := constructorNames
                       isStructure := isStructure
-                    }
+                    };
                     let inductiveDeclaration :=
-                      PsDeclaration.inductiveDecl info
+                      PsDeclaration.inductiveDecl info;
                     let withInductiveResult :=
                       psEnvironmentAddOwnedBootstrapDeclaration
                         environment
@@ -877,11 +1047,13 @@ def psElabInductiveDeclaration
                                 | Except.ok recursor =>
                                     Except.ok {
                                       declarations :=
-                                        [inductiveDeclaration]
-                                          ++ constructorDeclarations
-                                          ++ [recursor]
+                                        psElabAppendDeclarations
+                                          (List.cons
+                                            inductiveDeclaration
+                                            constructorDeclarations)
+                                          (List.cons recursor List.nil)
                                     }
-              | _ =>
+              else
                   Except.error PsElabError.unsupportedTerm
 
 
@@ -926,8 +1098,7 @@ def psElabPartialDeclaration
       let initial := psElabContextEmpty environment
       match
           psElabTypedBinders
-            (fun context term expected =>
-              psElabTerm context term expected)
+            psElabDeclarationTermCallback
             initial
             binders with
       | Except.error error => Except.error error
@@ -1072,7 +1243,7 @@ def psPrependBatchReverse
     (declarations : List PsDeclaration)
     (declarationsRev : List PsDeclaration) :
     List PsDeclaration :=
-  declarations.reverse ++ declarationsRev
+  psElabAppendDeclarations declarations.reverse declarationsRev
 
 def psElabDeclarations
     (environment : PsEnvironment) :

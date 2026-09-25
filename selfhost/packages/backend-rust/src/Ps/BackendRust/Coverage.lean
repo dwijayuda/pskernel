@@ -232,8 +232,20 @@ def psRustCoverageParameterList :
   | coverage, List.nil =>
       coverage
   | coverage, List.cons parameter rest =>
+      let withParameter :=
+        if psRustTypeContainsFunction parameter.type then
+          if psRustFunctionTypeIsFirstOrder parameter.type then
+            coverage
+          else
+            psRustCoverageAddUnsupported
+              (psRustCoverageAddFeature
+                coverage
+                "declaration:nestedFunctionParameter")
+              "declaration:nestedFunctionParameter"
+        else
+          coverage;
       psRustCoverageParameterList
-        (psRustCoverageType coverage parameter.type)
+        (psRustCoverageType withParameter parameter.type)
         rest
 
 def psRustCoverageFoldExprListWith
@@ -456,8 +468,17 @@ def psRustCoverageStructureFieldList :
   | coverage, List.nil =>
       coverage
   | coverage, List.cons field rest =>
+      let withStorage :=
+        if psRustTypeContainsFunction field.type then
+          psRustCoverageAddUnsupported
+            (psRustCoverageAddFeature
+              coverage
+              "module:functionStorage")
+            "module:functionStorage"
+        else
+          coverage;
       psRustCoverageStructureFieldList
-        (psRustCoverageType coverage field.type)
+        (psRustCoverageType withStorage field.type)
         rest
 
 def psRustCoverageConstructorFieldList :
@@ -467,8 +488,17 @@ def psRustCoverageConstructorFieldList :
   | coverage, List.nil =>
       coverage
   | coverage, List.cons field rest =>
+      let withStorage :=
+        if psRustTypeContainsFunction field.type then
+          psRustCoverageAddUnsupported
+            (psRustCoverageAddFeature
+              coverage
+              "module:functionStorage")
+            "module:functionStorage"
+        else
+          coverage;
       psRustCoverageConstructorFieldList
-        (psRustCoverageType coverage field.type)
+        (psRustCoverageType withStorage field.type)
         rest
 
 def psRustCoverageConstructorList :
@@ -514,12 +544,6 @@ def psRustCoverageInductiveList :
           inductiveInfo.constructors)
         rest
 
-def psRustCoverageTypeIsFunction
-    (type : PsVerifiedIrType) : Bool :=
-  match type with
-  | PsVerifiedIrType.function _ _ => true
-  | _ => false
-
 def psRustCoverageDeclarationIsGenericValue
     (declaration : PsVerifiedIrDeclaration) : Bool :=
   match declaration.parameters with
@@ -551,7 +575,7 @@ def psRustCoverageDeclarationList :
         else
           withDeclarationFeature;
       let withResultSupport :=
-        if psRustCoverageTypeIsFunction declaration.resultType then
+        if psRustTypeContainsFunction declaration.resultType then
           psRustCoverageAddUnsupported
             (psRustCoverageAddFeature
               withDeclaration

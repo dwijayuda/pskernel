@@ -8,6 +8,10 @@
     "sourceRoots": [
       "src"
     ],
-    "role": "portable-foundation"
+    "role": "portable-foundation",
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist"
   }
 }

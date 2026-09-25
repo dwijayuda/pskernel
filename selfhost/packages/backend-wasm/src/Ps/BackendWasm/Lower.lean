@@ -1,3 +1,4 @@
+import Ps.CompilerIr.Specialize
 import Ps.BackendWasm.Binary
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
@@ -226,11 +227,11 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
           let withCondition := collect condition types
           let withThen := collect thenBranch withCondition
           collect elseBranch withThen
-      | .record _ fields =>
+      | .record _ _ fields =>
           fields.foldl
             (fun state field => collect field.2 state)
             types
-      | .projection _ target _ =>
+      | .projection _ _ target _ =>
           collect target types
       | .constructor _ _ typeArguments fields =>
           let withTypes :=
@@ -241,7 +242,7 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
           fields.foldl
             (fun state field => collect field.2 state)
             withTypes
-      | .matchE _ scrutinee alternatives =>
+      | .matchE _ _ scrutinee alternatives =>
           let withScrutinee := collect scrutinee types
           alternatives.foldl
             (fun state alternative =>
@@ -758,17 +759,17 @@ def psWasmCollectCapturesWithFuel
           let withCondition := collect condition captures
           let withThen := collect thenBranch withCondition
           collect elseBranch withThen
-      | .record _ fields =>
+      | .record _ _ fields =>
           fields.foldl
             (fun state field => collect field.2 state)
             captures
-      | .projection _ target _ =>
+      | .projection _ _ target _ =>
           collect target captures
       | .constructor _ _ _ fields =>
           fields.foldl
             (fun state field => collect field.2 state)
             captures
-      | .matchE _ scrutinee alternatives =>
+      | .matchE _ _ scrutinee alternatives =>
           let withScrutinee := collect scrutinee captures
           alternatives.foldl
             (fun state alternative =>
@@ -1788,7 +1789,7 @@ def psWasmLowerExprWithFuel
                             ++ loweredBody.instructions
                         state := loweredBody.state
                       }
-      | .record structureName fields =>
+      | .record structureName _ fields =>
           match psWasmFindStructure structures structureName with
           | none =>
               Except.error
@@ -1814,7 +1815,7 @@ def psWasmLowerExprWithFuel
                             [PsWasmInstruction.structNew structureName]
                         state := lowered.state
                       }
-      | .projection structureName target fieldName =>
+      | .projection structureName _ target fieldName =>
           match psWasmFindStructure structures structureName with
           | none =>
               Except.error
@@ -1893,7 +1894,7 @@ def psWasmLowerExprWithFuel
                                         constructorName)]
                                 state := lowered.state
                               }
-      | .matchE inductiveName scrutinee alternatives =>
+      | .matchE inductiveName _ scrutinee alternatives =>
           match psWasmFindInductive inductives inductiveName with
           | none =>
               Except.error
@@ -2065,7 +2066,7 @@ def psWasmModuleHasUnsupportedData
   | _ :: _ => true
   | [] => false
 
-def psWasmLowerModule
+def psWasmLowerSpecializedModule
     (profile : PsWasmTargetProfile)
     (module : PsVerifiedIrModule) :
     Except PsWasmLowerError PsWasmModule :=
@@ -2123,3 +2124,14 @@ def psWasmLowerModule
                         psWasmExportsOfDeclarations
                           module.declarations
                     }
+
+
+def psWasmLowerModule
+    (profile : PsWasmTargetProfile)
+    (module : PsVerifiedIrModule) :
+    Except PsWasmLowerError PsWasmModule :=
+  match psIrSpecializeModule module with
+  | Except.error _ =>
+      Except.error PsWasmLowerError.unsupportedModuleFeature
+  | Except.ok specialized =>
+      psWasmLowerSpecializedModule profile specialized

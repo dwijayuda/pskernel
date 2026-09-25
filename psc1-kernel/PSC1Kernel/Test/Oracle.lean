@@ -1368,9 +1368,127 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
       throw <| IO.userError "simple inductive admission allowed unsupported small-elimination shape"
   | .error _ => pure ()
 
+  -- Indexed, non-recursive datatype. Constructor return indices may depend
+  -- on fields; recursor indices precede the major premise exactly as in Lean.
+  let Tag : PSC1Kernel.Name := .str .anonymous "OracleTag"
+  let TagZero : PSC1Kernel.Name := .str Tag "zero"
+  let TagAt : PSC1Kernel.Name := .str Tag "at"
+  let TagRec : PSC1Kernel.Name := .str Tag "rec"
+  let indexName : PSC1Kernel.Name := .str .anonymous "n"
+  let tagType : PSC1Kernel.Expr :=
+    .forallE indexName natT type1 .default
+  let tagZeroType : PSC1Kernel.Expr :=
+    .app (.const Tag []) (.lit (.nat 0))
+  let tagAtType : PSC1Kernel.Expr :=
+    .forallE indexName natT
+      (.app (.const Tag []) (.bvar 0))
+      .default
+  let tagBase :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursTag ← exceptToIO
+    "PSC1 indexed simple inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive tagBase {
+      levelParams := []
+      name := Tag
+      type := tagType
+      ctors := [
+        { name := TagZero, type := tagZeroType },
+        { name := TagAt, type := tagAtType }
+      ]
+      isUnsafe := false
+    })
+  let leanTag0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanTagNat ←
+    match Lean.Kernel.Environment.addDecl leanTag0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected Tag oracle Nat axiom"
+  let leanTag1 ←
+    match Lean.Kernel.Environment.addDecl leanTagNat {} (.inductDecl [] 0 [{
+      name := toLeanName Tag
+      type := toLeanExpr tagType
+      ctors := [
+        { name := toLeanName TagZero, type := toLeanExpr tagZeroType },
+        { name := toLeanName TagAt, type := toLeanExpr tagAtType }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected indexed simple inductive oracle"
+  let leanTagEnv := Lean.Environment.ofKernelEnv leanTag1
+  for name in [Tag, TagZero, TagAt, TagRec] do
+    let some oursInfo := oursTag.find? name
+      | throw <| IO.userError "PSC1 indexed inductive metadata missing"
+    let some leanInfo := leanTag1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 indexed inductive metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("indexed inductive generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursTag.find? Tag with
+  | some (.inductInfo info) =>
+      assertTrue "PSC1 indexed inductive numIndices mismatch"
+        (info.numIndices == 1)
+  | _ =>
+      throw <| IO.userError "PSC1 indexed inductive info missing"
+  match oursTag.find? TagRec with
+  | some (.recInfo info) =>
+      assertTrue "PSC1 indexed recursor numIndices mismatch"
+        (info.numIndices == 1)
+  | _ =>
+      throw <| IO.userError "PSC1 indexed recursor info missing"
+
+  let tagMotive : PSC1Kernel.Expr :=
+    .lam indexName natT
+      (.lam (.str .anonymous "tag")
+        (.app (.const Tag []) (.bvar 0))
+        natT
+        .default)
+      .default
+  let tagZeroMinor : PSC1Kernel.Expr := .lit (.nat 7)
+  let tagAtMinor : PSC1Kernel.Expr :=
+    .lam indexName natT (.bvar 0) .default
+  let tagIndex : PSC1Kernel.Expr := .lit (.nat 43)
+  let tagMajor : PSC1Kernel.Expr :=
+    .app (.const TagAt []) tagIndex
+  let tagRecApp :=
+    PSC1Kernel.applyArgs (.const TagRec [.succ .zero])
+      [tagMotive, tagZeroMinor, tagAtMinor, tagIndex, tagMajor]
+  let tagCtx := PSC1Kernel.CheckerContext.empty oursTag
+  let tagResultType ← exceptToIO
+    "PSC1 indexed recursor typecheck"
+    (PSC1Kernel.check tagCtx tagRecApp)
+  let tagTypeOk ← exceptToIO
+    "PSC1 indexed recursor result defeq"
+    (PSC1Kernel.isDefEq tagCtx tagResultType natT)
+  assertTrue "PSC1 indexed recursor result type mismatch" tagTypeOk
+  let oursTagReduced ← exceptToIO
+    "PSC1 indexed recursor reduction"
+    (PSC1Kernel.whnf tagCtx tagRecApp)
+  let leanTagType ←
+    match Lean.Kernel.check leanTagEnv ({} : Lean.LocalContext) (toLeanExpr tagRecApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected generated Tag recursor application"
+  assertTrue "indexed recursor result type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr tagResultType) leanTagType)
+  let leanTagReduced ← kernelExprWhnf leanTagEnv tagRecApp
+  assertTrue "indexed recursor reduction differs from Lean 4.34"
+    (toLeanExpr oursTagReduced == leanTagReduced)
+  assertTrue "indexed recursor did not pass constructor field to the minor"
+    (PSC1Kernel.Expr.eq oursTagReduced tagIndex)
+
   -- Next K5 slice: non-recursive constructor fields.
-  let natT : PSC1Kernel.Expr := .const NatN []
-  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
   let Box : PSC1Kernel.Name := .str .anonymous "OracleBox"
   let BoxMk : PSC1Kernel.Name := .str Box "mk"
   let BoxRec : PSC1Kernel.Name := .str Box "rec"

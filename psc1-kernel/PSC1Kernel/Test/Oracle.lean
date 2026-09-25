@@ -869,7 +869,7 @@ def assertOrdinaryRecursorOracle : IO Unit := do
         (.lam onMinorName dummy (.bvar 0) .default)
         .default)
       .default
-  let env := env3.addUnchecked (.recInfo {
+  let env4 := env3.addUnchecked (.recInfo {
     base := { name := Rec, levelParams := [u], type := dummy }
     all := [Flag]
     numParams := 0
@@ -883,6 +883,13 @@ def assertOrdinaryRecursorOracle : IO Unit := do
     k := false
     isUnsafe := false
   })
+  let Major : PSC1Kernel.Name := .str Flag "major"
+  let env := env4.addUnchecked (.defnInfo {
+    base := mkBase Major flagExpr
+    value := .const On []
+    hints := .regular 0
+    safety := .safe
+  })
   let ctx := PSC1Kernel.CheckerContext.empty env
   let motive : PSC1Kernel.Expr := .lam motiveName flagExpr dummy .default
   let offMinor : PSC1Kernel.Expr := .lit (.nat 17)
@@ -893,6 +900,23 @@ def assertOrdinaryRecursorOracle : IO Unit := do
   let onApp :=
     PSC1Kernel.applyArgs (.const Rec [.zero])
       [motive, offMinor, onMinor, .const On []]
+  let onViaDefinition :=
+    PSC1Kernel.applyArgs (.const Rec [.zero])
+      [motive, offMinor, onMinor, .const Major []]
+
+  -- Final Lean 4.34 separates cheap_rec from cheap_proj. A cheap recursor
+  -- leaves the delta-reducible major stuck, while cheap projection alone
+  -- must not suppress recursor-major delta reduction.
+  let recCheap ← exceptToIO
+    "PSC1 cheap-rec control"
+    (PSC1Kernel.whnfCore ctx onViaDefinition true true)
+  assertTrue "cheap_rec unexpectedly delta-reduced the recursor major"
+    (PSC1Kernel.Expr.eq recCheap onViaDefinition)
+  let projOnlyCheap ← exceptToIO
+    "PSC1 cheap-proj-only control"
+    (PSC1Kernel.whnfCore ctx onViaDefinition false true)
+  assertTrue "cheap_proj incorrectly enabled cheap_rec behavior"
+    (PSC1Kernel.Expr.eq projOnlyCheap onMinor)
 
   let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
   let lean1 ←

@@ -223,6 +223,23 @@ def psSyntaxConstructorCoreName
       | List.cons _ _ =>
           Option.none
 
+def psElabInductiveConstructorNames
+    (inductiveName : PsName)
+    (sources : List PsSyntaxInductiveConstructor) : List PsName :=
+  match sources with
+  | List.nil => List.nil
+  | List.cons source rest =>
+      let currentName :=
+        match
+            psSyntaxConstructorCoreName
+              inductiveName
+              source.name with
+        | Option.some constructorName => constructorName
+        | Option.none => inductiveName;
+      List.cons
+        currentName
+        (psElabInductiveConstructorNames inductiveName rest)
+
 def psElabContextWithEnvironment
     (context : PsElabContext)
     (environment : PsEnvironment) : PsElabContext :=
@@ -971,14 +988,9 @@ def psElabInductiveDeclaration
                     Except.error PsElabError.unresolvedMetavariable
                   else
                     let constructorNames :=
-                      constructors.map
-                        (fun source =>
-                          match
-                              psSyntaxConstructorCoreName
-                                name
-                                source.name with
-                          | some constructorName => constructorName
-                          | none => name)
+                      psElabInductiveConstructorNames
+                        name
+                        constructors;
                     let parameterArgs :=
                       psElabBinderArguments parameters.bindersRev
                     let info : PsInductiveInfo := {

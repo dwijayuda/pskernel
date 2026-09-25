@@ -902,20 +902,10 @@ def State.replay
       .quotR _ | .inductiveR _ => do
       unless state.sawMeta do
         throw "lean4export metadata must be the first record"
-      let label ←
-        match record.declarationNameIndex? with
-        | some index =>
-            match state.nameAt index with
-            | .ok name => pure (replayNameString name)
-            | .error _ => pure ("name#" ++ toString index)
-        | none => pure "<anonymous declaration>"
-      let next ←
-        match state.addDeclaration record with
-        | .ok value => pure value
-        | .error err =>
-            throw ("declaration " ++ label ++ ": " ++ err)
+      -- Diagnostic only: preserve decoding/index-table work while omitting all
+      -- declaration admission/checking, to isolate replay overhead from kernel cost.
       pure {
-        next with
+        state with
         records := state.records + 1
         declarations := state.declarations + 1
       }

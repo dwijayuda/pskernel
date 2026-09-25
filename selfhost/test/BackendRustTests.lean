@@ -502,11 +502,134 @@ def psBackendRustFunctionStorageModule : PsVerifiedIrModule :=
       }
     ]
     inductives := []
-    declarations := []
+    declarations := [
+      {
+        name := "plusOneStored"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natAdd
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)
+            ]
+      },
+      {
+        name := "makeCallbackHolder"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.named "CallbackHolder" []
+        body :=
+          PsVerifiedIrExpr.record
+            "CallbackHolder"
+            []
+            [
+              ("callback", PsVerifiedIrExpr.var "plusOneStored")
+            ]
+      },
+      {
+        name := "runCallbackHolder"
+        typeParameters := []
+        parameters := [
+          {
+            name := "holder"
+            type := PsVerifiedIrType.named "CallbackHolder" []
+          },
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.projection
+              "CallbackHolder"
+              []
+              (PsVerifiedIrExpr.var "holder")
+              "callback")
+            []
+            [PsVerifiedIrExpr.var "x"]
+      }
+    ]
   }
 
-def psTestBackendRustRejectsFunctionStorage : Bool :=
+def psTestBackendRustStaticFunctionStorage : Bool :=
   match psRustEmitModule psBackendRustFunctionStorageModule with
+  | Except.error _ =>
+      false
+  | Except.ok output =>
+      output.contains
+        "pub struct CallbackHolder { pub callback: fn(PsNat) -> PsNat }"
+        && output.contains
+          "pub fn makeCallbackHolder() -> CallbackHolder"
+
+def psBackendRustCapturedFunctionStorageModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := [
+      {
+        name := "CallbackHolder"
+        typeParameters := []
+        fields := [
+          {
+            name := "callback"
+            type :=
+              PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+          }
+        ]
+      }
+    ]
+    inductives := []
+    declarations := [
+      {
+        name := "makeCapturedHolder"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.named "CallbackHolder" []
+        body :=
+          PsVerifiedIrExpr.record
+            "CallbackHolder"
+            []
+            [
+              (
+                "callback",
+                PsVerifiedIrExpr.lambda
+                  [
+                    {
+                      name := "x"
+                      type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                    }
+                  ]
+                  (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+                  (PsVerifiedIrExpr.intrinsic
+                    PsVerifiedIrIntrinsic.natAdd
+                    [
+                      PsVerifiedIrExpr.var "x",
+                      PsVerifiedIrExpr.var "offset"
+                    ])
+              )
+            ]
+      }
+    ]
+  }
+
+def psTestBackendRustRejectsCapturedFunctionStorage : Bool :=
+  match psRustEmitModule psBackendRustCapturedFunctionStorageModule with
   | Except.error (PsRustEmitError.functionStorageUnsupported name) =>
       psStringEq name "callback"
   | _ =>
@@ -912,9 +1035,19 @@ def psTestBackendRustCoverageLambdaFunctionParameter : Bool :=
     coverage.unsupported
     "expr:lambdaFunctionParameter"
 
-def psTestBackendRustCoverageFunctionStorage : Bool :=
+def psTestBackendRustCoverageStaticFunctionStorage : Bool :=
   let coverage :=
     psRustCoverageModule psBackendRustFunctionStorageModule;
+  Nat.beq
+    (psRustCoverageLength coverage.unsupported)
+    0
+    && psRustCoverageContains
+      coverage.features
+      "module:staticFunctionStorage"
+
+def psTestBackendRustCoverageCapturedFunctionStorage : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustCapturedFunctionStorageModule;
   psRustCoverageContains
     coverage.unsupported
     "module:functionStorage"
@@ -961,7 +1094,8 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "accept direct function-valued results", passed := psTestBackendRustDirectFunctionResult },
   { name := "accept forwarded function-valued results", passed := psTestBackendRustForwardedFunctionResult },
   { name := "reject nested function-valued results", passed := psTestBackendRustRejectsNestedFunctionResult },
-  { name := "reject stored function values", passed := psTestBackendRustRejectsFunctionStorage },
+  { name := "accept static first-order function storage", passed := psTestBackendRustStaticFunctionStorage },
+  { name := "reject captured function storage", passed := psTestBackendRustRejectsCapturedFunctionStorage },
   { name := "reject nested function parameters", passed := psTestBackendRustRejectsNestedFunctionParameter },
   { name := "coverage accepts supported IR", passed := psTestBackendRustCoverageSupported },
   { name := "coverage rejects external imports", passed := psTestBackendRustCoverageExternalImport },
@@ -975,7 +1109,8 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "coverage rejects nested function results", passed := psTestBackendRustCoverageNestedFunctionResult },
   { name := "coverage rejects lambda function results", passed := psTestBackendRustCoverageLambdaFunctionResult },
   { name := "coverage rejects lambda function parameters", passed := psTestBackendRustCoverageLambdaFunctionParameter },
-  { name := "coverage rejects function storage", passed := psTestBackendRustCoverageFunctionStorage },
+  { name := "coverage accepts static function storage", passed := psTestBackendRustCoverageStaticFunctionStorage },
+  { name := "coverage rejects captured function storage", passed := psTestBackendRustCoverageCapturedFunctionStorage },
   { name := "coverage rejects nested function parameters", passed := psTestBackendRustCoverageNestedFunctionParameter },
   { name := "coverage report is CI-stable", passed := psTestBackendRustCoverageReport }
 ]

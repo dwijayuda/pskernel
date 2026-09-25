@@ -17,6 +17,19 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
             type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
           }
         ]
+      },
+      {
+        name := "CallbackHolder"
+        typeParameters := []
+        fields := [
+          {
+            name := "callback"
+            type :=
+              PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+          }
+        ]
       }
     ]
     inductives := [
@@ -260,6 +273,43 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
             [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
             (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
         body := PsVerifiedIrExpr.var "callback"
+      },
+      {
+        name := "storePlusOne"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.named "CallbackHolder" []
+        body :=
+          PsVerifiedIrExpr.record
+            "CallbackHolder"
+            []
+            [
+              ("callback", PsVerifiedIrExpr.var "plusOne")
+            ]
+      },
+      {
+        name := "callStored"
+        typeParameters := []
+        parameters := [
+          {
+            name := "holder"
+            type := PsVerifiedIrType.named "CallbackHolder" []
+          },
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.projection
+              "CallbackHolder"
+              []
+              (PsVerifiedIrExpr.var "holder")
+              "callback")
+            []
+            [PsVerifiedIrExpr.var "x"]
       },
       {
         name := "makePair"

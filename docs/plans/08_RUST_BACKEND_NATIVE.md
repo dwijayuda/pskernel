@@ -171,10 +171,14 @@ As of the current branch checkpoint:
   `impl Fn(...) -> ... + Clone` with an owned `move` closure, including
   captured portable values. A first-order function parameter/value may also be
   forwarded directly as the declaration result under the same representation.
-  Stored function values, computed/conditional or nested function-valued
-  declaration results, nested higher-order parameter shapes,
-  function-typed lambda parameters, and function-valued lambda results remain
-  fail-closed until they have an explicit ownership/runtime representation;
+  monomorphic first-order top-level function items may also be stored in
+  structure fields as Rust `fn(...) -> ...` pointers. The module validator
+  rejects local or capturing closures in those fields before Rust emission.
+  Capturing/general function storage, inductive constructor function storage,
+  computed/conditional or nested function-valued declaration results, nested
+  higher-order parameter shapes, function-typed lambda parameters, and
+  function-valued lambda results remain fail-closed until they have an explicit
+  ownership/runtime representation;
 - emitted Rust follows a clone-on-consume ownership rule for portable values:
   call/intrinsic arguments, let-bound values, record/constructor fields,
   projection targets, and match scrutinees are cloned before Rust would
@@ -234,8 +238,8 @@ silently using different semantics.
 
 The census currently treats external imports, unknown runtime types, traversal
 fuel exhaustion, generic top-level values, computed/conditional or nested
-function-valued declaration results, stored function values, nested
-higher-order parameter shapes,
+function-valued declaration results, capturing/general or inductive constructor
+function storage, nested higher-order parameter shapes,
 function-typed lambda parameters, function-valued lambda results, malformed
 intrinsic arity, unknown structure references, and unknown inductive references
 as explicit blockers. If the real compiler census reaches one of these,

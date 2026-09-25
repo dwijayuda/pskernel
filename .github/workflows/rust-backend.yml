@@ -393,6 +393,7 @@ jobs:
               arrayDemo,
               arrayFoldOnly,
               arrayMapDemo,
+              callStored,
               countDown,
               genericArrayId,
               idFloat,
@@ -414,9 +415,11 @@ jobs:
               pushBang,
               returnCallback,
               shadowOne,
+              storePlusOne,
               unwrapOr,
               utf8Size,
               wrapNat,
+              CallbackHolder,
               Maybe,
               Pair,
           };
@@ -450,6 +453,9 @@ jobs:
               let forwarded = returnCallback(makeAdder(n(2)));
               assert_eq!(forwarded(n(40)), n(42));
               assert_eq!(forwarded(n(41)), n(43));
+              let stored: CallbackHolder = storePlusOne();
+              assert_eq!(callStored(stored.clone(), n(41)), n(42));
+              assert_eq!((stored.callback)(n(9)), n(10));
               assert_eq!(pairLeft(Pair { left: n(11), right: n(22) }), n(11));
               assert_eq!(pushBang(String::from("hi")), "hi!");
               assert_eq!(utf8Size(String::from("é")), n(2));

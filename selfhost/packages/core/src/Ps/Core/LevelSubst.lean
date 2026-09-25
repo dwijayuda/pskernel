@@ -32,7 +32,9 @@ def psFindLevelArgument
 
 def psLevelInstantiateParams
     (parameters : List PsName)
-    (arguments : List PsLevel) : PsLevel -> PsLevel
+    (arguments : List PsLevel)
+    (level : PsLevel) : PsLevel :=
+  match level with
   | .zero => PsLevel.zero
   | .succ value =>
       PsLevel.succ (psLevelInstantiateParams parameters arguments value)
@@ -52,7 +54,9 @@ def psLevelInstantiateParams
 
 def psLevelListInstantiateParams
     (parameters : List PsName)
-    (arguments : List PsLevel) : List PsLevel -> List PsLevel
+    (arguments : List PsLevel)
+    (levels : List PsLevel) : List PsLevel :=
+  match levels with
   | [] => []
   | level :: rest =>
       List.cons

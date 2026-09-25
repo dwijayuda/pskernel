@@ -88,6 +88,21 @@ The fact that Lean accepts a construct does not make it part of PSC1.
 Portable semantic modules must not depend on Lean's implementation APIs,
 metaprogramming framework, macro system, unsafe escape hatches, or IO.
 
+The frozen PSC1 scalar foundation is explicitly:
+
+```text
+Nat Int
+UInt8 UInt16 UInt32 UInt64 USize
+Int8 Int16 Int32 Int64 ISize
+Float Float32
+Bool Char String Unit
+```
+
+The fact that the bootstrap compiler itself currently uses only a subset of
+these types does not make the rest optional language names. They are part of
+the PSC1 value model so later Rust/Wasm/native work does not require a
+foundational source-language revision.
+
 A lightweight source-profile audit guards against accidental dependencies such
 as `Lean.*`, `Std.*`, `unsafe`, `syntax`, `macro`, `elab`,
 `implemented_by`, `extern`, `run_tac`, and direct `IO` in portable
@@ -279,6 +294,7 @@ through both bootstrap lanes:
 - `erasure`
 - `compiler-ir`
 - `backend-ts`
+- `backend-rust` after the JavaScript fixed point / `.ps` source transition
 - `compiler`
 - the semantic/data portion of `environment`, `module`, `project`, `pretty`,
   `runtime` and `tactic` when used by PSC1
@@ -399,16 +415,27 @@ oracle; once the self-hosted implementation is authoritative, the handwritten
 source `.ts` can be retired while generated TypeScript remains a build
 artifact.
 
-Long term Lake disappears from the normal user path, while the npm workspace
-and JS build remain:
+Long term Lake disappears from the normal user path. JavaScript remains the
+first self-host execution lane, and Rust becomes the first planned native lane:
 
 ```text
-npm install
-  -> psc
-  -> .ps/.lean
-  -> .ts
-  -> .js
+                    .ps/.lean
+                        |
+                       psc
+                    /       \
+                  .ts       .rs
+                   |         |
+                  tsc       rustc
+                   |         |
+                  .js       native
 ```
+
+The Rust lane must consume the same checked core, erasure, and compiler IR as
+the TypeScript lane. Rust ownership/lifetime syntax is not added to PSC1 merely
+to satisfy the backend. After `.ps` becomes authoritative, the Rust backend
+should itself be authored in portable ProofScript and participate in the
+cross-host self-host/fixed-point gates described by
+`docs/plans/07_SELF_HOSTING_FOUNDATION.md`.
 
 Lake remains only as an independent bootstrap/reference checker when useful.
 

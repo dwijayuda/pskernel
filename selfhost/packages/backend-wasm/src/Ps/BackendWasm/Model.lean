@@ -67,6 +67,26 @@ inductive PsWasmInstruction where
   | i64GtU
   | i64GeS
   | i64GeU
+  | f32Add
+  | f32Sub
+  | f32Mul
+  | f32Div
+  | f32Eq
+  | f32Ne
+  | f32Lt
+  | f32Le
+  | f32Gt
+  | f32Ge
+  | f64Add
+  | f64Sub
+  | f64Mul
+  | f64Div
+  | f64Eq
+  | f64Ne
+  | f64Lt
+  | f64Le
+  | f64Gt
+  | f64Ge
 
 structure PsWasmFunction where
   name : String

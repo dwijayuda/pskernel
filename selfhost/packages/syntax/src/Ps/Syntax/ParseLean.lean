@@ -23,6 +23,7 @@ def psParseLeanImport
 
 def psLeanReservedApplicationToken (token : PsToken) : Bool :=
   token.text == "def"
+    || token.text == "partial"
     || token.text == "theorem"
     || token.text == "import"
     || token.text == "inductive"
@@ -1059,21 +1060,36 @@ def psParseLeanDeclaration
       else if keyword.text == "structure" then
         psParseLeanStructureDeclaration cursor
       else
+        let isPartial := keyword.text == "partial"
         let isDefinition := keyword.text == "def"
         let isTheorem := keyword.text == "theorem"
-        if !(isDefinition || isTheorem) then
+        if !(isPartial || isDefinition || isTheorem) then
           Except.error
             (PsParseError.expectedText
-              "def, theorem, inductive, or structure"
+              "partial def, def, theorem, inductive, or structure"
               keyword.text
               keyword.span)
         else
-          match psTokenCursorAdvance cursor with
-          | none =>
-              Except.error
-                (PsParseError.unexpectedEnd "declaration name")
-          | some afterKeyword =>
-              match psParseSyntaxName afterKeyword.cursor with
+          let afterKind :=
+            if isPartial then
+              match psTokenCursorAdvance cursor with
+              | none =>
+                  Except.error
+                    (PsParseError.unexpectedEnd "def after partial")
+              | some afterPartial =>
+                  match psTokenCursorExpectText afterPartial.cursor "def" with
+                  | Except.error error => Except.error error
+                  | Except.ok afterDef => Except.ok afterDef.cursor
+            else
+              match psTokenCursorAdvance cursor with
+              | none =>
+                  Except.error
+                    (PsParseError.unexpectedEnd "declaration name")
+              | some afterKeyword => Except.ok afterKeyword.cursor
+          match afterKind with
+          | Except.error error => Except.error error
+          | Except.ok afterKeyword =>
+              match psParseSyntaxName afterKeyword with
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseLeanBindersWithFuel
@@ -1100,31 +1116,23 @@ def psParseLeanDeclaration
                                   | Except.ok value =>
                                       let span := {
                                         start := keyword.span.start
-                                        stop :=
-                                          (psSyntaxTermSpan value.value).stop
+                                        stop := (psSyntaxTermSpan value.value).stop
                                       }
-                                      if isDefinition then
-                                        Except.ok {
-                                          value :=
-                                            PsSyntaxDeclaration.definition
-                                              name.value
-                                              binders.value
-                                              type.value
-                                              value.value
-                                              span
-                                          cursor := value.cursor
-                                        }
-                                      else
-                                        Except.ok {
-                                          value :=
-                                            PsSyntaxDeclaration.theoremDecl
-                                              name.value
-                                              binders.value
-                                              type.value
-                                              value.value
-                                              span
-                                          cursor := value.cursor
-                                        }
+                                      let declaration :=
+                                        if isPartial then
+                                          PsSyntaxDeclaration.partialDefinition
+                                            name.value binders.value type.value value.value span
+                                        else if isDefinition then
+                                          PsSyntaxDeclaration.definition
+                                            name.value binders.value type.value value.value span
+                                        else
+                                          PsSyntaxDeclaration.theoremDecl
+                                            name.value binders.value type.value value.value span
+                                      Except.ok {
+                                        value := declaration
+                                        cursor := value.cursor
+                                      }
+
 
 def psParseLeanImportsWithFuel
     (fuel : Nat)

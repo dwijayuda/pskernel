@@ -1071,12 +1071,12 @@ def psElabStructureDeclaration
     let constructorName : PsSyntaxName := {
       segments := ["mk"]
       span := span
-    }
+    };
     let constructor : PsSyntaxInductiveConstructor := {
       name := constructorName
       fields := fields
       span := span
-    }
+    };
     psElabInductiveDeclaration
       environment
       name
@@ -1095,7 +1095,7 @@ def psElabPartialDeclaration
   match psSyntaxNameToName nameSyntax with
   | none => Except.error PsElabError.emptyName
   | some name =>
-      let initial := psElabContextEmpty environment
+      let initial := psElabContextEmpty environment;
       match
           psElabTypedBinders
             psElabDeclarationTermCallback

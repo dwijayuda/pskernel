@@ -124,7 +124,184 @@ jobs:
           lake exe psc1_backend_diff_fixture ts > /tmp/psc-diff-ts/module.ts
           lake exe psc1_backend_diff_fixture rust > /tmp/psc-diff-rust/src/lib.rs
 
-          ./node_modules/.bin/tsc             /tmp/psc-diff-ts/module.ts             --target ES2022             --module commonjs             --strict             --skipLibCheck             --outDir /tmp/psc-diff-ts
+          npx --yes --package typescript@5.8.3 tsc --version | grep -q '^Version 5.8.3
+
+          cat > /tmp/psc-diff-ts/run.cjs <<'EOF'
+          const m = require("./module.js");
+          const lines = [
+            "nat_lt=" + m.diffNat(2n, 5n).toString(),
+            "nat_ge=" + m.diffNat(9n, 4n).toString(),
+            "int=" + m.diffInt(7n, 2n).toString(),
+            "string=" + m.diffString("é").toString(),
+            "array=" + m.diffArray(7n, 8n).toString(),
+            "maybe_some=" + m.diffMaybe(5n, 99n, true).toString(),
+            "maybe_none=" + m.diffMaybe(5n, 99n, false).toString(),
+          ];
+          process.stdout.write(lines.join("\n") + "\n");
+          EOF
+          node /tmp/psc-diff-ts/run.cjs > /tmp/psc-diff-ts.out
+
+          cat > /tmp/psc-diff-rust/Cargo.toml <<'EOF'
+          [package]
+          name = "psc-diff-rust"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          num-bigint = "0.4"
+          num-traits = "0.2"
+          EOF
+
+          cat > /tmp/psc-diff-rust/src/main.rs <<'EOF'
+          use num_bigint::{BigInt, BigUint};
+          use psc_diff_rust::{
+              diffArray,
+              diffInt,
+              diffMaybe,
+              diffNat,
+              diffString,
+          };
+
+          fn n(value: u32) -> BigUint {
+              BigUint::from(value)
+          }
+
+          fn i(value: i32) -> BigInt {
+              BigInt::from(value)
+          }
+
+          fn main() {
+              println!("nat_lt={}", diffNat(n(2), n(5)));
+              println!("nat_ge={}", diffNat(n(9), n(4)));
+              println!("int={}", diffInt(i(7), i(2)));
+              println!("string={}", diffString(String::from("é")));
+              println!("array={}", diffArray(n(7), n(8)));
+              println!("maybe_some={}", diffMaybe(n(5), n(99), true));
+              println!("maybe_none={}", diffMaybe(n(5), n(99), false));
+          }
+          EOF
+
+          cargo run --quiet --manifest-path /tmp/psc-diff-rust/Cargo.toml             > /tmp/psc-diff-rust.out
+
+          cat > /tmp/psc-diff-expected.out <<'EOF'
+          nat_lt=7
+          nat_ge=5
+          int=-5
+          string=3
+          array=8
+          maybe_some=5
+          maybe_none=99
+          EOF
+
+          diff -u /tmp/psc-diff-expected.out /tmp/psc-diff-ts.out
+          diff -u /tmp/psc-diff-expected.out /tmp/psc-diff-rust.out
+          diff -u /tmp/psc-diff-ts.out /tmp/psc-diff-rust.out
+          cat /tmp/psc-diff-rust.out
+          echo "PSC1_BACKEND_TS_RUST_DIFFERENTIAL: PASS"
+
+      - name: Compile generated Rust fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          mkdir -p /tmp/psc-rust-fixture/src
+          lake exe psc1_backend_rust_fixture > /tmp/psc-rust-fixture/src/lib.rs
+          lake exe psc1_backend_rust_fixture > /tmp/psc-rust-fixture/lib.second.rs
+          cmp /tmp/psc-rust-fixture/src/lib.rs /tmp/psc-rust-fixture/lib.second.rs
+          echo "PSC1_BACKEND_RUST_DETERMINISTIC_SOURCE: PASS"
+          cat > /tmp/psc-rust-fixture/Cargo.toml <<'EOF'
+          [package]
+          name = "psc-rust-fixture"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          num-bigint = "0.4"
+          num-traits = "0.2"
+          EOF
+          cargo check --manifest-path /tmp/psc-rust-fixture/Cargo.toml
+
+      - name: Execute generated Rust semantic smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/psc-rust-fixture/tests
+          cat > /tmp/psc-rust-fixture/tests/runtime.rs <<'EOF'
+          use num_bigint::BigUint;
+          use psc_rust_fixture::{
+              addGlobalOne,
+              arrayDemo,
+              arrayFoldOnly,
+              arrayMapDemo,
+              countDown,
+              genericArrayId,
+              idFloat,
+              idFloat32,
+              idISize,
+              idInt16,
+              idInt32,
+              idInt64,
+              idInt8,
+              idUInt16,
+              idUInt32,
+              idUInt64,
+              idUInt8,
+              idUSize,
+              one,
+              plusOne,
+              shadowOne,
+              pushBang,
+              unwrapOr,
+              utf8Size,
+              wrapNat,
+              Maybe,
+          };
+
+          fn n(value: u32) -> BigUint {
+              BigUint::from(value)
+          }
+
+          #[test]
+          fn generated_semantics_smoke() {
+              assert_eq!(countDown(n(8)), n(0));
+              assert_eq!(one(), n(1));
+              assert_eq!(addGlobalOne(n(41)), n(42));
+              assert_eq!(shadowOne(n(7)), n(7));
+              assert_eq!(idUInt8(255u8), 255u8);
+              assert_eq!(idUInt16(65535u16), 65535u16);
+              assert_eq!(idUInt32(4_000_000_000u32), 4_000_000_000u32);
+              assert_eq!(idUInt64(18_000_000_000u64), 18_000_000_000u64);
+              assert_eq!(idUSize(123usize), 123usize);
+              assert_eq!(idInt8(-12i8), -12i8);
+              assert_eq!(idInt16(-1234i16), -1234i16);
+              assert_eq!(idInt32(-123456i32), -123456i32);
+              assert_eq!(idInt64(-123456789i64), -123456789i64);
+              assert_eq!(idISize(-123isize), -123isize);
+              assert_eq!(idFloat(1.25f64), 1.25f64);
+              assert_eq!(idFloat32(1.25f32), 1.25f32);
+              assert_eq!(plusOne(n(41)), n(42));
+              assert_eq!(pushBang(String::from("hi")), "hi!");
+              assert_eq!(utf8Size(String::from("é")), n(2));
+
+              assert_eq!(
+                  arrayMapDemo(vec![n(1), n(2)]),
+                  vec![n(1), n(2)],
+              );
+              assert_eq!(
+                  genericArrayId(vec![String::from("a"), String::from("b")]),
+                  vec![String::from("a"), String::from("b")],
+              );
+              assert_eq!(arrayFoldOnly(vec![n(4), n(5)]), n(0));
+              assert_eq!(arrayDemo(n(7), n(8)), n(8));
+
+              assert_eq!(unwrapOr(wrapNat(n(5)), n(99)), n(5));
+              assert_eq!(unwrapOr(Maybe::none {}, n(99)), n(99));
+          }
+          EOF
+          cd selfhost
+          cargo test --manifest-path /tmp/psc-rust-fixture/Cargo.toml
+
+          npx --yes --package typescript@5.8.3 tsc /tmp/psc-diff-ts/module.ts --target ES2022 --module commonjs --strict --skipLibCheck --outDir /tmp/psc-diff-ts
 
           cat > /tmp/psc-diff-ts/run.cjs <<'EOF'
           const m = require("./module.js");

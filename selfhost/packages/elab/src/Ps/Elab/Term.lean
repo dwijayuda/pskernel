@@ -2243,8 +2243,11 @@ def psElabSyntaxLocalId
                 context.localContext
                 context.environment
                 name with
-          | some (.local id) => some id
-          | _ => none
+          | none => none
+          | some resolved =>
+              match resolved with
+              | .local id => some id
+              | .global _ => none
   | _ => none
 
 def psElabNatListAt

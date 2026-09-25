@@ -592,6 +592,39 @@ def psTestBackendRustRejectsFunctionResult : Bool :=
   | _ =>
       false
 
+def psBackendRustBadIntrinsicArityModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "badNatAdd"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natAdd
+            [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)]
+      }
+    ]
+  }
+
+def psTestBackendRustRejectsIntrinsicArity : Bool :=
+  match psRustEmitModule psBackendRustBadIntrinsicArityModule with
+  | Except.error PsRustEmitError.intrinsicArity =>
+      true
+  | _ =>
+      false
+
+def psTestBackendRustCoverageIntrinsicArity : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustBadIntrinsicArityModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "intrinsic:arity"
+
 def psBackendRustGenericValueModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -734,6 +767,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "top-level values and shadowing", passed := psTestBackendRustValues },
   { name := "frozen PSC1 scalar mappings", passed := psTestBackendRustScalarTypes },
   { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers },
+  { name := "reject malformed intrinsic arity", passed := psTestBackendRustRejectsIntrinsicArity },
   { name := "reject generic top-level values", passed := psTestBackendRustRejectsGenericValue },
   { name := "accept first-order callback parameters", passed := psTestBackendRustFirstOrderCallback },
   { name := "reject function-valued lambda results", passed := psTestBackendRustRejectsLambdaFunctionResult },
@@ -744,6 +778,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "coverage accepts supported IR", passed := psTestBackendRustCoverageSupported },
   { name := "coverage rejects external imports", passed := psTestBackendRustCoverageExternalImport },
   { name := "coverage rejects unknown runtime types", passed := psTestBackendRustCoverageUnknownType },
+  { name := "coverage rejects intrinsic arity", passed := psTestBackendRustCoverageIntrinsicArity },
   { name := "coverage rejects generic values", passed := psTestBackendRustCoverageGenericValue },
   { name := "coverage rejects function results", passed := psTestBackendRustCoverageFunctionResult },
   { name := "coverage rejects lambda function results", passed := psTestBackendRustCoverageLambdaFunctionResult },

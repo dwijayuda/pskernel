@@ -15,7 +15,7 @@ A foreign function has two relevant parts:
 Current bounded syntax:
 
 ```proofscript
-extern function hostShout(value : String) : String
+extern function hostShout(value: String): String
   from "host-lib"
   import shout;
 ```
@@ -69,7 +69,7 @@ Current config requires exact versions rather than ranges.
 A source declaration may use a bounded package subpath:
 
 ```proofscript
-extern function transform(value : String) : String
+extern function transform(value: String): String
   from "host-lib/feature"
   import transform;
 ```

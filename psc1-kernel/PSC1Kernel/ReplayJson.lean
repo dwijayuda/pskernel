@@ -31,7 +31,7 @@ partial def scanJsonStringToken
         else if c == '\\' then
           go tail (c :: acc) true
         else if c == '"' then
-          pure (String.ofList (('"' :: acc).reverse ++ ['"']), tail)
+          pure (String.ofList ('"' :: acc.reverse ++ ['"']), tail)
         else
           go tail (c :: acc) false
   go rest [] false

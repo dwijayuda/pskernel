@@ -302,6 +302,7 @@ def psWasmEncodeInstruction
       | some index =>
           Except.ok (psWasmByte 16 :: psWasmEncodeUleb index)
   | .return_ => Except.ok [psWasmByte 15]
+  | .drop => Except.ok [psWasmByte 26]
   | .ifStart result =>
       match result with
       | none =>

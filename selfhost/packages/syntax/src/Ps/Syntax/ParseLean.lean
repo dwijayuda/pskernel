@@ -1089,6 +1089,7 @@ def psParseLeanInductiveConstructorsWithFuel
 
 def psLeanTopLevelDeclarationToken (token : PsToken) : Bool :=
   token.text == "def"
+    || token.text == "partial"
     || token.text == "theorem"
     || token.text == "inductive"
     || token.text == "structure"

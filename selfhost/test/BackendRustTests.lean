@@ -132,7 +132,7 @@ def psTestBackendRustAdt : Bool :=
   | Except.error _ => false
   | Except.ok output =>
       output.contains "pub struct Pair { pub left: PsNat, pub right: PsNat }"
-        && output.contains "pub enum Maybe<A> { none { }, some { value: A } }"
+        && output.contains "pub enum Maybe<A> { none {}, some { value: A } }"
         && output.contains "Maybe::some { value: x }"
 
 def psBackendRustValueModule : PsVerifiedIrModule :=

@@ -294,18 +294,24 @@ def psEncodeCodecNames
 def psEncodeCodecNameList (names : List PsName) : String :=
   psJsonArray (psEncodeCodecNames names)
 
-def psBridgeFindConstructor :
-    List PsDeclaration -> PsName -> Option PsConstructorInfo
-  | [], _ => none
-  | declaration :: rest, name =>
-      match declaration with
-      | .constructorDecl info =>
-          if psNameEq info.name name then
-            some info
-          else
-            psBridgeFindConstructor rest name
-      | _ =>
-          psBridgeFindConstructor rest name
+def psBridgeFindConstructor
+    (declarations : List PsDeclaration) :
+    PsName -> Option PsConstructorInfo :=
+  match declarations with
+  | List.nil =>
+      fun (_name : PsName) => Option.none
+  | List.cons declaration rest =>
+      let smaller : PsName -> Option PsConstructorInfo :=
+        psBridgeFindConstructor rest;
+      fun (name : PsName) =>
+        match declaration with
+        | .constructorDecl info =>
+            if psNameEq info.name name then
+              Option.some info
+            else
+              smaller name
+        | _ =>
+            smaller name
 
 def psEncodeCodecConstructor
     (allDeclarations : List PsDeclaration)
@@ -384,14 +390,20 @@ def psEncodeCodecInductive
               psCheckedAdmissionJsonField "ts" (psJsonArray [encodedTypeEntry])
             ])
 
-def psBridgeFindRegularHeight :
-    List (PsName × Nat) -> PsName -> Nat
-  | [], _ => 0
-  | entry :: rest, name =>
-      if psNameEq (Prod.fst entry) name then
-        Prod.snd entry
-      else
-        psBridgeFindRegularHeight rest name
+def psBridgeFindRegularHeight
+    (entries : List (PsName × Nat)) :
+    PsName -> Nat :=
+  match entries with
+  | List.nil =>
+      fun (_name : PsName) => 0
+  | List.cons entry rest =>
+      let smaller : PsName -> Nat :=
+        psBridgeFindRegularHeight rest;
+      fun (name : PsName) =>
+        if psNameEq (Prod.fst entry) name then
+          Prod.snd entry
+        else
+          smaller name
 
 def psBridgeNatMax (left right : Nat) : Nat :=
   match left with

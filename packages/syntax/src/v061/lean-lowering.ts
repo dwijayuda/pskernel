@@ -1,5 +1,5 @@
 import type {V061Expr,V061Module} from './ast.js';
-import {v061BinaryPrecedence} from './operators.js';
+import {v061LeanSubsetBinaryPrecedence} from './operators.js';
 import {lowerV061TypeToLean} from './type-lowering.js';
 import {quoteV061Char} from './char-literal.js';
 import {lowerV061PatternToLean} from './pattern-parser.js';
@@ -53,7 +53,7 @@ function lowerV061TacticToLean(
 }
 
 function precedence(expr:V061Expr):number {
-  return expr.kind==='binary'?(v061BinaryPrecedence(expr.operator)??0):8;
+  return expr.kind==='binary'?(v061LeanSubsetBinaryPrecedence(expr.operator)??0):8;
 }
 
 export function lowerV061ExprToLean(expr:V061Expr,parentPrecedence=0):string {

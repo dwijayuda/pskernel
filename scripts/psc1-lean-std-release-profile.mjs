@@ -45,9 +45,12 @@ let leaves=0,attempts=0,directRoots=0,totalDeclarations=0,maxDepth=0;
 
 function exportRange(rangeStart,rangeCount,path){
   const fd=openSync(path,'w');
+  const rootRangeMode=process.env.PSC1_LEAN_SEGMENT_DECLARATIONS==='1'
+    ?'--root-range-segmented'
+    :'--root-range';
   const r=spawnSync(
     lean,
-    ['--run','oracle/replay-probe/DependencyExport.lean','Std','--root-range',String(rangeStart),String(rangeCount)],
+    ['--run','oracle/replay-probe/DependencyExport.lean','Std',rootRangeMode,String(rangeStart),String(rangeCount)],
     {
       cwd:root,
       env:{...process.env,PATH:`${bin}${delimiter}${process.env.PATH??''}`},
@@ -175,7 +178,8 @@ try{
     leaves,
     maxDepth,
     baseChunk,
-    replayedDeclarations:totalDeclarations
+    replayedDeclarations:totalDeclarations,
+    declarationSegmented:process.env.PSC1_LEAN_SEGMENT_DECLARATIONS==='1'
   },null,2));
 }finally{
   rmSync(temp,{recursive:true,force:true});

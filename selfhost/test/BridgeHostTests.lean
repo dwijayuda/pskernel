@@ -46,6 +46,58 @@ def psBridgeHostReplayDefinition : IO Bool := do
               && psJsonAsNumberText declarations == some "1")
       | _, _ => pure false
 
+def psBridgeHostReplayInductive : IO Bool := do
+  let choice := psRootName "BridgeChoice"
+  let left := psNameAppendStr choice "left"
+  let right := psNameAppendStr choice "right"
+  let choiceType := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let choiceValueType := PsExpr.constE choice []
+  let declarations : List PsDeclaration := [
+    PsDeclaration.inductiveDecl {
+      name := choice
+      levelParams := []
+      type := choiceType
+      numParams := 0
+      numIndices := 0
+      constructors := [left, right]
+    },
+    PsDeclaration.constructorDecl {
+      name := left
+      levelParams := []
+      type := choiceValueType
+      inductiveName := choice
+      constructorIndex := 0
+      numParams := 0
+      numFields := 0
+    },
+    PsDeclaration.constructorDecl {
+      name := right
+      levelParams := []
+      type := choiceValueType
+      inductiveName := choice
+      constructorIndex := 1
+      numParams := 0
+      numFields := 0
+    }
+  ]
+  let response ← psHostKernelReplay declarations
+  match response.value with
+  | none => pure false
+  | some value =>
+      match
+          psJsonGetField value "admissions",
+          psJsonGetField value "declarations" with
+      | some admissions, some declarationsValue =>
+          match
+              psJsonAsNumberText admissions,
+              psJsonAsNumberText declarationsValue with
+          | some admissionCount, some declarationCount =>
+              pure
+                (admissionCount == "1"
+                  && !declarationCount.isEmpty)
+          | _, _ => pure false
+      | _, _ => pure false
+
 def main : IO Unit := do
   let ping ← psHostKernelPing
   if !ping then
@@ -71,4 +123,9 @@ def main : IO Unit := do
   if !replay then
     throw (IO.userError "PSC1_KERNEL_BRIDGE_REPLAY: FAIL")
   IO.println "PSC1_KERNEL_BRIDGE_PASS: replay"
+
+  let inductiveReplay ← psBridgeHostReplayInductive
+  if !inductiveReplay then
+    throw (IO.userError "PSC1_KERNEL_BRIDGE_INDUCTIVE_REPLAY: FAIL")
+  IO.println "PSC1_KERNEL_BRIDGE_PASS: inductive replay"
   IO.println "PSC1_KERNEL_BRIDGE_HOST_TESTS: PASS"

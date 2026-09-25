@@ -2,6 +2,7 @@ import Ps.CompilerIr.Specialize
 import Ps.BackendWasm.Binary
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
+import Ps.BackendWasm.RuntimeNat
 
 inductive PsWasmLowerError where
   | unsupportedType
@@ -1226,6 +1227,70 @@ def psWasmLowerConstructorValuesWith
                         state := loweredRest.state
                       }
 
+def psWasmLowerNatArgumentsWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  psWasmLowerExprListWith
+    lower
+    (some psWasmNatRef)
+    state
+    arguments
+
+def psWasmLowerNatBinaryCallWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (functionName : String)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match arguments with
+  | [_, _] =>
+      match psWasmLowerNatArgumentsWith lower state arguments with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            instructions :=
+              lowered.instructions ++
+                [PsWasmInstruction.call functionName]
+            state := lowered.state
+          }
+  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
+def psWasmLowerNatCompareWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (comparison : PsWasmInstruction)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match arguments with
+  | [_, _] =>
+      match psWasmLowerNatArgumentsWith lower state arguments with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            instructions :=
+              lowered.instructions ++ [
+                PsWasmInstruction.call psWasmNatCmpFn,
+                PsWasmInstruction.i32Const 0,
+                comparison
+              ]
+            state := lowered.state
+          }
+  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
@@ -1307,6 +1372,33 @@ def psWasmLowerIntrinsicWith
                 state := lowered.state
               }
       | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | .natAdd =>
+      psWasmLowerNatBinaryCallWith
+        lower state psWasmNatAddFn arguments
+  | .natSub =>
+      psWasmLowerNatBinaryCallWith
+        lower state psWasmNatSubFn arguments
+  | .natMul =>
+      psWasmLowerNatBinaryCallWith
+        lower state psWasmNatMulFn arguments
+  | .natDiv =>
+      psWasmLowerNatBinaryCallWith
+        lower state psWasmNatDivFn arguments
+  | .natMod =>
+      psWasmLowerNatBinaryCallWith
+        lower state psWasmNatModFn arguments
+  | .natEq =>
+      psWasmLowerNatCompareWith
+        lower state PsWasmInstruction.i32Eq arguments
+  | .natNe =>
+      psWasmLowerNatCompareWith
+        lower state PsWasmInstruction.i32Ne arguments
+  | .natLe =>
+      psWasmLowerNatCompareWith
+        lower state PsWasmInstruction.i32LeS arguments
+  | .natLt =>
+      psWasmLowerNatCompareWith
+        lower state PsWasmInstruction.i32LtS arguments
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
 def psWasmLowerTypedArgumentsWith
@@ -1948,6 +2040,11 @@ def psWasmLowerExprWithFuel
       match expr with
       | .literal literal =>
           match literal with
+          | .natural value =>
+              Except.ok {
+                instructions := psWasmNatLiteralInstructions value
+                state := state
+              }
           | .machineInteger type value =>
               Except.ok {
                 instructions :=
@@ -2356,7 +2453,8 @@ def psWasmLowerSpecializedModule
                 | Except.ok lowered =>
                     Except.ok {
                       structures :=
-                        structures
+                        psWasmNatRuntimeStructures
+                          ++ structures
                           ++ inductiveTypes
                           ++ closureSignatures.1
                           ++ lowered.state.generatedStructures
@@ -2365,7 +2463,8 @@ def psWasmLowerSpecializedModule
                         closureSignatures.2
                           ++ lowered.state.generatedFunctionTypes
                       functions :=
-                        lowered.functions
+                        psWasmNatRuntimeFunctions
+                          ++ lowered.functions
                           ++ lowered.state.generatedFunctions
                       functionRefs :=
                         lowered.state.generatedFunctionRefs

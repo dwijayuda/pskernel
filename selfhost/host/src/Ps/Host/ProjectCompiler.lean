@@ -58,13 +58,72 @@ def psHostListContainsString :
   | value :: rest, target =>
       value == target || psHostListContainsString rest target
 
-def psHostResolveImport
+def psHostParentDirectory (path : String) : String :=
+  let parent := psHostDirectoryOfPath path
+  if parent == path then "." else parent
+
+partial def psHostFindWorkspaceRootWithFuel
+    (fuel : Nat)
+    (path : String) : IO (Option String) := do
+  match fuel with
+  | 0 => pure none
+  | remaining + 1 =>
+      let packageDir := psHostJoinPath path "packages"
+      let stdlibDir := psHostJoinPath path "stdlib"
+      let hasPackages ← System.FilePath.pathExists packageDir
+      let hasStdlib ← System.FilePath.pathExists stdlibDir
+      if hasPackages && hasStdlib then
+        pure (some path)
+      else
+        let parent := psHostParentDirectory path
+        if parent == path || (path == "." && parent == ".") then
+          pure none
+        else
+          psHostFindWorkspaceRootWithFuel remaining parent
+
+def psHostFindWorkspaceRoot (root : String) : IO (Option String) :=
+  psHostFindWorkspaceRootWithFuel 64 root
+
+def psHostPackageDirectory : List String -> Option String
+  | "Ps" :: "Foundation" :: _ => some "foundation"
+  | "Ps" :: "Syntax" :: _ => some "syntax"
+  | "Ps" :: "Core" :: _ => some "core"
+  | "Ps" :: "Environment" :: _ => some "environment"
+  | "Ps" :: "Project" :: _ => some "project"
+  | "Ps" :: "Meta" :: _ => some "meta"
+  | "Ps" :: "Elab" :: _ => some "elab"
+  | "Ps" :: "Bridge" :: _ => some "bridge"
+  | "Ps" :: "CompilerIr" :: _ => some "compiler-ir"
+  | "Ps" :: "Erasure" :: _ => some "erasure"
+  | "Ps" :: "BackendTs" :: _ => some "backend-ts"
+  | _ => none
+
+def psHostImportSearchBases
     (root : String)
-    (sourceName : PsSyntaxName) : IO String := do
-  let relative := psHostModuleRelativePath sourceName
-  if relative.isEmpty then
-    throw (IO.userError "PSC1_PROJECT_IMPORT_NAME")
-  let base := psHostJoinPath root relative
+    (workspace : Option String)
+    (sourceName : PsSyntaxName) : List String :=
+  match workspace with
+  | none => [root]
+  | some workspaceRoot =>
+      let stdlibRoot := psHostJoinPath workspaceRoot "stdlib"
+      match sourceName.segments with
+      | "ProofScript" :: _ =>
+          [root, stdlibRoot]
+      | segments =>
+          match psHostPackageDirectory segments with
+          | none => [root, stdlibRoot]
+          | some packageName =>
+              let packageRoot :=
+                psHostJoinPath
+                  (psHostJoinPath
+                    (psHostJoinPath workspaceRoot "packages")
+                    packageName)
+                  "src"
+              [root, packageRoot, stdlibRoot]
+
+def psHostResolveImportAtBase
+    (baseRoot relative : String) : IO (Option String) := do
+  let base := psHostJoinPath baseRoot relative
   let leanPath := base ++ ".lean"
   let proofScriptPath := base ++ ".ps"
   let hasLean ← System.FilePath.pathExists leanPath
@@ -74,13 +133,37 @@ def psHostResolveImport
       (IO.userError
         ("PSC1_PROJECT_SOURCE_AMBIGUITY: " ++ relative))
   else if hasLean then
-    pure leanPath
+    pure (some leanPath)
   else if hasProofScript then
-    pure proofScriptPath
+    pure (some proofScriptPath)
   else
-    throw
-      (IO.userError
-        ("PSC1_PROJECT_SOURCE_MISSING: " ++ relative))
+    pure none
+
+partial def psHostResolveImportFromBases
+    (relative : String) :
+    List String -> IO (Option String)
+  | [] => pure none
+  | base :: rest => do
+      let resolved ← psHostResolveImportAtBase base relative
+      match resolved with
+      | some path => pure (some path)
+      | none => psHostResolveImportFromBases relative rest
+
+def psHostResolveImport
+    (root : String)
+    (sourceName : PsSyntaxName) : IO String := do
+  let relative := psHostModuleRelativePath sourceName
+  if relative.isEmpty then
+    throw (IO.userError "PSC1_PROJECT_IMPORT_NAME")
+  let workspace ← psHostFindWorkspaceRoot root
+  let bases := psHostImportSearchBases root workspace sourceName
+  let resolved ← psHostResolveImportFromBases relative bases
+  match resolved with
+  | some path => pure path
+  | none =>
+      throw
+        (IO.userError
+          ("PSC1_PROJECT_SOURCE_MISSING: " ++ relative))
 
 def psHostTokenKindText : PsTokenKind -> String
   | .identifier => "identifier"

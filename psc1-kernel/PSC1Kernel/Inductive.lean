@@ -5,12 +5,12 @@ namespace PSC1Kernel
 namespace Kernel
 
 /--
-Checked K5 slice: an ordinary inductive datatype in a result universe that is
-provably nonzero. Shared parameters, indices, and constructor fields are
-supported together with direct strictly-positive recursive fields. Functional
-recursive fields are also supported when every function-domain binder is
-non-recursive and the final codomain is the same inductive. Nested, negative,
-and mutual occurrences still fail closed.
+Checked K5 slice: an ordinary inductive datatype with Lean-4.34-compatible
+large-vs-Prop elimination selection. Shared parameters, indices, and
+constructor fields are supported together with direct strictly-positive
+recursive fields. Functional recursive fields are also supported when every
+function-domain binder is non-recursive and the final codomain is the same
+inductive. Nested, negative, and mutual occurrences still fail closed.
 
 Unsupported inductive shapes fail closed instead of accepting exported
 constructor/recursor metadata.
@@ -244,7 +244,8 @@ partial def openSimpleConstructorFields
   | .forallE userName domain body binderInfo => do
       let domainType ← check ctx domain
       let fieldLevel ← ensureSort ctx domainType
-      unless Level.le fieldLevel resultLevel do
+      unless Level.le fieldLevel resultLevel ||
+          Level.normalizesToZero resultLevel do
         throw "simple inductive constructor field universe is too large"
       let (fresh, child0) := ctx.withLocal userName domain binderInfo
       let field : OpenBinder := {
@@ -442,6 +443,64 @@ def validateSimpleRecursorRules
       validateSimpleRecursorRules ctx params ruleBinders motive levels shapes rules
   | _, _ => throw "generated simple recursor rule count mismatch"
 
+def simpleExprMember (needle : Expr) : List Expr → Bool
+  | [] => false
+  | item :: rest => Expr.eq needle item || simpleExprMember needle rest
+
+partial def simpleCtorAllowsLargeElimCore
+    (ctx : CheckerContext)
+    (type : Expr)
+    (revNonProp : List Expr := []) : Except String Bool := do
+  let reduced ← whnf ctx type
+  match reduced with
+  | .forallE userName domain body binderInfo => do
+      let domainType ← check ctx domain
+      let fieldLevel ← ensureSort ctx domainType
+      let (fresh, child) := ctx.withLocal userName domain binderInfo
+      let revNonProp' :=
+        if Level.normalizesToZero fieldLevel then
+          revNonProp
+        else
+          .fvar fresh :: revNonProp
+      simpleCtorAllowsLargeElimCore
+        child (body.instantiate1 (.fvar fresh)) revNonProp'
+  | result =>
+      let resultArgs := result.getAppArgs
+      pure (revNonProp.all fun field => simpleExprMember field resultArgs)
+
+def simpleCtorAllowsLargeElim
+    (ctx : CheckerContext)
+    (params : List OpenBinder)
+    (type : Expr) : Except String Bool := do
+  let afterParams ← openSimpleConstructorParams ctx params type
+  simpleCtorAllowsLargeElimCore ctx afterParams
+
+def simpleElimOnlyAtZero
+    (ctx : CheckerContext)
+    (params : List OpenBinder)
+    (resultLevel : Level)
+    (ctors : List SimpleConstructorDecl) : Except String Bool := do
+  if Level.isNotZero resultLevel then
+    pure false
+  else
+    match ctors with
+    | [] => pure false
+    | [ctor] => do
+        let canEliminateLarge ←
+          simpleCtorAllowsLargeElim ctx params ctor.type
+        pure (!canEliminateLarge)
+    | _ => pure true
+
+def simpleKTarget
+    (resultLevel : Level)
+    (shapes : List SimpleConstructorShape) : Bool :=
+  if !Level.normalizesToZero resultLevel then
+    false
+  else
+    match shapes with
+    | [shape] => shape.fields.isEmpty
+    | _ => false
+
 def addSimpleInductive
     (env : Environment)
     (decl : SimpleInductiveDecl) : Except String Environment := do
@@ -472,9 +531,6 @@ def addSimpleInductive
     openSimpleHeaderIndices headerParamCtx afterParams
   let .sort resultLevel := headerResult
     | throw "simple inductive result must be a sort"
-  if !Level.isNotZero resultLevel then
-    throw "simple inductive admission currently requires a result universe that is provably nonzero"
-
   let levels := decl.levelParams.map Level.param
   let paramArgs := simpleParamArgs params
   let indexArgs := indices.map (fun index => Expr.fvar index.internalName)
@@ -552,9 +608,15 @@ def addSimpleInductive
   }
   let work1 := replaceSimpleInductiveInfo work1 finalInductInfo
 
+  let elimCtx : CheckerContext := { headerParamCtx with env := work1 }
+  let elimOnlyAtZero ←
+    simpleElimOnlyAtZero elimCtx params resultLevel decl.ctors
+  let kTarget := simpleKTarget resultLevel ctorShapes
   let elimName := simpleFreshElimName decl.levelParams
-  let elimLevel : Level := .param elimName
-  let recLevelParams := elimName :: decl.levelParams
+  let elimLevel : Level :=
+    if elimOnlyAtZero then .zero else .param elimName
+  let recLevelParams :=
+    if elimOnlyAtZero then decl.levelParams else elimName :: decl.levelParams
   let motiveInternal := simpleInternalName "motive"
   let motive : Expr := .fvar motiveInternal
   let motiveBinder : OpenBinder := {
@@ -597,7 +659,7 @@ def addSimpleInductive
     numMotives := 1
     numMinors := minorBinders.length
     rules := rules
-    k := false
+    k := kTarget
     isUnsafe := decl.isUnsafe
   }
 

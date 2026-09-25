@@ -2658,7 +2658,9 @@ def psWasmLowerModule
   | Except.error _ =>
       Except.error PsWasmLowerError.unsupportedModuleFeature
   | Except.ok specialized =>
-      let augmented := psWasmAugmentNatRuntime specialized
+      let arrayAugmented :=
+        psWasmAugmentArrayHigherOrderRuntime specialized
+      let augmented := psWasmAugmentNatRuntime arrayAugmented
       match psWasmLowerSpecializedModule profile augmented with
       | Except.error error => Except.error error
       | Except.ok lowered =>

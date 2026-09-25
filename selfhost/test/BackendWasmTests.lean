@@ -969,6 +969,7 @@ def psTestWasmClosureLowering : Bool :=
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
+    arrays := []
     functionTypes := []
     functions := [
       {

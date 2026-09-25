@@ -1944,7 +1944,11 @@ def psParseLeanInductiveDeclaration
               [] with
           | Except.error error => Except.error error
           | Except.ok params =>
-              let parseAfterResult :=
+              let parseAfterResult :
+                  Option PsSyntaxTerm ->
+                  PsTokenCursor ->
+                  Except PsParseError
+                    (PsParseResult PsSyntaxDeclaration) :=
                 fun
                   (resultType : Option PsSyntaxTerm)
                   (afterResult : PsTokenCursor) =>

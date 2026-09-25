@@ -167,6 +167,7 @@ inductive PsVerifiedIrExpr where
       (arguments : List PsVerifiedIrExpr)
   | letE
       (name : String)
+      (type : PsVerifiedIrType)
       (value : PsVerifiedIrExpr)
       (body : PsVerifiedIrExpr)
   | ifE

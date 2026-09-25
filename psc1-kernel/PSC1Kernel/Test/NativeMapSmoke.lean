@@ -42,6 +42,39 @@ def main : IO Unit := do
     | _ => false
   assertNativeMap "kind mismatch" wrongKindFails
 
+  -- Exercise the parsed portable map through the actual kernel WHNF/native
+  -- reduction path, not only through direct provider lookups.
+  let ctx : CheckerContext := {
+    CheckerContext.empty Environment.empty with
+    nativeEvaluator := some provider
+  }
+  let natMarker : Expr :=
+    .app (.const kernelReduceNatName []) (.const n [])
+  let natReduced ←
+    match whnf ctx natMarker with
+    | .ok value => pure value
+    | .error err => throw <| IO.userError ("native Nat WHNF failed: " ++ err)
+  assertNativeMap "Nat WHNF through map"
+    (Expr.eq natReduced (.lit (.nat 42)))
+
+  let boolMarker : Expr :=
+    .app (.const kernelReduceBoolName []) (.const b [])
+  let boolReduced ←
+    match whnf ctx boolMarker with
+    | .ok value => pure value
+    | .error err => throw <| IO.userError ("native Bool WHNF failed: " ++ err)
+  assertNativeMap "Bool WHNF through map"
+    (Expr.eq boolReduced (.const kernelBoolFalseName []))
+
+  let missingMarker : Expr :=
+    .app (.const kernelReduceNatName []) (.const missing [])
+  let missingReduced ←
+    match whnf ctx missingMarker with
+    | .ok value => pure value
+    | .error err => throw <| IO.userError ("missing native WHNF failed: " ++ err)
+  assertNativeMap "missing native result stays opaque"
+    (Expr.eq missingReduced missingMarker)
+
   let duplicateRejects :=
     match parseNativeMap
       "nat\tNativeMapSmoke.n\t1\nnat\tNativeMapSmoke.n\t2\n" with

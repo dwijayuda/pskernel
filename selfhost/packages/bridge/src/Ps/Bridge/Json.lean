@@ -72,7 +72,7 @@ def psJsonCharListEq
               false
 
 def psJsonStringEq (left right : String) : Bool :=
-  psJsonCharListEq psJsonStringToChars left psJsonStringToChars right
+  psJsonCharListEq (psJsonStringToChars left) (psJsonStringToChars right)
 
 def psJsonNatInRange
     (value lower upper : Nat) : Bool :=
@@ -132,7 +132,7 @@ def psJsonEscapeChars : List Char -> String
       psJsonConcat2 (psJsonEscapeChar char) (psJsonEscapeChars rest)
 
 def psJsonQuote (value : String) : String :=
-  psJsonConcat3 "\"" (psJsonEscapeChars psJsonStringToChars value) "\""
+  psJsonConcat3 "\"" (psJsonEscapeChars (psJsonStringToChars value)) "\""
 
 def psJsonJoin (separator : String) : List String -> String
   | List.nil =>
@@ -749,7 +749,7 @@ def psJsonCompareCharLists :
 
 def psJsonCompareKeys
     (left right : String) : PsJsonKeyOrder :=
-  psJsonCompareCharLists psJsonStringToChars left psJsonStringToChars right
+  psJsonCompareCharLists (psJsonStringToChars left) (psJsonStringToChars right)
 
 def psJsonInsertObjectField
     (field : String × PsJsonValue) :
@@ -786,7 +786,7 @@ def psJsonSortObjectFields :
 
 def psJsonValidateCanonicalNumber
     (text : String) : Bool :=
-  match psJsonParseNumber psJsonStringToChars text with
+  match psJsonParseNumber (psJsonStringToChars text) with
   | Except.error _ => false
   | Except.ok parsed =>
       match parsed.rest with

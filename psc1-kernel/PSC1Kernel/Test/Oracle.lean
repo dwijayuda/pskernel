@@ -3267,21 +3267,21 @@ def assertReplayCoreOracle : IO Unit := do
   | .error _ => pure ()
 
 def assertReplayJsonOracle : IO Unit := do
-  let meta :=
+  let metaLine :=
     "{\"meta\":{\"lean\":{\"version\":\"4.34.0\",\"githash\":\"" ++
       PSC1Kernel.Replay.pinnedLeanGitHash ++
       "\"},\"format\":{\"version\":\"3.1.0\"}}}"
-  let name :=
+  let nameLine :=
     "{\"in\":1,\"str\":{\"pre\":0,\"str\":\"ReplayJsonA\"}}"
-  let level := "{\"il\":2,\"succ\":0}"
-  let expr := "{\"ie\":20,\"sort\":2}"
-  let axiom :=
+  let levelLine := "{\"il\":2,\"succ\":0}"
+  let exprLine := "{\"ie\":20,\"sort\":2}"
+  let axiomLine :=
     "{\"axiom\":{\"name\":1,\"levelParams\":[],\"type\":20,\"isUnsafe\":false}}"
   let final ← exceptToIO
     "PSC1 Lean4Export NDJSON replay"
     (PSC1Kernel.ReplayJson.replayLines
       PSC1Kernel.Replay.State.empty
-      [meta, "", name, level, expr, axiom])
+      [metaLine, "", nameLine, levelLine, exprLine, axiomLine])
   let stats ← exceptToIO
     "PSC1 Lean4Export NDJSON finish"
     final.finish

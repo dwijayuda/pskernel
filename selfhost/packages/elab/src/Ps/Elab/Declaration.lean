@@ -1153,7 +1153,7 @@ def psElabPartialDeclaration
                             let openValue :=
                               psMetaInstantiate
                                 metaContext
-                                valueResult.term
+                                valueResult.term;
                             let finalOpenType :=
                               psMetaInstantiate
                                 metaContext

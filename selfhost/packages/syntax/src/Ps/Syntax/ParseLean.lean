@@ -1690,7 +1690,7 @@ def psParseLeanStructureField
                 let split :=
                   psSplitTokensThroughLine
                     firstType.span.start.line
-                    afterColon.cursor.remaining
+                    afterColon.cursor.remaining;
                 match psParseLeanTerm (psLeanTokenCursor split.fst) with
                 | Except.error error => Except.error error
                 | Except.ok type =>

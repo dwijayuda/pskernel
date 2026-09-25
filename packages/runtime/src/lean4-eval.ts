@@ -844,6 +844,247 @@ export class Lean434Evaluator {
     return result;
   }
 
+  private runtimeNameStructuralKey(
+    value:Lean434RuntimeValue,
+  ):string{
+    if(
+      !isTaggedRuntimeValue(value)
+      ||value.kind!=='constructor'
+    ){
+      throw new Lean434EvaluationError(
+        'runtime Lean.Name is not a constructor',
+      );
+    }
+    switch(value.name){
+      case 'Lean.Name.anonymous':
+        if(value.fields.length!==0){
+          throw new Lean434EvaluationError(
+            'Lean.Name.anonymous field count mismatch',
+          );
+        }
+        return 'a';
+      case 'Lean.Name.str':{
+        if(value.fields.length!==2||typeof value.fields[1]!=='string'){
+          throw new Lean434EvaluationError(
+            'Lean.Name.str runtime shape mismatch',
+          );
+        }
+        const suffix=value.fields[1] as string;
+        return this.runtimeNameStructuralKey(value.fields[0]!)+
+          '/s:'+String(suffix.length)+':'+suffix;
+      }
+      case 'Lean.Name.num':{
+        if(value.fields.length!==2||typeof value.fields[1]!=='bigint'){
+          throw new Lean434EvaluationError(
+            'Lean.Name.num runtime shape mismatch',
+          );
+        }
+        return this.runtimeNameStructuralKey(value.fields[0]!)+
+          '/n:'+String(value.fields[1]);
+      }
+      default:
+        throw new Lean434EvaluationError(
+          "unexpected runtime Lean.Name constructor '"+value.name+"'",
+        );
+    }
+  }
+
+  private runtimeIdStructuralKey(
+    value:Lean434RuntimeValue,
+    ctorName:string,
+  ):string{
+    if(
+      !isTaggedRuntimeValue(value)
+      ||value.kind!=='constructor'
+      ||value.name!==ctorName
+      ||value.fields.length!==1
+    ){
+      throw new Lean434EvaluationError(
+        "runtime id is not '"+ctorName+"'",
+      );
+    }
+    return this.runtimeNameStructuralKey(value.fields[0]!);
+  }
+
+  private runtimeExprHasMVar(
+    expr:Lean434RuntimeValue,
+  ):boolean{
+    if(!isTaggedRuntimeValue(expr)||expr.kind!=='constructor')return false;
+    switch(expr.name){
+      case 'Lean.Expr.mvar':
+        return true;
+      case 'Lean.Expr.app':
+        return this.runtimeExprHasMVar(expr.fields[0]!)
+          ||this.runtimeExprHasMVar(expr.fields[1]!);
+      case 'Lean.Expr.mdata':
+        return this.runtimeExprHasMVar(expr.fields[1]!);
+      case 'Lean.Expr.proj':
+        return this.runtimeExprHasMVar(expr.fields[2]!);
+      case 'Lean.Expr.lam':
+      case 'Lean.Expr.forallE':
+        return this.runtimeExprHasMVar(expr.fields[1]!)
+          ||this.runtimeExprHasMVar(expr.fields[2]!);
+      case 'Lean.Expr.letE':
+        return this.runtimeExprHasMVar(expr.fields[1]!)
+          ||this.runtimeExprHasMVar(expr.fields[2]!)
+          ||this.runtimeExprHasMVar(expr.fields[3]!);
+      default:
+        return false;
+    }
+  }
+
+  private runtimeExprAppView(
+    expr:Lean434RuntimeValue,
+  ):{
+    readonly fn:Lean434RuntimeValue;
+    readonly args:readonly Lean434RuntimeValue[];
+  }{
+    const reversed:Lean434RuntimeValue[]=[];
+    let current=expr;
+    while(
+      isTaggedRuntimeValue(current)
+      &&current.kind==='constructor'
+      &&current.name==='Lean.Expr.app'
+      &&current.fields.length===2
+    ){
+      reversed.push(current.fields[1]!);
+      current=current.fields[0]!;
+    }
+    return {fn:current,args:reversed.reverse()};
+  }
+
+  private runtimeExprMkAppN(
+    fn:Lean434RuntimeValue,
+    args:readonly Lean434RuntimeValue[],
+  ):Lean434RuntimeValue{
+    let result=fn;
+    for(const arg of args){
+      result={
+        kind:'constructor',
+        name:'Lean.Expr.app',
+        fields:[result,arg],
+      };
+    }
+    return result;
+  }
+
+  private substituteRuntimeExprFVars(
+    expr:Lean434RuntimeValue,
+    substitution:ReadonlyMap<string,Lean434RuntimeValue>,
+    depth:bigint=0n,
+  ):Lean434RuntimeValue{
+    if(!isTaggedRuntimeValue(expr)||expr.kind!=='constructor')return expr;
+    switch(expr.name){
+      case 'Lean.Expr.fvar':{
+        if(expr.fields.length!==1)return expr;
+        const key=this.runtimeIdStructuralKey(
+          expr.fields[0]!,
+          'Lean.FVarId.mk',
+        );
+        const replacement=substitution.get(key);
+        return replacement===undefined
+          ?expr
+          :this.liftRuntimeExprLooseBVars(replacement,depth);
+      }
+      case 'Lean.Expr.bvar':
+      case 'Lean.Expr.mvar':
+      case 'Lean.Expr.sort':
+      case 'Lean.Expr.const':
+      case 'Lean.Expr.lit':
+        return expr;
+      case 'Lean.Expr.app':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            this.substituteRuntimeExprFVars(
+              expr.fields[0]!,
+              substitution,
+              depth,
+            ),
+            this.substituteRuntimeExprFVars(
+              expr.fields[1]!,
+              substitution,
+              depth,
+            ),
+          ],
+        };
+      case 'Lean.Expr.mdata':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            this.substituteRuntimeExprFVars(
+              expr.fields[1]!,
+              substitution,
+              depth,
+            ),
+          ],
+        };
+      case 'Lean.Expr.proj':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            expr.fields[1]!,
+            this.substituteRuntimeExprFVars(
+              expr.fields[2]!,
+              substitution,
+              depth,
+            ),
+          ],
+        };
+      case 'Lean.Expr.lam':
+      case 'Lean.Expr.forallE':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            this.substituteRuntimeExprFVars(
+              expr.fields[1]!,
+              substitution,
+              depth,
+            ),
+            this.substituteRuntimeExprFVars(
+              expr.fields[2]!,
+              substitution,
+              depth+1n,
+            ),
+            expr.fields[3]!,
+          ],
+        };
+      case 'Lean.Expr.letE':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            this.substituteRuntimeExprFVars(
+              expr.fields[1]!,
+              substitution,
+              depth,
+            ),
+            this.substituteRuntimeExprFVars(
+              expr.fields[2]!,
+              substitution,
+              depth,
+            ),
+            this.substituteRuntimeExprFVars(
+              expr.fields[3]!,
+              substitution,
+              depth+1n,
+            ),
+            expr.fields[4]!,
+          ],
+        };
+      default:
+        return expr;
+    }
+  }
+
   private instantiateExprMVarsNative(
     initialMctx:Lean434RuntimeValue,
     initialExpr:Lean434RuntimeValue,

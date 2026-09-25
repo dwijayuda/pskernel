@@ -16,21 +16,26 @@ def psCheckedAdmissionJsonField
     (key value : String) : Prod String String :=
   Prod.mk key value
 
-def psEncodeCodecName : PsName -> String
+def psEncodeCodecName (name : PsName) : String :=
+  match name with
   | .anonymous =>
       psJsonObject [
         Prod.mk "k" (psJsonQuote "a")
       ]
   | .str parent value =>
+      let encodedParent : String :=
+        psEncodeCodecName parent;
       psJsonObject [
         psCheckedAdmissionJsonField "k" (psJsonQuote "s"),
-        psCheckedAdmissionJsonField "p" (psEncodeCodecName parent),
+        psCheckedAdmissionJsonField "p" encodedParent,
         psCheckedAdmissionJsonField "v" (psJsonQuote value)
       ]
   | .num parent value =>
+      let encodedParent : String :=
+        psEncodeCodecName parent;
       psJsonObject [
         psCheckedAdmissionJsonField "k" (psJsonQuote "n"),
-        psCheckedAdmissionJsonField "p" (psEncodeCodecName parent),
+        psCheckedAdmissionJsonField "p" encodedParent,
         psCheckedAdmissionJsonField "v" (psJsonQuote (toString value))
       ]
 

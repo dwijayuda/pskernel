@@ -222,33 +222,96 @@ def Name.lastIndexOf (needle : Name) (xs : List Name) : Option Nat :=
       go tail (index + 1) answer'
   go xs 0 none
 
-partial def Expr.abstractFVarsAt
+private partial def Expr.abstractFVarsAtSpec
     (e : Expr) (fvars : List Name) (offset : Nat) : Expr :=
   match e with
   | .fvar n =>
     match Name.lastIndexOf n fvars with
     | none => e
     | some i => .bvar (offset + fvars.length - i - 1)
-  | .app f a => .app (f.abstractFVarsAt fvars offset) (a.abstractFVarsAt fvars offset)
+  | .app f a =>
+    .app
+      (f.abstractFVarsAtSpec fvars offset)
+      (a.abstractFVarsAtSpec fvars offset)
   | .lam n t b bi =>
     .lam n
-      (t.abstractFVarsAt fvars offset)
-      (b.abstractFVarsAt fvars (offset + 1))
+      (t.abstractFVarsAtSpec fvars offset)
+      (b.abstractFVarsAtSpec fvars (offset + 1))
       bi
   | .forallE n t b bi =>
     .forallE n
-      (t.abstractFVarsAt fvars offset)
-      (b.abstractFVarsAt fvars (offset + 1))
+      (t.abstractFVarsAtSpec fvars offset)
+      (b.abstractFVarsAtSpec fvars (offset + 1))
       bi
   | .letE n t v b nd =>
     .letE n
-      (t.abstractFVarsAt fvars offset)
-      (v.abstractFVarsAt fvars offset)
-      (b.abstractFVarsAt fvars (offset + 1))
+      (t.abstractFVarsAtSpec fvars offset)
+      (v.abstractFVarsAtSpec fvars offset)
+      (b.abstractFVarsAtSpec fvars (offset + 1))
       nd
-  | .mdata m b => .mdata m (b.abstractFVarsAt fvars offset)
-  | .proj n i b => .proj n i (b.abstractFVarsAt fvars offset)
+  | .mdata m b => .mdata m (b.abstractFVarsAtSpec fvars offset)
+  | .proj n i b => .proj n i (b.abstractFVarsAtSpec fvars offset)
   | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => e
+
+private abbrev AbstractFVarsCache := Std.HashMap (USize × Nat) Expr
+
+private unsafe def Expr.abstractFVarsAtRuntimeGo
+    (e : Expr)
+    (fvars : List Name)
+    (offset : Nat)
+    (cache : AbstractFVarsCache) : Expr × AbstractFVarsCache :=
+  let key := (ptrAddrUnsafe e, offset)
+  match Std.HashMap.get? cache key with
+  | some cached => (cached, cache)
+  | none =>
+      let (result, cache) :=
+        match e with
+        | .fvar n =>
+            match Name.lastIndexOf n fvars with
+            | none => (e, cache)
+            | some i => (.bvar (offset + fvars.length - i - 1), cache)
+        | .app f a =>
+            let (f', cache) := Expr.abstractFVarsAtRuntimeGo f fvars offset cache
+            let (a', cache) := Expr.abstractFVarsAtRuntimeGo a fvars offset cache
+            (if ptrEq f f' && ptrEq a a' then e else .app f' a', cache)
+        | .lam n t b bi =>
+            let (t', cache) := Expr.abstractFVarsAtRuntimeGo t fvars offset cache
+            let (b', cache) := Expr.abstractFVarsAtRuntimeGo b fvars (offset + 1) cache
+            (if ptrEq t t' && ptrEq b b' then e else .lam n t' b' bi, cache)
+        | .forallE n t b bi =>
+            let (t', cache) := Expr.abstractFVarsAtRuntimeGo t fvars offset cache
+            let (b', cache) := Expr.abstractFVarsAtRuntimeGo b fvars (offset + 1) cache
+            (if ptrEq t t' && ptrEq b b' then e else .forallE n t' b' bi, cache)
+        | .letE n t v b nd =>
+            let (t', cache) := Expr.abstractFVarsAtRuntimeGo t fvars offset cache
+            let (v', cache) := Expr.abstractFVarsAtRuntimeGo v fvars offset cache
+            let (b', cache) := Expr.abstractFVarsAtRuntimeGo b fvars (offset + 1) cache
+            let result :=
+              if ptrEq t t' && ptrEq v v' && ptrEq b b' then e
+              else .letE n t' v' b' nd
+            (result, cache)
+        | .mdata m b =>
+            let (b', cache) := Expr.abstractFVarsAtRuntimeGo b fvars offset cache
+            (if ptrEq b b' then e else .mdata m b', cache)
+        | .proj n i b =>
+            let (b', cache) := Expr.abstractFVarsAtRuntimeGo b fvars offset cache
+            (if ptrEq b b' then e else .proj n i b', cache)
+        | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ =>
+            (e, cache)
+      (result, Std.HashMap.insert cache key result)
+
+private unsafe def Expr.abstractFVarsAtRuntime
+    (e : Expr) (fvars : List Name) (offset : Nat) : Expr :=
+  if fvars.isEmpty then
+    e
+  else
+    let cache : AbstractFVarsCache := Std.HashMap.emptyWithCapacity 64
+    (Expr.abstractFVarsAtRuntimeGo e fvars offset cache).1
+
+@[implemented_by Expr.abstractFVarsAtRuntime]
+partial def Expr.abstractFVarsAt
+    (e : Expr) (fvars : List Name) (offset : Nat) : Expr :=
+  e.abstractFVarsAtSpec fvars offset
 
 def Expr.abstractFVars (e : Expr) (fvars : List Name) : Expr :=
   e.abstractFVarsAt fvars 0

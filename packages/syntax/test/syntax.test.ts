@@ -1315,11 +1315,36 @@ throws(
   ),
   /PS_LEAN_SUBSET_CONSTRUCTOR_RESULT/,
 );
+{
+  const parsed=parseV061LeanSubsetModule(
+    'namespace Demo\n'+
+    'def x : Nat := 0\n'+
+    'namespace Inner\n'+
+    'def y : Nat := x\n'+
+    'end Inner\n'+
+    'end Demo\n',
+  );
+  equal(parsed.declarations.length,2);
+  equal(parsed.declarations[0]?.name,'Demo.x');
+  equal(parsed.declarations[1]?.name,'Demo.Inner.y');
+  equal(parsed.declarations[0]?.namespacePath?.join('.'),'Demo');
+  equal(parsed.declarations[1]?.namespacePath?.join('.'),'Demo.Inner');
+  equal(
+    lowerV061ModuleToLean(parsed),
+    'def Demo.x : Nat := 0\n\ndef Demo.Inner.y : Nat := x\n',
+  );
+}
 throws(
   ()=>parseV061LeanSubsetModule(
-    'namespace Demo\ndef x : Nat := 0\nend Demo\n',
+    'namespace Demo\ndef x : Nat := 0\nend Other\n',
   ),
-  /PS_LEAN_SUBSET_UNSUPPORTED_COMMAND/,
+  /PS_LEAN_SUBSET_NAMESPACE_END/,
+);
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'namespace Demo\ndef x : Nat := 0\n',
+  ),
+  /PS_LEAN_SUBSET_NAMESPACE_UNCLOSED/,
 );
 {
   const proofScript=parseV061Module(

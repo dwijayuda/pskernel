@@ -11,6 +11,12 @@ def psWasmSmokeU32FunctionType : PsVerifiedIrType :=
     [psWasmSmokeU32Type]
     psWasmSmokeU32Type
 
+def psWasmSmokeTypeA : PsVerifiedIrType :=
+  PsVerifiedIrType.typeParameter "A"
+
+def psWasmSmokeGenericListA : PsVerifiedIrType :=
+  PsVerifiedIrType.named "GenericList" [psWasmSmokeTypeA]
+
 def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -58,6 +64,17 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
           }
         ]
       }
+,
+      {
+        name := "GenericBox"
+        typeParameters := [{ name := "A" }]
+        fields := [
+          {
+            name := "value"
+            type := psWasmSmokeTypeA
+          }
+        ]
+      }
     ]
     inductives := [
       {
@@ -102,6 +119,30 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
               {
                 name := "tail"
                 type := PsVerifiedIrType.named "U32List" []
+              }
+            ]
+          }
+        ]
+      }
+,
+      {
+        name := "GenericList"
+        typeParameters := [{ name := "A" }]
+        constructors := [
+          {
+            name := "nil"
+            fields := []
+          },
+          {
+            name := "cons"
+            fields := [
+              {
+                name := "head"
+                type := psWasmSmokeTypeA
+              },
+              {
+                name := "tail"
+                type := psWasmSmokeGenericListA
               }
             ]
           }
@@ -667,6 +708,159 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                 PsVerifiedIrExpr.var "increment",
                 PsVerifiedIrExpr.var "value"
               ])
+      }
+,
+      {
+        name := "genericId"
+        typeParameters := [{ name := "A" }]
+        parameters := [
+          {
+            name := "value"
+            type := psWasmSmokeTypeA
+          }
+        ]
+        resultType := psWasmSmokeTypeA
+        body := PsVerifiedIrExpr.var "value"
+      },
+      {
+        name := "genericLength"
+        typeParameters := [{ name := "A" }]
+        parameters := [
+          {
+            name := "xs"
+            type := psWasmSmokeGenericListA
+          }
+        ]
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.matchE
+            "GenericList"
+            [psWasmSmokeTypeA]
+            (PsVerifiedIrExpr.var "xs")
+            [
+              (
+                "nil",
+                [],
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.machineInteger
+                    PsVerifiedIrMachineIntegerType.uint32
+                    0)
+              ),
+              (
+                "cons",
+                [
+                  {
+                    field := "head"
+                    name := "head"
+                    type := psWasmSmokeTypeA
+                  },
+                  {
+                    field := "tail"
+                    name := "tail"
+                    type := psWasmSmokeGenericListA
+                  }
+                ],
+                PsVerifiedIrExpr.intrinsic
+                  (PsVerifiedIrIntrinsic.machineIntBinary
+                    PsVerifiedIrMachineIntegerType.uint32
+                    PsVerifiedIrIntegerBinaryOp.add)
+                  [
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.machineInteger
+                        PsVerifiedIrMachineIntegerType.uint32
+                        1),
+                    PsVerifiedIrExpr.call
+                      (PsVerifiedIrExpr.var "genericLength")
+                      [psWasmSmokeTypeA]
+                      [PsVerifiedIrExpr.var "tail"]
+                  ]
+              )
+            ]
+      },
+      {
+        name := "genericBoxRoundTrip"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psWasmSmokeU32Type
+          }
+        ]
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.projection
+            "GenericBox"
+            [psWasmSmokeU32Type]
+            (PsVerifiedIrExpr.record
+              "GenericBox"
+              [psWasmSmokeU32Type]
+              [("value", PsVerifiedIrExpr.var "value")])
+            "value"
+      },
+      {
+        name := "genericIdU32"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psWasmSmokeU32Type
+          }
+        ]
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "genericId")
+            [psWasmSmokeU32Type]
+            [PsVerifiedIrExpr.var "value"]
+      },
+      {
+        name := "genericLengthTwo"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "genericLength")
+            [psWasmSmokeU32Type]
+            [
+              PsVerifiedIrExpr.constructor
+                "GenericList"
+                "cons"
+                [psWasmSmokeU32Type]
+                [
+                  (
+                    "head",
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.machineInteger
+                        PsVerifiedIrMachineIntegerType.uint32
+                        10)
+                  ),
+                  (
+                    "tail",
+                    PsVerifiedIrExpr.constructor
+                      "GenericList"
+                      "cons"
+                      [psWasmSmokeU32Type]
+                      [
+                        (
+                          "head",
+                          PsVerifiedIrExpr.literal
+                            (PsVerifiedIrLiteral.machineInteger
+                              PsVerifiedIrMachineIntegerType.uint32
+                              20)
+                        ),
+                        (
+                          "tail",
+                          PsVerifiedIrExpr.constructor
+                            "GenericList"
+                            "nil"
+                            [psWasmSmokeU32Type]
+                            []
+                        )
+                      ]
+                  )
+                ]
+            ]
       }
     ]
   }

@@ -133,16 +133,6 @@ jobs:
           test -f /tmp/psc1-project/Main.js
           echo "PSC1_PROJECT_IMPORTS: PASS"
 
-      - name: Probe real compiler source readiness
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd selfhost
-          lake exe psc1 check packages/foundation/src/Ps/Foundation/Diagnostic.lean
-          lake exe psc1 translate packages/foundation/src/Ps/Foundation/Diagnostic.lean --to ps > /tmp/psc1-diagnostic.ps
-          lake exe psc1 check packages/syntax/src/Ps/Syntax/Ast.lean
-          echo "PSC1_COMPILER_SOURCE_READINESS: PASS"
-
 
       - name: Run Lean bootstrap collections composition
         shell: bash
@@ -576,6 +566,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Probe real compiler source readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1 check packages/foundation/src/Ps/Foundation/Diagnostic.lean
+          lake exe psc1 translate packages/foundation/src/Ps/Foundation/Diagnostic.lean --to ps > /tmp/psc1-diagnostic.ps
+          lake exe psc1 check packages/syntax/src/Ps/Syntax/Ast.lean
+          echo "PSC1_COMPILER_SOURCE_READINESS: PASS"
+
 
       - name: Build current PSC0 packages
         shell: bash

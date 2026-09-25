@@ -178,14 +178,14 @@ def psTsEmitIntrinsicFromPrinted
     (arguments : List String) :
     Except PsTsEmitError String :=
   match operation, arguments with
-  | .machineIntBinary type integerOperation, [left, right] =>
+  | (.machineIntBinary type integerOperation), [left, right] =>
       psTsEmitMachineIntegerBinary type integerOperation left right
-  | .machineIntCompare _, integerOperation, [left, right] =>
+  | (.machineIntCompare _ integerOperation), [left, right] =>
       Except.ok
         (psTsEmitMachineIntegerCompare integerOperation left right)
-  | .floatBinary type floatOperation, [left, right] =>
+  | (.floatBinary type floatOperation), [left, right] =>
       Except.ok (psTsEmitFloatBinary type floatOperation left right)
-  | .floatCompare _, floatOperation, [left, right] =>
+  | (.floatCompare _ floatOperation), [left, right] =>
       Except.ok (psTsEmitFloatCompare floatOperation left right)
   | .natAdd, [left, right] =>
       Except.ok ("(" ++ left ++ " + " ++ right ++ ")")

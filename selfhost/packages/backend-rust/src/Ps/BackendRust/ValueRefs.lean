@@ -228,7 +228,7 @@ def psRustRewriteValueRefsWithFuel
                           rewrittenCondition
                           rewrittenThen
                           rewrittenElse)
-      | PsVerifiedIrExpr.record structureName fields =>
+      | PsVerifiedIrExpr.record structureName typeArguments fields =>
           match psRustRewriteFieldListWith
               rewriteNested
               fields with
@@ -238,8 +238,13 @@ def psRustRewriteValueRefsWithFuel
               Except.ok
                 (PsVerifiedIrExpr.record
                   structureName
+                  typeArguments
                   rewrittenFields)
-      | PsVerifiedIrExpr.projection structureName target field =>
+      | PsVerifiedIrExpr.projection
+          structureName
+          typeArguments
+          target
+          field =>
           match rewriteNested target with
           | Except.error error =>
               Except.error error
@@ -247,6 +252,7 @@ def psRustRewriteValueRefsWithFuel
               Except.ok
                 (PsVerifiedIrExpr.projection
                   structureName
+                  typeArguments
                   rewrittenTarget
                   field)
       | PsVerifiedIrExpr.constructor
@@ -268,6 +274,7 @@ def psRustRewriteValueRefsWithFuel
                   rewrittenFields)
       | PsVerifiedIrExpr.matchE
           inductiveName
+          typeArguments
           scrutinee
           alternatives =>
           match rewriteNested scrutinee with
@@ -293,6 +300,7 @@ def psRustRewriteValueRefsWithFuel
                   Except.ok
                     (PsVerifiedIrExpr.matchE
                       inductiveName
+                      typeArguments
                       rewrittenScrutinee
                       rewrittenAlternatives)
 

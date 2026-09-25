@@ -416,6 +416,18 @@ def psTestBackendRustCoverageUnknownType : Bool :=
     coverage.unsupported
     "type:unknown"
 
+def psTestBackendRustCoverageReport : Bool :=
+  let supported :=
+    psRustCoverageReport
+      (psRustCoverageModule psBackendRustIdentityModule);
+  let unsupported :=
+    psRustCoverageReport
+      (psRustCoverageModule psBackendRustUnsupportedImportModule);
+  supported.contains "PSC1_RUST_COVERAGE_UNSUPPORTED_COUNT: 0"
+    && unsupported.contains "PSC1_RUST_COVERAGE_UNSUPPORTED_COUNT: 1"
+    && unsupported.contains
+      "PSC1_RUST_COVERAGE_UNSUPPORTED: module:externalImport"
+
 structure PsBackendRustNamedTest where
   name : String
   passed : Bool
@@ -431,7 +443,8 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers },
   { name := "coverage accepts supported IR", passed := psTestBackendRustCoverageSupported },
   { name := "coverage rejects external imports", passed := psTestBackendRustCoverageExternalImport },
-  { name := "coverage rejects unknown runtime types", passed := psTestBackendRustCoverageUnknownType }
+  { name := "coverage rejects unknown runtime types", passed := psTestBackendRustCoverageUnknownType },
+  { name := "coverage report is CI-stable", passed := psTestBackendRustCoverageReport }
 ]
 
 def psRunBackendRustTests : List PsBackendRustNamedTest -> IO Bool

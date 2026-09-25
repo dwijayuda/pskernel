@@ -524,22 +524,24 @@ def psElabInductiveConstructors
             context
             parameterBindersRev
             inductiveName
-            (index + 1)
+            (Nat.succ index)
             rest
-            (psSetConstructorIndex index declaration :: declarationsRev)
+            (List.cons
+              (psSetConstructorIndex index declaration)
+              declarationsRev)
 
 
 
 def psEnvironmentAddOwnedBootstrapDeclaration
     (environment : PsEnvironment)
     (declaration : PsDeclaration) : Option PsEnvironment :=
-  let name := psDeclarationName declaration
-  if psNameEq name psProdName
-      || psNameEq name psListName
-      || psNameEq name psOptionName then
-    psEnvironmentAddReplacingAxiom
-      environment
-      declaration
+  let name := psDeclarationName declaration;
+  if psNameEq name psProdName then
+    psEnvironmentAddReplacingAxiom environment declaration
+  else if psNameEq name psListName then
+    psEnvironmentAddReplacingAxiom environment declaration
+  else if psNameEq name psOptionName then
+    psEnvironmentAddReplacingAxiom environment declaration
   else
     psEnvironmentAdd environment declaration
 

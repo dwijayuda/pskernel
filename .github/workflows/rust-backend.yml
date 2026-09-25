@@ -149,6 +149,8 @@ jobs:
             "int=" + m.diffInt(7n, 2n).toString(),
             "string=" + m.diffString("é").toString(),
             "array=" + m.diffArray(7n, 8n).toString(),
+            "capture=" + m.diffCapture(5n, 7n).toString(),
+            "capture_array=" + m.diffCaptureArray(5n).toString(),
             "maybe_some=" + m.diffMaybe(5n, 99n, true).toString(),
             "maybe_none=" + m.diffMaybe(5n, 99n, false).toString(),
           ];
@@ -171,6 +173,8 @@ jobs:
           use num_bigint::{BigInt, BigUint};
           use psc_diff_rust::{
               diffArray,
+              diffCapture,
+              diffCaptureArray,
               diffInt,
               diffMaybe,
               diffNat,
@@ -191,6 +195,8 @@ jobs:
               println!("int={}", diffInt(i(7), i(2)));
               println!("string={}", diffString(String::from("é")));
               println!("array={}", diffArray(n(7), n(8)));
+              println!("capture={}", diffCapture(n(5), n(7)));
+              println!("capture_array={}", diffCaptureArray(n(5)));
               println!("maybe_some={}", diffMaybe(n(5), n(99), true));
               println!("maybe_none={}", diffMaybe(n(5), n(99), false));
           }
@@ -205,6 +211,8 @@ jobs:
           int=-5
           string=3
           array=8
+          capture=12
+          capture_array=7
           maybe_some=5
           maybe_none=99
           EOF

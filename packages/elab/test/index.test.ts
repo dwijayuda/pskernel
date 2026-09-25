@@ -7,7 +7,7 @@ import {
   elaborateV061Declarations,
 } from '../src/index.js';
 import {ExprMetaContext} from '@proofscript/meta';
-import {parseV061Module} from '@proofscript/syntax';
+import {parseV061LeanSubsetModule,parseV061Module} from '@proofscript/syntax';
 import {
   Environment,
   Kernel,
@@ -433,6 +433,25 @@ function makeDefinitionEnvironment():Environment {
   );
 }
 console.log('ok - @proofscript/elab kernel-facing non-recursive definitions');
+
+{
+  const env=makeDefinitionEnvironment();
+  const result=elaborateV061Definitions(
+    parseV061LeanSubsetModule(
+      'partial def partialIdentity (x : TestNat) : TestNat := x\n',
+    ),
+    env,
+  );
+  const definition=result.definitions[0];
+  equal(definition?.kind,'definition');
+  if(definition?.kind==='definition'){
+    equal(definition.safety,'partial');
+  }
+  const stored=result.environment.find(nameFromDotted('partialIdentity'));
+  equal(stored?.kind,'definition');
+  if(stored?.kind==='definition')equal(stored.safety,'partial');
+}
+console.log('ok - @proofscript/elab partial definition safety');
 
 
 {

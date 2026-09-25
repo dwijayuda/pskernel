@@ -2,6 +2,7 @@ import Ps.Bridge.CheckedAdmissions
 import Ps.Bridge.Codec
 import Ps.Bridge.Protocol
 import Ps.Core.Builtin
+import Ps.Core.Equality
 
 def psBridgeTestDefinition : PsDeclaration :=
   PsDeclaration.definitionDecl

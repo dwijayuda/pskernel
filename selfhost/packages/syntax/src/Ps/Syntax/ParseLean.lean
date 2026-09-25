@@ -2274,13 +2274,19 @@ def psLeanEquationClausesForBranch
     List PsLeanEquationClause :=
   psLeanEquationClausesForBranchAcc branch clauses []
 
+def psLeanPatternListIsEmpty
+    (patterns : List PsSyntaxPattern) : Bool :=
+  match patterns with
+  | List.nil => true
+  | List.cons _ _ => false
+
 def psLeanFirstCompletedEquation
     (clauses : List PsLeanEquationClause) :
     Option PsLeanEquationClause :=
   match clauses with
   | [] => Option.none
   | List.cons clause rest =>
-      if clause.patterns.isEmpty then
+      if psLeanPatternListIsEmpty clause.patterns then
         Option.some clause
       else
         psLeanFirstCompletedEquation rest
@@ -2297,7 +2303,7 @@ partial def psLeanLowerEquationClauses
   | List.cons argument rest =>
       let patterns :=
         psLeanEquationHeadPatterns clauses;
-      if patterns.isEmpty then
+      if psLeanPatternListIsEmpty patterns then
         Option.none
       else
         let lowerAlternative :

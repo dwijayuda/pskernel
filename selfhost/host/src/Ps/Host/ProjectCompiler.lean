@@ -208,6 +208,10 @@ def psHostSyntaxDeclarationName : PsSyntaxDeclaration -> String
       match psSyntaxNameToName name with
       | some value => psNameToString value
       | none => "<definition>"
+  | .partialDefinition name _ _ _ _ =>
+      match psSyntaxNameToName name with
+      | some value => psNameToString value
+      | none => "<partial>"
   | .theoremDecl name _ _ _ _ =>
       match psSyntaxNameToName name with
       | some value => psNameToString value

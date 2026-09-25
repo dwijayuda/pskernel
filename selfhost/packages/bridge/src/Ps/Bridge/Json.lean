@@ -826,15 +826,21 @@ def psJsonCompareKeys
     (left right : String) : PsJsonKeyOrder :=
   psJsonCompareCharLists (psJsonStringToChars left) (psJsonStringToChars right)
 
-def psJsonInsertObjectField
-    (field : String × PsJsonValue) :
-    List (String × PsJsonValue) ->
-    Except PsJsonEncodeError (List (String × PsJsonValue)) :=
-  fun (fields : List (String × PsJsonValue)) =>
-    match fields with
-    | List.nil =>
+def psJsonInsertObjectFieldInto
+    (fields : List (String × PsJsonValue)) :
+    (String × PsJsonValue) ->
+      Except PsJsonEncodeError (List (String × PsJsonValue)) :=
+  match fields with
+  | List.nil =>
+      fun (field : String × PsJsonValue) =>
         Except.ok (List.cons field List.nil)
-    | List.cons current rest =>
+  | List.cons current rest =>
+      let smaller :
+          (String × PsJsonValue) ->
+            Except PsJsonEncodeError
+              (List (String × PsJsonValue)) :=
+        psJsonInsertObjectFieldInto rest;
+      fun (field : String × PsJsonValue) =>
         match
             psJsonCompareKeys
               (Prod.fst field)
@@ -847,14 +853,16 @@ def psJsonInsertObjectField
               (PsJsonEncodeError.duplicateObjectKey
                 (Prod.fst field))
         | PsJsonKeyOrder.gt =>
-            let smaller :
-                Except PsJsonEncodeError
-                  (List (String × PsJsonValue)) :=
-              psJsonInsertObjectField field rest;
-            match smaller with
+            match smaller field with
             | Except.error error => Except.error error
             | Except.ok sortedRest =>
                 Except.ok (List.cons current sortedRest)
+
+def psJsonInsertObjectField
+    (field : String × PsJsonValue)
+    (fields : List (String × PsJsonValue)) :
+    Except PsJsonEncodeError (List (String × PsJsonValue)) :=
+  psJsonInsertObjectFieldInto fields field
 
 def psJsonSortObjectFields :
     List (String × PsJsonValue) ->

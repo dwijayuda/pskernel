@@ -22,14 +22,14 @@ const packageBySection = new Map([
   ["BackendTs", "backend-ts"],
 ]);
 
-function usage() {
+function usage(entry, outDir) {
   return [
     "usage:",
-    "  node scripts/bootstrap-project.mjs <entry.lean> <out-workspace>",
+    "  node scripts/bootstrap-project.mjs [entry.lean] [out-workspace]",
     "",
     "default:",
-    "  entry: SELFHOST-COMPILER.lean",
-    "  out:   dist/bootstrap/workspace",
+    `  entry: ${entry}`,
+    `  out:   ${outDir}`,
   ].join("\n");
 }
 
@@ -127,8 +127,16 @@ function translateFile(sourcePath, outputPath) {
   }
 }
 
-const entryArg = process.argv[2] ?? "SELFHOST-COMPILER.lean";
-const outArg = process.argv[3] ?? path.join("dist", "bootstrap", "workspace");
+const psconfig = JSON.parse(
+  await readFile(path.join(selfhostRoot, "psconfig.json"), "utf8"),
+);
+const configuredOutDir = psconfig.compilerOptions?.outDir ?? "dist";
+const defaultWorkspace = path.join(configuredOutDir, "bootstrap", "workspace");
+const entryArg = process.argv[2] ?? psconfig.entry;
+const outArg = process.argv[3] ?? defaultWorkspace;
+if (!entryArg) {
+  throw new Error(usage("<missing psconfig.entry>", defaultWorkspace));
+}
 const entryPath = path.resolve(selfhostRoot, entryArg);
 const outWorkspace = path.resolve(selfhostRoot, outArg);
 

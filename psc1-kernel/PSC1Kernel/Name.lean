@@ -15,6 +15,11 @@ def Name.eq : Name → Name → Bool
   | .num p₁ n₁, .num p₂ n₂ => n₁ == n₂ && Name.eq p₁ p₂
   | _, _ => false
 
+def Name.appendAfter (name : Name) (suffix : String) : Name :=
+  match name with
+  | .str parent value => .str parent (value ++ suffix)
+  | other => .str other suffix
+
 def Name.components : Name → List NameComponent
   | .anonymous => []
   | .str p s => p.components ++ [.str s]

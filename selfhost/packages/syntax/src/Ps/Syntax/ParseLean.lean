@@ -570,7 +570,7 @@ def psParseLeanBinderGroup
   | Except.ok opening =>
       match
           psParseLeanBinderNamesWithFuel
-            psParseListLength opening.cursor.remaining
+            (psParseListLength opening.cursor.remaining)
             opening.cursor
             List.nil with
       | Except.error error => Except.error error
@@ -1184,7 +1184,7 @@ def psParseLeanTermWithFuel :
                 | Except.ok afterWith =>
                     match psParseLeanMatchAlternativesWithFuel
                         (psParseLeanTermWithFuel remaining)
-                        psParseListLength afterWith.cursor.remaining
+                        (psParseListLength afterWith.cursor.remaining)
                         afterWith.cursor
                         [] with
                     | Except.error error => Except.error error
@@ -1342,7 +1342,7 @@ def psParseLeanTermWithFuel :
         | none => Except.error (PsParseError.unexpectedEnd "lambda binder")
         | some keyword =>
             match psParseLeanBindersWithFuel
-                psParseListLength keyword.cursor.remaining
+                (psParseListLength keyword.cursor.remaining)
                 keyword.cursor
                 [] with
             | Except.error error => Except.error error
@@ -1487,7 +1487,7 @@ def psParseLeanInductiveConstructorsWithFuel
             | Except.error error => Except.error error
             | Except.ok name =>
                 match psParseLeanBindersWithFuel
-                    psParseListLength name.cursor.remaining
+                    (psParseListLength name.cursor.remaining)
                     name.cursor
                     [] with
                 | Except.error error => Except.error error
@@ -1641,7 +1641,7 @@ def psParseLeanStructureDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
-              psParseListLength name.cursor.remaining
+              (psParseListLength name.cursor.remaining)
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1651,7 +1651,7 @@ def psParseLeanStructureDeclaration
               | Except.ok afterWhere =>
                   match
                       psParseLeanStructureFieldsWithFuel
-                        psParseListLength afterWhere.cursor.remaining
+                        (psParseListLength afterWhere.cursor.remaining)
                         afterWhere.cursor
                         [] with
                   | Except.error error => Except.error error
@@ -1693,7 +1693,7 @@ def psParseLeanInductiveDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
-              psParseListLength name.cursor.remaining
+              (psParseListLength name.cursor.remaining)
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1705,7 +1705,7 @@ def psParseLeanInductiveDeclaration
                 | Except.error error => Except.error error
                 | Except.ok afterWhere =>
                     match psParseLeanInductiveConstructorsWithFuel
-                        psParseListLength afterWhere.cursor.remaining
+                        (psParseListLength afterWhere.cursor.remaining)
                         afterWhere.cursor
                         [] with
                     | Except.error error => Except.error error
@@ -1816,7 +1816,7 @@ def psParseLeanEquationClausesWithFuel
         | some bar =>
             match
                 psParseLeanEquationPatternsWithFuel
-                  psParseListLength bar.cursor.remaining
+                  (psParseListLength bar.cursor.remaining)
                   bar.cursor
                   [] with
             | Except.error error => Except.error error
@@ -2074,7 +2074,7 @@ def psLeanEquationArity
       if
           rest.all
             (fun next =>
-              psParseListLength next.patterns == arity) then
+              (psParseListLength next.patterns) == arity) then
         some arity
       else
         none
@@ -2196,7 +2196,7 @@ def psParseLeanDeclaration
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseLeanBindersWithFuel
-                      psParseListLength name.cursor.remaining
+                      (psParseListLength name.cursor.remaining)
                       name.cursor
                       [] with
                   | Except.error error => Except.error error
@@ -2234,7 +2234,7 @@ def psParseLeanDeclaration
                                 match
                                     psParseLeanEquationClausesWithFuel
                                       psParseLeanTerm
-                                      psParseListLength type.cursor.remaining
+                                      (psParseListLength type.cursor.remaining)
                                       type.cursor
                                       [] with
                                 | Except.error error =>

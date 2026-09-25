@@ -64,7 +64,7 @@ lift/instantiation against final Lean 4.34.
 - K5: inductive/nested-inductive admission and generated metadata validation. **IN PROGRESS** — checked ordinary admission covers empty datatypes, exact universe-polymorphic recursor naming, shared parameters, per-type indices, constructor fields, direct and functional strictly-positive recursion, recursive hypotheses/calls, Prop/small-elimination selection, K-target metadata and K-like proof reduction, and ordinary mutual declarations with multiple motives/minors and cross-recursive reduction. Nested preprocessing/restoration is now implemented for non-mutual outer families, including shared-parameter rebasing, auxiliary recursor renaming, removal of published `_nested` auxiliaries, and differential metadata/reduction oracles for both monomorphic and parameterized `Box Tree` shapes. Negative/nested-outer-mutual edge cases remain fail-closed.
 - K6: optional/fail-closed native-reduction boundary. **FOUNDATIONAL SLICE COMPLETE** — `NativeEvaluator` exposes only optional Bool/Nat callbacks; absent/unsupported results stay opaque, and the oracle verifies both successful callbacks and fail-closed behavior.
 - K7: lean4export replay protocol. **FOUNDATIONAL SLICE COMPLETE** — typed replay covers pinned metadata identity, dense/sequential Name/Level/Expr intern tables, axioms/theorems/opaque/definitions, safe and diagnostic mutual-definition reconstruction, Quot regeneration, and simple/mutual/nested inductive regeneration. The Lean-authored NDJSON boundary rejects duplicate JSON keys and ambiguous record kinds, retains exported constructor/inductive/recursor metadata, and verifies regenerated metadata/rules against the Lean export. CI generates a live pinned-Lean-4.34 stream and replays it through PSC1Kernel, and now also replays the canonical Lean 4.34 `Init.Prelude` fixture end-to-end. Corpus broadening moves to K8.
-- K8: direct/adversarial/Arena/bounded-corpus acceptance matrix. **IN PROGRESS** — the Lean-authored lane is green on canonical `Init.Prelude`, primitive closure, ProofScript text/self-host deltas, Std SAT/CNF, Std Parsec, Std ByteSlice, Lean RBMap, Lean PersistentArray, and Lean PersistentHashMap. Direct Lean-4.34 regressions now lock the two concrete soundness bugs previously exposed by the external Arena sweep (projected-structure validation and sparse/out-of-order export IDs), plus Quot name collision, duplicate mutual-definition names, normalized-`imax` Prop projection/elimination, reserved `_nested` rejection, and deterministic kernel recursion-depth limits with Lean's exact 16× multiplier. The external `round-2026-09` Arena corpus targets Lean 4.29.1, so it is not replayed under the branch's strict 4.34 identity; broader 4.34 adversarial/resource coverage remains.
+- K8: direct/adversarial/Arena/bounded-corpus acceptance matrix. **BOUNDED SEMANTIC BASELINE COMPLETE** — the Lean-authored lane is green on canonical `Init.Prelude`, primitive closure, ProofScript text/self-host deltas, Std SAT/CNF, Std Parsec, Std ByteSlice, Lean RBMap, Lean PersistentArray, and Lean PersistentHashMap. Direct Lean-4.34 regressions now lock the two concrete soundness bugs previously exposed by the external Arena sweep (projected-structure validation and sparse/out-of-order export IDs), plus Quot name collision, duplicate mutual-definition names, normalized-`imax` Prop projection/elimination, reserved `_nested` rejection, and deterministic kernel recursion-depth limits with Lean's exact 16× multiplier. The external `round-2026-09` Arena corpus targets Lean 4.29.1, so it is not replayed under the branch's strict 4.34 identity; broader 4.34 adversarial/resource coverage remains.
 - K9: compile the unchanged Lean source through PSC1 to TypeScript/JavaScript.
 - K10: generate canonical `.ps` and require checked-core/IR parity.
 
@@ -147,10 +147,14 @@ Lean 4.34 (`infer_type_core` and `whnf_core`).  A user-facing
 small-limit rejection and larger-limit acceptance to agree with
 `Lean.Kernel.Environment.addDeclCore`.
 
-Remaining K8 work is primarily broader 4.34 adversarial/resource acceptance
-(especially cumulative heartbeat/interrupt behavior) rather than another
-round of replay-protocol construction.  The current upstream Arena release is
-not used as direct evidence here because its tests are generated against Lean
+The bounded K8 semantic baseline is now closed and recorded in
+`K8_ACCEPTANCE.md`. Final Lean 4.34 installs cumulative heartbeat accounting,
+cancellation-token transport, native stack checks, and process-memory checks at
+the host/runtime boundary around declaration checking; those operational
+controls are therefore documented as host policy rather than copied into the
+pure semantic checker. Deterministic `maxRecDepth` behavior remains modeled and
+differential-tested in PSC1Kernel. The current upstream Arena release is not
+used as direct evidence here because its tests are generated against Lean
 4.29.1, not the pinned final 4.34.0 kernel.
 
 ### WHNF architecture checkpoint

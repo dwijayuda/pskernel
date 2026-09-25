@@ -1,4 +1,4 @@
-import Ps.BackendWasm.Binary
+import Ps.BackendWasm.Lower
 
 def psWasmProfile32 : PsWasmTargetProfile :=
   { wordSize := PsWasmWordSize.wasm32 }
@@ -128,6 +128,63 @@ def psTestWasmMachineIntegerOps : Bool :=
         .usize
         .add)
 
+def psWasmAddU32IrModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "addU32"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "right"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.uint32
+              PsVerifiedIrIntegerBinaryOp.add)
+            [
+              PsVerifiedIrExpr.var "left",
+              PsVerifiedIrExpr.var "right"
+            ]
+      }
+    ]
+  }
+
+def psWasmIsAddU32Function : PsWasmFunction -> Bool
+  | {
+      name := name,
+      parameters := [.i32, .i32],
+      results := [.i32],
+      body := [.localGet 0, .localGet 1, .i32Add]
+    } => name == "addU32"
+  | _ => false
+
+def psTestWasmVerifiedIrLowering : Bool :=
+  match psWasmLowerModule psWasmProfile32 psWasmAddU32IrModule with
+  | Except.error _ => false
+  | Except.ok module =>
+      match module.functions with
+      | [function] =>
+          psWasmIsAddU32Function function
+            && module.exports == [("addU32", "addU32")]
+      | _ => false
+
 def psWasmAnswerModule : PsWasmModule :=
   {
     functions := [
@@ -197,6 +254,7 @@ def main : IO Unit := do
       && psTestWasmWordProfiles
       && psTestWasmMachineIntegerOps
       && psTestWasmMachineIntegerLiterals
+      && psTestWasmVerifiedIrLowering
       && psTestWasmUleb
       && psTestWasmBinaryModule then
     IO.println "PSC1_BACKEND_WASM_TESTS: PASS"

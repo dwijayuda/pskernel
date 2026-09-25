@@ -159,8 +159,15 @@ As of the current branch checkpoint:
   `f32`, and `Float` remains `f64`;
 - the TS <-> Rust differential gate compares both backends against explicit
   expected output for UInt8 wraparound, Int16 overflow, UInt32 comparison,
-  Float32 arithmetic, Float arithmetic, captured closures, arrays, ADTs, and
-  structure-qualified projection;
+  Float32 arithmetic, Float arithmetic, captured closures used as local or
+  higher-order argument values, arrays, ADTs, and structure-qualified
+  projection;
+- generic zero-parameter declarations are rejected consistently with backend-ts
+  rather than being silently reinterpreted as generic Rust functions;
+- function-valued declaration results are currently fail-closed because a Rust
+  `fn(...)` pointer cannot represent a capturing returned closure. Supporting
+  returned/stored capturing closures requires an explicit ownership/runtime
+  representation and is not approximated by the backend;
 - the reusable R3 compiler-IR coverage census is wired into CI and is
   fail-closed: it reports an explicit unsupported set and the real-compiler
   gate requires `PSC1_RUST_COVERAGE_UNSUPPORTED_COUNT: 0` before Rust
@@ -210,6 +217,13 @@ Add:
 Every runtime construct required to compile the ProofScript compiler must lower
 through backend-rust. Unsupported constructs must fail explicitly rather than
 silently using different semantics.
+
+The census currently treats external imports, unknown runtime types, traversal
+fuel exhaustion, generic top-level values, and function-valued declaration
+results as explicit blockers. If the real compiler census reaches one of these,
+the next step is either a target-neutral/shared semantic change or a deliberate
+Rust representation that preserves the existing CompilerIR meaning—not a
+backend-specific semantic shortcut.
 
 ### R4 — native compiler bootstrap
 

@@ -1,11 +1,11 @@
-name: PSC1 shallow-name-hash validation oracle
+name: PSC1 fold-name-hash validation oracle
 
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-env-shallow-name-hash]
+    branches: [perf/psc1-env-fold-hash]
     paths:
-      - ".github/workflows/psc1-shallow-name-hash.yml"
+      - ".github/workflows/psc1-fold-name-hash.yml"
       - "psc1-kernel/**"
       - "oracle/replay-probe/MiniExport.lean"
       - "oracle/replay-probe/ReplayProbe.lean"

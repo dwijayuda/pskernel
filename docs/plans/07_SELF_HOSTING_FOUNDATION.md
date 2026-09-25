@@ -225,7 +225,7 @@ the REQUIRED PSC1 surface before self-hosting**. In particular:
 - Rust and Swift reinforce first-class algebraic data, `Option`-style absence,
   typed `Result`/error values and exhaustive elimination rather than adding
   `null` as a second absence mechanism;
-- Java/Java/C#/modern Python pattern facilities do not justify promoting rich
+- Java/C#/modern Python pattern facilities do not justify promoting rich
   pattern sugar when one ordinary constructor `match` already owns the
   semantics;
 - TypeScript/JavaScript reinforce the value of ecosystem/FFI interoperability,

@@ -86,9 +86,12 @@ def psMetaFresh
   }
 
 def psExprContainsMVar (target : Nat) : PsExpr -> Bool
-  | .mvar id => id == target
+  | .mvar id => Nat.beq id target
   | .app fn arg =>
-      psExprContainsMVar target fn || psExprContainsMVar target arg
+      if psExprContainsMVar target fn then
+        true
+      else
+        psExprContainsMVar target arg
   | .lam _ type body _ =>
       psExprContainsMVar target type || psExprContainsMVar target body
   | .forallE _ type body _ =>

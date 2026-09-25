@@ -113,8 +113,11 @@ jobs:
             Oracle.ReplayProbe.RuntimeMetaProbe \
             --selected-after Init.Prelude \
             "${whnf_init_roots[@]}" \
+            Lean.assignExp \
+            Lean.MetavarContext.getExprAssignmentExp \
             Lean.Meta.whnfImp \
             ProofScript.RuntimeProbe.whnfWithEmptyEnv \
+            ProofScript.RuntimeProbe.whnfWithEmptyEnvAndMCtx \
             > lean434-whnf-bootstrap.ndjson
           test -s lean434-whnf-bootstrap.ndjson
       - name: Execute real Lean.Meta WHNF in JavaScript

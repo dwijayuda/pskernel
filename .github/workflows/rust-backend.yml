@@ -28,6 +28,33 @@ on:
       - docs/plans/08_RUST_BACKEND_NATIVE.md
       - selfhost/rust-toolchain.toml
       - .github/workflows/rust-backend.yml
+  pull_request:
+    branches:
+      - selfhost/psc1-lean-bootstrap
+    paths:
+      - selfhost/packages/backend-rust/**
+      - selfhost/packages/backend-ts/**
+      - selfhost/packages/compiler-ir/**
+      - selfhost/packages/core/**
+      - selfhost/packages/environment/**
+      - selfhost/packages/elab/**
+      - selfhost/packages/erasure/**
+      - selfhost/packages/bridge/**
+      - selfhost/packages/compiler/**
+      - selfhost/host/**
+      - selfhost/packages/cli/**
+      - selfhost/test/BackendRustTests.lean
+      - selfhost/test/BackendRustFixture.lean
+      - selfhost/test/BackendRustSourceTests.lean
+      - selfhost/test/BackendDifferentialFixture.lean
+      - selfhost/test/IrSpecializeTests.lean
+      - selfhost/lakefile.lean
+      - selfhost/package.json
+      - selfhost/scripts/check-workspace.mjs
+      - selfhost/check-psc1-source.mjs
+      - docs/plans/08_RUST_BACKEND_NATIVE.md
+      - selfhost/rust-toolchain.toml
+      - .github/workflows/rust-backend.yml
 
 permissions:
   contents: read

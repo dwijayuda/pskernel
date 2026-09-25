@@ -32,7 +32,7 @@ def psLexSkipLineComment :
   | [], position =>
       { remaining := List.nil, position := position }
   | '\n' :: rest, position =>
-      { remaining := '\n' :: rest, position := position }
+      { remaining := List.cons '\n' rest, position := position }
   | char :: rest, position =>
       psLexSkipLineComment rest (psLexAdvanceChar position char)
 
@@ -90,7 +90,7 @@ def psLexSkipTriviaWithFuel :
           rest
           (psLexAdvanceChar position char)
       else
-        Except.ok { remaining := char :: rest, position := position }
+        Except.ok { remaining := List.cons char rest, position := position }
 
 def psLexSkipTrivia
     (remaining : List Char)
@@ -145,10 +145,10 @@ def psLexReadIdentifier :
         psLexReadIdentifier
           rest
           (psLexAdvanceChar position char)
-          (char :: charsRev)
+          (List.cons char charsRev)
       else
         {
-          cursor := { remaining := char :: rest, position := position }
+          cursor := { remaining := List.cons char rest, position := position }
           charsRev := charsRev
         }
 
@@ -164,10 +164,10 @@ def psLexReadNatural :
         psLexReadNatural
           rest
           (psLexAdvanceChar position char)
-          (char :: charsRev)
+          (List.cons char charsRev)
       else
         {
-          cursor := { remaining := char :: rest, position := position }
+          cursor := { remaining := List.cons char rest, position := position }
           charsRev := charsRev
         }
 
@@ -181,7 +181,7 @@ def psLexReadStringBody :
       let stop := psLexAdvanceChar position '"'
       Except.ok {
         cursor := { remaining := rest, position := stop }
-        charsRev := '"' :: charsRev
+        charsRev := List.cons '"' charsRev
       }
   | '\n' :: _, position, start, _ =>
       Except.error
@@ -193,13 +193,13 @@ def psLexReadStringBody :
         rest
         afterEscape
         start
-        (escaped :: '\\' :: charsRev)
+        (List.cons escaped (List.cons '\\' charsRev))
   | char :: rest, position, start, charsRev =>
       psLexReadStringBody
         rest
         (psLexAdvanceChar position char)
         start
-        (char :: charsRev)
+        (List.cons char charsRev)
 
 def psLexHexDigit (char : Char) : Bool :=
   ('0' <= char && char <= '9')
@@ -226,7 +226,7 @@ def psLexReadCharacterBody :
         Except.ok {
           cursor := { remaining := rest, position := stop }
           charsRev :=
-            '\'' :: second :: first :: 'x' :: '\\' :: charsRev
+            List.cons '\'' (List.cons second (List.cons first (List.cons 'x' (List.cons '\\' charsRev))))
         }
       else
         Except.error
@@ -249,8 +249,13 @@ def psLexReadCharacterBody :
         Except.ok {
           cursor := { remaining := rest, position := stop }
           charsRev :=
-            '\'' :: fourth :: third :: second :: first
-              :: 'u' :: '\\' :: charsRev
+            List.cons '\''
+              (List.cons fourth
+                (List.cons third
+                  (List.cons second
+                    (List.cons first
+                      (List.cons 'u'
+                        (List.cons '\\' charsRev))))))
         }
       else
         Except.error
@@ -269,7 +274,7 @@ def psLexReadCharacterBody :
         let stop := psLexAdvanceChar afterEscape '\''
         Except.ok {
           cursor := { remaining := rest, position := stop }
-          charsRev := '\'' :: escaped :: '\\' :: charsRev
+          charsRev := List.cons '\'' (List.cons escaped (List.cons '\\' charsRev))
         }
       else
         Except.error
@@ -280,7 +285,7 @@ def psLexReadCharacterBody :
       let stop := psLexAdvanceChar afterChar '\''
       Except.ok {
         cursor := { remaining := rest, position := stop }
-        charsRev := '\'' :: char :: charsRev
+        charsRev := List.cons '\'' (List.cons char charsRev)
       }
   | _ :: rest, position, start, _ =>
       let stop :=
@@ -346,7 +351,7 @@ def psLexReadToken
       if psLexIdentifierStart first then
         let read :=
           psLexReadIdentifier
-            (second :: rest)
+            (List.cons second rest)
             (psLexAdvanceChar start first)
             (List.cons first List.nil)
         Except.ok
@@ -354,7 +359,7 @@ def psLexReadToken
       else if psLexDigit first then
         let read :=
           psLexReadNatural
-            (second :: rest)
+            (List.cons second rest)
             (psLexAdvanceChar start first)
             (List.cons first List.nil)
         Except.ok
@@ -370,7 +375,7 @@ def psLexReadToken
       else
         let stop := psLexAdvanceChar start first
         let read : PsLexRead := {
-          cursor := { remaining := second :: rest, position := stop }
+          cursor := { remaining := List.cons second rest, position := stop }
           charsRev := List.cons first List.nil
         }
         Except.ok
@@ -422,18 +427,21 @@ def psLexAllWithFuel :
       | Except.ok ready =>
           if psLexCursorDone ready then
             let position := ready.position
-            Except.ok [{
-              kind := PsTokenKind.endOfInput
-              text := ""
-              span := psLexSpan position position
-            }]
+            Except.ok
+              (List.cons
+                {
+                  kind := PsTokenKind.endOfInput
+                  text := ""
+                  span := psLexSpan position position
+                }
+                List.nil)
           else
             match psLexReadToken ready with
             | Except.error error => Except.error error
             | Except.ok (token, next) =>
                 match psLexAllWithFuel fuel next with
                 | Except.error error => Except.error error
-                | Except.ok rest => Except.ok (token :: rest)
+                | Except.ok rest => Except.ok (List.cons token rest)
 
 def psLex (source : String) : Except PsLexError (List PsToken) :=
   let cursor := psLexCursorFromString source

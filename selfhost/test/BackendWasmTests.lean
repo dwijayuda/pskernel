@@ -359,6 +359,8 @@ def psWasmStructureIrModule : PsVerifiedIrModule :=
 def psWasmIsPointStructure : PsWasmStructType -> Bool
   | {
       name := name,
+      superType := none,
+      isFinal := true,
       fields := [
         { name := "x", storageType := .value .i32 },
         { name := "y", storageType := .value .i32 }
@@ -369,6 +371,8 @@ def psWasmIsPointStructure : PsWasmStructType -> Bool
 def psWasmIsSmallSignedStructure : PsWasmStructType -> Bool
   | {
       name := name,
+      superType := none,
+      isFinal := true,
       fields := [
         { name := "value", storageType := .packedI16 }
       ]
@@ -416,6 +420,186 @@ def psTestWasmStructureLowering : Bool :=
             && psWasmIsSmallSignedStructure small
             && psWasmIsPointXFunction pointFn
             && psWasmIsSmallSignedFunction smallFn
+      | _, _ => false
+
+def psWasmMaybeIrModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := [
+      {
+        name := "MaybeU32"
+        typeParameters := []
+        constructors := [
+          {
+            name := "none"
+            fields := []
+          },
+          {
+            name := "some"
+            fields := [
+              {
+                name := "value"
+                type :=
+                  PsVerifiedIrType.primitive
+                    PsVerifiedIrPrimitiveType.uint32
+              }
+            ]
+          }
+        ]
+      }
+    ]
+    declarations := [
+      {
+        name := "someValue"
+        typeParameters := []
+        parameters := [
+          {
+            name := "input"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.matchE
+            "MaybeU32"
+            (PsVerifiedIrExpr.constructor
+              "MaybeU32"
+              "some"
+              []
+              [("value", PsVerifiedIrExpr.var "input")])
+            [
+              (
+                "none",
+                [],
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.machineInteger
+                    PsVerifiedIrMachineIntegerType.uint32
+                    0)
+              ),
+              (
+                "some",
+                [
+                  {
+                    field := "value"
+                    name := "value"
+                    type :=
+                      PsVerifiedIrType.primitive
+                        PsVerifiedIrPrimitiveType.uint32
+                  }
+                ],
+                PsVerifiedIrExpr.var "value"
+              )
+            ]
+      },
+      {
+        name := "noneValue"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.matchE
+            "MaybeU32"
+            (PsVerifiedIrExpr.constructor
+              "MaybeU32"
+              "none"
+              []
+              [])
+            [
+              (
+                "none",
+                [],
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.machineInteger
+                    PsVerifiedIrMachineIntegerType.uint32
+                    0)
+              ),
+              (
+                "some",
+                [
+                  {
+                    field := "value"
+                    name := "value"
+                    type :=
+                      PsVerifiedIrType.primitive
+                        PsVerifiedIrPrimitiveType.uint32
+                  }
+                ],
+                PsVerifiedIrExpr.var "value"
+              )
+            ]
+      }
+    ]
+  }
+
+def psWasmIsMaybeBase : PsWasmStructType -> Bool
+  | {
+      name := "MaybeU32",
+      superType := none,
+      isFinal := false,
+      fields := []
+    } => true
+  | _ => false
+
+def psWasmIsMaybeNone : PsWasmStructType -> Bool
+  | {
+      name := "MaybeU32$none",
+      superType := some "MaybeU32",
+      isFinal := true,
+      fields := []
+    } => true
+  | _ => false
+
+def psWasmIsMaybeSome : PsWasmStructType -> Bool
+  | {
+      name := "MaybeU32$some",
+      superType := some "MaybeU32",
+      isFinal := true,
+      fields := [
+        { name := "value", storageType := .value .i32 }
+      ]
+    } => true
+  | _ => false
+
+def psWasmIsSomeValueFunction : PsWasmFunction -> Bool
+  | {
+      name := "someValue",
+      parameters := [.i32],
+      results := [.i32],
+      locals := [.refT "MaybeU32", .i32],
+      body := [
+        .localGet 0,
+        .structNew "MaybeU32$some",
+        .localSet 1,
+        .localGet 1,
+        .refTest "MaybeU32$none",
+        .ifStart (some .i32),
+        .i32Const 0,
+        .else_,
+        .localGet 1,
+        .refCast "MaybeU32$some",
+        .structGet "MaybeU32$some" 0,
+        .localSet 2,
+        .localGet 2,
+        .end_
+      ]
+    } => true
+  | _ => false
+
+def psTestWasmInductiveMatchLowering : Bool :=
+  match psWasmLowerModule psWasmProfile32 psWasmMaybeIrModule with
+  | Except.error _ => false
+  | Except.ok module =>
+      match module.structures, module.functions with
+      | [base, noneType, someType], someFn :: _ =>
+          psWasmIsMaybeBase base
+            && psWasmIsMaybeNone noneType
+            && psWasmIsMaybeSome someType
+            && psWasmIsSomeValueFunction someFn
       | _, _ => false
 
 def psWasmAnswerModule : PsWasmModule :=
@@ -500,6 +684,7 @@ def main : IO Unit := do
       && psTestWasmVerifiedIrLowering
       && psTestWasmLetLowering
       && psTestWasmStructureLowering
+      && psTestWasmInductiveMatchLowering
       && psTestWasmUleb
       && psTestWasmSignedLeb
       && psTestWasmBinaryModule then

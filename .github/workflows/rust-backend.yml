@@ -105,3 +105,46 @@ jobs:
           num-traits = "0.2"
           EOF
           cargo check --manifest-path /tmp/psc-rust-fixture/Cargo.toml
+
+      - name: Execute generated Rust semantic smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/psc-rust-fixture/tests
+          cat > /tmp/psc-rust-fixture/tests/runtime.rs <<'EOF'
+          use num_bigint::BigUint;
+          use psc_rust_fixture::{
+              arrayDemo,
+              arrayFoldOnly,
+              arrayMapDemo,
+              plusOne,
+              pushBang,
+              unwrapOr,
+              utf8Size,
+              wrapNat,
+              Maybe,
+          };
+
+          fn n(value: u32) -> BigUint {
+              BigUint::from(value)
+          }
+
+          #[test]
+          fn generated_semantics_smoke() {
+              assert_eq!(plusOne(n(41)), n(42));
+              assert_eq!(pushBang(String::from("hi")), "hi!");
+              assert_eq!(utf8Size(String::from("é")), n(2));
+
+              assert_eq!(
+                  arrayMapDemo(vec![n(1), n(2)]),
+                  vec![n(1), n(2)],
+              );
+              assert_eq!(arrayFoldOnly(vec![n(4), n(5)]), n(0));
+              assert_eq!(arrayDemo(n(7), n(8)), n(8));
+
+              assert_eq!(unwrapOr(wrapNat(n(5)), n(99)), n(5));
+              assert_eq!(unwrapOr(Maybe::none {}, n(99)), n(99));
+          }
+          EOF
+          cd selfhost
+          cargo test --manifest-path /tmp/psc-rust-fixture/Cargo.toml

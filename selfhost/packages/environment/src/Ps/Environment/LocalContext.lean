@@ -40,7 +40,7 @@ def psLocalDeclUserName : PsLocalDecl -> PsName
 def psLocalFindByIdInList (id : Nat) : List PsLocalDecl -> Option PsLocalDecl
   | [] => none
   | declaration :: rest =>
-      if psLocalDeclId declaration == id then
+      if Nat.beq (psLocalDeclId declaration) id then
         some declaration
       else
         psLocalFindByIdInList id rest
@@ -69,8 +69,8 @@ def psLocalPushBinding
     (userName : PsName)
     (type : PsExpr)
     (binder : PsBinderInfo) : PsLocalPushResult :=
-  let id := context.nextId
-  let declaration := PsLocalDecl.binding id userName type binder
+  let id := context.nextId;
+  let declaration := PsLocalDecl.binding id userName type binder;
   {
     context := {
       nextId := id + 1
@@ -84,8 +84,8 @@ def psLocalPushLet
     (userName : PsName)
     (type : PsExpr)
     (value : PsExpr) : PsLocalPushResult :=
-  let id := context.nextId
-  let declaration := PsLocalDecl.letDecl id userName type value
+  let id := context.nextId;
+  let declaration := PsLocalDecl.letDecl id userName type value;
   {
     context := {
       nextId := id + 1

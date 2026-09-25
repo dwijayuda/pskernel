@@ -33,14 +33,14 @@ def psLiteralEq (left : PsLiteral) (right : PsLiteral) : Bool :=
 def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
   match left with
   | .zero =>
-      fun right =>
+      fun (right : PsLevel) =>
         match right with
         | .zero => true
         | _ => false
   | .succ leftValue =>
       let smaller : PsLevel -> Bool :=
         psLevelStructuralEq leftValue;
-      fun right =>
+      fun (right : PsLevel) =>
         match right with
         | .succ rightValue =>
             smaller rightValue
@@ -50,7 +50,7 @@ def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
         psLevelStructuralEq leftA;
       let rightEq : PsLevel -> Bool :=
         psLevelStructuralEq leftB;
-      fun right =>
+      fun (right : PsLevel) =>
         match right with
         | .max rightA rightB =>
             if leftEq rightA then
@@ -63,7 +63,7 @@ def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
         psLevelStructuralEq leftA;
       let rightEq : PsLevel -> Bool :=
         psLevelStructuralEq leftB;
-      fun right =>
+      fun (right : PsLevel) =>
         match right with
         | .imax rightA rightB =>
             if leftEq rightA then
@@ -72,12 +72,12 @@ def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
               false
         | _ => false
   | .param leftName =>
-      fun right =>
+      fun (right : PsLevel) =>
         match right with
         | .param rightName => psNameEq leftName rightName
         | _ => false
   | .mvar leftId =>
-      fun right =>
+      fun (right : PsLevel) =>
         match right with
         | .mvar rightId => Nat.beq leftId rightId
         | _ => false

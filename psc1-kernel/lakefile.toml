@@ -9,3 +9,7 @@ name = "PSC1Kernel"
 [[lean_exe]]
 name = "psc1_replay"
 root = "PSC1Kernel.Test.ReplayFile"
+
+[[lean_exe]]
+name = "psc1-kernel-replay"
+root = "PSC1Kernel.Test.ReplayFile"

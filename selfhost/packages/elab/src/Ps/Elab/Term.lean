@@ -657,7 +657,7 @@ def psElabLambda
       match
           psElabLambdaBodyExpected
             binderResult.context
-            List.reverse binderResult.bindersRev
+            (List.reverse binderResult.bindersRev)
             expected with
       | Except.error error => Except.error error
       | Except.ok prepared =>

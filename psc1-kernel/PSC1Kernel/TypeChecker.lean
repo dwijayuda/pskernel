@@ -260,18 +260,21 @@ def reduceProjCore
     (typeName : Name)
     (idx : Nat)
     (struct : Expr) : Option Expr :=
-  let fn := struct.getAppFn
-  let args := struct.getAppArgs
-  match fn with
-  | .const ctorName _ =>
-    match ctx.env.find? ctorName with
-    | some (.ctorInfo ctor) =>
-      if !Name.eq ctor.induct typeName then
-        none
-      else
-        listGet? args (ctor.numParams + idx)
+  if idx > leanUInt32Max then
+    none
+  else
+    let fn := struct.getAppFn
+    let args := struct.getAppArgs
+    match fn with
+    | .const ctorName _ =>
+      match ctx.env.find? ctorName with
+      | some (.ctorInfo ctor) =>
+        if !Name.eq ctor.induct typeName then
+          none
+        else
+          listGet? args (ctor.numParams + idx)
+      | _ => none
     | _ => none
-  | _ => none
 
 
 def applyArgs (fn : Expr) (args : List Expr) : Expr :=
@@ -809,6 +812,8 @@ partial def inferProj
     (idx : Nat)
     (struct : Expr) : Except String Expr := do
   let type ← whnf ctx (← infer ctx struct)
+  if idx > leanUInt32Max then
+    throw "invalid projection index"
   let fn := type.getAppFn
   let args := type.getAppArgs
   let (.const inductName inductLevels) := fn

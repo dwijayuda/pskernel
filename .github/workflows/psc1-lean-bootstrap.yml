@@ -56,6 +56,8 @@ jobs:
           node --check selfhost/scripts/bootstrap-project.mjs
           node --check selfhost/scripts/compile-with-generated.mjs
           node --check selfhost/scripts/translate-with-generated.mjs
+          node --check selfhost/scripts/reemit-project-with-generated.mjs
+          node --check selfhost/scripts/compare-source-workspaces.mjs
           node --check selfhost/scripts/compare-selfhost.mjs
           node --check selfhost/scripts/check-workspace.mjs
           node --check selfhost/scripts/clean.mjs

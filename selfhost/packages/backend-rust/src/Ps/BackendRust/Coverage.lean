@@ -1,4 +1,5 @@
 import Ps.BackendRust.Type
+import Ps.BackendRust.Module
 
 structure PsRustCoverage where
   features : List String
@@ -738,9 +739,37 @@ def psRustCoverageModule
     psRustCoverageInductiveList
       withStructures
       module.inductives;
-  psRustCoverageDeclarationList
-    withInductives
-    module.declarations
+  let withDeclarations :=
+    psRustCoverageDeclarationList
+      withInductives
+      module.declarations;
+  match psRustValidateModuleNames module with
+  | Except.ok _ =>
+      withDeclarations
+  | Except.error (PsRustEmitError.unknownStructure _) =>
+      psRustCoverageAddUnsupported
+        (psRustCoverageAddFeature
+          withDeclarations
+          "module:unknownStructure")
+        "module:unknownStructure"
+  | Except.error (PsRustEmitError.unknownInductive _) =>
+      psRustCoverageAddUnsupported
+        (psRustCoverageAddFeature
+          withDeclarations
+          "module:unknownInductive")
+        "module:unknownInductive"
+  | Except.error PsRustEmitError.fuelExhausted =>
+      psRustCoverageAddUnsupported
+        (psRustCoverageAddFeature
+          withDeclarations
+          "coverage:nameValidationFuelExhausted")
+        "coverage:nameValidationFuelExhausted"
+  | Except.error _ =>
+      psRustCoverageAddUnsupported
+        (psRustCoverageAddFeature
+          withDeclarations
+          "module:nameValidation")
+        "module:nameValidation"
 
 def psRustCoverageReverseAcc :
     List String -> List String -> List String

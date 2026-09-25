@@ -170,8 +170,17 @@ def assertProjectionOracle : IO Unit := do
     | .error _ => true
 
   let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanNat ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type0
+      isUnsafe := false
+    }) with
+    | .ok e => pure e
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected projection-index oracle Nat axiom"
   let lean1 ←
-    match Lean.Kernel.Environment.addDecl lean0 {} (.inductDecl [] 0 [{
+    match Lean.Kernel.Environment.addDecl leanNat {} (.inductDecl [] 0 [{
       name := toLeanName S
       type := toLeanExpr type0
       ctors := [{

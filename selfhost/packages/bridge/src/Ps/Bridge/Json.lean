@@ -12,6 +12,45 @@ def psJsonCharCode (char : Char) : Nat :=
 def psJsonCharEq (left right : Char) : Bool :=
   Nat.beq (psJsonCharCode left) (psJsonCharCode right)
 
+def psJsonStringAtEnd
+    (value : String)
+    (position : Nat) : Bool :=
+  String.Internal.atEnd value (String.Pos.Raw.mk position)
+
+def psJsonStringGet
+    (value : String)
+    (position : Nat) : Char :=
+  String.Internal.get value (String.Pos.Raw.mk position)
+
+def psJsonStringNext
+    (value : String)
+    (position : Nat) : Nat :=
+  String.Pos.Raw.byteIdx
+    (String.Internal.next value (String.Pos.Raw.mk position))
+
+def psJsonStringCharsWithFuel
+    (fuel : Nat) : String -> Nat -> List Char :=
+  match fuel with
+  | Nat.zero =>
+      fun (_value : String) (_position : Nat) =>
+        List.nil
+  | Nat.succ remaining =>
+      let smaller : String -> Nat -> List Char :=
+        psJsonStringCharsWithFuel remaining;
+      fun (value : String) (position : Nat) =>
+        if psJsonStringAtEnd value position then
+          List.nil
+        else
+          List.cons
+            (psJsonStringGet value position)
+            (smaller value (psJsonStringNext value position))
+
+def psJsonStringToChars (value : String) : List Char :=
+  psJsonStringCharsWithFuel
+    (Nat.succ (String.utf8ByteSize value))
+    value
+    0
+
 def psJsonCharListEq
     (left : List Char) : List Char -> Bool :=
   match left with
@@ -33,7 +72,7 @@ def psJsonCharListEq
               false
 
 def psJsonStringEq (left right : String) : Bool :=
-  psJsonCharListEq left.toList right.toList
+  psJsonCharListEq psJsonStringToChars left psJsonStringToChars right
 
 def psJsonNatInRange
     (value lower upper : Nat) : Bool :=
@@ -93,7 +132,7 @@ def psJsonEscapeChars : List Char -> String
       psJsonConcat2 (psJsonEscapeChar char) (psJsonEscapeChars rest)
 
 def psJsonQuote (value : String) : String :=
-  psJsonConcat3 "\"" (psJsonEscapeChars value.toList) "\""
+  psJsonConcat3 "\"" (psJsonEscapeChars psJsonStringToChars value) "\""
 
 def psJsonJoin (separator : String) : List String -> String
   | List.nil =>
@@ -630,7 +669,7 @@ partial def psJsonParseValueWithFuel
 def psJsonParse
     (source : String) :
     Except PsJsonParseError PsJsonValue :=
-  let chars := source.toList;
+  let chars := psJsonStringToChars source;
   match
       psJsonParseValueWithFuel
         (Except.error PsJsonParseError.fuelExhausted)
@@ -710,7 +749,7 @@ def psJsonCompareCharLists :
 
 def psJsonCompareKeys
     (left right : String) : PsJsonKeyOrder :=
-  psJsonCompareCharLists left.toList right.toList
+  psJsonCompareCharLists psJsonStringToChars left psJsonStringToChars right
 
 def psJsonInsertObjectField
     (field : String × PsJsonValue) :
@@ -747,7 +786,7 @@ def psJsonSortObjectFields :
 
 def psJsonValidateCanonicalNumber
     (text : String) : Bool :=
-  match psJsonParseNumber text.toList with
+  match psJsonParseNumber psJsonStringToChars text with
   | Except.error _ => false
   | Except.ok parsed =>
       match parsed.rest with

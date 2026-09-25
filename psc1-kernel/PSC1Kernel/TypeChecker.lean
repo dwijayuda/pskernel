@@ -1,3 +1,4 @@
+import Init.Data.Nat.Bitwise.Basic
 import PSC1Kernel.Environment
 import PSC1Kernel.LocalContext
 import PSC1Kernel.Instantiate
@@ -66,6 +67,21 @@ def kernelNatBeqName : Name :=
 def kernelNatBleName : Name :=
   .str kernelNatName "ble"
 
+def kernelNatLandName : Name :=
+  .str kernelNatName "land"
+
+def kernelNatLorName : Name :=
+  .str kernelNatName "lor"
+
+def kernelNatXorName : Name :=
+  .str kernelNatName "xor"
+
+def kernelNatShiftLeftName : Name :=
+  .str kernelNatName "shiftLeft"
+
+def kernelNatShiftRightName : Name :=
+  .str kernelNatName "shiftRight"
+
 def natLiteralValue? : Expr → Option Nat
   | .lit (.nat value) => some value
   | .const name levels =>
@@ -97,6 +113,16 @@ def reduceNatBinary (op : Name) (a b : Nat) : Option Expr :=
     some (boolExpr (a == b))
   else if Name.eq op kernelNatBleName then
     some (boolExpr (a <= b))
+  else if Name.eq op kernelNatLandName then
+    some (.lit (.nat (Nat.land a b)))
+  else if Name.eq op kernelNatLorName then
+    some (.lit (.nat (Nat.lor a b)))
+  else if Name.eq op kernelNatXorName then
+    some (.lit (.nat (Nat.xor a b)))
+  else if Name.eq op kernelNatShiftLeftName then
+    some (.lit (.nat (Nat.shiftLeft a b)))
+  else if Name.eq op kernelNatShiftRightName then
+    some (.lit (.nat (Nat.shiftRight a b)))
   else
     none
 

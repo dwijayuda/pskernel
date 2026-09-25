@@ -16,7 +16,7 @@ import {
   invokeLean434JsImplementedBy,
   invokeLean434JsIntrinsic,
   type Lean434DeclarationExternBinding,
-  type LeanRef,
+  LeanRef,
 } from './lean4.js';
 import type {
   Lean434RuntimeMetadataIndex,

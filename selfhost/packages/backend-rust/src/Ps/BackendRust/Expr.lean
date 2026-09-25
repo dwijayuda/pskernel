@@ -34,7 +34,7 @@ def psRustEmitFieldListWith
       | Except.ok printed =>
           let rendered :=
             psRustConcat3
-              (Prod.fst field)
+              (psRustIdentifier (Prod.fst field))
               ": "
               printed;
           match psRustEmitFieldListWith emitExpr rest with
@@ -56,7 +56,7 @@ def psRustEmitParameterList
       | Except.ok printedType =>
           let rendered :=
             psRustConcat3
-              parameter.name
+              (psRustIdentifier parameter.name)
               ": "
               printedType;
           match psRustEmitParameterList rest with
@@ -585,9 +585,9 @@ def psRustEmitMatchBindings
   | List.cons binding rest =>
       let current :=
         psRustConcat3
-          binding.field
+          (psRustIdentifier binding.field)
           ": "
-          binding.name;
+          (psRustIdentifier binding.name);
       match rest with
       | List.nil =>
           current
@@ -621,9 +621,9 @@ def psRustEmitAlternativeListWith
       | Except.ok printedBody =>
           let pattern :=
             psRustConcat4
-              inductiveName
+              (psRustIdentifier inductiveName)
               "::"
-              constructorName
+              (psRustIdentifier constructorName)
               (psRustConcat3
                 " { "
                 (psRustEmitMatchBindings bindings)
@@ -656,7 +656,7 @@ def psRustEmitExprWithFuel :
       | PsVerifiedIrExpr.literal literal =>
           Except.ok (psRustEmitLiteral literal)
       | PsVerifiedIrExpr.var name =>
-          Except.ok name
+          Except.ok (psRustIdentifier name)
       | PsVerifiedIrExpr.intrinsic operation arguments =>
           match psRustEmitExprListWith emitNested arguments with
           | Except.error error =>
@@ -709,7 +709,7 @@ def psRustEmitExprWithFuel :
                   Except.ok
                     (psRustConcat4
                       "{ let "
-                      name
+                      (psRustIdentifier name)
                       " = "
                       (psRustConcat4
                         printedValue
@@ -746,7 +746,7 @@ def psRustEmitExprWithFuel :
           | Except.ok printedFields =>
               Except.ok
                 (psRustConcat4
-                  structureName
+                  (psRustIdentifier structureName)
                   " { "
                   (psRustJoin ", " printedFields)
                   " }")
@@ -760,7 +760,7 @@ def psRustEmitExprWithFuel :
                   "("
                   printedTarget
                   ")."
-                  field)
+                  (psRustIdentifier field))
       | PsVerifiedIrExpr.constructor
           inductiveName
           constructorName
@@ -774,16 +774,16 @@ def psRustEmitExprWithFuel :
               | List.nil =>
                   Except.ok
                     (psRustConcat4
-                      inductiveName
+                      (psRustIdentifier inductiveName)
                       "::"
-                      constructorName
+                      (psRustIdentifier constructorName)
                       "{}")
               | List.cons _ _ =>
                   Except.ok
                     (psRustConcat4
-                      inductiveName
+                      (psRustIdentifier inductiveName)
                       "::"
-                      constructorName
+                      (psRustIdentifier constructorName)
                       (psRustConcat3
                         " { "
                         (psRustJoin ", " printedFields)

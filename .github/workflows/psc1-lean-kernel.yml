@@ -84,7 +84,7 @@ jobs:
             --base ../oracle/fixtures/lean434-init-prelude.ndjson \
             ../oracle/fixtures/lean434-proofscript-text-foundation.ndjson \
             ../oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson
-      - name: Replay K8 standalone bounded corpora
+      - name: Replay K8 standalone small corpora
         working-directory: psc1-kernel
         shell: bash
         run: |
@@ -92,11 +92,38 @@ jobs:
           for fixture in \
             lean434-std-sat-cnf-roots.ndjson \
             lean434-std-parsec-roots.ndjson \
-            lean434-std-byteslice-roots.ndjson \
-            lean434-lean-rbmap-roots.ndjson \
-            lean434-lean-persistentarray-roots.ndjson \
             lean434-lean-persistenthashmap-roots.ndjson
           do
             echo "== replay $fixture =="
             timeout 600s lake env lean --run PSC1Kernel/Test/ReplayFile.lean "../oracle/fixtures/$fixture"
           done
+
+  k8-large:
+    name: K8 large corpus (${{ matrix.fixture }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        fixture:
+          - lean434-std-byteslice-roots.ndjson
+          - lean434-lean-rbmap-roots.ndjson
+          - lean434-lean-persistentarray-roots.ndjson
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build PSC1 kernel source with Lean 4.34
+        working-directory: psc1-kernel
+        run: lake build
+      - name: Replay bounded corpus
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "== replay ${{ matrix.fixture }} =="
+          timeout 1800s lake env lean --run PSC1Kernel/Test/ReplayFile.lean "../oracle/fixtures/${{ matrix.fixture }}"

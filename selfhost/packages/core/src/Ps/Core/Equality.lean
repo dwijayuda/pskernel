@@ -60,15 +60,18 @@ def psLevelStructuralEq (left : PsLevel) (right : PsLevel) : Bool :=
       | .mvar rightId => leftId == rightId
       | _ => false
 
-def psLevelListEq : List PsLevel -> List PsLevel -> Bool
-  | [], right =>
+def psLevelListEq
+    (left : List PsLevel)
+    (right : List PsLevel) : Bool :=
+  match left with
+  | [] =>
       match right with
       | [] => true
       | _ => false
-  | left :: leftRest, right =>
+  | leftValue :: leftRest =>
       match right with
       | rightValue :: rightRest =>
-          psLevelStructuralEq left rightValue
+          psLevelStructuralEq leftValue rightValue
             && psLevelListEq leftRest rightRest
       | _ => false
 

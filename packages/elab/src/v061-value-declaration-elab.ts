@@ -137,6 +137,6 @@ export function elaborateV061ValueDeclaration(
       kind:'regular',
       height:maxRegularHeight(environment,value)+1n,
     },
-    safety:'safe',
+    safety:source.partial?'partial':'safe',
   };
 }

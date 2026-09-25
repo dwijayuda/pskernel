@@ -198,6 +198,101 @@ def assertProjectionOracle : IO Unit := do
   assertTrue "uint32 projection-index rejection differs from Lean 4.34"
     (oursHugeRejects == leanHugeRejects && leanHugeRejects)
 
+def assertArenaProjectionStructureSoundnessOracle : IO Unit := do
+  -- Regression extracted from the Arena bug that previously let projection
+  -- typing trust the declared structure family without checking the actual
+  -- structure expression.  If accepted, this malformed constructor
+  -- application could be projected to manufacture a proof of False.
+  let FalseN : PSC1Kernel.Name := .str .anonymous "ArenaFalse"
+  let TrueN : PSC1Kernel.Name := .str .anonymous "ArenaTrue"
+  let TrueIntro : PSC1Kernel.Name := .str TrueN "intro"
+  let Wrapper : PSC1Kernel.Name := .str (.str .anonymous "Arena") "Wrapper"
+  let WrapperMk : PSC1Kernel.Name := .str Wrapper "mk"
+  let prop : PSC1Kernel.Expr := .sort .zero
+  let falseT : PSC1Kernel.Expr := .const FalseN []
+  let trueT : PSC1Kernel.Expr := .const TrueN []
+  let wrapperT : PSC1Kernel.Expr := .const Wrapper []
+  let wrapperCtorT : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "p") falseT wrapperT .default
+
+  let psc0 : PSC1Kernel.Environment := .empty
+  let psc1 := psc0.addUnchecked (.axiomInfo {
+    base := mkBase FalseN prop
+    isUnsafe := false
+  })
+  let psc2 := psc1.addUnchecked (.axiomInfo {
+    base := mkBase TrueN prop
+    isUnsafe := false
+  })
+  let psc3 := psc2.addUnchecked (.axiomInfo {
+    base := mkBase TrueIntro trueT
+    isUnsafe := false
+  })
+  let pscEnv ← exceptToIO
+    "PSC1 Arena projection wrapper admission"
+    (PSC1Kernel.Kernel.addSimpleInductive psc3 {
+      levelParams := []
+      name := Wrapper
+      type := prop
+      ctors := [{ name := WrapperMk, type := wrapperCtorT }]
+      isUnsafe := false
+    })
+
+  let badStruct : PSC1Kernel.Expr :=
+    .app (.const WrapperMk []) (.const TrueIntro [])
+  let badProj : PSC1Kernel.Expr :=
+    .proj Wrapper 0 badStruct
+  let pscRejects :=
+    match PSC1Kernel.check (PSC1Kernel.CheckerContext.empty pscEnv) badProj with
+    | .ok _ => false
+    | .error _ => true
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName FalseN
+      levelParams := []
+      type := toLeanExpr prop
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean rejected Arena False axiom"
+  let lean2 ←
+    match Lean.Kernel.Environment.addDecl lean1 {} (.axiomDecl {
+      name := toLeanName TrueN
+      levelParams := []
+      type := toLeanExpr prop
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean rejected Arena True axiom"
+  let lean3 ←
+    match Lean.Kernel.Environment.addDecl lean2 {} (.axiomDecl {
+      name := toLeanName TrueIntro
+      levelParams := []
+      type := toLeanExpr trueT
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean rejected Arena True.intro axiom"
+  let lean4 ←
+    match Lean.Kernel.Environment.addDecl lean3 {} (.inductDecl [] 0 [{
+      name := toLeanName Wrapper
+      type := toLeanExpr prop
+      ctors := [{ name := toLeanName WrapperMk, type := toLeanExpr wrapperCtorT }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean rejected Arena Wrapper inductive"
+  let leanEnv := Lean.Environment.ofKernelEnv lean4
+  let leanRejects :=
+    match Lean.Kernel.check leanEnv ({} : Lean.LocalContext) (toLeanExpr badProj) with
+    | .ok _ => false
+    | .error _ => true
+
+  assertTrue
+    "Arena projection-structure rejection differs from Lean 4.34"
+    (pscRejects == leanRejects && leanRejects)
+
 def natConst (field : String) : PSC1Kernel.Expr :=
   .const (.str (.str .anonymous "Nat") field) []
 
@@ -3410,6 +3505,46 @@ def assertReplayJsonOracle : IO Unit := do
   assertTrue "NDJSON replay omitted admitted axiom"
     (final.env.contains A)
 
+  -- Arena regression: valid sparse/out-of-order intern IDs must be
+  -- accepted and promoted into the dense prefix when the missing IDs arrive.
+  let sparseName2 :=
+    "{\"in\":2,\"str\":{\"pre\":0,\"str\":\"SparseTwo\"}}"
+  let sparseName1 :=
+    "{\"in\":1,\"str\":{\"pre\":0,\"str\":\"SparseOne\"}}"
+  let sparseLevel2 := "{\"il\":2,\"succ\":0}"
+  let sparseLevel1 := "{\"il\":1,\"succ\":0}"
+  let sparseExpr2 := "{\"ie\":2,\"sort\":2}"
+  let sparseExpr0 := "{\"ie\":0,\"sort\":1}"
+  let sparseExpr1 := "{\"ie\":1,\"sort\":0}"
+  let sparse ← exceptToIO
+    "PSC1 sparse/out-of-order NDJSON replay"
+    (PSC1Kernel.ReplayJson.replayLines
+      PSC1Kernel.Replay.State.empty
+      [
+        metaLine,
+        sparseName2, sparseName1,
+        sparseLevel2, sparseLevel1,
+        sparseExpr2, sparseExpr0, sparseExpr1
+      ])
+  let sparseStats ← exceptToIO
+    "PSC1 sparse/out-of-order replay finish"
+    sparse.finish
+  assertTrue "sparse replay Name count mismatch" (sparseStats.names == 2)
+  assertTrue "sparse replay Level count mismatch" (sparseStats.levels == 2)
+  assertTrue "sparse replay Expr count mismatch" (sparseStats.expressions == 3)
+  let sparseOne : PSC1Kernel.Name := .str .anonymous "SparseOne"
+  let sparseTwo : PSC1Kernel.Name := .str .anonymous "SparseTwo"
+  assertTrue "out-of-order Name id 1 was not promoted correctly"
+    (match sparse.names.get? 1 with
+     | some got => PSC1Kernel.Name.eq got sparseOne
+     | none => false)
+  assertTrue "out-of-order Name id 2 was not retained correctly"
+    (match sparse.names.get? 2 with
+     | some got => PSC1Kernel.Name.eq got sparseTwo
+     | none => false)
+  assertTrue "out-of-order Expr id 2 was not retained correctly"
+    ((sparse.exprs.get? 2).isSome)
+
   let duplicateTop :=
     "{\"in\":1,\"in\":2,\"str\":{\"pre\":0,\"str\":\"Dup\"}}"
   match PSC1Kernel.ReplayJson.decodeLine duplicateTop with
@@ -3924,6 +4059,7 @@ def run : IO Unit := do
   assertStringLiteralDefEqOracle
   assertQuotAdmissionOracle
   assertProjectionOracle
+  assertArenaProjectionStructureSoundnessOracle
   assertSimpleInductiveAdmissionOracle
   assertNestedInductiveAdmissionOracle
   assertParameterizedNestedInductiveAdmissionOracle

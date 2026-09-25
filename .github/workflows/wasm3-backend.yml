@@ -73,6 +73,13 @@ jobs:
           cd selfhost
           lake exe psc1_erasure_tests
 
+      - name: Run target-neutral generic specialization tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_ir_specialize_tests
+
       - name: Run owned Wasm backend tests
         shell: bash
         run: |

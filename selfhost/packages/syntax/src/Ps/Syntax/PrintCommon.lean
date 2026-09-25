@@ -16,12 +16,14 @@ def psPrintCommonConcat3
 
 def psPrintJoin (separator : String) : List String -> String
   | List.nil => ""
-  | List.cons value List.nil => value
   | List.cons value rest =>
-      psPrintCommonConcat3
-        value
-        separator
-        (psPrintJoin separator rest)
+      match rest with
+      | List.nil => value
+      | remaining =>
+          psPrintCommonConcat3
+            value
+            separator
+            (psPrintJoin separator remaining)
 
 def psPrintSyntaxName (name : PsSyntaxName) :
     Except PsSourcePrintError String :=

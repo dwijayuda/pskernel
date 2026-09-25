@@ -555,9 +555,13 @@ def psParseLeanBinderNamesWithFuel
                     psTokenKindEq
                       next.kind
                       PsTokenKind.identifier then
-                  (psParseLeanBinderNamesWithFuel remaining)
-                    name.cursor
-                    nextNames
+                  let smaller :
+                      PsTokenCursor ->
+                      List PsSyntaxName ->
+                      Except PsParseError
+                        (PsParseResult (List PsSyntaxName)) :=
+                    psParseLeanBinderNamesWithFuel remaining;
+                  smaller name.cursor nextNames
                 else
                   Except.error
                     (PsParseError.expectedText

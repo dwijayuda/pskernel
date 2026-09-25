@@ -26,6 +26,12 @@ inductive PsWasmLowerError where
 structure PsWasmLowerState where
   nextLocalIndex : Nat
   localTypes : List PsWasmValueType
+  currentDefinition : String
+  nextLambdaId : Nat
+  generatedStructures : List PsWasmStructType
+  generatedFunctionTypes : List PsWasmFunctionType
+  generatedFunctions : List PsWasmFunction
+  generatedFunctionRefs : List String
 
 structure PsWasmLoweredExpr where
   instructions : List PsWasmInstruction
@@ -387,8 +393,42 @@ def psWasmAddLocal
     {
       nextLocalIndex := index + 1
       localTypes := state.localTypes ++ [type]
+      currentDefinition := state.currentDefinition
+      nextLambdaId := state.nextLambdaId
+      generatedStructures := state.generatedStructures
+      generatedFunctionTypes := state.generatedFunctionTypes
+      generatedFunctions := state.generatedFunctions
+      generatedFunctionRefs := state.generatedFunctionRefs
     }
   )
+
+def psWasmStateForNestedFunction
+    (state : PsWasmLowerState)
+    (parameterCount : Nat) : PsWasmLowerState :=
+  {
+    nextLocalIndex := parameterCount
+    localTypes := []
+    currentDefinition := state.currentDefinition
+    nextLambdaId := state.nextLambdaId
+    generatedStructures := state.generatedStructures
+    generatedFunctionTypes := state.generatedFunctionTypes
+    generatedFunctions := state.generatedFunctions
+    generatedFunctionRefs := state.generatedFunctionRefs
+  }
+
+def psWasmStateRestoreOuterLocals
+    (outerState generatedState : PsWasmLowerState) :
+    PsWasmLowerState :=
+  {
+    nextLocalIndex := outerState.nextLocalIndex
+    localTypes := outerState.localTypes
+    currentDefinition := outerState.currentDefinition
+    nextLambdaId := generatedState.nextLambdaId
+    generatedStructures := generatedState.generatedStructures
+    generatedFunctionTypes := generatedState.generatedFunctionTypes
+    generatedFunctions := generatedState.generatedFunctions
+    generatedFunctionRefs := generatedState.generatedFunctionRefs
+  }
 
 def psWasmLowerExprListWith
     (lower :

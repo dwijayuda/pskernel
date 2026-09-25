@@ -316,6 +316,139 @@ def psRustEmitIntrinsicFromPrinted
               (psRustConcat2 right "))"))
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.charOfNat =>
+      match arguments with
+      | List.cons value List.nil =>
+          Except.ok
+            (psRustConcat3
+              "__ps_char_of_nat(&("
+              value
+              "))")
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.charToNat =>
+      match arguments with
+      | List.cons value List.nil =>
+          Except.ok
+            (psRustConcat3
+              "__ps_char_to_nat("
+              value
+              ")")
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringPush =>
+      match arguments with
+      | List.cons left (List.cons right List.nil) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_string_push(&("
+              left
+              "), "
+              (psRustConcat2 right ")"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringSingleton =>
+      match arguments with
+      | List.cons value List.nil =>
+          Except.ok
+            (psRustConcat3
+              "__ps_string_singleton("
+              value
+              ")")
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringLength =>
+      match arguments with
+      | List.cons value List.nil =>
+          Except.ok
+            (psRustConcat3
+              "__ps_string_length(&("
+              value
+              "))")
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringAppend =>
+      match arguments with
+      | List.cons left (List.cons right List.nil) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_string_append(&("
+              left
+              "), &("
+              (psRustConcat2 right "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize =>
+      match arguments with
+      | List.cons value List.nil =>
+          Except.ok
+            (psRustConcat3
+              "__ps_string_utf8_byte_size(&("
+              value
+              "))")
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringNext =>
+      match arguments with
+      | List.cons value (List.cons position List.nil) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_string_next(&("
+              value
+              "), &("
+              (psRustConcat2 position "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringGet =>
+      match arguments with
+      | List.cons value (List.cons position List.nil) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_string_get(&("
+              value
+              "), &("
+              (psRustConcat2 position "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringAtEnd =>
+      match arguments with
+      | List.cons value (List.cons position List.nil) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_string_at_end(&("
+              value
+              "), &("
+              (psRustConcat2 position "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringExtract =>
+      match arguments with
+      | List.cons value
+          (List.cons begin
+            (List.cons endPos List.nil)) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_string_extract(&("
+              value
+              "), &("
+              (psRustConcat4
+                begin
+                "), &("
+                endPos
+                "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.stringEq =>
+      match arguments with
+      | List.cons left (List.cons right List.nil) =>
+          Except.ok
+            (psRustConcat4
+              "__ps_string_eq(&("
+              left
+              "), &("
+              (psRustConcat2 right "))"))
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
   | _ =>
       Except.error PsRustEmitError.unsupportedIntrinsic
 

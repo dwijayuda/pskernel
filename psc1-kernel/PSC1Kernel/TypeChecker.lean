@@ -1057,6 +1057,48 @@ partial def typeCheckerExprHead (e : Expr) : String :=
       "projection " ++ typeCheckerNameString name ++ "." ++ toString index
   | .app _ _ => "application"
 
+partial def typeCheckerExprDiffAt
+    (path : String) (left right : Expr) : Option String :=
+  if Expr.eq left right then
+    none
+  else
+    match left, right with
+    | .app lf la, .app rf ra =>
+        match typeCheckerExprDiffAt (path ++ ".fn") lf rf with
+        | some diff => some diff
+        | none => typeCheckerExprDiffAt (path ++ ".arg") la ra
+    | .lam _ lt lb _, .lam _ rt rb _ =>
+        match typeCheckerExprDiffAt (path ++ ".lamType") lt rt with
+        | some diff => some diff
+        | none => typeCheckerExprDiffAt (path ++ ".lamBody") lb rb
+    | .forallE _ lt lb _, .forallE _ rt rb _ =>
+        match typeCheckerExprDiffAt (path ++ ".forallType") lt rt with
+        | some diff => some diff
+        | none => typeCheckerExprDiffAt (path ++ ".forallBody") lb rb
+    | .letE _ lt lv lb lnd, .letE _ rt rv rb rnd =>
+        if lnd != rnd then
+          some (path ++ ": let nondep mismatch")
+        else
+          match typeCheckerExprDiffAt (path ++ ".letType") lt rt with
+          | some diff => some diff
+          | none =>
+              match typeCheckerExprDiffAt (path ++ ".letValue") lv rv with
+              | some diff => some diff
+              | none => typeCheckerExprDiffAt (path ++ ".letBody") lb rb
+    | .mdata _ le, .mdata _ re =>
+        typeCheckerExprDiffAt (path ++ ".mdata") le re
+    | .proj ln li le, .proj rn ri re =>
+        if Name.eq ln rn && li == ri then
+          typeCheckerExprDiffAt (path ++ ".proj") le re
+        else
+          some (path ++ ": projection metadata mismatch")
+    | _, _ =>
+        some (path ++ ": " ++ typeCheckerExprHead left ++
+          " != " ++ typeCheckerExprHead right)
+
+def typeCheckerExprDiff (left right : Expr) : String :=
+  (typeCheckerExprDiffAt "root" left right).getD "no structural difference"
+
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with
   | .bvar _ => .error "loose bound variable in type checker"
@@ -1111,7 +1153,9 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
         typeCheckerExprHead fn ++
         " to " ++ typeCheckerExprHead arg ++
         "; expected domain " ++ typeCheckerExprHead domain ++
-        "; argument type " ++ typeCheckerExprHead argType)
+        "; argument type " ++ typeCheckerExprHead argType ++
+        "; first structural diff: " ++
+        typeCheckerExprDiff domain argType)
     else
       .ok (body.instantiate1 arg)
   | .lam name type body binderInfo => do

@@ -238,13 +238,14 @@ def psRustRewriteValueRefsWithFuel
                 (PsVerifiedIrExpr.record
                   structureName
                   rewrittenFields)
-      | PsVerifiedIrExpr.projection target field =>
+      | PsVerifiedIrExpr.projection structureName target field =>
           match rewriteNested target with
           | Except.error error =>
               Except.error error
           | Except.ok rewrittenTarget =>
               Except.ok
                 (PsVerifiedIrExpr.projection
+                  structureName
                   rewrittenTarget
                   field)
       | PsVerifiedIrExpr.constructor

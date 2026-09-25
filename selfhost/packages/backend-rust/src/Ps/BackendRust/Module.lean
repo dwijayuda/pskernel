@@ -356,6 +356,181 @@ def psRustEmitDeclarationList
           | Except.ok printedRest =>
               Except.ok (List.cons printed printedRest)
 
+def psRustStructureNames :
+    List PsVerifiedIrStructure -> List String
+  | List.nil =>
+      List.nil
+  | List.cons structureInfo rest =>
+      List.cons structureInfo.name (psRustStructureNames rest)
+
+def psRustInductiveNames :
+    List PsVerifiedIrInductive -> List String
+  | List.nil =>
+      List.nil
+  | List.cons inductiveInfo rest =>
+      List.cons inductiveInfo.name (psRustInductiveNames rest)
+
+def psRustValidateExprListWith
+    (validate :
+      PsVerifiedIrExpr ->
+      Except PsRustEmitError Bool) :
+    List PsVerifiedIrExpr ->
+    Except PsRustEmitError Bool
+  | List.nil =>
+      Except.ok true
+  | List.cons expr rest =>
+      match validate expr with
+      | Except.error error =>
+          Except.error error
+      | Except.ok _ =>
+          psRustValidateExprListWith validate rest
+
+def psRustValidateFieldListWith
+    (validate :
+      PsVerifiedIrExpr ->
+      Except PsRustEmitError Bool) :
+    List (Prod String PsVerifiedIrExpr) ->
+    Except PsRustEmitError Bool
+  | List.nil =>
+      Except.ok true
+  | List.cons field rest =>
+      match validate (Prod.snd field) with
+      | Except.error error =>
+          Except.error error
+      | Except.ok _ =>
+          psRustValidateFieldListWith validate rest
+
+def psRustValidateAlternativeListWith
+    (validate :
+      PsVerifiedIrExpr ->
+      Except PsRustEmitError Bool) :
+    List
+      (Prod String
+        (Prod
+          (List PsVerifiedIrMatchBinding)
+          PsVerifiedIrExpr)) ->
+    Except PsRustEmitError Bool
+  | List.nil =>
+      Except.ok true
+  | List.cons alternative rest =>
+      let payload := Prod.snd alternative;
+      match validate (Prod.snd payload) with
+      | Except.error error =>
+          Except.error error
+      | Except.ok _ =>
+          psRustValidateAlternativeListWith validate rest
+
+def psRustValidateExprNamesWithFuel
+    (structureNames : List String)
+    (inductiveNames : List String) :
+    Nat ->
+    PsVerifiedIrExpr ->
+    Except PsRustEmitError Bool
+  | 0, _ =>
+      Except.error PsRustEmitError.fuelExhausted
+  | fuel + 1, expr =>
+      let validateNested :=
+        fun (nested : PsVerifiedIrExpr) =>
+          psRustValidateExprNamesWithFuel
+            structureNames
+            inductiveNames
+            fuel
+            nested;
+      match expr with
+      | PsVerifiedIrExpr.literal _ =>
+          Except.ok true
+      | PsVerifiedIrExpr.var _ =>
+          Except.ok true
+      | PsVerifiedIrExpr.intrinsic _ arguments =>
+          psRustValidateExprListWith validateNested arguments
+      | PsVerifiedIrExpr.lambda _ _ body =>
+          validateNested body
+      | PsVerifiedIrExpr.call fn _ arguments =>
+          match validateNested fn with
+          | Except.error error =>
+              Except.error error
+          | Except.ok _ =>
+              psRustValidateExprListWith validateNested arguments
+      | PsVerifiedIrExpr.letE _ _ value body =>
+          match validateNested value with
+          | Except.error error =>
+              Except.error error
+          | Except.ok _ =>
+              validateNested body
+      | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
+          match validateNested condition with
+          | Except.error error =>
+              Except.error error
+          | Except.ok _ =>
+              match validateNested thenBranch with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok _ =>
+                  validateNested elseBranch
+      | PsVerifiedIrExpr.record structureName fields =>
+          if psRustStringListContains structureNames structureName then
+            psRustValidateFieldListWith validateNested fields
+          else
+            Except.error
+              (PsRustEmitError.unknownStructure structureName)
+      | PsVerifiedIrExpr.projection _ target _ =>
+          validateNested target
+      | PsVerifiedIrExpr.constructor
+          inductiveName
+          _
+          _
+          fields =>
+          if psRustStringListContains inductiveNames inductiveName then
+            psRustValidateFieldListWith validateNested fields
+          else
+            Except.error
+              (PsRustEmitError.unknownInductive inductiveName)
+      | PsVerifiedIrExpr.matchE
+          inductiveName
+          scrutinee
+          alternatives =>
+          if psRustStringListContains inductiveNames inductiveName then
+            match validateNested scrutinee with
+            | Except.error error =>
+                Except.error error
+            | Except.ok _ =>
+                psRustValidateAlternativeListWith
+                  validateNested
+                  alternatives
+          else
+            Except.error
+              (PsRustEmitError.unknownInductive inductiveName)
+
+def psRustValidateDeclarationNames
+    (structureNames : List String)
+    (inductiveNames : List String) :
+    List PsVerifiedIrDeclaration ->
+    Except PsRustEmitError Bool
+  | List.nil =>
+      Except.ok true
+  | List.cons declaration rest =>
+      match
+          psRustValidateExprNamesWithFuel
+            structureNames
+            inductiveNames
+            4096
+            declaration.body with
+      | Except.error error =>
+          Except.error error
+      | Except.ok _ =>
+          psRustValidateDeclarationNames
+            structureNames
+            inductiveNames
+            rest
+
+def psRustValidateModuleNames
+    (module : PsVerifiedIrModule) :
+    Except PsRustEmitError Bool :=
+  psRustValidateDeclarationNames
+    (psRustStructureNames module.structures)
+    (psRustInductiveNames module.inductives)
+    module.declarations
+
 def psRustModuleHasImports
     (imports : List PsVerifiedIrExternalImport) : Bool :=
   match imports with
@@ -372,25 +547,29 @@ def psRustEmitModule
   if psRustModuleHasImports module.imports then
     Except.error PsRustEmitError.externalImportUnsupported
   else
-    match psRustEmitStructureList module.structures with
+    match psRustValidateModuleNames module with
     | Except.error error =>
         Except.error error
-    | Except.ok structures =>
-        match psRustEmitInductiveList module.inductives with
-        | Except.error error =>
-            Except.error error
-        | Except.ok inductives =>
-            match psRustEmitDeclarationList valueNames module.declarations with
-            | Except.error error =>
-                Except.error error
-            | Except.ok declarations =>
-                let sections :=
-                  List.cons
-                    psRustRuntimePrelude
-                    (List.append
-                      structures
-                      (List.append inductives declarations));
-                Except.ok
-                  (psRustConcat2
-                    (psRustJoin "\n" sections)
-                    "\n")
+    | Except.ok _ =>
+      match psRustEmitStructureList module.structures with
+      | Except.error error =>
+          Except.error error
+      | Except.ok structures =>
+          match psRustEmitInductiveList module.inductives with
+          | Except.error error =>
+              Except.error error
+          | Except.ok inductives =>
+              match psRustEmitDeclarationList valueNames module.declarations with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok declarations =>
+                  let sections :=
+                    List.cons
+                      psRustRuntimePrelude
+                      (List.append
+                        structures
+                        (List.append inductives declarations));
+                  Except.ok
+                    (psRustConcat2
+                      (psRustJoin "\n" sections)
+                      "\n")

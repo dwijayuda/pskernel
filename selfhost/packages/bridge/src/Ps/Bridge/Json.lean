@@ -441,3 +441,107 @@ def psJsonAsObject :
     PsJsonValue -> Option (List (String × PsJsonValue))
   | .object fields => some fields
   | _ => none
+
+
+inductive PsJsonEncodeError where
+  | invalidNumber (text : String)
+  | duplicateObjectKey (key : String)
+
+inductive PsJsonKeyOrder where
+  | lt
+  | eq
+  | gt
+
+def psJsonCompareCharLists :
+    List Char -> List Char -> PsJsonKeyOrder
+  | [], [] => PsJsonKeyOrder.eq
+  | [], _ :: _ => PsJsonKeyOrder.lt
+  | _ :: _, [] => PsJsonKeyOrder.gt
+  | left :: leftRest, right :: rightRest =>
+      let leftValue := left.val.toNat
+      let rightValue := right.val.toNat
+      if leftValue < rightValue then
+        PsJsonKeyOrder.lt
+      else if rightValue < leftValue then
+        PsJsonKeyOrder.gt
+      else
+        psJsonCompareCharLists leftRest rightRest
+
+def psJsonCompareKeys
+    (left right : String) : PsJsonKeyOrder :=
+  psJsonCompareCharLists left.toList right.toList
+
+def psJsonInsertObjectField
+    (field : String × PsJsonValue) :
+    List (String × PsJsonValue) ->
+    Except PsJsonEncodeError (List (String × PsJsonValue))
+  | [] => Except.ok [field]
+  | current :: rest =>
+      match psJsonCompareKeys field.1 current.1 with
+      | PsJsonKeyOrder.lt =>
+          Except.ok (field :: current :: rest)
+      | PsJsonKeyOrder.eq =>
+          Except.error
+            (PsJsonEncodeError.duplicateObjectKey field.1)
+      | PsJsonKeyOrder.gt =>
+          match psJsonInsertObjectField field rest with
+          | Except.error error => Except.error error
+          | Except.ok sortedRest =>
+              Except.ok (current :: sortedRest)
+
+def psJsonSortObjectFields :
+    List (String × PsJsonValue) ->
+    Except PsJsonEncodeError (List (String × PsJsonValue))
+  | [] => Except.ok []
+  | field :: rest =>
+      match psJsonSortObjectFields rest with
+      | Except.error error => Except.error error
+      | Except.ok sortedRest =>
+          psJsonInsertObjectField field sortedRest
+
+def psJsonValidateCanonicalNumber
+    (text : String) : Bool :=
+  match psJsonParseNumber text.toList with
+  | Except.error _ => false
+  | Except.ok parsed => parsed.rest.isEmpty
+
+partial def psJsonEncodeCanonical
+    (value : PsJsonValue) :
+    Except PsJsonEncodeError String :=
+  match value with
+  | PsJsonValue.nullE => Except.ok "null"
+  | PsJsonValue.bool true => Except.ok "true"
+  | PsJsonValue.bool false => Except.ok "false"
+  | PsJsonValue.number text =>
+      if psJsonValidateCanonicalNumber text then
+        Except.ok text
+      else
+        Except.error (PsJsonEncodeError.invalidNumber text)
+  | PsJsonValue.string text =>
+      Except.ok (psJsonQuote text)
+  | PsJsonValue.array values =>
+      match values.mapM psJsonEncodeCanonical with
+      | Except.error error => Except.error error
+      | Except.ok encoded =>
+          Except.ok (psJsonArray encoded)
+  | PsJsonValue.object fields =>
+      match psJsonSortObjectFields fields with
+      | Except.error error => Except.error error
+      | Except.ok sorted =>
+          let encodeField :=
+            fun field =>
+              match psJsonEncodeCanonical field.2 with
+              | Except.error error => Except.error error
+              | Except.ok encoded =>
+                  Except.ok (field.1, encoded)
+          match sorted.mapM encodeField with
+          | Except.error error => Except.error error
+          | Except.ok encodedFields =>
+              Except.ok (psJsonObject encodedFields)
+
+def psJsonEncodeCanonicalText
+    (value : PsJsonValue) :
+    Except PsJsonEncodeError String :=
+  match psJsonEncodeCanonical value with
+  | Except.error error => Except.error error
+  | Except.ok encoded => Except.ok (encoded ++ "\n")

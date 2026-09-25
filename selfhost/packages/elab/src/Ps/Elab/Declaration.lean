@@ -782,6 +782,102 @@ def psElabStructureDeclaration
       [constructor]
       true
 
+def psElabPartialDeclaration
+    (environment : PsEnvironment)
+    (nameSyntax : PsSyntaxName)
+    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (typeSyntax : PsSyntaxTerm)
+    (valueSyntax : PsSyntaxTerm) :
+    Except PsElabError PsElabDeclarationResult :=
+  match psSyntaxNameToName nameSyntax with
+  | none => Except.error PsElabError.emptyName
+  | some name =>
+      let initial := psElabContextEmpty environment
+      match
+          psElabTypedBinders
+            (fun context term expected =>
+              psElabTerm context term expected)
+            initial
+            binders with
+      | Except.error error => Except.error error
+      | Except.ok binderResult =>
+          match
+              psElabTerm
+                binderResult.context
+                typeSyntax
+                none with
+          | Except.error error => Except.error error
+          | Except.ok typeResult =>
+              match
+                  psInferEnsureSort
+                    typeResult.context.environment
+                    typeResult.context.metaContext
+                    typeResult.context.localContext
+                    typeResult.type with
+              | Except.error error =>
+                  Except.error (PsElabError.infer error)
+              | Except.ok _ =>
+                  let typeMeta := typeResult.context.metaContext
+                  let openType :=
+                    psMetaInstantiate typeMeta typeResult.term
+                  let closedType :=
+                    psCloseElabForallBinders
+                      typeMeta
+                      binderResult.bindersRev
+                      openType
+                  if psExprHasUnresolvedMeta closedType then
+                    Except.error PsElabError.unresolvedMetavariable
+                  else
+                    let selfHeader :=
+                      PsDeclaration.axiomDecl name [] closedType
+                    match psEnvironmentAdd environment selfHeader with
+                    | none =>
+                        Except.error
+                          (PsElabError.duplicateDeclaration name)
+                    | some withSelf =>
+                        let valueContext :=
+                          psElabContextWithEnvironment
+                            typeResult.context
+                            withSelf
+                        match
+                            psElabTerm
+                              valueContext
+                              valueSyntax
+                              (some openType) with
+                        | Except.error error => Except.error error
+                        | Except.ok valueResult =>
+                            let metaContext :=
+                              valueResult.context.metaContext
+                            let openValue :=
+                              psMetaInstantiate
+                                metaContext
+                                valueResult.term
+                            let finalOpenType :=
+                              psMetaInstantiate
+                                metaContext
+                                openType
+                            let closed :=
+                              psCloseElabTypedBinders
+                                metaContext
+                                binderResult.bindersRev
+                                openValue
+                                finalOpenType
+                            if
+                                psExprHasUnresolvedMeta closed.1
+                                  || psExprHasUnresolvedMeta closed.2 then
+                              Except.error
+                                PsElabError.unresolvedMetavariable
+                            else
+                              Except.ok {
+                                declaration :=
+                                  PsDeclaration.partialDecl
+                                    name
+                                    []
+                                    closed.2
+                                    closed.1
+                                metaContext := metaContext
+                              }
+
 def psElabDeclaration
     (environment : PsEnvironment)
     (source : PsSyntaxDeclaration) :
@@ -795,6 +891,13 @@ def psElabDeclaration
         type
         value
         false
+  | .partialDefinition name binders type value _ =>
+      psElabPartialDeclaration
+        environment
+        name
+        binders
+        type
+        value
   | .theoremDecl name binders type value _ =>
       psElabDeclarationParts
         environment

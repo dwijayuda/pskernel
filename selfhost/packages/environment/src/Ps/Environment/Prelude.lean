@@ -251,6 +251,12 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
           PsBinderInfo.instanceImplicit)
         PsBinderInfo.explicit)
       PsBinderInfo.implicit
+  let natUnaryType :=
+    PsExpr.forallE
+      nName
+      natType
+      natType
+      PsBinderInfo.explicit
   let natBinaryType :=
     PsExpr.forallE
       aName
@@ -484,8 +490,16 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let envText9 :=
     psPreludeAdd envText8
       (PsDeclaration.axiomDecl psStringExtractName [] stringExtractType)
-  let envList0 :=
+  let envText10 :=
     psPreludeAdd envText9
+      (PsDeclaration.axiomDecl
+        psStringPosRawMkName [] natUnaryType)
+  let envText11 :=
+    psPreludeAdd envText10
+      (PsDeclaration.axiomDecl
+        psStringPosRawByteIdxName [] natUnaryType)
+  let envList0 :=
+    psPreludeAdd envText11
       (PsDeclaration.axiomDecl
         psListName [] unaryTypeConstructorType)
   let envOption0 :=

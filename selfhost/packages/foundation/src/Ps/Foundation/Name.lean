@@ -14,19 +14,25 @@ partial def psStringEqFrom
     (right : String)
     (leftPos : Nat)
     (rightPos : Nat) : Bool :=
-  if String.Internal.atEnd left leftPos then
-    String.Internal.atEnd right rightPos
-  else if String.Internal.atEnd right rightPos then
+  if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
+    String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
+  else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
     false
   else
-    let leftChar : Char := String.Internal.get left leftPos;
-    let rightChar : Char := String.Internal.get right rightPos;
+    let leftChar : Char := String.Internal.get left (String.Pos.Raw.mk leftPos);
+    let rightChar : Char := String.Internal.get right (String.Pos.Raw.mk rightPos);
     if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
       psStringEqFrom
         left
         right
-        (String.Internal.next left leftPos)
-        (String.Internal.next right rightPos)
+        (String.Pos.Raw.byteIdx
+          (String.Internal.next
+            left
+            (String.Pos.Raw.mk leftPos)))
+        (String.Pos.Raw.byteIdx
+          (String.Internal.next
+            right
+            (String.Pos.Raw.mk rightPos)))
     else
       false
 

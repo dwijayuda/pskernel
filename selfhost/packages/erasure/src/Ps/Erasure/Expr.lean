@@ -355,6 +355,15 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
+      else if text == "String.Pos.Raw.mk"
+          || text == "String.Pos.Raw.byteIdx" then
+        match view.args with
+        | [value] =>
+            match erase value with
+            | Except.error error => Except.error error
+            | Except.ok result => Except.ok (some result)
+        | _ =>
+            Except.error PsErasureError.unsupportedApplication
       else if text == "String.push" then
         binary PsVerifiedIrIntrinsic.stringPush
       else if text == "String.singleton" then

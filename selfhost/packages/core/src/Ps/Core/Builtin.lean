@@ -138,6 +138,18 @@ def psStringSingletonName : PsName :=
 def psStringInternalName : PsName :=
   psNameAppendStr psStringName "Internal"
 
+def psStringPosName : PsName :=
+  psNameAppendStr psStringName "Pos"
+
+def psStringPosRawName : PsName :=
+  psNameAppendStr psStringPosName "Raw"
+
+def psStringPosRawMkName : PsName :=
+  psNameAppendStr psStringPosRawName "mk"
+
+def psStringPosRawByteIdxName : PsName :=
+  psNameAppendStr psStringPosRawName "byteIdx"
+
 def psStringLengthName : PsName :=
   psNameAppendStr psStringInternalName "length"
 

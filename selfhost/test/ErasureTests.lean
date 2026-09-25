@@ -307,6 +307,36 @@ def psTestDualSourceLeanNativeTextPrimitives : Bool :=
         && leanOutput.contains "const __ps_w = BigInt"
   | _, _ => false
 
+def psTestDualSourceLeanNativeStringRawPositionBridge : Bool :=
+  let leanSource :=
+    "def rawPositionRoundTrip (p : Nat) : Nat := " ++
+    "String.Pos.Raw.byteIdx (String.Pos.Raw.mk p)\n" ++
+    "def rawCharAt (s : String) (p : Nat) : Char := " ++
+    "String.Internal.get s (String.Pos.Raw.mk p)\n" ++
+    "def rawNext (s : String) (p : Nat) : Nat := " ++
+    "String.Pos.Raw.byteIdx " ++
+    "(String.Internal.next s (String.Pos.Raw.mk p))"
+  let proofScriptSource :=
+    "def rawPositionRoundTrip(p : Nat) : Nat := " ++
+    "String.Pos.Raw.byteIdx(String.Pos.Raw.mk(p)); " ++
+    "def rawCharAt(s : String)(p : Nat) : Char := " ++
+    "String.Internal.get(s, String.Pos.Raw.mk(p)); " ++
+    "def rawNext(s : String)(p : Nat) : Nat := " ++
+    "String.Pos.Raw.byteIdx(" ++
+    "String.Internal.next(s, String.Pos.Raw.mk(p)));"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains
+          "export function rawPositionRoundTrip(p: bigint): bigint { return p; }"
+        && leanOutput.contains
+          "export function rawCharAt(s: string, p: bigint): string"
+        && leanOutput.contains
+          "export function rawNext(s: string, p: bigint): bigint"
+  | _, _ => false
+
 def psTestDualSourceLeanNativePartialDefinition : Bool :=
   let leanSource :=
     "partial def loop (n : Nat) : Nat := loop n"
@@ -340,6 +370,7 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native Array higher-order", passed := psTestDualSourceLeanNativeArrayHigherOrder },
   { name := "dual-source Lean-native partial application", passed := psTestDualSourceLeanNativePartialApplication },
   { name := "dual-source Lean-native text primitives", passed := psTestDualSourceLeanNativeTextPrimitives },
+  { name := "dual-source Lean-native String raw-position bridge", passed := psTestDualSourceLeanNativeStringRawPositionBridge },
   { name := "dual-source Lean-native controlled partial def", passed := psTestDualSourceLeanNativePartialDefinition }
 ]
 

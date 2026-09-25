@@ -17,14 +17,11 @@ resolution. This stays straightforward to lower through PSC1/TypeScript.
 -/
 def environmentBucketCount : Nat := 256
 
-def stringBucketHashCore : List Char → Nat → Nat
-  | [], acc => acc
-  | char :: rest, acc =>
-      stringBucketHashCore rest
-        ((acc * 33 + char.toNat + 1) % environmentBucketCount)
-
 def stringBucketHash (value : String) : Nat :=
-  stringBucketHashCore value.toList 5381
+  value.foldl
+    (fun acc char =>
+      (acc * 33 + char.toNat + 1) % environmentBucketCount)
+    5381
 
 /--
 Fast bucket selector for environment lookup. Bucket membership is only an

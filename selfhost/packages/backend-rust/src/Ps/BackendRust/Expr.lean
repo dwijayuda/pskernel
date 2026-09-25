@@ -902,32 +902,32 @@ def psRustEmitExprWithFuel :
           | Except.error error =>
               Except.error error
           | Except.ok generic =>
-            match psRustEmitFieldListWith emitNested fields with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedFields =>
-              match printedFields with
-              | List.nil =>
-                  Except.ok
-                    (psRustConcat4
-                      (psRustConcat2
-                        (psRustIdentifier inductiveName)
-                        generic)
-                      "::"
-                      (psRustIdentifier constructorName)
-                      "{}")
-              | List.cons _ _ =>
-                  Except.ok
-                    (psRustConcat4
-                      (psRustConcat2
-                        (psRustIdentifier inductiveName)
-                        generic)
-                      "::"
-                      (psRustIdentifier constructorName)
-                      (psRustConcat3
-                        " { "
-                        (psRustJoin ", " printedFields)
-                        " }"))
+              match psRustEmitFieldListWith emitNested fields with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok printedFields =>
+                  match printedFields with
+                  | List.nil =>
+                      Except.ok
+                        (psRustConcat4
+                          (psRustConcat2
+                            (psRustIdentifier inductiveName)
+                            generic)
+                          "::"
+                          (psRustIdentifier constructorName)
+                          "{}")
+                  | List.cons _ _ =>
+                      Except.ok
+                        (psRustConcat4
+                          (psRustConcat2
+                            (psRustIdentifier inductiveName)
+                            generic)
+                          "::"
+                          (psRustIdentifier constructorName)
+                          (psRustConcat3
+                            " { "
+                            (psRustJoin ", " printedFields)
+                            " }"))
       | PsVerifiedIrExpr.matchE
           inductiveName
           _

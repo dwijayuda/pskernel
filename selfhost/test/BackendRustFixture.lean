@@ -215,6 +215,35 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
             ]
       },
       {
+        name := "makeAdder"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body :=
+          PsVerifiedIrExpr.lambda
+            [
+              {
+                name := "value"
+                type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+              }
+            ]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.natAdd
+              [
+                PsVerifiedIrExpr.var "value",
+                PsVerifiedIrExpr.var "offset"
+              ])
+      },
+      {
         name := "makePair"
         typeParameters := []
         parameters := [

@@ -586,10 +586,74 @@ def psBackendRustFunctionResultModule : PsVerifiedIrModule :=
     ]
   }
 
-def psTestBackendRustRejectsFunctionResult : Bool :=
+def psTestBackendRustDirectFunctionResult : Bool :=
   match psRustEmitModule psBackendRustFunctionResultModule with
+  | Except.error _ =>
+      false
+  | Except.ok output =>
+      output.contains
+        "pub fn makeAdder(offset: PsNat) -> impl Fn(PsNat) -> PsNat + Clone"
+        && output.contains "{ move |value: PsNat| "
+
+def psBackendRustNestedFunctionResultModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "makeNested"
+        typeParameters := []
+        parameters := [
+          {
+            name := "seed"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.function
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+              (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat))
+        body :=
+          PsVerifiedIrExpr.lambda
+            [
+              {
+                name := "x"
+                type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+              }
+            ]
+            (PsVerifiedIrType.function
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+              (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat))
+            (PsVerifiedIrExpr.lambda
+              [
+                {
+                  name := "y"
+                  type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                }
+              ]
+              (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+              (PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natAdd
+                [
+                  PsVerifiedIrExpr.var "seed",
+                  PsVerifiedIrExpr.intrinsic
+                    PsVerifiedIrIntrinsic.natAdd
+                    [
+                      PsVerifiedIrExpr.var "x",
+                      PsVerifiedIrExpr.var "y"
+                    ]
+                ]))
+      }
+    ]
+  }
+
+def psTestBackendRustRejectsNestedFunctionResult : Bool :=
+  match psRustEmitModule psBackendRustNestedFunctionResultModule with
   | Except.error (PsRustEmitError.functionResultUnsupported name) =>
-      psStringEq name "makeAdder"
+      psStringEq name "makeNested"
   | _ =>
       false
 
@@ -777,9 +841,16 @@ def psTestBackendRustCoverageGenericValue : Bool :=
     coverage.unsupported
     "declaration:genericValue"
 
-def psTestBackendRustCoverageFunctionResult : Bool :=
+def psTestBackendRustCoverageDirectFunctionResult : Bool :=
   let coverage :=
     psRustCoverageModule psBackendRustFunctionResultModule;
+  Nat.beq
+    (psRustCoverageLength coverage.unsupported)
+    0
+
+def psTestBackendRustCoverageNestedFunctionResult : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustNestedFunctionResultModule;
   psRustCoverageContains
     coverage.unsupported
     "declaration:functionResult"
@@ -844,7 +915,8 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "accept first-order callback parameters", passed := psTestBackendRustFirstOrderCallback },
   { name := "reject function-valued lambda results", passed := psTestBackendRustRejectsLambdaFunctionResult },
   { name := "reject function-typed lambda parameters", passed := psTestBackendRustRejectsLambdaFunctionParameter },
-  { name := "reject function-valued results", passed := psTestBackendRustRejectsFunctionResult },
+  { name := "accept direct function-valued results", passed := psTestBackendRustDirectFunctionResult },
+  { name := "reject nested function-valued results", passed := psTestBackendRustRejectsNestedFunctionResult },
   { name := "reject stored function values", passed := psTestBackendRustRejectsFunctionStorage },
   { name := "reject nested function parameters", passed := psTestBackendRustRejectsNestedFunctionParameter },
   { name := "coverage accepts supported IR", passed := psTestBackendRustCoverageSupported },
@@ -854,7 +926,8 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "coverage rejects unknown inductives", passed := psTestBackendRustCoverageUnknownInductive },
   { name := "coverage rejects intrinsic arity", passed := psTestBackendRustCoverageIntrinsicArity },
   { name := "coverage rejects generic values", passed := psTestBackendRustCoverageGenericValue },
-  { name := "coverage rejects function results", passed := psTestBackendRustCoverageFunctionResult },
+  { name := "coverage accepts direct function results", passed := psTestBackendRustCoverageDirectFunctionResult },
+  { name := "coverage rejects nested function results", passed := psTestBackendRustCoverageNestedFunctionResult },
   { name := "coverage rejects lambda function results", passed := psTestBackendRustCoverageLambdaFunctionResult },
   { name := "coverage rejects lambda function parameters", passed := psTestBackendRustCoverageLambdaFunctionParameter },
   { name := "coverage rejects function storage", passed := psTestBackendRustCoverageFunctionStorage },

@@ -10,6 +10,7 @@ inductive PsRustEmitError where
   | externalImportUnsupported
   | genericValueUnsupported (name : String)
   | valueDeclarationUnsupported (name : String)
+  | functionResultUnsupported (name : String)
   | unknownStructure (name : String)
   | unknownInductive (name : String)
   | namedTypeArity (name : String)

@@ -573,7 +573,7 @@ def psElabLambdaExpectedBody
                   context.localContext
                   context.metaContext
                   binder.type
-                  forallView.domain
+                  forallView.domain;
               if !unified.success then
                 Except.error PsElabError.typeMismatch
               else
@@ -738,7 +738,7 @@ def psElabLetAfterValue
   let bodyContext :=
     psElabContextWithLocal
       valueResult.context
-      pushed.context
+      pushed.context;
   match elaborate bodyContext body expected with
   | Except.error error => Except.error error
   | Except.ok bodyResult =>
@@ -837,7 +837,7 @@ def psElabIf
     (elseBranch : PsSyntaxTerm)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let boolType := PsExpr.constE psBoolName []
+  let boolType := PsExpr.constE psBoolName [];
   match elaborate context condition (some boolType) with
   | Except.error error => Except.error error
   | Except.ok conditionResult =>
@@ -851,7 +851,7 @@ def psElabIf
       let decider :=
         psExprApplyMany
           (PsExpr.constE psBoolDecEqName [])
-          [conditionResult.term, trueTerm]
+          [conditionResult.term, trueTerm];
       match elaborate
           conditionResult.context
           thenBranch
@@ -861,7 +861,7 @@ def psElabIf
           let resultType :=
             match expected with
             | some type => type
-            | none => thenResult.type
+            | none => thenResult.type;
           match elaborate
               thenResult.context
               elseBranch
@@ -870,7 +870,7 @@ def psElabIf
           | Except.ok elseResult =>
               let metaContext := elseResult.context.metaContext
               let instantiatedType :=
-                psMetaInstantiate metaContext resultType
+                psMetaInstantiate metaContext resultType;
               match psInferType
                   elseResult.context.environment
                   metaContext
@@ -1026,7 +1026,7 @@ def psElabPrepareMatchAlternatives
           (fun ctorName =>
             match psElabMatchAlternativeFind ctorName alternatives with
             | some _ => true
-            | none => false)
+            | none => false);
       if exhaustive then
         Except.ok alternatives
       else
@@ -1306,7 +1306,7 @@ def psElabMatchConstructorMinor
             psElabWildcardBinderNames
               span
               0
-              ctorInfo.numFields
+              ctorInfo.numFields;
       if psElabBoolNot (psNameEq ctorInfo.inductiveName inductiveInfo.name) then
         Except.error
           (PsElabError.matchConstructorUnknown constructorName)
@@ -1325,7 +1325,7 @@ def psElabMatchConstructorMinor
           psExprInstantiateLevelParams
             ctorInfo.levelParams
             inductiveLevels
-            ctorInfo.type
+            ctorInfo.type;
         match psElabMatchApplyParameters
             context
             parameterArgs
@@ -1341,7 +1341,7 @@ def psElabMatchConstructorMinor
             | Except.error error => Except.error error
             | Except.ok fieldResult =>
                 let fields :=
-                  fieldResult.fieldsRev.reverse
+                  fieldResult.fieldsRev.reverse;
                 match
                     psElabPushRecursiveHypotheses
                       expectedType
@@ -1502,7 +1502,7 @@ def psElabMatch
               scrutineeResult.context.metaContext
               scrutineeResult.context.localContext
               scrutineeResult.type
-          let typeView := psExprAppView scrutineeType
+          let typeView := psExprAppView scrutineeType;
           match typeView.head with
           | .constE inductiveName inductiveLevels =>
               match psEnvironmentFindInductive
@@ -1523,7 +1523,7 @@ def psElabMatch
                     | Except.error error => Except.error error
                     | Except.ok alternatives =>
                         let recursorName :=
-                          psNameAppendStr inductiveInfo.name "rec"
+                          psNameAppendStr inductiveInfo.name "rec";
                         match psEnvironmentFindRecursor
                             scrutineeResult.context.environment
                             recursorName with
@@ -1548,7 +1548,7 @@ def psElabMatch
                               let instantiatedExpected :=
                                 psMetaInstantiate
                                   scrutineeResult.context.metaContext
-                                  expectedType
+                                  expectedType;
                               match psInferType
                                   scrutineeResult.context.environment
                                   scrutineeResult.context.metaContext
@@ -1571,7 +1571,7 @@ def psElabMatch
                                         else if Nat.beq recInfo.levelParams.length 1 then
                                           [resultLevel]
                                         else
-                                          []
+                                          [];
                                       if Nat.blt 1 recInfo.levelParams.length then
                                         Except.error
                                           PsElabError.matchRecursorLevels
@@ -1648,7 +1648,7 @@ def psElabApplyArgsWithFuel
           current.context.environment
           current.context.metaContext
           current.context.localContext
-          current.type
+          current.type;
       match currentType with
       | PsExpr.forallE _ domain body binder =>
           if psBinderAcceptsExplicitArgument binder then
@@ -1764,7 +1764,7 @@ def psElabSolvePendingInstances :
         type := psMetaInstantiate metaContext current.type
       }
   | current, id :: rest =>
-      let metaContext := current.context.metaContext
+      let metaContext := current.context.metaContext;
       match psMetaFindAssignment metaContext id with
       | some _ =>
           psElabSolvePendingInstances current rest
@@ -1774,7 +1774,7 @@ def psElabSolvePendingInstances :
               Except.error PsElabError.implicitApplicationUnsupported
           | some declaration =>
               let target :=
-                psMetaInstantiate metaContext declaration.type
+                psMetaInstantiate metaContext declaration.type;
               if psExprHasUnresolvedMeta target then
                 Except.error PsElabError.implicitApplicationUnsupported
               else
@@ -1784,7 +1784,7 @@ def psElabSolvePendingInstances :
                     current.context.localContext
                     current.context.instances
                     metaContext
-                    target
+                    target;
                 match synthesized.value with
                 | none =>
                     Except.error PsElabError.implicitApplicationUnsupported
@@ -1946,7 +1946,7 @@ def psElabRecordCandidateFromExpected
       context.metaContext
       context.localContext
       expected
-  let view := psInferAppView reduced
+  let view := psInferAppView reduced;
   match view.head with
   | .constE typeName _ =>
       match
@@ -2058,7 +2058,7 @@ def psElabRecord
     | none =>
         psElabUniqueRecordCandidate
           context.environment
-          fields
+          fields;
   match candidate with
   | none => Except.error PsElabError.unsupportedTerm
   | some found =>

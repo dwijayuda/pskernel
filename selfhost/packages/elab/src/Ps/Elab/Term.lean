@@ -1031,17 +1031,33 @@ def psElabMatchApplyParameters
             rest
             (psExprInstantiate1 forallView.body parameter)
 
+def psSyntaxNameIsWildcardBinder
+    (name : PsSyntaxName) : Bool :=
+  match name.segments with
+  | List.cons segment List.nil =>
+      psStringEq segment "_"
+  | _ => false
+
 def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
-  | [] => false
-  | name :: rest =>
-      let coreName := psSyntaxNameToName name
-      let duplicated :=
-        rest.any
-          (fun candidate =>
-            match coreName, psSyntaxNameToName candidate with
-            | some left, some right => psNameEq left right
-            | _, _ => false)
-      duplicated || psSyntaxNameListHasDuplicate rest
+  | List.nil => false
+  | List.cons name rest =>
+      if psSyntaxNameIsWildcardBinder name then
+        psSyntaxNameListHasDuplicate rest
+      else
+        let coreName := psSyntaxNameToName name;
+        let duplicated :=
+          rest.any
+            (fun candidate =>
+              if psSyntaxNameIsWildcardBinder candidate then
+                false
+              else
+                match coreName, psSyntaxNameToName candidate with
+                | some left, some right => psNameEq left right
+                | _, _ => false);
+        if duplicated then
+          true
+        else
+          psSyntaxNameListHasDuplicate rest
 
 def psElabMatchFields
     (context : PsElabContext)

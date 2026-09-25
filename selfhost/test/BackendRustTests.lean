@@ -60,7 +60,7 @@ def psTestBackendRustIntrinsic : Bool :=
   match psRustEmitModule psBackendRustIntrinsicModule with
   | Except.error _ => false
   | Except.ok output =>
-      output.contains "__ps_nat_add(&(x), &(__ps_nat_lit(\"1\")))"
+      output.contains "__ps_nat_add(&((x).clone()), &((__ps_nat_lit(\"1\")).clone()))"
 
 def psBackendRustAdtModule : PsVerifiedIrModule :=
   {
@@ -150,8 +150,8 @@ def psTestBackendRustAdt : Bool :=
   | Except.ok output =>
       output.contains "pub struct Pair { pub left: PsNat, pub right: PsNat }"
         && output.contains "pub enum Maybe<A: Clone> { none {}, some { value: A } }"
-        && output.contains "Maybe::some { value: x }"
-        && output.contains "pub fn leftOfPair(pair: Pair) -> PsNat { (pair).left }"
+        && output.contains "Maybe::some { value: (x).clone() }"
+        && output.contains "pub fn leftOfPair(pair: Pair) -> PsNat { ((pair).clone()).left }"
 
 def psBackendRustStringModule : PsVerifiedIrModule :=
   {
@@ -204,8 +204,9 @@ def psTestBackendRustStringIntrinsics : Bool :=
   match psRustEmitModule psBackendRustStringModule with
   | Except.error _ => false
   | Except.ok output =>
-      output.contains "__ps_string_push(&(value), __ps_char_of_nat(&(__ps_nat_lit(\"33\"))))"
-        && output.contains "__ps_string_utf8_byte_size(&(value))"
+      output.contains "__ps_string_push(&((value).clone())"
+        && output.contains "__ps_char_of_nat(&((__ps_nat_lit(\"33\")).clone()))"
+        && output.contains "__ps_string_utf8_byte_size(&((value).clone()))"
 
 def psBackendRustArrayModule : PsVerifiedIrModule :=
   {
@@ -275,8 +276,8 @@ def psTestBackendRustArrayIntrinsics : Bool :=
   | Except.error _ => false
   | Except.ok output =>
       output.contains "pub fn arraySizeDemo(xs: Vec<PsNat>) -> PsNat"
-        && output.contains "__ps_array_size(&(xs))"
-        && output.contains "__ps_array_map(arrayIdOnly, &(xs))"
+        && output.contains "__ps_array_size(&((xs).clone()))"
+        && output.contains "__ps_array_map((arrayIdOnly).clone(), &((xs).clone()))"
 
 def psBackendRustValueModule : PsVerifiedIrModule :=
   {
@@ -331,7 +332,7 @@ def psTestBackendRustValues : Bool :=
       output.contains
           "pub fn one() -> PsNat { __ps_nat_lit(\"1\") }"
         && output.contains
-          "__ps_nat_add(&(x), &((one)()))"
+          "__ps_nat_add(&((x).clone()), &(((one)()).clone()))"
         && output.contains
           "pub fn shadowOne(one: PsNat) -> PsNat { one }"
 
@@ -439,7 +440,7 @@ def psTestBackendRustFirstOrderCallback : Bool :=
       false
   | Except.ok output =>
       output.contains
-        "pub fn applyNatCallback(f: impl Fn(PsNat) -> PsNat, x: PsNat) -> PsNat"
+        "pub fn applyNatCallback(f: impl Fn(PsNat) -> PsNat + Clone, x: PsNat) -> PsNat"
 
 def psBackendRustFunctionStorageModule : PsVerifiedIrModule :=
   {

@@ -98,7 +98,7 @@ npm run psc -- verify-selfhost
 npm run psc -- fixed-point
 
 # Compile any generated ProofScript project with compiler.js:
-npm run psc -- build dist/bootstrap/workspace/SELFHOST-COMPILER.ps --out dist/next/compiler.ts
+npm run psc -- build dist/bootstrap/workspace/SELFHOST-COMPILER.ps --out dist/next/compiler.js
 ```
 
 The low-level CLI also supports explicit translation artifacts:
@@ -109,8 +109,41 @@ lake exe psc1 translate input.lean --to ps --out output.ps
 lake exe psc1 build input.ps --out compiler.ts
 ```
 
-`psc1 build` writes the requested TypeScript file and invokes `tsc`, producing
-the adjacent `.js`, `.d.ts`, and `.js.map` files.
+`psc1` remains the Lean-hosted bootstrap executable. The stable Node `psc`
+front door is JavaScript-first: `psc build ... --out output.js` writes the
+adjacent TypeScript intermediate, declaration file, source map, and JavaScript
+artifact. `--out output.ts` remains available for low-level/debug workflows.
+
+
+## Workspace convention
+
+The self-host tree intentionally follows normal JavaScript monorepo conventions
+without forcing the portable compiler modules to move while source closure is
+still in progress.
+
+Each semantic workspace under `packages/*` declares:
+
+- `src` as its portable source root;
+- `test` as its package-test root;
+- `dist` as its generated output directory;
+- explicit workspace dependencies in `package.json`.
+
+The bootstrap `host` and portable `stdlib` are also npm workspaces. The root
+workspace exposes conventional commands:
+
+```bash
+npm run build            # bootstrap source -> dist/bootstrap/compiler.js
+npm test                 # Lean-hosted bootstrap/unit suites
+npm run check            # workspace/source checks + tests
+npm run clean            # cross-platform dist cleanup
+npm run psc -- --help    # stable JS CLI
+```
+
+A later cleanup, after the whole compiler passes PSC1 source closure, should move
+the portable entry from `SELFHOST-COMPILER.lean` to `src/Compiler.lean`, move
+the Lean-only executable from `src/Main.lean` to `host/cli/Main.lean`, and
+place unit tests beside their owning packages. Those are file-layout changes
+only and should not be mixed into the current parser-closure work.
 
 ## Stage meanings
 

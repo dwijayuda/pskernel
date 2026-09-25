@@ -89,6 +89,7 @@ def mkChecker
     lctx := .empty
     levelParams := levelParams
     safety := safety
+    eagerReduce := false
   }
 
 def checkConstantBase

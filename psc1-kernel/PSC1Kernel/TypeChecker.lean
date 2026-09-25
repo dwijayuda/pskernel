@@ -874,19 +874,47 @@ partial def whnfCore
     match reduceProjCore ctx typeName idx struct'' with
     | some value => whnfCore ctx value cheapRec cheapProj
     | none => .ok e
-  | .app fn arg => do
-    let fn' ← whnfCore ctx fn cheapRec cheapProj
-    match fn' with
-    | .lam _ _ body _ =>
-      whnfCore ctx (body.instantiate1 arg) cheapRec cheapProj
+  | .app _ _ => do
+    -- Final Lean 4.34 flattens the full application spine before head
+    -- reduction. If the reduced head is a lambda spine, it substitutes as
+    -- many consecutive binders as there are arguments in one instantiate
+    -- operation, then reapplies the remaining arguments. This ordering is
+    -- observable because kernel definitional equality is intentionally
+    -- incomplete.
+    let fn0 := e.getAppFn
+    let args := e.getAppArgs
+    let fn ← whnfCore ctx fn0 cheapRec cheapProj
+    match fn with
+    | .lam _ _ _ _ =>
+        let rec countLambdas (current : Expr) (count : Nat) : Expr × Nat :=
+          match current with
+          | .lam _ _ body _ =>
+              if count < args.length then
+                if count + 1 < args.length then
+                  match body with
+                  | .lam _ _ _ _ => countLambdas body (count + 1)
+                  | _ => (current, count + 1)
+                else
+                  (current, count + 1)
+              else
+                (current, count)
+          | _ => (current, count)
+        let (lastLam, consumed) := countLambdas fn 0
+        let .lam _ _ body _ := lastLam
+          | return e
+        let reducedBody :=
+          body.instantiateRev (args.take consumed)
+        whnfCore ctx
+          (Expr.applyArgsCheap reducedBody (args.drop consumed))
+          cheapRec cheapProj
     | _ =>
-      if Expr.eq fn fn' then
+      if Expr.eq fn fn0 then
         let reduced ← reduceRecursor ctx e cheapRec cheapProj
         match reduced with
         | some value => whnfCore ctx value cheapRec cheapProj
         | none => .ok e
       else
-        whnfCore ctx (.app fn' arg) cheapRec cheapProj
+        whnfCore ctx (Expr.applyArgsCheap fn args) cheapRec cheapProj
 
 partial def reduceNative
     (ctx : CheckerContext)

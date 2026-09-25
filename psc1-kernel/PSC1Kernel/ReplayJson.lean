@@ -593,12 +593,17 @@ def replayLine
 def replayLines
     (state : Replay.State)
     (lines : List String) : Except String Replay.State := do
-  let rec go : Replay.State → List String → Except String Replay.State
-    | current, [] => pure current
-    | current, line :: rest => do
-        let next ← replayLine current line
-        go next rest
-  let final ← go state lines
+  let rec go :
+      Replay.State → Nat → List String → Except String Replay.State
+    | current, _, [] => pure current
+    | current, lineNo, line :: rest => do
+        let next ←
+          match replayLine current line with
+          | .ok value => pure value
+          | .error err =>
+              throw ("line " ++ toString lineNo ++ ": " ++ err)
+        go next (lineNo + 1) rest
+  let final ← go state 1 lines
   let _ ← final.finish
   pure final
 

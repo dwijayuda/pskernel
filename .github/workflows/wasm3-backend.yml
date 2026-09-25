@@ -160,6 +160,9 @@ jobs:
           if (instance.exports.natSubFloorsAtZero() !== 1) {
             throw new Error('PSC1_WASM_RUNTIME_NAT_SUB_RESULT');
           }
+          if (instance.exports.natAddCarryExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_ADD_CARRY_RESULT');
+          }
           if (instance.exports.natMulOneExact() !== 1) {
             throw new Error('PSC1_WASM_RUNTIME_NAT_MUL_ONE_RESULT');
           }

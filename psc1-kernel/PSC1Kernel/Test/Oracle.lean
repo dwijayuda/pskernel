@@ -1187,8 +1187,164 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   | _ =>
       throw <| IO.userError "Lean 4.34 polymorphic recursor metadata missing"
 
-  -- Next K5 slice: non-recursive constructor fields.
+  -- Shared datatype parameters: constructor parameters are checked against the
+  -- header, recursor parameters are inferred implicit exactly like Lean 4.34,
+  -- and computation rules receive only constructor fields after fixed params.
+  let ParamBox : PSC1Kernel.Name := .str .anonymous "OracleParamBox"
+  let ParamBoxMk : PSC1Kernel.Name := .str ParamBox "mk"
+  let ParamBoxRec : PSC1Kernel.Name := .str ParamBox "rec"
+  let paramBoxU : PSC1Kernel.Name := .str .anonymous "u"
+  let paramBoxLevel : PSC1Kernel.Level := .param paramBoxU
+  let alphaName : PSC1Kernel.Name := .str .anonymous "α"
+  let valueName : PSC1Kernel.Name := .str .anonymous "value"
+  let paramBoxType : PSC1Kernel.Expr :=
+    .forallE alphaName (.sort paramBoxLevel) (.sort paramBoxLevel) .default
+  let paramBoxCtorType : PSC1Kernel.Expr :=
+    .forallE alphaName (.sort paramBoxLevel)
+      (.forallE valueName (.bvar 0)
+        (.app (.const ParamBox [paramBoxLevel]) (.bvar 1))
+        .default)
+      .default
+  let oursParamBox ← exceptToIO
+    "PSC1 parameterized simple inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive .empty {
+      levelParams := [paramBoxU]
+      name := ParamBox
+      type := paramBoxType
+      ctors := [{ name := ParamBoxMk, type := paramBoxCtorType }]
+      isUnsafe := false
+      numParams := 1
+    })
+  let leanParamBox0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanParamBox1 ←
+    match Lean.Kernel.Environment.addDecl leanParamBox0 {} (.inductDecl [toLeanName paramBoxU] 1 [{
+      name := toLeanName ParamBox
+      type := toLeanExpr paramBoxType
+      ctors := [{
+        name := toLeanName ParamBoxMk
+        type := toLeanExpr paramBoxCtorType
+      }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected parameterized simple inductive oracle"
+  for name in [ParamBox, ParamBoxMk, ParamBoxRec] do
+    let some oursInfo := oursParamBox.find? name
+      | throw <| IO.userError "PSC1 parameterized inductive metadata missing"
+    let some leanInfo := leanParamBox1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 parameterized inductive metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("parameterized inductive generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursParamBox.find? ParamBox with
+  | some (.inductInfo info) =>
+      assertTrue "PSC1 parameterized inductive numParams mismatch"
+        (info.numParams == 1)
+  | _ =>
+      throw <| IO.userError "PSC1 parameterized inductive info missing"
+  match oursParamBox.find? ParamBoxMk with
+  | some (.ctorInfo info) =>
+      assertTrue "PSC1 parameterized constructor numParams mismatch"
+        (info.numParams == 1)
+      assertTrue "PSC1 parameterized constructor numFields mismatch"
+        (info.numFields == 1)
+  | _ =>
+      throw <| IO.userError "PSC1 parameterized constructor info missing"
+  match oursParamBox.find? ParamBoxRec with
+  | some (.recInfo info) =>
+      assertTrue "PSC1 parameterized recursor numParams mismatch"
+        (info.numParams == 1)
+      match info.type with
+      | .forallE _ _ _ binderInfo =>
+          assertTrue "PSC1 inferImplicit did not infer the datatype parameter"
+            (PSC1Kernel.BinderInfo.eq binderInfo .implicit)
+      | _ =>
+          throw <| IO.userError "PSC1 parameterized recursor has no parameter binder"
+  | _ =>
+      throw <| IO.userError "PSC1 parameterized recursor info missing"
+
   let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let paramBoxBase :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursParamBoxRun ← exceptToIO
+    "PSC1 parameterized simple inductive admission with Nat"
+    (PSC1Kernel.Kernel.addSimpleInductive paramBoxBase {
+      levelParams := [paramBoxU]
+      name := ParamBox
+      type := paramBoxType
+      ctors := [{ name := ParamBoxMk, type := paramBoxCtorType }]
+      isUnsafe := false
+      numParams := 1
+    })
+  let leanParamBoxNat ←
+    match Lean.Kernel.Environment.addDecl leanParamBox0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected ParamBox oracle Nat axiom"
+  let leanParamBoxRun ←
+    match Lean.Kernel.Environment.addDecl leanParamBoxNat {} (.inductDecl [toLeanName paramBoxU] 1 [{
+      name := toLeanName ParamBox
+      type := toLeanExpr paramBoxType
+      ctors := [{
+        name := toLeanName ParamBoxMk
+        type := toLeanExpr paramBoxCtorType
+      }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected ParamBox runtime oracle"
+  let leanParamBoxEnv := Lean.Environment.ofKernelEnv leanParamBoxRun
+  let one : PSC1Kernel.Level := .succ .zero
+  let paramBoxNatT : PSC1Kernel.Expr :=
+    .app (.const ParamBox [one]) natT
+  let paramMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "box") paramBoxNatT natT .default
+  let paramMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "value") natT (.bvar 0) .default
+  let paramMajor : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs (.const ParamBoxMk [one])
+      [natT, .lit (.nat 43)]
+  let paramRecApp :=
+    PSC1Kernel.applyArgs (.const ParamBoxRec [one, one])
+      [natT, paramMotive, paramMinor, paramMajor]
+  let paramCtx := PSC1Kernel.CheckerContext.empty oursParamBoxRun
+  let paramType ← exceptToIO
+    "PSC1 parameterized recursor typecheck"
+    (PSC1Kernel.check paramCtx paramRecApp)
+  let paramTypeOk ← exceptToIO
+    "PSC1 parameterized recursor result defeq"
+    (PSC1Kernel.isDefEq paramCtx paramType natT)
+  assertTrue "PSC1 parameterized recursor result type mismatch" paramTypeOk
+  let oursParamReduced ← exceptToIO
+    "PSC1 parameterized recursor reduction"
+    (PSC1Kernel.whnf paramCtx paramRecApp)
+  let leanParamType ←
+    match Lean.Kernel.check leanParamBoxEnv ({} : Lean.LocalContext) (toLeanExpr paramRecApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected generated ParamBox recursor application"
+  assertTrue "parameterized recursor type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr paramType) leanParamType)
+  let leanParamReduced ← kernelExprWhnf leanParamBoxEnv paramRecApp
+  assertTrue "parameterized recursor reduction differs from Lean 4.34"
+    (toLeanExpr oursParamReduced == leanParamReduced)
+  assertTrue "parameterized recursor did not strip the fixed constructor parameter"
+    (PSC1Kernel.Expr.eq oursParamReduced (.lit (.nat 43)))
+
+  -- Next K5 slice: non-recursive constructor fields.
   let natT : PSC1Kernel.Expr := .const NatN []
   let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
   let Box : PSC1Kernel.Name := .str .anonymous "OracleBox"

@@ -360,6 +360,20 @@ export function lean_array_fget<T>(array:LeanArray<T>,index:LeanNat):T{
 
 export const lean_array_fget_borrowed=lean_array_fget;
 
+export function lean_array_get<T>(
+  defaultValue:T,
+  array:LeanArray<T>,
+  index:LeanNat,
+):T{
+  assertNat(index,'lean_array_get index');
+  if(index>=BigInt(array.length))return defaultValue;
+  const n=Number(index);
+  if(!Number.isSafeInteger(n)){
+    throw new RangeError('lean_array_get index exceeds JavaScript safe index range');
+  }
+  return array[n]!;
+}
+
 export function lean_array_fset<T>(
   array:LeanArray<T>,
   index:LeanNat,
@@ -595,6 +609,7 @@ export const LEAN434_JS_EXTERN_MANIFEST:readonly Lean434ExternDescriptor[]=[
   {leanSymbol:'lean_array_push',jsExport:'lean_array_push',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_fget',jsExport:'lean_array_fget',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_fget_borrowed',jsExport:'lean_array_fget_borrowed',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_array_get',jsExport:'lean_array_get',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_fset',jsExport:'lean_array_fset',category:'persistent-value',upstreamSource:'Init/Data/Array/Set.lean'},
   {leanSymbol:'lean_array_set',jsExport:'lean_array_set',category:'persistent-value',upstreamSource:'Init/Data/Array/Set.lean'},
   {leanSymbol:'lean_string_length',jsExport:'lean_string_length',category:'persistent-value',upstreamSource:'Init/Data/String/Length.lean'},
@@ -877,6 +892,13 @@ readonly Lean434DeclarationExternBinding[]=[
     upstreamSource:'Init/Prelude.lean',
   },
   {
+    leanDeclaration:'Array.get!Internal',
+    leanSymbol:'lean_array_get',
+    arity:4,
+    runtimeArgs:[1,2,3],
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
     leanDeclaration:'Array.push',
     leanSymbol:'lean_array_push',
     arity:3,
@@ -981,6 +1003,24 @@ export function findLean434JsExternForDeclaration(
 type Lean434JsExternImplementation=
   (...args:readonly unknown[])=>unknown;
 
+function inhabitedDefault(value:unknown):unknown{
+  if(
+    typeof value==='object'
+    &&value!==null
+    &&!Array.isArray(value)
+    &&'kind' in value
+    &&(value as {kind?:unknown}).kind==='constructor'
+    &&'name' in value
+    &&(value as {name?:unknown}).name==='Inhabited.mk'
+    &&'fields' in value
+    &&Array.isArray((value as {fields?:unknown}).fields)
+  ){
+    const fields=(value as {fields:unknown[]}).fields;
+    if(fields.length>=1)return fields[0];
+  }
+  throw new TypeError('lean_array_get expected an Inhabited.mk runtime value');
+}
+
 const jsExternImplementations:
 ReadonlyMap<string,Lean434JsExternImplementation>=
 new Map<string,Lean434JsExternImplementation>([
@@ -1041,6 +1081,12 @@ new Map<string,Lean434JsExternImplementation>([
     lean_array_fget(array as LeanArray<unknown>,index as LeanNat)],
   ['lean_array_fget_borrowed',(array,index)=>
     lean_array_fget_borrowed(array as LeanArray<unknown>,index as LeanNat)],
+  ['lean_array_get',(inhabited,array,index)=>
+    lean_array_get(
+      inhabitedDefault(inhabited),
+      array as LeanArray<unknown>,
+      index as LeanNat,
+    )],
   ['lean_array_fset',(array,index,value)=>
     lean_array_fset(
       array as LeanArray<unknown>,

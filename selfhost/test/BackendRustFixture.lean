@@ -231,6 +231,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.record
             "Pair"
+            []
             [
               ("left", PsVerifiedIrExpr.var "a"),
               ("right", PsVerifiedIrExpr.var "b")
@@ -249,6 +250,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.projection
             "Pair"
+            []
             (PsVerifiedIrExpr.var "pair")
             "left"
       },
@@ -506,6 +508,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.matchE
             "Maybe"
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
             (PsVerifiedIrExpr.var "value")
             [
               (

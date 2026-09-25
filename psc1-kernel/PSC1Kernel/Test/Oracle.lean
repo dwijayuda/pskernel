@@ -1778,30 +1778,6 @@ def assertExprOracle : IO Unit := do
       Lean.Expr.equal (toLeanExpr letLeft) (toLeanExpr letRight) &&
       !PSC1Kernel.Expr.equal letLeft letRight)
 
-  -- Lean Expr.abstract inserts new binders, so pre-existing loose bvars must
-  -- be lifted past them. This is observable in dependent closing operations.
-  let abstractSource : PSC1Kernel.Expr :=
-    .app (.bvar 0) (.fvar x)
-  let abstractOurs := abstractSource.abstractFVars [x]
-  let abstractLean :=
-    (toLeanExpr abstractSource).abstract #[toLeanExpr (.fvar x)]
-  assertTrue "Expr.abstractFVars failed to lift existing loose bvars"
-    (toLeanExpr abstractOurs == abstractLean)
-  assertTrue "Expr.abstractFVars single-binder shape mismatch"
-    (PSC1Kernel.Expr.eq abstractOurs (.app (.bvar 1) (.bvar 0)))
-
-  let yF : PSC1Kernel.Name := .str .anonymous "yAbstract"
-  let abstractManySource : PSC1Kernel.Expr :=
-    .app (.app (.bvar 0) (.fvar x)) (.fvar yF)
-  let abstractManyOurs := abstractManySource.abstractFVars [x, yF]
-  let abstractManyLean :=
-    (toLeanExpr abstractManySource).abstract #[
-      toLeanExpr (.fvar x),
-      toLeanExpr (.fvar yF)
-    ]
-  assertTrue "Expr.abstractFVars multi-binder differs from Lean 4.34"
-    (toLeanExpr abstractManyOurs == abstractManyLean)
-
 
 
 

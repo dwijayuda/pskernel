@@ -33,6 +33,12 @@ def Environment.get? (env : Environment) (name : Name) : Option ConstantInfo :=
 def Environment.size (env : Environment) : Nat :=
   env.constants.length
 
+def Environment.isNonRecStructure (env : Environment) (name : Name) : Bool :=
+  match env.find? name with
+  | some (.inductInfo info) =>
+    !info.isRec && info.numIndices == 0 && info.ctors.length == 1
+  | _ => false
+
 def Environment.addUnchecked (env : Environment) (info : ConstantInfo) : Environment :=
   { env with constants := info :: env.constants }
 

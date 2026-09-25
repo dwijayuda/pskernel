@@ -1,23 +1,7 @@
 import Ps.BackendWasm.Model
 
-def psWasmIrTypeKeyList :
-    List PsVerifiedIrType -> Option String
-  | [] => some ""
-  | type :: rest =>
-      match psWasmIrTypeKey type with
-      | none => none
-      | some head =>
-          match psWasmIrTypeKeyList rest with
-          | none => none
-          | some tail =>
-              if tail == "" then
-                some head
-              else
-                some (head ++ "," ++ tail)
-
-termination_by types => types.length
-where
-  psWasmIrTypeKey :
+mutual
+  def psWasmIrTypeKey :
       PsVerifiedIrType -> Option String
     | .unknown => none
     | .typeParameter _ => none
@@ -53,42 +37,21 @@ where
             | some resultKey =>
                 some ("Fn{" ++ parameterKey ++ "}->{" ++ resultKey ++ "}")
 
-def psWasmIrTypeKey
-    (type : PsVerifiedIrType) : Option String :=
-  match type with
-  | .unknown => none
-  | .typeParameter _ => none
-  | .primitive primitive =>
-      some
-        (match primitive with
-        | .nat => "Nat"
-        | .int => "Int"
-        | .uint8 => "U8"
-        | .uint16 => "U16"
-        | .uint32 => "U32"
-        | .uint64 => "U64"
-        | .usize => "USize"
-        | .int8 => "I8"
-        | .int16 => "I16"
-        | .int32 => "I32"
-        | .int64 => "I64"
-        | .isize => "ISize"
-        | .float => "F64"
-        | .float32 => "F32"
-        | .bool => "Bool"
-        | .char => "Char"
-        | .string => "String"
-        | .unit => "Unit")
-  | .named name [] => some ("N{" ++ name ++ "}")
-  | .named _ (_ :: _) => none
-  | .function parameters result =>
-      match psWasmIrTypeKeyList parameters with
-      | none => none
-      | some parameterKey =>
-          match psWasmIrTypeKey result with
-          | none => none
-          | some resultKey =>
-              some ("Fn{" ++ parameterKey ++ "}->{" ++ resultKey ++ "}")
+  def psWasmIrTypeKeyList :
+      List PsVerifiedIrType -> Option String
+    | [] => some ""
+    | type :: rest =>
+        match psWasmIrTypeKey type with
+        | none => none
+        | some head =>
+            match psWasmIrTypeKeyList rest with
+            | none => none
+            | some tail =>
+                if tail == "" then
+                  some head
+                else
+                  some (head ++ "," ++ tail)
+end
 
 def psWasmClosureBaseName
     (type : PsVerifiedIrType) : Option String :=

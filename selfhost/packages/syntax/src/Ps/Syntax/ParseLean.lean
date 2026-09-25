@@ -280,11 +280,11 @@ def psParseLeanApplicationTailWithFuel
                       PsSyntaxTerm.unit {
                         start := opening.token.span.start
                         stop := close.token.span.stop
-                      }
+                      };
                     let next :=
                       psLeanApplicationWithArgument
                         current
-                        argument
+                        argument;
                     smaller
                       next
                       close.cursor
@@ -298,7 +298,7 @@ def psParseLeanApplicationTailWithFuel
                         let next :=
                           psLeanApplicationWithArgument
                             current
-                            inner.value
+                            inner.value;
                         smaller
                           next
                           close.cursor
@@ -317,7 +317,7 @@ def psParseLeanApplicationTailWithFuel
                   let next :=
                     psLeanApplicationWithArgument
                       current
-                      argument.value
+                      argument.value;
                   smaller
                     next
                     argument.cursor
@@ -328,7 +328,7 @@ def psParseLeanApplicationTailWithFuel
               let next :=
                 psLeanApplicationWithArgument
                   current
-                  argument.value
+                  argument.value;
               smaller
                 next
                 argument.cursor

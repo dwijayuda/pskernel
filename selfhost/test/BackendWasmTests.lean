@@ -602,6 +602,188 @@ def psTestWasmInductiveMatchLowering : Bool :=
             && psWasmIsSomeValueFunction someFn
       | _, _ => false
 
+def psWasmRecursiveListIrModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := [
+      {
+        name := "U32List"
+        typeParameters := []
+        constructors := [
+          {
+            name := "nil"
+            fields := []
+          },
+          {
+            name := "cons"
+            fields := [
+              {
+                name := "head"
+                type :=
+                  PsVerifiedIrType.primitive
+                    PsVerifiedIrPrimitiveType.uint32
+              },
+              {
+                name := "tail"
+                type := PsVerifiedIrType.named "U32List" []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+    declarations := [
+      {
+        name := "listLength"
+        typeParameters := []
+        parameters := [
+          {
+            name := "xs"
+            type := PsVerifiedIrType.named "U32List" []
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.matchE
+            "U32List"
+            (PsVerifiedIrExpr.var "xs")
+            [
+              (
+                "nil",
+                [],
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.machineInteger
+                    PsVerifiedIrMachineIntegerType.uint32
+                    0)
+              ),
+              (
+                "cons",
+                [
+                  {
+                    field := "head"
+                    name := "head"
+                    type :=
+                      PsVerifiedIrType.primitive
+                        PsVerifiedIrPrimitiveType.uint32
+                  },
+                  {
+                    field := "tail"
+                    name := "tail"
+                    type := PsVerifiedIrType.named "U32List" []
+                  }
+                ],
+                PsVerifiedIrExpr.intrinsic
+                  (PsVerifiedIrIntrinsic.machineIntBinary
+                    PsVerifiedIrMachineIntegerType.uint32
+                    PsVerifiedIrIntegerBinaryOp.add)
+                  [
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.machineInteger
+                        PsVerifiedIrMachineIntegerType.uint32
+                        1),
+                    PsVerifiedIrExpr.call
+                      (PsVerifiedIrExpr.var "listLength")
+                      []
+                      [PsVerifiedIrExpr.var "tail"]
+                  ]
+              )
+            ]
+      },
+      {
+        name := "listLengthTwo"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "listLength")
+            []
+            [
+              PsVerifiedIrExpr.constructor
+                "U32List"
+                "cons"
+                []
+                [
+                  (
+                    "head",
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.machineInteger
+                        PsVerifiedIrMachineIntegerType.uint32
+                        10)
+                  ),
+                  (
+                    "tail",
+                    PsVerifiedIrExpr.constructor
+                      "U32List"
+                      "cons"
+                      []
+                      [
+                        (
+                          "head",
+                          PsVerifiedIrExpr.literal
+                            (PsVerifiedIrLiteral.machineInteger
+                              PsVerifiedIrMachineIntegerType.uint32
+                              20)
+                        ),
+                        (
+                          "tail",
+                          PsVerifiedIrExpr.constructor
+                            "U32List"
+                            "nil"
+                            []
+                            []
+                        )
+                      ]
+                  )
+                ]
+            ]
+      }
+    ]
+  }
+
+def psWasmIsRecursiveListTypes :
+    List PsWasmStructType -> Bool
+  | [
+      {
+        name := "U32List",
+        superType := none,
+        isFinal := false,
+        fields := []
+      },
+      {
+        name := "U32List$nil",
+        superType := some "U32List",
+        isFinal := true,
+        fields := []
+      },
+      {
+        name := "U32List$cons",
+        superType := some "U32List",
+        isFinal := true,
+        fields := [
+          { name := "head", storageType := .value .i32 },
+          {
+            name := "tail",
+            storageType := .value (.refT "U32List")
+          }
+        ]
+      }
+    ] => true
+  | _ => false
+
+def psTestWasmRecursiveListLowering : Bool :=
+  match
+      psWasmLowerModule
+        psWasmProfile32
+        psWasmRecursiveListIrModule with
+  | Except.error _ => false
+  | Except.ok module =>
+      psWasmIsRecursiveListTypes module.structures
+        && module.functions.length == 2
+
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
@@ -685,6 +867,7 @@ def main : IO Unit := do
       && psTestWasmLetLowering
       && psTestWasmStructureLowering
       && psTestWasmInductiveMatchLowering
+      && psTestWasmRecursiveListLowering
       && psTestWasmUleb
       && psTestWasmSignedLeb
       && psTestWasmBinaryModule then

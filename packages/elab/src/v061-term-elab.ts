@@ -3,11 +3,13 @@ import {
   LocalContext,
   TypeChecker,
   app,
+  appView,
   constant,
   exprToString,
   fvar,
   hasMVar,
   nameFromDotted,
+  nameToString,
   natLit,
   strLit,
 } from 'lean-ts-kernel';
@@ -36,9 +38,51 @@ import {elaborateV061LetExpression} from './v061-let-elab.js';
 function resolveReference(
   name:string,
   context:V061CoreElabContext,
+  expected?:Expr,
 ):ReturnType<typeof constant>|ReturnType<typeof fvar> {
   const local=context.locals.get(name);
   if(local!==undefined)return fvar(local);
+
+  if(name.startsWith('.')){
+    if(expected===undefined){
+      throw new Error(
+        "PS_ELAB_CONSTRUCTOR_SHORTHAND_EXPECTED: constructor shorthand '"+
+        name+"' requires an expected inductive type",
+      );
+    }
+    const checker=new TypeChecker(
+      context.environment,
+      context.localContext.clone(),
+    );
+    const view=appView(checker.whnf(expected));
+    if(view.fn.kind!=='const'){
+      throw new Error(
+        "PS_ELAB_CONSTRUCTOR_SHORTHAND_EXPECTED: expected type is not inductive for '"+
+        name+"'",
+      );
+    }
+    const inductive=context.environment.find(view.fn.name);
+    if(inductive?.kind!=='inductive'){
+      throw new Error(
+        "PS_ELAB_CONSTRUCTOR_SHORTHAND_EXPECTED: expected type is not inductive for '"+
+        name+"'",
+      );
+    }
+    const suffix=name.slice(1);
+    const constructor=inductive.ctors.find((candidate)=>{
+      const rendered=nameToString(candidate);
+      const parts=rendered.split('.');
+      return parts[parts.length-1]===suffix;
+    });
+    if(constructor===undefined){
+      throw new Error(
+        "PS_ELAB_CONSTRUCTOR_SHORTHAND: no constructor '"+
+        name+"' for "+nameToString(inductive.name),
+      );
+    }
+    return elaborateV061Constant(constructor,context);
+  }
+
   const full=nameFromDotted(name);
   if(context.environment.find(full)===undefined){
     throw new Error("PS_ELAB_UNKNOWN_NAME: unknown name '"+name+"'");
@@ -64,7 +108,7 @@ export function elaborateV061Term(
         context,
       );
       if(projection!==undefined)return projection;
-      const reference=resolveReference(expr.name,context);
+      const reference=resolveReference(expr.name,context,expected);
       if(reference.kind==='fvar'){
         return {term:reference,type:checker.check(reference)};
       }
@@ -136,7 +180,7 @@ export function elaborateV061Term(
         expected,
       );
       if(recursive!==undefined)return recursive;
-      const fn=resolveReference(expr.callee,context);
+      const fn=resolveReference(expr.callee,context,expected);
       const args={
         length:expr.args.length,
         elaborate:(index:number,expectedType:import('lean-ts-kernel').Expr)=>{

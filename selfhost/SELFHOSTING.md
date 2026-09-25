@@ -331,6 +331,13 @@ closure of the existing compiler implementation, currently advancing through
 `Ps.Syntax.ParseLean`. The rule remains: fix the first real unsupported source
 construct without weakening semantic or regression gates.
 
+Rust backend work is allowed to proceed in parallel on
+`backend/rust-native`. That branch is deliberately non-blocking for this
+self-host lane: it should track/rebase onto shared compiler-IR contracts and
+must not redirect PSC1 source-closure work, introduce Rust-specific source
+semantics, or make the JavaScript fixed point depend on Rust. Its completed
+pieces are integrated when SH9/SH10 are stable enough for SH10R.
+
 
 ## Dual Lake + npm project model
 

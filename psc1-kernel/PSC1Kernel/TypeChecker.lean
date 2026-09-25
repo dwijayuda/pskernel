@@ -1115,11 +1115,37 @@ partial def typeCheckerWhnfSpineDiff
       let rightOpened := rightBody.instantiate1 (.fvar fresh)
       typeCheckerWhnfSpineDiff child leftOpened rightOpened (depth + 1)
   | _, _ =>
+      let projectionDetail ←
+        match leftWhnf with
+        | .proj typeName index struct => do
+            let structWhnf ← whnf ctx struct
+            let ctorDetail :=
+              match structWhnf.getAppFn with
+              | .const ctorName _ =>
+                  match ctx.env.find? ctorName with
+                  | some (.ctorInfo ctor) =>
+                      "; ctor=" ++ typeCheckerNameString ctorName ++
+                      "; ctor.induct=" ++ typeCheckerNameString ctor.induct ++
+                      "; ctor.numParams=" ++ toString ctor.numParams ++
+                      "; ctor.numFields=" ++ toString ctor.numFields ++
+                      "; ctor.args=" ++ toString structWhnf.getAppNumArgs
+                  | _ =>
+                      "; head-const=" ++ typeCheckerNameString ctorName ++
+                      " (not constructor)"
+              | _ => ""
+            pure (
+              "; projection=" ++ typeCheckerNameString typeName ++ "." ++
+              toString index ++
+              "; struct=" ++ typeCheckerExprHead struct ++
+              "; struct-whnf=" ++ typeCheckerExprHead structWhnf ++
+              ctorDetail)
+        | _ => pure ""
       return (
         "depth=" ++ toString depth ++
         "; left=" ++ typeCheckerExprHead leftWhnf ++
         "; right=" ++ typeCheckerExprHead rightWhnf ++
-        "; diff=" ++ typeCheckerExprDiff leftWhnf rightWhnf)
+        "; diff=" ++ typeCheckerExprDiff leftWhnf rightWhnf ++
+        projectionDetail)
 
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with

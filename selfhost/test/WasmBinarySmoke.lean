@@ -294,8 +294,10 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.projection
             "Point"
+            []
             (PsVerifiedIrExpr.record
               "Point"
+              []
               [
                 ("x", PsVerifiedIrExpr.var "x"),
                 ("y", PsVerifiedIrExpr.var "y")
@@ -318,8 +320,10 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.projection
             "SmallSigned"
+            []
             (PsVerifiedIrExpr.record
               "SmallSigned"
+              []
               [("value", PsVerifiedIrExpr.var "value")])
             "value"
       }
@@ -340,8 +344,10 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.projection
             "SmallUnsigned"
+            []
             (PsVerifiedIrExpr.record
               "SmallUnsigned"
+              []
               [("value", PsVerifiedIrExpr.var "value")])
             "value"
       }
@@ -362,6 +368,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.matchE
             "MaybeU32"
+            []
             (PsVerifiedIrExpr.constructor
               "MaybeU32"
               "some"
@@ -400,6 +407,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.matchE
             "MaybeU32"
+            []
             (PsVerifiedIrExpr.constructor
               "MaybeU32"
               "none"
@@ -444,6 +452,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.matchE
             "U32List"
+            []
             (PsVerifiedIrExpr.var "xs")
             [
               (

@@ -2107,6 +2107,163 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "functional recursive recursor did not generate the functional IH"
     (PSC1Kernel.Expr.eq oursWideReduced (.lit (.nat 5)))
 
+  -- Ordinary mutual recursion: one global motive/minor telescope and
+  -- cross-recursive calls between the generated recursors.
+  let Even : PSC1Kernel.Name := .str .anonymous "OracleEven"
+  let EvenZero : PSC1Kernel.Name := .str Even "zero"
+  let EvenSucc : PSC1Kernel.Name := .str Even "succ"
+  let EvenRec : PSC1Kernel.Name := .str Even "rec"
+  let Odd : PSC1Kernel.Name := .str .anonymous "OracleOdd"
+  let OddSucc : PSC1Kernel.Name := .str Odd "succ"
+  let OddRec : PSC1Kernel.Name := .str Odd "rec"
+  let evenT : PSC1Kernel.Expr := .const Even []
+  let oddT : PSC1Kernel.Expr := .const Odd []
+  let evenSuccType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "odd") oddT evenT .default
+  let oddSuccType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "even") evenT oddT .default
+  let mutualBase :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursMutual ← exceptToIO
+    "PSC1 ordinary mutual inductive admission"
+    (PSC1Kernel.Kernel.addSimpleMutualInductive mutualBase {
+      levelParams := []
+      numParams := 0
+      types := [
+        {
+          name := Even
+          type := type1
+          ctors := [
+            { name := EvenZero, type := evenT },
+            { name := EvenSucc, type := evenSuccType }
+          ]
+        },
+        {
+          name := Odd
+          type := type1
+          ctors := [
+            { name := OddSucc, type := oddSuccType }
+          ]
+        }
+      ]
+      isUnsafe := false
+    })
+  let leanMutual0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanMutualNat ←
+    match Lean.Kernel.Environment.addDecl leanMutual0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected mutual oracle Nat axiom"
+  let leanMutual1 ←
+    match Lean.Kernel.Environment.addDecl leanMutualNat {} (.inductDecl [] 0 [
+      {
+        name := toLeanName Even
+        type := toLeanExpr type1
+        ctors := [
+          { name := toLeanName EvenZero, type := toLeanExpr evenT },
+          { name := toLeanName EvenSucc, type := toLeanExpr evenSuccType }
+        ]
+      },
+      {
+        name := toLeanName Odd
+        type := toLeanExpr type1
+        ctors := [
+          { name := toLeanName OddSucc, type := toLeanExpr oddSuccType }
+        ]
+      }
+    ] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected ordinary mutual inductive oracle"
+  let leanMutualEnv := Lean.Environment.ofKernelEnv leanMutual1
+  for name in [Even, EvenZero, EvenSucc, EvenRec, Odd, OddSucc, OddRec] do
+    let some oursInfo := oursMutual.find? name
+      | throw <| IO.userError "PSC1 mutual inductive metadata missing"
+    let some leanInfo := leanMutual1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 mutual metadata missing: " ++ (toLeanName name).toString)
+    assertTrue
+      ("mutual generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  for name in [Even, Odd] do
+    match oursMutual.find? name with
+    | some (.inductInfo info) =>
+        assertTrue "PSC1 mutual inductive was not marked recursive" info.isRec
+        assertTrue "PSC1 direct mutual inductive unexpectedly reflexive"
+          (!info.isReflexive)
+        assertTrue "PSC1 mutual declaration lost its all-types metadata"
+          (info.all.length == 2)
+    | _ =>
+        throw <| IO.userError "PSC1 mutual inductive info missing"
+  for name in [EvenRec, OddRec] do
+    match oursMutual.find? name with
+    | some (.recInfo info) =>
+        assertTrue "PSC1 mutual recursor motive count mismatch"
+          (info.numMotives == 2)
+        assertTrue "PSC1 mutual recursor minor count mismatch"
+          (info.numMinors == 3)
+        assertTrue "PSC1 mutual recursor all-types metadata mismatch"
+          (info.all.length == 2)
+    | _ =>
+        throw <| IO.userError "PSC1 mutual recursor info missing"
+
+  let evenMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "even") evenT natT .default
+  let oddMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "odd") oddT natT .default
+  let evenZeroMinor : PSC1Kernel.Expr := .lit (.nat 61)
+  let evenSuccMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "odd") oddT
+      (.lam (.str .anonymous "odd_ih") natT (.bvar 0) .default)
+      .default
+  let oddSuccMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "even") evenT
+      (.lam (.str .anonymous "even_ih") natT (.bvar 0) .default)
+      .default
+  let mutualMajor : PSC1Kernel.Expr :=
+    .app (.const EvenSucc [])
+      (.app (.const OddSucc []) (.const EvenZero []))
+  let mutualRecApp :=
+    PSC1Kernel.applyArgs (.const EvenRec [.succ .zero])
+      [
+        evenMotive, oddMotive,
+        evenZeroMinor, evenSuccMinor, oddSuccMinor,
+        mutualMajor
+      ]
+  let mutualCtx := PSC1Kernel.CheckerContext.empty oursMutual
+  let mutualResultType ← exceptToIO
+    "PSC1 mutual recursor typecheck"
+    (PSC1Kernel.check mutualCtx mutualRecApp)
+  let mutualTypeOk ← exceptToIO
+    "PSC1 mutual recursor result defeq"
+    (PSC1Kernel.isDefEq mutualCtx mutualResultType natT)
+  assertTrue "PSC1 mutual recursor result type mismatch" mutualTypeOk
+  let oursMutualReduced ← exceptToIO
+    "PSC1 mutual cross-recursive reduction"
+    (PSC1Kernel.whnf mutualCtx mutualRecApp)
+  let leanMutualType ←
+    match Lean.Kernel.check leanMutualEnv ({} : Lean.LocalContext)
+        (toLeanExpr mutualRecApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected generated mutual recursor application"
+  assertTrue "mutual recursor result type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr mutualResultType) leanMutualType)
+  let leanMutualReduced ← kernelExprWhnf leanMutualEnv mutualRecApp
+  assertTrue "mutual cross-recursive reduction differs from Lean 4.34"
+    (toLeanExpr oursMutualReduced == leanMutualReduced)
+  assertTrue "mutual cross-recursive hypotheses did not reach the base minor"
+    (PSC1Kernel.Expr.eq oursMutualReduced (.lit (.nat 61)))
+
   -- Negative functional occurrences remain rejected.
   let Bad : PSC1Kernel.Name := .str .anonymous "OracleSimpleBad"
   let BadMk : PSC1Kernel.Name := .str Bad "mk"

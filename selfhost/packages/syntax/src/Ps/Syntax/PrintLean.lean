@@ -17,7 +17,9 @@ def psPrintLeanTermWithFuel :
       | .character text _ =>
           Except.ok text
       | .bool value _ =>
-          Except.ok (if value then "true" else "false")
+          match value with
+          | true => Except.ok "true"
+          | false => Except.ok "false"
       | .unit _ =>
           Except.ok "()"
       | .record fields _ =>
@@ -355,10 +357,18 @@ def psPrintLeanModule
       match module.declarations.mapM psPrintLeanDeclaration with
       | Except.error error => Except.error error
       | Except.ok declarations =>
+          let importSections :=
+            if imports.isEmpty then
+              List.nil
+            else
+              List.cons (psPrintJoin "\n" imports) List.nil;
+          let declarationSections :=
+            if declarations.isEmpty then
+              List.nil
+            else
+              List.cons (psPrintJoin "\n\n" declarations) List.nil;
           let sections :=
-            (if imports.isEmpty then [] else [psPrintJoin "\n" imports]) ++
-            (if declarations.isEmpty then []
-             else [psPrintJoin "\n\n" declarations])
+            List.append importSections declarationSections;
           if sections.isEmpty then
             Except.ok ""
           else

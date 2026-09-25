@@ -178,7 +178,7 @@ def psElabProjectionStep
       current.context.metaContext
       current.context.localContext
       current.type;
-  let view := psInferAppView reducedType
+  let view := psInferAppView reducedType;
   match view.head with
   | .constE typeName _ =>
       match psEnvironmentFindInductive current.context.environment typeName with

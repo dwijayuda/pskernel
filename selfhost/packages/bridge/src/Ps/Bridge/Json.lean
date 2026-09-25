@@ -740,8 +740,11 @@ partial def psJsonEncodeCanonical
     Except PsJsonEncodeError String :=
   match value with
   | PsJsonValue.nullE => Except.ok "null"
-  | PsJsonValue.bool true => Except.ok "true"
-  | PsJsonValue.bool false => Except.ok "false"
+  | PsJsonValue.bool boolValue =>
+      if boolValue then
+        Except.ok "true"
+      else
+        Except.ok "false"
   | PsJsonValue.number text =>
       if psJsonValidateCanonicalNumber text then
         Except.ok text

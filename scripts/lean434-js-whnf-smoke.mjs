@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import {
   Lean4ExportReplay,
+  anonymous,
   app,
   bvar,
   constant,
@@ -8,6 +9,8 @@ import {
   lam,
   nameFromDotted,
   natLit,
+  numName,
+  strName,
 } from '../dist/src/index.js';
 import {
   Lean434Evaluator,
@@ -23,6 +26,11 @@ import {
   Lean434RuntimeMetadataIndex,
   parseLean434RuntimeMetadata,
 } from '../packages/runtime/dist/src/lean4-metadata.js';
+import {
+  emptyLean434MetavarContext,
+  lean434RuntimeMVarId,
+  lean434RuntimeOptionValue,
+} from '../packages/runtime/dist/src/lean4-mctx.js';
 
 const fixture=process.argv[2]??'lean434-whnf-bootstrap.ndjson';
 const metadataFixture=
@@ -83,7 +91,7 @@ const metadata=new Lean434RuntimeMetadataIndex({
   initializers:selectedInitializers,
 });
 
-const runWhnf=(expr)=>{
+const makeWhnfEvaluator=()=>{
   // Each WHNF scenario gets the same strict evaluator budget.  Re-running the
   // two foundational Environment initializers avoids coupling independent
   // semantic cases through accumulated interpreter steps.
@@ -98,6 +106,11 @@ const runWhnf=(expr)=>{
       'expected exactly importingRef/envExtensionsRef to initialize for WHNF',
     );
   }
+  return evaluator;
+};
+
+const runWhnf=(expr)=>{
+  const evaluator=makeWhnfEvaluator();
 
   let action=evaluator.evaluate(
     constant(
@@ -170,5 +183,91 @@ const runWhnf=(expr)=>{
   }
   console.log(
     'ok - real Lean.Meta.whnfImp executes reduceNat? for closed Nat.add in JavaScript',
+  );
+}
+
+{
+  const mvarName=numName(strName(anonymous,'_m'),21n);
+  const mvarId=lean434RuntimeMVarId(mvarName);
+  const assignedValue=kernelExprToLean434Runtime(natLit(33n));
+
+  // Keep assignment construction under an independent strict budget.  The
+  // resulting logical MetavarContext value is then passed to a fresh WHNF
+  // evaluator, just as Lean threads MetaM state between operations.
+  const assignmentEvaluator=new Lean434Evaluator(
+    replay.env,
+    {metadata,maxSteps:250_000},
+  );
+  let assign=assignmentEvaluator.evaluate(
+    constant(nameFromDotted('Lean.assignExp')),
+  );
+  assign=assignmentEvaluator.applyRuntimeValue(
+    assign,
+    emptyLean434MetavarContext(),
+  );
+  assign=assignmentEvaluator.applyRuntimeValue(assign,mvarId);
+  const assignedMctx=assignmentEvaluator.applyRuntimeValue(
+    assign,
+    assignedValue,
+  );
+
+  const evaluator=makeWhnfEvaluator();
+  const runtimeMVar={
+    kind:'constructor',
+    name:'Lean.Expr.mvar',
+    fields:[mvarId],
+  };
+  let action=evaluator.evaluate(
+    constant(
+      nameFromDotted(
+        'ProofScript.RuntimeProbe.whnfWithEmptyEnvAndMCtx',
+      ),
+    ),
+  );
+  action=evaluator.applyRuntimeValue(action,assignedMctx);
+  action=evaluator.applyRuntimeValue(action,runtimeMVar);
+  const result=evaluator.runIOAction(action).value;
+  if(
+    result?.kind!=='constructor'
+    ||result.name!=='Prod.mk'
+    ||result.fields.length!==2
+  ){
+    throw new Error(
+      'real Lean.Meta.whnfImp mctx probe did not return Expr × MetavarContext',
+    );
+  }
+  if(
+    !exprEq(
+      lean434RuntimeExprToKernel(result.fields[0]),
+      natLit(33n),
+    )
+  ){
+    throw new Error(
+      'real Lean.Meta.whnfImp did not resolve an assigned expression metavariable',
+    );
+  }
+
+  let getAssignment=evaluator.evaluate(
+    constant(nameFromDotted('Lean.MetavarContext.getExprAssignmentExp')),
+  );
+  getAssignment=evaluator.applyRuntimeValue(
+    getAssignment,
+    result.fields[1],
+  );
+  const stored=evaluator.applyRuntimeValue(getAssignment,mvarId);
+  const storedRuntime=lean434RuntimeOptionValue(stored);
+  if(
+    storedRuntime===undefined
+    ||!exprEq(
+      lean434RuntimeExprToKernel(storedRuntime),
+      natLit(33n),
+    )
+  ){
+    throw new Error(
+      'real Lean.Meta.whnfImp did not preserve the threaded MetavarContext',
+    );
+  }
+  console.log(
+    'ok - real Lean.Meta.whnfImp resolves assigned mvars and preserves MetaM state in JavaScript',
   );
 }

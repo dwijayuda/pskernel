@@ -1,3 +1,4 @@
+import Ps.CompilerIr.Specialize
 import Ps.BackendWasm.Binary
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
@@ -2065,7 +2066,7 @@ def psWasmModuleHasUnsupportedData
   | _ :: _ => true
   | [] => false
 
-def psWasmLowerModule
+def psWasmLowerSpecializedModule
     (profile : PsWasmTargetProfile)
     (module : PsVerifiedIrModule) :
     Except PsWasmLowerError PsWasmModule :=
@@ -2123,3 +2124,14 @@ def psWasmLowerModule
                         psWasmExportsOfDeclarations
                           module.declarations
                     }
+
+
+def psWasmLowerModule
+    (profile : PsWasmTargetProfile)
+    (module : PsVerifiedIrModule) :
+    Except PsWasmLowerError PsWasmModule :=
+  match psIrSpecializeModule module with
+  | Except.error _ =>
+      Except.error PsWasmLowerError.unsupportedModuleFeature
+  | Except.ok specialized =>
+      psWasmLowerSpecializedModule profile specialized

@@ -20,6 +20,39 @@ def Name.appendAfter (name : Name) (suffix : String) : Name :=
   | .str parent value => .str parent (value ++ suffix)
   | other => .str other suffix
 
+def Name.append : Name → Name → Name
+  | prefix, .anonymous => prefix
+  | prefix, .str parent value =>
+      .str (Name.append prefix parent) value
+  | prefix, .num parent value =>
+      .num (Name.append prefix parent) value
+
+def Name.appendIndexAfter (name : Name) (index : Nat) : Name :=
+  name.appendAfter ("_" ++ toString index)
+
+partial def Name.isPrefixOf (prefix : Name) : Name → Bool
+  | .anonymous => Name.eq prefix .anonymous
+  | name@(.str parent _) =>
+      Name.eq prefix name || Name.isPrefixOf prefix parent
+  | name@(.num parent _) =>
+      Name.eq prefix name || Name.isPrefixOf prefix parent
+
+partial def Name.replacePrefix
+    (name oldPrefix newPrefix : Name) : Option Name :=
+  if Name.eq name oldPrefix then
+    some newPrefix
+  else
+    match name with
+    | .str parent value =>
+        match Name.replacePrefix parent oldPrefix newPrefix with
+        | some parent' => some (.str parent' value)
+        | none => none
+    | .num parent value =>
+        match Name.replacePrefix parent oldPrefix newPrefix with
+        | some parent' => some (.num parent' value)
+        | none => none
+    | .anonymous => none
+
 def Name.components : Name → List NameComponent
   | .anonymous => []
   | .str p s => p.components ++ [.str s]

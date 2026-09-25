@@ -2193,16 +2193,34 @@ def psElabSyntaxLocalId
           | _ => none
   | _ => none
 
+def psElabNatListAt
+    (values : List Nat)
+    (index : Nat) : Option Nat :=
+  match values with
+  | [] =>
+      none
+  | value :: rest =>
+      match index with
+      | 0 =>
+          some value
+      | nextIndex + 1 =>
+          psElabNatListAt rest nextIndex
+
 def psElabValidateStructuralCall
     (context : PsElabContext)
-    (recursion : PsElabStructuralRecursion) :
-    Nat ->
-    List PsSyntaxTerm ->
-    Option Nat ->
-    Except PsElabError Nat
-  | _, [], some hypothesisId => Except.ok hypothesisId
-  | _, [], none => Except.error PsElabError.structuralRecursionInternal
-  | index, argument :: rest, hypothesisId =>
+    (recursion : PsElabStructuralRecursion)
+    (index : Nat)
+    (arguments : List PsSyntaxTerm)
+    (hypothesisId : Option Nat) :
+    Except PsElabError Nat :=
+  match arguments with
+  | [] =>
+      match hypothesisId with
+      | some resolvedHypothesisId =>
+          Except.ok resolvedHypothesisId
+      | none =>
+          Except.error PsElabError.structuralRecursionInternal
+  | argument :: rest =>
       match psElabSyntaxLocalId context argument with
       | none =>
           if Nat.beq index recursion.recursiveParameterIndex then
@@ -2221,18 +2239,22 @@ def psElabValidateStructuralCall
                 psElabValidateStructuralCall
                   context
                   recursion
-                  (index + 1)
+                  (Nat.succ index)
                   rest
                   (some nextHypothesisId)
           else
-            match recursion.explicitParameterIds[index]? with
-            | none => Except.error PsElabError.structuralRecursionArity
+            match
+                psElabNatListAt
+                  recursion.explicitParameterIds
+                  index with
+            | none =>
+                Except.error PsElabError.structuralRecursionArity
             | some originalId =>
                 if Nat.beq argumentId originalId then
                   psElabValidateStructuralCall
                     context
                     recursion
-                    (index + 1)
+                    (Nat.succ index)
                     rest
                     hypothesisId
                 else

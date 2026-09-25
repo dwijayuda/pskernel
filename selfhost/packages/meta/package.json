@@ -9,7 +9,11 @@
       "src"
     ],
     "role": "meta",
-    "universeMeta": "separate-context"
+    "universeMeta": "separate-context",
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist"
   },
   "dependencies": {
     "@proofscript/core": "0.0.0-dev",

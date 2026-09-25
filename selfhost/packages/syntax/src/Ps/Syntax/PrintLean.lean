@@ -253,7 +253,8 @@ def psPrintLeanTermWithFuel
           match psPrintSyntaxName name with
           | Except.error error => Except.error error
           | Except.ok printedName =>
-              let printType :=
+              let printType :
+                  Except PsSourcePrintError String :=
                 match type with
                 | none => Except.ok ""
                 | some declaredType =>

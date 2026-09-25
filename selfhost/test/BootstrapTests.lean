@@ -840,6 +840,12 @@ def psTestCoreDeclarationEq : PsDeclaration -> PsDeclaration -> Bool
         && psNameListEq leftLevels rightLevels
         && psExprAlphaEq leftType rightType
         && psExprAlphaEq leftValue rightValue
+  | PsDeclaration.partialDecl leftName leftLevels leftType leftValue,
+    PsDeclaration.partialDecl rightName rightLevels rightType rightValue =>
+      psNameEq leftName rightName
+        && psNameListEq leftLevels rightLevels
+        && psExprAlphaEq leftType rightType
+        && psExprAlphaEq leftValue rightValue
   | PsDeclaration.opaqueDecl leftName leftLevels leftType leftValue,
     PsDeclaration.opaqueDecl rightName rightLevels rightType rightValue =>
       psNameEq leftName rightName
@@ -2245,6 +2251,32 @@ def psTestRejectChangedInvariantStructuralRecursion : Bool :=
       | Except.error PsElabError.structuralRecursionInvariantArgument => true
       | _ => false
 
+def psTestDualSourcePartialDefinition : Bool :=
+  match
+      psParseLeanSource
+        "partial def loop (n : Nat) : Nat := loop n",
+      psParseProofScriptSource
+        "partial def loop(n : Nat) : Nat := loop(n);" with
+  | Except.ok leanModule, Except.ok proofScriptModule =>
+      match
+          psElabModule psTestNatEnvironment leanModule,
+          psElabModule psTestNatEnvironment proofScriptModule with
+      | Except.ok leanResult, Except.ok proofScriptResult =>
+          psTestCoreDeclarationListsEq
+              leanResult.declarations
+              proofScriptResult.declarations
+            && match leanResult.declarations with
+               | [declaration@(PsDeclaration.partialDecl name [] type value)] =>
+                   psNameEq name (psTestName "loop")
+                     && psExprHasConst (psTestName "loop") value
+                     && psDeclarationValue declaration == none
+                     && match type with
+                        | PsExpr.forallE _ _ _ PsBinderInfo.explicit => true
+                        | _ => false
+               | _ => false
+      | _, _ => false
+  | _, _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
@@ -2281,6 +2313,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "ProofScript implicit constructor application", passed := psTestProofScriptImplicitConstructorApplication },
   { name := "dual-source implicit constructor application", passed := psTestDualSourceImplicitConstructorApplication },
   { name := "dual-source structural recursion", passed := psTestDualSourceStructuralRecursion },
+  { name := "dual-source controlled partial definition", passed := psTestDualSourcePartialDefinition },
   { name := "reject non-decreasing structural recursion", passed := psTestRejectNonDecreasingStructuralRecursion },
   { name := "reject changed invariant structural recursion", passed := psTestRejectChangedInvariantStructuralRecursion },
   { name := "dual-source String literal", passed := psTestDualSourceStringLiteral },

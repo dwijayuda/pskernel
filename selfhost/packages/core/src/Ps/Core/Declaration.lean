@@ -7,7 +7,7 @@ structure PsInductiveInfo where
   numParams : Nat
   numIndices : Nat
   constructors : List PsName
-  isStructure : Bool := false
+  isStructure : Bool
 
 structure PsConstructorInfo where
   name : PsName
@@ -17,7 +17,7 @@ structure PsConstructorInfo where
   constructorIndex : Nat
   numParams : Nat
   numFields : Nat
-  recursiveFields : List Nat := []
+  recursiveFields : List Nat
 
 structure PsRecursorInfo where
   name : PsName

@@ -1,11 +1,19 @@
 import Ps.Core.Expr
 
 def psExprAbstractFVarAt (target : Nat) (depth : Nat) : PsExpr -> PsExpr
+  | .bvar index =>
+      PsExpr.bvar index
   | .fvar id =>
       if Nat.beq id target then
         PsExpr.bvar depth
       else
         PsExpr.fvar id
+  | .mvar id =>
+      PsExpr.mvar id
+  | .sortE level =>
+      PsExpr.sortE level
+  | .constE name levels =>
+      PsExpr.constE name levels
   | .app fn arg =>
       PsExpr.app
         (psExprAbstractFVarAt target depth fn)
@@ -28,9 +36,10 @@ def psExprAbstractFVarAt (target : Nat) (depth : Nat) : PsExpr -> PsExpr
         (psExprAbstractFVarAt target depth type)
         (psExprAbstractFVarAt target depth value)
         (psExprAbstractFVarAt target (Nat.succ depth) body)
+  | .lit value =>
+      PsExpr.lit value
   | .proj typeName index value =>
       PsExpr.proj typeName index (psExprAbstractFVarAt target depth value)
-  | expr => expr
 
 def psExprAbstractFVar (target : Nat) (expr : PsExpr) : PsExpr :=
   psExprAbstractFVarAt target 0 expr

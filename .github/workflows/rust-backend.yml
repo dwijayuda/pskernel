@@ -112,7 +112,6 @@ jobs:
         run: |
           set -euo pipefail
           cd selfhost
-          npm ci
 
           rm -rf /tmp/psc-diff-ts /tmp/psc-diff-rust
           mkdir -p /tmp/psc-diff-ts /tmp/psc-diff-rust/src

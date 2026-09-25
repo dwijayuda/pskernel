@@ -58,7 +58,7 @@ lift/instantiation against final Lean 4.34.
 
 - K0: Name, Level, Expr, substitution/lifting/abstraction.
 - K1: declarations, local context and immutable environment.
-- K2: WHNF and type inference. **IN PROGRESS** — beta/let/fvar/delta, Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble), constructor projection reduction, and Lean-4.34-faithful projection typing are implemented; bitwise/shift Nat extensions, resource-size guards, recursor/quotient reduction and full cheap-projection control flow remain.
+- K2: WHNF and type inference. **IN PROGRESS** — separate Lean-faithful `whnfCore` (beta/let/fvar/projection only) and full `whnf` (core → Nat → delta), Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble), constructor projection reduction, and Lean-4.34-faithful projection typing are implemented; bitwise/shift Nat extensions, resource-size guards, recursor/quotient reduction and full cheap-projection control flow remain.
 - K3: definitional equality and exact reduction ordering. **IN PROGRESS** — sort/constant-universe/app/binding/projection cases exist; binding defeq follows Lean 4.34 by ignoring binder annotations and proof irrelevance is implemented. Function eta, non-recursive structure eta, and unit-like equality are implemented. Lazy delta ordering, string-literal expansion and caches remain.
 - K4: quotient and recursor reduction.
 - K5: inductive/nested-inductive admission and generated metadata validation.
@@ -67,3 +67,15 @@ lift/instantiation against final Lean 4.34.
 - K8: direct/adversarial/Arena/bounded-corpus acceptance matrix.
 - K9: compile the unchanged Lean source through PSC1 to TypeScript/JavaScript.
 - K10: generate canonical `.ps` and require checked-core/IR parity.
+
+
+### WHNF architecture checkpoint
+
+The Lean-authored kernel now preserves the final Lean 4.34 distinction between
+`whnfCore` and full `whnf`. `whnfCore` does not delta-unfold definitions
+or run Nat/native normalization extensions. Full `whnf` repeatedly performs
+core reduction, then the normalization-extension slot (native remains
+fail-closed/unimplemented), then Nat reduction, then delta unfolding.
+
+This separation is required for source-faithful lazy-delta definitional
+equality and cheap projection reduction.

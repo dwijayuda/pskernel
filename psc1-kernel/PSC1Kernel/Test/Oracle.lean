@@ -173,6 +173,29 @@ def natBinary
     (a b : PSC1Kernel.Expr) : PSC1Kernel.Expr :=
   .app (.app (natConst field) a) b
 
+def assertWhnfLayering : IO Unit := do
+  let D : PSC1Kernel.Name := .str .anonymous "D"
+  let NatN : PSC1Kernel.Name := .str .anonymous "Nat"
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.axiomInfo {
+    base := mkBase NatN type1
+    isUnsafe := false
+  })
+  let env := env1.addUnchecked (.defnInfo {
+    base := mkBase D natT
+    value := .lit (.nat 23)
+    hints := .regular 0
+    safety := .safe
+  })
+  let ctx := PSC1Kernel.CheckerContext.empty env
+  let d : PSC1Kernel.Expr := .const D []
+  let core ← exceptToIO "whnfCore delta boundary" (PSC1Kernel.whnfCore ctx d false)
+  let full ← exceptToIO "whnf delta boundary" (PSC1Kernel.whnf ctx d)
+  assertTrue "whnfCore performed forbidden delta reduction" (PSC1Kernel.Expr.eq core d)
+  assertTrue "full whnf failed to delta reduce" (PSC1Kernel.Expr.eq full (.lit (.nat 23)))
+
 def assertNatReductionOracle : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let ctx := PSC1Kernel.CheckerContext.empty .empty
@@ -437,6 +460,7 @@ def run : IO Unit := do
   ]
   assertLevelPairs levels
   assertExprOracle
+  assertWhnfLayering
   assertNatReductionOracle
   assertFunctionEtaOracle
   assertStructureEtaOracle

@@ -139,75 +139,111 @@ def reduceProjCore
   | _ => none
 
 
-partial def whnf (ctx : CheckerContext) (e : Expr) : Except String Expr :=
-  match e with
-  | .mdata _ body => whnf ctx body
-  | .letE _ _ value body _ =>
-    whnf ctx (body.instantiate1 value)
-  | .fvar name =>
-    match ctx.lctx.find? name with
-    | some decl =>
-      match decl.value? with
-      | some value => whnf ctx value
-      | none => .ok e
-    | none => .ok e
+def applyArgs (fn : Expr) (args : List Expr) : Expr :=
+  args.foldl (fun acc arg => .app acc arg) fn
+
+def unfoldDefinition (ctx : CheckerContext) (e : Expr) : Option Expr :=
+  let fn := e.getAppFn
+  let args := e.getAppArgs
+  match fn with
   | .const name levels =>
     match ctx.env.find? name with
     | some info =>
       match info.deltaValue? with
       | some value =>
         if info.levelParams.length == levels.length then
-          whnf ctx (value.instantiateLevelParams info.levelParams levels)
+          some (applyArgs
+            (value.instantiateLevelParams info.levelParams levels)
+            args)
         else
-          .ok e
+          none
+      | none => none
+    | none => none
+  | _ => none
+
+mutual
+
+partial def whnfCore
+    (ctx : CheckerContext)
+    (e : Expr)
+    (cheapProj : Bool) : Except String Expr :=
+  match e with
+  | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _
+  | .const _ _ | .lam _ _ _ _ | .lit _ => .ok e
+  | .mdata _ body => whnfCore ctx body cheapProj
+  | .fvar name =>
+    match ctx.lctx.find? name with
+    | some decl =>
+      match decl.value? with
+      | some value => whnfCore ctx value cheapProj
       | none => .ok e
     | none => .ok e
+  | .letE _ _ value body _ =>
+    whnfCore ctx (body.instantiate1 value) cheapProj
   | .proj typeName idx struct => do
-    let struct' ← whnf ctx struct
+    let struct' ←
+      if cheapProj then whnfCore ctx struct true
+      else whnf ctx struct
     match reduceProjCore ctx typeName idx struct' with
-    | some value => whnf ctx value
+    | some value => whnfCore ctx value cheapProj
     | none => .ok e
   | .app fn arg => do
-    let natReduced ←
-      match fn with
-      | .const name levels =>
-        if levels.length == 0 && Name.eq name kernelNatSuccName then
-          let arg' ← whnf ctx arg
-          match natLiteralValue? arg' with
-          | some value => .ok (some (.lit (.nat (value + 1))))
-          | none => .ok none
-        else
-          .ok none
-      | .app (.const name levels) left =>
-        if levels.length == 0 then
-          let left' ← whnf ctx left
-          let right' ← whnf ctx arg
-          match natLiteralValue? left', natLiteralValue? right' with
-          | some a, some b => .ok (reduceNatBinary name a b)
-          | _, _ => .ok none
-        else
-          .ok none
-      | _ => .ok none
-    match natReduced with
+    let fn' ← whnfCore ctx fn cheapProj
+    match fn' with
+    | .lam _ _ body _ =>
+      whnfCore ctx (body.instantiate1 arg) cheapProj
+    | _ =>
+      if Expr.eq fn fn' then
+        .ok e
+      else
+        whnfCore ctx (.app fn' arg) cheapProj
+
+partial def reduceNat
+    (ctx : CheckerContext)
+    (e : Expr) : Except String (Option Expr) :=
+  match e with
+  | .app (.const name levels) arg =>
+    if levels.length == 0 && Name.eq name kernelNatSuccName then
+      let arg' ← whnf ctx arg
+      match natLiteralValue? arg' with
+      | some value => .ok (some (.lit (.nat (value + 1))))
+      | none => .ok none
+    else
+      .ok none
+  | .app (.app (.const name levels) left) right =>
+    if levels.length == 0 then
+      let left' ← whnf ctx left
+      let right' ← whnf ctx right
+      match natLiteralValue? left', natLiteralValue? right' with
+      | some a, some b => .ok (reduceNatBinary name a b)
+      | _, _ => .ok none
+    else
+      .ok none
+  | _ => .ok none
+
+partial def whnf (ctx : CheckerContext) (e : Expr) : Except String Expr := do
+  match e with
+  | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _ | .lit _ => return e
+  | .mdata _ body => return ← whnf ctx body
+  | .fvar name =>
+    match ctx.lctx.find? name with
+    | some decl =>
+      if decl.value?.isNone then return e
+    | none => return e
+  | .lam _ _ _ _ | .app _ _ | .const _ _ | .letE _ _ _ _ _ | .proj _ _ _ =>
+    pure ()
+  let rec loop (t : Expr) : Except String Expr := do
+    let core ← whnfCore ctx t false
+    let nat ← reduceNat ctx core
+    match nat with
     | some value => .ok value
     | none =>
-      let fn' ← whnf ctx fn
-      match fn' with
-      | .lam _ _ body _ => whnf ctx (body.instantiate1 arg)
-      | .const name levels =>
-        match ctx.env.find? name with
-        | some info =>
-          match info.deltaValue? with
-          | some value =>
-            if info.levelParams.length == levels.length then
-              whnf ctx (.app (value.instantiateLevelParams info.levelParams levels) arg)
-            else
-              .ok (.app fn' arg)
-          | none => .ok (.app fn' arg)
-        | none => .ok (.app fn' arg)
-      | _ =>
-        if Expr.eq fn fn' then .ok e else .ok (.app fn' arg)
-  | _ => .ok e
+      match unfoldDefinition ctx core with
+      | some value => loop value
+      | none => .ok core
+  loop e
+
+end
 
 partial def ensureSort (ctx : CheckerContext) (e : Expr) : Except String Level := do
   let reduced ← whnf ctx e

@@ -284,6 +284,51 @@ const empty=emptyLean434MetavarContext();
   console.log(
     'ok - native Lean instantiateExprMVarsImp resolves direct mvar chains in JS',
   );
+
+  let core=evaluator.evaluate(
+    constant(nameFromDotted('Lean.instantiateMVarsCore')),
+  );
+  core=evaluator.applyRuntimeValue(core,chainMctx);
+  const coreResult=evaluator.applyRuntimeValue(core,target);
+  if(
+    coreResult?.kind!=='constructor'
+    ||coreResult.name!=='Prod.mk'
+    ||coreResult.fields.length!==2
+  ){
+    throw new Error(
+      'Lean.instantiateMVarsCore did not return Expr × MetavarContext',
+    );
+  }
+  if(
+    !exprEq(
+      lean434RuntimeExprToKernel(coreResult.fields[0]),
+      expected,
+    )
+  ){
+    throw new Error(
+      'real Lean instantiateMVarsCore returned the wrong normalized Expr',
+    );
+  }
+  let getCore=evaluator.evaluate(
+    constant(nameFromDotted('Lean.MetavarContext.getExprAssignmentExp')),
+  );
+  getCore=evaluator.applyRuntimeValue(getCore,coreResult.fields[1]);
+  const coreAssignment=evaluator.applyRuntimeValue(getCore,mvarId1);
+  const coreRuntime=lean434RuntimeOptionValue(coreAssignment);
+  if(
+    coreRuntime===undefined
+    ||!exprEq(
+      lean434RuntimeExprToKernel(coreRuntime),
+      natLit(42n),
+    )
+  ){
+    throw new Error(
+      'real Lean instantiateMVarsCore did not preserve normalized mctx state',
+    );
+  }
+  console.log(
+    'ok - real Lean instantiateMVarsCore executes through ST/StateRefT in JS',
+  );
 }
 
 const mvarName=numName(strName(anonymous,'_m'),7n);

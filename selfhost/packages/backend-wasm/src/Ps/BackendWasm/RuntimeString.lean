@@ -518,7 +518,7 @@ def psWasmStringRuntimeLengthDeclaration :
               (psWasmStringRuntimeU32Compare
                 PsVerifiedIrIntegerCompareOp.ne
                 (psWasmStringRuntimeU32Binary
-                  PsVerifiedIrIntegerBinaryOp.and
+                  PsVerifiedIrIntegerBinaryOp.bitAnd
                   (PsVerifiedIrExpr.var "byte")
                   (psWasmStringRuntimeU32 192))
                 (psWasmStringRuntimeU32 128))
@@ -611,7 +611,7 @@ def psWasmStringRuntimeNextDeclaration :
             (psWasmStringRuntimeU32Compare
               PsVerifiedIrIntegerCompareOp.eq
               (psWasmStringRuntimeU32Binary
-                PsVerifiedIrIntegerBinaryOp.and
+                PsVerifiedIrIntegerBinaryOp.bitAnd
                 (PsVerifiedIrExpr.var "byte")
                 (psWasmStringRuntimeU32 192))
               (psWasmStringRuntimeU32 128))
@@ -654,12 +654,12 @@ def psWasmStringRuntimeDecode2
     (psWasmStringRuntimeU32Binary
       PsVerifiedIrIntegerBinaryOp.mul
       (psWasmStringRuntimeU32Binary
-        PsVerifiedIrIntegerBinaryOp.and
+        PsVerifiedIrIntegerBinaryOp.bitAnd
         b0
         (psWasmStringRuntimeU32 31))
       (psWasmStringRuntimeU32 64))
     (psWasmStringRuntimeU32Binary
-      PsVerifiedIrIntegerBinaryOp.and
+      PsVerifiedIrIntegerBinaryOp.bitAnd
       b1
       (psWasmStringRuntimeU32 63))
 
@@ -672,19 +672,19 @@ def psWasmStringRuntimeDecode3
       (psWasmStringRuntimeU32Binary
         PsVerifiedIrIntegerBinaryOp.mul
         (psWasmStringRuntimeU32Binary
-          PsVerifiedIrIntegerBinaryOp.and
+          PsVerifiedIrIntegerBinaryOp.bitAnd
           b0
           (psWasmStringRuntimeU32 15))
         (psWasmStringRuntimeU32 4096))
       (psWasmStringRuntimeU32Binary
         PsVerifiedIrIntegerBinaryOp.mul
         (psWasmStringRuntimeU32Binary
-          PsVerifiedIrIntegerBinaryOp.and
+          PsVerifiedIrIntegerBinaryOp.bitAnd
           b1
           (psWasmStringRuntimeU32 63))
         (psWasmStringRuntimeU32 64)))
     (psWasmStringRuntimeU32Binary
-      PsVerifiedIrIntegerBinaryOp.and
+      PsVerifiedIrIntegerBinaryOp.bitAnd
       b2
       (psWasmStringRuntimeU32 63))
 
@@ -699,26 +699,26 @@ def psWasmStringRuntimeDecode4
         (psWasmStringRuntimeU32Binary
           PsVerifiedIrIntegerBinaryOp.mul
           (psWasmStringRuntimeU32Binary
-            PsVerifiedIrIntegerBinaryOp.and
+            PsVerifiedIrIntegerBinaryOp.bitAnd
             b0
             (psWasmStringRuntimeU32 7))
           (psWasmStringRuntimeU32 262144))
         (psWasmStringRuntimeU32Binary
           PsVerifiedIrIntegerBinaryOp.mul
           (psWasmStringRuntimeU32Binary
-            PsVerifiedIrIntegerBinaryOp.and
+            PsVerifiedIrIntegerBinaryOp.bitAnd
             b1
             (psWasmStringRuntimeU32 63))
           (psWasmStringRuntimeU32 4096)))
       (psWasmStringRuntimeU32Binary
         PsVerifiedIrIntegerBinaryOp.mul
         (psWasmStringRuntimeU32Binary
-          PsVerifiedIrIntegerBinaryOp.and
+          PsVerifiedIrIntegerBinaryOp.bitAnd
           b2
           (psWasmStringRuntimeU32 63))
         (psWasmStringRuntimeU32 64)))
     (psWasmStringRuntimeU32Binary
-      PsVerifiedIrIntegerBinaryOp.and
+      PsVerifiedIrIntegerBinaryOp.bitAnd
       b3
       (psWasmStringRuntimeU32 63))
 
@@ -757,7 +757,7 @@ def psWasmStringRuntimeGetDeclaration :
             (psWasmStringRuntimeU32Compare
               PsVerifiedIrIntegerCompareOp.eq
               (psWasmStringRuntimeU32Binary
-                PsVerifiedIrIntegerBinaryOp.and
+                PsVerifiedIrIntegerBinaryOp.bitAnd
                 (PsVerifiedIrExpr.var "b0")
                 (psWasmStringRuntimeU32 192))
               (psWasmStringRuntimeU32 128))
@@ -819,7 +819,7 @@ def psWasmStringRuntimeGetDeclaration :
                       (psWasmStringRuntimeNatAdd
                         (PsVerifiedIrExpr.var "position")
                         (psWasmStringRuntimeNat 3))
-                      (psWasmStringRuntimeU32 0)))))))
+                      (psWasmStringRuntimeU32 0))))))))
   }
 
 def psWasmStringRuntimeEqFromDeclaration :

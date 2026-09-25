@@ -10,6 +10,14 @@ inductive PsWasmLowerError where
   | unknownVariable (name : String)
   | unsupportedModuleFeature
 
+structure PsWasmLowerState where
+  nextLocalIndex : Nat
+  localTypes : List PsWasmValueType
+
+structure PsWasmLoweredExpr where
+  instructions : List PsWasmInstruction
+  state : PsWasmLowerState
+
 def psWasmLowerParameterType
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrType) :
@@ -72,190 +80,329 @@ def psWasmFloatingValueType
   | .float32 => .f32
   | .float => .f64
 
-def psWasmFindParameterIndexLoop
-    (name : String) :
-    Nat -> List PsVerifiedIrParameter -> Option Nat
-  | _, [] => none
+def psWasmParameterBindingsLoop :
+    Nat -> List PsVerifiedIrParameter -> List (String × Nat)
+  | _, [] => []
   | index, parameter :: rest =>
-      if parameter.name == name then
-        some index
-      else
-        psWasmFindParameterIndexLoop name (index + 1) rest
+      (parameter.name, index) ::
+        psWasmParameterBindingsLoop (index + 1) rest
 
-def psWasmFindParameterIndex
-    (parameters : List PsVerifiedIrParameter)
-    (name : String) : Option Nat :=
-  psWasmFindParameterIndexLoop name 0 parameters
+def psWasmParameterBindings
+    (parameters : List PsVerifiedIrParameter) :
+    List (String × Nat) :=
+  psWasmParameterBindingsLoop 0 parameters
+
+def psWasmFindBindingIndex :
+    List (String × Nat) -> String -> Option Nat
+  | [], _ => none
+  | binding :: rest, name =>
+      if binding.1 == name then
+        some binding.2
+      else
+        psWasmFindBindingIndex rest name
+
+def psWasmAddLocal
+    (state : PsWasmLowerState)
+    (type : PsWasmValueType) :
+    Nat × PsWasmLowerState :=
+  let index := state.nextLocalIndex
+  (
+    index,
+    {
+      nextLocalIndex := index + 1
+      localTypes := state.localTypes ++ [type]
+    }
+  )
 
 def psWasmLowerExprListWith
     (lower :
       Option PsWasmValueType ->
+      PsWasmLowerState ->
       PsVerifiedIrExpr ->
-        Except PsWasmLowerError (List PsWasmInstruction))
+        Except PsWasmLowerError PsWasmLoweredExpr)
     (expected : Option PsWasmValueType) :
+    PsWasmLowerState ->
     List PsVerifiedIrExpr ->
-    Except PsWasmLowerError (List PsWasmInstruction)
-  | [] => Except.ok []
-  | expr :: rest =>
-      match lower expected expr with
+    Except PsWasmLowerError PsWasmLoweredExpr
+  | state, [] =>
+      Except.ok {
+        instructions := []
+        state := state
+      }
+  | state, expr :: rest =>
+      match lower expected state expr with
       | Except.error error => Except.error error
       | Except.ok lowered =>
-          match psWasmLowerExprListWith lower expected rest with
+          match
+              psWasmLowerExprListWith
+                lower expected lowered.state rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered ++ loweredRest)
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++ loweredRest.instructions
+                state := loweredRest.state
+              }
 
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
       Option PsWasmValueType ->
+      PsWasmLowerState ->
       PsVerifiedIrExpr ->
-        Except PsWasmLowerError (List PsWasmInstruction))
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
     (operation : PsVerifiedIrIntrinsic)
     (arguments : List PsVerifiedIrExpr) :
-    Except PsWasmLowerError (List PsWasmInstruction) :=
+    Except PsWasmLowerError PsWasmLoweredExpr :=
   match operation with
   | .machineIntBinary type integerOperation =>
       match arguments with
       | [left, right] =>
           let expected :=
             some (psWasmMachineIntegerValueType profile type)
-          match psWasmLowerExprListWith
-              lower expected [left, right] with
+          match
+              psWasmLowerExprListWith
+                lower expected state [left, right] with
           | Except.error error => Except.error error
           | Except.ok lowered =>
-              Except.ok
-                (lowered ++
-                  psWasmLowerMachineIntegerBinary
-                    profile type integerOperation)
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++
+                    psWasmLowerMachineIntegerBinary
+                      profile type integerOperation
+                state := lowered.state
+              }
       | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .machineIntCompare type integerOperation =>
       match arguments with
       | [left, right] =>
           let expected :=
             some (psWasmMachineIntegerValueType profile type)
-          match psWasmLowerExprListWith
-              lower expected [left, right] with
+          match
+              psWasmLowerExprListWith
+                lower expected state [left, right] with
           | Except.error error => Except.error error
           | Except.ok lowered =>
-              Except.ok
-                (lowered ++
-                  psWasmLowerMachineIntegerCompare
-                    profile type integerOperation)
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++
+                    psWasmLowerMachineIntegerCompare
+                      profile type integerOperation
+                state := lowered.state
+              }
       | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .floatBinary type floatOperation =>
       match arguments with
       | [left, right] =>
           let expected := some (psWasmFloatingValueType type)
-          match psWasmLowerExprListWith
-              lower expected [left, right] with
+          match
+              psWasmLowerExprListWith
+                lower expected state [left, right] with
           | Except.error error => Except.error error
           | Except.ok lowered =>
-              Except.ok
-                (lowered ++ psWasmLowerFloatBinary type floatOperation)
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++
+                    psWasmLowerFloatBinary type floatOperation
+                state := lowered.state
+              }
       | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .floatCompare type floatOperation =>
       match arguments with
       | [left, right] =>
           let expected := some (psWasmFloatingValueType type)
-          match psWasmLowerExprListWith
-              lower expected [left, right] with
+          match
+              psWasmLowerExprListWith
+                lower expected state [left, right] with
           | Except.error error => Except.error error
           | Except.ok lowered =>
-              Except.ok
-                (lowered ++ psWasmLowerFloatCompare type floatOperation)
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++
+                    psWasmLowerFloatCompare type floatOperation
+                state := lowered.state
+              }
       | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
 def psWasmLowerCallWith
+    (bindings : List (String × Nat))
     (lower :
       Option PsWasmValueType ->
+      PsWasmLowerState ->
       PsVerifiedIrExpr ->
-        Except PsWasmLowerError (List PsWasmInstruction))
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
     (fn : PsVerifiedIrExpr)
     (arguments : List PsVerifiedIrExpr) :
-    Except PsWasmLowerError (List PsWasmInstruction) :=
+    Except PsWasmLowerError PsWasmLoweredExpr :=
   match fn with
   | .var name =>
-      match psWasmLowerExprListWith lower none arguments with
-      | Except.error error => Except.error error
-      | Except.ok lowered =>
-          Except.ok (lowered ++ [PsWasmInstruction.call name])
+      match psWasmFindBindingIndex bindings name with
+      | some _ =>
+          Except.error PsWasmLowerError.unsupportedExpression
+      | none =>
+          match
+              psWasmLowerExprListWith
+                lower none state arguments with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++
+                    [PsWasmInstruction.call name]
+                state := lowered.state
+              }
   | _ => Except.error PsWasmLowerError.unsupportedExpression
 
 def psWasmLowerIfWith
     (lower :
       Option PsWasmValueType ->
+      PsWasmLowerState ->
       PsVerifiedIrExpr ->
-        Except PsWasmLowerError (List PsWasmInstruction))
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
     (expected : Option PsWasmValueType)
     (condition thenBranch elseBranch : PsVerifiedIrExpr) :
-    Except PsWasmLowerError (List PsWasmInstruction) :=
+    Except PsWasmLowerError PsWasmLoweredExpr :=
   match expected with
   | none => Except.error PsWasmLowerError.unsupportedType
   | some resultType =>
-      match lower (some PsWasmValueType.i32) condition with
+      match
+          lower
+            (some PsWasmValueType.i32)
+            state
+            condition with
       | Except.error error => Except.error error
       | Except.ok conditionCode =>
-          match lower expected thenBranch with
+          match
+              lower
+                expected
+                conditionCode.state
+                thenBranch with
           | Except.error error => Except.error error
           | Except.ok thenCode =>
-              match lower expected elseBranch with
+              match
+                  lower
+                    expected
+                    thenCode.state
+                    elseBranch with
               | Except.error error => Except.error error
               | Except.ok elseCode =>
-                  Except.ok
-                    (conditionCode
-                      ++ [PsWasmInstruction.ifStart (some resultType)]
-                      ++ thenCode
-                      ++ [PsWasmInstruction.else_]
-                      ++ elseCode
-                      ++ [PsWasmInstruction.end_])
+                  Except.ok {
+                    instructions :=
+                      conditionCode.instructions
+                        ++ [PsWasmInstruction.ifStart (some resultType)]
+                        ++ thenCode.instructions
+                        ++ [PsWasmInstruction.else_]
+                        ++ elseCode.instructions
+                        ++ [PsWasmInstruction.end_]
+                    state := elseCode.state
+                  }
 
 def psWasmLowerExprWithFuel
     (profile : PsWasmTargetProfile)
-    (parameters : List PsVerifiedIrParameter)
+    (bindings : List (String × Nat))
     (expected : Option PsWasmValueType) :
-    Nat -> PsVerifiedIrExpr ->
-    Except PsWasmLowerError (List PsWasmInstruction)
-  | 0, _ => Except.error PsWasmLowerError.unsupportedExpression
-  | fuel + 1, expr =>
+    Nat ->
+    PsWasmLowerState ->
+    PsVerifiedIrExpr ->
+    Except PsWasmLowerError PsWasmLoweredExpr
+  | 0, _, _ =>
+      Except.error PsWasmLowerError.unsupportedExpression
+  | fuel + 1, state, expr =>
       let lower :=
-        fun expectedType nestedExpr =>
+        fun expectedType nestedState nestedExpr =>
           psWasmLowerExprWithFuel
-            profile parameters expectedType fuel nestedExpr
+            profile bindings expectedType fuel nestedState nestedExpr
       match expr with
       | .literal literal =>
           match literal with
           | .machineInteger type value =>
-              Except.ok
-                (psWasmLowerMachineIntegerLiteral profile type value)
+              Except.ok {
+                instructions :=
+                  psWasmLowerMachineIntegerLiteral profile type value
+                state := state
+              }
           | .bool value =>
-              Except.ok
-                [PsWasmInstruction.i32Const (if value then 1 else 0)]
-          | .unit => Except.ok []
-          | _ => Except.error PsWasmLowerError.unsupportedExpression
+              Except.ok {
+                instructions :=
+                  [PsWasmInstruction.i32Const
+                    (if value then 1 else 0)]
+                state := state
+              }
+          | .unit =>
+              Except.ok {
+                instructions := []
+                state := state
+              }
+          | _ =>
+              Except.error PsWasmLowerError.unsupportedExpression
       | .var name =>
-          match psWasmFindParameterIndex parameters name with
-          | none => Except.error (PsWasmLowerError.unknownVariable name)
+          match psWasmFindBindingIndex bindings name with
+          | none =>
+              Except.error (PsWasmLowerError.unknownVariable name)
           | some index =>
-              Except.ok [PsWasmInstruction.localGet index]
+              Except.ok {
+                instructions := [PsWasmInstruction.localGet index]
+                state := state
+              }
       | .intrinsic operation arguments =>
-          psWasmLowerIntrinsicWith profile lower operation arguments
+          psWasmLowerIntrinsicWith
+            profile lower state operation arguments
       | .call fn _ arguments =>
-          psWasmLowerCallWith lower fn arguments
+          psWasmLowerCallWith
+            bindings lower state fn arguments
+      | .letE name type value body =>
+          match psWasmLowerParameterType profile type with
+          | Except.error error => Except.error error
+          | Except.ok localType =>
+              match
+                  lower
+                    (some localType)
+                    state
+                    value with
+              | Except.error error => Except.error error
+              | Except.ok loweredValue =>
+                  let allocated :=
+                    psWasmAddLocal loweredValue.state localType
+                  let localIndex := allocated.1
+                  let localState := allocated.2
+                  let bodyBindings :=
+                    (name, localIndex) :: bindings
+                  match
+                      psWasmLowerExprWithFuel
+                        profile
+                        bodyBindings
+                        expected
+                        fuel
+                        localState
+                        body with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredBody =>
+                      Except.ok {
+                        instructions :=
+                          loweredValue.instructions
+                            ++ [PsWasmInstruction.localSet localIndex]
+                            ++ loweredBody.instructions
+                        state := loweredBody.state
+                      }
       | .ifE condition thenBranch elseBranch =>
           psWasmLowerIfWith
-            lower expected condition thenBranch elseBranch
-      | _ => Except.error PsWasmLowerError.unsupportedExpression
+            lower state expected condition thenBranch elseBranch
+      | _ =>
+          Except.error PsWasmLowerError.unsupportedExpression
 
 def psWasmLowerExpr
     (profile : PsWasmTargetProfile)
-    (parameters : List PsVerifiedIrParameter)
+    (bindings : List (String × Nat))
     (expected : Option PsWasmValueType)
+    (state : PsWasmLowerState)
     (expr : PsVerifiedIrExpr) :
-    Except PsWasmLowerError (List PsWasmInstruction) :=
+    Except PsWasmLowerError PsWasmLoweredExpr :=
   psWasmLowerExprWithFuel
-    profile parameters expected 4096 expr
+    profile bindings expected 4096 state expr
 
 def psWasmLowerDeclaration
     (profile : PsWasmTargetProfile)
@@ -270,20 +417,28 @@ def psWasmLowerDeclaration
           match psWasmExpectedResultType results with
           | Except.error error => Except.error error
           | Except.ok expected =>
-              match psWasmLowerExpr
-                  profile
-                  declaration.parameters
-                  expected
-                  declaration.body with
+              let bindings :=
+                psWasmParameterBindings declaration.parameters
+              let initialState : PsWasmLowerState := {
+                nextLocalIndex := declaration.parameters.length
+                localTypes := []
+              }
+              match
+                  psWasmLowerExpr
+                    profile
+                    bindings
+                    expected
+                    initialState
+                    declaration.body with
               | Except.error error => Except.error error
-              | Except.ok body =>
-                  Except.ok
-                    {
-                      name := declaration.name
-                      parameters := parameters
-                      results := results
-                      body := body
-                    }
+              | Except.ok lowered =>
+                  Except.ok {
+                    name := declaration.name
+                    parameters := parameters
+                    results := results
+                    locals := lowered.state.localTypes
+                    body := lowered.instructions
+                  }
 
 def psWasmLowerDeclarations
     (profile : PsWasmTargetProfile) :
@@ -328,8 +483,7 @@ def psWasmLowerModule
     match psWasmLowerDeclarations profile module.declarations with
     | Except.error error => Except.error error
     | Except.ok functions =>
-        Except.ok
-          {
-            functions := functions
-            exports := psWasmExportsOfDeclarations module.declarations
-          }
+        Except.ok {
+          functions := functions
+          exports := psWasmExportsOfDeclarations module.declarations
+        }

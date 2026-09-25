@@ -164,6 +164,12 @@ jobs:
           cat > /tmp/psc-diff-ts/run.cjs <<'EOF'
           const m = require("./module.js");
           const lines = [
+            "nat_div=" + m.diffNatDiv(7n, 2n).toString(),
+            "nat_div_zero=" + m.diffNatDiv(7n, 0n).toString(),
+            "nat_mod=" + m.diffNatMod(7n, 2n).toString(),
+            "nat_mod_zero=" + m.diffNatMod(7n, 0n).toString(),
+            "char_valid=" + m.diffCharRoundTrip(128512n).toString(),
+            "char_invalid=" + m.diffCharRoundTrip(55296n).toString(),
             "nat_lt=" + m.diffNat(2n, 5n).toString(),
             "nat_ge=" + m.diffNat(9n, 4n).toString(),
             "int=" + m.diffInt(7n, 2n).toString(),
@@ -213,12 +219,15 @@ jobs:
               diffArrayPersistentSet,
               diffCapture,
               diffCaptureArray,
+              diffCharRoundTrip,
               diffF32Add,
               diffF64Div,
               diffI16Mul,
               diffInt,
               diffMaybe,
               diffNat,
+              diffNatDiv,
+              diffNatMod,
               diffProjection,
               diffReuseCapture,
               diffReuseString,
@@ -242,6 +251,12 @@ jobs:
           }
 
           fn main() {
+              println!("nat_div={}", diffNatDiv(n(7), n(2)));
+              println!("nat_div_zero={}", diffNatDiv(n(7), n(0)));
+              println!("nat_mod={}", diffNatMod(n(7), n(2)));
+              println!("nat_mod_zero={}", diffNatMod(n(7), n(0)));
+              println!("char_valid={}", diffCharRoundTrip(n(128_512)));
+              println!("char_invalid={}", diffCharRoundTrip(n(55_296)));
               println!("nat_lt={}", diffNat(n(2), n(5)));
               println!("nat_ge={}", diffNat(n(9), n(4)));
               println!("int={}", diffInt(i(7), i(2)));
@@ -274,6 +289,12 @@ jobs:
             > /tmp/psc-diff-rust.out
 
           cat > /tmp/psc-diff-expected.out <<'EOF'
+          nat_div=3
+          nat_div_zero=0
+          nat_mod=1
+          nat_mod_zero=7
+          char_valid=128512
+          char_invalid=0
           nat_lt=7
           nat_ge=5
           int=-5

@@ -1313,9 +1313,11 @@ def psParseLeanTermWithFuel :
                               | List.nil =>
                                   psLeanTermStop scrutinee.value
                               | List.cons alternative _ =>
-                                  let bodyAndSpan := alternative.2;
-                                  let span := bodyAndSpan.2;
-                                  span.stop;
+                                  match alternative with
+                                  | Prod.mk _ bodyAndSpan =>
+                                      match bodyAndSpan with
+                                      | Prod.mk _ span =>
+                                          span.stop;
                             Except.ok {
                               value :=
                                 PsSyntaxTerm.matchE

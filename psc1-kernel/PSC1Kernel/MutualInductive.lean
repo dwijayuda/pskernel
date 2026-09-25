@@ -414,6 +414,11 @@ def addSimpleMutualInductive
         checkFresh rest
   checkFresh (typeNames ++ recNames ++ ctorNames)
 
+  simpleCheckUniformOccurrences
+    typeNames decl.levelParams decl.numParams
+    (decl.types.foldl
+      (fun acc type => acc ++ type.ctors.map (fun ctor => ctor.type)) [])
+
   let safety :=
     if decl.isUnsafe then DefinitionSafety.unsafeDef else DefinitionSafety.safe
   let levels := decl.levelParams.map Level.param

@@ -364,7 +364,7 @@ partial def findRecursorRule (ctorName : Name) : List RecursorRule → Option Re
 partial def reduceInductiveRec
     (ctx : CheckerContext)
     (e : Expr)
-    (cheapRec : Bool) : Except String (Option Expr) := do
+    (cheapRec cheapProj : Bool) : Except String (Option Expr) := do
   let .const recName recLevels := e.getAppFn | return none
   let some (.recInfo recursor) := ctx.env.find? recName | return none
   let recArgs := e.getAppArgs
@@ -375,7 +375,7 @@ partial def reduceInductiveRec
     return none
   let some major0 := listGet? recArgs majorIdx | return none
   let majorReduced ←
-    if cheapRec then whnfCore ctx major0 true
+    if cheapRec then whnfCore ctx major0 cheapRec cheapProj
     else whnf ctx major0
   let major ←
     match majorReduced with
@@ -406,53 +406,53 @@ partial def reduceInductiveRec
 partial def reduceRecursor
     (ctx : CheckerContext)
     (e : Expr)
-    (cheapRec : Bool) : Except String (Option Expr) := do
+    (cheapRec cheapProj : Bool) : Except String (Option Expr) := do
   let quot ← reduceQuotRec ctx e
   match quot with
   | some value => return some value
-  | none => reduceInductiveRec ctx e cheapRec
+  | none => reduceInductiveRec ctx e cheapRec cheapProj
 
 partial def whnfCore
     (ctx : CheckerContext)
     (e : Expr)
-    (cheapProj : Bool) : Except String Expr :=
+    (cheapRec cheapProj : Bool) : Except String Expr :=
   match e with
   | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _
   | .const _ _ | .lam _ _ _ _ | .lit _ => .ok e
-  | .mdata _ body => whnfCore ctx body cheapProj
+  | .mdata _ body => whnfCore ctx body cheapRec cheapProj
   | .fvar name =>
     match ctx.lctx.find? name with
     | some decl =>
       match decl.value? with
-      | some value => whnfCore ctx value cheapProj
+      | some value => whnfCore ctx value cheapRec cheapProj
       | none => .ok e
     | none => .ok e
   | .letE _ _ value body _ =>
-    whnfCore ctx (body.instantiate1 value) cheapProj
+    whnfCore ctx (body.instantiate1 value) cheapRec cheapProj
   | .proj typeName idx struct => do
     let struct' ←
-      if cheapProj then whnfCore ctx struct true
+      if cheapProj then whnfCore ctx struct cheapRec cheapProj
       else whnf ctx struct
     let struct'' ←
       match struct' with
       | .lit (.str value) => whnf ctx (stringLitToConstructor value)
       | _ => .ok struct'
     match reduceProjCore ctx typeName idx struct'' with
-    | some value => whnfCore ctx value cheapProj
+    | some value => whnfCore ctx value cheapRec cheapProj
     | none => .ok e
   | .app fn arg => do
-    let fn' ← whnfCore ctx fn cheapProj
+    let fn' ← whnfCore ctx fn cheapRec cheapProj
     match fn' with
     | .lam _ _ body _ =>
-      whnfCore ctx (body.instantiate1 arg) cheapProj
+      whnfCore ctx (body.instantiate1 arg) cheapRec cheapProj
     | _ =>
       if Expr.eq fn fn' then
-        let reduced ← reduceRecursor ctx e cheapProj
+        let reduced ← reduceRecursor ctx e cheapRec cheapProj
         match reduced with
-        | some value => whnfCore ctx value cheapProj
+        | some value => whnfCore ctx value cheapRec cheapProj
         | none => .ok e
       else
-        whnfCore ctx (.app fn' arg) cheapProj
+        whnfCore ctx (.app fn' arg) cheapRec cheapProj
 
 partial def reduceNat
     (ctx : CheckerContext)
@@ -492,7 +492,7 @@ partial def whnf (ctx : CheckerContext) (e : Expr) : Except String Expr := do
   | .lam _ _ _ _ | .app _ _ | .const _ _ | .letE _ _ _ _ _ | .proj _ _ _ =>
     pure ()
   let rec loop (t : Expr) : Except String Expr := do
-    let core ← whnfCore ctx t false
+    let core ← whnfCore ctx t false false
     let nat ← reduceNat ctx core
     match nat with
     | some value => .ok value
@@ -558,14 +558,14 @@ partial def deltaOnce
     (e : Expr) : Except String Expr := do
   let some unfolded := unfoldDefinition ctx e
     | .error "internal lazy-delta request for non-definition"
-  whnfCore ctx unfolded true
+  whnfCore ctx unfolded false true
 
 partial def tryUnfoldProjApp
     (ctx : CheckerContext)
     (e : Expr) : Except String (Option Expr) := do
   match e.getAppFn with
   | .proj _ _ _ =>
-      let reduced ← whnfCore ctx e false
+      let reduced ← whnfCore ctx e false false
       if Expr.eq reduced e then
         return none
       else
@@ -733,8 +733,8 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
           | _ => pure ()
     | _ => pure ()
 
-  let aCore ← whnfCore ctx a true
-  let bCore ← whnfCore ctx b true
+  let aCore ← whnfCore ctx a false true
+  let bCore ← whnfCore ctx b false true
   match quickReducedDefEq aCore bCore with
   | some value => return value
   | none => pure ()
@@ -770,8 +770,8 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
 
   -- Cheap projection normalization has now had its chance. Retry core WHNF
   -- with full projection reduction, as final Lean 4.34 does.
-  let aFull ← whnfCore ctx aDelta false
-  let bFull ← whnfCore ctx bDelta false
+  let aFull ← whnfCore ctx aDelta false false
+  let bFull ← whnfCore ctx bDelta false false
   if !Expr.eq aFull aDelta || !Expr.eq bFull bDelta then
     return ← isDefEq ctx aFull bFull
 

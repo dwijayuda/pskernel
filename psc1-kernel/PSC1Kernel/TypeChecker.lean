@@ -24,6 +24,82 @@ def kernelNatName : Name :=
 def kernelStringName : Name :=
   .str .anonymous "String"
 
+def kernelBoolName : Name :=
+  .str .anonymous "Bool"
+
+def kernelBoolTrueName : Name :=
+  .str kernelBoolName "true"
+
+def kernelBoolFalseName : Name :=
+  .str kernelBoolName "false"
+
+def kernelNatZeroName : Name :=
+  .str kernelNatName "zero"
+
+def kernelNatSuccName : Name :=
+  .str kernelNatName "succ"
+
+def kernelNatAddName : Name :=
+  .str kernelNatName "add"
+
+def kernelNatSubName : Name :=
+  .str kernelNatName "sub"
+
+def kernelNatMulName : Name :=
+  .str kernelNatName "mul"
+
+def kernelNatPowName : Name :=
+  .str kernelNatName "pow"
+
+def kernelNatGcdName : Name :=
+  .str kernelNatName "gcd"
+
+def kernelNatModName : Name :=
+  .str kernelNatName "mod"
+
+def kernelNatDivName : Name :=
+  .str kernelNatName "div"
+
+def kernelNatBeqName : Name :=
+  .str kernelNatName "beq"
+
+def kernelNatBleName : Name :=
+  .str kernelNatName "ble"
+
+def natLiteralValue? : Expr → Option Nat
+  | .lit (.nat value) => some value
+  | .const name levels =>
+    if levels.length == 0 && Name.eq name kernelNatZeroName then some 0 else none
+  | _ => none
+
+partial def kernelNatGcd (a b : Nat) : Nat :=
+  if b == 0 then a else kernelNatGcd b (a % b)
+
+def boolExpr (value : Bool) : Expr :=
+  .const (if value then kernelBoolTrueName else kernelBoolFalseName) []
+
+def reduceNatBinary (op : Name) (a b : Nat) : Option Expr :=
+  if Name.eq op kernelNatAddName then
+    some (.lit (.nat (a + b)))
+  else if Name.eq op kernelNatSubName then
+    some (.lit (.nat (a - b)))
+  else if Name.eq op kernelNatMulName then
+    some (.lit (.nat (a * b)))
+  else if Name.eq op kernelNatPowName then
+    if b > 16777216 then none else some (.lit (.nat (a ^ b)))
+  else if Name.eq op kernelNatGcdName then
+    some (.lit (.nat (kernelNatGcd a b)))
+  else if Name.eq op kernelNatModName then
+    some (.lit (.nat (if b == 0 then a else a % b)))
+  else if Name.eq op kernelNatDivName then
+    some (.lit (.nat (if b == 0 then 0 else a / b)))
+  else if Name.eq op kernelNatBeqName then
+    some (boolExpr (a == b))
+  else if Name.eq op kernelNatBleName then
+    some (boolExpr (a <= b))
+  else
+    none
+
 def CheckerContext.freshName (ctx : CheckerContext) (base : Name) : Name :=
   .num base ctx.lctx.nextIndex
 
@@ -92,22 +168,45 @@ partial def whnf (ctx : CheckerContext) (e : Expr) : Except String Expr :=
     | some value => whnf ctx value
     | none => .ok e
   | .app fn arg => do
-    let fn' ← whnf ctx fn
-    match fn' with
-    | .lam _ _ body _ => whnf ctx (body.instantiate1 arg)
-    | .const name levels =>
-      match ctx.env.find? name with
-      | some info =>
-        match info.deltaValue? with
-        | some value =>
-          if info.levelParams.length == levels.length then
-            whnf ctx (.app (value.instantiateLevelParams info.levelParams levels) arg)
-          else
-            .ok (.app fn' arg)
+    let natReduced ←
+      match fn with
+      | .const name levels =>
+        if levels.length == 0 && Name.eq name kernelNatSuccName then
+          let arg' ← whnf ctx arg
+          match natLiteralValue? arg' with
+          | some value => .ok (some (.lit (.nat (value + 1))))
+          | none => .ok none
+        else
+          .ok none
+      | .app (.const name levels) left =>
+        if levels.length == 0 then
+          let left' ← whnf ctx left
+          let right' ← whnf ctx arg
+          match natLiteralValue? left', natLiteralValue? right' with
+          | some a, some b => .ok (reduceNatBinary name a b)
+          | _, _ => .ok none
+        else
+          .ok none
+      | _ => .ok none
+    match natReduced with
+    | some value => .ok value
+    | none =>
+      let fn' ← whnf ctx fn
+      match fn' with
+      | .lam _ _ body _ => whnf ctx (body.instantiate1 arg)
+      | .const name levels =>
+        match ctx.env.find? name with
+        | some info =>
+          match info.deltaValue? with
+          | some value =>
+            if info.levelParams.length == levels.length then
+              whnf ctx (.app (value.instantiateLevelParams info.levelParams levels) arg)
+            else
+              .ok (.app fn' arg)
+          | none => .ok (.app fn' arg)
         | none => .ok (.app fn' arg)
-      | none => .ok (.app fn' arg)
-    | _ =>
-      if Expr.eq fn fn' then .ok e else .ok (.app fn' arg)
+      | _ =>
+        if Expr.eq fn fn' then .ok e else .ok (.app fn' arg)
   | _ => .ok e
 
 partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := do

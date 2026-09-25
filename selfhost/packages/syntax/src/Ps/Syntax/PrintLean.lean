@@ -267,10 +267,10 @@ def psPrintLeanStructureField
           | Except.ok printedType =>
               let value :=
                 match head.kind with
-                | .explicit => name ++ " : " ++ printedType
-                | .implicit => "{" ++ name ++ " : " ++ printedType ++ "}"
-                | .strictImplicit => "{{" ++ name ++ " : " ++ printedType ++ "}}"
-                | .instanceImplicit => "[" ++ name ++ " : " ++ printedType ++ "]";
+                | .explicit => psPrintLeanConcat3 name " : " printedType
+                | .implicit => psPrintLeanConcat5 "{" name " : " printedType "}"
+                | .strictImplicit => psPrintLeanConcat5 "{{" name " : " printedType "}}"
+                | .instanceImplicit => psPrintLeanConcat5 "[" name " : " printedType "]";
               Except.ok (psPrintLeanConcat2 "  " value)
 
 def psPrintLeanConstructor
@@ -284,7 +284,7 @@ def psPrintLeanConstructor
       | Except.ok fields =>
           let suffix :=
             if fields.isEmpty then ""
-            else " " ++ psPrintJoin " " fields;
+            else psPrintLeanConcat2 " " (psPrintJoin " " fields);
           Except.ok (psPrintLeanConcat3 "  | " name suffix)
 
 def psPrintLeanDeclaration
@@ -306,7 +306,7 @@ def psPrintLeanDeclaration
                   | Except.ok printedValue =>
                       let binderSuffix :=
                         if printedBinders.isEmpty then ""
-                        else " " ++ psPrintJoin " " printedBinders;
+                        else psPrintLeanConcat2 " " (psPrintJoin " " printedBinders);
                       Except.ok
                         (psPrintLeanConcat6
                           "def "
@@ -330,7 +330,7 @@ def psPrintLeanDeclaration
                   | Except.ok printedValue =>
                       let binderSuffix :=
                         if printedBinders.isEmpty then ""
-                        else " " ++ psPrintJoin " " printedBinders
+                        else psPrintLeanConcat2 " " (psPrintJoin " " printedBinders);
                       Except.ok
                         (psPrintLeanConcat6
                           "partial def "
@@ -354,7 +354,7 @@ def psPrintLeanDeclaration
                   | Except.ok printedValue =>
                       let binderSuffix :=
                         if printedBinders.isEmpty then ""
-                        else " " ++ psPrintJoin " " printedBinders
+                        else psPrintLeanConcat2 " " (psPrintJoin " " printedBinders);
                       Except.ok
                         (psPrintLeanConcat6
                           "theorem "
@@ -386,7 +386,7 @@ def psPrintLeanDeclaration
                   | Except.ok printedConstructors =>
                       let paramSuffix :=
                         if printedParams.isEmpty then ""
-                        else " " ++ psPrintJoin " " printedParams;
+                        else psPrintLeanConcat2 " " (psPrintJoin " " printedParams);
                       Except.ok
                         (psPrintLeanConcat6
                           "inductive "
@@ -407,7 +407,7 @@ def psPrintLeanDeclaration
               | Except.ok printedFields =>
                   let paramSuffix :=
                     if printedParams.isEmpty then ""
-                    else " " ++ psPrintJoin " " printedParams;
+                    else psPrintLeanConcat2 " " (psPrintJoin " " printedParams);
                   Except.ok
                     (psPrintLeanConcat5
                       "structure "

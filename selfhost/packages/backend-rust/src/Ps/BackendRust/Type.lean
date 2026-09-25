@@ -11,6 +11,8 @@ inductive PsRustEmitError where
   | genericValueUnsupported (name : String)
   | valueDeclarationUnsupported (name : String)
   | functionResultUnsupported (name : String)
+  | functionStorageUnsupported (name : String)
+  | nestedFunctionParameterUnsupported (name : String)
   | unknownStructure (name : String)
   | unknownInductive (name : String)
   | namedTypeArity (name : String)
@@ -184,6 +186,44 @@ def psRustEmitType
     (type : PsVerifiedIrType) :
     Except PsRustEmitError String :=
   psRustEmitTypeWithFuel 4096 type
+
+def psRustTypeContainsFunctionWithFuel :
+    Nat ->
+    PsVerifiedIrType ->
+    Bool
+  | 0, _ =>
+      true
+  | fuel + 1, type =>
+      match type with
+      | PsVerifiedIrType.function _ _ =>
+          true
+      | PsVerifiedIrType.named _ arguments =>
+          List.any
+            arguments
+            (fun (argument : PsVerifiedIrType) =>
+              psRustTypeContainsFunctionWithFuel fuel argument)
+      | _ =>
+          false
+
+def psRustTypeContainsFunction
+    (type : PsVerifiedIrType) : Bool :=
+  psRustTypeContainsFunctionWithFuel 4096 type
+
+def psRustFunctionTypeIsFirstOrder
+    (type : PsVerifiedIrType) : Bool :=
+  match type with
+  | PsVerifiedIrType.function parameters result =>
+      let nestedParameter :=
+        List.any parameters psRustTypeContainsFunction;
+      if nestedParameter then
+        false
+      else
+        if psRustTypeContainsFunction result then
+          false
+        else
+          true
+  | _ =>
+      false
 
 def psRustMachineIntegerSuffix
     (type : PsVerifiedIrMachineIntegerType) : String :=

@@ -1365,54 +1365,58 @@ def psEraseRuntimeExprWithFuel
               type
           match kind with
           | .runtime =>
-              match
-                  psEraseRuntimeExprWithFuel
-                    environment
-                    scope
-                    fuel
-                    value with
+              match psEraseRuntimeType environment scope type with
               | Except.error error => Except.error error
-              | Except.ok loweredValue =>
-                  let pushed :=
-                    psLocalPushLet
-                      scope.localContext
-                      name
-                      type
-                      value
-                  let localName :=
-                    psErasureSafeIdentifier
-                      (psNameToString name)
-                      "local"
-                  let nextScope : PsErasureScope := {
-                    localContext := pushed.context
-                    runtimeLocals :=
-                      (pushed.id, localName) ::
-                        scope.runtimeLocals
-                    typeLocals := scope.typeLocals
-                    erasedLocals := scope.erasedLocals
-                    declarationNames := scope.declarationNames
-                    runtimeConstructors := scope.runtimeConstructors
-                    runtimeRecursors := scope.runtimeRecursors
-                    runtimeStructures := scope.runtimeStructures
-                    runtimeStructureConstructors := scope.runtimeStructureConstructors
-                    runtimeExpressions := scope.runtimeExpressions
-                    currentDefinition := scope.currentDefinition
-                  }
+              | Except.ok loweredType =>
                   match
                       psEraseRuntimeExprWithFuel
                         environment
-                        nextScope
+                        scope
                         fuel
-                        (psExprInstantiate1
-                          body
-                          (PsExpr.fvar pushed.id)) with
+                        value with
                   | Except.error error => Except.error error
-                  | Except.ok loweredBody =>
-                      Except.ok
-                        (PsVerifiedIrExpr.letE
-                          localName
-                          loweredValue
-                          loweredBody)
+                  | Except.ok loweredValue =>
+                      let pushed :=
+                        psLocalPushLet
+                          scope.localContext
+                          name
+                          type
+                          value
+                      let localName :=
+                        psErasureSafeIdentifier
+                          (psNameToString name)
+                          "local"
+                      let nextScope : PsErasureScope := {
+                        localContext := pushed.context
+                        runtimeLocals :=
+                          (pushed.id, localName) ::
+                            scope.runtimeLocals
+                        typeLocals := scope.typeLocals
+                        erasedLocals := scope.erasedLocals
+                        declarationNames := scope.declarationNames
+                        runtimeConstructors := scope.runtimeConstructors
+                        runtimeRecursors := scope.runtimeRecursors
+                        runtimeStructures := scope.runtimeStructures
+                        runtimeStructureConstructors := scope.runtimeStructureConstructors
+                        runtimeExpressions := scope.runtimeExpressions
+                        currentDefinition := scope.currentDefinition
+                      }
+                      match
+                          psEraseRuntimeExprWithFuel
+                            environment
+                            nextScope
+                            fuel
+                            (psExprInstantiate1
+                              body
+                              (PsExpr.fvar pushed.id)) with
+                      | Except.error error => Except.error error
+                      | Except.ok loweredBody =>
+                          Except.ok
+                            (PsVerifiedIrExpr.letE
+                              localName
+                              loweredType
+                              loweredValue
+                              loweredBody)
           | _ =>
               psEraseRuntimeExprWithFuel
                 environment

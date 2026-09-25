@@ -1,4 +1,5 @@
 import Ps.Foundation.Source
+import ProofScript.Data.List
 
 structure PsLexCursor where
   remaining : List Char
@@ -8,9 +9,29 @@ structure PsLexStep where
   char : Char
   cursor : PsLexCursor
 
+partial def psLexStringToListFrom
+    (source : String)
+    (position : Nat) : List Char :=
+  let rawPosition : String.Pos.Raw :=
+    String.Pos.Raw.mk position;
+  if String.Internal.atEnd source rawPosition then
+    List.nil
+  else
+    let char : Char :=
+      String.Internal.get source rawPosition;
+    let nextPosition : Nat :=
+      String.Pos.Raw.byteIdx
+        (String.Internal.next source rawPosition);
+    List.cons
+      char
+      (psLexStringToListFrom source nextPosition)
+
+def psLexStringToList (source : String) : List Char :=
+  psLexStringToListFrom source 0
+
 def psLexCursorFromString (source : String) : PsLexCursor :=
   {
-    remaining := source.toList
+    remaining := psLexStringToList source
     position := { byteOffset := 0, line := 1, column := 1 }
   }
 
@@ -25,17 +46,19 @@ def psLexCursorPeek (cursor : PsLexCursor) : Option Char :=
   | List.cons char rest => Option.some char
 
 def psLexAdvancePosition (position : PsSourcePos) (char : Char) : PsSourcePos :=
-  if char == '\n' then
+  let charSize : Nat :=
+    String.utf8ByteSize (String.singleton char);
+  if Nat.beq (Char.toNat char) 10 then
     {
-      byteOffset := position.byteOffset + char.utf8Size
-      line := position.line + 1
+      byteOffset := Nat.add position.byteOffset charSize
+      line := Nat.add position.line 1
       column := 1
     }
   else
     {
-      byteOffset := position.byteOffset + char.utf8Size
+      byteOffset := Nat.add position.byteOffset charSize
       line := position.line
-      column := position.column + 1
+      column := Nat.add position.column 1
     }
 
 def psLexCursorAdvance (cursor : PsLexCursor) : Option PsLexStep :=

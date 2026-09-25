@@ -2292,12 +2292,12 @@ def psLeanFirstCompletedEquation
         psLeanFirstCompletedEquation rest
 
 def psLeanMapPatternAlternatives
-    (lower :
-      PsSyntaxPattern ->
-      Option
-        (Prod
-          PsSyntaxPattern
-          (Prod PsSyntaxTerm PsSourceSpan)))
+    (lowerClauses :
+      List PsSyntaxName ->
+      List PsLeanEquationClause ->
+      Option PsSyntaxTerm)
+    (arguments : List PsSyntaxName)
+    (clauses : List PsLeanEquationClause)
     (patterns : List PsSyntaxPattern) :
     Option
       (List
@@ -2308,10 +2308,27 @@ def psLeanMapPatternAlternatives
   | List.nil =>
       Option.some List.nil
   | List.cons pattern rest =>
-      match lower pattern with
+      let branchClauses :=
+        psLeanEquationClausesForBranch
+          pattern
+          clauses;
+      match lowerClauses arguments branchClauses with
       | Option.none => Option.none
-      | Option.some alternative =>
-          match psLeanMapPatternAlternatives lower rest with
+      | Option.some body =>
+          let alternative :=
+            Prod.mk
+              pattern
+              (Prod.mk
+                body
+                (psSyntaxSpanJoin
+                  (psSyntaxPatternSpan pattern)
+                  (psSyntaxTermSpan body)));
+          match
+              psLeanMapPatternAlternatives
+                lowerClauses
+                arguments
+                clauses
+                rest with
           | Option.none => Option.none
           | Option.some tail =>
               Option.some (List.cons alternative tail)
@@ -2331,32 +2348,12 @@ partial def psLeanLowerEquationClauses
       if psLeanPatternListIsEmpty patterns then
         Option.none
       else
-        let lowerAlternative :
-            PsSyntaxPattern ->
-            Option
-              (Prod
-                PsSyntaxPattern
-                (Prod PsSyntaxTerm PsSourceSpan)) :=
-          fun (pattern : PsSyntaxPattern) =>
-            let branchClauses :=
-              psLeanEquationClausesForBranch
-                pattern
-                clauses;
-            match
-                psLeanLowerEquationClauses
-                  rest
-                  branchClauses with
-            | Option.none => Option.none
-            | Option.some body =>
-                Option.some
-                  (Prod.mk
-                    pattern
-                    (Prod.mk
-                      body
-                      (psSyntaxSpanJoin
-                        (psSyntaxPatternSpan pattern)
-                        (psSyntaxTermSpan body))));
-        match psLeanMapPatternAlternatives lowerAlternative patterns with
+        match
+            psLeanMapPatternAlternatives
+              psLeanLowerEquationClauses
+              rest
+              clauses
+              patterns with
         | Option.none => Option.none
         | Option.some alternatives =>
             match psParseListReverse alternatives with

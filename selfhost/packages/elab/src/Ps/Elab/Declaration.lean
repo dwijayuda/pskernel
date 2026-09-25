@@ -1071,7 +1071,7 @@ def psElabStructureDeclaration
     let constructorName : PsSyntaxName := {
       segments := ["mk"]
       span := span
-    }
+    };
     let constructor : PsSyntaxInductiveConstructor := {
       name := constructorName
       fields := fields

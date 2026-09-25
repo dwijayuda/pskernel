@@ -31,8 +31,10 @@ import {
 function assert(condition: unknown, message = 'assertion failed'): asserts condition {
   if (!condition) throw new Error(message);
 }
+let equalAssertionIndex=0;
 function equal(actual: unknown, expected: unknown, message = ''): void {
-  if (actual !== expected) throw new Error(`${message ? message + ': ' : ''}expected ${String(expected)}, got ${String(actual)}`);
+  equalAssertionIndex+=1;
+  if (actual !== expected) throw new Error(`${message ? message + ': ' : ''}expected ${String(expected)}, got ${String(actual)} @equal#${equalAssertionIndex}`);
 }
 function throws(f: () => unknown, pattern: RegExp): void {
   try { f(); } catch (error) {

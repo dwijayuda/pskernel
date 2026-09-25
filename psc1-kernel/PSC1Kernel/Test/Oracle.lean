@@ -832,7 +832,7 @@ def assertStringLiteralExpansionShape : IO Unit := do
     value.toList.foldr
       (fun c rest =>
         Lean.mkApp2 listCons
-          (Lean.mkApp charOfNat (Lean.mkNatLit c.toNat))
+          (Lean.mkApp charOfNat (Lean.mkRawNatLit c.toNat))
           rest)
       listNil
   let expected := Lean.mkApp (Lean.mkConst ``String.ofList) data

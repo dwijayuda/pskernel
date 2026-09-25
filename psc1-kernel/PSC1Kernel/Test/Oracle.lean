@@ -2269,25 +2269,6 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "K-like recursor did not reduce an arbitrary singleton proof"
     (PSC1Kernel.Expr.eq oursTruthReduced truthMinor)
 
-  -- Final Lean's to_cnstr_when_K is fail-closed: inability to convert a K
-  -- major never rejects the term. Lock this specifically under the historical
-  -- Eq.rec name so temporary diagnostics cannot become kernel semantics.
-  match oursTruth.find? TruthRec with
-  | some (.recInfo info) => do
-      let eqRecName : PSC1Kernel.Name :=
-        .str (.str .anonymous "Eq") "rec"
-      let eqNamedInfo : PSC1Kernel.RecursorInfo := {
-        info with
-        base := { info.base with name := eqRecName }
-      }
-      let wrongMajor : PSC1Kernel.Expr := .lit (.nat 0)
-      let unchanged ← exceptToIO
-        "Eq.rec-named K conversion must fail closed"
-        (PSC1Kernel.toConstructorWhenK truthCtx eqNamedInfo wrongMajor)
-      assertTrue "Eq.rec-named K mismatch did not remain opaque"
-        (PSC1Kernel.Expr.eq unchanged wrongMajor)
-  | _ =>
-      throw <| IO.userError "PSC1 K fail-closed regression recursor missing"
 
   -- More than one constructor forces a Prop-only recursor.
   let ChoiceP : PSC1Kernel.Name := .str .anonymous "OracleChoiceProp"

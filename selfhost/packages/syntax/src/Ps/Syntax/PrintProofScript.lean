@@ -168,9 +168,7 @@ def psPrintProofScriptTermWithFuel
                   | Except.error error => Except.error error
                   | Except.ok name =>
                       match
-                          psPrintProofScriptTermWithFuel
-                            remaining
-                            type with
+                          smaller type with
                       | Except.error error => Except.error error
                       | Except.ok printedType =>
                           let delimiters :=
@@ -206,9 +204,7 @@ def psPrintProofScriptTermWithFuel
                   | Except.error error => Except.error error
                   | Except.ok name =>
                       match
-                          psPrintProofScriptTermWithFuel
-                            remaining
-                            type with
+                          smaller type with
                       | Except.error error => Except.error error
                       | Except.ok printedType =>
                           let delimiters :=
@@ -238,9 +234,7 @@ def psPrintProofScriptTermWithFuel
                 | none => Except.ok ""
                 | some declaredType =>
                     match
-                        psPrintProofScriptTermWithFuel
-                          remaining
-                          declaredType with
+                        smaller declaredType with
                     | Except.error error => Except.error error
                     | Except.ok printed =>
                         Except.ok (psPrintProofScriptConcat2 " : " printed);
@@ -248,15 +242,11 @@ def psPrintProofScriptTermWithFuel
               | Except.error error => Except.error error
               | Except.ok printedType =>
                   match
-                      psPrintProofScriptTermWithFuel
-                        remaining
-                        value with
+                      smaller value with
                   | Except.error error => Except.error error
                   | Except.ok printedValue =>
                       match
-                          psPrintProofScriptTermWithFuel
-                            remaining
-                            body with
+                          smaller body with
                       | Except.error error => Except.error error
                       | Except.ok printedBody =>
                           Except.ok
@@ -269,21 +259,15 @@ def psPrintProofScriptTermWithFuel
                               (psPrintProofScriptConcat2 "; " printedBody))
       | .ifE condition thenBranch elseBranch _ =>
           match
-              psPrintProofScriptTermWithFuel
-                remaining
-                condition with
+              smaller condition with
           | Except.error error => Except.error error
           | Except.ok printedCondition =>
               match
-                  psPrintProofScriptTermWithFuel
-                    remaining
-                    thenBranch with
+                  smaller thenBranch with
               | Except.error error => Except.error error
               | Except.ok printedThen =>
                   match
-                      psPrintProofScriptTermWithFuel
-                        remaining
-                        elseBranch with
+                      smaller elseBranch with
                   | Except.error error => Except.error error
                   | Except.ok printedElse =>
                       Except.ok
@@ -296,9 +280,7 @@ def psPrintProofScriptTermWithFuel
                           (psPrintProofScriptConcat2 printedElse " }"))
       | .matchE scrutinee alternatives _ =>
           match
-              psPrintProofScriptTermWithFuel
-                remaining
-                scrutinee with
+              smaller scrutinee with
           | Except.error error => Except.error error
           | Except.ok printedScrutinee =>
               let printAlternative :=
@@ -311,9 +293,7 @@ def psPrintProofScriptTermWithFuel
                           | Except.error error => Except.error error
                           | Except.ok printedPattern =>
                               match
-                                  psPrintProofScriptTermWithFuel
-                                    remaining
-                                    body with
+                                  smaller body with
                               | Except.error error => Except.error error
                               | Except.ok printedBody =>
                                   Except.ok

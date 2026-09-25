@@ -94,6 +94,13 @@ jobs:
           cd selfhost
           lake build
 
+      - name: Run owned WebAssembly backend target-lowering tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_tests
+
       - name: Probe real compiler source readiness
         shell: bash
         run: |
@@ -378,13 +385,6 @@ jobs:
           set -euo pipefail
           cd selfhost
           lake exe psc1_backend_ts_tests
-
-      - name: Run owned WebAssembly backend target-lowering tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd selfhost
-          lake exe psc1_backend_wasm_tests
 
       - name: Run Lean-native erasure pipeline tests
         shell: bash

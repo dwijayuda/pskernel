@@ -64,6 +64,7 @@ selfhost/
     compiler-ir/
     erasure/
     backend-ts/
+    backend-rust/          # planned after JS fixed point
 
     compiler/
       package.json
@@ -98,8 +99,11 @@ selfhost/
 ```
 
 `packages/compiler` is portable. It owns compiler composition APIs such as
-source translation, parsing, elaboration, checked-admission production, erasure
-and TypeScript emission. It must not own filesystem access or process spawning.
+source translation, parsing, elaboration, checked-admission production, erasure,
+and target-neutral compiler-IR production. Backend packages own target emission:
+`backend-ts` is the bootstrap backend and `backend-rust` is the planned first
+native backend after the JavaScript fixed point. The compiler package must not
+own filesystem access or process spawning.
 
 `packages/cli` is host-facing. Its Lean `Main.lean` is only the bootstrap
 command dispatcher. The Node `psc` binary is the normal post-bootstrap CLI.
@@ -108,9 +112,12 @@ command dispatcher. The Node `psc` binary is the normal post-bootstrap CLI.
 invocation. These are outside the semantic compiler and are not part of the
 portable trust story.
 
-## One compiler, two hosts
+## One compiler, staged execution hosts
 
-Both bootstrap and self-hosted execution use the same compiler API.
+Bootstrap and self-hosted execution use the same portable compiler API. The
+current closure uses Lean/Lake once and then JavaScript. After the JavaScript
+fixed point and `.ps` source transition are stable, the planned Rust backend
+adds a native host without changing compiler semantics.
 
 The Lake-hosted bootstrap path supports:
 
@@ -235,6 +242,49 @@ be byte-for-byte identical.
 Later assurance can add checked-core and IR fingerprints without changing the
 package/build structure.
 
+### 7. Planned Rust/native self-host
+
+Rust is deliberately sequenced after the first JavaScript fixed point. Once
+`.ps` is authoritative, the same compiler IR gains a `backend-rust` package:
+
+```text
+compiler.ps
+    |
+    +--> backend-ts   -> .ts -> tsc   -> psc.js
+    |
+    \--> backend-rust -> .rs -> rustc -> psc-native
+```
+
+The first native compiler is bootstrapped by the stable JavaScript compiler:
+
+```text
+compiler.ps --psc.js--> compiler.rs --rustc--> psc-native-1
+```
+
+Then the native compiler must compile the same compiler source again:
+
+```text
+compiler.ps --psc-native-1--> compiler.rs --rustc--> psc-native-2
+```
+
+The native host must also be able to emit the TypeScript backend, so the
+cross-host matrix includes:
+
+```text
+psc.js     -> compiler.ps -> Rust -> psc-native
+psc-native -> compiler.ps -> Rust -> next psc-native
+psc-native -> compiler.ps -> TS   -> psc.js
+```
+
+Cross-host equality is defined over normalized source plus checked-core and
+compiler-IR fingerprints. Native executable bytes are not required to be
+identical because rustc/linker/platform metadata are outside ProofScript
+semantics.
+
+The Rust host may initially use the same versioned external pskernel bridge as
+the JavaScript host. This milestone self-hosts the **compiler execution host**;
+it does not require rewriting the kernel in Rust.
+
 ## Source transition
 
 During bootstrap development, handwritten `.lean` remains authoritative and
@@ -252,7 +302,27 @@ packages/*/src/**/*.ps
 ```
 
 At that point Lake becomes a reference/bootstrap/verification build rather than
-the normal development build.
+the normal development build. After this source transition, `backend-rust`
+should be implemented in authoritative `.ps` source so the native backend does
+not create a second handwritten compiler tree.
+
+## PSC1 scalar foundation
+
+The frozen PSC1 scalar vocabulary is:
+
+```text
+Nat Int
+UInt8 UInt16 UInt32 UInt64 USize
+Int8 Int16 Int32 Int64 ISize
+Float Float32
+Bool Char String Unit
+```
+
+These are semantic ProofScript types, not aliases chosen independently by each
+backend. `Nat`/`Int` retain exact mathematical semantics; fixed-width
+integer types retain their declared widths; `USize`/`ISize` are
+target-word-sized; and floating-point backends must preserve the specified
+`Float`/`Float32` semantics.
 
 ## Current blocker
 

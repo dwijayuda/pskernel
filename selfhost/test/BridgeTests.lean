@@ -150,7 +150,9 @@ def psTestPersistentLevelCodecRoundTrip : Bool :=
           match psDecodeCodecLevel json with
           | Except.error _ => false
           | Except.ok decoded =>
-              psLevelEq level decoded
+              match psEncodeCodecLevel decoded with
+              | Except.error _ => false
+              | Except.ok reencoded => reencoded == encoded
 
 def psTestPersistentExprCodecRoundTrip : Bool :=
   let natType := PsExpr.constE psNatName []

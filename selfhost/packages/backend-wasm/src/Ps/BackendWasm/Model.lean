@@ -13,6 +13,7 @@ inductive PsWasmValueType where
   | f32
   | f64
   | refT (name : String)
+  | funcRef
   | noValue
 
 inductive PsWasmStorageType where
@@ -96,6 +97,9 @@ inductive PsWasmInstruction where
   | structGetU (typeName : String) (fieldIndex : Nat)
   | refTest (typeName : String)
   | refCast (typeName : String)
+  | refFunc (functionName : String)
+  | refCastFunction (typeName : String)
+  | callRef (typeName : String)
 
 structure PsWasmStructField where
   name : String
@@ -107,8 +111,14 @@ structure PsWasmStructType where
   isFinal : Bool
   fields : List PsWasmStructField
 
+structure PsWasmFunctionType where
+  name : String
+  parameters : List PsWasmValueType
+  results : List PsWasmValueType
+
 structure PsWasmFunction where
   name : String
+  typeName : Option String
   parameters : List PsWasmValueType
   results : List PsWasmValueType
   locals : List PsWasmValueType
@@ -116,12 +126,16 @@ structure PsWasmFunction where
 
 structure PsWasmModule where
   structures : List PsWasmStructType
+  functionTypes : List PsWasmFunctionType
   functions : List PsWasmFunction
+  functionRefs : List String
   exports : List (String × String)
 
 def psWasmModuleEmpty : PsWasmModule :=
   {
     structures := []
+    functionTypes := []
     functions := []
+    functionRefs := []
     exports := []
   }

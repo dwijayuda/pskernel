@@ -355,6 +355,33 @@ jobs:
           grep -q 'export function intCalc' /tmp/psc1-int-lean.js
           echo "PSC1_LEAN_NATIVE_INT_TSC_PIPELINE: PASS"
 
+
+          cat > /tmp/psc1-partial.lean <<'EOF'
+          partial def loop (n : Nat) : Nat := loop n
+          EOF
+          cat > /tmp/psc1-partial.ps <<'EOF'
+          partial def loop(n : Nat) : Nat := loop(n);
+          EOF
+          lake exe psc1 typescript /tmp/psc1-partial.lean > /tmp/psc1-partial-lean.ts
+          lake exe psc1 typescript /tmp/psc1-partial.ps > /tmp/psc1-partial-ps.ts
+          cmp /tmp/psc1-partial-lean.ts /tmp/psc1-partial-ps.ts
+          rm -f /tmp/psc1-partial-lean.js /tmp/psc1-partial-lean.d.ts /tmp/psc1-partial-lean.js.map
+          lake exe psc1 build /tmp/psc1-partial.lean --out /tmp/psc1-partial-lean.ts
+          test -f /tmp/psc1-partial-lean.js
+          test -f /tmp/psc1-partial-lean.d.ts
+          test -f /tmp/psc1-partial-lean.js.map
+          grep -q 'export function loop' /tmp/psc1-partial-lean.js
+          grep -q 'loop(n)' /tmp/psc1-partial-lean.js
+          if lake exe psc1 check /tmp/psc1-partial.lean; then
+            echo "partial def unexpectedly passed certification-oriented check" >&2
+            exit 1
+          fi
+          if lake exe psc1 admissions /tmp/psc1-partial.lean > /tmp/psc1-partial-admissions.json; then
+            echo "partial def unexpectedly emitted checked admissions" >&2
+            exit 1
+          fi
+          echo "PSC1_LEAN_NATIVE_PARTIAL_TSC_PIPELINE: PASS"
+
       - name: Run dual-source admission pipeline
         shell: bash
         run: |

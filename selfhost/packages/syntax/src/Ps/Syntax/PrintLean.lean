@@ -664,6 +664,17 @@ def psPrintLeanImport
   | Except.ok name =>
       Except.ok (psPrintLeanConcat2 "import " name)
 
+def psPrintLeanAppendStrings
+    (xs : List String) : List String -> List String :=
+  match xs with
+  | List.nil =>
+      fun (ys : List String) => ys
+  | List.cons head tail =>
+      let smaller : List String -> List String :=
+        psPrintLeanAppendStrings tail;
+      fun (ys : List String) =>
+        List.cons head (smaller ys)
+
 def psPrintLeanModuleParts
     (sourceImports : List PsSyntaxImport)
     (sourceDeclarations : List PsSyntaxDeclaration) :
@@ -697,7 +708,9 @@ def psPrintLeanModuleParts
                   (psPrintJoin "\n\n" declarations)
                   List.nil;
           let sections : List String :=
-            List.append importSections declarationSections;
+            psPrintLeanAppendStrings
+              importSections
+              declarationSections;
           match sections with
           | List.nil =>
               Except.ok ""

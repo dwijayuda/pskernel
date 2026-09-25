@@ -388,36 +388,68 @@ def psJsonParseArrayWith
   | Nat.zero, _, _ =>
       Except.error PsJsonParseError.fuelExhausted
   | Nat.succ remaining, input, valuesRev =>
-      let chars := psJsonSkipWhitespace input
+      let chars := psJsonSkipWhitespace input;
       match chars with
-      | ']' :: rest =>
-          Except.ok {
-            value := PsJsonValue.array (psJsonReverseValues valuesRev)
-            rest := rest
-          }
-      | _ =>
+      | List.nil =>
           match parseValue remaining chars with
           | Except.error error => Except.error error
           | Except.ok parsed =>
-              let afterValue := psJsonSkipWhitespace parsed.rest
+              let afterValue := psJsonSkipWhitespace parsed.rest;
               match afterValue with
-              | ',' :: rest =>
-                  psJsonParseArrayWith
-                    parseValue
-                    remaining
-                    rest
-                    (List.cons parsed.value valuesRev)
-              | ']' :: rest =>
-                  Except.ok {
-                    value :=
-                      PsJsonValue.array
-                        (psJsonReverseValues
-                          (List.cons parsed.value valuesRev))
-                    rest := rest
-                  }
-              | _ =>
+              | List.nil =>
                   Except.error
                     (PsJsonParseError.expected ", or ]")
+              | List.cons separator rest =>
+                  if psJsonCharEq separator ',' then
+                    psJsonParseArrayWith
+                      parseValue
+                      remaining
+                      rest
+                      (List.cons parsed.value valuesRev)
+                  else if psJsonCharEq separator ']' then
+                    Except.ok {
+                      value :=
+                        PsJsonValue.array
+                          (psJsonReverseValues
+                            (List.cons parsed.value valuesRev))
+                      rest := rest
+                    }
+                  else
+                    Except.error
+                      (PsJsonParseError.expected ", or ]")
+      | List.cons first rest =>
+          if psJsonCharEq first ']' then
+            Except.ok {
+              value := PsJsonValue.array (psJsonReverseValues valuesRev)
+              rest := rest
+            }
+          else
+            match parseValue remaining chars with
+            | Except.error error => Except.error error
+            | Except.ok parsed =>
+                let afterValue := psJsonSkipWhitespace parsed.rest;
+                match afterValue with
+                | List.nil =>
+                    Except.error
+                      (PsJsonParseError.expected ", or ]")
+                | List.cons separator afterSeparator =>
+                    if psJsonCharEq separator ',' then
+                      psJsonParseArrayWith
+                        parseValue
+                        remaining
+                        afterSeparator
+                        (List.cons parsed.value valuesRev)
+                    else if psJsonCharEq separator ']' then
+                      Except.ok {
+                        value :=
+                          PsJsonValue.array
+                            (psJsonReverseValues
+                              (List.cons parsed.value valuesRev))
+                        rest := afterSeparator
+                      }
+                    else
+                      Except.error
+                        (PsJsonParseError.expected ", or ]")
 
 def psJsonReverseFieldsAcc
     (fields : List (String × PsJsonValue))

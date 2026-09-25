@@ -171,6 +171,10 @@ jobs:
           {
             const failures = [];
             for (const name of [
+              'intLiteralNegativeShape',
+              'intLiteralPositiveShape',
+              'intEqNegativeSelf',
+              'intAddMixedShape',
               'intAddMixed',
               'intSubNegative',
               'intMulNegative',

@@ -7,6 +7,101 @@ namespace ReplayJson
 
 open Lean
 
+def jsonWs (c : Char) : Bool :=
+  c == ' ' || c == '\n' || c == '\r' || c == '\t'
+
+def skipJsonWs : List Char → List Char
+  | c :: rest => if jsonWs c then skipJsonWs rest else c :: rest
+  | [] => []
+
+partial def scanJsonStringToken
+    (input : List Char) : Except String (String × List Char) := do
+  let '"' :: rest := input
+    | throw "expected JSON string"
+  let rec go
+      (pending : List Char)
+      (acc : List Char)
+      (escaped : Bool) :
+      Except String (String × List Char) := do
+    match pending with
+    | [] => throw "unterminated JSON string"
+    | c :: tail =>
+        if escaped then
+          go tail (c :: acc) false
+        else if c == '\\' then
+          go tail (c :: acc) true
+        else if c == '"' then
+          pure (String.ofList (('"' :: acc).reverse ++ ['"']), tail)
+        else
+          go tail (c :: acc) false
+  go rest [] false
+
+def decodedJsonKey (token : String) : Except String String := do
+  match Lean.Json.parse token with
+  | .ok (.str key) => pure key
+  | .ok _ => throw "JSON object key did not decode as a string"
+  | .error err => throw ("invalid JSON object key: " ++ err)
+
+partial def scanJsonValue : List Char → Except String (List Char)
+  | input => do
+      let input := skipJsonWs input
+      match input with
+      | [] => throw "unexpected end of JSON input"
+      | '{' :: rest => scanJsonObject rest []
+      | '[' :: rest => scanJsonArray rest
+      | '"' :: _ =>
+          let (_, rest) ← scanJsonStringToken input
+          pure rest
+      | _ =>
+          let rec primitive : List Char → List Char
+            | [] => []
+            | c :: rest =>
+                if jsonWs c || c == ',' || c == ']' || c == '}' then
+                  c :: rest
+                else
+                  primitive rest
+          pure (primitive input)
+
+partial def scanJsonObject
+    (input : List Char)
+    (seen : List String) : Except String (List Char) := do
+  let input := skipJsonWs input
+  match input with
+  | '}' :: rest => pure rest
+  | _ => do
+      let (token, afterKey) ← scanJsonStringToken input
+      let key ← decodedJsonKey token
+      if seen.any (fun old => old == key) then
+        throw ("duplicate JSON object key: " ++ key)
+      let afterKey := skipJsonWs afterKey
+      let ':' :: afterColon := afterKey
+        | throw "expected ':' after JSON object key"
+      let afterValue ← scanJsonValue afterColon
+      let afterValue := skipJsonWs afterValue
+      match afterValue with
+      | ',' :: rest => scanJsonObject rest (key :: seen)
+      | '}' :: rest => pure rest
+      | _ => throw "expected ',' or '}' after JSON object value"
+
+partial def scanJsonArray
+    (input : List Char) : Except String (List Char) := do
+  let input := skipJsonWs input
+  match input with
+  | ']' :: rest => pure rest
+  | _ => do
+      let afterValue ← scanJsonValue input
+      let afterValue := skipJsonWs afterValue
+      match afterValue with
+      | ',' :: rest => scanJsonArray rest
+      | ']' :: rest => pure rest
+      | _ => throw "expected ',' or ']' after JSON array value"
+
+def validateNoDuplicateJsonKeys (raw : String) : Except String Unit := do
+  let rest ← scanJsonValue raw.toList
+  unless (skipJsonWs rest).isEmpty do
+    throw "trailing JSON input"
+  pure ()
+
 def field? (value : Json) (key : String) : Option Json :=
   match value with
   | .obj fields => fields.get? key
@@ -412,6 +507,7 @@ def decodeJson (root : Json) : Except String Replay.Record := do
     throw "unknown lean4export record"
 
 def decodeLine (raw : String) : Except String Replay.Record := do
+  validateNoDuplicateJsonKeys raw
   let json ←
     match Lean.Json.parse raw with
     | .ok value => pure value

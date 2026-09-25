@@ -75,8 +75,8 @@ It does not promise to preserve:
 ProofScript:
 
 ```proofscript
-const answer : Nat := 42;
-function add(x : Nat, y : Nat) : Nat := x + y;
+const answer: Nat := 42;
+function add(x: Nat, y: Nat): Nat := x + y;
 ```
 
 Canonical Lean uses ordinary definitions:
@@ -174,7 +174,7 @@ Not every ProofScript feature has a lossless Lean source representation.
 The current named npm FFI is the key example.
 
 ```proofscript
-extern function hostShout(value : String) : String
+extern function hostShout(value: String): String
   from "host-lib"
   import shout;
 ```

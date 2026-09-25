@@ -48,9 +48,10 @@ def psPrintPattern
     Except PsSourcePrintError String :=
   match pattern with
   | .bool value _ =>
-      match value with
-      | true => Except.ok "true"
-      | false => Except.ok "false"
+      if value then
+        Except.ok "true"
+      else
+        Except.ok "false"
   | .wildcard _ =>
       Except.ok "_"
   | .constructor name binders _ =>

@@ -33,6 +33,26 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Validate K8 bounded acceptance manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f psc1-kernel/K8_ACCEPTANCE.md
+          grep -Fq "BOUNDED SEMANTIC BASELINE COMPLETE" psc1-kernel/README.md
+          for fixture in \
+            lean434-std-sat-cnf-roots.ndjson \
+            lean434-std-parsec-roots.ndjson \
+            lean434-std-byteslice-roots.ndjson \
+            lean434-lean-rbmap-roots.ndjson \
+            lean434-lean-persistentarray-roots.ndjson \
+            lean434-lean-persistenthashmap-roots.ndjson
+          do
+            test -f "oracle/fixtures/$fixture"
+            grep -Fq "$fixture" .github/workflows/psc1-lean-kernel.yml
+            grep -Fq "$fixture" psc1-kernel/K8_ACCEPTANCE.md
+          done
+          grep -Fq "kernelInterrupt.lean':{kind:'operational-resource'" scripts/kernel-study-regression-matrix.mjs
+          grep -Fq "kernel_maxheartbeats.lean':{kind:'operational-resource'" scripts/kernel-study-regression-matrix.mjs
       - name: Install Lean 4.34
         shell: bash
         run: |

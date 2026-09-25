@@ -277,7 +277,48 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
     | .forallE name domain _ binderInfo =>
       isDefEq ctx (.lam name domain (.app other (.bvar 0)) binderInfo) b'
     | _ => return false
-  | _, _ => return false
+  | _, _ => do
+    if ← tryEtaStruct ctx a' b' then return true
+    if ← isDefEqUnitLike ctx a' b' then return true
+    return false
+
+partial def tryEtaStructCore
+    (ctx : CheckerContext)
+    (t s : Expr) : Except String Bool := do
+  let fn := s.getAppFn
+  let args := s.getAppArgs
+  let .const ctorName _ := fn | return false
+  let some (.ctorInfo ctor) := ctx.env.find? ctorName | return false
+  if args.length != ctor.numParams + ctor.numFields then return false
+  if !ctx.env.isNonRecStructure ctor.induct then return false
+  if !(← isDefEq ctx (← infer ctx t) (← infer ctx s)) then return false
+  let rec loop (i : Nat) : Except String Bool := do
+    if i < ctor.numFields then
+      let some arg := listGet? args (ctor.numParams + i) | return false
+      let ok ← isDefEq ctx (.proj ctor.induct i t) arg
+      if !ok then return false
+      loop (i + 1)
+    else
+      return true
+  loop 0
+
+partial def tryEtaStruct
+    (ctx : CheckerContext)
+    (t s : Expr) : Except String Bool := do
+  if ← tryEtaStructCore ctx t s then return true
+  tryEtaStructCore ctx s t
+
+partial def isDefEqUnitLike
+    (ctx : CheckerContext)
+    (t s : Expr) : Except String Bool := do
+  let tType ← whnf ctx (← infer ctx t)
+  let .const inductName _ := tType.getAppFn | return false
+  if !ctx.env.isNonRecStructure inductName then return false
+  let some (.inductInfo induct) := ctx.env.find? inductName | return false
+  let [ctorName] := induct.ctors | return false
+  let some (.ctorInfo ctor) := ctx.env.find? ctorName | return false
+  if ctor.numFields != 0 then return false
+  isDefEq ctx tType (← infer ctx s)
 
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with

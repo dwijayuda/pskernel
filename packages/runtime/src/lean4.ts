@@ -715,6 +715,13 @@ readonly Lean434DeclarationExternBinding[]=[
     upstreamSource:'Init/Prelude.lean',
   },
   {
+    leanDeclaration:'Nat.decEq',
+    leanSymbol:'lean_nat_dec_eq',
+    arity:2,
+    resultAdapter:'decidable',
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
     leanDeclaration:'Nat.ble',
     leanSymbol:'lean_nat_dec_le',
     arity:2,

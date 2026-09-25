@@ -36,6 +36,9 @@ def psWasmNatLeName : String :=
 def psWasmNatLtName : String :=
   "ProofScript.Nat.lt"
 
+def psWasmNatToU32Name : String :=
+  "ProofScript.Nat.toU32"
+
 def psWasmNatRef : PsWasmValueType :=
   PsWasmValueType.refT psWasmNatName
 
@@ -296,6 +299,29 @@ def psWasmNatModFunction : PsWasmFunction :=
       .end_
     ]
 
+def psWasmNatToU32Function : PsWasmFunction :=
+  {
+    name := psWasmNatToU32Name
+    typeName := none
+    parameters := [psWasmNatRef]
+    results := [PsWasmValueType.i32]
+    locals := []
+    body := [
+      .localGet 0,
+      .refTest psWasmNatSuccName,
+      .ifStart (some PsWasmValueType.i32),
+        .localGet 0,
+        .refCast psWasmNatSuccName,
+        .structGet psWasmNatSuccName 0,
+        .call psWasmNatToU32Name,
+        .i32Const 1,
+        .i32Add,
+      .else_,
+        .i32Const 0,
+      .end_
+    ]
+  }
+
 def psWasmNatFunctions : List PsWasmFunction :=
   [
     psWasmNatAddFunction,
@@ -306,7 +332,8 @@ def psWasmNatFunctions : List PsWasmFunction :=
     psWasmNatEqFunction,
     psWasmNatNeFunction,
     psWasmNatLeFunction,
-    psWasmNatLtFunction
+    psWasmNatLtFunction,
+    psWasmNatToU32Function
   ]
 
 def psWasmNatLiteralInstructions :

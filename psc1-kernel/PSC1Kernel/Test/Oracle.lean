@@ -625,6 +625,43 @@ def assertNativeAdmissionInjectionOracle : IO Unit := do
     "native evaluator injection did not publish the checked declaration"
     (admittedEnv.contains admitted)
 
+  let record : PSC1Kernel.Replay.DefinitionRecord := {
+    name := 1
+    levelParams := []
+    type := 0
+    value := 1
+    hints := .regular 1
+    safety := .safe
+    all := []
+  }
+  let replayWithProvider : PSC1Kernel.Replay.State := {
+    PSC1Kernel.Replay.State.empty
+      env 0 PSC1Kernel.leanNatMaxSizeDefault (some provider) with
+    names := PSC1Kernel.Replay.IndexTable.seed #[.anonymous, admitted]
+    exprs := PSC1Kernel.Replay.IndexTable.seed
+      #[expectedType, .const witness []]
+  }
+  let replayed ← exceptToIO
+    "PSC1 replay native evaluator injection"
+    (replayWithProvider.addDefinitionRecord record)
+  assertTrue
+    "replay did not carry native evaluator configuration into admission"
+    (replayed.env.contains admitted)
+
+  let replayWithoutProvider : PSC1Kernel.Replay.State := {
+    PSC1Kernel.Replay.State.empty env with
+    names := PSC1Kernel.Replay.IndexTable.seed #[.anonymous, admitted]
+    exprs := PSC1Kernel.Replay.IndexTable.seed
+      #[expectedType, .const witness []]
+  }
+  let replayNoProviderRejects :=
+    match replayWithoutProvider.addDefinitionRecord record with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue
+    "replay unexpectedly accepted native defeq without a provider"
+    replayNoProviderRejects
+
 def assertNatSizeLimitOracle : IO Unit := do
   let half : Nat := Nat.shiftLeft 1 63
   let big : Nat := half + half

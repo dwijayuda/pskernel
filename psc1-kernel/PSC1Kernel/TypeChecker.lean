@@ -553,11 +553,16 @@ partial def inferKMajorType?
       let sourceInfoCasesOn : Name :=
         .str (.str (.str .anonymous "Lean") "SourceInfo") "casesOn"
       let eqSymm : Name := .str (.str .anonymous "Eq") "symm"
+      let natEqOfBeq : Name :=
+        .str (.str (.str .anonymous "Nat") "eq_of_beq_eq_true") ""
+      let natEqOfBeq : Name :=
+        .str (.str .anonymous "Nat") "eq_of_beq_eq_true"
       let debugLabel? :=
         match major.getAppFn with
         | .const name _ =>
             if Name.eq name sourceInfoCasesOn then some "SourceInfo.casesOn"
             else if Name.eq name eqSymm then some "Eq.symm"
+            else if Name.eq name natEqOfBeq then some "Nat.eq_of_beq_eq_true"
             else none
         | _ => none
       let argc := major.getAppNumArgs

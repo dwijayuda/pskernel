@@ -307,6 +307,20 @@ def psTestDualSourceLeanNativeTextPrimitives : Bool :=
         && leanOutput.contains "const __ps_w = BigInt"
   | _, _ => false
 
+def psTestDualSourceLeanNativePartialDefinition : Bool :=
+  let leanSource :=
+    "partial def loop (n : Nat) : Nat := loop n"
+  let proofScriptSource :=
+    "partial def loop(n : Nat) : Nat := loop(n);"
+  match
+      psCompileLeanSourceToTypeScript leanSource,
+      psCompileProofScriptSourceToTypeScript proofScriptSource with
+  | Except.ok leanOutput, Except.ok proofScriptOutput =>
+      leanOutput == proofScriptOutput
+        && leanOutput.contains
+          "export function loop(n: bigint): bigint { return loop(n); }"
+  | _, _ => false
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -325,7 +339,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native Array foldl", passed := psTestDualSourceLeanNativeArrayFoldl },
   { name := "dual-source Lean-native Array higher-order", passed := psTestDualSourceLeanNativeArrayHigherOrder },
   { name := "dual-source Lean-native partial application", passed := psTestDualSourceLeanNativePartialApplication },
-  { name := "dual-source Lean-native text primitives", passed := psTestDualSourceLeanNativeTextPrimitives }
+  { name := "dual-source Lean-native text primitives", passed := psTestDualSourceLeanNativeTextPrimitives },
+  { name := "dual-source Lean-native controlled partial def", passed := psTestDualSourceLeanNativePartialDefinition }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

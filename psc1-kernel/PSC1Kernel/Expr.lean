@@ -182,7 +182,10 @@ def Expr.getAppArgs (e : Expr) : List Expr :=
   go e []
 
 def Expr.getAppNumArgs (e : Expr) : Nat :=
-  e.getAppArgs.length
+  let rec go : Expr → Nat → Nat
+    | .app fn _, count => go fn (count + 1)
+    | _, count => count
+  go e 0
 
 def typeAnnotationOutParamName : Name :=
   .str .anonymous "outParam"

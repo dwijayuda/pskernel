@@ -592,6 +592,74 @@ def psTestBackendRustRejectsFunctionResult : Bool :=
   | _ =>
       false
 
+def psBackendRustUnknownStructureModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "badRecord"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.unit
+        body :=
+          PsVerifiedIrExpr.record
+            "MissingStructure"
+            []
+      }
+    ]
+  }
+
+def psTestBackendRustRejectsUnknownStructure : Bool :=
+  match psRustEmitModule psBackendRustUnknownStructureModule with
+  | Except.error (PsRustEmitError.unknownStructure name) =>
+      psStringEq name "MissingStructure"
+  | _ =>
+      false
+
+def psTestBackendRustCoverageUnknownStructure : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustUnknownStructureModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "module:unknownStructure"
+
+def psBackendRustUnknownInductiveModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "badConstructor"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.unit
+        body :=
+          PsVerifiedIrExpr.constructor
+            "MissingInductive"
+            "missing"
+            []
+            []
+      }
+    ]
+  }
+
+def psTestBackendRustRejectsUnknownInductive : Bool :=
+  match psRustEmitModule psBackendRustUnknownInductiveModule with
+  | Except.error (PsRustEmitError.unknownInductive name) =>
+      psStringEq name "MissingInductive"
+  | _ =>
+      false
+
+def psTestBackendRustCoverageUnknownInductive : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustUnknownInductiveModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "module:unknownInductive"
+
 def psBackendRustBadIntrinsicArityModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -767,6 +835,8 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "top-level values and shadowing", passed := psTestBackendRustValues },
   { name := "frozen PSC1 scalar mappings", passed := psTestBackendRustScalarTypes },
   { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers },
+  { name := "reject unknown structures", passed := psTestBackendRustRejectsUnknownStructure },
+  { name := "reject unknown inductives", passed := psTestBackendRustRejectsUnknownInductive },
   { name := "reject malformed intrinsic arity", passed := psTestBackendRustRejectsIntrinsicArity },
   { name := "reject generic top-level values", passed := psTestBackendRustRejectsGenericValue },
   { name := "accept first-order callback parameters", passed := psTestBackendRustFirstOrderCallback },
@@ -778,6 +848,8 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "coverage accepts supported IR", passed := psTestBackendRustCoverageSupported },
   { name := "coverage rejects external imports", passed := psTestBackendRustCoverageExternalImport },
   { name := "coverage rejects unknown runtime types", passed := psTestBackendRustCoverageUnknownType },
+  { name := "coverage rejects unknown structures", passed := psTestBackendRustCoverageUnknownStructure },
+  { name := "coverage rejects unknown inductives", passed := psTestBackendRustCoverageUnknownInductive },
   { name := "coverage rejects intrinsic arity", passed := psTestBackendRustCoverageIntrinsicArity },
   { name := "coverage rejects generic values", passed := psTestBackendRustCoverageGenericValue },
   { name := "coverage rejects function results", passed := psTestBackendRustCoverageFunctionResult },

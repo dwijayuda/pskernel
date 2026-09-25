@@ -78,52 +78,85 @@ def psExprLiftBVars
     psExprLiftBVarsWorker amount expr;
   lifted cutoff
 
+def psExprInstantiateAtWorker
+    (replacement : PsExpr)
+    (expr : PsExpr) : Nat -> PsExpr :=
+  match expr with
+  | .bvar index =>
+      fun (depth : Nat) =>
+        if Nat.beq index depth then
+          psExprLiftBVars depth 0 replacement
+        else if Nat.blt depth index then
+          PsExpr.bvar (Nat.sub index 1)
+        else
+          PsExpr.bvar index
+  | .fvar id =>
+      fun (depth : Nat) => PsExpr.fvar id
+  | .mvar id =>
+      fun (depth : Nat) => PsExpr.mvar id
+  | .sortE level =>
+      fun (depth : Nat) => PsExpr.sortE level
+  | .constE name levels =>
+      fun (depth : Nat) => PsExpr.constE name levels
+  | .app fn arg =>
+      let instantiatedFn : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement fn;
+      let instantiatedArg : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement arg;
+      fun (depth : Nat) =>
+        PsExpr.app
+          (instantiatedFn depth)
+          (instantiatedArg depth)
+  | .lam name type body binder =>
+      let instantiatedType : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement type;
+      let instantiatedBody : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement body;
+      fun (depth : Nat) =>
+        PsExpr.lam
+          name
+          (instantiatedType depth)
+          (instantiatedBody (Nat.succ depth))
+          binder
+  | .forallE name type body binder =>
+      let instantiatedType : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement type;
+      let instantiatedBody : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement body;
+      fun (depth : Nat) =>
+        PsExpr.forallE
+          name
+          (instantiatedType depth)
+          (instantiatedBody (Nat.succ depth))
+          binder
+  | .letE name type value body =>
+      let instantiatedType : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement type;
+      let instantiatedValue : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement value;
+      let instantiatedBody : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement body;
+      fun (depth : Nat) =>
+        PsExpr.letE
+          name
+          (instantiatedType depth)
+          (instantiatedValue depth)
+          (instantiatedBody (Nat.succ depth))
+  | .lit value =>
+      fun (depth : Nat) => PsExpr.lit value
+  | .proj typeName index value =>
+      let instantiatedValue : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement value;
+      fun (depth : Nat) =>
+        PsExpr.proj typeName index (instantiatedValue depth)
+
 def psExprInstantiateAt
     (replacement : PsExpr)
     (depth : Nat)
     (expr : PsExpr) : PsExpr :=
-  match expr with
-  | .bvar index =>
-      if Nat.beq index depth then
-        psExprLiftBVars depth 0 replacement
-      else if Nat.blt depth index then
-        PsExpr.bvar (Nat.sub index 1)
-      else
-        PsExpr.bvar index
-  | .fvar id =>
-      PsExpr.fvar id
-  | .mvar id =>
-      PsExpr.mvar id
-  | .sortE level =>
-      PsExpr.sortE level
-  | .constE name levels =>
-      PsExpr.constE name levels
-  | .app fn arg =>
-      PsExpr.app
-        (psExprInstantiateAt replacement depth fn)
-        (psExprInstantiateAt replacement depth arg)
-  | .lam name type body binder =>
-      PsExpr.lam
-        name
-        (psExprInstantiateAt replacement depth type)
-        (psExprInstantiateAt replacement (Nat.succ depth) body)
-        binder
-  | .forallE name type body binder =>
-      PsExpr.forallE
-        name
-        (psExprInstantiateAt replacement depth type)
-        (psExprInstantiateAt replacement (Nat.succ depth) body)
-        binder
-  | .letE name type value body =>
-      PsExpr.letE
-        name
-        (psExprInstantiateAt replacement depth type)
-        (psExprInstantiateAt replacement depth value)
-        (psExprInstantiateAt replacement (Nat.succ depth) body)
-  | .lit value =>
-      PsExpr.lit value
-  | .proj typeName index value =>
-      PsExpr.proj typeName index (psExprInstantiateAt replacement depth value)
+  let instantiated : Nat -> PsExpr :=
+    psExprInstantiateAtWorker replacement expr;
+  instantiated depth
 
 def psExprInstantiate1 (body : PsExpr) (replacement : PsExpr) : PsExpr :=
   psExprInstantiateAt replacement 0 body

@@ -13,7 +13,7 @@ def psFindLevelArgument
           Option.none
       | argument :: argumentRest =>
           if psNameEq parameter target then
-            some argument
+            Option.some argument
           else
             psFindLevelArgument parameterRest argumentRest target
 

@@ -322,6 +322,7 @@ def psJsonParseObjectWith
           Except.error (PsJsonParseError.expected "object key")
 
 partial def psJsonParseValueWithFuel
+    (fallback : Except PsJsonParseError PsJsonParseResult)
     (fuel : Nat)
     (input : List Char) :
     Except PsJsonParseError PsJsonParseResult :=
@@ -341,13 +342,13 @@ partial def psJsonParseValueWithFuel
               }
       | '[' :: rest =>
           psJsonParseArrayWith
-            psJsonParseValueWithFuel
+            (psJsonParseValueWithFuel fallback)
             remaining
             rest
             []
       | '{' :: rest =>
           psJsonParseObjectWith
-            psJsonParseValueWithFuel
+            (psJsonParseValueWithFuel fallback)
             remaining
             rest
             []
@@ -392,6 +393,7 @@ def psJsonParse
   let chars := source.toList
   match
       psJsonParseValueWithFuel
+        (Except.error PsJsonParseError.fuelExhausted)
         (chars.length * 4 + 32)
         chars with
   | Except.error error => Except.error error

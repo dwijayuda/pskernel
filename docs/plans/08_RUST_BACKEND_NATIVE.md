@@ -153,9 +153,17 @@ As of the current branch checkpoint:
   Rust machine scalar types;
 - compiler API support exposes source-neutral `.lean`/`.ps` -> Rust
   generation over the same elaboration/erasure/CompilerIR path;
-- machine-scalar arithmetic/conversion intrinsics are not invented by this
-  backend. They remain gated on corresponding shared PSC1/core/CompilerIR
-  semantics.
+- target-neutral fixed-width integer and floating-point CompilerIR operations
+  are consumed directly: fixed-width integer add/sub/mul use Rust wrapping
+  operations, comparisons preserve the shared IR relation, `Float32` remains
+  `f32`, and `Float` remains `f64`;
+- the TS <-> Rust differential gate compares both backends against explicit
+  expected output for UInt8 wraparound, Int16 overflow, UInt32 comparison,
+  Float32 arithmetic, Float arithmetic, captured closures, arrays, ADTs, and
+  structure-qualified projection;
+- the reusable R3 compiler-IR coverage census is wired into CI. The decisive
+  real compiler -> Rust -> Cargo check remains gated by PSC1 self-host source
+  closure rather than by a known Rust semantic fork.
 
 ## Development milestones
 

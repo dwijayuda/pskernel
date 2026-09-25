@@ -7,6 +7,7 @@ inductive PsWasmLowerError where
   | unsupportedExpression
   | unsupportedIntrinsic
   | invalidIntrinsicArity
+  | invalidCallArity
   | unknownVariable (name : String)
   | unknownStructure (name : String)
   | unknownStructureField (structureName : String) (field : String)
@@ -1064,7 +1065,102 @@ def psWasmLowerIntrinsicWith
       | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
+def psWasmLowerTypedArgumentsWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr) :
+    PsWasmLowerState ->
+    List PsVerifiedIrType ->
+    List PsVerifiedIrExpr ->
+    Except PsWasmLowerError PsWasmLoweredExpr
+  | state, [], [] =>
+      Except.ok {
+        instructions := []
+        state := state
+      }
+  | state, type :: restTypes, argument :: restArguments =>
+      match psWasmValueTypeOfIrType? profile type with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some expected =>
+          match lower (some expected) state argument with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              match
+                  psWasmLowerTypedArgumentsWith
+                    profile
+                    lower
+                    lowered.state
+                    restTypes
+                    restArguments with
+              | Except.error error => Except.error error
+              | Except.ok loweredRest =>
+                  Except.ok {
+                    instructions :=
+                      lowered.instructions
+                        ++ loweredRest.instructions
+                    state := loweredRest.state
+                  }
+  | _, _, _ =>
+      Except.error PsWasmLowerError.invalidCallArity
+
+def psWasmLowerFunctionValueCall
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (binding : PsWasmBinding)
+    (parameterTypes : List PsVerifiedIrType)
+    (resultType : PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  let functionType :=
+    PsVerifiedIrType.function parameterTypes resultType
+  match psWasmClosureBaseName functionType with
+  | none => Except.error PsWasmLowerError.unsupportedType
+  | some baseName =>
+      match psWasmClosureCodeTypeName functionType with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some codeTypeName =>
+          let allocated :=
+            psWasmAddLocal
+              state
+              (PsWasmValueType.refT baseName)
+          let closureLocal := allocated.1
+          let nextState := allocated.2
+          match
+              psWasmLowerTypedArgumentsWith
+                profile
+                lower
+                nextState
+                parameterTypes
+                arguments with
+          | Except.error error => Except.error error
+          | Except.ok loweredArguments =>
+              Except.ok {
+                instructions :=
+                  [
+                    PsWasmInstruction.localGet binding.index,
+                    PsWasmInstruction.localSet closureLocal,
+                    PsWasmInstruction.localGet closureLocal
+                  ]
+                    ++ loweredArguments.instructions
+                    ++ [
+                      PsWasmInstruction.localGet closureLocal,
+                      PsWasmInstruction.structGet baseName 0,
+                      PsWasmInstruction.refCastFunction codeTypeName,
+                      PsWasmInstruction.callRef codeTypeName
+                    ]
+                state := loweredArguments.state
+              }
+
 def psWasmLowerCallWith
+    (profile : PsWasmTargetProfile)
     (bindings : List PsWasmBinding)
     (lower :
       Option PsWasmValueType ->
@@ -1077,9 +1173,20 @@ def psWasmLowerCallWith
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match fn with
   | .var name =>
-      match psWasmFindBindingIndex bindings name with
-      | some _ =>
-          Except.error PsWasmLowerError.unsupportedExpression
+      match psWasmFindBinding bindings name with
+      | some binding =>
+          match binding.type with
+          | .function parameterTypes resultType =>
+              psWasmLowerFunctionValueCall
+                profile
+                lower
+                state
+                binding
+                parameterTypes
+                resultType
+                arguments
+          | _ =>
+              Except.error PsWasmLowerError.unsupportedExpression
       | none =>
           match
               psWasmLowerExprListWith
@@ -1401,7 +1508,7 @@ def psWasmLowerExprWithFuel
             profile lower state operation arguments
       | .call fn _ arguments =>
           psWasmLowerCallWith
-            bindings lower state fn arguments
+            profile bindings lower state fn arguments
       | .letE name type value body =>
           match psWasmLowerParameterType profile type with
           | Except.error error => Except.error error

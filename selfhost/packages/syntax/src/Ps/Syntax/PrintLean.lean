@@ -51,7 +51,9 @@ def psPrintLeanTermWithFuel
       | .unit _ =>
           Except.ok "()"
       | .record fields _ =>
-          let printField :=
+          let printField :
+              Prod PsSyntaxName PsSyntaxTerm ->
+                Except PsSourcePrintError String :=
             fun (field : Prod PsSyntaxName PsSyntaxTerm) =>
               match psPrintSyntaxName field.fst with
               | Except.error error => Except.error error

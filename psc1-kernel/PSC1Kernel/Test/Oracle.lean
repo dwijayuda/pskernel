@@ -497,6 +497,27 @@ def assertBinderInfoDefEqOracle : IO Unit := do
   assertTrue "forall binder info differs from Lean 4.34 defeq" (oursPi == leanPi)
   assertTrue "Lean 4.34 forall binder info should be ignored by defeq" leanPi
 
+def assertStringLiteralDefEqOracle : IO Unit := do
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let pscEnv :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase PSC1Kernel.kernelStringName type1
+      isUnsafe := false
+    })
+  let ctx := PSC1Kernel.CheckerContext.empty pscEnv
+  let literal : PSC1Kernel.Expr := .lit (.str "A🙂")
+  let expanded := PSC1Kernel.stringLitToConstructor "A🙂"
+  let ours ← exceptToIO
+    "PSC1 string literal expansion defeq"
+    (PSC1Kernel.isDefEq ctx literal expanded)
+
+  Lean.initSearchPath (← Lean.findSysroot)
+  let leanEnv ← Lean.importModules #[{ module := `Init.Prelude }] {}
+  let lean ← kernelExprDefEq leanEnv literal expanded
+  assertTrue "string literal expansion differs from Lean 4.34"
+    (ours == lean)
+  assertTrue "Lean 4.34 should equate literal and String.ofList form" lean
+
 def assertExprOracle : IO Unit := do
   let x : PSC1Kernel.Name := .str .anonymous "x"
   let A : PSC1Kernel.Name := .str .anonymous "A"
@@ -979,6 +1000,7 @@ def run : IO Unit := do
   assertUnitLikeOracle
   assertProofIrrelevanceOracle
   assertBinderInfoDefEqOracle
+  assertStringLiteralDefEqOracle
   assertProjectionOracle
   assertOrdinaryRecursorOracle
   assertNatLiteralRecursorOracle

@@ -2165,14 +2165,20 @@ def psWasmLowerSpecializedModule
                           ++ inductiveTypes
                           ++ closureSignatures.1
                           ++ lowered.state.generatedStructures
-                          ++ psWasmNatStructures
+                          ++ (if psWasmModuleUsesNat specialized then
+                                psWasmNatStructures
+                              else
+                                [])
                       functionTypes :=
                         closureSignatures.2
                           ++ lowered.state.generatedFunctionTypes
                       functions :=
                         lowered.functions
                           ++ lowered.state.generatedFunctions
-                          ++ psWasmNatFunctions
+                          ++ (if psWasmModuleUsesNat specialized then
+                                psWasmNatFunctions
+                              else
+                                [])
                       functionRefs :=
                         lowered.state.generatedFunctionRefs
                       exports :=
@@ -2180,6 +2186,137 @@ def psWasmLowerSpecializedModule
                           module.declarations
                     }
 
+
+def psWasmTypeUsesNatWithFuel :
+    Nat -> PsVerifiedIrType -> Bool
+  | 0, _ => false
+  | fuel + 1, type =>
+      match type with
+      | .primitive .nat => true
+      | .primitive _ => false
+      | .unknown => false
+      | .typeParameter _ => false
+      | .named _ arguments =>
+          arguments.any
+            (psWasmTypeUsesNatWithFuel fuel)
+      | .function parameters result =>
+          parameters.any
+              (psWasmTypeUsesNatWithFuel fuel)
+            || psWasmTypeUsesNatWithFuel fuel result
+
+def psWasmTypeUsesNat
+    (type : PsVerifiedIrType) : Bool :=
+  psWasmTypeUsesNatWithFuel 64 type
+
+def psWasmIntrinsicUsesNat
+    (operation : PsVerifiedIrIntrinsic) : Bool :=
+  match operation with
+  | .natAdd => true
+  | .natSub => true
+  | .natMul => true
+  | .natDiv => true
+  | .natMod => true
+  | .natEq => true
+  | .natNe => true
+  | .natLe => true
+  | .natLt => true
+  | .intOfNat => true
+  | .charOfNat => true
+  | .charToNat => true
+  | .stringLength => true
+  | .stringUtf8ByteSize => true
+  | .arraySize _ => true
+  | .arrayGet _ => true
+  | .arrayGetD _ => true
+  | .arraySet _ => true
+  | .arraySetIfInBounds _ => true
+  | .arrayFoldl _ _ => true
+  | .arrayEmptyWithCapacity type =>
+      psWasmTypeUsesNat type
+  | .arrayPush type =>
+      psWasmTypeUsesNat type
+  | .arrayMap sourceType targetType =>
+      psWasmTypeUsesNat sourceType
+        || psWasmTypeUsesNat targetType
+  | _ => false
+
+def psWasmExprUsesNatWithFuel :
+    Nat -> PsVerifiedIrExpr -> Bool
+  | 0, _ => false
+  | fuel + 1, expr =>
+      let uses :=
+        psWasmExprUsesNatWithFuel fuel
+      match expr with
+      | .literal (.natural _) => true
+      | .literal _ => false
+      | .var _ => false
+      | .intrinsic operation arguments =>
+          psWasmIntrinsicUsesNat operation
+            || arguments.any uses
+      | .lambda parameters resultType body =>
+          parameters.any
+              (fun parameter =>
+                psWasmTypeUsesNat parameter.type)
+            || psWasmTypeUsesNat resultType
+            || uses body
+      | .call fn typeArguments arguments =>
+          uses fn
+            || typeArguments.any psWasmTypeUsesNat
+            || arguments.any uses
+      | .letE _ type value body =>
+          psWasmTypeUsesNat type
+            || uses value
+            || uses body
+      | .ifE condition thenBranch elseBranch =>
+          uses condition
+            || uses thenBranch
+            || uses elseBranch
+      | .record _ typeArguments fields =>
+          typeArguments.any psWasmTypeUsesNat
+            || fields.any (fun field => uses field.2)
+      | .projection _ typeArguments target _ =>
+          typeArguments.any psWasmTypeUsesNat
+            || uses target
+      | .constructor _ _ typeArguments fields =>
+          typeArguments.any psWasmTypeUsesNat
+            || fields.any (fun field => uses field.2)
+      | .matchE _ typeArguments scrutinee alternatives =>
+          typeArguments.any psWasmTypeUsesNat
+            || uses scrutinee
+            || alternatives.any
+              (fun alternative =>
+                alternative.2.1.any
+                    (fun binding =>
+                      psWasmTypeUsesNat binding.type)
+                  || uses alternative.2.2)
+
+def psWasmExprUsesNat
+    (expr : PsVerifiedIrExpr) : Bool :=
+  psWasmExprUsesNatWithFuel 4096 expr
+
+def psWasmModuleUsesNat
+    (module : PsVerifiedIrModule) : Bool :=
+  module.imports.any
+      (fun importInfo =>
+        psWasmTypeUsesNat importInfo.type)
+    || module.structures.any
+      (fun structureInfo =>
+        structureInfo.fields.any
+          (fun field => psWasmTypeUsesNat field.type))
+    || module.inductives.any
+      (fun inductiveInfo =>
+        inductiveInfo.constructors.any
+          (fun constructorInfo =>
+            constructorInfo.fields.any
+              (fun field =>
+                psWasmTypeUsesNat field.type)))
+    || module.declarations.any
+      (fun declaration =>
+        declaration.parameters.any
+            (fun parameter =>
+              psWasmTypeUsesNat parameter.type)
+          || psWasmTypeUsesNat declaration.resultType
+          || psWasmExprUsesNat declaration.body)
 
 def psWasmLowerModule
     (profile : PsWasmTargetProfile)

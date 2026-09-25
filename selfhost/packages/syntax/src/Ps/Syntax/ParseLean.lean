@@ -1048,77 +1048,94 @@ def psParseLeanMatchAlternativesAtColumnWithFuel
       PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
     (branchColumn : Nat)
-    (previousBranchLine : Nat)
-    (fuel : Nat)
-    (cursor : PsTokenCursor)
-    (alternativesRev :
-      List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan)) :
+    (fuel : Nat) :
+    Nat ->
+    PsTokenCursor ->
+    List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan) ->
     Except PsParseError
       (PsParseResult
         (List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))) :=
   match fuel with
   | 0 =>
-      Except.ok {
-        value := psParseListReverse alternativesRev
-        cursor := cursor
-      }
+      fun
+        (_previousBranchLine : Nat)
+        (cursor : PsTokenCursor)
+        (alternativesRev :
+          List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan)) =>
+        Except.ok {
+          value := psParseListReverse alternativesRev
+          cursor := cursor
+        }
   | remaining + 1 =>
-      match psTokenCursorPeek cursor with
-      | Option.none =>
-          Except.ok {
-            value := psParseListReverse alternativesRev
-            cursor := cursor
-          }
-      | Option.some token =>
-          let sameLine :=
-            Nat.beq token.span.start.line previousBranchLine;
-          let belongsToMatch :=
-            if psStringEq token.text "|" then
-              if sameLine then
-                true
-              else
-                Nat.ble branchColumn token.span.start.column
-            else
-              false;
-          if belongsToMatch then
-            match psTokenCursorAdvance cursor with
-            | Option.none =>
-                Except.error (PsParseError.unexpectedEnd "match pattern")
-            | Option.some bar =>
-                match psParseLeanPattern bar.cursor with
-                | Except.error error => Except.error error
-                | Except.ok pattern =>
-                    match psTokenCursorExpectText pattern.cursor "=>" with
-                    | Except.error error => Except.error error
-                    | Except.ok afterArrow =>
-                        match parseTerm afterArrow.cursor with
-                        | Except.error error => Except.error error
-                        | Except.ok body =>
-                            let span : PsSourceSpan := {
-                              start := bar.token.span.start
-                              stop := psLeanTermStop body.value
-                            };
-                            let alternative :
-                                Prod
-                                  PsSyntaxPattern
-                                  (Prod PsSyntaxTerm PsSourceSpan) :=
-                              Prod.mk
-                                pattern.value
-                                (Prod.mk body.value span);
-                            psParseLeanMatchAlternativesAtColumnWithFuel
-                              parseTerm
-                              branchColumn
-                              bar.token.span.start.line
-                              remaining
-                              body.cursor
-                              (List.cons
-                                alternative
-                                alternativesRev)
-          else
+      let smaller :
+          Nat ->
+          PsTokenCursor ->
+          List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan) ->
+          Except PsParseError
+            (PsParseResult
+              (List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))) :=
+        psParseLeanMatchAlternativesAtColumnWithFuel
+          parseTerm
+          branchColumn
+          remaining;
+      fun
+        (previousBranchLine : Nat)
+        (cursor : PsTokenCursor)
+        (alternativesRev :
+          List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan)) =>
+        match psTokenCursorPeek cursor with
+        | Option.none =>
             Except.ok {
               value := psParseListReverse alternativesRev
               cursor := cursor
             }
+        | Option.some token =>
+            let sameLine :=
+              Nat.beq token.span.start.line previousBranchLine;
+            let belongsToMatch :=
+              if psStringEq token.text "|" then
+                if sameLine then
+                  true
+                else
+                  Nat.ble branchColumn token.span.start.column
+              else
+                false;
+            if belongsToMatch then
+              match psTokenCursorAdvance cursor with
+              | Option.none =>
+                  Except.error (PsParseError.unexpectedEnd "match pattern")
+              | Option.some bar =>
+                  match psParseLeanPattern bar.cursor with
+                  | Except.error error => Except.error error
+                  | Except.ok pattern =>
+                      match psTokenCursorExpectText pattern.cursor "=>" with
+                      | Except.error error => Except.error error
+                      | Except.ok afterArrow =>
+                          match parseTerm afterArrow.cursor with
+                          | Except.error error => Except.error error
+                          | Except.ok body =>
+                              let span : PsSourceSpan := {
+                                start := bar.token.span.start
+                                stop := psLeanTermStop body.value
+                              };
+                              let alternative :
+                                  Prod
+                                    PsSyntaxPattern
+                                    (Prod PsSyntaxTerm PsSourceSpan) :=
+                                Prod.mk
+                                  pattern.value
+                                  (Prod.mk body.value span);
+                              smaller
+                                bar.token.span.start.line
+                                body.cursor
+                                (List.cons
+                                  alternative
+                                  alternativesRev)
+            else
+              Except.ok {
+                value := psParseListReverse alternativesRev
+                cursor := cursor
+              }
 
 def psParseLeanMatchAlternativesWithFuel
     (parseTerm :
@@ -1142,8 +1159,8 @@ def psParseLeanMatchAlternativesWithFuel
         psParseLeanMatchAlternativesAtColumnWithFuel
           parseTerm
           token.span.start.column
-          token.span.start.line
           fuel
+          token.span.start.line
           cursor
           alternativesRev
       else

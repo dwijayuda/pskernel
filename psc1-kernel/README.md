@@ -58,7 +58,7 @@ lift/instantiation against final Lean 4.34.
 
 - K0: Name, Level, Expr, substitution/lifting/abstraction.
 - K1: declarations, local context and immutable environment.
-- K2: WHNF and type inference. **IN PROGRESS** — separate Lean-faithful `whnfCore` (beta/let/fvar/projection only) and full `whnf` (core → Nat → delta), Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble), constructor projection reduction, and Lean-4.34-faithful projection typing are implemented; bitwise/shift Nat extensions, resource-size guards, recursor/quotient reduction and full cheap-projection control flow remain.
+- K2: WHNF and type inference. **IN PROGRESS** — separate Lean-faithful `whnfCore` (beta/let/fvar/projection only) and full `whnf` (core → Nat → delta), Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble/land/lor/xor/shiftLeft/shiftRight), constructor projection reduction, ordinary/Nat-literal recursor reduction, quotient lift/ind reduction, and Lean-4.34-faithful projection typing are implemented; exact resource-size guards and the remaining cheap-projection control-flow details remain.
 - K3: definitional equality and exact reduction ordering. **IN PROGRESS** — sort/constant-universe/app/binding/projection cases exist; binding defeq follows Lean 4.34 by ignoring binder annotations and proof irrelevance is implemented. Function eta, non-recursive structure eta, unit-like equality, and Lean-4.34 reducibility-hint-guided lazy delta are implemented. String-literal expansion, exact projection lazy-delta specialization, failure/equivalence caches and resource fuel remain.
 - K4: quotient and recursor reduction.
 - K5: inductive/nested-inductive admission and generated metadata validation.

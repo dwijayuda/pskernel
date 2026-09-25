@@ -546,7 +546,29 @@ partial def toConstructorWhenK
   let some majorInduct := recursorMajorInduct? recursor
     | if debugEq then throw "Eq.rec K debug: missing major inductive" else return major
   let some rawType ← inferKMajorType? ctx major
-    | if debugEq then throw "Eq.rec K debug: major type inference failed" else return major
+    | if debugEq then
+        match major with
+        | .bvar index =>
+            throw ("Eq.rec K debug: major type inference failed; major=bvar " ++ toString index)
+        | .fvar name =>
+            if (ctx.lctx.find? name).isSome then
+              throw "Eq.rec K debug: major type inference failed; major=fvar-known"
+            else
+              throw "Eq.rec K debug: major type inference failed; major=fvar-missing"
+        | .app _ _ =>
+            throw ("Eq.rec K debug: major type inference failed; major=app args=" ++
+              toString major.getAppNumArgs)
+        | .lam .. => throw "Eq.rec K debug: major type inference failed; major=lambda"
+        | .forallE .. => throw "Eq.rec K debug: major type inference failed; major=forall"
+        | .letE .. => throw "Eq.rec K debug: major type inference failed; major=let"
+        | .proj _ _ _ => throw "Eq.rec K debug: major type inference failed; major=projection"
+        | .const _ _ => throw "Eq.rec K debug: major type inference failed; major=const"
+        | .sort _ => throw "Eq.rec K debug: major type inference failed; major=sort"
+        | .mvar _ => throw "Eq.rec K debug: major type inference failed; major=mvar"
+        | .lit _ => throw "Eq.rec K debug: major type inference failed; major=literal"
+        | .mdata _ _ => throw "Eq.rec K debug: major type inference failed; major=mdata"
+      else
+        return major
   let appType ← whnf ctx rawType
   let .const typeInduct typeLevels := appType.getAppFn
     | if debugEq then throw "Eq.rec K debug: major type head is not constant" else return major

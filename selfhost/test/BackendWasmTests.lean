@@ -172,6 +172,7 @@ def psWasmAddU32IrModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.machineIntBinary
               PsVerifiedIrMachineIntegerType.uint32
               PsVerifiedIrIntegerBinaryOp.add)
+            []
             [
               PsVerifiedIrExpr.var "left",
               PsVerifiedIrExpr.var "right"
@@ -230,6 +231,7 @@ def psWasmLetIrModule : PsVerifiedIrModule :=
               (PsVerifiedIrIntrinsic.machineIntBinary
                 PsVerifiedIrMachineIntegerType.uint32
                 PsVerifiedIrIntegerBinaryOp.add)
+              []
               [
                 PsVerifiedIrExpr.var "saved",
                 PsVerifiedIrExpr.literal
@@ -690,6 +692,7 @@ def psWasmRecursiveListIrModule : PsVerifiedIrModule :=
                   (PsVerifiedIrIntrinsic.machineIntBinary
                     PsVerifiedIrMachineIntegerType.uint32
                     PsVerifiedIrIntegerBinaryOp.add)
+                  []
                   [
                     PsVerifiedIrExpr.literal
                       (PsVerifiedIrLiteral.machineInteger
@@ -851,6 +854,7 @@ def psWasmClosureIrModule : PsVerifiedIrModule :=
               (PsVerifiedIrIntrinsic.machineIntBinary
                 PsVerifiedIrMachineIntegerType.uint32
                 PsVerifiedIrIntegerBinaryOp.add)
+              []
               [
                 PsVerifiedIrExpr.var "base",
                 PsVerifiedIrExpr.var "value"

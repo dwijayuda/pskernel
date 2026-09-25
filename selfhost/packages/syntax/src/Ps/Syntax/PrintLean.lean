@@ -654,19 +654,22 @@ def psPrintLeanDeclaration
                       " where\n"
                       (psPrintJoin "\n" printedFields))
 
+def psPrintLeanImport
+    (sourceImport : PsSyntaxImport) :
+    Except PsSourcePrintError String :=
+  let printedNameResult :=
+    psPrintSyntaxName sourceImport.moduleName;
+  match printedNameResult with
+  | Except.error error => Except.error error
+  | Except.ok name =>
+      Except.ok (psPrintLeanConcat2 "import " name)
+
 def psPrintLeanModule
     (module : PsSyntaxModule) :
     Except PsSourcePrintError String :=
-  let printImport :
-      PsSyntaxImport -> Except PsSourcePrintError String :=
-    fun (sourceImport : PsSyntaxImport) =>
-      match psPrintSyntaxName sourceImport.moduleName with
-      | Except.error error => Except.error error
-      | Except.ok name =>
-          Except.ok (psPrintLeanConcat2 "import " name);
   let importsResult :
       Except PsSourcePrintError (List String) :=
-    psPrintLeanMapImports printImport module.imports;
+    psPrintLeanMapImports psPrintLeanImport module.imports;
   match importsResult with
   | Except.error error => Except.error error
   | Except.ok imports =>

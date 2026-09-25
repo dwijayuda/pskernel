@@ -419,11 +419,13 @@ def psPrintLeanDeclaration
 def psPrintLeanModule
     (module : PsSyntaxModule) :
     Except PsSourcePrintError String :=
-  match module.imports.mapM
-      (fun (sourceImport : PsSyntaxImport) =>
-        match psPrintSyntaxName sourceImport.moduleName with
-        | Except.error error => Except.error error
-        | Except.ok name => Except.ok (psPrintLeanConcat2 "import " name)) with
+  let printImport :=
+    fun (sourceImport : PsSyntaxImport) =>
+      match psPrintSyntaxName sourceImport.moduleName with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          Except.ok (psPrintLeanConcat2 "import " name);
+  match module.imports.mapM printImport with
   | Except.error error => Except.error error
   | Except.ok imports =>
       match module.declarations.mapM psPrintLeanDeclaration with

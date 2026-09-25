@@ -15,7 +15,6 @@ import {
   invokeLean434JsExtern,
   invokeLean434JsImplementedBy,
   invokeLean434JsIntrinsic,
-  lean_array_to_list,
   type Lean434DeclarationExternBinding,
   LeanRef,
 } from './lean4.js';
@@ -190,6 +189,24 @@ function describeRuntimeValue(
   }
   if(value instanceof LeanRef)return 'LeanRef';
   return 'unknown-runtime-value';
+}
+
+function runtimeArrayToLogicalList(
+  array:readonly Lean434RuntimeValue[],
+):Lean434ConstructorValue{
+  let out:Lean434ConstructorValue={
+    kind:'constructor',
+    name:'List.nil',
+    fields:[],
+  };
+  for(let i=array.length-1;i>=0;i--){
+    out={
+      kind:'constructor',
+      name:'List.cons',
+      fields:[array[i]!,out],
+    };
+  }
+  return out;
 }
 
 function typeValue(expr:Expr):Lean434TypeValue {
@@ -830,7 +847,7 @@ export class Lean434Evaluator {
         return {
           kind:'constructor',
           name:'Array.mk',
-          fields:[lean_array_to_list(value)],
+          fields:[runtimeArrayToLogicalList(value)],
         };
       }
     }

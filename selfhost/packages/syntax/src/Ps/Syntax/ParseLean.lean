@@ -741,15 +741,19 @@ def psParseLeanDependentArrowTail
               cursor := codomain.cursor
             }
   else
+    let nextText :=
+      match psTokenCursorPeek binder.cursor with
+      | none => ""
+      | some token => token.text;
+    let nextSpan :=
+      match psTokenCursorPeek binder.cursor with
+      | none => binder.value.fst.span
+      | some token => token.span;
     Except.error
       (PsParseError.expectedText
         "->"
-        (match psTokenCursorPeek binder.cursor with
-         | none => ""
-         | some token => token.text)
-        (match psTokenCursorPeek binder.cursor with
-         | none => binder.value.fst.span
-         | some token => token.span))
+        nextText
+        nextSpan)
 
 def psLeanPatternBinderName
     (token : PsToken)

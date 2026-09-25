@@ -748,7 +748,12 @@ def psLeanPatternBinderName
     (fallback : String) : PsSyntaxName :=
   {
     segments :=
-      [if token.text == "_" then fallback else token.text]
+      List.cons
+        (if psStringEq token.text "_" then
+          fallback
+        else
+          token.text)
+        List.nil
     span := token.span
   }
 
@@ -764,66 +769,112 @@ def psParseLeanListPattern
       match afterFirst with
       | List.nil => none
       | List.cons second afterSecond =>
-          if first.text == "[" && second.text == "]" then
-            let span :=
-              psSyntaxSpanJoin first.span second.span
-            let name : PsSyntaxName := {
-              segments :=
-                List.cons
-                  "List"
-                  (List.cons "nil" List.nil)
-              span := span
-            }
-            some
-              (Except.ok {
-                value :=
-                  PsSyntaxPattern.constructor
-                    name
-                    List.nil
-                    span
-                cursor := { remaining := afterSecond }
-              })
-          else if second.text == "::" then
+          if psStringEq first.text "[" then
+            if psStringEq second.text "]" then
+              let span :=
+                psSyntaxSpanJoin first.span second.span;
+              let name : PsSyntaxName := {
+                segments :=
+                  List.cons
+                    "List"
+                    (List.cons "nil" List.nil)
+                span := span
+              };
+              some
+                (Except.ok {
+                  value :=
+                    PsSyntaxPattern.constructor
+                      name
+                      List.nil
+                      span
+                  cursor := { remaining := afterSecond }
+                })
+            else if psStringEq second.text "::" then
+              match afterSecond with
+              | List.nil => none
+              | List.cons third rest =>
+                  if
+                      psTokenKindEq
+                        first.kind
+                        PsTokenKind.identifier then
+                    if
+                        psTokenKindEq
+                          third.kind
+                          PsTokenKind.identifier then
+                      let span :=
+                        psSyntaxSpanJoin first.span third.span;
+                      let name : PsSyntaxName := {
+                        segments :=
+                          List.cons
+                            "List"
+                            (List.cons "cons" List.nil)
+                        span := span
+                      };
+                      let headBinder :=
+                        psLeanPatternBinderName
+                          first
+                          "_listHead";
+                      let tailBinder :=
+                        psLeanPatternBinderName
+                          third
+                          "_listTail";
+                      some
+                        (Except.ok {
+                          value :=
+                            PsSyntaxPattern.constructor
+                              name
+                              (List.cons
+                                headBinder
+                                (List.cons
+                                  tailBinder
+                                  List.nil))
+                              span
+                          cursor := { remaining := rest }
+                        })
+                    else
+                      none
+                  else
+                    none
+            else
+              none
+          else if psStringEq second.text "::" then
             match afterSecond with
             | List.nil => none
             | List.cons third rest =>
                 if
                     psTokenKindEq
                       first.kind
-                      PsTokenKind.identifier
-                      && psTokenKindEq
+                      PsTokenKind.identifier then
+                  if
+                      psTokenKindEq
                         third.kind
                         PsTokenKind.identifier then
-                  let span :=
-                    psSyntaxSpanJoin first.span third.span
-                  let name : PsSyntaxName := {
-                    segments :=
-                      List.cons
-                        "List"
-                        (List.cons "cons" List.nil)
-                    span := span
-                  }
-                  let headBinder :=
-                    psLeanPatternBinderName
-                      first
-                      "_listHead"
-                  let tailBinder :=
-                    psLeanPatternBinderName
-                      third
-                      "_listTail"
-                  some
-                    (Except.ok {
-                      value :=
-                        PsSyntaxPattern.constructor
-                          name
-                          (List.cons
-                            headBinder
+                    let span :=
+                      psSyntaxSpanJoin first.span third.span;
+                    let name : PsSyntaxName := {
+                      segments :=
+                        List.cons
+                          "List"
+                          (List.cons "cons" List.nil)
+                      span := span
+                    };
+                    let headBinder :=
+                      psLeanPatternBinderName first "_listHead";
+                    let tailBinder :=
+                      psLeanPatternBinderName third "_listTail";
+                    some
+                      (Except.ok {
+                        value :=
+                          PsSyntaxPattern.constructor
+                            name
                             (List.cons
-                              tailBinder
-                              List.nil))
-                          span
-                      cursor := { remaining := rest }
-                    })
+                              headBinder
+                              (List.cons tailBinder List.nil))
+                            span
+                        cursor := { remaining := rest }
+                      })
+                  else
+                    none
                 else
                   none
           else
@@ -852,19 +903,21 @@ def psParseLeanNatPattern
       if
           psTokenKindEq
             first.kind
-            PsTokenKind.natural
-            && first.text == "0" then
-        some
-          (Except.ok {
-            value :=
-              PsSyntaxPattern.constructor
-                (psLeanNatPatternName
-                  "zero"
-                  first.span)
-                List.nil
-                first.span
-            cursor := { remaining := rest }
-          })
+            PsTokenKind.natural then
+        if psStringEq first.text "0" then
+          some
+            (Except.ok {
+              value :=
+                PsSyntaxPattern.constructor
+                  (psLeanNatPatternName
+                    "zero"
+                    first.span)
+                  List.nil
+                  first.span
+              cursor := { remaining := rest }
+            })
+        else
+          none
       else
         match rest with
         | List.nil => none
@@ -875,22 +928,23 @@ def psParseLeanNatPattern
                 if
                     psTokenKindEq
                       first.kind
-                      PsTokenKind.identifier
-                      && plus.text == "+"
-                      && psTokenKindEq
-                        one.kind
-                        PsTokenKind.natural
-                      && one.text == "1" then
-                  let span :=
-                    psSyntaxSpanJoin
-                      first.span
-                      one.span
-                  let binder :=
-                    psLeanPatternBinderName
-                      first
-                      "_natPred"
-                  some
-                    (Except.ok {
+                      PsTokenKind.identifier then
+                  if psStringEq plus.text "+" then
+                    if
+                        psTokenKindEq
+                          one.kind
+                          PsTokenKind.natural then
+                      if psStringEq one.text "1" then
+                        let span :=
+                          psSyntaxSpanJoin
+                            first.span
+                            one.span;
+                        let binder :=
+                          psLeanPatternBinderName
+                            first
+                            "_natPred";
+                        some
+                          (Except.ok {
                       value :=
                         PsSyntaxPattern.constructor
                           (psLeanNatPatternName
@@ -902,6 +956,12 @@ def psParseLeanNatPattern
                         remaining := afterOne
                       }
                     })
+                      else
+                        none
+                    else
+                      none
+                  else
+                    none
                 else
                   none
 

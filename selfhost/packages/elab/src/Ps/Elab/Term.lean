@@ -984,7 +984,7 @@ def psExprHasConst (target : PsName) : PsExpr -> Bool
   | _ => false
 
 def psMatchNameListContains (names : List PsName) (target : PsName) : Bool :=
-  List.any names (fun (name : PsName) => psNameEq name target)
+  List.any names (fun name => psNameEq name target)
 
 structure PsElabMatchAlternative where
   constructorName : PsName

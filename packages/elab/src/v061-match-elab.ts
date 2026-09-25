@@ -97,7 +97,21 @@ export function elaborateV061MatchExpression(
   const parameterArgs=typeView.args.slice(0,inductive.numParams);
 
   const byConstructor=new Map<string,typeof expr.alternatives[number]>();
-  for(const alternative of expr.alternatives){
+  let wildcard:typeof expr.alternatives[number]|undefined;
+  for(let index=0;index<expr.alternatives.length;index+=1){
+    const alternative=expr.alternatives[index]!;
+    if(alternative.pattern.kind==='wildcard'){
+      if(index!==expr.alternatives.length-1){
+        throw new Error(
+          'PS_ELAB_MATCH_WILDCARD_ORDER: wildcard must be the final alternative',
+        );
+      }
+      if(wildcard!==undefined){
+        throw new Error('PS_ELAB_MATCH_DUPLICATE_WILDCARD');
+      }
+      wildcard=alternative;
+      continue;
+    }
     const constructorName=patternConstructorName(
       alternative.pattern,
       inductive.name,
@@ -121,7 +135,7 @@ export function elaborateV061MatchExpression(
   const missing=inductive.ctors.filter(
     (constructor)=>!byConstructor.has(nameToString(constructor)),
   );
-  if(missing.length>0){
+  if(missing.length>0&&wildcard===undefined){
     throw new Error(
       'PS_ELAB_MATCH_NONEXHAUSTIVE: missing '+
       missing.map(nameToString).join(', '),
@@ -134,13 +148,46 @@ export function elaborateV061MatchExpression(
     expected,
   );
   const minors=inductive.ctors.map((constructor)=>{
-    const alternative=byConstructor.get(nameToString(constructor))!;
+    const explicit=byConstructor.get(nameToString(constructor));
+    const alternative=explicit??wildcard;
+    if(alternative===undefined){
+      throw new Error('PS_ELAB_MATCH_NONEXHAUSTIVE_INTERNAL');
+    }
     if(alternative.pattern.kind==='bool'){
       return elaborate(
         alternative.body,
         context,
         expected,
       ).term;
+    }
+    if(alternative.pattern.kind==='wildcard'){
+      const info=context.environment.find(constructor);
+      if(info?.kind!=='constructor'){
+        throw new Error(
+          "PS_ELAB_MATCH_CONSTRUCTOR: unknown constructor '"+
+          nameToString(constructor)+"'",
+        );
+      }
+      const binders=Array.from(
+        {length:info.numFields},
+        (_,index)=>'_wild_'+index,
+      );
+      return elaborateV061MatchMinor(
+        {
+          ...alternative,
+          pattern:{
+            kind:'constructor',
+            name:nameToString(constructor),
+            binders,
+            span:alternative.pattern.span,
+          },
+        },
+        constructor,
+        parameterArgs,
+        context,
+        expected,
+        elaborate,
+      );
     }
     return elaborateV061MatchMinor(
       alternative,

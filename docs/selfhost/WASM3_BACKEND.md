@@ -142,6 +142,9 @@ true:
    self-host branch;
 8. `backend-wasm` remains non-default and cannot block the JS self-host path.
 
+The dedicated merge signal is the **Owned Wasm backend integration** workflow.
+It must be green at the candidate HEAD after the latest self-host content sync.
+
 This is the **Wasm infrastructure merge**, not a claim that the backend is
 feature-complete. After that merge, GC ADTs, closures, String/Array, exact
 Nat/Int, SIMD, WASI/components, self-hosting and formal preservation proofs can
@@ -159,8 +162,9 @@ Current status:
 [done] signed/unsigned integer immediate encoding
 [done] independent WebAssembly.validate/runtime smoke
 [done] direct call lowering
-[next] structured if/control flow
-[next] basic locals/let
+[done] structured if/control flow
+[done] typed let bindings -> lexical Wasm locals
+[done] independent Wasm integration workflow
 [post-merge] GC structures/inductives
 [post-merge] closures/typed function references
 [post-merge] String/Array/Nat/Int runtime

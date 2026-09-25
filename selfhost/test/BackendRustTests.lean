@@ -151,7 +151,7 @@ def psTestBackendRustAdt : Bool :=
   | Except.ok output =>
       output.contains "pub struct Pair { pub left: PsNat, pub right: PsNat }"
         && output.contains "pub enum Maybe<A: Clone> { none {}, some { value: A } }"
-        && output.contains "Maybe::some { value: (x).clone() }"
+        && output.contains "Maybe::<PsNat>::some { value: (x).clone() }"
         && output.contains "pub fn leftOfPair(pair: Pair) -> PsNat { ((pair).clone()).left }"
 
 def psBackendRustStringModule : PsVerifiedIrModule :=

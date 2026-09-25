@@ -56,6 +56,9 @@ jobs:
           node --check selfhost/scripts/bootstrap-project.mjs
           node --check selfhost/scripts/compile-with-generated.mjs
           node --check selfhost/scripts/compare-selfhost.mjs
+          node --check selfhost/scripts/check-workspace.mjs
+          node --check selfhost/scripts/clean.mjs
+          node selfhost/scripts/check-workspace.mjs
 
       - name: Audit portable PSC1 source profile
         shell: bash

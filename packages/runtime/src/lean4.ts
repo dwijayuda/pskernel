@@ -307,6 +307,18 @@ export function lean_mk_empty_array_with_capacity<T>(_capacity:LeanNat):T[]{
   return [];
 }
 
+export function lean_mk_array<T>(
+  length:LeanNat,
+  value:T,
+):T[]{
+  assertNat(length,'lean_mk_array length');
+  const n=Number(length);
+  if(!Number.isSafeInteger(n)){
+    throw new RangeError('lean_mk_array length exceeds JavaScript safe range');
+  }
+  return Array.from({length:n},()=>value);
+}
+
 export function lean_array_mk<T>(list:LeanListRuntimeValue<T>):T[]{
   const out:T[]=[];
   let current:LeanListRuntimeValue<T>=list;
@@ -603,6 +615,7 @@ export const LEAN434_JS_EXTERN_MANIFEST:readonly Lean434ExternDescriptor[]=[
   {leanSymbol:'lean_usize_shift_left',jsExport:'lean_usize_shift_left',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
   {leanSymbol:'lean_usize_shift_right',jsExport:'lean_usize_shift_right',category:'pure-primitive',upstreamSource:'Init/Data/UInt/Basic.lean'},
   {leanSymbol:'lean_mk_empty_array_with_capacity',jsExport:'lean_mk_empty_array_with_capacity',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
+  {leanSymbol:'lean_mk_array',jsExport:'lean_mk_array',category:'persistent-value',upstreamSource:'Init/Data/Array/Basic.lean'},
   {leanSymbol:'lean_array_mk',jsExport:'lean_array_mk',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_to_list',jsExport:'lean_array_to_list',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
   {leanSymbol:'lean_array_get_size',jsExport:'lean_array_get_size',category:'persistent-value',upstreamSource:'Init/Prelude.lean'},
@@ -925,6 +938,13 @@ readonly Lean434DeclarationExternBinding[]=[
     upstreamSource:'Init/Prelude.lean',
   },
   {
+    leanDeclaration:'Array.replicate',
+    leanSymbol:'lean_mk_array',
+    arity:3,
+    runtimeArgs:[1,2],
+    upstreamSource:'Init/Data/Array/Basic.lean',
+  },
+  {
     leanDeclaration:'Array.size',
     leanSymbol:'lean_array_get_size',
     arity:2,
@@ -1130,6 +1150,8 @@ new Map<string,Lean434JsExternImplementation>([
     lean_usize_shift_right(a as LeanUSize,b as LeanUSize)],
   ['lean_mk_empty_array_with_capacity',(capacity)=>
     lean_mk_empty_array_with_capacity(capacity as LeanNat)],
+  ['lean_mk_array',(length,value)=>
+    lean_mk_array(length as LeanNat,value)],
   ['lean_array_mk',(list)=>
     lean_array_mk(list as LeanListRuntimeValue<unknown>)],
   ['lean_array_to_list',(array)=>

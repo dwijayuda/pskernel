@@ -508,12 +508,12 @@ def psParseLeanBinderNamesWithFuel
           let sourceName : PsSyntaxName := {
             segments := List.cons name.token.text List.nil
             span := name.token.span
-          }
+          };
           let nextNames :=
-            List.cons sourceName namesRev
+            List.cons sourceName namesRev;
           if psTokenCursorAtText name.cursor ":" then
             Except.ok {
-              value := nextNames.reverse
+              value := psParseListReverse nextNames
               cursor := name.cursor
             }
           else

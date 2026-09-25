@@ -31,9 +31,14 @@ structure PsWasmLoweredExpr where
   instructions : List PsWasmInstruction
   state : PsWasmLowerState
 
+structure PsWasmBinding where
+  name : String
+  index : Nat
+  type : PsVerifiedIrType
+
 structure PsWasmLoweredBindings where
   instructions : List PsWasmInstruction
-  bindings : List (String × Nat)
+  bindings : List PsWasmBinding
   state : PsWasmLowerState
 
 def psWasmLowerParameterType
@@ -341,25 +346,36 @@ def psWasmLowerInductives
               Except.ok (lowered ++ loweredRest)
 
 def psWasmParameterBindingsLoop :
-    Nat -> List PsVerifiedIrParameter -> List (String × Nat)
+    Nat -> List PsVerifiedIrParameter -> List PsWasmBinding
   | _, [] => []
   | index, parameter :: rest =>
-      (parameter.name, index) ::
+      {
+        name := parameter.name
+        index := index
+        type := parameter.type
+      } ::
         psWasmParameterBindingsLoop (index + 1) rest
 
 def psWasmParameterBindings
     (parameters : List PsVerifiedIrParameter) :
-    List (String × Nat) :=
+    List PsWasmBinding :=
   psWasmParameterBindingsLoop 0 parameters
 
-def psWasmFindBindingIndex :
-    List (String × Nat) -> String -> Option Nat
+def psWasmFindBinding :
+    List PsWasmBinding -> String -> Option PsWasmBinding
   | [], _ => none
   | binding :: rest, name =>
-      if binding.1 == name then
-        some binding.2
+      if binding.name == name then
+        some binding
       else
-        psWasmFindBindingIndex rest name
+        psWasmFindBinding rest name
+
+def psWasmFindBindingIndex
+    (bindings : List PsWasmBinding)
+    (name : String) : Option Nat :=
+  match psWasmFindBinding bindings name with
+  | none => none
+  | some binding => some binding.index
 
 def psWasmAddLocal
     (state : PsWasmLowerState)
@@ -585,7 +601,7 @@ def psWasmLowerIntrinsicWith
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
 def psWasmLowerCallWith
-    (bindings : List (String × Nat))
+    (bindings : List PsWasmBinding)
     (lower :
       Option PsWasmValueType ->
       PsWasmLowerState ->
@@ -664,7 +680,7 @@ def psWasmLowerMatchBindings
     (inductiveName : String)
     (constructorInfo : PsVerifiedIrConstructor)
     (scrutineeLocal : Nat)
-    (baseBindings : List (String × Nat)) :
+    (baseBindings : List PsWasmBinding) :
     PsWasmLowerState ->
     List PsVerifiedIrMatchBinding ->
     Except PsWasmLowerError PsWasmLoweredBindings
@@ -713,7 +729,11 @@ def psWasmLowerMatchBindings
                     inductiveName
                     constructorInfo
                     scrutineeLocal
-                    ((binding.name, localIndex) :: baseBindings)
+                    ({
+                      name := binding.name
+                      index := localIndex
+                      type := field.type
+                    } :: baseBindings)
                     nextState
                     rest with
               | Except.error error => Except.error error
@@ -730,12 +750,12 @@ def psWasmLowerMatchAlternativesWith
     (inductiveInfo : PsVerifiedIrInductive)
     (scrutineeLocal : Nat)
     (lowerWithBindings :
-      List (String × Nat) ->
+      List PsWasmBinding ->
       Option PsWasmValueType ->
       PsWasmLowerState ->
       PsVerifiedIrExpr ->
         Except PsWasmLowerError PsWasmLoweredExpr)
-    (baseBindings : List (String × Nat))
+    (baseBindings : List PsWasmBinding)
     (expected : Option PsWasmValueType) :
     PsWasmLowerState ->
     List
@@ -858,7 +878,7 @@ def psWasmLowerExprWithFuel
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
-    (bindings : List (String × Nat))
+    (bindings : List PsWasmBinding)
     (expected : Option PsWasmValueType) :
     Nat ->
     PsWasmLowerState ->
@@ -934,7 +954,11 @@ def psWasmLowerExprWithFuel
                   let localIndex := allocated.1
                   let localState := allocated.2
                   let bodyBindings :=
-                    (name, localIndex) :: bindings
+                    {
+                      name := name
+                      index := localIndex
+                      type := type
+                    } :: bindings
                   match
                       psWasmLowerExprWithFuel
                         profile
@@ -1112,7 +1136,7 @@ def psWasmLowerExpr
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
-    (bindings : List (String × Nat))
+    (bindings : List PsWasmBinding)
     (expected : Option PsWasmValueType)
     (state : PsWasmLowerState)
     (expr : PsVerifiedIrExpr) :

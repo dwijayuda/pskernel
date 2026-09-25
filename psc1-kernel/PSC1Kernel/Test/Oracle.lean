@@ -483,6 +483,182 @@ def assertExprOracle : IO Unit := do
   let nestedLean := (toLeanExpr nested).instantiate #[toLeanExpr replacement]
   assertTrue "nested instantiate differs from Lean 4.34" (toLeanExpr nestedOurs == nestedLean)
 
+
+def assertDeclarationAdmissionOracle : IO Unit := do
+  let P : PSC1Kernel.Name := .str .anonymous "AdmissionP"
+  let h : PSC1Kernel.Name := .str .anonymous "admissionProof"
+  let th : PSC1Kernel.Name := .str .anonymous "admissionTheorem"
+  let op : PSC1Kernel.Name := .str .anonymous "admissionOpaque"
+  let ident : PSC1Kernel.Name := .str .anonymous "admissionId"
+  let bad : PSC1Kernel.Name := .str .anonymous "admissionBad"
+  let badU : PSC1Kernel.Name := .str .anonymous "admissionBadUniverse"
+  let u : PSC1Kernel.Name := .str .anonymous "u"
+  let propSort : PSC1Kernel.Expr := .sort .zero
+  let pExpr : PSC1Kernel.Expr := .const P []
+  let hExpr : PSC1Kernel.Expr := .const h []
+
+  let pBase : PSC1Kernel.ConstantBase :=
+    { name := P, levelParams := [], type := propSort }
+  let pAxiom : PSC1Kernel.AxiomInfo :=
+    { base := pBase, isUnsafe := false }
+
+  let ours0 : PSC1Kernel.Environment := .empty
+  let lean0 ← Lean.mkEmptyEnvironment
+  let ours1 ← exceptToIO "PSC1 add axiom" (PSC1Kernel.Kernel.addAxiom ours0 pAxiom)
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName P
+      levelParams := []
+      type := toLeanExpr propSort
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected admission axiom"
+
+  let hBase : PSC1Kernel.ConstantBase :=
+    { name := h, levelParams := [], type := pExpr }
+  let hAxiom : PSC1Kernel.AxiomInfo :=
+    { base := hBase, isUnsafe := false }
+  let ours2 ← exceptToIO "PSC1 add proof axiom" (PSC1Kernel.Kernel.addAxiom ours1 hAxiom)
+  let lean2 ←
+    match Lean.Kernel.Environment.addDecl lean1 {} (.axiomDecl {
+      name := toLeanName h
+      levelParams := []
+      type := toLeanExpr pExpr
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected proof axiom"
+
+  let theoremValue : PSC1Kernel.TheoremInfo := {
+    base := { name := th, levelParams := [], type := pExpr }
+    value := hExpr
+  }
+  let ours3 ← exceptToIO "PSC1 add theorem" (PSC1Kernel.Kernel.addTheorem ours2 theoremValue)
+  let lean3 ←
+    match Lean.Kernel.Environment.addDecl lean2 {} (.thmDecl {
+      name := toLeanName th
+      levelParams := []
+      type := toLeanExpr pExpr
+      value := toLeanExpr hExpr
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected theorem"
+
+  let opaqueValue : PSC1Kernel.OpaqueInfo := {
+    base := { name := op, levelParams := [], type := pExpr }
+    value := hExpr
+    isUnsafe := false
+  }
+  let ours4 ← exceptToIO "PSC1 add opaque" (PSC1Kernel.Kernel.addOpaque ours3 opaqueValue)
+  let lean4 ←
+    match Lean.Kernel.Environment.addDecl lean3 {} (.opaqueDecl {
+      name := toLeanName op
+      levelParams := []
+      type := toLeanExpr pExpr
+      value := toLeanExpr hExpr
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected opaque"
+
+  let A : PSC1Kernel.Name := .str .anonymous "A"
+  let x : PSC1Kernel.Name := .str .anonymous "x"
+  let sort1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let idType : PSC1Kernel.Expr :=
+    .forallE A sort1
+      (.forallE x (.bvar 0) (.bvar 1) .default)
+      .default
+  let idValue : PSC1Kernel.Expr :=
+    .lam A sort1
+      (.lam x (.bvar 0) (.bvar 0) .default)
+      .default
+  let defValue : PSC1Kernel.DefinitionInfo := {
+    base := { name := ident, levelParams := [], type := idType }
+    value := idValue
+    hints := .regular 0
+    safety := .safe
+  }
+  let ours5 ← exceptToIO "PSC1 add definition" (PSC1Kernel.Kernel.addDefinition ours4 defValue)
+  let lean5 ←
+    match Lean.Kernel.Environment.addDecl lean4 {} (.defnDecl {
+      name := toLeanName ident
+      levelParams := []
+      type := toLeanExpr idType
+      value := toLeanExpr idValue
+      hints := .regular 0
+      safety := .safe
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected identity definition"
+
+  assertTrue "accepted declarations missing from PSC1 environment"
+    (ours5.contains P && ours5.contains h && ours5.contains th &&
+      ours5.contains op && ours5.contains ident)
+  assertTrue "accepted declarations missing from Lean environment"
+    ((lean5.find? (toLeanName P)).isSome &&
+      (lean5.find? (toLeanName ident)).isSome)
+
+  let duplicateOurs :=
+    match PSC1Kernel.Kernel.addAxiom ours5 pAxiom with
+    | .ok _ => false
+    | .error _ => true
+  let duplicateLean :=
+    match Lean.Kernel.Environment.addDecl lean5 {} (.axiomDecl {
+      name := toLeanName P
+      levelParams := []
+      type := toLeanExpr propSort
+      isUnsafe := false
+    }) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue "duplicate-name admission differs from Lean 4.34"
+    (duplicateOurs == duplicateLean && duplicateOurs)
+
+  let badValue : PSC1Kernel.DefinitionInfo := {
+    base := { name := bad, levelParams := [], type := pExpr }
+    value := propSort
+    hints := .regular 0
+    safety := .safe
+  }
+  let badOurs :=
+    match PSC1Kernel.Kernel.addDefinition ours5 badValue with
+    | .ok _ => false
+    | .error _ => true
+  let badLean :=
+    match Lean.Kernel.Environment.addDecl lean5 {} (.defnDecl {
+      name := toLeanName bad
+      levelParams := []
+      type := toLeanExpr pExpr
+      value := toLeanExpr propSort
+      hints := .regular 0
+      safety := .safe
+    }) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue "definition type-mismatch admission differs from Lean 4.34"
+    (badOurs == badLean && badOurs)
+
+  let badUniverseType : PSC1Kernel.Expr := .sort (.param u)
+  let badUniverseOurs :=
+    match PSC1Kernel.Kernel.addAxiom ours5 {
+      base := { name := badU, levelParams := [], type := badUniverseType }
+      isUnsafe := false
+    } with
+    | .ok _ => false
+    | .error _ => true
+  let badUniverseLean :=
+    match Lean.Kernel.Environment.addDecl lean5 {} (.axiomDecl {
+      name := toLeanName badU
+      levelParams := []
+      type := toLeanExpr badUniverseType
+      isUnsafe := false
+    }) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue "undefined-universe admission differs from Lean 4.34"
+    (badUniverseOurs == badUniverseLean && badUniverseOurs)
+
 def run : IO Unit := do
   let u : PSC1Kernel.Name := .str .anonymous "u"
   let v : PSC1Kernel.Name := .str .anonymous "v"
@@ -513,6 +689,7 @@ def run : IO Unit := do
   assertProofIrrelevanceOracle
   assertBinderInfoDefEqOracle
   assertProjectionOracle
+  assertDeclarationAdmissionOracle
   IO.println "PSC1Kernel Lean 4.34 foundational + projection oracle: PASS"
 
 end PSC1Kernel.Test

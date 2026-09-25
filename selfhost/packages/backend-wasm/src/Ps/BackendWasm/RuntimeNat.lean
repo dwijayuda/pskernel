@@ -400,100 +400,82 @@ def psWasmNatIntrinsicName :
   | .natLt => some psWasmNatRuntimeLtName
   | _ => none
 
-structure PsWasmNatRewriteFieldsResult where
-  fields : List (String × PsVerifiedIrExpr)
-
-structure PsWasmNatRewriteAlternativesResult where
-  alternatives :
-    List
-      (String ×
-        List PsVerifiedIrMatchBinding ×
-        PsVerifiedIrExpr)
-
-def psWasmRewriteNatExprList :
-    List PsVerifiedIrExpr -> List PsVerifiedIrExpr
-  | [] => []
-  | expression :: rest =>
-      psWasmRewriteNatExpr expression ::
-        psWasmRewriteNatExprList rest
-
-termination_by expressions => expressions.length
-where
-  psWasmRewriteNatExpr :
-      PsVerifiedIrExpr -> PsVerifiedIrExpr
-    | .literal (.natural value) =>
-        psWasmNatLiteralExpr value
-    | .literal literal =>
-        PsVerifiedIrExpr.literal literal
-    | .var name =>
-        PsVerifiedIrExpr.var name
-    | .intrinsic operation arguments =>
-        let rewritten :=
-          psWasmRewriteNatExprList arguments
-        match psWasmNatIntrinsicName operation with
-        | some name =>
-            psWasmNatRuntimeCall name rewritten
-        | none =>
-            PsVerifiedIrExpr.intrinsic operation rewritten
-    | .lambda parameters resultType body =>
-        PsVerifiedIrExpr.lambda
-          parameters
-          resultType
-          (psWasmRewriteNatExpr body)
-    | .call fn typeArguments arguments =>
-        PsVerifiedIrExpr.call
-          (psWasmRewriteNatExpr fn)
-          typeArguments
-          (psWasmRewriteNatExprList arguments)
-    | .letE name type value body =>
-        PsVerifiedIrExpr.letE
-          name
-          type
-          (psWasmRewriteNatExpr value)
-          (psWasmRewriteNatExpr body)
-    | .ifE condition thenBranch elseBranch =>
-        PsVerifiedIrExpr.ifE
-          (psWasmRewriteNatExpr condition)
-          (psWasmRewriteNatExpr thenBranch)
-          (psWasmRewriteNatExpr elseBranch)
-    | .record structureName typeArguments fields =>
-        PsVerifiedIrExpr.record
-          structureName
-          typeArguments
-          (fields.map
-            (fun field =>
-              (field.1, psWasmRewriteNatExpr field.2)))
-    | .projection structureName typeArguments target field =>
-        PsVerifiedIrExpr.projection
-          structureName
-          typeArguments
-          (psWasmRewriteNatExpr target)
-          field
-    | .constructor inductiveName constructorName typeArguments fields =>
-        PsVerifiedIrExpr.constructor
-          inductiveName
-          constructorName
-          typeArguments
-          (fields.map
-            (fun field =>
-              (field.1, psWasmRewriteNatExpr field.2)))
-    | .matchE inductiveName typeArguments scrutinee alternatives =>
-        PsVerifiedIrExpr.matchE
-          inductiveName
-          typeArguments
-          (psWasmRewriteNatExpr scrutinee)
-          (alternatives.map
-            (fun alternative =>
-              (
-                alternative.1,
-                alternative.2.1,
-                psWasmRewriteNatExpr alternative.2.2
-              )))
+def psWasmRewriteNatExprWithFuel :
+    Nat -> PsVerifiedIrExpr -> PsVerifiedIrExpr
+  | 0, expression => expression
+  | fuel + 1, expression =>
+      let rewrite :=
+        psWasmRewriteNatExprWithFuel fuel
+      match expression with
+      | .literal (.natural value) =>
+          psWasmNatLiteralExpr value
+      | .literal literal =>
+          PsVerifiedIrExpr.literal literal
+      | .var name =>
+          PsVerifiedIrExpr.var name
+      | .intrinsic operation arguments =>
+          let rewritten := arguments.map rewrite
+          match psWasmNatIntrinsicName operation with
+          | some name =>
+              psWasmNatRuntimeCall name rewritten
+          | none =>
+              PsVerifiedIrExpr.intrinsic operation rewritten
+      | .lambda parameters resultType body =>
+          PsVerifiedIrExpr.lambda
+            parameters
+            resultType
+            (rewrite body)
+      | .call fn typeArguments arguments =>
+          PsVerifiedIrExpr.call
+            (rewrite fn)
+            typeArguments
+            (arguments.map rewrite)
+      | .letE name type value body =>
+          PsVerifiedIrExpr.letE
+            name
+            type
+            (rewrite value)
+            (rewrite body)
+      | .ifE condition thenBranch elseBranch =>
+          PsVerifiedIrExpr.ifE
+            (rewrite condition)
+            (rewrite thenBranch)
+            (rewrite elseBranch)
+      | .record structureName typeArguments fields =>
+          PsVerifiedIrExpr.record
+            structureName
+            typeArguments
+            (fields.map
+              (fun field => (field.1, rewrite field.2)))
+      | .projection structureName typeArguments target field =>
+          PsVerifiedIrExpr.projection
+            structureName
+            typeArguments
+            (rewrite target)
+            field
+      | .constructor inductiveName constructorName typeArguments fields =>
+          PsVerifiedIrExpr.constructor
+            inductiveName
+            constructorName
+            typeArguments
+            (fields.map
+              (fun field => (field.1, rewrite field.2)))
+      | .matchE inductiveName typeArguments scrutinee alternatives =>
+          PsVerifiedIrExpr.matchE
+            inductiveName
+            typeArguments
+            (rewrite scrutinee)
+            (alternatives.map
+              (fun alternative =>
+                (
+                  alternative.1,
+                  alternative.2.1,
+                  rewrite alternative.2.2
+                )))
 
 def psWasmRewriteNatExpr
     (expression : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
-  psWasmRewriteNatExprList [expression]
-    |>.headD expression
+  psWasmRewriteNatExprWithFuel 4096 expression
 
 def psWasmRewriteNatDeclaration
     (declaration : PsVerifiedIrDeclaration) :

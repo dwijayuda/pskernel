@@ -546,13 +546,13 @@ def psLeanBinderPairsFromNames
       (Prod PsSyntaxBinderHead PsSyntaxTerm)
   | List.nil => List.nil
   | List.cons name rest =>
+      let head : PsSyntaxBinderHead := {
+        name := name
+        kind := kind
+        span := span
+      };
       List.cons
-        ({
-          name := name
-          kind := kind
-          span := span
-        },
-          type)
+        (Prod.mk head type)
         (psLeanBinderPairsFromNames
           kind
           span

@@ -49,28 +49,33 @@ partial def psNatToString (value : Nat) : String :=
         (Char.ofNat
           (Nat.add 48 (Nat.mod value 10))))
 
-partial def psNameEq (left : PsName) (right : PsName) : Bool :=
+partial def psNameEq (left : PsName) : PsName -> Bool :=
   match left with
   | PsName.anonymous =>
-      match right with
-      | PsName.anonymous => true
-      | _ => false
+      fun (right : PsName) =>
+        match right with
+        | PsName.anonymous => true
+        | _ => false
   | PsName.str leftPrefix leftValue =>
-      match right with
-      | PsName.str rightPrefix rightValue =>
-          if psNameEq leftPrefix rightPrefix then
-            psStringEq leftValue rightValue
-          else
-            false
-      | _ => false
+      let smaller : PsName -> Bool := psNameEq leftPrefix;
+      fun (right : PsName) =>
+        match right with
+        | PsName.str rightPrefix rightValue =>
+            if smaller rightPrefix then
+              psStringEq leftValue rightValue
+            else
+              false
+        | _ => false
   | PsName.num leftPrefix leftValue =>
-      match right with
-      | PsName.num rightPrefix rightValue =>
-          if psNameEq leftPrefix rightPrefix then
-            Nat.beq leftValue rightValue
-          else
-            false
-      | _ => false
+      let smaller : PsName -> Bool := psNameEq leftPrefix;
+      fun (right : PsName) =>
+        match right with
+        | PsName.num rightPrefix rightValue =>
+            if smaller rightPrefix then
+              Nat.beq leftValue rightValue
+            else
+              false
+        | _ => false
 
 def psNameAppendStr (parent : PsName) (value : String) : PsName :=
   PsName.str parent value

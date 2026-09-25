@@ -101,6 +101,26 @@ jobs:
           cd selfhost
           lake exe psc1_backend_wasm_tests
 
+      - name: Validate owned WebAssembly binary in Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv=readFileSync('/tmp/psc1-wasm-bytes.txt','utf8').trim();
+          const bytes=Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) {
+            throw new Error('PSC1_WASM_VALIDATE_FAILED');
+          }
+          const {instance}=await WebAssembly.instantiate(bytes);
+          if (instance.exports.answer() !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_RESULT');
+          }
+          console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
+          NODE
+
       - name: Probe real compiler source readiness
         shell: bash
         run: |

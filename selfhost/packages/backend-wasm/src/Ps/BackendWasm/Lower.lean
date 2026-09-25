@@ -11,6 +11,16 @@ inductive PsWasmLowerError where
   | unknownStructure (name : String)
   | unknownStructureField (structureName : String) (field : String)
   | missingRecordField (structureName : String) (field : String)
+  | unknownInductive (name : String)
+  | unknownConstructor (inductiveName : String) (constructorName : String)
+  | unknownConstructorField
+      (inductiveName : String)
+      (constructorName : String)
+      (field : String)
+  | missingConstructorField
+      (inductiveName : String)
+      (constructorName : String)
+      (field : String)
   | unsupportedModuleFeature
 
 structure PsWasmLowerState where
@@ -424,6 +434,57 @@ def psWasmLowerRecordFieldsWith
                         profile
                         lower
                         structInfo
+                        fields
+                        lowered.state
+                        rest with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredRest =>
+                      Except.ok {
+                        instructions :=
+                          lowered.instructions ++
+                            loweredRest.instructions
+                        state := loweredRest.state
+                      }
+
+def psWasmLowerConstructorValuesWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (inductiveName : String)
+    (constructorInfo : PsVerifiedIrConstructor)
+    (fields : List (String × PsVerifiedIrExpr)) :
+    PsWasmLowerState ->
+    List PsVerifiedIrConstructorField ->
+    Except PsWasmLowerError PsWasmLoweredExpr
+  | state, [] =>
+      Except.ok {
+        instructions := []
+        state := state
+      }
+  | state, field :: rest =>
+      match psWasmFindRecordField fields field.name with
+      | none =>
+          Except.error
+            (PsWasmLowerError.missingConstructorField
+              inductiveName
+              constructorInfo.name
+              field.name)
+      | some value =>
+          match psWasmValueTypeOfIrType? profile field.type with
+          | none => Except.error PsWasmLowerError.unsupportedType
+          | some valueType =>
+              match lower (some valueType) state value with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  match
+                      psWasmLowerConstructorValuesWith
+                        profile
+                        lower
+                        inductiveName
+                        constructorInfo
                         fields
                         lowered.state
                         rest with

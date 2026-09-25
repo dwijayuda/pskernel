@@ -5,9 +5,9 @@ namespace PSC1Kernel
 namespace Kernel
 
 /--
-Checked K5 slice: an ordinary, non-parametric, non-indexed inductive datatype
-in a non-Prop sort. Constructor fields are supported when they are
-non-recursive; recursive occurrences still fail closed.
+Checked K5 slice: an ordinary, non-indexed inductive datatype in a non-Prop
+sort. Shared declaration parameters and constructor fields are supported when
+fields are non-recursive; recursive occurrences still fail closed.
 
 Unsupported inductive shapes fail closed instead of accepting exported
 constructor/recursor metadata.
@@ -22,6 +22,7 @@ structure SimpleInductiveDecl where
   type : Expr
   ctors : List SimpleConstructorDecl
   isUnsafe : Bool
+  numParams : Nat := 0
 
 def simpleRecName (name : Name) : Name :=
   .str name "rec"
@@ -79,6 +80,46 @@ structure SimpleConstructorShape where
   ctor : SimpleConstructorDecl
   fields : List OpenBinder
 
+partial def openSimpleHeaderParams
+    (ctx : CheckerContext)
+    (type : Expr) :
+    Nat → List OpenBinder →
+      Except String (CheckerContext × List OpenBinder × Expr)
+  | 0, revParams => do
+      let result ← whnf ctx type
+      pure (ctx, revParams.reverse, result)
+  | remaining + 1, revParams => do
+      let reduced ← whnf ctx type
+      let .forallE userName domain body binderInfo := reduced
+        | throw "simple inductive declaration has fewer parameters than declared"
+      let domainType ← check ctx domain
+      let _ ← ensureSort ctx domainType
+      let (fresh, child) := ctx.withLocal userName domain binderInfo
+      let param : OpenBinder := {
+        internalName := fresh
+        userName := userName
+        type := domain
+        binderInfo := binderInfo
+      }
+      openSimpleHeaderParams
+        child (body.instantiate1 (.fvar fresh))
+        remaining (param :: revParams)
+
+partial def openSimpleConstructorParams
+    (ctx : CheckerContext)
+    (params : List OpenBinder)
+    (type : Expr) : Except String Expr := do
+  match params with
+  | [] => pure type
+  | param :: rest =>
+      let reduced ← whnf ctx type
+      let .forallE _ domain body _ := reduced
+        | throw "simple inductive constructor has fewer parameters than the datatype"
+      unless ← isDefEq ctx domain param.type do
+        throw "simple inductive constructor parameter does not match the datatype parameter"
+      openSimpleConstructorParams
+        ctx rest (body.instantiate1 (.fvar param.internalName))
+
 partial def openSimpleConstructorFields
     (ctx : CheckerContext)
     (target : Name)
@@ -115,12 +156,16 @@ def simpleFieldArgs (shape : SimpleConstructorShape) : List Expr :=
 
 def simpleCtorApp
     (levels : List Level)
+    (params : List OpenBinder)
     (shape : SimpleConstructorShape) : Expr :=
-  applyArgs (.const shape.ctor.name levels) (simpleFieldArgs shape)
+  applyArgs
+    (.const shape.ctor.name levels)
+    (params.map (fun param => .fvar param.internalName) ++ simpleFieldArgs shape)
 
 def makeSimpleMinorBinders
     (motive : Expr)
-    (levels : List Level) :
+    (levels : List Level)
+    (params : List OpenBinder) :
     List SimpleConstructorShape → Nat → List OpenBinder
   | [], _ => []
   | shape :: rest, index =>
@@ -130,12 +175,13 @@ def makeSimpleMinorBinders
         userName := shape.ctor.name
         type :=
           closeOpenBinders shape.fields
-            (.app motive (simpleCtorApp levels shape))
+            (.app motive (simpleCtorApp levels params shape))
         binderInfo := .default
       }
-      binder :: makeSimpleMinorBinders motive levels rest (index + 1)
+      binder :: makeSimpleMinorBinders motive levels params rest (index + 1)
 
 def makeSimpleRecursorRules
+    (params : List OpenBinder)
     (ruleBinders : List OpenBinder) :
     List SimpleConstructorShape → List OpenBinder → List RecursorRule
   | [], [] => []
@@ -146,11 +192,12 @@ def makeSimpleRecursorRules
         ctor := shape.ctor.name
         nFields := shape.fields.length
         rhs := closeOpenLambdas (ruleBinders ++ shape.fields) body
-      } :: makeSimpleRecursorRules ruleBinders shapes minors
+      } :: makeSimpleRecursorRules params ruleBinders shapes minors
   | _, _ => []
 
 def validateSimpleRecursorRules
     (ctx : CheckerContext)
+    (params : List OpenBinder)
     (ruleBinders : List OpenBinder)
     (motive : Expr)
     (levels : List Level) :
@@ -161,10 +208,10 @@ def validateSimpleRecursorRules
       let expectedType :=
         closeOpenBinders
           (ruleBinders ++ shape.fields)
-          (.app motive (simpleCtorApp levels shape))
+          (.app motive (simpleCtorApp levels params shape))
       unless ← isDefEq ctx gotType expectedType do
         throw "generated simple recursor rule is not type preserving"
-      validateSimpleRecursorRules ctx ruleBinders motive levels shapes rules
+      validateSimpleRecursorRules ctx params ruleBinders motive levels shapes rules
   | _, _ => throw "generated simple recursor rule count mismatch"
 
 def addSimpleInductive
@@ -191,21 +238,27 @@ def addSimpleInductive
   let headerCtx := mkChecker env decl.levelParams safety
   let headerType ← check headerCtx decl.type
   let _ ← ensureSort headerCtx headerType
-  let headerWhnf ← whnf headerCtx decl.type
-  let .sort resultLevel := headerWhnf
-    | throw "simple inductive type must have no parameters or indices"
+  let (headerParamCtx, params, headerResult) ←
+    openSimpleHeaderParams headerCtx decl.type decl.numParams []
+  match headerResult with
+  | .forallE .. =>
+      throw "simple inductive admission does not yet support indices"
+  | _ => pure ()
+  let .sort resultLevel := headerResult
+    | throw "simple inductive result must be a sort"
   if Level.normalizesToZero resultLevel then
     throw "simple inductive admission currently requires a non-Prop result sort"
 
   let levels := decl.levelParams.map Level.param
-  let inductExpr : Expr := .const decl.name levels
+  let paramArgs := params.map (fun param => Expr.fvar param.internalName)
+  let inductExpr : Expr := applyArgs (.const decl.name levels) paramArgs
   let inductInfo : InductiveInfo := {
     base := {
       name := decl.name
       levelParams := decl.levelParams
       type := decl.type
     }
-    numParams := 0
+    numParams := decl.numParams
     numIndices := 0
     all := [decl.name]
     ctors := decl.ctors.map (fun ctor => ctor.name)
@@ -225,12 +278,14 @@ def addSimpleInductive
     | ctor :: rest => do
         checkNoMVarNoFVar ctor.type
         checkLevelParams ctor.type decl.levelParams
-        let ctorCtx := mkChecker work decl.levelParams safety
-        let ctorTypeType ← check ctorCtx ctor.type
-        let _ ← ensureSort ctorCtx ctorTypeType
+        let closedCtorCtx := mkChecker work decl.levelParams safety
+        let ctorTypeType ← check closedCtorCtx ctor.type
+        let _ ← ensureSort closedCtorCtx ctorTypeType
+        let ctorCtx : CheckerContext := { headerParamCtx with env := work }
+        let afterParams ← openSimpleConstructorParams ctorCtx params ctor.type
         let (resultCtx, fields, result) ←
           openSimpleConstructorFields
-            ctorCtx decl.name resultLevel ctor.type
+            ctorCtx decl.name resultLevel afterParams
         unless Expr.eq result inductExpr do
           throw "simple inductive constructor must return the declared datatype"
         let work' := work.addUnchecked (.ctorInfo {
@@ -241,7 +296,7 @@ def addSimpleInductive
           }
           induct := decl.name
           cidx := index
-          numParams := 0
+          numParams := decl.numParams
           numFields := fields.length
           isUnsafe := decl.isUnsafe
         })
@@ -263,9 +318,9 @@ def addSimpleInductive
     internalName := motiveInternal
     userName := .str .anonymous "motive"
     type := mkArrow inductExpr (.sort elimLevel)
-    binderInfo := .implicit
+    binderInfo := .default
   }
-  let minorBinders := makeSimpleMinorBinders motive levels ctorShapes 0
+  let minorBinders := makeSimpleMinorBinders motive levels params ctorShapes 0
   let majorInternal := simpleInternalName "major"
   let major : Expr := .fvar majorInternal
   let majorBinder : OpenBinder := {
@@ -274,13 +329,15 @@ def addSimpleInductive
     type := inductExpr
     binderInfo := .default
   }
-  let ruleBinders := [motiveBinder] ++ minorBinders
-  let recType :=
+  let coreRuleBinders := [motiveBinder] ++ minorBinders
+  let ruleBinders := params ++ coreRuleBinders
+  let recTypeRaw :=
     closeOpenBinders
       (ruleBinders ++ [majorBinder])
       (.app motive major)
+  let recType := recTypeRaw.inferImplicitAll true
   let rules :=
-    makeSimpleRecursorRules ruleBinders ctorShapes minorBinders
+    makeSimpleRecursorRules params ruleBinders ctorShapes minorBinders
   let recInfo : RecursorInfo := {
     base := {
       name := recName
@@ -288,7 +345,7 @@ def addSimpleInductive
       type := recType
     }
     all := [decl.name]
-    numParams := 0
+    numParams := decl.numParams
     numIndices := 0
     numMotives := 1
     numMinors := minorBinders.length
@@ -301,7 +358,7 @@ def addSimpleInductive
   let recCtx := mkChecker work1 recLevelParams safety
   let recTypeType ← check recCtx recType
   let _ ← ensureSort recCtx recTypeType
-  validateSimpleRecursorRules recCtx ruleBinders motive levels ctorShapes rules
+  validateSimpleRecursorRules recCtx params ruleBinders motive levels ctorShapes rules
 
   pure (work1.addUnchecked (.recInfo recInfo))
 

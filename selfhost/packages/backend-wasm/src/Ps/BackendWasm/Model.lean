@@ -95,6 +95,7 @@ structure PsWasmFunction where
   name : String
   parameters : List PsWasmValueType
   results : List PsWasmValueType
+  locals : List PsWasmValueType
   body : List PsWasmInstruction
 
 structure PsWasmModule where

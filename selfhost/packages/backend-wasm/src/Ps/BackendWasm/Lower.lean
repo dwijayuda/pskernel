@@ -660,6 +660,192 @@ def psWasmFindBindingIndex
   | none => none
   | some binding => some binding.index
 
+def psWasmStringListContains :
+    List String -> String -> Bool
+  | [], _ => false
+  | item :: rest, name =>
+      if item == name then
+        true
+      else
+        psWasmStringListContains rest name
+
+def psWasmBindingListContains :
+    List PsWasmBinding -> String -> Bool
+  | [], _ => false
+  | binding :: rest, name =>
+      if binding.name == name then
+        true
+      else
+        psWasmBindingListContains rest name
+
+def psWasmAppendCaptureForName
+    (outerBindings : List PsWasmBinding)
+    (boundNames : List String)
+    (captures : List PsWasmBinding)
+    (name : String) : List PsWasmBinding :=
+  if psWasmStringListContains boundNames name then
+    captures
+  else if psWasmBindingListContains captures name then
+    captures
+  else
+    match psWasmFindBinding outerBindings name with
+    | none => captures
+    | some binding => captures ++ [binding]
+
+def psWasmParameterNames :
+    List PsVerifiedIrParameter -> List String
+  | [] => []
+  | parameter :: rest =>
+      parameter.name :: psWasmParameterNames rest
+
+def psWasmMatchBindingNames :
+    List PsVerifiedIrMatchBinding -> List String
+  | [] => []
+  | binding :: rest =>
+      binding.name :: psWasmMatchBindingNames rest
+
+def psWasmCollectCapturesFromExprListWithFuel
+    (outerBindings : List PsWasmBinding)
+    (boundNames : List String) :
+    Nat ->
+    List PsVerifiedIrExpr ->
+    List PsWasmBinding ->
+    List PsWasmBinding
+  | _, [], captures => captures
+  | 0, _, captures => captures
+  | fuel + 1, expr :: rest, captures =>
+      let next :=
+        psWasmCollectCapturesWithFuel
+          outerBindings
+          boundNames
+          fuel
+          expr
+          captures
+      psWasmCollectCapturesFromExprListWithFuel
+        outerBindings
+        boundNames
+        fuel
+        rest
+        next
+
+termination_by fuel expressions captures =>
+  (fuel, expressions.length)
+where
+  psWasmCollectCapturesWithFuel
+      (outerBindings : List PsWasmBinding)
+      (boundNames : List String) :
+      Nat ->
+      PsVerifiedIrExpr ->
+      List PsWasmBinding ->
+      List PsWasmBinding
+    | 0, _, captures => captures
+    | fuel + 1, expr, captures =>
+        let collect :=
+          fun nested nestedCaptures =>
+            psWasmCollectCapturesWithFuel
+              outerBindings
+              boundNames
+              fuel
+              nested
+              nestedCaptures
+        match expr with
+        | .literal _ => captures
+        | .var name =>
+            psWasmAppendCaptureForName
+              outerBindings
+              boundNames
+              captures
+              name
+        | .intrinsic _ arguments =>
+            psWasmCollectCapturesFromExprListWithFuel
+              outerBindings
+              boundNames
+              fuel
+              arguments
+              captures
+        | .lambda parameters _ body =>
+            psWasmCollectCapturesWithFuel
+              outerBindings
+              (psWasmParameterNames parameters ++ boundNames)
+              fuel
+              body
+              captures
+        | .call fn _ arguments =>
+            let withFn := collect fn captures
+            psWasmCollectCapturesFromExprListWithFuel
+              outerBindings
+              boundNames
+              fuel
+              arguments
+              withFn
+        | .letE name _ value body =>
+            let withValue := collect value captures
+            psWasmCollectCapturesWithFuel
+              outerBindings
+              (name :: boundNames)
+              fuel
+              body
+              withValue
+        | .ifE condition thenBranch elseBranch =>
+            let withCondition := collect condition captures
+            let withThen := collect thenBranch withCondition
+            collect elseBranch withThen
+        | .record _ fields =>
+            psWasmCollectCapturesFromExprListWithFuel
+              outerBindings
+              boundNames
+              fuel
+              (fields.map (fun field => field.2))
+              captures
+        | .projection _ target _ =>
+            collect target captures
+        | .constructor _ _ _ fields =>
+            psWasmCollectCapturesFromExprListWithFuel
+              outerBindings
+              boundNames
+              fuel
+              (fields.map (fun field => field.2))
+              captures
+        | .matchE _ scrutinee alternatives =>
+            let withScrutinee := collect scrutinee captures
+            alternatives.foldl
+              (fun state alternative =>
+                let matchBindings := alternative.2.1
+                let body := alternative.2.2
+                psWasmCollectCapturesWithFuel
+                  outerBindings
+                  (psWasmMatchBindingNames matchBindings ++ boundNames)
+                  fuel
+                  body
+                  state)
+              withScrutinee
+
+def psWasmCollectCaptures
+    (outerBindings : List PsWasmBinding)
+    (parameters : List PsVerifiedIrParameter)
+    (body : PsVerifiedIrExpr) :
+    List PsWasmBinding :=
+  psWasmCollectCapturesWithFuel
+    outerBindings
+    (psWasmParameterNames parameters)
+    4096
+    body
+    []
+
+def psWasmParameterBindingsFrom
+    (firstIndex : Nat) :
+    List PsVerifiedIrParameter -> List PsWasmBinding
+  | [] => []
+  | parameter :: rest =>
+      {
+        name := parameter.name
+        index := firstIndex
+        type := parameter.type
+      } ::
+        psWasmParameterBindingsFrom
+          (firstIndex + 1)
+          rest
+
 def psWasmAddLocal
     (state : PsWasmLowerState)
     (type : PsWasmValueType) :

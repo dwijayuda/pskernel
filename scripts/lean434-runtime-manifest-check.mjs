@@ -33,6 +33,9 @@ if(!Array.isArray(runtime.LEAN434_JS_INTRINSIC_BINDINGS)){
 if(!Array.isArray(runtime.LEAN434_JS_EVALUATOR_EXTERN_BINDINGS)){
   throw new Error('missing LEAN434_JS_EVALUATOR_EXTERN_BINDINGS');
 }
+if(!Array.isArray(runtime.LEAN434_JS_EVALUATOR_INTRINSIC_BINDINGS)){
+  throw new Error('missing LEAN434_JS_EVALUATOR_INTRINSIC_BINDINGS');
+}
 
 const seen=new Set();
 const checked=[];
@@ -264,6 +267,67 @@ for(const binding of runtime.LEAN434_JS_EVALUATOR_EXTERN_BINDINGS){
   });
 }
 
+const seenEvaluatorIntrinsics=new Set();
+const evaluatorIntrinsicBindings=[];
+for(const binding of runtime.LEAN434_JS_EVALUATOR_INTRINSIC_BINDINGS){
+  if(seenEvaluatorIntrinsics.has(binding.leanDeclaration)){
+    throw new Error(
+      'duplicate Lean evaluator intrinsic binding: '+binding.leanDeclaration,
+    );
+  }
+  seenEvaluatorIntrinsics.add(binding.leanDeclaration);
+  if(!Number.isInteger(binding.arity)||binding.arity<0){
+    throw new Error(
+      'invalid evaluator intrinsic arity for '+binding.leanDeclaration,
+    );
+  }
+  if(binding.adapter!=='instantiate-mvars-core'){
+    throw new Error(
+      'unsupported evaluator intrinsic adapter for '+
+      binding.leanDeclaration+': '+String(binding.adapter),
+    );
+  }
+  const upstream=path.join(
+    repoRoot,
+    'study','lean4-4.34.0','src',
+    ...binding.upstreamSource.split('/'),
+  );
+  if(!fs.existsSync(upstream)){
+    throw new Error(
+      'evaluator intrinsic upstream source missing: '+
+      binding.upstreamSource,
+    );
+  }
+  const source=fs.readFileSync(upstream,'utf8');
+  const shortName=binding.leanDeclaration.split('.').at(-1);
+  if(
+    typeof shortName!=='string'
+    ||!source.includes('def '+shortName)
+  ){
+    throw new Error(
+      'evaluator intrinsic declaration missing from upstream source: '+
+      binding.leanDeclaration,
+    );
+  }
+  if(
+    binding.adapter==='instantiate-mvars-core'
+    &&!(
+      source.includes('instantiateExprMVars e')
+      &&source.includes('runST fun _ => instantiate e |>.run |>.run mctx')
+    )
+  ){
+    throw new Error(
+      'instantiateMVarsCore source shape drifted from validated wrapper semantics',
+    );
+  }
+  evaluatorIntrinsicBindings.push({
+    leanDeclaration:binding.leanDeclaration,
+    arity:binding.arity,
+    adapter:binding.adapter,
+    upstreamSource:binding.upstreamSource,
+  });
+}
+
 const seenIntrinsics=new Set();
 const intrinsicBindings=[];
 for(const binding of runtime.LEAN434_JS_INTRINSIC_BINDINGS){
@@ -385,9 +449,11 @@ process.stdout.write(JSON.stringify({
   implementedByBindings:implementedByBindings.length,
   intrinsicBindings:intrinsicBindings.length,
   evaluatorExternBindings:evaluatorExternBindings.length,
+  evaluatorIntrinsicBindings:evaluatorIntrinsicBindings.length,
   entries:checked,
   bindings:declarationBindings,
   intrinsics:intrinsicBindings,
   evaluatorExterns:evaluatorExternBindings,
+  evaluatorIntrinsics:evaluatorIntrinsicBindings,
   implementedBy:implementedByBindings,
 },null,2)+'\n');

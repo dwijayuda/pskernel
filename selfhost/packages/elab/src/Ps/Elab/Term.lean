@@ -1172,6 +1172,22 @@ def psSyntaxNameIsWildcardBinder
       | List.cons _ _ =>
           false
 
+def psSyntaxNameMatchesCore
+    (coreName : Option PsName)
+    (candidate : PsSyntaxName) : Bool :=
+  if psSyntaxNameIsWildcardBinder candidate then
+    false
+  else
+    match coreName with
+    | none =>
+        false
+    | some left =>
+        match psSyntaxNameToName candidate with
+        | none =>
+            false
+        | some right =>
+            psNameEq left right
+
 def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
   | List.nil => false
   | List.cons name rest =>
@@ -1180,20 +1196,7 @@ def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
       else
         let coreName := psSyntaxNameToName name;
         let duplicated :=
-          List.any rest
-            (fun (candidate : PsSyntaxName) =>
-              if psSyntaxNameIsWildcardBinder candidate then
-                false
-              else
-                match coreName with
-                | none =>
-                    false
-                | some left =>
-                    match psSyntaxNameToName candidate with
-                    | none =>
-                        false
-                    | some right =>
-                        psNameEq left right);
+          List.any rest (psSyntaxNameMatchesCore coreName);
         if duplicated then
           true
         else

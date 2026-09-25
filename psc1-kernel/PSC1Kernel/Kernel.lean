@@ -102,7 +102,7 @@ def checkConstantBase
   checkNoMVarNoFVar base.type
   checkLevelParams base.type base.levelParams
   let ctx := mkChecker env base.levelParams safety
-  let typeType ← TypeChecker.check ctx base.type
+  let typeType ← check ctx base.type
   let _ ← ensureSort ctx typeType
   pure ()
 
@@ -113,7 +113,7 @@ def checkDefinitionBody
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
   let ctx := mkChecker env value.base.levelParams safety
-  let valueType ← TypeChecker.check ctx value.value
+  let valueType ← check ctx value.value
   unless ← isDefEq ctx valueType value.base.type do
     throw "definition type mismatch"
 
@@ -143,7 +143,7 @@ def addTheorem (env : Environment) (value : TheoremInfo) : Except String Environ
     throw "theorem type is not a proposition"
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
-  let valueType ← TypeChecker.check ctx value.value
+  let valueType ← check ctx value.value
   unless ← isDefEq ctx valueType value.base.type do
     throw "theorem proof type mismatch"
   env.add (.thmInfo value)
@@ -155,7 +155,7 @@ def addOpaque (env : Environment) (value : OpaqueInfo) : Except String Environme
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
   let ctx := mkChecker env value.base.levelParams .safe
-  let valueType ← TypeChecker.check ctx value.value
+  let valueType ← check ctx value.value
   unless ← isDefEq ctx valueType value.base.type do
     throw "opaque value type mismatch"
   env.add (.opaqueInfo value)

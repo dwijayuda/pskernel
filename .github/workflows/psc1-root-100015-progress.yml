@@ -40,6 +40,8 @@ jobs:
           lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 100015 1 > /tmp/root100015.ndjson
           echo "bytes=$(wc -c < /tmp/root100015.ndjson)"
           echo "lines=$(wc -l < /tmp/root100015.ndjson)"
+          echo "=== root100015 lines 190655-190665 ==="
+          sed -n '190655,190665p' /tmp/root100015.ndjson
       - name: Build progress replay executable
         working-directory: psc1-kernel
         run: |

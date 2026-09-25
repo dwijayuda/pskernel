@@ -40,6 +40,45 @@ Only the first form is D-CALL.
 Source positions and spans are part of the compiler foundation because
 diagnostics, source maps, navigation, and semantic identity depend on them.
 
+### 2.1 Canonical PSC1 spacing around type annotations
+
+Whitespace around a type-annotation colon is **not semantic**. Both of these
+parse to the same PSC1 declaration:
+
+```proofscript
+def answer: Nat := 43;
+def answer : Nat := 43;
+```
+
+Canonical `.ps` formatting uses the TypeScript-style form:
+
+```proofscript
+def answer: Nat := 43;
+function add(x: Nat, y: Nat): Nat := x + y;
+```
+
+That is:
+
+- no space before `:`;
+- one space after `:`;
+- spaces around `:=`.
+
+This is a **printer/formatter rule**, not a grammar restriction. A conforming
+PSC1 parser MUST continue to accept ordinary whitespace before `:` where the
+grammar permits whitespace.
+
+Canonical generated/reference `.lean` source follows normal Lean formatting
+instead:
+
+```lean
+def answer : Nat := 43
+
+def add (x : Nat) (y : Nat) : Nat := x + y
+```
+
+The distinction is intentional: PSC1 keeps a TypeScript-friendly surface style
+without changing Lean-compatible semantics.
+
 ## 3. Declaration grammar
 
 The following pseudo-grammar describes the required declaration family.

@@ -23,6 +23,30 @@ def psWasmSmokeNatType : PsVerifiedIrType :=
 def psWasmSmokeBoolType : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
 
+def psWasmSmokeStringType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+
+def psWasmSmokeCharType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.char
+
+def psWasmSmokeString
+    (value : String) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.string value)
+
+def psWasmSmokeStringUnary
+    (operation : PsVerifiedIrIntrinsic)
+    (value : String) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    operation
+    [psWasmSmokeString value]
+
+def psWasmSmokeStringBinary
+    (operation : PsVerifiedIrIntrinsic)
+    (left right : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    operation
+    [left, right]
+
 def psWasmSmokeNat
     (value : Nat) : PsVerifiedIrExpr :=
   PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural value)
@@ -1206,6 +1230,114 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
             (psWasmSmokeInt (-5))
       }
 ,
+      {
+        name := "stringAsciiLength"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeStringUnary
+              PsVerifiedIrIntrinsic.stringLength
+              "abc")
+            (psWasmSmokeNat 3)
+      },
+      {
+        name := "stringUnicodeLength"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeStringUnary
+              PsVerifiedIrIntrinsic.stringLength
+              "é😀")
+            (psWasmSmokeNat 2)
+      },
+      {
+        name := "stringUtf8ByteSize"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (psWasmSmokeStringUnary
+              PsVerifiedIrIntrinsic.stringUtf8ByteSize
+              "é😀")
+            (psWasmSmokeNat 6)
+      },
+      {
+        name := "stringNextUnicode"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeNatEq
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.stringNext
+              [
+                psWasmSmokeString "éA",
+                psWasmSmokeNat 0
+              ])
+            (psWasmSmokeNat 2)
+      },
+      {
+        name := "stringGetUnicode"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeCharType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringGet
+            [
+              psWasmSmokeString "é",
+              psWasmSmokeNat 0
+            ]
+      },
+      {
+        name := "stringAppendEq"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeStringBinary
+            PsVerifiedIrIntrinsic.stringEq
+            (psWasmSmokeStringBinary
+              PsVerifiedIrIntrinsic.stringAppend
+              (psWasmSmokeString "é")
+              (psWasmSmokeString "A"))
+            (psWasmSmokeString "éA")
+      },
+      {
+        name := "stringAtEndUnicode"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringAtEnd
+            [
+              psWasmSmokeString "éA",
+              psWasmSmokeNat 3
+            ]
+      },
+      {
+        name := "stringExtractUnicode"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeStringBinary
+            PsVerifiedIrIntrinsic.stringEq
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.stringExtract
+              [
+                psWasmSmokeString "éA",
+                psWasmSmokeNat 0,
+                psWasmSmokeNat 2
+              ])
+            (psWasmSmokeString "é")
+      },
       {
         name := "arraySizeAfterPush"
         typeParameters := []

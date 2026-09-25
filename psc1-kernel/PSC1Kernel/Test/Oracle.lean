@@ -662,6 +662,53 @@ def assertNativeAdmissionInjectionOracle : IO Unit := do
     "replay unexpectedly accepted native defeq without a provider"
     replayNoProviderRejects
 
+def assertEnvironmentIndexOracle : IO Unit := do
+  let ns : PSC1Kernel.Name := .str .anonymous "EnvironmentIndex"
+  let nameAt (i : Nat) : PSC1Kernel.Name := .num ns i
+  let rec build (i fuel : Nat) (env : PSC1Kernel.Environment) :
+      PSC1Kernel.Environment :=
+    match fuel with
+    | 0 => env
+    | n + 1 =>
+        let name := nameAt i
+        let info : PSC1Kernel.ConstantInfo := .axiomInfo {
+          base := mkBase name (.sort .zero)
+          isUnsafe := false
+        }
+        build (i + 1) n (env.addUnchecked info)
+  let env := build 0 600 .empty
+  assertTrue "environment index changed declaration count"
+    (env.size == 600)
+
+  let rec checkAll (i fuel : Nat) : IO Unit := do
+    match fuel with
+    | 0 => pure ()
+    | n + 1 =>
+        match env.find? (nameAt i) with
+        | some (.axiomInfo info) =>
+            assertTrue "environment index returned wrong declaration"
+              (PSC1Kernel.Name.eq info.base.name (nameAt i))
+        | _ =>
+            throw <| IO.userError (
+              "environment index missed declaration " ++ toString i)
+        checkAll (i + 1) n
+  checkAll 0 600
+
+  -- More declarations than buckets force structural-name collision handling.
+  let replacement : PSC1Kernel.ConstantInfo := .axiomInfo {
+    base := mkBase (nameAt 257) (.sort .zero)
+    isUnsafe := true
+  }
+  let replaced := env.replaceUnchecked replacement
+  assertTrue "environment replacement changed declaration count"
+    (replaced.size == 600)
+  match replaced.find? (nameAt 257) with
+  | some (.axiomInfo info) =>
+      assertTrue "environment replacement left stale indexed metadata"
+        info.isUnsafe
+  | _ =>
+      throw <| IO.userError "environment replacement lookup failed"
+
 def assertNatSizeLimitOracle : IO Unit := do
   let half : Nat := Nat.shiftLeft 1 63
   let big : Nat := half + half
@@ -4995,6 +5042,7 @@ def run : IO Unit := do
   assertNativeEvaluatorBoundary
   assertNativeAdmissionInjectionOracle
   assertNatReductionOracle
+  assertEnvironmentIndexOracle
   assertNatSizeLimitOracle
   assertFunctionEtaOracle
   assertLazyDeltaOracle

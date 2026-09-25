@@ -167,8 +167,9 @@ As of the current branch checkpoint:
   rather than being silently reinterpreted as generic Rust functions;
 - direct first-order callback parameters are supported as Rust
   `impl Fn(...) -> ... + Clone`; function-valued declaration results, stored
-  function values, nested higher-order parameter shapes, and function-typed
-  lambda parameters are fail-closed because Rust `fn(...)` pointers cannot
+  function values, nested higher-order parameter shapes, function-typed lambda
+  parameters, and function-valued lambda results are fail-closed because Rust
+  `fn(...)` pointers cannot
   represent arbitrary capturing closures. Supporting those shapes requires an
   explicit ownership/runtime representation and is not approximated by the
   backend;
@@ -231,8 +232,9 @@ silently using different semantics.
 
 The census currently treats external imports, unknown runtime types, traversal
 fuel exhaustion, generic top-level values, function-valued declaration
-results, stored function values, nested higher-order parameter shapes, and
-function-typed lambda parameters as explicit blockers. If the real compiler census reaches one of these,
+results, stored function values, nested higher-order parameter shapes,
+function-typed lambda parameters, function-valued lambda results, and malformed
+intrinsic arity as explicit blockers. If the real compiler census reaches one of these,
 the next step is either a target-neutral/shared semantic change or a deliberate
 Rust representation that preserves the existing CompilerIR meaning—not a
 backend-specific semantic shortcut.

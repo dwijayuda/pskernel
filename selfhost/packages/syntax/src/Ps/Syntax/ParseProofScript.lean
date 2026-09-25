@@ -116,7 +116,7 @@ def psProofScriptCallAdjacent
   | Option.none => false
   | Option.some token =>
       let stop := psProofScriptTermStop term;
-      token.span.start.byteOffset == stop.byteOffset
+      Nat.beq token.span.start.byteOffset stop.byteOffset
 
 def psParseProofScriptApplicationWithFuel
     (parseArgument :
@@ -1204,14 +1204,14 @@ def psParseProofScriptDeclaration
   match psTokenCursorPeek cursor with
   | Option.none => Except.error (PsParseError.unexpectedEnd "declaration")
   | Option.some keyword =>
-      if keyword.text == "inductive" then
+      if psStringEq keyword.text "inductive" then
         psParseProofScriptInductiveDeclaration cursor
-      else if keyword.text == "structure" then
+      else if psStringEq keyword.text "structure" then
         psParseProofScriptStructureDeclaration cursor
       else
-        let isPartial := keyword.text == "partial";
-        let isDefinition := keyword.text == "def";
-        let isTheorem := keyword.text == "theorem";
+        let isPartial := psStringEq keyword.text "partial";
+        let isDefinition := psStringEq keyword.text "def";
+        let isTheorem := psStringEq keyword.text "theorem";
         if psProofScriptBoolNot (isPartial || isDefinition || isTheorem) then
           Except.error
             (PsParseError.expectedText

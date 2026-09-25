@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - backend/wasm3-owned
+      - integrate/wasm3-owned
     paths:
       - selfhost/**
       - docs/selfhost/WASM3_BACKEND.md

@@ -956,11 +956,7 @@ def psWasmStringRuntimeExtractDeclaration :
 def psWasmStringRuntimeDeclarations :
     List PsVerifiedIrDeclaration :=
   [
-    psWasmStringRuntimeCharToNatDeclaration,
-    psWasmStringRuntimeCharOfNatDeclaration,
-    psWasmStringRuntimeSingletonDeclaration,
     psWasmStringRuntimeAppendDeclaration,
-    psWasmStringRuntimePushDeclaration,
     psWasmStringRuntimeLengthDeclaration,
     psWasmStringRuntimeUtf8ByteSizeDeclaration,
     psWasmStringRuntimeAtEndDeclaration,
@@ -973,8 +969,6 @@ def psWasmStringRuntimeDeclarations :
 
 def psWasmStringIntrinsicName :
     PsVerifiedIrIntrinsic -> Option String
-  | .stringPush => some psWasmStringRuntimePushName
-  | .stringSingleton => some psWasmStringRuntimeSingletonName
   | .stringLength => some psWasmStringRuntimeLengthName
   | .stringAppend => some psWasmStringRuntimeAppendName
   | .stringUtf8ByteSize => some psWasmStringRuntimeUtf8ByteSizeName
@@ -1077,23 +1071,13 @@ def psWasmRewriteStringExprWithFuel :
           PsVerifiedIrExpr.var name
       | .intrinsic operation arguments =>
           let rewritten := arguments.map rewrite
-          match operation with
-          | .charOfNat =>
-              psWasmStringRuntimeCall
-                psWasmStringRuntimeCharOfNatName
+          match psWasmStringIntrinsicName operation with
+          | some name =>
+              psWasmStringRuntimeCall name rewritten
+          | none =>
+              PsVerifiedIrExpr.intrinsic
+                (psWasmRewriteStringIntrinsic operation)
                 rewritten
-          | .charToNat =>
-              psWasmStringRuntimeCall
-                psWasmStringRuntimeCharToNatName
-                rewritten
-          | _ =>
-              match psWasmStringIntrinsicName operation with
-              | some name =>
-                  psWasmStringRuntimeCall name rewritten
-              | none =>
-                  PsVerifiedIrExpr.intrinsic
-                    (psWasmRewriteStringIntrinsic operation)
-                    rewritten
       | .lambda parameters resultType body =>
           PsVerifiedIrExpr.lambda
             (parameters.map psWasmRewriteStringParameter)

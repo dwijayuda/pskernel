@@ -1249,7 +1249,7 @@ def psParseLeanRecordApplicationTailWithFuel
             let next :=
               psLeanApplicationWithArgument
                 current
-                argument.value
+                argument.value;
             psParseLeanRecordApplicationTailWithFuel
               parseTerm
               remaining

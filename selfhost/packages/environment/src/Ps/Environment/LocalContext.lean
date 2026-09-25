@@ -89,7 +89,7 @@ def psLocalPushLet
   {
     context := {
       nextId := Nat.succ id
-      declarations := declaration :: context.declarations
+      declarations := List.cons declaration context.declarations
     }
     id := id
   }

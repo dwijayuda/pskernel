@@ -31,23 +31,23 @@ def psJsonEscapeControl (value : Nat) : String :=
     (psJsonHexDigit (Nat.mod value 16))
 
 def psJsonEscapeChar (char : Char) : String :=
-  let value := char.val
-  if value == 8 then
+  let value : Nat := char.val.toNat;
+  if Nat.beq value 8 then
     "\\b"
-  else if value == 9 then
+  else if Nat.beq value 9 then
     "\\t"
-  else if value == 10 then
+  else if Nat.beq value 10 then
     "\\n"
-  else if value == 12 then
+  else if Nat.beq value 12 then
     "\\f"
-  else if value == 13 then
+  else if Nat.beq value 13 then
     "\\r"
-  else if value == 34 then
+  else if Nat.beq value 34 then
     "\\\""
-  else if value == 92 then
+  else if Nat.beq value 92 then
     "\\\\"
-  else if value < 32 then
-    psJsonEscapeControl value.toNat
+  else if Nat.blt value 32 then
+    psJsonEscapeControl value
   else
     String.ofList [char]
 

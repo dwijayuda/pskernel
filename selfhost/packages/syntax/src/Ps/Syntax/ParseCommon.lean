@@ -1,6 +1,28 @@
 import Ps.Syntax.Ast
 import Ps.Syntax.ParserState
 
+
+def psParseListLength {α : Type} (xs : List α) : Nat :=
+  match xs with
+  | List.nil => 0
+  | List.cons _ tail =>
+      Nat.add 1 (psParseListLength tail)
+
+def psParseListReverseAcc {α : Type}
+    (xs : List α) : List α -> List α :=
+  match xs with
+  | List.nil =>
+      fun (acc : List α) => acc
+  | List.cons head tail =>
+      let smaller : List α -> List α :=
+        psParseListReverseAcc tail
+      fun (acc : List α) =>
+        smaller (List.cons head acc)
+
+def psParseListReverse {α : Type}
+    (xs : List α) : List α :=
+  psParseListReverseAcc xs List.nil
+
 def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan :=
   { start := start.start, stop := stop.stop }
 
@@ -68,7 +90,7 @@ def psParseSyntaxNameTail
   | [] =>
       Except.ok {
         value := {
-          segments := segmentsRev.reverse
+          segments := psParseListReverse segmentsRev
           span := { start := start, stop := stop }
         }
         cursor := { remaining := List.nil }
@@ -93,7 +115,7 @@ def psParseSyntaxNameTail
       else
         Except.ok {
           value := {
-            segments := segmentsRev.reverse
+            segments := psParseListReverse segmentsRev
             span := { start := start, stop := stop }
           }
           cursor := { remaining := List.cons dot rest }
@@ -150,7 +172,7 @@ def psParseRecordFieldsWithFuel
   | remaining + 1 =>
       if psTokenCursorAtText cursor "}" then
         Except.ok {
-          value := fieldsRev.reverse
+          value := psParseListReverse fieldsRev
           cursor := cursor
         }
       else
@@ -213,7 +235,7 @@ def psParseRecordLiteral
       match
           psParseRecordFieldsWithFuel
             parseTerm
-            opening.cursor.remaining.length
+            psParseListLength opening.cursor.remaining
             opening.cursor
             List.nil with
       | Except.error error => Except.error error
@@ -436,14 +458,14 @@ def psParsePatternBindersWithFuel
   match fuel with
   | 0 =>
       Except.ok {
-        value := bindersRev.reverse
+        value := psParseListReverse bindersRev
         cursor := cursor
       }
   | remaining + 1 =>
       match psTokenCursorPeek cursor with
       | none =>
           Except.ok {
-            value := bindersRev.reverse
+            value := psParseListReverse bindersRev
             cursor := cursor
           }
       | some token =>
@@ -453,19 +475,19 @@ def psParsePatternBindersWithFuel
                 PsTokenKind.identifier then
             if psStringEq token.text "true" then
               Except.ok {
-                value := bindersRev.reverse
+                value := psParseListReverse bindersRev
                 cursor := cursor
               }
             else if psStringEq token.text "false" then
               Except.ok {
-                value := bindersRev.reverse
+                value := psParseListReverse bindersRev
                 cursor := cursor
               }
             else
               match psTokenCursorAdvance cursor with
               | none =>
                   Except.ok {
-                    value := bindersRev.reverse
+                    value := psParseListReverse bindersRev
                     cursor := cursor
                   }
               | some read =>
@@ -479,7 +501,7 @@ def psParsePatternBindersWithFuel
                     (List.cons binder bindersRev)
           else
             Except.ok {
-              value := bindersRev.reverse
+              value := psParseListReverse bindersRev
               cursor := cursor
             }
 
@@ -488,13 +510,13 @@ def psParseConstructorPatternTail
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) :=
   match psParsePatternBindersWithFuel
-      cursor.remaining.length
+      psParseListLength cursor.remaining
       cursor
       List.nil with
   | Except.error error => Except.error error
   | Except.ok binders =>
       let span :=
-        match binders.value.reverse with
+        match psParseListReverse binders.value with
         | [] => constructorName.span
         | lastBinder :: _ =>
             psSyntaxSpanJoin

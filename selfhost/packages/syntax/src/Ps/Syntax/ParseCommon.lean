@@ -186,7 +186,7 @@ def psParseRecordFieldsWithFuel
                 | Except.error error => Except.error error
                 | Except.ok value =>
                     let nextField :=
-                      Prod.mk name.value value.value
+                      Prod.mk name.value value.value;
                     if psTokenCursorAtText value.cursor "," then
                       match psTokenCursorAdvance value.cursor with
                       | none =>
@@ -494,7 +494,7 @@ def psParsePatternBindersWithFuel
                   let binder : PsSyntaxName := {
                     segments := List.cons token.text List.nil
                     span := token.span
-                  }
+                  };
                   psParsePatternBindersWithFuel
                     remaining
                     read.cursor
@@ -521,7 +521,7 @@ def psParseConstructorPatternTail
         | lastBinder :: _ =>
             psSyntaxSpanJoin
               constructorName.span
-              lastBinder.span
+              lastBinder.span;
       Except.ok {
         value :=
           PsSyntaxPattern.constructor
@@ -574,7 +574,7 @@ def psParseBasicPattern
                     start := token.span.start
                     stop := constructorName.value.span.stop
                   }
-                }
+                };
                 psParseConstructorPatternTail
                   shorthandName
                   constructorName.cursor

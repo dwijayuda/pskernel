@@ -11,17 +11,23 @@ def psDecimalDigitValue : Char -> Option Nat
   | '9' => some 9
   | _ => none
 
-def psParseNaturalChars : List Char -> Nat -> Option Nat
-  | [], value => some value
-  | '_' :: rest, value => psParseNaturalChars rest value
-  | char :: rest, value =>
+def psParseNaturalChars
+    (chars : List Char)
+    (value : Nat) : Option Nat :=
+  match chars with
+  | [] =>
+      some value
+  | '_' :: rest =>
+      psParseNaturalChars rest value
+  | char :: rest =>
       match psDecimalDigitValue char with
-      | none => none
+      | none =>
+          none
       | some digit =>
           psParseNaturalChars rest (value * 10 + digit)
 
 def psParseNaturalText (text : String) : Option Nat :=
-  psParseNaturalChars text.toList 0
+  psParseNaturalChars (String.toList text) 0
 
 def psHexDigitValue : Char -> Option Nat
   | '0' => some 0
@@ -48,15 +54,27 @@ def psHexDigitValue : Char -> Option Nat
   | 'F' => some 15
   | _ => none
 
-def psReadFixedHex :
-    Nat -> List Char -> Nat -> Option (Nat × List Char)
-  | 0, rest, value => some (value, rest)
-  | count + 1, [], _ => none
-  | count + 1, char :: rest, value =>
-      match psHexDigitValue char with
-      | none => none
-      | some digit =>
-          psReadFixedHex count rest (value * 16 + digit)
+def psReadFixedHex
+    (count : Nat)
+    (chars : List Char)
+    (value : Nat) :
+    Option (Prod Nat (List Char)) :=
+  match count with
+  | 0 =>
+      some (Prod.mk value chars)
+  | nextCount + 1 =>
+      match chars with
+      | [] =>
+          none
+      | char :: rest =>
+          match psHexDigitValue char with
+          | none =>
+              none
+          | some digit =>
+              psReadFixedHex
+                nextCount
+                rest
+                (value * 16 + digit)
 
 def psValidUnicodeScalar (value : Nat) : Bool :=
   if value < 55296 then
@@ -69,53 +87,105 @@ def psValidUnicodeScalar (value : Nat) : Bool :=
 def psDecodeEscapedChar
     (count : Nat)
     (rest : List Char) :
-    Option (Char × List Char) :=
+    Option (Prod Char (List Char)) :=
   match psReadFixedHex count rest 0 with
-  | none => none
-  | some (value, tail) =>
+  | none =>
+      none
+  | some decoded =>
+      let value := Prod.fst decoded;
+      let tail := Prod.snd decoded;
       if psValidUnicodeScalar value then
-        some (Char.ofNat value, tail)
+        some (Prod.mk (Char.ofNat value) tail)
       else
         none
 
-def psDecodeStringBodyWithFuel :
-    Nat -> List Char -> List Char -> Option String
-  | 0, _, _ => none
-  | _ + 1, [], _ => none
-  | _ + 1, '"' :: [], charsRev =>
-      some (String.ofList charsRev.reverse)
-  | _ + 1, '"' :: _ :: _, _ => none
-  | fuel + 1, '\\' :: '"' :: rest, charsRev =>
-      psDecodeStringBodyWithFuel fuel rest ('"' :: charsRev)
-  | fuel + 1, '\\' :: '\\' :: rest, charsRev =>
-      psDecodeStringBodyWithFuel fuel rest ('\\' :: charsRev)
-  | fuel + 1, '\\' :: 'n' :: rest, charsRev =>
-      psDecodeStringBodyWithFuel fuel rest ('\n' :: charsRev)
-  | fuel + 1, '\\' :: 'r' :: rest, charsRev =>
-      psDecodeStringBodyWithFuel fuel rest ('\r' :: charsRev)
-  | fuel + 1, '\\' :: 't' :: rest, charsRev =>
-      psDecodeStringBodyWithFuel fuel rest ('\t' :: charsRev)
-  | fuel + 1, '\\' :: '0' :: rest, charsRev =>
-      psDecodeStringBodyWithFuel fuel rest (Char.ofNat 0 :: charsRev)
-  | fuel + 1, '\\' :: 'x' :: rest, charsRev =>
-      match psDecodeEscapedChar 2 rest with
-      | none => none
-      | some (char, tail) =>
-          psDecodeStringBodyWithFuel fuel tail (char :: charsRev)
-  | fuel + 1, '\\' :: 'u' :: rest, charsRev =>
-      match psDecodeEscapedChar 4 rest with
-      | none => none
-      | some (char, tail) =>
-          psDecodeStringBodyWithFuel fuel tail (char :: charsRev)
-  | _ + 1, '\\' :: _ :: _, _ => none
-  | fuel + 1, char :: rest, charsRev =>
-      psDecodeStringBodyWithFuel fuel rest (char :: charsRev)
+def psDecodeStringBodyWithFuel
+    (fuel : Nat)
+    (chars : List Char)
+    (charsRev : List Char) :
+    Option String :=
+  match fuel with
+  | 0 =>
+      none
+  | nextFuel + 1 =>
+      match chars with
+      | [] =>
+          none
+      | '"' :: restAfterQuote =>
+          match restAfterQuote with
+          | [] =>
+              some (String.ofList (List.reverse charsRev))
+          | _ :: _ =>
+              none
+      | '\\' :: restAfterSlash =>
+          match restAfterSlash with
+          | [] =>
+              none
+          | '"' :: rest =>
+              psDecodeStringBodyWithFuel
+                nextFuel
+                rest
+                ('"' :: charsRev)
+          | '\\' :: rest =>
+              psDecodeStringBodyWithFuel
+                nextFuel
+                rest
+                ('\\' :: charsRev)
+          | 'n' :: rest =>
+              psDecodeStringBodyWithFuel
+                nextFuel
+                rest
+                ('\n' :: charsRev)
+          | 'r' :: rest =>
+              psDecodeStringBodyWithFuel
+                nextFuel
+                rest
+                ('\r' :: charsRev)
+          | 't' :: rest =>
+              psDecodeStringBodyWithFuel
+                nextFuel
+                rest
+                ('\t' :: charsRev)
+          | '0' :: rest =>
+              psDecodeStringBodyWithFuel
+                nextFuel
+                rest
+                (Char.ofNat 0 :: charsRev)
+          | 'x' :: rest =>
+              match psDecodeEscapedChar 2 rest with
+              | none =>
+                  none
+              | some decoded =>
+                  psDecodeStringBodyWithFuel
+                    nextFuel
+                    (Prod.snd decoded)
+                    (Prod.fst decoded :: charsRev)
+          | 'u' :: rest =>
+              match psDecodeEscapedChar 4 rest with
+              | none =>
+                  none
+              | some decoded =>
+                  psDecodeStringBodyWithFuel
+                    nextFuel
+                    (Prod.snd decoded)
+                    (Prod.fst decoded :: charsRev)
+          | _ :: _ =>
+              none
+      | char :: rest =>
+          psDecodeStringBodyWithFuel
+            nextFuel
+            rest
+            (char :: charsRev)
 
 def psDecodeStringLiteral (text : String) : Option String :=
-  match text.toList with
+  match String.toList text with
   | '"' :: rest =>
-      psDecodeStringBodyWithFuel (rest.length + 1) rest []
-  | _ => none
+      psDecodeStringBodyWithFuel
+        (Nat.succ (List.length rest))
+        rest
+        []
+  | _ =>
+      none
 
 def psDecodeCharacterEscape
     (escaped : Char) : Option Char :=
@@ -128,18 +198,30 @@ def psDecodeCharacterEscape
   | 't' => some '\t'
   | _ => none
 
+def psDecodeCharacterEscapedTail
+    (decoded : Option (Prod Char (List Char))) :
+    Option Char :=
+  match decoded with
+  | none =>
+      none
+  | some pair =>
+      match Prod.snd pair with
+      | '\'' :: [] =>
+          some (Prod.fst pair)
+      | _ =>
+          none
+
 def psDecodeCharacterLiteral (text : String) : Option Char :=
-  match text.toList with
+  match String.toList text with
   | '\'' :: char :: '\'' :: [] =>
       some char
   | '\'' :: '\\' :: escaped :: '\'' :: [] =>
       psDecodeCharacterEscape escaped
   | '\'' :: '\\' :: 'x' :: rest =>
-      match psDecodeEscapedChar 2 rest with
-      | some (char, ['\'']) => some char
-      | _ => none
+      psDecodeCharacterEscapedTail
+        (psDecodeEscapedChar 2 rest)
   | '\'' :: '\\' :: 'u' :: rest =>
-      match psDecodeEscapedChar 4 rest with
-      | some (char, ['\'']) => some char
-      | _ => none
-  | _ => none
+      psDecodeCharacterEscapedTail
+        (psDecodeEscapedChar 4 rest)
+  | _ =>
+      none

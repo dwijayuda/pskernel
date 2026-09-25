@@ -49,8 +49,8 @@ PSC1 adopts this pattern with projects chosen for PSC1's semantics:
 
 Eloquent JavaScript idea | PSC1 adaptation
 --- | ---
-delivery robot / persistent simulation | persistent route planner
-programming-language project | tiny typed expression language
+delivery robot / persistent simulation | persistent delivery planner
+programming-language project | tiny typed language
 browser/application projects | omitted from PSC1 core book
 large environment-specific programs | tiny compiler pipeline
 

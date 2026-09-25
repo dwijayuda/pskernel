@@ -43,15 +43,15 @@ Project chapters combine several earlier ideas into a larger program.
 4. [Data Structures](./04-data-structures.md)
 5. [Higher-Order Functions](./05-higher-order-functions.md)
 6. [Abstraction with Data and Typeclasses](./06-abstraction.md)
-7. [Project: A Persistent Route Planner](./07-project-route-planner.md)
+7. [Project: A Delivery Planner](./07-project-delivery-planner.md)
 
 ### Part II — Building Reliable Programs
 
-8. [Bugs, Errors, and Proofs](./08-bugs-errors-and-proofs.md)
-9. [Text and Parsing](./09-text-and-parsing.md)
+8. [Bugs, Errors, and Proof Failures](./08-bugs-errors-and-proof-failures.md)
+9. [Text, Unicode, and Parsing](./09-text-unicode-and-parsing.md)
 10. [Modules and Packages](./10-modules-and-packages.md)
 11. [Effects and Host Capabilities](./11-effects-and-host-capabilities.md)
-12. [Project: A Tiny Programming Language](./12-project-tiny-language.md)
+12. [Project: A Tiny Typed Language](./12-project-tiny-typed-language.md)
 
 ### Part III — What Makes PSC1 Different
 

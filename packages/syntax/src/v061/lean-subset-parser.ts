@@ -277,6 +277,9 @@ export class V061LeanSubsetParser {
     const next=this.context.cursor.peek(1);
     if(
       token.kind==='identifier'
+      &&token.text!=='_'
+      &&token.text!=='true'
+      &&token.text!=='false'
       &&!token.text.includes('.')
       &&(next.text===','||next.text==='=>')
     ){

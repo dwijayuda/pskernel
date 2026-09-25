@@ -23,7 +23,9 @@ def psInstanceIndexAdd
     (entry : PsInstanceEntry) : PsInstanceIndex :=
   { entries := psInstanceListAppend index.entries [entry] }
 
-def psLocalInstanceEntriesFromList : List PsLocalDecl -> List PsInstanceEntry
+def psLocalInstanceEntriesFromList
+    (declarations : List PsLocalDecl) : List PsInstanceEntry :=
+  match declarations with
   | [] => []
   | declaration :: rest =>
       match declaration with

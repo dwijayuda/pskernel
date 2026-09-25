@@ -233,8 +233,9 @@ silently using different semantics.
 The census currently treats external imports, unknown runtime types, traversal
 fuel exhaustion, generic top-level values, function-valued declaration
 results, stored function values, nested higher-order parameter shapes,
-function-typed lambda parameters, function-valued lambda results, and malformed
-intrinsic arity as explicit blockers. If the real compiler census reaches one of these,
+function-typed lambda parameters, function-valued lambda results, malformed
+intrinsic arity, unknown structure references, and unknown inductive references
+as explicit blockers. If the real compiler census reaches one of these,
 the next step is either a target-neutral/shared semantic change or a deliberate
 Rust representation that preserves the existing CompilerIR meaning—not a
 backend-specific semantic shortcut.

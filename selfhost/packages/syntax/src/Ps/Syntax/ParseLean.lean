@@ -1349,13 +1349,17 @@ def psParseLeanTermWithFuel
       fun (_cursor : PsTokenCursor) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
+      let smaller :
+          PsTokenCursor ->
+          Except PsParseError (PsParseResult PsSyntaxTerm) :=
+        smaller;
       fun (cursor : PsTokenCursor) =>
       if psTokenCursorAtText cursor "do" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "do statement")
         | Option.some keyword =>
             psParseLeanDoWithFuel
-              (psParseLeanTermWithFuel remaining)
+              (smaller)
               remaining
               keyword.token.span.start
               keyword.cursor
@@ -1363,14 +1367,14 @@ def psParseLeanTermWithFuel
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "match scrutinee")
         | Option.some keyword =>
-            match psParseLeanTermWithFuel remaining keyword.cursor with
+            match smaller keyword.cursor with
             | Except.error error => Except.error error
             | Except.ok scrutinee =>
                 match psTokenCursorExpectText scrutinee.cursor "with" with
                 | Except.error error => Except.error error
                 | Except.ok afterWith =>
                     match psParseLeanMatchAlternativesWithFuel
-                        (psParseLeanTermWithFuel remaining)
+                        (smaller)
                         (psParseListLength afterWith.cursor.remaining)
                         afterWith.cursor
                         [] with
@@ -1416,19 +1420,19 @@ def psParseLeanTermWithFuel
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "if condition")
         | Option.some keyword =>
-            match psParseLeanTermWithFuel remaining keyword.cursor with
+            match smaller keyword.cursor with
             | Except.error error => Except.error error
             | Except.ok condition =>
                 match psTokenCursorExpectText condition.cursor "then" with
                 | Except.error error => Except.error error
                 | Except.ok afterThen =>
-                    match psParseLeanTermWithFuel remaining afterThen.cursor with
+                    match smaller afterThen.cursor with
                     | Except.error error => Except.error error
                     | Except.ok thenBranch =>
                         match psTokenCursorExpectText thenBranch.cursor "else" with
                         | Except.error error => Except.error error
                         | Except.ok afterElse =>
-                            match psParseLeanTermWithFuel remaining afterElse.cursor with
+                            match smaller afterElse.cursor with
                             | Except.error error => Except.error error
                             | Except.ok elseBranch =>
                                 Except.ok {
@@ -1581,11 +1585,11 @@ def psParseLeanTermWithFuel
               (PsParseError.unexpectedEnd "[")
         | Option.some opening =>
             psParseLeanListLiteral
-              (psParseLeanTermWithFuel remaining)
+              (smaller)
               opening
       else if psTokenCursorAtText cursor "{" then
         psParseRecordLiteral
-          (psParseLeanTermWithFuel remaining)
+          (smaller)
           cursor
       else if psTokenCursorAtText cursor "(" then
         match psTokenCursorAdvance cursor with
@@ -1608,30 +1612,30 @@ def psParseLeanTermWithFuel
               | Except.ok binder =>
                   if psTokenCursorAtArrow binder.cursor then
                     psParseLeanDependentArrowTail
-                      (psParseLeanTermWithFuel remaining)
+                      (smaller)
                       binder
                   else
-                    match psParseLeanTermWithFuel remaining opening.cursor with
+                    match smaller opening.cursor with
                     | Except.error error => Except.error error
                     | Except.ok grouped =>
                         match psTokenCursorExpectText grouped.cursor ")" with
                         | Except.error error => Except.error error
                         | Except.ok close =>
                             psParseLeanArrowTail
-                              (psParseLeanTermWithFuel remaining)
+                              (smaller)
                               {
                                 value := grouped.value
                                 cursor := close.cursor
                               }
               | Except.error _ =>
-                  match psParseLeanTermWithFuel remaining opening.cursor with
+                  match smaller opening.cursor with
                   | Except.error error => Except.error error
                   | Except.ok grouped =>
                       match psTokenCursorExpectText grouped.cursor ")" with
                       | Except.error error => Except.error error
                       | Except.ok close =>
                           psParseLeanArrowTail
-                            (psParseLeanTermWithFuel remaining)
+                            (smaller)
                             {
                               value := grouped.value
                               cursor := close.cursor
@@ -1642,14 +1646,14 @@ def psParseLeanTermWithFuel
         | Except.ok domain =>
             match
                 psParseLeanRecordApplicationTailWithFuel
-                  (psParseLeanTermWithFuel remaining)
+                  (smaller)
                   remaining
                   domain.value
                   domain.cursor with
             | Except.error error => Except.error error
             | Except.ok withRecords =>
                 psParseLeanArrowTail
-                  (psParseLeanTermWithFuel remaining)
+                  (smaller)
                   withRecords
 
 def psParseLeanTerm

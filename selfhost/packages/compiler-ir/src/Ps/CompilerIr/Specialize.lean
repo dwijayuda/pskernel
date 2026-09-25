@@ -628,20 +628,28 @@ def psIrSpecializeRewriteExprWithFuel
             expr := PsVerifiedIrExpr.var name
             requests := []
           }
-      | .intrinsic operation arguments =>
+      | .intrinsic operation typeArguments arguments =>
           match
-              psIrSpecializeRewriteExprListWith
-                rewrite
-                arguments with
+              psIrSpecializeRewriteTypeListWith
+                rewriteType
+                typeArguments with
           | Except.error error => Except.error error
-          | Except.ok lowered =>
-              Except.ok {
-                expr :=
-                  PsVerifiedIrExpr.intrinsic
-                    operation
-                    lowered.expressions
-                requests := lowered.requests
-              }
+          | Except.ok loweredTypes =>
+              match
+                  psIrSpecializeRewriteExprListWith
+                    rewrite
+                    arguments with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    expr :=
+                      PsVerifiedIrExpr.intrinsic
+                        operation
+                        loweredTypes.types
+                        lowered.expressions
+                    requests :=
+                      loweredTypes.requests ++ lowered.requests
+                  }
       | .lambda parameters resultType body =>
           match
               psIrSpecializeRewriteParameters

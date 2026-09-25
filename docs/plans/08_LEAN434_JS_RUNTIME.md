@@ -414,6 +414,57 @@ still admitted by pskernel and the intrinsic has no proof authority.
 
 GitHub Actions runs `36106526700` and `36106526614` are green.
 
-Next native-runtime gap: delayed metavariable assignments in
-`lean_instantiate_expr_mvars`, following
-`study/lean4-4.34.0/src/library/instantiate_mvars.cpp`.
+### Delayed metavariable substitution slice — GREEN (bounded)
+
+Advanced 2026-09-25.
+
+Concrete green evidence at `4a4e7a4`:
+
+- focused Meta bootstrap run `36113993145`;
+- full Lean 4.34 JavaScript runtime run `36113993139`;
+- real `Lean.instantiateExprMVarsImp` now covers:
+  - direct metavariable chains,
+  - assigned-mvar beta reduction,
+  - the native `apply_beta(..., preserve_data=false, zeta=true)` let-head
+    behavior used by `instantiate_mvars.cpp`,
+  - a delayed free-variable substitution,
+  - nested delayed substitutions;
+- real `Lean.instantiateMVarsCore` remains green through the source-verified
+  ST/StateRefT evaluator path;
+- the public `Lean.assignExp` /
+  `Lean.MetavarContext.getExprAssignmentExp` PersistentHashMap round trip is
+  green without increasing the 250,000-step per-scenario evaluator budget.
+
+The JavaScript native adapter visits application arguments in the same
+outside-in order as the pinned C++ implementation and applies them in source
+order. This is runtime compatibility only; pskernel remains declaration/proof
+authority.
+
+This is intentionally **not** a full-equivalence claim for
+`lean_instantiate_expr_mvars`. The pinned native implementation still has
+additional behavior to cover, especially pointer-sharing caches, the exact
+two-pass resolvability/write-back cut for partially resolvable delayed trees,
+and the sharing/lifting stress cases represented by upstream tests such as
+`instantiateMVarsShadow.lean`, `instantiateMVarsCrossScope.lean`, and
+`instantiateMVarsSharing.lean`.
+
+No new proof-authoritative primitive was introduced in this slice. The runtime
+change only makes the existing genuine Lean native boundary
+`lean_instantiate_expr_mvars` more faithful to pinned Lean 4.34 semantics.
+
+### Next R8 gate — real WHNF
+
+The next source-reuse gate is `Lean.Meta.whnf`.
+
+Pinned Lean 4.34 establishes the intended split:
+
+- `Lean.Meta.Basic` exposes `whnf` as `@[extern "lean_whnf"] opaque`;
+- `Lean.Meta.WHNF` provides the actual Lean implementation
+  `@[export lean_whnf] partial def whnfImp`;
+- `whnfCore`, beta/zeta/iota logic, delayed-assignment handling, projection
+  reduction, and unfolding policy are primarily Lean source.
+
+Therefore the next implementation should execute/export the real Lean
+`whnfImp` / supporting Lean code in the JS ecosystem and add only genuine
+runtime boundaries needed by that source. Do not hand-port WHNF into the old
+TypeScript frontend.

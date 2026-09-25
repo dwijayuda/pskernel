@@ -8,7 +8,7 @@ language constructs.
 ## Named functions
 
 ```proofscript
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
@@ -27,7 +27,7 @@ The declaration includes:
 The same semantic family can be written:
 
 ```proofscript
-def add(x : Nat, y : Nat) : Nat :=
+def add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
@@ -43,7 +43,7 @@ fun x => x + 1
 or with an explicit type:
 
 ```proofscript
-fun (x : Nat) => x + 1
+fun (x: Nat) => x + 1
 ```
 
 PSC1 deliberately keeps `fun` rather than borrowing JavaScript arrow syntax.
@@ -56,7 +56,7 @@ system.
 A function is a value and may be stored or passed.
 
 ```proofscript
-const increment : Nat -> Nat :=
+const increment: Nat -> Nat :=
   fun x => x + 1;
 ```
 
@@ -64,9 +64,9 @@ const increment : Nat -> Nat :=
 
 ```proofscript
 function applyTwice(
-  f : Nat -> Nat,
-  x : Nat
-) : Nat :=
+  f: Nat -> Nat,
+  x: Nat
+): Nat :=
   f(f(x));
 ```
 
@@ -94,7 +94,7 @@ while preserving the curried semantic core.
 ## Generic functions
 
 ```proofscript
-function identity {α : Type}(x : α) : α :=
+function identity {α: Type}(x: α): α :=
   x;
 ```
 
@@ -107,8 +107,8 @@ The important part is not merely "this accepts many types". It says:
 ## Multiple type parameters
 
 ```proofscript
-function first {α : Type}{β : Type}
-(x : α, y : β) : α :=
+function first {α: Type}{β: Type}
+(x: α, y: β): α :=
   x;
 ```
 
@@ -125,7 +125,7 @@ Nat -> Nat
 Dependent arrow:
 
 ```proofscript
-(x : Nat) -> Fin x -> Nat
+(x: Nat) -> Fin x -> Nat
 ```
 
 The second input type depends on the value of the first input.
@@ -147,10 +147,10 @@ bounded profile, elaboration fails rather than guessing.
 PSC1's v0.7 surface has a braced `where` form for local declarations.
 
 ```proofscript
-def f(x : Nat) : Nat :=
+def f(x: Nat): Nat :=
   helper(x)
 where {
-  helper(y : Nat) : Nat := y + 1;
+  helper(y: Nat): Nat := y + 1;
 }
 ```
 

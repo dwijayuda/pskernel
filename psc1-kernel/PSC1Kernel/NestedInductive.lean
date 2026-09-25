@@ -245,7 +245,7 @@ def simpleNestedCtorName
 def simpleNestedEnsureFamily
     (env : Environment)
     (declLevels : List Name)
-    (canonicalParams currentParams : List OpenBinder)
+    (_canonicalParams currentParams : List OpenBinder)
     (template : Expr)
     (fixedCurrent : List Expr)
     (state : SimpleNestedMapState) :
@@ -257,66 +257,104 @@ def simpleNestedEnsureFamily
         | throw "nested family head is not a constant"
       let some (.inductInfo outer) := env.find? outerName
         | throw "nested family head is not an inductive datatype"
-      match outer.all with
-      | [only] =>
-          unless Name.eq only outerName do
-            throw "nested outer inductive metadata is inconsistent"
-      | _ =>
-          throw "nested outer mutual families are not yet supported"
       let canonicalFixed := template.getAppArgs
       if canonicalFixed.length != outer.numParams ||
           fixedCurrent.length != outer.numParams then
         throw "nested template does not contain exactly the fixed outer parameters"
-      let (auxName, fresh') :=
-        simpleNestedFreshAuxName env state.aux outerName state.fresh
-      let outerType0 :=
-        outer.base.type.instantiateLevelParams
-          outer.base.levelParams outerLevels
-      let auxTypeOpen ←
-        simpleNestedInstantiateFirstParams outerType0 fixedCurrent
-      let auxType := closeOpenBinders currentParams auxTypeOpen
-      let rec makeAuxCtors :
-          List Name → Except String (List SimpleConstructorDecl ×
-            List SimpleNestedAuxCtorMap)
-        | [] => pure ([], [])
-        | outerCtorName :: rest => do
-            let some (.ctorInfo outerCtor) := env.find? outerCtorName
-              | throw "nested outer constructor metadata is missing"
-            let auxCtorName ←
-              simpleNestedCtorName outerName auxName outerCtorName
-            let ctorType0 :=
-              outerCtor.base.type.instantiateLevelParams
-                outerCtor.base.levelParams outerLevels
-            let auxCtorOpen ←
-              simpleNestedInstantiateFirstParams ctorType0 fixedCurrent
-            let auxCtorType := closeOpenBinders currentParams auxCtorOpen
-            let (laterCtors, laterMap) ← makeAuxCtors rest
-            pure (
-              { name := auxCtorName, type := auxCtorType } :: laterCtors,
-              {
-                auxCtor := auxCtorName
-                outerCtor := outerCtorName
-              } :: laterMap)
-      let (auxCtors, ctorMap) ← makeAuxCtors outer.ctors
-      let family : SimpleNestedAuxFamily := {
-        auxName := auxName
-        outerName := outerName
-        outerLevels := outerLevels
-        fixedParams := canonicalFixed
-        nestedTemplate := template
-        ctorMap := ctorMap
-      }
-      let auxTypeDecl : SimpleMutualTypeDecl := {
-        name := auxName
-        type := auxType
-        ctors := auxCtors
-      }
-      let _ := canonicalParams
-      pure (family, {
-        aux := state.aux ++ [family]
-        fresh := fresh'
-        created := state.created ++ [auxTypeDecl]
-      })
+
+      let rec createFamilies
+          (names : List Name)
+          (work : SimpleNestedMapState)
+          (selected : Option SimpleNestedAuxFamily) :
+          Except String (SimpleNestedAuxFamily × SimpleNestedMapState) := do
+        match names with
+        | [] =>
+            match selected with
+            | some family => pure (family, work)
+            | none => throw "nested family selection failed"
+        | familyName :: rest =>
+            let some (.inductInfo info) := env.find? familyName
+              | throw "invalid outer mutual inductive metadata"
+            unless info.numParams == outer.numParams do
+              throw "outer mutual inductive parameters are inconsistent"
+            let familyTemplate :=
+              applyArgs (.const familyName outerLevels) canonicalFixed
+            match simpleNestedFindFamily? familyTemplate work.aux with
+            | some existing =>
+                let selected' :=
+                  if Name.eq familyName outerName then some existing
+                  else selected
+                createFamilies rest work selected'
+            | none =>
+                let (auxName, fresh') :=
+                  simpleNestedFreshAuxName
+                    env work.aux familyName work.fresh
+                let outerType0 :=
+                  info.base.type.instantiateLevelParams
+                    info.base.levelParams outerLevels
+                let auxTypeOpen ←
+                  simpleNestedInstantiateFirstParams
+                    outerType0 fixedCurrent
+                let auxType :=
+                  closeOpenBinders currentParams auxTypeOpen
+
+                let rec makeAuxCtors :
+                    List Name →
+                      Except String
+                        (List SimpleConstructorDecl ×
+                          List SimpleNestedAuxCtorMap)
+                  | [] => pure ([], [])
+                  | outerCtorName :: more => do
+                      let some (.ctorInfo outerCtor) :=
+                          env.find? outerCtorName
+                        | throw "nested outer constructor metadata is missing"
+                      let auxCtorName ←
+                        simpleNestedCtorName
+                          familyName auxName outerCtorName
+                      let ctorType0 :=
+                        outerCtor.base.type.instantiateLevelParams
+                          outerCtor.base.levelParams outerLevels
+                      let auxCtorOpen ←
+                        simpleNestedInstantiateFirstParams
+                          ctorType0 fixedCurrent
+                      let auxCtorType :=
+                        closeOpenBinders currentParams auxCtorOpen
+                      let (laterCtors, laterMap) ←
+                        makeAuxCtors more
+                      pure (
+                        { name := auxCtorName, type := auxCtorType } ::
+                          laterCtors,
+                        {
+                          auxCtor := auxCtorName
+                          outerCtor := outerCtorName
+                        } :: laterMap)
+
+                let (auxCtors, ctorMap) ←
+                  makeAuxCtors info.ctors
+                let family : SimpleNestedAuxFamily := {
+                  auxName := auxName
+                  outerName := familyName
+                  outerLevels := outerLevels
+                  fixedParams := canonicalFixed
+                  nestedTemplate := familyTemplate
+                  ctorMap := ctorMap
+                }
+                let auxTypeDecl : SimpleMutualTypeDecl := {
+                  name := auxName
+                  type := auxType
+                  ctors := auxCtors
+                }
+                let work' : SimpleNestedMapState := {
+                  aux := work.aux ++ [family]
+                  fresh := fresh'
+                  created := work.created ++ [auxTypeDecl]
+                }
+                let selected' :=
+                  if Name.eq familyName outerName then some family
+                  else selected
+                createFamilies rest work' selected'
+
+      createFamilies outer.all state none
 
 def simpleNestedHasNew
     (newNames : List Name)

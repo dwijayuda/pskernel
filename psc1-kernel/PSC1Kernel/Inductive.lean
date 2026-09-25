@@ -150,6 +150,33 @@ partial def openSimpleConstructorParams
       openSimpleConstructorParams
         ctx rest (body.instantiate1 (.fvar param.internalName))
 
+def consumeSimpleResultParams :
+    List OpenBinder → List Expr → Option (List Expr)
+  | [], rest => some rest
+  | _, [] => none
+  | param :: params, arg :: args =>
+      if Expr.eq arg (.fvar param.internalName) then
+        consumeSimpleResultParams params args
+      else
+        none
+
+def simpleInductiveAppIndices?
+    (target : Name)
+    (levels : List Level)
+    (params : List OpenBinder)
+    (numIndices : Nat)
+    (e : Expr) : Option (List Expr) :=
+  match e.getAppFn with
+  | .const resultName resultLevels =>
+      if !Name.eq resultName target || !Level.listEq resultLevels levels then
+        none
+      else
+        match consumeSimpleResultParams params e.getAppArgs with
+        | some indices =>
+            if indices.length == numIndices then some indices else none
+        | none => none
+  | _ => none
+
 partial def openSimpleConstructorFields
     (ctx : CheckerContext)
     (target : Name)
@@ -203,33 +230,6 @@ def simpleFieldArgs (shape : SimpleConstructorShape) : List Expr :=
 
 def simpleParamArgs (params : List OpenBinder) : List Expr :=
   params.map (fun param => .fvar param.internalName)
-
-def consumeSimpleResultParams :
-    List OpenBinder → List Expr → Option (List Expr)
-  | [], rest => some rest
-  | _, [] => none
-  | param :: params, arg :: args =>
-      if Expr.eq arg (.fvar param.internalName) then
-        consumeSimpleResultParams params args
-      else
-        none
-
-def simpleInductiveAppIndices?
-    (target : Name)
-    (levels : List Level)
-    (params : List OpenBinder)
-    (numIndices : Nat)
-    (e : Expr) : Option (List Expr) :=
-  match e.getAppFn with
-  | .const resultName resultLevels =>
-      if !Name.eq resultName target || !Level.listEq resultLevels levels then
-        none
-      else
-        match consumeSimpleResultParams params e.getAppArgs with
-        | some indices =>
-            if indices.length == numIndices then some indices else none
-        | none => none
-  | _ => none
 
 partial def simpleIndicesContainTarget
     (target : Name) : List Expr → Bool

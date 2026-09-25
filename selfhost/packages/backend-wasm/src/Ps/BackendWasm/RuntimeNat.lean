@@ -36,11 +36,27 @@ def psWasmNatRuntimeLeName : String :=
 def psWasmNatRuntimeLtName : String :=
   "__ps_nat_lt"
 
+def psWasmNatRuntimeFromU32Name : String :=
+  "__ps_nat_from_u32"
+
+def psWasmNatRuntimeToU32BoundedName : String :=
+  "__ps_nat_to_u32_bounded"
+
 def psWasmNatRuntimeType : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
 
 def psWasmNatRuntimeBoolType : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+
+def psWasmNatRuntimeU32Type : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+
+def psWasmNatRuntimeU32
+    (value : Int) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.literal
+    (PsVerifiedIrLiteral.machineInteger
+      PsVerifiedIrMachineIntegerType.uint32
+      value)
 
 def psWasmNatRuntimeZero : PsVerifiedIrExpr :=
   PsVerifiedIrExpr.constructor
@@ -368,6 +384,73 @@ def psWasmNatRuntimeModDeclaration : PsVerifiedIrDeclaration :=
             ]))
   }
 
+def psWasmNatRuntimeFromU32Declaration :
+    PsVerifiedIrDeclaration :=
+  {
+    name := psWasmNatRuntimeFromU32Name
+    typeParameters := []
+    parameters := [
+      {
+        name := "value"
+        type := psWasmNatRuntimeU32Type
+      }
+    ]
+    resultType := psWasmNatRuntimeType
+    body :=
+      PsVerifiedIrExpr.ifE
+        (PsVerifiedIrExpr.intrinsic
+          (PsVerifiedIrIntrinsic.machineIntCompare
+            PsVerifiedIrMachineIntegerType.uint32
+            PsVerifiedIrIntegerCompareOp.eq)
+          [
+            PsVerifiedIrExpr.var "value",
+            psWasmNatRuntimeU32 0
+          ])
+        psWasmNatRuntimeZero
+        (psWasmNatRuntimeSucc
+          (psWasmNatRuntimeCall
+            psWasmNatRuntimeFromU32Name
+            [
+              PsVerifiedIrExpr.intrinsic
+                (PsVerifiedIrIntrinsic.machineIntBinary
+                  PsVerifiedIrMachineIntegerType.uint32
+                  PsVerifiedIrIntegerBinaryOp.sub)
+                [
+                  PsVerifiedIrExpr.var "value",
+                  psWasmNatRuntimeU32 1
+                ]
+            ]))
+  }
+
+def psWasmNatRuntimeToU32BoundedDeclaration :
+    PsVerifiedIrDeclaration :=
+  {
+    name := psWasmNatRuntimeToU32BoundedName
+    typeParameters := []
+    parameters := [
+      {
+        name := "value"
+        type := psWasmNatRuntimeType
+      }
+    ]
+    resultType := psWasmNatRuntimeU32Type
+    body :=
+      psWasmNatRuntimeMatch
+        (PsVerifiedIrExpr.var "value")
+        (psWasmNatRuntimeU32 0)
+        "pred"
+        (PsVerifiedIrExpr.intrinsic
+          (PsVerifiedIrIntrinsic.machineIntBinary
+            PsVerifiedIrMachineIntegerType.uint32
+            PsVerifiedIrIntegerBinaryOp.add)
+          [
+            psWasmNatRuntimeU32 1,
+            psWasmNatRuntimeCall
+              psWasmNatRuntimeToU32BoundedName
+              [PsVerifiedIrExpr.var "pred"]
+          ])
+  }
+
 def psWasmNatRuntimeDeclarations :
     List PsVerifiedIrDeclaration :=
   [
@@ -379,7 +462,9 @@ def psWasmNatRuntimeDeclarations :
     psWasmNatRuntimeLeDeclaration,
     psWasmNatRuntimeLtDeclaration,
     psWasmNatRuntimeDivDeclaration,
-    psWasmNatRuntimeModDeclaration
+    psWasmNatRuntimeModDeclaration,
+    psWasmNatRuntimeFromU32Declaration,
+    psWasmNatRuntimeToU32BoundedDeclaration
   ]
 
 def psWasmNatLiteralExpr : Nat -> PsVerifiedIrExpr

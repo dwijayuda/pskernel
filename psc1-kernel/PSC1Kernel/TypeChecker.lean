@@ -577,8 +577,31 @@ partial def inferKMajorType?
       let some argType ← inferKMajorType? ctx arg
         | match debugLabel? with
           | some label =>
+              let argShape :=
+                match arg with
+                | .app _ _ =>
+                    let head :=
+                      match arg.getAppFn with
+                      | .const name _ => kDebugNameString name
+                      | .fvar name => "fvar:" ++ kDebugNameString name
+                      | .bvar index => "bvar:" ++ toString index
+                      | _ => "non-constant"
+                    "app args=" ++ toString arg.getAppNumArgs ++ "; head=" ++ head
+                | .fvar name => "fvar:" ++ kDebugNameString name
+                | .bvar index => "bvar:" ++ toString index
+                | .const name _ => "const:" ++ kDebugNameString name
+                | .lam .. => "lambda"
+                | .forallE .. => "forall"
+                | .letE .. => "let"
+                | .proj typeName index _ =>
+                    "proj:" ++ kDebugNameString typeName ++ "." ++ toString index
+                | .sort _ => "sort"
+                | .mvar _ => "mvar"
+                | .lit _ => "literal"
+                | .mdata _ _ => "mdata"
               throw ("K app debug " ++ label ++
-                ": argument inference failed at args=" ++ toString argc)
+                ": argument inference failed at args=" ++ toString argc ++
+                "; arg=" ++ argShape)
           | none => return none
       unless ← kTypesEq ctx domain argType do
         match debugLabel? with

@@ -1,6 +1,7 @@
 import Ps.CompilerIr.Model
 import Ps.Bridge.Json
 import Ps.Foundation.Name
+import Ps.BackendRust.Identifier
 
 inductive PsRustEmitError where
   | fuelExhausted
@@ -127,7 +128,7 @@ def psRustEmitTypeWithFuel :
       | PsVerifiedIrType.unknown =>
           Except.error PsRustEmitError.unknownRuntimeType
       | PsVerifiedIrType.typeParameter name =>
-          Except.ok name
+          Except.ok (psRustIdentifier name)
       | PsVerifiedIrType.primitive primitive =>
           Except.ok (psRustEmitPrimitiveType primitive)
       | PsVerifiedIrType.function parameters result =>
@@ -165,13 +166,15 @@ def psRustEmitTypeWithFuel :
                     Except.error
                       (PsRustEmitError.namedTypeArity name)
               else
+                let rustName :=
+                  psRustIdentifier name;
                 match printedArguments with
                 | List.nil =>
-                    Except.ok name
+                    Except.ok rustName
                 | List.cons _ _ =>
                     Except.ok
                       (psRustConcat4
-                        name
+                        rustName
                         "<"
                         (psRustJoin ", " printedArguments)
                         ">")

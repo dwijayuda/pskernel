@@ -1235,6 +1235,12 @@ def psElabMatchFields
                   forallView.binder;
               let nextContext :=
                 psElabContextWithLocal context pushed.context;
+              let field : PsElabMatchField := {
+                id := pushed.id
+                name := binderName
+                type := forallView.domain
+                binder := forallView.binder
+              };
               psElabMatchFields
                 nextContext
                 inductiveName
@@ -1242,14 +1248,7 @@ def psElabMatchFields
                   forallView.body
                   (PsExpr.fvar pushed.id))
                 rest
-                (List.cons
-                  {
-                    id := pushed.id
-                    name := binderName
-                    type := forallView.domain
-                    binder := forallView.binder
-                  }
-                  fieldsRev)
+                (List.cons field fieldsRev)
 
 def psElabMatchFieldAt
     (fields : List PsElabMatchField)

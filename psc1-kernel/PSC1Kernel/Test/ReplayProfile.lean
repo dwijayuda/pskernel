@@ -3,11 +3,11 @@ import PSC1Kernel
 open PSC1Kernel
 
 def isContainer (line : String) : Bool :=
-  line.startsWith "{"environment":" ||
-  line.startsWith "{"batch":"
+  line.startsWith "{\"environment\":" ||
+  line.startsWith "{\"batch\":"
 
 def isSegment (line : String) : Bool :=
-  line.startsWith "{"segment":"
+  line.startsWith "{\"segment\":"
 
 def replayProfile (path : String) : IO Unit := do
   let content ← IO.FS.readFile path
@@ -46,7 +46,7 @@ def replayProfile (path : String) : IO Unit := do
               match record.declarationNameIndex? with
               | some idx =>
                   match state.nameAt idx with
-                  | .ok n => pure (toString n)
+                  | .ok n => pure (Replay.replayNameString n)
                   | .error _ => pure s!"name#{idx}"
               | none => pure "<none>"
             else

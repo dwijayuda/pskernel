@@ -4,7 +4,7 @@ import type {
   V061LambdaBinder,
 } from './ast.js';
 import {V061ParseContext,spanBetween} from './context.js';
-import {v061BinaryPrecedence} from './operators.js';
+import {v061LeanSubsetBinaryPrecedence} from './operators.js';
 import {parseV061LeanSubsetMatch} from './lean-subset-match-parser.js';
 import {parseV061RecordExpression} from './record-parser.js';
 import {parseV061ByExpression} from './tactic-parser.js';
@@ -36,7 +36,7 @@ export class V061LeanSubsetExpressionParser {
     let left=this.parsePrefix();
     while(true){
       const op=this.context.cursor.peek();
-      const precedence=v061BinaryPrecedence(op.text);
+      const precedence=v061LeanSubsetBinaryPrecedence(op.text);
       if(precedence===undefined||precedence<minPrecedence)break;
       this.context.cursor.consume();
       const right=this.parse(precedence+1);

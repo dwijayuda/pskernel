@@ -1,5 +1,4 @@
 import Ps.Foundation.Source
-import ProofScript.Data.List
 
 structure PsLexCursor where
   remaining : List Char

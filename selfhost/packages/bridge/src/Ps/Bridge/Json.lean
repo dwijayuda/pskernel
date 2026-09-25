@@ -7,7 +7,7 @@ def psJsonConcat3
   psJsonConcat2 first (psJsonConcat2 second third)
 
 def psJsonCharCode (char : Char) : Nat :=
-  char.val.toNat
+  Char.toNat char
 
 def psJsonCharEq (left right : Char) : Bool :=
   Nat.beq (psJsonCharCode left) (psJsonCharCode right)
@@ -63,7 +63,7 @@ def psJsonEscapeControl (value : Nat) : String :=
     (psJsonHexDigit (Nat.mod value 16))
 
 def psJsonEscapeChar (char : Char) : String :=
-  let value : Nat := char.val.toNat;
+  let value : Nat := Char.toNat char;
   if Nat.beq value 8 then
     "\\b"
   else if Nat.beq value 9 then

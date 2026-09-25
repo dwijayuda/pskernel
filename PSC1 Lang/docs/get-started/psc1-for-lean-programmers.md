@@ -46,7 +46,7 @@ canonicalizes to curried Lean application.
 ### Explicit parameter grouping
 
 ```proofscript
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 

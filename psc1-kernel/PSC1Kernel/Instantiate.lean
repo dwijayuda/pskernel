@@ -84,6 +84,45 @@ def Expr.reverseList : List Expr → List Expr
 def Expr.instantiateRev (e : Expr) (subst : List Expr) : Expr :=
   e.instantiate (Expr.reverseList subst)
 
+/--
+Lean 4.34 `cheap_beta_reduce`.
+
+This intentionally performs only the two cheap head-beta cases used by the
+kernel type checker:
+* a consumed lambda body that no longer contains loose bound variables;
+* a consumed lambda body that is exactly one of the consumed bound variables.
+
+All other applications are left unchanged.
+-/
+partial def Expr.cheapBetaReduce (e : Expr) : Expr :=
+  match e.getAppFn with
+  | .lam _ _ _ _ =>
+      let args := e.getAppArgs
+      let rec consume (fn : Expr) (count : Nat) : Expr × Nat :=
+        match fn with
+        | .lam _ _ body _ =>
+            if count < args.length then
+              consume body (count + 1)
+            else
+              (fn, count)
+        | _ => (fn, count)
+      let (body, consumed) := consume e.getAppFn 0
+      if consumed == 0 then
+        e
+      else if !body.hasLooseBVar then
+        applyArgs body (args.drop consumed)
+      else
+        match body with
+        | .bvar index =>
+            if index < consumed then
+              match listGet? args (consumed - index - 1) with
+              | some selected => applyArgs selected (args.drop consumed)
+              | none => e
+            else
+              e
+        | _ => e
+  | _ => e
+
 def Name.lastIndexOf (needle : Name) (xs : List Name) : Option Nat :=
   let rec go (rest : List Name) (index : Nat) (answer : Option Nat) : Option Nat :=
     match rest with

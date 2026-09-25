@@ -57,7 +57,7 @@ export function lean434RuntimeLMVarId(
   name:Name,
 ):Lean434ConstructorValue{
   return ctor(
-    'Lean.LMVarId.mk',
+    'Lean.LevelMVarId.mk',
     [kernelNameToLean434Runtime(name)],
   );
 }

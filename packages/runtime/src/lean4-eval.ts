@@ -629,6 +629,304 @@ export class Lean434Evaluator {
     };
   }
 
+  private instantiateExprMVarsNative(
+    initialMctx:Lean434RuntimeValue,
+    initialExpr:Lean434RuntimeValue,
+  ):Lean434ConstructorValue{
+    const visitLevelList=(
+      mctx:Lean434RuntimeValue,
+      levels:Lean434RuntimeValue,
+    ):{
+      readonly mctx:Lean434RuntimeValue;
+      readonly levels:Lean434RuntimeValue;
+    }=>{
+      this.consumeStep('lean_instantiate_expr_mvars.levels');
+      if(
+        !isTaggedRuntimeValue(levels)
+        ||levels.kind!=='constructor'
+      ){
+        throw new Lean434EvaluationError(
+          'Lean Expr.const level list is not a constructor',
+        );
+      }
+      if(levels.name==='List.nil'){
+        if(levels.fields.length!==0){
+          throw new Lean434EvaluationError(
+            'Lean Expr.const level List.nil field count mismatch',
+          );
+        }
+        return {mctx,levels};
+      }
+      if(levels.name!=='List.cons'||levels.fields.length!==2){
+        throw new Lean434EvaluationError(
+          "unexpected Lean level-list constructor '"+levels.name+"'",
+        );
+      }
+      const headResult=this.instantiateLevelMVarsNative(
+        mctx,
+        levels.fields[0]!,
+      );
+      const headMctx=headResult.fields[0]!;
+      const head=headResult.fields[1]!;
+      const tail=visitLevelList(headMctx,levels.fields[1]!);
+      return {
+        mctx:tail.mctx,
+        levels:
+          head===levels.fields[0]
+          &&tail.levels===levels.fields[1]
+            ?levels
+            :{
+                kind:'constructor',
+                name:'List.cons',
+                fields:[head,tail.levels],
+              },
+      };
+    };
+
+    const visit=(
+      mctx:Lean434RuntimeValue,
+      expr:Lean434RuntimeValue,
+    ):{
+      readonly mctx:Lean434RuntimeValue;
+      readonly expr:Lean434RuntimeValue;
+    }=>{
+      this.consumeStep('lean_instantiate_expr_mvars.expr');
+      if(
+        !isTaggedRuntimeValue(expr)
+        ||expr.kind!=='constructor'
+      ){
+        throw new Lean434EvaluationError(
+          'lean_instantiate_expr_mvars received a non-Expr runtime value',
+        );
+      }
+      switch(expr.name){
+        case 'Lean.Expr.bvar':
+        case 'Lean.Expr.fvar':
+        case 'Lean.Expr.lit':
+          return {mctx,expr};
+        case 'Lean.Expr.sort':{
+          if(expr.fields.length!==1){
+            throw new Lean434EvaluationError(
+              'Lean.Expr.sort field count mismatch',
+            );
+          }
+          const result=this.instantiateLevelMVarsNative(
+            mctx,
+            expr.fields[0]!,
+          );
+          const level=result.fields[1]!;
+          return {
+            mctx:result.fields[0]!,
+            expr:level===expr.fields[0]
+              ?expr
+              :{
+                  kind:'constructor',
+                  name:'Lean.Expr.sort',
+                  fields:[level],
+                },
+          };
+        }
+        case 'Lean.Expr.const':{
+          if(expr.fields.length!==2){
+            throw new Lean434EvaluationError(
+              'Lean.Expr.const field count mismatch',
+            );
+          }
+          const levels=visitLevelList(mctx,expr.fields[1]!);
+          return {
+            mctx:levels.mctx,
+            expr:levels.levels===expr.fields[1]
+              ?expr
+              :{
+                  kind:'constructor',
+                  name:'Lean.Expr.const',
+                  fields:[expr.fields[0]!,levels.levels],
+                },
+          };
+        }
+        case 'Lean.Expr.mvar':{
+          if(expr.fields.length!==1){
+            throw new Lean434EvaluationError(
+              'Lean.Expr.mvar field count mismatch',
+            );
+          }
+          const mvarId=expr.fields[0]!;
+          const assigned=this.optionPayload(
+            this.applyLeanConstant(
+              'Lean.MetavarContext.getExprAssignmentExp',
+              [mctx,mvarId],
+            ),
+            'Lean.MetavarContext.getExprAssignmentExp',
+          );
+          if(assigned===undefined){
+            const delayed=this.optionPayload(
+              this.applyLeanConstant(
+                'Lean.MetavarContext.getDelayedMVarAssignmentExp',
+                [mctx,mvarId],
+              ),
+              'Lean.MetavarContext.getDelayedMVarAssignmentExp',
+            );
+            if(delayed!==undefined){
+              throw new Lean434EvaluationError(
+                'lean_instantiate_expr_mvars delayed assignments are not '+
+                'supported by the current JS runtime slice',
+              );
+            }
+            return {mctx,expr};
+          }
+          const normalized=visit(mctx,assigned);
+          let nextMctx=normalized.mctx;
+          if(normalized.expr!==assigned){
+            nextMctx=this.applyLeanConstant(
+              'Lean.assignExp',
+              [nextMctx,mvarId,normalized.expr],
+            );
+          }
+          return {mctx:nextMctx,expr:normalized.expr};
+        }
+        case 'Lean.Expr.mdata':{
+          if(expr.fields.length!==2){
+            throw new Lean434EvaluationError(
+              'Lean.Expr.mdata field count mismatch',
+            );
+          }
+          const body=visit(mctx,expr.fields[1]!);
+          return {
+            mctx:body.mctx,
+            expr:body.expr===expr.fields[1]
+              ?expr
+              :{
+                  kind:'constructor',
+                  name:'Lean.Expr.mdata',
+                  fields:[expr.fields[0]!,body.expr],
+                },
+          };
+        }
+        case 'Lean.Expr.proj':{
+          if(expr.fields.length!==3){
+            throw new Lean434EvaluationError(
+              'Lean.Expr.proj field count mismatch',
+            );
+          }
+          const target=visit(mctx,expr.fields[2]!);
+          return {
+            mctx:target.mctx,
+            expr:target.expr===expr.fields[2]
+              ?expr
+              :{
+                  kind:'constructor',
+                  name:'Lean.Expr.proj',
+                  fields:[expr.fields[0]!,expr.fields[1]!,target.expr],
+                },
+          };
+        }
+        case 'Lean.Expr.app':{
+          if(expr.fields.length!==2){
+            throw new Lean434EvaluationError(
+              'Lean.Expr.app field count mismatch',
+            );
+          }
+          const originalFn=expr.fields[0]!;
+          const fn=visit(mctx,originalFn);
+          const arg=visit(fn.mctx,expr.fields[1]!);
+          if(
+            isTaggedRuntimeValue(originalFn)
+            &&originalFn.kind==='constructor'
+            &&originalFn.name==='Lean.Expr.mvar'
+            &&isTaggedRuntimeValue(fn.expr)
+            &&fn.expr.kind==='constructor'
+            &&fn.expr.name==='Lean.Expr.lam'
+          ){
+            throw new Lean434EvaluationError(
+              'lean_instantiate_expr_mvars beta reduction of an assigned '+
+              'metavariable application is not supported by the current JS '+
+              'runtime slice',
+            );
+          }
+          return {
+            mctx:arg.mctx,
+            expr:
+              fn.expr===originalFn
+              &&arg.expr===expr.fields[1]
+                ?expr
+                :{
+                    kind:'constructor',
+                    name:'Lean.Expr.app',
+                    fields:[fn.expr,arg.expr],
+                  },
+          };
+        }
+        case 'Lean.Expr.lam':
+        case 'Lean.Expr.forallE':{
+          if(expr.fields.length!==4){
+            throw new Lean434EvaluationError(
+              expr.name+' field count mismatch',
+            );
+          }
+          const domain=visit(mctx,expr.fields[1]!);
+          const body=visit(domain.mctx,expr.fields[2]!);
+          return {
+            mctx:body.mctx,
+            expr:
+              domain.expr===expr.fields[1]
+              &&body.expr===expr.fields[2]
+                ?expr
+                :{
+                    kind:'constructor',
+                    name:expr.name,
+                    fields:[
+                      expr.fields[0]!,
+                      domain.expr,
+                      body.expr,
+                      expr.fields[3]!,
+                    ],
+                  },
+          };
+        }
+        case 'Lean.Expr.letE':{
+          if(expr.fields.length!==5){
+            throw new Lean434EvaluationError(
+              'Lean.Expr.letE field count mismatch',
+            );
+          }
+          const type=visit(mctx,expr.fields[1]!);
+          const value=visit(type.mctx,expr.fields[2]!);
+          const body=visit(value.mctx,expr.fields[3]!);
+          return {
+            mctx:body.mctx,
+            expr:
+              type.expr===expr.fields[1]
+              &&value.expr===expr.fields[2]
+              &&body.expr===expr.fields[3]
+                ?expr
+                :{
+                    kind:'constructor',
+                    name:'Lean.Expr.letE',
+                    fields:[
+                      expr.fields[0]!,
+                      type.expr,
+                      value.expr,
+                      body.expr,
+                      expr.fields[4]!,
+                    ],
+                  },
+          };
+        }
+        default:
+          throw new Lean434EvaluationError(
+            "unexpected Lean.Expr constructor '"+expr.name+"'",
+          );
+      }
+    };
+
+    const result=visit(initialMctx,initialExpr);
+    return {
+      kind:'constructor',
+      name:'Prod.mk',
+      fields:[result.mctx,result.expr],
+    };
+  }
+
   private invokeEvaluatorExtern(
     binding:Lean434EvaluatorExternBinding,
     args:readonly Lean434RuntimeValue[],
@@ -642,6 +940,8 @@ export class Lean434Evaluator {
     switch(binding.adapter){
       case 'instantiate-level-mvars':
         return this.instantiateLevelMVarsNative(args[0]!,args[1]!);
+      case 'instantiate-expr-mvars':
+        return this.instantiateExprMVarsNative(args[0]!,args[1]!);
     }
   }
 

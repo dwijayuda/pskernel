@@ -614,7 +614,7 @@ def psParseProofScriptTermWithFuel
                     | Except.ok afterOpen =>
                         match psParseProofScriptMatchAlternativesWithFuel
                             (psParseProofScriptTermWithFuel remaining)
-                            afterOpen.psParseListLength cursor.remaining
+                            (psParseListLength afterOpen.cursor.remaining)
                             afterOpen.cursor
                             [] with
                         | Except.error error => Except.error error
@@ -800,7 +800,7 @@ def psParseProofScriptTermWithFuel
         | Option.none => Except.error (PsParseError.unexpectedEnd "lambda binder")
         | Option.some keyword =>
             match psParseProofScriptBindersWithFuel
-                keyword.psParseListLength cursor.remaining
+                (psParseListLength keyword.cursor.remaining)
                 keyword.cursor
                 [] with
             | Except.error error => Except.error error
@@ -945,7 +945,7 @@ def psParseProofScriptInductiveConstructorsWithFuel
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseProofScriptBindersWithFuel
-                      name.psParseListLength cursor.remaining
+                      (psParseListLength name.cursor.remaining)
                       name.cursor
                       [] with
                   | Except.error error => Except.error error
@@ -1062,7 +1062,7 @@ def psParseProofScriptStructureDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseProofScriptBindersWithFuel
-              name.psParseListLength cursor.remaining
+              (psParseListLength name.cursor.remaining)
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1075,7 +1075,7 @@ def psParseProofScriptStructureDeclaration
                   | Except.ok afterOpen =>
                       match
                           psParseProofScriptStructureFieldsWithFuel
-                            afterOpen.psParseListLength cursor.remaining
+                            (psParseListLength afterOpen.cursor.remaining)
                             afterOpen.cursor
                             [] with
                       | Except.error error => Except.error error
@@ -1124,7 +1124,7 @@ def psParseProofScriptInductiveDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseProofScriptBindersWithFuel
-              name.psParseListLength cursor.remaining
+              (psParseListLength name.cursor.remaining)
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1144,7 +1144,7 @@ def psParseProofScriptInductiveDeclaration
                     | Except.error error => Except.error error
                     | Except.ok afterOpen =>
                         match psParseProofScriptInductiveConstructorsWithFuel
-                            afterOpen.psParseListLength cursor.remaining
+                            (psParseListLength afterOpen.cursor.remaining)
                             afterOpen.cursor
                             [] with
                         | Except.error error => Except.error error
@@ -1242,7 +1242,7 @@ def psParseProofScriptDeclaration
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseProofScriptBindersWithFuel
-                      name.psParseListLength cursor.remaining
+                      (psParseListLength name.cursor.remaining)
                       name.cursor
                       [] with
                   | Except.error error => Except.error error
@@ -1269,11 +1269,11 @@ def psParseProofScriptDeclaration
                                       | Except.error error =>
                                           Except.error error
                                       | Except.ok afterSemi =>
-                                          let span := {
+                                          let span : PsSourceSpan := {
                                             start := keyword.span.start
                                             stop := afterSemi.token.span.stop
                                           };
-                                          let declaration :=
+                                          let declaration : PsSyntaxDeclaration :=
                                             if isPartial then
                                               PsSyntaxDeclaration.partialDefinition
                                                 name.value binders.value type.value value.value span
@@ -1382,11 +1382,11 @@ def psParseProofScriptTokens
     (tokens : List PsToken) :
     Except PsParseError PsSyntaxModule :=
   let cursor := psTokenCursorFromTokens tokens;
-  match psParseProofScriptImportsWithFuel psParseListLength tokens cursor [] with
+  match psParseProofScriptImportsWithFuel (psParseListLength tokens) cursor [] with
   | Except.error error => Except.error error
   | Except.ok imports =>
       match psParseProofScriptDeclarationsWithFuel
-          psParseListLength tokens
+          (psParseListLength tokens)
           imports.cursor
           [] with
       | Except.error error => Except.error error

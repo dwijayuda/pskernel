@@ -1976,7 +1976,7 @@ def psParseLeanEquationClausesWithFuel
                             start := bar.token.span.start
                             stop := psLeanTermStop body.value
                           }
-                        }
+                        };
                         psParseLeanEquationClausesWithFuel
                           parseTerm
                           remaining
@@ -2252,7 +2252,7 @@ def psLeanPrepareEquationBindersAcc
           name := name
           kind := binder.fst.kind
           span := binder.fst.span
-        }
+        };
         psLeanPrepareEquationBindersAcc
           (Nat.sub remaining 1)
           (Nat.add index 1)
@@ -2339,7 +2339,7 @@ def psFinishLeanValueDeclaration
   let span := {
     start := keyword.span.start
     stop := psLeanTermStop value
-  }
+  };
   let declaration :=
     if isPartial then
       PsSyntaxDeclaration.partialDefinition

@@ -951,7 +951,7 @@ def psExprAppViewAcc
     (args : List PsExpr) : PsExprAppView :=
   match expr with
   | .app fn argument =>
-      psExprAppViewAcc fn (argument :: args)
+      psExprAppViewAcc fn (List.cons argument args)
   | _ => {
       head := expr
       args := args
@@ -983,8 +983,13 @@ def psExprHasConst (target : PsName) : PsExpr -> Bool
   | .proj _ _ value => psExprHasConst target value
   | _ => false
 
+def psMatchNameEqTarget
+    (target : PsName)
+    (name : PsName) : Bool :=
+  psNameEq name target
+
 def psMatchNameListContains (names : List PsName) (target : PsName) : Bool :=
-  List.any names (fun (name : PsName) => psNameEq name target)
+  List.any names (psMatchNameEqTarget target)
 
 structure PsElabMatchAlternative where
   constructorName : PsName
@@ -1002,6 +1007,13 @@ def psElabMatchAlternativeFind
       else
         psElabMatchAlternativeFind name rest
 
+def psElabMatchAlternativeCovered
+    (alternatives : List PsElabMatchAlternative)
+    (ctorName : PsName) : Bool :=
+  match psElabMatchAlternativeFind ctorName alternatives with
+  | some _ => true
+  | none => false
+
 def psElabFillWildcardAlternatives
     (pattern : PsSyntaxPattern)
     (body : PsSyntaxTerm)
@@ -1017,12 +1029,13 @@ def psElabFillWildcardAlternatives
         match psElabMatchAlternativeFind ctorName alternativesRev with
         | some _ => alternativesRev
         | none =>
-            {
+            let alternative : PsElabMatchAlternative := {
               constructorName := ctorName
               pattern := pattern
               body := body
               span := span
-            } :: alternativesRev;
+            };
+            List.cons alternative alternativesRev;
       psElabFillWildcardAlternatives
         pattern
         body
@@ -1037,7 +1050,10 @@ def psElabMatchPatternConstructorName
   match pattern with
   | .bool value _ =>
       if psNameEq inductiveName psBoolName then
-        Except.ok (if value then psBoolTrueName else psBoolFalseName)
+        if value then
+          Except.ok psBoolTrueName
+        else
+          Except.ok psBoolFalseName
       else
         Except.error PsElabError.matchPatternUnsupported
   | .wildcard _ =>
@@ -1063,11 +1079,9 @@ def psElabPrepareMatchAlternatives
   | [] =>
       let alternatives := List.reverse alternativesRev;
       let exhaustive :=
-        List.all inductiveInfo.constructors
-          (fun (ctorName : PsName) =>
-            match psElabMatchAlternativeFind ctorName alternatives with
-            | some _ => true
-            | none => false);
+        List.all
+          inductiveInfo.constructors
+          (psElabMatchAlternativeCovered alternatives);
       if exhaustive then
         Except.ok alternatives
       else
@@ -1103,15 +1117,16 @@ def psElabPrepareMatchAlternatives
                     Except.error
                       (PsElabError.matchDuplicateConstructor ctorName)
                 | none =>
+                    let alternative : PsElabMatchAlternative := {
+                      constructorName := ctorName
+                      pattern := pattern
+                      body := body
+                      span := span
+                    };
                     psElabPrepareMatchAlternatives
                       inductiveInfo
                       rest
-                      ({
-                        constructorName := ctorName
-                        pattern := pattern
-                        body := body
-                        span := span
-                      } :: alternativesRev)
+                      (List.cons alternative alternativesRev)
 
 structure PsElabMatchField where
   id : Nat

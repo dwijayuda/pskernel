@@ -77,8 +77,8 @@ def psMetaFresh
   }
   {
     context := {
-      nextId := id + 1
-      declarations := declaration :: context.declarations
+      nextId := Nat.succ id
+      declarations := List.cons declaration context.declarations
       assignments := context.assignments
       levels := context.levels
     }
@@ -198,7 +198,7 @@ def psMetaAssign (context : PsMetaContext) (id : Nat) (value : PsExpr) : Option 
             some {
               nextId := context.nextId
               declarations := context.declarations
-              assignments := { id := id, value := resolved } :: context.assignments
+              assignments := List.cons { id := id, value := resolved } context.assignments
               levels := context.levels
             }
           else

@@ -150,8 +150,14 @@ The **minimal REQUIRED PSC1 language/capability set** is:
 - definitions, functions, lambdas, application and `let`;
 - ordinary `if` and basic single-scrutinee `match`;
 - structures, inductives, constructors and projections;
-- the primitive/runtime foundation actually needed by the compiler:
-  `Nat`, `Int`, `Bool`, `Char`, `String`, `Unit`;
+- the PSC1 primitive/runtime scalar foundation:
+  `Nat`, `Int`,
+  `UInt8`, `UInt16`, `UInt32`, `UInt64`, `USize`,
+  `Int8`, `Int16`, `Int32`, `Int64`, `ISize`,
+  `Float`, `Float32`,
+  `Bool`, `Char`, `String`, `Unit`;
+  these names and semantics are part of the frozen PSC1 foundation even when
+  the bootstrap compiler itself does not exercise every scalar type;
 - `List`, `Option`, `Result`/`Except`, `Prod`, `Array`, ordered
   `Map`/`Set`, plus the bounded operations exercised by compiler code;
 - dependent function types / `Prop` / kernel proof terms and the universe,
@@ -222,6 +228,28 @@ A runtime language feature is complete only when it executes through:
 
 A parser-only or backend-only implementation does not close a foundation gate.
 
+### PSC1 scalar-semantics invariant
+
+The machine scalar family is part of PSC1 semantics, not merely backend syntax.
+Backends must preserve the same source meaning:
+
+- `Nat` and `Int` retain exact mathematical semantics and must not be
+  silently reinterpreted as fixed-width machine integers by a compiler flag;
+- `UInt8/16/32/64` and `Int8/16/32/64` have their declared fixed-width
+  machine-integer semantics, including the specified narrowing/wrap behavior;
+- `USize` and `ISize` are explicitly target-word-sized and therefore may
+  be 32 or 64 bits according to the selected target ABI/profile;
+- `Float` and `Float32` preserve their specified floating-point semantics;
+  verified/deterministic build profiles must not silently enable fast-math or
+  other semantics-changing reassociation;
+- backend representation choices may optimize a value only when they preserve
+  these semantics. Proven range narrowing of `Nat`/`Int` is an
+  optimization, not a source-level type change.
+
+The scalar family should share generic implementation/proof machinery where
+possible (for example fixed-width integer operations parameterized by width)
+rather than duplicating unrelated semantics for every concrete type.
+
 ### TypeScript / JavaScript backend invariant
 
 For the Lean-authored compiler implementation, TypeScript is the final compiler
@@ -252,6 +280,58 @@ The Lean-hosted CLI should converge on the established `psc` user workflow:
 `check`, `build`, `run`, `translate`, and `emit-lean`. Bootstrap-only diagnostic
 commands such as checked-admission or raw-TypeScript emission may remain, but
 must not become a second semantic compilation path.
+
+### Planned Rust/native backend invariant
+
+Rust is the first planned backend after the JavaScript self-host fixed point.
+It must consume the **same checked core, erasure result, and compiler IR** as
+the TypeScript backend:
+
+```text
+supported .lean or .ps
+-> shared source-neutral AST
+-> Lean-compatible elaboration / checked core
+-> verified erasure / compiler IR
+-> backend-rust
+-> generated .rs
+-> pinned rustc/Cargo toolchain
+-> native executable/library
+```
+
+The Rust backend is not a second semantic compiler. It must not introduce
+Rust ownership, borrowing, lifetimes, traits, `unsafe`, or Cargo-specific
+syntax into PSC1 semantics merely because Rust is the output language. Those
+are backend/runtime implementation choices.
+
+The initial scalar mapping should preserve PSC1 semantics directly where
+possible:
+
+```text
+UInt8/16/32/64 -> u8/u16/u32/u64
+Int8/16/32/64  -> i8/i16/i32/i64
+USize/ISize    -> usize/isize for the selected native target
+Float/Float32  -> f64/f32 when consistent with the PSC1 definitions
+Bool           -> bool
+Unit           -> ()
+```
+
+`Nat` and `Int` must retain exact semantics through an appropriate runtime
+representation unless a proven range specialization justifies a machine
+integer representation.
+
+Generated ordinary application/compiler Rust should prefer safe Rust and, where
+practical, compile under `#![forbid(unsafe_code)]`. Any unavoidable unsafe
+runtime/FFI code must live behind a small explicit audited boundary rather than
+being emitted freely into user code.
+
+Rust backend correctness is checked by ProofScript's semantic gates first;
+`rustc` is an additional untrusted implementation/type/ownership checker, not
+the authority for ProofScript semantics.
+
+The Rust backend is **not required to close the first PSC1 JavaScript
+self-host**. It is added after that fixed point to establish a second,
+independent execution host without delaying the current source-closure
+campaign.
 
 ### Staged source portability invariant
 
@@ -1076,19 +1156,78 @@ with the same checked-core/IR/TS/JS equivalence gates. Neither direction may
 silently drop a language feature, proof term, module/import relation, universe
 annotation, or host-capability association.
 
+## SH10R — Rust backend and native cross-host self-host
+
+After the JavaScript fixed point is stable and `.ps` is authoritative, add
+`backend-rust` over the existing compiler IR. Do not fork the frontend,
+elaborator, checked-core path, erasure semantics, or compiler IR.
+
+Bootstrap the first native compiler from the already-stable JavaScript host:
+
+```text
+compiler.ps --psc.js--> compiler.rs --rustc--> psc-native-1
+```
+
+Then require a native self-host generation:
+
+```text
+compiler.ps --psc-native-1--> compiler.rs --rustc--> psc-native-2
+```
+
+and cross-host regeneration in both directions:
+
+```text
+compiler.ps --psc.js-------> compiler.rs -> psc-native
+compiler.ps --psc-native---> compiler.ts -> tsc -> psc.js
+compiler.ps --psc-native---> compiler.rs -> rustc -> next psc-native
+```
+
+Required gates:
+
+- JavaScript-hosted and Rust-hosted compilation produce equal normalized
+  checked-core and compiler-IR fingerprints for the compiler source;
+- normalized emitted Rust reaches a source fixed point across native
+  generations;
+- Rust-hosted emission of TypeScript is semantically/fingerprint-equivalent to
+  JavaScript-hosted emission;
+- JavaScript-hosted emission of Rust and Rust-hosted emission of Rust agree on
+  normalized compiler IR and normalized Rust source;
+- compiler/runtime regression suites pass under both hosts;
+- native binary byte identity is **not** required, because rustc/linker metadata,
+  platform object formats, and toolchain details may differ even when the
+  compiler semantics are identical.
+
+The first Rust-hosted compiler may continue to use the same versioned external
+pskernel bridge as the JavaScript host. A Rust-native kernel is a separate
+project and is not required for the Rust self-host claim.
+
+Once SH10R closes, ProofScript has one compiler semantics with at least two
+independent executable hosts:
+
+```text
+compiler.ps
+   |\
+   | \-> backend-ts   -> tsc   -> psc.js
+   |
+   \---> backend-rust -> rustc -> psc-native
+```
+
 ## SH11 — verified self-hosting
 
-After ordinary self-hosting is stable, add proofs/specifications for
+After ordinary multi-host self-hosting is stable, add proofs/specifications for
 semantics-preserving compiler transformations where they provide real
 assurance.
 
-This milestone must not block SH1-SH10.
+This milestone must not block SH1-SH10R.
 
 ## Deferred until the foundation closes
 
 Unless demanded by an SH gate, defer:
 
-- new backends beyond the current TypeScript/JavaScript path;
+- new backends beyond the current TypeScript/JavaScript path **until SH9/SH10
+  close**; Rust is the first planned post-bootstrap backend in SH10R, while
+  Wasm and other additional backends remain deferred until that foundation is
+  stable;
 - broad React/Next.js integration;
 - new browser/LSP/editor features;
 - extra package-manager features;

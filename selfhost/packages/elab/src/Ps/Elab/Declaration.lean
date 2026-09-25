@@ -904,7 +904,7 @@ def psElabInductiveDeclaration
     (params : List (PsSyntaxBinderHead × PsSyntaxTerm))
     (resultType : Option PsSyntaxTerm)
     (constructors : List PsSyntaxInductiveConstructor)
-    (isStructure : Bool := false) :
+    (isStructure : Bool) :
     Except PsElabError PsElabDeclarationBatchResult :=
   match psSyntaxNameToName nameSyntax with
   | none => Except.error PsElabError.emptyName

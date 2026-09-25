@@ -169,6 +169,8 @@ def psWasmLowerStructure
       | Except.ok fields =>
           Except.ok {
             name := structInfo.name
+            superType := none
+            isFinal := true
             fields := fields
           }
 

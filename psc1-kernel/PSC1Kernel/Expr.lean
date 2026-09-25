@@ -1,3 +1,4 @@
+import Std.Data.HashSet.Basic
 import PSC1Kernel.Level
 
 namespace PSC1Kernel
@@ -45,28 +46,85 @@ def Level.listEq : List Level → List Level → Bool
   | a :: as, b :: bs => Level.eq a b && Level.listEq as bs
   | _, _ => false
 
-private unsafe def exprEqImpl (left right : Expr) : Bool :=
+private structure ExprPtrPair where
+  left : USize
+  right : USize
+  deriving BEq, Hashable
+
+private unsafe def exprPtrPair (left right : Expr) : ExprPtrPair :=
+  let a := ptrAddrUnsafe left
+  let b := ptrAddrUnsafe right
+  if a <= b then { left := a, right := b } else { left := b, right := a }
+
+private unsafe def exprEqMemoCore
+    (seen : ST.Ref ω (Std.HashSet ExprPtrPair))
+    (left right : Expr) : ST ω Bool := do
   if ptrEq left right then
-    true
-  else
-    match left, right with
-    | .bvar a, .bvar b => a == b
-    | .fvar a, .fvar b => Name.eq a b
-    | .mvar a, .mvar b => Name.eq a b
-    | .sort a, .sort b => Level.eq a b
-    | .const n₁ ls₁, .const n₂ ls₂ => Name.eq n₁ n₂ && Level.listEq ls₁ ls₂
-    | .app f₁ a₁, .app f₂ a₂ => exprEqImpl f₁ f₂ && exprEqImpl a₁ a₂
-    | .lam _ t₁ b₁ _, .lam _ t₂ b₂ _ =>
-      exprEqImpl t₁ t₂ && exprEqImpl b₁ b₂
-    | .forallE _ t₁ b₁ _, .forallE _ t₂ b₂ _ =>
-      exprEqImpl t₁ t₂ && exprEqImpl b₁ b₂
-    | .letE _ t₁ v₁ b₁ d₁, .letE _ t₂ v₂ b₂ d₂ =>
-      exprEqImpl t₁ t₂ && exprEqImpl v₁ v₂ && exprEqImpl b₁ b₂ && d₁ == d₂
-    | .lit a, .lit b => Literal.eq a b
-    | .mdata m₁ e₁, .mdata m₂ e₂ => m₁ == m₂ && exprEqImpl e₁ e₂
-    | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
-      Name.eq n₁ n₂ && i₁ == i₂ && exprEqImpl e₁ e₂
-    | _, _ => false
+    return true
+  match left, right with
+  | .bvar a, .bvar b => return a == b
+  | .fvar a, .fvar b => return Name.eq a b
+  | .mvar a, .mvar b => return Name.eq a b
+  | .sort a, .sort b => return Level.eq a b
+  | .const n₁ ls₁, .const n₂ ls₂ =>
+      return Name.eq n₁ n₂ && Level.listEq ls₁ ls₂
+  | .lit a, .lit b => return Literal.eq a b
+  | .app f₁ a₁, .app f₂ a₂ => do
+      let key := exprPtrPair left right
+      let cache ← seen.get
+      if cache.contains key then
+        return true
+      seen.set (cache.insert key)
+      if !(← exprEqMemoCore seen f₁ f₂) then
+        return false
+      exprEqMemoCore seen a₁ a₂
+  | .lam _ t₁ b₁ _, .lam _ t₂ b₂ _
+  | .forallE _ t₁ b₁ _, .forallE _ t₂ b₂ _ => do
+      let key := exprPtrPair left right
+      let cache ← seen.get
+      if cache.contains key then
+        return true
+      seen.set (cache.insert key)
+      if !(← exprEqMemoCore seen t₁ t₂) then
+        return false
+      exprEqMemoCore seen b₁ b₂
+  | .letE _ t₁ v₁ b₁ d₁, .letE _ t₂ v₂ b₂ d₂ => do
+      if d₁ != d₂ then
+        return false
+      let key := exprPtrPair left right
+      let cache ← seen.get
+      if cache.contains key then
+        return true
+      seen.set (cache.insert key)
+      if !(← exprEqMemoCore seen t₁ t₂) then
+        return false
+      if !(← exprEqMemoCore seen v₁ v₂) then
+        return false
+      exprEqMemoCore seen b₁ b₂
+  | .mdata m₁ e₁, .mdata m₂ e₂ => do
+      if m₁ != m₂ then
+        return false
+      let key := exprPtrPair left right
+      let cache ← seen.get
+      if cache.contains key then
+        return true
+      seen.set (cache.insert key)
+      exprEqMemoCore seen e₁ e₂
+  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ => do
+      if !Name.eq n₁ n₂ || i₁ != i₂ then
+        return false
+      let key := exprPtrPair left right
+      let cache ← seen.get
+      if cache.contains key then
+        return true
+      seen.set (cache.insert key)
+      exprEqMemoCore seen e₁ e₂
+  | _, _ => return false
+
+private unsafe def exprEqImpl (left right : Expr) : Bool :=
+  runST fun _ => do
+    let seen ← ST.mkRef ({} : Std.HashSet ExprPtrPair)
+    exprEqMemoCore seen left right
 
 /--
 Lean 4.34 `Expr.eqv`-compatible structural equality. Binder display names and

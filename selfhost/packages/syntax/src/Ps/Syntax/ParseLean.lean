@@ -697,30 +697,44 @@ def psParseLeanBinder
                       }
 
 def psParseLeanBindersWithFuel
-    (fuel : Nat)
-    (cursor : PsTokenCursor)
-    (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) :
+    (fuel : Nat) :
+    PsTokenCursor ->
+    List (PsSyntaxBinderHead × PsSyntaxTerm) ->
     Except PsParseError
       (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
   match fuel with
   | 0 =>
-      Except.ok { value := psParseListReverse bindersRev, cursor := cursor }
-  | remaining + 1 =>
-      if psTokenCursorAtBinderStart cursor then
-        match psParseLeanBinderGroup cursor with
-        | Except.error error => Except.error error
-        | Except.ok parsed =>
-            psParseLeanBindersWithFuel
-              remaining
-              parsed.cursor
-              (psLeanPrependBinderGroupReverse
-                parsed.value
-                bindersRev)
-      else
+      fun
+        (cursor : PsTokenCursor)
+        (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>
         Except.ok {
           value := psParseListReverse bindersRev
           cursor := cursor
         }
+  | remaining + 1 =>
+      let smaller :
+          PsTokenCursor ->
+          List (PsSyntaxBinderHead × PsSyntaxTerm) ->
+          Except PsParseError
+            (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+        psParseLeanBindersWithFuel remaining;
+      fun
+        (cursor : PsTokenCursor)
+        (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>
+        if psTokenCursorAtBinderStart cursor then
+          match psParseLeanBinderGroup cursor with
+          | Except.error error => Except.error error
+          | Except.ok parsed =>
+              smaller
+                parsed.cursor
+                (psLeanPrependBinderGroupReverse
+                  parsed.value
+                  bindersRev)
+        else
+          Except.ok {
+            value := psParseListReverse bindersRev
+            cursor := cursor
+          }
 
 def psParseLeanArrowTail
     (parseCodomain :

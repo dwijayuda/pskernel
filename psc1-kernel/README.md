@@ -58,8 +58,8 @@ lift/instantiation against final Lean 4.34.
 
 - K0: Name, Level, Expr, substitution/lifting/abstraction.
 - K1: declarations, local context and immutable environment.
-- K2: WHNF and type inference. **IN PROGRESS** — separate Lean-faithful `whnfCore` (beta/let/fvar/projection only) and full `whnf` (core → Nat → delta), Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble/land/lor/xor/shiftLeft/shiftRight), the default 128 MiB numeral-size guard, exact UINT32 count rejection for `pow`/nonzero `shiftLeft`, constructor projection reduction, ordinary/Nat-literal recursor reduction, quotient lift/ind reduction, and Lean-4.34-faithful projection typing are implemented; configurable `LEAN_NAT_MAX_SIZE` injection and the remaining cheap-projection control-flow details remain. String-literal projection/recursor hooks are implemented with the final Lean 4.34 expansion shape; full `strLitProj` end-to-end parity still waits for the real String environment/replay layer.
-- K3: definitional equality and exact reduction ordering. **IN PROGRESS** — sort/constant-universe/app/binding/projection cases exist; binding defeq follows Lean 4.34 by ignoring binder annotations and proof irrelevance is implemented. Function eta, non-recursive structure eta, unit-like equality, Lean-4.34 reducibility-hint-guided lazy delta, and the special `String` literal ↔ `String.ofList` definitional-equality expansion are implemented. Projection lazy-delta specialization is implemented and differentially covered. Failure/equivalence caches, resource fuel, and the remaining exact lazy-delta step details remain.
+- K2: WHNF and type inference. **IN PROGRESS** — separate Lean-faithful `whnfCore` and full `whnf`, independent `cheap_rec`/`cheap_proj` controls, Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble/land/lor/xor/shiftLeft/shiftRight`), the default 128 MiB numeral-size guard, exact UINT32 count rejection for `pow`/nonzero `shiftLeft`, exact UINT32 projection-index rejection, scoped `eagerReduce`, constructor projection reduction, ordinary/Nat-literal recursor reduction, quotient lift/ind reduction, and Lean-4.34-faithful projection typing are implemented. Configurable `LEAN_NAT_MAX_SIZE` injection remains. String-literal projection/recursor hooks use the final Lean 4.34 expansion shape; full `strLitProj` end-to-end parity still waits for the real String environment/replay layer.
+- K3: definitional equality and exact reduction ordering. **IN PROGRESS** — sort/constant-universe/app cases, opened-binder lambda/forall defeq, proof irrelevance, Nat-offset comparison, function eta, non-recursive structure eta, unit-like equality, scoped eager-reduction behavior, the Lean-4.34 lazy-delta one-step state machine (including projection-headed unfolding and the same-definition regular-hint shortcut), projection lazy-delta field comparison, and the special `String` literal ↔ `String.ofList` expansion are implemented. Pair success/failure caches, deterministic resource fuel, and the native-reduction provider slot remain.
 - K4: quotient and recursor reduction.
 - K5: inductive/nested-inductive admission and generated metadata validation.
 - K6: optional/fail-closed native-reduction boundary.
@@ -78,4 +78,6 @@ core reduction, then the normalization-extension slot (native remains
 fail-closed/unimplemented), then Nat reduction, then delta unfolding.
 
 This separation is required for source-faithful lazy-delta definitional
-equality and cheap projection reduction.
+equality. The source also keeps Lean 4.34's `cheap_rec` and `cheap_proj`
+controls independent: initial defeq uses `(false, true)`, lazy-delta unfolding
+uses `(false, true)`, and full core WHNF uses `(false, false)`.

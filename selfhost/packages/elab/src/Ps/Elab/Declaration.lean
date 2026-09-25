@@ -355,11 +355,18 @@ def psAddDeclarationList
     List PsDeclaration -> Except PsElabError PsEnvironment
   | [] => Except.ok environment
   | declaration :: rest =>
-      match psEnvironmentAdd environment declaration with
+      let name := psDeclarationName declaration
+      let nextResult :=
+        if psNameEq name psProdName then
+          psEnvironmentAddReplacingAxiom
+            environment
+            declaration
+        else
+          psEnvironmentAdd environment declaration
+      match nextResult with
       | none =>
           Except.error
-            (PsElabError.duplicateDeclaration
-              (psDeclarationName declaration))
+            (PsElabError.duplicateDeclaration name)
       | some next =>
           psAddDeclarationList next rest
 

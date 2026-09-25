@@ -104,18 +104,20 @@ partial def isDefEq (env : Environment) (a b : Expr) : Result Bool := do
       isDefEq env ae be
   | _, _ => return false
 
+partial def ensurePiType (env : Environment) (type : Expr) : Result (Name × Expr × Expr × BinderInfo) := do
+  let type' ← whnf env type
+  match type' with
+  | .forallE n domain body bi => return (n, domain, body, bi)
+  | _ => throw "function expected"
+
+mutual
+
 partial def ensureSort (env : Environment) (ctx : LocalContext) (e : Expr) : Result Level := do
   let type ← infer env ctx e
   let type' ← whnf env type
   match type' with
   | .sort u => return u
   | _ => throw "type expected"
-
-partial def ensurePiType (env : Environment) (type : Expr) : Result (Name × Expr × Expr × BinderInfo) := do
-  let type' ← whnf env type
-  match type' with
-  | .forallE n domain body bi => return (n, domain, body, bi)
-  | _ => throw "function expected"
 
 partial def infer (env : Environment) (ctx : LocalContext) (e : Expr) : Result Expr := do
   match e with
@@ -158,6 +160,8 @@ partial def infer (env : Environment) (ctx : LocalContext) (e : Expr) : Result E
       return .const stringName []
   | .proj _ _ _ =>
       throw "projection inference requires the inductive kernel milestone"
+
+end
 
 def check (env : Environment) (e : Expr) : Result Expr :=
   if Expr.hasLooseBVars e then

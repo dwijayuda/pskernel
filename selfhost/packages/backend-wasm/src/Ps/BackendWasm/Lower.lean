@@ -1,3 +1,4 @@
+import Ps.BackendWasm.RuntimeNat
 import Ps.CompilerIr.Specialize
 import Ps.BackendWasm.Binary
 import Ps.BackendWasm.LowerInt
@@ -984,6 +985,34 @@ def psWasmLowerConstructorValuesWith
                         state := loweredRest.state
                       }
 
+def psWasmLowerNatBinaryCall
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (arguments : List PsVerifiedIrExpr)
+    (functionName : String) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match arguments with
+  | [left, right] =>
+      match
+          psWasmLowerExprListWith
+            lower
+            (some psWasmNatRef)
+            state
+            [left, right] with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            instructions :=
+              lowered.instructions
+                ++ [PsWasmInstruction.call functionName]
+            state := lowered.state
+          }
+  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
@@ -1064,6 +1093,24 @@ def psWasmLowerIntrinsicWith
                 state := lowered.state
               }
       | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | .natAdd =>
+      psWasmLowerNatBinaryCall lower state arguments psWasmNatAddName
+  | .natSub =>
+      psWasmLowerNatBinaryCall lower state arguments psWasmNatSubName
+  | .natMul =>
+      psWasmLowerNatBinaryCall lower state arguments psWasmNatMulName
+  | .natDiv =>
+      psWasmLowerNatBinaryCall lower state arguments psWasmNatDivName
+  | .natMod =>
+      psWasmLowerNatBinaryCall lower state arguments psWasmNatModName
+  | .natEq =>
+      psWasmLowerNatBinaryCall lower state arguments psWasmNatEqName
+  | .natNe =>
+      psWasmLowerNatBinaryCall lower state arguments psWasmNatNeName
+  | .natLe =>
+      psWasmLowerNatBinaryCall lower state arguments psWasmNatLeName
+  | .natLt =>
+      psWasmLowerNatBinaryCall lower state arguments psWasmNatLtName
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
 def psWasmLowerTypedArgumentsWith
@@ -1705,6 +1752,12 @@ def psWasmLowerExprWithFuel
       match expr with
       | .literal literal =>
           match literal with
+          | .natural value =>
+              Except.ok {
+                instructions :=
+                  psWasmNatLiteralInstructions value
+                state := state
+              }
           | .machineInteger type value =>
               Except.ok {
                 instructions :=
@@ -2112,12 +2165,14 @@ def psWasmLowerSpecializedModule
                           ++ inductiveTypes
                           ++ closureSignatures.1
                           ++ lowered.state.generatedStructures
+                          ++ psWasmNatStructures
                       functionTypes :=
                         closureSignatures.2
                           ++ lowered.state.generatedFunctionTypes
                       functions :=
                         lowered.functions
                           ++ lowered.state.generatedFunctions
+                          ++ psWasmNatFunctions
                       functionRefs :=
                         lowered.state.generatedFunctionRefs
                       exports :=

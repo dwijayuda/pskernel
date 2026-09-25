@@ -85,6 +85,9 @@ jobs:
       - name: Smoke Eq.rec K fail-closed behavior
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/KFailClosedSmoke.lean
+      - name: Smoke infer-only/check split
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/InferOnlySmoke.lean
       - name: Smoke portable native replay map
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/NativeMapSmoke.lean

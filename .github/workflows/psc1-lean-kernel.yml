@@ -12,6 +12,8 @@ on:
       - "oracle/replay-probe/NativeEval.lean"
       - "oracle/replay-probe/NativeMapFixture.lean"
       - "scripts/psc1-lean-native-map.mjs"
+      - "scripts/psc1-lean-native-targets.mjs"
+      - "oracle/fixtures/psc1-native-discovery-smoke.ndjson"
       - "oracle/fixtures/lean434-init-prelude.ndjson"
       - "oracle/fixtures/lean434-primitive-closure.ndjson"
       - "oracle/fixtures/lean434-proofscript-text-foundation.ndjson"
@@ -84,6 +86,21 @@ jobs:
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/NativeMapSmoke.lean
 
+      - name: Discover native marker targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/psc1-lean-native-targets.mjs \
+            --input oracle/fixtures/psc1-native-discovery-smoke.ndjson \
+            --out psc1-kernel/.lake/build/native-targets.txt
+          printf '%s\n' \
+            'bool:PSC1NativeMapFixture.b' \
+            'nat:PSC1NativeMapFixture.n' \
+            > psc1-kernel/.lake/build/native-targets.expected.txt
+          diff -u \
+            psc1-kernel/.lake/build/native-targets.expected.txt \
+            psc1-kernel/.lake/build/native-targets.txt
+
       - name: Generate native map from Lean compiler IR
         shell: bash
         run: |
@@ -94,8 +111,7 @@ jobs:
             node scripts/psc1-lean-native-map.mjs \
               --module NativeMapFixture \
               --out psc1-kernel/.lake/build/native-map.tsv \
-              nat:PSC1NativeMapFixture.n \
-              bool:PSC1NativeMapFixture.b
+              --requests-file psc1-kernel/.lake/build/native-targets.txt
 
       - name: Smoke generated compiler-IR native map through kernel
         working-directory: psc1-kernel

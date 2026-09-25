@@ -11,6 +11,11 @@ on:
       - "oracle/replay-probe/ReplayProbe.lean"
       - "oracle/fixtures/lean434-init-prelude.ndjson"
       - "oracle/fixtures/lean434-primitive-closure.ndjson"
+      - "oracle/fixtures/lean434-proofscript-text-foundation.ndjson"
+      - "oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson"
+      - "oracle/fixtures/lean434-std-sat-cnf-roots.ndjson"
+      - "oracle/fixtures/lean434-std-parsec-roots.ndjson"
+      - "oracle/fixtures/lean434-lean-persistenthashmap-roots.ndjson"
 
 concurrency:
   group: psc1-lean-kernel-${{ github.ref }}
@@ -67,3 +72,18 @@ jobs:
         run: |
           set -euo pipefail
           timeout 600s lake env lean --run PSC1Kernel/Test/ReplayFile.lean ../oracle/fixtures/lean434-primitive-closure.ndjson
+      - name: Replay K8 bounded small corpora
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          for fixture in \
+            lean434-proofscript-text-foundation.ndjson \
+            lean434-proofscript-selfhost-foundation.ndjson \
+            lean434-std-sat-cnf-roots.ndjson \
+            lean434-std-parsec-roots.ndjson \
+            lean434-lean-persistenthashmap-roots.ndjson
+          do
+            echo "== replay $fixture =="
+            timeout 600s lake env lean --run PSC1Kernel/Test/ReplayFile.lean "../oracle/fixtures/$fixture"
+          done

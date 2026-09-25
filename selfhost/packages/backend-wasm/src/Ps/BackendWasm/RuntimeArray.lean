@@ -287,38 +287,38 @@ def psWasmCollectModuleArrayElementTypes
         withResult)
     fromInductives
 
-def psWasmLowerArrayType
+def psWasmLowerArrayType?
     (profile : PsWasmTargetProfile)
     (elementType : PsVerifiedIrType) :
-    Except PsWasmLowerError PsWasmArrayType :=
+    Option PsWasmArrayType :=
   match psWasmArrayTypeName elementType with
-  | none => Except.error PsWasmLowerError.unsupportedType
+  | none => none
   | some name =>
       match psWasmStorageTypeOfIrType? profile elementType with
-      | none => Except.error PsWasmLowerError.unsupportedType
+      | none => none
       | some storageType =>
-          Except.ok {
+          some {
             name := name
             elementType := storageType
             mutable := true
           }
 
-def psWasmLowerArrayTypes
+def psWasmLowerArrayTypes? 
     (profile : PsWasmTargetProfile) :
     List PsVerifiedIrType ->
-    Except PsWasmLowerError (List PsWasmArrayType)
-  | [] => Except.ok []
+    Option (List PsWasmArrayType)
+  | [] => some []
   | elementType :: rest =>
       match
-          psWasmLowerArrayType
+          psWasmLowerArrayType?
             profile
             elementType with
-      | Except.error error => Except.error error
-      | Except.ok lowered =>
-          match psWasmLowerArrayTypes profile rest with
-          | Except.error error => Except.error error
-          | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+      | none => none
+      | some lowered =>
+          match psWasmLowerArrayTypes? profile rest with
+          | none => none
+          | some loweredRest =>
+              some (lowered :: loweredRest)
 
 def psWasmArrayGetInstruction
     (arrayTypeName : String)

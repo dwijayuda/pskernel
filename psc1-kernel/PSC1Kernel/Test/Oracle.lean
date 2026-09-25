@@ -1257,8 +1257,8 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   | some (.recInfo info) =>
       assertTrue "PSC1 parameterized recursor numParams mismatch"
         (info.numParams == 1)
-      match info.type with
-      | .forallE _ _ _ binderInfo =>
+      match info.base.type with
+      | PSC1Kernel.Expr.forallE _ _ _ binderInfo =>
           assertTrue "PSC1 inferImplicit did not infer the datatype parameter"
             (PSC1Kernel.BinderInfo.eq binderInfo .implicit)
       | _ =>

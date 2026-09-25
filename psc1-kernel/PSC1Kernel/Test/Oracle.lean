@@ -47,6 +47,12 @@ def exceptToIO (label : String) : Except String α → IO α
   | .ok value => pure value
   | .error message => throw <| IO.userError (label ++ ": " ++ message)
 
+def kernelExprDefEq
+    (env : Lean.Environment) (a b : PSC1Kernel.Expr) : IO Bool := do
+  match Lean.Kernel.isDefEq env ({} : Lean.LocalContext) (toLeanExpr a) (toLeanExpr b) with
+  | .ok value => pure value
+  | .error _ => throw <| IO.userError "Lean kernel expression isDefEq failed"
+
 def kernelSortDefEq
     (env : Lean.Environment) (a b : PSC1Kernel.Level) : IO Bool := do
   match Lean.Kernel.isDefEq env ({} : Lean.LocalContext)
@@ -149,6 +155,24 @@ def assertProjectionOracle : IO Unit := do
   let badReduce := PSC1Kernel.reduceProjCore ctx T 0 value
   assertTrue "reduceProjCore ignored structure name" badReduce.isNone
 
+def assertBinderInfoDefEqOracle : IO Unit := do
+  let env ← Lean.mkEmptyEnvironment
+  let x : PSC1Kernel.Name := .str .anonymous "x"
+  let p : PSC1Kernel.Expr := .sort .zero
+  let lamDefault : PSC1Kernel.Expr := .lam x p (.bvar 0) .default
+  let lamImplicit : PSC1Kernel.Expr := .lam x p (.bvar 0) .implicit
+  let piDefault : PSC1Kernel.Expr := .forallE x p p .default
+  let piImplicit : PSC1Kernel.Expr := .forallE x p p .implicit
+  let ctx := PSC1Kernel.CheckerContext.empty .empty
+  let oursLam ← exceptToIO "PSC1 lambda defeq" (PSC1Kernel.isDefEq ctx lamDefault lamImplicit)
+  let leanLam ← kernelExprDefEq env lamDefault lamImplicit
+  assertTrue "lambda binder info differs from Lean 4.34 defeq" (oursLam == leanLam)
+  assertTrue "Lean 4.34 lambda binder info should be ignored by defeq" leanLam
+  let oursPi ← exceptToIO "PSC1 forall defeq" (PSC1Kernel.isDefEq ctx piDefault piImplicit)
+  let leanPi ← kernelExprDefEq env piDefault piImplicit
+  assertTrue "forall binder info differs from Lean 4.34 defeq" (oursPi == leanPi)
+  assertTrue "Lean 4.34 forall binder info should be ignored by defeq" leanPi
+
 def assertExprOracle : IO Unit := do
   let x : PSC1Kernel.Name := .str .anonymous "x"
   let A : PSC1Kernel.Name := .str .anonymous "A"
@@ -197,6 +221,7 @@ def run : IO Unit := do
   ]
   assertLevelPairs levels
   assertExprOracle
+  assertBinderInfoDefEqOracle
   assertProjectionOracle
   IO.println "PSC1Kernel Lean 4.34 foundational + projection oracle: PASS"
 

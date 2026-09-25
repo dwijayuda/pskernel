@@ -98,7 +98,7 @@ jobs:
             echo "Rust backend remains constrained by the portable source-profile gate."
           fi
 
-      - name: Census real compiler IR
+      - name: Census and compile real compiler IR
         shell: bash
         run: |
           set -euo pipefail
@@ -107,9 +107,28 @@ jobs:
             lake exe psc1 rust-coverage packages/compiler/src/Ps/Compiler.lean \
               | tee /tmp/psc-rust-compiler-coverage.txt
             grep -q '^PSC1_RUST_COVERAGE_FEATURE_COUNT:' /tmp/psc-rust-compiler-coverage.txt
+
+            rm -rf /tmp/psc-rust-compiler
+            mkdir -p /tmp/psc-rust-compiler/src
+            lake exe psc1 rust packages/compiler/src/Ps/Compiler.lean \
+              > /tmp/psc-rust-compiler/src/lib.rs
+            cat > /tmp/psc-rust-compiler/Cargo.toml <<'EOF'
+          [package]
+          name = "psc-rust-compiler-gate"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          num-bigint = "0.4"
+          num-traits = "0.2"
+          EOF
+            cargo check --manifest-path /tmp/psc-rust-compiler/Cargo.toml
+
             echo "PSC1_RUST_COMPILER_COVERAGE: PASS"
+            echo "PSC1_RUST_REAL_COMPILER_CARGO_CHECK: PASS"
           else
             echo "PSC1_RUST_COMPILER_COVERAGE: BLOCKED_BY_SELFHOST_SOURCE_CLOSURE"
+            echo "PSC1_RUST_REAL_COMPILER_CARGO_CHECK: BLOCKED_BY_SELFHOST_SOURCE_CLOSURE"
           fi
 
       - name: Run Rust backend emitter tests

@@ -11,15 +11,15 @@ verify them.
 The canonical definition keyword is `def`.
 
 ```proofscript
-def answer : Nat := 42;
+def answer: Nat := 42;
 ```
 
 PSC1 also preserves two ergonomic aliases:
 
 ```proofscript
-const otherAnswer : Nat := 42;
+const otherAnswer: Nat := 42;
 
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
@@ -36,7 +36,7 @@ Use:
 A `const` may still hold a function value:
 
 ```proofscript
-const increment : Nat -> Nat :=
+const increment: Nat -> Nat :=
   fun x => x + 1;
 ```
 
@@ -46,7 +46,7 @@ value's type is a function.
 This is invalid:
 
 ```proofscript
-const add(x : Nat) : Nat := x + 1;
+const add(x: Nat): Nat := x + 1;
 ```
 
 because declaration parameters belong on `def` or `function`.
@@ -56,13 +56,13 @@ because declaration parameters belong on `def` or `function`.
 A declaration can state its result type:
 
 ```proofscript
-const enabled : Bool := true;
+const enabled: Bool := true;
 ```
 
 Function parameters carry their own types:
 
 ```proofscript
-function twice(x : Nat) : Nat :=
+function twice(x: Nat): Nat :=
   x + x;
 ```
 
@@ -95,9 +95,9 @@ The distinction matters for higher-order and dependent functions.
 Use `let` to name an intermediate value.
 
 ```proofscript
-function calculate(x : Nat) : Nat :=
-  let doubled : Nat := x * 2;
-  let adjusted : Nat := doubled + 1;
+function calculate(x: Nat): Nat :=
+  let doubled: Nat := x * 2;
+  let adjusted: Nat := doubled + 1;
   adjusted;
 ```
 
@@ -108,7 +108,7 @@ Do not assume it means mutable JavaScript `let`.
 ## Conditionals
 
 ```proofscript
-function choose(flag : Bool, left : Nat, right : Nat) : Nat :=
+function choose(flag: Bool, left: Nat, right: Nat): Nat :=
   if (flag) {
     left
   } else {
@@ -149,13 +149,13 @@ adds parentheses when target precedence differs.
 Compare:
 
 ```proofscript
-const x : Nat := 1;
+const x: Nat := 1;
 ```
 
 with:
 
 ```proofscript
-theorem xEqualsX : x = x := by rfl;
+theorem xEqualsX: x = x := by rfl;
 ```
 
 `:=` introduces a value.

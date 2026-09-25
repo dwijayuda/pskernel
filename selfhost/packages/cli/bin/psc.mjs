@@ -8,8 +8,8 @@ const selfhostRoot = path.resolve(binDir, "../../..");
 const node = process.execPath;
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 const defaultCompiler = "dist/bootstrap/packages/compiler/index.js";
-const defaultSelfhostSource =
-  "dist/bootstrap/workspace/packages/compiler/src/Ps/Compiler.ps";
+const defaultWorkspace = "dist/bootstrap/workspace";
+const defaultGeneration = "dist/selfhost";
 
 function run(command, args) {
   const result = spawnSync(command, args, {
@@ -31,18 +31,19 @@ function usage() {
     "",
     "usage:",
     "  psc bootstrap",
-    "  psc check <entry.lean|entry.ps> [--compiler <compiler.js>]",
     "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]",
     "  psc translate <input.lean|input.ps> --to <lean|ps> [--out <output>] [--compiler <compiler.js>]",
     "  psc emit-lean <input.lean|input.ps> [--out <output.lean>] [--compiler <compiler.js>]",
     "  psc emit-ps <input.lean|input.ps> [--out <output.ps>] [--compiler <compiler.js>]",
-    "  psc selfhost",
+    "  psc project emit <entry.lean|entry.ps> --to <lean|ps> --out <workspace> [--compiler <compiler.js>]",
+    "  psc selfhost [--compiler <compiler.js>] [--workspace <ps-workspace>] [--out <generation>]",
     "  psc verify-selfhost",
     "  psc fixed-point",
     "",
     "defaults:",
     `  compiler: ${defaultCompiler}`,
-    `  self-host source: ${defaultSelfhostSource}`,
+    `  workspace: ${defaultWorkspace}`,
+    `  next generation: ${defaultGeneration}`,
   ].join("\n");
 }
 
@@ -54,7 +55,15 @@ if (!command || command === "--help" || command === "-h") {
 } else if (command === "bootstrap") {
   run(npm, ["run", "bootstrap"]);
 } else if (command === "selfhost") {
-  run(npm, ["run", "selfhost"]);
+  const compiler = option(args, "--compiler") ?? defaultCompiler;
+  const workspace = option(args, "--workspace") ?? defaultWorkspace;
+  const output = option(args, "--out") ?? defaultGeneration;
+  run(node, [
+    "scripts/selfhost-generation.mjs",
+    compiler,
+    workspace,
+    output,
+  ]);
 } else if (command === "verify-selfhost") {
   run(npm, ["run", "verify:selfhost"]);
 } else if (command === "fixed-point") {
@@ -70,6 +79,23 @@ if (!command || command === "--help" || command === "-h") {
     "scripts/compile-with-generated.mjs",
     compiler,
     entry,
+    output,
+  ]);
+} else if (command === "project" && args[1] === "emit") {
+  const entry = args[2];
+  const target = option(args, "--to");
+  const output = option(args, "--out");
+  const compiler = option(args, "--compiler") ?? defaultCompiler;
+
+  if (!entry || !target || !output) throw new Error(usage());
+
+  run(node, [
+    "scripts/emit-project-with-generated.mjs",
+    compiler,
+    entry,
+    "--to",
+    target,
+    "--out",
     output,
   ]);
 } else if (command === "translate") {

@@ -777,27 +777,28 @@ def psBuildRecursorMinorBinders
       | Except.error error => Except.error error
       | Except.ok minorType =>
           let minorName :=
-            psNameAppendNum (psRootName "_minor") index
+            psNameAppendNum (psRootName "_minor") index;
           let pushed :=
             psLocalPushBinding
               context.localContext
               minorName
               minorType
-              PsBinderInfo.explicit
+              PsBinderInfo.explicit;
           let nextContext :=
-            psElabContextWithLocal context pushed.context
+            psElabContextWithLocal context pushed.context;
           psBuildRecursorMinorBinders
             parameterArgs
             motiveId
             rest
             nextContext
-            (index + 1)
-            ({
-              id := pushed.id
-              name := minorName
-              type := minorType
-              binder := PsBinderInfo.explicit
-            } :: bindersRev)
+            (Nat.succ index)
+            (List.cons
+              (PsElabTypedBinder.mk
+                pushed.id
+                minorName
+                minorType
+                PsBinderInfo.explicit)
+              bindersRev)
 
 def psBuildInductiveRecursor
     (context : PsElabContext)

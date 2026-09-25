@@ -743,16 +743,20 @@ def psJsonParse
       | List.cons _ _ =>
           Except.error PsJsonParseError.trailingInput
 
-def psJsonObjectFind :
-    List (String × PsJsonValue) ->
-    String ->
-    Option PsJsonValue
-  | [], _ => Option.none
-  | field :: rest, key =>
-      if psJsonStringEq (Prod.fst field) key then
-        Option.some (Prod.snd field)
-      else
-        psJsonObjectFind rest key
+def psJsonObjectFind
+    (fields : List (String × PsJsonValue)) :
+    String -> Option PsJsonValue :=
+  match fields with
+  | List.nil =>
+      fun (_key : String) => Option.none
+  | List.cons field rest =>
+      let smaller : String -> Option PsJsonValue :=
+        psJsonObjectFind rest;
+      fun (key : String) =>
+        if psJsonStringEq (Prod.fst field) key then
+          Option.some (Prod.snd field)
+        else
+          smaller key
 
 def psJsonGetField
     (value : PsJsonValue)

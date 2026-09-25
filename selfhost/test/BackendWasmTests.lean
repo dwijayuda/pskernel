@@ -128,6 +128,20 @@ def psTestWasmMachineIntegerOps : Bool :=
         .usize
         .add)
 
+def psWasmIsF32Add : List PsWasmInstruction -> Bool
+  | .f32Add :: [] => true
+  | _ => false
+
+def psWasmIsF64Le : List PsWasmInstruction -> Bool
+  | .f64Le :: [] => true
+  | _ => false
+
+def psTestWasmFloatOps : Bool :=
+  psWasmIsF32Add
+      (psWasmLowerFloatBinary .float32 .add)
+    && psWasmIsF64Le
+      (psWasmLowerFloatCompare .float .le)
+
 def psWasmAddU32IrModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -261,6 +275,7 @@ def main : IO Unit := do
       && psTestWasmWordProfiles
       && psTestWasmMachineIntegerOps
       && psTestWasmMachineIntegerLiterals
+      && psTestWasmFloatOps
       && psTestWasmVerifiedIrLowering
       && psTestWasmUleb
       && psTestWasmSignedLeb

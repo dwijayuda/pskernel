@@ -62,26 +62,27 @@ def psWasmFindParameterIndex
     (name : String) : Option Nat :=
   psWasmFindParameterIndexLoop name 0 parameters
 
-def psWasmLowerExprListWithFuel
-    (profile : PsWasmTargetProfile)
-    (parameters : List PsVerifiedIrParameter)
-    (fuel : Nat) :
+def psWasmLowerExprListWith
+    (lower :
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError (List PsWasmInstruction)) :
     List PsVerifiedIrExpr ->
     Except PsWasmLowerError (List PsWasmInstruction)
   | [] => Except.ok []
   | expr :: rest =>
-      match psWasmLowerExprWithFuel profile parameters fuel expr with
+      match lower expr with
       | Except.error error => Except.error error
       | Except.ok lowered =>
-          match psWasmLowerExprListWithFuel profile parameters fuel rest with
+          match psWasmLowerExprListWith lower rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok (lowered ++ loweredRest)
 
-def psWasmLowerIntrinsicWithFuel
+def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
-    (parameters : List PsVerifiedIrParameter)
-    (fuel : Nat)
+    (lower :
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError (List PsWasmInstruction))
     (operation : PsVerifiedIrIntrinsic)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError (List PsWasmInstruction) :=
@@ -89,8 +90,7 @@ def psWasmLowerIntrinsicWithFuel
   | .machineIntBinary type integerOperation =>
       match arguments with
       | [left, right] =>
-          match psWasmLowerExprListWithFuel
-              profile parameters fuel [left, right] with
+          match psWasmLowerExprListWith lower [left, right] with
           | Except.error error => Except.error error
           | Except.ok lowered =>
               Except.ok
@@ -101,8 +101,7 @@ def psWasmLowerIntrinsicWithFuel
   | .machineIntCompare type integerOperation =>
       match arguments with
       | [left, right] =>
-          match psWasmLowerExprListWithFuel
-              profile parameters fuel [left, right] with
+          match psWasmLowerExprListWith lower [left, right] with
           | Except.error error => Except.error error
           | Except.ok lowered =>
               Except.ok
@@ -112,17 +111,16 @@ def psWasmLowerIntrinsicWithFuel
       | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
-def psWasmLowerCallWithFuel
-    (profile : PsWasmTargetProfile)
-    (parameters : List PsVerifiedIrParameter)
-    (fuel : Nat)
+def psWasmLowerCallWith
+    (lower :
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError (List PsWasmInstruction))
     (fn : PsVerifiedIrExpr)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError (List PsWasmInstruction) :=
   match fn with
   | .var name =>
-      match psWasmLowerExprListWithFuel
-          profile parameters fuel arguments with
+      match psWasmLowerExprListWith lower arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
           Except.ok (lowered ++ [PsWasmInstruction.call name])
@@ -135,6 +133,8 @@ def psWasmLowerExprWithFuel
     Except PsWasmLowerError (List PsWasmInstruction)
   | 0, _ => Except.error PsWasmLowerError.unsupportedExpression
   | fuel + 1, expr =>
+      let lower :=
+        psWasmLowerExprWithFuel profile parameters fuel
       match expr with
       | .literal literal =>
           match literal with
@@ -152,11 +152,9 @@ def psWasmLowerExprWithFuel
           | some index =>
               Except.ok [PsWasmInstruction.localGet index]
       | .intrinsic operation arguments =>
-          psWasmLowerIntrinsicWithFuel
-            profile parameters fuel operation arguments
+          psWasmLowerIntrinsicWith profile lower operation arguments
       | .call fn _ arguments =>
-          psWasmLowerCallWithFuel
-            profile parameters fuel fn arguments
+          psWasmLowerCallWith lower fn arguments
       | _ => Except.error PsWasmLowerError.unsupportedExpression
 
 def psWasmLowerExpr

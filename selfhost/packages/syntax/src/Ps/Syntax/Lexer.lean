@@ -688,11 +688,11 @@ def psLexReadToken
   | List.nil =>
       Except.ok
         (Prod.mk
-          {
+          ({
             kind := PsTokenKind.endOfInput
             text := ""
             span := psLexSpan start start
-          }
+          })
           cursor)
   | List.cons first rest =>
       if psLexCharEq first '"' then

@@ -866,7 +866,7 @@ def psRustEmitExprWithFuel :
                   " { "
                   (psRustJoin ", " printedFields)
                   " }")
-      | PsVerifiedIrExpr.projection target field =>
+      | PsVerifiedIrExpr.projection _ target field =>
           match emitNested target with
           | Except.error error =>
               Except.error error

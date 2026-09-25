@@ -1146,6 +1146,89 @@ def assertQuotAdmissionOracle : IO Unit := do
       throw <| IO.userError "Quot admission overwrote an occupied primitive name"
   | .error _ => pure ()
 
+partial def makeDeepSuccExpr (depth : Nat) : PSC1Kernel.Expr :=
+  match depth with
+  | 0 => .lit (.nat 0)
+  | n + 1 => .app (.const PSC1Kernel.kernelNatSuccName []) (makeDeepSuccExpr n)
+
+def assertKernelRecDepthOracle : IO Unit := do
+  let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let Succ : PSC1Kernel.Name := PSC1Kernel.kernelNatSuccName
+  let Deep : PSC1Kernel.Name := .str .anonymous "OracleDeepRecDepth"
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let succT : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "n") natT natT .default
+  let deepValue := makeDeepSuccExpr 96
+
+  let psc0 :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let pscBase :=
+    psc0.addUnchecked (.axiomInfo {
+      base := mkBase Succ succT
+      isUnsafe := false
+    })
+  let pscDef : PSC1Kernel.DefinitionInfo := {
+    base := mkBase Deep natT
+    value := deepValue
+    hints := .opaqueHint
+    safety := .safe
+  }
+  let pscSmallRejects :=
+    match PSC1Kernel.Kernel.addDefinition pscBase pscDef 2 with
+    | .ok _ => false
+    | .error _ => true
+  let pscLargeAccepts :=
+    match PSC1Kernel.Kernel.addDefinition pscBase pscDef 100 with
+    | .ok _ => true
+    | .error _ => false
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanNat ←
+    match lean0.addDeclCore 0 0 (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) none with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean rejected recursion-depth Nat axiom"
+  let leanBase ←
+    match leanNat.addDeclCore 0 0 (.axiomDecl {
+      name := toLeanName Succ
+      levelParams := []
+      type := toLeanExpr succT
+      isUnsafe := false
+    }) none with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean rejected recursion-depth succ axiom"
+  let leanDef : Lean.DefinitionVal := {
+    name := toLeanName Deep
+    levelParams := []
+    type := toLeanExpr natT
+    value := toLeanExpr deepValue
+    hints := .opaque
+    safety := .safe
+  }
+  let leanSmallRejects :=
+    match leanBase.addDeclCore 0 2 (.defnDecl leanDef) none with
+    | .ok _ => false
+    | .error _ => true
+  let leanLargeAccepts :=
+    match leanBase.addDeclCore 0 100 (.defnDecl leanDef) none with
+    | .ok _ => true
+    | .error _ => false
+
+  assertTrue "small maxRecDepth rejection differs from Lean 4.34"
+    (pscSmallRejects == leanSmallRejects && leanSmallRejects)
+  assertTrue "large maxRecDepth acceptance differs from Lean 4.34"
+    (pscLargeAccepts == leanLargeAccepts && leanLargeAccepts)
+
 def assertMutualDuplicateNameOracle : IO Unit := do
   let Dup : PSC1Kernel.Name := .str .anonymous "OracleMutualDup"
   let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
@@ -4237,6 +4320,7 @@ def run : IO Unit := do
   assertStringLiteralExpansionShape
   assertStringLiteralDefEqOracle
   assertQuotAdmissionOracle
+  assertKernelRecDepthOracle
   assertMutualDuplicateNameOracle
   assertImaxPropOracle
   assertProjectionOracle

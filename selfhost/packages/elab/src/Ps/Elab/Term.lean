@@ -577,10 +577,11 @@ def psElabLambdaExpectedBody
       match binders with
       | [] =>
           Except.ok
-            (context,
-              psMetaInstantiate
+            (Prod.mk
+              context
+              (psMetaInstantiate
                 context.metaContext
-                expectedType)
+                expectedType))
       | binder :: rest =>
           match
               psInferEnsureForall
@@ -610,7 +611,7 @@ def psElabLambdaExpectedBody
                     (psMetaInstantiate
                       unified.context
                       forallView.body)
-                    (PsExpr.fvar binder.id)
+                    (PsExpr.fvar binder.id);
                 psElabLambdaExpectedBody
                   nextContext
                   rest

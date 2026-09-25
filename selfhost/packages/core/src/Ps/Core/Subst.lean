@@ -37,7 +37,7 @@ def psExprInstantiateAt (replacement : PsExpr) (depth : Nat) : PsExpr -> PsExpr
       if Nat.beq index depth then
         psExprLiftBVars depth 0 replacement
       else if Nat.blt depth index then
-        PsExpr.bvar (index - 1)
+        PsExpr.bvar (Nat.sub index 1)
       else
         PsExpr.bvar index
   | .app fn arg =>

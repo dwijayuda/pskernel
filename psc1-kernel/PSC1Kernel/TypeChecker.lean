@@ -1148,6 +1148,8 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
         ctx
     let ok ← isDefEq eqCtx argType domain
     if !ok then
+      let domainWhnf ← whnf eqCtx domain
+      let argTypeWhnf ← whnf eqCtx argType
       .error (
         "application type mismatch while applying " ++
         typeCheckerExprHead fn ++
@@ -1155,7 +1157,11 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
         "; expected domain " ++ typeCheckerExprHead domain ++
         "; argument type " ++ typeCheckerExprHead argType ++
         "; first structural diff: " ++
-        typeCheckerExprDiff domain argType)
+        typeCheckerExprDiff domain argType ++
+        "; full-whnf expected " ++ typeCheckerExprHead domainWhnf ++
+        "; full-whnf argument " ++ typeCheckerExprHead argTypeWhnf ++
+        "; full-whnf diff: " ++
+        typeCheckerExprDiff domainWhnf argTypeWhnf)
     else
       .ok (body.instantiate1 arg)
   | .lam name type body binderInfo => do

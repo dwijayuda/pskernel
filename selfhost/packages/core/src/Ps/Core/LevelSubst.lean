@@ -6,11 +6,11 @@ def psFindLevelArgument
     (target : PsName) : Option PsLevel :=
   match parameters with
   | [] =>
-      none
+      Option.none
   | parameter :: parameterRest =>
       match arguments with
       | [] =>
-          none
+          Option.none
       | argument :: argumentRest =>
           if psNameEq parameter target then
             some argument

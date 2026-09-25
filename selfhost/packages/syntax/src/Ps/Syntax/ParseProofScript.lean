@@ -570,8 +570,8 @@ def psParseProofScriptDoWithFuel
                                             span := {
                                               start := name.token.span.start
                                               stop :=
-                                                (psSyntaxTermSpan
-                                                  binderType.value).stop
+                                                psProofScriptTermStop
+                                                  binderType.value
                                             }
                                           };
                                           let span : PsSourceSpan := {

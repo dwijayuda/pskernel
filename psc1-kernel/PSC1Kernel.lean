@@ -12,3 +12,4 @@ import PSC1Kernel.Inductive
 import PSC1Kernel.MutualInductive
 import PSC1Kernel.NestedInductive
 import PSC1Kernel.Replay
+import PSC1Kernel.ReplayJson

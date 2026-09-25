@@ -1060,6 +1060,34 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
             [psWasmSmokeInt (-5)]
       },
       {
+        name := "intExplicitNegSuccValue"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var psWasmIntRuntimeToI32BoundedName)
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.intNegSucc
+                [psWasmSmokeNat 4]
+            ]
+      },
+      {
+        name := "intPositiveValue"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var psWasmIntRuntimeToI32BoundedName)
+            []
+            [psWasmSmokeInt 7]
+      },
+      {
         name := "intAddMixedValue"
         typeParameters := []
         parameters := []

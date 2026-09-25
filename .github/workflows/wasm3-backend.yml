@@ -169,6 +169,26 @@ jobs:
             }
           }
           {
+            const natSuccFour = instance.exports.natSuccFourValue();
+            const directNegFive = instance.exports.int32NegFiveDirect();
+            const negSuccPayload = instance.exports.intNegSuccPayloadValue();
+            const negSuccSuccPayload = instance.exports.intNegSuccSuccPayloadValue();
+            if (
+              natSuccFour !== 5 ||
+              directNegFive !== -5 ||
+              negSuccPayload !== 4 ||
+              negSuccSuccPayload !== 5
+            ) {
+              throw new Error(
+                'PSC1_WASM_RUNTIME_INT_PATH:' +
+                'natSuccFour=' + natSuccFour +
+                ',directNegFive=' + directNegFive +
+                ',payload=' + negSuccPayload +
+                ',succPayload=' + negSuccSuccPayload
+              );
+            }
+          }
+          {
             const literalNeg = instance.exports.intLiteralNegativeValue();
             const explicitNeg = instance.exports.intExplicitNegSuccValue();
             const positive = instance.exports.intPositiveValue();

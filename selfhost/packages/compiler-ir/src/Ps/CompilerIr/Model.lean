@@ -60,6 +60,9 @@ inductive PsVerifiedIrIntegerCompareOp where
 inductive PsVerifiedIrLiteral where
   | natural (value : Nat)
   | integer (value : Int)
+  | machineInteger
+      (type : PsVerifiedIrMachineIntegerType)
+      (value : Int)
   | string (value : String)
   | bool (value : Bool)
   | unit

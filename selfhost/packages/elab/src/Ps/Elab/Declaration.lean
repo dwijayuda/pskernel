@@ -490,9 +490,16 @@ def psSetConstructorIndex
     (declaration : PsDeclaration) : PsDeclaration :=
   match declaration with
   | .constructorDecl info =>
-      PsDeclaration.constructorDecl {
-        info with constructorIndex := index
-      }
+      PsDeclaration.constructorDecl
+        (PsConstructorInfo.mk
+          info.name
+          info.levelParams
+          info.type
+          info.inductiveName
+          index
+          info.numParams
+          info.numFields
+          info.recursiveFields)
   | _ => declaration
 
 def psElabInductiveConstructors

@@ -96,12 +96,17 @@ def psRustEmitConstructor
   | Except.error error =>
       Except.error error
   | Except.ok printedFields =>
-      Except.ok
-        (psRustConcat4
-          constructorInfo.name
-          " { "
-          (psRustJoin ", " printedFields)
-          " }")
+      match printedFields with
+      | List.nil =>
+          Except.ok
+            (psRustConcat2 constructorInfo.name " {}")
+      | List.cons _ _ =>
+          Except.ok
+            (psRustConcat4
+              constructorInfo.name
+              " { "
+              (psRustJoin ", " printedFields)
+              " }")
 
 def psRustEmitConstructorList
     (constructors : List PsVerifiedIrConstructor) :

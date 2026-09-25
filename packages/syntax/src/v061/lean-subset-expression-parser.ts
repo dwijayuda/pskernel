@@ -12,6 +12,9 @@ import {parseV061Type} from './type-parser.js';
 
 const RESERVED_APPLICATION_HEADS=new Set([
   'def','theorem','structure','class','instance','inductive',
+  'namespace','end','section','open','variable','axiom','opaque','abbrev',
+  'example','macro','syntax','elab','attribute','noncomputable',
+  'private','protected','partial',
   'where','then','else','with','by',
 ]);
 

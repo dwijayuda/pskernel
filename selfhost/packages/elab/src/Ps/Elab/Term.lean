@@ -1005,12 +1005,14 @@ def psElabMatchPatternConstructorName
   | .constructor syntaxName _ _ =>
       match syntaxName.segments with
       | [] => Except.error PsElabError.matchPatternUnsupported
-      | [segment] =>
-          Except.ok (psNameAppendStr inductiveName segment)
-      | _ =>
-          match psSyntaxNameToName syntaxName with
-          | none => Except.error PsElabError.matchPatternUnsupported
-          | some name => Except.ok name
+      | segment :: rest =>
+          match rest with
+          | [] =>
+              Except.ok (psNameAppendStr inductiveName segment)
+          | _ :: _ =>
+              match psSyntaxNameToName syntaxName with
+              | none => Except.error PsElabError.matchPatternUnsupported
+              | some name => Except.ok name
 
 def psElabPrepareMatchAlternatives
     (inductiveInfo : PsInductiveInfo) :
@@ -1900,34 +1902,39 @@ def psElabRecordCandidateForInfo
     (environment : PsEnvironment)
     (info : PsInductiveInfo) :
     Option PsElabRecordCandidate :=
-  if !info.isStructure then
-    none
-  else
+  if info.isStructure then
     match info.constructors with
-    | [constructorName] =>
-        match
-            psEnvironmentFindConstructor
-              environment
-              constructorName with
-        | none => none
-        | some constructorInfo =>
+    | [] =>
+        none
+    | constructorName :: rest =>
+        match rest with
+        | [] =>
             match
-                psElabDropForallBinders
-                  constructorInfo.numParams
-                  constructorInfo.type with
+                psEnvironmentFindConstructor
+                  environment
+                  constructorName with
             | none => none
-            | some fieldsType =>
+            | some constructorInfo =>
                 match
-                    psElabTakeForallNames
-                      constructorInfo.numFields
-                      fieldsType with
+                    psElabDropForallBinders
+                      constructorInfo.numParams
+                      constructorInfo.type with
                 | none => none
-                | some fieldNames =>
-                    some {
-                      constructorName := constructorName
-                      fieldNames := fieldNames
-                    }
-    | _ => none
+                | some fieldsType =>
+                    match
+                        psElabTakeForallNames
+                          constructorInfo.numFields
+                          fieldsType with
+                    | none => none
+                    | some fieldNames =>
+                        some {
+                          constructorName := constructorName
+                          fieldNames := fieldNames
+                        }
+        | _ :: _ =>
+            none
+  else
+    none
 
 def psElabRecordCandidateFromExpected
     (context : PsElabContext)
@@ -2011,8 +2018,12 @@ def psElabUniqueRecordCandidate
         fields
         environment.declarations
         [] with
-  | [candidate] => some candidate
-  | _ => none
+  | [] =>
+      none
+  | candidate :: rest =>
+      match rest with
+      | [] => some candidate
+      | _ :: _ => none
 
 def psElabRecord
     (elaborate :

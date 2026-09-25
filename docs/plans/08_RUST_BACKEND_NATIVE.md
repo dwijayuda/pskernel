@@ -139,6 +139,24 @@ Do not hand-maintain parallel `.ps` files before that transition.
 Prefer a typed Rust AST followed by deterministic pretty-printing over direct
 string concatenation for nontrivial emission.
 
+## Current implementation checkpoint
+
+As of the current branch checkpoint:
+
+- the backend is authored in PSC1-constrained Lean;
+- shared CompilerIR lowering produces deterministic safe Rust;
+- exact `Nat`/`Int`, `Bool`, `Char`, `String`, structures,
+  inductives, match, generic functions, top-level values, and persistent
+  `Array` paths compile and execute under Rust CI;
+- the frozen PSC1 scalar type family is synchronized from
+  `selfhost/psc1-lean-bootstrap` into the shared IR and maps directly to
+  Rust machine scalar types;
+- compiler API support exposes source-neutral `.lean`/`.ps` -> Rust
+  generation over the same elaboration/erasure/CompilerIR path;
+- machine-scalar arithmetic/conversion intrinsics are not invented by this
+  backend. They remain gated on corresponding shared PSC1/core/CompilerIR
+  semantics.
+
 ## Development milestones
 
 ### R0 — contract and fixtures

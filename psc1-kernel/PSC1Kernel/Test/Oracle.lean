@@ -173,6 +173,110 @@ def natBinary
     (a b : PSC1Kernel.Expr) : PSC1Kernel.Expr :=
   .app (.app (natConst field) a) b
 
+def assertEagerReduceOracle : IO Unit := do
+  let NatN := PSC1Kernel.kernelNatName
+  let Add := PSC1Kernel.kernelNatAddName
+  let Eager := PSC1Kernel.kernelEagerReduceName
+  let F : PSC1Kernel.Name := .str (.str .anonymous "Eager") "F"
+  let ghost : PSC1Kernel.Name := .str (.str .anonymous "Eager") "ghost"
+  let p : PSC1Kernel.Name := .str (.str .anonymous "Eager") "p"
+  let q : PSC1Kernel.Name := .str (.str .anonymous "Eager") "q"
+  let A : PSC1Kernel.Name := .str .anonymous "A"
+  let a : PSC1Kernel.Name := .str .anonymous "a"
+  let u : PSC1Kernel.Name := .str .anonymous "u"
+  let one : PSC1Kernel.Level := .succ .zero
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort one
+  let natBinType : PSC1Kernel.Expr :=
+    .forallE a natT
+      (.forallE a natT natT .default)
+      .default
+  let fType : PSC1Kernel.Expr :=
+    .forallE a natT type1 .default
+  let eagerType : PSC1Kernel.Expr :=
+    .forallE A (.sort (.param u))
+      (.forallE a (.bvar 0) (.bvar 1) .default)
+      .implicit
+
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.axiomInfo {
+    base := mkBase NatN type1
+    isUnsafe := false
+  })
+  let env2 := env1.addUnchecked (.axiomInfo {
+    base := mkBase Add natBinType
+    isUnsafe := false
+  })
+  let env3 := env2.addUnchecked (.axiomInfo {
+    base := mkBase F fType
+    isUnsafe := false
+  })
+  let env := env3.addUnchecked (.axiomInfo {
+    base := { name := Eager, levelParams := [u], type := eagerType }
+    isUnsafe := false
+  })
+
+  let lctx0 := PSC1Kernel.LocalContext.empty.addLocal ghost ghost natT .default
+  let ignored : PSC1Kernel.Expr :=
+    .letE (.str .anonymous "_g") natT (.fvar ghost) (.lit (.nat 1)) false
+  let red : PSC1Kernel.Expr :=
+    .app (.app (.const Add []) ignored) (.lit (.nat 1))
+  let p1 : PSC1Kernel.Expr := .app (.const F []) red
+  let p2 : PSC1Kernel.Expr := .app (.const F []) (.lit (.nat 2))
+  let lctx := lctx0.addLocal p p p1 .default
+  let ctx : PSC1Kernel.CheckerContext :=
+    { (PSC1Kernel.CheckerContext.empty env) with lctx := lctx }
+  let consume : PSC1Kernel.Expr :=
+    .lam q p2 (.lit (.nat 0)) .default
+  let plain : PSC1Kernel.Expr := .app consume (.fvar p)
+  let wrappedArg : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs (.const Eager [one]) [p1, .fvar p]
+  let wrapped : PSC1Kernel.Expr := .app consume wrappedArg
+
+  let oursPlainRejects :=
+    match PSC1Kernel.check ctx plain with
+    | .ok _ => false
+    | .error _ => true
+  let oursWrapped ← exceptToIO
+    "PSC1 eagerReduce wrapped application"
+    (PSC1Kernel.check ctx wrapped)
+  assertTrue "PSC1 eagerReduce result type mismatch"
+    (PSC1Kernel.Expr.eq oursWrapped natT)
+
+  Lean.initSearchPath (← Lean.findSysroot)
+  let leanPrelude ← Lean.importModules #[{ module := `Init.Prelude }] {}
+  let lean0 := leanPrelude.toKernelEnv
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName F
+      levelParams := []
+      type := toLeanExpr fType
+      isUnsafe := false
+    }) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected eagerReduce oracle F axiom"
+  let leanEnv := Lean.Environment.ofKernelEnv lean1
+  let ghostId : Lean.FVarId := ⟨toLeanName ghost⟩
+  let pId : Lean.FVarId := ⟨toLeanName p⟩
+  let leanLctx0 : Lean.LocalContext :=
+    ({} : Lean.LocalContext).mkLocalDecl ghostId (toLeanName ghost) (toLeanExpr natT) .default
+  let leanLctx :=
+    leanLctx0.mkLocalDecl pId (toLeanName p) (toLeanExpr p1) .default
+
+  let leanPlainRejects :=
+    match Lean.Kernel.check leanEnv leanLctx (toLeanExpr plain) with
+    | .ok _ => false
+    | .error _ => true
+  let leanWrapped ←
+    match Lean.Kernel.check leanEnv leanLctx (toLeanExpr wrapped) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected eagerReduce wrapped application"
+
+  assertTrue "plain application acceptance differs from Lean 4.34"
+    (oursPlainRejects == leanPlainRejects && leanPlainRejects)
+  assertTrue "eagerReduce wrapped result differs from Lean 4.34"
+    (Lean.Expr.equal (toLeanExpr oursWrapped) leanWrapped)
+
 def assertWhnfLayering : IO Unit := do
   let D : PSC1Kernel.Name := .str .anonymous "D"
   let NatN : PSC1Kernel.Name := .str .anonymous "Nat"
@@ -1050,6 +1154,7 @@ def run : IO Unit := do
   assertLevelPairs levels
   assertExprOracle
   assertWhnfLayering
+  assertEagerReduceOracle
   assertNatReductionOracle
   assertFunctionEtaOracle
   assertLazyDeltaOracle

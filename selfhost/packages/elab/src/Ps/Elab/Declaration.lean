@@ -806,98 +806,97 @@ def psBuildInductiveRecursor
     (inductiveInfo : PsInductiveInfo)
     (constructors : List PsDeclaration) :
     Except PsElabError PsDeclaration :=
-  let universeName := psRootName "u"
+  let universeName := psRootName "u";
   let parameterArgs :=
-    psElabBinderArguments parameterBindersRev
+    psElabBinderArguments parameterBindersRev;
   let inductiveType :=
     psExprApplyMany
-      (PsExpr.constE inductiveInfo.name [])
-      parameterArgs
-  let motiveName := psRootName "_motive"
+      (PsExpr.constE inductiveInfo.name List.nil)
+      parameterArgs;
+  let motiveName := psRootName "_motive";
   let motiveType :=
     PsExpr.forallE
       (psRootName "_major")
       inductiveType
       (PsExpr.sortE (PsLevel.param universeName))
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let motivePush :=
     psLocalPushBinding
       context.localContext
       motiveName
       motiveType
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let motiveContext :=
-    psElabContextWithLocal context motivePush.context
+    psElabContextWithLocal context motivePush.context;
   match psBuildRecursorMinorBinders
       parameterArgs
       motivePush.id
       constructors
       motiveContext
       0
-      [] with
-  | Except.error error => Except.error error
+      List.nil with
+  | Except.error error =>
+      Except.error error
   | Except.ok minors =>
-      let majorName := psRootName "_major"
+      let majorName := psRootName "_major";
       let majorPush :=
         psLocalPushBinding
           minors.context.localContext
           majorName
           inductiveType
-          PsBinderInfo.explicit
-      let majorBinder : PsElabTypedBinder := {
-        id := majorPush.id
-        name := majorName
-        type := inductiveType
-        binder := PsBinderInfo.explicit
-      }
-      let motiveBinder : PsElabTypedBinder := {
-        id := motivePush.id
-        name := motiveName
-        type := motiveType
-        binder := PsBinderInfo.explicit
-      }
+          PsBinderInfo.explicit;
+      let majorBinder : PsElabTypedBinder :=
+        PsElabTypedBinder.mk
+          majorPush.id
+          majorName
+          inductiveType
+          PsBinderInfo.explicit;
+      let motiveBinder : PsElabTypedBinder :=
+        PsElabTypedBinder.mk
+          motivePush.id
+          motiveName
+          motiveType
+          PsBinderInfo.explicit;
       let body :=
         PsExpr.app
           (PsExpr.fvar motivePush.id)
-          (PsExpr.fvar majorPush.id)
+          (PsExpr.fvar majorPush.id);
       let withMajor :=
         psCloseElabForallBinders
           minors.context.metaContext
-          [majorBinder]
-          body
+          (List.cons majorBinder List.nil)
+          body;
       let withMinors :=
         psCloseElabForallBinders
           minors.context.metaContext
           minors.bindersRev
-          withMajor
+          withMajor;
       let withMotive :=
         psCloseElabForallBinders
           minors.context.metaContext
-          [motiveBinder]
-          withMinors
+          (List.cons motiveBinder List.nil)
+          withMinors;
       let recursorType :=
         psCloseElabImplicitBinders
           minors.context.metaContext
           parameterBindersRev
-          withMotive
+          withMotive;
       let recursorName :=
-        psNameAppendStr inductiveInfo.name "rec"
+        psNameAppendStr inductiveInfo.name "rec";
       if psExprHasUnresolvedMeta recursorType then
         Except.error PsElabError.unresolvedMetavariable
       else
         Except.ok
-          (PsDeclaration.recursorDecl {
-            name := recursorName
-            levelParams := [universeName]
-            type := recursorType
-            inductiveNames := [inductiveInfo.name]
-            numParams := parameterArgs.length
-            numIndices := 0
-            numMotives := 1
-            numMinors := constructors.length
-          })
-
-
+          (PsDeclaration.recursorDecl
+            (PsRecursorInfo.mk
+              recursorName
+              (List.cons universeName List.nil)
+              recursorType
+              (List.cons inductiveInfo.name List.nil)
+              parameterArgs.length
+              0
+              1
+              constructors.length))
 
 def psElabInductiveDeclaration
     (environment : PsEnvironment)

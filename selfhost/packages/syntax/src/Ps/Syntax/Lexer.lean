@@ -839,15 +839,14 @@ def psLexAllWithFuel :
     Nat -> PsLexCursor -> Except PsLexError (List PsToken)
   | 0, cursor =>
       if psLexCursorDone cursor then
-        let position := cursor.position
+        let position := cursor.position;
+        let token : PsToken := {
+          kind := PsTokenKind.endOfInput
+          text := ""
+          span := psLexSpan position position
+        };
         Except.ok
-          (List.cons
-            {
-              kind := PsTokenKind.endOfInput
-              text := ""
-              span := psLexSpan position position
-            }
-            List.nil)
+          (List.cons token List.nil)
       else
         Except.error PsLexError.fuelExhausted
   | fuel + 1, cursor =>
@@ -855,15 +854,14 @@ def psLexAllWithFuel :
       | Except.error error => Except.error error
       | Except.ok ready =>
           if psLexCursorDone ready then
-            let position := ready.position
+            let position := ready.position;
+            let token : PsToken := {
+              kind := PsTokenKind.endOfInput
+              text := ""
+              span := psLexSpan position position
+            };
             Except.ok
-              (List.cons
-                {
-                  kind := PsTokenKind.endOfInput
-                  text := ""
-                  span := psLexSpan position position
-                }
-                List.nil)
+              (List.cons token List.nil)
           else
             match psLexReadToken ready with
             | Except.error error => Except.error error

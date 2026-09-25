@@ -84,7 +84,7 @@ structure Environment where
   Derived lookup index.  Entries are still validated with structural Name.eq,
   so bucket collisions cannot change lookup semantics.
   -/
-  constantIndex : List EnvironmentBucket
+  constantIndex : List EnvironmentBucket := []
   quotInitialized : Bool
 
 def Environment.empty : Environment :=
@@ -93,7 +93,14 @@ def Environment.empty : Environment :=
 def Environment.find? (env : Environment) (name : Name) : Option ConstantInfo :=
   match findEnvironmentBucket? name.bucketHash env.constantIndex with
   | some values => findConstantInBucket? name values
-  | none => none
+  | none =>
+      -- Preserve correctness for explicitly constructed legacy environments
+      -- that omit the derived index. Normal indexed environments do not take
+      -- this fallback on bucket misses.
+      if env.constantIndex.isEmpty && !env.constants.isEmpty then
+        findConstantInBucket? name env.constants
+      else
+        none
 
 def Environment.contains (env : Environment) (name : Name) : Bool :=
   env.find? name |>.isSome

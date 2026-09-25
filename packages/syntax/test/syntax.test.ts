@@ -1375,6 +1375,47 @@ throws(
   /PS_LEAN_SUBSET_PARTIAL/,
 );
 {
+  const parsed=parseV061LeanSubsetModule(
+    'def eqBool : Bool → Bool → Bool\n'+
+    '  | true, true => true\n'+
+    '  | _, _ => false\n',
+  );
+  const declaration=parsed.declarations[0];
+  equal(declaration?.kind,'def');
+  if(declaration?.kind==='def'){
+    equal(declaration.params.length,2);
+    equal(declaration.params[0]?.name,'_eq_arg_0');
+    equal(declaration.params[1]?.name,'_eq_arg_1');
+    equal(declaration.resultType.kind,'named');
+    equal(declaration.body.kind,'match');
+    if(declaration.body.kind==='match'){
+      equal(declaration.body.alternatives.length,2);
+      equal(declaration.body.alternatives[0]?.pattern.kind,'bool');
+      equal(declaration.body.alternatives[1]?.pattern.kind,'wildcard');
+      equal(declaration.body.alternatives[0]?.body.kind,'match');
+    }
+  }
+  const lowered=lowerV061ModuleToLean(parsed);
+  equal(lowered.includes('match _eq_arg_0 with'),true);
+  equal(lowered.includes('match _eq_arg_1 with'),true);
+}
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'def badEq : Bool → Bool\n'+
+    '  | _ => false\n'+
+    '  | true => true\n',
+  ),
+  /PS_LEAN_SUBSET_EQUATION_WILDCARD_ORDER/,
+);
+throws(
+  ()=>parseV061LeanSubsetModule(
+    'def badArity : Bool → Bool\n'+
+    '  | true => true\n'+
+    '  | false, true => false\n',
+  ),
+  /PS_LEAN_SUBSET_EQUATION_ARITY/,
+);
+{
   const proofScript=parseV061Module(
     'def choose(flag : Bool) : Nat := match flag with { '+
     '| true => 1; | false => 2; };',

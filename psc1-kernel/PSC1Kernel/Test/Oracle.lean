@@ -1578,12 +1578,131 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "constructor-field recursor did not pass the field to the minor"
     (PSC1Kernel.Expr.eq oursBoxReduced (.lit (.nat 41)))
 
-  -- Recursive fields remain intentionally unsupported in this narrow K5 slice.
+  -- Direct strictly-positive recursive fields generate induction hypotheses
+  -- after all constructor fields, and computation rules synthesize recursive
+  -- calls internally rather than taking IHs as rule lambda binders.
+  let NatLike : PSC1Kernel.Name := .str .anonymous "OracleNatLike"
+  let NatLikeZero : PSC1Kernel.Name := .str NatLike "zero"
+  let NatLikeSucc : PSC1Kernel.Name := .str NatLike "succ"
+  let NatLikeRec : PSC1Kernel.Name := .str NatLike "rec"
+  let natLikeT : PSC1Kernel.Expr := .const NatLike []
+  let natLikeSuccType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "pred") natLikeT natLikeT .default
+  let natLikeBase :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursNatLike ← exceptToIO
+    "PSC1 direct recursive inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive natLikeBase {
+      levelParams := []
+      name := NatLike
+      type := type1
+      ctors := [
+        { name := NatLikeZero, type := natLikeT },
+        { name := NatLikeSucc, type := natLikeSuccType }
+      ]
+      isUnsafe := false
+    })
+  let leanNatLike0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanNatLikeNat ←
+    match Lean.Kernel.Environment.addDecl leanNatLike0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected NatLike oracle Nat axiom"
+  let leanNatLike1 ←
+    match Lean.Kernel.Environment.addDecl leanNatLikeNat {} (.inductDecl [] 0 [{
+      name := toLeanName NatLike
+      type := toLeanExpr type1
+      ctors := [
+        { name := toLeanName NatLikeZero, type := toLeanExpr natLikeT },
+        { name := toLeanName NatLikeSucc, type := toLeanExpr natLikeSuccType }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected direct recursive inductive oracle"
+  let leanNatLikeEnv := Lean.Environment.ofKernelEnv leanNatLike1
+  for name in [NatLike, NatLikeZero, NatLikeSucc, NatLikeRec] do
+    let some oursInfo := oursNatLike.find? name
+      | throw <| IO.userError "PSC1 direct recursive inductive metadata missing"
+    let some leanInfo := leanNatLike1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 direct recursive inductive metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("direct recursive inductive generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursNatLike.find? NatLike with
+  | some (.inductInfo info) =>
+      assertTrue "PSC1 direct recursive inductive was not marked recursive"
+        info.isRec
+      assertTrue "PSC1 direct recursive inductive was incorrectly marked reflexive"
+        (!info.isReflexive)
+  | _ =>
+      throw <| IO.userError "PSC1 direct recursive inductive info missing"
+  match leanNatLike1.find? (toLeanName NatLike) with
+  | some (.inductInfo info) =>
+      assertTrue "Lean 4.34 direct recursive inductive was not marked recursive"
+        info.isRec
+      assertTrue "Lean 4.34 direct recursive inductive unexpectedly reflexive"
+        (!info.isReflexive)
+  | _ =>
+      throw <| IO.userError "Lean 4.34 direct recursive inductive info missing"
+
+  let natLikeMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "n") natLikeT natT .default
+  let natLikeZeroMinor : PSC1Kernel.Expr := .lit (.nat 7)
+  let natLikeSuccMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "pred") natLikeT
+      (.lam (.str .anonymous "pred_ih") natT (.bvar 0) .default)
+      .default
+  let natLikeMajor : PSC1Kernel.Expr :=
+    .app (.const NatLikeSucc []) (.const NatLikeZero [])
+  let natLikeRecApp :=
+    PSC1Kernel.applyArgs (.const NatLikeRec [.succ .zero])
+      [natLikeMotive, natLikeZeroMinor, natLikeSuccMinor, natLikeMajor]
+  let natLikeCtx := PSC1Kernel.CheckerContext.empty oursNatLike
+  let natLikeResultType ← exceptToIO
+    "PSC1 direct recursive recursor typecheck"
+    (PSC1Kernel.check natLikeCtx natLikeRecApp)
+  let natLikeTypeOk ← exceptToIO
+    "PSC1 direct recursive recursor result defeq"
+    (PSC1Kernel.isDefEq natLikeCtx natLikeResultType natT)
+  assertTrue "PSC1 direct recursive recursor result type mismatch" natLikeTypeOk
+  let oursNatLikeReduced ← exceptToIO
+    "PSC1 direct recursive recursor reduction"
+    (PSC1Kernel.whnf natLikeCtx natLikeRecApp)
+  let leanNatLikeType ←
+    match Lean.Kernel.check leanNatLikeEnv ({} : Lean.LocalContext)
+        (toLeanExpr natLikeRecApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected generated NatLike recursor application"
+  assertTrue "direct recursive recursor result type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr natLikeResultType) leanNatLikeType)
+  let leanNatLikeReduced ← kernelExprWhnf leanNatLikeEnv natLikeRecApp
+  assertTrue "direct recursive recursor reduction differs from Lean 4.34"
+    (toLeanExpr oursNatLikeReduced == leanNatLikeReduced)
+  assertTrue "direct recursive recursor did not feed the recursive hypothesis to the minor"
+    (PSC1Kernel.Expr.eq oursNatLikeReduced (.lit (.nat 7)))
+
+  -- Function-recursive fields are reflexive in Lean's terminology and remain
+  -- outside this direct-recursion slice.
   let Bad : PSC1Kernel.Name := .str .anonymous "OracleSimpleBad"
   let BadMk : PSC1Kernel.Name := .str Bad "mk"
   let badExpr : PSC1Kernel.Expr := .const Bad []
+  let badFunctionType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "x") badExpr badExpr .default
   let badCtorType : PSC1Kernel.Expr :=
-    .forallE (.str .anonymous "next") badExpr badExpr .default
+    .forallE (.str .anonymous "next") badFunctionType badExpr .default
   match PSC1Kernel.Kernel.addSimpleInductive .empty {
     levelParams := []
     name := Bad
@@ -1592,7 +1711,7 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
     isUnsafe := false
   } with
   | .ok _ =>
-      throw <| IO.userError "simple inductive admission accepted a recursive constructor field"
+      throw <| IO.userError "simple inductive admission accepted unsupported functional recursion"
   | .error _ => pure ()
 
 def assertOrdinaryRecursorOracle : IO Unit := do

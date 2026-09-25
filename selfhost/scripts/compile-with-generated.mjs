@@ -25,14 +25,14 @@ const packageBySection = new Map([
 function usage() {
   return [
     "usage:",
-    "  node scripts/compile-with-generated.mjs <compiler.js> <entry.ps> <output.ts|output.js>",
+    "  node scripts/compile-with-generated.mjs <compiler.js> <entry.lean|entry.ps> <output.ts|output.js>",
   ].join("\n");
 }
 
 function parseImports(source) {
   const imports = [];
   for (const line of source.split(/\r?\n/u)) {
-    const match = line.match(/^\s*import\s+([A-Za-z0-9_.]+)\s*$/u);
+    const match = line.match(/^\s*import\s+([A-Za-z0-9_.]+)\s*;?\s*$/u);
     if (match) imports.push(match[1]);
   }
   return imports;
@@ -41,7 +41,7 @@ function parseImports(source) {
 function stripImports(source) {
   return source
     .split(/\r?\n/u)
-    .filter((line) => !/^\s*import\s+[A-Za-z0-9_.]+\s*$/u.test(line))
+    .filter((line) => !/^\s*import\s+[A-Za-z0-9_.]+\s*;?\s*$/u.test(line))
     .join("\n")
     .trim();
 }
@@ -62,10 +62,10 @@ function findWorkspaceRoot(entryPath) {
   throw new Error(`PSC1_SELFHOST_WORKSPACE_NOT_FOUND: ${entryPath}`);
 }
 
-function moduleProofScriptPath(workspaceRoot, moduleName) {
+function moduleBasePath(workspaceRoot, moduleName) {
   const parts = moduleName.split(".");
   if (parts[0] === "ProofScript") {
-    return path.join(workspaceRoot, "stdlib", ...parts) + ".ps";
+    return path.join(workspaceRoot, "stdlib", ...parts);
   }
   if (parts[0] === "Ps" && parts.length >= 2) {
     const packageName = packageBySection.get(parts[1]);
@@ -78,47 +78,27 @@ function moduleProofScriptPath(workspaceRoot, moduleName) {
       packageName,
       "src",
       ...parts,
-    ) + ".ps";
+    );
   }
-  throw new Error(`PSC1_SELFHOST_UNKNOWN_IMPORT: ${moduleName}`);
+  return path.join(workspaceRoot, ...parts);
 }
 
-async function flattenProject(entryPath) {
-  const workspaceRoot = findWorkspaceRoot(entryPath);
-  const visited = new Set();
-  const ordered = [];
+function resolveModuleSource(workspaceRoot, moduleName) {
+  const base = moduleBasePath(workspaceRoot, moduleName);
+  const leanPath = base + ".lean";
+  const proofScriptPath = base + ".ps";
+  const hasLean = existsSync(leanPath);
+  const hasProofScript = existsSync(proofScriptPath);
 
-  async function visit(sourcePath) {
-    const absolute = path.resolve(sourcePath);
-    if (visited.has(absolute)) return;
-    visited.add(absolute);
-
-    if (!existsSync(absolute)) {
-      throw new Error(`PSC1_SELFHOST_SOURCE_MISSING: ${absolute}`);
+  if (hasLean && hasProofScript) {
+    if (moduleName.startsWith("Ps.") || moduleName.startsWith("ProofScript.")) {
+      return leanPath;
     }
-
-    const source = await readFile(absolute, "utf8");
-    for (const moduleName of parseImports(source)) {
-      await visit(moduleProofScriptPath(workspaceRoot, moduleName));
-    }
-    ordered.push({ path: absolute, source });
+    throw new Error(`PSC1_SELFHOST_SOURCE_AMBIGUITY: ${moduleName}`);
   }
-
-  await visit(entryPath);
-
-  const chunks = [];
-  for (const item of ordered) {
-    const body = stripImports(item.source);
-    if (body.length > 0) {
-      chunks.push(body);
-    }
-  }
-
-  return {
-    workspaceRoot,
-    moduleCount: ordered.length,
-    source: chunks.join("\n\n") + "\n",
-  };
+  if (hasLean) return leanPath;
+  if (hasProofScript) return proofScriptPath;
+  throw new Error(`PSC1_SELFHOST_SOURCE_MISSING: ${moduleName}`);
 }
 
 function exceptTag(value) {
@@ -143,17 +123,75 @@ function unwrapExcept(value, stage) {
 
 function requireCompilerApi(compiler) {
   const required = [
-    "psParseProofScriptSource",
-    "psElabModule",
-    "psBootstrapPreludeEnvironment",
-    "psEraseCoreModule",
-    "psTsEmitModule",
+    "PsCompilerSourceKind",
+    "psCompilerTranslateSource",
+    "psCompilerTypeScriptSource",
   ];
   for (const name of required) {
     if (!(name in compiler)) {
       throw new Error(`PSC1_SELFHOST_COMPILER_EXPORT_MISSING: ${name}`);
     }
   }
+}
+
+function sourceKind(compiler, sourcePath) {
+  if (sourcePath.endsWith(".lean")) {
+    return compiler.PsCompilerSourceKind.lean;
+  }
+  if (sourcePath.endsWith(".ps")) {
+    return compiler.PsCompilerSourceKind.proofScript;
+  }
+  throw new Error(`PSC1_SELFHOST_SOURCE_KIND: ${sourcePath}`);
+}
+
+async function flattenProject(compiler, entryPath) {
+  const workspaceRoot = findWorkspaceRoot(entryPath);
+  const targetKind = sourceKind(compiler, entryPath);
+  const visited = new Set();
+  const ordered = [];
+
+  async function visit(sourcePath) {
+    const absolute = path.resolve(sourcePath);
+    if (visited.has(absolute)) return;
+    visited.add(absolute);
+
+    if (!existsSync(absolute)) {
+      throw new Error(`PSC1_SELFHOST_SOURCE_MISSING: ${absolute}`);
+    }
+
+    const source = await readFile(absolute, "utf8");
+    for (const moduleName of parseImports(source)) {
+      await visit(resolveModuleSource(workspaceRoot, moduleName));
+    }
+    ordered.push({ path: absolute, source });
+  }
+
+  await visit(entryPath);
+
+  const chunks = [];
+  for (const item of ordered) {
+    const itemKind = sourceKind(compiler, item.path);
+    const normalized =
+      item.path.endsWith(entryPath.endsWith(".lean") ? ".lean" : ".ps")
+        ? item.source
+        : unwrapExcept(
+            compiler.psCompilerTranslateSource(
+              itemKind,
+              targetKind,
+              item.source,
+            ),
+            "translate",
+          );
+    const body = stripImports(normalized);
+    if (body.length > 0) chunks.push(body);
+  }
+
+  return {
+    workspaceRoot,
+    moduleCount: ordered.length,
+    sourceKind: targetKind,
+    source: chunks.join("\n\n") + "\n",
+  };
 }
 
 function compileTypeScript(typeScriptPath) {
@@ -210,37 +248,25 @@ const outputTsPath =
 if (!existsSync(compilerPath)) {
   throw new Error(`PSC1_SELFHOST_COMPILER_MISSING: ${compilerPath}`);
 }
+if (!entryPath.endsWith(".ps") && !entryPath.endsWith(".lean")) {
+  throw new Error(`PSC1_SELFHOST_SOURCE_KIND: ${entryPath}`);
+}
 if (!outputTsPath.endsWith(".ts")) {
   throw new Error(
     `PSC1_SELFHOST_OUTPUT_KIND: expected .ts or .js, got ${requestedOutputPath}`,
   );
 }
 
-const project = await flattenProject(entryPath);
 const compiler = await import(pathToFileURL(compilerPath).href);
 requireCompilerApi(compiler);
 
-const parsed = unwrapExcept(
-  compiler.psParseProofScriptSource(project.source),
-  "parse",
-);
-const elaborated = unwrapExcept(
-  compiler.psElabModule(
-    compiler.psBootstrapPreludeEnvironment,
-    parsed,
-  ),
-  "elab",
-);
-const ir = unwrapExcept(
-  compiler.psEraseCoreModule(
-    elaborated.environment,
-    elaborated.declarations,
-  ),
-  "erasure",
-);
+const project = await flattenProject(compiler, entryPath);
 const typeScript = unwrapExcept(
-  compiler.psTsEmitModule(ir),
-  "typescript",
+  compiler.psCompilerTypeScriptSource(
+    project.sourceKind,
+    project.source,
+  ),
+  "compile",
 );
 
 await mkdir(path.dirname(outputTsPath), { recursive: true });

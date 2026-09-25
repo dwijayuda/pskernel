@@ -251,6 +251,7 @@ def psWasmFindFunctionIndex
 
 def psWasmEncodeInstruction
     (structures : List PsWasmStructType)
+    (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction)
     (instruction : PsWasmInstruction) :
     Except PsWasmEncodeError (List UInt8) :=
@@ -393,6 +394,39 @@ def psWasmEncodeInstruction
             ([psWasmByte 251]
               ++ psWasmEncodeUleb 22
               ++ psWasmEncodeSleb (Int.ofNat typeIndex))
+  | .refFunc functionName =>
+      match psWasmFindFunctionIndex functions functionName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownFunction functionName)
+      | some functionIndex =>
+          Except.ok
+            ([psWasmByte 210]
+              ++ psWasmEncodeUleb functionIndex)
+  | .refCastFunction typeName =>
+      match
+          psWasmFindFunctionTypeIndex
+            structures
+            functionTypes
+            typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownFunctionType typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 22
+              ++ psWasmEncodeSleb (Int.ofNat typeIndex))
+  | .callRef typeName =>
+      match
+          psWasmFindFunctionTypeIndex
+            structures
+            functionTypes
+            typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownFunctionType typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 20]
+              ++ psWasmEncodeUleb typeIndex)
   | .f32ConstBits _ =>
       Except.error PsWasmEncodeError.unsupportedInstruction
   | .f64ConstBits _ =>
@@ -400,15 +434,24 @@ def psWasmEncodeInstruction
 
 def psWasmEncodeInstructions
     (structures : List PsWasmStructType)
+    (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction) :
     List PsWasmInstruction ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | instruction :: rest =>
-      match psWasmEncodeInstruction structures functions instruction with
+      match psWasmEncodeInstruction
+          structures
+          functionTypes
+          functions
+          instruction with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeInstructions structures functions rest with
+          match psWasmEncodeInstructions
+              structures
+              functionTypes
+              functions
+              rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
@@ -432,13 +475,18 @@ def psWasmEncodeLocalDeclarations
 
 def psWasmEncodeFunctionBody
     (structures : List PsWasmStructType)
+    (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction)
     (function : PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
   match psWasmEncodeLocalDeclarations structures function.locals with
   | Except.error error => Except.error error
   | Except.ok encodedLocals =>
-      match psWasmEncodeInstructions structures functions function.body with
+      match psWasmEncodeInstructions
+          structures
+          functionTypes
+          functions
+          function.body with
       | Except.error error => Except.error error
       | Except.ok instructions =>
           let body :=
@@ -450,15 +498,24 @@ def psWasmEncodeFunctionBody
 
 def psWasmEncodeFunctionBodies
     (structures : List PsWasmStructType)
+    (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction) :
     List PsWasmFunction ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | function :: rest =>
-      match psWasmEncodeFunctionBody structures functions function with
+      match psWasmEncodeFunctionBody
+          structures
+          functionTypes
+          functions
+          function with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeFunctionBodies structures functions rest with
+          match psWasmEncodeFunctionBodies
+              structures
+              functionTypes
+              functions
+              rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)

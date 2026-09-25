@@ -237,6 +237,22 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
             ]
       },
       {
+        name := "pairLeft"
+        typeParameters := []
+        parameters := [
+          {
+            name := "pair"
+            type := PsVerifiedIrType.named "Pair" []
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.projection
+            "Pair"
+            (PsVerifiedIrExpr.var "pair")
+            "left"
+      },
+      {
         name := "wrapNat"
         typeParameters := []
         parameters := [

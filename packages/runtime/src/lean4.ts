@@ -645,7 +645,8 @@ export type Lean434ExternEffect='pure'|'st-action';
 export type Lean434ExternResultAdapter='identity'|'decidable';
 
 export type Lean434EvaluatorExternAdapter=
-  |'instantiate-level-mvars';
+  |'instantiate-level-mvars'
+  |'instantiate-expr-mvars';
 
 export interface Lean434EvaluatorExternBinding {
   readonly leanDeclaration:string;
@@ -667,6 +668,13 @@ readonly Lean434EvaluatorExternBinding[]=[
     leanSymbol:'lean_instantiate_level_mvars',
     arity:2,
     adapter:'instantiate-level-mvars',
+    upstreamSource:'Lean/MetavarContext.lean',
+  },
+  {
+    leanDeclaration:'Lean.instantiateExprMVarsImp',
+    leanSymbol:'lean_instantiate_expr_mvars',
+    arity:2,
+    adapter:'instantiate-expr-mvars',
     upstreamSource:'Lean/MetavarContext.lean',
   },
 ] as const;

@@ -124,6 +124,12 @@ jobs:
           if (instance.exports.addThenOne(20, 21) !== 42) {
             throw new Error('PSC1_WASM_RUNTIME_DIRECT_CALL_RESULT');
           }
+          if (instance.exports.selectU32(1, 42, 7) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_IF_TRUE_RESULT');
+          }
+          if (instance.exports.selectU32(0, 42, 7) !== 7) {
+            throw new Error('PSC1_WASM_RUNTIME_IF_FALSE_RESULT');
+          }
           console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
           NODE
 

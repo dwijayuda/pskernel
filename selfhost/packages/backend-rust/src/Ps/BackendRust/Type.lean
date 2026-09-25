@@ -184,6 +184,27 @@ def psRustEmitType
     Except PsRustEmitError String :=
   psRustEmitTypeWithFuel 4096 type
 
+def psRustMachineIntegerSuffix
+    (type : PsVerifiedIrMachineIntegerType) : String :=
+  match type with
+  | PsVerifiedIrMachineIntegerType.uint8 => "u8"
+  | PsVerifiedIrMachineIntegerType.uint16 => "u16"
+  | PsVerifiedIrMachineIntegerType.uint32 => "u32"
+  | PsVerifiedIrMachineIntegerType.uint64 => "u64"
+  | PsVerifiedIrMachineIntegerType.usize => "usize"
+  | PsVerifiedIrMachineIntegerType.int8 => "i8"
+  | PsVerifiedIrMachineIntegerType.int16 => "i16"
+  | PsVerifiedIrMachineIntegerType.int32 => "i32"
+  | PsVerifiedIrMachineIntegerType.int64 => "i64"
+  | PsVerifiedIrMachineIntegerType.isize => "isize"
+
+def psRustEmitMachineIntegerLiteral
+    (type : PsVerifiedIrMachineIntegerType)
+    (value : Int) : String :=
+  psRustConcat2
+    (toString value)
+    (psRustMachineIntegerSuffix type)
+
 def psRustEmitLiteral
     (literal : PsVerifiedIrLiteral) : String :=
   match literal with
@@ -197,6 +218,8 @@ def psRustEmitLiteral
         "__ps_int_lit("
         (psRustQuote (toString value))
         ")"
+  | PsVerifiedIrLiteral.machineInteger type value =>
+      psRustEmitMachineIntegerLiteral type value
   | PsVerifiedIrLiteral.string value =>
       psRustConcat3
         "String::from("

@@ -40,9 +40,17 @@ function parseImports(source) {
 function findWorkspaceRoot(entryPath) {
   let current = path.dirname(entryPath);
   for (let fuel = 0; fuel < 64; fuel += 1) {
+    const hasGeneratedManifest = [
+      ".proofscript-bootstrap.json",
+      ".proofscript-selfhost.json",
+      ".proofscript-project.json",
+    ].some((name) => existsSync(path.join(current, name)));
     if (
-      existsSync(path.join(current, "package.json")) &&
-      existsSync(path.join(current, "packages"))
+      existsSync(path.join(current, "packages")) &&
+      (
+        existsSync(path.join(current, "package.json")) ||
+        hasGeneratedManifest
+      )
     ) {
       return current;
     }

@@ -4,7 +4,22 @@ import Ps.BackendRust.Module
 def psBackendDiffModule : PsVerifiedIrModule :=
   {
     imports := []
-    structures := []
+    structures := [
+      {
+        name := "Pair"
+        typeParameters := []
+        fields := [
+          {
+            name := "left"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "right"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+      }
+    ]
     inductives := [
       {
         name := "Maybe"
@@ -27,6 +42,31 @@ def psBackendDiffModule : PsVerifiedIrModule :=
       }
     ]
     declarations := [
+      {
+        name := "diffProjection"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "right"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.projection
+            "Pair"
+            (PsVerifiedIrExpr.record
+              "Pair"
+              [
+                ("left", PsVerifiedIrExpr.var "left"),
+                ("right", PsVerifiedIrExpr.var "right")
+              ])
+            "left"
+      },
       {
         name := "applyNat"
         typeParameters := []

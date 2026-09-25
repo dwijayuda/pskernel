@@ -27,13 +27,16 @@ def psPrintLeanConcat6
   let abcde := psPrintLeanConcat5 a b c d e;
   psPrintLeanConcat2 abcde f
 
-def psPrintLeanTermWithFuel
-    (fuel : Nat)
-    (term : PsSyntaxTerm) :
-    Except PsSourcePrintError String :=
-  match fuel with
-  | 0 => Except.error PsSourcePrintError.fuelExhausted
+def psPrintLeanTermWithFuel :
+    Nat -> PsSyntaxTerm -> Except PsSourcePrintError String
+  | 0 =>
+      fun (_term : PsSyntaxTerm) =>
+        Except.error PsSourcePrintError.fuelExhausted
   | remaining + 1 =>
+      let smaller :
+          PsSyntaxTerm -> Except PsSourcePrintError String :=
+        smaller;
+      fun (term : PsSyntaxTerm) =>
       match term with
       | .reference name =>
           psPrintSyntaxName name
@@ -58,7 +61,7 @@ def psPrintLeanTermWithFuel
               match psPrintSyntaxName field.fst with
               | Except.error error => Except.error error
               | Except.ok name =>
-                  match psPrintLeanTermWithFuel remaining field.snd with
+                  match smaller field.snd with
                   | Except.error error => Except.error error
                   | Except.ok value =>
                       Except.ok
@@ -72,12 +75,12 @@ def psPrintLeanTermWithFuel
           if psPrintLeanBoolNot (psSyntaxTermSimpleForApplication fn) then
             Except.error PsSourcePrintError.unsupportedApplication
           else
-            match psPrintLeanTermWithFuel remaining fn with
+            match smaller fn with
             | Except.error error => Except.error error
             | Except.ok printedFn =>
                 let printArgument :=
                   fun (arg : PsSyntaxTerm) =>
-                    match psPrintLeanTermWithFuel remaining arg with
+                    match smaller arg with
                     | Except.error error => Except.error error
                     | Except.ok printed =>
                         if psSyntaxTermSimpleForApplication arg then
@@ -100,7 +103,7 @@ def psPrintLeanTermWithFuel
                   match psPrintSyntaxName head.name with
                   | Except.error error => Except.error error
                   | Except.ok name =>
-                      match psPrintLeanTermWithFuel remaining type with
+                      match smaller type with
                       | Except.error error => Except.error error
                       | Except.ok printedType =>
                           let delimiters :=
@@ -115,7 +118,7 @@ def psPrintLeanTermWithFuel
           match binders.mapM printBinder with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
-              match psPrintLeanTermWithFuel remaining body with
+              match smaller body with
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   Except.ok
@@ -132,7 +135,7 @@ def psPrintLeanTermWithFuel
                   match psPrintSyntaxName head.name with
                   | Except.error error => Except.error error
                   | Except.ok name =>
-                      match psPrintLeanTermWithFuel remaining type with
+                      match smaller type with
                       | Except.error error => Except.error error
                       | Except.ok printedType =>
                           let delimiters :=
@@ -147,7 +150,7 @@ def psPrintLeanTermWithFuel
           match binders.mapM printBinder with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
-              match psPrintLeanTermWithFuel remaining body with
+              match smaller body with
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   Except.ok
@@ -170,10 +173,10 @@ def psPrintLeanTermWithFuel
               match printType with
               | Except.error error => Except.error error
               | Except.ok printedType =>
-                  match psPrintLeanTermWithFuel remaining value with
+                  match smaller value with
                   | Except.error error => Except.error error
                   | Except.ok printedValue =>
-                      match psPrintLeanTermWithFuel remaining body with
+                      match smaller body with
                       | Except.error error => Except.error error
                       | Except.ok printedBody =>
                           Except.ok
@@ -185,13 +188,13 @@ def psPrintLeanTermWithFuel
                               printedValue
                               (psPrintLeanConcat2 "; " printedBody))
       | .ifE condition thenBranch elseBranch _ =>
-          match psPrintLeanTermWithFuel remaining condition with
+          match smaller condition with
           | Except.error error => Except.error error
           | Except.ok printedCondition =>
-              match psPrintLeanTermWithFuel remaining thenBranch with
+              match smaller thenBranch with
               | Except.error error => Except.error error
               | Except.ok printedThen =>
-                  match psPrintLeanTermWithFuel remaining elseBranch with
+                  match smaller elseBranch with
                   | Except.error error => Except.error error
                   | Except.ok printedElse =>
                       Except.ok
@@ -203,7 +206,7 @@ def psPrintLeanTermWithFuel
                           " else "
                           printedElse)
       | .matchE scrutinee alternatives _ =>
-          match psPrintLeanTermWithFuel remaining scrutinee with
+          match smaller scrutinee with
           | Except.error error => Except.error error
           | Except.ok printedScrutinee =>
               let printAlternative :=
@@ -216,7 +219,7 @@ def psPrintLeanTermWithFuel
                           | Except.error error => Except.error error
                           | Except.ok printedPattern =>
                               match
-                                  psPrintLeanTermWithFuel remaining body with
+                                  smaller body with
                               | Except.error error => Except.error error
                               | Except.ok printedBody =>
                                   Except.ok

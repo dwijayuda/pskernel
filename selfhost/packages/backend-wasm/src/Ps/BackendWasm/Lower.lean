@@ -2,6 +2,7 @@ import Ps.CompilerIr.Specialize
 import Ps.BackendWasm.Binary
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
+import Ps.BackendWasm.RuntimeNat
 
 inductive PsWasmLowerError where
   | unsupportedType
@@ -2135,4 +2136,17 @@ def psWasmLowerModule
   | Except.error _ =>
       Except.error PsWasmLowerError.unsupportedModuleFeature
   | Except.ok specialized =>
-      psWasmLowerSpecializedModule profile specialized
+      let augmented := psWasmAugmentNatRuntime specialized
+      match psWasmLowerSpecializedModule profile augmented with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            structures := lowered.structures
+            arrays := lowered.arrays
+            functionTypes := lowered.functionTypes
+            functions := lowered.functions
+            functionRefs := lowered.functionRefs
+            exports :=
+              psWasmExportsOfDeclarations
+                specialized.declarations
+          }

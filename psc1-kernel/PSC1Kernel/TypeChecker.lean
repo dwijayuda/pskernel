@@ -733,21 +733,65 @@ def appHeadLevelsEquivalent (a b : Expr) : Bool :=
 
 mutual
 
-partial def isDefEqBinding
+/--
+Lean 4.34 compares consecutive lambda binders as one spine.  Opening all
+dependent binders with shared locals and delaying substitution is observable
+because kernel definitional equality is deliberately incomplete.
+-/
+partial def isDefEqLambdaSpine
     (ctx : CheckerContext)
-    (leftName : Name)
-    (leftDomain leftBody : Expr)
-    (leftBinderInfo : BinderInfo)
-    (rightName : Name)
-    (rightDomain rightBody : Expr)
-    (rightBinderInfo : BinderInfo) : Except String Bool := do
-  if !(← isDefEq ctx leftDomain rightDomain) then
-    return false
-  let (fresh, child) :=
-    ctx.withLocal rightName rightDomain rightBinderInfo
-  let leftOpened := leftBody.instantiate1 (.fvar fresh)
-  let rightOpened := rightBody.instantiate1 (.fvar fresh)
-  isDefEq child leftOpened rightOpened
+    (left right : Expr)
+    (subst : List Expr := []) : Except String Bool := do
+  match left, right with
+  | .lam _ leftDomain leftBody _,
+      .lam rightName rightDomain rightBody rightBinderInfo => do
+      let leftDomain' := leftDomain.instantiateRev subst
+      let rightDomain' := rightDomain.instantiateRev subst
+      if !Expr.eq leftDomain rightDomain then
+        if !(← isDefEq ctx leftDomain' rightDomain') then
+          return false
+      if leftBody.hasLooseBVar || rightBody.hasLooseBVar then
+        let (fresh, child) :=
+          ctx.withLocal rightName rightDomain' rightBinderInfo
+        isDefEqLambdaSpine
+          child leftBody rightBody (subst ++ [.fvar fresh])
+      else
+        -- Lean uses an internal don't-care term here.  The value cannot be
+        -- observed because neither remaining body references this binder.
+        isDefEqLambdaSpine
+          ctx leftBody rightBody (subst ++ [.sort .zero])
+  | _, _ =>
+      isDefEq ctx
+        (left.instantiateRev subst)
+        (right.instantiateRev subst)
+
+/--
+Lean 4.34's corresponding whole-spine comparison for forall expressions.
+-/
+partial def isDefEqForallSpine
+    (ctx : CheckerContext)
+    (left right : Expr)
+    (subst : List Expr := []) : Except String Bool := do
+  match left, right with
+  | .forallE _ leftDomain leftBody _,
+      .forallE rightName rightDomain rightBody rightBinderInfo => do
+      let leftDomain' := leftDomain.instantiateRev subst
+      let rightDomain' := rightDomain.instantiateRev subst
+      if !Expr.eq leftDomain rightDomain then
+        if !(← isDefEq ctx leftDomain' rightDomain') then
+          return false
+      if leftBody.hasLooseBVar || rightBody.hasLooseBVar then
+        let (fresh, child) :=
+          ctx.withLocal rightName rightDomain' rightBinderInfo
+        isDefEqForallSpine
+          child leftBody rightBody (subst ++ [.fvar fresh])
+      else
+        isDefEqForallSpine
+          ctx leftBody rightBody (subst ++ [.sort .zero])
+  | _, _ =>
+      isDefEq ctx
+        (left.instantiateRev subst)
+        (right.instantiateRev subst)
 
 partial def isDefEqArgs
     (ctx : CheckerContext)
@@ -869,10 +913,10 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
   -- opening both bodies with the same fresh local. Binder names/annotations
   -- are not part of definitional equality.
   match a, b with
-  | .lam ln ld lb lbi, .lam rn rd rb rbi =>
-      return ← isDefEqBinding ctx ln ld lb lbi rn rd rb rbi
-  | .forallE ln ld lb lbi, .forallE rn rd rb rbi =>
-      return ← isDefEqBinding ctx ln ld lb lbi rn rd rb rbi
+  | .lam .., .lam .. =>
+      return ← isDefEqLambdaSpine ctx a b
+  | .forallE .., .forallE .. =>
+      return ← isDefEqForallSpine ctx a b
   | _, _ => pure ()
 
   -- Final Lean 4.34 reflection fast path. eagerReduce deliberately extends
@@ -896,10 +940,10 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
   | some value => return value
   | none => pure ()
   match aCore, bCore with
-  | .lam ln ld lb lbi, .lam rn rd rb rbi =>
-      return ← isDefEqBinding ctx ln ld lb lbi rn rd rb rbi
-  | .forallE ln ld lb lbi, .forallE rn rd rb rbi =>
-      return ← isDefEqBinding ctx ln ld lb lbi rn rd rb rbi
+  | .lam .., .lam .. =>
+      return ← isDefEqLambdaSpine ctx aCore bCore
+  | .forallE .., .forallE .. =>
+      return ← isDefEqForallSpine ctx aCore bCore
   | _, _ => pure ()
 
   -- Final Lean 4.34 applies proof irrelevance before lazy delta.
@@ -939,11 +983,11 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
     let hf ← isDefEq ctx f₁ f₂
     if hf then
       if ← isDefEq ctx a₁ a₂ then return true
-  | .forallE n₁ d₁ body₁ bi₁, .forallE n₂ d₂ body₂ bi₂ => do
-    if ← isDefEqBinding ctx n₁ d₁ body₁ bi₁ n₂ d₂ body₂ bi₂ then
+  | .forallE .., .forallE .. => do
+    if ← isDefEqForallSpine ctx aFull bFull then
       return true
-  | .lam n₁ d₁ body₁ bi₁, .lam n₂ d₂ body₂ bi₂ => do
-    if ← isDefEqBinding ctx n₁ d₁ body₁ bi₁ n₂ d₂ body₂ bi₂ then
+  | .lam .., .lam .. => do
+    if ← isDefEqLambdaSpine ctx aFull bFull then
       return true
   | .lam _ _ _ _, other => do
     let otherType ← whnf ctx (← infer ctx other)

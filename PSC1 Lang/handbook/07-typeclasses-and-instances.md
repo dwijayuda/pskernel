@@ -10,8 +10,8 @@ A PSC1 `class` is **not** an object-oriented class.
 Representative shape:
 
 ```proofscript
-class Sized(α : Type) where {
-  size : α -> Nat;
+class Sized(α: Type) where {
+  size: α -> Nat;
 }
 ```
 

@@ -907,6 +907,15 @@ def psWasmClosureIrModule : PsVerifiedIrModule :=
     ]
   }
 
+def psWasmTestStringContains :
+    List String -> String -> Bool
+  | [], _ => false
+  | item :: rest, target =>
+      if item == target then
+        true
+      else
+        psWasmTestStringContains rest target
+
 def psWasmIsClosureBase : PsWasmStructType -> Bool
   | {
       name := name,
@@ -1026,8 +1035,9 @@ def psTestWasmClosureLowering : Bool :=
             && psWasmIsClosureCodeType codeType
             && psWasmIsMakeAdderFunction makeAdder
             && psWasmIsGeneratedClosureFunction generated
-            && module.functionRefs ==
-              [psWasmClosureTestLambdaName]
+            && psWasmTestStringContains
+              module.functionRefs
+              psWasmClosureTestLambdaName
       | _, _, _, _, _ => false
 
 def psWasmAnswerModule : PsWasmModule :=

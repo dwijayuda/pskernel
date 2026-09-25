@@ -90,6 +90,59 @@ def psTestJsonParserRejectsInvalid : Bool :=
     | _ => false
   trailing && invalidNumber && invalidEscape
 
+def psTestCanonicalJsonValueEncoding : Bool :=
+  let value :=
+    PsJsonValue.object [
+      ("z", PsJsonValue.number "2"),
+      ("a",
+        PsJsonValue.array [
+          PsJsonValue.bool true,
+          PsJsonValue.string "x\ny"
+        ]),
+      ("m", PsJsonValue.nullE)
+    ]
+  match psJsonEncodeCanonical value with
+  | Except.error _ => false
+  | Except.ok encoded =>
+      encoded ==
+        "{\"a\":[true,\"x\\ny\"],\"m\":null,\"z\":2}"
+
+def psTestCanonicalJsonParseEncodeStability : Bool :=
+  let source :=
+    "{\"z\":2,\"a\":[true,\"x\\ny\"],\"m\":null}"
+  match psJsonParse source with
+  | Except.error _ => false
+  | Except.ok parsed =>
+      match psJsonEncodeCanonical parsed with
+      | Except.error _ => false
+      | Except.ok first =>
+          match psJsonParse first with
+          | Except.error _ => false
+          | Except.ok reparsed =>
+              match psJsonEncodeCanonical reparsed with
+              | Except.error _ => false
+              | Except.ok second =>
+                  first == second
+                    && first ==
+                      "{\"a\":[true,\"x\\ny\"],\"m\":null,\"z\":2}"
+
+def psTestCanonicalJsonRejectsInvalidNumber : Bool :=
+  match
+      psJsonEncodeCanonical
+        (PsJsonValue.number "01") with
+  | Except.error (PsJsonEncodeError.invalidNumber "01") => true
+  | _ => false
+
+def psTestCanonicalJsonRejectsDuplicateKeys : Bool :=
+  let value :=
+    PsJsonValue.object [
+      ("a", PsJsonValue.number "1"),
+      ("a", PsJsonValue.number "2")
+    ]
+  match psJsonEncodeCanonical value with
+  | Except.error (PsJsonEncodeError.duplicateObjectKey "a") => true
+  | _ => false
+
 def psTestRejectFreeVariable : Bool :=
   let declaration :=
     PsDeclaration.definitionDecl
@@ -345,6 +398,10 @@ def psBridgeTests : List PsBridgeNamedTest := [
   { name := "JSON parser canonical payload", passed := psTestJsonParserCanonicalPayload },
   { name := "JSON parser escapes and nested values", passed := psTestJsonParserEscapesAndNested },
   { name := "JSON parser rejects malformed input", passed := psTestJsonParserRejectsInvalid },
+  { name := "canonical JSON value encoding", passed := psTestCanonicalJsonValueEncoding },
+  { name := "canonical JSON parse encode stability", passed := psTestCanonicalJsonParseEncodeStability },
+  { name := "canonical JSON rejects invalid number", passed := psTestCanonicalJsonRejectsInvalidNumber },
+  { name := "canonical JSON rejects duplicate keys", passed := psTestCanonicalJsonRejectsDuplicateKeys },
   { name := "persistent Name codec round-trip", passed := psTestPersistentNameCodecRoundTrip },
   { name := "persistent Level codec round-trip", passed := psTestPersistentLevelCodecRoundTrip },
   { name := "persistent Expr codec round-trip", passed := psTestPersistentExprCodecRoundTrip },

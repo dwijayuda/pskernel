@@ -829,10 +829,10 @@ def psParseLeanListPattern
         PsParseError
         (PsParseResult PsSyntaxPattern)) :=
   match cursor.remaining with
-  | List.nil => none
+  | List.nil => Option.none
   | List.cons first afterFirst =>
       match afterFirst with
-      | List.nil => none
+      | List.nil => Option.none
       | List.cons second afterSecond =>
           if psStringEq first.text "[" then
             if psStringEq second.text "]" then
@@ -850,14 +850,14 @@ def psParseLeanListPattern
                   name
                   List.nil
                   span;
-              some
+              Option.some
                 (Except.ok
                   (psLeanPatternParseResult
                     value
                     afterSecond))
             else if psStringEq second.text "::" then
               match afterSecond with
-              | List.nil => none
+              | List.nil => Option.none
               | List.cons third rest =>
                   if
                       psTokenKindEq
@@ -893,20 +893,20 @@ def psParseLeanListPattern
                               tailBinder
                               List.nil))
                           span;
-                      some
+                      Option.some
                         (Except.ok
                           (psLeanPatternParseResult
                             value
                             rest))
                     else
-                      none
+                      Option.none
                   else
-                    none
+                    Option.none
             else
-              none
+              Option.none
           else if psStringEq second.text "::" then
             match afterSecond with
-            | List.nil => none
+            | List.nil => Option.none
             | List.cons third rest =>
                 if
                     psTokenKindEq
@@ -936,17 +936,17 @@ def psParseLeanListPattern
                           headBinder
                           (List.cons tailBinder List.nil))
                         span;
-                    some
+                    Option.some
                       (Except.ok
                         (psLeanPatternParseResult
                           value
                           rest))
                   else
-                    none
+                    Option.none
                 else
-                  none
+                  Option.none
           else
-            none
+            Option.none
 
 def psLeanNatPatternName
     (constructor : String)
@@ -966,7 +966,7 @@ def psParseLeanNatPattern
         PsParseError
         (PsParseResult PsSyntaxPattern)) :=
   match cursor.remaining with
-  | List.nil => none
+  | List.nil => Option.none
   | List.cons first rest =>
       if
           psTokenKindEq
@@ -980,19 +980,19 @@ def psParseLeanNatPattern
                 first.span)
               List.nil
               first.span;
-          some
+          Option.some
             (Except.ok
               (psLeanPatternParseResult
                 value
                 rest))
         else
-          none
+          Option.none
       else
         match rest with
-        | List.nil => none
+        | List.nil => Option.none
         | List.cons plus afterPlus =>
             match afterPlus with
-            | List.nil => none
+            | List.nil => Option.none
             | List.cons one afterOne =>
                 if
                     psTokenKindEq
@@ -1019,29 +1019,29 @@ def psParseLeanNatPattern
                               span)
                             (List.cons binder List.nil)
                             span;
-                        some
+                        Option.some
                           (Except.ok
                             (psLeanPatternParseResult
                               value
                               afterOne))
                       else
-                        none
+                        Option.none
                     else
-                      none
+                      Option.none
                   else
-                    none
+                    Option.none
                 else
-                  none
+                  Option.none
 
 def psParseLeanPattern
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) :=
   match psParseLeanNatPattern cursor with
-  | some result => result
-  | none =>
+  | Option.some result => result
+  | Option.none =>
       match psParseLeanListPattern cursor with
-      | some result => result
-      | none => psParseBasicPattern cursor
+      | Option.some result => result
+      | Option.none => psParseBasicPattern cursor
 
 def psParseLeanMatchAlternativesAtColumnWithFuel
     (parseTerm :

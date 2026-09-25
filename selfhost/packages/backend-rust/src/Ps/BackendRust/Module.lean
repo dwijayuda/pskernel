@@ -101,8 +101,24 @@ def psRustEmitConstructorFieldList
       Except.ok List.nil
   | List.cons field rest =>
       if psRustTypeContainsFunction field.type then
-        Except.error
-          (PsRustEmitError.functionStorageUnsupported field.name)
+        if psRustFunctionTypeIsFirstOrder field.type then
+          match psRustEmitType field.type with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedType =>
+              let rendered :=
+                psRustConcat3
+                  (psRustIdentifier field.name)
+                  ": "
+                  printedType;
+              match psRustEmitConstructorFieldList rest with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok printedRest =>
+                  Except.ok (List.cons rendered printedRest)
+        else
+          Except.error
+            (PsRustEmitError.functionStorageUnsupported field.name)
       else
         match psRustEmitType field.type with
         | Except.error error =>
@@ -487,6 +503,42 @@ def psRustFindStructureFieldType
       else
         psRustFindStructureFieldType target rest
 
+def psRustFindInductiveConstructors
+    (target : String) :
+    List PsVerifiedIrInductive ->
+    Option (List PsVerifiedIrConstructor)
+  | List.nil =>
+      Option.none
+  | List.cons inductiveInfo rest =>
+      if psStringEq inductiveInfo.name target then
+        Option.some inductiveInfo.constructors
+      else
+        psRustFindInductiveConstructors target rest
+
+def psRustFindConstructorFields
+    (target : String) :
+    List PsVerifiedIrConstructor ->
+    Option (List PsVerifiedIrConstructorField)
+  | List.nil =>
+      Option.none
+  | List.cons constructorInfo rest =>
+      if psStringEq constructorInfo.name target then
+        Option.some constructorInfo.fields
+      else
+        psRustFindConstructorFields target rest
+
+def psRustFindConstructorFieldType
+    (target : String) :
+    List PsVerifiedIrConstructorField ->
+    Option PsVerifiedIrType
+  | List.nil =>
+      Option.none
+  | List.cons field rest =>
+      if psStringEq field.name target then
+        Option.some field.type
+      else
+        psRustFindConstructorFieldType target rest
+
 def psRustValidateStaticStoredFunction
     (staticFunctionNames : List String)
     (locals : List String)
@@ -617,6 +669,65 @@ def psRustValidateStorageFieldListWith
                   validateNested
                   rest
 
+def psRustValidateConstructorStorageFieldListWith
+    (staticFunctionNames : List String)
+    (locals : List String)
+    (definitionFields : List PsVerifiedIrConstructorField)
+    (validateNested :
+      PsVerifiedIrExpr ->
+      Except PsRustEmitError Bool) :
+    List (Prod String PsVerifiedIrExpr) ->
+    Except PsRustEmitError Bool
+  | List.nil =>
+      Except.ok true
+  | List.cons field rest =>
+      let fieldName := Prod.fst field;
+      let value := Prod.snd field;
+      match psRustFindConstructorFieldType fieldName definitionFields with
+      | Option.none =>
+          match validateNested value with
+          | Except.error error =>
+              Except.error error
+          | Except.ok _ =>
+              psRustValidateConstructorStorageFieldListWith
+                staticFunctionNames
+                locals
+                definitionFields
+                validateNested
+                rest
+      | Option.some fieldType =>
+          if psRustTypeContainsFunction fieldType then
+            if psRustFunctionTypeIsFirstOrder fieldType then
+              match
+                  psRustValidateStaticStoredFunction
+                    staticFunctionNames
+                    locals
+                    fieldName
+                    value with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok _ =>
+                  psRustValidateConstructorStorageFieldListWith
+                    staticFunctionNames
+                    locals
+                    definitionFields
+                    validateNested
+                    rest
+            else
+              Except.error
+                (PsRustEmitError.functionStorageUnsupported fieldName)
+          else
+            match validateNested value with
+            | Except.error error =>
+                Except.error error
+            | Except.ok _ =>
+                psRustValidateConstructorStorageFieldListWith
+                  staticFunctionNames
+                  locals
+                  definitionFields
+                  validateNested
+                  rest
+
 def psRustValidateStorageAlternativeListWith
     (validateBody :
       List PsVerifiedIrMatchBinding ->
@@ -642,6 +753,7 @@ def psRustValidateStorageAlternativeListWith
 
 def psRustValidateStorageExprWithFuel
     (structures : List PsVerifiedIrStructure)
+    (inductives : List PsVerifiedIrInductive)
     (staticFunctionNames : List String)
     (locals : List String) :
     Nat ->
@@ -654,6 +766,7 @@ def psRustValidateStorageExprWithFuel
         fun (nested : PsVerifiedIrExpr) =>
           psRustValidateStorageExprWithFuel
             structures
+            inductives
             staticFunctionNames
             locals
             fuel
@@ -668,6 +781,7 @@ def psRustValidateStorageExprWithFuel
       | PsVerifiedIrExpr.lambda parameters _ body =>
           psRustValidateStorageExprWithFuel
             structures
+            inductives
             staticFunctionNames
             (psRustAddParameterNames parameters locals)
             fuel
@@ -685,6 +799,7 @@ def psRustValidateStorageExprWithFuel
           | Except.ok _ =>
               psRustValidateStorageExprWithFuel
                 structures
+                inductives
                 staticFunctionNames
                 (List.cons name locals)
                 fuel
@@ -712,8 +827,31 @@ def psRustValidateStorageExprWithFuel
                 fields
       | PsVerifiedIrExpr.projection _ _ target _ =>
           validateNested target
-      | PsVerifiedIrExpr.constructor _ _ _ fields =>
-          psRustValidateFieldListWith validateNested fields
+      | PsVerifiedIrExpr.constructor
+          inductiveName
+          constructorName
+          _
+          fields =>
+          match
+              psRustFindInductiveConstructors
+                inductiveName
+                inductives with
+          | Option.none =>
+              psRustValidateFieldListWith validateNested fields
+          | Option.some constructors =>
+              match
+                  psRustFindConstructorFields
+                    constructorName
+                    constructors with
+              | Option.none =>
+                  psRustValidateFieldListWith validateNested fields
+              | Option.some definitionFields =>
+                  psRustValidateConstructorStorageFieldListWith
+                    staticFunctionNames
+                    locals
+                    definitionFields
+                    validateNested
+                    fields
       | PsVerifiedIrExpr.matchE _ _ scrutinee alternatives =>
           match validateNested scrutinee with
           | Except.error error =>
@@ -725,6 +863,7 @@ def psRustValidateStorageExprWithFuel
                   (body : PsVerifiedIrExpr) =>
                   psRustValidateStorageExprWithFuel
                     structures
+                    inductives
                     staticFunctionNames
                     (psRustAddBindingNames bindings locals)
                     fuel
@@ -735,6 +874,7 @@ def psRustValidateStorageExprWithFuel
 
 def psRustValidateStorageDeclarationList
     (structures : List PsVerifiedIrStructure)
+    (inductives : List PsVerifiedIrInductive)
     (staticFunctionNames : List String) :
     List PsVerifiedIrDeclaration ->
     Except PsRustEmitError Bool
@@ -744,6 +884,7 @@ def psRustValidateStorageDeclarationList
       match
           psRustValidateStorageExprWithFuel
             structures
+            inductives
             staticFunctionNames
             (psRustAddParameterNames
               declaration.parameters
@@ -755,6 +896,7 @@ def psRustValidateStorageDeclarationList
       | Except.ok _ =>
           psRustValidateStorageDeclarationList
             structures
+            inductives
             staticFunctionNames
             rest
 
@@ -763,6 +905,7 @@ def psRustValidateModuleFunctionStorage
     Except PsRustEmitError Bool :=
   psRustValidateStorageDeclarationList
     module.structures
+    module.inductives
     (psRustStaticFirstOrderFunctionNames module.declarations)
     module.declarations
 

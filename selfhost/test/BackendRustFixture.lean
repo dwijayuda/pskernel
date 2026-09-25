@@ -51,6 +51,24 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
             ]
           }
         ]
+      },
+      {
+        name := "CallbackBox"
+        typeParameters := []
+        constructors := [
+          {
+            name := "stored"
+            fields := [
+              {
+                name := "callback"
+                type :=
+                  PsVerifiedIrType.function
+                    [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                    (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+              }
+            ]
+          }
+        ]
       }
     ]
     declarations := [
@@ -310,6 +328,61 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
               "callback")
             []
             [PsVerifiedIrExpr.var "x"]
+      },
+      {
+        name := "storePlusOneBox"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.named "CallbackBox" []
+        body :=
+          PsVerifiedIrExpr.constructor
+            "CallbackBox"
+            "stored"
+            []
+            [
+              ("callback", PsVerifiedIrExpr.var "plusOne")
+            ]
+      },
+      {
+        name := "callStoredBox"
+        typeParameters := []
+        parameters := [
+          {
+            name := "box"
+            type := PsVerifiedIrType.named "CallbackBox" []
+          },
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.matchE
+            "CallbackBox"
+            []
+            (PsVerifiedIrExpr.var "box")
+            [
+              (
+                "stored",
+                (
+                  [
+                    {
+                      field := "callback"
+                      name := "callback"
+                      type :=
+                        PsVerifiedIrType.function
+                          [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                          (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+                    }
+                  ],
+                  PsVerifiedIrExpr.call
+                    (PsVerifiedIrExpr.var "callback")
+                    []
+                    [PsVerifiedIrExpr.var "x"]
+                )
+              )
+            ]
       },
       {
         name := "makePair"

@@ -161,7 +161,7 @@ def psElabFindStructureField
               typeName
               target
               fieldName
-              (index + 1)
+              (Nat.succ index)
               remaining
               (psExprInstantiate1
                 forallView.body

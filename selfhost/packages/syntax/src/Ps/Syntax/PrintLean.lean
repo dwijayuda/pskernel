@@ -611,7 +611,8 @@ def psPrintLeanDeclaration
 def psPrintLeanModule
     (module : PsSyntaxModule) :
     Except PsSourcePrintError String :=
-  let printImport :=
+  let printImport :
+      PsSyntaxImport -> Except PsSourcePrintError String :=
     fun (sourceImport : PsSyntaxImport) =>
       match psPrintSyntaxName sourceImport.moduleName with
       | Except.error error => Except.error error

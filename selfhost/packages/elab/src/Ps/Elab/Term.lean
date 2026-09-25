@@ -630,7 +630,7 @@ def psElabLambda
       Option PsExpr ->
       Except PsElabError PsElabTermResult)
     (context : PsElabContext)
-    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (body : PsSyntaxTerm)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
@@ -695,7 +695,7 @@ def psElabForall
       Option PsExpr ->
       Except PsElabError PsElabTermResult)
     (context : PsElabContext)
-    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (body : PsSyntaxTerm)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
@@ -1028,7 +1028,7 @@ def psElabMatchPatternConstructorName
 
 def psElabPrepareMatchAlternatives
     (inductiveInfo : PsInductiveInfo) :
-    List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan) ->
+    List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) ->
     List PsElabMatchAlternative ->
     Except PsElabError (List PsElabMatchAlternative)
   | [], alternativesRev =>
@@ -1499,7 +1499,7 @@ def psElabMatch
     (context : PsElabContext)
     (scrutineeSyntax : PsSyntaxTerm)
     (alternativesSyntax :
-      List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+      List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match expected with

@@ -90,6 +90,18 @@ inductive PsWasmInstruction where
   | f64Le
   | f64Gt
   | f64Ge
+  | structNew (typeName : String)
+  | structGet (typeName : String) (fieldIndex : Nat)
+  | structGetS (typeName : String) (fieldIndex : Nat)
+  | structGetU (typeName : String) (fieldIndex : Nat)
+
+structure PsWasmStructField where
+  name : String
+  storageType : PsWasmStorageType
+
+structure PsWasmStructType where
+  name : String
+  fields : List PsWasmStructField
 
 structure PsWasmFunction where
   name : String
@@ -99,11 +111,13 @@ structure PsWasmFunction where
   body : List PsWasmInstruction
 
 structure PsWasmModule where
+  structures : List PsWasmStructType
   functions : List PsWasmFunction
   exports : List (String × String)
 
 def psWasmModuleEmpty : PsWasmModule :=
   {
+    structures := []
     functions := []
     exports := []
   }

@@ -163,6 +163,39 @@ def unfoldDefinition (ctx : CheckerContext) (e : Expr) : Option Expr :=
 
 mutual
 
+partial def lazyDeltaReduction
+    (ctx : CheckerContext)
+    (left right : Expr) : Except String DeltaResult := do
+  let rec loop (a b : Expr) : Except String DeltaResult := do
+    match quickReducedDefEq a b with
+    | some value => return .decided value
+    | none => pure ()
+
+    if !a.hasFVar && !b.hasFVar then
+      let ar ← reduceNat ctx a
+      match ar with
+      | some value => return .decided (← isDefEq ctx value b)
+      | none => pure ()
+      let br ← reduceNat ctx b
+      match br with
+      | some value => return .decided (← isDefEq ctx a value)
+      | none => pure ()
+
+    match deltaDefinition? ctx a, deltaDefinition? ctx b with
+    | none, none => return .residual a b
+    | some _, none =>
+      loop (← deltaOnce ctx a) b
+    | none, some _ =>
+      loop a (← deltaOnce ctx b)
+    | some da, some db =>
+      if da.hints.lt db.hints then
+        loop (← deltaOnce ctx a) b
+      else if db.hints.lt da.hints then
+        loop a (← deltaOnce ctx b)
+      else
+        loop (← deltaOnce ctx a) (← deltaOnce ctx b)
+  loop left right
+
 partial def whnfCore
     (ctx : CheckerContext)
     (e : Expr)
@@ -295,38 +328,6 @@ partial def deltaOnce
     | .error "internal lazy-delta request for non-definition"
   whnfCore ctx unfolded true
 
-partial def lazyDeltaReduction
-    (ctx : CheckerContext)
-    (left right : Expr) : Except String DeltaResult := do
-  let rec loop (a b : Expr) : Except String DeltaResult := do
-    match quickReducedDefEq a b with
-    | some value => return .decided value
-    | none => pure ()
-
-    if !a.hasFVar && !b.hasFVar then
-      let ar ← reduceNat ctx a
-      match ar with
-      | some value => return .decided (← isDefEq ctx value b)
-      | none => pure ()
-      let br ← reduceNat ctx b
-      match br with
-      | some value => return .decided (← isDefEq ctx a value)
-      | none => pure ()
-
-    match deltaDefinition? ctx a, deltaDefinition? ctx b with
-    | none, none => return .residual a b
-    | some _, none =>
-      loop (← deltaOnce ctx a) b
-    | none, some _ =>
-      loop a (← deltaOnce ctx b)
-    | some da, some db =>
-      if da.hints.lt db.hints then
-        loop (← deltaOnce ctx a) b
-      else if db.hints.lt da.hints then
-        loop a (← deltaOnce ctx b)
-      else
-        loop (← deltaOnce ctx a) (← deltaOnce ctx b)
-  loop left right
 
 mutual
 

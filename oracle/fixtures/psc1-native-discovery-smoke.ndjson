@@ -1,0 +1,13 @@
+{"meta":{"format":{"version":"3.1.0"},"lean":{"githash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","version":"4.34.0"}}}
+{"in":1,"str":{"pre":0,"str":"Lean"}}
+{"in":2,"str":{"pre":1,"str":"reduceNat"}}
+{"in":3,"str":{"pre":1,"str":"reduceBool"}}
+{"in":4,"str":{"pre":0,"str":"PSC1NativeMapFixture"}}
+{"in":5,"str":{"pre":4,"str":"n"}}
+{"in":6,"str":{"pre":4,"str":"b"}}
+{"const":{"name":2,"us":[]},"ie":0}
+{"const":{"name":5,"us":[]},"ie":1}
+{"app":{"fn":0,"arg":1},"ie":2}
+{"const":{"name":3,"us":[]},"ie":3}
+{"const":{"name":6,"us":[]},"ie":4}
+{"app":{"fn":3,"arg":4},"ie":5}

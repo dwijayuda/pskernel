@@ -741,7 +741,7 @@ def psElabForall
                   binderResult.bindersRev
                   openBody;
               let outerContext :=
-                psElabContextWithMeta context metaContext
+                psElabContextWithMeta context metaContext;
               psElabResolvedTerm
                 outerContext
                 closed
@@ -789,7 +789,7 @@ def psElabLetAfterValue
           closedValue
           closedBody;
       let restoredContext :=
-        psElabContextWithMeta outerContext metaContext
+        psElabContextWithMeta outerContext metaContext;
       psElabResolvedTerm
         restoredContext
         term
@@ -935,7 +935,7 @@ def psElabIf
                             psMetaInstantiate metaContext elseResult.term
                           ];
                       let restoredContext :=
-                        psElabContextWithMeta context metaContext
+                        psElabContextWithMeta context metaContext;
                       psElabResolvedTerm
                         restoredContext
                         term
@@ -1445,7 +1445,7 @@ def psElabMatchConstructorMinor
                           psCloseElabMatchFields
                             metaContext
                             fieldResult.fieldsRev
-                            withHypotheses
+                            withHypotheses;
                         Except.ok {
                           context :=
                             psElabContextWithMeta
@@ -1679,7 +1679,7 @@ def psElabMatch
                                                 (typeView.args
                                                   ++ [motive]
                                                   ++ minors.minors
-                                                  ++ [scrutineeResult.term])
+                                                  ++ [scrutineeResult.term]);
                                             psElabResolvedTerm
                                               minors.context
                                               recursorTerm

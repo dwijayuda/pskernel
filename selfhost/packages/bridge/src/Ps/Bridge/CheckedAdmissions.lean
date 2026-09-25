@@ -234,8 +234,18 @@ def psEncodeCodecExpr :
               psCheckedAdmissionJsonField "n" (psEncodeCodecName typeName)
             ])
 
+def psEncodeCodecNames
+    (names : List PsName) : List String :=
+  match names with
+  | List.nil =>
+      List.nil
+  | List.cons name rest =>
+      List.cons
+        (psEncodeCodecName name)
+        (psEncodeCodecNames rest)
+
 def psEncodeCodecNameList (names : List PsName) : String :=
-  psJsonArray (names.map psEncodeCodecName)
+  psJsonArray (psEncodeCodecNames names)
 
 def psBridgeFindConstructor :
     List PsDeclaration -> PsName -> Option PsConstructorInfo

@@ -74,7 +74,34 @@ def psTestStructureTranslationRoundTrip : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestPartialDefinitionTranslationRoundTrip : Bool :=
+  let leanSource :=
+    "partial def loop (n : Nat) : Nat := loop n"
+  let proofScriptSource :=
+    "partial def loop(n : Nat) : Nat := loop(n);"
+  match
+      psTranslateLeanToProofScript leanSource,
+      psTranslateProofScriptToLean proofScriptSource with
+  | Except.ok proofScript, Except.ok lean =>
+      proofScript.contains "partial def loop"
+        && lean.contains "partial def loop"
+        && match
+            psTranslateProofScriptToLean proofScript,
+            psTranslateLeanToProofScript lean with
+           | Except.ok leanAgain, Except.ok proofScriptAgain =>
+               leanAgain == lean
+                 && proofScriptAgain == proofScript
+           | _, _ => false
+  | _, _ => false
+
 def main : IO Unit := do
+  if psTestPartialDefinitionTranslationRoundTrip then
+    IO.println
+      "PSC1_TRANSLATION_PASS: partial def .lean <-> .ps"
+  else
+    throw
+      (IO.userError
+        "PSC1_TRANSLATION_FAIL: partial def .lean <-> .ps")
   if psTestStructureTranslationRoundTrip then
     IO.println
       "PSC1_TRANSLATION_PASS: structure .lean <-> .ps"

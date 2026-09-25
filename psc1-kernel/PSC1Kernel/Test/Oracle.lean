@@ -3108,6 +3108,36 @@ def assertOuterMutualNestedInductiveAdmissionOracle : IO Unit := do
   assertTrue "outer-mutual nested recursion did not reach leaf minor"
     (PSC1Kernel.Expr.eq oursReduced (.lit (.nat 83)))
 
+def assertLetTypeClosureOracle : IO Unit := do
+  let h : PSC1Kernel.Name := .str .anonymous "letClosureH"
+  let A : PSC1Kernel.Name := .str .anonymous "letClosureA"
+  let x : PSC1Kernel.Name := .str .anonymous "letClosureX"
+  let prop : PSC1Kernel.Expr := .sort .zero
+  let type : PSC1Kernel.Expr := .sort (.succ .zero)
+  let term : PSC1Kernel.Expr :=
+    .lam h prop
+      (.letE A type prop
+        (.lam x (.bvar 0) (.bvar 0) .default)
+        false)
+      .default
+  let ctx := PSC1Kernel.CheckerContext.empty .empty
+  let inferred ← exceptToIO
+    "PSC1 let-local inferred-type closure"
+    (PSC1Kernel.check ctx term)
+  match inferred with
+  | .forallE _ _ (.letE _ _ _ _ _) _ => pure ()
+  | _ =>
+      throw <| IO.userError
+        "let-local inferred type escaped its closing let binder"
+  let expected : PSC1Kernel.Expr :=
+    .forallE h prop
+      (.forallE x prop prop .default)
+      .default
+  let ok ← exceptToIO
+    "PSC1 closed let-local type defeq"
+    (PSC1Kernel.isDefEq ctx inferred expected)
+  assertTrue "closed let-local inferred type is not definitionally correct" ok
+
 def assertReplayCoreOracle : IO Unit := do
   let metaRecord : PSC1Kernel.Replay.Record :=
     .metaR {
@@ -3815,6 +3845,7 @@ def run : IO Unit := do
   assertParameterizedNestedInductiveAdmissionOracle
   assertUniverseNestedInductiveAdmissionOracle
   assertOuterMutualNestedInductiveAdmissionOracle
+  assertLetTypeClosureOracle
   assertReplayCoreOracle
   assertReplayJsonOracle
   assertOrdinaryRecursorOracle

@@ -495,6 +495,21 @@ def psEncodeCheckedAdmissionsLoop
       | .partialDecl _ _ _ _ =>
           Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
 
+def psCheckedAdmissionReverseStringsAcc
+    (values : List String)
+    (acc : List String) : List String :=
+  match values with
+  | List.nil =>
+      acc
+  | List.cons head tail =>
+      psCheckedAdmissionReverseStringsAcc
+        tail
+        (List.cons head acc)
+
+def psCheckedAdmissionReverseStrings
+    (values : List String) : List String :=
+  psCheckedAdmissionReverseStringsAcc values List.nil
+
 def psEncodeCheckedAdmissionsCanonical
     (declarations : List PsDeclaration) :
     Except PsCheckedAdmissionCodecError String :=
@@ -509,7 +524,7 @@ def psEncodeCheckedAdmissionsCanonical
   | Except.ok state =>
       Except.ok
         (psJsonObject [
-          psCheckedAdmissionJsonField "admissions" (psJsonArray state.admissionsRev.reverse),
+          psCheckedAdmissionJsonField "admissions" (psJsonArray (psCheckedAdmissionReverseStrings state.admissionsRev)),
           psCheckedAdmissionJsonField "format" (psJsonQuote "proofscript-checked-admissions"),
           psCheckedAdmissionJsonField "version" ("2")
         ])

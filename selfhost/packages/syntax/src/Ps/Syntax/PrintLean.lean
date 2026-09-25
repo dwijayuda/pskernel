@@ -1,5 +1,10 @@
 import Ps.Syntax.PrintCommon
 
+def psPrintLeanBoolNot (value : Bool) : Bool :=
+  match value with
+  | true => false
+  | false => true
+
 def psPrintLeanTermWithFuel :
     Nat -> PsSyntaxTerm -> Except PsSourcePrintError String
   | 0, _ => Except.error PsSourcePrintError.fuelExhausted
@@ -19,11 +24,11 @@ def psPrintLeanTermWithFuel :
           Except.ok "()"
       | .record fields _ =>
           let printField :=
-            fun field =>
-              match psPrintSyntaxName field.1 with
+            fun (field : Prod PsSyntaxName PsSyntaxTerm) =>
+              match psPrintSyntaxName field.fst with
               | Except.error error => Except.error error
               | Except.ok name =>
-                  match psPrintLeanTermWithFuel remaining field.2 with
+                  match psPrintLeanTermWithFuel remaining field.snd with
                   | Except.error error => Except.error error
                   | Except.ok value =>
                       Except.ok
@@ -34,14 +39,14 @@ def psPrintLeanTermWithFuel :
               Except.ok
                 ("{ " ++ psPrintJoin ", " printedFields ++ " }")
       | .app fn args _ =>
-          if !psSyntaxTermSimpleForApplication fn then
+          if psPrintLeanBoolNot (psSyntaxTermSimpleForApplication fn) then
             Except.error PsSourcePrintError.unsupportedApplication
           else
             match psPrintLeanTermWithFuel remaining fn with
             | Except.error error => Except.error error
             | Except.ok printedFn =>
                 let printArgument :=
-                  fun arg =>
+                  fun (arg : PsSyntaxTerm) =>
                     match psPrintLeanTermWithFuel remaining arg with
                     | Except.error error => Except.error error
                     | Except.ok printed =>
@@ -59,9 +64,9 @@ def psPrintLeanTermWithFuel :
                         (printedFn ++ " " ++ psPrintJoin " " printedArgs)
       | .lambda binders body _ =>
           let printBinder :=
-            fun binder =>
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
               match binder with
-              | (head, type) =>
+              | Prod.mk head type =>
                   match psPrintSyntaxName head.name with
                   | Except.error error => Except.error error
                   | Except.ok name =>
@@ -71,8 +76,8 @@ def psPrintLeanTermWithFuel :
                           let delimiters :=
                             psPrintBinderDelimiters head.kind
                           Except.ok
-                            (delimiters.1 ++ name ++ " : " ++
-                              printedType ++ delimiters.2)
+                            (delimiters.fst ++ name ++ " : " ++
+                              printedType ++ delimiters.snd)
           match binders.mapM printBinder with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
@@ -84,9 +89,9 @@ def psPrintLeanTermWithFuel :
                       " => " ++ printedBody)
       | .forallE binders body _ =>
           let printBinder :=
-            fun binder =>
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
               match binder with
-              | (head, type) =>
+              | Prod.mk head type =>
                   match psPrintSyntaxName head.name with
                   | Except.error error => Except.error error
                   | Except.ok name =>
@@ -96,8 +101,8 @@ def psPrintLeanTermWithFuel :
                           let delimiters :=
                             psPrintBinderDelimiters head.kind
                           Except.ok
-                            (delimiters.1 ++ name ++ " : " ++
-                              printedType ++ delimiters.2)
+                            (delimiters.fst ++ name ++ " : " ++
+                              printedType ++ delimiters.snd)
           match binders.mapM printBinder with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
@@ -153,19 +158,21 @@ def psPrintLeanTermWithFuel :
           | Except.error error => Except.error error
           | Except.ok printedScrutinee =>
               let printAlternative :=
-                fun alternative =>
+                fun (alternative : Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) =>
                   match alternative with
-                  | (pattern, body, _) =>
-                      match psPrintPattern pattern with
-                      | Except.error error => Except.error error
-                      | Except.ok printedPattern =>
-                          match
-                              psPrintLeanTermWithFuel remaining body with
+                  | Prod.mk pattern bodyAndSpan =>
+                      match bodyAndSpan with
+                      | Prod.mk body _ =>
+                          match psPrintPattern pattern with
                           | Except.error error => Except.error error
-                          | Except.ok printedBody =>
-                              Except.ok
-                                ("  | " ++ printedPattern ++
-                                  " => " ++ printedBody)
+                          | Except.ok printedPattern =>
+                              match
+                                  psPrintLeanTermWithFuel remaining body with
+                              | Except.error error => Except.error error
+                              | Except.ok printedBody =>
+                                  Except.ok
+                                    ("  | " ++ printedPattern ++
+                                      " => " ++ printedBody)
               match alternatives.mapM printAlternative with
               | Except.error error => Except.error error
               | Except.ok printedAlternatives =>
@@ -182,7 +189,7 @@ def psPrintLeanBinder
     (binder : PsSyntaxBinderHead × PsSyntaxTerm) :
     Except PsSourcePrintError String :=
   match binder with
-  | (head, type) =>
+  | Prod.mk head type =>
       match psPrintSyntaxName head.name with
       | Except.error error => Except.error error
       | Except.ok name =>
@@ -191,14 +198,14 @@ def psPrintLeanBinder
           | Except.ok printedType =>
               let delimiters := psPrintBinderDelimiters head.kind
               Except.ok
-                (delimiters.1 ++ name ++ " : " ++
-                  printedType ++ delimiters.2)
+                (delimiters.fst ++ name ++ " : " ++
+                  printedType ++ delimiters.snd)
 
 def psPrintLeanStructureField
     (field : PsSyntaxBinderHead × PsSyntaxTerm) :
     Except PsSourcePrintError String :=
   match field with
-  | (head, type) =>
+  | Prod.mk head type =>
       match psPrintSyntaxName head.name with
       | Except.error error => Except.error error
       | Except.ok name =>
@@ -341,7 +348,7 @@ def psPrintLeanModule
     (module : PsSyntaxModule) :
     Except PsSourcePrintError String :=
   match module.imports.mapM
-      (fun sourceImport =>
+      (fun (sourceImport : PsSyntaxImport) =>
         match psPrintSyntaxName sourceImport.moduleName with
         | Except.error error => Except.error error
         | Except.ok name => Except.ok ("import " ++ name)) with

@@ -27,6 +27,16 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let boolType := PsExpr.constE psBoolName []
   let unitType := PsExpr.constE psUnitName []
   let charType := PsExpr.constE psCharName []
+  let prodType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        bName
+        typeType
+        typeType
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
   let arrayOf :=
     fun alpha => PsExpr.app (PsExpr.constE psArrayName []) alpha
   let arrayType :=
@@ -468,8 +478,11 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let envText9 :=
     psPreludeAdd envText8
       (PsDeclaration.axiomDecl psStringExtractName [] stringExtractType)
-  let envArray0 :=
+  let envProd0 :=
     psPreludeAdd envText9
+      (PsDeclaration.axiomDecl psProdName [] prodType)
+  let envArray0 :=
+    psPreludeAdd envProd0
       (PsDeclaration.axiomDecl psArrayName [] arrayType)
   let envArray1 :=
     psPreludeAdd envArray0

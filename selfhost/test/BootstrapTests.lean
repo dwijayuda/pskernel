@@ -1029,8 +1029,8 @@ def psTestDualSourceTypedLambdaElaboration : Bool :=
       | Except.ok leanTerm, Except.ok proofScriptTerm =>
           let initial := psElabContextEmpty psTestNatEnvironment
           match
-              psElabTerm initial leanTerm.value,
-              psElabTerm initial proofScriptTerm.value with
+              psElabTerm initial leanTerm.value none,
+              psElabTerm initial proofScriptTerm.value none with
           | Except.ok leanResult, Except.ok proofScriptResult =>
               psTestElaboratedTypedLambdaShape leanResult
                 && psTestElaboratedTypedLambdaShape proofScriptResult

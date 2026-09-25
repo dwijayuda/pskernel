@@ -381,6 +381,61 @@ partial def findRecursorRule (ctorName : Name) : List RecursorRule → Option Re
       if Name.eq rule.ctor ctorName then some rule
       else findRecursorRule ctorName rest
 
+partial def recursorMajorInduct?
+    (recursor : RecursorInfo) : Option Name :=
+  let majorIdx :=
+    recursor.numParams + recursor.numMotives +
+      recursor.numMinors + recursor.numIndices
+  let rec go : Expr → Nat → Option Name
+    | .forallE _ domain _ _, 0 =>
+        match domain.getAppFn with
+        | .const name _ => some name
+        | _ => none
+    | .forallE _ _ body _, n + 1 => go body n
+    | _, _ => none
+  go recursor.base.type majorIdx
+
+def mkNullaryConstructor?
+    (env : Environment)
+    (type : Expr)
+    (numParams : Nat) : Option Expr :=
+  match type.getAppFn with
+  | .const induct levels =>
+      match env.find? induct with
+      | some (.inductInfo info) =>
+          match info.ctors with
+          | ctor :: _ =>
+              some <|
+                applyArgs (.const ctor levels)
+                  (type.getAppArgs.take numParams)
+          | [] => none
+      | _ => none
+  | _ => none
+
+partial def toConstructorWhenK
+    (ctx : CheckerContext)
+    (recursor : RecursorInfo)
+    (major : Expr) : Except String Expr := do
+  let some majorInduct := recursorMajorInduct? recursor
+    | return major
+  let appType ← whnf ctx (← check ctx major)
+  let .const typeInduct _ := appType.getAppFn
+    | return major
+  if !Name.eq typeInduct majorInduct then
+    return major
+  if appType.hasMVar then
+    let indexArgs := appType.getAppArgs.drop recursor.numParams
+    if indexArgs.any (fun arg => arg.hasMVar) then
+      return major
+  let some ctorApp :=
+      mkNullaryConstructor? ctx.env appType recursor.numParams
+    | return major
+  let ctorType ← check ctx ctorApp
+  if ← isDefEq ctx appType ctorType then
+    pure ctorApp
+  else
+    pure major
+
 partial def reduceInductiveRec
     (ctx : CheckerContext)
     (e : Expr)
@@ -394,9 +449,12 @@ partial def reduceInductiveRec
   if majorIdx >= recArgs.length then
     return none
   let some major0 := listGet? recArgs majorIdx | return none
+  let majorK ←
+    if recursor.k then toConstructorWhenK ctx recursor major0
+    else pure major0
   let majorReduced ←
-    if cheapRec then whnfCore ctx major0 cheapRec cheapProj
-    else whnf ctx major0
+    if cheapRec then whnfCore ctx majorK cheapRec cheapProj
+    else whnf ctx majorK
   let major ←
     match majorReduced with
     | .lit (.nat 0) =>

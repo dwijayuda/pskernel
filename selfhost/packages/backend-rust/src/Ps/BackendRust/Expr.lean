@@ -392,7 +392,7 @@ def psRustEmitExprWithFuel :
       Except.error PsRustEmitError.fuelExhausted
   | fuel + 1, expr =>
       let emitNested :=
-        fun nested =>
+        fun (nested : PsVerifiedIrExpr) =>
           psRustEmitExprWithFuel fuel nested;
       match expr with
       | PsVerifiedIrExpr.literal literal =>

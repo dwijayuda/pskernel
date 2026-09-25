@@ -104,6 +104,44 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
             ]
       },
       {
+        name := "pushBang"
+        typeParameters := []
+        parameters := [
+          {
+            name := "text"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringPush
+            [
+              PsVerifiedIrExpr.var "text",
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.charOfNat
+                [
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 33)
+                ]
+            ]
+      },
+      {
+        name := "utf8Size"
+        typeParameters := []
+        parameters := [
+          {
+            name := "text"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringUtf8ByteSize
+            [PsVerifiedIrExpr.var "text"]
+      },
+      {
         name := "unwrapOr"
         typeParameters := []
         parameters := [

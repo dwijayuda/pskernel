@@ -3,6 +3,14 @@ import Ps.BackendWasm.Lower
 def psWasmSmokeProfile : PsWasmTargetProfile :=
   { wordSize := PsWasmWordSize.wasm32 }
 
+def psWasmSmokeU32Type : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+
+def psWasmSmokeU32FunctionType : PsVerifiedIrType :=
+  PsVerifiedIrType.function
+    [psWasmSmokeU32Type]
+    psWasmSmokeU32Type
+
 def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -528,6 +536,128 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                   )
                 ]
             ]
+      }
+,
+      {
+        name := "makeAdder"
+        typeParameters := []
+        parameters := [
+          {
+            name := "base"
+            type := psWasmSmokeU32Type
+          }
+        ]
+        resultType := psWasmSmokeU32FunctionType
+        body :=
+          PsVerifiedIrExpr.lambda
+            [
+              {
+                name := "value"
+                type := psWasmSmokeU32Type
+              }
+            ]
+            psWasmSmokeU32Type
+            (PsVerifiedIrExpr.intrinsic
+              (PsVerifiedIrIntrinsic.machineIntBinary
+                PsVerifiedIrMachineIntegerType.uint32
+                PsVerifiedIrIntegerBinaryOp.add)
+              [
+                PsVerifiedIrExpr.var "base",
+                PsVerifiedIrExpr.var "value"
+              ])
+      },
+      {
+        name := "applyReturnedAdder"
+        typeParameters := []
+        parameters := [
+          {
+            name := "base"
+            type := psWasmSmokeU32Type
+          },
+          {
+            name := "value"
+            type := psWasmSmokeU32Type
+          }
+        ]
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.letE
+            "adder"
+            psWasmSmokeU32FunctionType
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.var "makeAdder")
+              []
+              [PsVerifiedIrExpr.var "base"])
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.var "adder")
+              []
+              [PsVerifiedIrExpr.var "value"])
+      },
+      {
+        name := "applyTwice"
+        typeParameters := []
+        parameters := [
+          {
+            name := "fn"
+            type := psWasmSmokeU32FunctionType
+          },
+          {
+            name := "value"
+            type := psWasmSmokeU32Type
+          }
+        ]
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "fn")
+            []
+            [
+              PsVerifiedIrExpr.call
+                (PsVerifiedIrExpr.var "fn")
+                []
+                [PsVerifiedIrExpr.var "value"]
+            ]
+      },
+      {
+        name := "applyTwiceIncrement"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psWasmSmokeU32Type
+          }
+        ]
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.letE
+            "increment"
+            psWasmSmokeU32FunctionType
+            (PsVerifiedIrExpr.lambda
+              [
+                {
+                  name := "input"
+                  type := psWasmSmokeU32Type
+                }
+              ]
+              psWasmSmokeU32Type
+              (PsVerifiedIrExpr.intrinsic
+                (PsVerifiedIrIntrinsic.machineIntBinary
+                  PsVerifiedIrMachineIntegerType.uint32
+                  PsVerifiedIrIntegerBinaryOp.add)
+                [
+                  PsVerifiedIrExpr.var "input",
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.machineInteger
+                      PsVerifiedIrMachineIntegerType.uint32
+                      1)
+                ]))
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.var "applyTwice")
+              []
+              [
+                PsVerifiedIrExpr.var "increment",
+                PsVerifiedIrExpr.var "value"
+              ])
       }
     ]
   }

@@ -1146,6 +1146,158 @@ def assertQuotAdmissionOracle : IO Unit := do
       throw <| IO.userError "Quot admission overwrote an occupied primitive name"
   | .error _ => pure ()
 
+def assertMutualDuplicateNameOracle : IO Unit := do
+  let Dup : PSC1Kernel.Name := .str .anonymous "OracleMutualDup"
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let value : PSC1Kernel.Expr := .sort .zero
+  let info : PSC1Kernel.DefinitionInfo := {
+    base := mkBase Dup type1
+    value := value
+    hints := .opaqueHint
+    safety := .partialDef
+  }
+  let oursRejects :=
+    match PSC1Kernel.Kernel.addMutualDefinitions .empty [info, info] with
+    | .ok _ => false
+    | .error _ => true
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanInfo : Lean.DefinitionVal := {
+    name := toLeanName Dup
+    levelParams := []
+    type := toLeanExpr type1
+    value := toLeanExpr value
+    hints := .opaque
+    safety := .partial
+  }
+  let leanRejects :=
+    match Lean.Kernel.Environment.addDecl lean0 {}
+        (.mutualDefnDecl [leanInfo, leanInfo]) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue
+    "duplicate mutual-definition name rejection differs from Lean 4.34"
+    (oursRejects == leanRejects && leanRejects)
+
+def assertImaxPropOracle : IO Unit := do
+  let BoolN : PSC1Kernel.Name := .str .anonymous "OracleImaxBool"
+  let Data : PSC1Kernel.Name := .str .anonymous "OracleImaxData"
+  let DataMk : PSC1Kernel.Name := .str Data "mk"
+  let DataRec : PSC1Kernel.Name := .str Data "rec"
+  let Proof : PSC1Kernel.Name := .str Data "proof"
+  let UnitI : PSC1Kernel.Name := .str .anonymous "OracleImaxUnit"
+  let UnitIMk : PSC1Kernel.Name := .str UnitI "mk"
+  let UnitIRec : PSC1Kernel.Name := .str UnitI "rec"
+  let Unit0 : PSC1Kernel.Name := .str .anonymous "OraclePropUnit"
+  let Unit0Mk : PSC1Kernel.Name := .str Unit0 "mk"
+  let Unit0Rec : PSC1Kernel.Name := .str Unit0 "rec"
+
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let boolT : PSC1Kernel.Expr := .const BoolN []
+  let imaxProp : PSC1Kernel.Expr := .sort (.imax (.succ .zero) .zero)
+  let dataT : PSC1Kernel.Expr := .const Data []
+  let dataCtorT : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "b") boolT dataT .default
+  let unitIT : PSC1Kernel.Expr := .const UnitI []
+  let unit0T : PSC1Kernel.Expr := .const Unit0 []
+
+  let base :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase BoolN type1
+      isUnsafe := false
+    })
+  let oursData ← exceptToIO
+    "PSC1 imax-Prop data inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive base {
+      levelParams := []
+      name := Data
+      type := imaxProp
+      ctors := [{ name := DataMk, type := dataCtorT }]
+      isUnsafe := false
+    })
+  let oursI ← exceptToIO
+    "PSC1 imax-Prop unit admission"
+    (PSC1Kernel.Kernel.addSimpleInductive oursData {
+      levelParams := []
+      name := UnitI
+      type := imaxProp
+      ctors := [{ name := UnitIMk, type := unitIT }]
+      isUnsafe := false
+    })
+  let ours ← exceptToIO
+    "PSC1 literal-Prop unit admission"
+    (PSC1Kernel.Kernel.addSimpleInductive oursI {
+      levelParams := []
+      name := Unit0
+      type := .sort .zero
+      ctors := [{ name := Unit0Mk, type := unit0T }]
+      isUnsafe := false
+    })
+
+  match ours.find? DataRec with
+  | some (.recInfo info) =>
+      assertTrue "imax-normalized Prop data unexpectedly allows large elimination"
+        info.base.levelParams.isEmpty
+  | _ => throw <| IO.userError "PSC1 imax-Prop data recursor missing"
+
+  let some (.recInfo imaxRec) := ours.find? UnitIRec
+    | throw <| IO.userError "PSC1 imax-Prop unit recursor missing"
+  let some (.recInfo propRec) := ours.find? Unit0Rec
+    | throw <| IO.userError "PSC1 literal-Prop unit recursor missing"
+  assertTrue "imax-normalized Prop changed K metadata"
+    (imaxRec.k == propRec.k)
+  assertTrue "imax-normalized Prop changed elimination universe count"
+    (imaxRec.base.levelParams.length == propRec.base.levelParams.length)
+
+  let withProof := ours.addUnchecked (.axiomInfo {
+    base := mkBase Proof dataT
+    isUnsafe := false
+  })
+  let badProjection : PSC1Kernel.Expr :=
+    .proj Data 0 (.const Proof [])
+  let oursRejects :=
+    match PSC1Kernel.check
+        (PSC1Kernel.CheckerContext.empty withProof) badProjection with
+    | .ok _ => false
+    | .error _ => true
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanBool ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName BoolN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean rejected imax oracle Bool axiom"
+  let leanData ←
+    match Lean.Kernel.Environment.addDecl leanBool {} (.inductDecl [] 0 [{
+      name := toLeanName Data
+      type := toLeanExpr imaxProp
+      ctors := [{ name := toLeanName DataMk, type := toLeanExpr dataCtorT }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean rejected imax-Prop data inductive"
+  let leanProof ←
+    match Lean.Kernel.Environment.addDecl leanData {} (.axiomDecl {
+      name := toLeanName Proof
+      levelParams := []
+      type := toLeanExpr dataT
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean rejected imax oracle proof axiom"
+  let leanEnv := Lean.Environment.ofKernelEnv leanProof
+  let leanRejects :=
+    match Lean.Kernel.check leanEnv ({} : Lean.LocalContext)
+        (toLeanExpr badProjection) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue
+    "imax-normalized Prop projection rejection differs from Lean 4.34"
+    (oursRejects == leanRejects && leanRejects)
+
 def assertExprOracle : IO Unit := do
   let x : PSC1Kernel.Name := .str .anonymous "x"
   let A : PSC1Kernel.Name := .str .anonymous "A"
@@ -4058,6 +4210,8 @@ def run : IO Unit := do
   assertStringLiteralExpansionShape
   assertStringLiteralDefEqOracle
   assertQuotAdmissionOracle
+  assertMutualDuplicateNameOracle
+  assertImaxPropOracle
   assertProjectionOracle
   assertArenaProjectionStructureSoundnessOracle
   assertSimpleInductiveAdmissionOracle

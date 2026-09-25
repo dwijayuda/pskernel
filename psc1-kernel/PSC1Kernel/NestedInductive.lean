@@ -814,8 +814,10 @@ def simpleNestedCheckerWithParams
     (env : Environment)
     (levelParams : List Name)
     (safety : DefinitionSafety)
-    (params : List OpenBinder) : CheckerContext :=
-  let base := mkChecker env levelParams safety
+    (params : List OpenBinder)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault) : CheckerContext :=
+  let base := mkChecker env levelParams safety maxRecDepth maxNatSize
   let lctx :=
     params.foldl
       (fun ctx param =>
@@ -829,7 +831,9 @@ def simpleNestedValidateRestored
     (decl : SimpleMutualInductiveDecl)
     (canonicalParams : List OpenBinder)
     (families : List SimpleNestedAuxFamily)
-    (recRename : List (Name × Name)) : Except String Unit := do
+    (recRename : List (Name × Name))
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Unit := do
   let safety :=
     if decl.isUnsafe then DefinitionSafety.unsafeDef else DefinitionSafety.safe
   let originalNames := simpleMutualNames decl
@@ -839,7 +843,7 @@ def simpleNestedValidateRestored
     | family :: rest => do
         let ctx :=
           simpleNestedCheckerWithParams
-            finalEnv decl.levelParams safety canonicalParams
+            finalEnv decl.levelParams safety canonicalParams maxRecDepth maxNatSize
         let _ ← check ctx family.nestedTemplate
         checkTemplates rest
   checkTemplates families
@@ -852,14 +856,14 @@ def simpleNestedValidateRestored
           | ctor :: more => do
               let some (.ctorInfo info) := finalEnv.find? ctor.name
                 | throw "restored constructor missing during validation"
-              let ctx := mkChecker finalEnv decl.levelParams safety
+              let ctx := mkChecker finalEnv decl.levelParams safety maxRecDepth maxNatSize
               let _ ← check ctx info.base.type
               checkCtors more
         checkCtors type.ctors
         let recName := simpleRecName type.name
         let some (.recInfo recInfo) := finalEnv.find? recName
           | throw "restored recursor missing during validation"
-        let ctx := mkChecker finalEnv recInfo.base.levelParams safety
+        let ctx := mkChecker finalEnv recInfo.base.levelParams safety maxRecDepth maxNatSize
         let recTypeType ← check ctx recInfo.base.type
         let _ ← ensureSort ctx recTypeType
         let rec checkRules : List RecursorRule → Except String Unit
@@ -882,9 +886,9 @@ def simpleNestedValidateRestored
         let some (.recInfo newInfo) := finalEnv.find? newName
           | throw "restored nested auxiliary recursor missing"
         let oldCtx :=
-          mkChecker transformed oldInfo.base.levelParams safety
+          mkChecker transformed oldInfo.base.levelParams safety maxRecDepth maxNatSize
         let newCtx :=
-          mkChecker finalEnv newInfo.base.levelParams safety
+          mkChecker finalEnv newInfo.base.levelParams safety maxRecDepth maxNatSize
         let rec compareRules :
             List RecursorRule → List RecursorRule → Except String Unit
           | [], [] => pure ()
@@ -909,7 +913,9 @@ def simpleNestedValidateRestored
 
 def addSimpleNestedInductive
     (env : Environment)
-    (decl : SimpleMutualInductiveDecl) : Except String Environment := do
+    (decl : SimpleMutualInductiveDecl)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Environment := do
   simpleNestedCheckReserved decl
   let declaredNames := simpleMutualNames decl
   simpleCheckUniformOccurrences
@@ -922,7 +928,7 @@ def addSimpleNestedInductive
     | throw "empty nested inductive declaration"
   let safety :=
     if decl.isUnsafe then DefinitionSafety.unsafeDef else DefinitionSafety.safe
-  let firstCtx := mkChecker env decl.levelParams safety
+  let firstCtx := mkChecker env decl.levelParams safety maxRecDepth maxNatSize
   let firstTypeType ← check firstCtx first.type
   let _ ← ensureSort firstCtx firstTypeType
   let (_, canonicalParams, _) ←
@@ -949,14 +955,14 @@ def addSimpleNestedInductive
           ctors := type.ctors
           isUnsafe := decl.isUnsafe
           numParams := decl.numParams
-        }
+        } maxRecDepth maxNatSize
     | _ =>
         addSimpleMutualInductive env {
           levelParams := decl.levelParams
           numParams := decl.numParams
           types := transformedTypes
           isUnsafe := decl.isUnsafe
-        }
+        } maxRecDepth maxNatSize
   else
     let transformed ←
       match addSimpleMutualInductive env {
@@ -964,7 +970,7 @@ def addSimpleNestedInductive
         numParams := decl.numParams
         types := transformedTypes
         isUnsafe := decl.isUnsafe
-      } with
+      } maxRecDepth maxNatSize with
       | .ok value => pure value
       | .error err => throw ("nested transformed admission: " ++ err)
     let mainRec := simpleRecName (decl.types.head?.map (fun t => t.name) |>.getD .anonymous)
@@ -988,7 +994,8 @@ def addSimpleNestedInductive
       | .ok value => pure value
       | .error err => throw ("nested auxiliary restoration: " ++ err)
     match simpleNestedValidateRestored
-      transformed finalEnv decl canonicalParams state.aux recRename with
+      transformed finalEnv decl canonicalParams state.aux recRename
+      maxRecDepth maxNatSize with
     | .ok _ => pure ()
     | .error err => throw ("nested restored validation: " ++ err)
     pure finalEnv

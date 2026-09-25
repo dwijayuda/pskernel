@@ -554,8 +554,6 @@ partial def inferKMajorType?
         .str (.str (.str .anonymous "Lean") "SourceInfo") "casesOn"
       let eqSymm : Name := .str (.str .anonymous "Eq") "symm"
       let natEqOfBeq : Name :=
-        .str (.str (.str .anonymous "Nat") "eq_of_beq_eq_true") ""
-      let natEqOfBeq : Name :=
         .str (.str .anonymous "Nat") "eq_of_beq_eq_true"
       let debugLabel? :=
         match major.getAppFn with

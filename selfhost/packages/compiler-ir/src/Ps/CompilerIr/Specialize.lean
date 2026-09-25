@@ -26,6 +26,10 @@ structure PsIrSpecializeTypeListResult where
   types : List PsVerifiedIrType
   requests : List PsIrSpecializeRequest
 
+structure PsIrSpecializeIntrinsicResult where
+  operation : PsVerifiedIrIntrinsic
+  requests : List PsIrSpecializeRequest
+
 structure PsIrSpecializeExprResult where
   expr : PsVerifiedIrExpr
   requests : List PsIrSpecializeRequest

@@ -253,7 +253,20 @@ def psEraseSelectedArguments
               | Except.ok erasedRest =>
                   Except.ok (erased :: erasedRest)
 
+def psErasePrimitiveTypeArgument
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (arguments : List PsExpr)
+    (index : Nat) :
+    Except PsErasureError PsVerifiedIrType :=
+  match arguments[index]? with
+  | none => Except.error PsErasureError.unsupportedApplication
+  | some type =>
+      psEraseRuntimeType environment scope type
+
 def psErasePrimitiveApplication
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
     (erase :
       PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (view : PsErasureAppView) :
@@ -1195,7 +1208,12 @@ def psEraseRuntimeExprWithFuel
           | Except.error error => Except.error error
           | Except.ok (some lowered) => Except.ok lowered
           | Except.ok none =>
-              match psErasePrimitiveApplication erase view with
+              match
+                  psErasePrimitiveApplication
+                    environment
+                    scope
+                    erase
+                    view with
               | Except.error error => Except.error error
               | Except.ok (some lowered) => Except.ok lowered
               | Except.ok none =>

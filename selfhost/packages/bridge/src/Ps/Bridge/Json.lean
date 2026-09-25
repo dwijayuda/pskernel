@@ -234,13 +234,15 @@ def psJsonDecodeUnicode4
                                       (Prod.mk (Char.ofNat value) rest)
 
 def psJsonReverseCharsAcc
-    (values : List Char)
-    (acc : List Char) : List Char :=
+    (values : List Char) : List Char -> List Char :=
   match values with
   | List.nil =>
-      acc
+      fun (acc : List Char) => acc
   | List.cons head tail =>
-      psJsonReverseCharsAcc tail (List.cons head acc)
+      let smaller : List Char -> List Char :=
+        psJsonReverseCharsAcc tail;
+      fun (acc : List Char) =>
+        smaller (List.cons head acc)
 
 def psJsonReverseChars (values : List Char) : List Char :=
   psJsonReverseCharsAcc values List.nil
@@ -300,17 +302,22 @@ def psJsonDigit (char : Char) : Bool :=
   let value : Nat := psJsonCharCode char;
   psJsonNatInRange value 48 57
 
-def psJsonTakeDigits :
-    List Char -> List Char -> List Char × List Char
-  | List.nil, digitsRev =>
-      Prod.mk (psJsonReverseChars digitsRev) List.nil
-  | List.cons char rest, digitsRev =>
-      if psJsonDigit char then
-        psJsonTakeDigits rest (List.cons char digitsRev)
-      else
-        Prod.mk
-          (psJsonReverseChars digitsRev)
-          (List.cons char rest)
+def psJsonTakeDigits
+    (chars : List Char) : List Char -> List Char × List Char :=
+  match chars with
+  | List.nil =>
+      fun (digitsRev : List Char) =>
+        Prod.mk (psJsonReverseChars digitsRev) List.nil
+  | List.cons char rest =>
+      let smaller : List Char -> List Char × List Char :=
+        psJsonTakeDigits rest;
+      fun (digitsRev : List Char) =>
+        if psJsonDigit char then
+          smaller (List.cons char digitsRev)
+        else
+          Prod.mk
+            (psJsonReverseChars digitsRev)
+            (List.cons char rest)
 
 def psJsonParseNumber
     (chars : List Char) :
@@ -374,13 +381,16 @@ def psJsonConsumeLiteral
             none
 
 def psJsonReverseValuesAcc
-    (values : List PsJsonValue)
-    (acc : List PsJsonValue) : List PsJsonValue :=
+    (values : List PsJsonValue) :
+    List PsJsonValue -> List PsJsonValue :=
   match values with
   | List.nil =>
-      acc
+      fun (acc : List PsJsonValue) => acc
   | List.cons head tail =>
-      psJsonReverseValuesAcc tail (List.cons head acc)
+      let smaller : List PsJsonValue -> List PsJsonValue :=
+        psJsonReverseValuesAcc tail;
+      fun (acc : List PsJsonValue) =>
+        smaller (List.cons head acc)
 
 def psJsonReverseValues
     (values : List PsJsonValue) : List PsJsonValue :=
@@ -460,14 +470,19 @@ def psJsonParseArrayWith
                         (PsJsonParseError.expected ", or ]")
 
 def psJsonReverseFieldsAcc
-    (fields : List (String × PsJsonValue))
-    (acc : List (String × PsJsonValue)) :
-    List (String × PsJsonValue) :=
+    (fields : List (String × PsJsonValue)) :
+    List (String × PsJsonValue) ->
+      List (String × PsJsonValue) :=
   match fields with
   | List.nil =>
-      acc
+      fun (acc : List (String × PsJsonValue)) => acc
   | List.cons head tail =>
-      psJsonReverseFieldsAcc tail (List.cons head acc)
+      let smaller :
+          List (String × PsJsonValue) ->
+            List (String × PsJsonValue) :=
+        psJsonReverseFieldsAcc tail;
+      fun (acc : List (String × PsJsonValue)) =>
+        smaller (List.cons head acc)
 
 def psJsonReverseFields
     (fields : List (String × PsJsonValue)) :

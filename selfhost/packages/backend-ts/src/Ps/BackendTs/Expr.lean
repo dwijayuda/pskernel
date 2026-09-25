@@ -28,7 +28,7 @@ def psTsExprUsesNameWithFuel :
             || arguments.any
               (fun argument =>
                 psTsExprUsesNameWithFuel fuel argument name)
-      | .letE localName value body =>
+      | .letE localName _ value body =>
           localName == name
             || psTsExprUsesNameWithFuel fuel value name
             || psTsExprUsesNameWithFuel fuel body name
@@ -82,11 +82,111 @@ def psTsEmitTypeArguments
       else
         Except.ok ("<" ++ psTsJoin ", " printed ++ ">")
 
+def psTsNormalizeMachineInteger
+    (type : PsVerifiedIrMachineIntegerType)
+    (value : String) :
+    Except PsTsEmitError String :=
+  match type with
+  | .uint8 =>
+      Except.ok ("((" ++ value ++ ") & 255)")
+  | .uint16 =>
+      Except.ok ("((" ++ value ++ ") & 65535)")
+  | .uint32 =>
+      Except.ok ("((" ++ value ++ ") >>> 0)")
+  | .int8 =>
+      Except.ok ("(((" ++ value ++ ") << 24) >> 24)")
+  | .int16 =>
+      Except.ok ("(((" ++ value ++ ") << 16) >> 16)")
+  | .int32 =>
+      Except.ok ("((" ++ value ++ ") | 0)")
+  | .uint64 =>
+      Except.ok ("BigInt.asUintN(64, (" ++ value ++ "))")
+  | .int64 =>
+      Except.ok ("BigInt.asIntN(64, (" ++ value ++ "))")
+  | .usize =>
+      Except.error PsTsEmitError.targetWordSizeRequired
+  | .isize =>
+      Except.error PsTsEmitError.targetWordSizeRequired
+
+def psTsMachineIntegerBinaryRaw
+    (type : PsVerifiedIrMachineIntegerType)
+    (operation : PsVerifiedIrIntegerBinaryOp)
+    (left right : String) : String :=
+  match operation with
+  | .add => "(" ++ left ++ " + " ++ right ++ ")"
+  | .sub => "(" ++ left ++ " - " ++ right ++ ")"
+  | .mul =>
+      match type with
+      | .uint8 => "Math.imul(" ++ left ++ ", " ++ right ++ ")"
+      | .uint16 => "Math.imul(" ++ left ++ ", " ++ right ++ ")"
+      | .uint32 => "Math.imul(" ++ left ++ ", " ++ right ++ ")"
+      | .int8 => "Math.imul(" ++ left ++ ", " ++ right ++ ")"
+      | .int16 => "Math.imul(" ++ left ++ ", " ++ right ++ ")"
+      | .int32 => "Math.imul(" ++ left ++ ", " ++ right ++ ")"
+      | _ => "(" ++ left ++ " * " ++ right ++ ")"
+  | .bitAnd => "(" ++ left ++ " & " ++ right ++ ")"
+  | .bitOr => "(" ++ left ++ " | " ++ right ++ ")"
+  | .bitXor => "(" ++ left ++ " ^ " ++ right ++ ")"
+
+def psTsEmitMachineIntegerBinary
+    (type : PsVerifiedIrMachineIntegerType)
+    (operation : PsVerifiedIrIntegerBinaryOp)
+    (left right : String) :
+    Except PsTsEmitError String :=
+  psTsNormalizeMachineInteger
+    type
+    (psTsMachineIntegerBinaryRaw type operation left right)
+
+def psTsEmitMachineIntegerCompare
+    (operation : PsVerifiedIrIntegerCompareOp)
+    (left right : String) : String :=
+  match operation with
+  | .eq => "(" ++ left ++ " === " ++ right ++ ")"
+  | .ne => "(" ++ left ++ " !== " ++ right ++ ")"
+  | .lt => "(" ++ left ++ " < " ++ right ++ ")"
+  | .le => "(" ++ left ++ " <= " ++ right ++ ")"
+  | .gt => "(" ++ left ++ " > " ++ right ++ ")"
+  | .ge => "(" ++ left ++ " >= " ++ right ++ ")"
+
+def psTsEmitFloatBinary
+    (type : PsVerifiedIrFloatingType)
+    (operation : PsVerifiedIrFloatBinaryOp)
+    (left right : String) : String :=
+  let raw :=
+    match operation with
+    | .add => "(" ++ left ++ " + " ++ right ++ ")"
+    | .sub => "(" ++ left ++ " - " ++ right ++ ")"
+    | .mul => "(" ++ left ++ " * " ++ right ++ ")"
+    | .div => "(" ++ left ++ " / " ++ right ++ ")"
+  match type with
+  | .float => raw
+  | .float32 => "Math.fround(" ++ raw ++ ")"
+
+def psTsEmitFloatCompare
+    (operation : PsVerifiedIrFloatCompareOp)
+    (left right : String) : String :=
+  match operation with
+  | .eq => "(" ++ left ++ " === " ++ right ++ ")"
+  | .ne => "(" ++ left ++ " !== " ++ right ++ ")"
+  | .lt => "(" ++ left ++ " < " ++ right ++ ")"
+  | .le => "(" ++ left ++ " <= " ++ right ++ ")"
+  | .gt => "(" ++ left ++ " > " ++ right ++ ")"
+  | .ge => "(" ++ left ++ " >= " ++ right ++ ")"
+
 def psTsEmitIntrinsicFromPrinted
     (operation : PsVerifiedIrIntrinsic)
     (arguments : List String) :
     Except PsTsEmitError String :=
   match operation, arguments with
+  | (.machineIntBinary type integerOperation), [left, right] =>
+      psTsEmitMachineIntegerBinary type integerOperation left right
+  | (.machineIntCompare _ integerOperation), [left, right] =>
+      Except.ok
+        (psTsEmitMachineIntegerCompare integerOperation left right)
+  | (.floatBinary type floatOperation), [left, right] =>
+      Except.ok (psTsEmitFloatBinary type floatOperation left right)
+  | (.floatCompare _ floatOperation), [left, right] =>
+      Except.ok (psTsEmitFloatCompare floatOperation left right)
   | .natAdd, [left, right] =>
       Except.ok ("(" ++ left ++ " + " ++ right ++ ")")
   | .natSub, [left, right] =>
@@ -275,7 +375,7 @@ def psTsEmitExprWithFuel
   | fuel + 1, expr =>
       match expr with
       | .literal literal =>
-          Except.ok (psTsEmitLiteral literal)
+          psTsEmitLiteral literal
       | .var name =>
           Except.ok name
       | .intrinsic operation arguments =>
@@ -314,7 +414,7 @@ def psTsEmitExprWithFuel
                       Except.ok
                         (printedFn ++ generic ++ "(" ++
                           psTsJoin ", " printedArguments ++ ")")
-      | .letE name value body =>
+      | .letE name _ value body =>
           match psTsEmitExprWithFuel brands tags fuel value with
           | Except.error error => Except.error error
           | Except.ok printedValue =>

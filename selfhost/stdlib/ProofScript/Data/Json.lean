@@ -677,7 +677,7 @@ def jsonEncodeArrayBodyWith
               match
                   jsonEncodeArrayBodyWith
                     encode
-                    (JsonValue.arrayCons next rest) with
+                    tail with
               | Result.error error => Result.error error
               | Result.ok encodedTail =>
                   Result.ok
@@ -717,10 +717,7 @@ def jsonEncodeObjectBodyWith
               match
                   jsonEncodeObjectBodyWith
                     encode
-                    (JsonValue.objectField
-                      nextKey
-                      nextValue
-                      rest) with
+                    tail with
               | Result.error error => Result.error error
               | Result.ok encodedTail =>
                   Result.ok

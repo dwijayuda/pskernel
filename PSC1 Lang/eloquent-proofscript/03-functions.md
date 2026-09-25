@@ -1,42 +1,33 @@
 # 3. Functions
 
-Functions are the main abstraction mechanism in PSC1.
+Functions are the main way PSC1 turns repeated details into reusable concepts.
 
-They let you name computation, pass computation around, and express both
-ordinary and dependent relationships between inputs and outputs.
-
-## A named function
+## Named functions
 
 ```proofscript
 function square(x: Nat): Nat :=
   x * x;
 ```
 
-The same semantic definition can be written with `def`:
+A public function signature states the contract visible to callers.
+
+## Anonymous functions
 
 ```proofscript
-def square2(x: Nat): Nat :=
-  x * x;
+fun (x: Nat) => x + 1
 ```
 
-`function` is an ergonomic alias, not a separate runtime function kind.
+A lambda is a value.
 
-## Multiple parameters
+## Function types
 
 ```proofscript
-function add(x: Nat, y: Nat): Nat :=
-  x + y;
+Nat -> Nat
 ```
 
-Source D-CALL:
+describes a function from a natural number to a natural number.
 
-```proofscript
-add(20, 22)
-```
-
-normalizes to ordinary curried application.
-
-## Function values
+## Functions as values
 
 ```proofscript
 const increment: Nat -> Nat :=
@@ -45,72 +36,83 @@ const increment: Nat -> Nat :=
 
 Functions can be passed to other functions.
 
-## Lexical scope
-
-A lambda or local definition can use values from its surrounding checked
-context.
-
-That is lexical closure behavior at the language level.
-
-The target backend may represent closures differently.
-
-Portable PSC1 code cannot observe the allocation identity of that closure.
-
-## Polymorphic functions
+## Higher-order parameters
 
 ```proofscript
-function identity {α: Type}(x: α): α :=
-  x;
+function applyTwice(f: Nat -> Nat, x: Nat): Nat :=
+  f(f(x));
 ```
 
-The type argument is implicit and may be inferred.
+This capability will become central in Chapter 5.
 
-## Dependent functions
+## Lexical scope and closures
 
-A later parameter type may mention an earlier value:
+A lambda can refer to values in the lexical environment in which it was
+created.
+
+Conceptually:
 
 ```proofscript
-(x: Nat) -> Fin x -> Nat
+function addBy(amount: Nat): Nat -> Nat :=
+  fun x => x + amount;
 ```
 
-This is a dependent Pi type.
+The returned function retains the semantic value of `amount`.
 
-It is a direct extension of the ordinary function idea, not a separate
-"theorem-only" mechanism.
-
-## Pure functions and side effects
-
-Ordinary portable PSC1 functions are expected to be referentially transparent.
-
-A function that reads a file, network, clock, random source, or mutable host
-state crosses an explicit effect/capability boundary.
-
-This makes optimization and proof rewriting safer.
+The backend may implement the closure using objects, heap records, or Wasm GC,
+but those representations do not define source semantics.
 
 ## Recursion
 
 ```proofscript
-function listLength {α: Type}(xs: PsList(α)): Nat :=
-  match xs with {
-    | .nil => 0;
-    | .cons head tail => 1 + listLength(tail);
+function sumTo(n: Nat): Nat :=
+  if (n == 0) {
+    0
+  } else {
+    n + sumTo(n - 1)
   };
 ```
 
-Structural recursion is the preferred first-freeze recursion mechanism.
+For the first PSC1 profile, structural recursion over inductive data is the most
+important guaranteed recursive pattern.
 
-## Controlled partiality
+Recursion over numeric measures can require termination support beyond the
+smallest structural subset, so use current compiler gates as the final
+implementation authority.
 
-Some executable compiler algorithms may require the explicit `partial def`
-boundary.
+## Pure functions and side effects
 
-Partial executable code is not permission to prove arbitrary propositions.
+Portable ordinary functions are pure.
+
+Reading a file, clock, network, random source, or process state is not an
+invisible property of a normal function.
+
+Those capabilities belong behind an explicit effect boundary.
+
+## Growing functions
+
+A useful design technique is to begin with a concrete function, notice the
+varying piece, and turn that piece into a parameter.
+
+Example evolution:
+
+```proofscript
+function increment(x: Nat): Nat := x + 1;
+```
+
+to:
+
+```proofscript
+function transform(f: Nat -> Nat, x: Nat): Nat :=
+  f(x);
+```
+
+The second function captures the reusable idea.
 
 ## Exercises
 
-1. Define a function-valued `const`.
-2. Define a polymorphic identity function.
-3. Define `applyTwice(f, x)` for `Nat -> Nat`.
-4. Define a structurally recursive sum over a Nat list.
-5. Explain why a backend closure address cannot be part of portable function
-   equality.
+1. Write `compose(f, g, x)` for `Nat -> Nat` functions.
+2. Write `applyThreeTimes`.
+3. Write `makeAdder(amount)` returning a closure.
+4. Explain why closure semantics cannot be defined as "a JavaScript object with
+   captured properties".

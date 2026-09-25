@@ -1,125 +1,108 @@
 # Introduction
 
-Programming languages are tools for leaving unimportant detail behind.
+Programming is the work of expressing a process precisely enough that a
+machine can execute it.
 
-PSC1 adds one more kind of detail that can be removed from the programmer's
-head: facts that the type checker and proof checker can establish once and then
-carry for the rest of the program.
+ProofScript adds another question:
 
-A PSC1 program can be ordinary:
+> Can we express enough of the *reason* the program is correct that a small
+> checker can verify it?
 
-```proofscript
-function double(x: Nat): Nat :=
-  x + x;
-```
+That does not mean every line must be a theorem.
 
-or it can expose a stronger contract:
+Most PSC1 code is ordinary programming.
 
 ```proofscript
-function safeGet {α: Type}
-(xs: Array(α), index: Nat, h: index < Array.size(xs)): α :=
-  Array.getInternal(xs, index, h);
+function square(x: Nat): Nat :=
+  x * x;
 ```
 
-Both are programs. The second carries evidence about a condition that would
-otherwise be a runtime concern.
-
-## Why the language matters
-
-PSC1 is designed around a deliberate division:
-
-```text
-friendly source
-    ↓
-Lean-compatible elaborated meaning
-    ↓
-pskernel
-    ↓
-target-neutral executable meaning
-    ↓
-TypeScript / Rust / Wasm
-```
-
-This means a surface convenience is allowed to be pleasant without becoming a
-new semantic system.
-
-For example:
+But when an invariant matters, the same language can state it.
 
 ```proofscript
-function add(x: Nat, y: Nat): Nat := x + y;
+theorem squareSelf(x: Nat):
+square(x) = x * x := by rfl;
 ```
 
-is friendlier to a TypeScript programmer than the corresponding Lean source,
-but it does not invent JavaScript function semantics.
+## Why language design matters
 
-## Programs are expressions plus names
+Low-level representations expose details.
 
-PSC1 is expression-oriented.
+Higher-level abstractions let us name the concept we actually care about.
 
-You build larger programs by:
+For example, a hand-written recursive traversal may be correct, but once a
+general `listMap` exists, a transformation is clearer when written as a map.
 
-- naming values;
-- naming functions;
-- composing functions;
-- defining data;
-- matching data;
-- importing modules;
-- stating invariants;
-- proving the invariants that matter.
+```proofscript
+function incrementAll(xs: PsList(Nat)): PsList(Nat) :=
+  listMap(fun x => x + 1, xs);
+```
 
-The book avoids teaching a statement-heavy mutable style first because that is
-not the smallest stable PSC1 core.
+The language and library should help us say *what* the program means without
+hiding important correctness assumptions.
 
-## The first habit: run the checker
+## PSC1 in one paragraph
 
-Create a small project:
+PSC1 is a small general-purpose language with:
+
+- TypeScript-friendly surface conventions;
+- Lean-compatible dependent/proof semantics for the supported core;
+- a pskernel-checked logical boundary;
+- a target-neutral executable IR;
+- TypeScript/JavaScript, Rust, and WebAssembly backend goals.
+
+It is neither JavaScript with proof keywords nor full Lean with different
+punctuation.
+
+## Running code
+
+A normal project starts with:
 
 ```bash
-psc init eloquent-psc1
-cd eloquent-psc1
+psc init hello
+cd hello
 psc check
+psc build
+psc run -- 5
 ```
 
-Then change the program and check again.
+The generated project contains a `psconfig.json` and a `.ps` entry source.
 
-A language with a strong checker is learned partly by reading what it rejects.
+## Checking and running are different claims
 
-## The second habit: separate language from host
+`psc check` establishes that the supported source elaborates and passes
+pskernel admission.
 
-A browser can draw pixels.
+`psc build` then erases proof-only information and lowers executable meaning.
 
-Node can open files.
+`psc run` invokes the generated program.
 
-npm can load packages.
+This distinction matters throughout the book.
 
-Rust can allocate memory in ways JavaScript cannot.
+## Read code actively
 
-Wasm has its own numeric instructions and memory models.
+The best way to use this book is to:
 
-None of those facts should silently become the definition of a PSC1 value.
+1. type the examples;
+2. change them;
+3. deliberately break them;
+4. read the diagnostics;
+5. solve the exercises;
+6. inspect canonical Lean or generated target code when useful.
 
-This distinction becomes increasingly important in Part II.
+PSC1 is easiest to understand when its programming and proof feedback are seen
+together.
 
-## The third habit: use proofs where they pay rent
+## The route through the book
 
-Not every function needs a theorem.
+The first six chapters build a programming vocabulary.
 
-Use proofs when they improve something concrete:
+Chapter 7 combines it into a persistent route-planning project.
 
-- a boundary check;
-- a parser invariant;
-- a transformation law;
-- a compiler pass;
-- a recursion argument;
-- a public API contract.
+Chapters 8–11 focus on reliability, text, modules, and effects.
 
-PSC1 is meant to let ordinary programming and theorem proving meet where doing
-so reduces uncertainty.
+Chapter 12 builds a tiny programming language—an especially useful exercise for
+understanding PSC1 because ProofScript itself must eventually compile itself.
 
-## Exercises
-
-1. Initialize a PSC1 application and make `main` return its Nat argument plus
-   one.
-2. Change the result type to `Bool` without changing the body. Read the error.
-3. Restore the program and emit canonical Lean. Identify the corresponding
-   definition and function application.
+The final part introduces the dependent/proof/portability ideas that distinguish
+PSC1 from ordinary typed languages.

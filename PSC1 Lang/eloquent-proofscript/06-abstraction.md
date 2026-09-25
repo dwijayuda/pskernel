@@ -1,55 +1,53 @@
-# 6. Abstraction with Structures, Inductives, and Typeclasses
+# 6. Abstraction with Data and Typeclasses
 
-JavaScript abstraction often centers on objects, prototypes, classes, and
-methods.
+Functions abstract behavior.
 
-PSC1 reaches similar software-design goals through a different set of
-mechanisms:
+Structures and inductives abstract data.
 
-- functions;
-- structures;
-- inductives;
-- modules;
-- typeclasses;
-- dependent types.
+Typeclasses abstract type-directed evidence and operations.
 
-## Abstract data through modules
+Together they provide most of the abstraction machinery PSC1 needs without an
+object/prototype system.
 
-A type can expose a small public set of constructors/functions while keeping
-implementation helpers local to a module.
+## Abstract data with structures
 
-The module boundary, not prototype inheritance, is the first abstraction tool.
-
-## Structures for product data
-
-Use a structure when a value is made of several named pieces that belong
-together.
+A structure can expose a meaningful interface without exposing backend layout.
 
 ```proofscript
-structure Position where {
-  line: Nat;
-  column: Nat;
+structure Counter where {
+  value: Nat;
 }
 ```
 
-## Inductives for alternatives
+Library functions can operate on `Counter` values.
 
-Use an inductive when a value can have one of several shapes.
+The source does not need methods or mutable object identity.
+
+## Alternative states with inductives
 
 ```proofscript
-inductive TokenKind where {
-  | identifier;
-  | number;
-  | endOfInput;
+inductive ParseState where {
+  | ready;
+  | failed(message: String);
 };
 ```
 
-Pattern matching forces the program to address constructor alternatives
-explicitly.
+A constructor makes each state explicit.
 
-## Typeclasses for ad-hoc polymorphism
+Pattern matching forces consumers to account for alternatives.
 
-Representative class:
+## Generic abstraction
+
+```proofscript
+function identity {α: Type}(x: α): α :=
+  x;
+```
+
+Parametric polymorphism works uniformly for any `α`.
+
+## Type-directed behavior
+
+A typeclass can package operations:
 
 ```proofscript
 class Sized(α: Type) where {
@@ -57,50 +55,65 @@ class Sized(α: Type) where {
 }
 ```
 
-The elaborator can synthesize evidence for `[Sized α]`.
+Functions can request instance evidence rather than taking a concrete
+implementation manually every time.
 
-This is not virtual method dispatch and does not imply object identity.
+## Typeclasses are not OOP classes
 
-## Dependent types for stronger interfaces
+PSC1 `class` does not imply:
 
-When an operation's result or precondition depends on a value, use a dependent
-type.
-
-Example shape:
-
-```text
-(xs: Array α) -> (i: Nat) -> i < size xs -> α
-```
-
-This expresses an invariant directly.
-
-## Avoid inheritance-shaped thinking
-
-PSC1 does not need source semantics for:
-
-- prototype chains;
+- inheritance;
+- constructors;
 - `this`;
-- class inheritance;
-- `instanceof`;
-- mutable hidden fields;
-- getter/setter magic.
+- virtual dispatch;
+- object identity;
+- mutable private fields.
 
-If an abstraction can be expressed with data + functions + evidence, that is
-usually more portable and easier to verify.
+It is an evidence-resolution mechanism.
 
-## Iterator-like abstractions
+## Encapsulation without objects
 
-Generic iteration can be provided as library functions or typeclasses when the
-compiler workload justifies it.
+Useful encapsulation comes from:
 
-A new language-level iterator protocol is not required for PSC1 freeze merely
-because JavaScript has one.
+- module boundaries;
+- abstract data constructors;
+- functions;
+- private implementation conventions;
+- checked invariants.
+
+A language does not need prototype semantics to organize large programs.
+
+## Invariants as data or proofs
+
+Suppose a value must always satisfy a property.
+
+There are several strategies:
+
+1. use an inductive whose constructors can only build valid states;
+2. use a structure containing data plus proof evidence;
+3. keep the representation private and expose validated construction
+   functions.
+
+PSC1 can choose the weakest mechanism that expresses the needed invariant.
+
+## Representation independence
+
+Backends may represent the same source abstraction differently.
+
+A structure might become:
+
+- a JavaScript object;
+- a Rust struct;
+- a Wasm GC record;
+- a custom memory layout.
+
+Portable PSC1 code cannot observe that representation identity.
 
 ## Exercises
 
-1. Model a compiler token using one structure and one inductive.
-2. Refactor an imaginary object-oriented "Shape" hierarchy into an inductive
-   plus functions.
-3. Give an example where a typeclass is more appropriate than adding a tag to
-   an inductive.
-4. Give an example where a dependent function type prevents an invalid call.
+1. Model a traffic light as an inductive.
+2. Model a coordinate as a structure.
+3. Write one function that is polymorphic in its element type.
+4. Sketch a typeclass for an operation you would otherwise pass manually.
+5. Explain why a PSC1 structure is not equivalent to a TypeScript structural
+   object type.

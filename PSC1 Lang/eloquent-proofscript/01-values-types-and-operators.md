@@ -1,51 +1,43 @@
 # 1. Values, Types, and Operators
 
-Programs manipulate values.
+Programs compute with values.
 
-PSC1 differs from JavaScript in one important respect: the type of a value is
-not an after-the-fact runtime guess. It is part of the program's checked
-meaning.
+PSC1 also tracks the types of those values before runtime.
 
 ## Natural numbers
 
 ```proofscript
-const count: Nat := 12;
+const answer: Nat := 42;
 ```
 
-`Nat` represents nonnegative mathematical integers.
+`Nat` is an exact natural-number type.
 
-It is not restricted to the safe-integer range of JavaScript `number`.
+It is not defined as JavaScript `number`.
 
 ## Integers
 
 ```proofscript
-const delta: Int := -3;
+const offset: Int := -3;
 ```
 
-`Int` is exact mathematical integer arithmetic.
+`Int` is an exact integer type.
 
 ## Fixed-width integers
 
-PSC1 freezes:
+PSC1 freezes these names:
 
 ```text
 UInt8 UInt16 UInt32 UInt64 USize
-Int8 Int16 Int32 Int64 ISize
+Int8  Int16  Int32  Int64  ISize
 ```
 
-These types exist because programs sometimes need machine-shaped data.
-
-They must not inherit corner-case behavior accidentally from one backend.
+A fixed width is part of the type's contract.
 
 ### Freeze note
 
-The names are frozen.
-
-The complete machine-scalar operation and conversion matrix remains an open
-SH7 obligation in the baseline used by this book.
-
-Until that closes, examples should avoid pretending unspecified overflow or
-conversion corners are already normative.
+The complete scalar operation/conversion matrix is still an explicit PSC1
+freeze obligation in the current repository baseline. Do not infer missing
+overflow/conversion rules from JavaScript, Rust, or Wasm behavior.
 
 ## Floating point
 
@@ -54,9 +46,9 @@ Float
 Float32
 ```
 
-are computational floating types.
+represent the frozen floating types.
 
-Portable semantics must remain stable across the supported backends.
+Backend fast-math is not source semantics.
 
 ## Booleans
 
@@ -64,34 +56,31 @@ Portable semantics must remain stable across the supported backends.
 const enabled: Bool := true;
 ```
 
-Bool is executable data.
+Boolean operators include the supported:
 
-It is not the same thing as `Prop`.
+```text
+!   &&   ||
+```
 
-## Characters and strings
+## Strings and characters
 
 ```proofscript
 const greeting: String := "hello";
 ```
 
-PSC1 strings follow the semantic model needed by the pinned Lean-compatible
-foundation and compiler workload.
+`String` and `Char` are semantic language values.
 
-The self-hosting work specifically cares about UTF-8 positions and text slicing,
-so backend-native string indexing is not the language definition.
+Their backend representation is private to the runtime/backend.
 
 ## Unit
 
-```proofscript
-const done: Unit := ();
-```
+`Unit` represents a result with no interesting information.
 
-Unit is useful when the meaningful result is "there is exactly one ordinary
-value here."
+It is useful in effectful APIs.
 
 ## Operators
 
-Current shared binary precedence, weak to strong:
+For the current shared grammar, ordinary binary precedence is:
 
 ```text
 ||
@@ -102,39 +91,53 @@ Current shared binary precedence, weak to strong:
 * / %
 ```
 
-Application binds tighter.
+Application binds more tightly.
 
-## Three equal-looking symbols with different jobs
+## Three different-looking equalities
+
+These must not be confused:
 
 ```text
-:=  definition or local binding
-=   propositional equality
-==  Bool-valued equality
+:=   defines or binds
+=    creates a proposition of equality
+==   computes Bool equality where supported
 ```
 
-For example:
+Example:
 
 ```proofscript
 const one: Nat := 1;
 
 function isOne(x: Nat): Bool :=
-  x == one;
+  x == 1;
 
-theorem oneEqualsItself: one = one := by rfl;
+theorem oneIsOne: one = one := by rfl;
 ```
 
-## No automatic JavaScript coercion
+## No automatic coercion philosophy
 
-PSC1 does not define arithmetic by "try converting whatever values happen to be
-present."
+PSC1 should not silently reproduce JavaScript-style conversions such as
+"number plus string becomes string" or truthiness conversion.
 
-Conversions are explicit, typed operations whose accepted cases belong in the
-language contract.
+Conversions must be explicit or come from a specifically defined elaboration
+rule.
+
+Failing to type-check is preferable to guessing a runtime interpretation.
+
+## Expressions compose
+
+```proofscript
+function score(x: Nat, bonus: Nat): Nat :=
+  (x * 2) + bonus;
+```
+
+The same principle scales to user-defined functions and data.
 
 ## Exercises
 
-1. Define `const fortyThree: Nat := 43;`.
-2. Write `function isZero(x: Nat): Bool` using `==`.
-3. Write a theorem that `fortyThree = fortyThree`.
-4. Explain why `Nat` cannot be defined as "JavaScript number restricted to
-   nonnegative values" in a multi-backend language.
+1. Define `triple(x: Nat): Nat`.
+2. Define `between(x, low, high): Bool` using comparisons and `&&`.
+3. Write one Bool-valued equality function and one theorem using
+   propositional equality. Explain the difference.
+4. List which numeric types in PSC1 have a target-independent fixed width and
+   which do not.

@@ -1,118 +1,104 @@
 # Eloquent ProofScript PSC1
 
-This book is a practical, code-first introduction to ProofScript PSC1.
+This book is a programming-first introduction to ProofScript PSC1.
 
-Its **teaching architecture** is inspired by the strengths studied in
-*Eloquent JavaScript* and cross-checked against the repository's Lean,
-TypeScript, ProofScript, self-hosting, and theorem-prover study material.
+Its pedagogical structure is inspired by the strongest ideas in *Eloquent
+JavaScript, 4th edition*: begin with values and expressions, build functions
+and data structures, introduce abstraction through higher-order functions,
+interrupt the conceptual chapters with substantial projects, then confront
+errors, modules, effects, and language implementation.
 
-It is not a translation of *Eloquent JavaScript*. JavaScript's dynamic object
-model, mutation, exceptions, promises, browser APIs, and Node runtime are not
-PSC1 semantics.
+The content itself is PSC1-native.
 
-Instead, this book asks the analogous question:
+It does **not** import JavaScript semantics such as:
 
-> What is the shortest path from "I can read a PSC1 expression" to "I can build,
-> reason about, verify, package, and run a real PSC1 program"?
+- implicit coercion;
+- mutable object identity as the default data model;
+- prototypes or `this`;
+- exceptions as the portable error model;
+- promises/event-loop scheduling as source semantics;
+- unrestricted loops and mutation;
+- browser DOM APIs.
 
-## The three parts
+## How to read this book
 
-### Part I — The language
+The chapters are meant to be read in order and typed into a real PSC1 project.
+
+Each chapter contains:
+
+- a small set of language ideas;
+- compact examples;
+- a practical design lesson;
+- exercises.
+
+Project chapters combine several earlier ideas into a larger program.
+
+## Contents
+
+### Part I — The Language
 
 1. [Values, Types, and Operators](./01-values-types-and-operators.md)
 2. [Program Structure](./02-program-structure.md)
 3. [Functions](./03-functions.md)
 4. [Data Structures](./04-data-structures.md)
 5. [Higher-Order Functions](./05-higher-order-functions.md)
-6. [Abstraction with Structures, Inductives, and Typeclasses](./06-abstraction.md)
-7. [Project: A Delivery Planner](./07-project-delivery-planner.md)
-8. [Bugs, Errors, and Proof Failures](./08-bugs-errors-and-proof-failures.md)
-9. [Text, Unicode, and Parsing](./09-text-unicode-and-parsing.md)
+6. [Abstraction with Data and Typeclasses](./06-abstraction.md)
+7. [Project: A Persistent Route Planner](./07-project-route-planner.md)
+
+### Part II — Building Reliable Programs
+
+8. [Bugs, Errors, and Proofs](./08-bugs-errors-and-proofs.md)
+9. [Text and Parsing](./09-text-and-parsing.md)
 10. [Modules and Packages](./10-modules-and-packages.md)
-11. [Effects, Waiting, and Host Capabilities](./11-effects-and-host-capabilities.md)
-12. [Project: A Tiny Typed Language](./12-project-tiny-typed-language.md)
+11. [Effects and Host Capabilities](./11-effects-and-host-capabilities.md)
+12. [Project: A Tiny Programming Language](./12-project-tiny-language.md)
 
-### Part II — Programs at the host boundary
+### Part III — What Makes PSC1 Different
 
-13. [JavaScript, the Web, and FFI](./13-javascript-web-and-ffi.md)
-14. [JSON and External Data](./14-json-and-external-data.md)
-15. [Project: A Checked Host Adapter](./15-project-checked-host-adapter.md)
-16. [Node, npm, and Command-Line Programs](./16-node-npm-and-cli.md)
+13. [Propositions and Proofs](./13-propositions-and-proofs.md)
+14. [Dependent Types](./14-dependent-types.md)
+15. [Interop and Portability](./15-interop-and-portability.md)
+16. [Project: A Tiny Compiler Pipeline](./16-project-tiny-compiler.md)
 
-### Part III — Building the language with the language
+Then use:
 
-17. [Project: A Small Compiler Slice](./17-project-compiler-slice.md)
+- [Exercise Hints](./EXERCISE_HINTS.md)
+- [PSC1 Handbook](../handbook/README.md)
+- [Theorem Proving in ProofScript](../theorem-proving-in-proofscript/README.md)
+- [PSC1 Language Manual](../language-manual/README.md)
 
-Then use [Exercise Hints](./EXERCISE_HINTS.md) only after trying the exercises.
+## A note on examples
 
-## How to read this book
-
-Type the examples.
-
-Run:
-
-```bash
-psc check
-psc build
-psc run
-```
-
-Use:
-
-```bash
-psc translate input.ps --to lean
-psc emit-lean input.ps
-```
-
-when you want to inspect the supported semantic translation.
-
-Do not merely read a solution and decide that you "would have written that."
-The point of the exercises is to make the type checker, elaborator, and runtime
-give you feedback.
-
-## What this book treats as PSC1
-
-The book follows the active PSC1 profile:
-
-- `def`, `const`, `function`;
-- lambdas, application, `let`;
-- `if` and single-scrutinee `match`;
-- structures and inductives;
-- the frozen scalar vocabulary;
-- List/Option/Result/Prod/Array/ordered Map/Set capabilities;
-- dependent functions and `Prop`;
-- bounded class/instance behavior;
-- structural recursion;
-- bounded theorem tactics;
-- modules/imports;
-- explicit compiler effects;
-- target-neutral CheckedCore -> Erasure -> VerifiedIR execution.
-
-It does **not** teach optional/deferred constructs as though they were already
-required PSC1.
-
-## Example style
-
-Native PSC1 examples use canonical formatting:
+The examples use the canonical PSC1 formatting style:
 
 ```proofscript
 function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
-Canonical Lean examples use normal Lean spacing:
+The repository still contains older source written with Lean-style spacing
+(`x : Nat`). Both are semantically equivalent; the canonical `.ps`
+formatter style is `x: Nat`.
 
-```lean
-def add (x : Nat) (y : Nat) : Nat :=
-  x + y
-```
+Some later chapters discuss capabilities that are required by the PSC1
+self-host profile but whose complete library/API freeze is still in progress.
+Those sections are labeled rather than pretending the implementation is more
+complete than it is.
 
-## Status labels
+## The main design idea
 
-Some sections use these labels:
+A good PSC1 program should read at the level of the problem.
 
-- **Current PSC1** — supported by current repository evidence.
-- **Profile requirement** — required by the first self-host language plan but
-  may still be closing end-to-end gates.
-- **Host boundary** — a runtime capability, not proof semantics.
-- **Deferred** — deliberately outside the first PSC1 freeze.
+Instead of encoding everything as low-level control flow, prefer:
+
+- descriptive functions;
+- algebraic data;
+- higher-order combinators;
+- explicit error/effect types;
+- dependent types when they genuinely improve an API;
+- proofs where they eliminate a meaningful class of mistakes.
+
+The goal is not to maximize proof syntax.
+
+The goal is to make correct programs easier to state, understand, reuse, and
+compile across multiple backends.

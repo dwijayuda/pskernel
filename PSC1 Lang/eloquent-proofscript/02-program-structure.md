@@ -1,119 +1,122 @@
 # 2. Program Structure
 
-PSC1 programs are built from declarations and expressions.
+Values become useful when they are arranged into definitions and expressions
+that describe a larger computation.
 
-The first core deliberately avoids requiring a large imperative statement
+PSC1 deliberately keeps this structure smaller than JavaScript's statement
 language.
 
 ## Definitions
 
 ```proofscript
-def answer: Nat := 42;
+def base: Nat := 10;
+const bonus: Nat := 5;
 ```
 
-`def` is the canonical general declaration.
+`def` is canonical.
 
-Two ergonomic aliases share the same semantics:
+`const` is the parameterless alias.
+
+## Function declarations
 
 ```proofscript
-const otherAnswer: Nat := 42;
-
-function add(x: Nat, y: Nat): Nat :=
-  x + y;
+function total(x: Nat): Nat :=
+  x + base + bonus;
 ```
+
+`function` is a parameterized alias of the same definition mechanism.
 
 ## Local bindings
 
 ```proofscript
-function score(x: Nat): Nat :=
-  let doubled: Nat := x * 2;
-  let adjusted: Nat := doubled + 1;
+function invoice(subtotal: Nat): Nat :=
+  let fee: Nat := 3;
+  let adjusted: Nat := subtotal + fee;
   adjusted;
 ```
 
-A local `let` introduces a lexical value.
+A `let` is lexical.
 
-It is not a mutable JavaScript `let`.
+It does not imply mutable JavaScript-style assignment.
 
-## Conditional computation
-
-PSC1 owns a braced expression form:
+## Conditional expressions
 
 ```proofscript
-function choose(flag: Bool, yes: Nat, no: Nat): Nat :=
-  if (flag) {
-    yes
+function maxNat(x: Nat, y: Nat): Nat :=
+  if (x >= y) {
+    x
   } else {
-    no
+    y
   };
 ```
 
 The branches are expressions.
 
-## Dispatching on data
+The braces are registered PSC1 syntax, not generic statement blocks.
 
-For algebraic alternatives, use `match`:
+## Pattern-based control
+
+For algebraic alternatives, use `match` rather than a switch over untyped
+tags.
 
 ```proofscript
-function optionOrZero(value: PsOption(Nat)): Nat :=
+function optionDefault {α: Type}
+(value: PsOption(α), fallback: α): α :=
   match value with {
-    | .none => 0;
+    | .none => fallback;
     | .some x => x;
   };
 ```
 
-This is the PSC1 analogue of a value-directed control construct.
+## Sequencing
 
-## Repetition
+Pure code usually expresses sequence through data dependencies and nested/local
+bindings.
 
-JavaScript introductory material often reaches for `while` and `for`.
+Effectful sequencing belongs in an explicit effect and `do` notation.
 
-PSC1's first freeze does not need loops as a foundational requirement.
+## Why loops are not central to PSC1
 
-Use structural recursion when the data itself provides the iteration shape:
+A small functional language can express iteration through:
 
-```proofscript
-function listLength {α: Type}(xs: PsList(α)): Nat :=
-  match xs with {
-    | .nil => 0;
-    | .cons head tail => 1 + listLength(tail);
-  };
-```
+- structural recursion;
+- `map`;
+- `fold`;
+- reusable traversal functions.
 
-Loop/mutation syntax is optional/deferred unless real compiler source makes it
-necessary.
+Imperative loops may be useful future syntax, but they are not required to
+make PSC1 computationally useful or self-hosting.
 
 ## Comments and formatting
 
-Formatting does not define type semantics.
+Formatting is intentionally conventional:
 
-Canonical native PSC1 uses:
-
-```text
-name: Type
+```proofscript
+function add(x: Nat, y: Nat): Nat :=
+  x + y;
 ```
 
-rather than the Lean printer's:
+Spacing around `:` is not semantic.
 
-```text
-name : Type
+The canonical `.ps` style is `x: Type`.
+
+## Exercise: Fizz-like classification
+
+Write:
+
+```proofscript
+function classify(n: Nat): String := ...
 ```
 
-## Order of declarations
+that returns one of a few fixed strings based on divisibility tests.
 
-A module is checked in an explicit environment.
-
-Do not rely on JavaScript-style hoisting.
-
-The exact visibility rules are part of module/environment elaboration, not a
-host runtime accident.
+Prefer nested `if` expressions over inventing mutable state.
 
 ## Exercises
 
-1. Implement `absoluteLike(flag, x, y)` as an `if` expression choosing
-   between two Nat values.
-2. Define an inductive with two constructors and a function that dispatches on
-   it with `match`.
-3. Implement a recursive count over `PsList(Nat)`.
-4. Rewrite a small algorithm that you would normally express with a mutable loop
-   as structural recursion.
+1. Rewrite a three-step arithmetic computation using two local `let`
+   bindings.
+2. Write `absDiff(x, y): Nat` using an `if`.
+3. Define your own two-constructor status inductive and write a `match`
+   function over it.
+4. Explain why a PSC1 branch block is not equivalent to an arbitrary JS block.

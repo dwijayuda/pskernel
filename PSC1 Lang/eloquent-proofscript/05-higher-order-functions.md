@@ -1,84 +1,115 @@
 # 5. Higher-Order Functions
 
-A higher-order function takes or returns another function.
+Abstraction lets a program speak in the vocabulary of its problem rather than
+in the mechanics of every traversal.
 
-This lets programs describe a pattern once and supply only the varying behavior.
+Higher-order functions are one of PSC1's most important abstraction tools.
 
-## Mapping
+## A map function
 
-The repository's ProofScript stdlib contains the higher-order shape:
+The current PSC1 stdlib uses:
 
 ```proofscript
 function listMap {α: Type}{β: Type}
 (f: α -> β, xs: PsList(α)): PsList(β) :=
   match xs with {
     | .nil => PsList.nil;
-    | .cons head tail => PsList.cons(f(head), listMap(f, tail));
+    | .cons head tail =>
+      PsList.cons(f(head), listMap(f, tail));
   };
 ```
 
-This combines:
-
-- polymorphism;
-- function values;
-- structural recursion;
-- generic inductive data.
-
-## Transforming behavior, not data representation
-
-A higher-order function should abstract an operation because the operation is
-the varying part.
-
-Do not add a generic abstraction merely because it is possible.
-
-PSC1's small-language philosophy applies at library level too.
-
-## Composition
-
-Conceptually:
+A caller can then say:
 
 ```proofscript
-function compose {α: Type}{β: Type}{γ: Type}
-(f: β -> γ, g: α -> β, x: α): γ :=
-  f(g(x));
+listMap(fun x => x + 1, xs)
 ```
 
-Composition is ordinary function application.
+instead of rewriting the recursion every time.
 
-No special runtime object model is needed.
+## Array map
 
-## Folds
+```proofscript
+function arrayMap {α: Type}{β: Type}
+(f: α -> β, xs: Array(α)): Array(β) :=
+  Array.map(f, xs);
+```
 
-A fold summarizes recursive data by giving behavior for constructors.
+The abstraction describes transformation directly.
 
-That idea is closely related to the recursors generated for inductive types.
+## Folding
 
-In programming, a fold is a reusable traversal.
+A fold reduces a collection to a summary.
 
-In theorem proving, an induction principle is a proof-producing traversal over
-the same shape.
+The current stdlib exposes an array fold shape:
 
-## Laws
+```proofscript
+function arrayFoldl {α: Type}{β: Type}
+(f: β -> α -> β, init: β, xs: Array(α)): β :=
+  ...
+```
 
-Higher-order abstractions become much more valuable when their laws are stated.
+From folds we can express many traversals without adding new language syntax.
 
-The repository already dogfoods laws such as the interaction of `listMap` and
-`listAppend`.
+## Predicates as values
 
-A theorem can document an optimization- or refactoring-safe property of a
-library abstraction.
+```proofscript
+function arrayAny {α: Type}
+(predicate: α -> Bool, xs: Array(α)): Bool :=
+  ...
+```
 
-## Generic code and typeclasses
+A predicate is just a function value returning `Bool`.
 
-Use ordinary type parameters when behavior is uniform for every type.
+## Option bind
 
-Use a typeclass when the function needs type-specific evidence/operations.
+The stdlib includes:
+
+```proofscript
+function optionBind {α: Type}{β: Type}
+(value: PsOption(α), f: α -> PsOption(β)): PsOption(β) :=
+  match value with {
+    | .none => PsOption.none;
+    | .some x => f(x);
+  };
+```
+
+This captures the repeated "if present, continue; if absent, stop" pattern.
+
+## Result bind
+
+Similarly:
+
+```proofscript
+function resultBind {α: Type}{β: Type}{ε: Type}
+(value: PsResult(α, ε), f: α -> PsResult(β, ε)): PsResult(β, ε) :=
+  ...
+```
+
+This provides typed error propagation as a reusable abstraction.
+
+## Composability
+
+Small reusable functions are valuable because they can be combined.
+
+A good abstraction:
+
+- removes incidental detail;
+- preserves the important contract;
+- composes with other abstractions;
+- remains easy to test and reason about.
+
+## Libraries before syntax
+
+When repetition can be abstracted by a function such as `map`, `fold`,
+`bind`, or `compare`, PSC1 prefers that library abstraction over adding a
+new keyword.
+
+This is a central small-language design rule.
 
 ## Exercises
 
-1. Implement `compose`.
-2. Implement `listMap` for a custom recursive list type.
-3. Write a `listLength` function and explain why its behavior does not need a
-   typeclass.
-4. State a theorem you would want from a reusable `map` operation, even if you
-   do not prove it yet.
+1. Implement `listMap` for a custom recursive list.
+2. Define `listFold` and use it to compute a length or sum.
+3. Define `optionMap2` from two optional values.
+4. Express "all array elements satisfy a predicate" using a fold.

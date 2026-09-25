@@ -1390,8 +1390,12 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
       (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
   match oursSmall.find? SmallRec with
   | some (.recInfo info) =>
-      assertTrue "small-elimination recursor incorrectly gained an eliminator universe"
-        (info.base.levelParams == [paramBoxU])
+      match info.base.levelParams with
+      | [only] =>
+          assertTrue "small-elimination recursor changed its original universe parameter"
+            (PSC1Kernel.Name.eq only paramBoxU)
+      | _ =>
+          throw <| IO.userError "small-elimination recursor universe arity mismatch"
       assertTrue "small-elimination recursor was incorrectly marked K"
         (!info.k)
   | _ =>
@@ -1497,10 +1501,11 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   let Reveal : PSC1Kernel.Name := .str .anonymous "OracleReveal"
   let RevealMk : PSC1Kernel.Name := .str Reveal "mk"
   let RevealRec : PSC1Kernel.Name := .str Reveal "rec"
+  let revealIndexName : PSC1Kernel.Name := .str .anonymous "n"
   let revealType : PSC1Kernel.Expr :=
-    .forallE indexName natT propT .default
+    .forallE revealIndexName natT propT .default
   let revealCtorType : PSC1Kernel.Expr :=
-    .forallE indexName natT
+    .forallE revealIndexName natT
       (.app (.const Reveal []) (.bvar 0))
       .default
   let revealBase :=
@@ -1549,14 +1554,14 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
         (toLeanName name).toString)
       (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
   let revealMotive : PSC1Kernel.Expr :=
-    .lam indexName natT
+    .lam revealIndexName natT
       (.lam (.str .anonymous "proof")
         (.app (.const Reveal []) (.bvar 0))
         natT
         .default)
       .default
   let revealMinor : PSC1Kernel.Expr :=
-    .lam indexName natT (.bvar 0) .default
+    .lam revealIndexName natT (.bvar 0) .default
   let revealIndex : PSC1Kernel.Expr := .lit (.nat 47)
   let revealMajor : PSC1Kernel.Expr :=
     .app (.const RevealMk []) revealIndex

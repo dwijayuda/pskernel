@@ -631,6 +631,219 @@ export class Lean434Evaluator {
     };
   }
 
+  private liftRuntimeExprLooseBVars(
+    expr:Lean434RuntimeValue,
+    amount:bigint,
+    cutoff:bigint=0n,
+  ):Lean434RuntimeValue{
+    if(amount===0n)return expr;
+    if(!isTaggedRuntimeValue(expr)||expr.kind!=='constructor')return expr;
+    switch(expr.name){
+      case 'Lean.Expr.bvar':{
+        if(expr.fields.length!==1)return expr;
+        const index=expr.fields[0];
+        if(typeof index!=='bigint')return expr;
+        return index<cutoff
+          ?expr
+          :{
+              kind:'constructor',
+              name:'Lean.Expr.bvar',
+              fields:[index+amount],
+            };
+      }
+      case 'Lean.Expr.fvar':
+      case 'Lean.Expr.mvar':
+      case 'Lean.Expr.sort':
+      case 'Lean.Expr.const':
+      case 'Lean.Expr.lit':
+        return expr;
+      case 'Lean.Expr.app':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            this.liftRuntimeExprLooseBVars(expr.fields[0]!,amount,cutoff),
+            this.liftRuntimeExprLooseBVars(expr.fields[1]!,amount,cutoff),
+          ],
+        };
+      case 'Lean.Expr.mdata':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            this.liftRuntimeExprLooseBVars(expr.fields[1]!,amount,cutoff),
+          ],
+        };
+      case 'Lean.Expr.proj':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            expr.fields[1]!,
+            this.liftRuntimeExprLooseBVars(expr.fields[2]!,amount,cutoff),
+          ],
+        };
+      case 'Lean.Expr.lam':
+      case 'Lean.Expr.forallE':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            this.liftRuntimeExprLooseBVars(expr.fields[1]!,amount,cutoff),
+            this.liftRuntimeExprLooseBVars(
+              expr.fields[2]!,
+              amount,
+              cutoff+1n,
+            ),
+            expr.fields[3]!,
+          ],
+        };
+      case 'Lean.Expr.letE':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            this.liftRuntimeExprLooseBVars(expr.fields[1]!,amount,cutoff),
+            this.liftRuntimeExprLooseBVars(expr.fields[2]!,amount,cutoff),
+            this.liftRuntimeExprLooseBVars(
+              expr.fields[3]!,
+              amount,
+              cutoff+1n,
+            ),
+            expr.fields[4]!,
+          ],
+        };
+      default:
+        return expr;
+    }
+  }
+
+  private instantiateRuntimeExprBVar(
+    expr:Lean434RuntimeValue,
+    value:Lean434RuntimeValue,
+    depth:bigint=0n,
+  ):Lean434RuntimeValue{
+    if(!isTaggedRuntimeValue(expr)||expr.kind!=='constructor')return expr;
+    switch(expr.name){
+      case 'Lean.Expr.bvar':{
+        if(expr.fields.length!==1)return expr;
+        const index=expr.fields[0];
+        if(typeof index!=='bigint')return expr;
+        if(index<depth)return expr;
+        if(index===depth){
+          return this.liftRuntimeExprLooseBVars(value,depth);
+        }
+        return {
+          kind:'constructor',
+          name:'Lean.Expr.bvar',
+          fields:[index-1n],
+        };
+      }
+      case 'Lean.Expr.fvar':
+      case 'Lean.Expr.mvar':
+      case 'Lean.Expr.sort':
+      case 'Lean.Expr.const':
+      case 'Lean.Expr.lit':
+        return expr;
+      case 'Lean.Expr.app':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            this.instantiateRuntimeExprBVar(expr.fields[0]!,value,depth),
+            this.instantiateRuntimeExprBVar(expr.fields[1]!,value,depth),
+          ],
+        };
+      case 'Lean.Expr.mdata':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            this.instantiateRuntimeExprBVar(expr.fields[1]!,value,depth),
+          ],
+        };
+      case 'Lean.Expr.proj':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            expr.fields[1]!,
+            this.instantiateRuntimeExprBVar(expr.fields[2]!,value,depth),
+          ],
+        };
+      case 'Lean.Expr.lam':
+      case 'Lean.Expr.forallE':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            this.instantiateRuntimeExprBVar(expr.fields[1]!,value,depth),
+            this.instantiateRuntimeExprBVar(
+              expr.fields[2]!,
+              value,
+              depth+1n,
+            ),
+            expr.fields[3]!,
+          ],
+        };
+      case 'Lean.Expr.letE':
+        return {
+          kind:'constructor',
+          name:expr.name,
+          fields:[
+            expr.fields[0]!,
+            this.instantiateRuntimeExprBVar(expr.fields[1]!,value,depth),
+            this.instantiateRuntimeExprBVar(expr.fields[2]!,value,depth),
+            this.instantiateRuntimeExprBVar(
+              expr.fields[3]!,
+              value,
+              depth+1n,
+            ),
+            expr.fields[4]!,
+          ],
+        };
+      default:
+        return expr;
+    }
+  }
+
+  private betaApplyRuntimeExpr(
+    fn:Lean434RuntimeValue,
+    args:readonly Lean434RuntimeValue[],
+  ):Lean434RuntimeValue{
+    let result=fn;
+    let index=0;
+    while(
+      index<args.length
+      &&isTaggedRuntimeValue(result)
+      &&result.kind==='constructor'
+      &&result.name==='Lean.Expr.lam'
+      &&result.fields.length===4
+    ){
+      result=this.instantiateRuntimeExprBVar(
+        result.fields[2]!,
+        args[index]!,
+      );
+      index+=1;
+    }
+    while(index<args.length){
+      result={
+        kind:'constructor',
+        name:'Lean.Expr.app',
+        fields:[result,args[index]!],
+      };
+      index+=1;
+    }
+    return result;
+  }
+
   private instantiateExprMVarsNative(
     initialMctx:Lean434RuntimeValue,
     initialExpr:Lean434RuntimeValue,
@@ -839,11 +1052,11 @@ export class Lean434Evaluator {
             &&fn.expr.kind==='constructor'
             &&fn.expr.name==='Lean.Expr.lam'
           ){
-            throw new Lean434EvaluationError(
-              'lean_instantiate_expr_mvars beta reduction of an assigned '+
-              'metavariable application is not supported by the current JS '+
-              'runtime slice',
+            const reduced=this.betaApplyRuntimeExpr(
+              fn.expr,
+              [arg.expr],
             );
+            return visit(arg.mctx,reduced);
           }
           return {
             mctx:arg.mctx,

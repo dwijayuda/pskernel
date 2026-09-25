@@ -63,6 +63,81 @@ def simpleFreshElimNameAux
 def simpleFreshElimName (levelParams : List Name) : Name :=
   simpleFreshElimNameAux levelParams (levelParams.length + 1) 0
 
+def simpleDeclaredNameMember (name : Name) : List Name → Bool
+  | [] => false
+  | candidate :: rest =>
+      Name.eq name candidate || simpleDeclaredNameMember name rest
+
+def simpleUniformParamArgsMatch
+    (offset : Nat) : List Expr → Nat → Bool
+  | [], _ => true
+  | arg :: rest, index =>
+      match arg with
+      | .bvar bvarIndex =>
+          bvarIndex == offset - 1 - index &&
+            simpleUniformParamArgsMatch offset rest (index + 1)
+      | _ => false
+
+partial def simpleCheckUniformOccurrenceExpr
+    (declaredNames : List Name)
+    (expectedLevels : List Level)
+    (numParams : Nat)
+    (e : Expr)
+    (offset : Nat := 0) : Except String Unit := do
+  match e.getAppFn with
+  | .const name levels =>
+      let args := e.getAppArgs
+      if simpleDeclaredNameMember name declaredNames &&
+          args.length <= numParams then
+        let ok :=
+          args.length == numParams &&
+          offset >= numParams &&
+          Level.listEq levels expectedLevels &&
+          simpleUniformParamArgsMatch offset args 0
+        unless ok do
+          throw
+            "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration"
+        return
+  | _ => pure ()
+
+  match e with
+  | .app fn arg => do
+      simpleCheckUniformOccurrenceExpr
+        declaredNames expectedLevels numParams fn offset
+      simpleCheckUniformOccurrenceExpr
+        declaredNames expectedLevels numParams arg offset
+  | .lam _ type body _ | .forallE _ type body _ => do
+      simpleCheckUniformOccurrenceExpr
+        declaredNames expectedLevels numParams type offset
+      simpleCheckUniformOccurrenceExpr
+        declaredNames expectedLevels numParams body (offset + 1)
+  | .letE _ type value body _ => do
+      simpleCheckUniformOccurrenceExpr
+        declaredNames expectedLevels numParams type offset
+      simpleCheckUniformOccurrenceExpr
+        declaredNames expectedLevels numParams value offset
+      simpleCheckUniformOccurrenceExpr
+        declaredNames expectedLevels numParams body (offset + 1)
+  | .mdata _ body | .proj _ _ body =>
+      simpleCheckUniformOccurrenceExpr
+        declaredNames expectedLevels numParams body offset
+  | .bvar _ | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ =>
+      pure ()
+
+def simpleCheckUniformOccurrences
+    (declaredNames : List Name)
+    (levelParams : List Name)
+    (numParams : Nat)
+    (ctorTypes : List Expr) : Except String Unit := do
+  let expectedLevels := levelParams.map Level.param
+  let rec go : List Expr → Except String Unit
+    | [] => pure ()
+    | ctorType :: rest => do
+        simpleCheckUniformOccurrenceExpr
+          declaredNames expectedLevels numParams ctorType 0
+        go rest
+  go ctorTypes
+
 partial def exprContainsConst (target : Name) : Expr → Bool
   | .const name _ => Name.eq name target
   | .app fn arg => exprContainsConst target fn || exprContainsConst target arg
@@ -522,6 +597,10 @@ def addSimpleInductive
           throw "inductive declaration name is already declared"
         checkFresh rest
   checkFresh allNames
+
+  simpleCheckUniformOccurrences
+    [decl.name] decl.levelParams decl.numParams
+    (decl.ctors.map fun ctor => ctor.type)
 
   checkNoMVarNoFVar decl.type
   checkLevelParams decl.type decl.levelParams

@@ -32,11 +32,11 @@ inductive PsSyntaxTerm where
   | unit (span : PsSourceSpan)
   | app (fn : PsSyntaxTerm) (args : List PsSyntaxTerm) (span : PsSourceSpan)
   | lambda
-      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (body : PsSyntaxTerm)
       (span : PsSourceSpan)
   | forallE
-      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (body : PsSyntaxTerm)
       (span : PsSourceSpan)
   | letE
@@ -52,12 +52,12 @@ inductive PsSyntaxTerm where
       (span : PsSourceSpan)
   | matchE
       (scrutinee : PsSyntaxTerm)
-      (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+      (alternatives : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
       (span : PsSourceSpan)
 
 structure PsSyntaxInductiveConstructor where
   name : PsSyntaxName
-  fields : List (PsSyntaxBinderHead × PsSyntaxTerm)
+  fields : List (Prod PsSyntaxBinderHead PsSyntaxTerm)
   span : PsSourceSpan
 
 structure PsSyntaxImport where
@@ -67,32 +67,32 @@ structure PsSyntaxImport where
 inductive PsSyntaxDeclaration where
   | definition
       (name : PsSyntaxName)
-      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
       (span : PsSourceSpan)
   | partialDefinition
       (name : PsSyntaxName)
-      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
       (span : PsSourceSpan)
   | theoremDecl
       (name : PsSyntaxName)
-      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
       (span : PsSourceSpan)
   | inductiveDecl
       (name : PsSyntaxName)
-      (params : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (params : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (resultType : Option PsSyntaxTerm)
       (constructors : List PsSyntaxInductiveConstructor)
       (span : PsSourceSpan)
   | structureDecl
       (name : PsSyntaxName)
-      (params : List (PsSyntaxBinderHead × PsSyntaxTerm))
-      (fields : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (params : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+      (fields : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (span : PsSourceSpan)
 
 structure PsSyntaxModule where

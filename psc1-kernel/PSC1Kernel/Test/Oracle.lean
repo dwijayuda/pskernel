@@ -3266,6 +3266,65 @@ def assertReplayCoreOracle : IO Unit := do
       throw <| IO.userError "replay finish accepted an incomplete mutual group"
   | .error _ => pure ()
 
+def assertReplayJsonOracle : IO Unit := do
+  let meta :=
+    "{\"meta\":{\"lean\":{\"version\":\"4.34.0\",\"githash\":\"" ++
+      PSC1Kernel.Replay.pinnedLeanGitHash ++
+      "\"},\"format\":{\"version\":\"3.1.0\"}}}"
+  let name :=
+    "{\"in\":1,\"str\":{\"pre\":0,\"str\":\"ReplayJsonA\"}}"
+  let level := "{\"il\":2,\"succ\":0}"
+  let expr := "{\"ie\":20,\"sort\":2}"
+  let axiom :=
+    "{\"axiom\":{\"name\":1,\"levelParams\":[],\"type\":20,\"isUnsafe\":false}}"
+  let final ← exceptToIO
+    "PSC1 Lean4Export NDJSON replay"
+    (PSC1Kernel.ReplayJson.replayLines
+      PSC1Kernel.Replay.State.empty
+      [meta, "", name, level, expr, axiom])
+  let stats ← exceptToIO
+    "PSC1 Lean4Export NDJSON finish"
+    final.finish
+  assertTrue "NDJSON replay declaration count mismatch"
+    (stats.declarations == 1)
+  assertTrue "NDJSON replay Name count mismatch"
+    (stats.names == 1)
+  assertTrue "NDJSON replay Level count mismatch"
+    (stats.levels == 1)
+  assertTrue "NDJSON replay Expr count mismatch"
+    (stats.expressions == 1)
+  let A : PSC1Kernel.Name := .str .anonymous "ReplayJsonA"
+  assertTrue "NDJSON replay omitted admitted axiom"
+    (final.env.contains A)
+
+  let duplicateTop :=
+    "{\"in\":1,\"in\":2,\"str\":{\"pre\":0,\"str\":\"Dup\"}}"
+  match PSC1Kernel.ReplayJson.decodeLine duplicateTop with
+  | .ok _ =>
+      throw <| IO.userError "NDJSON decoder accepted duplicate top-level JSON keys"
+  | .error _ => pure ()
+
+  let duplicateNested :=
+    "{\"meta\":{\"lean\":{\"version\":\"4.34.0\",\"version\":\"4.34.0\",\"githash\":\"" ++
+      PSC1Kernel.Replay.pinnedLeanGitHash ++
+      "\"},\"format\":{\"version\":\"3.1.0\"}}}"
+  match PSC1Kernel.ReplayJson.decodeLine duplicateNested with
+  | .ok _ =>
+      throw <| IO.userError "NDJSON decoder accepted duplicate nested JSON keys"
+  | .error _ => pure ()
+
+  let ambiguous :=
+    "{\"in\":1,\"il\":2,\"str\":{\"pre\":0,\"str\":\"Ambiguous\"},\"succ\":0}"
+  match PSC1Kernel.ReplayJson.decodeLine ambiguous with
+  | .ok _ =>
+      throw <| IO.userError "NDJSON decoder accepted multiple record kinds on one line"
+  | .error _ => pure ()
+
+  match PSC1Kernel.ReplayJson.decodeLine "{\"unknown\":true}" with
+  | .ok _ =>
+      throw <| IO.userError "NDJSON decoder accepted an unknown record kind"
+  | .error _ => pure ()
+
 def assertOrdinaryRecursorOracle : IO Unit := do
   let Flag : PSC1Kernel.Name := .str .anonymous "OracleFlag"
   let Off : PSC1Kernel.Name := .str Flag "off"
@@ -3757,6 +3816,7 @@ def run : IO Unit := do
   assertUniverseNestedInductiveAdmissionOracle
   assertOuterMutualNestedInductiveAdmissionOracle
   assertReplayCoreOracle
+  assertReplayJsonOracle
   assertOrdinaryRecursorOracle
   assertNatLiteralRecursorOracle
   assertQuotReductionOracle

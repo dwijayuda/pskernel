@@ -106,7 +106,7 @@ def psParseSyntaxName
   | token :: rest =>
       if psTokenKindEq token.kind PsTokenKind.identifier then
         psParseSyntaxNameTail
-          List.cons token.text List.nil
+          (List.cons token.text List.nil)
           token.span.start
           token.span.stop
           rest

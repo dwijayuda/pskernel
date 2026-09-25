@@ -1,6 +1,12 @@
 import Ps.Syntax.Lexer
 import Ps.Syntax.ParseCommon
 
+def psLeanTermStop
+    (term : PsSyntaxTerm) : PsSourcePos :=
+  let span := psSyntaxTermSpan term;
+  span.stop
+
+
 def psParseLeanImport
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxImport) :=
@@ -1030,7 +1036,7 @@ def psParseLeanMatchAlternativesAtColumnWithFuel
                         | Except.ok body =>
                             let span := {
                               start := bar.token.span.start
-                              stop := (psSyntaxTermSpan body.value).stop
+                              stop := psLeanTermStop body.value
                             }
                             psParseLeanMatchAlternativesAtColumnWithFuel
                               parseTerm
@@ -1106,7 +1112,7 @@ def psParseLeanDoWithFuel
                     value.cursor
                 let span := {
                   start := start
-                  stop := (psSyntaxTermSpan value.value).stop
+                  stop := psLeanTermStop value.value
                 }
                 Except.ok {
                   value := psSyntaxCompilerPure value.value span
@@ -1169,7 +1175,7 @@ def psParseLeanDoWithFuel
                                         let span := {
                                           start := start
                                           stop :=
-                                            (psSyntaxTermSpan body.value).stop
+                                            psLeanTermStop body.value
                                         }
                                         Except.ok {
                                           value :=
@@ -1270,7 +1276,7 @@ def psParseLeanTermWithFuel :
                         | _ =>
                             let stop :=
                               match psParseListReverse alternatives.value with
-                              | [] => (psSyntaxTermSpan scrutinee.value).stop
+                              | [] => psLeanTermStop scrutinee.value
                               | (_, _, span) :: _ => span.stop
                             Except.ok {
                               value :=
@@ -1310,7 +1316,7 @@ def psParseLeanTermWithFuel :
                                       elseBranch.value
                                       {
                                         start := keyword.token.span.start
-                                        stop := (psSyntaxTermSpan elseBranch.value).stop
+                                        stop := psLeanTermStop elseBranch.value
                                       }
                                   cursor := elseBranch.cursor
                                 }
@@ -1368,7 +1374,7 @@ def psParseLeanTermWithFuel :
                                                 {
                                                   start := keyword.token.span.start
                                                   stop :=
-                                                    (psSyntaxTermSpan body.value).stop
+                                                    psLeanTermStop body.value
                                                 }
                                             cursor := body.cursor
                                           }
@@ -1399,7 +1405,7 @@ def psParseLeanTermWithFuel :
                                         {
                                           start := keyword.token.span.start
                                           stop :=
-                                            (psSyntaxTermSpan body.value).stop
+                                            psLeanTermStop body.value
                                         }
                                     cursor := body.cursor
                                   }
@@ -1441,7 +1447,7 @@ def psParseLeanTermWithFuel :
                                   body.value
                                   {
                                     start := keyword.token.span.start
-                                    stop := (psSyntaxTermSpan body.value).stop
+                                    stop := psLeanTermStop body.value
                                   }
                               cursor := body.cursor
                             }
@@ -1652,7 +1658,7 @@ def psParseLeanStructureField
                         kind := PsSyntaxBinderKind.explicit
                         span := {
                           start := name.token.span.start
-                          stop := (psSyntaxTermSpan type.value).stop
+                          stop := psLeanTermStop type.value
                         }
                       }
                       Except.ok {
@@ -1901,7 +1907,7 @@ def psParseLeanEquationClausesWithFuel
                           body := body.value
                           span := {
                             start := bar.token.span.start
-                            stop := (psSyntaxTermSpan body.value).stop
+                            stop := psLeanTermStop body.value
                           }
                         }
                         psParseLeanEquationClausesWithFuel
@@ -2068,7 +2074,7 @@ partial def psLeanLowerEquationClauses
                     alternatives
                     {
                       start := argument.span.start
-                      stop := (psSyntaxTermSpan body).stop
+                      stop := psLeanTermStop body
                     })
 
 def psLeanFlattenForallBinders
@@ -2178,7 +2184,7 @@ def psLeanLowerEquationValue
                       body
                       {
                         start := first.span.start
-                        stop := (psSyntaxTermSpan body).stop
+                        stop := psLeanTermStop body
                       })
 
 def psFinishLeanValueDeclaration
@@ -2195,7 +2201,7 @@ def psFinishLeanValueDeclaration
     PsParseResult PsSyntaxDeclaration :=
   let span := {
     start := keyword.span.start
-    stop := (psSyntaxTermSpan value).stop
+    stop := psLeanTermStop value
   }
   let declaration :=
     if isPartial then

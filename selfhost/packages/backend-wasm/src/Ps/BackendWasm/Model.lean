@@ -26,6 +26,8 @@ structure PsWasmLoweredType where
   storageType : PsWasmStorageType
 
 inductive PsWasmInstruction where
+  | unreachable
+  | drop
   | localGet (index : Nat)
   | localSet (index : Nat)
   | call (name : String)

@@ -1,15 +1,163 @@
 import {SyntaxError} from '../source.js';
 import type {
   V061Declaration,
+  V061Expr,
   V061Module,
+  V061Parameter,
 } from './ast.js';
 import {V061ParseContext} from './context.js';
 import {V061LeanSubsetExpressionParser} from './lean-subset-expression-parser.js';
 import {parseV061LeanSubsetDeclaration} from './lean-subset-declaration-parser.js';
 import {parseV061ParameterSequence} from './parameter-parser.js';
-import {parseV061Type} from './type-parser.js';
+import {parseV061Pattern,type V061Pattern} from './pattern-parser.js';
+import {parseV061Type,type V061TypeExpr} from './type-parser.js';
 import {parseV061LeanSubsetWhereDeclarations} from './lean-subset-where-parser.js';
 import {parseV061ModuleImports} from './module-import-parser.js';
+
+interface LeanEquationRow {
+  readonly patterns:readonly V061Pattern[];
+  readonly body:V061Expr;
+  readonly span:V061Expr['span'];
+}
+
+function equationPatternKey(pattern:V061Pattern):string|undefined {
+  switch(pattern.kind){
+    case 'wildcard':return undefined;
+    case 'bool':return pattern.value?'#true':'#false';
+    case 'constructor':return '#ctor:'+pattern.name;
+  }
+}
+
+function compileEquationMatrix(
+  scrutinees:readonly V061Expr[],
+  rows:readonly LeanEquationRow[],
+):V061Expr {
+  if(rows.length===0){
+    throw new Error('PS_LEAN_SUBSET_EQUATION_INTERNAL: empty equation matrix');
+  }
+  if(scrutinees.length===0){
+    return rows[0]!.body;
+  }
+
+  let sawWildcard=false;
+  const keys:string[]=[];
+  const representative=new Map<string,V061Pattern>();
+  for(const row of rows){
+    const pattern=row.patterns[0];
+    if(pattern===undefined){
+      throw new Error('PS_LEAN_SUBSET_EQUATION_INTERNAL: missing equation pattern');
+    }
+    const key=equationPatternKey(pattern);
+    if(key===undefined){
+      sawWildcard=true;
+      continue;
+    }
+    if(sawWildcard){
+      throw new Error(
+        'PS_LEAN_SUBSET_EQUATION_WILDCARD_ORDER: wildcard rows must follow constructor rows',
+      );
+    }
+    if(!representative.has(key)){
+      representative.set(key,pattern);
+      keys.push(key);
+    }
+  }
+
+  const alternatives:{
+    pattern:V061Pattern;
+    body:V061Expr;
+    span:V061Expr['span'];
+  }[]=[];
+  for(const key of keys){
+    const applicable=rows
+      .filter((row)=>{
+        const pattern=row.patterns[0]!;
+        const rowKey=equationPatternKey(pattern);
+        return rowKey===key||rowKey===undefined;
+      })
+      .map((row)=>({
+        ...row,
+        patterns:row.patterns.slice(1),
+      }));
+    const pattern=representative.get(key)!;
+    const body=compileEquationMatrix(
+      scrutinees.slice(1),
+      applicable,
+    );
+    alternatives.push({
+      pattern,
+      body,
+      span:{start:pattern.span.start,end:body.span.end},
+    });
+  }
+
+  const wildcardRows=rows
+    .filter((row)=>equationPatternKey(row.patterns[0]!)===undefined)
+    .map((row)=>({...row,patterns:row.patterns.slice(1)}));
+  if(wildcardRows.length>0){
+    const sourcePattern=rows.find(
+      (row)=>equationPatternKey(row.patterns[0]!)===undefined,
+    )!.patterns[0]!;
+    const body=compileEquationMatrix(
+      scrutinees.slice(1),
+      wildcardRows,
+    );
+    alternatives.push({
+      pattern:sourcePattern,
+      body,
+      span:{start:sourcePattern.span.start,end:body.span.end},
+    });
+  }
+
+  if(alternatives.length===0){
+    throw new Error(
+      'PS_LEAN_SUBSET_EQUATION_INTERNAL: equation column has no alternatives',
+    );
+  }
+  const first=alternatives[0]!;
+  const last=alternatives[alternatives.length-1]!;
+  return {
+    kind:'match',
+    scrutinee:scrutinees[0]!,
+    alternatives,
+    span:{start:scrutinees[0]!.span.start,end:last.span.end},
+  };
+}
+
+function exposeEquationArguments(
+  type:V061TypeExpr,
+  count:number,
+):{
+  readonly params:readonly V061Parameter[];
+  readonly resultType:V061TypeExpr;
+  readonly scrutinees:readonly V061Expr[];
+} {
+  const params:V061Parameter[]=[];
+  const scrutinees:V061Expr[]=[];
+  let cursor=type;
+  for(let index=0;index<count;index+=1){
+    if(cursor.kind!=='arrow'&&cursor.kind!=='dependentArrow'){
+      throw new Error(
+        'PS_LEAN_SUBSET_EQUATION_ARITY: equation patterns exceed the declared function type',
+      );
+    }
+    const name=cursor.kind==='dependentArrow'
+      ?cursor.name
+      :'_eq_arg_'+index;
+    params.push({
+      name,
+      type:cursor.domain,
+      span:cursor.domain.span,
+    });
+    scrutinees.push({
+      kind:'reference',
+      name,
+      span:cursor.domain.span,
+    });
+    cursor=cursor.codomain;
+  }
+  return {params,resultType:cursor,scrutinees};
+}
 
 export class V061LeanSubsetParser {
   readonly context:V061ParseContext;
@@ -87,6 +235,46 @@ export class V061LeanSubsetParser {
     };
   }
 
+  private parseEquationRows():readonly LeanEquationRow[] {
+    const rows:LeanEquationRow[]=[];
+    let arity:number|undefined;
+    while(this.context.cursor.at('|')){
+      const bar=this.context.cursor.consume();
+      const patterns:V061Pattern[]=[];
+      while(true){
+        patterns.push(parseV061Pattern(this.context));
+        if(!this.context.cursor.consumeIf(','))break;
+      }
+      if(patterns.length===0){
+        throw new SyntaxError(
+          'PS_LEAN_SUBSET_EQUATION_EMPTY: equation row requires a pattern',
+          bar.span,
+        );
+      }
+      if(arity===undefined)arity=patterns.length;
+      else if(patterns.length!==arity){
+        throw new SyntaxError(
+          'PS_LEAN_SUBSET_EQUATION_ARITY: every equation row must have the same pattern arity',
+          bar.span,
+        );
+      }
+      this.context.cursor.expect('=>');
+      const body=this.expressions.parse();
+      rows.push({
+        patterns,
+        body,
+        span:{start:bar.span.start,end:body.span.end},
+      });
+    }
+    if(rows.length===0){
+      throw new SyntaxError(
+        'PS_LEAN_SUBSET_EQUATION_EMPTY: expected equation rows',
+        this.context.cursor.peek().span,
+      );
+    }
+    return rows;
+  }
+
   private parseDeclaration():V061Declaration {
     const token=this.context.cursor.peek();
     const partial=token.text==='partial';
@@ -114,9 +302,22 @@ export class V061LeanSubsetParser {
     );
     const {params}=parseV061ParameterSequence(this.context);
     this.context.cursor.expect(':');
-    const resultType=parseV061Type(this.context);
-    this.context.cursor.expect(':=');
-    const body=this.expressions.parse();
+    let resultType=parseV061Type(this.context);
+    let declarationParams=params;
+    let body:V061Expr;
+    if(this.context.cursor.at('|')){
+      const rows=this.parseEquationRows();
+      const exposed=exposeEquationArguments(
+        resultType,
+        rows[0]!.patterns.length,
+      );
+      declarationParams=[...params,...exposed.params];
+      resultType=exposed.resultType;
+      body=compileEquationMatrix(exposed.scrutinees,rows);
+    }else{
+      this.context.cursor.expect(':=');
+      body=this.expressions.parse();
+    }
 
     const whereDeclarations=this.context.cursor.at('where')
       ?parseV061LeanSubsetWhereDeclarations(this.context)
@@ -132,7 +333,7 @@ export class V061LeanSubsetParser {
       kind,
       ...(partial?{partial:true}:{}),
       name:name.text,
-      params,
+      params:declarationParams,
       resultType,
       body,
       ...(whereDeclarations===undefined?{}:{whereDeclarations}),

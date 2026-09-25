@@ -423,24 +423,85 @@ partial def recursorMajorInduct?
     | _, _ => none
   go recursor.base.type majorIdx
 
+partial def kTypesEq
+    (ctx : CheckerContext)
+    (left right : Expr) : Except String Bool := do
+  let left' ← whnf ctx left
+  let right' ← whnf ctx right
+  pure (Expr.eq left' right')
+
 partial def inferKMajorType?
     (ctx : CheckerContext)
-    (major : Expr) : Option Expr :=
+    (major : Expr) : Except String (Option Expr) := do
   match major with
+  | .bvar _ | .mvar _ => return none
+  | .sort level => return some (.sort (.succ level))
   | .fvar name =>
       match ctx.lctx.find? name with
-      | some decl => some decl.type
-      | none => none
+      | some decl => return some decl.type
+      | none => return none
   | .const name levels =>
       match ctx.env.find? name with
       | some info =>
           if info.levelParams.length == levels.length then
-            some (info.type.instantiateLevelParams info.levelParams levels)
+            return some
+              (info.type.instantiateLevelParams info.levelParams levels)
           else
-            none
-      | none => none
+            return none
+      | none => return none
+  | .lit (.nat _) => return some (.const kernelNatName [])
+  | .lit (.str _) => return some (.const kernelStringName [])
   | .mdata _ body => inferKMajorType? ctx body
-  | _ => none
+  | .app fn arg => do
+      let some fnType ← inferKMajorType? ctx fn
+        | return none
+      let fnType' ← whnf ctx fnType
+      let .forallE _ domain body _ := fnType'
+        | return none
+      let some argType ← inferKMajorType? ctx arg
+        | return none
+      unless ← kTypesEq ctx domain argType do
+        return none
+      return some (body.instantiate1 arg)
+  | .lam userName domain body binderInfo => do
+      let some domainType ← inferKMajorType? ctx domain
+        | return none
+      let domainType' ← whnf ctx domainType
+      let .sort _ := domainType'
+        | return none
+      let (fresh, child) := ctx.withLocal userName domain binderInfo
+      let some bodyType ←
+          inferKMajorType? child (body.instantiate1 (.fvar fresh))
+        | return none
+      return some <|
+        .forallE userName domain
+          (bodyType.abstractFVars [fresh]) binderInfo
+  | .forallE userName domain body binderInfo => do
+      let some domainType ← inferKMajorType? ctx domain
+        | return none
+      let domainType' ← whnf ctx domainType
+      let .sort domainLevel := domainType'
+        | return none
+      let (fresh, child) := ctx.withLocal userName domain binderInfo
+      let some bodyType ←
+          inferKMajorType? child (body.instantiate1 (.fvar fresh))
+        | return none
+      let bodyType' ← whnf child bodyType
+      let .sort bodyLevel := bodyType'
+        | return none
+      return some (.sort (.imax domainLevel bodyLevel))
+  | .letE _ type value body _ => do
+      let some typeType ← inferKMajorType? ctx type
+        | return none
+      let typeType' ← whnf ctx typeType
+      let .sort _ := typeType'
+        | return none
+      let some valueType ← inferKMajorType? ctx value
+        | return none
+      unless ← kTypesEq ctx type valueType do
+        return none
+      inferKMajorType? ctx (body.instantiate1 value)
+  | .proj _ _ _ => return none
 
 partial def exprHasMVarForK : Expr → Bool
   | .mvar _ => true
@@ -482,7 +543,7 @@ partial def toConstructorWhenK
     (major : Expr) : Except String Expr := do
   let some majorInduct := recursorMajorInduct? recursor
     | return major
-  let some rawType := inferKMajorType? ctx major
+  let some rawType ← inferKMajorType? ctx major
     | return major
   let appType ← whnf ctx rawType
   let .const typeInduct typeLevels := appType.getAppFn
@@ -508,7 +569,7 @@ partial def toConstructorWhenK
     ctor.base.type.instantiateLevelParams ctor.base.levelParams typeLevels
   let some ctorType ← consumeKConstructorParams ctx ctorType0 params
     | return major
-  if !Expr.eq ctorType appType then
+  unless ← kTypesEq ctx ctorType appType do
     return major
   pure (applyArgs (.const ctorName typeLevels) params)
 

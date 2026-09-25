@@ -145,7 +145,7 @@ def psCompilerTypeScriptSource
     (sourceKind : PsCompilerSourceKind)
     (source : String) :
     Except PsCompilerError String :=
-  match psCompilerCheckSource sourceKind source with
+  match psCompilerElaborateSource sourceKind source with
   | Except.error error =>
       Except.error error
   | Except.ok elaborated =>

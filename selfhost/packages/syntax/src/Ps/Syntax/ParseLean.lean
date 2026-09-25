@@ -2208,8 +2208,8 @@ def psLeanFlattenForallBinders
   match type with
   | .forallE binders body _ =>
       let tail := psLeanFlattenForallBinders body
-      (binders ++ tail.fst, tail.snd)
-  | _ => ([], type)
+      Prod.mk (binders ++ tail.fst) tail.snd
+  | _ => Prod.mk List.nil type
 
 def psLeanEquationBinderName
     (index : Nat)
@@ -2247,7 +2247,7 @@ def psLeanPrepareEquationBindersAcc
           (Prod PsSyntaxBinderHead PsSyntaxTerm))
         (List PsSyntaxName)) :=
   if Nat.beq remaining 0 then
-    some (psParseListReverse bindersRev, psParseListReverse namesRev)
+    some (Prod.mk (psParseListReverse bindersRev) (psParseListReverse namesRev))
   else
     match available with
     | [] => none

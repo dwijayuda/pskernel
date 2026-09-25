@@ -548,6 +548,20 @@ partial def lazyDeltaReduction
   loop left right
 
 
+partial def lazyDeltaProjReduction
+    (ctx : CheckerContext)
+    (left right : Expr)
+    (typeName : Name)
+    (index : Nat) : Except String Bool := do
+  let delta ← lazyDeltaReduction ctx left right
+  match delta with
+  | .decided value => return value
+  | .residual left' right' =>
+      match reduceProjCore ctx typeName index left',
+            reduceProjCore ctx typeName index right' with
+      | some lfield, some rfield => isDefEq ctx lfield rfield
+      | _, _ => isDefEq ctx left' right'
+
 partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := do
   if Expr.eq a b then return true
 
@@ -577,7 +591,7 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
     if Name.eq n₁ n₂ then return true
   | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
     if Name.eq n₁ n₂ && i₁ == i₂ then
-      if ← isDefEq ctx e₁ e₂ then return true
+      if ← lazyDeltaProjReduction ctx e₁ e₂ n₁ i₁ then return true
   | _, _ => pure ()
 
   -- Cheap projection normalization has now had its chance. Retry core WHNF

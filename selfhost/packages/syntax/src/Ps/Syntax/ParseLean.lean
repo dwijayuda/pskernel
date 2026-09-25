@@ -274,6 +274,134 @@ def psParseLeanBinderType
     (cursor.remaining.length + 1)
     cursor
 
+def psParseLeanBinderNamesWithFuel
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (namesRev : List PsSyntaxName) :
+    Except PsParseError
+      (PsParseResult (List PsSyntaxName)) :=
+  match fuel with
+  | 0 => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      match
+          psTokenCursorExpectKind
+            cursor
+            PsTokenKind.identifier with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          let sourceName : PsSyntaxName := {
+            segments := List.cons name.token.text List.nil
+            span := name.token.span
+          }
+          let nextNames :=
+            List.cons sourceName namesRev
+          if psTokenCursorAtText name.cursor ":" then
+            Except.ok {
+              value := nextNames.reverse
+              cursor := name.cursor
+            }
+          else
+            match psTokenCursorPeek name.cursor with
+            | none =>
+                Except.error
+                  (PsParseError.unexpectedEnd ":")
+            | some next =>
+                if
+                    psTokenKindEq
+                      next.kind
+                      PsTokenKind.identifier then
+                  psParseLeanBinderNamesWithFuel
+                    remaining
+                    name.cursor
+                    nextNames
+                else
+                  Except.error
+                    (PsParseError.expectedText
+                      ":"
+                      next.text
+                      next.span)
+
+def psLeanBinderPairsFromNames
+    (kind : PsSyntaxBinderKind)
+    (span : PsSourceSpan)
+    (type : PsSyntaxTerm) :
+    List PsSyntaxName ->
+    List
+      (Prod PsSyntaxBinderHead PsSyntaxTerm)
+  | List.nil => List.nil
+  | List.cons name rest =>
+      List.cons
+        ({
+          name := name
+          kind := kind
+          span := span
+        },
+          type)
+        (psLeanBinderPairsFromNames
+          kind
+          span
+          type
+          rest)
+
+def psParseLeanBinderGroup
+    (cursor : PsTokenCursor) :
+    Except PsParseError
+      (PsParseResult
+        (List
+          (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=
+  match psParseBinderOpening cursor with
+  | Except.error error => Except.error error
+  | Except.ok opening =>
+      match
+          psParseLeanBinderNamesWithFuel
+            opening.cursor.remaining.length
+            opening.cursor
+            List.nil with
+      | Except.error error => Except.error error
+      | Except.ok names =>
+          match
+              psTokenCursorExpectText
+                names.cursor
+                ":" with
+          | Except.error error => Except.error error
+          | Except.ok afterColon =>
+              match
+                  psParseLeanBinderType
+                    afterColon.cursor with
+              | Except.error error => Except.error error
+              | Except.ok type =>
+                  match
+                      psParseBinderClosing
+                        opening
+                        type.cursor with
+                  | Except.error error => Except.error error
+                  | Except.ok closing =>
+                      Except.ok {
+                        value :=
+                          psLeanBinderPairsFromNames
+                            opening.kind
+                            closing.value
+                            type.value
+                            names.value
+                        cursor := closing.cursor
+                      }
+
+def psLeanPrependBinderGroupReverse
+    (group :
+      List
+        (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (bindersRev :
+      List
+        (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
+    List
+      (Prod PsSyntaxBinderHead PsSyntaxTerm) :=
+  match group with
+  | List.nil => bindersRev
+  | List.cons binder rest =>
+      psLeanPrependBinderGroupReverse
+        rest
+        (List.cons binder bindersRev)
+
 def psParseLeanBinder
     (cursor : PsTokenCursor) :
     Except PsParseError
@@ -318,15 +446,20 @@ def psParseLeanBindersWithFuel
       Except.ok { value := bindersRev.reverse, cursor := cursor }
   | remaining + 1 =>
       if psTokenCursorAtBinderStart cursor then
-        match psParseLeanBinder cursor with
+        match psParseLeanBinderGroup cursor with
         | Except.error error => Except.error error
         | Except.ok parsed =>
             psParseLeanBindersWithFuel
               remaining
               parsed.cursor
-              (parsed.value :: bindersRev)
+              (psLeanPrependBinderGroupReverse
+                parsed.value
+                bindersRev)
       else
-        Except.ok { value := bindersRev.reverse, cursor := cursor }
+        Except.ok {
+          value := bindersRev.reverse
+          cursor := cursor
+        }
 
 def psParseLeanArrowTail
     (parseCodomain :

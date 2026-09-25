@@ -2264,6 +2264,200 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "mutual cross-recursive hypotheses did not reach the base minor"
     (PSC1Kernel.Expr.eq oursMutualReduced (.lit (.nat 61)))
 
+  -- Nested-inductive preprocessing/restoration: Box Tree is replaced by an
+  -- auxiliary mutual datatype, checked, then restored to Box Tree while its
+  -- auxiliary recursor is published as Tree.rec_1.
+  let NestedBox : PSC1Kernel.Name := .str .anonymous "OracleNestedBox"
+  let NestedBoxMk : PSC1Kernel.Name := .str NestedBox "mk"
+  let Tree : PSC1Kernel.Name := .str .anonymous "OracleNestedTree"
+  let TreeLeaf : PSC1Kernel.Name := .str Tree "leaf"
+  let TreeNode : PSC1Kernel.Name := .str Tree "node"
+  let TreeRec : PSC1Kernel.Name := .str Tree "rec"
+  let TreeRec1 : PSC1Kernel.Name := TreeRec.appendIndexAfter 1
+  let nestedAlpha : PSC1Kernel.Name := .str .anonymous "α"
+  let nestedValue : PSC1Kernel.Name := .str .anonymous "value"
+  let nestedBoxType : PSC1Kernel.Expr :=
+    .forallE nestedAlpha type1 type1 .default
+  let nestedBoxCtorType : PSC1Kernel.Expr :=
+    .forallE nestedAlpha type1
+      (.forallE nestedValue (.bvar 0)
+        (.app (.const NestedBox []) (.bvar 1))
+        .default)
+      .default
+  let treeT : PSC1Kernel.Expr := .const Tree []
+  let boxTreeT : PSC1Kernel.Expr :=
+    .app (.const NestedBox []) treeT
+  let treeNodeType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "children") boxTreeT treeT .default
+  let nestedBase :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursNestedBox ← exceptToIO
+    "PSC1 nested oracle outer Box admission"
+    (PSC1Kernel.Kernel.addSimpleInductive nestedBase {
+      levelParams := []
+      name := NestedBox
+      type := nestedBoxType
+      ctors := [{ name := NestedBoxMk, type := nestedBoxCtorType }]
+      isUnsafe := false
+      numParams := 1
+    })
+  let oursNested ← exceptToIO
+    "PSC1 nested inductive admission"
+    (PSC1Kernel.Kernel.addSimpleNestedInductive oursNestedBox {
+      levelParams := []
+      numParams := 0
+      types := [{
+        name := Tree
+        type := type1
+        ctors := [
+          { name := TreeLeaf, type := treeT },
+          { name := TreeNode, type := treeNodeType }
+        ]
+      }]
+      isUnsafe := false
+    })
+
+  let leanNested0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanNestedNat ←
+    match Lean.Kernel.Environment.addDecl leanNested0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected nested oracle Nat axiom"
+  let leanNestedBox ←
+    match Lean.Kernel.Environment.addDecl leanNestedNat {} (.inductDecl [] 1 [{
+      name := toLeanName NestedBox
+      type := toLeanExpr nestedBoxType
+      ctors := [{
+        name := toLeanName NestedBoxMk
+        type := toLeanExpr nestedBoxCtorType
+      }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected nested oracle Box"
+  let leanNested1 ←
+    match Lean.Kernel.Environment.addDecl leanNestedBox {} (.inductDecl [] 0 [{
+      name := toLeanName Tree
+      type := toLeanExpr type1
+      ctors := [
+        { name := toLeanName TreeLeaf, type := toLeanExpr treeT },
+        { name := toLeanName TreeNode, type := toLeanExpr treeNodeType }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected nested Tree oracle"
+  let leanNestedEnv := Lean.Environment.ofKernelEnv leanNested1
+
+  for name in [Tree, TreeLeaf, TreeNode, TreeRec, TreeRec1] do
+    let some oursInfo := oursNested.find? name
+      | throw <| IO.userError (
+          "PSC1 restored nested metadata missing: " ++ (toLeanName name).toString)
+    let some leanInfo := leanNested1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 restored nested metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("nested restored type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursNested.find? Tree with
+  | some (.inductInfo info) =>
+      assertTrue "PSC1 nested datatype did not record nested families"
+        (info.numNested == 1)
+  | _ =>
+      throw <| IO.userError "PSC1 restored nested inductive info missing"
+  match leanNested1.find? (toLeanName Tree) with
+  | some (.inductInfo info) =>
+      assertTrue "Lean 4.34 nested datatype did not record nested families"
+        (info.numNested == 1)
+  | _ =>
+      throw <| IO.userError "Lean 4.34 restored nested inductive info missing"
+  assertTrue "PSC1 leaked a reserved _nested auxiliary declaration"
+    (!oursNested.constants.any fun info =>
+      PSC1Kernel.Kernel.simpleNestedPrefix.isPrefixOf info.name)
+
+  match oursNested.find? TreeRec with
+  | some (.recInfo info) =>
+      assertTrue "PSC1 nested main recursor motive count mismatch"
+        (info.numMotives == 2)
+      assertTrue "PSC1 nested main recursor minor count mismatch"
+        (info.numMinors == 3)
+  | _ =>
+      throw <| IO.userError "PSC1 nested main recursor info missing"
+  match oursNested.find? TreeRec1 with
+  | some (.recInfo info) =>
+      assertTrue "PSC1 restored auxiliary recursor motive count mismatch"
+        (info.numMotives == 2)
+      assertTrue "PSC1 restored auxiliary recursor minor count mismatch"
+        (info.numMinors == 3)
+      match info.rules with
+      | [rule] =>
+          assertTrue "PSC1 restored auxiliary rule did not recover Box.mk"
+            (PSC1Kernel.Name.eq rule.ctor NestedBoxMk)
+      | _ =>
+          throw <| IO.userError "PSC1 restored auxiliary rule count mismatch"
+  | _ =>
+      throw <| IO.userError "PSC1 restored auxiliary recursor info missing"
+
+  let treeMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "tree") treeT natT .default
+  let boxMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "box") boxTreeT natT .default
+  let treeLeafMinor : PSC1Kernel.Expr := .lit (.nat 71)
+  let treeNodeMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "children") boxTreeT
+      (.lam (.str .anonymous "children_ih") natT (.bvar 0) .default)
+      .default
+  let nestedBoxMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "child") treeT
+      (.lam (.str .anonymous "child_ih") natT (.bvar 0) .default)
+      .default
+  let nestedBoxLeaf : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs (.const NestedBoxMk [])
+      [treeT, .const TreeLeaf []]
+  let nestedMajor : PSC1Kernel.Expr :=
+    .app (.const TreeNode []) nestedBoxLeaf
+  let nestedRecApp :=
+    PSC1Kernel.applyArgs (.const TreeRec [.succ .zero])
+      [
+        treeMotive, boxMotive,
+        treeLeafMinor, treeNodeMinor, nestedBoxMinor,
+        nestedMajor
+      ]
+  let nestedCtx := PSC1Kernel.CheckerContext.empty oursNested
+  let nestedResultType ← exceptToIO
+    "PSC1 nested recursor typecheck"
+    (PSC1Kernel.check nestedCtx nestedRecApp)
+  let nestedTypeOk ← exceptToIO
+    "PSC1 nested recursor result defeq"
+    (PSC1Kernel.isDefEq nestedCtx nestedResultType natT)
+  assertTrue "PSC1 nested recursor result type mismatch" nestedTypeOk
+  let oursNestedReduced ← exceptToIO
+    "PSC1 nested restored recursor reduction"
+    (PSC1Kernel.whnf nestedCtx nestedRecApp)
+  let leanNestedType ←
+    match Lean.Kernel.check leanNestedEnv ({} : Lean.LocalContext)
+        (toLeanExpr nestedRecApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected generated nested recursor application"
+  assertTrue "nested recursor result type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr nestedResultType) leanNestedType)
+  let leanNestedReduced ← kernelExprWhnf leanNestedEnv nestedRecApp
+  assertTrue "nested restored recursor reduction differs from Lean 4.34"
+    (toLeanExpr oursNestedReduced == leanNestedReduced)
+  assertTrue "nested recursion did not traverse Box to the Tree leaf"
+    (PSC1Kernel.Expr.eq oursNestedReduced (.lit (.nat 71)))
+
   -- Negative functional occurrences remain rejected.
   let Bad : PSC1Kernel.Name := .str .anonymous "OracleSimpleBad"
   let BadMk : PSC1Kernel.Name := .str Bad "mk"

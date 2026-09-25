@@ -390,3 +390,30 @@ A mainline merge should require at minimum:
 5. a documented relationship with
    `docs/plans/07_SELF_HOSTING_FOUNDATION.md`.
 
+
+
+## R8 progress — Meta bootstrap
+
+### MetavarContext substitution slice — COMPLETE (first slice)
+
+Completed 2026-09-25.
+
+Verified on the pinned Lean 4.34 source/runtime path:
+
+- real `Lean.assignExp` / `Lean.MetavarContext.getExprAssignmentExp`;
+- real `PersistentHashMap` insert/find behavior under the JS runtime;
+- native-compatible `Lean.instantiateLevelMVarsImp`;
+- native-compatible `Lean.instantiateExprMVarsImp` for direct assignments;
+- real `Lean.instantiateMVarsCore` observable semantics.
+
+`instantiateMVarsCore` is executed through a source-verified evaluator intrinsic
+because its Lean body is only `runST` / `StateRefT` / `MonadCacheT`
+plumbing around `instantiateExprMVarsImp`. The manifest gate checks the pinned
+source shape before accepting this optimization. The logical declaration is
+still admitted by pskernel and the intrinsic has no proof authority.
+
+GitHub Actions runs `36106526700` and `36106526614` are green.
+
+Next native-runtime gap: delayed metavariable assignments in
+`lean_instantiate_expr_mvars`, following
+`study/lean4-4.34.0/src/library/instantiate_mvars.cpp`.

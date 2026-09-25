@@ -64,7 +64,8 @@ selfhost/
     compiler-ir/
     erasure/
     backend-ts/
-    backend-rust/          # planned after JS fixed point
+    backend-rust/          # planned native backend
+    backend-wasm/          # isolated owned Wasm 3 backend
 
     compiler/
       package.json
@@ -101,8 +102,10 @@ selfhost/
 `packages/compiler` is portable. It owns compiler composition APIs such as
 source translation, parsing, elaboration, checked-admission production, erasure,
 and target-neutral compiler-IR production. Backend packages own target emission:
-`backend-ts` is the bootstrap backend and `backend-rust` is the planned first
-native backend after the JavaScript fixed point. The compiler package must not
+`backend-ts` is the bootstrap backend, `backend-rust` is the planned first
+native backend after the JavaScript fixed point, and `backend-wasm` is the
+isolated owned WebAssembly backend. All three consume the same target-neutral
+VerifiedIR and own their target lowering after that boundary. The compiler package must not
 own filesystem access or process spawning.
 
 `packages/cli` is host-facing. Its Lean `Main.lean` is only the bootstrap
@@ -284,6 +287,54 @@ semantics.
 The Rust host may initially use the same versioned external pskernel bridge as
 the JavaScript host. This milestone self-hosts the **compiler execution host**;
 it does not require rewriting the kernel in Rust.
+
+## Shared IR contract for TS + Rust + Wasm
+
+There is one semantic compiler pipeline and three backend lowerings:
+
+```text
+source -> Elab -> pskernel -> CheckedCore -> Erasure -> VerifiedIR
+                                                     /     |      \
+                                                    TS    Rust    Wasm
+```
+
+`packages/compiler-ir` must stay target-neutral. It may encode PSC semantic
+types, ADTs, functions and semantic intrinsics; it may not encode JS
+`number/bigint`, Rust ownership/container choices, or Wasm opcodes/value
+types/GC/memory layout. Each backend may introduce a private target IR after
+VerifiedIR.
+
+The workspace runs `npm run check:ir-neutrality` to catch obvious target
+leakage. This is a regression guard, not a substitute for architectural review.
+
+Pure PSC libraries using only portable APIs are expected to compile through all
+three backends. Target-specific imports/capabilities explicitly reduce the
+supported target set.
+
+### Planned direct Wasm lane
+
+Development occurs on `backend/wasm3-owned` and remains non-blocking for the
+active JS self-host closure:
+
+```text
+compiler/library.ps
+       |
+    VerifiedIR
+       |
+ shared optimizer
+       |
+ backend-wasm
+       |
+ Wasm target IR
+       |
+ owned encoder
+       |
+     .wasm
+```
+
+Wasm-specific GC representation, typed function refs, tail calls, SIMD,
+linear-memory layout, memory64, WIT/WASI and component concerns belong only
+below this boundary.
 
 ## Source transition
 
@@ -504,3 +555,9 @@ adapters that still live under `scripts/`. The physical moves of
 `stdlib/` and `host/` are intentionally deferred until first self-host
 closure because changing import roots during the current parser-closure work
 adds risk without changing semantics.
+
+
+Owned Wasm backend work is likewise allowed to proceed in parallel on
+`backend/wasm3-owned`. It must preserve the shared VerifiedIR contract,
+introduce Wasm-specific representation only in `backend-wasm`/Wasm target IR,
+and must not make PSC1 source closure or the JS fixed point depend on Wasm.

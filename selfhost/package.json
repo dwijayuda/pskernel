@@ -17,8 +17,8 @@
     "check:workspace": "node scripts/check-workspace.mjs",
     "check:source": "node check-psc1-source.mjs",
     "build:lean": "npm run build:lake",
-    "test:lean": "lake exe psc1_tests && lake exe psc1_translation_tests && lake exe psc1_bridge_tests && lake exe psc1_backend_ts_tests && lake exe psc1_erasure_tests",
-    "bootstrap:lean": "npm run check:workspace && npm run check:source && npm run build:lean",
+    "test:lean": "lake exe psc1_tests && lake exe psc1_translation_tests && lake exe psc1_bridge_tests && lake exe psc1_backend_ts_tests && lake exe psc1_backend_wasm_tests && lake exe psc1_erasure_tests",
+    "bootstrap:lean": "npm run check:workspace && npm run check:source && npm run check:ir-neutrality && npm run build:lean",
     "bootstrap:check": "lake exe psc1 check packages/compiler/src/Ps/Compiler.lean",
     "bootstrap:emit": "node scripts/bootstrap-project.mjs",
     "bootstrap:compiler": "lake exe psc1 build dist/bootstrap/workspace/packages/compiler/src/Ps/Compiler.ps --out dist/bootstrap/packages/compiler/index.js",
@@ -28,7 +28,7 @@
     "fixed-point": "npm run bootstrap && npm run selfhost && npm run verify:selfhost",
     "build": "npm run build:auto",
     "test": "npm run test:lean",
-    "check": "npm run check:workspace && npm run check:source && npm run test",
+    "check": "npm run check:workspace && npm run check:source && npm run check:ir-neutrality && npm run test",
     "selfhost:emit-ps": "npm run bootstrap:emit",
     "selfhost:build-bootstrap-js": "npm run bootstrap:compiler",
     "selfhost:bootstrap": "npm run bootstrap",
@@ -43,7 +43,8 @@
     "build:psc": "node scripts/build-current.mjs",
     "build:auto": "node scripts/build-auto.mjs",
     "build:dual": "npm run build:lake && npm run build:psc",
-    "generation:next": "node scripts/selfhost-generation.mjs"
+    "generation:next": "node scripts/selfhost-generation.mjs",
+    "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

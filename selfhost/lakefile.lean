@@ -84,6 +84,17 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Module
   ]
 
+lean_lib PsBackendWasm where
+  srcDir := "packages/backend-wasm/src"
+  roots := #[
+    `Ps.BackendWasm.Model,
+    `Ps.BackendWasm.Type,
+    `Ps.BackendWasm.LowerInt,
+    `Ps.BackendWasm.LowerFloat,
+    `Ps.BackendWasm.Binary,
+    `Ps.BackendWasm.Lower
+  ]
+
 lean_lib PsCompiler where
   srcDir := "packages/compiler/src"
   roots := #[
@@ -144,6 +155,14 @@ lean_exe psc1_bridge_tests where
 lean_exe psc1_backend_ts_tests where
   srcDir := "test"
   root := `BackendTsTests
+
+lean_exe psc1_backend_wasm_tests where
+  srcDir := "test"
+  root := `BackendWasmTests
+
+lean_exe psc1_backend_wasm_binary_smoke where
+  srcDir := "test"
+  root := `WasmBinarySmoke
 
 lean_exe psc1_erasure_tests where
   srcDir := "test"

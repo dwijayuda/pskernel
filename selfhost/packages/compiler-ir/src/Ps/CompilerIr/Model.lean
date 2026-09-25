@@ -29,14 +29,75 @@ inductive PsVerifiedIrType where
       (name : String)
       (arguments : List PsVerifiedIrType)
 
+inductive PsVerifiedIrMachineIntegerType where
+  | uint8
+  | uint16
+  | uint32
+  | uint64
+  | usize
+  | int8
+  | int16
+  | int32
+  | int64
+  | isize
+
+inductive PsVerifiedIrIntegerBinaryOp where
+  | add
+  | sub
+  | mul
+  | bitAnd
+  | bitOr
+  | bitXor
+
+inductive PsVerifiedIrIntegerCompareOp where
+  | eq
+  | ne
+  | lt
+  | le
+  | gt
+  | ge
+
+inductive PsVerifiedIrFloatingType where
+  | float
+  | float32
+
+inductive PsVerifiedIrFloatBinaryOp where
+  | add
+  | sub
+  | mul
+  | div
+
+inductive PsVerifiedIrFloatCompareOp where
+  | eq
+  | ne
+  | lt
+  | le
+  | gt
+  | ge
+
 inductive PsVerifiedIrLiteral where
   | natural (value : Nat)
   | integer (value : Int)
+  | machineInteger
+      (type : PsVerifiedIrMachineIntegerType)
+      (value : Int)
   | string (value : String)
   | bool (value : Bool)
   | unit
 
 inductive PsVerifiedIrIntrinsic where
+  | machineIntBinary
+      (type : PsVerifiedIrMachineIntegerType)
+      (operation : PsVerifiedIrIntegerBinaryOp)
+  | machineIntCompare
+      (type : PsVerifiedIrMachineIntegerType)
+      (operation : PsVerifiedIrIntegerCompareOp)
+  | floatBinary
+      (type : PsVerifiedIrFloatingType)
+      (operation : PsVerifiedIrFloatBinaryOp)
+  | floatCompare
+      (type : PsVerifiedIrFloatingType)
+      (operation : PsVerifiedIrFloatCompareOp)
   | natAdd
   | natSub
   | natMul
@@ -106,6 +167,7 @@ inductive PsVerifiedIrExpr where
       (arguments : List PsVerifiedIrExpr)
   | letE
       (name : String)
+      (type : PsVerifiedIrType)
       (value : PsVerifiedIrExpr)
       (body : PsVerifiedIrExpr)
   | ifE

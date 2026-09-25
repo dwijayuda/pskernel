@@ -30,41 +30,57 @@ def psLiteralEq (left : PsLiteral) (right : PsLiteral) : Bool :=
       | .string rightValue => psStringEq leftValue rightValue
       | _ => false
 
-def psLevelStructuralEq (left : PsLevel) (right : PsLevel) : Bool :=
+def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
   match left with
   | .zero =>
-      match right with
-      | .zero => true
-      | _ => false
+      fun right =>
+        match right with
+        | .zero => true
+        | _ => false
   | .succ leftValue =>
-      match right with
-      | .succ rightValue =>
-          psLevelStructuralEq leftValue rightValue
-      | _ => false
+      let smaller : PsLevel -> Bool :=
+        psLevelStructuralEq leftValue;
+      fun right =>
+        match right with
+        | .succ rightValue =>
+            smaller rightValue
+        | _ => false
   | .max leftA leftB =>
-      match right with
-      | .max rightA rightB =>
-          if psLevelStructuralEq leftA rightA then
-            psLevelStructuralEq leftB rightB
-          else
-            false
-      | _ => false
+      let leftEq : PsLevel -> Bool :=
+        psLevelStructuralEq leftA;
+      let rightEq : PsLevel -> Bool :=
+        psLevelStructuralEq leftB;
+      fun right =>
+        match right with
+        | .max rightA rightB =>
+            if leftEq rightA then
+              rightEq rightB
+            else
+              false
+        | _ => false
   | .imax leftA leftB =>
-      match right with
-      | .imax rightA rightB =>
-          if psLevelStructuralEq leftA rightA then
-            psLevelStructuralEq leftB rightB
-          else
-            false
-      | _ => false
+      let leftEq : PsLevel -> Bool :=
+        psLevelStructuralEq leftA;
+      let rightEq : PsLevel -> Bool :=
+        psLevelStructuralEq leftB;
+      fun right =>
+        match right with
+        | .imax rightA rightB =>
+            if leftEq rightA then
+              rightEq rightB
+            else
+              false
+        | _ => false
   | .param leftName =>
-      match right with
-      | .param rightName => psNameEq leftName rightName
-      | _ => false
+      fun right =>
+        match right with
+        | .param rightName => psNameEq leftName rightName
+        | _ => false
   | .mvar leftId =>
-      match right with
-      | .mvar rightId => Nat.beq leftId rightId
-      | _ => false
+      fun right =>
+        match right with
+        | .mvar rightId => Nat.beq leftId rightId
+        | _ => false
 
 def psLevelListEq
     (left : List PsLevel)

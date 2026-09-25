@@ -464,16 +464,17 @@ def psElabTypedBindersAcc
       PsSyntaxTerm ->
       Option PsExpr ->
       Except PsElabError PsElabTermResult)
-    (context : PsElabContext) :
-    List (PsSyntaxBinderHead × PsSyntaxTerm) ->
-    List PsElabTypedBinder ->
-    Except PsElabError PsElabTypedBindersResult
-  | [], bindersRev =>
+    (context : PsElabContext)
+    (entries : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (bindersRev : List PsElabTypedBinder) :
+    Except PsElabError PsElabTypedBindersResult :=
+  match entries with
+  | [] =>
       Except.ok {
         context := context
         bindersRev := bindersRev
       }
-  | List.cons entry rest, bindersRev =>
+  | List.cons entry rest =>
       let head := Prod.fst entry;
       let sourceType := Prod.snd entry;
       match psSyntaxNameToName head.name with
@@ -521,18 +522,20 @@ def psElabTypedBinders
       Option PsExpr ->
       Except PsElabError PsElabTermResult)
     (context : PsElabContext)
-    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm)) :
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
     Except PsElabError PsElabTypedBindersResult :=
   psElabTypedBindersAcc elaborate context binders []
 
 def psCloseElabTypedBinders
-    (metaContext : PsMetaContext) :
-    List PsElabTypedBinder ->
-    PsExpr ->
-    PsExpr ->
-    (PsExpr × PsExpr)
-  | [], value, type => (value, type)
-  | binder :: rest, value, type =>
+    (metaContext : PsMetaContext)
+    (binders : List PsElabTypedBinder)
+    (value : PsExpr)
+    (type : PsExpr) :
+    Prod PsExpr PsExpr :=
+  match binders with
+  | [] =>
+      Prod.mk value type
+  | binder :: rest =>
       let binderType :=
         psMetaInstantiate metaContext binder.type;
       let closedValue :=
@@ -546,7 +549,7 @@ def psCloseElabTypedBinders
           binder.name
           binderType
           (psExprAbstractFVar binder.id type)
-          binder.binder
+          binder.binder;
       psCloseElabTypedBinders
         metaContext
         rest

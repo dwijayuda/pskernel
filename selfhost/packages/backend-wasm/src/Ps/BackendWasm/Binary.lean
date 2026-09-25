@@ -138,7 +138,7 @@ def psWasmFindHeapTypeIndex
       match psWasmFindArrayIndex arrays name with
       | none => none
       | some index =>
-      some (structures.length + arrays.length + index)
+      some (structures.length + index)
 
 def psWasmEncodeValueType
     (structures : List PsWasmStructType)
@@ -201,7 +201,7 @@ def psWasmFindFunctionTypeIndex
     (name : String) : Option Nat :=
   match psWasmFindFunctionTypeIndexLoop name 0 functionTypes with
   | none => none
-  | some index => some (structures.length + index)
+  | some index => some (structures.length + arrays.length + index)
 
 def psWasmEncodeNamedFunctionType
     (structures : List PsWasmStructType)

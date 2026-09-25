@@ -105,8 +105,13 @@ def psElabResolvedTerm
   | Except.error error =>
       Except.error (PsElabError.infer error)
   | Except.ok type =>
+      let result :=
+        PsElabTermResult.mk
+          context
+          term
+          type;
       psElabFinalizeExpected
-        { context := context, term := term, type := type }
+        result
         expected
 
 def psElabProjectionApplyParameters

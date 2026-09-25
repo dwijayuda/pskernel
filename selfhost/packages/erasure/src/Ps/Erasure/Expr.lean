@@ -233,7 +233,7 @@ def psEraseMappedIntrinsic
   | Except.error error => Except.error error
   | Except.ok erased =>
       Except.ok
-        (PsVerifiedIrExpr.intrinsic operation erased)
+        (PsVerifiedIrExpr.intrinsic operation [] erased)
 
 def psEraseSelectedArguments
     (erase :
@@ -253,7 +253,62 @@ def psEraseSelectedArguments
               | Except.ok erasedRest =>
                   Except.ok (erased :: erasedRest)
 
+def psEraseSelectedTypeArguments
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (arguments : List PsExpr) :
+    List Nat -> Except PsErasureError (List PsVerifiedIrType)
+  | [] => Except.ok []
+  | index :: rest =>
+      match arguments[index]? with
+      | none => Except.error PsErasureError.unsupportedApplication
+      | some argument =>
+          match psEraseRuntimeType environment scope argument with
+          | Except.error error => Except.error error
+          | Except.ok erased =>
+              match
+                  psEraseSelectedTypeArguments
+                    environment
+                    scope
+                    arguments
+                    rest with
+              | Except.error error => Except.error error
+              | Except.ok erasedRest =>
+                  Except.ok (erased :: erasedRest)
+
+def psEraseTypedIntrinsic
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (erase : PsExpr -> Except PsErasureError PsVerifiedIrExpr)
+    (operation : PsVerifiedIrIntrinsic)
+    (arguments : List PsExpr)
+    (typeIndexes : List Nat)
+    (runtimeIndexes : List Nat) :
+    Except PsErasureError PsVerifiedIrExpr :=
+  match
+      psEraseSelectedTypeArguments
+        environment
+        scope
+        arguments
+        typeIndexes with
+  | Except.error error => Except.error error
+  | Except.ok typeArguments =>
+      match
+          psEraseSelectedArguments
+            erase
+            arguments
+            runtimeIndexes with
+      | Except.error error => Except.error error
+      | Except.ok runtimeArguments =>
+          Except.ok
+            (PsVerifiedIrExpr.intrinsic
+              operation
+              typeArguments
+              runtimeArguments)
+
 def psErasePrimitiveApplication
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
     (erase :
       PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (view : PsErasureAppView) :
@@ -429,86 +484,77 @@ def psErasePrimitiveApplication
         else
           Except.error PsErasureError.unsupportedApplication
       else if text == "Array.emptyWithCapacity" && view.args.length == 2 then
-        match psEraseSelectedArguments erase view.args [1] with
+        match
+            psEraseTypedIntrinsic
+              environment scope erase
+              PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+              view.args [0] [1] with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
-                  args))
+        | Except.ok result => Except.ok (some result)
       else if text == "Array.size" && view.args.length == 2 then
-        match psEraseSelectedArguments erase view.args [1] with
+        match
+            psEraseTypedIntrinsic
+              environment scope erase
+              PsVerifiedIrIntrinsic.arraySize
+              view.args [0] [1] with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arraySize
-                  args))
+        | Except.ok result => Except.ok (some result)
       else if text == "Array.push" && view.args.length == 3 then
-        match psEraseSelectedArguments erase view.args [1, 2] with
+        match
+            psEraseTypedIntrinsic
+              environment scope erase
+              PsVerifiedIrIntrinsic.arrayPush
+              view.args [0] [1, 2] with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayPush
-                  args))
+        | Except.ok result => Except.ok (some result)
       else if text == "Array.getInternal" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [1, 2] with
+        match
+            psEraseTypedIntrinsic
+              environment scope erase
+              PsVerifiedIrIntrinsic.arrayGet
+              view.args [0] [1, 2] with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayGet
-                  args))
+        | Except.ok result => Except.ok (some result)
       else if text == "Array.getD" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [1, 2, 3] with
+        match
+            psEraseTypedIntrinsic
+              environment scope erase
+              PsVerifiedIrIntrinsic.arrayGetD
+              view.args [0] [1, 2, 3] with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayGetD
-                  args))
+        | Except.ok result => Except.ok (some result)
       else if text == "Array.set" && view.args.length == 5 then
-        match psEraseSelectedArguments erase view.args [1, 2, 3] with
+        match
+            psEraseTypedIntrinsic
+              environment scope erase
+              PsVerifiedIrIntrinsic.arraySet
+              view.args [0] [1, 2, 3] with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arraySet
-                  args))
+        | Except.ok result => Except.ok (some result)
       else if text == "Array.setIfInBounds" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [1, 2, 3] with
+        match
+            psEraseTypedIntrinsic
+              environment scope erase
+              PsVerifiedIrIntrinsic.arraySetIfInBounds
+              view.args [0] [1, 2, 3] with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arraySetIfInBounds
-                  args))
+        | Except.ok result => Except.ok (some result)
       else if text == "Array.map" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [2, 3] with
+        match
+            psEraseTypedIntrinsic
+              environment scope erase
+              PsVerifiedIrIntrinsic.arrayMap
+              view.args [0, 1] [2, 3] with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayMap
-                  args))
+        | Except.ok result => Except.ok (some result)
       else if text == "Array.foldl" && view.args.length == 7 then
-        match psEraseSelectedArguments erase view.args [2, 3, 4, 5, 6] with
+        match
+            psEraseTypedIntrinsic
+              environment scope erase
+              PsVerifiedIrIntrinsic.arrayFoldl
+              view.args [0, 1] [2, 3, 4, 5, 6] with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayFoldl
-                  args))
+        | Except.ok result => Except.ok (some result)
       else
         Except.ok none
   | _ => Except.ok none
@@ -1195,7 +1241,12 @@ def psEraseRuntimeExprWithFuel
           | Except.error error => Except.error error
           | Except.ok (some lowered) => Except.ok lowered
           | Except.ok none =>
-              match psErasePrimitiveApplication erase view with
+              match
+                  psErasePrimitiveApplication
+                    environment
+                    scope
+                    erase
+                    view with
               | Except.error error => Except.error error
               | Except.ok (some lowered) => Except.ok lowered
               | Except.ok none =>

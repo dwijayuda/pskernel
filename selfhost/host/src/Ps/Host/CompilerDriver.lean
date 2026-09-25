@@ -110,12 +110,17 @@ def psHostCompilerTypeScript
 
 def psHostCompilerBuild
     (inputPath outputPath : String) : IO Unit := do
-  if !outputPath.endsWith ".ts" then
-    throw
-      (IO.userError
-        "PSC1_CLI_OUTPUT_KIND: bootstrap build output must end in .ts")
+  let typeScriptPath ←
+    if outputPath.endsWith ".ts" then
+      pure outputPath
+    else if outputPath.endsWith ".js" then
+      pure (outputPath.dropRight 3 ++ ".ts")
+    else
+      throw
+        (IO.userError
+          "PSC1_CLI_OUTPUT_KIND: build output must end in .js or .ts")
   let source ← psHostCompilerTypeScriptSource inputPath
-  let result ← psWriteAndCompileTypeScript source outputPath
+  let result ← psWriteAndCompileTypeScript source typeScriptPath
   IO.println
     ("PSC1_COMPILE: " ++ result.typeScriptPath ++
       " -> " ++ result.javascriptPath)

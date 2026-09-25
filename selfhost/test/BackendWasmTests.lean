@@ -1,4 +1,4 @@
-import Ps.BackendWasm.LowerInt
+import Ps.BackendWasm.Binary
 
 def psWasmProfile32 : PsWasmTargetProfile :=
   { wordSize := PsWasmWordSize.wasm32 }
@@ -107,10 +107,76 @@ def psTestWasmMachineIntegerOps : Bool :=
         .usize
         .add)
 
+def psWasmAnswerModule : PsWasmModule :=
+  {
+    functions := [
+      {
+        name := "answer"
+        parameters := []
+        results := [PsWasmValueType.i32]
+        body := [PsWasmInstruction.i32Const 42]
+      }
+    ]
+    exports := [("answer", "answer")]
+  }
+
+def psWasmExpectedAnswerBytes : List UInt8 := [
+  psWasmByte 0,
+  psWasmByte 97,
+  psWasmByte 115,
+  psWasmByte 109,
+  psWasmByte 1,
+  psWasmByte 0,
+  psWasmByte 0,
+  psWasmByte 0,
+  psWasmByte 1,
+  psWasmByte 5,
+  psWasmByte 1,
+  psWasmByte 96,
+  psWasmByte 0,
+  psWasmByte 1,
+  psWasmByte 127,
+  psWasmByte 3,
+  psWasmByte 2,
+  psWasmByte 1,
+  psWasmByte 0,
+  psWasmByte 7,
+  psWasmByte 10,
+  psWasmByte 1,
+  psWasmByte 6,
+  psWasmByte 97,
+  psWasmByte 110,
+  psWasmByte 115,
+  psWasmByte 119,
+  psWasmByte 101,
+  psWasmByte 114,
+  psWasmByte 0,
+  psWasmByte 0,
+  psWasmByte 10,
+  psWasmByte 6,
+  psWasmByte 1,
+  psWasmByte 4,
+  psWasmByte 0,
+  psWasmByte 65,
+  psWasmByte 42,
+  psWasmByte 11
+]
+
+def psTestWasmUleb : Bool :=
+  psWasmEncodeUleb 624485 ==
+    [psWasmByte 229, psWasmByte 142, psWasmByte 38]
+
+def psTestWasmBinaryModule : Bool :=
+  match psWasmEncodeModule psWasmAnswerModule with
+  | Except.error _ => false
+  | Except.ok bytes => bytes == psWasmExpectedAnswerBytes
+
 def main : IO Unit := do
   if psTestWasmScalarLowering
       && psTestWasmWordProfiles
-      && psTestWasmMachineIntegerOps then
+      && psTestWasmMachineIntegerOps
+      && psTestWasmUleb
+      && psTestWasmBinaryModule then
     IO.println "PSC1_BACKEND_WASM_TESTS: PASS"
   else
     throw (IO.userError "PSC1_BACKEND_WASM_TESTS: FAIL")

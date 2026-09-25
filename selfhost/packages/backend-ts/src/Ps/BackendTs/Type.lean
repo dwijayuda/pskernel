@@ -90,15 +90,21 @@ def psTsMachineIntegerUsesBigInt :
   | _ => false
 
 def psTsEmitLiteral
-    (literal : PsVerifiedIrLiteral) : String :=
+    (literal : PsVerifiedIrLiteral) :
+    Except PsTsEmitError String :=
   match literal with
-  | .natural value => toString value ++ "n"
-  | .integer value => toString value ++ "n"
+  | .natural value => Except.ok (toString value ++ "n")
+  | .integer value => Except.ok (toString value ++ "n")
   | .machineInteger type value =>
-      if psTsMachineIntegerUsesBigInt type then
-        toString value ++ "n"
-      else
-        toString value
-  | .string value => psJsonQuote value
-  | .bool value => if value then "true" else "false"
-  | .unit => "undefined"
+      match type with
+      | .usize => Except.error PsTsEmitError.targetWordSizeRequired
+      | .isize => Except.error PsTsEmitError.targetWordSizeRequired
+      | _ =>
+          if psTsMachineIntegerUsesBigInt type then
+            Except.ok (toString value ++ "n")
+          else
+            Except.ok (toString value)
+  | .string value => Except.ok (psJsonQuote value)
+  | .bool value =>
+      Except.ok (if value then "true" else "false")
+  | .unit => Except.ok "undefined"

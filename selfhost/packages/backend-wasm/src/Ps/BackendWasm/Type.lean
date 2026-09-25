@@ -45,3 +45,24 @@ def psWasmLowerPrimitive
     valueType := psWasmValueTypeOfPrimitive profile type
     storageType := psWasmStorageTypeOfPrimitive profile type
   }
+
+
+def psWasmValueTypeOfIrType?
+    (profile : PsWasmTargetProfile) :
+    PsVerifiedIrType -> Option PsWasmValueType
+  | .primitive primitive =>
+      match psWasmValueTypeOfPrimitive profile primitive with
+      | .noValue => none
+      | valueType => some valueType
+  | .named name [] => some (.refT name)
+  | _ => none
+
+def psWasmStorageTypeOfIrType?
+    (profile : PsWasmTargetProfile) :
+    PsVerifiedIrType -> Option PsWasmStorageType
+  | .primitive primitive =>
+      match psWasmValueTypeOfPrimitive profile primitive with
+      | .noValue => none
+      | _ => some (psWasmStorageTypeOfPrimitive profile primitive)
+  | .named name [] => some (.value (.refT name))
+  | _ => none

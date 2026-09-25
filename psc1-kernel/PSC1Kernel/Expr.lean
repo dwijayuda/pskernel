@@ -152,6 +152,39 @@ def Expr.getAppArgs (e : Expr) : List Expr :=
 def Expr.getAppNumArgs (e : Expr) : Nat :=
   e.getAppArgs.length
 
+def typeAnnotationOutParamName : Name :=
+  .str .anonymous "outParam"
+
+def typeAnnotationSemiOutParamName : Name :=
+  .str .anonymous "semiOutParam"
+
+def typeAnnotationOptParamName : Name :=
+  .str .anonymous "optParam"
+
+def typeAnnotationAutoParamName : Name :=
+  .str .anonymous "autoParam"
+
+/--
+Lean 4.34 `Expr.consumeTypeAnnotations`: remove only leading
+`outParam`, `semiOutParam`, `optParam`, and `autoParam` wrappers.
+Annotations nested under another type constructor are intentionally untouched.
+-/
+partial def Expr.consumeTypeAnnotations (e : Expr) : Expr :=
+  match e.getAppFn, e.getAppArgs with
+  | .const name _, [arg] =>
+      if Name.eq name typeAnnotationOutParamName ||
+          Name.eq name typeAnnotationSemiOutParamName then
+        arg.consumeTypeAnnotations
+      else
+        e
+  | .const name _, [arg, _] =>
+      if Name.eq name typeAnnotationOptParamName ||
+          Name.eq name typeAnnotationAutoParamName then
+        arg.consumeTypeAnnotations
+      else
+        e
+  | _, _ => e
+
 partial def Expr.hasFVar (e : Expr) : Bool :=
   match e with
   | .fvar _ => true

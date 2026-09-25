@@ -71,6 +71,14 @@ def psWasmSmokeArrayGetU32
       psWasmSmokeU32Type)
     [array, index]
 
+def psWasmSmokeArrayTwoU32
+    (first second : Int) : PsVerifiedIrExpr :=
+  psWasmSmokeArrayPushU32
+    (psWasmSmokeArrayPushU32
+      (psWasmSmokeArrayEmptyU32 2)
+      (psWasmSmokeU32 first))
+    (psWasmSmokeU32 second)
+
 def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -1134,6 +1142,89 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
               (psWasmSmokeArrayGetU32
                 (PsVerifiedIrExpr.var "unchanged")
                 (psWasmSmokeNat 0)))
+      }
+,
+      {
+        name := "arrayMapIncrementSum"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.letE
+            "mapped"
+            psWasmSmokeArrayU32Type
+            (PsVerifiedIrExpr.intrinsic
+              (PsVerifiedIrIntrinsic.arrayMap
+                psWasmSmokeU32Type
+                psWasmSmokeU32Type)
+              [
+                PsVerifiedIrExpr.lambda
+                  [
+                    {
+                      name := "value"
+                      type := psWasmSmokeU32Type
+                    }
+                  ]
+                  psWasmSmokeU32Type
+                  (PsVerifiedIrExpr.intrinsic
+                    (PsVerifiedIrIntrinsic.machineIntBinary
+                      PsVerifiedIrMachineIntegerType.uint32
+                      PsVerifiedIrIntegerBinaryOp.add)
+                    [
+                      PsVerifiedIrExpr.var "value",
+                      psWasmSmokeU32 1
+                    ]),
+                psWasmSmokeArrayTwoU32 10 20
+              ])
+            (PsVerifiedIrExpr.intrinsic
+              (PsVerifiedIrIntrinsic.machineIntBinary
+                PsVerifiedIrMachineIntegerType.uint32
+                PsVerifiedIrIntegerBinaryOp.add)
+              [
+                psWasmSmokeArrayGetU32
+                  (PsVerifiedIrExpr.var "mapped")
+                  (psWasmSmokeNat 0),
+                psWasmSmokeArrayGetU32
+                  (PsVerifiedIrExpr.var "mapped")
+                  (psWasmSmokeNat 1)
+              ])
+      },
+      {
+        name := "arrayFoldlSum"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.arrayFoldl
+              psWasmSmokeU32Type
+              psWasmSmokeU32Type)
+            [
+              PsVerifiedIrExpr.lambda
+                [
+                  {
+                    name := "acc"
+                    type := psWasmSmokeU32Type
+                  },
+                  {
+                    name := "value"
+                    type := psWasmSmokeU32Type
+                  }
+                ]
+                psWasmSmokeU32Type
+                (PsVerifiedIrExpr.intrinsic
+                  (PsVerifiedIrIntrinsic.machineIntBinary
+                    PsVerifiedIrMachineIntegerType.uint32
+                    PsVerifiedIrIntegerBinaryOp.add)
+                  [
+                    PsVerifiedIrExpr.var "acc",
+                    PsVerifiedIrExpr.var "value"
+                  ]),
+              psWasmSmokeU32 1,
+              psWasmSmokeArrayTwoU32 10 20,
+              psWasmSmokeNat 0,
+              psWasmSmokeNat 2
+            ]
       }
     ]
   }

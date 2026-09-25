@@ -1048,6 +1048,94 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
       }
 ,
       {
+        name := "intLiteralNegativeShape"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          PsVerifiedIrExpr.matchE
+            "ProofScript.Int"
+            []
+            (psWasmSmokeInt (-5))
+            [
+              ("ofNat", [], PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false)),
+              (
+                "negSucc",
+                [{
+                  field := "value"
+                  name := "n"
+                  type := psWasmSmokeNatType
+                }],
+                psWasmSmokeNatEq
+                  (PsVerifiedIrExpr.var "n")
+                  (psWasmSmokeNat 4)
+              )
+            ]
+      },
+      {
+        name := "intLiteralPositiveShape"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          PsVerifiedIrExpr.matchE
+            "ProofScript.Int"
+            []
+            (psWasmSmokeInt 7)
+            [
+              (
+                "ofNat",
+                [{
+                  field := "value"
+                  name := "n"
+                  type := psWasmSmokeNatType
+                }],
+                psWasmSmokeNatEq
+                  (PsVerifiedIrExpr.var "n")
+                  (psWasmSmokeNat 7)
+              ),
+              ("negSucc", [], PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))
+            ]
+      },
+      {
+        name := "intEqNegativeSelf"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          psWasmSmokeIntEq
+            (psWasmSmokeInt (-5))
+            (psWasmSmokeInt (-5))
+      },
+      {
+        name := "intAddMixedShape"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeBoolType
+        body :=
+          PsVerifiedIrExpr.matchE
+            "ProofScript.Int"
+            []
+            (psWasmSmokeIntBinary
+              PsVerifiedIrIntrinsic.intAdd
+              (-5)
+              7)
+            [
+              (
+                "ofNat",
+                [{
+                  field := "value"
+                  name := "n"
+                  type := psWasmSmokeNatType
+                }],
+                psWasmSmokeNatEq
+                  (PsVerifiedIrExpr.var "n")
+                  (psWasmSmokeNat 2)
+              ),
+              ("negSucc", [], PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))
+            ]
+      },
+      {
         name := "intAddMixed"
         typeParameters := []
         parameters := []

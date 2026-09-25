@@ -611,6 +611,10 @@ def psParseProofScriptTermWithFuel
       fun (_cursor : PsTokenCursor) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
+      let smaller :
+          PsTokenCursor ->
+          Except PsParseError (PsParseResult PsSyntaxTerm) :=
+        psParseProofScriptTermWithFuel remaining;
       fun (cursor : PsTokenCursor) =>
         if psTokenCursorAtText cursor "do" then
         match psTokenCursorAdvance cursor with
@@ -620,7 +624,7 @@ def psParseProofScriptTermWithFuel
             | Except.error error => Except.error error
             | Except.ok afterOpen =>
                 psParseProofScriptDoWithFuel
-                  (psParseProofScriptTermWithFuel remaining)
+                  (smaller)
                   remaining
                   keyword.token.span.start
                   afterOpen.cursor
@@ -628,7 +632,7 @@ def psParseProofScriptTermWithFuel
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "match scrutinee")
         | Option.some keyword =>
-            match psParseProofScriptTermWithFuel remaining keyword.cursor with
+            match smaller keyword.cursor with
             | Except.error error => Except.error error
             | Except.ok scrutinee =>
                 match psTokenCursorExpectText scrutinee.cursor "with" with
@@ -638,7 +642,7 @@ def psParseProofScriptTermWithFuel
                     | Except.error error => Except.error error
                     | Except.ok afterOpen =>
                         match psParseProofScriptMatchAlternativesWithFuel
-                            (psParseProofScriptTermWithFuel remaining)
+                            (smaller)
                             (psParseListLength afterOpen.cursor.remaining)
                             afterOpen.cursor
                             [] with
@@ -680,7 +684,7 @@ def psParseProofScriptTermWithFuel
             match psTokenCursorExpectText keyword.cursor "(" with
             | Except.error error => Except.error error
             | Except.ok afterOpen =>
-                match psParseProofScriptTermWithFuel remaining afterOpen.cursor with
+                match smaller afterOpen.cursor with
                 | Except.error error => Except.error error
                 | Except.ok condition =>
                     match psTokenCursorExpectText condition.cursor ")" with
@@ -689,9 +693,7 @@ def psParseProofScriptTermWithFuel
                         match psTokenCursorExpectText afterCondition.cursor "{" with
                         | Except.error error => Except.error error
                         | Except.ok afterThenOpen =>
-                            match psParseProofScriptTermWithFuel
-                                remaining
-                                afterThenOpen.cursor with
+                            match smaller afterThenOpen.cursor with
                             | Except.error error => Except.error error
                             | Except.ok thenBranch =>
                                 match psTokenCursorExpectText thenBranch.cursor "}" with
@@ -707,9 +709,7 @@ def psParseProofScriptTermWithFuel
                                             "{" with
                                         | Except.error error => Except.error error
                                         | Except.ok afterElseOpen =>
-                                            match psParseProofScriptTermWithFuel
-                                                remaining
-                                                afterElseOpen.cursor with
+                                            match smaller afterElseOpen.cursor with
                                             | Except.error error => Except.error error
                                             | Except.ok elseBranch =>
                                                 match psTokenCursorExpectText
@@ -750,9 +750,7 @@ def psParseProofScriptTermWithFuel
                       Except.error
                         (PsParseError.unexpectedEnd "let binding type")
                   | Option.some afterColon =>
-                      match psParseProofScriptTermWithFuel
-                          remaining
-                          afterColon.cursor with
+                      match smaller afterColon.cursor with
                       | Except.error error => Except.error error
                       | Except.ok declaredType =>
                           match psTokenCursorExpectText
@@ -760,9 +758,7 @@ def psParseProofScriptTermWithFuel
                               ":=" with
                           | Except.error error => Except.error error
                           | Except.ok afterAssign =>
-                              match psParseProofScriptTermWithFuel
-                                  remaining
-                                  afterAssign.cursor with
+                              match smaller afterAssign.cursor with
                               | Except.error error => Except.error error
                               | Except.ok value =>
                                   match psTokenCursorExpectText
@@ -770,9 +766,7 @@ def psParseProofScriptTermWithFuel
                                       ";" with
                                   | Except.error error => Except.error error
                                   | Except.ok afterSemi =>
-                                      match psParseProofScriptTermWithFuel
-                                          remaining
-                                          afterSemi.cursor with
+                                      match smaller afterSemi.cursor with
                                       | Except.error error => Except.error error
                                       | Except.ok body =>
                                           Except.ok {
@@ -793,17 +787,13 @@ def psParseProofScriptTermWithFuel
                   match psTokenCursorExpectText name.cursor ":=" with
                   | Except.error error => Except.error error
                   | Except.ok afterAssign =>
-                      match psParseProofScriptTermWithFuel
-                          remaining
-                          afterAssign.cursor with
+                      match smaller afterAssign.cursor with
                       | Except.error error => Except.error error
                       | Except.ok value =>
                           match psTokenCursorExpectText value.cursor ";" with
                           | Except.error error => Except.error error
                           | Except.ok afterSemi =>
-                              match psParseProofScriptTermWithFuel
-                                  remaining
-                                  afterSemi.cursor with
+                              match smaller afterSemi.cursor with
                               | Except.error error => Except.error error
                               | Except.ok body =>
                                   Except.ok {
@@ -846,9 +836,7 @@ def psParseProofScriptTermWithFuel
                     match psTokenCursorExpectText binders.cursor "=>" with
                     | Except.error error => Except.error error
                     | Except.ok afterArrow =>
-                        match psParseProofScriptTermWithFuel
-                            remaining
-                            afterArrow.cursor with
+                        match smaller afterArrow.cursor with
                         | Except.error error => Except.error error
                         | Except.ok body =>
                             Except.ok {
@@ -864,7 +852,7 @@ def psParseProofScriptTermWithFuel
                             }
       else if psTokenCursorAtText cursor "{" then
         psParseRecordLiteral
-          (psParseProofScriptTermWithFuel remaining)
+          (smaller)
           cursor
       else if psTokenCursorAtText cursor "(" then
         match psTokenCursorAdvance cursor with
@@ -887,30 +875,30 @@ def psParseProofScriptTermWithFuel
               | Except.ok binder =>
                   if psTokenCursorAtArrow binder.cursor then
                     psParseProofScriptDependentArrowTail
-                      (psParseProofScriptTermWithFuel remaining)
+                      (smaller)
                       binder
                   else
-                    match psParseProofScriptTermWithFuel remaining opening.cursor with
+                    match smaller opening.cursor with
                     | Except.error error => Except.error error
                     | Except.ok grouped =>
                         match psTokenCursorExpectText grouped.cursor ")" with
                         | Except.error error => Except.error error
                         | Except.ok close =>
                             psParseProofScriptArrowTail
-                              (psParseProofScriptTermWithFuel remaining)
+                              (smaller)
                               {
                                 value := grouped.value
                                 cursor := close.cursor
                               }
               | Except.error _ =>
-                  match psParseProofScriptTermWithFuel remaining opening.cursor with
+                  match smaller opening.cursor with
                   | Except.error error => Except.error error
                   | Except.ok grouped =>
                       match psTokenCursorExpectText grouped.cursor ")" with
                       | Except.error error => Except.error error
                       | Except.ok close =>
                           psParseProofScriptArrowTail
-                            (psParseProofScriptTermWithFuel remaining)
+                            (smaller)
                             {
                               value := grouped.value
                               cursor := close.cursor
@@ -918,13 +906,13 @@ def psParseProofScriptTermWithFuel
       else
         match
             psParseProofScriptApplicationWithFuel
-              (psParseProofScriptTermWithFuel remaining)
+              (smaller)
               (Nat.add remaining 1)
               cursor with
         | Except.error error => Except.error error
         | Except.ok domain =>
             psParseProofScriptArrowTail
-              (psParseProofScriptTermWithFuel remaining)
+              (smaller)
               domain
 
 def psParseProofScriptTerm

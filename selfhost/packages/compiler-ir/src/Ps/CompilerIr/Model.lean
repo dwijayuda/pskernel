@@ -160,6 +160,7 @@ inductive PsVerifiedIrExpr where
       (arguments : List PsVerifiedIrExpr)
   | lambda
       (parameters : List PsVerifiedIrParameter)
+      (resultType : PsVerifiedIrType)
       (body : PsVerifiedIrExpr)
   | call
       (fn : PsVerifiedIrExpr)

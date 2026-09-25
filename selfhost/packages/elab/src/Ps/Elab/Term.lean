@@ -2444,19 +2444,21 @@ def psElabTermWithFuel
                 args
                 expected with
           | Except.error error => Except.error error
-          | Except.ok (some result) => Except.ok result
-          | Except.ok none =>
-              match psElabTermWithFuel remaining context fn none with
-              | Except.error error => Except.error error
-              | Except.ok elaboratedFn =>
-                  match psElabApplyArgs
-                      (psElabTermWithFuel remaining)
-                      elaboratedFn
-                      args
-                      [] with
+          | Except.ok selfCall =>
+              match selfCall with
+              | some result => Except.ok result
+              | none =>
+                  match psElabTermWithFuel remaining context fn none with
                   | Except.error error => Except.error error
-                  | Except.ok application =>
-                      psElabFinishApplication application expected
+                  | Except.ok elaboratedFn =>
+                      match psElabApplyArgs
+                          (psElabTermWithFuel remaining)
+                          elaboratedFn
+                          args
+                          [] with
+                      | Except.error error => Except.error error
+                      | Except.ok application =>
+                          psElabFinishApplication application expected
 
 def psElabTerm
     (context : PsElabContext)

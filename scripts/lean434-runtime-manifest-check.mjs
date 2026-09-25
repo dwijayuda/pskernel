@@ -216,7 +216,10 @@ for(const binding of runtime.LEAN434_JS_EVALUATOR_EXTERN_BINDINGS){
       'invalid evaluator extern arity for '+binding.leanDeclaration,
     );
   }
-  if(binding.adapter!=='instantiate-level-mvars'){
+  if(
+    binding.adapter!=='instantiate-level-mvars'
+    &&binding.adapter!=='instantiate-expr-mvars'
+  ){
     throw new Error(
       'unsupported evaluator extern adapter for '+
       binding.leanDeclaration+': '+String(binding.adapter),

@@ -1027,11 +1027,12 @@ def psElabMatchPatternConstructorName
               | some name => Except.ok name
 
 def psElabPrepareMatchAlternatives
-    (inductiveInfo : PsInductiveInfo) :
-    List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) ->
-    List PsElabMatchAlternative ->
-    Except PsElabError (List PsElabMatchAlternative)
-  | [], alternativesRev =>
+    (inductiveInfo : PsInductiveInfo)
+    (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
+    (alternativesRev : List PsElabMatchAlternative) :
+    Except PsElabError (List PsElabMatchAlternative) :=
+  match entries with
+  | [] =>
       let alternatives := alternativesRev.reverse;
       let exhaustive :=
         inductiveInfo.constructors.all
@@ -1043,7 +1044,11 @@ def psElabPrepareMatchAlternatives
         Except.ok alternatives
       else
         Except.error PsElabError.matchNonExhaustive
-  | (pattern, body, span) :: rest, alternativesRev =>
+  | entry :: rest =>
+      let pattern := Prod.fst entry;
+      let payload := Prod.snd entry;
+      let body := Prod.fst payload;
+      let span := Prod.snd payload;
       match pattern with
       | .wildcard _ =>
           if rest.isEmpty then

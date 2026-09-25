@@ -125,6 +125,62 @@ def psBackendDiffModule : PsVerifiedIrModule :=
             [PsVerifiedIrExpr.var "x"]
       },
       {
+        name := "diffReuseCapture"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.letE
+            "addOffset"
+            (PsVerifiedIrType.function
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+              (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat))
+            (PsVerifiedIrExpr.lambda
+              [
+                {
+                  name := "value"
+                  type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                }
+              ]
+              (PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natAdd
+                [
+                  PsVerifiedIrExpr.var "value",
+                  PsVerifiedIrExpr.var "offset"
+                ]))
+            (PsVerifiedIrExpr.letE
+              "first"
+              (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+              (PsVerifiedIrExpr.call
+                (PsVerifiedIrExpr.var "applyNat")
+                []
+                [
+                  PsVerifiedIrExpr.var "addOffset",
+                  PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)
+                ])
+              (PsVerifiedIrExpr.letE
+                "second"
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+                (PsVerifiedIrExpr.call
+                  (PsVerifiedIrExpr.var "applyNat")
+                  []
+                  [
+                    PsVerifiedIrExpr.var "addOffset",
+                    PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 2)
+                  ])
+                (PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.natAdd
+                  [
+                    PsVerifiedIrExpr.var "first",
+                    PsVerifiedIrExpr.var "second"
+                  ])))
+      },
+      {
         name := "diffCapture"
         typeParameters := []
         parameters := [

@@ -450,6 +450,32 @@ def psParsePatternBindersWithFuel
               cursor := cursor
             }
 
+def psParseConstructorPatternTail
+    (constructorName : PsSyntaxName)
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxPattern) :=
+  match psParsePatternBindersWithFuel
+      cursor.remaining.length
+      cursor
+      [] with
+  | Except.error error => Except.error error
+  | Except.ok binders =>
+      let span :=
+        match binders.value.reverse with
+        | [] => constructorName.span
+        | lastBinder :: _ =>
+            psSyntaxSpanJoin
+              constructorName.span
+              lastBinder.span
+      Except.ok {
+        value :=
+          PsSyntaxPattern.constructor
+            constructorName
+            binders.value
+            span
+        cursor := binders.cursor
+      }
+
 def psParseBasicPattern
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) :=
@@ -480,28 +506,27 @@ def psParseBasicPattern
               value := PsSyntaxPattern.wildcard token.span
               cursor := read.cursor
             }
+      else if token.text == "." then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "constructor name")
+        | some dot =>
+            match psParseSyntaxName dot.cursor with
+            | Except.error error => Except.error error
+            | Except.ok constructorName =>
+                let shorthandName : PsSyntaxName := {
+                  segments := constructorName.value.segments
+                  span := {
+                    start := token.span.start
+                    stop := constructorName.value.span.stop
+                  }
+                }
+                psParseConstructorPatternTail
+                  shorthandName
+                  constructorName.cursor
       else
         match psParseSyntaxName cursor with
         | Except.error error => Except.error error
         | Except.ok constructorName =>
-            match psParsePatternBindersWithFuel
-                constructorName.cursor.remaining.length
-                constructorName.cursor
-                [] with
-            | Except.error error => Except.error error
-            | Except.ok binders =>
-                let span :=
-                  match binders.value.reverse with
-                  | [] => constructorName.value.span
-                  | lastBinder :: _ =>
-                      psSyntaxSpanJoin
-                        constructorName.value.span
-                        lastBinder.span
-                Except.ok {
-                  value :=
-                    PsSyntaxPattern.constructor
-                      constructorName.value
-                      binders.value
-                      span
-                  cursor := binders.cursor
-                }
+            psParseConstructorPatternTail
+              constructorName.value
+              constructorName.cursor

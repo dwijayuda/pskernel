@@ -1,6 +1,6 @@
 {
   "languageVersion": "0.7",
-  "entry": "SELFHOST-COMPILER.lean",
+  "entry": "packages/compiler/src/Ps/Compiler.lean",
   "sourceRoots": [
     "packages",
     "stdlib"

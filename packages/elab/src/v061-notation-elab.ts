@@ -73,6 +73,18 @@ export function elaborateV061BinaryNotation(
   expected:import('lean-ts-kernel').Expr|undefined,
   elaborate:V061TermElaborator,
 ):ElaboratedCoreTerm {
+  if(expr.operator==='++'){
+    return elaborate(
+      {
+        kind:'call',
+        callee:'List.append',
+        args:[expr.left,expr.right],
+        span:expr.span,
+      },
+      context,
+      expected,
+    );
+  }
   if(isV061BoolBinary(expr.operator)){
     return elaborateV061BoolBinaryNotation(
       expr,

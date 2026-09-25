@@ -6,6 +6,15 @@ def psRootName (value : String) : PsName :=
 def psNatName : PsName :=
   psRootName "Nat"
 
+def psNatZeroName : PsName :=
+  psNameAppendStr psNatName "zero"
+
+def psNatSuccName : PsName :=
+  psNameAppendStr psNatName "succ"
+
+def psNatRecName : PsName :=
+  psNameAppendStr psNatName "rec"
+
 def psNatAddName : PsName :=
   psNameAppendStr psNatName "add"
 

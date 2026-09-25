@@ -70,6 +70,7 @@ def psJsonObject (sortedFields : List (String × String)) : String :=
   "{" ++ psJsonJoin "," fields ++ "}"
 
 
+
 inductive PsJsonValue where
   | nullE
   | bool (value : Bool)
@@ -159,9 +160,9 @@ def psJsonParseStringChars :
             else if escaped == '/' then
               psJsonParseStringChars fuel tail ('/' :: charsRev)
             else if escaped == 'b' then
-              psJsonParseStringChars fuel tail ('\b' :: charsRev)
+              psJsonParseStringChars fuel tail (Char.ofNat 8 :: charsRev)
             else if escaped == 'f' then
-              psJsonParseStringChars fuel tail ('\f' :: charsRev)
+              psJsonParseStringChars fuel tail (Char.ofNat 12 :: charsRev)
             else if escaped == 'n' then
               psJsonParseStringChars fuel tail ('\n' :: charsRev)
             else if escaped == 'r' then
@@ -231,15 +232,107 @@ def psJsonConsumeLiteral
         none
   | _, _ => none
 
-def psJsonParseValueWithFuel :
-    Nat -> List Char -> Except PsJsonParseError PsJsonParseResult
-  | 0, _ => Except.error PsJsonParseError.fuelExhausted
-  | fuel + 1, input =>
+def psJsonParseArrayWith
+    (parseValue :
+      Nat -> List Char -> Except PsJsonParseError PsJsonParseResult) :
+    Nat ->
+    List Char ->
+    List PsJsonValue ->
+    Except PsJsonParseError PsJsonParseResult
+  | 0, _, _ => Except.error PsJsonParseError.fuelExhausted
+  | remaining + 1, input, valuesRev =>
+      let chars := psJsonSkipWhitespace input
+      match chars with
+      | ']' :: rest =>
+          Except.ok {
+            value := PsJsonValue.array valuesRev.reverse
+            rest := rest
+          }
+      | _ =>
+          match parseValue remaining chars with
+          | Except.error error => Except.error error
+          | Except.ok parsed =>
+              let afterValue := psJsonSkipWhitespace parsed.rest
+              match afterValue with
+              | ',' :: rest =>
+                  psJsonParseArrayWith
+                    parseValue
+                    remaining
+                    rest
+                    (parsed.value :: valuesRev)
+              | ']' :: rest =>
+                  Except.ok {
+                    value :=
+                      PsJsonValue.array
+                        (parsed.value :: valuesRev).reverse
+                    rest := rest
+                  }
+              | _ =>
+                  Except.error
+                    (PsJsonParseError.expected ", or ]")
+
+def psJsonParseObjectWith
+    (parseValue :
+      Nat -> List Char -> Except PsJsonParseError PsJsonParseResult) :
+    Nat ->
+    List Char ->
+    List (String × PsJsonValue) ->
+    Except PsJsonParseError PsJsonParseResult
+  | 0, _, _ => Except.error PsJsonParseError.fuelExhausted
+  | remaining + 1, input, fieldsRev =>
+      let chars := psJsonSkipWhitespace input
+      match chars with
+      | '}' :: rest =>
+          Except.ok {
+            value := PsJsonValue.object fieldsRev.reverse
+            rest := rest
+          }
+      | '"' :: rest =>
+          match psJsonParseStringChars remaining rest [] with
+          | Except.error error => Except.error error
+          | Except.ok (key, afterKey) =>
+              match psJsonSkipWhitespace afterKey with
+              | ':' :: afterColon =>
+                  match parseValue remaining afterColon with
+                  | Except.error error => Except.error error
+                  | Except.ok parsed =>
+                      let afterValue :=
+                        psJsonSkipWhitespace parsed.rest
+                      match afterValue with
+                      | ',' :: tail =>
+                          psJsonParseObjectWith
+                            parseValue
+                            remaining
+                            tail
+                            ((key, parsed.value) :: fieldsRev)
+                      | '}' :: tail =>
+                          Except.ok {
+                            value :=
+                              PsJsonValue.object
+                                ((key, parsed.value) ::
+                                  fieldsRev).reverse
+                            rest := tail
+                          }
+                      | _ =>
+                          Except.error
+                            (PsJsonParseError.expected ", or }")
+              | _ =>
+                  Except.error (PsJsonParseError.expected ":")
+      | _ =>
+          Except.error (PsJsonParseError.expected "object key")
+
+partial def psJsonParseValueWithFuel
+    (fuel : Nat)
+    (input : List Char) :
+    Except PsJsonParseError PsJsonParseResult :=
+  match fuel with
+  | 0 => Except.error PsJsonParseError.fuelExhausted
+  | remaining + 1 =>
       let chars := psJsonSkipWhitespace input
       match chars with
       | [] => Except.error PsJsonParseError.unexpectedEnd
       | '"' :: rest =>
-          match psJsonParseStringChars fuel rest [] with
+          match psJsonParseStringChars remaining rest [] with
           | Except.error error => Except.error error
           | Except.ok (value, afterString) =>
               Except.ok {
@@ -247,9 +340,17 @@ def psJsonParseValueWithFuel :
                 rest := afterString
               }
       | '[' :: rest =>
-          psJsonParseArrayWithFuel fuel rest []
+          psJsonParseArrayWith
+            psJsonParseValueWithFuel
+            remaining
+            rest
+            []
       | '{' :: rest =>
-          psJsonParseObjectWithFuel fuel rest []
+          psJsonParseObjectWith
+            psJsonParseValueWithFuel
+            remaining
+            rest
+            []
       | 't' :: _ =>
           match psJsonConsumeLiteral ['t','r','u','e'] chars with
           | none => Except.error PsJsonParseError.invalidLiteral
@@ -284,94 +385,6 @@ def psJsonParseValueWithFuel :
           else
             Except.error
               (PsJsonParseError.expected "JSON value")
-
-def psJsonParseArrayWithFuel
-    (fuel : Nat)
-    (input : List Char)
-    (valuesRev : List PsJsonValue) :
-    Except PsJsonParseError PsJsonParseResult :=
-  match fuel with
-  | 0 => Except.error PsJsonParseError.fuelExhausted
-  | remaining + 1 =>
-      let chars := psJsonSkipWhitespace input
-      match chars with
-      | ']' :: rest =>
-          Except.ok {
-            value := PsJsonValue.array valuesRev.reverse
-            rest := rest
-          }
-      | _ =>
-          match psJsonParseValueWithFuel remaining chars with
-          | Except.error error => Except.error error
-          | Except.ok parsed =>
-              let afterValue := psJsonSkipWhitespace parsed.rest
-              match afterValue with
-              | ',' :: rest =>
-                  psJsonParseArrayWithFuel
-                    remaining
-                    rest
-                    (parsed.value :: valuesRev)
-              | ']' :: rest =>
-                  Except.ok {
-                    value :=
-                      PsJsonValue.array
-                        (parsed.value :: valuesRev).reverse
-                    rest := rest
-                  }
-              | _ =>
-                  Except.error
-                    (PsJsonParseError.expected ", or ]")
-
-def psJsonParseObjectWithFuel
-    (fuel : Nat)
-    (input : List Char)
-    (fieldsRev : List (String × PsJsonValue)) :
-    Except PsJsonParseError PsJsonParseResult :=
-  match fuel with
-  | 0 => Except.error PsJsonParseError.fuelExhausted
-  | remaining + 1 =>
-      let chars := psJsonSkipWhitespace input
-      match chars with
-      | '}' :: rest =>
-          Except.ok {
-            value := PsJsonValue.object fieldsRev.reverse
-            rest := rest
-          }
-      | '"' :: rest =>
-          match psJsonParseStringChars remaining rest [] with
-          | Except.error error => Except.error error
-          | Except.ok (key, afterKey) =>
-              match psJsonSkipWhitespace afterKey with
-              | ':' :: afterColon =>
-                  match
-                      psJsonParseValueWithFuel
-                        remaining
-                        afterColon with
-                  | Except.error error => Except.error error
-                  | Except.ok parsed =>
-                      let afterValue :=
-                        psJsonSkipWhitespace parsed.rest
-                      match afterValue with
-                      | ',' :: tail =>
-                          psJsonParseObjectWithFuel
-                            remaining
-                            tail
-                            ((key, parsed.value) :: fieldsRev)
-                      | '}' :: tail =>
-                          Except.ok {
-                            value :=
-                              PsJsonValue.object
-                                ((key, parsed.value) ::
-                                  fieldsRev).reverse
-                            rest := tail
-                          }
-                      | _ =>
-                          Except.error
-                            (PsJsonParseError.expected ", or }")
-              | _ =>
-                  Except.error (PsJsonParseError.expected ":")
-      | _ =>
-          Except.error (PsJsonParseError.expected "object key")
 
 def psJsonParse
     (source : String) :

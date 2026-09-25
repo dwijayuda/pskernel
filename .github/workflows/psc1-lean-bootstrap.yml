@@ -147,6 +147,9 @@ jobs:
           if (instance.exports.noneValue() !== 0) {
             throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_NONE_RESULT');
           }
+          if (instance.exports.listLengthTwo() !== 2) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_RECURSIVE_ADT_RESULT');
+          }
           console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
           NODE
 

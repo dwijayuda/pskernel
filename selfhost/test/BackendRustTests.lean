@@ -317,6 +317,20 @@ def psTestBackendRustValues : Bool :=
         && output.contains
           "pub fn shadowOne(one: PsNat) -> PsNat { one }"
 
+def psTestBackendRustScalarTypes : Bool :=
+  psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.uint8 == "u8"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.uint16 == "u16"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.uint32 == "u32"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.uint64 == "u64"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.usize == "usize"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.int8 == "i8"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.int16 == "i16"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.int32 == "i32"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.int64 == "i64"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.isize == "isize"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.float == "f64"
+    && psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.float32 == "f32"
+
 structure PsBackendRustNamedTest where
   name : String
   passed : Bool
@@ -327,7 +341,8 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "structure and inductive", passed := psTestBackendRustAdt },
   { name := "Char and String intrinsics", passed := psTestBackendRustStringIntrinsics },
   { name := "Array intrinsics", passed := psTestBackendRustArrayIntrinsics },
-  { name := "top-level values and shadowing", passed := psTestBackendRustValues }
+  { name := "top-level values and shadowing", passed := psTestBackendRustValues },
+  { name := "frozen PSC1 scalar mappings", passed := psTestBackendRustScalarTypes }
 ]
 
 def psRunBackendRustTests : List PsBackendRustNamedTest -> IO Bool

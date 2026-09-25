@@ -37,6 +37,147 @@ def psLeanReservedApplicationToken (token : PsToken) : Bool :=
     || token.text == "match"
     || token.text == "with"
 
+
+def psLeanApplicationWithArgument
+    (current : PsSyntaxTerm)
+    (argument : PsSyntaxTerm) : PsSyntaxTerm :=
+  let span :=
+    psSyntaxSpanJoin
+      (psSyntaxTermSpan current)
+      (psSyntaxTermSpan argument)
+  match current with
+  | .app fn args _ =>
+      PsSyntaxTerm.app
+        fn
+        (List.append
+          args
+          (List.cons argument List.nil))
+        span
+  | _ =>
+      PsSyntaxTerm.app
+        current
+        (List.cons argument List.nil)
+        span
+
+def psLeanListConstructorName
+    (constructor : String)
+    (span : PsSourceSpan) : PsSyntaxName :=
+  {
+    segments :=
+      List.cons
+        "List"
+        (List.cons constructor List.nil)
+    span := span
+  }
+
+def psLeanBuildListLiteral
+    (elements : List PsSyntaxTerm)
+    (span : PsSourceSpan) : PsSyntaxTerm :=
+  match elements with
+  | List.nil =>
+      PsSyntaxTerm.reference
+        (psLeanListConstructorName "nil" span)
+  | List.cons head rest =>
+      let tail :=
+        psLeanBuildListLiteral rest span
+      PsSyntaxTerm.app
+        (PsSyntaxTerm.reference
+          (psLeanListConstructorName "cons" span))
+        (List.cons
+          head
+          (List.cons tail List.nil))
+        span
+
+def psParseLeanListLiteralWithFuel
+    (parseTerm :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat) :
+    PsSourcePos ->
+    PsTokenCursor ->
+    List PsSyntaxTerm ->
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match fuel with
+  | 0 =>
+      fun _ _ _ =>
+        Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      let smaller :
+          PsSourcePos ->
+          PsTokenCursor ->
+          List PsSyntaxTerm ->
+          Except PsParseError (PsParseResult PsSyntaxTerm) :=
+        psParseLeanListLiteralWithFuel
+          parseTerm
+          remaining
+      fun start cursor elementsRev =>
+        if psTokenCursorAtText cursor "]" then
+          match psTokenCursorAdvance cursor with
+          | none =>
+              Except.error
+                (PsParseError.unexpectedEnd "]")
+          | some close =>
+              let span : PsSourceSpan := {
+                start := start
+                stop := close.token.span.stop
+              }
+              Except.ok {
+                value :=
+                  psLeanBuildListLiteral
+                    elementsRev.reverse
+                    span
+                cursor := close.cursor
+              }
+        else
+          match parseTerm cursor with
+          | Except.error error => Except.error error
+          | Except.ok element =>
+              let nextElements :=
+                List.cons element.value elementsRev
+              if psTokenCursorAtText element.cursor "," then
+                match psTokenCursorAdvance element.cursor with
+                | none =>
+                    Except.error
+                      (PsParseError.unexpectedEnd
+                        "list element")
+                | some afterComma =>
+                    smaller
+                      start
+                      afterComma.cursor
+                      nextElements
+              else if
+                  psTokenCursorAtText
+                    element.cursor
+                    "]" then
+                smaller
+                  start
+                  element.cursor
+                  nextElements
+              else
+                match psTokenCursorPeek element.cursor with
+                | none =>
+                    Except.error
+                      (PsParseError.unexpectedEnd "]")
+                | some token =>
+                    Except.error
+                      (PsParseError.expectedText
+                        "]"
+                        token.text
+                        token.span)
+
+def psParseLeanListLiteral
+    (parseTerm :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (opening : PsTokenRead) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  psParseLeanListLiteralWithFuel
+    parseTerm
+    (opening.cursor.remaining.length + 1)
+    opening.token.span.start
+    opening.cursor
+    List.nil
+
 def psLeanCanStartSimpleArgument
     (current : PsSyntaxTerm)
     (cursor : PsTokenCursor) : Bool :=
@@ -50,6 +191,7 @@ def psLeanCanStartSimpleArgument
       !psLeanReservedApplicationToken token
         && !startsLaterAssignment
         && (token.text == "("
+          || token.text == "["
           || psTokenKindEq token.kind PsTokenKind.identifier
           || psTokenKindEq token.kind PsTokenKind.natural
           || psTokenKindEq token.kind PsTokenKind.string
@@ -81,16 +223,10 @@ def psParseLeanApplicationTailWithFuel
                         start := opening.token.span.start
                         stop := close.token.span.stop
                       }
-                    let span :=
-                      psSyntaxSpanJoin
-                        (psSyntaxTermSpan current)
-                        (psSyntaxTermSpan argument)
                     let next :=
-                      match current with
-                      | .app fn args _ =>
-                          PsSyntaxTerm.app fn (args ++ [argument]) span
-                      | _ =>
-                          PsSyntaxTerm.app current [argument] span
+                      psLeanApplicationWithArgument
+                        current
+                        argument
                     psParseLeanApplicationTailWithFuel
                       parseParenthesized
                       remaining
@@ -103,41 +239,44 @@ def psParseLeanApplicationTailWithFuel
                     match psTokenCursorExpectText inner.cursor ")" with
                     | Except.error error => Except.error error
                     | Except.ok close =>
-                        let span :=
-                          psSyntaxSpanJoin
-                            (psSyntaxTermSpan current)
-                            (psSyntaxTermSpan inner.value)
                         let next :=
-                          match current with
-                          | .app fn args _ =>
-                              PsSyntaxTerm.app
-                                fn
-                                (args ++ [inner.value])
-                                span
-                          | _ =>
-                              PsSyntaxTerm.app
-                                current
-                                [inner.value]
-                                span
+                          psLeanApplicationWithArgument
+                            current
+                            inner.value
                         psParseLeanApplicationTailWithFuel
                           parseParenthesized
                           remaining
                           next
                           close.cursor
+        else if psTokenCursorAtText cursor "[" then
+          match psTokenCursorAdvance cursor with
+          | none =>
+              Except.error
+                (PsParseError.unexpectedEnd "[")
+          | some opening =>
+              match
+                  psParseLeanListLiteral
+                    parseParenthesized
+                    opening with
+              | Except.error error => Except.error error
+              | Except.ok argument =>
+                  let next :=
+                    psLeanApplicationWithArgument
+                      current
+                      argument.value
+                  psParseLeanApplicationTailWithFuel
+                    parseParenthesized
+                    remaining
+                    next
+                    argument.cursor
         else
           match psParseSimpleTerm cursor with
           | Except.error error => Except.error error
           | Except.ok argument =>
-              let span :=
-                psSyntaxSpanJoin
-                  (psSyntaxTermSpan current)
-                  (psSyntaxTermSpan argument.value)
               let next :=
-                match current with
-                | .app fn args _ =>
-                    PsSyntaxTerm.app fn (args ++ [argument.value]) span
-                | _ =>
-                    PsSyntaxTerm.app current [argument.value] span
+                psLeanApplicationWithArgument
+                  current
+                  argument.value
               psParseLeanApplicationTailWithFuel
                 parseParenthesized
                 remaining
@@ -920,22 +1059,10 @@ def psParseLeanRecordApplicationTailWithFuel
         match psParseRecordLiteral parseTerm cursor with
         | Except.error error => Except.error error
         | Except.ok argument =>
-            let span :=
-              psSyntaxSpanJoin
-                (psSyntaxTermSpan current)
-                (psSyntaxTermSpan argument.value)
             let next :=
-              match current with
-              | .app fn args _ =>
-                  PsSyntaxTerm.app
-                    fn
-                    (args ++ [argument.value])
-                    span
-              | _ =>
-                  PsSyntaxTerm.app
-                    current
-                    [argument.value]
-                    span
+              psLeanApplicationWithArgument
+                current
+                argument.value
             psParseLeanRecordApplicationTailWithFuel
               parseTerm
               remaining
@@ -1169,6 +1296,15 @@ def psParseLeanTermWithFuel :
                                   }
                               cursor := body.cursor
                             }
+      else if psTokenCursorAtText cursor "[" then
+        match psTokenCursorAdvance cursor with
+        | none =>
+            Except.error
+              (PsParseError.unexpectedEnd "[")
+        | some opening =>
+            psParseLeanListLiteral
+              (psParseLeanTermWithFuel remaining)
+              opening
       else if psTokenCursorAtText cursor "{" then
         psParseRecordLiteral
           (psParseLeanTermWithFuel remaining)

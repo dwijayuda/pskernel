@@ -82,7 +82,7 @@ def psElabFinalizeExpected
           result.context.localContext
           result.context.metaContext
           result.type
-          expectedType
+          expectedType;
       if unified.success then
         Except.ok
           (psElabResultWithMeta
@@ -105,8 +105,13 @@ def psElabResolvedTerm
   | Except.error error =>
       Except.error (PsElabError.infer error)
   | Except.ok type =>
+      let result :=
+        PsElabTermResult.mk
+          context
+          term
+          type;
       psElabFinalizeExpected
-        { context := context, term := term, type := type }
+        result
         expected
 
 def psElabProjectionApplyParameters
@@ -145,7 +150,10 @@ def psElabFindStructureField
       | Except.error error =>
           Except.error (PsElabError.infer error)
       | Except.ok forallView =>
-          if psNameLastComponent forallView.name == fieldName then
+          if
+              psStringEq
+                (psNameLastComponent forallView.name)
+                fieldName then
             Except.ok index
           else
             psElabFindStructureField
@@ -153,7 +161,7 @@ def psElabFindStructureField
               typeName
               target
               fieldName
-              (index + 1)
+              (Nat.succ index)
               remaining
               (psExprInstantiate1
                 forallView.body
@@ -169,8 +177,8 @@ def psElabProjectionStep
       context.environment
       current.context.metaContext
       current.context.localContext
-      current.type
-  let view := psInferAppView reducedType
+      current.type;
+  let view := psInferAppView reducedType;
   match view.head with
   | .constE typeName _ =>
       match psEnvironmentFindInductive current.context.environment typeName with

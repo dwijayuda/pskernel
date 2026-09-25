@@ -1561,13 +1561,16 @@ partial def typeCheckerWhnfSpineDiff
 partial def inferLambdaSpine
     (ctx : CheckerContext)
     (e : Expr)
+    (inferOnly : Bool)
     (fvars : List Expr := [])
     (binders : List CheckerCloseBinder := []) : Except String Expr := do
   match e with
   | .lam name domain body binderInfo => do
       let openedDomain := domain.instantiateRev fvars
-      let domainType ← infer ctx openedDomain
-      let _ ← ensureSort ctx domainType
+      if !inferOnly then
+        let domainType ← inferCore ctx openedDomain false
+        let _ ← ensureSort ctx domainType
+        pure ()
       let (fresh, child) := ctx.withLocal name openedDomain binderInfo
       let binder : CheckerCloseBinder := {
         internalName := fresh
@@ -1576,45 +1579,50 @@ partial def inferLambdaSpine
         binderInfo := binderInfo
       }
       inferLambdaSpine
-        child body (fvars ++ [.fvar fresh]) (binders ++ [binder])
+        child body inferOnly
+        (fvars ++ [.fvar fresh]) (binders ++ [binder])
   | tail => do
-      let result ← infer ctx (tail.instantiateRev fvars)
+      let result ← inferCore ctx (tail.instantiateRev fvars) inferOnly
       let result := result.cheapBetaReduce
       pure (closeCheckerBinders binders result)
 
 partial def inferForallSpine
     (ctx : CheckerContext)
     (e : Expr)
+    (inferOnly : Bool)
     (fvars : List Expr := [])
     (levels : List Level := []) : Except String Expr := do
   match e with
   | .forallE name domain body binderInfo => do
       let openedDomain := domain.instantiateRev fvars
-      let domainType ← infer ctx openedDomain
+      let domainType ← inferCore ctx openedDomain inferOnly
       let level ← ensureSort ctx domainType
       let (fresh, child) := ctx.withLocal name openedDomain binderInfo
       inferForallSpine
-        child body (fvars ++ [.fvar fresh]) (levels ++ [level])
+        child body inferOnly
+        (fvars ++ [.fvar fresh]) (levels ++ [level])
   | tail => do
       let openedTail := tail.instantiateRev fvars
-      let tailType ← infer ctx openedTail
+      let tailType ← inferCore ctx openedTail inferOnly
       let resultLevel ← ensureSort ctx tailType
       pure (.sort (levels.foldr Level.mkIMax resultLevel))
 
 partial def inferLetSpine
     (ctx : CheckerContext)
     (e : Expr)
+    (inferOnly : Bool)
     (fvars : List Expr := [])
     (binders : List CheckerCloseBinder := []) : Except String Expr := do
   match e with
   | .letE name type value body nondep => do
       let openedType := type.instantiateRev fvars
       let openedValue := value.instantiateRev fvars
-      let typeType ← infer ctx openedType
-      let _ ← ensureSort ctx typeType
-      let valueType ← infer ctx openedValue
-      if !(← isDefEq ctx valueType openedType) then
-        throw "let value type mismatch"
+      if !inferOnly then
+        let typeType ← inferCore ctx openedType false
+        let _ ← ensureSort ctx typeType
+        let valueType ← inferCore ctx openedValue false
+        if !(← isDefEq ctx valueType openedType) then
+          throw "let value type mismatch"
       let (fresh, child) := ctx.withLet name openedType openedValue
       let binder : CheckerCloseBinder := {
         internalName := fresh
@@ -1625,13 +1633,48 @@ partial def inferLetSpine
         nondep := nondep
       }
       inferLetSpine
-        child body (fvars ++ [.fvar fresh]) (binders ++ [binder])
+        child body inferOnly
+        (fvars ++ [.fvar fresh]) (binders ++ [binder])
   | tail => do
-      let result ← infer ctx (tail.instantiateRev fvars)
+      let result ← inferCore ctx (tail.instantiateRev fvars) inferOnly
       let result := result.cheapBetaReduce
       pure (closeCheckerBinders binders result true)
 
-partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr := do
+/--
+Final Lean 4.34 infer-only application inference. It consumes an entire
+application spine without checking argument types, delaying substitutions
+across syntactically visible Pi binders and instantiating the accumulated slice
+only when a hidden Pi must be exposed.
+-/
+partial def inferAppOnlySpine
+    (ctx : CheckerContext)
+    (e : Expr) : Except String Expr := do
+  let args := e.getAppArgs
+  let fnType ← inferCore ctx e.getAppFn true
+  let rec loop (i j : Nat) (current : Expr) : Except String Expr := do
+    if i < args.length then
+      match current with
+      | .forallE _ _ body _ =>
+          loop (i + 1) j body
+      | _ =>
+          let pending := (args.drop j).take (i - j)
+          let exposed := current.instantiateRev pending
+          let (_, _, body, _) ← ensureForall ctx exposed
+          loop (i + 1) i body
+    else
+      pure (current.instantiateRev (args.drop j))
+  loop 0 0 fnType
+
+/--
+Lean 4.34 `infer_type_core`. When `inferOnly` is true, the checker trusts
+the input term's well-typedness contract and computes its type without
+rechecking application arguments, lambda domains, let values, or
+unsafe/partial-use restrictions. Full declaration checking uses false.
+-/
+partial def inferCore
+    (ctx : CheckerContext)
+    (e : Expr)
+    (inferOnly : Bool) : Except String Expr := do
   let ctx ← ctx.enterKernelRecDepth
   match e with
   | .bvar _ => .error "loose bound variable in type checker"
@@ -1647,9 +1690,9 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr := do
     | some info =>
       if info.levelParams.length != levels.length then
         .error "incorrect number of universe levels"
-      else if info.isUnsafe && !ctx.safety.isUnsafe then
+      else if !inferOnly && info.isUnsafe && !ctx.safety.isUnsafe then
         .error "safe declaration uses unsafe constant"
-      else if info.isPartial && ctx.safety.isSafe then
+      else if !inferOnly && info.isPartial && ctx.safety.isSafe then
         .error "safe declaration uses partial constant"
       else
         .ok (info.type.instantiateLevelParams info.levelParams levels)
@@ -1659,51 +1702,59 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr := do
         checkNatSize ctx.maxNatSize value
         .ok (.const kernelNatName [])
     | .str _ => .ok (.const kernelStringName [])
-  | .mdata _ body => infer ctx body
-  | .app fn arg => do
-    let fnType ← infer ctx fn
-    let forallInfo ←
-      match ensureForall ctx fnType with
-      | .ok value => pure value
-      | .error _ => do
-          let reduced ← whnf ctx fnType
-          throw (
-            "expected function type while applying " ++
-            typeCheckerExprHead fn ++
-            "; reduced function type is " ++
-            typeCheckerExprHead reduced)
-    let (_, domain, body, _) := forallInfo
-    let argType ← infer ctx arg
-    let eqCtx :=
-      if isEagerReduceExpr arg then
-        { ctx with eagerReduce := true }
+  | .mdata _ body => inferCore ctx body inferOnly
+  | .app fn arg =>
+    if inferOnly then
+      inferAppOnlySpine ctx e
+    else do
+      let fnType ← inferCore ctx fn false
+      let forallInfo ←
+        match ensureForall ctx fnType with
+        | .ok value => pure value
+        | .error _ => do
+            let reduced ← whnf ctx fnType
+            throw (
+              "expected function type while applying " ++
+              typeCheckerExprHead fn ++
+              "; reduced function type is " ++
+              typeCheckerExprHead reduced)
+      let (_, domain, body, _) := forallInfo
+      let argType ← inferCore ctx arg false
+      let eqCtx :=
+        if isEagerReduceExpr arg then
+          { ctx with eagerReduce := true }
+        else
+          ctx
+      let ok ← isDefEq eqCtx argType domain
+      if !ok then
+        let domainWhnf ← whnf eqCtx domain
+        let argTypeWhnf ← whnf eqCtx argType
+        let spineDiff ←
+          typeCheckerWhnfSpineDiff eqCtx domain argType
+        .error (
+          "application type mismatch while applying " ++
+          typeCheckerExprHead fn ++
+          " to " ++ typeCheckerExprHead arg ++
+          "; expected domain " ++ typeCheckerExprHead domain ++
+          "; argument type " ++ typeCheckerExprHead argType ++
+          "; first structural diff: " ++
+          typeCheckerExprDiff domain argType ++
+          "; full-whnf expected " ++ typeCheckerExprHead domainWhnf ++
+          "; full-whnf argument " ++ typeCheckerExprHead argTypeWhnf ++
+          "; full-whnf diff: " ++
+          typeCheckerExprDiff domainWhnf argTypeWhnf ++
+          "; binder-aware whnf: " ++ spineDiff)
       else
-        ctx
-    let ok ← isDefEq eqCtx argType domain
-    if !ok then
-      let domainWhnf ← whnf eqCtx domain
-      let argTypeWhnf ← whnf eqCtx argType
-      let spineDiff ←
-        typeCheckerWhnfSpineDiff eqCtx domain argType
-      .error (
-        "application type mismatch while applying " ++
-        typeCheckerExprHead fn ++
-        " to " ++ typeCheckerExprHead arg ++
-        "; expected domain " ++ typeCheckerExprHead domain ++
-        "; argument type " ++ typeCheckerExprHead argType ++
-        "; first structural diff: " ++
-        typeCheckerExprDiff domain argType ++
-        "; full-whnf expected " ++ typeCheckerExprHead domainWhnf ++
-        "; full-whnf argument " ++ typeCheckerExprHead argTypeWhnf ++
-        "; full-whnf diff: " ++
-        typeCheckerExprDiff domainWhnf argTypeWhnf ++
-        "; binder-aware whnf: " ++ spineDiff)
-    else
-      .ok (body.instantiate1 arg)
-  | .lam .. => inferLambdaSpine ctx e
-  | .forallE .. => inferForallSpine ctx e
-  | .letE .. => inferLetSpine ctx e
-  | .proj typeName idx struct => inferProj ctx typeName idx struct
+        .ok (body.instantiate1 arg)
+  | .lam .. => inferLambdaSpine ctx e inferOnly
+  | .forallE .. => inferForallSpine ctx e inferOnly
+  | .letE .. => inferLetSpine ctx e inferOnly
+  | .proj typeName idx struct =>
+      inferProj ctx typeName idx struct inferOnly
+
+/-- Lean public `infer`: infer-only mode. -/
+partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
+  inferCore ctx e true
 
 partial def getSortLevel (ctx : CheckerContext) (e : Expr) : Except String Level := do
   let type ← infer ctx e
@@ -1717,8 +1768,9 @@ partial def inferProj
     (ctx : CheckerContext)
     (typeName : Name)
     (idx : Nat)
-    (struct : Expr) : Except String Expr := do
-  let type ← whnf ctx (← infer ctx struct)
+    (struct : Expr)
+    (inferOnly : Bool) : Except String Expr := do
+  let type ← whnf ctx (← inferCore ctx struct inferOnly)
   if idx > leanUInt32Max then
     throw "invalid projection index"
   let fn := type.getAppFn
@@ -1785,6 +1837,6 @@ partial def inferProj
 end
 
 def check (ctx : CheckerContext) (e : Expr) : Except String Expr :=
-  infer ctx e
+  inferCore ctx e false
 
 end PSC1Kernel

@@ -157,9 +157,6 @@ def addSimpleInductive
     throw "duplicate universe parameter"
   if !decl.levelParams.isEmpty then
     throw "simple inductive admission does not yet support universe parameters"
-  if decl.ctors.isEmpty then
-    throw "simple inductive admission does not yet support empty datatypes"
-
   let recName := simpleRecName decl.name
   let allNames := decl.name :: recName :: decl.ctors.map (fun ctor => ctor.name)
   unless simpleNameListUnique allNames do

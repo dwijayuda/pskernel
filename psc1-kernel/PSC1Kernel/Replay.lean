@@ -543,8 +543,8 @@ def State.replay
         throw "lean4export metadata must be the first record"
       let next ← state.addExprRecord value
       pure { next with records := state.records + 1 }
-  | .axiom _ | .definition _ | .theorem _ | .opaque _ |
-      .quot _ | .inductive _ => do
+  | .axiomR _ | .definitionR _ | .theoremR _ | .opaqueR _ |
+      .quotR _ | .inductiveR _ => do
       unless state.sawMeta do
         throw "lean4export metadata must be the first record"
       let next ← state.addDeclaration record

@@ -146,11 +146,11 @@ partial def replaySegmentedLinesFromProgress
             match current with
             | some value => value
             | none => Replay.State.empty shared maxRecDepth maxNatSize nativeEvaluator
-          if lineNo >= 190530 && lineNo <= 190660 then
+          if lineNo >= 190530 && lineNo <= 190680 then
             IO.println s!"PSC1 Lean replay RAW-BEGIN line={lineNo} chars={line.length}"
           let record ←
             liftReplayResult path lineNo (ReplayJson.decodeLine line)
-          if lineNo >= 190530 && lineNo <= 190660 then
+          if lineNo >= 190530 && lineNo <= 190680 then
             let recordLabel :=
               match record with
               | .metaR _ => "meta"
@@ -172,7 +172,7 @@ partial def replaySegmentedLinesFromProgress
           | none => pure ()
           let next ←
             liftReplayResult path lineNo (state.replay record)
-          if lineNo >= 190530 && lineNo <= 190660 then
+          if lineNo >= 190530 && lineNo <= 190680 then
             IO.println s!"PSC1 Lean replay RECORD-END line={lineNo} namesDense={next.names.dense.size} namesSparse={next.names.sparse.length} levelsDense={next.levels.dense.size} levelsSparse={next.levels.sparse.length} exprsDense={next.exprs.dense.size} exprsSparse={next.exprs.sparse.length} env={next.env.size}"
           if progressEvery > 0 then
             if lineNo % progressEvery == 0 then

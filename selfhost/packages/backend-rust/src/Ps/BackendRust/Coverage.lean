@@ -74,6 +74,10 @@ def psRustCoveragePrimitiveName
 def psRustCoverageIntrinsicName
     (intrinsic : PsVerifiedIrIntrinsic) : String :=
   match intrinsic with
+  | PsVerifiedIrIntrinsic.machineIntBinary _ _ => "MachineInt.binary"
+  | PsVerifiedIrIntrinsic.machineIntCompare _ _ => "MachineInt.compare"
+  | PsVerifiedIrIntrinsic.floatBinary _ _ => "Float.binary"
+  | PsVerifiedIrIntrinsic.floatCompare _ _ => "Float.compare"
   | PsVerifiedIrIntrinsic.natAdd => "Nat.add"
   | PsVerifiedIrIntrinsic.natSub => "Nat.sub"
   | PsVerifiedIrIntrinsic.natMul => "Nat.mul"
@@ -340,15 +344,19 @@ def psRustCoverageExprWithFuel :
             visitNested
             arguments
             withTypes
-      | PsVerifiedIrExpr.letE _ value body =>
+      | PsVerifiedIrExpr.letE _ type value body =>
           let withLet :=
             psRustCoverageAddFeature
               coverage
               "expr:let";
+          let withType :=
+            psRustCoverageType
+              withLet
+              type;
           let withValue :=
             psRustCoverageExprWithFuel
               fuel
-              withLet
+              withType
               value;
           psRustCoverageExprWithFuel
             fuel

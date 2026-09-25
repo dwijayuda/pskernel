@@ -1,3 +1,4 @@
+import Ps.BackendWasm.RuntimeArray
 import Ps.BackendWasm.RuntimeNat
 import Ps.CompilerIr.Specialize
 import Ps.BackendWasm.Binary

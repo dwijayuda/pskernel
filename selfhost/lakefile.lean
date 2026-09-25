@@ -91,6 +91,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Model,
     `Ps.BackendWasm.Type,
     `Ps.BackendWasm.RuntimeNat,
+    `Ps.BackendWasm.RuntimeInt,
     `Ps.BackendWasm.RuntimeArray,
     `Ps.BackendWasm.LowerInt,
     `Ps.BackendWasm.LowerFloat,

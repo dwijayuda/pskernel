@@ -305,7 +305,7 @@ export class TypeChecker {
   }
 
   private quick(a:Expr,b:Expr):boolean|null{
-    if(exprLeanEq(a,b)||this.state.success.has(this.state.pair(a,b)))return true;
+    if(exprLeanEq(a,b))return true;
     if(a.kind===b.kind){switch(a.kind){
       case'sort':return b.kind==='sort'&&levelEquivalent(a.level,b.level);
       case'lit':return b.kind==='lit'&&exprEq(a,b);
@@ -413,10 +413,9 @@ export class TypeChecker {
     if(!ai&&bi){const ap=this.tryUnfoldProjApp(a);if(ap)return {a:ap,b};const u=this.unfold(b);return u?{a,b:this.whnfCore(u,false,true)}:null;}
     const c=cmpHint(hint(ai!),hint(bi!));if(c<0){const u=this.unfold(a)!;return {a:this.whnfCore(u,false,true),b};}if(c>0){const u=this.unfold(b)!;return {a,b:this.whnfCore(u,false,true)};}
     if(a.kind==='app'&&b.kind==='app'&&ai===bi&&hint(ai!).kind==='regular'){
-      const pair=this.state.pair(a,b);if(!this.state.failure.has(pair)){
+      {
         const al=af.kind==='const'?af.levels:[],bl=bf.kind==='const'?bf.levels:[];
         if(al.length===bl.length&&al.every((l,i)=>levelEquivalent(l,bl[i]!))&&this.isDefEqArgs(a,b))return {a,b,equal:true};
-        this.state.failure.add(pair);
       }
     }
     const ua=this.unfold(a),ub=this.unfold(b);return ua&&ub?{a:this.whnfCore(ua,false,true),b:this.whnfCore(ub,false,true)}:null;
@@ -455,12 +454,8 @@ export class TypeChecker {
   });}
 
   isDefEq(a:Expr,b:Expr):boolean{
-    const pair=this.state.pair(a,b);
-    // Final Lean 4.34 always enters is_def_eq_core first; quick_is_def_eq inside
-    // the guarded core consults the positive cache. Do not bypass recursion-depth
-    // accounting at the public wrapper.
-    const r=this.isDefEqCore(a,b);
-    if(r)this.state.success.add(pair);
-    return r;
+    // Diagnostic branch: omit the public success cache while preserving
+    // recursion-depth accounting and the rest of the checker algorithm.
+    return this.isDefEqCore(a,b);
   }
 }

@@ -63,7 +63,8 @@ lean_lib PsBridge where
 lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
-    `Ps.CompilerIr.Model
+    `Ps.CompilerIr.Model,
+    `Ps.CompilerIr.Specialize
   ]
 
 lean_lib PsErasure where
@@ -159,6 +160,10 @@ lean_exe psc1_backend_ts_tests where
 lean_exe psc1_backend_wasm_tests where
   srcDir := "test"
   root := `BackendWasmTests
+
+lean_exe psc1_ir_specialize_tests where
+  srcDir := "test"
+  root := `IrSpecializeTests
 
 lean_exe psc1_backend_wasm_binary_smoke where
   srcDir := "test"

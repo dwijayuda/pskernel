@@ -84,6 +84,9 @@ def Expr.reverseList : List Expr → List Expr
 def Expr.instantiateRev (e : Expr) (subst : List Expr) : Expr :=
   e.instantiate (Expr.reverseList subst)
 
+def Expr.applyArgsCheap (fn : Expr) (args : List Expr) : Expr :=
+  args.foldl (fun acc arg => .app acc arg) fn
+
 /--
 Lean 4.34 `cheap_beta_reduce`.
 
@@ -110,13 +113,13 @@ partial def Expr.cheapBetaReduce (e : Expr) : Expr :=
       if consumed == 0 then
         e
       else if !body.hasLooseBVar then
-        applyArgs body (args.drop consumed)
+        Expr.applyArgsCheap body (args.drop consumed)
       else
         match body with
         | .bvar index =>
             if index < consumed then
               match listGet? args (consumed - index - 1) with
-              | some selected => applyArgs selected (args.drop consumed)
+              | some selected => Expr.applyArgsCheap selected (args.drop consumed)
               | none => e
             else
               e

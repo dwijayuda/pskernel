@@ -122,7 +122,8 @@ def logHotPhase (label : String) : IO Unit := do
     (label : String)
     (thunk : Unit → Except String α) : IO α := do
   logHotPhase (label ++ "-begin")
-  let value ← liftReplayResult "<diagnostic>" 0 (thunk ())
+  let result ← IO.lazyPure (fun _ => thunk ())
+  let value ← liftReplayResult "<diagnostic>" 0 result
   logHotPhase (label ++ "-end")
   pure value
 

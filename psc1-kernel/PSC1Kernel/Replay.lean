@@ -463,6 +463,99 @@ def State.addDefinitionRecord
     else
       pure { state with pendingMutual := pending }
 
+def replayLevelString : Level → String
+  | .zero => "0"
+  | .succ level => "succ(" ++ replayLevelString level ++ ")"
+  | .max left right =>
+      "max(" ++ replayLevelString left ++ "," ++ replayLevelString right ++ ")"
+  | .imax left right =>
+      "imax(" ++ replayLevelString left ++ "," ++ replayLevelString right ++ ")"
+  | .param name => "param(" ++ replayNameString name ++ ")"
+  | .mvar name => "mvar(" ++ replayNameString name ++ ")"
+
+def replayLevelsString : List Level → String
+  | [] => ""
+  | [level] => replayLevelString level
+  | level :: rest =>
+      replayLevelString level ++ "," ++ replayLevelsString rest
+
+def replayExprHead : Expr → String
+  | .bvar index => "bvar(" ++ toString index ++ ")"
+  | .fvar name => "fvar(" ++ replayNameString name ++ ")"
+  | .mvar name => "mvar(" ++ replayNameString name ++ ")"
+  | .sort level => "sort(" ++ replayLevelString level ++ ")"
+  | .const name levels =>
+      "const(" ++ replayNameString name ++ ";[" ++ replayLevelsString levels ++ "])"
+  | .app _ _ => "app"
+  | .lam _ _ _ _ => "lam"
+  | .forallE _ _ _ _ => "forallE"
+  | .letE _ _ _ _ _ => "letE"
+  | .lit _ => "lit"
+  | .mdata metadata _ => "mdata(" ++ toString metadata ++ ")"
+  | .proj typeName index _ =>
+      "proj(" ++ replayNameString typeName ++ "," ++ toString index ++ ")"
+
+partial def replayExprDiffAt
+    (path : String) : Expr → Expr → Option String
+  | .bvar left, .bvar right =>
+      if left == right then none
+      else some (path ++ ": bvar " ++ toString left ++ " != " ++ toString right)
+  | .fvar left, .fvar right =>
+      if Name.eq left right then none
+      else some (path ++ ": fvar " ++ replayNameString left ++
+        " != " ++ replayNameString right)
+  | .mvar left, .mvar right =>
+      if Name.eq left right then none
+      else some (path ++ ": mvar " ++ replayNameString left ++
+        " != " ++ replayNameString right)
+  | .sort left, .sort right =>
+      if Level.eq left right then none
+      else some (path ++ ": sort " ++ replayLevelString left ++
+        " != " ++ replayLevelString right)
+  | .const leftName leftLevels, .const rightName rightLevels =>
+      if Name.eq leftName rightName && Level.listEq leftLevels rightLevels then none
+      else some (path ++ ": " ++
+        replayExprHead (.const leftName leftLevels) ++ " != " ++
+        replayExprHead (.const rightName rightLevels))
+  | .app leftFn leftArg, .app rightFn rightArg =>
+      match replayExprDiffAt (path ++ ".fn") leftFn rightFn with
+      | some diff => some diff
+      | none => replayExprDiffAt (path ++ ".arg") leftArg rightArg
+  | .lam _ leftType leftBody _, .lam _ rightType rightBody _ =>
+      match replayExprDiffAt (path ++ ".lamType") leftType rightType with
+      | some diff => some diff
+      | none => replayExprDiffAt (path ++ ".lamBody") leftBody rightBody
+  | .forallE _ leftType leftBody _, .forallE _ rightType rightBody _ =>
+      match replayExprDiffAt (path ++ ".forallType") leftType rightType with
+      | some diff => some diff
+      | none => replayExprDiffAt (path ++ ".forallBody") leftBody rightBody
+  | .letE _ leftType leftValue leftBody leftNondep,
+      .letE _ rightType rightValue rightBody rightNondep =>
+      if leftNondep != rightNondep then
+        some (path ++ ": let nondep mismatch")
+      else
+        match replayExprDiffAt (path ++ ".letType") leftType rightType with
+        | some diff => some diff
+        | none =>
+            match replayExprDiffAt (path ++ ".letValue") leftValue rightValue with
+            | some diff => some diff
+            | none => replayExprDiffAt (path ++ ".letBody") leftBody rightBody
+  | .lit left, .lit right =>
+      if Literal.eq left right then none else some (path ++ ": literal mismatch")
+  | .mdata leftMeta leftExpr, .mdata rightMeta rightExpr =>
+      if leftMeta != rightMeta then some (path ++ ": metadata mismatch")
+      else replayExprDiffAt (path ++ ".mdata") leftExpr rightExpr
+  | .proj leftName leftIndex leftExpr, .proj rightName rightIndex rightExpr =>
+      if !Name.eq leftName rightName || leftIndex != rightIndex then
+        some (path ++ ": projection metadata mismatch")
+      else replayExprDiffAt (path ++ ".proj") leftExpr rightExpr
+  | left, right =>
+      some (path ++ ": node " ++ replayExprHead left ++
+        " != " ++ replayExprHead right)
+
+def replayExprDiff (left right : Expr) : String :=
+  (replayExprDiffAt "root" left right).getD "no structural difference"
+
 def State.addInductiveRecord
     (state : State)
     (record : InductiveRecord) : Except String State := do
@@ -663,7 +756,8 @@ def State.addInductiveRecord
         unless Kernel.quotExprEqv info.base.type expectedType do
           throw ("generated recursor type metadata mismatch for " ++
             replayNameString name ++
-            " (name-index=" ++ toString recursor.name ++ ")")
+            " (name-index=" ++ toString recursor.name ++ "): " ++
+            replayExprDiff info.base.type expectedType)
         unless namesEq info.all expectedAll do
           throw "generated recursor all-list mismatch"
         unless info.numParams == recursor.numParams do

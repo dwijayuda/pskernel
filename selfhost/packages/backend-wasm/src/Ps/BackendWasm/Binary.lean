@@ -24,32 +24,44 @@ def psWasmEncodeUlebWithFuel :
 def psWasmEncodeUleb (value : Nat) : List UInt8 :=
   psWasmEncodeUlebWithFuel 16 value
 
-def psWasmEncodePositiveSlebWithFuel :
-    Nat -> Nat -> List UInt8
+def psWasmEncodeSlebWithFuel :
+    Nat -> Int -> List UInt8
   | 0, _ => []
   | fuel + 1, value =>
-      let low := value % 128
+      let lowInt := value % 128
+      let low := lowInt.toNat
       let rest := value / 128
-      if rest == 0 then
-        if low < 64 then
-          [psWasmByte low]
-        else
-          [psWasmByte (low + 128), psWasmByte 0]
+      let signSet := 64 <= low
+      let donePositive := rest == 0 && !signSet
+      let doneNegative := rest == -1 && signSet
+      if donePositive || doneNegative then
+        [psWasmByte low]
       else
         psWasmByte (low + 128) ::
-          psWasmEncodePositiveSlebWithFuel fuel rest
+          psWasmEncodeSlebWithFuel fuel rest
 
-def psWasmEncodePositiveSleb (value : Nat) : List UInt8 :=
-  psWasmEncodePositiveSlebWithFuel 16 value
+def psWasmEncodeSleb (value : Int) : List UInt8 :=
+  psWasmEncodeSlebWithFuel 16 value
 
-def psWasmEncodeIntConstant
-    (value : Int) :
-    Except PsWasmEncodeError (List UInt8) :=
-  match value with
-  | .ofNat natural =>
-      Except.ok (psWasmEncodePositiveSleb natural)
-  | .negSucc _ =>
-      Except.error PsWasmEncodeError.negativeIntegerConstant
+def psWasmNormalizeI32Immediate (value : Int) : Int :=
+  let reduced := value % 4294967296
+  if reduced >= 2147483648 then
+    reduced - 4294967296
+  else
+    reduced
+
+def psWasmNormalizeI64Immediate (value : Int) : Int :=
+  let reduced := value % 18446744073709551616
+  if reduced >= 9223372036854775808 then
+    reduced - 18446744073709551616
+  else
+    reduced
+
+def psWasmEncodeI32Constant (value : Int) : List UInt8 :=
+  psWasmEncodeSleb (psWasmNormalizeI32Immediate value)
+
+def psWasmEncodeI64Constant (value : Int) : List UInt8 :=
+  psWasmEncodeSleb (psWasmNormalizeI64Immediate value)
 
 def psWasmEncodeUtf8Char (char : Char) : List UInt8 :=
   let value := char.toNat
@@ -170,15 +182,11 @@ def psWasmEncodeInstruction
           Except.ok (psWasmByte 16 :: psWasmEncodeUleb index)
   | .return_ => Except.ok [psWasmByte 15]
   | .i32Const value =>
-      match psWasmEncodeIntConstant value with
-      | Except.error error => Except.error error
-      | Except.ok immediate =>
-          Except.ok (psWasmByte 65 :: immediate)
+      Except.ok
+        (psWasmByte 65 :: psWasmEncodeI32Constant value)
   | .i64Const value =>
-      match psWasmEncodeIntConstant value with
-      | Except.error error => Except.error error
-      | Except.ok immediate =>
-          Except.ok (psWasmByte 66 :: immediate)
+      Except.ok
+        (psWasmByte 66 :: psWasmEncodeI64Constant value)
   | .i32Add => Except.ok [psWasmByte 106]
   | .i32Sub => Except.ok [psWasmByte 107]
   | .i32Mul => Except.ok [psWasmByte 108]

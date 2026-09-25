@@ -1789,14 +1789,15 @@ def psElabApplyArgsWithFuel
                       psExprInstantiate1
                         body
                         elaboratedArgument.term;
+                    let nextResult : PsElabTermResult := {
+                      context := elaboratedArgument.context
+                      term := nextTerm
+                      type := nextType
+                    };
                     psElabApplyArgsWithFuel
                       elaborate
                       fuel
-                      {
-                        context := elaboratedArgument.context
-                        term := nextTerm
-                        type := nextType
-                      }
+                      nextResult
                       rest
                       pendingInstancesRev
           else if

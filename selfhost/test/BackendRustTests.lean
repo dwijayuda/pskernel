@@ -595,6 +595,42 @@ def psTestBackendRustDirectFunctionResult : Bool :=
         "pub fn makeAdder(offset: PsNat) -> impl Fn(PsNat) -> PsNat + Clone"
         && output.contains "{ move |value: PsNat| "
 
+def psBackendRustForwardedFunctionResultModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "returnCallback"
+        typeParameters := []
+        parameters := [
+          {
+            name := "callback"
+            type :=
+              PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body := PsVerifiedIrExpr.var "callback"
+      }
+    ]
+  }
+
+def psTestBackendRustForwardedFunctionResult : Bool :=
+  match psRustEmitModule psBackendRustForwardedFunctionResultModule with
+  | Except.error _ =>
+      false
+  | Except.ok output =>
+      output.contains
+        "pub fn returnCallback(callback: impl Fn(PsNat) -> PsNat + Clone) -> impl Fn(PsNat) -> PsNat + Clone"
+        && output.contains "{ callback }"
+
 def psBackendRustNestedFunctionResultModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -848,6 +884,13 @@ def psTestBackendRustCoverageDirectFunctionResult : Bool :=
     (psRustCoverageLength coverage.unsupported)
     0
 
+def psTestBackendRustCoverageForwardedFunctionResult : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustForwardedFunctionResultModule;
+  Nat.beq
+    (psRustCoverageLength coverage.unsupported)
+    0
+
 def psTestBackendRustCoverageNestedFunctionResult : Bool :=
   let coverage :=
     psRustCoverageModule psBackendRustNestedFunctionResultModule;
@@ -916,6 +959,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "reject function-valued lambda results", passed := psTestBackendRustRejectsLambdaFunctionResult },
   { name := "reject function-typed lambda parameters", passed := psTestBackendRustRejectsLambdaFunctionParameter },
   { name := "accept direct function-valued results", passed := psTestBackendRustDirectFunctionResult },
+  { name := "accept forwarded function-valued results", passed := psTestBackendRustForwardedFunctionResult },
   { name := "reject nested function-valued results", passed := psTestBackendRustRejectsNestedFunctionResult },
   { name := "reject stored function values", passed := psTestBackendRustRejectsFunctionStorage },
   { name := "reject nested function parameters", passed := psTestBackendRustRejectsNestedFunctionParameter },
@@ -927,6 +971,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "coverage rejects intrinsic arity", passed := psTestBackendRustCoverageIntrinsicArity },
   { name := "coverage rejects generic values", passed := psTestBackendRustCoverageGenericValue },
   { name := "coverage accepts direct function results", passed := psTestBackendRustCoverageDirectFunctionResult },
+  { name := "coverage accepts forwarded function results", passed := psTestBackendRustCoverageForwardedFunctionResult },
   { name := "coverage rejects nested function results", passed := psTestBackendRustCoverageNestedFunctionResult },
   { name := "coverage rejects lambda function results", passed := psTestBackendRustCoverageLambdaFunctionResult },
   { name := "coverage rejects lambda function parameters", passed := psTestBackendRustCoverageLambdaFunctionParameter },

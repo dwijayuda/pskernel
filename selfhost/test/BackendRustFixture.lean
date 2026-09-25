@@ -244,6 +244,24 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
               ])
       },
       {
+        name := "returnCallback"
+        typeParameters := []
+        parameters := [
+          {
+            name := "callback"
+            type :=
+              PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body := PsVerifiedIrExpr.var "callback"
+      },
+      {
         name := "makePair"
         typeParameters := []
         parameters := [

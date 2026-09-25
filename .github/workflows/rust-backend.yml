@@ -412,6 +412,7 @@ jobs:
               pairLeft,
               plusOne,
               pushBang,
+              returnCallback,
               shadowOne,
               unwrapOr,
               utf8Size,
@@ -446,6 +447,9 @@ jobs:
               let add_five = makeAdder(n(5));
               assert_eq!(add_five(n(7)), n(12));
               assert_eq!(add_five(n(9)), n(14));
+              let forwarded = returnCallback(makeAdder(n(2)));
+              assert_eq!(forwarded(n(40)), n(42));
+              assert_eq!(forwarded(n(41)), n(43));
               assert_eq!(pairLeft(Pair { left: n(11), right: n(22) }), n(11));
               assert_eq!(pushBang(String::from("hi")), "hi!");
               assert_eq!(utf8Size(String::from("é")), n(2));

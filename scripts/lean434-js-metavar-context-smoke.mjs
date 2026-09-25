@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import {
   Lean4ExportReplay,
   anonymous,
+  app,
   exprEq,
   nameFromDotted,
   natLit,
@@ -194,6 +195,94 @@ const empty=emptyLean434MetavarContext();
   }
   console.log(
     'ok - native Lean instantiateLevelMVarsImp normalizes and writes back in JS',
+  );
+}
+
+{
+  const mvarName1=numName(strName(anonymous,'_m'),8n);
+  const mvarName2=numName(strName(anonymous,'_m'),9n);
+  const mvarId1=lean434RuntimeMVarId(mvarName1);
+  const mvarId2=lean434RuntimeMVarId(mvarName2);
+  const mvarExpr2={
+    kind:'constructor',
+    name:'Lean.Expr.mvar',
+    fields:[mvarId2],
+  };
+  const value=kernelExprToLean434Runtime(natLit(42n));
+
+  let assign=evaluator.evaluate(
+    constant(nameFromDotted('Lean.assignExp')),
+  );
+  assign=evaluator.applyRuntimeValue(assign,empty);
+  assign=evaluator.applyRuntimeValue(assign,mvarId2);
+  let chainMctx=evaluator.applyRuntimeValue(assign,value);
+
+  assign=evaluator.evaluate(
+    constant(nameFromDotted('Lean.assignExp')),
+  );
+  assign=evaluator.applyRuntimeValue(assign,chainMctx);
+  assign=evaluator.applyRuntimeValue(assign,mvarId1);
+  chainMctx=evaluator.applyRuntimeValue(assign,mvarExpr2);
+
+  const target={
+    kind:'constructor',
+    name:'Lean.Expr.app',
+    fields:[
+      kernelExprToLean434Runtime(
+        constant(nameFromDotted('Nat.succ')),
+      ),
+      {
+        kind:'constructor',
+        name:'Lean.Expr.mvar',
+        fields:[mvarId1],
+      },
+    ],
+  };
+
+  let instantiate=evaluator.evaluate(
+    constant(nameFromDotted('Lean.instantiateExprMVarsImp')),
+  );
+  instantiate=evaluator.applyRuntimeValue(instantiate,chainMctx);
+  const result=evaluator.applyRuntimeValue(instantiate,target);
+  if(
+    result?.kind!=='constructor'
+    ||result.name!=='Prod.mk'
+    ||result.fields.length!==2
+  ){
+    throw new Error(
+      'Lean.instantiateExprMVarsImp did not return MetavarContext × Expr',
+    );
+  }
+  const normalized=lean434RuntimeExprToKernel(result.fields[1]);
+  const expected=app(
+    constant(nameFromDotted('Nat.succ')),
+    natLit(42n),
+  );
+  if(!exprEq(normalized,expected)){
+    throw new Error(
+      'Lean.instantiateExprMVarsImp returned the wrong normalized Expr',
+    );
+  }
+
+  let get=evaluator.evaluate(
+    constant(nameFromDotted('Lean.MetavarContext.getExprAssignmentExp')),
+  );
+  get=evaluator.applyRuntimeValue(get,result.fields[0]);
+  const mvar1Assignment=evaluator.applyRuntimeValue(get,mvarId1);
+  const mvar1Runtime=lean434RuntimeOptionValue(mvar1Assignment);
+  if(
+    mvar1Runtime===undefined
+    ||!exprEq(
+      lean434RuntimeExprToKernel(mvar1Runtime),
+      natLit(42n),
+    )
+  ){
+    throw new Error(
+      'Lean.instantiateExprMVarsImp did not write back normalized assignment',
+    );
+  }
+  console.log(
+    'ok - native Lean instantiateExprMVarsImp resolves direct mvar chains in JS',
   );
 }
 

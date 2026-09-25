@@ -121,13 +121,11 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
     let hf ← isDefEq ctx f₁ f₂
     if !hf then return false
     isDefEq ctx a₁ a₂
-  | .forallE _ d₁ b₁ i₁, .forallE _ d₂ b₂ i₂ => do
-    if !BinderInfo.eq i₁ i₂ then return false
+  | .forallE _ d₁ b₁ _, .forallE _ d₂ b₂ _ => do
     let hd ← isDefEq ctx d₁ d₂
     if !hd then return false
     isDefEq ctx b₁ b₂
-  | .lam _ d₁ b₁ i₁, .lam _ d₂ b₂ i₂ => do
-    if !BinderInfo.eq i₁ i₂ then return false
+  | .lam _ d₁ b₁ _, .lam _ d₂ b₂ _ => do
     let hd ← isDefEq ctx d₁ d₂
     if !hd then return false
     isDefEq ctx b₁ b₂

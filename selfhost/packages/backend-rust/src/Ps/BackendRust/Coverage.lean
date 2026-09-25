@@ -522,19 +522,33 @@ def psRustCoverageExprWithFuel :
             fuel
             withThen
             elseBranch
-      | PsVerifiedIrExpr.record _ fields =>
+      | PsVerifiedIrExpr.record _ typeArguments fields =>
+          let withRecord :=
+            psRustCoverageAddFeature
+              coverage
+              "expr:record";
+          let withTypes :=
+            psRustCoverageFoldTypeListWith
+              psRustCoverageType
+              typeArguments
+              withRecord;
           psRustCoverageFoldFieldListWith
             visitNested
             fields
-            (psRustCoverageAddFeature
+            withTypes
+      | PsVerifiedIrExpr.projection _ typeArguments target _ =>
+          let withProjection :=
+            psRustCoverageAddFeature
               coverage
-              "expr:record")
-      | PsVerifiedIrExpr.projection _ target _ =>
+              "expr:projection";
+          let withTypes :=
+            psRustCoverageFoldTypeListWith
+              psRustCoverageType
+              typeArguments
+              withProjection;
           psRustCoverageExprWithFuel
             fuel
-            (psRustCoverageAddFeature
-              coverage
-              "expr:projection")
+            withTypes
             target
       | PsVerifiedIrExpr.constructor _ _ typeArguments fields =>
           let withConstructor :=
@@ -550,15 +564,20 @@ def psRustCoverageExprWithFuel :
             visitNested
             fields
             withTypes
-      | PsVerifiedIrExpr.matchE _ scrutinee alternatives =>
+      | PsVerifiedIrExpr.matchE _ typeArguments scrutinee alternatives =>
           let withMatch :=
             psRustCoverageAddFeature
               coverage
               "expr:match";
+          let withTypes :=
+            psRustCoverageFoldTypeListWith
+              psRustCoverageType
+              typeArguments
+              withMatch;
           let withScrutinee :=
             psRustCoverageExprWithFuel
               fuel
-              withMatch
+              withTypes
               scrutinee;
           psRustCoverageFoldAlternativesWith
             visitNested

@@ -611,17 +611,101 @@ def psWasmEncodeStructTypes
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
 
-def psWasmEncodeFunctionTypeIndicesLoop :
-    Nat -> Nat -> List UInt8
-  | _, 0 => []
-  | index, count + 1 =>
-      psWasmEncodeUleb index ++
-        psWasmEncodeFunctionTypeIndicesLoop (index + 1) count
+def psWasmFunctionTypeIndex
+    (structures : List PsWasmStructType)
+    (functionTypes : List PsWasmFunctionType)
+    (functionIndex : Nat)
+    (function : PsWasmFunction) :
+    Except PsWasmEncodeError Nat :=
+  match function.typeName with
+  | none =>
+      Except.ok
+        (structures.length
+          + functionTypes.length
+          + functionIndex)
+  | some typeName =>
+      match
+          psWasmFindFunctionTypeIndex
+            structures
+            functionTypes
+            typeName with
+      | none =>
+          Except.error
+            (PsWasmEncodeError.unknownFunctionType typeName)
+      | some typeIndex => Except.ok typeIndex
+
+def psWasmEncodeFunctionTypeIndicesLoop
+    (structures : List PsWasmStructType)
+    (functionTypes : List PsWasmFunctionType) :
+    Nat ->
+    List PsWasmFunction ->
+    Except PsWasmEncodeError (List UInt8)
+  | _, [] => Except.ok []
+  | functionIndex, function :: rest =>
+      match
+          psWasmFunctionTypeIndex
+            structures
+            functionTypes
+            functionIndex
+            function with
+      | Except.error error => Except.error error
+      | Except.ok typeIndex =>
+          match
+              psWasmEncodeFunctionTypeIndicesLoop
+                structures
+                functionTypes
+                (functionIndex + 1)
+                rest with
+          | Except.error error => Except.error error
+          | Except.ok encodedRest =>
+              Except.ok
+                (psWasmEncodeUleb typeIndex ++ encodedRest)
 
 def psWasmEncodeFunctionTypeIndices
-    (firstTypeIndex : Nat)
-    (count : Nat) : List UInt8 :=
-  psWasmEncodeFunctionTypeIndicesLoop firstTypeIndex count
+    (structures : List PsWasmStructType)
+    (functionTypes : List PsWasmFunctionType)
+    (functions : List PsWasmFunction) :
+    Except PsWasmEncodeError (List UInt8) :=
+  psWasmEncodeFunctionTypeIndicesLoop
+    structures functionTypes 0 functions
+
+def psWasmEncodeFunctionRefIndices
+    (functions : List PsWasmFunction) :
+    List String ->
+    Except PsWasmEncodeError (List UInt8)
+  | [] => Except.ok []
+  | name :: rest =>
+      match psWasmFindFunctionIndex functions name with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownFunction name)
+      | some index =>
+          match psWasmEncodeFunctionRefIndices functions rest with
+          | Except.error error => Except.error error
+          | Except.ok encodedRest =>
+              Except.ok
+                (psWasmEncodeUleb index ++ encodedRest)
+
+def psWasmEncodeDeclarativeFunctionRefs
+    (functions : List PsWasmFunction)
+    (functionRefs : List String) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match functionRefs with
+  | [] => Except.ok []
+  | _ =>
+      match
+          psWasmEncodeFunctionRefIndices
+            functions
+            functionRefs with
+      | Except.error error => Except.error error
+      | Except.ok indices =>
+          let segment :=
+            psWasmEncodeUleb 3
+              ++ [psWasmByte 0]
+              ++ psWasmEncodeVector
+                indices
+                functionRefs.length
+          Except.ok
+            (psWasmEncodeVector segment 1)
 
 def psWasmEncodeExports
     (functions : List PsWasmFunction) :

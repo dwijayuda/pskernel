@@ -38,5 +38,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          lake build
           /usr/bin/time -f 'decode-only-elapsed=%e decode-only-maxrss-kb=%M' \
             lake env lean --run PSC1Kernel/Test/DecodeFile.lean /tmp/root100015.ndjson

@@ -1106,7 +1106,12 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
         ctx
     let ok ← isDefEq eqCtx argType domain
     if !ok then
-      .error "application type mismatch"
+      .error (
+        "application type mismatch while applying " ++
+        typeCheckerExprHead fn ++
+        " to " ++ typeCheckerExprHead arg ++
+        "; expected domain " ++ typeCheckerExprHead domain ++
+        "; argument type " ++ typeCheckerExprHead argType)
     else
       .ok (body.instantiate1 arg)
   | .lam name type body binderInfo => do

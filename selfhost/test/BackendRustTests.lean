@@ -364,6 +364,29 @@ def psTestBackendRustIdentifiers : Bool :=
       (psRustIdentifier "__psr_value")
       "__psr___psr_value"
 
+def psBackendRustGenericValueModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "genericValue"
+        typeParameters := [{ name := "A" }]
+        parameters := []
+        resultType := PsVerifiedIrType.typeParameter "A"
+        body := PsVerifiedIrExpr.literal PsVerifiedIrLiteral.unit
+      }
+    ]
+  }
+
+def psTestBackendRustRejectsGenericValue : Bool :=
+  match psRustEmitModule psBackendRustGenericValueModule with
+  | Except.error (PsRustEmitError.genericValueUnsupported name) =>
+      psStringEq name "genericValue"
+  | _ =>
+      false
+
 def psBackendRustUnsupportedImportModule : PsVerifiedIrModule :=
   {
     imports := [
@@ -416,6 +439,13 @@ def psTestBackendRustCoverageUnknownType : Bool :=
     coverage.unsupported
     "type:unknown"
 
+def psTestBackendRustCoverageGenericValue : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustGenericValueModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "declaration:genericValue"
+
 def psTestBackendRustCoverageReport : Bool :=
   let supported :=
     psRustCoverageReport
@@ -441,9 +471,11 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "top-level values and shadowing", passed := psTestBackendRustValues },
   { name := "frozen PSC1 scalar mappings", passed := psTestBackendRustScalarTypes },
   { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers },
+  { name := "reject generic top-level values", passed := psTestBackendRustRejectsGenericValue },
   { name := "coverage accepts supported IR", passed := psTestBackendRustCoverageSupported },
   { name := "coverage rejects external imports", passed := psTestBackendRustCoverageExternalImport },
   { name := "coverage rejects unknown runtime types", passed := psTestBackendRustCoverageUnknownType },
+  { name := "coverage rejects generic values", passed := psTestBackendRustCoverageGenericValue },
   { name := "coverage report is CI-stable", passed := psTestBackendRustCoverageReport }
 ]
 

@@ -721,15 +721,17 @@ def psParseLeanDependentArrowTail
         match parseCodomain afterArrow.cursor with
         | Except.error error => Except.error error
         | Except.ok codomain =>
+            let codomainSpan := psSyntaxTermSpan codomain.value;
+            let span : PsSourceSpan := {
+              start := binder.value.fst.span.start
+              stop := codomainSpan.stop
+            };
             Except.ok {
               value :=
                 PsSyntaxTerm.forallE
-                  [binder.value]
+                  (List.cons binder.value List.nil)
                   codomain.value
-                  {
-                    start := binder.value.fst.span.start
-                    stop := (psSyntaxTermSpan codomain.value).stop
-                  }
+                  span
               cursor := codomain.cursor
             }
   else

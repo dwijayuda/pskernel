@@ -44,6 +44,11 @@ inductive PsDeclaration where
       (levelParams : List PsName)
       (type : PsExpr)
       (value : PsExpr)
+  | partialDecl
+      (name : PsName)
+      (levelParams : List PsName)
+      (type : PsExpr)
+      (value : PsExpr)
   | opaqueDecl
       (name : PsName)
       (levelParams : List PsName)

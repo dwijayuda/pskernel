@@ -146,11 +146,15 @@ def psPrintLeanTermWithFuel
                 match printedArgsResult with
                 | Except.error error => Except.error error
                 | Except.ok printedArgs =>
-                    if printedArgs.isEmpty then
-                      Except.ok printedFn
-                    else
-                      Except.ok
-                        (psPrintLeanConcat3 printedFn " " (psPrintJoin " " printedArgs))
+                    match printedArgs with
+                    | List.nil =>
+                        Except.ok printedFn
+                    | List.cons _ _ =>
+                        Except.ok
+                          (psPrintLeanConcat3
+                            printedFn
+                            " "
+                            (psPrintJoin " " printedArgs))
       | .lambda binders body _ =>
           let printBinder :=
             fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>

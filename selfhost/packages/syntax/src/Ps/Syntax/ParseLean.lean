@@ -10,6 +10,15 @@ def psLeanTokenCursor
     (remaining : List PsToken) : PsTokenCursor :=
   { remaining := remaining }
 
+def psLeanPatternParseResult
+    (value : PsSyntaxPattern)
+    (remaining : List PsToken) :
+    PsParseResult PsSyntaxPattern :=
+  {
+    value := value
+    cursor := psLeanTokenCursor remaining
+  }
+
 
 def psParseLeanImport
     (cursor : PsTokenCursor) :
@@ -796,15 +805,16 @@ def psParseLeanListPattern
                     (List.cons "nil" List.nil)
                 span := span
               };
+              let value :=
+                PsSyntaxPattern.constructor
+                  name
+                  List.nil
+                  span;
               some
-                (Except.ok {
-                  value :=
-                    PsSyntaxPattern.constructor
-                      name
-                      List.nil
-                      span
-                  cursor := psLeanTokenCursor afterSecond
-                })
+                (Except.ok
+                  (psLeanPatternParseResult
+                    value
+                    afterSecond))
             else if psStringEq second.text "::" then
               match afterSecond with
               | List.nil => none
@@ -834,19 +844,20 @@ def psParseLeanListPattern
                         psLeanPatternBinderName
                           third
                           "_listTail";
+                      let value :=
+                        PsSyntaxPattern.constructor
+                          name
+                          (List.cons
+                            headBinder
+                            (List.cons
+                              tailBinder
+                              List.nil))
+                          span;
                       some
-                        (Except.ok {
-                          value :=
-                            PsSyntaxPattern.constructor
-                              name
-                              (List.cons
-                                headBinder
-                                (List.cons
-                                  tailBinder
-                                  List.nil))
-                              span
-                          cursor := psLeanTokenCursor rest
-                        })
+                        (Except.ok
+                          (psLeanPatternParseResult
+                            value
+                            rest))
                     else
                       none
                   else
@@ -878,17 +889,18 @@ def psParseLeanListPattern
                       psLeanPatternBinderName first "_listHead";
                     let tailBinder :=
                       psLeanPatternBinderName third "_listTail";
+                    let value :=
+                      PsSyntaxPattern.constructor
+                        name
+                        (List.cons
+                          headBinder
+                          (List.cons tailBinder List.nil))
+                        span;
                     some
-                      (Except.ok {
-                        value :=
-                          PsSyntaxPattern.constructor
-                            name
-                            (List.cons
-                              headBinder
-                              (List.cons tailBinder List.nil))
-                            span
-                        cursor := psLeanTokenCursor rest
-                      })
+                      (Except.ok
+                        (psLeanPatternParseResult
+                          value
+                          rest))
                   else
                     none
                 else
@@ -921,17 +933,18 @@ def psParseLeanNatPattern
             first.kind
             PsTokenKind.natural then
         if psStringEq first.text "0" then
+          let value :=
+            PsSyntaxPattern.constructor
+              (psLeanNatPatternName
+                "zero"
+                first.span)
+              List.nil
+              first.span;
           some
-            (Except.ok {
-              value :=
-                PsSyntaxPattern.constructor
-                  (psLeanNatPatternName
-                    "zero"
-                    first.span)
-                  List.nil
-                  first.span
-              cursor := psLeanTokenCursor rest
-            })
+            (Except.ok
+              (psLeanPatternParseResult
+                value
+                rest))
         else
           none
       else
@@ -959,19 +972,18 @@ def psParseLeanNatPattern
                           psLeanPatternBinderName
                             first
                             "_natPred";
+                        let value :=
+                          PsSyntaxPattern.constructor
+                            (psLeanNatPatternName
+                              "succ"
+                              span)
+                            (List.cons binder List.nil)
+                            span;
                         some
-                          (Except.ok {
-                      value :=
-                        PsSyntaxPattern.constructor
-                          (psLeanNatPatternName
-                            "succ"
-                            span)
-                          (List.cons binder List.nil)
-                          span
-                      cursor := {
-                        remaining := afterOne
-                      }
-                    })
+                          (Except.ok
+                            (psLeanPatternParseResult
+                              value
+                              afterOne))
                       else
                         none
                     else

@@ -1131,7 +1131,7 @@ def psElabPartialDeclaration
                     Except.error PsElabError.unresolvedMetavariable
                   else
                     let selfHeader :=
-                      PsDeclaration.axiomDecl name [] closedType
+                      PsDeclaration.axiomDecl name [] closedType;
                     match psEnvironmentAdd environment selfHeader with
                     | none =>
                         Except.error

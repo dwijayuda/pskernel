@@ -686,14 +686,13 @@ def psLexReadToken
   let start := cursor.position;
   match cursor.remaining with
   | List.nil =>
+      let token : PsToken := {
+        kind := PsTokenKind.endOfInput
+        text := ""
+        span := psLexSpan start start
+      };
       Except.ok
-        (Prod.mk
-          ({
-            kind := PsTokenKind.endOfInput
-            text := ""
-            span := psLexSpan start start
-          })
-          cursor)
+        (Prod.mk token cursor)
   | List.cons first rest =>
       if psLexCharEq first '"' then
         let afterOpen := psLexAdvanceChar start first;

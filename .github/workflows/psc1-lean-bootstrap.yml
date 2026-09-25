@@ -116,7 +116,10 @@ jobs:
           }
           const {instance}=await WebAssembly.instantiate(bytes);
           if (instance.exports.addU32(20, 22) !== 42) {
-            throw new Error('PSC1_WASM_RUNTIME_RESULT');
+            throw new Error('PSC1_WASM_RUNTIME_U32_RESULT');
+          }
+          if (instance.exports.addF32(20.5, 21.5) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_F32_RESULT');
           }
           console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
           NODE

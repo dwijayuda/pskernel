@@ -376,6 +376,7 @@ def psBackendRustLambdaFunctionParameterExpr : PsVerifiedIrExpr :=
             (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
       }
     ]
+    (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
     (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0))
 
 def psBackendRustLambdaFunctionParameterModule : PsVerifiedIrModule :=
@@ -534,6 +535,7 @@ def psBackendRustFunctionResultModule : PsVerifiedIrModule :=
                 type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
               }
             ]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.natAdd
               [

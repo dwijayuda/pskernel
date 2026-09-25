@@ -468,15 +468,166 @@ def State.addInductiveRecord
             types := types
             isUnsafe := record.isUnsafe
           }
-  let rec verifyNested : List Kernel.SimpleMutualTypeDecl → Except String Unit
+  let rec resolveCtorNames :
+      List ConstructorRecord → Except String (List Name)
+    | [] => pure []
+    | ctor :: rest => do
+        let head ← state.nameAt ctor.name
+        let tail ← resolveCtorNames rest
+        pure (head :: tail)
+
+  let rec verifyConstructors :
+      List ConstructorRecord → Except String Unit
+    | [] => pure ()
+    | ctor :: rest => do
+        let name ← state.nameAt ctor.name
+        let expectedType ← state.exprAt ctor.type
+        let some (.ctorInfo info) := env.find? name
+          | throw "replayed constructor metadata is missing"
+        unless Kernel.quotExprEqv info.base.type expectedType do
+          throw "generated constructor type metadata mismatch"
+        match ctor.levelParams with
+        | some refs =>
+            let expected ← resolveNames state refs
+            unless namesEq info.base.levelParams expected do
+              throw "generated constructor universe metadata mismatch"
+        | none => pure ()
+        match ctor.induct with
+        | some ref =>
+            unless Name.eq info.induct (← state.nameAt ref) do
+              throw "generated constructor inductive metadata mismatch"
+        | none => pure ()
+        match ctor.cidx with
+        | some expected =>
+            unless info.cidx == expected do
+              throw "generated constructor index metadata mismatch"
+        | none => pure ()
+        match ctor.numParams with
+        | some expected =>
+            unless info.numParams == expected do
+              throw "generated constructor parameter metadata mismatch"
+        | none => pure ()
+        match ctor.numFields with
+        | some expected =>
+            unless info.numFields == expected do
+              throw "generated constructor field metadata mismatch"
+        | none => pure ()
+        match ctor.isUnsafe with
+        | some expected =>
+            unless info.isUnsafe == expected do
+              throw "generated constructor safety metadata mismatch"
+        | none => pure ()
+        verifyConstructors rest
+
+  let rec verifyTypes :
+      List InductiveTypeRecord → Except String Unit
     | [] => pure ()
     | type :: rest => do
-        let some (.inductInfo info) := env.find? type.name
+        let name ← state.nameAt type.name
+        let expectedType ← state.exprAt type.type
+        let some (.inductInfo info) := env.find? name
           | throw "replayed inductive metadata is missing"
+        unless Kernel.quotExprEqv info.base.type expectedType do
+          throw "generated inductive type metadata mismatch"
         unless info.numNested == record.numNested do
           throw "replayed inductive nested-count mismatch"
-        verifyNested rest
-  verifyNested types
+        let expectedCtors ← resolveCtorNames type.ctors
+        unless namesEq info.ctors expectedCtors do
+          throw "generated inductive constructor-list mismatch"
+        match type.levelParams with
+        | some refs =>
+            let expected ← resolveNames state refs
+            unless namesEq info.base.levelParams expected do
+              throw "generated inductive universe metadata mismatch"
+        | none => pure ()
+        match type.numParams with
+        | some expected =>
+            unless info.numParams == expected do
+              throw "generated inductive parameter metadata mismatch"
+        | none => pure ()
+        match type.numIndices with
+        | some expected =>
+            unless info.numIndices == expected do
+              throw "generated inductive index metadata mismatch"
+        | none => pure ()
+        match type.all with
+        | some refs =>
+            let expected ← resolveNames state refs
+            unless namesEq info.all expected do
+              throw "generated inductive all-list mismatch"
+        | none => pure ()
+        match type.numNested with
+        | some expected =>
+            unless info.numNested == expected do
+              throw "generated inductive nested metadata mismatch"
+        | none => pure ()
+        match type.isRec with
+        | some expected =>
+            unless info.isRec == expected do
+              throw "generated inductive recursion metadata mismatch"
+        | none => pure ()
+        match type.isReflexive with
+        | some expected =>
+            unless info.isReflexive == expected do
+              throw "generated inductive reflexivity metadata mismatch"
+        | none => pure ()
+        match type.isUnsafe with
+        | some expected =>
+            unless info.isUnsafe == expected do
+              throw "generated inductive safety metadata mismatch"
+        | none => pure ()
+        verifyConstructors type.ctors
+        verifyTypes rest
+
+  let rec verifyRules :
+      List RecursorRule → List RecursorRuleRecord → Except String Unit
+    | [], [] => pure ()
+    | got :: gotRest, expected :: expectedRest => do
+        let expectedCtor ← state.nameAt expected.ctor
+        let expectedRhs ← state.exprAt expected.rhs
+        unless Name.eq got.ctor expectedCtor do
+          throw "generated recursor rule constructor mismatch"
+        unless got.nFields == expected.nFields do
+          throw "generated recursor rule field-count mismatch"
+        unless Kernel.quotExprEqv got.rhs expectedRhs do
+          throw "generated recursor rule rhs mismatch"
+        verifyRules gotRest expectedRest
+    | _, _ =>
+        throw "generated recursor rule-count mismatch"
+
+  let rec verifyRecursors :
+      List RecursorRecord → Except String Unit
+    | [] => pure ()
+    | recursor :: rest => do
+        let name ← state.nameAt recursor.name
+        let some (.recInfo info) := env.find? name
+          | throw "replayed recursor metadata is missing"
+        let expectedLevels ← resolveNames state recursor.levelParams
+        let expectedType ← state.exprAt recursor.type
+        let expectedAll ← resolveNames state recursor.all
+        unless namesEq info.base.levelParams expectedLevels do
+          throw "generated recursor universe metadata mismatch"
+        unless Kernel.quotExprEqv info.base.type expectedType do
+          throw "generated recursor type metadata mismatch"
+        unless namesEq info.all expectedAll do
+          throw "generated recursor all-list mismatch"
+        unless info.numParams == recursor.numParams do
+          throw "generated recursor parameter metadata mismatch"
+        unless info.numIndices == recursor.numIndices do
+          throw "generated recursor index metadata mismatch"
+        unless info.numMotives == recursor.numMotives do
+          throw "generated recursor motive metadata mismatch"
+        unless info.numMinors == recursor.numMinors do
+          throw "generated recursor minor metadata mismatch"
+        unless info.k == recursor.k do
+          throw "generated recursor K metadata mismatch"
+        unless info.isUnsafe == recursor.isUnsafe do
+          throw "generated recursor safety metadata mismatch"
+        verifyRules info.rules recursor.rules
+        verifyRecursors rest
+
+  verifyTypes record.types
+  verifyRecursors record.recs
   pure { state with env := env }
 
 def State.addDeclaration

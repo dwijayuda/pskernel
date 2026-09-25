@@ -19,11 +19,11 @@ def psPrintJoin (separator : String) : List String -> String
   | List.cons value rest =>
       match rest with
       | List.nil => value
-      | remaining =>
+      | List.cons next tail =>
           psPrintCommonConcat3
             value
             separator
-            (psPrintJoin separator remaining)
+            (psPrintJoin separator (List.cons next tail))
 
 def psPrintSyntaxName (name : PsSyntaxName) :
     Except PsSourcePrintError String :=

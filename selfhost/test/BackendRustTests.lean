@@ -103,6 +103,22 @@ def psBackendRustAdtModule : PsVerifiedIrModule :=
     ]
     declarations := [
       {
+        name := "leftOfPair"
+        typeParameters := []
+        parameters := [
+          {
+            name := "pair"
+            type := PsVerifiedIrType.named "Pair" []
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.projection
+            "Pair"
+            (PsVerifiedIrExpr.var "pair")
+            "left"
+      },
+      {
         name := "wrapNat"
         typeParameters := []
         parameters := [
@@ -134,6 +150,7 @@ def psTestBackendRustAdt : Bool :=
       output.contains "pub struct Pair { pub left: PsNat, pub right: PsNat }"
         && output.contains "pub enum Maybe<A: Clone> { none {}, some { value: A } }"
         && output.contains "Maybe::some { value: x }"
+        && output.contains "pub fn leftOfPair(pair: Pair) -> PsNat { (pair).left }"
 
 def psBackendRustStringModule : PsVerifiedIrModule :=
   {

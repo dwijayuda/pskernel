@@ -911,6 +911,11 @@ def addSimpleNestedInductive
     (env : Environment)
     (decl : SimpleMutualInductiveDecl) : Except String Environment := do
   simpleNestedCheckReserved decl
+  let declaredNames := simpleMutualNames decl
+  simpleCheckUniformOccurrences
+    declaredNames decl.levelParams decl.numParams
+    (decl.types.foldl
+      (fun acc type => acc ++ type.ctors.map (fun ctor => ctor.type)) [])
   if decl.types.isEmpty then
     throw "empty nested inductive declaration"
   let first :: _ := decl.types

@@ -82,7 +82,7 @@ def psElabFinalizeExpected
           result.context.localContext
           result.context.metaContext
           result.type
-          expectedType
+          expectedType;
       if unified.success then
         Except.ok
           (psElabResultWithMeta

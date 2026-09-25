@@ -78,7 +78,11 @@ def psExprLiftBVars
     psExprLiftBVarsWorker amount expr;
   lifted cutoff
 
-def psExprInstantiateAt (replacement : PsExpr) (depth : Nat) : PsExpr -> PsExpr
+def psExprInstantiateAt
+    (replacement : PsExpr)
+    (depth : Nat)
+    (expr : PsExpr) : PsExpr :=
+  match expr with
   | .bvar index =>
       if Nat.beq index depth then
         psExprLiftBVars depth 0 replacement

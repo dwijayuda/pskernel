@@ -193,7 +193,7 @@ def psParseProofScriptSimpleApplication
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psParseProofScriptSimpleApplicationWithFuel
-    (psParseListLength cursor.remaining + 1)
+    (Nat.add (psParseListLength cursor.remaining) 1)
     cursor
 
 def psParseProofScriptBinderTypeWithFuel
@@ -239,7 +239,7 @@ def psParseProofScriptBinderType
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psParseProofScriptBinderTypeWithFuel
-    (psParseListLength cursor.remaining + 1)
+    (Nat.add (psParseListLength cursor.remaining) 1)
     cursor
 
 def psParseProofScriptBinder
@@ -906,7 +906,7 @@ def psParseProofScriptTermWithFuel
         match
             psParseProofScriptApplicationWithFuel
               (psParseProofScriptTermWithFuel remaining)
-              (remaining + 1)
+              (Nat.add remaining 1)
               cursor with
         | Except.error error => Except.error error
         | Except.ok domain =>
@@ -917,7 +917,7 @@ def psParseProofScriptTermWithFuel
 def psParseProofScriptTerm
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  psParseProofScriptTermWithFuel (psParseListLength cursor.remaining + 1) cursor
+  psParseProofScriptTermWithFuel (Nat.add (psParseListLength cursor.remaining) 1) cursor
 
 
 def psParseProofScriptInductiveConstructorsWithFuel

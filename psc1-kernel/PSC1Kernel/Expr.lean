@@ -86,7 +86,7 @@ two critical DAG-sharing fast paths used by Lean's C++ `expr_eq_fn`. The cache
 only skips a pair after the same acyclic pair has already been entered, so it
 does not change the structural-equality result.
 -/
-private unsafe partial def Expr.eqRuntimeGo
+private unsafe def Expr.eqRuntimeGo
     (left right : Expr)
     (seen : ExprEqPairCache) : Bool × ExprEqPairCache :=
   if ptrEq left right then

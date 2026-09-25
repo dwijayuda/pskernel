@@ -109,27 +109,41 @@ def psElabDeclarationParts
     (isTheorem : Bool) :
     Except PsElabError PsElabDeclarationResult :=
   match psSyntaxNameToName nameSyntax with
-  | none => Except.error PsElabError.emptyName
+  | none =>
+      Except.error PsElabError.emptyName
   | some name =>
-      let initial := psElabContextEmpty environment
-      match psElabTypedBinders
-          (fun context term expected => psElabTerm context term expected)
-          initial
-          binders with
-      | Except.error error => Except.error error
+      let initial : PsElabContext :=
+        psElabContextEmpty environment;
+      match
+          psElabTypedBinders
+            (fun
+              (context : PsElabContext)
+              (term : PsSyntaxTerm)
+              (expected : Option PsExpr) =>
+                psElabTerm context term expected)
+            initial
+            binders with
+      | Except.error error =>
+          Except.error error
       | Except.ok binderResult =>
-          match psElabTerm binderResult.context typeSyntax none with
-          | Except.error error => Except.error error
+          match
+              psElabTerm
+                binderResult.context
+                typeSyntax
+                Option.none with
+          | Except.error error =>
+              Except.error error
           | Except.ok typeResult =>
-              match psInferEnsureSort
-                  typeResult.context.environment
-                  typeResult.context.metaContext
-                  typeResult.context.localContext
-                  typeResult.type with
+              match
+                  psInferEnsureSort
+                    typeResult.context.environment
+                    typeResult.context.metaContext
+                    typeResult.context.localContext
+                    typeResult.type with
               | Except.error error =>
                   Except.error (PsElabError.infer error)
               | Except.ok _ =>
-                  let valueContext :=
+                  let valueContext : PsElabContext :=
                     if isTheorem then
                       typeResult.context
                     else
@@ -139,48 +153,59 @@ def psElabDeclarationParts
                           name
                           binderResult.bindersRev
                           valueSyntax
-                          typeResult.context)
-                  match psElabTerm
-                      valueContext
-                      valueSyntax
-                      (some typeResult.term) with
-                  | Except.error error => Except.error error
+                          typeResult.context);
+                  match
+                      psElabTerm
+                        valueContext
+                        valueSyntax
+                        (Option.some typeResult.term) with
+                  | Except.error error =>
+                      Except.error error
                   | Except.ok valueResult =>
-                      let metaContext := valueResult.context.metaContext
-                      let openValue :=
-                        psMetaInstantiate metaContext valueResult.term
-                      let openType :=
-                        psMetaInstantiate metaContext typeResult.term
-                      let closed :=
+                      let metaContext : PsMetaContext :=
+                        valueResult.context.metaContext;
+                      let openValue : PsExpr :=
+                        psMetaInstantiate
+                          metaContext
+                          valueResult.term;
+                      let openType : PsExpr :=
+                        psMetaInstantiate
+                          metaContext
+                          typeResult.term;
+                      let closed : PsExpr × PsExpr :=
                         psCloseElabTypedBinders
                           metaContext
                           binderResult.bindersRev
                           openValue
-                          openType
+                          openType;
                       if
-                          psExprHasUnresolvedMeta closed.1
-                            || psExprHasUnresolvedMeta closed.2 then
-                        Except.error PsElabError.unresolvedMetavariable
+                          psExprHasUnresolvedMeta
+                            (Prod.fst closed) then
+                        Except.error
+                          PsElabError.unresolvedMetavariable
+                      else if
+                          psExprHasUnresolvedMeta
+                            (Prod.snd closed) then
+                        Except.error
+                          PsElabError.unresolvedMetavariable
                       else if isTheorem then
-                        Except.ok {
-                          declaration :=
-                            PsDeclaration.theoremDecl
+                        Except.ok
+                          (PsElabDeclarationResult.mk
+                            (PsDeclaration.theoremDecl
                               name
-                              []
-                              closed.2
-                              closed.1
-                          metaContext := metaContext
-                        }
+                              List.nil
+                              (Prod.snd closed)
+                              (Prod.fst closed))
+                            metaContext)
                       else
-                        Except.ok {
-                          declaration :=
-                            PsDeclaration.definitionDecl
+                        Except.ok
+                          (PsElabDeclarationResult.mk
+                            (PsDeclaration.definitionDecl
                               name
-                              []
-                              closed.2
-                              closed.1
-                          metaContext := metaContext
-                        }
+                              List.nil
+                              (Prod.snd closed)
+                              (Prod.fst closed))
+                            metaContext)
 
 def psSyntaxConstructorCoreName
     (inductiveName : PsName)

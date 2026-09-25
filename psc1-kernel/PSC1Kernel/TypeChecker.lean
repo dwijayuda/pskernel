@@ -22,6 +22,10 @@ structure CheckerContext where
   safety : DefinitionSafety
   eagerReduce : Bool
   nativeEvaluator : Option NativeEvaluator
+  /-- User-facing Lean maxRecDepth value. 0 means unlimited. -/
+  maxRecDepth : Nat := 0
+  /-- Current kernel checker recursion depth. -/
+  recDepth : Nat := 0
 
 def CheckerContext.empty (env : Environment) : CheckerContext :=
   {
@@ -31,7 +35,20 @@ def CheckerContext.empty (env : Environment) : CheckerContext :=
     safety := .safe
     eagerReduce := false
     nativeEvaluator := none
+    maxRecDepth := 0
+    recDepth := 0
   }
+
+/-- Final Lean 4.34 kernel multiplier from runtime/interrupt.cpp. -/
+def kernelRecDepthFactor : Nat := 16
+
+def CheckerContext.enterKernelRecDepth
+    (ctx : CheckerContext) : Except String CheckerContext := do
+  let next := ctx.recDepth + 1
+  if ctx.maxRecDepth != 0 &&
+      next > ctx.maxRecDepth * kernelRecDepthFactor then
+    throw "deep recursion detected, use maxRecDepth to increase the limit"
+  pure { ctx with recDepth := next }
 
 def kernelNatName : Name :=
   .str .anonymous "Nat"
@@ -840,7 +857,8 @@ partial def reduceRecursor
 partial def whnfCore
     (ctx : CheckerContext)
     (e : Expr)
-    (cheapRec cheapProj : Bool) : Except String Expr :=
+    (cheapRec cheapProj : Bool) : Except String Expr := do
+  let ctx ← ctx.enterKernelRecDepth
   match e with
   | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _
   | .const _ _ | .lam _ _ _ _ | .lit _ => .ok e
@@ -1564,7 +1582,8 @@ partial def inferLetSpine
       let result := result.cheapBetaReduce
       pure (closeCheckerBinders binders result true)
 
-partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
+partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr := do
+  let ctx ← ctx.enterKernelRecDepth
   match e with
   | .bvar _ => .error "loose bound variable in type checker"
   | .mvar _ => .error "kernel type checker does not support metavariables"

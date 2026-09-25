@@ -44,12 +44,12 @@ def psLeanApplicationWithArgument
   let span :=
     psSyntaxSpanJoin
       (psSyntaxTermSpan current)
-      (psSyntaxTermSpan argument)
+      (psSyntaxTermSpan argument);
   match current with
   | .app fn args _ =>
       PsSyntaxTerm.app
         fn
-        (List.append
+        (psParseListAppend
           args
           (List.cons argument List.nil))
         span
@@ -79,7 +79,7 @@ def psLeanBuildListLiteral
         (psLeanListConstructorName "nil" span)
   | List.cons head rest =>
       let tail :=
-        psLeanBuildListLiteral rest span
+        psLeanBuildListLiteral rest span;
       PsSyntaxTerm.app
         (PsSyntaxTerm.reference
           (psLeanListConstructorName "cons" span))
@@ -109,7 +109,7 @@ def psParseLeanListLiteralWithFuel
           Except PsParseError (PsParseResult PsSyntaxTerm) :=
         psParseLeanListLiteralWithFuel
           parseTerm
-          remaining
+          remaining;
       fun start cursor elementsRev =>
         if psTokenCursorAtText cursor "]" then
           match psTokenCursorAdvance cursor with
@@ -120,11 +120,11 @@ def psParseLeanListLiteralWithFuel
               let span : PsSourceSpan := {
                 start := start
                 stop := close.token.span.stop
-              }
+              };
               Except.ok {
                 value :=
                   psLeanBuildListLiteral
-                    elementsRev.reverse
+                    (psParseListReverse elementsRev)
                     span
                 cursor := close.cursor
               }
@@ -133,7 +133,7 @@ def psParseLeanListLiteralWithFuel
           | Except.error error => Except.error error
           | Except.ok element =>
               let nextElements :=
-                List.cons element.value elementsRev
+                List.cons element.value elementsRev;
               if psTokenCursorAtText element.cursor "," then
                 match psTokenCursorAdvance element.cursor with
                 | none =>
@@ -173,7 +173,9 @@ def psParseLeanListLiteral
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psParseLeanListLiteralWithFuel
     parseTerm
-    (opening.cursor.remaining.length + 1)
+    (Nat.add
+      (psParseListLength opening.cursor.remaining)
+      1)
     opening.token.span.start
     opening.cursor
     List.nil
@@ -187,7 +189,7 @@ def psLeanCanStartSimpleArgument
       let startsLaterAssignment :=
         psTokenCursorStartsNamedAssignment cursor
           && token.span.start.line
-            > (psSyntaxTermSpan current).stop.line
+            > (psSyntaxTermSpan current).stop.line;
       !psLeanReservedApplicationToken token
         && !startsLaterAssignment
         && (token.text == "("

@@ -77,6 +77,68 @@ partial def Expr.hasLooseAt (e : Expr) (offset : Nat) : Bool :=
 def Expr.hasLooseBVar (e : Expr) : Bool :=
   e.hasLooseAt 0
 
+partial def Expr.hasLooseBVarAtCore
+    (e : Expr) (index depth : Nat) : Bool :=
+  match e with
+  | .bvar i => i == index + depth
+  | .app f a =>
+      f.hasLooseBVarAtCore index depth ||
+        a.hasLooseBVarAtCore index depth
+  | .lam _ type body _ | .forallE _ type body _ =>
+      type.hasLooseBVarAtCore index depth ||
+        body.hasLooseBVarAtCore index (depth + 1)
+  | .letE _ type value body _ =>
+      type.hasLooseBVarAtCore index depth ||
+        value.hasLooseBVarAtCore index depth ||
+        body.hasLooseBVarAtCore index (depth + 1)
+  | .mdata _ body | .proj _ _ body =>
+      body.hasLooseBVarAtCore index depth
+  | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => false
+
+def Expr.hasLooseBVarAt (e : Expr) (index : Nat) : Bool :=
+  e.hasLooseBVarAtCore index 0
+
+partial def Expr.hasLooseBVarInExplicitDomain
+    (e : Expr) (bvarIdx : Nat) (considerRange : Bool) : Bool :=
+  match e with
+  | .forallE _ domain body binderInfo =>
+      let dependency :=
+        domain.hasLooseBVarAt bvarIdx &&
+          (BinderInfo.eq binderInfo .default ||
+            body.hasLooseBVarInExplicitDomain 0 considerRange)
+      dependency ||
+        body.hasLooseBVarInExplicitDomain (bvarIdx + 1) considerRange
+  | other =>
+      considerRange && other.hasLooseBVarAt bvarIdx
+
+partial def Expr.inferImplicit
+    (e : Expr) (numParams : Nat) (considerRange : Bool) : Expr :=
+  match e, numParams with
+  | .forallE name domain body binderInfo, n + 1 =>
+      let body' := body.inferImplicit n considerRange
+      let binderInfo' :=
+        if BinderInfo.eq binderInfo .default &&
+            body'.hasLooseBVarInExplicitDomain 0 considerRange then
+          BinderInfo.implicit
+        else
+          binderInfo
+      .forallE name domain body' binderInfo'
+  | other, _ => other
+
+partial def Expr.inferImplicitAll
+    (e : Expr) (considerRange : Bool) : Expr :=
+  match e with
+  | .forallE name domain body binderInfo =>
+      let body' := body.inferImplicitAll considerRange
+      let binderInfo' :=
+        if BinderInfo.eq binderInfo .default &&
+            body'.hasLooseBVarInExplicitDomain 0 considerRange then
+          BinderInfo.implicit
+        else
+          binderInfo
+      .forallE name domain body' binderInfo'
+  | other => other
+
 partial def Expr.getAppFn : Expr → Expr
   | .app fn _ => fn.getAppFn
   | e => e

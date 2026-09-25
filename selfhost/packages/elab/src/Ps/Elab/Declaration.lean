@@ -1126,7 +1126,7 @@ def psElabPartialDeclaration
                     psCloseElabForallBinders
                       typeMeta
                       binderResult.bindersRev
-                      openType
+                      openType;
                   if psExprHasUnresolvedMeta closedType then
                     Except.error PsElabError.unresolvedMetavariable
                   else

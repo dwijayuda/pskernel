@@ -5,7 +5,9 @@ import {
   app,
   bvar,
   exprEq,
+  fvar,
   lam,
+  nameKey,
   nameFromDotted,
   natLit,
   numName,
@@ -338,6 +340,94 @@ const empty=emptyLean434MetavarContext();
     }
     console.log(
       'ok - native Lean instantiateExprMVarsImp beta-reduces assigned mvar applications',
+    );
+  }
+
+  {
+    const delayedName=numName(strName(anonymous,'_m'),11n);
+    const pendingName=numName(strName(anonymous,'_m'),12n);
+    const fvarName=numName(strName(anonymous,'_f'),1n);
+    const delayedId=lean434RuntimeMVarId(delayedName);
+    const pendingId=lean434RuntimeMVarId(pendingName);
+    const runtimeFVar=kernelExprToLean434Runtime(
+      fvar(nameKey(fvarName)),
+    );
+
+    let insertDelayed=evaluator.evaluate(
+      constant(
+        nameFromDotted(
+          'ProofScript.RuntimeProbe.insertDelayedExprAssignment',
+        ),
+      ),
+    );
+    insertDelayed=evaluator.applyRuntimeValue(insertDelayed,empty);
+    insertDelayed=evaluator.applyRuntimeValue(
+      insertDelayed,
+      delayedId,
+    );
+    insertDelayed=evaluator.applyRuntimeValue(
+      insertDelayed,
+      [runtimeFVar],
+    );
+    let delayedMctx=evaluator.applyRuntimeValue(
+      insertDelayed,
+      pendingId,
+    );
+
+    let assignPending=evaluator.evaluate(
+      constant(nameFromDotted('Lean.assignExp')),
+    );
+    assignPending=evaluator.applyRuntimeValue(
+      assignPending,
+      delayedMctx,
+    );
+    assignPending=evaluator.applyRuntimeValue(
+      assignPending,
+      pendingId,
+    );
+    delayedMctx=evaluator.applyRuntimeValue(
+      assignPending,
+      runtimeFVar,
+    );
+
+    const delayedTarget={
+      kind:'constructor',
+      name:'Lean.Expr.app',
+      fields:[
+        {
+          kind:'constructor',
+          name:'Lean.Expr.mvar',
+          fields:[delayedId],
+        },
+        kernelExprToLean434Runtime(natLit(42n)),
+      ],
+    };
+    let instantiateDelayed=evaluator.evaluate(
+      constant(nameFromDotted('Lean.instantiateExprMVarsImp')),
+    );
+    instantiateDelayed=evaluator.applyRuntimeValue(
+      instantiateDelayed,
+      delayedMctx,
+    );
+    const delayedResult=evaluator.applyRuntimeValue(
+      instantiateDelayed,
+      delayedTarget,
+    );
+    if(
+      delayedResult?.kind!=='constructor'
+      ||delayedResult.name!=='Prod.mk'
+      ||delayedResult.fields.length!==2
+      ||!exprEq(
+        lean434RuntimeExprToKernel(delayedResult.fields[1]),
+        natLit(42n),
+      )
+    ){
+      throw new Error(
+        'Lean.instantiateExprMVarsImp did not resolve delayed fvar substitution',
+      );
+    }
+    console.log(
+      'ok - native Lean instantiateExprMVarsImp resolves a delayed fvar assignment',
     );
   }
 

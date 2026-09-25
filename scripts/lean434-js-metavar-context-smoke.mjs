@@ -812,8 +812,16 @@ if(lean434RuntimeOptionValue(directFound)===undefined){
 }
 console.log('ok - real Lean PersistentHashMap insert/find? round-trip in JS');
 
-console.log(JSON.stringify({phase:'metavar-context-initial-lookup-start'}));
-let getAssignment=evaluator.evaluate(
+{
+  // The preceding low-level hash-map probes are intentionally diagnostic and
+  // can consume much of the interpreter budget.  Exercise the public
+  // MetavarContext assignment round-trip with the same strict budget, but in
+  // its own evaluator so this gate measures that path rather than accumulated
+  // unrelated work.
+  const evaluator=makeEvaluator();
+
+  console.log(JSON.stringify({phase:'metavar-context-initial-lookup-start'}));
+  let getAssignment=evaluator.evaluate(
   constant(nameFromDotted('Lean.MetavarContext.getExprAssignmentExp')),
 );
 getAssignment=evaluator.applyRuntimeValue(getAssignment,empty);
@@ -931,6 +939,7 @@ if(lean434RuntimeOptionValue(originalStillEmpty)!==undefined){
 console.log(
   'ok - real Lean.assignExp/getExprAssignmentExp execute in JS',
 );
-console.log(
-  'ok - Lean metavariable assignment preserves PersistentHashMap value semantics',
-);
+  console.log(
+    'ok - Lean metavariable assignment preserves PersistentHashMap value semantics',
+  );
+}

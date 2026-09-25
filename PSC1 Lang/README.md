@@ -107,6 +107,8 @@ The PSC1 folder now also contains a TypeScript-inspired documentation stack:
 - [theorem-proving-in-proofscript/README.md](./theorem-proving-in-proofscript/README.md) — proof-first PSC1 book grounded in the current bounded tactic/kernel story;
 - [language-manual/README.md](./language-manual/README.md) — lookup-oriented PSC1 manual modeled on the useful category split of the Lean Language Reference;
 - [LEAN_PROGRAMMING_THEOREM_REFERENCE_STUDY.md](./LEAN_PROGRAMMING_THEOREM_REFERENCE_STUDY.md) — research map from the three Lean documentation corpora to PSC1.
+- [eloquent-proofscript/README.md](./eloquent-proofscript/README.md) — project- and exercise-driven PSC1 book inspired by the pedagogy of Eloquent JavaScript;
+- [ELOQUENT_JAVASCRIPT_STUDY.md](./ELOQUENT_JAVASCRIPT_STUDY.md) — research map from Eloquent JavaScript's teaching structure to PSC1 without importing JavaScript semantics.
 
 The Handbook is explanatory rather than normative. When a handbook example and
 an exact language/conformance document appear to disagree, use the normative

@@ -7,6 +7,9 @@ It teaches ProofScript primarily as a **programming language**, introducing
 proofs exactly where they make programs safer, more precise, or easier to
 optimize.
 
+For a more example-heavy, exercise- and project-driven path, see
+[Eloquent ProofScript PSC1](../eloquent-proofscript/README.md).
+
 It is intentionally not a translation of *Functional Programming in Lean*.
 PSC1 has a smaller source language, a different project/tooling story, an
 explicit multi-backend architecture, and a deliberately bounded proof/tactic

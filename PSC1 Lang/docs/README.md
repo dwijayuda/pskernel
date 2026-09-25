@@ -38,6 +38,12 @@ For the compiler, project file, and normal workflow:
 
 Then read the [PSC1 Handbook](../handbook/README.md) from top to bottom.
 
+If you learn best from examples, exercises, and larger projects, use
+[Eloquent ProofScript PSC1](../eloquent-proofscript/README.md). It progresses
+from values and functions through a route-planning project, errors, parsing,
+modules, effects, a tiny programming language, dependent types, and a tiny
+compiler pipeline.
+
 For a programming-first path modeled on the strongest ideas from Functional
 Programming in Lean, use [Programming in ProofScript PSC1](../programming-in-proofscript/README.md).
 

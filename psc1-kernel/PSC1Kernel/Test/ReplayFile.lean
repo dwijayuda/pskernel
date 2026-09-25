@@ -2,8 +2,7 @@ import PSC1Kernel
 
 open PSC1Kernel
 
-def main : IO Unit := do
-  let args ← IO.getArgs
+def main (args : List String) : IO Unit := do
   let path ←
     match args with
     | [path] => pure path

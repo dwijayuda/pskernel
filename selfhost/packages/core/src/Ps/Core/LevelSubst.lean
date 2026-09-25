@@ -42,8 +42,9 @@ def psLevelListInstantiateParams
     (arguments : List PsLevel) : List PsLevel -> List PsLevel
   | [] => []
   | level :: rest =>
-      psLevelInstantiateParams parameters arguments level
-        :: psLevelListInstantiateParams parameters arguments rest
+      List.cons
+        (psLevelInstantiateParams parameters arguments level)
+        (psLevelListInstantiateParams parameters arguments rest)
 
 def psExprInstantiateLevelParams
     (parameters : List PsName)

@@ -70,6 +70,16 @@ def replaceEnvironmentConstant
       else
         info :: replaceEnvironmentConstant target replacement rest
 
+def replaceConstantInBucket
+    (target : Name)
+    (replacement : ConstantInfo) : List ConstantInfo → List ConstantInfo
+  | [] => []
+  | info :: rest =>
+      if Name.eq info.name target then
+        replacement :: rest
+      else
+        info :: replaceConstantInBucket target replacement rest
+
 structure Environment where
   /-- Canonical newest-first declaration order used by replay/diagnostics. -/
   constants : List ConstantInfo
@@ -126,9 +136,20 @@ def Environment.replaceUnchecked
     (env : Environment)
     (info : ConstantInfo) : Environment :=
   let constants := replaceEnvironmentConstant info.name info env.constants
+  let index :=
+    if env.constantIndex.size == environmentBucketCount then
+      let key := info.name.bucketHash
+      match env.constantIndex[key]? with
+      | some values =>
+          env.constantIndex.set! key
+            (replaceConstantInBucket info.name info values)
+      | none =>
+          buildEnvironmentIndex constants
+    else
+      buildEnvironmentIndex constants
   { env with
     constants := constants
-    constantIndex := buildEnvironmentIndex constants }
+    constantIndex := index }
 
 def Environment.add (env : Environment) (info : ConstantInfo) : Except String Environment :=
   if env.contains info.name then

@@ -1,107 +1,124 @@
-# 11. Effects, Waiting, and Host Capabilities
+# 11. Effects and Host Capabilities
 
-Real programs interact with things that are slower, mutable, external, or
-unpredictable.
+Real programs eventually need to interact with a world that changes.
 
-JavaScript exposes those concerns through callbacks, promises, async functions,
-events, and host APIs.
+Files are read.
 
-PSC1 does not copy those mechanisms into its core semantics.
+Errors happen.
 
-## Pure code first
+State evolves.
 
-A portable pure function:
+Time passes.
+
+PSC1 keeps these effects explicit rather than letting backend behavior leak
+into ordinary pure functions.
+
+## Pure core
+
+This function is pure:
 
 ```proofscript
-function next(x: Nat): Nat :=
+function normalizeCount(x: Nat): Nat :=
   x + 1;
 ```
 
-has no hidden file, network, clock, or process interaction.
+Its result depends only on its input.
 
-That makes:
+## Compiler effects
 
-- testing easier;
-- equational reasoning stronger;
-- compiler optimization safer;
-- backend portability clearer.
+A self-hosted compiler needs:
 
-## The compiler still needs effects
+- immutable context;
+- mutable compiler state;
+- typed recoverable failure;
+- sequencing;
+- rollback for speculative work.
 
-A compiler needs:
+The first PSC1 profile therefore needs a concrete reader/state/error effect.
 
-- context;
-- mutable logical state;
-- recoverable errors;
+## `pure`
+
+`pure` lifts an ordinary value into an effectful computation.
+
+Conceptually:
+
+```text
+pure: α -> CompilerM(α)
+```
+
+## `bind`
+
+`bind` sequences computations:
+
+```text
+bind: CompilerM(α) -> (α -> CompilerM(β)) -> CompilerM(β)
+```
+
+## `do`
+
+`do` is readable notation for explicit sequencing.
+
+It is not JavaScript Promise syntax in disguise.
+
+The semantics belong to the PSC1 effect abstraction.
+
+## State
+
+Compiler state may include:
+
 - fresh IDs;
-- speculative rollback.
+- metavariables;
+- environments;
+- diagnostic accumulation;
+- parser/elaboration caches.
 
-PSC1's self-host profile therefore requires one concrete reader/state/error
-effect.
+State changes must be explicit enough to support rollback.
 
-## Sequencing
+## Typed failure
 
-The semantic building blocks are:
+Recoverable failures should use a declared channel.
 
-```text
-pure
-bind
-do
-```
+A backend may internally throw an exception, but the PSC1-visible semantics
+should remain the declared typed effect.
 
-Exact library names/source sugar are frozen by the active compiler-effect
-profile.
+## Transactional rollback
 
-The important point is that sequencing is explicit in the language semantics.
+Speculative parsing or elaboration often does:
 
-## Waiting for external work
+1. remember current state;
+2. try one interpretation;
+3. if it fails recoverably, restore state;
+4. try another interpretation.
 
-Filesystem/network/process work belongs to host capabilities.
+Without rollback, failed alternatives could leak metavariable assignments or
+environment changes.
 
-A JavaScript adapter might internally use a Promise.
+## Filesystem and process APIs
 
-A Rust adapter might use a different async runtime.
+These are host capabilities.
 
-A Wasm/WASI adapter might use component or host calls.
+A JavaScript backend may use Node.
 
-Those mechanisms are target implementations, not portable PSC1 source
-semantics.
+A Rust backend may use native OS APIs.
 
-## No hidden Promise meaning
+A Wasm backend may use WASI.
 
-An `extern function` does not automatically mean:
+PSC1 source should depend on a capability contract, not on the accidental API
+shape of one host.
 
-```text
-Promise-returning JS function
-```
+## Asynchrony
 
-The current FFI profile is intentionally first-order and bounded.
+Asynchronous programming is important, but PSC1's first freeze does not define
+JavaScript Promise/event-loop semantics as portable source behavior.
 
-Richer asynchronous host capabilities require an explicit contract before they
-can be portable PSC1 APIs.
-
-## Failure channel
-
-Expected host failure should enter PSC1 through a declared typed failure/effect
-channel.
-
-An arbitrary rejected Promise or thrown host exception cannot silently define
-the language's error model.
-
-## Concurrency
-
-PSC1 does not need a concurrency model in PSC1 core merely because JavaScript
-has an event loop or Wasm/Rust can run threads.
-
-Concurrency semantics require an explicit future design if/when compiler or
-application workloads justify them.
+A future task/async model should be specified backend-neutrally before becoming
+a PSC1 language feature.
 
 ## Exercises
 
-1. Classify each capability as pure or effectful: integer addition, reading a
-   file, getting current time, parsing an already-provided String, generating a
-   fresh compiler ID.
-2. Explain why wrapping `fetch` in an `extern function` without specifying
-   failure/sequencing is not enough to define a portable PSC1 network API.
-3. Sketch a typed Result-based file-read adapter without choosing a JS/Rust/Wasm
-   implementation.
+1. Classify these as pure or effectful: list length, current time, file read,
+   integer addition, random number.
+2. Sketch a compiler state containing a fresh-name counter.
+3. Explain why a failed speculative elaboration must roll back metavariables.
+4. Describe how the same file-read capability could be implemented by Node,
+   native Rust, and WASI.

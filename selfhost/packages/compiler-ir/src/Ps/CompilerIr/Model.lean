@@ -29,6 +29,34 @@ inductive PsVerifiedIrType where
       (name : String)
       (arguments : List PsVerifiedIrType)
 
+inductive PsVerifiedIrMachineIntegerType where
+  | uint8
+  | uint16
+  | uint32
+  | uint64
+  | usize
+  | int8
+  | int16
+  | int32
+  | int64
+  | isize
+
+inductive PsVerifiedIrIntegerBinaryOp where
+  | add
+  | sub
+  | mul
+  | bitAnd
+  | bitOr
+  | bitXor
+
+inductive PsVerifiedIrIntegerCompareOp where
+  | eq
+  | ne
+  | lt
+  | le
+  | gt
+  | ge
+
 inductive PsVerifiedIrLiteral where
   | natural (value : Nat)
   | integer (value : Int)
@@ -37,6 +65,12 @@ inductive PsVerifiedIrLiteral where
   | unit
 
 inductive PsVerifiedIrIntrinsic where
+  | machineIntBinary
+      (type : PsVerifiedIrMachineIntegerType)
+      (operation : PsVerifiedIrIntegerBinaryOp)
+  | machineIntCompare
+      (type : PsVerifiedIrMachineIntegerType)
+      (operation : PsVerifiedIrIntegerCompareOp)
   | natAdd
   | natSub
   | natMul

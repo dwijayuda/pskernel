@@ -44,7 +44,7 @@ def psMetaRestore (_current : PsMetaContext) (snapshot : PsMetaContext) : PsMeta
 def psMetaFindDeclInList (id : Nat) : List PsMetaVarDecl -> Option PsMetaVarDecl
   | [] => Option.none
   | declaration :: rest =>
-      if declaration.id == id then
+      if Nat.beq declaration.id id then
         Option.some declaration
       else
         psMetaFindDeclInList id rest

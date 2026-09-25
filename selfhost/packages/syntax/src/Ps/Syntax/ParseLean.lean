@@ -1659,9 +1659,10 @@ def psLeanTopLevelDeclarationToken (token : PsToken) : Bool :=
     psStringEq token.text "import"
 
 def psSplitTokensThroughLine
-    (line : Nat) :
-    List PsToken ->
-    Prod (List PsToken) (List PsToken)
+    (line : Nat)
+    (tokens : List PsToken) :
+    Prod (List PsToken) (List PsToken) :=
+  match tokens with
   | List.nil =>
       Prod.mk List.nil List.nil
   | List.cons token rest =>
@@ -2285,8 +2286,9 @@ def psLeanPrepareEquationBindersAcc
           (List.cons name namesRev)
 
 def psLeanEquationClausesHaveArity
-    (arity : Nat) :
-    List PsLeanEquationClause -> Bool
+    (arity : Nat)
+    (clauses : List PsLeanEquationClause) : Bool :=
+  match clauses with
   | List.nil => true
   | List.cons clause rest =>
       if

@@ -1165,8 +1165,8 @@ def psElabPartialDeclaration
                                 openValue
                                 finalOpenType;
                             if
-                                psExprHasUnresolvedMeta closed.1
-                                  || psExprHasUnresolvedMeta closed.2 then
+                                psExprHasUnresolvedMeta (Prod.fst closed)
+                                  || psExprHasUnresolvedMeta (Prod.snd closed) then
                               Except.error
                                 PsElabError.unresolvedMetavariable
                             else
@@ -1175,8 +1175,8 @@ def psElabPartialDeclaration
                                   PsDeclaration.partialDecl
                                     name
                                     []
-                                    closed.2
-                                    closed.1
+                                    (Prod.snd closed)
+                                    (Prod.fst closed)
                                 metaContext := metaContext
                               }
 

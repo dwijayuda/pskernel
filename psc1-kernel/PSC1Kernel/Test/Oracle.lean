@@ -2734,6 +2734,109 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
       throw <| IO.userError "simple inductive admission accepted unsupported functional recursion"
   | .error _ => pure ()
 
+def assertNestedUniformityOracle : IO Unit := do
+  -- Lean #14576/#14577: a non-uniform occurrence hidden in a fixed
+  -- parameter of a nested outer family must be rejected before preprocessing
+  -- can erase that parameter.
+  let W : PSC1Kernel.Name := .str .anonymous "OracleUniformW"
+  let BadW : PSC1Kernel.Name := .str W "bad"
+  let L : PSC1Kernel.Name := .str .anonymous "OracleUniformL"
+  let E : PSC1Kernel.Name := .str .anonymous "OracleUniformE"
+  let EMk : PSC1Kernel.Name := .str E "mk"
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let wT : PSC1Kernel.Expr := .const W []
+  let badW : PSC1Kernel.Expr := .const BadW []
+  let lType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "α") type1 type1 .default
+  let eType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "w") wT type1 .default
+  let badNested : PSC1Kernel.Expr :=
+    .app (.const L []) (.app (.const E []) badW)
+  let eCtorType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "w") wT
+      (.forallE (.str .anonymous "l") badNested
+        (.app (.const E []) (.bvar 1))
+        .default)
+      .default
+
+  let base0 :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase W type1
+      isUnsafe := false
+    })
+  let base1 :=
+    base0.addUnchecked (.axiomInfo {
+      base := mkBase BadW wT
+      isUnsafe := false
+    })
+  let base ← exceptToIO
+    "PSC1 nested-uniformity outer-family setup"
+    (PSC1Kernel.Kernel.addSimpleInductive base1 {
+      levelParams := []
+      name := L
+      type := lType
+      ctors := []
+      isUnsafe := false
+      numParams := 1
+    })
+
+  let oursRejects :=
+    match PSC1Kernel.Kernel.addSimpleNestedInductive base {
+      levelParams := []
+      numParams := 1
+      types := [{
+        name := E
+        type := eType
+        ctors := [{ name := EMk, type := eCtorType }]
+      }]
+      isUnsafe := false
+    } with
+    | .ok _ => false
+    | .error _ => true
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanW ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName W
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean rejected nested-uniformity W axiom"
+  let leanBadW ←
+    match Lean.Kernel.Environment.addDecl leanW {} (.axiomDecl {
+      name := toLeanName BadW
+      levelParams := []
+      type := toLeanExpr wT
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean rejected nested-uniformity bad W axiom"
+  let leanL ←
+    match Lean.Kernel.Environment.addDecl leanBadW {} (.inductDecl [] 1 [{
+      name := toLeanName L
+      type := toLeanExpr lType
+      ctors := []
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean rejected nested-uniformity outer family"
+  let leanRejects :=
+    match Lean.Kernel.Environment.addDecl leanL {} (.inductDecl [] 1 [{
+      name := toLeanName E
+      type := toLeanExpr eType
+      ctors := [{ name := toLeanName EMk, type := toLeanExpr eCtorType }]
+    }] false) with
+    | .ok _ => false
+    | .error _ => true
+
+  assertTrue
+    "nested fixed-parameter uniformity rejection differs from Lean 4.34"
+    (oursRejects == leanRejects && leanRejects)
+
 def assertNestedReservedNameOracle : IO Unit := do
   -- Lean 4.34 reserves the _nested namespace for temporary types created by
   -- nested-inductive elimination. User declarations must not be able to name
@@ -4365,6 +4468,7 @@ def run : IO Unit := do
   assertProjectionOracle
   assertArenaProjectionStructureSoundnessOracle
   assertSimpleInductiveAdmissionOracle
+  assertNestedUniformityOracle
   assertNestedReservedNameOracle
   assertNestedInductiveAdmissionOracle
   assertParameterizedNestedInductiveAdmissionOracle

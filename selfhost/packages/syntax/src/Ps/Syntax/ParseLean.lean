@@ -690,8 +690,8 @@ def psParseLeanArrowTail
         match parseCodomain afterArrow.cursor with
         | Except.error error => Except.error error
         | Except.ok codomain =>
-            let domainSpan := psSyntaxTermSpan domain.value
-            let span := psSyntaxSpanJoin domainSpan (psSyntaxTermSpan codomain.value)
+            let domainSpan := psSyntaxTermSpan domain.value;
+            let span := psSyntaxSpanJoin domainSpan (psSyntaxTermSpan codomain.value);
             Except.ok {
               value :=
                 PsSyntaxTerm.forallE
@@ -938,10 +938,16 @@ def psParseLeanMatchAlternativesAtColumnWithFuel
             cursor := cursor
           }
       | some token =>
-          let sameLine := token.span.start.line == previousBranchLine
+          let sameLine :=
+            Nat.beq token.span.start.line previousBranchLine;
           let belongsToMatch :=
-            token.text == "|"
-              && (sameLine || Nat.ble branchColumn token.span.start.column)
+            if psStringEq token.text "|" then
+              if sameLine then
+                true
+              else
+                Nat.ble branchColumn token.span.start.column
+            else
+              false;
           if belongsToMatch then
             match psTokenCursorAdvance cursor with
             | none =>
@@ -1454,7 +1460,7 @@ def psParseLeanTermWithFuel :
 def psParseLeanTerm
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  psParseLeanTermWithFuel (psParseListLength cursor.remaining + 1) cursor
+  psParseLeanTermWithFuel (Nat.add (psParseListLength cursor.remaining) 1) cursor
 
 def psParseLeanInductiveConstructorsWithFuel
     (fuel : Nat)
@@ -1481,19 +1487,19 @@ def psParseLeanInductiveConstructorsWithFuel
             | Except.error error => Except.error error
             | Except.ok name =>
                 match psParseLeanBindersWithFuel
-                    name.psParseListLength cursor.remaining
+                    psParseListLength name.cursor.remaining
                     name.cursor
                     [] with
                 | Except.error error => Except.error error
                 | Except.ok fields =>
                     let sourceName : PsSyntaxName := {
-                      segments := [name.token.text]
+                      segments := List.cons name.token.text List.nil
                       span := name.token.span
-                    }
+                    };
                     let stop :=
                       match psParseListReverse fields.value with
-                      | [] => name.token.span.stop
-                      | (head, _) :: _ => head.span.stop
+                      | List.nil => name.token.span.stop
+                      | List.cons pair _ => pair.1.span.stop;
                     let constructor : PsSyntaxInductiveConstructor := {
                       name := sourceName
                       fields := fields.value
@@ -1501,7 +1507,7 @@ def psParseLeanInductiveConstructorsWithFuel
                         start := bar.token.span.start
                         stop := stop
                       }
-                    }
+                    };
                     psParseLeanInductiveConstructorsWithFuel
                       remaining
                       fields.cursor
@@ -1635,7 +1641,7 @@ def psParseLeanStructureDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
-              name.psParseListLength cursor.remaining
+              psParseListLength name.cursor.remaining
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1645,7 +1651,7 @@ def psParseLeanStructureDeclaration
               | Except.ok afterWhere =>
                   match
                       psParseLeanStructureFieldsWithFuel
-                        afterWhere.psParseListLength cursor.remaining
+                        psParseListLength afterWhere.cursor.remaining
                         afterWhere.cursor
                         [] with
                   | Except.error error => Except.error error
@@ -1687,7 +1693,7 @@ def psParseLeanInductiveDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
-              name.psParseListLength cursor.remaining
+              psParseListLength name.cursor.remaining
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1699,7 +1705,7 @@ def psParseLeanInductiveDeclaration
                 | Except.error error => Except.error error
                 | Except.ok afterWhere =>
                     match psParseLeanInductiveConstructorsWithFuel
-                        afterWhere.psParseListLength cursor.remaining
+                        psParseListLength afterWhere.cursor.remaining
                         afterWhere.cursor
                         [] with
                     | Except.error error => Except.error error
@@ -1810,7 +1816,7 @@ def psParseLeanEquationClausesWithFuel
         | some bar =>
             match
                 psParseLeanEquationPatternsWithFuel
-                  bar.psParseListLength cursor.remaining
+                  psParseListLength bar.cursor.remaining
                   bar.cursor
                   [] with
             | Except.error error => Except.error error
@@ -2151,10 +2157,16 @@ def psParseLeanDeclaration
       else if keyword.text == "structure" then
         psParseLeanStructureDeclaration cursor
       else
-        let isPartial := keyword.text == "partial"
-        let isDefinition := keyword.text == "def"
-        let isTheorem := keyword.text == "theorem"
-        if !(isPartial || isDefinition || isTheorem) then
+        let isPartial := psStringEq keyword.text "partial";
+        let isDefinition := psStringEq keyword.text "def";
+        let isTheorem := psStringEq keyword.text "theorem";
+        if
+            if isPartial then
+              false
+            else if isDefinition then
+              false
+            else
+              !isTheorem then
           Except.error
             (PsParseError.expectedText
               "partial def, def, theorem, inductive, or structure"
@@ -2184,7 +2196,7 @@ def psParseLeanDeclaration
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseLeanBindersWithFuel
-                      name.psParseListLength cursor.remaining
+                      psParseListLength name.cursor.remaining
                       name.cursor
                       [] with
                   | Except.error error => Except.error error
@@ -2222,7 +2234,7 @@ def psParseLeanDeclaration
                                 match
                                     psParseLeanEquationClausesWithFuel
                                       psParseLeanTerm
-                                      type.psParseListLength cursor.remaining
+                                      psParseListLength type.cursor.remaining
                                       type.cursor
                                       [] with
                                 | Except.error error =>
@@ -2337,12 +2349,12 @@ def psParseLeanDeclarationsWithFuel
 def psParseLeanTokens
     (tokens : List PsToken) :
     Except PsParseError PsSyntaxModule :=
-  let cursor := psTokenCursorFromTokens tokens
-  match psParseLeanImportsWithFuel psParseListLength tokens cursor [] with
+  let cursor := psTokenCursorFromTokens tokens;
+  match psParseLeanImportsWithFuel (psParseListLength tokens) cursor [] with
   | Except.error error => Except.error error
   | Except.ok imports =>
       match psParseLeanDeclarationsWithFuel
-          psParseListLength tokens
+          (psParseListLength tokens)
           imports.cursor
           [] with
       | Except.error error => Except.error error

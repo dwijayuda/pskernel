@@ -99,6 +99,58 @@ def replayFileFrom
       throw <| IO.userError (
         "Lean4Export replay failed for " ++ path ++ ": " ++ err)
 
+def replayExcept
+    (path : String)
+    (lineNo : Nat)
+    (result : Except String α) : IO α :=
+  match result with
+  | .ok value => pure value
+  | .error err =>
+      throw <| IO.userError (
+        "Lean4Export replay failed for " ++ path ++
+        " at line " ++ toString lineNo ++ ": " ++ err)
+
+partial def replayFileFromStreaming
+    (base : Environment)
+    (path : String)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) :
+    IO (Environment × ReplayTotals) :=
+  IO.FS.withFile path IO.FS.Mode.read fun handle => do
+    let rec go
+        (shared : Environment)
+        (current : Option Replay.State)
+        (totals : ReplayTotals)
+        (lineNo : Nat) :
+        IO (Environment × ReplayTotals) := do
+      let line ← handle.getLine
+      if line.isEmpty then
+        replayExcept path lineNo
+          (finishReplaySegment shared current totals)
+      else
+        let trimmed := line.trim
+        if trimmed.isEmpty then
+          go shared current totals (lineNo + 1)
+        else if isReplayContainerMarker trimmed then
+          go shared current totals (lineNo + 1)
+        else if isReplaySegmentMarker trimmed then
+          let (shared', totals') ←
+            replayExcept path lineNo
+              (finishReplaySegment shared current totals)
+          go shared'
+            (some (Replay.State.empty shared' maxRecDepth maxNatSize nativeEvaluator))
+            totals' (lineNo + 1)
+        else
+          let state :=
+            match current with
+            | some value => value
+            | none => Replay.State.empty shared maxRecDepth maxNatSize nativeEvaluator
+          let next ←
+            replayExcept path lineNo (ReplayJson.replayLine state line)
+          go shared (some next) totals (lineNo + 1)
+    go base none {} 1
+
 def printReplayTotals (path : String) (totals : ReplayTotals) : IO Unit :=
   IO.println s!"PSC1 Lean replay PASS file={path} records={totals.records} names={totals.names} levels={totals.levels} exprs={totals.expressions} declarations={totals.declarations} segments={totals.segments}"
 
@@ -118,6 +170,9 @@ partial def replayTargets
 
 def main (args : List String) : IO Unit := do
   match args with
+  | ["--stream", path] => do
+      let (_, totals) ← replayFileFromStreaming .empty path
+      printReplayTotals path totals
   | [path] => do
       let (_, totals) ← replayFileFrom .empty path
       printReplayTotals path totals
@@ -137,7 +192,7 @@ def main (args : List String) : IO Unit := do
         baseEnv (target :: rest) 0 leanNatMaxSizeDefault (some provider)
   | _ =>
       throw <| IO.userError (
-        "usage: ReplayFile <lean4export.ndjson> | " ++
+        "usage: ReplayFile [--stream] <lean4export.ndjson> | " ++
         "ReplayFile --base <base.ndjson> <delta.ndjson> [delta.ndjson ...] | " ++
         "ReplayFile --native-map <native.tsv> <lean4export.ndjson> | " ++
         "ReplayFile --native-map <native.tsv> --base <base.ndjson> " ++

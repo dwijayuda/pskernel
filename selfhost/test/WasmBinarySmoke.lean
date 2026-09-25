@@ -6,7 +6,38 @@ def psWasmSmokeProfile : PsWasmTargetProfile :=
 def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {
     imports := []
-    structures := []
+    structures := [
+      {
+        name := "Point"
+        typeParameters := []
+        fields := [
+          {
+            name := "x"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "y"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+      },
+      {
+        name := "SmallSigned"
+        typeParameters := []
+        fields := [
+          {
+            name := "value"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.int16
+          }
+        ]
+      }
+    ]
     inductives := []
     declarations := [
       {
@@ -170,6 +201,58 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                     PsVerifiedIrMachineIntegerType.uint32
                     1)
               ])
+      }
+,
+      {
+        name := "pointX"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "y"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.projection
+            "Point"
+            (PsVerifiedIrExpr.record
+              "Point"
+              [
+                ("x", PsVerifiedIrExpr.var "x"),
+                ("y", PsVerifiedIrExpr.var "y")
+              ])
+            "x"
+      },
+      {
+        name := "smallSigned"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.int16
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int16
+        body :=
+          PsVerifiedIrExpr.projection
+            "SmallSigned"
+            (PsVerifiedIrExpr.record
+              "SmallSigned"
+              [("value", PsVerifiedIrExpr.var "value")])
+            "value"
       }
     ]
   }

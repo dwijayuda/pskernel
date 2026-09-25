@@ -265,8 +265,162 @@ def psTestWasmLetLowering : Bool :=
       | [function] => psWasmIsLetU32Function function
       | _ => false
 
+def psWasmStructureIrModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := [
+      {
+        name := "Point"
+        typeParameters := []
+        fields := [
+          {
+            name := "x"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "y"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+      },
+      {
+        name := "SmallSigned"
+        typeParameters := []
+        fields := [
+          {
+            name := "value"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.int16
+          }
+        ]
+      }
+    ]
+    inductives := []
+    declarations := [
+      {
+        name := "pointX"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "y"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.projection
+            "Point"
+            (PsVerifiedIrExpr.record
+              "Point"
+              [
+                ("x", PsVerifiedIrExpr.var "x"),
+                ("y", PsVerifiedIrExpr.var "y")
+              ])
+            "x"
+      },
+      {
+        name := "smallSigned"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.int16
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int16
+        body :=
+          PsVerifiedIrExpr.projection
+            "SmallSigned"
+            (PsVerifiedIrExpr.record
+              "SmallSigned"
+              [("value", PsVerifiedIrExpr.var "value")])
+            "value"
+      }
+    ]
+  }
+
+def psWasmIsPointStructure : PsWasmStructType -> Bool
+  | {
+      name := name,
+      fields := [
+        { name := "x", storageType := .value .i32 },
+        { name := "y", storageType := .value .i32 }
+      ]
+    } => name == "Point"
+  | _ => false
+
+def psWasmIsSmallSignedStructure : PsWasmStructType -> Bool
+  | {
+      name := name,
+      fields := [
+        { name := "value", storageType := .packedI16 }
+      ]
+    } => name == "SmallSigned"
+  | _ => false
+
+def psWasmIsPointXFunction : PsWasmFunction -> Bool
+  | {
+      name := name,
+      parameters := [.i32, .i32],
+      results := [.i32],
+      locals := [],
+      body :=
+        [
+          .localGet 0,
+          .localGet 1,
+          .structNew "Point",
+          .structGet "Point" 0
+        ]
+    } => name == "pointX"
+  | _ => false
+
+def psWasmIsSmallSignedFunction : PsWasmFunction -> Bool
+  | {
+      name := name,
+      parameters := [.i32],
+      results := [.i32],
+      locals := [],
+      body :=
+        [
+          .localGet 0,
+          .structNew "SmallSigned",
+          .structGetS "SmallSigned" 0
+        ]
+    } => name == "smallSigned"
+  | _ => false
+
+def psTestWasmStructureLowering : Bool :=
+  match psWasmLowerModule psWasmProfile32 psWasmStructureIrModule with
+  | Except.error _ => false
+  | Except.ok module =>
+      match module.structures, module.functions with
+      | [point, small], [pointFn, smallFn] =>
+          psWasmIsPointStructure point
+            && psWasmIsSmallSignedStructure small
+            && psWasmIsPointXFunction pointFn
+            && psWasmIsSmallSignedFunction smallFn
+      | _, _ => false
+
 def psWasmAnswerModule : PsWasmModule :=
   {
+    structures := []
     functions := [
       {
         name := "answer"
@@ -345,6 +499,7 @@ def main : IO Unit := do
       && psTestWasmFloatOps
       && psTestWasmVerifiedIrLowering
       && psTestWasmLetLowering
+      && psTestWasmStructureLowering
       && psTestWasmUleb
       && psTestWasmSignedLeb
       && psTestWasmBinaryModule then

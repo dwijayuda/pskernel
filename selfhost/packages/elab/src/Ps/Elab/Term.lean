@@ -1315,19 +1315,18 @@ def psElabPushRecursiveHypotheses
                 psElabContextWithStructuralRecursion
                   withLocal
                   (Option.some nextRecursion);
+          let hypothesis : PsElabMatchField := {
+            id := pushed.id
+            name := hypothesisName
+            type := expectedType
+            binder := PsBinderInfo.explicit
+          };
           psElabPushRecursiveHypotheses
             expectedType
             fields
             rest
             withRecursion
-            (List.cons
-              {
-                id := pushed.id
-                name := hypothesisName
-                type := expectedType
-                binder := PsBinderInfo.explicit
-              }
-              hypothesesRev)
+            (List.cons hypothesis hypothesesRev)
 
 def psCloseElabMatchFields
     (metaContext : PsMetaContext)

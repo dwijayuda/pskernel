@@ -364,7 +364,7 @@ def assertWhnfLayering : IO Unit := do
   })
   let ctx := PSC1Kernel.CheckerContext.empty env
   let d : PSC1Kernel.Expr := .const D []
-  let core ← exceptToIO "whnfCore delta boundary" (PSC1Kernel.whnfCore ctx d false)
+  let core ← exceptToIO "whnfCore delta boundary" (PSC1Kernel.whnfCore ctx d false false)
   let full ← exceptToIO "whnf delta boundary" (PSC1Kernel.whnf ctx d)
   assertTrue "whnfCore performed forbidden delta reduction" (PSC1Kernel.Expr.eq core d)
   assertTrue "full whnf failed to delta reduce" (PSC1Kernel.Expr.eq full (.lit (.nat 23)))

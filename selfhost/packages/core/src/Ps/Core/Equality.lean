@@ -83,21 +83,24 @@ def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
         | _ => false
 
 def psLevelListEq
-    (left : List PsLevel)
-    (right : List PsLevel) : Bool :=
+    (left : List PsLevel) : List PsLevel -> Bool :=
   match left with
   | [] =>
-      match right with
-      | [] => true
-      | _ => false
+      fun (right : List PsLevel) =>
+        match right with
+        | [] => true
+        | _ => false
   | leftValue :: leftRest =>
-      match right with
-      | rightValue :: rightRest =>
-          if psLevelStructuralEq leftValue rightValue then
-            psLevelListEq leftRest rightRest
-          else
-            false
-      | _ => false
+      let smaller : List PsLevel -> Bool :=
+        psLevelListEq leftRest;
+      fun (right : List PsLevel) =>
+        match right with
+        | rightValue :: rightRest =>
+            if psLevelStructuralEq leftValue rightValue then
+              smaller rightRest
+            else
+              false
+        | _ => false
 
 def psExprAlphaEq (left : PsExpr) (right : PsExpr) : Bool :=
   match left with

@@ -570,8 +570,44 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let env8 :=
     psPreludeAdd env7
       (PsDeclaration.axiomDecl psIntMulName [] intBinaryType);
-  let env9 :=
+  let envScalarUInt8 :=
     psPreludeAdd env8
+      (PsDeclaration.axiomDecl psUInt8Name [] typeType);
+  let envScalarUInt16 :=
+    psPreludeAdd envScalarUInt8
+      (PsDeclaration.axiomDecl psUInt16Name [] typeType);
+  let envScalarUInt32 :=
+    psPreludeAdd envScalarUInt16
+      (PsDeclaration.axiomDecl psUInt32Name [] typeType);
+  let envScalarUInt64 :=
+    psPreludeAdd envScalarUInt32
+      (PsDeclaration.axiomDecl psUInt64Name [] typeType);
+  let envScalarUSize :=
+    psPreludeAdd envScalarUInt64
+      (PsDeclaration.axiomDecl psUSizeName [] typeType);
+  let envScalarInt8 :=
+    psPreludeAdd envScalarUSize
+      (PsDeclaration.axiomDecl psInt8Name [] typeType);
+  let envScalarInt16 :=
+    psPreludeAdd envScalarInt8
+      (PsDeclaration.axiomDecl psInt16Name [] typeType);
+  let envScalarInt32 :=
+    psPreludeAdd envScalarInt16
+      (PsDeclaration.axiomDecl psInt32Name [] typeType);
+  let envScalarInt64 :=
+    psPreludeAdd envScalarInt32
+      (PsDeclaration.axiomDecl psInt64Name [] typeType);
+  let envScalarISize :=
+    psPreludeAdd envScalarInt64
+      (PsDeclaration.axiomDecl psISizeName [] typeType);
+  let envScalarFloat :=
+    psPreludeAdd envScalarISize
+      (PsDeclaration.axiomDecl psFloatName [] typeType);
+  let envScalarFloat32 :=
+    psPreludeAdd envScalarFloat
+      (PsDeclaration.axiomDecl psFloat32Name [] typeType);
+  let env9 :=
+    psPreludeAdd envScalarFloat32
       (PsDeclaration.axiomDecl psStringName [] typeType);
   let env10 :=
     psPreludeAdd env9

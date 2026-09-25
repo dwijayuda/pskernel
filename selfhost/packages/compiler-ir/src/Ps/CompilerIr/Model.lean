@@ -177,9 +177,11 @@ inductive PsVerifiedIrExpr where
       (elseBranch : PsVerifiedIrExpr)
   | record
       (structureName : String)
+      (typeArguments : List PsVerifiedIrType)
       (fields : List (String × PsVerifiedIrExpr))
   | projection
       (structureName : String)
+      (typeArguments : List PsVerifiedIrType)
       (target : PsVerifiedIrExpr)
       (field : String)
   | constructor
@@ -189,6 +191,7 @@ inductive PsVerifiedIrExpr where
       (fields : List (String × PsVerifiedIrExpr))
   | matchE
       (inductiveName : String)
+      (typeArguments : List PsVerifiedIrType)
       (scrutinee : PsVerifiedIrExpr)
       (alternatives :
         List

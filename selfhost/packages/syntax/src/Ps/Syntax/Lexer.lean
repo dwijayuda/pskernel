@@ -16,7 +16,10 @@ def psLexSpan (start : PsSourcePos) (stop : PsSourcePos) : PsSourceSpan :=
   { start := start, stop := stop }
 
 def psLexString (charsRev : List Char) : String :=
-  String.ofList charsRev.reverse
+  match charsRev with
+  | List.nil => ""
+  | List.cons char rest =>
+      String.push (psLexString rest) char
 
 def psLexAdvanceChar (position : PsSourcePos) (char : Char) : PsSourcePos :=
   psLexAdvancePosition position char

@@ -37,3 +37,5 @@ jobs:
           nl -ba /tmp/root100015.ndjson | sed -n '190655,190665p'
           echo "=== around Array.push_eq_append ==="
           nl -ba /tmp/root100015.ndjson | sed -n '191655,191670p'
+          echo "=== proof head / body records ==="
+          grep -n -E '"ie":(103435|173305)|"ie":17331[4-8]' /tmp/root100015.ndjson || true

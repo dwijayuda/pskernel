@@ -53,13 +53,26 @@ structure PsEnvironment where
 def psEnvironmentEmpty : PsEnvironment :=
   PsEnvironment.mk List.nil
 
-def psEnvironmentFindInList (name : PsName) : List PsDeclaration -> Option PsDeclaration
-  | [] => Option.none
-  | declaration :: rest =>
-      if psNameEq name (psDeclarationName declaration) then
-        Option.some declaration
-      else
-        psEnvironmentFindInList name rest
+def psEnvironmentFindInListWorker
+    (declarations : List PsDeclaration) :
+    PsName -> Option PsDeclaration :=
+  match declarations with
+  | List.nil =>
+      fun (_name : PsName) => Option.none
+  | List.cons declaration rest =>
+      let smaller : PsName -> Option PsDeclaration :=
+        psEnvironmentFindInListWorker rest;
+      fun (name : PsName) =>
+        if psNameEq name (psDeclarationName declaration) then
+          Option.some declaration
+        else
+          smaller name
+
+def psEnvironmentFindInList
+    (name : PsName)
+    (declarations : List PsDeclaration) :
+    Option PsDeclaration :=
+  psEnvironmentFindInListWorker declarations name
 
 def psEnvironmentFind (environment : PsEnvironment) (name : PsName) : Option PsDeclaration :=
   psEnvironmentFindInList name environment.declarations
@@ -90,14 +103,26 @@ def psEnvironmentContains (environment : PsEnvironment) (name : PsName) : Bool :
   | none => false
   | some _ => true
 
+def psEnvironmentRemoveNameWorker
+    (declarations : List PsDeclaration) :
+    PsName -> List PsDeclaration :=
+  match declarations with
+  | List.nil =>
+      fun (_name : PsName) => List.nil
+  | List.cons declaration rest =>
+      let smaller : PsName -> List PsDeclaration :=
+        psEnvironmentRemoveNameWorker rest;
+      fun (name : PsName) =>
+        if psNameEq name (psDeclarationName declaration) then
+          smaller name
+        else
+          List.cons declaration (smaller name)
+
 def psEnvironmentRemoveName
-    (name : PsName) : List PsDeclaration -> List PsDeclaration
-  | [] => []
-  | declaration :: rest =>
-      if psNameEq name (psDeclarationName declaration) then
-        psEnvironmentRemoveName name rest
-      else
-        List.cons declaration (psEnvironmentRemoveName name rest)
+    (name : PsName)
+    (declarations : List PsDeclaration) :
+    List PsDeclaration :=
+  psEnvironmentRemoveNameWorker declarations name
 
 def psEnvironmentAddReplacingAxiom
     (environment : PsEnvironment)

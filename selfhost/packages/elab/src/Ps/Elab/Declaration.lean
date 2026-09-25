@@ -1007,7 +1007,7 @@ def psElabInductiveDeclaration
                     let withInductiveResult :=
                       psEnvironmentAddOwnedBootstrapDeclaration
                         environment
-                        inductiveDeclaration
+                        inductiveDeclaration;
                     match withInductiveResult with
                     | none =>
                         Except.error
@@ -1016,7 +1016,7 @@ def psElabInductiveDeclaration
                         let constructorContext :=
                           psElabContextWithEnvironment
                             headerContext
-                            withInductive
+                            withInductive;
                         match psElabInductiveConstructors
                             constructorContext
                             parameters.bindersRev

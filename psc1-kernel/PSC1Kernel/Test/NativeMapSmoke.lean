@@ -7,16 +7,14 @@ def assertNativeMap (label : String) (ok : Bool) : IO Unit :=
   if ok then pure ()
   else throw <| IO.userError ("native map smoke failed: " ++ label)
 
-def main : IO Unit := do
-  let entries ←
-    match parseNativeMap
-      "nat\tNativeMapSmoke.n\t42\nbool\tNativeMapSmoke.b\tfalse\n" with
-    | .ok value => pure value
-    | .error err => throw <| IO.userError err
-  let provider := nativeMapEvaluator entries
-  let n : Name := .str (.str .anonymous "NativeMapSmoke") "n"
-  let b : Name := .str (.str .anonymous "NativeMapSmoke") "b"
+def nativeSmokeName (text : String) : IO Name := do
+  match nativeMapName text with
+  | .ok name => pure name
+  | .error err => throw <| IO.userError err
 
+def runNativeProviderSmoke
+    (provider : NativeEvaluator)
+    (n b missing : Name) : IO Unit := do
   let natOk :=
     match provider.evalNat n with
     | .ok (some 42) => true
@@ -29,7 +27,6 @@ def main : IO Unit := do
     | _ => false
   assertNativeMap "Bool lookup" boolOk
 
-  let missing : Name := .str (.str .anonymous "NativeMapSmoke") "missing"
   let missingOk :=
     match provider.evalNat missing with
     | .ok none => true
@@ -42,8 +39,7 @@ def main : IO Unit := do
     | _ => false
   assertNativeMap "kind mismatch" wrongKindFails
 
-  -- Exercise the parsed portable map through the actual kernel WHNF/native
-  -- reduction path, not only through direct provider lookups.
+  -- Exercise the provider through the actual kernel WHNF/native path.
   let ctx : CheckerContext := {
     CheckerContext.empty Environment.empty with
     nativeEvaluator := some provider
@@ -74,6 +70,29 @@ def main : IO Unit := do
     | .error err => throw <| IO.userError ("missing native WHNF failed: " ++ err)
   assertNativeMap "missing native result stays opaque"
     (Expr.eq missingReduced missingMarker)
+
+def main (args : List String) : IO Unit := do
+  match args with
+  | [] => do
+      let entries ←
+        match parseNativeMap
+          "nat\tNativeMapSmoke.n\t42\nbool\tNativeMapSmoke.b\tfalse\n" with
+        | .ok value => pure value
+        | .error err => throw <| IO.userError err
+      runNativeProviderSmoke
+        (nativeMapEvaluator entries)
+        (← nativeSmokeName "NativeMapSmoke.n")
+        (← nativeSmokeName "NativeMapSmoke.b")
+        (← nativeSmokeName "NativeMapSmoke.missing")
+  | [path] => do
+      let provider ← loadNativeMap path
+      runNativeProviderSmoke
+        provider
+        (← nativeSmokeName "PSC1NativeMapFixture.n")
+        (← nativeSmokeName "PSC1NativeMapFixture.b")
+        (← nativeSmokeName "PSC1NativeMapFixture.missing")
+  | _ =>
+      throw <| IO.userError "usage: NativeMapSmoke [native-map.tsv]"
 
   let duplicateRejects :=
     match parseNativeMap

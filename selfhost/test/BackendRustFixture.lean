@@ -142,6 +142,138 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
             [PsVerifiedIrExpr.var "text"]
       },
       {
+        name := "arrayIdOnly"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "arrayMapDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "xs"
+            type :=
+              PsVerifiedIrType.named
+                "Array"
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.named
+            "Array"
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayMap
+            [
+              PsVerifiedIrExpr.var "arrayIdOnly",
+              PsVerifiedIrExpr.var "xs"
+            ]
+      },
+      {
+        name := "arrayKeepLeft"
+        typeParameters := []
+        parameters := [
+          {
+            name := "acc"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body := PsVerifiedIrExpr.var "acc"
+      },
+      {
+        name := "arrayFoldOnly"
+        typeParameters := []
+        parameters := [
+          {
+            name := "xs"
+            type :=
+              PsVerifiedIrType.named
+                "Array"
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayFoldl
+            [
+              PsVerifiedIrExpr.var "arrayKeepLeft",
+              PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0),
+              PsVerifiedIrExpr.var "xs",
+              PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0),
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.arraySize
+                [PsVerifiedIrExpr.var "xs"]
+            ]
+      },
+      {
+        name := "arrayDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "a"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "b"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.letE
+            "xs"
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.arrayPush
+              [
+                PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.arrayPush
+                  [
+                    PsVerifiedIrExpr.intrinsic
+                      PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                      [
+                        PsVerifiedIrExpr.literal
+                          (PsVerifiedIrLiteral.natural 2)
+                      ],
+                    PsVerifiedIrExpr.var "a"
+                  ],
+                PsVerifiedIrExpr.var "b"
+              ])
+            (PsVerifiedIrExpr.letE
+              "ys"
+              (PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.arraySetIfInBounds
+                [
+                  PsVerifiedIrExpr.var "xs",
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 0),
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 10)
+                ])
+              (PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.arrayGetD
+                [
+                  PsVerifiedIrExpr.var "ys",
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 1),
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 99)
+                ]))
+      },
+      {
         name := "unwrapOr"
         typeParameters := []
         parameters := [

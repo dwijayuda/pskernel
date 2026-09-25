@@ -57,6 +57,24 @@ inductive PsVerifiedIrIntegerCompareOp where
   | gt
   | ge
 
+inductive PsVerifiedIrFloatingType where
+  | float
+  | float32
+
+inductive PsVerifiedIrFloatBinaryOp where
+  | add
+  | sub
+  | mul
+  | div
+
+inductive PsVerifiedIrFloatCompareOp where
+  | eq
+  | ne
+  | lt
+  | le
+  | gt
+  | ge
+
 inductive PsVerifiedIrLiteral where
   | natural (value : Nat)
   | integer (value : Int)
@@ -74,6 +92,12 @@ inductive PsVerifiedIrIntrinsic where
   | machineIntCompare
       (type : PsVerifiedIrMachineIntegerType)
       (operation : PsVerifiedIrIntegerCompareOp)
+  | floatBinary
+      (type : PsVerifiedIrFloatingType)
+      (operation : PsVerifiedIrFloatBinaryOp)
+  | floatCompare
+      (type : PsVerifiedIrFloatingType)
+      (operation : PsVerifiedIrFloatCompareOp)
   | natAdd
   | natSub
   | natMul

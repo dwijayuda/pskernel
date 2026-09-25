@@ -1116,7 +1116,7 @@ partial def typeCheckerWhnfSpineDiff
       typeCheckerWhnfSpineDiff child leftOpened rightOpened (depth + 1)
   | _, _ =>
       let projectionDetail ←
-        match leftWhnf with
+        match leftWhnf.getAppFn with
         | .proj typeName index struct => do
             let structWhnf ← whnf ctx struct
             let ctorDetail :=
@@ -1136,6 +1136,7 @@ partial def typeCheckerWhnfSpineDiff
             pure (
               "; projection=" ++ typeCheckerNameString typeName ++ "." ++
               toString index ++
+              "; projection-extra-args=" ++ toString leftWhnf.getAppNumArgs ++
               "; struct=" ++ typeCheckerExprHead struct ++
               "; struct-whnf=" ++ typeCheckerExprHead structWhnf ++
               ctorDetail)

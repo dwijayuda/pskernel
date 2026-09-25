@@ -246,6 +246,16 @@ private unsafe def Expr.eqRuntime (left right : Expr) : Bool :=
 partial def Expr.eq (left right : Expr) : Bool :=
   Expr.eqSpec left right
 
+/-- Diagnostic-only wrapper for profiling the runtime structural hash. -/
+unsafe def Expr.debugStructHashRuntime (e : Expr) : UInt64 :=
+  let cache : ExprHashCache := Std.HashMap.emptyWithCapacity 128
+  (Expr.structHashRuntimeGo e cache).1
+
+/-- Diagnostic-only wrapper for profiling pair-memoized equality without the hash gate. -/
+unsafe def Expr.debugPairEqRuntime (left right : Expr) : Bool :=
+  let seen : ExprEqPairCache := Std.HashSet.emptyWithCapacity 64
+  (Expr.eqRuntimeGo left right seen).1
+
 /--
 Lean 4.34 `Expr.equal`-compatible binder-aware structural equality. Use this
 only when binder names/annotations are semantically relevant to the caller.

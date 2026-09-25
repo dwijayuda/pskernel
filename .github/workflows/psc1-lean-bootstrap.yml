@@ -157,6 +157,38 @@ jobs:
           test -f /tmp/psc1-collections.js.map
           echo "PSC1_COLLECTIONS_COMPOSITION: PASS"
 
+      - name: Run portable JSON composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          cd selfhost
+          lake exe psc1 typescript stdlib/SELFHOST-JSON.lean > /tmp/psc1-json.ts
+          grep -q 'export type JsonError' /tmp/psc1-json.ts
+          grep -q 'export type JsonValue' /tmp/psc1-json.ts
+          grep -q 'export function jsonParse' /tmp/psc1-json.ts
+          grep -q 'export function jsonEncodeCanonical' /tmp/psc1-json.ts
+          grep -q 'export const selfhostJsonCanonical' /tmp/psc1-json.ts
+          rm -f /tmp/psc1-json.js /tmp/psc1-json.d.ts /tmp/psc1-json.js.map
+          lake exe psc1 build stdlib/SELFHOST-JSON.lean --out /tmp/psc1-json.ts
+          test -f /tmp/psc1-json.js
+          test -f /tmp/psc1-json.d.ts
+          test -f /tmp/psc1-json.js.map
+          cp /tmp/psc1-json.js /tmp/psc1-json.mjs
+          node --input-type=module <<'NODE'
+          const m = await import('file:///tmp/psc1-json.mjs');
+          if (m.selfhostJsonCanonical.error !== undefined) {
+            throw new Error('selfhostJsonCanonical');
+          }
+          if (m.selfhostJsonCanonical.value !== '{"a":[true,"x\\ny"],"m":null,"z":2}') {
+            throw new Error('canonical JSON output');
+          }
+          if (m.selfhostJsonA.tag !== 'some') {
+            throw new Error('JSON object lookup');
+          }
+          NODE
+          echo "PSC1_JSON_COMPOSITION: PASS"
+
       - name: Run concrete compiler effect composition
         shell: bash
         run: |

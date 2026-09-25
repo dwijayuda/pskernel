@@ -390,6 +390,83 @@ def psParseLeanDependentArrowTail
          | none => binder.value.1.span
          | some token => token.span))
 
+def psLeanPatternBinderName
+    (token : PsToken)
+    (fallback : String) : PsSyntaxName :=
+  {
+    segments :=
+      [if token.text == "_" then fallback else token.text]
+    span := token.span
+  }
+
+def psParseLeanListPattern
+    (cursor : PsTokenCursor) :
+    Option
+      (Except
+        PsParseError
+        (PsParseResult PsSyntaxPattern)) :=
+  match cursor.remaining with
+  | opening :: closing :: rest =>
+      if opening.text == "[" && closing.text == "]" then
+        let span :=
+          psSyntaxSpanJoin opening.span closing.span
+        let name : PsSyntaxName := {
+          segments := ["List", "nil"]
+          span := span
+        }
+        some
+          (Except.ok {
+            value :=
+              PsSyntaxPattern.constructor
+                name
+                []
+                span
+            cursor := { remaining := rest }
+          })
+      else
+        none
+  | first :: cons :: second :: rest =>
+      if
+          cons.text == "::"
+            && psTokenKindEq
+              first.kind
+              PsTokenKind.identifier
+            && psTokenKindEq
+              second.kind
+              PsTokenKind.identifier then
+        let span :=
+          psSyntaxSpanJoin first.span second.span
+        let name : PsSyntaxName := {
+          segments := ["List", "cons"]
+          span := span
+        }
+        some
+          (Except.ok {
+            value :=
+              PsSyntaxPattern.constructor
+                name
+                [
+                  psLeanPatternBinderName
+                    first
+                    "_listHead",
+                  psLeanPatternBinderName
+                    second
+                    "_listTail"
+                ]
+                span
+            cursor := { remaining := rest }
+          })
+      else
+        none
+  | _ => none
+
+def psParseLeanPattern
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxPattern) :=
+  match psParseLeanListPattern cursor with
+  | some result => result
+  | none => psParseBasicPattern cursor
+
 def psParseLeanMatchAlternativesAtColumnWithFuel
     (parseTerm :
       PsTokenCursor ->
@@ -426,7 +503,7 @@ def psParseLeanMatchAlternativesAtColumnWithFuel
             | none =>
                 Except.error (PsParseError.unexpectedEnd "match pattern")
             | some bar =>
-                match psParseBasicPattern bar.cursor with
+                match psParseLeanPattern bar.cursor with
                 | Except.error error => Except.error error
                 | Except.ok pattern =>
                     match psTokenCursorExpectText pattern.cursor "=>" with
@@ -1246,7 +1323,7 @@ def psParseLeanEquationPatternsWithFuel
   match fuel with
   | 0 => Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      match psParseBasicPattern cursor with
+      match psParseLeanPattern cursor with
       | Except.error error => Except.error error
       | Except.ok pattern =>
           let nextPatterns := pattern.value :: patternsRev

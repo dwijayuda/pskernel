@@ -1352,7 +1352,7 @@ def psParseLeanTermWithFuel
       let smaller :
           PsTokenCursor ->
           Except PsParseError (PsParseResult PsSyntaxTerm) :=
-        smaller;
+        psParseLeanTermWithFuel remaining;
       fun (cursor : PsTokenCursor) =>
       if psTokenCursorAtText cursor "do" then
         match psTokenCursorAdvance cursor with

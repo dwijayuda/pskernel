@@ -160,28 +160,55 @@ def psJsonDecodeUnicode4
     (chars : List Char) :
     Except PsJsonParseError (Char × List Char) :=
   match chars with
-  | a :: b :: c :: d :: rest =>
-      match
-          psJsonHexValue a,
-          psJsonHexValue b,
-          psJsonHexValue c,
-          psJsonHexValue d with
-      | some av, some bv, some cv, some dv =>
-          let value : Nat :=
-            Nat.add
-              (Nat.add
-                (Nat.mul av 4096)
-                (Nat.mul bv 256))
-              (Nat.add
-                (Nat.mul cv 16)
-                dv);
-          if psJsonNatInRange value 55296 57343 then
-            Except.error PsJsonParseError.invalidUnicodeEscape
-          else
-            Except.ok (Prod.mk (Char.ofNat value) rest)
-      | _, _, _, _ =>
-          Except.error PsJsonParseError.invalidUnicodeEscape
-  | _ => Except.error PsJsonParseError.unexpectedEnd
+  | List.nil =>
+      Except.error PsJsonParseError.unexpectedEnd
+  | List.cons a rest1 =>
+      match rest1 with
+      | List.nil =>
+          Except.error PsJsonParseError.unexpectedEnd
+      | List.cons b rest2 =>
+          match rest2 with
+          | List.nil =>
+              Except.error PsJsonParseError.unexpectedEnd
+          | List.cons c rest3 =>
+              match rest3 with
+              | List.nil =>
+                  Except.error PsJsonParseError.unexpectedEnd
+              | List.cons d rest =>
+                  match psJsonHexValue a with
+                  | none =>
+                      Except.error PsJsonParseError.invalidUnicodeEscape
+                  | some av =>
+                      match psJsonHexValue b with
+                      | none =>
+                          Except.error PsJsonParseError.invalidUnicodeEscape
+                      | some bv =>
+                          match psJsonHexValue c with
+                          | none =>
+                              Except.error PsJsonParseError.invalidUnicodeEscape
+                          | some cv =>
+                              match psJsonHexValue d with
+                              | none =>
+                                  Except.error PsJsonParseError.invalidUnicodeEscape
+                              | some dv =>
+                                  let value : Nat :=
+                                    Nat.add
+                                      (Nat.add
+                                        (Nat.mul av 4096)
+                                        (Nat.mul bv 256))
+                                      (Nat.add
+                                        (Nat.mul cv 16)
+                                        dv);
+                                  if
+                                      psJsonNatInRange
+                                        value
+                                        55296
+                                        57343 then
+                                    Except.error
+                                      PsJsonParseError.invalidUnicodeEscape
+                                  else
+                                    Except.ok
+                                      (Prod.mk (Char.ofNat value) rest)
 
 def psJsonParseStringChars :
     Nat ->

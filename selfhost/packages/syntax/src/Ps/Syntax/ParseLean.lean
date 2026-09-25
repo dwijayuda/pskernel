@@ -572,10 +572,11 @@ def psParseLeanBinderNamesWithFuel
 def psLeanBinderPairsFromNames
     (kind : PsSyntaxBinderKind)
     (span : PsSourceSpan)
-    (type : PsSyntaxTerm) :
-    List PsSyntaxName ->
+    (type : PsSyntaxTerm)
+    (names : List PsSyntaxName) :
     List
-      (Prod PsSyntaxBinderHead PsSyntaxTerm)
+      (Prod PsSyntaxBinderHead PsSyntaxTerm) :=
+  match names with
   | List.nil => List.nil
   | List.cons name rest =>
       let head : PsSyntaxBinderHead := {

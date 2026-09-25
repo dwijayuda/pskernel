@@ -61,7 +61,11 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Build PSC1 kernel source with Lean 4.34
         working-directory: psc1-kernel
-        run: lake build PSC1Kernel psc1_replay
+        run: lake build
+
+      - name: Build compiled replay executable
+        working-directory: psc1-kernel
+        run: lake build psc1-kernel-replay PSC1Kernel psc1_replay
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash
@@ -142,7 +146,11 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Build PSC1 kernel source with Lean 4.34
         working-directory: psc1-kernel
-        run: lake build PSC1Kernel psc1_replay
+        run: lake build
+
+      - name: Build compiled replay executable
+        working-directory: psc1-kernel
+        run: lake build psc1-kernel-replay PSC1Kernel psc1_replay
       - name: Replay bounded corpus
         working-directory: psc1-kernel
         shell: bash

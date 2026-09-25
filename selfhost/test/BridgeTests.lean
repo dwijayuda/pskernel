@@ -1,4 +1,5 @@
 import Ps.Bridge.CheckedAdmissions
+import Ps.Bridge.Codec
 import Ps.Core.Builtin
 
 def psBridgeTestDefinition : PsDeclaration :=
@@ -120,6 +121,61 @@ def psTestRejectUniverseMetavariable : Bool :=
   | Except.error PsCheckedAdmissionCodecError.universeMetavariable => true
   | _ => false
 
+def psTestPersistentNameCodecRoundTrip : Bool :=
+  let name :=
+    psNameAppendNum
+      (psNameAppendStr PsName.anonymous "Demo")
+      42
+  let encoded := psEncodeCodecName name
+  match psJsonParse encoded with
+  | Except.error _ => false
+  | Except.ok json =>
+      match psDecodeCodecName json with
+      | Except.error _ => false
+      | Except.ok decoded => psNameEq name decoded
+
+def psTestPersistentLevelCodecRoundTrip : Bool :=
+  let level :=
+    PsLevel.imax
+      (PsLevel.succ PsLevel.zero)
+      (PsLevel.param (psRootName "u"))
+  match psEncodeCodecLevel level with
+  | Except.error _ => false
+  | Except.ok encoded =>
+      match psJsonParse encoded with
+      | Except.error _ => false
+      | Except.ok json =>
+          match psDecodeCodecLevel json with
+          | Except.error _ => false
+          | Except.ok decoded =>
+              psLevelEq level decoded
+
+def psTestPersistentExprCodecRoundTrip : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let name := psRootName "x"
+  let expr :=
+    PsExpr.lam
+      name
+      natType
+      (PsExpr.letE
+        (psRootName "y")
+        natType
+        (PsExpr.lit (PsLiteral.natural 7))
+        (PsExpr.app
+          (PsExpr.constE (psRootName "f") [])
+          (PsExpr.bvar 0)))
+      PsBinderInfo.explicit
+  match psEncodeCodecExpr expr with
+  | Except.error _ => false
+  | Except.ok encoded =>
+      match psJsonParse encoded with
+      | Except.error _ => false
+      | Except.ok json =>
+          match psDecodeCodecExpr json with
+          | Except.error _ => false
+          | Except.ok decoded =>
+              psExprAlphaEq expr decoded
+
 def psTestRejectPartialCertification : Bool :=
   let natType := PsExpr.constE psNatName []
   let loopName := psRootName "loop"
@@ -212,6 +268,9 @@ def psBridgeTests : List PsBridgeNamedTest := [
   { name := "JSON parser canonical payload", passed := psTestJsonParserCanonicalPayload },
   { name := "JSON parser escapes and nested values", passed := psTestJsonParserEscapesAndNested },
   { name := "JSON parser rejects malformed input", passed := psTestJsonParserRejectsInvalid },
+  { name := "persistent Name codec round-trip", passed := psTestPersistentNameCodecRoundTrip },
+  { name := "persistent Level codec round-trip", passed := psTestPersistentLevelCodecRoundTrip },
+  { name := "persistent Expr codec round-trip", passed := psTestPersistentExprCodecRoundTrip },
   { name := "reject free variable", passed := psTestRejectFreeVariable },
   { name := "reject expression metavariable", passed := psTestRejectExpressionMetavariable },
   { name := "reject universe metavariable", passed := psTestRejectUniverseMetavariable },

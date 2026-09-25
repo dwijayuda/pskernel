@@ -365,7 +365,7 @@ def psElabNatural
   match psParseNaturalText text with
   | none => Except.error (PsElabError.invalidNatural text)
   | some value =>
-      let natural := PsExpr.lit (PsLiteral.natural value)
+      let natural := PsExpr.lit (PsLiteral.natural value);
       match expected with
       | some expectedType =>
           let reducedExpected :=
@@ -373,7 +373,7 @@ def psElabNatural
               context.environment
               context.metaContext
               context.localContext
-              expectedType
+              expectedType;
           match reducedExpected with
           | .constE name _ =>
               if psNameEq name psIntName then

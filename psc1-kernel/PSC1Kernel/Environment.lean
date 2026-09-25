@@ -8,7 +8,7 @@ def Name.listContains (needle : Name) : List Name → Bool
 
 def Name.hasDuplicates : List Name → Bool
   | [] => false
-  | x :: xs => xs.listContains x || Name.hasDuplicates xs
+  | x :: xs => Name.listContains x xs || Name.hasDuplicates xs
 
 structure Environment where
   constants : List ConstantInfo

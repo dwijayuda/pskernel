@@ -178,7 +178,7 @@ def psRustEmitHigherOrderParameterType
                   "impl Fn("
                   (psRustJoin ", " printedParameters)
                   ") -> "
-                  printedResult)
+                  (psRustConcat2 printedResult " + Clone"))
   | _ =>
       psRustEmitType type
 

@@ -48,6 +48,14 @@ jobs:
           lean --version
           test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
 
+      - name: Check self-host host scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check selfhost/scripts/bootstrap-project.mjs
+          node --check selfhost/scripts/compile-with-generated.mjs
+          node --check selfhost/scripts/compare-selfhost.mjs
+
       - name: Audit portable PSC1 source profile
         shell: bash
         run: |
@@ -114,8 +122,12 @@ jobs:
           lake exe psc1 check /tmp/psc1-cli.ps
           lake exe psc1 emit-lean /tmp/psc1-cli.ps > /tmp/psc1-cli-emitted.lean
           lake exe psc1 translate /tmp/psc1-cli.lean --to ps > /tmp/psc1-cli-translated.ps
+          lake exe psc1 emit-ps /tmp/psc1-cli.lean --out /tmp/psc1-cli-output.ps
+          lake exe psc1 translate /tmp/psc1-cli.ps --to lean --out /tmp/psc1-cli-output.lean
           grep -q 'def idNat' /tmp/psc1-cli-emitted.lean
           grep -q 'def idNat' /tmp/psc1-cli-translated.ps
+          grep -q 'def idNat' /tmp/psc1-cli-output.ps
+          grep -q 'def idNat' /tmp/psc1-cli-output.lean
           rm -f /tmp/psc1-cli.js /tmp/psc1-cli.d.ts /tmp/psc1-cli.js.map
           lake exe psc1 build /tmp/psc1-cli.lean --out /tmp/psc1-cli.ts
           test -f /tmp/psc1-cli.js

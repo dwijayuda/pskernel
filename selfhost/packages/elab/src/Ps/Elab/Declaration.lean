@@ -1121,7 +1121,7 @@ def psElabPartialDeclaration
               | Except.ok _ =>
                   let typeMeta := typeResult.context.metaContext;
                   let openType :=
-                    psMetaInstantiate typeMeta typeResult.term
+                    psMetaInstantiate typeMeta typeResult.term;
                   let closedType :=
                     psCloseElabForallBinders
                       typeMeta

@@ -248,6 +248,26 @@ def psRustCoverageParameterList :
         (psRustCoverageType withParameter parameter.type)
         rest
 
+def psRustCoverageLambdaParameterList :
+    PsRustCoverage ->
+    List PsVerifiedIrParameter ->
+    PsRustCoverage
+  | coverage, List.nil =>
+      coverage
+  | coverage, List.cons parameter rest =>
+      let withParameter :=
+        if psRustTypeContainsFunction parameter.type then
+          psRustCoverageAddUnsupported
+            (psRustCoverageAddFeature
+              coverage
+              "expr:lambdaFunctionParameter")
+            "expr:lambdaFunctionParameter"
+        else
+          coverage;
+      psRustCoverageLambdaParameterList
+        (psRustCoverageType withParameter parameter.type)
+        rest
+
 def psRustCoverageFoldExprListWith
     (visit :
       PsRustCoverage ->
@@ -350,7 +370,7 @@ def psRustCoverageExprWithFuel :
               coverage
               "expr:lambda";
           let withParameterTypes :=
-            psRustCoverageParameterList
+            psRustCoverageLambdaParameterList
               withLambda
               parameters;
           psRustCoverageExprWithFuel

@@ -83,6 +83,36 @@ Portable compiler source must stay inside the intersection of:
 2. constructs we are willing to support in canonical `.ps`;
 3. ordinary Lean syntax accepted by official Lean 4.34.
 
+For ProofScript source syntax, the normative PSC1 reference is **ProofScript
+Language Reference v0.7, with v0.6.1 as the compatible compiler-ready
+baseline**. **Do not use v0.8 as the PSC1 language reference.** A later
+reference revision may be studied separately, but it must not silently remove
+or redefine v0.7/v0.6.1 PSC1 source forms.
+
+Accordingly, PSC1 includes all three v0.7/v0.6.1 definition spellings:
+
+```proofscript
+def answer : Nat := 42;
+const answer2 : Nat := 42;
+function add(x : Nat, y : Nat) : Nat := x + y;
+```
+
+Their semantics are one ordinary definition mechanism:
+
+```text
+const    -> parameterless def alias
+function -> parameterized def alias, >= 1 explicit parameter group
+def      -> canonical general definition
+```
+
+`const` with declaration parameters and `function` without an explicit
+parameter group are invalid. A parameterless `const` may still contain a
+function-valued expression. Neither alias has JavaScript-specific semantics.
+When translating to Lean, both aliases canonicalize to `def`. When generating
+canonical `.ps` from Lean during the source transition, emitting `def` is
+sufficient; lexical alias preservation is not required because aliases have
+identical checked semantics.
+
 The fact that Lean accepts a construct does not make it part of PSC1.
 
 Portable semantic modules must not depend on Lean's implementation APIs,

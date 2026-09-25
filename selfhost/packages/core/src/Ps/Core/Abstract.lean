@@ -2,7 +2,7 @@ import Ps.Core.Expr
 
 def psExprAbstractFVarAt (target : Nat) (depth : Nat) : PsExpr -> PsExpr
   | .fvar id =>
-      if id == target then
+      if Nat.beq id target then
         PsExpr.bvar depth
       else
         PsExpr.fvar id

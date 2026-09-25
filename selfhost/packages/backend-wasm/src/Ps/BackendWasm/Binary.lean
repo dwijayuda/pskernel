@@ -5,6 +5,7 @@ inductive PsWasmEncodeError where
   | unsupportedInstruction
   | negativeIntegerConstant
   | unknownFunction (name : String)
+  | unknownFunctionType (name : String)
   | unknownStructure (name : String)
 
 def psWasmByte (value : Nat) : UInt8 :=
@@ -128,6 +129,7 @@ def psWasmEncodeValueType
           Except.ok
             ([psWasmByte 100]
               ++ psWasmEncodeSleb (Int.ofNat index))
+  | .funcRef => Except.ok [psWasmByte 112]
   | .noValue => Except.error PsWasmEncodeError.unsupportedValueType
 
 def psWasmEncodeValueTypes
@@ -148,6 +150,60 @@ def psWasmEncodeVector
     (bytes : List UInt8)
     (count : Nat) : List UInt8 :=
   psWasmEncodeUleb count ++ bytes
+
+def psWasmFindFunctionTypeIndexLoop
+    (name : String) :
+    Nat -> List PsWasmFunctionType -> Option Nat
+  | _, [] => none
+  | index, functionType :: rest =>
+      if functionType.name == name then
+        some index
+      else
+        psWasmFindFunctionTypeIndexLoop
+          name
+          (index + 1)
+          rest
+
+def psWasmFindFunctionTypeIndex
+    (structures : List PsWasmStructType)
+    (functionTypes : List PsWasmFunctionType)
+    (name : String) : Option Nat :=
+  match psWasmFindFunctionTypeIndexLoop name 0 functionTypes with
+  | none => none
+  | some index => some (structures.length + index)
+
+def psWasmEncodeNamedFunctionType
+    (structures : List PsWasmStructType)
+    (functionType : PsWasmFunctionType) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match psWasmEncodeValueTypes structures functionType.parameters with
+  | Except.error error => Except.error error
+  | Except.ok parameters =>
+      match psWasmEncodeValueTypes structures functionType.results with
+      | Except.error error => Except.error error
+      | Except.ok results =>
+          Except.ok
+            ([psWasmByte 96]
+              ++ psWasmEncodeVector
+                parameters
+                functionType.parameters.length
+              ++ psWasmEncodeVector
+                results
+                functionType.results.length)
+
+def psWasmEncodeNamedFunctionTypes
+    (structures : List PsWasmStructType) :
+    List PsWasmFunctionType ->
+    Except PsWasmEncodeError (List UInt8)
+  | [] => Except.ok []
+  | functionType :: rest =>
+      match psWasmEncodeNamedFunctionType structures functionType with
+      | Except.error error => Except.error error
+      | Except.ok encoded =>
+          match psWasmEncodeNamedFunctionTypes structures rest with
+          | Except.error error => Except.error error
+          | Except.ok encodedRest =>
+              Except.ok (encoded ++ encodedRest)
 
 def psWasmEncodeFunctionType
     (structures : List PsWasmStructType)

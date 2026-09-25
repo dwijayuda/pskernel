@@ -43,6 +43,18 @@ structure PsElabTermResult where
   term : PsExpr
   type : PsExpr
 
+def psElabBoolNot (value : Bool) : Bool :=
+  if value then false else true
+
+def psElabBoolOr (left right : Bool) : Bool :=
+  if left then true else right
+
+def psElabBoolAnd (left right : Bool) : Bool :=
+  if left then right else false
+
+def psElabNatNe (left right : Nat) : Bool :=
+  if Nat.beq left right then false else true
+
 def psSyntaxNameAppendSegments : PsName -> List String -> PsName
   | name, [] => name
   | name, segment :: rest =>
@@ -575,7 +587,7 @@ def psElabLambdaBodyExpected
             expectedType with
       | Except.error error => Except.error error
       | Except.ok prepared =>
-          Except.ok (prepared.1, some prepared.2)
+          Except.ok ((Prod.fst prepared), some (Prod.snd prepared))
 
 def psElabLambda
     (elaborate :
@@ -598,7 +610,7 @@ def psElabLambda
             expected with
       | Except.error error => Except.error error
       | Except.ok prepared =>
-          match elaborate prepared.1 body prepared.2 with
+          match elaborate (Prod.fst prepared) body (Prod.snd prepared) with
           | Except.error error => Except.error error
           | Except.ok bodyResult =>
               let metaContext := bodyResult.context.metaContext
@@ -617,8 +629,8 @@ def psElabLambda
               psElabFinalizeExpected
                 {
                   context := outerContext
-                  term := closed.1
-                  type := closed.2
+                  term := (Prod.fst closed)
+                  type := (Prod.snd closed)
                 }
                 expected
 
@@ -891,15 +903,23 @@ def psExprAppView (expr : PsExpr) : PsExprAppView :=
 def psExprHasConst (target : PsName) : PsExpr -> Bool
   | .constE name _ => psNameEq name target
   | .app fn argument =>
-      psExprHasConst target fn || psExprHasConst target argument
+      psElabBoolOr
+        (psExprHasConst target fn)
+        (psExprHasConst target argument)
   | .lam _ type body _ =>
-      psExprHasConst target type || psExprHasConst target body
+      psElabBoolOr
+        (psExprHasConst target type)
+        (psExprHasConst target body)
   | .forallE _ type body _ =>
-      psExprHasConst target type || psExprHasConst target body
+      psElabBoolOr
+        (psExprHasConst target type)
+        (psExprHasConst target body)
   | .letE _ type value body =>
-      psExprHasConst target type
-        || psExprHasConst target value
-        || psExprHasConst target body
+      psElabBoolOr
+        (psExprHasConst target type)
+        (psElabBoolOr
+          (psExprHasConst target value)
+          (psExprHasConst target body))
   | .proj _ _ value => psExprHasConst target value
   | _ => false
 
@@ -1055,9 +1075,14 @@ def psElabMatchApplyParameters
 def psSyntaxNameIsWildcardBinder
     (name : PsSyntaxName) : Bool :=
   match name.segments with
-  | List.cons segment List.nil =>
-      psStringEq segment "_"
-  | _ => false
+  | List.nil =>
+      false
+  | List.cons segment rest =>
+      match rest with
+      | List.nil =>
+          psStringEq segment "_"
+      | List.cons _ _ =>
+          false
 
 def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
   | List.nil => false
@@ -1072,9 +1097,15 @@ def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
               if psSyntaxNameIsWildcardBinder candidate then
                 false
               else
-                match coreName, psSyntaxNameToName candidate with
-                | some left, some right => psNameEq left right
-                | _, _ => false);
+                match coreName with
+                | none =>
+                    false
+                | some left =>
+                    match psSyntaxNameToName candidate with
+                    | none =>
+                        false
+                    | some right =>
+                        psNameEq left right);
         if duplicated then
           true
         else
@@ -1252,18 +1283,18 @@ def psElabMatchConstructorMinor
               span
               0
               ctorInfo.numFields
-      if !psNameEq ctorInfo.inductiveName inductiveInfo.name then
+      if psElabBoolNot (psNameEq ctorInfo.inductiveName inductiveInfo.name) then
         Except.error
           (PsElabError.matchConstructorUnknown constructorName)
-      else if ctorInfo.numParams != parameterArgs.length then
+      else if psElabNatNe ctorInfo.numParams parameterArgs.length then
         Except.error PsElabError.matchParameterArity
-      else if ctorInfo.numFields != binders.length then
+      else if psElabNatNe ctorInfo.numFields binders.length then
         Except.error
           (PsElabError.matchConstructorArity constructorName)
       else if psSyntaxNameListHasDuplicate binders then
         Except.error
           (PsElabError.matchConstructorArity constructorName)
-      else if ctorInfo.levelParams.length != inductiveLevels.length then
+      else if psElabNatNe ctorInfo.levelParams.length inductiveLevels.length then
         Except.error PsElabError.matchRecursorLevels
       else
         let ctorType :=
@@ -1456,9 +1487,9 @@ def psElabMatch
               | none =>
                   Except.error PsElabError.matchScrutineeUnsupported
               | some inductiveInfo =>
-                  if inductiveInfo.numIndices != 0 then
+                  if psElabNatNe inductiveInfo.numIndices 0 then
                     Except.error PsElabError.matchInductiveUnsupported
-                  else if typeView.args.length != inductiveInfo.numParams then
+                  else if psElabNatNe typeView.args.length inductiveInfo.numParams then
                     Except.error PsElabError.matchParameterArity
                   else
                     match psElabPrepareMatchAlternatives
@@ -1475,11 +1506,18 @@ def psElabMatch
                         | none =>
                             Except.error PsElabError.matchRecursorUnsupported
                         | some recInfo =>
-                            if recInfo.numParams != inductiveInfo.numParams
-                                || recInfo.numIndices != 0
-                                || recInfo.numMotives != 1
-                                || recInfo.numMinors
-                                  != inductiveInfo.constructors.length then
+                            if
+                                psElabBoolOr
+                                  (psElabNatNe
+                                    recInfo.numParams
+                                    inductiveInfo.numParams)
+                                  (psElabBoolOr
+                                    (psElabNatNe recInfo.numIndices 0)
+                                    (psElabBoolOr
+                                      (psElabNatNe recInfo.numMotives 1)
+                                      (psElabNatNe
+                                        recInfo.numMinors
+                                        inductiveInfo.constructors.length))) then
                               Except.error
                                 PsElabError.matchRecursorUnsupported
                             else
@@ -1504,13 +1542,13 @@ def psElabMatch
                                       Except.error (PsElabError.infer error)
                                   | Except.ok resultLevel =>
                                       let recursorLevels :=
-                                        if recInfo.levelParams.length == 0 then
+                                        if Nat.beq recInfo.levelParams.length 0 then
                                           []
-                                        else if recInfo.levelParams.length == 1 then
+                                        else if Nat.beq recInfo.levelParams.length 1 then
                                           [resultLevel]
                                         else
                                           []
-                                      if recInfo.levelParams.length > 1 then
+                                      if Nat.blt 1 recInfo.levelParams.length then
                                         Except.error
                                           PsElabError.matchRecursorLevels
                                       else
@@ -1621,8 +1659,10 @@ def psElabApplyArgsWithFuel
                       }
                       rest
                       pendingInstancesRev
-          else if psBinderIsStrictImplicit binder
-              && arguments.isEmpty then
+          else if
+              psElabBoolAnd
+                (psBinderIsStrictImplicit binder)
+                arguments.isEmpty then
             Except.ok {
               result := current
               pendingInstancesRev := pendingInstancesRev
@@ -1783,7 +1823,7 @@ def psElabTakeForallNames :
 def psSyntaxRecordFieldName
     (field : Prod PsSyntaxName PsSyntaxTerm) :
     Option String :=
-  match field.1.segments.reverse with
+  match (Prod.fst field).segments.reverse with
   | [] => none
   | name :: _ => some name
 
@@ -1795,15 +1835,16 @@ def psSyntaxRecordHasField
     (fun field =>
       match psSyntaxRecordFieldName field with
       | none => false
-      | some fieldName => fieldName == name)
+      | some fieldName => psStringEq fieldName name)
 
 def psSyntaxRecordFieldsMatch
     (fields :
       List (Prod PsSyntaxName PsSyntaxTerm))
     (names : List String) : Bool :=
-  fields.length == names.length
-    && names.all
-      (fun name => psSyntaxRecordHasField fields name)
+  psElabBoolAnd
+    (Nat.beq fields.length names.length)
+    (names.all
+      (fun name => psSyntaxRecordHasField fields name))
 
 def psSyntaxRecordFindField :
     List (Prod PsSyntaxName PsSyntaxTerm) ->
@@ -1813,8 +1854,8 @@ def psSyntaxRecordFindField :
   | field :: rest, name =>
       match psSyntaxRecordFieldName field with
       | some fieldName =>
-          if fieldName == name then
-            some field.2
+          if psStringEq fieldName name then
+            some (Prod.snd field)
           else
             psSyntaxRecordFindField rest name
       | none =>
@@ -1885,7 +1926,7 @@ def psElabRecordCandidateFromExpected
             typeName with
       | none => none
       | some info =>
-          if view.args.length != info.numParams then
+          if psElabNatNe view.args.length info.numParams then
             none
           else
             psElabRecordCandidateForInfo
@@ -2043,12 +2084,12 @@ def psElabValidateStructuralCall
   | index, argument :: rest, hypothesisId =>
       match psElabSyntaxLocalId context argument with
       | none =>
-          if index == recursion.recursiveParameterIndex then
+          if Nat.beq index recursion.recursiveParameterIndex then
             Except.error PsElabError.structuralRecursionNotDecreasing
           else
             Except.error PsElabError.structuralRecursionInvariantArgument
       | some argumentId =>
-          if index == recursion.recursiveParameterIndex then
+          if Nat.beq index recursion.recursiveParameterIndex then
             match
                 psElabStructuralRecursionFindCall
                   recursion.calls
@@ -2066,7 +2107,7 @@ def psElabValidateStructuralCall
             match recursion.explicitParameterIds[index]? with
             | none => Except.error PsElabError.structuralRecursionArity
             | some originalId =>
-                if argumentId == originalId then
+                if Nat.beq argumentId originalId then
                   psElabValidateStructuralCall
                     context
                     recursion
@@ -2083,34 +2124,41 @@ def psTryElabStructuralSelfCall
     (arguments : List PsSyntaxTerm)
     (expected : Option PsExpr) :
     Except PsElabError (Option PsElabTermResult) :=
-  match context.structuralRecursion, fn with
-  | some recursion, .reference sourceName =>
-      match psSyntaxNameToName sourceName with
-      | some calledName =>
-          if !psNameEq calledName recursion.functionName then
-            Except.ok none
-          else if
-              arguments.length != recursion.explicitParameterIds.length then
-            Except.error PsElabError.structuralRecursionArity
-          else
-            match
-                psElabValidateStructuralCall
-                  context
-                  recursion
-                  0
-                  arguments
-                  none with
-            | Except.error error => Except.error error
-            | Except.ok hypothesisId =>
+  match context.structuralRecursion with
+  | none =>
+      Except.ok none
+  | some recursion =>
+      match fn with
+      | .reference sourceName =>
+          match psSyntaxNameToName sourceName with
+          | some calledName =>
+              if psElabBoolNot (psNameEq calledName recursion.functionName) then
+                Except.ok none
+              else if
+                  psElabNatNe
+                    arguments.length
+                    recursion.explicitParameterIds.length then
+                Except.error PsElabError.structuralRecursionArity
+              else
                 match
-                    psElabResolvedTerm
+                    psElabValidateStructuralCall
                       context
-                      (PsExpr.fvar hypothesisId)
-                      expected with
+                      recursion
+                      0
+                      arguments
+                      none with
                 | Except.error error => Except.error error
-                | Except.ok result => Except.ok (some result)
-      | none => Except.ok none
-  | _, _ => Except.ok none
+                | Except.ok hypothesisId =>
+                    match
+                        psElabResolvedTerm
+                          context
+                          (PsExpr.fvar hypothesisId)
+                          expected with
+                    | Except.error error => Except.error error
+                    | Except.ok result => Except.ok (some result)
+          | none => Except.ok none
+      | _ =>
+          Except.ok none
 
 def psElabTermWithFuel
     (fuel : Nat)

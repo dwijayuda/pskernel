@@ -873,6 +873,57 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
     ]
   }
 
+def psWasmGcArraySmokeTypeName : String :=
+  "ProofScript.TestU32Array"
+
+def psWasmAddGcArrayTargetSmoke
+    (module : PsWasmModule) : PsWasmModule :=
+  {
+    structures := module.structures
+    arrays :=
+      module.arrays ++ [
+        {
+          name := psWasmGcArraySmokeTypeName
+          elementType :=
+            PsWasmStorageType.value PsWasmValueType.i32
+          mutable := true
+        }
+      ]
+    functionTypes := module.functionTypes
+    functions :=
+      module.functions ++ [
+        {
+          name := "gcArray42"
+          typeName := none
+          parameters := []
+          results := [PsWasmValueType.i32]
+          locals := [
+            PsWasmValueType.refT psWasmGcArraySmokeTypeName
+          ]
+          body := [
+            PsWasmInstruction.i32Const 20,
+            PsWasmInstruction.i32Const 22,
+            PsWasmInstruction.arrayNewFixed
+              psWasmGcArraySmokeTypeName
+              2,
+            PsWasmInstruction.localSet 0,
+            PsWasmInstruction.localGet 0,
+            PsWasmInstruction.i32Const 0,
+            PsWasmInstruction.arrayGet
+              psWasmGcArraySmokeTypeName,
+            PsWasmInstruction.localGet 0,
+            PsWasmInstruction.i32Const 1,
+            PsWasmInstruction.arrayGet
+              psWasmGcArraySmokeTypeName,
+            PsWasmInstruction.i32Add
+          ]
+        }
+      ]
+    functionRefs := module.functionRefs
+    exports :=
+      module.exports ++ [("gcArray42", "gcArray42")]
+  }
+
 def psWasmByteStrings : List UInt8 -> List String
   | [] => []
   | byte :: rest =>
@@ -889,7 +940,9 @@ def main : IO Unit := do
   | Except.error _ =>
       throw (IO.userError "PSC1_BACKEND_WASM_BINARY_SMOKE: lower failed")
   | Except.ok module =>
-      match psWasmEncodeModule module with
+      let moduleWithArraySmoke :=
+        psWasmAddGcArrayTargetSmoke module
+      match psWasmEncodeModule moduleWithArraySmoke with
       | Except.error _ =>
           throw (IO.userError "PSC1_BACKEND_WASM_BINARY_SMOKE: encode failed")
       | Except.ok bytes =>

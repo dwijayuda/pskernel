@@ -89,7 +89,8 @@ lean_lib PsBackendWasm where
   roots := #[
     `Ps.BackendWasm.Model,
     `Ps.BackendWasm.Type,
-    `Ps.BackendWasm.LowerInt
+    `Ps.BackendWasm.LowerInt,
+    `Ps.BackendWasm.Binary
   ]
 
 lean_lib PsCompiler where

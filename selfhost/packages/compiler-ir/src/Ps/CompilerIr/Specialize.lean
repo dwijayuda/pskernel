@@ -431,6 +431,112 @@ def psIrSpecializeRewriteType
     128
     type
 
+def psIrSpecializeRewriteIntrinsic
+    (module : PsVerifiedIrModule)
+    (substitution : List (String × PsVerifiedIrType))
+    (operation : PsVerifiedIrIntrinsic) :
+    Except PsIrSpecializeError PsIrSpecializeIntrinsicResult :=
+  let rewriteType :=
+    psIrSpecializeRewriteType module substitution
+  match operation with
+  | .arrayEmptyWithCapacity elementType =>
+      match rewriteType elementType with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            operation :=
+              PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                lowered.type
+            requests := lowered.requests
+          }
+  | .arraySize elementType =>
+      match rewriteType elementType with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            operation := PsVerifiedIrIntrinsic.arraySize lowered.type
+            requests := lowered.requests
+          }
+  | .arrayPush elementType =>
+      match rewriteType elementType with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            operation := PsVerifiedIrIntrinsic.arrayPush lowered.type
+            requests := lowered.requests
+          }
+  | .arrayGet elementType =>
+      match rewriteType elementType with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            operation := PsVerifiedIrIntrinsic.arrayGet lowered.type
+            requests := lowered.requests
+          }
+  | .arrayGetD elementType =>
+      match rewriteType elementType with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            operation := PsVerifiedIrIntrinsic.arrayGetD lowered.type
+            requests := lowered.requests
+          }
+  | .arraySet elementType =>
+      match rewriteType elementType with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            operation := PsVerifiedIrIntrinsic.arraySet lowered.type
+            requests := lowered.requests
+          }
+  | .arraySetIfInBounds elementType =>
+      match rewriteType elementType with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            operation :=
+              PsVerifiedIrIntrinsic.arraySetIfInBounds
+                lowered.type
+            requests := lowered.requests
+          }
+  | .arrayMap sourceType resultType =>
+      match rewriteType sourceType with
+      | Except.error error => Except.error error
+      | Except.ok loweredSource =>
+          match rewriteType resultType with
+          | Except.error error => Except.error error
+          | Except.ok loweredResult =>
+              Except.ok {
+                operation :=
+                  PsVerifiedIrIntrinsic.arrayMap
+                    loweredSource.type
+                    loweredResult.type
+                requests :=
+                  loweredSource.requests
+                    ++ loweredResult.requests
+              }
+  | .arrayFoldl elementType accumulatorType =>
+      match rewriteType elementType with
+      | Except.error error => Except.error error
+      | Except.ok loweredElement =>
+          match rewriteType accumulatorType with
+          | Except.error error => Except.error error
+          | Except.ok loweredAccumulator =>
+              Except.ok {
+                operation :=
+                  PsVerifiedIrIntrinsic.arrayFoldl
+                    loweredElement.type
+                    loweredAccumulator.type
+                requests :=
+                  loweredElement.requests
+                    ++ loweredAccumulator.requests
+              }
+  | _ =>
+      Except.ok {
+        operation := operation
+        requests := []
+      }
+
 def psIrSpecializeRewriteParameters
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType)) :
@@ -634,18 +740,27 @@ def psIrSpecializeRewriteExprWithFuel
           }
       | .intrinsic operation arguments =>
           match
-              psIrSpecializeRewriteExprListWith
-                rewrite
-                arguments with
+              psIrSpecializeRewriteIntrinsic
+                module
+                substitution
+                operation with
           | Except.error error => Except.error error
-          | Except.ok lowered =>
-              Except.ok {
-                expr :=
-                  PsVerifiedIrExpr.intrinsic
-                    operation
-                    lowered.expressions
-                requests := lowered.requests
-              }
+          | Except.ok loweredOperation =>
+              match
+                  psIrSpecializeRewriteExprListWith
+                    rewrite
+                    arguments with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    expr :=
+                      PsVerifiedIrExpr.intrinsic
+                        loweredOperation.operation
+                        lowered.expressions
+                    requests :=
+                      loweredOperation.requests
+                        ++ lowered.requests
+                  }
       | .lambda parameters resultType body =>
           match
               psIrSpecializeRewriteParameters

@@ -48,7 +48,7 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
         PsBinderInfo.explicit)
       PsBinderInfo.explicit;
   let prodOf :=
-    fun alpha beta =>
+    fun (alpha : PsExpr) (beta : PsExpr) =>
       PsExpr.app
         (PsExpr.app (PsExpr.constE psProdName []) alpha)
         beta;
@@ -81,7 +81,7 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
         PsBinderInfo.implicit)
       PsBinderInfo.implicit;
   let arrayOf :=
-    fun alpha => PsExpr.app (PsExpr.constE psArrayName []) alpha;
+    fun (alpha : PsExpr) => PsExpr.app (PsExpr.constE psArrayName []) alpha;
   let arrayType :=
     PsExpr.forallE
       alphaName

@@ -219,9 +219,11 @@ def psJsonWhitespace (char : Char) : Bool :=
   else
     psJsonCharEq char '\t'
 
-def psJsonSkipWhitespace : List Char -> List Char
-  | [] => []
-  | char :: rest =>
+def psJsonSkipWhitespace (chars : List Char) : List Char :=
+  match chars with
+  | List.nil =>
+      List.nil
+  | List.cons char rest =>
       if psJsonWhitespace char then
         psJsonSkipWhitespace rest
       else

@@ -427,7 +427,12 @@ def psPrintProofScriptConstructor
   match psPrintSyntaxName constructor.name with
   | Except.error error => Except.error error
   | Except.ok name =>
-      match constructor.fields.mapM psPrintProofScriptBinder with
+      let fieldsResult :
+          Except PsSourcePrintError (List String) :=
+        psPrintProofScriptMapBinders
+          psPrintProofScriptBinder
+          constructor.fields;
+      match fieldsResult with
       | Except.error error => Except.error error
       | Except.ok fields =>
           let suffix :=

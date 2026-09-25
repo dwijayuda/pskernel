@@ -606,17 +606,6 @@ def psCheckedAdmissionReverseStringsAcc
         smaller (List.cons head acc)
 
 
-def psCheckedAdmissionReverseStringsAcc
-    (values : List String)
-    (acc : List String) : List String :=
-  match values with
-  | List.nil =>
-      acc
-  | List.cons head tail =>
-      psCheckedAdmissionReverseStringsAcc
-        tail
-        (List.cons head acc)
-
 def psCheckedAdmissionReverseStrings
     (values : List String) : List String :=
   psCheckedAdmissionReverseStringsAcc values List.nil

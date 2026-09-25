@@ -667,41 +667,43 @@ def psPrintLeanImport
 def psPrintLeanModule
     (module : PsSyntaxModule) :
     Except PsSourcePrintError String :=
-  let importsResult :
-      Except PsSourcePrintError (List String) :=
-    psPrintLeanMapImports psPrintLeanImport module.imports;
-  match importsResult with
-  | Except.error error => Except.error error
-  | Except.ok imports =>
-      let declarationsResult :
+  match module with
+  | PsSyntaxModule.mk sourceImports sourceDeclarations =>
+      let importsResult :
           Except PsSourcePrintError (List String) :=
-        psPrintLeanMapDeclarations
-          psPrintLeanDeclaration
-          module.declarations;
-      match declarationsResult with
+        psPrintLeanMapImports psPrintLeanImport sourceImports;
+      match importsResult with
       | Except.error error => Except.error error
-      | Except.ok declarations =>
-          let importSections : List String :=
-            match imports with
-            | List.nil =>
-                List.nil
-            | List.cons _ _ =>
-                List.cons (psPrintJoin "\n" imports) List.nil;
-          let declarationSections : List String :=
-            match declarations with
-            | List.nil =>
-                List.nil
-            | List.cons _ _ =>
-                List.cons
-                  (psPrintJoin "\n\n" declarations)
-                  List.nil;
-          let sections : List String :=
-            List.append importSections declarationSections;
-          match sections with
-          | List.nil =>
-              Except.ok ""
-          | List.cons _ _ =>
-              Except.ok
-                (psPrintLeanConcat2
-                  (psPrintJoin "\n\n" sections)
-                  "\n")
+      | Except.ok imports =>
+          let declarationsResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintLeanMapDeclarations
+              psPrintLeanDeclaration
+              sourceDeclarations;
+          match declarationsResult with
+          | Except.error error => Except.error error
+          | Except.ok declarations =>
+              let importSections : List String :=
+                match imports with
+                | List.nil =>
+                    List.nil
+                | List.cons _ _ =>
+                    List.cons (psPrintJoin "\n" imports) List.nil;
+              let declarationSections : List String :=
+                match declarations with
+                | List.nil =>
+                    List.nil
+                | List.cons _ _ =>
+                    List.cons
+                      (psPrintJoin "\n\n" declarations)
+                      List.nil;
+              let sections : List String :=
+                List.append importSections declarationSections;
+              match sections with
+              | List.nil =>
+                  Except.ok ""
+              | List.cons _ _ =>
+                  Except.ok
+                    (psPrintLeanConcat2
+                      (psPrintJoin "\n\n" sections)
+                      "\n")

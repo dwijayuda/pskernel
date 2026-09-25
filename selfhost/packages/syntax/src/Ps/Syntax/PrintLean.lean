@@ -230,6 +230,26 @@ def psPrintLeanDeclaration
                         ("def " ++ printedName ++ binderSuffix ++
                           " : " ++ printedType ++
                           " := " ++ printedValue)
+  | .partialDefinition name binders type value _ =>
+      match psPrintSyntaxName name with
+      | Except.error error => Except.error error
+      | Except.ok printedName =>
+          match binders.mapM psPrintLeanBinder with
+          | Except.error error => Except.error error
+          | Except.ok printedBinders =>
+              match psPrintLeanTerm type with
+              | Except.error error => Except.error error
+              | Except.ok printedType =>
+                  match psPrintLeanTerm value with
+                  | Except.error error => Except.error error
+                  | Except.ok printedValue =>
+                      let binderSuffix :=
+                        if printedBinders.isEmpty then ""
+                        else " " ++ psPrintJoin " " printedBinders
+                      Except.ok
+                        ("partial def " ++ printedName ++ binderSuffix ++
+                          " : " ++ printedType ++
+                          " := " ++ printedValue)
   | .theoremDecl name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error

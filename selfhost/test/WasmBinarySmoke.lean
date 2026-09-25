@@ -1103,6 +1103,185 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
               PsVerifiedIrExpr.literal
               (PsVerifiedIrLiteral.natural 42)
             ]
+      },
+      {
+        name := "intOfNatExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.intEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intOfNat
+              []
+              [
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 42)
+              ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (42))
+            ]
+      },
+      {
+        name := "intNegSuccExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.intEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intNegSucc
+              []
+              [
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 41)
+              ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (-42))
+            ]
+      },
+      {
+        name := "intNegExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.intEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intNeg
+              []
+              [
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (-42))
+              ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (42))
+            ]
+      },
+      {
+        name := "intAddMixedExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.intEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intAdd
+              []
+              [
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (-50)),
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (92))
+              ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (42))
+            ]
+      },
+      {
+        name := "intSubMixedExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.intEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intSub
+              []
+              [
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (20)),
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (-22))
+              ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (42))
+            ]
+      },
+      {
+        name := "intMulSignedExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.intEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intMul
+              []
+              [
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (-6)),
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (-7))
+              ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (42))
+            ]
+      },
+      {
+        name := "intLargeExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.intEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intAdd
+              []
+              [
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (-1208925819614629174706176)),
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (1208925819614629174706218))
+              ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (42))
+            ]
+      },
+      {
+        name := "intLtExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.intLt
+              []
+              [
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (-43)),
+                PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (42))
+              ]
       }
     ]
   }

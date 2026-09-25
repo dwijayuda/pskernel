@@ -36,6 +36,65 @@ Until the self-hosting foundation gates in this document are closed:
 
 ## Reference workload
 
+### ProofScript language-reference baseline
+
+PSC1 uses the **ProofScript Language Reference v0.7 line, with v0.6.1 as the
+compatible compiler-ready baseline**, for ordinary ProofScript source syntax.
+The v0.8 language reference is **not** normative for PSC1 and must not be used
+to remove or reinterpret source forms that v0.7/v0.6.1 define.
+
+In particular, PSC1 preserves the v0.7/v0.6.1 definition-declaration family:
+
+- `def` is the canonical general definition declaration;
+- `const` is a **parameterless `def` alias**;
+- `function` is a **parameterized `def` alias** and requires at least one
+  explicit declaration parameter group.
+
+The aliases introduce **no new checked-core, kernel, erasure, IR, or runtime
+declaration kinds**. Both lower/elaborate exactly as ordinary `def`
+declarations. Their purpose is source ergonomics only.
+
+Required source rules:
+
+```proofscript
+def answer : Nat := 42;
+
+const answer2 : Nat := 42;
+
+function add(x : Nat, y : Nat) : Nat :=
+  x + y;
+```
+
+A `const` declaration must not have declaration parameters:
+
+```proofscript
+const add(x : Nat, y : Nat) : Nat := x + y;  // reject
+```
+
+but a parameterless `const` may still hold a function-valued expression:
+
+```proofscript
+const increment : Nat -> Nat :=
+  fun x => x + 1;
+```
+
+A `function` declaration without an explicit parameter group must be rejected:
+
+```proofscript
+function answer : Nat := 42;  // reject
+```
+
+These spellings must not acquire JavaScript semantics. In particular, `const`
+does not mean JavaScript binding/object immutability, and `function` does not
+introduce JavaScript hoisting, `this`, prototypes, statement-body semantics,
+or unrestricted `return`.
+
+Canonical Lean translation always emits `def`. Canonical ProofScript
+translation may also normalize aliases to `def`; semantic/source round-trip
+gates require equal checked-core/IR meaning, not preservation of the original
+alias spelling. Therefore supporting these aliases does not create a second
+semantic mechanism.
+
 The implementation workload is derived from the pinned Lean 4.34 sources under:
 
 - `study/lean4-4.34.0/src/Lean/Parser/`
@@ -148,6 +207,10 @@ The preferred canonical choices for the first bootstrap are:
 The **minimal REQUIRED PSC1 language/capability set** is:
 
 - definitions, functions, lambdas, application and `let`;
+- the v0.7/v0.6.1 definition spellings: canonical `def`, parameterless
+  `const` alias, and parameterized `function` alias with at least one
+  explicit declaration parameter group; all three elaborate to the same
+  definition semantics;
 - ordinary `if` and basic single-scrutinee `match`;
 - structures, inductives, constructors and projections;
 - the PSC1 primitive/runtime scalar foundation:
@@ -1199,6 +1262,18 @@ feature must be green for:
 4. stable compiler-IR fingerprints;
 5. TypeScript emission;
 6. JavaScript execution.
+
+The declaration-alias row is REQUIRED before SH7 freeze. It must additionally
+prove:
+
+- `def f(...)` and equivalent `function f(...)` produce equal checked-core
+  and compiler-IR fingerprints;
+- parameterless `def x` and equivalent `const x` produce equal checked-core
+  and compiler-IR fingerprints;
+- `const` with declaration parameters is rejected;
+- `function` without an explicit declaration parameter group is rejected;
+- canonical Lean lowering emits `def`, never a new Lean declaration kind;
+- alias spelling never changes runtime behavior or proof authority.
 
 The full generated `.lean -> .ps` / `.ps -> .lean` parity matrix is deferred
 until the completed SH8a compiler can generate canonical ProofScript source

@@ -1,4 +1,5 @@
 import Ps.BackendRust.Module
+import Ps.BackendRust.Coverage
 
 def psBackendRustIdentityModule : PsVerifiedIrModule :=
   {
@@ -363,6 +364,58 @@ def psTestBackendRustIdentifiers : Bool :=
       (psRustIdentifier "__psr_value")
       "__psr___psr_value"
 
+def psBackendRustUnsupportedImportModule : PsVerifiedIrModule :=
+  {
+    imports := [
+      {
+        localName := "hostValue"
+        source := "host"
+        importedName := "value"
+        type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+      }
+    ]
+    structures := []
+    inductives := []
+    declarations := []
+  }
+
+def psBackendRustUnknownTypeModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "unknownValue"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.unknown
+        body := PsVerifiedIrExpr.literal PsVerifiedIrLiteral.unit
+      }
+    ]
+  }
+
+def psTestBackendRustCoverageSupported : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustIdentityModule;
+  Nat.beq
+    (psRustCoverageLength coverage.unsupported)
+    0
+
+def psTestBackendRustCoverageExternalImport : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustUnsupportedImportModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "module:externalImport"
+
+def psTestBackendRustCoverageUnknownType : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustUnknownTypeModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "type:unknown"
+
 structure PsBackendRustNamedTest where
   name : String
   passed : Bool
@@ -375,7 +428,10 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "Array intrinsics", passed := psTestBackendRustArrayIntrinsics },
   { name := "top-level values and shadowing", passed := psTestBackendRustValues },
   { name := "frozen PSC1 scalar mappings", passed := psTestBackendRustScalarTypes },
-  { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers }
+  { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers },
+  { name := "coverage accepts supported IR", passed := psTestBackendRustCoverageSupported },
+  { name := "coverage rejects external imports", passed := psTestBackendRustCoverageExternalImport },
+  { name := "coverage rejects unknown runtime types", passed := psTestBackendRustCoverageUnknownType }
 ]
 
 def psRunBackendRustTests : List PsBackendRustNamedTest -> IO Bool

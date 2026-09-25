@@ -513,14 +513,21 @@ def psParseLeanBinderType
     cursor
 
 def psParseLeanBinderNamesWithFuel
-    (fuel : Nat)
-    (cursor : PsTokenCursor)
-    (namesRev : List PsSyntaxName) :
+    (fuel : Nat) :
+    PsTokenCursor ->
+    List PsSyntaxName ->
     Except PsParseError
       (PsParseResult (List PsSyntaxName)) :=
   match fuel with
-  | 0 => Except.error PsParseError.fuelExhausted
+  | 0 =>
+      fun
+        (_cursor : PsTokenCursor)
+        (_namesRev : List PsSyntaxName) =>
+      Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
+      fun
+        (cursor : PsTokenCursor)
+        (namesRev : List PsSyntaxName) =>
       match
           psTokenCursorExpectKind
             cursor
@@ -548,8 +555,7 @@ def psParseLeanBinderNamesWithFuel
                     psTokenKindEq
                       next.kind
                       PsTokenKind.identifier then
-                  psParseLeanBinderNamesWithFuel
-                    remaining
+                  (psParseLeanBinderNamesWithFuel remaining)
                     name.cursor
                     nextNames
                 else

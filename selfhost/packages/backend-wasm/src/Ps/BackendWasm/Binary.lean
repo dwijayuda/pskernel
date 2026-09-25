@@ -100,8 +100,8 @@ def psWasmFindStructureIndexLoop
     (name : String) :
     Nat -> List PsWasmStructType -> Option Nat
   | _, [] => none
-  | index, structure :: rest =>
-      if structure.name == name then
+  | index, structType :: rest =>
+      if structType.name == name then
         some index
       else
         psWasmFindStructureIndexLoop name (index + 1) rest
@@ -424,14 +424,14 @@ def psWasmEncodeStructFields
 
 def psWasmEncodeStructType
     (structures : List PsWasmStructType)
-    (structure : PsWasmStructType) :
+    (structType : PsWasmStructType) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeStructFields structures structure.fields with
+  match psWasmEncodeStructFields structures structType.fields with
   | Except.error error => Except.error error
   | Except.ok fields =>
       Except.ok
         ([psWasmByte 95]
-          ++ psWasmEncodeUleb structure.fields.length
+          ++ psWasmEncodeUleb structType.fields.length
           ++ fields)
 
 def psWasmEncodeStructTypes
@@ -439,8 +439,8 @@ def psWasmEncodeStructTypes
     List PsWasmStructType ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
-  | structure :: rest =>
-      match psWasmEncodeStructType structures structure with
+  | structType :: rest =>
+      match psWasmEncodeStructType structures structType with
       | Except.error error => Except.error error
       | Except.ok encoded =>
           match psWasmEncodeStructTypes structures rest with

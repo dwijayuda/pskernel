@@ -1,3 +1,4 @@
+import Init.ShareCommon
 import PSC1Kernel.Quot
 
 namespace PSC1Kernel
@@ -179,16 +180,23 @@ def addTheorem
     (maxRecDepth : Nat := 0)
     (maxNatSize : Nat := leanNatMaxSizeDefault)
     (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
-  checkConstantBase env value.base .safe maxRecDepth maxNatSize nativeEvaluator
-  let ctx := mkChecker env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
-  unless ← isProp ctx value.base.type do
+  -- Final Lean 4.34 max-shares theorem value and type together before checking.
+  -- `ShareCommon.shareCommon'` is definitionally the identity; only its compiled
+  -- runtime implementation hash-conses equal subgraphs.
+  let shared := ShareCommon.shareCommon' (value.value, value.base.type)
+  let proof := shared.1
+  let theoremType := shared.2
+  let base := { value.base with type := theoremType }
+  checkConstantBase env base .safe maxRecDepth maxNatSize nativeEvaluator
+  let ctx := mkChecker env base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
+  unless ← isProp ctx theoremType do
     throw "theorem type is not a proposition"
-  checkNoMVarNoFVar value.value
-  checkLevelParams value.value value.base.levelParams
-  let valueType ← check ctx value.value
-  unless ← isDefEq ctx valueType value.base.type do
+  checkNoMVarNoFVar proof
+  checkLevelParams proof base.levelParams
+  let valueType ← check ctx proof
+  unless ← isDefEq ctx valueType theoremType do
     throw "theorem proof type mismatch"
-  env.add (.thmInfo value)
+  env.add (.thmInfo { base := base, value := proof })
 
 def addOpaque
     (env : Environment)

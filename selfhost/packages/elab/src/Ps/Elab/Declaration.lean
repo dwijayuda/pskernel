@@ -941,7 +941,7 @@ def psElabInductiveDeclaration
                         Except.ok
                           (Prod.mk
                             elaborated.context
-                            elaborated.term)
+                            elaborated.term);
           match result with
           | Except.error error => Except.error error
           | Except.ok (headerContext, openResultType) =>

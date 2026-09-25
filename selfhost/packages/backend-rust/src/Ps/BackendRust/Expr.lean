@@ -865,18 +865,24 @@ def psRustEmitExprWithFuel :
                             " } else { "
                             printedElse
                             " })"))
-      | PsVerifiedIrExpr.record structureName fields =>
-          match psRustEmitFieldListWith emitNested fields with
+      | PsVerifiedIrExpr.record structureName typeArguments fields =>
+          match psRustEmitTypeArguments typeArguments with
           | Except.error error =>
               Except.error error
-          | Except.ok printedFields =>
-              Except.ok
-                (psRustConcat4
-                  (psRustIdentifier structureName)
-                  " { "
-                  (psRustJoin ", " printedFields)
-                  " }")
-      | PsVerifiedIrExpr.projection _ target field =>
+          | Except.ok generic =>
+              match psRustEmitFieldListWith emitNested fields with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok printedFields =>
+                  Except.ok
+                    (psRustConcat4
+                      (psRustConcat2
+                        (psRustIdentifier structureName)
+                        generic)
+                      " { "
+                      (psRustJoin ", " printedFields)
+                      " }")
+      | PsVerifiedIrExpr.projection _ _ target field =>
           match emitNested target with
           | Except.error error =>
               Except.error error
@@ -890,9 +896,13 @@ def psRustEmitExprWithFuel :
       | PsVerifiedIrExpr.constructor
           inductiveName
           constructorName
-          _
+          typeArguments
           fields =>
-          match psRustEmitFieldListWith emitNested fields with
+          match psRustEmitTypeArguments typeArguments with
+          | Except.error error =>
+              Except.error error
+          | Except.ok generic =>
+            match psRustEmitFieldListWith emitNested fields with
           | Except.error error =>
               Except.error error
           | Except.ok printedFields =>
@@ -900,14 +910,18 @@ def psRustEmitExprWithFuel :
               | List.nil =>
                   Except.ok
                     (psRustConcat4
-                      (psRustIdentifier inductiveName)
+                      (psRustConcat2
+                        (psRustIdentifier inductiveName)
+                        generic)
                       "::"
                       (psRustIdentifier constructorName)
                       "{}")
               | List.cons _ _ =>
                   Except.ok
                     (psRustConcat4
-                      (psRustIdentifier inductiveName)
+                      (psRustConcat2
+                        (psRustIdentifier inductiveName)
+                        generic)
                       "::"
                       (psRustIdentifier constructorName)
                       (psRustConcat3
@@ -916,6 +930,7 @@ def psRustEmitExprWithFuel :
                         " }"))
       | PsVerifiedIrExpr.matchE
           inductiveName
+          _
           scrutinee
           alternatives =>
           match emitNested scrutinee with

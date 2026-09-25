@@ -625,7 +625,8 @@ def psElabLambdaBodyExpected
       PsElabError
       (Prod PsElabContext (Option PsExpr)) :=
   match expected with
-  | none => Except.ok (context, none)
+  | none =>
+      Except.ok (Prod.mk context Option.none)
   | some expectedType =>
       match
           psElabLambdaExpectedBody
@@ -634,7 +635,10 @@ def psElabLambdaBodyExpected
             expectedType with
       | Except.error error => Except.error error
       | Except.ok prepared =>
-          Except.ok ((Prod.fst prepared), some (Prod.snd prepared))
+          Except.ok
+            (Prod.mk
+              (Prod.fst prepared)
+              (Option.some (Prod.snd prepared)))
 
 def psElabLambda
     (elaborate :

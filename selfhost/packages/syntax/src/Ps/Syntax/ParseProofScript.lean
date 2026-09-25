@@ -23,6 +23,16 @@ def psParseOptionalSemicolon
 def psProofScriptBoolNot (value : Bool) : Bool :=
   if value then false else true
 
+def psProofScriptBoolAnd
+    (left : Bool)
+    (right : Bool) : Bool :=
+  if left then right else false
+
+def psProofScriptBoolOr
+    (left : Bool)
+    (right : Bool) : Bool :=
+  if left then true else right
+
 def psParseProofScriptImport
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxImport) :=
@@ -131,8 +141,10 @@ def psParseProofScriptApplicationWithFuel
       match psParseSimpleTerm cursor with
       | Except.error error => Except.error error
       | Except.ok first =>
-          if psTokenCursorAtText first.cursor "("
-              && psProofScriptCallAdjacent first.value first.cursor then
+          if
+              psProofScriptBoolAnd
+                (psTokenCursorAtText first.cursor "(")
+                (psProofScriptCallAdjacent first.value first.cursor) then
             match psTokenCursorAdvance first.cursor with
             | Option.none => Except.error (PsParseError.unexpectedEnd "(")
             | Option.some opening =>
@@ -1212,7 +1224,10 @@ def psParseProofScriptDeclaration
         let isPartial := psStringEq keyword.text "partial";
         let isDefinition := psStringEq keyword.text "def";
         let isTheorem := psStringEq keyword.text "theorem";
-        if psProofScriptBoolNot (isPartial || isDefinition || isTheorem) then
+        if psProofScriptBoolNot
+          (psProofScriptBoolOr
+            isPartial
+            (psProofScriptBoolOr isDefinition isTheorem)) then
           Except.error
             (PsParseError.expectedText
               "partial def, def, theorem, inductive, or structure"

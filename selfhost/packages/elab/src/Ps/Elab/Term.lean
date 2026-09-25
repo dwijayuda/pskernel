@@ -681,12 +681,14 @@ def psElabLambda
                 expected
 
 def psCloseElabForallBinders
-    (metaContext : PsMetaContext) :
-    List PsElabTypedBinder ->
-    PsExpr ->
-    PsExpr
-  | [], body => body
-  | binder :: rest, body =>
+    (metaContext : PsMetaContext)
+    (binders : List PsElabTypedBinder)
+    (body : PsExpr) :
+    PsExpr :=
+  match binders with
+  | [] =>
+      body
+  | binder :: rest =>
       let binderType :=
         psMetaInstantiate metaContext binder.type;
       let closedBody :=
@@ -694,7 +696,7 @@ def psCloseElabForallBinders
           binder.name
           binderType
           (psExprAbstractFVar binder.id body)
-          binder.binder
+          binder.binder;
       psCloseElabForallBinders
         metaContext
         rest
@@ -844,10 +846,16 @@ def psElabLet
                         body
                         expected
 
-def psExprApplyMany : PsExpr -> List PsExpr -> PsExpr
-  | fn, [] => fn
-  | fn, argument :: rest =>
-      psExprApplyMany (PsExpr.app fn argument) rest
+def psExprApplyMany
+    (fn : PsExpr)
+    (arguments : List PsExpr) : PsExpr :=
+  match arguments with
+  | [] =>
+      fn
+  | argument :: rest =>
+      psExprApplyMany
+        (PsExpr.app fn argument)
+        rest
 
 def psElabIf
     (elaborate :
@@ -991,12 +999,14 @@ def psElabMatchAlternativeFind
 def psElabFillWildcardAlternatives
     (pattern : PsSyntaxPattern)
     (body : PsSyntaxTerm)
-    (span : PsSourceSpan) :
-    List PsName ->
-    List PsElabMatchAlternative ->
-    List PsElabMatchAlternative
-  | [], alternativesRev => alternativesRev
-  | ctorName :: rest, alternativesRev =>
+    (span : PsSourceSpan)
+    (constructors : List PsName)
+    (alternativesRev : List PsElabMatchAlternative) :
+    List PsElabMatchAlternative :=
+  match constructors with
+  | [] =>
+      alternativesRev
+  | ctorName :: rest =>
       let next :=
         match psElabMatchAlternativeFind ctorName alternativesRev with
         | some _ => alternativesRev
@@ -1006,7 +1016,7 @@ def psElabFillWildcardAlternatives
               pattern := pattern
               body := body
               span := span
-            } :: alternativesRev
+            } :: alternativesRev;
       psElabFillWildcardAlternatives
         pattern
         body
@@ -1108,10 +1118,14 @@ structure PsElabMatchFieldsResult where
   fieldsRev : List PsElabMatchField
 
 def psElabMatchApplyParameters
-    (context : PsElabContext) :
-    List PsExpr -> PsExpr -> Except PsElabError PsExpr
-  | [], cursor => Except.ok cursor
-  | parameter :: rest, cursor =>
+    (context : PsElabContext)
+    (parameters : List PsExpr)
+    (cursor : PsExpr) :
+    Except PsElabError PsExpr :=
+  match parameters with
+  | [] =>
+      Except.ok cursor
+  | parameter :: rest =>
       match psInferEnsureForall
           context.environment
           context.metaContext

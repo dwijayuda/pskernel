@@ -475,10 +475,11 @@ partial def jsonParseValueWithFuel
     (fuel : Nat)
     (source : String)
     (position : Nat) : Result JsonParseResult JsonError :=
-  match fuel with
-  | 0 => Result.error JsonError.fuelExhausted
-  | remaining + 1 =>
-      let start : Nat := jsonSkipWhitespace source position;
+  if Nat.beq fuel 0 then
+    Result.error JsonError.fuelExhausted
+  else
+    let remaining : Nat := Nat.sub fuel 1;
+    let start : Nat := jsonSkipWhitespace source position;
       if String.Internal.atEnd source start then
         Result.error JsonError.unexpectedEnd
       else

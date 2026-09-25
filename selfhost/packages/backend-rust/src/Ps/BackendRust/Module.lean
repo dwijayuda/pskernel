@@ -243,6 +243,8 @@ def psRustDeclarationDirectFunctionResultSupported
     match declaration.body with
     | PsVerifiedIrExpr.lambda _ _ _ =>
         true
+    | PsVerifiedIrExpr.var _ =>
+        true
     | _ =>
         false
   else
@@ -264,7 +266,11 @@ def psRustPrepareDeclarationBody
     (declaration : PsVerifiedIrDeclaration)
     (printedBody : String) : String :=
   if psRustTypeContainsFunction declaration.resultType then
-    psRustConcat2 "move " printedBody
+    match declaration.body with
+    | PsVerifiedIrExpr.lambda _ _ _ =>
+        psRustConcat2 "move " printedBody
+    | _ =>
+        printedBody
   else
     printedBody
 

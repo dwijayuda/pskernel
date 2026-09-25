@@ -56,7 +56,10 @@ def psLocalContainsId (context : PsLocalContext) (id : Nat) : Bool :=
   | Option.none => false
   | Option.some _ => true
 
-def psLocalFindUserInList (userName : PsName) : List PsLocalDecl -> Option PsLocalDecl
+def psLocalFindUserInList
+    (userName : PsName)
+    (declarations : List PsLocalDecl) : Option PsLocalDecl :=
+  match declarations with
   | [] => Option.none
   | declaration :: rest =>
       if psNameEq userName (psLocalDeclUserName declaration) then

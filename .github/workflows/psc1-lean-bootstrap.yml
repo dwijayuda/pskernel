@@ -141,6 +141,12 @@ jobs:
           if (instance.exports.smallSigned(-123) !== -123) {
             throw new Error('PSC1_WASM_RUNTIME_GC_PACKED_I16_RESULT');
           }
+          if (instance.exports.someValue(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_SOME_RESULT');
+          }
+          if (instance.exports.noneValue() !== 0) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_NONE_RESULT');
+          }
           console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
           NODE
 

@@ -150,7 +150,10 @@ def psElabFindStructureField
       | Except.error error =>
           Except.error (PsElabError.infer error)
       | Except.ok forallView =>
-          if psNameLastComponent forallView.name == fieldName then
+          if
+              psStringEq
+                (psNameLastComponent forallView.name)
+                fieldName then
             Except.ok index
           else
             psElabFindStructureField

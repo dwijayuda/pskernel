@@ -8,10 +8,11 @@ namespace Kernel
 First checked nested-inductive slice.
 
 The transformation supports shared parameters and declaration universe
-parameters. Nested occurrences through an already-declared, non-mutual outer
-inductive family are eliminated into auxiliary mutual datatypes, checked by
-the ordinary mutual path, restored across parameter binders, and rechecked
-before publication. Nested outer mutual families remain fail-closed.
+parameters. Nested occurrences through already-declared outer inductive
+families, including ordinary outer mutual families with consistent shared
+parameters, are eliminated into auxiliary mutual datatypes, checked by the
+ordinary mutual path, restored across parameter binders, and rechecked before
+publication. Unsupported or malformed nested shapes remain fail-closed.
 -/
 structure SimpleNestedAuxCtorMap where
   auxCtor : Name

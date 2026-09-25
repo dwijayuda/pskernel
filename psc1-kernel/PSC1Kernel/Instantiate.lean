@@ -161,9 +161,7 @@ partial def Expr.abstractFVarsAt
       nd
   | .mdata m b => .mdata m (b.abstractFVarsAt fvars offset)
   | .proj n i b => .proj n i (b.abstractFVarsAt fvars offset)
-  | .bvar i =>
-      if i >= offset then .bvar (i + fvars.length) else e
-  | .mvar _ | .sort _ | .const _ _ | .lit _ => e
+  | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => e
 
 def Expr.abstractFVars (e : Expr) (fvars : List Name) : Expr :=
   e.abstractFVarsAt fvars 0

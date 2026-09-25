@@ -15,7 +15,7 @@ def psParseListReverseAcc {α : Type}
       fun (acc : List α) => acc
   | List.cons head tail =>
       let smaller : List α -> List α :=
-        psParseListReverseAcc tail
+        psParseListReverseAcc tail;
       fun (acc : List α) =>
         smaller (List.cons head acc)
 
@@ -68,7 +68,7 @@ def psSyntaxCompilerBind
     (action : PsSyntaxTerm)
     (body : PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
-  let bodySpan := psSyntaxTermSpan body
+  let bodySpan := psSyntaxTermSpan body;
   let lambda :=
     PsSyntaxTerm.lambda
       (List.cons (Prod.mk binder binderType) List.nil)
@@ -76,7 +76,7 @@ def psSyntaxCompilerBind
       {
         start := binder.span.start
         stop := bodySpan.stop
-      }
+      };
   PsSyntaxTerm.app
     (psSyntaxSyntheticReference "compilerBind" span)
     (List.cons action (List.cons lambda List.nil))

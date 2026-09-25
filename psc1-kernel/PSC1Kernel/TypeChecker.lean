@@ -395,7 +395,7 @@ partial def recursorMajorInduct?
     | _, _ => none
   go recursor.base.type majorIdx
 
-def mkNullaryConstructor?
+partial def mkNullaryConstructor?
     (env : Environment)
     (type : Expr)
     (numParams : Nat) : Option Expr :=

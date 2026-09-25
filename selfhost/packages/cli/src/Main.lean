@@ -11,6 +11,8 @@ def psCliUsage : String :=
   "  psc1 emit-ps <input.lean|input.ps> [--out <output.ps>]\n" ++
   "  psc1 admissions <input.lean|input.ps>\n" ++
   "  psc1 typescript <input.lean|input.ps>\n" ++
+  "  psc1 rust <input.lean|input.ps>\n" ++
+  "  psc1 rust-coverage <input.lean|input.ps>\n" ++
   "  psc1 compile <input.lean|input.ps> --out <output.js|output.ts>"
 
 def main (args : List String) : IO Unit := do
@@ -35,6 +37,10 @@ def main (args : List String) : IO Unit := do
       psHostCompilerAdmissions inputPath
   | ["typescript", inputPath] =>
       psHostCompilerTypeScript inputPath
+  | ["rust", inputPath] =>
+      psHostCompilerRust inputPath
+  | ["rust-coverage", inputPath] =>
+      psHostCompilerRustCoverage inputPath
   | ["build", inputPath, "--out", outputPath] =>
       psHostCompilerBuild inputPath outputPath
   | ["compile", inputPath, "--out", outputPath] =>

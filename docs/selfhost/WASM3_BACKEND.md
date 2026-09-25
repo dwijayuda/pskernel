@@ -1,6 +1,7 @@
 # ProofScript owned WebAssembly 3 backend
 
-Branch: `backend/wasm3-owned`
+Development branch: `backend/wasm3-owned`
+Integration candidate: `integrate/wasm3-owned`
 
 Status: experimental and deliberately non-blocking for the active PSC1
 JavaScript self-host closure.

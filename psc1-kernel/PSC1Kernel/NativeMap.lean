@@ -12,8 +12,8 @@ structure NativeMapEntry where
 
 def nativeMapNamePart (parent : Name) (part : String) : Name :=
   match part.toNat? with
-  | some index => .num prefix index
-  | none => .str prefix part
+  | some index => .num parent index
+  | none => .str parent part
 
 def nativeMapName (text : String) : Except String Name := do
   if text.isEmpty then

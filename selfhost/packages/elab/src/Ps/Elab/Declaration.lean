@@ -761,7 +761,7 @@ def psElabInductiveDeclaration
   match psSyntaxNameToName nameSyntax with
   | none => Except.error PsElabError.emptyName
   | some name =>
-      let initial := psElabContextEmpty environment
+      let initial := psElabContextEmpty environment;
       match psElabTypedBinders
           (fun context term expected =>
             psElabTerm context term expected)

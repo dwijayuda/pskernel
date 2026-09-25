@@ -11,9 +11,7 @@ def psParseOptionalSemicolon
     cursor
 
 def psProofScriptBoolNot (value : Bool) : Bool :=
-  match value with
-  | true => false
-  | false => true
+  if value then false else true
 
 def psParseProofScriptImport
     (cursor : PsTokenCursor) :

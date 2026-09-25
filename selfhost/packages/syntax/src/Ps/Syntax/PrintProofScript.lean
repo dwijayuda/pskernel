@@ -110,6 +110,31 @@ def psPrintProofScriptMapBinders
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
+def psPrintProofScriptMapAlternatives
+    (printAlternative :
+      Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan) ->
+        Except PsSourcePrintError String)
+    (alternatives :
+      List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) :
+    Except PsSourcePrintError (List String) :=
+  match alternatives with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons alternative rest =>
+      let printedHeadResult :=
+        printAlternative alternative;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintProofScriptMapAlternatives printAlternative rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintProofScriptTermWithFuel
     (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
@@ -336,7 +361,12 @@ def psPrintProofScriptTermWithFuel
                                       " => "
                                       printedBody
                                       ";");
-              match alternatives.mapM printAlternative with
+              let printedAlternativesResult :
+                  Except PsSourcePrintError (List String) :=
+                psPrintProofScriptMapAlternatives
+                  printAlternative
+                  alternatives;
+              match printedAlternativesResult with
               | Except.error error => Except.error error
               | Except.ok printedAlternatives =>
                   Except.ok

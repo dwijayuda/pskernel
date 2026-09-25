@@ -2214,7 +2214,7 @@ def psLeanFlattenForallBinders
   match type with
   | .forallE binders body _ =>
       let tail := psLeanFlattenForallBinders body;
-      Prod.mk (binders ++ tail.fst) tail.snd
+      Prod.mk (psParseListAppend binders tail.fst) tail.snd
   | _ => Prod.mk List.nil type
 
 def psLeanEquationBinderName

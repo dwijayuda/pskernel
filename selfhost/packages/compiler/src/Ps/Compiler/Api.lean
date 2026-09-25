@@ -4,6 +4,7 @@ import Ps.Environment.Prelude
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
 import Ps.BackendTs.Module
+import Ps.BackendRust.Module
 
 inductive PsCompilerSourceKind where
   | lean
@@ -17,6 +18,7 @@ inductive PsCompilerError where
   | admission (error : PsCheckedAdmissionCodecError)
   | erasure (error : PsErasureError)
   | typeScript (error : PsTsEmitError)
+  | rust (error : PsRustEmitError)
 
 def psCompilerTranslateSource
     (sourceKind targetKind : PsCompilerSourceKind)
@@ -107,6 +109,22 @@ def psCompilerTypeScriptFromElaborated
       | Except.ok output =>
           Except.ok output
 
+def psCompilerRustFromElaborated
+    (elaborated : PsElabModuleResult) :
+    Except PsCompilerError String :=
+  match
+      psEraseCoreModule
+        elaborated.environment
+        elaborated.declarations with
+  | Except.error error =>
+      Except.error (PsCompilerError.erasure error)
+  | Except.ok ir =>
+      match psRustEmitModule ir with
+      | Except.error error =>
+          Except.error (PsCompilerError.rust error)
+      | Except.ok output =>
+          Except.ok output
+
 def psCompilerElaborateSource
     (sourceKind : PsCompilerSourceKind)
     (source : String) :
@@ -150,3 +168,13 @@ def psCompilerTypeScriptSource
       Except.error error
   | Except.ok elaborated =>
       psCompilerTypeScriptFromElaborated elaborated
+
+def psCompilerRustSource
+    (sourceKind : PsCompilerSourceKind)
+    (source : String) :
+    Except PsCompilerError String :=
+  match psCompilerElaborateSource sourceKind source with
+  | Except.error error =>
+      Except.error error
+  | Except.ok elaborated =>
+      psCompilerRustFromElaborated elaborated

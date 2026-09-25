@@ -1,6 +1,7 @@
 import Ps.Compiler.Api
 import Ps.Host.ProjectCompiler
 import Ps.Host.TypeScriptCompiler
+import Ps.BackendRust.Coverage
 
 def psHostCompilerSourceKindFromPath
     (path : String) : Option PsCompilerSourceKind :=
@@ -107,6 +108,37 @@ def psHostCompilerTypeScriptSource
 def psHostCompilerTypeScript
     (inputPath : String) : IO Unit := do
   IO.print (← psHostCompilerTypeScriptSource inputPath)
+
+def psHostCompilerRustSource
+    (inputPath : String) : IO String := do
+  let elaborated ← psHostCompilerElaborateProject inputPath
+  match psCompilerRustFromElaborated elaborated with
+  | Except.error _ =>
+      throw
+        (IO.userError
+          "PSC1_CLI_RUST_EMIT_FAILED: source is outside the executable Rust backend subset")
+  | Except.ok output =>
+      pure output
+
+def psHostCompilerRust
+    (inputPath : String) : IO Unit := do
+  IO.print (← psHostCompilerRustSource inputPath)
+
+def psHostCompilerRustCoverage
+    (inputPath : String) : IO Unit := do
+  let elaborated ← psHostCompilerElaborateProject inputPath
+  match
+      psEraseCoreModule
+        elaborated.environment
+        elaborated.declarations with
+  | Except.error _ =>
+      throw
+        (IO.userError
+          "PSC1_RUST_COVERAGE_ERASURE_FAILED")
+  | Except.ok ir =>
+      IO.print
+        (psRustCoverageReport
+          (psRustCoverageModule ir))
 
 def psHostCompilerBuild
     (inputPath outputPath : String) : IO Unit := do

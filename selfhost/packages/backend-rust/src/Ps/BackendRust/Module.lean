@@ -1,0 +1,576 @@
+import Ps.BackendRust.Expr
+import Ps.BackendRust.ValueRefs
+import Ps.BackendRust.Runtime
+
+def psRustTypeParameterNames
+    (parameters : List PsVerifiedIrTypeParameter) : List String :=
+  match parameters with
+  | List.nil =>
+      List.nil
+  | List.cons parameter rest =>
+      List.cons
+        (psRustConcat3
+          (psRustIdentifier parameter.name)
+          ": "
+          "Clone")
+        (psRustTypeParameterNames rest)
+
+def psRustGenericNames
+    (parameters : List PsVerifiedIrTypeParameter) : String :=
+  match parameters with
+  | List.nil =>
+      ""
+  | List.cons _ _ =>
+      let names :=
+        psRustTypeParameterNames parameters;
+      psRustConcat4
+        "<"
+        (psRustJoin ", " names)
+        ">"
+        ""
+
+def psRustEmitStructureFieldList
+    (fields : List PsVerifiedIrStructureField) :
+    Except PsRustEmitError (List String) :=
+  match fields with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons field rest =>
+      if psRustTypeContainsFunction field.type then
+        Except.error
+          (PsRustEmitError.functionStorageUnsupported field.name)
+      else
+        match psRustEmitType field.type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok printedType =>
+            let rendered :=
+              psRustConcat4
+                "pub "
+                (psRustIdentifier field.name)
+                ": "
+                printedType;
+            match psRustEmitStructureFieldList rest with
+            | Except.error error =>
+                Except.error error
+            | Except.ok printedRest =>
+                Except.ok (List.cons rendered printedRest)
+
+def psRustEmitStructure
+    (structureInfo : PsVerifiedIrStructure) :
+    Except PsRustEmitError String :=
+  match psRustEmitStructureFieldList structureInfo.fields with
+  | Except.error error =>
+      Except.error error
+  | Except.ok printedFields =>
+      let generic :=
+        psRustGenericNames structureInfo.typeParameters;
+      Except.ok
+        (psRustConcat4
+          "#[derive(Clone)]\npub struct "
+          (psRustIdentifier structureInfo.name)
+          generic
+          (psRustConcat4
+            " { "
+            (psRustJoin ", " printedFields)
+            " }"
+            ""))
+
+def psRustEmitConstructorFieldList
+    (fields : List PsVerifiedIrConstructorField) :
+    Except PsRustEmitError (List String) :=
+  match fields with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons field rest =>
+      if psRustTypeContainsFunction field.type then
+        Except.error
+          (PsRustEmitError.functionStorageUnsupported field.name)
+      else
+        match psRustEmitType field.type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok printedType =>
+            let rendered :=
+              psRustConcat3
+                (psRustIdentifier field.name)
+                ": "
+                printedType;
+            match psRustEmitConstructorFieldList rest with
+            | Except.error error =>
+                Except.error error
+            | Except.ok printedRest =>
+                Except.ok (List.cons rendered printedRest)
+
+def psRustEmitConstructor
+    (constructorInfo : PsVerifiedIrConstructor) :
+    Except PsRustEmitError String :=
+  match psRustEmitConstructorFieldList constructorInfo.fields with
+  | Except.error error =>
+      Except.error error
+  | Except.ok printedFields =>
+      match printedFields with
+      | List.nil =>
+          Except.ok
+            (psRustConcat2
+              (psRustIdentifier constructorInfo.name)
+              " {}")
+      | List.cons _ _ =>
+          Except.ok
+            (psRustConcat4
+              (psRustIdentifier constructorInfo.name)
+              " { "
+              (psRustJoin ", " printedFields)
+              " }")
+
+def psRustEmitConstructorList
+    (constructors : List PsVerifiedIrConstructor) :
+    Except PsRustEmitError (List String) :=
+  match constructors with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons constructorInfo rest =>
+      match psRustEmitConstructor constructorInfo with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printed =>
+          match psRustEmitConstructorList rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedRest =>
+              Except.ok (List.cons printed printedRest)
+
+def psRustEmitInductive
+    (inductiveInfo : PsVerifiedIrInductive) :
+    Except PsRustEmitError String :=
+  match psRustEmitConstructorList inductiveInfo.constructors with
+  | Except.error error =>
+      Except.error error
+  | Except.ok printedConstructors =>
+      let generic :=
+        psRustGenericNames inductiveInfo.typeParameters;
+      Except.ok
+        (psRustConcat4
+          "#[derive(Clone)]\npub enum "
+          (psRustIdentifier inductiveInfo.name)
+          generic
+          (psRustConcat4
+            " { "
+            (psRustJoin ", " printedConstructors)
+            " }"
+            ""))
+
+def psRustEmitHigherOrderParameterType
+    (type : PsVerifiedIrType) :
+    Except PsRustEmitError String :=
+  match type with
+  | PsVerifiedIrType.function parameters result =>
+      match psRustEmitTypeListWith psRustEmitType parameters with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedParameters =>
+          match psRustEmitType result with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedResult =>
+              Except.ok
+                (psRustConcat4
+                  "impl Fn("
+                  (psRustJoin ", " printedParameters)
+                  ") -> "
+                  (psRustConcat2 printedResult " + Clone"))
+  | _ =>
+      psRustEmitType type
+
+def psRustEmitDeclarationParameter
+    (parameter : PsVerifiedIrParameter) :
+    Except PsRustEmitError String :=
+  if psRustTypeContainsFunction parameter.type then
+    if psRustFunctionTypeIsFirstOrder parameter.type then
+      match psRustEmitHigherOrderParameterType parameter.type with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedType =>
+          Except.ok
+            (psRustConcat3
+              (psRustIdentifier parameter.name)
+              ": "
+              printedType)
+    else
+      Except.error
+        (PsRustEmitError.nestedFunctionParameterUnsupported parameter.name)
+  else
+    match psRustEmitHigherOrderParameterType parameter.type with
+    | Except.error error =>
+        Except.error error
+    | Except.ok printedType =>
+        Except.ok
+          (psRustConcat3
+            (psRustIdentifier parameter.name)
+            ": "
+            printedType)
+
+def psRustEmitDeclarationParameterList
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsRustEmitError (List String) :=
+  match parameters with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons parameter rest =>
+      match psRustEmitDeclarationParameter parameter with
+      | Except.error error =>
+          Except.error error
+      | Except.ok rendered =>
+          match psRustEmitDeclarationParameterList rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedRest =>
+              Except.ok (List.cons rendered printedRest)
+
+def psRustDeclarationIsGenericValue
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  match declaration.parameters with
+  | List.nil =>
+      match declaration.typeParameters with
+      | List.nil => false
+      | List.cons _ _ => true
+  | List.cons _ _ =>
+      false
+
+def psRustEmitDeclaration
+    (valueNames : List String)
+    (declaration : PsVerifiedIrDeclaration) :
+    Except PsRustEmitError String :=
+  if psRustDeclarationIsGenericValue declaration then
+    Except.error
+      (PsRustEmitError.genericValueUnsupported declaration.name)
+  else if psRustTypeContainsFunction declaration.resultType then
+    Except.error
+      (PsRustEmitError.functionResultUnsupported declaration.name)
+  else
+    match psRustEmitDeclarationParameterList declaration.parameters with
+    | Except.error error =>
+        Except.error error
+    | Except.ok printedParameters =>
+        match psRustEmitType declaration.resultType with
+        | Except.error error =>
+            Except.error error
+        | Except.ok printedResult =>
+            let locals :=
+              psRustAddParameterNames
+                declaration.parameters
+                List.nil;
+            match
+                psRustRewriteValueRefs
+                  valueNames
+                  locals
+                  declaration.body with
+            | Except.error error =>
+                Except.error error
+            | Except.ok rewrittenBody =>
+                match psRustEmitExpr rewrittenBody with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok printedBody =>
+                    let generic :=
+                      psRustGenericNames declaration.typeParameters;
+                    Except.ok
+                      (psRustConcat4
+                        "pub fn "
+                        (psRustIdentifier declaration.name)
+                        generic
+                        (psRustConcat4
+                          "("
+                          (psRustJoin ", " printedParameters)
+                          ") -> "
+                          (psRustConcat4
+                            printedResult
+                            " { "
+                            printedBody
+                            " }")))
+
+def psRustEmitStructureList
+    (structures : List PsVerifiedIrStructure) :
+    Except PsRustEmitError (List String) :=
+  match structures with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons structureInfo rest =>
+      match psRustEmitStructure structureInfo with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printed =>
+          match psRustEmitStructureList rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedRest =>
+              Except.ok (List.cons printed printedRest)
+
+def psRustEmitInductiveList
+    (inductives : List PsVerifiedIrInductive) :
+    Except PsRustEmitError (List String) :=
+  match inductives with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons inductiveInfo rest =>
+      match psRustEmitInductive inductiveInfo with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printed =>
+          match psRustEmitInductiveList rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedRest =>
+              Except.ok (List.cons printed printedRest)
+
+def psRustValueDeclarationNames
+    (declarations : List PsVerifiedIrDeclaration) :
+    List String :=
+  match declarations with
+  | List.nil =>
+      List.nil
+  | List.cons declaration rest =>
+      match declaration.parameters with
+      | List.nil =>
+          List.cons
+            declaration.name
+            (psRustValueDeclarationNames rest)
+      | List.cons _ _ =>
+          psRustValueDeclarationNames rest
+
+def psRustEmitDeclarationList
+    (valueNames : List String)
+    (declarations : List PsVerifiedIrDeclaration) :
+    Except PsRustEmitError (List String) :=
+  match declarations with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons declaration rest =>
+      match psRustEmitDeclaration valueNames declaration with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printed =>
+          match psRustEmitDeclarationList valueNames rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedRest =>
+              Except.ok (List.cons printed printedRest)
+
+def psRustStructureNames :
+    List PsVerifiedIrStructure -> List String
+  | List.nil =>
+      List.nil
+  | List.cons structureInfo rest =>
+      List.cons structureInfo.name (psRustStructureNames rest)
+
+def psRustInductiveNames :
+    List PsVerifiedIrInductive -> List String
+  | List.nil =>
+      List.nil
+  | List.cons inductiveInfo rest =>
+      List.cons inductiveInfo.name (psRustInductiveNames rest)
+
+def psRustValidateExprListWith
+    (validate :
+      PsVerifiedIrExpr ->
+      Except PsRustEmitError Bool) :
+    List PsVerifiedIrExpr ->
+    Except PsRustEmitError Bool
+  | List.nil =>
+      Except.ok true
+  | List.cons expr rest =>
+      match validate expr with
+      | Except.error error =>
+          Except.error error
+      | Except.ok _ =>
+          psRustValidateExprListWith validate rest
+
+def psRustValidateFieldListWith
+    (validate :
+      PsVerifiedIrExpr ->
+      Except PsRustEmitError Bool) :
+    List (Prod String PsVerifiedIrExpr) ->
+    Except PsRustEmitError Bool
+  | List.nil =>
+      Except.ok true
+  | List.cons field rest =>
+      match validate (Prod.snd field) with
+      | Except.error error =>
+          Except.error error
+      | Except.ok _ =>
+          psRustValidateFieldListWith validate rest
+
+def psRustValidateAlternativeListWith
+    (validate :
+      PsVerifiedIrExpr ->
+      Except PsRustEmitError Bool) :
+    List
+      (Prod String
+        (Prod
+          (List PsVerifiedIrMatchBinding)
+          PsVerifiedIrExpr)) ->
+    Except PsRustEmitError Bool
+  | List.nil =>
+      Except.ok true
+  | List.cons alternative rest =>
+      let payload := Prod.snd alternative;
+      match validate (Prod.snd payload) with
+      | Except.error error =>
+          Except.error error
+      | Except.ok _ =>
+          psRustValidateAlternativeListWith validate rest
+
+def psRustValidateExprNamesWithFuel
+    (structureNames : List String)
+    (inductiveNames : List String) :
+    Nat ->
+    PsVerifiedIrExpr ->
+    Except PsRustEmitError Bool
+  | 0, _ =>
+      Except.error PsRustEmitError.fuelExhausted
+  | fuel + 1, expr =>
+      let validateNested :=
+        fun (nested : PsVerifiedIrExpr) =>
+          psRustValidateExprNamesWithFuel
+            structureNames
+            inductiveNames
+            fuel
+            nested;
+      match expr with
+      | PsVerifiedIrExpr.literal _ =>
+          Except.ok true
+      | PsVerifiedIrExpr.var _ =>
+          Except.ok true
+      | PsVerifiedIrExpr.intrinsic _ arguments =>
+          psRustValidateExprListWith validateNested arguments
+      | PsVerifiedIrExpr.lambda _ _ body =>
+          validateNested body
+      | PsVerifiedIrExpr.call fn _ arguments =>
+          match validateNested fn with
+          | Except.error error =>
+              Except.error error
+          | Except.ok _ =>
+              psRustValidateExprListWith validateNested arguments
+      | PsVerifiedIrExpr.letE _ _ value body =>
+          match validateNested value with
+          | Except.error error =>
+              Except.error error
+          | Except.ok _ =>
+              validateNested body
+      | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
+          match validateNested condition with
+          | Except.error error =>
+              Except.error error
+          | Except.ok _ =>
+              match validateNested thenBranch with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok _ =>
+                  validateNested elseBranch
+      | PsVerifiedIrExpr.record structureName _ fields =>
+          if psRustStringListContains structureNames structureName then
+            psRustValidateFieldListWith validateNested fields
+          else
+            Except.error
+              (PsRustEmitError.unknownStructure structureName)
+      | PsVerifiedIrExpr.projection _ _ target _ =>
+          validateNested target
+      | PsVerifiedIrExpr.constructor
+          inductiveName
+          _
+          _
+          fields =>
+          if psRustStringListContains inductiveNames inductiveName then
+            psRustValidateFieldListWith validateNested fields
+          else
+            Except.error
+              (PsRustEmitError.unknownInductive inductiveName)
+      | PsVerifiedIrExpr.matchE
+          inductiveName
+          _
+          scrutinee
+          alternatives =>
+          if psRustStringListContains inductiveNames inductiveName then
+            match validateNested scrutinee with
+            | Except.error error =>
+                Except.error error
+            | Except.ok _ =>
+                psRustValidateAlternativeListWith
+                  validateNested
+                  alternatives
+          else
+            Except.error
+              (PsRustEmitError.unknownInductive inductiveName)
+
+def psRustValidateDeclarationNames
+    (structureNames : List String)
+    (inductiveNames : List String) :
+    List PsVerifiedIrDeclaration ->
+    Except PsRustEmitError Bool
+  | List.nil =>
+      Except.ok true
+  | List.cons declaration rest =>
+      match
+          psRustValidateExprNamesWithFuel
+            structureNames
+            inductiveNames
+            4096
+            declaration.body with
+      | Except.error error =>
+          Except.error error
+      | Except.ok _ =>
+          psRustValidateDeclarationNames
+            structureNames
+            inductiveNames
+            rest
+
+def psRustValidateModuleNames
+    (module : PsVerifiedIrModule) :
+    Except PsRustEmitError Bool :=
+  psRustValidateDeclarationNames
+    (psRustStructureNames module.structures)
+    (psRustInductiveNames module.inductives)
+    module.declarations
+
+def psRustModuleHasImports
+    (imports : List PsVerifiedIrExternalImport) : Bool :=
+  match imports with
+  | List.nil =>
+      false
+  | List.cons _ _ =>
+      true
+
+def psRustEmitModule
+    (module : PsVerifiedIrModule) :
+    Except PsRustEmitError String :=
+  let valueNames :=
+    psRustValueDeclarationNames module.declarations;
+  if psRustModuleHasImports module.imports then
+    Except.error PsRustEmitError.externalImportUnsupported
+  else
+    match psRustValidateModuleNames module with
+    | Except.error error =>
+        Except.error error
+    | Except.ok _ =>
+        match psRustEmitStructureList module.structures with
+        | Except.error error =>
+            Except.error error
+        | Except.ok structures =>
+            match psRustEmitInductiveList module.inductives with
+            | Except.error error =>
+                Except.error error
+            | Except.ok inductives =>
+                match psRustEmitDeclarationList valueNames module.declarations with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok declarations =>
+                    let sections :=
+                      List.cons
+                        psRustRuntimePrelude
+                        (List.append
+                          structures
+                          (List.append inductives declarations));
+                    Except.ok
+                      (psRustConcat2
+                        (psRustJoin "\n" sections)
+                        "\n")

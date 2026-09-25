@@ -17,7 +17,7 @@
     "check:workspace": "node scripts/check-workspace.mjs",
     "check:source": "node check-psc1-source.mjs",
     "build:lean": "npm run build:lake",
-    "test:lean": "lake exe psc1_tests && lake exe psc1_translation_tests && lake exe psc1_bridge_tests && lake exe psc1_backend_ts_tests && lake exe psc1_backend_wasm_tests && lake exe psc1_erasure_tests",
+    "test:lean": "lake exe psc1_tests && lake exe psc1_translation_tests && lake exe psc1_bridge_tests && lake exe psc1_backend_ts_tests && lake exe psc1_backend_wasm_tests && lake exe psc1_backend_rust_tests && lake exe psc1_erasure_tests",
     "bootstrap:lean": "npm run check:workspace && npm run check:source && npm run check:ir-neutrality && npm run build:lean",
     "bootstrap:check": "lake exe psc1 check packages/compiler/src/Ps/Compiler.lean",
     "bootstrap:emit": "node scripts/bootstrap-project.mjs",

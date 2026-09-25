@@ -85,6 +85,18 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Module
   ]
 
+lean_lib PsBackendRust where
+  srcDir := "packages/backend-rust/src"
+  roots := #[
+    `Ps.BackendRust.Identifier,
+    `Ps.BackendRust.Type,
+    `Ps.BackendRust.Expr,
+    `Ps.BackendRust.ValueRefs,
+    `Ps.BackendRust.Runtime,
+    `Ps.BackendRust.Module,
+    `Ps.BackendRust.Coverage
+  ]
+
 lean_lib PsBackendWasm where
   srcDir := "packages/backend-wasm/src"
   roots := #[
@@ -164,6 +176,22 @@ lean_exe psc1_backend_wasm_tests where
 lean_exe psc1_ir_specialize_tests where
   srcDir := "test"
   root := `IrSpecializeTests
+
+lean_exe psc1_backend_rust_tests where
+  srcDir := "test"
+  root := `BackendRustTests
+
+lean_exe psc1_backend_rust_fixture where
+  srcDir := "test"
+  root := `BackendRustFixture
+
+lean_exe psc1_backend_rust_source_tests where
+  srcDir := "test"
+  root := `BackendRustSourceTests
+
+lean_exe psc1_backend_diff_fixture where
+  srcDir := "test"
+  root := `BackendDifferentialFixture
 
 lean_exe psc1_backend_wasm_binary_smoke where
   srcDir := "test"

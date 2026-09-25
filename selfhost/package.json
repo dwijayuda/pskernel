@@ -23,8 +23,8 @@
     "bootstrap:emit": "node scripts/bootstrap-project.mjs",
     "bootstrap:compiler": "lake exe psc1 build dist/bootstrap/workspace/packages/compiler/src/Ps/Compiler.ps --out dist/bootstrap/packages/compiler/index.js",
     "bootstrap": "npm run bootstrap:lean && npm run bootstrap:check && npm run bootstrap:emit && npm run bootstrap:compiler",
-    "selfhost": "node scripts/compile-with-generated.mjs dist/bootstrap/packages/compiler/index.js dist/bootstrap/workspace/packages/compiler/src/Ps/Compiler.ps dist/selfhost/packages/compiler/index.js",
-    "verify:selfhost": "node scripts/compare-selfhost.mjs dist/bootstrap/packages/compiler/index.ts dist/selfhost/packages/compiler/index.ts",
+    "selfhost": "npm run selfhost:emit-source && npm run selfhost:compiler",
+    "verify:selfhost": "npm run verify:source && npm run verify:compiler",
     "fixed-point": "npm run bootstrap && npm run selfhost && npm run verify:selfhost",
     "build": "npm run bootstrap",
     "test": "npm run test:lean",
@@ -34,7 +34,11 @@
     "selfhost:bootstrap": "npm run bootstrap",
     "selfhost:next": "npm run selfhost",
     "selfhost:compare": "npm run verify:selfhost",
-    "selfhost:fixed-point": "npm run fixed-point"
+    "selfhost:fixed-point": "npm run fixed-point",
+    "selfhost:emit-source": "node scripts/reemit-project-with-generated.mjs dist/bootstrap/packages/compiler/index.js dist/bootstrap/workspace dist/selfhost/workspace",
+    "selfhost:compiler": "node scripts/compile-with-generated.mjs dist/bootstrap/packages/compiler/index.js dist/selfhost/workspace/packages/compiler/src/Ps/Compiler.ps dist/selfhost/packages/compiler/index.js",
+    "verify:source": "node scripts/compare-source-workspaces.mjs dist/bootstrap/workspace dist/selfhost/workspace",
+    "verify:compiler": "node scripts/compare-selfhost.mjs dist/bootstrap/packages/compiler/index.ts dist/selfhost/packages/compiler/index.ts"
   },
   "devDependencies": {
     "typescript": "5.8.3"

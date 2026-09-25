@@ -63,7 +63,7 @@ jobs:
         run: |
           set -euo pipefail
           cd selfhost
-          lake build PsBackendRust psc1_backend_rust_tests psc1_backend_rust_fixture
+          lake build PsBackendRust psc1_backend_rust_tests psc1_backend_rust_fixture psc1_backend_rust_source_tests
 
       - name: Probe Rust backend with PSC1 frontend
         shell: bash
@@ -86,6 +86,7 @@ jobs:
           set -euo pipefail
           cd selfhost
           lake exe psc1_backend_rust_tests
+          lake exe psc1_backend_rust_source_tests
 
       - name: Compile generated Rust fixture
         shell: bash

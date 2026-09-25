@@ -226,7 +226,7 @@ def psInferTypeWithFuel
           match psEnvironmentFind environment name with
           | none => Except.error (PsInferError.unknownConstant name)
           | some declaration =>
-              let parameters := psDeclarationLevelParams declaration
+              let parameters := psDeclarationLevelParams declaration;
               if parameters.length == levels.length then
                 Except.ok
                   (psExprInstantiateLevelParams
@@ -265,8 +265,8 @@ def psInferTypeWithFuel
               match psInferEnsureSort environment metaContext localContext typeType with
               | Except.error error => Except.error error
               | Except.ok _ =>
-                  let pushed := psLocalPushBinding localContext name type binder
-                  let openedBody := psExprInstantiate1 body (PsExpr.fvar pushed.id)
+                  let pushed := psLocalPushBinding localContext name type binder;
+                  let openedBody := psExprInstantiate1 body (PsExpr.fvar pushed.id);
                   match psInferTypeWithFuel
                       environment
                       metaContext
@@ -288,8 +288,8 @@ def psInferTypeWithFuel
               match psInferEnsureSort environment metaContext localContext typeType with
               | Except.error error => Except.error error
               | Except.ok domainLevel =>
-                  let pushed := psLocalPushBinding localContext name type binder
-                  let openedBody := psExprInstantiate1 body (PsExpr.fvar pushed.id)
+                  let pushed := psLocalPushBinding localContext name type binder;
+                  let openedBody := psExprInstantiate1 body (PsExpr.fvar pushed.id);
                   match psInferTypeWithFuel
                       environment
                       metaContext

@@ -161,9 +161,14 @@ As of the current branch checkpoint:
   expected output for UInt8 wraparound, Int16 overflow, UInt32 comparison,
   Float32 arithmetic, Float arithmetic, captured closures, arrays, ADTs, and
   structure-qualified projection;
-- the reusable R3 compiler-IR coverage census is wired into CI. The decisive
-  real compiler -> Rust -> Cargo check remains gated by PSC1 self-host source
-  closure rather than by a known Rust semantic fork.
+- the reusable R3 compiler-IR coverage census is wired into CI and is
+  fail-closed: it reports an explicit unsupported set and the real-compiler
+  gate requires `PSC1_RUST_COVERAGE_UNSUPPORTED_COUNT: 0` before Rust
+  emission;
+- unsupported external imports, unknown runtime types, and traversal fuel
+  exhaustion are census blockers rather than informational-only features;
+- the decisive real compiler -> Rust -> Cargo check remains gated by PSC1
+  self-host source closure rather than by a known Rust semantic fork.
 
 ## Development milestones
 

@@ -59,7 +59,7 @@ lift/instantiation against final Lean 4.34.
 - K0: Name, Level, Expr, substitution/lifting/abstraction.
 - K1: declarations, local context and immutable environment.
 - K2: WHNF and type inference. **IN PROGRESS** — beta/let/fvar/delta, Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble), constructor projection reduction, and Lean-4.34-faithful projection typing are implemented; bitwise/shift Nat extensions, resource-size guards, recursor/quotient reduction and full cheap-projection control flow remain.
-- K3: definitional equality and exact reduction ordering. **IN PROGRESS** — sort/app/binding/projection cases exist; binding defeq follows Lean 4.34 by ignoring binder annotations. Proof irrelevance, lazy delta ordering, eta, string/unit-like cases and caches remain.
+- K3: definitional equality and exact reduction ordering. **IN PROGRESS** — sort/constant-universe/app/binding/projection cases exist; binding defeq follows Lean 4.34 by ignoring binder annotations and proof irrelevance is implemented. Lazy delta ordering, eta, string/unit-like cases and caches remain.
 - K4: quotient and recursor reduction.
 - K5: inductive/nested-inductive admission and generated metadata validation.
 - K6: optional/fail-closed native-reduction boundary.

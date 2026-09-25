@@ -157,7 +157,7 @@ def psRustRewriteValueRefsWithFuel
                 (PsVerifiedIrExpr.intrinsic
                   operation
                   rewrittenArguments)
-      | PsVerifiedIrExpr.lambda parameters body =>
+      | PsVerifiedIrExpr.lambda parameters resultType body =>
           let bodyLocals :=
             psRustAddParameterNames parameters locals;
           match
@@ -172,6 +172,7 @@ def psRustRewriteValueRefsWithFuel
               Except.ok
                 (PsVerifiedIrExpr.lambda
                   parameters
+                  resultType
                   rewrittenBody)
       | PsVerifiedIrExpr.call fn typeArguments arguments =>
           match rewriteNested fn with

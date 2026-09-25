@@ -65,14 +65,15 @@ def psPrintPattern
           match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
-              if printedBinders.isEmpty then
-                Except.ok printedName
-              else
-                Except.ok
-                  (psPrintCommonConcat3
-                    printedName
-                    " "
-                    (psPrintJoin " " printedBinders))
+              match printedBinders with
+              | List.nil =>
+                  Except.ok printedName
+              | List.cons _ _ =>
+                  Except.ok
+                    (psPrintCommonConcat3
+                      printedName
+                      " "
+                      (psPrintJoin " " printedBinders))
 
 def psSyntaxTermSimpleForApplication : PsSyntaxTerm -> Bool
   | .reference _ => true

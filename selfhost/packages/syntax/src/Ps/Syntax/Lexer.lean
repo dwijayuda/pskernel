@@ -874,5 +874,5 @@ def psLexAllWithFuel :
                     Except.ok (List.cons token rest)
 
 def psLex (source : String) : Except PsLexError (List PsToken) :=
-  let cursor := psLexCursorFromString source
+  let cursor := psLexCursorFromString source;
   psLexAllWithFuel (Nat.add source.toList.length 1) cursor

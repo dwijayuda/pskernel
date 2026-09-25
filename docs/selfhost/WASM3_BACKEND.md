@@ -1,12 +1,13 @@
 # ProofScript owned WebAssembly 3 backend
 
 Foundation merge: `fb44f81a`
-Current large-feature branch: `backend/wasm3-gc-adts`
+GC/ADT merge: `549edcf9`
+Current large-feature branch: `backend/wasm3-closures`
 
 Status: experimental and deliberately non-blocking for the active PSC1
-JavaScript self-host closure. The scalar/control-flow Wasm foundation is merged;
-the current branch adds the first managed-data milestone: GC structures,
-nominal inductives, `match`, and recursive ADTs.
+JavaScript self-host closure. Scalar/control flow and the first managed-data
+milestone are merged. The current branch adds higher-order function values,
+captured GC closures, typed function references and `call_ref`.
 
 ## Goal
 
@@ -122,54 +123,79 @@ Target-specific imports narrow the target set explicitly.
 
 ## Current large-feature merge boundary
 
-The first Wasm infrastructure merge is complete. The next merge unit is
-**GC structures + nominal inductives + match**, kept together because all three
-share the same managed-data representation and type-index discipline.
+The GC structure/inductive/match milestone is merged. The current merge unit is
+**closures + higher-order functions + typed function references**.
+
+The shared IR remains semantic: a lambda carries its PSC parameter/result
+types, body and ordinary lexical variables. Closure conversion, environment
+layout, `funcref`, concrete Wasm function types, `ref.func`, `ref.cast` and
+`call_ref` are private `backend-wasm` decisions.
+
+Current representation:
+
+```text
+PSC function type
+  -> one non-final GC closure base
+       field 0: generic funcref code
+  -> one shared typed Wasm code signature
+       (closureBase, user arguments...) -> result
+
+PSC lambda
+  -> private GC subtype of the closure base
+       inherited code field + captured values
+  -> private code function using the shared signature
+       capture-unpacking prologue + lowered body
+  -> closure construction
+       ref.func code + captures + struct.new
+
+PSC higher-order call
+  -> evaluate/store closure
+  -> push closure environment + user arguments
+  -> load code field
+  -> ref.cast to shared code signature
+  -> call_ref
+```
 
 Merge this branch only when all of these are true:
 
-1. the branch is mergeable against the live self-host line, with no unresolved
-   shared-IR/erasure conflicts;
-2. portable-source and shared-IR-neutrality gates are green;
-3. the complete Lean/Lake workspace builds;
-4. TypeScript and erasure regression suites are green;
-5. Wasm lowering/unit tests are green;
-6. independent Node validation and execution cover:
-   - ordinary GC structures;
-   - packed signed/unsigned structure fields;
-   - nominal inductive base + constructor subtypes;
-   - multi-constructor `match`;
-   - constructor field binding through `ref.test` / `ref.cast`;
-   - a recursive ADT whose constructor contains a reference to its own base
-     type;
-   - a recursive function over that ADT;
-7. the normal PSC1 workflow has no new failure before the already-known
+1. target-neutral source/IR guards are green;
+2. full Lake build, TypeScript regressions and erasure regressions are green;
+3. existing scalar/control-flow/GC/ADT Wasm tests remain green;
+4. target-lowering unit tests assert the closure base, lambda subtype,
+   generated code signature/function and declarative `ref.func` registration;
+5. independent Node validation/execution covers:
+   - an escaping closure that captures a lexical value and is invoked later;
+   - a higher-order function parameter invoked through typed `call_ref`;
+   - repeated higher-order invocation such as `applyTwice`;
+6. the ordinary PSC1 workflow introduces no new failure before the existing
    self-host source-readiness/PSC0 blockers;
-8. Wasm remains non-default and does not gate JavaScript self-host closure.
+7. the branch is replayed cleanly onto the live self-host base before merge.
 
 Current status:
 
 ```text
-[done] target-neutral projection owner identity
-[done] GC struct types + struct.new/struct.get
-[done] packed i8/i16 structure storage/access
-[done] nominal inductive base type
-[done] constructor GC subtypes
-[done] ref.test / ref.cast match lowering
-[done] lexical constructor-field bindings
-[done] multi-constructor MaybeU32 runtime execution
-[done] recursive U32List type lowering
-[done] recursive listLength runtime execution
-[green] dedicated Owned Wasm backend integration workflow
-[next] live-base mergeability check / integration PR
-[post-merge] generic monomorphization for GC ADTs
-[post-merge] closures / typed function references
+[done] lambda result type retained as target-neutral VerifiedIR metadata
+[done] deterministic PSC function-type -> Wasm closure-signature mapping
+[done] generic funcref closure code field
+[done] typed shared code signatures
+[done] declarative ref.func registration
+[done] lexical free-variable capture analysis
+[done] GC closure subtype with captured fields
+[done] generated lambda code function and capture-unpacking prologue
+[done] higher-order local calls via ref.cast + call_ref
+[done] escaping captured closure runtime execution
+[done] applyTwice higher-order runtime execution
+[green] dedicated Owned Wasm integration workflow
+[next] exact-head structural unit gate + clean live-base integration replay
+[post-merge] target-neutral generic specialization/monomorphization
 [post-merge] String / Array / exact Nat / Int runtime
 [post-merge] SIMD / WASI / components / formal preservation proof
 ```
 
-This merge still does **not** claim full Wasm language coverage. Generic ADTs
-remain fail-closed until target-neutral specialization/monomorphization exists.
+The closure milestone intentionally does not add Wasm concepts to VerifiedIR
+and does not claim general generic-function/ADT support. Function types
+containing unresolved type parameters still fail closed until shared
+specialization/monomorphization exists.
 
 ## Development order
 

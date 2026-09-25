@@ -100,6 +100,13 @@ def psElabStructuralRecursionFromSource
   | _ =>
       Option.none
 
+def psElabDeclarationTermCallback
+    (context : PsElabContext)
+    (term : PsSyntaxTerm)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  psElabTerm context term expected
+
 def psElabDeclarationParts
     (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
@@ -116,11 +123,7 @@ def psElabDeclarationParts
         psElabContextEmpty environment;
       match
           psElabTypedBinders
-            (fun
-              (context : PsElabContext)
-              (term : PsSyntaxTerm)
-              (expected : Option PsExpr) =>
-                psElabTerm context term expected)
+            psElabDeclarationTermCallback
             initial
             binders with
       | Except.error error =>

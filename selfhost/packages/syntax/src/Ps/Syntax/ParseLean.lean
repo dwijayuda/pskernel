@@ -727,7 +727,7 @@ def psParseLeanDependentArrowTail
                   [binder.value]
                   codomain.value
                   {
-                    start := binder.value.1.span.start
+                    start := binder.value.fst.span.start
                     stop := (psSyntaxTermSpan codomain.value).stop
                   }
               cursor := codomain.cursor
@@ -740,7 +740,7 @@ def psParseLeanDependentArrowTail
          | none => ""
          | some token => token.text)
         (match psTokenCursorPeek binder.cursor with
-         | none => binder.value.1.span
+         | none => binder.value.fst.span
          | some token => token.span))
 
 def psLeanPatternBinderName
@@ -1563,7 +1563,7 @@ def psParseLeanInductiveConstructorsWithFuel
                     let stop :=
                       match psParseListReverse fields.value with
                       | List.nil => name.token.span.stop
-                      | List.cons pair _ => pair.1.span.stop;
+                      | List.cons pair _ => pair.fst.span.stop;
                     let constructor : PsSyntaxInductiveConstructor := {
                       name := sourceName
                       fields := fields.value
@@ -1601,7 +1601,7 @@ def psSplitTokensThroughLine
         ([], token :: rest)
       else
         let tail := psSplitTokensThroughLine line rest
-        (token :: tail.1, tail.2)
+        (token :: tail.fst, tail.snd)
 
 def psParseLeanStructureField
     (cursor : PsTokenCursor) :
@@ -1625,7 +1625,7 @@ def psParseLeanStructureField
                   psSplitTokensThroughLine
                     firstType.span.start.line
                     afterColon.cursor.remaining
-                match psParseLeanTerm { remaining := split.1 } with
+                match psParseLeanTerm { remaining := split.fst } with
                 | Except.error error => Except.error error
                 | Except.ok type =>
                     if !psTokenCursorDone type.cursor then
@@ -1655,7 +1655,7 @@ def psParseLeanStructureField
                       }
                       Except.ok {
                         value := (head, type.value)
-                        cursor := { remaining := split.2 }
+                        cursor := { remaining := split.snd }
                       }
 
 def psParseLeanStructureFieldsWithFuel
@@ -2078,7 +2078,7 @@ def psLeanFlattenForallBinders
   match type with
   | .forallE binders body _ =>
       let tail := psLeanFlattenForallBinders body
-      (binders ++ tail.1, tail.2)
+      (binders ++ tail.fst, tail.snd)
   | _ => ([], type)
 
 def psLeanEquationBinderName
@@ -2115,17 +2115,17 @@ def psLeanPrepareEquationBindersAcc
     | [] => none
     | binder :: rest =>
         let name :=
-          psLeanEquationBinderName index binder.1
+          psLeanEquationBinderName index binder.fst
         let head : PsSyntaxBinderHead := {
           name := name
-          kind := binder.1.kind
-          span := binder.1.span
+          kind := binder.fst.kind
+          span := binder.fst.span
         }
         psLeanPrepareEquationBindersAcc
           (Nat.sub remaining 1)
           (Nat.add index 1)
           rest
-          ((head, binder.2) :: bindersRev)
+          ((head, binder.snd) :: bindersRev)
           (name :: namesRev)
 
 def psLeanEquationArity
@@ -2156,14 +2156,14 @@ def psLeanLowerEquationValue
           psLeanPrepareEquationBindersAcc
             arity
             0
-            flattened.1
+            flattened.fst
             []
             [] with
       | none => none
       | some prepared =>
           match
               psLeanLowerEquationClauses
-                prepared.2
+                prepared.snd
                 clauses with
           | none => none
           | some body =>
@@ -2172,7 +2172,7 @@ def psLeanLowerEquationValue
               | first :: _ =>
                   some
                     (PsSyntaxTerm.lambda
-                      prepared.1
+                      prepared.fst
                       body
                       {
                         start := first.span.start

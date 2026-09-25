@@ -117,11 +117,14 @@ jobs:
           cat > /tmp/psc-rust-fixture/tests/runtime.rs <<'EOF'
           use num_bigint::BigUint;
           use psc_rust_fixture::{
+              addGlobalOne,
               arrayDemo,
               arrayFoldOnly,
               arrayMapDemo,
               genericArrayId,
+              one,
               plusOne,
+              shadowOne,
               pushBang,
               unwrapOr,
               utf8Size,
@@ -135,6 +138,9 @@ jobs:
 
           #[test]
           fn generated_semantics_smoke() {
+              assert_eq!(one(), n(1));
+              assert_eq!(addGlobalOne(n(41)), n(42));
+              assert_eq!(shadowOne(n(7)), n(7));
               assert_eq!(plusOne(n(41)), n(42));
               assert_eq!(pushBang(String::from("hi")), "hi!");
               assert_eq!(utf8Size(String::from("é")), n(2));

@@ -14,18 +14,58 @@ import {parseV061Type,type V061TypeExpr} from './type-parser.js';
 import {parseV061LeanSubsetWhereDeclarations} from './lean-subset-where-parser.js';
 import {parseV061ModuleImports} from './module-import-parser.js';
 
+type LeanEquationPattern =
+  | V061Pattern
+  | {
+      readonly kind:'variable';
+      readonly name:string;
+      readonly span:V061Pattern['span'];
+    };
+
 interface LeanEquationRow {
-  readonly patterns:readonly V061Pattern[];
+  readonly patterns:readonly LeanEquationPattern[];
   readonly body:V061Expr;
   readonly span:V061Expr['span'];
 }
 
-function equationPatternKey(pattern:V061Pattern):string|undefined {
+function equationPatternKey(pattern:LeanEquationPattern):string|undefined {
   switch(pattern.kind){
-    case 'wildcard':return undefined;
+    case 'wildcard':
+    case 'variable':
+      return undefined;
     case 'bool':return pattern.value?'#true':'#false';
     case 'constructor':return '#ctor:'+pattern.name;
   }
+}
+
+function equationAlternativePattern(
+  pattern:LeanEquationPattern,
+):V061Pattern {
+  if(pattern.kind==='variable'){
+    return {kind:'wildcard',span:pattern.span};
+  }
+  return pattern;
+}
+
+function stripEquationColumn(
+  row:LeanEquationRow,
+  scrutinee:V061Expr,
+):LeanEquationRow {
+  const pattern=row.patterns[0]!;
+  const body=pattern.kind==='variable'
+    ?({
+        kind:'let',
+        name:pattern.name,
+        value:scrutinee,
+        body:row.body,
+        span:{start:pattern.span.start,end:row.body.span.end},
+      } as V061Expr)
+    :row.body;
+  return {
+    ...row,
+    patterns:row.patterns.slice(1),
+    body,
+  };
 }
 
 function compileEquationMatrix(
@@ -41,7 +81,7 @@ function compileEquationMatrix(
 
   let sawWildcard=false;
   const keys:string[]=[];
-  const representative=new Map<string,V061Pattern>();
+  const representative=new Map<string,LeanEquationPattern>();
   for(const row of rows){
     const pattern=row.patterns[0];
     if(pattern===undefined){
@@ -75,11 +115,8 @@ function compileEquationMatrix(
         const rowKey=equationPatternKey(pattern);
         return rowKey===key||rowKey===undefined;
       })
-      .map((row)=>({
-        ...row,
-        patterns:row.patterns.slice(1),
-      }));
-    const pattern=representative.get(key)!;
+      .map((row)=>stripEquationColumn(row,scrutinees[0]!));
+    const pattern=equationAlternativePattern(representative.get(key)!);
     const body=compileEquationMatrix(
       scrutinees.slice(1),
       applicable,
@@ -93,11 +130,11 @@ function compileEquationMatrix(
 
   const wildcardRows=rows
     .filter((row)=>equationPatternKey(row.patterns[0]!)===undefined)
-    .map((row)=>({...row,patterns:row.patterns.slice(1)}));
+    .map((row)=>stripEquationColumn(row,scrutinees[0]!));
   if(wildcardRows.length>0){
-    const sourcePattern=rows.find(
+    const sourcePattern=equationAlternativePattern(rows.find(
       (row)=>equationPatternKey(row.patterns[0]!)===undefined,
-    )!.patterns[0]!;
+    )!.patterns[0]!);
     const body=compileEquationMatrix(
       scrutinees.slice(1),
       wildcardRows,
@@ -235,14 +272,32 @@ export class V061LeanSubsetParser {
     };
   }
 
+  private parseEquationPattern():LeanEquationPattern {
+    const token=this.context.cursor.peek();
+    const next=this.context.cursor.peek(1);
+    if(
+      token.kind==='identifier'
+      &&!token.text.includes('.')
+      &&(next.text===','||next.text==='=>')
+    ){
+      this.context.cursor.consume();
+      return {
+        kind:'variable',
+        name:token.text,
+        span:token.span,
+      };
+    }
+    return parseV061Pattern(this.context);
+  }
+
   private parseEquationRows():readonly LeanEquationRow[] {
     const rows:LeanEquationRow[]=[];
     let arity:number|undefined;
     while(this.context.cursor.at('|')){
       const bar=this.context.cursor.consume();
-      const patterns:V061Pattern[]=[];
+      const patterns:LeanEquationPattern[]=[];
       while(true){
-        patterns.push(parseV061Pattern(this.context));
+        patterns.push(this.parseEquationPattern());
         if(!this.context.cursor.consumeIf(','))break;
       }
       if(patterns.length===0){

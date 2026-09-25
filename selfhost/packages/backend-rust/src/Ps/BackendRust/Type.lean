@@ -12,6 +12,7 @@ inductive PsRustEmitError where
   | unknownStructure (name : String)
   | unknownInductive (name : String)
   | namedTypeArity (name : String)
+  | unknownRuntimeType
 
 def psRustConcat2 (a b : String) : String :=
   String.Internal.append a b
@@ -112,7 +113,7 @@ def psRustEmitTypeWithFuel :
   | fuel + 1, type =>
       match type with
       | PsVerifiedIrType.unknown =>
-          Except.ok "()"
+          Except.error PsRustEmitError.unknownRuntimeType
       | PsVerifiedIrType.typeParameter name =>
           Except.ok name
       | PsVerifiedIrType.primitive primitive =>

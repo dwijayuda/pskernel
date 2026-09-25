@@ -1117,15 +1117,16 @@ def psElabPrepareMatchAlternatives
                     Except.error
                       (PsElabError.matchDuplicateConstructor ctorName)
                 | none =>
+                    let alternative : PsElabMatchAlternative := {
+                      constructorName := ctorName
+                      pattern := pattern
+                      body := body
+                      span := span
+                    };
                     psElabPrepareMatchAlternatives
                       inductiveInfo
                       rest
-                      ({
-                        constructorName := ctorName
-                        pattern := pattern
-                        body := body
-                        span := span
-                      } :: alternativesRev)
+                      (List.cons alternative alternativesRev)
 
 structure PsElabMatchField where
   id : Nat

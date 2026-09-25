@@ -27,12 +27,12 @@ structure PsSolveInstanceArgsResult where
   success : Bool
 
 def psSynthFailure (context : PsMetaContext) : PsSynthInstanceResult :=
-  { context := context, value := none }
+  { context := context, value := Option.none }
 
 def psSynthSuccess
     (context : PsMetaContext)
     (value : PsExpr) : PsSynthInstanceResult :=
-  { context := context, value := some value }
+  { context := context, value := Option.some value }
 
 def psBinderInfoIsInstance (binder : PsBinderInfo) : Bool :=
   match binder with
@@ -112,18 +112,18 @@ def psSolvePreparedInstanceArguments
       match argument.expr with
       | .mvar id =>
           match psMetaFindAssignment current id with
-          | some _ =>
+          | Option.some _ =>
               psSolvePreparedInstanceArguments synthesize rest current
-          | none =>
+          | Option.none =>
               if argument.isInstance then
                 let targetType := psMetaInstantiate current argument.type
                 let synthesized := synthesize current targetType
                 match synthesized.value with
-                | none => { context := current, success := false }
-                | some instanceValue =>
+                | Option.none => { context := current, success := false }
+                | Option.some instanceValue =>
                     match psMetaAssign synthesized.context id instanceValue with
-                    | none => { context := current, success := false }
-                    | some next =>
+                    | Option.none => { context := current, success := false }
+                    | Option.some next =>
                         psSolvePreparedInstanceArguments synthesize rest next
               else
                 { context := current, success := false }
@@ -185,8 +185,8 @@ def psTryInstanceCandidates
           synthesize
           entry
       match attempt.value with
-      | some _ => attempt
-      | none =>
+      | Option.some _ => attempt
+      | Option.none =>
           psTryInstanceCandidates
             environment
             localContext

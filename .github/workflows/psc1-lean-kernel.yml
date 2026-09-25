@@ -61,7 +61,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Build PSC1 kernel source with Lean 4.34
         working-directory: psc1-kernel
-        run: lake build
+        run: lake build PSC1Kernel psc1_replay
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash
@@ -85,25 +85,25 @@ jobs:
           LEAN_PATH=. lean --run MiniExport.lean > ../../psc1-kernel/.lake/build/lean434-mini-export.ndjson
       - name: Replay pinned Lean4Export mini stream with PSC1 kernel
         working-directory: psc1-kernel
-        run: lake env lean --run PSC1Kernel/Test/ReplayFile.lean .lake/build/lean434-mini-export.ndjson
+        run: .lake/build/bin/psc1_replay .lake/build/lean434-mini-export.ndjson
       - name: Replay canonical Lean 4.34 Init.Prelude stream
         working-directory: psc1-kernel
         shell: bash
         run: |
           set -euo pipefail
-          timeout 600s lake env lean --run PSC1Kernel/Test/ReplayFile.lean ../oracle/fixtures/lean434-init-prelude.ndjson
+          timeout 600s .lake/build/bin/psc1_replay ../oracle/fixtures/lean434-init-prelude.ndjson
       - name: Replay K8 primitive-closure corpus
         working-directory: psc1-kernel
         shell: bash
         run: |
           set -euo pipefail
-          timeout 600s lake env lean --run PSC1Kernel/Test/ReplayFile.lean ../oracle/fixtures/lean434-primitive-closure.ndjson
+          timeout 600s .lake/build/bin/psc1_replay ../oracle/fixtures/lean434-primitive-closure.ndjson
       - name: Replay K8 ProofScript delta corpora
         working-directory: psc1-kernel
         shell: bash
         run: |
           set -euo pipefail
-          timeout 900s lake env lean --run PSC1Kernel/Test/ReplayFile.lean \
+          timeout 900s .lake/build/bin/psc1_replay \
             --base ../oracle/fixtures/lean434-init-prelude.ndjson \
             ../oracle/fixtures/lean434-proofscript-text-foundation.ndjson \
             ../oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson
@@ -118,7 +118,7 @@ jobs:
             lean434-lean-persistenthashmap-roots.ndjson
           do
             echo "== replay $fixture =="
-            timeout 600s lake env lean --run PSC1Kernel/Test/ReplayFile.lean "../oracle/fixtures/$fixture"
+            timeout 600s .lake/build/bin/psc1_replay "../oracle/fixtures/$fixture"
           done
 
   k8-large:
@@ -142,11 +142,11 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Build PSC1 kernel source with Lean 4.34
         working-directory: psc1-kernel
-        run: lake build
+        run: lake build PSC1Kernel psc1_replay
       - name: Replay bounded corpus
         working-directory: psc1-kernel
         shell: bash
         run: |
           set -euo pipefail
           echo "== replay ${{ matrix.fixture }} =="
-          timeout 1800s lake env lean --run PSC1Kernel/Test/ReplayFile.lean "../oracle/fixtures/${{ matrix.fixture }}"
+          timeout 1800s .lake/build/bin/psc1_replay "../oracle/fixtures/${{ matrix.fixture }}"

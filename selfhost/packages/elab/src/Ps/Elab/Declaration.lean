@@ -966,7 +966,7 @@ def psElabInductiveDeclaration
                     psCloseElabForallBinders
                       headerContext.metaContext
                       parameters.bindersRev
-                      instantiatedResultType
+                      instantiatedResultType;
                   if psExprHasUnresolvedMeta inductiveType then
                     Except.error PsElabError.unresolvedMetavariable
                   else

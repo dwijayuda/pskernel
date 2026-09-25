@@ -285,11 +285,15 @@ const empty=emptyLean434MetavarContext();
     'ok - native Lean instantiateExprMVarsImp resolves direct mvar chains in JS',
   );
 
-  let core=evaluator.evaluate(
+  const coreEvaluator=new Lean434Evaluator(
+    replay.env,
+    {maxSteps:250_000,metadata},
+  );
+  let core=coreEvaluator.evaluate(
     constant(nameFromDotted('Lean.instantiateMVarsCore')),
   );
-  core=evaluator.applyRuntimeValue(core,chainMctx);
-  const coreResult=evaluator.applyRuntimeValue(core,target);
+  core=coreEvaluator.applyRuntimeValue(core,chainMctx);
+  const coreResult=coreEvaluator.applyRuntimeValue(core,target);
   if(
     coreResult?.kind!=='constructor'
     ||coreResult.name!=='Prod.mk'
@@ -309,11 +313,11 @@ const empty=emptyLean434MetavarContext();
       'real Lean instantiateMVarsCore returned the wrong normalized Expr',
     );
   }
-  let getCore=evaluator.evaluate(
+  let getCore=coreEvaluator.evaluate(
     constant(nameFromDotted('Lean.MetavarContext.getExprAssignmentExp')),
   );
-  getCore=evaluator.applyRuntimeValue(getCore,coreResult.fields[1]);
-  const coreAssignment=evaluator.applyRuntimeValue(getCore,mvarId1);
+  getCore=coreEvaluator.applyRuntimeValue(getCore,coreResult.fields[1]);
+  const coreAssignment=coreEvaluator.applyRuntimeValue(getCore,mvarId1);
   const coreRuntime=lean434RuntimeOptionValue(coreAssignment);
   if(
     coreRuntime===undefined

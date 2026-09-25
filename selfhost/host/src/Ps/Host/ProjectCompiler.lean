@@ -122,6 +122,7 @@ def psHostImportSearchBases
               [root, packageRoot, stdlibRoot]
 
 def psHostResolveImportAtBase
+    (preferLean : Bool)
     (baseRoot relative : String) : IO (Option String) := do
   let base := psHostJoinPath baseRoot relative
   let leanPath := base ++ ".lean"
@@ -129,9 +130,12 @@ def psHostResolveImportAtBase
   let hasLean ← System.FilePath.pathExists leanPath
   let hasProofScript ← System.FilePath.pathExists proofScriptPath
   if hasLean && hasProofScript then
-    throw
-      (IO.userError
-        ("PSC1_PROJECT_SOURCE_AMBIGUITY: " ++ relative))
+    if preferLean then
+      pure (some leanPath)
+    else
+      throw
+        (IO.userError
+          ("PSC1_PROJECT_SOURCE_AMBIGUITY: " ++ relative))
   else if hasLean then
     pure (some leanPath)
   else if hasProofScript then
@@ -140,14 +144,30 @@ def psHostResolveImportAtBase
     pure none
 
 partial def psHostResolveImportFromBases
+    (preferLean : Bool)
     (relative : String) :
     List String -> IO (Option String)
   | [] => pure none
   | base :: rest => do
-      let resolved ← psHostResolveImportAtBase base relative
+      let resolved ←
+        psHostResolveImportAtBase
+          preferLean
+          base
+          relative
       match resolved with
       | some path => pure (some path)
-      | none => psHostResolveImportFromBases relative rest
+      | none =>
+          psHostResolveImportFromBases
+            preferLean
+            relative
+            rest
+
+def psHostPreferAuthoritativeLean
+    (sourceName : PsSyntaxName) : Bool :=
+  match sourceName.segments with
+  | "Ps" :: _ => true
+  | "ProofScript" :: _ => true
+  | _ => false
 
 def psHostResolveImport
     (root : String)
@@ -157,7 +177,11 @@ def psHostResolveImport
     throw (IO.userError "PSC1_PROJECT_IMPORT_NAME")
   let workspace ← psHostFindWorkspaceRoot root
   let bases := psHostImportSearchBases root workspace sourceName
-  let resolved ← psHostResolveImportFromBases relative bases
+  let resolved ←
+    psHostResolveImportFromBases
+      (psHostPreferAuthoritativeLean sourceName)
+      relative
+      bases
   match resolved with
   | some path => pure path
   | none =>

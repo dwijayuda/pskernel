@@ -9,6 +9,9 @@ on:
       - "psc1-kernel/**"
       - "oracle/replay-probe/MiniExport.lean"
       - "oracle/replay-probe/ReplayProbe.lean"
+      - "oracle/replay-probe/NativeEval.lean"
+      - "oracle/replay-probe/NativeMapFixture.lean"
+      - "scripts/psc1-lean-native-map.mjs"
       - "oracle/fixtures/lean434-init-prelude.ndjson"
       - "oracle/fixtures/lean434-primitive-closure.ndjson"
       - "oracle/fixtures/lean434-proofscript-text-foundation.ndjson"
@@ -65,7 +68,7 @@ jobs:
 
       - name: Build compiled replay executable
         working-directory: psc1-kernel
-        run: lake build psc1-kernel-replay PSC1Kernel psc1_replay
+        run: lake build psc1_replay
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash
@@ -80,6 +83,25 @@ jobs:
       - name: Smoke portable native replay map
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/NativeMapSmoke.lean
+
+      - name: Generate native map from Lean compiler IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean oracle/replay-probe/NativeMapFixture.lean \
+            -o oracle/replay-probe/NativeMapFixture.olean
+          LEAN_PATH="$PWD/oracle/replay-probe" \
+            node scripts/psc1-lean-native-map.mjs \
+              --module NativeMapFixture \
+              --out psc1-kernel/.lake/build/native-map.tsv \
+              nat:PSC1NativeMapFixture.n \
+              bool:PSC1NativeMapFixture.b
+
+      - name: Smoke generated compiler-IR native map through kernel
+        working-directory: psc1-kernel
+        run: |
+          lake env lean --run PSC1Kernel/Test/NativeMapSmoke.lean \
+            .lake/build/native-map.tsv
       - name: Generate pinned Lean4Export mini stream
         working-directory: oracle/replay-probe
         shell: bash
@@ -150,7 +172,7 @@ jobs:
 
       - name: Build compiled replay executable
         working-directory: psc1-kernel
-        run: lake build psc1-kernel-replay PSC1Kernel psc1_replay
+        run: lake build psc1_replay
       - name: Replay bounded corpus
         working-directory: psc1-kernel
         shell: bash

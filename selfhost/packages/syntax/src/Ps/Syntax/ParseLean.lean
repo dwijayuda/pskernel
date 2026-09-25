@@ -638,16 +638,16 @@ def psParseLeanBinder
                   | Except.error error => Except.error error
                   | Except.ok closing =>
                       let binderName : PsSyntaxName := {
-                        segments := [name.token.text]
+                        segments := List.cons name.token.text List.nil
                         span := name.token.span
-                      }
+                      };
                       let binder : PsSyntaxBinderHead := {
                         name := binderName
                         kind := opening.kind
                         span := closing.value
-                      }
+                      };
                       Except.ok {
-                        value := (binder, type.value)
+                        value := Prod.mk binder type.value
                         cursor := closing.cursor
                       }
 

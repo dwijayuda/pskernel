@@ -148,6 +148,20 @@ partial def replaySegmentedLinesFromProgress
             | none => Replay.State.empty shared maxRecDepth maxNatSize nativeEvaluator
           let record ←
             liftReplayResult path lineNo (ReplayJson.decodeLine line)
+          if lineNo >= 190530 && lineNo <= 190660 then
+            let recordLabel :=
+              match record with
+              | .metaR _ => "meta"
+              | .nameR value => "name#" ++ toString value.index
+              | .levelR value => "level#" ++ toString value.index
+              | .exprR value => "expr#" ++ toString value.index
+              | .axiomR value => "axiom-name#" ++ toString value.name
+              | .definitionR value => "def-name#" ++ toString value.name
+              | .theoremR value => "thm-name#" ++ toString value.name
+              | .opaqueR value => "opaque-name#" ++ toString value.name
+              | .quotR value => "quot-name#" ++ toString value.name
+              | .inductiveR _ => "inductive"
+            IO.println s!"PSC1 Lean replay RECORD-BEGIN line={lineNo} record={recordLabel} namesDense={state.names.dense.size} namesSparse={state.names.sparse.length} levelsDense={state.levels.dense.size} levelsSparse={state.levels.sparse.length} exprsDense={state.exprs.dense.size} exprsSparse={state.exprs.sparse.length}"
           match record.declarationNameIndex? with
           | some nameIndex =>
               let name ←

@@ -27,6 +27,18 @@ def psPrintProofScriptConcat6
   let abcde := psPrintProofScriptConcat5 a b c d e;
   psPrintProofScriptConcat2 abcde f
 
+def psPrintProofScriptUnitCallArgs
+    (args : List PsSyntaxTerm) : Bool :=
+  match args with
+  | List.nil => false
+  | List.cons argument rest =>
+      match argument with
+      | .unit _ =>
+          match rest with
+          | List.nil => true
+          | List.cons _ _ => false
+      | _ => false
+
 def psPrintProofScriptTermWithFuel :
     Nat -> PsSyntaxTerm -> Except PsSourcePrintError String
   | 0, _ => Except.error PsSourcePrintError.fuelExhausted
@@ -69,20 +81,19 @@ def psPrintProofScriptTermWithFuel :
             match psPrintProofScriptTermWithFuel remaining fn with
             | Except.error error => Except.error error
             | Except.ok printedFn =>
-                match args with
-                | [.unit _] =>
-                    Except.ok (psPrintProofScriptConcat2 printedFn "()")
-                | _ =>
-                    match args.mapM
-                        (psPrintProofScriptTermWithFuel remaining) with
-                    | Except.error error => Except.error error
-                    | Except.ok printedArgs =>
-                        Except.ok
-                          (psPrintProofScriptConcat4
-                            printedFn
-                            "("
-                            (psPrintJoin ", " printedArgs)
-                            ")")
+                if psPrintProofScriptUnitCallArgs args then
+                  Except.ok (psPrintProofScriptConcat2 printedFn "()")
+                else
+                  match args.mapM
+                      (psPrintProofScriptTermWithFuel remaining) with
+                  | Except.error error => Except.error error
+                  | Except.ok printedArgs =>
+                      Except.ok
+                        (psPrintProofScriptConcat4
+                          printedFn
+                          "("
+                          (psPrintJoin ", " printedArgs)
+                          ")")
       | .lambda binders body _ =>
           let printBinder :=
             fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>

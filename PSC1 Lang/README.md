@@ -86,6 +86,9 @@ In particular:
 - [CONFORMANCE_PORTABILITY_AND_STATUS.md](./CONFORMANCE_PORTABILITY_AND_STATUS.md)
   — conformance model, dual-source equivalence, backend obligations, assurance
   claims, required/optional/deferred matrix, and remaining SH7 freeze work.
+- [SOURCE_EVIDENCE_MAP.md](./SOURCE_EVIDENCE_MAP.md) — research traceability,
+  source precedence, and explicit resolution of conflicts between current plans,
+  v0.7/v0.6.1 study material, pinned Lean 4.34, and current implementation.
 
 ## Normative wording
 

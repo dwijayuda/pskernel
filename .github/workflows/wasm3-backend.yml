@@ -6,17 +6,9 @@ on:
     branches:
       - backend/wasm3-owned
     paths:
-      - selfhost/packages/compiler-ir/**
-      - selfhost/packages/erasure/**
-      - selfhost/packages/backend-ts/**
-      - selfhost/packages/backend-wasm/**
-      - selfhost/test/BackendTsTests.lean
-      - selfhost/test/BackendWasmTests.lean
-      - selfhost/test/WasmBinarySmoke.lean
-      - selfhost/scripts/check-ir-neutrality.mjs
-      - selfhost/lakefile.lean
-      - selfhost/package.json
+      - selfhost/**
       - docs/selfhost/WASM3_BACKEND.md
+      - docs/plans/07_SELF_HOSTING_FOUNDATION.md
       - .github/workflows/wasm3-backend.yml
 
 permissions:

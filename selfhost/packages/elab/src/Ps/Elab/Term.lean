@@ -2037,7 +2037,7 @@ def psSyntaxRecordOrderFields
           | none =>
               none
           | some values =>
-              some (value :: values)
+              some (List.cons value values)
 
 def psElabRecordCandidateForInfo
     (environment : PsEnvironment)

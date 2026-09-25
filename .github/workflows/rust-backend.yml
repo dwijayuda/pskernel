@@ -179,6 +179,18 @@ jobs:
 
           cargo run --quiet --manifest-path /tmp/psc-diff-rust/Cargo.toml             > /tmp/psc-diff-rust.out
 
+          cat > /tmp/psc-diff-expected.out <<'EOF'
+          nat_lt=7
+          nat_ge=5
+          int=-5
+          string=3
+          array=8
+          maybe_some=5
+          maybe_none=99
+          EOF
+
+          diff -u /tmp/psc-diff-expected.out /tmp/psc-diff-ts.out
+          diff -u /tmp/psc-diff-expected.out /tmp/psc-diff-rust.out
           diff -u /tmp/psc-diff-ts.out /tmp/psc-diff-rust.out
           cat /tmp/psc-diff-rust.out
           echo "PSC1_BACKEND_TS_RUST_DIFFERENTIAL: PASS"

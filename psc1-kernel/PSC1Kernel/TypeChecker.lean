@@ -6,12 +6,22 @@ import PSC1Kernel.Instantiate
 
 namespace PSC1Kernel
 
+/--
+Optional execution boundary for final Lean 4.34's deprecated in-kernel native
+reduction markers. The semantic kernel does not execute compiler IR itself;
+a host may supply this provider. Absence means fail closed/no native step.
+-/
+structure NativeEvaluator where
+  evalBool : Name → Except String (Option Bool)
+  evalNat : Name → Except String (Option Nat)
+
 structure CheckerContext where
   env : Environment
   lctx : LocalContext
   levelParams : List Name
   safety : DefinitionSafety
   eagerReduce : Bool
+  nativeEvaluator : Option NativeEvaluator
 
 def CheckerContext.empty (env : Environment) : CheckerContext :=
   {
@@ -20,6 +30,7 @@ def CheckerContext.empty (env : Environment) : CheckerContext :=
     levelParams := []
     safety := .safe
     eagerReduce := false
+    nativeEvaluator := none
   }
 
 def kernelNatName : Name :=
@@ -36,6 +47,15 @@ def kernelBoolTrueName : Name :=
 
 def kernelBoolFalseName : Name :=
   .str kernelBoolName "false"
+
+def kernelLeanName : Name :=
+  .str .anonymous "Lean"
+
+def kernelReduceBoolName : Name :=
+  .str kernelLeanName "reduceBool"
+
+def kernelReduceNatName : Name :=
+  .str kernelLeanName "reduceNat"
 
 def kernelEagerReduceName : Name :=
   .str .anonymous "eagerReduce"
@@ -454,6 +474,27 @@ partial def whnfCore
       else
         whnfCore ctx (.app fn' arg) cheapRec cheapProj
 
+def reduceNative
+    (ctx : CheckerContext)
+    (e : Expr) : Except String (Option Expr) := do
+  let some provider := ctx.nativeEvaluator
+    | return none
+  match e with
+  | .app (.const marker levels) (.const target _) =>
+      if levels.length != 0 then
+        return none
+      if Name.eq marker kernelReduceBoolName then
+        match ← provider.evalBool target with
+        | some value => return some (boolExpr value)
+        | none => return none
+      else if Name.eq marker kernelReduceNatName then
+        match ← provider.evalNat target with
+        | some value => return some (.lit (.nat value))
+        | none => return none
+      else
+        return none
+  | _ => return none
+
 partial def reduceNat
     (ctx : CheckerContext)
     (e : Expr) : Except String (Option Expr) :=
@@ -493,6 +534,10 @@ partial def whnf (ctx : CheckerContext) (e : Expr) : Except String Expr := do
     pure ()
   let rec loop (t : Expr) : Except String Expr := do
     let core ← whnfCore ctx t false false
+    let native ← reduceNative ctx core
+    match native with
+    | some value => return value
+    | none => pure ()
     let nat ← reduceNat ctx core
     match nat with
     | some value => .ok value
@@ -676,9 +721,15 @@ partial def lazyDeltaReduction
       | some value => return .decided (← isDefEq ctx a value)
       | none => pure ()
 
-    -- Native reduction occupies this slot in final Lean 4.34. The portable
-    -- source kernel currently has no native provider and therefore fails
-    -- closed by proceeding to ordinary lazy delta.
+    let an ← reduceNative ctx a
+    match an with
+    | some value => return .decided (← isDefEq ctx value b)
+    | none => pure ()
+    let bn ← reduceNative ctx b
+    match bn with
+    | some value => return .decided (← isDefEq ctx a value)
+    | none => pure ()
+
     match ← lazyDeltaReductionStep ctx a b with
     | .continue a' b' => loop a' b'
     | .unknown a' b' => return .residual a' b'

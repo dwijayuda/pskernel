@@ -126,6 +126,40 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body := PsVerifiedIrExpr.var "x"
       },
       {
+        name := "countDown"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.ifE
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.natEq
+              [
+                PsVerifiedIrExpr.var "x",
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.natural 0)
+              ])
+            (PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 0))
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.var "countDown")
+              []
+              [
+                PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.natSub
+                  [
+                    PsVerifiedIrExpr.var "x",
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.natural 1)
+                  ]
+              ])
+      },
+      {
         name := "one"
         typeParameters := []
         parameters := []

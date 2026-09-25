@@ -2423,6 +2423,17 @@ def psTestLeanListPatternSugar : Bool :=
           | _ => false
       | _ => false
 
+def psTestLeanNatMatchSugar : Bool :=
+  let source :=
+    "def natCase (n : Nat) : Nat := " ++
+    "match n with | 0 => 7 | k + 1 => k"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psBootstrapPreludeEnvironment module with
+      | Except.ok _ => true
+      | Except.error _ => false
+
 def psTestLeanGroupedTypedBinders : Bool :=
   let source :=
     "def groupedNat (left value right : Nat) : Nat := " ++
@@ -2475,6 +2486,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source typed lambda elaboration", passed := psTestDualSourceTypedLambdaElaboration },
   { name := "structure stops before partial def", passed := psTestStructureBeforePartialDefinition },
   { name := "Lean list pattern sugar", passed := psTestLeanListPatternSugar },
+  { name := "Lean Nat match sugar", passed := psTestLeanNatMatchSugar },
   { name := "Lean grouped typed binders", passed := psTestLeanGroupedTypedBinders },
   { name := "lambda match uses expected type", passed := psTestLambdaMatchExpectedType },
   { name := "two-argument equation definition", passed := psTestTwoArgumentEquationDefinition },

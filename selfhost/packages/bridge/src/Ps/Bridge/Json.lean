@@ -704,7 +704,7 @@ partial def psJsonEncodeCanonical
       | Except.ok sorted =>
           let encodeField :=
             fun field =>
-              match psJsonEncodeCanonical Prod.snd field with
+              match psJsonEncodeCanonical (Prod.snd field) with
               | Except.error error => Except.error error
               | Except.ok encoded =>
                   Except.ok (Prod.mk (Prod.fst field) encoded)

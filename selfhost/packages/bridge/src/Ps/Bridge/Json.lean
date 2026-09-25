@@ -539,63 +539,66 @@ partial def psJsonParseValueWithFuel
     (input : List Char) :
     Except PsJsonParseError PsJsonParseResult :=
   match fuel with
-  | 0 => Except.error PsJsonParseError.fuelExhausted
+  | Nat.zero =>
+      Except.error PsJsonParseError.fuelExhausted
   | Nat.succ remaining =>
-      let chars := psJsonSkipWhitespace input
+      let chars := psJsonSkipWhitespace input;
       match chars with
-      | [] => Except.error PsJsonParseError.unexpectedEnd
-      | '"' :: rest =>
-          match psJsonParseStringChars remaining rest [] with
-          | Except.error error => Except.error error
-          | Except.ok stringResult =>
-              let value := Prod.fst stringResult;
-              let afterString := Prod.snd stringResult;
-              Except.ok {
-                value := PsJsonValue.string value
-                rest := afterString
-              }
-      | '[' :: rest =>
-          psJsonParseArrayWith
-            (psJsonParseValueWithFuel fallback)
-            remaining
-            rest
-            []
-      | '{' :: rest =>
-          psJsonParseObjectWith
-            (psJsonParseValueWithFuel fallback)
-            remaining
-            rest
-            []
-      | 't' :: _ =>
-          match psJsonConsumeLiteral ['t','r','u','e'] chars with
-          | none => Except.error PsJsonParseError.invalidLiteral
-          | some rest =>
-              Except.ok {
-                value := PsJsonValue.bool true
-                rest := rest
-              }
-      | 'f' :: _ =>
-          match
-              psJsonConsumeLiteral
-                ['f','a','l','s','e']
-                chars with
-          | none => Except.error PsJsonParseError.invalidLiteral
-          | some rest =>
-              Except.ok {
-                value := PsJsonValue.bool false
-                rest := rest
-              }
-      | 'n' :: _ =>
-          match psJsonConsumeLiteral ['n','u','l','l'] chars with
-          | none => Except.error PsJsonParseError.invalidLiteral
-          | some rest =>
-              Except.ok {
-                value := PsJsonValue.nullE
-                rest := rest
-              }
-      | '-' :: _ => psJsonParseNumber chars
-      | char :: _ =>
-          if psJsonDigit char then
+      | List.nil =>
+          Except.error PsJsonParseError.unexpectedEnd
+      | List.cons first rest =>
+          if psJsonCharEq first '"' then
+            match psJsonParseStringChars remaining rest List.nil with
+            | Except.error error => Except.error error
+            | Except.ok stringResult =>
+                let value := Prod.fst stringResult;
+                let afterString := Prod.snd stringResult;
+                Except.ok {
+                  value := PsJsonValue.string value
+                  rest := afterString
+                }
+          else if psJsonCharEq first '[' then
+            psJsonParseArrayWith
+              (psJsonParseValueWithFuel fallback)
+              remaining
+              rest
+              List.nil
+          else if psJsonCharEq first '{' then
+            psJsonParseObjectWith
+              (psJsonParseValueWithFuel fallback)
+              remaining
+              rest
+              List.nil
+          else if psJsonCharEq first 't' then
+            match psJsonConsumeLiteral ['t','r','u','e'] chars with
+            | none => Except.error PsJsonParseError.invalidLiteral
+            | some afterLiteral =>
+                Except.ok {
+                  value := PsJsonValue.bool true
+                  rest := afterLiteral
+                }
+          else if psJsonCharEq first 'f' then
+            match
+                psJsonConsumeLiteral
+                  ['f','a','l','s','e']
+                  chars with
+            | none => Except.error PsJsonParseError.invalidLiteral
+            | some afterLiteral =>
+                Except.ok {
+                  value := PsJsonValue.bool false
+                  rest := afterLiteral
+                }
+          else if psJsonCharEq first 'n' then
+            match psJsonConsumeLiteral ['n','u','l','l'] chars with
+            | none => Except.error PsJsonParseError.invalidLiteral
+            | some afterLiteral =>
+                Except.ok {
+                  value := PsJsonValue.nullE
+                  rest := afterLiteral
+                }
+          else if psJsonCharEq first '-' then
+            psJsonParseNumber chars
+          else if psJsonDigit first then
             psJsonParseNumber chars
           else
             Except.error

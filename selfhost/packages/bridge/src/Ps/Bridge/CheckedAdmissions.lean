@@ -16,6 +16,44 @@ def psCheckedAdmissionJsonField
     (key value : String) : Prod String String :=
   Prod.mk key value
 
+def psCheckedAdmissionIncrementDecimalDigits
+    (digits : List Nat) : List Nat :=
+  match digits with
+  | List.nil =>
+      List.cons 1 List.nil
+  | List.cons digit rest =>
+      if Nat.beq digit 9 then
+        List.cons
+          0
+          (psCheckedAdmissionIncrementDecimalDigits rest)
+      else
+        List.cons (Nat.succ digit) rest
+
+def psCheckedAdmissionDecimalDigits
+    (value : Nat) : List Nat :=
+  match value with
+  | Nat.zero =>
+      List.cons 0 List.nil
+  | Nat.succ predecessor =>
+      psCheckedAdmissionIncrementDecimalDigits
+        (psCheckedAdmissionDecimalDigits predecessor)
+
+def psCheckedAdmissionDecimalDigitsToString
+    (digits : List Nat) : String :=
+  match digits with
+  | List.nil =>
+      ""
+  | List.cons digit rest =>
+      String.Internal.append
+        (psCheckedAdmissionDecimalDigitsToString rest)
+        (String.singleton
+          (Char.ofNat (Nat.add 48 digit)))
+
+def psCheckedAdmissionNatToString
+    (value : Nat) : String :=
+  psCheckedAdmissionDecimalDigitsToString
+    (psCheckedAdmissionDecimalDigits value)
+
 def psEncodeCodecName (name : PsName) : String :=
   match name with
   | .anonymous =>
@@ -36,7 +74,7 @@ def psEncodeCodecName (name : PsName) : String :=
       psJsonObject [
         psCheckedAdmissionJsonField "k" (psJsonQuote "n"),
         psCheckedAdmissionJsonField "p" encodedParent,
-        psCheckedAdmissionJsonField "v" (psJsonQuote (toString value))
+        psCheckedAdmissionJsonField "v" (psJsonQuote (psCheckedAdmissionNatToString value))
       ]
 
 def psEncodeCodecLevel :
@@ -126,7 +164,7 @@ def psEncodeCodecExpr :
   | .bvar index =>
       Except.ok
         (psJsonObject [
-          psCheckedAdmissionJsonField "i" (toString index),
+          psCheckedAdmissionJsonField "i" (psCheckedAdmissionNatToString index),
           psCheckedAdmissionJsonField "k" (psJsonQuote "b")
         ])
   | .fvar _ =>
@@ -219,7 +257,7 @@ def psEncodeCodecExpr :
           Except.ok
             (psJsonObject [
               psCheckedAdmissionJsonField "k" (psJsonQuote "nat"),
-              psCheckedAdmissionJsonField "v" (psJsonQuote (toString value))
+              psCheckedAdmissionJsonField "v" (psJsonQuote (psCheckedAdmissionNatToString value))
             ])
       | .string value =>
           Except.ok
@@ -234,7 +272,7 @@ def psEncodeCodecExpr :
           Except.ok
             (psJsonObject [
               psCheckedAdmissionJsonField "e" (encodedValue),
-              psCheckedAdmissionJsonField "i" (toString index),
+              psCheckedAdmissionJsonField "i" (psCheckedAdmissionNatToString index),
               psCheckedAdmissionJsonField "k" (psJsonQuote "proj"),
               psCheckedAdmissionJsonField "n" (psEncodeCodecName typeName)
             ])
@@ -338,7 +376,7 @@ def psEncodeCodecInductive
           Except.ok
             (psJsonObject [
               psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList info.levelParams),
-              psCheckedAdmissionJsonField "np" (toString info.numParams),
+              psCheckedAdmissionJsonField "np" (psCheckedAdmissionNatToString info.numParams),
               psCheckedAdmissionJsonField "ts" (psJsonArray [encodedTypeEntry])
             ])
 
@@ -402,7 +440,7 @@ def psEncodeCodecDefinition
       | Except.ok encodedValue =>
           let hints :=
             psJsonObject [
-              psCheckedAdmissionJsonField "h" (psJsonQuote (toString height)),
+              psCheckedAdmissionJsonField "h" (psJsonQuote (psCheckedAdmissionNatToString height)),
               psCheckedAdmissionJsonField "k" (psJsonQuote "regular")
             ];
           Except.ok

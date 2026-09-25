@@ -1,8 +1,9 @@
 {
   "languageVersion": "0.7",
-  "entry": "src/ProofScript/Compiler/Data.lean",
+  "entry": "SELFHOST-COMPILER.lean",
   "sourceRoots": [
-    "src"
+    "packages",
+    "stdlib"
   ],
   "runtimeDependencies": {},
   "compilerOptions": {

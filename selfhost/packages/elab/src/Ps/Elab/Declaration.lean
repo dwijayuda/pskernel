@@ -248,20 +248,22 @@ def psCloseElabImplicitBinders
   | [], body => body
   | binder :: rest, body =>
       let binderType :=
-        psMetaInstantiate metaContext binder.type
+        psMetaInstantiate metaContext binder.type;
       let closed :=
         PsExpr.forallE
           binder.name
           binderType
           (psExprAbstractFVar binder.id body)
-          PsBinderInfo.implicit
+          PsBinderInfo.implicit;
       psCloseElabImplicitBinders metaContext rest closed
 
 def psExprListAlphaEq : List PsExpr -> List PsExpr -> Bool
   | [], [] => true
   | left :: leftRest, right :: rightRest =>
-      psExprAlphaEq left right
-        && psExprListAlphaEq leftRest rightRest
+      if psExprAlphaEq left right then
+        psExprListAlphaEq leftRest rightRest
+      else
+        false
   | _, _ => false
 
 def psElabIsDirectRecursiveField

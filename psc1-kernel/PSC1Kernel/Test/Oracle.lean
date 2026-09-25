@@ -1077,27 +1077,112 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "generated simple recursor selected wrong on minor"
     (PSC1Kernel.Expr.eq oursOn onMinor)
 
-  -- This first K5 slice is intentionally fail-closed for constructor fields.
+  -- Next K5 slice: non-recursive constructor fields.
   let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let Box : PSC1Kernel.Name := .str .anonymous "OracleBox"
+  let BoxMk : PSC1Kernel.Name := .str Box "mk"
+  let BoxRec : PSC1Kernel.Name := .str Box "rec"
+  let boxT : PSC1Kernel.Expr := .const Box []
+  let boxCtorType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "n") natT boxT .default
+  let boxBase :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursBox ← exceptToIO
+    "PSC1 simple inductive constructor-field admission"
+    (PSC1Kernel.Kernel.addSimpleInductive boxBase {
+      levelParams := []
+      name := Box
+      type := type1
+      ctors := [{ name := BoxMk, type := boxCtorType }]
+      isUnsafe := false
+    })
+
+  let leanBox0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanBoxNat ←
+    match Lean.Kernel.Environment.addDecl leanBox0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected Box oracle Nat axiom"
+  let leanBox1 ←
+    match Lean.Kernel.Environment.addDecl leanBoxNat {} (.inductDecl [] 0 [{
+      name := toLeanName Box
+      type := toLeanExpr type1
+      ctors := [{ name := toLeanName BoxMk, type := toLeanExpr boxCtorType }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected simple constructor-field oracle"
+  let leanBoxEnv := Lean.Environment.ofKernelEnv leanBox1
+
+  for name in [Box, BoxMk, BoxRec] do
+    let some oursInfo := oursBox.find? name
+      | throw <| IO.userError "PSC1 Box metadata missing"
+    let some leanInfo := leanBox1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 Box metadata missing: " ++ (toLeanName name).toString)
+    assertTrue
+      ("simple constructor-field metadata differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+
+  let boxCtx := PSC1Kernel.CheckerContext.empty oursBox
+  let boxMotiveName : PSC1Kernel.Name := .str .anonymous "boxMotive"
+  let boxMinorName : PSC1Kernel.Name := .str .anonymous "boxMinor"
+  let boxMotive : PSC1Kernel.Expr :=
+    .lam boxMotiveName boxT natT .default
+  let boxMinor : PSC1Kernel.Expr :=
+    .lam boxMinorName natT (.bvar 0) .default
+  let boxMajor : PSC1Kernel.Expr :=
+    .app (.const BoxMk []) (.lit (.nat 41))
+  let boxRecApp :=
+    PSC1Kernel.applyArgs (.const BoxRec [.succ .zero])
+      [boxMotive, boxMinor, boxMajor]
+  let boxType ← exceptToIO
+    "PSC1 constructor-field recursor typecheck"
+    (PSC1Kernel.check boxCtx boxRecApp)
+  assertTrue "PSC1 constructor-field recursor result type mismatch"
+    (PSC1Kernel.Expr.eq boxType natT)
+  let oursBoxReduced ← exceptToIO
+    "PSC1 constructor-field recursor reduction"
+    (PSC1Kernel.whnf boxCtx boxRecApp)
+  let leanBoxType ←
+    match Lean.Kernel.check leanBoxEnv ({} : Lean.LocalContext) (toLeanExpr boxRecApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected generated Box recursor application"
+  assertTrue "constructor-field recursor type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr boxType) leanBoxType)
+  let leanBoxReduced ← kernelExprWhnf leanBoxEnv boxRecApp
+  assertTrue "constructor-field recursor reduction differs from Lean 4.34"
+    (toLeanExpr oursBoxReduced == leanBoxReduced)
+  assertTrue "constructor-field recursor did not pass the field to the minor"
+    (PSC1Kernel.Expr.eq oursBoxReduced (.lit (.nat 41)))
+
+  -- Recursive fields remain intentionally unsupported in this narrow K5 slice.
   let Bad : PSC1Kernel.Name := .str .anonymous "OracleSimpleBad"
   let BadMk : PSC1Kernel.Name := .str Bad "mk"
   let badExpr : PSC1Kernel.Expr := .const Bad []
   let badCtorType : PSC1Kernel.Expr :=
-    .forallE (.str .anonymous "n") (.const NatN []) badExpr .default
-  let badBase :=
-    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
-      base := mkBase NatN (.sort (.succ .zero))
-      isUnsafe := false
-    })
-  match PSC1Kernel.Kernel.addSimpleInductive badBase {
+    .forallE (.str .anonymous "next") badExpr badExpr .default
+  match PSC1Kernel.Kernel.addSimpleInductive .empty {
     levelParams := []
     name := Bad
-    type := .sort (.succ .zero)
+    type := type1
     ctors := [{ name := BadMk, type := badCtorType }]
     isUnsafe := false
   } with
   | .ok _ =>
-      throw <| IO.userError "simple inductive admission accepted unsupported constructor fields"
+      throw <| IO.userError "simple inductive admission accepted a recursive constructor field"
   | .error _ => pure ()
 
 def assertOrdinaryRecursorOracle : IO Unit := do

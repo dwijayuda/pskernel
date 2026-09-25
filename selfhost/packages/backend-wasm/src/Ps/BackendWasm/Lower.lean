@@ -31,6 +31,11 @@ structure PsWasmLoweredExpr where
   instructions : List PsWasmInstruction
   state : PsWasmLowerState
 
+structure PsWasmLoweredBindings where
+  instructions : List PsWasmInstruction
+  bindings : List (String × Nat)
+  state : PsWasmLowerState
+
 def psWasmLowerParameterType
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrType) :

@@ -110,6 +110,46 @@ def liftReplayResult
         "Lean4Export replay failed for " ++ path ++
         " at line " ++ toString lineNo ++ ": " ++ err)
 
+def isPushEqAppendName (name : Name) : Bool :=
+  Replay.replayNameString name == "Array.push_eq_append"
+
+def replayPushEqAppendTheorem
+    (state : Replay.State)
+    (record : Replay.TheoremRecord) : IO Replay.State := do
+  let name ← liftReplayResult "<diagnostic>" 0 (state.nameAt record.name)
+  let levelParams ← liftReplayResult "<diagnostic>" 0
+    (Replay.resolveNames state record.levelParams)
+  let type ← liftReplayResult "<diagnostic>" 0 (state.exprAt record.type)
+  let value ← liftReplayResult "<diagnostic>" 0 (state.exprAt record.value)
+  let info : TheoremInfo := {
+    base := { name := name, levelParams := levelParams, type := type }
+    value := value
+  }
+  IO.println "PSC1 Lean theorem PHASE header-begin"
+  liftReplayResult "<diagnostic>" 0
+    (Kernel.checkConstantBase state.env info.base .safe
+      state.maxRecDepth state.maxNatSize state.nativeEvaluator)
+  IO.println "PSC1 Lean theorem PHASE header-end"
+  let ctx := Kernel.mkChecker state.env info.base.levelParams .safe
+    state.maxRecDepth state.maxNatSize state.nativeEvaluator
+  IO.println "PSC1 Lean theorem PHASE isProp-begin"
+  let prop ← liftReplayResult "<diagnostic>" 0 (isProp ctx info.base.type)
+  unless prop do throw <| IO.userError "theorem type is not a proposition"
+  IO.println "PSC1 Lean theorem PHASE isProp-end"
+  liftReplayResult "<diagnostic>" 0 (Kernel.checkNoMVarNoFVar info.value)
+  liftReplayResult "<diagnostic>" 0
+    (Kernel.checkLevelParams info.value info.base.levelParams)
+  IO.println "PSC1 Lean theorem PHASE proof-check-begin"
+  let valueType ← liftReplayResult "<diagnostic>" 0 (check ctx info.value)
+  IO.println "PSC1 Lean theorem PHASE proof-check-end"
+  IO.println "PSC1 Lean theorem PHASE final-defeq-begin"
+  let eq ← liftReplayResult "<diagnostic>" 0
+    (isDefEq ctx valueType info.base.type)
+  unless eq do throw <| IO.userError "theorem proof type mismatch"
+  IO.println "PSC1 Lean theorem PHASE final-defeq-end"
+  let env ← liftReplayResult "<diagnostic>" 0 (state.env.add (.thmInfo info))
+  pure { state with env := env }
+
 partial def replaySegmentedLinesFromProgress
     (path : String)
     (base : Environment)
@@ -171,8 +211,22 @@ partial def replaySegmentedLinesFromProgress
               IO.println s!"PSC1 Lean replay DECL-BEGIN file={path} line={lineNo} decl={Replay.replayNameString name} segmentDecls={state.declarations} env={state.env.size}"
           | none => pure ()
           let next ←
-            if lineNo == 190660 then
-              match record with
+            match record with
+            | .theoremR theoremRecord =>
+                let theoremName ←
+                  liftReplayResult path lineNo (state.nameAt theoremRecord.name)
+                if isPushEqAppendName theoremName then
+                  let next ← replayPushEqAppendTheorem state theoremRecord
+                  pure {
+                    next with
+                    records := state.records + 1
+                    declarations := state.declarations + 1
+                  }
+                else
+                  liftReplayResult path lineNo (state.replay record)
+            | _ =>
+              if lineNo == 190660 then
+                match record with
               | .exprR value =>
                   match value.node with
                   | .app fn arg => do

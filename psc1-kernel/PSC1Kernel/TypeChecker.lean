@@ -297,6 +297,34 @@ def CheckerContext.withLet
   let lctx := ctx.lctx.addLet fresh userName type value
   (fresh, { ctx with lctx := lctx })
 
+structure CheckerCloseBinder where
+  internalName : Name
+  userName : Name
+  type : Expr
+  binderInfo : BinderInfo
+  value? : Option Expr := none
+  nondep : Bool := false
+
+partial def closeCheckerBinders
+    (binders : List CheckerCloseBinder)
+    (body : Expr)
+    (removeDeadLets : Bool := false) : Expr :=
+  match binders with
+  | [] => body
+  | binder :: rest =>
+      let inner := closeCheckerBinders rest body removeDeadLets
+      match binder.value? with
+      | none =>
+          .forallE binder.userName binder.type
+            (inner.abstractFVars [binder.internalName])
+            binder.binderInfo
+      | some value =>
+          let abstracted := inner.abstractFVars [binder.internalName]
+          if removeDeadLets && !abstracted.hasLooseBVarAt 0 then
+            inner
+          else
+            .letE binder.userName binder.type value abstracted binder.nondep
+
 def reduceProjCore
     (ctx : CheckerContext)
     (typeName : Name)
@@ -1192,6 +1220,79 @@ partial def typeCheckerWhnfSpineDiff
         "; diff=" ++ typeCheckerExprDiff leftWhnf rightWhnf ++
         projectionDetail)
 
+partial def inferLambdaSpine
+    (ctx : CheckerContext)
+    (e : Expr)
+    (fvars : List Expr := [])
+    (binders : List CheckerCloseBinder := []) : Except String Expr := do
+  match e with
+  | .lam name domain body binderInfo => do
+      let openedDomain := domain.instantiateRev fvars
+      let domainType ← infer ctx openedDomain
+      let _ ← ensureSort ctx domainType
+      let (fresh, child) := ctx.withLocal name openedDomain binderInfo
+      let binder : CheckerCloseBinder := {
+        internalName := fresh
+        userName := name
+        type := openedDomain
+        binderInfo := binderInfo
+      }
+      inferLambdaSpine
+        child body (fvars ++ [.fvar fresh]) (binders ++ [binder])
+  | tail => do
+      let result ← infer ctx (tail.instantiateRev fvars)
+      let result := result.cheapBetaReduce
+      pure (closeCheckerBinders binders result)
+
+partial def inferForallSpine
+    (ctx : CheckerContext)
+    (e : Expr)
+    (fvars : List Expr := [])
+    (levels : List Level := []) : Except String Expr := do
+  match e with
+  | .forallE name domain body binderInfo => do
+      let openedDomain := domain.instantiateRev fvars
+      let domainType ← infer ctx openedDomain
+      let level ← ensureSort ctx domainType
+      let (fresh, child) := ctx.withLocal name openedDomain binderInfo
+      inferForallSpine
+        child body (fvars ++ [.fvar fresh]) (levels ++ [level])
+  | tail => do
+      let openedTail := tail.instantiateRev fvars
+      let tailType ← infer ctx openedTail
+      let resultLevel ← ensureSort ctx tailType
+      pure (.sort (levels.foldr Level.mkIMax resultLevel))
+
+partial def inferLetSpine
+    (ctx : CheckerContext)
+    (e : Expr)
+    (fvars : List Expr := [])
+    (binders : List CheckerCloseBinder := []) : Except String Expr := do
+  match e with
+  | .letE name type value body nondep => do
+      let openedType := type.instantiateRev fvars
+      let openedValue := value.instantiateRev fvars
+      let typeType ← infer ctx openedType
+      let _ ← ensureSort ctx typeType
+      let valueType ← infer ctx openedValue
+      if !(← isDefEq ctx valueType openedType) then
+        throw "let value type mismatch"
+      let (fresh, child) := ctx.withLet name openedType openedValue
+      let binder : CheckerCloseBinder := {
+        internalName := fresh
+        userName := name
+        type := openedType
+        binderInfo := .default
+        value? := some openedValue
+        nondep := nondep
+      }
+      inferLetSpine
+        child body (fvars ++ [.fvar fresh]) (binders ++ [binder])
+  | tail => do
+      let result ← infer ctx (tail.instantiateRev fvars)
+      let result := result.cheapBetaReduce
+      pure (closeCheckerBinders binders result true)
+
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with
   | .bvar _ => .error "loose bound variable in type checker"
@@ -1260,34 +1361,9 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
         "; binder-aware whnf: " ++ spineDiff)
     else
       .ok (body.instantiate1 arg)
-  | .lam name type body binderInfo => do
-    let typeType ← infer ctx type
-    let _ ← ensureSort ctx typeType
-    let (fresh, child) := ctx.withLocal name type binderInfo
-    let bodyType ← infer child (body.instantiate1 (.fvar fresh))
-    let bodyType := bodyType.cheapBetaReduce
-    .ok (.forallE name type (bodyType.abstractFVars [fresh]) binderInfo)
-  | .forallE name type body binderInfo => do
-    let typeType ← infer ctx type
-    let u ← ensureSort ctx typeType
-    let (fresh, child) := ctx.withLocal name type binderInfo
-    let bodyType ← infer child (body.instantiate1 (.fvar fresh))
-    let v ← ensureSort child bodyType
-    .ok (.sort (Level.mkIMax u v))
-  | .letE name type value body nondep => do
-    let typeType ← infer ctx type
-    let _ ← ensureSort ctx typeType
-    let valueType ← infer ctx value
-    let ok ← isDefEq ctx valueType type
-    if !ok then
-      .error "let value type mismatch"
-    else
-      let (fresh, child) := ctx.withLet name type value
-      let bodyType ← infer child (body.instantiate1 (.fvar fresh))
-      let bodyType := bodyType.cheapBetaReduce
-      -- Lean 4.34 cheap-beta-reduces the inferred let body type before
-      -- closing the let-local back into the result.
-      .ok (.letE name type value (bodyType.abstractFVars [fresh]) nondep)
+  | .lam .. => inferLambdaSpine ctx e
+  | .forallE .. => inferForallSpine ctx e
+  | .letE .. => inferLetSpine ctx e
   | .proj typeName idx struct => inferProj ctx typeName idx struct
 
 partial def getSortLevel (ctx : CheckerContext) (e : Expr) : Except String Level := do

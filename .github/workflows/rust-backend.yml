@@ -124,7 +124,8 @@ jobs:
           lake exe psc1_backend_diff_fixture ts > /tmp/psc-diff-ts/module.ts
           lake exe psc1_backend_diff_fixture rust > /tmp/psc-diff-rust/src/lib.rs
 
-          npx --yes --package typescript@5.8.3 tsc --version | grep -q '^Version 5.8.3
+          npx --yes --package=typescript@5.8.3 tsc --version | grep -q "Version 5.8.3"
+          npx --yes --package=typescript@5.8.3 tsc /tmp/psc-diff-ts/module.ts --target ES2022 --module commonjs --strict --skipLibCheck --outDir /tmp/psc-diff-ts
 
           cat > /tmp/psc-diff-ts/run.cjs <<'EOF'
           const m = require("./module.js");

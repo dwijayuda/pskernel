@@ -94,6 +94,9 @@ jobs:
           cd selfhost
           mkdir -p /tmp/psc-rust-fixture/src
           lake exe psc1_backend_rust_fixture > /tmp/psc-rust-fixture/src/lib.rs
+          lake exe psc1_backend_rust_fixture > /tmp/psc-rust-fixture/lib.second.rs
+          cmp /tmp/psc-rust-fixture/src/lib.rs /tmp/psc-rust-fixture/lib.second.rs
+          echo "PSC1_BACKEND_RUST_DETERMINISTIC_SOURCE: PASS"
           cat > /tmp/psc-rust-fixture/Cargo.toml <<'EOF'
           [package]
           name = "psc-rust-fixture"

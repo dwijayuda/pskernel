@@ -55,9 +55,13 @@ def psElabBoolAnd (left right : Bool) : Bool :=
 def psElabNatNe (left right : Nat) : Bool :=
   if Nat.beq left right then false else true
 
-def psSyntaxNameAppendSegments : PsName -> List String -> PsName
-  | name, [] => name
-  | name, segment :: rest =>
+def psSyntaxNameAppendSegments
+    (name : PsName)
+    (segments : List String) : PsName :=
+  match segments with
+  | [] =>
+      name
+  | segment :: rest =>
       psSyntaxNameAppendSegments
         (psNameAppendStr name segment)
         rest
@@ -127,10 +131,14 @@ def psElabResolvedTerm
         expected
 
 def psElabProjectionApplyParameters
-    (context : PsElabContext) :
-    List PsExpr -> PsExpr -> Except PsElabError PsExpr
-  | [], cursor => Except.ok cursor
-  | parameter :: rest, cursor =>
+    (context : PsElabContext)
+    (parameters : List PsExpr)
+    (cursor : PsExpr) :
+    Except PsElabError PsExpr :=
+  match parameters with
+  | [] =>
+      Except.ok cursor
+  | parameter :: rest =>
       match
           psInferEnsureForall
             context.environment
@@ -149,10 +157,15 @@ def psElabFindStructureField
     (context : PsElabContext)
     (typeName : PsName)
     (target : PsExpr)
-    (fieldName : String) :
-    Nat -> Nat -> PsExpr -> Except PsElabError Nat
-  | _, 0, _ => Except.error PsElabError.unsupportedTerm
-  | index, remaining + 1, cursor =>
+    (fieldName : String)
+    (index : Nat)
+    (remaining : Nat)
+    (cursor : PsExpr) :
+    Except PsElabError Nat :=
+  match remaining with
+  | 0 =>
+      Except.error PsElabError.unsupportedTerm
+  | nextRemaining + 1 =>
       match
           psInferEnsureForall
             context.environment
@@ -174,7 +187,7 @@ def psElabFindStructureField
               target
               fieldName
               (Nat.succ index)
-              remaining
+              nextRemaining
               (psExprInstantiate1
                 forallView.body
                 (PsExpr.proj typeName index target))
@@ -502,18 +515,17 @@ def psElabTypedBindersAcc
                     psElabContextWithLocal
                       typeResult.context
                       pushed.context;
+                  let binderEntry : PsElabTypedBinder := {
+                    id := pushed.id
+                    name := name
+                    type := typeResult.term
+                    binder := binder
+                  };
                   psElabTypedBindersAcc
                     elaborate
                     nextContext
                     rest
-                    (List.cons
-                      {
-                        id := pushed.id
-                        name := name
-                        type := typeResult.term
-                        binder := binder
-                      }
-                      bindersRev)
+                    (List.cons binderEntry bindersRev)
 
 def psElabTypedBinders
     (elaborate :

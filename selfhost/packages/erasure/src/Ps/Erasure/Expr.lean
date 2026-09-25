@@ -689,6 +689,7 @@ def psEraseRuntimeStructureApplication
                         (some
                           (PsVerifiedIrExpr.record
                             structureInfo.name
+                            typeArguments
                             fields))
   | _ => Except.ok none
 
@@ -1101,6 +1102,7 @@ def psEraseRuntimeRecursorApplication
                                 (some
                                   (PsVerifiedIrExpr.matchE
                                     inductiveInfo.name
+                                    typeArguments
                                     scrutinee
                                     alternatives))
   | _ => Except.ok none
@@ -1473,19 +1475,60 @@ def psEraseRuntimeExprWithFuel
                     (fun field => field.projectionIndex == index) with
               | none => Except.error PsErasureError.unsupportedRuntimeTerm
               | some field =>
-                  match
-                      psEraseRuntimeExprWithFuel
-                        environment
-                        scope
-                        fuel
-                        target with
+                  let typeArgumentsResult :
+                      Except PsErasureError (List PsVerifiedIrType) :=
+                    match structureInfo.typeParameters with
+                    | [] => Except.ok []
+                    | _ =>
+                        match
+                            psInferType
+                              environment
+                              psMetaEmpty
+                              scope.localContext
+                              target with
+                        | Except.error _ =>
+                            Except.error
+                              PsErasureError.unsupportedRuntimeTerm
+                        | Except.ok targetType =>
+                            match
+                                psEraseRuntimeType
+                                  environment
+                                  scope
+                                  targetType with
+                            | Except.error error =>
+                                Except.error error
+                            | Except.ok erasedType =>
+                                match erasedType with
+                                | .named ownerName arguments =>
+                                    if
+                                        ownerName == structureInfo.name
+                                          && arguments.length ==
+                                            structureInfo.typeParameters.length
+                                    then
+                                      Except.ok arguments
+                                    else
+                                      Except.error
+                                        PsErasureError.unsupportedRuntimeTerm
+                                | _ =>
+                                    Except.error
+                                      PsErasureError.unsupportedRuntimeTerm
+                  match typeArgumentsResult with
                   | Except.error error => Except.error error
-                  | Except.ok loweredTarget =>
-                      Except.ok
-                        (PsVerifiedIrExpr.projection
-                          (psNameToString typeName)
-                          loweredTarget
-                          field.name)
+                  | Except.ok typeArguments =>
+                      match
+                          psEraseRuntimeExprWithFuel
+                            environment
+                            scope
+                            fuel
+                            target with
+                      | Except.error error => Except.error error
+                      | Except.ok loweredTarget =>
+                          Except.ok
+                            (PsVerifiedIrExpr.projection
+                              structureInfo.name
+                              typeArguments
+                              loweredTarget
+                              field.name)
 
 def psEraseRuntimeExpr
     (environment : PsEnvironment)

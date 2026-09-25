@@ -2264,6 +2264,29 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "mutual cross-recursive hypotheses did not reach the base minor"
     (PSC1Kernel.Expr.eq oursMutualReduced (.lit (.nat 61)))
 
+  -- Negative functional occurrences remain rejected.
+  let Bad : PSC1Kernel.Name := .str .anonymous "OracleSimpleBad"
+  let BadMk : PSC1Kernel.Name := .str Bad "mk"
+  let badExpr : PSC1Kernel.Expr := .const Bad []
+  let badFunctionType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "x") badExpr badExpr .default
+  let badCtorType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "next") badFunctionType badExpr .default
+  match PSC1Kernel.Kernel.addSimpleInductive .empty {
+    levelParams := []
+    name := Bad
+    type := type1
+    ctors := [{ name := BadMk, type := badCtorType }]
+    isUnsafe := false
+  } with
+  | .ok _ =>
+      throw <| IO.userError "simple inductive admission accepted unsupported functional recursion"
+  | .error _ => pure ()
+
+def assertNestedInductiveAdmissionOracle : IO Unit := do
+  let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
   -- Nested-inductive preprocessing/restoration: Box Tree is replaced by an
   -- auxiliary mutual datatype, checked, then restored to Box Tree while its
   -- auxiliary recursor is published as Tree.rec_1.
@@ -2458,24 +2481,7 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "nested recursion did not traverse Box to the Tree leaf"
     (PSC1Kernel.Expr.eq oursNestedReduced (.lit (.nat 71)))
 
-  -- Negative functional occurrences remain rejected.
-  let Bad : PSC1Kernel.Name := .str .anonymous "OracleSimpleBad"
-  let BadMk : PSC1Kernel.Name := .str Bad "mk"
-  let badExpr : PSC1Kernel.Expr := .const Bad []
-  let badFunctionType : PSC1Kernel.Expr :=
-    .forallE (.str .anonymous "x") badExpr badExpr .default
-  let badCtorType : PSC1Kernel.Expr :=
-    .forallE (.str .anonymous "next") badFunctionType badExpr .default
-  match PSC1Kernel.Kernel.addSimpleInductive .empty {
-    levelParams := []
-    name := Bad
-    type := type1
-    ctors := [{ name := BadMk, type := badCtorType }]
-    isUnsafe := false
-  } with
-  | .ok _ =>
-      throw <| IO.userError "simple inductive admission accepted unsupported functional recursion"
-  | .error _ => pure ()
+
 
 def assertOrdinaryRecursorOracle : IO Unit := do
   let Flag : PSC1Kernel.Name := .str .anonymous "OracleFlag"
@@ -2963,6 +2969,7 @@ def run : IO Unit := do
   assertQuotAdmissionOracle
   assertProjectionOracle
   assertSimpleInductiveAdmissionOracle
+  assertNestedInductiveAdmissionOracle
   assertOrdinaryRecursorOracle
   assertNatLiteralRecursorOracle
   assertQuotReductionOracle

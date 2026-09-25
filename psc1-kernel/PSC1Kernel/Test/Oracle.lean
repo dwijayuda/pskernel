@@ -1120,6 +1120,73 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   | _ =>
       throw <| IO.userError "PSC1 empty inductive recursor metadata missing"
 
+  -- Universe-polymorphic simple inductives must use Lean's exact fresh
+  -- recursor-universe naming rule: u, then u_1, u_2, ...
+  let polyU : PSC1Kernel.Name := .str .anonymous "u"
+  let polyElimU : PSC1Kernel.Name := .str .anonymous "u_1"
+  let Poly : PSC1Kernel.Name := .str .anonymous "OraclePoly"
+  let PolyMk : PSC1Kernel.Name := .str Poly "mk"
+  let PolyRec : PSC1Kernel.Name := .str Poly "rec"
+  let polyLevel : PSC1Kernel.Level := .param polyU
+  let polyType : PSC1Kernel.Expr := .sort (.succ polyLevel)
+  let polyT : PSC1Kernel.Expr := .const Poly [polyLevel]
+  let polyCtorType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "α") (.sort polyLevel) polyT .default
+  let oursPoly ← exceptToIO
+    "PSC1 universe-polymorphic simple inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive .empty {
+      levelParams := [polyU]
+      name := Poly
+      type := polyType
+      ctors := [{ name := PolyMk, type := polyCtorType }]
+      isUnsafe := false
+    })
+  let leanPoly0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanPoly1 ←
+    match Lean.Kernel.Environment.addDecl leanPoly0 {} (.inductDecl [toLeanName polyU] 0 [{
+      name := toLeanName Poly
+      type := toLeanExpr polyType
+      ctors := [{ name := toLeanName PolyMk, type := toLeanExpr polyCtorType }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected universe-polymorphic simple inductive oracle"
+  for name in [Poly, PolyMk, PolyRec] do
+    let some oursInfo := oursPoly.find? name
+      | throw <| IO.userError "PSC1 polymorphic inductive metadata missing"
+    let some leanInfo := leanPoly1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 polymorphic inductive metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("polymorphic inductive generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursPoly.find? PolyRec with
+  | some (.recInfo info) =>
+      match info.base.levelParams with
+      | [elim, original] =>
+          assertTrue "PSC1 recursor did not choose Lean's u_1 eliminator universe"
+            (PSC1Kernel.Name.eq elim polyElimU)
+          assertTrue "PSC1 recursor lost the original universe parameter"
+            (PSC1Kernel.Name.eq original polyU)
+      | _ =>
+          throw <| IO.userError "PSC1 polymorphic recursor universe arity mismatch"
+  | _ =>
+      throw <| IO.userError "PSC1 polymorphic recursor metadata missing"
+  match leanPoly1.find? (toLeanName PolyRec) with
+  | some (.recInfo info) =>
+      match info.levelParams with
+      | [elim, original] =>
+          assertTrue "Lean 4.34 recursor did not choose expected u_1 eliminator universe"
+            (elim == toLeanName polyElimU)
+          assertTrue "Lean 4.34 recursor lost the original universe parameter"
+            (original == toLeanName polyU)
+      | _ =>
+          throw <| IO.userError "Lean 4.34 polymorphic recursor universe arity mismatch"
+  | _ =>
+      throw <| IO.userError "Lean 4.34 polymorphic recursor metadata missing"
+
   -- Next K5 slice: non-recursive constructor fields.
   let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
   let natT : PSC1Kernel.Expr := .const NatN []

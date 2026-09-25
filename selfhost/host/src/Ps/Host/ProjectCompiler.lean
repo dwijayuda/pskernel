@@ -94,6 +94,7 @@ def psHostPackageDirectory : List String -> Option String
   | "Ps" :: "Elab" :: _ => some "elab"
   | "Ps" :: "Bridge" :: _ => some "bridge"
   | "Ps" :: "CompilerIr" :: _ => some "compiler-ir"
+  | "Ps" :: "Compiler" :: _ => some "compiler"
   | "Ps" :: "Erasure" :: _ => some "erasure"
   | "Ps" :: "BackendTs" :: _ => some "backend-ts"
   | _ => none

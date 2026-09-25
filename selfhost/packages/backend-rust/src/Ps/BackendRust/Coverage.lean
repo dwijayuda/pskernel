@@ -418,7 +418,7 @@ def psRustCoverageExprWithFuel :
           psRustCoverageAddFeature
             coverage
             "expr:var"
-      | PsVerifiedIrExpr.intrinsic intrinsic arguments =>
+      | PsVerifiedIrExpr.intrinsic intrinsic _ arguments =>
           let withIntrinsicFeature :=
             psRustCoverageAddFeature
               (psRustCoverageAddFeature

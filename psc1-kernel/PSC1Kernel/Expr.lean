@@ -1,5 +1,6 @@
 import PSC1Kernel.Level
 import Std.Data.HashSet.Basic
+import Std.Data.HashMap.Basic
 
 namespace PSC1Kernel
 
@@ -69,6 +70,97 @@ private partial def Expr.eqSpec : Expr → Expr → Bool
   | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
     Name.eq n₁ n₂ && i₁ == i₂ && Expr.eqSpec e₁ e₂
   | _, _ => false
+
+private partial def Name.structHash : Name → UInt64
+  | .anonymous => 11
+  | .str parent value =>
+      mixHash 13 (mixHash parent.structHash (hash value))
+  | .num parent value =>
+      mixHash 17 (mixHash parent.structHash (hash value))
+
+private partial def Level.structHash : Level → UInt64
+  | .zero => 19
+  | .succ level => mixHash 23 level.structHash
+  | .max left right =>
+      mixHash 29 (mixHash left.structHash right.structHash)
+  | .imax left right =>
+      mixHash 31 (mixHash left.structHash right.structHash)
+  | .param name => mixHash 37 name.structHash
+  | .mvar name => mixHash 41 name.structHash
+
+private def Level.listStructHash (levels : List Level) : UInt64 :=
+  levels.foldl (fun acc level => mixHash acc level.structHash) 43
+
+private def Literal.structHash : Literal → UInt64
+  | .nat value => mixHash 47 (hash value)
+  | .str value => mixHash 53 (hash value)
+
+private abbrev ExprHashCache := Std.HashMap USize UInt64
+
+/--
+Runtime structural hash compatible with `Expr.eq`.
+
+This intentionally mirrors the fields observed by `Expr.eq`: lambda/forall
+binder display names and binder annotations are ignored, let display names are
+ignored while `nondep` is retained, and metadata payloads remain structural.
+Pointer addresses are cache keys only; they never contribute to the hash value.
+-/
+private unsafe def Expr.structHashRuntimeGo
+    (e : Expr)
+    (cache : ExprHashCache) : UInt64 × ExprHashCache :=
+  let key := ptrAddrUnsafe e
+  match Std.HashMap.get? cache key with
+  | some cached => (cached, cache)
+  | none =>
+      let (value, cache) :=
+        match e with
+        | .bvar index =>
+            (mixHash 59 (hash index), cache)
+        | .fvar name =>
+            (mixHash 61 name.structHash, cache)
+        | .mvar name =>
+            (mixHash 67 name.structHash, cache)
+        | .sort level =>
+            (mixHash 71 level.structHash, cache)
+        | .const name levels =>
+            (mixHash 73 (mixHash name.structHash (Level.listStructHash levels)), cache)
+        | .app fn arg =>
+            let (fnHash, cache) := Expr.structHashRuntimeGo fn cache
+            let (argHash, cache) := Expr.structHashRuntimeGo arg cache
+            (mixHash 79 (mixHash fnHash argHash), cache)
+        | .lam _ type body _ =>
+            let (typeHash, cache) := Expr.structHashRuntimeGo type cache
+            let (bodyHash, cache) := Expr.structHashRuntimeGo body cache
+            (mixHash 83 (mixHash typeHash bodyHash), cache)
+        | .forallE _ type body _ =>
+            let (typeHash, cache) := Expr.structHashRuntimeGo type cache
+            let (bodyHash, cache) := Expr.structHashRuntimeGo body cache
+            (mixHash 89 (mixHash typeHash bodyHash), cache)
+        | .letE _ type value body nondep =>
+            let (typeHash, cache) := Expr.structHashRuntimeGo type cache
+            let (valueHash, cache) := Expr.structHashRuntimeGo value cache
+            let (bodyHash, cache) := Expr.structHashRuntimeGo body cache
+            let fieldsHash :=
+              mixHash typeHash (mixHash valueHash (mixHash bodyHash (hash nondep)))
+            (mixHash 97 fieldsHash, cache)
+        | .lit value =>
+            (mixHash 101 value.structHash, cache)
+        | .mdata metadata body =>
+            let (bodyHash, cache) := Expr.structHashRuntimeGo body cache
+            (mixHash 103 (mixHash (hash metadata) bodyHash), cache)
+        | .proj typeName index body =>
+            let (bodyHash, cache) := Expr.structHashRuntimeGo body cache
+            let fieldsHash :=
+              mixHash typeName.structHash (mixHash (hash index) bodyHash)
+            (mixHash 107 fieldsHash, cache)
+      (value, Std.HashMap.insert cache key value)
+
+private unsafe def Expr.structHashRuntime
+    (left right : Expr) : UInt64 × UInt64 :=
+  let cache : ExprHashCache := Std.HashMap.emptyWithCapacity 128
+  let (leftHash, cache) := Expr.structHashRuntimeGo left cache
+  let (rightHash, _) := Expr.structHashRuntimeGo right cache
+  (leftHash, rightHash)
 
 private abbrev ExprEqPairCache := Std.HashSet (USize × USize)
 
@@ -140,8 +232,15 @@ private unsafe def Expr.eqRuntimeGo
       | _, _ => (false, seen)
 
 private unsafe def Expr.eqRuntime (left right : Expr) : Bool :=
-  let seen : ExprEqPairCache := Std.HashSet.emptyWithCapacity 64
-  (Expr.eqRuntimeGo left right seen).1
+  if ptrEq left right then
+    true
+  else
+    let (leftHash, rightHash) := Expr.structHashRuntime left right
+    if leftHash != rightHash then
+      false
+    else
+      let seen : ExprEqPairCache := Std.HashSet.emptyWithCapacity 64
+      (Expr.eqRuntimeGo left right seen).1
 
 @[implemented_by Expr.eqRuntime]
 partial def Expr.eq (left right : Expr) : Bool :=

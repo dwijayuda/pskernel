@@ -514,6 +514,12 @@ def psRustCoverageInductiveList :
           inductiveInfo.constructors)
         rest
 
+def psRustCoverageTypeIsFunction
+    (type : PsVerifiedIrType) : Bool :=
+  match type with
+  | PsVerifiedIrType.function _ _ => true
+  | _ => false
+
 def psRustCoverageDeclarationIsGenericValue
     (declaration : PsVerifiedIrDeclaration) : Bool :=
   match declaration.parameters with
@@ -544,9 +550,18 @@ def psRustCoverageDeclarationList :
             "declaration:genericValue"
         else
           withDeclarationFeature;
+      let withResultSupport :=
+        if psRustCoverageTypeIsFunction declaration.resultType then
+          psRustCoverageAddUnsupported
+            (psRustCoverageAddFeature
+              withDeclaration
+              "declaration:functionResult")
+            "declaration:functionResult"
+        else
+          withDeclaration;
       let withParameters :=
         psRustCoverageParameterList
-          withDeclaration
+          withResultSupport
           declaration.parameters;
       let withResult :=
         psRustCoverageType

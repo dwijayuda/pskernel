@@ -42,6 +42,43 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
     ]
     declarations := [
       {
+        name := "one"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body := PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)
+      },
+      {
+        name := "addGlobalOne"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natAdd
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.var "one"
+            ]
+      },
+      {
+        name := "shadowOne"
+        typeParameters := []
+        parameters := [
+          {
+            name := "one"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body := PsVerifiedIrExpr.var "one"
+      },
+      {
         name := "plusOne"
         typeParameters := []
         parameters := [

@@ -163,6 +163,15 @@ jobs:
           if (instance.exports.applyTwiceIncrement(40) !== 42) {
             throw new Error('PSC1_WASM_RUNTIME_HIGHER_ORDER_CALL_REF_RESULT');
           }
+          if (instance.exports.genericBoxRoundTrip(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GENERIC_BOX_RESULT');
+          }
+          if (instance.exports.genericIdU32(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GENERIC_FUNCTION_RESULT');
+          }
+          if (instance.exports.genericLengthTwo() !== 2) {
+            throw new Error('PSC1_WASM_RUNTIME_GENERIC_RECURSIVE_ADT_RESULT');
+          }
           console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
           NODE
 

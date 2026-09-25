@@ -279,6 +279,50 @@ def importStructureFixture : IO Lean.Environment := do
   Lean.initSearchPath (← Lean.findSysroot)
   Lean.importModules #[{ module := `PSC1Kernel.Test.StructureFixture }] {}
 
+def makeDeltaEnvironment : PSC1Kernel.Environment :=
+  let nat : PSC1Kernel.Name := .str .anonymous "Nat"
+  let deltaA : PSC1Kernel.Name :=
+    .str (.str (.str .anonymous "PSC1Kernel") "Test") "DeltaA"
+  let deltaB : PSC1Kernel.Name :=
+    .str (.str (.str .anonymous "PSC1Kernel") "Test") "DeltaB"
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let natT : PSC1Kernel.Expr := .const nat []
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.axiomInfo {
+    base := mkBase nat type1
+    isUnsafe := false
+  })
+  let env2 := env1.addUnchecked (.defnInfo {
+    base := mkBase deltaA natT
+    value := .lit (.nat 7)
+    hints := .regular 0
+    safety := .safe
+  })
+  env2.addUnchecked (.defnInfo {
+    base := mkBase deltaB natT
+    value := .const deltaA []
+    hints := .abbrevHint
+    safety := .safe
+  })
+
+def assertLazyDeltaOracle : IO Unit := do
+  let deltaB : PSC1Kernel.Name :=
+    .str (.str (.str .anonymous "PSC1Kernel") "Test") "DeltaB"
+  let expr : PSC1Kernel.Expr := .const deltaB []
+  let ctx := PSC1Kernel.CheckerContext.empty makeDeltaEnvironment
+  let ours ← exceptToIO
+    "PSC1 lazy delta"
+    (PSC1Kernel.isDefEq ctx expr (.lit (.nat 7)))
+
+  let leanEnv ← importStructureFixture
+  let lean ←
+    match Lean.Kernel.isDefEq leanEnv ({} : Lean.LocalContext)
+      (toLeanExpr expr) (.lit (.natVal 7)) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean kernel lazy-delta oracle failed"
+  assertTrue "lazy delta differs from Lean 4.34" (ours == lean)
+  assertTrue "Lean 4.34 should unfold the abbreviation/definition chain" lean
+
 def assertStructureEtaOracle : IO Unit := do
   let env := makeStructureEnvironment
   let pair : PSC1Kernel.Name := .str (.str (.str .anonymous "PSC1Kernel") "Test") "EtaPair"
@@ -463,6 +507,7 @@ def run : IO Unit := do
   assertWhnfLayering
   assertNatReductionOracle
   assertFunctionEtaOracle
+  assertLazyDeltaOracle
   assertStructureEtaOracle
   assertUnitLikeOracle
   assertProofIrrelevanceOracle

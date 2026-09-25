@@ -266,95 +266,141 @@ def levelListsEquivalent : List Level → List Level → Bool
     Level.equivalent a b && levelListsEquivalent as bs
   | _, _ => false
 
+inductive DeltaResult where
+  | decided (value : Bool)
+  | residual (left : Expr) (right : Expr)
+
+def deltaDefinition? (ctx : CheckerContext) (e : Expr) : Option DefinitionInfo :=
+  match e.getAppFn with
+  | .const name levels =>
+    match ctx.env.find? name with
+    | some (.defnInfo info) =>
+      if info.base.levelParams.length == levels.length then some info else none
+    | _ => none
+  | _ => none
+
+def quickReducedDefEq (a b : Expr) : Option Bool :=
+  if Expr.eq a b then
+    some true
+  else
+    match a, b with
+    | .sort u, .sort v => some (Level.equivalent u v)
+    | .lit x, .lit y => some (Literal.eq x y)
+    | _, _ => none
+
+partial def deltaOnce
+    (ctx : CheckerContext)
+    (e : Expr) : Except String Expr := do
+  let some unfolded := unfoldDefinition ctx e
+    | .error "internal lazy-delta request for non-definition"
+  whnfCore ctx unfolded true
+
+partial def lazyDeltaReduction
+    (ctx : CheckerContext)
+    (left right : Expr) : Except String DeltaResult := do
+  let rec loop (a b : Expr) : Except String DeltaResult := do
+    match quickReducedDefEq a b with
+    | some value => return .decided value
+    | none => pure ()
+
+    if !a.hasFVar && !b.hasFVar then
+      let ar ← reduceNat ctx a
+      match ar with
+      | some value => return .decided (← isDefEq ctx value b)
+      | none => pure ()
+      let br ← reduceNat ctx b
+      match br with
+      | some value => return .decided (← isDefEq ctx a value)
+      | none => pure ()
+
+    match deltaDefinition? ctx a, deltaDefinition? ctx b with
+    | none, none => return .residual a b
+    | some _, none =>
+      loop (← deltaOnce ctx a) b
+    | none, some _ =>
+      loop a (← deltaOnce ctx b)
+    | some da, some db =>
+      if da.hints.lt db.hints then
+        loop (← deltaOnce ctx a) b
+      else if db.hints.lt da.hints then
+        loop a (← deltaOnce ctx b)
+      else
+        loop (← deltaOnce ctx a) (← deltaOnce ctx b)
+  loop left right
+
 mutual
 
 partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := do
   if Expr.eq a b then return true
-  let a' ← whnf ctx a
-  let b' ← whnf ctx b
-  if Expr.eq a' b' then return true
 
-  -- Lean 4.34 proof irrelevance: if the left term is a proof, equality is
-  -- determined by definitional equality of the two proposition types.
-  let aType ← infer ctx a'
+  let aCore ← whnfCore ctx a true
+  let bCore ← whnfCore ctx b true
+  match quickReducedDefEq aCore bCore with
+  | some value => return value
+  | none => pure ()
+
+  -- Final Lean 4.34 applies proof irrelevance before lazy delta.
+  let aType ← infer ctx aCore
   let aIsProof ← isProp ctx aType
   if aIsProof then
-    let bType ← infer ctx b'
+    let bType ← infer ctx bCore
     return ← isDefEq ctx aType bType
 
-  match a', b' with
-  | .sort u, .sort v => return Level.equivalent u v
+  let delta ← lazyDeltaReduction ctx aCore bCore
+  let (aDelta, bDelta) ←
+    match delta with
+    | .decided value => return value
+    | .residual left right => pure (left, right)
+
+  match aDelta, bDelta with
   | .const n₁ ls₁, .const n₂ ls₂ =>
-    return Name.eq n₁ n₂ && levelListsEquivalent ls₁ ls₂
+    if Name.eq n₁ n₂ && levelListsEquivalent ls₁ ls₂ then return true
+  | .fvar n₁, .fvar n₂ =>
+    if Name.eq n₁ n₂ then return true
+  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
+    if Name.eq n₁ n₂ && i₁ == i₂ then
+      if ← isDefEq ctx e₁ e₂ then return true
+  | _, _ => pure ()
+
+  -- Cheap projection normalization has now had its chance. Retry core WHNF
+  -- with full projection reduction, as final Lean 4.34 does.
+  let aFull ← whnfCore ctx aDelta false
+  let bFull ← whnfCore ctx bDelta false
+  if !Expr.eq aFull aDelta || !Expr.eq bFull bDelta then
+    return ← isDefEq ctx aFull bFull
+
+  match aFull, bFull with
+  | .sort u, .sort v => return Level.equivalent u v
+  | .lit x, .lit y => return Literal.eq x y
   | .app f₁ a₁, .app f₂ a₂ => do
     let hf ← isDefEq ctx f₁ f₂
-    if !hf then return false
-    isDefEq ctx a₁ a₂
-  | .forallE _ d₁ b₁ _, .forallE _ d₂ b₂ _ => do
-    let hd ← isDefEq ctx d₁ d₂
-    if !hd then return false
-    isDefEq ctx b₁ b₂
-  | .lam _ d₁ b₁ _, .lam _ d₂ b₂ _ => do
-    let hd ← isDefEq ctx d₁ d₂
-    if !hd then return false
-    isDefEq ctx b₁ b₂
-  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ => do
-    if !Name.eq n₁ n₂ || i₁ != i₂ then return false
-    isDefEq ctx e₁ e₂
+    if hf then
+      if ← isDefEq ctx a₁ a₂ then return true
+  | .forallE _ d₁ body₁ _, .forallE _ d₂ body₂ _ => do
+    if ← isDefEq ctx d₁ d₂ then
+      if ← isDefEq ctx body₁ body₂ then return true
+  | .lam _ d₁ body₁ _, .lam _ d₂ body₂ _ => do
+    if ← isDefEq ctx d₁ d₂ then
+      if ← isDefEq ctx body₁ body₂ then return true
   | .lam _ _ _ _, other => do
     let otherType ← whnf ctx (← infer ctx other)
     match otherType with
     | .forallE name domain _ binderInfo =>
-      isDefEq ctx a' (.lam name domain (.app other (.bvar 0)) binderInfo)
-    | _ => return false
+      if ← isDefEq ctx aFull (.lam name domain (.app other (.bvar 0)) binderInfo) then
+        return true
+    | _ => pure ()
   | other, .lam _ _ _ _ => do
     let otherType ← whnf ctx (← infer ctx other)
     match otherType with
     | .forallE name domain _ binderInfo =>
-      isDefEq ctx (.lam name domain (.app other (.bvar 0)) binderInfo) b'
-    | _ => return false
-  | _, _ => do
-    if ← tryEtaStruct ctx a' b' then return true
-    if ← isDefEqUnitLike ctx a' b' then return true
-    return false
+      if ← isDefEq ctx (.lam name domain (.app other (.bvar 0)) binderInfo) bFull then
+        return true
+    | _ => pure ()
+  | _, _ => pure ()
 
-partial def tryEtaStructCore
-    (ctx : CheckerContext)
-    (t s : Expr) : Except String Bool := do
-  let fn := s.getAppFn
-  let args := s.getAppArgs
-  let .const ctorName _ := fn | return false
-  let some (.ctorInfo ctor) := ctx.env.find? ctorName | return false
-  if args.length != ctor.numParams + ctor.numFields then return false
-  if !ctx.env.isNonRecStructure ctor.induct then return false
-  if !(← isDefEq ctx (← infer ctx t) (← infer ctx s)) then return false
-  let rec loop (i : Nat) : Except String Bool := do
-    if i < ctor.numFields then
-      let some arg := listGet? args (ctor.numParams + i) | return false
-      let ok ← isDefEq ctx (.proj ctor.induct i t) arg
-      if !ok then return false
-      loop (i + 1)
-    else
-      return true
-  loop 0
-
-partial def tryEtaStruct
-    (ctx : CheckerContext)
-    (t s : Expr) : Except String Bool := do
-  if ← tryEtaStructCore ctx t s then return true
-  tryEtaStructCore ctx s t
-
-partial def isDefEqUnitLike
-    (ctx : CheckerContext)
-    (t s : Expr) : Except String Bool := do
-  let tType ← whnf ctx (← infer ctx t)
-  let .const inductName _ := tType.getAppFn | return false
-  if !ctx.env.isNonRecStructure inductName then return false
-  let some (.inductInfo induct) := ctx.env.find? inductName | return false
-  let [ctorName] := induct.ctors | return false
-  let some (.ctorInfo ctor) := ctx.env.find? ctorName | return false
-  if ctor.numFields != 0 then return false
-  isDefEq ctx tType (← infer ctx s)
+  if ← tryEtaStruct ctx aFull bFull then return true
+  if ← isDefEqUnitLike ctx aFull bFull then return true
+  return false
 
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with

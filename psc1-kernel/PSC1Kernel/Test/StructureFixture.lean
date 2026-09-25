@@ -6,4 +6,7 @@ structure EtaPair where
 
 structure EtaUnit where
 
+def DeltaA : Nat := 7
+abbrev DeltaB : Nat := DeltaA
+
 end PSC1Kernel.Test

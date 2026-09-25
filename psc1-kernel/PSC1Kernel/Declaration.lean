@@ -20,6 +20,17 @@ inductive ReducibilityHints where
   | abbrevHint
   | regular (height : Nat)
 
+def ReducibilityHints.lt : ReducibilityHints → ReducibilityHints → Bool
+  | .abbrevHint, .abbrevHint => false
+  | .abbrevHint, _ => true
+  | .regular a, .regular b => a > b
+  | .regular _, .opaqueHint => true
+  | _, _ => false
+
+def ReducibilityHints.isRegular : ReducibilityHints → Bool
+  | .regular _ => true
+  | _ => false
+
 structure ConstantBase where
   name : Name
   levelParams : List Name

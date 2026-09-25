@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - selfhost/psc1-lean-bootstrap
+      - kernel/psc1-lean-reference
     paths:
       - selfhost/**
       - docs/selfhost/PSC1_LEAN_BOOTSTRAP.md

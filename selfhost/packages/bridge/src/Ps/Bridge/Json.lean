@@ -342,7 +342,7 @@ def psJsonParseNumber
             Except.ok {
               value := PsJsonValue.number text
               rest := afterDigits
-            }
+            };
   match chars with
   | '-' :: rest => parseUnsigned true rest
   | _ => parseUnsigned false chars

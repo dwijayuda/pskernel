@@ -1455,6 +1455,39 @@ console.log('ok - @proofscript/elab structural recursion via recursor');
 {
   const env=makeNatNotationEnvironment();
   const result=elaborateV061Declarations(parseV061Module(
+    'inductive WildList(α : Type) where { '+
+    '| nil; | cons(head : α, tail : WildList(α)); } '+
+    'function wildcardLength {α : Type}(xs : WildList(α)) : Nat := '+
+    'match xs with { | .nil => 0; | _ => 1; };',
+  ),env);
+  const definition=result.definitions.find(
+    (item)=>containsNamePrefix(item.name,'wildcardLength'),
+  );
+  equal(definition?.kind,'definition');
+  if(definition?.kind==='definition'){
+    equal(containsNamedConstant(definition.value,'WildList.rec'),true);
+  }
+}
+{
+  const env=makeNatNotationEnvironment();
+  let rejected=false;
+  try{
+    elaborateV061Declarations(parseV061Module(
+      'inductive WildOrder(α : Type) where { '+
+      '| nil; | cons(head : α, tail : WildOrder(α)); } '+
+      'function badWildcard {α : Type}(xs : WildOrder(α)) : Nat := '+
+      'match xs with { | _ => 0; | .nil => 1; };',
+    ),env);
+  }catch(error){
+    rejected=/PS_ELAB_MATCH_WILDCARD_ORDER/.test(String(error));
+  }
+  equal(rejected,true);
+}
+console.log('ok - @proofscript/elab final wildcard match fallback');
+
+{
+  const env=makeNatNotationEnvironment();
+  const result=elaborateV061Declarations(parseV061Module(
     'inductive PsList2(α : Type) where { '+
     '| nil; | cons(head : α, tail : PsList2(α)); } '+
     'function countFrom {α : Type}(base : Nat, xs : PsList2(α)) : Nat := '+

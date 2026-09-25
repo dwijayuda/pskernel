@@ -691,6 +691,44 @@ def assertProofIrrelevanceOracle : IO Unit := do
   assertTrue "proof irrelevance differs from Lean 4.34" (ours == lean)
   assertTrue "Lean 4.34 should identify proofs of the same proposition" lean
 
+def assertBindingOpenDefEqOracle : IO Unit := do
+  let NatN := PSC1Kernel.kernelNatName
+  let Succ := PSC1Kernel.kernelNatSuccName
+  let x : PSC1Kernel.Name := .str (.str .anonymous "Binding") "x"
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let succType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "n") natT natT .default
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.axiomInfo {
+    base := mkBase NatN type1
+    isUnsafe := false
+  })
+  let env := env1.addUnchecked (.axiomInfo {
+    base := mkBase Succ succType
+    isUnsafe := false
+  })
+  let ctx := PSC1Kernel.CheckerContext.empty env
+
+  let ignored : PSC1Kernel.Expr :=
+    .letE (.str .anonymous "_g") natT (.bvar 0) (.lit (.nat 4)) false
+  let lhs : PSC1Kernel.Expr :=
+    .lam x natT
+      (.app (.const Succ []) ignored)
+      .default
+  let rhs : PSC1Kernel.Expr :=
+    .lam x natT (.lit (.nat 5)) .default
+
+  let ours ← exceptToIO
+    "PSC1 opened-binder defeq"
+    (PSC1Kernel.isDefEq ctx lhs rhs)
+
+  Lean.initSearchPath (← Lean.findSysroot)
+  let leanEnv ← Lean.importModules #[{ module := `Init.Prelude }] {}
+  let lean ← kernelExprDefEq leanEnv lhs rhs
+  assertTrue "opened-binder defeq differs from Lean 4.34" (ours == lean)
+  assertTrue "Lean 4.34 should compare binder bodies in an opened local context" lean
+
 def assertBinderInfoDefEqOracle : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let x : PSC1Kernel.Name := .str .anonymous "x"
@@ -1232,6 +1270,7 @@ def run : IO Unit := do
   assertStructureEtaOracle
   assertUnitLikeOracle
   assertProofIrrelevanceOracle
+  assertBindingOpenDefEqOracle
   assertBinderInfoDefEqOracle
   assertStringLiteralExpansionShape
   assertStringLiteralDefEqOracle

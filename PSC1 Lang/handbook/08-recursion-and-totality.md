@@ -12,7 +12,7 @@ The preferred first mechanism is structural recursion.
 Example from the current stdlib shape:
 
 ```proofscript
-function listLength {α : Type}(xs : PsList(α)) : Nat :=
+function listLength {α: Type}(xs: PsList(α)): Nat :=
   match xs with {
     | .nil => 0;
     | .cons head tail => 1 + listLength(tail);
@@ -45,8 +45,8 @@ The parser recognizing a recursive name is not enough.
 ## Recursive map
 
 ```proofscript
-function listMap {α : Type}{β : Type}
-(f : α -> β, xs : PsList(α)) : PsList(β) :=
+function listMap {α: Type}{β: Type}
+(f: α -> β, xs: PsList(α)): PsList(β) :=
   match xs with {
     | .nil => PsList.nil;
     | .cons head tail =>

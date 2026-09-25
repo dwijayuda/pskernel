@@ -1157,7 +1157,7 @@ def psElabPartialDeclaration
                             let finalOpenType :=
                               psMetaInstantiate
                                 metaContext
-                                openType
+                                openType;
                             let closed :=
                               psCloseElabTypedBinders
                                 metaContext

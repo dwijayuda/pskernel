@@ -98,6 +98,9 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.letE
             "xs"
+            (PsVerifiedIrType.named
+              "Array"
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.arrayPush
               [
@@ -118,6 +121,9 @@ def psBackendDiffModule : PsVerifiedIrModule :=
               ])
             (PsVerifiedIrExpr.letE
               "addOffset"
+              (PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat))
               (PsVerifiedIrExpr.lambda
                 [
                   {
@@ -133,6 +139,9 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                   ]))
               (PsVerifiedIrExpr.letE
                 "ys"
+                (PsVerifiedIrType.named
+                  "Array"
+                  [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
                 (PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.arrayMap
                   [
@@ -252,6 +261,9 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.letE
             "xs"
+            (PsVerifiedIrType.named
+              "Array"
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.arrayPush
               [
@@ -270,6 +282,9 @@ def psBackendDiffModule : PsVerifiedIrModule :=
               ])
             (PsVerifiedIrExpr.letE
               "ys"
+              (PsVerifiedIrType.named
+                "Array"
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.arraySetIfInBounds
                 [
@@ -310,6 +325,9 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.letE
             "value"
+            (PsVerifiedIrType.named
+              "Maybe"
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
             (PsVerifiedIrExpr.ifE
               (PsVerifiedIrExpr.var "useSome")
               (PsVerifiedIrExpr.constructor

@@ -93,8 +93,10 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.projection
             "Pair"
+            []
             (PsVerifiedIrExpr.record
               "Pair"
+              []
               [
                 ("left", PsVerifiedIrExpr.var "left"),
                 ("right", PsVerifiedIrExpr.var "right")
@@ -926,6 +928,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                 []))
             (PsVerifiedIrExpr.matchE
               "Maybe"
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
               (PsVerifiedIrExpr.var "value")
               [
                 (

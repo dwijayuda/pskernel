@@ -14,20 +14,20 @@ def psExprAbstractFVarAt (target : Nat) (depth : Nat) : PsExpr -> PsExpr
       PsExpr.lam
         name
         (psExprAbstractFVarAt target depth type)
-        (psExprAbstractFVarAt target (depth + 1) body)
+        (psExprAbstractFVarAt target (Nat.succ depth) body)
         binder
   | .forallE name type body binder =>
       PsExpr.forallE
         name
         (psExprAbstractFVarAt target depth type)
-        (psExprAbstractFVarAt target (depth + 1) body)
+        (psExprAbstractFVarAt target (Nat.succ depth) body)
         binder
   | .letE name type value body =>
       PsExpr.letE
         name
         (psExprAbstractFVarAt target depth type)
         (psExprAbstractFVarAt target depth value)
-        (psExprAbstractFVarAt target (depth + 1) body)
+        (psExprAbstractFVarAt target (Nat.succ depth) body)
   | .proj typeName index value =>
       PsExpr.proj typeName index (psExprAbstractFVarAt target depth value)
   | expr => expr

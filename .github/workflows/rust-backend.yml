@@ -122,6 +122,18 @@ jobs:
               arrayFoldOnly,
               arrayMapDemo,
               genericArrayId,
+              idFloat,
+              idFloat32,
+              idISize,
+              idInt16,
+              idInt32,
+              idInt64,
+              idInt8,
+              idUInt16,
+              idUInt32,
+              idUInt64,
+              idUInt8,
+              idUSize,
               one,
               plusOne,
               shadowOne,
@@ -141,6 +153,18 @@ jobs:
               assert_eq!(one(), n(1));
               assert_eq!(addGlobalOne(n(41)), n(42));
               assert_eq!(shadowOne(n(7)), n(7));
+              assert_eq!(idUInt8(255u8), 255u8);
+              assert_eq!(idUInt16(65535u16), 65535u16);
+              assert_eq!(idUInt32(4_000_000_000u32), 4_000_000_000u32);
+              assert_eq!(idUInt64(18_000_000_000u64), 18_000_000_000u64);
+              assert_eq!(idUSize(123usize), 123usize);
+              assert_eq!(idInt8(-12i8), -12i8);
+              assert_eq!(idInt16(-1234i16), -1234i16);
+              assert_eq!(idInt32(-123456i32), -123456i32);
+              assert_eq!(idInt64(-123456789i64), -123456789i64);
+              assert_eq!(idISize(-123isize), -123isize);
+              assert_eq!(idFloat(1.25f64), 1.25f64);
+              assert_eq!(idFloat32(1.25f32), 1.25f32);
               assert_eq!(plusOne(n(41)), n(42));
               assert_eq!(pushBang(String::from("hi")), "hi!");
               assert_eq!(utf8Size(String::from("é")), n(2));

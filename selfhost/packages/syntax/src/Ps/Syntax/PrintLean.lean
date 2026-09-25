@@ -420,9 +420,11 @@ def psPrintLeanConstructor
       match fieldsResult with
       | Except.error error => Except.error error
       | Except.ok fields =>
-          let suffix :=
-            if fields.isEmpty then ""
-            else psPrintLeanConcat2 " " (psPrintJoin " " fields);
+          let suffix : String :=
+            match fields with
+            | List.nil => ""
+            | List.cons _ _ =>
+                psPrintLeanConcat2 " " (psPrintJoin " " fields);
           Except.ok (psPrintLeanConcat3 "  | " name suffix)
 
 def psPrintLeanDeclaration

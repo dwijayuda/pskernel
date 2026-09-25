@@ -7,14 +7,17 @@ structure PsElabStructuralRecursion where
   functionName : PsName
   explicitParameterIds : List Nat
   recursiveParameterIndex : Nat
-  calls : List (Nat × Nat)
+  calls : List (Prod Nat Nat)
 
-def psElabStructuralRecursionFindCall :
-    List (Nat × Nat) -> Nat -> Option Nat
-  | [], _ => none
-  | entry :: rest, fieldId =>
-      if entry.1 == fieldId then
-        some entry.2
+def psElabStructuralRecursionFindCall
+    (calls : List (Prod Nat Nat))
+    (fieldId : Nat) : Option Nat :=
+  match calls with
+  | [] =>
+      none
+  | entry :: rest =>
+      if Nat.beq (Prod.fst entry) fieldId then
+        some (Prod.snd entry)
       else
         psElabStructuralRecursionFindCall rest fieldId
 

@@ -92,9 +92,16 @@ def psExprInstantiateLevelParams
         (psExprInstantiateLevelParams parameters arguments type)
         (psExprInstantiateLevelParams parameters arguments value)
         (psExprInstantiateLevelParams parameters arguments body)
+  | .bvar index =>
+      PsExpr.bvar index
+  | .fvar id =>
+      PsExpr.fvar id
+  | .mvar id =>
+      PsExpr.mvar id
+  | .lit value =>
+      PsExpr.lit value
   | .proj typeName index value =>
       PsExpr.proj
         typeName
         index
         (psExprInstantiateLevelParams parameters arguments value)
-  | expr => expr

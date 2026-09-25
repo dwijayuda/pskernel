@@ -102,86 +102,117 @@ def psLevelListEq
               false
         | _ => false
 
-def psExprAlphaEq (left : PsExpr) (right : PsExpr) : Bool :=
+def psExprAlphaEq (left : PsExpr) : PsExpr -> Bool :=
   match left with
   | .bvar leftIndex =>
-      match right with
-      | .bvar rightIndex => Nat.beq leftIndex rightIndex
-      | _ => false
+      fun (right : PsExpr) =>
+        match right with
+        | .bvar rightIndex => Nat.beq leftIndex rightIndex
+        | _ => false
   | .fvar leftId =>
-      match right with
-      | .fvar rightId => Nat.beq leftId rightId
-      | _ => false
+      fun (right : PsExpr) =>
+        match right with
+        | .fvar rightId => Nat.beq leftId rightId
+        | _ => false
   | .mvar leftId =>
-      match right with
-      | .mvar rightId => Nat.beq leftId rightId
-      | _ => false
+      fun (right : PsExpr) =>
+        match right with
+        | .mvar rightId => Nat.beq leftId rightId
+        | _ => false
   | .sortE leftLevel =>
-      match right with
-      | .sortE rightLevel =>
-          psLevelStructuralEq leftLevel rightLevel
-      | _ => false
+      fun (right : PsExpr) =>
+        match right with
+        | .sortE rightLevel =>
+            psLevelStructuralEq leftLevel rightLevel
+        | _ => false
   | .constE leftName leftLevels =>
-      match right with
-      | .constE rightName rightLevels =>
-          if psNameEq leftName rightName then
-            psLevelListEq leftLevels rightLevels
-          else
-            false
-      | _ => false
+      fun (right : PsExpr) =>
+        match right with
+        | .constE rightName rightLevels =>
+            if psNameEq leftName rightName then
+              psLevelListEq leftLevels rightLevels
+            else
+              false
+        | _ => false
   | .app leftFn leftArg =>
-      match right with
-      | .app rightFn rightArg =>
-          if psExprAlphaEq leftFn rightFn then
-            psExprAlphaEq leftArg rightArg
-          else
-            false
-      | _ => false
+      let fnEq : PsExpr -> Bool :=
+        psExprAlphaEq leftFn;
+      let argEq : PsExpr -> Bool :=
+        psExprAlphaEq leftArg;
+      fun (right : PsExpr) =>
+        match right with
+        | .app rightFn rightArg =>
+            if fnEq rightFn then
+              argEq rightArg
+            else
+              false
+        | _ => false
   | .lam _ leftType leftBody leftBinder =>
-      match right with
-      | .lam _ rightType rightBody rightBinder =>
-          if psBinderInfoEq leftBinder rightBinder then
-            if psExprAlphaEq leftType rightType then
-              psExprAlphaEq leftBody rightBody
+      let typeEq : PsExpr -> Bool :=
+        psExprAlphaEq leftType;
+      let bodyEq : PsExpr -> Bool :=
+        psExprAlphaEq leftBody;
+      fun (right : PsExpr) =>
+        match right with
+        | .lam _ rightType rightBody rightBinder =>
+            if psBinderInfoEq leftBinder rightBinder then
+              if typeEq rightType then
+                bodyEq rightBody
+              else
+                false
             else
               false
-          else
-            false
-      | _ => false
+        | _ => false
   | .forallE _ leftType leftBody leftBinder =>
-      match right with
-      | .forallE _ rightType rightBody rightBinder =>
-          if psBinderInfoEq leftBinder rightBinder then
-            if psExprAlphaEq leftType rightType then
-              psExprAlphaEq leftBody rightBody
+      let typeEq : PsExpr -> Bool :=
+        psExprAlphaEq leftType;
+      let bodyEq : PsExpr -> Bool :=
+        psExprAlphaEq leftBody;
+      fun (right : PsExpr) =>
+        match right with
+        | .forallE _ rightType rightBody rightBinder =>
+            if psBinderInfoEq leftBinder rightBinder then
+              if typeEq rightType then
+                bodyEq rightBody
+              else
+                false
             else
               false
-          else
-            false
-      | _ => false
+        | _ => false
   | .letE _ leftType leftValue leftBody =>
-      match right with
-      | .letE _ rightType rightValue rightBody =>
-          if psExprAlphaEq leftType rightType then
-            if psExprAlphaEq leftValue rightValue then
-              psExprAlphaEq leftBody rightBody
+      let typeEq : PsExpr -> Bool :=
+        psExprAlphaEq leftType;
+      let valueEq : PsExpr -> Bool :=
+        psExprAlphaEq leftValue;
+      let bodyEq : PsExpr -> Bool :=
+        psExprAlphaEq leftBody;
+      fun (right : PsExpr) =>
+        match right with
+        | .letE _ rightType rightValue rightBody =>
+            if typeEq rightType then
+              if valueEq rightValue then
+                bodyEq rightBody
+              else
+                false
             else
               false
-          else
-            false
-      | _ => false
+        | _ => false
   | .lit leftValue =>
-      match right with
-      | .lit rightValue => psLiteralEq leftValue rightValue
-      | _ => false
+      fun (right : PsExpr) =>
+        match right with
+        | .lit rightValue => psLiteralEq leftValue rightValue
+        | _ => false
   | .proj leftType leftIndex leftValue =>
-      match right with
-      | .proj rightType rightIndex rightValue =>
-          if psNameEq leftType rightType then
-            if Nat.beq leftIndex rightIndex then
-              psExprAlphaEq leftValue rightValue
+      let valueEq : PsExpr -> Bool :=
+        psExprAlphaEq leftValue;
+      fun (right : PsExpr) =>
+        match right with
+        | .proj rightType rightIndex rightValue =>
+            if psNameEq leftType rightType then
+              if Nat.beq leftIndex rightIndex then
+                valueEq rightValue
+              else
+                false
             else
               false
-          else
-            false
-      | _ => false
+        | _ => false

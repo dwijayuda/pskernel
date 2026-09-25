@@ -1050,6 +1050,27 @@ function makeNatBoolNotationEnvironment():Environment {
 }
 console.log('ok - @proofscript/elab bounded Nat notation');
 
+{
+  const env=makeNatBoolNotationEnvironment();
+  const result=elaborateV061Declarations(
+    parseV061LeanSubsetModule(
+      'def eqBool : Bool → Bool → Bool\n'+
+      '  | true, true => true\n'+
+      '  | _, _ => false\n',
+    ),
+    env,
+  );
+  equal(result.definitions.length,1);
+  const definition=result.definitions[0]!;
+  equal(definition.kind,'definition');
+  equal(containsNamedConstant(definition.value,'Bool.rec'),true);
+  equal(
+    result.environment.find(nameFromDotted('eqBool'))?.kind,
+    'definition',
+  );
+}
+console.log('ok - @proofscript/elab Lean equation clauses via recursors');
+
 
 {
   const env=makeDefinitionEnvironment();

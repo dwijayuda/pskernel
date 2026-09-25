@@ -38,7 +38,8 @@ def finishReplaySegment
       let stats ← state.finish
       pure (state.env, totals.add stats)
 
-partial def replaySegmentedLines
+partial def replaySegmentedLinesFrom
+    (base : Environment)
     (lines : List String) :
     Except String (Environment × ReplayTotals) := do
   let rec go
@@ -73,17 +74,45 @@ partial def replaySegmentedLines
             | .error err =>
                 throw ("line " ++ toString lineNo ++ ": " ++ err)
           go shared (some next) totals (lineNo + 1) rest
-  go .empty none {} 1 lines
+  go base none {} 1 lines
+
+def replaySegmentedLines
+    (lines : List String) :
+    Except String (Environment × ReplayTotals) :=
+  replaySegmentedLinesFrom .empty lines
+
+def replayFileFrom
+    (base : Environment)
+    (path : String) : IO (Environment × ReplayTotals) := do
+  let content ← IO.FS.readFile path
+  match replaySegmentedLinesFrom base (content.splitOn "\n") with
+  | .ok value => pure value
+  | .error err =>
+      throw <| IO.userError (
+        "Lean4Export replay failed for " ++ path ++ ": " ++ err)
+
+def printReplayTotals (path : String) (totals : ReplayTotals) : IO Unit :=
+  IO.println s!"PSC1 Lean replay PASS file={path} records={totals.records} names={totals.names} levels={totals.levels} exprs={totals.expressions} declarations={totals.declarations} segments={totals.segments}"
+
+partial def replayTargets
+    (base : Environment)
+    (paths : List String) : IO Unit := do
+  match paths with
+  | [] => pure ()
+  | path :: rest => do
+      let (_, totals) ← replayFileFrom base path
+      printReplayTotals path totals
+      replayTargets base rest
 
 def main (args : List String) : IO Unit := do
-  let path ←
-    match args with
-    | [path] => pure path
-    | _ => throw <| IO.userError "usage: ReplayFile <lean4export.ndjson>"
-  let text ← IO.FS.readFile path
-  let (_, totals) ←
-    match replaySegmentedLines (text.splitOn "\n") with
-    | .ok value => pure value
-    | .error err =>
-        throw <| IO.userError ("Lean4Export replay failed: " ++ err)
-  IO.println s!"PSC1 Lean replay PASS records={totals.records} names={totals.names} levels={totals.levels} exprs={totals.expressions} declarations={totals.declarations} segments={totals.segments}"
+  match args with
+  | [path] => do
+      let (_, totals) ← replayFileFrom .empty path
+      printReplayTotals path totals
+  | "--base" :: basePath :: target :: rest => do
+      let (baseEnv, _) ← replayFileFrom .empty basePath
+      replayTargets baseEnv (target :: rest)
+  | _ =>
+      throw <| IO.userError (
+        "usage: ReplayFile <lean4export.ndjson> | " ++
+        "ReplayFile --base <base.ndjson> <delta.ndjson> [delta.ndjson ...]")

@@ -233,32 +233,64 @@ def psJsonDigit (char : Char) : Bool :=
   let value : Nat := psJsonCharCode char;
   psJsonNatInRange value 48 57
 
+def psJsonReverseCharsAcc
+    (values : List Char)
+    (acc : List Char) : List Char :=
+  match values with
+  | List.nil =>
+      acc
+  | List.cons head tail =>
+      psJsonReverseCharsAcc tail (List.cons head acc)
+
+def psJsonReverseChars (values : List Char) : List Char :=
+  psJsonReverseCharsAcc values List.nil
+
 def psJsonTakeDigits :
     List Char -> List Char -> List Char × List Char
-  | [], digitsRev => (digitsRev.reverse, [])
-  | char :: rest, digitsRev =>
+  | List.nil, digitsRev =>
+      Prod.mk (psJsonReverseChars digitsRev) List.nil
+  | List.cons char rest, digitsRev =>
       if psJsonDigit char then
-        psJsonTakeDigits rest (char :: digitsRev)
+        psJsonTakeDigits rest (List.cons char digitsRev)
       else
-        (digitsRev.reverse, char :: rest)
+        Prod.mk
+          (psJsonReverseChars digitsRev)
+          (List.cons char rest)
 
 def psJsonParseNumber
     (chars : List Char) :
     Except PsJsonParseError PsJsonParseResult :=
   let parseUnsigned :=
     fun negative rest =>
-      let taken := psJsonTakeDigits rest []
-      match taken.1 with
-      | [] => Except.error PsJsonParseError.invalidNumber
-      | first :: more =>
-          if first == '0' && !more.isEmpty then
-            Except.error PsJsonParseError.invalidNumber
+      let taken := psJsonTakeDigits rest List.nil;
+      let digits := Prod.fst taken;
+      let afterDigits := Prod.snd taken;
+      match digits with
+      | List.nil =>
+          Except.error PsJsonParseError.invalidNumber
+      | List.cons first more =>
+          let hasMore : Bool :=
+            match more with
+            | List.nil => false
+            | List.cons _ _ => true;
+          if psJsonCharEq first '0' then
+            if hasMore then
+              Except.error PsJsonParseError.invalidNumber
+            else
+              let body := String.ofList (List.cons first more);
+              let text :=
+                if negative then psJsonConcat2 "-" body else body;
+              Except.ok {
+                value := PsJsonValue.number text
+                rest := afterDigits
+              }
           else
-            let body := String.ofList (first :: more)
-            let text := if negative then psJsonConcat2 "-" body else body
+            let body := String.ofList (List.cons first more);
+            let text :=
+              if negative then psJsonConcat2 "-" body else body;
             Except.ok {
               value := PsJsonValue.number text
-              rest := taken.2
+              rest := afterDigits
             }
   match chars with
   | '-' :: rest => parseUnsigned true rest
@@ -271,11 +303,24 @@ def psJsonConsumeLiteral
   match expected, chars with
   | [], rest => some rest
   | expectedChar :: expectedRest, char :: rest =>
-      if expectedChar == char then
+      if psJsonCharEq expectedChar char then
         psJsonConsumeLiteral expectedRest rest
       else
         none
   | _, _ => none
+
+def psJsonReverseValuesAcc
+    (values : List PsJsonValue)
+    (acc : List PsJsonValue) : List PsJsonValue :=
+  match values with
+  | List.nil =>
+      acc
+  | List.cons head tail =>
+      psJsonReverseValuesAcc tail (List.cons head acc)
+
+def psJsonReverseValues
+    (values : List PsJsonValue) : List PsJsonValue :=
+  psJsonReverseValuesAcc values List.nil
 
 def psJsonParseArrayWith
     (parseValue :
@@ -284,13 +329,14 @@ def psJsonParseArrayWith
     List Char ->
     List PsJsonValue ->
     Except PsJsonParseError PsJsonParseResult
-  | 0, _, _ => Except.error PsJsonParseError.fuelExhausted
-  | remaining + 1, input, valuesRev =>
+  | Nat.zero, _, _ =>
+      Except.error PsJsonParseError.fuelExhausted
+  | Nat.succ remaining, input, valuesRev =>
       let chars := psJsonSkipWhitespace input
       match chars with
       | ']' :: rest =>
           Except.ok {
-            value := PsJsonValue.array valuesRev.reverse
+            value := PsJsonValue.array (psJsonReverseValues valuesRev)
             rest := rest
           }
       | _ =>
@@ -304,17 +350,33 @@ def psJsonParseArrayWith
                     parseValue
                     remaining
                     rest
-                    (parsed.value :: valuesRev)
+                    (List.cons parsed.value valuesRev)
               | ']' :: rest =>
                   Except.ok {
                     value :=
                       PsJsonValue.array
-                        (parsed.value :: valuesRev).reverse
+                        (psJsonReverseValues
+                          (List.cons parsed.value valuesRev))
                     rest := rest
                   }
               | _ =>
                   Except.error
                     (PsJsonParseError.expected ", or ]")
+
+def psJsonReverseFieldsAcc
+    (fields : List (String × PsJsonValue))
+    (acc : List (String × PsJsonValue)) :
+    List (String × PsJsonValue) :=
+  match fields with
+  | List.nil =>
+      acc
+  | List.cons head tail =>
+      psJsonReverseFieldsAcc tail (List.cons head acc)
+
+def psJsonReverseFields
+    (fields : List (String × PsJsonValue)) :
+    List (String × PsJsonValue) :=
+  psJsonReverseFieldsAcc fields List.nil
 
 def psJsonParseObjectWith
     (parseValue :
@@ -323,19 +385,22 @@ def psJsonParseObjectWith
     List Char ->
     List (String × PsJsonValue) ->
     Except PsJsonParseError PsJsonParseResult
-  | 0, _, _ => Except.error PsJsonParseError.fuelExhausted
-  | remaining + 1, input, fieldsRev =>
+  | Nat.zero, _, _ =>
+      Except.error PsJsonParseError.fuelExhausted
+  | Nat.succ remaining, input, fieldsRev =>
       let chars := psJsonSkipWhitespace input
       match chars with
       | '}' :: rest =>
           Except.ok {
-            value := PsJsonValue.object fieldsRev.reverse
+            value := PsJsonValue.object (psJsonReverseFields fieldsRev)
             rest := rest
           }
       | '"' :: rest =>
           match psJsonParseStringChars remaining rest [] with
           | Except.error error => Except.error error
-          | Except.ok (key, afterKey) =>
+          | Except.ok keyResult =>
+              let key := Prod.fst keyResult;
+              let afterKey := Prod.snd keyResult;
               match psJsonSkipWhitespace afterKey with
               | ':' :: afterColon =>
                   match parseValue remaining afterColon with
@@ -349,13 +414,17 @@ def psJsonParseObjectWith
                             parseValue
                             remaining
                             tail
-                            ((key, parsed.value) :: fieldsRev)
+                            (List.cons
+                              (Prod.mk key parsed.value)
+                              fieldsRev)
                       | '}' :: tail =>
                           Except.ok {
                             value :=
                               PsJsonValue.object
-                                ((key, parsed.value) ::
-                                  fieldsRev).reverse
+                                (psJsonReverseFields
+                                  (List.cons
+                                    (Prod.mk key parsed.value)
+                                    fieldsRev))
                             rest := tail
                           }
                       | _ =>

@@ -641,13 +641,28 @@ def psOpenConstructorFields
     cursor
     bindersRev
 
+def psElabExprAt
+    (values : List PsExpr) : Nat -> Option PsExpr :=
+  match values with
+  | List.nil =>
+      fun (_index : Nat) => Option.none
+  | List.cons head tail =>
+      let smaller : Nat -> Option PsExpr :=
+        psElabExprAt tail;
+      fun (index : Nat) =>
+        match index with
+        | Nat.zero =>
+            Option.some head
+        | Nat.succ rest =>
+            smaller rest
+
 def psWrapRecursiveHypotheses
     (motiveId : Nat)
     (fieldArgs : List PsExpr) :
     List Nat -> PsExpr -> Except PsElabError PsExpr
   | [], body => Except.ok body
   | fieldIndex :: rest, body =>
-      match fieldArgs[fieldIndex]? with
+      match psElabExprAt fieldArgs fieldIndex with
       | none => Except.error PsElabError.unsupportedTerm
       | some recursiveValue =>
           match

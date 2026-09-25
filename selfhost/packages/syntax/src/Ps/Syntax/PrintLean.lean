@@ -435,7 +435,10 @@ def psPrintLeanDeclaration
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
-          match binders.mapM psPrintLeanBinder with
+          let printedBindersResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintLeanMapBinders psPrintLeanBinder binders;
+          match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               match psPrintLeanTerm type with
@@ -459,7 +462,10 @@ def psPrintLeanDeclaration
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
-          match binders.mapM psPrintLeanBinder with
+          let printedBindersResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintLeanMapBinders psPrintLeanBinder binders;
+          match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               match psPrintLeanTerm type with
@@ -483,7 +489,10 @@ def psPrintLeanDeclaration
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
-          match binders.mapM psPrintLeanBinder with
+          let printedBindersResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintLeanMapBinders psPrintLeanBinder binders;
+          match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               match psPrintLeanTerm type with
@@ -507,7 +516,10 @@ def psPrintLeanDeclaration
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
-          match params.mapM psPrintLeanBinder with
+          let printedParamsResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintLeanMapBinders psPrintLeanBinder params;
+          match printedParamsResult with
           | Except.error error => Except.error error
           | Except.ok printedParams =>
               let printResult :=
@@ -539,10 +551,18 @@ def psPrintLeanDeclaration
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
-          match params.mapM psPrintLeanBinder with
+          let printedParamsResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintLeanMapBinders psPrintLeanBinder params;
+          match printedParamsResult with
           | Except.error error => Except.error error
           | Except.ok printedParams =>
-              match fields.mapM psPrintLeanStructureField with
+              let printedFieldsResult :
+                  Except PsSourcePrintError (List String) :=
+                psPrintLeanMapBinders
+                  psPrintLeanStructureField
+                  fields;
+              match printedFieldsResult with
               | Except.error error => Except.error error
               | Except.ok printedFields =>
                   let paramSuffix :=

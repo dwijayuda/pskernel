@@ -10,6 +10,11 @@ def psLeanTokenCursor
     (remaining : List PsToken) : PsTokenCursor :=
   { remaining := remaining }
 
+def psLeanBoolNot (value : Bool) : Bool :=
+  match value with
+  | true => false
+  | false => true
+
 def psLeanPatternParseResult
     (value : PsSyntaxPattern)
     (remaining : List PsToken) :
@@ -1945,7 +1950,7 @@ def psParseLeanEquationClausesWithFuel
   match fuel with
   | 0 => Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      if !psTokenCursorAtText cursor "|" then
+      if psLeanBoolNot (psTokenCursorAtText cursor "|") then
         Except.ok {
           value := psParseListReverse clausesRev
           cursor := cursor
@@ -2384,7 +2389,7 @@ def psParseLeanDeclaration
             else if isDefinition then
               false
             else
-              !isTheorem then
+              psLeanBoolNot isTheorem then
           Except.error
             (PsParseError.expectedText
               "partial def, def, theorem, inductive, or structure"

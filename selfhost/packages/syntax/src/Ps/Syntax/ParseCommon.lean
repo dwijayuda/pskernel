@@ -208,68 +208,73 @@ def psParseRecordFieldsWithFuel
     (parseTerm :
       PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
-    (fuel : Nat)
-    (cursor : PsTokenCursor)
-    (fieldsRev :
-      List (Prod PsSyntaxName PsSyntaxTerm)) :
+    (fuel : Nat) :
+    PsTokenCursor ->
+    List (Prod PsSyntaxName PsSyntaxTerm) ->
     Except PsParseError
       (PsParseResult
         (List (Prod PsSyntaxName PsSyntaxTerm))) :=
   match fuel with
-  | 0 => Except.error PsParseError.fuelExhausted
+  | 0 =>
+      fun _ _ =>
+        Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      if psTokenCursorAtText cursor "}" then
-        Except.ok {
-          value := psParseListReverse fieldsRev
-          cursor := cursor
-        }
-      else
-        match psParseSyntaxName cursor with
-        | Except.error error => Except.error error
-        | Except.ok name =>
-            match psTokenCursorExpectText name.cursor ":=" with
-            | Except.error error => Except.error error
-            | Except.ok afterAssign =>
-                match parseTerm afterAssign.cursor with
-                | Except.error error => Except.error error
-                | Except.ok value =>
-                    let nextField :=
-                      Prod.mk name.value value.value;
-                    if psTokenCursorAtText value.cursor "," then
-                      match psTokenCursorAdvance value.cursor with
-                      | none =>
-                          Except.error
-                            (PsParseError.unexpectedEnd
-                              "record field")
-                      | some afterComma =>
-                          psParseRecordFieldsWithFuel
-                            parseTerm
-                            remaining
-                            afterComma.cursor
-                            (List.cons nextField fieldsRev)
-                    else if
-                        if psTokenCursorAtText value.cursor "}" then
-                          true
-                        else
-                          psTokenCursorStartsNamedAssignment
-                            value.cursor then
-                      psParseRecordFieldsWithFuel
-                        parseTerm
-                        remaining
-                        value.cursor
-                        (List.cons nextField fieldsRev)
-                    else
-                      match psTokenCursorPeek value.cursor with
-                      | none =>
-                          Except.error
-                            (PsParseError.unexpectedEnd
-                              ", or }")
-                      | some token =>
-                          Except.error
-                            (PsParseError.expectedText
-                              ", or }"
-                              token.text
-                              token.span)
+      let smaller :
+          PsTokenCursor ->
+          List (Prod PsSyntaxName PsSyntaxTerm) ->
+          Except PsParseError
+            (PsParseResult
+              (List (Prod PsSyntaxName PsSyntaxTerm))) :=
+        psParseRecordFieldsWithFuel parseTerm remaining;
+      fun cursor fieldsRev =>
+        if psTokenCursorAtText cursor "}" then
+          Except.ok {
+            value := psParseListReverse fieldsRev
+            cursor := cursor
+          }
+        else
+          match psParseSyntaxName cursor with
+          | Except.error error => Except.error error
+          | Except.ok name =>
+              match psTokenCursorExpectText name.cursor ":=" with
+              | Except.error error => Except.error error
+              | Except.ok afterAssign =>
+                  match parseTerm afterAssign.cursor with
+                  | Except.error error => Except.error error
+                  | Except.ok value =>
+                      let nextField :=
+                        Prod.mk name.value value.value;
+                      if psTokenCursorAtText value.cursor "," then
+                        match psTokenCursorAdvance value.cursor with
+                        | none =>
+                            Except.error
+                              (PsParseError.unexpectedEnd
+                                "record field")
+                        | some afterComma =>
+                            smaller
+                              afterComma.cursor
+                              (List.cons nextField fieldsRev)
+                      else if
+                          if psTokenCursorAtText value.cursor "}" then
+                            true
+                          else
+                            psTokenCursorStartsNamedAssignment
+                              value.cursor then
+                        smaller
+                          value.cursor
+                          (List.cons nextField fieldsRev)
+                      else
+                        match psTokenCursorPeek value.cursor with
+                        | none =>
+                            Except.error
+                              (PsParseError.unexpectedEnd
+                                ", or }")
+                        | some token =>
+                            Except.error
+                              (PsParseError.expectedText
+                                ", or }"
+                                token.text
+                                token.span)
 
 def psParseRecordLiteral
     (parseTerm :
@@ -499,59 +504,66 @@ def psSyntaxPatternSpan : PsSyntaxPattern -> PsSourceSpan
   | .constructor _ _ span => span
 
 def psParsePatternBindersWithFuel
-    (fuel : Nat)
-    (cursor : PsTokenCursor)
-    (bindersRev : List PsSyntaxName) :
+    (fuel : Nat) :
+    PsTokenCursor ->
+    List PsSyntaxName ->
     Except PsParseError (PsParseResult (List PsSyntaxName)) :=
   match fuel with
   | 0 =>
-      Except.ok {
-        value := psParseListReverse bindersRev
-        cursor := cursor
-      }
+      fun cursor bindersRev =>
+        Except.ok {
+          value := psParseListReverse bindersRev
+          cursor := cursor
+        }
   | remaining + 1 =>
-      match psTokenCursorPeek cursor with
-      | none =>
-          Except.ok {
-            value := psParseListReverse bindersRev
-            cursor := cursor
-          }
-      | some token =>
-          if
-              psTokenKindEq
-                token.kind
-                PsTokenKind.identifier then
-            if psStringEq token.text "true" then
-              Except.ok {
-                value := psParseListReverse bindersRev
-                cursor := cursor
-              }
-            else if psStringEq token.text "false" then
-              Except.ok {
-                value := psParseListReverse bindersRev
-                cursor := cursor
-              }
-            else
-              match psTokenCursorAdvance cursor with
-              | none =>
-                  Except.ok {
-                    value := psParseListReverse bindersRev
-                    cursor := cursor
-                  }
-              | some read =>
-                  let binder : PsSyntaxName := {
-                    segments := List.cons token.text List.nil
-                    span := token.span
-                  };
-                  psParsePatternBindersWithFuel
-                    remaining
-                    read.cursor
-                    (List.cons binder bindersRev)
-          else
+      let smaller :
+          PsTokenCursor ->
+          List PsSyntaxName ->
+          Except PsParseError
+            (PsParseResult (List PsSyntaxName)) :=
+        psParsePatternBindersWithFuel remaining;
+      fun cursor bindersRev =>
+        match psTokenCursorPeek cursor with
+        | none =>
             Except.ok {
               value := psParseListReverse bindersRev
               cursor := cursor
             }
+        | some token =>
+            if
+                psTokenKindEq
+                  token.kind
+                  PsTokenKind.identifier then
+              if psStringEq token.text "true" then
+                Except.ok {
+                  value := psParseListReverse bindersRev
+                  cursor := cursor
+                }
+              else if psStringEq token.text "false" then
+                Except.ok {
+                  value := psParseListReverse bindersRev
+                  cursor := cursor
+                }
+              else
+                match psTokenCursorAdvance cursor with
+                | none =>
+                    Except.ok {
+                      value := psParseListReverse bindersRev
+                      cursor := cursor
+                    }
+                | some read =>
+                    let binder : PsSyntaxName := {
+                      segments := List.cons token.text List.nil
+                      span := token.span
+                    };
+                    smaller
+                      read.cursor
+                      (List.cons binder bindersRev)
+            else
+              Except.ok {
+                value := psParseListReverse bindersRev
+                cursor := cursor
+              }
 
 def psParseConstructorPatternTail
     (constructorName : PsSyntaxName)

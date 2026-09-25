@@ -2198,14 +2198,15 @@ partial def psLeanLowerEquationClauses
                 | Prod.mk _ bodyAndSpan =>
                     match bodyAndSpan with
                     | Prod.mk body _ =>
+                        let matchSpan : PsSourceSpan := {
+                          start := argument.span.start
+                          stop := psLeanTermStop body
+                        };
                         some
                           (PsSyntaxTerm.matchE
                             (PsSyntaxTerm.reference argument)
                             alternatives
-                            {
-                              start := argument.span.start
-                              stop := psLeanTermStop body
-                            })
+                            matchSpan)
 
 def psLeanFlattenForallBinders
     (type : PsSyntaxTerm) :

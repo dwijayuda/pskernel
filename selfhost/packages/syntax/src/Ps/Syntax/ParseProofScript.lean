@@ -124,7 +124,7 @@ def psParseProofScriptApplicationWithFuel
                     let span := {
                       start := (psSyntaxTermSpan first.value).start
                       stop := call.closeSpan.stop
-                    }
+                    };
                     let args :=
                       match call.args with
                       | [] =>
@@ -132,7 +132,7 @@ def psParseProofScriptApplicationWithFuel
                             start := opening.token.span.start
                             stop := call.closeSpan.stop
                           }]
-                      | _ => call.args
+                      | _ => call.args;
                     Except.ok {
                       value := PsSyntaxTerm.app first.value args span
                       cursor := call.cursor
@@ -177,13 +177,13 @@ def psParseProofScriptBinderTypeWithFuel :
                       afterArrow.cursor with
                 | Except.error error => Except.error error
                 | Except.ok codomain =>
-                    let domainSpan := psSyntaxTermSpan domain.value
+                    let domainSpan := psSyntaxTermSpan domain.value;
                     Except.ok {
                       value :=
                         PsSyntaxTerm.forallE
-                          [(psSyntaxAnonymousExplicitBinder
-                            domainSpan,
-                            domain.value)]
+                          [Prod.mk
+                            (psSyntaxAnonymousExplicitBinder domainSpan)
+                            domain.value]
                           codomain.value
                           (psSyntaxSpanJoin
                             domainSpan
@@ -222,14 +222,14 @@ def psParseProofScriptBinder
                       let binderName : PsSyntaxName := {
                         segments := [name.token.text]
                         span := name.token.span
-                      }
+                      };
                       let binder : PsSyntaxBinderHead := {
                         name := binderName
                         kind := opening.kind
                         span := closing.value
-                      }
+                      };
                       Except.ok {
-                        value := (binder, type.value)
+                        value := Prod.mk binder type.value
                         cursor := closing.cursor
                       }
 
@@ -267,8 +267,8 @@ def psParseProofScriptArrowTail
         match parseCodomain afterArrow.cursor with
         | Except.error error => Except.error error
         | Except.ok codomain =>
-            let domainSpan := psSyntaxTermSpan domain.value
-            let span := psSyntaxSpanJoin domainSpan (psSyntaxTermSpan codomain.value)
+            let domainSpan := psSyntaxTermSpan domain.value;
+            let span := psSyntaxSpanJoin domainSpan (psSyntaxTermSpan codomain.value);
             Except.ok {
               value :=
                 PsSyntaxTerm.forallE
@@ -352,7 +352,7 @@ def psParseProofScriptMatchAlternativesWithFuel
                         let span := {
                           start := bar.token.span.start
                           stop := (psSyntaxTermSpan body.value).stop
-                        }
+                        };
                         if psTokenCursorAtText body.cursor ";" then
                           match psTokenCursorAdvance body.cursor with
                           | none =>
@@ -408,14 +408,14 @@ def psParseProofScriptDoWithFuel
                     | none => value.cursor
                     | some afterSemi => afterSemi.cursor
                   else
-                    value.cursor
+                    value.cursor;
                 match psTokenCursorExpectText afterValue "}" with
                 | Except.error error => Except.error error
                 | Except.ok close =>
                     let span := {
                       start := start
                       stop := close.token.span.stop
-                    }
+                    };
                     Except.ok {
                       value := psSyntaxCompilerPure value.value span
                       cursor := close.cursor
@@ -463,7 +463,7 @@ def psParseProofScriptDoWithFuel
                                         let nameSyntax : PsSyntaxName := {
                                           segments := [name.token.text]
                                           span := name.token.span
-                                        }
+                                        };
                                         let binder : PsSyntaxBinderHead := {
                                           name := nameSyntax
                                           kind := PsSyntaxBinderKind.explicit
@@ -473,12 +473,12 @@ def psParseProofScriptDoWithFuel
                                               (psSyntaxTermSpan
                                                 binderType.value).stop
                                           }
-                                        }
+                                        };
                                         let span := {
                                           start := start
                                           stop :=
                                             (psSyntaxTermSpan body.value).stop
-                                        }
+                                        };
                                         Except.ok {
                                           value :=
                                             psSyntaxCompilerBind
@@ -638,7 +638,7 @@ def psParseProofScriptTermWithFuel :
                 let sourceName : PsSyntaxName := {
                   segments := [name.token.text]
                   span := name.token.span
-                }
+                };
                 if psTokenCursorAtText name.cursor ":" then
                   match psTokenCursorAdvance name.cursor with
                   | none =>
@@ -862,7 +862,7 @@ def psParseProofScriptInductiveConstructorsWithFuel
                         let sourceName : PsSyntaxName := {
                           segments := [name.token.text]
                           span := name.token.span
-                        }
+                        };
                         let constructor : PsSyntaxInductiveConstructor := {
                           name := sourceName
                           fields := fields.value
@@ -870,7 +870,7 @@ def psParseProofScriptInductiveConstructorsWithFuel
                             start := bar.token.span.start
                             stop := semi.token.span.stop
                           }
-                        }
+                        };
                         psParseProofScriptInductiveConstructorsWithFuel
                           remaining
                           semi.cursor
@@ -907,7 +907,7 @@ def psParseProofScriptStructureField
                     let fieldName : PsSyntaxName := {
                       segments := [name.token.text]
                       span := name.token.span
-                    }
+                    };
                     let head : PsSyntaxBinderHead := {
                       name := fieldName
                       kind := PsSyntaxBinderKind.explicit
@@ -915,7 +915,7 @@ def psParseProofScriptStructureField
                         start := name.token.span.start
                         stop := (psSyntaxTermSpan type.value).stop
                       }
-                    }
+                    };
                     Except.ok {
                       value := Prod.mk head type.value
                       cursor := semi.cursor
@@ -993,7 +993,7 @@ def psParseProofScriptStructureDeclaration
                               | Except.error error => Except.error error
                               | Except.ok close =>
                                   let finalCursor :=
-                                    psParseOptionalSemicolon close.cursor
+                                    psParseOptionalSemicolon close.cursor;
                                   Except.ok {
                                     value :=
                                       PsSyntaxDeclaration.structureDecl
@@ -1161,7 +1161,7 @@ def psParseProofScriptDeclaration
                                           let span := {
                                             start := keyword.span.start
                                             stop := afterSemi.token.span.stop
-                                          }
+                                          };
                                           let declaration :=
                                             if isPartial then
                                               PsSyntaxDeclaration.partialDefinition
@@ -1171,7 +1171,7 @@ def psParseProofScriptDeclaration
                                                 name.value binders.value type.value value.value span
                                             else
                                               PsSyntaxDeclaration.theoremDecl
-                                                name.value binders.value type.value value.value span
+                                                name.value binders.value type.value value.value span;
                                           Except.ok {
                                             value := declaration
                                             cursor := afterSemi.cursor

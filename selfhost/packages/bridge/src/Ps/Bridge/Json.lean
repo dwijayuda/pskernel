@@ -232,13 +232,13 @@ def psJsonSkipWhitespace (chars : List Char) : List Char :=
 def psJsonHexValue (char : Char) : Option Nat :=
   let value : Nat := psJsonCharCode char;
   if psJsonNatInRange value 48 57 then
-    some (Nat.sub value 48)
+    Option.some (Nat.sub value 48)
   else if psJsonNatInRange value 65 70 then
-    some (Nat.sub value 55)
+    Option.some (Nat.sub value 55)
   else if psJsonNatInRange value 97 102 then
-    some (Nat.sub value 87)
+    Option.some (Nat.sub value 87)
   else
-    none
+    Option.none
 
 def psJsonDecodeUnicode4
     (chars : List Char) :
@@ -260,21 +260,21 @@ def psJsonDecodeUnicode4
                   Except.error PsJsonParseError.unexpectedEnd
               | List.cons d rest =>
                   match psJsonHexValue a with
-                  | none =>
+                  | Option.none =>
                       Except.error PsJsonParseError.invalidUnicodeEscape
-                  | some av =>
+                  | Option.some av =>
                       match psJsonHexValue b with
-                      | none =>
+                      | Option.none =>
                           Except.error PsJsonParseError.invalidUnicodeEscape
-                      | some bv =>
+                      | Option.some bv =>
                           match psJsonHexValue c with
-                          | none =>
+                          | Option.none =>
                               Except.error PsJsonParseError.invalidUnicodeEscape
-                          | some cv =>
+                          | Option.some cv =>
                               match psJsonHexValue d with
-                              | none =>
+                              | Option.none =>
                                   Except.error PsJsonParseError.invalidUnicodeEscape
-                              | some dv =>
+                              | Option.some dv =>
                                   let value : Nat :=
                                     Nat.add
                                       (Nat.add
@@ -430,16 +430,16 @@ def psJsonConsumeLiteral
     Option (List Char) :=
   match expected with
   | List.nil =>
-      some chars
+      Option.some chars
   | List.cons expectedChar expectedRest =>
       match chars with
       | List.nil =>
-          none
+          Option.none
       | List.cons char rest =>
           if psJsonCharEq expectedChar char then
             psJsonConsumeLiteral expectedRest rest
           else
-            none
+            Option.none
 
 def psJsonReverseValuesAcc
     (values : List PsJsonValue) :
@@ -655,8 +655,8 @@ partial def psJsonParseValueWithFuel
               List.nil
           else if psJsonCharEq first 't' then
             match psJsonConsumeLiteral ['t','r','u','e'] chars with
-            | none => Except.error PsJsonParseError.invalidLiteral
-            | some afterLiteral =>
+            | Option.none => Except.error PsJsonParseError.invalidLiteral
+            | Option.some afterLiteral =>
                 Except.ok {
                   value := PsJsonValue.bool true
                   rest := afterLiteral
@@ -666,16 +666,16 @@ partial def psJsonParseValueWithFuel
                 psJsonConsumeLiteral
                   ['f','a','l','s','e']
                   chars with
-            | none => Except.error PsJsonParseError.invalidLiteral
-            | some afterLiteral =>
+            | Option.none => Except.error PsJsonParseError.invalidLiteral
+            | Option.some afterLiteral =>
                 Except.ok {
                   value := PsJsonValue.bool false
                   rest := afterLiteral
                 }
           else if psJsonCharEq first 'n' then
             match psJsonConsumeLiteral ['n','u','l','l'] chars with
-            | none => Except.error PsJsonParseError.invalidLiteral
-            | some afterLiteral =>
+            | Option.none => Except.error PsJsonParseError.invalidLiteral
+            | Option.some afterLiteral =>
                 Except.ok {
                   value := PsJsonValue.nullE
                   rest := afterLiteral
@@ -709,10 +709,10 @@ def psJsonObjectFind :
     List (String × PsJsonValue) ->
     String ->
     Option PsJsonValue
-  | [], _ => none
+  | [], _ => Option.none
   | field :: rest, key =>
       if psJsonStringEq (Prod.fst field) key then
-        some (Prod.snd field)
+        Option.some (Prod.snd field)
       else
         psJsonObjectFind rest key
 
@@ -721,28 +721,28 @@ def psJsonGetField
     (key : String) : Option PsJsonValue :=
   match value with
   | .object fields => psJsonObjectFind fields key
-  | _ => none
+  | _ => Option.none
 
 def psJsonAsString : PsJsonValue -> Option String
-  | .string value => some value
-  | _ => none
+  | .string value => Option.some value
+  | _ => Option.none
 
 def psJsonAsBool : PsJsonValue -> Option Bool
-  | .bool value => some value
-  | _ => none
+  | .bool value => Option.some value
+  | _ => Option.none
 
 def psJsonAsNumberText : PsJsonValue -> Option String
-  | .number text => some text
-  | _ => none
+  | .number text => Option.some text
+  | _ => Option.none
 
 def psJsonAsArray : PsJsonValue -> Option (List PsJsonValue)
-  | .array values => some values
-  | _ => none
+  | .array values => Option.some values
+  | _ => Option.none
 
 def psJsonAsObject :
     PsJsonValue -> Option (List (String × PsJsonValue))
-  | .object fields => some fields
-  | _ => none
+  | .object fields => Option.some fields
+  | _ => Option.none
 
 
 inductive PsJsonEncodeError where

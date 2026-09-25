@@ -1,0 +1,115 @@
+name: PSC1 full-K root 110018 assurance
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [assurance/psc1-full-k-root110018]
+    paths:
+      - ".github/workflows/psc1-lean-std-release-assurance.yml"
+      - ".github/workflows/psc1-full-k-root110018.yml"
+      - "scripts/psc1-lean-std-release-profile.mjs"
+      - "oracle/replay-probe/DependencyExport.lean"
+      - "psc1-kernel/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-lean-std-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prerequisites:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate assurance runner
+        run: node --check scripts/psc1-lean-std-release-profile.mjs
+
+      - name: Compile dependency exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$LEAN434_BIN/lean" oracle/replay-probe/DependencyExport.lean
+
+      - name: Build PSC1 Lean kernel
+        working-directory: psc1-kernel
+        run: |
+          lake build
+          lake build psc1_replay
+
+      - name: Build oracle-only structure fixture
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .lake/build/lib/lean/PSC1Kernel/Test
+          lake env lean PSC1Kernel/Test/StructureFixture.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/Test/StructureFixture.olean
+
+      - name: Run Lean 4.34 differential oracle
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/Oracle.lean
+
+  coverage:
+    needs: prerequisites
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { label: root-110018, start: 110018, count: 1 }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build PSC1 Lean kernel and replay executable
+        working-directory: psc1-kernel
+        run: |
+          lake build
+          lake build psc1_replay
+
+      - name: Replay Std release-assurance roots
+        shell: bash
+        env:
+          PSC1_LEAN_STD_CHUNK: "32"
+          PSC1_LEAN_EXPORT_TIMEOUT_MS: "180000"
+          PSC1_LEAN_REPLAY_TIMEOUT_MS: "600000"
+          PSC1_LEAN_REPLAY_BIN: "psc1-kernel/.lake/build/bin/psc1_replay"
+        run: |
+          set -euo pipefail
+          node scripts/psc1-lean-std-release-profile.mjs \
+            --label "${{ matrix.label }}" \
+            --start "${{ matrix.start }}" \
+            --count "${{ matrix.count }}"

@@ -153,3 +153,22 @@ const runWhnf=(expr)=>{
     'ok - real Lean.Meta.whnfImp beta-reduces a closed application in JavaScript',
   );
 }
+
+{
+  const input=app(
+    app(
+      constant(nameFromDotted('Nat.add')),
+      natLit(20n),
+    ),
+    natLit(22n),
+  );
+  const actual=runWhnf(input);
+  if(!exprEq(actual,natLit(42n))){
+    throw new Error(
+      'real Lean.Meta.whnfImp did not reduce closed Nat.add literals',
+    );
+  }
+  console.log(
+    'ok - real Lean.Meta.whnfImp executes reduceNat? for closed Nat.add in JavaScript',
+  );
+}

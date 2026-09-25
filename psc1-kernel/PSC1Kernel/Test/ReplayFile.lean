@@ -114,6 +114,10 @@ def isHotArrayProofName (name : Name) : Bool :=
   Replay.replayNameString name ==
     "_private.Init.Data.Array.Lemmas.0.Array.getElem_extract_loop_ge._proof_1_1"
 
+def logHotPhase (label : String) : IO Unit := do
+  let t ← IO.monoMsNow
+  IO.println s!"PSC1 HOT PHASE monoMs={t} {label}"
+
 def replayHotArrayProofTheorem
     (state : Replay.State)
     (record : Replay.TheoremRecord) : IO Replay.State := do
@@ -126,31 +130,31 @@ def replayHotArrayProofTheorem
     base := { name := name, levelParams := levelParams, type := type }
     value := value
   }
-  IO.println "PSC1 HOT PHASE header-begin"
+  logHotPhase "header-begin"
   liftReplayResult "<diagnostic>" 0
     (Kernel.checkConstantBase state.env info.base .safe
       state.maxRecDepth state.maxNatSize state.nativeEvaluator)
-  IO.println "PSC1 HOT PHASE header-end"
+  logHotPhase "header-end"
   let ctx := Kernel.mkChecker state.env info.base.levelParams .safe
     state.maxRecDepth state.maxNatSize state.nativeEvaluator
-  IO.println "PSC1 HOT PHASE isProp-begin"
+  logHotPhase "isProp-begin"
   let prop ← liftReplayResult "<diagnostic>" 0 (isProp ctx info.base.type)
   unless prop do throw <| IO.userError "hot theorem type is not a proposition"
-  IO.println "PSC1 HOT PHASE isProp-end"
+  logHotPhase "isProp-end"
   liftReplayResult "<diagnostic>" 0 (Kernel.checkNoMVarNoFVar info.value)
   liftReplayResult "<diagnostic>" 0
     (Kernel.checkLevelParams info.value info.base.levelParams)
-  IO.println "PSC1 HOT PHASE proof-check-begin"
+  logHotPhase "proof-check-begin"
   let valueType ← liftReplayResult "<diagnostic>" 0 (check ctx info.value)
-  IO.println "PSC1 HOT PHASE proof-check-end"
-  IO.println "PSC1 HOT PHASE final-defeq-begin"
+  logHotPhase "proof-check-end"
+  logHotPhase "final-defeq-begin"
   let eq ← liftReplayResult "<diagnostic>" 0
     (isDefEq ctx valueType info.base.type)
   unless eq do throw <| IO.userError "hot theorem proof type mismatch"
-  IO.println "PSC1 HOT PHASE final-defeq-end"
-  IO.println "PSC1 HOT PHASE env-add-begin"
+  logHotPhase "final-defeq-end"
+  logHotPhase "env-add-begin"
   let env ← liftReplayResult "<diagnostic>" 0 (state.env.add (.thmInfo info))
-  IO.println "PSC1 HOT PHASE env-add-end"
+  logHotPhase "env-add-end"
   pure { state with env := env }
 
 partial def replaySegmentedLinesFromProgress

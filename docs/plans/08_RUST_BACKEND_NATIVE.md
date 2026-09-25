@@ -116,11 +116,25 @@ packages/backend-rust/
         Runtime.ps
 ```
 
-During the current Lean-first bootstrap era, branch experiments may temporarily
-use `.lean` or TypeScript scaffolding when necessary, but do not create a
-second permanent handwritten compiler architecture. After SH10 promotes
-`.ps` to authoritative compiler source, backend-rust should converge to
-portable `.ps`.
+During the current Lean-first bootstrap era, the Rust backend implementation
+must be authored in **portable Lean constrained to the frozen/planned PSC1
+subset**, following the same source-profile discipline as the self-host
+compiler. Do not use TypeScript as the semantic backend implementation and do
+not rely on Lean-only conveniences merely because official Lean accepts them.
+Host-only Rust toolchain/process adapters may remain outside the portable
+backend.
+
+The intended transition is therefore:
+
+```text
+BackendRust/*.lean   # handwritten now, PSC1-constrained
+        |
+        | canonical compiler translation after SH10
+        v
+BackendRust/*.ps     # authoritative portable source
+```
+
+Do not hand-maintain parallel `.ps` files before that transition.
 
 Prefer a typed Rust AST followed by deterministic pretty-printing over direct
 string concatenation for nontrivial emission.

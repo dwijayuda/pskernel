@@ -5,11 +5,9 @@ import Ps.BackendRust.Identifier
 
 inductive PsRustEmitError where
   | fuelExhausted
-  | unsupportedIntrinsic
   | intrinsicArity
   | externalImportUnsupported
   | genericValueUnsupported (name : String)
-  | valueDeclarationUnsupported (name : String)
   | functionResultUnsupported (name : String)
   | functionStorageUnsupported (name : String)
   | nestedFunctionParameterUnsupported (name : String)

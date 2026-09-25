@@ -303,7 +303,7 @@ def psPrintProofScriptStructureField
           match psPrintProofScriptTerm type with
           | Except.error error => Except.error error
           | Except.ok printedType =>
-              let value :=
+              let value : String :=
                 match head.kind with
                 | .explicit => psPrintProofScriptConcat3 name " : " printedType
                 | .implicit => psPrintProofScriptConcat5 "{" name " : " printedType "}"

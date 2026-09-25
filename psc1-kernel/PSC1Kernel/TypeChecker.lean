@@ -341,12 +341,15 @@ partial def reduceInductiveRec
   let majorReduced ←
     if cheapRec then whnfCore ctx major0 true
     else whnf ctx major0
-  let major :=
+  let major ←
     match majorReduced with
-    | .lit (.nat 0) => Expr.const kernelNatZeroName []
+    | .lit (.nat 0) =>
+        .ok (Expr.const kernelNatZeroName [])
     | .lit (.nat (n + 1)) =>
-        Expr.app (Expr.const kernelNatSuccName []) (.lit (.nat n))
-    | _ => majorReduced
+        .ok (Expr.app (Expr.const kernelNatSuccName []) (.lit (.nat n)))
+    | .lit (.str value) =>
+        whnf ctx (stringLitToConstructor value)
+    | _ => .ok majorReduced
   let .const ctorName _ := major.getAppFn | return none
   let some rule := findRecursorRule ctorName recursor.rules | return none
   let majorArgs := major.getAppArgs
@@ -394,7 +397,11 @@ partial def whnfCore
     let struct' ←
       if cheapProj then whnfCore ctx struct true
       else whnf ctx struct
-    match reduceProjCore ctx typeName idx struct' with
+    let struct'' ←
+      match struct' with
+      | .lit (.str value) => whnf ctx (stringLitToConstructor value)
+      | _ => .ok struct'
+    match reduceProjCore ctx typeName idx struct'' with
     | some value => whnfCore ctx value cheapProj
     | none => .ok e
   | .app fn arg => do

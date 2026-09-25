@@ -86,6 +86,30 @@ def psPrintProofScriptMapTerms
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
+def psPrintProofScriptMapBinders
+    (printBinder :
+      Prod PsSyntaxBinderHead PsSyntaxTerm ->
+        Except PsSourcePrintError String)
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
+    Except PsSourcePrintError (List String) :=
+  match binders with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons binder rest =>
+      let printedHeadResult :=
+        printBinder binder;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintProofScriptMapBinders printBinder rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintProofScriptTermWithFuel
     (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
@@ -180,7 +204,10 @@ def psPrintProofScriptTermWithFuel
                               " : "
                               printedType
                               delimiters.snd);
-          match binders.mapM printBinder with
+          let printedBindersResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintProofScriptMapBinders printBinder binders;
+          match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               match
@@ -216,7 +243,10 @@ def psPrintProofScriptTermWithFuel
                               " : "
                               printedType
                               delimiters.snd);
-          match binders.mapM printBinder with
+          let printedBindersResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintProofScriptMapBinders printBinder binders;
+          match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               match

@@ -920,6 +920,30 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
             ]
       },
       {
+        name := "natAddCarryExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natAdd
+                []
+                [
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 14),
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 7)
+                ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 21)
+            ]
+      },
+      {
         name := "natMulOneExact"
         typeParameters := []
         parameters := []

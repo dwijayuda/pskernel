@@ -58,7 +58,7 @@ lift/instantiation against final Lean 4.34.
 
 - K0: Name, Level, Expr, substitution/lifting/abstraction.
 - K1: declarations, local context and immutable environment.
-- K2: WHNF and type inference. **IN PROGRESS** — separate Lean-faithful `whnfCore` and full `whnf`, independent `cheap_rec`/`cheap_proj` controls, Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble/land/lor/xor/shiftLeft/shiftRight`), the default 128 MiB numeral-size guard, exact UINT32 count rejection for `pow`/nonzero `shiftLeft`, exact UINT32 projection-index rejection, scoped `eagerReduce`, constructor projection reduction, ordinary/Nat-literal recursor reduction, quotient lift/ind reduction, string-literal projection/recursor expansion, a fail-closed native evaluator callback boundary, and Lean-4.34-faithful projection typing are implemented. Configurable `LEAN_NAT_MAX_SIZE` injection remains.
+- K2: WHNF and type inference. **SEMANTIC BASELINE COMPLETE** — separate Lean-faithful `whnfCore` and full `whnf`, independent `cheap_rec`/`cheap_proj` controls, Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble/land/lor/xor/shiftLeft/shiftRight`), exact UINT32 count rejection for `pow`/nonzero `shiftLeft`, exact UINT32 projection-index rejection, scoped `eagerReduce`, constructor projection reduction, ordinary/Nat-literal recursor reduction, quotient lift/ind reduction, string-literal projection/recursor expansion, a fail-closed native evaluator callback boundary, and Lean-4.34-faithful projection typing are implemented. The final Lean 4.34 `LEAN_NAT_MAX_SIZE` policy is modeled as explicit portable `maxNatSize` host configuration with the same 128 MiB default; literal admission and computed Nat results are regression-tested at overridden limits.
 - K3: definitional equality and exact reduction ordering. **IN PROGRESS** — sort/constant-universe/app cases, opened-binder lambda/forall defeq, proof irrelevance, Nat-offset comparison, function eta, non-recursive structure eta, unit-like equality, scoped eager-reduction behavior, the Lean-4.34 lazy-delta one-step state machine (including projection-headed unfolding and the same-definition regular-hint shortcut), projection lazy-delta field comparison, native-reduction ordering, and the special `String` literal ↔ `String.ofList` expansion are implemented. Pair success/failure caches and deterministic resource fuel remain.
 - K4: quotient and recursor reduction. **FOUNDATIONAL SLICE COMPLETE** — checked Lean-4.34-style Quot admission validates the Eq/Eq.refl bootstrap shape, rejects primitive-name collisions, installs all four Quot constants, and is differential-tested against Lean 4.34; quotient lift/ind reduction is wired into WHNF.
 - K5: inductive/nested-inductive admission and generated metadata validation. **IN PROGRESS** — checked ordinary admission covers empty datatypes, exact universe-polymorphic recursor naming, shared parameters, per-type indices, constructor fields, direct and functional strictly-positive recursion, recursive hypotheses/calls, Prop/small-elimination selection, K-target metadata and K-like proof reduction, and ordinary mutual declarations with multiple motives/minors and cross-recursive reduction. Nested preprocessing/restoration is now implemented for non-mutual outer families, including shared-parameter rebasing, auxiliary recursor renaming, removal of published `_nested` auxiliaries, and differential metadata/reduction oracles for both monomorphic and parameterized `Box Tree` shapes. Negative/nested-outer-mutual edge cases remain fail-closed.
@@ -156,6 +156,20 @@ pure semantic checker. Deterministic `maxRecDepth` behavior remains modeled and
 differential-tested in PSC1Kernel. The current upstream Arena release is not
 used as direct evidence here because its tests are generated against Lean
 4.29.1, not the pinned final 4.34.0 kernel.
+
+### K2 resource-limit checkpoint
+
+Final Lean 4.34 initializes its process-wide Nat numeral limit from
+`LEAN_NAT_MAX_SIZE`, falling back to 128 MiB when the variable is absent or
+malformed. PSC1Kernel keeps the semantic checker pure by representing the same
+limit explicitly as `CheckerContext.maxNatSize`; host code may inject the
+configured value when constructing a checker or admitting a declaration.
+
+The limit is applied to source Nat literals and to the same computed reduction
+paths guarded by final Lean 4.34. The direct oracle verifies that an 8-byte
+limit rejects a 16-byte literal/result while a 16-byte limit accepts both.
+The default remains 128 MiB. This separates portable kernel policy from
+process-environment lookup without weakening the kernel limit.
 
 ### WHNF architecture checkpoint
 

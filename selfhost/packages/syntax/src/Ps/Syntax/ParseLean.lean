@@ -22,20 +22,34 @@ def psParseLeanImport
           }
 
 def psLeanReservedApplicationToken (token : PsToken) : Bool :=
-  token.text == "def"
-    || token.text == "partial"
-    || token.text == "theorem"
-    || token.text == "import"
-    || token.text == "inductive"
-    || token.text == "structure"
-    || token.text == "where"
-    || token.text == "then"
-    || token.text == "else"
-    || token.text == "fun"
-    || token.text == "let"
-    || token.text == "if"
-    || token.text == "match"
-    || token.text == "with"
+  if psStringEq token.text "def" then
+    true
+  else if psStringEq token.text "partial" then
+    true
+  else if psStringEq token.text "theorem" then
+    true
+  else if psStringEq token.text "import" then
+    true
+  else if psStringEq token.text "inductive" then
+    true
+  else if psStringEq token.text "structure" then
+    true
+  else if psStringEq token.text "where" then
+    true
+  else if psStringEq token.text "then" then
+    true
+  else if psStringEq token.text "else" then
+    true
+  else if psStringEq token.text "fun" then
+    true
+  else if psStringEq token.text "let" then
+    true
+  else if psStringEq token.text "if" then
+    true
+  else if psStringEq token.text "match" then
+    true
+  else
+    psStringEq token.text "with"
 
 
 def psLeanApplicationWithArgument
@@ -99,7 +113,10 @@ def psParseLeanListLiteralWithFuel
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match fuel with
   | 0 =>
-      fun _ _ _ =>
+      fun
+          (_start : PsSourcePos)
+          (_cursor : PsTokenCursor)
+          (_elementsRev : List PsSyntaxTerm) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
       let smaller :
@@ -110,7 +127,10 @@ def psParseLeanListLiteralWithFuel
         psParseLeanListLiteralWithFuel
           parseTerm
           remaining;
-      fun start cursor elementsRev =>
+      fun
+          (start : PsSourcePos)
+          (cursor : PsTokenCursor)
+          (elementsRev : List PsSyntaxTerm) =>
         if psTokenCursorAtText cursor "]" then
           match psTokenCursorAdvance cursor with
           | none =>
@@ -186,18 +206,41 @@ def psLeanCanStartSimpleArgument
   match psTokenCursorPeek cursor with
   | none => false
   | some token =>
+      let currentSpan := psSyntaxTermSpan current;
       let startsLaterAssignment :=
-        psTokenCursorStartsNamedAssignment cursor
-          && token.span.start.line
-            > (psSyntaxTermSpan current).stop.line;
-      !psLeanReservedApplicationToken token
-        && !startsLaterAssignment
-        && (token.text == "("
-          || token.text == "["
-          || psTokenKindEq token.kind PsTokenKind.identifier
-          || psTokenKindEq token.kind PsTokenKind.natural
-          || psTokenKindEq token.kind PsTokenKind.string
-          || psTokenKindEq token.kind PsTokenKind.character)
+        if psTokenCursorStartsNamedAssignment cursor then
+          Nat.ble
+            (Nat.add currentSpan.stop.line 1)
+            token.span.start.line
+        else
+          false;
+      if psLeanReservedApplicationToken token then
+        false
+      else if startsLaterAssignment then
+        false
+      else if psStringEq token.text "(" then
+        true
+      else if psStringEq token.text "[" then
+        true
+      else if
+          psTokenKindEq
+            token.kind
+            PsTokenKind.identifier then
+        true
+      else if
+          psTokenKindEq
+            token.kind
+            PsTokenKind.natural then
+        true
+      else if
+          psTokenKindEq
+            token.kind
+            PsTokenKind.string then
+        true
+      else
+        psTokenKindEq
+          token.kind
+          PsTokenKind.character
 
 def psParseLeanApplicationTailWithFuel
     (parseParenthesized :

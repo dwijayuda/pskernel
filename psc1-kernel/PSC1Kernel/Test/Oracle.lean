@@ -1344,29 +1344,249 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "parameterized recursor did not strip the fixed constructor parameter"
     (PSC1Kernel.Expr.eq oursParamReduced (.lit (.nat 43)))
 
-  -- This narrower K5 path intentionally rejects declarations whose result
-  -- universe may become Prop; Lean's small-elimination analysis is not yet
-  -- implemented here.
+  -- Small-elimination selection follows Lean 4.34 even when the result
+  -- universe is polymorphic and may instantiate to Prop.
   let Small : PSC1Kernel.Name := .str .anonymous "OracleSmallElim"
   let SmallMk : PSC1Kernel.Name := .str Small "mk"
-  let smallT : PSC1Kernel.Expr := .app (.const Small [paramBoxLevel]) (.bvar 0)
+  let SmallRec : PSC1Kernel.Name := .str Small "rec"
   let smallType : PSC1Kernel.Expr :=
     .forallE alphaName (.sort paramBoxLevel) (.sort paramBoxLevel) .default
   let smallCtorType : PSC1Kernel.Expr :=
     .forallE alphaName (.sort paramBoxLevel)
-      (.forallE valueName (.bvar 0) smallT .default)
+      (.forallE valueName (.bvar 0)
+        (.app (.const Small [paramBoxLevel]) (.bvar 1))
+        .default)
       .default
-  match PSC1Kernel.Kernel.addSimpleInductive .empty {
-    levelParams := [paramBoxU]
-    name := Small
-    type := smallType
-    ctors := [{ name := SmallMk, type := smallCtorType }]
-    isUnsafe := false
-    numParams := 1
-  } with
-  | .ok _ =>
-      throw <| IO.userError "simple inductive admission allowed unsupported small-elimination shape"
-  | .error _ => pure ()
+  let oursSmall ← exceptToIO
+    "PSC1 small-elimination inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive .empty {
+      levelParams := [paramBoxU]
+      name := Small
+      type := smallType
+      ctors := [{ name := SmallMk, type := smallCtorType }]
+      isUnsafe := false
+      numParams := 1
+    })
+  let leanSmall0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanSmall1 ←
+    match Lean.Kernel.Environment.addDecl leanSmall0 {} (.inductDecl [toLeanName paramBoxU] 1 [{
+      name := toLeanName Small
+      type := toLeanExpr smallType
+      ctors := [{ name := toLeanName SmallMk, type := toLeanExpr smallCtorType }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected small-elimination oracle"
+  for name in [Small, SmallMk, SmallRec] do
+    let some oursInfo := oursSmall.find? name
+      | throw <| IO.userError "PSC1 small-elimination metadata missing"
+    let some leanInfo := leanSmall1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 small-elimination metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("small-elimination generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursSmall.find? SmallRec with
+  | some (.recInfo info) =>
+      assertTrue "small-elimination recursor incorrectly gained an eliminator universe"
+        (info.base.levelParams == [paramBoxU])
+      assertTrue "small-elimination recursor was incorrectly marked K"
+        (!info.k)
+  | _ =>
+      throw <| IO.userError "PSC1 small-elimination recursor info missing"
+
+  -- A Prop singleton with no fields supports large elimination and K reduction.
+  let Truth : PSC1Kernel.Name := .str .anonymous "OracleTruth"
+  let TruthMk : PSC1Kernel.Name := .str Truth "mk"
+  let TruthRec : PSC1Kernel.Name := .str Truth "rec"
+  let propT : PSC1Kernel.Expr := .sort .zero
+  let truthT : PSC1Kernel.Expr := .const Truth []
+  let oursTruth ← exceptToIO
+    "PSC1 K-target Prop inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive .empty {
+      levelParams := []
+      name := Truth
+      type := propT
+      ctors := [{ name := TruthMk, type := truthT }]
+      isUnsafe := false
+    })
+  let leanTruth0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanTruth1 ←
+    match Lean.Kernel.Environment.addDecl leanTruth0 {} (.inductDecl [] 0 [{
+      name := toLeanName Truth
+      type := toLeanExpr propT
+      ctors := [{ name := toLeanName TruthMk, type := toLeanExpr truthT }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected K-target Prop oracle"
+  for name in [Truth, TruthMk, TruthRec] do
+    let some oursInfo := oursTruth.find? name
+      | throw <| IO.userError "PSC1 K-target metadata missing"
+    let some leanInfo := leanTruth1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 K-target metadata missing: " ++ (toLeanName name).toString)
+    assertTrue
+      ("K-target generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursTruth.find? TruthRec with
+  | some (.recInfo info) =>
+      assertTrue "Prop singleton did not gain a fresh eliminator universe"
+        (info.base.levelParams.length == 1)
+      assertTrue "Prop singleton was not marked K"
+        info.k
+  | _ =>
+      throw <| IO.userError "PSC1 K-target recursor info missing"
+
+  -- More than one constructor forces a Prop-only recursor.
+  let ChoiceP : PSC1Kernel.Name := .str .anonymous "OracleChoiceProp"
+  let ChoicePA : PSC1Kernel.Name := .str ChoiceP "a"
+  let ChoicePB : PSC1Kernel.Name := .str ChoiceP "b"
+  let ChoicePRec : PSC1Kernel.Name := .str ChoiceP "rec"
+  let choicePT : PSC1Kernel.Expr := .const ChoiceP []
+  let oursChoiceP ← exceptToIO
+    "PSC1 multi-constructor Prop inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive .empty {
+      levelParams := []
+      name := ChoiceP
+      type := propT
+      ctors := [
+        { name := ChoicePA, type := choicePT },
+        { name := ChoicePB, type := choicePT }
+      ]
+      isUnsafe := false
+    })
+  let leanChoiceP0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanChoiceP1 ←
+    match Lean.Kernel.Environment.addDecl leanChoiceP0 {} (.inductDecl [] 0 [{
+      name := toLeanName ChoiceP
+      type := toLeanExpr propT
+      ctors := [
+        { name := toLeanName ChoicePA, type := toLeanExpr choicePT },
+        { name := toLeanName ChoicePB, type := toLeanExpr choicePT }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected multi-constructor Prop oracle"
+  for name in [ChoiceP, ChoicePA, ChoicePB, ChoicePRec] do
+    let some oursInfo := oursChoiceP.find? name
+      | throw <| IO.userError "PSC1 multi-constructor Prop metadata missing"
+    let some leanInfo := leanChoiceP1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 multi-constructor Prop metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("multi-constructor Prop generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursChoiceP.find? ChoicePRec with
+  | some (.recInfo info) =>
+      assertTrue "multi-constructor Prop recursor unexpectedly gained universes"
+        info.base.levelParams.isEmpty
+      assertTrue "multi-constructor Prop recursor was incorrectly marked K"
+        (!info.k)
+  | _ =>
+      throw <| IO.userError "PSC1 multi-constructor Prop recursor info missing"
+
+  -- A non-Prop field is safe for large elimination when the field itself is
+  -- exposed as an index in the constructor result.
+  let Reveal : PSC1Kernel.Name := .str .anonymous "OracleReveal"
+  let RevealMk : PSC1Kernel.Name := .str Reveal "mk"
+  let RevealRec : PSC1Kernel.Name := .str Reveal "rec"
+  let revealType : PSC1Kernel.Expr :=
+    .forallE indexName natT propT .default
+  let revealCtorType : PSC1Kernel.Expr :=
+    .forallE indexName natT
+      (.app (.const Reveal []) (.bvar 0))
+      .default
+  let revealBase :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursReveal ← exceptToIO
+    "PSC1 indexed Prop large-elimination admission"
+    (PSC1Kernel.Kernel.addSimpleInductive revealBase {
+      levelParams := []
+      name := Reveal
+      type := revealType
+      ctors := [{ name := RevealMk, type := revealCtorType }]
+      isUnsafe := false
+    })
+  let leanReveal0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanRevealNat ←
+    match Lean.Kernel.Environment.addDecl leanReveal0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected Reveal oracle Nat axiom"
+  let leanReveal1 ←
+    match Lean.Kernel.Environment.addDecl leanRevealNat {} (.inductDecl [] 0 [{
+      name := toLeanName Reveal
+      type := toLeanExpr revealType
+      ctors := [{ name := toLeanName RevealMk, type := toLeanExpr revealCtorType }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected indexed Prop large-elimination oracle"
+  let leanRevealEnv := Lean.Environment.ofKernelEnv leanReveal1
+  for name in [Reveal, RevealMk, RevealRec] do
+    let some oursInfo := oursReveal.find? name
+      | throw <| IO.userError "PSC1 indexed Prop metadata missing"
+    let some leanInfo := leanReveal1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 indexed Prop metadata missing: " ++ (toLeanName name).toString)
+    assertTrue
+      ("indexed Prop generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  let revealMotive : PSC1Kernel.Expr :=
+    .lam indexName natT
+      (.lam (.str .anonymous "proof")
+        (.app (.const Reveal []) (.bvar 0))
+        natT
+        .default)
+      .default
+  let revealMinor : PSC1Kernel.Expr :=
+    .lam indexName natT (.bvar 0) .default
+  let revealIndex : PSC1Kernel.Expr := .lit (.nat 47)
+  let revealMajor : PSC1Kernel.Expr :=
+    .app (.const RevealMk []) revealIndex
+  let revealRecApp :=
+    PSC1Kernel.applyArgs (.const RevealRec [.succ .zero])
+      [revealMotive, revealMinor, revealIndex, revealMajor]
+  let revealCtx := PSC1Kernel.CheckerContext.empty oursReveal
+  let revealResultType ← exceptToIO
+    "PSC1 indexed Prop recursor typecheck"
+    (PSC1Kernel.check revealCtx revealRecApp)
+  let revealTypeOk ← exceptToIO
+    "PSC1 indexed Prop recursor result defeq"
+    (PSC1Kernel.isDefEq revealCtx revealResultType natT)
+  assertTrue "PSC1 indexed Prop recursor result type mismatch" revealTypeOk
+  let oursRevealReduced ← exceptToIO
+    "PSC1 indexed Prop recursor reduction"
+    (PSC1Kernel.whnf revealCtx revealRecApp)
+  let leanRevealType ←
+    match Lean.Kernel.check leanRevealEnv ({} : Lean.LocalContext)
+        (toLeanExpr revealRecApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected generated Reveal recursor application"
+  assertTrue "indexed Prop recursor result type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr revealResultType) leanRevealType)
+  let leanRevealReduced ← kernelExprWhnf leanRevealEnv revealRecApp
+  assertTrue "indexed Prop recursor reduction differs from Lean 4.34"
+    (toLeanExpr oursRevealReduced == leanRevealReduced)
+  assertTrue "indexed Prop large elimination did not reveal the indexed field"
+    (PSC1Kernel.Expr.eq oursRevealReduced revealIndex)
 
   -- Indexed, non-recursive datatype. Constructor return indices may depend
   -- on fields; recursor indices precede the major premise exactly as in Lean.

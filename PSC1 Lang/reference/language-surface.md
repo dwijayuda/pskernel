@@ -5,11 +5,11 @@ This page is a lookup sheet, not a tutorial.
 ## Definitions
 
 ```proofscript
-def answer : Nat := 42;
+def answer: Nat := 42;
 
-const answer2 : Nat := 42;
+const answer2: Nat := 42;
 
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
@@ -51,20 +51,20 @@ f/-c-/(x) not D-CALL
 
 ```proofscript
 fun x => x
-fun (x : Nat) => x + 1
+fun (x: Nat) => x + 1
 ```
 
 ## Function types
 
 ```proofscript
 Nat -> Nat
-(x : Nat) -> Fin x -> Nat
+(x: Nat) -> Fin x -> Nat
 ```
 
 ## Local binding
 
 ```proofscript
-let x : Nat := 1;
+let x: Nat := 1;
 body
 ```
 
@@ -84,8 +84,8 @@ Each branch is one expression.
 
 ```proofscript
 structure Point where {
-  x : Nat;
-  y : Nat;
+  x: Nat;
+  y: Nat;
 }
 ```
 
@@ -98,9 +98,9 @@ structure Point where {
 ## Inductive
 
 ```proofscript
-inductive PsOption(α : Type) where {
+inductive PsOption(α: Type) where {
   | none;
-  | some(value : α);
+  | some(value: α);
 };
 ```
 
@@ -116,17 +116,17 @@ match value with {
 ## Where
 
 ```proofscript
-def f(x : Nat) : Nat :=
+def f(x: Nat): Nat :=
   helper(x)
 where {
-  helper(y : Nat) : Nat := y + 1;
+  helper(y: Nat): Nat := y + 1;
 }
 ```
 
 ## Theorem
 
 ```proofscript
-theorem selfEq {α : Type}(x : α) : x = x := by rfl;
+theorem selfEq {α: Type}(x: α): x = x := by rfl;
 ```
 
 ## Current bounded tactic family
@@ -158,7 +158,7 @@ import Foo.Bar
 ## Runtime external
 
 ```proofscript
-extern function hostFn(value : String) : String
+extern function hostFn(value: String): String
   from "host-lib"
   import hostFn;
 ```

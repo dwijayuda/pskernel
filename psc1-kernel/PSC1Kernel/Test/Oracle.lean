@@ -1445,6 +1445,71 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   | _ =>
       throw <| IO.userError "PSC1 K-target recursor info missing"
 
+  -- K-like reduction converts an arbitrary proof of the singleton predicate
+  -- to its nullary constructor before ordinary iota reduction.
+  let TruthProof : PSC1Kernel.Name := .str Truth "proof"
+  let oursTruthNat :=
+    oursTruth.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursTruthRun :=
+    oursTruthNat.addUnchecked (.axiomInfo {
+      base := mkBase TruthProof truthT
+      isUnsafe := false
+    })
+  let leanTruthNat ←
+    match Lean.Kernel.Environment.addDecl leanTruth1 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected Truth oracle Nat axiom"
+  let leanTruthRun ←
+    match Lean.Kernel.Environment.addDecl leanTruthNat {} (.axiomDecl {
+      name := toLeanName TruthProof
+      levelParams := []
+      type := toLeanExpr truthT
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected Truth proof axiom"
+  let leanTruthEnv := Lean.Environment.ofKernelEnv leanTruthRun
+  let truthMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "proof") truthT natT .default
+  let truthMinor : PSC1Kernel.Expr := .lit (.nat 59)
+  let truthRecApp :=
+    PSC1Kernel.applyArgs (.const TruthRec [.succ .zero])
+      [truthMotive, truthMinor, .const TruthProof []]
+  let truthCtx := PSC1Kernel.CheckerContext.empty oursTruthRun
+  let truthResultType ← exceptToIO
+    "PSC1 K-like recursor typecheck"
+    (PSC1Kernel.check truthCtx truthRecApp)
+  let truthTypeOk ← exceptToIO
+    "PSC1 K-like recursor result defeq"
+    (PSC1Kernel.isDefEq truthCtx truthResultType natT)
+  assertTrue "PSC1 K-like recursor result type mismatch" truthTypeOk
+  let oursTruthReduced ← exceptToIO
+    "PSC1 K-like recursor reduction"
+    (PSC1Kernel.whnf truthCtx truthRecApp)
+  let leanTruthType ←
+    match Lean.Kernel.check leanTruthEnv ({} : Lean.LocalContext)
+        (toLeanExpr truthRecApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected generated Truth K application"
+  assertTrue "K-like recursor result type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr truthResultType) leanTruthType)
+  let leanTruthReduced ← kernelExprWhnf leanTruthEnv truthRecApp
+  assertTrue "K-like recursor reduction differs from Lean 4.34"
+    (toLeanExpr oursTruthReduced == leanTruthReduced)
+  assertTrue "K-like recursor did not reduce an arbitrary singleton proof"
+    (PSC1Kernel.Expr.eq oursTruthReduced truthMinor)
+
   -- More than one constructor forces a Prop-only recursor.
   let ChoiceP : PSC1Kernel.Name := .str .anonymous "OracleChoiceProp"
   let ChoicePA : PSC1Kernel.Name := .str ChoiceP "a"

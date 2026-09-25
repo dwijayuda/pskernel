@@ -381,7 +381,7 @@ def psEncodeCodecDefinition
             psJsonObject [
               psCheckedAdmissionJsonField "h" (psJsonQuote (toString height)),
               psCheckedAdmissionJsonField "k" (psJsonQuote "regular")
-            ]
+            ];
           Except.ok
             (psJsonObject [
               psCheckedAdmissionJsonField "h" (hints),
@@ -439,7 +439,7 @@ def psEncodeCheckedAdmissionsLoop
       match declaration with
       | .definitionDecl name levelParams type value =>
           let height :=
-            psBridgeExprMaxRegularHeight state.heights value + 1
+            psBridgeExprMaxRegularHeight state.heights value + 1;
           match
               psEncodeCodecDefinition
                 name

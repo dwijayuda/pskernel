@@ -199,7 +199,7 @@ def psElabProjectionStep
             Except.error PsElabError.unsupportedTerm
           else
             match info.constructors with
-            | [constructorName] =>
+            | List.cons constructorName List.nil =>
                 match
                     psEnvironmentFindConstructor
                       current.context.environment

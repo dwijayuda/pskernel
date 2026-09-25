@@ -816,6 +816,75 @@ export class Lean434Evaluator {
     );
   }
 
+  private materializeComputedFieldMajor(
+    major:Lean434ConstructorValue,
+    info:RecursorInfo,
+    fn:Lean434RecursorFunction,
+    args:readonly Lean434RuntimeValue[],
+  ):Lean434ConstructorValue|undefined{
+    const expectedCtor=major.name+'_impl';
+    if(
+      !info.rules.some(
+        (rule)=>nameToString(rule.ctor)===expectedCtor,
+      )
+    ){
+      return undefined;
+    }
+
+    const runtimeTarget=
+      this.options.metadata?.runtimeTargetFor(major.name)
+      ??this.options.metadata?.implementedByFor(major.name);
+    if(runtimeTarget===undefined)return undefined;
+
+    const implName=this.findEnvironmentName(runtimeTarget.implementation);
+    if(implName===undefined){
+      throw new Lean434EvaluationError(
+        "computed-field constructor runtime target is missing: '"+
+        major.name+"' -> '"+runtimeTarget.implementation+"'",
+      );
+    }
+    const implInfo=this.environment.find(implName);
+    if(implInfo===undefined||!('levelParams' in implInfo)){
+      throw new Lean434EvaluationError(
+        "computed-field constructor runtime target has no declaration info: '"+
+        runtimeTarget.implementation+"'",
+      );
+    }
+    const levelCount=implInfo.levelParams.length;
+    if(levelCount>fn.levels.length){
+      throw new Lean434EvaluationError(
+        "computed-field constructor runtime target has incompatible universe arity: '"+
+        runtimeTarget.implementation+"'",
+      );
+    }
+
+    let value=this.evaluateConstant(
+      {
+        kind:'const',
+        name:implName,
+        levels:fn.levels.slice(0,levelCount),
+      },
+      [],
+    );
+    for(const param of args.slice(0,info.numParams)){
+      value=this.apply(value,param);
+    }
+    for(const field of major.fields){
+      value=this.apply(value,field);
+    }
+    if(
+      !isTaggedRuntimeValue(value)
+      ||value.kind!=='constructor'
+      ||value.name!==expectedCtor
+    ){
+      throw new Lean434EvaluationError(
+        "computed-field constructor runtime target did not materialize '"+
+        expectedCtor+"' from '"+major.name+"'",
+      );
+    }
+    return value;
+  }
+
   private evaluateRecursor(
     fn:Lean434RecursorFunction,
     args:readonly Lean434RuntimeValue[],
@@ -826,10 +895,24 @@ export class Lean434Evaluator {
       info.numMotives+
       info.numMinors+
       info.numIndices;
-    const major=this.normalizeMajor(args[majorIndex]!,info);
-    const rule=info.rules.find(
+    let major=this.normalizeMajor(args[majorIndex]!,info);
+    let rule=info.rules.find(
       (candidate)=>nameToString(candidate.ctor)===major.name,
     );
+    if(rule===undefined){
+      const materialized=this.materializeComputedFieldMajor(
+        major,
+        info,
+        fn,
+        args,
+      );
+      if(materialized!==undefined){
+        major=materialized;
+        rule=info.rules.find(
+          (candidate)=>nameToString(candidate.ctor)===major.name,
+        );
+      }
+    }
     if(rule===undefined){
       throw new Lean434EvaluationError(
         "recursor '"+fn.name+

@@ -1717,6 +1717,43 @@ def assertExprOracle : IO Unit := do
   let nestedLean := (toLeanExpr nested).instantiate #[toLeanExpr replacement]
   assertTrue "nested instantiate differs from Lean 4.34" (toLeanExpr nestedOurs == nestedLean)
 
+  let y : PSC1Kernel.Name := .str .anonymous "y"
+  let lamLeft : PSC1Kernel.Expr :=
+    .lam x type0 (.bvar 0) .default
+  let lamRight : PSC1Kernel.Expr :=
+    .lam y type0 (.bvar 0) .implicit
+  assertTrue "Expr.eq binder-insensitive lambda differs from Lean Expr.eqv"
+    (PSC1Kernel.Expr.eq lamLeft lamRight ==
+      Lean.Expr.eqv (toLeanExpr lamLeft) (toLeanExpr lamRight))
+  assertTrue "Lean Expr.eqv oracle did not ignore lambda binder metadata"
+    (PSC1Kernel.Expr.eq lamLeft lamRight)
+  assertTrue "Expr.equal failed to preserve Lean binder-aware distinction"
+    (PSC1Kernel.Expr.equal lamLeft lamRight ==
+      Lean.Expr.equal (toLeanExpr lamLeft) (toLeanExpr lamRight) &&
+      !PSC1Kernel.Expr.equal lamLeft lamRight)
+
+  let piLeft : PSC1Kernel.Expr :=
+    .forallE x type0 (.bvar 0) .default
+  let piRight : PSC1Kernel.Expr :=
+    .forallE y type0 (.bvar 0) .instImplicit
+  assertTrue "Expr.eq binder-insensitive forall differs from Lean Expr.eqv"
+    (PSC1Kernel.Expr.eq piLeft piRight ==
+      Lean.Expr.eqv (toLeanExpr piLeft) (toLeanExpr piRight) &&
+      PSC1Kernel.Expr.eq piLeft piRight)
+
+  let letLeft : PSC1Kernel.Expr :=
+    .letE x type0 type0 (.bvar 0) false
+  let letRight : PSC1Kernel.Expr :=
+    .letE y type0 type0 (.bvar 0) false
+  assertTrue "Expr.eq binder-insensitive let differs from Lean Expr.eqv"
+    (PSC1Kernel.Expr.eq letLeft letRight ==
+      Lean.Expr.eqv (toLeanExpr letLeft) (toLeanExpr letRight) &&
+      PSC1Kernel.Expr.eq letLeft letRight)
+  assertTrue "Expr.equal failed to compare let binder names"
+    (PSC1Kernel.Expr.equal letLeft letRight ==
+      Lean.Expr.equal (toLeanExpr letLeft) (toLeanExpr letRight) &&
+      !PSC1Kernel.Expr.equal letLeft letRight)
+
 
 
 

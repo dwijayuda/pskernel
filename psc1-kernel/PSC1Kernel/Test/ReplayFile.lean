@@ -99,6 +99,212 @@ def replayFileFrom
       throw <| IO.userError (
         "Lean4Export replay failed for " ++ path ++ ": " ++ err)
 
+def liftReplayResult
+    (path : String)
+    (lineNo : Nat)
+    (result : Except String α) : IO α :=
+  match result with
+  | .ok value => pure value
+  | .error err =>
+      throw <| IO.userError (
+        "Lean4Export replay failed for " ++ path ++
+        " at line " ++ toString lineNo ++ ": " ++ err)
+
+def isPushEqAppendName (name : Name) : Bool :=
+  Replay.replayNameString name == "Array.push_eq_append"
+
+partial def diagnoseDefEqTerminalArgs
+    (ctx : CheckerContext)
+    (left right : Expr)
+    (subst : List Expr := [])
+    (depth : Nat := 0) : IO Bool := do
+  match left, right with
+  | .forallE _ leftDomain leftBody _,
+      .forallE rightName rightDomain rightBody rightBinderInfo => do
+      IO.println s!"PSC1 Lean defeq FORALL depth={depth} domain-structural={Expr.eq leftDomain rightDomain}"
+      let leftDomain' := leftDomain.instantiateRev subst
+      let rightDomain' := rightDomain.instantiateRev subst
+      if !Expr.eq leftDomain rightDomain then
+        IO.println s!"PSC1 Lean defeq FORALL depth={depth} domain-defeq-begin"
+        let ok ← liftReplayResult "<diagnostic>" 0
+          (isDefEq ctx leftDomain' rightDomain')
+        IO.println s!"PSC1 Lean defeq FORALL depth={depth} domain-defeq-end result={ok}"
+        if !ok then return false
+      if leftBody.hasLooseBVar || rightBody.hasLooseBVar then
+        let (fresh, child) :=
+          ctx.withLocal rightName rightDomain' rightBinderInfo
+        diagnoseDefEqTerminalArgs
+          child leftBody rightBody (subst ++ [.fvar fresh]) (depth + 1)
+      else
+        diagnoseDefEqTerminalArgs
+          ctx leftBody rightBody (subst ++ [.sort .zero]) (depth + 1)
+  | _, _ => do
+      let left' := left.instantiateRev subst
+      let right' := right.instantiateRev subst
+      IO.println s!"PSC1 Lean defeq TERMINAL depth={depth} left={typeCheckerExprHead left'} right={typeCheckerExprHead right'}"
+      IO.println s!"PSC1 Lean defeq TERMINAL diff={typeCheckerExprDiff left' right'}"
+      let leftFn := left'.getAppFn
+      let rightFn := right'.getAppFn
+      let leftArgs := left'.getAppArgs
+      let rightArgs := right'.getAppArgs
+      IO.println s!"PSC1 Lean defeq APP heads left={typeCheckerExprHead leftFn} right={typeCheckerExprHead rightFn} leftArgs={leftArgs.length} rightArgs={rightArgs.length}"
+      if leftArgs.length != rightArgs.length then
+        return false
+      IO.println "PSC1 Lean defeq APP head-begin"
+      let headOk ← liftReplayResult "<diagnostic>" 0 (isDefEq ctx leftFn rightFn)
+      IO.println s!"PSC1 Lean defeq APP head-end result={headOk}"
+      if !headOk then return false
+      let rec compareArgs
+          (index : Nat)
+          (as bs : List Expr) : IO Bool := do
+        match as, bs with
+        | [], [] => return true
+        | a :: as', b :: bs' => do
+            IO.println s!"PSC1 Lean defeq ARG index={index} begin structural={Expr.eq a b} left={typeCheckerExprHead a} right={typeCheckerExprHead b}"
+            if !Expr.eq a b then
+              IO.println s!"PSC1 Lean defeq ARG index={index} diff={typeCheckerExprDiff a b}"
+            let ok ← liftReplayResult "<diagnostic>" 0 (isDefEq ctx a b)
+            IO.println s!"PSC1 Lean defeq ARG index={index} end result={ok}"
+            if !ok then return false
+            compareArgs (index + 1) as' bs'
+        | _, _ => return false
+      compareArgs 0 leftArgs rightArgs
+
+def replayPushEqAppendTheorem
+    (state : Replay.State)
+    (record : Replay.TheoremRecord) : IO Replay.State := do
+  let name ← liftReplayResult "<diagnostic>" 0 (state.nameAt record.name)
+  let levelParams ← liftReplayResult "<diagnostic>" 0
+    (Replay.resolveNames state record.levelParams)
+  let type ← liftReplayResult "<diagnostic>" 0 (state.exprAt record.type)
+  let value ← liftReplayResult "<diagnostic>" 0 (state.exprAt record.value)
+  let info : TheoremInfo := {
+    base := { name := name, levelParams := levelParams, type := type }
+    value := value
+  }
+  IO.println "PSC1 Lean theorem PHASE header-begin"
+  liftReplayResult "<diagnostic>" 0
+    (Kernel.checkConstantBase state.env info.base .safe
+      state.maxRecDepth state.maxNatSize state.nativeEvaluator)
+  IO.println "PSC1 Lean theorem PHASE header-end"
+  let ctx := Kernel.mkChecker state.env info.base.levelParams .safe
+    state.maxRecDepth state.maxNatSize state.nativeEvaluator
+  IO.println "PSC1 Lean theorem PHASE isProp-begin"
+  let prop ← liftReplayResult "<diagnostic>" 0 (isProp ctx info.base.type)
+  unless prop do throw <| IO.userError "theorem type is not a proposition"
+  IO.println "PSC1 Lean theorem PHASE isProp-end"
+  liftReplayResult "<diagnostic>" 0 (Kernel.checkNoMVarNoFVar info.value)
+  liftReplayResult "<diagnostic>" 0
+    (Kernel.checkLevelParams info.value info.base.levelParams)
+  IO.println "PSC1 Lean theorem PHASE proof-check-begin"
+  let valueType ← liftReplayResult "<diagnostic>" 0 (check ctx info.value)
+  IO.println "PSC1 Lean theorem PHASE proof-check-end"
+  IO.println "PSC1 Lean theorem PHASE raw-expr-eq-begin"
+  let rawEq := Expr.eq valueType info.base.type
+  IO.println s!"PSC1 Lean theorem PHASE raw-expr-eq-end result={rawEq}"
+  IO.println "PSC1 Lean theorem PHASE final-defeq-begin"
+  let eq ← diagnoseDefEqTerminalArgs ctx valueType info.base.type
+  unless eq do throw <| IO.userError "theorem proof type mismatch"
+  IO.println "PSC1 Lean theorem PHASE final-defeq-end"
+  let env ← liftReplayResult "<diagnostic>" 0 (state.env.add (.thmInfo info))
+  pure { state with env := env }
+
+partial def replaySegmentedLinesFromProgress
+    (path : String)
+    (base : Environment)
+    (lines : List String)
+    (progressEvery : Nat := 10000)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) :
+    IO (Environment × ReplayTotals) := do
+  let rec go
+      (shared : Environment)
+      (current : Option Replay.State)
+      (totals : ReplayTotals)
+      (lineNo : Nat)
+      (remaining : List String) :
+      IO (Environment × ReplayTotals) := do
+    match remaining with
+    | [] =>
+        liftReplayResult path lineNo
+          (finishReplaySegment shared current totals)
+    | line :: rest =>
+        let trimmed := line.trim
+        if trimmed.isEmpty || isReplayContainerMarker trimmed then
+          go shared current totals (lineNo + 1) rest
+        else if isReplaySegmentMarker trimmed then
+          let (shared', totals') ←
+            liftReplayResult path lineNo
+              (finishReplaySegment shared current totals)
+          go shared'
+            (some (Replay.State.empty shared' maxRecDepth maxNatSize nativeEvaluator))
+            totals' (lineNo + 1) rest
+        else
+          let state :=
+            match current with
+            | some value => value
+            | none => Replay.State.empty shared maxRecDepth maxNatSize nativeEvaluator
+          if lineNo >= 190530 && lineNo <= 190680 then
+            IO.println s!"PSC1 Lean replay RAW-BEGIN line={lineNo} chars={line.length}"
+          let record ←
+            liftReplayResult path lineNo (ReplayJson.decodeLine line)
+          if lineNo >= 190530 && lineNo <= 190680 then
+            let recordLabel :=
+              match record with
+              | .metaR _ => "meta"
+              | .nameR value => "name#" ++ toString value.index
+              | .levelR value => "level#" ++ toString value.index
+              | .exprR value => "expr#" ++ toString value.index
+              | .axiomR value => "axiom-name#" ++ toString value.name
+              | .definitionR value => "def-name#" ++ toString value.name
+              | .theoremR value => "thm-name#" ++ toString value.name
+              | .opaqueR value => "opaque-name#" ++ toString value.name
+              | .quotR value => "quot-name#" ++ toString value.name
+              | .inductiveR _ => "inductive"
+            IO.println s!"PSC1 Lean replay RECORD-BEGIN line={lineNo} record={recordLabel} namesDense={state.names.dense.size} namesSparse={state.names.sparse.length} levelsDense={state.levels.dense.size} levelsSparse={state.levels.sparse.length} exprsDense={state.exprs.dense.size} exprsSparse={state.exprs.sparse.length}"
+          match record.declarationNameIndex? with
+          | some nameIndex =>
+              let name ←
+                liftReplayResult path lineNo (state.nameAt nameIndex)
+              IO.println s!"PSC1 Lean replay DECL-BEGIN file={path} line={lineNo} decl={Replay.replayNameString name} segmentDecls={state.declarations} env={state.env.size}"
+          | none => pure ()
+          let next ←
+            match record with
+            | .theoremR theoremRecord =>
+                let theoremName ←
+                  liftReplayResult path lineNo (state.nameAt theoremRecord.name)
+                if isPushEqAppendName theoremName then
+                  let next ← replayPushEqAppendTheorem state theoremRecord
+                  pure {
+                    next with
+                    records := state.records + 1
+                    declarations := state.declarations + 1
+                  }
+                else
+                  liftReplayResult path lineNo (state.replay record)
+            | _ =>
+                liftReplayResult path lineNo (state.replay record)
+          if lineNo >= 190530 && lineNo <= 190680 then
+            IO.println s!"PSC1 Lean replay RECORD-END line={lineNo} namesDense={next.names.dense.size} namesSparse={next.names.sparse.length} levelsDense={next.levels.dense.size} levelsSparse={next.levels.sparse.length} exprsDense={next.exprs.dense.size} exprsSparse={next.exprs.sparse.length} env={next.env.size}"
+          if progressEvery > 0 then
+            if lineNo % progressEvery == 0 then
+              IO.println s!"PSC1 Lean replay PROGRESS file={path} line={lineNo} segmentDecls={next.declarations} totalDecls={totals.declarations + next.declarations} env={next.env.size}"
+          go shared (some next) totals (lineNo + 1) rest
+  go base none {} 1 lines
+
+def replayFileFromProgress
+    (base : Environment)
+    (path : String)
+    (progressEvery : Nat := 10000)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) :
+    IO (Environment × ReplayTotals) := do
+  let content ← IO.FS.readFile path
+  replaySegmentedLinesFromProgress path base (content.splitOn "\n")
+    progressEvery maxRecDepth maxNatSize nativeEvaluator
+
 def printReplayTotals (path : String) (totals : ReplayTotals) : IO Unit :=
   IO.println s!"PSC1 Lean replay PASS file={path} records={totals.records} names={totals.names} levels={totals.levels} exprs={totals.expressions} declarations={totals.declarations} segments={totals.segments}"
 
@@ -118,6 +324,9 @@ partial def replayTargets
 
 def main (args : List String) : IO Unit := do
   match args with
+  | ["--progress", path] => do
+      let (_, totals) ← replayFileFromProgress .empty path
+      printReplayTotals path totals
   | [path] => do
       let (_, totals) ← replayFileFrom .empty path
       printReplayTotals path totals
@@ -137,7 +346,7 @@ def main (args : List String) : IO Unit := do
         baseEnv (target :: rest) 0 leanNatMaxSizeDefault (some provider)
   | _ =>
       throw <| IO.userError (
-        "usage: ReplayFile <lean4export.ndjson> | " ++
+        "usage: ReplayFile [--progress] <lean4export.ndjson> | " ++
         "ReplayFile --base <base.ndjson> <delta.ndjson> [delta.ndjson ...] | " ++
         "ReplayFile --native-map <native.tsv> <lean4export.ndjson> | " ++
         "ReplayFile --native-map <native.tsv> --base <base.ndjson> " ++

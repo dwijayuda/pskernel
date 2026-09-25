@@ -137,6 +137,72 @@ def psRustCoverageIntrinsicName
   | PsVerifiedIrIntrinsic.arrayMap => "Array.map"
   | PsVerifiedIrIntrinsic.arrayFoldl => "Array.foldl"
 
+def psRustCoverageIntrinsicArity
+    (intrinsic : PsVerifiedIrIntrinsic) : Nat :=
+  match intrinsic with
+  | PsVerifiedIrIntrinsic.machineIntBinary _ _ => 2
+  | PsVerifiedIrIntrinsic.machineIntCompare _ _ => 2
+  | PsVerifiedIrIntrinsic.floatBinary _ _ => 2
+  | PsVerifiedIrIntrinsic.floatCompare _ _ => 2
+  | PsVerifiedIrIntrinsic.natAdd => 2
+  | PsVerifiedIrIntrinsic.natSub => 2
+  | PsVerifiedIrIntrinsic.natMul => 2
+  | PsVerifiedIrIntrinsic.natDiv => 2
+  | PsVerifiedIrIntrinsic.natMod => 2
+  | PsVerifiedIrIntrinsic.natEq => 2
+  | PsVerifiedIrIntrinsic.natNe => 2
+  | PsVerifiedIrIntrinsic.natLe => 2
+  | PsVerifiedIrIntrinsic.natLt => 2
+  | PsVerifiedIrIntrinsic.intOfNat => 1
+  | PsVerifiedIrIntrinsic.intNegSucc => 1
+  | PsVerifiedIrIntrinsic.intNeg => 1
+  | PsVerifiedIrIntrinsic.intAdd => 2
+  | PsVerifiedIrIntrinsic.intSub => 2
+  | PsVerifiedIrIntrinsic.intMul => 2
+  | PsVerifiedIrIntrinsic.intEq => 2
+  | PsVerifiedIrIntrinsic.intLe => 2
+  | PsVerifiedIrIntrinsic.intLt => 2
+  | PsVerifiedIrIntrinsic.boolNot => 1
+  | PsVerifiedIrIntrinsic.boolAnd => 2
+  | PsVerifiedIrIntrinsic.boolOr => 2
+  | PsVerifiedIrIntrinsic.boolEq => 2
+  | PsVerifiedIrIntrinsic.boolNe => 2
+  | PsVerifiedIrIntrinsic.charOfNat => 1
+  | PsVerifiedIrIntrinsic.charToNat => 1
+  | PsVerifiedIrIntrinsic.stringPush => 2
+  | PsVerifiedIrIntrinsic.stringSingleton => 1
+  | PsVerifiedIrIntrinsic.stringLength => 1
+  | PsVerifiedIrIntrinsic.stringAppend => 2
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize => 1
+  | PsVerifiedIrIntrinsic.stringNext => 2
+  | PsVerifiedIrIntrinsic.stringGet => 2
+  | PsVerifiedIrIntrinsic.stringAtEnd => 2
+  | PsVerifiedIrIntrinsic.stringExtract => 3
+  | PsVerifiedIrIntrinsic.stringEq => 2
+  | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity => 1
+  | PsVerifiedIrIntrinsic.arraySize => 1
+  | PsVerifiedIrIntrinsic.arrayPush => 2
+  | PsVerifiedIrIntrinsic.arrayGet => 2
+  | PsVerifiedIrIntrinsic.arrayGetD => 3
+  | PsVerifiedIrIntrinsic.arraySet => 3
+  | PsVerifiedIrIntrinsic.arraySetIfInBounds => 3
+  | PsVerifiedIrIntrinsic.arrayMap => 2
+  | PsVerifiedIrIntrinsic.arrayFoldl => 5
+
+def psRustCoverageExprListLength :
+    List PsVerifiedIrExpr -> Nat
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ (psRustCoverageExprListLength rest)
+
+def psRustCoverageIntrinsicArityMatches
+    (intrinsic : PsVerifiedIrIntrinsic)
+    (arguments : List PsVerifiedIrExpr) : Bool :=
+  Nat.beq
+    (psRustCoverageIntrinsicArity intrinsic)
+    (psRustCoverageExprListLength arguments)
+
 def psRustCoverageFoldTypeListWith
     (visit :
       PsRustCoverage ->
@@ -352,7 +418,7 @@ def psRustCoverageExprWithFuel :
             coverage
             "expr:var"
       | PsVerifiedIrExpr.intrinsic intrinsic arguments =>
-          let withIntrinsic :=
+          let withIntrinsicFeature :=
             psRustCoverageAddFeature
               (psRustCoverageAddFeature
                 coverage
@@ -360,6 +426,15 @@ def psRustCoverageExprWithFuel :
               (psRustConcat2
                 "intrinsic:"
                 (psRustCoverageIntrinsicName intrinsic));
+          let withIntrinsic :=
+            if psRustCoverageIntrinsicArityMatches intrinsic arguments then
+              withIntrinsicFeature
+            else
+              psRustCoverageAddUnsupported
+                (psRustCoverageAddFeature
+                  withIntrinsicFeature
+                  "intrinsic:arity")
+                "intrinsic:arity";
           psRustCoverageFoldExprListWith
             visitNested
             arguments

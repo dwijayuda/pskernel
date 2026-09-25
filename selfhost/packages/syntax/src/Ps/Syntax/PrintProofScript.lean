@@ -158,7 +158,9 @@ def psPrintProofScriptTermWithFuel
                           (psPrintJoin ", " printedArgs)
                           ")")
       | .lambda binders body _ =>
-          let printBinder :=
+          let printBinder :
+              Prod PsSyntaxBinderHead PsSyntaxTerm ->
+                Except PsSourcePrintError String :=
             fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
               match binder with
               | Prod.mk head type =>
@@ -194,7 +196,9 @@ def psPrintProofScriptTermWithFuel
                       " => "
                       printedBody)
       | .forallE binders body _ =>
-          let printBinder :=
+          let printBinder :
+              Prod PsSyntaxBinderHead PsSyntaxTerm ->
+                Except PsSourcePrintError String :=
             fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
               match binder with
               | Prod.mk head type =>

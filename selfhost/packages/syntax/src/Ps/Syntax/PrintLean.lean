@@ -3,6 +3,30 @@ import Ps.Syntax.PrintCommon
 def psPrintLeanBoolNot (value : Bool) : Bool :=
   if value then false else true
 
+def psPrintLeanConcat2
+    (a b : String) : String :=
+  String.Internal.append a b
+
+def psPrintLeanConcat3
+    (a b c : String) : String :=
+  let ab := psPrintLeanConcat2 a b;
+  psPrintLeanConcat2 ab c
+
+def psPrintLeanConcat4
+    (a b c d : String) : String :=
+  let abc := psPrintLeanConcat3 a b c;
+  psPrintLeanConcat2 abc d
+
+def psPrintLeanConcat5
+    (a b c d e : String) : String :=
+  let abcd := psPrintLeanConcat4 a b c d;
+  psPrintLeanConcat2 abcd e
+
+def psPrintLeanConcat6
+    (a b c d e f : String) : String :=
+  let abcde := psPrintLeanConcat5 a b c d e;
+  psPrintLeanConcat2 abcde f
+
 def psPrintLeanTermWithFuel :
     Nat -> PsSyntaxTerm -> Except PsSourcePrintError String
   | 0, _ => Except.error PsSourcePrintError.fuelExhausted
@@ -32,12 +56,12 @@ def psPrintLeanTermWithFuel :
                   | Except.error error => Except.error error
                   | Except.ok value =>
                       Except.ok
-                        (name ++ " := " ++ value);
+                        (psPrintLeanConcat3 name " := " value);
           match fields.mapM printField with
           | Except.error error => Except.error error
           | Except.ok printedFields =>
               Except.ok
-                ("{ " ++ psPrintJoin ", " printedFields ++ " }")
+                (psPrintLeanConcat3 "{ " (psPrintJoin ", " printedFields) " }")
       | .app fn args _ =>
           if psPrintLeanBoolNot (psSyntaxTermSimpleForApplication fn) then
             Except.error PsSourcePrintError.unsupportedApplication
@@ -53,7 +77,7 @@ def psPrintLeanTermWithFuel :
                         if psSyntaxTermSimpleForApplication arg then
                           Except.ok printed
                         else
-                          Except.ok ("(" ++ printed ++ ")");
+                          Except.ok (psPrintLeanConcat3 "(" printed ")");
                 match args.mapM printArgument with
                 | Except.error error => Except.error error
                 | Except.ok printedArgs =>
@@ -61,7 +85,7 @@ def psPrintLeanTermWithFuel :
                       Except.ok printedFn
                     else
                       Except.ok
-                        (printedFn ++ " " ++ psPrintJoin " " printedArgs)
+                        (psPrintLeanConcat3 printedFn " " (psPrintJoin " " printedArgs))
       | .lambda binders body _ =>
           let printBinder :=
             fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
@@ -76,8 +100,12 @@ def psPrintLeanTermWithFuel :
                           let delimiters :=
                             psPrintBinderDelimiters head.kind
                           Except.ok
-                            (delimiters.fst ++ name ++ " : " ++
-                              printedType ++ delimiters.snd);
+                            (psPrintLeanConcat5
+                              delimiters.fst
+                              name
+                              " : "
+                              printedType
+                              delimiters.snd);
           match binders.mapM printBinder with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
@@ -85,8 +113,11 @@ def psPrintLeanTermWithFuel :
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   Except.ok
-                    ("fun " ++ psPrintJoin " " printedBinders ++
-                      " => " ++ printedBody)
+                    (psPrintLeanConcat4
+                      "fun "
+                      (psPrintJoin " " printedBinders)
+                      " => "
+                      printedBody)
       | .forallE binders body _ =>
           let printBinder :=
             fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
@@ -101,8 +132,12 @@ def psPrintLeanTermWithFuel :
                           let delimiters :=
                             psPrintBinderDelimiters head.kind
                           Except.ok
-                            (delimiters.fst ++ name ++ " : " ++
-                              printedType ++ delimiters.snd);
+                            (psPrintLeanConcat5
+                              delimiters.fst
+                              name
+                              " : "
+                              printedType
+                              delimiters.snd);
           match binders.mapM printBinder with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
@@ -125,7 +160,7 @@ def psPrintLeanTermWithFuel :
                           declaredType with
                     | Except.error error => Except.error error
                     | Except.ok printed =>
-                        Except.ok (" : " ++ printed);
+                        Except.ok (psPrintLeanConcat2 " : " printed);
               match printType with
               | Except.error error => Except.error error
               | Except.ok printedType =>
@@ -136,9 +171,13 @@ def psPrintLeanTermWithFuel :
                       | Except.error error => Except.error error
                       | Except.ok printedBody =>
                           Except.ok
-                            ("let " ++ printedName ++ printedType ++
-                              " := " ++ printedValue ++
-                              "; " ++ printedBody)
+                            (psPrintLeanConcat6
+                              "let "
+                              printedName
+                              printedType
+                              " := "
+                              printedValue
+                              (psPrintLeanConcat2 "; " printedBody))
       | .ifE condition thenBranch elseBranch _ =>
           match psPrintLeanTermWithFuel remaining condition with
           | Except.error error => Except.error error
@@ -150,9 +189,13 @@ def psPrintLeanTermWithFuel :
                   | Except.error error => Except.error error
                   | Except.ok printedElse =>
                       Except.ok
-                        ("if " ++ printedCondition ++
-                          " then " ++ printedThen ++
-                          " else " ++ printedElse)
+                        (psPrintLeanConcat6
+                          "if "
+                          printedCondition
+                          " then "
+                          printedThen
+                          " else "
+                          printedElse)
       | .matchE scrutinee alternatives _ =>
           match psPrintLeanTermWithFuel remaining scrutinee with
           | Except.error error => Except.error error
@@ -171,14 +214,20 @@ def psPrintLeanTermWithFuel :
                               | Except.error error => Except.error error
                               | Except.ok printedBody =>
                                   Except.ok
-                                    ("  | " ++ printedPattern ++
-                                      " => " ++ printedBody);
+                                    (psPrintLeanConcat4
+                                      "  | "
+                                      printedPattern
+                                      " => "
+                                      printedBody);
               match alternatives.mapM printAlternative with
               | Except.error error => Except.error error
               | Except.ok printedAlternatives =>
                   Except.ok
-                    ("match " ++ printedScrutinee ++ " with\n" ++
-                      psPrintJoin "\n" printedAlternatives)
+                    (psPrintLeanConcat4
+                      "match "
+                      printedScrutinee
+                      " with\n"
+                      (psPrintJoin "\n" printedAlternatives))
 
 def psPrintLeanTerm
     (term : PsSyntaxTerm) :
@@ -198,8 +247,12 @@ def psPrintLeanBinder
           | Except.ok printedType =>
               let delimiters := psPrintBinderDelimiters head.kind;
               Except.ok
-                (delimiters.fst ++ name ++ " : " ++
-                  printedType ++ delimiters.snd)
+                (psPrintLeanConcat5
+                  delimiters.fst
+                  name
+                  " : "
+                  printedType
+                  delimiters.snd)
 
 def psPrintLeanStructureField
     (field : PsSyntaxBinderHead × PsSyntaxTerm) :
@@ -218,7 +271,7 @@ def psPrintLeanStructureField
                 | .implicit => "{" ++ name ++ " : " ++ printedType ++ "}"
                 | .strictImplicit => "{{" ++ name ++ " : " ++ printedType ++ "}}"
                 | .instanceImplicit => "[" ++ name ++ " : " ++ printedType ++ "]";
-              Except.ok ("  " ++ value)
+              Except.ok (psPrintLeanConcat2 "  " value)
 
 def psPrintLeanConstructor
     (constructor : PsSyntaxInductiveConstructor) :
@@ -232,7 +285,7 @@ def psPrintLeanConstructor
           let suffix :=
             if fields.isEmpty then ""
             else " " ++ psPrintJoin " " fields;
-          Except.ok ("  | " ++ name ++ suffix)
+          Except.ok (psPrintLeanConcat3 "  | " name suffix)
 
 def psPrintLeanDeclaration
     (declaration : PsSyntaxDeclaration) :
@@ -255,9 +308,13 @@ def psPrintLeanDeclaration
                         if printedBinders.isEmpty then ""
                         else " " ++ psPrintJoin " " printedBinders;
                       Except.ok
-                        ("def " ++ printedName ++ binderSuffix ++
-                          " : " ++ printedType ++
-                          " := " ++ printedValue)
+                        (psPrintLeanConcat6
+                          "def "
+                          printedName
+                          binderSuffix
+                          " : "
+                          printedType
+                          (psPrintLeanConcat2 " := " printedValue))
   | .partialDefinition name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
@@ -275,9 +332,13 @@ def psPrintLeanDeclaration
                         if printedBinders.isEmpty then ""
                         else " " ++ psPrintJoin " " printedBinders
                       Except.ok
-                        ("partial def " ++ printedName ++ binderSuffix ++
-                          " : " ++ printedType ++
-                          " := " ++ printedValue)
+                        (psPrintLeanConcat6
+                          "partial def "
+                          printedName
+                          binderSuffix
+                          " : "
+                          printedType
+                          (psPrintLeanConcat2 " := " printedValue))
   | .theoremDecl name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
@@ -295,9 +356,13 @@ def psPrintLeanDeclaration
                         if printedBinders.isEmpty then ""
                         else " " ++ psPrintJoin " " printedBinders
                       Except.ok
-                        ("theorem " ++ printedName ++ binderSuffix ++
-                          " : " ++ printedType ++
-                          " := " ++ printedValue)
+                        (psPrintLeanConcat6
+                          "theorem "
+                          printedName
+                          binderSuffix
+                          " : "
+                          printedType
+                          (psPrintLeanConcat2 " := " printedValue))
   | .inductiveDecl name params resultType constructors _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
@@ -312,7 +377,7 @@ def psPrintLeanDeclaration
                     match psPrintLeanTerm type with
                     | Except.error error => Except.error error
                     | Except.ok printed =>
-                        Except.ok (" : " ++ printed);
+                        Except.ok (psPrintLeanConcat2 " : " printed);
               match printResult with
               | Except.error error => Except.error error
               | Except.ok printedResult =>
@@ -323,10 +388,13 @@ def psPrintLeanDeclaration
                         if printedParams.isEmpty then ""
                         else " " ++ psPrintJoin " " printedParams;
                       Except.ok
-                        ("inductive " ++ printedName ++
-                          paramSuffix ++ printedResult ++
-                          " where\n" ++
-                          psPrintJoin "\n" printedConstructors)
+                        (psPrintLeanConcat6
+                          "inductive "
+                          printedName
+                          paramSuffix
+                          printedResult
+                          " where\n"
+                          (psPrintJoin "\n" printedConstructors))
   | .structureDecl name params fields _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
@@ -341,8 +409,12 @@ def psPrintLeanDeclaration
                     if printedParams.isEmpty then ""
                     else " " ++ psPrintJoin " " printedParams;
                   Except.ok
-                    ("structure " ++ printedName ++ paramSuffix ++
-                      " where\n" ++ psPrintJoin "\n" printedFields)
+                    (psPrintLeanConcat5
+                      "structure "
+                      printedName
+                      paramSuffix
+                      " where\n"
+                      (psPrintJoin "\n" printedFields))
 
 def psPrintLeanModule
     (module : PsSyntaxModule) :
@@ -351,7 +423,7 @@ def psPrintLeanModule
       (fun (sourceImport : PsSyntaxImport) =>
         match psPrintSyntaxName sourceImport.moduleName with
         | Except.error error => Except.error error
-        | Except.ok name => Except.ok ("import " ++ name)) with
+        | Except.ok name => Except.ok (psPrintLeanConcat2 "import " name)) with
   | Except.error error => Except.error error
   | Except.ok imports =>
       match module.declarations.mapM psPrintLeanDeclaration with
@@ -372,4 +444,7 @@ def psPrintLeanModule
           if sections.isEmpty then
             Except.ok ""
           else
-            Except.ok (psPrintJoin "\n\n" sections ++ "\n")
+            Except.ok
+              (psPrintLeanConcat2
+                (psPrintJoin "\n\n" sections)
+                "\n")

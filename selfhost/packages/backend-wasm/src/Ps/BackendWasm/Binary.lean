@@ -319,6 +319,24 @@ def psWasmEncodeInstruction
               ++ psWasmEncodeUleb 4
               ++ psWasmEncodeUleb typeIndex
               ++ psWasmEncodeUleb fieldIndex)
+  | .refTest typeName =>
+      match psWasmFindStructureIndex structures typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 20
+              ++ psWasmEncodeSleb (Int.ofNat typeIndex))
+  | .refCast typeName =>
+      match psWasmFindStructureIndex structures typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 22
+              ++ psWasmEncodeSleb (Int.ofNat typeIndex))
   | .f32ConstBits _ =>
       Except.error PsWasmEncodeError.unsupportedInstruction
   | .f64ConstBits _ =>
@@ -422,7 +440,7 @@ def psWasmEncodeStructFields
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
 
-def psWasmEncodeStructType
+def psWasmEncodeStructCompositeType
     (structures : List PsWasmStructType)
     (structType : PsWasmStructType) :
     Except PsWasmEncodeError (List UInt8) :=
@@ -433,6 +451,38 @@ def psWasmEncodeStructType
         ([psWasmByte 95]
           ++ psWasmEncodeUleb structType.fields.length
           ++ fields)
+
+def psWasmEncodeStructType
+    (structures : List PsWasmStructType)
+    (structType : PsWasmStructType) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match psWasmEncodeStructCompositeType structures structType with
+  | Except.error error => Except.error error
+  | Except.ok composite =>
+      match structType.superType with
+      | none =>
+          if structType.isFinal then
+            Except.ok composite
+          else
+            Except.ok
+              ([psWasmByte 80]
+                ++ psWasmEncodeUleb 0
+                ++ composite)
+      | some superName =>
+          match psWasmFindStructureIndex structures superName with
+          | none =>
+              Except.error (PsWasmEncodeError.unknownStructure superName)
+          | some superIndex =>
+              let prefix :=
+                if structType.isFinal then
+                  psWasmByte 79
+                else
+                  psWasmByte 80
+              Except.ok
+                ([prefix]
+                  ++ psWasmEncodeUleb 1
+                  ++ psWasmEncodeUleb superIndex
+                  ++ composite)
 
 def psWasmEncodeStructTypes
     (structures : List PsWasmStructType) :

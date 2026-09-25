@@ -59,13 +59,26 @@ partial def findUndefExprLevelParam (e : Expr) (allowed : List Name) : Option Na
           | none => findUndefExprLevelParam body allowed
   | .mdata _ body | .proj _ _ body => findUndefExprLevelParam body allowed
 
+partial def levelHasMVar : Level → Bool
+  | .mvar _ => true
+  | .succ level => levelHasMVar level
+  | .max left right | .imax left right =>
+      levelHasMVar left || levelHasMVar right
+  | .zero | .param _ => false
+
+def levelsHaveMVar : List Level → Bool
+  | [] => false
+  | level :: rest => levelHasMVar level || levelsHaveMVar rest
+
 partial def hasMVar : Expr → Bool
   | .mvar _ => true
+  | .sort level => levelHasMVar level
+  | .const _ levels => levelsHaveMVar levels
   | .app f a => hasMVar f || hasMVar a
   | .lam _ type body _ | .forallE _ type body _ => hasMVar type || hasMVar body
   | .letE _ type value body _ => hasMVar type || hasMVar value || hasMVar body
   | .mdata _ body | .proj _ _ body => hasMVar body
-  | .bvar _ | .fvar _ | .sort _ | .const _ _ | .lit _ => false
+  | .bvar _ | .fvar _ | .lit _ => false
 
 def checkNoMVarNoFVar (e : Expr) : Except String Unit :=
   if hasMVar e then

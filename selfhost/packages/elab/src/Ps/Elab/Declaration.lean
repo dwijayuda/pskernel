@@ -214,8 +214,14 @@ def psSyntaxConstructorCoreName
     (inductiveName : PsName)
     (sourceName : PsSyntaxName) : Option PsName :=
   match sourceName.segments with
-  | [segment] => some (psNameAppendStr inductiveName segment)
-  | _ => none
+  | List.nil =>
+      Option.none
+  | List.cons segment rest =>
+      match rest with
+      | List.nil =>
+          Option.some (psNameAppendStr inductiveName segment)
+      | List.cons _ _ =>
+          Option.none
 
 def psElabContextWithEnvironment
     (context : PsElabContext)

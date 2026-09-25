@@ -28,6 +28,128 @@ def psBackendDiffModule : PsVerifiedIrModule :=
     ]
     declarations := [
       {
+        name := "applyNat"
+        typeParameters := []
+        parameters := [
+          {
+            name := "f"
+            type :=
+              PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+          },
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "f")
+            []
+            [PsVerifiedIrExpr.var "x"]
+      },
+      {
+        name := "diffCapture"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "applyNat")
+            []
+            [
+              PsVerifiedIrExpr.lambda
+                [
+                  {
+                    name := "value"
+                    type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                  }
+                ]
+                (PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.natAdd
+                  [
+                    PsVerifiedIrExpr.var "value",
+                    PsVerifiedIrExpr.var "offset"
+                  ]),
+              PsVerifiedIrExpr.var "x"
+            ]
+      },
+      {
+        name := "diffCaptureArray"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.letE
+            "xs"
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.arrayPush
+              [
+                PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.arrayPush
+                  [
+                    PsVerifiedIrExpr.intrinsic
+                      PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                      [
+                        PsVerifiedIrExpr.literal
+                          (PsVerifiedIrLiteral.natural 2)
+                      ],
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.natural 1)
+                  ],
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.natural 2)
+              ])
+            (PsVerifiedIrExpr.letE
+              "addOffset"
+              (PsVerifiedIrExpr.lambda
+                [
+                  {
+                    name := "value"
+                    type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                  }
+                ]
+                (PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.natAdd
+                  [
+                    PsVerifiedIrExpr.var "value",
+                    PsVerifiedIrExpr.var "offset"
+                  ]))
+              (PsVerifiedIrExpr.letE
+                "ys"
+                (PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.arrayMap
+                  [
+                    PsVerifiedIrExpr.var "addOffset",
+                    PsVerifiedIrExpr.var "xs"
+                  ])
+                (PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.arrayGetD
+                  [
+                    PsVerifiedIrExpr.var "ys",
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.natural 1),
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.natural 0)
+                  ])))
+      },
+      {
         name := "diffNat"
         typeParameters := []
         parameters := [

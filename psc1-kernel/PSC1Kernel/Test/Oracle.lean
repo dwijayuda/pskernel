@@ -764,6 +764,47 @@ def assertLazyDeltaOracle : IO Unit := do
   assertTrue "lazy delta differs from Lean 4.34" (ours == lean)
   assertTrue "Lean 4.34 should unfold the abbreviation/definition chain" lean
 
+def assertLongLazyDeltaOracle : IO Unit := do
+  let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let env0 :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let ns : PSC1Kernel.Name :=
+    .str (.str .anonymous "PSC1Kernel") "LongDelta"
+  let nameAt (i : Nat) : PSC1Kernel.Name :=
+    .str ns ("D" ++ toString i)
+  let rec build (i fuel : Nat) (env : PSC1Kernel.Environment) :
+      PSC1Kernel.Environment :=
+    match fuel with
+    | 0 =>
+        env.addUnchecked (.defnInfo {
+          base := mkBase (nameAt i) natT
+          value := .lit (.nat 0)
+          hints := .regular 1
+          safety := .safe
+        })
+    | n + 1 =>
+        let env' :=
+          env.addUnchecked (.defnInfo {
+            base := mkBase (nameAt i) natT
+            value := .const (nameAt (i + 1)) []
+            hints := .regular (n + 2)
+            safety := .safe
+          })
+        build (i + 1) n env'
+  let env := build 0 600 env0
+  let ctx := PSC1Kernel.CheckerContext.empty env
+  let ok ← exceptToIO
+    "PSC1 long lazy-delta chain"
+    (PSC1Kernel.isDefEq ctx (.const (nameAt 0) []) (.lit (.nat 0)))
+  assertTrue
+    "lazy delta has an arbitrary <=512-step semantic cap"
+    ok
+
 def assertStructureEtaOracle : IO Unit := do
   let env := makeStructureEnvironment
   let pair : PSC1Kernel.Name := .str (.str (.str .anonymous "PSC1Kernel") "Test") "EtaPair"
@@ -4581,6 +4622,7 @@ def run : IO Unit := do
   assertNatSizeLimitOracle
   assertFunctionEtaOracle
   assertLazyDeltaOracle
+  assertLongLazyDeltaOracle
   assertProjectionLazyDeltaOracle
   assertStructureMajorRecursorOracle
   assertStructureEtaOracle

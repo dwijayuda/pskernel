@@ -364,6 +364,50 @@ def psTestBackendRustIdentifiers : Bool :=
       (psRustIdentifier "__psr_value")
       "__psr___psr_value"
 
+def psBackendRustFunctionResultModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "makeAdder"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body :=
+          PsVerifiedIrExpr.lambda
+            [
+              {
+                name := "value"
+                type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+              }
+            ]
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.natAdd
+              [
+                PsVerifiedIrExpr.var "value",
+                PsVerifiedIrExpr.var "offset"
+              ])
+      }
+    ]
+  }
+
+def psTestBackendRustRejectsFunctionResult : Bool :=
+  match psRustEmitModule psBackendRustFunctionResultModule with
+  | Except.error (PsRustEmitError.functionResultUnsupported name) =>
+      psStringEq name "makeAdder"
+  | _ =>
+      false
+
 def psBackendRustGenericValueModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -446,6 +490,13 @@ def psTestBackendRustCoverageGenericValue : Bool :=
     coverage.unsupported
     "declaration:genericValue"
 
+def psTestBackendRustCoverageFunctionResult : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustFunctionResultModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "declaration:functionResult"
+
 def psTestBackendRustCoverageReport : Bool :=
   let supported :=
     psRustCoverageReport
@@ -472,10 +523,12 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "frozen PSC1 scalar mappings", passed := psTestBackendRustScalarTypes },
   { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers },
   { name := "reject generic top-level values", passed := psTestBackendRustRejectsGenericValue },
+  { name := "reject function-valued results", passed := psTestBackendRustRejectsFunctionResult },
   { name := "coverage accepts supported IR", passed := psTestBackendRustCoverageSupported },
   { name := "coverage rejects external imports", passed := psTestBackendRustCoverageExternalImport },
   { name := "coverage rejects unknown runtime types", passed := psTestBackendRustCoverageUnknownType },
   { name := "coverage rejects generic values", passed := psTestBackendRustCoverageGenericValue },
+  { name := "coverage rejects function results", passed := psTestBackendRustCoverageFunctionResult },
   { name := "coverage report is CI-stable", passed := psTestBackendRustCoverageReport }
 ]
 

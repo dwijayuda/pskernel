@@ -560,9 +560,25 @@ jobs:
         run: |
           set -euo pipefail
           cd selfhost
-          lake exe psc1 check packages/foundation/src/Ps/Foundation/Diagnostic.lean
-          lake exe psc1 translate packages/foundation/src/Ps/Foundation/Diagnostic.lean --to ps > /tmp/psc1-diagnostic.ps
-          lake exe psc1 check packages/syntax/src/Ps/Syntax/Ast.lean
+
+          sources=(
+            packages/foundation/src/Ps/Foundation/Diagnostic.lean
+            packages/syntax/src/Ps/Syntax/Ast.lean
+            packages/syntax/src/Ps/Syntax/Translate.lean
+            packages/elab/src/Ps/Elab/Declaration.lean
+            packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean
+            packages/erasure/src/Ps/Erasure/Definition.lean
+            packages/backend-ts/src/Ps/BackendTs/Module.lean
+          )
+
+          for source in "${sources[@]}"; do
+            echo "PSC1_COMPILER_SOURCE_CHECK: ${source}"
+            lake exe psc1 check "${source}"
+            output="/tmp/psc1-$(basename "${source}" .lean).ps"
+            lake exe psc1 translate "${source}" --to ps > "${output}"
+            test -s "${output}"
+          done
+
           echo "PSC1_COMPILER_SOURCE_READINESS: PASS"
 
 

@@ -1,5 +1,15 @@
 import Ps.BackendRust.Expr
 
+def psRustTypeParameterNames
+    (parameters : List PsVerifiedIrTypeParameter) : List String :=
+  match parameters with
+  | List.nil =>
+      List.nil
+  | List.cons parameter rest =>
+      List.cons
+        parameter.name
+        (psRustTypeParameterNames rest)
+
 def psRustGenericNames
     (parameters : List PsVerifiedIrTypeParameter) : String :=
   match parameters with
@@ -13,16 +23,6 @@ def psRustGenericNames
         (psRustJoin ", " names)
         ">"
         ""
-
-def psRustTypeParameterNames
-    (parameters : List PsVerifiedIrTypeParameter) : List String :=
-  match parameters with
-  | List.nil =>
-      List.nil
-  | List.cons parameter rest =>
-      List.cons
-        parameter.name
-        (psRustTypeParameterNames rest)
 
 def psRustEmitStructureFieldList
     (fields : List PsVerifiedIrStructureField) :

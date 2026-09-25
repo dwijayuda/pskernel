@@ -174,13 +174,12 @@ partial def reduceQuotRec
   if !ctx.env.quotInitialized then
     return none
   let .const fnName _ := e.getAppFn | return none
-  let (mkPos, argPos) :=
-    if Name.eq fnName kernelQuotLiftName then
-      (5, 3)
-    else if Name.eq fnName kernelQuotIndName then
-      (4, 3)
-    else
-      return none
+  let isLift := Name.eq fnName kernelQuotLiftName
+  let isInd := Name.eq fnName kernelQuotIndName
+  if !isLift && !isInd then
+    return none
+  let mkPos : Nat := if isLift then 5 else 4
+  let argPos : Nat := 3
   let args := e.getAppArgs
   if args.length <= mkPos then
     return none
@@ -192,7 +191,7 @@ partial def reduceQuotRec
   let mkArgs := major'.getAppArgs
   let some representative := listGet? mkArgs 2 | return none
   let some f := listGet? args argPos | return none
-  let base := .app f representative
+  let base := Expr.app f representative
   let elimArity := mkPos + 1
   return some (applyArgs base (args.drop elimArity))
 

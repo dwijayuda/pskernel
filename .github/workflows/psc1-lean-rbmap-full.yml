@@ -1,0 +1,50 @@
+name: PSC1 Lean full RBMap assurance
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [assurance/psc1-lean-rbmap-full]
+    paths:
+      - ".github/workflows/psc1-lean-rbmap-full.yml"
+      - "oracle/fixtures/lean434-lean-rbmap-all.ndjson.gz"
+      - "psc1-kernel/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-lean-rbmap-full-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - name: Build PSC1 Lean kernel
+        working-directory: psc1-kernel
+        run: lake build
+
+      - name: Replay full Lean.Data.RBMap environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          gzip -dc oracle/fixtures/lean434-lean-rbmap-all.ndjson.gz > /tmp/lean434-rbmap-all.ndjson
+          output="$(
+            cd psc1-kernel
+            lake env lean --run PSC1Kernel/Test/ReplayFile.lean /tmp/lean434-rbmap-all.ndjson
+          )"
+          printf '%s\n' "$output"
+          grep -Fq 'records=463440 names=61310 levels=283 exprs=391273 declarations=10573' <<<"$output"
+          echo "PSC1_LEAN_FULL_RBMAP_REPLAY: PASS"

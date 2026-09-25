@@ -46,7 +46,7 @@ partial def simpleFreshElimNameAux
     (candidate : Nat) : Name :=
   let base : Name := .str .anonymous "u"
   let name := if candidate == 0 then base else .num base candidate
-  if Name.listContains name levelParams then
+  if nameMember name levelParams then
     simpleFreshElimNameAux levelParams (candidate + 1)
   else
     name

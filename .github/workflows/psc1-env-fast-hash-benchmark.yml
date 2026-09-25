@@ -5,7 +5,7 @@ on:
   push:
     branches: [diagnostic/psc1-env-fast-hash]
     paths:
-      - ".github/workflows/psc1-env-array-index-benchmark.yml"
+      - ".github/workflows/psc1-env-fast-hash-benchmark.yml"
       - "psc1-kernel/**"
 
 permissions:

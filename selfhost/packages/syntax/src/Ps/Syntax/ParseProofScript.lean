@@ -365,7 +365,7 @@ def psParseProofScriptDependentArrowTail
             Except.ok {
               value :=
                 PsSyntaxTerm.forallE
-                  [binder.value]
+                  (List.cons binder.value List.nil)
                   codomain.value
                   {
                     start := binder.value.fst.span.start
@@ -374,15 +374,19 @@ def psParseProofScriptDependentArrowTail
               cursor := codomain.cursor
             }
   else
+    let actualText : String :=
+      match psTokenCursorPeek binder.cursor with
+      | Option.none => ""
+      | Option.some token => token.text;
+    let actualSpan : PsSourceSpan :=
+      match psTokenCursorPeek binder.cursor with
+      | Option.none => binder.value.fst.span
+      | Option.some token => token.span;
     Except.error
       (PsParseError.expectedText
         "->"
-        (match psTokenCursorPeek binder.cursor with
-         | Option.none => ""
-         | Option.some token => token.text)
-        (match psTokenCursorPeek binder.cursor with
-         | Option.none => binder.value.fst.span
-         | Option.some token => token.span))
+        actualText
+        actualSpan)
 
 
 def psParseProofScriptMatchAlternativesWithFuel

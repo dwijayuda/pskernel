@@ -46,13 +46,14 @@ def psSyntaxCompilerBind
     (action : PsSyntaxTerm)
     (body : PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
+  let bodySpan := psSyntaxTermSpan body
   let lambda :=
     PsSyntaxTerm.lambda
       (List.cons (Prod.mk binder binderType) List.nil)
       body
       {
         start := binder.span.start
-        stop := (psSyntaxTermSpan body).stop
+        stop := bodySpan.stop
       }
   PsSyntaxTerm.app
     (psSyntaxSyntheticReference "compilerBind" span)

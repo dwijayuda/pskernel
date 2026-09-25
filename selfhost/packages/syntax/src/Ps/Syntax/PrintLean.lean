@@ -27,8 +27,10 @@ def psPrintLeanConcat6
   let abcde := psPrintLeanConcat5 a b c d e;
   psPrintLeanConcat2 abcde f
 
-def psPrintLeanTermWithFuel :
-    Nat -> PsSyntaxTerm -> Except PsSourcePrintError String
+def psPrintLeanTermWithFuel
+    (fuel : Nat) :
+    PsSyntaxTerm -> Except PsSourcePrintError String :=
+  match fuel with
   | 0 =>
       fun (_term : PsSyntaxTerm) =>
         Except.error PsSourcePrintError.fuelExhausted

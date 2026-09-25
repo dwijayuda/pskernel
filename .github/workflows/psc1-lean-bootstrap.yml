@@ -197,6 +197,18 @@ jobs:
           cd selfhost
           lake exe psc1_bridge_tests
 
+
+      - name: Run pskernel String bridge acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          npx tsc -p packages/environment/tsconfig.json
+          npx tsc -p packages/checked-core/tsconfig.json
+          cd selfhost
+          lake exe psc1_bridge_host_tests
+
       - name: Run Lean-native TypeScript backend tests
         shell: bash
         run: |

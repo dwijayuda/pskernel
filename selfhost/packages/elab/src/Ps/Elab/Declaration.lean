@@ -1119,7 +1119,7 @@ def psElabPartialDeclaration
               | Except.error error =>
                   Except.error (PsElabError.infer error)
               | Except.ok _ =>
-                  let typeMeta := typeResult.context.metaContext
+                  let typeMeta := typeResult.context.metaContext;
                   let openType :=
                     psMetaInstantiate typeMeta typeResult.term
                   let closedType :=

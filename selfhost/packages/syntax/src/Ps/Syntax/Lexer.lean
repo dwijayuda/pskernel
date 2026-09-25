@@ -244,7 +244,7 @@ def psLexSkipTriviaWithFuel
 def psLexSkipTrivia
     (remaining : List Char)
     (position : PsSourcePos) : Except PsLexError PsLexCursor :=
-  psLexSkipTriviaWithFuel (Nat.add remaining.length 1) remaining position
+  psLexSkipTriviaWithFuel (Nat.add (List.length remaining) 1) remaining position
 
 def psLexLetterLike (char : Char) : Bool :=
   let code : Nat := Char.toNat char;
@@ -878,4 +878,4 @@ def psLexAllWithFuel :
 
 def psLex (source : String) : Except PsLexError (List PsToken) :=
   let cursor := psLexCursorFromString source;
-  psLexAllWithFuel (Nat.add source.toList.length 1) cursor
+  psLexAllWithFuel (Nat.add (String.utf8ByteSize source) 1) cursor

@@ -312,11 +312,29 @@ def assertEagerReduceOracle : IO Unit := do
   assertTrue "PSC1 eagerReduce result type mismatch"
     (PSC1Kernel.Expr.eq oursWrapped natT)
 
-  Lean.initSearchPath (← Lean.findSysroot)
-  let leanPrelude ← Lean.importModules #[{ module := `Init.Core }] {}
-  let lean0 := leanPrelude.toKernelEnv
+  -- Mirror the PSC fixture exactly. Importing Init.Core here would make
+  -- Nat.add delta-reducible and would no longer isolate the eagerReduce path.
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
   let lean1 ←
     match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected eagerReduce oracle Nat axiom"
+  let lean2 ←
+    match Lean.Kernel.Environment.addDecl lean1 {} (.axiomDecl {
+      name := toLeanName Add
+      levelParams := []
+      type := toLeanExpr natBinType
+      isUnsafe := false
+    }) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected eagerReduce oracle Nat.add axiom"
+  let lean3 ←
+    match Lean.Kernel.Environment.addDecl lean2 {} (.axiomDecl {
       name := toLeanName F
       levelParams := []
       type := toLeanExpr fType
@@ -324,7 +342,16 @@ def assertEagerReduceOracle : IO Unit := do
     }) with
     | .ok value => pure value
     | .error _ => throw <| IO.userError "Lean 4.34 rejected eagerReduce oracle F axiom"
-  let leanEnv := Lean.Environment.ofKernelEnv lean1
+  let lean4 ←
+    match Lean.Kernel.Environment.addDecl lean3 {} (.axiomDecl {
+      name := toLeanName Eager
+      levelParams := [toLeanName u]
+      type := toLeanExpr eagerType
+      isUnsafe := false
+    }) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected eagerReduce oracle marker axiom"
+  let leanEnv := Lean.Environment.ofKernelEnv lean4
   let ghostId : Lean.FVarId := ⟨toLeanName ghost⟩
   let pId : Lean.FVarId := ⟨toLeanName p⟩
   let leanLctx0 : Lean.LocalContext :=

@@ -209,13 +209,47 @@ partial def whnf (ctx : CheckerContext) (e : Expr) : Except String Expr :=
         if Expr.eq fn fn' then .ok e else .ok (.app fn' arg)
   | _ => .ok e
 
+partial def ensureSort (ctx : CheckerContext) (e : Expr) : Except String Level := do
+  let reduced ← whnf ctx e
+  match reduced with
+  | .sort level => .ok level
+  | _ => .error "expected sort"
+
+partial def ensureForall
+    (ctx : CheckerContext) (e : Expr) :
+    Except String (Name × Expr × Expr × BinderInfo) := do
+  let reduced ← whnf ctx e
+  match reduced with
+  | .forallE name domain body binderInfo => .ok (name, domain, body, binderInfo)
+  | _ => .error "expected function type"
+
+
+def levelListsEquivalent : List Level → List Level → Bool
+  | [], [] => true
+  | a :: as, b :: bs =>
+    Level.equivalent a b && levelListsEquivalent as bs
+  | _, _ => false
+
+mutual
+
 partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := do
   if Expr.eq a b then return true
   let a' ← whnf ctx a
   let b' ← whnf ctx b
   if Expr.eq a' b' then return true
+
+  -- Lean 4.34 proof irrelevance: if the left term is a proof, equality is
+  -- determined by definitional equality of the two proposition types.
+  let aType ← infer ctx a'
+  let aIsProof ← isProp ctx aType
+  if aIsProof then
+    let bType ← infer ctx b'
+    return ← isDefEq ctx aType bType
+
   match a', b' with
   | .sort u, .sort v => return Level.equivalent u v
+  | .const n₁ ls₁, .const n₂ ls₂ =>
+    return Name.eq n₁ n₂ && levelListsEquivalent ls₁ ls₂
   | .app f₁ a₁, .app f₂ a₂ => do
     let hf ← isDefEq ctx f₁ f₂
     if !hf then return false
@@ -232,23 +266,6 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
     if !Name.eq n₁ n₂ || i₁ != i₂ then return false
     isDefEq ctx e₁ e₂
   | _, _ => return false
-
-partial def ensureSort (ctx : CheckerContext) (e : Expr) : Except String Level := do
-  let reduced ← whnf ctx e
-  match reduced with
-  | .sort level => .ok level
-  | _ => .error "expected sort"
-
-partial def ensureForall
-    (ctx : CheckerContext) (e : Expr) :
-    Except String (Name × Expr × Expr × BinderInfo) := do
-  let reduced ← whnf ctx e
-  match reduced with
-  | .forallE name domain body binderInfo => .ok (name, domain, body, binderInfo)
-  | _ => .error "expected function type"
-
-
-mutual
 
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with

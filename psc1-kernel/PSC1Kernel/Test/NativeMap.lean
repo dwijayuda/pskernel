@@ -73,7 +73,7 @@ def parseNativeMap (text : String) : Except String (List NativeMapEntry) := do
             if nativeMapContains entry.name seen then
               throw (
                 "native map line " ++ toString lineNo ++
-                ": duplicate constant " ++ replayNameString entry.name)
+                ": duplicate constant " ++ PSC1Kernel.Replay.replayNameString entry.name)
             go (lineNo + 1) (entry :: seen) rest
   go 1 [] (text.splitOn "\n")
 
@@ -83,13 +83,13 @@ def nativeMapEvaluator (entries : List NativeMapEntry) : NativeEvaluator :=
       match nativeMapFind? name entries with
       | some (.bool value) => .ok (some value)
       | some (.nat _) => .error (
-          "native map kind mismatch for " ++ replayNameString name)
+          "native map kind mismatch for " ++ PSC1Kernel.Replay.replayNameString name)
       | none => .ok none
     evalNat := fun name =>
       match nativeMapFind? name entries with
       | some (.nat value) => .ok (some value)
       | some (.bool _) => .error (
-          "native map kind mismatch for " ++ replayNameString name)
+          "native map kind mismatch for " ++ PSC1Kernel.Replay.replayNameString name)
       | none => .ok none
   }
 

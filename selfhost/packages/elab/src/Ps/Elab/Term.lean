@@ -599,7 +599,7 @@ def psElabLambdaExpectedBody
                   context.metaContext
                   binder.type
                   forallView.domain;
-              if !unified.success then
+              if psElabBoolNot unified.success then
                 Except.error PsElabError.typeMismatch
               else
                 let nextContext :=
@@ -1511,16 +1511,17 @@ def psElabMatchMinors
     (inductiveLevels : List PsLevel)
     (parameterArgs : List PsExpr)
     (expectedType : PsExpr)
-    (alternatives : List PsElabMatchAlternative) :
-    PsElabContext ->
-    List PsName ->
-    Except PsElabError PsElabMatchMinorsResult
-  | context, [] =>
+    (alternatives : List PsElabMatchAlternative)
+    (context : PsElabContext)
+    (constructorNames : List PsName) :
+    Except PsElabError PsElabMatchMinorsResult :=
+  match constructorNames with
+  | [] =>
       Except.ok {
         context := context
         minors := []
       }
-  | context, ctorName :: rest =>
+  | ctorName :: rest =>
       match psElabMatchAlternativeFind ctorName alternatives with
       | none => Except.error PsElabError.matchNonExhaustive
       | some alternative =>
@@ -1824,18 +1825,19 @@ def psElabApplyArgs
     arguments
     pendingInstancesRev
 
-def psElabSolvePendingInstances :
-    PsElabTermResult ->
-    List Nat ->
-    Except PsElabError PsElabTermResult
-  | current, [] =>
-      let metaContext := current.context.metaContext
+def psElabSolvePendingInstances
+    (current : PsElabTermResult)
+    (pendingInstances : List Nat) :
+    Except PsElabError PsElabTermResult :=
+  match pendingInstances with
+  | [] =>
+      let metaContext := current.context.metaContext;
       Except.ok {
         context := current.context
         term := psMetaInstantiate metaContext current.term
         type := psMetaInstantiate metaContext current.type
       }
-  | current, id :: rest =>
+  | id :: rest =>
       let metaContext := current.context.metaContext;
       match psMetaFindAssignment metaContext id with
       | some _ =>
@@ -1895,22 +1897,28 @@ structure PsElabRecordCandidate where
   constructorName : PsName
   fieldNames : List String
 
-def psElabDropForallBinders :
-    Nat -> PsExpr -> Option PsExpr
-  | 0, type => some type
-  | remaining + 1, type =>
+def psElabDropForallBinders
+    (remaining : Nat)
+    (type : PsExpr) : Option PsExpr :=
+  match remaining with
+  | 0 =>
+      some type
+  | nextRemaining + 1 =>
       match type with
       | .forallE _ _ body _ =>
-          psElabDropForallBinders remaining body
+          psElabDropForallBinders nextRemaining body
       | _ => none
 
-def psElabTakeForallNames :
-    Nat -> PsExpr -> Option (List String)
-  | 0, _ => some []
-  | remaining + 1, type =>
+def psElabTakeForallNames
+    (remaining : Nat)
+    (type : PsExpr) : Option (List String) :=
+  match remaining with
+  | 0 =>
+      some []
+  | nextRemaining + 1 =>
       match type with
       | .forallE name _ body _ =>
-          match psElabTakeForallNames remaining body with
+          match psElabTakeForallNames nextRemaining body with
           | none => none
           | some rest =>
               some (psNameLastComponent name :: rest)
@@ -1942,12 +1950,14 @@ def psSyntaxRecordFieldsMatch
     (names.all
       (fun name => psSyntaxRecordHasField fields name))
 
-def psSyntaxRecordFindField :
-    List (Prod PsSyntaxName PsSyntaxTerm) ->
-    String ->
-    Option PsSyntaxTerm
-  | [], _ => none
-  | field :: rest, name =>
+def psSyntaxRecordFindField
+    (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+    (name : String) :
+    Option PsSyntaxTerm :=
+  match fields with
+  | [] =>
+      none
+  | field :: rest =>
       match psSyntaxRecordFieldName field with
       | some fieldName =>
           if psStringEq fieldName name then
@@ -1958,17 +1968,22 @@ def psSyntaxRecordFindField :
           psSyntaxRecordFindField rest name
 
 def psSyntaxRecordOrderFields
-    (fields :
-      List (Prod PsSyntaxName PsSyntaxTerm)) :
-    List String -> Option (List PsSyntaxTerm)
-  | [] => some []
+    (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+    (names : List String) :
+    Option (List PsSyntaxTerm) :=
+  match names with
+  | [] =>
+      some []
   | name :: rest =>
-      match
-          psSyntaxRecordFindField fields name,
-          psSyntaxRecordOrderFields fields rest with
-      | some value, some values =>
-          some (value :: values)
-      | _, _ => none
+      match psSyntaxRecordFindField fields name with
+      | none =>
+          none
+      | some value =>
+          match psSyntaxRecordOrderFields fields rest with
+          | none =>
+              none
+          | some values =>
+              some (value :: values)
 
 def psElabRecordCandidateForInfo
     (environment : PsEnvironment)
@@ -2037,13 +2052,14 @@ def psElabRecordCandidateFromExpected
 
 def psElabRecordCandidates
     (environment : PsEnvironment)
-    (fields :
-      List (Prod PsSyntaxName PsSyntaxTerm)) :
-    List PsDeclaration ->
-    List PsElabRecordCandidate ->
-    List PsElabRecordCandidate
-  | [], candidatesRev => candidatesRev.reverse
-  | declaration :: rest, candidatesRev =>
+    (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+    (declarations : List PsDeclaration)
+    (candidatesRev : List PsElabRecordCandidate) :
+    List PsElabRecordCandidate :=
+  match declarations with
+  | [] =>
+      candidatesRev.reverse
+  | declaration :: rest =>
       match declaration with
       | .inductiveDecl info =>
           match

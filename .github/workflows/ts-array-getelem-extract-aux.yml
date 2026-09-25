@@ -1,0 +1,52 @@
+name: TS Array.getElem_extract_aux baseline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [diagnostic/ts-array-getelem-extract-aux]
+    paths:
+      - ".github/workflows/ts-array-getelem-extract-aux.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build TypeScript kernel
+        run: |
+          npm ci
+          npm run build --silent
+      - name: Export named dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean oracle/replay-probe/DependencyExport.lean
+          lean --run oracle/replay-probe/DependencyExport.lean Std Array.getElem_extract_aux > /tmp/hot.ndjson
+          echo "bytes=$(wc -c < /tmp/hot.ndjson)"
+          echo "lines=$(wc -l < /tmp/hot.ndjson)"
+      - name: Replay with cached TypeScript kernel
+        shell: bash
+        env:
+          PSKERNEL_NATIVE_MODULE: Std
+        run: |
+          set -euo pipefail
+          export PSKERNEL_NATIVE_LEAN="$LEAN434_BIN/lean"
+          /usr/bin/time -f 'ts-hot-elapsed=%e ts-hot-maxrss-kb=%M' \
+            node --expose-gc --max-old-space-size=4096 scripts/batch-replay-worker.mjs \
+            < /tmp/hot.ndjson

@@ -146,6 +146,18 @@ inductive Record where
   | quotR (value : QuotRecord)
   | inductiveR (value : InductiveRecord)
 
+def Record.declarationNameIndex? : Record → Option Nat
+  | .axiomR value => some value.name
+  | .definitionR value => some value.name
+  | .theoremR value => some value.name
+  | .opaqueR value => some value.name
+  | .quotR value => some value.name
+  | .inductiveR value =>
+      match value.types with
+      | first :: _ => some first.name
+      | [] => none
+  | _ => none
+
 structure PendingMutual where
   all : List Name
   defs : List DefinitionInfo
@@ -890,7 +902,18 @@ def State.replay
       .quotR _ | .inductiveR _ => do
       unless state.sawMeta do
         throw "lean4export metadata must be the first record"
-      let next ← state.addDeclaration record
+      let label ←
+        match record.declarationNameIndex? with
+        | some index =>
+            match state.nameAt index with
+            | .ok name => pure (replayNameString name)
+            | .error _ => pure ("name#" ++ toString index)
+        | none => pure "<anonymous declaration>"
+      let next ←
+        match state.addDeclaration record with
+        | .ok value => pure value
+        | .error err =>
+            throw ("declaration " ++ label ++ ": " ++ err)
       pure {
         next with
         records := state.records + 1

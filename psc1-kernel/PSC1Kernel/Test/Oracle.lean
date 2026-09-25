@@ -2675,6 +2675,201 @@ def assertParameterizedNestedInductiveAdmissionOracle : IO Unit := do
   assertTrue "parameterized nested recursion did not reach leaf minor"
     (PSC1Kernel.Expr.eq oursReduced (.lit (.nat 73)))
 
+def assertUniverseNestedInductiveAdmissionOracle : IO Unit := do
+  let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+
+  let u : PSC1Kernel.Name := .str .anonymous "u"
+  let v : PSC1Kernel.Name := .str .anonymous "v"
+  let U : PSC1Kernel.Level := .param u
+  let V : PSC1Kernel.Level := .param v
+
+  let Box : PSC1Kernel.Name := .str .anonymous "OracleUniverseNestedBox"
+  let BoxMk : PSC1Kernel.Name := .str Box "mk"
+  let Beta : PSC1Kernel.Name := .str .anonymous "β"
+  let boxType : PSC1Kernel.Expr :=
+    .forallE Beta (.sort V) (.sort V) .default
+  let boxCtorType : PSC1Kernel.Expr :=
+    .forallE Beta (.sort V)
+      (.forallE (.str .anonymous "value") (.bvar 0)
+        (.app (.const Box [V]) (.bvar 1))
+        .default)
+      .default
+
+  let Tree : PSC1Kernel.Name := .str .anonymous "OracleUniverseNestedTree"
+  let TreeLeaf : PSC1Kernel.Name := .str Tree "leaf"
+  let TreeNode : PSC1Kernel.Name := .str Tree "node"
+  let TreeRec : PSC1Kernel.Name := .str Tree "rec"
+  let TreeRec1 : PSC1Kernel.Name := TreeRec.appendIndexAfter 1
+  let Alpha : PSC1Kernel.Name := .str .anonymous "α"
+  let treeType : PSC1Kernel.Expr :=
+    .forallE Alpha (.sort U) (.sort (.succ U)) .default
+  let treeAtBvar : PSC1Kernel.Expr :=
+    .app (.const Tree [U]) (.bvar 0)
+  let treeLeafType : PSC1Kernel.Expr :=
+    .forallE Alpha (.sort U) treeAtBvar .default
+  let boxTreeAtBvar : PSC1Kernel.Expr :=
+    .app (.const Box [.succ U]) treeAtBvar
+  let treeNodeType : PSC1Kernel.Expr :=
+    .forallE Alpha (.sort U)
+      (.forallE (.str .anonymous "children") boxTreeAtBvar
+        (.app (.const Tree [U]) (.bvar 1))
+        .default)
+      .default
+
+  let base :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursBox ← exceptToIO
+    "PSC1 universe-nested outer Box admission"
+    (PSC1Kernel.Kernel.addSimpleInductive base {
+      levelParams := [v]
+      name := Box
+      type := boxType
+      ctors := [{ name := BoxMk, type := boxCtorType }]
+      isUnsafe := false
+      numParams := 1
+    })
+  let ours ← exceptToIO
+    "PSC1 universe-polymorphic nested Tree admission"
+    (PSC1Kernel.Kernel.addSimpleNestedInductive oursBox {
+      levelParams := [u]
+      numParams := 1
+      types := [{
+        name := Tree
+        type := treeType
+        ctors := [
+          { name := TreeLeaf, type := treeLeafType },
+          { name := TreeNode, type := treeNodeType }
+        ]
+      }]
+      isUnsafe := false
+    })
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanNat ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected universe-nested Nat axiom"
+  let leanBox ←
+    match Lean.Kernel.Environment.addDecl leanNat {} (.inductDecl [toLeanName v] 1 [{
+      name := toLeanName Box
+      type := toLeanExpr boxType
+      ctors := [{
+        name := toLeanName BoxMk
+        type := toLeanExpr boxCtorType
+      }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected universe-nested Box"
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl leanBox {} (.inductDecl [toLeanName u] 1 [{
+      name := toLeanName Tree
+      type := toLeanExpr treeType
+      ctors := [
+        { name := toLeanName TreeLeaf, type := toLeanExpr treeLeafType },
+        { name := toLeanName TreeNode, type := toLeanExpr treeNodeType }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected universe-polymorphic nested Tree"
+  let leanEnv := Lean.Environment.ofKernelEnv lean1
+
+  for name in [Tree, TreeLeaf, TreeNode, TreeRec, TreeRec1] do
+    let some oursInfo := ours.find? name
+      | throw <| IO.userError (
+          "PSC1 universe-nested metadata missing: " ++
+          (toLeanName name).toString)
+    let some leanInfo := lean1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 universe-nested metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("universe-nested type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+
+  match ours.find? Tree with
+  | some (.inductInfo info) =>
+      assertTrue "universe-nested level parameter count mismatch"
+        (info.base.levelParams.length == 1)
+      assertTrue "universe-nested numNested mismatch"
+        (info.numNested == 1)
+  | _ =>
+      throw <| IO.userError "PSC1 universe-nested inductive info missing"
+
+  let one : PSC1Kernel.Level := .succ .zero
+  let two : PSC1Kernel.Level := .succ one
+  let treeNat : PSC1Kernel.Expr :=
+    .app (.const Tree [one]) natT
+  let boxTreeNat : PSC1Kernel.Expr :=
+    .app (.const Box [two]) treeNat
+  let treeMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "tree") treeNat natT .default
+  let boxMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "box") boxTreeNat natT .default
+  let leafMinor : PSC1Kernel.Expr := .lit (.nat 79)
+  let nodeMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "children") boxTreeNat
+      (.lam (.str .anonymous "children_ih") natT (.bvar 0) .default)
+      .default
+  let boxMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "child") treeNat
+      (.lam (.str .anonymous "child_ih") natT (.bvar 0) .default)
+      .default
+  let leaf : PSC1Kernel.Expr :=
+    .app (.const TreeLeaf [one]) natT
+  let boxedLeaf : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs (.const BoxMk [two])
+      [treeNat, leaf]
+  let major : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs (.const TreeNode [one])
+      [natT, boxedLeaf]
+  let recApp :=
+    PSC1Kernel.applyArgs (.const TreeRec [one, one])
+      [
+        natT,
+        treeMotive, boxMotive,
+        leafMinor, nodeMinor, boxMinor,
+        major
+      ]
+  let ctx := PSC1Kernel.CheckerContext.empty ours
+  let resultType ← exceptToIO
+    "PSC1 universe-nested recursor typecheck"
+    (PSC1Kernel.check ctx recApp)
+  let resultTypeOk ← exceptToIO
+    "PSC1 universe-nested recursor result defeq"
+    (PSC1Kernel.isDefEq ctx resultType natT)
+  assertTrue "PSC1 universe-nested recursor result type mismatch"
+    resultTypeOk
+  let oursReduced ← exceptToIO
+    "PSC1 universe-nested recursor reduction"
+    (PSC1Kernel.whnf ctx recApp)
+  let leanType ←
+    match Lean.Kernel.check leanEnv ({} : Lean.LocalContext)
+        (toLeanExpr recApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected universe-nested recursor application"
+  assertTrue "universe-nested recursor result type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr resultType) leanType)
+  let leanReduced ← kernelExprWhnf leanEnv recApp
+  assertTrue "universe-nested recursor reduction differs from Lean 4.34"
+    (toLeanExpr oursReduced == leanReduced)
+  assertTrue "universe-nested recursion did not reach leaf minor"
+    (PSC1Kernel.Expr.eq oursReduced (.lit (.nat 79)))
+
 def assertOrdinaryRecursorOracle : IO Unit := do
   let Flag : PSC1Kernel.Name := .str .anonymous "OracleFlag"
   let Off : PSC1Kernel.Name := .str Flag "off"
@@ -3163,6 +3358,7 @@ def run : IO Unit := do
   assertSimpleInductiveAdmissionOracle
   assertNestedInductiveAdmissionOracle
   assertParameterizedNestedInductiveAdmissionOracle
+  assertUniverseNestedInductiveAdmissionOracle
   assertOrdinaryRecursorOracle
   assertNatLiteralRecursorOracle
   assertQuotReductionOracle

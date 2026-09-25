@@ -356,14 +356,18 @@ def psJsonConsumeLiteral
     (expected : List Char)
     (chars : List Char) :
     Option (List Char) :=
-  match expected, chars with
-  | [], rest => some rest
-  | expectedChar :: expectedRest, char :: rest =>
-      if psJsonCharEq expectedChar char then
-        psJsonConsumeLiteral expectedRest rest
-      else
-        none
-  | _, _ => none
+  match expected with
+  | List.nil =>
+      some chars
+  | List.cons expectedChar expectedRest =>
+      match chars with
+      | List.nil =>
+          none
+      | List.cons char rest =>
+          if psJsonCharEq expectedChar char then
+            psJsonConsumeLiteral expectedRest rest
+          else
+            none
 
 def psJsonReverseValuesAcc
     (values : List PsJsonValue)

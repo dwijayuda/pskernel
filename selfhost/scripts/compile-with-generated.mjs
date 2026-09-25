@@ -24,7 +24,7 @@ const packageBySection = new Map([
 function usage() {
   return [
     "usage:",
-    "  node scripts/compile-with-generated.mjs <compiler.js> <entry.ps> <output.ts>",
+    "  node scripts/compile-with-generated.mjs <compiler.js> <entry.ps> <output.ts|output.js>",
   ].join("\n");
 }
 
@@ -200,13 +200,19 @@ if (process.argv.length < 5) {
 
 const compilerPath = path.resolve(selfhostRoot, process.argv[2]);
 const entryPath = path.resolve(selfhostRoot, process.argv[3]);
-const outputTsPath = path.resolve(selfhostRoot, process.argv[4]);
+const requestedOutputPath = path.resolve(selfhostRoot, process.argv[4]);
+const outputTsPath =
+  requestedOutputPath.endsWith(".js")
+    ? requestedOutputPath.replace(/\.js$/u, ".ts")
+    : requestedOutputPath;
 
 if (!existsSync(compilerPath)) {
   throw new Error(`PSC1_SELFHOST_COMPILER_MISSING: ${compilerPath}`);
 }
 if (!outputTsPath.endsWith(".ts")) {
-  throw new Error(`PSC1_SELFHOST_OUTPUT_KIND: expected .ts, got ${outputTsPath}`);
+  throw new Error(
+    `PSC1_SELFHOST_OUTPUT_KIND: expected .ts or .js, got ${requestedOutputPath}`,
+  );
 }
 
 const project = await flattenProject(entryPath);

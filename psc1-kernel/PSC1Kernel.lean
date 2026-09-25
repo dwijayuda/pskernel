@@ -10,3 +10,4 @@ import PSC1Kernel.TypeChecker
 import PSC1Kernel.Kernel
 import PSC1Kernel.Inductive
 import PSC1Kernel.MutualInductive
+import PSC1Kernel.NestedInductive

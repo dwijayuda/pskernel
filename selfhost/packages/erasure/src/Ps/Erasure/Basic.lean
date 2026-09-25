@@ -243,10 +243,58 @@ def psErasurePrimitiveType
     some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.nat)
-  else if psNameToString name == "Int" then
+  else if psNameEq name psIntName then
     some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.int)
+  else if psNameEq name psUInt8Name then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.uint8)
+  else if psNameEq name psUInt16Name then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.uint16)
+  else if psNameEq name psUInt32Name then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.uint32)
+  else if psNameEq name psUInt64Name then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.uint64)
+  else if psNameEq name psUSizeName then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.usize)
+  else if psNameEq name psInt8Name then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.int8)
+  else if psNameEq name psInt16Name then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.int16)
+  else if psNameEq name psInt32Name then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.int32)
+  else if psNameEq name psInt64Name then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.int64)
+  else if psNameEq name psISizeName then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.isize)
+  else if psNameEq name psFloatName then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.float)
+  else if psNameEq name psFloat32Name then
+    some
+      (PsVerifiedIrType.primitive
+        PsVerifiedIrPrimitiveType.float32)
   else if psNameEq name psBoolName then
     some
       (PsVerifiedIrType.primitive

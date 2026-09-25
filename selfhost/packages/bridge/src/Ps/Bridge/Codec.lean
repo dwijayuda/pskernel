@@ -315,23 +315,23 @@ def psDecodeCodecExprWithFuel :
                     psCodecField value "b" with
                 | Except.ok nameValue,
                   Except.ok typeValue,
-                  Except.ok bodyValue,
-                  Except.ok valueValue =>
+                  Except.ok valueValue,
+                  Except.ok bodyValue =>
                     match
                         psDecodeCodecNameWithFuel fuel nameValue,
                         psDecodeCodecExprWithFuel fuel typeValue,
-                        psDecodeCodecExprWithFuel fuel bodyValue,
-                        psDecodeCodecExprWithFuel fuel valueValue with
+                        psDecodeCodecExprWithFuel fuel valueValue,
+                        psDecodeCodecExprWithFuel fuel bodyValue with
                     | Except.ok name,
                       Except.ok type,
-                      Except.ok body,
-                      Except.ok boundValue =>
+                      Except.ok boundValue,
+                      Except.ok body =>
                         Except.ok
                           (PsExpr.letE
                             name
                             type
-                            body
-                            boundValue)
+                            boundValue
+                            body)
                     | Except.error error, _, _, _ =>
                         Except.error error
                     | _, Except.error error, _, _ =>

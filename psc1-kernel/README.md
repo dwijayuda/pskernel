@@ -63,7 +63,7 @@ lift/instantiation against final Lean 4.34.
 - K4: quotient and recursor reduction. **FOUNDATIONAL SLICE COMPLETE** — checked Lean-4.34-style Quot admission validates the Eq/Eq.refl bootstrap shape, rejects primitive-name collisions, installs all four Quot constants, and is differential-tested against Lean 4.34; quotient lift/ind reduction is wired into WHNF.
 - K5: inductive/nested-inductive admission and generated metadata validation. **IN PROGRESS** — checked ordinary admission covers empty datatypes, exact universe-polymorphic recursor naming, shared parameters, per-type indices, constructor fields, direct and functional strictly-positive recursion, recursive hypotheses/calls, Prop/small-elimination selection, K-target metadata and K-like proof reduction, and ordinary mutual declarations with multiple motives/minors and cross-recursive reduction. Nested preprocessing/restoration is now implemented for non-mutual outer families, including shared-parameter rebasing, auxiliary recursor renaming, removal of published `_nested` auxiliaries, and differential metadata/reduction oracles for both monomorphic and parameterized `Box Tree` shapes. Negative/nested-outer-mutual edge cases remain fail-closed.
 - K6: optional/fail-closed native-reduction boundary. **FOUNDATIONAL SLICE COMPLETE** — `NativeEvaluator` exposes only optional Bool/Nat callbacks; absent/unsupported results stay opaque, and the oracle verifies both successful callbacks and fail-closed behavior.
-- K7: lean4export replay protocol. **IN PROGRESS** — typed replay now covers pinned metadata identity, sparse Name/Level/Expr intern tables, axioms/theorems/opaque/definitions, safe and diagnostic mutual-definition reconstruction, Quot regeneration, and simple/mutual/nested inductive regeneration. The Lean-authored NDJSON boundary rejects duplicate JSON keys and ambiguous record kinds, retains exported constructor/inductive/recursor metadata, and verifies regenerated metadata/rules against the Lean export. CI now generates a live stream with pinned Lean 4.34 `MiniExport.lean` and replays it through PSC1Kernel; the current live gate passes 232 records / 39 names / 4 levels / 180 expressions / 8 declarations, including recursive, polymorphic, and indexed inductives. Canonical Init.Prelude/module-stream replay remains.
+- K7: lean4export replay protocol. **FOUNDATIONAL SLICE COMPLETE** — typed replay covers pinned metadata identity, dense/sequential Name/Level/Expr intern tables, axioms/theorems/opaque/definitions, safe and diagnostic mutual-definition reconstruction, Quot regeneration, and simple/mutual/nested inductive regeneration. The Lean-authored NDJSON boundary rejects duplicate JSON keys and ambiguous record kinds, retains exported constructor/inductive/recursor metadata, and verifies regenerated metadata/rules against the Lean export. CI generates a live pinned-Lean-4.34 stream and replays it through PSC1Kernel, and now also replays the canonical Lean 4.34 `Init.Prelude` fixture end-to-end. Corpus broadening moves to K8.
 - K8: direct/adversarial/Arena/bounded-corpus acceptance matrix.
 - K9: compile the unchanged Lean source through PSC1 to TypeScript/JavaScript.
 - K10: generate canonical `.ps` and require checked-core/IR parity.
@@ -104,8 +104,9 @@ remain rejected.
 `Replay.lean` is the typed protocol/state-machine layer; `ReplayJson.lean`
 is a separate fail-closed NDJSON boundary. Metadata must be the first record and
 must identify final Lean 4.34.0 plus the pinned git hash and format 3.1.0.
-Sparse intern IDs are accepted only when referenced entries already exist, and
-end-of-stream rejects incomplete diagnostic mutual groups.
+Intern tables follow the canonical lean4export sequential/dense discipline and
+reject invalid references or duplicate IDs; end-of-stream rejects incomplete
+diagnostic mutual groups.
 
 For inductive records, replay no longer treats regeneration success as enough.
 Real decoded streams retain Lean's exported inductive, constructor, recursor,
@@ -116,10 +117,12 @@ recursor arities/K/safety, and every rule constructor/field-count/RHS.
 
 The CI gate also exercises the real producer-consumer boundary: pinned Lean
 4.34 compiles `ReplayProbe.lean`, `MiniExport.lean` emits NDJSON, and the
-Lean-authored PSC1 kernel replays that exact output. The gate currently covers
+Lean-authored PSC1 kernel replays that exact output. The live mini stream covers
 `MiniNat`, polymorphic recursive `MiniList`, and parameterized indexed
-`MiniVec` plus ordinary declarations. The next replay closure target is the
-canonical Init.Prelude stream, followed by broader bounded/canonical corpora.
+`MiniVec` plus ordinary declarations. A second mandatory gate replays the
+canonical Lean 4.34 `Init.Prelude` fixture and is green end-to-end. The next
+closure layer is K8: direct/adversarial/Arena and broader bounded corpus
+acceptance rather than more replay-protocol plumbing.
 
 ### WHNF architecture checkpoint
 

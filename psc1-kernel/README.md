@@ -58,7 +58,7 @@ lift/instantiation against final Lean 4.34.
 
 - K0: Name, Level, Expr, substitution/lifting/abstraction.
 - K1: declarations, local context and immutable environment.
-- K2: WHNF and type inference.
+- K2: WHNF and type inference. **IN PROGRESS** — beta/let/fvar/delta plus constructor projection reduction and Lean-4.34-faithful projection typing are implemented; recursor/quotient reduction and full cheap-projection control flow remain.
 - K3: definitional equality and exact reduction ordering.
 - K4: quotient and recursor reduction.
 - K5: inductive/nested-inductive admission and generated metadata validation.

@@ -1,4 +1,5 @@
 import PSC1Kernel.Expr
+import Std.Data.HashMap.Basic
 
 namespace PSC1Kernel
 
@@ -36,7 +37,7 @@ partial def Expr.liftLooseBVars (e : Expr) (start amount : Nat) : Expr :=
 def Expr.lift (e : Expr) (amount : Nat) : Expr :=
   e.liftLooseBVars 0 amount
 
-partial def Expr.instantiateAt
+private partial def Expr.instantiateAtSpec
     (e : Expr) (start : Nat) (subst : List Expr) (offset : Nat) : Expr :=
   match e with
   | .bvar i =>
@@ -49,27 +50,113 @@ partial def Expr.instantiateAt
       | none => .bvar (i - subst.length)
   | .app f a =>
     .app
-      (f.instantiateAt start subst offset)
-      (a.instantiateAt start subst offset)
+      (f.instantiateAtSpec start subst offset)
+      (a.instantiateAtSpec start subst offset)
   | .lam n t b bi =>
     .lam n
-      (t.instantiateAt start subst offset)
-      (b.instantiateAt start subst (offset + 1))
+      (t.instantiateAtSpec start subst offset)
+      (b.instantiateAtSpec start subst (offset + 1))
       bi
   | .forallE n t b bi =>
     .forallE n
-      (t.instantiateAt start subst offset)
-      (b.instantiateAt start subst (offset + 1))
+      (t.instantiateAtSpec start subst offset)
+      (b.instantiateAtSpec start subst (offset + 1))
       bi
   | .letE n t v b nd =>
     .letE n
-      (t.instantiateAt start subst offset)
-      (v.instantiateAt start subst offset)
-      (b.instantiateAt start subst (offset + 1))
+      (t.instantiateAtSpec start subst offset)
+      (v.instantiateAtSpec start subst offset)
+      (b.instantiateAtSpec start subst (offset + 1))
       nd
-  | .mdata m b => .mdata m (b.instantiateAt start subst offset)
-  | .proj n i b => .proj n i (b.instantiateAt start subst offset)
+  | .mdata m b => .mdata m (b.instantiateAtSpec start subst offset)
+  | .proj n i b => .proj n i (b.instantiateAtSpec start subst offset)
   | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => e
+
+private abbrev InstantiateCache := Std.HashMap (USize × Nat) Expr
+
+private unsafe def instantiateCacheKey (e : Expr) (offset : Nat) : USize × Nat :=
+  (ptrAddrUnsafe e, offset)
+
+/--
+Runtime implementation of Lean 4.34-style instantiation.
+
+Lean's kernel routes instantiation through `replace`, which memoizes shared
+nodes by `(expression pointer, binder offset)` and reuses the original node
+when transformed children are pointer-identical. The pure
+`Expr.instantiateAtSpec` above remains the specification; this implementation
+preserves the same result while retaining DAG sharing at runtime.
+-/
+private unsafe def Expr.instantiateAtRuntimeGo
+    (e : Expr)
+    (start : Nat)
+    (subst : List Expr)
+    (offset : Nat)
+    (cache : InstantiateCache) : Expr × InstantiateCache :=
+  let key := instantiateCacheKey e offset
+  match Std.HashMap.get? cache key with
+  | some cached => (cached, cache)
+  | none =>
+      let (result, cache) :=
+        match e with
+        | .bvar i =>
+            let s := start + offset
+            if i < s then
+              (e, cache)
+            else
+              let relative := i - s
+              match listGet? subst relative with
+              | some replacement =>
+                  (replacement.liftLooseBVars 0 offset, cache)
+              | none =>
+                  if subst.isEmpty then
+                    (e, cache)
+                  else
+                    (.bvar (i - subst.length), cache)
+        | .app f a =>
+            let (f', cache) := Expr.instantiateAtRuntimeGo f start subst offset cache
+            let (a', cache) := Expr.instantiateAtRuntimeGo a start subst offset cache
+            let result := if ptrEq f f' && ptrEq a a' then e else .app f' a'
+            (result, cache)
+        | .lam n t b bi =>
+            let (t', cache) := Expr.instantiateAtRuntimeGo t start subst offset cache
+            let (b', cache) := Expr.instantiateAtRuntimeGo b start subst (offset + 1) cache
+            let result := if ptrEq t t' && ptrEq b b' then e else .lam n t' b' bi
+            (result, cache)
+        | .forallE n t b bi =>
+            let (t', cache) := Expr.instantiateAtRuntimeGo t start subst offset cache
+            let (b', cache) := Expr.instantiateAtRuntimeGo b start subst (offset + 1) cache
+            let result := if ptrEq t t' && ptrEq b b' then e else .forallE n t' b' bi
+            (result, cache)
+        | .letE n t v b nd =>
+            let (t', cache) := Expr.instantiateAtRuntimeGo t start subst offset cache
+            let (v', cache) := Expr.instantiateAtRuntimeGo v start subst offset cache
+            let (b', cache) := Expr.instantiateAtRuntimeGo b start subst (offset + 1) cache
+            let result :=
+              if ptrEq t t' && ptrEq v v' && ptrEq b b' then e
+              else .letE n t' v' b' nd
+            (result, cache)
+        | .mdata m b =>
+            let (b', cache) := Expr.instantiateAtRuntimeGo b start subst offset cache
+            (if ptrEq b b' then e else .mdata m b', cache)
+        | .proj n i b =>
+            let (b', cache) := Expr.instantiateAtRuntimeGo b start subst offset cache
+            (if ptrEq b b' then e else .proj n i b', cache)
+        | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ =>
+            (e, cache)
+      (result, Std.HashMap.insert cache key result)
+
+private unsafe def Expr.instantiateAtRuntime
+    (e : Expr) (start : Nat) (subst : List Expr) (offset : Nat) : Expr :=
+  if subst.isEmpty then
+    e
+  else
+    let cache : InstantiateCache := Std.HashMap.emptyWithCapacity 64
+    (Expr.instantiateAtRuntimeGo e start subst offset cache).1
+
+@[implemented_by Expr.instantiateAtRuntime]
+partial def Expr.instantiateAt
+    (e : Expr) (start : Nat) (subst : List Expr) (offset : Nat) : Expr :=
+  e.instantiateAtSpec start subst offset
 
 def Expr.instantiate (e : Expr) (subst : List Expr) : Expr :=
   e.instantiateAt 0 subst 0

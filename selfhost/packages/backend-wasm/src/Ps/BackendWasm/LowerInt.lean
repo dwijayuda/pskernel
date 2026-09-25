@@ -42,6 +42,18 @@ def psWasmNormalizeMachineInteger :
   | .int16 => [PsWasmInstruction.i32Extend16S]
   | _ => []
 
+def psWasmLowerMachineIntegerLiteral
+    (profile : PsWasmTargetProfile)
+    (type : PsVerifiedIrMachineIntegerType)
+    (value : Int) :
+    List PsWasmInstruction :=
+  let constant :=
+    if psWasmMachineIntegerIs64 profile type then
+      PsWasmInstruction.i64Const value
+    else
+      PsWasmInstruction.i32Const value
+  constant :: psWasmNormalizeMachineInteger type
+
 def psWasmMachineIntegerBinaryInstruction
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrMachineIntegerType)

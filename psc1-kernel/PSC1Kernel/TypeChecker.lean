@@ -203,7 +203,7 @@ partial def reduceNat
     (e : Expr) : Except String (Option Expr) :=
   match e with
   | .app (.const name levels) arg =>
-    if levels.length == 0 && Name.eq name kernelNatSuccName then
+    if levels.length == 0 && Name.eq name kernelNatSuccName then do
       let arg' ← whnf ctx arg
       match natLiteralValue? arg' with
       | some value => .ok (some (.lit (.nat (value + 1))))
@@ -211,7 +211,7 @@ partial def reduceNat
     else
       .ok none
   | .app (.app (.const name levels) left) right =>
-    if levels.length == 0 then
+    if levels.length == 0 then do
       let left' ← whnf ctx left
       let right' ← whnf ctx right
       match natLiteralValue? left', natLiteralValue? right' with

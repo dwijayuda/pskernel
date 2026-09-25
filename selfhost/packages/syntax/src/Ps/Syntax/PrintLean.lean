@@ -35,7 +35,7 @@ def psPrintLeanTermWithFuel :
   | remaining + 1 =>
       let smaller :
           PsSyntaxTerm -> Except PsSourcePrintError String :=
-        smaller;
+        psPrintLeanTermWithFuel remaining;
       fun (term : PsSyntaxTerm) =>
       match term with
       | .reference name =>
@@ -163,10 +163,7 @@ def psPrintLeanTermWithFuel :
                 match type with
                 | none => Except.ok ""
                 | some declaredType =>
-                    match
-                        psPrintLeanTermWithFuel
-                          remaining
-                          declaredType with
+                    match smaller declaredType with
                     | Except.error error => Except.error error
                     | Except.ok printed =>
                         Except.ok (psPrintLeanConcat2 " : " printed);

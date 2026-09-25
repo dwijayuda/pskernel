@@ -395,7 +395,10 @@ def psJsonTakeDigits
 def psJsonParseNumber
     (chars : List Char) :
     Except PsJsonParseError PsJsonParseResult :=
-  let parseUnsigned :=
+  let parseUnsigned :
+      Bool ->
+        List Char ->
+          Except PsJsonParseError PsJsonParseResult :=
     fun (negative : Bool) (rest : List Char) =>
       let taken := psJsonTakeDigits rest List.nil;
       let digits := Prod.fst taken;

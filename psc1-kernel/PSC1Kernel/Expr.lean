@@ -45,11 +45,38 @@ def Level.listEq : List Level → List Level → Bool
   | a :: as, b :: bs => Level.eq a b && Level.listEq as bs
   | _, _ => false
 
+private unsafe partial def exprEqImpl (left right : Expr) : Bool :=
+  if ptrEq left right then
+    true
+  else
+    match left, right with
+    | .bvar a, .bvar b => a == b
+    | .fvar a, .fvar b => Name.eq a b
+    | .mvar a, .mvar b => Name.eq a b
+    | .sort a, .sort b => Level.eq a b
+    | .const n₁ ls₁, .const n₂ ls₂ => Name.eq n₁ n₂ && Level.listEq ls₁ ls₂
+    | .app f₁ a₁, .app f₂ a₂ => exprEqImpl f₁ f₂ && exprEqImpl a₁ a₂
+    | .lam _ t₁ b₁ _, .lam _ t₂ b₂ _ =>
+      exprEqImpl t₁ t₂ && exprEqImpl b₁ b₂
+    | .forallE _ t₁ b₁ _, .forallE _ t₂ b₂ _ =>
+      exprEqImpl t₁ t₂ && exprEqImpl b₁ b₂
+    | .letE _ t₁ v₁ b₁ d₁, .letE _ t₂ v₂ b₂ d₂ =>
+      exprEqImpl t₁ t₂ && exprEqImpl v₁ v₂ && exprEqImpl b₁ b₂ && d₁ == d₂
+    | .lit a, .lit b => Literal.eq a b
+    | .mdata m₁ e₁, .mdata m₂ e₂ => m₁ == m₂ && exprEqImpl e₁ e₂
+    | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
+      Name.eq n₁ n₂ && i₁ == i₂ && exprEqImpl e₁ e₂
+    | _, _ => false
+
 /--
 Lean 4.34 `Expr.eqv`-compatible structural equality. Binder display names and
 binder annotations on lambda/forall/let nodes are deliberately ignored; they
 are not part of kernel alpha-equivalence. Metadata payloads remain structural.
+
+The logical definition stays purely structural. The compiled implementation
+adds Lean's sound pointer-identity shortcut for shared expression subgraphs.
 -/
+@[implemented_by exprEqImpl]
 partial def Expr.eq : Expr → Expr → Bool
   | .bvar a, .bvar b => a == b
   | .fvar a, .fvar b => Name.eq a b

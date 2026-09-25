@@ -49,7 +49,7 @@ partial def psNatToString (value : Nat) : String :=
         (Char.ofNat
           (Nat.add 48 (Nat.mod value 10))))
 
-partial def psNameEq (left : PsName) : PsName -> Bool :=
+def psNameEq (left : PsName) : PsName -> Bool :=
   match left with
   | PsName.anonymous =>
       fun (right : PsName) =>

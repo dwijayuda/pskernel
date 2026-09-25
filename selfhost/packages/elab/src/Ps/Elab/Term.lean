@@ -431,11 +431,16 @@ def psElabBool
     (value : Bool)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let name := if value then psBoolTrueName else psBoolFalseName;
-  psElabResolvedTerm
-    context
-    (PsExpr.constE name [])
-    expected
+  if value then
+    psElabResolvedTerm
+      context
+      (PsExpr.constE psBoolTrueName [])
+      expected
+  else
+    psElabResolvedTerm
+      context
+      (PsExpr.constE psBoolFalseName [])
+      expected
 
 structure PsElabTypedBinder where
   id : Nat

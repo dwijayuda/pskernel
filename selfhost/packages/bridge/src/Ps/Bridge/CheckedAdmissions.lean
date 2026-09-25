@@ -405,16 +405,19 @@ def psBridgeFindRegularHeight
         else
           smaller name
 
-def psBridgeNatMax (left right : Nat) : Nat :=
+def psBridgeNatMax (left : Nat) : Nat -> Nat :=
   match left with
   | Nat.zero =>
-      right
+      fun (right : Nat) => right
   | Nat.succ leftPred =>
-      match right with
-      | Nat.zero =>
-          left
-      | Nat.succ rightPred =>
-          Nat.succ (psBridgeNatMax leftPred rightPred)
+      let smaller : Nat -> Nat :=
+        psBridgeNatMax leftPred;
+      fun (right : Nat) =>
+        match right with
+        | Nat.zero =>
+            left
+        | Nat.succ rightPred =>
+            Nat.succ (smaller rightPred)
 
 def psBridgeExprMaxRegularHeight
     (heights : List (PsName × Nat)) : PsExpr -> Nat

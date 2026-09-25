@@ -42,6 +42,8 @@ def decodedJsonKey (token : String) : Except String String := do
   | .ok _ => throw "JSON object key did not decode as a string"
   | .error err => throw ("invalid JSON object key: " ++ err)
 
+mutual
+
 partial def scanJsonValue : List Char → Except String (List Char)
   | input => do
       let input := skipJsonWs input
@@ -95,6 +97,8 @@ partial def scanJsonArray
       | ',' :: rest => scanJsonArray rest
       | ']' :: rest => pure rest
       | _ => throw "expected ',' or ']' after JSON array value"
+
+end
 
 def validateNoDuplicateJsonKeys (raw : String) : Except String Unit := do
   let rest ← scanJsonValue raw.toList

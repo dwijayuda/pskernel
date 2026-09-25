@@ -1096,7 +1096,7 @@ partial def typeCheckerExprDiffAt
         some (path ++ ": " ++ typeCheckerExprHead left ++
           " != " ++ typeCheckerExprHead right)
 
-def typeCheckerExprDiff (left right : Expr) : String :=
+partial def typeCheckerExprDiff (left right : Expr) : String :=
   (typeCheckerExprDiffAt "root" left right).getD "no structural difference"
 
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=

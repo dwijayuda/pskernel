@@ -52,24 +52,6 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
       PsExpr.app
         (PsExpr.app (PsExpr.constE psProdName []) alpha)
         beta
-  let prodMkType :=
-    PsExpr.forallE
-      alphaName
-      typeType
-      (PsExpr.forallE
-        betaName
-        typeType
-        (PsExpr.forallE
-          firstName
-          (PsExpr.bvar 1)
-          (PsExpr.forallE
-            secondName
-            (PsExpr.bvar 1)
-            (prodOf (PsExpr.bvar 3) (PsExpr.bvar 2))
-            PsBinderInfo.explicit)
-          PsBinderInfo.explicit)
-        PsBinderInfo.implicit)
-      PsBinderInfo.implicit
   let prodFstType :=
     PsExpr.forallE
       alphaName
@@ -664,15 +646,12 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
       (PsDeclaration.axiomDecl psProdName [] prodType)
   let envProd1 :=
     psPreludeAdd envProd0
-      (PsDeclaration.axiomDecl psProdMkName [] prodMkType)
+      (PsDeclaration.axiomDecl psProdFstName [] prodFstType)
   let envProd2 :=
     psPreludeAdd envProd1
-      (PsDeclaration.axiomDecl psProdFstName [] prodFstType)
-  let envProd3 :=
-    psPreludeAdd envProd2
       (PsDeclaration.axiomDecl psProdSndName [] prodSndType)
   let envArray0 :=
-    psPreludeAdd envProd3
+    psPreludeAdd envProd2
       (PsDeclaration.axiomDecl psArrayName [] arrayType)
   let envArray1 :=
     psPreludeAdd envArray0

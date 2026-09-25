@@ -1,4 +1,5 @@
 import PSC1Kernel
+import PSC1Kernel.Test.NativeMap
 
 open PSC1Kernel
 
@@ -40,7 +41,10 @@ def finishReplaySegment
 
 partial def replaySegmentedLinesFrom
     (base : Environment)
-    (lines : List String) :
+    (lines : List String)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) :
     Except String (Environment × ReplayTotals) := do
   let rec go
       (shared : Environment)
@@ -61,13 +65,13 @@ partial def replaySegmentedLinesFrom
         else if isReplaySegmentMarker trimmed then
           let (shared', totals') ←
             finishReplaySegment shared current totals
-          go shared' (some (Replay.State.empty shared')) totals'
+          go shared' (some (Replay.State.empty shared maxRecDepth maxNatSize nativeEvaluator' maxRecDepth maxNatSize nativeEvaluator)) totals'
             (lineNo + 1) rest
         else
           let state :=
             match current with
             | some value => value
-            | none => Replay.State.empty shared
+            | none => Replay.State.empty shared maxRecDepth maxNatSize nativeEvaluator
           let next ←
             match ReplayJson.replayLine state line with
             | .ok value => pure value
@@ -83,9 +87,14 @@ def replaySegmentedLines
 
 def replayFileFrom
     (base : Environment)
-    (path : String) : IO (Environment × ReplayTotals) := do
+    (path : String)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) :
+    IO (Environment × ReplayTotals) := do
   let content ← IO.FS.readFile path
-  match replaySegmentedLinesFrom base (content.splitOn "\n") with
+  match replaySegmentedLinesFrom
+      base (content.splitOn "\n") maxRecDepth maxNatSize nativeEvaluator with
   | .ok value => pure value
   | .error err =>
       throw <| IO.userError (
@@ -96,13 +105,17 @@ def printReplayTotals (path : String) (totals : ReplayTotals) : IO Unit :=
 
 partial def replayTargets
     (base : Environment)
-    (paths : List String) : IO Unit := do
+    (paths : List String)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : IO Unit := do
   match paths with
   | [] => pure ()
   | path :: rest => do
-      let (_, totals) ← replayFileFrom base path
+      let (_, totals) ←
+        replayFileFrom base path maxRecDepth maxNatSize nativeEvaluator
       printReplayTotals path totals
-      replayTargets base rest
+      replayTargets base rest maxRecDepth maxNatSize nativeEvaluator
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -112,7 +125,21 @@ def main (args : List String) : IO Unit := do
   | "--base" :: basePath :: target :: rest => do
       let (baseEnv, _) ← replayFileFrom .empty basePath
       replayTargets baseEnv (target :: rest)
+  | ["--native-map", mapPath, path] => do
+      let provider ← PSC1Kernel.Test.loadNativeMap mapPath
+      let (_, totals) ←
+        replayFileFrom .empty path 0 leanNatMaxSizeDefault (some provider)
+      printReplayTotals path totals
+  | "--native-map" :: mapPath :: "--base" :: basePath :: target :: rest => do
+      let provider ← PSC1Kernel.Test.loadNativeMap mapPath
+      let (baseEnv, _) ←
+        replayFileFrom .empty basePath 0 leanNatMaxSizeDefault (some provider)
+      replayTargets
+        baseEnv (target :: rest) 0 leanNatMaxSizeDefault (some provider)
   | _ =>
       throw <| IO.userError (
         "usage: ReplayFile <lean4export.ndjson> | " ++
-        "ReplayFile --base <base.ndjson> <delta.ndjson> [delta.ndjson ...]")
+        "ReplayFile --base <base.ndjson> <delta.ndjson> [delta.ndjson ...] | " ++
+        "ReplayFile --native-map <native.tsv> <lean4export.ndjson> | " ++
+        "ReplayFile --native-map <native.tsv> --base <base.ndjson> " ++
+        "<delta.ndjson> [delta.ndjson ...]")

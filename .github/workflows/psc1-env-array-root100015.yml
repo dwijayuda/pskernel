@@ -1,9 +1,9 @@
-name: PSC1 env array root 100015
+name: PSC1 env array 4096 root 100015
 
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-env-array-index]
+    branches: [perf/psc1-env-array-4096]
     paths:
       - ".github/workflows/psc1-env-array-root100015.yml"
       - "scripts/psc1-lean-std-release-profile.mjs"

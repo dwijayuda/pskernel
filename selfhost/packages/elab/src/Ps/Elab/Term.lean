@@ -1973,7 +1973,8 @@ def psElabTakeForallNames
 def psSyntaxRecordFieldName
     (field : Prod PsSyntaxName PsSyntaxTerm) :
     Option String :=
-  match List.reverse (Prod.fst field).segments with
+  let syntaxName := Prod.fst field;
+  match List.reverse syntaxName.segments with
   | [] => none
   | name :: _ => some name
 

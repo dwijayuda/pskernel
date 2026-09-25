@@ -1,3 +1,4 @@
+import Init.ShareCommon
 import PSC1Kernel.Quot
 
 namespace PSC1Kernel
@@ -186,7 +187,8 @@ def addTheorem
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
   let valueType ← check ctx value.value
-  unless ← isDefEq ctx valueType value.base.type do
+  let compared := ShareCommon.shareCommon' (valueType, value.base.type)
+  unless ← isDefEq ctx compared.1 compared.2 do
     throw "theorem proof type mismatch"
   env.add (.thmInfo value)
 

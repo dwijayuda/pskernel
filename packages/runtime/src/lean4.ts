@@ -669,6 +669,44 @@ export interface Lean434EvaluatorExternBinding {
   readonly upstreamSource:string;
 }
 
+export type Lean434EvaluatorIntrinsicAdapter=
+  |'instantiate-mvars-core';
+
+export interface Lean434EvaluatorIntrinsicBinding {
+  readonly leanDeclaration:string;
+  readonly arity:number;
+  readonly adapter:Lean434EvaluatorIntrinsicAdapter;
+  readonly upstreamSource:string;
+}
+
+/**
+ * Lean definitions whose source bodies are semantically just runtime/monad
+ * plumbing around evaluator externs. They remain ordinary pskernel-checked
+ * declarations; this table only selects an equivalent executable path.
+ */
+export const LEAN434_JS_EVALUATOR_INTRINSIC_BINDINGS:
+readonly Lean434EvaluatorIntrinsicBinding[]=[
+  {
+    leanDeclaration:'Lean.instantiateMVarsCore',
+    arity:2,
+    adapter:'instantiate-mvars-core',
+    upstreamSource:'Lean/MetavarContext.lean',
+  },
+] as const;
+
+const evaluatorIntrinsicByDeclaration=new Map(
+  LEAN434_JS_EVALUATOR_INTRINSIC_BINDINGS.map(
+    (entry)=>[entry.leanDeclaration,entry] as const,
+  ),
+);
+
+export function findLean434EvaluatorIntrinsicForDeclaration(
+  leanDeclaration:string,
+):Lean434EvaluatorIntrinsicBinding|undefined{
+  return evaluatorIntrinsicByDeclaration.get(leanDeclaration);
+}
+
+
 /**
  * Native Lean externs whose executable semantics require the active evaluator
  * and its replayed Environment. They are deliberately separate from ordinary

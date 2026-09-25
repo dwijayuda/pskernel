@@ -441,9 +441,9 @@ def psElabInductiveConstructor
           source.fields with
       | Except.error error => Except.error error
       | Except.ok fields =>
-          let metaContext := fields.context.metaContext
+          let metaContext := fields.context.metaContext;
           let parameterArgs :=
-            psElabBinderArguments parameterBindersRev
+            psElabBinderArguments parameterBindersRev;
           match
               psElabRecursiveFieldIndices
                 fields.context
@@ -457,17 +457,17 @@ def psElabInductiveConstructor
               let appliedInductive :=
                 psExprApplyMany
                   (PsExpr.constE inductiveName [])
-                  parameterArgs
+                  parameterArgs;
               let fieldClosed :=
                 psCloseElabForallBinders
                   metaContext
                   fields.bindersRev
-                  appliedInductive
+                  appliedInductive;
               let constructorType :=
                 psCloseElabImplicitBinders
                   metaContext
                   parameterBindersRev
-                  fieldClosed
+                  fieldClosed;
               if psExprHasUnresolvedMeta constructorType then
                 Except.error PsElabError.unresolvedMetavariable
               else

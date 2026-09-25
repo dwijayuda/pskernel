@@ -2112,6 +2112,7 @@ def psWasmLowerSpecializedModule
                           ++ inductiveTypes
                           ++ closureSignatures.1
                           ++ lowered.state.generatedStructures
+                      arrays := []
                       functionTypes :=
                         closureSignatures.2
                           ++ lowered.state.generatedFunctionTypes

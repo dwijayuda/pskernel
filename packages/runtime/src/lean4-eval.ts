@@ -10,6 +10,7 @@ import {
 } from 'lean-ts-kernel';
 import {
   findLean434EvaluatorExternForDeclaration,
+  findLean434EvaluatorIntrinsicForDeclaration,
   findLean434JsExternForDeclaration,
   findLean434JsImplementedBy,
   findLean434JsIntrinsic,
@@ -18,6 +19,7 @@ import {
   invokeLean434JsIntrinsic,
   type Lean434DeclarationExternBinding,
   type Lean434EvaluatorExternBinding,
+  type Lean434EvaluatorIntrinsicBinding,
   LeanRef,
 } from './lean4.js';
 import type {
@@ -927,6 +929,38 @@ export class Lean434Evaluator {
     };
   }
 
+  private invokeEvaluatorIntrinsic(
+    binding:Lean434EvaluatorIntrinsicBinding,
+    args:readonly Lean434RuntimeValue[],
+  ):Lean434RuntimeValue{
+    if(args.length!==binding.arity){
+      throw new Lean434EvaluationError(
+        "evaluator intrinsic arity mismatch for '"+
+        binding.leanDeclaration+"'",
+      );
+    }
+    switch(binding.adapter){
+      case 'instantiate-mvars-core':{
+        const native=this.instantiateExprMVarsNative(args[0]!,args[1]!);
+        if(
+          !isTaggedRuntimeValue(native)
+          ||native.kind!=='constructor'
+          ||native.name!=='Prod.mk'
+          ||native.fields.length!==2
+        ){
+          throw new Lean434EvaluationError(
+            'instantiateExprMVars native adapter returned malformed pair',
+          );
+        }
+        return {
+          kind:'constructor',
+          name:'Prod.mk',
+          fields:[native.fields[1]!,native.fields[0]!],
+        };
+      }
+    }
+  }
+
   private invokeEvaluatorExtern(
     binding:Lean434EvaluatorExternBinding,
     args:readonly Lean434RuntimeValue[],
@@ -958,6 +992,19 @@ export class Lean434Evaluator {
 
     if(this.runtimeGlobals.has(name)){
       return this.runtimeGlobals.get(name)!;
+    }
+
+    const evaluatorIntrinsic=
+      findLean434EvaluatorIntrinsicForDeclaration(name);
+    if(evaluatorIntrinsic!==undefined){
+      return primitive(
+        name,
+        evaluatorIntrinsic.arity,
+        (args)=>this.invokeEvaluatorIntrinsic(
+          evaluatorIntrinsic,
+          args,
+        ),
+      );
     }
 
     const intrinsic=findLean434JsIntrinsic(name);

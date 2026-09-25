@@ -870,6 +870,192 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                 ]
             ]
       }
+,
+      {
+        name := "natAddLargeExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natAdd
+                []
+                [
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 1208925819614629174706176),
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 1)
+                ],
+              PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 1208925819614629174706177)
+            ]
+      },
+      {
+        name := "natSubFloorsAtZero"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natSub
+                []
+                [
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 20),
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 22)
+                ],
+              PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 0)
+            ]
+      },
+      {
+        name := "natMulExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natMul
+                []
+                [
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 6),
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 7)
+                ],
+              PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 42)
+            ]
+      },
+      {
+        name := "natDivExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natDiv
+                []
+                [
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 100),
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 7)
+                ],
+              PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 14)
+            ]
+      },
+      {
+        name := "natModExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natMod
+                []
+                [
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 100),
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 7)
+                ],
+              PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 2)
+            ]
+      },
+      {
+        name := "natDivZero"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natDiv
+                []
+                [
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 42),
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 0)
+                ],
+              PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 0)
+            ]
+      },
+      {
+        name := "natModZero"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natMod
+                []
+                [
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 42),
+                  PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 0)
+                ],
+              PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 42)
+            ]
+      },
+      {
+        name := "natLtExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natLt
+            []
+            [
+              PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 41),
+              PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.natural 42)
+            ]
+      }
     ]
   }
 

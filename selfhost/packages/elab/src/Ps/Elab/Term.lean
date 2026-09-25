@@ -1315,19 +1315,18 @@ def psElabPushRecursiveHypotheses
                 psElabContextWithStructuralRecursion
                   withLocal
                   (Option.some nextRecursion);
+          let hypothesis : PsElabMatchField := {
+            id := pushed.id
+            name := hypothesisName
+            type := expectedType
+            binder := PsBinderInfo.explicit
+          };
           psElabPushRecursiveHypotheses
             expectedType
             fields
             rest
             withRecursion
-            (List.cons
-              {
-                id := pushed.id
-                name := hypothesisName
-                type := expectedType
-                binder := PsBinderInfo.explicit
-              }
-              hypothesesRev)
+            (List.cons hypothesis hypothesesRev)
 
 def psCloseElabMatchFields
     (metaContext : PsMetaContext)
@@ -1361,11 +1360,14 @@ def psElabWildcardBinderNames
   | 0 =>
       []
   | nextRemaining + 1 =>
+      let segment :=
+        String.Internal.append "_wild" (toString index);
+      let syntaxName : PsSyntaxName := {
+        segments := List.cons segment List.nil
+        span := span
+      };
       List.cons
-        {
-          segments := ["_wild" ++ toString index]
-          span := span
-        }
+        syntaxName
         (psElabWildcardBinderNames
           span
           (Nat.succ index)
@@ -1571,7 +1573,7 @@ def psElabMatchMinors
               | Except.ok tail =>
                   Except.ok {
                     context := tail.context
-                    minors := minor.term :: tail.minors
+                    minors := List.cons minor.term tail.minors
                   }
 
 def psElabMatch
@@ -1690,15 +1692,24 @@ def psElabMatch
                                                 scrutineeType
                                                 instantiatedExpected
                                                 PsBinderInfo.explicit;
+                                            let recursorTail :=
+                                              List.append
+                                                minors.minors
+                                                (List.cons
+                                                  scrutineeResult.term
+                                                  List.nil);
+                                            let recursorArgs :=
+                                              List.append
+                                                typeView.args
+                                                (List.cons
+                                                  motive
+                                                  recursorTail);
                                             let recursorTerm :=
                                               psExprApplyMany
                                                 (PsExpr.constE
                                                   recursorName
                                                   recursorLevels)
-                                                (typeView.args
-                                                  ++ [motive]
-                                                  ++ minors.minors
-                                                  ++ [scrutineeResult.term]);
+                                                recursorArgs;
                                             psElabResolvedTerm
                                               minors.context
                                               recursorTerm

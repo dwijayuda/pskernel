@@ -28,6 +28,19 @@ def findExprMap?
     (id : Lean.MVarId) : Option Lean.Expr :=
   m.find? id
 
+def insertDelayedExprAssignment
+    (m : Lean.MetavarContext)
+    (id : Lean.MVarId)
+    (fvars : Array Lean.Expr)
+    (pending : Lean.MVarId) : Lean.MetavarContext :=
+  {
+    m with
+    dAssignment := m.dAssignment.insert id {
+      fvars
+      mvarIdPending := pending
+    }
+  }
+
 def firstBucketIndex
     (id : Lean.MVarId) : Nat :=
   let h := hash id |>.toUSize

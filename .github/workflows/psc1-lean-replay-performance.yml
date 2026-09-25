@@ -1,0 +1,52 @@
+name: PSC1 Lean replay performance
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [performance/psc1-lean-replay]
+    paths:
+      - ".github/workflows/psc1-lean-replay-performance.yml"
+      - "psc1-kernel/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-lean-replay-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  replay-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Build library and replay executable
+        working-directory: psc1-kernel
+        run: lake build PSC1Kernel psc1_replay
+
+      - name: Baseline interpreted replay
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'interpreted_seconds=%e max_rss_kib=%M' \
+            lake env lean --run PSC1Kernel/Test/ReplayFile.lean \
+            ../oracle/fixtures/lean434-std-sat-cnf-roots.ndjson
+
+      - name: Compiled replay
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'compiled_seconds=%e max_rss_kib=%M' \
+            .lake/build/bin/psc1_replay \
+            ../oracle/fixtures/lean434-std-sat-cnf-roots.ndjson

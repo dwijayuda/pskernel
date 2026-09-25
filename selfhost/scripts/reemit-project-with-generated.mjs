@@ -45,10 +45,18 @@ if (!existsSync(compilerPath)) {
   throw new Error(`PSC1_SELFHOST_COMPILER_MISSING: ${compilerPath}`);
 }
 
-const manifestPath = path.join(inputWorkspace, ".proofscript-bootstrap.json");
-if (!existsSync(manifestPath)) {
-  throw new Error(`PSC1_SELFHOST_MANIFEST_MISSING: ${manifestPath}`);
+const manifestCandidates = [
+  ".proofscript-bootstrap.json",
+  ".proofscript-selfhost.json",
+  ".proofscript-project.json",
+];
+const manifestName = manifestCandidates.find((name) =>
+  existsSync(path.join(inputWorkspace, name)),
+);
+if (!manifestName) {
+  throw new Error(`PSC1_SELFHOST_MANIFEST_MISSING: ${inputWorkspace}`);
 }
+const manifestPath = path.join(inputWorkspace, manifestName);
 
 const compiler = await import(pathToFileURL(compilerPath).href);
 if (

@@ -353,51 +353,78 @@ def psElabNestedRecursiveFieldTypeSupported
     inductiveName
     type
 
-def psElabRecursiveFieldIndices
+def psElabReverseNatListAcc
+    (values : List Nat) : List Nat -> List Nat :=
+  match values with
+  | List.nil =>
+      fun (acc : List Nat) => acc
+  | List.cons head tail =>
+      let smaller : List Nat -> List Nat :=
+        psElabReverseNatListAcc tail;
+      fun (acc : List Nat) =>
+        smaller (List.cons head acc)
+
+def psElabReverseNatList (values : List Nat) : List Nat :=
+  psElabReverseNatListAcc values List.nil
+
+def psElabRecursiveFieldIndicesWorker
     (context : PsElabContext)
     (inductiveName : PsName)
-    (parameterArgs : List PsExpr) :
-    List PsElabTypedBinder ->
+    (parameterArgs : List PsExpr)
+    (fields : List PsElabTypedBinder) :
     Nat ->
     List Nat ->
-    Except PsElabError (List Nat)
-  | [], _, indicesRev => Except.ok indicesRev.reverse
-  | field :: rest, index, indicesRev =>
-      let direct :=
-        psElabIsDirectRecursiveField
+    Except PsElabError (List Nat) :=
+  match fields with
+  | List.nil =>
+      fun (_index : Nat) (indicesRev : List Nat) =>
+        Except.ok (psElabReverseNatList indicesRev)
+  | List.cons field rest =>
+      let smaller :
+          Nat ->
+          List Nat ->
+          Except PsElabError (List Nat) :=
+        psElabRecursiveFieldIndicesWorker
           context
           inductiveName
           parameterArgs
-          field.type
-      if direct then
-        psElabRecursiveFieldIndices
-          context
-          inductiveName
-          parameterArgs
-          rest
-          (index + 1)
-          (index :: indicesRev)
-      else if psExprHasConst inductiveName field.type then
-        if psElabNestedRecursiveFieldTypeSupported
-            inductiveName
-            field.type then
-          psElabRecursiveFieldIndices
+          rest;
+      fun (index : Nat) (indicesRev : List Nat) =>
+        let direct :=
+          psElabIsDirectRecursiveField
             context
             inductiveName
             parameterArgs
-            rest
-            (index + 1)
-            indicesRev
+            field.type;
+        if direct then
+          smaller
+            (Nat.succ index)
+            (List.cons index indicesRev)
+        else if psExprHasConst inductiveName field.type then
+          if psElabNestedRecursiveFieldTypeSupported
+              inductiveName
+              field.type then
+            smaller (Nat.succ index) indicesRev
+          else
+            Except.error PsElabError.unsupportedTerm
         else
-          Except.error PsElabError.unsupportedTerm
-      else
-        psElabRecursiveFieldIndices
-          context
-          inductiveName
-          parameterArgs
-          rest
-          (index + 1)
-          indicesRev
+          smaller (Nat.succ index) indicesRev
+
+def psElabRecursiveFieldIndices
+    (context : PsElabContext)
+    (inductiveName : PsName)
+    (parameterArgs : List PsExpr)
+    (fields : List PsElabTypedBinder)
+    (index : Nat)
+    (indicesRev : List Nat) :
+    Except PsElabError (List Nat) :=
+  psElabRecursiveFieldIndicesWorker
+    context
+    inductiveName
+    parameterArgs
+    fields
+    index
+    indicesRev
 
 def psElabInductiveConstructor
     (context : PsElabContext)

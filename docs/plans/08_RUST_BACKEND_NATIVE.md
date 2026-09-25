@@ -164,10 +164,12 @@ As of the current branch checkpoint:
   projection;
 - generic zero-parameter declarations are rejected consistently with backend-ts
   rather than being silently reinterpreted as generic Rust functions;
-- function-valued declaration results are currently fail-closed because a Rust
-  `fn(...)` pointer cannot represent a capturing returned closure. Supporting
-  returned/stored capturing closures requires an explicit ownership/runtime
-  representation and is not approximated by the backend;
+- direct first-order callback parameters are supported as Rust `impl Fn`;
+  function-valued declaration results, stored function values, and nested
+  higher-order parameter shapes are fail-closed because Rust `fn(...)`
+  pointers cannot represent arbitrary capturing closures. Supporting those
+  shapes requires an explicit ownership/runtime representation and is not
+  approximated by the backend;
 - the reusable R3 compiler-IR coverage census is wired into CI and is
   fail-closed: it reports an explicit unsupported set and the real-compiler
   gate requires `PSC1_RUST_COVERAGE_UNSUPPORTED_COUNT: 0` before Rust
@@ -219,8 +221,9 @@ through backend-rust. Unsupported constructs must fail explicitly rather than
 silently using different semantics.
 
 The census currently treats external imports, unknown runtime types, traversal
-fuel exhaustion, generic top-level values, and function-valued declaration
-results as explicit blockers. If the real compiler census reaches one of these,
+fuel exhaustion, generic top-level values, function-valued declaration
+results, stored function values, and nested higher-order parameter shapes as
+explicit blockers. If the real compiler census reaches one of these,
 the next step is either a target-neutral/shared semantic change or a deliberate
 Rust representation that preserves the existing CompilerIR meaning—not a
 backend-specific semantic shortcut.

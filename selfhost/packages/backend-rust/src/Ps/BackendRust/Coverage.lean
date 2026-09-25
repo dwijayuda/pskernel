@@ -364,7 +364,7 @@ def psRustCoverageExprWithFuel :
             visitNested
             arguments
             withIntrinsic
-      | PsVerifiedIrExpr.lambda parameters body =>
+      | PsVerifiedIrExpr.lambda parameters resultType body =>
           let withLambda :=
             psRustCoverageAddFeature
               coverage
@@ -373,9 +373,22 @@ def psRustCoverageExprWithFuel :
             psRustCoverageLambdaParameterList
               withLambda
               parameters;
+          let withResultSupport :=
+            if psRustTypeContainsFunction resultType then
+              psRustCoverageAddUnsupported
+                (psRustCoverageAddFeature
+                  withParameterTypes
+                  "expr:lambdaFunctionResult")
+                "expr:lambdaFunctionResult"
+            else
+              withParameterTypes;
+          let withResultType :=
+            psRustCoverageType
+              withResultSupport
+              resultType;
           psRustCoverageExprWithFuel
             fuel
-            withParameterTypes
+            withResultType
             body
       | PsVerifiedIrExpr.call fn typeArguments arguments =>
           let withCall :=

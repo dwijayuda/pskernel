@@ -8,6 +8,7 @@ on:
       - integrate/wasm3-owned
       - backend/wasm3-gc-adts
       - backend/wasm3-closures
+      - backend/wasm3-runtime
       - compiler-ir/generic-specialization
       - integrate/generic-specialization
       - integrate/wasm3-closures

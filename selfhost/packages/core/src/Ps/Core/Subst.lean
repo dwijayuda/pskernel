@@ -1,6 +1,7 @@
 import Ps.Core.Expr
 
-def psExprLiftBVars (amount : Nat) (cutoff : Nat) : PsExpr -> PsExpr
+def psExprLiftBVars (amount : Nat) (cutoff : Nat) (expr : PsExpr) : PsExpr :=
+  match expr with
   | .bvar index =>
       if Nat.ble cutoff index then
         PsExpr.bvar (Nat.add index amount)

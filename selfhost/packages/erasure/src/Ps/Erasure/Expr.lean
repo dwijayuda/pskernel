@@ -192,8 +192,18 @@ def psEraseFinishApplicationWithFuel
           match parametersRev.reverse with
           | [] => Except.ok body
           | parameters =>
-              Except.ok
-                (PsVerifiedIrExpr.lambda parameters body)
+              match
+                  psEraseRuntimeType
+                    environment
+                    scope
+                    functionType with
+              | Except.error error => Except.error error
+              | Except.ok resultType =>
+                  Except.ok
+                    (PsVerifiedIrExpr.lambda
+                      parameters
+                      resultType
+                      body)
 
 def psEraseFinishApplication
     (environment : PsEnvironment)
@@ -1301,22 +1311,42 @@ def psEraseRuntimeExprWithFuel
                   | Except.error error => Except.error error
                   | Except.ok loweredBody =>
                       match loweredBody with
-                      | .lambda parameters innerBody =>
+                      | .lambda parameters resultType innerBody =>
                           Except.ok
                             (PsVerifiedIrExpr.lambda
                               ({
                                 name := parameterName
                                 type := parameterType
                               } :: parameters)
+                              resultType
                               innerBody)
                       | _ =>
-                          Except.ok
-                            (PsVerifiedIrExpr.lambda
-                              [{
-                                name := parameterName
-                                type := parameterType
-                              }]
-                              loweredBody)
+                          match
+                              psInferType
+                                environment
+                                psMetaEmpty
+                                nextScope.localContext
+                                openedBody with
+                          | Except.error _ =>
+                              Except.error
+                                PsErasureError.unsupportedRuntimeTerm
+                          | Except.ok bodyType =>
+                              match
+                                  psEraseRuntimeType
+                                    environment
+                                    nextScope
+                                    bodyType with
+                              | Except.error error =>
+                                  Except.error error
+                              | Except.ok resultType =>
+                                  Except.ok
+                                    (PsVerifiedIrExpr.lambda
+                                      [{
+                                        name := parameterName
+                                        type := parameterType
+                                      }]
+                                      resultType
+                                      loweredBody)
           | .type =>
               let typeName := "T" ++ toString pushed.id
               let nextScope : PsErasureScope := {

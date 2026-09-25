@@ -874,9 +874,11 @@ def addSimpleNestedInductive
     created := []
   }
   let (transformedTypes, state) ←
-    simpleNestedProcessQueue
+    match simpleNestedProcessQueue
       env decl.levelParams originalNames canonicalParams decl.numParams
-      decl.types [] initialState
+      decl.types [] initialState with
+    | .ok value => pure value
+    | .error err => throw ("nested preprocessing: " ++ err)
   if state.aux.isEmpty then
     match transformedTypes with
     | [type] =>
@@ -897,12 +899,14 @@ def addSimpleNestedInductive
         }
   else
     let transformed ←
-      addSimpleMutualInductive env {
+      match addSimpleMutualInductive env {
         levelParams := decl.levelParams
         numParams := decl.numParams
         types := transformedTypes
         isUnsafe := decl.isUnsafe
-      }
+      } with
+      | .ok value => pure value
+      | .error err => throw ("nested transformed admission: " ++ err)
     let mainRec := simpleRecName (decl.types.head?.map (fun t => t.name) |>.getD .anonymous)
     let rec makeRenames :
         List SimpleNestedAuxFamily → Nat → List (Name × Name)
@@ -913,14 +917,20 @@ def addSimpleNestedInductive
               makeRenames rest (index + 1)
     let recRename := makeRenames state.aux 1
     let restoredOriginals ←
-      simpleNestedAddOriginals
-        transformed env decl canonicalParams state.aux recRename
+      match simpleNestedAddOriginals
+        transformed env decl canonicalParams state.aux recRename with
+      | .ok value => pure value
+      | .error err => throw ("nested original restoration: " ++ err)
     let finalEnv ←
-      simpleNestedAddAuxRecursors
+      match simpleNestedAddAuxRecursors
         transformed restoredOriginals originalNames
-        canonicalParams decl.numParams state.aux recRename
-    simpleNestedValidateRestored
-      transformed finalEnv decl canonicalParams state.aux recRename
+        canonicalParams decl.numParams state.aux recRename with
+      | .ok value => pure value
+      | .error err => throw ("nested auxiliary restoration: " ++ err)
+    match simpleNestedValidateRestored
+      transformed finalEnv decl canonicalParams state.aux recRename with
+    | .ok _ => pure ()
+    | .error err => throw ("nested restored validation: " ++ err)
     pure finalEnv
 
 end Kernel

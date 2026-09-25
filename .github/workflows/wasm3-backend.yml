@@ -1,0 +1,110 @@
+name: Owned Wasm backend integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - backend/wasm3-owned
+    paths:
+      - selfhost/**
+      - docs/selfhost/WASM3_BACKEND.md
+      - docs/plans/07_SELF_HOSTING_FOUNDATION.md
+      - .github/workflows/wasm3-backend.yml
+
+permissions:
+  contents: read
+
+jobs:
+  wasm3-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh             | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - name: Enforce portable source and neutral shared IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node check-psc1-source.mjs
+          node scripts/check-ir-neutrality.mjs
+
+      - name: Build complete Lean self-host workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build
+
+      - name: Run TypeScript shared-IR regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_ts_tests
+
+      - name: Run erasure shared-IR regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_erasure_tests
+
+      - name: Run owned Wasm backend tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_tests
+
+      - name: Execute owned Wasm binary in Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv=readFileSync('/tmp/psc1-wasm-bytes.txt','utf8').trim();
+          const bytes=Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) {
+            throw new Error('PSC1_WASM_VALIDATE_FAILED');
+          }
+          const {instance}=await WebAssembly.instantiate(bytes);
+          if (instance.exports.addU32(20, 22) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_U32_RESULT');
+          }
+          if (instance.exports.addF32(20.5, 21.5) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_F32_RESULT');
+          }
+          if (instance.exports.addThenOne(20, 21) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_DIRECT_CALL_RESULT');
+          }
+          if (instance.exports.selectU32(1, 42, 7) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_IF_TRUE_RESULT');
+          }
+          if (instance.exports.selectU32(0, 42, 7) !== 7) {
+            throw new Error('PSC1_WASM_RUNTIME_IF_FALSE_RESULT');
+          }
+          if (instance.exports.letPlusOne(41) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_LET_RESULT');
+          }
+          console.log('PSC1_WASM3_INTEGRATION: PASS');
+          NODE

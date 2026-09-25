@@ -146,8 +146,16 @@ partial def replaySegmentedLinesFromProgress
             match current with
             | some value => value
             | none => Replay.State.empty shared maxRecDepth maxNatSize nativeEvaluator
+          let record ←
+            liftReplayResult path lineNo (ReplayJson.decodeLine line)
+          match record.declarationNameIndex? with
+          | some nameIndex =>
+              let name ←
+                liftReplayResult path lineNo (state.nameAt nameIndex)
+              IO.println s!"PSC1 Lean replay DECL-BEGIN file={path} line={lineNo} decl={Replay.replayNameString name} segmentDecls={state.declarations} env={state.env.size}"
+          | none => pure ()
           let next ←
-            liftReplayResult path lineNo (ReplayJson.replayLine state line)
+            liftReplayResult path lineNo (state.replay record)
           if progressEvery > 0 then
             if lineNo % progressEvery == 0 then
               IO.println s!"PSC1 Lean replay PROGRESS file={path} line={lineNo} segmentDecls={next.declarations} totalDecls={totals.declarations + next.declarations} env={next.env.size}"

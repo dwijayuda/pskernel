@@ -28,6 +28,9 @@ structure PsForallView where
 def psInferBoolNot (value : Bool) : Bool :=
   if value then false else true
 
+def psInferBoolOr (left right : Bool) : Bool :=
+  if left then true else right
+
 def psInferNatNe (left right : Nat) : Bool :=
   if Nat.beq left right then false else true
 
@@ -166,9 +169,11 @@ def psInferProjectionType
         | none => Except.error PsInferError.projectionUnsupported
         | some info =>
             if
-                psInferBoolNot info.isStructure
-                  || psInferNatNe info.numIndices 0
-                  || psInferNatNe view.args.length info.numParams then
+                psInferBoolOr
+                  (psInferBoolNot info.isStructure)
+                  (psInferBoolOr
+                    (psInferNatNe info.numIndices 0)
+                    (psInferNatNe view.args.length info.numParams)) then
               Except.error PsInferError.projectionUnsupported
             else
               match info.constructors with
@@ -181,8 +186,9 @@ def psInferProjectionType
                       Except.error PsInferError.projectionUnsupported
                   | some constructorInfo =>
                       if
-                          psInferNatNe constructorInfo.numParams info.numParams
-                            || index >= constructorInfo.numFields then
+                          psInferBoolOr
+                            (psInferNatNe constructorInfo.numParams info.numParams)
+                            (Nat.ble constructorInfo.numFields index) then
                         Except.error PsInferError.projectionUnsupported
                       else
                         match
@@ -233,7 +239,7 @@ def psInferTypeWithFuel
           | none => Except.error (PsInferError.unknownConstant name)
           | some declaration =>
               let parameters := psDeclarationLevelParams declaration;
-              if parameters.length == levels.length then
+              if Nat.beq parameters.length levels.length then
                 Except.ok
                   (psExprInstantiateLevelParams
                     parameters

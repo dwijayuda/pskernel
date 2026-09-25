@@ -28,6 +28,9 @@ def psRustConcat3 (a b c : String) : String :=
 def psRustConcat4 (a b c d : String) : String :=
   psRustConcat2 (psRustConcat3 a b c) d
 
+def psRustClonePrinted (value : String) : String :=
+  psRustConcat3 "(" value ").clone()"
+
 def psRustJoin
     (separator : String)
     (values : List String) : String :=

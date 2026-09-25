@@ -41,19 +41,6 @@ def closeOpenLambdas : List OpenBinder → Expr → Expr
 def simpleNameListUnique (names : List Name) : Bool :=
   !Name.hasDuplicates names
 
-partial def simpleFreshElimNameAux
-    (levelParams : List Name)
-    (candidate : Nat) : Name :=
-  let base : Name := .str .anonymous "u"
-  let name := if candidate == 0 then base else .num base candidate
-  if nameMember name levelParams then
-    simpleFreshElimNameAux levelParams (candidate + 1)
-  else
-    name
-
-def simpleFreshElimName (levelParams : List Name) : Name :=
-  simpleFreshElimNameAux levelParams 0
-
 def makeSimpleMinorBinders
     (motive : Expr)
     (levels : List Level) :
@@ -104,6 +91,8 @@ def addSimpleInductive
     (decl : SimpleInductiveDecl) : Except String Environment := do
   if Name.hasDuplicates decl.levelParams then
     throw "duplicate universe parameter"
+  if !decl.levelParams.isEmpty then
+    throw "simple inductive admission does not yet support universe parameters"
   if decl.ctors.isEmpty then
     throw "simple inductive admission does not yet support empty datatypes"
 
@@ -181,7 +170,7 @@ def addSimpleInductive
 
   let work1 ← addConstructors work0 0 decl.ctors
 
-  let elimName := simpleFreshElimName decl.levelParams
+  let elimName : Name := .str .anonymous "u"
   let elimLevel : Level := .param elimName
   let recLevelParams := elimName :: decl.levelParams
   let motiveInternal := simpleInternalName "motive"

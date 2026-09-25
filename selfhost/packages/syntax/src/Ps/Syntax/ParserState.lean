@@ -1,7 +1,5 @@
 import Ps.Foundation.Name
 import Ps.Syntax.Token
-import ProofScript.Data.List
-import ProofScript.Data.Option
 
 structure PsTokenCursor where
   remaining : List PsToken

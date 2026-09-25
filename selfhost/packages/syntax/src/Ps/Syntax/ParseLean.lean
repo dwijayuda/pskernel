@@ -1648,7 +1648,7 @@ def psParseLeanInductiveConstructorsWithFuel
                       segments := List.cons name.token.text List.nil
                       span := name.token.span
                     };
-                    let stop :=
+                    let stop : PsSourcePos :=
                       match psParseListReverse fields.value with
                       | List.nil => name.token.span.stop
                       | List.cons pair _ => pair.fst.span.stop;
@@ -1907,7 +1907,7 @@ def psParseLeanInductiveDeclaration
                                     token.text
                                     token.span)
                         | _ =>
-                            let stop :=
+                            let stop : PsSourcePos :=
                               match psParseListReverse constructors.value with
                               | [] => name.value.span.stop
                               | List.cons constructor _ =>

@@ -98,6 +98,31 @@ def psPrintLeanMapBinders
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
+def psPrintLeanMapAlternatives
+    (printAlternative :
+      Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan) ->
+        Except PsSourcePrintError String)
+    (alternatives :
+      List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) :
+    Except PsSourcePrintError (List String) :=
+  match alternatives with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons alternative rest =>
+      let printedHeadResult :=
+        printAlternative alternative;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintLeanMapAlternatives printAlternative rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintLeanTermWithFuel
     (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
@@ -322,7 +347,12 @@ def psPrintLeanTermWithFuel
                                       printedPattern
                                       " => "
                                       printedBody);
-              match alternatives.mapM printAlternative with
+              let printedAlternativesResult :
+                  Except PsSourcePrintError (List String) :=
+                psPrintLeanMapAlternatives
+                  printAlternative
+                  alternatives;
+              match printedAlternativesResult with
               | Except.error error => Except.error error
               | Except.ok printedAlternatives =>
                   Except.ok

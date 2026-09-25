@@ -225,6 +225,22 @@ jobs:
               throw new Error('PSC1_WASM_RUNTIME_INT_RESULT:' + name);
             }
           }
+          for (const name of [
+            'stringAsciiLength',
+            'stringUnicodeLength',
+            'stringUtf8ByteSize',
+            'stringNextUnicode',
+            'stringAppendEq',
+            'stringAtEndUnicode',
+            'stringExtractUnicode',
+          ]) {
+            if (instance.exports[name]() !== 1) {
+              throw new Error('PSC1_WASM_RUNTIME_STRING_RESULT:' + name);
+            }
+          }
+          if (instance.exports.stringGetUnicode() !== 233) {
+            throw new Error('PSC1_WASM_RUNTIME_STRING_GET_RESULT');
+          }
           if (instance.exports.arraySizeAfterPush() !== 1) {
             throw new Error('PSC1_WASM_RUNTIME_ARRAY_SIZE_RESULT');
           }

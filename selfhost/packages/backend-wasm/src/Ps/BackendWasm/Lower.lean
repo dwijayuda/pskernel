@@ -187,10 +187,15 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
       match expr with
       | .literal _ => types
       | .var _ => types
-      | .intrinsic _ arguments =>
+      | .intrinsic _ typeArguments arguments =>
+          let withTypes :=
+            typeArguments.foldl
+              (fun state type =>
+                psWasmCollectFunctionTypesFromType type state)
+              types
           arguments.foldl
             (fun state argument => collect argument state)
-            types
+            withTypes
       | .lambda parameters resultType body =>
           let withParameters :=
             psWasmCollectFunctionTypesFromParameters
@@ -731,7 +736,7 @@ def psWasmCollectCapturesWithFuel
             boundNames
             captures
             name
-      | .intrinsic _ arguments =>
+      | .intrinsic _ typeArguments arguments =>
           arguments.foldl
             (fun state argument => collect argument state)
             captures
@@ -1743,9 +1748,9 @@ def psWasmLowerExprWithFuel
             parameters
             resultType
             body
-      | .intrinsic operation arguments =>
+      | .intrinsic operation typeArguments arguments =>
           psWasmLowerIntrinsicWith
-            profile lower state operation arguments
+            profile lower state operation typeArguments arguments
       | .call fn _ arguments =>
           psWasmLowerCallWith
             profile bindings lower state fn arguments

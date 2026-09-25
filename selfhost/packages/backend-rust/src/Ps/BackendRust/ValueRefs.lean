@@ -189,7 +189,7 @@ def psRustRewriteValueRefsWithFuel
                       rewrittenFn
                       typeArguments
                       rewrittenArguments)
-      | PsVerifiedIrExpr.letE name value body =>
+      | PsVerifiedIrExpr.letE name type value body =>
           match rewriteNested value with
           | Except.error error =>
               Except.error error
@@ -206,6 +206,7 @@ def psRustRewriteValueRefsWithFuel
                   Except.ok
                     (PsVerifiedIrExpr.letE
                       name
+                      type
                       rewrittenValue
                       rewrittenBody)
       | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>

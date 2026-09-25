@@ -99,18 +99,17 @@ def psTestComplexApplicationTranslationRoundTrip : Bool :=
     "def effectDo (state : Nat) : Nat := do\n" ++
     "  let next : Nat <- compilerPure state;\n" ++
     "  return next"
-  match psTranslateLeanToProofScript leanSource with
-  | Except.error _ => false
-  | Except.ok proofScript =>
+  match
+      psTranslateLeanToProofScript leanSource,
+      psCanonicalizeLeanSource leanSource with
+  | Except.ok proofScript, Except.ok canonicalLean =>
       proofScript.contains "compilerBind("
         && proofScript.contains "fun "
         && match psTranslateProofScriptToLean proofScript with
            | Except.error _ => false
-           | Except.ok lean =>
-               match psTranslateLeanToProofScript lean with
-               | Except.error _ => false
-               | Except.ok proofScriptAgain =>
-                   proofScriptAgain == proofScript
+           | Except.ok leanAgain =>
+               leanAgain == canonicalLean
+  | _, _ => false
 
 def main : IO Unit := do
   if psTestComplexApplicationTranslationRoundTrip then

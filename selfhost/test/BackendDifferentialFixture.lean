@@ -628,6 +628,142 @@ def psBackendDiffModule : PsVerifiedIrModule :=
             ]
       },
       {
+        name := "diffArrayPersistentSet"
+        typeParameters := []
+        parameters := [
+          {
+            name := "a"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "b"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.letE
+            "xs"
+            (PsVerifiedIrType.named
+              "Array"
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.arrayPush
+              [
+                PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.arrayPush
+                  [
+                    PsVerifiedIrExpr.intrinsic
+                      PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                      [
+                        PsVerifiedIrExpr.literal
+                          (PsVerifiedIrLiteral.natural 2)
+                      ],
+                    PsVerifiedIrExpr.var "a"
+                  ],
+                PsVerifiedIrExpr.var "b"
+              ])
+            (PsVerifiedIrExpr.letE
+              "ys"
+              (PsVerifiedIrType.named
+                "Array"
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
+              (PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.arraySet
+                [
+                  PsVerifiedIrExpr.var "xs",
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 0),
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 10)
+                ])
+              (PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natAdd
+                [
+                  PsVerifiedIrExpr.intrinsic
+                    PsVerifiedIrIntrinsic.arrayGet
+                    [
+                      PsVerifiedIrExpr.var "xs",
+                      PsVerifiedIrExpr.literal
+                        (PsVerifiedIrLiteral.natural 0)
+                    ],
+                  PsVerifiedIrExpr.intrinsic
+                    PsVerifiedIrIntrinsic.arrayGet
+                    [
+                      PsVerifiedIrExpr.var "ys",
+                      PsVerifiedIrExpr.literal
+                        (PsVerifiedIrLiteral.natural 0)
+                    ]
+                ]))
+      },
+      {
+        name := "diffArrayFold"
+        typeParameters := []
+        parameters := [
+          {
+            name := "a"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "b"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.letE
+            "xs"
+            (PsVerifiedIrType.named
+              "Array"
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.arrayPush
+              [
+                PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.arrayPush
+                  [
+                    PsVerifiedIrExpr.intrinsic
+                      PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                      [
+                        PsVerifiedIrExpr.literal
+                          (PsVerifiedIrLiteral.natural 2)
+                      ],
+                    PsVerifiedIrExpr.var "a"
+                  ],
+                PsVerifiedIrExpr.var "b"
+              ])
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.arrayFoldl
+              [
+                PsVerifiedIrExpr.lambda
+                  [
+                    {
+                      name := "acc"
+                      type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                    },
+                    {
+                      name := "value"
+                      type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                    }
+                  ]
+                  (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+                  (PsVerifiedIrExpr.intrinsic
+                    PsVerifiedIrIntrinsic.natAdd
+                    [
+                      PsVerifiedIrExpr.var "acc",
+                      PsVerifiedIrExpr.var "value"
+                    ]),
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.natural 0),
+                PsVerifiedIrExpr.var "xs",
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.natural 0),
+                PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.arraySize
+                  [PsVerifiedIrExpr.var "xs"]
+              ])
+      },
+      {
         name := "diffArray"
         typeParameters := []
         parameters := [

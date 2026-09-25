@@ -2330,14 +2330,15 @@ def psLeanLowerEquationValue
               match clauses with
               | [] => none
               | List.cons first _ =>
+                  let lambdaSpan : PsSourceSpan := {
+                    start := first.span.start
+                    stop := psLeanTermStop body
+                  };
                   some
                     (PsSyntaxTerm.lambda
                       prepared.fst
                       body
-                      {
-                        start := first.span.start
-                        stop := psLeanTermStop body
-                      })
+                      lambdaSpan)
 
 def psFinishLeanValueDeclaration
     (keyword : PsToken)

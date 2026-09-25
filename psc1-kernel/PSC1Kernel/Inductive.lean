@@ -585,7 +585,8 @@ def addSimpleInductive
     (env : Environment)
     (decl : SimpleInductiveDecl)
     (maxRecDepth : Nat := 0)
-    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Environment := do
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
   if Name.hasDuplicates decl.levelParams then
     throw "duplicate universe parameter"
   let recName := simpleRecName decl.name
@@ -608,7 +609,7 @@ def addSimpleInductive
   checkLevelParams decl.type decl.levelParams
   let safety :=
     if decl.isUnsafe then DefinitionSafety.unsafeDef else DefinitionSafety.safe
-  let headerCtx := mkChecker env decl.levelParams safety maxRecDepth maxNatSize
+  let headerCtx := mkChecker env decl.levelParams safety maxRecDepth maxNatSize nativeEvaluator
   let headerType ← check headerCtx decl.type
   let _ ← ensureSort headerCtx headerType
   let (headerParamCtx, params, afterParams) ←
@@ -648,7 +649,7 @@ def addSimpleInductive
     | ctor :: rest => do
         checkNoMVarNoFVar ctor.type
         checkLevelParams ctor.type decl.levelParams
-        let closedCtorCtx := mkChecker work decl.levelParams safety maxRecDepth maxNatSize
+        let closedCtorCtx := mkChecker work decl.levelParams safety maxRecDepth maxNatSize nativeEvaluator
         let ctorTypeType ← check closedCtorCtx ctor.type
         let _ ← ensureSort closedCtorCtx ctorTypeType
         let ctorCtx : CheckerContext := { headerParamCtx with env := work }
@@ -750,11 +751,11 @@ def addSimpleInductive
   }
 
   -- Validate generated metadata independently before exposing it.
-  let recCtx := mkChecker work1 recLevelParams safety maxRecDepth maxNatSize
+  let recCtx := mkChecker work1 recLevelParams safety maxRecDepth maxNatSize nativeEvaluator
   let recTypeType ← check recCtx recType
   let _ ← ensureSort recCtx recTypeType
   let work2 := work1.addUnchecked (.recInfo recInfo)
-  let ruleCtx := mkChecker work2 recLevelParams safety maxRecDepth maxNatSize
+  let ruleCtx := mkChecker work2 recLevelParams safety maxRecDepth maxNatSize nativeEvaluator
   validateSimpleRecursorRules
     ruleCtx params ruleBinders motive levels ctorShapes rules
 

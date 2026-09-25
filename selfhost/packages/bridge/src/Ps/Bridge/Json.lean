@@ -229,6 +229,18 @@ def psJsonDecodeUnicode4
                                     Except.ok
                                       (Prod.mk (Char.ofNat value) rest)
 
+def psJsonReverseCharsAcc
+    (values : List Char)
+    (acc : List Char) : List Char :=
+  match values with
+  | List.nil =>
+      acc
+  | List.cons head tail =>
+      psJsonReverseCharsAcc tail (List.cons head acc)
+
+def psJsonReverseChars (values : List Char) : List Char :=
+  psJsonReverseCharsAcc values List.nil
+
 def psJsonParseStringChars :
     Nat ->
     List Char ->
@@ -239,7 +251,10 @@ def psJsonParseStringChars :
       Except.error PsJsonParseError.unexpectedEnd
   | Nat.succ fuel, List.cons char rest, charsRev =>
       if psJsonCharEq char '"' then
-        Except.ok (String.ofList charsRev.reverse, rest)
+        Except.ok
+          (Prod.mk
+            (String.ofList (psJsonReverseChars charsRev))
+            rest)
       else if psJsonCharEq char '\\' then
         match rest with
         | [] => Except.error PsJsonParseError.unexpectedEnd
@@ -278,18 +293,6 @@ def psJsonParseStringChars :
 def psJsonDigit (char : Char) : Bool :=
   let value : Nat := psJsonCharCode char;
   psJsonNatInRange value 48 57
-
-def psJsonReverseCharsAcc
-    (values : List Char)
-    (acc : List Char) : List Char :=
-  match values with
-  | List.nil =>
-      acc
-  | List.cons head tail =>
-      psJsonReverseCharsAcc tail (List.cons head acc)
-
-def psJsonReverseChars (values : List Char) : List Char :=
-  psJsonReverseCharsAcc values List.nil
 
 def psJsonTakeDigits :
     List Char -> List Char -> List Char × List Char

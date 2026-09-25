@@ -3108,6 +3108,177 @@ def assertOuterMutualNestedInductiveAdmissionOracle : IO Unit := do
   assertTrue "outer-mutual nested recursion did not reach leaf minor"
     (PSC1Kernel.Expr.eq oursReduced (.lit (.nat 83)))
 
+def assertReplayCoreOracle : IO Unit := do
+  let meta : PSC1Kernel.Replay.Record :=
+    .metaR {
+      leanVersion := PSC1Kernel.Replay.pinnedLeanVersion
+      leanGitHash := PSC1Kernel.Replay.pinnedLeanGitHash
+      formatVersion := PSC1Kernel.Replay.supportedFormatVersion
+    }
+
+  -- Metadata is mandatory and identity-pinned.
+  match PSC1Kernel.Replay.State.empty.replay
+      (.nameR { index := 1, node := .str 0 "Bad" }) with
+  | .ok _ =>
+      throw <| IO.userError "replay accepted a pre-metadata record"
+  | .error _ => pure ()
+  match PSC1Kernel.Replay.State.empty.replay
+      (.metaR {
+        leanVersion := PSC1Kernel.Replay.pinnedLeanVersion
+        leanGitHash := "wrong"
+        formatVersion := PSC1Kernel.Replay.supportedFormatVersion
+      }) with
+  | .ok _ =>
+      throw <| IO.userError "replay accepted a wrong Lean git hash"
+  | .error _ => pure ()
+
+  let records : List PSC1Kernel.Replay.Record := [
+    meta,
+
+    -- Sparse Name table entries are legal as long as references are defined.
+    .nameR { index := 1, node := .str 0 "ReplayA" },
+    .nameR { index := 3, node := .str 0 "x" },
+    .nameR { index := 5, node := .str 0 "ReplayId" },
+    .nameR { index := 7, node := .str 0 "ReplayF" },
+    .nameR { index := 9, node := .str 0 "ReplayG" },
+    .nameR { index := 11, node := .str 0 "ReplayFlag" },
+    .nameR { index := 13, node := .str 11 "off" },
+    .nameR { index := 15, node := .str 11 "on" },
+
+    .levelR { index := 2, node := .succ 0 },
+
+    -- 20: Type, 22: A, 24: #0, 26: A -> A, 28: fun x => x
+    .exprR { index := 20, node := .sort 2 },
+    .exprR { index := 22, node := .const 1 [] },
+    .exprR { index := 24, node := .bvar 0 },
+    .exprR {
+      index := 26
+      node := .forallE 3 22 22 .default
+    },
+    .exprR {
+      index := 28
+      node := .lam 3 22 24 .default
+    },
+
+    .axiomR {
+      name := 1
+      levelParams := []
+      type := 20
+      isUnsafe := false
+    },
+    .definitionR {
+      name := 5
+      levelParams := []
+      type := 26
+      value := 28
+      hints := .regular 0
+      safety := .safe
+      all := []
+    },
+
+    -- Mutual unsafe definitions:
+    -- f x := g x, g x := f x.
+    .exprR { index := 30, node := .const 7 [] },
+    .exprR { index := 32, node := .const 9 [] },
+    .exprR { index := 34, node := .app 32 24 },
+    .exprR { index := 36, node := .lam 3 22 34 .default },
+    .exprR { index := 38, node := .app 30 24 },
+    .exprR { index := 40, node := .lam 3 22 38 .default },
+    .definitionR {
+      name := 7
+      levelParams := []
+      type := 26
+      value := 36
+      hints := .regular 1
+      safety := .unsafeDef
+      all := [7, 9]
+    },
+    .definitionR {
+      name := 9
+      levelParams := []
+      type := 26
+      value := 40
+      hints := .regular 1
+      safety := .unsafeDef
+      all := [7, 9]
+    },
+
+    -- Flag : Type with two nullary constructors. Replay regenerates Flag.rec.
+    .exprR { index := 42, node := .const 11 [] },
+    .inductiveR {
+      levelParams := []
+      numParams := 0
+      types := [{
+        name := 11
+        type := 20
+        ctors := [
+          { name := 13, type := 42 },
+          { name := 15, type := 42 }
+        ]
+      }]
+      isUnsafe := false
+      numNested := 0
+    }
+  ]
+
+  let final ← exceptToIO
+    "PSC1 typed Lean4Export replay"
+    (PSC1Kernel.Replay.replayAll PSC1Kernel.Replay.State.empty records)
+  let stats ← exceptToIO
+    "PSC1 replay finish"
+    final.finish
+  assertTrue "replay declaration count mismatch"
+    (stats.declarations == 5)
+  assertTrue "replay sparse Name count mismatch"
+    (stats.names == 8)
+  assertTrue "replay Level count mismatch"
+    (stats.levels == 1)
+  assertTrue "replay Expr count mismatch"
+    (stats.expressions == 11)
+
+  let A : PSC1Kernel.Name := .str .anonymous "ReplayA"
+  let Id : PSC1Kernel.Name := .str .anonymous "ReplayId"
+  let F : PSC1Kernel.Name := .str .anonymous "ReplayF"
+  let G : PSC1Kernel.Name := .str .anonymous "ReplayG"
+  let Flag : PSC1Kernel.Name := .str .anonymous "ReplayFlag"
+  let Off : PSC1Kernel.Name := .str Flag "off"
+  let On : PSC1Kernel.Name := .str Flag "on"
+  let Rec : PSC1Kernel.Name := .str Flag "rec"
+  for name in [A, Id, F, G, Flag, Off, On, Rec] do
+    assertTrue "replay omitted an admitted declaration"
+      (final.env.contains name)
+
+  -- The first mutual record must remain pending until its partner arrives.
+  let prefixRecords := records.take (records.length - 2)
+  let partial ← exceptToIO
+    "PSC1 incomplete mutual replay setup"
+    (let rec go
+        (state : PSC1Kernel.Replay.State)
+        (items : List PSC1Kernel.Replay.Record) :
+        Except String PSC1Kernel.Replay.State := do
+      match items with
+      | [] => pure state
+      | item :: rest => go (← state.replay item) rest
+     go PSC1Kernel.Replay.State.empty prefixRecords)
+  -- This prefix already contains both mutual members; construct a direct
+  -- one-member pending stream to verify finish rejects incomplete groups.
+  let pendingRecords := records.take 21
+  let pending ← exceptToIO
+    "PSC1 pending mutual replay setup"
+    (let rec go
+        (state : PSC1Kernel.Replay.State)
+        (items : List PSC1Kernel.Replay.Record) :
+        Except String PSC1Kernel.Replay.State := do
+      match items with
+      | [] => pure state
+      | item :: rest => go (← state.replay item) rest
+     go PSC1Kernel.Replay.State.empty pendingRecords)
+  let _ := partial
+  match pending.finish with
+  | .ok _ =>
+      throw <| IO.userError "replay finish accepted an incomplete mutual group"
+  | .error _ => pure ()
+
 def assertOrdinaryRecursorOracle : IO Unit := do
   let Flag : PSC1Kernel.Name := .str .anonymous "OracleFlag"
   let Off : PSC1Kernel.Name := .str Flag "off"
@@ -3598,6 +3769,7 @@ def run : IO Unit := do
   assertParameterizedNestedInductiveAdmissionOracle
   assertUniverseNestedInductiveAdmissionOracle
   assertOuterMutualNestedInductiveAdmissionOracle
+  assertReplayCoreOracle
   assertOrdinaryRecursorOracle
   assertNatLiteralRecursorOracle
   assertQuotReductionOracle

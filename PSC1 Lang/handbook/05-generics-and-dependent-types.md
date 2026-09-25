@@ -8,7 +8,7 @@ two unrelated features. They are points on the same function/type spectrum.
 ## Generic identity
 
 ```proofscript
-function identity {α : Type}(x : α) : α :=
+function identity {α: Type}(x: α): α :=
   x;
 ```
 
@@ -34,9 +34,9 @@ needed by elaboration.
 ## Generic data
 
 ```proofscript
-inductive PsOption(α : Type) where {
+inductive PsOption(α: Type) where {
   | none;
-  | some(value : α);
+  | some(value: α);
 };
 ```
 
@@ -46,8 +46,8 @@ definition with different types.
 ## Generic functions over data
 
 ```proofscript
-function optionMap {α : Type}{β : Type}
-(f : α -> β, value : PsOption(α)) : PsOption(β) :=
+function optionMap {α: Type}{β: Type}
+(f: α -> β, value: PsOption(α)): PsOption(β) :=
   match value with {
     | .none => PsOption.none;
     | .some x => PsOption.some(f(x));
@@ -74,7 +74,7 @@ has a result type independent of the input value.
 A dependent function type:
 
 ```proofscript
-(x : Nat) -> Fin x -> Nat
+(x: Nat) -> Fin x -> Nat
 ```
 
 lets a later type mention `x`.

@@ -6,6 +6,10 @@ import PSC1Kernel.Instantiate
 
 namespace PSC1Kernel
 
+/-- Final Lean 4.34 default `LEAN_NAT_MAX_SIZE`: 128 MiB. -/
+def leanNatMaxSizeDefault : Nat :=
+  128 * 1024 * 1024
+
 /--
 Optional execution boundary for final Lean 4.34's deprecated in-kernel native
 reduction markers. The semantic kernel does not execute compiler IR itself;
@@ -24,6 +28,12 @@ structure CheckerContext where
   nativeEvaluator : Option NativeEvaluator
   /-- User-facing Lean maxRecDepth value. 0 means unlimited. -/
   maxRecDepth : Nat := 0
+  /--
+  Maximum byte size for Nat literals/reduction results. Final Lean 4.34 reads
+  this process-wide value from `LEAN_NAT_MAX_SIZE`; the portable kernel takes
+  it as explicit host configuration so it remains pure and self-hostable.
+  -/
+  maxNatSize : Nat := leanNatMaxSizeDefault
   /-- Current kernel checker recursion depth. -/
   recDepth : Nat := 0
 
@@ -36,6 +46,7 @@ def CheckerContext.empty (env : Environment) : CheckerContext :=
     eagerReduce := false
     nativeEvaluator := none
     maxRecDepth := 0
+    maxNatSize := leanNatMaxSizeDefault
     recDepth := 0
   }
 
@@ -179,10 +190,6 @@ def natLiteralValue? : Expr → Option Nat
 partial def kernelNatGcd (a b : Nat) : Nat :=
   if b == 0 then a else kernelNatGcd b (a % b)
 
-/-- Final Lean 4.34 default from `type_checker.cpp`: 128 MiB. -/
-def leanNatMaxSizeDefault : Nat :=
-  128 * 1024 * 1024
-
 /-- Final Lean 4.34 runtime count boundary for Nat.pow/Nat.shiftLeft. -/
 def leanUInt32Max : Nat :=
   4294967295
@@ -204,8 +211,8 @@ partial def natHeapWordCount (n : Nat) : Nat :=
 def natSizeInBytes (n : Nat) : Nat :=
   if n <= leanMaxSmallNat then 8 else natHeapWordCount n * 8
 
-def checkNatSize (n : Nat) : Except String Unit :=
-  if natSizeInBytes n > leanNatMaxSizeDefault then
+def checkNatSize (maxNatSize n : Nat) : Except String Unit :=
+  if natSizeInBytes n > maxNatSize then
     .error "the kernel refused a Nat numeral because its size exceeds the maximum"
   else
     .ok ()
@@ -246,24 +253,27 @@ def isStringOfListApp : Expr → Bool
       levels.length == 0 && Name.eq name kernelStringOfListName
   | _ => false
 
-def reduceNatBinary (op : Name) (a b : Nat) : Except String (Option Expr) := do
+def reduceNatBinary
+    (maxNatSize : Nat)
+    (op : Name)
+    (a b : Nat) : Except String (Option Expr) := do
   if Name.eq op kernelNatAddName then
     let r := a + b
-    checkNatSize r
+    checkNatSize maxNatSize r
     return some (.lit (.nat r))
   else if Name.eq op kernelNatSubName then
     let r := a - b
-    checkNatSize r
+    checkNatSize maxNatSize r
     return some (.lit (.nat r))
   else if Name.eq op kernelNatMulName then
     let r := a * b
-    checkNatSize r
+    checkNatSize maxNatSize r
     return some (.lit (.nat r))
   else if Name.eq op kernelNatPowName then
     checkCountArg "Nat.pow" b
     if a > 1 then
       if b != 0 then
-        if natSizeInBytes a > leanNatMaxSizeDefault / b then
+        if natSizeInBytes a > maxNatSize / b then
           throw "the kernel refused to evaluate Nat.pow because the result would exceed the maximum numeral size"
     return some (.lit (.nat (a ^ b)))
   else if Name.eq op kernelNatGcdName then
@@ -286,7 +296,7 @@ def reduceNatBinary (op : Name) (a b : Nat) : Except String (Option Expr) := do
     if a == 0 then
       return some (.lit (.nat 0))
     checkCountArg "Nat.shiftLeft" b
-    if natSizeInBytes a + b / 8 + 1 > leanNatMaxSizeDefault then
+    if natSizeInBytes a + b / 8 + 1 > maxNatSize then
       throw "the kernel refused a Nat numeral because its size exceeds the maximum"
     return some (.lit (.nat (Nat.shiftLeft a b)))
   else if Name.eq op kernelNatShiftRightName then
@@ -928,7 +938,7 @@ partial def reduceNat
       match natLiteralValue? arg' with
       | some value => do
           let result := value + 1
-          checkNatSize result
+          checkNatSize ctx.maxNatSize result
           .ok (some (.lit (.nat result)))
       | none => .ok none
     else
@@ -938,7 +948,7 @@ partial def reduceNat
       let left' ← whnf ctx left
       let right' ← whnf ctx right
       match natLiteralValue? left', natLiteralValue? right' with
-      | some a, some b => reduceNatBinary name a b
+      | some a, some b => reduceNatBinary ctx.maxNatSize name a b
       | _, _ => .ok none
     else
       .ok none
@@ -1607,7 +1617,7 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr := do
   | .lit literal =>
     match literal with
     | .nat value => do
-        checkNatSize value
+        checkNatSize ctx.maxNatSize value
         .ok (.const kernelNatName [])
     | .str _ => .ok (.const kernelStringName [])
   | .mdata _ body => infer ctx body

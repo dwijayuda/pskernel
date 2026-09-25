@@ -52,13 +52,13 @@ def kernelJsonAsNumberText (value : JsonValue) : Option String :=
   | _ => Option.none
 
 def kernelObjectAdd
-    (fields : Result (Map String JsonValue) JsonError)
+    (fields : Result JsonValue JsonError)
     (key : String)
     (value : JsonValue) :
-    Result (Map String JsonValue) JsonError :=
+    Result JsonValue JsonError :=
   match fields with
   | Result.error error => Result.error error
-  | Result.ok map => jsonObjectInsert key value map
+  | Result.ok object => jsonObjectInsert key value object
 
 def kernelLookupPayload
     (name : String) :
@@ -67,16 +67,16 @@ def kernelLookupPayload
       jsonObjectInsert
         "name"
         (JsonValue.string name)
-        Map.empty with
+        JsonValue.objectNil with
   | Result.error error => Result.error error
-  | Result.ok fields => Result.ok (JsonValue.object fields)
+  | Result.ok fields => Result.ok fields
 
 def kernelRequestPayload
     (request : KernelRequest) :
     Result JsonValue JsonError :=
   match request with
   | KernelRequest.ping =>
-      Result.ok (JsonValue.object Map.empty)
+      Result.ok JsonValue.objectNil
   | KernelRequest.lookup name =>
       kernelLookupPayload name
 
@@ -91,41 +91,41 @@ def kernelEnvelope
   match kernelRequestPayload request with
   | Result.error error => Result.error error
   | Result.ok payload =>
-      let fields0 : Result (Map String JsonValue) JsonError :=
-        Result.ok Map.empty;
-      let fields1 : Result (Map String JsonValue) JsonError :=
+      let fields0 : Result JsonValue JsonError :=
+        Result.ok JsonValue.objectNil;
+      let fields1 : Result JsonValue JsonError :=
         kernelObjectAdd
           fields0
           "foundation"
           (JsonValue.string kernelBridgeFoundationFingerprint);
-      let fields2 : Result (Map String JsonValue) JsonError :=
+      let fields2 : Result JsonValue JsonError :=
         kernelObjectAdd
           fields1
           "kernel"
           (JsonValue.string kernelBridgeKernelFingerprint);
-      let fields3 : Result (Map String JsonValue) JsonError :=
+      let fields3 : Result JsonValue JsonError :=
         kernelObjectAdd
           fields2
           "op"
           (JsonValue.string (kernelRequestOp request));
-      let fields4 : Result (Map String JsonValue) JsonError :=
+      let fields4 : Result JsonValue JsonError :=
         kernelObjectAdd
           fields3
           "payload"
           payload;
-      let fields5 : Result (Map String JsonValue) JsonError :=
+      let fields5 : Result JsonValue JsonError :=
         kernelObjectAdd
           fields4
           "protocol"
           (JsonValue.string kernelBridgeProtocol);
-      let fields6 : Result (Map String JsonValue) JsonError :=
+      let fields6 : Result JsonValue JsonError :=
         kernelObjectAdd
           fields5
           "version"
           (JsonValue.number kernelBridgeVersionText);
       match fields6 with
       | Result.error error => Result.error error
-      | Result.ok fields => Result.ok (JsonValue.object fields)
+      | Result.ok fields => Result.ok fields
 
 def kernelEncodeRequest
     (request : KernelRequest) :

@@ -713,6 +713,49 @@ partial def dumpRootRange (env : Environment) (target : Name) (start count : Nat
         inSegment := 0) |>.run {}
   pure ()
 
+partial def dumpRootRangeSegmented
+    (env : Environment) (target : Name) (start count : Nat) : IO Unit := do
+  if count == 0 then throw <| IO.userError "root range count must be positive"
+  let buckets := collectRootsByModule env
+  let roots := flattenRoots buckets
+  if roots.size != env.constants.map₁.size then
+    throw <| IO.userError s!"root coverage mismatch: {roots.size} != {env.constants.map₁.size}"
+  if start >= roots.size then
+    throw <| IO.userError s!"root range starts at {start}, but only {roots.size} roots exist"
+  let stop := min roots.size (start + count)
+  let selected := roots.extract start stop
+  IO.println <| (Json.mkObj [("environment", Json.mkObj [
+    ("module", target.toString),
+    ("constants", env.constants.map₁.size),
+    ("modules", env.header.moduleNames.size),
+    ("rootStart", start),
+    ("rootStop", stop),
+    ("selectedDirectRoots", selected.size),
+    ("segmentation", "declaration")
+  ])]).compress
+  let firstModule :=
+    match selected[0]? >>= env.getModuleIdxFor? with
+    | some idx => env.header.moduleNames[idx]!.toString
+    | none => ""
+  let lastModule :=
+    match selected[selected.size - 1]? >>= env.getModuleIdxFor? with
+    | some idx => env.header.moduleNames[idx]!.toString
+    | none => ""
+  IO.println <| (Json.mkObj [("batch", Json.mkObj [
+    ("index", start),
+    ("firstModule", firstModule),
+    ("lastModule", lastModule),
+    ("firstRoot", selected[0]!.toString),
+    ("lastRoot", selected[selected.size - 1]!.toString),
+    ("directRoots", selected.size)
+  ])]).compress
+  let _ ← (do
+    modify fun (s : S) => { s with segmented := true }
+    for n in selected do
+      dumpConstant env n
+    closeDeclarationSegment) |>.run {}
+  pure ()
+
 partial def dumpModuleStream (env : Environment) (target : Name) : IO Unit := do
   let total := env.constants.map₁.size
   let mut replayable := 0
@@ -809,6 +852,10 @@ unsafe def main (args : List String) : IO Unit := do
       let segmentRoots := requestedRoots[1]!.toNat!
       let selected := requestedRoots.drop 2 |>.map String.toName
       dumpSelectedRootsSegmented env selected segmentRoots
+    else if requestedRoots.length == 3 && requestedRoots.head! == "--root-range-segmented" then
+      let start := requestedRoots[1]!.toNat!
+      let count := requestedRoots[2]!.toNat!
+      dumpRootRangeSegmented env moduleName start count
     else if requestedRoots.length == 3 && requestedRoots.head! == "--root-range" then
       let start := requestedRoots[1]!.toNat!
       let count := requestedRoots[2]!.toNat!

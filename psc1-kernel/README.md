@@ -59,7 +59,7 @@ lift/instantiation against final Lean 4.34.
 - K0: Name, Level, Expr, substitution/lifting/abstraction.
 - K1: declarations, local context and immutable environment.
 - K2: WHNF and type inference. **SEMANTIC BASELINE COMPLETE** — separate Lean-faithful `whnfCore` and full `whnf`, independent `cheap_rec`/`cheap_proj` controls, Lean-4.34 Nat literal normalization (`succ`, add/sub/mul/pow/gcd/mod/div/beq/ble/land/lor/xor/shiftLeft/shiftRight`), exact UINT32 count rejection for `pow`/nonzero `shiftLeft`, exact UINT32 projection-index rejection, scoped `eagerReduce`, constructor projection reduction, ordinary/Nat-literal recursor reduction, quotient lift/ind reduction, string-literal projection/recursor expansion, a fail-closed native evaluator callback boundary, and Lean-4.34-faithful projection typing are implemented. The final Lean 4.34 `LEAN_NAT_MAX_SIZE` policy is modeled as explicit portable `maxNatSize` host configuration with the same 128 MiB default; literal admission and computed Nat results are regression-tested at overridden limits.
-- K3: definitional equality and exact reduction ordering. **IN PROGRESS** — sort/constant-universe/app cases, opened-binder lambda/forall defeq, proof irrelevance, Nat-offset comparison, function eta, non-recursive structure eta, unit-like equality, scoped eager-reduction behavior, the Lean-4.34 lazy-delta one-step state machine (including projection-headed unfolding and the same-definition regular-hint shortcut), projection lazy-delta field comparison, native-reduction ordering, the special `String` literal ↔ `String.ofList` expansion, and the `is_def_eq_core` recursion-depth boundary are implemented. A direct regression rejects any arbitrary 512-step lazy-delta fuel cap. Lean-style checker-state success/failure pair-cache parity remains the principal K3 maturity gap.
+- K3: definitional equality and exact reduction ordering. **SEMANTIC BASELINE COMPLETE** — sort/constant-universe/app cases, opened-binder lambda/forall defeq, proof irrelevance, Nat-offset comparison, function eta, non-recursive structure eta, unit-like equality, scoped eager-reduction behavior, the Lean-4.34 lazy-delta one-step state machine (including projection-headed unfolding and the same-definition regular-hint shortcut), projection lazy-delta field comparison, native-reduction ordering, the special `String` literal ↔ `String.ofList` expansion, and the `is_def_eq_core` recursion-depth boundary are implemented. A direct regression rejects any arbitrary 512-step lazy-delta fuel cap. Lean-style mutable success/failure pair caches remain a runtime-maturity/performance parity item; they are not treated as a missing definitional-equality rule.
 - K4: quotient and recursor reduction. **FOUNDATIONAL SLICE COMPLETE** — checked Lean-4.34-style Quot admission validates the Eq/Eq.refl bootstrap shape, rejects primitive-name collisions, installs all four Quot constants, and is differential-tested against Lean 4.34; quotient lift/ind reduction is wired into WHNF.
 - K5: inductive/nested-inductive admission and generated metadata validation. **SEMANTIC BASELINE COMPLETE** — checked ordinary admission covers empty datatypes, exact universe-polymorphic recursor naming, shared parameters, per-type indices, constructor fields, direct and functional strictly-positive recursion, recursive hypotheses/calls, Prop/small-elimination selection, K-target metadata and K-like proof reduction, and ordinary mutual declarations with multiple motives/minors and cross-recursive reduction. Nested preprocessing/restoration covers shared-parameter and universe-polymorphic families, repeated nesting, indexed outer families, and nested occurrences through ordinary outer mutual families; restored metadata/rules are rechecked before publication. Malformed, reserved-name, non-uniform, and non-strictly-positive shapes remain fail-closed. This closes the bounded Lean-4.34 semantic feature baseline, not full-environment equivalence or a formal proof of equivalence.
 - K6: optional/fail-closed native-reduction boundary. **FOUNDATIONAL SLICE COMPLETE** — `NativeEvaluator` exposes only optional Bool/Nat callbacks; absent/unsupported results stay opaque, and the oracle verifies both successful callbacks and fail-closed behavior.
@@ -93,11 +93,11 @@ per target datatype. A differential Even/Odd oracle verifies metadata and
 actual cross-recursive reduction against Lean 4.34.
 
 Nested-inductive preprocessing/restoration remains a separate layer. The
-bounded implementation now restores monomorphic and shared-parameter nested
-families and rechecks restored artifacts before publication. Nested occurrences
-through an outer mutual family, plus broader adversarial nested combinations,
-remain fail-closed; negative and otherwise unsupported recursive occurrences
-remain rejected.
+bounded implementation restores monomorphic, shared-parameter and
+universe-polymorphic nested families, repeated nesting, indexed outer families,
+and nested occurrences through ordinary outer mutual families, then rechecks
+restored artifacts before publication. Malformed, non-uniform and
+non-strictly-positive recursive occurrences remain rejected.
 
 ### K5 nested-inductive checkpoint
 
@@ -157,8 +157,9 @@ reserved nested auxiliaries, and data projection from proposition-valued
 out-of-order IDs without allowing duplicates.  Quot primitive collisions were
 already locked by K4 admission tests.
 
-Kernel recursion depth is now modeled at the same two entry points as final
-Lean 4.34 (`infer_type_core` and `whnf_core`).  A user-facing
+Kernel recursion depth is now modeled at the same three checker entry points as
+final Lean 4.34 (`infer_type_core`, `whnf_core`, and `is_def_eq_core`).
+A user-facing
 `maxRecDepth = 0` remains unlimited; nonzero limits use Lean's kernel factor of
 16, and a direct differential definition-admission oracle requires both the
 small-limit rejection and larger-limit acceptance to agree with

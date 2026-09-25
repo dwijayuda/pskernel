@@ -5,32 +5,46 @@ inductive PsSourcePrintError where
   | unsupportedApplication
   | emptyName
 
+def psPrintCommonConcat2
+    (left right : String) : String :=
+  String.Internal.append left right
+
+def psPrintCommonConcat3
+    (first second third : String) : String :=
+  let firstTwo := psPrintCommonConcat2 first second;
+  psPrintCommonConcat2 firstTwo third
+
 def psPrintJoin (separator : String) : List String -> String
-  | [] => ""
-  | [value] => value
-  | value :: rest =>
-      value ++ separator ++ psPrintJoin separator rest
+  | List.nil => ""
+  | List.cons value List.nil => value
+  | List.cons value rest =>
+      psPrintCommonConcat3
+        value
+        separator
+        (psPrintJoin separator rest)
 
 def psPrintSyntaxName (name : PsSyntaxName) :
     Except PsSourcePrintError String :=
   match name.segments with
-  | [] => Except.error PsSourcePrintError.emptyName
+  | List.nil => Except.error PsSourcePrintError.emptyName
   | segments => Except.ok (psPrintJoin "." segments)
 
 def psPrintBinderDelimiters
-    (kind : PsSyntaxBinderKind) : String × String :=
+    (kind : PsSyntaxBinderKind) : Prod String String :=
   match kind with
-  | .explicit => ("(", ")")
-  | .implicit => ("{", "}")
-  | .strictImplicit => ("{{", "}}")
-  | .instanceImplicit => ("[", "]")
+  | .explicit => Prod.mk "(" ")"
+  | .implicit => Prod.mk "{" "}"
+  | .strictImplicit => Prod.mk "{{" "}}"
+  | .instanceImplicit => Prod.mk "[" "]"
 
 def psPrintPattern
     (pattern : PsSyntaxPattern) :
     Except PsSourcePrintError String :=
   match pattern with
   | .bool value _ =>
-      Except.ok (if value then "true" else "false")
+      match value with
+      | true => Except.ok "true"
+      | false => Except.ok "false"
   | .wildcard _ =>
       Except.ok "_"
   | .constructor name binders _ =>
@@ -44,7 +58,10 @@ def psPrintPattern
                 Except.ok printedName
               else
                 Except.ok
-                  (printedName ++ " " ++ psPrintJoin " " printedBinders)
+                  (psPrintCommonConcat3
+                    printedName
+                    " "
+                    (psPrintJoin " " printedBinders))
 
 def psSyntaxTermSimpleForApplication : PsSyntaxTerm -> Bool
   | .reference _ => true
@@ -59,6 +76,9 @@ def psPrintArrowChain
     (binders : List String)
     (body : String) : String :=
   match binders with
-  | [] => body
-  | binder :: rest =>
-      binder ++ " -> " ++ psPrintArrowChain rest body
+  | List.nil => body
+  | List.cons binder rest =>
+      psPrintCommonConcat3
+        binder
+        " -> "
+        (psPrintArrowChain rest body)

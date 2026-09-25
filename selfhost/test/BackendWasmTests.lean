@@ -326,8 +326,10 @@ def psWasmStructureIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.projection
             "Point"
+            []
             (PsVerifiedIrExpr.record
               "Point"
+              []
               [
                 ("x", PsVerifiedIrExpr.var "x"),
                 ("y", PsVerifiedIrExpr.var "y")
@@ -350,8 +352,10 @@ def psWasmStructureIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.projection
             "SmallSigned"
+            []
             (PsVerifiedIrExpr.record
               "SmallSigned"
+              []
               [("value", PsVerifiedIrExpr.var "value")])
             "value"
       }
@@ -470,6 +474,7 @@ def psWasmMaybeIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.matchE
             "MaybeU32"
+            []
             (PsVerifiedIrExpr.constructor
               "MaybeU32"
               "some"
@@ -508,6 +513,7 @@ def psWasmMaybeIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.matchE
             "MaybeU32"
+            []
             (PsVerifiedIrExpr.constructor
               "MaybeU32"
               "none"
@@ -653,6 +659,7 @@ def psWasmRecursiveListIrModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.matchE
             "U32List"
+            []
             (PsVerifiedIrExpr.var "xs")
             [
               (

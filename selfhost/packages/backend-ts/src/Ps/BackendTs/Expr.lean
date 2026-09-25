@@ -36,17 +36,17 @@ def psTsExprUsesNameWithFuel :
           psTsExprUsesNameWithFuel fuel condition name
             || psTsExprUsesNameWithFuel fuel thenBranch name
             || psTsExprUsesNameWithFuel fuel elseBranch name
-      | .record _ fields =>
+      | .record _ _ fields =>
           fields.any
             (fun field =>
               psTsExprUsesNameWithFuel fuel field.2 name)
-      | .projection _ target _ =>
+      | .projection _ _ target _ =>
           psTsExprUsesNameWithFuel fuel target name
       | .constructor _ _ _ fields =>
           fields.any
             (fun field =>
               psTsExprUsesNameWithFuel fuel field.2 name)
-      | .matchE _ scrutinee alternatives =>
+      | .matchE _ _ scrutinee alternatives =>
           psTsExprUsesNameWithFuel fuel scrutinee name
             || alternatives.any
               (fun alternative =>
@@ -438,7 +438,7 @@ def psTsEmitExprWithFuel
                       Except.ok
                         ("(" ++ printedCondition ++ " ? " ++
                           printedThen ++ " : " ++ printedElse ++ ")")
-      | .record structureName fields =>
+      | .record structureName _ fields =>
           match psTsLookup brands structureName with
           | none =>
               Except.error (PsTsEmitError.unknownStructure structureName)
@@ -464,7 +464,7 @@ def psTsEmitExprWithFuel
                       ", " ++ psTsJoin ", " printedFields
                   Except.ok
                     ("{ [" ++ brand ++ "]: true" ++ suffix ++ " }")
-      | .projection _ target field =>
+      | .projection _ _ target field =>
           match psTsEmitExprWithFuel brands tags fuel target with
           | Except.error error => Except.error error
           | Except.ok printedTarget =>
@@ -496,7 +496,7 @@ def psTsEmitExprWithFuel
                         Except.ok
                           (access ++ generic ++ "(" ++
                             psTsJoin ", " printedFields ++ ")")
-      | .matchE inductiveName scrutinee alternatives =>
+      | .matchE inductiveName _ scrutinee alternatives =>
           match psTsLookup tags inductiveName with
           | none =>
               Except.error (PsTsEmitError.unknownInductive inductiveName)

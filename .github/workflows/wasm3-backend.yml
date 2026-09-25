@@ -8,6 +8,8 @@ on:
       - integrate/wasm3-owned
       - backend/wasm3-gc-adts
       - backend/wasm3-closures
+      - compiler-ir/generic-specialization
+      - integrate/generic-specialization
       - integrate/wasm3-closures
       - integrate/wasm3-gc-adts
     paths:
@@ -72,6 +74,13 @@ jobs:
           cd selfhost
           lake exe psc1_erasure_tests
 
+      - name: Run target-neutral generic specialization tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_ir_specialize_tests
+
       - name: Run owned Wasm backend tests
         shell: bash
         run: |
@@ -134,6 +143,15 @@ jobs:
           }
           if (instance.exports.applyTwiceIncrement(40) !== 42) {
             throw new Error('PSC1_WASM_RUNTIME_HIGHER_ORDER_CALL_REF_RESULT');
+          }
+          if (instance.exports.genericBoxRoundTrip(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GENERIC_BOX_RESULT');
+          }
+          if (instance.exports.genericIdU32(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GENERIC_FUNCTION_RESULT');
+          }
+          if (instance.exports.genericLengthTwo() !== 2) {
+            throw new Error('PSC1_WASM_RUNTIME_GENERIC_RECURSIVE_ADT_RESULT');
           }
           console.log('PSC1_WASM3_INTEGRATION: PASS');
           NODE

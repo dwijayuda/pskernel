@@ -104,6 +104,78 @@ function explicitArgument(
 }
 
 
+function preconstrainRemainingApplicationResult(
+  checker:TypeChecker,
+  metaContext:ExprMetaContext,
+  type:Expr,
+  remainingExplicitArgs:number,
+  expectedType:Expr,
+  localContext:LocalContext,
+):void {
+  let cursor=type;
+  let remaining=remainingExplicitArgs;
+  while(true){
+    const current=checker.whnf(metaContext.instantiate(cursor));
+    if(current.kind!=='forall'){
+      try{
+        metaContext.unify(
+          current,
+          metaContext.instantiate(expectedType),
+          localContext,
+        );
+      }catch{
+        // This is only an early constraint pass. The ordinary application
+        // checks below remain authoritative and will report any real mismatch.
+      }
+      return;
+    }
+
+    if(current.binderInfo==='default'){
+      if(remaining===0){
+        try{
+          metaContext.unify(
+            current,
+            metaContext.instantiate(expectedType),
+            localContext,
+          );
+        }catch{
+          // Defer mismatch reporting to the normal application result check.
+        }
+        return;
+      }
+      const placeholder=metaContext.mkFresh(
+        metaContext.instantiate(current.type),
+        localContext,
+        'natural',
+      );
+      cursor=instantiate1(current.body,placeholder);
+      remaining-=1;
+      continue;
+    }
+
+    if(current.binderInfo==='strictImplicit'&&remaining===0){
+      try{
+        metaContext.unify(
+          current,
+          metaContext.instantiate(expectedType),
+          localContext,
+        );
+      }catch{
+        // Defer mismatch reporting to the normal application result check.
+      }
+      return;
+    }
+
+    const placeholder=metaContext.mkFresh(
+      metaContext.instantiate(current.type),
+      localContext,
+      implicitKind(current.binderInfo),
+    );
+    cursor=instantiate1(current.body,placeholder);
+  }
+}
+
+
 export function elaborateApplication({
   environment,
   metaContext,
@@ -232,6 +304,18 @@ export function elaborateApplication({
         term=metaContext.instantiate(term);
         type=metaContext.instantiate(type);
       }
+    }
+    if(expectedType!==undefined){
+      preconstrainRemainingApplicationResult(
+        checker,
+        metaContext,
+        type,
+        args.length-explicitIndex,
+        expectedType,
+        localContext,
+      );
+      term=metaContext.instantiate(term);
+      type=metaContext.instantiate(type);
     }
   }
 

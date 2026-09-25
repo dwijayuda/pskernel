@@ -25,6 +25,12 @@ structure PsForallView where
   body : PsExpr
   binder : PsBinderInfo
 
+def psInferBoolNot (value : Bool) : Bool :=
+  if value then false else true
+
+def psInferNatNe (left right : Nat) : Bool :=
+  if Nat.beq left right then false else true
+
 def psInferEnsureSort
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -153,16 +159,16 @@ def psInferProjectionType
         targetType);
   match view.head with
   | .constE actualName _ =>
-      if !psNameEq actualName typeName then
+      if psInferBoolNot (psNameEq actualName typeName) then
         Except.error PsInferError.projectionUnsupported
       else
         match psEnvironmentFindInductive environment typeName with
         | none => Except.error PsInferError.projectionUnsupported
         | some info =>
             if
-                !info.isStructure
-                  || info.numIndices != 0
-                  || view.args.length != info.numParams then
+                psInferBoolNot info.isStructure
+                  || psInferNatNe info.numIndices 0
+                  || psInferNatNe view.args.length info.numParams then
               Except.error PsInferError.projectionUnsupported
             else
               match info.constructors with
@@ -175,7 +181,7 @@ def psInferProjectionType
                       Except.error PsInferError.projectionUnsupported
                   | some constructorInfo =>
                       if
-                          constructorInfo.numParams != info.numParams
+                          psInferNatNe constructorInfo.numParams info.numParams
                             || index >= constructorInfo.numFields then
                         Except.error PsInferError.projectionUnsupported
                       else

@@ -611,7 +611,7 @@ partial def psJsonParseValueWithFuel
 def psJsonParse
     (source : String) :
     Except PsJsonParseError PsJsonValue :=
-  let chars := source.toList
+  let chars := source.toList;
   match
       psJsonParseValueWithFuel
         (Except.error PsJsonParseError.fuelExhausted)

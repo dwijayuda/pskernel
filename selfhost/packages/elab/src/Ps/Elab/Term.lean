@@ -1978,15 +1978,18 @@ def psSyntaxRecordFieldName
   | [] => none
   | name :: _ => some name
 
+def psSyntaxRecordFieldMatchesName
+    (name : String)
+    (field : Prod PsSyntaxName PsSyntaxTerm) : Bool :=
+  match psSyntaxRecordFieldName field with
+  | none => false
+  | some fieldName => psStringEq fieldName name
+
 def psSyntaxRecordHasField
     (fields :
       List (Prod PsSyntaxName PsSyntaxTerm))
     (name : String) : Bool :=
-  List.any fields
-    (fun (field : Prod PsSyntaxName PsSyntaxTerm) =>
-      match psSyntaxRecordFieldName field with
-      | none => false
-      | some fieldName => psStringEq fieldName name)
+  List.any fields (psSyntaxRecordFieldMatchesName name)
 
 def psSyntaxRecordFieldsMatch
     (fields :

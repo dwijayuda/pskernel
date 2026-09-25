@@ -46,27 +46,65 @@ def Level.listEq : List Level → List Level → Bool
   | _, _ => false
 
 /--
-Lean 4.34 `Expr.eqv`-compatible structural equality. Binder display names and
-binder annotations on lambda/forall/let nodes are deliberately ignored; they
-are not part of kernel alpha-equivalence. Metadata payloads remain structural.
+Lean 4.34 `Expr.eqv`-compatible structural equality core. Binder display
+names and binder annotations on lambda/forall/let nodes are deliberately
+ignored; they are not part of kernel alpha-equivalence. Metadata payloads
+remain structural.
 -/
-partial def Expr.eq : Expr → Expr → Bool
+partial def Expr.eqCore : Expr → Expr → Bool
   | .bvar a, .bvar b => a == b
   | .fvar a, .fvar b => Name.eq a b
   | .mvar a, .mvar b => Name.eq a b
   | .sort a, .sort b => Level.eq a b
   | .const n₁ ls₁, .const n₂ ls₂ => Name.eq n₁ n₂ && Level.listEq ls₁ ls₂
-  | .app f₁ a₁, .app f₂ a₂ => Expr.eq f₁ f₂ && Expr.eq a₁ a₂
+  | .app f₁ a₁, .app f₂ a₂ => Expr.eqCore f₁ f₂ && Expr.eqCore a₁ a₂
   | .lam _ t₁ b₁ _, .lam _ t₂ b₂ _ =>
-    Expr.eq t₁ t₂ && Expr.eq b₁ b₂
+    Expr.eqCore t₁ t₂ && Expr.eqCore b₁ b₂
   | .forallE _ t₁ b₁ _, .forallE _ t₂ b₂ _ =>
-    Expr.eq t₁ t₂ && Expr.eq b₁ b₂
+    Expr.eqCore t₁ t₂ && Expr.eqCore b₁ b₂
   | .letE _ t₁ v₁ b₁ d₁, .letE _ t₂ v₂ b₂ d₂ =>
-    Expr.eq t₁ t₂ && Expr.eq v₁ v₂ && Expr.eq b₁ b₂ && d₁ == d₂
+    Expr.eqCore t₁ t₂ && Expr.eqCore v₁ v₂ && Expr.eqCore b₁ b₂ && d₁ == d₂
   | .lit a, .lit b => Literal.eq a b
-  | .mdata m₁ e₁, .mdata m₂ e₂ => m₁ == m₂ && Expr.eq e₁ e₂
-  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ => Name.eq n₁ n₂ && i₁ == i₂ && Expr.eq e₁ e₂
+  | .mdata m₁ e₁, .mdata m₂ e₂ => m₁ == m₂ && Expr.eqCore e₁ e₂
+  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
+    Name.eq n₁ n₂ && i₁ == i₂ && Expr.eqCore e₁ e₂
   | _, _ => false
+
+private theorem Expr.eqCoreSelf : ∀ e : Expr, Expr.eqCore e e = true := by
+  intro e
+  induction e with
+  | bvar index => simp [Expr.eqCore]
+  | fvar name => simp [Expr.eqCore, Name.eq]
+  | mvar name => simp [Expr.eqCore, Name.eq]
+  | sort level => simp [Expr.eqCore, Level.eq]
+  | const name levels =>
+      simp [Expr.eqCore, Name.eq, Level.listEq]
+  | app fn arg fnIH argIH =>
+      simp [Expr.eqCore, fnIH, argIH]
+  | lam name type body binderInfo typeIH bodyIH =>
+      simp [Expr.eqCore, typeIH, bodyIH]
+  | forallE name type body binderInfo typeIH bodyIH =>
+      simp [Expr.eqCore, typeIH, bodyIH]
+  | letE name type value body nondep typeIH valueIH bodyIH =>
+      simp [Expr.eqCore, typeIH, valueIH, bodyIH]
+  | lit value =>
+      cases value <;> simp [Expr.eqCore, Literal.eq]
+  | mdata metadata expr exprIH =>
+      simp [Expr.eqCore, exprIH]
+  | proj typeName index expr exprIH =>
+      simp [Expr.eqCore, Name.eq, exprIH]
+
+/--
+Semantically this is exactly `Expr.eqCore`. `withPtrEq` has a pure fallback
+and may only return early when pointer equality proves the same value is being
+compared; `eqCoreSelf` discharges that soundness obligation. This mirrors a
+runtime fast path without making pointer identity part of kernel semantics.
+-/
+def Expr.eq (a b : Expr) : Bool :=
+  withPtrEq a b (fun _ => Expr.eqCore a b) (by
+    intro h
+    cases h
+    exact Expr.eqCoreSelf a)
 
 /--
 Lean 4.34 `Expr.equal`-compatible binder-aware structural equality. Use this

@@ -143,7 +143,7 @@ def psJsonSkipWhitespace : List Char -> List Char
       if psJsonWhitespace char then
         psJsonSkipWhitespace rest
       else
-        char :: rest
+        List.cons char rest
 
 def psJsonHexValue (char : Char) : Option Nat :=
   let value : Nat := psJsonCharCode char;
@@ -167,12 +167,18 @@ def psJsonDecodeUnicode4
           psJsonHexValue c,
           psJsonHexValue d with
       | some av, some bv, some cv, some dv =>
-          let value :=
-            av * 4096 + bv * 256 + cv * 16 + dv
-          if value >= 55296 && value <= 57343 then
+          let value : Nat :=
+            Nat.add
+              (Nat.add
+                (Nat.mul av 4096)
+                (Nat.mul bv 256))
+              (Nat.add
+                (Nat.mul cv 16)
+                dv);
+          if psJsonNatInRange value 55296 57343 then
             Except.error PsJsonParseError.invalidUnicodeEscape
           else
-            Except.ok (Char.ofNat value, rest)
+            Except.ok (Prod.mk (Char.ofNat value) rest)
       | _, _, _, _ =>
           Except.error PsJsonParseError.invalidUnicodeEscape
   | _ => Except.error PsJsonParseError.unexpectedEnd
@@ -183,44 +189,45 @@ def psJsonParseStringChars :
     List Char ->
     Except PsJsonParseError (String × List Char)
   | 0, _, _ => Except.error PsJsonParseError.fuelExhausted
-  | _ + 1, [], _ => Except.error PsJsonParseError.unexpectedEnd
-  | fuel + 1, char :: rest, charsRev =>
-      if char == '"' then
+  | Nat.succ _, List.nil, _ =>
+      Except.error PsJsonParseError.unexpectedEnd
+  | Nat.succ fuel, List.cons char rest, charsRev =>
+      if psJsonCharEq char '"' then
         Except.ok (String.ofList charsRev.reverse, rest)
-      else if char == '\\' then
+      else if psJsonCharEq char '\\' then
         match rest with
         | [] => Except.error PsJsonParseError.unexpectedEnd
         | escaped :: tail =>
-            if escaped == '"' then
-              psJsonParseStringChars fuel tail ('"' :: charsRev)
-            else if escaped == '\\' then
-              psJsonParseStringChars fuel tail ('\\' :: charsRev)
-            else if escaped == '/' then
-              psJsonParseStringChars fuel tail ('/' :: charsRev)
-            else if escaped == 'b' then
-              psJsonParseStringChars fuel tail (Char.ofNat 8 :: charsRev)
-            else if escaped == 'f' then
-              psJsonParseStringChars fuel tail (Char.ofNat 12 :: charsRev)
-            else if escaped == 'n' then
-              psJsonParseStringChars fuel tail ('\n' :: charsRev)
-            else if escaped == 'r' then
-              psJsonParseStringChars fuel tail ('\r' :: charsRev)
-            else if escaped == 't' then
-              psJsonParseStringChars fuel tail ('\t' :: charsRev)
-            else if escaped == 'u' then
+            if psJsonCharEq escaped '"' then
+              psJsonParseStringChars fuel tail (List.cons '"' charsRev)
+            else if psJsonCharEq escaped '\\' then
+              psJsonParseStringChars fuel tail (List.cons '\\' charsRev)
+            else if psJsonCharEq escaped '/' then
+              psJsonParseStringChars fuel tail (List.cons '/' charsRev)
+            else if psJsonCharEq escaped 'b' then
+              psJsonParseStringChars fuel tail (List.cons (Char.ofNat 8) charsRev)
+            else if psJsonCharEq escaped 'f' then
+              psJsonParseStringChars fuel tail (List.cons (Char.ofNat 12) charsRev)
+            else if psJsonCharEq escaped 'n' then
+              psJsonParseStringChars fuel tail (List.cons '\n' charsRev)
+            else if psJsonCharEq escaped 'r' then
+              psJsonParseStringChars fuel tail (List.cons '\r' charsRev)
+            else if psJsonCharEq escaped 't' then
+              psJsonParseStringChars fuel tail (List.cons '\t' charsRev)
+            else if psJsonCharEq escaped 'u' then
               match psJsonDecodeUnicode4 tail with
               | Except.error error => Except.error error
               | Except.ok (decoded, afterUnicode) =>
                   psJsonParseStringChars
                     fuel
                     afterUnicode
-                    (decoded :: charsRev)
+                    (List.cons decoded charsRev)
             else
               Except.error PsJsonParseError.invalidEscape
-      else if char.val.toNat < 32 then
+      else if Nat.blt (psJsonCharCode char) 32 then
         Except.error PsJsonParseError.invalidEscape
       else
-        psJsonParseStringChars fuel rest (char :: charsRev)
+        psJsonParseStringChars fuel rest (List.cons char charsRev)
 
 def psJsonDigit (char : Char) : Bool :=
   let value : Nat := psJsonCharCode char;

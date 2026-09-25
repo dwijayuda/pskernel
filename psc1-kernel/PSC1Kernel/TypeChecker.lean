@@ -430,7 +430,7 @@ partial def kDebugNameString : Name → String
   | .num .anonymous value => toString value
   | .num parent value => kDebugNameString parent ++ "." ++ toString value
 
-def kLevelListsEq : List Level → List Level → Bool
+partial def kLevelListsEq : List Level → List Level → Bool
   | [], [] => true
   | left :: lefts, right :: rights =>
       Level.equivalent left right && kLevelListsEq lefts rights

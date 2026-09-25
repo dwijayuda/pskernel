@@ -224,10 +224,11 @@ def reduceNatBinary (op : Name) (a b : Nat) : Except String (Option Expr) := do
     return some (.lit (.nat r))
   else if Name.eq op kernelNatPowName then
     checkCountArg "Nat.pow" b
-    if a > 1 && b != 0 && natSizeInBytes a > leanNatMaxSizeDefault / b then
-      throw "the kernel refused to evaluate Nat.pow because the result would exceed the maximum numeral size"
-    else
-      return some (.lit (.nat (a ^ b)))
+    if a > 1 then
+      if b != 0 then
+        if natSizeInBytes a > leanNatMaxSizeDefault / b then
+          throw "the kernel refused to evaluate Nat.pow because the result would exceed the maximum numeral size"
+    return some (.lit (.nat (a ^ b)))
   else if Name.eq op kernelNatGcdName then
     return some (.lit (.nat (kernelNatGcd a b)))
   else if Name.eq op kernelNatModName then
@@ -625,13 +626,13 @@ partial def lazyDeltaReductionStep
         let right' ← deltaOnce ctx right
         return finish left right'
       else
-        if left.getAppNumArgs > 0 &&
-            right.getAppNumArgs > 0 &&
-            sameDeltaDefinition da db &&
-            da.hints.isRegular &&
-            appHeadLevelsEquivalent left right then
-          if ← isDefEqArgs ctx left right then
-            return .equal
+        if left.getAppNumArgs > 0 then
+          if right.getAppNumArgs > 0 then
+            if sameDeltaDefinition da db &&
+                da.hints.isRegular &&
+                appHeadLevelsEquivalent left right then
+              if ← isDefEqArgs ctx left right then
+                return .equal
         let left' ← deltaOnce ctx left
         let right' ← deltaOnce ctx right
         return finish left' right'

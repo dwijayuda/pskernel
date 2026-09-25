@@ -3,11 +3,13 @@ import Ps.BackendRust.Type
 structure PsRustCoverage where
   features : List String
   namedTypes : List String
+  unsupported : List String
 
 def psRustCoverageEmpty : PsRustCoverage :=
   {
     features := List.nil
     namedTypes := List.nil
+    unsupported := List.nil
   }
 
 def psRustCoverageContains :
@@ -35,6 +37,7 @@ def psRustCoverageAddFeature
     features :=
       psRustCoverageAddUnique coverage.features feature
     namedTypes := coverage.namedTypes
+    unsupported := coverage.unsupported
   }
 
 def psRustCoverageAddNamedType
@@ -47,6 +50,17 @@ def psRustCoverageAddNamedType
         "type:named"
     namedTypes :=
       psRustCoverageAddUnique coverage.namedTypes name
+    unsupported := coverage.unsupported
+  }
+
+def psRustCoverageAddUnsupported
+    (coverage : PsRustCoverage)
+    (reason : String) : PsRustCoverage :=
+  {
+    features := coverage.features
+    namedTypes := coverage.namedTypes
+    unsupported :=
+      psRustCoverageAddUnique coverage.unsupported reason
   }
 
 def psRustCoveragePrimitiveName
@@ -145,14 +159,18 @@ def psRustCoverageTypeWithFuel :
     PsVerifiedIrType ->
     PsRustCoverage
   | 0, coverage, _ =>
-      psRustCoverageAddFeature
-        coverage
+      psRustCoverageAddUnsupported
+        (psRustCoverageAddFeature
+          coverage
+          "coverage:fuelExhausted")
         "coverage:fuelExhausted"
   | fuel + 1, coverage, type =>
       match type with
       | PsVerifiedIrType.unknown =>
-          psRustCoverageAddFeature
-            coverage
+          psRustCoverageAddUnsupported
+            (psRustCoverageAddFeature
+              coverage
+              "type:unknown")
             "type:unknown"
       | PsVerifiedIrType.typeParameter _ =>
           psRustCoverageAddFeature
@@ -278,8 +296,10 @@ def psRustCoverageExprWithFuel :
     PsVerifiedIrExpr ->
     PsRustCoverage
   | 0, coverage, _ =>
-      psRustCoverageAddFeature
-        coverage
+      psRustCoverageAddUnsupported
+        (psRustCoverageAddFeature
+          coverage
+          "coverage:fuelExhausted")
         "coverage:fuelExhausted"
   | fuel + 1, coverage, expr =>
       let visitNested :=
@@ -526,11 +546,15 @@ def psRustCoverageImportList :
   | coverage, List.nil =>
       coverage
   | coverage, List.cons item rest =>
-      psRustCoverageImportList
-        (psRustCoverageType
+      let withImport :=
+        psRustCoverageAddUnsupported
           (psRustCoverageAddFeature
             coverage
             "module:externalImport")
+          "module:externalImport";
+      psRustCoverageImportList
+        (psRustCoverageType
+          withImport
           item.type)
         rest
 
@@ -592,18 +616,32 @@ def psRustCoverageReport
     psRustCoverageLines
       "PSC1_RUST_COVERAGE_NAMED_TYPE: "
       (psRustCoverageReverse coverage.namedTypes);
+  let unsupportedLines :=
+    psRustCoverageLines
+      "PSC1_RUST_COVERAGE_UNSUPPORTED: "
+      (psRustCoverageReverse coverage.unsupported);
+  let featureBlock :=
+    List.cons
+      (psRustConcat2
+        "PSC1_RUST_COVERAGE_FEATURE_COUNT: "
+        (toString (psRustCoverageLength coverage.features)))
+      featureLines;
+  let namedTypeBlock :=
+    List.cons
+      (psRustConcat2
+        "PSC1_RUST_COVERAGE_NAMED_TYPE_COUNT: "
+        (toString (psRustCoverageLength coverage.namedTypes)))
+      namedTypeLines;
+  let unsupportedBlock :=
+    List.cons
+      (psRustConcat2
+        "PSC1_RUST_COVERAGE_UNSUPPORTED_COUNT: "
+        (toString (psRustCoverageLength coverage.unsupported)))
+      unsupportedLines;
   psRustConcat2
     (psRustJoin
       "\n"
       (List.append
-        (List.cons
-          (psRustConcat2
-            "PSC1_RUST_COVERAGE_FEATURE_COUNT: "
-            (toString (psRustCoverageLength coverage.features)))
-          featureLines)
-        (List.cons
-          (psRustConcat2
-            "PSC1_RUST_COVERAGE_NAMED_TYPE_COUNT: "
-            (toString (psRustCoverageLength coverage.namedTypes)))
-          namedTypeLines)))
+        (List.append featureBlock namedTypeBlock)
+        unsupportedBlock))
     "\n"

@@ -220,7 +220,9 @@ def psWasmLowerExprWithFuel
   | 0, _ => Except.error PsWasmLowerError.unsupportedExpression
   | fuel + 1, expr =>
       let lower :=
-        psWasmLowerExprWithFuel profile parameters · fuel
+        fun expectedType nestedExpr =>
+          psWasmLowerExprWithFuel
+            profile parameters expectedType fuel nestedExpr
       match expr with
       | .literal literal =>
           match literal with

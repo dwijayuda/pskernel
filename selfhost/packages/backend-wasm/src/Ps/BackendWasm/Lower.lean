@@ -5,6 +5,7 @@ import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat
 import Ps.BackendWasm.RuntimeInt
 import Ps.BackendWasm.RuntimeArray
+import Ps.BackendWasm.RuntimeString
 
 inductive PsWasmLowerError where
   | unsupportedType
@@ -2659,8 +2660,10 @@ def psWasmLowerModule
   | Except.error _ =>
       Except.error PsWasmLowerError.unsupportedModuleFeature
   | Except.ok specialized =>
+      let stringAugmented :=
+        psWasmAugmentStringRuntime specialized
       let arrayAugmented :=
-        psWasmAugmentArrayHigherOrderRuntime specialized
+        psWasmAugmentArrayHigherOrderRuntime stringAugmented
       let natAugmented := psWasmAugmentNatRuntime arrayAugmented
       let augmented := psWasmAugmentIntRuntime natAugmented
       match psWasmLowerSpecializedModule profile augmented with

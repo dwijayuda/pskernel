@@ -8,6 +8,9 @@ inductive PsWasmLowerError where
   | unsupportedIntrinsic
   | invalidIntrinsicArity
   | unknownVariable (name : String)
+  | unknownStructure (name : String)
+  | unknownStructureField (structureName : String) (field : String)
+  | missingRecordField (structureName : String) (field : String)
   | unsupportedModuleFeature
 
 structure PsWasmLowerState where
@@ -22,13 +25,9 @@ def psWasmLowerParameterType
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrType) :
     Except PsWasmLowerError PsWasmValueType :=
-  match type with
-  | .primitive primitive =>
-      match psWasmValueTypeOfPrimitive profile primitive with
-      | .noValue => Except.error PsWasmLowerError.unsupportedType
-      | .refT _ => Except.error PsWasmLowerError.unsupportedType
-      | valueType => Except.ok valueType
-  | _ => Except.error PsWasmLowerError.unsupportedType
+  match psWasmValueTypeOfIrType? profile type with
+  | none => Except.error PsWasmLowerError.unsupportedType
+  | some valueType => Except.ok valueType
 
 def psWasmLowerResultType
     (profile : PsWasmTargetProfile)
@@ -36,12 +35,10 @@ def psWasmLowerResultType
     Except PsWasmLowerError (List PsWasmValueType) :=
   match type with
   | .primitive .unit => Except.ok []
-  | .primitive primitive =>
-      match psWasmValueTypeOfPrimitive profile primitive with
-      | .noValue => Except.ok []
-      | .refT _ => Except.error PsWasmLowerError.unsupportedType
-      | valueType => Except.ok [valueType]
-  | _ => Except.error PsWasmLowerError.unsupportedType
+  | _ =>
+      match psWasmValueTypeOfIrType? profile type with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some valueType => Except.ok [valueType]
 
 def psWasmLowerParameterTypes
     (profile : PsWasmTargetProfile) :
@@ -79,6 +76,115 @@ def psWasmFloatingValueType
   match type with
   | .float32 => .f32
   | .float => .f64
+
+def psWasmFindStructure :
+    List PsVerifiedIrStructure -> String -> Option PsVerifiedIrStructure
+  | [], _ => none
+  | structure :: rest, name =>
+      if structure.name == name then
+        some structure
+      else
+        psWasmFindStructure rest name
+
+def psWasmFindStructureFieldLoop
+    (fieldName : String) :
+    Nat ->
+    List PsVerifiedIrStructureField ->
+    Option (Nat × PsVerifiedIrStructureField)
+  | _, [] => none
+  | index, field :: rest =>
+      if field.name == fieldName then
+        some (index, field)
+      else
+        psWasmFindStructureFieldLoop
+          fieldName (index + 1) rest
+
+def psWasmFindStructureField
+    (structure : PsVerifiedIrStructure)
+    (fieldName : String) :
+    Option (Nat × PsVerifiedIrStructureField) :=
+  psWasmFindStructureFieldLoop fieldName 0 structure.fields
+
+def psWasmFindRecordField :
+    List (String × PsVerifiedIrExpr) ->
+    String ->
+    Option PsVerifiedIrExpr
+  | [], _ => none
+  | field :: rest, name =>
+      if field.1 == name then
+        some field.2
+      else
+        psWasmFindRecordField rest name
+
+def psWasmStructGetInstruction
+    (structureName : String)
+    (fieldIndex : Nat)
+    (type : PsVerifiedIrType) : PsWasmInstruction :=
+  match type with
+  | .primitive .uint8 =>
+      .structGetU structureName fieldIndex
+  | .primitive .uint16 =>
+      .structGetU structureName fieldIndex
+  | .primitive .int8 =>
+      .structGetS structureName fieldIndex
+  | .primitive .int16 =>
+      .structGetS structureName fieldIndex
+  | _ => .structGet structureName fieldIndex
+
+def psWasmLowerStructureField
+    (profile : PsWasmTargetProfile)
+    (field : PsVerifiedIrStructureField) :
+    Except PsWasmLowerError PsWasmStructField :=
+  match psWasmStorageTypeOfIrType? profile field.type with
+  | none => Except.error PsWasmLowerError.unsupportedType
+  | some storageType =>
+      Except.ok {
+        name := field.name
+        storageType := storageType
+      }
+
+def psWasmLowerStructureFields
+    (profile : PsWasmTargetProfile) :
+    List PsVerifiedIrStructureField ->
+    Except PsWasmLowerError (List PsWasmStructField)
+  | [] => Except.ok []
+  | field :: rest =>
+      match psWasmLowerStructureField profile field with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          match psWasmLowerStructureFields profile rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok (lowered :: loweredRest)
+
+def psWasmLowerStructure
+    (profile : PsWasmTargetProfile)
+    (structure : PsVerifiedIrStructure) :
+    Except PsWasmLowerError PsWasmStructType :=
+  match structure.typeParameters with
+  | _ :: _ => Except.error PsWasmLowerError.unsupportedType
+  | [] =>
+      match psWasmLowerStructureFields profile structure.fields with
+      | Except.error error => Except.error error
+      | Except.ok fields =>
+          Except.ok {
+            name := structure.name
+            fields := fields
+          }
+
+def psWasmLowerStructures
+    (profile : PsWasmTargetProfile) :
+    List PsVerifiedIrStructure ->
+    Except PsWasmLowerError (List PsWasmStructType)
+  | [] => Except.ok []
+  | structure :: rest =>
+      match psWasmLowerStructure profile structure with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          match psWasmLowerStructures profile rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok (lowered :: loweredRest)
 
 def psWasmParameterBindingsLoop :
     Nat -> List PsVerifiedIrParameter -> List (String × Nat)

@@ -427,6 +427,9 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.letE
             "xs"
+            (PsVerifiedIrType.named
+              "Array"
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.arrayPush
               [
@@ -445,6 +448,9 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
               ])
             (PsVerifiedIrExpr.letE
               "ys"
+              (PsVerifiedIrType.named
+                "Array"
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.arraySetIfInBounds
                 [

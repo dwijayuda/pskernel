@@ -1303,17 +1303,18 @@ def psElabPushRecursiveHypotheses
             | none =>
                 withLocal
             | some recursion =>
+                let nextRecursion : PsElabStructuralRecursion := {
+                  functionName := recursion.functionName
+                  explicitParameterIds := recursion.explicitParameterIds
+                  recursiveParameterIndex := recursion.recursiveParameterIndex
+                  calls :=
+                    List.cons
+                      (Prod.mk field.id pushed.id)
+                      recursion.calls
+                };
                 psElabContextWithStructuralRecursion
                   withLocal
-                  (some {
-                    functionName := recursion.functionName
-                    explicitParameterIds := recursion.explicitParameterIds
-                    recursiveParameterIndex := recursion.recursiveParameterIndex
-                    calls :=
-                      List.cons
-                        (Prod.mk field.id pushed.id)
-                        recursion.calls
-                  });
+                  (Option.some nextRecursion);
           psElabPushRecursiveHypotheses
             expectedType
             fields

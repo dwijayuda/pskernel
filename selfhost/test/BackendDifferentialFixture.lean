@@ -147,6 +147,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                   type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
                 }
               ]
+              (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.natAdd
                 [
@@ -206,6 +207,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                     type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
                   }
                 ]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
                 (PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.natAdd
                   [
@@ -261,6 +263,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                     type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
                   }
                 ]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
                 (PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.natAdd
                   [

@@ -1042,7 +1042,9 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
     let some oursInfo := ours.find? name
       | throw <| IO.userError "PSC1 simple inductive metadata missing"
     let some leanInfo := leanEnv.find? (toLeanName name)
-      | throw <| IO.userError "Lean 4.34 simple inductive metadata missing"
+      | throw <| IO.userError (
+          "Lean 4.34 simple inductive metadata missing: " ++
+          (toLeanName name).toString)
     assertTrue "simple inductive generated type differs from Lean 4.34"
       (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
 

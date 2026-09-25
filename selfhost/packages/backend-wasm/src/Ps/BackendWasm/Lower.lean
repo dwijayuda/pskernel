@@ -808,6 +808,55 @@ def psWasmLowerExprWithFuel
                               field.type]
                         state := lowered.state
                       }
+      | .constructor
+          inductiveName
+          constructorName
+          typeArguments
+          fields =>
+          match typeArguments with
+          | _ :: _ =>
+              Except.error PsWasmLowerError.unsupportedType
+          | [] =>
+              match psWasmFindInductive inductives inductiveName with
+              | none =>
+                  Except.error
+                    (PsWasmLowerError.unknownInductive inductiveName)
+              | some inductiveInfo =>
+                  match inductiveInfo.typeParameters with
+                  | _ :: _ =>
+                      Except.error PsWasmLowerError.unsupportedType
+                  | [] =>
+                      match
+                          psWasmFindConstructor
+                            inductiveInfo.constructors
+                            constructorName with
+                      | none =>
+                          Except.error
+                            (PsWasmLowerError.unknownConstructor
+                              inductiveName
+                              constructorName)
+                      | some constructorInfo =>
+                          match
+                              psWasmLowerConstructorValuesWith
+                                profile
+                                lower
+                                inductiveName
+                                constructorInfo
+                                fields
+                                state
+                                constructorInfo.fields with
+                          | Except.error error =>
+                              Except.error error
+                          | Except.ok lowered =>
+                              Except.ok {
+                                instructions :=
+                                  lowered.instructions ++
+                                    [PsWasmInstruction.structNew
+                                      (psWasmConstructorTypeName
+                                        inductiveName
+                                        constructorName)]
+                                state := lowered.state
+                              }
       | .ifE condition thenBranch elseBranch =>
           psWasmLowerIfWith
             lower state expected condition thenBranch elseBranch

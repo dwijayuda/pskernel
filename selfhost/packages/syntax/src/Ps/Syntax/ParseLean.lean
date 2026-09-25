@@ -2086,25 +2086,30 @@ def psLeanPatternListContainsHead
           target
 
 def psLeanEquationHeadPatternsAcc
-    (clauses : List PsLeanEquationClause)
-    (patternsRev : List PsSyntaxPattern) :
+    (clauses : List PsLeanEquationClause) :
+    List PsSyntaxPattern ->
     List PsSyntaxPattern :=
   match clauses with
-  | [] => psParseListReverse patternsRev
+  | [] =>
+      fun (patternsRev : List PsSyntaxPattern) =>
+        psParseListReverse patternsRev
   | List.cons clause rest =>
-      match clause.patterns with
-      | [] =>
-          psLeanEquationHeadPatternsAcc rest patternsRev
-      | List.cons pattern _ =>
-          if
-              psLeanPatternListContainsHead
-                patternsRev
-                pattern then
-            psLeanEquationHeadPatternsAcc rest patternsRev
-          else
-            psLeanEquationHeadPatternsAcc
-              rest
-              (List.cons pattern patternsRev)
+      let smaller :
+          List PsSyntaxPattern ->
+          List PsSyntaxPattern :=
+        psLeanEquationHeadPatternsAcc rest;
+      fun (patternsRev : List PsSyntaxPattern) =>
+        match clause.patterns with
+        | [] =>
+            smaller patternsRev
+        | List.cons pattern _ =>
+            if
+                psLeanPatternListContainsHead
+                  patternsRev
+                  pattern then
+              smaller patternsRev
+            else
+              smaller (List.cons pattern patternsRev)
 
 def psLeanEquationHeadPatterns
     (clauses : List PsLeanEquationClause) :
@@ -2137,26 +2142,29 @@ def psLeanEquationClauseForBranch
 
 def psLeanEquationClausesForBranchAcc
     (branch : PsSyntaxPattern)
-    (clauses : List PsLeanEquationClause)
-    (resultRev : List PsLeanEquationClause) :
+    (clauses : List PsLeanEquationClause) :
+    List PsLeanEquationClause ->
     List PsLeanEquationClause :=
   match clauses with
-  | [] => psParseListReverse resultRev
+  | [] =>
+      fun (resultRev : List PsLeanEquationClause) =>
+        psParseListReverse resultRev
   | List.cons clause rest =>
-      match
-          psLeanEquationClauseForBranch
-            branch
-            clause with
-      | none =>
-          psLeanEquationClausesForBranchAcc
-            branch
-            rest
-            resultRev
-      | some stripped =>
-          psLeanEquationClausesForBranchAcc
-            branch
-            rest
-            (List.cons stripped resultRev)
+      let smaller :
+          List PsLeanEquationClause ->
+          List PsLeanEquationClause :=
+        psLeanEquationClausesForBranchAcc
+          branch
+          rest;
+      fun (resultRev : List PsLeanEquationClause) =>
+        match
+            psLeanEquationClauseForBranch
+              branch
+              clause with
+        | none =>
+            smaller resultRev
+        | some stripped =>
+            smaller (List.cons stripped resultRev)
 
 def psLeanEquationClausesForBranch
     (branch : PsSyntaxPattern)

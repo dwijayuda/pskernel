@@ -992,13 +992,13 @@ partial def ensureForall
   | _ => .error "expected function type"
 
 
-def levelListsEquivalent : List Level → List Level → Bool
+partial def levelListsEquivalent : List Level → List Level → Bool
   | [], [] => true
   | a :: as, b :: bs =>
     Level.equivalent a b && levelListsEquivalent as bs
   | _, _ => false
 
-def deltaDefinition? (ctx : CheckerContext) (e : Expr) : Option DefinitionInfo :=
+partial def deltaDefinition? (ctx : CheckerContext) (e : Expr) : Option DefinitionInfo :=
   match e.getAppFn with
   | .const name levels =>
     match ctx.env.find? name with
@@ -1007,7 +1007,7 @@ def deltaDefinition? (ctx : CheckerContext) (e : Expr) : Option DefinitionInfo :
     | _ => none
   | _ => none
 
-def quickReducedDefEq (a b : Expr) : Option Bool :=
+partial def quickReducedDefEq (a b : Expr) : Option Bool :=
   if Expr.eq a b then
     some true
   else
@@ -1035,10 +1035,10 @@ partial def tryUnfoldProjApp
         return some reduced
   | _ => return none
 
-def sameDeltaDefinition (a b : DefinitionInfo) : Bool :=
+partial def sameDeltaDefinition (a b : DefinitionInfo) : Bool :=
   Name.eq a.base.name b.base.name
 
-def appHeadLevelsEquivalent (a b : Expr) : Bool :=
+partial def appHeadLevelsEquivalent (a b : Expr) : Bool :=
   match a.getAppFn, b.getAppFn with
   | .const _ as, .const _ bs => levelListsEquivalent as bs
   | _, _ => false

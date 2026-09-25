@@ -161,8 +161,10 @@ def psEncodeCodecLevels
   | Except.error error => Except.error error
   | Except.ok encoded => Except.ok (psJsonArray encoded)
 
-def psEncodeCodecExpr :
-    PsExpr -> Except PsCheckedAdmissionCodecError String
+def psEncodeCodecExpr
+    (expr : PsExpr) :
+    Except PsCheckedAdmissionCodecError String :=
+  match expr with
   | .bvar index =>
       Except.ok
         (psJsonObject [

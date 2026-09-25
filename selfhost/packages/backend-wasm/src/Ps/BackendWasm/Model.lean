@@ -29,6 +29,9 @@ inductive PsWasmInstruction where
   | localSet (index : Nat)
   | call (name : String)
   | return_
+  | ifStart (result : Option PsWasmValueType)
+  | else_
+  | end_
   | i32Const (value : Int)
   | i64Const (value : Int)
   | f32ConstBits (bits : UInt32)

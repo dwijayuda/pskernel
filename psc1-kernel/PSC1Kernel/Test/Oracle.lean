@@ -833,6 +833,102 @@ def assertStringLiteralDefEqOracle : IO Unit := do
     (ours == lean)
   assertTrue "Lean 4.34 should equate literal and String.ofList form" lean
 
+def makeQuotEqEnvironment (varyBinderMetadata : Bool) : PSC1Kernel.Environment :=
+  let u : PSC1Kernel.Name := .str .anonymous "quotOracleU"
+  let eqName := PSC1Kernel.Kernel.kernelEqName
+  let reflName : PSC1Kernel.Name := .str eqName "refl"
+  let rawEqType := PSC1Kernel.Kernel.expectedEqType u
+  let rawReflType := PSC1Kernel.Kernel.expectedEqReflType u
+  let eqType :=
+    if varyBinderMetadata then
+      match rawEqType with
+      | .forallE _ domain body _ =>
+          .forallE (.str .anonymous "ChangedEqBinder") domain body .strictImplicit
+      | other => other
+    else
+      rawEqType
+  let reflType :=
+    if varyBinderMetadata then
+      match rawReflType with
+      | .forallE _ domain body _ =>
+          .forallE (.str .anonymous "ChangedReflBinder") domain body .instImplicit
+      | other => other
+    else
+      rawReflType
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.inductInfo {
+    base := { name := eqName, levelParams := [u], type := eqType }
+    numParams := 2
+    numIndices := 1
+    all := [eqName]
+    ctors := [reflName]
+    numNested := 0
+    isRec := false
+    isReflexive := true
+    isUnsafe := false
+  })
+  env1.addUnchecked (.ctorInfo {
+    base := { name := reflName, levelParams := [u], type := reflType }
+    induct := eqName
+    cidx := 0
+    numParams := 2
+    numFields := 0
+    isUnsafe := false
+  })
+
+def assertQuotAdmissionOracle : IO Unit := do
+  -- Lean's quotient bootstrap compares Eq/Eq.refl structurally while ignoring
+  -- binder display metadata. Exercise that exact boundary explicitly.
+  let base := makeQuotEqEnvironment true
+  let admitted ← exceptToIO
+    "PSC1 Quot admission with binder-metadata variation"
+    (PSC1Kernel.Kernel.addQuot base)
+  assertTrue "Quot admission did not mark the environment initialized"
+    admitted.quotInitialized
+
+  let expectedNames : List PSC1Kernel.Name := [
+    PSC1Kernel.kernelQuotName,
+    PSC1Kernel.kernelQuotMkName,
+    PSC1Kernel.kernelQuotLiftName,
+    PSC1Kernel.kernelQuotIndName
+  ]
+  for name in expectedNames do
+    assertTrue "Quot admission omitted a generated primitive"
+      (admitted.contains name)
+
+  -- Re-initialization is idempotent in final Lean 4.34.
+  let admittedAgain ← exceptToIO
+    "PSC1 Quot admission idempotence"
+    (PSC1Kernel.Kernel.addQuot admitted)
+  assertTrue "Quot admission idempotence changed environment size"
+    (admittedAgain.size == admitted.size)
+
+  -- Generated types must agree with the actual Lean 4.34 Prelude environment.
+  Lean.initSearchPath (← Lean.findSysroot)
+  let leanEnv ← Lean.importModules #[{ module := `Init.Prelude }] {}
+  for name in expectedNames do
+    let some oursInfo := admitted.find? name
+      | throw <| IO.userError "PSC1 Quot primitive missing after admission"
+    let some leanInfo := leanEnv.find? (toLeanName name)
+      | throw <| IO.userError "Lean 4.34 Quot primitive missing from Init.Prelude"
+    assertTrue "generated Quot primitive type differs from Lean 4.34"
+      (Lean.Expr.equal (toLeanExpr oursInfo.type) leanInfo.type)
+
+  -- Final Lean 4.34 checks all four names before raw insertion; an occupied
+  -- primitive name must reject initialization instead of overwriting it.
+  let collision := base.addUnchecked (.axiomInfo {
+    base := {
+      name := PSC1Kernel.kernelQuotLiftName
+      levelParams := []
+      type := .sort .zero
+    }
+    isUnsafe := false
+  })
+  match PSC1Kernel.Kernel.addQuot collision with
+  | .ok _ =>
+      throw <| IO.userError "Quot admission overwrote an occupied primitive name"
+  | .error _ => pure ()
+
 def assertExprOracle : IO Unit := do
   let x : PSC1Kernel.Name := .str .anonymous "x"
   let A : PSC1Kernel.Name := .str .anonymous "A"
@@ -1346,6 +1442,7 @@ def run : IO Unit := do
   assertBinderInfoDefEqOracle
   assertStringLiteralExpansionShape
   assertStringLiteralDefEqOracle
+  assertQuotAdmissionOracle
   assertProjectionOracle
   assertOrdinaryRecursorOracle
   assertNatLiteralRecursorOracle

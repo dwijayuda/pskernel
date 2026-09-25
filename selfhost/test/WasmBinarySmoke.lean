@@ -107,6 +107,38 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                   1)
             ]
       }
+,
+      {
+        name := "selectU32"
+        typeParameters := []
+        parameters := [
+          {
+            name := "flag"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.bool
+          },
+          {
+            name := "whenTrue"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "whenFalse"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.ifE
+            (PsVerifiedIrExpr.var "flag")
+            (PsVerifiedIrExpr.var "whenTrue")
+            (PsVerifiedIrExpr.var "whenFalse")
+      }
     ]
   }
 

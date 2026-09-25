@@ -184,46 +184,59 @@ def psElabProjectionStep
       match psEnvironmentFindInductive current.context.environment typeName with
       | none => Except.error PsElabError.unsupportedTerm
       | some info =>
-          if
-              !info.isStructure
-                || info.numIndices != 0
-                || view.args.length != info.numParams then
+          let projectionInvalid :=
+            if info.isStructure then
+              if Nat.beq info.numIndices 0 then
+                if Nat.beq view.args.length info.numParams then
+                  false
+                else
+                  true
+              else
+                true
+            else
+              true;
+          if projectionInvalid then
             Except.error PsElabError.unsupportedTerm
           else
             match info.constructors with
-            | [constructorName] =>
-                match
-                    psEnvironmentFindConstructor
-                      current.context.environment
-                      constructorName with
-                | none => Except.error PsElabError.unsupportedTerm
-                | some constructorInfo =>
+            | List.nil =>
+                Except.error PsElabError.unsupportedTerm
+            | List.cons constructorName remainingConstructors =>
+                match remainingConstructors with
+                | List.nil =>
                     match
-                        psElabProjectionApplyParameters
-                          current.context
-                          view.args
-                          constructorInfo.type with
-                    | Except.error error => Except.error error
-                    | Except.ok fieldCursor =>
+                        psEnvironmentFindConstructor
+                          current.context.environment
+                          constructorName with
+                    | none => Except.error PsElabError.unsupportedTerm
+                    | some constructorInfo =>
                         match
-                            psElabFindStructureField
+                            psElabProjectionApplyParameters
                               current.context
-                              typeName
-                              current.term
-                              fieldName
-                              0
-                              constructorInfo.numFields
-                              fieldCursor with
+                              view.args
+                              constructorInfo.type with
                         | Except.error error => Except.error error
-                        | Except.ok index =>
-                            psElabResolvedTerm
-                              current.context
-                              (PsExpr.proj
-                                typeName
-                                index
-                                current.term)
-                              none
-            | _ => Except.error PsElabError.unsupportedTerm
+                        | Except.ok fieldCursor =>
+                            match
+                                psElabFindStructureField
+                                  current.context
+                                  typeName
+                                  current.term
+                                  fieldName
+                                  0
+                                  constructorInfo.numFields
+                                  fieldCursor with
+                            | Except.error error => Except.error error
+                            | Except.ok index =>
+                                psElabResolvedTerm
+                                  current.context
+                                  (PsExpr.proj
+                                    typeName
+                                    index
+                                    current.term)
+                                  none
+                | List.cons _ _ =>
+                    Except.error PsElabError.unsupportedTerm
   | _ => Except.error PsElabError.unsupportedTerm
 
 def psElabProjectionChain

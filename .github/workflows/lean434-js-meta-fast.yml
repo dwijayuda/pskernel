@@ -69,3 +69,36 @@ jobs:
           node scripts/lean434-js-metavar-context-smoke.mjs \
             lean434-metavar-context-bootstrap.ndjson \
             lean434-metavar-context-runtime-metadata.json
+      - name: Compile real Lean.Meta WHNF probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean -o Oracle/ReplayProbe/RuntimeMetaProbe.olean \
+            Oracle/ReplayProbe/RuntimeMetaProbe.lean
+      - name: Export Lean.Meta WHNF runtime metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          LEAN_PATH="$PWD:${LEAN_PATH:-}" \
+            npm run generate:lean434-runtime-metadata -- \
+              Oracle.ReplayProbe.RuntimeMetaProbe \
+              --out lean434-whnf-runtime-metadata.json
+      - name: Generate focused real Lean.Meta WHNF corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          LEAN_PATH="$PWD:${LEAN_PATH:-}" \
+            lean --run oracle/replay-probe/DependencyExport.lean \
+            Oracle.ReplayProbe.RuntimeMetaProbe \
+            --selected-after Init.Prelude \
+            Lean.Meta.whnfImp \
+            ProofScript.RuntimeProbe.whnfWithEmptyEnv \
+            Lean.ImportingFlag.importingRef \
+            Lean.EnvExtension.envExtensionsRef \
+            > lean434-whnf-bootstrap.ndjson
+          test -s lean434-whnf-bootstrap.ndjson
+      - name: Execute real Lean.Meta WHNF in JavaScript
+        run: |
+          node scripts/lean434-js-whnf-smoke.mjs \
+            lean434-whnf-bootstrap.ndjson \
+            lean434-whnf-runtime-metadata.json

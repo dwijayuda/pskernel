@@ -13,8 +13,8 @@ A structure groups fields.
 
 ```proofscript
 structure Point where {
-  x : Nat;
-  y : Nat;
+  x: Nat;
+  y: Nat;
 }
 ```
 
@@ -27,7 +27,7 @@ It is not merely a JavaScript object shape.
 The supported record-value family uses Lean-style assignment punctuation:
 
 ```proofscript
-const origin : Point := {
+const origin: Point := {
   x := 0,
   y := 0
 };
@@ -47,9 +47,9 @@ projections.
 An inductive lists constructors.
 
 ```proofscript
-inductive PsOption(α : Type) where {
+inductive PsOption(α: Type) where {
   | none;
-  | some(value : α);
+  | some(value: α);
 };
 ```
 
@@ -60,9 +60,9 @@ A value of `PsOption(Nat)` is built by one of the declared constructors.
 A result type can distinguish success and error payloads:
 
 ```proofscript
-inductive PsResult(α : Type, ε : Type) where {
-  | ok(value : α);
-  | error(error : ε);
+inductive PsResult(α: Type, ε: Type) where {
+  | ok(value: α);
+  | error(error: ε);
 };
 ```
 
@@ -71,8 +71,8 @@ The alternatives are explicit in the type.
 ## Match
 
 ```proofscript
-function resultIsOk {α : Type}{ε : Type}
-(value : PsResult(α, ε)) : Bool :=
+function resultIsOk {α: Type}{ε: Type}
+(value: PsResult(α, ε)): Bool :=
   match value with {
     | .ok x => true;
     | .error err => false;
@@ -101,9 +101,9 @@ Dependent types can make branch result types even more precise.
 ## Recursive data
 
 ```proofscript
-inductive PsList(α : Type) where {
+inductive PsList(α: Type) where {
   | nil;
-  | cons(head : α, tail : PsList(α));
+  | cons(head: α, tail: PsList(α));
 };
 ```
 
@@ -115,7 +115,7 @@ well-formedness.
 ## Recursive functions by matching
 
 ```proofscript
-function listLength {α : Type}(xs : PsList(α)) : Nat :=
+function listLength {α: Type}(xs: PsList(α)): Nat :=
   match xs with {
     | .nil => 0;
     | .cons head tail => 1 + listLength(tail);

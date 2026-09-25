@@ -115,7 +115,7 @@ jobs:
             throw new Error('PSC1_WASM_VALIDATE_FAILED');
           }
           const {instance}=await WebAssembly.instantiate(bytes);
-          if (instance.exports.answer() !== 42) {
+          if (instance.exports.addU32(20, 22) !== 42) {
             throw new Error('PSC1_WASM_RUNTIME_RESULT');
           }
           console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');

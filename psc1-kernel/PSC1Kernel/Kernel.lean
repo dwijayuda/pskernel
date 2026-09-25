@@ -1,4 +1,4 @@
-import PSC1Kernel.TypeChecker
+import PSC1Kernel.Quot
 
 namespace PSC1Kernel
 

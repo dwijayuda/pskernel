@@ -66,6 +66,85 @@ def assertLevelPairs (levels : List PSC1Kernel.Level) : IO Unit := do
       j := j + 1
     i := i + 1
 
+
+def mkBase (name : PSC1Kernel.Name) (type : PSC1Kernel.Expr) : PSC1Kernel.ConstantBase :=
+  { name := name, levelParams := [], type := type }
+
+def assertProjectionOracle : IO Unit := do
+  let S : PSC1Kernel.Name := .str .anonymous "S"
+  let Smk : PSC1Kernel.Name := .str S "mk"
+  let T : PSC1Kernel.Name := .str .anonymous "T"
+  let Tmk : PSC1Kernel.Name := .str T "mk"
+  let NatN : PSC1Kernel.Name := .str .anonymous "Nat"
+  let type0 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let sT : PSC1Kernel.Expr := .const S []
+  let tT : PSC1Kernel.Expr := .const T []
+  let ctorSType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "a") natT
+      (.forallE (.str .anonymous "b") natT sT .default)
+      .default
+  let ctorTType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "a") natT tT .default
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.axiomInfo { base := mkBase NatN type0, isUnsafe := false })
+  let env2 := env1.addUnchecked (.inductInfo {
+    base := mkBase S type0
+    numParams := 0
+    numIndices := 0
+    all := [S]
+    ctors := [Smk]
+    numNested := 0
+    isRec := false
+    isReflexive := false
+    isUnsafe := false
+  })
+  let env3 := env2.addUnchecked (.ctorInfo {
+    base := mkBase Smk ctorSType
+    induct := S
+    cidx := 0
+    numParams := 0
+    numFields := 2
+    isUnsafe := false
+  })
+  let env4 := env3.addUnchecked (.inductInfo {
+    base := mkBase T type0
+    numParams := 0
+    numIndices := 0
+    all := [T]
+    ctors := [Tmk]
+    numNested := 0
+    isRec := false
+    isReflexive := false
+    isUnsafe := false
+  })
+  let env := env4.addUnchecked (.ctorInfo {
+    base := mkBase Tmk ctorTType
+    induct := T
+    cidx := 0
+    numParams := 0
+    numFields := 1
+    isUnsafe := false
+  })
+  let ctx := PSC1Kernel.CheckerContext.empty env
+  let value : PSC1Kernel.Expr :=
+    .app (.app (.const Smk []) (.lit (.nat 7))) (.lit (.nat 11))
+  let p0 : PSC1Kernel.Expr := .proj S 0 value
+  let p1 : PSC1Kernel.Expr := .proj S 1 value
+  let badName : PSC1Kernel.Expr := .proj T 0 value
+  let r0 ← PSC1Kernel.whnf ctx p0
+  let r1 ← PSC1Kernel.whnf ctx p1
+  assertTrue "projection field 0 did not reduce" (PSC1Kernel.Expr.eq r0 (.lit (.nat 7)))
+  assertTrue "projection field 1 did not reduce" (PSC1Kernel.Expr.eq r1 (.lit (.nat 11)))
+  match PSC1Kernel.infer ctx p0 with
+  | .ok ty => assertTrue "projection field type mismatch" (PSC1Kernel.Expr.eq ty natT)
+  | .error msg => throw <| IO.userError ("projection infer failed: " ++ msg)
+  match PSC1Kernel.infer ctx badName with
+  | .ok _ => throw <| IO.userError "projection with wrong structure name was accepted"
+  | .error _ => pure ()
+  let badReduce := PSC1Kernel.reduceProjCore ctx T 0 value
+  assertTrue "reduceProjCore ignored structure name" badReduce.isNone
+
 def assertExprOracle : IO Unit := do
   let x : PSC1Kernel.Name := .str .anonymous "x"
   let A : PSC1Kernel.Name := .str .anonymous "A"
@@ -114,7 +193,8 @@ def run : IO Unit := do
   ]
   assertLevelPairs levels
   assertExprOracle
-  IO.println "PSC1Kernel Lean 4.34 foundational oracle: PASS"
+  assertProjectionOracle
+  IO.println "PSC1Kernel Lean 4.34 foundational + projection oracle: PASS"
 
 end PSC1Kernel.Test
 

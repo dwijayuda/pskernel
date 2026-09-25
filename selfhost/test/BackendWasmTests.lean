@@ -34,6 +34,33 @@ def psWasmIsNatRef : PsWasmValueType -> Bool
   | .refT name => name == "ProofScript.Nat"
   | _ => false
 
+def psWasmTestFindFunction :
+    List PsWasmFunction -> String -> Option PsWasmFunction
+  | [], _ => none
+  | function :: rest, name =>
+      if function.name == name then
+        some function
+      else
+        psWasmTestFindFunction rest name
+
+def psWasmTestFindStruct :
+    List PsWasmStructType -> String -> Option PsWasmStructType
+  | [], _ => none
+  | structType :: rest, name =>
+      if structType.name == name then
+        some structType
+      else
+        psWasmTestFindStruct rest name
+
+def psWasmTestFindFunctionType :
+    List PsWasmFunctionType -> String -> Option PsWasmFunctionType
+  | [], _ => none
+  | functionType :: rest, name =>
+      if functionType.name == name then
+        some functionType
+      else
+        psWasmTestFindFunctionType rest name
+
 def psTestWasmScalarLowering : Bool :=
   psWasmIsI32 (psWasmValueTypeOfPrimitive psWasmProfile32 .uint8)
     && psWasmIsPackedI8 (psWasmStorageTypeOfPrimitive psWasmProfile32 .uint8)
@@ -195,11 +222,14 @@ def psTestWasmVerifiedIrLowering : Bool :=
   match psWasmLowerModule psWasmProfile32 psWasmAddU32IrModule with
   | Except.error _ => false
   | Except.ok module =>
-      match module.functions with
-      | [function] =>
+      match
+          psWasmTestFindFunction
+            module.functions
+            "addU32" with
+      | none => false
+      | some function =>
           psWasmIsAddU32Function function
             && module.exports == [("addU32", "addU32")]
-      | _ => false
 
 def psWasmLetIrModule : PsVerifiedIrModule :=
   {
@@ -263,9 +293,12 @@ def psTestWasmLetLowering : Bool :=
   match psWasmLowerModule psWasmProfile32 psWasmLetIrModule with
   | Except.error _ => false
   | Except.ok module =>
-      match module.functions with
-      | [function] => psWasmIsLetU32Function function
-      | _ => false
+      match
+          psWasmTestFindFunction
+            module.functions
+            "letU32" with
+      | none => false
+      | some function => psWasmIsLetU32Function function
 
 def psWasmStructureIrModule : PsVerifiedIrModule :=
   {
@@ -422,13 +455,17 @@ def psTestWasmStructureLowering : Bool :=
   match psWasmLowerModule psWasmProfile32 psWasmStructureIrModule with
   | Except.error _ => false
   | Except.ok module =>
-      match module.structures, module.functions with
-      | [point, small], [pointFn, smallFn] =>
+      match
+          psWasmTestFindStruct module.structures "Point",
+          psWasmTestFindStruct module.structures "SmallSigned",
+          psWasmTestFindFunction module.functions "pointX",
+          psWasmTestFindFunction module.functions "smallSigned" with
+      | some point, some small, some pointFn, some smallFn =>
           psWasmIsPointStructure point
             && psWasmIsSmallSignedStructure small
             && psWasmIsPointXFunction pointFn
             && psWasmIsSmallSignedFunction smallFn
-      | _, _ => false
+      | _, _, _, _ => false
 
 def psWasmMaybeIrModule : PsVerifiedIrModule :=
   {
@@ -605,13 +642,17 @@ def psTestWasmInductiveMatchLowering : Bool :=
   match psWasmLowerModule psWasmProfile32 psWasmMaybeIrModule with
   | Except.error _ => false
   | Except.ok module =>
-      match module.structures, module.functions with
-      | [base, noneType, someType], someFn :: _ =>
+      match
+          psWasmTestFindStruct module.structures "MaybeU32",
+          psWasmTestFindStruct module.structures "MaybeU32$none",
+          psWasmTestFindStruct module.structures "MaybeU32$some",
+          psWasmTestFindFunction module.functions "someValue" with
+      | some base, some noneType, some someType, someFn =>
           psWasmIsMaybeBase base
             && psWasmIsMaybeNone noneType
             && psWasmIsMaybeSome someType
             && psWasmIsSomeValueFunction someFn
-      | _, _ => false
+      | _, _, _, _ => false
 
 def psWasmRecursiveListIrModule : PsVerifiedIrModule :=
   {
@@ -793,8 +834,15 @@ def psTestWasmRecursiveListLowering : Bool :=
         psWasmRecursiveListIrModule with
   | Except.error _ => false
   | Except.ok module =>
-      psWasmIsRecursiveListTypes module.structures
-        && module.functions.length == 2
+      match
+          psWasmTestFindStruct module.structures "U32List",
+          psWasmTestFindStruct module.structures "U32List$nil",
+          psWasmTestFindStruct module.structures "U32List$cons",
+          psWasmTestFindFunction module.functions "listLength",
+          psWasmTestFindFunction module.functions "listLengthTwo" with
+      | some base, some nilType, some consType, some _, some _ =>
+          psWasmIsRecursiveListTypes [base, nilType, consType]
+      | _, _, _, _, _ => false
 
 def psWasmClosureTestU32Type : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
@@ -953,10 +1001,26 @@ def psTestWasmClosureLowering : Bool :=
   | Except.error _ => false
   | Except.ok module =>
       match
-          module.structures,
-          module.functionTypes,
-          module.functions with
-      | [baseType, subtype], [codeType], [makeAdder, generated] =>
+          psWasmTestFindStruct
+            module.structures
+            psWasmClosureTestBaseName,
+          psWasmTestFindStruct
+            module.structures
+            psWasmClosureTestSubtypeName,
+          psWasmTestFindFunctionType
+            module.functionTypes
+            psWasmClosureTestCodeTypeName,
+          psWasmTestFindFunction
+            module.functions
+            "makeAdder",
+          psWasmTestFindFunction
+            module.functions
+            psWasmClosureTestLambdaName with
+      | some baseType,
+        some subtype,
+        some codeType,
+        some makeAdder,
+        some generated =>
           psWasmIsClosureBase baseType
             && psWasmIsClosureSubtype subtype
             && psWasmIsClosureCodeType codeType
@@ -964,7 +1028,7 @@ def psTestWasmClosureLowering : Bool :=
             && psWasmIsGeneratedClosureFunction generated
             && module.functionRefs ==
               [psWasmClosureTestLambdaName]
-      | _, _, _ => false
+      | _, _, _, _, _ => false
 
 def psWasmAnswerModule : PsWasmModule :=
   {

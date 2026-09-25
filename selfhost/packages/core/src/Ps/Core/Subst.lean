@@ -3,7 +3,7 @@ import Ps.Core.Expr
 def psExprLiftBVars (amount : Nat) (cutoff : Nat) : PsExpr -> PsExpr
   | .bvar index =>
       if Nat.ble cutoff index then
-        PsExpr.bvar (index + amount)
+        PsExpr.bvar (Nat.add index amount)
       else
         PsExpr.bvar index
   | .app fn arg =>
@@ -14,7 +14,7 @@ def psExprLiftBVars (amount : Nat) (cutoff : Nat) : PsExpr -> PsExpr
       PsExpr.lam
         name
         (psExprLiftBVars amount cutoff type)
-        (psExprLiftBVars amount (cutoff + 1) body)
+        (psExprLiftBVars amount (Nat.succ cutoff) body)
         binder
   | .forallE name type body binder =>
       PsExpr.forallE

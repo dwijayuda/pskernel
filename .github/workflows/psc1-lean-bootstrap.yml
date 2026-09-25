@@ -203,6 +203,12 @@ jobs:
           if (instance.exports.arraySetIfOutOfBounds() !== 10) {
             throw new Error('PSC1_WASM_RUNTIME_ARRAY_SET_IF_OOB_RESULT');
           }
+          if (instance.exports.arrayMapIncrementSum() !== 32) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_MAP_RESULT');
+          }
+          if (instance.exports.arrayFoldlSum() !== 31) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_FOLDL_RESULT');
+          }
           console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
           NODE
 

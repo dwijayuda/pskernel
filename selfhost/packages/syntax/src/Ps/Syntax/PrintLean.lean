@@ -98,7 +98,7 @@ def psPrintLeanTermWithFuel :
                       | Except.error error => Except.error error
                       | Except.ok printedType =>
                           let delimiters :=
-                            psPrintBinderDelimiters head.kind
+                            psPrintBinderDelimiters head.kind;
                           Except.ok
                             (psPrintLeanConcat5
                               delimiters.fst
@@ -130,7 +130,7 @@ def psPrintLeanTermWithFuel :
                       | Except.error error => Except.error error
                       | Except.ok printedType =>
                           let delimiters :=
-                            psPrintBinderDelimiters head.kind
+                            psPrintBinderDelimiters head.kind;
                           Except.ok
                             (psPrintLeanConcat5
                               delimiters.fst

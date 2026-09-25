@@ -60,6 +60,24 @@ def psWasmIrTypeKey
     (type : PsVerifiedIrType) : Option String :=
   psWasmIrTypeKeyWithFuel 64 type
 
+def psWasmArrayBaseName
+    (elementType : PsVerifiedIrType) : Option String :=
+  match psWasmIrTypeKey elementType with
+  | none => none
+  | some key => some ("ProofScript.Array$" ++ key)
+
+def psWasmArrayNilName
+    (elementType : PsVerifiedIrType) : Option String :=
+  match psWasmArrayBaseName elementType with
+  | none => none
+  | some baseName => some (baseName ++ "$nil")
+
+def psWasmArrayConsName
+    (elementType : PsVerifiedIrType) : Option String :=
+  match psWasmArrayBaseName elementType with
+  | none => none
+  | some baseName => some (baseName ++ "$cons")
+
 def psWasmClosureBaseName
     (type : PsVerifiedIrType) : Option String :=
   match type with
@@ -132,6 +150,10 @@ def psWasmValueTypeOfIrType?
       match psWasmValueTypeOfPrimitive profile primitive with
       | .noValue => none
       | valueType => some valueType
+  | .named "Array" [elementType] =>
+      match psWasmArrayBaseName elementType with
+      | none => none
+      | some name => some (.refT name)
   | .named name [] => some (.refT name)
   | .function parameters result =>
       match
@@ -148,6 +170,10 @@ def psWasmStorageTypeOfIrType?
       match psWasmValueTypeOfPrimitive profile primitive with
       | .noValue => none
       | _ => some (psWasmStorageTypeOfPrimitive profile primitive)
+  | .named "Array" [elementType] =>
+      match psWasmArrayBaseName elementType with
+      | none => none
+      | some name => some (.value (.refT name))
   | .named name [] => some (.value (.refT name))
   | .function parameters result =>
       match

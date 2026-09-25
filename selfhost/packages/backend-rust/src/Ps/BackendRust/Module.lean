@@ -1,4 +1,5 @@
 import Ps.BackendRust.Expr
+import Ps.BackendRust.Runtime
 
 def psRustTypeParameterNames
     (parameters : List PsVerifiedIrTypeParameter) : List String :=
@@ -262,25 +263,6 @@ def psRustModuleHasImports
       false
   | List.cons _ _ =>
       true
-
-def psRustRuntimePrelude : String :=
-  "#![forbid(unsafe_code)]\n" ++
-  "use num_bigint::{BigInt as PsInt, BigUint as PsNat};\n" ++
-  "use num_traits::Zero;\n" ++
-  "use std::str::FromStr;\n" ++
-  "fn __ps_nat_lit(text: &str) -> PsNat { PsNat::from_str(text).expect(\"valid generated Nat literal\") }\n" ++
-  "fn __ps_int_lit(text: &str) -> PsInt { PsInt::from_str(text).expect(\"valid generated Int literal\") }\n" ++
-  "fn __ps_nat_add(a: &PsNat, b: &PsNat) -> PsNat { a + b }\n" ++
-  "fn __ps_nat_sub(a: &PsNat, b: &PsNat) -> PsNat { if a >= b { a - b } else { PsNat::zero() } }\n" ++
-  "fn __ps_nat_mul(a: &PsNat, b: &PsNat) -> PsNat { a * b }\n" ++
-  "fn __ps_nat_div(a: &PsNat, b: &PsNat) -> PsNat { if b.is_zero() { PsNat::zero() } else { a / b } }\n" ++
-  "fn __ps_nat_mod(a: &PsNat, b: &PsNat) -> PsNat { if b.is_zero() { a.clone() } else { a % b } }\n" ++
-  "fn __ps_int_of_nat(value: &PsNat) -> PsInt { PsInt::from(value.clone()) }\n" ++
-  "fn __ps_int_neg_succ(value: &PsNat) -> PsInt { -(PsInt::from(value.clone()) + PsInt::from(1u8)) }\n" ++
-  "fn __ps_int_neg(value: &PsInt) -> PsInt { -value }\n" ++
-  "fn __ps_int_add(a: &PsInt, b: &PsInt) -> PsInt { a + b }\n" ++
-  "fn __ps_int_sub(a: &PsInt, b: &PsInt) -> PsInt { a - b }\n" ++
-  "fn __ps_int_mul(a: &PsInt, b: &PsInt) -> PsInt { a * b }\n"
 
 def psRustEmitModule
     (module : PsVerifiedIrModule) :

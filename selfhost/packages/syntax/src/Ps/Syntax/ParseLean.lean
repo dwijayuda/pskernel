@@ -2291,6 +2291,31 @@ def psLeanFirstCompletedEquation
       else
         psLeanFirstCompletedEquation rest
 
+def psLeanMapPatternAlternatives
+    (lower :
+      PsSyntaxPattern ->
+      Option
+        (Prod
+          PsSyntaxPattern
+          (Prod PsSyntaxTerm PsSourceSpan)))
+    (patterns : List PsSyntaxPattern) :
+    Option
+      (List
+        (Prod
+          PsSyntaxPattern
+          (Prod PsSyntaxTerm PsSourceSpan))) :=
+  match patterns with
+  | List.nil =>
+      Option.some List.nil
+  | List.cons pattern rest =>
+      match lower pattern with
+      | Option.none => Option.none
+      | Option.some alternative =>
+          match psLeanMapPatternAlternatives lower rest with
+          | Option.none => Option.none
+          | Option.some tail =>
+              Option.some (List.cons alternative tail)
+
 partial def psLeanLowerEquationClauses
     (arguments : List PsSyntaxName)
     (clauses : List PsLeanEquationClause) :
@@ -2331,7 +2356,7 @@ partial def psLeanLowerEquationClauses
                       (psSyntaxSpanJoin
                         (psSyntaxPatternSpan pattern)
                         (psSyntaxTermSpan body))));
-        match patterns.mapM lowerAlternative with
+        match psLeanMapPatternAlternatives lowerAlternative patterns with
         | Option.none => Option.none
         | Option.some alternatives =>
             match psParseListReverse alternatives with

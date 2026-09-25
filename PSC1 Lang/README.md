@@ -90,6 +90,24 @@ In particular:
   source precedence, and explicit resolution of conflicts between current plans,
   v0.7/v0.6.1 study material, pinned Lean 4.34, and current implementation.
 
+## Learning documentation
+
+The PSC1 folder now also contains a TypeScript-inspired documentation stack:
+
+- [docs/README.md](./docs/README.md) — documentation landing page and learning paths;
+- [docs/get-started/psc1-from-scratch.md](./docs/get-started/psc1-from-scratch.md) — first introduction;
+- [docs/get-started/psc1-for-typescript-programmers.md](./docs/get-started/psc1-for-typescript-programmers.md) — migration of mental models from TS/JS;
+- [docs/get-started/psc1-for-lean-programmers.md](./docs/get-started/psc1-for-lean-programmers.md) — PSC1 from a Lean background;
+- [docs/get-started/psc1-in-5-minutes.md](./docs/get-started/psc1-in-5-minutes.md) — compact tour;
+- [docs/tooling-and-projects.md](./docs/tooling-and-projects.md) — current psc/psconfig workflow;
+- [handbook/README.md](./handbook/README.md) — 13-chapter progressive PSC1 Handbook;
+- [reference/README.md](./reference/README.md) — quick lookup for language surface, CLI, and psconfig;
+- [TYPESCRIPT_DOCS_HANDBOOK_STUDY.md](./TYPESCRIPT_DOCS_HANDBOOK_STUDY.md) — analysis of the TypeScript documentation architecture and how it maps to PSC1.
+
+The Handbook is explanatory rather than normative. When a handbook example and
+an exact language/conformance document appear to disagree, use the normative
+reference and current executable gates.
+
 ## Normative wording
 
 The words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** are

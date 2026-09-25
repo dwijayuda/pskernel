@@ -36,21 +36,25 @@ def psRustEmitStructureFieldList
   | List.nil =>
       Except.ok List.nil
   | List.cons field rest =>
-      match psRustEmitType field.type with
-      | Except.error error =>
-          Except.error error
-      | Except.ok printedType =>
-          let rendered :=
-            psRustConcat4
-              "pub "
-              (psRustIdentifier field.name)
-              ": "
-              printedType;
-          match psRustEmitStructureFieldList rest with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedRest =>
-              Except.ok (List.cons rendered printedRest)
+      if psRustTypeContainsFunction field.type then
+        Except.error
+          (PsRustEmitError.functionStorageUnsupported field.name)
+      else
+        match psRustEmitType field.type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok printedType =>
+            let rendered :=
+              psRustConcat4
+                "pub "
+                (psRustIdentifier field.name)
+                ": "
+                printedType;
+            match psRustEmitStructureFieldList rest with
+            | Except.error error =>
+                Except.error error
+            | Except.ok printedRest =>
+                Except.ok (List.cons rendered printedRest)
 
 def psRustEmitStructure
     (structureInfo : PsVerifiedIrStructure) :
@@ -79,20 +83,24 @@ def psRustEmitConstructorFieldList
   | List.nil =>
       Except.ok List.nil
   | List.cons field rest =>
-      match psRustEmitType field.type with
-      | Except.error error =>
-          Except.error error
-      | Except.ok printedType =>
-          let rendered :=
-            psRustConcat3
-              (psRustIdentifier field.name)
-              ": "
-              printedType;
-          match psRustEmitConstructorFieldList rest with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedRest =>
-              Except.ok (List.cons rendered printedRest)
+      if psRustTypeContainsFunction field.type then
+        Except.error
+          (PsRustEmitError.functionStorageUnsupported field.name)
+      else
+        match psRustEmitType field.type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok printedType =>
+            let rendered :=
+              psRustConcat3
+                (psRustIdentifier field.name)
+                ": "
+                printedType;
+            match psRustEmitConstructorFieldList rest with
+            | Except.error error =>
+                Except.error error
+            | Except.ok printedRest =>
+                Except.ok (List.cons rendered printedRest)
 
 def psRustEmitConstructor
     (constructorInfo : PsVerifiedIrConstructor) :
@@ -174,6 +182,34 @@ def psRustEmitHigherOrderParameterType
   | _ =>
       psRustEmitType type
 
+def psRustEmitDeclarationParameter
+    (parameter : PsVerifiedIrParameter) :
+    Except PsRustEmitError String :=
+  if psRustTypeContainsFunction parameter.type then
+    if psRustFunctionTypeIsFirstOrder parameter.type then
+      match psRustEmitHigherOrderParameterType parameter.type with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedType =>
+          Except.ok
+            (psRustConcat3
+              (psRustIdentifier parameter.name)
+              ": "
+              printedType)
+    else
+      Except.error
+        (PsRustEmitError.nestedFunctionParameterUnsupported parameter.name)
+  else
+    match psRustEmitHigherOrderParameterType parameter.type with
+    | Except.error error =>
+        Except.error error
+    | Except.ok printedType =>
+        Except.ok
+          (psRustConcat3
+            (psRustIdentifier parameter.name)
+            ": "
+            printedType)
+
 def psRustEmitDeclarationParameterList
     (parameters : List PsVerifiedIrParameter) :
     Except PsRustEmitError (List String) :=
@@ -181,26 +217,15 @@ def psRustEmitDeclarationParameterList
   | List.nil =>
       Except.ok List.nil
   | List.cons parameter rest =>
-      match psRustEmitHigherOrderParameterType parameter.type with
+      match psRustEmitDeclarationParameter parameter with
       | Except.error error =>
           Except.error error
-      | Except.ok printedType =>
-          let rendered :=
-            psRustConcat3
-              (psRustIdentifier parameter.name)
-              ": "
-              printedType;
+      | Except.ok rendered =>
           match psRustEmitDeclarationParameterList rest with
           | Except.error error =>
               Except.error error
           | Except.ok printedRest =>
               Except.ok (List.cons rendered printedRest)
-
-def psRustTypeIsFunction
-    (type : PsVerifiedIrType) : Bool :=
-  match type with
-  | PsVerifiedIrType.function _ _ => true
-  | _ => false
 
 def psRustDeclarationIsGenericValue
     (declaration : PsVerifiedIrDeclaration) : Bool :=
@@ -219,7 +244,7 @@ def psRustEmitDeclaration
   if psRustDeclarationIsGenericValue declaration then
     Except.error
       (PsRustEmitError.genericValueUnsupported declaration.name)
-  else if psRustTypeIsFunction declaration.resultType then
+  else if psRustTypeContainsFunction declaration.resultType then
     Except.error
       (PsRustEmitError.functionResultUnsupported declaration.name)
   else

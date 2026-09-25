@@ -920,6 +920,47 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
             ]
       },
       {
+        name := "natLiteralEqExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 2),
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 2)
+            ]
+      },
+      {
+        name := "natAddOneOneExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natAdd
+                []
+                [
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 1),
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 1)
+                ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 2)
+            ]
+      },
+      {
         name := "natAddCarrySmallExact"
         typeParameters := []
         parameters := []

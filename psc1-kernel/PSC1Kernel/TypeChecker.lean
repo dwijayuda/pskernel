@@ -528,6 +528,12 @@ inductive DeltaResult where
   | decided (value : Bool)
   | residual (left : Expr) (right : Expr)
 
+inductive DeltaStepResult where
+  | continue (left : Expr) (right : Expr)
+  | unknown (left : Expr) (right : Expr)
+  | equal
+  | different (left : Expr) (right : Expr)
+
 def deltaDefinition? (ctx : CheckerContext) (e : Expr) : Option DefinitionInfo :=
   match e.getAppFn with
   | .const name levels =>
@@ -553,17 +559,87 @@ partial def deltaOnce
     | .error "internal lazy-delta request for non-definition"
   whnfCore ctx unfolded true
 
+partial def tryUnfoldProjApp
+    (ctx : CheckerContext)
+    (e : Expr) : Except String (Option Expr) := do
+  match e.getAppFn with
+  | .proj _ _ _ =>
+      let reduced ← whnfCore ctx e false
+      if Expr.eq reduced e then
+        return none
+      else
+        return some reduced
+  | _ => return none
+
+def sameDeltaDefinition (a b : DefinitionInfo) : Bool :=
+  Name.eq a.base.name b.base.name
+
+def appHeadLevelsEquivalent (a b : Expr) : Bool :=
+  match a.getAppFn, b.getAppFn with
+  | .const _ as, .const _ bs => levelListsEquivalent as bs
+  | _, _ => false
 
 mutual
+
+partial def isDefEqArgs
+    (ctx : CheckerContext)
+    (left right : Expr) : Except String Bool := do
+  match left, right with
+  | .app lf la, .app rf ra =>
+      if !(← isDefEq ctx la ra) then
+        return false
+      isDefEqArgs ctx lf rf
+  | .app _ _, _ => return false
+  | _, .app _ _ => return false
+  | _, _ => return true
+
+partial def lazyDeltaReductionStep
+    (ctx : CheckerContext)
+    (left right : Expr) : Except String DeltaStepResult := do
+  let finish (a b : Expr) : DeltaStepResult :=
+    match quickReducedDefEq a b with
+    | some true => .equal
+    | some false => .different a b
+    | none => .continue a b
+
+  match deltaDefinition? ctx left, deltaDefinition? ctx right with
+  | none, none =>
+      return .unknown left right
+  | some _, none =>
+      match ← tryUnfoldProjApp ctx right with
+      | some right' => return finish left right'
+      | none =>
+          let left' ← deltaOnce ctx left
+          return finish left' right
+  | none, some _ =>
+      match ← tryUnfoldProjApp ctx left with
+      | some left' => return finish left' right
+      | none =>
+          let right' ← deltaOnce ctx right
+          return finish left right'
+  | some da, some db =>
+      if da.hints.lt db.hints then
+        let left' ← deltaOnce ctx left
+        return finish left' right
+      else if db.hints.lt da.hints then
+        let right' ← deltaOnce ctx right
+        return finish left right'
+      else
+        if left.getAppNumArgs > 0 &&
+            right.getAppNumArgs > 0 &&
+            sameDeltaDefinition da db &&
+            da.hints.isRegular &&
+            appHeadLevelsEquivalent left right then
+          if ← isDefEqArgs ctx left right then
+            return .equal
+        let left' ← deltaOnce ctx left
+        let right' ← deltaOnce ctx right
+        return finish left' right'
 
 partial def lazyDeltaReduction
     (ctx : CheckerContext)
     (left right : Expr) : Except String DeltaResult := do
   let rec loop (a b : Expr) : Except String DeltaResult := do
-    match quickReducedDefEq a b with
-    | some value => return .decided value
-    | none => pure ()
-
     -- Final Lean 4.34 tries the Nat offset rule before ordinary Nat
     -- reduction, and does so regardless of syntactic free variables.
     if isNatZeroExpr a && isNatZeroExpr b then
@@ -583,35 +659,34 @@ partial def lazyDeltaReduction
       | some value => return .decided (← isDefEq ctx a value)
       | none => pure ()
 
-    match deltaDefinition? ctx a, deltaDefinition? ctx b with
-    | none, none => return .residual a b
-    | some _, none =>
-      loop (← deltaOnce ctx a) b
-    | none, some _ =>
-      loop a (← deltaOnce ctx b)
-    | some da, some db =>
-      if da.hints.lt db.hints then
-        loop (← deltaOnce ctx a) b
-      else if db.hints.lt da.hints then
-        loop a (← deltaOnce ctx b)
-      else
-        loop (← deltaOnce ctx a) (← deltaOnce ctx b)
+    -- Native reduction occupies this slot in final Lean 4.34. The portable
+    -- source kernel currently has no native provider and therefore fails
+    -- closed by proceeding to ordinary lazy delta.
+    match ← lazyDeltaReductionStep ctx a b with
+    | .continue a' b' => loop a' b'
+    | .unknown a' b' => return .residual a' b'
+    | .equal => return .decided true
+    | .different _ _ => return .decided false
   loop left right
-
 
 partial def lazyDeltaProjReduction
     (ctx : CheckerContext)
     (left right : Expr)
     (typeName : Name)
     (index : Nat) : Except String Bool := do
-  let delta ← lazyDeltaReduction ctx left right
-  match delta with
-  | .decided value => return value
-  | .residual left' right' =>
-      match reduceProjCore ctx typeName index left',
-            reduceProjCore ctx typeName index right' with
-      | some lfield, some rfield => isDefEq ctx lfield rfield
-      | _, _ => isDefEq ctx left' right'
+  let rec finish (a b : Expr) : Except String Bool := do
+    match reduceProjCore ctx typeName index a,
+          reduceProjCore ctx typeName index b with
+    | some lfield, some rfield => isDefEq ctx lfield rfield
+    | _, _ => isDefEq ctx a b
+
+  let rec loop (a b : Expr) : Except String Bool := do
+    match ← lazyDeltaReductionStep ctx a b with
+    | .continue a' b' => loop a' b'
+    | .equal => return true
+    | .unknown a' b' => finish a' b'
+    | .different a' b' => finish a' b'
+  loop left right
 
 partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := do
   if Expr.eq a b then return true

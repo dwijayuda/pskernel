@@ -547,6 +547,84 @@ def assertNativeEvaluatorBoundary : IO Unit := do
   assertTrue "missing native provider must leave marker reduction unavailable"
     (PSC1Kernel.Expr.eq closedResult natExpr)
 
+def assertNativeAdmissionInjectionOracle : IO Unit := do
+  let NatN := PSC1Kernel.kernelNatName
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let target : PSC1Kernel.Name :=
+    .str (.str .anonymous "NativeAdmission") "target"
+  let Family : PSC1Kernel.Name :=
+    .str .anonymous "NativeAdmissionFamily"
+  let witness : PSC1Kernel.Name :=
+    .str .anonymous "NativeAdmissionWitness"
+  let admitted : PSC1Kernel.Name :=
+    .str .anonymous "NativeAdmissionChecked"
+
+  let reduceNatType : PSC1Kernel.Expr :=
+    .forallE .anonymous natT natT .default
+  let familyType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "n") natT type1 .default
+  let marker : PSC1Kernel.Expr :=
+    .app (.const PSC1Kernel.kernelReduceNatName []) (.const target [])
+  let markerType : PSC1Kernel.Expr :=
+    .app (.const Family []) marker
+  let expectedType : PSC1Kernel.Expr :=
+    .app (.const Family []) (.lit (.nat 42))
+
+  let env0 :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let env1 :=
+    env0.addUnchecked (.axiomInfo {
+      base := mkBase PSC1Kernel.kernelReduceNatName reduceNatType
+      isUnsafe := false
+    })
+  let env2 :=
+    env1.addUnchecked (.axiomInfo {
+      base := mkBase target natT
+      isUnsafe := false
+    })
+  let env3 :=
+    env2.addUnchecked (.axiomInfo {
+      base := mkBase Family familyType
+      isUnsafe := false
+    })
+  let env :=
+    env3.addUnchecked (.axiomInfo {
+      base := mkBase witness markerType
+      isUnsafe := false
+    })
+
+  let info : PSC1Kernel.DefinitionInfo := {
+    base := mkBase admitted expectedType
+    value := .const witness []
+    hints := .regular 1
+    safety := .safe
+  }
+
+  let noProviderRejects :=
+    match PSC1Kernel.Kernel.addDefinition env info with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue
+    "declaration admission unexpectedly accepted native defeq without a provider"
+    noProviderRejects
+
+  let provider : PSC1Kernel.NativeEvaluator := {
+    evalBool := fun _ => .ok none
+    evalNat := fun name =>
+      if PSC1Kernel.Name.eq name target then .ok (some 42) else .ok none
+  }
+  let admittedEnv ← exceptToIO
+    "PSC1 native evaluator injection through declaration admission"
+    (PSC1Kernel.Kernel.addDefinition
+      env info 0 PSC1Kernel.leanNatMaxSizeDefault (some provider))
+  assertTrue
+    "native evaluator injection did not publish the checked declaration"
+    (admittedEnv.contains admitted)
+
 def assertNatSizeLimitOracle : IO Unit := do
   let half : Nat := Nat.shiftLeft 1 63
   let big : Nat := half + half
@@ -4878,6 +4956,7 @@ def run : IO Unit := do
   assertNatOffsetOracle
   assertEagerReduceOracle
   assertNativeEvaluatorBoundary
+  assertNativeAdmissionInjectionOracle
   assertNatReductionOracle
   assertNatSizeLimitOracle
   assertFunctionEtaOracle

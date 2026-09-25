@@ -196,50 +196,64 @@ def psRustEmitDeclarationParameterList
           | Except.ok printedRest =>
               Except.ok (List.cons rendered printedRest)
 
+def psRustDeclarationIsGenericValue
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  match declaration.parameters with
+  | List.nil =>
+      match declaration.typeParameters with
+      | List.nil => false
+      | List.cons _ _ => true
+  | List.cons _ _ =>
+      false
+
 def psRustEmitDeclaration
     (valueNames : List String)
     (declaration : PsVerifiedIrDeclaration) :
     Except PsRustEmitError String :=
-  match psRustEmitDeclarationParameterList declaration.parameters with
-  | Except.error error =>
-      Except.error error
-  | Except.ok printedParameters =>
-      match psRustEmitType declaration.resultType with
-      | Except.error error =>
-          Except.error error
-      | Except.ok printedResult =>
-          let locals :=
-            psRustAddParameterNames
-              declaration.parameters
-              List.nil;
-          match
-              psRustRewriteValueRefs
-                valueNames
-                locals
-                declaration.body with
-          | Except.error error =>
-              Except.error error
-          | Except.ok rewrittenBody =>
-              match psRustEmitExpr rewrittenBody with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok printedBody =>
-                  let generic :=
-                    psRustGenericNames declaration.typeParameters;
-                  Except.ok
-                    (psRustConcat4
-                      "pub fn "
-                      (psRustIdentifier declaration.name)
-                      generic
+  if psRustDeclarationIsGenericValue declaration then
+    Except.error
+      (PsRustEmitError.genericValueUnsupported declaration.name)
+  else
+    match psRustEmitDeclarationParameterList declaration.parameters with
+    | Except.error error =>
+        Except.error error
+    | Except.ok printedParameters =>
+        match psRustEmitType declaration.resultType with
+        | Except.error error =>
+            Except.error error
+        | Except.ok printedResult =>
+            let locals :=
+              psRustAddParameterNames
+                declaration.parameters
+                List.nil;
+            match
+                psRustRewriteValueRefs
+                  valueNames
+                  locals
+                  declaration.body with
+            | Except.error error =>
+                Except.error error
+            | Except.ok rewrittenBody =>
+                match psRustEmitExpr rewrittenBody with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok printedBody =>
+                    let generic :=
+                      psRustGenericNames declaration.typeParameters;
+                    Except.ok
                       (psRustConcat4
-                        "("
-                        (psRustJoin ", " printedParameters)
-                        ") -> "
+                        "pub fn "
+                        (psRustIdentifier declaration.name)
+                        generic
                         (psRustConcat4
-                          printedResult
-                          " { "
-                          printedBody
-                          " }")))
+                          "("
+                          (psRustJoin ", " printedParameters)
+                          ") -> "
+                          (psRustConcat4
+                            printedResult
+                            " { "
+                            printedBody
+                            " }")))
 
 def psRustEmitStructureList
     (structures : List PsVerifiedIrStructure) :

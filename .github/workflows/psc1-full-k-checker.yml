@@ -6,6 +6,7 @@ on:
     branches: [kernel/psc1-lean-full-k-checker]
     paths:
       - ".github/workflows/psc1-lean-kernel.yml"
+      - ".github/workflows/psc1-full-k-checker.yml"
       - "psc1-kernel/**"
       - "oracle/replay-probe/MiniExport.lean"
       - "oracle/replay-probe/ReplayProbe.lean"

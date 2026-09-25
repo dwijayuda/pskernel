@@ -7,6 +7,8 @@ on:
     paths:
       - ".github/workflows/psc1-lean-kernel.yml"
       - "psc1-kernel/**"
+      - "oracle/replay-probe/MiniExport.lean"
+      - "oracle/replay-probe/ReplayProbe.lean"
 
 concurrency:
   group: psc1-lean-kernel-${{ github.ref }}
@@ -41,3 +43,13 @@ jobs:
       - name: Differential foundational oracle against Lean 4.34
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/Oracle.lean
+      - name: Generate pinned Lean4Export mini stream
+        working-directory: oracle/replay-probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean ReplayProbe.lean -o ReplayProbe.olean
+          LEAN_PATH=. lean --run MiniExport.lean > ../../psc1-kernel/.lake/build/lean434-mini-export.ndjson
+      - name: Replay pinned Lean4Export mini stream with PSC1 kernel
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/ReplayFile.lean .lake/build/lean434-mini-export.ndjson

@@ -350,6 +350,19 @@ def psElabInductiveConstructors
 
 
 
+def psEnvironmentAddOwnedBootstrapDeclaration
+    (environment : PsEnvironment)
+    (declaration : PsDeclaration) : Option PsEnvironment :=
+  let name := psDeclarationName declaration
+  if psNameEq name psProdName
+      || psNameEq name psListName
+      || psNameEq name psOptionName then
+    psEnvironmentAddReplacingAxiom
+      environment
+      declaration
+  else
+    psEnvironmentAdd environment declaration
+
 def psAddDeclarationList
     (environment : PsEnvironment) :
     List PsDeclaration -> Except PsElabError PsEnvironment
@@ -357,14 +370,9 @@ def psAddDeclarationList
   | declaration :: rest =>
       let name := psDeclarationName declaration
       let nextResult :=
-        if psNameEq name psProdName
-            || psNameEq name psListName
-            || psNameEq name psOptionName then
-          psEnvironmentAddReplacingAxiom
-            environment
-            declaration
-        else
-          psEnvironmentAdd environment declaration
+        psEnvironmentAddOwnedBootstrapDeclaration
+          environment
+          declaration
       match nextResult with
       | none =>
           Except.error
@@ -714,14 +722,9 @@ def psElabInductiveDeclaration
                     let inductiveDeclaration :=
                       PsDeclaration.inductiveDecl info
                     let withInductiveResult :=
-                      if psNameEq name psProdName then
-                        psEnvironmentAddReplacingAxiom
-                          environment
-                          inductiveDeclaration
-                      else
-                        psEnvironmentAdd
-                          environment
-                          inductiveDeclaration
+                      psEnvironmentAddOwnedBootstrapDeclaration
+                        environment
+                        inductiveDeclaration
                     match withInductiveResult with
                     | none =>
                         Except.error

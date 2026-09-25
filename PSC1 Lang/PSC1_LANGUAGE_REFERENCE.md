@@ -214,9 +214,9 @@ pairs as blocks.
 `def` is the canonical general definition mechanism.
 
 ```proofscript
-def answer : Nat := 42;
+def answer: Nat := 42;
 
-def add(x : Nat, y : Nat) : Nat :=
+def add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
@@ -234,9 +234,9 @@ def add (x : Nat) (y : Nat) : Nat :=
 `const` is a **parameterless `def` alias**.
 
 ```proofscript
-const answer : Nat := 42;
+const answer: Nat := 42;
 
-const increment : Nat -> Nat :=
+const increment: Nat -> Nat :=
   fun x => x + 1;
 ```
 
@@ -245,7 +245,7 @@ A `const` MAY have a function type. It MUST NOT have declaration parameters.
 Rejected:
 
 ```proofscript
-const add(x : Nat, y : Nat) : Nat := x + y;
+const add(x: Nat, y: Nat): Nat := x + y;
 ```
 
 `const` does not introduce JavaScript binding/object-immutability semantics.
@@ -256,17 +256,17 @@ const add(x : Nat, y : Nat) : Nat := x + y;
 explicit declaration parameter group.
 
 ```proofscript
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 
-function identity {α : Type}(x : α) : α :=
+function identity {α: Type}(x: α): α :=
   x;
 ```
 
 Rejected:
 
 ```proofscript
-function answer : Nat := 42;
+function answer: Nat := 42;
 ```
 
 `function` does not introduce hoisting, prototypes, `this`, JavaScript
@@ -289,7 +289,7 @@ A theorem is a logical declaration whose type is a proposition and whose body
 constructs a proof term.
 
 ```proofscript
-theorem addZero(n : Nat) : n + 0 = n := by {
+theorem addZero(n: Nat): n + 0 = n := by {
   rfl
 }
 ```
@@ -313,16 +313,16 @@ implied support merely because Lean has them.
 PSC1 retains Lean binder meaning.
 
 ```proofscript
-(x : A)        -- explicit
-{α : Type}     -- implicit
-{{α : Type}}   -- strict implicit, when supported by the frozen subset
+(x: A)        -- explicit
+{α: Type}     -- implicit
+{{α: Type}}   -- strict implicit, when supported by the frozen subset
 [C α]          -- instance implicit
 ```
 
 Registered declaration/header contexts may group complete explicit binders:
 
 ```proofscript
-function get(n : Nat, i : Fin n) : Fin n :=
+function get(n: Nat, i: Fin n): Fin n :=
   i;
 ```
 
@@ -342,7 +342,7 @@ Nat -> Nat
 Dependent function type:
 
 ```proofscript
-(x : Nat) -> Fin x -> Nat
+(x: Nat) -> Fin x -> Nat
 ```
 
 The dependent arrow denotes ordinary dependent Pi semantics; it is not a
@@ -354,7 +354,7 @@ Anonymous functions use `fun`:
 
 ```proofscript
 fun x => x + 1
-fun (x : Nat) => x + 1
+fun (x: Nat) => x + 1
 ```
 
 TypeScript/JavaScript arrow-lambda spelling is not part of the PSC1 normative
@@ -489,8 +489,8 @@ objects.
 
 ```proofscript
 structure Point where {
-  x : Float;
-  y : Float;
+  x: Float;
+  y: Float;
 }
 ```
 
@@ -508,7 +508,7 @@ admission follow the checked semantics.
 Record values use the supported record syntax:
 
 ```proofscript
-const origin : Point := { x := 0, y := 0 };
+const origin: Point := { x := 0, y := 0 };
 ```
 
 Structure-update convenience is optional/non-blocking for the first PSC1 freeze
@@ -524,8 +524,8 @@ A class declaration is a logical structure-like declaration participating in
 bounded class/instance synthesis.
 
 ```proofscript
-class Sized(α : Type) where {
-  size : α -> Nat;
+class Sized(α: Type) where {
+  size: α -> Nat;
 }
 ```
 
@@ -544,9 +544,9 @@ PSC1 supports inductive data with Lean-compatible constructor and recursor
 meaning.
 
 ```proofscript
-inductive Result(α : Type, ε : Type) where {
-  | ok(value : α);
-  | error(error : ε);
+inductive Result(α: Type, ε: Type) where {
+  | ok(value: α);
+  | error(error: ε);
 }
 ```
 
@@ -571,7 +571,7 @@ freeze unless real compiler source adopts it.
 PSC1 requires ordinary basic single-scrutinee match.
 
 ```proofscript
-function getOrElse(value : Option Nat, fallback : Nat) : Nat :=
+function getOrElse(value: Option Nat, fallback: Nat): Nat :=
   match value with {
     | .none => fallback;
     | .some x => x;
@@ -594,10 +594,10 @@ them.
 The owned braced `where` form is preserved:
 
 ```proofscript
-def f(x : Nat) : Nat :=
+def f(x: Nat): Nat :=
   helper(x)
 where {
-  helper(y : Nat) : Nat := y + 1;
+  helper(y: Nat): Nat := y + 1;
 }
 ```
 
@@ -737,7 +737,7 @@ PSC1 does not add a second Boolean proposition logic.
 Examples:
 
 ```proofscript
-theorem selfEq {α : Type}(x : α) : x = x := by {
+theorem selfEq {α: Type}(x: α): x = x := by {
   rfl
 }
 ```
@@ -965,7 +965,7 @@ The repository currently supports a deliberately bounded post-v0.7 source
 extension of the form:
 
 ```proofscript
-extern function hostInc(x : Nat) : Nat
+extern function hostInc(x: Nat): Nat
   from "host-lib"
   import inc;
 ```

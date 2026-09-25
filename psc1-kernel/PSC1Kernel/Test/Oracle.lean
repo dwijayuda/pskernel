@@ -939,13 +939,10 @@ def assertQuotAdmissionOracle : IO Unit := do
     let some leanInfo := leanEnv.find? (toLeanName name)
       | throw <| IO.userError "Lean 4.34 Quot primitive missing from Init.Prelude"
     let oursType := toLeanExpr oursInfo.type
-    if !Lean.Expr.equal oursType leanInfo.type then
-      throw <| IO.userError (
-        "generated Quot primitive type differs from Lean 4.34 at " ++
-        (toLeanName name).toString ++
-        "; alphaEq=" ++ toString (Lean.Expr.eqv oursType leanInfo.type) ++
-        "; ours=" ++ Lean.Expr.dbgToString oursType ++
-        "; lean=" ++ Lean.Expr.dbgToString leanInfo.type)
+    assertTrue
+      ("generated Quot primitive type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv oursType leanInfo.type)
 
   -- Final Lean 4.34 checks all four names before raw insertion; an occupied
   -- primitive name must reject initialization instead of overwriting it.

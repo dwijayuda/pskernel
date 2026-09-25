@@ -1181,17 +1181,18 @@ def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
 
 def psElabMatchFields
     (context : PsElabContext)
-    (inductiveName : PsName) :
-    PsExpr ->
-    List PsSyntaxName ->
-    List PsElabMatchField ->
-    Except PsElabError PsElabMatchFieldsResult
-  | cursor, [], fieldsRev =>
+    (inductiveName : PsName)
+    (cursor : PsExpr)
+    (binderSyntaxes : List PsSyntaxName)
+    (fieldsRev : List PsElabMatchField) :
+    Except PsElabError PsElabMatchFieldsResult :=
+  match binderSyntaxes with
+  | [] =>
       Except.ok {
         context := context
         fieldsRev := fieldsRev
       }
-  | cursor, binderSyntax :: rest, fieldsRev =>
+  | binderSyntax :: rest =>
       match psInferEnsureForall
           context.environment
           context.metaContext
@@ -1210,7 +1211,7 @@ def psElabMatchFields
                   forallView.domain
                   forallView.binder;
               let nextContext :=
-                psElabContextWithLocal context pushed.context
+                psElabContextWithLocal context pushed.context;
               psElabMatchFields
                 nextContext
                 inductiveName
@@ -1218,19 +1219,27 @@ def psElabMatchFields
                   forallView.body
                   (PsExpr.fvar pushed.id))
                 rest
-                ({
-                  id := pushed.id
-                  name := binderName
-                  type := forallView.domain
-                  binder := forallView.binder
-                } :: fieldsRev)
+                (List.cons
+                  {
+                    id := pushed.id
+                    name := binderName
+                    type := forallView.domain
+                    binder := forallView.binder
+                  }
+                  fieldsRev)
 
-def psElabMatchFieldAt :
-    List PsElabMatchField -> Nat -> Option PsElabMatchField
-  | [], _ => none
-  | field :: rest, 0 => some field
-  | _ :: rest, index + 1 =>
-      psElabMatchFieldAt rest index
+def psElabMatchFieldAt
+    (fields : List PsElabMatchField)
+    (index : Nat) : Option PsElabMatchField :=
+  match fields with
+  | [] =>
+      none
+  | field :: rest =>
+      match index with
+      | 0 =>
+          some field
+      | nextIndex + 1 =>
+          psElabMatchFieldAt rest nextIndex
 
 structure PsElabMatchHypothesesResult where
   context : PsElabContext
@@ -1238,17 +1247,18 @@ structure PsElabMatchHypothesesResult where
 
 def psElabPushRecursiveHypotheses
     (expectedType : PsExpr)
-    (fields : List PsElabMatchField) :
-    List Nat ->
-    PsElabContext ->
-    List PsElabMatchField ->
-    Except PsElabError PsElabMatchHypothesesResult
-  | [], context, hypothesesRev =>
+    (fields : List PsElabMatchField)
+    (fieldIndices : List Nat)
+    (context : PsElabContext)
+    (hypothesesRev : List PsElabMatchField) :
+    Except PsElabError PsElabMatchHypothesesResult :=
+  match fieldIndices with
+  | [] =>
       Except.ok {
         context := context
         hypothesesRev := hypothesesRev
       }
-  | fieldIndex :: rest, context, hypothesesRev =>
+  | fieldIndex :: rest =>
       match psElabMatchFieldAt fields fieldIndex with
       | none => Except.error PsElabError.structuralRecursionInternal
       | some field =>
@@ -1268,57 +1278,75 @@ def psElabPushRecursiveHypotheses
               pushed.context;
           let withRecursion :=
             match context.structuralRecursion with
-            | none => withLocal
+            | none =>
+                withLocal
             | some recursion =>
                 psElabContextWithStructuralRecursion
                   withLocal
                   (some {
-                    recursion with
+                    functionName := recursion.functionName
+                    explicitParameterIds := recursion.explicitParameterIds
+                    recursiveParameterIndex := recursion.recursiveParameterIndex
                     calls :=
-                      (field.id, pushed.id) :: recursion.calls
-                  })
+                      List.cons
+                        (Prod.mk field.id pushed.id)
+                        recursion.calls
+                  });
           psElabPushRecursiveHypotheses
             expectedType
             fields
             rest
             withRecursion
-            ({
-              id := pushed.id
-              name := hypothesisName
-              type := expectedType
-              binder := PsBinderInfo.explicit
-            } :: hypothesesRev)
+            (List.cons
+              {
+                id := pushed.id
+                name := hypothesisName
+                type := expectedType
+                binder := PsBinderInfo.explicit
+              }
+              hypothesesRev)
 
 def psCloseElabMatchFields
-    (metaContext : PsMetaContext) :
-    List PsElabMatchField -> PsExpr -> PsExpr
-  | [], term => term
-  | field :: rest, term =>
+    (metaContext : PsMetaContext)
+    (fields : List PsElabMatchField)
+    (term : PsExpr) : PsExpr :=
+  match fields with
+  | [] =>
+      term
+  | field :: rest =>
       let closed :=
         PsExpr.lam
           field.name
           (psMetaInstantiate metaContext field.type)
           (psExprAbstractFVar field.id term)
-          field.binder
-      psCloseElabMatchFields metaContext rest closed
+          field.binder;
+      psCloseElabMatchFields
+        metaContext
+        rest
+        closed
 
 structure PsElabMatchMinorResult where
   context : PsElabContext
   term : PsExpr
 
 def psElabWildcardBinderNames
-    (span : PsSourceSpan) :
-    Nat -> Nat -> List PsSyntaxName
-  | _, 0 => []
-  | index, remaining + 1 =>
-      {
-        segments := ["_wild" ++ toString index]
-        span := span
-      } ::
-        psElabWildcardBinderNames
+    (span : PsSourceSpan)
+    (index : Nat)
+    (remaining : Nat) :
+    List PsSyntaxName :=
+  match remaining with
+  | 0 =>
+      []
+  | nextRemaining + 1 =>
+      List.cons
+        {
+          segments := ["_wild" ++ toString index]
+          span := span
+        }
+        (psElabWildcardBinderNames
           span
-          (index + 1)
-          remaining
+          (Nat.succ index)
+          nextRemaining)
 
 def psElabMatchConstructorMinor
     (elaborate :

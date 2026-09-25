@@ -387,12 +387,110 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
       natType
       charType
       PsBinderInfo.explicit
+  let natMotiveName := psRootName "_motive"
+  let natMajorName := psRootName "_major"
+  let natZeroMinorName := psRootName "_zero"
+  let natSuccMinorName := psRootName "_succ"
+  let natHypothesisName := psRootName "_ih"
+  let natMotiveType :=
+    PsExpr.forallE
+      natMajorName
+      natType
+      (PsExpr.sortE (PsLevel.param uName))
+      PsBinderInfo.explicit
+  let natZeroMinorType :=
+    PsExpr.app
+      (PsExpr.bvar 0)
+      (PsExpr.constE psNatZeroName List.nil)
+  let natSuccMinorType :=
+    PsExpr.forallE
+      nName
+      natType
+      (PsExpr.forallE
+        natHypothesisName
+        (PsExpr.app
+          (PsExpr.bvar 2)
+          (PsExpr.bvar 0))
+        (PsExpr.app
+          (PsExpr.bvar 3)
+          (PsExpr.app
+            (PsExpr.constE psNatSuccName List.nil)
+            (PsExpr.bvar 1)))
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
+  let natRecType :=
+    PsExpr.forallE
+      natMotiveName
+      natMotiveType
+      (PsExpr.forallE
+        natZeroMinorName
+        natZeroMinorType
+        (PsExpr.forallE
+          natSuccMinorName
+          natSuccMinorType
+          (PsExpr.forallE
+            natMajorName
+            natType
+            (PsExpr.app
+              (PsExpr.bvar 3)
+              (PsExpr.bvar 0))
+            PsBinderInfo.explicit)
+          PsBinderInfo.explicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit
   let env0 := psEnvironmentEmpty
   let env1 :=
     psPreludeAdd env0
-      (PsDeclaration.axiomDecl psNatName [] typeType)
-  let envNat1 :=
+      (PsDeclaration.inductiveDecl {
+        name := psNatName
+        levelParams := List.nil
+        type := typeType
+        numParams := 0
+        numIndices := 0
+        constructors :=
+          List.cons
+            psNatZeroName
+            (List.cons psNatSuccName List.nil)
+        isStructure := false
+      })
+  let envNatZero :=
     psPreludeAdd env1
+      (PsDeclaration.constructorDecl {
+        name := psNatZeroName
+        levelParams := List.nil
+        type := natType
+        inductiveName := psNatName
+        constructorIndex := 0
+        numParams := 0
+        numFields := 0
+        recursiveFields := List.nil
+      })
+  let envNatSucc :=
+    psPreludeAdd envNatZero
+      (PsDeclaration.constructorDecl {
+        name := psNatSuccName
+        levelParams := List.nil
+        type := natUnaryType
+        inductiveName := psNatName
+        constructorIndex := 1
+        numParams := 0
+        numFields := 1
+        recursiveFields := List.cons 0 List.nil
+      })
+  let envNatRec :=
+    psPreludeAdd envNatSucc
+      (PsDeclaration.recursorDecl {
+        name := psNatRecName
+        levelParams := List.cons uName List.nil
+        type := natRecType
+        inductiveNames := List.cons psNatName List.nil
+        numParams := 0
+        numIndices := 0
+        numMotives := 1
+        numMinors := 2
+      })
+  let envNat1 :=
+    psPreludeAdd envNatRec
       (PsDeclaration.axiomDecl psNatAddName [] natBinaryType)
   let envNat2 :=
     psPreludeAdd envNat1

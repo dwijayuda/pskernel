@@ -120,6 +120,7 @@ jobs:
               arrayDemo,
               arrayFoldOnly,
               arrayMapDemo,
+              genericArrayId,
               plusOne,
               pushBang,
               unwrapOr,
@@ -141,6 +142,10 @@ jobs:
               assert_eq!(
                   arrayMapDemo(vec![n(1), n(2)]),
                   vec![n(1), n(2)],
+              );
+              assert_eq!(
+                  genericArrayId(vec![String::from("a"), String::from("b")]),
+                  vec![String::from("a"), String::from("b")],
               );
               assert_eq!(arrayFoldOnly(vec![n(4), n(5)]), n(0));
               assert_eq!(arrayDemo(n(7), n(8)), n(8));

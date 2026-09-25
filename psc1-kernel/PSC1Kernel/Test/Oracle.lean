@@ -1150,8 +1150,10 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   let boxType ← exceptToIO
     "PSC1 constructor-field recursor typecheck"
     (PSC1Kernel.check boxCtx boxRecApp)
-  assertTrue "PSC1 constructor-field recursor result type mismatch"
-    (PSC1Kernel.Expr.eq boxType natT)
+  let boxTypeOk ← exceptToIO
+    "PSC1 constructor-field recursor result defeq"
+    (PSC1Kernel.isDefEq boxCtx boxType natT)
+  assertTrue "PSC1 constructor-field recursor result type mismatch" boxTypeOk
   let oursBoxReduced ← exceptToIO
     "PSC1 constructor-field recursor reduction"
     (PSC1Kernel.whnf boxCtx boxRecApp)

@@ -472,16 +472,16 @@ def psElabInductiveConstructor
                 Except.error PsElabError.unresolvedMetavariable
               else
                 Except.ok
-                  (PsDeclaration.constructorDecl {
-                    name := constructorName
-                    levelParams := []
-                    type := constructorType
-                    inductiveName := inductiveName
-                    constructorIndex := 0
-                    numParams := parameterArgs.length
-                    numFields := source.fields.length
-                    recursiveFields := recursiveFields
-                  })
+                  (PsDeclaration.constructorDecl
+                    (PsConstructorInfo.mk
+                      constructorName
+                      List.nil
+                      constructorType
+                      inductiveName
+                      0
+                      parameterArgs.length
+                      source.fields.length
+                      recursiveFields))
 
 
 

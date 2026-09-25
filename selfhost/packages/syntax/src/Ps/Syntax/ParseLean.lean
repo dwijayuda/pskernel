@@ -6,6 +6,10 @@ def psLeanTermStop
   let span := psSyntaxTermSpan term;
   span.stop
 
+def psLeanTokenCursor
+    (remaining : List PsToken) : PsTokenCursor :=
+  { remaining := remaining }
+
 
 def psParseLeanImport
     (cursor : PsTokenCursor) :
@@ -799,7 +803,7 @@ def psParseLeanListPattern
                       name
                       List.nil
                       span
-                  cursor := { remaining := afterSecond }
+                  cursor := psLeanTokenCursor afterSecond
                 })
             else if psStringEq second.text "::" then
               match afterSecond with
@@ -841,7 +845,7 @@ def psParseLeanListPattern
                                   tailBinder
                                   List.nil))
                               span
-                          cursor := { remaining := rest }
+                          cursor := psLeanTokenCursor rest
                         })
                     else
                       none
@@ -883,7 +887,7 @@ def psParseLeanListPattern
                               headBinder
                               (List.cons tailBinder List.nil))
                             span
-                        cursor := { remaining := rest }
+                        cursor := psLeanTokenCursor rest
                       })
                   else
                     none
@@ -926,7 +930,7 @@ def psParseLeanNatPattern
                     first.span)
                   List.nil
                   first.span
-              cursor := { remaining := rest }
+              cursor := psLeanTokenCursor rest
             })
         else
           none
@@ -1655,7 +1659,7 @@ def psParseLeanStructureField
                   psSplitTokensThroughLine
                     firstType.span.start.line
                     afterColon.cursor.remaining
-                match psParseLeanTerm { remaining := split.fst } with
+                match psParseLeanTerm (psLeanTokenCursor split.fst) with
                 | Except.error error => Except.error error
                 | Except.ok type =>
                     if psTokenCursorDone type.cursor then
@@ -1676,7 +1680,7 @@ def psParseLeanStructureField
                       };
                       Except.ok {
                         value := Prod.mk head type.value
-                        cursor := { remaining := split.snd }
+                        cursor := psLeanTokenCursor split.snd
                       }
                     else
                       match psTokenCursorPeek type.cursor with

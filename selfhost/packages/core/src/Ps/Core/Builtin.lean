@@ -69,6 +69,15 @@ def psOptionName : PsName :=
 def psProdName : PsName :=
   psRootName "Prod"
 
+def psProdMkName : PsName :=
+  psNameAppendStr psProdName "mk"
+
+def psProdFstName : PsName :=
+  psNameAppendStr psProdName "fst"
+
+def psProdSndName : PsName :=
+  psNameAppendStr psProdName "snd"
+
 def psArrayName : PsName :=
   psRootName "Array"
 

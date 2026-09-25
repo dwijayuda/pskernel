@@ -317,43 +317,43 @@ def psTsEmitIntrinsicFromPrinted
           value ++ ", " ++ start ++ ", " ++ stop ++ ")")
   | .stringEq, [left, right] =>
       Except.ok ("(" ++ left ++ " === " ++ right ++ ")")
-  | .arrayEmptyWithCapacity, [capacity] =>
+  | .arrayEmptyWithCapacity _, [capacity] =>
       Except.ok
         ("(() => { void (" ++ capacity ++ "); return []; })()")
-  | .arraySize, [value] =>
+  | .arraySize _, [value] =>
       Except.ok ("BigInt((" ++ value ++ ").length)")
-  | .arrayPush, [array, value] =>
+  | .arrayPush _, [array, value] =>
       Except.ok ("[...(" ++ array ++ "), " ++ value ++ "]")
-  | .arrayGet, [array, index] =>
+  | .arrayGet _, [array, index] =>
       Except.ok
         ("(<T>(__ps_a: T[], __ps_i: bigint): T => " ++
           "__ps_a[Number(__ps_i)]!)(" ++
           array ++ ", " ++ index ++ ")")
-  | .arrayGetD, [array, index, fallback] =>
+  | .arrayGetD _, [array, index, fallback] =>
       Except.ok
         ("(<T>(__ps_a: T[], __ps_i: bigint, __ps_fallback: T): T => " ++
           "(__ps_i < BigInt(__ps_a.length) ? " ++
           "__ps_a[Number(__ps_i)]! : __ps_fallback))(" ++
           array ++ ", " ++ index ++ ", " ++ fallback ++ ")")
-  | .arraySet, [array, index, value] =>
+  | .arraySet _, [array, index, value] =>
       Except.ok
         ("(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): T[] => {" ++
           " const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; " ++
           "return __ps_out; })(" ++
           array ++ ", " ++ index ++ ", " ++ value ++ ")")
-  | .arraySetIfInBounds, [array, index, value] =>
+  | .arraySetIfInBounds _, [array, index, value] =>
       Except.ok
         ("(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): T[] => { " ++
           "if (__ps_i >= BigInt(__ps_a.length)) return __ps_a; " ++
           "const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; " ++
           "return __ps_out; })(" ++
           array ++ ", " ++ index ++ ", " ++ value ++ ")")
-  | .arrayMap, [fn, array] =>
+  | .arrayMap _ _, [fn, array] =>
       Except.ok
         ("(<A, B>(__ps_f: (__ps_x: A) => B, __ps_a: A[]): B[] => " ++
           "__ps_a.map((__ps_x) => __ps_f(__ps_x)))(" ++
           fn ++ ", " ++ array ++ ")")
-  | .arrayFoldl, [fn, init, array, start, stop] =>
+  | .arrayFoldl _ _, [fn, init, array, start, stop] =>
       Except.ok
         ("(<A, B>(__ps_f: (__ps_b: B, __ps_x: A) => B, __ps_init: B, " ++
           "__ps_a: A[], __ps_start: bigint, __ps_stop: bigint): B => {" ++

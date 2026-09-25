@@ -33,6 +33,40 @@ inductive PsWasmInstruction where
   | i64Const (value : Int)
   | f32ConstBits (bits : UInt32)
   | f64ConstBits (bits : UInt64)
+  | i32Add
+  | i32Sub
+  | i32Mul
+  | i32And
+  | i32Or
+  | i32Xor
+  | i32Extend8S
+  | i32Extend16S
+  | i32Eq
+  | i32Ne
+  | i32LtS
+  | i32LtU
+  | i32LeS
+  | i32LeU
+  | i32GtS
+  | i32GtU
+  | i32GeS
+  | i32GeU
+  | i64Add
+  | i64Sub
+  | i64Mul
+  | i64And
+  | i64Or
+  | i64Xor
+  | i64Eq
+  | i64Ne
+  | i64LtS
+  | i64LtU
+  | i64LeS
+  | i64LeU
+  | i64GtS
+  | i64GtU
+  | i64GeS
+  | i64GeU
 
 structure PsWasmFunction where
   name : String

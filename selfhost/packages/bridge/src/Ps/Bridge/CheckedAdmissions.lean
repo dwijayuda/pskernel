@@ -319,7 +319,7 @@ def psEncodeCodecInductive
               psCheckedAdmissionJsonField "cs" (psJsonArray encodedConstructors),
               psCheckedAdmissionJsonField "n" (psEncodeCodecName info.name),
               psCheckedAdmissionJsonField "t" (encodedType)
-            ]
+            ];
           Except.ok
             (psJsonObject [
               psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList info.levelParams),

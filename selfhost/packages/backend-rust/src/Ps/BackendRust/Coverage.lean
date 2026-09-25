@@ -598,11 +598,16 @@ def psRustCoverageStructureFieldList :
   | coverage, List.cons field rest =>
       let withStorage :=
         if psRustTypeContainsFunction field.type then
-          psRustCoverageAddUnsupported
-            (psRustCoverageAddFeature
+          if psRustFunctionTypeIsFirstOrder field.type then
+            psRustCoverageAddFeature
               coverage
-              "module:functionStorage")
-            "module:functionStorage"
+              "module:staticFunctionStorage"
+          else
+            psRustCoverageAddUnsupported
+              (psRustCoverageAddFeature
+                coverage
+                "module:functionStorage")
+              "module:functionStorage"
         else
           coverage;
       psRustCoverageStructureFieldList
@@ -767,7 +772,27 @@ def psRustCoverageModule
       module.declarations;
   match psRustValidateModuleNames module with
   | Except.ok _ =>
-      withDeclarations
+      match psRustValidateModuleFunctionStorage module with
+      | Except.ok _ =>
+          withDeclarations
+      | Except.error (PsRustEmitError.functionStorageUnsupported _) =>
+          psRustCoverageAddUnsupported
+            (psRustCoverageAddFeature
+              withDeclarations
+              "module:functionStorage")
+            "module:functionStorage"
+      | Except.error PsRustEmitError.fuelExhausted =>
+          psRustCoverageAddUnsupported
+            (psRustCoverageAddFeature
+              withDeclarations
+              "coverage:storageValidationFuelExhausted")
+            "coverage:storageValidationFuelExhausted"
+      | Except.error _ =>
+          psRustCoverageAddUnsupported
+            (psRustCoverageAddFeature
+              withDeclarations
+              "module:storageValidation")
+            "module:storageValidation"
   | Except.error (PsRustEmitError.unknownStructure _) =>
       psRustCoverageAddUnsupported
         (psRustCoverageAddFeature

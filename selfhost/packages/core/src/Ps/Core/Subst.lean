@@ -27,7 +27,7 @@ def psExprLiftBVars (amount : Nat) (cutoff : Nat) : PsExpr -> PsExpr
         name
         (psExprLiftBVars amount cutoff type)
         (psExprLiftBVars amount cutoff value)
-        (psExprLiftBVars amount (cutoff + 1) body)
+        (psExprLiftBVars amount (Nat.succ cutoff) body)
   | .proj typeName index value =>
       PsExpr.proj typeName index (psExprLiftBVars amount cutoff value)
   | expr => expr

@@ -196,6 +196,38 @@ def assertNatReductionOracle : IO Unit := do
       ("Nat reduction differs from Lean 4.34: " ++ label)
       (toLeanExpr ours == lean)
 
+def assertProofIrrelevanceOracle : IO Unit := do
+  let env ← Lean.mkEmptyEnvironment
+  let P : PSC1Kernel.Name := .str .anonymous "P"
+  let h₁ : PSC1Kernel.Name := .str .anonymous "h1"
+  let h₂ : PSC1Kernel.Name := .str .anonymous "h2"
+
+  let lctx0 : PSC1Kernel.LocalContext := .empty
+  let lctx1 := lctx0.addLocal P P (.sort .zero) .default
+  let lctx2 := lctx1.addLocal h₁ h₁ (.fvar P) .default
+  let lctx3 := lctx2.addLocal h₂ h₂ (.fvar P) .default
+  let ctx : PSC1Kernel.CheckerContext :=
+    { (PSC1Kernel.CheckerContext.empty .empty) with lctx := lctx3 }
+
+  let ours ← exceptToIO
+    "PSC1 proof irrelevance"
+    (PSC1Kernel.isDefEq ctx (.fvar h₁) (.fvar h₂))
+
+  let pId : Lean.FVarId := ⟨toLeanName P⟩
+  let h1Id : Lean.FVarId := ⟨toLeanName h₁⟩
+  let h2Id : Lean.FVarId := ⟨toLeanName h₂⟩
+  let leanLctx0 : Lean.LocalContext := {}
+  let leanLctx1 := leanLctx0.mkLocalDecl pId (toLeanName P) (.sort .zero) .default
+  let leanLctx2 := leanLctx1.mkLocalDecl h1Id (toLeanName h₁) (.fvar pId) .default
+  let leanLctx3 := leanLctx2.mkLocalDecl h2Id (toLeanName h₂) (.fvar pId) .default
+  let lean ←
+    match Lean.Kernel.isDefEq env leanLctx3 (.fvar h1Id) (.fvar h2Id) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean kernel proof-irrelevance oracle failed"
+
+  assertTrue "proof irrelevance differs from Lean 4.34" (ours == lean)
+  assertTrue "Lean 4.34 should identify proofs of the same proposition" lean
+
 def assertBinderInfoDefEqOracle : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let x : PSC1Kernel.Name := .str .anonymous "x"
@@ -263,6 +295,7 @@ def run : IO Unit := do
   assertLevelPairs levels
   assertExprOracle
   assertNatReductionOracle
+  assertProofIrrelevanceOracle
   assertBinderInfoDefEqOracle
   assertProjectionOracle
   IO.println "PSC1Kernel Lean 4.34 foundational + projection oracle: PASS"

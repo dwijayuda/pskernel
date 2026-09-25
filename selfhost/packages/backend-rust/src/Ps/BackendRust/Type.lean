@@ -117,7 +117,7 @@ def psRustEmitTypeWithFuel :
           Except.ok (psRustEmitPrimitiveType primitive)
       | PsVerifiedIrType.function parameters result =>
           let emitNested :=
-            fun nestedType =>
+            fun (nestedType : PsVerifiedIrType) =>
               psRustEmitTypeWithFuel fuel nestedType;
           match psRustEmitTypeListWith emitNested parameters with
           | Except.error error =>
@@ -135,7 +135,7 @@ def psRustEmitTypeWithFuel :
                       printedResult)
       | PsVerifiedIrType.named name arguments =>
           let emitNested :=
-            fun nestedType =>
+            fun (nestedType : PsVerifiedIrType) =>
               psRustEmitTypeWithFuel fuel nestedType;
           match psRustEmitTypeListWith emitNested arguments with
           | Except.error error =>

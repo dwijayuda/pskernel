@@ -1076,7 +1076,7 @@ def psElabStructureDeclaration
       name := constructorName
       fields := fields
       span := span
-    }
+    };
     psElabInductiveDeclaration
       environment
       name

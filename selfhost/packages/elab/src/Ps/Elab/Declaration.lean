@@ -706,8 +706,7 @@ def psBuildInductiveMinorType
           | Except.error error => Except.error error
           | Except.ok fields =>
               let fieldArgs :=
-                fields.bindersRev.reverse.map
-                  (fun field => PsExpr.fvar field.id)
+                psElabBinderArguments fields.bindersRev
               let intro :=
                 psExprApplyMany
                   (PsExpr.constE info.name [])

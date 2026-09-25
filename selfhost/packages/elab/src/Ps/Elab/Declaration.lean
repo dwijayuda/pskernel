@@ -1163,7 +1163,7 @@ def psElabPartialDeclaration
                                 metaContext
                                 binderResult.bindersRev
                                 openValue
-                                finalOpenType
+                                finalOpenType;
                             if
                                 psExprHasUnresolvedMeta closed.1
                                   || psExprHasUnresolvedMeta closed.2 then

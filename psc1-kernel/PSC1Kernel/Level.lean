@@ -19,6 +19,20 @@ def Level.eq : Level → Level → Bool
   | .mvar a, .mvar b => Name.eq a b
   | _, _ => false
 
+theorem Level.eqSelf : ∀ level : Level, Level.eq level level = true
+  | .zero => rfl
+  | .succ level => Level.eqSelf level
+  | .max left right => by
+      simp only [Level.eq]
+      rw [Level.eqSelf left, Level.eqSelf right]
+      rfl
+  | .imax left right => by
+      simp only [Level.eq]
+      rw [Level.eqSelf left, Level.eqSelf right]
+      rfl
+  | .param name => Name.eqSelf name
+  | .mvar name => Name.eqSelf name
+
 def Level.isZero : Level → Bool
   | .zero => true
   | _ => false

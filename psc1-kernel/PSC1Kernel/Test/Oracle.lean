@@ -196,6 +196,32 @@ def assertNatReductionOracle : IO Unit := do
       ("Nat reduction differs from Lean 4.34: " ++ label)
       (toLeanExpr ours == lean)
 
+def assertFunctionEtaOracle : IO Unit := do
+  let env ← Lean.mkEmptyEnvironment
+  let x : PSC1Kernel.Name := .str .anonymous "x"
+  let f : PSC1Kernel.Name := .str .anonymous "f"
+  let prop : PSC1Kernel.Expr := .sort .zero
+  let fnType : PSC1Kernel.Expr := .forallE x prop prop .default
+
+  let pscLctx := PSC1Kernel.LocalContext.empty.addLocal f f fnType .default
+  let ctx : PSC1Kernel.CheckerContext :=
+    { (PSC1Kernel.CheckerContext.empty .empty) with lctx := pscLctx }
+  let eta : PSC1Kernel.Expr :=
+    .lam x prop (.app (.fvar f) (.bvar 0)) .default
+  let ours ← exceptToIO "PSC1 eta defeq" (PSC1Kernel.isDefEq ctx eta (.fvar f))
+
+  let fId : Lean.FVarId := ⟨toLeanName f⟩
+  let leanFnType := toLeanExpr fnType
+  let leanLctx : Lean.LocalContext :=
+    ({} : Lean.LocalContext).mkLocalDecl fId (toLeanName f) leanFnType .default
+  let lean ←
+    match Lean.Kernel.isDefEq env leanLctx (toLeanExpr eta) (.fvar fId) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean kernel eta oracle failed"
+
+  assertTrue "function eta differs from Lean 4.34" (ours == lean)
+  assertTrue "Lean 4.34 should accept function eta" lean
+
 def assertProofIrrelevanceOracle : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let P : PSC1Kernel.Name := .str .anonymous "P"
@@ -295,6 +321,7 @@ def run : IO Unit := do
   assertLevelPairs levels
   assertExprOracle
   assertNatReductionOracle
+  assertFunctionEtaOracle
   assertProofIrrelevanceOracle
   assertBinderInfoDefEqOracle
   assertProjectionOracle

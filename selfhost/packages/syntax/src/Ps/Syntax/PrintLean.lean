@@ -24,11 +24,16 @@ def psPrintLeanTermWithFuel :
             match psPrintLeanTermWithFuel remaining fn with
             | Except.error error => Except.error error
             | Except.ok printedFn =>
-                match args.mapM (fun arg =>
-                    if psSyntaxTermSimpleForApplication arg then
-                      psPrintLeanTermWithFuel remaining arg
-                    else
-                      Except.error PsSourcePrintError.unsupportedApplication) with
+                let printArgument :=
+                  fun arg =>
+                    match psPrintLeanTermWithFuel remaining arg with
+                    | Except.error error => Except.error error
+                    | Except.ok printed =>
+                        if psSyntaxTermSimpleForApplication arg then
+                          Except.ok printed
+                        else
+                          Except.ok ("(" ++ printed ++ ")")
+                match args.mapM printArgument with
                 | Except.error error => Except.error error
                 | Except.ok printedArgs =>
                     if printedArgs.isEmpty then

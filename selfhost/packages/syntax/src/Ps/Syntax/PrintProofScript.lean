@@ -28,17 +28,13 @@ def psPrintProofScriptTermWithFuel :
                 | [.unit _] =>
                     Except.ok (printedFn ++ "()")
                 | _ =>
-                    if args.any (fun arg => !psSyntaxTermSimpleForApplication arg
-                      || match arg with | .unit _ => true | _ => false) then
-                      Except.error PsSourcePrintError.unsupportedApplication
-                    else
-                      match args.mapM
-                          (psPrintProofScriptTermWithFuel remaining) with
-                      | Except.error error => Except.error error
-                      | Except.ok printedArgs =>
-                          Except.ok
-                            (printedFn ++ "(" ++
-                              psPrintJoin ", " printedArgs ++ ")")
+                    match args.mapM
+                        (psPrintProofScriptTermWithFuel remaining) with
+                    | Except.error error => Except.error error
+                    | Except.ok printedArgs =>
+                        Except.ok
+                          (printedFn ++ "(" ++
+                            psPrintJoin ", " printedArgs ++ ")")
       | .lambda binders body _ =>
           let printBinder :=
             fun binder =>

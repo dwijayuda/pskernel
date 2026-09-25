@@ -94,7 +94,32 @@ def psTestPartialDefinitionTranslationRoundTrip : Bool :=
            | _, _ => false
   | _, _ => false
 
+def psTestComplexApplicationTranslationRoundTrip : Bool :=
+  let leanSource :=
+    "def effectDo (state : Nat) : Nat := do\n" ++
+    "  let next : Nat <- compilerPure state;\n" ++
+    "  return next"
+  match psTranslateLeanToProofScript leanSource with
+  | Except.error _ => false
+  | Except.ok proofScript =>
+      proofScript.contains "compilerBind("
+        && proofScript.contains "fun "
+        && match psTranslateProofScriptToLean proofScript with
+           | Except.error _ => false
+           | Except.ok lean =>
+               match psTranslateLeanToProofScript lean with
+               | Except.error _ => false
+               | Except.ok proofScriptAgain =>
+                   proofScriptAgain == proofScript
+
 def main : IO Unit := do
+  if psTestComplexApplicationTranslationRoundTrip then
+    IO.println
+      "PSC1_TRANSLATION_PASS: complex application .lean <-> .ps"
+  else
+    throw
+      (IO.userError
+        "PSC1_TRANSLATION_FAIL: complex application .lean <-> .ps")
   if psTestPartialDefinitionTranslationRoundTrip then
     IO.println
       "PSC1_TRANSLATION_PASS: partial def .lean <-> .ps"

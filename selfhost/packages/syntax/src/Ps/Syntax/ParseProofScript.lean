@@ -91,7 +91,10 @@ def psProofScriptCallAdjacent
   | some token =>
       token.span.start.byteOffset == (psSyntaxTermSpan term).stop.byteOffset
 
-def psParseProofScriptSimpleApplicationWithFuel
+def psParseProofScriptApplicationWithFuel
+    (parseArgument :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
     (fuel : Nat)
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
@@ -107,7 +110,7 @@ def psParseProofScriptSimpleApplicationWithFuel
             | none => Except.error (PsParseError.unexpectedEnd "(")
             | some opening =>
                 match psParseProofScriptCallArgsWithFuel
-                    (psParseProofScriptSimpleApplicationWithFuel remaining)
+                    parseArgument
                     remaining
                     opening.cursor
                     [] with
@@ -131,6 +134,17 @@ def psParseProofScriptSimpleApplicationWithFuel
                     }
           else
             Except.ok first
+
+def psParseProofScriptSimpleApplicationWithFuel :
+    Nat ->
+    PsTokenCursor ->
+    Except PsParseError (PsParseResult PsSyntaxTerm)
+  | 0, _ => Except.error PsParseError.fuelExhausted
+  | remaining + 1, cursor =>
+      psParseProofScriptApplicationWithFuel
+        (psParseProofScriptSimpleApplicationWithFuel remaining)
+        (remaining + 1)
+        cursor
 
 def psParseProofScriptSimpleApplication
     (cursor : PsTokenCursor) :
@@ -788,7 +802,11 @@ def psParseProofScriptTermWithFuel :
                               cursor := close.cursor
                             }
       else
-        match psParseProofScriptSimpleApplication cursor with
+        match
+            psParseProofScriptApplicationWithFuel
+              (psParseProofScriptTermWithFuel remaining)
+              (remaining + 1)
+              cursor with
         | Except.error error => Except.error error
         | Except.ok domain =>
             psParseProofScriptArrowTail

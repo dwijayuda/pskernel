@@ -87,14 +87,34 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          mapfile -t whnf_init_roots < <(node --input-type=module -e "
+            import fs from 'node:fs';
+            const d=JSON.parse(fs.readFileSync(
+              'lean434-whnf-runtime-metadata.json','utf8'
+            ));
+            const entries=[
+              d.initializers.find(
+                x=>x.declaration.includes('ImportingFlag') &&
+                   x.declaration.endsWith('.importingRef')
+              ),
+              d.initializers.find(
+                x=>x.declaration.includes('EnvExtension.envExtensionsRef')
+              ),
+            ];
+            if(entries.some(x=>!x))process.exit(2);
+            for(const e of entries){
+              console.log(e.declaration);
+              if(e.initFunction)console.log(e.initFunction);
+            }
+          ")
+          printf 'WHNF initializer root: %s\n' "${whnf_init_roots[@]}"
           LEAN_PATH="$PWD:${LEAN_PATH:-}" \
             lean --run oracle/replay-probe/DependencyExport.lean \
             Oracle.ReplayProbe.RuntimeMetaProbe \
             --selected-after Init.Prelude \
+            "${whnf_init_roots[@]}" \
             Lean.Meta.whnfImp \
             ProofScript.RuntimeProbe.whnfWithEmptyEnv \
-            Lean.ImportingFlag.importingRef \
-            Lean.EnvExtension.envExtensionsRef \
             > lean434-whnf-bootstrap.ndjson
           test -s lean434-whnf-bootstrap.ndjson
       - name: Execute real Lean.Meta WHNF in JavaScript

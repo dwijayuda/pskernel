@@ -190,6 +190,24 @@ def psRustEmitType
     Except PsRustEmitError String :=
   psRustEmitTypeWithFuel 4096 type
 
+def psRustEmitTypeArguments
+    (arguments : List PsVerifiedIrType) :
+    Except PsRustEmitError String :=
+  match psRustEmitTypeListWith psRustEmitType arguments with
+  | Except.error error =>
+      Except.error error
+  | Except.ok printed =>
+      match printed with
+      | List.nil =>
+          Except.ok ""
+      | List.cons _ _ =>
+          Except.ok
+            (psRustConcat4
+              "::<"
+              (psRustJoin ", " printed)
+              ">"
+              "")
+
 def psRustTypeContainsFunctionWithFuel :
     Nat ->
     PsVerifiedIrType ->

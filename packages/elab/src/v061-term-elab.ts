@@ -55,7 +55,8 @@ function resolveReference(
       context.environment,
       context.localContext.clone(),
     );
-    const view=appView(checker.whnf(expected));
+    const resolvedExpected=context.metaContext.instantiate(expected);
+    const view=appView(checker.whnf(resolvedExpected));
     if(view.fn.kind!=='const'){
       throw new Error(
         "PS_ELAB_CONSTRUCTOR_SHORTHAND_EXPECTED: expected type is not inductive for '"+

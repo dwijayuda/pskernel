@@ -998,6 +998,7 @@ def psWasmLowerIntrinsicWith
         Except PsWasmLowerError PsWasmLoweredExpr)
     (state : PsWasmLowerState)
     (operation : PsVerifiedIrIntrinsic)
+    (typeArguments : List PsVerifiedIrType)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match operation with

@@ -225,6 +225,42 @@ def assertNatReductionOracle : IO Unit := do
       ("Nat reduction differs from Lean 4.34: " ++ label)
       (toLeanExpr ours == lean)
 
+  -- Final Lean 4.34 rejects pow/shiftLeft counts above UINT32_MAX before
+  -- entering runtime arithmetic. This is intentionally not an arbitrary
+  -- implementation cutoff.
+  let tooLargeCount : Nat := 4294967296
+  let hugePow := natBinary "pow" (.lit (.nat 2)) (.lit (.nat tooLargeCount))
+  let oursPowRejects :=
+    match PSC1Kernel.whnf ctx hugePow with
+    | .ok _ => false
+    | .error _ => true
+  let leanPowRejects :=
+    match Lean.Kernel.whnf env ({} : Lean.LocalContext) (toLeanExpr hugePow) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue "Nat.pow UINT32 count guard differs from Lean 4.34"
+    (oursPowRejects == leanPowRejects && leanPowRejects)
+
+  let hugeShift := natBinary "shiftLeft" (.lit (.nat 1)) (.lit (.nat tooLargeCount))
+  let oursShiftRejects :=
+    match PSC1Kernel.whnf ctx hugeShift with
+    | .ok _ => false
+    | .error _ => true
+  let leanShiftRejects :=
+    match Lean.Kernel.whnf env ({} : Lean.LocalContext) (toLeanExpr hugeShift) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue "Nat.shiftLeft UINT32 count guard differs from Lean 4.34"
+    (oursShiftRejects == leanShiftRejects && leanShiftRejects)
+
+  -- Lean checks the shift count only for nonzero values. Preserve that exact
+  -- ordering: 0 <<< huge reduces to zero rather than rejecting the count.
+  let zeroHugeShift := natBinary "shiftLeft" (.lit (.nat 0)) (.lit (.nat tooLargeCount))
+  let oursZero ← exceptToIO "PSC1 zero huge shift" (PSC1Kernel.whnf ctx zeroHugeShift)
+  let leanZero ← kernelExprWhnf env zeroHugeShift
+  assertTrue "Nat.shiftLeft zero/count ordering differs from Lean 4.34"
+    (toLeanExpr oursZero == leanZero)
+
 def makeStructureEnvironment : PSC1Kernel.Environment :=
   let pair : PSC1Kernel.Name := .str (.str (.str .anonymous "PSC1Kernel") "Test") "EtaPair"
   let pairMk : PSC1Kernel.Name := .str pair "mk"

@@ -467,13 +467,13 @@ def psRustValidateExprNamesWithFuel
                   Except.error error
               | Except.ok _ =>
                   validateNested elseBranch
-      | PsVerifiedIrExpr.record structureName fields =>
+      | PsVerifiedIrExpr.record structureName _ fields =>
           if psRustStringListContains structureNames structureName then
             psRustValidateFieldListWith validateNested fields
           else
             Except.error
               (PsRustEmitError.unknownStructure structureName)
-      | PsVerifiedIrExpr.projection _ target _ =>
+      | PsVerifiedIrExpr.projection _ _ target _ =>
           validateNested target
       | PsVerifiedIrExpr.constructor
           inductiveName
@@ -487,6 +487,7 @@ def psRustValidateExprNamesWithFuel
               (PsRustEmitError.unknownInductive inductiveName)
       | PsVerifiedIrExpr.matchE
           inductiveName
+          _
           scrutinee
           alternatives =>
           if psRustStringListContains inductiveNames inductiveName then

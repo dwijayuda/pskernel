@@ -1694,8 +1694,130 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   assertTrue "direct recursive recursor did not feed the recursive hypothesis to the minor"
     (PSC1Kernel.Expr.eq oursNatLikeReduced (.lit (.nat 7)))
 
-  -- Function-recursive fields are reflexive in Lean's terminology and remain
-  -- outside this direct-recursion slice.
+  -- Functional recursive fields are Lean "reflexive" datatypes. The IH is
+  -- itself a function over the recursive field's non-recursive arguments.
+  let Wide : PSC1Kernel.Name := .str .anonymous "OracleWide"
+  let WideLeaf : PSC1Kernel.Name := .str Wide "leaf"
+  let WideBranch : PSC1Kernel.Name := .str Wide "branch"
+  let WideRec : PSC1Kernel.Name := .str Wide "rec"
+  let wideT : PSC1Kernel.Expr := .const Wide []
+  let wideChildrenType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "n") natT wideT .default
+  let wideBranchType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "children") wideChildrenType wideT .default
+  let wideBase :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursWide ← exceptToIO
+    "PSC1 functional recursive inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive wideBase {
+      levelParams := []
+      name := Wide
+      type := type1
+      ctors := [
+        { name := WideLeaf, type := wideT },
+        { name := WideBranch, type := wideBranchType }
+      ]
+      isUnsafe := false
+    })
+  let leanWide0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanWideNat ←
+    match Lean.Kernel.Environment.addDecl leanWide0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected Wide oracle Nat axiom"
+  let leanWide1 ←
+    match Lean.Kernel.Environment.addDecl leanWideNat {} (.inductDecl [] 0 [{
+      name := toLeanName Wide
+      type := toLeanExpr type1
+      ctors := [
+        { name := toLeanName WideLeaf, type := toLeanExpr wideT },
+        { name := toLeanName WideBranch, type := toLeanExpr wideBranchType }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected functional recursive inductive oracle"
+  let leanWideEnv := Lean.Environment.ofKernelEnv leanWide1
+  for name in [Wide, WideLeaf, WideBranch, WideRec] do
+    let some oursInfo := oursWide.find? name
+      | throw <| IO.userError "PSC1 functional recursive metadata missing"
+    let some leanInfo := leanWide1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 functional recursive metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("functional recursive generated type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+  match oursWide.find? Wide with
+  | some (.inductInfo info) =>
+      assertTrue "PSC1 functional recursive inductive was not marked recursive"
+        info.isRec
+      assertTrue "PSC1 functional recursive inductive was not marked reflexive"
+        info.isReflexive
+  | _ =>
+      throw <| IO.userError "PSC1 functional recursive inductive info missing"
+  match leanWide1.find? (toLeanName Wide) with
+  | some (.inductInfo info) =>
+      assertTrue "Lean 4.34 functional recursive inductive was not recursive"
+        info.isRec
+      assertTrue "Lean 4.34 functional recursive inductive was not reflexive"
+        info.isReflexive
+  | _ =>
+      throw <| IO.userError "Lean 4.34 functional recursive inductive info missing"
+
+  let wideMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "w") wideT natT .default
+  let wideLeafMinor : PSC1Kernel.Expr := .lit (.nat 5)
+  let wideIHType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "n") natT natT .default
+  let wideBranchMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "children") wideChildrenType
+      (.lam (.str .anonymous "children_ih") wideIHType
+        (.app (.bvar 0) (.lit (.nat 0)))
+        .default)
+      .default
+  let wideChildren : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "n") natT (.const WideLeaf []) .default
+  let wideMajor : PSC1Kernel.Expr :=
+    .app (.const WideBranch []) wideChildren
+  let wideRecApp :=
+    PSC1Kernel.applyArgs (.const WideRec [.succ .zero])
+      [wideMotive, wideLeafMinor, wideBranchMinor, wideMajor]
+  let wideCtx := PSC1Kernel.CheckerContext.empty oursWide
+  let wideResultType ← exceptToIO
+    "PSC1 functional recursive recursor typecheck"
+    (PSC1Kernel.check wideCtx wideRecApp)
+  let wideTypeOk ← exceptToIO
+    "PSC1 functional recursive recursor result defeq"
+    (PSC1Kernel.isDefEq wideCtx wideResultType natT)
+  assertTrue "PSC1 functional recursive recursor result type mismatch" wideTypeOk
+  let oursWideReduced ← exceptToIO
+    "PSC1 functional recursive recursor reduction"
+    (PSC1Kernel.whnf wideCtx wideRecApp)
+  let leanWideType ←
+    match Lean.Kernel.check leanWideEnv ({} : Lean.LocalContext)
+        (toLeanExpr wideRecApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected generated Wide recursor application"
+  assertTrue "functional recursive recursor result type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr wideResultType) leanWideType)
+  let leanWideReduced ← kernelExprWhnf leanWideEnv wideRecApp
+  assertTrue "functional recursive recursor reduction differs from Lean 4.34"
+    (toLeanExpr oursWideReduced == leanWideReduced)
+  assertTrue "functional recursive recursor did not generate the functional IH"
+    (PSC1Kernel.Expr.eq oursWideReduced (.lit (.nat 5)))
+
+  -- Negative functional occurrences remain rejected.
   let Bad : PSC1Kernel.Name := .str .anonymous "OracleSimpleBad"
   let BadMk : PSC1Kernel.Name := .str Bad "mk"
   let badExpr : PSC1Kernel.Expr := .const Bad []

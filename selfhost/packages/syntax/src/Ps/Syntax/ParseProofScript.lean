@@ -1235,7 +1235,8 @@ def psParseProofScriptDeclaration
               keyword.text
               keyword.span)
         else
-          let afterKind :=
+          let afterKind :
+              Except PsParseError PsTokenCursor :=
             if isPartial then
               match psTokenCursorAdvance cursor with
               | Option.none =>

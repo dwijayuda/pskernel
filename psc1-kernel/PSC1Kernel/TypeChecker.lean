@@ -91,40 +91,93 @@ def natLiteralValue? : Expr → Option Nat
 partial def kernelNatGcd (a b : Nat) : Nat :=
   if b == 0 then a else kernelNatGcd b (a % b)
 
+/-- Final Lean 4.34 default from `type_checker.cpp`: 128 MiB. -/
+def leanNatMaxSizeDefault : Nat :=
+  128 * 1024 * 1024
+
+/-- Final Lean 4.34 runtime count boundary for Nat.pow/Nat.shiftLeft. -/
+def leanUInt32Max : Nat :=
+  4294967295
+
+/-- Largest Nat encoded as an immediate scalar by the 64-bit Lean runtime. -/
+def leanMaxSmallNat : Nat :=
+  9223372036854775807
+
+/--
+Portable model of Lean 4.34 `lean_nat_size_in_bytes` on the supported
+64-bit runtime: one word for scalars, whole 64-bit limbs for heap naturals.
+-/
+partial def natHeapWordCount (n : Nat) : Nat :=
+  if n == 0 then
+    0
+  else
+    1 + natHeapWordCount (Nat.shiftRight n 64)
+
+def natSizeInBytes (n : Nat) : Nat :=
+  if n <= leanMaxSmallNat then 8 else natHeapWordCount n * 8
+
+def checkNatSize (n : Nat) : Except String Unit :=
+  if natSizeInBytes n > leanNatMaxSizeDefault then
+    .error "the kernel refused a Nat numeral because its size exceeds the maximum"
+  else
+    .ok ()
+
+def checkCountArg (op : String) (count : Nat) : Except String Unit :=
+  if count > leanUInt32Max then
+    .error ("the kernel refused to evaluate " ++ op ++
+      " because its second argument does not fit in a 32-bit unsigned integer")
+  else
+    .ok ()
+
 def boolExpr (value : Bool) : Expr :=
   .const (if value then kernelBoolTrueName else kernelBoolFalseName) []
 
-def reduceNatBinary (op : Name) (a b : Nat) : Option Expr :=
+def reduceNatBinary (op : Name) (a b : Nat) : Except String (Option Expr) := do
   if Name.eq op kernelNatAddName then
-    some (.lit (.nat (a + b)))
+    let r := a + b
+    checkNatSize r
+    return some (.lit (.nat r))
   else if Name.eq op kernelNatSubName then
-    some (.lit (.nat (a - b)))
+    let r := a - b
+    checkNatSize r
+    return some (.lit (.nat r))
   else if Name.eq op kernelNatMulName then
-    some (.lit (.nat (a * b)))
+    let r := a * b
+    checkNatSize r
+    return some (.lit (.nat r))
   else if Name.eq op kernelNatPowName then
-    if b > 16777216 then none else some (.lit (.nat (a ^ b)))
+    checkCountArg "Nat.pow" b
+    if a > 1 && b != 0 && natSizeInBytes a > leanNatMaxSizeDefault / b then
+      throw "the kernel refused to evaluate Nat.pow because the result would exceed the maximum numeral size"
+    else
+      return some (.lit (.nat (a ^ b)))
   else if Name.eq op kernelNatGcdName then
-    some (.lit (.nat (kernelNatGcd a b)))
+    return some (.lit (.nat (kernelNatGcd a b)))
   else if Name.eq op kernelNatModName then
-    some (.lit (.nat (if b == 0 then a else a % b)))
+    return some (.lit (.nat (if b == 0 then a else a % b)))
   else if Name.eq op kernelNatDivName then
-    some (.lit (.nat (if b == 0 then 0 else a / b)))
+    return some (.lit (.nat (if b == 0 then 0 else a / b)))
   else if Name.eq op kernelNatBeqName then
-    some (boolExpr (a == b))
+    return some (boolExpr (a == b))
   else if Name.eq op kernelNatBleName then
-    some (boolExpr (a <= b))
+    return some (boolExpr (a <= b))
   else if Name.eq op kernelNatLandName then
-    some (.lit (.nat (Nat.land a b)))
+    return some (.lit (.nat (Nat.land a b)))
   else if Name.eq op kernelNatLorName then
-    some (.lit (.nat (Nat.lor a b)))
+    return some (.lit (.nat (Nat.lor a b)))
   else if Name.eq op kernelNatXorName then
-    some (.lit (.nat (Nat.xor a b)))
+    return some (.lit (.nat (Nat.xor a b)))
   else if Name.eq op kernelNatShiftLeftName then
-    some (.lit (.nat (Nat.shiftLeft a b)))
+    if a == 0 then
+      return some (.lit (.nat 0))
+    checkCountArg "Nat.shiftLeft" b
+    if natSizeInBytes a + b / 8 + 1 > leanNatMaxSizeDefault then
+      throw "the kernel refused a Nat numeral because its size exceeds the maximum"
+    return some (.lit (.nat (Nat.shiftLeft a b)))
   else if Name.eq op kernelNatShiftRightName then
-    some (.lit (.nat (Nat.shiftRight a b)))
+    return some (.lit (.nat (Nat.shiftRight a b)))
   else
-    none
+    return none
 
 def CheckerContext.freshName (ctx : CheckerContext) (base : Name) : Name :=
   .num base ctx.lctx.nextIndex
@@ -321,7 +374,10 @@ partial def reduceNat
     if levels.length == 0 && Name.eq name kernelNatSuccName then do
       let arg' ← whnf ctx arg
       match natLiteralValue? arg' with
-      | some value => .ok (some (.lit (.nat (value + 1))))
+      | some value => do
+          let result := value + 1
+          checkNatSize result
+          .ok (some (.lit (.nat result)))
       | none => .ok none
     else
       .ok none
@@ -330,7 +386,7 @@ partial def reduceNat
       let left' ← whnf ctx left
       let right' ← whnf ctx right
       match natLiteralValue? left', natLiteralValue? right' with
-      | some a, some b => .ok (reduceNatBinary name a b)
+      | some a, some b => reduceNatBinary name a b
       | _, _ => .ok none
     else
       .ok none
@@ -580,7 +636,9 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
         .ok (info.type.instantiateLevelParams info.levelParams levels)
   | .lit literal =>
     match literal with
-    | .nat _ => .ok (.const kernelNatName [])
+    | .nat value => do
+        checkNatSize value
+        .ok (.const kernelNatName [])
     | .str _ => .ok (.const kernelStringName [])
   | .mdata _ body => infer ctx body
   | .app fn arg => do

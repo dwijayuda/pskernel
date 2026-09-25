@@ -194,7 +194,10 @@ def addTheorem
   checkNoMVarNoFVar proof
   checkLevelParams proof base.levelParams
   let valueType ← check ctx proof
-  unless ← isDefEq ctx valueType theoremType do
+  -- Hash-cons the actual conversion pair. This is definitionally identity and
+  -- only changes compiled sharing, so the defeq decision/order is preserved.
+  let compared := ShareCommon.shareCommon' (valueType, theoremType)
+  unless ← isDefEq ctx compared.1 compared.2 do
     throw "theorem proof type mismatch"
   env.add (.thmInfo { base := base, value := proof })
 

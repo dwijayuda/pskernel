@@ -23,6 +23,18 @@ def psParseListReverse {α : Type}
     (xs : List α) : List α :=
   psParseListReverseAcc xs List.nil
 
+
+def psParseListAppend {α : Type}
+    (xs : List α) : List α -> List α :=
+  match xs with
+  | List.nil =>
+      fun (ys : List α) => ys
+  | List.cons head tail =>
+      let smaller : List α -> List α :=
+        psParseListAppend tail;
+      fun (ys : List α) =>
+        List.cons head (smaller ys)
+
 def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan :=
   { start := start.start, stop := stop.stop }
 

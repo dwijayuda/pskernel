@@ -155,11 +155,11 @@ def psParseProofScriptApplicationWithFuel
                     [] with
                 | Except.error error => Except.error error
                 | Except.ok call =>
-                    let span := {
+                    let span : PsSourceSpan := {
                       start := psProofScriptTermStart first.value
                       stop := call.closeSpan.stop
                     };
-                    let args :=
+                    let args : List PsSyntaxTerm :=
                       match call.args with
                       | [] =>
                           [PsSyntaxTerm.unit {

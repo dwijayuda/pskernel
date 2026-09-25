@@ -430,6 +430,96 @@ partial def kTypesEq
   let right' ← whnf ctx right
   pure (Expr.eq left' right')
 
+partial def inferKLambdaSpine
+    (ctx : CheckerContext)
+    (e : Expr)
+    (fvars : List Expr := [])
+    (binders : List CheckerCloseBinder := []) :
+    Except String (Option Expr) := do
+  match e with
+  | .lam name domain body binderInfo => do
+      let openedDomain := domain.instantiateRev fvars
+      let some domainType ← inferKMajorType? ctx openedDomain
+        | return none
+      let domainType' ← whnf ctx domainType
+      let .sort _ := domainType'
+        | return none
+      let (fresh, child) := ctx.withLocal name openedDomain binderInfo
+      let binder : CheckerCloseBinder := {
+        internalName := fresh
+        userName := name
+        type := openedDomain
+        binderInfo := binderInfo
+      }
+      inferKLambdaSpine
+        child body (fvars ++ [.fvar fresh]) (binders ++ [binder])
+  | tail => do
+      let some result ← inferKMajorType? ctx (tail.instantiateRev fvars)
+        | return none
+      let result := result.cheapBetaReduce
+      return some (closeCheckerBinders binders result)
+
+partial def inferKForallSpine
+    (ctx : CheckerContext)
+    (e : Expr)
+    (fvars : List Expr := [])
+    (levels : List Level := []) :
+    Except String (Option Expr) := do
+  match e with
+  | .forallE name domain body binderInfo => do
+      let openedDomain := domain.instantiateRev fvars
+      let some domainType ← inferKMajorType? ctx openedDomain
+        | return none
+      let domainType' ← whnf ctx domainType
+      let .sort level := domainType'
+        | return none
+      let (fresh, child) := ctx.withLocal name openedDomain binderInfo
+      inferKForallSpine
+        child body (fvars ++ [.fvar fresh]) (levels ++ [level])
+  | tail => do
+      let some tailType ← inferKMajorType? ctx (tail.instantiateRev fvars)
+        | return none
+      let tailType' ← whnf ctx tailType
+      let .sort resultLevel := tailType'
+        | return none
+      return some (.sort (levels.foldr Level.mkIMax resultLevel))
+
+partial def inferKLetSpine
+    (ctx : CheckerContext)
+    (e : Expr)
+    (fvars : List Expr := [])
+    (binders : List CheckerCloseBinder := []) :
+    Except String (Option Expr) := do
+  match e with
+  | .letE name type value body nondep => do
+      let openedType := type.instantiateRev fvars
+      let openedValue := value.instantiateRev fvars
+      let some typeType ← inferKMajorType? ctx openedType
+        | return none
+      let typeType' ← whnf ctx typeType
+      let .sort _ := typeType'
+        | return none
+      let some valueType ← inferKMajorType? ctx openedValue
+        | return none
+      unless ← kTypesEq ctx openedType valueType do
+        return none
+      let (fresh, child) := ctx.withLet name openedType openedValue
+      let binder : CheckerCloseBinder := {
+        internalName := fresh
+        userName := name
+        type := openedType
+        binderInfo := .default
+        value? := some openedValue
+        nondep := nondep
+      }
+      inferKLetSpine
+        child body (fvars ++ [.fvar fresh]) (binders ++ [binder])
+  | tail => do
+      let some result ← inferKMajorType? ctx (tail.instantiateRev fvars)
+        | return none
+      let result := result.cheapBetaReduce
+      return some (closeCheckerBinders binders result true)
+
 partial def inferKMajorType?
     (ctx : CheckerContext)
     (major : Expr) : Except String (Option Expr) := do
@@ -463,44 +553,9 @@ partial def inferKMajorType?
       unless ← kTypesEq ctx domain argType do
         return none
       return some (body.instantiate1 arg)
-  | .lam userName domain body binderInfo => do
-      let some domainType ← inferKMajorType? ctx domain
-        | return none
-      let domainType' ← whnf ctx domainType
-      let .sort _ := domainType'
-        | return none
-      let (fresh, child) := ctx.withLocal userName domain binderInfo
-      let some bodyType ←
-          inferKMajorType? child (body.instantiate1 (.fvar fresh))
-        | return none
-      return some <|
-        .forallE userName domain
-          (bodyType.abstractFVars [fresh]) binderInfo
-  | .forallE userName domain body binderInfo => do
-      let some domainType ← inferKMajorType? ctx domain
-        | return none
-      let domainType' ← whnf ctx domainType
-      let .sort domainLevel := domainType'
-        | return none
-      let (fresh, child) := ctx.withLocal userName domain binderInfo
-      let some bodyType ←
-          inferKMajorType? child (body.instantiate1 (.fvar fresh))
-        | return none
-      let bodyType' ← whnf child bodyType
-      let .sort bodyLevel := bodyType'
-        | return none
-      return some (.sort (.imax domainLevel bodyLevel))
-  | .letE _ type value body _ => do
-      let some typeType ← inferKMajorType? ctx type
-        | return none
-      let typeType' ← whnf ctx typeType
-      let .sort _ := typeType'
-        | return none
-      let some valueType ← inferKMajorType? ctx value
-        | return none
-      unless ← kTypesEq ctx type valueType do
-        return none
-      inferKMajorType? ctx (body.instantiate1 value)
+  | .lam .. => inferKLambdaSpine ctx major
+  | .forallE .. => inferKForallSpine ctx major
+  | .letE .. => inferKLetSpine ctx major
   | .proj _ _ _ => return none
 
 partial def exprHasMVarForK : Expr → Bool

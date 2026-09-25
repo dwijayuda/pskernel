@@ -1,0 +1,53 @@
+name: TS no-defeq-cache diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [diagnostic/ts-no-defeq-cache]
+    paths:
+      - ".github/workflows/ts-no-defeq-cache-diagnostic.yml"
+      - "src/kernel/type-checker.ts"
+      - "src/kernel/state.ts"
+      - "src/core/**"
+      - "src/integration/lean4export.ts"
+      - "oracle/replay-probe/**"
+      - "scripts/adaptive-root-oracle.mjs"
+      - "scripts/batch-replay-worker.mjs"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: read
+
+jobs:
+  roots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        root: [30019, 40003, 70000, 80000, 100015, 110018]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Compile dependency exporter
+        run: lean oracle/replay-probe/DependencyExport.lean
+      - name: Replay exact Std root without defeq pair caches
+        env:
+          PSKERNEL_WORKER_HEAP_MIB: "4096"
+          PSKERNEL_WORKER_TIMEOUT_MS: "180000"
+        run: |
+          node scripts/adaptive-root-oracle.mjs Std 114029 "${{ matrix.root }}" 1 1 1

@@ -21,6 +21,7 @@
     "@proofscript/environment-next": "0.0.0-dev",
     "@proofscript/elab-next": "0.0.0-dev",
     "@proofscript/erasure-next": "0.0.0-dev",
-    "@proofscript/backend-ts-next": "0.0.0-dev"
+    "@proofscript/backend-ts-next": "0.0.0-dev",
+    "@proofscript/backend-rust-next": "0.0.0-dev"
   }
 }

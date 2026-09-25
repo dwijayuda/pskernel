@@ -87,6 +87,7 @@ lean_lib PsBackendTs where
 lean_lib PsBackendRust where
   srcDir := "packages/backend-rust/src"
   roots := #[
+    `Ps.BackendRust.Identifier,
     `Ps.BackendRust.Type,
     `Ps.BackendRust.Expr,
     `Ps.BackendRust.ValueRefs,

@@ -14,6 +14,8 @@ on:
       - selfhost/packages/cli/**
       - selfhost/test/BackendRustTests.lean
       - selfhost/test/BackendRustFixture.lean
+      - selfhost/test/BackendRustSourceTests.lean
+      - selfhost/test/BackendDifferentialFixture.lean
       - selfhost/lakefile.lean
       - selfhost/package.json
       - selfhost/scripts/check-workspace.mjs
@@ -66,7 +68,7 @@ jobs:
         run: |
           set -euo pipefail
           cd selfhost
-          lake build PsBackendRust psc1_backend_rust_tests psc1_backend_rust_fixture psc1_backend_rust_source_tests
+          lake build PsBackendRust psc1_backend_rust_tests psc1_backend_rust_fixture psc1_backend_rust_source_tests psc1_backend_diff_fixture
 
       - name: Probe Rust backend with PSC1 frontend
         shell: bash
@@ -104,6 +106,82 @@ jobs:
           cd selfhost
           lake exe psc1_backend_rust_tests
           lake exe psc1_backend_rust_source_tests
+
+      - name: Differential TS and Rust semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          npm ci
+
+          rm -rf /tmp/psc-diff-ts /tmp/psc-diff-rust
+          mkdir -p /tmp/psc-diff-ts /tmp/psc-diff-rust/src
+
+          lake exe psc1_backend_diff_fixture ts > /tmp/psc-diff-ts/module.ts
+          lake exe psc1_backend_diff_fixture rust > /tmp/psc-diff-rust/src/lib.rs
+
+          ./node_modules/.bin/tsc             /tmp/psc-diff-ts/module.ts             --target ES2022             --module commonjs             --strict             --skipLibCheck             --outDir /tmp/psc-diff-ts
+
+          cat > /tmp/psc-diff-ts/run.cjs <<'EOF'
+          const m = require("./module.js");
+          const lines = [
+            "nat_lt=" + m.diffNat(2n, 5n).toString(),
+            "nat_ge=" + m.diffNat(9n, 4n).toString(),
+            "int=" + m.diffInt(7n, 2n).toString(),
+            "string=" + m.diffString("é").toString(),
+            "array=" + m.diffArray(7n, 8n).toString(),
+            "maybe_some=" + m.diffMaybe(5n, 99n, true).toString(),
+            "maybe_none=" + m.diffMaybe(5n, 99n, false).toString(),
+          ];
+          process.stdout.write(lines.join("\n") + "\n");
+          EOF
+          node /tmp/psc-diff-ts/run.cjs > /tmp/psc-diff-ts.out
+
+          cat > /tmp/psc-diff-rust/Cargo.toml <<'EOF'
+          [package]
+          name = "psc-diff-rust"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          num-bigint = "0.4"
+          num-traits = "0.2"
+          EOF
+
+          cat > /tmp/psc-diff-rust/src/main.rs <<'EOF'
+          use num_bigint::{BigInt, BigUint};
+          use psc_diff_rust::{
+              diffArray,
+              diffInt,
+              diffMaybe,
+              diffNat,
+              diffString,
+          };
+
+          fn n(value: u32) -> BigUint {
+              BigUint::from(value)
+          }
+
+          fn i(value: i32) -> BigInt {
+              BigInt::from(value)
+          }
+
+          fn main() {
+              println!("nat_lt={}", diffNat(n(2), n(5)));
+              println!("nat_ge={}", diffNat(n(9), n(4)));
+              println!("int={}", diffInt(i(7), i(2)));
+              println!("string={}", diffString(String::from("é")));
+              println!("array={}", diffArray(n(7), n(8)));
+              println!("maybe_some={}", diffMaybe(n(5), n(99), true));
+              println!("maybe_none={}", diffMaybe(n(5), n(99), false));
+          }
+          EOF
+
+          cargo run --quiet --manifest-path /tmp/psc-diff-rust/Cargo.toml             > /tmp/psc-diff-rust.out
+
+          diff -u /tmp/psc-diff-ts.out /tmp/psc-diff-rust.out
+          cat /tmp/psc-diff-rust.out
+          echo "PSC1_BACKEND_TS_RUST_DIFFERENTIAL: PASS"
 
       - name: Compile generated Rust fixture
         shell: bash

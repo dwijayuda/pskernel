@@ -36,15 +36,15 @@ def psDeclarationValue : PsDeclaration -> Option PsExpr
   | _ => Option.none
 
 def psDeclarationInductiveInfo : PsDeclaration -> Option PsInductiveInfo
-  | .inductiveDecl info => some info
+  | .inductiveDecl info => Option.some info
   | _ => Option.none
 
 def psDeclarationConstructorInfo : PsDeclaration -> Option PsConstructorInfo
-  | .constructorDecl info => some info
+  | .constructorDecl info => Option.some info
   | _ => Option.none
 
 def psDeclarationRecursorInfo : PsDeclaration -> Option PsRecursorInfo
-  | .recursorDecl info => some info
+  | .recursorDecl info => Option.some info
   | _ => Option.none
 
 structure PsEnvironment where

@@ -75,6 +75,7 @@ import {
   lean_array_push,
   lean_array_set,
   lean_mk_empty_array_with_capacity,
+  lean_mk_array,
   lean_nat_add,
   lean_nat_div,
   lean_nat_mod,
@@ -382,6 +383,12 @@ equal(lean_usize_shift_right(8n,65n),4n);
 // unique arrays using destructive updates.
 const empty=lean_mk_empty_array_with_capacity<number>(64n);
 deepEqual(empty,[],'empty Lean array mismatch');
+deepEqual(lean_mk_array(0n,7),[],'Lean Array.replicate zero mismatch');
+deepEqual(
+  lean_mk_array(3n,7),
+  [7,7,7],
+  'Lean Array.replicate runtime mismatch',
+);
 const listRuntime={
   kind:'constructor' as const,
   name:'List.cons' as const,

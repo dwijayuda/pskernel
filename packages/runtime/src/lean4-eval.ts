@@ -9,6 +9,7 @@ import {
   type RecursorInfo,
 } from 'lean-ts-kernel';
 import {
+  findLean434EvaluatorExternForDeclaration,
   findLean434JsExternForDeclaration,
   findLean434JsImplementedBy,
   findLean434JsIntrinsic,
@@ -16,6 +17,7 @@ import {
   invokeLean434JsImplementedBy,
   invokeLean434JsIntrinsic,
   type Lean434DeclarationExternBinding,
+  type Lean434EvaluatorExternBinding,
   LeanRef,
 } from './lean4.js';
 import type {
@@ -475,6 +477,174 @@ export class Lean434Evaluator {
     }
   }
 
+  private applyLeanConstant(
+    exact:string,
+    args:readonly Lean434RuntimeValue[],
+  ):Lean434RuntimeValue{
+    const name=this.findEnvironmentName(exact);
+    if(name===undefined){
+      throw new Lean434EvaluationError(
+        "required Lean runtime declaration is missing: '"+exact+"'",
+      );
+    }
+    let value=this.evaluateConstant(
+      {kind:'const',name,levels:[]},
+      [],
+    );
+    for(const arg of args)value=this.apply(value,arg);
+    return value;
+  }
+
+  private optionPayload(
+    value:Lean434RuntimeValue,
+    where:string,
+  ):Lean434RuntimeValue|undefined{
+    if(
+      !isTaggedRuntimeValue(value)
+      ||value.kind!=='constructor'
+    ){
+      throw new Lean434EvaluationError(
+        where+' did not return a Lean Option constructor',
+      );
+    }
+    if(value.name==='Option.none'){
+      if(value.fields.length!==0){
+        throw new Lean434EvaluationError(
+          where+' returned malformed Option.none',
+        );
+      }
+      return undefined;
+    }
+    if(value.name==='Option.some'){
+      if(value.fields.length!==1){
+        throw new Lean434EvaluationError(
+          where+' returned malformed Option.some',
+        );
+      }
+      return value.fields[0]!;
+    }
+    throw new Lean434EvaluationError(
+      where+" returned unexpected constructor '"+value.name+"'",
+    );
+  }
+
+  private instantiateLevelMVarsNative(
+    initialMctx:Lean434RuntimeValue,
+    initialLevel:Lean434RuntimeValue,
+  ):Lean434ConstructorValue{
+    const visit=(
+      mctx:Lean434RuntimeValue,
+      level:Lean434RuntimeValue,
+    ):{
+      readonly mctx:Lean434RuntimeValue;
+      readonly level:Lean434RuntimeValue;
+    }=>{
+      if(
+        !isTaggedRuntimeValue(level)
+        ||level.kind!=='constructor'
+      ){
+        throw new Lean434EvaluationError(
+          'lean_instantiate_level_mvars received a non-Level runtime value',
+        );
+      }
+      switch(level.name){
+        case 'Lean.Level.zero':
+        case 'Lean.Level.param':
+          return {mctx,level};
+        case 'Lean.Level.succ':{
+          if(level.fields.length!==1){
+            throw new Lean434EvaluationError(
+              'Lean.Level.succ field count mismatch',
+            );
+          }
+          const child=visit(mctx,level.fields[0]!);
+          return {
+            mctx:child.mctx,
+            level:child.level===level.fields[0]
+              ?level
+              :{
+                  kind:'constructor',
+                  name:'Lean.Level.succ',
+                  fields:[child.level],
+                },
+          };
+        }
+        case 'Lean.Level.max':
+        case 'Lean.Level.imax':{
+          if(level.fields.length!==2){
+            throw new Lean434EvaluationError(
+              level.name+' field count mismatch',
+            );
+          }
+          const left=visit(mctx,level.fields[0]!);
+          const right=visit(left.mctx,level.fields[1]!);
+          return {
+            mctx:right.mctx,
+            level:
+              left.level===level.fields[0]
+              &&right.level===level.fields[1]
+                ?level
+                :{
+                    kind:'constructor',
+                    name:level.name,
+                    fields:[left.level,right.level],
+                  },
+          };
+        }
+        case 'Lean.Level.mvar':{
+          if(level.fields.length!==1){
+            throw new Lean434EvaluationError(
+              'Lean.Level.mvar field count mismatch',
+            );
+          }
+          const mvarId=level.fields[0]!;
+          const assigned=this.optionPayload(
+            this.applyLeanConstant(
+              'Lean.getLevelMVarAssignmentExp',
+              [mctx,mvarId],
+            ),
+            'Lean.getLevelMVarAssignmentExp',
+          );
+          if(assigned===undefined)return {mctx,level};
+          const normalized=visit(mctx,assigned);
+          if(normalized.level===assigned)return normalized;
+          const updated=this.applyLeanConstant(
+            'Lean.assignLevelMVarExp',
+            [normalized.mctx,mvarId,normalized.level],
+          );
+          return {mctx:updated,level:normalized.level};
+        }
+        default:
+          throw new Lean434EvaluationError(
+            "unexpected Lean.Level constructor '"+level.name+"'",
+          );
+      }
+    };
+
+    const result=visit(initialMctx,initialLevel);
+    return {
+      kind:'constructor',
+      name:'Prod.mk',
+      fields:[result.mctx,result.level],
+    };
+  }
+
+  private invokeEvaluatorExtern(
+    binding:Lean434EvaluatorExternBinding,
+    args:readonly Lean434RuntimeValue[],
+  ):Lean434RuntimeValue{
+    if(args.length!==binding.arity){
+      throw new Lean434EvaluationError(
+        "evaluator extern arity mismatch for '"+
+        binding.leanDeclaration+"'",
+      );
+    }
+    switch(binding.adapter){
+      case 'instantiate-level-mvars':
+        return this.instantiateLevelMVarsNative(args[0]!,args[1]!);
+    }
+  }
+
   private evaluateConstant(
     expr:Extract<Expr,{kind:'const'}>,
     locals:readonly Lean434RuntimeValue[],
@@ -564,6 +734,32 @@ export class Lean434Evaluator {
           levels:expr.levels,
         },
         locals,
+      );
+    }
+
+    const evaluatorExtern=
+      findLean434EvaluatorExternForDeclaration(name);
+    if(evaluatorExtern!==undefined){
+      const metadataExtern=this.options.metadata?.externFor(name);
+      if(metadataExtern!==undefined){
+        const selected=metadataExtern.entries.find(
+          (entry)=>entry.kind==='standard'&&entry.backend==='all',
+        );
+        if(
+          selected===undefined
+          ||selected.kind!=='standard'
+          ||selected.symbol!==evaluatorExtern.leanSymbol
+        ){
+          throw new Lean434EvaluationError(
+            "evaluator extern metadata mismatch for '"+name+"': expected '"+
+            evaluatorExtern.leanSymbol+"'",
+          );
+        }
+      }
+      return primitive(
+        name,
+        evaluatorExtern.arity,
+        (args)=>this.invokeEvaluatorExtern(evaluatorExtern,args),
       );
     }
 

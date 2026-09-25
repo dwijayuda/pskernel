@@ -512,15 +512,24 @@ def psRustEmitExprWithFuel :
           | Except.error error =>
               Except.error error
           | Except.ok printedFields =>
-              Except.ok
-                (psRustConcat4
-                  inductiveName
-                  "::"
-                  constructorName
-                  (psRustConcat3
-                    " { "
-                    (psRustJoin ", " printedFields)
-                    " }"))
+              match printedFields with
+              | List.nil =>
+                  Except.ok
+                    (psRustConcat4
+                      inductiveName
+                      "::"
+                      constructorName
+                      "{}")
+              | List.cons _ _ =>
+                  Except.ok
+                    (psRustConcat4
+                      inductiveName
+                      "::"
+                      constructorName
+                      (psRustConcat3
+                        " { "
+                        (psRustJoin ", " printedFields)
+                        " }"))
       | PsVerifiedIrExpr.matchE
           inductiveName
           scrutinee

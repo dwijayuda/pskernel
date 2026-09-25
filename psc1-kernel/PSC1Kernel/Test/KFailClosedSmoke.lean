@@ -3,6 +3,15 @@ import PSC1Kernel
 open PSC1Kernel
 
 def main : IO Unit := do
+  let universeMeta : Level := .mvar (.str .anonymous "u")
+  let exprMeta : Expr := .mvar (.str .anonymous "m")
+  let constWithUniverseMeta : Expr :=
+    .const (.str .anonymous "KUniverseMeta") [universeMeta]
+  if exprHasMVarForK constWithUniverseMeta then
+    throw <| IO.userError "K guard incorrectly treated a universe metavariable as an expression metavariable"
+  if !exprHasMVarForK exprMeta then
+    throw <| IO.userError "K guard failed to detect an expression metavariable"
+
   let Truth : Name := .str .anonymous "KFailClosedTruth"
   let EqRec : Name := .str (.str .anonymous "Eq") "rec"
   let recursor : RecursorInfo := {

@@ -471,7 +471,7 @@ def psEncodeCheckedAdmissionsLoop
                 allDeclarations
                 rest
                 {
-                  heights := (name, height) :: state.heights
+                  heights := Prod.mk name height :: state.heights
                   admissionsRev :=
                     psEncodeConstantAdmission encoded ::
                       state.admissionsRev

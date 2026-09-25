@@ -151,7 +151,7 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
           foldFunctionType
           (PsExpr.forallE
             (psRootName "init")
-            (PsExpr.bvar 2)
+            (PsExpr.bvar 1)
             (PsExpr.forallE
               aName
               (arrayOf (PsExpr.bvar 3))

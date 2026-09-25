@@ -20,7 +20,7 @@ def psTsExprUsesNameWithFuel :
           arguments.any
             (fun argument =>
               psTsExprUsesNameWithFuel fuel argument name)
-      | .lambda parameters body =>
+      | .lambda parameters _ body =>
           parameters.any (fun parameter => parameter.name == name)
             || psTsExprUsesNameWithFuel fuel body name
       | .call fn _ arguments =>
@@ -384,7 +384,7 @@ def psTsEmitExprWithFuel
           | Except.error error => Except.error error
           | Except.ok printed =>
               psTsEmitIntrinsicFromPrinted operation printed
-      | .lambda parameters body =>
+      | .lambda parameters _ body =>
           let printParameter :=
             fun parameter =>
               match psTsEmitType parameter.type with

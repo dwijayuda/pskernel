@@ -8,6 +8,8 @@ on:
       - backend/wasm3-owned
       - integrate/wasm3-owned
       - backend/wasm3-gc-adts
+      - backend/wasm3-closures
+      - integrate/wasm3-closures
       - integrate/wasm3-gc-adts
     paths:
       - selfhost/**
@@ -153,6 +155,12 @@ jobs:
           }
           if (instance.exports.listLengthTwo() !== 2) {
             throw new Error('PSC1_WASM_RUNTIME_GC_RECURSIVE_ADT_RESULT');
+          }
+          if (instance.exports.applyReturnedAdder(40, 2) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_CLOSURE_CAPTURE_RESULT');
+          }
+          if (instance.exports.applyTwiceIncrement(40) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_HIGHER_ORDER_CALL_REF_RESULT');
           }
           console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
           NODE

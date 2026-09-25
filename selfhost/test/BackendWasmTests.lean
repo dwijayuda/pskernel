@@ -183,6 +183,7 @@ def psWasmAddU32IrModule : PsVerifiedIrModule :=
 def psWasmIsAddU32Function : PsWasmFunction -> Bool
   | {
       name := name,
+      typeName := none,
       parameters := [.i32, .i32],
       results := [.i32],
       locals := [],
@@ -243,6 +244,7 @@ def psWasmLetIrModule : PsVerifiedIrModule :=
 def psWasmIsLetU32Function : PsWasmFunction -> Bool
   | {
       name := name,
+      typeName := none,
       parameters := [.i32],
       results := [.i32],
       locals := [.i32],
@@ -382,6 +384,7 @@ def psWasmIsSmallSignedStructure : PsWasmStructType -> Bool
 def psWasmIsPointXFunction : PsWasmFunction -> Bool
   | {
       name := name,
+      typeName := none,
       parameters := [.i32, .i32],
       results := [.i32],
       locals := [],
@@ -398,6 +401,7 @@ def psWasmIsPointXFunction : PsWasmFunction -> Bool
 def psWasmIsSmallSignedFunction : PsWasmFunction -> Bool
   | {
       name := name,
+      typeName := none,
       parameters := [.i32],
       results := [.i32],
       locals := [],
@@ -568,6 +572,7 @@ def psWasmIsMaybeSome : PsWasmStructType -> Bool
 def psWasmIsSomeValueFunction : PsWasmFunction -> Bool
   | {
       name := "someValue",
+      typeName := none,
       parameters := [.i32],
       results := [.i32],
       locals := [.refT "MaybeU32", .i32],
@@ -784,18 +789,191 @@ def psTestWasmRecursiveListLowering : Bool :=
       psWasmIsRecursiveListTypes module.structures
         && module.functions.length == 2
 
+def psWasmClosureTestU32Type : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+
+def psWasmClosureTestFunctionType : PsVerifiedIrType :=
+  PsVerifiedIrType.function
+    [psWasmClosureTestU32Type]
+    psWasmClosureTestU32Type
+
+def psWasmClosureTestBaseName : String :=
+  match psWasmClosureBaseName psWasmClosureTestFunctionType with
+  | none => ""
+  | some name => name
+
+def psWasmClosureTestCodeTypeName : String :=
+  match psWasmClosureCodeTypeName psWasmClosureTestFunctionType with
+  | none => ""
+  | some name => name
+
+def psWasmClosureTestLambdaName : String :=
+  "makeAdder$lambda$0"
+
+def psWasmClosureTestSubtypeName : String :=
+  psWasmClosureTestBaseName
+    ++ "$"
+    ++ psWasmClosureTestLambdaName
+
+def psWasmClosureIrModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "makeAdder"
+        typeParameters := []
+        parameters := [
+          {
+            name := "base"
+            type := psWasmClosureTestU32Type
+          }
+        ]
+        resultType := psWasmClosureTestFunctionType
+        body :=
+          PsVerifiedIrExpr.lambda
+            [
+              {
+                name := "value"
+                type := psWasmClosureTestU32Type
+              }
+            ]
+            psWasmClosureTestU32Type
+            (PsVerifiedIrExpr.intrinsic
+              (PsVerifiedIrIntrinsic.machineIntBinary
+                PsVerifiedIrMachineIntegerType.uint32
+                PsVerifiedIrIntegerBinaryOp.add)
+              [
+                PsVerifiedIrExpr.var "base",
+                PsVerifiedIrExpr.var "value"
+              ])
+      }
+    ]
+  }
+
+def psWasmIsClosureBase : PsWasmStructType -> Bool
+  | {
+      name := name,
+      superType := none,
+      isFinal := false,
+      fields := [
+        {
+          name := "code",
+          storageType := .value .funcRef
+        }
+      ]
+    } => name == psWasmClosureTestBaseName
+  | _ => false
+
+def psWasmIsClosureSubtype : PsWasmStructType -> Bool
+  | {
+      name := name,
+      superType := some superName,
+      isFinal := true,
+      fields := [
+        {
+          name := "code",
+          storageType := .value .funcRef
+        },
+        {
+          name := "base",
+          storageType := .value .i32
+        }
+      ]
+    } =>
+      name == psWasmClosureTestSubtypeName
+        && superName == psWasmClosureTestBaseName
+  | _ => false
+
+def psWasmIsClosureCodeType : PsWasmFunctionType -> Bool
+  | {
+      name := name,
+      parameters := [.refT baseName, .i32],
+      results := [.i32]
+    } =>
+      name == psWasmClosureTestCodeTypeName
+        && baseName == psWasmClosureTestBaseName
+  | _ => false
+
+def psWasmIsMakeAdderFunction : PsWasmFunction -> Bool
+  | {
+      name := "makeAdder",
+      typeName := none,
+      parameters := [.i32],
+      results := [.refT resultBase],
+      locals := [],
+      body := [
+        .refFunc lambdaName,
+        .localGet 0,
+        .structNew subtypeName
+      ]
+    } =>
+      resultBase == psWasmClosureTestBaseName
+        && lambdaName == psWasmClosureTestLambdaName
+        && subtypeName == psWasmClosureTestSubtypeName
+  | _ => false
+
+def psWasmIsGeneratedClosureFunction : PsWasmFunction -> Bool
+  | {
+      name := lambdaName,
+      typeName := some typeName,
+      parameters := [.refT baseName, .i32],
+      results := [.i32],
+      locals := [.i32],
+      body := [
+        .localGet 0,
+        .refCast subtypeName,
+        .structGet captureType 1,
+        .localSet 2,
+        .localGet 2,
+        .localGet 1,
+        .i32Add
+      ]
+    } =>
+      lambdaName == psWasmClosureTestLambdaName
+        && typeName == psWasmClosureTestCodeTypeName
+        && baseName == psWasmClosureTestBaseName
+        && subtypeName == psWasmClosureTestSubtypeName
+        && captureType == psWasmClosureTestSubtypeName
+  | _ => false
+
+def psTestWasmClosureLowering : Bool :=
+  match
+      psWasmLowerModule
+        psWasmProfile32
+        psWasmClosureIrModule with
+  | Except.error _ => false
+  | Except.ok module =>
+      match
+          module.structures,
+          module.functionTypes,
+          module.functions with
+      | [baseType, subtype], [codeType], [makeAdder, generated] =>
+          psWasmIsClosureBase baseType
+            && psWasmIsClosureSubtype subtype
+            && psWasmIsClosureCodeType codeType
+            && psWasmIsMakeAdderFunction makeAdder
+            && psWasmIsGeneratedClosureFunction generated
+            && module.functionRefs ==
+              [psWasmClosureTestLambdaName]
+      | _, _, _ => false
+
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
+    functionTypes := []
     functions := [
       {
         name := "answer"
+        typeName := none
         parameters := []
         results := [PsWasmValueType.i32]
         locals := []
         body := [PsWasmInstruction.i32Const 42]
       }
     ]
+    functionRefs := []
     exports := [("answer", "answer")]
   }
 
@@ -868,6 +1046,7 @@ def main : IO Unit := do
       && psTestWasmStructureLowering
       && psTestWasmInductiveMatchLowering
       && psTestWasmRecursiveListLowering
+      && psTestWasmClosureLowering
       && psTestWasmUleb
       && psTestWasmSignedLeb
       && psTestWasmBinaryModule then

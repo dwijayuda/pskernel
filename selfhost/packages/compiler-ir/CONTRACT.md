@@ -32,6 +32,11 @@ Runtime `let` bindings retain their erased PSC semantic type in VerifiedIR.
 This is required for target-independent checking/lowering of locals and does
 not prescribe stack slots, registers, JS closures, Rust storage, or Wasm locals.
 
+Runtime lambdas retain their erased PSC parameter and result types in
+VerifiedIR. The result type is semantic function information required by any
+typed backend; it does not prescribe closure conversion, environment layout,
+function references, calling convention, or allocation strategy.
+
 Machine integer literals carry their PSC machine-integer type in VerifiedIR.
 The literal value must already denote the PSC semantic value produced by
 elaboration/erasure; backend code must not infer its width from surrounding

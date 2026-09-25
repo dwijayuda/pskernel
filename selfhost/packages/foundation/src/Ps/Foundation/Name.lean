@@ -3,18 +3,68 @@ inductive PsName where
   | str (parent : PsName) (value : String)
   | num (parent : PsName) (value : Nat)
 
-def psNameDepth : PsName -> Nat
-  | .anonymous => 0
-  | .str parent _ => psNameDepth parent + 1
-  | .num parent _ => psNameDepth parent + 1
+def psNameDepth (name : PsName) : Nat :=
+  match name with
+  | PsName.anonymous => 0
+  | PsName.str parent _ => Nat.add (psNameDepth parent) 1
+  | PsName.num parent _ => Nat.add (psNameDepth parent) 1
 
-def psNameEq : PsName -> PsName -> Bool
-  | .anonymous, .anonymous => true
-  | .str leftPrefix leftValue, .str rightPrefix rightValue =>
-      psNameEq leftPrefix rightPrefix && leftValue == rightValue
-  | .num leftPrefix leftValue, .num rightPrefix rightValue =>
-      psNameEq leftPrefix rightPrefix && leftValue == rightValue
-  | _, _ => false
+partial def psStringEqFrom
+    (left : String)
+    (right : String)
+    (leftPos : Nat)
+    (rightPos : Nat) : Bool :=
+  if String.Internal.atEnd left leftPos then
+    String.Internal.atEnd right rightPos
+  else if String.Internal.atEnd right rightPos then
+    false
+  else
+    let leftChar : Char := String.Internal.get left leftPos;
+    let rightChar : Char := String.Internal.get right rightPos;
+    if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
+      psStringEqFrom
+        left
+        right
+        (String.Internal.next left leftPos)
+        (String.Internal.next right rightPos)
+    else
+      false
+
+def psStringEq (left : String) (right : String) : Bool :=
+  psStringEqFrom left right 0 0
+
+partial def psNatToString (value : Nat) : String :=
+  if Nat.blt value 10 then
+    String.singleton (Char.ofNat (Nat.add 48 value))
+  else
+    String.Internal.append
+      (psNatToString (Nat.div value 10))
+      (String.singleton
+        (Char.ofNat
+          (Nat.add 48 (Nat.mod value 10))))
+
+def psNameEq (left : PsName) (right : PsName) : Bool :=
+  match left with
+  | PsName.anonymous =>
+      match right with
+      | PsName.anonymous => true
+      | _ => false
+  | PsName.str leftPrefix leftValue =>
+      match right with
+      | PsName.str rightPrefix rightValue =>
+          if psNameEq leftPrefix rightPrefix then
+            psStringEq leftValue rightValue
+          else
+            false
+      | _ => false
+  | PsName.num leftPrefix leftValue =>
+      match right with
+      | PsName.num rightPrefix rightValue =>
+          if psNameEq leftPrefix rightPrefix then
+            Nat.beq leftValue rightValue
+          else
+            false
+      | _ => false
 
 def psNameAppendStr (parent : PsName) (value : String) : PsName :=
   PsName.str parent value
@@ -22,23 +72,29 @@ def psNameAppendStr (parent : PsName) (value : String) : PsName :=
 def psNameAppendNum (parent : PsName) (value : Nat) : PsName :=
   PsName.num parent value
 
-def psNameToString : PsName -> String
-  | .anonymous => ""
-  | .str parent value =>
-      let prefixText := psNameToString parent
-      if prefixText.isEmpty then
+def psNameToString (name : PsName) : String :=
+  match name with
+  | PsName.anonymous => ""
+  | PsName.str parent value =>
+      let prefixText : String := psNameToString parent;
+      if Nat.beq (String.Internal.length prefixText) 0 then
         value
       else
-        prefixText ++ "." ++ value
-  | .num parent value =>
-      let prefixText := psNameToString parent
-      let suffix := toString value
-      if prefixText.isEmpty then
+        String.Internal.append
+          (String.Internal.append prefixText ".")
+          value
+  | PsName.num parent value =>
+      let prefixText : String := psNameToString parent;
+      let suffix : String := psNatToString value;
+      if Nat.beq (String.Internal.length prefixText) 0 then
         suffix
       else
-        prefixText ++ "." ++ suffix
+        String.Internal.append
+          (String.Internal.append prefixText ".")
+          suffix
 
-def psNameLastComponent : PsName -> String
-  | .anonymous => ""
-  | .str _ value => value
-  | .num _ value => toString value
+def psNameLastComponent (name : PsName) : String :=
+  match name with
+  | PsName.anonymous => ""
+  | PsName.str _ value => value
+  | PsName.num _ value => psNatToString value

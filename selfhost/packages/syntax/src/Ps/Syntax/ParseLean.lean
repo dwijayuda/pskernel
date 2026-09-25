@@ -2305,7 +2305,12 @@ partial def psLeanLowerEquationClauses
       if patterns.isEmpty then
         Option.none
       else
-        let lowerAlternative :=
+        let lowerAlternative :
+            PsSyntaxPattern ->
+            Option
+              (Prod
+                PsSyntaxPattern
+                (Prod PsSyntaxTerm PsSourceSpan)) :=
           fun (pattern : PsSyntaxPattern) =>
             let branchClauses :=
               psLeanEquationClausesForBranch

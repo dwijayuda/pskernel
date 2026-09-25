@@ -551,25 +551,25 @@ def psRustEmitModule
     | Except.error error =>
         Except.error error
     | Except.ok _ =>
-      match psRustEmitStructureList module.structures with
-      | Except.error error =>
-          Except.error error
-      | Except.ok structures =>
-          match psRustEmitInductiveList module.inductives with
-          | Except.error error =>
-              Except.error error
-          | Except.ok inductives =>
-              match psRustEmitDeclarationList valueNames module.declarations with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok declarations =>
-                  let sections :=
-                    List.cons
-                      psRustRuntimePrelude
-                      (List.append
-                        structures
-                        (List.append inductives declarations));
-                  Except.ok
-                    (psRustConcat2
-                      (psRustJoin "\n" sections)
-                      "\n")
+        match psRustEmitStructureList module.structures with
+        | Except.error error =>
+            Except.error error
+        | Except.ok structures =>
+            match psRustEmitInductiveList module.inductives with
+            | Except.error error =>
+                Except.error error
+            | Except.ok inductives =>
+                match psRustEmitDeclarationList valueNames module.declarations with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok declarations =>
+                    let sections :=
+                      List.cons
+                        psRustRuntimePrelude
+                        (List.append
+                          structures
+                          (List.append inductives declarations));
+                    Except.ok
+                      (psRustConcat2
+                        (psRustJoin "\n" sections)
+                        "\n")

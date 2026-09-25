@@ -583,7 +583,9 @@ def simpleKTarget
 
 def addSimpleInductive
     (env : Environment)
-    (decl : SimpleInductiveDecl) : Except String Environment := do
+    (decl : SimpleInductiveDecl)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Environment := do
   if Name.hasDuplicates decl.levelParams then
     throw "duplicate universe parameter"
   let recName := simpleRecName decl.name
@@ -606,7 +608,7 @@ def addSimpleInductive
   checkLevelParams decl.type decl.levelParams
   let safety :=
     if decl.isUnsafe then DefinitionSafety.unsafeDef else DefinitionSafety.safe
-  let headerCtx := mkChecker env decl.levelParams safety
+  let headerCtx := mkChecker env decl.levelParams safety maxRecDepth maxNatSize
   let headerType ← check headerCtx decl.type
   let _ ← ensureSort headerCtx headerType
   let (headerParamCtx, params, afterParams) ←
@@ -646,7 +648,7 @@ def addSimpleInductive
     | ctor :: rest => do
         checkNoMVarNoFVar ctor.type
         checkLevelParams ctor.type decl.levelParams
-        let closedCtorCtx := mkChecker work decl.levelParams safety
+        let closedCtorCtx := mkChecker work decl.levelParams safety maxRecDepth maxNatSize
         let ctorTypeType ← check closedCtorCtx ctor.type
         let _ ← ensureSort closedCtorCtx ctorTypeType
         let ctorCtx : CheckerContext := { headerParamCtx with env := work }
@@ -748,11 +750,11 @@ def addSimpleInductive
   }
 
   -- Validate generated metadata independently before exposing it.
-  let recCtx := mkChecker work1 recLevelParams safety
+  let recCtx := mkChecker work1 recLevelParams safety maxRecDepth maxNatSize
   let recTypeType ← check recCtx recType
   let _ ← ensureSort recCtx recTypeType
   let work2 := work1.addUnchecked (.recInfo recInfo)
-  let ruleCtx := mkChecker work2 recLevelParams safety
+  let ruleCtx := mkChecker work2 recLevelParams safety maxRecDepth maxNatSize
   validateSimpleRecursorRules
     ruleCtx params ruleBinders motive levels ctorShapes rules
 

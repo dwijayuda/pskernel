@@ -37,6 +37,19 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
           }
         ]
       }
+,
+      {
+        name := "SmallUnsigned"
+        typeParameters := []
+        fields := [
+          {
+            name := "value"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint16
+          }
+        ]
+      }
     ]
     inductives := [
       {
@@ -299,6 +312,28 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
             "SmallSigned"
             (PsVerifiedIrExpr.record
               "SmallSigned"
+              [("value", PsVerifiedIrExpr.var "value")])
+            "value"
+      }
+,
+      {
+        name := "smallUnsigned"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint16
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint16
+        body :=
+          PsVerifiedIrExpr.projection
+            "SmallUnsigned"
+            (PsVerifiedIrExpr.record
+              "SmallUnsigned"
               [("value", PsVerifiedIrExpr.var "value")])
             "value"
       }

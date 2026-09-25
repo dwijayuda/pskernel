@@ -195,7 +195,7 @@ partial def reduceQuotRec
   let elimArity := mkPos + 1
   return some (applyArgs base (args.drop elimArity))
 
-def findRecursorRule (ctorName : Name) : List RecursorRule → Option RecursorRule
+partial def findRecursorRule (ctorName : Name) : List RecursorRule → Option RecursorRule
   | [] => none
   | rule :: rest =>
       if Name.eq rule.ctor ctorName then some rule

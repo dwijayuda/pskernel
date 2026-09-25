@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const binDir = path.dirname(fileURLToPath(import.meta.url));
-const selfhostRoot = path.resolve(binDir, "..");
+const selfhostRoot = path.resolve(binDir, "../../..");
 const node = process.execPath;
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 const defaultCompiler = "dist/bootstrap/packages/compiler/index.js";

@@ -2385,6 +2385,29 @@ def psTestDualSourcePartialDefinition : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestLeanListPatternSugar : Bool :=
+  let source :=
+    "def listEmptyOrTail (xs : List Nat) : Nat := " ++
+    "match xs with | [] => 0 | head :: tail => head"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match module.declarations with
+      | [PsSyntaxDeclaration.definition _ _ _ value _] =>
+          match value with
+          | PsSyntaxTerm.matchE _
+              [
+                (PsSyntaxPattern.constructor nilName [] _, _, _),
+                (PsSyntaxPattern.constructor consName [headName, tailName] _, _, _)
+              ]
+              _ =>
+              nilName.segments == ["List", "nil"]
+                && consName.segments == ["List", "cons"]
+                && headName.segments == ["head"]
+                && tailName.segments == ["tail"]
+          | _ => false
+      | _ => false
+
 def psTestLambdaMatchExpectedType : Bool :=
   let source :=
     "inductive LambdaFlag where | off | on\n" ++
@@ -2424,6 +2447,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source binder kinds parse", passed := psTestDualSourceBinderKindsParse },
   { name := "dual-source typed lambda parse", passed := psTestDualSourceTypedLambdaParse },
   { name := "dual-source typed lambda elaboration", passed := psTestDualSourceTypedLambdaElaboration },
+  { name := "Lean list pattern sugar", passed := psTestLeanListPatternSugar },
   { name := "lambda match uses expected type", passed := psTestLambdaMatchExpectedType },
   { name := "two-argument equation definition", passed := psTestTwoArgumentEquationDefinition },
   { name := "dual-source Pi parse", passed := psTestDualSourcePiParse },

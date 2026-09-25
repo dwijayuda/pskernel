@@ -35,6 +35,9 @@ jobs:
           set -euo pipefail
           lake build
           lake build psc1_replay
+          mkdir -p .lake/build/lib/lean/PSC1Kernel/Test
+          lake env lean PSC1Kernel/Test/StructureFixture.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/Test/StructureFixture.olean
           lake env lean --run PSC1Kernel/Test/Oracle.lean
       - name: Export Std root 100015
         shell: bash

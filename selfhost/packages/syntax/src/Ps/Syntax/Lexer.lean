@@ -152,7 +152,7 @@ def psLexSkipBlockComment
     (position : PsSourcePos) :
     Except PsLexError PsLexCursor :=
   psLexSkipBlockCommentWithFuel
-    (Nat.add (List.length remaining) 1)
+    (Nat.add (listLength remaining) 1)
     depth
     remaining
     start
@@ -251,7 +251,7 @@ def psLexSkipTriviaWithFuel
 def psLexSkipTrivia
     (remaining : List Char)
     (position : PsSourcePos) : Except PsLexError PsLexCursor :=
-  psLexSkipTriviaWithFuel (Nat.add (List.length remaining) 1) remaining position
+  psLexSkipTriviaWithFuel (Nat.add (listLength remaining) 1) remaining position
 
 def psLexLetterLike (char : Char) : Bool :=
   let code : Nat := Char.toNat char;
@@ -458,7 +458,7 @@ def psLexReadStringBody
     (charsRev : List Char) :
     Except PsLexError PsLexRead :=
   psLexReadStringBodyWithFuel
-    (Nat.add (List.length remaining) 1)
+    (Nat.add (listLength remaining) 1)
     remaining
     position
     start

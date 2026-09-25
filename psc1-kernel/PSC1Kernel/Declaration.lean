@@ -7,6 +7,14 @@ inductive DefinitionSafety where
   | safe
   | partialDef
 
+def DefinitionSafety.isUnsafe : DefinitionSafety → Bool
+  | .unsafeDef => true
+  | .safe | .partialDef => false
+
+def DefinitionSafety.isSafe : DefinitionSafety → Bool
+  | .safe => true
+  | .unsafeDef | .partialDef => false
+
 inductive ReducibilityHints where
   | opaqueHint
   | abbrevHint

@@ -283,6 +283,13 @@ def resolveLevels
       let tail ← resolveLevels state rest
       pure (value :: tail)
 
+def replayNameString : Name → String
+  | .anonymous => "_"
+  | .str .anonymous value => value
+  | .str parent value => replayNameString parent ++ "." ++ value
+  | .num .anonymous value => toString value
+  | .num parent value => replayNameString parent ++ "." ++ toString value
+
 def namesEq : List Name → List Name → Bool
   | [], [] => true
   | a :: as, b :: bs =>
@@ -654,7 +661,9 @@ def State.addInductiveRecord
         unless namesEq info.base.levelParams expectedLevels do
           throw "generated recursor universe metadata mismatch"
         unless Kernel.quotExprEqv info.base.type expectedType do
-          throw "generated recursor type metadata mismatch"
+          throw ("generated recursor type metadata mismatch for " ++
+            replayNameString name ++
+            " (name-index=" ++ toString recursor.name ++ ")")
         unless namesEq info.all expectedAll do
           throw "generated recursor all-list mismatch"
         unless info.numParams == recursor.numParams do

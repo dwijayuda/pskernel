@@ -6,6 +6,14 @@ def psExprLiftBVars (amount : Nat) (cutoff : Nat) : PsExpr -> PsExpr
         PsExpr.bvar (Nat.add index amount)
       else
         PsExpr.bvar index
+  | .fvar id =>
+      PsExpr.fvar id
+  | .mvar id =>
+      PsExpr.mvar id
+  | .sortE level =>
+      PsExpr.sortE level
+  | .constE name levels =>
+      PsExpr.constE name levels
   | .app fn arg =>
       PsExpr.app
         (psExprLiftBVars amount cutoff fn)
@@ -28,9 +36,10 @@ def psExprLiftBVars (amount : Nat) (cutoff : Nat) : PsExpr -> PsExpr
         (psExprLiftBVars amount cutoff type)
         (psExprLiftBVars amount cutoff value)
         (psExprLiftBVars amount (Nat.succ cutoff) body)
+  | .lit value =>
+      PsExpr.lit value
   | .proj typeName index value =>
       PsExpr.proj typeName index (psExprLiftBVars amount cutoff value)
-  | expr => expr
 
 def psExprInstantiateAt (replacement : PsExpr) (depth : Nat) : PsExpr -> PsExpr
   | .bvar index =>

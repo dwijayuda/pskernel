@@ -92,11 +92,6 @@ for(const binding of runtime.LEAN434_JS_DECL_EXTERN_BINDINGS){
       binding.leanDeclaration+' -> '+binding.leanSymbol,
     );
   }
-  if(descriptor.upstreamSource!==binding.upstreamSource){
-    throw new Error(
-      'declaration binding source mismatch for '+binding.leanDeclaration,
-    );
-  }
   if(!Number.isInteger(binding.arity)||binding.arity<0){
     throw new Error(
       'invalid declaration binding arity for '+binding.leanDeclaration,

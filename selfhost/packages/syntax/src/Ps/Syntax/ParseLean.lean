@@ -1869,7 +1869,7 @@ def psParseLeanInductiveDeclaration
                               match psParseListReverse constructors.value with
                               | [] => name.value.span.stop
                               | List.cons constructor _ =>
-                                  constructor.span.stop
+                                  constructor.span.stop;
                             Except.ok {
                               value :=
                                 PsSyntaxDeclaration.inductiveDecl
@@ -1882,7 +1882,7 @@ def psParseLeanInductiveDeclaration
                                     stop := stop
                                   }
                               cursor := constructors.cursor
-                            }
+                            };
               if psTokenCursorAtText params.cursor ":" then
                 match psTokenCursorAdvance params.cursor with
                 | none =>
@@ -2097,7 +2097,7 @@ def psLeanEquationClauseForBranch
           if psLeanPatternIsWildcard pattern then
             true
           else
-            psLeanPatternHeadEq pattern branch
+            psLeanPatternHeadEq pattern branch;
       if applicable then
         some {
           patterns := rest
@@ -2158,7 +2158,7 @@ partial def psLeanLowerEquationClauses
       | some clause => some clause.body
   | List.cons argument rest =>
       let patterns :=
-        psLeanEquationHeadPatterns clauses
+        psLeanEquationHeadPatterns clauses;
       if patterns.isEmpty then
         none
       else
@@ -2167,7 +2167,7 @@ partial def psLeanLowerEquationClauses
             let branchClauses :=
               psLeanEquationClausesForBranch
                 pattern
-                clauses
+                clauses;
             match
                 psLeanLowerEquationClauses
                   rest
@@ -2175,11 +2175,13 @@ partial def psLeanLowerEquationClauses
             | none => none
             | some body =>
                 some
-                  (pattern,
-                    body,
-                    psSyntaxSpanJoin
-                      (psSyntaxPatternSpan pattern)
-                      (psSyntaxTermSpan body))
+                  (Prod.mk
+                    pattern
+                    (Prod.mk
+                      body
+                      (psSyntaxSpanJoin
+                        (psSyntaxPatternSpan pattern)
+                        (psSyntaxTermSpan body))));
         match patterns.mapM lowerAlternative with
         | none => none
         | some alternatives =>
@@ -2207,7 +2209,7 @@ def psLeanFlattenForallBinders
       PsSyntaxTerm :=
   match type with
   | .forallE binders body _ =>
-      let tail := psLeanFlattenForallBinders body
+      let tail := psLeanFlattenForallBinders body;
       Prod.mk (binders ++ tail.fst) tail.snd
   | _ => Prod.mk List.nil type
 
@@ -2253,7 +2255,7 @@ def psLeanPrepareEquationBindersAcc
     | [] => none
     | List.cons binder rest =>
         let name :=
-          psLeanEquationBinderName index binder.fst
+          psLeanEquationBinderName index binder.fst;
         let head : PsSyntaxBinderHead := {
           name := name
           kind := binder.fst.kind
@@ -2302,7 +2304,7 @@ def psLeanLowerEquationValue
   | none => none
   | some arity =>
       let flattened :=
-        psLeanFlattenForallBinders type
+        psLeanFlattenForallBinders type;
       match
           psLeanPrepareEquationBindersAcc
             arity
@@ -2355,7 +2357,7 @@ def psFinishLeanValueDeclaration
         name binders type value span
     else
       PsSyntaxDeclaration.theoremDecl
-        name binders type value span
+        name binders type value span;
   {
     value := declaration
     cursor := cursor
@@ -2403,7 +2405,7 @@ def psParseLeanDeclaration
               | none =>
                   Except.error
                     (PsParseError.unexpectedEnd "declaration name")
-              | some afterKeyword => Except.ok afterKeyword.cursor
+              | some afterKeyword => Except.ok afterKeyword.cursor;
           match afterKind with
           | Except.error error => Except.error error
           | Except.ok afterKeyword =>

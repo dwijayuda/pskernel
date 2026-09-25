@@ -1,0 +1,72 @@
+name: PSC1 root 100015 hot-stage matrix
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [diagnostic/psc1-root-100015-perf-progress]
+    paths:
+      - ".github/workflows/psc1-root-100015-hot-stage.yml"
+      - "psc1-kernel/**"
+      - "oracle/replay-probe/DependencyExport.lean"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-root-100015-hot-stage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        stage:
+          - header
+          - mkChecker
+          - isProp
+          - proof-no-mvar-fvar
+          - proof-level-params
+          - proof-check
+          - final-defeq
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - name: Export root 100015
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean oracle/replay-probe/DependencyExport.lean
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 100015 1 > /tmp/root100015.ndjson
+      - name: Build diagnostic replay
+        working-directory: psc1-kernel
+        run: |
+          lake build
+          lake build psc1_replay
+      - name: Stop after hot stage
+        shell: bash
+        env:
+          PSC1_HOT_STOP_AFTER: ${{ matrix.stage }}
+        run: |
+          set +e
+          timeout 300s psc1-kernel/.lake/build/bin/psc1_replay --progress /tmp/root100015.ndjson 2>&1 | tee /tmp/hot-stage.log
+          rc=${PIPESTATUS[0]}
+          if grep -Fq "HOT-STAGE-DONE:${PSC1_HOT_STOP_AFTER}" /tmp/hot-stage.log; then
+            echo "HOT-STAGE-PASS:${PSC1_HOT_STOP_AFTER}"
+            exit 0
+          fi
+          if [ "$rc" -eq 124 ]; then
+            echo "HOT-STAGE-TIMEOUT:${PSC1_HOT_STOP_AFTER}"
+          else
+            echo "HOT-STAGE-FAILED:${PSC1_HOT_STOP_AFTER}:rc=$rc"
+          fi
+          exit "$rc"

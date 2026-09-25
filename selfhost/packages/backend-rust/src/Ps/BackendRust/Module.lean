@@ -8,7 +8,7 @@ def psRustTypeParameterNames
       List.nil
   | List.cons parameter rest =>
       List.cons
-        parameter.name
+        (psRustConcat3 parameter.name ": " "Clone")
         (psRustTypeParameterNames rest)
 
 def psRustGenericNames
@@ -59,7 +59,7 @@ def psRustEmitStructure
         psRustGenericNames structureInfo.typeParameters;
       Except.ok
         (psRustConcat4
-          "pub struct "
+          "#[derive(Clone)]\npub struct "
           structureInfo.name
           generic
           (psRustConcat4
@@ -137,7 +137,7 @@ def psRustEmitInductive
         psRustGenericNames inductiveInfo.typeParameters;
       Except.ok
         (psRustConcat4
-          "pub enum "
+          "#[derive(Clone)]\npub enum "
           inductiveInfo.name
           generic
           (psRustConcat4

@@ -704,10 +704,16 @@ def psElabInductiveDeclaration
                     }
                     let inductiveDeclaration :=
                       PsDeclaration.inductiveDecl info
-                    match
+                    let withInductiveResult :=
+                      if psNameEq name psProdName then
+                        psEnvironmentAddReplacingAxiom
+                          environment
+                          inductiveDeclaration
+                      else
                         psEnvironmentAdd
                           environment
-                          inductiveDeclaration with
+                          inductiveDeclaration
+                    match withInductiveResult with
                     | none =>
                         Except.error
                           (PsElabError.duplicateDeclaration name)

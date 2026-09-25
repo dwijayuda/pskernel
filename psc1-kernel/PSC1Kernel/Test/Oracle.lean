@@ -4248,6 +4248,86 @@ def assertQuotReductionOracle : IO Unit := do
   assertTrue "Quot.ind did not expose representative"
     (PSC1Kernel.Expr.eq oursInd representative)
 
+def assertMetavariableRejectionOracle : IO Unit := do
+  let ExprBad : PSC1Kernel.Name := .str .anonymous "OracleExprMVar"
+  let UnivBad : PSC1Kernel.Name := .str .anonymous "OracleUniverseMVar"
+  let BodyBad : PSC1Kernel.Name := .str .anonymous "OracleBodyMVar"
+  let ExprMeta : PSC1Kernel.Name := .str .anonymous "exprMeta"
+  let UnivMeta : PSC1Kernel.Name := .str .anonymous "univMeta"
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let exprMVar : PSC1Kernel.Expr := .mvar ExprMeta
+  let universeMVarType : PSC1Kernel.Expr := .sort (.mvar UnivMeta)
+
+  let oursExprRejects :=
+    match PSC1Kernel.Kernel.addAxiom .empty {
+      base := mkBase ExprBad exprMVar
+      isUnsafe := false
+    } with
+    | .ok _ => false
+    | .error _ => true
+  let oursUniverseRejects :=
+    match PSC1Kernel.Kernel.addAxiom .empty {
+      base := mkBase UnivBad universeMVarType
+      isUnsafe := false
+    } with
+    | .ok _ => false
+    | .error _ => true
+  let oursBodyRejects :=
+    match PSC1Kernel.Kernel.addDefinition .empty {
+      base := mkBase BodyBad type1
+      value := exprMVar
+      hints := .opaqueHint
+      safety := .safe
+    } with
+    | .ok _ => false
+    | .error _ => true
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanExprRejects :=
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName ExprBad
+      levelParams := []
+      type := toLeanExpr exprMVar
+      isUnsafe := false
+    }) with
+    | .ok _ => false
+    | .error _ => true
+  let leanUniverseRejects :=
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName UnivBad
+      levelParams := []
+      type := toLeanExpr universeMVarType
+      isUnsafe := false
+    }) with
+    | .ok _ => false
+    | .error _ => true
+  let leanBodyRejects :=
+    match Lean.Kernel.Environment.addDecl lean0 {} (.defnDecl {
+      name := toLeanName BodyBad
+      levelParams := []
+      type := toLeanExpr type1
+      value := toLeanExpr exprMVar
+      hints := .opaque
+      safety := .safe
+    }) with
+    | .ok _ => false
+    | .error _ => true
+
+  assertTrue "expression-metavariable declaration rejection differs from Lean 4.34"
+    (oursExprRejects == leanExprRejects && leanExprRejects)
+  assertTrue "universe-metavariable declaration rejection differs from Lean 4.34"
+    (oursUniverseRejects == leanUniverseRejects && leanUniverseRejects)
+  assertTrue "definition-body metavariable rejection differs from Lean 4.34"
+    (oursBodyRejects == leanBodyRejects && leanBodyRejects)
+  assertTrue "failed metavariable declarations mutated PSC1 environment"
+    (!PSC1Kernel.Environment.empty.contains ExprBad &&
+      !PSC1Kernel.Environment.empty.contains UnivBad &&
+      !PSC1Kernel.Environment.empty.contains BodyBad)
+  assertTrue "failed metavariable declarations mutated Lean environment"
+    ((lean0.find? (toLeanName ExprBad)).isNone &&
+      (lean0.find? (toLeanName UnivBad)).isNone &&
+      (lean0.find? (toLeanName BodyBad)).isNone)
+
 def assertDeclarationAdmissionOracle : IO Unit := do
   let P : PSC1Kernel.Name := .str .anonymous "AdmissionP"
   let h : PSC1Kernel.Name := .str .anonymous "admissionProof"
@@ -4480,6 +4560,7 @@ def run : IO Unit := do
   assertOrdinaryRecursorOracle
   assertNatLiteralRecursorOracle
   assertQuotReductionOracle
+  assertMetavariableRejectionOracle
   assertDeclarationAdmissionOracle
   IO.println "PSC1Kernel Lean 4.34 foundational + projection oracle: PASS"
 

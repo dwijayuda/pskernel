@@ -3560,6 +3560,138 @@ def assertUniverseNestedInductiveAdmissionOracle : IO Unit := do
   assertTrue "universe-nested recursion did not reach leaf minor"
     (PSC1Kernel.Expr.eq oursReduced (.lit (.nat 79)))
 
+def assertIndexedOuterNestedInductiveAdmissionOracle : IO Unit := do
+  let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+
+  -- A small Vec-like outer family with one parameter and one index. This
+  -- exercises an indexed nested-type-former shape without elaborator arithmetic.
+  let Slot : PSC1Kernel.Name := .str .anonymous "OracleIndexedNestedSlot"
+  let SlotMk : PSC1Kernel.Name := .str Slot "mk"
+  let Alpha : PSC1Kernel.Name := .str .anonymous "α"
+  let Index : PSC1Kernel.Name := .str .anonymous "n"
+  let Value : PSC1Kernel.Name := .str .anonymous "value"
+  let slotType : PSC1Kernel.Expr :=
+    .forallE Alpha type1
+      (.forallE Index natT type1 .default)
+      .default
+  let slotCtorType : PSC1Kernel.Expr :=
+    .forallE Alpha type1
+      (.forallE Index natT
+        (.forallE Value (.bvar 1)
+          (PSC1Kernel.applyArgs (.const Slot []) [.bvar 2, .bvar 1])
+          .default)
+        .default)
+      .default
+
+  let Tree : PSC1Kernel.Name := .str .anonymous "OracleIndexedNestedTree"
+  let TreeLeaf : PSC1Kernel.Name := .str Tree "leaf"
+  let TreeNode : PSC1Kernel.Name := .str Tree "node"
+  let TreeRec : PSC1Kernel.Name := .str Tree "rec"
+  let TreeRec1 : PSC1Kernel.Name := TreeRec.appendIndexAfter 1
+  let treeT : PSC1Kernel.Expr := .const Tree []
+  let slotTree32 : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs (.const Slot []) [treeT, .lit (.nat 32)]
+  let treeNodeType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "children") slotTree32 treeT .default
+
+  let base :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursSlot ← exceptToIO
+    "PSC1 indexed nested outer Slot admission"
+    (PSC1Kernel.Kernel.addSimpleInductive base {
+      levelParams := []
+      name := Slot
+      type := slotType
+      ctors := [{ name := SlotMk, type := slotCtorType }]
+      isUnsafe := false
+      numParams := 1
+    })
+  let ours ← exceptToIO
+    "PSC1 indexed-outer nested Tree admission"
+    (PSC1Kernel.Kernel.addSimpleNestedInductive oursSlot {
+      levelParams := []
+      numParams := 0
+      types := [{
+        name := Tree
+        type := type1
+        ctors := [
+          { name := TreeLeaf, type := treeT },
+          { name := TreeNode, type := treeNodeType }
+        ]
+      }]
+      isUnsafe := false
+    })
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanNat ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected indexed-nested Nat axiom"
+  let leanSlot ←
+    match Lean.Kernel.Environment.addDecl leanNat {} (.inductDecl [] 1 [{
+      name := toLeanName Slot
+      type := toLeanExpr slotType
+      ctors := [{ name := toLeanName SlotMk, type := toLeanExpr slotCtorType }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected indexed nested outer Slot"
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl leanSlot {} (.inductDecl [] 0 [{
+      name := toLeanName Tree
+      type := toLeanExpr type1
+      ctors := [
+        { name := toLeanName TreeLeaf, type := toLeanExpr treeT },
+        { name := toLeanName TreeNode, type := toLeanExpr treeNodeType }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected indexed-outer nested Tree"
+
+  for name in [Tree, TreeLeaf, TreeNode, TreeRec, TreeRec1] do
+    let some oursInfo := ours.find? name
+      | throw <| IO.userError (
+          "PSC1 indexed-outer nested metadata missing: " ++
+          (toLeanName name).toString)
+    let some leanInfo := lean1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 indexed-outer nested metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("indexed-outer nested type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+
+  match ours.find? Tree with
+  | some (.inductInfo info) =>
+      assertTrue "indexed-outer nested numNested mismatch"
+        (info.numNested == 1)
+  | _ =>
+      throw <| IO.userError "PSC1 indexed-outer nested inductive info missing"
+
+  match ours.find? TreeRec1 with
+  | some (.recInfo info) =>
+      assertTrue "indexed outer auxiliary recursor lost its index"
+        (info.numIndices == 1)
+  | _ =>
+      throw <| IO.userError "PSC1 indexed outer auxiliary recursor missing"
+
+  assertTrue "indexed-outer nested admission leaked _nested auxiliaries"
+    (!ours.constants.any fun info =>
+      PSC1Kernel.Kernel.simpleNestedPrefix.isPrefixOf info.name)
+
 def assertOuterMutualNestedInductiveAdmissionOracle : IO Unit := do
   let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
   let natT : PSC1Kernel.Expr := .const NatN []
@@ -4665,6 +4797,7 @@ def run : IO Unit := do
   assertNestedInductiveAdmissionOracle
   assertParameterizedNestedInductiveAdmissionOracle
   assertUniverseNestedInductiveAdmissionOracle
+  assertIndexedOuterNestedInductiveAdmissionOracle
   assertOuterMutualNestedInductiveAdmissionOracle
   assertLetTypeClosureOracle
   assertReplayCoreOracle

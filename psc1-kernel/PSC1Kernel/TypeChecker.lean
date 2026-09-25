@@ -1122,7 +1122,7 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
     let bodyType ← infer child (body.instantiate1 (.fvar fresh))
     let v ← ensureSort child bodyType
     .ok (.sort (Level.mkIMax u v))
-  | .letE name type value body _ => do
+  | .letE name type value body nondep => do
     let typeType ← infer ctx type
     let _ ← ensureSort ctx typeType
     let valueType ← infer ctx value
@@ -1132,7 +1132,10 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
     else
       let (fresh, child) := ctx.withLet name type value
       let bodyType ← infer child (body.instantiate1 (.fvar fresh))
-      .ok (bodyType.abstractFVars [fresh])
+      -- Lean 4.34 closes a used let-local as a let binder in the inferred
+      -- type. Returning only an abstraction would leave its bvar loose and
+      -- let an enclosing binder capture it.
+      .ok (.letE name type value (bodyType.abstractFVars [fresh]) nondep)
   | .proj typeName idx struct => inferProj ctx typeName idx struct
 
 partial def getSortLevel (ctx : CheckerContext) (e : Expr) : Except String Level := do

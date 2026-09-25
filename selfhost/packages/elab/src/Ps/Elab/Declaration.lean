@@ -60,33 +60,45 @@ def psElabStructuralRecursionFromSource
     (context : PsElabContext) :
     Option PsElabStructuralRecursion :=
   match body with
-  | .matchE (.reference scrutineeName) _ _ =>
-      match psSyntaxNameToName scrutineeName with
-      | none => none
-      | some sourceName =>
-          match
-              psResolveName
-                context.localContext
-                context.environment
-                sourceName with
-          | some (.local scrutineeId) =>
-              let explicitParameterIds :=
-                psElabExplicitParameterIds bindersRev.reverse
+  | .matchE scrutinee _ _ =>
+      match scrutinee with
+      | .reference scrutineeName =>
+          match psSyntaxNameToName scrutineeName with
+          | none =>
+              Option.none
+          | some sourceName =>
               match
-                  psElabFindNatIndex
-                    scrutineeId
-                    explicitParameterIds
-                    0 with
-              | none => none
-              | some recursiveParameterIndex =>
-                  some {
-                    functionName := functionName
-                    explicitParameterIds := explicitParameterIds
-                    recursiveParameterIndex := recursiveParameterIndex
-                    calls := []
-                  }
-          | _ => none
-  | _ => none
+                  psResolveName
+                    context.localContext
+                    context.environment
+                    sourceName with
+              | some resolution =>
+                  match resolution with
+                  | .local scrutineeId =>
+                      let explicitParameterIds :=
+                        psElabExplicitParameterIds bindersRev.reverse;
+                      match
+                          psElabFindNatIndex
+                            scrutineeId
+                            explicitParameterIds
+                            0 with
+                      | none =>
+                          Option.none
+                      | some recursiveParameterIndex =>
+                          Option.some
+                            (PsElabStructuralRecursion.mk
+                              functionName
+                              explicitParameterIds
+                              recursiveParameterIndex
+                              List.nil)
+                  | _ =>
+                      Option.none
+              | none =>
+                  Option.none
+      | _ =>
+          Option.none
+  | _ =>
+      Option.none
 
 def psElabDeclarationParts
     (environment : PsEnvironment)

@@ -1595,25 +1595,43 @@ def psParseLeanInductiveConstructorsWithFuel
         }
 
 def psLeanTopLevelDeclarationToken (token : PsToken) : Bool :=
-  token.text == "def"
-    || token.text == "partial"
-    || token.text == "theorem"
-    || token.text == "inductive"
-    || token.text == "structure"
-    || token.text == "import"
+  if psStringEq token.text "def" then
+    true
+  else if psStringEq token.text "partial" then
+    true
+  else if psStringEq token.text "theorem" then
+    true
+  else if psStringEq token.text "inductive" then
+    true
+  else if psStringEq token.text "structure" then
+    true
+  else
+    psStringEq token.text "import"
 
 def psSplitTokensThroughLine
     (line : Nat) :
-    List PsToken -> List PsToken × List PsToken
-  | [] => ([], [])
-  | token :: rest =>
+    List PsToken ->
+    Prod (List PsToken) (List PsToken)
+  | List.nil =>
+      Prod.mk List.nil List.nil
+  | List.cons token rest =>
       if
-          psTokenKindEq token.kind PsTokenKind.endOfInput
-            || token.span.start.line > line then
-        ([], token :: rest)
+          psTokenKindEq
+            token.kind
+            PsTokenKind.endOfInput then
+        Prod.mk
+          List.nil
+          (List.cons token rest)
+      else if Nat.blt line token.span.start.line then
+        Prod.mk
+          List.nil
+          (List.cons token rest)
       else
-        let tail := psSplitTokensThroughLine line rest
-        (token :: tail.fst, tail.snd)
+        let tail :=
+          psSplitTokensThroughLine line rest;
+        Prod.mk
+          (List.cons token tail.fst)
+          tail.snd
 
 def psParseLeanStructureField
     (cursor : PsTokenCursor) :
@@ -1640,7 +1658,27 @@ def psParseLeanStructureField
                 match psParseLeanTerm { remaining := split.fst } with
                 | Except.error error => Except.error error
                 | Except.ok type =>
-                    if !psTokenCursorDone type.cursor then
+                    if psTokenCursorDone type.cursor then
+                      let fieldName : PsSyntaxName := {
+                        segments :=
+                          List.cons
+                            name.token.text
+                            List.nil
+                        span := name.token.span
+                      };
+                      let head : PsSyntaxBinderHead := {
+                        name := fieldName
+                        kind := PsSyntaxBinderKind.explicit
+                        span := {
+                          start := name.token.span.start
+                          stop := psLeanTermStop type.value
+                        }
+                      };
+                      Except.ok {
+                        value := Prod.mk head type.value
+                        cursor := { remaining := split.snd }
+                      }
+                    else
                       match psTokenCursorPeek type.cursor with
                       | none =>
                           Except.error
@@ -1652,23 +1690,6 @@ def psParseLeanStructureField
                               "end of structure field"
                               token.text
                               token.span)
-                    else
-                      let fieldName : PsSyntaxName := {
-                        segments := [name.token.text]
-                        span := name.token.span
-                      }
-                      let head : PsSyntaxBinderHead := {
-                        name := fieldName
-                        kind := PsSyntaxBinderKind.explicit
-                        span := {
-                          start := name.token.span.start
-                          stop := psLeanTermStop type.value
-                        }
-                      }
-                      Except.ok {
-                        value := (head, type.value)
-                        cursor := { remaining := split.snd }
-                      }
 
 def psParseLeanStructureFieldsWithFuel
     (fuel : Nat)
@@ -1692,8 +1713,14 @@ def psParseLeanStructureFieldsWithFuel
           }
       | some token =>
           if
-              psTokenKindEq token.kind PsTokenKind.endOfInput
-                || psLeanTopLevelDeclarationToken token then
+              psTokenKindEq
+                token.kind
+                PsTokenKind.endOfInput then
+            Except.ok {
+              value := psParseListReverse fieldsRev
+              cursor := cursor
+            }
+          else if psLeanTopLevelDeclarationToken token then
             Except.ok {
               value := psParseListReverse fieldsRev
               cursor := cursor
@@ -1705,7 +1732,7 @@ def psParseLeanStructureFieldsWithFuel
                 psParseLeanStructureFieldsWithFuel
                   remaining
                   field.cursor
-                  (field.value :: fieldsRev)
+                  (List.cons field.value fieldsRev)
 
 def psParseLeanStructureDeclaration
     (cursor : PsTokenCursor) :
@@ -1926,24 +1953,72 @@ def psLeanPatternIsWildcard
   | .wildcard _ => true
   | _ => false
 
+def psLeanStringListEq
+    (left : List String) :
+    List String -> Bool :=
+  match left with
+  | List.nil =>
+      fun (right : List String) =>
+        match right with
+        | List.nil => true
+        | List.cons _ _ => false
+  | List.cons leftHead leftTail =>
+      let smaller : List String -> Bool :=
+        psLeanStringListEq leftTail;
+      fun (right : List String) =>
+        match right with
+        | List.nil => false
+        | List.cons rightHead rightTail =>
+            if psStringEq leftHead rightHead then
+              smaller rightTail
+            else
+              false
+
+def psLeanBoolEq (left : Bool) (right : Bool) : Bool :=
+  match left with
+  | true =>
+      match right with
+      | true => true
+      | false => false
+  | false =>
+      match right with
+      | true => false
+      | false => true
+
 def psLeanPatternHeadEq
     (left : PsSyntaxPattern)
     (right : PsSyntaxPattern) : Bool :=
-  match left, right with
-  | .bool leftValue _, .bool rightValue _ =>
-      leftValue == rightValue
-  | .wildcard _, .wildcard _ => true
-  | .constructor leftName _ _,
-      .constructor rightName _ _ =>
-      leftName.segments == rightName.segments
-  | _, _ => false
+  match left with
+  | .bool leftValue _ =>
+      match right with
+      | .bool rightValue _ =>
+          psLeanBoolEq leftValue rightValue
+      | _ => false
+  | .wildcard _ =>
+      match right with
+      | .wildcard _ => true
+      | _ => false
+  | .constructor leftName _ _ =>
+      match right with
+      | .constructor rightName _ _ =>
+          psLeanStringListEq
+            leftName.segments
+            rightName.segments
+      | _ => false
+  | _ => false
 
 def psLeanPatternListContainsHead
     (patterns : List PsSyntaxPattern)
     (target : PsSyntaxPattern) : Bool :=
-  patterns.any
-    (fun pattern =>
-      psLeanPatternHeadEq pattern target)
+  match patterns with
+  | List.nil => false
+  | List.cons pattern rest =>
+      if psLeanPatternHeadEq pattern target then
+        true
+      else
+        psLeanPatternListContainsHead
+          rest
+          target
 
 def psLeanEquationHeadPatternsAcc
     (clauses : List PsLeanEquationClause)
@@ -1982,8 +2057,10 @@ def psLeanEquationClauseForBranch
         if psLeanPatternIsWildcard branch then
           psLeanPatternIsWildcard pattern
         else
-          psLeanPatternIsWildcard pattern
-            || psLeanPatternHeadEq pattern branch
+          if psLeanPatternIsWildcard pattern then
+            true
+          else
+            psLeanPatternHeadEq pattern branch
       if applicable then
         some {
           patterns := rest
@@ -2097,13 +2174,21 @@ def psLeanEquationBinderName
     (index : Nat)
     (head : PsSyntaxBinderHead) :
     PsSyntaxName :=
-  if head.name.segments == ["_"] then
-    {
-      segments := ["_eq" ++ toString index]
-      span := head.name.span
-    }
-  else
-    head.name
+  match head.name.segments with
+  | List.cons segment List.nil =>
+      if psStringEq segment "_" then
+        let generated :=
+          String.Internal.append
+            "_eq"
+            (psNatToString index);
+        {
+          segments :=
+            List.cons generated List.nil
+          span := head.name.span
+        }
+      else
+        head.name
+  | _ => head.name
 
 def psLeanPrepareEquationBindersAcc
     (remaining : Nat)
@@ -2120,7 +2205,7 @@ def psLeanPrepareEquationBindersAcc
         (List
           (Prod PsSyntaxBinderHead PsSyntaxTerm))
         (List PsSyntaxName)) :=
-  if remaining == 0 then
+  if Nat.beq remaining 0 then
     some (psParseListReverse bindersRev, psParseListReverse namesRev)
   else
     match available with
@@ -2140,17 +2225,30 @@ def psLeanPrepareEquationBindersAcc
           ((head, binder.snd) :: bindersRev)
           (name :: namesRev)
 
+def psLeanEquationClausesHaveArity
+    (arity : Nat) :
+    List PsLeanEquationClause -> Bool
+  | List.nil => true
+  | List.cons clause rest =>
+      if
+          Nat.beq
+            (psParseListLength clause.patterns)
+            arity then
+        psLeanEquationClausesHaveArity
+          arity
+          rest
+      else
+        false
+
 def psLeanEquationArity
     (clauses : List PsLeanEquationClause) :
     Option Nat :=
   match clauses with
-  | [] => none
-  | clause :: rest =>
-      let arity := psParseListLength clause.patterns
-      if
-          rest.all
-            (fun next =>
-              (psParseListLength next.patterns) == arity) then
+  | List.nil => none
+  | List.cons clause rest =>
+      let arity :=
+        psParseListLength clause.patterns;
+      if psLeanEquationClausesHaveArity arity rest then
         some arity
       else
         none

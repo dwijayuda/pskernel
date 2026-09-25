@@ -195,6 +195,54 @@ partial def reduceQuotRec
   let elimArity := mkPos + 1
   return some (applyArgs base (args.drop elimArity))
 
+def findRecursorRule (ctorName : Name) : List RecursorRule → Option RecursorRule
+  | [] => none
+  | rule :: rest =>
+      if Name.eq rule.ctor ctorName then some rule
+      else findRecursorRule ctorName rest
+
+partial def reduceInductiveRec
+    (ctx : CheckerContext)
+    (e : Expr)
+    (cheapRec : Bool) : Except String (Option Expr) := do
+  let .const recName recLevels := e.getAppFn | return none
+  let some (.recInfo recursor) := ctx.env.find? recName | return none
+  let recArgs := e.getAppArgs
+  let majorIdx :=
+    recursor.numParams + recursor.numMotives +
+      recursor.numMinors + recursor.numIndices
+  if majorIdx >= recArgs.length then
+    return none
+  let some major0 := listGet? recArgs majorIdx | return none
+  let major ←
+    if cheapRec then whnfCore ctx major0 true
+    else whnf ctx major0
+  let .const ctorName _ := major.getAppFn | return none
+  let some rule := findRecursorRule ctorName recursor.rules | return none
+  let majorArgs := major.getAppArgs
+  if rule.nFields > majorArgs.length then
+    return none
+  if recLevels.length != recursor.base.levelParams.length then
+    return none
+  let rhs0 :=
+    rule.rhs.instantiateLevelParams recursor.base.levelParams recLevels
+  let fixedCount :=
+    recursor.numParams + recursor.numMotives + recursor.numMinors
+  let rhs1 := applyArgs rhs0 (recArgs.take fixedCount)
+  let ctorParamCount := majorArgs.length - rule.nFields
+  let rhs2 :=
+    applyArgs rhs1 ((majorArgs.drop ctorParamCount).take rule.nFields)
+  return some (applyArgs rhs2 (recArgs.drop (majorIdx + 1)))
+
+partial def reduceRecursor
+    (ctx : CheckerContext)
+    (e : Expr)
+    (cheapRec : Bool) : Except String (Option Expr) := do
+  let quot ← reduceQuotRec ctx e
+  match quot with
+  | some value => return some value
+  | none => reduceInductiveRec ctx e cheapRec
+
 partial def whnfCore
     (ctx : CheckerContext)
     (e : Expr)
@@ -226,8 +274,8 @@ partial def whnfCore
       whnfCore ctx (body.instantiate1 arg) cheapProj
     | _ =>
       if Expr.eq fn fn' then
-        let quot ← reduceQuotRec ctx e
-        match quot with
+        let reduced ← reduceRecursor ctx e cheapProj
+        match reduced with
         | some value => whnfCore ctx value cheapProj
         | none => .ok e
       else

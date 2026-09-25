@@ -485,6 +485,113 @@ def assertExprOracle : IO Unit := do
 
 
 
+
+def assertOrdinaryRecursorOracle : IO Unit := do
+  let Flag : PSC1Kernel.Name := .str .anonymous "OracleFlag"
+  let Off : PSC1Kernel.Name := .str Flag "off"
+  let On : PSC1Kernel.Name := .str Flag "on"
+  let Rec : PSC1Kernel.Name := .str Flag "rec"
+  let u : PSC1Kernel.Name := .str .anonymous "u"
+  let flagType : PSC1Kernel.Expr := .sort (.succ .zero)
+  let flagExpr : PSC1Kernel.Expr := .const Flag []
+
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.inductInfo {
+    base := mkBase Flag flagType
+    numParams := 0
+    numIndices := 0
+    all := [Flag]
+    ctors := [Off, On]
+    numNested := 0
+    isRec := false
+    isReflexive := false
+    isUnsafe := false
+  })
+  let env2 := env1.addUnchecked (.ctorInfo {
+    base := mkBase Off flagExpr
+    induct := Flag
+    cidx := 0
+    numParams := 0
+    numFields := 0
+    isUnsafe := false
+  })
+  let env3 := env2.addUnchecked (.ctorInfo {
+    base := mkBase On flagExpr
+    induct := Flag
+    cidx := 1
+    numParams := 0
+    numFields := 0
+    isUnsafe := false
+  })
+  let dummy : PSC1Kernel.Expr := .sort .zero
+  let motiveName : PSC1Kernel.Name := .str .anonymous "motive"
+  let offMinorName : PSC1Kernel.Name := .str .anonymous "offMinor"
+  let onMinorName : PSC1Kernel.Name := .str .anonymous "onMinor"
+  let rhsOff : PSC1Kernel.Expr :=
+    .lam motiveName dummy
+      (.lam offMinorName dummy
+        (.lam onMinorName dummy (.bvar 1) .default)
+        .default)
+      .default
+  let rhsOn : PSC1Kernel.Expr :=
+    .lam motiveName dummy
+      (.lam offMinorName dummy
+        (.lam onMinorName dummy (.bvar 0) .default)
+        .default)
+      .default
+  let env := env3.addUnchecked (.recInfo {
+    base := { name := Rec, levelParams := [u], type := dummy }
+    all := [Flag]
+    numParams := 0
+    numIndices := 0
+    numMotives := 1
+    numMinors := 2
+    rules := [
+      { ctor := Off, nFields := 0, rhs := rhsOff },
+      { ctor := On, nFields := 0, rhs := rhsOn }
+    ]
+    k := false
+    isUnsafe := false
+  })
+  let ctx := PSC1Kernel.CheckerContext.empty env
+  let motive : PSC1Kernel.Expr := .lam motiveName flagExpr dummy .default
+  let offMinor : PSC1Kernel.Expr := .lit (.nat 17)
+  let onMinor : PSC1Kernel.Expr := .lit (.nat 29)
+  let offApp :=
+    PSC1Kernel.applyArgs (.const Rec [.zero])
+      [motive, offMinor, onMinor, .const Off []]
+  let onApp :=
+    PSC1Kernel.applyArgs (.const Rec [.zero])
+      [motive, offMinor, onMinor, .const On []]
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.inductDecl [] 0 [{
+      name := toLeanName Flag
+      type := toLeanExpr flagType
+      ctors := [
+        { name := toLeanName Off, type := toLeanExpr flagExpr },
+        { name := toLeanName On, type := toLeanExpr flagExpr }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ => throw <| IO.userError "Lean 4.34 rejected recursor oracle inductive"
+  let leanEnv := Lean.Environment.ofKernelEnv lean1
+
+  let oursOff ← exceptToIO "PSC1 ordinary recursor off" (PSC1Kernel.whnf ctx offApp)
+  let leanOff ← kernelExprWhnf leanEnv offApp
+  assertTrue "ordinary recursor off reduction differs from Lean 4.34"
+    (toLeanExpr oursOff == leanOff)
+  assertTrue "ordinary recursor off chose wrong minor"
+    (PSC1Kernel.Expr.eq oursOff offMinor)
+
+  let oursOn ← exceptToIO "PSC1 ordinary recursor on" (PSC1Kernel.whnf ctx onApp)
+  let leanOn ← kernelExprWhnf leanEnv onApp
+  assertTrue "ordinary recursor on reduction differs from Lean 4.34"
+    (toLeanExpr oursOn == leanOn)
+  assertTrue "ordinary recursor on chose wrong minor"
+    (PSC1Kernel.Expr.eq oursOn onMinor)
+
 def assertQuotReductionOracle : IO Unit := do
   let leanEnv ← importStructureFixture
   let ctx := PSC1Kernel.CheckerContext.empty PSC1Kernel.Environment.empty.markQuotInitialized
@@ -724,6 +831,7 @@ def run : IO Unit := do
   assertProofIrrelevanceOracle
   assertBinderInfoDefEqOracle
   assertProjectionOracle
+  assertOrdinaryRecursorOracle
   assertQuotReductionOracle
   assertDeclarationAdmissionOracle
   IO.println "PSC1Kernel Lean 4.34 foundational + projection oracle: PASS"

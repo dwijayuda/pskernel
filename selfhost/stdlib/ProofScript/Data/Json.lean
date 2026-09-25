@@ -337,136 +337,138 @@ def jsonObjectInsert
   else
     Result.ok (mapInsert orderingString key value fields)
 
-def jsonParseArrayWith
+partial def jsonParseArrayWith
     (parseValue :
-      Nat -> String -> Nat -> Result JsonParseResult JsonError) :
-    Nat ->
-    String ->
-    Nat ->
-    List JsonValue ->
-    Result JsonParseResult JsonError
-  | 0, source, position, valuesRev =>
-      Result.error JsonError.fuelExhausted
-  | remaining + 1, source, position, valuesRev =>
-      let start : Nat := jsonSkipWhitespace source position;
-      if String.Internal.atEnd source start then
-        Result.error JsonError.unexpectedEnd
+      Nat -> String -> Nat -> Result JsonParseResult JsonError)
+    (fuel : Nat)
+    (source : String)
+    (position : Nat)
+    (valuesRev : List JsonValue) :
+    Result JsonParseResult JsonError :=
+  if Nat.beq fuel 0 then
+    Result.error JsonError.fuelExhausted
+  else
+    let remaining : Nat := Nat.sub fuel 1;
+    let start : Nat := jsonSkipWhitespace source position;
+    if String.Internal.atEnd source start then
+      Result.error JsonError.unexpectedEnd
+    else
+      let char : Char := String.Internal.get source start;
+      if jsonCharCodeEq char 93 then
+        Result.ok
+          (JsonParseResult.mk
+            (JsonValue.array (listReverse valuesRev))
+            (String.Internal.next source start))
       else
-        let char : Char := String.Internal.get source start;
-        if jsonCharCodeEq char 93 then
-          Result.ok
-            (JsonParseResult.mk
-              (JsonValue.array (listReverse valuesRev))
-              (String.Internal.next source start))
-        else
-          match parseValue remaining source start with
-          | Result.error error => Result.error error
-          | Result.ok parsed =>
-              let afterValue : Nat :=
-                jsonSkipWhitespace source parsed.position;
-              if String.Internal.atEnd source afterValue then
-                Result.error JsonError.unexpectedEnd
+        match parseValue remaining source start with
+        | Result.error error => Result.error error
+        | Result.ok parsed =>
+            let afterValue : Nat :=
+              jsonSkipWhitespace source parsed.position;
+            if String.Internal.atEnd source afterValue then
+              Result.error JsonError.unexpectedEnd
+            else
+              let separator : Char :=
+                String.Internal.get source afterValue;
+              let next : Nat :=
+                String.Internal.next source afterValue;
+              if jsonCharCodeEq separator 44 then
+                jsonParseArrayWith
+                  parseValue
+                  remaining
+                  source
+                  next
+                  (List.cons parsed.value valuesRev)
+              else if jsonCharCodeEq separator 93 then
+                Result.ok
+                  (JsonParseResult.mk
+                    (JsonValue.array
+                      (listReverse
+                        (List.cons parsed.value valuesRev)))
+                    next)
               else
-                let separator : Char :=
-                  String.Internal.get source afterValue;
-                let next : Nat :=
-                  String.Internal.next source afterValue;
-                if jsonCharCodeEq separator 44 then
-                  jsonParseArrayWith
-                    parseValue
-                    remaining
-                    source
-                    next
-                    (List.cons parsed.value valuesRev)
-                else if jsonCharCodeEq separator 93 then
-                  Result.ok
-                    (JsonParseResult.mk
-                      (JsonValue.array
-                        (listReverse
-                          (List.cons parsed.value valuesRev)))
-                      next)
-                else
-                  Result.error (JsonError.expected ", or ]")
+                Result.error (JsonError.expected ", or ]")
 
-def jsonParseObjectWith
+partial def jsonParseObjectWith
     (parseValue :
-      Nat -> String -> Nat -> Result JsonParseResult JsonError) :
-    Nat ->
-    String ->
-    Nat ->
-    Map String JsonValue ->
-    Result JsonParseResult JsonError
-  | 0, source, position, fields =>
-      Result.error JsonError.fuelExhausted
-  | remaining + 1, source, position, fields =>
-      let start : Nat := jsonSkipWhitespace source position;
-      if String.Internal.atEnd source start then
-        Result.error JsonError.unexpectedEnd
-      else
-        let char : Char := String.Internal.get source start;
-        if jsonCharCodeEq char 125 then
-          Result.ok
-            (JsonParseResult.mk
-              (JsonValue.object fields)
-              (String.Internal.next source start))
-        else if jsonCharCodeEq char 34 then
-          match
-              jsonParseStringBody
-                source
-                (String.Internal.next source start)
-                "" with
-          | Result.error error => Result.error error
-          | Result.ok key =>
-              let colonPos : Nat :=
-                jsonSkipWhitespace source key.snd;
-              if String.Internal.atEnd source colonPos then
-                Result.error JsonError.unexpectedEnd
-              else
-                let colon : Char :=
-                  String.Internal.get source colonPos;
-                if jsonCharCodeEq colon 58 then
-                  match
-                      parseValue
-                        remaining
-                        source
-                        (String.Internal.next source colonPos) with
-                  | Result.error error => Result.error error
-                  | Result.ok parsed =>
-                      match
-                          jsonObjectInsert
-                            key.fst
-                            parsed.value
-                            fields with
-                      | Result.error error => Result.error error
-                      | Result.ok nextFields =>
-                          let afterValue : Nat :=
-                            jsonSkipWhitespace source parsed.position;
-                          if String.Internal.atEnd source afterValue then
-                            Result.error JsonError.unexpectedEnd
+      Nat -> String -> Nat -> Result JsonParseResult JsonError)
+    (fuel : Nat)
+    (source : String)
+    (position : Nat)
+    (fields : Map String JsonValue) :
+    Result JsonParseResult JsonError :=
+  if Nat.beq fuel 0 then
+    Result.error JsonError.fuelExhausted
+  else
+    let remaining : Nat := Nat.sub fuel 1;
+    let start : Nat := jsonSkipWhitespace source position;
+    if String.Internal.atEnd source start then
+      Result.error JsonError.unexpectedEnd
+    else
+      let char : Char := String.Internal.get source start;
+      if jsonCharCodeEq char 125 then
+        Result.ok
+          (JsonParseResult.mk
+            (JsonValue.object fields)
+            (String.Internal.next source start))
+      else if jsonCharCodeEq char 34 then
+        match
+            jsonParseStringBody
+              source
+              (String.Internal.next source start)
+              "" with
+        | Result.error error => Result.error error
+        | Result.ok key =>
+            let colonPos : Nat :=
+              jsonSkipWhitespace source key.snd;
+            if String.Internal.atEnd source colonPos then
+              Result.error JsonError.unexpectedEnd
+            else
+              let colon : Char :=
+                String.Internal.get source colonPos;
+              if jsonCharCodeEq colon 58 then
+                match
+                    parseValue
+                      remaining
+                      source
+                      (String.Internal.next source colonPos) with
+                | Result.error error => Result.error error
+                | Result.ok parsed =>
+                    match
+                        jsonObjectInsert
+                          key.fst
+                          parsed.value
+                          fields with
+                    | Result.error error => Result.error error
+                    | Result.ok nextFields =>
+                        let afterValue : Nat :=
+                          jsonSkipWhitespace source parsed.position;
+                        if String.Internal.atEnd source afterValue then
+                          Result.error JsonError.unexpectedEnd
+                        else
+                          let separator : Char :=
+                            String.Internal.get source afterValue;
+                          let next : Nat :=
+                            String.Internal.next source afterValue;
+                          if jsonCharCodeEq separator 44 then
+                            jsonParseObjectWith
+                              parseValue
+                              remaining
+                              source
+                              next
+                              nextFields
+                          else if jsonCharCodeEq separator 125 then
+                            Result.ok
+                              (JsonParseResult.mk
+                                (JsonValue.object nextFields)
+                                next)
                           else
-                            let separator : Char :=
-                              String.Internal.get source afterValue;
-                            let next : Nat :=
-                              String.Internal.next source afterValue;
-                            if jsonCharCodeEq separator 44 then
-                              jsonParseObjectWith
-                                parseValue
-                                remaining
-                                source
-                                next
-                                nextFields
-                            else if jsonCharCodeEq separator 125 then
-                              Result.ok
-                                (JsonParseResult.mk
-                                  (JsonValue.object nextFields)
-                                  next)
-                            else
-                              Result.error
-                                (JsonError.expected ", or }")
-                else
-                  Result.error (JsonError.expected ":")
-        else
-          Result.error (JsonError.expected "object key")
+                            Result.error
+                              (JsonError.expected ", or }")
+              else
+                Result.error (JsonError.expected ":")
+      else
+        Result.error (JsonError.expected "object key")
 
 partial def jsonParseValueWithFuel
     (fallback : Result JsonParseResult JsonError)
@@ -607,22 +609,28 @@ def jsonQuote (value : String) : String :=
       "\"")
 
 def jsonEncodeListWith
-    (encode : JsonValue -> Result String JsonError) :
-    List JsonValue ->
-    Result String JsonError
+    (encode : JsonValue -> Result String JsonError)
+    (values : List JsonValue) :
+    Result String JsonError :=
+  match values with
   | List.nil => Result.ok ""
-  | List.cons head List.nil => encode head
   | List.cons head tail =>
-      match encode head with
-      | Result.error error => Result.error error
-      | Result.ok encodedHead =>
-          match jsonEncodeListWith encode tail with
+      match tail with
+      | List.nil => encode head
+      | List.cons next rest =>
+          match encode head with
           | Result.error error => Result.error error
-          | Result.ok encodedTail =>
-              Result.ok
-                (jsonAppend
-                  encodedHead
-                  (jsonAppend "," encodedTail))
+          | Result.ok encodedHead =>
+              match
+                  jsonEncodeListWith
+                    encode
+                    (List.cons next rest) with
+              | Result.error error => Result.error error
+              | Result.ok encodedTail =>
+                  Result.ok
+                    (jsonAppend
+                      encodedHead
+                      (jsonAppend "," encodedTail))
 
 def jsonNormalizeObject
     (source : Map String JsonValue) :
@@ -636,33 +644,36 @@ def jsonNormalizeObject
           jsonObjectInsert key value normalized
 
 def jsonEncodeObjectWith
-    (encode : JsonValue -> Result String JsonError) :
-    Map String JsonValue ->
-    Result String JsonError
+    (encode : JsonValue -> Result String JsonError)
+    (fields : Map String JsonValue) :
+    Result String JsonError :=
+  match fields with
   | Map.empty => Result.ok ""
-  | Map.node key value Map.empty =>
-      match encode value with
-      | Result.error error => Result.error error
-      | Result.ok encoded =>
-          Result.ok
-            (jsonAppend
-              (jsonQuote key)
-              (jsonAppend ":" encoded))
   | Map.node key value tail =>
       match encode value with
       | Result.error error => Result.error error
       | Result.ok encoded =>
-          match jsonEncodeObjectWith encode tail with
-          | Result.error error => Result.error error
-          | Result.ok encodedTail =>
+          match tail with
+          | Map.empty =>
               Result.ok
                 (jsonAppend
                   (jsonQuote key)
-                  (jsonAppend
-                    ":"
+                  (jsonAppend ":" encoded))
+          | Map.node nextKey nextValue rest =>
+              match
+                  jsonEncodeObjectWith
+                    encode
+                    (Map.node nextKey nextValue rest) with
+              | Result.error error => Result.error error
+              | Result.ok encodedTail =>
+                  Result.ok
                     (jsonAppend
-                      encoded
-                      (jsonAppend "," encodedTail))))
+                      (jsonQuote key)
+                      (jsonAppend
+                        ":"
+                        (jsonAppend
+                          encoded
+                          (jsonAppend "," encodedTail))))
 
 def jsonNumberTextValid (text : String) : Bool :=
   match jsonParseNumberAt text 0 with
@@ -674,8 +685,11 @@ partial def jsonEncodeCanonical
     (value : JsonValue) : Result String JsonError :=
   match value with
   | JsonValue.nullE => Result.ok "null"
-  | JsonValue.bool true => Result.ok "true"
-  | JsonValue.bool false => Result.ok "false"
+  | JsonValue.bool flag =>
+      if flag then
+        Result.ok "true"
+      else
+        Result.ok "false"
   | JsonValue.number text =>
       if jsonNumberTextValid text then
         Result.ok text

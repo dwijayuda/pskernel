@@ -1558,15 +1558,15 @@ This milestone must not block SH1-SH10R.
 
 Unless demanded by an SH gate, defer:
 
-- integration of new backends into the active self-host closure **until SH9/SH10
-  close**. Rust backend implementation may proceed now on the dedicated
-  `backend/rust-native` branch as a parallel research/implementation lane,
-  provided it consumes the existing compiler IR, does not change PSC1 semantics
-  merely for Rust, and does not block or destabilize
-  `selfhost/psc1-lean-bootstrap`. Merge/integration into the authoritative
-  self-host line remains gated on the JavaScript fixed point and `.ps` source
-  transition. Wasm and other additional backends remain deferred unless
-  separately authorized;
+- declaration of Rust native self-hosting / SH10R completion **until SH9/SH10
+  close**. Rust backend implementation and code integration may proceed earlier
+  when it consumes the current shared compiler IR, does not change PSC1
+  semantics merely for Rust, does not weaken existing SH gates, and its claimed
+  subset is covered by executable regression/differential tests. A blocked
+  real-compiler Rust census caused solely by the still-active PSC1 source-closure
+  frontier does not by itself block code integration; that census remains
+  mandatory before R3/SH10R/native-self-host completion is claimed. Wasm and
+  other additional backends remain governed by their own integration rules;
 - broad React/Next.js integration;
 - new browser/LSP/editor features;
 - extra package-manager features;
@@ -1615,10 +1615,14 @@ Unless demanded by an SH gate, defer:
 - `kernel/lean434-study-hardening`: independent TypeScript kernel assurance
   and Lean 4.34 conformance work.
 - Rust work can be cherry-picked or merged into the authoritative self-host line
-  only when it is compatible with the then-current compiler IR and cannot
-  weaken SH1-SH10 gates. SH10R becomes an integration requirement after the
-  JavaScript fixed point; it is not a prerequisite for reaching that fixed
-  point.
+  when it is compatible with the then-current compiler IR, introduces no
+  Rust-specific semantic fork, cannot weaken SH1-SH10 gates, and has executable
+  regression/differential coverage for the claimed subset. The real
+  compiler -> Rust -> Cargo gate may remain explicitly
+  `BLOCKED_BY_SELFHOST_SOURCE_CLOSURE` during this early code-integration
+  phase, but it must become PASS before R3/SH10R/native-self-host completion is
+  claimed. SH10R remains a post-JavaScript-fixed-point completion milestone; it
+  is not a prerequisite for reaching that fixed point.
 - Kernel changes merge to the integration line only when independently
   justified by kernel compatibility, never solely to make a ProofScript
   compiler/backend test pass.

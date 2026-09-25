@@ -1,4 +1,6 @@
 import Ps.BackendWasm.Binary
+import Ps.BackendWasm.LowerInt
+import Ps.BackendWasm.LowerFloat
 
 inductive PsWasmLowerError where
   | unsupportedType
@@ -108,6 +110,24 @@ def psWasmLowerIntrinsicWith
                 (lowered ++
                   psWasmLowerMachineIntegerCompare
                     profile type integerOperation)
+      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | .floatBinary type floatOperation =>
+      match arguments with
+      | [left, right] =>
+          match psWasmLowerExprListWith lower [left, right] with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok
+                (lowered ++ psWasmLowerFloatBinary type floatOperation)
+      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | .floatCompare type floatOperation =>
+      match arguments with
+      | [left, right] =>
+          match psWasmLowerExprListWith lower [left, right] with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok
+                (lowered ++ psWasmLowerFloatCompare type floatOperation)
       | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 

@@ -1055,6 +1055,76 @@ def psWasmLowerTypedArgumentsWith
   | _, _, _ =>
       Except.error PsWasmLowerError.invalidCallArity
 
+def psWasmArrayType
+    (elementType : PsVerifiedIrType) : PsVerifiedIrType :=
+  PsVerifiedIrType.named "Array" [elementType]
+
+def psWasmLowerArrayRuntimeCall
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (argumentTypes : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr)
+    (functionName : Option String) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match functionName with
+  | none => Except.error PsWasmLowerError.unsupportedType
+  | some name =>
+      match
+          psWasmLowerTypedArgumentsWith
+            profile
+            lower
+            state
+            argumentTypes
+            arguments with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            instructions :=
+              lowered.instructions ++ [PsWasmInstruction.call name]
+            state := lowered.state
+          }
+
+def psWasmLowerArrayEmpty
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (elementType : PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match arguments with
+  | [capacity] =>
+      match
+          psWasmLowerTypedArgumentsWith
+            profile
+            lower
+            state
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            [capacity] with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          match psWasmArrayNilName elementType with
+          | none => Except.error PsWasmLowerError.unsupportedType
+          | some nilName =>
+              Except.ok {
+                instructions :=
+                  lowered.instructions
+                    ++ [
+                      PsWasmInstruction.drop,
+                      PsWasmInstruction.structNew nilName
+                    ]
+                state := lowered.state
+              }
+  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
@@ -1153,6 +1223,72 @@ def psWasmLowerIntrinsicWith
       psWasmLowerNatBinaryCall lower state arguments psWasmNatLeName
   | .natLt =>
       psWasmLowerNatBinaryCall lower state arguments psWasmNatLtName
+  | .arrayEmptyWithCapacity elementType =>
+      psWasmLowerArrayEmpty
+        profile lower state elementType arguments
+  | .arraySize elementType =>
+      psWasmLowerArrayRuntimeCall
+        profile
+        lower
+        state
+        [psWasmArrayType elementType]
+        arguments
+        (psWasmArraySizeFunctionName elementType)
+  | .arrayPush elementType =>
+      psWasmLowerArrayRuntimeCall
+        profile
+        lower
+        state
+        [psWasmArrayType elementType, elementType]
+        arguments
+        (psWasmArrayPushFunctionName elementType)
+  | .arrayGet elementType =>
+      psWasmLowerArrayRuntimeCall
+        profile
+        lower
+        state
+        [
+          psWasmArrayType elementType,
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        ]
+        arguments
+        (psWasmArrayGetFunctionName elementType)
+  | .arrayGetD elementType =>
+      psWasmLowerArrayRuntimeCall
+        profile
+        lower
+        state
+        [
+          psWasmArrayType elementType,
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat,
+          elementType
+        ]
+        arguments
+        (psWasmArrayGetDFunctionName elementType)
+  | .arraySet elementType =>
+      psWasmLowerArrayRuntimeCall
+        profile
+        lower
+        state
+        [
+          psWasmArrayType elementType,
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat,
+          elementType
+        ]
+        arguments
+        (psWasmArraySetFunctionName elementType)
+  | .arraySetIfInBounds elementType =>
+      psWasmLowerArrayRuntimeCall
+        profile
+        lower
+        state
+        [
+          psWasmArrayType elementType,
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat,
+          elementType
+        ]
+        arguments
+        (psWasmArraySetIfFunctionName elementType)
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
 def psWasmLowerFunctionValueCall

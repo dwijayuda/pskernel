@@ -5,6 +5,7 @@ inductive PsWasmEncodeError where
   | unsupportedInstruction
   | negativeIntegerConstant
   | unknownFunction (name : String)
+  | unknownStructure (name : String)
 
 def psWasmByte (value : Nat) : UInt8 :=
   UInt8.ofNat value
@@ -95,29 +96,53 @@ def psWasmEncodeName (name : String) : List UInt8 :=
   let bytes := psWasmEncodeUtf8Chars name.toList
   psWasmEncodeUleb bytes.length ++ bytes
 
+def psWasmFindStructureIndexLoop
+    (name : String) :
+    Nat -> List PsWasmStructType -> Option Nat
+  | _, [] => none
+  | index, structure :: rest =>
+      if structure.name == name then
+        some index
+      else
+        psWasmFindStructureIndexLoop name (index + 1) rest
+
+def psWasmFindStructureIndex
+    (structures : List PsWasmStructType)
+    (name : String) : Option Nat :=
+  psWasmFindStructureIndexLoop name 0 structures
+
 def psWasmEncodeValueType
+    (structures : List PsWasmStructType)
     (type : PsWasmValueType) :
-    Except PsWasmEncodeError UInt8 :=
+    Except PsWasmEncodeError (List UInt8) :=
   match type with
-  | .i32 => Except.ok (psWasmByte 127)
-  | .i64 => Except.ok (psWasmByte 126)
-  | .f32 => Except.ok (psWasmByte 125)
-  | .f64 => Except.ok (psWasmByte 124)
-  | .refT _ => Except.error PsWasmEncodeError.unsupportedValueType
+  | .i32 => Except.ok [psWasmByte 127]
+  | .i64 => Except.ok [psWasmByte 126]
+  | .f32 => Except.ok [psWasmByte 125]
+  | .f64 => Except.ok [psWasmByte 124]
+  | .refT name =>
+      match psWasmFindStructureIndex structures name with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure name)
+      | some index =>
+          Except.ok
+            ([psWasmByte 100]
+              ++ psWasmEncodeSleb (Int.ofNat index))
   | .noValue => Except.error PsWasmEncodeError.unsupportedValueType
 
-def psWasmEncodeValueTypes :
+def psWasmEncodeValueTypes
+    (structures : List PsWasmStructType) :
     List PsWasmValueType ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | type :: rest =>
-      match psWasmEncodeValueType type with
+      match psWasmEncodeValueType structures type with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeValueTypes rest with
+          match psWasmEncodeValueTypes structures rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
-              Except.ok (encoded :: encodedRest)
+              Except.ok (encoded ++ encodedRest)
 
 def psWasmEncodeVector
     (bytes : List UInt8)
@@ -125,12 +150,13 @@ def psWasmEncodeVector
   psWasmEncodeUleb count ++ bytes
 
 def psWasmEncodeFunctionType
+    (structures : List PsWasmStructType)
     (function : PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeValueTypes function.parameters with
+  match psWasmEncodeValueTypes structures function.parameters with
   | Except.error error => Except.error error
   | Except.ok parameters =>
-      match psWasmEncodeValueTypes function.results with
+      match psWasmEncodeValueTypes structures function.results with
       | Except.error error => Except.error error
       | Except.ok results =>
           Except.ok
@@ -138,15 +164,16 @@ def psWasmEncodeFunctionType
               ++ psWasmEncodeVector parameters function.parameters.length
               ++ psWasmEncodeVector results function.results.length)
 
-def psWasmEncodeFunctionTypes :
+def psWasmEncodeFunctionTypes
+    (structures : List PsWasmStructType) :
     List PsWasmFunction ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | function :: rest =>
-      match psWasmEncodeFunctionType function with
+      match psWasmEncodeFunctionType structures function with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeFunctionTypes rest with
+          match psWasmEncodeFunctionTypes structures rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)

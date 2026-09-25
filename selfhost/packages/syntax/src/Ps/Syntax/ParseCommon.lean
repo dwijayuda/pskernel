@@ -235,7 +235,7 @@ def psParseRecordLiteral
       match
           psParseRecordFieldsWithFuel
             parseTerm
-            psParseListLength opening.cursor.remaining
+            (psParseListLength opening.cursor.remaining)
             opening.cursor
             List.nil with
       | Except.error error => Except.error error
@@ -510,7 +510,7 @@ def psParseConstructorPatternTail
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) :=
   match psParsePatternBindersWithFuel
-      psParseListLength cursor.remaining
+      (psParseListLength cursor.remaining)
       cursor
       List.nil with
   | Except.error error => Except.error error

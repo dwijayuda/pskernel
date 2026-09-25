@@ -13,6 +13,34 @@ structure OpenBinder where
 def mkArrow (domain codomain : Expr) : Expr :=
   .forallE .anonymous domain codomain .default
 
+/--
+Lean expression structural equality used by the quotient bootstrap shape check.
+Binder display names and binder annotations are intentionally ignored, matching
+Lean 4.34 expression equality; metadata placement/payload still participates.
+-/
+partial def quotExprEqv : Expr → Expr → Bool
+  | .bvar a, .bvar b => a == b
+  | .fvar a, .fvar b => Name.eq a b
+  | .mvar a, .mvar b => Name.eq a b
+  | .sort a, .sort b => Level.eq a b
+  | .const n₁ ls₁, .const n₂ ls₂ =>
+      Name.eq n₁ n₂ && Level.listEq ls₁ ls₂
+  | .app f₁ a₁, .app f₂ a₂ =>
+      quotExprEqv f₁ f₂ && quotExprEqv a₁ a₂
+  | .lam _ t₁ b₁ _, .lam _ t₂ b₂ _ =>
+      quotExprEqv t₁ t₂ && quotExprEqv b₁ b₂
+  | .forallE _ t₁ b₁ _, .forallE _ t₂ b₂ _ =>
+      quotExprEqv t₁ t₂ && quotExprEqv b₁ b₂
+  | .letE _ t₁ v₁ b₁ d₁, .letE _ t₂ v₂ b₂ d₂ =>
+      quotExprEqv t₁ t₂ && quotExprEqv v₁ v₂ &&
+        quotExprEqv b₁ b₂ && d₁ == d₂
+  | .lit a, .lit b => Literal.eq a b
+  | .mdata m₁ e₁, .mdata m₂ e₂ =>
+      m₁ == m₂ && quotExprEqv e₁ e₂
+  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
+      Name.eq n₁ n₂ && i₁ == i₂ && quotExprEqv e₁ e₂
+  | _, _ => false
+
 def closeOpenBinders : List OpenBinder → Expr → Expr
   | [], body => body
   | binder :: rest, body =>
@@ -71,14 +99,14 @@ def checkEqForQuot (env : Environment) : Except String Unit := do
     | throw "failed to initialize quot module, unexpected number of universe params at Eq type"
   let [reflName] := eqInfo.ctors
     | throw "failed to initialize quot module, unexpected number of constructors for Eq type"
-  unless Expr.eq eqInfo.base.type (expectedEqType uName) do
+  unless quotExprEqv eqInfo.base.type (expectedEqType uName) do
     throw "failed to initialize quot module, Eq has an unexpected type"
 
   let some reflInfo := env.find? reflName
     | throw "failed to initialize quot module, missing Eq constructor"
   let [reflUName] := reflInfo.levelParams
     | throw "failed to initialize quot module, unexpected universe params at Eq constructor"
-  unless Expr.eq reflInfo.type (expectedEqReflType reflUName) do
+  unless quotExprEqv reflInfo.type (expectedEqReflType reflUName) do
     throw "failed to initialize quot module, unexpected type for Eq constructor"
 
 def makeQuotType (uName : Name) : Expr :=

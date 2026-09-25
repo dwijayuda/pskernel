@@ -536,6 +536,24 @@ def assertBinderInfoDefEqOracle : IO Unit := do
   assertTrue "forall binder info differs from Lean 4.34 defeq" (oursPi == leanPi)
   assertTrue "Lean 4.34 forall binder info should be ignored by defeq" leanPi
 
+def assertStringLiteralExpansionShape : IO Unit := do
+  let value := "A🙂"
+  let ours := toLeanExpr (PSC1Kernel.stringLitToConstructor value)
+  let charType := Lean.mkConst ``Char
+  let listNil := Lean.mkApp (Lean.mkConst ``List.nil [.zero]) charType
+  let listCons := Lean.mkApp (Lean.mkConst ``List.cons [.zero]) charType
+  let charOfNat := Lean.mkConst ``Char.ofNat
+  let data :=
+    value.toList.foldr
+      (fun c rest =>
+        Lean.mkApp2 listCons
+          (Lean.mkApp charOfNat (Lean.mkNatLit c.toNat))
+          rest)
+      listNil
+  let expected := Lean.mkApp (Lean.mkConst ``String.ofList) data
+  assertTrue "string literal constructor shape differs from Lean 4.34"
+    (Lean.Expr.equal ours expected)
+
 def assertStringLiteralDefEqOracle : IO Unit := do
   let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
   let pscEnv :=
@@ -1040,6 +1058,7 @@ def run : IO Unit := do
   assertUnitLikeOracle
   assertProofIrrelevanceOracle
   assertBinderInfoDefEqOracle
+  assertStringLiteralExpansionShape
   assertStringLiteralDefEqOracle
   assertProjectionOracle
   assertOrdinaryRecursorOracle

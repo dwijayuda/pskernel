@@ -6,6 +6,8 @@ on:
     branches:
       - backend/wasm3-owned
       - integrate/wasm3-owned
+      - backend/wasm3-gc-adts
+      - integrate/wasm3-gc-adts
     paths:
       - selfhost/**
       - docs/selfhost/WASM3_BACKEND.md
@@ -106,6 +108,24 @@ jobs:
           }
           if (instance.exports.letPlusOne(41) !== 42) {
             throw new Error('PSC1_WASM_RUNTIME_LET_RESULT');
+          }
+          if (instance.exports.pointX(42, 7) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_STRUCT_RESULT');
+          }
+          if (instance.exports.smallSigned(-123) !== -123) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_PACKED_I16_RESULT');
+          }
+          if (instance.exports.smallUnsigned(65535) !== 65535) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_PACKED_U16_RESULT');
+          }
+          if (instance.exports.someValue(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_SOME_RESULT');
+          }
+          if (instance.exports.noneValue() !== 0) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_NONE_RESULT');
+          }
+          if (instance.exports.listLengthTwo() !== 2) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_RECURSIVE_ADT_RESULT');
           }
           console.log('PSC1_WASM3_INTEGRATION: PASS');
           NODE

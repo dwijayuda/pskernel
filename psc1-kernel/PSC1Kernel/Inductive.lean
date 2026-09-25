@@ -246,8 +246,8 @@ def addSimpleInductive
   | _ => pure ()
   let .sort resultLevel := headerResult
     | throw "simple inductive result must be a sort"
-  if Level.normalizesToZero resultLevel then
-    throw "simple inductive admission currently requires a non-Prop result sort"
+  if !Level.isNotZero resultLevel then
+    throw "simple inductive admission currently requires a result universe that is provably nonzero"
 
   let levels := decl.levelParams.map Level.param
   let paramArgs := params.map (fun param => Expr.fvar param.internalName)

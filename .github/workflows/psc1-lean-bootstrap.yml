@@ -6,6 +6,7 @@ on:
     branches:
       - selfhost/psc1-lean-bootstrap
       - backend/wasm3-owned
+      - integrate/wasm3-owned
     paths:
       - selfhost/**
       - docs/selfhost/PSC1_LEAN_BOOTSTRAP.md

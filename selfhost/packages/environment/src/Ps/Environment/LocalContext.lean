@@ -41,7 +41,7 @@ def psLocalFindByIdInList (id : Nat) : List PsLocalDecl -> Option PsLocalDecl
   | [] => Option.none
   | declaration :: rest =>
       if Nat.beq (psLocalDeclId declaration) id then
-        some declaration
+        Option.some declaration
       else
         psLocalFindByIdInList id rest
 
@@ -50,14 +50,14 @@ def psLocalFindById (context : PsLocalContext) (id : Nat) : Option PsLocalDecl :
 
 def psLocalContainsId (context : PsLocalContext) (id : Nat) : Bool :=
   match psLocalFindById context id with
-  | none => false
-  | some _ => true
+  | Option.none => false
+  | Option.some _ => true
 
 def psLocalFindUserInList (userName : PsName) : List PsLocalDecl -> Option PsLocalDecl
-  | [] => none
+  | [] => Option.none
   | declaration :: rest =>
       if psNameEq userName (psLocalDeclUserName declaration) then
-        some declaration
+        Option.some declaration
       else
         psLocalFindUserInList userName rest
 

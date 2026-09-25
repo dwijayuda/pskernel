@@ -17,7 +17,10 @@ def psRustEmitExprListWith
           | Except.error error =>
               Except.error error
           | Except.ok printedRest =>
-              Except.ok (List.cons printed printedRest)
+              Except.ok
+                (List.cons
+                  (psRustClonePrinted printed)
+                  printedRest)
 
 def psRustEmitFieldListWith
     (emitExpr :
@@ -36,7 +39,7 @@ def psRustEmitFieldListWith
             psRustConcat3
               (psRustIdentifier (Prod.fst field))
               ": "
-              printed;
+              (psRustClonePrinted printed);
           match psRustEmitFieldListWith emitExpr rest with
           | Except.error error =>
               Except.error error
@@ -832,7 +835,7 @@ def psRustEmitExprWithFuel :
                       (psRustIdentifier name)
                       " = "
                       (psRustConcat4
-                        printedValue
+                        (psRustClonePrinted printedValue)
                         "; "
                         printedBody
                         " }"))
@@ -878,7 +881,7 @@ def psRustEmitExprWithFuel :
               Except.ok
                 (psRustConcat4
                   "("
-                  printedTarget
+                  (psRustClonePrinted printedTarget)
                   ")."
                   (psRustIdentifier field))
       | PsVerifiedIrExpr.constructor
@@ -926,7 +929,7 @@ def psRustEmitExprWithFuel :
                   Except.ok
                     (psRustConcat4
                       "(match "
-                      printedScrutinee
+                      (psRustClonePrinted printedScrutinee)
                       " { "
                       (psRustConcat2
                         (psRustJoin ", " printedAlternatives)

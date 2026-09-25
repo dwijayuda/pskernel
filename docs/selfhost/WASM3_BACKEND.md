@@ -117,6 +117,56 @@ library.ps -> VerifiedIR
 
 Target-specific imports narrow the target set explicitly.
 
+## Merge boundary
+
+Do not wait for the complete Wasm runtime before integrating this branch. A
+very long-lived backend branch would increase shared-IR drift and make the
+eventual merge riskier.
+
+The first merge into the active self-host line is allowed when all of these are
+true:
+
+1. the branch is synchronized with the current self-host source and has no
+   unresolved overlap in shared compiler files;
+2. the shared-IR neutrality gate is green;
+3. the full Lean/Lake build is green;
+4. existing TypeScript backend tests affected by shared-IR changes are green;
+5. direct Wasm lowering tests are green;
+6. an independently validated runtime smoke covers:
+   - fixed-width integer arithmetic;
+   - `Float32` arithmetic;
+   - direct cross-function calls;
+   - structured conditional control flow;
+   - basic local/`let` lowering;
+7. the only remaining CI failures are demonstrably inherited from the base
+   self-host branch;
+8. `backend-wasm` remains non-default and cannot block the JS self-host path.
+
+This is the **Wasm infrastructure merge**, not a claim that the backend is
+feature-complete. After that merge, GC ADTs, closures, String/Array, exact
+Nat/Int, SIMD, WASI/components, self-hosting and formal preservation proofs can
+continue in small follow-up branches.
+
+Current status:
+
+```text
+[done] target-neutral VerifiedIR contract + regression guard
+[done] Wasm target IR
+[done] scalar type lowering
+[done] fixed-width integer operations/comparisons
+[done] Float/Float32 operations/comparisons
+[done] owned core module/function/export/code encoder
+[done] signed/unsigned integer immediate encoding
+[done] independent WebAssembly.validate/runtime smoke
+[done] direct call lowering
+[next] structured if/control flow
+[next] basic locals/let
+[post-merge] GC structures/inductives
+[post-merge] closures/typed function references
+[post-merge] String/Array/Nat/Int runtime
+[post-merge] SIMD/WASI/components/formal proof
+```
+
 ## Development order
 
 1. Freeze and guard the target-neutral VerifiedIR contract.

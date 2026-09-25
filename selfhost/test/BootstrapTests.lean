@@ -1487,6 +1487,26 @@ def psTestPreludeCollectionTypeConstructors : Bool :=
          some (PsDeclaration.axiomDecl _ _ _) => true
        | _, _ => false
 
+def psTestPositiveNestedRecursiveField : Bool :=
+  let source :=
+    "inductive Rose where | node (children : List Rose)"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psBootstrapPreludeEnvironment module with
+      | Except.ok _ => true
+      | Except.error _ => false
+
+def psTestRejectNegativeNestedRecursiveField : Bool :=
+  let source :=
+    "inductive BadNested where | mk (apply : BadNested -> Nat)"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psBootstrapPreludeEnvironment module with
+      | Except.error PsElabError.unsupportedTerm => true
+      | _ => false
+
 def psTestLeanProductInsideApplicationParse : Bool :=
   let source := "List (Nat × String)"
   match psLex source with
@@ -2385,6 +2405,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source if", passed := psTestDualSourceIf },
   { name := "inductive metadata lookup", passed := psTestInductiveMetadataLookup },
   { name := "bootstrap List/Option type constructors", passed := psTestPreludeCollectionTypeConstructors },
+  { name := "positive nested recursive field", passed := psTestPositiveNestedRecursiveField },
+  { name := "reject negative nested recursive field", passed := psTestRejectNegativeNestedRecursiveField },
   { name := "Lean product inside application parse", passed := psTestLeanProductInsideApplicationParse },
   { name := "dual-source basic match parse", passed := psTestDualSourceBasicMatchParse },
   { name := "Lean nested match dedent parse", passed := psTestLeanNestedMatchDedentParse },

@@ -1,0 +1,52 @@
+name: PSC1 root 100015 long control
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [diagnostic/psc1-root-100015-long]
+    paths:
+      - ".github/workflows/psc1-root-100015-long.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-root-100015-long-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  root-100015:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build PSC1 Lean replay executable
+        working-directory: psc1-kernel
+        run: |
+          lake build
+          lake build psc1_replay
+      - name: Replay Std root 100015 with long control timeout
+        shell: bash
+        env:
+          PSC1_LEAN_STD_CHUNK: "32"
+          PSC1_LEAN_EXPORT_TIMEOUT_MS: "180000"
+          PSC1_LEAN_REPLAY_TIMEOUT_MS: "900000"
+          PSC1_LEAN_REPLAY_BIN: "psc1-kernel/.lake/build/bin/psc1_replay"
+        run: |
+          set -euo pipefail
+          node scripts/psc1-lean-std-release-profile.mjs \
+            --label root-100015-long \
+            --start 100015 \
+            --count 1

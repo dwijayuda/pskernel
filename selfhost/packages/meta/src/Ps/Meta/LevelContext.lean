@@ -29,10 +29,10 @@ def psNatListContains (values : List Nat) (target : Nat) : Bool :=
       if value == target then true else psNatListContains rest target
 
 def psLevelFindAssignmentInList (id : Nat) : List PsLevelAssignment -> Option PsLevel
-  | [] => none
+  | [] => Option.none
   | assignment :: rest =>
       if assignment.id == id then
-        some assignment.value
+        Option.some assignment.value
       else
         psLevelFindAssignmentInList id rest
 
@@ -57,8 +57,8 @@ def psLevelInstantiateWithFuel
       match level with
       | .mvar id =>
           match psLevelFindAssignment context id with
-          | none => level
-          | some value => psLevelInstantiateWithFuel context fuel value
+          | Option.none => level
+          | Option.some value => psLevelInstantiateWithFuel context fuel value
       | .succ value =>
           PsLevel.succ (psLevelInstantiateWithFuel context fuel value)
       | .max left right =>
@@ -92,19 +92,19 @@ def psLevelAssign
     (value : PsLevel) : Option PsLevelMetaContext :=
   if psNatListContains context.declarations id then
     match psLevelFindAssignment context id with
-    | some _ => none
-    | none =>
+    | Option.some _ => Option.none
+    | Option.none =>
         let resolved := psLevelInstantiate context value
         if psLevelOccurs context id resolved then
-          none
+          Option.none
         else
-          some {
+          Option.some {
             nextId := context.nextId
             declarations := context.declarations
             assignments := List.cons { id := id, value := resolved } context.assignments
           }
   else
-    none
+    Option.none
 
 def psLevelUnifyWithFuel
     (context : PsLevelMetaContext) : Nat -> PsLevel -> PsLevel -> PsLevelUnifyResult
@@ -118,12 +118,12 @@ def psLevelUnifyWithFuel
         match leftValue, rightValue with
         | .mvar id, value =>
             match psLevelAssign context id value with
-            | none => { context := context, success := false }
-            | some next => { context := next, success := true }
+            | Option.none => { context := context, success := false }
+            | Option.some next => { context := next, success := true }
         | value, .mvar id =>
             match psLevelAssign context id value with
-            | none => { context := context, success := false }
-            | some next => { context := next, success := true }
+            | Option.none => { context := context, success := false }
+            | Option.some next => { context := next, success := true }
         | .succ leftInner, .succ rightInner =>
             psLevelUnifyWithFuel context fuel leftInner rightInner
         | .max leftA leftB, .max rightA rightB =>

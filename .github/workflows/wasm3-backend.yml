@@ -168,17 +168,22 @@ jobs:
               throw new Error('PSC1_WASM_RUNTIME_NAT_RESULT:' + name);
             }
           }
-          for (const name of [
-            'intAddMixed',
-            'intSubNegative',
-            'intMulNegative',
-            'intNegExact',
-            'intOrderNegative',
-            'intOfNatExact',
-            'intNegSuccExact',
-          ]) {
-            if (instance.exports[name]() !== 1) {
-              throw new Error('PSC1_WASM_RUNTIME_INT_RESULT:' + name);
+          {
+            const failures = [];
+            for (const name of [
+              'intAddMixed',
+              'intSubNegative',
+              'intMulNegative',
+              'intNegExact',
+              'intOrderNegative',
+              'intOfNatExact',
+              'intNegSuccExact',
+            ]) {
+              const value = instance.exports[name]();
+              if (value !== 1) failures.push(name + '=' + value);
+            }
+            if (failures.length !== 0) {
+              throw new Error('PSC1_WASM_RUNTIME_INT_RESULT:' + failures.join(','));
             }
           }
           if (instance.exports.arraySizeAfterPush() !== 1) {

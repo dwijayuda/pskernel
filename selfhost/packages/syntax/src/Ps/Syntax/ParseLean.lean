@@ -2222,19 +2222,22 @@ def psLeanEquationBinderName
     (head : PsSyntaxBinderHead) :
     PsSyntaxName :=
   match head.name.segments with
-  | List.cons segment List.nil =>
-      if psStringEq segment "_" then
-        let generated :=
-          String.Internal.append
-            "_eq"
-            (psNatToString index);
-        {
-          segments :=
-            List.cons generated List.nil
-          span := head.name.span
-        }
-      else
-        head.name
+  | List.cons segment rest =>
+      match rest with
+      | List.nil =>
+          if psStringEq segment "_" then
+            let generated :=
+              String.Internal.append
+                "_eq"
+                (psNatToString index);
+            {
+              segments :=
+                List.cons generated List.nil
+              span := head.name.span
+            }
+          else
+            head.name
+      | _ => head.name
   | _ => head.name
 
 def psLeanPrepareEquationBindersAcc

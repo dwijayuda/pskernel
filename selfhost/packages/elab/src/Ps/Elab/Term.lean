@@ -252,12 +252,14 @@ def psElabProjectionStep
   | _ => Except.error PsElabError.unsupportedTerm
 
 def psElabProjectionChain
-    (context : PsElabContext) :
-    PsElabTermResult ->
-    List String ->
-    Except PsElabError PsElabTermResult
-  | current, [] => Except.ok current
-  | current, field :: rest =>
+    (context : PsElabContext)
+    (current : PsElabTermResult)
+    (fields : List String) :
+    Except PsElabError PsElabTermResult :=
+  match fields with
+  | [] =>
+      Except.ok current
+  | field :: rest =>
       match psElabProjectionStep context current field with
       | Except.error error => Except.error error
       | Except.ok projected =>

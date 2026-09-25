@@ -166,6 +166,11 @@ jobs:
             "nat_lt=" + m.diffNat(2n, 5n).toString(),
             "nat_ge=" + m.diffNat(9n, 4n).toString(),
             "int=" + m.diffInt(7n, 2n).toString(),
+            "u8_wrap=" + m.diffU8Wrap(250, 10).toString(),
+            "i16_wrap=" + m.diffI16Mul(200, 200).toString(),
+            "u32_lt=" + m.diffU32Lt(4000000000, 10).toString(),
+            "f32_add=" + m.diffF32Add(Math.fround(16777216), Math.fround(1)).toString(),
+            "f64_div=" + m.diffF64Div(7.5, 2.5).toString(),
             "string=" + m.diffString("é").toString(),
             "array=" + m.diffArray(7n, 8n).toString(),
             "capture=" + m.diffCapture(5n, 7n).toString(),
@@ -194,10 +199,15 @@ jobs:
               diffArray,
               diffCapture,
               diffCaptureArray,
+              diffF32Add,
+              diffF64Div,
+              diffI16Mul,
               diffInt,
               diffMaybe,
               diffNat,
               diffString,
+              diffU32Lt,
+              diffU8Wrap,
           };
 
           fn n(value: u32) -> BigUint {
@@ -212,6 +222,11 @@ jobs:
               println!("nat_lt={}", diffNat(n(2), n(5)));
               println!("nat_ge={}", diffNat(n(9), n(4)));
               println!("int={}", diffInt(i(7), i(2)));
+              println!("u8_wrap={}", diffU8Wrap(250u8, 10u8));
+              println!("i16_wrap={}", diffI16Mul(200i16, 200i16));
+              println!("u32_lt={}", diffU32Lt(4_000_000_000u32, 10u32));
+              println!("f32_add={}", diffF32Add(16_777_216.0f32, 1.0f32));
+              println!("f64_div={}", diffF64Div(7.5f64, 2.5f64));
               println!("string={}", diffString(String::from("é")));
               println!("array={}", diffArray(n(7), n(8)));
               println!("capture={}", diffCapture(n(5), n(7)));
@@ -228,6 +243,11 @@ jobs:
           nat_lt=7
           nat_ge=5
           int=-5
+          u8_wrap=4
+          i16_wrap=-25536
+          u32_lt=false
+          f32_add=16777216
+          f64_div=3
           string=3
           array=8
           capture=12

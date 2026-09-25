@@ -60,6 +60,32 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
           }
         ]
       }
+,
+      {
+        name := "U32List"
+        typeParameters := []
+        constructors := [
+          {
+            name := "nil"
+            fields := []
+          },
+          {
+            name := "cons"
+            fields := [
+              {
+                name := "head"
+                type :=
+                  PsVerifiedIrType.primitive
+                    PsVerifiedIrPrimitiveType.uint32
+              },
+              {
+                name := "tail"
+                type := PsVerifiedIrType.named "U32List" []
+              }
+            ]
+          }
+        ]
+      }
     ]
     declarations := [
       {
@@ -358,6 +384,114 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                 ],
                 PsVerifiedIrExpr.var "value"
               )
+            ]
+      }
+,
+      {
+        name := "listLength"
+        typeParameters := []
+        parameters := [
+          {
+            name := "xs"
+            type := PsVerifiedIrType.named "U32List" []
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.matchE
+            "U32List"
+            (PsVerifiedIrExpr.var "xs")
+            [
+              (
+                "nil",
+                [],
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.machineInteger
+                    PsVerifiedIrMachineIntegerType.uint32
+                    0)
+              ),
+              (
+                "cons",
+                [
+                  {
+                    field := "head"
+                    name := "head"
+                    type :=
+                      PsVerifiedIrType.primitive
+                        PsVerifiedIrPrimitiveType.uint32
+                  },
+                  {
+                    field := "tail"
+                    name := "tail"
+                    type := PsVerifiedIrType.named "U32List" []
+                  }
+                ],
+                PsVerifiedIrExpr.intrinsic
+                  (PsVerifiedIrIntrinsic.machineIntBinary
+                    PsVerifiedIrMachineIntegerType.uint32
+                    PsVerifiedIrIntegerBinaryOp.add)
+                  [
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.machineInteger
+                        PsVerifiedIrMachineIntegerType.uint32
+                        1),
+                    PsVerifiedIrExpr.call
+                      (PsVerifiedIrExpr.var "listLength")
+                      []
+                      [PsVerifiedIrExpr.var "tail"]
+                  ]
+              )
+            ]
+      },
+      {
+        name := "listLengthTwo"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "listLength")
+            []
+            [
+              PsVerifiedIrExpr.constructor
+                "U32List"
+                "cons"
+                []
+                [
+                  (
+                    "head",
+                    PsVerifiedIrExpr.literal
+                      (PsVerifiedIrLiteral.machineInteger
+                        PsVerifiedIrMachineIntegerType.uint32
+                        10)
+                  ),
+                  (
+                    "tail",
+                    PsVerifiedIrExpr.constructor
+                      "U32List"
+                      "cons"
+                      []
+                      [
+                        (
+                          "head",
+                          PsVerifiedIrExpr.literal
+                            (PsVerifiedIrLiteral.machineInteger
+                              PsVerifiedIrMachineIntegerType.uint32
+                              20)
+                        ),
+                        (
+                          "tail",
+                          PsVerifiedIrExpr.constructor
+                            "U32List"
+                            "nil"
+                            []
+                            []
+                        )
+                      ]
+                  )
+                ]
             ]
       }
     ]

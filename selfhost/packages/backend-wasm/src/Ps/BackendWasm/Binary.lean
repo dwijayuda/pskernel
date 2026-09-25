@@ -271,16 +271,38 @@ def psWasmEncodeInstructions
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
 
+def psWasmEncodeLocalDeclarations :
+    List PsWasmValueType ->
+    Except PsWasmEncodeError (List UInt8)
+  | [] => Except.ok []
+  | type :: rest =>
+      match psWasmEncodeValueType type with
+      | Except.error error => Except.error error
+      | Except.ok encodedType =>
+          match psWasmEncodeLocalDeclarations rest with
+          | Except.error error => Except.error error
+          | Except.ok encodedRest =>
+              Except.ok
+                (psWasmEncodeUleb 1
+                  ++ [encodedType]
+                  ++ encodedRest)
+
 def psWasmEncodeFunctionBody
     (functions : List PsWasmFunction)
     (function : PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeInstructions functions function.body with
+  match psWasmEncodeLocalDeclarations function.locals with
   | Except.error error => Except.error error
-  | Except.ok instructions =>
-      let body :=
-        [psWasmByte 0] ++ instructions ++ [psWasmByte 11]
-      Except.ok (psWasmEncodeUleb body.length ++ body)
+  | Except.ok encodedLocals =>
+      match psWasmEncodeInstructions functions function.body with
+      | Except.error error => Except.error error
+      | Except.ok instructions =>
+          let body :=
+            psWasmEncodeUleb function.locals.length
+              ++ encodedLocals
+              ++ instructions
+              ++ [psWasmByte 11]
+          Except.ok (psWasmEncodeUleb body.length ++ body)
 
 def psWasmEncodeFunctionBodies
     (functions : List PsWasmFunction) :

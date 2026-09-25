@@ -1,16 +1,44 @@
-import Ps.BackendWasm.Binary
+import Ps.BackendWasm.Lower
 
-def psWasmSmokeModule : PsWasmModule :=
+def psWasmSmokeProfile : PsWasmTargetProfile :=
+  { wordSize := PsWasmWordSize.wasm32 }
+
+def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {
-    functions := [
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
       {
-        name := "answer"
-        parameters := []
-        results := [PsWasmValueType.i32]
-        body := [PsWasmInstruction.i32Const 42]
+        name := "addU32"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "right"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.uint32
+              PsVerifiedIrIntegerBinaryOp.add)
+            [
+              PsVerifiedIrExpr.var "left",
+              PsVerifiedIrExpr.var "right"
+            ]
       }
     ]
-    exports := [("answer", "answer")]
   }
 
 def psWasmByteStrings : List UInt8 -> List String
@@ -25,8 +53,12 @@ def psWasmJoinComma : List String -> String
       value ++ "," ++ psWasmJoinComma rest
 
 def main : IO Unit := do
-  match psWasmEncodeModule psWasmSmokeModule with
+  match psWasmLowerModule psWasmSmokeProfile psWasmSmokeIrModule with
   | Except.error _ =>
-      throw (IO.userError "PSC1_BACKEND_WASM_BINARY_SMOKE: encode failed")
-  | Except.ok bytes =>
-      IO.println (psWasmJoinComma (psWasmByteStrings bytes))
+      throw (IO.userError "PSC1_BACKEND_WASM_BINARY_SMOKE: lower failed")
+  | Except.ok module =>
+      match psWasmEncodeModule module with
+      | Except.error _ =>
+          throw (IO.userError "PSC1_BACKEND_WASM_BINARY_SMOKE: encode failed")
+      | Except.ok bytes =>
+          IO.println (psWasmJoinComma (psWasmByteStrings bytes))

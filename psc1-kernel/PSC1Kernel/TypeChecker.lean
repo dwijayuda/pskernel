@@ -474,7 +474,7 @@ partial def whnfCore
       else
         whnfCore ctx (.app fn' arg) cheapRec cheapProj
 
-def reduceNative
+partial def reduceNative
     (ctx : CheckerContext)
     (e : Expr) : Except String (Option Expr) := do
   let some provider := ctx.nativeEvaluator

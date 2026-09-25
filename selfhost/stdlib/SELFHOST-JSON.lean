@@ -32,3 +32,7 @@ def selfhostJsonLookup
 
 def selfhostJsonA : Option JsonValue :=
   selfhostJsonLookup selfhostJsonParsed
+
+
+def selfhostJsonAIsSome : Bool :=
+  optionIsSome selfhostJsonA

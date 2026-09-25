@@ -2463,6 +2463,6 @@ def psElabTermWithFuel
 def psElabTerm
     (context : PsElabContext)
     (term : PsSyntaxTerm)
-    (expected : Option PsExpr := none) :
+    (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   psElabTermWithFuel 4096 context term expected

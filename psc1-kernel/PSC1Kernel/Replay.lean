@@ -216,6 +216,9 @@ def IndexTable.add
 
 structure State where
   env : Environment
+  maxRecDepth : Nat
+  maxNatSize : Nat
+  nativeEvaluator : Option NativeEvaluator
   names : IndexTable Name
   levels : IndexTable Level
   exprs : IndexTable Expr
@@ -224,9 +227,16 @@ structure State where
   declarations : Nat
   pendingMutual : List PendingMutual
 
-def State.empty (env : Environment := .empty) : State :=
+def State.empty
+    (env : Environment := .empty)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : State :=
   {
     env := env
+    maxRecDepth := maxRecDepth
+    maxNatSize := maxNatSize
+    nativeEvaluator := nativeEvaluator
     names := IndexTable.seed #[.anonymous]
     levels := IndexTable.seed #[.zero]
     exprs := IndexTable.empty
@@ -437,7 +447,7 @@ def State.addDefinitionRecord
     | .partialDef => exprUsesName name value
     | .safe | .unsafeDef => false
   if record.safety.isSafe || (all.length <= 1 && !selfRef) then
-    let env ← Kernel.addDefinition state.env info
+    let env ← Kernel.addDefinition state.env info state.maxRecDepth state.maxNatSize state.nativeEvaluator
     pure { state with env := env }
   else
     unless Kernel.nameMember name all do
@@ -454,7 +464,7 @@ def State.addDefinitionRecord
       removePending all state.pendingMutual ++ [group]
     if group.defs.length == all.length then
       let ordered ← orderDefinitions all group.defs
-      let env ← Kernel.addMutualDefinitions state.env ordered
+      let env ← Kernel.addMutualDefinitions state.env ordered state.maxRecDepth state.maxNatSize state.nativeEvaluator
       pure {
         state with
         env := env
@@ -595,7 +605,7 @@ def State.addInductiveRecord
         numParams := record.numParams
         types := types
         isUnsafe := record.isUnsafe
-      }
+      } state.maxRecDepth state.maxNatSize state.nativeEvaluator
     else
       match types with
       | [type] =>
@@ -606,14 +616,14 @@ def State.addInductiveRecord
             ctors := type.ctors
             isUnsafe := record.isUnsafe
             numParams := record.numParams
-          }
+          } state.maxRecDepth state.maxNatSize state.nativeEvaluator
       | _ =>
           Kernel.addSimpleMutualInductive state.env {
             levelParams := levelParams
             numParams := record.numParams
             types := types
             isUnsafe := record.isUnsafe
-          }
+          } state.maxRecDepth state.maxNatSize state.nativeEvaluator
   let rec resolveCtorNames :
       List ConstructorRecord → Except String (List Name)
     | [] => pure []
@@ -791,7 +801,7 @@ def State.addDeclaration
           type := ← state.exprAt value.type
         }
         isUnsafe := value.isUnsafe
-      }
+      } state.maxRecDepth state.maxNatSize state.nativeEvaluator
       pure { state with env := env }
   | .definitionR value =>
       state.addDefinitionRecord value
@@ -803,7 +813,7 @@ def State.addDeclaration
           type := ← state.exprAt value.type
         }
         value := ← state.exprAt value.value
-      }
+      } state.maxRecDepth state.maxNatSize state.nativeEvaluator
       pure { state with env := env }
   | .opaqueR value => do
       let env ← Kernel.addOpaque state.env {
@@ -814,7 +824,7 @@ def State.addDeclaration
         }
         value := ← state.exprAt value.value
         isUnsafe := value.isUnsafe
-      }
+      } state.maxRecDepth state.maxNatSize state.nativeEvaluator
       pure { state with env := env }
   | .quotR value => do
       let env ←

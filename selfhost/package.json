@@ -8,6 +8,12 @@
   ],
   "scripts": {
     "build:lean": "lake build",
-    "check:source": "node check-psc1-source.mjs"
+    "check:source": "node check-psc1-source.mjs",
+    "selfhost:emit-ps": "node scripts/bootstrap-project.mjs SELFHOST-COMPILER.lean out/bootstrap/workspace",
+    "selfhost:build-bootstrap-js": "lake exe psc1 build out/bootstrap/workspace/SELFHOST-COMPILER.ps --out out/bootstrap/compiler.ts",
+    "selfhost:bootstrap": "npm run selfhost:emit-ps && npm run selfhost:build-bootstrap-js",
+    "selfhost:next": "node scripts/compile-with-generated.mjs out/bootstrap/compiler.js out/bootstrap/workspace/SELFHOST-COMPILER.ps out/next/compiler.ts",
+    "selfhost:compare": "node scripts/compare-selfhost.mjs out/bootstrap/compiler.ts out/next/compiler.ts",
+    "selfhost:fixed-point": "npm run selfhost:bootstrap && npm run selfhost:next && npm run selfhost:compare"
   }
 }

@@ -771,6 +771,20 @@ def simpleNestedAddAuxRecursors
         go rest (work.addUnchecked (.recInfo restored))
   go families base
 
+def simpleNestedCheckerWithParams
+    (env : Environment)
+    (levelParams : List Name)
+    (safety : DefinitionSafety)
+    (params : List OpenBinder) : CheckerContext :=
+  let base := mkChecker env levelParams safety
+  let lctx :=
+    params.foldl
+      (fun ctx param =>
+        ctx.addLocal
+          param.internalName param.userName param.type param.binderInfo)
+      base.lctx
+  { base with lctx := lctx }
+
 def simpleNestedValidateRestored
     (transformed finalEnv : Environment)
     (decl : SimpleMutualInductiveDecl)
@@ -784,7 +798,9 @@ def simpleNestedValidateRestored
   let rec checkTemplates : List SimpleNestedAuxFamily → Except String Unit
     | [] => pure ()
     | family :: rest => do
-        let ctx := mkChecker finalEnv decl.levelParams safety
+        let ctx :=
+          simpleNestedCheckerWithParams
+            finalEnv decl.levelParams safety canonicalParams
         let _ ← check ctx family.nestedTemplate
         checkTemplates rest
   checkTemplates families

@@ -58,8 +58,10 @@ not a claim of formal equivalence to Lean 4.34.
   portable native map support is gated in CI.
 - Std release-profile parity: **active on**
   `assurance/psc1-lean-std-release`.
-- K3 semantic ordering: broad direct coverage is green; Lean-style mutable
-  success/failure cache parity remains a runtime-maturity item.
+- K3 semantic baseline: **complete** for the bounded final-Lean-4.34 ordering
+  covered by direct differential regressions. Lean-style mutable success/failure
+  cache parity remains a runtime-maturity/performance item rather than a missing
+  semantic rule.
 - Full Std environment replay, full Lean environment replay, native compiler-IR
   provider parity, and formal equivalence remain outside the completed claim.
 

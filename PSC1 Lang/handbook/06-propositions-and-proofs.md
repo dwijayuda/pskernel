@@ -11,7 +11,7 @@ That single idea connects ordinary programming to theorem proving.
 A proposition can be used as the type of a theorem:
 
 ```proofscript
-theorem selfEq(x : Nat) : x = x := by rfl;
+theorem selfEq(x: Nat): x = x := by rfl;
 ```
 
 The theorem body constructs a proof term.
@@ -70,7 +70,7 @@ A tactic is not trusted simply because it says "success".
 The bounded current `rfl` path handles the ordinary Eq reflexivity case.
 
 ```proofscript
-theorem selfEq {α : Type}(x : α) : x = x := by rfl;
+theorem selfEq {α: Type}(x: α): x = x := by rfl;
 ```
 
 The elaborator constructs the real polymorphic reflexivity proof and pskernel
@@ -86,7 +86,7 @@ If you already have a term of the goal type, `exact` can use it.
 Conceptually:
 
 ```proofscript
-theorem keep {P : Prop}(h : P) : P := by exact h;
+theorem keep {P: Prop}(h: P): P := by exact h;
 ```
 
 The supplied proof term must match the goal.
@@ -199,17 +199,15 @@ It is not full `solveByElim`/library search.
 The current stdlib demonstrates useful patterns:
 
 ```proofscript
-theorem optionGetOrElseSome {α : Type}
-(value : α, fallback : α) :
-optionGetOrElse(PsOption.some(value), fallback) = value := by rfl;
+theorem optionGetOrElseSome {α: Type}
+(value: α, fallback: α): optionGetOrElse(PsOption.some(value), fallback) = value := by rfl;
 ```
 
 and proofs by cases:
 
 ```proofscript
-theorem optionOrElseNoneRight {α : Type}
-(value : PsOption(α)) :
-optionOrElse(value, PsOption.none) = value :=
+theorem optionOrElseNoneRight {α: Type}
+(value: PsOption(α)): optionOrElse(value, PsOption.none) = value :=
   by cases value; rfl; rfl;
 ```
 

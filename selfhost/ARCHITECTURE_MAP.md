@@ -280,23 +280,45 @@ Do not make TypeScript's type system part of ProofScript semantics.
 ### compiler
 
 Owns:
-- composition/orchestration only;
-- no duplicated parser/type/kernel logic.
+- the portable public compiler API;
+- source-kind dispatch for Lean-subset and ProofScript source;
+- canonical `.lean <-> .ps` translation;
+- parse/elaborate/check composition;
+- checked-admission serialization;
+- erasure and IR -> TypeScript composition;
+- no filesystem or process execution.
 
-Harvest from:
-- current `@proofscript/compiler` pipeline.
+Current self-host modules:
+- `Ps.Compiler` — package entry/barrel, analogous to a JS package `index.ts`;
+- `Ps.Compiler.Api` — portable API consumed by both bootstrap and generated JS hosts.
+
+The generated compiler package is emitted as
+`dist/<generation>/packages/compiler/index.js`, not as a special handwritten
+`compiler.js` source file.
+
+### cli
+
+Owns:
+- command-line argument parsing and user-facing command names only;
+- no parser, elaborator, erasure or backend semantics.
+
+Current entries:
+- `packages/cli/src/Main.lean` — Lean/Lake bootstrap CLI;
+- `packages/cli/bin/psc.mjs` — normal generated-JS CLI front door.
 
 ### host/tooling
 
-Remain TypeScript when appropriate:
-- CLI;
+Host adapters are deliberately outside the portable compiler:
 - filesystem/path/process;
+- project source loading;
 - npm package discovery;
-- TypeScript Compiler API;
+- `tsc` invocation;
 - LSP/editor transport;
 - browser adapters.
 
-Move portable algorithms out of these packages when self-hosting needs them.
+The bootstrap host is currently Lean where that is cheapest; the post-bootstrap
+host is Node/JavaScript. Both call the same portable `Ps.Compiler.Api`.
+Move portable algorithms out of host/tooling whenever self-hosting needs them.
 
 ## File-structure rule
 

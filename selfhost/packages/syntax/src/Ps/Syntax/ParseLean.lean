@@ -37,12 +37,18 @@ def psLeanReservedApplicationToken (token : PsToken) : Bool :=
     || token.text == "match"
     || token.text == "with"
 
-def psLeanCanStartSimpleArgument (cursor : PsTokenCursor) : Bool :=
+def psLeanCanStartSimpleArgument
+    (current : PsSyntaxTerm)
+    (cursor : PsTokenCursor) : Bool :=
   match psTokenCursorPeek cursor with
   | none => false
   | some token =>
+      let startsLaterAssignment :=
+        psTokenCursorStartsNamedAssignment cursor
+          && token.span.start.line
+            > (psSyntaxTermSpan current).stop.line
       !psLeanReservedApplicationToken token
-        && !psTokenCursorStartsNamedAssignment cursor
+        && !startsLaterAssignment
         && (token.text == "("
           || psTokenKindEq token.kind PsTokenKind.identifier
           || psTokenKindEq token.kind PsTokenKind.natural
@@ -61,7 +67,7 @@ def psParseLeanApplicationTailWithFuel
   | 0 =>
       Except.ok { value := current, cursor := cursor }
   | remaining + 1 =>
-      if psLeanCanStartSimpleArgument cursor then
+      if psLeanCanStartSimpleArgument current cursor then
         if psTokenCursorAtText cursor "(" then
           match psTokenCursorAdvance cursor with
           | none => Except.error (PsParseError.unexpectedEnd "(")

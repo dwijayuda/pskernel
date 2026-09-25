@@ -2148,15 +2148,10 @@ def psLeanStringListEq
               false
 
 def psLeanBoolEq (left : Bool) (right : Bool) : Bool :=
-  match left with
-  | true =>
-      match right with
-      | true => true
-      | false => false
-  | false =>
-      match right with
-      | true => false
-      | false => true
+  if left then
+    right
+  else
+    psLeanBoolNot right
 
 def psLeanPatternHeadEq
     (left : PsSyntaxPattern)

@@ -440,21 +440,23 @@ def psJsonParseNumber
         parseUnsigned false chars
 
 def psJsonConsumeLiteral
-    (expected : List Char)
-    (chars : List Char) :
-    Option (List Char) :=
+    (expected : List Char) : List Char -> Option (List Char) :=
   match expected with
   | List.nil =>
-      Option.some chars
+      fun (chars : List Char) =>
+        Option.some chars
   | List.cons expectedChar expectedRest =>
-      match chars with
-      | List.nil =>
-          Option.none
-      | List.cons char rest =>
-          if psJsonCharEq expectedChar char then
-            psJsonConsumeLiteral expectedRest rest
-          else
+      let smaller : List Char -> Option (List Char) :=
+        psJsonConsumeLiteral expectedRest;
+      fun (chars : List Char) =>
+        match chars with
+        | List.nil =>
             Option.none
+        | List.cons char rest =>
+            if psJsonCharEq expectedChar char then
+              smaller rest
+            else
+              Option.none
 
 def psJsonReverseValuesAcc
     (values : List PsJsonValue) :

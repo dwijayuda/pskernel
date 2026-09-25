@@ -471,6 +471,136 @@ def psBackendDiffModule : PsVerifiedIrModule :=
             ]
       },
       {
+        name := "diffStringLength"
+        typeParameters := []
+        parameters := [
+          {
+            name := "text"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringLength
+            [PsVerifiedIrExpr.var "text"]
+      },
+      {
+        name := "diffStringNext"
+        typeParameters := []
+        parameters := [
+          {
+            name := "text"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          },
+          {
+            name := "position"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringNext
+            [
+              PsVerifiedIrExpr.var "text",
+              PsVerifiedIrExpr.var "position"
+            ]
+      },
+      {
+        name := "diffStringGet"
+        typeParameters := []
+        parameters := [
+          {
+            name := "text"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          },
+          {
+            name := "position"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.char
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringGet
+            [
+              PsVerifiedIrExpr.var "text",
+              PsVerifiedIrExpr.var "position"
+            ]
+      },
+      {
+        name := "diffStringAtEnd"
+        typeParameters := []
+        parameters := [
+          {
+            name := "text"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          },
+          {
+            name := "position"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringAtEnd
+            [
+              PsVerifiedIrExpr.var "text",
+              PsVerifiedIrExpr.var "position"
+            ]
+      },
+      {
+        name := "diffStringExtract"
+        typeParameters := []
+        parameters := [
+          {
+            name := "text"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          },
+          {
+            name := "begin"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "end"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringExtract
+            [
+              PsVerifiedIrExpr.var "text",
+              PsVerifiedIrExpr.var "begin",
+              PsVerifiedIrExpr.var "end"
+            ]
+      },
+      {
+        name := "diffStringEq"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          },
+          {
+            name := "right"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringEq
+            [
+              PsVerifiedIrExpr.var "left",
+              PsVerifiedIrExpr.var "right"
+            ]
+      },
+      {
         name := "diffString"
         typeParameters := []
         parameters := [

@@ -2256,74 +2256,6 @@ def psWasmModuleHasUnsupportedData
   | _ :: _ => true
   | [] => false
 
-def psWasmLowerSpecializedModule
-    (profile : PsWasmTargetProfile)
-    (module : PsVerifiedIrModule) :
-    Except PsWasmLowerError PsWasmModule :=
-  if psWasmModuleHasUnsupportedData module then
-    Except.error PsWasmLowerError.unsupportedModuleFeature
-  else
-    match psWasmLowerStructures profile module.structures with
-    | Except.error error => Except.error error
-    | Except.ok structures =>
-        match psWasmLowerInductives profile module.inductives with
-        | Except.error error => Except.error error
-        | Except.ok inductiveTypes =>
-            let semanticFunctionTypes :=
-              psWasmCollectModuleFunctionTypes module
-            match
-                psWasmLowerClosureSignatures
-                  profile
-                  semanticFunctionTypes with
-            | Except.error error => Except.error error
-            | Except.ok closureSignatures =>
-                let initialState : PsWasmLowerState := {
-                  nextLocalIndex := 0
-                  localTypes := []
-                  currentDefinition := ""
-                  nextLambdaId := 0
-                  generatedStructures := []
-                  generatedFunctionTypes := []
-                  generatedFunctions := []
-                  generatedFunctionRefs := []
-                }
-                match
-                    psWasmLowerDeclarations
-                      profile
-                      module.structures
-                      module.inductives
-                      initialState
-                      module.declarations with
-                | Except.error error => Except.error error
-                | Except.ok lowered =>
-                    Except.ok {
-                      structures :=
-                        structures
-                          ++ inductiveTypes
-                          ++ closureSignatures.1
-                          ++ lowered.state.generatedStructures
-                          ++ (if psWasmModuleUsesNat specialized then
-                                psWasmNatStructures
-                              else
-                                [])
-                      functionTypes :=
-                        closureSignatures.2
-                          ++ lowered.state.generatedFunctionTypes
-                      functions :=
-                        lowered.functions
-                          ++ lowered.state.generatedFunctions
-                          ++ (if psWasmModuleUsesNat specialized then
-                                psWasmNatFunctions
-                              else
-                                [])
-                      functionRefs :=
-                        lowered.state.generatedFunctionRefs
-                      exports :=
-                        psWasmExportsOfDeclarations
-                          module.declarations
-                    }
-
-
 def psWasmTypeUsesNatWithFuel :
     Nat -> PsVerifiedIrType -> Bool
   | 0, _ => false
@@ -2454,6 +2386,105 @@ def psWasmModuleUsesNat
               psWasmTypeUsesNat parameter.type)
           || psWasmTypeUsesNat declaration.resultType
           || psWasmExprUsesNat declaration.body)
+
+
+def psWasmBuildModuleArrayRuntime
+    (profile : PsWasmTargetProfile)
+    (module : PsVerifiedIrModule) :
+    Except PsWasmLowerError PsWasmArrayRuntime :=
+  match
+      psWasmBuildArrayRuntimes
+        profile
+        (psWasmCollectModuleArrayElementTypes module) with
+  | none => Except.error PsWasmLowerError.unsupportedType
+  | some runtime => Except.ok runtime
+
+def psWasmListNonempty {α : Type}
+    (values : List α) : Bool :=
+  match values with
+  | [] => false
+  | _ :: _ => true
+
+def psWasmLowerSpecializedModule
+    (profile : PsWasmTargetProfile)
+    (module : PsVerifiedIrModule) :
+    Except PsWasmLowerError PsWasmModule :=
+  if psWasmModuleHasUnsupportedData module then
+    Except.error PsWasmLowerError.unsupportedModuleFeature
+  else
+    match psWasmBuildModuleArrayRuntime profile module with
+    | Except.error error => Except.error error
+    | Except.ok arrayRuntime =>
+        match psWasmLowerStructures profile module.structures with
+        | Except.error error => Except.error error
+        | Except.ok structures =>
+            match psWasmLowerInductives profile module.inductives with
+            | Except.error error => Except.error error
+            | Except.ok inductiveTypes =>
+                let semanticFunctionTypes :=
+                  psWasmCollectModuleFunctionTypes module
+                match
+                    psWasmLowerClosureSignatures
+                      profile
+                      semanticFunctionTypes with
+                | Except.error error => Except.error error
+                | Except.ok closureSignatures =>
+                    let initialState : PsWasmLowerState := {
+                      nextLocalIndex := 0
+                      localTypes := []
+                      currentDefinition := ""
+                      nextLambdaId := 0
+                      generatedStructures := []
+                      generatedFunctionTypes := []
+                      generatedFunctions := []
+                      generatedFunctionRefs := []
+                    }
+                    match
+                        psWasmLowerDeclarations
+                          profile
+                          module.structures
+                          module.inductives
+                          initialState
+                          module.declarations with
+                    | Except.error error => Except.error error
+                    | Except.ok lowered =>
+                        Except.ok {
+                          structures :=
+                            structures
+                              ++ inductiveTypes
+                              ++ closureSignatures.1
+                              ++ lowered.state.generatedStructures
+                              ++ arrayRuntime.structures
+                              ++ (if
+                                    psWasmModuleUsesNat module
+                                      || psWasmListNonempty
+                                        (psWasmCollectModuleArrayElementTypes module)
+                                  then
+                                    psWasmNatStructures
+                                  else
+                                    [])
+                          functionTypes :=
+                            closureSignatures.2
+                              ++ lowered.state.generatedFunctionTypes
+                          functions :=
+                            lowered.functions
+                              ++ lowered.state.generatedFunctions
+                              ++ arrayRuntime.functions
+                              ++ (if
+                                    psWasmModuleUsesNat module
+                                      || psWasmListNonempty
+                                        (psWasmCollectModuleArrayElementTypes module)
+                                  then
+                                    psWasmNatFunctions
+                                  else
+                                    [])
+                          functionRefs :=
+                            lowered.state.generatedFunctionRefs
+                          exports :=
+                            psWasmExportsOfDeclarations
+                              module.declarations
+                        }
+
 
 def psWasmLowerModule
     (profile : PsWasmTargetProfile)

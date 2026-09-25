@@ -625,7 +625,8 @@ def psElabLambdaBodyExpected
       PsElabError
       (Prod PsElabContext (Option PsExpr)) :=
   match expected with
-  | none => Except.ok (context, none)
+  | none =>
+      Except.ok (Prod.mk context Option.none)
   | some expectedType =>
       match
           psElabLambdaExpectedBody
@@ -634,7 +635,10 @@ def psElabLambdaBodyExpected
             expectedType with
       | Except.error error => Except.error error
       | Except.ok prepared =>
-          Except.ok ((Prod.fst prepared), some (Prod.snd prepared))
+          Except.ok
+            (Prod.mk
+              (Prod.fst prepared)
+              (Option.some (Prod.snd prepared)))
 
 def psElabLambda
     (elaborate :
@@ -1702,20 +1706,29 @@ structure PsElabApplicationResult where
   result : PsElabTermResult
   pendingInstancesRev : List Nat
 
+def psSyntaxTermListIsEmpty
+    (values : List PsSyntaxTerm) : Bool :=
+  match values with
+  | [] =>
+      true
+  | _ :: _ =>
+      false
+
 def psElabApplyArgsWithFuel
     (elaborate :
       PsElabContext ->
       PsSyntaxTerm ->
       Option PsExpr ->
-      Except PsElabError PsElabTermResult) :
-    Nat ->
-    PsElabTermResult ->
-    List PsSyntaxTerm ->
-    List Nat ->
-    Except PsElabError PsElabApplicationResult
-  | 0, _, _, _ =>
+      Except PsElabError PsElabTermResult)
+    (remainingFuel : Nat)
+    (current : PsElabTermResult)
+    (arguments : List PsSyntaxTerm)
+    (pendingInstancesRev : List Nat) :
+    Except PsElabError PsElabApplicationResult :=
+  match remainingFuel with
+  | 0 =>
       Except.error PsElabError.fuelExhausted
-  | fuel + 1, current, arguments, pendingInstancesRev =>
+  | fuel + 1 =>
       let currentType :=
         psWhnf
           current.context.environment
@@ -1745,7 +1758,7 @@ def psElabApplyArgsWithFuel
                     let nextType :=
                       psExprInstantiate1
                         body
-                        elaboratedArgument.term
+                        elaboratedArgument.term;
                     psElabApplyArgsWithFuel
                       elaborate
                       fuel
@@ -1759,7 +1772,7 @@ def psElabApplyArgsWithFuel
           else if
               psElabBoolAnd
                 (psBinderIsStrictImplicit binder)
-                arguments.isEmpty then
+                (psSyntaxTermListIsEmpty arguments) then
             Except.ok {
               result := current
               pendingInstancesRev := pendingInstancesRev
@@ -1784,14 +1797,14 @@ def psElabApplyArgsWithFuel
               context := nextContext
               term := PsExpr.app current.term fresh.expr
               type := psExprInstantiate1 body fresh.expr
-            }
+            };
             let nextPending :=
               if psBinderIsInstanceImplicit binder then
                 match fresh.expr with
                 | PsExpr.mvar id => id :: pendingInstancesRev
                 | _ => pendingInstancesRev
               else
-                pendingInstancesRev
+                pendingInstancesRev;
             psElabApplyArgsWithFuel
               elaborate
               fuel
@@ -1799,7 +1812,7 @@ def psElabApplyArgsWithFuel
               arguments
               nextPending
       | _ =>
-          if arguments.isEmpty then
+          if psSyntaxTermListIsEmpty arguments then
             Except.ok {
               result := current
               pendingInstancesRev := pendingInstancesRev

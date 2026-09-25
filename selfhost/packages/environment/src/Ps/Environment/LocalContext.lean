@@ -38,7 +38,7 @@ def psLocalDeclUserName : PsLocalDecl -> PsName
   | .letDecl _ userName _ _ => userName
 
 def psLocalFindByIdInList (id : Nat) : List PsLocalDecl -> Option PsLocalDecl
-  | [] => none
+  | [] => Option.none
   | declaration :: rest =>
       if Nat.beq (psLocalDeclId declaration) id then
         some declaration

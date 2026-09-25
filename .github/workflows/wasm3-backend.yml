@@ -184,5 +184,29 @@ jobs:
           if (instance.exports.natLtExact() !== 1) {
             throw new Error('PSC1_WASM_RUNTIME_NAT_COMPARE_RESULT');
           }
+          if (instance.exports.intOfNatExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_OF_NAT_RESULT');
+          }
+          if (instance.exports.intNegSuccExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_NEG_SUCC_RESULT');
+          }
+          if (instance.exports.intNegExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_NEG_RESULT');
+          }
+          if (instance.exports.intAddMixedExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_ADD_RESULT');
+          }
+          if (instance.exports.intSubMixedExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_SUB_RESULT');
+          }
+          if (instance.exports.intMulSignedExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_MUL_RESULT');
+          }
+          if (instance.exports.intLargeExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_LARGE_RESULT');
+          }
+          if (instance.exports.intLtExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_COMPARE_RESULT');
+          }
           console.log('PSC1_WASM3_INTEGRATION: PASS');
           NODE

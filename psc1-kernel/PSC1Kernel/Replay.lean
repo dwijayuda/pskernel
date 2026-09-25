@@ -910,10 +910,14 @@ def State.replay
             | .error _ => pure ("name#" ++ toString index)
         | none => pure "<anonymous declaration>"
       let next ←
-        match state.addDeclaration record with
-        | .ok value => pure value
-        | .error err =>
-            throw ("declaration " ++ label ++ ": " ++ err)
+        dbgTrace
+          ("PSC1 replay entering declaration " ++
+            toString (state.declarations + 1) ++ ": " ++ label)
+          (fun _ =>
+            match state.addDeclaration record with
+            | .ok value => pure value
+            | .error err =>
+                throw ("declaration " ++ label ++ ": " ++ err))
       pure {
         next with
         records := state.records + 1

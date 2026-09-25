@@ -209,6 +209,55 @@ the one that reuses an existing semantic mechanism. Add a new REQUIRED language
 feature only after demonstrating that the compiler cannot be written
 reasonably using the frozen core/library vocabulary.
 
+### Mainstream-language design review / PSC1 freeze confirmation
+
+A cross-language design review completed on 2026-09-26 compared the planned
+PSC1 surface and semantics against thirteen representative widely used
+languages: Python, JavaScript, TypeScript, Java, C#, C, C++, Go, Rust, PHP,
+Swift, Ruby and R. The purpose was not to copy their feature counts; it was to
+look for semantic capabilities whose absence would make PSC1 an unreasonable
+general-purpose or self-hosting language.
+
+The review found **no missing major language feature that justifies expanding
+the REQUIRED PSC1 surface before self-hosting**. In particular:
+
+- Go reinforces the small-language/library-first policy;
+- Rust and Swift reinforce first-class algebraic data, `Option`-style absence,
+  typed `Result`/error values and exhaustive elimination rather than adding
+  `null` as a second absence mechanism;
+- Java/Java/C#/modern Python pattern facilities do not justify promoting rich
+  pattern sugar when one ordinary constructor `match` already owns the
+  semantics;
+- TypeScript/JavaScript reinforce the value of ecosystem/FFI interoperability,
+  but their dynamic object identity, coercions, structural escape hatches and
+  host-number model must not leak into portable PSC1 semantics;
+- C/C++/Rust reinforce the need for precise machine-scalar and ABI semantics,
+  not for exposing pointers, ownership, borrowing, lifetimes or host layout in
+  PSC1;
+- mainstream OOP does not create a PSC1 capability gap: structures,
+  inductives, functions, modules and bounded classes/instances already provide
+  the required abstraction mechanisms;
+- loops, mutation-looking syntax, richer patterns, exception syntax, generic
+  HKT stacks and large metaprogramming systems remain conveniences or
+  implementation techniques, not PSC1 completion requirements.
+
+Therefore **do not reopen PSC1 language scope merely to match mainstream
+feature lists**. Continue the current self-host sequence. A new REQUIRED
+feature still needs evidence from real compiler code or a frozen semantic
+obligation.
+
+The review did identify two semantic-hardening items that must be closed before
+the PSC1 freeze, without adding new source-language features:
+
+1. freeze a normative machine-scalar operation/conversion contract;
+2. freeze the purity/effect classification and sequencing contract for
+   host/FFI capabilities.
+
+It also identified two useful post-PSC1 directions that are deliberately
+non-blocking: a small backend-neutral structured async/task model, and
+deterministic resource-cleanup/bracket semantics before adding convenience
+syntax such as `defer`, `using` or RAII-like forms.
+
 ## Foundation completion rule
 
 A runtime language feature is complete only when it executes through:
@@ -249,6 +298,41 @@ Backends must preserve the same source meaning:
 The scalar family should share generic implementation/proof machinery where
 possible (for example fixed-width integer operations parameterized by width)
 rather than duplicating unrelated semantics for every concrete type.
+
+#### Scalar operation/conversion freeze checklist
+
+Before SH7 freezes PSC1, publish and executable-gate a normative scalar matrix
+for every operation/conversion that the frozen source surface accepts. Merely
+naming fixed-width types is insufficient for a multi-backend language. The
+matrix must specify at least:
+
+| Area | Required PSC1 decision |
+| --- | --- |
+| fixed-width `+`, `-`, `*` | exact overflow/wrap behavior |
+| division/remainder | zero-divisor behavior and signed quotient/remainder rules |
+| shifts/rotates | width, masking/range behavior and signedness |
+| bitwise operations | exact width/sign interpretation |
+| widening conversions | exact value-preserving cases |
+| narrowing conversions | truncation/wrap/rejection semantics |
+| signed <-> unsigned | exact bit/value conversion rules |
+| `Nat`/`Int` <-> machine integers | checked, modulo or otherwise explicit conversion semantics |
+| integer <-> floating point | rounding and out-of-range behavior |
+| `Float32` <-> `Float` | exact widening/narrowing behavior |
+| floating comparison | NaN, signed-zero and ordering behavior |
+| floating bit conversions | payload/canonicalization obligations where exposed |
+| `USize`/`ISize` | target profile, width reporting and cross-target behavior |
+
+For operations inherited from the supported Lean 4.34 model, prefer the pinned
+Lean semantics rather than inventing backend-specific ProofScript behavior.
+Where PSC1 introduces a scalar operation not directly inherited from that
+model, specify it once at the language level before any backend implementation
+is accepted.
+
+The TypeScript, Rust and Wasm backends must share one scalar conformance corpus.
+Backend-native operators may be used only when their observable result matches
+the PSC1 matrix. Otherwise the backend must synthesize the required semantics.
+Fast-math, host-default narrowing, JavaScript `number` coercion, Rust overflow
+mode, Wasm opcode choice or target ABI defaults are never language semantics.
 
 ### Shared VerifiedIR target-neutrality contract
 
@@ -296,6 +380,40 @@ A repository guard must reject obvious backend namespace/representation leakage
 from `packages/compiler-ir/src`. Review of shared-IR changes must ask whether
 the same node has a coherent meaning for TS, Rust, and Wasm without mentioning
 any of those targets.
+
+### Portable value identity and purity/effect boundary invariant
+
+Portable PSC1 values are semantic values, not target objects. Structures,
+inductives, arrays, strings, closures and other managed values must not expose
+JavaScript object identity, Rust addresses/layout, GC identity, or Wasm
+reference/linear-memory addresses as part of ordinary PSC1 semantics. Equality
+and ordering come from the declared PSC1 operation/typeclass semantics, not
+from backend representation identity. A future explicit identity/reference
+capability would be a separate effectful feature and is not part of PSC1.
+
+Ordinary PSC1 functions are referentially transparent with respect to portable
+language semantics. Therefore a host binding may appear as an ordinary pure
+function only when its capability manifest explicitly classifies the operation
+as a trusted pure/deterministic runtime assumption compatible with that
+signature. Such a runtime assumption is still never proof evidence.
+
+Operations that can observe or change the external world -- including
+filesystem/process access, clocks/randomness, mutable host state, network I/O
+or exception-throwing host APIs -- must cross an explicit effect/capability
+boundary such as `CompilerM`, a later `IO`/host effect, or an equivalent
+owned abstraction. They must not masquerade as ordinary pure functions.
+
+Effect sequencing is owned by the PSC1 effect semantics (`bind`/`do` or its
+future equivalent), not by JavaScript evaluation order, Rust statement order,
+or Wasm instruction order. Host exceptions/rejections used for ordinary runtime
+failure must be caught at the adapter boundary and translated into the declared
+PSC1 error/effect channel unless the capability is explicitly documented as an
+unrecoverable runtime abort.
+
+This invariant protects proof rewriting, compiler optimizations and
+cross-backend equivalence: pure code may be transformed according to PSC1
+semantics without accidentally duplicating, removing or reordering hidden host
+effects.
 
 ### TypeScript / JavaScript backend invariant
 
@@ -1054,6 +1172,12 @@ PSC1 minimality policy plus any optional facility that real compiler source has
 actually adopted by freeze time. Merely being USEFUL/CHEAP, present in Lean, or
 already listed in an SH milestone does not make a feature a freeze requirement.
 
+Before SH7 may freeze, the cross-language semantic-hardening obligations above
+must also be closed: the scalar operation/conversion matrix must be normative
+and executable across the active backend conformance lanes, and every host
+capability used by the bootstrap must have an explicit pure-vs-effectful
+classification with no backend-object identity leaking into portable values.
+
 Optional features stay documented and may already be implemented; they are not
 removed. Their incomplete status cannot block SH7/PSC1 unless a required
 compiler module depends on them. Expensive, unnecessary Lean implementation
@@ -1389,6 +1513,12 @@ Unless demanded by an SH gate, defer:
 - tactic breadth unrelated to the currently supported ProofScript theorem
   frontend;
 - broad npm binding generation;
+- a general structured async/task/concurrency model; Promise/Future/goroutine/
+  actor-specific behavior must not be chosen as PSC1 semantics merely because
+  one backend provides it;
+- convenience syntax for deterministic resource cleanup; first establish an
+  owned library/effect mechanism such as bracket/withResource, then add
+  `defer`/`using`-style syntax only if workloads justify it;
 - kernel rewrite in ProofScript.
 
 ## Branch policy
@@ -1434,6 +1564,12 @@ Before accepting any ProofScript infrastructure task, ask:
 7. If the feature exists mainly to mirror Lean's generic implementation style,
    can PSC1 use the same semantics through a simpler concrete representation
    while keeping the source/kernel model compatible with a later generic form?
+8. Does the change accidentally make host object identity, address/layout,
+   JavaScript evaluation behavior, Rust ownership, or Wasm representation part
+   of portable PSC1 semantics?
+9. If the change touches FFI/host capabilities, is its pure-vs-effectful
+   classification explicit and are observable effects sequenced only through
+   owned PSC1 effect semantics?
 
 If the feature is not REQUIRED, it does not block PSC1. Keep useful features in
 the plan, land them opportunistically when local/desugaring-based, and preserve

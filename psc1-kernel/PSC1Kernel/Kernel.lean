@@ -90,6 +90,7 @@ def mkChecker
     levelParams := levelParams
     safety := safety
     eagerReduce := false
+    nativeEvaluator := none
   }
 
 def checkConstantBase

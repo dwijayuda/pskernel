@@ -244,6 +244,13 @@ def psTestWasmUleb : Bool :=
   psWasmEncodeUleb 624485 ==
     [psWasmByte 229, psWasmByte 142, psWasmByte 38]
 
+def psTestWasmSignedLeb : Bool :=
+  psWasmEncodeI32Constant (-1) == [psWasmByte 127]
+    && psWasmEncodeI32Constant 4294967295 == [psWasmByte 127]
+    && psWasmEncodeI64Constant (-1) == [psWasmByte 127]
+    && psWasmEncodeI64Constant 18446744073709551615 ==
+      [psWasmByte 127]
+
 def psTestWasmBinaryModule : Bool :=
   match psWasmEncodeModule psWasmAnswerModule with
   | Except.error _ => false
@@ -256,6 +263,7 @@ def main : IO Unit := do
       && psTestWasmMachineIntegerLiterals
       && psTestWasmVerifiedIrLowering
       && psTestWasmUleb
+      && psTestWasmSignedLeb
       && psTestWasmBinaryModule then
     IO.println "PSC1_BACKEND_WASM_TESTS: PASS"
   else

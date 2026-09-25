@@ -12,6 +12,7 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "portable-stdlib"
+    "role": "portable-stdlib",
+    "portable": true
   }
 }

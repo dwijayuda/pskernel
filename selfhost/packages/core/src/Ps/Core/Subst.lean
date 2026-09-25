@@ -61,7 +61,7 @@ def psExprInstantiateAt (replacement : PsExpr) (depth : Nat) : PsExpr -> PsExpr
         name
         (psExprInstantiateAt replacement depth type)
         (psExprInstantiateAt replacement depth value)
-        (psExprInstantiateAt replacement (depth + 1) body)
+        (psExprInstantiateAt replacement (Nat.succ depth) body)
   | .proj typeName index value =>
       PsExpr.proj typeName index (psExprInstantiateAt replacement depth value)
   | expr => expr

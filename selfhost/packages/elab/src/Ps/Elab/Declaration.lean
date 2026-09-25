@@ -1016,7 +1016,7 @@ def psElabInductiveDeclaration
                         let constructorContext :=
                           psElabContextWithEnvironment
                             headerContext
-                            withInductive
+                            withInductive;
                         match psElabInductiveConstructors
                             constructorContext
                             parameters.bindersRev

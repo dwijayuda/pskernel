@@ -254,6 +254,8 @@ def psEraseSelectedArguments
                   Except.ok (erased :: erasedRest)
 
 def psErasePrimitiveApplication
+    (eraseType :
+      PsExpr -> Except PsErasureError PsVerifiedIrType)
     (erase :
       PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (view : PsErasureAppView) :
@@ -429,86 +431,150 @@ def psErasePrimitiveApplication
         else
           Except.error PsErasureError.unsupportedApplication
       else if text == "Array.emptyWithCapacity" && view.args.length == 2 then
-        match psEraseSelectedArguments erase view.args [1] with
-        | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
-                  args))
+        match view.args with
+        | typeExpr :: _ =>
+            match eraseType typeExpr with
+            | Except.error error => Except.error error
+            | Except.ok elementType =>
+                match psEraseSelectedArguments erase view.args [1] with
+                | Except.error error => Except.error error
+                | Except.ok args =>
+                    Except.ok
+                      (some
+                        (PsVerifiedIrExpr.intrinsic
+                          (PsVerifiedIrIntrinsic.arrayEmptyWithCapacity elementType)
+                          args))
+        | _ => Except.error PsErasureError.unsupportedApplication
       else if text == "Array.size" && view.args.length == 2 then
-        match psEraseSelectedArguments erase view.args [1] with
-        | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arraySize
-                  args))
+        match view.args with
+        | typeExpr :: _ =>
+            match eraseType typeExpr with
+            | Except.error error => Except.error error
+            | Except.ok elementType =>
+                match psEraseSelectedArguments erase view.args [1] with
+                | Except.error error => Except.error error
+                | Except.ok args =>
+                    Except.ok
+                      (some
+                        (PsVerifiedIrExpr.intrinsic
+                          (PsVerifiedIrIntrinsic.arraySize elementType)
+                          args))
+        | _ => Except.error PsErasureError.unsupportedApplication
       else if text == "Array.push" && view.args.length == 3 then
-        match psEraseSelectedArguments erase view.args [1, 2] with
-        | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayPush
-                  args))
+        match view.args with
+        | typeExpr :: _ =>
+            match eraseType typeExpr with
+            | Except.error error => Except.error error
+            | Except.ok elementType =>
+                match psEraseSelectedArguments erase view.args [1, 2] with
+                | Except.error error => Except.error error
+                | Except.ok args =>
+                    Except.ok
+                      (some
+                        (PsVerifiedIrExpr.intrinsic
+                          (PsVerifiedIrIntrinsic.arrayPush elementType)
+                          args))
+        | _ => Except.error PsErasureError.unsupportedApplication
       else if text == "Array.getInternal" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [1, 2] with
-        | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayGet
-                  args))
+        match view.args with
+        | typeExpr :: _ =>
+            match eraseType typeExpr with
+            | Except.error error => Except.error error
+            | Except.ok elementType =>
+                match psEraseSelectedArguments erase view.args [1, 2] with
+                | Except.error error => Except.error error
+                | Except.ok args =>
+                    Except.ok
+                      (some
+                        (PsVerifiedIrExpr.intrinsic
+                          (PsVerifiedIrIntrinsic.arrayGet elementType)
+                          args))
+        | _ => Except.error PsErasureError.unsupportedApplication
       else if text == "Array.getD" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [1, 2, 3] with
-        | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayGetD
-                  args))
+        match view.args with
+        | typeExpr :: _ =>
+            match eraseType typeExpr with
+            | Except.error error => Except.error error
+            | Except.ok elementType =>
+                match psEraseSelectedArguments erase view.args [1, 2, 3] with
+                | Except.error error => Except.error error
+                | Except.ok args =>
+                    Except.ok
+                      (some
+                        (PsVerifiedIrExpr.intrinsic
+                          (PsVerifiedIrIntrinsic.arrayGetD elementType)
+                          args))
+        | _ => Except.error PsErasureError.unsupportedApplication
       else if text == "Array.set" && view.args.length == 5 then
-        match psEraseSelectedArguments erase view.args [1, 2, 3] with
-        | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arraySet
-                  args))
+        match view.args with
+        | typeExpr :: _ =>
+            match eraseType typeExpr with
+            | Except.error error => Except.error error
+            | Except.ok elementType =>
+                match psEraseSelectedArguments erase view.args [1, 2, 3] with
+                | Except.error error => Except.error error
+                | Except.ok args =>
+                    Except.ok
+                      (some
+                        (PsVerifiedIrExpr.intrinsic
+                          (PsVerifiedIrIntrinsic.arraySet elementType)
+                          args))
+        | _ => Except.error PsErasureError.unsupportedApplication
       else if text == "Array.setIfInBounds" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [1, 2, 3] with
-        | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arraySetIfInBounds
-                  args))
+        match view.args with
+        | typeExpr :: _ =>
+            match eraseType typeExpr with
+            | Except.error error => Except.error error
+            | Except.ok elementType =>
+                match psEraseSelectedArguments erase view.args [1, 2, 3] with
+                | Except.error error => Except.error error
+                | Except.ok args =>
+                    Except.ok
+                      (some
+                        (PsVerifiedIrExpr.intrinsic
+                          (PsVerifiedIrIntrinsic.arraySetIfInBounds elementType)
+                          args))
+        | _ => Except.error PsErasureError.unsupportedApplication
       else if text == "Array.map" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [2, 3] with
-        | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayMap
-                  args))
+        match view.args with
+        | sourceExpr :: targetExpr :: _ =>
+            match eraseType sourceExpr with
+            | Except.error error => Except.error error
+            | Except.ok sourceType =>
+                match eraseType targetExpr with
+                | Except.error error => Except.error error
+                | Except.ok targetType =>
+                    match psEraseSelectedArguments erase view.args [2, 3] with
+                    | Except.error error => Except.error error
+                    | Except.ok args =>
+                        Except.ok
+                          (some
+                            (PsVerifiedIrExpr.intrinsic
+                              (PsVerifiedIrIntrinsic.arrayMap
+                                sourceType
+                                targetType)
+                              args))
+        | _ => Except.error PsErasureError.unsupportedApplication
       else if text == "Array.foldl" && view.args.length == 7 then
-        match psEraseSelectedArguments erase view.args [2, 3, 4, 5, 6] with
-        | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayFoldl
-                  args))
+        match view.args with
+        | elementExpr :: accumulatorExpr :: _ =>
+            match eraseType elementExpr with
+            | Except.error error => Except.error error
+            | Except.ok elementType =>
+                match eraseType accumulatorExpr with
+                | Except.error error => Except.error error
+                | Except.ok accumulatorType =>
+                    match psEraseSelectedArguments erase view.args [2, 3, 4, 5, 6] with
+                    | Except.error error => Except.error error
+                    | Except.ok args =>
+                        Except.ok
+                          (some
+                            (PsVerifiedIrExpr.intrinsic
+                              (PsVerifiedIrIntrinsic.arrayFoldl
+                                elementType
+                                accumulatorType)
+                              args))
+        | _ => Except.error PsErasureError.unsupportedApplication
       else
         Except.ok none
   | _ => Except.ok none
@@ -1195,7 +1261,9 @@ def psEraseRuntimeExprWithFuel
           | Except.error error => Except.error error
           | Except.ok (some lowered) => Except.ok lowered
           | Except.ok none =>
-              match psErasePrimitiveApplication erase view with
+              let eraseType :=
+                psEraseRuntimeType environment scope
+              match psErasePrimitiveApplication eraseType erase view with
               | Except.error error => Except.error error
               | Except.ok (some lowered) => Except.ok lowered
               | Except.ok none =>

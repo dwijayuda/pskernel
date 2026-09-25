@@ -5,9 +5,12 @@ on:
   push:
     branches:
       - selfhost/psc1-lean-bootstrap
+      - backend/wasm3-owned
     paths:
       - selfhost/**
       - docs/selfhost/PSC1_LEAN_BOOTSTRAP.md
+      - docs/selfhost/WASM3_BACKEND.md
+      - docs/plans/07_SELF_HOSTING_FOUNDATION.md
       - .github/workflows/psc1-lean-bootstrap.yml
       - packages/syntax/**
       - packages/elab/**
@@ -15,6 +18,8 @@ on:
       - packages/erasure/**
       - packages/compiler-ir/**
       - packages/backend-ts/**
+      - selfhost/packages/backend-wasm/**
+      - selfhost/packages/compiler-ir/**
       - packages/compiler/**
       - packages/cli/**
       - package.json
@@ -64,6 +69,7 @@ jobs:
           node --check selfhost/scripts/build-auto.mjs
           node --check selfhost/scripts/compare-selfhost.mjs
           node --check selfhost/scripts/check-workspace.mjs
+          node --check selfhost/scripts/check-ir-neutrality.mjs
           node --check selfhost/scripts/clean.mjs
           node selfhost/scripts/check-workspace.mjs
 
@@ -73,6 +79,13 @@ jobs:
           set -euo pipefail
           cd selfhost
           node check-psc1-source.mjs
+
+      - name: Enforce target-neutral shared compiler IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node scripts/check-ir-neutrality.mjs
 
       - name: Build compiler with Lake
         shell: bash
@@ -365,6 +378,13 @@ jobs:
           set -euo pipefail
           cd selfhost
           lake exe psc1_backend_ts_tests
+
+      - name: Run owned WebAssembly backend target-lowering tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_tests
 
       - name: Run Lean-native erasure pipeline tests
         shell: bash

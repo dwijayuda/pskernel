@@ -589,6 +589,7 @@ def psEraseCondition
                       Except.ok
                         (PsVerifiedIrExpr.intrinsic
                           PsVerifiedIrIntrinsic.stringEq
+                          []
                           [erasedLeft, erasedRight])
             else
               Except.error PsErasureError.unsupportedApplication

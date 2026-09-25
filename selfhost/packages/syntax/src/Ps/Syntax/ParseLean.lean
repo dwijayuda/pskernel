@@ -1302,31 +1302,43 @@ def psParseLeanRecordApplicationTailWithFuel
     (parseTerm :
       PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
-    (fuel : Nat)
-    (current : PsSyntaxTerm)
-    (cursor : PsTokenCursor) :
+    (fuel : Nat) :
+    PsSyntaxTerm ->
+    PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match fuel with
-  | 0 => Except.error PsParseError.fuelExhausted
+  | 0 =>
+      fun
+        (_current : PsSyntaxTerm)
+        (_cursor : PsTokenCursor) =>
+        Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      if psTokenCursorAtText cursor "{" then
-        match psParseRecordLiteral parseTerm cursor with
-        | Except.error error => Except.error error
-        | Except.ok argument =>
-            let next :=
-              psLeanApplicationWithArgument
-                current
-                argument.value;
-            psParseLeanRecordApplicationTailWithFuel
-              parseTerm
-              remaining
-              next
-              argument.cursor
-      else
-        Except.ok {
-          value := current
-          cursor := cursor
-        }
+      let smaller :
+          PsSyntaxTerm ->
+          PsTokenCursor ->
+          Except PsParseError (PsParseResult PsSyntaxTerm) :=
+        psParseLeanRecordApplicationTailWithFuel
+          parseTerm
+          remaining;
+      fun
+        (current : PsSyntaxTerm)
+        (cursor : PsTokenCursor) =>
+        if psTokenCursorAtText cursor "{" then
+          match psParseRecordLiteral parseTerm cursor with
+          | Except.error error => Except.error error
+          | Except.ok argument =>
+              let next :=
+                psLeanApplicationWithArgument
+                  current
+                  argument.value;
+              smaller
+                next
+                argument.cursor
+        else
+          Except.ok {
+            value := current
+            cursor := cursor
+          }
 
 def psParseLeanTermWithFuel :
     Nat ->

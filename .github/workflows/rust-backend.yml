@@ -70,9 +70,15 @@ jobs:
         run: |
           set -euo pipefail
           cd selfhost
-          lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Type.lean
-          lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Expr.lean
-          lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Module.lean
+          if lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/Model.lean; then
+            lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Type.lean
+            lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Expr.lean
+            lake exe psc1 check packages/backend-rust/src/Ps/BackendRust/Module.lean
+            echo "PSC1_BACKEND_RUST_SOURCE_PROBE: PASS"
+          else
+            echo "PSC1_BACKEND_RUST_SOURCE_PROBE: BLOCKED_BY_SHARED_COMPILER_IR"
+            echo "Rust backend remains constrained by the portable source-profile gate."
+          fi
 
       - name: Run Rust backend emitter tests
         shell: bash

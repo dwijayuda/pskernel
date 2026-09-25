@@ -86,6 +86,14 @@ def psExprInstantiateAt (replacement : PsExpr) (depth : Nat) : PsExpr -> PsExpr
         PsExpr.bvar (Nat.sub index 1)
       else
         PsExpr.bvar index
+  | .fvar id =>
+      PsExpr.fvar id
+  | .mvar id =>
+      PsExpr.mvar id
+  | .sortE level =>
+      PsExpr.sortE level
+  | .constE name levels =>
+      PsExpr.constE name levels
   | .app fn arg =>
       PsExpr.app
         (psExprInstantiateAt replacement depth fn)
@@ -108,9 +116,10 @@ def psExprInstantiateAt (replacement : PsExpr) (depth : Nat) : PsExpr -> PsExpr
         (psExprInstantiateAt replacement depth type)
         (psExprInstantiateAt replacement depth value)
         (psExprInstantiateAt replacement (Nat.succ depth) body)
+  | .lit value =>
+      PsExpr.lit value
   | .proj typeName index value =>
       PsExpr.proj typeName index (psExprInstantiateAt replacement depth value)
-  | expr => expr
 
 def psExprInstantiate1 (body : PsExpr) (replacement : PsExpr) : PsExpr :=
   psExprInstantiateAt replacement 0 body

@@ -473,13 +473,13 @@ def psWasmEncodeStructType
           | none =>
               Except.error (PsWasmEncodeError.unknownStructure superName)
           | some superIndex =>
-              let prefix :=
+              let subtypeTag :=
                 if structType.isFinal then
                   psWasmByte 79
                 else
                   psWasmByte 80
               Except.ok
-                ([prefix]
+                ([subtypeTag]
                   ++ psWasmEncodeUleb 1
                   ++ psWasmEncodeUleb superIndex
                   ++ composite)

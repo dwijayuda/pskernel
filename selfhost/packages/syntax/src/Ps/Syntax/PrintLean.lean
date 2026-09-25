@@ -27,6 +27,30 @@ def psPrintLeanConcat6
   let abcde := psPrintLeanConcat5 a b c d e;
   psPrintLeanConcat2 abcde f
 
+def psPrintLeanMapRecordFields
+    (printField :
+      Prod PsSyntaxName PsSyntaxTerm ->
+        Except PsSourcePrintError String)
+    (fields : List (Prod PsSyntaxName PsSyntaxTerm)) :
+    Except PsSourcePrintError (List String) :=
+  match fields with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons field rest =>
+      let printedHeadResult :=
+        printField field;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintLeanMapRecordFields printField rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintLeanTermWithFuel
     (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
@@ -68,7 +92,10 @@ def psPrintLeanTermWithFuel
                   | Except.ok value =>
                       Except.ok
                         (psPrintLeanConcat3 name " := " value);
-          match fields.mapM printField with
+          let printedFieldsResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintLeanMapRecordFields printField fields;
+          match printedFieldsResult with
           | Except.error error => Except.error error
           | Except.ok printedFields =>
               Except.ok

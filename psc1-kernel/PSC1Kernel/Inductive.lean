@@ -104,11 +104,12 @@ partial def openSimpleHeaderParams
         | throw "simple inductive declaration has fewer parameters than declared"
       let domainType ← check ctx domain
       let _ ← ensureSort ctx domainType
-      let (fresh, child) := ctx.withLocal userName domain binderInfo
+      let localDomain := domain.consumeTypeAnnotations
+      let (fresh, child) := ctx.withLocal userName localDomain binderInfo
       let param : OpenBinder := {
         internalName := fresh
         userName := userName
-        type := domain
+        type := localDomain
         binderInfo := binderInfo
       }
       openSimpleHeaderParams
@@ -125,11 +126,12 @@ partial def openSimpleHeaderIndices
   | .forallE userName domain body binderInfo => do
       let domainType ← check ctx domain
       let _ ← ensureSort ctx domainType
-      let (fresh, child) := ctx.withLocal userName domain binderInfo
+      let localDomain := domain.consumeTypeAnnotations
+      let (fresh, child) := ctx.withLocal userName localDomain binderInfo
       let index : OpenBinder := {
         internalName := fresh
         userName := userName
-        type := domain
+        type := localDomain
         binderInfo := binderInfo
       }
       openSimpleHeaderIndices
@@ -211,11 +213,12 @@ partial def analyzeSimpleRecursiveArgument
             throw "recursive function argument contains a negative recursive occurrence"
           let domainType ← check ctx domain
           let _ ← ensureSort ctx domainType
-          let (fresh, child) := ctx.withLocal userName domain binderInfo
+          let localDomain := domain.consumeTypeAnnotations
+          let (fresh, child) := ctx.withLocal userName localDomain binderInfo
           let arg : OpenBinder := {
             internalName := fresh
             userName := userName
-            type := domain
+            type := localDomain
             binderInfo := binderInfo
           }
           analyzeSimpleRecursiveArgument
@@ -247,11 +250,12 @@ partial def openSimpleConstructorFields
       unless Level.le fieldLevel resultLevel ||
           Level.normalizesToZero resultLevel do
         throw "simple inductive constructor field universe is too large"
-      let (fresh, child0) := ctx.withLocal userName domain binderInfo
+      let localDomain := domain.consumeTypeAnnotations
+      let (fresh, child0) := ctx.withLocal userName localDomain binderInfo
       let field : OpenBinder := {
         internalName := fresh
         userName := userName
-        type := domain
+        type := localDomain
         binderInfo := binderInfo
       }
       let (analysisCtx, recursiveInfo?) ←
@@ -456,7 +460,8 @@ partial def simpleCtorAllowsLargeElimCore
   | .forallE userName domain body binderInfo => do
       let domainType ← check ctx domain
       let fieldLevel ← ensureSort ctx domainType
-      let (fresh, child) := ctx.withLocal userName domain binderInfo
+      let localDomain := domain.consumeTypeAnnotations
+      let (fresh, child) := ctx.withLocal userName localDomain binderInfo
       let revNonProp' :=
         if Level.normalizesToZero fieldLevel then
           revNonProp

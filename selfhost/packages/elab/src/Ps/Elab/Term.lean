@@ -1573,7 +1573,7 @@ def psElabMatchMinors
               | Except.ok tail =>
                   Except.ok {
                     context := tail.context
-                    minors := minor.term :: tail.minors
+                    minors := List.cons minor.term tail.minors
                   }
 
 def psElabMatch

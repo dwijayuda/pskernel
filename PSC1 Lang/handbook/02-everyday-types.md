@@ -12,7 +12,7 @@ The central rule is:
 `Nat` represents exact natural numbers.
 
 ```proofscript
-const count : Nat := 42;
+const count: Nat := 42;
 ```
 
 At the language level `Nat` is not JavaScript `number`.
@@ -98,8 +98,8 @@ operator behavior.
 ## `Bool`
 
 ```proofscript
-const yes : Bool := true;
-const no : Bool := false;
+const yes: Bool := true;
+const no: Bool := false;
 ```
 
 Bool-valued computation is distinct from propositions in `Prop`.
@@ -107,14 +107,14 @@ Bool-valued computation is distinct from propositions in `Prop`.
 This function returns a runtime Bool:
 
 ```proofscript
-function sameNat(x : Nat, y : Nat) : Bool :=
+function sameNat(x: Nat, y: Nat): Bool :=
   x == y;
 ```
 
 This theorem states a proposition:
 
 ```proofscript
-theorem selfEq(x : Nat) : x = x := by rfl;
+theorem selfEq(x: Nat): x = x := by rfl;
 ```
 
 ## `Char`
@@ -176,17 +176,17 @@ model.
 The current self-hosted stdlib uses:
 
 ```proofscript
-inductive PsOption(α : Type) where {
+inductive PsOption(α: Type) where {
   | none;
-  | some(value : α);
+  | some(value: α);
 };
 ```
 
 A generic function can consume it:
 
 ```proofscript
-function optionGetOrElse {α : Type}
-(value : PsOption(α), fallback : α) : α :=
+function optionGetOrElse {α: Type}
+(value: PsOption(α), fallback: α): α :=
   match value with {
     | .none => fallback;
     | .some x => x;
@@ -198,9 +198,9 @@ function optionGetOrElse {α : Type}
 The stdlib similarly dogfoods:
 
 ```proofscript
-inductive PsResult(α : Type, ε : Type) where {
-  | ok(value : α);
-  | error(error : ε);
+inductive PsResult(α: Type, ε: Type) where {
+  | ok(value: α);
+  | error(error: ε);
 };
 ```
 
@@ -211,9 +211,9 @@ This makes recoverable failure explicit in data.
 The current ProofScript-owned list is recursive:
 
 ```proofscript
-inductive PsList(α : Type) where {
+inductive PsList(α: Type) where {
   | nil;
-  | cons(head : α, tail : PsList(α));
+  | cons(head: α, tail: PsList(α));
 };
 ```
 

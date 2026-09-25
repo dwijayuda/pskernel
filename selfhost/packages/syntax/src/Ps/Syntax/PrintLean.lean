@@ -74,6 +74,30 @@ def psPrintLeanMapTerms
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
+def psPrintLeanMapBinders
+    (printBinder :
+      Prod PsSyntaxBinderHead PsSyntaxTerm ->
+        Except PsSourcePrintError String)
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
+    Except PsSourcePrintError (List String) :=
+  match binders with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons binder rest =>
+      let printedHeadResult :=
+        printBinder binder;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintLeanMapBinders printBinder rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintLeanTermWithFuel
     (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
@@ -177,7 +201,10 @@ def psPrintLeanTermWithFuel
                               " : "
                               printedType
                               delimiters.snd);
-          match binders.mapM printBinder with
+          let printedBindersResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintLeanMapBinders printBinder binders;
+          match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               match smaller body with
@@ -211,7 +238,10 @@ def psPrintLeanTermWithFuel
                               " : "
                               printedType
                               delimiters.snd);
-          match binders.mapM printBinder with
+          let printedBindersResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintLeanMapBinders printBinder binders;
+          match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               match smaller body with

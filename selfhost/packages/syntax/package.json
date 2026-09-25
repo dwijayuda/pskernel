@@ -8,7 +8,11 @@
     "sourceRoots": [
       "src"
     ],
-    "role": "syntax"
+    "role": "syntax",
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist"
   },
   "dependencies": {
     "@proofscript/foundation": "0.0.0-dev"

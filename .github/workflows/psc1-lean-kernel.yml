@@ -82,6 +82,9 @@ jobs:
       - name: Differential foundational oracle against Lean 4.34
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/Oracle.lean
+      - name: Smoke Eq.rec K fail-closed behavior
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/KFailClosedSmoke.lean
       - name: Smoke portable native replay map
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/NativeMapSmoke.lean

@@ -73,6 +73,9 @@ jobs:
       - name: Differential foundational oracle against Lean 4.34
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/Oracle.lean
+      - name: Smoke portable native replay map
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/NativeMapSmoke.lean
       - name: Generate pinned Lean4Export mini stream
         working-directory: oracle/replay-probe
         shell: bash

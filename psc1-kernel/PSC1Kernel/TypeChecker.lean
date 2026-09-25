@@ -423,6 +423,13 @@ partial def recursorMajorInduct?
     | _, _ => none
   go recursor.base.type majorIdx
 
+partial def kDebugNameString : Name → String
+  | .anonymous => "_"
+  | .str .anonymous value => value
+  | .str parent value => kDebugNameString parent ++ "." ++ value
+  | .num .anonymous value => toString value
+  | .num parent value => kDebugNameString parent ++ "." ++ toString value
+
 partial def kTypesEq
     (ctx : CheckerContext)
     (left right : Expr) : Except String Bool := do
@@ -630,8 +637,14 @@ partial def toConstructorWhenK
             else
               throw "Eq.rec K debug: major type inference failed; major=fvar-missing"
         | .app _ _ =>
+            let head :=
+              match major.getAppFn with
+              | .const name _ => kDebugNameString name
+              | .fvar name => "fvar:" ++ kDebugNameString name
+              | .bvar index => "bvar:" ++ toString index
+              | _ => "non-constant"
             throw ("Eq.rec K debug: major type inference failed; major=app args=" ++
-              toString major.getAppNumArgs)
+              toString major.getAppNumArgs ++ "; head=" ++ head)
         | .lam .. => throw "Eq.rec K debug: major type inference failed; major=lambda"
         | .forallE .. => throw "Eq.rec K debug: major type inference failed; major=forall"
         | .letE .. => throw "Eq.rec K debug: major type inference failed; major=let"

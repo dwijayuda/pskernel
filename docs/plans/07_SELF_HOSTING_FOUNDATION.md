@@ -1224,10 +1224,15 @@ This milestone must not block SH1-SH10R.
 
 Unless demanded by an SH gate, defer:
 
-- new backends beyond the current TypeScript/JavaScript path **until SH9/SH10
-  close**; Rust is the first planned post-bootstrap backend in SH10R, while
-  Wasm and other additional backends remain deferred until that foundation is
-  stable;
+- integration of new backends into the active self-host closure **until SH9/SH10
+  close**. Rust backend implementation may proceed now on the dedicated
+  `backend/rust-native` branch as a parallel research/implementation lane,
+  provided it consumes the existing compiler IR, does not change PSC1 semantics
+  merely for Rust, and does not block or destabilize
+  `selfhost/psc1-lean-bootstrap`. Merge/integration into the authoritative
+  self-host line remains gated on the JavaScript fixed point and `.ps` source
+  transition. Wasm and other additional backends remain deferred unless
+  separately authorized;
 - broad React/Next.js integration;
 - new browser/LSP/editor features;
 - extra package-manager features;
@@ -1253,12 +1258,30 @@ Unless demanded by an SH gate, defer:
 
 ## Branch policy
 
-- `main`: ProofScript self-hosting foundation and non-kernel changes needed
-  for SH0-SH11.
+- `main`: ProofScript integration line after milestone branches have closed
+  their required gates.
+- `selfhost/psc1-lean-bootstrap`: authoritative active PSC1/self-host closure
+  lane. Keep its priority on source closure, JavaScript fixed point, and the
+  `.ps` source transition. Parallel backend work must not make this branch
+  wait.
+- `backend/rust-native`: parallel Rust backend/native-host development lane,
+  branched from the current PSC1 self-host plan. It may implement
+  `backend-rust`, Rust AST/emission, runtime mappings, rustc/Cargo host
+  adapters, scalar lowering, tests, and native self-host scaffolding now.
+  It must consume the shared checked-core/erasure/compiler-IR contracts rather
+  than fork semantics. If those contracts are still moving, adapt/rebase the
+  Rust branch; do not push Rust-specific semantic changes back into PSC1 merely
+  to simplify code generation.
 - `kernel/lean434-study-hardening`: independent TypeScript kernel assurance
   and Lean 4.34 conformance work.
-- Kernel changes merge to `main` only when they are independently justified by
-  kernel compatibility, never solely to make a ProofScript compiler test pass.
+- Rust work can be cherry-picked or merged into the authoritative self-host line
+  only when it is compatible with the then-current compiler IR and cannot
+  weaken SH1-SH10 gates. SH10R becomes an integration requirement after the
+  JavaScript fixed point; it is not a prerequisite for reaching that fixed
+  point.
+- Kernel changes merge to the integration line only when independently
+  justified by kernel compatibility, never solely to make a ProofScript
+  compiler/backend test pass.
 
 ## Anti-drift decision test
 

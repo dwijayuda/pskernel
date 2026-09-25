@@ -7,6 +7,7 @@ import Ps.Core.Builtin
 import Ps.Core.Equality
 import Ps.Core.Expr
 import Ps.Environment.Basic
+import Ps.Environment.Prelude
 import Ps.Environment.LocalContext
 import Ps.Environment.Instances
 import Ps.Meta.Context

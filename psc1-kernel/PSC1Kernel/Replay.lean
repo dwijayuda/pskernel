@@ -88,11 +88,43 @@ structure QuotRecord where
 structure ConstructorRecord where
   name : Nat
   type : Nat
+  levelParams : Option (List Nat) := none
+  induct : Option Nat := none
+  cidx : Option Nat := none
+  numParams : Option Nat := none
+  numFields : Option Nat := none
+  isUnsafe : Option Bool := none
 
 structure InductiveTypeRecord where
   name : Nat
   type : Nat
   ctors : List ConstructorRecord
+  levelParams : Option (List Nat) := none
+  numParams : Option Nat := none
+  numIndices : Option Nat := none
+  all : Option (List Nat) := none
+  numNested : Option Nat := none
+  isRec : Option Bool := none
+  isReflexive : Option Bool := none
+  isUnsafe : Option Bool := none
+
+structure RecursorRuleRecord where
+  ctor : Nat
+  nFields : Nat
+  rhs : Nat
+
+structure RecursorRecord where
+  name : Nat
+  levelParams : List Nat
+  type : Nat
+  all : List Nat
+  numParams : Nat
+  numIndices : Nat
+  numMotives : Nat
+  numMinors : Nat
+  rules : List RecursorRuleRecord
+  k : Bool
+  isUnsafe : Bool
 
 structure InductiveRecord where
   levelParams : List Nat
@@ -100,6 +132,7 @@ structure InductiveRecord where
   types : List InductiveTypeRecord
   isUnsafe : Bool
   numNested : Nat
+  recs : List RecursorRecord := []
 
 inductive Record where
   | metaR (value : Meta)

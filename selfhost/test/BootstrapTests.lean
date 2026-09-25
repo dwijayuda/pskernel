@@ -2451,6 +2451,18 @@ def psTestLeanListPatternSugar : Bool :=
           | _ => false
       | _ => false
 
+def psTestRepeatedWildcardMatchBinders : Bool :=
+  let source :=
+    "inductive TripleWild where | mk (first : Nat) (second : Nat) (third : Nat)\n" ++
+    "def tripleThird (value : TripleWild) : Nat := " ++
+    "match value with | TripleWild.mk _ _ third => third"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match psElabModule psBootstrapPreludeEnvironment module with
+      | Except.ok _ => true
+      | Except.error _ => false
+
 def psTestLeanNatMatchSugar : Bool :=
   let source :=
     "def natCase (n : Nat) : Nat := " ++
@@ -2515,6 +2527,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "structure stops before partial def", passed := psTestStructureBeforePartialDefinition },
   { name := "Lean list literal sugar", passed := psTestLeanListLiteralSugar },
   { name := "Lean list pattern sugar", passed := psTestLeanListPatternSugar },
+  { name := "repeated wildcard match binders", passed := psTestRepeatedWildcardMatchBinders },
   { name := "Lean Nat match sugar", passed := psTestLeanNatMatchSugar },
   { name := "Lean grouped typed binders", passed := psTestLeanGroupedTypedBinders },
   { name := "lambda match uses expected type", passed := psTestLambdaMatchExpectedType },

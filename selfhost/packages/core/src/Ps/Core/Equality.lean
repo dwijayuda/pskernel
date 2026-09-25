@@ -23,11 +23,11 @@ def psLiteralEq (left : PsLiteral) (right : PsLiteral) : Bool :=
   match left with
   | .natural leftValue =>
       match right with
-      | .natural rightValue => leftValue == rightValue
+      | .natural rightValue => Nat.beq leftValue rightValue
       | _ => false
   | .string leftValue =>
       match right with
-      | .string rightValue => leftValue == rightValue
+      | .string rightValue => psStringEq leftValue rightValue
       | _ => false
 
 def psLevelStructuralEq (left : PsLevel) (right : PsLevel) : Bool :=
@@ -57,7 +57,7 @@ def psLevelStructuralEq (left : PsLevel) (right : PsLevel) : Bool :=
       | _ => false
   | .mvar leftId =>
       match right with
-      | .mvar rightId => leftId == rightId
+      | .mvar rightId => Nat.beq leftId rightId
       | _ => false
 
 def psLevelListEq
@@ -79,15 +79,15 @@ def psExprAlphaEq (left : PsExpr) (right : PsExpr) : Bool :=
   match left with
   | .bvar leftIndex =>
       match right with
-      | .bvar rightIndex => leftIndex == rightIndex
+      | .bvar rightIndex => Nat.beq leftIndex rightIndex
       | _ => false
   | .fvar leftId =>
       match right with
-      | .fvar rightId => leftId == rightId
+      | .fvar rightId => Nat.beq leftId rightId
       | _ => false
   | .mvar leftId =>
       match right with
-      | .mvar rightId => leftId == rightId
+      | .mvar rightId => Nat.beq leftId rightId
       | _ => false
   | .sortE leftLevel =>
       match right with
@@ -135,6 +135,6 @@ def psExprAlphaEq (left : PsExpr) (right : PsExpr) : Bool :=
       match right with
       | .proj rightType rightIndex rightValue =>
           psNameEq leftType rightType
-            && leftIndex == rightIndex
+            && Nat.beq leftIndex rightIndex
             && psExprAlphaEq leftValue rightValue
       | _ => false

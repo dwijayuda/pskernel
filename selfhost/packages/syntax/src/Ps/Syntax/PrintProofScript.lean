@@ -262,6 +262,26 @@ def psPrintProofScriptDeclaration
                         ("def " ++ printedName ++ binderSuffix ++
                           " : " ++ printedType ++
                           " := " ++ printedValue ++ ";")
+  | .partialDefinition name binders type value _ =>
+      match psPrintSyntaxName name with
+      | Except.error error => Except.error error
+      | Except.ok printedName =>
+          match binders.mapM psPrintProofScriptBinder with
+          | Except.error error => Except.error error
+          | Except.ok printedBinders =>
+              match psPrintProofScriptTerm type with
+              | Except.error error => Except.error error
+              | Except.ok printedType =>
+                  match psPrintProofScriptTerm value with
+                  | Except.error error => Except.error error
+                  | Except.ok printedValue =>
+                      let binderSuffix :=
+                        if printedBinders.isEmpty then ""
+                        else " " ++ psPrintJoin " " printedBinders
+                      Except.ok
+                        ("partial def " ++ printedName ++ binderSuffix ++
+                          " : " ++ printedType ++
+                          " := " ++ printedValue ++ ";")
   | .theoremDecl name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error

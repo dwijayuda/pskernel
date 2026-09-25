@@ -332,7 +332,11 @@ def psParseProofScriptArrowTail
             Except.ok {
               value :=
                 PsSyntaxTerm.forallE
-                  [(psSyntaxAnonymousExplicitBinder domainSpan, domain.value)]
+                  (List.cons
+                    (Prod.mk
+                      (psSyntaxAnonymousExplicitBinder domainSpan)
+                      domain.value)
+                    List.nil)
                   codomain.value
                   span
               cursor := codomain.cursor

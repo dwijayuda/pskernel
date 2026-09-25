@@ -1072,6 +1072,79 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
       }
 ,
       {
+        name := "natSuccFourValue"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var psWasmNatRuntimeToU32BoundedName)
+            []
+            [
+              psWasmNatRuntimeSucc
+                (psWasmSmokeNat 4)
+            ]
+      },
+      {
+        name := "int32NegFiveDirect"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.int32
+              PsVerifiedIrIntegerBinaryOp.sub)
+            [
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.machineInteger
+                  PsVerifiedIrMachineIntegerType.int32
+                  0),
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.machineInteger
+                  PsVerifiedIrMachineIntegerType.int32
+                  5)
+            ]
+      },
+      {
+        name := "intNegSuccPayloadValue"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          psWasmIntRuntimeMatch
+            (psWasmIntRuntimeNegSucc
+              (psWasmSmokeNat 4))
+            "n"
+            (psWasmNatRuntimeU32 99)
+            "n"
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.var psWasmNatRuntimeToU32BoundedName)
+              []
+              [PsVerifiedIrExpr.var "n"])
+      },
+      {
+        name := "intNegSuccSuccPayloadValue"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          psWasmIntRuntimeMatch
+            (psWasmIntRuntimeNegSucc
+              (psWasmSmokeNat 4))
+            "n"
+            (psWasmNatRuntimeU32 99)
+            "n"
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.var psWasmNatRuntimeToU32BoundedName)
+              []
+              [
+                psWasmNatRuntimeSucc
+                  (PsVerifiedIrExpr.var "n")
+              ])
+      },
+      {
         name := "intLiteralNegativeValue"
         typeParameters := []
         parameters := []

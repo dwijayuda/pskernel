@@ -15,6 +15,9 @@ on:
       - "oracle/fixtures/lean434-proofscript-selfhost-foundation.ndjson"
       - "oracle/fixtures/lean434-std-sat-cnf-roots.ndjson"
       - "oracle/fixtures/lean434-std-parsec-roots.ndjson"
+      - "oracle/fixtures/lean434-std-byteslice-roots.ndjson"
+      - "oracle/fixtures/lean434-lean-rbmap-roots.ndjson"
+      - "oracle/fixtures/lean434-lean-persistentarray-roots.ndjson"
       - "oracle/fixtures/lean434-lean-persistenthashmap-roots.ndjson"
 
 concurrency:
@@ -89,6 +92,9 @@ jobs:
           for fixture in \
             lean434-std-sat-cnf-roots.ndjson \
             lean434-std-parsec-roots.ndjson \
+            lean434-std-byteslice-roots.ndjson \
+            lean434-lean-rbmap-roots.ndjson \
+            lean434-lean-persistentarray-roots.ndjson \
             lean434-lean-persistenthashmap-roots.ndjson
           do
             echo "== replay $fixture =="

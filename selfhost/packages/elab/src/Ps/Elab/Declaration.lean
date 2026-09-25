@@ -1007,7 +1007,7 @@ def psElabInductiveDeclaration
                     let withInductiveResult :=
                       psEnvironmentAddOwnedBootstrapDeclaration
                         environment
-                        inductiveDeclaration
+                        inductiveDeclaration;
                     match withInductiveResult with
                     | none =>
                         Except.error

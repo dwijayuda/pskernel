@@ -4,7 +4,7 @@
   "version": "0.0.0-dev",
   "type": "module",
   "bin": {
-    "psc": "./bin/psc.mjs"
+    "psc": "./packages/cli/bin/psc.mjs"
   },
   "workspaces": [
     "packages/*",
@@ -12,7 +12,7 @@
     "stdlib"
   ],
   "scripts": {
-    "psc": "node bin/psc.mjs",
+    "psc": "node packages/cli/bin/psc.mjs",
     "clean": "node scripts/clean.mjs",
     "check:workspace": "node scripts/check-workspace.mjs",
     "check:source": "node check-psc1-source.mjs",

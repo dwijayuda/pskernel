@@ -822,7 +822,7 @@ export class Lean434Evaluator {
     fn:Lean434RecursorFunction,
     args:readonly Lean434RuntimeValue[],
   ):Lean434ConstructorValue|undefined{
-    const expectedCtor=major.name+'_impl';
+    const expectedCtor=major.name+'._impl';
     if(
       !info.rules.some(
         (rule)=>nameToString(rule.ctor)===expectedCtor,

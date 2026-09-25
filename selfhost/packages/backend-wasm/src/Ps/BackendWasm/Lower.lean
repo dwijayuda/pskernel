@@ -1154,6 +1154,7 @@ def psWasmLowerDeclaration
               | Except.ok lowered =>
                   Except.ok {
                     name := declaration.name
+                    typeName := none
                     parameters := parameters
                     results := results
                     locals := lowered.state.localTypes
@@ -1212,7 +1213,9 @@ def psWasmLowerModule
             | Except.ok functions =>
                 Except.ok {
                   structures := structures ++ inductiveTypes
+                  functionTypes := []
                   functions := functions
+                  functionRefs := []
                   exports :=
                     psWasmExportsOfDeclarations module.declarations
                 }

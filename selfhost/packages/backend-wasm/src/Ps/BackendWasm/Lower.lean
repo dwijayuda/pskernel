@@ -2393,6 +2393,129 @@ def psWasmLowerDeclarations
                 state := loweredRest.state
               }
 
+def psWasmTypeUsesNatWithFuel :
+    Nat -> PsVerifiedIrType -> Bool
+  | 0, _ => false
+  | fuel + 1, type =>
+      match type with
+      | .primitive .nat => true
+      | .function parameters result =>
+          parameters.any
+              (fun parameter =>
+                psWasmTypeUsesNatWithFuel fuel parameter)
+            || psWasmTypeUsesNatWithFuel fuel result
+      | .named _ arguments =>
+          arguments.any
+            (fun argument =>
+              psWasmTypeUsesNatWithFuel fuel argument)
+      | _ => false
+
+def psWasmTypeUsesNat
+    (type : PsVerifiedIrType) : Bool :=
+  psWasmTypeUsesNatWithFuel 64 type
+
+def psWasmIntrinsicUsesNat
+    (operation : PsVerifiedIrIntrinsic) : Bool :=
+  match operation with
+  | .natAdd => true
+  | .natSub => true
+  | .natMul => true
+  | .natDiv => true
+  | .natMod => true
+  | .natEq => true
+  | .natNe => true
+  | .natLe => true
+  | .natLt => true
+  | .intOfNat => true
+  | .intNegSucc => true
+  | .charOfNat => true
+  | .charToNat => true
+  | .stringLength => true
+  | .stringUtf8ByteSize => true
+  | .stringNext => true
+  | .stringGet => true
+  | .stringAtEnd => true
+  | .stringExtract => true
+  | .arrayEmptyWithCapacity => true
+  | .arraySize => true
+  | .arrayGet => true
+  | .arrayGetD => true
+  | .arraySet => true
+  | .arraySetIfInBounds => true
+  | .arrayFoldl => true
+  | _ => false
+
+def psWasmExprUsesNatWithFuel :
+    Nat -> PsVerifiedIrExpr -> Bool
+  | 0, _ => false
+  | fuel + 1, expr =>
+      let uses :=
+        fun nested => psWasmExprUsesNatWithFuel fuel nested
+      match expr with
+      | .literal (.natural _) => true
+      | .literal _ => false
+      | .var _ => false
+      | .intrinsic operation typeArguments arguments =>
+          psWasmIntrinsicUsesNat operation
+            || typeArguments.any psWasmTypeUsesNat
+            || arguments.any uses
+      | .lambda parameters resultType body =>
+          parameters.any
+              (fun parameter => psWasmTypeUsesNat parameter.type)
+            || psWasmTypeUsesNat resultType
+            || uses body
+      | .call fn typeArguments arguments =>
+          uses fn
+            || typeArguments.any psWasmTypeUsesNat
+            || arguments.any uses
+      | .letE _ type value body =>
+          psWasmTypeUsesNat type || uses value || uses body
+      | .ifE condition thenBranch elseBranch =>
+          uses condition || uses thenBranch || uses elseBranch
+      | .record _ typeArguments fields =>
+          typeArguments.any psWasmTypeUsesNat
+            || fields.any (fun field => uses field.2)
+      | .projection _ typeArguments target _ =>
+          typeArguments.any psWasmTypeUsesNat || uses target
+      | .constructor _ _ typeArguments fields =>
+          typeArguments.any psWasmTypeUsesNat
+            || fields.any (fun field => uses field.2)
+      | .matchE _ typeArguments scrutinee alternatives =>
+          typeArguments.any psWasmTypeUsesNat
+            || uses scrutinee
+            || alternatives.any
+              (fun alternative =>
+                alternative.2.1.any
+                    (fun binding =>
+                      psWasmTypeUsesNat binding.type)
+                  || uses alternative.2.2)
+
+def psWasmExprUsesNat
+    (expr : PsVerifiedIrExpr) : Bool :=
+  psWasmExprUsesNatWithFuel 4096 expr
+
+def psWasmModuleUsesNat
+    (module : PsVerifiedIrModule) : Bool :=
+  module.imports.any
+      (fun importInfo => psWasmTypeUsesNat importInfo.type)
+    || module.structures.any
+      (fun structureInfo =>
+        structureInfo.fields.any
+          (fun field => psWasmTypeUsesNat field.type))
+    || module.inductives.any
+      (fun inductiveInfo =>
+        inductiveInfo.constructors.any
+          (fun constructorInfo =>
+            constructorInfo.fields.any
+              (fun field => psWasmTypeUsesNat field.type)))
+    || module.declarations.any
+      (fun declaration =>
+        declaration.parameters.any
+            (fun parameter =>
+              psWasmTypeUsesNat parameter.type)
+          || psWasmTypeUsesNat declaration.resultType
+          || psWasmExprUsesNat declaration.body)
+
 def psWasmExportsOfDeclarations :
     List PsVerifiedIrDeclaration -> List (String × String)
   | [] => []
@@ -2451,9 +2574,19 @@ def psWasmLowerSpecializedModule
                       module.declarations with
                 | Except.error error => Except.error error
                 | Except.ok lowered =>
+                    let runtimeStructures :=
+                      if psWasmModuleUsesNat module then
+                        psWasmNatRuntimeStructures
+                      else
+                        []
+                    let runtimeFunctions :=
+                      if psWasmModuleUsesNat module then
+                        psWasmNatRuntimeFunctions
+                      else
+                        []
                     Except.ok {
                       structures :=
-                        psWasmNatRuntimeStructures
+                        runtimeStructures
                           ++ structures
                           ++ inductiveTypes
                           ++ closureSignatures.1
@@ -2463,7 +2596,7 @@ def psWasmLowerSpecializedModule
                         closureSignatures.2
                           ++ lowered.state.generatedFunctionTypes
                       functions :=
-                        psWasmNatRuntimeFunctions
+                        runtimeFunctions
                           ++ lowered.functions
                           ++ lowered.state.generatedFunctions
                       functionRefs :=

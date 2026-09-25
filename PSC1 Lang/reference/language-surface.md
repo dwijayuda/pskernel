@@ -21,6 +21,24 @@ Rules:
 - all three use one definition semantics;
 - canonical Lean uses `def`.
 
+## Canonical spacing
+
+Both forms are accepted:
+
+```proofscript
+def answer: Nat := 43;
+def answer : Nat := 43;
+```
+
+Canonical `.ps` formatting is:
+
+```proofscript
+def answer: Nat := 43;
+function add(x: Nat, y: Nat): Nat := x + y;
+```
+
+Canonical `.lean` output keeps Lean style: `x : Nat`.
+
 ## Binders
 
 ```text

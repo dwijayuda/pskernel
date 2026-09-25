@@ -369,6 +369,53 @@ def assertWhnfLayering : IO Unit := do
   assertTrue "whnfCore performed forbidden delta reduction" (PSC1Kernel.Expr.eq core d)
   assertTrue "full whnf failed to delta reduce" (PSC1Kernel.Expr.eq full (.lit (.nat 23)))
 
+def assertNativeEvaluatorBoundary : IO Unit := do
+  let natTarget : PSC1Kernel.Name :=
+    .str (.str .anonymous "NativeOracle") "nat"
+  let boolTarget : PSC1Kernel.Name :=
+    .str (.str .anonymous "NativeOracle") "bool"
+  let provider : PSC1Kernel.NativeEvaluator := {
+    evalBool := fun name =>
+      if PSC1Kernel.Name.eq name boolTarget then
+        .ok (some true)
+      else
+        .ok none
+    evalNat := fun name =>
+      if PSC1Kernel.Name.eq name natTarget then
+        .ok (some 37)
+      else
+        .ok none
+  }
+  let baseCtx := PSC1Kernel.CheckerContext.empty .empty
+  let ctx : PSC1Kernel.CheckerContext :=
+    { baseCtx with nativeEvaluator := some provider }
+  let natExpr : PSC1Kernel.Expr :=
+    .app
+      (.const PSC1Kernel.kernelReduceNatName [])
+      (.const natTarget [])
+  let boolExpr : PSC1Kernel.Expr :=
+    .app
+      (.const PSC1Kernel.kernelReduceBoolName [])
+      (.const boolTarget [])
+
+  let natResult ← exceptToIO
+    "PSC1 native Nat provider"
+    (PSC1Kernel.whnf ctx natExpr)
+  assertTrue "native Nat provider returned the wrong kernel value"
+    (PSC1Kernel.Expr.eq natResult (.lit (.nat 37)))
+
+  let boolResult ← exceptToIO
+    "PSC1 native Bool provider"
+    (PSC1Kernel.whnf ctx boolExpr)
+  assertTrue "native Bool provider returned the wrong kernel value"
+    (PSC1Kernel.Expr.eq boolResult (.const PSC1Kernel.kernelBoolTrueName []))
+
+  let closedResult ← exceptToIO
+    "PSC1 native boundary fail-closed"
+    (PSC1Kernel.whnf baseCtx natExpr)
+  assertTrue "missing native provider must leave marker reduction unavailable"
+    (PSC1Kernel.Expr.eq closedResult natExpr)
+
 def assertNatReductionOracle : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let ctx := PSC1Kernel.CheckerContext.empty .empty
@@ -1287,6 +1334,7 @@ def run : IO Unit := do
   assertWhnfLayering
   assertNatOffsetOracle
   assertEagerReduceOracle
+  assertNativeEvaluatorBoundary
   assertNatReductionOracle
   assertFunctionEtaOracle
   assertLazyDeltaOracle

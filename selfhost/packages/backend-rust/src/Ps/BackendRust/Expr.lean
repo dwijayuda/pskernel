@@ -65,11 +65,127 @@ def psRustEmitParameterList
           | Except.ok printedRest =>
               Except.ok (List.cons rendered printedRest)
 
+def psRustEmitMachineIntegerBinary
+    (operation : PsVerifiedIrIntegerBinaryOp)
+    (left right : String) : String :=
+  match operation with
+  | PsVerifiedIrIntegerBinaryOp.add =>
+      psRustConcat4
+        "(("
+        left
+        ").wrapping_add("
+        (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerBinaryOp.sub =>
+      psRustConcat4
+        "(("
+        left
+        ").wrapping_sub("
+        (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerBinaryOp.mul =>
+      psRustConcat4
+        "(("
+        left
+        ").wrapping_mul("
+        (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerBinaryOp.bitAnd =>
+      psRustConcat4 "((" left ") & (" (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerBinaryOp.bitOr =>
+      psRustConcat4 "((" left ") | (" (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerBinaryOp.bitXor =>
+      psRustConcat4 "((" left ") ^ (" (psRustConcat2 right "))")
+
+def psRustEmitMachineIntegerCompare
+    (operation : PsVerifiedIrIntegerCompareOp)
+    (left right : String) : String :=
+  match operation with
+  | PsVerifiedIrIntegerCompareOp.eq =>
+      psRustConcat4 "((" left ") == (" (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerCompareOp.ne =>
+      psRustConcat4 "((" left ") != (" (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerCompareOp.lt =>
+      psRustConcat4 "((" left ") < (" (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerCompareOp.le =>
+      psRustConcat4 "((" left ") <= (" (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerCompareOp.gt =>
+      psRustConcat4 "((" left ") > (" (psRustConcat2 right "))")
+  | PsVerifiedIrIntegerCompareOp.ge =>
+      psRustConcat4 "((" left ") >= (" (psRustConcat2 right "))")
+
+def psRustEmitFloatBinary
+    (operation : PsVerifiedIrFloatBinaryOp)
+    (left right : String) : String :=
+  match operation with
+  | PsVerifiedIrFloatBinaryOp.add =>
+      psRustConcat4 "((" left ") + (" (psRustConcat2 right "))")
+  | PsVerifiedIrFloatBinaryOp.sub =>
+      psRustConcat4 "((" left ") - (" (psRustConcat2 right "))")
+  | PsVerifiedIrFloatBinaryOp.mul =>
+      psRustConcat4 "((" left ") * (" (psRustConcat2 right "))")
+  | PsVerifiedIrFloatBinaryOp.div =>
+      psRustConcat4 "((" left ") / (" (psRustConcat2 right "))")
+
+def psRustEmitFloatCompare
+    (operation : PsVerifiedIrFloatCompareOp)
+    (left right : String) : String :=
+  match operation with
+  | PsVerifiedIrFloatCompareOp.eq =>
+      psRustConcat4 "((" left ") == (" (psRustConcat2 right "))")
+  | PsVerifiedIrFloatCompareOp.ne =>
+      psRustConcat4 "((" left ") != (" (psRustConcat2 right "))")
+  | PsVerifiedIrFloatCompareOp.lt =>
+      psRustConcat4 "((" left ") < (" (psRustConcat2 right "))")
+  | PsVerifiedIrFloatCompareOp.le =>
+      psRustConcat4 "((" left ") <= (" (psRustConcat2 right "))")
+  | PsVerifiedIrFloatCompareOp.gt =>
+      psRustConcat4 "((" left ") > (" (psRustConcat2 right "))")
+  | PsVerifiedIrFloatCompareOp.ge =>
+      psRustConcat4 "((" left ") >= (" (psRustConcat2 right "))")
+
 def psRustEmitIntrinsicFromPrinted
     (operation : PsVerifiedIrIntrinsic)
     (arguments : List String) :
     Except PsRustEmitError String :=
   match operation with
+  | PsVerifiedIrIntrinsic.machineIntBinary _ integerOperation =>
+      match arguments with
+      | List.cons left (List.cons right List.nil) =>
+          Except.ok
+            (psRustEmitMachineIntegerBinary
+              integerOperation
+              left
+              right)
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.machineIntCompare _ integerOperation =>
+      match arguments with
+      | List.cons left (List.cons right List.nil) =>
+          Except.ok
+            (psRustEmitMachineIntegerCompare
+              integerOperation
+              left
+              right)
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.floatBinary _ floatOperation =>
+      match arguments with
+      | List.cons left (List.cons right List.nil) =>
+          Except.ok
+            (psRustEmitFloatBinary
+              floatOperation
+              left
+              right)
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.floatCompare _ floatOperation =>
+      match arguments with
+      | List.cons left (List.cons right List.nil) =>
+          Except.ok
+            (psRustEmitFloatCompare
+              floatOperation
+              left
+              right)
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natAdd =>
       match arguments with
       | List.cons left (List.cons right List.nil) =>
@@ -697,7 +813,7 @@ def psRustEmitExprWithFuel :
                       (psRustConcat2
                         (psRustJoin ", " printedArguments)
                         ")"))
-      | PsVerifiedIrExpr.letE name value body =>
+      | PsVerifiedIrExpr.letE name _ value body =>
           match emitNested value with
           | Except.error error =>
               Except.error error

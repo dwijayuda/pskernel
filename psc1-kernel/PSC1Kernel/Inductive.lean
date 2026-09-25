@@ -7,8 +7,8 @@ namespace Kernel
 /--
 Checked K5 slice: an ordinary inductive datatype in a result universe that is
 provably nonzero. Shared parameters, indices, and constructor fields are
-supported when fields are non-recursive; recursive occurrences still fail
-closed.
+supported together with direct strictly-positive recursive fields. Function-
+recursive, nested, negative, and mutual occurrences still fail closed.
 
 Unsupported inductive shapes fail closed instead of accepting exported
 constructor/recursor metadata.
@@ -77,9 +77,14 @@ partial def exprContainsConst (target : Name) : Expr → Bool
       Name.eq typeName target || exprContainsConst target body
   | .bvar _ | .fvar _ | .mvar _ | .sort _ | .lit _ => false
 
+structure SimpleRecursiveField where
+  field : OpenBinder
+  indices : List Expr
+
 structure SimpleConstructorShape where
   ctor : SimpleConstructorDecl
   fields : List OpenBinder
+  recursiveFields : List SimpleRecursiveField
   resultIndices : List Expr
 
 partial def openSimpleHeaderParams
@@ -148,10 +153,15 @@ partial def openSimpleConstructorParams
 partial def openSimpleConstructorFields
     (ctx : CheckerContext)
     (target : Name)
+    (levels : List Level)
+    (params : List OpenBinder)
+    (numIndices : Nat)
     (resultLevel : Level)
     (type : Expr)
-    (revFields : List OpenBinder := []) :
-    Except String (CheckerContext × List OpenBinder × Expr) := do
+    (revFields : List OpenBinder := [])
+    (revRecursive : List SimpleRecursiveField := []) :
+    Except String
+      (CheckerContext × List OpenBinder × List SimpleRecursiveField × Expr) := do
   let reduced ← whnf ctx type
   match reduced with
   | .forallE userName domain body binderInfo => do
@@ -160,9 +170,12 @@ partial def openSimpleConstructorFields
       unless Level.le fieldLevel resultLevel do
         throw "simple inductive constructor field universe is too large"
       let domainWhnf ← whnf ctx domain
-      if exprContainsConst target domain ||
-          exprContainsConst target domainWhnf then
-        throw "simple inductive admission does not yet support recursive constructor fields"
+      let recursiveIndices? :=
+        simpleInductiveAppIndices? target levels params numIndices domainWhnf
+      if recursiveIndices?.isNone &&
+          (exprContainsConst target domain ||
+            exprContainsConst target domainWhnf) then
+        throw "simple inductive admission supports only direct strictly-positive recursive fields"
       let (fresh, child) := ctx.withLocal userName domain binderInfo
       let field : OpenBinder := {
         internalName := fresh
@@ -170,11 +183,20 @@ partial def openSimpleConstructorFields
         type := domain
         binderInfo := binderInfo
       }
+      let revRecursive' :=
+        match recursiveIndices? with
+        | some recursiveIndices =>
+            {
+              field := field
+              indices := recursiveIndices
+            } :: revRecursive
+        | none => revRecursive
       openSimpleConstructorFields
-        child target resultLevel (body.instantiate1 (.fvar fresh))
-        (field :: revFields)
+        child target levels params numIndices resultLevel
+        (body.instantiate1 (.fvar fresh))
+        (field :: revFields) revRecursive'
   | result =>
-      pure (ctx, revFields.reverse, result)
+      pure (ctx, revFields.reverse, revRecursive.reverse, result)
 
 def simpleFieldArgs (shape : SimpleConstructorShape) : List Expr :=
   shape.fields.map (fun field => .fvar field.internalName)
@@ -192,6 +214,23 @@ def consumeSimpleResultParams :
       else
         none
 
+def simpleInductiveAppIndices?
+    (target : Name)
+    (levels : List Level)
+    (params : List OpenBinder)
+    (numIndices : Nat)
+    (e : Expr) : Option (List Expr) :=
+  match e.getAppFn with
+  | .const resultName resultLevels =>
+      if !Name.eq resultName target || !Level.listEq resultLevels levels then
+        none
+      else
+        match consumeSimpleResultParams params e.getAppArgs with
+        | some indices =>
+            if indices.length == numIndices then some indices else none
+        | none => none
+  | _ => none
+
 partial def simpleIndicesContainTarget
     (target : Name) : List Expr → Bool
   | [] => false
@@ -205,14 +244,9 @@ def validateSimpleConstructorResult
     (params : List OpenBinder)
     (numIndices : Nat)
     (result : Expr) : Except String (List Expr) := do
-  let .const resultName resultLevels := result.getAppFn
-    | throw "simple inductive constructor result is not an inductive application"
-  unless Name.eq resultName target && Level.listEq resultLevels levels do
-    throw "simple inductive constructor returns the wrong datatype"
-  let some indices := consumeSimpleResultParams params result.getAppArgs
-    | throw "simple inductive constructor return parameters do not match the datatype parameters"
-  unless indices.length == numIndices do
-    throw "simple inductive constructor return index arity mismatch"
+  let some indices :=
+      simpleInductiveAppIndices? target levels params numIndices result
+    | throw "simple inductive constructor must return the declared datatype with matching parameters and index arity"
   if simpleIndicesContainTarget target indices then
     throw "simple inductive constructor return index contains a recursive occurrence"
   pure indices
@@ -231,6 +265,46 @@ def simpleCtorApp
     (.const shape.ctor.name levels)
     (simpleParamArgs params ++ simpleFieldArgs shape)
 
+def makeSimpleIHBinders
+    (motive : Expr)
+    (shape : SimpleConstructorShape) : List OpenBinder :=
+  let rec go : List SimpleRecursiveField → Nat → List OpenBinder
+    | [], _ => []
+    | recursive :: rest, index =>
+        let internalName := .num (simpleInternalName "ih") index
+        let binder : OpenBinder := {
+          internalName := internalName
+          userName := recursive.field.userName.appendAfter "_ih"
+          type :=
+            simpleMotiveApp motive recursive.indices
+              (.fvar recursive.field.internalName)
+          binderInfo := .default
+        }
+        binder :: go rest (index + 1)
+  go shape.recursiveFields 0
+
+def simpleHasRecursiveFields : List SimpleConstructorShape → Bool
+  | [] => false
+  | shape :: rest =>
+      !shape.recursiveFields.isEmpty || simpleHasRecursiveFields rest
+
+partial def replaceSimpleConstant
+    (target : Name)
+    (replacement : ConstantInfo) : List ConstantInfo → List ConstantInfo
+  | [] => []
+  | info :: rest =>
+      if Name.eq info.name target then
+        replacement :: rest
+      else
+        info :: replaceSimpleConstant target replacement rest
+
+def replaceSimpleInductiveInfo
+    (env : Environment)
+    (info : InductiveInfo) : Environment :=
+  { env with
+    constants :=
+      replaceSimpleConstant info.base.name (.inductInfo info) env.constants }
+
 def makeSimpleMinorBinders
     (motive : Expr)
     (levels : List Level)
@@ -239,30 +313,54 @@ def makeSimpleMinorBinders
   | [], _ => []
   | shape :: rest, index =>
       let internalName := .num (simpleInternalName "minor") index
+      let ihBinders := makeSimpleIHBinders motive shape
       let binder : OpenBinder := {
         internalName := internalName
         userName := shape.ctor.name
         type :=
-          closeOpenBinders shape.fields
+          closeOpenBinders (shape.fields ++ ihBinders)
             (simpleMotiveApp motive shape.resultIndices
               (simpleCtorApp levels params shape))
         binderInfo := .default
       }
       binder :: makeSimpleMinorBinders motive levels params rest (index + 1)
 
-def makeSimpleRecursorRules
+def makeSimpleRecursiveCalls
+    (recName : Name)
+    (recLevels : List Level)
     (params : List OpenBinder)
+    (motive : Expr)
+    (minors : List OpenBinder)
+    (shape : SimpleConstructorShape) : List Expr :=
+  let fixed :=
+    simpleParamArgs params ++
+      [motive] ++ minors.map (fun minor => Expr.fvar minor.internalName)
+  shape.recursiveFields.map fun recursive =>
+    applyArgs (.const recName recLevels)
+      (fixed ++ recursive.indices ++ [.fvar recursive.field.internalName])
+
+def makeSimpleRecursorRules
+    (recName : Name)
+    (recLevels : List Level)
+    (params : List OpenBinder)
+    (motive : Expr)
+    (allMinors : List OpenBinder)
     (ruleBinders : List OpenBinder) :
     List SimpleConstructorShape → List OpenBinder → List RecursorRule
   | [], [] => []
   | shape :: shapes, minor :: minors =>
+      let recursiveCalls :=
+        makeSimpleRecursiveCalls
+          recName recLevels params motive allMinors shape
       let body :=
-        applyArgs (.fvar minor.internalName) (simpleFieldArgs shape)
+        applyArgs (.fvar minor.internalName)
+          (simpleFieldArgs shape ++ recursiveCalls)
       {
         ctor := shape.ctor.name
         nFields := shape.fields.length
         rhs := closeOpenLambdas (ruleBinders ++ shape.fields) body
-      } :: makeSimpleRecursorRules params ruleBinders shapes minors
+      } :: makeSimpleRecursorRules
+        recName recLevels params motive allMinors ruleBinders shapes minors
   | _, _ => []
 
 def validateSimpleRecursorRules
@@ -354,9 +452,9 @@ def addSimpleInductive
         let _ ← ensureSort closedCtorCtx ctorTypeType
         let ctorCtx : CheckerContext := { headerParamCtx with env := work }
         let afterParams ← openSimpleConstructorParams ctorCtx params ctor.type
-        let (resultCtx, fields, result) ←
+        let (resultCtx, fields, recursiveFields, result) ←
           openSimpleConstructorFields
-            ctorCtx decl.name resultLevel afterParams
+            ctorCtx decl.name levels params indices.length resultLevel afterParams
         let resultIndices ←
           validateSimpleConstructorResult
             decl.name levels params indices.length result
@@ -376,6 +474,7 @@ def addSimpleInductive
         let shape : SimpleConstructorShape := {
           ctor := ctor
           fields := fields
+          recursiveFields := recursiveFields
           resultIndices := resultIndices
         }
         -- Keep resultCtx live through validation above; generated metadata is
@@ -384,6 +483,12 @@ def addSimpleInductive
         pure (done, shape :: shapes)
 
   let (work1, ctorShapes) ← addConstructors work0 0 decl.ctors
+
+  let isRecursive := simpleHasRecursiveFields ctorShapes
+  let finalInductInfo : InductiveInfo := {
+    inductInfo with isRec := isRecursive
+  }
+  let work1 := replaceSimpleInductiveInfo work1 finalInductInfo
 
   let elimName := simpleFreshElimName decl.levelParams
   let elimLevel : Level := .param elimName
@@ -414,8 +519,10 @@ def addSimpleInductive
       (ruleBinders ++ indices ++ [majorBinder])
       (simpleMotiveApp motive indexArgs major)
   let recType := recTypeRaw.inferImplicitAll true
+  let recLevels := recLevelParams.map Level.param
   let rules :=
-    makeSimpleRecursorRules params ruleBinders ctorShapes minorBinders
+    makeSimpleRecursorRules
+      recName recLevels params motive minorBinders ruleBinders ctorShapes minorBinders
   let recInfo : RecursorInfo := {
     base := {
       name := recName
@@ -436,9 +543,12 @@ def addSimpleInductive
   let recCtx := mkChecker work1 recLevelParams safety
   let recTypeType ← check recCtx recType
   let _ ← ensureSort recCtx recTypeType
-  validateSimpleRecursorRules recCtx params ruleBinders motive levels ctorShapes rules
+  let work2 := work1.addUnchecked (.recInfo recInfo)
+  let ruleCtx := mkChecker work2 recLevelParams safety
+  validateSimpleRecursorRules
+    ruleCtx params ruleBinders motive levels ctorShapes rules
 
-  pure (work1.addUnchecked (.recInfo recInfo))
+  pure work2
 
 end Kernel
 

@@ -28,7 +28,7 @@ function usage() {
     "",
     "default:",
     "  entry: SELFHOST-COMPILER.lean",
-    "  out:   out/bootstrap/workspace",
+    "  out:   dist/bootstrap/workspace",
   ].join("\n");
 }
 
@@ -127,7 +127,7 @@ function translateFile(sourcePath, outputPath) {
 }
 
 const entryArg = process.argv[2] ?? "SELFHOST-COMPILER.lean";
-const outArg = process.argv[3] ?? path.join("out", "bootstrap", "workspace");
+const outArg = process.argv[3] ?? path.join("dist", "bootstrap", "workspace");
 const entryPath = path.resolve(selfhostRoot, entryArg);
 const outWorkspace = path.resolve(selfhostRoot, outArg);
 

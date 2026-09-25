@@ -706,13 +706,13 @@ def psBuildInductiveMinorType
           | Except.error error => Except.error error
           | Except.ok fields =>
               let fieldArgs :=
-                psElabBinderArguments fields.bindersRev
+                psElabBinderArguments fields.bindersRev;
               let intro :=
                 psExprApplyMany
                   (PsExpr.constE info.name [])
-                  (parameterArgs ++ fieldArgs)
+                  (parameterArgs ++ fieldArgs);
               let body :=
-                PsExpr.app (PsExpr.fvar motiveId) intro
+                PsExpr.app (PsExpr.fvar motiveId) intro;
               match
                   psWrapRecursiveHypotheses
                     motiveId

@@ -1839,9 +1839,10 @@ def psParseLeanInductiveDeclaration
               [] with
           | Except.error error => Except.error error
           | Except.ok params =>
-              let parseAfterResult
+              let parseAfterResult :=
+                fun
                   (resultType : Option PsSyntaxTerm)
-                  (afterResult : PsTokenCursor) :=
+                  (afterResult : PsTokenCursor) =>
                 match psTokenCursorExpectText afterResult "where" with
                 | Except.error error => Except.error error
                 | Except.ok afterWhere =>

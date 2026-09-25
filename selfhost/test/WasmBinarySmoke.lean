@@ -38,7 +38,29 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
         ]
       }
     ]
-    inductives := []
+    inductives := [
+      {
+        name := "MaybeU32"
+        typeParameters := []
+        constructors := [
+          {
+            name := "none"
+            fields := []
+          },
+          {
+            name := "some"
+            fields := [
+              {
+                name := "value"
+                type :=
+                  PsVerifiedIrType.primitive
+                    PsVerifiedIrPrimitiveType.uint32
+              }
+            ]
+          }
+        ]
+      }
+    ]
     declarations := [
       {
         name := "addU32"
@@ -253,6 +275,90 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
               "SmallSigned"
               [("value", PsVerifiedIrExpr.var "value")])
             "value"
+      }
+,
+      {
+        name := "someValue"
+        typeParameters := []
+        parameters := [
+          {
+            name := "input"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.matchE
+            "MaybeU32"
+            (PsVerifiedIrExpr.constructor
+              "MaybeU32"
+              "some"
+              []
+              [("value", PsVerifiedIrExpr.var "input")])
+            [
+              (
+                "none",
+                [],
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.machineInteger
+                    PsVerifiedIrMachineIntegerType.uint32
+                    0)
+              ),
+              (
+                "some",
+                [
+                  {
+                    field := "value"
+                    name := "value"
+                    type :=
+                      PsVerifiedIrType.primitive
+                        PsVerifiedIrPrimitiveType.uint32
+                  }
+                ],
+                PsVerifiedIrExpr.var "value"
+              )
+            ]
+      },
+      {
+        name := "noneValue"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.matchE
+            "MaybeU32"
+            (PsVerifiedIrExpr.constructor
+              "MaybeU32"
+              "none"
+              []
+              [])
+            [
+              (
+                "none",
+                [],
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.machineInteger
+                    PsVerifiedIrMachineIntegerType.uint32
+                    0)
+              ),
+              (
+                "some",
+                [
+                  {
+                    field := "value"
+                    name := "value"
+                    type :=
+                      PsVerifiedIrType.primitive
+                        PsVerifiedIrPrimitiveType.uint32
+                  }
+                ],
+                PsVerifiedIrExpr.var "value"
+              )
+            ]
       }
     ]
   }

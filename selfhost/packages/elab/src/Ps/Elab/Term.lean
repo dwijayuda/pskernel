@@ -827,6 +827,32 @@ def psElabMatchAlternativeFind
       else
         psElabMatchAlternativeFind name rest
 
+def psElabFillWildcardAlternatives
+    (pattern : PsSyntaxPattern)
+    (body : PsSyntaxTerm)
+    (span : PsSourceSpan) :
+    List PsName ->
+    List PsElabMatchAlternative ->
+    List PsElabMatchAlternative
+  | [], alternativesRev => alternativesRev
+  | ctorName :: rest, alternativesRev =>
+      let next :=
+        match psElabMatchAlternativeFind ctorName alternativesRev with
+        | some _ => alternativesRev
+        | none =>
+            {
+              constructorName := ctorName
+              pattern := pattern
+              body := body
+              span := span
+            } :: alternativesRev
+      psElabFillWildcardAlternatives
+        pattern
+        body
+        span
+        rest
+        next
+
 def psElabMatchPatternConstructorName
     (inductiveName : PsName)
     (pattern : PsSyntaxPattern) :
@@ -867,28 +893,41 @@ def psElabPrepareMatchAlternatives
       else
         Except.error PsElabError.matchNonExhaustive
   | (pattern, body, span) :: rest, alternativesRev =>
-      match psElabMatchPatternConstructorName
-          inductiveInfo.name
-          pattern with
-      | Except.error error => Except.error error
-      | Except.ok ctorName =>
-          if !psMatchNameListContains inductiveInfo.constructors ctorName then
-            Except.error (PsElabError.matchConstructorUnknown ctorName)
+      match pattern with
+      | .wildcard _ =>
+          if rest.isEmpty then
+            Except.ok
+              ((psElabFillWildcardAlternatives
+                pattern
+                body
+                span
+                inductiveInfo.constructors
+                alternativesRev).reverse)
           else
-            match psElabMatchAlternativeFind ctorName alternativesRev with
-            | some _ =>
-                Except.error
-                  (PsElabError.matchDuplicateConstructor ctorName)
-            | none =>
-                psElabPrepareMatchAlternatives
-                  inductiveInfo
-                  rest
-                  ({
-                    constructorName := ctorName
-                    pattern := pattern
-                    body := body
-                    span := span
-                  } :: alternativesRev)
+            Except.error PsElabError.matchPatternUnsupported
+      | _ =>
+          match psElabMatchPatternConstructorName
+              inductiveInfo.name
+              pattern with
+          | Except.error error => Except.error error
+          | Except.ok ctorName =>
+              if !psMatchNameListContains inductiveInfo.constructors ctorName then
+                Except.error (PsElabError.matchConstructorUnknown ctorName)
+              else
+                match psElabMatchAlternativeFind ctorName alternativesRev with
+                | some _ =>
+                    Except.error
+                      (PsElabError.matchDuplicateConstructor ctorName)
+                | none =>
+                    psElabPrepareMatchAlternatives
+                      inductiveInfo
+                      rest
+                      ({
+                        constructorName := ctorName
+                        pattern := pattern
+                        body := body
+                        span := span
+                      } :: alternativesRev)
 
 structure PsElabMatchField where
   id : Nat
@@ -1057,6 +1096,122 @@ structure PsElabMatchMinorResult where
   context : PsElabContext
   term : PsExpr
 
+def psElabWildcardBinderNames
+    (span : PsSourceSpan) :
+    Nat -> Nat -> List PsSyntaxName
+  | _, 0 => []
+  | index, remaining + 1 =>
+      {
+        segments := ["_wild" ++ toString index]
+        span := span
+      } ::
+        psElabWildcardBinderNames
+          span
+          (index + 1)
+          remaining
+
+def psElabMatchConstructorMinor
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (context : PsElabContext)
+    (inductiveInfo : PsInductiveInfo)
+    (inductiveLevels : List PsLevel)
+    (parameterArgs : List PsExpr)
+    (expectedType : PsExpr)
+    (constructorName : PsName)
+    (body : PsSyntaxTerm)
+    (span : PsSourceSpan)
+    (sourceBinders : Option (List PsSyntaxName)) :
+    Except PsElabError PsElabMatchMinorResult :=
+  match psEnvironmentFindConstructor
+      context.environment
+      constructorName with
+  | none =>
+      Except.error
+        (PsElabError.matchConstructorUnknown constructorName)
+  | some ctorInfo =>
+      let binders :=
+        match sourceBinders with
+        | some values => values
+        | none =>
+            psElabWildcardBinderNames
+              span
+              0
+              ctorInfo.numFields
+      if !psNameEq ctorInfo.inductiveName inductiveInfo.name then
+        Except.error
+          (PsElabError.matchConstructorUnknown constructorName)
+      else if ctorInfo.numParams != parameterArgs.length then
+        Except.error PsElabError.matchParameterArity
+      else if ctorInfo.numFields != binders.length then
+        Except.error
+          (PsElabError.matchConstructorArity constructorName)
+      else if psSyntaxNameListHasDuplicate binders then
+        Except.error
+          (PsElabError.matchConstructorArity constructorName)
+      else if ctorInfo.levelParams.length != inductiveLevels.length then
+        Except.error PsElabError.matchRecursorLevels
+      else
+        let ctorType :=
+          psExprInstantiateLevelParams
+            ctorInfo.levelParams
+            inductiveLevels
+            ctorInfo.type
+        match psElabMatchApplyParameters
+            context
+            parameterArgs
+            ctorType with
+        | Except.error error => Except.error error
+        | Except.ok fieldCursor =>
+            match psElabMatchFields
+                context
+                inductiveInfo.name
+                fieldCursor
+                binders
+                [] with
+            | Except.error error => Except.error error
+            | Except.ok fieldResult =>
+                let fields :=
+                  fieldResult.fieldsRev.reverse
+                match
+                    psElabPushRecursiveHypotheses
+                      expectedType
+                      fields
+                      ctorInfo.recursiveFields
+                      fieldResult.context
+                      [] with
+                | Except.error error => Except.error error
+                | Except.ok hypotheses =>
+                    match elaborate
+                        hypotheses.context
+                        body
+                        (some expectedType) with
+                    | Except.error error => Except.error error
+                    | Except.ok bodyResult =>
+                        let metaContext := bodyResult.context.metaContext
+                        let withHypotheses :=
+                          psCloseElabMatchFields
+                            metaContext
+                            hypotheses.hypothesesRev
+                            (psMetaInstantiate
+                              metaContext
+                              bodyResult.term)
+                        let closed :=
+                          psCloseElabMatchFields
+                            metaContext
+                            fieldResult.fieldsRev
+                            withHypotheses
+                        Except.ok {
+                          context :=
+                            psElabContextWithMeta
+                              context
+                              metaContext
+                          term := closed
+                        }
+
 def psElabMatchMinor
     (elaborate :
       PsElabContext ->
@@ -1079,90 +1234,30 @@ def psElabMatchMinor
             context := bodyResult.context
             term := bodyResult.term
           }
-  | .wildcard _ =>
-      Except.error PsElabError.matchPatternUnsupported
-  | .constructor _ binders _ =>
-      match psEnvironmentFindConstructor
-          context.environment
-          alternative.constructorName with
-      | none =>
-          Except.error
-            (PsElabError.matchConstructorUnknown
-              alternative.constructorName)
-      | some ctorInfo =>
-          if !psNameEq ctorInfo.inductiveName inductiveInfo.name then
-            Except.error
-              (PsElabError.matchConstructorUnknown
-                alternative.constructorName)
-          else if ctorInfo.numParams != parameterArgs.length then
-            Except.error PsElabError.matchParameterArity
-          else if ctorInfo.numFields != binders.length then
-            Except.error
-              (PsElabError.matchConstructorArity
-                alternative.constructorName)
-          else if psSyntaxNameListHasDuplicate binders then
-            Except.error
-              (PsElabError.matchConstructorArity
-                alternative.constructorName)
-          else if ctorInfo.levelParams.length != inductiveLevels.length then
-            Except.error PsElabError.matchRecursorLevels
-          else
-            let ctorType :=
-              psExprInstantiateLevelParams
-                ctorInfo.levelParams
-                inductiveLevels
-                ctorInfo.type
-            match psElabMatchApplyParameters
-                context
-                parameterArgs
-                ctorType with
-            | Except.error error => Except.error error
-            | Except.ok fieldCursor =>
-                match psElabMatchFields
-                    context
-                    inductiveInfo.name
-                    fieldCursor
-                    binders
-                    [] with
-                | Except.error error => Except.error error
-                | Except.ok fieldResult =>
-                    let fields :=
-                      fieldResult.fieldsRev.reverse
-                    match
-                        psElabPushRecursiveHypotheses
-                          expectedType
-                          fields
-                          ctorInfo.recursiveFields
-                          fieldResult.context
-                          [] with
-                    | Except.error error => Except.error error
-                    | Except.ok hypotheses =>
-                        match elaborate
-                            hypotheses.context
-                            alternative.body
-                            (some expectedType) with
-                        | Except.error error => Except.error error
-                        | Except.ok bodyResult =>
-                            let metaContext := bodyResult.context.metaContext
-                            let withHypotheses :=
-                              psCloseElabMatchFields
-                                metaContext
-                                hypotheses.hypothesesRev
-                                (psMetaInstantiate
-                                  metaContext
-                                  bodyResult.term)
-                            let closed :=
-                              psCloseElabMatchFields
-                                metaContext
-                                fieldResult.fieldsRev
-                                withHypotheses
-                            Except.ok {
-                              context :=
-                                psElabContextWithMeta
-                                  context
-                                  metaContext
-                              term := closed
-                            }
+  | .wildcard span =>
+      psElabMatchConstructorMinor
+        elaborate
+        context
+        inductiveInfo
+        inductiveLevels
+        parameterArgs
+        expectedType
+        alternative.constructorName
+        alternative.body
+        span
+        none
+  | .constructor _ binders span =>
+      psElabMatchConstructorMinor
+        elaborate
+        context
+        inductiveInfo
+        inductiveLevels
+        parameterArgs
+        expectedType
+        alternative.constructorName
+        alternative.body
+        span
+        (some binders)
 
 structure PsElabMatchMinorsResult where
   context : PsElabContext

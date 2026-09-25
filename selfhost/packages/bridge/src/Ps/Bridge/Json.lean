@@ -13,20 +13,24 @@ def psJsonCharEq (left right : Char) : Bool :=
   Nat.beq (psJsonCharCode left) (psJsonCharCode right)
 
 def psJsonCharListEq
-    (left right : List Char) : Bool :=
+    (left : List Char) : List Char -> Bool :=
   match left with
   | List.nil =>
-      match right with
-      | List.nil => true
-      | List.cons _ _ => false
+      fun (right : List Char) =>
+        match right with
+        | List.nil => true
+        | List.cons _ _ => false
   | List.cons leftHead leftTail =>
-      match right with
-      | List.nil => false
-      | List.cons rightHead rightTail =>
-          if psJsonCharEq leftHead rightHead then
-            psJsonCharListEq leftTail rightTail
-          else
-            false
+      let smaller : List Char -> Bool :=
+        psJsonCharListEq leftTail;
+      fun (right : List Char) =>
+        match right with
+        | List.nil => false
+        | List.cons rightHead rightTail =>
+            if psJsonCharEq leftHead rightHead then
+              smaller rightTail
+            else
+              false
 
 def psJsonStringEq (left right : String) : Bool :=
   psJsonCharListEq left.toList right.toList

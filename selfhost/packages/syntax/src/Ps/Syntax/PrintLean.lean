@@ -398,7 +398,7 @@ def psPrintLeanStructureField
           match psPrintLeanTerm type with
           | Except.error error => Except.error error
           | Except.ok printedType =>
-              let value :=
+              let value : String :=
                 match head.kind with
                 | .explicit => psPrintLeanConcat3 name " : " printedType
                 | .implicit => psPrintLeanConcat5 "{" name " : " printedType "}"

@@ -138,9 +138,9 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
     | some info =>
       if info.levelParams.length != levels.length then
         .error "incorrect number of universe levels"
-      else if info.isUnsafe && ctx.safety != .unsafeDef then
+      else if info.isUnsafe && !ctx.safety.isUnsafe then
         .error "safe declaration uses unsafe constant"
-      else if info.isPartial && ctx.safety == .safe then
+      else if info.isPartial && ctx.safety.isSafe then
         .error "safe declaration uses partial constant"
       else
         .ok (info.type.instantiateLevelParams info.levelParams levels)

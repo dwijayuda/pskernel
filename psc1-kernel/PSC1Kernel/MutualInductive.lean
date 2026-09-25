@@ -392,7 +392,9 @@ def validateSimpleMutualRules
 
 def addSimpleMutualInductive
     (env : Environment)
-    (decl : SimpleMutualInductiveDecl) : Except String Environment := do
+    (decl : SimpleMutualInductiveDecl)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Environment := do
   if Name.hasDuplicates decl.levelParams then
     throw "duplicate universe parameter"
   if decl.types.length < 2 then
@@ -427,7 +429,7 @@ def addSimpleMutualInductive
     | throw "empty mutual inductive declaration"
   checkNoMVarNoFVar first.type
   checkLevelParams first.type decl.levelParams
-  let firstCtx := mkChecker env decl.levelParams safety
+  let firstCtx := mkChecker env decl.levelParams safety maxRecDepth maxNatSize
   let firstTypeType ← check firstCtx first.type
   let _ ← ensureSort firstCtx firstTypeType
   let (headerParamCtx, params, firstAfterParams) ←
@@ -448,7 +450,7 @@ def addSimpleMutualInductive
     | type :: rest => do
         checkNoMVarNoFVar type.type
         checkLevelParams type.type decl.levelParams
-        let closedCtx := mkChecker env decl.levelParams safety
+        let closedCtx := mkChecker env decl.levelParams safety maxRecDepth maxNatSize
         let typeType ← check closedCtx type.type
         let _ ← ensureSort closedCtx typeType
         let afterParams ←
@@ -504,7 +506,7 @@ def addSimpleMutualInductive
           | ctor :: more => do
               checkNoMVarNoFVar ctor.type
               checkLevelParams ctor.type decl.levelParams
-              let closedCtorCtx := mkChecker work decl.levelParams safety
+              let closedCtorCtx := mkChecker work decl.levelParams safety maxRecDepth maxNatSize
               let ctorTypeType ← check closedCtorCtx ctor.type
               let _ ← ensureSort closedCtorCtx ctorTypeType
               let ctorCtx : CheckerContext := {
@@ -637,7 +639,7 @@ def addSimpleMutualInductive
     match infos with
     | [] => pure ()
     | info :: rest => do
-        let recCtx := mkChecker work2 recLevelParams safety
+        let recCtx := mkChecker work2 recLevelParams safety maxRecDepth maxNatSize
         let recTypeType ← check recCtx info.base.type
         let _ ← ensureSort recCtx recTypeType
         validateSimpleMutualRules

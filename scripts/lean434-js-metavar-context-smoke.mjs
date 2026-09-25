@@ -6,6 +6,7 @@ import {
   bvar,
   exprEq,
   fvar,
+  forallE,
   lam,
   nameKey,
   nameFromDotted,
@@ -340,6 +341,79 @@ const empty=emptyLean434MetavarContext();
     }
     console.log(
       'ok - native Lean instantiateExprMVarsImp beta-reduces assigned mvar applications',
+    );
+  }
+
+  {
+    const zetaName=numName(strName(anonymous,'_m'),13n);
+    const zetaId=lean434RuntimeMVarId(zetaName);
+    const natType=constant(nameFromDotted('Nat'));
+    const fnType=forallE(
+      nameFromDotted('x'),
+      natType,
+      natType,
+    );
+    const letFunction={
+      kind:'let',
+      name:nameFromDotted('f'),
+      type:fnType,
+      value:lam(
+        nameFromDotted('x'),
+        natType,
+        bvar(0),
+      ),
+      body:bvar(0),
+      nondep:false,
+    };
+
+    let zetaAssign=evaluator.evaluate(
+      constant(nameFromDotted('Lean.assignExp')),
+    );
+    zetaAssign=evaluator.applyRuntimeValue(zetaAssign,empty);
+    zetaAssign=evaluator.applyRuntimeValue(zetaAssign,zetaId);
+    const zetaMctx=evaluator.applyRuntimeValue(
+      zetaAssign,
+      kernelExprToLean434Runtime(letFunction),
+    );
+    const zetaTarget={
+      kind:'constructor',
+      name:'Lean.Expr.app',
+      fields:[
+        {
+          kind:'constructor',
+          name:'Lean.Expr.mvar',
+          fields:[zetaId],
+        },
+        kernelExprToLean434Runtime(natLit(42n)),
+      ],
+    };
+
+    let instantiateZeta=evaluator.evaluate(
+      constant(nameFromDotted('Lean.instantiateExprMVarsImp')),
+    );
+    instantiateZeta=evaluator.applyRuntimeValue(
+      instantiateZeta,
+      zetaMctx,
+    );
+    const zetaResult=evaluator.applyRuntimeValue(
+      instantiateZeta,
+      zetaTarget,
+    );
+    if(
+      zetaResult?.kind!=='constructor'
+      ||zetaResult.name!=='Prod.mk'
+      ||zetaResult.fields.length!==2
+      ||!exprEq(
+        lean434RuntimeExprToKernel(zetaResult.fields[1]),
+        natLit(42n),
+      )
+    ){
+      throw new Error(
+        'Lean.instantiateExprMVarsImp did not zeta-reduce a let-bound assigned function',
+      );
+    }
+    console.log(
+      'ok - native Lean instantiateExprMVarsImp matches apply_beta zeta semantics',
     );
   }
 

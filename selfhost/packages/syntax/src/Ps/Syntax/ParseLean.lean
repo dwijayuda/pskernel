@@ -609,12 +609,91 @@ def psParseLeanListPattern
           else
             none
 
+def psLeanNatPatternName
+    (constructor : String)
+    (span : PsSourceSpan) : PsSyntaxName :=
+  {
+    segments :=
+      List.cons
+        "Nat"
+        (List.cons constructor List.nil)
+    span := span
+  }
+
+def psParseLeanNatPattern
+    (cursor : PsTokenCursor) :
+    Option
+      (Except
+        PsParseError
+        (PsParseResult PsSyntaxPattern)) :=
+  match cursor.remaining with
+  | List.nil => none
+  | List.cons first rest =>
+      if
+          psTokenKindEq
+            first.kind
+            PsTokenKind.natural
+            && first.text == "0" then
+        some
+          (Except.ok {
+            value :=
+              PsSyntaxPattern.constructor
+                (psLeanNatPatternName
+                  "zero"
+                  first.span)
+                List.nil
+                first.span
+            cursor := { remaining := rest }
+          })
+      else
+        match rest with
+        | List.nil => none
+        | List.cons plus afterPlus =>
+            match afterPlus with
+            | List.nil => none
+            | List.cons one afterOne =>
+                if
+                    psTokenKindEq
+                      first.kind
+                      PsTokenKind.identifier
+                      && plus.text == "+"
+                      && psTokenKindEq
+                        one.kind
+                        PsTokenKind.natural
+                      && one.text == "1" then
+                  let span :=
+                    psSyntaxSpanJoin
+                      first.span
+                      one.span
+                  let binder :=
+                    psLeanPatternBinderName
+                      first
+                      "_natPred"
+                  some
+                    (Except.ok {
+                      value :=
+                        PsSyntaxPattern.constructor
+                          (psLeanNatPatternName
+                            "succ"
+                            span)
+                          (List.cons binder List.nil)
+                          span
+                      cursor := {
+                        remaining := afterOne
+                      }
+                    })
+                else
+                  none
+
 def psParseLeanPattern
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) :=
-  match psParseLeanListPattern cursor with
+  match psParseLeanNatPattern cursor with
   | some result => result
-  | none => psParseBasicPattern cursor
+  | none =>
+      match psParseLeanListPattern cursor with
+      | some result => result
+      | none => psParseBasicPattern cursor
 
 def psParseLeanMatchAlternativesAtColumnWithFuel
     (parseTerm :

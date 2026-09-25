@@ -43,6 +43,10 @@ partial def toLeanExpr : PSC1Kernel.Expr → Lean.Expr
 def assertTrue (label : String) (value : Bool) : IO Unit :=
   if value then pure () else throw <| IO.userError ("FAIL: " ++ label)
 
+def exceptToIO (label : String) : Except String α → IO α
+  | .ok value => pure value
+  | .error message => throw <| IO.userError (label ++ ": " ++ message)
+
 def kernelSortDefEq
     (env : Lean.Environment) (a b : PSC1Kernel.Level) : IO Bool := do
   match Lean.Kernel.isDefEq env ({} : Lean.LocalContext)
@@ -132,8 +136,8 @@ def assertProjectionOracle : IO Unit := do
   let p0 : PSC1Kernel.Expr := .proj S 0 value
   let p1 : PSC1Kernel.Expr := .proj S 1 value
   let badName : PSC1Kernel.Expr := .proj T 0 value
-  let r0 ← PSC1Kernel.whnf ctx p0
-  let r1 ← PSC1Kernel.whnf ctx p1
+  let r0 ← exceptToIO "projection field 0 whnf" (PSC1Kernel.whnf ctx p0)
+  let r1 ← exceptToIO "projection field 1 whnf" (PSC1Kernel.whnf ctx p1)
   assertTrue "projection field 0 did not reduce" (PSC1Kernel.Expr.eq r0 (.lit (.nat 7)))
   assertTrue "projection field 1 did not reduce" (PSC1Kernel.Expr.eq r1 (.lit (.nat 11)))
   match PSC1Kernel.infer ctx p0 with

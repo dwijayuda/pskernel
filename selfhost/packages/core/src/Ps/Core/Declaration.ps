@@ -1,8 +1,0 @@
-import Ps.Core.Expr
-
-inductive PsDeclaration where {
-  | axiomDecl(name : PsName, levelParams : List(PsName), type : PsExpr);
-  | definitionDecl(name : PsName, levelParams : List(PsName), type : PsExpr, value : PsExpr);
-  | theoremDecl(name : PsName, levelParams : List(PsName), type : PsExpr, value : PsExpr);
-  | opaqueDecl(name : PsName, levelParams : List(PsName), type : PsExpr, value : PsExpr);
-};

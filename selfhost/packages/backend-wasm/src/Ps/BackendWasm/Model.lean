@@ -94,6 +94,8 @@ inductive PsWasmInstruction where
   | structGet (typeName : String) (fieldIndex : Nat)
   | structGetS (typeName : String) (fieldIndex : Nat)
   | structGetU (typeName : String) (fieldIndex : Nat)
+  | refTest (typeName : String)
+  | refCast (typeName : String)
 
 structure PsWasmStructField where
   name : String
@@ -101,6 +103,8 @@ structure PsWasmStructField where
 
 structure PsWasmStructType where
   name : String
+  superType : Option String
+  isFinal : Bool
   fields : List PsWasmStructField
 
 structure PsWasmFunction where

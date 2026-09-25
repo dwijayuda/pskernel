@@ -105,14 +105,21 @@ def psEnvironmentAddReplacingAxiom
   let name := psDeclarationName declaration;
   match psEnvironmentFind environment name with
   | none =>
-      Option.some (PsEnvironment.mk (List.cons declaration environment.declarations))
-  | some (.axiomDecl _ _ _) =>
       Option.some
         (PsEnvironment.mk
-          (List.cons
-            declaration
-            (psEnvironmentRemoveName name environment.declarations)))
-  | some _ => Option.none
+          (List.cons declaration environment.declarations))
+  | some existing =>
+      match existing with
+      | .axiomDecl _ _ _ =>
+          Option.some
+            (PsEnvironment.mk
+              (List.cons
+                declaration
+                (psEnvironmentRemoveName
+                  name
+                  environment.declarations)))
+      | _ =>
+          Option.none
 
 def psEnvironmentAdd (environment : PsEnvironment) (declaration : PsDeclaration) : Option PsEnvironment :=
   if psEnvironmentContains environment (psDeclarationName declaration) then

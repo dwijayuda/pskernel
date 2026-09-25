@@ -10,6 +10,11 @@ def psParseOptionalSemicolon
   else
     cursor
 
+def psProofScriptBoolNot (value : Bool) : Bool :=
+  match value with
+  | true => false
+  | false => true
+
 def psParseProofScriptImport
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxImport) :=
@@ -72,13 +77,13 @@ def psParseProofScriptCallArgsWithFuel
                     parseArgument
                     remaining
                     comma.cursor
-                    (argument.value :: argsRev)
+                    (List.cons argument.value argsRev)
             else
               match psTokenCursorExpectText argument.cursor ")" with
               | Except.error error => Except.error error
               | Except.ok close =>
                   Except.ok {
-                    args := (argument.value :: argsRev).reverse
+                    args := (List.cons argument.value argsRev).reverse
                     closeSpan := close.token.span
                     cursor := close.cursor
                   }
@@ -245,7 +250,7 @@ def psParseProofScriptBindersWithFuel
             psParseProofScriptBindersWithFuel
               remaining
               parsed.cursor
-              (parsed.value :: bindersRev)
+              (List.cons parsed.value bindersRev)
       else
         Except.ok { value := bindersRev.reverse, cursor := cursor }
 
@@ -295,7 +300,7 @@ def psParseProofScriptDependentArrowTail
                   [binder.value]
                   codomain.value
                   {
-                    start := binder.value.1.span.start
+                    start := binder.value.fst.span.start
                     stop := (psSyntaxTermSpan codomain.value).stop
                   }
               cursor := codomain.cursor
@@ -308,7 +313,7 @@ def psParseProofScriptDependentArrowTail
          | none => ""
          | some token => token.text)
         (match psTokenCursorPeek binder.cursor with
-         | none => binder.value.1.span
+         | none => binder.value.fst.span
          | some token => token.span))
 
 def psParseProofScriptMatchAlternativesWithFuel
@@ -358,13 +363,13 @@ def psParseProofScriptMatchAlternativesWithFuel
                                 parseTerm
                                 remaining
                                 afterSemi.cursor
-                                ((pattern.value, body.value, span) :: alternativesRev)
+                                (List.cons (Prod.mk pattern.value (Prod.mk body.value span)) alternativesRev)
                         else if psTokenCursorAtText body.cursor "}" then
                           psParseProofScriptMatchAlternativesWithFuel
                             parseTerm
                             remaining
                             body.cursor
-                            ((pattern.value, body.value, span) :: alternativesRev)
+                            (List.cons (Prod.mk pattern.value (Prod.mk body.value span)) alternativesRev)
                         else
                           match psTokenCursorPeek body.cursor with
                           | none =>
@@ -869,7 +874,7 @@ def psParseProofScriptInductiveConstructorsWithFuel
                         psParseProofScriptInductiveConstructorsWithFuel
                           remaining
                           semi.cursor
-                          (constructor :: constructorsRev)
+                          (List.cons constructor constructorsRev)
 
 def psParseProofScriptStructureField
     (cursor : PsTokenCursor) :
@@ -912,7 +917,7 @@ def psParseProofScriptStructureField
                       }
                     }
                     Except.ok {
-                      value := (head, type.value)
+                      value := Prod.mk head type.value
                       cursor := semi.cursor
                     }
 
@@ -938,7 +943,7 @@ def psParseProofScriptStructureFieldsWithFuel
             psParseProofScriptStructureFieldsWithFuel
               remaining
               field.cursor
-              (field.value :: fieldsRev)
+              (List.cons field.value fieldsRev)
 
 def psParseProofScriptStructureDeclaration
     (cursor : PsTokenCursor) :
@@ -1017,9 +1022,10 @@ def psParseProofScriptInductiveDeclaration
               [] with
           | Except.error error => Except.error error
           | Except.ok params =>
-              let parseAfterResult
+              let parseAfterResult :=
+                fun
                   (resultType : Option PsSyntaxTerm)
-                  (afterResult : PsTokenCursor) :=
+                  (afterResult : PsTokenCursor) =>
                 match psTokenCursorExpectText afterResult "where" with
                 | Except.error error => Except.error error
                 | Except.ok afterWhere =>
@@ -1052,7 +1058,7 @@ def psParseProofScriptInductiveDeclaration
                                 | Except.error error => Except.error error
                                 | Except.ok close =>
                                     let finalCursor :=
-                                      psParseOptionalSemicolon close.cursor
+                                      psParseOptionalSemicolon close.cursor;
                                     Except.ok {
                                       value :=
                                         PsSyntaxDeclaration.inductiveDecl
@@ -1065,7 +1071,7 @@ def psParseProofScriptInductiveDeclaration
                                             stop := close.token.span.stop
                                           }
                                       cursor := finalCursor
-                                    }
+                                    };
               if psTokenCursorAtText params.cursor ":" then
                 match psTokenCursorAdvance params.cursor with
                 | none =>
@@ -1092,10 +1098,10 @@ def psParseProofScriptDeclaration
       else if keyword.text == "structure" then
         psParseProofScriptStructureDeclaration cursor
       else
-        let isPartial := keyword.text == "partial"
-        let isDefinition := keyword.text == "def"
-        let isTheorem := keyword.text == "theorem"
-        if !(isPartial || isDefinition || isTheorem) then
+        let isPartial := keyword.text == "partial";
+        let isDefinition := keyword.text == "def";
+        let isTheorem := keyword.text == "theorem";
+        if psProofScriptBoolNot (isPartial || isDefinition || isTheorem) then
           Except.error
             (PsParseError.expectedText
               "partial def, def, theorem, inductive, or structure"
@@ -1117,7 +1123,7 @@ def psParseProofScriptDeclaration
               | none =>
                   Except.error
                     (PsParseError.unexpectedEnd "declaration name")
-              | some afterKeyword => Except.ok afterKeyword.cursor
+              | some afterKeyword => Except.ok afterKeyword.cursor;
           match afterKind with
           | Except.error error => Except.error error
           | Except.ok afterKeyword =>
@@ -1191,7 +1197,7 @@ def psParseProofScriptImportsWithFuel
             psParseProofScriptImportsWithFuel
               remaining
               parsed.cursor
-              (parsed.value :: importsRev)
+              (List.cons parsed.value importsRev)
       else
         Except.ok {
           value := importsRev.reverse
@@ -1235,12 +1241,12 @@ def psParseProofScriptDeclarationsWithFuel
             psParseProofScriptDeclarationsWithFuel
               remaining
               parsed.cursor
-              (parsed.value :: declarationsRev)
+              (List.cons parsed.value declarationsRev)
 
 def psParseProofScriptTokens
     (tokens : List PsToken) :
     Except PsParseError PsSyntaxModule :=
-  let cursor := psTokenCursorFromTokens tokens
+  let cursor := psTokenCursorFromTokens tokens;
   match psParseProofScriptImportsWithFuel tokens.length cursor [] with
   | Except.error error => Except.error error
   | Except.ok imports =>

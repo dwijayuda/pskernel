@@ -484,6 +484,41 @@ def assertExprOracle : IO Unit := do
   assertTrue "nested instantiate differs from Lean 4.34" (toLeanExpr nestedOurs == nestedLean)
 
 
+
+def assertQuotReductionOracle : IO Unit := do
+  let leanEnv ← importStructureFixture
+  let ctx := PSC1Kernel.CheckerContext.empty PSC1Kernel.Environment.empty.markQuotInitialized
+  let x : PSC1Kernel.Name := .str .anonymous "quot_x"
+  let dummy : PSC1Kernel.Expr := .sort .zero
+  let representative : PSC1Kernel.Expr := .lit (.nat 37)
+  let fn : PSC1Kernel.Expr := .lam x dummy (.bvar 0) .default
+  let quotMk : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs
+      (.const PSC1Kernel.kernelQuotMkName [])
+      [dummy, dummy, representative]
+  let liftExpr : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs
+      (.const PSC1Kernel.kernelQuotLiftName [])
+      [dummy, dummy, dummy, fn, dummy, quotMk]
+  let indExpr : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs
+      (.const PSC1Kernel.kernelQuotIndName [])
+      [dummy, dummy, dummy, fn, quotMk]
+
+  let oursLift ← exceptToIO "PSC1 Quot.lift reduction" (PSC1Kernel.whnf ctx liftExpr)
+  let leanLift ← kernelExprWhnf leanEnv liftExpr
+  assertTrue "Quot.lift reduction differs from Lean 4.34"
+    (toLeanExpr oursLift == leanLift)
+  assertTrue "Quot.lift did not expose representative"
+    (PSC1Kernel.Expr.eq oursLift representative)
+
+  let oursInd ← exceptToIO "PSC1 Quot.ind reduction" (PSC1Kernel.whnf ctx indExpr)
+  let leanInd ← kernelExprWhnf leanEnv indExpr
+  assertTrue "Quot.ind reduction differs from Lean 4.34"
+    (toLeanExpr oursInd == leanInd)
+  assertTrue "Quot.ind did not expose representative"
+    (PSC1Kernel.Expr.eq oursInd representative)
+
 def assertDeclarationAdmissionOracle : IO Unit := do
   let P : PSC1Kernel.Name := .str .anonymous "AdmissionP"
   let h : PSC1Kernel.Name := .str .anonymous "admissionProof"
@@ -689,6 +724,7 @@ def run : IO Unit := do
   assertProofIrrelevanceOracle
   assertBinderInfoDefEqOracle
   assertProjectionOracle
+  assertQuotReductionOracle
   assertDeclarationAdmissionOracle
   IO.println "PSC1Kernel Lean 4.34 foundational + projection oracle: PASS"
 

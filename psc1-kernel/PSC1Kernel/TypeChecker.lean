@@ -161,7 +161,40 @@ def unfoldDefinition (ctx : CheckerContext) (e : Expr) : Option Expr :=
     | none => none
   | _ => none
 
+def kernelQuotName : Name := .str .anonymous "Quot"
+def kernelQuotMkName : Name := .str kernelQuotName "mk"
+def kernelQuotLiftName : Name := .str kernelQuotName "lift"
+def kernelQuotIndName : Name := .str kernelQuotName "ind"
+
 mutual
+
+partial def reduceQuotRec
+    (ctx : CheckerContext)
+    (e : Expr) : Except String (Option Expr) := do
+  if !ctx.env.quotInitialized then
+    return none
+  let .const fnName _ := e.getAppFn | return none
+  let (mkPos, argPos) :=
+    if Name.eq fnName kernelQuotLiftName then
+      (5, 3)
+    else if Name.eq fnName kernelQuotIndName then
+      (4, 3)
+    else
+      return none
+  let args := e.getAppArgs
+  if args.length <= mkPos then
+    return none
+  let some major := listGet? args mkPos | return none
+  let major' ← whnf ctx major
+  let .const mkName _ := major'.getAppFn | return none
+  if !Name.eq mkName kernelQuotMkName || major'.getAppNumArgs != 3 then
+    return none
+  let mkArgs := major'.getAppArgs
+  let some representative := listGet? mkArgs 2 | return none
+  let some f := listGet? args argPos | return none
+  let base := .app f representative
+  let elimArity := mkPos + 1
+  return some (applyArgs base (args.drop elimArity))
 
 partial def whnfCore
     (ctx : CheckerContext)
@@ -194,7 +227,10 @@ partial def whnfCore
       whnfCore ctx (body.instantiate1 arg) cheapProj
     | _ =>
       if Expr.eq fn fn' then
-        .ok e
+        let quot ← reduceQuotRec ctx e
+        match quot with
+        | some value => whnfCore ctx value cheapProj
+        | none => .ok e
       else
         whnfCore ctx (.app fn' arg) cheapProj
 

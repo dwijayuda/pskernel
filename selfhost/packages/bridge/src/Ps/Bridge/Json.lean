@@ -476,52 +476,62 @@ def psJsonParseObjectWith
   | Nat.zero, _, _ =>
       Except.error PsJsonParseError.fuelExhausted
   | Nat.succ remaining, input, fieldsRev =>
-      let chars := psJsonSkipWhitespace input
+      let chars := psJsonSkipWhitespace input;
       match chars with
-      | '}' :: rest =>
-          Except.ok {
-            value := PsJsonValue.object (psJsonReverseFields fieldsRev)
-            rest := rest
-          }
-      | '"' :: rest =>
-          match psJsonParseStringChars remaining rest [] with
-          | Except.error error => Except.error error
-          | Except.ok keyResult =>
-              let key := Prod.fst keyResult;
-              let afterKey := Prod.snd keyResult;
-              match psJsonSkipWhitespace afterKey with
-              | ':' :: afterColon =>
-                  match parseValue remaining afterColon with
-                  | Except.error error => Except.error error
-                  | Except.ok parsed =>
-                      let afterValue :=
-                        psJsonSkipWhitespace parsed.rest
-                      match afterValue with
-                      | ',' :: tail =>
-                          psJsonParseObjectWith
-                            parseValue
-                            remaining
-                            tail
-                            (List.cons
-                              (Prod.mk key parsed.value)
-                              fieldsRev)
-                      | '}' :: tail =>
-                          Except.ok {
-                            value :=
-                              PsJsonValue.object
-                                (psJsonReverseFields
+      | List.nil =>
+          Except.error (PsJsonParseError.expected "object key")
+      | List.cons first rest =>
+          if psJsonCharEq first '}' then
+            Except.ok {
+              value := PsJsonValue.object (psJsonReverseFields fieldsRev)
+              rest := rest
+            }
+          else if psJsonCharEq first '"' then
+            match psJsonParseStringChars remaining rest List.nil with
+            | Except.error error => Except.error error
+            | Except.ok keyResult =>
+                let key := Prod.fst keyResult;
+                let afterKey := Prod.snd keyResult;
+                match psJsonSkipWhitespace afterKey with
+                | List.nil =>
+                    Except.error (PsJsonParseError.expected ":")
+                | List.cons colon afterColon =>
+                    if psJsonCharEq colon ':' then
+                      match parseValue remaining afterColon with
+                      | Except.error error => Except.error error
+                      | Except.ok parsed =>
+                          let afterValue :=
+                            psJsonSkipWhitespace parsed.rest;
+                          match afterValue with
+                          | List.nil =>
+                              Except.error
+                                (PsJsonParseError.expected ", or }")
+                          | List.cons separator tail =>
+                              if psJsonCharEq separator ',' then
+                                psJsonParseObjectWith
+                                  parseValue
+                                  remaining
+                                  tail
                                   (List.cons
                                     (Prod.mk key parsed.value)
-                                    fieldsRev))
-                            rest := tail
-                          }
-                      | _ =>
-                          Except.error
-                            (PsJsonParseError.expected ", or }")
-              | _ =>
-                  Except.error (PsJsonParseError.expected ":")
-      | _ =>
-          Except.error (PsJsonParseError.expected "object key")
+                                    fieldsRev)
+                              else if psJsonCharEq separator '}' then
+                                Except.ok {
+                                  value :=
+                                    PsJsonValue.object
+                                      (psJsonReverseFields
+                                        (List.cons
+                                          (Prod.mk key parsed.value)
+                                          fieldsRev))
+                                  rest := tail
+                                }
+                              else
+                                Except.error
+                                  (PsJsonParseError.expected ", or }")
+                    else
+                      Except.error (PsJsonParseError.expected ":")
+          else
+            Except.error (PsJsonParseError.expected "object key")
 
 partial def psJsonParseValueWithFuel
     (fallback : Except PsJsonParseError PsJsonParseResult)

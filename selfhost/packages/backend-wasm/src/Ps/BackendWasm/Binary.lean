@@ -1,4 +1,4 @@
-import Ps.BackendWasm.LowerInt
+import Ps.BackendWasm.Model
 
 inductive PsWasmEncodeError where
   | unsupportedValueType

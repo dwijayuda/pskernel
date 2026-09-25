@@ -2,6 +2,7 @@ import ProofScript.Data.Option
 import ProofScript.Data.Prod
 import ProofScript.Data.Result
 import ProofScript.Data.List
+import ProofScript.Data.Array
 import ProofScript.Data.Map
 import ProofScript.Data.Set
 
@@ -48,3 +49,50 @@ def collectionSetContains : Bool :=
 
 def collectionSetMissing : Bool :=
   setContains orderingNat 3 collectionSet
+
+
+def collectionNatAdd (left : Nat) (right : Nat) : Nat :=
+  Nat.add left right
+
+def collectionIsTwo (value : Nat) : Bool :=
+  Nat.beq value 2
+
+def collectionBelowThree (value : Nat) : Bool :=
+  Nat.blt value 3
+
+def collectionArray : Array Nat :=
+  arrayPush
+    (arrayPush (arrayEmpty Unit.unit) 1)
+    2
+
+def collectionArraySize : Nat :=
+  arraySize collectionArray
+
+def collectionArrayGet : Option Nat :=
+  arrayGetOption collectionArray 1
+
+def collectionArrayMissing : Option Nat :=
+  arrayGetOption collectionArray 7
+
+def collectionArraySet : Array Nat :=
+  arraySet collectionArray 0 3
+
+def collectionArrayMapped : Array Nat :=
+  arrayMap collectionIdentityNat collectionArray
+
+def collectionArrayFolded : Nat :=
+  arrayFoldl
+    collectionNatAdd
+    0
+    collectionArray
+    0
+    (arraySize collectionArray)
+
+def collectionArrayAny : Bool :=
+  arrayAny collectionIsTwo collectionArray
+
+def collectionArrayAll : Bool :=
+  arrayAll collectionBelowThree collectionArray
+
+def collectionArrayFound : Option Nat :=
+  arrayFindOption collectionIsTwo collectionArray

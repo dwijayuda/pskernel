@@ -364,6 +364,71 @@ def psTestBackendRustIdentifiers : Bool :=
       (psRustIdentifier "__psr_value")
       "__psr___psr_value"
 
+def psBackendRustFunctionStorageModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := [
+      {
+        name := "CallbackHolder"
+        typeParameters := []
+        fields := [
+          {
+            name := "callback"
+            type :=
+              PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+          }
+        ]
+      }
+    ]
+    inductives := []
+    declarations := []
+  }
+
+def psTestBackendRustRejectsFunctionStorage : Bool :=
+  match psRustEmitModule psBackendRustFunctionStorageModule with
+  | Except.error (PsRustEmitError.functionStorageUnsupported name) =>
+      psStringEq name "callback"
+  | _ =>
+      false
+
+def psBackendRustNestedFunctionParameterModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "useCallbacks"
+        typeParameters := []
+        parameters := [
+          {
+            name := "callbacks"
+            type :=
+              PsVerifiedIrType.named
+                "Array"
+                [
+                  PsVerifiedIrType.function
+                    [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                    (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+                ]
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body := PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0)
+      }
+    ]
+  }
+
+def psTestBackendRustRejectsNestedFunctionParameter : Bool :=
+  match psRustEmitModule psBackendRustNestedFunctionParameterModule with
+  | Except.error
+      (PsRustEmitError.nestedFunctionParameterUnsupported name) =>
+      psStringEq name "callbacks"
+  | _ =>
+      false
+
 def psBackendRustFunctionResultModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -497,6 +562,20 @@ def psTestBackendRustCoverageFunctionResult : Bool :=
     coverage.unsupported
     "declaration:functionResult"
 
+def psTestBackendRustCoverageFunctionStorage : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustFunctionStorageModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "module:functionStorage"
+
+def psTestBackendRustCoverageNestedFunctionParameter : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustNestedFunctionParameterModule;
+  psRustCoverageContains
+    coverage.unsupported
+    "declaration:nestedFunctionParameter"
+
 def psTestBackendRustCoverageReport : Bool :=
   let supported :=
     psRustCoverageReport
@@ -524,11 +603,15 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "Rust identifier escaping", passed := psTestBackendRustIdentifiers },
   { name := "reject generic top-level values", passed := psTestBackendRustRejectsGenericValue },
   { name := "reject function-valued results", passed := psTestBackendRustRejectsFunctionResult },
+  { name := "reject stored function values", passed := psTestBackendRustRejectsFunctionStorage },
+  { name := "reject nested function parameters", passed := psTestBackendRustRejectsNestedFunctionParameter },
   { name := "coverage accepts supported IR", passed := psTestBackendRustCoverageSupported },
   { name := "coverage rejects external imports", passed := psTestBackendRustCoverageExternalImport },
   { name := "coverage rejects unknown runtime types", passed := psTestBackendRustCoverageUnknownType },
   { name := "coverage rejects generic values", passed := psTestBackendRustCoverageGenericValue },
   { name := "coverage rejects function results", passed := psTestBackendRustCoverageFunctionResult },
+  { name := "coverage rejects function storage", passed := psTestBackendRustCoverageFunctionStorage },
+  { name := "coverage rejects nested function parameters", passed := psTestBackendRustCoverageNestedFunctionParameter },
   { name := "coverage report is CI-stable", passed := psTestBackendRustCoverageReport }
 ]
 

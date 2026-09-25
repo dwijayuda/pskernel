@@ -174,6 +174,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.machineIntBinary
               PsVerifiedIrMachineIntegerType.uint32
               PsVerifiedIrIntegerBinaryOp.add)
+            []
             [
               PsVerifiedIrExpr.var "left",
               PsVerifiedIrExpr.var "right"
@@ -204,6 +205,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.floatBinary
               PsVerifiedIrFloatingType.float32
               PsVerifiedIrFloatBinaryOp.add)
+            []
             [
               PsVerifiedIrExpr.var "left",
               PsVerifiedIrExpr.var "right"
@@ -234,6 +236,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.machineIntBinary
               PsVerifiedIrMachineIntegerType.uint32
               PsVerifiedIrIntegerBinaryOp.add)
+            []
             [
               PsVerifiedIrExpr.call
                 (PsVerifiedIrExpr.var "addU32")
@@ -304,6 +307,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
               (PsVerifiedIrIntrinsic.machineIntBinary
                 PsVerifiedIrMachineIntegerType.uint32
                 PsVerifiedIrIntegerBinaryOp.add)
+              []
               [
                 PsVerifiedIrExpr.var "saved",
                 PsVerifiedIrExpr.literal
@@ -524,6 +528,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                   (PsVerifiedIrIntrinsic.machineIntBinary
                     PsVerifiedIrMachineIntegerType.uint32
                     PsVerifiedIrIntegerBinaryOp.add)
+                  []
                   [
                     PsVerifiedIrExpr.literal
                       (PsVerifiedIrLiteral.machineInteger
@@ -611,6 +616,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
               (PsVerifiedIrIntrinsic.machineIntBinary
                 PsVerifiedIrMachineIntegerType.uint32
                 PsVerifiedIrIntegerBinaryOp.add)
+              []
               [
                 PsVerifiedIrExpr.var "base",
                 PsVerifiedIrExpr.var "value"
@@ -694,6 +700,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                 (PsVerifiedIrIntrinsic.machineIntBinary
                   PsVerifiedIrMachineIntegerType.uint32
                   PsVerifiedIrIntegerBinaryOp.add)
+                []
                 [
                   PsVerifiedIrExpr.var "input",
                   PsVerifiedIrExpr.literal
@@ -764,6 +771,7 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                   (PsVerifiedIrIntrinsic.machineIntBinary
                     PsVerifiedIrMachineIntegerType.uint32
                     PsVerifiedIrIntegerBinaryOp.add)
+                  []
                   [
                     PsVerifiedIrExpr.literal
                       (PsVerifiedIrLiteral.machineInteger

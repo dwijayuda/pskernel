@@ -1939,8 +1939,6 @@ def psWasmLowerExprWithFuel
       | .ifE condition thenBranch elseBranch =>
           psWasmLowerIfWith
             lower state expected condition thenBranch elseBranch
-      | _ =>
-          Except.error PsWasmLowerError.unsupportedExpression
 
 def psWasmLowerExpr
     (profile : PsWasmTargetProfile)

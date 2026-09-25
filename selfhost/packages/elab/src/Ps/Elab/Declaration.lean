@@ -17,25 +17,41 @@ structure PsElabModuleResult where
   environment : PsEnvironment
   declarations : List PsDeclaration
 
-def psElabExplicitParameterIds :
-    List PsElabTypedBinder -> List Nat
-  | [] => []
-  | binder :: rest =>
+def psElabExplicitParameterIds
+    (binders : List PsElabTypedBinder) : List Nat :=
+  match binders with
+  | List.nil =>
+      List.nil
+  | List.cons binder rest =>
+      let smaller : List Nat :=
+        psElabExplicitParameterIds rest;
       match binder.binder with
       | PsBinderInfo.explicit =>
-          binder.id :: psElabExplicitParameterIds rest
+          List.cons binder.id smaller
       | _ =>
-          psElabExplicitParameterIds rest
+          smaller
+
+def psElabFindNatIndexWorker
+    (target : Nat)
+    (values : List Nat) :
+    Nat -> Option Nat :=
+  match values with
+  | List.nil =>
+      fun (_index : Nat) => Option.none
+  | List.cons value rest =>
+      let smaller : Nat -> Option Nat :=
+        psElabFindNatIndexWorker target rest;
+      fun (index : Nat) =>
+        if Nat.beq value target then
+          Option.some index
+        else
+          smaller (Nat.succ index)
 
 def psElabFindNatIndex
-    (target : Nat) :
-    List Nat -> Nat -> Option Nat
-  | [], _ => none
-  | value :: rest, index =>
-      if value == target then
-        some index
-      else
-        psElabFindNatIndex target rest (index + 1)
+    (target : Nat)
+    (values : List Nat)
+    (index : Nat) : Option Nat :=
+  psElabFindNatIndexWorker target values index
 
 def psElabStructuralRecursionFromSource
     (functionName : PsName)

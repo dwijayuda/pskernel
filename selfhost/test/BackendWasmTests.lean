@@ -647,7 +647,7 @@ def psTestWasmInductiveMatchLowering : Bool :=
           psWasmTestFindStruct module.structures "MaybeU32$none",
           psWasmTestFindStruct module.structures "MaybeU32$some",
           psWasmTestFindFunction module.functions "someValue" with
-      | some base, some noneType, some someType, someFn =>
+      | some base, some noneType, some someType, some someFn =>
           psWasmIsMaybeBase base
             && psWasmIsMaybeNone noneType
             && psWasmIsMaybeSome someType

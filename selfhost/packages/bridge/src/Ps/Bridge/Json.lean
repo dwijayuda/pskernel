@@ -719,6 +719,13 @@ partial def psJsonParseValueWithFuel
             Except.error
               (PsJsonParseError.expected "JSON value")
 
+def psJsonCharListLength (chars : List Char) : Nat :=
+  match chars with
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ (psJsonCharListLength rest)
+
 def psJsonParse
     (source : String) :
     Except PsJsonParseError PsJsonValue :=
@@ -726,7 +733,7 @@ def psJsonParse
   match
       psJsonParseValueWithFuel
         (Except.error PsJsonParseError.fuelExhausted)
-        (Nat.add (Nat.mul chars.length 4) 32)
+        (Nat.add (Nat.mul (psJsonCharListLength chars) 4) 32)
         chars with
   | Except.error error => Except.error error
   | Except.ok parsed =>

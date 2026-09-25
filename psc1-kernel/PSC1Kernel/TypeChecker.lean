@@ -720,7 +720,7 @@ partial def toConstructorWhenK
     if debugEq then throw "Eq.rec K debug: constructor result type mismatch" else return major
   pure (applyArgs (.const ctorName typeLevels) params)
 
-def isConstructorApp
+partial def isConstructorApp
     (env : Environment)
     (e : Expr) : Bool :=
   match e.getAppFn with

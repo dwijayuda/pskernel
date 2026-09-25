@@ -1,5 +1,6 @@
 import Ps.Bridge.CheckedAdmissions
 import Ps.Bridge.Codec
+import Ps.Bridge.Protocol
 import Ps.Core.Builtin
 
 def psBridgeTestDefinition : PsDeclaration :=
@@ -176,6 +177,79 @@ def psTestPersistentExprCodecRoundTrip : Bool :=
           | Except.ok decoded =>
               psExprAlphaEq expr decoded
 
+def psTestKernelBridgeLookupRequest : Bool :=
+  let name := psNameAppendStr (psRootName "Demo") "value"
+  match
+      psEncodeKernelBridgeRequest
+        (PsKernelBridgeRequest.lookup name) with
+  | Except.error _ => false
+  | Except.ok encoded =>
+      match psJsonParse encoded with
+      | Except.error _ => false
+      | Except.ok value =>
+          match
+              psJsonGetField value "protocol",
+              psJsonGetField value "version",
+              psJsonGetField value "op",
+              psJsonGetField value "payload" with
+          | some protocol,
+            some version,
+            some op,
+            some payload =>
+              psJsonAsString protocol ==
+                  some psKernelBridgeProtocol
+                && psJsonAsNumberText version ==
+                  some (toString psKernelBridgeVersion)
+                && psJsonAsString op == some "lookup"
+                && match psJsonGetField payload "name" with
+                   | none => false
+                   | some encodedName =>
+                       match psDecodeCodecName encodedName with
+                       | Except.error _ => false
+                       | Except.ok decoded =>
+                           psNameEq name decoded
+          | _, _, _, _ => false
+
+def psTestKernelBridgeResponseValidation : Bool :=
+  let expr := PsExpr.constE psNatName []
+  match psEncodeCodecExpr expr with
+  | Except.error _ => false
+  | Except.ok encodedExpr =>
+      let response :=
+        psJsonObject [
+          ("foundation",
+            psJsonQuote psKernelBridgeFoundationFingerprint),
+          ("kernel",
+            psJsonQuote psKernelBridgeKernelFingerprint),
+          ("ok", "true"),
+          ("protocol", psJsonQuote psKernelBridgeProtocol),
+          ("value", encodedExpr),
+          ("version", toString psKernelBridgeVersion)
+        ]
+      match psDecodeKernelBridgeResponse response with
+      | Except.error _ => false
+      | Except.ok decoded =>
+          match psKernelBridgeResponseExpr decoded with
+          | Except.error _ => false
+          | Except.ok decodedExpr =>
+              psExprAlphaEq expr decodedExpr
+
+def psTestKernelBridgeRejectsFingerprintMismatch : Bool :=
+  let response :=
+    psJsonObject [
+      ("foundation",
+        psJsonQuote psKernelBridgeFoundationFingerprint),
+      ("kernel", psJsonQuote "wrong-kernel"),
+      ("ok", "true"),
+      ("protocol", psJsonQuote psKernelBridgeProtocol),
+      ("value", "null"),
+      ("version", toString psKernelBridgeVersion)
+    ]
+  match psDecodeKernelBridgeResponse response with
+  | Except.error
+      PsKernelBridgeProtocolError.kernelFingerprintMismatch => true
+  | _ => false
+
 def psTestRejectPartialCertification : Bool :=
   let natType := PsExpr.constE psNatName []
   let loopName := psRootName "loop"
@@ -271,6 +345,9 @@ def psBridgeTests : List PsBridgeNamedTest := [
   { name := "persistent Name codec round-trip", passed := psTestPersistentNameCodecRoundTrip },
   { name := "persistent Level codec round-trip", passed := psTestPersistentLevelCodecRoundTrip },
   { name := "persistent Expr codec round-trip", passed := psTestPersistentExprCodecRoundTrip },
+  { name := "kernel bridge lookup request", passed := psTestKernelBridgeLookupRequest },
+  { name := "kernel bridge response validation", passed := psTestKernelBridgeResponseValidation },
+  { name := "kernel bridge rejects fingerprint mismatch", passed := psTestKernelBridgeRejectsFingerprintMismatch },
   { name := "reject free variable", passed := psTestRejectFreeVariable },
   { name := "reject expression metavariable", passed := psTestRejectExpressionMetavariable },
   { name := "reject universe metavariable", passed := psTestRejectUniverseMetavariable },

@@ -43,6 +43,40 @@ def psBackendDiffModule : PsVerifiedIrModule :=
     ]
     declarations := [
       {
+        name := "stringIdentity"
+        typeParameters := []
+        parameters := [
+          {
+            name := "text"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+        body := PsVerifiedIrExpr.var "text"
+      },
+      {
+        name := "diffReuseString"
+        typeParameters := []
+        parameters := [
+          {
+            name := "text"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.letE
+            "copy"
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string)
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.var "stringIdentity")
+              []
+              [PsVerifiedIrExpr.var "text"])
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.stringUtf8ByteSize
+              [PsVerifiedIrExpr.var "text"])
+      },
+      {
         name := "diffProjection"
         typeParameters := []
         parameters := [

@@ -112,9 +112,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Build PSC1 Lean kernel
+      - name: Build PSC1 Lean kernel and replay executable
         working-directory: psc1-kernel
-        run: lake build
+        run: |
+          lake build
+          lake build psc1_replay
 
       - name: Replay Std release-assurance roots
         shell: bash

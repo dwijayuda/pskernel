@@ -1140,7 +1140,7 @@ def psElabPartialDeclaration
                         let valueContext :=
                           psElabContextWithEnvironment
                             typeResult.context
-                            withSelf
+                            withSelf;
                         match
                             psElabTerm
                               valueContext

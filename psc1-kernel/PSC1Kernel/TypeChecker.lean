@@ -1169,37 +1169,62 @@ partial def isDefEqApp
     | _, _ => return false
   compareArgs leftArgs rightArgs
 
+/--
+Final Lean 4.34 `quick_is_def_eq`: structural equality first, then the
+kind-specific cheap cases. Binding and metadata cases intentionally recurse
+through the ordinary public defeq entry so evaluation order matches the C++
+checker rather than treating post-delta terms as mere syntax.
+-/
+partial def quickDefEq
+    (ctx : CheckerContext)
+    (left right : Expr) : Except String (Option Bool) := do
+  if Expr.eq left right then
+    return some true
+  match left, right with
+  | .lam .., .lam .. =>
+      return some (← isDefEqLambdaSpine ctx left right)
+  | .forallE .., .forallE .. =>
+      return some (← isDefEqForallSpine ctx left right)
+  | .sort u, .sort v =>
+      return some (Level.equivalent u v)
+  | .mdata _ leftBody, .mdata _ rightBody =>
+      return some (← isDefEq ctx leftBody rightBody)
+  | .lit x, .lit y =>
+      return some (Literal.eq x y)
+  | _, _ =>
+      return none
+
 partial def lazyDeltaReductionStep
     (ctx : CheckerContext)
     (left right : Expr) : Except String DeltaStepResult := do
-  let finish (a b : Expr) : DeltaStepResult :=
-    match quickReducedDefEq a b with
-    | some true => .equal
-    | some false => .different a b
-    | none => .continue a b
+  let finish (a b : Expr) : Except String DeltaStepResult := do
+    match ← quickDefEq ctx a b with
+    | some true => return .equal
+    | some false => return .different a b
+    | none => return .continue a b
 
   match deltaDefinition? ctx left, deltaDefinition? ctx right with
   | none, none =>
       return .unknown left right
   | some _, none =>
       match ← tryUnfoldProjApp ctx right with
-      | some right' => return finish left right'
+      | some right' => finish left right'
       | none =>
           let left' ← deltaOnce ctx left
-          return finish left' right
+          finish left' right
   | none, some _ =>
       match ← tryUnfoldProjApp ctx left with
-      | some left' => return finish left' right
+      | some left' => finish left' right
       | none =>
           let right' ← deltaOnce ctx right
-          return finish left right'
+          finish left right'
   | some da, some db =>
       if da.hints.lt db.hints then
         let left' ← deltaOnce ctx left
-        return finish left' right
+        finish left' right
       else if db.hints.lt da.hints then
         let right' ← deltaOnce ctx right
-        return finish left right'
+        finish left right'
       else
         if left.getAppNumArgs > 0 then
           if right.getAppNumArgs > 0 then
@@ -1210,7 +1235,7 @@ partial def lazyDeltaReductionStep
                 return .equal
         let left' ← deltaOnce ctx left
         let right' ← deltaOnce ctx right
-        return finish left' right'
+        finish left' right'
 
 partial def lazyDeltaReduction
     (ctx : CheckerContext)
@@ -1274,17 +1299,9 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
   -- Final Lean 4.34 enters scope_rec_depth in is_def_eq_core before even the
   -- structural/success-cache quick path. Keep that resource boundary here.
   let ctx ← ctx.enterKernelRecDepth
-  if Expr.eq a b then return true
-
-  -- Lean 4.34 handles binding expressions in the quick-defeq phase by
-  -- opening both bodies with the same fresh local. Binder names/annotations
-  -- are not part of definitional equality.
-  match a, b with
-  | .lam .., .lam .. =>
-      return ← isDefEqLambdaSpine ctx a b
-  | .forallE .., .forallE .. =>
-      return ← isDefEqForallSpine ctx a b
-  | _, _ => pure ()
+  match ← quickDefEq ctx a b with
+  | some value => return value
+  | none => pure ()
 
   -- Final Lean 4.34 reflection fast path. eagerReduce deliberately extends
   -- this path to expressions containing free variables.
@@ -1303,15 +1320,9 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
 
   let aCore ← whnfCore ctx a false true
   let bCore ← whnfCore ctx b false true
-  match quickReducedDefEq aCore bCore with
+  match ← quickDefEq ctx aCore bCore with
   | some value => return value
   | none => pure ()
-  match aCore, bCore with
-  | .lam .., .lam .. =>
-      return ← isDefEqLambdaSpine ctx aCore bCore
-  | .forallE .., .forallE .. =>
-      return ← isDefEqForallSpine ctx aCore bCore
-  | _, _ => pure ()
 
   -- Final Lean 4.34 applies proof irrelevance before lazy delta.
   let aType ← infer ctx aCore

@@ -541,36 +541,38 @@ partial def toConstructorWhenK
     (ctx : CheckerContext)
     (recursor : RecursorInfo)
     (major : Expr) : Except String Expr := do
+  let eqRec : Name := .str (.str .anonymous "Eq") "rec"
+  let debugEq := Name.eq recursor.base.name eqRec
   let some majorInduct := recursorMajorInduct? recursor
-    | return major
+    | if debugEq then throw "Eq.rec K debug: missing major inductive" else return major
   let some rawType ← inferKMajorType? ctx major
-    | return major
+    | if debugEq then throw "Eq.rec K debug: major type inference failed" else return major
   let appType ← whnf ctx rawType
   let .const typeInduct typeLevels := appType.getAppFn
-    | return major
+    | if debugEq then throw "Eq.rec K debug: major type head is not constant" else return major
   if !Name.eq typeInduct majorInduct then
-    return major
+    if debugEq then throw "Eq.rec K debug: major inductive mismatch" else return major
   if exprHasMVarForK appType then
-    return major
+    if debugEq then throw "Eq.rec K debug: major type has metavariables" else return major
   let some (.inductInfo induct) := ctx.env.find? typeInduct
-    | return major
+    | if debugEq then throw "Eq.rec K debug: inductive metadata missing" else return major
   let ctorName :: _ := induct.ctors
-    | return major
+    | if debugEq then throw "Eq.rec K debug: no constructor" else return major
   let some (.ctorInfo ctor) := ctx.env.find? ctorName
-    | return major
+    | if debugEq then throw "Eq.rec K debug: constructor metadata missing" else return major
   if ctor.numFields != 0 || ctor.numParams != recursor.numParams then
-    return major
+    if debugEq then throw "Eq.rec K debug: constructor arity mismatch" else return major
   if ctor.base.levelParams.length != typeLevels.length then
-    return major
+    if debugEq then throw "Eq.rec K debug: constructor universe arity mismatch" else return major
   let params := appType.getAppArgs.take recursor.numParams
   if params.length != recursor.numParams then
-    return major
+    if debugEq then throw "Eq.rec K debug: parameter arity mismatch" else return major
   let ctorType0 :=
     ctor.base.type.instantiateLevelParams ctor.base.levelParams typeLevels
   let some ctorType ← consumeKConstructorParams ctx ctorType0 params
-    | return major
+    | if debugEq then throw "Eq.rec K debug: constructor parameter consumption failed" else return major
   unless ← kTypesEq ctx ctorType appType do
-    return major
+    if debugEq then throw "Eq.rec K debug: constructor result type mismatch" else return major
   pure (applyArgs (.const ctorName typeLevels) params)
 
 partial def reduceInductiveRec

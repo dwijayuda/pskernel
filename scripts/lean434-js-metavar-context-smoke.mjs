@@ -92,6 +92,7 @@ const evaluator=new Lean434Evaluator(
   replay.env,
   {maxSteps:250_000,metadata},
 );
+const empty=emptyLean434MetavarContext();
 
 {
   let modify=evaluator.evaluate(
@@ -129,7 +130,6 @@ const evaluator=new Lean434Evaluator(
   const u2=numName(strName(anonymous,'_u'),2n);
   const lmvar1=lean434RuntimeLMVarId(u1);
   const lmvar2=lean434RuntimeLMVarId(u2);
-  const zero=kernelLevelToLean434Runtime(levelZero);
   const succZero=kernelLevelToLean434Runtime(levelSucc(levelZero));
   const mvar2=kernelLevelToLean434Runtime(levelMVar(u2));
 
@@ -201,8 +201,6 @@ const mvarName=numName(strName(anonymous,'_m'),7n);
 const mvarId=lean434RuntimeMVarId(mvarName);
 const valueExpr=natLit(42n);
 const runtimeExpr=kernelExprToLean434Runtime(valueExpr);
-const empty=emptyLean434MetavarContext();
-
 const emptyExprMap=
   empty.kind==='constructor'?empty.fields[8]:undefined;
 if(

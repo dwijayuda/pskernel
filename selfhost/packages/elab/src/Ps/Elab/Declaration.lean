@@ -217,6 +217,52 @@ def psElabIsDirectRecursiveField
         && psExprListAlphaEq view.args parameterArgs
   | _ => false
 
+def psElabNestedRecursiveFieldTypeSupportedWithFuel :
+    Nat -> PsName -> PsExpr -> Bool
+  | 0, _, _ => false
+  | remaining + 1, inductiveName, type =>
+      if !psExprHasConst inductiveName type then
+        true
+      else
+        let view := psExprAppView type
+        match view.head with
+        | .constE name _ =>
+            if psNameEq name inductiveName then
+              true
+            else if psNameEq name psListName
+                || psNameEq name psOptionName
+                || psNameEq name psArrayName then
+              match view.args with
+              | [argument] =>
+                  psElabNestedRecursiveFieldTypeSupportedWithFuel
+                    remaining
+                    inductiveName
+                    argument
+              | _ => false
+            else if psNameEq name psProdName then
+              match view.args with
+              | [left, right] =>
+                  psElabNestedRecursiveFieldTypeSupportedWithFuel
+                      remaining
+                      inductiveName
+                      left
+                    && psElabNestedRecursiveFieldTypeSupportedWithFuel
+                      remaining
+                      inductiveName
+                      right
+              | _ => false
+            else
+              false
+        | _ => false
+
+def psElabNestedRecursiveFieldTypeSupported
+    (inductiveName : PsName)
+    (type : PsExpr) : Bool :=
+  psElabNestedRecursiveFieldTypeSupportedWithFuel
+    4096
+    inductiveName
+    type
+
 def psElabRecursiveFieldIndices
     (context : PsElabContext)
     (inductiveName : PsName)
@@ -242,7 +288,18 @@ def psElabRecursiveFieldIndices
           (index + 1)
           (index :: indicesRev)
       else if psExprHasConst inductiveName field.type then
-        Except.error PsElabError.unsupportedTerm
+        if psElabNestedRecursiveFieldTypeSupported
+            inductiveName
+            field.type then
+          psElabRecursiveFieldIndices
+            context
+            inductiveName
+            parameterArgs
+            rest
+            (index + 1)
+            indicesRev
+        else
+          Except.error PsElabError.unsupportedTerm
       else
         psElabRecursiveFieldIndices
           context

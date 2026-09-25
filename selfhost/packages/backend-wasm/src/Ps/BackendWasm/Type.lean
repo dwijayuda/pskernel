@@ -133,8 +133,10 @@ def psWasmValueTypeOfIrType?
       | .noValue => none
       | valueType => some valueType
   | .named name [] => some (.refT name)
-  | .function _ _ =>
-      match psWasmClosureBaseName type with
+  | .function parameters result =>
+      match
+          psWasmClosureBaseName
+            (PsVerifiedIrType.function parameters result) with
       | none => none
       | some name => some (.refT name)
   | _ => none
@@ -147,8 +149,10 @@ def psWasmStorageTypeOfIrType?
       | .noValue => none
       | _ => some (psWasmStorageTypeOfPrimitive profile primitive)
   | .named name [] => some (.value (.refT name))
-  | .function _ _ =>
-      match psWasmClosureBaseName type with
+  | .function parameters result =>
+      match
+          psWasmClosureBaseName
+            (PsVerifiedIrType.function parameters result) with
       | none => none
       | some name => some (.value (.refT name))
   | _ => none

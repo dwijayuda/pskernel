@@ -178,6 +178,7 @@ inductive PsVerifiedIrExpr where
       (structureName : String)
       (fields : List (String × PsVerifiedIrExpr))
   | projection
+      (structureName : String)
       (target : PsVerifiedIrExpr)
       (field : String)
   | constructor

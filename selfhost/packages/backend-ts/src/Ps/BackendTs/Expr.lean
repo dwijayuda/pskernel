@@ -40,7 +40,7 @@ def psTsExprUsesNameWithFuel :
           fields.any
             (fun field =>
               psTsExprUsesNameWithFuel fuel field.2 name)
-      | .projection target _ =>
+      | .projection _ target _ =>
           psTsExprUsesNameWithFuel fuel target name
       | .constructor _ _ _ fields =>
           fields.any
@@ -464,7 +464,7 @@ def psTsEmitExprWithFuel
                       ", " ++ psTsJoin ", " printedFields
                   Except.ok
                     ("{ [" ++ brand ++ "]: true" ++ suffix ++ " }")
-      | .projection target field =>
+      | .projection _ target field =>
           match psTsEmitExprWithFuel brands tags fuel target with
           | Except.error error => Except.error error
           | Except.ok printedTarget =>

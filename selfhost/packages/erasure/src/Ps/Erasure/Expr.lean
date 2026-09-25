@@ -1453,6 +1453,7 @@ def psEraseRuntimeExprWithFuel
                   | Except.ok loweredTarget =>
                       Except.ok
                         (PsVerifiedIrExpr.projection
+                          (psNameToString typeName)
                           loweredTarget
                           field.name)
 

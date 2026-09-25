@@ -1,10 +1,12 @@
 # ProofScript owned WebAssembly 3 backend
 
-Development branch: `backend/wasm3-owned`
-Integration candidate: `integrate/wasm3-owned`
+Foundation merge: `fb44f81a`
+Current large-feature branch: `backend/wasm3-gc-adts`
 
 Status: experimental and deliberately non-blocking for the active PSC1
-JavaScript self-host closure.
+JavaScript self-host closure. The scalar/control-flow Wasm foundation is merged;
+the current branch adds the first managed-data milestone: GC structures,
+nominal inductives, `match`, and recursive ADTs.
 
 ## Goal
 
@@ -118,59 +120,56 @@ library.ps -> VerifiedIR
 
 Target-specific imports narrow the target set explicitly.
 
-## Merge boundary
+## Current large-feature merge boundary
 
-Do not wait for the complete Wasm runtime before integrating this branch. A
-very long-lived backend branch would increase shared-IR drift and make the
-eventual merge riskier.
+The first Wasm infrastructure merge is complete. The next merge unit is
+**GC structures + nominal inductives + match**, kept together because all three
+share the same managed-data representation and type-index discipline.
 
-The first merge into the active self-host line is allowed when all of these are
-true:
+Merge this branch only when all of these are true:
 
-1. the branch is synchronized with the current self-host source and has no
-   unresolved overlap in shared compiler files;
-2. the shared-IR neutrality gate is green;
-3. the full Lean/Lake build is green;
-4. existing TypeScript backend tests affected by shared-IR changes are green;
-5. direct Wasm lowering tests are green;
-6. an independently validated runtime smoke covers:
-   - fixed-width integer arithmetic;
-   - `Float32` arithmetic;
-   - direct cross-function calls;
-   - structured conditional control flow;
-   - basic local/`let` lowering;
-7. the only remaining CI failures are demonstrably inherited from the base
-   self-host branch;
-8. `backend-wasm` remains non-default and cannot block the JS self-host path.
-
-The dedicated merge signal is the **Owned Wasm backend integration** workflow.
-It must be green at the candidate HEAD after the latest self-host content sync.
-
-This is the **Wasm infrastructure merge**, not a claim that the backend is
-feature-complete. After that merge, GC ADTs, closures, String/Array, exact
-Nat/Int, SIMD, WASI/components, self-hosting and formal preservation proofs can
-continue in small follow-up branches.
+1. the branch is mergeable against the live self-host line, with no unresolved
+   shared-IR/erasure conflicts;
+2. portable-source and shared-IR-neutrality gates are green;
+3. the complete Lean/Lake workspace builds;
+4. TypeScript and erasure regression suites are green;
+5. Wasm lowering/unit tests are green;
+6. independent Node validation and execution cover:
+   - ordinary GC structures;
+   - packed signed/unsigned structure fields;
+   - nominal inductive base + constructor subtypes;
+   - multi-constructor `match`;
+   - constructor field binding through `ref.test` / `ref.cast`;
+   - a recursive ADT whose constructor contains a reference to its own base
+     type;
+   - a recursive function over that ADT;
+7. the normal PSC1 workflow has no new failure before the already-known
+   self-host source-readiness/PSC0 blockers;
+8. Wasm remains non-default and does not gate JavaScript self-host closure.
 
 Current status:
 
 ```text
-[done] target-neutral VerifiedIR contract + regression guard
-[done] Wasm target IR
-[done] scalar type lowering
-[done] fixed-width integer operations/comparisons
-[done] Float/Float32 operations/comparisons
-[done] owned core module/function/export/code encoder
-[done] signed/unsigned integer immediate encoding
-[done] independent WebAssembly.validate/runtime smoke
-[done] direct call lowering
-[done] structured if/control flow
-[done] typed let bindings -> lexical Wasm locals
-[done] independent Wasm integration workflow
-[post-merge] GC structures/inductives
-[post-merge] closures/typed function references
-[post-merge] String/Array/Nat/Int runtime
-[post-merge] SIMD/WASI/components/formal proof
+[done] target-neutral projection owner identity
+[done] GC struct types + struct.new/struct.get
+[done] packed i8/i16 structure storage/access
+[done] nominal inductive base type
+[done] constructor GC subtypes
+[done] ref.test / ref.cast match lowering
+[done] lexical constructor-field bindings
+[done] multi-constructor MaybeU32 runtime execution
+[done] recursive U32List type lowering
+[done] recursive listLength runtime execution
+[green] dedicated Owned Wasm backend integration workflow
+[next] live-base mergeability check / integration PR
+[post-merge] generic monomorphization for GC ADTs
+[post-merge] closures / typed function references
+[post-merge] String / Array / exact Nat / Int runtime
+[post-merge] SIMD / WASI / components / formal preservation proof
 ```
+
+This merge still does **not** claim full Wasm language coverage. Generic ADTs
+remain fail-closed until target-neutral specialization/monomorphization exists.
 
 ## Development order
 

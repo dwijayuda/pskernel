@@ -1014,6 +1014,47 @@ def psWasmLowerNatBinaryCall
           }
   | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
+def psWasmLowerTypedArgumentsWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr) :
+    PsWasmLowerState ->
+    List PsVerifiedIrType ->
+    List PsVerifiedIrExpr ->
+    Except PsWasmLowerError PsWasmLoweredExpr
+  | state, [], [] =>
+      Except.ok {
+        instructions := []
+        state := state
+      }
+  | state, type :: restTypes, argument :: restArguments =>
+      match psWasmValueTypeOfIrType? profile type with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some expected =>
+          match lower (some expected) state argument with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              match
+                  psWasmLowerTypedArgumentsWith
+                    profile
+                    lower
+                    lowered.state
+                    restTypes
+                    restArguments with
+              | Except.error error => Except.error error
+              | Except.ok loweredRest =>
+                  Except.ok {
+                    instructions :=
+                      lowered.instructions
+                        ++ loweredRest.instructions
+                    state := loweredRest.state
+                  }
+  | _, _, _ =>
+      Except.error PsWasmLowerError.invalidCallArity
+
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
@@ -1113,47 +1154,6 @@ def psWasmLowerIntrinsicWith
   | .natLt =>
       psWasmLowerNatBinaryCall lower state arguments psWasmNatLtName
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
-
-def psWasmLowerTypedArgumentsWith
-    (profile : PsWasmTargetProfile)
-    (lower :
-      Option PsWasmValueType ->
-      PsWasmLowerState ->
-      PsVerifiedIrExpr ->
-        Except PsWasmLowerError PsWasmLoweredExpr) :
-    PsWasmLowerState ->
-    List PsVerifiedIrType ->
-    List PsVerifiedIrExpr ->
-    Except PsWasmLowerError PsWasmLoweredExpr
-  | state, [], [] =>
-      Except.ok {
-        instructions := []
-        state := state
-      }
-  | state, type :: restTypes, argument :: restArguments =>
-      match psWasmValueTypeOfIrType? profile type with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some expected =>
-          match lower (some expected) state argument with
-          | Except.error error => Except.error error
-          | Except.ok lowered =>
-              match
-                  psWasmLowerTypedArgumentsWith
-                    profile
-                    lower
-                    lowered.state
-                    restTypes
-                    restArguments with
-              | Except.error error => Except.error error
-              | Except.ok loweredRest =>
-                  Except.ok {
-                    instructions :=
-                      lowered.instructions
-                        ++ loweredRest.instructions
-                    state := loweredRest.state
-                  }
-  | _, _, _ =>
-      Except.error PsWasmLowerError.invalidCallArity
 
 def psWasmLowerFunctionValueCall
     (profile : PsWasmTargetProfile)

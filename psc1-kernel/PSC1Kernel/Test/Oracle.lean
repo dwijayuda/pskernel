@@ -1146,7 +1146,7 @@ def assertQuotAdmissionOracle : IO Unit := do
       throw <| IO.userError "Quot admission overwrote an occupied primitive name"
   | .error _ => pure ()
 
-partial def makeDeepSuccExpr (depth : Nat) : PSC1Kernel.Expr :=
+def makeDeepSuccExpr (depth : Nat) : PSC1Kernel.Expr :=
   match depth with
   | 0 => .lit (.nat 0)
   | n + 1 => .app (.const PSC1Kernel.kernelNatSuccName []) (makeDeepSuccExpr n)

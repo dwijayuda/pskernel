@@ -181,6 +181,8 @@ jobs:
             "string_extract=" + m.diffStringExtract("aéz", 1n, 3n),
             "string_eq=" + m.diffStringEq("hé", "hé").toString(),
             "string=" + m.diffString("é").toString(),
+            "array_persistent=" + m.diffArrayPersistentSet(7n, 8n).toString(),
+            "array_fold=" + m.diffArrayFold(7n, 8n).toString(),
             "array=" + m.diffArray(7n, 8n).toString(),
             "reuse_capture=" + m.diffReuseCapture(5n).toString(),
             "capture=" + m.diffCapture(5n, 7n).toString(),
@@ -207,6 +209,8 @@ jobs:
           use num_bigint::{BigInt, BigUint};
           use psc_diff_rust::{
               diffArray,
+              diffArrayFold,
+              diffArrayPersistentSet,
               diffCapture,
               diffCaptureArray,
               diffF32Add,
@@ -255,6 +259,8 @@ jobs:
               println!("string_extract={}", diffStringExtract(String::from("aéz"), n(1), n(3)));
               println!("string_eq={}", diffStringEq(String::from("hé"), String::from("hé")));
               println!("string={}", diffString(String::from("é")));
+              println!("array_persistent={}", diffArrayPersistentSet(n(7), n(8)));
+              println!("array_fold={}", diffArrayFold(n(7), n(8)));
               println!("array={}", diffArray(n(7), n(8)));
               println!("reuse_capture={}", diffReuseCapture(n(5)));
               println!("capture={}", diffCapture(n(5), n(7)));
@@ -285,6 +291,8 @@ jobs:
           string_extract=é
           string_eq=true
           string=3
+          array_persistent=17
+          array_fold=15
           array=8
           reuse_capture=13
           capture=12

@@ -168,6 +168,7 @@ jobs:
             "nat_ge=" + m.diffNat(9n, 4n).toString(),
             "int=" + m.diffInt(7n, 2n).toString(),
             "projection=" + m.diffProjection(11n, 22n).toString(),
+            "reuse_string=" + m.diffReuseString("é").toString(),
             "u8_wrap=" + m.diffU8Wrap(250, 10).toString(),
             "i16_wrap=" + m.diffI16Mul(200, 200).toString(),
             "u32_lt=" + m.diffU32Lt(4000000000, 10).toString(),
@@ -208,6 +209,7 @@ jobs:
               diffMaybe,
               diffNat,
               diffProjection,
+              diffReuseString,
               diffString,
               diffU32Lt,
               diffU8Wrap,
@@ -226,6 +228,7 @@ jobs:
               println!("nat_ge={}", diffNat(n(9), n(4)));
               println!("int={}", diffInt(i(7), i(2)));
               println!("projection={}", diffProjection(n(11), n(22)));
+              println!("reuse_string={}", diffReuseString(String::from("é")));
               println!("u8_wrap={}", diffU8Wrap(250u8, 10u8));
               println!("i16_wrap={}", diffI16Mul(200i16, 200i16));
               println!("u32_lt={}", diffU32Lt(4_000_000_000u32, 10u32));
@@ -248,6 +251,7 @@ jobs:
           nat_ge=5
           int=-5
           projection=11
+          reuse_string=2
           u8_wrap=4
           i16_wrap=-25536
           u32_lt=false

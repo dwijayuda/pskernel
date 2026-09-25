@@ -1,21 +1,34 @@
 import Ps.Core.Expr
 
+def psFindLevelArgumentWorker
+    (parameters : List PsName) :
+    List PsLevel -> PsName -> Option PsLevel :=
+  match parameters with
+  | [] =>
+      fun (arguments : List PsLevel) =>
+        fun (target : PsName) =>
+          Option.none
+  | parameter :: parameterRest =>
+      let smaller : List PsLevel -> PsName -> Option PsLevel :=
+        psFindLevelArgumentWorker parameterRest;
+      fun (arguments : List PsLevel) =>
+        fun (target : PsName) =>
+          match arguments with
+          | [] =>
+              Option.none
+          | argument :: argumentRest =>
+              if psNameEq parameter target then
+                Option.some argument
+              else
+                smaller argumentRest target
+
 def psFindLevelArgument
     (parameters : List PsName)
     (arguments : List PsLevel)
     (target : PsName) : Option PsLevel :=
-  match parameters with
-  | [] =>
-      Option.none
-  | parameter :: parameterRest =>
-      match arguments with
-      | [] =>
-          Option.none
-      | argument :: argumentRest =>
-          if psNameEq parameter target then
-            Option.some argument
-          else
-            psFindLevelArgument parameterRest argumentRest target
+  let find : List PsLevel -> PsName -> Option PsLevel :=
+    psFindLevelArgumentWorker parameters;
+  find arguments target
 
 def psLevelInstantiateParams
     (parameters : List PsName)

@@ -2385,6 +2385,21 @@ def psTestDualSourcePartialDefinition : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestStructureBeforePartialDefinition : Bool :=
+  let source :=
+    "structure LayoutState where\n" ++
+    "  value : Nat\n\n" ++
+    "partial def layoutLoop (n : Nat) : Nat := layoutLoop n"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match module.declarations with
+      | [
+          PsSyntaxDeclaration.structureDecl _ _ _ _,
+          PsSyntaxDeclaration.partialDefinition _ _ _ _ _
+        ] => true
+      | _ => false
+
 def psTestLeanListPatternSugar : Bool :=
   let source :=
     "def listEmptyOrTail (xs : List Nat) : Nat := " ++
@@ -2447,6 +2462,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source binder kinds parse", passed := psTestDualSourceBinderKindsParse },
   { name := "dual-source typed lambda parse", passed := psTestDualSourceTypedLambdaParse },
   { name := "dual-source typed lambda elaboration", passed := psTestDualSourceTypedLambdaElaboration },
+  { name := "structure stops before partial def", passed := psTestStructureBeforePartialDefinition },
   { name := "Lean list pattern sugar", passed := psTestLeanListPatternSugar },
   { name := "lambda match uses expected type", passed := psTestLambdaMatchExpectedType },
   { name := "two-argument equation definition", passed := psTestTwoArgumentEquationDefinition },

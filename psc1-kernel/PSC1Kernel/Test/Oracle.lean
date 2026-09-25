@@ -3560,6 +3560,115 @@ def assertUniverseNestedInductiveAdmissionOracle : IO Unit := do
   assertTrue "universe-nested recursion did not reach leaf minor"
     (PSC1Kernel.Expr.eq oursReduced (.lit (.nat 79)))
 
+def assertRepeatedOuterNestedInductiveAdmissionOracle : IO Unit := do
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let Box : PSC1Kernel.Name := .str .anonymous "OracleRepeatedNestedBox"
+  let BoxMk : PSC1Kernel.Name := .str Box "mk"
+  let Alpha : PSC1Kernel.Name := .str .anonymous "α"
+  let Value : PSC1Kernel.Name := .str .anonymous "value"
+  let boxType : PSC1Kernel.Expr :=
+    .forallE Alpha type1 type1 .default
+  let boxCtorType : PSC1Kernel.Expr :=
+    .forallE Alpha type1
+      (.forallE Value (.bvar 0)
+        (.app (.const Box []) (.bvar 1))
+        .default)
+      .default
+
+  let Tree : PSC1Kernel.Name := .str .anonymous "OracleRepeatedNestedTree"
+  let TreeLeaf : PSC1Kernel.Name := .str Tree "leaf"
+  let TreeNode : PSC1Kernel.Name := .str Tree "node"
+  let TreeRec : PSC1Kernel.Name := .str Tree "rec"
+  let TreeRec1 : PSC1Kernel.Name := TreeRec.appendIndexAfter 1
+  let TreeRec2 : PSC1Kernel.Name := TreeRec.appendIndexAfter 2
+  let treeT : PSC1Kernel.Expr := .const Tree []
+  let boxTree : PSC1Kernel.Expr := .app (.const Box []) treeT
+  let boxBoxTree : PSC1Kernel.Expr := .app (.const Box []) boxTree
+  let treeNodeType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "children") boxBoxTree treeT .default
+
+  let oursBox ← exceptToIO
+    "PSC1 repeated nested outer Box admission"
+    (PSC1Kernel.Kernel.addSimpleInductive .empty {
+      levelParams := []
+      name := Box
+      type := boxType
+      ctors := [{ name := BoxMk, type := boxCtorType }]
+      isUnsafe := false
+      numParams := 1
+    })
+  let ours ← exceptToIO
+    "PSC1 repeated outer nested Tree admission"
+    (PSC1Kernel.Kernel.addSimpleNestedInductive oursBox {
+      levelParams := []
+      numParams := 0
+      types := [{
+        name := Tree
+        type := type1
+        ctors := [
+          { name := TreeLeaf, type := treeT },
+          { name := TreeNode, type := treeNodeType }
+        ]
+      }]
+      isUnsafe := false
+    })
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanBox ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.inductDecl [] 1 [{
+      name := toLeanName Box
+      type := toLeanExpr boxType
+      ctors := [{ name := toLeanName BoxMk, type := toLeanExpr boxCtorType }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected repeated nested outer Box"
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl leanBox {} (.inductDecl [] 0 [{
+      name := toLeanName Tree
+      type := toLeanExpr type1
+      ctors := [
+        { name := toLeanName TreeLeaf, type := toLeanExpr treeT },
+        { name := toLeanName TreeNode, type := toLeanExpr treeNodeType }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected repeated outer nested Tree"
+
+  for name in [Tree, TreeLeaf, TreeNode, TreeRec, TreeRec1, TreeRec2] do
+    let some oursInfo := ours.find? name
+      | throw <| IO.userError (
+          "PSC1 repeated nested metadata missing: " ++
+          (toLeanName name).toString)
+    let some leanInfo := lean1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 repeated nested metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("repeated nested type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+
+  match ours.find? Tree with
+  | some (.inductInfo info) =>
+      assertTrue "repeated nested numNested mismatch"
+        (info.numNested == 2)
+  | _ =>
+      throw <| IO.userError "PSC1 repeated nested inductive info missing"
+
+  for name in [TreeRec1, TreeRec2] do
+    match ours.find? name with
+    | some (.recInfo info) =>
+        assertTrue "repeated nested auxiliary recursor motive count mismatch"
+          (info.numMotives == 3)
+    | _ =>
+        throw <| IO.userError "PSC1 repeated nested auxiliary recursor missing"
+
+  assertTrue "repeated nested admission leaked _nested auxiliaries"
+    (!ours.constants.any fun info =>
+      PSC1Kernel.Kernel.simpleNestedPrefix.isPrefixOf info.name)
+
 def assertIndexedOuterNestedInductiveAdmissionOracle : IO Unit := do
   let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
   let natT : PSC1Kernel.Expr := .const NatN []
@@ -4797,6 +4906,7 @@ def run : IO Unit := do
   assertNestedInductiveAdmissionOracle
   assertParameterizedNestedInductiveAdmissionOracle
   assertUniverseNestedInductiveAdmissionOracle
+  assertRepeatedOuterNestedInductiveAdmissionOracle
   assertIndexedOuterNestedInductiveAdmissionOracle
   assertOuterMutualNestedInductiveAdmissionOracle
   assertLetTypeClosureOracle

@@ -395,22 +395,58 @@ partial def recursorMajorInduct?
     | _, _ => none
   go recursor.base.type majorIdx
 
-partial def mkNullaryConstructor?
-    (env : Environment)
-    (type : Expr)
-    (numParams : Nat) : Option Expr :=
-  match type.getAppFn with
-  | .const induct levels =>
-      match env.find? induct with
-      | some (.inductInfo info) =>
-          match info.ctors with
-          | ctor :: _ =>
-              some <|
-                applyArgs (.const ctor levels)
-                  (type.getAppArgs.take numParams)
-          | [] => none
-      | _ => none
+partial def inferKMajorType?
+    (ctx : CheckerContext)
+    (major : Expr) : Option Expr :=
+  match major with
+  | .fvar name =>
+      match ctx.lctx.find? name with
+      | some decl => some decl.type
+      | none => none
+  | .const name levels =>
+      match ctx.env.find? name with
+      | some info =>
+          if info.levelParams.length == levels.length then
+            some (info.type.instantiateLevelParams info.levelParams levels)
+          else
+            none
+      | none => none
+  | .mdata _ body => inferKMajorType? ctx body
   | _ => none
+
+partial def exprHasMVarForK : Expr → Bool
+  | .mvar _ => true
+  | .sort level =>
+      match level with
+      | .mvar _ => true
+      | _ => false
+  | .const _ levels =>
+      levels.any fun level =>
+        match level with
+        | .mvar _ => true
+        | _ => false
+  | .app fn arg =>
+      exprHasMVarForK fn || exprHasMVarForK arg
+  | .lam _ type body _ | .forallE _ type body _ =>
+      exprHasMVarForK type || exprHasMVarForK body
+  | .letE _ type value body _ =>
+      exprHasMVarForK type ||
+        exprHasMVarForK value ||
+        exprHasMVarForK body
+  | .mdata _ body | .proj _ _ body => exprHasMVarForK body
+  | .bvar _ | .fvar _ | .lit _ => false
+
+partial def consumeKConstructorParams
+    (ctx : CheckerContext)
+    (type : Expr)
+    (params : List Expr) : Except String (Option Expr) := do
+  match params with
+  | [] => return some (← whnf ctx type)
+  | param :: rest =>
+      let reduced ← whnf ctx type
+      let .forallE _ _ body _ := reduced
+        | return none
+      consumeKConstructorParams ctx (body.instantiate1 param) rest
 
 partial def toConstructorWhenK
     (ctx : CheckerContext)
@@ -418,23 +454,35 @@ partial def toConstructorWhenK
     (major : Expr) : Except String Expr := do
   let some majorInduct := recursorMajorInduct? recursor
     | return major
-  let appType ← whnf ctx (← check ctx major)
-  let .const typeInduct _ := appType.getAppFn
+  let some rawType := inferKMajorType? ctx major
+    | return major
+  let appType ← whnf ctx rawType
+  let .const typeInduct typeLevels := appType.getAppFn
     | return major
   if !Name.eq typeInduct majorInduct then
     return major
-  if appType.hasMVar then
-    let indexArgs := appType.getAppArgs.drop recursor.numParams
-    if indexArgs.any (fun arg => arg.hasMVar) then
-      return major
-  let some ctorApp :=
-      mkNullaryConstructor? ctx.env appType recursor.numParams
+  if exprHasMVarForK appType then
+    return major
+  let some (.inductInfo induct) := ctx.env.find? typeInduct
     | return major
-  let ctorType ← check ctx ctorApp
-  if ← isDefEq ctx appType ctorType then
-    pure ctorApp
-  else
-    pure major
+  let ctorName :: _ := induct.ctors
+    | return major
+  let some (.ctorInfo ctor) := ctx.env.find? ctorName
+    | return major
+  if ctor.numFields != 0 || ctor.numParams != recursor.numParams then
+    return major
+  if ctor.base.levelParams.length != typeLevels.length then
+    return major
+  let params := appType.getAppArgs.take recursor.numParams
+  if params.length != recursor.numParams then
+    return major
+  let ctorType0 :=
+    ctor.base.type.instantiateLevelParams ctor.base.levelParams typeLevels
+  let some ctorType ← consumeKConstructorParams ctx ctorType0 params
+    | return major
+  if !Expr.eq ctorType appType then
+    return major
+  pure (applyArgs (.const ctorName typeLevels) params)
 
 partial def reduceInductiveRec
     (ctx : CheckerContext)

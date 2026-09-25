@@ -136,8 +136,12 @@ def psPrintProofScriptTermWithFuel :
                           let delimiters :=
                             psPrintBinderDelimiters head.kind;
                           Except.ok
-                            (delimiters.fst ++ name ++ " : " ++
-                              printedType ++ delimiters.snd)
+                            (psPrintProofScriptConcat5
+                              delimiters.fst
+                              name
+                              " : "
+                              printedType
+                              delimiters.snd);
           match binders.mapM printBinder with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
@@ -290,10 +294,10 @@ def psPrintProofScriptStructureField
           | Except.ok printedType =>
               let value :=
                 match head.kind with
-                | .explicit => name ++ " : " ++ printedType
-                | .implicit => "{" ++ name ++ " : " ++ printedType ++ "}"
-                | .strictImplicit => "{{" ++ name ++ " : " ++ printedType ++ "}}"
-                | .instanceImplicit => "[" ++ name ++ " : " ++ printedType ++ "]"
+                | .explicit => psPrintProofScriptConcat3 name " : " printedType
+                | .implicit => psPrintProofScriptConcat5 "{" name " : " printedType "}"
+                | .strictImplicit => psPrintProofScriptConcat5 "{{" name " : " printedType "}}"
+                | .instanceImplicit => psPrintProofScriptConcat5 "[" name " : " printedType "]"
               Except.ok (psPrintProofScriptConcat3 "  " value ";")
 
 def psPrintProofScriptConstructor
@@ -307,7 +311,7 @@ def psPrintProofScriptConstructor
       | Except.ok fields =>
           let suffix :=
             if fields.isEmpty then ""
-            else " " ++ psPrintJoin " " fields;
+            else psPrintProofScriptConcat2 " " (psPrintJoin " " fields);
           Except.ok (psPrintProofScriptConcat4 "  | " name suffix ";")
 
 def psPrintProofScriptDeclaration
@@ -329,7 +333,7 @@ def psPrintProofScriptDeclaration
                   | Except.ok printedValue =>
                       let binderSuffix :=
                         if printedBinders.isEmpty then ""
-                        else " " ++ psPrintJoin " " printedBinders;
+                        else psPrintProofScriptConcat2 " " (psPrintJoin " " printedBinders);
                       Except.ok
                         (psPrintProofScriptConcat6
                           "def "
@@ -353,7 +357,7 @@ def psPrintProofScriptDeclaration
                   | Except.ok printedValue =>
                       let binderSuffix :=
                         if printedBinders.isEmpty then ""
-                        else " " ++ psPrintJoin " " printedBinders;
+                        else psPrintProofScriptConcat2 " " (psPrintJoin " " printedBinders);
                       Except.ok
                         (psPrintProofScriptConcat6
                           "partial def "
@@ -377,7 +381,7 @@ def psPrintProofScriptDeclaration
                   | Except.ok printedValue =>
                       let binderSuffix :=
                         if printedBinders.isEmpty then ""
-                        else " " ++ psPrintJoin " " printedBinders;
+                        else psPrintProofScriptConcat2 " " (psPrintJoin " " printedBinders);
                       Except.ok
                         (psPrintProofScriptConcat6
                           "theorem "
@@ -400,7 +404,7 @@ def psPrintProofScriptDeclaration
                     match psPrintProofScriptTerm type with
                     | Except.error error => Except.error error
                     | Except.ok printed =>
-                        Except.ok (" : " ++ printed)
+                        Except.ok (psPrintProofScriptConcat2 " : " printed);
               match printResult with
               | Except.error error => Except.error error
               | Except.ok printedResult =>
@@ -411,7 +415,7 @@ def psPrintProofScriptDeclaration
                   | Except.ok printedConstructors =>
                       let paramSuffix :=
                         if printedParams.isEmpty then ""
-                        else " " ++ psPrintJoin " " printedParams;
+                        else psPrintProofScriptConcat2 " " (psPrintJoin " " printedParams);
                       Except.ok
                         (psPrintProofScriptConcat6
                           "inductive "
@@ -434,7 +438,7 @@ def psPrintProofScriptDeclaration
               | Except.ok printedFields =>
                   let paramSuffix :=
                     if printedParams.isEmpty then ""
-                    else " " ++ psPrintJoin " " printedParams;
+                    else psPrintProofScriptConcat2 " " (psPrintJoin " " printedParams);
                   Except.ok
                     (psPrintProofScriptConcat6
                       "structure "

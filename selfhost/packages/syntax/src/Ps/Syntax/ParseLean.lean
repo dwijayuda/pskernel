@@ -1340,12 +1340,16 @@ def psParseLeanRecordApplicationTailWithFuel
             cursor := cursor
           }
 
-def psParseLeanTermWithFuel :
-    Nat ->
+def psParseLeanTermWithFuel
+    (fuel : Nat) :
     PsTokenCursor ->
-    Except PsParseError (PsParseResult PsSyntaxTerm)
-  | 0, _ => Except.error PsParseError.fuelExhausted
-  | remaining + 1, cursor =>
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match fuel with
+  | 0 =>
+      fun (_cursor : PsTokenCursor) =>
+        Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      fun (cursor : PsTokenCursor) =>
       if psTokenCursorAtText cursor "do" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "do statement")

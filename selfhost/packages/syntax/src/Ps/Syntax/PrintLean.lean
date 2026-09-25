@@ -44,9 +44,10 @@ def psPrintLeanTermWithFuel
       | .character text _ =>
           Except.ok text
       | .bool value _ =>
-          match value with
-          | true => Except.ok "true"
-          | false => Except.ok "false"
+          if value then
+            Except.ok "true"
+          else
+            Except.ok "false"
       | .unit _ =>
           Except.ok "()"
       | .record fields _ =>

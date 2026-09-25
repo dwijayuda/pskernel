@@ -185,6 +185,7 @@ def psWasmIsAddU32Function : PsWasmFunction -> Bool
       name := name,
       parameters := [.i32, .i32],
       results := [.i32],
+      locals := [],
       body := [.localGet 0, .localGet 1, .i32Add]
     } => name == "addU32"
   | _ => false
@@ -199,6 +200,71 @@ def psTestWasmVerifiedIrLowering : Bool :=
             && module.exports == [("addU32", "addU32")]
       | _ => false
 
+def psWasmLetIrModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "letU32"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.letE
+            "saved"
+            (PsVerifiedIrType.primitive
+              PsVerifiedIrPrimitiveType.uint32)
+            (PsVerifiedIrExpr.var "value")
+            (PsVerifiedIrExpr.intrinsic
+              (PsVerifiedIrIntrinsic.machineIntBinary
+                PsVerifiedIrMachineIntegerType.uint32
+                PsVerifiedIrIntegerBinaryOp.add)
+              [
+                PsVerifiedIrExpr.var "saved",
+                PsVerifiedIrExpr.literal
+                  (PsVerifiedIrLiteral.machineInteger
+                    PsVerifiedIrMachineIntegerType.uint32
+                    1)
+              ])
+      }
+    ]
+  }
+
+def psWasmIsLetU32Function : PsWasmFunction -> Bool
+  | {
+      name := name,
+      parameters := [.i32],
+      results := [.i32],
+      locals := [.i32],
+      body :=
+        [
+          .localGet 0,
+          .localSet 1,
+          .localGet 1,
+          .i32Const 1,
+          .i32Add
+        ]
+    } => name == "letU32"
+  | _ => false
+
+def psTestWasmLetLowering : Bool :=
+  match psWasmLowerModule psWasmProfile32 psWasmLetIrModule with
+  | Except.error _ => false
+  | Except.ok module =>
+      match module.functions with
+      | [function] => psWasmIsLetU32Function function
+      | _ => false
+
 def psWasmAnswerModule : PsWasmModule :=
   {
     functions := [
@@ -206,6 +272,7 @@ def psWasmAnswerModule : PsWasmModule :=
         name := "answer"
         parameters := []
         results := [PsWasmValueType.i32]
+        locals := []
         body := [PsWasmInstruction.i32Const 42]
       }
     ]
@@ -277,6 +344,7 @@ def main : IO Unit := do
       && psTestWasmMachineIntegerLiterals
       && psTestWasmFloatOps
       && psTestWasmVerifiedIrLowering
+      && psTestWasmLetLowering
       && psTestWasmUleb
       && psTestWasmSignedLeb
       && psTestWasmBinaryModule then

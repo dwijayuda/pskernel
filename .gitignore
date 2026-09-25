@@ -3,3 +3,4 @@ dist/
 *.tgz
 *.zip
 full-std.local.log
+selfhost/out/

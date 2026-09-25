@@ -1,0 +1,213 @@
+/* Maybe change color of code?  Maybe add white-space: pre-wrap? */
+code {
+  color: black
+}
+
+code span.kw {    /* keywords */
+  color: blue;
+  font-weight: normal
+}
+
+code span.co {    /* comments */
+  color: green;
+  font-style: normal
+}
+
+code span.st {    /* quoted string */
+  color: brown
+}
+
+code span.er {    /* error */
+  color: black;
+  font-weight: normal;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: red
+}
+
+code span.sc {    /* Hidden delimiter: !! or - */
+  display: none
+}
+
+code span.wa {      /* keyword in error */
+  color: blue;
+  font-weight: normal;
+  font-style: normal;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: red
+}
+
+code span.cn {     /* sorry */
+  color: crimson;
+  font-weight: normal
+}
+
+code span.al {      /* keyword with warning */
+  color: blue;
+  font-weight: normal;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: darkgoldenrod;
+}
+
+code span.an {     /* warning */
+  color: black;
+  font-weight: normal;
+  font-style: normal;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: darkgoldenrod;
+}
+
+code span.do {   /* keyword with output */
+  color: blue;
+  font-style: normal;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: dodgerblue
+}
+
+code span.ot {   /* output */
+  color: black;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: dodgerblue
+}
+
+code span.in {       /* identifiers in InfoView */
+  color: Chocolate;
+  font-weight: bold;
+  font-style: normal
+}
+
+code span.re {      /* "case" label in InfoView */
+  color: green;
+  font-weight: bold
+}
+
+code span.ss {      /* "No goals" in InfoView */
+  color: steelblue;
+  font-weight: bold
+}
+
+code span.re::before{
+  content: "▼";
+  color: black;
+  padding-right: 3px
+}
+
+.inout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  row-gap: 0
+}
+
+.inpt::before {
+  content: "Lean File";
+  text-decoration-line: underline
+}
+
+.outpt::before {
+  content: "Tactic State in InfoView";
+  text-decoration-line: underline
+}
+
+.lftrt {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  row-gap: 0
+}
+
+.bef::before {
+  content: "Tactic State Before Using Strategy";
+  text-decoration-line: underline
+}
+
+.aft::before {
+  content: "Tactic State After Using Strategy";
+  text-decoration-line: underline
+}
+
+.numex::before {
+  content: attr(data-arguments)".";
+  float: left;
+  padding-right: 0.6em
+}
+
+.quote {
+  margin-left: 10%
+}
+
+.ind {
+  margin-left: 3%
+}
+
+.spacer {   /* span: horizontal space */
+  display: inline-block;
+  width: 2em
+}
+
+.mdsk {    /* div: vertical space */
+  height: 10px;
+  margin: 0px
+}
+
+.thm {
+  font-style: italic
+}
+
+.thm::before {
+  content: "Theorem.";
+  font-style: normal;
+  font-weight: bold;
+  padding-right: 0.4em;
+  float: left
+}
+
+.nthm {
+  font-style: italic
+}
+
+.nthm::before {
+  content: attr(data-arguments)".";
+  font-style: normal;
+  font-weight: bold;
+  padding-right: 0.4em;
+  float: left
+}
+
+.npf::before {
+  content: attr(data-arguments)".";
+  font-style: italic;
+  padding-right: 0.4em;
+  float: left
+}
+
+.dfn {
+  font-style: normal
+}
+
+.dfn::before {
+  content: "Definition.";
+  font-weight: bold;
+  padding-right: 0.4em;
+  float: left
+}
+
+.ndfn {
+  font-style: normal
+}
+
+.ndfn::before {
+  content: attr(data-arguments)".";
+  font-weight: bold;
+  padding-right: 0.4em;
+  float: left
+}
+
+.lrg {
+  font-size: 1.2em
+}

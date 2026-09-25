@@ -30,9 +30,10 @@ def psPrintJoin
 
 def psPrintSyntaxName (name : PsSyntaxName) :
     Except PsSourcePrintError String :=
-  match name.segments with
+  let segments := name.segments;
+  match segments with
   | List.nil => Except.error PsSourcePrintError.emptyName
-  | segments => Except.ok (psPrintJoin "." segments)
+  | List.cons _ _ => Except.ok (psPrintJoin "." segments)
 
 def psPrintBinderDelimiters
     (kind : PsSyntaxBinderKind) : Prod String String :=

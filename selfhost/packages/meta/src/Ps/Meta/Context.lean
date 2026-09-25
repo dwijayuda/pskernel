@@ -68,7 +68,7 @@ def psMetaFresh
     (localContext : PsLocalContext)
     (type : PsExpr)
     (kind : PsMetaVarKind) : PsMetaFreshResult :=
-  let id := context.nextId
+  let id := context.nextId;
   let declaration : PsMetaVarDecl := {
     id := id
     type := type

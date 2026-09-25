@@ -412,6 +412,69 @@ def psBackendDiffModule : PsVerifiedIrModule :=
             ]
       },
       {
+        name := "diffNatDiv"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "y"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natDiv
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.var "y"
+            ]
+      },
+      {
+        name := "diffNatMod"
+        typeParameters := []
+        parameters := [
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "y"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natMod
+            [
+              PsVerifiedIrExpr.var "x",
+              PsVerifiedIrExpr.var "y"
+            ]
+      },
+      {
+        name := "diffCharRoundTrip"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.charToNat
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.charOfNat
+                [PsVerifiedIrExpr.var "value"]
+            ]
+      },
+      {
         name := "diffNat"
         typeParameters := []
         parameters := [

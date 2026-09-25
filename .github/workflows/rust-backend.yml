@@ -137,6 +137,7 @@ jobs:
         run: |
           set -euo pipefail
           cd selfhost
+          lake exe psc1_ir_specialize_tests
           lake exe psc1_backend_rust_tests
           lake exe psc1_backend_rust_source_tests
 

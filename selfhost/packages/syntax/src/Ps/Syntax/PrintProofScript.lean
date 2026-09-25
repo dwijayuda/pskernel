@@ -39,6 +39,30 @@ def psPrintProofScriptUnitCallArgs
           | List.cons _ _ => false
       | _ => false
 
+def psPrintProofScriptMapRecordFields
+    (printField :
+      Prod PsSyntaxName PsSyntaxTerm ->
+        Except PsSourcePrintError String)
+    (fields : List (Prod PsSyntaxName PsSyntaxTerm)) :
+    Except PsSourcePrintError (List String) :=
+  match fields with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons field rest =>
+      let printedHeadResult :=
+        printField field;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintProofScriptMapRecordFields printField rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintProofScriptTermWithFuel
     (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
@@ -80,7 +104,10 @@ def psPrintProofScriptTermWithFuel
                   | Except.ok value =>
                       Except.ok
                         (psPrintProofScriptConcat3 name " := " value);
-          match fields.mapM printField with
+          let printedFieldsResult :
+              Except PsSourcePrintError (List String) :=
+            psPrintProofScriptMapRecordFields printField fields;
+          match printedFieldsResult with
           | Except.error error => Except.error error
           | Except.ok printedFields =>
               Except.ok

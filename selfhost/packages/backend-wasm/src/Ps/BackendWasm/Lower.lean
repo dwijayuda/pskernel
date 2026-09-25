@@ -103,6 +103,283 @@ def psWasmFloatingValueType
   | .float32 => .f32
   | .float => .f64
 
+def psWasmFunctionTypeListContains
+    (types : List PsVerifiedIrType)
+    (candidate : PsVerifiedIrType) : Bool :=
+  match psWasmIrTypeKey candidate with
+  | none => false
+  | some candidateKey =>
+      types.any
+        (fun existing =>
+          match psWasmIrTypeKey existing with
+          | none => false
+          | some existingKey => existingKey == candidateKey)
+
+def psWasmInsertFunctionType
+    (types : List PsVerifiedIrType)
+    (candidate : PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  match candidate with
+  | .function _ _ =>
+      if psWasmFunctionTypeListContains types candidate then
+        types
+      else
+        types ++ [candidate]
+  | _ => types
+
+def psWasmCollectFunctionTypesFromTypeWithFuel :
+    Nat ->
+    PsVerifiedIrType ->
+    List PsVerifiedIrType ->
+    List PsVerifiedIrType
+  | 0, _, types => types
+  | fuel + 1, type, types =>
+      match type with
+      | .function parameters result =>
+          let withSelf :=
+            psWasmInsertFunctionType types type
+          let withParameters :=
+            parameters.foldl
+              (fun state parameter =>
+                psWasmCollectFunctionTypesFromTypeWithFuel
+                  fuel parameter state)
+              withSelf
+          psWasmCollectFunctionTypesFromTypeWithFuel
+            fuel result withParameters
+      | .named _ arguments =>
+          arguments.foldl
+            (fun state argument =>
+              psWasmCollectFunctionTypesFromTypeWithFuel
+                fuel argument state)
+            types
+      | _ => types
+
+def psWasmCollectFunctionTypesFromType
+    (type : PsVerifiedIrType)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  psWasmCollectFunctionTypesFromTypeWithFuel 64 type types
+
+def psWasmCollectFunctionTypesFromParameters
+    (parameters : List PsVerifiedIrParameter)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  parameters.foldl
+    (fun state parameter =>
+      psWasmCollectFunctionTypesFromType
+        parameter.type
+        state)
+    types
+
+def psWasmCollectFunctionTypesFromExprWithFuel :
+    Nat ->
+    PsVerifiedIrExpr ->
+    List PsVerifiedIrType ->
+    List PsVerifiedIrType
+  | 0, _, types => types
+  | fuel + 1, expr, types =>
+      let collect :=
+        fun expression state =>
+          psWasmCollectFunctionTypesFromExprWithFuel
+            fuel expression state
+      match expr with
+      | .literal _ => types
+      | .var _ => types
+      | .intrinsic _ arguments =>
+          arguments.foldl
+            (fun state argument => collect argument state)
+            types
+      | .lambda parameters resultType body =>
+          let withParameters :=
+            psWasmCollectFunctionTypesFromParameters
+              parameters types
+          let functionType :=
+            PsVerifiedIrType.function
+              (parameters.map (fun parameter => parameter.type))
+              resultType
+          let withFunction :=
+            psWasmInsertFunctionType
+              withParameters
+              functionType
+          let withResult :=
+            psWasmCollectFunctionTypesFromType
+              resultType
+              withFunction
+          collect body withResult
+      | .call fn typeArguments arguments =>
+          let withFn := collect fn types
+          let withTypes :=
+            typeArguments.foldl
+              (fun state type =>
+                psWasmCollectFunctionTypesFromType type state)
+              withFn
+          arguments.foldl
+            (fun state argument => collect argument state)
+            withTypes
+      | .letE _ type value body =>
+          let withType :=
+            psWasmCollectFunctionTypesFromType type types
+          let withValue := collect value withType
+          collect body withValue
+      | .ifE condition thenBranch elseBranch =>
+          let withCondition := collect condition types
+          let withThen := collect thenBranch withCondition
+          collect elseBranch withThen
+      | .record _ fields =>
+          fields.foldl
+            (fun state field => collect field.2 state)
+            types
+      | .projection _ target _ =>
+          collect target types
+      | .constructor _ _ typeArguments fields =>
+          let withTypes :=
+            typeArguments.foldl
+              (fun state type =>
+                psWasmCollectFunctionTypesFromType type state)
+              types
+          fields.foldl
+            (fun state field => collect field.2 state)
+            withTypes
+      | .matchE _ scrutinee alternatives =>
+          let withScrutinee := collect scrutinee types
+          alternatives.foldl
+            (fun state alternative =>
+              let bindings := alternative.2.1
+              let body := alternative.2.2
+              let withBindings :=
+                bindings.foldl
+                  (fun inner binding =>
+                    psWasmCollectFunctionTypesFromType
+                      binding.type
+                      inner)
+                  state
+              collect body withBindings)
+            withScrutinee
+
+def psWasmCollectFunctionTypesFromExpr
+    (expr : PsVerifiedIrExpr)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  psWasmCollectFunctionTypesFromExprWithFuel 4096 expr types
+
+def psWasmCollectModuleFunctionTypes
+    (module : PsVerifiedIrModule) :
+    List PsVerifiedIrType :=
+  let fromStructures :=
+    module.structures.foldl
+      (fun state structureInfo =>
+        structureInfo.fields.foldl
+          (fun inner field =>
+            psWasmCollectFunctionTypesFromType field.type inner)
+          state)
+      []
+  let fromInductives :=
+    module.inductives.foldl
+      (fun state inductiveInfo =>
+        inductiveInfo.constructors.foldl
+          (fun inner constructorInfo =>
+            constructorInfo.fields.foldl
+              (fun fieldsState field =>
+                psWasmCollectFunctionTypesFromType
+                  field.type
+                  fieldsState)
+              inner)
+          state)
+      fromStructures
+  module.declarations.foldl
+    (fun state declaration =>
+      let withParameters :=
+        psWasmCollectFunctionTypesFromParameters
+          declaration.parameters
+          state
+      let withResult :=
+        psWasmCollectFunctionTypesFromType
+          declaration.resultType
+          withParameters
+      psWasmCollectFunctionTypesFromExpr
+        declaration.body
+        withResult)
+    fromInductives
+
+structure PsWasmClosureSignature where
+  baseStructure : PsWasmStructType
+  codeType : PsWasmFunctionType
+
+def psWasmLowerIrTypeList
+    (profile : PsWasmTargetProfile) :
+    List PsVerifiedIrType ->
+    Except PsWasmLowerError (List PsWasmValueType)
+  | [] => Except.ok []
+  | type :: rest =>
+      match psWasmValueTypeOfIrType? profile type with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some lowered =>
+          match psWasmLowerIrTypeList profile rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok (lowered :: loweredRest)
+
+def psWasmLowerClosureSignature
+    (profile : PsWasmTargetProfile)
+    (type : PsVerifiedIrType) :
+    Except PsWasmLowerError PsWasmClosureSignature :=
+  match type with
+  | .function parameters result =>
+      match psWasmClosureBaseName type with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some baseName =>
+          match psWasmClosureCodeTypeName type with
+          | none => Except.error PsWasmLowerError.unsupportedType
+          | some codeTypeName =>
+              match psWasmLowerIrTypeList profile parameters with
+              | Except.error error => Except.error error
+              | Except.ok loweredParameters =>
+                  match psWasmLowerResultType profile result with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredResults =>
+                      Except.ok {
+                        baseStructure := {
+                          name := baseName
+                          superType := none
+                          isFinal := false
+                          fields := [
+                            {
+                              name := "code"
+                              storageType :=
+                                PsWasmStorageType.value
+                                  PsWasmValueType.funcRef
+                            }
+                          ]
+                        }
+                        codeType := {
+                          name := codeTypeName
+                          parameters :=
+                            PsWasmValueType.refT baseName ::
+                              loweredParameters
+                          results := loweredResults
+                        }
+                      }
+  | _ => Except.error PsWasmLowerError.unsupportedType
+
+def psWasmLowerClosureSignatures
+    (profile : PsWasmTargetProfile) :
+    List PsVerifiedIrType ->
+    Except PsWasmLowerError
+      (List PsWasmStructType × List PsWasmFunctionType)
+  | [] => Except.ok ([], [])
+  | type :: rest =>
+      match psWasmLowerClosureSignature profile type with
+      | Except.error error => Except.error error
+      | Except.ok signature =>
+          match psWasmLowerClosureSignatures profile rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok
+                (
+                  signature.baseStructure :: loweredRest.1,
+                  signature.codeType :: loweredRest.2
+                )
+
 def psWasmFindStructure :
     List PsVerifiedIrStructure -> String -> Option PsVerifiedIrStructure
   | [], _ => none

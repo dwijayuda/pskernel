@@ -100,6 +100,14 @@ inductive PsWasmInstruction where
   | refFunc (functionName : String)
   | refCastFunction (typeName : String)
   | callRef (typeName : String)
+  | arrayNew (typeName : String)
+  | arrayNewDefault (typeName : String)
+  | arrayGet (typeName : String)
+  | arrayGetS (typeName : String)
+  | arrayGetU (typeName : String)
+  | arraySet (typeName : String)
+  | arrayLen
+  | arrayCopy (targetType : String) (sourceType : String)
 
 structure PsWasmStructField where
   name : String
@@ -110,6 +118,11 @@ structure PsWasmStructType where
   superType : Option String
   isFinal : Bool
   fields : List PsWasmStructField
+
+structure PsWasmArrayType where
+  name : String
+  elementType : PsWasmStorageType
+  mutable : Bool
 
 structure PsWasmFunctionType where
   name : String
@@ -126,6 +139,7 @@ structure PsWasmFunction where
 
 structure PsWasmModule where
   structures : List PsWasmStructType
+  arrays : List PsWasmArrayType
   functionTypes : List PsWasmFunctionType
   functions : List PsWasmFunction
   functionRefs : List String
@@ -134,6 +148,7 @@ structure PsWasmModule where
 def psWasmModuleEmpty : PsWasmModule :=
   {
     structures := []
+    arrays := []
     functionTypes := []
     functions := []
     functionRefs := []

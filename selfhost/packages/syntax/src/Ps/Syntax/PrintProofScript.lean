@@ -308,7 +308,7 @@ def psPrintProofScriptStructureField
                 | .explicit => psPrintProofScriptConcat3 name " : " printedType
                 | .implicit => psPrintProofScriptConcat5 "{" name " : " printedType "}"
                 | .strictImplicit => psPrintProofScriptConcat5 "{{" name " : " printedType "}}"
-                | .instanceImplicit => psPrintProofScriptConcat5 "[" name " : " printedType "]"
+                | .instanceImplicit => psPrintProofScriptConcat5 "[" name " : " printedType "]";
               Except.ok (psPrintProofScriptConcat3 "  " value ";")
 
 def psPrintProofScriptConstructor

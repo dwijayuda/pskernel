@@ -1025,14 +1025,14 @@ partial def isDefEqUnitLike
   if ctor.numFields != 0 then return false
   isDefEq ctx tType (← infer ctx s)
 
-def typeCheckerNameString : Name → String
+partial def typeCheckerNameString : Name → String
   | .anonymous => "_"
   | .str .anonymous value => value
   | .str parent value => typeCheckerNameString parent ++ "." ++ value
   | .num .anonymous value => toString value
   | .num parent value => typeCheckerNameString parent ++ "." ++ toString value
 
-def typeCheckerExprHead (e : Expr) : String :=
+partial def typeCheckerExprHead (e : Expr) : String :=
   let args := e.getAppNumArgs
   match e.getAppFn with
   | .const name _ =>

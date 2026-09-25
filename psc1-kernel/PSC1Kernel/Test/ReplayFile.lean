@@ -113,6 +113,63 @@ def liftReplayResult
 def isPushEqAppendName (name : Name) : Bool :=
   Replay.replayNameString name == "Array.push_eq_append"
 
+partial def diagnoseDefEqTerminalArgs
+    (ctx : CheckerContext)
+    (left right : Expr)
+    (subst : List Expr := [])
+    (depth : Nat := 0) : IO Bool := do
+  match left, right with
+  | .forallE _ leftDomain leftBody _,
+      .forallE rightName rightDomain rightBody rightBinderInfo => do
+      IO.println s!"PSC1 Lean defeq FORALL depth={depth} domain-structural={Expr.eq leftDomain rightDomain}"
+      let leftDomain' := leftDomain.instantiateRev subst
+      let rightDomain' := rightDomain.instantiateRev subst
+      if !Expr.eq leftDomain rightDomain then
+        IO.println s!"PSC1 Lean defeq FORALL depth={depth} domain-defeq-begin"
+        let ok ← liftReplayResult "<diagnostic>" 0
+          (isDefEq ctx leftDomain' rightDomain')
+        IO.println s!"PSC1 Lean defeq FORALL depth={depth} domain-defeq-end result={ok}"
+        if !ok then return false
+      if leftBody.hasLooseBVar || rightBody.hasLooseBVar then
+        let (fresh, child) :=
+          ctx.withLocal rightName rightDomain' rightBinderInfo
+        diagnoseDefEqTerminalArgs
+          child leftBody rightBody (subst ++ [.fvar fresh]) (depth + 1)
+      else
+        diagnoseDefEqTerminalArgs
+          ctx leftBody rightBody (subst ++ [.sort .zero]) (depth + 1)
+  | _, _ => do
+      let left' := left.instantiateRev subst
+      let right' := right.instantiateRev subst
+      IO.println s!"PSC1 Lean defeq TERMINAL depth={depth} left={typeCheckerExprHead left'} right={typeCheckerExprHead right'}"
+      IO.println s!"PSC1 Lean defeq TERMINAL diff={typeCheckerExprDiff left' right'}"
+      let leftFn := left'.getAppFn
+      let rightFn := right'.getAppFn
+      let leftArgs := left'.getAppArgs
+      let rightArgs := right'.getAppArgs
+      IO.println s!"PSC1 Lean defeq APP heads left={typeCheckerExprHead leftFn} right={typeCheckerExprHead rightFn} leftArgs={leftArgs.length} rightArgs={rightArgs.length}"
+      if leftArgs.length != rightArgs.length then
+        return false
+      IO.println "PSC1 Lean defeq APP head-begin"
+      let headOk ← liftReplayResult "<diagnostic>" 0 (isDefEq ctx leftFn rightFn)
+      IO.println s!"PSC1 Lean defeq APP head-end result={headOk}"
+      if !headOk then return false
+      let rec compareArgs
+          (index : Nat)
+          (as bs : List Expr) : IO Bool := do
+        match as, bs with
+        | [], [] => return true
+        | a :: as', b :: bs' => do
+            IO.println s!"PSC1 Lean defeq ARG index={index} begin structural={Expr.eq a b} left={typeCheckerExprHead a} right={typeCheckerExprHead b}"
+            if !Expr.eq a b then
+              IO.println s!"PSC1 Lean defeq ARG index={index} diff={typeCheckerExprDiff a b}"
+            let ok ← liftReplayResult "<diagnostic>" 0 (isDefEq ctx a b)
+            IO.println s!"PSC1 Lean defeq ARG index={index} end result={ok}"
+            if !ok then return false
+            compareArgs (index + 1) as' bs'
+        | _, _ => return false
+      compareArgs 0 leftArgs rightArgs
+
 def replayPushEqAppendTheorem
     (state : Replay.State)
     (record : Replay.TheoremRecord) : IO Replay.State := do
@@ -146,8 +203,7 @@ def replayPushEqAppendTheorem
   let rawEq := Expr.eq valueType info.base.type
   IO.println s!"PSC1 Lean theorem PHASE raw-expr-eq-end result={rawEq}"
   IO.println "PSC1 Lean theorem PHASE final-defeq-begin"
-  let eq ← liftReplayResult "<diagnostic>" 0
-    (isDefEq ctx valueType info.base.type)
+  let eq ← diagnoseDefEqTerminalArgs ctx valueType info.base.type
   unless eq do throw <| IO.userError "theorem proof type mismatch"
   IO.println "PSC1 Lean theorem PHASE final-defeq-end"
   let env ← liftReplayResult "<diagnostic>" 0 (state.env.add (.thmInfo info))

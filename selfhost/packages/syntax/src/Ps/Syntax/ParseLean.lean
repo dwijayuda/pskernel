@@ -1372,7 +1372,7 @@ def psParseLeanTermWithFuel :
                 let sourceName : PsSyntaxName := {
                   segments := [name.token.text]
                   span := name.token.span
-                }
+                };
                 if psTokenCursorAtText name.cursor ":" then
                   match psTokenCursorAdvance name.cursor with
                   | none =>

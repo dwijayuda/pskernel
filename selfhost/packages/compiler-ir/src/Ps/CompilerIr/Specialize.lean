@@ -30,6 +30,10 @@ structure PsIrSpecializeExprResult where
   expr : PsVerifiedIrExpr
   requests : List PsIrSpecializeRequest
 
+structure PsIrSpecializeIntrinsicResult where
+  operation : PsVerifiedIrIntrinsic
+  requests : List PsIrSpecializeRequest
+
 structure PsIrSpecializeExprListResult where
   expressions : List PsVerifiedIrExpr
   requests : List PsIrSpecializeRequest
@@ -599,6 +603,66 @@ def psIrSpecializeRewriteAlternativesWith
                         ++ loweredRest.requests
                   }
 
+def psIrSpecializeRewriteIntrinsic
+    (module : PsVerifiedIrModule)
+    (substitution : List (String × PsVerifiedIrType))
+    (operation : PsVerifiedIrIntrinsic) :
+    Except PsIrSpecializeError PsIrSpecializeIntrinsicResult :=
+  let rewriteType :=
+    psIrSpecializeRewriteType module substitution
+  let unary :=
+    fun type make =>
+      match rewriteType type with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            operation := make lowered.type
+            requests := lowered.requests
+          }
+  let binary :=
+    fun first second make =>
+      match rewriteType first with
+      | Except.error error => Except.error error
+      | Except.ok loweredFirst =>
+          match rewriteType second with
+          | Except.error error => Except.error error
+          | Except.ok loweredSecond =>
+              Except.ok {
+                operation := make loweredFirst.type loweredSecond.type
+                requests :=
+                  loweredFirst.requests ++ loweredSecond.requests
+              }
+  match operation with
+  | .arrayEmptyWithCapacity type =>
+      unary type PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+  | .arraySize type =>
+      unary type PsVerifiedIrIntrinsic.arraySize
+  | .arrayPush type =>
+      unary type PsVerifiedIrIntrinsic.arrayPush
+  | .arrayGet type =>
+      unary type PsVerifiedIrIntrinsic.arrayGet
+  | .arrayGetD type =>
+      unary type PsVerifiedIrIntrinsic.arrayGetD
+  | .arraySet type =>
+      unary type PsVerifiedIrIntrinsic.arraySet
+  | .arraySetIfInBounds type =>
+      unary type PsVerifiedIrIntrinsic.arraySetIfInBounds
+  | .arrayMap sourceType targetType =>
+      binary
+        sourceType
+        targetType
+        PsVerifiedIrIntrinsic.arrayMap
+  | .arrayFoldl elementType accumulatorType =>
+      binary
+        elementType
+        accumulatorType
+        PsVerifiedIrIntrinsic.arrayFoldl
+  | _ =>
+      Except.ok {
+        operation := operation
+        requests := []
+      }
+
 def psIrSpecializeRewriteExprWithFuel
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType)) :
@@ -630,18 +694,27 @@ def psIrSpecializeRewriteExprWithFuel
           }
       | .intrinsic operation arguments =>
           match
-              psIrSpecializeRewriteExprListWith
-                rewrite
-                arguments with
+              psIrSpecializeRewriteIntrinsic
+                module
+                substitution
+                operation with
           | Except.error error => Except.error error
-          | Except.ok lowered =>
-              Except.ok {
-                expr :=
-                  PsVerifiedIrExpr.intrinsic
-                    operation
-                    lowered.expressions
-                requests := lowered.requests
-              }
+          | Except.ok loweredOperation =>
+              match
+                  psIrSpecializeRewriteExprListWith
+                    rewrite
+                    arguments with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    expr :=
+                      PsVerifiedIrExpr.intrinsic
+                        loweredOperation.operation
+                        lowered.expressions
+                    requests :=
+                      loweredOperation.requests
+                        ++ lowered.requests
+                  }
       | .lambda parameters resultType body =>
           match
               psIrSpecializeRewriteParameters

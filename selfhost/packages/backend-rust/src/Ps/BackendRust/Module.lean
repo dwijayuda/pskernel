@@ -9,7 +9,10 @@ def psRustTypeParameterNames
       List.nil
   | List.cons parameter rest =>
       List.cons
-        (psRustConcat3 parameter.name ": " "Clone")
+        (psRustConcat3
+          (psRustIdentifier parameter.name)
+          ": "
+          "Clone")
         (psRustTypeParameterNames rest)
 
 def psRustGenericNames
@@ -40,7 +43,7 @@ def psRustEmitStructureFieldList
           let rendered :=
             psRustConcat4
               "pub "
-              field.name
+              (psRustIdentifier field.name)
               ": "
               printedType;
           match psRustEmitStructureFieldList rest with
@@ -61,7 +64,7 @@ def psRustEmitStructure
       Except.ok
         (psRustConcat4
           "#[derive(Clone)]\npub struct "
-          structureInfo.name
+          (psRustIdentifier structureInfo.name)
           generic
           (psRustConcat4
             " { "
@@ -82,7 +85,7 @@ def psRustEmitConstructorFieldList
       | Except.ok printedType =>
           let rendered :=
             psRustConcat3
-              field.name
+              (psRustIdentifier field.name)
               ": "
               printedType;
           match psRustEmitConstructorFieldList rest with
@@ -101,11 +104,13 @@ def psRustEmitConstructor
       match printedFields with
       | List.nil =>
           Except.ok
-            (psRustConcat2 constructorInfo.name " {}")
+            (psRustConcat2
+              (psRustIdentifier constructorInfo.name)
+              " {}")
       | List.cons _ _ =>
           Except.ok
             (psRustConcat4
-              constructorInfo.name
+              (psRustIdentifier constructorInfo.name)
               " { "
               (psRustJoin ", " printedFields)
               " }")
@@ -139,7 +144,7 @@ def psRustEmitInductive
       Except.ok
         (psRustConcat4
           "#[derive(Clone)]\npub enum "
-          inductiveInfo.name
+          (psRustIdentifier inductiveInfo.name)
           generic
           (psRustConcat4
             " { "
@@ -182,7 +187,7 @@ def psRustEmitDeclarationParameterList
       | Except.ok printedType =>
           let rendered :=
             psRustConcat3
-              parameter.name
+              (psRustIdentifier parameter.name)
               ": "
               printedType;
           match psRustEmitDeclarationParameterList rest with
@@ -224,7 +229,7 @@ def psRustEmitDeclaration
                   Except.ok
                     (psRustConcat4
                       "pub fn "
-                      declaration.name
+                      (psRustIdentifier declaration.name)
                       generic
                       (psRustConcat4
                         "("

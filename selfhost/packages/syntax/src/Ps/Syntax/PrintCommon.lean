@@ -59,7 +59,10 @@ def psPrintPattern
       match printedNameResult with
       | Except.error error => Except.error error
       | Except.ok printedName =>
-          match binders.mapM psPrintSyntaxName with
+          let printedBindersResult :
+              Except PsSourcePrintError (List String) :=
+            binders.mapM psPrintSyntaxName;
+          match printedBindersResult with
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               if printedBinders.isEmpty then

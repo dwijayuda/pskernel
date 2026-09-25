@@ -939,6 +939,13 @@ readonly Lean434DeclarationExternBinding[]=[
     upstreamSource:'Init/Prelude.lean',
   },
   {
+    leanDeclaration:'String.decEq',
+    leanSymbol:'lean_string_dec_eq',
+    arity:2,
+    resultAdapter:'decidable',
+    upstreamSource:'Init/Prelude.lean',
+  },
+  {
     leanDeclaration:'ST.Prim.mkRef',
     leanSymbol:'lean_st_mk_ref',
     arity:3,

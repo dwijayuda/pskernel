@@ -526,7 +526,8 @@ def psPrintLeanDeclaration
           match printedParamsResult with
           | Except.error error => Except.error error
           | Except.ok printedParams =>
-              let printResult :=
+              let printResult :
+                  Except PsSourcePrintError String :=
                 match resultType with
                 | none => Except.ok ""
                 | some type =>

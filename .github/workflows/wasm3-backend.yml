@@ -154,5 +154,20 @@ jobs:
           if (instance.exports.genericLengthTwo() !== 2) {
             throw new Error('PSC1_WASM_RUNTIME_GENERIC_RECURSIVE_ADT_RESULT');
           }
+          if (instance.exports.natArithmetic() !== 20) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_ARITHMETIC_RESULT');
+          }
+          if (instance.exports.natDivMod() !== 5) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_DIV_MOD_RESULT');
+          }
+          if (instance.exports.natLtTrue() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_COMPARE_RESULT');
+          }
+          if (instance.exports.natDivZero() !== 0) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_DIV_ZERO_RESULT');
+          }
+          if (instance.exports.natModZero() !== 7) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_MOD_ZERO_RESULT');
+          }
           console.log('PSC1_WASM3_INTEGRATION: PASS');
           NODE

@@ -168,6 +168,19 @@ jobs:
               throw new Error('PSC1_WASM_RUNTIME_NAT_RESULT:' + name);
             }
           }
+          for (const name of [
+            'intAddMixed',
+            'intSubNegative',
+            'intMulNegative',
+            'intNegExact',
+            'intOrderNegative',
+            'intOfNatExact',
+            'intNegSuccExact',
+          ]) {
+            if (instance.exports[name]() !== 1) {
+              throw new Error('PSC1_WASM_RUNTIME_INT_RESULT:' + name);
+            }
+          }
           if (instance.exports.arraySizeAfterPush() !== 1) {
             throw new Error('PSC1_WASM_RUNTIME_ARRAY_SIZE_RESULT');
           }

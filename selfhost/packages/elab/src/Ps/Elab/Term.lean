@@ -492,10 +492,16 @@ def psCloseElabTypedBinders
 def psElabLambdaExpectedBody
     (context : PsElabContext)
     (binders : List PsElabTypedBinder) :
-    PsExpr -> Except PsElabError PsExpr
+    PsExpr ->
+    Except PsElabError (Prod PsElabContext PsExpr)
   | expectedType =>
       match binders with
-      | [] => Except.ok expectedType
+      | [] =>
+          Except.ok
+            (context,
+              psMetaInstantiate
+                context.metaContext
+                expectedType)
       | binder :: rest =>
           match
               psInferEnsureForall
@@ -506,29 +512,40 @@ def psElabLambdaExpectedBody
           | Except.error error =>
               Except.error (PsElabError.infer error)
           | Except.ok forallView =>
-              if
-                  !psDefEqReadOnlyWithEnv
-                    context.environment
-                    context.metaContext
-                    context.localContext
-                    binder.type
-                    forallView.domain then
+              let unified :=
+                psUnify
+                  context.environment
+                  context.localContext
+                  context.metaContext
+                  binder.type
+                  forallView.domain
+              if !unified.success then
                 Except.error PsElabError.typeMismatch
               else
+                let nextContext :=
+                  psElabContextWithMeta
+                    context
+                    unified.context
+                let nextExpected :=
+                  psExprInstantiate1
+                    (psMetaInstantiate
+                      unified.context
+                      forallView.body)
+                    (PsExpr.fvar binder.id)
                 psElabLambdaExpectedBody
-                  context
+                  nextContext
                   rest
-                  (psExprInstantiate1
-                    forallView.body
-                    (PsExpr.fvar binder.id))
+                  nextExpected
 
 def psElabLambdaBodyExpected
     (context : PsElabContext)
     (binders : List PsElabTypedBinder)
     (expected : Option PsExpr) :
-    Except PsElabError (Option PsExpr) :=
+    Except
+      PsElabError
+      (Prod PsElabContext (Option PsExpr)) :=
   match expected with
-  | none => Except.ok none
+  | none => Except.ok (context, none)
   | some expectedType =>
       match
           psElabLambdaExpectedBody
@@ -536,7 +553,8 @@ def psElabLambdaBodyExpected
             binders
             expectedType with
       | Except.error error => Except.error error
-      | Except.ok bodyType => Except.ok (some bodyType)
+      | Except.ok prepared =>
+          Except.ok (prepared.1, some prepared.2)
 
 def psElabLambda
     (elaborate :
@@ -558,8 +576,8 @@ def psElabLambda
             binderResult.bindersRev.reverse
             expected with
       | Except.error error => Except.error error
-      | Except.ok bodyExpected =>
-          match elaborate binderResult.context body bodyExpected with
+      | Except.ok prepared =>
+          match elaborate prepared.1 body prepared.2 with
           | Except.error error => Except.error error
           | Except.ok bodyResult =>
               let metaContext := bodyResult.context.metaContext

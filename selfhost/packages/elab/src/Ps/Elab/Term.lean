@@ -488,13 +488,13 @@ def psElabTypedBindersAcc
               | Except.error error =>
                   Except.error (PsElabError.infer error)
               | Except.ok _ =>
-                  let binder := psElabBinderKindToCore head.kind
+                  let binder := psElabBinderKindToCore head.kind;
                   let pushed :=
                     psLocalPushBinding
                       typeResult.context.localContext
                       name
                       typeResult.term
-                      binder
+                      binder;
                   let nextContext :=
                     psElabContextWithLocal
                       typeResult.context
@@ -530,13 +530,13 @@ def psCloseElabTypedBinders
   | [], value, type => (value, type)
   | binder :: rest, value, type =>
       let binderType :=
-        psMetaInstantiate metaContext binder.type
+        psMetaInstantiate metaContext binder.type;
       let closedValue :=
         PsExpr.lam
           binder.name
           binderType
           (psExprAbstractFVar binder.id value)
-          binder.binder
+          binder.binder;
       let closedType :=
         PsExpr.forallE
           binder.name
@@ -585,7 +585,7 @@ def psElabLambdaExpectedBody
                 let nextContext :=
                   psElabContextWithMeta
                     context
-                    unified.context
+                    unified.context;
                 let nextExpected :=
                   psExprInstantiate1
                     (psMetaInstantiate
@@ -640,17 +640,17 @@ def psElabLambda
           match elaborate (Prod.fst prepared) body (Prod.snd prepared) with
           | Except.error error => Except.error error
           | Except.ok bodyResult =>
-              let metaContext := bodyResult.context.metaContext
+              let metaContext := bodyResult.context.metaContext;
               let openTerm :=
-                psMetaInstantiate metaContext bodyResult.term
+                psMetaInstantiate metaContext bodyResult.term;
               let openType :=
-                psMetaInstantiate metaContext bodyResult.type
+                psMetaInstantiate metaContext bodyResult.type;
               let closed :=
                 psCloseElabTypedBinders
                   metaContext
                   binderResult.bindersRev
                   openTerm
-                  openType
+                  openType;
               let outerContext :=
                 psElabContextWithMeta context metaContext
               psElabFinalizeExpected
@@ -669,7 +669,7 @@ def psCloseElabForallBinders
   | [], body => body
   | binder :: rest, body =>
       let binderType :=
-        psMetaInstantiate metaContext binder.type
+        psMetaInstantiate metaContext binder.type;
       let closedBody :=
         PsExpr.forallE
           binder.name
@@ -706,14 +706,14 @@ def psElabForall
           | Except.error error =>
               Except.error (PsElabError.infer error)
           | Except.ok _ =>
-              let metaContext := bodyResult.context.metaContext
+              let metaContext := bodyResult.context.metaContext;
               let openBody :=
-                psMetaInstantiate metaContext bodyResult.term
+                psMetaInstantiate metaContext bodyResult.term;
               let closed :=
                 psCloseElabForallBinders
                   metaContext
                   binderResult.bindersRev
-                  openBody
+                  openBody;
               let outerContext :=
                 psElabContextWithMeta context metaContext
               psElabResolvedTerm
@@ -739,7 +739,7 @@ def psElabLetAfterValue
       valueResult.context.localContext
       name
       bindingType
-      valueResult.term
+      valueResult.term;
   let bodyContext :=
     psElabContextWithLocal
       valueResult.context
@@ -747,21 +747,21 @@ def psElabLetAfterValue
   match elaborate bodyContext body expected with
   | Except.error error => Except.error error
   | Except.ok bodyResult =>
-      let metaContext := bodyResult.context.metaContext
+      let metaContext := bodyResult.context.metaContext;
       let closedBindingType :=
-        psMetaInstantiate metaContext bindingType
+        psMetaInstantiate metaContext bindingType;
       let closedValue :=
-        psMetaInstantiate metaContext valueResult.term
+        psMetaInstantiate metaContext valueResult.term;
       let openBody :=
-        psMetaInstantiate metaContext bodyResult.term
+        psMetaInstantiate metaContext bodyResult.term;
       let closedBody :=
-        psExprAbstractFVar pushed.id openBody
+        psExprAbstractFVar pushed.id openBody;
       let term :=
         PsExpr.letE
           name
           closedBindingType
           closedValue
-          closedBody
+          closedBody;
       let restoredContext :=
         psElabContextWithMeta outerContext metaContext
       psElabResolvedTerm
@@ -846,13 +846,13 @@ def psElabIf
   match elaborate context condition (some boolType) with
   | Except.error error => Except.error error
   | Except.ok conditionResult =>
-      let trueTerm := PsExpr.constE psBoolTrueName []
+      let trueTerm := PsExpr.constE psBoolTrueName [];
       let conditionProp :=
         psExprApplyMany
           (PsExpr.constE
             psEqName
             [PsLevel.succ PsLevel.zero])
-          [boolType, conditionResult.term, trueTerm]
+          [boolType, conditionResult.term, trueTerm];
       let decider :=
         psExprApplyMany
           (PsExpr.constE psBoolDecEqName [])
@@ -873,7 +873,7 @@ def psElabIf
               (some resultType) with
           | Except.error error => Except.error error
           | Except.ok elseResult =>
-              let metaContext := elseResult.context.metaContext
+              let metaContext := elseResult.context.metaContext;
               let instantiatedType :=
                 psMetaInstantiate metaContext resultType;
               match psInferType
@@ -901,7 +901,7 @@ def psElabIf
                             psMetaInstantiate metaContext decider,
                             psMetaInstantiate metaContext thenResult.term,
                             psMetaInstantiate metaContext elseResult.term
-                          ]
+                          ];
                       let restoredContext :=
                         psElabContextWithMeta context metaContext
                       psElabResolvedTerm
@@ -1025,7 +1025,7 @@ def psElabPrepareMatchAlternatives
     List PsElabMatchAlternative ->
     Except PsElabError (List PsElabMatchAlternative)
   | [], alternativesRev =>
-      let alternatives := alternativesRev.reverse
+      let alternatives := alternativesRev.reverse;
       let exhaustive :=
         inductiveInfo.constructors.all
           (fun ctorName =>
@@ -1169,7 +1169,7 @@ def psElabMatchFields
                   context.localContext
                   binderName
                   forallView.domain
-                  forallView.binder
+                  forallView.binder;
               let nextContext :=
                 psElabContextWithLocal context pushed.context
               psElabMatchFields
@@ -1216,17 +1216,17 @@ def psElabPushRecursiveHypotheses
           let hypothesisName :=
             psNameAppendNum
               (psRootName "_ih")
-              fieldIndex
+              fieldIndex;
           let pushed :=
             psLocalPushBinding
               context.localContext
               hypothesisName
               expectedType
-              PsBinderInfo.explicit
+              PsBinderInfo.explicit;
           let withLocal :=
             psElabContextWithLocal
               context
-              pushed.context
+              pushed.context;
           let withRecursion :=
             match context.structuralRecursion with
             | none => withLocal
@@ -1362,14 +1362,14 @@ def psElabMatchConstructorMinor
                         (some expectedType) with
                     | Except.error error => Except.error error
                     | Except.ok bodyResult =>
-                        let metaContext := bodyResult.context.metaContext
+                        let metaContext := bodyResult.context.metaContext;
                         let withHypotheses :=
                           psCloseElabMatchFields
                             metaContext
                             hypotheses.hypothesesRev
                             (psMetaInstantiate
                               metaContext
-                              bodyResult.term)
+                              bodyResult.term);
                         let closed :=
                           psCloseElabMatchFields
                             metaContext
@@ -1506,7 +1506,7 @@ def psElabMatch
               scrutineeResult.context.environment
               scrutineeResult.context.metaContext
               scrutineeResult.context.localContext
-              scrutineeResult.type
+              scrutineeResult.type;
           let typeView := psExprAppView scrutineeType;
           match typeView.head with
           | .constE inductiveName inductiveLevels =>
@@ -1598,7 +1598,7 @@ def psElabMatch
                                                 (psRootName "_match")
                                                 scrutineeType
                                                 instantiatedExpected
-                                                PsBinderInfo.explicit
+                                                PsBinderInfo.explicit;
                                             let recursorTerm :=
                                               psExprApplyMany
                                                 (PsExpr.constE
@@ -1673,7 +1673,7 @@ def psElabApplyArgsWithFuel
                     let nextTerm :=
                       PsExpr.app
                         current.term
-                        elaboratedArgument.term
+                        elaboratedArgument.term;
                     let nextType :=
                       psExprInstantiate1
                         body
@@ -1701,17 +1701,17 @@ def psElabApplyArgsWithFuel
               if psBinderIsInstanceImplicit binder then
                 PsMetaVarKind.synthetic
               else
-                PsMetaVarKind.natural
+                PsMetaVarKind.natural;
             let fresh :=
               psMetaFresh
                 current.context.metaContext
                 current.context.localContext
                 domain
-                kind
+                kind;
             let nextContext :=
               psElabContextWithMeta
                 current.context
-                fresh.context
+                fresh.context;
             let nextResult : PsElabTermResult := {
               context := nextContext
               term := PsExpr.app current.term fresh.expr
@@ -1950,7 +1950,7 @@ def psElabRecordCandidateFromExpected
       context.environment
       context.metaContext
       context.localContext
-      expected
+      expected;
   let view := psInferAppView reduced;
   match view.head with
   | .constE typeName _ =>

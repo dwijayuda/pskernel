@@ -35,6 +35,7 @@ def psBuildErasureDeclarationNames :
       let sourceName :=
         match declaration with
         | .definitionDecl name _ _ _ => some name
+        | .partialDecl name _ _ _ => some name
         | .theoremDecl name _ _ _ => some name
         | .inductiveDecl info => some info.name
         | _ => none
@@ -316,6 +317,27 @@ def psEraseDefinitionsLoop
   | declaration :: rest, declarationsRev =>
       match declaration with
       | .definitionDecl name _ type value =>
+          match
+              psEraseDefinition
+                environment
+                scope
+                name
+                type
+                value with
+          | Except.error error => Except.error error
+          | Except.ok none =>
+              psEraseDefinitionsLoop
+                environment
+                scope
+                rest
+                declarationsRev
+          | Except.ok (some lowered) =>
+              psEraseDefinitionsLoop
+                environment
+                scope
+                rest
+                (lowered :: declarationsRev)
+      | .partialDecl name _ type value =>
           match
               psEraseDefinition
                 environment

@@ -314,6 +314,10 @@ def psErasePrimitiveApplication
         binary PsVerifiedIrIntrinsic.natMod
       else if text == "Nat.beq" then
         binary PsVerifiedIrIntrinsic.natEq
+      else if text == "Nat.ble" then
+        binary PsVerifiedIrIntrinsic.natLe
+      else if text == "Nat.blt" then
+        binary PsVerifiedIrIntrinsic.natLt
       else if text == "Bool.and" then
         binary PsVerifiedIrIntrinsic.boolAnd
       else if text == "Bool.or" then

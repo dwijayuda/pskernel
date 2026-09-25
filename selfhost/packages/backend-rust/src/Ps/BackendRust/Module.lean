@@ -1,4 +1,5 @@
 import Ps.BackendRust.Expr
+import Ps.BackendRust.ValueRefs
 import Ps.BackendRust.Runtime
 
 def psRustTypeParameterNames
@@ -169,22 +170,30 @@ def psRustEmitDeclarationParameterList
               Except.ok (List.cons rendered printedRest)
 
 def psRustEmitDeclaration
+    (valueNames : List String)
     (declaration : PsVerifiedIrDeclaration) :
     Except PsRustEmitError String :=
-  match declaration.parameters with
-  | List.nil =>
-      Except.error
-        (PsRustEmitError.valueDeclarationUnsupported declaration.name)
-  | List.cons _ _ =>
-      match psRustEmitDeclarationParameterList declaration.parameters with
+  match psRustEmitDeclarationParameterList declaration.parameters with
+  | Except.error error =>
+      Except.error error
+  | Except.ok printedParameters =>
+      match psRustEmitType declaration.resultType with
       | Except.error error =>
           Except.error error
-      | Except.ok printedParameters =>
-          match psRustEmitType declaration.resultType with
+      | Except.ok printedResult =>
+          let locals :=
+            psRustAddParameterNames
+              declaration.parameters
+              List.nil;
+          match
+              psRustRewriteValueRefs
+                valueNames
+                locals
+                declaration.body with
           | Except.error error =>
               Except.error error
-          | Except.ok printedResult =>
-              match psRustEmitExpr declaration.body with
+          | Except.ok rewrittenBody =>
+              match psRustEmitExpr rewrittenBody with
               | Except.error error =>
                   Except.error error
               | Except.ok printedBody =>
@@ -239,18 +248,34 @@ def psRustEmitInductiveList
           | Except.ok printedRest =>
               Except.ok (List.cons printed printedRest)
 
+def psRustValueDeclarationNames
+    (declarations : List PsVerifiedIrDeclaration) :
+    List String :=
+  match declarations with
+  | List.nil =>
+      List.nil
+  | List.cons declaration rest =>
+      match declaration.parameters with
+      | List.nil =>
+          List.cons
+            declaration.name
+            (psRustValueDeclarationNames rest)
+      | List.cons _ _ =>
+          psRustValueDeclarationNames rest
+
 def psRustEmitDeclarationList
+    (valueNames : List String)
     (declarations : List PsVerifiedIrDeclaration) :
     Except PsRustEmitError (List String) :=
   match declarations with
   | List.nil =>
       Except.ok List.nil
   | List.cons declaration rest =>
-      match psRustEmitDeclaration declaration with
+      match psRustEmitDeclaration valueNames declaration with
       | Except.error error =>
           Except.error error
       | Except.ok printed =>
-          match psRustEmitDeclarationList rest with
+          match psRustEmitDeclarationList valueNames rest with
           | Except.error error =>
               Except.error error
           | Except.ok printedRest =>
@@ -267,6 +292,8 @@ def psRustModuleHasImports
 def psRustEmitModule
     (module : PsVerifiedIrModule) :
     Except PsRustEmitError String :=
+  let valueNames :=
+    psRustValueDeclarationNames module.declarations;
   if psRustModuleHasImports module.imports then
     Except.error PsRustEmitError.externalImportUnsupported
   else
@@ -278,7 +305,7 @@ def psRustEmitModule
         | Except.error error =>
             Except.error error
         | Except.ok inductives =>
-            match psRustEmitDeclarationList module.declarations with
+            match psRustEmitDeclarationList valueNames module.declarations with
             | Except.error error =>
                 Except.error error
             | Except.ok declarations =>

@@ -166,13 +166,13 @@ As of the current branch checkpoint:
 - generic zero-parameter declarations are rejected consistently with backend-ts
   rather than being silently reinterpreted as generic Rust functions;
 - direct first-order callback parameters are supported as Rust
-  `impl Fn(...) -> ... + Clone`; function-valued declaration results, stored
-  function values, nested higher-order parameter shapes, function-typed lambda
-  parameters, and function-valued lambda results are fail-closed because Rust
-  `fn(...)` pointers cannot
-  represent arbitrary capturing closures. Supporting those shapes requires an
-  explicit ownership/runtime representation and is not approximated by the
-  backend;
+  `impl Fn(...) -> ... + Clone`; direct first-order function-valued
+  declaration results whose body is a lambda are also supported as
+  `impl Fn(...) -> ... + Clone` with an owned `move` closure, including
+  captured portable values. Stored function values, indirect or nested
+  function-valued declaration results, nested higher-order parameter shapes,
+  function-typed lambda parameters, and function-valued lambda results remain
+  fail-closed until they have an explicit ownership/runtime representation;
 - emitted Rust follows a clone-on-consume ownership rule for portable values:
   call/intrinsic arguments, let-bound values, record/constructor fields,
   projection targets, and match scrutinees are cloned before Rust would
@@ -231,7 +231,7 @@ through backend-rust. Unsupported constructs must fail explicitly rather than
 silently using different semantics.
 
 The census currently treats external imports, unknown runtime types, traversal
-fuel exhaustion, generic top-level values, function-valued declaration
+fuel exhaustion, generic top-level values, indirect or nested function-valued declaration
 results, stored function values, nested higher-order parameter shapes,
 function-typed lambda parameters, function-valued lambda results, malformed
 intrinsic arity, unknown structure references, and unknown inductive references

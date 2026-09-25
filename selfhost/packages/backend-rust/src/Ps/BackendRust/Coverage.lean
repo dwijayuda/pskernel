@@ -704,11 +704,14 @@ def psRustCoverageDeclarationList :
           withDeclarationFeature;
       let withResultSupport :=
         if psRustTypeContainsFunction declaration.resultType then
-          psRustCoverageAddUnsupported
-            (psRustCoverageAddFeature
-              withDeclaration
-              "declaration:functionResult")
-            "declaration:functionResult"
+          if psRustDeclarationDirectFunctionResultSupported declaration then
+            withDeclaration
+          else
+            psRustCoverageAddUnsupported
+              (psRustCoverageAddFeature
+                withDeclaration
+                "declaration:functionResult")
+              "declaration:functionResult"
         else
           withDeclaration;
       let withParameters :=

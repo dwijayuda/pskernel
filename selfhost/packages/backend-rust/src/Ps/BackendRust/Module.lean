@@ -237,6 +237,37 @@ def psRustDeclarationIsGenericValue
   | List.cons _ _ =>
       false
 
+def psRustDeclarationDirectFunctionResultSupported
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  if psRustFunctionTypeIsFirstOrder declaration.resultType then
+    match declaration.body with
+    | PsVerifiedIrExpr.lambda _ _ _ =>
+        true
+    | _ =>
+        false
+  else
+    false
+
+def psRustEmitDeclarationResultType
+    (declaration : PsVerifiedIrDeclaration) :
+    Except PsRustEmitError String :=
+  if psRustTypeContainsFunction declaration.resultType then
+    if psRustDeclarationDirectFunctionResultSupported declaration then
+      psRustEmitHigherOrderParameterType declaration.resultType
+    else
+      Except.error
+        (PsRustEmitError.functionResultUnsupported declaration.name)
+  else
+    psRustEmitType declaration.resultType
+
+def psRustPrepareDeclarationBody
+    (declaration : PsVerifiedIrDeclaration)
+    (printedBody : String) : String :=
+  if psRustTypeContainsFunction declaration.resultType then
+    psRustConcat2 "move " printedBody
+  else
+    printedBody
+
 def psRustEmitDeclaration
     (valueNames : List String)
     (declaration : PsVerifiedIrDeclaration) :
@@ -244,15 +275,12 @@ def psRustEmitDeclaration
   if psRustDeclarationIsGenericValue declaration then
     Except.error
       (PsRustEmitError.genericValueUnsupported declaration.name)
-  else if psRustTypeContainsFunction declaration.resultType then
-    Except.error
-      (PsRustEmitError.functionResultUnsupported declaration.name)
   else
     match psRustEmitDeclarationParameterList declaration.parameters with
     | Except.error error =>
         Except.error error
     | Except.ok printedParameters =>
-        match psRustEmitType declaration.resultType with
+        match psRustEmitDeclarationResultType declaration with
         | Except.error error =>
             Except.error error
         | Except.ok printedResult =>
@@ -286,7 +314,9 @@ def psRustEmitDeclaration
                           (psRustConcat4
                             printedResult
                             " { "
-                            printedBody
+                            (psRustPrepareDeclarationBody
+                              declaration
+                              printedBody)
                             " }")))
 
 def psRustEmitStructureList

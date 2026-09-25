@@ -54,7 +54,9 @@ def psPrintPattern
   | .wildcard _ =>
       Except.ok "_"
   | .constructor name binders _ =>
-      match psPrintSyntaxName name with
+      let printedNameResult :=
+        psPrintSyntaxName name;
+      match printedNameResult with
       | Except.error error => Except.error error
       | Except.ok printedName =>
           match binders.mapM psPrintSyntaxName with

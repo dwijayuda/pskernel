@@ -2210,10 +2210,7 @@ partial def psLeanLowerEquationClauses
 
 def psLeanFlattenForallBinders
     (type : PsSyntaxTerm) :
-    Prod
-      (List
-        (Prod PsSyntaxBinderHead PsSyntaxTerm))
-      PsSyntaxTerm :=
+    Prod (List (Prod PsSyntaxBinderHead PsSyntaxTerm)) PsSyntaxTerm :=
   match type with
   | .forallE binders body _ =>
       let tail := psLeanFlattenForallBinders body;

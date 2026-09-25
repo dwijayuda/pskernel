@@ -45,7 +45,7 @@ def Level.listEq : List Level → List Level → Bool
   | a :: as, b :: bs => Level.eq a b && Level.listEq as bs
   | _, _ => false
 
-private unsafe partial def exprEqImpl (left right : Expr) : Bool :=
+private unsafe def exprEqImpl (left right : Expr) : Bool :=
   if ptrEq left right then
     true
   else

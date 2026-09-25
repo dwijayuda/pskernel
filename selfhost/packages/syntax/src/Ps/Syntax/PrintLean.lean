@@ -51,6 +51,29 @@ def psPrintLeanMapRecordFields
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
+def psPrintLeanMapTerms
+    (printTerm :
+      PsSyntaxTerm -> Except PsSourcePrintError String)
+    (terms : List PsSyntaxTerm) :
+    Except PsSourcePrintError (List String) :=
+  match terms with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons term rest =>
+      let printedHeadResult :=
+        printTerm term;
+      match printedHeadResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedHead =>
+          let printedTailResult :=
+            psPrintLeanMapTerms printTerm rest;
+          match printedTailResult with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedTail =>
+              Except.ok (List.cons printedHead printedTail)
+
 def psPrintLeanTermWithFuel
     (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
@@ -117,7 +140,10 @@ def psPrintLeanTermWithFuel
                           Except.ok printed
                         else
                           Except.ok (psPrintLeanConcat3 "(" printed ")");
-                match args.mapM printArgument with
+                let printedArgsResult :
+                    Except PsSourcePrintError (List String) :=
+                  psPrintLeanMapTerms printArgument args;
+                match printedArgsResult with
                 | Except.error error => Except.error error
                 | Except.ok printedArgs =>
                     if printedArgs.isEmpty then

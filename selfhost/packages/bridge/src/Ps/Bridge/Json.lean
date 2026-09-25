@@ -344,8 +344,13 @@ def psJsonParseNumber
               rest := afterDigits
             };
   match chars with
-  | '-' :: rest => parseUnsigned true rest
-  | _ => parseUnsigned false chars
+  | List.nil =>
+      parseUnsigned false chars
+  | List.cons first rest =>
+      if psJsonCharEq first '-' then
+        parseUnsigned true rest
+      else
+        parseUnsigned false chars
 
 def psJsonConsumeLiteral
     (expected : List Char)

@@ -9,6 +9,8 @@ on:
       - "psc1-kernel/**"
       - "oracle/replay-probe/MiniExport.lean"
       - "oracle/replay-probe/ReplayProbe.lean"
+      - "oracle/fixtures/lean434-init-prelude.ndjson"
+      - "oracle/fixtures/lean434-primitive-closure.ndjson"
 
 concurrency:
   group: psc1-lean-kernel-${{ github.ref }}
@@ -59,3 +61,9 @@ jobs:
         run: |
           set -euo pipefail
           timeout 600s lake env lean --run PSC1Kernel/Test/ReplayFile.lean ../oracle/fixtures/lean434-init-prelude.ndjson
+      - name: Replay K8 primitive-closure corpus
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 600s lake env lean --run PSC1Kernel/Test/ReplayFile.lean ../oracle/fixtures/lean434-primitive-closure.ndjson

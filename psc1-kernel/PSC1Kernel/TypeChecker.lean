@@ -1234,6 +1234,9 @@ partial def lazyDeltaProjReduction
   loop left right
 
 partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := do
+  -- Final Lean 4.34 enters scope_rec_depth in is_def_eq_core before even the
+  -- structural/success-cache quick path. Keep that resource boundary here.
+  let ctx ← ctx.enterKernelRecDepth
   if Expr.eq a b then return true
 
   -- Lean 4.34 handles binding expressions in the quick-defeq phase by

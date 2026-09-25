@@ -1,5 +1,6 @@
 import Ps.CompilerIr.Model
 import Ps.Bridge.Json
+import Ps.Foundation.Name
 
 inductive PsRustEmitError where
   | fuelExhausted

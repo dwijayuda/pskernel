@@ -944,7 +944,9 @@ def psElabInductiveDeclaration
                             elaborated.term);
           match result with
           | Except.error error => Except.error error
-          | Except.ok (headerContext, openResultType) =>
+          | Except.ok headerResult =>
+              let headerContext := Prod.fst headerResult;
+              let openResultType := Prod.snd headerResult;
               let instantiatedResultType :=
                 psMetaInstantiate
                   headerContext.metaContext

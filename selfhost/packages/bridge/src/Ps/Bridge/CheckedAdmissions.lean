@@ -20,15 +20,15 @@ def psEncodeCodecName : PsName -> String
       ]
   | .str parent value =>
       psJsonObject [
-        psCheckedAdmissionJsonField "k" psJsonQuote "s",
-        psCheckedAdmissionJsonField "p" psEncodeCodecName parent,
-        psCheckedAdmissionJsonField "v" psJsonQuote value
+        psCheckedAdmissionJsonField "k" (psJsonQuote "s"),
+        psCheckedAdmissionJsonField "p" (psEncodeCodecName parent),
+        psCheckedAdmissionJsonField "v" (psJsonQuote value)
       ]
   | .num parent value =>
       psJsonObject [
-        psCheckedAdmissionJsonField "k" psJsonQuote "n",
-        psCheckedAdmissionJsonField "p" psEncodeCodecName parent,
-        psCheckedAdmissionJsonField "v" psJsonQuote (toString value)
+        psCheckedAdmissionJsonField "k" (psJsonQuote "n"),
+        psCheckedAdmissionJsonField "p" (psEncodeCodecName parent),
+        psCheckedAdmissionJsonField "v" (psJsonQuote (toString value))
       ]
 
 def psEncodeCodecLevel :
@@ -36,7 +36,7 @@ def psEncodeCodecLevel :
   | .zero =>
       Except.ok
         (psJsonObject [
-          psCheckedAdmissionJsonField "k" psJsonQuote "z"
+          psCheckedAdmissionJsonField "k" (psJsonQuote "z")
         ])
   | .succ level =>
       match psEncodeCodecLevel level with
@@ -44,8 +44,8 @@ def psEncodeCodecLevel :
       | Except.ok encoded =>
           Except.ok
             (psJsonObject [
-              psCheckedAdmissionJsonField "k" psJsonQuote "s",
-              psCheckedAdmissionJsonField "o" encoded
+              psCheckedAdmissionJsonField "k" (psJsonQuote "s"),
+              psCheckedAdmissionJsonField "o" (encoded)
             ])
   | .max left right =>
       match psEncodeCodecLevel left with
@@ -56,9 +56,9 @@ def psEncodeCodecLevel :
           | Except.ok encodedRight =>
               Except.ok
                 (psJsonObject [
-                  psCheckedAdmissionJsonField "k" psJsonQuote "max",
-                  psCheckedAdmissionJsonField "l" encodedLeft,
-                  psCheckedAdmissionJsonField "r" encodedRight
+                  psCheckedAdmissionJsonField "k" (psJsonQuote "max"),
+                  psCheckedAdmissionJsonField "l" (encodedLeft),
+                  psCheckedAdmissionJsonField "r" (encodedRight)
                 ])
   | .imax left right =>
       match psEncodeCodecLevel left with
@@ -69,15 +69,15 @@ def psEncodeCodecLevel :
           | Except.ok encodedRight =>
               Except.ok
                 (psJsonObject [
-                  psCheckedAdmissionJsonField "k" psJsonQuote "imax",
-                  psCheckedAdmissionJsonField "l" encodedLeft,
-                  psCheckedAdmissionJsonField "r" encodedRight
+                  psCheckedAdmissionJsonField "k" (psJsonQuote "imax"),
+                  psCheckedAdmissionJsonField "l" (encodedLeft),
+                  psCheckedAdmissionJsonField "r" (encodedRight)
                 ])
   | .param name =>
       Except.ok
         (psJsonObject [
-          psCheckedAdmissionJsonField "k" psJsonQuote "p",
-          psCheckedAdmissionJsonField "n" psEncodeCodecName name
+          psCheckedAdmissionJsonField "k" (psJsonQuote "p"),
+          psCheckedAdmissionJsonField "n" (psEncodeCodecName name)
         ])
   | .mvar _ =>
       Except.error PsCheckedAdmissionCodecError.universeMetavariable
@@ -101,8 +101,8 @@ def psEncodeCodecExpr :
   | .bvar index =>
       Except.ok
         (psJsonObject [
-          psCheckedAdmissionJsonField "i" toString index,
-          psCheckedAdmissionJsonField "k" psJsonQuote "b"
+          psCheckedAdmissionJsonField "i" (toString index),
+          psCheckedAdmissionJsonField "k" (psJsonQuote "b")
         ])
   | .fvar _ =>
       Except.error PsCheckedAdmissionCodecError.freeVariable
@@ -114,8 +114,8 @@ def psEncodeCodecExpr :
       | Except.ok encodedLevel =>
           Except.ok
             (psJsonObject [
-              psCheckedAdmissionJsonField "k" psJsonQuote "sort",
-              psCheckedAdmissionJsonField "l" encodedLevel
+              psCheckedAdmissionJsonField "k" (psJsonQuote "sort"),
+              psCheckedAdmissionJsonField "l" (encodedLevel)
             ])
   | .constE name levels =>
       match psEncodeCodecLevels levels with
@@ -123,9 +123,9 @@ def psEncodeCodecExpr :
       | Except.ok encodedLevels =>
           Except.ok
             (psJsonObject [
-              psCheckedAdmissionJsonField "k" psJsonQuote "const",
-              psCheckedAdmissionJsonField "ls" encodedLevels,
-              psCheckedAdmissionJsonField "n" psEncodeCodecName name
+              psCheckedAdmissionJsonField "k" (psJsonQuote "const"),
+              psCheckedAdmissionJsonField "ls" (encodedLevels),
+              psCheckedAdmissionJsonField "n" (psEncodeCodecName name)
             ])
   | .app fn arg =>
       match psEncodeCodecExpr arg with
@@ -136,9 +136,9 @@ def psEncodeCodecExpr :
           | Except.ok encodedFn =>
               Except.ok
                 (psJsonObject [
-                  psCheckedAdmissionJsonField "a" encodedArg,
-                  psCheckedAdmissionJsonField "f" encodedFn,
-                  psCheckedAdmissionJsonField "k" psJsonQuote "app"
+                  psCheckedAdmissionJsonField "a" (encodedArg),
+                  psCheckedAdmissionJsonField "f" (encodedFn),
+                  psCheckedAdmissionJsonField "k" (psJsonQuote "app")
                 ])
   | .lam name type body binder =>
       match psEncodeCodecExpr body with
@@ -149,11 +149,11 @@ def psEncodeCodecExpr :
           | Except.ok encodedType =>
               Except.ok
                 (psJsonObject [
-                  psCheckedAdmissionJsonField "b" encodedBody,
-                  psCheckedAdmissionJsonField "bi" psJsonQuote (psEncodeCodecBinderInfo binder),
-                  psCheckedAdmissionJsonField "k" psJsonQuote "lam",
-                  psCheckedAdmissionJsonField "n" psEncodeCodecName name,
-                  psCheckedAdmissionJsonField "t" encodedType
+                  psCheckedAdmissionJsonField "b" (encodedBody),
+                  psCheckedAdmissionJsonField "bi" (psJsonQuote (psEncodeCodecBinderInfo binder)),
+                  psCheckedAdmissionJsonField "k" (psJsonQuote "lam"),
+                  psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
+                  psCheckedAdmissionJsonField "t" (encodedType)
                 ])
   | .forallE name type body binder =>
       match psEncodeCodecExpr body with
@@ -164,11 +164,11 @@ def psEncodeCodecExpr :
           | Except.ok encodedType =>
               Except.ok
                 (psJsonObject [
-                  psCheckedAdmissionJsonField "b" encodedBody,
-                  psCheckedAdmissionJsonField "bi" psJsonQuote (psEncodeCodecBinderInfo binder),
-                  psCheckedAdmissionJsonField "k" psJsonQuote "forall",
-                  psCheckedAdmissionJsonField "n" psEncodeCodecName name,
-                  psCheckedAdmissionJsonField "t" encodedType
+                  psCheckedAdmissionJsonField "b" (encodedBody),
+                  psCheckedAdmissionJsonField "bi" (psJsonQuote (psEncodeCodecBinderInfo binder)),
+                  psCheckedAdmissionJsonField "k" (psJsonQuote "forall"),
+                  psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
+                  psCheckedAdmissionJsonField "t" (encodedType)
                 ])
   | .letE name type value body =>
       match psEncodeCodecExpr body with
@@ -182,25 +182,25 @@ def psEncodeCodecExpr :
               | Except.ok encodedValue =>
                   Except.ok
                     (psJsonObject [
-                      psCheckedAdmissionJsonField "b" encodedBody,
-                      psCheckedAdmissionJsonField "k" psJsonQuote "let",
-                      psCheckedAdmissionJsonField "n" psEncodeCodecName name,
-                      psCheckedAdmissionJsonField "t" encodedType,
-                      psCheckedAdmissionJsonField "v" encodedValue
+                      psCheckedAdmissionJsonField "b" (encodedBody),
+                      psCheckedAdmissionJsonField "k" (psJsonQuote "let"),
+                      psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
+                      psCheckedAdmissionJsonField "t" (encodedType),
+                      psCheckedAdmissionJsonField "v" (encodedValue)
                     ])
   | .lit literal =>
       match literal with
       | .natural value =>
           Except.ok
             (psJsonObject [
-              psCheckedAdmissionJsonField "k" psJsonQuote "nat",
-              psCheckedAdmissionJsonField "v" psJsonQuote (toString value)
+              psCheckedAdmissionJsonField "k" (psJsonQuote "nat"),
+              psCheckedAdmissionJsonField "v" (psJsonQuote (toString value))
             ])
       | .string value =>
           Except.ok
             (psJsonObject [
-              psCheckedAdmissionJsonField "k" psJsonQuote "str",
-              psCheckedAdmissionJsonField "v" psJsonQuote value
+              psCheckedAdmissionJsonField "k" (psJsonQuote "str"),
+              psCheckedAdmissionJsonField "v" (psJsonQuote value)
             ])
   | .proj typeName index value =>
       match psEncodeCodecExpr value with
@@ -208,10 +208,10 @@ def psEncodeCodecExpr :
       | Except.ok encodedValue =>
           Except.ok
             (psJsonObject [
-              psCheckedAdmissionJsonField "e" encodedValue,
-              psCheckedAdmissionJsonField "i" toString index,
-              psCheckedAdmissionJsonField "k" psJsonQuote "proj",
-              psCheckedAdmissionJsonField "n" psEncodeCodecName typeName
+              psCheckedAdmissionJsonField "e" (encodedValue),
+              psCheckedAdmissionJsonField "i" (toString index),
+              psCheckedAdmissionJsonField "k" (psJsonQuote "proj"),
+              psCheckedAdmissionJsonField "n" (psEncodeCodecName typeName)
             ])
 
 def psEncodeCodecNameList (names : List PsName) : String :=
@@ -249,8 +249,8 @@ def psEncodeCodecConstructor
         | Except.ok encodedType =>
             Except.ok
               (psJsonObject [
-                psCheckedAdmissionJsonField "n" psEncodeCodecName info.name,
-                psCheckedAdmissionJsonField "t" encodedType
+                psCheckedAdmissionJsonField "n" (psEncodeCodecName info.name),
+                psCheckedAdmissionJsonField "t" (encodedType)
               ])
 
 def psEncodeCodecInductive
@@ -266,15 +266,15 @@ def psEncodeCodecInductive
       | Except.ok encodedType =>
           let encodedTypeEntry :=
             psJsonObject [
-              psCheckedAdmissionJsonField "cs" psJsonArray encodedConstructors,
-              psCheckedAdmissionJsonField "n" psEncodeCodecName info.name,
-              psCheckedAdmissionJsonField "t" encodedType
+              psCheckedAdmissionJsonField "cs" (psJsonArray encodedConstructors),
+              psCheckedAdmissionJsonField "n" (psEncodeCodecName info.name),
+              psCheckedAdmissionJsonField "t" (encodedType)
             ]
           Except.ok
             (psJsonObject [
-              psCheckedAdmissionJsonField "lp" psEncodeCodecNameList info.levelParams,
-              psCheckedAdmissionJsonField "np" toString info.numParams,
-              psCheckedAdmissionJsonField "ts" psJsonArray [encodedTypeEntry]
+              psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList info.levelParams),
+              psCheckedAdmissionJsonField "np" (toString info.numParams),
+              psCheckedAdmissionJsonField "ts" (psJsonArray [encodedTypeEntry])
             ])
 
 def psBridgeFindRegularHeight :
@@ -329,18 +329,18 @@ def psEncodeCodecDefinition
       | Except.ok encodedValue =>
           let hints :=
             psJsonObject [
-              psCheckedAdmissionJsonField "h" psJsonQuote (toString height),
-              psCheckedAdmissionJsonField "k" psJsonQuote "regular"
+              psCheckedAdmissionJsonField "h" (psJsonQuote (toString height)),
+              psCheckedAdmissionJsonField "k" (psJsonQuote "regular")
             ]
           Except.ok
             (psJsonObject [
-              psCheckedAdmissionJsonField "h" hints,
-              psCheckedAdmissionJsonField "k" psJsonQuote "definition",
-              psCheckedAdmissionJsonField "lp" psEncodeCodecNameList levelParams,
-              psCheckedAdmissionJsonField "n" psEncodeCodecName name,
-              psCheckedAdmissionJsonField "s" psJsonQuote "safe",
-              psCheckedAdmissionJsonField "t" encodedType,
-              psCheckedAdmissionJsonField "v" encodedValue
+              psCheckedAdmissionJsonField "h" (hints),
+              psCheckedAdmissionJsonField "k" (psJsonQuote "definition"),
+              psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList levelParams),
+              psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
+              psCheckedAdmissionJsonField "s" (psJsonQuote "safe"),
+              psCheckedAdmissionJsonField "t" (encodedType),
+              psCheckedAdmissionJsonField "v" (encodedValue)
             ])
 
 def psEncodeCodecTheorem
@@ -356,23 +356,23 @@ def psEncodeCodecTheorem
       | Except.ok encodedValue =>
           Except.ok
             (psJsonObject [
-              psCheckedAdmissionJsonField "k" psJsonQuote "theorem",
-              psCheckedAdmissionJsonField "lp" psEncodeCodecNameList levelParams,
-              psCheckedAdmissionJsonField "n" psEncodeCodecName name,
-              psCheckedAdmissionJsonField "t" encodedType,
-              psCheckedAdmissionJsonField "v" encodedValue
+              psCheckedAdmissionJsonField "k" (psJsonQuote "theorem"),
+              psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList levelParams),
+              psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
+              psCheckedAdmissionJsonField "t" (encodedType),
+              psCheckedAdmissionJsonField "v" (encodedValue)
             ])
 
 def psEncodeConstantAdmission (declaration : String) : String :=
   psJsonObject [
-    psCheckedAdmissionJsonField "declaration" declaration,
-    psCheckedAdmissionJsonField "kind" psJsonQuote "constant"
+    psCheckedAdmissionJsonField "declaration" (declaration),
+    psCheckedAdmissionJsonField "kind" (psJsonQuote "constant")
   ]
 
 def psEncodeInductiveAdmission (declaration : String) : String :=
   psJsonObject [
-    psCheckedAdmissionJsonField "declaration" declaration,
-    psCheckedAdmissionJsonField "kind" psJsonQuote "inductive"
+    psCheckedAdmissionJsonField "declaration" (declaration),
+    psCheckedAdmissionJsonField "kind" (psJsonQuote "inductive")
   ]
 
 structure PsCheckedAdmissionEncodeState where
@@ -459,9 +459,9 @@ def psEncodeCheckedAdmissionsCanonical
   | Except.ok state =>
       Except.ok
         (psJsonObject [
-          psCheckedAdmissionJsonField "admissions" psJsonArray state.admissionsRev.reverse,
-          psCheckedAdmissionJsonField "format" psJsonQuote "proofscript-checked-admissions",
-          psCheckedAdmissionJsonField "version" "2"
+          psCheckedAdmissionJsonField "admissions" (psJsonArray state.admissionsRev.reverse),
+          psCheckedAdmissionJsonField "format" (psJsonQuote "proofscript-checked-admissions"),
+          psCheckedAdmissionJsonField "version" ("2")
         ])
 
 def psEncodeCheckedAdmissionsText

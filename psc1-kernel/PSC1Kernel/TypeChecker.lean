@@ -720,6 +720,68 @@ partial def toConstructorWhenK
     if debugEq then throw "Eq.rec K debug: constructor result type mismatch" else return major
   pure (applyArgs (.const ctorName typeLevels) params)
 
+def isConstructorApp
+    (env : Environment)
+    (e : Expr) : Bool :=
+  match e.getAppFn with
+  | .const name _ =>
+      match env.find? name with
+      | some (.ctorInfo _) => true
+      | _ => false
+  | _ => false
+
+partial def isPropTypeForStructure
+    (ctx : CheckerContext)
+    (type : Expr) : Except String Bool := do
+  let some sortType ← inferKMajorType? ctx type
+    | return false
+  let sortType' ← whnf ctx sortType
+  match sortType' with
+  | .sort level => return Level.normalizesToZero level
+  | _ => return false
+
+/--
+Lean 4.34 `to_cnstr_when_structure`: when a recursor major is an arbitrary
+value of a non-recursive, non-Prop structure, eta-expand it to the unique
+constructor applied to its parameters and field projections. This lets iota
+reduction proceed even when the major is not syntactically a constructor.
+-/
+partial def toConstructorWhenStructure
+    (ctx : CheckerContext)
+    (recursor : RecursorInfo)
+    (major : Expr) : Except String Expr := do
+  if isConstructorApp ctx.env major then
+    return major
+  let some inductName := recursorMajorInduct? recursor
+    | return major
+  if !ctx.env.isNonRecStructure inductName then
+    return major
+  let some rawType ← inferKMajorType? ctx major
+    | return major
+  let majorType ← whnf ctx rawType
+  let .const typeName levels := majorType.getAppFn
+    | return major
+  if !Name.eq typeName inductName then
+    return major
+  if ← isPropTypeForStructure ctx majorType then
+    return major
+  let some (.inductInfo induct) := ctx.env.find? inductName
+    | return major
+  let [ctorName] := induct.ctors
+    | return major
+  let some (.ctorInfo ctor) := ctx.env.find? ctorName
+    | return major
+  let args := majorType.getAppArgs
+  if args.length < ctor.numParams then
+    return major
+  let params := args.take ctor.numParams
+  let rec fields (i : Nat) : List Expr :=
+    if h : i < ctor.numFields then
+      .proj inductName i major :: fields (i + 1)
+    else
+      []
+  pure (applyArgs (.const ctorName levels) (params ++ fields 0))
+
 partial def reduceInductiveRec
     (ctx : CheckerContext)
     (e : Expr)
@@ -747,7 +809,8 @@ partial def reduceInductiveRec
         .ok (Expr.app (Expr.const kernelNatSuccName []) (.lit (.nat n)))
     | .lit (.str value) =>
         whnf ctx (stringLitToConstructor value)
-    | _ => .ok majorReduced
+    | _ =>
+        toConstructorWhenStructure ctx recursor majorReduced
   let .const ctorName _ := major.getAppFn | return none
   let some rule := findRecursorRule ctorName recursor.rules | return none
   let majorArgs := major.getAppArgs

@@ -438,6 +438,8 @@ def psEncodeCheckedAdmissionsLoop
           Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
       | .opaqueDecl _ _ _ _ =>
           Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
+      | .partialDecl _ _ _ _ =>
+          Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
 
 def psEncodeCheckedAdmissionsCanonical
     (declarations : List PsDeclaration) :

@@ -505,6 +505,153 @@ const empty=emptyLean434MetavarContext();
     );
   }
 
+  {
+    // Small source-derived nested-delayed case.  This exercises the same
+    // substitution composition that Lean's instantiateMVarsShadow test relies
+    // on, without pulling the whole MetaM test harness into this bootstrap
+    // fixture:
+    //
+    //   ?inner [x] := Nat.succ x
+    //   ?outer [x] := ?inner (Nat.succ x)
+    //   ?outer 40  ==> Nat.succ (Nat.succ 40)
+    const fvarName=numName(strName(anonymous,'_f'),2n);
+    const runtimeFVar=kernelExprToLean434Runtime(
+      fvar(nameKey(fvarName)),
+    );
+    const innerDelayedId=lean434RuntimeMVarId(
+      numName(strName(anonymous,'_m'),14n),
+    );
+    const innerPendingId=lean434RuntimeMVarId(
+      numName(strName(anonymous,'_m'),15n),
+    );
+    const outerDelayedId=lean434RuntimeMVarId(
+      numName(strName(anonymous,'_m'),16n),
+    );
+    const outerPendingId=lean434RuntimeMVarId(
+      numName(strName(anonymous,'_m'),17n),
+    );
+
+    const insertDelayed=(mctx,id,pending)=>{
+      let fn=evaluator.evaluate(
+        constant(
+          nameFromDotted(
+            'ProofScript.RuntimeProbe.insertDelayedExprAssignment',
+          ),
+        ),
+      );
+      fn=evaluator.applyRuntimeValue(fn,mctx);
+      fn=evaluator.applyRuntimeValue(fn,id);
+      fn=evaluator.applyRuntimeValue(fn,[runtimeFVar]);
+      return evaluator.applyRuntimeValue(fn,pending);
+    };
+    const assignRuntime=(mctx,id,value)=>{
+      let fn=evaluator.evaluate(
+        constant(nameFromDotted('Lean.assignExp')),
+      );
+      fn=evaluator.applyRuntimeValue(fn,mctx);
+      fn=evaluator.applyRuntimeValue(fn,id);
+      return evaluator.applyRuntimeValue(fn,value);
+    };
+
+    let nestedMctx=insertDelayed(
+      empty,
+      innerDelayedId,
+      innerPendingId,
+    );
+    nestedMctx=assignRuntime(
+      nestedMctx,
+      innerPendingId,
+      {
+        kind:'constructor',
+        name:'Lean.Expr.app',
+        fields:[
+          kernelExprToLean434Runtime(
+            constant(nameFromDotted('Nat.succ')),
+          ),
+          runtimeFVar,
+        ],
+      },
+    );
+    nestedMctx=insertDelayed(
+      nestedMctx,
+      outerDelayedId,
+      outerPendingId,
+    );
+    const succFVar={
+      kind:'constructor',
+      name:'Lean.Expr.app',
+      fields:[
+        kernelExprToLean434Runtime(
+          constant(nameFromDotted('Nat.succ')),
+        ),
+        runtimeFVar,
+      ],
+    };
+    nestedMctx=assignRuntime(
+      nestedMctx,
+      outerPendingId,
+      {
+        kind:'constructor',
+        name:'Lean.Expr.app',
+        fields:[
+          {
+            kind:'constructor',
+            name:'Lean.Expr.mvar',
+            fields:[innerDelayedId],
+          },
+          succFVar,
+        ],
+      },
+    );
+
+    const nestedTarget={
+      kind:'constructor',
+      name:'Lean.Expr.app',
+      fields:[
+        {
+          kind:'constructor',
+          name:'Lean.Expr.mvar',
+          fields:[outerDelayedId],
+        },
+        kernelExprToLean434Runtime(natLit(40n)),
+      ],
+    };
+    let instantiateNested=evaluator.evaluate(
+      constant(nameFromDotted('Lean.instantiateExprMVarsImp')),
+    );
+    instantiateNested=evaluator.applyRuntimeValue(
+      instantiateNested,
+      nestedMctx,
+    );
+    const nestedResult=evaluator.applyRuntimeValue(
+      instantiateNested,
+      nestedTarget,
+    );
+    const nestedExpected=app(
+      constant(nameFromDotted('Nat.succ')),
+      app(
+        constant(nameFromDotted('Nat.succ')),
+        natLit(40n),
+      ),
+    );
+    if(
+      nestedResult?.kind!=='constructor'
+      ||nestedResult.name!=='Prod.mk'
+      ||nestedResult.fields.length!==2
+      ||!exprEq(
+        lean434RuntimeExprToKernel(nestedResult.fields[1]),
+        nestedExpected,
+      )
+    ){
+      throw new Error(
+        'Lean.instantiateExprMVarsImp did not compose nested delayed substitutions',
+      );
+    }
+    console.log(
+      'ok - native Lean instantiateExprMVarsImp composes nested delayed substitutions',
+    );
+  }
+
   const coreEvaluator=new Lean434Evaluator(
     replay.env,
     {maxSteps:250_000,metadata},

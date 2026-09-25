@@ -147,6 +147,28 @@ def psRustEmitInductive
             " }"
             ""))
 
+def psRustEmitHigherOrderParameterType
+    (type : PsVerifiedIrType) :
+    Except PsRustEmitError String :=
+  match type with
+  | PsVerifiedIrType.function parameters result =>
+      match psRustEmitTypeListWith psRustEmitType parameters with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedParameters =>
+          match psRustEmitType result with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedResult =>
+              Except.ok
+                (psRustConcat4
+                  "impl Fn("
+                  (psRustJoin ", " printedParameters)
+                  ") -> "
+                  printedResult)
+  | _ =>
+      psRustEmitType type
+
 def psRustEmitDeclarationParameterList
     (parameters : List PsVerifiedIrParameter) :
     Except PsRustEmitError (List String) :=
@@ -154,7 +176,7 @@ def psRustEmitDeclarationParameterList
   | List.nil =>
       Except.ok List.nil
   | List.cons parameter rest =>
-      match psRustEmitType parameter.type with
+      match psRustEmitHigherOrderParameterType parameter.type with
       | Except.error error =>
           Except.error error
       | Except.ok printedType =>

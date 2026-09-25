@@ -188,14 +188,29 @@ jobs:
               throw new Error('PSC1_WASM_RUNTIME_NAT_RESULT:' + name);
             }
           }
-          if (instance.exports.intLiteralNegativeValue() !== -5) {
-            throw new Error('PSC1_WASM_RUNTIME_INT_LITERAL_VALUE');
+          {
+            const literalNeg = instance.exports.intLiteralNegativeValue();
+            const explicitNeg = instance.exports.intExplicitNegSuccValue();
+            const positive = instance.exports.intPositiveValue();
+            if (literalNeg !== -5 || explicitNeg !== -5 || positive !== 7) {
+              throw new Error(
+                'PSC1_WASM_RUNTIME_INT_REPR:' +
+                'literal=' + literalNeg +
+                ',explicit=' + explicitNeg +
+                ',positive=' + positive
+              );
+            }
           }
-          if (instance.exports.intAddMixedValue() !== 2) {
-            throw new Error('PSC1_WASM_RUNTIME_INT_ADD_VALUE');
-          }
-          if (instance.exports.intNegValue() !== 5) {
-            throw new Error('PSC1_WASM_RUNTIME_INT_NEG_VALUE');
+          {
+            const addValue = instance.exports.intAddMixedValue();
+            const negValue = instance.exports.intNegValue();
+            if (addValue !== 2 || negValue !== 5) {
+              throw new Error(
+                'PSC1_WASM_RUNTIME_INT_VALUE:' +
+                'add=' + addValue +
+                ',neg=' + negValue
+              );
+            }
           }
           for (const name of [
             'intAddMixed',

@@ -1043,7 +1043,10 @@ def psElabMatchPatternConstructorName
   match pattern with
   | .bool value _ =>
       if psNameEq inductiveName psBoolName then
-        Except.ok (if value then psBoolTrueName else psBoolFalseName)
+        if value then
+          Except.ok psBoolTrueName
+        else
+          Except.ok psBoolFalseName
       else
         Except.error PsElabError.matchPatternUnsupported
   | .wildcard _ =>

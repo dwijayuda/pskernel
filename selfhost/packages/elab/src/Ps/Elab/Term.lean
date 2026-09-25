@@ -310,38 +310,52 @@ def psElabProjectionReference
                   | Except.ok projected =>
                       psElabFinalizeExpected projected expected
 
+def psElabNamedReference
+    (context : PsElabContext)
+    (sourceName : PsSyntaxName)
+    (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match psSyntaxNameToName sourceName with
+  | none => Except.error PsElabError.emptyName
+  | some name =>
+      match psResolveName context.localContext context.environment name with
+      | none =>
+          psElabProjectionReference context sourceName expected
+      | some resolved =>
+          match resolved with
+          | .local id =>
+              psElabResolvedTerm context (PsExpr.fvar id) expected
+          | .global globalName =>
+              psElabResolvedTerm
+                context
+                (PsExpr.constE globalName [])
+                expected
+
 def psElabReference
     (context : PsElabContext)
     (sourceName : PsSyntaxName)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match sourceName.segments with
-  | ["Prop"] =>
-      psElabResolvedTerm
-        context
-        (PsExpr.sortE PsLevel.zero)
-        expected
-  | ["Type"] =>
-      psElabResolvedTerm
-        context
-        (PsExpr.sortE (PsLevel.succ PsLevel.zero))
-        expected
-  | _ =>
-      match psSyntaxNameToName sourceName with
-      | none => Except.error PsElabError.emptyName
-      | some name =>
-          match psResolveName context.localContext context.environment name with
-          | none =>
-              psElabProjectionReference context sourceName expected
-          | some resolved =>
-              match resolved with
-              | .local id =>
-                  psElabResolvedTerm context (PsExpr.fvar id) expected
-              | .global globalName =>
-                  psElabResolvedTerm
-                    context
-                    (PsExpr.constE globalName [])
-                    expected
+  | List.nil =>
+      psElabNamedReference context sourceName expected
+  | List.cons segment rest =>
+      match rest with
+      | List.nil =>
+          if psStringEq segment "Prop" then
+            psElabResolvedTerm
+              context
+              (PsExpr.sortE PsLevel.zero)
+              expected
+          else if psStringEq segment "Type" then
+            psElabResolvedTerm
+              context
+              (PsExpr.sortE (PsLevel.succ PsLevel.zero))
+              expected
+          else
+            psElabNamedReference context sourceName expected
+      | List.cons _ _ =>
+          psElabNamedReference context sourceName expected
 
 def psElabNatural
     (context : PsElabContext)

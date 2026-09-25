@@ -544,6 +544,25 @@ def psRustCoverageModule
     withInductives
     module.declarations
 
+def psRustCoverageReverseAcc :
+    List String -> List String -> List String
+  | List.nil, output =>
+      output
+  | List.cons value rest, output =>
+      psRustCoverageReverseAcc
+        rest
+        (List.cons value output)
+
+def psRustCoverageReverse
+    (values : List String) : List String :=
+  psRustCoverageReverseAcc values List.nil
+
+def psRustCoverageLength : List String -> Nat
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ (psRustCoverageLength rest)
+
 def psRustCoverageLines
     (linePrefix : String)
     (values : List String) : List String :=
@@ -560,11 +579,11 @@ def psRustCoverageReport
   let featureLines :=
     psRustCoverageLines
       "PSC1_RUST_COVERAGE_FEATURE: "
-      coverage.features.reverse;
+      psRustCoverageReverse coverage.features;
   let namedTypeLines :=
     psRustCoverageLines
       "PSC1_RUST_COVERAGE_NAMED_TYPE: "
-      coverage.namedTypes.reverse;
+      psRustCoverageReverse coverage.namedTypes;
   psRustConcat2
     (psRustJoin
       "\n"
@@ -572,11 +591,11 @@ def psRustCoverageReport
         (List.cons
           (psRustConcat2
             "PSC1_RUST_COVERAGE_FEATURE_COUNT: "
-            (toString coverage.features.length))
+            (toString psRustCoverageLength coverage.features))
           featureLines)
         (List.cons
           (psRustConcat2
             "PSC1_RUST_COVERAGE_NAMED_TYPE_COUNT: "
-            (toString coverage.namedTypes.length))
+            (toString psRustCoverageLength coverage.namedTypes))
           namedTypeLines)))
     "\n"

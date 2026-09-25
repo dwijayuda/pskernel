@@ -644,6 +644,45 @@ export function findLean434JsExtern(
 export type Lean434ExternEffect='pure'|'st-action';
 export type Lean434ExternResultAdapter='identity'|'decidable';
 
+export type Lean434EvaluatorExternAdapter=
+  |'instantiate-level-mvars';
+
+export interface Lean434EvaluatorExternBinding {
+  readonly leanDeclaration:string;
+  readonly leanSymbol:string;
+  readonly arity:number;
+  readonly adapter:Lean434EvaluatorExternAdapter;
+  readonly upstreamSource:string;
+}
+
+/**
+ * Native Lean externs whose executable semantics require the active evaluator
+ * and its replayed Environment. They are deliberately separate from ordinary
+ * standalone JS primitives.
+ */
+export const LEAN434_JS_EVALUATOR_EXTERN_BINDINGS:
+readonly Lean434EvaluatorExternBinding[]=[
+  {
+    leanDeclaration:'Lean.instantiateLevelMVarsImp',
+    leanSymbol:'lean_instantiate_level_mvars',
+    arity:2,
+    adapter:'instantiate-level-mvars',
+    upstreamSource:'Lean/MetavarContext.lean',
+  },
+] as const;
+
+const evaluatorExternByDeclaration=new Map(
+  LEAN434_JS_EVALUATOR_EXTERN_BINDINGS.map(
+    (entry)=>[entry.leanDeclaration,entry] as const,
+  ),
+);
+
+export function findLean434EvaluatorExternForDeclaration(
+  leanDeclaration:string,
+):Lean434EvaluatorExternBinding|undefined{
+  return evaluatorExternByDeclaration.get(leanDeclaration);
+}
+
 export interface Lean434DeclarationExternBinding {
   readonly leanDeclaration:string;
   readonly leanSymbol:string;

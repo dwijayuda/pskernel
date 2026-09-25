@@ -1198,7 +1198,7 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
   let alphaName : PSC1Kernel.Name := .str .anonymous "α"
   let valueName : PSC1Kernel.Name := .str .anonymous "value"
   let paramBoxType : PSC1Kernel.Expr :=
-    .forallE alphaName (.sort paramBoxLevel) (.sort paramBoxLevel) .default
+    .forallE alphaName (.sort paramBoxLevel) (.sort (.succ paramBoxLevel)) .default
   let paramBoxCtorType : PSC1Kernel.Expr :=
     .forallE alphaName (.sort paramBoxLevel)
       (.forallE valueName (.bvar 0)
@@ -1343,6 +1343,30 @@ def assertSimpleInductiveAdmissionOracle : IO Unit := do
     (toLeanExpr oursParamReduced == leanParamReduced)
   assertTrue "parameterized recursor did not strip the fixed constructor parameter"
     (PSC1Kernel.Expr.eq oursParamReduced (.lit (.nat 43)))
+
+  -- This narrower K5 path intentionally rejects declarations whose result
+  -- universe may become Prop; Lean's small-elimination analysis is not yet
+  -- implemented here.
+  let Small : PSC1Kernel.Name := .str .anonymous "OracleSmallElim"
+  let SmallMk : PSC1Kernel.Name := .str Small "mk"
+  let smallT : PSC1Kernel.Expr := .app (.const Small [paramBoxLevel]) (.bvar 0)
+  let smallType : PSC1Kernel.Expr :=
+    .forallE alphaName (.sort paramBoxLevel) (.sort paramBoxLevel) .default
+  let smallCtorType : PSC1Kernel.Expr :=
+    .forallE alphaName (.sort paramBoxLevel)
+      (.forallE valueName (.bvar 0) smallT .default)
+      .default
+  match PSC1Kernel.Kernel.addSimpleInductive .empty {
+    levelParams := [paramBoxU]
+    name := Small
+    type := smallType
+    ctors := [{ name := SmallMk, type := smallCtorType }]
+    isUnsafe := false
+    numParams := 1
+  } with
+  | .ok _ =>
+      throw <| IO.userError "simple inductive admission allowed unsupported small-elimination shape"
+  | .error _ => pure ()
 
   -- Next K5 slice: non-recursive constructor fields.
   let natT : PSC1Kernel.Expr := .const NatN []

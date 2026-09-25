@@ -1,4 +1,4 @@
-name: PSC1 full K checker root 110018
+name: PSC1 full K checker Std blockers
 
 on:
   workflow_dispatch:
@@ -74,6 +74,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { label: root-030019, start: 30019, count: 1 }
+          - { label: root-040003, start: 40003, count: 1 }
+          - { label: root-070000, start: 70000, count: 1 }
+          - { label: root-080000, start: 80000, count: 1 }
+          - { label: root-100015, start: 100015, count: 1 }
           - { label: root-110018, start: 110018, count: 1 }
 
     steps:

@@ -81,69 +81,75 @@ def psRustEmitPrimitiveType
   | PsVerifiedIrPrimitiveType.string => "String"
   | PsVerifiedIrPrimitiveType.unit => "()"
 
-def psRustEmitTypeListWithFuel
-    (fuel : Nat) :
+def psRustEmitTypeListWith
+    (emitType :
+      PsVerifiedIrType ->
+      Except PsRustEmitError String) :
     List PsVerifiedIrType ->
     Except PsRustEmitError (List String)
   | List.nil =>
       Except.ok List.nil
   | List.cons type rest =>
-      match psRustEmitTypeWithFuel fuel type with
+      match emitType type with
       | Except.error error =>
           Except.error error
       | Except.ok printed =>
-          match psRustEmitTypeListWithFuel fuel rest with
+          match psRustEmitTypeListWith emitType rest with
           | Except.error error =>
               Except.error error
           | Except.ok printedRest =>
               Except.ok (List.cons printed printedRest)
 
-mutual
-  def psRustEmitTypeWithFuel :
-      Nat ->
-      PsVerifiedIrType ->
-      Except PsRustEmitError String
-    | 0, _ =>
-        Except.error PsRustEmitError.fuelExhausted
-    | fuel + 1, type =>
-        match type with
-        | PsVerifiedIrType.unknown =>
-            Except.ok "()"
-        | PsVerifiedIrType.typeParameter name =>
-            Except.ok name
-        | PsVerifiedIrType.primitive primitive =>
-            Except.ok (psRustEmitPrimitiveType primitive)
-        | PsVerifiedIrType.function parameters result =>
-            match psRustEmitTypeListWithFuel fuel parameters with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedParameters =>
-                match psRustEmitTypeWithFuel fuel result with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok printedResult =>
-                    Except.ok
-                      (psRustConcat4
-                        "fn("
-                        (psRustJoin ", " printedParameters)
-                        ") -> "
-                        printedResult)
-        | PsVerifiedIrType.named name arguments =>
-            match psRustEmitTypeListWithFuel fuel arguments with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedArguments =>
-                match printedArguments with
-                | List.nil =>
-                    Except.ok name
-                | List.cons _ _ =>
-                    Except.ok
-                      (psRustConcat4
-                        name
-                        "<"
-                        (psRustJoin ", " printedArguments)
-                        ">")
-end
+def psRustEmitTypeWithFuel :
+    Nat ->
+    PsVerifiedIrType ->
+    Except PsRustEmitError String
+  | 0, _ =>
+      Except.error PsRustEmitError.fuelExhausted
+  | fuel + 1, type =>
+      match type with
+      | PsVerifiedIrType.unknown =>
+          Except.ok "()"
+      | PsVerifiedIrType.typeParameter name =>
+          Except.ok name
+      | PsVerifiedIrType.primitive primitive =>
+          Except.ok (psRustEmitPrimitiveType primitive)
+      | PsVerifiedIrType.function parameters result =>
+          let emitNested :=
+            fun nestedType =>
+              psRustEmitTypeWithFuel fuel nestedType;
+          match psRustEmitTypeListWith emitNested parameters with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedParameters =>
+              match psRustEmitTypeWithFuel fuel result with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok printedResult =>
+                  Except.ok
+                    (psRustConcat4
+                      "fn("
+                      (psRustJoin ", " printedParameters)
+                      ") -> "
+                      printedResult)
+      | PsVerifiedIrType.named name arguments =>
+          let emitNested :=
+            fun nestedType =>
+              psRustEmitTypeWithFuel fuel nestedType;
+          match psRustEmitTypeListWith emitNested arguments with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedArguments =>
+              match printedArguments with
+              | List.nil =>
+                  Except.ok name
+              | List.cons _ _ =>
+                  Except.ok
+                    (psRustConcat4
+                      name
+                      "<"
+                      (psRustJoin ", " printedArguments)
+                      ">")
 
 def psRustEmitType
     (type : PsVerifiedIrType) :

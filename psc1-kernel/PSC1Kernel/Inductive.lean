@@ -7,8 +7,10 @@ namespace Kernel
 /--
 Checked K5 slice: an ordinary inductive datatype in a result universe that is
 provably nonzero. Shared parameters, indices, and constructor fields are
-supported together with direct strictly-positive recursive fields. Function-
-recursive, nested, negative, and mutual occurrences still fail closed.
+supported together with direct strictly-positive recursive fields. Functional
+recursive fields are also supported when every function-domain binder is
+non-recursive and the final codomain is the same inductive. Nested, negative,
+and mutual occurrences still fail closed.
 
 Unsupported inductive shapes fail closed instead of accepting exported
 constructor/recursor metadata.
@@ -79,6 +81,7 @@ partial def exprContainsConst (target : Name) : Expr → Bool
 
 structure SimpleRecursiveField where
   field : OpenBinder
+  args : List OpenBinder
   indices : List Expr
 
 structure SimpleConstructorShape where
@@ -177,6 +180,53 @@ def simpleInductiveAppIndices?
         | none => none
   | _ => none
 
+partial def simpleIndicesContainTarget
+    (target : Name) : List Expr → Bool
+  | [] => false
+  | index :: rest =>
+      exprContainsConst target index ||
+        simpleIndicesContainTarget target rest
+
+partial def analyzeSimpleRecursiveArgument
+    (ctx : CheckerContext)
+    (target : Name)
+    (levels : List Level)
+    (params : List OpenBinder)
+    (numIndices : Nat)
+    (type : Expr)
+    (revArgs : List OpenBinder := []) :
+    Except String (CheckerContext × Option (List OpenBinder × List Expr)) := do
+  let reduced ← whnf ctx type
+  match simpleInductiveAppIndices? target levels params numIndices reduced with
+  | some indices =>
+      if simpleIndicesContainTarget target indices then
+        throw "recursive argument index contains a recursive occurrence"
+      pure (ctx, some (revArgs.reverse, indices))
+  | none =>
+      match reduced with
+      | .forallE userName domain body binderInfo => do
+          let domainWhnf ← whnf ctx domain
+          if exprContainsConst target domain ||
+              exprContainsConst target domainWhnf then
+            throw "recursive function argument contains a negative recursive occurrence"
+          let domainType ← check ctx domain
+          let _ ← ensureSort ctx domainType
+          let (fresh, child) := ctx.withLocal userName domain binderInfo
+          let arg : OpenBinder := {
+            internalName := fresh
+            userName := userName
+            type := domain
+            binderInfo := binderInfo
+          }
+          analyzeSimpleRecursiveArgument
+            child target levels params numIndices
+            (body.instantiate1 (.fvar fresh)) (arg :: revArgs)
+      | _ =>
+          if exprContainsConst target type ||
+              exprContainsConst target reduced then
+            throw "simple inductive admission does not yet support nested recursive occurrences"
+          pure (ctx, none)
+
 partial def openSimpleConstructorFields
     (ctx : CheckerContext)
     (target : Name)
@@ -196,25 +246,26 @@ partial def openSimpleConstructorFields
       let fieldLevel ← ensureSort ctx domainType
       unless Level.le fieldLevel resultLevel do
         throw "simple inductive constructor field universe is too large"
-      let domainWhnf ← whnf ctx domain
-      let recursiveIndices? :=
-        simpleInductiveAppIndices? target levels params numIndices domainWhnf
-      if recursiveIndices?.isNone &&
-          (exprContainsConst target domain ||
-            exprContainsConst target domainWhnf) then
-        throw "simple inductive admission supports only direct strictly-positive recursive fields"
-      let (fresh, child) := ctx.withLocal userName domain binderInfo
+      let (fresh, child0) := ctx.withLocal userName domain binderInfo
       let field : OpenBinder := {
         internalName := fresh
         userName := userName
         type := domain
         binderInfo := binderInfo
       }
+      let (analysisCtx, recursiveInfo?) ←
+        analyzeSimpleRecursiveArgument
+          child0 target levels params numIndices domain
+      let continuationLctx : LocalContext := {
+        child0.lctx with nextIndex := analysisCtx.lctx.nextIndex
+      }
+      let child : CheckerContext := { child0 with lctx := continuationLctx }
       let revRecursive' :=
-        match recursiveIndices? with
-        | some recursiveIndices =>
+        match recursiveInfo? with
+        | some (args, recursiveIndices) =>
             {
               field := field
+              args := args
               indices := recursiveIndices
             } :: revRecursive
         | none => revRecursive
@@ -230,13 +281,6 @@ def simpleFieldArgs (shape : SimpleConstructorShape) : List Expr :=
 
 def simpleParamArgs (params : List OpenBinder) : List Expr :=
   params.map (fun param => .fvar param.internalName)
-
-partial def simpleIndicesContainTarget
-    (target : Name) : List Expr → Bool
-  | [] => false
-  | index :: rest =>
-      exprContainsConst target index ||
-        simpleIndicesContainTarget target rest
 
 def validateSimpleConstructorResult
     (target : Name)
@@ -276,8 +320,11 @@ def makeSimpleIHBinders
           internalName := internalName
           userName := recursive.field.userName.appendAfter "_ih"
           type :=
-            simpleMotiveApp motive recursive.indices
-              (.fvar recursive.field.internalName)
+            closeOpenBinders recursive.args
+              (simpleMotiveApp motive recursive.indices
+                (applyArgs
+                  (.fvar recursive.field.internalName)
+                  (recursive.args.map fun arg => Expr.fvar arg.internalName)))
           binderInfo := .default
         }
         binder :: go rest (index + 1)
@@ -287,6 +334,12 @@ def simpleHasRecursiveFields : List SimpleConstructorShape → Bool
   | [] => false
   | shape :: rest =>
       !shape.recursiveFields.isEmpty || simpleHasRecursiveFields rest
+
+def simpleHasReflexiveFields : List SimpleConstructorShape → Bool
+  | [] => false
+  | shape :: rest =>
+      shape.recursiveFields.any (fun recursive => !recursive.args.isEmpty) ||
+        simpleHasReflexiveFields rest
 
 partial def replaceSimpleConstant
     (target : Name)
@@ -336,8 +389,14 @@ def makeSimpleRecursiveCalls
     simpleParamArgs params ++
       [motive] ++ minors.map (fun minor => Expr.fvar minor.internalName)
   shape.recursiveFields.map fun recursive =>
-    applyArgs (.const recName recLevels)
-      (fixed ++ recursive.indices ++ [.fvar recursive.field.internalName])
+    let appliedField :=
+      applyArgs
+        (.fvar recursive.field.internalName)
+        (recursive.args.map fun arg => Expr.fvar arg.internalName)
+    let recursiveCall :=
+      applyArgs (.const recName recLevels)
+        (fixed ++ recursive.indices ++ [appliedField])
+    closeOpenLambdas recursive.args recursiveCall
 
 def makeSimpleRecursorRules
     (recName : Name)
@@ -485,8 +544,11 @@ def addSimpleInductive
   let (work1, ctorShapes) ← addConstructors work0 0 decl.ctors
 
   let isRecursive := simpleHasRecursiveFields ctorShapes
+  let isReflexive := simpleHasReflexiveFields ctorShapes
   let finalInductInfo : InductiveInfo := {
-    inductInfo with isRec := isRecursive
+    inductInfo with
+    isRec := isRecursive
+    isReflexive := isReflexive
   }
   let work1 := replaceSimpleInductiveInfo work1 finalInductInfo
 

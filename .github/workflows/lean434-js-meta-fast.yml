@@ -61,6 +61,7 @@ jobs:
             ProofScript.RuntimeProbe.replaceNullEntry \
             ProofScript.RuntimeProbe.insertExprMap \
             ProofScript.RuntimeProbe.findExprMap? \
+            ProofScript.RuntimeProbe.insertDelayedExprAssignment \
             > lean434-metavar-context-bootstrap.ndjson
           test -s lean434-metavar-context-bootstrap.ndjson
       - name: Execute real Lean.MetavarContext assignment in JavaScript

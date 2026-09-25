@@ -514,6 +514,16 @@ def psRustCoverageInductiveList :
           inductiveInfo.constructors)
         rest
 
+def psRustCoverageDeclarationIsGenericValue
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  match declaration.parameters with
+  | List.nil =>
+      match declaration.typeParameters with
+      | List.nil => false
+      | List.cons _ _ => true
+  | List.cons _ _ =>
+      false
+
 def psRustCoverageDeclarationList :
     PsRustCoverage ->
     List PsVerifiedIrDeclaration ->
@@ -521,10 +531,19 @@ def psRustCoverageDeclarationList :
   | coverage, List.nil =>
       coverage
   | coverage, List.cons declaration rest =>
-      let withDeclaration :=
+      let withDeclarationFeature :=
         psRustCoverageAddFeature
           coverage
           "module:declaration";
+      let withDeclaration :=
+        if psRustCoverageDeclarationIsGenericValue declaration then
+          psRustCoverageAddUnsupported
+            (psRustCoverageAddFeature
+              withDeclarationFeature
+              "declaration:genericValue")
+            "declaration:genericValue"
+        else
+          withDeclarationFeature;
       let withParameters :=
         psRustCoverageParameterList
           withDeclaration

@@ -1393,7 +1393,7 @@ def psParseLeanTermWithFuel
                                     token.text
                                     token.span)
                         | _ =>
-                            let stop :=
+                            let stop : PsSourcePos :=
                               match
                                   psParseListReverse
                                     alternatives.value with

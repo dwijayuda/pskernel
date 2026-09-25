@@ -676,7 +676,7 @@ def psElabLambda
                   openTerm
                   openType;
               let outerContext :=
-                psElabContextWithMeta context metaContext
+                psElabContextWithMeta context metaContext;
               psElabFinalizeExpected
                 {
                   context := outerContext

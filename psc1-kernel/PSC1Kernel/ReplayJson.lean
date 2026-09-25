@@ -412,6 +412,12 @@ def decodeConstructorFromJson
   pure {
     name := ← natField value "name" "constructor"
     type := ← natField value "type" "constructor"
+    levelParams := some (← natListField value "levelParams" "constructor")
+    induct := some (← natField value "induct" "constructor")
+    cidx := some (← natField value "cidx" "constructor")
+    numParams := some (← natField value "numParams" "constructor")
+    numFields := some (← natField value "numFields" "constructor")
+    isUnsafe := some (← boolField value "isUnsafe" "constructor")
   }
 
 def decodeInductiveType
@@ -431,6 +437,47 @@ def decodeInductiveType
     name := ← natField value "name" "inductive type"
     type := ← natField value "type" "inductive type"
     ctors := ← resolve ctorNames
+    levelParams := some (← natListField value "levelParams" "inductive type")
+    numParams := some (← natField value "numParams" "inductive type")
+    numIndices := some (← natField value "numIndices" "inductive type")
+    all := some (← natListField value "all" "inductive type")
+    numNested := some (← natField value "numNested" "inductive type")
+    isRec := some (← boolField value "isRec" "inductive type")
+    isReflexive := some (← boolField value "isReflexive" "inductive type")
+    isUnsafe := some (← boolField value "isUnsafe" "inductive type")
+  }
+
+def decodeRecursorRule
+    (value : Json) : Except String Replay.RecursorRuleRecord := do
+  pure {
+    ctor := ← natField value "ctor" "recursor rule"
+    nFields := ← natField value "nfields" "recursor rule"
+    rhs := ← natField value "rhs" "recursor rule"
+  }
+
+def decodeRecursor
+    (value : Json) : Except String Replay.RecursorRecord := do
+  let rules ←
+    asArray (← requireField value "rules" "recursor") "recursor.rules"
+  let rec decodeRules :
+      List Json → Except String (List Replay.RecursorRuleRecord)
+    | [] => pure []
+    | item :: rest => do
+        let head ← decodeRecursorRule (← asObject item "recursor rule")
+        let tail ← decodeRules rest
+        pure (head :: tail)
+  pure {
+    name := ← natField value "name" "recursor"
+    levelParams := ← natListField value "levelParams" "recursor"
+    type := ← natField value "type" "recursor"
+    all := ← natListField value "all" "recursor"
+    numParams := ← natField value "numParams" "recursor"
+    numIndices := ← natField value "numIndices" "recursor"
+    numMotives := ← natField value "numMotives" "recursor"
+    numMinors := ← natField value "numMinors" "recursor"
+    rules := ← decodeRules rules.toList
+    k := ← boolField value "k" "recursor"
+    isUnsafe := ← boolField value "isUnsafe" "recursor"
   }
 
 def maxNat : List Nat → Nat
@@ -444,7 +491,7 @@ def decodeInductive (root : Json) : Except String Replay.Record := do
     asArray (← requireField value "types" "inductive") "inductive.types"
   let ctorArray ←
     asArray (← requireField value "ctors" "inductive") "inductive.ctors"
-  let _ ←
+  let recArray ←
     asArray (← requireField value "recs" "inductive") "inductive.recs"
   let typeValues := typeArray.toList
   let first :: _ := typeValues
@@ -477,12 +524,20 @@ def decodeInductive (root : Json) : Except String Replay.Record := do
         let head ← decodeInductiveType ctorArray.toList item
         let tail ← decodeTypes rest
         pure (head :: tail)
+  let rec decodeRecs :
+      List Json → Except String (List Replay.RecursorRecord)
+    | [] => pure []
+    | item :: rest => do
+        let head ← decodeRecursor (← asObject item "recursor")
+        let tail ← decodeRecs rest
+        pure (head :: tail)
   pure (.inductiveR {
     levelParams := sharedLevels
     numParams := sharedParams
     types := ← decodeTypes typeValues
     isUnsafe := sharedUnsafe
     numNested := maxNat nestedCounts
+    recs := ← decodeRecs recArray.toList
   })
 
 def recordKindCount (root : Json) : Nat :=

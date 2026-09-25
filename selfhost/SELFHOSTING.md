@@ -1,196 +1,262 @@
 # PSC1 Self-Host Pipeline
 
-The self-host target is:
+The self-host target is package-oriented, not a pair of special
+`compiler.ps` / `compiler.js` files.
 
 ```text
-portable compiler sources (.lean)
-    |
-    | one-time Lean 4.34/Lake bootstrap
-    v
-generated canonical ProofScript workspace (.ps)
-    |
-    | Lean-hosted PSC1 bootstrap compiler
-    v
-bootstrap compiler.ts -> tsc -> compiler.js
-    |
-    | compiler.js + thin Node filesystem host
-    v
-same generated .ps workspace
-    |
-    v
-next compiler.ts -> tsc -> next compiler.js
-    |
-    v
-fixed-point comparison
+packages/*/src/**/*.lean
+packages/compiler/src/Ps/Compiler.lean
+        |
+        | one-time Lean 4.34/Lake bootstrap
+        v
+dist/bootstrap/workspace/
+  packages/*/src/**/*.ps
+  packages/compiler/src/Ps/Compiler.ps
+        |
+        | Lean-hosted PSC1 bootstrap
+        v
+dist/bootstrap/packages/compiler/
+  index.ts
+  index.js
+  index.d.ts
+  index.js.map
+        |
+        | generated JS compiler re-emits its own .ps workspace
+        v
+dist/selfhost/workspace/
+  packages/*/src/**/*.ps
+  packages/compiler/src/Ps/Compiler.ps
+        |
+        | generated JS compiler
+        v
+dist/selfhost/packages/compiler/
+  index.ts
+  index.js
+  index.d.ts
+  index.js.map
+        |
+        +--> source fixed-point check
+        +--> compiler fixed-point check
 ```
 
-Lean/Lake is a bootstrap tool, not a runtime dependency of the final compiler.
-The Node host is intentionally outside the semantic compiler. It performs
-filesystem/import traversal, writes generated TypeScript, and invokes `tsc`.
-Parsing, elaboration, checking, erasure, and TypeScript emission in the second
-compile are executed by the generated `compiler.js`.
+Lean/Lake is required only for the bootstrap generation. After
+`dist/bootstrap/packages/compiler/index.js` exists, translation,
+canonicalization and JavaScript compilation are performed by the generated
+compiler plus thin Node filesystem/`tsc` adapters.
 
-## Source layout
-
-Handwritten portable compiler sources stay in the existing package topology:
+## Package boundaries
 
 ```text
 selfhost/
-  SELFHOST-COMPILER.lean
-  packages/*/src/**/*.lean
-  stdlib/**/*.lean
-  host/                    # Lean bootstrap host only
-  scripts/                 # host/orchestration only
+  package.json
+  psconfig.json
+  lakefile.lean
+
+  packages/
+    foundation/
+    syntax/
+    core/
+    environment/
+    project/
+    meta/
+    elab/
+    bridge/
+    compiler-ir/
+    erasure/
+    backend-ts/
+
+    compiler/
+      package.json
+      src/
+        Ps/
+          Compiler.lean
+          Compiler/
+            Api.lean
+      test/
+      dist/
+
+    cli/
+      package.json
+      src/
+        Main.lean          # thin Lean bootstrap CLI only
+      bin/
+        psc.mjs            # stable Node CLI
+      test/
+      dist/
+
+  host/
+    src/
+      Ps/Host/
+        ProjectCompiler.lean
+        CompilerDriver.lean
+        TypeScriptCompiler.lean
+        KernelBridge.lean
+
+  stdlib/
+  scripts/
+  dist/
 ```
 
-Do not create a second handwritten compiler tree. During bootstrap, `.lean`
-remains the handwritten source. Canonical `.ps` files are generated.
+`packages/compiler` is portable. It owns compiler composition APIs such as
+source translation, parsing, elaboration, checked-admission production, erasure
+and TypeScript emission. It must not own filesystem access or process spawning.
 
-## Generated layout
+`packages/cli` is host-facing. Its Lean `Main.lean` is only the bootstrap
+command dispatcher. The Node `psc` binary is the normal post-bootstrap CLI.
 
-All generated self-host artifacts live under the ignored `selfhost/dist/`
-directory:
+`host` owns filesystem/project loading, process execution and `tsc`
+invocation. These are outside the semantic compiler and are not part of the
+portable trust story.
 
-```text
-selfhost/dist/
-  bootstrap/
-    workspace/
-      SELFHOST-COMPILER.ps
-      packages/*/src/**/*.ps
-      stdlib/**/*.ps
-      .proofscript-bootstrap.json
-    compiler.ts
-    compiler.js
-    compiler.d.ts
-    compiler.js.map
+## One compiler, two hosts
 
-  next/
-    compiler.ts
-    compiler.js
-    compiler.d.ts
-    compiler.js.map
+Both bootstrap and self-hosted execution use the same compiler API.
+
+The Lake-hosted bootstrap path supports:
+
+```bash
+lake exe psc1 check input.lean
+lake exe psc1 check input.ps
+
+lake exe psc1 translate input.lean --to ps --out output.ps
+lake exe psc1 translate input.ps --to lean --out output.lean
+
+lake exe psc1 build input.lean --out output.js
+lake exe psc1 build input.ps --out output.js
 ```
 
-The generated workspace mirrors the source package layout so normal module names
-continue to resolve without special self-host-only import rules.
+The generated JavaScript path supports the same source directions:
 
-## Commands
+```bash
+npm run psc -- translate input.lean --to ps --out output.ps
+npm run psc -- translate input.ps --to lean --out output.lean
+npm run psc -- emit-ps input.ps --out canonical.ps
+npm run psc -- emit-lean input.ps --out output.lean
+
+npm run psc -- build input.lean --out dist/index.js
+npm run psc -- build input.ps --out dist/index.js
+```
+
+The JavaScript host uses
+`dist/bootstrap/packages/compiler/index.js` by default.
+
+## Workspace commands
 
 From `selfhost/`:
 
 ```bash
-# One-time Lean/Lake bootstrap:
+npm run check:workspace
+npm run check:source
+npm run build:lean
+npm test
+
+# one-time Lean bootstrap
 npm run bootstrap
 
-# Use generated compiler.js to compile the same .ps workspace again:
+# generated JS re-emits the .ps workspace and compiles it again
 npm run selfhost
 
-# Verify deterministic fixed point:
+# compare source and compiler fixed points
 npm run verify:selfhost
 
-# Entire chain:
+# complete chain
 npm run fixed-point
+```
 
-# Stable front door (same operations):
+The stable CLI exposes the same lifecycle:
+
+```bash
 npm run psc -- bootstrap
 npm run psc -- selfhost
 npm run psc -- verify-selfhost
 npm run psc -- fixed-point
-
-# Compile any generated ProofScript project with compiler.js:
-npm run psc -- build dist/bootstrap/workspace/SELFHOST-COMPILER.ps --out dist/next/compiler.js
 ```
-
-The low-level CLI also supports explicit translation artifacts:
-
-```bash
-lake exe psc1 emit-ps input.lean --out output.ps
-lake exe psc1 translate input.lean --to ps --out output.ps
-lake exe psc1 build input.ps --out compiler.ts
-```
-
-`psc1` remains the Lean-hosted bootstrap executable. The stable Node `psc`
-front door is JavaScript-first: `psc build ... --out output.js` writes the
-adjacent TypeScript intermediate, declaration file, source map, and JavaScript
-artifact. `--out output.ts` remains available for low-level/debug workflows.
-
-
-## Workspace convention
-
-The self-host tree intentionally follows normal JavaScript monorepo conventions
-without forcing the portable compiler modules to move while source closure is
-still in progress.
-
-Each semantic workspace under `packages/*` declares:
-
-- `src` as its portable source root;
-- `test` as its package-test root;
-- `dist` as its generated output directory;
-- explicit workspace dependencies in `package.json`.
-
-The bootstrap `host` and portable `stdlib` are also npm workspaces. The root
-workspace exposes conventional commands:
-
-```bash
-npm run build            # bootstrap source -> dist/bootstrap/compiler.js
-npm test                 # Lean-hosted bootstrap/unit suites
-npm run check            # workspace/source checks + tests
-npm run clean            # cross-platform dist cleanup
-npm run psc -- --help    # stable JS CLI
-```
-
-A later cleanup, after the whole compiler passes PSC1 source closure, should move
-the portable entry from `SELFHOST-COMPILER.lean` to `src/Compiler.lean`, move
-the Lean-only executable from `src/Main.lean` to `host/cli/Main.lean`, and
-place unit tests beside their owning packages. Those are file-layout changes
-only and should not be mixed into the current parser-closure work.
 
 ## Stage meanings
 
-### Bootstrap source closure
+### 1. Portable source closure
 
-`lake exe psc1 check SELFHOST-COMPILER.lean` must pass. This proves that the
-whole portable compiler project is inside the PSC1 source subset.
+The authoritative project entry is:
 
-### Canonical ProofScript workspace
+```text
+packages/compiler/src/Ps/Compiler.lean
+```
 
-`bootstrap:emit` walks the import graph from `SELFHOST-COMPILER.lean` and
-translates every reachable portable source to a mirrored `.ps` workspace.
-No generated `.ps` file should be edited manually.
+`lake exe psc1 check packages/compiler/src/Ps/Compiler.lean` must pass.
+This proves the reachable portable compiler workspace fits the frozen PSC1
+source subset.
 
-### Bootstrap JavaScript compiler
+### 2. Lean -> canonical ProofScript workspace
 
-`bootstrap:compiler` loads the generated `.ps` project and produces
-`dist/bootstrap/compiler.js`. Lean/Lake is still present only because the
-bootstrap executable itself is Lean-hosted.
+`bootstrap:emit` reads `psconfig.json`, walks the package import graph and
+mirrors every reachable portable `.lean` source into
+`dist/bootstrap/workspace/**/*.ps`.
 
-### JavaScript self-host
+No generated `.ps` source is handwritten.
 
-`selfhost` dynamically loads `dist/bootstrap/compiler.js`. The Node host
-flattens the generated module graph in dependency order, then calls exports from
-the generated compiler:
+### 3. Bootstrap compiler package
 
-- `psParseProofScriptSource`
-- `psElabModule`
-- `psBootstrapPreludeEnvironment`
-- `psEraseCoreModule`
-- `psTsEmitModule`
+`bootstrap:compiler` compiles the generated package entry:
 
-The resulting TypeScript is compiled by `tsc` to
-`dist/next/compiler.js`. Lean/Lake is not used in this stage.
+```text
+dist/bootstrap/workspace/packages/compiler/src/Ps/Compiler.ps
+```
 
-### Fixed point
+into:
 
-`verify:selfhost` requires `dist/bootstrap/compiler.ts` and
-`dist/next/compiler.ts` to be byte-for-byte identical and reports their SHA-256.
-Later we can strengthen this with checked-core and IR fingerprints as separate
-artifacts, but TypeScript fixed-point equality is the first executable closure
-gate.
+```text
+dist/bootstrap/packages/compiler/index.js
+```
+
+with adjacent `.ts`, `.d.ts` and source-map artifacts.
+
+### 4. JavaScript source self-host
+
+`selfhost:emit-source` loads the generated compiler package and canonicalizes
+the entire bootstrap `.ps` workspace again into
+`dist/selfhost/workspace`.
+
+No Lean/Lake process is involved.
+
+### 5. JavaScript compiler self-host
+
+`selfhost:compiler` compiles the second-generation package entry with
+`dist/bootstrap/packages/compiler/index.js`, producing
+`dist/selfhost/packages/compiler/index.js`.
+
+### 6. Fixed points
+
+`verify:source` requires the bootstrap and self-hosted canonical `.ps`
+workspaces to be byte-for-byte identical.
+
+`verify:compiler` requires bootstrap and self-hosted generated TypeScript to
+be byte-for-byte identical.
+
+Later assurance can add checked-core and IR fingerprints without changing the
+package/build structure.
+
+## Source transition
+
+During bootstrap development, handwritten `.lean` remains authoritative and
+canonical `.ps` is generated.
+
+After the fixed point is stable, the source authority can switch naturally:
+
+```text
+packages/*/src/**/*.ps
+        |
+        +--> psc build -> package dist/*.js
+        |
+        +--> psc translate --to lean
+                -> Lean verification/reference artifacts
+```
+
+At that point Lake becomes a reference/bootstrap/verification build rather than
+the normal development build.
 
 ## Current blocker
 
-The architecture and commands above are in place, but the full pipeline is not
-yet expected to pass until `SELFHOST-COMPILER.lean` itself passes the early
-PSC1 compiler-source readiness gate. Work should continue by fixing the first
-real source-subset incompatibility reported by that gate, without weakening or
-moving it later.
+The workspace/package architecture is in place. The remaining blocker is source
+closure of the existing compiler implementation, currently advancing through
+`Ps.Syntax.ParseLean`. The rule remains: fix the first real unsupported source
+construct without weakening semantic or regression gates.

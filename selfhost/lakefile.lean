@@ -55,7 +55,8 @@ lean_lib PsBridge where
   srcDir := "packages/bridge/src"
   roots := #[
     `Ps.Bridge.Json,
-    `Ps.Bridge.CheckedAdmissions
+    `Ps.Bridge.CheckedAdmissions,
+    `Ps.Bridge.Codec
   ]
 
 lean_lib PsCompilerIr where

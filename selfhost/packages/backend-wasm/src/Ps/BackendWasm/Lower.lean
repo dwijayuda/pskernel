@@ -704,121 +704,82 @@ def psWasmMatchBindingNames :
   | binding :: rest =>
       binding.name :: psWasmMatchBindingNames rest
 
-def psWasmCollectCapturesFromExprListWithFuel
+def psWasmCollectCapturesWithFuel
     (outerBindings : List PsWasmBinding)
     (boundNames : List String) :
     Nat ->
-    List PsVerifiedIrExpr ->
+    PsVerifiedIrExpr ->
     List PsWasmBinding ->
     List PsWasmBinding
-  | _, [], captures => captures
   | 0, _, captures => captures
-  | fuel + 1, expr :: rest, captures =>
-      let next :=
-        psWasmCollectCapturesWithFuel
-          outerBindings
-          boundNames
-          fuel
-          expr
-          captures
-      psWasmCollectCapturesFromExprListWithFuel
-        outerBindings
-        boundNames
-        fuel
-        rest
-        next
-
-termination_by fuel expressions captures =>
-  (fuel, expressions.length)
-where
-  psWasmCollectCapturesWithFuel
-      (outerBindings : List PsWasmBinding)
-      (boundNames : List String) :
-      Nat ->
-      PsVerifiedIrExpr ->
-      List PsWasmBinding ->
-      List PsWasmBinding
-    | 0, _, captures => captures
-    | fuel + 1, expr, captures =>
-        let collect :=
-          fun nested nestedCaptures =>
-            psWasmCollectCapturesWithFuel
-              outerBindings
-              boundNames
-              fuel
-              nested
-              nestedCaptures
-        match expr with
-        | .literal _ => captures
-        | .var name =>
-            psWasmAppendCaptureForName
-              outerBindings
-              boundNames
-              captures
-              name
-        | .intrinsic _ arguments =>
-            psWasmCollectCapturesFromExprListWithFuel
-              outerBindings
-              boundNames
-              fuel
-              arguments
-              captures
-        | .lambda parameters _ body =>
-            psWasmCollectCapturesWithFuel
-              outerBindings
-              (psWasmParameterNames parameters ++ boundNames)
-              fuel
-              body
-              captures
-        | .call fn _ arguments =>
-            let withFn := collect fn captures
-            psWasmCollectCapturesFromExprListWithFuel
-              outerBindings
-              boundNames
-              fuel
-              arguments
-              withFn
-        | .letE name _ value body =>
-            let withValue := collect value captures
-            psWasmCollectCapturesWithFuel
-              outerBindings
-              (name :: boundNames)
-              fuel
-              body
-              withValue
-        | .ifE condition thenBranch elseBranch =>
-            let withCondition := collect condition captures
-            let withThen := collect thenBranch withCondition
-            collect elseBranch withThen
-        | .record _ fields =>
-            psWasmCollectCapturesFromExprListWithFuel
-              outerBindings
-              boundNames
-              fuel
-              (fields.map (fun field => field.2))
-              captures
-        | .projection _ target _ =>
-            collect target captures
-        | .constructor _ _ _ fields =>
-            psWasmCollectCapturesFromExprListWithFuel
-              outerBindings
-              boundNames
-              fuel
-              (fields.map (fun field => field.2))
-              captures
-        | .matchE _ scrutinee alternatives =>
-            let withScrutinee := collect scrutinee captures
-            alternatives.foldl
-              (fun state alternative =>
-                let matchBindings := alternative.2.1
-                let body := alternative.2.2
-                psWasmCollectCapturesWithFuel
-                  outerBindings
-                  (psWasmMatchBindingNames matchBindings ++ boundNames)
-                  fuel
-                  body
-                  state)
-              withScrutinee
+  | fuel + 1, expr, captures =>
+      let collect :=
+        fun nested state =>
+          psWasmCollectCapturesWithFuel
+            outerBindings
+            boundNames
+            fuel
+            nested
+            state
+      match expr with
+      | .literal _ => captures
+      | .var name =>
+          psWasmAppendCaptureForName
+            outerBindings
+            boundNames
+            captures
+            name
+      | .intrinsic _ arguments =>
+          arguments.foldl
+            (fun state argument => collect argument state)
+            captures
+      | .lambda parameters _ body =>
+          psWasmCollectCapturesWithFuel
+            outerBindings
+            (psWasmParameterNames parameters ++ boundNames)
+            fuel
+            body
+            captures
+      | .call fn _ arguments =>
+          let withFn := collect fn captures
+          arguments.foldl
+            (fun state argument => collect argument state)
+            withFn
+      | .letE name _ value body =>
+          let withValue := collect value captures
+          psWasmCollectCapturesWithFuel
+            outerBindings
+            (name :: boundNames)
+            fuel
+            body
+            withValue
+      | .ifE condition thenBranch elseBranch =>
+          let withCondition := collect condition captures
+          let withThen := collect thenBranch withCondition
+          collect elseBranch withThen
+      | .record _ fields =>
+          fields.foldl
+            (fun state field => collect field.2 state)
+            captures
+      | .projection _ target _ =>
+          collect target captures
+      | .constructor _ _ _ fields =>
+          fields.foldl
+            (fun state field => collect field.2 state)
+            captures
+      | .matchE _ scrutinee alternatives =>
+          let withScrutinee := collect scrutinee captures
+          alternatives.foldl
+            (fun state alternative =>
+              let matchBindings := alternative.2.1
+              let body := alternative.2.2
+              psWasmCollectCapturesWithFuel
+                outerBindings
+                (psWasmMatchBindingNames matchBindings ++ boundNames)
+                fuel
+                body
+                state)
+            withScrutinee
 
 def psWasmCollectCaptures
     (outerBindings : List PsWasmBinding)

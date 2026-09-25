@@ -77,7 +77,7 @@ def psPrepareInstanceWithFuel
             fresh.context
             nextValue
             nextType
-            (argument :: arguments)
+            (List.cons argument arguments)
             fuel
       | _ => {
           context := context

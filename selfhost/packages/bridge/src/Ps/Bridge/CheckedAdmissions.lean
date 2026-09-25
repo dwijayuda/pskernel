@@ -471,9 +471,10 @@ def psEncodeCheckedAdmissionsLoop
                 allDeclarations
                 rest
                 {
-                  heights := Prod.mk name height :: state.heights
+                  heights := List.cons (Prod.mk name height) state.heights
                   admissionsRev :=
-                    psEncodeConstantAdmission encoded ::
+                    List.cons
+                      (psEncodeConstantAdmission encoded)
                       state.admissionsRev
                 }
       | .theoremDecl name levelParams type value =>
@@ -486,7 +487,8 @@ def psEncodeCheckedAdmissionsLoop
                 {
                   heights := state.heights
                   admissionsRev :=
-                    psEncodeConstantAdmission encoded ::
+                    List.cons
+                      (psEncodeConstantAdmission encoded)
                       state.admissionsRev
                 }
       | .inductiveDecl info =>
@@ -499,7 +501,8 @@ def psEncodeCheckedAdmissionsLoop
                 {
                   heights := state.heights
                   admissionsRev :=
-                    psEncodeInductiveAdmission encoded ::
+                    List.cons
+                      (psEncodeInductiveAdmission encoded)
                       state.admissionsRev
                 }
       | .constructorDecl _ =>

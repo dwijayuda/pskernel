@@ -1466,9 +1466,8 @@ def psParseLeanTermWithFuel
                       Except.error
                         (PsParseError.unexpectedEnd "let binding type")
                   | Option.some afterColon =>
-                      match psParseLeanTermWithFuel
-                          remaining
-                          afterColon.cursor with
+                      match smaller
+                                                    afterColon.cursor with
                       | Except.error error => Except.error error
                       | Except.ok declaredType =>
                           match psTokenCursorExpectText
@@ -1476,9 +1475,8 @@ def psParseLeanTermWithFuel
                               ":=" with
                           | Except.error error => Except.error error
                           | Except.ok afterAssign =>
-                              match psParseLeanTermWithFuel
-                                  remaining
-                                  afterAssign.cursor with
+                              match smaller
+                                                                    afterAssign.cursor with
                               | Except.error error => Except.error error
                               | Except.ok value =>
                                   match psTokenCursorExpectText
@@ -1486,9 +1484,8 @@ def psParseLeanTermWithFuel
                                       ";" with
                                   | Except.error error => Except.error error
                                   | Except.ok afterSemi =>
-                                      match psParseLeanTermWithFuel
-                                          remaining
-                                          afterSemi.cursor with
+                                      match smaller
+                                                                                    afterSemi.cursor with
                                       | Except.error error => Except.error error
                                       | Except.ok body =>
                                           Except.ok {
@@ -1509,17 +1506,15 @@ def psParseLeanTermWithFuel
                   match psTokenCursorExpectText name.cursor ":=" with
                   | Except.error error => Except.error error
                   | Except.ok afterAssign =>
-                      match psParseLeanTermWithFuel
-                          remaining
-                          afterAssign.cursor with
+                      match smaller
+                                                    afterAssign.cursor with
                       | Except.error error => Except.error error
                       | Except.ok value =>
                           match psTokenCursorExpectText value.cursor ";" with
                           | Except.error error => Except.error error
                           | Except.ok afterSemi =>
-                              match psParseLeanTermWithFuel
-                                  remaining
-                                  afterSemi.cursor with
+                              match smaller
+                                                                    afterSemi.cursor with
                               | Except.error error => Except.error error
                               | Except.ok body =>
                                   Except.ok {
@@ -1562,9 +1557,8 @@ def psParseLeanTermWithFuel
                     match psTokenCursorExpectText binders.cursor "=>" with
                     | Except.error error => Except.error error
                     | Except.ok afterArrow =>
-                        match psParseLeanTermWithFuel
-                            remaining
-                            afterArrow.cursor with
+                        match smaller
+                                                        afterArrow.cursor with
                         | Except.error error => Except.error error
                         | Except.ok body =>
                             Except.ok {

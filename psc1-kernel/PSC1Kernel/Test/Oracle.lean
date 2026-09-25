@@ -3109,7 +3109,7 @@ def assertOuterMutualNestedInductiveAdmissionOracle : IO Unit := do
     (PSC1Kernel.Expr.eq oursReduced (.lit (.nat 83)))
 
 def assertReplayCoreOracle : IO Unit := do
-  let meta : PSC1Kernel.Replay.Record :=
+  let metaRecord : PSC1Kernel.Replay.Record :=
     .metaR {
       leanVersion := PSC1Kernel.Replay.pinnedLeanVersion
       leanGitHash := PSC1Kernel.Replay.pinnedLeanGitHash
@@ -3133,7 +3133,7 @@ def assertReplayCoreOracle : IO Unit := do
   | .error _ => pure ()
 
   let records : List PSC1Kernel.Replay.Record := [
-    meta,
+    metaRecord,
 
     -- Sparse Name table entries are legal as long as references are defined.
     .nameR { index := 1, node := .str 0 "ReplayA" },

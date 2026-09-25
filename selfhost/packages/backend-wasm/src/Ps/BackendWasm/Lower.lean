@@ -942,10 +942,7 @@ def psWasmModuleHasUnsupportedData
     (module : PsVerifiedIrModule) : Bool :=
   match module.imports with
   | _ :: _ => true
-  | [] =>
-      match module.inductives with
-      | _ :: _ => true
-      | [] => false
+  | [] => false
 
 def psWasmLowerModule
     (profile : PsWasmTargetProfile)
@@ -957,15 +954,20 @@ def psWasmLowerModule
     match psWasmLowerStructures profile module.structures with
     | Except.error error => Except.error error
     | Except.ok structures =>
-        match
-            psWasmLowerDeclarations
-              profile
-              module.structures
-              module.declarations with
+        match psWasmLowerInductives profile module.inductives with
         | Except.error error => Except.error error
-        | Except.ok functions =>
-            Except.ok {
-              structures := structures
-              functions := functions
-              exports := psWasmExportsOfDeclarations module.declarations
-            }
+        | Except.ok inductiveTypes =>
+            match
+                psWasmLowerDeclarations
+                  profile
+                  module.structures
+                  module.inductives
+                  module.declarations with
+            | Except.error error => Except.error error
+            | Except.ok functions =>
+                Except.ok {
+                  structures := structures ++ inductiveTypes
+                  functions := functions
+                  exports :=
+                    psWasmExportsOfDeclarations module.declarations
+                }

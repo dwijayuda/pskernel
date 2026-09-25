@@ -2129,7 +2129,7 @@ def psElabRecordCandidates
                   environment
                   fields
                   rest
-                  (candidate :: candidatesRev)
+                  (List.cons candidate candidatesRev)
               else
                 psElabRecordCandidates
                   environment

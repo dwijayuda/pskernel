@@ -500,6 +500,30 @@ def assertWhnfLayering : IO Unit := do
   assertTrue "whnfCore performed forbidden delta reduction" (PSC1Kernel.Expr.eq core d)
   assertTrue "full whnf failed to delta reduce" (PSC1Kernel.Expr.eq full (.lit (.nat 23)))
 
+  let A : PSC1Kernel.Name := .str .anonymous "WhnfSpineA"
+  let B : PSC1Kernel.Name := .str .anonymous "WhnfSpineB"
+  let C : PSC1Kernel.Name := .str .anonymous "WhnfSpineC"
+  let binderType : PSC1Kernel.Expr := .sort .zero
+  let twoBinder : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "x") binderType
+      (.lam (.str .anonymous "y") binderType
+        (.app (.bvar 1) (.bvar 0))
+        .default)
+      .default
+  let spineApp :=
+    PSC1Kernel.applyArgs twoBinder
+      [.const A [], .const B [], .const C []]
+  let oursSpine ← exceptToIO
+    "PSC1 multi-binder WHNF spine"
+    (PSC1Kernel.whnfCore (.empty .empty) spineApp false false)
+  let leanSpine ← kernelExprWhnf (← Lean.mkEmptyEnvironment) spineApp
+  assertTrue "multi-binder WHNF spine differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr oursSpine) leanSpine)
+  let expectedSpine : PSC1Kernel.Expr :=
+    .app (.app (.const A []) (.const B [])) (.const C [])
+  assertTrue "multi-binder WHNF substituted/reapplied arguments in wrong order"
+    (PSC1Kernel.Expr.eq oursSpine expectedSpine)
+
 def assertNativeEvaluatorBoundary : IO Unit := do
   let natTarget : PSC1Kernel.Name :=
     .str (.str .anonymous "NativeOracle") "nat"

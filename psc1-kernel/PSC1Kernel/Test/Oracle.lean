@@ -648,6 +648,89 @@ def assertStructureEtaOracle : IO Unit := do
   assertTrue "structure eta differs from Lean 4.34" (ours == lean)
   assertTrue "Lean 4.34 should accept structure eta" lean
 
+def assertStructureMajorRecursorOracle : IO Unit := do
+  let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let Pair : PSC1Kernel.Name := .str .anonymous "OracleStructureMajor"
+  let PairMk : PSC1Kernel.Name := .str Pair "mk"
+  let PairRec : PSC1Kernel.Name := .str Pair "rec"
+  let pairT : PSC1Kernel.Expr := .const Pair []
+  let pairCtorT : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "left") natT
+      (.forallE (.str .anonymous "right") natT pairT .default)
+      .default
+  let base :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursEnv ← exceptToIO
+    "PSC1 structure-major inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive base {
+      levelParams := []
+      name := Pair
+      type := type1
+      ctors := [{ name := PairMk, type := pairCtorT }]
+      isUnsafe := false
+    })
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanNat ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected structure-major Nat axiom"
+  let leanKernel ←
+    match Lean.Kernel.Environment.addDecl leanNat {} (.inductDecl [] 0 [{
+      name := toLeanName Pair
+      type := toLeanExpr type1
+      ctors := [{ name := toLeanName PairMk, type := toLeanExpr pairCtorT }]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected structure-major Pair"
+  let leanEnv := Lean.Environment.ofKernelEnv leanKernel
+
+  let p : PSC1Kernel.Name := .str .anonymous "p"
+  let motive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "pair") pairT natT .default
+  let minor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "left") natT
+      (.lam (.str .anonymous "right") natT (.bvar 1) .default)
+      .default
+  let recApp :=
+    PSC1Kernel.applyArgs (.const PairRec [.succ .zero])
+      [motive, minor, .fvar p]
+  let expected : PSC1Kernel.Expr := .proj Pair 0 (.fvar p)
+
+  let pscLctx := PSC1Kernel.LocalContext.empty.addLocal p p pairT .default
+  let pscCtx : PSC1Kernel.CheckerContext :=
+    { (PSC1Kernel.CheckerContext.empty oursEnv) with lctx := pscLctx }
+  let ours ← exceptToIO
+    "PSC1 arbitrary structure-major recursor reduction"
+    (PSC1Kernel.whnf pscCtx recApp)
+
+  let pId : Lean.FVarId := ⟨toLeanName p⟩
+  let leanLctx : Lean.LocalContext :=
+    ({} : Lean.LocalContext).mkLocalDecl pId (toLeanName p)
+      (toLeanExpr pairT) .default
+  let lean ←
+    match Lean.Kernel.whnf leanEnv leanLctx (toLeanExpr recApp) with
+    | .ok value => pure value
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 structure-major recursor reduction failed"
+
+  assertTrue "structure-major recursor reduction differs from Lean 4.34"
+    (toLeanExpr ours == lean)
+  assertTrue "structure-major recursor did not eta-expand the arbitrary major"
+    (PSC1Kernel.Expr.eq ours expected)
+
 def assertProjectionLazyDeltaOracle : IO Unit := do
   let env0 := makeStructureEnvironment
   let pair : PSC1Kernel.Name :=
@@ -3831,6 +3914,7 @@ def run : IO Unit := do
   assertFunctionEtaOracle
   assertLazyDeltaOracle
   assertProjectionLazyDeltaOracle
+  assertStructureMajorRecursorOracle
   assertStructureEtaOracle
   assertUnitLikeOracle
   assertProofIrrelevanceOracle

@@ -118,6 +118,14 @@ def logHotPhase (label : String) : IO Unit := do
   let t ← IO.monoMsNow
   IO.println s!"PSC1 HOT PHASE monoMs={t} {label}"
 
+@[noinline] def runHotExcept
+    (label : String)
+    (thunk : Unit → Except String α) : IO α := do
+  logHotPhase (label ++ "-begin")
+  let value ← liftReplayResult "<diagnostic>" 0 (thunk ())
+  logHotPhase (label ++ "-end")
+  pure value
+
 def replayHotArrayProofTheorem
     (state : Replay.State)
     (record : Replay.TheoremRecord) : IO Replay.State := do
@@ -130,31 +138,24 @@ def replayHotArrayProofTheorem
     base := { name := name, levelParams := levelParams, type := type }
     value := value
   }
-  logHotPhase "header-begin"
-  liftReplayResult "<diagnostic>" 0
-    (Kernel.checkConstantBase state.env info.base .safe
+  let _ ← runHotExcept "header" (fun _ =>
+    Kernel.checkConstantBase state.env info.base .safe
       state.maxRecDepth state.maxNatSize state.nativeEvaluator)
-  logHotPhase "header-end"
+  logHotPhase "mkChecker-begin"
   let ctx := Kernel.mkChecker state.env info.base.levelParams .safe
     state.maxRecDepth state.maxNatSize state.nativeEvaluator
-  logHotPhase "isProp-begin"
-  let prop ← liftReplayResult "<diagnostic>" 0 (isProp ctx info.base.type)
+  logHotPhase "mkChecker-end"
+  let prop ← runHotExcept "isProp" (fun _ => isProp ctx info.base.type)
   unless prop do throw <| IO.userError "hot theorem type is not a proposition"
-  logHotPhase "isProp-end"
-  liftReplayResult "<diagnostic>" 0 (Kernel.checkNoMVarNoFVar info.value)
-  liftReplayResult "<diagnostic>" 0
-    (Kernel.checkLevelParams info.value info.base.levelParams)
-  logHotPhase "proof-check-begin"
-  let valueType ← liftReplayResult "<diagnostic>" 0 (check ctx info.value)
-  logHotPhase "proof-check-end"
-  logHotPhase "final-defeq-begin"
-  let eq ← liftReplayResult "<diagnostic>" 0
-    (isDefEq ctx valueType info.base.type)
+  let _ ← runHotExcept "proof-no-mvar-fvar" (fun _ =>
+    Kernel.checkNoMVarNoFVar info.value)
+  let _ ← runHotExcept "proof-level-params" (fun _ =>
+    Kernel.checkLevelParams info.value info.base.levelParams)
+  let valueType ← runHotExcept "proof-check" (fun _ => check ctx info.value)
+  let eq ← runHotExcept "final-defeq" (fun _ =>
+    isDefEq ctx valueType info.base.type)
   unless eq do throw <| IO.userError "hot theorem proof type mismatch"
-  logHotPhase "final-defeq-end"
-  logHotPhase "env-add-begin"
-  let env ← liftReplayResult "<diagnostic>" 0 (state.env.add (.thmInfo info))
-  logHotPhase "env-add-end"
+  let env ← runHotExcept "env-add" (fun _ => state.env.add (.thmInfo info))
   pure { state with env := env }
 
 partial def replaySegmentedLinesFromProgress

@@ -486,16 +486,21 @@ def simpleNestedFindRename?
       else
         simpleNestedFindRename? name rest
 
-partial def simpleNestedRestoreExpr
+partial def simpleNestedRestoreOpen
     (families : List SimpleNestedAuxFamily)
     (recRename : List (Name × Name))
+    (canonicalParams currentParams : List OpenBinder)
+    (numParams : Nat)
     (e : Expr) : Expr :=
   match e with
   | .app _ _ =>
       let fn := e.getAppFn
       let args :=
         e.getAppArgs.map
-          (fun arg => simpleNestedRestoreExpr families recRename arg)
+          (fun arg =>
+            simpleNestedRestoreOpen
+              families recRename canonicalParams currentParams
+              numParams arg)
       match fn with
       | .const name levels =>
           match simpleNestedFindRename? name recRename with
@@ -504,66 +509,125 @@ partial def simpleNestedRestoreExpr
           | none =>
               match simpleNestedFindAuxByName? name families with
               | some family =>
-                  applyArgs family.nestedTemplate args
+                  let nested :=
+                    simpleNestedRebaseParams
+                      family.nestedTemplate canonicalParams currentParams
+                  if args.length < numParams then
+                    applyArgs (.const name levels) args
+                  else
+                    applyArgs nested (args.drop numParams)
               | none =>
                   match simpleNestedFindCtorMap? name families with
                   | some (family, outerCtor) =>
-                      applyArgs
-                        (.const outerCtor family.outerLevels)
-                        (family.fixedParams ++ args)
+                      if args.length < numParams then
+                        applyArgs (.const name levels) args
+                      else
+                        let fixed :=
+                          family.fixedParams.map fun arg =>
+                            simpleNestedRebaseParams
+                              arg canonicalParams currentParams
+                        applyArgs
+                          (.const outerCtor family.outerLevels)
+                          (fixed ++ args.drop numParams)
                   | none =>
                       let fn' :=
-                        simpleNestedRestoreExpr families recRename fn
+                        simpleNestedRestoreOpen
+                          families recRename canonicalParams currentParams
+                          numParams fn
                       applyArgs fn' args
       | _ =>
-          let fn' := simpleNestedRestoreExpr families recRename fn
+          let fn' :=
+            simpleNestedRestoreOpen
+              families recRename canonicalParams currentParams
+              numParams fn
           applyArgs fn' args
   | .lam name type body binderInfo =>
       .lam name
-        (simpleNestedRestoreExpr families recRename type)
-        (simpleNestedRestoreExpr families recRename body)
+        (simpleNestedRestoreOpen
+          families recRename canonicalParams currentParams numParams type)
+        (simpleNestedRestoreOpen
+          families recRename canonicalParams currentParams numParams body)
         binderInfo
   | .forallE name type body binderInfo =>
       .forallE name
-        (simpleNestedRestoreExpr families recRename type)
-        (simpleNestedRestoreExpr families recRename body)
+        (simpleNestedRestoreOpen
+          families recRename canonicalParams currentParams numParams type)
+        (simpleNestedRestoreOpen
+          families recRename canonicalParams currentParams numParams body)
         binderInfo
   | .letE name type value body nondep =>
       .letE name
-        (simpleNestedRestoreExpr families recRename type)
-        (simpleNestedRestoreExpr families recRename value)
-        (simpleNestedRestoreExpr families recRename body)
+        (simpleNestedRestoreOpen
+          families recRename canonicalParams currentParams numParams type)
+        (simpleNestedRestoreOpen
+          families recRename canonicalParams currentParams numParams value)
+        (simpleNestedRestoreOpen
+          families recRename canonicalParams currentParams numParams body)
         nondep
   | .mdata metadata body =>
       .mdata metadata
-        (simpleNestedRestoreExpr families recRename body)
+        (simpleNestedRestoreOpen
+          families recRename canonicalParams currentParams numParams body)
   | .proj typeName index body =>
       let typeName' :=
         match simpleNestedFindAuxByName? typeName families with
         | some family => family.outerName
         | none => typeName
       .proj typeName' index
-        (simpleNestedRestoreExpr families recRename body)
+        (simpleNestedRestoreOpen
+          families recRename canonicalParams currentParams numParams body)
   | .const name levels =>
       match simpleNestedFindRename? name recRename with
       | some renamed => .const renamed levels
       | none =>
           match simpleNestedFindAuxByName? name families with
-          | some family => family.nestedTemplate
+          | some family =>
+              if numParams == 0 then
+                simpleNestedRebaseParams
+                  family.nestedTemplate canonicalParams currentParams
+              else
+                e
           | none =>
               match simpleNestedFindCtorMap? name families with
               | some (family, outerCtor) =>
-                  applyArgs
-                    (.const outerCtor family.outerLevels)
-                    family.fixedParams
+                  if numParams == 0 then
+                    let fixed :=
+                      family.fixedParams.map fun arg =>
+                        simpleNestedRebaseParams
+                          arg canonicalParams currentParams
+                    applyArgs
+                      (.const outerCtor family.outerLevels) fixed
+                  else
+                    e
               | none => e
   | .bvar _ | .fvar _ | .mvar _ | .sort _ | .lit _ => e
+
+def simpleNestedRestoreExpr
+    (families : List SimpleNestedAuxFamily)
+    (recRename : List (Name × Name))
+    (canonicalParams : List OpenBinder)
+    (numParams : Nat)
+    (e : Expr) : Except String Expr := do
+  if numParams == 0 then
+    pure <|
+      simpleNestedRestoreOpen
+        families recRename canonicalParams [] 0 e
+  else
+    let (kind, currentParams, body) ←
+      simpleNestedOpenRestorationParams e numParams
+    let restored :=
+      simpleNestedRestoreOpen
+        families recRename canonicalParams currentParams
+        numParams body
+    pure (simpleNestedCloseRestoration kind currentParams restored)
 
 def simpleNestedRestoreRule
     (families : List SimpleNestedAuxFamily)
     (recRename : List (Name × Name))
+    (canonicalParams : List OpenBinder)
+    (numParams : Nat)
     (mapCtor : Bool)
-    (rule : RecursorRule) : RecursorRule :=
+    (rule : RecursorRule) : Except String RecursorRule := do
   let ctor :=
     if mapCtor then
       match simpleNestedFindCtorMap? rule.ctor families with
@@ -571,31 +635,56 @@ def simpleNestedRestoreRule
       | none => rule.ctor
     else
       rule.ctor
-  {
+  let rhs ←
+    simpleNestedRestoreExpr
+      families recRename canonicalParams numParams rule.rhs
+  pure {
     ctor := ctor
     nFields := rule.nFields
-    rhs := simpleNestedRestoreExpr families recRename rule.rhs
+    rhs := rhs
   }
+
+def simpleNestedRestoreRules
+    (families : List SimpleNestedAuxFamily)
+    (recRename : List (Name × Name))
+    (canonicalParams : List OpenBinder)
+    (numParams : Nat)
+    (mapCtor : Bool) :
+    List RecursorRule → Except String (List RecursorRule)
+  | [] => pure []
+  | rule :: rest => do
+      let restored ←
+        simpleNestedRestoreRule
+          families recRename canonicalParams numParams mapCtor rule
+      let tail ←
+        simpleNestedRestoreRules
+          families recRename canonicalParams numParams mapCtor rest
+      pure (restored :: tail)
 
 def simpleNestedRestoreRecursor
     (originalNames : List Name)
     (families : List SimpleNestedAuxFamily)
     (recRename : List (Name × Name))
+    (canonicalParams : List OpenBinder)
+    (numParams : Nat)
     (newName : Name)
     (mapCtor : Bool)
-    (info : RecursorInfo) : RecursorInfo :=
-  {
+    (info : RecursorInfo) : Except String RecursorInfo := do
+  let type ←
+    simpleNestedRestoreExpr
+      families recRename canonicalParams numParams info.base.type
+  let rules ←
+    simpleNestedRestoreRules
+      families recRename canonicalParams numParams mapCtor info.rules
+  pure {
     info with
     base := {
       info.base with
       name := newName
-      type :=
-        simpleNestedRestoreExpr families recRename info.base.type
+      type := type
     }
     all := originalNames
-    rules :=
-      info.rules.map
-        (simpleNestedRestoreRule families recRename mapCtor)
+    rules := rules
   }
 
 def simpleNestedAddOriginals

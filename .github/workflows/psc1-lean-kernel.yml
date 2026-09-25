@@ -1,0 +1,31 @@
+name: PSC1 Lean kernel bootstrap
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [selfhost/psc1-kernel-lean434]
+    paths:
+      - ".github/workflows/psc1-lean-kernel.yml"
+      - "selfhost/kernel/**"
+
+permissions:
+  contents: read
+
+jobs:
+  lean434:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build Lean-authored kernel
+        working-directory: selfhost/kernel
+        run: lake build
+      - name: Typecheck direct original-kernel oracle
+        working-directory: selfhost/kernel
+        run: lake env lean lean/PSC1Kernel/LevelOracle.lean

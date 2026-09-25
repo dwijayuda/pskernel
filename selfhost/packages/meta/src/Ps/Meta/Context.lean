@@ -55,7 +55,7 @@ def psMetaFindDecl (context : PsMetaContext) (id : Nat) : Option PsMetaVarDecl :
 def psMetaFindAssignmentInList (id : Nat) : List PsMetaAssignment -> Option PsExpr
   | [] => Option.none
   | assignment :: rest =>
-      if assignment.id == id then
+      if Nat.beq assignment.id id then
         Option.some assignment.value
       else
         psMetaFindAssignmentInList id rest

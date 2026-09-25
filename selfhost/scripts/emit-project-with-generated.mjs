@@ -234,6 +234,100 @@ const entryRelative = path
   .replace(/\.(lean|ps)$/u, targetExtension)
   .replaceAll(path.sep, "/");
 
+function leanModuleName(relativePath, sourceRoot) {
+  const relativeModule = path.posix
+    .relative(sourceRoot, relativePath)
+    .replace(/\.lean$/u, "");
+  return relativeModule.split("/").join(".");
+}
+
+function generatedLakefile(generatedFiles) {
+  const groups = new Map();
+
+  for (const relativePath of generatedFiles) {
+    if (!relativePath.endsWith(".lean")) continue;
+    const normalized = relativePath.replaceAll("\\", "/");
+    let sourceRoot;
+    let key;
+
+    const packageMatch = normalized.match(/^packages\/([^/]+)\/src\/(.+)\.lean$/u);
+    if (packageMatch) {
+      key = `package-${packageMatch[1]}`;
+      sourceRoot = `packages/${packageMatch[1]}/src`;
+    } else if (normalized.startsWith("stdlib/")) {
+      key = "stdlib";
+      sourceRoot = "stdlib";
+    } else {
+      key = "root";
+      sourceRoot = ".";
+    }
+
+    const entry = groups.get(key) ?? { sourceRoot, modules: [] };
+    entry.modules.push(leanModuleName(normalized, sourceRoot));
+    groups.set(key, entry);
+  }
+
+  const lines = [
+    "import Lake",
+    "open Lake DSL",
+    "",
+    "package proofscriptGenerated",
+    "",
+  ];
+
+  let index = 0;
+  for (const entry of groups.values()) {
+    const targetName = `GeneratedLib${index}`;
+    index += 1;
+    lines.push("@[default_target]");
+    lines.push(`lean_lib ${targetName} where`);
+    lines.push(`  srcDir := "${entry.sourceRoot}"`);
+    lines.push("  roots := #[");
+    const modules = [...entry.modules].sort();
+    for (let moduleIndex = 0; moduleIndex < modules.length; moduleIndex += 1) {
+      const suffix = moduleIndex + 1 === modules.length ? "" : ",";
+      lines.push(`    \`${modules[moduleIndex]}${suffix}`);
+    }
+    lines.push("  ]");
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
+async function writeGeneratedProjectMetadata() {
+  if (targetExtension === ".ps") {
+    const generatedConfig = {
+      languageVersion: "0.7",
+      entry: entryRelative,
+      sourceRoots: ["packages", "stdlib"],
+      runtimeDependencies: {},
+      compilerOptions: {
+        outDir: "dist",
+        emitTypeScript: true,
+        declaration: true,
+        sourceMap: true,
+      },
+    };
+    await writeFile(
+      path.join(outputWorkspace, "psconfig.json"),
+      JSON.stringify(generatedConfig, null, 2) + "\n",
+      "utf8",
+    );
+  } else {
+    await writeFile(
+      path.join(outputWorkspace, "lean-toolchain"),
+      "leanprover/lean4:v4.34.0\n",
+      "utf8",
+    );
+    await writeFile(
+      path.join(outputWorkspace, "lakefile.lean"),
+      generatedLakefile(generated),
+      "utf8",
+    );
+  }
+}
+
 const manifest = {
   schemaVersion: 1,
   sourceKind: sourceExtension.slice(1),
@@ -249,6 +343,8 @@ await writeFile(
   JSON.stringify(manifest, null, 2) + "\n",
   "utf8",
 );
+
+await writeGeneratedProjectMetadata();
 
 process.stdout.write(
   [

@@ -80,20 +80,20 @@ implementation shape:
 Examples:
 
 ```proofscript
-def x : Nat := 1;
+def x: Nat := 1;
 
-const y : Nat := 2;
+const y: Nat := 2;
 
-function add(x : Nat, y : Nat) : Nat :=
+function add(x: Nat, y: Nat): Nat :=
   x + y;
 ```
 
 Rejected:
 
 ```proofscript
-const add(x : Nat) : Nat := x;
+const add(x: Nat): Nat := x;
 
-function answer : Nat := 42;
+function answer: Nat := 42;
 ```
 
 ### 3.1 Local `where` declarations
@@ -107,10 +107,10 @@ WhereBlock ::= "where" "{" LocalDeclaration* "}"
 Example:
 
 ```proofscript
-def f(x : Nat) : Nat :=
+def f(x: Nat): Nat :=
   helper(x)
 where {
-  helper(y : Nat) : Nat := y + 1;
+  helper(y: Nat): Nat := y + 1;
 }
 ```
 
@@ -266,8 +266,8 @@ Example:
 
 ```proofscript
 structure Box where {
-  {α : Type};
-  value : α;
+  {α: Type};
+  value: α;
 }
 ```
 
@@ -297,8 +297,8 @@ compiler.
 Owned class-body form:
 
 ```proofscript
-class Sized(α : Type) where {
-  size : α -> Nat;
+class Sized(α: Type) where {
+  size: α -> Nat;
 }
 ```
 
@@ -324,9 +324,9 @@ ConstructorDecl
 Representative example:
 
 ```proofscript
-inductive Option(α : Type) where {
+inductive Option(α: Type) where {
   | none;
-  | some(value : α);
+  | some(value: α);
 }
 ```
 
@@ -374,7 +374,7 @@ Lambda:
 
 ```proofscript
 fun x => body
-fun (x : Nat) => body
+fun (x: Nat) => body
 ```
 
 Let:
@@ -396,7 +396,7 @@ Nat -> Nat
 Dependent function type:
 
 ```proofscript
-(x : Nat) -> Fin x -> Nat
+(x: Nat) -> Fin x -> Nat
 ```
 
 TypeScript arrow lambdas and generic `<T>` binder syntax are not normative
@@ -407,7 +407,7 @@ PSC1 forms.
 Representative theorem:
 
 ```proofscript
-theorem addZero(n : Nat) : n + 0 = n := by {
+theorem addZero(n: Nat): n + 0 = n := by {
   rfl
 }
 ```
@@ -462,7 +462,7 @@ ExternalDecl
 Example:
 
 ```proofscript
-extern function hostShout(value : String) : String
+extern function hostShout(value: String): String
   from "host-lib/feature"
   import shout;
 ```

@@ -1,9 +1,9 @@
-name: PSC1 env array index kernel validation oracle
+name: PSC1 env array 4096 validation oracle
 
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-env-array-index]
+    branches: [perf/psc1-env-array-4096]
     paths:
       - ".github/workflows/psc1-env-array-index.yml"
       - "psc1-kernel/**"

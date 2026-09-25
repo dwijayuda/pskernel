@@ -5,7 +5,7 @@ on:
   push:
     branches: [perf/psc1-linear-spine-ops]
     paths:
-      - ".github/workflows/psc1-lean-kernel.yml"
+      - ".github/workflows/psc1-linear-spine-kernel.yml"
       - "psc1-kernel/**"
       - "oracle/replay-probe/MiniExport.lean"
       - "oracle/replay-probe/ReplayProbe.lean"

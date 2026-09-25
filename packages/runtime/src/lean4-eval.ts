@@ -814,6 +814,14 @@ export class Lean434Evaluator {
     }
   }
 
+  /**
+   * Lean 4.34 kernel apply_beta semantics used by instantiate_mvars.cpp.
+   *
+   * Both native call sites pass preserve_data=false and zeta=true.  Our args
+   * are stored in source order instead of Lean's reverse-argument buffer, but
+   * the reduction order is otherwise the same: consume lambdas, zeta-reduce
+   * let heads while arguments remain, and discard metadata heads.
+   */
   private betaApplyRuntimeExpr(
     fn:Lean434RuntimeValue,
     args:readonly Lean434RuntimeValue[],
@@ -824,14 +832,42 @@ export class Lean434Evaluator {
       index<args.length
       &&isTaggedRuntimeValue(result)
       &&result.kind==='constructor'
-      &&result.name==='Lean.Expr.lam'
-      &&result.fields.length===4
     ){
-      result=this.instantiateRuntimeExprBVar(
-        result.fields[2]!,
-        args[index]!,
-      );
-      index+=1;
+      if(result.name==='Lean.Expr.lam'){
+        if(result.fields.length!==4){
+          throw new Lean434EvaluationError(
+            'Lean.Expr.lam field count mismatch during beta reduction',
+          );
+        }
+        result=this.instantiateRuntimeExprBVar(
+          result.fields[2]!,
+          args[index]!,
+        );
+        index+=1;
+        continue;
+      }
+      if(result.name==='Lean.Expr.letE'){
+        if(result.fields.length!==5){
+          throw new Lean434EvaluationError(
+            'Lean.Expr.letE field count mismatch during zeta reduction',
+          );
+        }
+        result=this.instantiateRuntimeExprBVar(
+          result.fields[3]!,
+          result.fields[2]!,
+        );
+        continue;
+      }
+      if(result.name==='Lean.Expr.mdata'){
+        if(result.fields.length!==2){
+          throw new Lean434EvaluationError(
+            'Lean.Expr.mdata field count mismatch during beta reduction',
+          );
+        }
+        result=result.fields[1]!;
+        continue;
+      }
+      break;
     }
     while(index<args.length){
       result={
@@ -1289,7 +1325,41 @@ export class Lean434Evaluator {
               ),
               'Lean.MetavarContext.getExprAssignmentExp',
             );
-            if(directAssignment===undefined){
+            if(directAssignment!==undefined){
+              let nextMctx=mctx;
+              const normalizedAssignment=visit(
+                nextMctx,
+                directAssignment,
+              );
+              nextMctx=normalizedAssignment.mctx;
+              if(normalizedAssignment.expr!==directAssignment){
+                nextMctx=this.applyLeanConstant(
+                  'Lean.assignExp',
+                  [nextMctx,mvarId,normalizedAssignment.expr],
+                );
+              }
+
+              // instantiate_mvars.cpp collects the application from the
+              // outside in, so visit arguments right-to-left before applying
+              // the normalized assignment.  betaApplyRuntimeExpr uses source
+              // order after that traversal.
+              const normalizedArgs=
+                new Array<Lean434RuntimeValue>(spine.args.length);
+              for(let index=spine.args.length-1;index>=0;index-=1){
+                const normalized=visit(nextMctx,spine.args[index]!);
+                nextMctx=normalized.mctx;
+                normalizedArgs[index]=normalized.expr;
+              }
+              return {
+                mctx:nextMctx,
+                expr:this.betaApplyRuntimeExpr(
+                  normalizedAssignment.expr,
+                  normalizedArgs,
+                ),
+              };
+            }
+
+            {
               const delayed=this.optionPayload(
                 this.applyLeanConstant(
                   'Lean.MetavarContext.getDelayedMVarAssignmentExp',
@@ -1299,11 +1369,12 @@ export class Lean434Evaluator {
               );
               if(delayed!==undefined){
                 let nextMctx=mctx;
-                const normalizedArgs:Lean434RuntimeValue[]=[];
-                for(const argExpr of spine.args){
-                  const normalized=visit(nextMctx,argExpr);
+                const normalizedArgs=
+                  new Array<Lean434RuntimeValue>(spine.args.length);
+                for(let index=spine.args.length-1;index>=0;index-=1){
+                  const normalized=visit(nextMctx,spine.args[index]!);
                   nextMctx=normalized.mctx;
-                  normalizedArgs.push(normalized.expr);
+                  normalizedArgs[index]=normalized.expr;
                 }
 
                 if(

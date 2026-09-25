@@ -430,12 +430,51 @@ partial def kDebugNameString : Name → String
   | .num .anonymous value => toString value
   | .num parent value => kDebugNameString parent ++ "." ++ toString value
 
+def kLevelListsEq : List Level → List Level → Bool
+  | [], [] => true
+  | left :: lefts, right :: rights =>
+      Level.equivalent left right && kLevelListsEq lefts rights
+  | _, _ => false
+
 partial def kTypesEq
     (ctx : CheckerContext)
     (left right : Expr) : Except String Bool := do
   let left' ← whnf ctx left
   let right' ← whnf ctx right
-  pure (Expr.eq left' right')
+  if Expr.eq left' right' then
+    return true
+  match left', right' with
+  | .sort u, .sort v =>
+      return Level.equivalent u v
+  | .const leftName leftLevels, .const rightName rightLevels =>
+      return Name.eq leftName rightName &&
+        kLevelListsEq leftLevels rightLevels
+  | .app leftFn leftArg, .app rightFn rightArg => do
+      if !(← kTypesEq ctx leftFn rightFn) then
+        return false
+      kTypesEq ctx leftArg rightArg
+  | .lam _ leftType leftBody _, .lam _ rightType rightBody _ => do
+      if !(← kTypesEq ctx leftType rightType) then
+        return false
+      kTypesEq ctx leftBody rightBody
+  | .forallE _ leftType leftBody _, .forallE _ rightType rightBody _ => do
+      if !(← kTypesEq ctx leftType rightType) then
+        return false
+      kTypesEq ctx leftBody rightBody
+  | .proj leftName leftIndex leftExpr,
+      .proj rightName rightIndex rightExpr =>
+      if !Name.eq leftName rightName || leftIndex != rightIndex then
+        return false
+      kTypesEq ctx leftExpr rightExpr
+  | .bvar leftIndex, .bvar rightIndex =>
+      return leftIndex == rightIndex
+  | .fvar leftName, .fvar rightName =>
+      return Name.eq leftName rightName
+  | .mvar leftName, .mvar rightName =>
+      return Name.eq leftName rightName
+  | .lit leftLit, .lit rightLit =>
+      return Literal.eq leftLit rightLit
+  | _, _ => return false
 
 partial def inferKLambdaSpine
     (ctx : CheckerContext)

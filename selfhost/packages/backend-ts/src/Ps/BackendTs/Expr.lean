@@ -16,7 +16,7 @@ def psTsExprUsesNameWithFuel :
       match expr with
       | .literal _ => false
       | .var value => value == name
-      | .intrinsic _ arguments =>
+      | .intrinsic _ _ arguments =>
           arguments.any
             (fun argument =>
               psTsExprUsesNameWithFuel fuel argument name)

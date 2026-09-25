@@ -420,7 +420,9 @@ def psBridgeNatMax (left : Nat) : Nat -> Nat :=
             Nat.succ (smaller rightPred)
 
 def psBridgeExprMaxRegularHeight
-    (heights : List (PsName × Nat)) : PsExpr -> Nat
+    (heights : List (PsName × Nat))
+    (expr : PsExpr) : Nat :=
+  match expr with
   | .constE name _ =>
       psBridgeFindRegularHeight heights name
   | .app fn arg =>

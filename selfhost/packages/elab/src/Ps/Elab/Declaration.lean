@@ -545,62 +545,101 @@ def psEnvironmentAddOwnedBootstrapDeclaration
   else
     psEnvironmentAdd environment declaration
 
-def psAddDeclarationList
-    (environment : PsEnvironment) :
-    List PsDeclaration -> Except PsElabError PsEnvironment
-  | [] => Except.ok environment
-  | declaration :: rest =>
-      let name := psDeclarationName declaration
-      let nextResult :=
-        psEnvironmentAddOwnedBootstrapDeclaration
-          environment
-          declaration
-      match nextResult with
-      | none =>
-          Except.error
-            (PsElabError.duplicateDeclaration name)
-      | some next =>
-          psAddDeclarationList next rest
+def psAddDeclarationListWorker
+    (declarations : List PsDeclaration) :
+    PsEnvironment -> Except PsElabError PsEnvironment :=
+  match declarations with
+  | List.nil =>
+      fun (environment : PsEnvironment) =>
+        Except.ok environment
+  | List.cons declaration rest =>
+      let smaller :
+          PsEnvironment -> Except PsElabError PsEnvironment :=
+        psAddDeclarationListWorker rest;
+      fun (environment : PsEnvironment) =>
+        let name := psDeclarationName declaration;
+        let nextResult :=
+          psEnvironmentAddOwnedBootstrapDeclaration
+            environment
+            declaration;
+        match nextResult with
+        | none =>
+            Except.error
+              (PsElabError.duplicateDeclaration name)
+        | some next =>
+            smaller next
 
-def psOpenConstructorFields
-    (context : PsElabContext) :
-    Nat ->
+def psAddDeclarationList
+    (environment : PsEnvironment)
+    (declarations : List PsDeclaration) :
+    Except PsElabError PsEnvironment :=
+  psAddDeclarationListWorker declarations environment
+
+def psOpenConstructorFieldsWorker
+    (fuel : Nat) :
+    PsElabContext ->
     PsExpr ->
     List PsElabTypedBinder ->
-    Except PsElabError PsElabConstructorBuildResult
-  | 0, _, bindersRev =>
-      Except.ok {
-        context := context
-        bindersRev := bindersRev
-      }
-  | remaining + 1, cursor, bindersRev =>
-      match psInferEnsureForall
-          context.environment
-          context.metaContext
-          context.localContext
-          cursor with
-      | Except.error error => Except.error (PsElabError.infer error)
-      | Except.ok forallView =>
-          let pushed :=
-            psLocalPushBinding
-              context.localContext
-              forallView.name
-              forallView.domain
-              forallView.binder
-          let nextContext :=
-            psElabContextWithLocal context pushed.context
-          psOpenConstructorFields
-            nextContext
-            remaining
-            (psExprInstantiate1
-              forallView.body
-              (PsExpr.fvar pushed.id))
-            ({
-              id := pushed.id
-              name := forallView.name
-              type := forallView.domain
-              binder := forallView.binder
-            } :: bindersRev)
+    Except PsElabError PsElabConstructorBuildResult :=
+  match fuel with
+  | Nat.zero =>
+      fun (context : PsElabContext)
+          (_cursor : PsExpr)
+          (bindersRev : List PsElabTypedBinder) =>
+        Except.ok
+          (PsElabConstructorBuildResult.mk
+            context
+            bindersRev)
+  | Nat.succ remaining =>
+      let smaller :
+          PsElabContext ->
+          PsExpr ->
+          List PsElabTypedBinder ->
+          Except PsElabError PsElabConstructorBuildResult :=
+        psOpenConstructorFieldsWorker remaining;
+      fun (context : PsElabContext)
+          (cursor : PsExpr)
+          (bindersRev : List PsElabTypedBinder) =>
+        match psInferEnsureForall
+            context.environment
+            context.metaContext
+            context.localContext
+            cursor with
+        | Except.error error =>
+            Except.error (PsElabError.infer error)
+        | Except.ok forallView =>
+            let pushed :=
+              psLocalPushBinding
+                context.localContext
+                forallView.name
+                forallView.domain
+                forallView.binder;
+            let nextContext :=
+              psElabContextWithLocal context pushed.context;
+            smaller
+              nextContext
+              (psExprInstantiate1
+                forallView.body
+                (PsExpr.fvar pushed.id))
+              (List.cons
+                (PsElabTypedBinder.mk
+                  pushed.id
+                  forallView.name
+                  forallView.domain
+                  forallView.binder)
+                bindersRev)
+
+def psOpenConstructorFields
+    (context : PsElabContext)
+    (fuel : Nat)
+    (cursor : PsExpr)
+    (bindersRev : List PsElabTypedBinder) :
+    Except PsElabError PsElabConstructorBuildResult :=
+  psOpenConstructorFieldsWorker
+    fuel
+    context
+    cursor
+    bindersRev
 
 def psWrapRecursiveHypotheses
     (motiveId : Nat)

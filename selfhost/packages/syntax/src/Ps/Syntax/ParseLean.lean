@@ -353,10 +353,12 @@ def psParseLeanDependentArrowTail
          | none => binder.value.1.span
          | some token => token.span))
 
-def psParseLeanMatchAlternativesWithFuel
+def psParseLeanMatchAlternativesAtColumnWithFuel
     (parseTerm :
       PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
+    (branchColumn : Nat)
+    (previousBranchLine : Nat)
     (fuel : Nat)
     (cursor : PsTokenCursor)
     (alternativesRev :
@@ -371,29 +373,74 @@ def psParseLeanMatchAlternativesWithFuel
         cursor := cursor
       }
   | remaining + 1 =>
-      if psTokenCursorAtText cursor "|" then
-        match psTokenCursorAdvance cursor with
-        | none =>
-            Except.error (PsParseError.unexpectedEnd "match pattern")
-        | some bar =>
-            match psParseBasicPattern bar.cursor with
-            | Except.error error => Except.error error
-            | Except.ok pattern =>
-                match psTokenCursorExpectText pattern.cursor "=>" with
+      match psTokenCursorPeek cursor with
+      | none =>
+          Except.ok {
+            value := alternativesRev.reverse
+            cursor := cursor
+          }
+      | some token =>
+          let sameLine := token.span.start.line == previousBranchLine
+          let belongsToMatch :=
+            token.text == "|"
+              && (sameLine || branchColumn <= token.span.start.column)
+          if belongsToMatch then
+            match psTokenCursorAdvance cursor with
+            | none =>
+                Except.error (PsParseError.unexpectedEnd "match pattern")
+            | some bar =>
+                match psParseBasicPattern bar.cursor with
                 | Except.error error => Except.error error
-                | Except.ok afterArrow =>
-                    match parseTerm afterArrow.cursor with
+                | Except.ok pattern =>
+                    match psTokenCursorExpectText pattern.cursor "=>" with
                     | Except.error error => Except.error error
-                    | Except.ok body =>
-                        let span := {
-                          start := bar.token.span.start
-                          stop := (psSyntaxTermSpan body.value).stop
-                        }
-                        psParseLeanMatchAlternativesWithFuel
-                          parseTerm
-                          remaining
-                          body.cursor
-                          ((pattern.value, body.value, span) :: alternativesRev)
+                    | Except.ok afterArrow =>
+                        match parseTerm afterArrow.cursor with
+                        | Except.error error => Except.error error
+                        | Except.ok body =>
+                            let span := {
+                              start := bar.token.span.start
+                              stop := (psSyntaxTermSpan body.value).stop
+                            }
+                            psParseLeanMatchAlternativesAtColumnWithFuel
+                              parseTerm
+                              branchColumn
+                              bar.token.span.start.line
+                              remaining
+                              body.cursor
+                              ((pattern.value, body.value, span) :: alternativesRev)
+          else
+            Except.ok {
+              value := alternativesRev.reverse
+              cursor := cursor
+            }
+
+def psParseLeanMatchAlternativesWithFuel
+    (parseTerm :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat)
+    (cursor : PsTokenCursor)
+    (alternativesRev :
+      List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan)) :
+    Except PsParseError
+      (PsParseResult
+        (List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))) :=
+  match psTokenCursorPeek cursor with
+  | none =>
+      Except.ok {
+        value := alternativesRev.reverse
+        cursor := cursor
+      }
+  | some token =>
+      if token.text == "|" then
+        psParseLeanMatchAlternativesAtColumnWithFuel
+          parseTerm
+          token.span.start.column
+          token.span.start.line
+          fuel
+          cursor
+          alternativesRev
       else
         Except.ok {
           value := alternativesRev.reverse

@@ -1429,6 +1429,53 @@ def psTestDualSourceBasicMatchParse : Bool :=
       | _, _ => false
   | _, _ => false
 
+def psTestLeanNestedMatchDedentParse : Bool :=
+  let source :=
+    "match true with\n" ++
+    "  | true =>\n" ++
+    "      match false with\n" ++
+    "      | true => 1\n" ++
+    "      | false => 2\n" ++
+    "  | false => 3"
+  match psLex source with
+  | Except.error _ => false
+  | Except.ok tokens =>
+      match psParseLeanTerm (psTokenCursorFromTokens tokens) with
+      | Except.error _ => false
+      | Except.ok parsed =>
+          psTokenCursorDone parsed.cursor
+            && match parsed.value with
+               | PsSyntaxTerm.matchE
+                   (PsSyntaxTerm.bool true _)
+                   [
+                     (
+                       PsSyntaxPattern.bool true _,
+                       PsSyntaxTerm.matchE
+                         (PsSyntaxTerm.bool false _)
+                         [
+                           (
+                             PsSyntaxPattern.bool true _,
+                             PsSyntaxTerm.natural "1" _,
+                             _
+                           ),
+                           (
+                             PsSyntaxPattern.bool false _,
+                             PsSyntaxTerm.natural "2" _,
+                             _
+                           )
+                         ]
+                         _,
+                       _
+                     ),
+                     (
+                       PsSyntaxPattern.bool false _,
+                       PsSyntaxTerm.natural "3" _,
+                       _
+                     )
+                   ]
+                   _ => true
+               | _ => false
+
 def psTestConstructorMatchPatternShape : Bool :=
   match psLex "match x with | Option.some y => y | Option.none => 0" with
   | Except.error _ => false
@@ -2299,6 +2346,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source if", passed := psTestDualSourceIf },
   { name := "inductive metadata lookup", passed := psTestInductiveMetadataLookup },
   { name := "dual-source basic match parse", passed := psTestDualSourceBasicMatchParse },
+  { name := "Lean nested match dedent parse", passed := psTestLeanNestedMatchDedentParse },
   { name := "constructor match pattern parse", passed := psTestConstructorMatchPatternShape },
   { name := "dual-source basic match elaboration", passed := psTestDualSourceBasicMatchElaboration },
   { name := "dual-source field match elaboration", passed := psTestDualSourceFieldMatchElaboration },

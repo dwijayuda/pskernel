@@ -1573,7 +1573,7 @@ def psElabMatchMinors
               | Except.ok tail =>
                   Except.ok {
                     context := tail.context
-                    minors := minor.term :: tail.minors
+                    minors := List.cons minor.term tail.minors
                   }
 
 def psElabMatch
@@ -1692,15 +1692,24 @@ def psElabMatch
                                                 scrutineeType
                                                 instantiatedExpected
                                                 PsBinderInfo.explicit;
+                                            let recursorTail :=
+                                              List.append
+                                                minors.minors
+                                                (List.cons
+                                                  scrutineeResult.term
+                                                  List.nil);
+                                            let recursorArgs :=
+                                              List.append
+                                                typeView.args
+                                                (List.cons
+                                                  motive
+                                                  recursorTail);
                                             let recursorTerm :=
                                               psExprApplyMany
                                                 (PsExpr.constE
                                                   recursorName
                                                   recursorLevels)
-                                                (typeView.args
-                                                  ++ [motive]
-                                                  ++ minors.minors
-                                                  ++ [scrutineeResult.term]);
+                                                recursorArgs;
                                             psElabResolvedTerm
                                               minors.context
                                               recursorTerm
@@ -1780,14 +1789,15 @@ def psElabApplyArgsWithFuel
                       psExprInstantiate1
                         body
                         elaboratedArgument.term;
+                    let nextResult : PsElabTermResult := {
+                      context := elaboratedArgument.context
+                      term := nextTerm
+                      type := nextType
+                    };
                     psElabApplyArgsWithFuel
                       elaborate
                       fuel
-                      {
-                        context := elaboratedArgument.context
-                        term := nextTerm
-                        type := nextType
-                      }
+                      nextResult
                       rest
                       pendingInstancesRev
           else if

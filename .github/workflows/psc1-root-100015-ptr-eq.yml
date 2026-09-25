@@ -1,0 +1,64 @@
+name: PSC1 root 100015 pointer-eq diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [diagnostic/psc1-root-100015-ptr-eq]
+    paths:
+      - ".github/workflows/psc1-root-100015-progress.yml"
+      - "psc1-kernel/PSC1Kernel/Test/ReplayFile.lean"
+      - "psc1-kernel/**"
+      - "oracle/replay-probe/DependencyExport.lean"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-root-100015-progress-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "LEAN434_BIN=$(dirname "$lean_bin")" >> "$GITHUB_ENV"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - name: Export root 100015 dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean oracle/replay-probe/DependencyExport.lean
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 100015 1 > /tmp/root100015.ndjson
+          echo "bytes=$(wc -c < /tmp/root100015.ndjson)"
+          echo "lines=$(wc -l < /tmp/root100015.ndjson)"
+          echo "=== root100015 lines 190655-190665 ==="
+          sed -n '190655,190665p' /tmp/root100015.ndjson
+      - name: Build progress replay executable
+        working-directory: psc1-kernel
+        run: |
+          lake build
+          lake build psc1_replay
+      - name: Replay with progress for three minutes
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          timeout 180s psc1-kernel/.lake/build/bin/psc1_replay --progress /tmp/root100015.ndjson || rc=$?
+          echo "replay-exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            exit 0
+          fi
+          if [ "$rc" -eq 124 ]; then
+            echo "EXPECTED_DIAGNOSTIC_TIMEOUT"
+            exit 0
+          fi
+          exit "$rc"

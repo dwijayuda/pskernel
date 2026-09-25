@@ -436,8 +436,7 @@ def psElabInductiveConstructor
   | none => Except.error PsElabError.emptyName
   | some constructorName =>
       match psElabTypedBinders
-          (fun nextContext term expected =>
-            psElabTerm nextContext term expected)
+          psElabDeclarationTermCallback
           context
           source.fields with
       | Except.error error => Except.error error
@@ -827,8 +826,7 @@ def psElabInductiveDeclaration
   | some name =>
       let initial := psElabContextEmpty environment;
       match psElabTypedBinders
-          (fun context term expected =>
-            psElabTerm context term expected)
+          psElabDeclarationTermCallback
           initial
           params with
       | Except.error error => Except.error error
@@ -987,8 +985,7 @@ def psElabPartialDeclaration
       let initial := psElabContextEmpty environment
       match
           psElabTypedBinders
-            (fun context term expected =>
-              psElabTerm context term expected)
+            psElabDeclarationTermCallback
             initial
             binders with
       | Except.error error => Except.error error

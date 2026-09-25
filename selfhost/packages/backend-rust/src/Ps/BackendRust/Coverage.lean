@@ -623,11 +623,16 @@ def psRustCoverageConstructorFieldList :
   | coverage, List.cons field rest =>
       let withStorage :=
         if psRustTypeContainsFunction field.type then
-          psRustCoverageAddUnsupported
-            (psRustCoverageAddFeature
+          if psRustFunctionTypeIsFirstOrder field.type then
+            psRustCoverageAddFeature
               coverage
-              "module:functionStorage")
-            "module:functionStorage"
+              "module:staticConstructorFunctionStorage"
+          else
+            psRustCoverageAddUnsupported
+              (psRustCoverageAddFeature
+                coverage
+                "module:functionStorage")
+              "module:functionStorage"
         else
           coverage;
       psRustCoverageConstructorFieldList

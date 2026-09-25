@@ -394,6 +394,7 @@ jobs:
               arrayFoldOnly,
               arrayMapDemo,
               callStored,
+              callStoredBox,
               countDown,
               genericArrayId,
               idFloat,
@@ -416,9 +417,11 @@ jobs:
               returnCallback,
               shadowOne,
               storePlusOne,
+              storePlusOneBox,
               unwrapOr,
               utf8Size,
               wrapNat,
+              CallbackBox,
               CallbackHolder,
               Maybe,
               Pair,
@@ -456,6 +459,9 @@ jobs:
               let stored: CallbackHolder = storePlusOne();
               assert_eq!(callStored(stored.clone(), n(41)), n(42));
               assert_eq!((stored.callback)(n(9)), n(10));
+              let stored_box: CallbackBox = storePlusOneBox();
+              assert_eq!(callStoredBox(stored_box.clone(), n(41)), n(42));
+              assert_eq!(callStoredBox(stored_box, n(9)), n(10));
               assert_eq!(pairLeft(Pair { left: n(11), right: n(22) }), n(11));
               assert_eq!(pushBang(String::from("hi")), "hi!");
               assert_eq!(utf8Size(String::from("é")), n(2));

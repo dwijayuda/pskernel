@@ -388,7 +388,7 @@ def psRustCoverageExprWithFuel :
             (psRustCoverageAddFeature
               coverage
               "expr:record")
-      | PsVerifiedIrExpr.projection target _ =>
+      | PsVerifiedIrExpr.projection _ target _ =>
           psRustCoverageExprWithFuel
             fuel
             (psRustCoverageAddFeature

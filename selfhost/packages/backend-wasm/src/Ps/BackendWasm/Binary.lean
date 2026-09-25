@@ -664,6 +664,7 @@ def psWasmEncodeFunctionBodies
 
 def psWasmEncodeStorageType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (type : PsWasmStorageType) :
     Except PsWasmEncodeError (List UInt8) :=
   match type with
@@ -674,32 +675,35 @@ def psWasmEncodeStorageType
 
 def psWasmEncodeStructField
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (field : PsWasmStructField) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeStorageType structures field.storageType with
+  match psWasmEncodeStorageType structures arrays field.storageType with
   | Except.error error => Except.error error
   | Except.ok storage =>
       Except.ok (storage ++ [psWasmByte 0])
 
 def psWasmEncodeStructFields
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmStructField ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | field :: rest =>
-      match psWasmEncodeStructField structures field with
+      match psWasmEncodeStructField structures arrays field with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeStructFields structures rest with
+          match psWasmEncodeStructFields structures arrays rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
 
 def psWasmEncodeStructCompositeType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (structType : PsWasmStructType) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeStructFields structures structType.fields with
+  match psWasmEncodeStructFields structures arrays structType.fields with
   | Except.error error => Except.error error
   | Except.ok fields =>
       Except.ok
@@ -709,9 +713,10 @@ def psWasmEncodeStructCompositeType
 
 def psWasmEncodeStructType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (structType : PsWasmStructType) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeStructCompositeType structures structType with
+  match psWasmEncodeStructCompositeType structures arrays structType with
   | Except.error error => Except.error error
   | Except.ok composite =>
       match structType.superType with
@@ -740,21 +745,66 @@ def psWasmEncodeStructType
                   ++ composite)
 
 def psWasmEncodeStructTypes
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmStructType ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | structType :: rest =>
-      match psWasmEncodeStructType structures structType with
+      match psWasmEncodeStructType structures arrays structType with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeStructTypes structures rest with
+          match psWasmEncodeStructTypes structures arrays rest with
+          | Except.error error => Except.error error
+          | Except.ok encodedRest =>
+              Except.ok (encoded ++ encodedRest)
+
+def psWasmEncodeArrayType
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
+    (arrayType : PsWasmArrayType) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match
+      psWasmEncodeStorageType
+        structures
+        arrays
+        arrayType.elementType with
+  | Except.error error => Except.error error
+  | Except.ok elementType =>
+      let mutability :=
+        if arrayType.mutable then psWasmByte 1
+        else psWasmByte 0
+      Except.ok
+        ([psWasmByte 94]
+          ++ elementType
+          ++ [mutability])
+
+def psWasmEncodeArrayTypes
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
+    List PsWasmArrayType ->
+    Except PsWasmEncodeError (List UInt8)
+  | [] => Except.ok []
+  | arrayType :: rest =>
+      match
+          psWasmEncodeArrayType
+            structures
+            arrays
+            arrayType with
+      | Except.error error => Except.error error
+      | Except.ok encoded =>
+          match
+              psWasmEncodeArrayTypes
+                structures
+                arrays
+                rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
 
 def psWasmFunctionTypeIndex
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (functionIndex : Nat)
     (function : PsWasmFunction) :
@@ -763,6 +813,7 @@ def psWasmFunctionTypeIndex
   | none =>
       Except.ok
         (structures.length
+          + arrays.length
           + functionTypes.length
           + functionIndex)
   | some typeName =>
@@ -779,6 +830,7 @@ def psWasmFunctionTypeIndex
 
 def psWasmEncodeFunctionTypeIndicesLoop
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType) :
     Nat ->
     List PsWasmFunction ->
@@ -788,6 +840,7 @@ def psWasmEncodeFunctionTypeIndicesLoop
       match
           psWasmFunctionTypeIndex
             structures
+            arrays
             functionTypes
             functionIndex
             function with
@@ -796,6 +849,7 @@ def psWasmEncodeFunctionTypeIndicesLoop
           match
               psWasmEncodeFunctionTypeIndicesLoop
                 structures
+                arrays
                 functionTypes
                 (functionIndex + 1)
                 rest with
@@ -806,11 +860,12 @@ def psWasmEncodeFunctionTypeIndicesLoop
 
 def psWasmEncodeFunctionTypeIndices
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
   psWasmEncodeFunctionTypeIndicesLoop
-    structures functionTypes 0 functions
+    structures arrays functionTypes 0 functions
 
 def psWasmEncodeFunctionRefIndices
     (functions : List PsWasmFunction) :

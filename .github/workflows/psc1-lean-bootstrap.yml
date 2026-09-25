@@ -169,11 +169,44 @@ jobs:
           grep -q 'export function compilerBind' /tmp/psc1-effect.ts
           grep -q 'export function compilerRollback' /tmp/psc1-effect.ts
           grep -q 'export const effectRecovered' /tmp/psc1-effect.ts
+          grep -q 'export const effectSetFive' /tmp/psc1-effect.ts
+          grep -q 'export const effectWithReader' /tmp/psc1-effect.ts
+          grep -q 'export const effectFailureAlias' /tmp/psc1-effect.ts
+          grep -q 'export const effectCommitted' /tmp/psc1-effect.ts
+          grep -q 'export const effectWhenTrue' /tmp/psc1-effect.ts
+          grep -q 'export const effectUnlessFalse' /tmp/psc1-effect.ts
           rm -f /tmp/psc1-effect.js /tmp/psc1-effect.d.ts /tmp/psc1-effect.js.map
           lake exe psc1 build stdlib/SELFHOST-EFFECT.lean --out /tmp/psc1-effect.ts
           test -f /tmp/psc1-effect.js
           test -f /tmp/psc1-effect.d.ts
           test -f /tmp/psc1-effect.js.map
+          cp /tmp/psc1-effect.js /tmp/psc1-effect.mjs
+          node --input-type=module <<'NODE'
+          const m = await import('file:///tmp/psc1-effect.mjs');
+          const context = { label: 'outer' };
+          const state = { count: 0n };
+          const setResult = m.effectSetFive.run(context, state);
+          if (setResult.value.snd.count !== 5n) throw new Error('effectSetFive');
+          const readerResult = m.effectWithReader.run(context, state);
+          if (readerResult.value.fst !== 'inner') throw new Error('effectWithReader');
+          const failureResult = m.effectFailureAlias.run(context, state);
+          if (failureResult.error !== 'failed-alias') throw new Error('effectFailureAlias');
+          const commitResult = m.effectCommitted.run(context, state);
+          if (commitResult.value.snd.count !== 0n) throw new Error('effectCommitted');
+          const whenTrue = m.effectWhenTrue.run(context, state);
+          if (whenTrue.value.snd.count !== 1n) throw new Error('effectWhenTrue');
+          const whenFalse = m.effectWhenFalse.run(context, state);
+          if (whenFalse.value.snd.count !== 0n) throw new Error('effectWhenFalse');
+          const unlessTrue = m.effectUnlessTrue.run(context, state);
+          if (unlessTrue.value.snd.count !== 0n) throw new Error('effectUnlessTrue');
+          const unlessFalse = m.effectUnlessFalse.run(context, state);
+          if (unlessFalse.value.snd.count !== 1n) throw new Error('effectUnlessFalse');
+          const recovered = m.effectRunRecovered(context, state);
+          if (recovered.value.fst !== 7n || recovered.value.snd.count !== 0n) {
+            throw new Error('effectRollbackRecovered');
+          }
+          console.log('PSC1_EFFECT_RUNTIME: PASS');
+          NODE
           echo "PSC1_EFFECT_COMPOSITION: PASS"
 
       - name: Run bootstrap semantic tests

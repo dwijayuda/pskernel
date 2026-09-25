@@ -250,6 +250,53 @@ def psWasmLowerExprListWith
                 state := loweredRest.state
               }
 
+def psWasmLowerRecordFieldsWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (structure : PsVerifiedIrStructure)
+    (fields : List (String × PsVerifiedIrExpr)) :
+    PsWasmLowerState ->
+    List PsVerifiedIrStructureField ->
+    Except PsWasmLowerError PsWasmLoweredExpr
+  | state, [] =>
+      Except.ok {
+        instructions := []
+        state := state
+      }
+  | state, field :: rest =>
+      match psWasmFindRecordField fields field.name with
+      | none =>
+          Except.error
+            (PsWasmLowerError.missingRecordField
+              structure.name field.name)
+      | some value =>
+          match psWasmValueTypeOfIrType? profile field.type with
+          | none => Except.error PsWasmLowerError.unsupportedType
+          | some valueType =>
+              match lower (some valueType) state value with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  match
+                      psWasmLowerRecordFieldsWith
+                        profile
+                        lower
+                        structure
+                        fields
+                        lowered.state
+                        rest with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredRest =>
+                      Except.ok {
+                        instructions :=
+                          lowered.instructions ++
+                            loweredRest.instructions
+                        state := loweredRest.state
+                      }
+
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
@@ -409,6 +456,7 @@ def psWasmLowerIfWith
 
 def psWasmLowerExprWithFuel
     (profile : PsWasmTargetProfile)
+    (structures : List PsVerifiedIrStructure)
     (bindings : List (String × Nat))
     (expected : Option PsWasmValueType) :
     Nat ->
@@ -421,7 +469,13 @@ def psWasmLowerExprWithFuel
       let lower :=
         fun expectedType nestedState nestedExpr =>
           psWasmLowerExprWithFuel
-            profile bindings expectedType fuel nestedState nestedExpr
+            profile
+            structures
+            bindings
+            expectedType
+            fuel
+            nestedState
+            nestedExpr
       match expr with
       | .literal literal =>
           match literal with
@@ -480,6 +534,7 @@ def psWasmLowerExprWithFuel
                   match
                       psWasmLowerExprWithFuel
                         profile
+                        structures
                         bodyBindings
                         expected
                         fuel
@@ -494,6 +549,62 @@ def psWasmLowerExprWithFuel
                             ++ loweredBody.instructions
                         state := loweredBody.state
                       }
+      | .record structureName fields =>
+          match psWasmFindStructure structures structureName with
+          | none =>
+              Except.error
+                (PsWasmLowerError.unknownStructure structureName)
+          | some structure =>
+              match structure.typeParameters with
+              | _ :: _ =>
+                  Except.error PsWasmLowerError.unsupportedType
+              | [] =>
+                  match
+                      psWasmLowerRecordFieldsWith
+                        profile
+                        lower
+                        structure
+                        fields
+                        state
+                        structure.fields with
+                  | Except.error error => Except.error error
+                  | Except.ok lowered =>
+                      Except.ok {
+                        instructions :=
+                          lowered.instructions ++
+                            [PsWasmInstruction.structNew structureName]
+                        state := lowered.state
+                      }
+      | .projection structureName target fieldName =>
+          match psWasmFindStructure structures structureName with
+          | none =>
+              Except.error
+                (PsWasmLowerError.unknownStructure structureName)
+          | some structure =>
+              match psWasmFindStructureField structure fieldName with
+              | none =>
+                  Except.error
+                    (PsWasmLowerError.unknownStructureField
+                      structureName fieldName)
+              | some indexedField =>
+                  let fieldIndex := indexedField.1
+                  let field := indexedField.2
+                  match
+                      lower
+                        (some (PsWasmValueType.refT structureName))
+                        state
+                        target with
+                  | Except.error error => Except.error error
+                  | Except.ok lowered =>
+                      Except.ok {
+                        instructions :=
+                          lowered.instructions ++
+                            [psWasmStructGetInstruction
+                              structureName
+                              fieldIndex
+                              field.type]
+                        state := lowered.state
+                      }
       | .ifE condition thenBranch elseBranch =>
           psWasmLowerIfWith
             lower state expected condition thenBranch elseBranch
@@ -502,16 +613,18 @@ def psWasmLowerExprWithFuel
 
 def psWasmLowerExpr
     (profile : PsWasmTargetProfile)
+    (structures : List PsVerifiedIrStructure)
     (bindings : List (String × Nat))
     (expected : Option PsWasmValueType)
     (state : PsWasmLowerState)
     (expr : PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   psWasmLowerExprWithFuel
-    profile bindings expected 4096 state expr
+    profile structures bindings expected 4096 state expr
 
 def psWasmLowerDeclaration
     (profile : PsWasmTargetProfile)
+    (structures : List PsVerifiedIrStructure)
     (declaration : PsVerifiedIrDeclaration) :
     Except PsWasmLowerError PsWasmFunction :=
   match psWasmLowerParameterTypes profile declaration.parameters with
@@ -532,6 +645,7 @@ def psWasmLowerDeclaration
               match
                   psWasmLowerExpr
                     profile
+                    structures
                     bindings
                     expected
                     initialState
@@ -547,15 +661,16 @@ def psWasmLowerDeclaration
                   }
 
 def psWasmLowerDeclarations
-    (profile : PsWasmTargetProfile) :
+    (profile : PsWasmTargetProfile)
+    (structures : List PsVerifiedIrStructure) :
     List PsVerifiedIrDeclaration ->
     Except PsWasmLowerError (List PsWasmFunction)
   | [] => Except.ok []
   | declaration :: rest =>
-      match psWasmLowerDeclaration profile declaration with
+      match psWasmLowerDeclaration profile structures declaration with
       | Except.error error => Except.error error
       | Except.ok lowered =>
-          match psWasmLowerDeclarations profile rest with
+          match psWasmLowerDeclarations profile structures rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok (lowered :: loweredRest)

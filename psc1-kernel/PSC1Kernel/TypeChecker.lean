@@ -552,32 +552,40 @@ partial def inferKMajorType?
   | .app fn arg => do
       let sourceInfoCasesOn : Name :=
         .str (.str (.str .anonymous "Lean") "SourceInfo") "casesOn"
-      let debugCasesOn :=
+      let eqSymm : Name := .str (.str .anonymous "Eq") "symm"
+      let debugLabel? :=
         match major.getAppFn with
-        | .const name _ => Name.eq name sourceInfoCasesOn
-        | _ => false
+        | .const name _ =>
+            if Name.eq name sourceInfoCasesOn then some "SourceInfo.casesOn"
+            else if Name.eq name eqSymm then some "Eq.symm"
+            else none
+        | _ => none
       let argc := major.getAppNumArgs
       let some fnType ← inferKMajorType? ctx fn
-        | if debugCasesOn then
-            throw ("K casesOn debug: function inference failed at args=" ++ toString argc)
-          else
-            return none
+        | match debugLabel? with
+          | some label =>
+              throw ("K app debug " ++ label ++
+                ": function inference failed at args=" ++ toString argc)
+          | none => return none
       let fnType' ← whnf ctx fnType
       let .forallE _ domain body _ := fnType'
-        | if debugCasesOn then
-            throw ("K casesOn debug: function type not forall at args=" ++ toString argc)
-          else
-            return none
+        | match debugLabel? with
+          | some label =>
+              throw ("K app debug " ++ label ++
+                ": function type not forall at args=" ++ toString argc)
+          | none => return none
       let some argType ← inferKMajorType? ctx arg
-        | if debugCasesOn then
-            throw ("K casesOn debug: argument inference failed at args=" ++ toString argc)
-          else
-            return none
+        | match debugLabel? with
+          | some label =>
+              throw ("K app debug " ++ label ++
+                ": argument inference failed at args=" ++ toString argc)
+          | none => return none
       unless ← kTypesEq ctx domain argType do
-        if debugCasesOn then
-          throw ("K casesOn debug: argument type mismatch at args=" ++ toString argc)
-        else
-          return none
+        match debugLabel? with
+        | some label =>
+            throw ("K app debug " ++ label ++
+              ": argument type mismatch at args=" ++ toString argc)
+        | none => return none
       return some (body.instantiate1 arg)
   | .lam .. => inferKLambdaSpine ctx major
   | .forallE .. => inferKForallSpine ctx major

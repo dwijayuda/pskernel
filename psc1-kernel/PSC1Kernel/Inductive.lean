@@ -434,9 +434,7 @@ partial def replaceSimpleConstant
 def replaceSimpleInductiveInfo
     (env : Environment)
     (info : InductiveInfo) : Environment :=
-  { env with
-    constants :=
-      replaceSimpleConstant info.base.name (.inductInfo info) env.constants }
+  env.replaceUnchecked (.inductInfo info)
 
 def makeSimpleMinorBinders
     (motive : Expr)

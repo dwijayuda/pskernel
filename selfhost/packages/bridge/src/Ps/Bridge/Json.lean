@@ -278,7 +278,9 @@ def psJsonParseStringChars :
             else if psJsonCharEq escaped 'u' then
               match psJsonDecodeUnicode4 tail with
               | Except.error error => Except.error error
-              | Except.ok (decoded, afterUnicode) =>
+              | Except.ok decodedResult =>
+                  let decoded := Prod.fst decodedResult;
+                  let afterUnicode := Prod.snd decodedResult;
                   psJsonParseStringChars
                     fuel
                     afterUnicode

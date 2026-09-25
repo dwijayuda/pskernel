@@ -68,6 +68,45 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
               PsVerifiedIrExpr.var "right"
             ]
       }
+,
+      {
+        name := "addThenOne"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "right"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.uint32
+              PsVerifiedIrIntegerBinaryOp.add)
+            [
+              PsVerifiedIrExpr.call
+                (PsVerifiedIrExpr.var "addU32")
+                []
+                [
+                  PsVerifiedIrExpr.var "left",
+                  PsVerifiedIrExpr.var "right"
+                ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.machineInteger
+                  PsVerifiedIrMachineIntegerType.uint32
+                  1)
+            ]
+      }
     ]
   }
 

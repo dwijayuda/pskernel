@@ -1832,7 +1832,8 @@ def psElabApplyArgsWithFuel
             let nextPending :=
               if psBinderIsInstanceImplicit binder then
                 match fresh.expr with
-                | PsExpr.mvar id => id :: pendingInstancesRev
+                | PsExpr.mvar id =>
+                    List.cons id pendingInstancesRev
                 | _ => pendingInstancesRev
               else
                 pendingInstancesRev;

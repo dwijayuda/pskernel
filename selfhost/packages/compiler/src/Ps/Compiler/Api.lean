@@ -35,7 +35,7 @@ def psCompilerTranslateSource
         | PsCompilerSourceKind.lean =>
             psTranslateProofScriptToLean source
         | PsCompilerSourceKind.proofScript =>
-            psCanonicalizeProofScriptSource source
+            psCanonicalizeProofScriptSource source;
   match translated with
   | Except.error error =>
       Except.error (PsCompilerError.translation error)

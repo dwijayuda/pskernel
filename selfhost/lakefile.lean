@@ -91,7 +91,8 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.Expr,
     `Ps.BackendRust.ValueRefs,
     `Ps.BackendRust.Runtime,
-    `Ps.BackendRust.Module
+    `Ps.BackendRust.Module,
+    `Ps.BackendRust.Coverage
   ]
 
 lean_lib PsCompiler where

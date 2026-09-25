@@ -10,8 +10,8 @@ def psResolveName
     (environment : PsEnvironment)
     (name : PsName) : Option PsResolvedName :=
   match psLocalFindUser localContext name with
-  | some declaration => some (PsResolvedName.local (psLocalDeclId declaration))
-  | none =>
+  | Option.some declaration => Option.some (PsResolvedName.local (psLocalDeclId declaration))
+  | Option.none =>
       match psEnvironmentFind environment name with
-      | some _ => some (PsResolvedName.global name)
-      | none => none
+      | Option.some _ => Option.some (PsResolvedName.global name)
+      | Option.none => Option.none

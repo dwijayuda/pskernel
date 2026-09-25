@@ -1229,6 +1229,44 @@ def assertKernelRecDepthOracle : IO Unit := do
   assertTrue "large maxRecDepth acceptance differs from Lean 4.34"
     (pscLargeAccepts == leanLargeAccepts && leanLargeAccepts)
 
+def assertOpaqueClosureOracle : IO Unit := do
+  -- Lean #14484/#14498 hardening: opaque bodies must be closed before any
+  -- checker cache/history can make a dangling local look admissible.
+  let OpaqueN : PSC1Kernel.Name := .str .anonymous "OracleDanglingOpaque"
+  let Fresh : PSC1Kernel.Name := .str .anonymous "_kernel_fresh"
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let prop : PSC1Kernel.Expr := .sort .zero
+  let oursInfo : PSC1Kernel.OpaqueInfo := {
+    base := mkBase OpaqueN type1
+    value := .fvar Fresh
+    isUnsafe := false
+  }
+  let oursRejects :=
+    match PSC1Kernel.Kernel.addOpaque .empty oursInfo with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue "rejected opaque declaration mutated PSC1 environment"
+    (!PSC1Kernel.Environment.empty.contains OpaqueN)
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanInfo : Lean.OpaqueVal := {
+    name := toLeanName OpaqueN
+    levelParams := []
+    type := toLeanExpr type1
+    value := .fvar ⟨toLeanName Fresh⟩
+    isUnsafe := false
+  }
+  let leanRejects :=
+    match Lean.Kernel.Environment.addDecl lean0 {} (.opaqueDecl leanInfo) with
+    | .ok _ => false
+    | .error _ => true
+
+  assertTrue
+    "dangling-free-variable opaque rejection differs from Lean 4.34"
+    (oursRejects == leanRejects && leanRejects)
+  let _ := prop
+  pure ()
+
 def assertMutualDuplicateNameOracle : IO Unit := do
   let Dup : PSC1Kernel.Name := .str .anonymous "OracleMutualDup"
   let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
@@ -4321,6 +4359,7 @@ def run : IO Unit := do
   assertStringLiteralDefEqOracle
   assertQuotAdmissionOracle
   assertKernelRecDepthOracle
+  assertOpaqueClosureOracle
   assertMutualDuplicateNameOracle
   assertImaxPropOracle
   assertProjectionOracle

@@ -314,6 +314,7 @@ jobs:
               idUInt8,
               idUSize,
               one,
+              pairLeft,
               plusOne,
               pushBang,
               shadowOne,
@@ -321,6 +322,7 @@ jobs:
               utf8Size,
               wrapNat,
               Maybe,
+              Pair,
           };
 
           fn n(value: u32) -> BigUint {
@@ -346,6 +348,7 @@ jobs:
               assert_eq!(idFloat(1.25f64), 1.25f64);
               assert_eq!(idFloat32(1.25f32), 1.25f32);
               assert_eq!(plusOne(n(41)), n(42));
+              assert_eq!(pairLeft(Pair { left: n(11), right: n(22) }), n(11));
               assert_eq!(pushBang(String::from("hi")), "hi!");
               assert_eq!(utf8Size(String::from("é")), n(2));
               assert_eq!(

@@ -2870,6 +2870,244 @@ def assertUniverseNestedInductiveAdmissionOracle : IO Unit := do
   assertTrue "universe-nested recursion did not reach leaf minor"
     (PSC1Kernel.Expr.eq oursReduced (.lit (.nat 79)))
 
+def assertOuterMutualNestedInductiveAdmissionOracle : IO Unit := do
+  let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let natT : PSC1Kernel.Expr := .const NatN []
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+
+  let EvenBox : PSC1Kernel.Name := .str .anonymous "OracleOuterEvenBox"
+  let EvenMk : PSC1Kernel.Name := .str EvenBox "mk"
+  let OddBox : PSC1Kernel.Name := .str .anonymous "OracleOuterOddBox"
+  let OddMk : PSC1Kernel.Name := .str OddBox "mk"
+  let Alpha : PSC1Kernel.Name := .str .anonymous "α"
+  let evenType : PSC1Kernel.Expr :=
+    .forallE Alpha type1 type1 .default
+  let oddType : PSC1Kernel.Expr :=
+    .forallE Alpha type1 type1 .default
+  let evenCtorType : PSC1Kernel.Expr :=
+    .forallE Alpha type1
+      (.forallE (.str .anonymous "odd")
+        (.app (.const OddBox []) (.bvar 0))
+        (.app (.const EvenBox []) (.bvar 1))
+        .default)
+      .default
+  let oddCtorType : PSC1Kernel.Expr :=
+    .forallE Alpha type1
+      (.forallE (.str .anonymous "value") (.bvar 0)
+        (.app (.const OddBox []) (.bvar 1))
+        .default)
+      .default
+
+  let Tree : PSC1Kernel.Name := .str .anonymous "OracleOuterMutualTree"
+  let TreeLeaf : PSC1Kernel.Name := .str Tree "leaf"
+  let TreeNode : PSC1Kernel.Name := .str Tree "node"
+  let TreeRec : PSC1Kernel.Name := .str Tree "rec"
+  let TreeRec1 : PSC1Kernel.Name := TreeRec.appendIndexAfter 1
+  let TreeRec2 : PSC1Kernel.Name := TreeRec.appendIndexAfter 2
+  let treeT : PSC1Kernel.Expr := .const Tree []
+  let evenTreeT : PSC1Kernel.Expr :=
+    .app (.const EvenBox []) treeT
+  let treeNodeType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "children") evenTreeT treeT .default
+
+  let base :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN type1
+      isUnsafe := false
+    })
+  let oursOuter ← exceptToIO
+    "PSC1 nested outer mutual family admission"
+    (PSC1Kernel.Kernel.addSimpleMutualInductive base {
+      levelParams := []
+      numParams := 1
+      types := [
+        {
+          name := EvenBox
+          type := evenType
+          ctors := [{ name := EvenMk, type := evenCtorType }]
+        },
+        {
+          name := OddBox
+          type := oddType
+          ctors := [{ name := OddMk, type := oddCtorType }]
+        }
+      ]
+      isUnsafe := false
+    })
+  let ours ← exceptToIO
+    "PSC1 outer-mutual nested Tree admission"
+    (PSC1Kernel.Kernel.addSimpleNestedInductive oursOuter {
+      levelParams := []
+      numParams := 0
+      types := [{
+        name := Tree
+        type := type1
+        ctors := [
+          { name := TreeLeaf, type := treeT },
+          { name := TreeNode, type := treeNodeType }
+        ]
+      }]
+      isUnsafe := false
+    })
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let leanNat ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.axiomDecl {
+      name := toLeanName NatN
+      levelParams := []
+      type := toLeanExpr type1
+      isUnsafe := false
+    }) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected outer-mutual nested Nat axiom"
+  let leanOuter ←
+    match Lean.Kernel.Environment.addDecl leanNat {} (.inductDecl [] 1 [
+      {
+        name := toLeanName EvenBox
+        type := toLeanExpr evenType
+        ctors := [{ name := toLeanName EvenMk, type := toLeanExpr evenCtorType }]
+      },
+      {
+        name := toLeanName OddBox
+        type := toLeanExpr oddType
+        ctors := [{ name := toLeanName OddMk, type := toLeanExpr oddCtorType }]
+      }
+    ] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected outer mutual family"
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl leanOuter {} (.inductDecl [] 0 [{
+      name := toLeanName Tree
+      type := toLeanExpr type1
+      ctors := [
+        { name := toLeanName TreeLeaf, type := toLeanExpr treeT },
+        { name := toLeanName TreeNode, type := toLeanExpr treeNodeType }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected outer-mutual nested Tree"
+  let leanEnv := Lean.Environment.ofKernelEnv lean1
+
+  for name in [Tree, TreeLeaf, TreeNode, TreeRec, TreeRec1, TreeRec2] do
+    let some oursInfo := ours.find? name
+      | throw <| IO.userError (
+          "PSC1 outer-mutual nested metadata missing: " ++
+          (toLeanName name).toString)
+    let some leanInfo := lean1.find? (toLeanName name)
+      | throw <| IO.userError (
+          "Lean 4.34 outer-mutual nested metadata missing: " ++
+          (toLeanName name).toString)
+    assertTrue
+      ("outer-mutual nested type differs from Lean 4.34 at " ++
+        (toLeanName name).toString)
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+
+  match ours.find? Tree with
+  | some (.inductInfo info) =>
+      assertTrue "outer-mutual nested numNested mismatch"
+        (info.numNested == 2)
+  | _ =>
+      throw <| IO.userError "PSC1 outer-mutual nested inductive info missing"
+
+  match ours.find? TreeRec with
+  | some (.recInfo info) =>
+      assertTrue "outer-mutual nested main recursor motive count mismatch"
+        (info.numMotives == 3)
+      assertTrue "outer-mutual nested main recursor minor count mismatch"
+        (info.numMinors == 4)
+  | _ =>
+      throw <| IO.userError "PSC1 outer-mutual nested main recursor missing"
+
+  match ours.find? TreeRec1 with
+  | some (.recInfo info) =>
+      match info.rules with
+      | [rule] =>
+          assertTrue "first restored outer-mutual auxiliary rule ctor mismatch"
+            (PSC1Kernel.Name.eq rule.ctor EvenMk)
+      | _ =>
+          throw <| IO.userError "first outer-mutual auxiliary rule count mismatch"
+  | _ =>
+      throw <| IO.userError "first outer-mutual auxiliary recursor missing"
+
+  match ours.find? TreeRec2 with
+  | some (.recInfo info) =>
+      match info.rules with
+      | [rule] =>
+          assertTrue "second restored outer-mutual auxiliary rule ctor mismatch"
+            (PSC1Kernel.Name.eq rule.ctor OddMk)
+      | _ =>
+          throw <| IO.userError "second outer-mutual auxiliary rule count mismatch"
+  | _ =>
+      throw <| IO.userError "second outer-mutual auxiliary recursor missing"
+
+  assertTrue "outer-mutual nested admission leaked _nested auxiliaries"
+    (!ours.constants.any fun info =>
+      PSC1Kernel.Kernel.simpleNestedPrefix.isPrefixOf info.name)
+
+  let oddTreeT : PSC1Kernel.Expr :=
+    .app (.const OddBox []) treeT
+  let treeMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "tree") treeT natT .default
+  let evenMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "even") evenTreeT natT .default
+  let oddMotive : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "odd") oddTreeT natT .default
+  let leafMinor : PSC1Kernel.Expr := .lit (.nat 83)
+  let nodeMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "children") evenTreeT
+      (.lam (.str .anonymous "children_ih") natT (.bvar 0) .default)
+      .default
+  let evenMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "odd") oddTreeT
+      (.lam (.str .anonymous "odd_ih") natT (.bvar 0) .default)
+      .default
+  let oddMinor : PSC1Kernel.Expr :=
+    .lam (.str .anonymous "tree") treeT
+      (.lam (.str .anonymous "tree_ih") natT (.bvar 0) .default)
+      .default
+  let leaf : PSC1Kernel.Expr := .const TreeLeaf []
+  let oddLeaf : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs (.const OddMk []) [treeT, leaf]
+  let evenOddLeaf : PSC1Kernel.Expr :=
+    PSC1Kernel.applyArgs (.const EvenMk []) [treeT, oddLeaf]
+  let major : PSC1Kernel.Expr :=
+    .app (.const TreeNode []) evenOddLeaf
+  let recApp :=
+    PSC1Kernel.applyArgs (.const TreeRec [.succ .zero])
+      [
+        treeMotive, evenMotive, oddMotive,
+        leafMinor, nodeMinor, evenMinor, oddMinor,
+        major
+      ]
+  let ctx := PSC1Kernel.CheckerContext.empty ours
+  let resultType ← exceptToIO
+    "PSC1 outer-mutual nested recursor typecheck"
+    (PSC1Kernel.check ctx recApp)
+  let resultTypeOk ← exceptToIO
+    "PSC1 outer-mutual nested recursor result defeq"
+    (PSC1Kernel.isDefEq ctx resultType natT)
+  assertTrue "PSC1 outer-mutual nested recursor result type mismatch"
+    resultTypeOk
+  let oursReduced ← exceptToIO
+    "PSC1 outer-mutual nested recursor reduction"
+    (PSC1Kernel.whnf ctx recApp)
+  let leanType ←
+    match Lean.Kernel.check leanEnv ({} : Lean.LocalContext)
+        (toLeanExpr recApp) with
+    | .ok ty => pure ty
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected outer-mutual nested recursor application"
+  assertTrue "outer-mutual nested recursor type differs from Lean 4.34"
+    (Lean.Expr.eqv (toLeanExpr resultType) leanType)
+  let leanReduced ← kernelExprWhnf leanEnv recApp
+  assertTrue "outer-mutual nested reduction differs from Lean 4.34"
+    (toLeanExpr oursReduced == leanReduced)
+  assertTrue "outer-mutual nested recursion did not reach leaf minor"
+    (PSC1Kernel.Expr.eq oursReduced (.lit (.nat 83)))
+
 def assertOrdinaryRecursorOracle : IO Unit := do
   let Flag : PSC1Kernel.Name := .str .anonymous "OracleFlag"
   let Off : PSC1Kernel.Name := .str Flag "off"
@@ -3359,6 +3597,7 @@ def run : IO Unit := do
   assertNestedInductiveAdmissionOracle
   assertParameterizedNestedInductiveAdmissionOracle
   assertUniverseNestedInductiveAdmissionOracle
+  assertOuterMutualNestedInductiveAdmissionOracle
   assertOrdinaryRecursorOracle
   assertNatLiteralRecursorOracle
   assertQuotReductionOracle

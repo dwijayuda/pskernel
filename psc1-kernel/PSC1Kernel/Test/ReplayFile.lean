@@ -127,6 +127,19 @@ def logHotPhase (label : String) : IO Unit := do
   logHotPhase (label ++ "-end")
   pure value
 
+@[noinline] def runHotPure
+    (label : String)
+    (thunk : Unit → α) : IO α := do
+  logHotPhase (label ++ "-begin")
+  let value ← IO.lazyPure (fun _ => thunk ())
+  logHotPhase (label ++ "-end")
+  pure value
+
+def stopHotAfter (label : String) : IO Unit := do
+  let requested ← IO.getEnv "PSC1_HOT_STOP_AFTER"
+  if requested == some label then
+    throw <| IO.userError ("HOT-STAGE-DONE:" ++ label)
+
 def replayHotArrayProofTheorem
     (state : Replay.State)
     (record : Replay.TheoremRecord) : IO Replay.State := do
@@ -142,21 +155,28 @@ def replayHotArrayProofTheorem
   let _ ← runHotExcept "header" (fun _ =>
     Kernel.checkConstantBase state.env info.base .safe
       state.maxRecDepth state.maxNatSize state.nativeEvaluator)
-  logHotPhase "mkChecker-begin"
-  let ctx := Kernel.mkChecker state.env info.base.levelParams .safe
-    state.maxRecDepth state.maxNatSize state.nativeEvaluator
-  logHotPhase "mkChecker-end"
+  stopHotAfter "header"
+  let ctx ← runHotPure "mkChecker" (fun _ =>
+    Kernel.mkChecker state.env info.base.levelParams .safe
+      state.maxRecDepth state.maxNatSize state.nativeEvaluator)
+  stopHotAfter "mkChecker"
   let prop ← runHotExcept "isProp" (fun _ => isProp ctx info.base.type)
   unless prop do throw <| IO.userError "hot theorem type is not a proposition"
+  stopHotAfter "isProp"
   let _ ← runHotExcept "proof-no-mvar-fvar" (fun _ =>
     Kernel.checkNoMVarNoFVar info.value)
+  stopHotAfter "proof-no-mvar-fvar"
   let _ ← runHotExcept "proof-level-params" (fun _ =>
     Kernel.checkLevelParams info.value info.base.levelParams)
+  stopHotAfter "proof-level-params"
   let valueType ← runHotExcept "proof-check" (fun _ => check ctx info.value)
+  stopHotAfter "proof-check"
   let eq ← runHotExcept "final-defeq" (fun _ =>
     isDefEq ctx valueType info.base.type)
   unless eq do throw <| IO.userError "hot theorem proof type mismatch"
+  stopHotAfter "final-defeq"
   let env ← runHotExcept "env-add" (fun _ => state.env.add (.thmInfo info))
+  stopHotAfter "env-add"
   pure { state with env := env }
 
 partial def replaySegmentedLinesFromProgress

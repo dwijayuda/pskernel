@@ -1157,13 +1157,13 @@ def psElabPartialDeclaration
                             let finalOpenType :=
                               psMetaInstantiate
                                 metaContext
-                                openType
+                                openType;
                             let closed :=
                               psCloseElabTypedBinders
                                 metaContext
                                 binderResult.bindersRev
                                 openValue
-                                finalOpenType
+                                finalOpenType;
                             if
                                 psExprHasUnresolvedMeta closed.1
                                   || psExprHasUnresolvedMeta closed.2 then

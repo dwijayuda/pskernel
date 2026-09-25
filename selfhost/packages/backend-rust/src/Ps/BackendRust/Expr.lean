@@ -576,8 +576,6 @@ def psRustEmitIntrinsicFromPrinted
                   (psRustConcat2 stop "))"))))
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
-  | _ =>
-      Except.error PsRustEmitError.unsupportedIntrinsic
 
 def psRustEmitMatchBindings
     (bindings : List PsVerifiedIrMatchBinding) : String :=

@@ -83,7 +83,8 @@ def checkLevelParams (e : Expr) (allowed : List Name) : Except String Unit :=
 def mkChecker
     (env : Environment)
     (levelParams : List Name)
-    (safety : DefinitionSafety) : CheckerContext :=
+    (safety : DefinitionSafety)
+    (maxRecDepth : Nat := 0) : CheckerContext :=
   {
     env := env
     lctx := .empty
@@ -91,19 +92,22 @@ def mkChecker
     safety := safety
     eagerReduce := false
     nativeEvaluator := none
+    maxRecDepth := maxRecDepth
+    recDepth := 0
   }
 
 def checkConstantBase
     (env : Environment)
     (base : ConstantBase)
-    (safety : DefinitionSafety) : Except String Unit := do
+    (safety : DefinitionSafety)
+    (maxRecDepth : Nat := 0) : Except String Unit := do
   if env.contains base.name then
     throw "already declared"
   if Name.hasDuplicates base.levelParams then
     throw "duplicate universe parameter"
   checkNoMVarNoFVar base.type
   checkLevelParams base.type base.levelParams
-  let ctx := mkChecker env base.levelParams safety
+  let ctx := mkChecker env base.levelParams safety maxRecDepth
   let typeType ← check ctx base.type
   let _ ← ensureSort ctx typeType
   pure ()
@@ -111,10 +115,11 @@ def checkConstantBase
 def checkDefinitionBody
     (env : Environment)
     (value : DefinitionInfo)
-    (safety : DefinitionSafety) : Except String Unit := do
+    (safety : DefinitionSafety)
+    (maxRecDepth : Nat := 0) : Except String Unit := do
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
-  let ctx := mkChecker env value.base.levelParams safety
+  let ctx := mkChecker env value.base.levelParams safety maxRecDepth
   let valueType ← check ctx value.value
   unless ← isDefEq ctx valueType value.base.type do
     throw "definition type mismatch"
@@ -124,18 +129,21 @@ def addAxiom (env : Environment) (value : AxiomInfo) : Except String Environment
   checkConstantBase env value.base safety
   env.add (.axiomInfo value)
 
-def addDefinition (env : Environment) (value : DefinitionInfo) : Except String Environment := do
+def addDefinition
+    (env : Environment)
+    (value : DefinitionInfo)
+    (maxRecDepth : Nat := 0) : Except String Environment := do
   match value.safety with
   | .unsafeDef =>
       -- Final Lean 4.34 adds the *full definition* before checking the body,
       -- so recursive unsafe code may unfold itself while being checked.
-      checkConstantBase env value.base .unsafeDef
+      checkConstantBase env value.base .unsafeDef maxRecDepth
       let work ← env.add (.defnInfo value)
-      checkDefinitionBody work value .unsafeDef
+      checkDefinitionBody work value .unsafeDef maxRecDepth
       pure work
   | .safe | .partialDef =>
-      checkConstantBase env value.base .safe
-      checkDefinitionBody env value .safe
+      checkConstantBase env value.base .safe maxRecDepth
+      checkDefinitionBody env value .safe maxRecDepth
       env.add (.defnInfo value)
 
 def addTheorem (env : Environment) (value : TheoremInfo) : Except String Environment := do

@@ -983,7 +983,7 @@ def psExprHasConst (target : PsName) : PsExpr -> Bool
   | _ => false
 
 def psMatchNameListContains (names : List PsName) (target : PsName) : Bool :=
-  List.any names (fun name => psNameEq name target)
+  List.any names (fun (name : PsName) => psNameEq name target)
 
 structure PsElabMatchAlternative where
   constructorName : PsName
@@ -1063,7 +1063,7 @@ def psElabPrepareMatchAlternatives
       let alternatives := List.reverse alternativesRev;
       let exhaustive :=
         List.all inductiveInfo.constructors
-          (fun ctorName =>
+          (fun (ctorName : PsName) =>
             match psElabMatchAlternativeFind ctorName alternatives with
             | some _ => true
             | none => false);
@@ -1165,7 +1165,7 @@ def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
         let coreName := psSyntaxNameToName name;
         let duplicated :=
           List.any rest
-            (fun candidate =>
+            (fun (candidate : PsSyntaxName) =>
               if psSyntaxNameIsWildcardBinder candidate then
                 false
               else
@@ -1949,7 +1949,7 @@ def psSyntaxRecordHasField
       List (Prod PsSyntaxName PsSyntaxTerm))
     (name : String) : Bool :=
   List.any fields
-    (fun field =>
+    (fun (field : Prod PsSyntaxName PsSyntaxTerm) =>
       match psSyntaxRecordFieldName field with
       | none => false
       | some fieldName => psStringEq fieldName name)
@@ -1961,7 +1961,7 @@ def psSyntaxRecordFieldsMatch
   psElabBoolAnd
     (Nat.beq List.length fields List.length names)
     (List.all names
-      (fun name => psSyntaxRecordHasField fields name))
+      (fun (name : String) => psSyntaxRecordHasField fields name))
 
 def psSyntaxRecordFindField
     (fields : List (Prod PsSyntaxName PsSyntaxTerm))

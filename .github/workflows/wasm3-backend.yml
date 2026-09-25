@@ -9,6 +9,7 @@ on:
       - backend/wasm3-gc-adts
       - backend/wasm3-closures
       - compiler-ir/generic-specialization
+      - backend/wasm3-runtime-arrays
       - integrate/generic-specialization
       - integrate/wasm3-closures
       - integrate/wasm3-gc-adts

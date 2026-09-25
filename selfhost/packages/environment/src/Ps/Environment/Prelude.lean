@@ -11,6 +11,10 @@ def psPreludeAdd
 def psBootstrapPreludeEnvironment : PsEnvironment :=
   let uName := psRootName "u"
   let alphaName := psRootName "α"
+  let betaName := psRootName "β"
+  let firstName := psRootName "first"
+  let secondName := psRootName "second"
+  let pairName := psRootName "pair"
   let aName := psRootName "a"
   let bName := psRootName "b"
   let pName := psRootName "p"
@@ -43,6 +47,57 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
         typeType
         PsBinderInfo.explicit)
       PsBinderInfo.explicit
+  let prodOf :=
+    fun alpha beta =>
+      PsExpr.app
+        (PsExpr.app (PsExpr.constE psProdName []) alpha)
+        beta
+  let prodMkType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        betaName
+        typeType
+        (PsExpr.forallE
+          firstName
+          (PsExpr.bvar 1)
+          (PsExpr.forallE
+            secondName
+            (PsExpr.bvar 1)
+            (prodOf (PsExpr.bvar 3) (PsExpr.bvar 2))
+            PsBinderInfo.explicit)
+          PsBinderInfo.explicit)
+        PsBinderInfo.implicit)
+      PsBinderInfo.implicit
+  let prodFstType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        betaName
+        typeType
+        (PsExpr.forallE
+          pairName
+          (prodOf (PsExpr.bvar 1) (PsExpr.bvar 0))
+          (PsExpr.bvar 2)
+          PsBinderInfo.explicit)
+        PsBinderInfo.implicit)
+      PsBinderInfo.implicit
+  let prodSndType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        betaName
+        typeType
+        (PsExpr.forallE
+          pairName
+          (prodOf (PsExpr.bvar 1) (PsExpr.bvar 0))
+          (PsExpr.bvar 1)
+          PsBinderInfo.explicit)
+        PsBinderInfo.implicit)
+      PsBinderInfo.implicit
   let arrayOf :=
     fun alpha => PsExpr.app (PsExpr.constE psArrayName []) alpha
   let arrayType :=
@@ -607,8 +662,17 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
   let envProd0 :=
     psPreludeAdd envOption0
       (PsDeclaration.axiomDecl psProdName [] prodType)
-  let envArray0 :=
+  let envProd1 :=
     psPreludeAdd envProd0
+      (PsDeclaration.axiomDecl psProdMkName [] prodMkType)
+  let envProd2 :=
+    psPreludeAdd envProd1
+      (PsDeclaration.axiomDecl psProdFstName [] prodFstType)
+  let envProd3 :=
+    psPreludeAdd envProd2
+      (PsDeclaration.axiomDecl psProdSndName [] prodSndType)
+  let envArray0 :=
+    psPreludeAdd envProd3
       (PsDeclaration.axiomDecl psArrayName [] arrayType)
   let envArray1 :=
     psPreludeAdd envArray0

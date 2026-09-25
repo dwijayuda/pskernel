@@ -89,7 +89,17 @@ export class V061LeanSubsetParser {
 
   private parseDeclaration():V061Declaration {
     const token=this.context.cursor.peek();
-    if(token.text!=='def'&&token.text!=='theorem'){
+    const partial=token.text==='partial';
+    if(partial){
+      const partialToken=this.context.cursor.consume();
+      if(!this.context.cursor.at('def')){
+        throw new SyntaxError(
+          "PS_LEAN_SUBSET_PARTIAL: 'partial' currently modifies 'def' only",
+          partialToken.span,
+        );
+      }
+    }
+    if(!this.context.cursor.at('def')&&!this.context.cursor.at('theorem')){
       return parseV061LeanSubsetDeclaration(
         this.context,
         this.expressions,
@@ -120,6 +130,7 @@ export class V061LeanSubsetParser {
 
     return {
       kind,
+      ...(partial?{partial:true}:{}),
       name:name.text,
       params,
       resultType,

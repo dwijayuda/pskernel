@@ -21,21 +21,21 @@ def Name.appendAfter (name : Name) (suffix : String) : Name :=
   | other => .str other suffix
 
 def Name.append : Name → Name → Name
-  | prefix, .anonymous => prefix
-  | prefix, .str parent value =>
-      .str (Name.append prefix parent) value
-  | prefix, .num parent value =>
-      .num (Name.append prefix parent) value
+  | base, .anonymous => base
+  | base, .str parent value =>
+      .str (Name.append base parent) value
+  | base, .num parent value =>
+      .num (Name.append base parent) value
 
 def Name.appendIndexAfter (name : Name) (index : Nat) : Name :=
   name.appendAfter ("_" ++ toString index)
 
-partial def Name.isPrefixOf (prefix : Name) : Name → Bool
-  | .anonymous => Name.eq prefix .anonymous
+partial def Name.isPrefixOf (needle : Name) : Name → Bool
+  | .anonymous => Name.eq needle .anonymous
   | name@(.str parent _) =>
-      Name.eq prefix name || Name.isPrefixOf prefix parent
+      Name.eq needle name || Name.isPrefixOf needle parent
   | name@(.num parent _) =>
-      Name.eq prefix name || Name.isPrefixOf prefix parent
+      Name.eq needle name || Name.isPrefixOf needle parent
 
 partial def Name.replacePrefix
     (name oldPrefix newPrefix : Name) : Option Name :=

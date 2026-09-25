@@ -2400,6 +2400,34 @@ def psTestStructureBeforePartialDefinition : Bool :=
         ] => true
       | _ => false
 
+def psTestLeanListLiteralSugar : Bool :=
+  let source := "def listValue (x : Nat) : List Nat := [x, 2]"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok module =>
+      match module.declarations with
+      | [PsSyntaxDeclaration.definition _ _ _ value _] =>
+          match value with
+          | PsSyntaxTerm.app
+              (PsSyntaxTerm.reference consName)
+              [
+                PsSyntaxTerm.reference xName,
+                PsSyntaxTerm.app
+                  (PsSyntaxTerm.reference consName2)
+                  [
+                    PsSyntaxTerm.natural "2" _,
+                    PsSyntaxTerm.reference nilName
+                  ]
+                  _
+              ]
+              _ =>
+              consName.segments == ["List", "cons"]
+                && consName2.segments == ["List", "cons"]
+                && nilName.segments == ["List", "nil"]
+                && xName.segments == ["x"]
+          | _ => false
+      | _ => false
+
 def psTestLeanListPatternSugar : Bool :=
   let source :=
     "def listEmptyOrTail (xs : List Nat) : Nat := " ++
@@ -2485,6 +2513,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "dual-source typed lambda parse", passed := psTestDualSourceTypedLambdaParse },
   { name := "dual-source typed lambda elaboration", passed := psTestDualSourceTypedLambdaElaboration },
   { name := "structure stops before partial def", passed := psTestStructureBeforePartialDefinition },
+  { name := "Lean list literal sugar", passed := psTestLeanListLiteralSugar },
   { name := "Lean list pattern sugar", passed := psTestLeanListPatternSugar },
   { name := "Lean Nat match sugar", passed := psTestLeanNatMatchSugar },
   { name := "Lean grouped typed binders", passed := psTestLeanGroupedTypedBinders },

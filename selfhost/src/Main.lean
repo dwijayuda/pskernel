@@ -49,9 +49,9 @@ def psCliTranslationTarget
   else
     none
 
-def psCliTranslate
+def psCliTranslatedSource
     (inputPath : String)
-    (targetText : String) : IO Unit := do
+    (targetText : String) : IO String := do
   let sourceKind ←
     match psCliSourceKindFromPath inputPath with
     | none =>
@@ -85,7 +85,21 @@ def psCliTranslate
         (IO.userError
           "PSC1_CLI_TRANSLATION_FAILED: source is outside the supported bootstrap subset")
   | Except.ok output =>
-      IO.print output
+      pure output
+
+def psCliTranslate
+    (inputPath : String)
+    (targetText : String) : IO Unit := do
+  IO.print (← psCliTranslatedSource inputPath targetText)
+
+def psCliTranslateToFile
+    (inputPath : String)
+    (targetText : String)
+    (outputPath : String) : IO Unit := do
+  let output ← psCliTranslatedSource inputPath targetText
+  IO.FS.writeFile outputPath output
+  IO.println
+    ("PSC1_TRANSLATE: " ++ inputPath ++ " -> " ++ outputPath)
 
 def psCliElaborateSource
     (inputPath : String) : IO PsElabModuleResult :=
@@ -110,6 +124,10 @@ def psCliCheck
 def psCliEmitLean
     (inputPath : String) : IO Unit :=
   psCliTranslate inputPath "lean"
+
+def psCliEmitProofScript
+    (inputPath : String) : IO Unit :=
+  psCliTranslate inputPath "ps"
 
 def psCliAdmissions
     (inputPath : String) : IO Unit := do
@@ -172,7 +190,9 @@ def psCliUsage : String :=
   "  psc1 check <input.lean|input.ps>\n" ++
   "  psc1 build <input.lean|input.ps> --out <output.ts>\n" ++
   "  psc1 translate <input.lean|input.ps> --to <lean|ps>\n" ++
-  "  psc1 emit-lean <input.lean|input.ps>\n" ++
+  "  psc1 translate <input.lean|input.ps> --to <lean|ps> --out <output>\n" ++
+  "  psc1 emit-lean <input.lean|input.ps> [--out <output.lean>]\n" ++
+  "  psc1 emit-ps <input.lean|input.ps> [--out <output.ps>]\n" ++
   "  psc1 admissions <input.lean|input.ps>\n" ++
   "  psc1 typescript <input.lean|input.ps>\n" ++
   "  psc1 compile <input.lean|input.ps> --out <output.ts>"
@@ -185,8 +205,16 @@ def main (args : List String) : IO Unit := do
       psCliCheck inputPath
   | ["translate", inputPath, "--to", target] =>
       psCliTranslate inputPath target
+  | ["translate", inputPath, "--to", target, "--out", outputPath] =>
+      psCliTranslateToFile inputPath target outputPath
   | ["emit-lean", inputPath] =>
       psCliEmitLean inputPath
+  | ["emit-lean", inputPath, "--out", outputPath] =>
+      psCliTranslateToFile inputPath "lean" outputPath
+  | ["emit-ps", inputPath] =>
+      psCliEmitProofScript inputPath
+  | ["emit-ps", inputPath, "--out", outputPath] =>
+      psCliTranslateToFile inputPath "ps" outputPath
   | ["admissions", inputPath] =>
       psCliAdmissions inputPath
   | ["typescript", inputPath] =>

@@ -1,5 +1,6 @@
 import Lean
 import PSC1Kernel
+import PSC1Kernel.Test.StructureFixture
 
 namespace PSC1Kernel.Test
 
@@ -196,6 +197,122 @@ def assertNatReductionOracle : IO Unit := do
       ("Nat reduction differs from Lean 4.34: " ++ label)
       (toLeanExpr ours == lean)
 
+def makeStructureEnvironment : PSC1Kernel.Environment :=
+  let pair : PSC1Kernel.Name := .str (.str (.str .anonymous "PSC1Kernel") "Test") "EtaPair"
+  let pairMk : PSC1Kernel.Name := .str pair "mk"
+  let unit : PSC1Kernel.Name := .str (.str (.str .anonymous "PSC1Kernel") "Test") "EtaUnit"
+  let unitMk : PSC1Kernel.Name := .str unit "mk"
+  let nat : PSC1Kernel.Name := .str .anonymous "Nat"
+  let type1 : PSC1Kernel.Expr := .sort (.succ .zero)
+  let natT : PSC1Kernel.Expr := .const nat []
+  let pairT : PSC1Kernel.Expr := .const pair []
+  let unitT : PSC1Kernel.Expr := .const unit []
+  let pairCtorT : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "left") natT
+      (.forallE (.str .anonymous "right") natT pairT .default)
+      .default
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.axiomInfo { base := mkBase nat type1, isUnsafe := false })
+  let env2 := env1.addUnchecked (.inductInfo {
+    base := mkBase pair type1
+    numParams := 0
+    numIndices := 0
+    all := [pair]
+    ctors := [pairMk]
+    numNested := 0
+    isRec := false
+    isReflexive := false
+    isUnsafe := false
+  })
+  let env3 := env2.addUnchecked (.ctorInfo {
+    base := mkBase pairMk pairCtorT
+    induct := pair
+    cidx := 0
+    numParams := 0
+    numFields := 2
+    isUnsafe := false
+  })
+  let env4 := env3.addUnchecked (.inductInfo {
+    base := mkBase unit type1
+    numParams := 0
+    numIndices := 0
+    all := [unit]
+    ctors := [unitMk]
+    numNested := 0
+    isRec := false
+    isReflexive := false
+    isUnsafe := false
+  })
+  env4.addUnchecked (.ctorInfo {
+    base := mkBase unitMk unitT
+    induct := unit
+    cidx := 0
+    numParams := 0
+    numFields := 0
+    isUnsafe := false
+  })
+
+def importStructureFixture : IO Lean.Environment := do
+  Lean.initSearchPath (← Lean.findSysroot)
+  Lean.importModules #[{ module := `PSC1Kernel.Test.StructureFixture }] {}
+
+def assertStructureEtaOracle : IO Unit := do
+  let env := makeStructureEnvironment
+  let pair : PSC1Kernel.Name := .str (.str (.str .anonymous "PSC1Kernel") "Test") "EtaPair"
+  let pairMk : PSC1Kernel.Name := .str pair "mk"
+  let x : PSC1Kernel.Name := .str .anonymous "x"
+  let pairT : PSC1Kernel.Expr := .const pair []
+  let pscLctx := PSC1Kernel.LocalContext.empty.addLocal x x pairT .default
+  let ctx : PSC1Kernel.CheckerContext :=
+    { (PSC1Kernel.CheckerContext.empty env) with lctx := pscLctx }
+  let xExpr : PSC1Kernel.Expr := .fvar x
+  let expanded : PSC1Kernel.Expr :=
+    .app
+      (.app (.const pairMk []) (.proj pair 0 xExpr))
+      (.proj pair 1 xExpr)
+  let ours ← exceptToIO "PSC1 structure eta" (PSC1Kernel.isDefEq ctx xExpr expanded)
+
+  let leanEnv ← importStructureFixture
+  let xId : Lean.FVarId := ⟨toLeanName x⟩
+  let leanPairT := toLeanExpr pairT
+  let leanLctx : Lean.LocalContext :=
+    ({} : Lean.LocalContext).mkLocalDecl xId (toLeanName x) leanPairT .default
+  let lean ←
+    match Lean.Kernel.isDefEq leanEnv leanLctx (.fvar xId) (toLeanExpr expanded) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean kernel structure eta oracle failed"
+  assertTrue "structure eta differs from Lean 4.34" (ours == lean)
+  assertTrue "Lean 4.34 should accept structure eta" lean
+
+def assertUnitLikeOracle : IO Unit := do
+  let env := makeStructureEnvironment
+  let unit : PSC1Kernel.Name := .str (.str (.str .anonymous "PSC1Kernel") "Test") "EtaUnit"
+  let a : PSC1Kernel.Name := .str .anonymous "a"
+  let b : PSC1Kernel.Name := .str .anonymous "b"
+  let unitT : PSC1Kernel.Expr := .const unit []
+  let pscLctx0 := PSC1Kernel.LocalContext.empty.addLocal a a unitT .default
+  let pscLctx := pscLctx0.addLocal b b unitT .default
+  let ctx : PSC1Kernel.CheckerContext :=
+    { (PSC1Kernel.CheckerContext.empty env) with lctx := pscLctx }
+  let ours ← exceptToIO
+    "PSC1 unit-like defeq"
+    (PSC1Kernel.isDefEq ctx (.fvar a) (.fvar b))
+
+  let leanEnv ← importStructureFixture
+  let aId : Lean.FVarId := ⟨toLeanName a⟩
+  let bId : Lean.FVarId := ⟨toLeanName b⟩
+  let leanUnitT := toLeanExpr unitT
+  let leanLctx0 : Lean.LocalContext :=
+    ({} : Lean.LocalContext).mkLocalDecl aId (toLeanName a) leanUnitT .default
+  let leanLctx :=
+    leanLctx0.mkLocalDecl bId (toLeanName b) leanUnitT .default
+  let lean ←
+    match Lean.Kernel.isDefEq leanEnv leanLctx (.fvar aId) (.fvar bId) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "Lean kernel unit-like oracle failed"
+  assertTrue "unit-like defeq differs from Lean 4.34" (ours == lean)
+  assertTrue "Lean 4.34 should identify inhabitants of a nullary structure" lean
+
 def assertFunctionEtaOracle : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let x : PSC1Kernel.Name := .str .anonymous "x"
@@ -322,6 +439,8 @@ def run : IO Unit := do
   assertExprOracle
   assertNatReductionOracle
   assertFunctionEtaOracle
+  assertStructureEtaOracle
+  assertUnitLikeOracle
   assertProofIrrelevanceOracle
   assertBinderInfoDefEqOracle
   assertProjectionOracle

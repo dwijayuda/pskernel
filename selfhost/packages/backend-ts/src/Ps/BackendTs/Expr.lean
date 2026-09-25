@@ -28,7 +28,7 @@ def psTsExprUsesNameWithFuel :
             || arguments.any
               (fun argument =>
                 psTsExprUsesNameWithFuel fuel argument name)
-      | .letE localName value body =>
+      | .letE localName _ value body =>
           localName == name
             || psTsExprUsesNameWithFuel fuel value name
             || psTsExprUsesNameWithFuel fuel body name
@@ -414,7 +414,7 @@ def psTsEmitExprWithFuel
                       Except.ok
                         (printedFn ++ generic ++ "(" ++
                           psTsJoin ", " printedArguments ++ ")")
-      | .letE name value body =>
+      | .letE name _ value body =>
           match psTsEmitExprWithFuel brands tags fuel value with
           | Except.error error => Except.error error
           | Except.ok printedValue =>

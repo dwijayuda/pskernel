@@ -1,3 +1,4 @@
+import Init.Data.String.Iterate
 import PSC1Kernel.Declaration
 
 namespace PSC1Kernel
@@ -17,14 +18,11 @@ to lower through PSC1/TypeScript.
 -/
 def environmentBucketCount : Nat := 4096
 
-def stringBucketHashCore : List Char → Nat → Nat
-  | [], acc => acc
-  | char :: rest, acc =>
-      stringBucketHashCore rest
-        ((acc * 33 + char.toNat + 1) % environmentBucketCount)
-
 def stringBucketHash (value : String) : Nat :=
-  stringBucketHashCore value.toList 5381
+  value.foldl
+    (fun acc char =>
+      (acc * 33 + char.toNat + 1) % environmentBucketCount)
+    5381
 
 def Name.bucketHash : Name → Nat
   | .anonymous => 0

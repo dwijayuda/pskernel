@@ -214,9 +214,15 @@ partial def reduceInductiveRec
   if majorIdx >= recArgs.length then
     return none
   let some major0 := listGet? recArgs majorIdx | return none
-  let major ←
+  let majorReduced ←
     if cheapRec then whnfCore ctx major0 true
     else whnf ctx major0
+  let major :=
+    match majorReduced with
+    | .lit (.nat 0) => Expr.const kernelNatZeroName []
+    | .lit (.nat (n + 1)) =>
+        Expr.app (Expr.const kernelNatSuccName []) (.lit (.nat n))
+    | _ => majorReduced
   let .const ctorName _ := major.getAppFn | return none
   let some rule := findRecursorRule ctorName recursor.rules | return none
   let majorArgs := major.getAppArgs

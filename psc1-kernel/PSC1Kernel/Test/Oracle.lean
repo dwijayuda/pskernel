@@ -592,6 +592,114 @@ def assertOrdinaryRecursorOracle : IO Unit := do
   assertTrue "ordinary recursor on chose wrong minor"
     (PSC1Kernel.Expr.eq oursOn onMinor)
 
+
+def assertNatLiteralRecursorOracle : IO Unit := do
+  let NatN := PSC1Kernel.kernelNatName
+  let Zero := PSC1Kernel.kernelNatZeroName
+  let Succ := PSC1Kernel.kernelNatSuccName
+  let Rec : PSC1Kernel.Name := .str NatN "rec"
+  let u : PSC1Kernel.Name := .str .anonymous "u"
+  let natType : PSC1Kernel.Expr := .sort (.succ .zero)
+  let natExpr : PSC1Kernel.Expr := .const NatN []
+  let succType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "n") natExpr natExpr .default
+  let env0 : PSC1Kernel.Environment := .empty
+  let env1 := env0.addUnchecked (.inductInfo {
+    base := mkBase NatN natType
+    numParams := 0
+    numIndices := 0
+    all := [NatN]
+    ctors := [Zero, Succ]
+    numNested := 0
+    isRec := true
+    isReflexive := false
+    isUnsafe := false
+  })
+  let env2 := env1.addUnchecked (.ctorInfo {
+    base := mkBase Zero natExpr
+    induct := NatN
+    cidx := 0
+    numParams := 0
+    numFields := 0
+    isUnsafe := false
+  })
+  let env3 := env2.addUnchecked (.ctorInfo {
+    base := mkBase Succ succType
+    induct := NatN
+    cidx := 1
+    numParams := 0
+    numFields := 1
+    isUnsafe := false
+  })
+  let motiveF : PSC1Kernel.Name := .str .anonymous "natMotive"
+  let zeroF : PSC1Kernel.Name := .str .anonymous "natZeroMinor"
+  let succF : PSC1Kernel.Name := .str .anonymous "natSuccMinor"
+  let nF : PSC1Kernel.Name := .str .anonymous "natPred"
+  let dummy : PSC1Kernel.Expr := .sort .zero
+
+  let zeroBody : PSC1Kernel.Expr := .fvar zeroF
+  let zeroClosed := zeroBody.abstractFVars [motiveF, zeroF, succF]
+  let rhsZero : PSC1Kernel.Expr :=
+    .lam motiveF dummy
+      (.lam zeroF dummy
+        (.lam succF dummy zeroClosed .default)
+        .default)
+      .default
+
+  let recursiveCall :=
+    PSC1Kernel.applyArgs
+      (.const Rec [.param u])
+      [.fvar motiveF, .fvar zeroF, .fvar succF, .fvar nF]
+  let succBody : PSC1Kernel.Expr :=
+    .app (.app (.fvar succF) (.fvar nF)) recursiveCall
+  let succClosed :=
+    succBody.abstractFVars [motiveF, zeroF, succF, nF]
+  let rhsSucc : PSC1Kernel.Expr :=
+    .lam motiveF dummy
+      (.lam zeroF dummy
+        (.lam succF dummy
+          (.lam nF dummy succClosed .default)
+          .default)
+        .default)
+      .default
+
+  let env := env3.addUnchecked (.recInfo {
+    base := { name := Rec, levelParams := [u], type := dummy }
+    all := [NatN]
+    numParams := 0
+    numIndices := 0
+    numMotives := 1
+    numMinors := 2
+    rules := [
+      { ctor := Zero, nFields := 0, rhs := rhsZero },
+      { ctor := Succ, nFields := 1, rhs := rhsSucc }
+    ]
+    k := false
+    isUnsafe := false
+  })
+  let ctx := PSC1Kernel.CheckerContext.empty env
+  let nName : PSC1Kernel.Name := .str .anonymous "n"
+  let ihName : PSC1Kernel.Name := .str .anonymous "ih"
+  let motive : PSC1Kernel.Expr := .lam nName natExpr natExpr .default
+  let zeroMinor : PSC1Kernel.Expr := .lit (.nat 0)
+  let succMinor : PSC1Kernel.Expr :=
+    .lam nName natExpr
+      (.lam ihName natExpr
+        (.app (.const Succ []) (.bvar 0))
+        .default)
+      .default
+  let input :=
+    PSC1Kernel.applyArgs
+      (.const Rec [.succ .zero])
+      [motive, zeroMinor, succMinor, .lit (.nat 3)]
+  let ours ← exceptToIO "PSC1 Nat literal recursor" (PSC1Kernel.whnf ctx input)
+  let leanEnv ← Lean.importModules #[{ module := `Init.Prelude }] {}
+  let lean ← kernelExprWhnf leanEnv input
+  assertTrue "Nat literal recursor reduction differs from Lean 4.34"
+    (toLeanExpr ours == lean)
+  assertTrue "Nat literal recursor did not normalize recursively"
+    (PSC1Kernel.Expr.eq ours (.lit (.nat 3)))
+
 def assertQuotReductionOracle : IO Unit := do
   let leanEnv ← importStructureFixture
   let ctx := PSC1Kernel.CheckerContext.empty PSC1Kernel.Environment.empty.markQuotInitialized
@@ -832,6 +940,7 @@ def run : IO Unit := do
   assertBinderInfoDefEqOracle
   assertProjectionOracle
   assertOrdinaryRecursorOracle
+  assertNatLiteralRecursorOracle
   assertQuotReductionOracle
   assertDeclarationAdmissionOracle
   IO.println "PSC1Kernel Lean 4.34 foundational + projection oracle: PASS"

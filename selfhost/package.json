@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "psc": "node bin/psc.mjs",
-    "clean": "rm -rf dist",
+    "clean": "node scripts/clean.mjs",
     "check:workspace": "node scripts/check-workspace.mjs",
     "check:source": "node check-psc1-source.mjs",
     "build:lean": "lake build",

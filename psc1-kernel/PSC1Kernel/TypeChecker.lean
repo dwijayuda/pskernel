@@ -1141,6 +1141,34 @@ partial def isDefEqArgs
   | _, .app _ _ => return false
   | _, _ => return true
 
+/--
+Final Lean 4.34 `is_def_eq_app`: flatten both application spines, compare the
+heads first, reject differing arity only after the head comparison, then compare
+arguments from left to right. The order is observable because defeq is
+intentionally incomplete.
+-/
+partial def isDefEqApp
+    (ctx : CheckerContext)
+    (left right : Expr) : Except String Bool := do
+  let leftFn := left.getAppFn
+  let rightFn := right.getAppFn
+  if !(← isDefEq ctx leftFn rightFn) then
+    return false
+  let leftArgs := left.getAppArgs
+  let rightArgs := right.getAppArgs
+  if leftArgs.length != rightArgs.length then
+    return false
+  let rec compareArgs
+      (as bs : List Expr) : Except String Bool := do
+    match as, bs with
+    | [], [] => return true
+    | a :: as', b :: bs' =>
+        if !(← isDefEq ctx a b) then
+          return false
+        compareArgs as' bs'
+    | _, _ => return false
+  compareArgs leftArgs rightArgs
+
 partial def lazyDeltaReductionStep
     (ctx : CheckerContext)
     (left right : Expr) : Except String DeltaStepResult := do
@@ -1318,10 +1346,9 @@ partial def isDefEq (ctx : CheckerContext) (a b : Expr) : Except String Bool := 
   match aFull, bFull with
   | .sort u, .sort v => return Level.equivalent u v
   | .lit x, .lit y => return Literal.eq x y
-  | .app f₁ a₁, .app f₂ a₂ => do
-    let hf ← isDefEq ctx f₁ f₂
-    if hf then
-      if ← isDefEq ctx a₁ a₂ then return true
+  | .app _ _, .app _ _ => do
+    if ← isDefEqApp ctx aFull bFull then
+      return true
   | .forallE .., .forallE .. => do
     if ← isDefEqForallSpine ctx aFull bFull then
       return true

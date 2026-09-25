@@ -383,7 +383,7 @@ def psParseLeanMatchAlternativesAtColumnWithFuel
           let sameLine := token.span.start.line == previousBranchLine
           let belongsToMatch :=
             token.text == "|"
-              && (sameLine || branchColumn <= token.span.start.column)
+              && (sameLine || Nat.ble branchColumn token.span.start.column)
           if belongsToMatch then
             match psTokenCursorAdvance cursor with
             | none =>

@@ -514,18 +514,13 @@ structure PsCheckedAdmissionEncodeState where
 def psEncodeCheckedAdmissionsLoop
     (allDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
-    PsCheckedAdmissionEncodeState ->
-      Except PsCheckedAdmissionCodecError
-        PsCheckedAdmissionEncodeState :=
+    PsCheckedAdmissionEncodeState -> Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
   match declarations with
   | List.nil =>
       fun (state : PsCheckedAdmissionEncodeState) =>
         Except.ok state
   | List.cons declaration rest =>
-      let smaller :
-          PsCheckedAdmissionEncodeState ->
-            Except PsCheckedAdmissionCodecError
-              PsCheckedAdmissionEncodeState :=
+      let smaller : PsCheckedAdmissionEncodeState -> Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
         psEncodeCheckedAdmissionsLoop allDeclarations rest;
       fun (state : PsCheckedAdmissionEncodeState) =>
         match declaration with

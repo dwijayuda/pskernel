@@ -39,10 +39,18 @@ def psPrintProofScriptUnitCallArgs
           | List.cons _ _ => false
       | _ => false
 
-def psPrintProofScriptTermWithFuel :
-    Nat -> PsSyntaxTerm -> Except PsSourcePrintError String
-  | 0, _ => Except.error PsSourcePrintError.fuelExhausted
-  | remaining + 1, term =>
+def psPrintProofScriptTermWithFuel
+    (fuel : Nat) :
+    PsSyntaxTerm -> Except PsSourcePrintError String :=
+  match fuel with
+  | 0 =>
+      fun (_term : PsSyntaxTerm) =>
+        Except.error PsSourcePrintError.fuelExhausted
+  | remaining + 1 =>
+      let smaller :
+          PsSyntaxTerm -> Except PsSourcePrintError String :=
+        psPrintProofScriptTermWithFuel remaining;
+      fun (term : PsSyntaxTerm) =>
       match term with
       | .reference name =>
           psPrintSyntaxName name
@@ -64,7 +72,7 @@ def psPrintProofScriptTermWithFuel :
               match psPrintSyntaxName field.fst with
               | Except.error error => Except.error error
               | Except.ok name =>
-                  match psPrintProofScriptTermWithFuel remaining field.snd with
+                  match smaller field.snd with
                   | Except.error error => Except.error error
                   | Except.ok value =>
                       Except.ok
@@ -78,14 +86,14 @@ def psPrintProofScriptTermWithFuel :
           if psPrintProofScriptBoolNot (psSyntaxTermSimpleForApplication fn) then
             Except.error PsSourcePrintError.unsupportedApplication
           else
-            match psPrintProofScriptTermWithFuel remaining fn with
+            match smaller fn with
             | Except.error error => Except.error error
             | Except.ok printedFn =>
                 if psPrintProofScriptUnitCallArgs args then
                   Except.ok (psPrintProofScriptConcat2 printedFn "()")
                 else
                   match args.mapM
-                      (psPrintProofScriptTermWithFuel remaining) with
+                      (smaller) with
                   | Except.error error => Except.error error
                   | Except.ok printedArgs =>
                       Except.ok
@@ -121,7 +129,7 @@ def psPrintProofScriptTermWithFuel :
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               match
-                  psPrintProofScriptTermWithFuel remaining body with
+                  smaller body with
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   Except.ok
@@ -157,7 +165,7 @@ def psPrintProofScriptTermWithFuel :
           | Except.error error => Except.error error
           | Except.ok printedBinders =>
               match
-                  psPrintProofScriptTermWithFuel remaining body with
+                  smaller body with
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   Except.ok

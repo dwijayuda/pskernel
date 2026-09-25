@@ -992,7 +992,7 @@ def psElabInductiveDeclaration
                         name
                         constructors;
                     let parameterArgs :=
-                      psElabBinderArguments parameters.bindersRev
+                      psElabBinderArguments parameters.bindersRev;
                     let info : PsInductiveInfo := {
                       name := name
                       levelParams := []

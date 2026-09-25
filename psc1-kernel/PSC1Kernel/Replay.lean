@@ -150,11 +150,75 @@ structure PendingMutual where
   all : List Name
   defs : List DefinitionInfo
 
+structure IndexTable (α : Type) where
+  dense : Array α
+  sparse : List (Nat × α)
+  count : Nat
+
+def IndexTable.empty : IndexTable α :=
+  { dense := #[], sparse := [], count := 0 }
+
+def IndexTable.seed (values : Array α) : IndexTable α :=
+  { dense := values, sparse := [], count := values.size }
+
+def lookupSparse? (index : Nat) : List (Nat × α) → Option α
+  | [] => none
+  | (i, value) :: rest =>
+      if i == index then some value else lookupSparse? index rest
+
+def takeSparse?
+    (index : Nat) : List (Nat × α) → Option (α × List (Nat × α))
+  | [] => none
+  | (i, value) :: rest =>
+      if i == index then
+        some (value, rest)
+      else
+        match takeSparse? index rest with
+        | some (found, remaining) =>
+            some (found, (i, value) :: remaining)
+        | none => none
+
+def IndexTable.get? (table : IndexTable α) (index : Nat) : Option α :=
+  if index < table.dense.size then
+    table.dense[index]?
+  else
+    lookupSparse? index table.sparse
+
+partial def promoteIndexTable
+    (dense : Array α)
+    (sparse : List (Nat × α)) : Array α × List (Nat × α) :=
+  match takeSparse? dense.size sparse with
+  | some (value, rest) =>
+      promoteIndexTable (dense.push value) rest
+  | none => (dense, sparse)
+
+def IndexTable.add
+    (table : IndexTable α)
+    (kind : String)
+    (index : Nat)
+    (value : α) : Except String (IndexTable α) :=
+  if (table.get? index).isSome then
+    .error ("lean4export " ++ kind ++ " index is already defined")
+  else if index == table.dense.size then
+    let (dense, sparse) :=
+      promoteIndexTable (table.dense.push value) table.sparse
+    .ok {
+      dense := dense
+      sparse := sparse
+      count := table.count + 1
+    }
+  else
+    .ok {
+      dense := table.dense
+      sparse := (index, value) :: table.sparse
+      count := table.count + 1
+    }
+
 structure State where
   env : Environment
-  names : List (Nat × Name)
-  levels : List (Nat × Level)
-  exprs : List (Nat × Expr)
+  names : IndexTable Name
+  levels : IndexTable Level
+  exprs : IndexTable Expr
   sawMeta : Bool
   records : Nat
   declarations : Nat
@@ -163,9 +227,9 @@ structure State where
 def State.empty (env : Environment := .empty) : State :=
   {
     env := env
-    names := [(0, .anonymous)]
-    levels := [(0, .zero)]
-    exprs := []
+    names := IndexTable.seed #[.anonymous]
+    levels := IndexTable.seed #[.zero]
+    exprs := IndexTable.empty
     sawMeta := false
     records := 0
     declarations := 0
@@ -182,42 +246,24 @@ structure Stats where
 def State.stats (state : State) : Stats :=
   {
     records := state.records
-    names := if state.names.isEmpty then 0 else state.names.length - 1
-    levels := if state.levels.isEmpty then 0 else state.levels.length - 1
-    expressions := state.exprs.length
+    names := state.names.count - 1
+    levels := state.levels.count - 1
+    expressions := state.exprs.count
     declarations := state.declarations
   }
 
-def lookupIndex? (index : Nat) : List (Nat × α) → Option α
-  | [] => none
-  | (i, value) :: rest =>
-      if i == index then some value else lookupIndex? index rest
-
-def hasIndex (index : Nat) (table : List (Nat × α)) : Bool :=
-  (lookupIndex? index table).isSome
-
-def addIndex
-    (kind : String)
-    (index : Nat)
-    (value : α)
-    (table : List (Nat × α)) : Except String (List (Nat × α)) :=
-  if hasIndex index table then
-    .error ("lean4export " ++ kind ++ " index is already defined")
-  else
-    .ok (table ++ [(index, value)])
-
 def State.nameAt (state : State) (index : Nat) : Except String Name :=
-  match lookupIndex? index state.names with
+  match state.names.get? index with
   | some value => .ok value
   | none => .error "lean4export Name reference is undefined"
 
 def State.levelAt (state : State) (index : Nat) : Except String Level :=
-  match lookupIndex? index state.levels with
+  match state.levels.get? index with
   | some value => .ok value
   | none => .error "lean4export Level reference is undefined"
 
 def State.exprAt (state : State) (index : Nat) : Except String Expr :=
-  match lookupIndex? index state.exprs with
+  match state.exprs.get? index with
   | some value => .ok value
   | none => .error "lean4export Expr reference is undefined"
 
@@ -265,7 +311,7 @@ def State.addNameRecord
         pure (.str (← state.nameAt parent) text)
     | .num parent value =>
         pure (.num (← state.nameAt parent) value)
-  let names ← addIndex "Name" record.index value state.names
+  let names ← state.names.add "Name" record.index value
   pure { state with names := names }
 
 def State.addLevelRecord
@@ -281,7 +327,7 @@ def State.addLevelRecord
         pure (.imax (← state.levelAt left) (← state.levelAt right))
     | .param name =>
         pure (.param (← state.nameAt name))
-  let levels ← addIndex "Level" record.index value state.levels
+  let levels ← state.levels.add "Level" record.index value
   pure { state with levels := levels }
 
 def State.addExprRecord
@@ -323,7 +369,7 @@ def State.addExprRecord
     | .strVal value => pure (.lit (.str value))
     | .mdata metadata expr =>
         pure (.mdata metadata (← state.exprAt expr))
-  let exprs ← addIndex "Expr" record.index value state.exprs
+  let exprs ← state.exprs.add "Expr" record.index value
   pure { state with exprs := exprs }
 
 def findPending?

@@ -959,6 +959,106 @@ def assertExprOracle : IO Unit := do
 
 
 
+def assertSimpleInductiveAdmissionOracle : IO Unit := do
+  let Enum : PSC1Kernel.Name := .str .anonymous "OracleEnum"
+  let Off : PSC1Kernel.Name := .str Enum "off"
+  let On : PSC1Kernel.Name := .str Enum "on"
+  let Rec : PSC1Kernel.Name := .str Enum "rec"
+  let enumType : PSC1Kernel.Expr := .sort (.succ .zero)
+  let enumExpr : PSC1Kernel.Expr := .const Enum []
+  let decl : PSC1Kernel.Kernel.SimpleInductiveDecl := {
+    levelParams := []
+    name := Enum
+    type := enumType
+    ctors := [
+      { name := Off, type := enumExpr },
+      { name := On, type := enumExpr }
+    ]
+    isUnsafe := false
+  }
+
+  let ours ← exceptToIO
+    "PSC1 simple inductive admission"
+    (PSC1Kernel.Kernel.addSimpleInductive .empty decl)
+  for name in [Enum, Off, On, Rec] do
+    assertTrue "simple inductive admission omitted generated declaration"
+      (ours.contains name)
+
+  let lean0 := (← Lean.mkEmptyEnvironment).toKernelEnv
+  let lean1 ←
+    match Lean.Kernel.Environment.addDecl lean0 {} (.inductDecl [] 0 [{
+      name := toLeanName Enum
+      type := toLeanExpr enumType
+      ctors := [
+        { name := toLeanName Off, type := toLeanExpr enumExpr },
+        { name := toLeanName On, type := toLeanExpr enumExpr }
+      ]
+    }] false) with
+    | .ok env => pure env
+    | .error _ =>
+        throw <| IO.userError "Lean 4.34 rejected simple inductive oracle"
+  let leanEnv := Lean.Environment.ofKernelEnv lean1
+
+  for name in [Enum, Off, On, Rec] do
+    let some oursInfo := ours.find? name
+      | throw <| IO.userError "PSC1 simple inductive metadata missing"
+    let some leanInfo := leanEnv.find? (toLeanName name)
+      | throw <| IO.userError "Lean 4.34 simple inductive metadata missing"
+    assertTrue "simple inductive generated type differs from Lean 4.34"
+      (Lean.Expr.eqv (toLeanExpr oursInfo.type) leanInfo.type)
+
+  let ctx := PSC1Kernel.CheckerContext.empty ours
+  let motiveName : PSC1Kernel.Name := .str .anonymous "motive"
+  let motive : PSC1Kernel.Expr :=
+    .lam motiveName enumExpr (.sort .zero) .default
+  let offMinor : PSC1Kernel.Expr := .lit (.nat 17)
+  let onMinor : PSC1Kernel.Expr := .lit (.nat 29)
+  let offApp :=
+    PSC1Kernel.applyArgs (.const Rec [.zero])
+      [motive, offMinor, onMinor, .const Off []]
+  let onApp :=
+    PSC1Kernel.applyArgs (.const Rec [.zero])
+      [motive, offMinor, onMinor, .const On []]
+  let oursOff ← exceptToIO
+    "PSC1 generated simple recursor off"
+    (PSC1Kernel.whnf ctx offApp)
+  let oursOn ← exceptToIO
+    "PSC1 generated simple recursor on"
+    (PSC1Kernel.whnf ctx onApp)
+  let leanOff ← kernelExprWhnf leanEnv offApp
+  let leanOn ← kernelExprWhnf leanEnv onApp
+  assertTrue "generated simple recursor off differs from Lean 4.34"
+    (toLeanExpr oursOff == leanOff)
+  assertTrue "generated simple recursor on differs from Lean 4.34"
+    (toLeanExpr oursOn == leanOn)
+  assertTrue "generated simple recursor selected wrong off minor"
+    (PSC1Kernel.Expr.eq oursOff offMinor)
+  assertTrue "generated simple recursor selected wrong on minor"
+    (PSC1Kernel.Expr.eq oursOn onMinor)
+
+  -- This first K5 slice is intentionally fail-closed for constructor fields.
+  let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
+  let Bad : PSC1Kernel.Name := .str .anonymous "OracleSimpleBad"
+  let BadMk : PSC1Kernel.Name := .str Bad "mk"
+  let badExpr : PSC1Kernel.Expr := .const Bad []
+  let badCtorType : PSC1Kernel.Expr :=
+    .forallE (.str .anonymous "n") (.const NatN []) badExpr .default
+  let badBase :=
+    PSC1Kernel.Environment.empty.addUnchecked (.axiomInfo {
+      base := mkBase NatN (.sort (.succ .zero))
+      isUnsafe := false
+    })
+  match PSC1Kernel.Kernel.addSimpleInductive badBase {
+    levelParams := []
+    name := Bad
+    type := .sort (.succ .zero)
+    ctors := [{ name := BadMk, type := badCtorType }]
+    isUnsafe := false
+  } with
+  | .ok _ =>
+      throw <| IO.userError "simple inductive admission accepted unsupported constructor fields"
+  | .error _ => pure ()
+
 def assertOrdinaryRecursorOracle : IO Unit := do
   let Flag : PSC1Kernel.Name := .str .anonymous "OracleFlag"
   let Off : PSC1Kernel.Name := .str Flag "off"
@@ -1444,6 +1544,7 @@ def run : IO Unit := do
   assertStringLiteralDefEqOracle
   assertQuotAdmissionOracle
   assertProjectionOracle
+  assertSimpleInductiveAdmissionOracle
   assertOrdinaryRecursorOracle
   assertNatLiteralRecursorOracle
   assertQuotReductionOracle

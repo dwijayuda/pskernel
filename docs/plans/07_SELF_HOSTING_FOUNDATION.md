@@ -36,6 +36,65 @@ Until the self-hosting foundation gates in this document are closed:
 
 ## Reference workload
 
+### ProofScript language-reference baseline
+
+PSC1 uses the **ProofScript Language Reference v0.7 line, with v0.6.1 as the
+compatible compiler-ready baseline**, for ordinary ProofScript source syntax.
+The v0.8 language reference is **not** normative for PSC1 and must not be used
+to remove or reinterpret source forms that v0.7/v0.6.1 define.
+
+In particular, PSC1 preserves the v0.7/v0.6.1 definition-declaration family:
+
+- `def` is the canonical general definition declaration;
+- `const` is a **parameterless `def` alias**;
+- `function` is a **parameterized `def` alias** and requires at least one
+  explicit declaration parameter group.
+
+The aliases introduce **no new checked-core, kernel, erasure, IR, or runtime
+declaration kinds**. Both lower/elaborate exactly as ordinary `def`
+declarations. Their purpose is source ergonomics only.
+
+Required source rules:
+
+```proofscript
+def answer : Nat := 42;
+
+const answer2 : Nat := 42;
+
+function add(x : Nat, y : Nat) : Nat :=
+  x + y;
+```
+
+A `const` declaration must not have declaration parameters:
+
+```proofscript
+const add(x : Nat, y : Nat) : Nat := x + y;  // reject
+```
+
+but a parameterless `const` may still hold a function-valued expression:
+
+```proofscript
+const increment : Nat -> Nat :=
+  fun x => x + 1;
+```
+
+A `function` declaration without an explicit parameter group must be rejected:
+
+```proofscript
+function answer : Nat := 42;  // reject
+```
+
+These spellings must not acquire JavaScript semantics. In particular, `const`
+does not mean JavaScript binding/object immutability, and `function` does not
+introduce JavaScript hoisting, `this`, prototypes, statement-body semantics,
+or unrestricted `return`.
+
+Canonical Lean translation always emits `def`. Canonical ProofScript
+translation may also normalize aliases to `def`; semantic/source round-trip
+gates require equal checked-core/IR meaning, not preservation of the original
+alias spelling. Therefore supporting these aliases does not create a second
+semantic mechanism.
+
 The implementation workload is derived from the pinned Lean 4.34 sources under:
 
 - `study/lean4-4.34.0/src/Lean/Parser/`
@@ -148,6 +207,10 @@ The preferred canonical choices for the first bootstrap are:
 The **minimal REQUIRED PSC1 language/capability set** is:
 
 - definitions, functions, lambdas, application and `let`;
+- the v0.7/v0.6.1 definition spellings: canonical `def`, parameterless
+  `const` alias, and parameterized `function` alias with at least one
+  explicit declaration parameter group; all three elaborate to the same
+  definition semantics;
 - ordinary `if` and basic single-scrutinee `match`;
 - structures, inductives, constructors and projections;
 - the PSC1 primitive/runtime scalar foundation:
@@ -209,6 +272,55 @@ the one that reuses an existing semantic mechanism. Add a new REQUIRED language
 feature only after demonstrating that the compiler cannot be written
 reasonably using the frozen core/library vocabulary.
 
+### Mainstream-language design review / PSC1 freeze confirmation
+
+A cross-language design review completed on 2026-09-26 compared the planned
+PSC1 surface and semantics against thirteen representative widely used
+languages: Python, JavaScript, TypeScript, Java, C#, C, C++, Go, Rust, PHP,
+Swift, Ruby and R. The purpose was not to copy their feature counts; it was to
+look for semantic capabilities whose absence would make PSC1 an unreasonable
+general-purpose or self-hosting language.
+
+The review found **no missing major language feature that justifies expanding
+the REQUIRED PSC1 surface before self-hosting**. In particular:
+
+- Go reinforces the small-language/library-first policy;
+- Rust and Swift reinforce first-class algebraic data, `Option`-style absence,
+  typed `Result`/error values and exhaustive elimination rather than adding
+  `null` as a second absence mechanism;
+- Java/C#/modern Python pattern facilities do not justify promoting rich
+  pattern sugar when one ordinary constructor `match` already owns the
+  semantics;
+- TypeScript/JavaScript reinforce the value of ecosystem/FFI interoperability,
+  but their dynamic object identity, coercions, structural escape hatches and
+  host-number model must not leak into portable PSC1 semantics;
+- C/C++/Rust reinforce the need for precise machine-scalar and ABI semantics,
+  not for exposing pointers, ownership, borrowing, lifetimes or host layout in
+  PSC1;
+- mainstream OOP does not create a PSC1 capability gap: structures,
+  inductives, functions, modules and bounded classes/instances already provide
+  the required abstraction mechanisms;
+- loops, mutation-looking syntax, richer patterns, exception syntax, generic
+  HKT stacks and large metaprogramming systems remain conveniences or
+  implementation techniques, not PSC1 completion requirements.
+
+Therefore **do not reopen PSC1 language scope merely to match mainstream
+feature lists**. Continue the current self-host sequence. A new REQUIRED
+feature still needs evidence from real compiler code or a frozen semantic
+obligation.
+
+The review did identify two semantic-hardening items that must be closed before
+the PSC1 freeze, without adding new source-language features:
+
+1. freeze a normative machine-scalar operation/conversion contract;
+2. freeze the purity/effect classification and sequencing contract for
+   host/FFI capabilities.
+
+It also identified two useful post-PSC1 directions that are deliberately
+non-blocking: a small backend-neutral structured async/task model, and
+deterministic resource-cleanup/bracket semantics before adding convenience
+syntax such as `defer`, `using` or RAII-like forms.
+
 ## Foundation completion rule
 
 A runtime language feature is complete only when it executes through:
@@ -249,6 +361,122 @@ Backends must preserve the same source meaning:
 The scalar family should share generic implementation/proof machinery where
 possible (for example fixed-width integer operations parameterized by width)
 rather than duplicating unrelated semantics for every concrete type.
+
+#### Scalar operation/conversion freeze checklist
+
+Before SH7 freezes PSC1, publish and executable-gate a normative scalar matrix
+for every operation/conversion that the frozen source surface accepts. Merely
+naming fixed-width types is insufficient for a multi-backend language. The
+matrix must specify at least:
+
+| Area | Required PSC1 decision |
+| --- | --- |
+| fixed-width `+`, `-`, `*` | exact overflow/wrap behavior |
+| division/remainder | zero-divisor behavior and signed quotient/remainder rules |
+| shifts/rotates | width, masking/range behavior and signedness |
+| bitwise operations | exact width/sign interpretation |
+| widening conversions | exact value-preserving cases |
+| narrowing conversions | truncation/wrap/rejection semantics |
+| signed <-> unsigned | exact bit/value conversion rules |
+| `Nat`/`Int` <-> machine integers | checked, modulo or otherwise explicit conversion semantics |
+| integer <-> floating point | rounding and out-of-range behavior |
+| `Float32` <-> `Float` | exact widening/narrowing behavior |
+| floating comparison | NaN, signed-zero and ordering behavior |
+| floating bit conversions | payload/canonicalization obligations where exposed |
+| `USize`/`ISize` | target profile, width reporting and cross-target behavior |
+
+For operations inherited from the supported Lean 4.34 model, prefer the pinned
+Lean semantics rather than inventing backend-specific ProofScript behavior.
+Where PSC1 introduces a scalar operation not directly inherited from that
+model, specify it once at the language level before any backend implementation
+is accepted.
+
+The TypeScript, Rust and Wasm backends must share one scalar conformance corpus.
+Backend-native operators may be used only when their observable result matches
+the PSC1 matrix. Otherwise the backend must synthesize the required semantics.
+Fast-math, host-default narrowing, JavaScript `number` coercion, Rust overflow
+mode, Wasm opcode choice or target ABI defaults are never language semantics.
+
+### Shared VerifiedIR target-neutrality contract
+
+`CheckedCore -> Erasure -> VerifiedIR` is the single semantic lowering shared
+by **all execution backends**. TypeScript, Rust, and WebAssembly must consume the
+same target-neutral `PsVerifiedIrModule`; no backend gets a privileged
+semantic IR.
+
+```text
+                       CheckedCore
+                           |
+                        Erasure
+                           |
+                      VerifiedIR
+                    /      |       \
+                   /       |        \
+          backend-ts  backend-rust  backend-wasm
+              |           |             |
+             .ts         .rs       Wasm target IR
+```
+
+The shared IR may describe ProofScript runtime semantics: PSC primitive types,
+functions/lambdas/calls, structures, inductives, constructors, matches,
+semantic intrinsics, target-neutral capabilities/import identities, and proved
+optimization facts.
+
+The shared IR must **not** contain target representation decisions:
+
+- no TypeScript/JavaScript `number`, `bigint`, object layout, npm, or Node
+  semantics;
+- no Rust `u32`, `Vec<T>`, ownership, borrowing, lifetimes, traits, Cargo,
+  or Rust ABI semantics;
+- no WebAssembly `i32/i64/f32/f64`, opcodes, GC heap types, memories,
+  tables, sections, WIT/WASI, or binary-format semantics;
+- no target-specific object layout, calling convention, import syntax, or
+  allocation policy.
+
+Each backend owns a **target-lowering layer after VerifiedIR**. Backend-specific
+IRs are allowed and encouraged when useful, but they must be downstream of the
+shared semantic IR. Optimizations that are semantics-preserving and useful to
+multiple targets should live in a shared target-neutral optimizer before
+backend lowering.
+
+A repository guard must reject obvious backend namespace/representation leakage
+from `packages/compiler-ir/src`. Review of shared-IR changes must ask whether
+the same node has a coherent meaning for TS, Rust, and Wasm without mentioning
+any of those targets.
+
+### Portable value identity and purity/effect boundary invariant
+
+Portable PSC1 values are semantic values, not target objects. Structures,
+inductives, arrays, strings, closures and other managed values must not expose
+JavaScript object identity, Rust addresses/layout, GC identity, or Wasm
+reference/linear-memory addresses as part of ordinary PSC1 semantics. Equality
+and ordering come from the declared PSC1 operation/typeclass semantics, not
+from backend representation identity. A future explicit identity/reference
+capability would be a separate effectful feature and is not part of PSC1.
+
+Ordinary PSC1 functions are referentially transparent with respect to portable
+language semantics. Therefore a host binding may appear as an ordinary pure
+function only when its capability manifest explicitly classifies the operation
+as a trusted pure/deterministic runtime assumption compatible with that
+signature. Such a runtime assumption is still never proof evidence.
+
+Operations that can observe or change the external world -- including
+filesystem/process access, clocks/randomness, mutable host state, network I/O
+or exception-throwing host APIs -- must cross an explicit effect/capability
+boundary such as `CompilerM`, a later `IO`/host effect, or an equivalent
+owned abstraction. They must not masquerade as ordinary pure functions.
+
+Effect sequencing is owned by the PSC1 effect semantics (`bind`/`do` or its
+future equivalent), not by JavaScript evaluation order, Rust statement order,
+or Wasm instruction order. Host exceptions/rejections used for ordinary runtime
+failure must be caught at the adapter boundary and translated into the declared
+PSC1 error/effect channel unless the capability is explicitly documented as an
+unrecoverable runtime abort.
+
+This invariant protects proof rewriting, compiler optimizations and
+cross-backend equivalence: pure code may be transformed according to PSC1
+semantics without accidentally duplicating, removing or reordering hidden host
+effects.
 
 ### TypeScript / JavaScript backend invariant
 
@@ -332,6 +560,72 @@ The Rust backend is **not required to close the first PSC1 JavaScript
 self-host**. It is added after that fixed point to establish a second,
 independent execution host without delaying the current source-closure
 campaign.
+
+### Planned owned WebAssembly 3 backend invariant
+
+The direct WebAssembly backend is developed independently on
+`backend/wasm3-owned` so it cannot block PSC1 source closure. It consumes the
+same VerifiedIR contract as TypeScript and Rust and lowers into a distinct
+Wasm target IR before binary encoding:
+
+```text
+supported .lean or .ps
+-> shared source-neutral AST
+-> checked core
+-> erasure
+-> target-neutral VerifiedIR
+-> shared target-neutral optimizations
+-> backend-wasm
+-> Wasm target IR
+-> owned binary encoder
+-> .wasm
+```
+
+The production design may use WebAssembly 3 facilities such as GC structs and
+arrays, typed function references, tail calls, packed i8/i16 storage, SIMD,
+memory64 profiles, and the deterministic execution profile. These capabilities
+must remain backend implementation choices and must not become PSC1 source
+features merely because Wasm supports them.
+
+Initial semantic mappings are:
+
+```text
+UInt8/Int8       -> i32 execution, packed i8 storage where appropriate
+UInt16/Int16     -> i32 execution, packed i16 storage where appropriate
+UInt32/Int32     -> i32
+UInt64/Int64     -> i64
+USize/ISize      -> i32 for wasm32, i64 for wasm64
+Float32          -> f32
+Float            -> f64
+Bool/Char        -> target-lowered scalar representations preserving PSC rules
+Nat/Int          -> exact PSC runtime representations unless proven narrowed
+String/ADTs      -> runtime/GC representations preserving PSC semantics
+```
+
+Prefer a hybrid runtime: Wasm GC for managed semantic data such as structures,
+inductives, closures and generic reference arrays; linear memory/SIMD for packed
+numeric and binary workloads. Representation selection belongs to
+`backend-wasm` or a proven target-neutral optimization fact, never to the
+semantic meaning of VerifiedIR.
+
+A pure ProofScript package that depends only on portable PSC APIs should be
+eligible for all three targets:
+
+```text
+library.ps
+   -> VerifiedIR
+      +-> backend-ts   -> JS/npm
+      +-> backend-rust -> native/Cargo
+      +-> backend-wasm -> .wasm/component
+```
+
+Target-specific npm, Cargo, WASI, or other host dependencies must narrow the
+declared target set explicitly rather than contaminating the shared IR.
+
+The Wasm backend is non-blocking for SH8-SH10 and should be rebased regularly
+onto the shared IR contract. It becomes an integration milestone only after the
+JavaScript fixed point is stable enough that backend work cannot destabilize the
+bootstrap source-closure campaign.
 
 ### Staged source portability invariant
 
@@ -941,6 +1235,12 @@ PSC1 minimality policy plus any optional facility that real compiler source has
 actually adopted by freeze time. Merely being USEFUL/CHEAP, present in Lean, or
 already listed in an SH milestone does not make a feature a freeze requirement.
 
+Before SH7 may freeze, the cross-language semantic-hardening obligations above
+must also be closed: the scalar operation/conversion matrix must be normative
+and executable across the active backend conformance lanes, and every host
+capability used by the bootstrap must have an explicit pure-vs-effectful
+classification with no backend-object identity leaking into portable values.
+
 Optional features stay documented and may already be implemented; they are not
 removed. Their incomplete status cannot block SH7/PSC1 unless a required
 compiler module depends on them. Expensive, unnecessary Lean implementation
@@ -962,6 +1262,18 @@ feature must be green for:
 4. stable compiler-IR fingerprints;
 5. TypeScript emission;
 6. JavaScript execution.
+
+The declaration-alias row is REQUIRED before SH7 freeze. It must additionally
+prove:
+
+- `def f(...)` and equivalent `function f(...)` produce equal checked-core
+  and compiler-IR fingerprints;
+- parameterless `def x` and equivalent `const x` produce equal checked-core
+  and compiler-IR fingerprints;
+- `const` with declaration parameters is rejected;
+- `function` without an explicit declaration parameter group is rejected;
+- canonical Lean lowering emits `def`, never a new Lean declaration kind;
+- alias spelling never changes runtime behavior or proof authority.
 
 The full generated `.lean -> .ps` / `.ps -> .lean` parity matrix is deferred
 until the completed SH8a compiler can generate canonical ProofScript source
@@ -1212,6 +1524,28 @@ compiler.ps
    \---> backend-rust -> rustc -> psc-native
 ```
 
+## SH10W — owned Wasm backend and Wasm cross-host lane
+
+After the shared IR contract is stable, integrate the independently developed
+`backend-wasm` without forking frontend, elaboration, checking, erasure or
+VerifiedIR semantics.
+
+Required integration gates:
+
+- the same source produces equal CheckedCore and VerifiedIR fingerprints before
+  TS, Rust, and Wasm lowering;
+- direct Wasm behavior matches the TS and Rust backends for the portable,
+  deterministic conformance corpus;
+- target-specific representation choices are confined to Wasm target IR/runtime;
+- deterministic assurance builds do not silently enable relaxed SIMD or
+  semantics-changing floating-point transforms;
+- the owned encoder is validated against independent Wasm validators/runtimes;
+- eventual `psc.wasm` self-hosting is a separate host fixed-point gate, not a
+  prerequisite for the first direct-Wasm backend claim.
+
+Longer-term assurance should connect VerifiedIR semantics to Wasm target-IR
+semantics and then to the exact encoded artifact.
+
 ## SH11 — verified self-hosting
 
 After ordinary multi-host self-hosting is stable, add proofs/specifications for
@@ -1254,6 +1588,12 @@ Unless demanded by an SH gate, defer:
 - tactic breadth unrelated to the currently supported ProofScript theorem
   frontend;
 - broad npm binding generation;
+- a general structured async/task/concurrency model; Promise/Future/goroutine/
+  actor-specific behavior must not be chosen as PSC1 semantics merely because
+  one backend provides it;
+- convenience syntax for deterministic resource cleanup; first establish an
+  owned library/effect mechanism such as bracket/withResource, then add
+  `defer`/`using`-style syntax only if workloads justify it;
 - kernel rewrite in ProofScript.
 
 ## Branch policy
@@ -1299,6 +1639,12 @@ Before accepting any ProofScript infrastructure task, ask:
 7. If the feature exists mainly to mirror Lean's generic implementation style,
    can PSC1 use the same semantics through a simpler concrete representation
    while keeping the source/kernel model compatible with a later generic form?
+8. Does the change accidentally make host object identity, address/layout,
+   JavaScript evaluation behavior, Rust ownership, or Wasm representation part
+   of portable PSC1 semantics?
+9. If the change touches FFI/host capabilities, is its pure-vs-effectful
+   classification explicit and are observable effects sequenced only through
+   owned PSC1 effect semantics?
 
 If the feature is not REQUIRED, it does not block PSC1. Keep useful features in
 the plan, land them opportunistically when local/desugaring-based, and preserve

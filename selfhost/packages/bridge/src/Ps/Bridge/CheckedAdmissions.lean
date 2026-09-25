@@ -77,15 +77,17 @@ def psEncodeCodecName (name : PsName) : String :=
         psCheckedAdmissionJsonField "v" (psJsonQuote (psCheckedAdmissionNatToString value))
       ]
 
-def psEncodeCodecLevel :
-    PsLevel -> Except PsCheckedAdmissionCodecError String
+def psEncodeCodecLevel
+    (level : PsLevel) :
+    Except PsCheckedAdmissionCodecError String :=
+  match level with
   | .zero =>
       Except.ok
         (psJsonObject [
           psCheckedAdmissionJsonField "k" (psJsonQuote "z")
         ])
-  | .succ level =>
-      match psEncodeCodecLevel level with
+  | .succ inner =>
+      match psEncodeCodecLevel inner with
       | Except.error error => Except.error error
       | Except.ok encoded =>
           Except.ok

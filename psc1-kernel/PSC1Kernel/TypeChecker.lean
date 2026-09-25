@@ -112,6 +112,27 @@ def isEagerReduceExpr (e : Expr) : Bool :=
       Name.eq name kernelEagerReduceName && e.getAppNumArgs == 2
   | _ => false
 
+def isNatZeroExpr (e : Expr) : Bool :=
+  match e with
+  | .lit (.nat value) => value == 0
+  | .const name levels =>
+      levels.length == 0 && Name.eq name kernelNatZeroName
+  | _ => false
+
+def natPredExpr? (e : Expr) : Option Expr :=
+  match e with
+  | .lit (.nat (n + 1)) => some (.lit (.nat n))
+  | _ =>
+      match e.getAppFn with
+      | .const name levels =>
+          if levels.length == 0 &&
+              Name.eq name kernelNatSuccName &&
+              e.getAppNumArgs == 1 then
+            listGet? e.getAppArgs 0
+          else
+            none
+      | _ => none
+
 def natLiteralValue? : Expr → Option Nat
   | .lit (.nat value) => some value
   | .const name levels =>
@@ -542,6 +563,15 @@ partial def lazyDeltaReduction
     match quickReducedDefEq a b with
     | some value => return .decided value
     | none => pure ()
+
+    -- Final Lean 4.34 tries the Nat offset rule before ordinary Nat
+    -- reduction, and does so regardless of syntactic free variables.
+    if isNatZeroExpr a && isNatZeroExpr b then
+      return .decided true
+    match natPredExpr? a, natPredExpr? b with
+    | some pa, some pb =>
+        return .decided (← isDefEq ctx pa pb)
+    | _, _ => pure ()
 
     if (!a.hasFVar && !b.hasFVar) || ctx.eagerReduce then
       let ar ← reduceNat ctx a

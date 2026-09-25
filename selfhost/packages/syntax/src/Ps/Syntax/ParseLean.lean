@@ -638,18 +638,30 @@ def psParseLeanBinderGroup
 def psLeanPrependBinderGroupReverse
     (group :
       List
-        (Prod PsSyntaxBinderHead PsSyntaxTerm))
-    (bindersRev :
-      List
         (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
+    List
+      (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
     List
       (Prod PsSyntaxBinderHead PsSyntaxTerm) :=
   match group with
-  | List.nil => bindersRev
+  | List.nil =>
+      fun
+        (bindersRev :
+          List
+            (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>
+        bindersRev
   | List.cons binder rest =>
-      psLeanPrependBinderGroupReverse
-        rest
-        (List.cons binder bindersRev)
+      let smaller :
+          List
+            (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
+          List
+            (Prod PsSyntaxBinderHead PsSyntaxTerm) :=
+        psLeanPrependBinderGroupReverse rest;
+      fun
+        (bindersRev :
+          List
+            (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>
+        smaller (List.cons binder bindersRev)
 
 def psParseLeanBinder
     (cursor : PsTokenCursor) :

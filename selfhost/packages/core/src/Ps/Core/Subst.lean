@@ -48,7 +48,7 @@ def psExprInstantiateAt (replacement : PsExpr) (depth : Nat) : PsExpr -> PsExpr
       PsExpr.lam
         name
         (psExprInstantiateAt replacement depth type)
-        (psExprInstantiateAt replacement (depth + 1) body)
+        (psExprInstantiateAt replacement (Nat.succ depth) body)
         binder
   | .forallE name type body binder =>
       PsExpr.forallE

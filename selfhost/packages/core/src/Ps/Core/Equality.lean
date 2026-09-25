@@ -44,12 +44,18 @@ def psLevelStructuralEq (left : PsLevel) (right : PsLevel) : Bool :=
   | .max leftA leftB =>
       match right with
       | .max rightA rightB =>
-          psLevelStructuralEq leftA rightA && psLevelStructuralEq leftB rightB
+          if psLevelStructuralEq leftA rightA then
+            psLevelStructuralEq leftB rightB
+          else
+            false
       | _ => false
   | .imax leftA leftB =>
       match right with
       | .imax rightA rightB =>
-          psLevelStructuralEq leftA rightA && psLevelStructuralEq leftB rightB
+          if psLevelStructuralEq leftA rightA then
+            psLevelStructuralEq leftB rightB
+          else
+            false
       | _ => false
   | .param leftName =>
       match right with
@@ -71,8 +77,10 @@ def psLevelListEq
   | leftValue :: leftRest =>
       match right with
       | rightValue :: rightRest =>
-          psLevelStructuralEq leftValue rightValue
-            && psLevelListEq leftRest rightRest
+          if psLevelStructuralEq leftValue rightValue then
+            psLevelListEq leftRest rightRest
+          else
+            false
       | _ => false
 
 def psExprAlphaEq (left : PsExpr) (right : PsExpr) : Bool :=
@@ -97,35 +105,51 @@ def psExprAlphaEq (left : PsExpr) (right : PsExpr) : Bool :=
   | .constE leftName leftLevels =>
       match right with
       | .constE rightName rightLevels =>
-          psNameEq leftName rightName
-            && psLevelListEq leftLevels rightLevels
+          if psNameEq leftName rightName then
+            psLevelListEq leftLevels rightLevels
+          else
+            false
       | _ => false
   | .app leftFn leftArg =>
       match right with
       | .app rightFn rightArg =>
-          psExprAlphaEq leftFn rightFn
-            && psExprAlphaEq leftArg rightArg
+          if psExprAlphaEq leftFn rightFn then
+            psExprAlphaEq leftArg rightArg
+          else
+            false
       | _ => false
   | .lam _ leftType leftBody leftBinder =>
       match right with
       | .lam _ rightType rightBody rightBinder =>
-          psBinderInfoEq leftBinder rightBinder
-            && psExprAlphaEq leftType rightType
-            && psExprAlphaEq leftBody rightBody
+          if psBinderInfoEq leftBinder rightBinder then
+            if psExprAlphaEq leftType rightType then
+              psExprAlphaEq leftBody rightBody
+            else
+              false
+          else
+            false
       | _ => false
   | .forallE _ leftType leftBody leftBinder =>
       match right with
       | .forallE _ rightType rightBody rightBinder =>
-          psBinderInfoEq leftBinder rightBinder
-            && psExprAlphaEq leftType rightType
-            && psExprAlphaEq leftBody rightBody
+          if psBinderInfoEq leftBinder rightBinder then
+            if psExprAlphaEq leftType rightType then
+              psExprAlphaEq leftBody rightBody
+            else
+              false
+          else
+            false
       | _ => false
   | .letE _ leftType leftValue leftBody =>
       match right with
       | .letE _ rightType rightValue rightBody =>
-          psExprAlphaEq leftType rightType
-            && psExprAlphaEq leftValue rightValue
-            && psExprAlphaEq leftBody rightBody
+          if psExprAlphaEq leftType rightType then
+            if psExprAlphaEq leftValue rightValue then
+              psExprAlphaEq leftBody rightBody
+            else
+              false
+          else
+            false
       | _ => false
   | .lit leftValue =>
       match right with
@@ -134,7 +158,11 @@ def psExprAlphaEq (left : PsExpr) (right : PsExpr) : Bool :=
   | .proj leftType leftIndex leftValue =>
       match right with
       | .proj rightType rightIndex rightValue =>
-          psNameEq leftType rightType
-            && Nat.beq leftIndex rightIndex
-            && psExprAlphaEq leftValue rightValue
+          if psNameEq leftType rightType then
+            if Nat.beq leftIndex rightIndex then
+              psExprAlphaEq leftValue rightValue
+            else
+              false
+          else
+            false
       | _ => false

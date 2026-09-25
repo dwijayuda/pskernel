@@ -23,7 +23,7 @@ function usage() {
     "",
     "usage:",
     "  psc bootstrap",
-    "  psc build <entry.ps> --out <output.ts> [--compiler <compiler.js>]",
+    "  psc build <entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]",
     "  psc selfhost",
     "  psc verify-selfhost",
     "  psc fixed-point",

@@ -1,11 +1,11 @@
-name: PSC1 shallow-name-hash root 100015
+name: PSC1 fold-name-hash root 100015
 
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-env-shallow-name-hash]
+    branches: [perf/psc1-env-fold-hash]
     paths:
-      - ".github/workflows/psc1-shallow-name-hash-root100015.yml"
+      - ".github/workflows/psc1-fold-name-hash-root100015.yml"
       - "scripts/psc1-lean-std-release-profile.mjs"
       - "oracle/replay-probe/DependencyExport.lean"
       - "psc1-kernel/**"

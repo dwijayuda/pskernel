@@ -1241,6 +1241,25 @@ def makeDeepSuccExpr (depth : Nat) : PSC1Kernel.Expr :=
   | 0 => .lit (.nat 0)
   | n + 1 => .app (.const PSC1Kernel.kernelNatSuccName []) (makeDeepSuccExpr n)
 
+def assertDefEqRecDepthOracle : IO Unit := do
+  let base := PSC1Kernel.CheckerContext.empty PSC1Kernel.Environment.empty
+  let limited : PSC1Kernel.CheckerContext :=
+    { base with maxRecDepth := 1, recDepth := 16 }
+  let rejectsAtBoundary :=
+    match PSC1Kernel.isDefEq limited (.sort .zero) (.sort .zero) with
+    | .ok _ => false
+    | .error _ => true
+  assertTrue
+    "defeq structural quick path bypassed Lean 4.34 recursion-depth guard"
+    rejectsAtBoundary
+
+  let available : PSC1Kernel.CheckerContext :=
+    { base with maxRecDepth := 1, recDepth := 0 }
+  let accepts ← exceptToIO
+    "PSC1 defeq recursion-depth available"
+    (PSC1Kernel.isDefEq available (.sort .zero) (.sort .zero))
+  assertTrue "defeq recursion-depth guard changed an in-budget equality" accepts
+
 def assertKernelRecDepthOracle : IO Unit := do
   let NatN : PSC1Kernel.Name := PSC1Kernel.kernelNatName
   let Succ : PSC1Kernel.Name := PSC1Kernel.kernelNatSuccName
@@ -4633,6 +4652,7 @@ def run : IO Unit := do
   assertStringLiteralExpansionShape
   assertStringLiteralDefEqOracle
   assertQuotAdmissionOracle
+  assertDefEqRecDepthOracle
   assertKernelRecDepthOracle
   assertOpaqueClosureOracle
   assertMutualDuplicateNameOracle

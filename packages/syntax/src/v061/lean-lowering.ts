@@ -159,7 +159,8 @@ export function lowerV061ModuleToLean(module:V061Module):string {
       }).join('\n');
       return 'inductive '+decl.name+params+result+' where\n'+constructors;
     }
-    const head=decl.kind==='function'||decl.kind==='const'?'def':decl.kind;
+    const baseHead=decl.kind==='function'||decl.kind==='const'?'def':decl.kind;
+    const head=decl.partial?'partial '+baseHead:baseHead;
     const params=decl.params.map(
       (p)=>' '+lowerV061ParameterToLean(p),
     ).join('');

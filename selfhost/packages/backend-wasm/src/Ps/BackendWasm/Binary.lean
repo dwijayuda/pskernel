@@ -137,7 +137,8 @@ def psWasmFindHeapTypeIndex
   | none =>
       match psWasmFindArrayIndex arrays name with
       | none => none
-      | some index => some (structures.length + index)
+      | some index =>
+      some (structures.length + arrays.length + index)
 
 def psWasmEncodeValueType
     (structures : List PsWasmStructType)
@@ -195,6 +196,7 @@ def psWasmFindFunctionTypeIndexLoop
 
 def psWasmFindFunctionTypeIndex
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (name : String) : Option Nat :=
   match psWasmFindFunctionTypeIndexLoop name 0 functionTypes with
@@ -203,12 +205,13 @@ def psWasmFindFunctionTypeIndex
 
 def psWasmEncodeNamedFunctionType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionType : PsWasmFunctionType) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeValueTypes structures functionType.parameters with
+  match psWasmEncodeValueTypes structures arrays functionType.parameters with
   | Except.error error => Except.error error
   | Except.ok parameters =>
-      match psWasmEncodeValueTypes structures functionType.results with
+      match psWasmEncodeValueTypes structures arrays functionType.results with
       | Except.error error => Except.error error
       | Except.ok results =>
           Except.ok
@@ -221,27 +224,29 @@ def psWasmEncodeNamedFunctionType
                 functionType.results.length)
 
 def psWasmEncodeNamedFunctionTypes
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmFunctionType ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | functionType :: rest =>
-      match psWasmEncodeNamedFunctionType structures functionType with
+      match psWasmEncodeNamedFunctionType structures arrays functionType with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeNamedFunctionTypes structures rest with
+          match psWasmEncodeNamedFunctionTypes structures arrays rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
 
 def psWasmEncodeFunctionType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (function : PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeValueTypes structures function.parameters with
+  match psWasmEncodeValueTypes structures arrays function.parameters with
   | Except.error error => Except.error error
   | Except.ok parameters =>
-      match psWasmEncodeValueTypes structures function.results with
+      match psWasmEncodeValueTypes structures arrays function.results with
       | Except.error error => Except.error error
       | Except.ok results =>
           Except.ok
@@ -250,15 +255,16 @@ def psWasmEncodeFunctionType
               ++ psWasmEncodeVector results function.results.length)
 
 def psWasmEncodeFunctionTypes
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmFunction ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | function :: rest =>
-      match psWasmEncodeFunctionType structures function with
+      match psWasmEncodeFunctionType structures arrays function with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeFunctionTypes structures rest with
+          match psWasmEncodeFunctionTypes structures arrays rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)

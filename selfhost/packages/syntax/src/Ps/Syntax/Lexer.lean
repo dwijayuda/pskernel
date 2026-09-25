@@ -27,70 +27,190 @@ def psLexAdvanceTwo
     (second : Char) : PsSourcePos :=
   psLexAdvanceChar (psLexAdvanceChar position first) second
 
-def psLexSkipLineComment :
-    List Char -> PsSourcePos -> PsLexCursor
-  | [], position =>
+def psLexCharEq (left : Char) (right : Char) : Bool :=
+  Nat.beq (Char.toNat left) (Char.toNat right)
+
+def psLexNatBetween (lower value upper : Nat) : Bool :=
+  if Nat.ble lower value then
+    Nat.ble value upper
+  else
+    false
+
+def psLexWhitespace (char : Char) : Bool :=
+  if psLexCharEq char ' ' then
+    true
+  else if psLexCharEq char '\t' then
+    true
+  else if psLexCharEq char '\r' then
+    true
+  else
+    psLexCharEq char '\n'
+
+def psLexSkipLineComment
+    (remaining : List Char)
+    (position : PsSourcePos) : PsLexCursor :=
+  match remaining with
+  | List.nil =>
       { remaining := List.nil, position := position }
-  | '\n' :: rest, position =>
-      { remaining := List.cons '\n' rest, position := position }
-  | char :: rest, position =>
-      psLexSkipLineComment rest (psLexAdvanceChar position char)
-
-def psLexSkipBlockComment :
-    Nat -> List Char -> PsSourcePos -> PsSourcePos ->
-    Except PsLexError PsLexCursor
-  | _, [], start, position =>
-      Except.error
-        (PsLexError.unterminatedBlockComment (psLexSpan start position))
-  | depth, '/' :: '-' :: rest, start, position =>
-      psLexSkipBlockComment
-        (depth + 1)
-        rest
-        start
-        (psLexAdvanceTwo position '/' '-')
-  | 1, '-' :: '/' :: rest, _, position =>
-      Except.ok {
-        remaining := rest
-        position := psLexAdvanceTwo position '-' '/'
-      }
-  | depth + 1, '-' :: '/' :: rest, start, position =>
-      psLexSkipBlockComment
-        depth
-        rest
-        start
-        (psLexAdvanceTwo position '-' '/')
-  | depth, char :: rest, start, position =>
-      psLexSkipBlockComment
-        depth
-        rest
-        start
-        (psLexAdvanceChar position char)
-
-def psLexSkipTriviaWithFuel :
-    Nat -> List Char -> PsSourcePos -> Except PsLexError PsLexCursor
-  | 0, remaining, position =>
-      Except.ok { remaining := remaining, position := position }
-  | _ + 1, [], position =>
-      Except.ok { remaining := List.nil, position := position }
-  | fuel + 1, '-' :: '-' :: rest, position =>
-      let afterPrefix := psLexAdvanceTwo position '-' '-'
-      let cursor := psLexSkipLineComment rest afterPrefix
-      psLexSkipTriviaWithFuel fuel cursor.remaining cursor.position
-  | fuel + 1, '/' :: '-' :: rest, position =>
-      let start := position
-      let afterPrefix := psLexAdvanceTwo position '/' '-'
-      match psLexSkipBlockComment 1 rest start afterPrefix with
-      | Except.error error => Except.error error
-      | Except.ok cursor =>
-          psLexSkipTriviaWithFuel fuel cursor.remaining cursor.position
-  | fuel + 1, char :: rest, position =>
-      if char.isWhitespace then
-        psLexSkipTriviaWithFuel
-          fuel
+  | List.cons char rest =>
+      if psLexCharEq char '\n' then
+        {
+          remaining := List.cons char rest
+          position := position
+        }
+      else
+        psLexSkipLineComment
           rest
           (psLexAdvanceChar position char)
-      else
-        Except.ok { remaining := List.cons char rest, position := position }
+
+def psLexSkipBlockComment
+    (depth : Nat)
+    (remaining : List Char)
+    (start : PsSourcePos)
+    (position : PsSourcePos) :
+    Except PsLexError PsLexCursor :=
+  match remaining with
+  | List.nil =>
+      Except.error
+        (PsLexError.unterminatedBlockComment
+          (psLexSpan start position))
+  | List.cons first rest =>
+      match rest with
+      | List.nil =>
+          psLexSkipBlockComment
+            depth
+            List.nil
+            start
+            (psLexAdvanceChar position first)
+      | List.cons second tail =>
+          if psLexCharEq first '/' then
+            if psLexCharEq second '-' then
+              psLexSkipBlockComment
+                (Nat.add depth 1)
+                tail
+                start
+                (psLexAdvanceTwo position first second)
+            else
+              psLexSkipBlockComment
+                depth
+                rest
+                start
+                (psLexAdvanceChar position first)
+          else if psLexCharEq first '-' then
+            if psLexCharEq second '/' then
+              if Nat.beq depth 1 then
+                Except.ok {
+                  remaining := tail
+                  position :=
+                    psLexAdvanceTwo position first second
+                }
+              else
+                psLexSkipBlockComment
+                  (Nat.sub depth 1)
+                  tail
+                  start
+                  (psLexAdvanceTwo position first second)
+            else
+              psLexSkipBlockComment
+                depth
+                rest
+                start
+                (psLexAdvanceChar position first)
+          else
+            psLexSkipBlockComment
+              depth
+              rest
+              start
+              (psLexAdvanceChar position first)
+
+def psLexSkipTriviaWithFuel
+    (fuel : Nat)
+    (remaining : List Char)
+    (position : PsSourcePos) :
+    Except PsLexError PsLexCursor :=
+  match fuel with
+  | 0 =>
+      Except.ok {
+        remaining := remaining
+        position := position
+      }
+  | remainingFuel + 1 =>
+      match remaining with
+      | List.nil =>
+          Except.ok {
+            remaining := List.nil
+            position := position
+          }
+      | List.cons first rest =>
+          match rest with
+          | List.cons second tail =>
+              if psLexCharEq first '-' then
+                if psLexCharEq second '-' then
+                  let afterPrefix :=
+                    psLexAdvanceTwo position first second;
+                  let cursor :=
+                    psLexSkipLineComment tail afterPrefix;
+                  psLexSkipTriviaWithFuel
+                    remainingFuel
+                    cursor.remaining
+                    cursor.position
+                else if psLexWhitespace first then
+                  psLexSkipTriviaWithFuel
+                    remainingFuel
+                    rest
+                    (psLexAdvanceChar position first)
+                else
+                  Except.ok {
+                    remaining := List.cons first rest
+                    position := position
+                  }
+              else if psLexCharEq first '/' then
+                if psLexCharEq second '-' then
+                  let afterPrefix :=
+                    psLexAdvanceTwo position first second;
+                  match
+                      psLexSkipBlockComment
+                        1
+                        tail
+                        position
+                        afterPrefix with
+                  | Except.error error => Except.error error
+                  | Except.ok cursor =>
+                      psLexSkipTriviaWithFuel
+                        remainingFuel
+                        cursor.remaining
+                        cursor.position
+                else if psLexWhitespace first then
+                  psLexSkipTriviaWithFuel
+                    remainingFuel
+                    rest
+                    (psLexAdvanceChar position first)
+                else
+                  Except.ok {
+                    remaining := List.cons first rest
+                    position := position
+                  }
+              else if psLexWhitespace first then
+                psLexSkipTriviaWithFuel
+                  remainingFuel
+                  rest
+                  (psLexAdvanceChar position first)
+              else
+                Except.ok {
+                  remaining := List.cons first rest
+                  position := position
+                }
+          | List.nil =>
+              if psLexWhitespace first then
+                psLexSkipTriviaWithFuel
+                  remainingFuel
+                  List.nil
+                  (psLexAdvanceChar position first)
+              else
+                Except.ok {
+                  remaining := List.cons first List.nil
+                  position := position
+                }
 
 def psLexSkipTrivia
     (remaining : List Char)
@@ -98,40 +218,89 @@ def psLexSkipTrivia
   psLexSkipTriviaWithFuel (remaining.length + 1) remaining position
 
 def psLexLetterLike (char : Char) : Bool :=
-  (0x3b1 <= char.val && char.val <= 0x3c9 && char.val != 0x3bb)
-    || (0x391 <= char.val && char.val <= 0x3a9
-      && char.val != 0x3a0 && char.val != 0x3a3)
-    || (0x3ca <= char.val && char.val <= 0x3fb)
-    || (0x1f00 <= char.val && char.val <= 0x1ffe)
-    || (0x2100 <= char.val && char.val <= 0x214f)
-    || (0x1d49c <= char.val && char.val <= 0x1d59f)
-    || (0x00c0 <= char.val && char.val <= 0x00ff
-      && char.val != 0x00d7 && char.val != 0x00f7)
-    || (0x0100 <= char.val && char.val <= 0x017f)
+  let code : Nat := Char.toNat char;
+  if psLexNatBetween 945 code 969 then
+    if Nat.beq code 955 then false else true
+  else if psLexNatBetween 913 code 937 then
+    if Nat.beq code 928 then
+      false
+    else if Nat.beq code 931 then
+      false
+    else
+      true
+  else if psLexNatBetween 970 code 1019 then
+    true
+  else if psLexNatBetween 7936 code 8190 then
+    true
+  else if psLexNatBetween 8448 code 8527 then
+    true
+  else if psLexNatBetween 119964 code 120223 then
+    true
+  else if psLexNatBetween 192 code 255 then
+    if Nat.beq code 215 then
+      false
+    else if Nat.beq code 247 then
+      false
+    else
+      true
+  else
+    psLexNatBetween 256 code 383
 
 def psLexNumericSubscript (char : Char) : Bool :=
-  0x2080 <= char.val && char.val <= 0x2089
+  psLexNatBetween 8320 (Char.toNat char) 8329
 
 def psLexSubscriptAlnum (char : Char) : Bool :=
-  psLexNumericSubscript char
-    || (0x2090 <= char.val && char.val <= 0x209c)
-    || (0x1d62 <= char.val && char.val <= 0x1d6a)
-    || char.val == 0x2c7c
+  let code : Nat := Char.toNat char;
+  if psLexNumericSubscript char then
+    true
+  else if psLexNatBetween 8336 code 8348 then
+    true
+  else if psLexNatBetween 7522 code 7530 then
+    true
+  else
+    Nat.beq code 11388
 
-def psLexIdentifierStart (char : Char) : Bool :=
-  char.isAlpha || char == '_' || psLexLetterLike char
-
-def psLexIdentifierContinue (char : Char) : Bool :=
-  char.isAlphanum
-    || char == '_'
-    || char == '\''
-    || char == '!'
-    || char == '?'
-    || psLexLetterLike char
-    || psLexSubscriptAlnum char
+def psLexAsciiAlpha (char : Char) : Bool :=
+  let code : Nat := Char.toNat char;
+  if psLexNatBetween 65 code 90 then
+    true
+  else
+    psLexNatBetween 97 code 122
 
 def psLexDigit (char : Char) : Bool :=
-  char.isDigit
+  psLexNatBetween 48 (Char.toNat char) 57
+
+def psLexIdentifierStart (char : Char) : Bool :=
+  if psLexAsciiAlpha char then
+    true
+  else if psLexCharEq char '_' then
+    true
+  else
+    psLexLetterLike char
+
+def psLexIdentifierContinue (char : Char) : Bool :=
+  if psLexAsciiAlpha char then
+    true
+  else if psLexDigit char then
+    true
+  else if psLexCharEq char '_' then
+    true
+  else if psLexCharEq char '\'' then
+    true
+  else if psLexCharEq char '!' then
+    true
+  else if psLexCharEq char '?' then
+    true
+  else if psLexLetterLike char then
+    true
+  else
+    psLexSubscriptAlnum char
+
+def psLexNaturalContinue (char : Char) : Bool :=
+  if psLexDigit char then
+    true
+  else
+    psLexCharEq char '_'
 
 def psLexReadIdentifier :
     List Char -> PsSourcePos -> List Char -> PsLexRead
@@ -160,7 +329,7 @@ def psLexReadNatural :
         charsRev := charsRev
       }
   | char :: rest, position, charsRev =>
-      if psLexDigit char || char == '_' then
+      if psLexNaturalContinue char then
         psLexReadNatural
           rest
           (psLexAdvanceChar position char)

@@ -656,6 +656,29 @@ def psElabExprAt
         | Nat.succ rest =>
             smaller rest
 
+def psElabAppendExprs
+    (left : List PsExpr) : List PsExpr -> List PsExpr :=
+  match left with
+  | List.nil =>
+      fun (right : List PsExpr) => right
+  | List.cons head tail =>
+      let smaller : List PsExpr -> List PsExpr :=
+        psElabAppendExprs tail;
+      fun (right : List PsExpr) =>
+        List.cons head (smaller right)
+
+def psElabAppendDeclarations
+    (left : List PsDeclaration) :
+    List PsDeclaration -> List PsDeclaration :=
+  match left with
+  | List.nil =>
+      fun (right : List PsDeclaration) => right
+  | List.cons head tail =>
+      let smaller : List PsDeclaration -> List PsDeclaration :=
+        psElabAppendDeclarations tail;
+      fun (right : List PsDeclaration) =>
+        List.cons head (smaller right)
+
 def psWrapRecursiveHypotheses
     (motiveId : Nat)
     (fieldArgs : List PsExpr) :
@@ -710,7 +733,7 @@ def psBuildInductiveMinorType
               let intro :=
                 psExprApplyMany
                   (PsExpr.constE info.name [])
-                  (parameterArgs ++ fieldArgs);
+                  (psElabAppendExprs parameterArgs fieldArgs);
               let body :=
                 PsExpr.app (PsExpr.fvar motiveId) intro;
               match
@@ -998,9 +1021,11 @@ def psElabInductiveDeclaration
                                 | Except.ok recursor =>
                                     Except.ok {
                                       declarations :=
-                                        [inductiveDeclaration]
-                                          ++ constructorDeclarations
-                                          ++ [recursor]
+                                        psElabAppendDeclarations
+                                          (List.cons
+                                            inductiveDeclaration
+                                            constructorDeclarations)
+                                          (List.cons recursor List.nil)
                                     }
               | _ =>
                   Except.error PsElabError.unsupportedTerm
@@ -1192,7 +1217,7 @@ def psPrependBatchReverse
     (declarations : List PsDeclaration)
     (declarationsRev : List PsDeclaration) :
     List PsDeclaration :=
-  declarations.reverse ++ declarationsRev
+  psElabAppendDeclarations declarations.reverse declarationsRev
 
 def psElabDeclarations
     (environment : PsEnvironment) :

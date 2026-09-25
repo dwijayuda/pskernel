@@ -1138,11 +1138,11 @@ def psParseLeanDoWithFuel
                     | none => value.cursor
                     | some afterSemi => afterSemi.cursor
                   else
-                    value.cursor
-                let span := {
+                    value.cursor;
+                let span : PsSourceSpan := {
                   start := start
                   stop := psLeanTermStop value.value
-                }
+                };
                 Except.ok {
                   value := psSyntaxCompilerPure value.value span
                   cursor := finalCursor

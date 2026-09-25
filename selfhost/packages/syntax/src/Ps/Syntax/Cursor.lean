@@ -11,16 +11,21 @@ structure PsLexStep where
 partial def psLexStringToListFrom
     (source : String)
     (position : Nat) : List Char :=
-  let rawPosition : String.Pos.Raw :=
-    String.Pos.Raw.mk position;
-  if String.Internal.atEnd source rawPosition then
+  if
+      String.Internal.atEnd
+        source
+        (String.Pos.Raw.mk position) then
     List.nil
   else
     let char : Char :=
-      String.Internal.get source rawPosition;
+      String.Internal.get
+        source
+        (String.Pos.Raw.mk position);
     let nextPosition : Nat :=
       String.Pos.Raw.byteIdx
-        (String.Internal.next source rawPosition);
+        (String.Internal.next
+          source
+          (String.Pos.Raw.mk position));
     List.cons
       char
       (psLexStringToListFrom source nextPosition)

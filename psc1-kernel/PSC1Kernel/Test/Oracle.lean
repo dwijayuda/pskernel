@@ -392,6 +392,45 @@ def assertStructureEtaOracle : IO Unit := do
   assertTrue "structure eta differs from Lean 4.34" (ours == lean)
   assertTrue "Lean 4.34 should accept structure eta" lean
 
+def assertProjectionLazyDeltaOracle : IO Unit := do
+  let env0 := makeStructureEnvironment
+  let pair : PSC1Kernel.Name :=
+    .str (.str (.str .anonymous "PSC1Kernel") "Test") "EtaPair"
+  let pairMk : PSC1Kernel.Name := .str pair "mk"
+  let pairA : PSC1Kernel.Name :=
+    .str (.str (.str .anonymous "PSC1Kernel") "Test") "ProjDeltaA"
+  let pairB : PSC1Kernel.Name :=
+    .str (.str (.str .anonymous "PSC1Kernel") "Test") "ProjDeltaB"
+  let pairT : PSC1Kernel.Expr := .const pair []
+  let mkPair (a b : Nat) : PSC1Kernel.Expr :=
+    .app
+      (.app (.const pairMk []) (.lit (.nat a)))
+      (.lit (.nat b))
+  let env1 := env0.addUnchecked (.defnInfo {
+    base := mkBase pairA pairT
+    value := mkPair 1 2
+    hints := .regular 0
+    safety := .safe
+  })
+  let env := env1.addUnchecked (.defnInfo {
+    base := mkBase pairB pairT
+    value := mkPair 1 3
+    hints := .regular 0
+    safety := .safe
+  })
+  let ctx := PSC1Kernel.CheckerContext.empty env
+  let left : PSC1Kernel.Expr := .proj pair 0 (.const pairA [])
+  let right : PSC1Kernel.Expr := .proj pair 0 (.const pairB [])
+  let ours ← exceptToIO
+    "PSC1 projection lazy delta"
+    (PSC1Kernel.isDefEq ctx left right)
+
+  let leanEnv ← importStructureFixture
+  let lean ← kernelExprDefEq leanEnv left right
+  assertTrue "projection lazy-delta differs from Lean 4.34"
+    (ours == lean)
+  assertTrue "Lean 4.34 should compare projected fields before unrelated fields" lean
+
 def assertUnitLikeOracle : IO Unit := do
   let env := makeStructureEnvironment
   let unit : PSC1Kernel.Name := .str (.str (.str .anonymous "PSC1Kernel") "Test") "EtaUnit"
@@ -996,6 +1035,7 @@ def run : IO Unit := do
   assertNatReductionOracle
   assertFunctionEtaOracle
   assertLazyDeltaOracle
+  assertProjectionLazyDeltaOracle
   assertStructureEtaOracle
   assertUnitLikeOracle
   assertProofIrrelevanceOracle

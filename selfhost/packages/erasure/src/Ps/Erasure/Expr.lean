@@ -442,86 +442,125 @@ def psErasePrimitiveApplication
         else
           Except.error PsErasureError.unsupportedApplication
       else if text == "Array.emptyWithCapacity" && view.args.length == 2 then
-        match psEraseSelectedArguments erase view.args [1] with
+        match psErasePrimitiveTypeArgument environment scope view.args 0 with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
-                  args))
+        | Except.ok elementType =>
+            match psEraseSelectedArguments erase view.args [1] with
+            | Except.error error => Except.error error
+            | Except.ok args =>
+                Except.ok
+                  (some
+                    (PsVerifiedIrExpr.intrinsic
+                      (PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                        elementType)
+                      args))
       else if text == "Array.size" && view.args.length == 2 then
-        match psEraseSelectedArguments erase view.args [1] with
+        match psErasePrimitiveTypeArgument environment scope view.args 0 with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arraySize
-                  args))
+        | Except.ok elementType =>
+            match psEraseSelectedArguments erase view.args [1] with
+            | Except.error error => Except.error error
+            | Except.ok args =>
+                Except.ok
+                  (some
+                    (PsVerifiedIrExpr.intrinsic
+                      (PsVerifiedIrIntrinsic.arraySize elementType)
+                      args))
       else if text == "Array.push" && view.args.length == 3 then
-        match psEraseSelectedArguments erase view.args [1, 2] with
+        match psErasePrimitiveTypeArgument environment scope view.args 0 with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayPush
-                  args))
+        | Except.ok elementType =>
+            match psEraseSelectedArguments erase view.args [1, 2] with
+            | Except.error error => Except.error error
+            | Except.ok args =>
+                Except.ok
+                  (some
+                    (PsVerifiedIrExpr.intrinsic
+                      (PsVerifiedIrIntrinsic.arrayPush elementType)
+                      args))
       else if text == "Array.getInternal" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [1, 2] with
+        match psErasePrimitiveTypeArgument environment scope view.args 0 with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayGet
-                  args))
+        | Except.ok elementType =>
+            match psEraseSelectedArguments erase view.args [1, 2] with
+            | Except.error error => Except.error error
+            | Except.ok args =>
+                Except.ok
+                  (some
+                    (PsVerifiedIrExpr.intrinsic
+                      (PsVerifiedIrIntrinsic.arrayGet elementType)
+                      args))
       else if text == "Array.getD" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [1, 2, 3] with
+        match psErasePrimitiveTypeArgument environment scope view.args 0 with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayGetD
-                  args))
+        | Except.ok elementType =>
+            match psEraseSelectedArguments erase view.args [1, 2, 3] with
+            | Except.error error => Except.error error
+            | Except.ok args =>
+                Except.ok
+                  (some
+                    (PsVerifiedIrExpr.intrinsic
+                      (PsVerifiedIrIntrinsic.arrayGetD elementType)
+                      args))
       else if text == "Array.set" && view.args.length == 5 then
-        match psEraseSelectedArguments erase view.args [1, 2, 3] with
+        match psErasePrimitiveTypeArgument environment scope view.args 0 with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arraySet
-                  args))
+        | Except.ok elementType =>
+            match psEraseSelectedArguments erase view.args [1, 2, 3] with
+            | Except.error error => Except.error error
+            | Except.ok args =>
+                Except.ok
+                  (some
+                    (PsVerifiedIrExpr.intrinsic
+                      (PsVerifiedIrIntrinsic.arraySet elementType)
+                      args))
       else if text == "Array.setIfInBounds" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [1, 2, 3] with
+        match psErasePrimitiveTypeArgument environment scope view.args 0 with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arraySetIfInBounds
-                  args))
+        | Except.ok elementType =>
+            match psEraseSelectedArguments erase view.args [1, 2, 3] with
+            | Except.error error => Except.error error
+            | Except.ok args =>
+                Except.ok
+                  (some
+                    (PsVerifiedIrExpr.intrinsic
+                      (PsVerifiedIrIntrinsic.arraySetIfInBounds
+                        elementType)
+                      args))
       else if text == "Array.map" && view.args.length == 4 then
-        match psEraseSelectedArguments erase view.args [2, 3] with
+        match psErasePrimitiveTypeArgument environment scope view.args 0 with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayMap
-                  args))
+        | Except.ok sourceType =>
+            match psErasePrimitiveTypeArgument environment scope view.args 1 with
+            | Except.error error => Except.error error
+            | Except.ok resultType =>
+                match psEraseSelectedArguments erase view.args [2, 3] with
+                | Except.error error => Except.error error
+                | Except.ok args =>
+                    Except.ok
+                      (some
+                        (PsVerifiedIrExpr.intrinsic
+                          (PsVerifiedIrIntrinsic.arrayMap
+                            sourceType
+                            resultType)
+                          args))
       else if text == "Array.foldl" && view.args.length == 7 then
-        match psEraseSelectedArguments erase view.args [2, 3, 4, 5, 6] with
+        match psErasePrimitiveTypeArgument environment scope view.args 0 with
         | Except.error error => Except.error error
-        | Except.ok args =>
-            Except.ok
-              (some
-                (PsVerifiedIrExpr.intrinsic
-                  PsVerifiedIrIntrinsic.arrayFoldl
-                  args))
+        | Except.ok elementType =>
+            match psErasePrimitiveTypeArgument environment scope view.args 1 with
+            | Except.error error => Except.error error
+            | Except.ok accumulatorType =>
+                match psEraseSelectedArguments erase view.args [2, 3, 4, 5, 6] with
+                | Except.error error => Except.error error
+                | Except.ok args =>
+                    Except.ok
+                      (some
+                        (PsVerifiedIrExpr.intrinsic
+                          (PsVerifiedIrIntrinsic.arrayFoldl
+                            elementType
+                            accumulatorType)
+                          args))
       else
         Except.ok none
   | _ => Except.ok none

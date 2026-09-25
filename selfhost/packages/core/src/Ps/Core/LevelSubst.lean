@@ -65,7 +65,9 @@ def psLevelListInstantiateParams
 
 def psExprInstantiateLevelParams
     (parameters : List PsName)
-    (arguments : List PsLevel) : PsExpr -> PsExpr
+    (arguments : List PsLevel)
+    (expr : PsExpr) : PsExpr :=
+  match expr with
   | .sortE level =>
       PsExpr.sortE (psLevelInstantiateParams parameters arguments level)
   | .constE name levels =>

@@ -68,6 +68,33 @@ def psTestRejectUniverseMetavariable : Bool :=
   | Except.error PsCheckedAdmissionCodecError.universeMetavariable => true
   | _ => false
 
+def psTestRejectPartialCertification : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let loopName := psRootName "loop"
+  let loopType :=
+    PsExpr.forallE
+      (psRootName "n")
+      natType
+      natType
+      PsBinderInfo.explicit
+  let loopValue :=
+    PsExpr.lam
+      (psRootName "n")
+      natType
+      (PsExpr.app
+        (PsExpr.constE loopName [])
+        (PsExpr.bvar 0))
+      PsBinderInfo.explicit
+  let declaration :=
+    PsDeclaration.partialDecl
+      loopName
+      []
+      loopType
+      loopValue
+  match psEncodeCheckedAdmissionsCanonical [declaration] with
+  | Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration => true
+  | _ => false
+
 def psTestInductiveGrouping : Bool :=
   let choice := psRootName "Choice"
   let left := psNameAppendStr choice "left"
@@ -133,6 +160,7 @@ def psBridgeTests : List PsBridgeNamedTest := [
   { name := "reject free variable", passed := psTestRejectFreeVariable },
   { name := "reject expression metavariable", passed := psTestRejectExpressionMetavariable },
   { name := "reject universe metavariable", passed := psTestRejectUniverseMetavariable },
+  { name := "reject partial certification", passed := psTestRejectPartialCertification },
   { name := "inductive grouping", passed := psTestInductiveGrouping }
 ]
 

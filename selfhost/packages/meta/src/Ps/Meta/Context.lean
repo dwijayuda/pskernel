@@ -74,7 +74,7 @@ def psMetaFresh
     type := type
     localContext := localContext
     kind := kind
-  }
+  };
   {
     context := {
       nextId := Nat.succ id

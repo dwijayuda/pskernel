@@ -1054,17 +1054,26 @@ def psParseLeanMatchAlternativesAtColumnWithFuel
                         match parseTerm afterArrow.cursor with
                         | Except.error error => Except.error error
                         | Except.ok body =>
-                            let span := {
+                            let span : PsSourceSpan := {
                               start := bar.token.span.start
                               stop := psLeanTermStop body.value
-                            }
+                            };
+                            let alternative :
+                                Prod
+                                  PsSyntaxPattern
+                                  (Prod PsSyntaxTerm PsSourceSpan) :=
+                              Prod.mk
+                                pattern.value
+                                (Prod.mk body.value span);
                             psParseLeanMatchAlternativesAtColumnWithFuel
                               parseTerm
                               branchColumn
                               bar.token.span.start.line
                               remaining
                               body.cursor
-                              ((pattern.value, body.value, span) :: alternativesRev)
+                              (List.cons
+                                alternative
+                                alternativesRev)
           else
             Except.ok {
               value := psParseListReverse alternativesRev

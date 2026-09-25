@@ -96,3 +96,19 @@ def collectionArrayAll : Bool :=
 
 def collectionArrayFound : Option Nat :=
   arrayFindOption collectionIsTwo collectionArray
+
+
+def collectionArrayGetIsSome : Bool :=
+  optionIsSome collectionArrayGet
+
+def collectionArrayGetValue : Nat :=
+  optionGetOrElse collectionArrayGet 999
+
+def collectionArrayMissingIsSome : Bool :=
+  optionIsSome collectionArrayMissing
+
+def collectionArrayFoundIsSome : Bool :=
+  optionIsSome collectionArrayFound
+
+def collectionArrayFoundValue : Nat :=
+  optionGetOrElse collectionArrayFound 999

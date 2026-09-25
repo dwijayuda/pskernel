@@ -62,6 +62,35 @@ jobs:
           cd selfhost
           lake build
 
+      - name: Probe real compiler source readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+
+          echo "PSC1_COMPILER_PROJECT_CHECK: SELFHOST-COMPILER.lean"
+          lake exe psc1 check SELFHOST-COMPILER.lean
+
+          sources=(
+            packages/foundation/src/Ps/Foundation/Diagnostic.lean
+            packages/syntax/src/Ps/Syntax/Ast.lean
+            packages/syntax/src/Ps/Syntax/Translate.lean
+            packages/elab/src/Ps/Elab/Declaration.lean
+            packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean
+            packages/erasure/src/Ps/Erasure/Definition.lean
+            packages/backend-ts/src/Ps/BackendTs/Module.lean
+          )
+
+          for source in "${sources[@]}"; do
+            echo "PSC1_COMPILER_SOURCE_CHECK: ${source}"
+            lake exe psc1 check "${source}"
+            output="/tmp/psc1-$(basename "${source}" .lean).ps"
+            lake exe psc1 translate "${source}" --to ps > "${output}"
+            test -s "${output}"
+          done
+
+          echo "PSC1_COMPILER_SOURCE_READINESS: PASS"
+
       - name: Run Lean-hosted compiler smoke
         shell: bash
         run: |
@@ -555,34 +584,6 @@ jobs:
           NODE
 
 
-      - name: Probe real compiler source readiness
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd selfhost
-
-          echo "PSC1_COMPILER_PROJECT_CHECK: SELFHOST-COMPILER.lean"
-          lake exe psc1 check SELFHOST-COMPILER.lean
-
-          sources=(
-            packages/foundation/src/Ps/Foundation/Diagnostic.lean
-            packages/syntax/src/Ps/Syntax/Ast.lean
-            packages/syntax/src/Ps/Syntax/Translate.lean
-            packages/elab/src/Ps/Elab/Declaration.lean
-            packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean
-            packages/erasure/src/Ps/Erasure/Definition.lean
-            packages/backend-ts/src/Ps/BackendTs/Module.lean
-          )
-
-          for source in "${sources[@]}"; do
-            echo "PSC1_COMPILER_SOURCE_CHECK: ${source}"
-            lake exe psc1 check "${source}"
-            output="/tmp/psc1-$(basename "${source}" .lean).ps"
-            lake exe psc1 translate "${source}" --to ps > "${output}"
-            test -s "${output}"
-          done
-
-          echo "PSC1_COMPILER_SOURCE_READINESS: PASS"
 
 
   psc0-compatibility:

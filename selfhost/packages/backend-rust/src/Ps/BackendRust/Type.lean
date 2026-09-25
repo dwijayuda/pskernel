@@ -13,6 +13,7 @@ inductive PsRustEmitError where
   | functionResultUnsupported (name : String)
   | functionStorageUnsupported (name : String)
   | nestedFunctionParameterUnsupported (name : String)
+  | lambdaFunctionParameterUnsupported (name : String)
   | unknownStructure (name : String)
   | unknownInductive (name : String)
   | namedTypeArity (name : String)

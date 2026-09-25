@@ -97,7 +97,7 @@ partial def simpleCheckUniformOccurrenceExpr
         unless ok do
           throw
             "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration"
-        return
+        return ()
   | _ => pure ()
 
   match e with

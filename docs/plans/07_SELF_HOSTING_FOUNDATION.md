@@ -250,6 +250,53 @@ The scalar family should share generic implementation/proof machinery where
 possible (for example fixed-width integer operations parameterized by width)
 rather than duplicating unrelated semantics for every concrete type.
 
+### Shared VerifiedIR target-neutrality contract
+
+`CheckedCore -> Erasure -> VerifiedIR` is the single semantic lowering shared
+by **all execution backends**. TypeScript, Rust, and WebAssembly must consume the
+same target-neutral `PsVerifiedIrModule`; no backend gets a privileged
+semantic IR.
+
+```text
+                       CheckedCore
+                           |
+                        Erasure
+                           |
+                      VerifiedIR
+                    /      |       \
+                   /       |        \
+          backend-ts  backend-rust  backend-wasm
+              |           |             |
+             .ts         .rs       Wasm target IR
+```
+
+The shared IR may describe ProofScript runtime semantics: PSC primitive types,
+functions/lambdas/calls, structures, inductives, constructors, matches,
+semantic intrinsics, target-neutral capabilities/import identities, and proved
+optimization facts.
+
+The shared IR must **not** contain target representation decisions:
+
+- no TypeScript/JavaScript `number`, `bigint`, object layout, npm, or Node
+  semantics;
+- no Rust `u32`, `Vec<T>`, ownership, borrowing, lifetimes, traits, Cargo,
+  or Rust ABI semantics;
+- no WebAssembly `i32/i64/f32/f64`, opcodes, GC heap types, memories,
+  tables, sections, WIT/WASI, or binary-format semantics;
+- no target-specific object layout, calling convention, import syntax, or
+  allocation policy.
+
+Each backend owns a **target-lowering layer after VerifiedIR**. Backend-specific
+IRs are allowed and encouraged when useful, but they must be downstream of the
+shared semantic IR. Optimizations that are semantics-preserving and useful to
+multiple targets should live in a shared target-neutral optimizer before
+backend lowering.
+
+A repository guard must reject obvious backend namespace/representation leakage
+from `packages/compiler-ir/src`. Review of shared-IR changes must ask whether
+the same node has a coherent meaning for TS, Rust, and Wasm without mentioning
+any of those targets.
+
 ### TypeScript / JavaScript backend invariant
 
 For the Lean-authored compiler implementation, TypeScript is the final compiler
@@ -332,6 +379,72 @@ The Rust backend is **not required to close the first PSC1 JavaScript
 self-host**. It is added after that fixed point to establish a second,
 independent execution host without delaying the current source-closure
 campaign.
+
+### Planned owned WebAssembly 3 backend invariant
+
+The direct WebAssembly backend is developed independently on
+`backend/wasm3-owned` so it cannot block PSC1 source closure. It consumes the
+same VerifiedIR contract as TypeScript and Rust and lowers into a distinct
+Wasm target IR before binary encoding:
+
+```text
+supported .lean or .ps
+-> shared source-neutral AST
+-> checked core
+-> erasure
+-> target-neutral VerifiedIR
+-> shared target-neutral optimizations
+-> backend-wasm
+-> Wasm target IR
+-> owned binary encoder
+-> .wasm
+```
+
+The production design may use WebAssembly 3 facilities such as GC structs and
+arrays, typed function references, tail calls, packed i8/i16 storage, SIMD,
+memory64 profiles, and the deterministic execution profile. These capabilities
+must remain backend implementation choices and must not become PSC1 source
+features merely because Wasm supports them.
+
+Initial semantic mappings are:
+
+```text
+UInt8/Int8       -> i32 execution, packed i8 storage where appropriate
+UInt16/Int16     -> i32 execution, packed i16 storage where appropriate
+UInt32/Int32     -> i32
+UInt64/Int64     -> i64
+USize/ISize      -> i32 for wasm32, i64 for wasm64
+Float32          -> f32
+Float            -> f64
+Bool/Char        -> target-lowered scalar representations preserving PSC rules
+Nat/Int          -> exact PSC runtime representations unless proven narrowed
+String/ADTs      -> runtime/GC representations preserving PSC semantics
+```
+
+Prefer a hybrid runtime: Wasm GC for managed semantic data such as structures,
+inductives, closures and generic reference arrays; linear memory/SIMD for packed
+numeric and binary workloads. Representation selection belongs to
+`backend-wasm` or a proven target-neutral optimization fact, never to the
+semantic meaning of VerifiedIR.
+
+A pure ProofScript package that depends only on portable PSC APIs should be
+eligible for all three targets:
+
+```text
+library.ps
+   -> VerifiedIR
+      +-> backend-ts   -> JS/npm
+      +-> backend-rust -> native/Cargo
+      +-> backend-wasm -> .wasm/component
+```
+
+Target-specific npm, Cargo, WASI, or other host dependencies must narrow the
+declared target set explicitly rather than contaminating the shared IR.
+
+The Wasm backend is non-blocking for SH8-SH10 and should be rebased regularly
+onto the shared IR contract. It becomes an integration milestone only after the
+JavaScript fixed point is stable enough that backend work cannot destabilize the
+bootstrap source-closure campaign.
 
 ### Staged source portability invariant
 
@@ -1211,6 +1324,28 @@ compiler.ps
    |
    \---> backend-rust -> rustc -> psc-native
 ```
+
+## SH10W — owned Wasm backend and Wasm cross-host lane
+
+After the shared IR contract is stable, integrate the independently developed
+`backend-wasm` without forking frontend, elaboration, checking, erasure or
+VerifiedIR semantics.
+
+Required integration gates:
+
+- the same source produces equal CheckedCore and VerifiedIR fingerprints before
+  TS, Rust, and Wasm lowering;
+- direct Wasm behavior matches the TS and Rust backends for the portable,
+  deterministic conformance corpus;
+- target-specific representation choices are confined to Wasm target IR/runtime;
+- deterministic assurance builds do not silently enable relaxed SIMD or
+  semantics-changing floating-point transforms;
+- the owned encoder is validated against independent Wasm validators/runtimes;
+- eventual `psc.wasm` self-hosting is a separate host fixed-point gate, not a
+  prerequisite for the first direct-Wasm backend claim.
+
+Longer-term assurance should connect VerifiedIR semantics to Wasm target-IR
+semantics and then to the exact encoded artifact.
 
 ## SH11 — verified self-hosting
 

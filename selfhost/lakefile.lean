@@ -89,6 +89,7 @@ lean_lib PsBackendRust where
   roots := #[
     `Ps.BackendRust.Type,
     `Ps.BackendRust.Expr,
+    `Ps.BackendRust.Runtime,
     `Ps.BackendRust.Module
   ]
 

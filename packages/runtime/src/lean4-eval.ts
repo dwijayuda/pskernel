@@ -15,6 +15,7 @@ import {
   invokeLean434JsExtern,
   invokeLean434JsImplementedBy,
   invokeLean434JsIntrinsic,
+  lean_array_to_list,
   type Lean434DeclarationExternBinding,
   LeanRef,
 } from './lean4.js';
@@ -816,6 +817,22 @@ export class Lean434Evaluator {
         name:nameToString(info.rules[0]!.ctor),
         fields:[],
       };
+    }
+
+    if(Array.isArray(value)){
+      const arrayCtor=info.rules.find(
+        (rule)=>nameToString(rule.ctor)==='Array.mk',
+      );
+      if(arrayCtor!==undefined){
+        // Lean's logical Array is a one-field structure around List. Native
+        // execution stores arrays compactly; nested inductive recursors such
+        // as T.rec_1 are generated against the logical Array.mk shape.
+        return {
+          kind:'constructor',
+          name:'Array.mk',
+          fields:[lean_array_to_list(value)],
+        };
+      }
     }
 
     if(typeof value==='bigint'){

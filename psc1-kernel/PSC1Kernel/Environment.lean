@@ -26,14 +26,21 @@ def stringBucketHashCore : List Char → Nat → Nat
 def stringBucketHash (value : String) : Nat :=
   stringBucketHashCore value.toList 5381
 
+/--
+Fast bucket selector for environment lookup. Bucket membership is only an
+optimization: every candidate is still checked with structural Name.eq, so the
+selector does not participate in kernel semantics.
+
+Using the final name component avoids recursively re-hashing the complete
+hierarchical name on every lookup. The final component is already highly
+discriminating for Lean declaration names; collisions remain harmless.
+-/
 def Name.bucketHash : Name → Nat
   | .anonymous => 0
-  | .str parent value =>
-      (parent.bucketHash * 33 + stringBucketHash value + 1) %
-        environmentBucketCount
-  | .num parent value =>
-      (parent.bucketHash * 33 + (value % environmentBucketCount) + 17) %
-        environmentBucketCount
+  | .str _ value =>
+      (stringBucketHash value + 1) % environmentBucketCount
+  | .num _ value =>
+      (value + 17) % environmentBucketCount
 
 abbrev EnvironmentIndex := Array (List ConstantInfo)
 

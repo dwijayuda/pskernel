@@ -183,6 +183,7 @@ def psWasmAddU32IrModule : PsVerifiedIrModule :=
 def psWasmIsAddU32Function : PsWasmFunction -> Bool
   | {
       name := name,
+      typeName := none,
       parameters := [.i32, .i32],
       results := [.i32],
       locals := [],
@@ -243,6 +244,7 @@ def psWasmLetIrModule : PsVerifiedIrModule :=
 def psWasmIsLetU32Function : PsWasmFunction -> Bool
   | {
       name := name,
+      typeName := none,
       parameters := [.i32],
       results := [.i32],
       locals := [.i32],
@@ -382,6 +384,7 @@ def psWasmIsSmallSignedStructure : PsWasmStructType -> Bool
 def psWasmIsPointXFunction : PsWasmFunction -> Bool
   | {
       name := name,
+      typeName := none,
       parameters := [.i32, .i32],
       results := [.i32],
       locals := [],
@@ -398,6 +401,7 @@ def psWasmIsPointXFunction : PsWasmFunction -> Bool
 def psWasmIsSmallSignedFunction : PsWasmFunction -> Bool
   | {
       name := name,
+      typeName := none,
       parameters := [.i32],
       results := [.i32],
       locals := [],
@@ -568,6 +572,7 @@ def psWasmIsMaybeSome : PsWasmStructType -> Bool
 def psWasmIsSomeValueFunction : PsWasmFunction -> Bool
   | {
       name := "someValue",
+      typeName := none,
       parameters := [.i32],
       results := [.i32],
       locals := [.refT "MaybeU32", .i32],

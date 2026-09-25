@@ -1,7 +1,7 @@
-import PSC1Kernel.Test.NativeMap
+import PSC1Kernel.NativeMap
 
 open PSC1Kernel
-open PSC1Kernel.Test
+open PSC1Kernel.NativeMap
 
 def assertNativeMap (label : String) (ok : Bool) : IO Unit :=
   if ok then pure ()

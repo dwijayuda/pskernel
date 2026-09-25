@@ -47,12 +47,12 @@ jobs:
         run: |
           lake build
           lake build psc1_replay
-      - name: Replay with progress for three minutes
+      - name: Replay with progress for ninety seconds
         shell: bash
         run: |
           set -uo pipefail
           rc=0
-          timeout 180s psc1-kernel/.lake/build/bin/psc1_replay --progress /tmp/root100015.ndjson || rc=$?
+          timeout 90s psc1-kernel/.lake/build/bin/psc1_replay --progress /tmp/root100015.ndjson || rc=$?
           echo "replay-exit=$rc"
           if [ "$rc" -eq 0 ]; then
             exit 0

@@ -47,6 +47,12 @@ def exceptToIO (label : String) : Except String α → IO α
   | .ok value => pure value
   | .error message => throw <| IO.userError (label ++ ": " ++ message)
 
+def kernelExprWhnf
+    (env : Lean.Environment) (e : PSC1Kernel.Expr) : IO Lean.Expr := do
+  match Lean.Kernel.whnf env ({} : Lean.LocalContext) (toLeanExpr e) with
+  | .ok value => pure value
+  | .error _ => throw <| IO.userError "Lean kernel whnf failed"
+
 def kernelExprDefEq
     (env : Lean.Environment) (a b : PSC1Kernel.Expr) : IO Bool := do
   match Lean.Kernel.isDefEq env ({} : Lean.LocalContext) (toLeanExpr a) (toLeanExpr b) with
@@ -155,6 +161,41 @@ def assertProjectionOracle : IO Unit := do
   let badReduce := PSC1Kernel.reduceProjCore ctx T 0 value
   assertTrue "reduceProjCore ignored structure name" badReduce.isNone
 
+def natConst (field : String) : PSC1Kernel.Expr :=
+  .const (.str (.str .anonymous "Nat") field) []
+
+def natUnary (field : String) (a : PSC1Kernel.Expr) : PSC1Kernel.Expr :=
+  .app (natConst field) a
+
+def natBinary
+    (field : String)
+    (a b : PSC1Kernel.Expr) : PSC1Kernel.Expr :=
+  .app (.app (natConst field) a) b
+
+def assertNatReductionOracle : IO Unit := do
+  let env ← Lean.mkEmptyEnvironment
+  let ctx := PSC1Kernel.CheckerContext.empty .empty
+  let cases : List (String × PSC1Kernel.Expr) := [
+    ("succ", natUnary "succ" (.lit (.nat 4))),
+    ("add", natBinary "add" (.lit (.nat 7)) (.lit (.nat 11))),
+    ("sub-saturating", natBinary "sub" (.lit (.nat 7)) (.lit (.nat 11))),
+    ("mul", natBinary "mul" (.lit (.nat 7)) (.lit (.nat 11))),
+    ("pow", natBinary "pow" (.lit (.nat 3)) (.lit (.nat 4))),
+    ("gcd", natBinary "gcd" (.lit (.nat 84)) (.lit (.nat 30))),
+    ("mod-zero", natBinary "mod" (.lit (.nat 11)) (.lit (.nat 0))),
+    ("div-zero", natBinary "div" (.lit (.nat 11)) (.lit (.nat 0))),
+    ("beq-true", natBinary "beq" (.lit (.nat 11)) (.lit (.nat 11))),
+    ("ble-false", natBinary "ble" (.lit (.nat 12)) (.lit (.nat 11)))
+  ]
+  for item in cases do
+    let label := item.1
+    let input := item.2
+    let ours ← exceptToIO ("PSC1 Nat whnf " ++ label) (PSC1Kernel.whnf ctx input)
+    let lean ← kernelExprWhnf env input
+    assertTrue
+      ("Nat reduction differs from Lean 4.34: " ++ label)
+      (toLeanExpr ours == lean)
+
 def assertBinderInfoDefEqOracle : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let x : PSC1Kernel.Name := .str .anonymous "x"
@@ -221,6 +262,7 @@ def run : IO Unit := do
   ]
   assertLevelPairs levels
   assertExprOracle
+  assertNatReductionOracle
   assertBinderInfoDefEqOracle
   assertProjectionOracle
   IO.println "PSC1Kernel Lean 4.34 foundational + projection oracle: PASS"

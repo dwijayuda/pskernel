@@ -593,7 +593,7 @@ def psParseConstructorPatternTail
       List.nil with
   | Except.error error => Except.error error
   | Except.ok binders =>
-      let span :=
+      let span : PsSourceSpan :=
         match psParseListReverse binders.value with
         | [] => constructorName.span
         | lastBinder :: _ =>

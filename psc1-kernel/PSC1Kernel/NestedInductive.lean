@@ -82,7 +82,7 @@ partial def simpleNestedInstantiateFirstParams
 
 def simpleNestedLookupRebase
     (name : Name)
-    (from to : List OpenBinder) : Option Expr :=
+    (sourceParams targetParams : List OpenBinder) : Option Expr :=
   let rec go : List OpenBinder → List OpenBinder → Option Expr
     | f :: fs, t :: ts =>
         if Name.eq f.internalName name then
@@ -90,38 +90,38 @@ def simpleNestedLookupRebase
         else
           go fs ts
     | _, _ => none
-  go from to
+  go sourceParams targetParams
 
 partial def simpleNestedRebaseParams
     (e : Expr)
-    (from to : List OpenBinder) : Expr :=
+    (sourceParams targetParams : List OpenBinder) : Expr :=
   match e with
   | .fvar name =>
-      (simpleNestedLookupRebase name from to).getD e
+      (simpleNestedLookupRebase name sourceParams targetParams).getD e
   | .app fn arg =>
       .app
-        (simpleNestedRebaseParams fn from to)
-        (simpleNestedRebaseParams arg from to)
+        (simpleNestedRebaseParams fn sourceParams targetParams)
+        (simpleNestedRebaseParams arg sourceParams targetParams)
   | .lam name type body binderInfo =>
       .lam name
-        (simpleNestedRebaseParams type from to)
-        (simpleNestedRebaseParams body from to)
+        (simpleNestedRebaseParams type sourceParams targetParams)
+        (simpleNestedRebaseParams body sourceParams targetParams)
         binderInfo
   | .forallE name type body binderInfo =>
       .forallE name
-        (simpleNestedRebaseParams type from to)
-        (simpleNestedRebaseParams body from to)
+        (simpleNestedRebaseParams type sourceParams targetParams)
+        (simpleNestedRebaseParams body sourceParams targetParams)
         binderInfo
   | .letE name type value body nondep =>
       .letE name
-        (simpleNestedRebaseParams type from to)
-        (simpleNestedRebaseParams value from to)
-        (simpleNestedRebaseParams body from to)
+        (simpleNestedRebaseParams type sourceParams targetParams)
+        (simpleNestedRebaseParams value sourceParams targetParams)
+        (simpleNestedRebaseParams body sourceParams targetParams)
         nondep
   | .mdata metadata body =>
-      .mdata metadata (simpleNestedRebaseParams body from to)
+      .mdata metadata (simpleNestedRebaseParams body sourceParams targetParams)
   | .proj typeName index body =>
-      .proj typeName index (simpleNestedRebaseParams body from to)
+      .proj typeName index (simpleNestedRebaseParams body sourceParams targetParams)
   | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => e
 
 partial def simpleNestedOpenConstructorParams
@@ -691,6 +691,7 @@ def simpleNestedAddOriginals
     (transformed : Environment)
     (base : Environment)
     (decl : SimpleMutualInductiveDecl)
+    (canonicalParams : List OpenBinder)
     (families : List SimpleNestedAuxFamily)
     (recRename : List (Name × Name)) :
     Except String Environment := do
@@ -706,7 +707,9 @@ def simpleNestedAddOriginals
           base := {
             info.base with
             type :=
-              simpleNestedRestoreExpr families recRename info.base.type
+              (← simpleNestedRestoreExpr
+                families recRename canonicalParams decl.numParams
+                info.base.type)
           }
           all := originalNames
           numNested := families.length
@@ -723,8 +726,9 @@ def simpleNestedAddOriginals
                 base := {
                   ctor.base with
                   type :=
-                    simpleNestedRestoreExpr
-                      families recRename ctor.base.type
+                    (← simpleNestedRestoreExpr
+                      families recRename canonicalParams decl.numParams
+                      ctor.base.type)
                 }
               }
               copyCtors more (work.addUnchecked (.ctorInfo restoredCtor))
@@ -733,8 +737,9 @@ def simpleNestedAddOriginals
         let some (.recInfo recInfo) := transformed.find? recName
           | throw "restored nested recursor metadata is missing"
         let restoredRec :=
-          simpleNestedRestoreRecursor
-            originalNames families recRename recName false recInfo
+          ← simpleNestedRestoreRecursor
+            originalNames families recRename canonicalParams decl.numParams
+            recName false recInfo
         let work := work.addUnchecked (.recInfo restoredRec)
         go rest work
   go decl.types base
@@ -743,6 +748,8 @@ def simpleNestedAddAuxRecursors
     (transformed : Environment)
     (base : Environment)
     (originalNames : List Name)
+    (canonicalParams : List OpenBinder)
+    (numParams : Nat)
     (families : List SimpleNestedAuxFamily)
     (recRename : List (Name × Name)) :
     Except String Environment := do
@@ -757,15 +764,17 @@ def simpleNestedAddAuxRecursors
           throw "nested auxiliary recursor rename collides with an existing declaration"
         let some (.recInfo recInfo) := transformed.find? oldName
           | throw "nested auxiliary recursor metadata is missing"
-        let restored :=
+        let restored ←
           simpleNestedRestoreRecursor
-            originalNames families recRename newName true recInfo
+            originalNames families recRename canonicalParams numParams
+            newName true recInfo
         go rest (work.addUnchecked (.recInfo restored))
   go families base
 
 def simpleNestedValidateRestored
     (transformed finalEnv : Environment)
     (decl : SimpleMutualInductiveDecl)
+    (canonicalParams : List OpenBinder)
     (families : List SimpleNestedAuxFamily)
     (recRename : List (Name × Name)) : Except String Unit := do
   let safety :=
@@ -826,8 +835,9 @@ def simpleNestedValidateRestored
           | [], [] => pure ()
           | oldRule :: oldRest, newRule :: newRest => do
               let oldType ← check oldCtx oldRule.rhs
-              let expected :=
-                simpleNestedRestoreExpr families recRename oldType
+              let expected ←
+                simpleNestedRestoreExpr
+                  families recRename canonicalParams decl.numParams oldType
               let got ← check newCtx newRule.rhs
               unless ← isDefEq newCtx got expected do
                 throw "restored nested recursor rule is not type preserving"
@@ -846,10 +856,17 @@ def addSimpleNestedInductive
     (env : Environment)
     (decl : SimpleMutualInductiveDecl) : Except String Environment := do
   simpleNestedCheckReserved decl
-  if decl.numParams != 0 then
-    throw "nested inductive bootstrap slice does not yet support shared parameters"
   if decl.types.isEmpty then
     throw "empty nested inductive declaration"
+  let first :: _ := decl.types
+    | throw "empty nested inductive declaration"
+  let safety :=
+    if decl.isUnsafe then DefinitionSafety.unsafeDef else DefinitionSafety.safe
+  let firstCtx := mkChecker env decl.levelParams safety
+  let firstTypeType ← check firstCtx first.type
+  let _ ← ensureSort firstCtx firstTypeType
+  let (_, canonicalParams, _) ←
+    openSimpleHeaderParams firstCtx first.type decl.numParams []
   let originalNames := simpleMutualNames decl
   let initialState : SimpleNestedMapState := {
     aux := []
@@ -858,7 +875,7 @@ def addSimpleNestedInductive
   }
   let (transformedTypes, state) ←
     simpleNestedProcessQueue
-      env decl.levelParams originalNames
+      env decl.levelParams originalNames canonicalParams decl.numParams
       decl.types [] initialState
   if state.aux.isEmpty then
     match transformedTypes with
@@ -869,12 +886,12 @@ def addSimpleNestedInductive
           type := type.type
           ctors := type.ctors
           isUnsafe := decl.isUnsafe
-          numParams := 0
+          numParams := decl.numParams
         }
     | _ =>
         addSimpleMutualInductive env {
           levelParams := decl.levelParams
-          numParams := 0
+          numParams := decl.numParams
           types := transformedTypes
           isUnsafe := decl.isUnsafe
         }
@@ -882,7 +899,7 @@ def addSimpleNestedInductive
     let transformed ←
       addSimpleMutualInductive env {
         levelParams := decl.levelParams
-        numParams := 0
+        numParams := decl.numParams
         types := transformedTypes
         isUnsafe := decl.isUnsafe
       }
@@ -897,13 +914,13 @@ def addSimpleNestedInductive
     let recRename := makeRenames state.aux 1
     let restoredOriginals ←
       simpleNestedAddOriginals
-        transformed env decl state.aux recRename
+        transformed env decl canonicalParams state.aux recRename
     let finalEnv ←
       simpleNestedAddAuxRecursors
         transformed restoredOriginals originalNames
-        state.aux recRename
+        canonicalParams decl.numParams state.aux recRename
     simpleNestedValidateRestored
-      transformed finalEnv decl state.aux recRename
+      transformed finalEnv decl canonicalParams state.aux recRename
     pure finalEnv
 
 end Kernel

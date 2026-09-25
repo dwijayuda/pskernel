@@ -1,6 +1,7 @@
 import Ps.Core.Expr
 
-def psExprAbstractFVarAt (target : Nat) (depth : Nat) : PsExpr -> PsExpr
+def psExprAbstractFVarAt (target : Nat) (depth : Nat) (expr : PsExpr) : PsExpr :=
+  match expr with
   | .bvar index =>
       PsExpr.bvar index
   | .fvar id =>

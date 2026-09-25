@@ -1025,6 +1025,38 @@ partial def isDefEqUnitLike
   if ctor.numFields != 0 then return false
   isDefEq ctx tType (← infer ctx s)
 
+def typeCheckerNameString : Name → String
+  | .anonymous => "_"
+  | .str .anonymous value => value
+  | .str parent value => typeCheckerNameString parent ++ "." ++ value
+  | .num .anonymous value => toString value
+  | .num parent value => typeCheckerNameString parent ++ "." ++ toString value
+
+def typeCheckerExprHead (e : Expr) : String :=
+  let args := e.getAppNumArgs
+  match e.getAppFn with
+  | .const name _ =>
+      "const " ++ typeCheckerNameString name ++
+        " (args=" ++ toString args ++ ")"
+  | .fvar name =>
+      "fvar " ++ typeCheckerNameString name ++
+        " (args=" ++ toString args ++ ")"
+  | .bvar index =>
+      "bvar " ++ toString index ++
+        " (args=" ++ toString args ++ ")"
+  | .mvar name =>
+      "mvar " ++ typeCheckerNameString name ++
+        " (args=" ++ toString args ++ ")"
+  | .sort _ => "sort"
+  | .lam _ _ _ _ => "lambda"
+  | .forallE _ _ _ _ => "forall"
+  | .letE _ _ _ _ _ => "let"
+  | .lit _ => "literal"
+  | .mdata _ _ => "metadata"
+  | .proj name index _ =>
+      "projection " ++ typeCheckerNameString name ++ "." ++ toString index
+  | .app _ _ => "application"
+
 partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   match e with
   | .bvar _ => .error "loose bound variable in type checker"
@@ -1055,7 +1087,17 @@ partial def infer (ctx : CheckerContext) (e : Expr) : Except String Expr :=
   | .mdata _ body => infer ctx body
   | .app fn arg => do
     let fnType ← infer ctx fn
-    let (_, domain, body, _) ← ensureForall ctx fnType
+    let forallInfo ←
+      match ensureForall ctx fnType with
+      | .ok value => pure value
+      | .error _ => do
+          let reduced ← whnf ctx fnType
+          throw (
+            "expected function type while applying " ++
+            typeCheckerExprHead fn ++
+            "; reduced function type is " ++
+            typeCheckerExprHead reduced)
+    let (_, domain, body, _) := forallInfo
     let argType ← infer ctx arg
     let eqCtx :=
       if isEagerReduceExpr arg then

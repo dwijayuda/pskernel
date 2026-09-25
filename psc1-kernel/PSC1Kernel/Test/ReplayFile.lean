@@ -142,6 +142,9 @@ def replayPushEqAppendTheorem
   IO.println "PSC1 Lean theorem PHASE proof-check-begin"
   let valueType ← liftReplayResult "<diagnostic>" 0 (check ctx info.value)
   IO.println "PSC1 Lean theorem PHASE proof-check-end"
+  IO.println "PSC1 Lean theorem PHASE raw-expr-eq-begin"
+  let rawEq := Expr.eq valueType info.base.type
+  IO.println s!"PSC1 Lean theorem PHASE raw-expr-eq-end result={rawEq}"
   IO.println "PSC1 Lean theorem PHASE final-defeq-begin"
   let eq ← liftReplayResult "<diagnostic>" 0
     (isDefEq ctx valueType info.base.type)

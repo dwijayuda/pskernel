@@ -98,14 +98,15 @@ def mkChecker
     (levelParams : List Name)
     (safety : DefinitionSafety)
     (maxRecDepth : Nat := 0)
-    (maxNatSize : Nat := leanNatMaxSizeDefault) : CheckerContext :=
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : CheckerContext :=
   {
     env := env
     lctx := .empty
     levelParams := levelParams
     safety := safety
     eagerReduce := false
-    nativeEvaluator := none
+    nativeEvaluator := nativeEvaluator
     maxRecDepth := maxRecDepth
     maxNatSize := maxNatSize
     recDepth := 0
@@ -116,14 +117,15 @@ def checkConstantBase
     (base : ConstantBase)
     (safety : DefinitionSafety)
     (maxRecDepth : Nat := 0)
-    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Unit := do
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Unit := do
   if env.contains base.name then
     throw "already declared"
   if Name.hasDuplicates base.levelParams then
     throw "duplicate universe parameter"
   checkNoMVarNoFVar base.type
   checkLevelParams base.type base.levelParams
-  let ctx := mkChecker env base.levelParams safety maxRecDepth maxNatSize
+  let ctx := mkChecker env base.levelParams safety maxRecDepth maxNatSize nativeEvaluator
   let typeType ← check ctx base.type
   let _ ← ensureSort ctx typeType
   pure ()
@@ -133,10 +135,11 @@ def checkDefinitionBody
     (value : DefinitionInfo)
     (safety : DefinitionSafety)
     (maxRecDepth : Nat := 0)
-    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Unit := do
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Unit := do
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
-  let ctx := mkChecker env value.base.levelParams safety maxRecDepth maxNatSize
+  let ctx := mkChecker env value.base.levelParams safety maxRecDepth maxNatSize nativeEvaluator
   let valueType ← check ctx value.value
   unless ← isDefEq ctx valueType value.base.type do
     throw "definition type mismatch"
@@ -145,36 +148,39 @@ def addAxiom
     (env : Environment)
     (value : AxiomInfo)
     (maxRecDepth : Nat := 0)
-    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Environment := do
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
   let safety := if value.isUnsafe then DefinitionSafety.unsafeDef else DefinitionSafety.safe
-  checkConstantBase env value.base safety maxRecDepth maxNatSize
+  checkConstantBase env value.base safety maxRecDepth maxNatSize nativeEvaluator
   env.add (.axiomInfo value)
 
 def addDefinition
     (env : Environment)
     (value : DefinitionInfo)
     (maxRecDepth : Nat := 0)
-    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Environment := do
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
   match value.safety with
   | .unsafeDef =>
       -- Final Lean 4.34 adds the *full definition* before checking the body,
       -- so recursive unsafe code may unfold itself while being checked.
-      checkConstantBase env value.base .unsafeDef maxRecDepth maxNatSize
+      checkConstantBase env value.base .unsafeDef maxRecDepth maxNatSize nativeEvaluator
       let work ← env.add (.defnInfo value)
-      checkDefinitionBody work value .unsafeDef maxRecDepth maxNatSize
+      checkDefinitionBody work value .unsafeDef maxRecDepth maxNatSize nativeEvaluator
       pure work
   | .safe | .partialDef =>
-      checkConstantBase env value.base .safe maxRecDepth maxNatSize
-      checkDefinitionBody env value .safe maxRecDepth maxNatSize
+      checkConstantBase env value.base .safe maxRecDepth maxNatSize nativeEvaluator
+      checkDefinitionBody env value .safe maxRecDepth maxNatSize nativeEvaluator
       env.add (.defnInfo value)
 
 def addTheorem
     (env : Environment)
     (value : TheoremInfo)
     (maxRecDepth : Nat := 0)
-    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Environment := do
-  checkConstantBase env value.base .safe maxRecDepth maxNatSize
-  let ctx := mkChecker env value.base.levelParams .safe maxRecDepth maxNatSize
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
+  checkConstantBase env value.base .safe maxRecDepth maxNatSize nativeEvaluator
+  let ctx := mkChecker env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
   unless ← isProp ctx value.base.type do
     throw "theorem type is not a proposition"
   checkNoMVarNoFVar value.value
@@ -188,13 +194,14 @@ def addOpaque
     (env : Environment)
     (value : OpaqueInfo)
     (maxRecDepth : Nat := 0)
-    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Environment := do
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
   -- Matches final Lean 4.34 environment.cpp: opaque bodies are checked by the
   -- ordinary safe checker even though ConstantInfo retains an isUnsafe bit.
-  checkConstantBase env value.base .safe maxRecDepth maxNatSize
+  checkConstantBase env value.base .safe maxRecDepth maxNatSize nativeEvaluator
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
-  let ctx := mkChecker env value.base.levelParams .safe maxRecDepth maxNatSize
+  let ctx := mkChecker env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
   let valueType ← check ctx value.value
   unless ← isDefEq ctx valueType value.base.type do
     throw "opaque value type mismatch"
@@ -204,7 +211,8 @@ def addMutualDefinitions
     (env : Environment)
     (values : List DefinitionInfo)
     (maxRecDepth : Nat := 0)
-    (maxNatSize : Nat := leanNatMaxSizeDefault) : Except String Environment := do
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
   let first :: _ := values
     | throw "invalid empty mutual definition"
   if first.safety.isSafe then
@@ -219,7 +227,7 @@ def addMutualDefinitions
           throw "invalid mutual definition, declarations must have the same universe level parameters"
         if nameMember value.base.name seen then
           throw "invalid mutual definition, duplicate declaration name"
-        checkConstantBase env value.base first.safety maxRecDepth maxNatSize
+        checkConstantBase env value.base first.safety maxRecDepth maxNatSize nativeEvaluator
         checkHeaders (value.base.name :: seen) rest
   checkHeaders [] values
 
@@ -227,7 +235,7 @@ def addMutualDefinitions
   let rec checkBodies : List DefinitionInfo → Except String Unit
     | [] => pure ()
     | value :: rest => do
-        checkDefinitionBody work value first.safety maxRecDepth maxNatSize
+        checkDefinitionBody work value first.safety maxRecDepth maxNatSize nativeEvaluator
         checkBodies rest
   checkBodies values
   pure work

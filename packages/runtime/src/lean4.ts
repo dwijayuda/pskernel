@@ -1113,6 +1113,8 @@ new Map<string,Lean434JsExternImplementation>([
       index as LeanNat,
       value,
     )],
+  ['lean_string_dec_eq',(a,b)=>
+    lean_string_dec_eq(a as LeanString,b as LeanString)],
   ['lean_string_length',(value)=>
     lean_string_length(value as LeanString)],
   ['lean_string_utf8_byte_size',(value)=>

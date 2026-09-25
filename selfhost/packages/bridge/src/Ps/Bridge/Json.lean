@@ -735,6 +735,47 @@ def psJsonValidateCanonicalNumber
       | List.nil => true
       | List.cons _ _ => false
 
+def psJsonEncodeValueList
+    (encodeValue :
+      PsJsonValue -> Except PsJsonEncodeError String)
+    (values : List PsJsonValue) :
+    Except PsJsonEncodeError (List String) :=
+  match values with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons value rest =>
+      match encodeValue value with
+      | Except.error error =>
+          Except.error error
+      | Except.ok encodedHead =>
+          match psJsonEncodeValueList encodeValue rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encodedTail =>
+              Except.ok (List.cons encodedHead encodedTail)
+
+def psJsonEncodeFieldList
+    (encodeValue :
+      PsJsonValue -> Except PsJsonEncodeError String)
+    (fields : List (String × PsJsonValue)) :
+    Except PsJsonEncodeError (List (String × String)) :=
+  match fields with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons field rest =>
+      match encodeValue (Prod.snd field) with
+      | Except.error error =>
+          Except.error error
+      | Except.ok encodedHead =>
+          match psJsonEncodeFieldList encodeValue rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encodedTail =>
+              Except.ok
+                (List.cons
+                  (Prod.mk (Prod.fst field) encodedHead)
+                  encodedTail)
+
 partial def psJsonEncodeCanonical
     (value : PsJsonValue) :
     Except PsJsonEncodeError String :=
@@ -753,7 +794,10 @@ partial def psJsonEncodeCanonical
   | PsJsonValue.string text =>
       Except.ok (psJsonQuote text)
   | PsJsonValue.array values =>
-      match values.mapM psJsonEncodeCanonical with
+      match
+          psJsonEncodeValueList
+            psJsonEncodeCanonical
+            values with
       | Except.error error => Except.error error
       | Except.ok encoded =>
           Except.ok (psJsonArray encoded)
@@ -761,13 +805,10 @@ partial def psJsonEncodeCanonical
       match psJsonSortObjectFields fields with
       | Except.error error => Except.error error
       | Except.ok sorted =>
-          let encodeField :=
-            fun (field : String × PsJsonValue) =>
-              match psJsonEncodeCanonical (Prod.snd field) with
-              | Except.error error => Except.error error
-              | Except.ok encoded =>
-                  Except.ok (Prod.mk (Prod.fst field) encoded)
-          match sorted.mapM encodeField with
+          match
+              psJsonEncodeFieldList
+                psJsonEncodeCanonical
+                sorted with
           | Except.error error => Except.error error
           | Except.ok encodedFields =>
               Except.ok (psJsonObject encodedFields)

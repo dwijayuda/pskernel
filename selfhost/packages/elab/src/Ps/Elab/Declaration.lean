@@ -1149,7 +1149,7 @@ def psElabPartialDeclaration
                         | Except.error error => Except.error error
                         | Except.ok valueResult =>
                             let metaContext :=
-                              valueResult.context.metaContext
+                              valueResult.context.metaContext;
                             let openValue :=
                               psMetaInstantiate
                                 metaContext

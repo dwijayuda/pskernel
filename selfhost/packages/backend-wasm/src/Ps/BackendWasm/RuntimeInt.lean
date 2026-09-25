@@ -31,11 +31,17 @@ def psWasmIntRuntimeLeName : String :=
 def psWasmIntRuntimeLtName : String :=
   "__ps_int_lt"
 
+def psWasmIntRuntimeToI32BoundedName : String :=
+  "__ps_int_to_i32_bounded"
+
 def psWasmIntRuntimeType : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int
 
 def psWasmIntRuntimeBoolType : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+
+def psWasmIntRuntimeI32Type : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32
 
 def psWasmIntRuntimeOfNat
     (value : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
@@ -437,6 +443,39 @@ def psWasmIntRuntimeLtDeclaration : PsVerifiedIrDeclaration :=
             ]))
   }
 
+def psWasmIntRuntimeToI32BoundedDeclaration :
+    PsVerifiedIrDeclaration :=
+  {
+    name := psWasmIntRuntimeToI32BoundedName
+    typeParameters := []
+    parameters := psWasmIntRuntimeUnaryParameter
+    resultType := psWasmIntRuntimeI32Type
+    body :=
+      psWasmIntRuntimeMatch
+        (PsVerifiedIrExpr.var "value")
+        "n"
+        (psWasmIntRuntimeNatCall
+          psWasmNatRuntimeToU32BoundedName
+          [PsVerifiedIrExpr.var "n"])
+        "n"
+        (PsVerifiedIrExpr.intrinsic
+          (PsVerifiedIrIntrinsic.machineIntBinary
+            PsVerifiedIrMachineIntegerType.int32
+            PsVerifiedIrIntegerBinaryOp.sub)
+          [
+            PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.machineInteger
+                PsVerifiedIrMachineIntegerType.int32
+                0),
+            psWasmIntRuntimeNatCall
+              psWasmNatRuntimeToU32BoundedName
+              [
+                psWasmNatRuntimeSucc
+                  (PsVerifiedIrExpr.var "n")
+              ]
+          ])
+  }
+
 def psWasmIntRuntimeDeclarations :
     List PsVerifiedIrDeclaration :=
   [
@@ -446,7 +485,8 @@ def psWasmIntRuntimeDeclarations :
     psWasmIntRuntimeMulDeclaration,
     psWasmIntRuntimeEqDeclaration,
     psWasmIntRuntimeLeDeclaration,
-    psWasmIntRuntimeLtDeclaration
+    psWasmIntRuntimeLtDeclaration,
+    psWasmIntRuntimeToI32BoundedDeclaration
   ]
 
 def psWasmIntLiteralExpr : Int -> PsVerifiedIrExpr

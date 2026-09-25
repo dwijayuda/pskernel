@@ -549,70 +549,33 @@ partial def inferKMajorType?
   | .lit (.nat _) => return some (.const kernelNatName [])
   | .lit (.str _) => return some (.const kernelStringName [])
   | .mdata _ body => inferKMajorType? ctx body
-  | .app fn arg => do
-      let sourceInfoCasesOn : Name :=
-        .str (.str (.str .anonymous "Lean") "SourceInfo") "casesOn"
-      let eqSymm : Name := .str (.str .anonymous "Eq") "symm"
-      let natEqOfBeq : Name :=
-        .str (.str .anonymous "Nat") "eq_of_beq_eq_true"
-      let debugLabel? :=
-        match major.getAppFn with
-        | .const name _ =>
-            if Name.eq name sourceInfoCasesOn then some "SourceInfo.casesOn"
-            else if Name.eq name eqSymm then some "Eq.symm"
-            else if Name.eq name natEqOfBeq then some "Nat.eq_of_beq_eq_true"
-            else none
-        | _ => none
-      let argc := major.getAppNumArgs
+  | .app _ _ => do
+      -- Lean 4.34's `infer_type` uses infer-only application inference here:
+      -- flatten the application, postpone binder substitution across an
+      -- already-visible Pi spine, and do not type-check the arguments.
+      let fn := major.getAppFn
+      let args := major.getAppArgs
       let some fnType ← inferKMajorType? ctx fn
-        | match debugLabel? with
-          | some label =>
-              throw ("K app debug " ++ label ++
-                ": function inference failed at args=" ++ toString argc)
-          | none => return none
-      let fnType' ← whnf ctx fnType
-      let .forallE _ domain body _ := fnType'
-        | match debugLabel? with
-          | some label =>
-              throw ("K app debug " ++ label ++
-                ": function type not forall at args=" ++ toString argc)
-          | none => return none
-      let some argType ← inferKMajorType? ctx arg
-        | match debugLabel? with
-          | some label =>
-              let argShape :=
-                match arg with
-                | .app _ _ =>
-                    let head :=
-                      match arg.getAppFn with
-                      | .const name _ => kDebugNameString name
-                      | .fvar name => "fvar:" ++ kDebugNameString name
-                      | .bvar index => "bvar:" ++ toString index
-                      | _ => "non-constant"
-                    "app args=" ++ toString arg.getAppNumArgs ++ "; head=" ++ head
-                | .fvar name => "fvar:" ++ kDebugNameString name
-                | .bvar index => "bvar:" ++ toString index
-                | .const name _ => "const:" ++ kDebugNameString name
-                | .lam .. => "lambda"
-                | .forallE .. => "forall"
-                | .letE .. => "let"
-                | .proj typeName index _ =>
-                    "proj:" ++ kDebugNameString typeName ++ "." ++ toString index
-                | .sort _ => "sort"
-                | .mvar _ => "mvar"
-                | .lit _ => "literal"
-                | .mdata _ _ => "mdata"
-              throw ("K app debug " ++ label ++
-                ": argument inference failed at args=" ++ toString argc ++
-                "; arg=" ++ argShape)
-          | none => return none
-      unless ← kTypesEq ctx domain argType do
-        match debugLabel? with
-        | some label =>
-            throw ("K app debug " ++ label ++
-              ": argument type mismatch at args=" ++ toString argc)
-        | none => return none
-      return some (body.instantiate1 arg)
+        | return none
+      let rec go
+          (current : Expr)
+          (remaining : List Expr)
+          (pending : List Expr) :
+          Except String (Option Expr) := do
+        match remaining with
+        | [] =>
+            return some (current.instantiateRev pending)
+        | arg :: rest =>
+            match current with
+            | .forallE _ _ body _ =>
+                go body rest (pending ++ [arg])
+            | _ =>
+                let applied := current.instantiateRev pending
+                let reduced ← whnf ctx applied
+                let .forallE _ _ body _ := reduced
+                  | return none
+                go body rest [arg]
+      go fnType args []
   | .lam .. => inferKLambdaSpine ctx major
   | .forallE .. => inferKForallSpine ctx major
   | .letE .. => inferKLetSpine ctx major

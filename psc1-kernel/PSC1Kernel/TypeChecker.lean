@@ -401,6 +401,16 @@ def kernelQuotMkName : Name := .str kernelQuotName "mk"
 def kernelQuotLiftName : Name := .str kernelQuotName "lift"
 def kernelQuotIndName : Name := .str kernelQuotName "ind"
 
+inductive DeltaResult where
+  | decided (value : Bool)
+  | residual (left : Expr) (right : Expr)
+
+inductive DeltaStepResult where
+  | continue (left : Expr) (right : Expr)
+  | unknown (left : Expr) (right : Expr)
+  | equal
+  | different (left : Expr) (right : Expr)
+
 mutual
 
 partial def reduceQuotRec
@@ -687,46 +697,29 @@ partial def toConstructorWhenK
     (major : Expr) : Except String Expr := do
   let some majorInduct := recursorMajorInduct? recursor
     | return major
-  let some rawType ← inferKMajorType? ctx major
-    | return major
-  let appType ← whnf ctx rawType
+  let appType ← whnf ctx (← infer ctx major)
   let .const typeInduct typeLevels := appType.getAppFn
     | return major
   if !Name.eq typeInduct majorInduct then
     return major
 
-  -- Final Lean 4.34 only blocks K conversion when expression metavariables
-  -- occur in indices. Metavariables confined to parameters are allowed.
   if exprHasMVarForK appType then
-    let indexedArgs := appType.getAppArgs.drop recursor.numParams
-    if indexedArgs.any exprHasMVarForK then
+    let indices := appType.getAppArgs.drop recursor.numParams
+    if indices.any exprHasMVarForK then
       return major
 
   let some (.inductInfo induct) := ctx.env.find? typeInduct
     | return major
   let ctorName :: _ := induct.ctors
     | return major
-  let some (.ctorInfo ctor) := ctx.env.find? ctorName
-    | return major
-  if ctor.numFields != 0 then
-    return major
-
-  -- Lean's mk_nullary_cnstr takes exactly the recursor parameters from the
-  -- major type and applies them to the first constructor.
   let params := appType.getAppArgs.take recursor.numParams
   if params.length != recursor.numParams then
     return major
-  let ctorApp := applyArgs (.const ctorName typeLevels) params
-
-  -- This helper predates the full mutually-recursive defeq engine, so it uses
-  -- the K-local type inference/equality path here. Crucially, failure is
-  -- fail-closed exactly like final Lean: leave the major unchanged, never
-  -- reject the term merely because K conversion was unavailable.
-  let some ctorType ← inferKMajorType? ctx ctorApp
-    | return major
-  unless ← kTypesEq ctx appType ctorType do
+  let candidate := applyArgs (.const ctorName typeLevels) params
+  let candidateType ← infer ctx candidate
+  if !(← isDefEq ctx appType candidateType) then
     return major
-  pure ctorApp
+  pure candidate
 
 partial def isConstructorApp
     (env : Environment)
@@ -740,13 +733,8 @@ partial def isConstructorApp
 
 partial def isPropTypeForStructure
     (ctx : CheckerContext)
-    (type : Expr) : Except String Bool := do
-  let some sortType ← inferKMajorType? ctx type
-    | return false
-  let sortType' ← whnf ctx sortType
-  match sortType' with
-  | .sort level => return Level.normalizesToZero level
-  | _ => return false
+    (type : Expr) : Except String Bool :=
+  isProp ctx type
 
 /--
 Lean 4.34 `to_cnstr_when_structure`: when a recursor major is an arbitrary
@@ -989,8 +977,6 @@ partial def whnf (ctx : CheckerContext) (e : Expr) : Except String Expr := do
       | none => .ok core
   loop e
 
-end
-
 partial def ensureSort (ctx : CheckerContext) (e : Expr) : Except String Level := do
   let reduced ← whnf ctx e
   match reduced with
@@ -1011,16 +997,6 @@ def levelListsEquivalent : List Level → List Level → Bool
   | a :: as, b :: bs =>
     Level.equivalent a b && levelListsEquivalent as bs
   | _, _ => false
-
-inductive DeltaResult where
-  | decided (value : Bool)
-  | residual (left : Expr) (right : Expr)
-
-inductive DeltaStepResult where
-  | continue (left : Expr) (right : Expr)
-  | unknown (left : Expr) (right : Expr)
-  | equal
-  | different (left : Expr) (right : Expr)
 
 def deltaDefinition? (ctx : CheckerContext) (e : Expr) : Option DefinitionInfo :=
   match e.getAppFn with
@@ -1066,8 +1042,6 @@ def appHeadLevelsEquivalent (a b : Expr) : Bool :=
   match a.getAppFn, b.getAppFn with
   | .const _ as, .const _ bs => levelListsEquivalent as bs
   | _, _ => false
-
-mutual
 
 /--
 Lean 4.34 compares consecutive lambda binders as one spine.  Opening all

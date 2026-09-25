@@ -939,7 +939,9 @@ def psElabInductiveDeclaration
                         Except.error (PsElabError.infer error)
                     | Except.ok _ =>
                         Except.ok
-                          (elaborated.context, elaborated.term)
+                          (Prod.mk
+                            elaborated.context
+                            elaborated.term)
           match result with
           | Except.error error => Except.error error
           | Except.ok (headerContext, openResultType) =>

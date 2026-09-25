@@ -80,11 +80,24 @@ def psTsEmitType
     Except PsTsEmitError String :=
   psTsEmitTypeWithFuel 4096 type
 
+def psTsMachineIntegerUsesBigInt :
+    PsVerifiedIrMachineIntegerType -> Bool
+  | .uint64 => true
+  | .int64 => true
+  | .usize => true
+  | .isize => true
+  | _ => false
+
 def psTsEmitLiteral
     (literal : PsVerifiedIrLiteral) : String :=
   match literal with
   | .natural value => toString value ++ "n"
   | .integer value => toString value ++ "n"
+  | .machineInteger type value =>
+      if psTsMachineIntegerUsesBigInt type then
+        toString value ++ "n"
+      else
+        toString value
   | .string value => psJsonQuote value
   | .bool value => if value then "true" else "false"
   | .unit => "undefined"

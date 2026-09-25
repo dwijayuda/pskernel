@@ -273,16 +273,16 @@ def psWasmEncodeExports
     List (String × String) ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
-  | export :: rest =>
-      match psWasmFindFunctionIndex functions export.2 with
+  | exportItem :: rest =>
+      match psWasmFindFunctionIndex functions exportItem.2 with
       | none =>
-          Except.error (PsWasmEncodeError.unknownFunction export.2)
+          Except.error (PsWasmEncodeError.unknownFunction exportItem.2)
       | some index =>
           match psWasmEncodeExports functions rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok
-                (psWasmEncodeName export.1
+                (psWasmEncodeName exportItem.1
                   ++ [psWasmByte 0]
                   ++ psWasmEncodeUleb index
                   ++ encodedRest)

@@ -1,0 +1,38 @@
+name: PSC1 root 100015 export diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [kernel/psc1-lean-full-k-checker]
+    paths:
+      - ".github/workflows/psc1-root-100015-export-diagnostic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - name: Export and measure root 100015
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean oracle/replay-probe/DependencyExport.lean
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 100015 1 > /tmp/root100015.ndjson
+          echo "bytes=$(wc -c < /tmp/root100015.ndjson)"
+          echo "lines=$(wc -l < /tmp/root100015.ndjson)"
+          grep -m1 '"environment"' /tmp/root100015.ndjson || true
+          grep -m1 '"batch"' /tmp/root100015.ndjson || true
+          echo "declaration-records=$(grep -Ec '"(axiom|def|thm|opaque|quot|inductive)":' /tmp/root100015.ndjson || true)"
+          echo "segment-markers=$(grep -c '"segment"' /tmp/root100015.ndjson || true)"

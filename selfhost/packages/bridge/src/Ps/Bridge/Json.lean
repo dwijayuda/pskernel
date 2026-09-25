@@ -12,6 +12,25 @@ def psJsonCharCode (char : Char) : Nat :=
 def psJsonCharEq (left right : Char) : Bool :=
   Nat.beq (psJsonCharCode left) (psJsonCharCode right)
 
+def psJsonCharListEq
+    (left right : List Char) : Bool :=
+  match left with
+  | List.nil =>
+      match right with
+      | List.nil => true
+      | List.cons _ _ => false
+  | List.cons leftHead leftTail =>
+      match right with
+      | List.nil => false
+      | List.cons rightHead rightTail =>
+          if psJsonCharEq leftHead rightHead then
+            psJsonCharListEq leftTail rightTail
+          else
+            false
+
+def psJsonStringEq (left right : String) : Bool :=
+  psJsonCharListEq left.toList right.toList
+
 def psJsonNatInRange
     (value lower upper : Nat) : Bool :=
   if Nat.ble lower value then
@@ -469,14 +488,16 @@ partial def psJsonParseValueWithFuel
     Except PsJsonParseError PsJsonParseResult :=
   match fuel with
   | 0 => Except.error PsJsonParseError.fuelExhausted
-  | remaining + 1 =>
+  | Nat.succ remaining =>
       let chars := psJsonSkipWhitespace input
       match chars with
       | [] => Except.error PsJsonParseError.unexpectedEnd
       | '"' :: rest =>
           match psJsonParseStringChars remaining rest [] with
           | Except.error error => Except.error error
-          | Except.ok (value, afterString) =>
+          | Except.ok stringResult =>
+              let value := Prod.fst stringResult;
+              let afterString := Prod.snd stringResult;
               Except.ok {
                 value := PsJsonValue.string value
                 rest := afterString
@@ -535,14 +556,15 @@ def psJsonParse
   match
       psJsonParseValueWithFuel
         (Except.error PsJsonParseError.fuelExhausted)
-        (chars.length * 4 + 32)
+        (Nat.add (Nat.mul chars.length 4) 32)
         chars with
   | Except.error error => Except.error error
   | Except.ok parsed =>
-      if (psJsonSkipWhitespace parsed.rest).isEmpty then
-        Except.ok parsed.value
-      else
-        Except.error PsJsonParseError.trailingInput
+      match psJsonSkipWhitespace parsed.rest with
+      | List.nil =>
+          Except.ok parsed.value
+      | List.cons _ _ =>
+          Except.error PsJsonParseError.trailingInput
 
 def psJsonObjectFind :
     List (String × PsJsonValue) ->
@@ -550,8 +572,8 @@ def psJsonObjectFind :
     Option PsJsonValue
   | [], _ => none
   | field :: rest, key =>
-      if field.1 == key then
-        some field.2
+      if psJsonStringEq (Prod.fst field) key then
+        some (Prod.snd field)
       else
         psJsonObjectFind rest key
 
@@ -599,11 +621,11 @@ def psJsonCompareCharLists :
   | [], _ :: _ => PsJsonKeyOrder.lt
   | _ :: _, [] => PsJsonKeyOrder.gt
   | left :: leftRest, right :: rightRest =>
-      let leftValue := left.val.toNat
-      let rightValue := right.val.toNat
-      if leftValue < rightValue then
+      let leftValue : Nat := psJsonCharCode left;
+      let rightValue : Nat := psJsonCharCode right;
+      if Nat.blt leftValue rightValue then
         PsJsonKeyOrder.lt
-      else if rightValue < leftValue then
+      else if Nat.blt rightValue leftValue then
         PsJsonKeyOrder.gt
       else
         psJsonCompareCharLists leftRest rightRest
@@ -618,17 +640,22 @@ def psJsonInsertObjectField
     Except PsJsonEncodeError (List (String × PsJsonValue))
   | [] => Except.ok [field]
   | current :: rest =>
-      match psJsonCompareKeys field.1 current.1 with
+      match
+          psJsonCompareKeys
+            (Prod.fst field)
+            (Prod.fst current) with
       | PsJsonKeyOrder.lt =>
-          Except.ok (field :: current :: rest)
+          Except.ok
+            (List.cons field (List.cons current rest))
       | PsJsonKeyOrder.eq =>
           Except.error
-            (PsJsonEncodeError.duplicateObjectKey field.1)
+            (PsJsonEncodeError.duplicateObjectKey
+              (Prod.fst field))
       | PsJsonKeyOrder.gt =>
           match psJsonInsertObjectField field rest with
           | Except.error error => Except.error error
           | Except.ok sortedRest =>
-              Except.ok (current :: sortedRest)
+              Except.ok (List.cons current sortedRest)
 
 def psJsonSortObjectFields :
     List (String × PsJsonValue) ->
@@ -644,7 +671,10 @@ def psJsonValidateCanonicalNumber
     (text : String) : Bool :=
   match psJsonParseNumber text.toList with
   | Except.error _ => false
-  | Except.ok parsed => parsed.rest.isEmpty
+  | Except.ok parsed =>
+      match parsed.rest with
+      | List.nil => true
+      | List.cons _ _ => false
 
 partial def psJsonEncodeCanonical
     (value : PsJsonValue) :
@@ -671,10 +701,10 @@ partial def psJsonEncodeCanonical
       | Except.ok sorted =>
           let encodeField :=
             fun field =>
-              match psJsonEncodeCanonical field.2 with
+              match psJsonEncodeCanonical Prod.snd field with
               | Except.error error => Except.error error
               | Except.ok encoded =>
-                  Except.ok (field.1, encoded)
+                  Except.ok (Prod.mk (Prod.fst field) encoded)
           match sorted.mapM encodeField with
           | Except.error error => Except.error error
           | Except.ok encodedFields =>

@@ -83,6 +83,36 @@ Portable compiler source must stay inside the intersection of:
 2. constructs we are willing to support in canonical `.ps`;
 3. ordinary Lean syntax accepted by official Lean 4.34.
 
+For ProofScript source syntax, the normative PSC1 reference is **ProofScript
+Language Reference v0.7, with v0.6.1 as the compatible compiler-ready
+baseline**. **Do not use v0.8 as the PSC1 language reference.** A later
+reference revision may be studied separately, but it must not silently remove
+or redefine v0.7/v0.6.1 PSC1 source forms.
+
+Accordingly, PSC1 includes all three v0.7/v0.6.1 definition spellings:
+
+```proofscript
+def answer : Nat := 42;
+const answer2 : Nat := 42;
+function add(x : Nat, y : Nat) : Nat := x + y;
+```
+
+Their semantics are one ordinary definition mechanism:
+
+```text
+const    -> parameterless def alias
+function -> parameterized def alias, >= 1 explicit parameter group
+def      -> canonical general definition
+```
+
+`const` with declaration parameters and `function` without an explicit
+parameter group are invalid. A parameterless `const` may still contain a
+function-valued expression. Neither alias has JavaScript-specific semantics.
+When translating to Lean, both aliases canonicalize to `def`. When generating
+canonical `.ps` from Lean during the source transition, emitting `def` is
+sufficient; lexical alias preservation is not required because aliases have
+identical checked semantics.
+
 The fact that Lean accepts a construct does not make it part of PSC1.
 
 Portable semantic modules must not depend on Lean's implementation APIs,
@@ -210,9 +240,10 @@ Erasure
       |
       v
 VerifiedIR
-      |
-      v
-TypeScript emitter
+   /     |      \
+  v      v       v
+TS      Rust    Wasm
+emitter lowering lowering
 ```
 
 The important split is:
@@ -225,6 +256,33 @@ The important split is:
   kernel-checkable terms.
 - There is no second semantic type checker after elaboration. pskernel is the
   independent final admission authority.
+
+## Backend-neutral VerifiedIR boundary
+
+The bootstrap architecture must not accidentally encode the first backend into
+the common compiler. `VerifiedIR` is the post-erasure semantic contract shared
+by TypeScript, Rust, and direct WebAssembly.
+
+Allowed: PSC primitive types, functions, structures/inductives, calls/matches,
+semantic intrinsics and target-neutral capability identities.
+
+Forbidden: JS `number/bigint` or object conventions; Rust ownership, traits,
+containers or ABI; Wasm `i32/i64`, opcodes, GC types, memories, WIT/WASI or
+binary-section details.
+
+Backend-specific target IRs sit strictly below this boundary. Thus adding or
+optimizing one backend cannot silently redefine another backend's semantics.
+
+```text
+CheckedCore -> Erasure -> VerifiedIR -> shared optimizer
+                               |          |          |
+                               v          v          v
+                              TS         Rust       Wasm
+```
+
+Pure portable ProofScript source should therefore be backend-polymorphic:
+the same checked semantics can be emitted to JS/npm, native/Cargo, or direct
+Wasm. Only explicit target capabilities/imports may restrict that set.
 
 ## npm-workspace topology is the long-term topology
 
@@ -295,6 +353,7 @@ through both bootstrap lanes:
 - `compiler-ir`
 - `backend-ts`
 - `backend-rust` after the JavaScript fixed point / `.ps` source transition
+- `backend-wasm` as an isolated direct-Wasm branch, integrated only through the same VerifiedIR contract
 - `compiler`
 - the semantic/data portion of `environment`, `module`, `project`, `pretty`,
   `runtime` and `tactic` when used by PSC1
@@ -416,18 +475,19 @@ source `.ts` can be retired while generated TypeScript remains a build
 artifact.
 
 Long term Lake disappears from the normal user path. JavaScript remains the
-first self-host execution lane, and Rust becomes the first planned native lane:
+first self-host execution lane, Rust becomes the first planned native lane,
+and direct Wasm is a third backend over the same VerifiedIR:
 
 ```text
                     .ps/.lean
                         |
                        psc
                     /       \
-                  .ts       .rs
-                   |         |
-                  tsc       rustc
-                   |         |
-                  .js       native
+              .ts         .rs       Wasm target IR
+                |           |             |
+               tsc         rustc       owned encoder
+                |           |             |
+               .js        native         .wasm
 ```
 
 The Rust lane must consume the same checked core, erasure, and compiler IR as

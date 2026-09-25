@@ -123,10 +123,153 @@ structure PsBackendTsNamedTest where
   name : String
   passed : Bool
 
+def psBackendTsMachineLiteralModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "u32Max"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.machineInteger
+              PsVerifiedIrMachineIntegerType.uint32
+              4294967295)
+      },
+      {
+        name := "u64Value"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint64
+        body :=
+          PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.machineInteger
+              PsVerifiedIrMachineIntegerType.uint64
+              42)
+      }
+    ]
+  }
+
+def psTestBackendTsMachineLiterals : Bool :=
+  match psTsEmitModule psBackendTsMachineLiteralModule with
+  | Except.error _ => false
+  | Except.ok output =>
+      output.contains "export const u32Max: number = 4294967295;"
+        && output.contains "export const u64Value: bigint = 42n;"
+
+def psBackendTsTargetWordLiteralModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "word"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.usize
+        body :=
+          PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.machineInteger
+              PsVerifiedIrMachineIntegerType.usize
+              42)
+      }
+    ]
+  }
+
+def psTestBackendTsTargetWordLiteralFailsClosed : Bool :=
+  match psTsEmitModule psBackendTsTargetWordLiteralModule with
+  | Except.error PsTsEmitError.targetWordSizeRequired => true
+  | _ => false
+
+def psBackendTsSharedNumericModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "addU32"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          },
+          {
+            name := "right"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.uint32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.uint32
+              PsVerifiedIrIntegerBinaryOp.add)
+            [
+              PsVerifiedIrExpr.var "left",
+              PsVerifiedIrExpr.var "right"
+            ]
+      },
+      {
+        name := "addF32"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.float32
+          },
+          {
+            name := "right"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.float32
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.floatBinary
+              PsVerifiedIrFloatingType.float32
+              PsVerifiedIrFloatBinaryOp.add)
+            [
+              PsVerifiedIrExpr.var "left",
+              PsVerifiedIrExpr.var "right"
+            ]
+      }
+    ]
+  }
+
+def psTestBackendTsSharedNumericIntrinsics : Bool :=
+  match psTsEmitModule psBackendTsSharedNumericModule with
+  | Except.error _ => false
+  | Except.ok output =>
+      output.contains "(((left + right)) >>> 0)"
+        && output.contains "Math.fround((left + right))"
+
 def psBackendTsTests : List PsBackendTsNamedTest := [
   { name := "identity module", passed := psTestBackendTsIdentity },
   { name := "generic inductive", passed := psTestBackendTsInductive },
-  { name := "Nat intrinsic", passed := psTestBackendTsIntrinsic }
+  { name := "Nat intrinsic", passed := psTestBackendTsIntrinsic },
+  { name := "machine integer literals", passed := psTestBackendTsMachineLiterals },
+  { name := "target word literal fails closed", passed := psTestBackendTsTargetWordLiteralFailsClosed },
+  { name := "shared numeric intrinsics", passed := psTestBackendTsSharedNumericIntrinsics }
 ]
 
 def psRunBackendTsTests : List PsBackendTsNamedTest -> IO Bool

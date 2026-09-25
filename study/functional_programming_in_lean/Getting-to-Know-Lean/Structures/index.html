@@ -1,0 +1,2361 @@
+<!DOCTYPE html>
+<html>
+  
+<!-- Mirrored from https://lean-lang.org/functional_programming_in_lean/Getting-to-Know-Lean/Structures/ by HTTrack Website Copier/3.x [XR&CO], Wed, 23 Sep 2026 18:47:21 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head><script>
+(function () {
+  const canonical = "Getting-to-Know-Lean/Structures/index.html";
+  const loc = window.location;
+  const path = loc.pathname;
+
+  // Normalize the path by which the page was accessed to the directory form
+  // that canonical URLs use
+  let dir = path;
+  if (dir.endsWith("https://lean-lang.org/index.html")) {
+    dir = dir.slice(0, -"index.html".length);
+  } else if (dir.endsWith(".html")) {
+    dir = dir.slice(0, -".html".length) + "/";
+  } else if (!dir.endsWith("/")) {
+    dir = dir + "/";
+  }
+
+  // The prefix depends on where the site is served from, so compare only the
+  // final segments, modulo case. Leave any other URL as it is.
+  if (dir.slice(-canonical.length).toLowerCase() !== canonical.toLowerCase()) return;
+
+  // The final segments did match, so redirect to the correct location,
+  // taking into account that we might be served from a different root.
+  const target = dir.slice(0, -canonical.length) + canonical;
+  if (target !== path) {
+    loc.replace(target + loc.search + loc.hash);
+  }
+})();
+</script>
+    <script>
+      (function(){
+  const {protocol:proto, host:hostName, pathname:path, search:srch, hash:hsh} = window.location;
+  if (!(path.endsWith("/") || path.endsWith(".html"))) {
+    window.location.replace(`${proto}//${hostName}${path}/${srch}${hsh}`);
+  }
+})()</script>
+    <script>
+      // Enable TypeScript checking.
+// @ts-check
+
+// Applies a saved table-of-contents width before the first paint.
+//
+// This is a tiny inline counterpart to toc-resize.js: it runs in the page head so that
+// returning desktop readers do not see the default width flash to their saved width.
+// It only records the width in the --verso-toc-user-width custom property; the
+// stylesheet clamps it and ignores it on mobile, and toc-resize.js then takes over the
+// interactive resizing. Keep the storage key in sync with toc-resize.js.
+
+(function () {
+    try {
+        const saved = localStorage.getItem("verso-toc-width");
+        // Parse to a number (as toc-resize.js does) and write that back, so a stored
+        // value with stray whitespace becomes a valid length rather than `" 420 px"`.
+        const width = saved === null ? NaN : Number(saved);
+        if (Number.isFinite(width)) {
+            document.documentElement.style.setProperty("--verso-toc-user-width", `${width}px`);
+        }
+    } catch (_) {
+        // Leave the default width in place when local storage is unavailable.
+    }
+})();
+</script>
+    <base href=""><meta charset="utf-8">
+    <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <title>Structures</title><link rel="stylesheet" href="../../book.css">
+    <link rel="stylesheet" href="../../verso-vars.css">
+    <script src="../../../../cdn.jsdelivr.net/npm/marked%4011.1.1/marked.min.js" integrity="sha384-zbcZAIxlvJtNE3Dp5nxLXdXtXyxwOdnILY1TDPVmKFhl4r4nSUG1r8bcFXGVa4Te" crossorigin="anonymous"></script>
+    <script defer="defer" src="../../-verso-search/elasticlunr.min.js"></script>
+    <script defer="defer" src="../../-verso-search/fuzzysort.min.js"></script>
+    <script defer="defer" src="../../-verso-search/searchIndex.js"></script>
+    <script defer="defer" src="../../-verso-search/search-config.js"></script>
+    <script type="module" src="../../-verso-search/search-init.js"></script>
+    <link rel="stylesheet" href="../../-verso-search/search-box.css">
+    <link rel="stylesheet" href="../../-verso-search/search-page.css">
+    <link rel="stylesheet" href="../../-verso-search/search-highlight.css">
+    <link rel="stylesheet" href="../../-verso-search/domain-display.css">
+    <script src="../../-verso-search/search-highlight.js" defer="defer"></script>
+    <script src="../../toc-resize.js" defer="defer"></script>
+    <script src="../../-verso-data/katex/katex.js"></script>
+    <script src="../../-verso-data/katex/math.js"></script>
+    <script src="../../-verso-data/popper.min.js"></script>
+    <script src="../../-verso-data/tippy-bundle.umd.min.js"></script>
+    <link rel="stylesheet" href="../../-verso-data/tippy-border.css">
+    <link rel="stylesheet" href="../../-verso-data/katex/katex.css">
+    <style>
+div.paragraph > .eval-steps:not(:first-child), div.paragraph > .eval-steps:not(:first-child) > * {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .eval-steps:not(:last-child), div.paragraph > .eval-steps:not(:last-child) > * {
+  margin-bottom: 0.5rem;
+}
+
+.eval-steps .hl.lean.block {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.eval-steps .hl.lean.block:not(:last-child)::after {
+  content: "⟹";
+  display: block;
+  margin-left: 1em;
+  font-size: 175%;
+}
+
+</style><style>
+.shell-commands {
+
+}
+.shell-commands > * {
+  display: block;
+  white-space: pre;
+}
+.shell-commands .command::before {
+  content: "$ ";
+  font-weight: 600;
+}
+
+div.paragraph > .shell-commands:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .shell-commands:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+</style><style>
+.eq-steps .hl.lean.block {
+  background-color: #f6f7f6;
+  padding: 1rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+.eq-steps .reason {
+  font-style: italic;
+  margin-left: 2.5em;
+  display: flex;
+}
+.eq-steps .reason::before {
+  content: "={";
+  font-family: var(--verso-code-font-family);
+  font-style: normal;
+  font-weight: 600;
+  margin-right: 0.5em;
+  align-self: center;
+}
+.eq-steps .reason > p {
+  margin: 0;
+  max-width: 25em;
+  align-self: center;
+}
+.eq-steps .reason::after {
+  content: "}=";
+  font-family: var(--verso-code-font-family);
+  font-style: normal;
+  font-weight: 600;
+  margin-left: 1em;
+  align-self: center;
+}
+</style><style>/static/theme.css</style><style>
+.example-file {
+  white-space: normal;
+  font-family: var(--verso-structure-font-family);
+  margin: 1rem;
+  width: fit-content;
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+
+  /* These are necessary for the container to behave nicely on mobile */
+  overflow-x: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.example-file::before {
+  counter-reset: linenumber;
+}
+.example-file > .line {
+  display: block;
+  white-space: pre;
+  counter-increment: linenumber;
+  font-family: var(--verso-code-font-family);
+}
+.example-file > .line::before {
+  -webkit-user-select: none;
+  display: inline-block;
+  content: counter(linenumber);
+  border-right: 1px solid #ddd;
+  width: 2em;
+  padding-right: 0.25em;
+  margin-right: 0.25em;
+  font-family: var(--verso-code-font-family);
+  text-align: right;
+}
+.example-file > .line::after {
+  -webkit-user-select: none;
+  display: inline-block;
+  content: "⏎";
+  opacity: 0;
+}
+.example-file > .line:hover::after {
+  opacity: 1;
+}
+.example-file > .line:hover, .example-file > .line:hover::before {
+  background-color: #eee;
+}
+.example-file > .empty {
+  display: block;
+  white-space: pre;
+  font-family: var(--verso-code-font-family);
+  font-style: italic;
+}
+.example-file > .empty::before {
+  -webkit-user-select: none;
+  display: inline-block;
+  content: "";
+  border-right: 1px solid #ddd;
+  width: 2em;
+  padding-right: 0.25em;
+  margin-right: 0.25em;
+  font-family: var(--verso-code-font-family);
+  text-align: right;
+}
+</style><style>
+.shell-command {
+
+}
+.shell-command.block > * {
+  display: block;
+  white-space: pre;
+}
+.shell-command .command .prompt {
+  font-weight: 600;
+}
+
+div.paragraph > .shell-command:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .shell-command:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+</style><style>/static/fonts/source-code-pro/source-code-pro.css</style><style>
+.namedocs {
+  position: relative;
+  border: solid 1px #98B2C0;
+  border-radius: .5rem;
+  padding-top: var(--verso--box-padding);
+  margin-top: var(--verso--box-vertical-margin);
+  margin-bottom: var(--verso--box-vertical-margin);
+}
+
+.namedocs .text {
+  /* Causes margins on child elements to collapse inside the element, such
+     that the margins don't extend into parent with the background color.
+     The effect is that weird borders in the definition box don't happen anymore. */
+  display: flow-root;
+  /* Add a padding. this is the same as the margin applied to the first and last child.
+     The effect is that the padding looks the same size on all sides. */
+  padding: 0 var(--verso--box-padding);
+  border-top: 1px solid #98B2C0;
+}
+
+.namedocs .text > pre {
+  overflow-x: auto;
+}
+
+.namedocs .signature {
+  font-family: var(--verso-code-font-family);
+  margin-top: 0 !important;
+  margin-left: var(--verso--box-padding) !important;
+  margin-bottom: .75rem !important;
+}
+
+.namedocs .label {
+  display: block;
+  font-size: small;
+  font-family: var(--verso-structure-font-family);
+  position: absolute;
+  top: -0.65rem;
+  left: 1rem;
+  background: #fff;
+  padding: 0 .5rem .125rem;
+  border: 1px solid #98B2C0;
+  border-radius: 1rem;
+  color: #555;
+}
+
+.namedocs .docstring-section {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.namedocs .docstring-section-label {
+  font-size: inherit;
+  font-weight: bold;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.namedocs > .text .constructor {
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.namedocs > .text .constructor::before {
+  content: '| ';
+  display: block;
+  font-family: var(--verso-code-font-family);
+  font-weight: bold;
+  float: left;
+  width: 0.5rem;
+  white-space: pre;
+}
+
+.namedocs > .text .constructor .name-and-type {
+  padding-left: 0.5rem;
+  float: left;
+  margin-top: 0;
+  max-width: calc(100% - 1rem);
+}
+.namedocs > .text .constructor .docs {
+  clear: both;
+  padding-left: 1rem;
+}
+
+/* These margins work together with the padding on .text */
+.namedocs .text > :first-child {
+  margin-top: var(--verso--box-padding);
+}
+.namedocs .text > :last-child {
+  margin-bottom: var(--verso--box-padding);
+}
+
+.namedocs .methods td, .namedocs .fields td {
+  vertical-align: top;
+}
+.namedocs .inheritance {
+  vertical-align: top;
+  font-size: smaller;
+  font-family: var(--verso-structure-font-family);
+}
+.namedocs .inheritance ol {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+.namedocs .inheritance ol li {
+  list-style-type: none;
+  display: inline-block;
+}
+.namedocs .inheritance ol li::after {
+  content: " > "
+}
+.namedocs .inheritance ol li:last-child::after {
+  content: "";
+}
+
+.namedocs .extends {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.namedocs .extends li {
+  list-style-type: none;
+  display: inline-block;
+}
+
+.namedocs .extends li label {
+  padding-right: 1rem;
+}
+
+.namedocs .subdocs .name-and-type {
+  font-size: 1rem;
+  margin-left: 0;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0.5rem;
+}
+
+.namedocs .subdocs .docs {
+  margin-left: 1.5rem;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0.5rem;
+}
+
+.namedocs:has(input[data-parent-idx]) [data-inherited-from] {
+  transition-property: opacity, display;
+  transition-duration: 0.4s;
+  transition-behavior: allow-discrete;
+  @starting-style { opacity: 0 !important; }
+}
+
+#this-page-items .tactic-name { font-weight: bold; }
+.namedocs:has(input[data-parent-idx="0"]) [data-inherited-from="0"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="0"]:checked) [data-inherited-from="0"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="0"]:checked):has(.inheritance[data-inherited-from="0"]:hover) [data-inherited-from]:not([data-inherited-from="0"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="1"]) [data-inherited-from="1"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="1"]:checked) [data-inherited-from="1"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="1"]:checked):has(.inheritance[data-inherited-from="1"]:hover) [data-inherited-from]:not([data-inherited-from="1"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="2"]) [data-inherited-from="2"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="2"]:checked) [data-inherited-from="2"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="2"]:checked):has(.inheritance[data-inherited-from="2"]:hover) [data-inherited-from]:not([data-inherited-from="2"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="3"]) [data-inherited-from="3"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="3"]:checked) [data-inherited-from="3"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="3"]:checked):has(.inheritance[data-inherited-from="3"]:hover) [data-inherited-from]:not([data-inherited-from="3"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="4"]) [data-inherited-from="4"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="4"]:checked) [data-inherited-from="4"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="4"]:checked):has(.inheritance[data-inherited-from="4"]:hover) [data-inherited-from]:not([data-inherited-from="4"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="5"]) [data-inherited-from="5"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="5"]:checked) [data-inherited-from="5"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="5"]:checked):has(.inheritance[data-inherited-from="5"]:hover) [data-inherited-from]:not([data-inherited-from="5"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="6"]) [data-inherited-from="6"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="6"]:checked) [data-inherited-from="6"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="6"]:checked):has(.inheritance[data-inherited-from="6"]:hover) [data-inherited-from]:not([data-inherited-from="6"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="7"]) [data-inherited-from="7"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="7"]:checked) [data-inherited-from="7"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="7"]:checked):has(.inheritance[data-inherited-from="7"]:hover) [data-inherited-from]:not([data-inherited-from="7"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="8"]) [data-inherited-from="8"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="8"]:checked) [data-inherited-from="8"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="8"]:checked):has(.inheritance[data-inherited-from="8"]:hover) [data-inherited-from]:not([data-inherited-from="8"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="9"]) [data-inherited-from="9"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="9"]:checked) [data-inherited-from="9"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="9"]:checked):has(.inheritance[data-inherited-from="9"]:hover) [data-inherited-from]:not([data-inherited-from="9"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="10"]) [data-inherited-from="10"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="10"]:checked) [data-inherited-from="10"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="10"]:checked):has(.inheritance[data-inherited-from="10"]:hover) [data-inherited-from]:not([data-inherited-from="10"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="11"]) [data-inherited-from="11"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="11"]:checked) [data-inherited-from="11"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="11"]:checked):has(.inheritance[data-inherited-from="11"]:hover) [data-inherited-from]:not([data-inherited-from="11"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="12"]) [data-inherited-from="12"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="12"]:checked) [data-inherited-from="12"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="12"]:checked):has(.inheritance[data-inherited-from="12"]:hover) [data-inherited-from]:not([data-inherited-from="12"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="13"]) [data-inherited-from="13"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="13"]:checked) [data-inherited-from="13"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="13"]:checked):has(.inheritance[data-inherited-from="13"]:hover) [data-inherited-from]:not([data-inherited-from="13"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="14"]) [data-inherited-from="14"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="14"]:checked) [data-inherited-from="14"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="14"]:checked):has(.inheritance[data-inherited-from="14"]:hover) [data-inherited-from]:not([data-inherited-from="14"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="15"]) [data-inherited-from="15"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="15"]:checked) [data-inherited-from="15"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="15"]:checked):has(.inheritance[data-inherited-from="15"]:hover) [data-inherited-from]:not([data-inherited-from="15"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="16"]) [data-inherited-from="16"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="16"]:checked) [data-inherited-from="16"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="16"]:checked):has(.inheritance[data-inherited-from="16"]:hover) [data-inherited-from]:not([data-inherited-from="16"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="17"]) [data-inherited-from="17"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="17"]:checked) [data-inherited-from="17"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="17"]:checked):has(.inheritance[data-inherited-from="17"]:hover) [data-inherited-from]:not([data-inherited-from="17"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="18"]) [data-inherited-from="18"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="18"]:checked) [data-inherited-from="18"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="18"]:checked):has(.inheritance[data-inherited-from="18"]:hover) [data-inherited-from]:not([data-inherited-from="18"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="19"]) [data-inherited-from="19"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="19"]:checked) [data-inherited-from="19"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="19"]:checked):has(.inheritance[data-inherited-from="19"]:hover) [data-inherited-from]:not([data-inherited-from="19"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="20"]) [data-inherited-from="20"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="20"]:checked) [data-inherited-from="20"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="20"]:checked):has(.inheritance[data-inherited-from="20"]:hover) [data-inherited-from]:not([data-inherited-from="20"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="21"]) [data-inherited-from="21"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="21"]:checked) [data-inherited-from="21"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="21"]:checked):has(.inheritance[data-inherited-from="21"]:hover) [data-inherited-from]:not([data-inherited-from="21"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="22"]) [data-inherited-from="22"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="22"]:checked) [data-inherited-from="22"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="22"]:checked):has(.inheritance[data-inherited-from="22"]:hover) [data-inherited-from]:not([data-inherited-from="22"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="23"]) [data-inherited-from="23"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="23"]:checked) [data-inherited-from="23"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="23"]:checked):has(.inheritance[data-inherited-from="23"]:hover) [data-inherited-from]:not([data-inherited-from="23"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="24"]) [data-inherited-from="24"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="24"]:checked) [data-inherited-from="24"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="24"]:checked):has(.inheritance[data-inherited-from="24"]:hover) [data-inherited-from]:not([data-inherited-from="24"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="25"]) [data-inherited-from="25"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="25"]:checked) [data-inherited-from="25"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="25"]:checked):has(.inheritance[data-inherited-from="25"]:hover) [data-inherited-from]:not([data-inherited-from="25"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="26"]) [data-inherited-from="26"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="26"]:checked) [data-inherited-from="26"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="26"]:checked):has(.inheritance[data-inherited-from="26"]:hover) [data-inherited-from]:not([data-inherited-from="26"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="27"]) [data-inherited-from="27"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="27"]:checked) [data-inherited-from="27"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="27"]:checked):has(.inheritance[data-inherited-from="27"]:hover) [data-inherited-from]:not([data-inherited-from="27"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="28"]) [data-inherited-from="28"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="28"]:checked) [data-inherited-from="28"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="28"]:checked):has(.inheritance[data-inherited-from="28"]:hover) [data-inherited-from]:not([data-inherited-from="28"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="29"]) [data-inherited-from="29"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="29"]:checked) [data-inherited-from="29"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="29"]:checked):has(.inheritance[data-inherited-from="29"]:hover) [data-inherited-from]:not([data-inherited-from="29"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="30"]) [data-inherited-from="30"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="30"]:checked) [data-inherited-from="30"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="30"]:checked):has(.inheritance[data-inherited-from="30"]:hover) [data-inherited-from]:not([data-inherited-from="30"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="31"]) [data-inherited-from="31"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="31"]:checked) [data-inherited-from="31"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="31"]:checked):has(.inheritance[data-inherited-from="31"]:hover) [data-inherited-from]:not([data-inherited-from="31"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="32"]) [data-inherited-from="32"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="32"]:checked) [data-inherited-from="32"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="32"]:checked):has(.inheritance[data-inherited-from="32"]:hover) [data-inherited-from]:not([data-inherited-from="32"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="33"]) [data-inherited-from="33"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="33"]:checked) [data-inherited-from="33"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="33"]:checked):has(.inheritance[data-inherited-from="33"]:hover) [data-inherited-from]:not([data-inherited-from="33"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="34"]) [data-inherited-from="34"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="34"]:checked) [data-inherited-from="34"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="34"]:checked):has(.inheritance[data-inherited-from="34"]:hover) [data-inherited-from]:not([data-inherited-from="34"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="35"]) [data-inherited-from="35"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="35"]:checked) [data-inherited-from="35"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="35"]:checked):has(.inheritance[data-inherited-from="35"]:hover) [data-inherited-from]:not([data-inherited-from="35"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="36"]) [data-inherited-from="36"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="36"]:checked) [data-inherited-from="36"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="36"]:checked):has(.inheritance[data-inherited-from="36"]:hover) [data-inherited-from]:not([data-inherited-from="36"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="37"]) [data-inherited-from="37"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="37"]:checked) [data-inherited-from="37"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="37"]:checked):has(.inheritance[data-inherited-from="37"]:hover) [data-inherited-from]:not([data-inherited-from="37"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="38"]) [data-inherited-from="38"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="38"]:checked) [data-inherited-from="38"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="38"]:checked):has(.inheritance[data-inherited-from="38"]:hover) [data-inherited-from]:not([data-inherited-from="38"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="39"]) [data-inherited-from="39"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="39"]:checked) [data-inherited-from="39"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="39"]:checked):has(.inheritance[data-inherited-from="39"]:hover) [data-inherited-from]:not([data-inherited-from="39"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="40"]) [data-inherited-from="40"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="40"]:checked) [data-inherited-from="40"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="40"]:checked):has(.inheritance[data-inherited-from="40"]:hover) [data-inherited-from]:not([data-inherited-from="40"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="41"]) [data-inherited-from="41"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="41"]:checked) [data-inherited-from="41"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="41"]:checked):has(.inheritance[data-inherited-from="41"]:hover) [data-inherited-from]:not([data-inherited-from="41"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="42"]) [data-inherited-from="42"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="42"]:checked) [data-inherited-from="42"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="42"]:checked):has(.inheritance[data-inherited-from="42"]:hover) [data-inherited-from]:not([data-inherited-from="42"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="43"]) [data-inherited-from="43"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="43"]:checked) [data-inherited-from="43"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="43"]:checked):has(.inheritance[data-inherited-from="43"]:hover) [data-inherited-from]:not([data-inherited-from="43"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="44"]) [data-inherited-from="44"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="44"]:checked) [data-inherited-from="44"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="44"]:checked):has(.inheritance[data-inherited-from="44"]:hover) [data-inherited-from]:not([data-inherited-from="44"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="45"]) [data-inherited-from="45"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="45"]:checked) [data-inherited-from="45"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="45"]:checked):has(.inheritance[data-inherited-from="45"]:hover) [data-inherited-from]:not([data-inherited-from="45"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="46"]) [data-inherited-from="46"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="46"]:checked) [data-inherited-from="46"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="46"]:checked):has(.inheritance[data-inherited-from="46"]:hover) [data-inherited-from]:not([data-inherited-from="46"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="47"]) [data-inherited-from="47"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="47"]:checked) [data-inherited-from="47"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="47"]:checked):has(.inheritance[data-inherited-from="47"]:hover) [data-inherited-from]:not([data-inherited-from="47"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="48"]) [data-inherited-from="48"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="48"]:checked) [data-inherited-from="48"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="48"]:checked):has(.inheritance[data-inherited-from="48"]:hover) [data-inherited-from]:not([data-inherited-from="48"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="49"]) [data-inherited-from="49"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="49"]:checked) [data-inherited-from="49"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="49"]:checked):has(.inheritance[data-inherited-from="49"]:hover) [data-inherited-from]:not([data-inherited-from="49"]) {
+  opacity: 0.5;
+}
+</style><style>
+table.tabular {
+  margin: auto;
+  border-spacing: 1rem;
+}
+table.tabular.left-align {
+  margin-right: auto;
+  margin-left: 0;
+}
+table.tabular.center-align {
+  margin: auto;
+}
+table.tabular.right-align {
+  margin-left auto;
+  margin-right: 0;
+}
+table.tabular td, table.tabular th {
+  text-align: left;
+  vertical-align: top;
+}
+table.tabular td > p:first-child, table.tabular th > p:first-child {
+  margin-top: 0;
+}
+table.tabular td > p:last-child, table.tabular th > p:first-child {
+  margin-bottom: 0;
+}
+</style><style>/static/fonts/source-serif/source-serif-text.css</style><style>/static/fonts/source-sans/source-sans-3.css</style><style>
+a.technical-term {
+  color: inherit;
+  text-decoration: currentcolor underline dotted;
+}
+a.technical-term:hover {
+  text-decoration: currentcolor underline solid;
+}
+/* Highlight the clicked term */
+.def-technical-term:target {
+  background-color: var(--verso-selected-color);
+  outline: auto;
+}
+</style><style>
+.shell-command {
+
+}
+.shell-command.inline > * {
+  display: inline;
+  white-space: pre;
+}
+.shell-command.inline .command::before {
+  content: "$ ";
+  font-weight: 600;
+}
+</style><style>/static/fonts/noto-sans-mono/noto-sans-mono.css</style><style>
+.interaction {
+  overflow-x: auto;
+}
+.interaction > * {
+  display: inline;
+  white-space: pre;
+}
+.interaction .command::before {
+  content: "$ ";
+  font-weight: 600;
+}
+.interaction .input {
+  font-weight: 600;
+  color: #0000c0;
+}
+
+div.paragraph > .interaction:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .interaction:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+</style><style>
+div.paragraph > .eq-steps:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .eq-steps:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+</style><style>
+
+.hl.lean {
+  white-space: pre;
+  font-weight: normal;
+  font-style: normal;
+  font-size: inherit;
+}
+
+.hl.lean .keyword {
+  color: var(--verso-code-keyword-color,);
+  font-weight: var(--verso-code-keyword-weight, bold);
+  font-style: var(--verso-code-keyword-style, normal);
+  font-family: var(--verso-code-keyword-font-family,);
+}
+
+.hl.lean .const {
+  color: var(--verso-code-const-color,);
+  font-weight: var(--verso-code-const-weight, normal);
+  font-style: var(--verso-code-const-style, normal);
+  font-family: var(--verso-code-const-font-family,);
+}
+
+.hl.lean .var {
+  color: var(--verso-code-var-color,);
+  font-weight: var(--verso-code-var-weight, normal);
+  font-style: var(--verso-code-var-style, italic);
+  font-family: var(--verso-code-var-font-family,);
+
+  position: relative;
+}
+
+.hl.lean .literal, .hl.lean .unknown {
+  color: var(--verso-code-color,);
+  font-weight: normal;
+  font-style: normal;
+  font-family: var(--verso-code-font-family,);
+}
+
+/* These lexically-classified token kinds default to the `.unknown` appearance. The rule follows
+   `.const` so it wins for the `anon-ctor` tokens, which also carry the `const` class. */
+.hl.lean .anon-ctor,
+.hl.lean .number,
+.hl.lean .char,
+.hl.lean .comment,
+.hl.lean .punctuation,
+.hl.lean .delim,
+.hl.lean .wildcard {
+  color: var(--verso-code-color,);
+  font-weight: normal;
+  font-style: normal;
+  font-family: var(--verso-code-font-family,);
+}
+
+.hover-container {
+  width: 0;
+  height: 0;
+  position: relative;
+  display: inline;
+}
+
+.hl.lean a {
+  color: inherit;
+  text-decoration: currentcolor underline dotted;
+}
+
+.hl.lean a:hover {
+  text-decoration: currentcolor underline solid;
+}
+
+/* Links inside tooltips show their underline only when hovered. */
+.tippy-box .hl.lean a {
+  text-decoration: none;
+}
+
+.hl.lean .hover-info {
+  white-space: normal;
+}
+
+.hl.lean .token .hover-info {
+  display: none;
+  position: absolute;
+  color: var(--verso-tooltip-color, black);
+  background-color: var(--verso-tooltip-bg-color, #e5e5e5);
+  border: 1px solid var(--verso-tooltip-border-color, black);
+  padding: 0.5rem;
+  z-index: 300;
+}
+
+.hl.lean .hover-info.messages {
+  max-height: 10rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  padding: 0 0.5rem 0 0;
+  display: block;
+}
+
+.hl.lean .hover-info code {
+  white-space: pre-wrap;
+  background: none;
+}
+
+.hl.lean .hover-info code:not(.verso-message) {
+  color: var(--verso-tooltip-color, black);
+}
+
+.hl.lean .hover-info.messages > code {
+  padding: 0.5rem;
+  display: block;
+  width: fit-content;
+}
+
+.hl.lean .hover-info.messages > code:only-child {
+  margin: 0;
+}
+
+.hl.lean .hover-info.messages > code {
+  margin: 0.1rem;
+}
+
+.hl.lean .hover-info.messages > code:not(:first-child) {
+  margin-top: 0rem;
+}
+
+.hl.lean {
+}
+
+.hl.lean.block {
+  display: block;
+}
+
+.hl.lean.inline {
+  display: inline;
+  white-space: pre-wrap;
+}
+
+.hl.lean * {
+}
+
+.hl.lean .token {
+  transition: all 0.25s; /* Slight fade for highlights */
+}
+
+@media (hover: hover) {
+  /* Hovered content nested in a collapsed tactic region keeps its plain background: the
+     region's proof state is the tooltip that appears there, and its label is what
+     highlights. `:where` keeps the exclusion out of the specificity computation. */
+  .hl.lean .token.binding-hl,
+  .hl.lean :is(.literal, .token.typed, .token[data-verso-hover]):hover:not(:where(.tactic:has(> .tactic-toggle:not(:checked)) > label *)) {
+    background-color: var(--verso-code-hover-bg-color, #eeeeee);
+    border-radius: 2px;
+    transition: none;
+  }
+
+  /* Within a hovered message span, token hover backgrounds are removed so the span's own
+     hover background shows across the whole span. The exception is a hovered documented
+     token, which keeps its background because its tooltip is the one shown. */
+  .hl.lean .has-info:hover .token.binding-hl:not(:hover),
+  .hl.lean .has-info:hover .token.binding-hl:not([data-verso-hover]),
+  .hl.lean .has-info:hover .literal:hover:not([data-verso-hover]),
+  .hl.lean .has-info:hover .token.typed:hover:not([data-verso-hover]) {
+    background-color: transparent;
+  }
+}
+
+
+.hl.lean .has-info .token:not(.tactic-state):not(.tactic-state *), .hl.lean .has-info .inter-text:not(.tactic-state):not(.tactic-state *) {
+  text-decoration-style: wavy;
+  text-decoration-line: underline;
+  text-decoration-thickness: from-font;
+  text-decoration-skip-ink: none;
+}
+
+/*
+The underline color comes from the nearest enclosing message span: each severity's span rule
+sets `--verso--region-indicator-color`, which inherits, so a region nested inside one of
+another severity keeps its own indicator color.
+*/
+.hl.lean .has-info :not(.tactic-state):not(.tactic-state *) {
+  text-decoration-color: var(--verso--region-indicator-color);
+}
+
+.hl.lean .has-info .hover-info {
+  display: none;
+  position: absolute;
+  transform: translate(0.25rem, 0.3rem);
+  color: var(--verso-tooltip-color, black);
+  border: 1px solid var(--verso-tooltip-border-color, black);
+  padding: 0.5rem;
+  z-index: 400;
+  text-align: left;
+}
+
+.hl.lean .has-info.error {
+  --verso--region-indicator-color: var(--verso-error-indicator-color, #ff0000);
+  --verso--region-hover-color: var(--verso-code-error-hover-color, currentcolor);
+  --verso--region-hover-bg-color: var(--verso-code-error-hover-bg-color, #ffb3b3);
+  color: var(--verso-code-error-color, currentcolor);
+  background-color: var(--verso-code-error-bg-color, transparent);
+}
+
+/*
+The hover highlight follows the tooltip: a message span highlights only when its own tooltip
+is the one that appears. When a hovered nested message span, a hovered documented token, or
+a hovered collapsed tactic label shows its own tooltip instead, the message span does not
+highlight. A span nested in a collapsed tactic region likewise stays plain, because hovering
+it shows the region's proof state; `:where` keeps that exclusion out of the specificity
+computation.
+
+The hover colors come from `--verso--region-hover-color` and `--verso--region-hover-bg-color`,
+which each severity's span rule sets. This keeps the hover conditions in this one rule, and
+because the properties inherit, a region nested inside one of another severity keeps its own
+hover colors.
+*/
+@media (hover: hover) {
+  .hl.lean .has-info:hover:not(:has(.has-info:hover)):not(:has([data-verso-hover]:hover)):not(:has(.tactic > label:hover + .tactic-toggle:not(:checked))):not(:where(.tactic:has(> .tactic-toggle:not(:checked)) > label *)) {
+    color: var(--verso--region-hover-color, currentcolor);
+    background-color: var(--verso--region-hover-bg-color, transparent);
+  }
+}
+
+.hl.lean .hover-info.messages > code.error {
+  background-color: var(--verso-tooltip-error-bg-color, #e5e5e5);
+  border-left: 0.2rem solid var(--verso-tooltip-error-border-color, #ffb3b3);
+}
+
+/*
+A tooltip that shows only messages of the box's own severity leaves severity styling to the
+box itself. When messages of several severities share the tooltip, or a `mixed` tooltip
+combines messages with other content (such as documentation), each message keeps its
+severity accent to distinguish them.
+*/
+.tippy-box .hl.lean.mixed > .hover-info.messages {
+  margin-bottom: 0.5rem;
+}
+
+.tippy-box[data-theme~='error'] .hl.lean:not(.mixed) .hover-info.messages:not(:has(> code.warning)):not(:has(> code.information)) > code.error {
+  background: none;
+  border: none;
+}
+
+.error .verso-message, .error .verso-message .token, .error .verso-message label {
+  color: var(--verso-message-error-color, #cc0000);
+}
+
+.error .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-message-error-color, #cc0000) !important;
+}
+
+.hl.lean .has-info.warning {
+  --verso--region-indicator-color: var(--verso-warning-indicator-color, #e7a71d);
+  --verso--region-hover-color: var(--verso-code-warning-hover-color, currentcolor);
+  --verso--region-hover-bg-color: var(--verso-code-warning-hover-bg-color, #ffd580);
+  color: var(--verso-code-warning-color, currentcolor);
+  background-color: var(--verso-code-warning-bg-color, transparent);
+}
+
+.hl.lean .hover-info.messages > code.warning {
+  background-color: var(--verso-tooltip-warning-bg-color, #e5e5e5);
+  border-left: 0.2rem solid var(--verso-tooltip-warning-border-color, #ffd580);
+}
+
+.lean-output {
+  border-left: 0.2em solid transparent;
+  padding: 0 0 0 0.5em;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.lean-output.error {
+  border-color: var(--verso-output-error-color, var(--verso-error-indicator-color, #ff0000));
+}
+
+.lean-output.information {
+  border-color: var(--verso-output-info-color, var(--verso-info-indicator-color, #4777ff));
+}
+
+.lean-output.warning {
+  border-color: var(--verso-output-warning-color, var(--verso-warning-indicator-color, #e7a71d));
+}
+
+.tippy-box[data-theme~='warning'] .hl.lean:not(.mixed) .hover-info.messages:not(:has(> code.error)):not(:has(> code.information)) > code.warning {
+  background: none;
+  border: none;
+}
+
+.warning .verso-message, .warning .verso-message .token, .warning .verso-message label {
+  color: var(--verso-message-warning-color, black);
+}
+
+.warning .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-message-warning-color, black) !important;
+}
+
+
+.hl.lean .has-info.information {
+  --verso--region-indicator-color: var(--verso-info-indicator-color, #4777ff);
+  --verso--region-hover-color: var(--verso-code-info-hover-color, currentcolor);
+  --verso--region-hover-bg-color: var(--verso-code-info-hover-bg-color, #4777ff);
+  color: var(--verso-code-info-color, currentcolor);
+  background-color: var(--verso-code-info-bg-color, transparent);
+}
+
+
+.hl.lean .hover-info.messages > code.information {
+  background-color: var(--verso-tooltip-info-bg-color, #e5e5e5);
+  border-left: 0.2rem solid var(--verso-tooltip-info-border-color, #4777ff);
+}
+
+.tippy-box[data-theme~='info'] .hl.lean:not(.mixed) .hover-info.messages:not(:has(> code.error)):not(:has(> code.warning)) > code.information {
+  background: none;
+  border: none;
+}
+
+.information .verso-message, .information .verso-message .token, .information .verso-message label {
+  color: var(--verso-message-info-color, black);
+}
+
+.information .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-message-info-color, black) !important;
+}
+
+.hl.lean div.docstring {
+  font-family: var(--verso-text-font-family, sans-serif);
+  white-space: normal;
+  max-width: calc(min(40rem, 90vw));
+  width: max-content;
+}
+
+.hl.lean div.docstring > :last-child {
+  margin-bottom: 0;
+}
+
+.hl.lean div.docstring > :first-child {
+  margin-top: 0;
+}
+
+.hl.lean .hover-info .sep {
+  display: block;
+  width: auto;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  height: 1px;
+  border-top: 1px solid var(--verso-tooltip-separator-color, #ccc);
+}
+
+.hl.lean code {
+  font-family: var(--verso-code-font-family);
+}
+
+.hl.lean .tactic-state {
+  display: none;
+  position: relative;
+  width: fit-content;
+  border: 1px solid var(--verso-tactic-state-border-color, #888888);
+  border-radius: 0.1rem;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  color: var(--verso-tactic-state-color, black);
+  background-color: var(--verso-tactic-state-bg-color, white);
+}
+
+.hl.lean.popup .tactic-state {
+  position: static;
+  display: block;
+  width: auto;
+  border: none;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  background-color: var(--verso-tactic-state-bg-color, white);
+}
+
+
+.hl.lean .tactic {
+  position: relative;
+  display: inline;
+  vertical-align: top;
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.hl.lean .tactic:has(> .tactic-toggle:checked) {
+  display: inline-grid;
+  grid-template-columns: 1fr;
+}
+
+.hl.lean .tactic-toggle:checked ~ .tactic-state {
+  display: inline-block;
+  vertical-align: top;
+  grid-row: 2;
+  justify-self: start;
+}
+
+.hl.lean .tactic > label {
+  position: relative;
+  grid-row: 1;
+  display: inline;
+}
+
+@media (hover: hover) {
+  /* Highlight a region on hover only when its own toggle is unchecked, and only the innermost
+     hovered region: `label:hover` bubbles to ancestor labels, so suppress the highlight on a region
+     whose label contains a more deeply nested hovered tactic label. The region's proof state is the
+     tooltip for everything else in its label, so the label keeps its highlight while any of that
+     content is hovered. */
+  .hl.lean .tactic:has(> .tactic-toggle:not(:checked)) > label:hover:not(:has(.tactic > label:hover)) {
+    background-color: var(--verso-code-hover-bg-color, #eeeeee);
+  }
+}
+
+.hl.lean .tactic-toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .tactic > label::after {
+  content: "";
+  border: 1px solid var(--verso-tactic-toggle-color, #bbbbbb);
+  /* These need to be em, not rem, to scale with the font */
+  border-radius: 1em;
+  height: 0.25em;
+  vertical-align: middle;
+  width: 0.6em;
+  margin-left: 0.1em;
+  margin-right: 0.1em;
+  display: inline-block;
+  transition: all 0.5s;
+}
+
+/*
+@media (hover: hover) {
+  .hl.lean .tactic > label:hover::after {
+    border: 1px solid #aaaaaa;
+    background-color: #aaaaaa;
+    transition: all 0.5s;
+  }
+}
+*/
+
+.hl.lean .tactic > label:has(+ .tactic-toggle:checked)::after {
+  border: 1px solid var(--verso-tactic-toggle-checked-color, #999999);
+  background-color: var(--verso-tactic-toggle-checked-color, #999999);
+  transition: all 0.5s;
+}
+
+.hl.lean .tactic-state .goal + .goal {
+  margin-top: 1.5em;
+}
+
+/*
+Some CSS frameworks customize details/summary in ways not compatible with Verso's output.
+*/
+
+.hl.lean details {
+  display: block !important;
+  margin: 0;
+}
+
+.hl.lean details summary {
+  display: list-item !important;
+  margin: 0;
+}
+
+.hl.lean details summary:focus {
+  outline: none;
+  outline-offset: none;
+  color: inherit;
+}
+
+.hl.lean ul > li {
+  margin-bottom: 0;
+}
+
+.hl.lean details summary::marker {
+  display: inline !important;
+}
+
+.hl.lean details > summary:first-of-type {
+  list-style-type: disclosure-closed;
+  list-style-position: inside;
+}
+
+.hl.lean details[open] > summary:first-of-type {
+  list-style-type: disclosure-open;
+}
+
+.hl.lean details summary::before, .hl.lean details summary::after {
+  content: "" !important;
+  background: none;
+  display: none;
+}
+
+.hl.lean .tactic-state summary {
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: -0.5em;
+}
+
+.hl.lean .tactic-state details {
+  /* These need to be em, not rem, to scale with the font */
+  padding-left: 0.5em;
+}
+
+.hl.lean .case-label {
+  display: block;
+  position: relative;
+}
+
+.hl.lean .case-label input[type="checkbox"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"])::before {
+  display: inline-block;
+  background-color: currentcolor;
+  content: ' ';
+  transition: ease 0.2s;
+  margin-right: 0.7em;
+  clip-path: polygon(100% 0, 0 0, 50% 100%);
+  width: 0.6em;
+  height: 0.6em;
+  vertical-align: middle;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:not(:checked))::before {
+  transform: rotate(-90deg);
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]) {
+
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:checked) {
+
+}
+
+
+.hl.lean .labeled-case > :not(:first-child) {
+  max-height: 0px;
+  display: block;
+  overflow: hidden;
+  transition: max-height 0.1s ease-in;
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: 0.5em;
+  margin-top: 0.1em;
+}
+
+.hl.lean .labeled-case:has(.case-label input[type="checkbox"]:checked) > :not(:first-child) {
+  max-height: 100%;
+}
+
+
+.hl.lean .goal-name::before {
+  font-style: normal;
+  content: "case ";
+}
+
+.hl.lean .goal-name {
+  font-style: italic;
+  font-family: var(--verso-code-font-family);
+  color: inherit;
+}
+
+.hl.lean .hypotheses {
+  display: table;
+}
+
+.hl.lean .hypothesis {
+  display: table-row;
+}
+
+.hl.lean .hypothesis > * {
+  display: table-cell;
+}
+
+
+.hl.lean .hypotheses .colon {
+  text-align: center;
+  /* This needs to be em, not rem, to scale with the font */
+  min-width: 1em;
+}
+
+.hl.lean .hypotheses .name {
+  text-align: right;
+}
+
+.hl.lean .hypotheses .name,
+.hl.lean .hypotheses .type,
+.hl.lean .conclusion .type {
+  font-family: var(--verso-code-font-family);
+}
+
+.tippy-box {
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/*
+Tippy's stylesheet paints each arrow's fill triangle with the arrow element's `color` (its
+placement-specific `::before` rules use `border-color: initial`, which is `currentcolor`),
+and its border extension paints the outline triangle with the box's border color. Setting
+`color` on the arrow therefore matches it to the tooltip background for every placement.
+*/
+.tippy-box[data-theme~='lean'] {
+  background-color: var(--verso-tooltip-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-color, black);
+  border: 1px solid var(--verso-tooltip-border-color, black);
+}
+.tippy-box[data-theme~='lean'] > .tippy-arrow {
+  color: var(--verso-tooltip-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::before {
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::after {
+  bottom: -11px;
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::after {
+  top: -11px;
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::before {
+  border-width: 11px 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::after {
+  right: -11px;
+  border-width: 11px 0 11px 11px;
+}
+
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::before {
+  border-width: 11px 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::after {
+  left: -11px;
+  border-width: 11px 11px 11px 0;
+}
+
+
+
+.tippy-box[data-theme~='warning'] {
+  background-color: var(--verso-tooltip-warning-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-warning-color, black);
+  border: 3px solid var(--verso-tooltip-warning-border-color, #ffd580);
+}
+.tippy-box[data-theme~='warning'] > .tippy-arrow {
+  color: var(--verso-tooltip-warning-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='error'] {
+  background-color: var(--verso-tooltip-error-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-error-color, black);
+  border: 3px solid var(--verso-tooltip-error-border-color, #ffb3b3);
+}
+.tippy-box[data-theme~='error'] > .tippy-arrow {
+  color: var(--verso-tooltip-error-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='info'] {
+  background-color: var(--verso-tooltip-info-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-info-color, black);
+  border: 3px solid var(--verso-tooltip-info-border-color, #4777ff);
+}
+.tippy-box[data-theme~='info'] > .tippy-arrow {
+  color: var(--verso-tooltip-info-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='tactic'] {
+  background-color: var(--verso-tactic-state-bg-color, white);
+  color: var(--verso-tactic-state-color, black);
+  border: 1px solid var(--verso-tactic-state-border-color, #888888);
+}
+.tippy-box[data-theme~='tactic'] > .tippy-arrow {
+  color: var(--verso-tactic-state-bg-color, white);
+}
+
+.extra-doc-links {
+  list-style-type: none;
+  margin-left: 0;
+  padding: 0;
+}
+
+.extra-doc-links > li {
+  display: inline-block;
+}
+
+.extra-doc-links > li:not(:last-child)::after {
+  content: '|';
+  display: inline-block;
+  margin: 0 0.25em;
+}
+
+.verso-message .trace {
+  display: block;
+}
+
+.verso-message .trace > summary::marker {
+  color: var(--verso-text-color, black);
+}
+
+.verso-message .trace-children {
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .trace-children > li {
+  list-style-type: none;
+  margin-left: 1.5em;
+}
+
+.verso-message .trace-children > li:not(:has(.trace)) {
+  margin-left: 0;
+}
+
+.verso-message .trace-class {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .text {
+  white-space: pre-wrap;
+}
+
+</style><script>
+      
+window.onload = async () => {
+
+    // Don't show hovers inside of closed tactic states
+    function blockedByTactic(elem) {
+      let parent = elem.parentNode;
+      while (parent && "classList" in parent) {
+        if (parent.classList.contains("tactic")) {
+          const toggle = parent.querySelector(":scope > input.tactic-toggle");
+          if (toggle) {
+            return !toggle.checked;
+          }
+        }
+        parent = parent.parentNode;
+      }
+      return false;
+    }
+
+    // The innermost element under the pointer, used to show only the most specific hover
+    let hoverTarget = null;
+    document.addEventListener('mouseover', (e) => { hoverTarget = e.target; }, true);
+
+    // Visible tippy references; a tooltip is blocked while an unrelated one is visible
+    const visibleTippies = new Set();
+    function blockedByTippy(elem) {
+      for (const ref of visibleTippies) {
+        if (!ref.contains(elem) && !elem.contains(ref)) return true;
+      }
+      return false;
+    }
+
+    // Whether the element's tooltip would have content to show. Content nested in a
+    // collapsed tactic region is covered by the region's proof-state tooltip, whether or
+    // not a tippy instance is currently attached to it.
+    function showsContent(el) {
+      if (!el._tippy) return false;
+      if (el.classList.contains('tactic')) {
+        const toggle = el.querySelector(':scope > input.tactic-toggle');
+        return !!toggle && !toggle.checked;
+      }
+      return (!!el.querySelector('.hover-info') || 'versoHover' in el.dataset) &&
+        !blockedByTactic(el);
+    }
+
+    // The nearest enclosing element whose tooltip has content
+    function innermostShowable(el) {
+      while (el && el.nodeType === Node.ELEMENT_NODE) {
+        if (showsContent(el)) return el;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    // Binding highlights via event delegation with cached lookups
+    const bindingCache = new Map(); // context+binding -> [token elements]
+    let highlightedTokens = [];
+    function getBindingTokens(context, binding) {
+      const key = context + "\0" + binding;
+      let tokens = bindingCache.get(key);
+      if (!tokens) {
+        tokens = [];
+        for (const example of document.querySelectorAll(".hl.lean")) {
+          if (example.dataset.leanContext == context) {
+            for (const tok of example.querySelectorAll(".token[data-binding=\"" + CSS.escape(binding) + "\"]")) {
+              tokens.push(tok);
+            }
+          }
+        }
+        bindingCache.set(key, tokens);
+      }
+      return tokens;
+    }
+    for (const container of document.querySelectorAll(".hl.lean")) {
+      container.addEventListener("mouseover", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !c.dataset.binding || c.dataset.binding === "" || !container.contains(c)) return;
+        if (blockedByTactic(c)) return;
+        const tokens = getBindingTokens(container.dataset.leanContext, c.dataset.binding);
+        for (const tok of tokens) {
+          tok.classList.add("binding-hl");
+        }
+        highlightedTokens = tokens;
+      });
+      container.addEventListener("mouseout", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !container.contains(c)) return;
+        for (const tok of highlightedTokens) {
+          tok.classList.remove("binding-hl");
+        }
+        highlightedTokens = [];
+      });
+    }
+    /* Render docstrings */
+    if ('undefined' !== typeof marked) {
+        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement("div");
+            rendered.classList.add("docstring");
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+        }
+    }
+    // Add hovers
+    const versoDocData = await (fetch("../../-verso-docs.json").then((resp) => resp.json()));
+
+    function hideParentTooltips(element) {
+      let parent = element.parentElement;
+      while (parent) {
+        const tippyInstance = parent._tippy;
+        if (tippyInstance) {
+          tippyInstance.hide();
+        }
+        parent = parent.parentElement;
+      }
+    }
+
+    function hideDescendantTooltips(element) {
+      for (const ref of visibleTippies) {
+        if (ref !== element && element.contains(ref)) {
+          ref._tippy.hide();
+        }
+      }
+    }
+
+    // Renders the documentation for a hover ID from the doc table
+    function docHoverContent(hoverId) {
+      const info = document.createElement('span');
+      info.className = 'hover-info';
+      info.style.display = 'block';
+      const data = versoDocData[hoverId];
+      if (data) {
+        info.innerHTML = data;
+        /* Render docstrings - TODO server-side */
+        if ('undefined' !== typeof marked) {
+          for (const d of info.querySelectorAll('code.docstring, pre.docstring')) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement('div');
+            rendered.classList.add('docstring');
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+          }
+        }
+      } else {
+        info.innerHTML = 'Failed to load doc ID: ' + hoverId;
+      }
+      return info;
+    }
+
+
+
+
+    const defaultTippyProps = {
+      /* DEBUG -- remove the space: * /
+      onHide(any) { return false; },
+      trigger: "click",
+      // */
+      /* theme: "lean", */
+      maxWidth: "none",
+      appendTo: () => document.body,
+      interactive: true,
+      delay: [100, null],
+      /* ignoreAttributes: true, */
+      followCursor: 'initial',
+      onShow(inst) {
+        const ref = inst.reference;
+        if (ref.className == 'tactic') {
+          const toggle = ref.querySelector(":scope > input.tactic-toggle");
+          if (toggle && toggle.checked) {
+            return false;
+          }
+        } else if (ref.querySelector(".hover-info") || "versoHover" in ref.dataset) {
+          if (blockedByTactic(ref)) { return false };
+        } else { // Nothing to show here!
+          return false;
+        }
+        // Show only the most specific hover under the pointer
+        if (hoverTarget && ref.contains(hoverTarget) && innermostShowable(hoverTarget) !== ref) {
+          return false;
+        }
+        hideParentTooltips(ref);
+        hideDescendantTooltips(ref);
+        if (blockedByTippy(ref)) { return false; }
+      },
+      onShown(inst) { visibleTippies.add(inst.reference); },
+      onHidden(inst) { visibleTippies.delete(inst.reference); },
+      content (tgt) {
+        const content = document.createElement("span");
+        if (tgt.className == 'tactic') {
+          const state = tgt.querySelector(":scope > .tactic-state").cloneNode(true);
+          state.style.display = "block";
+          content.appendChild(state);
+          content.style.display = "block";
+          content.className = "hl lean popup";
+        } else {
+          content.className = "hl lean";
+          content.style.display = "block";
+          content.style.maxHeight = "300px";
+          content.style.overflowY = "auto";
+          content.style.overflowX = "hidden";
+          // Messages come from the inline hover-info; documentation comes from the doc
+          // table. An element with both (a message span sharing a documented token's
+          // extent) shows both in one tooltip.
+          const hoverId = tgt.dataset.versoHover;
+          const hoverInfo = tgt.querySelector(".hover-info");
+          if (hoverInfo) {
+            content.appendChild(hoverInfo.cloneNode(true));
+          }
+          if (hoverId) {
+            // TODO stop doing an implicit conversion from string to number here
+            content.appendChild(docHoverContent(hoverId));
+          }
+          if (hoverInfo && hoverId) {
+            content.classList.add('mixed');
+          }
+          const extraLinks = tgt.dataset['versoLinks'] || tgt.parentElement.dataset['versoLinks'];
+          if (extraLinks) {
+            try {
+              const extras = JSON.parse(extraLinks);
+              const links = document.createElement('ul');
+              links.className = 'extra-doc-links';
+              extras.forEach((l) => {
+                const li = document.createElement('li');
+                li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
+                links.appendChild(li);
+              });
+              content.appendChild(links);
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        }
+        return content;
+      }
+    };
+
+
+    document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'lean');
+    });
+    document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'warning message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'info message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'error message');
+    });
+    document.querySelectorAll('.hl.lean .tactic').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'tactic');
+    });
+    // Skip tokens inside closed tactics — they interfere with tactic tippys
+    const closedTactics = new Set();
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle && !toggle.checked) closedTactics.add(tactic);
+    });
+    function isInsideClosedTactic(el) {
+      const tactic = el.closest('.tactic');
+      return tactic && tactic !== el && closedTactics.has(tactic);
+    }
+
+    const tokenSelector = '.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort';
+    tippy(Array.from(document.querySelectorAll(tokenSelector)).filter(el => !isInsideClosedTactic(el)), defaultTippyProps);
+
+    // Create/destroy token tippys when tactic checkbox toggles
+    const tacticTippySelector = '.const.token, .keyword.token, .literal.token, .option.token, .var.token, .typed.token, .has-info, .level-var, .level-const, .level-op, .sort';
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle) toggle.addEventListener('change', () => {
+        if (toggle.checked) {
+          closedTactics.delete(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (!el._tippy) {
+              tippy(el, defaultTippyProps);
+            }
+          });
+        } else {
+          closedTactics.add(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (el._tippy) el._tippy.destroy();
+          });
+        }
+        // The toggle changes which element's tooltip belongs to the pointer's position,
+        // but the pointer stays put, so no hover event announces the change. Show the
+        // right tooltip once the click that flipped the toggle has hidden the old one.
+        setTimeout(() => {
+          if (hoverTarget && hoverTarget.isConnected) {
+            const showable = innermostShowable(hoverTarget);
+            if (showable && showable._tippy) showable._tippy.show();
+          }
+        }, 0);
+      });
+  });
+}
+</script>
+    <script defer="defer" data-domain="lean-lang.org" src="../../../../plausible.io/js/script.outbound-links.js"></script>
+    </head>
+  <body>
+    <header>
+      <div class="header-logo-wrapper">
+        <a href="#" id="logo"><img src="../../static/lean_logo.svg"></a></div>
+      <div class="header-title-wrapper">
+        <a href="#" class="header-title"><h1>
+            Functional Programming in Lean</h1>
+          </a></div>
+      </header>
+    <label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc">
+      <div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div>
+      <nav id="toc">
+        <input type="checkbox" id="toggle-toc"><div class="first">
+          <a href="#" class="toc-title"><h1>
+              Functional Programming in Lean</h1>
+            </a><div class="split-tocs">
+            <div class="split-toc book">
+              <div class="title">
+                <label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot"></label><span class="">Table of Contents</span></div>
+              <table><tr class="unnumbered"><td class="num"><td><a href="../../Introduction/index.html#Functional-Programming-in-Lean--Introduction">Introduction</a></td></tr><tr class="unnumbered"><td class="num"><td><a href="../../Acknowledgments/index.html#Functional-Programming-in-Lean--Acknowledgments">Acknowledgments</a></td></tr><tr class="current numbered"><td class="num">1.</td><td><a href="../index.html#getting-to-know">Getting to Know Lean</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="../../Hello___-World___/index.html#hello-world">Hello, World!</a></td></tr><tr class="unnumbered"><td class="num"><td><a href="../../Interlude___-Propositions___-Proofs___-and-Indexing/index.html#props-proofs-indexing">Interlude: Propositions, Proofs, and Indexing</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="../../Overloading-and-Type-Classes/index.html#type-classes">Overloading and Type Classes</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="../../Monads/index.html#monads">Monads</a></td></tr><tr class="numbered"><td class="num">5.</td><td><a href="../../Functors___-Applicative-Functors___-and-Monads/index.html#Functional-Programming-in-Lean--Functors___-Applicative-Functors___-and-Monads">Functors, Applicative Functors, and Monads</a></td></tr><tr class="numbered"><td class="num">6.</td><td><a href="../../Monad-Transformers/index.html#Functional-Programming-in-Lean--Monad-Transformers">Monad Transformers</a></td></tr><tr class="numbered"><td class="num">7.</td><td><a href="../../Programming-with-Dependent-Types/index.html#dependent-types">Programming with Dependent Types</a></td></tr><tr class="unnumbered"><td class="num"><td><a href="../../Interlude___-Tactics___-Induction___-and-Proofs/index.html#tactics-induction-proofs">Interlude: Tactics, Induction, and Proofs</a></td></tr><tr class="numbered"><td class="num">8.</td><td><a href="../../Programming___-Proving___-and-Performance/index.html#Functional-Programming-in-Lean--Programming___-Proving___-and-Performance">Programming, Proving, and Performance</a></td></tr><tr class="numbered"><td class="num">9.</td><td><a href="../../Next-Steps/index.html#next-steps">Next Steps</a></td></tr></table></div>
+            <div class="split-toc">
+              <div class="title">
+                <label for="--verso-manual-toc-getting-to-know" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-getting-to-know" checked="checked"></label><span class="number">1.</span> <span class=""><a href="../index.html#getting-to-know">Getting to Know Lean</a></span></div>
+              <table><tr class="numbered"><td class="num">1.1.</td><td><a href="../Evaluating-Expressions/index.html#evaluating">Evaluating Expressions</a></td></tr><tr class="numbered"><td class="num">1.2.</td><td><a href="../Types/index.html#getting-to-know-types">Types</a></td></tr><tr class="numbered"><td class="num">1.3.</td><td><a href="../Functions-and-Definitions/index.html#functions-and-definitions">Functions and Definitions</a></td></tr><tr class="current numbered"><td class="num">1.4.</td><td><a href="index.html#structures">Structures</a></td></tr><tr class="numbered"><td class="num">1.5.</td><td><a href="../Datatypes-and-Patterns/index.html#datatypes-and-patterns">Datatypes and Patterns</a></td></tr><tr class="numbered"><td class="num">1.6.</td><td><a href="../Polymorphism/index.html#polymorphism">Polymorphism</a></td></tr><tr class="numbered"><td class="num">1.7.</td><td><a href="../Characters___-Strings___-and-Slices/index.html#chars-strings-slices">Characters, Strings, and Slices</a></td></tr><tr class="numbered"><td class="num">1.8.</td><td><a href="../Additional-Conveniences/index.html#getting-to-know-conveniences">Additional Conveniences</a></td></tr><tr class="numbered"><td class="num">1.9.</td><td><a href="../Summary/index.html#getting-to-know-summary">Summary</a></td></tr></table></div>
+            <div class="split-toc">
+              <div class="title">
+                <label for="--verso-manual-toc-structures" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-structures" checked="checked"></label><span class="number">1.4.</span> <span class="current"><a href="index.html#structures">Structures</a></span></div>
+              <table><tr class="numbered"><td class="num">1.4.1.</td><td><a href="index.html#updating-structures">Updating Structures</a></td></tr><tr class="numbered"><td class="num">1.4.2.</td><td><a href="index.html#behind-the-scenes">Behind the Scenes</a></td></tr><tr class="numbered"><td class="num">1.4.3.</td><td><a href="index.html#structure-exercises">Exercises</a></td></tr></table></div>
+            </div>
+          </div>
+        <div class="last">
+          <ul id="meta-links">
+            <li>
+              <a href="https://github.com/leanprover/fp-lean">Source Code</a></li>
+            <li>
+              <a href="https://github.com/leanprover/fp-lean/issues">Report Issues</a></li>
+            </ul>
+          </div>
+        </nav>
+      <div class="toc-resize-handle"></div>
+      <main><div class="content-wrapper">
+          <nav class="prev-next-buttons">
+            <a class="local-button active" href="../Functions-and-Definitions/index.html#functions-and-definitions" rel="prev" title="1.3. Functions and Definitions"><span class="arrow">←</span><span class="where">1.3. Functions and Definitions</span></a><a class="local-button active" href="../Datatypes-and-Patterns/index.html#datatypes-and-patterns" rel="next" title="1.5. Datatypes and Patterns"><span class="where">1.5. Datatypes and Patterns</span><span class="arrow">→</span></a></nav>
+          <section>
+            <h1>
+              1.4. Structures<span class="permalink-widget inline"><a href="../../find/indexe1b7.html?domain=Verso.Genre.Manual.section&amp;name=structures" title="Permalink">🔗</a></span></h1>
+            <p>
+              The first step in writing a program is usually to identify the problem domain's concepts, and then find suitable representations for them in code.
+Sometimes, a domain concept is a collection of other, simpler, concepts.
+In that case, it can be convenient to group these simpler components together into a single “package”, which can then be given a meaningful name.
+In Lean, this is done using <em>structures</em>, which are analogous to <code>struct</code>s in C or Rust and <code>record</code>s in C#.</p>
+            <p>
+              Defining a structure introduces a completely new type to Lean that can't be reduced to any other type.
+This is useful because multiple structures might represent different concepts that nonetheless contain the same data.
+For instance, a point might be represented using either Cartesian or polar coordinates, each being a pair of floating-point numbers.
+Defining separate structures prevents API clients from confusing one for another.</p>
+            <p>
+              Lean's floating-point number type is called <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code>, and floating-point numbers are written in the usual notation.</p>
+            <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-7071">#check</span></a><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">1.2</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="unknown token" data-binding="">1.2</span></span><span class="text"> : </span><span class="highlighted"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></span></span></pre><code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-7183">#check</span></a><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term-_»-7190">-</span><span class="literal number token" data-binding="" data-verso-hover="68">454.2123215</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><a href="https://lean-lang.org/doc/reference/4.26.0/Type-Classes/Basic-Classes/#Neg___mk" title="Documentation for Neg.neg in Lean Language Reference"><span class="const token" data-binding="const-Neg.neg" data-verso-hover="69">-</span></a><span class="unknown token" data-binding="">454.2123215</span></span><span class="text"> : </span><span class="highlighted"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></span></span></pre><code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-7297">#check</span></a><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="unknown token" data-binding="">0.0</span></span><span class="text"> : </span><span class="highlighted"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></span></span></pre><p>
+              When floating point numbers are written with the decimal point, Lean will infer the type <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code>. If they are written without it, then a type annotation may be necessary.</p>
+            <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-7393">#check</span></a><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="5">0</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="unknown token" data-binding="">0</span></span><span class="text"> : </span><span class="highlighted"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Natural-Numbers/#Nat___zero" title="Documentation for Nat in Lean Language Reference"><span class="const token" data-binding="const-Nat" data-verso-hover="6">Nat</span></a></span></span></pre><code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-7485">#check</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-7492">(</span><span class="literal number token" data-binding="" data-verso-hover="68">0</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeAscription-7492">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.typeAscription-7492">)</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="unknown token" data-binding="">0</span></span><span class="text"> : </span><span class="highlighted"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></span></span></pre><p>
+              A Cartesian point is a structure with two <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code> fields, called <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span></code>.
+This is declared using the <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">structure</span></code> keyword.</p>
+            <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structureTk-7548">structure</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structure-7548">where</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-7574">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-7586">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code><p>
+              After this declaration, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></code> is a new structure type.
+The typical way to create a value of a structure type is to provide values for all of its fields inside of curly braces.
+The origin of a Cartesian plane is where <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span></code> are both zero:</p>
+            <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-7791">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-origin" data-verso-hover="73">origin</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-7802">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-7810">:=</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-7813">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-7817">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-7815">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-7827">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-7813">}</span></code><p>
+              The result of <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-7942" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-origin" data-verso-hover="73">origin</span></code> looks very much like the definition of <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-origin" data-verso-hover="73">origin</span></code>.</p>
+            <pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">{ x := 0.000000, y := 0.000000 }</span></span></pre><p>
+              Because structures exist to “bundle up” a collection of data, naming it and treating it as a single unit, it is also important to be able to extract the individual fields of a structure.
+This is done using dot notation, as in C, Python, Rust, or JavaScript.</p>
+            <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-9949" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-origin" data-verso-hover="73">origin</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">0.000000</span></span></pre><code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-10044" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-origin" data-verso-hover="73">origin</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">0.000000</span></span></pre><div class="paragraph">
+              <p>
+                This can be used to define functions that take structures as arguments.
+For instance, addition of points is performed by adding the underlying coordinate values.
+It should be the case that</p>
+              <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-10334" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-addPoints" data-verso-hover="75">addPoints</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-10350">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-10354">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">1.5</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-10352">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-10364">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">32</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-10350">}</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-10372">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-10376">:=</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term-_»-10379">-</span><span class="literal number token" data-binding="" data-verso-hover="68">8</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-10374">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-10385">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.2</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-10372">}</span></code><p>
+                yields</p>
+              <pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">{ x := -6.500000, y := 32.200000 }</span></span></pre></div>
+            <p>
+              The function itself takes two <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></code>s as arguments, called <code class="hl lean inline" data-lean-context="examples"><span class="var token" data-binding="var-_uniq.12458" data-verso-hover="76">p1</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="var token" data-binding="var-_uniq.12460" data-verso-hover="76">p2</span></code>.
+The resulting point is based on the <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span></code> fields of both <code class="hl lean inline" data-lean-context="examples"><span class="var token" data-binding="var-_uniq.12458" data-verso-hover="76">p1</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="var token" data-binding="var-_uniq.12460" data-verso-hover="76">p2</span></code>:</p>
+            <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-10130">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-addPoints" data-verso-hover="75">addPoints</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-10144">(</span><span class="var token" data-binding="var-_uniq.12458" data-verso-hover="76">p1</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-10144">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-10144">)</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-10157">(</span><span class="var token" data-binding="var-_uniq.12460" data-verso-hover="76">p2</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-10157">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-10157">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-10170">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-10178">:=</span><span class="inter-text">
+  </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-10183">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-10187">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.12458" data-verso-hover="76">p1</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_+_»-10190">+</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.12460" data-verso-hover="76">p2</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-10185">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-10205">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.12458" data-verso-hover="76">p1</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_+_»-10208">+</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.12460" data-verso-hover="76">p2</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-10183">}</span></code><p>
+              Similarly, the distance between two points, which is the square root of the sum of the squares of the differences in their <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span></code> components, can be written:</p>
+            <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-11704">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-distance" data-verso-hover="77" id="distance">distance</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11717">(</span><span class="var token" data-binding="var-_uniq.16085" data-verso-hover="76">p1</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11717">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11717">)</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11730">(</span><span class="var token" data-binding="var-_uniq.16087" data-verso-hover="76">p2</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11730">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11730">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-11743">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-11751">:=</span><span class="inter-text">
+  </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float___sqrt" title="Documentation for Float.sqrt in Lean Language Reference"><span class="const token" data-binding="const-Float.sqrt" data-verso-hover="78">Float.sqrt</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-11767">(</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-11768">(</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-11769">(</span><span class="var token" data-binding="var-_uniq.16087" data-verso-hover="76">p2</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_-_»-11770">-</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16085" data-verso-hover="76">p1</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-11769">)</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_^_»-11769">^</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">2.0</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-11768">)</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_+_»-11768">+</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-11792">(</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-11793">(</span><span class="var token" data-binding="var-_uniq.16087" data-verso-hover="76">p2</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_-_»-11794">-</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16085" data-verso-hover="76">p1</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-11793">)</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_^_»-11793">^</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">2.0</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-11792">)</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-11767">)</span></code><p>
+              For example, the distance between <code class="math inline">(1, 2)</code> and <code class="math inline">(5, -1)</code> is <code class="math inline">5</code>:</p>
+            <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-11901" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><a href="index.html#distance" title="Definition of example"><span class="const token" data-binding="const-distance" data-verso-hover="77">distance</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-11916">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-11920">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">1.0</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-11918">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-11930">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">2.0</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-11916">}</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-11939">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-11943">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">5.0</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-11941">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-11953">:=</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term-_»-11956">-</span><span class="literal number token" data-binding="" data-verso-hover="68">1.0</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-11939">}</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">5.000000</span></span></pre><p>
+              Multiple structures may have fields with the same names.
+A three-dimensional point datatype may share the fields <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point3D.x" data-verso-hover="79">x</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point3D.y" data-verso-hover="80">y</span></code>, and be instantiated with the same field names:</p>
+            <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structureTk-10441">structure</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point3D" data-verso-hover="81" id="Point3D">Point3D</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structure-10441">where</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-Point3D.x" data-verso-hover="79">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-10469">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Point3D.y" data-verso-hover="80">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-10481">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="../../const-Point3D.html" data-verso-hover="82" id="Point3D___z">z</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-10493">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code><code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-10545">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-origin3D" data-verso-hover="83" id="origin3D">origin3D</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-10558">:</span><span class="inter-text"> </span><a href="index.html#Point3D" title="Definition of example"><span class="const token" data-binding="const-Point3D" data-verso-hover="81">Point3D</span></a><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-10568">:=</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-10571">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point3D.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-10575">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-10573">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point3D.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-10585">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-10573">,</span><span class="inter-text"> </span><a href="index.html#Point3D___z" title="Definition of example"><span class="const token" data-binding="../../const-Point3D.html" data-verso-hover="74">z</span></a><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-10595">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-10571">}</span></code><p>
+              This means that the structure's expected type must be known in order to use the curly-brace syntax.
+If the type is not known, Lean will not be able to instantiate the structure.
+For example,</p>
+            <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-8322">#check</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8329">{</span><span class="inter-text"> </span><span class="unknown token" data-binding="">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-8333">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="">0.0</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-8331">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-8343">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="">0.0</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8329">}</span></code><p>
+              leads to the error</p>
+            <pre class="hl lean lean-output error"><span class="verso-message"><span class="text"></span><span class="text">invalid {...} notation, expected type is not known</span></span></pre><p>
+              As usual, the situation can be remedied by providing a type annotation.</p>
+            <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-8467">#check</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-8474">(</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8475">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-8479">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-8477">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-8489">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8475">}</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeAscription-8474">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.typeAscription-8474">)</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0.0</span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0.0</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">}</span></span><span class="text"> : </span><span class="highlighted"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></span></span></pre><p>
+              To make programs more concise, Lean also allows the structure type annotation inside the curly braces.</p>
+            <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-8626">#check</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8633">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-8637">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-8635">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-8647">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0.0</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInst-8633">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8633">}</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0.0</span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0.0</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">}</span></span><span class="text"> : </span><span class="highlighted"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></span></span></pre><section>
+              <h2 id="updating-structures">
+                1.4.1. Updating Structures<span class="permalink-widget inline"><a href="../../find/indexdf50.html?domain=Verso.Genre.Manual.section&amp;name=updating-structures" title="Permalink">🔗</a></span></h2>
+              <p>
+                Imagine a function <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Oops.zeroX" data-verso-hover="85">zeroX</span></code> that replaces the <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Oops.Point.x" data-verso-hover="74">x</span></code> field of a <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Oops.Point" data-verso-hover="72">Point</span></code> with <code class="hl lean inline" data-lean-context="examples"><span class="literal number token" data-binding="" data-verso-hover="68">0</span></code>.
+In most programming language communities, this sentence would mean that the memory location pointed to by <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code> was to be overwritten with a new value.
+However, Lean is a functional programming language.
+In functional programming communities, what is almost always meant by this kind of statement is that a fresh <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></code> is allocated with the <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code> field pointing to the new value, and all other fields pointing to the original values from the input.
+One way to write <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Oops.zeroX" data-verso-hover="85">zeroX</span></code> is to follow this description literally, filling out the new value for <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code> and manually transferring <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span></code>:</p>
+              <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-8731">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-Oops.zeroX" data-verso-hover="85">zeroX</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-8741">(</span><span class="var token" data-binding="var-_uniq.9552" data-verso-hover="76">p</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-8741">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Oops.Point" data-verso-hover="72">Point</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-8741">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-8753">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Oops.Point" data-verso-hover="72">Point</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-8761">:=</span><span class="inter-text">
+  </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8766">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Oops.Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-8770">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-8768">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Oops.Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-8778">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.9552" data-verso-hover="76">p</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Oops.Point.y" data-verso-hover="71">y</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8766">}</span></code><p>
+                This style of programming has drawbacks, however.
+First off, if a new field is added to a structure, then every site that updates any field at all must be updated, causing maintenance difficulties.
+Secondly, if the structure contains multiple fields with the same type, then there is a real risk of copy-paste coding leading to field contents being duplicated or switched.
+Finally, the program becomes long and bureaucratic.</p>
+              <p>
+                Lean provides a convenient syntax for replacing some fields in a structure while leaving the others alone.
+This is done by using the <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">with</span></code> keyword in a structure initialization.
+The source of unchanged fields occurs before the <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">with</span></code>, and the new fields occur after.
+For example, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-zeroX" data-verso-hover="85">zeroX</span></code> can be written with only the new <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code> value:</p>
+              <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-8838">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-zeroX" data-verso-hover="85">zeroX</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-8848">(</span><span class="var token" data-binding="var-_uniq.9610" data-verso-hover="76">p</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-8848">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-8848">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-8860">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-8868">:=</span><span class="inter-text">
+  </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8873">{</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.9610" data-verso-hover="76">p</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.structInst-8873" data-verso-hover="86">with</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-8884">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">0</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-8873">}</span></code><p>
+                Remember that this structure update syntax does not modify existing values—it creates new values that share some fields with old values.
+Given the point <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-fourAndThree" data-verso-hover="87">fourAndThree</span></code>:</p>
+              <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-9058">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-fourAndThree" data-verso-hover="87">fourAndThree</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-9075">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-9083">:=</span><span class="inter-text">
+  </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-9088">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-9092">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">4.3</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-9090">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-9102">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">3.4</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-9088">}</span></code><p>
+                evaluating it, then evaluating an update of it using <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-zeroX" data-verso-hover="85">zeroX</span></code>, then evaluating it again yields the original value:</p>
+              <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-9231" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-fourAndThree" data-verso-hover="87">fourAndThree</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">{ x := 4.300000, y := 3.400000 }</span></span></pre><code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-9377" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-zeroX" data-verso-hover="85">zeroX</span><span class="inter-text"> </span><span class="const token" data-binding="const-fourAndThree" data-verso-hover="87">fourAndThree</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">{ x := 0.000000, y := 3.400000 }</span></span></pre><code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-9231" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-fourAndThree" data-verso-hover="87">fourAndThree</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">{ x := 4.300000, y := 3.400000 }</span></span></pre><p>
+                One consequence of the fact that structure updates do not modify the original structure is that it becomes easier to reason about cases where the new value is computed from the old one.
+All references to the old structure continue to refer to the same field values in all of the new values provided.</p>
+              </section>
+            <section>
+              <h2 id="behind-the-scenes">
+                1.4.2. Behind the Scenes<span class="permalink-widget inline"><a href="../../find/index7f77.html?domain=Verso.Genre.Manual.section&amp;name=behind-the-scenes" title="Permalink">🔗</a></span></h2>
+              <p>
+                Every structure has a <em>constructor</em>.
+Here, the term “constructor” may be a source of confusion.
+Unlike constructors in languages such as Java or Python, constructors in Lean are not arbitrary code to be run when a datatype is initialized.
+Instead, constructors simply gather the data to be stored in the newly-allocated data structure.
+It is not possible to provide a custom constructor that pre-processes data or rejects invalid arguments.
+This is really a case of the word “constructor” having different, but related, meanings in the two contexts.</p>
+              <p>
+                By default, the constructor for a structure named <code>S</code> is named <code>S.mk</code>.
+Here, <code>S</code> is a namespace qualifier, and <code>mk</code> is the name of the constructor itself.
+Instead of using curly-brace initialization syntax, the constructor can also be applied directly.</p>
+              <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-11003">#check</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">Point.mk</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">1.5</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="68">2.8</span></code><p>
+                However, this is not generally considered to be good Lean style, and Lean even returns its feedback using the standard structure initializer syntax.</p>
+              <pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">1.5</span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">2.8</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">}</span></span><span class="text"> : </span><span class="highlighted"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></span></span></pre><p>
+                Constructors have function types, which means they can be used anywhere that a function is expected.
+For instance, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">Point.mk</span></code> is a function that accepts two <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code>s (respectively <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span></code>) and returns a new <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></code>.</p>
+              <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-9524">#check</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-9531">(</span><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">Point.mk</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-9531">)</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">Point.mk</span></span><span class="text"> : </span><span class="highlighted"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></span></span></pre><p>
+                To override a structure's constructor name, write it with two colons at the beginning.
+For instance, to use <code class="hl lean inline" data-lean-context="examples"><a href="index.html#Ctor___Point___point" title="Definition of example"><span class="const token" data-binding="const-Ctor.Point.point" data-verso-hover="88">Point.point</span></a></code> instead of <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.mk" data-verso-hover="84">Point.mk</span></code>, write:</p>
+              <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structureTk-10670">structure</span><span class="inter-text"> </span><span class="const token" data-binding="const-Ctor.Point" data-verso-hover="72" id="Ctor___Point">Point</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structure-10670">where</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-Ctor.Point.point" data-verso-hover="88" id="Ctor___Point___point">point</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-Lean.Parser.Command.structCtor-10694">::</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-Ctor.Point.x" data-verso-hover="70" id="Ctor___Point___x">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-10707">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Ctor.Point.y" data-verso-hover="71" id="Ctor___Point___y">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-10719">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code><p>
+                In addition to the constructor, an accessor function is defined for each field of a structure.
+These have the same name as the field, in the structure's namespace.
+For <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></code>, accessor functions <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">Point.x</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.y" data-verso-hover="71">Point.y</span></code> are generated.</p>
+              <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-9638">#check</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-9645">(</span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">Point.x</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-9645">)</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="const token" data-binding="const-Point.x" data-verso-hover="70">Point.x</span></span><span class="text"> : </span><span class="highlighted"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></span></span></pre><code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___check" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.check-9750">#check</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-9757">(</span><span class="const token" data-binding="const-Point.y" data-verso-hover="71">Point.y</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-9757">)</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="const token" data-binding="const-Point.y" data-verso-hover="71">Point.y</span></span><span class="text"> : </span><span class="highlighted"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></span></span></pre><p>
+                In fact, just as the curly-braced structure construction syntax is converted to a call to the structure's constructor behind the scenes, the syntax <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span></code> in the prior definition of <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-addPoints" data-verso-hover="75">addPoints</span></code> is converted into a call to the <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span></code> accessor.
+That is, <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-9949" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-origin" data-verso-hover="73">origin</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span></code> and <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-9847" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">Point.x</span><span class="inter-text"> </span><span class="const token" data-binding="const-origin" data-verso-hover="73">origin</span></code> both yield</p>
+              <pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">0.000000</span></span></pre><p>
+                Accessor dot notation is usable with more than just structure fields.
+It can also be used for functions that take any number of arguments.
+More generally, accessor notation has the form <code>TARGET.f ARG1 ARG2 ...</code>.
+If <code>TARGET</code> has type <code>T</code>, the function named <code>T.f</code> is called.
+<code>TARGET</code> becomes its leftmost argument of type <code>T</code>, which is often but not always the first one, and <code>ARG1 ARG2 ...</code> are provided in order as the remaining arguments.
+For instance, <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___append" title="Documentation for String.append in Lean Language Reference"><span class="const token" data-binding="const-String.append" data-verso-hover="12">String.append</span></a></code> can be invoked from a string with accessor notation, even though <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___ofByteArray" title="Documentation for String in Lean Language Reference"><span class="const token" data-binding="const-String" data-verso-hover="9">String</span></a></code> is not a structure with an <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___append" title="Documentation for String.append in Lean Language Reference"><span class="const token" data-binding="const-String.append" data-verso-hover="12">append</span></a></code> field.</p>
+              <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-11136" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="89">"one string"</span><span class="built-in delim token" data-binding="">.</span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___append" title="Documentation for String.append in Lean Language Reference"><span class="const token" data-binding="const-String.append" data-verso-hover="12">append</span></a><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="90">" and another"</span></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="highlighted"><span class="literal string token" data-binding="" data-verso-hover="91">"one string and another"</span></span></span></pre><p>
+                In that example, <code>TARGET</code> represents <code class="hl lean inline" data-lean-context="examples"><span class="literal string token" data-binding="" data-verso-hover="89">"one string"</span></code> and <code>ARG1</code> represents <code class="hl lean inline" data-lean-context="examples"><span class="literal string token" data-binding="" data-verso-hover="90">" and another"</span></code>.</p>
+              <p>
+                The function <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.modifyBoth" data-verso-hover="92">Point.modifyBoth</span></code> (that is, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point.modifyBoth" data-verso-hover="92">modifyBoth</span></code> defined in the <code>Point</code> namespace) applies a function to both fields in a <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></code>:</p>
+              <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-11232">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.modifyBoth" data-verso-hover="92">Point.modifyBoth</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11253">(</span><span class="var token" data-binding="var-_uniq.14733" data-verso-hover="93">f</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11253">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-Lean.Parser.Term.arrow-11258">→</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11253">)</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11275">(</span><span class="var token" data-binding="var-_uniq.14735" data-verso-hover="76">p</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11275">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-11275">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-11287">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-11295">:=</span><span class="inter-text">
+  </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-11300">{</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.x" data-verso-hover="74">x</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-11304">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.14733" data-verso-hover="93">f</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.14735" data-verso-hover="76">p</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.x" data-verso-hover="70">x</span><span class="punctuation separator token" data-binding="kw-occ-Lean.Parser.Term.structInstFields-11302">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-Point.y" data-verso-hover="74">y</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.structInstFieldDef-11316">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.14733" data-verso-hover="93">f</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.14735" data-verso-hover="76">p</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.y" data-verso-hover="71">y</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.structInst-11300">}</span></code><p>
+                Even though the <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Point" data-verso-hover="72">Point</span></code> argument comes after the function argument, it can be used with dot notation as well:</p>
+              <code class="hl lean block" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Interacting-with-Lean/#Lean___Parser___Command___eval" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-11561" data-verso-hover="7">#eval</span></a><span class="inter-text"> </span><span class="const token" data-binding="const-fourAndThree" data-verso-hover="87">fourAndThree</span><span class="built-in delim token" data-binding="">.</span><span class="const token" data-binding="const-Point.modifyBoth" data-verso-hover="92">modifyBoth</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float___floor" title="Documentation for Float.floor in Lean Language Reference"><span class="const token" data-binding="const-Float.floor" data-verso-hover="94">Float.floor</span></a></code><pre class="hl lean lean-output information"><span class="verso-message"><span class="text"></span><span class="text">{ x := 4.000000, y := 3.000000 }</span></span></pre><p>
+                In this case, <code>TARGET</code> represents <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-fourAndThree" data-verso-hover="87">fourAndThree</span></code>, while <code>ARG1</code> is <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float___floor" title="Documentation for Float.floor in Lean Language Reference"><span class="const token" data-binding="const-Float.floor" data-verso-hover="94">Float.floor</span></a></code>.
+This is because the target of the accessor notation is used as the first argument in which the type matches, not necessarily the first argument.</p>
+              </section>
+            <section>
+              <h2 id="structure-exercises">
+                1.4.3. Exercises<span class="permalink-widget inline"><a href="../../find/indexd934.html?domain=Verso.Genre.Manual.section&amp;name=structure-exercises" title="Permalink">🔗</a></span></h2>
+              <ul>
+                <li>
+                  <p>
+                    Define a structure named <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Ex.RectangularPrism" data-verso-hover="95">RectangularPrism</span></code> that contains the height, width, and depth of a rectangular prism, each as a <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code>.</p>
+                  </li>
+                <li>
+                  <p>
+                    Define a function named <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Ex.volume" data-verso-hover="96" id="Ex___volume">volume</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-51129">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Ex.RectangularPrism" data-verso-hover="95">RectangularPrism</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-Lean.Parser.Term.arrow-51131">→</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code> that computes the volume of a rectangular prism.</p>
+                  </li>
+                <li>
+                  <p>
+                    Define a structure named <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Ex.Segment" data-verso-hover="97">Segment</span></code> that represents a line segment by its endpoints, and define a function <code>length : Segment → Float</code> that computes the length of a line segment. <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Ex.Segment" data-verso-hover="97">Segment</span></code> should have at most two fields.</p>
+                  </li>
+                <li>
+                  <p>
+                    Which names are introduced by the declaration of <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Ex.RectangularPrism" data-verso-hover="95">RectangularPrism</span></code>?</p>
+                  </li>
+                <li>
+                  <p>
+                    Which names are introduced by the following declarations of <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Hamster" data-verso-hover="98">Hamster</span></code> and <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Book" data-verso-hover="99">Book</span></code>? What are their types?</p>
+                  <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structureTk-12012">structure</span><span class="inter-text"> </span><span class="const token" data-binding="const-Hamster" data-verso-hover="98">Hamster</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structure-12012">where</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-Hamster.name" data-verso-hover="100" id="Hamster___name">name</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-12043">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___ofByteArray" title="Documentation for String in Lean Language Reference"><span class="const token" data-binding="const-String" data-verso-hover="9">String</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Hamster.fluffy" data-verso-hover="101" id="Hamster___fluffy">fluffy</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-12061">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Booleans/#Bool___false" title="Documentation for Bool in Lean Language Reference"><span class="const token" data-binding="const-Bool" data-verso-hover="47">Bool</span></a></code><code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structureTk-12108">structure</span><span class="inter-text"> </span><span class="const token" data-binding="const-Book" data-verso-hover="99">Book</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structure-12108">where</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-Book.makeBook" data-verso-hover="102" id="Book___makeBook">makeBook</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-Lean.Parser.Command.structCtor-12131">::</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-Book.title" data-verso-hover="103" id="Book___title">title</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-12151">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___ofByteArray" title="Documentation for String in Lean Language Reference"><span class="const token" data-binding="const-String" data-verso-hover="9">String</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Book.author" data-verso-hover="104" id="Book___author">author</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-12169">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___ofByteArray" title="Documentation for String in Lean Language Reference"><span class="const token" data-binding="const-String" data-verso-hover="9">String</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Book.price" data-verso-hover="105" id="Book___price">price</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-12186">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Floating-Point-Numbers/#Float-next" title="Documentation for Float in Lean Language Reference"><span class="const token" data-binding="const-Float" data-verso-hover="67">Float</span></a></code></li>
+                </ul>
+              </section>
+            </section>
+          <nav class="prev-next-buttons">
+            <a class="local-button active" href="../Functions-and-Definitions/index.html#functions-and-definitions" rel="prev" title="1.3. Functions and Definitions"><span class="arrow">←</span><span class="where">1.3. Functions and Definitions</span></a><a class="local-button active" href="../Datatypes-and-Patterns/index.html#datatypes-and-patterns" rel="next" title="1.5. Datatypes and Patterns"><span class="where">1.5. Datatypes and Patterns</span><span class="arrow">→</span></a></nav>
+          </div>
+        </main></div>
+    </body>
+  
+<!-- Mirrored from https://lean-lang.org/functional_programming_in_lean/Getting-to-Know-Lean/Structures/ by HTTrack Website Copier/3.x [XR&CO], Wed, 23 Sep 2026 18:47:41 GMT -->
+</html>
+

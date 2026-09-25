@@ -5,9 +5,19 @@ on:
   push:
     branches:
       - selfhost/psc1-lean-bootstrap
+      - backend/wasm3-owned
+      - integrate/wasm3-owned
+      - backend/wasm3-gc-adts
+      - backend/wasm3-closures
+      - compiler-ir/generic-specialization
+      - integrate/generic-specialization
+      - integrate/wasm3-closures
+      - integrate/wasm3-gc-adts
     paths:
       - selfhost/**
       - docs/selfhost/PSC1_LEAN_BOOTSTRAP.md
+      - docs/selfhost/WASM3_BACKEND.md
+      - docs/plans/07_SELF_HOSTING_FOUNDATION.md
       - .github/workflows/psc1-lean-bootstrap.yml
       - packages/syntax/**
       - packages/elab/**
@@ -15,6 +25,8 @@ on:
       - packages/erasure/**
       - packages/compiler-ir/**
       - packages/backend-ts/**
+      - selfhost/packages/backend-wasm/**
+      - selfhost/packages/compiler-ir/**
       - packages/compiler/**
       - packages/cli/**
       - package.json
@@ -64,6 +76,7 @@ jobs:
           node --check selfhost/scripts/build-auto.mjs
           node --check selfhost/scripts/compare-selfhost.mjs
           node --check selfhost/scripts/check-workspace.mjs
+          node --check selfhost/scripts/check-ir-neutrality.mjs
           node --check selfhost/scripts/clean.mjs
           node selfhost/scripts/check-workspace.mjs
 
@@ -74,12 +87,94 @@ jobs:
           cd selfhost
           node check-psc1-source.mjs
 
+      - name: Enforce target-neutral shared compiler IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node scripts/check-ir-neutrality.mjs
+
       - name: Build compiler with Lake
         shell: bash
         run: |
           set -euo pipefail
           cd selfhost
           lake build
+
+      - name: Run owned WebAssembly backend target-lowering tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_tests
+
+      - name: Validate owned WebAssembly binary in Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv=readFileSync('/tmp/psc1-wasm-bytes.txt','utf8').trim();
+          const bytes=Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) {
+            throw new Error('PSC1_WASM_VALIDATE_FAILED');
+          }
+          const {instance}=await WebAssembly.instantiate(bytes);
+          if (instance.exports.addU32(20, 22) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_U32_RESULT');
+          }
+          if (instance.exports.addF32(20.5, 21.5) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_F32_RESULT');
+          }
+          if (instance.exports.addThenOne(20, 21) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_DIRECT_CALL_RESULT');
+          }
+          if (instance.exports.selectU32(1, 42, 7) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_IF_TRUE_RESULT');
+          }
+          if (instance.exports.selectU32(0, 42, 7) !== 7) {
+            throw new Error('PSC1_WASM_RUNTIME_IF_FALSE_RESULT');
+          }
+          if (instance.exports.letPlusOne(41) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_LET_RESULT');
+          }
+          if (instance.exports.pointX(42, 7) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_STRUCT_RESULT');
+          }
+          if (instance.exports.smallSigned(-123) !== -123) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_PACKED_I16_RESULT');
+          }
+          if (instance.exports.smallUnsigned(65535) !== 65535) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_PACKED_U16_RESULT');
+          }
+          if (instance.exports.someValue(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_SOME_RESULT');
+          }
+          if (instance.exports.noneValue() !== 0) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_NONE_RESULT');
+          }
+          if (instance.exports.listLengthTwo() !== 2) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_RECURSIVE_ADT_RESULT');
+          }
+          if (instance.exports.applyReturnedAdder(40, 2) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_CLOSURE_CAPTURE_RESULT');
+          }
+          if (instance.exports.applyTwiceIncrement(40) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_HIGHER_ORDER_CALL_REF_RESULT');
+          }
+          if (instance.exports.genericBoxRoundTrip(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GENERIC_BOX_RESULT');
+          }
+          if (instance.exports.genericIdU32(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GENERIC_FUNCTION_RESULT');
+          }
+          if (instance.exports.genericLengthTwo() !== 2) {
+            throw new Error('PSC1_WASM_RUNTIME_GENERIC_RECURSIVE_ADT_RESULT');
+          }
+          console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
+          NODE
 
       - name: Probe real compiler source readiness
         shell: bash

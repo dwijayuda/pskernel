@@ -545,15 +545,15 @@ def psRustCoverageModule
     module.declarations
 
 def psRustCoverageLines
-    (prefix : String)
+    (linePrefix : String)
     (values : List String) : List String :=
   match values with
   | List.nil =>
       List.nil
   | List.cons value rest =>
       List.cons
-        (psRustConcat2 prefix value)
-        (psRustCoverageLines prefix rest)
+        (psRustConcat2 linePrefix value)
+        (psRustCoverageLines linePrefix rest)
 
 def psRustCoverageReport
     (coverage : PsRustCoverage) : String :=

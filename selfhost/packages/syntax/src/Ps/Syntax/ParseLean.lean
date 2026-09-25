@@ -1201,7 +1201,7 @@ def psParseLeanDoWithFuel
             match parseTerm returnKeyword.cursor with
             | Except.error error => Except.error error
             | Except.ok value =>
-                let finalCursor :=
+                let finalCursor : PsTokenCursor :=
                   if psTokenCursorAtText value.cursor ";" then
                     match psTokenCursorAdvance value.cursor with
                     | Option.none => value.cursor
@@ -1261,7 +1261,7 @@ def psParseLeanDoWithFuel
                                               List.nil
                                           span := name.token.span
                                         };
-                                        let binderStop :=
+                                        let binderStop : PsSourcePos :=
                                           psLeanTermStop binderType.value;
                                         let binder : PsSyntaxBinderHead := {
                                           name := nameSyntax

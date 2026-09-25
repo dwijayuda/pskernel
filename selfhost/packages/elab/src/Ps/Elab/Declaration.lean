@@ -1003,7 +1003,7 @@ def psElabInductiveDeclaration
                       isStructure := isStructure
                     };
                     let inductiveDeclaration :=
-                      PsDeclaration.inductiveDecl info
+                      PsDeclaration.inductiveDecl info;
                     let withInductiveResult :=
                       psEnvironmentAddOwnedBootstrapDeclaration
                         environment

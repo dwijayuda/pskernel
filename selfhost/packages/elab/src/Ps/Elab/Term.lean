@@ -184,10 +184,18 @@ def psElabProjectionStep
       match psEnvironmentFindInductive current.context.environment typeName with
       | none => Except.error PsElabError.unsupportedTerm
       | some info =>
-          if
-              !info.isStructure
-                || info.numIndices != 0
-                || view.args.length != info.numParams then
+          let projectionInvalid :=
+            if info.isStructure then
+              if Nat.beq info.numIndices 0 then
+                if Nat.beq view.args.length info.numParams then
+                  false
+                else
+                  true
+              else
+                true
+            else
+              true;
+          if projectionInvalid then
             Except.error PsElabError.unsupportedTerm
           else
             match info.constructors with

@@ -116,6 +116,7 @@ def psBackendRustAdtModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.projection
             "Pair"
+            []
             (PsVerifiedIrExpr.var "pair")
             "left"
       },
@@ -606,6 +607,7 @@ def psBackendRustUnknownStructureModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.record
             "MissingStructure"
+            []
             []
       }
     ]

@@ -29,17 +29,22 @@ def collectionLength : Nat :=
 def collectionMapped : List Nat :=
   listMap collectionIdentityNat collectionList
 
-def compareAlwaysEq (left : Nat) (right : Nat) : Ordering :=
-  Ordering.eq
-
 def collectionMap : Map Nat String :=
-  mapInsert compareAlwaysEq 1 "one" Map.empty
+  mapInsert orderingNat 2 "two"
+    (mapInsert orderingNat 1 "one" Map.empty)
 
 def collectionMapLookup : Option String :=
-  mapFindOption compareAlwaysEq 1 collectionMap
+  mapFindOption orderingNat 2 collectionMap
+
+def collectionMapMissing : Option String :=
+  mapFindOption orderingNat 3 collectionMap
 
 def collectionSet : Set Nat :=
-  setInsert compareAlwaysEq 1 (setEmpty Unit.unit)
+  setInsert orderingNat 2
+    (setInsert orderingNat 1 (setEmpty Unit.unit))
 
 def collectionSetContains : Bool :=
-  setContains compareAlwaysEq 1 collectionSet
+  setContains orderingNat 2 collectionSet
+
+def collectionSetMissing : Bool :=
+  setContains orderingNat 3 collectionSet

@@ -71,6 +71,12 @@ inductive PsSyntaxDeclaration where
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
       (span : PsSourceSpan)
+  | partialDefinition
+      (name : PsSyntaxName)
+      (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+      (type : PsSyntaxTerm)
+      (value : PsSyntaxTerm)
+      (span : PsSourceSpan)
   | theoremDecl
       (name : PsSyntaxName)
       (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))

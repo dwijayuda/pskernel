@@ -93,24 +93,6 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Compiler
   ]
 
-lean_lib ProofScriptStdlib where
-  srcDir := "stdlib"
-  roots := #[
-    `ProofScript.Data.Prod,
-    `ProofScript.Data.Option,
-    `ProofScript.Data.Ordering,
-    `ProofScript.Data.Result,
-    `ProofScript.Data.Except,
-    `ProofScript.Data.List,
-    `ProofScript.Data.Array,
-    `ProofScript.Data.Map,
-    `ProofScript.Data.Set
-  ]
-
-lean_lib PsBootstrap where
-  srcDir := "packages/bootstrap/src"
-  roots := #[`Ps.Bootstrap.SelfHost]
-
 lean_lib PsBackendRust where
   srcDir := "packages/backend-rust/src"
   roots := #[

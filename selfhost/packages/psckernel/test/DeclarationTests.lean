@@ -65,23 +65,23 @@ def psCKernelDeclarationOptionExprEq
 
 def psCKernelDeclarationTestReducibilityOrder : Bool :=
   psCKernelReducibilityHintsLt
-      PsCKernelReducibilityHints.abbrev
+      PsCKernelReducibilityHints.abbreviation
       (PsCKernelReducibilityHints.regular 1) &&
     psCKernelReducibilityHintsLt
       (PsCKernelReducibilityHints.regular 3)
       (PsCKernelReducibilityHints.regular 2) &&
     psCKernelReducibilityHintsLt
       (PsCKernelReducibilityHints.regular 1)
-      PsCKernelReducibilityHints.opaque &&
+      PsCKernelReducibilityHints.opaqueHint &&
     !psCKernelReducibilityHintsLt
-      PsCKernelReducibilityHints.opaque
-      PsCKernelReducibilityHints.abbrev
+      PsCKernelReducibilityHints.opaqueHint
+      PsCKernelReducibilityHints.abbreviation
 
 def psCKernelDeclarationTestHintPredicates : Bool :=
-  psCKernelReducibilityHintsIsAbbrev PsCKernelReducibilityHints.abbrev &&
-    !psCKernelReducibilityHintsIsAbbrev PsCKernelReducibilityHints.opaque &&
+  psCKernelReducibilityHintsIsAbbrev PsCKernelReducibilityHints.abbreviation &&
+    !psCKernelReducibilityHintsIsAbbrev PsCKernelReducibilityHints.opaqueHint &&
     psCKernelReducibilityHintsIsRegular (PsCKernelReducibilityHints.regular 4) &&
-    !psCKernelReducibilityHintsIsRegular PsCKernelReducibilityHints.abbrev
+    !psCKernelReducibilityHintsIsRegular PsCKernelReducibilityHints.abbreviation
 
 def psCKernelDeclarationTestDefinitionValue : Bool :=
   let info : PsCKernelConstantInfo :=
@@ -102,12 +102,12 @@ def psCKernelDeclarationTestOpaqueVisibility : Bool :=
 def psCKernelDeclarationTestUnsafeDefinition : Bool :=
   psCKernelConstantInfoIsUnsafe
       (psCKernelDeclarationDefinition
-        PsCKernelDefinitionSafety.unsafe
-        PsCKernelReducibilityHints.opaque) &&
+        PsCKernelDefinitionSafety.unsafeDef
+        PsCKernelReducibilityHints.opaqueHint) &&
     !psCKernelConstantInfoIsUnsafe
       (psCKernelDeclarationDefinition
         PsCKernelDefinitionSafety.safe
-        PsCKernelReducibilityHints.opaque)
+        PsCKernelReducibilityHints.opaqueHint)
 
 def psCKernelDeclarationTestUnsafeOtherKinds : Bool :=
   psCKernelConstantInfoIsUnsafe (psCKernelDeclarationAxiom true) &&
@@ -119,7 +119,7 @@ def psCKernelDeclarationTestPartial : Bool :=
   psCKernelConstantInfoIsPartial
       (psCKernelDeclarationDefinition
         PsCKernelDefinitionSafety.partial
-        PsCKernelReducibilityHints.opaque) &&
+        PsCKernelReducibilityHints.opaqueHint) &&
     !psCKernelConstantInfoIsPartial psCKernelDeclarationTheorem
 
 def psCKernelDeclarationTestBaseAccessors : Bool :=
@@ -137,11 +137,11 @@ def psCKernelDeclarationTestHintsFallback : Bool :=
       (psCKernelConstantInfoHints
         (psCKernelDeclarationDefinition
           PsCKernelDefinitionSafety.safe
-          PsCKernelReducibilityHints.abbrev))
-      PsCKernelReducibilityHints.abbrev &&
+          PsCKernelReducibilityHints.abbreviation))
+      PsCKernelReducibilityHints.abbreviation &&
     psCKernelReducibilityHintsEq
       (psCKernelConstantInfoHints psCKernelDeclarationTheorem)
-      PsCKernelReducibilityHints.opaque
+      PsCKernelReducibilityHints.opaqueHint
 
 def psCKernelDeclarationTestInductiveHelpers : Bool :=
   let info : PsCKernelInductiveVal := {

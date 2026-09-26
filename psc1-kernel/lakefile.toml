@@ -5,8 +5,14 @@ defaultTargets = ["PSC1Kernel"]
 [[lean_lib]]
 name = "PSC1Kernel"
 
-
 [[lean_exe]]
 name = "psc1_replay"
 root = "PSC1Kernel.Test.ReplayFile"
 
+[[lean_exe]]
+name = "psc1_whnf_pointer_cache_smoke"
+root = "PSC1Kernel.Test.CheckerWhnfPointerCacheSmoke"
+
+[[lean_exe]]
+name = "psc1_target_profile"
+root = "PSC1Kernel.Test.ReplayTargetProfile"

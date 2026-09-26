@@ -243,7 +243,7 @@ partial def inferCoreStatefulWith
             let args := e.getAppArgs
             let (fnType, state1) ←
               inferCoreStatefulWith defeq ctx state e.getAppFn true
-            let rec loop
+            let rec loopApp
                 (i j : Nat)
                 (current : Expr)
                 (currentState : CheckerState) :
@@ -251,7 +251,7 @@ partial def inferCoreStatefulWith
               if i < args.length then
                 match current with
                 | .forallE _ _ body _ =>
-                    loop (i + 1) j body currentState
+                    loopApp (i + 1) j body currentState
                 | _ =>
                     let pending := (args.drop j).take (i - j)
                     let exposed := current.instantiateRev pending
@@ -259,11 +259,11 @@ partial def inferCoreStatefulWith
                       whnfStateful ctx currentState exposed
                     let .forallE _ _ body _ := exposedWhnf
                       | throw "expected function type"
-                    loop (i + 1) i body next
+                    loopApp (i + 1) i body next
               else
                 let result := current.instantiateRev (args.drop j)
                 return (result, cacheInferStatefulResult currentState true e result)
-            loop 0 0 fnType state1
+            loopApp 0 0 fnType state1
           else do
             let ctx ← ctx.enterKernelRecDepth
             let (fnType, state1) ← inferCoreStatefulWith defeq ctx state fn false
@@ -284,7 +284,7 @@ partial def inferCoreStatefulWith
 
       | .lam _ _ _ _ => do
           let ctx ← ctx.enterKernelRecDepth
-          let rec loop
+          let rec loopLambda
               (currentCtx : CheckerContext)
               (currentState : CheckerState)
               (current : Expr)
@@ -314,7 +314,7 @@ partial def inferCoreStatefulWith
                   type := openedDomain
                   binderInfo := binderInfo
                 }
-                loop child state2 body
+                loopLambda child state2 body
                   (fvars ++ [.fvar fresh]) (binders ++ [binder])
             | tail =>
                 let openedTail := tail.instantiateRev fvars
@@ -322,12 +322,12 @@ partial def inferCoreStatefulWith
                   inferCoreStatefulWith defeq currentCtx currentState openedTail inferOnly
                 let result := closeCheckerBinders binders tailType.cheapBetaReduce
                 return (result, next)
-          let (result, next) ← loop ctx state e [] []
+          let (result, next) ← loopLambda ctx state e [] []
           return (result, cacheInferStatefulResult next inferOnly e result)
 
       | .forallE _ _ _ _ => do
           let ctx ← ctx.enterKernelRecDepth
-          let rec loop
+          let rec loopForall
               (currentCtx : CheckerContext)
               (currentState : CheckerState)
               (current : Expr)
@@ -346,7 +346,7 @@ partial def inferCoreStatefulWith
                   currentCtx with
                     lctx := currentCtx.lctx.addLocal fresh name openedDomain binderInfo
                 }
-                loop child state3 body
+                loopForall child state3 body
                   (fvars ++ [.fvar fresh]) (levels ++ [level])
             | tail =>
                 let openedTail := tail.instantiateRev fvars
@@ -355,12 +355,12 @@ partial def inferCoreStatefulWith
                 let (resultLevel, state2) ←
                   ensureSortStatefulResult currentCtx state1 tailType
                 return (.sort (levels.foldr Level.mkIMax resultLevel), state2)
-          let (result, next) ← loop ctx state e [] []
+          let (result, next) ← loopForall ctx state e [] []
           return (result, cacheInferStatefulResult next inferOnly e result)
 
       | .letE _ _ _ _ _ => do
           let ctx ← ctx.enterKernelRecDepth
-          let rec loop
+          let rec loopLet
               (currentCtx : CheckerContext)
               (currentState : CheckerState)
               (current : Expr)
@@ -397,7 +397,7 @@ partial def inferCoreStatefulWith
                   value? := some openedValue
                   nondep := nondep
                 }
-                loop child state2 body
+                loopLet child state2 body
                   (fvars ++ [.fvar fresh]) (binders ++ [binder])
             | tail =>
                 let openedTail := tail.instantiateRev fvars
@@ -405,7 +405,7 @@ partial def inferCoreStatefulWith
                   inferCoreStatefulWith defeq currentCtx currentState openedTail inferOnly
                 let result := closeCheckerBinders binders tailType.cheapBetaReduce true
                 return (result, next)
-          let (result, next) ← loop ctx state e [] []
+          let (result, next) ← loopLet ctx state e [] []
           return (result, cacheInferStatefulResult next inferOnly e result)
 
       | _ =>

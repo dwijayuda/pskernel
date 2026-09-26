@@ -24,14 +24,6 @@ def psCKernelExprUnfoldDefinitionBasic?
       | none => none
   | _ => none
 
-def psCKernelExprListGet?
-    (values : List PsCKernelExpr)
-    (index : Nat) : Option PsCKernelExpr :=
-  match values, index with
-  | [], _ => none
-  | value :: _, 0 => some value
-  | _ :: rest, next + 1 => psCKernelExprListGet? rest next
-
 def psCKernelExprReduceProjectionCoreBasic?
     (env : PsCKernelEnvironment)
     (typeName : PsCKernelName)

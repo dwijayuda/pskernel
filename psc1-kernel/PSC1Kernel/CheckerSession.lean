@@ -1,4 +1,4 @@
-import PSC1Kernel.CheckerDefEqStatefulReduced
+import PSC1Kernel.CheckerDefEqStatefulCached
 
 namespace PSC1Kernel
 
@@ -41,7 +41,7 @@ def checkStateful
     (session : CheckerSession)
     (e : Expr) : Except String (Expr × CheckerSession) := do
   let (result, state) ←
-    PSC1Kernel.checkStatefulWith StatefulDefEqReduced.isDefEq
+    PSC1Kernel.checkStatefulWith StatefulDefEqCached.isDefEq
       session.context session.state e
   pure (result, { session with state := state })
 
@@ -50,7 +50,7 @@ def inferStateful
     (session : CheckerSession)
     (e : Expr) : Except String (Expr × CheckerSession) := do
   let (result, state) ←
-    PSC1Kernel.inferStatefulWith StatefulDefEqReduced.isDefEq
+    PSC1Kernel.inferStatefulWith StatefulDefEqCached.isDefEq
       session.context session.state e
   pure (result, { session with state := state })
 
@@ -59,7 +59,7 @@ def whnfStateful
     (session : CheckerSession)
     (e : Expr) : Except String (Expr × CheckerSession) := do
   let (result, state) ←
-    StatefulReduction.whnf StatefulDefEqReduced.isDefEq
+    StatefulReductionCached.whnf StatefulDefEqCached.isDefEq
       session.context session.state e
   pure (result, { session with state := state })
 
@@ -85,7 +85,7 @@ def isDefEqStateful
     (session : CheckerSession)
     (a b : Expr) : Except String (Bool × CheckerSession) := do
   let (result, state) ←
-    StatefulDefEqReduced.isDefEq session.context session.state a b
+    StatefulDefEqCached.isDefEq session.context session.state a b
   pure (result, { session with state := state })
 
 end CheckerSession

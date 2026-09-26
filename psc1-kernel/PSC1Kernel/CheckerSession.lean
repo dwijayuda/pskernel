@@ -1,24 +1,25 @@
-import PSC1Kernel.TypeChecker
+import PSC1Kernel.CheckerStateful
 
 namespace PSC1Kernel
 
 /--
 A declaration-scoped checker boundary.
 
-The initial representation is intentionally semantics-neutral: it owns one
-`CheckerContext` and routes all public checker operations through that context.
-Future Lean-4.34-faithful memo state belongs behind this boundary, not in the
-persistent `Environment` and not in replay state. A session must never outlive
-an environment mutation.
+The session owns one immutable checker context plus pure memo state. Stateful
+operations return the next session explicitly, so memoization cannot leak
+across environment mutation boundaries.
 -/
 structure CheckerSession where
   context : CheckerContext
+  state : CheckerState := .empty
 
 namespace CheckerSession
 
+/-- Compatibility one-shot checked inference. -/
 def check (session : CheckerSession) (e : Expr) : Except String Expr :=
   PSC1Kernel.check session.context e
 
+/-- Compatibility one-shot infer-only operation. -/
 def infer (session : CheckerSession) (e : Expr) : Except String Expr :=
   PSC1Kernel.infer session.context e
 
@@ -30,6 +31,27 @@ def isProp (session : CheckerSession) (e : Expr) : Except String Bool :=
 
 def isDefEq (session : CheckerSession) (a b : Expr) : Except String Bool :=
   PSC1Kernel.isDefEq session.context a b
+
+/-- Pure stateful checked inference; returns the next declaration-scoped session. -/
+def checkStateful
+    (session : CheckerSession)
+    (e : Expr) : Except String (Expr × CheckerSession) := do
+  let (result, state) ← PSC1Kernel.checkStateful session.context session.state e
+  pure (result, { session with state := state })
+
+/-- Pure stateful infer-only operation. -/
+def inferStateful
+    (session : CheckerSession)
+    (e : Expr) : Except String (Expr × CheckerSession) := do
+  let (result, state) ← PSC1Kernel.inferStateful session.context session.state e
+  pure (result, { session with state := state })
+
+/-- Pure stateful public WHNF operation. -/
+def whnfStateful
+    (session : CheckerSession)
+    (e : Expr) : Except String (Expr × CheckerSession) := do
+  let (result, state) ← PSC1Kernel.whnfStateful session.context session.state e
+  pure (result, { session with state := state })
 
 end CheckerSession
 
@@ -55,6 +77,7 @@ def mkCheckerSession
       maxNatSize := maxNatSize
       recDepth := 0
     }
+    state := .empty
   }
 
 end Kernel

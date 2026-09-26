@@ -90,3 +90,6 @@ jobs:
 
       - name: Run PSCKernel Level differential
         run: node scripts/psckernel-level-differential.mjs
+
+      - name: Run PSCKernel Expr differential
+        run: node scripts/psckernel-expr-differential.mjs

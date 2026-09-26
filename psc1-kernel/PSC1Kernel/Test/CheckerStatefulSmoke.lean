@@ -57,8 +57,10 @@ def main : IO Unit := do
         (match CheckerExprMap.get? state1.whnf whnfInput with
          | some cached => Expr.eq cached whnfExpected
          | none => false)
-      expectStateful "whnf-core table remains separate"
-        (state1.whnfCore.size == 0)
+      expectStateful "public whnf threads whnf-core cache"
+        (match CheckerExprMap.get? state1.whnfCore whnfInput with
+         | some cached => Expr.eq cached whnfExpected
+         | none => false)
       match whnfStateful ctx state1 whnfInput with
       | .error err =>
           throw <| IO.userError ("second stateful whnf failed: " ++ err)
@@ -66,6 +68,17 @@ def main : IO Unit := do
           expectStateful "second whnf result" (Expr.eq actual2 whnfExpected)
           expectStateful "whnf cache cardinality is stable"
             (state2.whnf.size == state1.whnf.size)
+          expectStateful "whnf-core cache cardinality is stable"
+            (state2.whnfCore.size == state1.whnfCore.size)
+
+  -- Lean4Lean mirrors the C++ cheap-projection rule: WHNF-core results reached
+  -- with cheapProj=true are deliberately not written to the core cache.
+  match whnfCoreStateful ctx initial whnfInput false true with
+  | .error err =>
+      throw <| IO.userError ("cheap-proj stateful whnf-core failed: " ++ err)
+  | .ok (actual, state) =>
+      expectStateful "cheap-proj whnf-core result" (Expr.eq actual whnfExpected)
+      expectStateful "cheap-proj suppresses whnf-core cache" (state.whnfCore.size == 0)
 
   -- This term forces checked application inference to expose a function type
   -- through public WHNF. A merely outer `checkStateful` wrapper cannot populate

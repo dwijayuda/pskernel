@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
-import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import { parseImports, resolveModuleSource } from "./workspace-layout.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -37,45 +37,6 @@ function findWorkspaceRoot(entryPath) {
     current = parent;
   }
   throw new Error(`PSC2_SELFHOST_WORKSPACE_NOT_FOUND: ${entryPath}`);
-}
-
-function moduleBasePath(workspaceRoot, moduleName) {
-  const parts = moduleName.split(".");
-  if (parts[0] === "ProofScript") {
-    return path.join(workspaceRoot, "stdlib", ...parts);
-  }
-  if (parts[0] === "Ps" && parts.length >= 2) {
-    const packageName = packageBySection.get(parts[1]);
-    if (!packageName) {
-      throw new Error(`PSC2_SELFHOST_UNKNOWN_PACKAGE: ${moduleName}`);
-    }
-    return path.join(
-      workspaceRoot,
-      "packages",
-      packageName,
-      "src",
-      ...parts,
-    );
-  }
-  return path.join(workspaceRoot, ...parts);
-}
-
-function resolveModuleSource(workspaceRoot, moduleName) {
-  const base = moduleBasePath(workspaceRoot, moduleName);
-  const leanPath = base + ".lean";
-  const proofScriptPath = base + ".ps";
-  const hasLean = existsSync(leanPath);
-  const hasProofScript = existsSync(proofScriptPath);
-
-  if (hasLean && hasProofScript) {
-    if (moduleName.startsWith("Ps.") || moduleName.startsWith("ProofScript.")) {
-      return leanPath;
-    }
-    throw new Error(`PSC2_SELFHOST_SOURCE_AMBIGUITY: ${moduleName}`);
-  }
-  if (hasLean) return leanPath;
-  if (hasProofScript) return proofScriptPath;
-  throw new Error(`PSC2_SELFHOST_SOURCE_MISSING: ${moduleName}`);
 }
 
 function exceptTag(value) {
@@ -138,7 +99,15 @@ async function flattenProject(compiler, entryPath) {
 
     const source = await readFile(absolute, "utf8");
     for (const moduleName of parseImports(source)) {
-      await visit(resolveModuleSource(workspaceRoot, moduleName));
+      const dependency = resolveModuleSource(
+        workspaceRoot,
+        moduleName,
+        ".lean",
+      );
+      if (!dependency) {
+        throw new Error(`PSC2_SELFHOST_SOURCE_MISSING: ${moduleName}`);
+      }
+      await visit(dependency);
     }
     ordered.push({ path: absolute, source });
   }

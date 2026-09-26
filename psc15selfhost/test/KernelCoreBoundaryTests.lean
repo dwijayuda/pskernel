@@ -1,10 +1,8 @@
 import Ps.KernelCore
 
-open Ps.KernelCore
-
 def psKernelCoreBoundaryAvailable : Bool :=
-  match Name.str Name.anonymous "Core" with
-  | Name.str Name.anonymous "Core" => true
+  match PsKernelCoreName.str PsKernelCoreName.anonymous "Core" with
+  | PsKernelCoreName.str PsKernelCoreName.anonymous "Core" => true
   | _ => false
 
 def main : IO Unit := do

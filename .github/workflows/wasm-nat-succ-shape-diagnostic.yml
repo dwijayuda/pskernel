@@ -1,0 +1,142 @@
+name: Wasm Nat Succ Shape Diagnostic
+
+on:
+  push:
+    branches:
+      - debug/wasm3-nat-carry
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Inject structural probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('selfhost/test/WasmBinarySmoke.lean')
+          text = path.read_text()
+          helper = text.index('def psWasmAddGcArrayTargetSmoke')
+          marker = 'module.functions ++ ['
+          pos = text.index(marker, helper) + len(marker)
+          fns = '''
+                {
+                  name := "natSuccOneIsZeroTarget"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatSuccFn,
+                    PsWasmInstruction.refTest psWasmNatZeroName
+                  ]
+                },
+                {
+                  name := "natSuccOneIsBit0Target"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatSuccFn,
+                    PsWasmInstruction.refTest psWasmNatBit0Name
+                  ]
+                },
+                {
+                  name := "natSuccOneIsBit1Target"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatSuccFn,
+                    PsWasmInstruction.refTest psWasmNatBit1Name
+                  ]
+                },
+                {
+                  name := "natSuccOneHalfIsOneTarget"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatSuccFn,
+                    PsWasmInstruction.call psWasmNatHalfFn,
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatCmpFn,
+                    PsWasmInstruction.i32Const 0,
+                    PsWasmInstruction.i32Eq
+                  ]
+                },
+                {
+                  name := "natSuccOneLowTarget"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatSuccFn,
+                    PsWasmInstruction.call psWasmNatLowFn
+                  ]
+                },'''
+          text = text[:pos] + fns + text[pos:]
+          export_marker = 'module.exports ++ [("gcArray42", "gcArray42")]'
+          replacement = '''module.exports ++ [
+                ("gcArray42", "gcArray42"),
+                ("natSuccOneIsZeroTarget", "natSuccOneIsZeroTarget"),
+                ("natSuccOneIsBit0Target", "natSuccOneIsBit0Target"),
+                ("natSuccOneIsBit1Target", "natSuccOneIsBit1Target"),
+                ("natSuccOneHalfIsOneTarget", "natSuccOneHalfIsOneTarget"),
+                ("natSuccOneLowTarget", "natSuccOneLowTarget")
+              ]'''
+          if export_marker not in text:
+              raise SystemExit('export marker not found')
+          path.write_text(text.replace(export_marker, replacement, 1))
+          PY
+      - name: Build and execute probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv = readFileSync('/tmp/psc1-wasm-bytes.txt','utf8').trim();
+          const bytes = Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) throw new Error('invalid wasm');
+          const {instance} = await WebAssembly.instantiate(bytes);
+          const names = [
+            'natSuccOneIsZeroTarget','natSuccOneIsBit0Target',
+            'natSuccOneIsBit1Target','natSuccOneHalfIsOneTarget',
+            'natSuccOneLowTarget','natAddCarrySmallExact'
+          ];
+          const values = Object.fromEntries(names.map(n => [n, instance.exports[n]()]));
+          console.log('PSC1_WASM_NAT_SUCC_SHAPE', JSON.stringify(values));
+          NODE

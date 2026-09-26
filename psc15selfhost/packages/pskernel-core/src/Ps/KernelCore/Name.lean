@@ -5,21 +5,35 @@ inductive PsKernelCoreName where
   | str (parent : PsKernelCoreName) (value : String)
   | num (parent : PsKernelCoreName) (value : Nat)
 
-def psKernelCoreStringEqFrom
+def psKernelCoreStringPositionAfter
+    (value : String)
+    (steps : Nat) : Nat :=
+  match steps with
+  | Nat.zero => 0
+  | Nat.succ remaining =>
+      let previous :=
+        psKernelCoreStringPositionAfter value remaining;
+      if String.Internal.atEnd value (String.Pos.Raw.mk previous) then
+        previous
+      else
+        String.Pos.Raw.byteIdx
+          (String.Internal.next
+            value
+            (String.Pos.Raw.mk previous))
+
+def psKernelCoreStringEqCount
     (left : String)
     (right : String)
-    (leftPos : Nat)
-    (rightPos : Nat)
-    (fuel : Nat) : Bool :=
-  match fuel with
-  | Nat.zero =>
-      if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
-        String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
-      else
-        false
+    (count : Nat) : Bool :=
+  match count with
+  | Nat.zero => true
   | Nat.succ remaining =>
+      let leftPos :=
+        psKernelCoreStringPositionAfter left remaining;
+      let rightPos :=
+        psKernelCoreStringPositionAfter right remaining;
       if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
-        String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
+        false
       else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
         false
       else
@@ -28,30 +42,19 @@ def psKernelCoreStringEqFrom
         let rightChar : Char :=
           String.Internal.get right (String.Pos.Raw.mk rightPos);
         if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
-          psKernelCoreStringEqFrom
-            left
-            right
-            (String.Pos.Raw.byteIdx
-              (String.Internal.next
-                left
-                (String.Pos.Raw.mk leftPos)))
-            (String.Pos.Raw.byteIdx
-              (String.Internal.next
-                right
-                (String.Pos.Raw.mk rightPos)))
-            remaining
+          psKernelCoreStringEqCount left right remaining
         else
           false
 
 def psKernelCoreStringEq
     (left : String)
     (right : String) : Bool :=
-  psKernelCoreStringEqFrom
-    left
-    right
-    0
-    0
-    (String.utf8ByteSize left)
+  let leftLength := String.Internal.length left;
+  let rightLength := String.Internal.length right;
+  if Nat.beq leftLength rightLength then
+    psKernelCoreStringEqCount left right leftLength
+  else
+    false
 
 def psKernelCoreNameEq
     (left : PsKernelCoreName) : PsKernelCoreName -> Bool :=

@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import { parseImports, resolveModuleSource } from "./workspace-layout.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -36,50 +36,6 @@ function findWorkspaceRoot(entryPath) {
     current = parent;
   }
   throw new Error(`PSC2_PROJECT_WORKSPACE_NOT_FOUND: ${entryPath}`);
-}
-
-function firstExisting(candidates) {
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) return candidate;
-  }
-  return undefined;
-}
-
-function moduleBaseCandidates(workspaceRoot, moduleName) {
-  const parts = moduleName.split(".");
-  if (parts[0] === "ProofScript") {
-    return [
-      path.join(workspaceRoot, "packages", "stdlib", "src", ...parts),
-      path.join(workspaceRoot, "packages", "stdlib", ...parts),
-      path.join(workspaceRoot, "stdlib", ...parts),
-    ];
-  }
-  if (parts[0] === "Ps" && parts.length >= 2) {
-    const packageName = packageBySection.get(parts[1]);
-    if (!packageName) {
-      throw new Error(`PSC2_PROJECT_UNKNOWN_PACKAGE: ${moduleName}`);
-    }
-    return [
-      path.join(workspaceRoot, "packages", packageName, "src", ...parts),
-    ];
-  }
-  return [path.join(workspaceRoot, ...parts)];
-}
-
-function resolveModuleSource(workspaceRoot, moduleName, preferredExtension) {
-  const alternateExtension = preferredExtension === ".lean" ? ".ps" : ".lean";
-  const bases = moduleBaseCandidates(workspaceRoot, moduleName);
-  const preferred = firstExisting(
-    bases.map((base) => base + preferredExtension),
-  );
-  if (preferred) return preferred;
-
-  const alternate = firstExisting(
-    bases.map((base) => base + alternateExtension),
-  );
-  if (alternate) return alternate;
-
-  throw new Error(`PSC2_PROJECT_SOURCE_MISSING: ${moduleName}`);
 }
 
 function exceptTag(value) {
@@ -172,13 +128,15 @@ async function visit(sourcePath) {
 
   const source = await readFile(absolute, "utf8");
   for (const moduleName of parseImports(source)) {
-    await visit(
-      resolveModuleSource(
-        workspaceRoot,
-        moduleName,
-        sourceExtension,
-      ),
+    const dependency = resolveModuleSource(
+      workspaceRoot,
+      moduleName,
+      sourceExtension,
     );
+    if (!dependency) {
+      throw new Error(`PSC2_PROJECT_SOURCE_MISSING: ${moduleName}`);
+    }
+    await visit(dependency);
   }
   ordered.push({ path: absolute, source });
 }

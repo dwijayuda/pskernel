@@ -1,4 +1,4 @@
-import PSC1Kernel.CheckerStateful
+import PSC1Kernel.CheckerDefEqStateful
 
 open PSC1Kernel
 
@@ -24,7 +24,7 @@ def main : IO Unit := do
   let left : Expr := .app (.const fName []) (.sort .zero)
   let right : Expr := .app (.const fName []) (.sort (.succ .zero))
 
-  match isDefEqStateful ctx CheckerState.empty left right with
+  match StatefulDefEq.isDefEq ctx CheckerState.empty left right with
   | .error err =>
       throw <| IO.userError ("real stateful defeq failed: " ++ err)
   | .ok (equal, state) =>

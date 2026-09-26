@@ -39,18 +39,21 @@ private unsafe def withClosedSuccessImpl
     compute ()
   else
     let ref : IO.Ref CheckerState := unsafeCast cache
-    let state := unsafeBaseIO ref.get
-    if state.success.contains left right then
-      .ok true
-    else
-      match compute () with
-      | .ok true =>
-          -- Modify the latest state instead of writing the snapshot above:
-          -- recursive defeq calls may have inserted entries in the meantime.
-          let _ := unsafeBaseIO (ref.modify fun current =>
-            { current with success := current.success.insert left right })
-          .ok true
-      | result => result
+    -- Keep the complete read/compute/write sequence inside one BaseIO action.
+    -- Escaping a write as an unused pure value allows dead-code elimination to
+    -- erase the mutation; returning the action's result forces its sequencing.
+    unsafeBaseIO do
+      let state ← ref.get
+      if state.success.contains left right then
+        pure (.ok true)
+      else
+        match compute () with
+        | .ok true =>
+            ref.modify fun current =>
+              { current with success := current.success.insert left right }
+            pure (.ok true)
+        | result =>
+            pure result
 
 /--
 Run one definitional-equality computation with declaration-scoped successful

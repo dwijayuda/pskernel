@@ -1,0 +1,47 @@
+name: PSC1 infer-app root 100015 replay profile
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [diagnostic/psc1-infer-app-root100015-profile]
+    paths:
+      - ".github/workflows/psc1-infer-app-root100015-profile.yml"
+      - "psc1-kernel/**"
+      - "oracle/replay-probe/DependencyExport.lean"
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - name: Build kernel
+        working-directory: psc1-kernel
+        run: lake build
+
+      - name: Export Std root 100015
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean oracle/replay-probe/DependencyExport.lean
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 100015 1 > /tmp/root100015.ndjson
+
+      - name: Profile declaration replay
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 300s lake env lean --run PSC1Kernel/Test/ReplayProfile.lean /tmp/root100015.ndjson

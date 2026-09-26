@@ -4,6 +4,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import { bootstrapManifestSchemaVersion } from "./bootstrap-manifest.mjs";
 import {
   assertBootstrapPackageAllowed,
   bootstrapPackageViolation,
@@ -148,5 +149,5 @@ for (const packageName of packageNames) {
 }
 
 process.stdout.write(
-  `PSC2_BOOTSTRAP_CLOSURE: PASS (${visited.size} modules; ${[...packageNames].sort().join(", ")})\n`,
+  `PSC2_BOOTSTRAP_CLOSURE: PASS (manifest-v${bootstrapManifestSchemaVersion}; ${visited.size} modules; ${[...packageNames].sort().join(", ")})\n`,
 );

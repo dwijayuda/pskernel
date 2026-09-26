@@ -91,7 +91,14 @@ def psKernelCoreLevelMkIMax
     right
   else
     match left with
-    | PsKernelCoreLevel.succ PsKernelCoreLevel.zero => right
+    | PsKernelCoreLevel.succ child =>
+        match child with
+        | PsKernelCoreLevel.zero => right
+        | _ =>
+            if psKernelCoreLevelEq left right then
+              left
+            else
+              PsKernelCoreLevel.imax left right
     | _ =>
         if psKernelCoreLevelEq left right then
           left

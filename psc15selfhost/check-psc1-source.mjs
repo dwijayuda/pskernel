@@ -1,10 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = process.cwd();
-const workspaceRoot = fs.existsSync(path.join(root, "package.json"))
-  ? root
-  : path.resolve("psc15selfhost");
+const scriptPath = fileURLToPath(import.meta.url);
+const workspaceRoot = path.dirname(scriptPath);
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, "utf8"));

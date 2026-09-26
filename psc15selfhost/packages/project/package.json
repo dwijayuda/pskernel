@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "proofscript": {
-    "bootstrap": true,
+    "bootstrap": false,
+    "portable": true,
     "sourceRoots": [
       "src"
     ],
-    "role": "project-module-graph",
+    "role": "project-module-graph-extension",
     "testRoots": [
       "test"
     ],

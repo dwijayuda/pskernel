@@ -33,42 +33,56 @@ jobs:
           set -euo pipefail
           python3 <<'PY'
           from pathlib import Path
+
           path = Path('selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean')
           text = path.read_text()
 
           succ_start = text.index('    {\n      name := psWasmNatSuccFn')
           cmp_start = text.index('    {\n      name := psWasmNatCmpFn', succ_start)
-          new_succ = '''    {
-            name := psWasmNatSuccFn
-            typeName := none
-            parameters := [psWasmNatRef]
-            results := [psWasmNatRef]
-            locals := []
-            body := [
-              PsWasmInstruction.localGet 0,
-              PsWasmInstruction.call psWasmNatZeroFn,
-              PsWasmInstruction.call psWasmNatBit1Fn,
-              PsWasmInstruction.call psWasmNatAddFn
-            ]
-          },
-          '''
+          new_succ = '\n'.join([
+              '    {',
+              '      name := psWasmNatSuccFn',
+              '      typeName := none',
+              '      parameters := [psWasmNatRef]',
+              '      results := [psWasmNatRef]',
+              '      locals := []',
+              '      body := [',
+              '        PsWasmInstruction.localGet 0,',
+              '        PsWasmInstruction.call psWasmNatZeroFn,',
+              '        PsWasmInstruction.call psWasmNatBit1Fn,',
+              '        PsWasmInstruction.call psWasmNatAddFn',
+              '      ]',
+              '    },',
+              ''
+          ])
           text = text[:succ_start] + new_succ + text[cmp_start:]
 
           add_start = text.index('    {\n      name := psWasmNatAddFn')
           sub_start = text.index('    {\n      name := psWasmNatSubGeFn', add_start)
-          add_block = text[add_start:sub_start]
-          old_carry = '''              PsWasmInstruction.localGet 2,
-              PsWasmInstruction.call psWasmNatSuccFn,
-              PsWasmInstruction.call psWasmNatMkBit0Fn,'''
-          new_carry = '''              PsWasmInstruction.localGet 2,
-              PsWasmInstruction.call psWasmNatZeroFn,
-              PsWasmInstruction.call psWasmNatBit1Fn,
-              PsWasmInstruction.call psWasmNatAddFn,
-              PsWasmInstruction.call psWasmNatMkBit0Fn,'''
-          count = add_block.count(old_carry)
-          if count != 1:
-              raise SystemExit(f'carry patch expected one match in Nat.add, found {count}')
-          add_block = add_block.replace(old_carry, new_carry, 1)
+          add_lines = text[add_start:sub_start].splitlines()
+          matches = 0
+          i = 0
+          while i + 2 < len(add_lines):
+              if (
+                  add_lines[i].strip() == 'PsWasmInstruction.localGet 2,' and
+                  add_lines[i + 1].strip() == 'PsWasmInstruction.call psWasmNatSuccFn,' and
+                  add_lines[i + 2].strip() == 'PsWasmInstruction.call psWasmNatMkBit0Fn,'
+              ):
+                  indent = add_lines[i][:len(add_lines[i]) - len(add_lines[i].lstrip())]
+                  add_lines[i:i + 3] = [
+                      indent + 'PsWasmInstruction.localGet 2,',
+                      indent + 'PsWasmInstruction.call psWasmNatZeroFn,',
+                      indent + 'PsWasmInstruction.call psWasmNatBit1Fn,',
+                      indent + 'PsWasmInstruction.call psWasmNatAddFn,',
+                      indent + 'PsWasmInstruction.call psWasmNatMkBit0Fn,'
+                  ]
+                  matches += 1
+                  i += 5
+              else:
+                  i += 1
+          if matches != 1:
+              raise SystemExit(f'carry patch expected one match in Nat.add, found {matches}')
+          add_block = '\n'.join(add_lines) + '\n'
           text = text[:add_start] + add_block + text[sub_start:]
           path.write_text(text)
           PY

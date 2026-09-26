@@ -12,6 +12,7 @@ on:
       - perf/psc1-lean-stateful-infer-proj
       - perf/psc1-lean-stateful-recursor
       - perf/psc1-lean-stateful-infer-whnf
+      - perf/psc1-lean-dag-sharing
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
@@ -66,6 +67,9 @@ jobs:
           mkdir -p .lake/build/lib/lean/PSC1Kernel/Test
           lake env lean PSC1Kernel/Test/StructureFixture.lean \
             -o .lake/build/lib/lean/PSC1Kernel/Test/StructureFixture.olean
+      - name: Expression DAG sharing
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/InstantiateSharingSmoke.lean
       - name: Checker-state cache invariants
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerStateSmoke.lean

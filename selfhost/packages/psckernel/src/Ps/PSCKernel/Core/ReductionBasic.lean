@@ -24,6 +24,38 @@ def psCKernelExprUnfoldDefinitionBasic?
       | none => none
   | _ => none
 
+def psCKernelExprListGet?
+    (values : List PsCKernelExpr)
+    (index : Nat) : Option PsCKernelExpr :=
+  match values, index with
+  | [], _ => none
+  | value :: _, 0 => some value
+  | _ :: rest, next + 1 => psCKernelExprListGet? rest next
+
+def psCKernelExprReduceProjectionCoreBasic?
+    (env : PsCKernelEnvironment)
+    (typeName : PsCKernelName)
+    (index : Nat)
+    (major : PsCKernelExpr) : Option PsCKernelExpr :=
+  match psCKernelExprGetAppFn major with
+  | PsCKernelExpr.constE ctorName _ =>
+      match psCKernelEnvironmentFind? env ctorName with
+      | some info =>
+          match info with
+          | PsCKernelConstantInfo.ctorInfo value =>
+              if psCKernelNameEq value.induct typeName then
+                if Nat.blt index value.numFields then
+                  psCKernelExprListGet?
+                    (psCKernelExprGetAppArgs major)
+                    (Nat.add value.numParams index)
+                else
+                  none
+              else
+                none
+          | _ => none
+      | none => none
+  | _ => none
+
 partial def psCKernelExprWhnfBasic
     (env : PsCKernelEnvironment)
     (lctx : PsCKernelLocalContext)
@@ -58,4 +90,13 @@ partial def psCKernelExprWhnfBasic
         env
         lctx
         (psCKernelExprInstantiate1 body value)
+  | PsCKernelExpr.proj typeName index value =>
+      let reducedValue : PsCKernelExpr := psCKernelExprWhnfBasic env lctx value
+      match psCKernelExprReduceProjectionCoreBasic? env typeName index reducedValue with
+      | some field => psCKernelExprWhnfBasic env lctx field
+      | none =>
+          if psCKernelExprEqStructural reducedValue value then
+            expr
+          else
+            PsCKernelExpr.proj typeName index reducedValue
   | _ => expr

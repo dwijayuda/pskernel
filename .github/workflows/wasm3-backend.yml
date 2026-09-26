@@ -4,11 +4,13 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - selfhost/psc1-lean-bootstrap
       - backend/wasm3-owned
       - integrate/wasm3-owned
       - backend/wasm3-gc-adts
       - backend/wasm3-closures
       - backend/wasm3-runtime-core
+      - backend/wasm3-array-runtime
       - compiler-ir/generic-specialization
       - integrate/generic-specialization
       - integrate/wasm3-closures
@@ -222,6 +224,33 @@ jobs:
           }
           if (instance.exports.intLtExact() !== 1) {
             throw new Error('PSC1_WASM_RUNTIME_INT_COMPARE_RESULT');
+          }
+          if (instance.exports.arrayEmptySizeExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_EMPTY_SIZE_RESULT');
+          }
+          if (instance.exports.arrayPushGet() !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_PUSH_GET_RESULT');
+          }
+          if (instance.exports.arrayPushSizeExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_PUSH_SIZE_RESULT');
+          }
+          if (instance.exports.arrayGetDInBounds() !== 22) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_GETD_IN_BOUNDS_RESULT');
+          }
+          if (instance.exports.arrayGetDOob() !== 99) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_GETD_OOB_RESULT');
+          }
+          if (instance.exports.arrayGetDHugeIndex() !== 99) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_GETD_HUGE_INDEX_RESULT');
+          }
+          if (instance.exports.arraySetPersistent() !== 62) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_SET_PERSISTENT_RESULT');
+          }
+          if (instance.exports.arraySetIfInBoundsOob() !== 20) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_SET_IF_OOB_RESULT');
+          }
+          if (instance.exports.arrayNatRoundTripExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_ARRAY_NAT_ROUNDTRIP_RESULT');
           }
           console.log('PSC1_WASM3_INTEGRATION: PASS');
           NODE

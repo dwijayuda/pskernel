@@ -63,6 +63,77 @@ def psBackendRustLetFunctionResultFixture : PsVerifiedIrModule :=
               (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat))
             (PsVerifiedIrExpr.var "callback")
             (PsVerifiedIrExpr.var "forwarded")
+      },
+      {
+        name := "makeAdderForCall"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body :=
+          PsVerifiedIrExpr.lambda
+            [
+              {
+                name := "value"
+                type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+              }
+            ]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.natAdd
+              [
+                PsVerifiedIrExpr.var "value",
+                PsVerifiedIrExpr.var "offset"
+              ])
+      },
+      {
+        name := "makeAdderViaCall"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "makeAdderForCall")
+            []
+            [PsVerifiedIrExpr.var "offset"]
+      },
+      {
+        name := "makeAdderViaLetThenCall"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body :=
+          PsVerifiedIrExpr.letE
+            "delta"
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+            (PsVerifiedIrExpr.var "offset")
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.var "makeAdderForCall")
+              []
+              [PsVerifiedIrExpr.var "delta"])
       }
     ]
   }

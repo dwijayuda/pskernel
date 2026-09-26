@@ -163,6 +163,13 @@ jobs:
           cd selfhost
           lake env lean --run packages/psckernel/test/DefEqEtaTests.lean
 
+      - name: Run PSCKernel structure eta defeq tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake env lean --run packages/psckernel/test/DefEqStructEtaTests.lean
+
       - name: Run PSCKernel checked inference basic tests
         shell: bash
         run: |

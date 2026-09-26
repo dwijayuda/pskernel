@@ -1,5 +1,4 @@
-import PSC1Kernel.CheckerState
-import PSC1Kernel.TypeChecker
+import PSC1Kernel.CheckerStateful
 
 open PSC1Kernel
 
@@ -81,7 +80,7 @@ def main : IO Unit := do
       expectStateful "cheap-proj suppresses whnf-core cache" (state.whnfCore.size == 0)
 
   -- This term forces checked application inference to expose a function type
-  -- through public WHNF. A merely outer `checkStateful` wrapper cannot populate
+  -- through public WHNF. A merely outer checkStateful wrapper cannot populate
   -- this internal WHNF entry; recursive checker state must flow through infer.
   let fName : Name := .str .anonymous "f"
   let xName : Name := .str .anonymous "x"

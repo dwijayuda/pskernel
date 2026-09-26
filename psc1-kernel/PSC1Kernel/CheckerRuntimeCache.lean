@@ -18,9 +18,8 @@ structure CheckerRuntimeCache where
 namespace CheckerRuntimeCache
 
 private unsafe def freshForImpl (_env : Environment) : CheckerRuntimeCache :=
-  match unsafeIO (IO.mkRef CheckerState.empty) with
-  | .ok ref => unsafeCast ref
-  | .error _ => { marker := 0 }
+  let ref := unsafeBaseIO (IO.mkRef CheckerState.empty)
+  unsafeCast ref
 
 /--
 Create declaration-scoped runtime memo state. The pure specification carries
@@ -40,21 +39,18 @@ private unsafe def withClosedSuccessImpl
     compute ()
   else
     let ref : IO.Ref CheckerState := unsafeCast cache
-    match unsafeIO ref.get with
-    | .error _ => compute ()
-    | .ok state =>
-        if state.success.contains left right then
+    let state := unsafeBaseIO ref.get
+    if state.success.contains left right then
+      .ok true
+    else
+      match compute () with
+      | .ok true =>
+          -- Modify the latest state instead of writing the snapshot above:
+          -- recursive defeq calls may have inserted entries in the meantime.
+          unsafeBaseIO (ref.modify fun current =>
+            { current with success := current.success.insert left right })
           .ok true
-        else
-          match compute () with
-          | .ok true =>
-              -- Modify the latest state instead of writing the snapshot above:
-              -- recursive defeq calls may have inserted entries in the meantime.
-              match unsafeIO (ref.modify fun current =>
-                  { current with success := current.success.insert left right }) with
-              | .ok _ => .ok true
-              | .error _ => .ok true
-          | result => result
+      | result => result
 
 /--
 Run one definitional-equality computation with declaration-scoped successful

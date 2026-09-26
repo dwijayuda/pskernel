@@ -257,6 +257,9 @@ jobs:
       - name: Run PSCKernel quotient reduction differential
         run: node scripts/psckernel-quot-reduction-differential.mjs
 
+      - name: Run PSCKernel Nat primitive reduction differential
+        run: node scripts/psckernel-nat-primitive-reduction-differential.mjs
+
       - name: Run PSCKernel basic type inference differential
         run: node scripts/psckernel-type-inference-basic-differential.mjs
 

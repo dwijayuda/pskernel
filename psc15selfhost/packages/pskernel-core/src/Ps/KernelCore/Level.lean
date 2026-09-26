@@ -178,16 +178,16 @@ partial def psKernelCoreLevelEquivalent
 
 def psKernelCoreNameLookupLevel
     (name : PsKernelCoreName)
-    (params : List PsKernelCoreName)
-    (values : List PsKernelCoreLevel) : Option PsKernelCoreLevel :=
+    (params : PsKernelCoreList PsKernelCoreName)
+    (values : PsKernelCoreList PsKernelCoreLevel) : PsKernelCoreOption PsKernelCoreLevel :=
   match params with
-  | [] => none
-  | param :: remainingParams =>
+  | PsKernelCoreList.nil => PsKernelCoreOption.none
+  | PsKernelCoreList.cons param remainingParams =>
       match values with
-      | [] => none
-      | value :: remainingValues =>
+      | PsKernelCoreList.nil => PsKernelCoreOption.none
+      | PsKernelCoreList.cons value remainingValues =>
           if psKernelCoreNameEq name param then
-            some value
+            PsKernelCoreOption.some value
           else
             psKernelCoreNameLookupLevel
               name
@@ -196,15 +196,15 @@ def psKernelCoreNameLookupLevel
 
 def psKernelCoreLevelInstantiateParams
     (root : PsKernelCoreLevel)
-    (params : List PsKernelCoreName)
-    (values : List PsKernelCoreLevel) : PsKernelCoreLevel :=
+    (params : PsKernelCoreList PsKernelCoreName)
+    (values : PsKernelCoreList PsKernelCoreLevel) : PsKernelCoreLevel :=
   match root with
   | PsKernelCoreLevel.zero => root
   | PsKernelCoreLevel.mvar _ => root
   | PsKernelCoreLevel.param name =>
       match psKernelCoreNameLookupLevel name params values with
-      | some value => value
-      | none => root
+      | PsKernelCoreOption.some value => value
+      | PsKernelCoreOption.none => root
   | PsKernelCoreLevel.succ child =>
       let next := psKernelCoreLevelInstantiateParams child params values;
       if psKernelCoreLevelEq child next then

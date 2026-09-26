@@ -1,4 +1,4 @@
-import PSC1Kernel.CheckerDefEqStateful
+import PSC1Kernel.CheckerDefEqStatefulClosed
 
 namespace PSC1Kernel
 
@@ -33,15 +33,15 @@ def isDefEq (session : CheckerSession) (a b : Expr) : Except String Bool :=
   PSC1Kernel.isDefEq session.context a b
 
 /--
-Pure stateful checked inference. Application checks use the same recursive
-stateful defeq algorithm as the session, so infer/WHNF/defeq share one cache
-state instead of dropping back to the compatibility wrapper.
+Pure stateful checked inference. Application checks use the same closed
+recursive stateful defeq algorithm as the session, so infer/WHNF/defeq share
+one cache state without dropping back to the compatibility wrapper.
 -/
 def checkStateful
     (session : CheckerSession)
     (e : Expr) : Except String (Expr × CheckerSession) := do
   let (result, state) ←
-    PSC1Kernel.checkStatefulWith StatefulDefEq.isDefEq
+    PSC1Kernel.checkStatefulWith StatefulDefEqClosed.isDefEq
       session.context session.state e
   pure (result, { session with state := state })
 
@@ -50,7 +50,7 @@ def inferStateful
     (session : CheckerSession)
     (e : Expr) : Except String (Expr × CheckerSession) := do
   let (result, state) ←
-    PSC1Kernel.inferStatefulWith StatefulDefEq.isDefEq
+    PSC1Kernel.inferStatefulWith StatefulDefEqClosed.isDefEq
       session.context session.state e
   pure (result, { session with state := state })
 
@@ -78,12 +78,12 @@ def isPropStateful
   let (level, next2) ← next1.ensureSortStateful type
   pure (Level.normalizesToZero level, next2)
 
-/-- Pure declaration-scoped recursive definitional equality. -/
+/-- Pure declaration-scoped closed recursive definitional equality. -/
 def isDefEqStateful
     (session : CheckerSession)
     (a b : Expr) : Except String (Bool × CheckerSession) := do
   let (result, state) ←
-    StatefulDefEq.isDefEq session.context session.state a b
+    StatefulDefEqClosed.isDefEq session.context session.state a b
   pure (result, { session with state := state })
 
 end CheckerSession

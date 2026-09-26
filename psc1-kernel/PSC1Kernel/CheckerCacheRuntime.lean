@@ -52,6 +52,18 @@ def checkerLocalContextHash (ctx : LocalContext) : UInt64 :=
   checkerMixHash (hash ctx.nextIndex) (checkerLocalDeclsHash ctx.decls)
 
 /--
+Runtime environment version test shared by checker caches. The canonical
+`constants` spine changes on every declaration add/replace. `constantIndex` is
+purely derived and can be rebuilt without changing checker semantics, so it is
+intentionally excluded. Quotient initialization is semantic state and must be
+tracked separately.
+-/
+unsafe def checkerEnvironmentSameVersion
+    (left right : Environment) : Bool :=
+  ptrEq left.constants right.constants &&
+    left.quotInitialized == right.quotInitialized
+
+/--
 Closed defeq pairs are independent of the local context. Open pairs still need
 it because PSC1's current pure checker can reuse temporary FVar names in sibling
 local scopes; until fresh-name generation is fully checker-state scoped, that
@@ -108,12 +120,7 @@ def insert
 
 end CheckerScopedExprPairSet
 
-/--
-One native cache scope. Holding `env` keeps its runtime object alive, so pointer
-identity cannot be recycled while the cache can still return a hit. A scope
-change discards the old maps; races can therefore lose cache entries, but they
-cannot manufacture a hit for a different environment.
--/
+/-- One native cache scope for Lean-4.34-style defeq memoization. -/
 structure CheckerDefEqRuntimeState where
   env? : Option Environment
   maxRecDepth : Nat
@@ -151,7 +158,7 @@ private unsafe def checkerDefEqScopeMatches
     (maxRecDepth maxNatSize : Nat) : Bool :=
   match state.env? with
   | some cachedEnv =>
-      ptrEq cachedEnv env &&
+      checkerEnvironmentSameVersion cachedEnv env &&
         state.maxRecDepth == maxRecDepth &&
         state.maxNatSize == maxNatSize
   | none => false

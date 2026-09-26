@@ -8,11 +8,13 @@ on:
       - perf/psc1-lean-stateful-infer-app
       - perf/psc1-lean-stateful-infer-binders
       - perf/psc1-lean-stateful-infer-proj
+      - diagnostic/psc1-recursor-pre-lazy-defeq
     paths:
       - ".github/workflows/psc1-lean-stateful-root100015-progress.yml"
       - "psc1-kernel/PSC1Kernel.lean"
       - "psc1-kernel/PSC1Kernel/CheckerState.lean"
       - "psc1-kernel/PSC1Kernel/CheckerStateful.lean"
+      - "psc1-kernel/PSC1Kernel/CheckerReductionStateful.lean"
       - "psc1-kernel/PSC1Kernel/CheckerLazyDeltaStateful.lean"
       - "psc1-kernel/PSC1Kernel/CheckerDefEqStateful.lean"
       - "psc1-kernel/PSC1Kernel/CheckerDefEqStatefulClosed.lean"

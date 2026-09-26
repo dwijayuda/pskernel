@@ -226,6 +226,13 @@ jobs:
           cd selfhost
           lake env lean --run packages/psckernel/test/QuotientAdmissionTests.lean
 
+      - name: Run PSCKernel inductive admission basic tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake env lean --run packages/psckernel/test/InductiveAdmissionBasicTests.lean
+
       - name: Install TypeScript kernel dependencies
         run: npm ci --no-audit --no-fund
 

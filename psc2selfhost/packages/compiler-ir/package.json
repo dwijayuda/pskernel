@@ -1,0 +1,17 @@
+{
+  "name": "@proofscript/compiler-ir-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "verified-compiler-ir"
+  }
+}

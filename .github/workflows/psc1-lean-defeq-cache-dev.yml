@@ -39,7 +39,9 @@ jobs:
         run: lake build
       - name: Runtime cache smoke
         working-directory: psc1-kernel
-        run: lake env lean --run PSC1Kernel/Test/CheckerRuntimeCacheSmoke.lean
+        run: |
+          lake build psc1_cache_smoke
+          .lake/build/bin/psc1_cache_smoke
       - name: Checker-state cache invariants
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerStateSmoke.lean

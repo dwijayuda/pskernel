@@ -24,6 +24,10 @@ unsafe def main : IO Unit := do
   let abstracted := e.abstractFVars [absent]
   expectSharing "no-op abstract preserves root object" (sameObject e abstracted)
 
+  let levelInstantiated := e.instantiateLevelParams [] []
+  expectSharing "empty level substitution preserves root object"
+    (sameObject e levelInstantiated)
+
   let withBVar : Expr := .app c (.bvar 0)
   let instantiatedChanged := withBVar.instantiate [.lit (.nat 9)]
   expectSharing "instantiate still changes targeted bvar"

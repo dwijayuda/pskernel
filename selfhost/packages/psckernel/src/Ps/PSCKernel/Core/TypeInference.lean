@@ -4,22 +4,30 @@ import Ps.PSCKernel.Core.ExprAbstraction
 def psCKernelTypeInferenceFreshBaseName : PsCKernelName :=
   psCKernelNameFromDotted "_kernel_fresh"
 
-partial def psCKernelTypeInferenceFreshFVarIdFrom
+def psCKernelTypeInferenceFreshCandidate
+    (seed : Nat) : PsCKernelFVarId := {
+  name := psCKernelNameAppendIndexAfter psCKernelTypeInferenceFreshBaseName seed
+}
+
+def psCKernelTypeInferenceFreshFVarIdSearch
     (lctx : PsCKernelLocalContext)
-    (seed : Nat) : PsCKernelFVarId :=
-  let candidate : PsCKernelFVarId := {
-    name := psCKernelNameAppendIndexAfter
-      psCKernelTypeInferenceFreshBaseName
-      (Nat.add (psCKernelLocalContextNumIndices lctx) seed)
-  }
-  if psCKernelLocalContextContains lctx candidate then
-    psCKernelTypeInferenceFreshFVarIdFrom lctx (Nat.add seed 1)
-  else
-    candidate
+    (seed : Nat)
+    (fuel : Nat) : PsCKernelFVarId :=
+  let candidate := psCKernelTypeInferenceFreshCandidate seed
+  match fuel with
+  | 0 => candidate
+  | Nat.succ rest =>
+      if psCKernelLocalContextContains lctx candidate then
+        psCKernelTypeInferenceFreshFVarIdSearch lctx (Nat.add seed 1) rest
+      else
+        candidate
 
 def psCKernelTypeInferenceFreshFVarId
     (lctx : PsCKernelLocalContext) : PsCKernelFVarId :=
-  psCKernelTypeInferenceFreshFVarIdFrom lctx 0
+  psCKernelTypeInferenceFreshFVarIdSearch
+    lctx
+    0
+    (Nat.add (psCKernelLocalContextNumIndices lctx) 1)
 
 def psCKernelExprContainsFVar
     (expr : PsCKernelExpr)

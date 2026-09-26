@@ -34,6 +34,7 @@ const expected = new Map([
   ["Foundation", "foundation"],
   ["Syntax", "syntax"],
   ["Core", "core"],
+  ["KernelCore", "pskernel-core"],
   ["Environment", "environment"],
   ["Project", "project"],
   ["Meta", "meta"],
@@ -47,12 +48,33 @@ const expected = new Map([
   ["BackendWasm", "backend-wasm"],
 ]);
 
+if (!(layout.packageBySection instanceof Map)) {
+  throw new Error("PSC2_LAYOUT_PACKAGE_MAP_MISSING");
+}
+if (layout.packageBySection.size !== expected.size) {
+  throw new Error(
+    `PSC2_LAYOUT_SECTION_COUNT_MISMATCH: expected ${expected.size}, got ${layout.packageBySection.size}`,
+  );
+}
 for (const [section, packageName] of expected) {
-  if (layout.packageBySection?.get(section) !== packageName) {
+  if (layout.packageBySection.get(section) !== packageName) {
     throw new Error(`PSC2_LAYOUT_SECTION_MISMATCH: ${section}`);
   }
 }
 
+const hostResolverPath = path.join(
+  root,
+  "host",
+  "src",
+  "Ps",
+  "Host",
+  "ProjectCompiler.lean",
+);
+const hostResolver = await readFile(hostResolverPath, "utf8");
+if (!hostResolver.includes('| "Ps" :: "KernelCore" :: _ => some "pskernel-core"')) {
+  throw new Error("PSC2_LAYOUT_HOST_KERNEL_CORE_MAPPING_MISSING");
+}
+
 process.stdout.write(
-  `PSC2_LAYOUT_DRIFT: PASS (${expected.size} module sections; ${consumers.length} consumers)\n`,
+  `PSC2_LAYOUT_DRIFT: PASS (${expected.size} module sections; ${consumers.length} shared-map consumers; kernel-core host mapping)\n`,
 );

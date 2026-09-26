@@ -10,6 +10,7 @@ on:
       - perf/psc1-lean-stateful-infer-app
       - perf/psc1-lean-stateful-infer-binders
       - perf/psc1-lean-stateful-infer-proj
+      - perf/psc1-lean-bounded-expr-hash
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"

@@ -28,6 +28,7 @@ const forbiddenBootstrapPackages = new Set([
   "backend-rust",
   "backend-wasm",
   "pskernel",
+  "pskernel-core",
 ]);
 
 function sourceForModule(moduleName) {

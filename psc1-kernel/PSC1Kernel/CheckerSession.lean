@@ -53,6 +53,23 @@ def whnfStateful
   let (result, state) ← PSC1Kernel.whnfStateful session.context session.state e
   pure (result, { session with state := state })
 
+/-- Stateful `ensure_sort`: normalize with the declaration-scoped WHNF cache. -/
+def ensureSortStateful
+    (session : CheckerSession)
+    (e : Expr) : Except String (Level × CheckerSession) := do
+  let (reduced, next) ← session.whnfStateful e
+  match reduced with
+  | .sort level => pure (level, next)
+  | _ => throw "expected sort"
+
+/-- Stateful `is_prop`, matching infer-only then sort-normalization order. -/
+def isPropStateful
+    (session : CheckerSession)
+    (e : Expr) : Except String (Bool × CheckerSession) := do
+  let (type, next1) ← session.inferStateful e
+  let (level, next2) ← next1.ensureSortStateful type
+  pure (Level.normalizesToZero level, next2)
+
 /-- Pure stateful positive-memo definitional equality. -/
 def isDefEqStateful
     (session : CheckerSession)

@@ -36,6 +36,7 @@ jobs:
 
           path = Path('selfhost/test/WasmBinarySmoke.lean')
           text = path.read_text()
+
           marker = '''      {
                   name := "natAddCarrySmallExact"'''
           insertion = '''      {
@@ -82,8 +83,64 @@ jobs:
                 {
                   name := "natAddCarrySmallExact"'''
           if marker not in text:
-              raise SystemExit('diagnostic marker not found')
-          path.write_text(text.replace(marker, insertion, 1))
+              raise SystemExit('diagnostic IR marker not found')
+          text = text.replace(marker, insertion, 1)
+
+          function_marker = '''      module.functions ++ [
+                {
+                  name := "gcArray42"'''
+          function_insertion = '''      module.functions ++ [
+                {
+                  name := "natSuccZeroExactTarget"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.call psWasmNatSuccFn,
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatCmpFn,
+                    PsWasmInstruction.i32Const 0,
+                    PsWasmInstruction.i32Eq
+                  ]
+                },
+                {
+                  name := "natSuccOneExactTarget"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatSuccFn,
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.structNew psWasmNatBit0Name,
+                    PsWasmInstruction.call psWasmNatCmpFn,
+                    PsWasmInstruction.i32Const 0,
+                    PsWasmInstruction.i32Eq
+                  ]
+                },
+                {
+                  name := "gcArray42"'''
+          if function_marker not in text:
+              raise SystemExit('diagnostic target-function marker not found')
+          text = text.replace(function_marker, function_insertion, 1)
+
+          export_marker = '''      module.exports ++ [("gcArray42", "gcArray42")]'''
+          export_insertion = '''      module.exports ++ [
+                ("gcArray42", "gcArray42"),
+                ("natSuccZeroExactTarget", "natSuccZeroExactTarget"),
+                ("natSuccOneExactTarget", "natSuccOneExactTarget")
+              ]'''
+          if export_marker not in text:
+              raise SystemExit('diagnostic export marker not found')
+          text = text.replace(export_marker, export_insertion, 1)
+
+          path.write_text(text)
           PY
 
       - name: Build diagnostic Wasm binary
@@ -110,6 +167,8 @@ jobs:
             natAddOneOneExact: instance.exports.natAddOneOneExact(),
             natAddTwoTwoExact: instance.exports.natAddTwoTwoExact(),
             natAddCarrySmallExact: instance.exports.natAddCarrySmallExact(),
+            natSuccZeroExactTarget: instance.exports.natSuccZeroExactTarget(),
+            natSuccOneExactTarget: instance.exports.natSuccOneExactTarget(),
           };
           console.log('PSC1_WASM_NAT_DIAGNOSTIC', JSON.stringify(values));
           NODE

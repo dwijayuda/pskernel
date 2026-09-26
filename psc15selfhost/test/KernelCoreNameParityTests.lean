@@ -7,6 +7,14 @@ def psKernelCoreNameParity : Bool :=
   let kcBar := PsKernelCoreName.str kcAnon "Bar"
   let kcFooOne := PsKernelCoreName.num kcFoo 1
   let kcFooTwo := PsKernelCoreName.num kcFoo 2
+  let kcUnique :=
+    PsKernelCoreList.cons kcFoo
+      (PsKernelCoreList.cons kcBar
+        (PsKernelCoreList.cons kcFooOne PsKernelCoreList.nil))
+  let kcDuplicate :=
+    PsKernelCoreList.cons kcFoo
+      (PsKernelCoreList.cons kcBar
+        (PsKernelCoreList.cons kcFoo PsKernelCoreList.nil))
   let refAnon := PSC1Kernel.Name.anonymous
   let refFoo := PSC1Kernel.Name.str refAnon "Foo"
   let refBar := PSC1Kernel.Name.str refAnon "Bar"
@@ -18,8 +26,8 @@ def psKernelCoreNameParity : Bool :=
   (psKernelCoreNameEq kcFooOne kcFooOne == PSC1Kernel.Name.eq refFooOne refFooOne) &&
   (psKernelCoreNameEq kcFooOne kcFooTwo == PSC1Kernel.Name.eq refFooOne refFooTwo) &&
   (psKernelCoreNameEq kcFoo kcFooOne == PSC1Kernel.Name.eq refFoo refFooOne) &&
-  (!psKernelCoreNameHasDuplicates [kcFoo, kcBar, kcFooOne]) &&
-  psKernelCoreNameHasDuplicates [kcFoo, kcBar, kcFoo]
+  (!psKernelCoreNameHasDuplicates kcUnique) &&
+  psKernelCoreNameHasDuplicates kcDuplicate
 
 def main : IO Unit := do
   if psKernelCoreNameParity then

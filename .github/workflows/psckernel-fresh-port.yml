@@ -142,6 +142,13 @@ jobs:
           cd selfhost
           lake env lean --run packages/psckernel/test/TypeInferenceTests.lean
 
+      - name: Run PSCKernel basic definitional equality tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake env lean --run packages/psckernel/test/DefEqBasicTests.lean
+
       - name: Install TypeScript kernel dependencies
         run: npm ci --no-audit --no-fund
 

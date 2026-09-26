@@ -170,6 +170,32 @@ partial def whnfCoreStateful
     (cheapRec cheapProj : Bool) : Except String (Expr × CheckerState) :=
   whnfCoreStatefulWith whnfStateful ctx state e cheapRec cheapProj
 
+/--
+Declaration-scoped positive definitional-equality memoization. Successful pairs
+are reusable throughout one immutable checker environment and the pair set is
+symmetric. Arbitrary negative full-defeq results are intentionally not cached:
+Lean 4.34's failure table is narrower and belongs at the lazy-delta argument
+comparison site.
+
+Lean enters the kernel recursion-depth scope before its success-cache quick
+path. A cache hit therefore still performs that resource-boundary check. On a
+miss the established `isDefEq` implementation performs the check itself.
+-/
+partial def isDefEqStateful
+    (ctx : CheckerContext)
+    (state : CheckerState)
+    (a b : Expr) : Except String (Bool × CheckerState) := do
+  if CheckerExprPairSet.contains state.success a b then
+    let _ctx ← ctx.enterKernelRecDepth
+    return (true, state)
+  let result ← isDefEq ctx a b
+  if result then
+    return (true, {
+      state with success := CheckerExprPairSet.insert state.success a b
+    })
+  else
+    return (false, state)
+
 private def cacheInferStatefulResult
     (state : CheckerState)
     (inferOnly : Bool)
@@ -181,8 +207,9 @@ private def cacheInferStatefulResult
 
 /--
 Incremental stateful counterpart of Lean 4.34 infer_type_core. Checked
-applications already thread recursive inference and public WHNF state; other
-forms still delegate to the established pure checker until migrated by tests.
+applications already thread recursive inference, public WHNF, and positive
+defeq memo state; other forms still delegate to the established pure checker
+until migrated by tests.
 -/
 partial def inferCoreStateful
     (ctx : CheckerContext)
@@ -211,11 +238,11 @@ partial def inferCoreStateful
                 { ctx with eagerReduce := true }
               else
                 ctx
-            let ok ← isDefEq eqCtx argType domain
+            let (ok, state4) ← isDefEqStateful eqCtx state3 argType domain
             if !ok then
               throw "application type mismatch"
             let result := body.instantiate1 arg
-            return (result, cacheInferStatefulResult state3 false e result)
+            return (result, cacheInferStatefulResult state4 false e result)
       | _ =>
           match inferCore ctx e inferOnly with
           | .error err => .error err

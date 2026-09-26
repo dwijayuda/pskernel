@@ -36,29 +36,6 @@ jobs:
       - name: Build PSC1 kernel
         working-directory: psc1-kernel
         run: lake build
-      - name: Build experimental checker state and runtime cache
-        working-directory: psc1-kernel
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p .lake/build/lib/lean/PSC1Kernel
-          lake env lean PSC1Kernel/CheckerState.lean \
-            -o .lake/build/lib/lean/PSC1Kernel/CheckerState.olean
-          lake env lean PSC1Kernel/CheckerCacheRuntime.lean \
-            -o .lake/build/lib/lean/PSC1Kernel/CheckerCacheRuntime.olean
-      - name: Inspect native cache symbols
-        working-directory: psc1-kernel
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake build PSC1Kernel.CheckerCacheRuntime:c.o
-          echo "=== CheckerCacheRuntime artifacts ==="
-          find .lake/build -type f -name '*CheckerCacheRuntime*' -print
-          echo "=== checkerDefEq symbols ==="
-          while IFS= read -r obj; do
-            echo "--- $obj"
-            nm -C "$obj" 2>/dev/null | grep 'checkerDefEq' || true
-          done < <(find .lake/build -type f \( -name '*CheckerCacheRuntime*.o' -o -name '*CheckerCacheRuntime*.export' \) -print)
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash

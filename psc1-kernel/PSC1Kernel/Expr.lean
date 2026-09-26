@@ -226,24 +226,73 @@ partial def Expr.hasFVar (e : Expr) : Bool :=
   | .mdata _ b | .proj _ _ b => b.hasFVar
   | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => false
 
+/-- Sharing-preserving list-level substitution helper. -/
+partial def Level.instantiateParamsListChanged
+    (levels : List Level)
+    (params : List Name)
+    (values : List Level) : List Level × Bool :=
+  match params with
+  | [] => (levels, false)
+  | _ =>
+    match levels with
+    | [] => (levels, false)
+    | level :: rest =>
+        let level' := level.instantiateParams params values
+        let (rest', restChanged) :=
+          Level.instantiateParamsListChanged rest params values
+        let levelChanged := !Level.eq level level'
+        if levelChanged || restChanged then
+          (level' :: rest', true)
+        else
+          (levels, false)
+
+/--
+Sharing-preserving universe-parameter instantiation. Like Lean 4.34 update-node
+constructors and the TS kernel, unchanged subtrees return their original node.
+-/
+partial def Expr.instantiateLevelParamsChanged
+    (e : Expr) (params : List Name) (values : List Level) : Expr × Bool :=
+  match params with
+  | [] => (e, false)
+  | _ =>
+    match e with
+    | .sort u =>
+        let u' := u.instantiateParams params values
+        if Level.eq u u' then (e, false) else (.sort u', true)
+    | .const n levels =>
+        let (levels', changed) :=
+          Level.instantiateParamsListChanged levels params values
+        if changed then (.const n levels', true) else (e, false)
+    | .app f a =>
+        let (f', fChanged) := f.instantiateLevelParamsChanged params values
+        let (a', aChanged) := a.instantiateLevelParamsChanged params values
+        if fChanged || aChanged then (.app f' a', true) else (e, false)
+    | .lam n t b bi =>
+        let (t', tChanged) := t.instantiateLevelParamsChanged params values
+        let (b', bChanged) := b.instantiateLevelParamsChanged params values
+        if tChanged || bChanged then (.lam n t' b' bi, true) else (e, false)
+    | .forallE n t b bi =>
+        let (t', tChanged) := t.instantiateLevelParamsChanged params values
+        let (b', bChanged) := b.instantiateLevelParamsChanged params values
+        if tChanged || bChanged then (.forallE n t' b' bi, true) else (e, false)
+    | .letE n t v b nd =>
+        let (t', tChanged) := t.instantiateLevelParamsChanged params values
+        let (v', vChanged) := v.instantiateLevelParamsChanged params values
+        let (b', bChanged) := b.instantiateLevelParamsChanged params values
+        if tChanged || vChanged || bChanged then
+          (.letE n t' v' b' nd, true)
+        else
+          (e, false)
+    | .mdata m b =>
+        let (b', changed) := b.instantiateLevelParamsChanged params values
+        if changed then (.mdata m b', true) else (e, false)
+    | .proj n i b =>
+        let (b', changed) := b.instantiateLevelParamsChanged params values
+        if changed then (.proj n i b', true) else (e, false)
+    | .bvar _ | .fvar _ | .mvar _ | .lit _ => (e, false)
+
 partial def Expr.instantiateLevelParams
     (e : Expr) (params : List Name) (values : List Level) : Expr :=
-  match e with
-  | .sort u => .sort (u.instantiateParams params values)
-  | .const n ls => .const n (ls.map fun u => u.instantiateParams params values)
-  | .app f a => .app (f.instantiateLevelParams params values) (a.instantiateLevelParams params values)
-  | .lam n t b bi =>
-    .lam n (t.instantiateLevelParams params values) (b.instantiateLevelParams params values) bi
-  | .forallE n t b bi =>
-    .forallE n (t.instantiateLevelParams params values) (b.instantiateLevelParams params values) bi
-  | .letE n t v b nd =>
-    .letE n
-      (t.instantiateLevelParams params values)
-      (v.instantiateLevelParams params values)
-      (b.instantiateLevelParams params values)
-      nd
-  | .mdata m b => .mdata m (b.instantiateLevelParams params values)
-  | .proj n i b => .proj n i (b.instantiateLevelParams params values)
-  | .bvar _ | .fvar _ | .mvar _ | .lit _ => e
+  (e.instantiateLevelParamsChanged params values).1
 
 end PSC1Kernel

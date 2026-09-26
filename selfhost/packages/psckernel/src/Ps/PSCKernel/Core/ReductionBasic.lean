@@ -83,6 +83,54 @@ def psCKernelNatZeroName : PsCKernelName :=
 def psCKernelNatSuccName : PsCKernelName :=
   psCKernelNameFromDotted "Nat.succ"
 
+def psCKernelNatAddName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.add"
+
+def psCKernelNatSubName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.sub"
+
+def psCKernelNatMulName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.mul"
+
+def psCKernelNatPowName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.pow"
+
+def psCKernelNatGcdName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.gcd"
+
+def psCKernelNatModName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.mod"
+
+def psCKernelNatDivName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.div"
+
+def psCKernelNatLandName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.land"
+
+def psCKernelNatLorName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.lor"
+
+def psCKernelNatXorName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.xor"
+
+def psCKernelNatShiftLeftName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.shiftLeft"
+
+def psCKernelNatShiftRightName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.shiftRight"
+
+def psCKernelNatBeqName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.beq"
+
+def psCKernelNatBleName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.ble"
+
+def psCKernelBoolFalseName : PsCKernelName :=
+  psCKernelNameFromDotted "Bool.false"
+
+def psCKernelBoolTrueName : PsCKernelName :=
+  psCKernelNameFromDotted "Bool.true"
+
 def psCKernelQuotMkName : PsCKernelName :=
   psCKernelNameFromDotted "Quot.mk"
 
@@ -99,6 +147,63 @@ def psCKernelNatLiteralToConstructor (value : Nat) : PsCKernelExpr :=
       PsCKernelExpr.app
         (PsCKernelExpr.constE psCKernelNatSuccName [])
         (PsCKernelExpr.lit (PsCKernelLiteral.natVal predecessor))
+
+def psCKernelNatValue? (expr : PsCKernelExpr) : Option Nat :=
+  match expr with
+  | PsCKernelExpr.lit (PsCKernelLiteral.natVal value) => some value
+  | PsCKernelExpr.constE name levels =>
+      if Nat.beq levels.length 0 then
+        if psCKernelNameEq name psCKernelNatZeroName then
+          some 0
+        else
+          none
+      else
+        none
+  | _ => none
+
+def psCKernelNatLiteralExpr (value : Nat) : PsCKernelExpr :=
+  PsCKernelExpr.lit (PsCKernelLiteral.natVal value)
+
+def psCKernelBoolExpr (value : Bool) : PsCKernelExpr :=
+  if value then
+    PsCKernelExpr.constE psCKernelBoolTrueName []
+  else
+    PsCKernelExpr.constE psCKernelBoolFalseName []
+
+def psCKernelNatPrimitiveBinary?
+    (name : PsCKernelName)
+    (left : Nat)
+    (right : Nat) : Option PsCKernelExpr :=
+  if psCKernelNameEq name psCKernelNatAddName then
+    some (psCKernelNatLiteralExpr (Nat.add left right))
+  else if psCKernelNameEq name psCKernelNatSubName then
+    some (psCKernelNatLiteralExpr (Nat.sub left right))
+  else if psCKernelNameEq name psCKernelNatMulName then
+    some (psCKernelNatLiteralExpr (Nat.mul left right))
+  else if psCKernelNameEq name psCKernelNatPowName then
+    some (psCKernelNatLiteralExpr (Nat.pow left right))
+  else if psCKernelNameEq name psCKernelNatGcdName then
+    some (psCKernelNatLiteralExpr (Nat.gcd left right))
+  else if psCKernelNameEq name psCKernelNatModName then
+    some (psCKernelNatLiteralExpr (Nat.mod left right))
+  else if psCKernelNameEq name psCKernelNatDivName then
+    some (psCKernelNatLiteralExpr (Nat.div left right))
+  else if psCKernelNameEq name psCKernelNatLandName then
+    some (psCKernelNatLiteralExpr (Nat.land left right))
+  else if psCKernelNameEq name psCKernelNatLorName then
+    some (psCKernelNatLiteralExpr (Nat.lor left right))
+  else if psCKernelNameEq name psCKernelNatXorName then
+    some (psCKernelNatLiteralExpr (Nat.xor left right))
+  else if psCKernelNameEq name psCKernelNatShiftLeftName then
+    some (psCKernelNatLiteralExpr (Nat.shiftLeft left right))
+  else if psCKernelNameEq name psCKernelNatShiftRightName then
+    some (psCKernelNatLiteralExpr (Nat.shiftRight left right))
+  else if psCKernelNameEq name psCKernelNatBeqName then
+    some (psCKernelBoolExpr (Nat.beq left right))
+  else if psCKernelNameEq name psCKernelNatBleName then
+    some (psCKernelBoolExpr (Nat.ble left right))
+  else
+    none
 
 partial def psCKernelExprWhnfBasic
     (env : PsCKernelEnvironment)
@@ -119,6 +224,42 @@ partial def psCKernelExprWhnfBasic
   | PsCKernelExpr.app fn arg =>
       let appHead := psCKernelExprGetAppFn expr
       let appArgs := psCKernelExprGetAppArgs expr
+      let natPrimitiveReduced : Option PsCKernelExpr :=
+        match appHead with
+        | PsCKernelExpr.constE primitiveName primitiveLevels =>
+            if Nat.beq primitiveLevels.length 0 then
+              if psCKernelNameEq primitiveName psCKernelNatSuccName then
+                if Nat.beq appArgs.length 1 then
+                  match psCKernelExprListGet? appArgs 0 with
+                  | none => none
+                  | some operand =>
+                      match psCKernelNatValue?
+                          (psCKernelExprWhnfBasic env lctx operand) with
+                      | none => none
+                      | some value =>
+                          some (psCKernelNatLiteralExpr (Nat.succ value))
+                else
+                  none
+              else if Nat.beq appArgs.length 2 then
+                match psCKernelExprListGet? appArgs 0,
+                    psCKernelExprListGet? appArgs 1 with
+                | some leftExpr, some rightExpr =>
+                    let reducedLeft := psCKernelExprWhnfBasic env lctx leftExpr
+                    let reducedRight := psCKernelExprWhnfBasic env lctx rightExpr
+                    match psCKernelNatValue? reducedLeft,
+                        psCKernelNatValue? reducedRight with
+                    | some leftValue, some rightValue =>
+                        psCKernelNatPrimitiveBinary?
+                          primitiveName
+                          leftValue
+                          rightValue
+                    | _, _ => none
+                | _, _ => none
+              else
+                none
+            else
+              none
+        | _ => none
       let quotientReduced : Option PsCKernelExpr :=
         if env.quotInitialized then
           match appHead with
@@ -235,24 +376,27 @@ partial def psCKernelExprWhnfBasic
                     | _ => none
             | _ => none
         | _ => none
-      match quotientReduced with
+      match natPrimitiveReduced with
       | some reduced => psCKernelExprWhnfBasic env lctx reduced
       | none =>
-          match recursorReduced with
+          match quotientReduced with
           | some reduced => psCKernelExprWhnfBasic env lctx reduced
           | none =>
-              let reducedFn : PsCKernelExpr := psCKernelExprWhnfBasic env lctx fn
-              match reducedFn with
-              | PsCKernelExpr.lam _ _ body _ =>
-                  psCKernelExprWhnfBasic
-                    env
-                    lctx
-                    (psCKernelExprInstantiate1 body arg)
-              | _ =>
-                  if psCKernelExprEqStructural reducedFn fn then
-                    expr
-                  else
-                    PsCKernelExpr.app reducedFn arg
+              match recursorReduced with
+              | some reduced => psCKernelExprWhnfBasic env lctx reduced
+              | none =>
+                  let reducedFn : PsCKernelExpr := psCKernelExprWhnfBasic env lctx fn
+                  match reducedFn with
+                  | PsCKernelExpr.lam _ _ body _ =>
+                      psCKernelExprWhnfBasic
+                        env
+                        lctx
+                        (psCKernelExprInstantiate1 body arg)
+                  | _ =>
+                      if psCKernelExprEqStructural reducedFn fn then
+                        expr
+                      else
+                        PsCKernelExpr.app reducedFn arg
   | PsCKernelExpr.letE _ _ value body _ =>
       psCKernelExprWhnfBasic
         env

@@ -1,4 +1,5 @@
 import PSC1Kernel.CheckerDefEqStatefulReduced
+import PSC1Kernel.CheckerInferenceStatefulReduced
 
 open PSC1Kernel
 
@@ -64,7 +65,8 @@ def main : IO Unit := do
   let ctx := { CheckerContext.empty env with lctx := lctx }
   let input : Expr := .app (.fvar fName) (.sort .zero)
 
-  match checkStatefulWith StatefulDefEqReduced.isDefEq ctx CheckerState.empty input with
+  match StatefulInferenceReduced.check StatefulDefEqReduced.isDefEq
+      ctx CheckerState.empty input with
   | .error err => throw <| IO.userError ("stateful checked application failed: " ++ err)
   | .ok (actual, state) =>
       expectInferWhnfStateful "checked application result"

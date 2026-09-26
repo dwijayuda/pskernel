@@ -11,6 +11,7 @@ on:
       - perf/psc1-lean-stateful-infer-binders
       - perf/psc1-lean-stateful-infer-proj
       - perf/psc1-lean-stateful-recursor
+      - perf/psc1-lean-stateful-dag-sharing
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
@@ -37,6 +38,9 @@ jobs:
       - name: Build PSC1 kernel
         working-directory: psc1-kernel
         run: lake build
+      - name: Portable instantiate DAG sharing
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/InstantiateSharingSmoke.lean
       - name: Build experimental checker state
         working-directory: psc1-kernel
         shell: bash

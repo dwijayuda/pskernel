@@ -140,3 +140,6 @@ jobs:
 
       - name: Run PSCKernel LocalContext differential
         run: node scripts/psckernel-local-context-differential.mjs
+
+      - name: Run PSCKernel Declaration differential
+        run: node scripts/psckernel-declaration-differential.mjs

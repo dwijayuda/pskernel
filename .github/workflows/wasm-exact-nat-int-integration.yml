@@ -1,0 +1,145 @@
+name: Wasm exact Nat/Int clean integration
+
+on:
+  push:
+    branches:
+      - integrate/wasm3-exact-nat-int
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate-and-verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Replay exact Nat/Int milestone only
+        id: replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin backend/wasm3-runtime-core-fix
+
+          # Keep the latest verified backend-private runtimes, including the
+          # structural Bit0/Bit1 distinction required by Wasm GC.
+          git show origin/backend/wasm3-runtime-core-fix:selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean \
+            > selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean
+          git show origin/backend/wasm3-runtime-core-fix:selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean \
+            > selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean
+
+          # Replay only semantic lowering, build wiring, and durable runtime
+          # regression cases. Do not import stale TS/Rust/array branch history.
+          for commit in \
+            b8ae9885e19326c41c164a294832bb1c47bd14b0 \
+            0332f237005a66d269f829941dfbd97274a9ef6c \
+            36efe85ddd1ffd900a8a30cd28417a5c16a1bfbc \
+            f227342a8f25541c8490c698df986b1e19e2fd2f \
+            f111683b408d0a77e03c5f59bb22138d58e59e03 \
+            79deb80cd5e2fcba29025ede68f4261bb2f0bc4f \
+            0c72c6dbb6a35fe5f94717927f5bb34ab1e97132 \
+            17ee011c89f7931d4b065fd135f4fd930c9c393f
+          do
+            git cherry-pick --no-commit "$commit"
+          done
+
+          git diff --check
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+          git status --short
+
+      - name: Verify portable source and neutral shared IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node check-psc1-source.mjs
+          node scripts/check-ir-neutrality.mjs
+
+      - name: Build complete Lean self-host workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build
+
+      - name: Run shared backend regression suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_ts_tests
+          lake exe psc1_erasure_tests
+          lake exe psc1_ir_specialize_tests
+          lake exe psc1_backend_wasm_tests
+
+      - name: Execute exact Nat/Int Wasm in Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv=readFileSync('/tmp/psc1-wasm-bytes.txt','utf8').trim();
+          const bytes=Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) throw new Error('PSC1_WASM_VALIDATE_FAILED');
+          const {instance}=await WebAssembly.instantiate(bytes);
+          const checks = [
+            ['genericBox', instance.exports.genericBoxRoundTrip(42), 42],
+            ['genericId', instance.exports.genericIdU32(42), 42],
+            ['genericList', instance.exports.genericLengthTwo(), 2],
+            ['natAddLarge', instance.exports.natAddLargeExact(), 1],
+            ['natSub', instance.exports.natSubFloorsAtZero(), 1],
+            ['natLiteralEq', instance.exports.natLiteralEqExact(), 1],
+            ['natAddOneOne', instance.exports.natAddOneOneExact(), 1],
+            ['natAddCarrySmall', instance.exports.natAddCarrySmallExact(), 1],
+            ['natMul', instance.exports.natMulExact(), 1],
+            ['natDiv', instance.exports.natDivExact(), 1],
+            ['natMod', instance.exports.natModExact(), 1],
+            ['natDivZero', instance.exports.natDivZero(), 1],
+            ['natModZero', instance.exports.natModZero(), 1],
+            ['natLt', instance.exports.natLtExact(), 1],
+            ['intOfNat', instance.exports.intOfNatExact(), 1],
+            ['intNegSucc', instance.exports.intNegSuccExact(), 1],
+            ['intNeg', instance.exports.intNegExact(), 1],
+            ['intAdd', instance.exports.intAddMixedExact(), 1],
+            ['intSub', instance.exports.intSubMixedExact(), 1],
+            ['intMul', instance.exports.intMulSignedExact(), 1],
+            ['intLarge', instance.exports.intLargeExact(), 1],
+            ['intLt', instance.exports.intLtExact(), 1],
+          ];
+          for (const [name, actual, expected] of checks) {
+            if (actual !== expected) throw new Error(`PSC1_WASM_${name}: ${actual} !== ${expected}`);
+          }
+          console.log('PSC1_WASM_EXACT_NAT_INT_INTEGRATION: PASS');
+          NODE
+
+      - name: Commit verified clean integration
+        if: steps.replay.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean \
+                  selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean \
+                  selfhost/packages/backend-wasm/src/Ps/BackendWasm/Lower.lean \
+                  selfhost/test/WasmBinarySmoke.lean \
+                  selfhost/lakefile.lean
+          git commit -m 'feat(wasm): integrate exact Nat and Int runtime'
+          git push origin HEAD:integrate/wasm3-exact-nat-int

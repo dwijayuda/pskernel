@@ -12,6 +12,7 @@ on:
       - perf/psc1-lean-stateful-infer-proj
       - perf/psc1-lean-stateful-recursor
       - perf/psc1-lean-stateful-dag-sharing
+      - perf/psc1-lean-expr-withptreq
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"

@@ -4,6 +4,8 @@ Status: **research-driven post-PSC1 profile draft**
 
 Base profile: [`PSC1 Lang`](../PSC1%20Lang/README.md)
 
+Primary normative draft: [PSC2_LANGUAGE_REFERENCE.md](./PSC2_LANGUAGE_REFERENCE.md)
+
 PSC2 extends PSC1. It does **not** reopen or invalidate the PSC1 freeze.
 PSC1 remains the small bootstrap language and semantic foundation. PSC2 is the
 first productivity/adoption profile intended to make day-to-day ProofScript
@@ -68,7 +70,8 @@ PROGRAMMING ERGONOMICS
 
 THEOREM-PROVING ERGONOMICS
   structured proof terms, mature simp infrastructure, common proof tactics,
-  stronger typeclass/coercion support, controlled notation and attributes
+  stronger typeclass/coercion support, controlled notation and attributes,
+  explicit universes, noncomputable/classical source, interactive research tools
 
 FORMAL VERIFICATION
   requires/ensures, assert, loop invariants, decreasing measures, VC generation
@@ -128,7 +131,7 @@ PSC2 SHOULD require the following source/elaboration capabilities:
 
 ### B. Theorem-proving ergonomics
 
-PSC2 SHOULD require a standard prover layer containing at least:
+PSC2 SHOULD require a standard prover/research layer containing at least:
 
 - term proof structuring: `have`, `show`, `suffices`, `calc`;
 - proof control: `by_cases`, `by_contra`, `exfalso`, `subst`, `generalize`,
@@ -144,9 +147,14 @@ PSC2 SHOULD require a standard prover layer containing at least:
 - stronger `cases`/`induction` support for indexed/dependent contexts;
 - stronger instance synthesis, scoped/local instances, and practical coercion
   insertion;
+- explicit practical universe declarations/polymorphism for library-scale
+  theorem code;
+- `noncomputable` and explicit `classical` support for mathematical source;
 - controlled theorem/library metadata analogous to the useful subset of Lean
   attributes such as simplification/extensionality registrations;
 - controlled mathematical notation/infix/scoped notation;
+- interactive research commands analogous to `#check`, `#eval`, `#reduce`,
+  `#print`, and `#synth`;
 - an extensible Meta/tactic API whose extensions construct ordinary proof terms
   and never bypass kernel checking.
 
@@ -258,8 +266,13 @@ See [SELF_HOSTING_AND_EXTENSION_MODEL.md](./SELF_HOSTING_AND_EXTENSION_MODEL.md)
 
 ## Document map
 
-- [PSC2_LANGUAGE_PROFILE.md](./PSC2_LANGUAGE_PROFILE.md) — proposed PSC2
-  language/prover/platform profile and lowering strategy.
+- [PSC2_LANGUAGE_REFERENCE.md](./PSC2_LANGUAGE_REFERENCE.md) — primary
+  comprehensive normative PSC2 draft covering source syntax, semantics,
+  theorem proving, contracts, portability, kernel profiles, self-hosting and
+  conformance.
+- [PSC2_LANGUAGE_PROFILE.md](./PSC2_LANGUAGE_PROFILE.md) — concise PSC2
+  language/prover/platform profile and lowering strategy; where it is less
+  precise than the comprehensive reference, the comprehensive reference wins.
 - [FEATURE_RESEARCH_MATRIX.md](./FEATURE_RESEARCH_MATRIX.md) — evidence-driven
   comparison of Lean usage, TypeScript expectations, PSC1 status and PSC2
   priority.
@@ -269,6 +282,8 @@ See [SELF_HOSTING_AND_EXTENSION_MODEL.md](./SELF_HOSTING_AND_EXTENSION_MODEL.md)
   how PSC1/Lean bootstrap richer PSC2 features without circular dependency.
 - [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) — intended migration experience for
   Lean 4 and TypeScript developers.
+- [RESEARCH_SOURCES.md](./RESEARCH_SOURCES.md) — external/repository evidence
+  used to shape PSC2.
 
 ## Research sources
 

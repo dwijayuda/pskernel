@@ -243,7 +243,10 @@ def psExprHasUnresolvedMeta : PsExpr -> Bool
       else
         psExprHasUnresolvedMeta arg
   | .lam _ type body _ =>
-      psExprHasUnresolvedMeta type || psExprHasUnresolvedMeta body
+      if psExprHasUnresolvedMeta type then
+        true
+      else
+        psExprHasUnresolvedMeta body
   | .forallE _ type body _ =>
       psExprHasUnresolvedMeta type || psExprHasUnresolvedMeta body
   | .letE _ type value body =>

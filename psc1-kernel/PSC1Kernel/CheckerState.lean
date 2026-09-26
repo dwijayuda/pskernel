@@ -93,10 +93,10 @@ def empty : CheckerExprMap α :=
   Std.HashMap.emptyWithCapacity 64
 
 def get? (cache : CheckerExprMap α) (expr : Expr) : Option α :=
-  cache.get? { value := expr }
+  cache.get? (CheckerExprKey.mk expr)
 
 def insert (cache : CheckerExprMap α) (expr : Expr) (value : α) : CheckerExprMap α :=
-  cache.insert { value := expr } value
+  cache.insert (CheckerExprKey.mk expr) value
 
 end CheckerExprMap
 
@@ -109,10 +109,10 @@ def empty : CheckerExprPairSet :=
   { entries := Std.HashMap.emptyWithCapacity 64 }
 
 def contains (set : CheckerExprPairSet) (left right : Expr) : Bool :=
-  (set.entries.get? { left := left, right := right }).isSome
+  (set.entries.get? (CheckerExprPairKey.mk left right)).isSome
 
 def insert (set : CheckerExprPairSet) (left right : Expr) : CheckerExprPairSet :=
-  { entries := set.entries.insert { left := left, right := right } () }
+  { entries := set.entries.insert (CheckerExprPairKey.mk left right) () }
 
 end CheckerExprPairSet
 

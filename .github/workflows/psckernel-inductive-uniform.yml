@@ -1,0 +1,52 @@
+name: PSCKernel inductive uniform gate
+
+on:
+  push:
+    branches:
+      - selfhost/psckernel-fresh-port
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inductive-uniform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Verify pinned Lean toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - name: Audit portable PSC1 source profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node check-psc1-source.mjs
+
+      - name: Build PSCKernel with Lake
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build PsPSCKernel
+
+      - name: Run uniform recursive occurrence tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake env lean --run packages/psckernel/test/InductiveAdmissionUniformTests.lean

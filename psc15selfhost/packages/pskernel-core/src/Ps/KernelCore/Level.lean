@@ -8,28 +8,59 @@ inductive PsKernelCoreLevel where
   | param (name : PsKernelCoreName)
   | mvar (name : PsKernelCoreName)
 
-def psKernelCoreLevelEq :
-    PsKernelCoreLevel -> PsKernelCoreLevel -> Bool
-  | PsKernelCoreLevel.zero, PsKernelCoreLevel.zero => true
-  | PsKernelCoreLevel.succ left, PsKernelCoreLevel.succ right =>
-      psKernelCoreLevelEq left right
-  | PsKernelCoreLevel.max leftA leftB,
-      PsKernelCoreLevel.max rightA rightB =>
-      if psKernelCoreLevelEq leftA rightA then
-        psKernelCoreLevelEq leftB rightB
-      else
-        false
-  | PsKernelCoreLevel.imax leftA leftB,
-      PsKernelCoreLevel.imax rightA rightB =>
-      if psKernelCoreLevelEq leftA rightA then
-        psKernelCoreLevelEq leftB rightB
-      else
-        false
-  | PsKernelCoreLevel.param left, PsKernelCoreLevel.param right =>
-      psKernelCoreNameEq left right
-  | PsKernelCoreLevel.mvar left, PsKernelCoreLevel.mvar right =>
-      psKernelCoreNameEq left right
-  | _, _ => false
+def psKernelCoreLevelEq
+    (left : PsKernelCoreLevel) : PsKernelCoreLevel -> Bool :=
+  match left with
+  | PsKernelCoreLevel.zero =>
+      fun (right : PsKernelCoreLevel) =>
+        match right with
+        | PsKernelCoreLevel.zero => true
+        | _ => false
+  | PsKernelCoreLevel.succ leftChild =>
+      let childEq : PsKernelCoreLevel -> Bool :=
+        psKernelCoreLevelEq leftChild;
+      fun (right : PsKernelCoreLevel) =>
+        match right with
+        | PsKernelCoreLevel.succ rightChild => childEq rightChild
+        | _ => false
+  | PsKernelCoreLevel.max leftA leftB =>
+      let leftEq : PsKernelCoreLevel -> Bool :=
+        psKernelCoreLevelEq leftA;
+      let rightEq : PsKernelCoreLevel -> Bool :=
+        psKernelCoreLevelEq leftB;
+      fun (right : PsKernelCoreLevel) =>
+        match right with
+        | PsKernelCoreLevel.max rightA rightB =>
+            if leftEq rightA then
+              rightEq rightB
+            else
+              false
+        | _ => false
+  | PsKernelCoreLevel.imax leftA leftB =>
+      let leftEq : PsKernelCoreLevel -> Bool :=
+        psKernelCoreLevelEq leftA;
+      let rightEq : PsKernelCoreLevel -> Bool :=
+        psKernelCoreLevelEq leftB;
+      fun (right : PsKernelCoreLevel) =>
+        match right with
+        | PsKernelCoreLevel.imax rightA rightB =>
+            if leftEq rightA then
+              rightEq rightB
+            else
+              false
+        | _ => false
+  | PsKernelCoreLevel.param leftName =>
+      fun (right : PsKernelCoreLevel) =>
+        match right with
+        | PsKernelCoreLevel.param rightName =>
+            psKernelCoreNameEq leftName rightName
+        | _ => false
+  | PsKernelCoreLevel.mvar leftName =>
+      fun (right : PsKernelCoreLevel) =>
+        match right with
+        | PsKernelCoreLevel.mvar rightName =>
+            psKernelCoreNameEq leftName rightName
+        | _ => false
 
 def psKernelCoreLevelIsZero (level : PsKernelCoreLevel) : Bool :=
   match level with
@@ -132,32 +163,36 @@ partial def psKernelCoreLevelEquivalent
     if psKernelCoreLevelEq normalizedLeft normalizedRight then
       true
     else
-      match normalizedLeft, normalizedRight with
-      | PsKernelCoreLevel.max leftA leftB,
-          PsKernelCoreLevel.max rightA rightB =>
-          if psKernelCoreLevelEquivalent leftA rightA then
-            psKernelCoreLevelEquivalent leftB rightB
-          else if psKernelCoreLevelEquivalent leftA rightB then
-            psKernelCoreLevelEquivalent leftB rightA
-          else
-            false
-      | _, _ => false
+      match normalizedLeft with
+      | PsKernelCoreLevel.max leftA leftB =>
+          match normalizedRight with
+          | PsKernelCoreLevel.max rightA rightB =>
+              if psKernelCoreLevelEquivalent leftA rightA then
+                psKernelCoreLevelEquivalent leftB rightB
+              else if psKernelCoreLevelEquivalent leftA rightB then
+                psKernelCoreLevelEquivalent leftB rightA
+              else
+                false
+          | _ => false
+      | _ => false
 
 def psKernelCoreNameLookupLevel
     (name : PsKernelCoreName)
     (params : List PsKernelCoreName)
     (values : List PsKernelCoreLevel) : Option PsKernelCoreLevel :=
-  match params, values with
-  | [], _ => none
-  | _, [] => none
-  | param :: remainingParams, value :: remainingValues =>
-      if psKernelCoreNameEq name param then
-        some value
-      else
-        psKernelCoreNameLookupLevel
-          name
-          remainingParams
-          remainingValues
+  match params with
+  | [] => none
+  | param :: remainingParams =>
+      match values with
+      | [] => none
+      | value :: remainingValues =>
+          if psKernelCoreNameEq name param then
+            some value
+          else
+            psKernelCoreNameLookupLevel
+              name
+              remainingParams
+              remainingValues
 
 def psKernelCoreLevelInstantiateParams
     (root : PsKernelCoreLevel)

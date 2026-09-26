@@ -47,9 +47,9 @@ assertSemanticBoundary(
   "packages/compiler/src/Ps/Compiler/Api.lean",
   [
     "import Ps.Erasure.Definition",
-    "def psValidatePreparedAdmissions := true",
+    "def psCompilerValidatePrepared := true",
     "def psCompilerVerifiedIrFromPrepared :=",
-    "  if psValidatePreparedAdmissions then psEraseCoreModule env declarations else error",
+    "  if psCompilerValidatePrepared then psEraseCoreModule env declarations else error",
   ].join("\n"),
 );
 

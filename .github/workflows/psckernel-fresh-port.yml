@@ -287,3 +287,6 @@ jobs:
 
       - name: Run PSCKernel projection basic differential
         run: node scripts/psckernel-projection-basic-differential.mjs
+
+      - name: Run PSCKernel declaration admission differential
+        run: node scripts/psckernel-declaration-admission-differential.mjs

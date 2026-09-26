@@ -6,6 +6,7 @@ on:
     branches:
       - perf/psc1-lean-stateful-checker
       - perf/psc1-lean-stateful-infer-app
+      - perf/psc1-lean-stateful-infer-binders
     paths:
       - ".github/workflows/psc1-lean-stateful-root100015-progress.yml"
       - "psc1-kernel/PSC1Kernel.lean"

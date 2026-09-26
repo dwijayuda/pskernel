@@ -348,6 +348,7 @@ def psTestInductiveGrouping : Bool :=
       numParams := 0
       numIndices := 0
       constructors := [left, right]
+      isStructure := false
     },
     PsDeclaration.constructorDecl {
       name := left
@@ -357,6 +358,7 @@ def psTestInductiveGrouping : Bool :=
       constructorIndex := 0
       numParams := 0
       numFields := 0
+      recursiveFields := []
     },
     PsDeclaration.constructorDecl {
       name := right
@@ -366,6 +368,7 @@ def psTestInductiveGrouping : Bool :=
       constructorIndex := 1
       numParams := 0
       numFields := 0
+      recursiveFields := []
     },
     PsDeclaration.recursorDecl {
       name := recName

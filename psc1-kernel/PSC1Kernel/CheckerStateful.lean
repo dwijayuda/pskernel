@@ -234,6 +234,12 @@ partial def inferCoreStatefulWith
       return (cached, state)
   | none =>
       match e with
+      | .mdata _ body => do
+          let ctx ← ctx.enterKernelRecDepth
+          let (result, next) ←
+            inferCoreStatefulWith defeq ctx state body inferOnly
+          return (result, cacheInferStatefulResult next inferOnly e result)
+
       | .app fn arg =>
           if inferOnly then do
             -- Lean 4.34 infer_app: infer the flattened function head through

@@ -307,3 +307,6 @@ jobs:
 
       - name: Run PSCKernel quotient admission differential
         run: node scripts/psckernel-quotient-admission-differential.mjs
+
+      - name: Run PSCKernel inductive admission basic differential
+        run: node scripts/psckernel-inductive-admission-basic-differential.mjs

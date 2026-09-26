@@ -3,7 +3,10 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
-import { parseImports, resolveModuleSource } from "./workspace-layout.mjs";
+import {
+  parseImports,
+  resolveCompilerModuleSource,
+} from "./workspace-layout.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -99,10 +102,9 @@ async function flattenProject(compiler, entryPath) {
 
     const source = await readFile(absolute, "utf8");
     for (const moduleName of parseImports(source)) {
-      const dependency = resolveModuleSource(
+      const dependency = resolveCompilerModuleSource(
         workspaceRoot,
         moduleName,
-        ".lean",
       );
       if (!dependency) {
         throw new Error(`PSC2_SELFHOST_SOURCE_MISSING: ${moduleName}`);

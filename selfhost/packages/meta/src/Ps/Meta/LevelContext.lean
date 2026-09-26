@@ -100,7 +100,7 @@ def psLevelAssign
     match psLevelFindAssignment context id with
     | Option.some _ => Option.none
     | Option.none =>
-        let resolved := psLevelInstantiate context value
+        let resolved := psLevelInstantiate context value;
         if psLevelOccurs context id resolved then
           Option.none
         else

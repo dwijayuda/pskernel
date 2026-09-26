@@ -83,7 +83,10 @@ def psLevelOccursResolved (target : Nat) : PsLevel -> Bool
       else
         psLevelOccursResolved target right
   | .imax left right =>
-      psLevelOccursResolved target left || psLevelOccursResolved target right
+      if psLevelOccursResolved target left then
+        true
+      else
+        psLevelOccursResolved target right
   | _ => false
 
 def psLevelOccurs (context : PsLevelMetaContext) (target : Nat) (level : PsLevel) : Bool :=

@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Make Bit1 structurally distinct
+      - name: Make Bit1 structurally distinct with a packed discriminator
         shell: bash
         run: |
           set -euo pipefail
@@ -39,30 +39,6 @@ jobs:
 
           bit1_start = text.index('    {\n      name := psWasmNatBit1Name')
           divmod_start = text.index('    {\n      name := psWasmNatDivModName', bit1_start)
-          bit1_block = text[bit1_start:divmod_start]
-          old_fields = '''      fields := [
-                {
-                  name := "half"
-                  storageType := PsWasmStorageType.value psWasmNatRef
-                }
-              ]
-            },
-          '''
-          # Be whitespace-robust by replacing only inside the Bit1 structure block.
-          lines = bit1_block.splitlines()
-          close_idx = None
-          for i, line in enumerate(lines):
-              if line.strip() == ']' and i > 0 and 'storageType := PsWasmStorageType.value psWasmNatRef' in '\n'.join(lines[max(0, i-5):i]):
-                  close_idx = i
-                  break
-          if close_idx is None:
-              raise SystemExit('Bit1 field list close not found')
-          indent = lines[close_idx-4][:len(lines[close_idx-4]) - len(lines[close_idx-4].lstrip())]
-          field_indent = indent
-          lines[close_idx:close_idx] = [
-              field_indent[:-2] + '},' if False else '',
-          ]
-          # Rebuild the small block explicitly to avoid fragile punctuation edits.
           bit1_block = '''    {
             name := psWasmNatBit1Name
             superType := some psWasmNatName
@@ -73,58 +49,55 @@ jobs:
                 storageType := PsWasmStorageType.value psWasmNatRef
               },
               {
-                name := "tag"
-                storageType := PsWasmStorageType.value PsWasmValueType.i32
+                name := "constructorTag"
+                storageType := PsWasmStorageType.packedI8
               }
             ]
           },
           '''
           text = text[:bit1_start] + bit1_block + text[divmod_start:]
 
-          # Every direct Bit1 struct.new now needs the private tag after the half value.
           runtime_start = text.index('def psWasmNatRuntimeFunctions')
           literal_start = text.index('def psWasmNatLiteralInstructionsWithFuel')
           runtime = text[runtime_start:literal_start]
-          needle = 'PsWasmInstruction.structNew psWasmNatBit1Name'
-          count = runtime.count(needle)
-          if count != 3:
-              raise SystemExit(f'expected 3 direct Bit1 constructors in runtime, found {count}')
-          runtime = runtime.replace(
+
+          bit1_fn_start = runtime.index('    {\n      name := psWasmNatBit1Fn')
+          succ_start = runtime.index('    {\n      name := psWasmNatSuccFn', bit1_fn_start)
+          bit1_fn = runtime[bit1_fn_start:succ_start]
+          needle = '''        PsWasmInstruction.localGet 0,
+                  PsWasmInstruction.structNew psWasmNatBit1Name'''
+          if needle not in bit1_fn:
+              raise SystemExit('Bit1 constructor helper body not found')
+          bit1_fn = bit1_fn.replace(
               needle,
-              'PsWasmInstruction.i32Const 1,\n        PsWasmInstruction.structNew psWasmNatBit1Name'
-          )
+              '''        PsWasmInstruction.localGet 0,
+                  PsWasmInstruction.i32Const 1,
+                  PsWasmInstruction.structNew psWasmNatBit1Name''',
+              1)
+          runtime = runtime[:bit1_fn_start] + bit1_fn + runtime[succ_start:]
+
+          succ_start = runtime.index('    {\n      name := psWasmNatSuccFn')
+          cmp_start = runtime.index('    {\n      name := psWasmNatCmpFn', succ_start)
+          succ = runtime[succ_start:cmp_start]
+          direct = 'PsWasmInstruction.structNew psWasmNatBit1Name'
+          if succ.count(direct) != 2:
+              raise SystemExit(f'expected 2 direct Bit1 constructions in succ, found {succ.count(direct)}')
+          succ = succ.replace(direct, 'PsWasmInstruction.call psWasmNatBit1Fn')
+          runtime = runtime[:succ_start] + succ + runtime[cmp_start:]
+
+          if runtime.count('PsWasmInstruction.structNew psWasmNatBit1Name') != 1:
+              raise SystemExit('Bit1 construction was not centralized')
           text = text[:runtime_start] + runtime + text[literal_start:]
 
-          # Nat literal emission constructs Bit1 directly, so emit the tag there too.
-          old_literal = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
-                [PsWasmInstruction.structNew
-                  (if low == 0 then psWasmNatBit0Name
-                   else psWasmNatBit1Name)]'''
-          if old_literal not in text:
-              # Normalize by locating the exact semantic segment independent of indentation.
-              start = text.index('      psWasmNatLiteralInstructionsWithFuel fuel half ++', text.index('def psWasmNatLiteralInstructionsWithFuel'))
-              end = text.index('\n\ndef psWasmNatLiteralInstructions', start)
-              current = text[start:end]
-              replacement = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
+          literal_fn = text.index('def psWasmNatLiteralInstructionsWithFuel')
+          literal_body = text.index('      psWasmNatLiteralInstructionsWithFuel fuel half ++', literal_fn)
+          literal_end = text.index('\n\ndef psWasmNatLiteralInstructions', literal_body)
+          replacement = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
                 (if low == 0 then
                   [PsWasmInstruction.structNew psWasmNatBit0Name]
                 else
-                  [
-                    PsWasmInstruction.i32Const 1,
-                    PsWasmInstruction.structNew psWasmNatBit1Name
-                  ])'''
-              text = text[:start] + replacement + text[end:]
-          else:
-              replacement = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
-                (if low == 0 then
-                  [PsWasmInstruction.structNew psWasmNatBit0Name]
-                else
-                  [
-                    PsWasmInstruction.i32Const 1,
-                    PsWasmInstruction.structNew psWasmNatBit1Name
-                  ])'''
-              text = text.replace(old_literal, replacement, 1)
-
+                  [PsWasmInstruction.call psWasmNatBit1Fn])'''
+          text = text[:literal_body] + replacement + text[literal_end:]
           path.write_text(text)
           PY
 
@@ -217,5 +190,5 @@ jobs:
           if (instance.exports.listLengthTwo() !== 2) throw new Error('listLengthTwo');
           if (instance.exports.applyReturnedAdder(40,2) !== 42) throw new Error('applyReturnedAdder');
           if (instance.exports.genericLengthTwo() !== 2) throw new Error('genericLengthTwo');
-          console.log('PSC1_WASM_TAGGED_BIT1_OK', JSON.stringify(values));
+          console.log('PSC1_WASM_COMPACT_TAGGED_BIT1_OK', JSON.stringify(values));
           NODE

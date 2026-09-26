@@ -71,23 +71,26 @@ requireScript(
   "npm run bootstrap && npm run selfhost && npm run verify:selfhost",
 );
 
+if (!scripts["test:all"]?.includes("npm run test:kernel-core")) {
+  throw new Error("PSC2_SELFHOST_KERNEL_TESTS_NOT_IN_FULL_SUITE");
+}
+
 const selfhostGeneration = await readFile(
   path.join(root, "scripts", "selfhost-generation.mjs"),
   "utf8",
 );
-for (const requiredPath of [
-  'path.join(outputGeneration, "workspace")',
-  'path.join(outputGeneration, "packages",',
-  '"compiler",',
-  '"index.js",',
-]) {
-  if (!selfhostGeneration.includes(requiredPath)) {
+const generationLayoutPatterns = [
+  /path\.join\(\s*outputGeneration,\s*"workspace"\s*\)/u,
+  /path\.join\(\s*outputGeneration,\s*"packages",\s*"compiler",\s*"index\.js",?\s*\)/u,
+];
+for (const pattern of generationLayoutPatterns) {
+  if (!pattern.test(selfhostGeneration)) {
     throw new Error(
-      `PSC2_SELFHOST_GENERATION_LAYOUT_DRIFT: missing ${requiredPath}`,
+      `PSC2_SELFHOST_GENERATION_LAYOUT_DRIFT: ${pattern.source}`,
     );
   }
 }
 
 process.stdout.write(
-  `PSC2_SELFHOST_ORCHESTRATION: PASS (${files.length} files; 9 script contracts)\n`,
+  `PSC2_SELFHOST_ORCHESTRATION: PASS (${files.length} files; 9 script contracts; generation layout; kernel full-suite coverage)\n`,
 );

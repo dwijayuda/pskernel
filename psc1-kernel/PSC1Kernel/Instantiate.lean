@@ -7,69 +7,103 @@ def listGet? : List α → Nat → Option α
   | x :: _, 0 => some x
   | _ :: xs, n + 1 => listGet? xs n
 
-partial def Expr.liftLooseBVars (e : Expr) (start amount : Nat) : Expr :=
-  if amount == 0 then e
+/--
+Portable DAG-preserving implementation of loose-bvar lifting.
+
+The Bool reports whether this subtree changed. When no descendant changes we
+return the original node, preserving the sharing Lean's kernel relies on,
+without pointer APIs or host-specific mutation.
+-/
+private partial def Expr.liftLooseBVarsChanged
+    (e : Expr) (start amount : Nat) : Expr × Bool :=
+  if amount == 0 then
+    (e, false)
   else
     match e with
-    | .bvar i => if i ≥ start then .bvar (i + amount) else e
-    | .app f a => .app (f.liftLooseBVars start amount) (a.liftLooseBVars start amount)
+    | .bvar i =>
+        if i ≥ start then (.bvar (i + amount), true) else (e, false)
+    | .app f a =>
+        let (f', fc) := f.liftLooseBVarsChanged start amount
+        let (a', ac) := a.liftLooseBVarsChanged start amount
+        if fc || ac then (.app f' a', true) else (e, false)
     | .lam n t b bi =>
-      .lam n
-        (t.liftLooseBVars start amount)
-        (b.liftLooseBVars (start + 1) amount)
-        bi
+        let (t', tc) := t.liftLooseBVarsChanged start amount
+        let (b', bc) := b.liftLooseBVarsChanged (start + 1) amount
+        if tc || bc then (.lam n t' b' bi, true) else (e, false)
     | .forallE n t b bi =>
-      .forallE n
-        (t.liftLooseBVars start amount)
-        (b.liftLooseBVars (start + 1) amount)
-        bi
+        let (t', tc) := t.liftLooseBVarsChanged start amount
+        let (b', bc) := b.liftLooseBVarsChanged (start + 1) amount
+        if tc || bc then (.forallE n t' b' bi, true) else (e, false)
     | .letE n t v b nd =>
-      .letE n
-        (t.liftLooseBVars start amount)
-        (v.liftLooseBVars start amount)
-        (b.liftLooseBVars (start + 1) amount)
-        nd
-    | .mdata m b => .mdata m (b.liftLooseBVars start amount)
-    | .proj n i b => .proj n i (b.liftLooseBVars start amount)
-    | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => e
+        let (t', tc) := t.liftLooseBVarsChanged start amount
+        let (v', vc) := v.liftLooseBVarsChanged start amount
+        let (b', bc) := b.liftLooseBVarsChanged (start + 1) amount
+        if tc || vc || bc then (.letE n t' v' b' nd, true) else (e, false)
+    | .mdata m b =>
+        let (b', bc) := b.liftLooseBVarsChanged start amount
+        if bc then (.mdata m b', true) else (e, false)
+    | .proj n i b =>
+        let (b', bc) := b.liftLooseBVarsChanged start amount
+        if bc then (.proj n i b', true) else (e, false)
+    | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => (e, false)
+
+partial def Expr.liftLooseBVars (e : Expr) (start amount : Nat) : Expr :=
+  (e.liftLooseBVarsChanged start amount).1
 
 def Expr.lift (e : Expr) (amount : Nat) : Expr :=
   e.liftLooseBVars 0 amount
 
-partial def Expr.instantiateAt
-    (e : Expr) (start : Nat) (subst : List Expr) (offset : Nat) : Expr :=
+/--
+Portable DAG-preserving instantiation. The changed bit lets parents reuse their
+original node when substitution does not affect the subtree, matching the
+sharing behavior of Lean's `replace`-based implementation without `unsafe` or
+`implemented_by`.
+-/
+private partial def Expr.instantiateAtChanged
+    (e : Expr) (start : Nat) (subst : List Expr) (offset : Nat) : Expr × Bool :=
   match e with
   | .bvar i =>
-    let s := start + offset
-    if i < s then e
-    else
-      let relative := i - s
-      match listGet? subst relative with
-      | some replacement => replacement.liftLooseBVars 0 offset
-      | none => .bvar (i - subst.length)
+      let s := start + offset
+      if i < s then
+        (e, false)
+      else
+        let relative := i - s
+        match listGet? subst relative with
+        | some replacement =>
+            (replacement.liftLooseBVars 0 offset, true)
+        | none =>
+            if subst.isEmpty then
+              (e, false)
+            else
+              (.bvar (i - subst.length), true)
   | .app f a =>
-    .app
-      (f.instantiateAt start subst offset)
-      (a.instantiateAt start subst offset)
+      let (f', fc) := f.instantiateAtChanged start subst offset
+      let (a', ac) := a.instantiateAtChanged start subst offset
+      if fc || ac then (.app f' a', true) else (e, false)
   | .lam n t b bi =>
-    .lam n
-      (t.instantiateAt start subst offset)
-      (b.instantiateAt start subst (offset + 1))
-      bi
+      let (t', tc) := t.instantiateAtChanged start subst offset
+      let (b', bc) := b.instantiateAtChanged start subst (offset + 1)
+      if tc || bc then (.lam n t' b' bi, true) else (e, false)
   | .forallE n t b bi =>
-    .forallE n
-      (t.instantiateAt start subst offset)
-      (b.instantiateAt start subst (offset + 1))
-      bi
+      let (t', tc) := t.instantiateAtChanged start subst offset
+      let (b', bc) := b.instantiateAtChanged start subst (offset + 1)
+      if tc || bc then (.forallE n t' b' bi, true) else (e, false)
   | .letE n t v b nd =>
-    .letE n
-      (t.instantiateAt start subst offset)
-      (v.instantiateAt start subst offset)
-      (b.instantiateAt start subst (offset + 1))
-      nd
-  | .mdata m b => .mdata m (b.instantiateAt start subst offset)
-  | .proj n i b => .proj n i (b.instantiateAt start subst offset)
-  | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => e
+      let (t', tc) := t.instantiateAtChanged start subst offset
+      let (v', vc) := v.instantiateAtChanged start subst offset
+      let (b', bc) := b.instantiateAtChanged start subst (offset + 1)
+      if tc || vc || bc then (.letE n t' v' b' nd, true) else (e, false)
+  | .mdata m b =>
+      let (b', bc) := b.instantiateAtChanged start subst offset
+      if bc then (.mdata m b', true) else (e, false)
+  | .proj n i b =>
+      let (b', bc) := b.instantiateAtChanged start subst offset
+      if bc then (.proj n i b', true) else (e, false)
+  | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => (e, false)
+
+partial def Expr.instantiateAt
+    (e : Expr) (start : Nat) (subst : List Expr) (offset : Nat) : Expr :=
+  if subst.isEmpty then e else (e.instantiateAtChanged start subst offset).1
 
 def Expr.instantiate (e : Expr) (subst : List Expr) : Expr :=
   e.instantiateAt 0 subst 0
@@ -135,33 +169,47 @@ def Name.lastIndexOf (needle : Name) (xs : List Name) : Option Nat :=
       go tail (index + 1) answer'
   go xs 0 none
 
-partial def Expr.abstractFVarsAt
-    (e : Expr) (fvars : List Name) (offset : Nat) : Expr :=
+/--
+Portable DAG-preserving FVar abstraction. Unaffected subtrees are returned
+verbatim instead of being rebuilt. This recovers the important sharing property
+of Lean's pointer-memoized abstraction while staying inside the PSC1 source
+profile.
+-/
+private partial def Expr.abstractFVarsAtChanged
+    (e : Expr) (fvars : List Name) (offset : Nat) : Expr × Bool :=
   match e with
   | .fvar n =>
-    match Name.lastIndexOf n fvars with
-    | none => e
-    | some i => .bvar (offset + fvars.length - i - 1)
-  | .app f a => .app (f.abstractFVarsAt fvars offset) (a.abstractFVarsAt fvars offset)
+      match Name.lastIndexOf n fvars with
+      | none => (e, false)
+      | some i => (.bvar (offset + fvars.length - i - 1), true)
+  | .app f a =>
+      let (f', fc) := f.abstractFVarsAtChanged fvars offset
+      let (a', ac) := a.abstractFVarsAtChanged fvars offset
+      if fc || ac then (.app f' a', true) else (e, false)
   | .lam n t b bi =>
-    .lam n
-      (t.abstractFVarsAt fvars offset)
-      (b.abstractFVarsAt fvars (offset + 1))
-      bi
+      let (t', tc) := t.abstractFVarsAtChanged fvars offset
+      let (b', bc) := b.abstractFVarsAtChanged fvars (offset + 1)
+      if tc || bc then (.lam n t' b' bi, true) else (e, false)
   | .forallE n t b bi =>
-    .forallE n
-      (t.abstractFVarsAt fvars offset)
-      (b.abstractFVarsAt fvars (offset + 1))
-      bi
+      let (t', tc) := t.abstractFVarsAtChanged fvars offset
+      let (b', bc) := b.abstractFVarsAtChanged fvars (offset + 1)
+      if tc || bc then (.forallE n t' b' bi, true) else (e, false)
   | .letE n t v b nd =>
-    .letE n
-      (t.abstractFVarsAt fvars offset)
-      (v.abstractFVarsAt fvars offset)
-      (b.abstractFVarsAt fvars (offset + 1))
-      nd
-  | .mdata m b => .mdata m (b.abstractFVarsAt fvars offset)
-  | .proj n i b => .proj n i (b.abstractFVarsAt fvars offset)
-  | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => e
+      let (t', tc) := t.abstractFVarsAtChanged fvars offset
+      let (v', vc) := v.abstractFVarsAtChanged fvars offset
+      let (b', bc) := b.abstractFVarsAtChanged fvars (offset + 1)
+      if tc || vc || bc then (.letE n t' v' b' nd, true) else (e, false)
+  | .mdata m b =>
+      let (b', bc) := b.abstractFVarsAtChanged fvars offset
+      if bc then (.mdata m b', true) else (e, false)
+  | .proj n i b =>
+      let (b', bc) := b.abstractFVarsAtChanged fvars offset
+      if bc then (.proj n i b', true) else (e, false)
+  | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => (e, false)
+
+partial def Expr.abstractFVarsAt
+    (e : Expr) (fvars : List Name) (offset : Nat) : Expr :=
+  if fvars.isEmpty then e else (e.abstractFVarsAtChanged fvars offset).1
 
 def Expr.abstractFVars (e : Expr) (fvars : List Name) : Expr :=
   e.abstractFVarsAt fvars 0

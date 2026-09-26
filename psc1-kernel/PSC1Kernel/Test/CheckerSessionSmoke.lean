@@ -100,6 +100,20 @@ def main : IO Unit := do
       expectSession "stateful infer-only recursively caches function head"
         ((CheckerExprMap.get? next.state.inferOnly (.const F [])).isSome)
 
+  -- Metadata is semantically transparent to inference. It must forward through
+  -- the same stateful infer path rather than escaping to the pure checker.
+  let metadataBody : Expr := .app (.const F []) (.const NatN [])
+  let metadataInput : Expr := .mdata 7 metadataBody
+  match session.inferStateful metadataInput with
+  | .error err =>
+      throw <| IO.userError ("stateful metadata inference failed: " ++ err)
+  | .ok (actual, next) =>
+      expectSession "stateful metadata result" (Expr.eq actual natT)
+      expectSession "stateful metadata caches wrapper"
+        ((CheckerExprMap.get? next.state.inferOnly metadataInput).isSome)
+      expectSession "stateful metadata recursively caches body"
+        ((CheckerExprMap.get? next.state.inferOnly metadataBody).isSome)
+
   -- Binder spines must recurse through the same state as well. These tests use
   -- a fresh session each time so the first generated FVar is deterministic.
   let xName : Name := .str .anonymous "binderX"

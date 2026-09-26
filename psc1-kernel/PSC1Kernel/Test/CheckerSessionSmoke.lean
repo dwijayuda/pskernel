@@ -142,4 +142,47 @@ def main : IO Unit := do
         ((CheckerExprMap.get? next.state.inferOnly openedX).isSome)
       expectSession "stateful let advances fresh-name state" (next.state.nextFresh == 1)
 
+  -- Projection inference must recursively infer the projected structure through
+  -- the same CheckerState. A pure inferProj fallback caches only the outer
+  -- projection and therefore misses this inner structure application.
+  let BoxN : Name := .str .anonymous "SessionBox"
+  let BoxMkN : Name := .str BoxN "mk"
+  let fieldN : Name := .str .anonymous "field"
+  let boxT : Expr := .const BoxN []
+  let boxCtorType : Expr :=
+    .forallE fieldN (.sort .zero) boxT .default
+  let projEnv0 :=
+    Environment.empty.addUnchecked (.inductInfo {
+      base := { name := BoxN, levelParams := [], type := .sort (.succ .zero) }
+      numParams := 0
+      numIndices := 0
+      all := [BoxN]
+      ctors := [BoxMkN]
+      numNested := 0
+      isRec := false
+      isReflexive := false
+      isUnsafe := false
+    })
+  let projEnv :=
+    projEnv0.addUnchecked (.ctorInfo {
+      base := { name := BoxMkN, levelParams := [], type := boxCtorType }
+      induct := BoxN
+      cidx := 0
+      numParams := 0
+      numFields := 1
+      isUnsafe := false
+    })
+  let projSession := Kernel.mkCheckerSession projEnv [] .safe
+  let structTerm : Expr := .app (.const BoxMkN []) (.sort .zero)
+  let projection : Expr := .proj BoxN 0 structTerm
+  match projSession.inferStateful projection with
+  | .error err =>
+      throw <| IO.userError ("stateful projection inference failed: " ++ err)
+  | .ok (actual, next) =>
+      expectSession "stateful projection result" (Expr.eq actual (.sort .zero))
+      expectSession "stateful projection caches outer projection"
+        ((CheckerExprMap.get? next.state.inferOnly projection).isSome)
+      expectSession "stateful projection recursively caches structure"
+        ((CheckerExprMap.get? next.state.inferOnly structTerm).isSome)
+
   IO.println "PSC1 declaration checker-session smoke: PASS"

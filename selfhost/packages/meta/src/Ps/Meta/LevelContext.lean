@@ -72,7 +72,7 @@ def psLevelInstantiateWithFuel
       | _ => level
 
 def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLevel :=
-  psLevelInstantiateWithFuel context (context.assignments.length + 1) level
+  psLevelInstantiateWithFuel context (Nat.add context.assignments.length 1) level
 
 def psLevelOccursResolved (target : Nat) : PsLevel -> Bool
   | .mvar id => id == target

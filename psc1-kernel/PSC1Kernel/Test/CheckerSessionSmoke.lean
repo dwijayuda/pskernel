@@ -56,4 +56,35 @@ def main : IO Unit := do
     | .error err => throw <| IO.userError err
   expectSession "session defeq" reflexive
 
+  -- Stateful session calls are explicit and pure: each call returns the next
+  -- declaration-scoped session. Reusing that returned session must reuse the
+  -- checker memo state without process-global mutation.
+  let cacheInput : Expr := .sort .zero
+  let cacheExpected : Expr := .sort (.succ .zero)
+  match session.checkStateful cacheInput with
+  | .error err =>
+      throw <| IO.userError ("stateful session check failed: " ++ err)
+  | .ok (actual1, session1) =>
+      expectSession "stateful session checked result" (Expr.eq actual1 cacheExpected)
+      expectSession "stateful session owns checked cache"
+        (match CheckerExprMap.get? session1.state.checkedInfer cacheInput with
+         | some cached => Expr.eq cached cacheExpected
+         | none => false)
+      let checkedSize := session1.state.checkedInfer.size
+      match session1.checkStateful cacheInput with
+      | .error err =>
+          throw <| IO.userError ("second stateful session check failed: " ++ err)
+      | .ok (actual2, session2) =>
+          expectSession "stateful session second result" (Expr.eq actual2 cacheExpected)
+          expectSession "stateful session reuses checked cache"
+            (session2.state.checkedInfer.size == checkedSize)
+          match session2.inferStateful cacheInput with
+          | .error err =>
+              throw <| IO.userError ("stateful session infer failed: " ++ err)
+          | .ok (actual3, session3) =>
+              expectSession "stateful session infer result" (Expr.eq actual3 cacheExpected)
+              expectSession "stateful session keeps infer-only cache separate"
+                ((CheckerExprMap.get? session3.state.inferOnly cacheInput).isSome &&
+                 session3.state.checkedInfer.size == checkedSize)
+
   IO.println "PSC1 declaration checker-session smoke: PASS"

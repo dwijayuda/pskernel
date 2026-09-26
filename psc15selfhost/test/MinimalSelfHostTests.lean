@@ -34,8 +34,8 @@ def psTestForgedAdmissionReadyRejected : Bool :=
       let forged : PsCompilerAdmissionReadyModule :=
         { prepared with canonicalAdmissions := "forged" }
       match psCompilerVerifiedIrFromPrepared forged with
-      | Except.error _ => true
-      | Except.ok _ => false
+      | Except.error PsCompilerError.preparedAdmissionMismatch => true
+      | _ => false
 
 def psTestMinimalSelfHostTypeScript : Bool :=
   match

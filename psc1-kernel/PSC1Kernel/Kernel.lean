@@ -20,6 +20,20 @@ def nameMember (target : Name) : List Name → Bool
   | [] => false
   | x :: xs => Name.eq target x || nameMember target xs
 
+def arrayPushEqAppendName : Name :=
+  .str (.str .anonymous "Array") "push_eq_append"
+
+private def traceArrayPushStage
+    (declName : Name)
+    (stage : String)
+    (k : Unit → α) : α :=
+  if Name.eq declName arrayPushEqAppendName then
+    dbgTrace ("[psc1-array-push] BEGIN " ++ stage) fun _ =>
+      let result := k ()
+      dbgTrace ("[psc1-array-push] END " ++ stage) fun _ => result
+  else
+    k ()
+
 partial def findUndefLevelParam (u : Level) (allowed : List Name) : Option Name :=
   match u with
   | .zero | .mvar _ => none
@@ -192,15 +206,22 @@ def addTheorem
     (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
   let session :=
     mkCheckerSession env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
-  checkConstantBaseWithSession session value.base
-  unless ← session.isProp value.base.type do
+  let _ ← traceArrayPushStage value.base.name "header" fun _ =>
+    checkConstantBaseWithSession session value.base
+  let theoremIsProp ← traceArrayPushStage value.base.name "isProp" fun _ =>
+    session.isProp value.base.type
+  unless theoremIsProp do
     throw "theorem type is not a proposition"
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
-  let valueType ← session.check value.value
-  unless ← session.isDefEq valueType value.base.type do
+  let valueType ← traceArrayPushStage value.base.name "proof-check" fun _ =>
+    session.check value.value
+  let proofTypeMatches ← traceArrayPushStage value.base.name "proof-defeq" fun _ =>
+    session.isDefEq valueType value.base.type
+  unless proofTypeMatches do
     throw "theorem proof type mismatch"
-  env.add (.thmInfo value)
+  traceArrayPushStage value.base.name "env-add" fun _ =>
+    env.add (.thmInfo value)
 
 def addOpaque
     (env : Environment)

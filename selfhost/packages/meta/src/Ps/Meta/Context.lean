@@ -190,7 +190,7 @@ def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
     psMetaInstantiateRounds
       context
       (Nat.add context.assignments.length 1)
-      expr
+      expr;
   psLevelInstantiateExpr context.levels value
 
 structure PsMetaFreshLevelResult where

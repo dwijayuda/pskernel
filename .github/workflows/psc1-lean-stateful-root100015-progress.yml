@@ -8,6 +8,7 @@ on:
       - perf/psc1-lean-stateful-infer-app
       - perf/psc1-lean-stateful-infer-binders
       - perf/psc1-lean-stateful-infer-proj
+      - perf/psc1-lean-preserve-transform-sharing
     paths:
       - ".github/workflows/psc1-lean-stateful-root100015-progress.yml"
       - "psc1-kernel/PSC1Kernel.lean"
@@ -18,6 +19,7 @@ on:
       - "psc1-kernel/PSC1Kernel/CheckerDefEqStatefulClosed.lean"
       - "psc1-kernel/PSC1Kernel/CheckerSession.lean"
       - "psc1-kernel/PSC1Kernel/Kernel.lean"
+      - "psc1-kernel/PSC1Kernel/Instantiate.lean"
       - "psc1-kernel/PSC1Kernel/Test/ReplayFile.lean"
 
 permissions:

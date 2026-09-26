@@ -200,3 +200,6 @@ jobs:
 
       - name: Run PSCKernel basic definitional equality differential
         run: node scripts/psckernel-defeq-basic-differential.mjs
+
+      - name: Run PSCKernel checked inference basic differential
+        run: node scripts/psckernel-checked-inference-basic-differential.mjs

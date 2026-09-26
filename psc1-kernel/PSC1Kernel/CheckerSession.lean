@@ -32,18 +32,26 @@ def isProp (session : CheckerSession) (e : Expr) : Except String Bool :=
 def isDefEq (session : CheckerSession) (a b : Expr) : Except String Bool :=
   PSC1Kernel.isDefEq session.context a b
 
-/-- Pure stateful checked inference; returns the next declaration-scoped session. -/
+/--
+Pure stateful checked inference. Application checks use the same recursive
+stateful defeq algorithm as the session, so infer/WHNF/defeq share one cache
+state instead of dropping back to the compatibility wrapper.
+-/
 def checkStateful
     (session : CheckerSession)
     (e : Expr) : Except String (Expr × CheckerSession) := do
-  let (result, state) ← PSC1Kernel.checkStateful session.context session.state e
+  let (result, state) ←
+    PSC1Kernel.checkStatefulWith StatefulDefEq.isDefEq
+      session.context session.state e
   pure (result, { session with state := state })
 
-/-- Pure stateful infer-only operation. -/
+/-- Pure stateful infer-only operation using the shared recursive checker state. -/
 def inferStateful
     (session : CheckerSession)
     (e : Expr) : Except String (Expr × CheckerSession) := do
-  let (result, state) ← PSC1Kernel.inferStateful session.context session.state e
+  let (result, state) ←
+    PSC1Kernel.inferStatefulWith StatefulDefEq.isDefEq
+      session.context session.state e
   pure (result, { session with state := state })
 
 /-- Pure stateful public WHNF operation. -/
@@ -70,11 +78,7 @@ def isPropStateful
   let (level, next2) ← next1.ensureSortStateful type
   pure (Level.normalizesToZero level, next2)
 
-/--
-Pure declaration-scoped recursive definitional equality. This is the real
-Lean-4.34-style stateful algorithm; the older `PSC1Kernel.isDefEqStateful`
-wrapper remains only as an incremental inference compatibility path.
--/
+/-- Pure declaration-scoped recursive definitional equality. -/
 def isDefEqStateful
     (session : CheckerSession)
     (a b : Expr) : Except String (Bool × CheckerSession) := do

@@ -10,6 +10,7 @@ on:
       - perf/psc1-lean-stateful-infer-app
       - perf/psc1-lean-stateful-infer-binders
       - perf/psc1-lean-stateful-infer-proj
+      - perf/psc1-lean-stateful-recursor
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
@@ -64,6 +65,9 @@ jobs:
       - name: Stateful recursive checker
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerStatefulSmoke.lean
+      - name: Stateful recursor reduction
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerRecursorStatefulSmoke.lean
       - name: Recursive stateful defeq
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerDefEqStatefulSmoke.lean

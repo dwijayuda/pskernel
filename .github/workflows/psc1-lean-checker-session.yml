@@ -34,6 +34,9 @@ jobs:
           mkdir -p .lake/build/lib/lean/PSC1Kernel/Test
           lake env lean PSC1Kernel/Test/StructureFixture.lean \
             -o .lake/build/lib/lean/PSC1Kernel/Test/StructureFixture.olean
+      - name: Checker-state cache invariants
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerStateSmoke.lean
       - name: Checker-session smoke
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerSessionSmoke.lean

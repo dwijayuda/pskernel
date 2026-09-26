@@ -110,3 +110,6 @@ jobs:
 
       - name: Run PSCKernel Expr level instantiation differential
         run: node scripts/psckernel-expr-level-instantiation-differential.mjs
+
+      - name: Run PSCKernel Expr instantiation differential
+        run: node scripts/psckernel-expr-instantiation-differential.mjs

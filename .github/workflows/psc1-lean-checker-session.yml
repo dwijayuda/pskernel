@@ -13,6 +13,7 @@ on:
       - perf/psc1-lean-stateful-recursor
       - perf/psc1-lean-stateful-dag-sharing
       - perf/psc1-lean-expr-withptreq
+      - perf/psc1-lean-stateful-delta
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
@@ -73,6 +74,9 @@ jobs:
       - name: Stateful recursor reduction
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerRecursorStatefulSmoke.lean
+      - name: Stateful lazy-delta recursor
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerDeltaStatefulSmoke.lean
       - name: Recursive stateful defeq
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerDefEqStatefulSmoke.lean

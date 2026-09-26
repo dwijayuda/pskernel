@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
-import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertBootstrapWorkspaceManifest } from "./bootstrap-manifest.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -22,19 +22,29 @@ const rightManifest = JSON.parse(
   await readFile(path.join(rightRoot, ".proofscript-selfhost.json"), "utf8"),
 );
 
+const [leftClosureSha256, rightClosureSha256] = await Promise.all([
+  assertBootstrapWorkspaceManifest(leftRoot, leftManifest, "bootstrap"),
+  assertBootstrapWorkspaceManifest(rightRoot, rightManifest, "selfhost"),
+]);
+
 if (leftManifest.entry !== rightManifest.entry) {
   throw new Error(
     `PSC1_SELFHOST_SOURCE_ENTRY_MISMATCH: ${leftManifest.entry} != ${rightManifest.entry}`,
   );
 }
 
-const leftFiles = [...leftManifest.generated].sort();
-const rightFiles = [...rightManifest.generated].sort();
+const leftFiles = leftManifest.generated;
+const rightFiles = rightManifest.generated;
 if (JSON.stringify(leftFiles) !== JSON.stringify(rightFiles)) {
   throw new Error("PSC1_SELFHOST_SOURCE_FILESET_MISMATCH");
 }
 
-const hash = createHash("sha256");
+if (leftClosureSha256 !== rightClosureSha256) {
+  throw new Error(
+    `PSC1_SELFHOST_SOURCE_CLOSURE_MISMATCH: ${leftClosureSha256} != ${rightClosureSha256}`,
+  );
+}
+
 for (const relativePath of leftFiles) {
   const [left, right] = await Promise.all([
     readFile(path.join(leftRoot, relativePath), "utf8"),
@@ -43,16 +53,12 @@ for (const relativePath of leftFiles) {
   if (left !== right) {
     throw new Error(`PSC1_SELFHOST_SOURCE_MISMATCH: ${relativePath}`);
   }
-  hash.update(relativePath, "utf8");
-  hash.update("\0", "utf8");
-  hash.update(left, "utf8");
-  hash.update("\0", "utf8");
 }
 
 process.stdout.write(
   [
     "PSC1_SELFHOST_SOURCE_FIXED_POINT: PASS",
     `files=${leftFiles.length}`,
-    `sha256=${hash.digest("hex")}`,
+    `closure.sha256=${leftClosureSha256}`,
   ].join("\n") + "\n",
 );

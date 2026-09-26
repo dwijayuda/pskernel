@@ -23,9 +23,9 @@ def main : IO Unit := do
     ((checkerWhnfCoreLookup env decls 0 1024 false input).isNone)
 
   let x : Name := .str .anonymous "x"
-  let local : LocalDecl := .localDecl 0 x x (.sort .zero) .default
+  let localDecl : LocalDecl := .localDecl 0 x x (.sort .zero) .default
   expect "different local spine misses"
-    ((checkerWhnfCoreLookup env [local] 1 1024 true input).isNone)
+    ((checkerWhnfCoreLookup env [localDecl] 1 1024 true input).isNone)
 
   let env2 := { env with quotInitialized := true }
   expect "different environment misses"

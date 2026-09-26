@@ -296,6 +296,8 @@ def psWasmEncodeInstruction
       Except.ok (psWasmByte 32 :: psWasmEncodeUleb index)
   | .localSet index =>
       Except.ok (psWasmByte 33 :: psWasmEncodeUleb index)
+  | .drop => Except.ok [psWasmByte 26]
+  | .unreachable => Except.ok [psWasmByte 0]
   | .call name =>
       match psWasmFindFunctionIndex functions name with
       | none => Except.error (PsWasmEncodeError.unknownFunction name)
@@ -325,6 +327,7 @@ def psWasmEncodeInstruction
   | .i32And => Except.ok [psWasmByte 113]
   | .i32Or => Except.ok [psWasmByte 114]
   | .i32Xor => Except.ok [psWasmByte 115]
+  | .i32ShrU => Except.ok [psWasmByte 118]
   | .i32Extend8S => Except.ok [psWasmByte 192]
   | .i32Extend16S => Except.ok [psWasmByte 193]
   | .i32Eq => Except.ok [psWasmByte 70]

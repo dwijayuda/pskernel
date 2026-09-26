@@ -244,9 +244,8 @@ structure PsVerifiedIrModule where
   declarations : List PsVerifiedIrDeclaration
 
 def psVerifiedIrModuleEmpty : PsVerifiedIrModule :=
-  {
-    imports := []
-    structures := []
-    inductives := []
-    declarations := []
-  }
+  PsVerifiedIrModule.mk
+    List.nil
+    List.nil
+    List.nil
+    List.nil

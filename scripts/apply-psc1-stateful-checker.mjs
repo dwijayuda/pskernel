@@ -21,4 +21,23 @@ if (!text.includes('def checkStateful')) {
 }
 
 fs.writeFileSync(path, text);
-console.log('PSC1_STATEFUL_CHECKER_PATCH: checked application state flow applied');
+
+const sessionPath = 'psc1-kernel/PSC1Kernel/CheckerSession.lean';
+let sessionText = fs.readFileSync(sessionPath, 'utf8');
+
+const oldSessionStruct = `structure CheckerSession where\n  context : CheckerContext\n`;
+const newSessionStruct = `structure CheckerSession where\n  context : CheckerContext\n  /-- Pure declaration-scoped memo state; callers thread the returned session. -/\n  state : CheckerState := .empty\n`;
+if (!sessionText.includes('state : CheckerState')) {
+  if (!sessionText.includes(oldSessionStruct)) throw new Error('CheckerSession structure anchor missing');
+  sessionText = sessionText.replace(oldSessionStruct, newSessionStruct);
+}
+
+const oldSessionTail = `def isDefEq (session : CheckerSession) (a b : Expr) : Except String Bool :=\n  PSC1Kernel.isDefEq session.context a b\n\nend CheckerSession\n`;
+const newSessionTail = `def isDefEq (session : CheckerSession) (a b : Expr) : Except String Bool :=\n  PSC1Kernel.isDefEq session.context a b\n\n/--\nPure stateful checked inference. The updated session carries exactly the memo\nstate produced while checking this expression.\n-/\ndef checkStateful\n    (session : CheckerSession)\n    (e : Expr) : Except String (Expr × CheckerSession) := do\n  let (result, state) ← PSC1Kernel.checkStateful session.context session.state e\n  pure (result, { session with state := state })\n\n/-- Pure stateful infer-only entry point. -/\ndef inferStateful\n    (session : CheckerSession)\n    (e : Expr) : Except String (Expr × CheckerSession) := do\n  let (result, state) ← PSC1Kernel.inferStateful session.context session.state e\n  pure (result, { session with state := state })\n\n/-- Pure stateful public-WHNF entry point. -/\ndef whnfStateful\n    (session : CheckerSession)\n    (e : Expr) : Except String (Expr × CheckerSession) := do\n  let (result, state) ← PSC1Kernel.whnfStateful session.context session.state e\n  pure (result, { session with state := state })\n\nend CheckerSession\n`;
+if (!sessionText.includes('def checkStateful')) {
+  if (!sessionText.includes(oldSessionTail)) throw new Error('CheckerSession method anchor missing');
+  sessionText = sessionText.replace(oldSessionTail, newSessionTail);
+}
+
+fs.writeFileSync(sessionPath, sessionText);
+console.log('PSC1_STATEFUL_CHECKER_PATCH: recursive checker and pure session state flow applied');

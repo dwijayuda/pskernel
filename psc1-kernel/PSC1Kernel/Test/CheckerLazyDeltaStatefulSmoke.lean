@@ -1,4 +1,4 @@
-import PSC1Kernel.CheckerStateful
+import PSC1Kernel.CheckerLazyDeltaStateful
 
 open PSC1Kernel
 

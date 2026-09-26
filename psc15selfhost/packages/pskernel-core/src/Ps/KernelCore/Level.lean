@@ -65,8 +65,8 @@ def psKernelCoreLevelAddOffset
     (level : PsKernelCoreLevel)
     (offset : Nat) : PsKernelCoreLevel :=
   match offset with
-  | 0 => level
-  | remaining + 1 =>
+  | Nat.zero => level
+  | Nat.succ remaining =>
       PsKernelCoreLevel.succ
         (psKernelCoreLevelAddOffset level remaining)
 
@@ -120,8 +120,8 @@ partial def psKernelCoreLevelEquivalent
   if psKernelCoreLevelEq left right then
     true
   else
-    let normalizedLeft := psKernelCoreLevelNormalize left
-    let normalizedRight := psKernelCoreLevelNormalize right
+    let normalizedLeft := psKernelCoreLevelNormalize left;
+    let normalizedRight := psKernelCoreLevelNormalize right;
     if psKernelCoreLevelEq normalizedLeft normalizedRight then
       true
     else
@@ -164,14 +164,14 @@ def psKernelCoreLevelInstantiateParams
       | some value => value
       | none => root
   | PsKernelCoreLevel.succ child =>
-      let next := psKernelCoreLevelInstantiateParams child params values
+      let next := psKernelCoreLevelInstantiateParams child params values;
       if psKernelCoreLevelEq child next then
         root
       else
         PsKernelCoreLevel.succ next
   | PsKernelCoreLevel.max left right =>
-      let nextLeft := psKernelCoreLevelInstantiateParams left params values
-      let nextRight := psKernelCoreLevelInstantiateParams right params values
+      let nextLeft := psKernelCoreLevelInstantiateParams left params values;
+      let nextRight := psKernelCoreLevelInstantiateParams right params values;
       if psKernelCoreLevelEq left nextLeft then
         if psKernelCoreLevelEq right nextRight then
           root
@@ -180,8 +180,8 @@ def psKernelCoreLevelInstantiateParams
       else
         psKernelCoreLevelMkMax nextLeft nextRight
   | PsKernelCoreLevel.imax left right =>
-      let nextLeft := psKernelCoreLevelInstantiateParams left params values
-      let nextRight := psKernelCoreLevelInstantiateParams right params values
+      let nextLeft := psKernelCoreLevelInstantiateParams left params values;
+      let nextRight := psKernelCoreLevelInstantiateParams right params values;
       if psKernelCoreLevelEq left nextLeft then
         if psKernelCoreLevelEq right nextRight then
           root

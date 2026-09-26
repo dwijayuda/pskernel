@@ -1,0 +1,73 @@
+name: Wasm Array runtime development
+
+on:
+  push:
+    branches:
+      - backend/wasm3-array-runtime
+    paths:
+      - .github/workflows/wasm3-array-runtime-dev.yml
+      - selfhost/**
+
+permissions:
+  contents: write
+
+jobs:
+  array-red:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Prove Array lowering is RED before implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          cat > /tmp/WasmArrayRed.lean <<'LEAN'
+          import Ps.BackendWasm.Lower
+
+          def profile : PsWasmTargetProfile := { wordSize := .wasm32 }
+          def u32 : PsVerifiedIrType := .primitive .uint32
+          def arrayU32 : PsVerifiedIrType := .named "Array" [u32]
+
+          def redModule : PsVerifiedIrModule := {
+            imports := []
+            structures := []
+            inductives := []
+            declarations := [
+              {
+                name := "empty"
+                typeParameters := []
+                parameters := []
+                resultType := arrayU32
+                body := .intrinsic .arrayEmptyWithCapacity [u32]
+                  [.literal (.natural 0)]
+              }
+            ]
+          }
+
+          def main : IO Unit := do
+            match psWasmLowerModule profile redModule with
+            | Except.ok _ =>
+                throw (IO.userError "WASM_ARRAY_RED_UNEXPECTEDLY_GREEN")
+            | Except.error PsWasmLowerError.unsupportedIntrinsic =>
+                throw (IO.userError "WASM_ARRAY_RED_UNSUPPORTED_INTRINSIC")
+            | Except.error _ =>
+                throw (IO.userError "WASM_ARRAY_RED_WRONG_FAILURE")
+          LEAN
+
+          set +e
+          lake env lean --run /tmp/WasmArrayRed.lean >/tmp/array-red.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/array-red.log
+          test "$status" -ne 0
+          grep -q 'WASM_ARRAY_RED_UNSUPPORTED_INTRINSIC' /tmp/array-red.log
+          echo 'WASM_ARRAY_TDD_RED: PASS'

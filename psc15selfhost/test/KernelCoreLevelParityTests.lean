@@ -14,6 +14,14 @@ def psKernelCoreLevelParity : Bool :=
   let kcIMaxZero := PsKernelCoreLevel.imax kcOne kcZero
   let kcNested := PsKernelCoreLevel.succ (PsKernelCoreLevel.max kcUParam kcVParam)
   let kcMVar := PsKernelCoreLevel.mvar kcU
+  let kcUParams := PsKernelCoreList.cons kcU PsKernelCoreList.nil
+  let kcOneValues := PsKernelCoreList.cons kcOne PsKernelCoreList.nil
+  let kcUVParams :=
+    PsKernelCoreList.cons kcU
+      (PsKernelCoreList.cons kcV PsKernelCoreList.nil)
+  let kcOneZeroValues :=
+    PsKernelCoreList.cons kcOne
+      (PsKernelCoreList.cons kcZero PsKernelCoreList.nil)
   let refAnon := PSC1Kernel.Name.anonymous
   let refU := PSC1Kernel.Name.str refAnon "u"
   let refV := PSC1Kernel.Name.str refAnon "v"
@@ -30,19 +38,19 @@ def psKernelCoreLevelParity : Bool :=
   (psKernelCoreLevelEquivalent kcMaxUV kcMaxVU == PSC1Kernel.Level.equivalent refMaxUV refMaxVU) &&
   (psKernelCoreLevelEquivalent kcIMaxZero kcZero == PSC1Kernel.Level.equivalent refIMaxZero refZero) &&
   (psKernelCoreLevelEq
-      (psKernelCoreLevelInstantiateParams kcUParam [kcU] [kcOne])
+      (psKernelCoreLevelInstantiateParams kcUParam kcUParams kcOneValues)
       kcOne ==
     PSC1Kernel.Level.eq
       (PSC1Kernel.Level.instantiateParams refUParam [refU] [refOne])
       refOne) &&
   (psKernelCoreLevelEq
-      (psKernelCoreLevelInstantiateParams kcVParam [kcU] [kcOne])
+      (psKernelCoreLevelInstantiateParams kcVParam kcUParams kcOneValues)
       kcVParam ==
     PSC1Kernel.Level.eq
       (PSC1Kernel.Level.instantiateParams refVParam [refU] [refOne])
       refVParam) &&
   (psKernelCoreLevelEq
-      (psKernelCoreLevelInstantiateParams kcNested [kcU, kcV] [kcOne, kcZero])
+      (psKernelCoreLevelInstantiateParams kcNested kcUVParams kcOneZeroValues)
       (PsKernelCoreLevel.succ kcOne) ==
     PSC1Kernel.Level.eq
       (PSC1Kernel.Level.instantiateParams refNested [refU, refV] [refOne, refZero])

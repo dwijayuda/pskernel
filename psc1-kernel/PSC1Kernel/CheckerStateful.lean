@@ -206,10 +206,13 @@ private def cacheInferStatefulResult
     { state with checkedInfer := CheckerExprMap.insert state.checkedInfer e result }
 
 /--
-Incremental stateful counterpart of Lean 4.34 infer_type_core. Checked
-applications already thread recursive inference, public WHNF, and positive
-defeq memo state; other forms still delegate to the established pure checker
-until migrated by tests.
+Incremental stateful counterpart of Lean 4.34 `infer_type_core`.
+
+Final Lean 4.34 enters `scope_rec_depth` before the infer-cache lookup. During
+this incremental migration, cache hits and the custom checked-application path
+therefore enter the PSC1 recursion guard explicitly. Non-migrated misses still
+delegate to the established pure `inferCore`, which already enters that guard;
+charging them here as well would incorrectly double-count recursion depth.
 -/
 partial def inferCoreStateful
     (ctx : CheckerContext)
@@ -218,16 +221,23 @@ partial def inferCoreStateful
     (inferOnly : Bool) : Except String (Expr × CheckerState) :=
   let cache := if inferOnly then state.inferOnly else state.checkedInfer
   match CheckerExprMap.get? cache e with
-  | some cached => .ok (cached, state)
+  | some cached => do
+      let _ctx ← ctx.enterKernelRecDepth
+      return (cached, state)
   | none =>
       match e with
       | .app fn arg =>
           if inferOnly then
+            -- This branch is not migrated yet. Pure `inferCore` owns exactly
+            -- one recursion-depth scope, matching the C++ miss path.
             match inferCore ctx e true with
             | .error err => .error err
             | .ok result =>
                 .ok (result, cacheInferStatefulResult state true e result)
           else do
+            -- This branch replaces pure `inferCore`, so it must own the one
+            -- `scope_rec_depth` that Lean C++ charges before recursive work.
+            let ctx ← ctx.enterKernelRecDepth
             let (fnType, state1) ← inferCoreStateful ctx state fn false
             let (fnTypeWhnf, state2) ← whnfStateful ctx state1 fnType
             let .forallE _ domain body _ := fnTypeWhnf
@@ -244,6 +254,7 @@ partial def inferCoreStateful
             let result := body.instantiate1 arg
             return (result, cacheInferStatefulResult state4 false e result)
       | _ =>
+          -- Non-migrated forms retain the proven pure resource accounting.
           match inferCore ctx e inferOnly with
           | .error err => .error err
           | .ok result =>

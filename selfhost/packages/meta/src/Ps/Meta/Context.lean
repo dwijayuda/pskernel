@@ -115,7 +115,10 @@ def psExprContainsMVar (target : Nat) : PsExpr -> Bool
 def psExprFVarsInContext (localContext : PsLocalContext) : PsExpr -> Bool
   | .fvar id => psLocalContainsId localContext id
   | .app fn arg =>
-      psExprFVarsInContext localContext fn && psExprFVarsInContext localContext arg
+      if psExprFVarsInContext localContext fn then
+        psExprFVarsInContext localContext arg
+      else
+        false
   | .lam _ type body _ =>
       psExprFVarsInContext localContext type && psExprFVarsInContext localContext body
   | .forallE _ type body _ =>

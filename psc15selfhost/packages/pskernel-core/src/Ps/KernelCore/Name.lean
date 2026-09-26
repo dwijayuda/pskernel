@@ -17,7 +17,10 @@ def psKernelCoreNameEq
       fun (right : PsKernelCoreName) =>
         match right with
         | PsKernelCoreName.str rightParent rightValue =>
-            parentEq rightParent && leftValue == rightValue
+            if parentEq rightParent then
+              leftValue == rightValue
+            else
+              false
         | _ => false
   | PsKernelCoreName.num leftParent leftValue =>
       let parentEq : PsKernelCoreName -> Bool :=
@@ -25,7 +28,10 @@ def psKernelCoreNameEq
       fun (right : PsKernelCoreName) =>
         match right with
         | PsKernelCoreName.num rightParent rightValue =>
-            parentEq rightParent && Nat.beq leftValue rightValue
+            if parentEq rightParent then
+              Nat.beq leftValue rightValue
+            else
+              false
         | _ => false
 
 def psKernelCoreNameMember

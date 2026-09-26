@@ -155,6 +155,10 @@ lean_lib PsElab where
     `Ps.Elab.Declaration
   ]
 
+lean_lib PsKernelCore where
+  srcDir := "packages/pskernel-core/src"
+  roots := #[`Ps.KernelCore]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"

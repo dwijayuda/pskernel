@@ -210,3 +210,6 @@ jobs:
 
       - name: Run PSCKernel checked inference basic differential
         run: node scripts/psckernel-checked-inference-basic-differential.mjs
+
+      - name: Run PSCKernel projection basic differential
+        run: node scripts/psckernel-projection-basic-differential.mjs

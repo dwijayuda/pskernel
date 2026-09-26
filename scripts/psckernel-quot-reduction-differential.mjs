@@ -7,7 +7,6 @@ import {
   bvar,
   constant,
   exprLeanEq,
-  letE,
   mkAppN,
 } from '../dist/src/core/expr.js';
 import { nameFromDotted } from '../dist/src/core/name.js';
@@ -90,7 +89,14 @@ const observations = [];
   observations.push(exprLeanEq(tc.whnf(e), mkAppN(C('proof'), [payload, tail])));
 }
 {
-  const major = letE(N('q'), C('QuotType'), quotMk(payload), bvar(0), false);
+  const major = {
+    kind: 'let',
+    name: N('q'),
+    type: C('QuotType'),
+    value: quotMk(payload),
+    body: bvar(0),
+    nondep: false,
+  };
   const e = quotLift(major);
   observations.push(exprLeanEq(tc.whnf(e), mkAppN(C('f'), [payload])));
 }

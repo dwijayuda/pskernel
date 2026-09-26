@@ -1,0 +1,86 @@
+name: Verify exact Wasm Array integration
+
+on:
+  push:
+    branches:
+      - verify/wasm3-array-runtime-integration
+    paths:
+      - .github/workflows/verify-wasm3-array-runtime-integration.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify-exact-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 131437c3e16b2819798d051b0765393eb034f4b5
+
+      - name: Assert exact integration SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "131437c3e16b2819798d051b0765393eb034f4b5"
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - name: Enforce portable source and neutral shared IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node check-psc1-source.mjs
+          node scripts/check-ir-neutrality.mjs
+
+      - name: Build complete Lean self-host workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build
+
+      - name: Run shared and owned regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_ts_tests
+          lake exe psc1_erasure_tests
+          lake exe psc1_ir_specialize_tests
+          lake exe psc1_backend_wasm_tests
+
+      - name: Execute complete permanent Wasm runtime matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('../.github/workflows/wasm3-backend.yml').read_text()
+          marker = "          node --input-type=module <<'NODE'\n"
+          if text.count(marker) != 1:
+              raise SystemExit('expected one owned-Wasm Node heredoc')
+          body = text.split(marker, 1)[1].split("\n          NODE", 1)[0]
+          lines = [line[10:] if line.startswith('          ') else line for line in body.splitlines()]
+          Path('/tmp/psc1-wasm-runtime.mjs').write_text('\n'.join(lines) + '\n')
+          PY
+          node /tmp/psc1-wasm-runtime.mjs

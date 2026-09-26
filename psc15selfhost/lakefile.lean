@@ -161,7 +161,10 @@ lean_lib PsKernelCore where
 
 lean_lib PSC1KernelReferenceFoundations where
   srcDir := "packages/pskernel"
-  roots := #[`PSC1Kernel.Name]
+  roots := #[
+    `PSC1Kernel.Name,
+    `PSC1Kernel.Level
+  ]
 
 @[default_target]
 lean_exe psc1 where
@@ -235,3 +238,7 @@ lean_exe psc2_kernel_core_boundary_tests where
 lean_exe psc2_kernel_core_name_parity_tests where
   srcDir := "test"
   root := `KernelCoreNameParityTests
+
+lean_exe psc2_kernel_core_level_parity_tests where
+  srcDir := "test"
+  root := `KernelCoreLevelParityTests

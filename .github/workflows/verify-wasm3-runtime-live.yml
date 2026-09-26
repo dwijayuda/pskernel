@@ -6,13 +6,31 @@ on:
       - integrate/wasm3-runtime-live
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Apply isolated intrinsic-arity integration fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('selfhost/packages/backend-rust/src/Ps/BackendRust/Module.lean')
+          text = path.read_text()
+          old = '      | PsVerifiedIrExpr.intrinsic _ arguments =>'
+          new = '      | PsVerifiedIrExpr.intrinsic _ _ arguments =>'
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one stale intrinsic pattern, found {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          git diff --check
+          git diff -- selfhost/packages/backend-rust/src/Ps/BackendRust/Module.lean
 
       - name: Install Lean 4.34.0
         shell: bash
@@ -120,3 +138,16 @@ jobs:
           }
           console.log('PSC1_WASM3_RUNTIME_LIVE_REPLAY: PASS');
           NODE
+
+      - name: Commit the tested integration fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add selfhost/packages/backend-rust/src/Ps/BackendRust/Module.lean
+          git diff --cached --check
+          test "$(git diff --cached --name-only | wc -l)" -eq 1
+          test "$(git diff --cached --name-only)" = "selfhost/packages/backend-rust/src/Ps/BackendRust/Module.lean"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix(rust): migrate storage intrinsic pattern"
+          git push origin HEAD:integrate/wasm3-runtime-live

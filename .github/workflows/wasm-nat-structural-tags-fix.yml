@@ -1,0 +1,247 @@
+name: Wasm Nat structural-tag fix
+
+on:
+  push:
+    branches:
+      - backend/wasm3-runtime-core-fix
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Make Nat binary constructors structurally distinct
+        id: patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean')
+          text = path.read_text()
+
+          if 'name := "bit0Marker"' not in text:
+              old = '''    {
+                name := psWasmNatBit0Name
+                superType := some psWasmNatName
+                isFinal := true
+                fields := [
+                  {
+                    name := "half"
+                    storageType := PsWasmStorageType.value psWasmNatRef
+                  }
+                ]
+              },'''
+              new = '''    {
+                name := psWasmNatBit0Name
+                superType := some psWasmNatName
+                isFinal := true
+                fields := [
+                  {
+                    name := "half"
+                    storageType := PsWasmStorageType.value psWasmNatRef
+                  },
+                  {
+                    name := "bit0Marker"
+                    storageType :=
+                      PsWasmStorageType.value PsWasmValueType.i32
+                  }
+                ]
+              },'''
+              if old not in text:
+                  raise SystemExit('Bit0 structure marker not found')
+              text = text.replace(old, new, 1)
+
+          if 'name := "bit1Marker"' not in text:
+              old = '''    {
+                name := psWasmNatBit1Name
+                superType := some psWasmNatName
+                isFinal := true
+                fields := [
+                  {
+                    name := "half"
+                    storageType := PsWasmStorageType.value psWasmNatRef
+                  }
+                ]
+              },'''
+              new = '''    {
+                name := psWasmNatBit1Name
+                superType := some psWasmNatName
+                isFinal := true
+                fields := [
+                  {
+                    name := "half"
+                    storageType := PsWasmStorageType.value psWasmNatRef
+                  },
+                  {
+                    name := "bit1Marker"
+                    storageType :=
+                      PsWasmStorageType.value PsWasmValueType.i64
+                  }
+                ]
+              },'''
+              if old not in text:
+                  raise SystemExit('Bit1 structure marker not found')
+              text = text.replace(old, new, 1)
+
+          if 'bit0Marker' in text and 'bit1Marker' in text and 'PSC1_NAT_MARKER_CONSTANTS_APPLIED' not in text:
+              lines = text.splitlines()
+              out = []
+              for line in lines:
+                  stripped = line.strip()
+                  indent = line[:len(line) - len(line.lstrip())]
+                  if stripped == 'PsWasmInstruction.structNew psWasmNatBit0Name,':
+                      out.append(indent + 'PsWasmInstruction.i32Const 0,')
+                  elif stripped == 'PsWasmInstruction.structNew psWasmNatBit1Name,':
+                      out.append(indent + 'PsWasmInstruction.i64Const 1,')
+                  out.append(line)
+              text = '\n'.join(out) + '\n'
+
+              old_literal = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
+                [PsWasmInstruction.structNew
+                  (if low == 0 then psWasmNatBit0Name
+                   else psWasmNatBit1Name)]
+              '''
+              new_literal = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
+                (if low == 0 then
+                  [
+                    PsWasmInstruction.i32Const 0,
+                    PsWasmInstruction.structNew psWasmNatBit0Name
+                  ]
+                 else
+                  [
+                    PsWasmInstruction.i64Const 1,
+                    PsWasmInstruction.structNew psWasmNatBit1Name
+                  ])
+              '''
+              if old_literal not in text:
+                  raise SystemExit('Nat literal constructor marker not found')
+              text = text.replace(old_literal, new_literal, 1)
+              text = text.rstrip() + '\n\n-- PSC1_NAT_MARKER_CONSTANTS_APPLIED\n'
+
+          path.write_text(text)
+          PY
+
+          if git diff --quiet -- selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+            git diff --check
+            git diff -- selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean
+          fi
+
+      - name: Verify portable source and neutral shared IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node check-psc1-source.mjs
+          node scripts/check-ir-neutrality.mjs
+
+      - name: Build complete Lean self-host workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build
+
+      - name: Run shared and Wasm regression suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_ts_tests
+          lake exe psc1_erasure_tests
+          lake exe psc1_ir_specialize_tests
+          lake exe psc1_backend_wasm_tests
+
+      - name: Execute owned Wasm binary in Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv=readFileSync('/tmp/psc1-wasm-bytes.txt','utf8').trim();
+          const bytes=Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) throw new Error('PSC1_WASM_VALIDATE_FAILED');
+          const {instance}=await WebAssembly.instantiate(bytes);
+          const checks = [
+            ['addU32', instance.exports.addU32(20,22), 42],
+            ['addF32', instance.exports.addF32(20.5,21.5), 42],
+            ['directCall', instance.exports.addThenOne(20,21), 42],
+            ['ifTrue', instance.exports.selectU32(1,42,7), 42],
+            ['ifFalse', instance.exports.selectU32(0,42,7), 7],
+            ['let', instance.exports.letPlusOne(41), 42],
+            ['struct', instance.exports.pointX(42,7), 42],
+            ['packedI16', instance.exports.smallSigned(-123), -123],
+            ['packedU16', instance.exports.smallUnsigned(65535), 65535],
+            ['some', instance.exports.someValue(42), 42],
+            ['none', instance.exports.noneValue(), 0],
+            ['recursiveAdt', instance.exports.listLengthTwo(), 2],
+            ['closure', instance.exports.applyReturnedAdder(40,2), 42],
+            ['higherOrder', instance.exports.applyTwiceIncrement(40), 42],
+            ['genericBox', instance.exports.genericBoxRoundTrip(42), 42],
+            ['genericId', instance.exports.genericIdU32(42), 42],
+            ['genericList', instance.exports.genericLengthTwo(), 2],
+            ['natAddLarge', instance.exports.natAddLargeExact(), 1],
+            ['natSub', instance.exports.natSubFloorsAtZero(), 1],
+            ['natLiteralEq', instance.exports.natLiteralEqExact(), 1],
+            ['natAddOneOne', instance.exports.natAddOneOneExact(), 1],
+            ['natAddCarrySmall', instance.exports.natAddCarrySmallExact(), 1],
+            ['natAddCarryMid', instance.exports.natAddCarryMidExact(), 1],
+            ['natAddCarry', instance.exports.natAddCarryExact(), 1],
+            ['natMulOne', instance.exports.natMulOneExact(), 1],
+            ['natMulOdd', instance.exports.natMulOddExact(), 1],
+            ['natMul', instance.exports.natMulExact(), 1],
+            ['natDiv', instance.exports.natDivExact(), 1],
+            ['natMod', instance.exports.natModExact(), 1],
+            ['natDivZero', instance.exports.natDivZero(), 1],
+            ['natModZero', instance.exports.natModZero(), 1],
+            ['natLt', instance.exports.natLtExact(), 1],
+            ['intOfNat', instance.exports.intOfNatExact(), 1],
+            ['intNegSucc', instance.exports.intNegSuccExact(), 1],
+            ['intNeg', instance.exports.intNegExact(), 1],
+            ['intAdd', instance.exports.intAddMixedExact(), 1],
+            ['intSub', instance.exports.intSubMixedExact(), 1],
+            ['intMul', instance.exports.intMulSignedExact(), 1],
+            ['intLarge', instance.exports.intLargeExact(), 1],
+            ['intLt', instance.exports.intLtExact(), 1],
+          ];
+          for (const [name, actual, expected] of checks) {
+            if (actual !== expected) throw new Error(`PSC1_WASM_${name}: ${actual} !== ${expected}`);
+          }
+          console.log('PSC1_WASM_NAT_STRUCTURAL_TAG_FIX: PASS');
+          NODE
+
+      - name: Commit verified runtime fix
+        if: steps.patch.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean
+          git commit -m 'fix(wasm): distinguish exact Nat binary constructors'
+          git push origin HEAD:backend/wasm3-runtime-core-fix

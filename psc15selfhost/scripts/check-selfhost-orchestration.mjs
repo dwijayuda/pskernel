@@ -55,6 +55,10 @@ requireScript(
   "node scripts/compile-with-generated.mjs dist/bootstrap/packages/compiler/index.js dist/selfhost/workspace/packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps dist/selfhost/packages/compiler/index.js",
 );
 requireScript(
+  "selfhost:emit-lean",
+  "node scripts/emit-project-with-generated.mjs dist/selfhost/packages/compiler/index.js dist/selfhost/workspace/packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps --to lean --out dist/selfhost/lean",
+);
+requireScript(
   "verify:source",
   "node scripts/compare-source-workspaces.mjs dist/bootstrap/workspace dist/selfhost/workspace",
 );
@@ -90,7 +94,27 @@ for (const pattern of generationLayoutPatterns) {
     );
   }
 }
+if (/leanWorkspace|outputLean/u.test(selfhostGeneration)) {
+  throw new Error("PSC2_SELFHOST_LEAN_WORKSPACE_IN_CRITICAL_PATH");
+}
+if (
+  /emit-project-with-generated\.mjs[\s\S]*?"--to"[\s\S]*?"lean"/u.test(
+    selfhostGeneration,
+  )
+) {
+  throw new Error("PSC2_SELFHOST_LEAN_EMIT_IN_CRITICAL_PATH");
+}
+
+const cli = await readFile(
+  path.join(root, "packages", "cli", "bin", "psc.mjs"),
+  "utf8",
+);
+const cliSelfhostForwarding =
+  /"scripts\/selfhost-generation\.mjs",\s*compiler,\s*workspace,\s*output,/u;
+if (!cliSelfhostForwarding.test(cli)) {
+  throw new Error("PSC2_SELFHOST_CLI_FORWARDING_DRIFT");
+}
 
 process.stdout.write(
-  `PSC2_SELFHOST_ORCHESTRATION: PASS (${files.length} files; 9 script contracts; generation layout; kernel full-suite coverage)\n`,
+  `PSC2_SELFHOST_ORCHESTRATION: PASS (${files.length} files; 10 script contracts; minimal generation path; optional Lean assurance; kernel full-suite coverage)\n`,
 );

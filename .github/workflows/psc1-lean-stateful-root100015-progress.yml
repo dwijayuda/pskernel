@@ -6,6 +6,12 @@ on:
     branches: [perf/psc1-lean-stateful-checker]
     paths:
       - ".github/workflows/psc1-lean-stateful-root100015-progress.yml"
+      - "psc1-kernel/PSC1Kernel/CheckerState.lean"
+      - "psc1-kernel/PSC1Kernel/CheckerStateful.lean"
+      - "psc1-kernel/PSC1Kernel/CheckerLazyDeltaStateful.lean"
+      - "psc1-kernel/PSC1Kernel/CheckerSession.lean"
+      - "psc1-kernel/PSC1Kernel/Kernel.lean"
+      - "psc1-kernel/PSC1Kernel/Test/ReplayFile.lean"
 
 permissions:
   contents: read

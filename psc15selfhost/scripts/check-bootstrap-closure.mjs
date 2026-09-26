@@ -2,7 +2,11 @@ import { existsSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import {
+  packageForModule,
+  parseImports,
+  resolveModuleSource,
+} from "./workspace-layout.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
@@ -30,27 +34,6 @@ const forbiddenBootstrapPackages = new Set([
   "pskernel",
   "pskernel-core",
 ]);
-
-function sourceForModule(moduleName) {
-  const parts = moduleName.split(".");
-  if (parts[0] === "ProofScript") {
-    return {
-      packageName: "stdlib",
-      sourcePath: path.join(root, "stdlib", ...parts) + ".lean",
-    };
-  }
-  if (parts[0] === "Ps" && parts.length >= 2) {
-    const packageName = packageBySection.get(parts[1]);
-    if (!packageName) {
-      throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_PACKAGE: ${moduleName}`);
-    }
-    return {
-      packageName,
-      sourcePath: path.join(root, "packages", packageName, "src", ...parts) + ".lean",
-    };
-  }
-  throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_IMPORT: ${moduleName}`);
-}
 
 async function readJson(file) {
   return JSON.parse(await readFile(file, "utf8"));
@@ -126,9 +109,21 @@ async function visit(sourcePath) {
 
   const source = await readFile(absolute, "utf8");
   for (const moduleName of parseImports(source)) {
-    const resolved = sourceForModule(moduleName);
-    packageNames.add(resolved.packageName);
-    await visit(resolved.sourcePath);
+    const packageName = packageForModule(moduleName);
+    if (!packageName) {
+      throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_IMPORT: ${moduleName}`);
+    }
+    const dependency = resolveModuleSource(
+      root,
+      moduleName,
+      ".lean",
+      { allowAlternate: false },
+    );
+    if (!dependency) {
+      throw new Error(`PSC2_BOOTSTRAP_SOURCE_MISSING: ${moduleName}`);
+    }
+    packageNames.add(packageName);
+    await visit(dependency);
   }
 }
 

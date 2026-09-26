@@ -89,8 +89,6 @@ def main : IO Unit := do
 
   -- Lean 4.34 infer-only application inference is recursive: the application
   -- and the function head are both inferred through the same checker state.
-  -- A wrapper that delegates the whole application to pure `inferCore` only
-  -- caches the outer application and therefore fails this regression.
   let inferApp : Expr := .app (.const F []) (.const NatN [])
   match session.inferStateful inferApp with
   | .error err =>
@@ -101,5 +99,47 @@ def main : IO Unit := do
         ((CheckerExprMap.get? next.state.inferOnly inferApp).isSome)
       expectSession "stateful infer-only recursively caches function head"
         ((CheckerExprMap.get? next.state.inferOnly (.const F [])).isSome)
+
+  -- Binder spines must recurse through the same state as well. These tests use
+  -- a fresh session each time so the first generated FVar is deterministic.
+  let xName : Name := .str .anonymous "binderX"
+  let openedX : Expr := .fvar (.num xName 0)
+
+  let lambdaInput : Expr :=
+    .lam xName (.sort .zero) (.bvar 0) .default
+  let lambdaExpected : Expr :=
+    .forallE xName (.sort .zero) (.sort .zero) .default
+  match session.inferStateful lambdaInput with
+  | .error err =>
+      throw <| IO.userError ("stateful lambda inference failed: " ++ err)
+  | .ok (actual, next) =>
+      expectSession "stateful lambda result" (Expr.eq actual lambdaExpected)
+      expectSession "stateful lambda caches opened body"
+        ((CheckerExprMap.get? next.state.inferOnly openedX).isSome)
+      expectSession "stateful lambda advances fresh-name state" (next.state.nextFresh == 1)
+
+  let forallInput : Expr :=
+    .forallE xName (.sort .zero) (.sort .zero) .default
+  let forallExpected : Expr := .sort (.succ .zero)
+  match session.inferStateful forallInput with
+  | .error err =>
+      throw <| IO.userError ("stateful forall inference failed: " ++ err)
+  | .ok (actual, next) =>
+      expectSession "stateful forall result" (Expr.eq actual forallExpected)
+      expectSession "stateful forall caches binder domain"
+        ((CheckerExprMap.get? next.state.inferOnly (.sort .zero)).isSome)
+      expectSession "stateful forall advances fresh-name state" (next.state.nextFresh == 1)
+
+  let letInput : Expr :=
+    .letE xName (.sort (.succ .zero)) (.sort .zero) (.bvar 0) false
+  let letExpected : Expr := .sort (.succ .zero)
+  match session.inferStateful letInput with
+  | .error err =>
+      throw <| IO.userError ("stateful let inference failed: " ++ err)
+  | .ok (actual, next) =>
+      expectSession "stateful let result" (Expr.eq actual letExpected)
+      expectSession "stateful let caches opened body"
+        ((CheckerExprMap.get? next.state.inferOnly openedX).isSome)
+      expectSession "stateful let advances fresh-name state" (next.state.nextFresh == 1)
 
   IO.println "PSC1 declaration checker-session smoke: PASS"

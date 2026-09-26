@@ -243,10 +243,21 @@ structure PsVerifiedIrModule where
   inductives : List PsVerifiedIrInductive
   declarations : List PsVerifiedIrDeclaration
 
+def psVerifiedIrEmptyImports : List PsVerifiedIrExternalImport :=
+  List.nil
+
+def psVerifiedIrEmptyStructures : List PsVerifiedIrStructure :=
+  List.nil
+
+def psVerifiedIrEmptyInductives : List PsVerifiedIrInductive :=
+  List.nil
+
+def psVerifiedIrEmptyDeclarations : List PsVerifiedIrDeclaration :=
+  List.nil
+
 def psVerifiedIrModuleEmpty : PsVerifiedIrModule :=
-  {
-    imports := []
-    structures := []
-    inductives := []
-    declarations := []
-  }
+  PsVerifiedIrModule.mk
+    psVerifiedIrEmptyImports
+    psVerifiedIrEmptyStructures
+    psVerifiedIrEmptyInductives
+    psVerifiedIrEmptyDeclarations

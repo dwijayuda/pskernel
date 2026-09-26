@@ -1,0 +1,100 @@
+name: Wasm Nat Succ Fix Diagnostic
+
+on:
+  push:
+    branches:
+      - debug/wasm3-nat-carry
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-fix:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply candidate Nat.succ fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean')
+          text = path.read_text()
+          old = '''            PsWasmInstruction.localGet 0,
+                      PsWasmInstruction.refCast psWasmNatBit1Name,
+                      PsWasmInstruction.structGet psWasmNatBit1Name 0,
+                      PsWasmInstruction.call psWasmNatSuccFn,
+                      PsWasmInstruction.call psWasmNatMkBit0Fn,'''
+          new = '''            PsWasmInstruction.localGet 0,
+                      PsWasmInstruction.call psWasmNatHalfFn,
+                      PsWasmInstruction.call psWasmNatSuccFn,
+                      PsWasmInstruction.call psWasmNatMkBit0Fn,'''
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'candidate patch expected one match, found {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+
+      - name: Build Wasm binary smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+
+      - name: Execute Nat and Int runtime checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv = readFileSync('/tmp/psc1-wasm-bytes.txt', 'utf8').trim();
+          const bytes = Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) throw new Error('PSC1_WASM_VALIDATE_FAILED');
+          const {instance} = await WebAssembly.instantiate(bytes);
+          const checks = [
+            ['natAddLargeExact', instance.exports.natAddLargeExact()],
+            ['natSubFloorsAtZero', instance.exports.natSubFloorsAtZero()],
+            ['natLiteralEqExact', instance.exports.natLiteralEqExact()],
+            ['natAddOneOneExact', instance.exports.natAddOneOneExact()],
+            ['natAddCarrySmallExact', instance.exports.natAddCarrySmallExact()],
+            ['natAddCarryMidExact', instance.exports.natAddCarryMidExact()],
+            ['natAddCarryExact', instance.exports.natAddCarryExact()],
+            ['natMulOneExact', instance.exports.natMulOneExact()],
+            ['natMulOddExact', instance.exports.natMulOddExact()],
+            ['natMulExact', instance.exports.natMulExact()],
+            ['natDivExact', instance.exports.natDivExact()],
+            ['natModExact', instance.exports.natModExact()],
+            ['natDivZero', instance.exports.natDivZero()],
+            ['natModZero', instance.exports.natModZero()],
+            ['natLtExact', instance.exports.natLtExact()],
+            ['intOfNatExact', instance.exports.intOfNatExact()],
+            ['intNegSuccExact', instance.exports.intNegSuccExact()],
+            ['intNegExact', instance.exports.intNegExact()],
+            ['intAddMixedExact', instance.exports.intAddMixedExact()],
+            ['intSubMixedExact', instance.exports.intSubMixedExact()],
+            ['intMulSignedExact', instance.exports.intMulSignedExact()],
+            ['intLargeExact', instance.exports.intLargeExact()],
+            ['intLtExact', instance.exports.intLtExact()],
+          ];
+          for (const [name, value] of checks) {
+            if (value !== 1) throw new Error(`${name}=${value}`);
+          }
+          console.log('PSC1_WASM_NAT_SUCC_FIX_OK', JSON.stringify(Object.fromEntries(checks)));
+          NODE

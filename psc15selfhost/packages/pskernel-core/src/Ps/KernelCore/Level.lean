@@ -143,24 +143,6 @@ def psKernelCoreLevelMkIMax
         else
           PsKernelCoreLevel.imax left right
 
-def psKernelCoreLevelSize (level : PsKernelCoreLevel) : Nat :=
-  match level with
-  | PsKernelCoreLevel.zero => 1
-  | PsKernelCoreLevel.param _ => 1
-  | PsKernelCoreLevel.mvar _ => 1
-  | PsKernelCoreLevel.succ child =>
-      Nat.succ (psKernelCoreLevelSize child)
-  | PsKernelCoreLevel.max left right =>
-      Nat.succ
-        (Nat.add
-          (psKernelCoreLevelSize left)
-          (psKernelCoreLevelSize right))
-  | PsKernelCoreLevel.imax left right =>
-      Nat.succ
-        (Nat.add
-          (psKernelCoreLevelSize left)
-          (psKernelCoreLevelSize right))
-
 def psKernelCoreLevelNormalize
     (level : PsKernelCoreLevel) : PsKernelCoreLevel :=
   match level with
@@ -179,31 +161,29 @@ def psKernelCoreLevelNormalize
         (psKernelCoreLevelNormalize right)
 
 def psKernelCoreLevelEquivalentNormalized
-    (fuel : Nat)
-    (left : PsKernelCoreLevel)
-    (right : PsKernelCoreLevel) : Bool :=
-  match fuel with
-  | Nat.zero => psKernelCoreLevelEq left right
-  | Nat.succ remaining =>
-      if psKernelCoreLevelEq left right then
-        true
-      else
-        match left with
-        | PsKernelCoreLevel.max leftA leftB =>
-            match right with
-            | PsKernelCoreLevel.max rightA rightB =>
-                if psKernelCoreLevelEquivalentNormalized
-                    remaining leftA rightA then
-                  psKernelCoreLevelEquivalentNormalized
-                    remaining leftB rightB
-                else if psKernelCoreLevelEquivalentNormalized
-                    remaining leftA rightB then
-                  psKernelCoreLevelEquivalentNormalized
-                    remaining leftB rightA
-                else
-                  false
-            | _ => false
-        | _ => false
+    (left : PsKernelCoreLevel) : PsKernelCoreLevel -> Bool :=
+  match left with
+  | PsKernelCoreLevel.max leftA leftB =>
+      let equivalentA : PsKernelCoreLevel -> Bool :=
+        psKernelCoreLevelEquivalentNormalized leftA;
+      let equivalentB : PsKernelCoreLevel -> Bool :=
+        psKernelCoreLevelEquivalentNormalized leftB;
+      fun (right : PsKernelCoreLevel) =>
+        if psKernelCoreLevelEq left right then
+          true
+        else
+          match right with
+          | PsKernelCoreLevel.max rightA rightB =>
+              if equivalentA rightA then
+                equivalentB rightB
+              else if equivalentA rightB then
+                equivalentB rightA
+              else
+                false
+          | _ => false
+  | _ =>
+      fun (right : PsKernelCoreLevel) =>
+        psKernelCoreLevelEq left right
 
 def psKernelCoreLevelEquivalent
     (left right : PsKernelCoreLevel) : Bool :=
@@ -212,12 +192,7 @@ def psKernelCoreLevelEquivalent
   else
     let normalizedLeft := psKernelCoreLevelNormalize left;
     let normalizedRight := psKernelCoreLevelNormalize right;
-    psKernelCoreLevelEquivalentNormalized
-      (Nat.add
-        (psKernelCoreLevelSize normalizedLeft)
-        (psKernelCoreLevelSize normalizedRight))
-      normalizedLeft
-      normalizedRight
+    psKernelCoreLevelEquivalentNormalized normalizedLeft normalizedRight
 
 def psKernelCoreLevelSubstLookup
     (target : PsKernelCoreName)

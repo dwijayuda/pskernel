@@ -67,4 +67,35 @@ def main : IO Unit := do
           expectStateful "whnf cache cardinality is stable"
             (state2.whnf.size == state1.whnf.size)
 
+  -- This term forces checked application inference to expose a function type
+  -- through public WHNF. A merely outer `checkStateful` wrapper cannot populate
+  -- this internal WHNF entry; recursive checker state must flow through infer.
+  let fName : Name := .str .anonymous "f"
+  let xName : Name := .str .anonymous "x"
+  let aName : Name := .str .anonymous "A"
+  let letFnType : Expr :=
+    .letE aName
+      (.sort (.succ .zero))
+      (.sort .zero)
+      (.forallE xName (.sort .zero) (.sort .zero) .default)
+      false
+  let exposedFnType : Expr :=
+    .forallE xName (.sort .zero) (.sort .zero) .default
+  let recursiveLCtx :=
+    (LocalContext.empty.addLocal fName fName letFnType .default).addLocal
+      xName xName (.sort .zero) .default
+  let recursiveCtx := { ctx with lctx := recursiveLCtx }
+  let recursiveInput : Expr := .app (.fvar fName) (.fvar xName)
+  match checkStateful recursiveCtx initial recursiveInput with
+  | .error err =>
+      throw <| IO.userError ("recursive stateful check failed: " ++ err)
+  | .ok (actual, state) =>
+      expectStateful "recursive checked result" (Expr.eq actual (.sort .zero))
+      expectStateful "recursive checked infer caches top application"
+        ((CheckerExprMap.get? state.checkedInfer recursiveInput).isSome)
+      expectStateful "recursive inference threads internal WHNF cache"
+        (match CheckerExprMap.get? state.whnf letFnType with
+         | some cached => Expr.eq cached exposedFnType
+         | none => false)
+
   IO.println "PSC1 stateful recursive checker smoke: PASS"

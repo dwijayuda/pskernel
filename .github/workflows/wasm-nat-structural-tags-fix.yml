@@ -127,34 +127,35 @@ jobs:
               out.append(line)
           text = '\n'.join(out) + '\n'
 
-          # The literal builder previously chose the constructor name inside a
-          # single struct.new, so it needs a branch that also chooses the
-          # corresponding marker operand.
+          # The literal builder chose a constructor name inside one struct.new,
+          # so replace precisely that final clause by source position. This
+          # avoids depending on whitespace in the old formatting.
           literal_def = text.index('def psWasmNatLiteralInstructionsWithFuel')
           next_def = text.index('\n\ndef psWasmNatLiteralInstructions\n', literal_def)
           body_start_marker = '      psWasmNatLiteralInstructionsWithFuel fuel half ++\n'
           body_start = text.index(body_start_marker, literal_def, next_def)
           literal_tail = text[body_start:next_def]
-          old_dynamic = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
-                [PsWasmInstruction.structNew
-                  (if low == 0 then psWasmNatBit0Name
-                   else psWasmNatBit1Name)]'''
-          new_dynamic = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
-                (if low == 0 then
-                  [
-                    PsWasmInstruction.i32Const 0,
-                    PsWasmInstruction.structNew psWasmNatBit0Name
-                  ]
-                 else
-                  [
-                    PsWasmInstruction.i64Const 1,
-                    PsWasmInstruction.structNew psWasmNatBit1Name
-                  ])'''
-          if old_dynamic in literal_tail:
+          literal_is_fixed = (
+              'PsWasmInstruction.i32Const 0,' in literal_tail
+              and 'PsWasmInstruction.structNew psWasmNatBit0Name' in literal_tail
+              and 'PsWasmInstruction.i64Const 1,' in literal_tail
+              and 'PsWasmInstruction.structNew psWasmNatBit1Name' in literal_tail
+          )
+          if not literal_is_fixed:
+              new_dynamic = (
+                  '      psWasmNatLiteralInstructionsWithFuel fuel half ++\n'
+                  '        (if low == 0 then\n'
+                  '          [\n'
+                  '            PsWasmInstruction.i32Const 0,\n'
+                  '            PsWasmInstruction.structNew psWasmNatBit0Name\n'
+                  '          ]\n'
+                  '         else\n'
+                  '          [\n'
+                  '            PsWasmInstruction.i64Const 1,\n'
+                  '            PsWasmInstruction.structNew psWasmNatBit1Name\n'
+                  '          ])'
+              )
               text = text[:body_start] + new_dynamic + text[next_def:]
-          elif 'PsWasmInstruction.i32Const 0' not in literal_tail or \
-               'PsWasmInstruction.i64Const 1' not in literal_tail:
-              raise SystemExit('Nat literal constructor shape is neither old nor fixed')
 
           # Fail closed if any direct constructor is still missing its matching
           # marker operand.

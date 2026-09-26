@@ -8,6 +8,7 @@ on:
       - perf/psc1-lean-checker-cache
       - perf/psc1-lean-stateful-checker
       - perf/psc1-lean-stateful-infer-app
+      - perf/psc1-lean-stateful-infer-binders
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"

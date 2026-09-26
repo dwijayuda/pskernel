@@ -9,6 +9,10 @@ def expectWhnfCache (label : String) (ok : Bool) : IO Unit :=
   if ok then pure ()
   else throw <| IO.userError ("checker WHNF cache smoke failed: " ++ label)
 
+def expectStored (label : String) : Except String Expr → IO Expr
+  | .ok value => pure value
+  | .error err => throw <| IO.userError (label ++ ": " ++ err)
+
 def main : IO Unit := do
   let env := Environment.empty
   let lctx := LocalContext.empty
@@ -17,7 +21,7 @@ def main : IO Unit := do
 
   expectWhnfCache "initial WHNF miss"
     ((checkerWhnfCached env lctx 0 whnfSmokeNatMax true closed).isNone)
-  let stored := checkerWhnfCacheResult
+  let stored ← expectStored "WHNF store failed" <| checkerWhnfCacheResult
     env lctx 0 whnfSmokeNatMax true closed closedResult
   expectWhnfCache "WHNF store is identity" (Expr.eq stored closedResult)
   expectWhnfCache "WHNF hit"
@@ -30,7 +34,7 @@ def main : IO Unit := do
   let lctxB := lctx.addLocal x x (.sort (.succ .zero)) .default
   let openExpr : Expr := .fvar x
   let openResult : Expr := .sort .zero
-  let storedOpen := checkerWhnfCacheResult
+  let storedOpen ← expectStored "open WHNF store failed" <| checkerWhnfCacheResult
     env lctxA 0 whnfSmokeNatMax true openExpr openResult
   expectWhnfCache "open WHNF store is identity" (Expr.eq storedOpen openResult)
   expectWhnfCache "same local context hits"
@@ -46,7 +50,7 @@ def main : IO Unit := do
 
   expectWhnfCache "WHNF-core table starts separate"
     ((checkerWhnfCoreCached env lctx 0 whnfSmokeNatMax true closed).isNone)
-  let storedCore := checkerWhnfCoreCacheResult
+  let storedCore ← expectStored "WHNF-core store failed" <| checkerWhnfCoreCacheResult
     env lctx 0 whnfSmokeNatMax true closed closedResult
   expectWhnfCache "WHNF-core store is identity" (Expr.eq storedCore closedResult)
   expectWhnfCache "WHNF-core hit"

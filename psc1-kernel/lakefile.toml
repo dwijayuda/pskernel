@@ -13,3 +13,6 @@ root = "PSC1Kernel.Test.ReplayFile"
 name = "psc1_defeq_cache_smoke"
 root = "PSC1Kernel.Test.CheckerDefEqCacheSmoke"
 
+[[lean_exe]]
+name = "psc1_whnf_cache_smoke"
+root = "PSC1Kernel.Test.CheckerWhnfCacheSmoke"

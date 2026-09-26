@@ -6,7 +6,7 @@ def expectSharing (label : String) (ok : Bool) : IO Unit :=
   if ok then pure ()
   else throw <| IO.userError ("instantiate sharing smoke failed: " ++ label)
 
-def main : IO Unit := do
+unsafe def main : IO Unit := do
   let x : Name := .str .anonymous "x"
   let k : Name := .str .anonymous "K"
   let untouched : Expr := .app (.const k []) (.sort .zero)

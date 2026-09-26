@@ -48,6 +48,35 @@ def psCKernelExprReduceProjectionCoreBasic?
       | none => none
   | _ => none
 
+def psCKernelExprListTake
+    (values : List PsCKernelExpr)
+    (count : Nat) : List PsCKernelExpr :=
+  match values, count with
+  | _, 0 => []
+  | [], _ => []
+  | value :: rest, Nat.succ remaining =>
+      value :: psCKernelExprListTake rest remaining
+
+def psCKernelExprListDrop
+    (values : List PsCKernelExpr)
+    (count : Nat) : List PsCKernelExpr :=
+  match values, count with
+  | values, 0 => values
+  | [], _ => []
+  | _ :: rest, Nat.succ remaining =>
+      psCKernelExprListDrop rest remaining
+
+def psCKernelFindRecursorRule?
+    (rules : List PsCKernelRecursorRule)
+    (ctorName : PsCKernelName) : Option PsCKernelRecursorRule :=
+  match rules with
+  | [] => none
+  | rule :: rest =>
+      if psCKernelNameEq rule.ctor ctorName then
+        some rule
+      else
+        psCKernelFindRecursorRule? rest ctorName
+
 partial def psCKernelExprWhnfBasic
     (env : PsCKernelEnvironment)
     (lctx : PsCKernelLocalContext)
@@ -65,18 +94,73 @@ partial def psCKernelExprWhnfBasic
       | none => expr
       | some value => psCKernelExprWhnfBasic env lctx value
   | PsCKernelExpr.app fn arg =>
-      let reducedFn : PsCKernelExpr := psCKernelExprWhnfBasic env lctx fn
-      match reducedFn with
-      | PsCKernelExpr.lam _ _ body _ =>
-          psCKernelExprWhnfBasic
-            env
-            lctx
-            (psCKernelExprInstantiate1 body arg)
-      | _ =>
-          if psCKernelExprEqStructural reducedFn fn then
-            expr
-          else
-            PsCKernelExpr.app reducedFn arg
+      let appHead := psCKernelExprGetAppFn expr
+      let appArgs := psCKernelExprGetAppArgs expr
+      let recursorReduced : Option PsCKernelExpr :=
+        match appHead with
+        | PsCKernelExpr.constE recursorName recursorLevels =>
+            match psCKernelEnvironmentFind? env recursorName with
+            | some (PsCKernelConstantInfo.recInfo recursor) =>
+                let majorIndex :=
+                  Nat.add recursor.numParams
+                    (Nat.add recursor.numMotives
+                      (Nat.add recursor.numMinors recursor.numIndices))
+                match psCKernelExprListGet? appArgs majorIndex with
+                | none => none
+                | some major =>
+                    let reducedMajor := psCKernelExprWhnfBasic env lctx major
+                    match psCKernelExprGetAppFn reducedMajor with
+                    | PsCKernelExpr.constE ctorName _ =>
+                        match psCKernelFindRecursorRule? recursor.rules ctorName with
+                        | none => none
+                        | some rule =>
+                            let majorArgs := psCKernelExprGetAppArgs reducedMajor
+                            if Nat.ble rule.nfields majorArgs.length then
+                              if Nat.beq
+                                  recursorLevels.length
+                                  recursor.base.levelParams.length then
+                                let rhs :=
+                                  psCKernelInstantiateExprLevels
+                                    rule.rhs
+                                    recursor.base.levelParams
+                                    recursorLevels
+                                let firstIndex :=
+                                  Nat.add recursor.numParams
+                                    (Nat.add recursor.numMotives recursor.numMinors)
+                                let prefixArgs :=
+                                  psCKernelExprListTake appArgs firstIndex
+                                let withPrefix := psCKernelExprMkAppN rhs prefixArgs
+                                let ctorParameterCount :=
+                                  Nat.sub majorArgs.length rule.nfields
+                                let fieldArgs :=
+                                  psCKernelExprListDrop majorArgs ctorParameterCount
+                                let withFields :=
+                                  psCKernelExprMkAppN withPrefix fieldArgs
+                                let trailingArgs :=
+                                  psCKernelExprListDrop appArgs (Nat.add majorIndex 1)
+                                some (psCKernelExprMkAppN withFields trailingArgs)
+                              else
+                                none
+                            else
+                              none
+                    | _ => none
+            | _ => none
+        | _ => none
+      match recursorReduced with
+      | some reduced => psCKernelExprWhnfBasic env lctx reduced
+      | none =>
+          let reducedFn : PsCKernelExpr := psCKernelExprWhnfBasic env lctx fn
+          match reducedFn with
+          | PsCKernelExpr.lam _ _ body _ =>
+              psCKernelExprWhnfBasic
+                env
+                lctx
+                (psCKernelExprInstantiate1 body arg)
+          | _ =>
+              if psCKernelExprEqStructural reducedFn fn then
+                expr
+              else
+                PsCKernelExpr.app reducedFn arg
   | PsCKernelExpr.letE _ _ value body _ =>
       psCKernelExprWhnfBasic
         env

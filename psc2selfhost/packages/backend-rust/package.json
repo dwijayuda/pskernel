@@ -1,0 +1,23 @@
+{
+  "name": "@proofscript/backend-rust-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "portable": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "rust-backend"
+  },
+  "dependencies": {
+    "@proofscript/compiler-ir-next": "0.0.0-dev",
+    "@proofscript/bridge-next": "0.0.0-dev",
+    "@proofscript/foundation-next": "0.0.0-dev"
+  }
+}

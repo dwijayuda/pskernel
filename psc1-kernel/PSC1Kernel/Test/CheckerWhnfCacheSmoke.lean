@@ -13,7 +13,7 @@ def expectStored (label : String) : Except String Expr → IO Expr
   | .ok value => pure value
   | .error err => throw <| IO.userError (label ++ ": " ++ err)
 
-def main : IO Unit := do
+unsafe def main : IO Unit := do
   let env := Environment.empty
   let lctx := LocalContext.empty
   let closed : Expr := .app (.lam (.str .anonymous "x") (.sort .zero) (.bvar 0) .default) (.sort .zero)
@@ -36,7 +36,11 @@ def main : IO Unit := do
      | none => false)
   expectWhnfCache "WHNF scope remains stable after store"
     (checkerWhnfScopeMatchesCurrent env 0 whnfSmokeNatMax)
-  expectWhnfCache "WHNF hit"
+  expectWhnfCache "direct native WHNF hit"
+    (match checkerWhnfCachedImpl env lctx 0 whnfSmokeNatMax true closed with
+     | some value => Expr.eq value closedResult
+     | none => false)
+  expectWhnfCache "WHNF implemented-by wrapper hit"
     (match checkerWhnfCached env lctx 0 whnfSmokeNatMax true closed with
      | some value => Expr.eq value closedResult
      | none => false)

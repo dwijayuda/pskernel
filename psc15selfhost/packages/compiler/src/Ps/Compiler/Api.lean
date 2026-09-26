@@ -14,10 +14,10 @@ inductive PsCompilerError where
   | proofScriptFrontend (error : PsProofScriptFrontendError)
   | elaboration (error : PsElabError)
   | admission (error : PsCheckedAdmissionCodecError)
+  | preparedAdmissionMismatch
   | erasure (error : PsErasureError)
 
 structure PsCompilerAdmissionReadyModule where
-  environment : PsEnvironment
   declarations : List PsDeclaration
   canonicalAdmissions : String
 
@@ -92,7 +92,6 @@ def psCompilerPrepareElaborated
       Except.error (PsCompilerError.admission error)
   | Except.ok canonicalAdmissions =>
       Except.ok {
-        environment := elaborated.environment
         declarations := elaborated.declarations
         canonicalAdmissions := canonicalAdmissions
       }
@@ -118,9 +117,28 @@ def psCompilerCheckSource
     Except PsCompilerError PsCompilerAdmissionReadyModule :=
   psCompilerPrepareSource sourceKind source
 
+def psCompilerValidatePrepared
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerError Unit :=
+  match
+      psEncodeCheckedAdmissionsCanonical
+        prepared.declarations with
+  | Except.error error =>
+      Except.error (PsCompilerError.admission error)
+  | Except.ok canonicalAdmissions =>
+      if canonicalAdmissions == prepared.canonicalAdmissions then
+        Except.ok Unit.unit
+      else
+        Except.error PsCompilerError.preparedAdmissionMismatch
+
 def psCompilerAdmissionsFromPrepared
-    (prepared : PsCompilerAdmissionReadyModule) : String :=
-  prepared.canonicalAdmissions ++ "\n"
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerError String :=
+  match psCompilerValidatePrepared prepared with
+  | Except.error error =>
+      Except.error error
+  | Except.ok _ =>
+      Except.ok (prepared.canonicalAdmissions ++ "\n")
 
 def psCompilerAdmissionsFromElaborated
     (elaborated : PsElabModuleResult) :
@@ -129,7 +147,7 @@ def psCompilerAdmissionsFromElaborated
   | Except.error error =>
       Except.error error
   | Except.ok prepared =>
-      Except.ok (psCompilerAdmissionsFromPrepared prepared)
+      psCompilerAdmissionsFromPrepared prepared
 
 def psCompilerAdmissionsSource
     (sourceKind : PsCompilerSourceKind)
@@ -139,19 +157,39 @@ def psCompilerAdmissionsSource
   | Except.error error =>
       Except.error error
   | Except.ok prepared =>
-      Except.ok (psCompilerAdmissionsFromPrepared prepared)
+      psCompilerAdmissionsFromPrepared prepared
+
+def psCompilerEnvironmentFromPrepared
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerError PsEnvironment :=
+  match psCompilerValidatePrepared prepared with
+  | Except.error error =>
+      Except.error error
+  | Except.ok _ =>
+      match
+          psAddDeclarationList
+            psBootstrapPreludeEnvironment
+            prepared.declarations with
+      | Except.error error =>
+          Except.error (PsCompilerError.elaboration error)
+      | Except.ok environment =>
+          Except.ok environment
 
 def psCompilerVerifiedIrFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :
     Except PsCompilerError PsVerifiedIrModule :=
-  match
-      psEraseCoreModule
-        prepared.environment
-        prepared.declarations with
+  match psCompilerEnvironmentFromPrepared prepared with
   | Except.error error =>
-      Except.error (PsCompilerError.erasure error)
-  | Except.ok ir =>
-      Except.ok ir
+      Except.error error
+  | Except.ok environment =>
+      match
+          psEraseCoreModule
+            environment
+            prepared.declarations with
+      | Except.error error =>
+          Except.error (PsCompilerError.erasure error)
+      | Except.ok ir =>
+          Except.ok ir
 
 def psCompilerVerifiedIrFromElaborated
     (elaborated : PsElabModuleResult) :

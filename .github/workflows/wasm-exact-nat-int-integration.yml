@@ -35,16 +35,8 @@ jobs:
         run: |
           set -euo pipefail
           git fetch origin backend/wasm3-runtime-core-fix
-
-          git show origin/backend/wasm3-runtime-core-fix:selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean \
-            > selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean
-          git show origin/backend/wasm3-runtime-core-fix:selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean \
-            > selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean
-
-          # Only Nat/Int lowering, build wiring, and baseline runtime tests.
-          # The old carry-bisection commit is intentionally not replayed: it
-          # conflicts with today's smoke layout, so the useful cases are added
-          # below directly against the live file.
+          git show origin/backend/wasm3-runtime-core-fix:selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean > selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean
+          git show origin/backend/wasm3-runtime-core-fix:selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean > selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean
           for commit in \
             b8ae9885e19326c41c164a294832bb1c47bd14b0 \
             0332f237005a66d269f829941dfbd97274a9ef6c \
@@ -56,87 +48,7 @@ jobs:
           do
             git cherry-pick --no-commit "$commit"
           done
-
-          python3 <<'PY'
-          from pathlib import Path
-          path = Path('selfhost/test/WasmBinarySmoke.lean')
-          text = path.read_text()
-          if 'name := "natAddCarrySmallExact"' not in text:
-              marker = '''      {
-        name := "natAddLargeExact"'''
-              insertion = '''      {
-        name := "natLiteralEqExact"
-        typeParameters := []
-        parameters := []
-        resultType :=
-          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
-        body :=
-          PsVerifiedIrExpr.intrinsic
-            PsVerifiedIrIntrinsic.natEq
-            []
-            [
-              PsVerifiedIrExpr.literal
-                (PsVerifiedIrLiteral.natural 42),
-              PsVerifiedIrExpr.literal
-                (PsVerifiedIrLiteral.natural 42)
-            ]
-      },
-      {
-        name := "natAddOneOneExact"
-        typeParameters := []
-        parameters := []
-        resultType :=
-          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
-        body :=
-          PsVerifiedIrExpr.intrinsic
-            PsVerifiedIrIntrinsic.natEq
-            []
-            [
-              PsVerifiedIrExpr.intrinsic
-                PsVerifiedIrIntrinsic.natAdd
-                []
-                [
-                  PsVerifiedIrExpr.literal
-                    (PsVerifiedIrLiteral.natural 1),
-                  PsVerifiedIrExpr.literal
-                    (PsVerifiedIrLiteral.natural 1)
-                ],
-              PsVerifiedIrExpr.literal
-                (PsVerifiedIrLiteral.natural 2)
-            ]
-      },
-      {
-        name := "natAddCarrySmallExact"
-        typeParameters := []
-        parameters := []
-        resultType :=
-          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
-        body :=
-          PsVerifiedIrExpr.intrinsic
-            PsVerifiedIrIntrinsic.natEq
-            []
-            [
-              PsVerifiedIrExpr.intrinsic
-                PsVerifiedIrIntrinsic.natAdd
-                []
-                [
-                  PsVerifiedIrExpr.literal
-                    (PsVerifiedIrLiteral.natural 3),
-                  PsVerifiedIrExpr.literal
-                    (PsVerifiedIrLiteral.natural 1)
-                ],
-              PsVerifiedIrExpr.literal
-                (PsVerifiedIrLiteral.natural 4)
-            ]
-      },
-      {
-        name := "natAddLargeExact"'''
-              if marker not in text:
-                  raise SystemExit('live Nat smoke insertion marker not found')
-              text = text.replace(marker, insertion, 1)
-              path.write_text(text)
-          PY
-
+          python3 .github/scripts/inject-wasm-nat-carry-smoke.py
           git diff --check
           echo 'changed=true' >> "$GITHUB_OUTPUT"
           git status --short
@@ -215,10 +127,6 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean \
-                  selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean \
-                  selfhost/packages/backend-wasm/src/Ps/BackendWasm/Lower.lean \
-                  selfhost/test/WasmBinarySmoke.lean \
-                  selfhost/lakefile.lean
+          git add selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean selfhost/packages/backend-wasm/src/Ps/BackendWasm/Lower.lean selfhost/test/WasmBinarySmoke.lean selfhost/lakefile.lean
           git commit -m 'feat(wasm): integrate exact Nat and Int runtime'
           git push origin HEAD:integrate/wasm3-exact-nat-int

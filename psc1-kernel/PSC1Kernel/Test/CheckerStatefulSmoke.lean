@@ -70,8 +70,6 @@ def main : IO Unit := do
           expectStateful "whnf-core cache cardinality is stable"
             (state2.whnfCore.size == state1.whnfCore.size)
 
-  -- Lean4Lean mirrors the C++ cheap-projection rule: WHNF-core results reached
-  -- with cheapProj=true are deliberately not written to the core cache.
   match whnfCoreStateful ctx initial whnfInput false true with
   | .error err =>
       throw <| IO.userError ("cheap-proj stateful whnf-core failed: " ++ err)
@@ -79,9 +77,6 @@ def main : IO Unit := do
       expectStateful "cheap-proj whnf-core result" (Expr.eq actual whnfExpected)
       expectStateful "cheap-proj suppresses whnf-core cache" (state.whnfCore.size == 0)
 
-  -- Successful defeq pairs are declaration-scoped reusable facts. Negative
-  -- full-defeq results are deliberately not globally memoized: Lean's failure
-  -- table is narrower and will be migrated at its lazy-delta call site.
   match isDefEqStateful ctx initial whnfInput whnfExpected with
   | .error err =>
       throw <| IO.userError ("stateful defeq failed: " ++ err)
@@ -108,9 +103,6 @@ def main : IO Unit := do
       expectStateful "negative full defeq is not globally memoized"
         (state.failure.entries.size == 0 && state.success.entries.size == 0)
 
-  -- This term forces checked application inference to expose a function type
-  -- through public WHNF. A merely outer checkStateful wrapper cannot populate
-  -- this internal WHNF entry; recursive checker state must flow through infer.
   let fName : Name := .str .anonymous "f"
   let xName : Name := .str .anonymous "x"
   let aName : Name := .str .anonymous "A"
@@ -138,5 +130,18 @@ def main : IO Unit := do
         (match CheckerExprMap.get? state.whnf letFnType with
          | some cached => Expr.eq cached exposedFnType
          | none => false)
+
+  -- Metadata is semantically transparent to inference. Its body must stay in
+  -- the same stateful recursion so inner application/inference work is reused.
+  let mdataInput : Expr := .mdata 17 recursiveInput
+  match checkStateful recursiveCtx initial mdataInput with
+  | .error err =>
+      throw <| IO.userError ("mdata stateful check failed: " ++ err)
+  | .ok (actual, state) =>
+      expectStateful "mdata checked result" (Expr.eq actual (.sort .zero))
+      expectStateful "mdata wrapper is cached"
+        ((CheckerExprMap.get? state.checkedInfer mdataInput).isSome)
+      expectStateful "mdata inference keeps inner application in stateful cache"
+        ((CheckerExprMap.get? state.checkedInfer recursiveInput).isSome)
 
   IO.println "PSC1 stateful recursive checker smoke: PASS"

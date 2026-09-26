@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - psc2/minimal-selfhost-psc15
+      - psc2/kernel-core-phase1
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean

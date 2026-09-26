@@ -26,6 +26,14 @@ jobs:
       - name: Build PSC1 kernel
         working-directory: psc1-kernel
         run: lake build
+      - name: Build oracle-only structure fixture
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .lake/build/lib/lean/PSC1Kernel/Test
+          lake env lean PSC1Kernel/Test/StructureFixture.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/Test/StructureFixture.olean
       - name: Checker-session smoke
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerSessionSmoke.lean

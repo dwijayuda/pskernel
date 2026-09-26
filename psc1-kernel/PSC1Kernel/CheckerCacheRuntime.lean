@@ -102,6 +102,7 @@ structure CheckerDefEqRuntimeState where
   maxNatSize : Nat
   success : CheckerScopedExprPairSet
   failure : CheckerScopedExprPairSet
+  deriving Nonempty
 
 namespace CheckerDefEqRuntimeState
 

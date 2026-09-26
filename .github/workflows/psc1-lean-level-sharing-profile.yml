@@ -1,12 +1,14 @@
-name: PSC1 Lean level sharing profile
+name: PSC1 Lean stateful inference profile
 
 on:
   workflow_dispatch:
   push:
     branches:
       - perf/psc1-lean-level-instantiation-sharing
+      - perf/psc1-lean-stateful-infer-mdata
     paths:
       - ".github/workflows/psc1-lean-level-sharing-profile.yml"
+      - "psc1-kernel/PSC1Kernel/CheckerStateful.lean"
       - "psc1-kernel/PSC1Kernel/Expr.lean"
       - "psc1-kernel/PSC1Kernel/Instantiate.lean"
       - "psc1-kernel/PSC1Kernel/Test/ReplayProfile.lean"
@@ -15,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: psc1-lean-level-sharing-profile-${{ github.ref }}
+  group: psc1-lean-stateful-inference-profile-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

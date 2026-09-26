@@ -170,3 +170,6 @@ jobs:
 
       - name: Run PSCKernel basic reduction differential
         run: node scripts/psckernel-reduction-basic-differential.mjs
+
+      - name: Run PSCKernel basic type inference differential
+        run: node scripts/psckernel-type-inference-basic-differential.mjs

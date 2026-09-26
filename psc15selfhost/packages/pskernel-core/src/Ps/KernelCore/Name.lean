@@ -3,6 +3,40 @@ inductive PsKernelCoreName where
   | str (parent : PsKernelCoreName) (value : String)
   | num (parent : PsKernelCoreName) (value : Nat)
 
+partial def psKernelCoreStringEqFrom
+    (left : String)
+    (right : String)
+    (leftPos : Nat)
+    (rightPos : Nat) : Bool :=
+  if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
+    String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
+  else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
+    false
+  else
+    let leftChar : Char :=
+      String.Internal.get left (String.Pos.Raw.mk leftPos);
+    let rightChar : Char :=
+      String.Internal.get right (String.Pos.Raw.mk rightPos);
+    if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
+      psKernelCoreStringEqFrom
+        left
+        right
+        (String.Pos.Raw.byteIdx
+          (String.Internal.next
+            left
+            (String.Pos.Raw.mk leftPos)))
+        (String.Pos.Raw.byteIdx
+          (String.Internal.next
+            right
+            (String.Pos.Raw.mk rightPos)))
+    else
+      false
+
+def psKernelCoreStringEq
+    (left : String)
+    (right : String) : Bool :=
+  psKernelCoreStringEqFrom left right 0 0
+
 def psKernelCoreNameEq
     (left : PsKernelCoreName) : PsKernelCoreName -> Bool :=
   match left with
@@ -18,7 +52,7 @@ def psKernelCoreNameEq
         match right with
         | PsKernelCoreName.str rightParent rightValue =>
             if parentEq rightParent then
-              leftValue == rightValue
+              psKernelCoreStringEq leftValue rightValue
             else
               false
         | _ => false

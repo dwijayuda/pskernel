@@ -83,6 +83,15 @@ def psCKernelNatZeroName : PsCKernelName :=
 def psCKernelNatSuccName : PsCKernelName :=
   psCKernelNameFromDotted "Nat.succ"
 
+def psCKernelQuotMkName : PsCKernelName :=
+  psCKernelNameFromDotted "Quot.mk"
+
+def psCKernelQuotLiftName : PsCKernelName :=
+  psCKernelNameFromDotted "Quot.lift"
+
+def psCKernelQuotIndName : PsCKernelName :=
+  psCKernelNameFromDotted "Quot.ind"
+
 def psCKernelNatLiteralToConstructor (value : Nat) : PsCKernelExpr :=
   match value with
   | 0 => PsCKernelExpr.constE psCKernelNatZeroName []
@@ -110,6 +119,67 @@ partial def psCKernelExprWhnfBasic
   | PsCKernelExpr.app fn arg =>
       let appHead := psCKernelExprGetAppFn expr
       let appArgs := psCKernelExprGetAppArgs expr
+      let quotientReduced : Option PsCKernelExpr :=
+        if env.quotInitialized then
+          match appHead with
+          | PsCKernelExpr.constE quotientName _ =>
+              if psCKernelNameEq quotientName psCKernelQuotLiftName then
+                if Nat.ble 6 appArgs.length then
+                  match psCKernelExprListGet? appArgs 5 with
+                  | none => none
+                  | some major =>
+                      let reducedMajor := psCKernelExprWhnfBasic env lctx major
+                      match psCKernelExprGetAppFn reducedMajor with
+                      | PsCKernelExpr.constE ctorName _ =>
+                          let ctorArgs := psCKernelExprGetAppArgs reducedMajor
+                          if psCKernelNameEq ctorName psCKernelQuotMkName then
+                            if Nat.beq ctorArgs.length 3 then
+                              match psCKernelExprListGet? appArgs 3,
+                                  psCKernelExprListGet? ctorArgs 2 with
+                              | some fnValue, some payload =>
+                                  some
+                                    (psCKernelExprMkAppN
+                                      fnValue
+                                      (payload :: psCKernelExprListDrop appArgs 6))
+                              | _, _ => none
+                            else
+                              none
+                          else
+                            none
+                      | _ => none
+                else
+                  none
+              else if psCKernelNameEq quotientName psCKernelQuotIndName then
+                if Nat.ble 5 appArgs.length then
+                  match psCKernelExprListGet? appArgs 4 with
+                  | none => none
+                  | some major =>
+                      let reducedMajor := psCKernelExprWhnfBasic env lctx major
+                      match psCKernelExprGetAppFn reducedMajor with
+                      | PsCKernelExpr.constE ctorName _ =>
+                          let ctorArgs := psCKernelExprGetAppArgs reducedMajor
+                          if psCKernelNameEq ctorName psCKernelQuotMkName then
+                            if Nat.beq ctorArgs.length 3 then
+                              match psCKernelExprListGet? appArgs 3,
+                                  psCKernelExprListGet? ctorArgs 2 with
+                              | some proof, some payload =>
+                                  some
+                                    (psCKernelExprMkAppN
+                                      proof
+                                      (payload :: psCKernelExprListDrop appArgs 5))
+                              | _, _ => none
+                            else
+                              none
+                          else
+                            none
+                      | _ => none
+                else
+                  none
+              else
+                none
+          | _ => none
+        else
+          none
       let recursorReduced : Option PsCKernelExpr :=
         match appHead with
         | PsCKernelExpr.constE recursorName recursorLevels =>
@@ -165,21 +235,24 @@ partial def psCKernelExprWhnfBasic
                     | _ => none
             | _ => none
         | _ => none
-      match recursorReduced with
+      match quotientReduced with
       | some reduced => psCKernelExprWhnfBasic env lctx reduced
       | none =>
-          let reducedFn : PsCKernelExpr := psCKernelExprWhnfBasic env lctx fn
-          match reducedFn with
-          | PsCKernelExpr.lam _ _ body _ =>
-              psCKernelExprWhnfBasic
-                env
-                lctx
-                (psCKernelExprInstantiate1 body arg)
-          | _ =>
-              if psCKernelExprEqStructural reducedFn fn then
-                expr
-              else
-                PsCKernelExpr.app reducedFn arg
+          match recursorReduced with
+          | some reduced => psCKernelExprWhnfBasic env lctx reduced
+          | none =>
+              let reducedFn : PsCKernelExpr := psCKernelExprWhnfBasic env lctx fn
+              match reducedFn with
+              | PsCKernelExpr.lam _ _ body _ =>
+                  psCKernelExprWhnfBasic
+                    env
+                    lctx
+                    (psCKernelExprInstantiate1 body arg)
+              | _ =>
+                  if psCKernelExprEqStructural reducedFn fn then
+                    expr
+                  else
+                    PsCKernelExpr.app reducedFn arg
   | PsCKernelExpr.letE _ _ value body _ =>
       psCKernelExprWhnfBasic
         env

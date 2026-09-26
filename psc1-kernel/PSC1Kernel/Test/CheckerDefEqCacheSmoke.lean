@@ -26,8 +26,9 @@ def main : IO Unit := do
   let lctxB := lctx.addLocal x x (.sort (.succ .zero)) .default
   let fvar : Expr := .fvar x
   let target : Expr := .sort .zero
-  let _ := checkerDefEqCacheSuccessResult
+  let storedLocalSuccess := checkerDefEqCacheSuccessResult
     env lctxA 0 leanNatMaxSizeDefault true fvar target true
+  expectDefEqCache "local success identity" storedLocalSuccess
   expectDefEqCache "same local context hits"
     (checkerDefEqSuccessCached env lctxA 0 leanNatMaxSizeDefault true fvar target)
   expectDefEqCache "different local type does not alias"
@@ -37,8 +38,9 @@ def main : IO Unit := do
   expectDefEqCache "different environment does not alias"
     (!checkerDefEqSuccessCached env2 lctxA 0 leanNatMaxSizeDefault true fvar target)
 
-  let _ := checkerDefEqCacheSuccessResult
+  let storedConfiguredSuccess := checkerDefEqCacheSuccessResult
     env lctx 17 leanNatMaxSizeDefault true left target true
+  expectDefEqCache "configured success identity" storedConfiguredSuccess
   expectDefEqCache "different recursion configuration does not alias"
     (!checkerDefEqSuccessCached env lctx 18 leanNatMaxSizeDefault true left target)
 

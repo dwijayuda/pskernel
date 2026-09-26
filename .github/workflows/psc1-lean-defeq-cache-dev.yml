@@ -53,7 +53,9 @@ jobs:
         run: lake env lean --run PSC1Kernel/Test/InferOnlySmoke.lean
       - name: Differential oracle
         working-directory: psc1-kernel
-        run: lake env lean --run PSC1Kernel/Test/Oracle.lean
+        run: |
+          lake env lean PSC1Kernel/Test/StructureFixture.lean
+          lake env lean --run PSC1Kernel/Test/Oracle.lean
       - name: Persist tested integration
         shell: bash
         run: |

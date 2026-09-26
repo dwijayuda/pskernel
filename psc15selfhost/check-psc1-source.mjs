@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const scriptPath = fileURLToPath(import.meta.url);
 const workspaceRoot = path.dirname(scriptPath);
+const allPortable = process.argv.includes("--all-portable");
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
@@ -32,7 +33,8 @@ for (const directory of workspaceDirectories()) {
   if (!fs.existsSync(manifestPath)) continue;
   const manifest = readJson(manifestPath);
   const config = manifest.proofscript;
-  if (!config || config.bootstrap !== true || config.portable === false) continue;
+  if (!config || config.portable === false) continue;
+  if (!allPortable && config.bootstrap !== true) continue;
   for (const sourceRoot of config.sourceRoots ?? []) {
     roots.push(path.resolve(directory, sourceRoot));
   }
@@ -176,10 +178,11 @@ for (const file of files) {
 }
 
 if (files.length === 0) {
-  console.error("PSC1_SOURCE_PROFILE: no portable bootstrap Lean modules found");
+  console.error("PSC1_SOURCE_PROFILE: no portable Lean modules found");
   failed = true;
 }
 if (failed) process.exit(1);
+const scope = allPortable ? "all-portable" : "bootstrap";
 console.log(
-  `PSC1_SOURCE_PROFILE: PASS (${files.length} portable bootstrap modules across ${roots.length} source roots)`,
+  `PSC1_SOURCE_PROFILE: PASS (${scope}; ${files.length} portable modules across ${roots.length} source roots)`,
 );

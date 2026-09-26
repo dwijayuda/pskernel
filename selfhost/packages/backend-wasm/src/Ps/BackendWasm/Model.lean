@@ -28,6 +28,8 @@ structure PsWasmLoweredType where
 inductive PsWasmInstruction where
   | localGet (index : Nat)
   | localSet (index : Nat)
+  | drop
+  | unreachable
   | call (name : String)
   | return_
   | ifStart (result : Option PsWasmValueType)
@@ -43,6 +45,7 @@ inductive PsWasmInstruction where
   | i32And
   | i32Or
   | i32Xor
+  | i32ShrU
   | i32Extend8S
   | i32Extend16S
   | i32Eq

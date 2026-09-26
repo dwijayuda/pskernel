@@ -56,6 +56,19 @@ def insert
 
 end CheckerScopedExprMap
 
+/--
+Runtime identity for an immutable PSC1 environment. `Environment` itself is a
+pure wrapper and can be reboxed, so pointer equality on the wrapper is too
+strict. The declaration list and derived index are persistent payloads; any
+semantic environment mutation replaces at least one of them, while quotient
+initialization is tracked explicitly.
+-/
+private unsafe def checkerWhnfEnvironmentMatches
+    (left right : Environment) : Bool :=
+  ptrEq left.constants right.constants &&
+    ptrEq left.constantIndex right.constantIndex &&
+    left.quotInitialized == right.quotInitialized
+
 /-- Native runtime counterpart of Lean 4.34's `m_whnf_core` and `m_whnf`. -/
 structure CheckerWhnfRuntimeState where
   env? : Option Environment
@@ -94,7 +107,7 @@ private unsafe def checkerWhnfScopeMatches
     (maxRecDepth maxNatSize : Nat) : Bool :=
   match state.env? with
   | some cachedEnv =>
-      ptrEq cachedEnv env &&
+      checkerWhnfEnvironmentMatches cachedEnv env &&
         state.maxRecDepth == maxRecDepth &&
         state.maxNatSize == maxNatSize
   | none => false

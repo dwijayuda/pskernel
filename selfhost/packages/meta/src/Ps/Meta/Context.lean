@@ -253,8 +253,11 @@ def psExprHasUnresolvedMeta : PsExpr -> Bool
       else
         psExprHasUnresolvedMeta body
   | .letE _ type value body =>
-      psExprHasUnresolvedMeta type
-        || psExprHasUnresolvedMeta value
-        || psExprHasUnresolvedMeta body
+      if psExprHasUnresolvedMeta type then
+        true
+      else if psExprHasUnresolvedMeta value then
+        true
+      else
+        psExprHasUnresolvedMeta body
   | .proj _ _ value => psExprHasUnresolvedMeta value
   | _ => false

@@ -1,3 +1,6 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+
 export const packageBySection = new Map([
   ["Bootstrap", "bootstrap"],
   ["Foundation", "foundation"],
@@ -33,4 +36,57 @@ export function packageForModule(moduleName) {
     return packageBySection.get(parts[1]);
   }
   return undefined;
+}
+
+export function moduleBaseCandidates(workspaceRoot, moduleName) {
+  const parts = moduleName.split(".");
+  if (parts[0] === "ProofScript") {
+    return [
+      path.join(workspaceRoot, "packages", "stdlib", "src", ...parts),
+      path.join(workspaceRoot, "packages", "stdlib", ...parts),
+      path.join(workspaceRoot, "stdlib", ...parts),
+    ];
+  }
+  if (parts[0] === "Ps" && parts.length >= 2) {
+    const packageName = packageForModule(moduleName);
+    if (!packageName) {
+      throw new Error(`PSC2_LAYOUT_UNKNOWN_PACKAGE: ${moduleName}`);
+    }
+    return [
+      path.join(workspaceRoot, "packages", packageName, "src", ...parts),
+    ];
+  }
+  return [path.join(workspaceRoot, ...parts)];
+}
+
+export function firstExisting(candidates) {
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+  return undefined;
+}
+
+export function resolveModuleSource(
+  workspaceRoot,
+  moduleName,
+  preferredExtension,
+  options = {},
+) {
+  if (preferredExtension !== ".lean" && preferredExtension !== ".ps") {
+    throw new Error(
+      `PSC2_LAYOUT_SOURCE_EXTENSION: ${preferredExtension}`,
+    );
+  }
+  const allowAlternate = options.allowAlternate !== false;
+  const bases = moduleBaseCandidates(workspaceRoot, moduleName);
+  const preferred = firstExisting(
+    bases.map((base) => base + preferredExtension),
+  );
+  if (preferred) return preferred;
+  if (!allowAlternate) return undefined;
+
+  const alternateExtension = preferredExtension === ".lean" ? ".ps" : ".lean";
+  return firstExisting(
+    bases.map((base) => base + alternateExtension),
+  );
 }

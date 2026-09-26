@@ -190,3 +190,6 @@ jobs:
 
       - name: Run PSCKernel binder-aware type inference differential
         run: node scripts/psckernel-type-inference-differential.mjs
+
+      - name: Run PSCKernel basic definitional equality differential
+        run: node scripts/psckernel-defeq-basic-differential.mjs

@@ -31,6 +31,7 @@ The self-host fixed point is import-closure based. It may contain only the packa
 needed for the semantic compiler plus one executable backend:
 
 ```text
+bootstrap                 # tiny composition root only
 foundation
 syntax
 core
@@ -41,14 +42,17 @@ elab
 bridge
 compiler-ir
 erasure
-compiler
-backend-ts
+compiler                  # backend-neutral semantic compiler
+backend-ts                # the one bootstrap backend
 portable stdlib modules imported by the compiler
 ```
 
 Rust and Wasm remain valuable backend extensions, but they are not prerequisites for
-creating the PSC2 compiler. Their source, tests and packages may remain in this
-workspace while staying outside the bootstrap import closure.
+creating the PSC2 compiler. Their source, tests and packages remain in this workspace
+while staying outside the bootstrap import closure. `packages/pskernel` is likewise a
+bounded Lean reference/assurance package for now: it has its own Core model and is not
+silently treated as the compiler's checked-core provider. Integrating it is a later,
+explicit kernel-provider milestone.
 
 The self-host path is:
 
@@ -140,6 +144,19 @@ AdmissionReadyModule
 
 At that milestone erasure should accept only the checked artifact. Do not fake this
 milestone by renaming codec validation to `CheckedCore`.
+
+## Package responsibilities
+
+- `packages/compiler`: frontend orchestration, admission-ready boundary and VerifiedIR.
+  It must not import `Ps.Backend*`.
+- `packages/backend-ts`: TypeScript lowering plus the thin bootstrap compiler adapter.
+- `packages/bootstrap`: composition root selecting the one backend required to produce
+  the next compiler generation. It should stay tiny.
+- `packages/backend-rust`, `packages/backend-wasm`: optional VerifiedIR consumers.
+- `host`: Lean bootstrap IO, project loading and `tsc` process integration.
+- `stdlib`: portable ordinary ProofScript libraries needed by compiler source.
+- `packages/pskernel`: bounded assurance/reference kernel until an explicit adapter
+  makes it the checked-core provider.
 
 ## Growth rules
 

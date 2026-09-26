@@ -91,6 +91,20 @@ if (psconfig.acceptedLanguageProfile !== "PSC2-bootstrap") {
   throw new Error("PSC2_BOOTSTRAP_ACCEPTED_PROFILE: expected PSC2-bootstrap");
 }
 
+const semanticApiPath = path.join(
+  root,
+  "packages",
+  "compiler",
+  "src",
+  "Ps",
+  "Compiler",
+  "Api.lean",
+);
+const semanticApi = await readFile(semanticApiPath, "utf8");
+if (/\bPs\.Backend/u.test(semanticApi)) {
+  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_BACKEND_COUPLING");
+}
+
 const entry = path.join(root, psconfig.entry);
 if (!existsSync(entry)) {
   throw new Error(`PSC2_BOOTSTRAP_ENTRY_MISSING: ${psconfig.entry}`);

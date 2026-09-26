@@ -222,3 +222,7 @@ lean_exe psc1_bridge_host_tests where
 lean_exe psckernel_name_tests where
   srcDir := "packages/psckernel/test"
   root := `NameTests
+
+lean_exe psckernel_name_fixture where
+  srcDir := "packages/psckernel/test"
+  root := `NameFixture

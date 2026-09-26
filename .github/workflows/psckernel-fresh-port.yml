@@ -57,3 +57,12 @@ jobs:
           set -euo pipefail
           cd selfhost
           lake exe psckernel_name_tests
+
+      - name: Install TypeScript kernel dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build TypeScript kernel
+        run: npm run build --silent
+
+      - name: Run PSCKernel Name differential
+        run: node scripts/psckernel-name-differential.mjs

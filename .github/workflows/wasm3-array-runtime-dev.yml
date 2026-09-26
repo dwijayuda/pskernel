@@ -30,6 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           cd selfhost
+          lake build PsBackendWasm
           cat > /tmp/WasmArrayRed.lean <<'LEAN'
           import Ps.BackendWasm.Lower
 

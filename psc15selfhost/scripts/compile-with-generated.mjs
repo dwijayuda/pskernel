@@ -3,39 +3,16 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
+import { packageBySection, parseImports } from "./workspace-layout.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
-
-const packageBySection = new Map([
-  ["Foundation", "foundation"],
-  ["Syntax", "syntax"],
-  ["Core", "core"],
-  ["Environment", "environment"],
-  ["Project", "project"],
-  ["Meta", "meta"],
-  ["Elab", "elab"],
-  ["Bridge", "bridge"],
-  ["CompilerIr", "compiler-ir"],
-  ["Compiler", "compiler"],
-  ["Erasure", "erasure"],
-  ["BackendTs", "backend-ts"],
-]);
 
 function usage() {
   return [
     "usage:",
     "  node scripts/compile-with-generated.mjs <compiler.js> <entry.lean|entry.ps> <output.ts|output.js>",
   ].join("\n");
-}
-
-function parseImports(source) {
-  const imports = [];
-  for (const line of source.split(/\r?\n/u)) {
-    const match = line.match(/^\s*import\s+([A-Za-z0-9_.]+)\s*;?\s*$/u);
-    if (match) imports.push(match[1]);
-  }
-  return imports;
 }
 
 function stripImports(source) {
@@ -59,7 +36,7 @@ function findWorkspaceRoot(entryPath) {
     if (parent === current) break;
     current = parent;
   }
-  throw new Error(`PSC1_SELFHOST_WORKSPACE_NOT_FOUND: ${entryPath}`);
+  throw new Error(`PSC2_SELFHOST_WORKSPACE_NOT_FOUND: ${entryPath}`);
 }
 
 function moduleBasePath(workspaceRoot, moduleName) {
@@ -70,7 +47,7 @@ function moduleBasePath(workspaceRoot, moduleName) {
   if (parts[0] === "Ps" && parts.length >= 2) {
     const packageName = packageBySection.get(parts[1]);
     if (!packageName) {
-      throw new Error(`PSC1_SELFHOST_UNKNOWN_PACKAGE: ${moduleName}`);
+      throw new Error(`PSC2_SELFHOST_UNKNOWN_PACKAGE: ${moduleName}`);
     }
     return path.join(
       workspaceRoot,
@@ -94,11 +71,11 @@ function resolveModuleSource(workspaceRoot, moduleName) {
     if (moduleName.startsWith("Ps.") || moduleName.startsWith("ProofScript.")) {
       return leanPath;
     }
-    throw new Error(`PSC1_SELFHOST_SOURCE_AMBIGUITY: ${moduleName}`);
+    throw new Error(`PSC2_SELFHOST_SOURCE_AMBIGUITY: ${moduleName}`);
   }
   if (hasLean) return leanPath;
   if (hasProofScript) return proofScriptPath;
-  throw new Error(`PSC1_SELFHOST_SOURCE_MISSING: ${moduleName}`);
+  throw new Error(`PSC2_SELFHOST_SOURCE_MISSING: ${moduleName}`);
 }
 
 function exceptTag(value) {
@@ -115,10 +92,10 @@ function unwrapExcept(value, stage) {
   if (tag === "ok") return value.value;
   if (tag === "error") {
     throw new Error(
-      `PSC1_SELFHOST_${stage.toUpperCase()}_FAILED: ${JSON.stringify(value.error)}`,
+      `PSC2_SELFHOST_${stage.toUpperCase()}_FAILED: ${JSON.stringify(value.error)}`,
     );
   }
-  throw new Error(`PSC1_SELFHOST_${stage.toUpperCase()}_RESULT_SHAPE`);
+  throw new Error(`PSC2_SELFHOST_${stage.toUpperCase()}_RESULT_SHAPE`);
 }
 
 function requireCompilerApi(compiler) {
@@ -129,7 +106,7 @@ function requireCompilerApi(compiler) {
   ];
   for (const name of required) {
     if (!(name in compiler)) {
-      throw new Error(`PSC1_SELFHOST_COMPILER_EXPORT_MISSING: ${name}`);
+      throw new Error(`PSC2_SELFHOST_COMPILER_EXPORT_MISSING: ${name}`);
     }
   }
 }
@@ -141,7 +118,7 @@ function sourceKind(compiler, sourcePath) {
   if (sourcePath.endsWith(".ps")) {
     return compiler.PsCompilerSourceKind.proofScript;
   }
-  throw new Error(`PSC1_SELFHOST_SOURCE_KIND: ${sourcePath}`);
+  throw new Error(`PSC2_SELFHOST_SOURCE_KIND: ${sourcePath}`);
 }
 
 async function flattenProject(compiler, entryPath) {
@@ -156,7 +133,7 @@ async function flattenProject(compiler, entryPath) {
     visited.add(absolute);
 
     if (!existsSync(absolute)) {
-      throw new Error(`PSC1_SELFHOST_SOURCE_MISSING: ${absolute}`);
+      throw new Error(`PSC2_SELFHOST_SOURCE_MISSING: ${absolute}`);
     }
 
     const source = await readFile(absolute, "utf8");
@@ -225,7 +202,7 @@ function compileTypeScript(typeScriptPath) {
   if (result.status !== 0) {
     throw new Error(
       [
-        "PSC1_SELFHOST_TSC_FAILED",
+        "PSC2_SELFHOST_TSC_FAILED",
         result.stdout,
         result.stderr,
       ].filter(Boolean).join("\n"),
@@ -246,14 +223,14 @@ const outputTsPath =
     : requestedOutputPath;
 
 if (!existsSync(compilerPath)) {
-  throw new Error(`PSC1_SELFHOST_COMPILER_MISSING: ${compilerPath}`);
+  throw new Error(`PSC2_SELFHOST_COMPILER_MISSING: ${compilerPath}`);
 }
 if (!entryPath.endsWith(".ps") && !entryPath.endsWith(".lean")) {
-  throw new Error(`PSC1_SELFHOST_SOURCE_KIND: ${entryPath}`);
+  throw new Error(`PSC2_SELFHOST_SOURCE_KIND: ${entryPath}`);
 }
 if (!outputTsPath.endsWith(".ts")) {
   throw new Error(
-    `PSC1_SELFHOST_OUTPUT_KIND: expected .ts or .js, got ${requestedOutputPath}`,
+    `PSC2_SELFHOST_OUTPUT_KIND: expected .ts or .js, got ${requestedOutputPath}`,
   );
 }
 
@@ -275,10 +252,10 @@ compileTypeScript(outputTsPath);
 
 process.stdout.write(
   [
-    `PSC1_SELFHOST_COMPILER: ${path.relative(selfhostRoot, compilerPath)}`,
-    `PSC1_SELFHOST_SOURCE: ${path.relative(selfhostRoot, entryPath)}`,
-    `PSC1_SELFHOST_MODULES: ${project.moduleCount}`,
-    `PSC1_SELFHOST_TS: ${path.relative(selfhostRoot, outputTsPath)}`,
-    `PSC1_SELFHOST_JS: ${path.relative(selfhostRoot, outputTsPath.replace(/\.ts$/u, ".js"))}`,
+    `PSC2_SELFHOST_COMPILER: ${path.relative(selfhostRoot, compilerPath)}`,
+    `PSC2_SELFHOST_SOURCE: ${path.relative(selfhostRoot, entryPath)}`,
+    `PSC2_SELFHOST_MODULES: ${project.moduleCount}`,
+    `PSC2_SELFHOST_TS: ${path.relative(selfhostRoot, outputTsPath)}`,
+    `PSC2_SELFHOST_JS: ${path.relative(selfhostRoot, outputTsPath.replace(/\.ts$/u, ".js"))}`,
   ].join("\n") + "\n",
 );

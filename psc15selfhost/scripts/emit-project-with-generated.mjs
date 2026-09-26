@@ -2,39 +2,16 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { packageBySection, parseImports } from "./workspace-layout.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
-
-const packageBySection = new Map([
-  ["Foundation", "foundation"],
-  ["Syntax", "syntax"],
-  ["Core", "core"],
-  ["Environment", "environment"],
-  ["Project", "project"],
-  ["Meta", "meta"],
-  ["Elab", "elab"],
-  ["Bridge", "bridge"],
-  ["CompilerIr", "compiler-ir"],
-  ["Compiler", "compiler"],
-  ["Erasure", "erasure"],
-  ["BackendTs", "backend-ts"],
-]);
 
 function usage() {
   return [
     "usage:",
     "  node scripts/emit-project-with-generated.mjs <compiler.js> <entry.lean|entry.ps> --to <lean|ps> --out <workspace>",
   ].join("\n");
-}
-
-function parseImports(source) {
-  const imports = [];
-  for (const line of source.split(/\r?\n/u)) {
-    const match = line.match(/^\s*import\s+([A-Za-z0-9_.]+)\s*;?\s*$/u);
-    if (match) imports.push(match[1]);
-  }
-  return imports;
 }
 
 function findWorkspaceRoot(entryPath) {
@@ -58,7 +35,7 @@ function findWorkspaceRoot(entryPath) {
     if (parent === current) break;
     current = parent;
   }
-  throw new Error(`PSC1_PROJECT_WORKSPACE_NOT_FOUND: ${entryPath}`);
+  throw new Error(`PSC2_PROJECT_WORKSPACE_NOT_FOUND: ${entryPath}`);
 }
 
 function firstExisting(candidates) {
@@ -80,7 +57,7 @@ function moduleBaseCandidates(workspaceRoot, moduleName) {
   if (parts[0] === "Ps" && parts.length >= 2) {
     const packageName = packageBySection.get(parts[1]);
     if (!packageName) {
-      throw new Error(`PSC1_PROJECT_UNKNOWN_PACKAGE: ${moduleName}`);
+      throw new Error(`PSC2_PROJECT_UNKNOWN_PACKAGE: ${moduleName}`);
     }
     return [
       path.join(workspaceRoot, "packages", packageName, "src", ...parts),
@@ -102,7 +79,7 @@ function resolveModuleSource(workspaceRoot, moduleName, preferredExtension) {
   );
   if (alternate) return alternate;
 
-  throw new Error(`PSC1_PROJECT_SOURCE_MISSING: ${moduleName}`);
+  throw new Error(`PSC2_PROJECT_SOURCE_MISSING: ${moduleName}`);
 }
 
 function exceptTag(value) {
@@ -119,11 +96,11 @@ function unwrapExcept(value, stage, sourcePath) {
   if (tag === "ok") return value.value;
   if (tag === "error") {
     throw new Error(
-      `PSC1_PROJECT_${stage.toUpperCase()}_FAILED: ${sourcePath}: ${JSON.stringify(value.error)}`,
+      `PSC2_PROJECT_${stage.toUpperCase()}_FAILED: ${sourcePath}: ${JSON.stringify(value.error)}`,
     );
   }
   throw new Error(
-    `PSC1_PROJECT_${stage.toUpperCase()}_RESULT_SHAPE: ${sourcePath}`,
+    `PSC2_PROJECT_${stage.toUpperCase()}_RESULT_SHAPE: ${sourcePath}`,
   );
 }
 
@@ -134,7 +111,7 @@ function compilerKind(compiler, extension) {
   if (extension === ".ps" || extension === "ps") {
     return compiler.PsCompilerSourceKind.proofScript;
   }
-  throw new Error(`PSC1_PROJECT_SOURCE_KIND: ${extension}`);
+  throw new Error(`PSC2_PROJECT_SOURCE_KIND: ${extension}`);
 }
 
 if (process.argv.length < 8) {
@@ -153,7 +130,7 @@ const outputWorkspace =
 
 if (!targetText || !outputWorkspace) throw new Error(usage());
 if (!existsSync(compilerPath)) {
-  throw new Error(`PSC1_PROJECT_COMPILER_MISSING: ${compilerPath}`);
+  throw new Error(`PSC2_PROJECT_COMPILER_MISSING: ${compilerPath}`);
 }
 
 const sourceExtension = entryPath.endsWith(".lean")
@@ -162,7 +139,7 @@ const sourceExtension = entryPath.endsWith(".lean")
     ? ".ps"
     : undefined;
 if (!sourceExtension) {
-  throw new Error(`PSC1_PROJECT_ENTRY_KIND: ${entryPath}`);
+  throw new Error(`PSC2_PROJECT_ENTRY_KIND: ${entryPath}`);
 }
 const targetExtension =
   targetText === "lean" || targetText === ".lean"
@@ -171,7 +148,7 @@ const targetExtension =
       ? ".ps"
       : undefined;
 if (!targetExtension) {
-  throw new Error(`PSC1_PROJECT_TARGET_KIND: ${targetText}`);
+  throw new Error(`PSC2_PROJECT_TARGET_KIND: ${targetText}`);
 }
 
 const compiler = await import(pathToFileURL(compilerPath).href);
@@ -179,7 +156,7 @@ if (
   !("PsCompilerSourceKind" in compiler) ||
   !("psCompilerTranslateSource" in compiler)
 ) {
-  throw new Error("PSC1_PROJECT_COMPILER_API_MISSING");
+  throw new Error("PSC2_PROJECT_COMPILER_API_MISSING");
 }
 
 const workspaceRoot = findWorkspaceRoot(entryPath);
@@ -220,7 +197,7 @@ for (const item of ordered) {
 
   const relative = path.relative(workspaceRoot, item.path);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error(`PSC1_PROJECT_SOURCE_OUTSIDE_WORKSPACE: ${item.path}`);
+    throw new Error(`PSC2_PROJECT_SOURCE_OUTSIDE_WORKSPACE: ${item.path}`);
   }
   const targetRelative = relative.replace(/\.(lean|ps)$/u, targetExtension);
   const outputPath = path.join(outputWorkspace, targetRelative);
@@ -299,6 +276,8 @@ async function writeGeneratedProjectMetadata() {
   if (targetExtension === ".ps") {
     const generatedConfig = {
       languageVersion: "0.7",
+      implementationProfile: "PSC1",
+      acceptedLanguageProfile: "PSC2-bootstrap",
       entry: entryRelative,
       sourceRoots: ["packages", "stdlib"],
       runtimeDependencies: {},
@@ -348,9 +327,9 @@ await writeGeneratedProjectMetadata();
 
 process.stdout.write(
   [
-    `PSC1_PROJECT_EMIT_SOURCE: ${path.relative(selfhostRoot, entryPath)}`,
-    `PSC1_PROJECT_EMIT_TARGET: ${targetExtension.slice(1)}`,
-    `PSC1_PROJECT_EMIT_OUTPUT: ${path.relative(selfhostRoot, outputWorkspace)}`,
-    `PSC1_PROJECT_EMIT_FILES: ${generated.length}`,
+    `PSC2_PROJECT_EMIT_SOURCE: ${path.relative(selfhostRoot, entryPath)}`,
+    `PSC2_PROJECT_EMIT_TARGET: ${targetExtension.slice(1)}`,
+    `PSC2_PROJECT_EMIT_OUTPUT: ${path.relative(selfhostRoot, outputWorkspace)}`,
+    `PSC2_PROJECT_EMIT_FILES: ${generated.length}`,
   ].join("\n") + "\n",
 );

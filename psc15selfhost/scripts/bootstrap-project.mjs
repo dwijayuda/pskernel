@@ -3,24 +3,10 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { packageBySection, parseImports } from "./workspace-layout.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
-
-const packageBySection = new Map([
-  ["Foundation", "foundation"],
-  ["Syntax", "syntax"],
-  ["Core", "core"],
-  ["Environment", "environment"],
-  ["Project", "project"],
-  ["Meta", "meta"],
-  ["Elab", "elab"],
-  ["Bridge", "bridge"],
-  ["CompilerIr", "compiler-ir"],
-  ["Compiler", "compiler"],
-  ["Erasure", "erasure"],
-  ["BackendTs", "backend-ts"],
-]);
 
 function usage(entry, outDir) {
   return [
@@ -33,15 +19,6 @@ function usage(entry, outDir) {
   ].join("\n");
 }
 
-function parseImports(source) {
-  const imports = [];
-  for (const line of source.split(/\r?\n/u)) {
-    const match = line.match(/^\s*import\s+([A-Za-z0-9_.]+)\s*$/u);
-    if (match) imports.push(match[1]);
-  }
-  return imports;
-}
-
 function moduleSourcePath(moduleName) {
   const parts = moduleName.split(".");
   if (parts[0] === "ProofScript") {
@@ -50,7 +27,7 @@ function moduleSourcePath(moduleName) {
   if (parts[0] === "Ps" && parts.length >= 2) {
     const packageName = packageBySection.get(parts[1]);
     if (!packageName) {
-      throw new Error(`PSC1_BOOTSTRAP_UNKNOWN_PACKAGE: ${moduleName}`);
+      throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_PACKAGE: ${moduleName}`);
     }
     return path.join(
       selfhostRoot,
@@ -60,7 +37,7 @@ function moduleSourcePath(moduleName) {
       ...parts,
     ) + ".lean";
   }
-  throw new Error(`PSC1_BOOTSTRAP_UNKNOWN_IMPORT: ${moduleName}`);
+  throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_IMPORT: ${moduleName}`);
 }
 
 async function collectProject(entryPath) {
@@ -73,7 +50,7 @@ async function collectProject(entryPath) {
     visited.add(absolute);
 
     if (!existsSync(absolute)) {
-      throw new Error(`PSC1_BOOTSTRAP_SOURCE_MISSING: ${absolute}`);
+      throw new Error(`PSC2_BOOTSTRAP_SOURCE_MISSING: ${absolute}`);
     }
 
     const source = await readFile(absolute, "utf8");
@@ -90,7 +67,7 @@ async function collectProject(entryPath) {
 function translatedRelativePath(sourcePath) {
   const relative = path.relative(selfhostRoot, sourcePath);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error(`PSC1_BOOTSTRAP_SOURCE_OUTSIDE_WORKSPACE: ${sourcePath}`);
+    throw new Error(`PSC2_BOOTSTRAP_SOURCE_OUTSIDE_WORKSPACE: ${sourcePath}`);
   }
   return relative.replace(/\.lean$/u, ".ps");
 }
@@ -119,7 +96,7 @@ function translateFile(sourcePath, outputPath) {
   if (result.status !== 0) {
     throw new Error(
       [
-        `PSC1_BOOTSTRAP_TRANSLATE_FAILED: ${relativeSource}`,
+        `PSC2_BOOTSTRAP_TRANSLATE_FAILED: ${relativeSource}`,
         result.stdout,
         result.stderr,
       ].filter(Boolean).join("\n"),
@@ -168,8 +145,8 @@ await writeFile(
 
 process.stdout.write(
   [
-    `PSC1_BOOTSTRAP_PS_WORKSPACE: ${path.relative(selfhostRoot, outWorkspace)}`,
-    `PSC1_BOOTSTRAP_PS_ENTRY: ${path.join(path.relative(selfhostRoot, outWorkspace), entryRelative)}`,
-    `PSC1_BOOTSTRAP_PS_SOURCES: ${sources.length}`,
+    `PSC2_BOOTSTRAP_PS_WORKSPACE: ${path.relative(selfhostRoot, outWorkspace)}`,
+    `PSC2_BOOTSTRAP_PS_ENTRY: ${path.join(path.relative(selfhostRoot, outWorkspace), entryRelative)}`,
+    `PSC2_BOOTSTRAP_PS_SOURCES: ${sources.length}`,
   ].join("\n") + "\n",
 );

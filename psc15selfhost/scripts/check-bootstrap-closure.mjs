@@ -2,26 +2,10 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { packageBySection, parseImports } from "./workspace-layout.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
-
-const packageBySection = new Map([
-  ["Foundation", "foundation"],
-  ["Syntax", "syntax"],
-  ["Core", "core"],
-  ["Environment", "environment"],
-  ["Project", "project"],
-  ["Meta", "meta"],
-  ["Elab", "elab"],
-  ["Bridge", "bridge"],
-  ["CompilerIr", "compiler-ir"],
-  ["Compiler", "compiler"],
-  ["Erasure", "erasure"],
-  ["BackendTs", "backend-ts"],
-  ["BackendRust", "backend-rust"],
-  ["BackendWasm", "backend-wasm"],
-]);
 
 const allowedBootstrapPackages = new Set([
   "bootstrap",
@@ -29,7 +13,6 @@ const allowedBootstrapPackages = new Set([
   "syntax",
   "core",
   "environment",
-  "project",
   "meta",
   "elab",
   "bridge",
@@ -41,19 +24,11 @@ const allowedBootstrapPackages = new Set([
 ]);
 
 const forbiddenBootstrapPackages = new Set([
+  "project",
   "backend-rust",
   "backend-wasm",
   "pskernel",
 ]);
-
-function parseImports(source) {
-  const imports = [];
-  for (const line of source.split(/\r?\n/u)) {
-    const match = line.match(/^\s*import\s+([A-Za-z0-9_.]+)\s*$/u);
-    if (match) imports.push(match[1]);
-  }
-  return imports;
-}
 
 function sourceForModule(moduleName) {
   const parts = moduleName.split(".");

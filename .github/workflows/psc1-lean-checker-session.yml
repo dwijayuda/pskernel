@@ -53,6 +53,9 @@ jobs:
       - name: Stateful recursive checker
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerStatefulSmoke.lean
+      - name: Stateful lazy-delta failure memo
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerLazyDeltaStatefulSmoke.lean
       - name: Checker-session smoke
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerSessionSmoke.lean

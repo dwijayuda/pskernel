@@ -156,7 +156,7 @@ private unsafe def checkerDefEqStateFor
     checkerDefEqRuntimeRef.set fresh
     pure fresh
 
-private unsafe def checkerDefEqSuccessCachedImpl
+unsafe def checkerDefEqSuccessCachedImpl
     (env : Environment)
     (lctx : LocalContext)
     (maxRecDepth maxNatSize : Nat)
@@ -181,7 +181,7 @@ opaque checkerDefEqSuccessCached
     (enabled : Bool)
     (left right : Expr) : Bool := false
 
-private unsafe def checkerDefEqCacheSuccessResultImpl
+unsafe def checkerDefEqCacheSuccessResultImpl
     (env : Environment)
     (lctx : LocalContext)
     (maxRecDepth maxNatSize : Nat)
@@ -210,7 +210,7 @@ opaque checkerDefEqCacheSuccessResult
     (left right : Expr)
     (result : Bool) : Bool := result
 
-private unsafe def checkerDefEqFailureCachedImpl
+unsafe def checkerDefEqFailureCachedImpl
     (env : Environment)
     (lctx : LocalContext)
     (maxRecDepth maxNatSize : Nat)
@@ -232,7 +232,7 @@ opaque checkerDefEqFailureCached
     (enabled : Bool)
     (left right : Expr) : Bool := false
 
-private unsafe def checkerDefEqCacheFailureResultImpl
+unsafe def checkerDefEqCacheFailureResultImpl
     (env : Environment)
     (lctx : LocalContext)
     (maxRecDepth maxNatSize : Nat)

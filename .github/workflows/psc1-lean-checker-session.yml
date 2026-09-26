@@ -10,6 +10,7 @@ on:
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
+      - "scripts/apply-psc1-defeq-cache.mjs"
 
 permissions:
   contents: read
@@ -26,6 +27,12 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Apply experimental recursive defeq cache wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/apply-psc1-defeq-cache.mjs
+          git diff --check
       - name: Build PSC1 kernel
         working-directory: psc1-kernel
         run: lake build

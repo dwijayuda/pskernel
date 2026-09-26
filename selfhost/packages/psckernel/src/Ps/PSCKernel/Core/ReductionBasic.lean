@@ -77,6 +77,20 @@ def psCKernelFindRecursorRule?
       else
         psCKernelFindRecursorRule? rest ctorName
 
+def psCKernelNatZeroName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.zero"
+
+def psCKernelNatSuccName : PsCKernelName :=
+  psCKernelNameFromDotted "Nat.succ"
+
+def psCKernelNatLiteralToConstructor (value : Nat) : PsCKernelExpr :=
+  match value with
+  | 0 => PsCKernelExpr.constE psCKernelNatZeroName []
+  | Nat.succ predecessor =>
+      PsCKernelExpr.app
+        (PsCKernelExpr.constE psCKernelNatSuccName [])
+        (PsCKernelExpr.lit (PsCKernelLiteral.natVal predecessor))
+
 partial def psCKernelExprWhnfBasic
     (env : PsCKernelEnvironment)
     (lctx : PsCKernelLocalContext)
@@ -109,12 +123,17 @@ partial def psCKernelExprWhnfBasic
                 | none => none
                 | some major =>
                     let reducedMajor := psCKernelExprWhnfBasic env lctx major
-                    match psCKernelExprGetAppFn reducedMajor with
+                    let ruleMajor :=
+                      match reducedMajor with
+                      | PsCKernelExpr.lit (PsCKernelLiteral.natVal value) =>
+                          psCKernelNatLiteralToConstructor value
+                      | _ => reducedMajor
+                    match psCKernelExprGetAppFn ruleMajor with
                     | PsCKernelExpr.constE ctorName _ =>
                         match psCKernelFindRecursorRule? recursor.rules ctorName with
                         | none => none
                         | some rule =>
-                            let majorArgs := psCKernelExprGetAppArgs reducedMajor
+                            let majorArgs := psCKernelExprGetAppArgs ruleMajor
                             if Nat.ble rule.nfields majorArgs.length then
                               if Nat.beq
                                   recursorLevels.length

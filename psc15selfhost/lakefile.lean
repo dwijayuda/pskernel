@@ -219,3 +219,7 @@ lean_exe psc1_erasure_tests where
 lean_exe psc2_minimal_selfhost_tests where
   srcDir := "test"
   root := `MinimalSelfHostTests
+
+lean_exe psc2_kernel_core_boundary_tests where
+  srcDir := "test"
+  root := `KernelCoreBoundaryTests

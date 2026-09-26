@@ -86,10 +86,10 @@ jobs:
               raise SystemExit('diagnostic IR marker not found')
           text = text.replace(marker, insertion, 1)
 
-          function_marker = '''      module.functions ++ [
-                {
-                  name := "gcArray42"'''
-          function_insertion = '''      module.functions ++ [
+          helper_anchor = text.index('def psWasmAddGcArrayTargetSmoke')
+          list_marker = 'module.functions ++ ['
+          list_start = text.index(list_marker, helper_anchor) + len(list_marker)
+          target_functions = '''
                 {
                   name := "natSuccZeroExactTarget"
                   typeName := none
@@ -123,15 +123,11 @@ jobs:
                     PsWasmInstruction.i32Const 0,
                     PsWasmInstruction.i32Eq
                   ]
-                },
-                {
-                  name := "gcArray42"'''
-          if function_marker not in text:
-              raise SystemExit('diagnostic target-function marker not found')
-          text = text.replace(function_marker, function_insertion, 1)
+                },'''
+          text = text[:list_start] + target_functions + text[list_start:]
 
-          export_marker = '''      module.exports ++ [("gcArray42", "gcArray42")]'''
-          export_insertion = '''      module.exports ++ [
+          export_marker = 'module.exports ++ [("gcArray42", "gcArray42")]'
+          export_insertion = '''module.exports ++ [
                 ("gcArray42", "gcArray42"),
                 ("natSuccZeroExactTarget", "natSuccZeroExactTarget"),
                 ("natSuccOneExactTarget", "natSuccOneExactTarget")

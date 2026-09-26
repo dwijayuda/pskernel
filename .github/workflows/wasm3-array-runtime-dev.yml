@@ -8,6 +8,7 @@ on:
       - .github/workflows/wasm3-array-runtime-dev.yml
       - .github/dev/apply_wasm_array_runtime.py
       - .github/dev/apply_wasm_array_collection_fix.py
+      - .github/dev/apply_wasm_array_nat_u32_fix.py
       - selfhost/**
 
 permissions:
@@ -47,6 +48,7 @@ jobs:
           PY
           python3 .github/dev/apply_wasm_array_runtime.py
           python3 .github/dev/apply_wasm_array_collection_fix.py
+          python3 .github/dev/apply_wasm_array_nat_u32_fix.py
           python3 - <<'PY'
           from pathlib import Path
           path = Path('.github/workflows/wasm3-backend.yml')

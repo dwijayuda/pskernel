@@ -64,6 +64,13 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_expr_parity_tests
 
+      - name: Substitution parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_subst_parity_tests
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |

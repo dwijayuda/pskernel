@@ -222,4 +222,30 @@ opaque checkerWhnfCacheResult
     (enabled : Bool)
     (expr result : Expr) : Except String Expr := .ok result
 
+/-- Test-only diagnostic: bypass scope refresh and inspect the current WHNF map. -/
+unsafe def checkerWhnfRawCachedImpl
+    (lctx : LocalContext)
+    (expr : Expr) : Option Expr :=
+  checkerWhnfRunIO none do
+    let state ← checkerWhnfRuntimeRef.get
+    pure (state.whnf.get? lctx expr)
+
+@[implemented_by checkerWhnfRawCachedImpl]
+opaque checkerWhnfRawCached
+    (lctx : LocalContext)
+    (expr : Expr) : Option Expr := none
+
+/-- Test-only diagnostic: does the currently retained scope match these inputs? -/
+unsafe def checkerWhnfScopeMatchesCurrentImpl
+    (env : Environment)
+    (maxRecDepth maxNatSize : Nat) : Bool :=
+  checkerWhnfRunIO false do
+    let state ← checkerWhnfRuntimeRef.get
+    pure (checkerWhnfScopeMatches state env maxRecDepth maxNatSize)
+
+@[implemented_by checkerWhnfScopeMatchesCurrentImpl]
+opaque checkerWhnfScopeMatchesCurrent
+    (env : Environment)
+    (maxRecDepth maxNatSize : Nat) : Bool := false
+
 end PSC1Kernel

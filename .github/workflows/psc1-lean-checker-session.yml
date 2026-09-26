@@ -7,6 +7,7 @@ on:
       - perf/psc1-lean-checker-session
       - perf/psc1-lean-checker-cache
       - perf/psc1-lean-defeq-cache
+      - perf/psc1-lean-full-checker-cache
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
@@ -52,6 +53,11 @@ jobs:
         run: |
           lake build psc1_defeq_cache_smoke
           .lake/build/bin/psc1_defeq_cache_smoke
+      - name: Native WHNF cache isolation
+        working-directory: psc1-kernel
+        run: |
+          lake build psc1_whnf_cache_smoke
+          .lake/build/bin/psc1_whnf_cache_smoke
       - name: Checker-session smoke
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerSessionSmoke.lean

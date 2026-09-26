@@ -160,3 +160,6 @@ jobs:
 
       - name: Run PSCKernel Environment differential
         run: node scripts/psckernel-environment-differential.mjs
+
+      - name: Run PSCKernel basic reduction differential
+        run: node scripts/psckernel-reduction-basic-differential.mjs

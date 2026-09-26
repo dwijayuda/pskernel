@@ -156,7 +156,8 @@ lean_lib PsPSCKernel where
     `Ps.PSCKernel.Core.Name,
     `Ps.PSCKernel.Core.Level,
     `Ps.PSCKernel.Core.Expr,
-    `Ps.PSCKernel.Core.ExprLevelInstantiation
+    `Ps.PSCKernel.Core.ExprLevelInstantiation,
+    `Ps.PSCKernel.Core.ExprInstantiation
   ]
 
 @[default_target]

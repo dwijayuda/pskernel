@@ -211,7 +211,7 @@ and the full recursive stateful defeq algorithm while still letting both share
 one `CheckerState`.
 
 Final Lean 4.34 enters `scope_rec_depth` before the infer-cache lookup. During
-this incremental migration, cache hits and the custom checked-application path
+this incremental migration, cache hits and the custom application paths
 therefore enter the PSC1 recursion guard explicitly. Non-migrated misses still
 delegate to the established pure `inferCore`, which already enters that guard;
 charging them here as well would incorrectly double-count recursion depth.
@@ -231,13 +231,37 @@ partial def inferCoreStatefulWith
   | none =>
       match e with
       | .app fn arg =>
-          if inferOnly then
-            -- This branch is not migrated yet. Pure `inferCore` owns exactly
-            -- one recursion-depth scope, matching the C++ miss path.
-            match inferCore ctx e true with
-            | .error err => .error err
-            | .ok result =>
-                .ok (result, cacheInferStatefulResult state true e result)
+          if inferOnly then do
+            -- Lean 4.34 infer_app: infer the flattened function head through
+            -- the shared state, consume syntactically visible Pi binders, and
+            -- instantiate delayed argument slices only when a hidden Pi must
+            -- be exposed. Infer-only mode deliberately does not check args.
+            let ctx ← ctx.enterKernelRecDepth
+            let args := e.getAppArgs
+            let (fnType, state1) ←
+              inferCoreStatefulWith defeq ctx state e.getAppFn true
+            let rec loop
+                (i j : Nat)
+                (current : Expr)
+                (currentState : CheckerState) :
+                Except String (Expr × CheckerState) := do
+              if i < args.length then
+                match current with
+                | .forallE _ _ body _ =>
+                    loop (i + 1) j body currentState
+                | _ =>
+                    let pending := (args.drop j).take (i - j)
+                    let exposed := current.instantiateRev pending
+                    let (exposedWhnf, next) ←
+                      whnfStateful ctx currentState exposed
+                    let .forallE _ _ body _ := exposedWhnf
+                      | throw "expected function type"
+                    loop (i + 1) i body next
+              else
+                let result := current.instantiateRev (args.drop j)
+                return
+                  (result, cacheInferStatefulResult currentState true e result)
+            loop 0 0 fnType state1
           else do
             -- This branch replaces pure `inferCore`, so it must own the one
             -- `scope_rec_depth` that Lean C++ charges before recursive work.

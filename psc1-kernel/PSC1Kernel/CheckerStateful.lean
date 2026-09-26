@@ -204,17 +204,20 @@ private def cacheInferStatefulResult
   else
     { state with checkedInfer := CheckerExprMap.insert state.checkedInfer e result }
 
+private def ensureSortStatefulResult
+    (ctx : CheckerContext)
+    (state : CheckerState)
+    (type : Expr) : Except String (Level × CheckerState) := do
+  let (reduced, next) ← whnfStateful ctx state type
+  match reduced with
+  | .sort level => return (level, next)
+  | _ => throw "expected sort"
+
 /--
 Incremental stateful counterpart of Lean 4.34 `infer_type_core` with an explicit
-definitional-equality callback. This breaks the module cycle between inference
-and the full recursive stateful defeq algorithm while still letting both share
-one `CheckerState`.
-
-Final Lean 4.34 enters `scope_rec_depth` before the infer-cache lookup. During
-this incremental migration, cache hits and the custom application paths
-therefore enter the PSC1 recursion guard explicitly. Non-migrated misses still
-delegate to the established pure `inferCore`, which already enters that guard;
-charging them here as well would incorrectly double-count recursion depth.
+definitional-equality callback. The migrated application and binder paths share
+one declaration-scoped state through recursive inference, WHNF, and defeq.
+Non-migrated misses still delegate to the established pure semantic checker.
 -/
 partial def inferCoreStatefulWith
     (defeq : CheckerContext → CheckerState → Expr → Expr →
@@ -262,8 +265,6 @@ partial def inferCoreStatefulWith
                 return (result, cacheInferStatefulResult currentState true e result)
             loop 0 0 fnType state1
           else do
-            -- This branch replaces pure `inferCore`, so it must own the one
-            -- `scope_rec_depth` that Lean C++ charges before recursive work.
             let ctx ← ctx.enterKernelRecDepth
             let (fnType, state1) ← inferCoreStatefulWith defeq ctx state fn false
             let (fnTypeWhnf, state2) ← whnfStateful ctx state1 fnType
@@ -280,6 +281,133 @@ partial def inferCoreStatefulWith
               throw "application type mismatch"
             let result := body.instantiate1 arg
             return (result, cacheInferStatefulResult state4 false e result)
+
+      | .lam _ _ _ _ => do
+          let ctx ← ctx.enterKernelRecDepth
+          let rec loop
+              (currentCtx : CheckerContext)
+              (currentState : CheckerState)
+              (current : Expr)
+              (fvars : List Expr)
+              (binders : List CheckerCloseBinder) :
+              Except String (Expr × CheckerState) := do
+            match current with
+            | .lam name domain body binderInfo =>
+                let openedDomain := domain.instantiateRev fvars
+                let state1 ←
+                  if inferOnly then
+                    pure currentState
+                  else do
+                    let (domainType, next1) ←
+                      inferCoreStatefulWith defeq currentCtx currentState openedDomain false
+                    let (_, next2) ←
+                      ensureSortStatefulResult currentCtx next1 domainType
+                    pure next2
+                let (fresh, state2) := state1.freshName name
+                let child := {
+                  currentCtx with
+                    lctx := currentCtx.lctx.addLocal fresh name openedDomain binderInfo
+                }
+                let binder : CheckerCloseBinder := {
+                  internalName := fresh
+                  userName := name
+                  type := openedDomain
+                  binderInfo := binderInfo
+                }
+                loop child state2 body
+                  (fvars ++ [.fvar fresh]) (binders ++ [binder])
+            | tail =>
+                let openedTail := tail.instantiateRev fvars
+                let (tailType, next) ←
+                  inferCoreStatefulWith defeq currentCtx currentState openedTail inferOnly
+                let result := closeCheckerBinders binders tailType.cheapBetaReduce
+                return (result, next)
+          let (result, next) ← loop ctx state e [] []
+          return (result, cacheInferStatefulResult next inferOnly e result)
+
+      | .forallE _ _ _ _ => do
+          let ctx ← ctx.enterKernelRecDepth
+          let rec loop
+              (currentCtx : CheckerContext)
+              (currentState : CheckerState)
+              (current : Expr)
+              (fvars : List Expr)
+              (levels : List Level) :
+              Except String (Expr × CheckerState) := do
+            match current with
+            | .forallE name domain body binderInfo =>
+                let openedDomain := domain.instantiateRev fvars
+                let (domainType, state1) ←
+                  inferCoreStatefulWith defeq currentCtx currentState openedDomain inferOnly
+                let (level, state2) ←
+                  ensureSortStatefulResult currentCtx state1 domainType
+                let (fresh, state3) := state2.freshName name
+                let child := {
+                  currentCtx with
+                    lctx := currentCtx.lctx.addLocal fresh name openedDomain binderInfo
+                }
+                loop child state3 body
+                  (fvars ++ [.fvar fresh]) (levels ++ [level])
+            | tail =>
+                let openedTail := tail.instantiateRev fvars
+                let (tailType, state1) ←
+                  inferCoreStatefulWith defeq currentCtx currentState openedTail inferOnly
+                let (resultLevel, state2) ←
+                  ensureSortStatefulResult currentCtx state1 tailType
+                return (.sort (levels.foldr Level.mkIMax resultLevel), state2)
+          let (result, next) ← loop ctx state e [] []
+          return (result, cacheInferStatefulResult next inferOnly e result)
+
+      | .letE _ _ _ _ _ => do
+          let ctx ← ctx.enterKernelRecDepth
+          let rec loop
+              (currentCtx : CheckerContext)
+              (currentState : CheckerState)
+              (current : Expr)
+              (fvars : List Expr)
+              (binders : List CheckerCloseBinder) :
+              Except String (Expr × CheckerState) := do
+            match current with
+            | .letE name type value body nondep =>
+                let openedType := type.instantiateRev fvars
+                let openedValue := value.instantiateRev fvars
+                let state1 ←
+                  if inferOnly then
+                    pure currentState
+                  else do
+                    let (typeType, next1) ←
+                      inferCoreStatefulWith defeq currentCtx currentState openedType false
+                    let (_, next2) ←
+                      ensureSortStatefulResult currentCtx next1 typeType
+                    let (valueType, next3) ←
+                      inferCoreStatefulWith defeq currentCtx next2 openedValue false
+                    let (ok, next4) ← defeq currentCtx next3 valueType openedType
+                    if !ok then throw "let value type mismatch"
+                    pure next4
+                let (fresh, state2) := state1.freshName name
+                let child := {
+                  currentCtx with
+                    lctx := currentCtx.lctx.addLet fresh name openedType openedValue
+                }
+                let binder : CheckerCloseBinder := {
+                  internalName := fresh
+                  userName := name
+                  type := openedType
+                  binderInfo := .default
+                  value? := some openedValue
+                  nondep := nondep
+                }
+                loop child state2 body
+                  (fvars ++ [.fvar fresh]) (binders ++ [binder])
+            | tail =>
+                let openedTail := tail.instantiateRev fvars
+                let (tailType, next) ←
+                  inferCoreStatefulWith defeq currentCtx currentState openedTail inferOnly
+                let result := closeCheckerBinders binders tailType.cheapBetaReduce true
+                return (result, next)
+          let (result, next) ← loop ctx state e [] []
+          return (result, cacheInferStatefulResult next inferOnly e result)
+
       | _ =>
           -- Non-migrated forms retain the proven pure resource accounting.
           match inferCore ctx e inferOnly with

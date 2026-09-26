@@ -3,8 +3,6 @@ import Ps.Bridge.CheckedAdmissions
 import Ps.Environment.Prelude
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
-import Ps.BackendTs.Module
-import Ps.BackendRust.Module
 
 inductive PsCompilerSourceKind where
   | lean
@@ -17,8 +15,11 @@ inductive PsCompilerError where
   | elaboration (error : PsElabError)
   | admission (error : PsCheckedAdmissionCodecError)
   | erasure (error : PsErasureError)
-  | typeScript (error : PsTsEmitError)
-  | rust (error : PsRustEmitError)
+
+structure PsCompilerAdmissionReadyModule where
+  environment : PsEnvironment
+  declarations : List PsDeclaration
+  canonicalAdmissions : String
 
 def psCompilerTranslateSource
     (sourceKind targetKind : PsCompilerSourceKind)
@@ -53,77 +54,23 @@ def psCompilerParseSource
       match psParseLeanSource source with
       | Except.error error =>
           Except.error (PsCompilerError.leanFrontend error)
-      | Except.ok module =>
-          Except.ok module
+      | Except.ok sourceModule =>
+          Except.ok sourceModule
   | PsCompilerSourceKind.proofScript =>
       match psParseProofScriptSource source with
       | Except.error error =>
           Except.error (PsCompilerError.proofScriptFrontend error)
-      | Except.ok module =>
-          Except.ok module
+      | Except.ok sourceModule =>
+          Except.ok sourceModule
 
 def psCompilerElaborateModule
-    (module : PsSyntaxModule) :
+    (sourceModule : PsSyntaxModule) :
     Except PsCompilerError PsElabModuleResult :=
-  match psElabModule psBootstrapPreludeEnvironment module with
+  match psElabModule psBootstrapPreludeEnvironment sourceModule with
   | Except.error error =>
       Except.error (PsCompilerError.elaboration error)
   | Except.ok elaborated =>
       Except.ok elaborated
-
-def psCompilerCheckElaborated
-    (elaborated : PsElabModuleResult) :
-    Except PsCompilerError Unit :=
-  match
-      psEncodeCheckedAdmissionsCanonical
-        elaborated.declarations with
-  | Except.error error =>
-      Except.error (PsCompilerError.admission error)
-  | Except.ok _ =>
-      Except.ok ()
-
-def psCompilerAdmissionsFromElaborated
-    (elaborated : PsElabModuleResult) :
-    Except PsCompilerError String :=
-  match
-      psEncodeCheckedAdmissionsText
-        elaborated.declarations with
-  | Except.error error =>
-      Except.error (PsCompilerError.admission error)
-  | Except.ok output =>
-      Except.ok output
-
-def psCompilerTypeScriptFromElaborated
-    (elaborated : PsElabModuleResult) :
-    Except PsCompilerError String :=
-  match
-      psEraseCoreModule
-        elaborated.environment
-        elaborated.declarations with
-  | Except.error error =>
-      Except.error (PsCompilerError.erasure error)
-  | Except.ok ir =>
-      match psTsEmitModule ir with
-      | Except.error error =>
-          Except.error (PsCompilerError.typeScript error)
-      | Except.ok output =>
-          Except.ok output
-
-def psCompilerRustFromElaborated
-    (elaborated : PsElabModuleResult) :
-    Except PsCompilerError String :=
-  match
-      psEraseCoreModule
-        elaborated.environment
-        elaborated.declarations with
-  | Except.error error =>
-      Except.error (PsCompilerError.erasure error)
-  | Except.ok ir =>
-      match psRustEmitModule ir with
-      | Except.error error =>
-          Except.error (PsCompilerError.rust error)
-      | Except.ok output =>
-          Except.ok output
 
 def psCompilerElaborateSource
     (sourceKind : PsCompilerSourceKind)
@@ -132,49 +79,95 @@ def psCompilerElaborateSource
   match psCompilerParseSource sourceKind source with
   | Except.error error =>
       Except.error error
-  | Except.ok module =>
-      psCompilerElaborateModule module
+  | Except.ok sourceModule =>
+      psCompilerElaborateModule sourceModule
 
-def psCompilerCheckSource
+def psCompilerPrepareElaborated
+    (elaborated : PsElabModuleResult) :
+    Except PsCompilerError PsCompilerAdmissionReadyModule :=
+  match
+      psEncodeCheckedAdmissionsCanonical
+        elaborated.declarations with
+  | Except.error error =>
+      Except.error (PsCompilerError.admission error)
+  | Except.ok canonicalAdmissions =>
+      Except.ok {
+        environment := elaborated.environment
+        declarations := elaborated.declarations
+        canonicalAdmissions := canonicalAdmissions
+      }
+
+def psCompilerCheckElaborated
+    (elaborated : PsElabModuleResult) :
+    Except PsCompilerError PsCompilerAdmissionReadyModule :=
+  psCompilerPrepareElaborated elaborated
+
+def psCompilerPrepareSource
     (sourceKind : PsCompilerSourceKind)
     (source : String) :
-    Except PsCompilerError PsElabModuleResult :=
+    Except PsCompilerError PsCompilerAdmissionReadyModule :=
   match psCompilerElaborateSource sourceKind source with
   | Except.error error =>
       Except.error error
   | Except.ok elaborated =>
-      match psCompilerCheckElaborated elaborated with
-      | Except.error error =>
-          Except.error error
-      | Except.ok _ =>
-          Except.ok elaborated
+      psCompilerPrepareElaborated elaborated
+
+def psCompilerCheckSource
+    (sourceKind : PsCompilerSourceKind)
+    (source : String) :
+    Except PsCompilerError PsCompilerAdmissionReadyModule :=
+  psCompilerPrepareSource sourceKind source
+
+def psCompilerAdmissionsFromPrepared
+    (prepared : PsCompilerAdmissionReadyModule) : String :=
+  prepared.canonicalAdmissions ++ "\n"
+
+def psCompilerAdmissionsFromElaborated
+    (elaborated : PsElabModuleResult) :
+    Except PsCompilerError String :=
+  match psCompilerPrepareElaborated elaborated with
+  | Except.error error =>
+      Except.error error
+  | Except.ok prepared =>
+      Except.ok (psCompilerAdmissionsFromPrepared prepared)
 
 def psCompilerAdmissionsSource
     (sourceKind : PsCompilerSourceKind)
     (source : String) :
     Except PsCompilerError String :=
-  match psCompilerCheckSource sourceKind source with
+  match psCompilerPrepareSource sourceKind source with
   | Except.error error =>
       Except.error error
-  | Except.ok elaborated =>
-      psCompilerAdmissionsFromElaborated elaborated
+  | Except.ok prepared =>
+      Except.ok (psCompilerAdmissionsFromPrepared prepared)
 
-def psCompilerTypeScriptSource
+def psCompilerVerifiedIrFromPrepared
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerError PsVerifiedIrModule :=
+  match
+      psEraseCoreModule
+        prepared.environment
+        prepared.declarations with
+  | Except.error error =>
+      Except.error (PsCompilerError.erasure error)
+  | Except.ok ir =>
+      Except.ok ir
+
+def psCompilerVerifiedIrFromElaborated
+    (elaborated : PsElabModuleResult) :
+    Except PsCompilerError PsVerifiedIrModule :=
+  match psCompilerPrepareElaborated elaborated with
+  | Except.error error =>
+      Except.error error
+  | Except.ok prepared =>
+      psCompilerVerifiedIrFromPrepared prepared
+
+def psCompilerVerifiedIrSource
     (sourceKind : PsCompilerSourceKind)
     (source : String) :
-    Except PsCompilerError String :=
-  match psCompilerElaborateSource sourceKind source with
+    Except PsCompilerError PsVerifiedIrModule :=
+  match psCompilerPrepareSource sourceKind source with
   | Except.error error =>
       Except.error error
-  | Except.ok elaborated =>
-      psCompilerTypeScriptFromElaborated elaborated
-
-def psCompilerRustSource
-    (sourceKind : PsCompilerSourceKind)
-    (source : String) :
-    Except PsCompilerError String :=
-  match psCompilerElaborateSource sourceKind source with
-  | Except.error error =>
-      Except.error error
-  | Except.ok elaborated =>
-      psCompilerRustFromElaborated elaborated
+  | Except.ok prepared =>
+      psCompilerVerifiedIrFromPrepared prepared

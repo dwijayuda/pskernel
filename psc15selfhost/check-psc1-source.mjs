@@ -4,7 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 const workspaceRoot = fs.existsSync(path.join(root, "package.json"))
   ? root
-  : path.resolve("selfhost");
+  : path.resolve("psc15selfhost");
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
@@ -33,7 +33,7 @@ for (const directory of workspaceDirectories()) {
   if (!fs.existsSync(manifestPath)) continue;
   const manifest = readJson(manifestPath);
   const config = manifest.proofscript;
-  if (!config || config.portable === false) continue;
+  if (!config || config.bootstrap !== true || config.portable === false) continue;
   for (const sourceRoot of config.sourceRoots ?? []) {
     roots.push(path.resolve(directory, sourceRoot));
   }
@@ -177,10 +177,10 @@ for (const file of files) {
 }
 
 if (files.length === 0) {
-  console.error("PSC1_SOURCE_PROFILE: no portable Lean modules found");
+  console.error("PSC1_SOURCE_PROFILE: no portable bootstrap Lean modules found");
   failed = true;
 }
 if (failed) process.exit(1);
 console.log(
-  `PSC1_SOURCE_PROFILE: PASS (${files.length} portable self-host modules across ${roots.length} source roots)`,
+  `PSC1_SOURCE_PROFILE: PASS (${files.length} portable bootstrap modules across ${roots.length} source roots)`,
 );

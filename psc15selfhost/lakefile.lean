@@ -77,13 +77,25 @@ lean_lib PsErasure where
     `Ps.Erasure.Definition
   ]
 
+lean_lib PsCompiler where
+  srcDir := "packages/compiler/src"
+  roots := #[
+    `Ps.Compiler,
+    `Ps.Compiler.Api
+  ]
+
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
   roots := #[
     `Ps.BackendTs.Type,
     `Ps.BackendTs.Expr,
-    `Ps.BackendTs.Module
+    `Ps.BackendTs.Module,
+    `Ps.BackendTs.Compiler
   ]
+
+lean_lib PsBootstrap where
+  srcDir := "packages/bootstrap/src"
+  roots := #[`Ps.Bootstrap.SelfHost]
 
 lean_lib PsBackendRust where
   srcDir := "packages/backend-rust/src"
@@ -94,7 +106,8 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.ValueRefs,
     `Ps.BackendRust.Runtime,
     `Ps.BackendRust.Module,
-    `Ps.BackendRust.Coverage
+    `Ps.BackendRust.Coverage,
+    `Ps.BackendRust.Compiler
   ]
 
 lean_lib PsBackendWasm where
@@ -110,20 +123,12 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Lower
   ]
 
-lean_lib PsCompiler where
-  srcDir := "packages/compiler/src"
-  roots := #[
-    `Ps.Compiler,
-    `Ps.Compiler.Api
-  ]
-
 lean_lib PsHost where
   srcDir := "host/src"
   roots := #[
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
-    `Ps.Host.CompilerDriver,
-    `Ps.Host.KernelBridge
+    `Ps.Host.CompilerDriver
   ]
 
 lean_lib PsProject where
@@ -211,6 +216,6 @@ lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests
 
-lean_exe psc1_bridge_host_tests where
+lean_exe psc2_minimal_selfhost_tests where
   srcDir := "test"
-  root := `BridgeHostTests
+  root := `MinimalSelfHostTests

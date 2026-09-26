@@ -5,6 +5,7 @@
   "type": "module",
   "proofscript": {
     "bootstrap": true,
+    "portable": true,
     "sourceRoots": [
       "src"
     ],
@@ -12,9 +13,10 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "typescript-backend"
+    "role": "typescript-bootstrap-backend"
   },
   "dependencies": {
+    "@proofscript/compiler-next": "0.0.0-dev",
     "@proofscript/compiler-ir-next": "0.0.0-dev",
     "@proofscript/bridge-next": "0.0.0-dev"
   }

@@ -1,7 +1,7 @@
 import Ps.Compiler.Api
+import Ps.BackendTs.Compiler
 import Ps.Host.ProjectCompiler
 import Ps.Host.TypeScriptCompiler
-import Ps.BackendRust.Coverage
 
 def psHostCompilerSourceKindFromPath
     (path : String) : Option PsCompilerSourceKind :=
@@ -29,7 +29,7 @@ def psHostCompilerTranslatedSource
     | none =>
         throw
           (IO.userError
-            ("PSC1_CLI_SOURCE_KIND: expected .lean or .ps input, got " ++
+            ("PSC2_CLI_SOURCE_KIND: expected .lean or .ps input, got " ++
               inputPath))
     | some kind => pure kind
   let targetKind ←
@@ -37,7 +37,7 @@ def psHostCompilerTranslatedSource
     | none =>
         throw
           (IO.userError
-            ("PSC1_CLI_TRANSLATION_TARGET: expected ps or lean, got " ++
+            ("PSC2_CLI_TRANSLATION_TARGET: expected ps or lean, got " ++
               targetText))
     | some kind => pure kind
   let source ← IO.FS.readFile inputPath
@@ -45,7 +45,7 @@ def psHostCompilerTranslatedSource
   | Except.error _ =>
       throw
         (IO.userError
-          "PSC1_CLI_TRANSLATION_FAILED: source is outside the supported bootstrap subset")
+          "PSC2_CLI_TRANSLATION_FAILED: source is outside the supported bootstrap subset")
   | Except.ok output =>
       pure output
 
@@ -61,7 +61,7 @@ def psHostCompilerTranslateToFile
   let output ← psHostCompilerTranslatedSource inputPath targetText
   IO.FS.writeFile outputPath output
   IO.println
-    ("PSC1_TRANSLATE: " ++ inputPath ++ " -> " ++ outputPath)
+    ("PSC2_TRANSLATE: " ++ inputPath ++ " -> " ++ outputPath)
 
 def psHostCompilerElaborateProject
     (inputPath : String) : IO PsElabModuleResult :=
@@ -76,11 +76,11 @@ def psHostCompilerCheck
   | Except.error _ =>
       throw
         (IO.userError
-          "PSC1_CHECK_FAILED: elaborated source is not persistable checked core")
-  | Except.ok _ =>
+          "PSC2_CHECK_FAILED: elaborated source is not admission-ready")
+  | Except.ok prepared =>
       IO.println
-        ("PSC1_CHECK: PASS (" ++
-          toString elaborated.declarations.length ++
+        ("PSC2_CHECK: PASS (" ++
+          toString prepared.declarations.length ++
           " declarations)")
 
 def psHostCompilerAdmissions
@@ -90,7 +90,7 @@ def psHostCompilerAdmissions
   | Except.error _ =>
       throw
         (IO.userError
-          "PSC1_CLI_ADMISSION_CODEC_FAILED: elaborated source is not persistable")
+          "PSC2_CLI_ADMISSION_CODEC_FAILED: elaborated source is not persistable")
   | Except.ok encoded =>
       IO.print encoded
 
@@ -101,44 +101,13 @@ def psHostCompilerTypeScriptSource
   | Except.error _ =>
       throw
         (IO.userError
-          "PSC1_CLI_TS_EMIT_FAILED: source is outside the executable TypeScript backend subset")
+          "PSC2_CLI_TS_EMIT_FAILED: source is outside the executable TypeScript backend subset")
   | Except.ok output =>
       pure output
 
 def psHostCompilerTypeScript
     (inputPath : String) : IO Unit := do
   IO.print (← psHostCompilerTypeScriptSource inputPath)
-
-def psHostCompilerRustSource
-    (inputPath : String) : IO String := do
-  let elaborated ← psHostCompilerElaborateProject inputPath
-  match psCompilerRustFromElaborated elaborated with
-  | Except.error _ =>
-      throw
-        (IO.userError
-          "PSC1_CLI_RUST_EMIT_FAILED: source is outside the executable Rust backend subset")
-  | Except.ok output =>
-      pure output
-
-def psHostCompilerRust
-    (inputPath : String) : IO Unit := do
-  IO.print (← psHostCompilerRustSource inputPath)
-
-def psHostCompilerRustCoverage
-    (inputPath : String) : IO Unit := do
-  let elaborated ← psHostCompilerElaborateProject inputPath
-  match
-      psEraseCoreModule
-        elaborated.environment
-        elaborated.declarations with
-  | Except.error _ =>
-      throw
-        (IO.userError
-          "PSC1_RUST_COVERAGE_ERASURE_FAILED")
-  | Except.ok ir =>
-      IO.print
-        (psRustCoverageReport
-          (psRustCoverageModule ir))
 
 def psHostCompilerBuild
     (inputPath outputPath : String) : IO Unit := do
@@ -150,15 +119,15 @@ def psHostCompilerBuild
     else
       throw
         (IO.userError
-          "PSC1_CLI_OUTPUT_KIND: build output must end in .js or .ts")
+          "PSC2_CLI_OUTPUT_KIND: build output must end in .js or .ts")
   let source ← psHostCompilerTypeScriptSource inputPath
   let result ← psWriteAndCompileTypeScript source typeScriptPath
   IO.println
-    ("PSC1_COMPILE: " ++ result.typeScriptPath ++
+    ("PSC2_COMPILE: " ++ result.typeScriptPath ++
       " -> " ++ result.javascriptPath)
   IO.println
-    ("PSC1_DECLARATION: " ++ result.declarationPath)
+    ("PSC2_DECLARATION: " ++ result.declarationPath)
   IO.println
-    ("PSC1_SOURCE_MAP: " ++ result.sourceMapPath)
+    ("PSC2_SOURCE_MAP: " ++ result.sourceMapPath)
   IO.println
-    ("PSC1_TYPESCRIPT: " ++ result.typescriptVersion)
+    ("PSC2_TYPESCRIPT: " ++ result.typescriptVersion)

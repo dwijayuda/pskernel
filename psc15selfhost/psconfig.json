@@ -1,6 +1,8 @@
 {
   "languageVersion": "0.7",
-  "entry": "packages/compiler/src/Ps/Compiler.lean",
+  "implementationProfile": "PSC1",
+  "acceptedLanguageProfile": "PSC2-bootstrap",
+  "entry": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
   "sourceRoots": [
     "packages",
     "stdlib"

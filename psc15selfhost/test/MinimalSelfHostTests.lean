@@ -1,4 +1,4 @@
-import Ps.Compiler.SelfHost
+import Ps.Bootstrap.SelfHost
 
 def psMinimalSelfHostLeanSource : String :=
   "def answer : Nat := 42"

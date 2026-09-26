@@ -24,6 +24,7 @@ const packageBySection = new Map([
 ]);
 
 const allowedBootstrapPackages = new Set([
+  "bootstrap",
   "foundation",
   "syntax",
   "core",
@@ -42,6 +43,7 @@ const allowedBootstrapPackages = new Set([
 const forbiddenBootstrapPackages = new Set([
   "backend-rust",
   "backend-wasm",
+  "pskernel",
 ]);
 
 function parseImports(source) {
@@ -75,11 +77,18 @@ function sourceForModule(moduleName) {
 }
 
 const psconfig = JSON.parse(await readFile(path.join(root, "psconfig.json"), "utf8"));
-const requiredEntry = "packages/compiler/src/Ps/Compiler/SelfHost.lean";
+const requiredEntry = "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean";
 if (psconfig.entry !== requiredEntry) {
   throw new Error(
     `PSC2_BOOTSTRAP_ENTRY: expected ${requiredEntry}, got ${psconfig.entry ?? "<none>"}`,
   );
+}
+
+if (psconfig.implementationProfile !== "PSC1") {
+  throw new Error("PSC2_BOOTSTRAP_IMPLEMENTATION_PROFILE: expected PSC1");
+}
+if (psconfig.acceptedLanguageProfile !== "PSC2-bootstrap") {
+  throw new Error("PSC2_BOOTSTRAP_ACCEPTED_PROFILE: expected PSC2-bootstrap");
 }
 
 const entry = path.join(root, psconfig.entry);
@@ -88,7 +97,7 @@ if (!existsSync(entry)) {
 }
 
 const visited = new Set();
-const packageNames = new Set(["compiler"]);
+const packageNames = new Set(["bootstrap"]);
 
 async function visit(sourcePath) {
   const absolute = path.resolve(sourcePath);

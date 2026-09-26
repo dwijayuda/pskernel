@@ -1,10 +1,10 @@
 {
-  "name": "@proofscript/backend-rust-next",
+  "name": "@proofscript/psc2-bootstrap",
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
   "proofscript": {
-    "bootstrap": false,
+    "bootstrap": true,
     "portable": true,
     "sourceRoots": [
       "src"
@@ -13,12 +13,11 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "rust-backend-extension"
+    "role": "psc2-selfhost-composition"
   },
   "dependencies": {
     "@proofscript/compiler-next": "0.0.0-dev",
-    "@proofscript/compiler-ir-next": "0.0.0-dev",
-    "@proofscript/bridge-next": "0.0.0-dev",
-    "@proofscript/foundation-next": "0.0.0-dev"
+    "@proofscript/backend-ts-next": "0.0.0-dev",
+    "@proofscript/stdlib-next": "0.0.0-dev"
   }
 }

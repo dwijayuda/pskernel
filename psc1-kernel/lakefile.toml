@@ -12,3 +12,7 @@ root = "PSC1Kernel.Test.ReplayFile"
 [[lean_exe]]
 name = "psc1_cache_smoke"
 root = "PSC1Kernel.Test.CheckerRuntimeCacheSmoke"
+
+[[lean_exe]]
+name = "psc1_oracle"
+root = "PSC1Kernel.Test.Oracle"

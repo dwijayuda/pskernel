@@ -20,18 +20,18 @@ structure PsLevelUnifyResult where
   success : Bool
 
 def psLevelMetaEmpty : PsLevelMetaContext :=
-  { nextId := 0, declarations := [], assignments := [] }
+  { nextId := 0, declarations := List.nil, assignments := List.nil }
 
 def psNatListContains (values : List Nat) (target : Nat) : Bool :=
   match values with
   | [] => false
   | value :: rest =>
-      if value == target then true else psNatListContains rest target
+      if Nat.beq value target then true else psNatListContains rest target
 
 def psLevelFindAssignmentInList (id : Nat) : List PsLevelAssignment -> Option PsLevel
   | [] => Option.none
   | assignment :: rest =>
-      if assignment.id == id then
+      if Nat.beq assignment.id id then
         Option.some assignment.value
       else
         psLevelFindAssignmentInList id rest
@@ -75,12 +75,18 @@ def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLeve
   psLevelInstantiateWithFuel context (context.assignments.length + 1) level
 
 def psLevelOccursResolved (target : Nat) : PsLevel -> Bool
-  | .mvar id => id == target
+  | .mvar id => Nat.beq id target
   | .succ value => psLevelOccursResolved target value
   | .max left right =>
-      psLevelOccursResolved target left || psLevelOccursResolved target right
+      if psLevelOccursResolved target left then
+        true
+      else
+        psLevelOccursResolved target right
   | .imax left right =>
-      psLevelOccursResolved target left || psLevelOccursResolved target right
+      if psLevelOccursResolved target left then
+        true
+      else
+        psLevelOccursResolved target right
   | _ => false
 
 def psLevelOccurs (context : PsLevelMetaContext) (target : Nat) (level : PsLevel) : Bool :=
@@ -179,10 +185,22 @@ def psLevelInstantiateExpr (context : PsLevelMetaContext) : PsExpr -> PsExpr
 def psLevelHasMVar : PsLevel -> Bool
   | .mvar _ => true
   | .succ value => psLevelHasMVar value
-  | .max left right => psLevelHasMVar left || psLevelHasMVar right
-  | .imax left right => psLevelHasMVar left || psLevelHasMVar right
+  | .max left right =>
+      if psLevelHasMVar left then
+        true
+      else
+        psLevelHasMVar right
+  | .imax left right =>
+      if psLevelHasMVar left then
+        true
+      else
+        psLevelHasMVar right
   | _ => false
 
 def psLevelListHasMVar : List PsLevel -> Bool
   | [] => false
-  | level :: rest => psLevelHasMVar level || psLevelListHasMVar rest
+  | level :: rest =>
+      if psLevelHasMVar level then
+        true
+      else
+        psLevelListHasMVar rest

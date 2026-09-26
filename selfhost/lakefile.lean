@@ -161,7 +161,8 @@ lean_lib PsPSCKernel where
     `Ps.PSCKernel.Core.ExprAbstraction,
     `Ps.PSCKernel.Core.LocalContext,
     `Ps.PSCKernel.Core.Declaration,
-    `Ps.PSCKernel.Core.Environment
+    `Ps.PSCKernel.Core.Environment,
+    `Ps.PSCKernel.Core.ReductionBasic
   ]
 
 @[default_target]

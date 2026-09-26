@@ -16,3 +16,7 @@ root = "PSC1Kernel.Test.CheckerDefEqCacheSmoke"
 [[lean_exe]]
 name = "psc1_whnf_cache_smoke"
 root = "PSC1Kernel.Test.CheckerWhnfCacheSmoke"
+
+[[lean_exe]]
+name = "psc1_whnf_memo_smoke"
+root = "PSC1Kernel.Test.CheckerWhnfMemoSmoke"

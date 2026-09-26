@@ -482,49 +482,49 @@ partial def isDefEq
     let (equal, next) ← isDefEq ctx state10 aFull bFull
     return finish next a b equal
 
-  let mut current := state10
+  let mut finalState := state10
   match aFull, bFull with
   | .sort u, .sort v =>
-      return finish current a b (Level.equivalent u v)
+      return finish finalState a b (Level.equivalent u v)
   | .lit x, .lit y =>
-      return finish current a b (Literal.eq x y)
+      return finish finalState a b (Literal.eq x y)
   | .app _ _, .app _ _ =>
-      let (equal, next) ← app isDefEq ctx current aFull bFull
-      current := next
-      if equal then return finish current a b true
+      let (equal, next) ← app isDefEq ctx finalState aFull bFull
+      finalState := next
+      if equal then return finish finalState a b true
   | .forallE .., .forallE .. =>
-      let (equal, next) ← forallSpine isDefEq ctx current aFull bFull
-      current := next
-      if equal then return finish current a b true
+      let (equal, next) ← forallSpine isDefEq ctx finalState aFull bFull
+      finalState := next
+      if equal then return finish finalState a b true
   | .lam .., .lam .. =>
-      let (equal, next) ← lambdaSpine isDefEq ctx current aFull bFull
-      current := next
-      if equal then return finish current a b true
+      let (equal, next) ← lambdaSpine isDefEq ctx finalState aFull bFull
+      finalState := next
+      if equal then return finish finalState a b true
   | .lam _ _ _ _, other =>
-      let (otherType0, next1) ← inferStateful ctx current other
+      let (otherType0, next1) ← inferStateful ctx finalState other
       let (otherType, next2) ← whnfStateful ctx next1 otherType0
-      current := next2
+      finalState := next2
       match otherType with
       | .forallE name domain _ binderInfo =>
           let eta := .lam name domain (.app other (.bvar 0)) binderInfo
-          let (equal, next3) ← isDefEq ctx current aFull eta
-          current := next3
-          if equal then return finish current a b true
+          let (equal, next3) ← isDefEq ctx finalState aFull eta
+          finalState := next3
+          if equal then return finish finalState a b true
       | _ => pure ()
   | other, .lam _ _ _ _ =>
-      let (otherType0, next1) ← inferStateful ctx current other
+      let (otherType0, next1) ← inferStateful ctx finalState other
       let (otherType, next2) ← whnfStateful ctx next1 otherType0
-      current := next2
+      finalState := next2
       match otherType with
       | .forallE name domain _ binderInfo =>
           let eta := .lam name domain (.app other (.bvar 0)) binderInfo
-          let (equal, next3) ← isDefEq ctx current eta bFull
-          current := next3
-          if equal then return finish current a b true
+          let (equal, next3) ← isDefEq ctx finalState eta bFull
+          finalState := next3
+          if equal then return finish finalState a b true
       | _ => pure ()
   | _, _ => pure ()
 
-  let (etaEqual, state11) ← etaStruct isDefEq ctx current aFull bFull
+  let (etaEqual, state11) ← etaStruct isDefEq ctx finalState aFull bFull
   if etaEqual then return finish state11 a b true
   let (stringResult, state12) ←
     stringLitExpansion isDefEq ctx state11 aFull bFull

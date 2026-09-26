@@ -67,12 +67,12 @@ def psCKernelAdmissionSeedEnv : PsCKernelEnvironment :=
   let pInfo := psCKernelAdmissionAxiom
     "P" [] (PsCKernelExpr.sortE psCKernelLevelZero)
   let env1 :=
-    match psCKernelEnvironmentAdd? env0 pInfo with
+    match psCKernelEnvironmentTryAdd env0 pInfo with
     | some env => env
     | none => env0
   let proofInfo := psCKernelAdmissionAxiom
     "p" [] (PsCKernelExpr.constE psCKernelAdmissionPropName [])
-  match psCKernelEnvironmentAdd? env1 proofInfo with
+  match psCKernelEnvironmentTryAdd env1 proofInfo with
   | some env => env
   | none => env1
 
@@ -209,14 +209,14 @@ def psCKernelAdmissionTestOpaqueMismatch : Bool :=
   | some _ => false
 
 def psCKernelAdmissionTestFailurePersistent : Bool :=
-  let before := psCKernelEnvironmentNumConstants psCKernelAdmissionSeedEnv
+  let before := psCKernelEnvironmentSize psCKernelAdmissionSeedEnv
   let info := psCKernelAdmissionDef
     "badTxn"
     []
     (PsCKernelExpr.sortE psCKernelLevelZero)
     (PsCKernelExpr.sortE psCKernelLevelZero)
   let _ := psCKernelAdmitConstant? psCKernelAdmissionSeedEnv info
-  Nat.beq before (psCKernelEnvironmentNumConstants psCKernelAdmissionSeedEnv)
+  Nat.beq before (psCKernelEnvironmentSize psCKernelAdmissionSeedEnv)
 
 def psCKernelDeclarationAdmissionTests : List PsCKernelDeclarationAdmissionNamedTest := [
   { name := "valid axiom is admitted", passed := psCKernelAdmissionTestValidAxiom },

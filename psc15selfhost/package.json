@@ -49,6 +49,7 @@
     "selfhost:fixed-point": "npm run fixed-point",
     "selfhost:emit-source": "node scripts/reemit-project-with-generated.mjs dist/bootstrap/packages/compiler/index.js dist/bootstrap/workspace dist/selfhost/workspace",
     "selfhost:compiler": "node scripts/compile-with-generated.mjs dist/bootstrap/packages/compiler/index.js dist/selfhost/workspace/packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps dist/selfhost/packages/compiler/index.js",
+    "selfhost:emit-lean": "node scripts/emit-project-with-generated.mjs dist/selfhost/packages/compiler/index.js dist/selfhost/workspace/packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps --to lean --out dist/selfhost/lean",
     "verify:source": "node scripts/compare-source-workspaces.mjs dist/bootstrap/workspace dist/selfhost/workspace",
     "verify:compiler": "node scripts/compare-selfhost.mjs dist/bootstrap/packages/compiler/index.ts dist/selfhost/packages/compiler/index.ts",
     "build:lake": "lake build",

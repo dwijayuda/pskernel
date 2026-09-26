@@ -49,6 +49,11 @@ def psWasmNatRuntimeStructures : List PsWasmStructType :=
         {
           name := "half"
           storageType := PsWasmStorageType.value psWasmNatRef
+        },
+        {
+          name := "bit0Marker"
+          storageType :=
+            PsWasmStorageType.value PsWasmValueType.i32
         }
       ]
     },
@@ -60,6 +65,11 @@ def psWasmNatRuntimeStructures : List PsWasmStructType :=
         {
           name := "half"
           storageType := PsWasmStorageType.value psWasmNatRef
+        },
+        {
+          name := "bit1Marker"
+          storageType :=
+            PsWasmStorageType.value PsWasmValueType.i64
         }
       ]
     },
@@ -142,6 +152,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
           PsWasmInstruction.localGet 0,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
+          PsWasmInstruction.i32Const 0,
           PsWasmInstruction.structNew psWasmNatBit0Name,
         PsWasmInstruction.end_
       ]
@@ -154,6 +165,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
+        PsWasmInstruction.i64Const 1,
         PsWasmInstruction.structNew psWasmNatBit1Name
       ]
     },
@@ -168,6 +180,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
         PsWasmInstruction.refTest psWasmNatZeroName,
         PsWasmInstruction.ifStart (some psWasmNatRef),
           PsWasmInstruction.localGet 0,
+          PsWasmInstruction.i64Const 1,
           PsWasmInstruction.structNew psWasmNatBit1Name,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
@@ -176,6 +189,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
             PsWasmInstruction.localGet 0,
             PsWasmInstruction.refCast psWasmNatBit0Name,
             PsWasmInstruction.structGet psWasmNatBit0Name 0,
+            PsWasmInstruction.i64Const 1,
             PsWasmInstruction.structNew psWasmNatBit1Name,
           PsWasmInstruction.else_,
             PsWasmInstruction.localGet 0,
@@ -520,9 +534,16 @@ def psWasmNatLiteralInstructionsWithFuel :
       let half := value / 2
       let low := value % 2
       psWasmNatLiteralInstructionsWithFuel fuel half ++
-        [PsWasmInstruction.structNew
-          (if low == 0 then psWasmNatBit0Name
-           else psWasmNatBit1Name)]
+        (if low == 0 then
+          [
+            PsWasmInstruction.i32Const 0,
+            PsWasmInstruction.structNew psWasmNatBit0Name
+          ]
+         else
+          [
+            PsWasmInstruction.i64Const 1,
+            PsWasmInstruction.structNew psWasmNatBit1Name
+          ])
 
 def psWasmNatLiteralInstructions
     (value : Nat) : List PsWasmInstruction :=

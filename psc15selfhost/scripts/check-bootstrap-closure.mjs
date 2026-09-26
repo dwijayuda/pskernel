@@ -4,8 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
 import {
-  allowedBootstrapPackages,
-  forbiddenBootstrapPackages,
+  assertBootstrapPackageAllowed,
+  bootstrapPackageViolation,
 } from "./bootstrap-closure-contract.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -115,12 +115,7 @@ async function visit(sourcePath) {
 await visit(entry);
 
 for (const packageName of packageNames) {
-  if (forbiddenBootstrapPackages.has(packageName)) {
-    throw new Error(`PSC2_BOOTSTRAP_FORBIDDEN_PACKAGE: ${packageName}`);
-  }
-  if (!allowedBootstrapPackages.has(packageName)) {
-    throw new Error(`PSC2_BOOTSTRAP_UNAPPROVED_PACKAGE: ${packageName}`);
-  }
+  assertBootstrapPackageAllowed(packageName);
 }
 
 const manifests = await workspaceManifests();
@@ -138,9 +133,9 @@ for (const packageName of packageNames) {
     const dependency = manifests.byName.get(dependencyName);
     if (!dependency) continue;
     const dependencyConfig = dependency.manifest.proofscript;
+    const dependencyViolation = bootstrapPackageViolation(dependency.folder);
     if (
-      forbiddenBootstrapPackages.has(dependency.folder) ||
-      !allowedBootstrapPackages.has(dependency.folder) ||
+      dependencyViolation ||
       dependencyConfig?.bootstrap !== true ||
       dependencyConfig?.portable === false
     ) {

@@ -376,3 +376,263 @@ def psCKernelLevelToString (level : PsCKernelLevel) : String :=
       psCKernelNameToString name
   | PsCKernelLevel.mvar name =>
       String.Internal.append "?" (psCKernelNameToString name)
+
+def psCKernelLevelKindRank (level : PsCKernelLevel) : Nat :=
+  match level with
+  | PsCKernelLevel.zero => 0
+  | PsCKernelLevel.succ _ => 1
+  | PsCKernelLevel.max _ _ => 2
+  | PsCKernelLevel.imax _ _ => 3
+  | PsCKernelLevel.param _ => 4
+  | PsCKernelLevel.mvar _ => 5
+
+def psCKernelLevelIsExplicit (level : PsCKernelLevel) : Bool :=
+  psCKernelLevelIsZero (psCKernelLevelToOffset level).base
+
+def psCKernelLevelPushMaxArgs (level : PsCKernelLevel) : List PsCKernelLevel :=
+  match level with
+  | PsCKernelLevel.max left right =>
+      List.append
+        (psCKernelLevelPushMaxArgs left)
+        (psCKernelLevelPushMaxArgs right)
+  | _ => [level]
+
+partial def psCKernelLevelNormLt
+    (left : PsCKernelLevel)
+    (right : PsCKernelLevel) : Bool :=
+  let leftOffset : PsCKernelLevelOffset := psCKernelLevelToOffset left
+  let rightOffset : PsCKernelLevelOffset := psCKernelLevelToOffset right
+  if psCKernelLevelEqStructural leftOffset.base rightOffset.base then
+    Nat.blt leftOffset.offset rightOffset.offset
+  else
+    let leftRank : Nat := psCKernelLevelKindRank leftOffset.base
+    let rightRank : Nat := psCKernelLevelKindRank rightOffset.base
+    if Nat.blt leftRank rightRank then
+      true
+    else if Nat.blt rightRank leftRank then
+      false
+    else
+      match leftOffset.base, rightOffset.base with
+      | PsCKernelLevel.param leftName, PsCKernelLevel.param rightName =>
+          psCKernelNameCmp leftName rightName == -1
+      | PsCKernelLevel.mvar leftName, PsCKernelLevel.mvar rightName =>
+          psCKernelNameCmp leftName rightName == -1
+      | PsCKernelLevel.max leftA leftB, PsCKernelLevel.max rightA rightB =>
+          if psCKernelLevelEqStructural leftA rightA then
+            psCKernelLevelNormLt leftB rightB
+          else
+            psCKernelLevelNormLt leftA rightA
+      | PsCKernelLevel.imax leftA leftB, PsCKernelLevel.imax rightA rightB =>
+          if psCKernelLevelEqStructural leftA rightA then
+            psCKernelLevelNormLt leftB rightB
+          else
+            psCKernelLevelNormLt leftA rightA
+      | _, _ => false
+
+def psCKernelLevelInsertNorm
+    (level : PsCKernelLevel)
+    (levels : List PsCKernelLevel) : List PsCKernelLevel :=
+  match levels with
+  | [] => [level]
+  | head :: tail =>
+      if psCKernelLevelNormLt level head then
+        level :: head :: tail
+      else
+        head :: psCKernelLevelInsertNorm level tail
+
+def psCKernelLevelSortNorm
+    (levels : List PsCKernelLevel) : List PsCKernelLevel :=
+  match levels with
+  | [] => []
+  | head :: tail =>
+      psCKernelLevelInsertNorm head (psCKernelLevelSortNorm tail)
+
+def psCKernelLevelNormalizeAndFlatten
+    (normalize : PsCKernelLevel -> PsCKernelLevel)
+    (levels : List PsCKernelLevel) : List PsCKernelLevel :=
+  match levels with
+  | [] => []
+  | head :: tail =>
+      List.append
+        (psCKernelLevelPushMaxArgs (normalize head))
+        (psCKernelLevelNormalizeAndFlatten normalize tail)
+
+def psCKernelLevelListHasOffsetAtLeast
+    (levels : List PsCKernelLevel)
+    (threshold : Nat) : Bool :=
+  match levels with
+  | [] => false
+  | head :: tail =>
+      let offset : Nat := (psCKernelLevelToOffset head).offset
+      if Nat.ble threshold offset then
+        true
+      else
+        psCKernelLevelListHasOffsetAtLeast tail threshold
+
+def psCKernelLevelDropExplicitSubsumedGo
+    (candidate : Option PsCKernelLevel)
+    (levels : List PsCKernelLevel) : List PsCKernelLevel :=
+  match levels with
+  | [] =>
+      match candidate with
+      | none => []
+      | some level => [level]
+  | head :: tail =>
+      if psCKernelLevelIsExplicit head then
+        psCKernelLevelDropExplicitSubsumedGo (some head) tail
+      else
+        match candidate with
+        | none => levels
+        | some explicitLevel =>
+            let explicitOffset : Nat :=
+              (psCKernelLevelToOffset explicitLevel).offset
+            if psCKernelLevelListHasOffsetAtLeast levels explicitOffset then
+              levels
+            else
+              explicitLevel :: levels
+
+def psCKernelLevelDropExplicitSubsumed
+    (levels : List PsCKernelLevel) : List PsCKernelLevel :=
+  psCKernelLevelDropExplicitSubsumedGo none levels
+
+def psCKernelLevelCollapseSortedGo
+    (current : PsCKernelLevel)
+    (levels : List PsCKernelLevel) : List PsCKernelLevel :=
+  match levels with
+  | [] => [current]
+  | head :: tail =>
+      let currentOffset : PsCKernelLevelOffset :=
+        psCKernelLevelToOffset current
+      let headOffset : PsCKernelLevelOffset :=
+        psCKernelLevelToOffset head
+      if psCKernelLevelEqStructural currentOffset.base headOffset.base then
+        psCKernelLevelCollapseSortedGo head tail
+      else
+        current :: psCKernelLevelCollapseSortedGo head tail
+
+def psCKernelLevelCollapseSorted
+    (levels : List PsCKernelLevel) : List PsCKernelLevel :=
+  match levels with
+  | [] => []
+  | head :: tail => psCKernelLevelCollapseSortedGo head tail
+
+def psCKernelLevelAddOffsetList
+    (levels : List PsCKernelLevel)
+    (offset : Nat) : List PsCKernelLevel :=
+  match levels with
+  | [] => []
+  | head :: tail =>
+      psCKernelLevelAddOffset head offset ::
+        psCKernelLevelAddOffsetList tail offset
+
+def psCKernelLevelRebuildMax
+    (levels : List PsCKernelLevel) : PsCKernelLevel :=
+  match levels with
+  | [] => psCKernelLevelZero
+  | head :: tail =>
+      match tail with
+      | [] => head
+      | _ => psCKernelLevelMkMax head (psCKernelLevelRebuildMax tail)
+
+partial def psCKernelNormalizeLevel
+    (level : PsCKernelLevel) : PsCKernelLevel :=
+  let outer : PsCKernelLevelOffset := psCKernelLevelToOffset level
+  match outer.base with
+  | PsCKernelLevel.zero => level
+  | PsCKernelLevel.param _ => level
+  | PsCKernelLevel.mvar _ => level
+  | PsCKernelLevel.succ _ => level
+  | PsCKernelLevel.imax left right =>
+      psCKernelLevelAddOffset
+        (psCKernelLevelMkIMax
+          (psCKernelNormalizeLevel left)
+          (psCKernelNormalizeLevel right))
+        outer.offset
+  | PsCKernelLevel.max _ _ =>
+      let leaves : List PsCKernelLevel :=
+        psCKernelLevelPushMaxArgs outer.base
+      let normalizedLeaves : List PsCKernelLevel :=
+        psCKernelLevelNormalizeAndFlatten psCKernelNormalizeLevel leaves
+      let sorted : List PsCKernelLevel :=
+        psCKernelLevelSortNorm normalizedLeaves
+      let withoutSubsumedExplicit : List PsCKernelLevel :=
+        psCKernelLevelDropExplicitSubsumed sorted
+      let collapsed : List PsCKernelLevel :=
+        psCKernelLevelCollapseSorted withoutSubsumedExplicit
+      let shifted : List PsCKernelLevel :=
+        psCKernelLevelAddOffsetList collapsed outer.offset
+      psCKernelLevelRebuildMax shifted
+
+def psCKernelLevelEquivalent
+    (left : PsCKernelLevel)
+    (right : PsCKernelLevel) : Bool :=
+  if psCKernelLevelEqStructural left right then
+    true
+  else
+    psCKernelLevelEqStructural
+      (psCKernelNormalizeLevel left)
+      (psCKernelNormalizeLevel right)
+
+def psCKernelLevelGeqRemainder
+    (geq : PsCKernelLevel -> PsCKernelLevel -> Bool)
+    (left : PsCKernelLevel)
+    (right : PsCKernelLevel) : Bool :=
+  match right with
+  | PsCKernelLevel.imax rightLeft rightRight =>
+      if geq left rightLeft then
+        geq left rightRight
+      else
+        false
+  | _ =>
+      match left with
+      | PsCKernelLevel.imax _ leftRight =>
+          geq leftRight right
+      | _ =>
+          let leftOffset : PsCKernelLevelOffset :=
+            psCKernelLevelToOffset left
+          let rightOffset : PsCKernelLevelOffset :=
+            psCKernelLevelToOffset right
+          if psCKernelLevelEqStructural leftOffset.base rightOffset.base then
+            Nat.ble rightOffset.offset leftOffset.offset
+          else if psCKernelLevelIsZero rightOffset.base then
+            Nat.ble rightOffset.offset leftOffset.offset
+          else if Nat.beq leftOffset.offset rightOffset.offset then
+            if Nat.beq leftOffset.offset 0 then
+              false
+            else
+              geq leftOffset.base rightOffset.base
+          else
+            false
+
+partial def psCKernelLevelGeq
+    (leftInput : PsCKernelLevel)
+    (rightInput : PsCKernelLevel) : Bool :=
+  let left : PsCKernelLevel := psCKernelNormalizeLevel leftInput
+  let right : PsCKernelLevel := psCKernelNormalizeLevel rightInput
+  if psCKernelLevelEqStructural left right then
+    true
+  else if psCKernelLevelIsZero right then
+    true
+  else
+    match right with
+    | PsCKernelLevel.max rightLeft rightRight =>
+        if psCKernelLevelGeq left rightLeft then
+          psCKernelLevelGeq left rightRight
+        else
+          false
+    | _ =>
+        match left with
+        | PsCKernelLevel.max leftLeft leftRight =>
+            if psCKernelLevelGeq leftLeft right then
+              true
+            else if psCKernelLevelGeq leftRight right then
+              true
+            else
+              psCKernelLevelGeqRemainder psCKernelLevelGeq left right
+        | _ =>
+            psCKernelLevelGeqRemainder psCKernelLevelGeq left right
+
+def psCKernelLevelLe
+    (left : PsCKernelLevel)
+    (right : PsCKernelLevel) : Bool :=
+  psCKernelLevelGeq right left

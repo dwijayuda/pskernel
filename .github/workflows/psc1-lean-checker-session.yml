@@ -10,6 +10,7 @@ on:
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
+      - "scripts/audit-psc1-kernel-portability.mjs"
 
 permissions:
   contents: read
@@ -20,6 +21,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: PSC1 portability hard gate
+        shell: bash
+        run: node scripts/audit-psc1-kernel-portability.mjs
       - name: Install Lean 4.34
         shell: bash
         run: |
@@ -39,6 +43,8 @@ jobs:
             -o .lake/build/lib/lean/PSC1Kernel/CheckerState.olean
           lake env lean PSC1Kernel/CheckerStateful.lean \
             -o .lake/build/lib/lean/PSC1Kernel/CheckerStateful.olean
+          lake env lean PSC1Kernel/CheckerDefEqStateful.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/CheckerDefEqStateful.olean
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash

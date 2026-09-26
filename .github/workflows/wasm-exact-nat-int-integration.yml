@@ -49,6 +49,7 @@ jobs:
             git cherry-pick --no-commit "$commit"
           done
           python3 .github/scripts/inject-wasm-nat-carry-smoke.py
+          python3 .github/scripts/adapt-wasm-runtime-intrinsics.py
           git diff --check
           echo 'changed=true' >> "$GITHUB_OUTPUT"
           git status --short

@@ -177,9 +177,8 @@ symmetric. Arbitrary negative full-defeq results are intentionally not cached:
 Lean 4.34's failure table is narrower and belongs at the lazy-delta argument
 comparison site.
 
-Lean enters the kernel recursion-depth scope before its success-cache quick
-path. A cache hit therefore still performs that resource-boundary check. On a
-miss the established `isDefEq` implementation performs the check itself.
+This compatibility wrapper remains for incremental callers. Fully migrated
+callers inject `StatefulDefEq.isDefEq` through `inferCoreStatefulWith` instead.
 -/
 partial def isDefEqStateful
     (ctx : CheckerContext)
@@ -206,7 +205,10 @@ private def cacheInferStatefulResult
     { state with checkedInfer := CheckerExprMap.insert state.checkedInfer e result }
 
 /--
-Incremental stateful counterpart of Lean 4.34 `infer_type_core`.
+Incremental stateful counterpart of Lean 4.34 `infer_type_core` with an explicit
+definitional-equality callback. This breaks the module cycle between inference
+and the full recursive stateful defeq algorithm while still letting both share
+one `CheckerState`.
 
 Final Lean 4.34 enters `scope_rec_depth` before the infer-cache lookup. During
 this incremental migration, cache hits and the custom checked-application path
@@ -214,7 +216,9 @@ therefore enter the PSC1 recursion guard explicitly. Non-migrated misses still
 delegate to the established pure `inferCore`, which already enters that guard;
 charging them here as well would incorrectly double-count recursion depth.
 -/
-partial def inferCoreStateful
+partial def inferCoreStatefulWith
+    (defeq : CheckerContext → CheckerState → Expr → Expr →
+      Except String (Bool × CheckerState))
     (ctx : CheckerContext)
     (state : CheckerState)
     (e : Expr)
@@ -238,17 +242,17 @@ partial def inferCoreStateful
             -- This branch replaces pure `inferCore`, so it must own the one
             -- `scope_rec_depth` that Lean C++ charges before recursive work.
             let ctx ← ctx.enterKernelRecDepth
-            let (fnType, state1) ← inferCoreStateful ctx state fn false
+            let (fnType, state1) ← inferCoreStatefulWith defeq ctx state fn false
             let (fnTypeWhnf, state2) ← whnfStateful ctx state1 fnType
             let .forallE _ domain body _ := fnTypeWhnf
               | throw "expected function type"
-            let (argType, state3) ← inferCoreStateful ctx state2 arg false
+            let (argType, state3) ← inferCoreStatefulWith defeq ctx state2 arg false
             let eqCtx :=
               if isEagerReduceExpr arg then
                 { ctx with eagerReduce := true }
               else
                 ctx
-            let (ok, state4) ← isDefEqStateful eqCtx state3 argType domain
+            let (ok, state4) ← defeq eqCtx state3 argType domain
             if !ok then
               throw "application type mismatch"
             let result := body.instantiate1 arg
@@ -260,18 +264,44 @@ partial def inferCoreStateful
           | .ok result =>
               .ok (result, cacheInferStatefulResult state inferOnly e result)
 
-/-- Stateful checked-inference entry point. -/
+/-- Compatibility stateful inference using the older positive-cache wrapper. -/
+partial def inferCoreStateful
+    (ctx : CheckerContext)
+    (state : CheckerState)
+    (e : Expr)
+    (inferOnly : Bool) : Except String (Expr × CheckerState) :=
+  inferCoreStatefulWith isDefEqStateful ctx state e inferOnly
+
+/-- Stateful checked-inference entry point with an injected defeq algorithm. -/
+def checkStatefulWith
+    (defeq : CheckerContext → CheckerState → Expr → Expr →
+      Except String (Bool × CheckerState))
+    (ctx : CheckerContext)
+    (state : CheckerState)
+    (e : Expr) : Except String (Expr × CheckerState) :=
+  inferCoreStatefulWith defeq ctx state e false
+
+/-- Stateful infer-only entry point with an injected defeq algorithm. -/
+def inferStatefulWith
+    (defeq : CheckerContext → CheckerState → Expr → Expr →
+      Except String (Bool × CheckerState))
+    (ctx : CheckerContext)
+    (state : CheckerState)
+    (e : Expr) : Except String (Expr × CheckerState) :=
+  inferCoreStatefulWith defeq ctx state e true
+
+/-- Compatibility checked-inference entry point. -/
 def checkStateful
     (ctx : CheckerContext)
     (state : CheckerState)
     (e : Expr) : Except String (Expr × CheckerState) :=
-  inferCoreStateful ctx state e false
+  checkStatefulWith isDefEqStateful ctx state e
 
-/-- Stateful infer-only entry point with a cache separate from checked inference. -/
+/-- Compatibility infer-only entry point with a cache separate from checked inference. -/
 def inferStateful
     (ctx : CheckerContext)
     (state : CheckerState)
     (e : Expr) : Except String (Expr × CheckerState) :=
-  inferCoreStateful ctx state e true
+  inferStatefulWith isDefEqStateful ctx state e
 
 end PSC1Kernel

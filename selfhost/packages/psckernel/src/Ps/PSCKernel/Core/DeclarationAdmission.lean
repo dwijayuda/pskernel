@@ -156,11 +156,11 @@ def psCKernelAdmitConstant?
     let declType := psCKernelConstantInfoType info
     match info with
     | PsCKernelConstantInfo.axiomInfo _ =>
-        psCKernelEnvironmentAdd? env info
+        psCKernelEnvironmentTryAdd env info
     | PsCKernelConstantInfo.defnInfo value =>
         if psCKernelAdmissionExprClosed levelParams value.value then
           if psCKernelAdmissionValueMatches env value.value declType then
-            psCKernelEnvironmentAdd? env info
+            psCKernelEnvironmentTryAdd env info
           else
             none
         else
@@ -169,7 +169,7 @@ def psCKernelAdmitConstant?
         if psCKernelAdmissionTypeIsProp env declType then
           if psCKernelAdmissionExprClosed levelParams value.value then
             if psCKernelAdmissionValueMatches env value.value declType then
-              psCKernelEnvironmentAdd? env info
+              psCKernelEnvironmentTryAdd env info
             else
               none
           else
@@ -179,7 +179,7 @@ def psCKernelAdmitConstant?
     | PsCKernelConstantInfo.opaqueInfo value =>
         if psCKernelAdmissionExprClosed levelParams value.value then
           if psCKernelAdmissionValueMatches env value.value declType then
-            psCKernelEnvironmentAdd? env info
+            psCKernelEnvironmentTryAdd env info
           else
             none
         else

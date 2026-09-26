@@ -9,6 +9,7 @@ import PSC1Kernel.TypeChecker
 import PSC1Kernel.CheckerState
 import PSC1Kernel.CheckerStateful
 import PSC1Kernel.CheckerLazyDeltaStateful
+import PSC1Kernel.CheckerDefEqStateful
 import PSC1Kernel.CheckerSession
 
 import PSC1Kernel.Kernel

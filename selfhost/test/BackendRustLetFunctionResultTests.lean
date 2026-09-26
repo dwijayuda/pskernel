@@ -89,6 +89,107 @@ def psTestBackendRustCoverageLetFunctionResult : Bool :=
     (psRustCoverageLength coverage.unsupported)
     0
 
+def psBackendRustCallFunctionResultModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "makeAdderForCall"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body :=
+          PsVerifiedIrExpr.lambda
+            [
+              {
+                name := "value"
+                type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+              }
+            ]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.natAdd
+              [
+                PsVerifiedIrExpr.var "value",
+                PsVerifiedIrExpr.var "offset"
+              ])
+      },
+      {
+        name := "makeAdderViaCall"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "makeAdderForCall")
+            []
+            [PsVerifiedIrExpr.var "offset"]
+      },
+      {
+        name := "makeAdderViaLetThenCall"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.function
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+        body :=
+          PsVerifiedIrExpr.letE
+            "delta"
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+            (PsVerifiedIrExpr.var "offset")
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.var "makeAdderForCall")
+              []
+              [PsVerifiedIrExpr.var "delta"])
+      }
+    ]
+  }
+
+def psTestBackendRustCallFunctionResult : Bool :=
+  match psRustEmitModule psBackendRustCallFunctionResultModule with
+  | Except.error _ =>
+      false
+  | Except.ok output =>
+      output.contains
+          "pub fn makeAdderViaCall(offset: PsNat) -> impl Fn(PsNat) -> PsNat + Clone"
+        && output.contains
+          "(makeAdderForCall)((offset).clone())"
+        && output.contains
+          "pub fn makeAdderViaLetThenCall(offset: PsNat) -> impl Fn(PsNat) -> PsNat + Clone"
+        && output.contains
+          "{ let delta = (offset).clone(); (makeAdderForCall)((delta).clone()) }"
+
+def psTestBackendRustCoverageCallFunctionResult : Bool :=
+  let coverage :=
+    psRustCoverageModule psBackendRustCallFunctionResultModule;
+  Nat.beq
+    (psRustCoverageLength coverage.unsupported)
+    0
+
 def psBackendRustConditionalFunctionResultModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -198,6 +299,14 @@ def main : IO Unit := do
     IO.println "PSC1_BACKEND_RUST_PASS: let-bound function result coverage"
   else
     throw (IO.userError "PSC1_BACKEND_RUST_FAIL: let-bound function result coverage")
+  if psTestBackendRustCallFunctionResult then
+    IO.println "PSC1_BACKEND_RUST_PASS: call-forwarded function results"
+  else
+    throw (IO.userError "PSC1_BACKEND_RUST_FAIL: call-forwarded function results")
+  if psTestBackendRustCoverageCallFunctionResult then
+    IO.println "PSC1_BACKEND_RUST_PASS: call-forwarded function result coverage"
+  else
+    throw (IO.userError "PSC1_BACKEND_RUST_FAIL: call-forwarded function result coverage")
   if psTestBackendRustRejectsConditionalFunctionResult then
     IO.println "PSC1_BACKEND_RUST_PASS: reject conditional function results"
   else

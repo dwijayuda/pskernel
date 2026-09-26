@@ -275,6 +275,12 @@ def psRustFunctionResultExprSupported : PsVerifiedIrExpr -> Bool
       true
   | PsVerifiedIrExpr.var _ =>
       true
+  | PsVerifiedIrExpr.call fn _ _ =>
+      match fn with
+      | PsVerifiedIrExpr.var _ =>
+          true
+      | _ =>
+          false
   | PsVerifiedIrExpr.letE _ type value body =>
       if psRustTypeContainsFunction type then
         if psRustFunctionTypeIsFirstOrder type then
@@ -338,6 +344,15 @@ def psRustEmitFunctionResultExprWithFuel
               Except.ok (psRustConcat2 "move " printed)
       | PsVerifiedIrExpr.var _ =>
           psRustEmitExprWithFuel fuel expr
+      | PsVerifiedIrExpr.call fn typeArguments arguments =>
+          match fn with
+          | PsVerifiedIrExpr.var _ =>
+              psRustEmitExprWithFuel
+                fuel
+                (PsVerifiedIrExpr.call fn typeArguments arguments)
+          | _ =>
+              Except.error
+                (PsRustEmitError.functionResultUnsupported declarationName)
       | PsVerifiedIrExpr.letE name _ value body =>
           match psRustEmitExprWithFuel fuel value with
           | Except.error error =>

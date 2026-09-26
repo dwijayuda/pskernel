@@ -1,0 +1,37 @@
+name: PSC1 Lean checker session
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [perf/psc1-lean-checker-session]
+    paths:
+      - ".github/workflows/psc1-lean-checker-session.yml"
+      - "psc1-kernel/**"
+
+permissions:
+  contents: read
+
+jobs:
+  checker-session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build PSC1 kernel
+        working-directory: psc1-kernel
+        run: lake build
+      - name: Checker-session smoke
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerSessionSmoke.lean
+      - name: Existing infer/check regression
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/InferOnlySmoke.lean
+      - name: Existing differential oracle
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/Oracle.lean

@@ -126,4 +126,7 @@ partial def psCKernelCheckBasic?
                   none
           else
             none
-  | PsCKernelExpr.proj _ _ _ => none
+  | PsCKernelExpr.proj _ _ target =>
+      match psCKernelCheckBasic? env lctx target with
+      | none => none
+      | some _ => psCKernelInfer? env lctx expr

@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
-import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import { parseImports, resolveModuleSource } from "./workspace-layout.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -17,27 +17,6 @@ function usage(entry, outDir) {
     `  entry: ${entry}`,
     `  out:   ${outDir}`,
   ].join("\n");
-}
-
-function moduleSourcePath(moduleName) {
-  const parts = moduleName.split(".");
-  if (parts[0] === "ProofScript") {
-    return path.join(selfhostRoot, "stdlib", ...parts) + ".lean";
-  }
-  if (parts[0] === "Ps" && parts.length >= 2) {
-    const packageName = packageBySection.get(parts[1]);
-    if (!packageName) {
-      throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_PACKAGE: ${moduleName}`);
-    }
-    return path.join(
-      selfhostRoot,
-      "packages",
-      packageName,
-      "src",
-      ...parts,
-    ) + ".lean";
-  }
-  throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_IMPORT: ${moduleName}`);
 }
 
 async function collectProject(entryPath) {
@@ -55,7 +34,16 @@ async function collectProject(entryPath) {
 
     const source = await readFile(absolute, "utf8");
     for (const moduleName of parseImports(source)) {
-      await visit(moduleSourcePath(moduleName));
+      const dependency = resolveModuleSource(
+        selfhostRoot,
+        moduleName,
+        ".lean",
+        { allowAlternate: false },
+      );
+      if (!dependency) {
+        throw new Error(`PSC2_BOOTSTRAP_SOURCE_MISSING: ${moduleName}`);
+      }
+      await visit(dependency);
     }
     ordered.push(absolute);
   }

@@ -47,7 +47,7 @@ private unsafe def withClosedSuccessImpl
       | .ok true =>
           -- Modify the latest state instead of writing the snapshot above:
           -- recursive defeq calls may have inserted entries in the meantime.
-          unsafeBaseIO (ref.modify fun current =>
+          let _ := unsafeBaseIO (ref.modify fun current =>
             { current with success := current.success.insert left right })
           .ok true
       | result => result

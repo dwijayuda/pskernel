@@ -1,4 +1,4 @@
-import PSC1Kernel.CheckerStateful
+import PSC1Kernel.CheckerReductionStateful
 
 open PSC1Kernel
 
@@ -57,7 +57,7 @@ def main : IO Unit := do
   let major : Expr := .fvar majorName
   let input : Expr := .app (.const recName []) major
 
-  match whnfStateful ctx CheckerState.empty input with
+  match StatefulReduction.whnf isDefEqStateful ctx CheckerState.empty input with
   | .error err =>
       throw <| IO.userError ("stateful recursor reduction failed: " ++ err)
   | .ok (actual, state) =>

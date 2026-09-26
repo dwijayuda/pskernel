@@ -24,6 +24,13 @@ def main : IO Unit := do
   let x : Name := .str .anonymous "x"
   let lctxA := lctx.addLocal x x (.sort .zero) .default
   let lctxB := lctx.addLocal x x (.sort (.succ .zero)) .default
+
+  -- Closed expressions do not depend on the local context. Lean 4.34 can use
+  -- an expression-pair cache here because its free-variable ids are globally
+  -- unique. PSC1 must provide the same reuse without allowing FVar aliasing.
+  expectDefEqCache "closed pair survives local-context change"
+    (checkerDefEqSuccessCached env lctxA 0 leanNatMaxSizeDefault true left right)
+
   let fvar : Expr := .fvar x
   let target : Expr := .sort .zero
   let storedLocalSuccess := checkerDefEqCacheSuccessResult

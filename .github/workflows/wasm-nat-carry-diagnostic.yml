@@ -91,6 +91,58 @@ jobs:
           list_start = text.index(list_marker, helper_anchor) + len(list_marker)
           target_functions = '''
                 {
+                  name := "natHalfOneZeroTarget"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatHalfFn,
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.call psWasmNatCmpFn,
+                    PsWasmInstruction.i32Const 0,
+                    PsWasmInstruction.i32Eq
+                  ]
+                },
+                {
+                  name := "natMkBit0OneTwoTarget"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatMkBit0Fn,
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.structNew psWasmNatBit0Name,
+                    PsWasmInstruction.call psWasmNatCmpFn,
+                    PsWasmInstruction.i32Const 0,
+                    PsWasmInstruction.i32Eq
+                  ]
+                },
+                {
+                  name := "natSuccHalfOneOneTarget"
+                  typeName := none
+                  parameters := []
+                  results := [PsWasmValueType.i32]
+                  locals := []
+                  body := [
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatHalfFn,
+                    PsWasmInstruction.call psWasmNatSuccFn,
+                    PsWasmInstruction.structNew psWasmNatZeroName,
+                    PsWasmInstruction.structNew psWasmNatBit1Name,
+                    PsWasmInstruction.call psWasmNatCmpFn,
+                    PsWasmInstruction.i32Const 0,
+                    PsWasmInstruction.i32Eq
+                  ]
+                },
+                {
                   name := "natSuccZeroExactTarget"
                   typeName := none
                   parameters := []
@@ -129,13 +181,15 @@ jobs:
           export_marker = 'module.exports ++ [("gcArray42", "gcArray42")]'
           export_insertion = '''module.exports ++ [
                 ("gcArray42", "gcArray42"),
+                ("natHalfOneZeroTarget", "natHalfOneZeroTarget"),
+                ("natMkBit0OneTwoTarget", "natMkBit0OneTwoTarget"),
+                ("natSuccHalfOneOneTarget", "natSuccHalfOneOneTarget"),
                 ("natSuccZeroExactTarget", "natSuccZeroExactTarget"),
                 ("natSuccOneExactTarget", "natSuccOneExactTarget")
               ]'''
           if export_marker not in text:
               raise SystemExit('diagnostic export marker not found')
           text = text.replace(export_marker, export_insertion, 1)
-
           path.write_text(text)
           PY
 
@@ -163,6 +217,9 @@ jobs:
             natAddOneOneExact: instance.exports.natAddOneOneExact(),
             natAddTwoTwoExact: instance.exports.natAddTwoTwoExact(),
             natAddCarrySmallExact: instance.exports.natAddCarrySmallExact(),
+            natHalfOneZeroTarget: instance.exports.natHalfOneZeroTarget(),
+            natMkBit0OneTwoTarget: instance.exports.natMkBit0OneTwoTarget(),
+            natSuccHalfOneOneTarget: instance.exports.natSuccHalfOneOneTarget(),
             natSuccZeroExactTarget: instance.exports.natSuccZeroExactTarget(),
             natSuccOneExactTarget: instance.exports.natSuccOneExactTarget(),
           };

@@ -1,0 +1,115 @@
+name: Wasm Nat Carry Diagnostic
+
+on:
+  push:
+    branches:
+      - debug/wasm3-nat-carry
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Inject diagnostic Nat cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('selfhost/test/WasmBinarySmoke.lean')
+          text = path.read_text()
+          marker = '''      {
+                  name := "natAddCarrySmallExact"'''
+          insertion = '''      {
+                  name := "natLiteralFourEqExact"
+                  typeParameters := []
+                  parameters := []
+                  resultType :=
+                    PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+                  body :=
+                    PsVerifiedIrExpr.intrinsic
+                      PsVerifiedIrIntrinsic.natEq
+                      []
+                      [
+                        PsVerifiedIrExpr.literal
+                          (PsVerifiedIrLiteral.natural 4),
+                        PsVerifiedIrExpr.literal
+                          (PsVerifiedIrLiteral.natural 4)
+                      ]
+                },
+                {
+                  name := "natAddTwoTwoExact"
+                  typeParameters := []
+                  parameters := []
+                  resultType :=
+                    PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+                  body :=
+                    PsVerifiedIrExpr.intrinsic
+                      PsVerifiedIrIntrinsic.natEq
+                      []
+                      [
+                        PsVerifiedIrExpr.intrinsic
+                          PsVerifiedIrIntrinsic.natAdd
+                          []
+                          [
+                            PsVerifiedIrExpr.literal
+                              (PsVerifiedIrLiteral.natural 2),
+                            PsVerifiedIrExpr.literal
+                              (PsVerifiedIrLiteral.natural 2)
+                          ],
+                        PsVerifiedIrExpr.literal
+                          (PsVerifiedIrLiteral.natural 4)
+                      ]
+                },
+                {
+                  name := "natAddCarrySmallExact"'''
+          if marker not in text:
+              raise SystemExit('diagnostic marker not found')
+          path.write_text(text.replace(marker, insertion, 1))
+          PY
+
+      - name: Build diagnostic Wasm binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+
+      - name: Execute diagnostic cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv = readFileSync('/tmp/psc1-wasm-bytes.txt', 'utf8').trim();
+          const bytes = Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) throw new Error('diagnostic wasm validation failed');
+          const {instance} = await WebAssembly.instantiate(bytes);
+          const values = {
+            natLiteralEqExact: instance.exports.natLiteralEqExact(),
+            natLiteralFourEqExact: instance.exports.natLiteralFourEqExact(),
+            natAddOneOneExact: instance.exports.natAddOneOneExact(),
+            natAddTwoTwoExact: instance.exports.natAddTwoTwoExact(),
+            natAddCarrySmallExact: instance.exports.natAddCarrySmallExact(),
+          };
+          console.log('PSC1_WASM_NAT_DIAGNOSTIC', JSON.stringify(values));
+          NODE

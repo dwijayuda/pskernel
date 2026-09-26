@@ -54,8 +54,8 @@ jobs:
       - name: Differential oracle
         working-directory: psc1-kernel
         run: |
-          lake env lean PSC1Kernel/Test/StructureFixture.lean
-          lake env lean --run PSC1Kernel/Test/Oracle.lean
+          lake build psc1_oracle
+          .lake/build/bin/psc1_oracle
       - name: Persist tested integration
         shell: bash
         run: |

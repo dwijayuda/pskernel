@@ -1,0 +1,67 @@
+name: PSC1 Lean defeq cache dev
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [perf/psc1-lean-defeq-cache-dev]
+    paths:
+      - ".github/workflows/psc1-lean-defeq-cache-dev.yml"
+      - "scripts/apply-psc1-defeq-cache-experiment.py"
+      - "psc1-kernel/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: psc1-lean-defeq-cache-dev-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cache-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - name: Apply cache integration
+        run: python3 scripts/apply-psc1-defeq-cache-experiment.py
+      - name: Build PSC1 kernel
+        working-directory: psc1-kernel
+        run: lake build
+      - name: Runtime cache smoke
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerRuntimeCacheSmoke.lean
+      - name: Checker-state cache invariants
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerStateSmoke.lean
+      - name: Checker-session smoke
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerSessionSmoke.lean
+      - name: Infer/check regression
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/InferOnlySmoke.lean
+      - name: Differential oracle
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/Oracle.lean
+      - name: Persist tested integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- psc1-kernel/PSC1Kernel/TypeChecker.lean psc1-kernel/PSC1Kernel/CheckerSession.lean; then
+            echo "tested integration already committed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc1-kernel/PSC1Kernel/TypeChecker.lean psc1-kernel/PSC1Kernel/CheckerSession.lean
+          git commit -m "perf(kernel): memoize successful closed defeq pairs"
+          git push origin HEAD:perf/psc1-lean-defeq-cache-dev

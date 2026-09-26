@@ -36,15 +36,15 @@ jobs:
           set -euo pipefail
           git fetch origin backend/wasm3-runtime-core-fix
 
-          # Keep the latest verified backend-private runtimes, including the
-          # structural Bit0/Bit1 distinction required by Wasm GC.
           git show origin/backend/wasm3-runtime-core-fix:selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean \
             > selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean
           git show origin/backend/wasm3-runtime-core-fix:selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean \
             > selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean
 
-          # Replay only semantic lowering, build wiring, and durable runtime
-          # regression cases. Do not import stale TS/Rust/array branch history.
+          # Only Nat/Int lowering, build wiring, and baseline runtime tests.
+          # The old carry-bisection commit is intentionally not replayed: it
+          # conflicts with today's smoke layout, so the useful cases are added
+          # below directly against the live file.
           for commit in \
             b8ae9885e19326c41c164a294832bb1c47bd14b0 \
             0332f237005a66d269f829941dfbd97274a9ef6c \
@@ -52,11 +52,90 @@ jobs:
             f227342a8f25541c8490c698df986b1e19e2fd2f \
             f111683b408d0a77e03c5f59bb22138d58e59e03 \
             79deb80cd5e2fcba29025ede68f4261bb2f0bc4f \
-            0c72c6dbb6a35fe5f94717927f5bb34ab1e97132 \
-            17ee011c89f7931d4b065fd135f4fd930c9c393f
+            0c72c6dbb6a35fe5f94717927f5bb34ab1e97132
           do
             git cherry-pick --no-commit "$commit"
           done
+
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('selfhost/test/WasmBinarySmoke.lean')
+          text = path.read_text()
+          if 'name := "natAddCarrySmallExact"' not in text:
+              marker = '''      {
+        name := "natAddLargeExact"'''
+              insertion = '''      {
+        name := "natLiteralEqExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 42),
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 42)
+            ]
+      },
+      {
+        name := "natAddOneOneExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natAdd
+                []
+                [
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 1),
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 1)
+                ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 2)
+            ]
+      },
+      {
+        name := "natAddCarrySmallExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natAdd
+                []
+                [
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 3),
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 1)
+                ],
+              PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 4)
+            ]
+      },
+      {
+        name := "natAddLargeExact"'''
+              if marker not in text:
+                  raise SystemExit('live Nat smoke insertion marker not found')
+              text = text.replace(marker, insertion, 1)
+              path.write_text(text)
+          PY
 
           git diff --check
           echo 'changed=true' >> "$GITHUB_OUTPUT"

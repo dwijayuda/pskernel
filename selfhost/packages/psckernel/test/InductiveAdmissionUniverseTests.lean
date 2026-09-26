@@ -1,4 +1,4 @@
-import Ps.PSCKernel.Core.InductiveAdmission
+import Ps.PSCKernel.Core.InductiveAdmissionUniverse
 
 structure PsCKernelInductiveAdmissionUniverseNamedTest where
   name : String
@@ -10,7 +10,7 @@ def psCKernelInductiveUniverseName (text : String) : PsCKernelName :=
 def psCKernelInductiveUniverseValidationAccepted
     (decl : PsCKernelInductiveDecl) : Bool :=
   match
-      psCKernelValidateOrdinaryInductiveBasic?
+      psCKernelValidateOrdinaryInductiveUniverse?
         psCKernelEnvironmentEmpty
         decl with
   | none => false

@@ -1,4 +1,4 @@
-import PSC1Kernel.CheckerStateful
+import PSC1Kernel.CheckerDefEqStateful
 
 namespace PSC1Kernel
 
@@ -70,12 +70,16 @@ def isPropStateful
   let (level, next2) ← next1.ensureSortStateful type
   pure (Level.normalizesToZero level, next2)
 
-/-- Pure stateful positive-memo definitional equality. -/
+/--
+Pure declaration-scoped recursive definitional equality. This is the real
+Lean-4.34-style stateful algorithm; the older `PSC1Kernel.isDefEqStateful`
+wrapper remains only as an incremental inference compatibility path.
+-/
 def isDefEqStateful
     (session : CheckerSession)
     (a b : Expr) : Except String (Bool × CheckerSession) := do
   let (result, state) ←
-    PSC1Kernel.isDefEqStateful session.context session.state a b
+    StatefulDefEq.isDefEq session.context session.state a b
   pure (result, { session with state := state })
 
 end CheckerSession

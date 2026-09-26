@@ -8,7 +8,7 @@ inductive PsCKernelReducibilityHints where
 inductive PsCKernelDefinitionSafety where
   | unsafeDef
   | safe
-  | partial
+  | «partial»
 
 structure PsCKernelConstantVal where
   name : PsCKernelName

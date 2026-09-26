@@ -6,6 +6,7 @@ on:
     branches:
       - perf/psc1-lean-checker-session
       - perf/psc1-lean-checker-cache
+      - perf/psc1-lean-defeq-cache
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
@@ -28,7 +29,7 @@ jobs:
       - name: Build PSC1 kernel
         working-directory: psc1-kernel
         run: lake build
-      - name: Build experimental checker state
+      - name: Build experimental checker state and runtime cache
         working-directory: psc1-kernel
         shell: bash
         run: |
@@ -36,6 +37,8 @@ jobs:
           mkdir -p .lake/build/lib/lean/PSC1Kernel
           lake env lean PSC1Kernel/CheckerState.lean \
             -o .lake/build/lib/lean/PSC1Kernel/CheckerState.olean
+          lake env lean PSC1Kernel/CheckerCacheRuntime.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/CheckerCacheRuntime.olean
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash
@@ -47,6 +50,9 @@ jobs:
       - name: Checker-state cache invariants
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerStateSmoke.lean
+      - name: Native defeq cache isolation
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerDefEqCacheSmoke.lean
       - name: Checker-session smoke
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerSessionSmoke.lean

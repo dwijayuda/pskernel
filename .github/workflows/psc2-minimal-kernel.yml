@@ -49,6 +49,13 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_name_parity_tests
 
+      - name: Level parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_level_parity_tests
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |
@@ -57,7 +64,6 @@ jobs:
           node scripts/check-bootstrap-closure.mjs
 
       - name: KernelCore PSC1 source profile
-        if: ${{ hashFiles('psc15selfhost/scripts/check-kernel-core-source.mjs') != '' }}
         shell: bash
         run: |
           set -euo pipefail

@@ -59,7 +59,9 @@ jobs:
         run: lake env lean --run PSC1Kernel/Test/CheckerStateSmoke.lean
       - name: Native defeq cache isolation
         working-directory: psc1-kernel
-        run: lake env lean --run PSC1Kernel/Test/CheckerDefEqCacheSmoke.lean
+        run: |
+          lake build psc1_defeq_cache_smoke
+          .lake/build/bin/psc1_defeq_cache_smoke
       - name: Checker-session smoke
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerSessionSmoke.lean

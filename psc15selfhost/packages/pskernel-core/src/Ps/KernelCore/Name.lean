@@ -1,3 +1,5 @@
+import Ps.KernelCore.Data
+
 inductive PsKernelCoreName where
   | anonymous
   | str (parent : PsKernelCoreName) (value : String)
@@ -70,20 +72,20 @@ def psKernelCoreNameEq
 
 def psKernelCoreNameMember
     (target : PsKernelCoreName)
-    (names : List PsKernelCoreName) : Bool :=
+    (names : PsKernelCoreList PsKernelCoreName) : Bool :=
   match names with
-  | [] => false
-  | name :: rest =>
+  | PsKernelCoreList.nil => false
+  | PsKernelCoreList.cons name rest =>
       if psKernelCoreNameEq target name then
         true
       else
         psKernelCoreNameMember target rest
 
 def psKernelCoreNameHasDuplicates
-    (names : List PsKernelCoreName) : Bool :=
+    (names : PsKernelCoreList PsKernelCoreName) : Bool :=
   match names with
-  | [] => false
-  | name :: rest =>
+  | PsKernelCoreList.nil => false
+  | PsKernelCoreList.cons name rest =>
       if psKernelCoreNameMember name rest then
         true
       else

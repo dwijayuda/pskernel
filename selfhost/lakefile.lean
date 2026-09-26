@@ -164,7 +164,8 @@ lean_lib PsPSCKernel where
     `Ps.PSCKernel.Core.Environment,
     `Ps.PSCKernel.Core.ReductionBasic,
     `Ps.PSCKernel.Core.TypeInferenceBasic,
-    `Ps.PSCKernel.Core.TypeInference
+    `Ps.PSCKernel.Core.TypeInference,
+    `Ps.PSCKernel.Core.DefEqBasic
   ]
 
 @[default_target]

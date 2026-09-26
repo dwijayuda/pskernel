@@ -20,6 +20,10 @@ def psWasmNatMulFn : String := "__ps_wasm_nat_mul"
 def psWasmNatDivModFn : String := "__ps_wasm_nat_divmod"
 def psWasmNatDivFn : String := "__ps_wasm_nat_div"
 def psWasmNatModFn : String := "__ps_wasm_nat_mod"
+def psWasmNatFitsBitsFn : String := "__ps_wasm_nat_fits_bits"
+def psWasmNatFitsU32Fn : String := "__ps_wasm_nat_fits_u32"
+def psWasmNatToU32Fn : String := "__ps_wasm_nat_to_u32"
+def psWasmNatOfU32Fn : String := "__ps_wasm_nat_of_u32"
 
 def psWasmNatRef : PsWasmValueType :=
   PsWasmValueType.refT psWasmNatName
@@ -514,6 +518,101 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
         PsWasmInstruction.localGet 1,
         PsWasmInstruction.call psWasmNatDivModFn,
         PsWasmInstruction.structGet psWasmNatDivModName 1
+      ]
+    }
+,
+    {
+      name := psWasmNatFitsBitsFn
+      typeName := none
+      parameters := [psWasmNatRef, PsWasmValueType.i32]
+      results := [PsWasmValueType.i32]
+      locals := []
+      body := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.refTest psWasmNatZeroName,
+        PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+          PsWasmInstruction.i32Const 1,
+        PsWasmInstruction.else_,
+          PsWasmInstruction.localGet 1,
+          PsWasmInstruction.i32Const 0,
+          PsWasmInstruction.i32Eq,
+          PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+            PsWasmInstruction.i32Const 0,
+          PsWasmInstruction.else_,
+            PsWasmInstruction.localGet 0,
+            PsWasmInstruction.call psWasmNatHalfFn,
+            PsWasmInstruction.localGet 1,
+            PsWasmInstruction.i32Const 1,
+            PsWasmInstruction.i32Sub,
+            PsWasmInstruction.call psWasmNatFitsBitsFn,
+          PsWasmInstruction.end_,
+        PsWasmInstruction.end_
+      ]
+    },
+    {
+      name := psWasmNatFitsU32Fn
+      typeName := none
+      parameters := [psWasmNatRef]
+      results := [PsWasmValueType.i32]
+      locals := []
+      body := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.i32Const 32,
+        PsWasmInstruction.call psWasmNatFitsBitsFn
+      ]
+    },
+    {
+      name := psWasmNatToU32Fn
+      typeName := none
+      parameters := [psWasmNatRef]
+      results := [PsWasmValueType.i32]
+      locals := []
+      body := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.refTest psWasmNatZeroName,
+        PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+          PsWasmInstruction.i32Const 0,
+        PsWasmInstruction.else_,
+          PsWasmInstruction.localGet 0,
+          PsWasmInstruction.call psWasmNatHalfFn,
+          PsWasmInstruction.call psWasmNatToU32Fn,
+          PsWasmInstruction.i32Const 2,
+          PsWasmInstruction.i32Mul,
+          PsWasmInstruction.localGet 0,
+          PsWasmInstruction.call psWasmNatLowFn,
+          PsWasmInstruction.i32Add,
+        PsWasmInstruction.end_
+      ]
+    },
+    {
+      name := psWasmNatOfU32Fn
+      typeName := none
+      parameters := [PsWasmValueType.i32]
+      results := [psWasmNatRef]
+      locals := [psWasmNatRef]
+      body := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.i32Const 0,
+        PsWasmInstruction.i32Eq,
+        PsWasmInstruction.ifStart (some psWasmNatRef),
+          PsWasmInstruction.call psWasmNatZeroFn,
+        PsWasmInstruction.else_,
+          PsWasmInstruction.localGet 0,
+          PsWasmInstruction.i32Const 1,
+          PsWasmInstruction.i32ShrU,
+          PsWasmInstruction.call psWasmNatOfU32Fn,
+          PsWasmInstruction.localSet 1,
+          PsWasmInstruction.localGet 0,
+          PsWasmInstruction.i32Const 1,
+          PsWasmInstruction.i32And,
+          PsWasmInstruction.ifStart (some psWasmNatRef),
+            PsWasmInstruction.localGet 1,
+            PsWasmInstruction.call psWasmNatBit1Fn,
+          PsWasmInstruction.else_,
+            PsWasmInstruction.localGet 1,
+            PsWasmInstruction.call psWasmNatMkBit0Fn,
+          PsWasmInstruction.end_,
+        PsWasmInstruction.end_
       ]
     }
   ]

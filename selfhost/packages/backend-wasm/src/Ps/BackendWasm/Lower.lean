@@ -392,15 +392,38 @@ def psWasmCollectArrayTypesFromExprWithFuel :
       match expr with
       | .literal _ => types
       | .var _ => types
-      | .intrinsic _ typeArguments arguments =>
+      | .intrinsic operation typeArguments arguments =>
           let withTypes :=
             typeArguments.foldl
               (fun state type =>
                 psWasmCollectArrayTypesFromType type state)
               types
+          let withArrayTypes :=
+            match operation, typeArguments with
+            | .arrayMap, [inputType, outputType] =>
+                psWasmInsertArrayType
+                  (psWasmInsertArrayType
+                    withTypes
+                    (PsVerifiedIrType.named "Array" [inputType]))
+                  (PsVerifiedIrType.named "Array" [outputType])
+            | .arrayFoldl, [elementType, _] =>
+                psWasmInsertArrayType
+                  withTypes
+                  (PsVerifiedIrType.named "Array" [elementType])
+            | .arrayEmptyWithCapacity, [elementType]
+            | .arraySize, [elementType]
+            | .arrayPush, [elementType]
+            | .arrayGet, [elementType]
+            | .arrayGetD, [elementType]
+            | .arraySet, [elementType]
+            | .arraySetIfInBounds, [elementType] =>
+                psWasmInsertArrayType
+                  withTypes
+                  (PsVerifiedIrType.named "Array" [elementType])
+            | _, _ => withTypes
           arguments.foldl
             (fun state argument => collect argument state)
-            withTypes
+            withArrayTypes
       | .lambda parameters resultType body =>
           let withParameters :=
             psWasmCollectArrayTypesFromParameters
@@ -1410,6 +1433,462 @@ def psWasmLowerIntCompareWith
           }
   | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
+
+structure PsWasmArrayLowerInfo where
+  elementType : PsVerifiedIrType
+  elementValueType : PsWasmValueType
+  typeName : String
+  refType : PsWasmValueType
+
+def psWasmResolveArrayLowerInfo
+    (profile : PsWasmTargetProfile)
+    (typeArguments : List PsVerifiedIrType) :
+    Except PsWasmLowerError PsWasmArrayLowerInfo :=
+  match typeArguments with
+  | [elementType] =>
+      match psWasmArrayTypeName elementType with
+      | none => Except.error PsWasmLowerError.unsupportedType
+      | some typeName =>
+          match psWasmValueTypeOfIrType? profile elementType with
+          | none => Except.error PsWasmLowerError.unsupportedType
+          | some elementValueType =>
+              Except.ok {
+                elementType := elementType
+                elementValueType := elementValueType
+                typeName := typeName
+                refType := PsWasmValueType.refT typeName
+              }
+  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
+def psWasmArrayGetInstruction
+    (typeName : String)
+    (elementType : PsVerifiedIrType) : PsWasmInstruction :=
+  match elementType with
+  | .primitive .uint8 => PsWasmInstruction.arrayGetU typeName
+  | .primitive .uint16 => PsWasmInstruction.arrayGetU typeName
+  | .primitive .int8 => PsWasmInstruction.arrayGetS typeName
+  | .primitive .int16 => PsWasmInstruction.arrayGetS typeName
+  | _ => PsWasmInstruction.arrayGet typeName
+
+def psWasmLowerArrayEmptyWithCapacityWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (typeArguments : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmResolveArrayLowerInfo profile typeArguments with
+  | Except.error error => Except.error error
+  | Except.ok info =>
+      match arguments with
+      | [capacity] =>
+          match lower (some psWasmNatRef) state capacity with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++ [
+                    PsWasmInstruction.drop,
+                    PsWasmInstruction.arrayNewFixed info.typeName 0
+                  ]
+                state := lowered.state
+              }
+      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
+def psWasmLowerArraySizeWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (typeArguments : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmResolveArrayLowerInfo profile typeArguments with
+  | Except.error error => Except.error error
+  | Except.ok info =>
+      match arguments with
+      | [array] =>
+          match lower (some info.refType) state array with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++ [
+                    PsWasmInstruction.arrayLen,
+                    PsWasmInstruction.call psWasmNatOfU32Fn
+                  ]
+                state := lowered.state
+              }
+      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
+def psWasmLowerArrayPushWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (typeArguments : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmResolveArrayLowerInfo profile typeArguments with
+  | Except.error error => Except.error error
+  | Except.ok info =>
+      match arguments with
+      | [array, value] =>
+          match lower (some info.refType) state array with
+          | Except.error error => Except.error error
+          | Except.ok loweredArray =>
+              let allocatedArray :=
+                psWasmAddLocal loweredArray.state info.refType
+              let arrayLocal := allocatedArray.1
+              match
+                  lower
+                    (some info.elementValueType)
+                    allocatedArray.2
+                    value with
+              | Except.error error => Except.error error
+              | Except.ok loweredValue =>
+                  let allocatedValue :=
+                    psWasmAddLocal
+                      loweredValue.state
+                      info.elementValueType
+                  let valueLocal := allocatedValue.1
+                  let allocatedOutput :=
+                    psWasmAddLocal allocatedValue.2 info.refType
+                  let outputLocal := allocatedOutput.1
+                  Except.ok {
+                    instructions :=
+                      loweredArray.instructions ++ [
+                        PsWasmInstruction.localSet arrayLocal
+                      ] ++ loweredValue.instructions ++ [
+                        PsWasmInstruction.localSet valueLocal,
+                        PsWasmInstruction.localGet valueLocal,
+                        PsWasmInstruction.localGet arrayLocal,
+                        PsWasmInstruction.arrayLen,
+                        PsWasmInstruction.i32Const 1,
+                        PsWasmInstruction.i32Add,
+                        PsWasmInstruction.arrayNew info.typeName,
+                        PsWasmInstruction.localSet outputLocal,
+                        PsWasmInstruction.localGet outputLocal,
+                        PsWasmInstruction.i32Const 0,
+                        PsWasmInstruction.localGet arrayLocal,
+                        PsWasmInstruction.i32Const 0,
+                        PsWasmInstruction.localGet arrayLocal,
+                        PsWasmInstruction.arrayLen,
+                        PsWasmInstruction.arrayCopy
+                          info.typeName info.typeName,
+                        PsWasmInstruction.localGet outputLocal
+                      ]
+                    state := allocatedOutput.2
+                  }
+      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
+def psWasmLowerArrayGetWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (typeArguments : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmResolveArrayLowerInfo profile typeArguments with
+  | Except.error error => Except.error error
+  | Except.ok info =>
+      match arguments with
+      | [array, index] =>
+          match lower (some info.refType) state array with
+          | Except.error error => Except.error error
+          | Except.ok loweredArray =>
+              let allocatedArray :=
+                psWasmAddLocal loweredArray.state info.refType
+              let arrayLocal := allocatedArray.1
+              match lower (some psWasmNatRef) allocatedArray.2 index with
+              | Except.error error => Except.error error
+              | Except.ok loweredIndex =>
+                  let allocatedIndex :=
+                    psWasmAddLocal loweredIndex.state psWasmNatRef
+                  let indexLocal := allocatedIndex.1
+                  Except.ok {
+                    instructions :=
+                      loweredArray.instructions ++ [
+                        PsWasmInstruction.localSet arrayLocal
+                      ] ++ loweredIndex.instructions ++ [
+                        PsWasmInstruction.localSet indexLocal,
+                        PsWasmInstruction.localGet indexLocal,
+                        PsWasmInstruction.call psWasmNatFitsU32Fn,
+                        PsWasmInstruction.ifStart
+                          (some info.elementValueType),
+                          PsWasmInstruction.localGet arrayLocal,
+                          PsWasmInstruction.localGet indexLocal,
+                          PsWasmInstruction.call psWasmNatToU32Fn,
+                          psWasmArrayGetInstruction
+                            info.typeName info.elementType,
+                        PsWasmInstruction.else_,
+                          PsWasmInstruction.unreachable,
+                        PsWasmInstruction.end_
+                      ]
+                    state := allocatedIndex.2
+                  }
+      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
+def psWasmLowerArrayGetDWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (typeArguments : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmResolveArrayLowerInfo profile typeArguments with
+  | Except.error error => Except.error error
+  | Except.ok info =>
+      match arguments with
+      | [array, index, fallback] =>
+          match lower (some info.refType) state array with
+          | Except.error error => Except.error error
+          | Except.ok loweredArray =>
+              let allocatedArray :=
+                psWasmAddLocal loweredArray.state info.refType
+              let arrayLocal := allocatedArray.1
+              match lower (some psWasmNatRef) allocatedArray.2 index with
+              | Except.error error => Except.error error
+              | Except.ok loweredIndex =>
+                  let allocatedIndex :=
+                    psWasmAddLocal loweredIndex.state psWasmNatRef
+                  let indexLocal := allocatedIndex.1
+                  match
+                      lower
+                        (some info.elementValueType)
+                        allocatedIndex.2
+                        fallback with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredFallback =>
+                      let allocatedFallback :=
+                        psWasmAddLocal
+                          loweredFallback.state
+                          info.elementValueType
+                      let fallbackLocal := allocatedFallback.1
+                      Except.ok {
+                        instructions :=
+                          loweredArray.instructions ++ [
+                            PsWasmInstruction.localSet arrayLocal
+                          ] ++ loweredIndex.instructions ++ [
+                            PsWasmInstruction.localSet indexLocal
+                          ] ++ loweredFallback.instructions ++ [
+                            PsWasmInstruction.localSet fallbackLocal,
+                            PsWasmInstruction.localGet indexLocal,
+                            PsWasmInstruction.call psWasmNatFitsU32Fn,
+                            PsWasmInstruction.ifStart
+                              (some info.elementValueType),
+                              PsWasmInstruction.localGet indexLocal,
+                              PsWasmInstruction.call psWasmNatToU32Fn,
+                              PsWasmInstruction.localGet arrayLocal,
+                              PsWasmInstruction.arrayLen,
+                              PsWasmInstruction.i32LtU,
+                              PsWasmInstruction.ifStart
+                                (some info.elementValueType),
+                                PsWasmInstruction.localGet arrayLocal,
+                                PsWasmInstruction.localGet indexLocal,
+                                PsWasmInstruction.call psWasmNatToU32Fn,
+                                psWasmArrayGetInstruction
+                                  info.typeName info.elementType,
+                              PsWasmInstruction.else_,
+                                PsWasmInstruction.localGet fallbackLocal,
+                              PsWasmInstruction.end_,
+                            PsWasmInstruction.else_,
+                              PsWasmInstruction.localGet fallbackLocal,
+                            PsWasmInstruction.end_
+                          ]
+                        state := allocatedFallback.2
+                      }
+      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
+def psWasmLowerArraySetWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (typeArguments : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmResolveArrayLowerInfo profile typeArguments with
+  | Except.error error => Except.error error
+  | Except.ok info =>
+      match arguments with
+      | [array, index, value] =>
+          match lower (some info.refType) state array with
+          | Except.error error => Except.error error
+          | Except.ok loweredArray =>
+              let allocatedArray :=
+                psWasmAddLocal loweredArray.state info.refType
+              let arrayLocal := allocatedArray.1
+              match lower (some psWasmNatRef) allocatedArray.2 index with
+              | Except.error error => Except.error error
+              | Except.ok loweredIndex =>
+                  let allocatedIndex :=
+                    psWasmAddLocal loweredIndex.state psWasmNatRef
+                  let indexLocal := allocatedIndex.1
+                  match
+                      lower
+                        (some info.elementValueType)
+                        allocatedIndex.2
+                        value with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredValue =>
+                      let allocatedValue :=
+                        psWasmAddLocal
+                          loweredValue.state
+                          info.elementValueType
+                      let valueLocal := allocatedValue.1
+                      let allocatedOutput :=
+                        psWasmAddLocal allocatedValue.2 info.refType
+                      let outputLocal := allocatedOutput.1
+                      Except.ok {
+                        instructions :=
+                          loweredArray.instructions ++ [
+                            PsWasmInstruction.localSet arrayLocal
+                          ] ++ loweredIndex.instructions ++ [
+                            PsWasmInstruction.localSet indexLocal
+                          ] ++ loweredValue.instructions ++ [
+                            PsWasmInstruction.localSet valueLocal,
+                            PsWasmInstruction.localGet indexLocal,
+                            PsWasmInstruction.call psWasmNatFitsU32Fn,
+                            PsWasmInstruction.ifStart (some info.refType),
+                              PsWasmInstruction.localGet valueLocal,
+                              PsWasmInstruction.localGet arrayLocal,
+                              PsWasmInstruction.arrayLen,
+                              PsWasmInstruction.arrayNew info.typeName,
+                              PsWasmInstruction.localSet outputLocal,
+                              PsWasmInstruction.localGet outputLocal,
+                              PsWasmInstruction.i32Const 0,
+                              PsWasmInstruction.localGet arrayLocal,
+                              PsWasmInstruction.i32Const 0,
+                              PsWasmInstruction.localGet arrayLocal,
+                              PsWasmInstruction.arrayLen,
+                              PsWasmInstruction.arrayCopy
+                                info.typeName info.typeName,
+                              PsWasmInstruction.localGet outputLocal,
+                              PsWasmInstruction.localGet indexLocal,
+                              PsWasmInstruction.call psWasmNatToU32Fn,
+                              PsWasmInstruction.localGet valueLocal,
+                              PsWasmInstruction.arraySet info.typeName,
+                              PsWasmInstruction.localGet outputLocal,
+                            PsWasmInstruction.else_,
+                              PsWasmInstruction.unreachable,
+                            PsWasmInstruction.end_
+                          ]
+                        state := allocatedOutput.2
+                      }
+      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
+def psWasmLowerArraySetIfInBoundsWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (typeArguments : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmResolveArrayLowerInfo profile typeArguments with
+  | Except.error error => Except.error error
+  | Except.ok info =>
+      match arguments with
+      | [array, index, value] =>
+          match lower (some info.refType) state array with
+          | Except.error error => Except.error error
+          | Except.ok loweredArray =>
+              let allocatedArray :=
+                psWasmAddLocal loweredArray.state info.refType
+              let arrayLocal := allocatedArray.1
+              match lower (some psWasmNatRef) allocatedArray.2 index with
+              | Except.error error => Except.error error
+              | Except.ok loweredIndex =>
+                  let allocatedIndex :=
+                    psWasmAddLocal loweredIndex.state psWasmNatRef
+                  let indexLocal := allocatedIndex.1
+                  match
+                      lower
+                        (some info.elementValueType)
+                        allocatedIndex.2
+                        value with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredValue =>
+                      let allocatedValue :=
+                        psWasmAddLocal
+                          loweredValue.state
+                          info.elementValueType
+                      let valueLocal := allocatedValue.1
+                      let allocatedOutput :=
+                        psWasmAddLocal allocatedValue.2 info.refType
+                      let outputLocal := allocatedOutput.1
+                      Except.ok {
+                        instructions :=
+                          loweredArray.instructions ++ [
+                            PsWasmInstruction.localSet arrayLocal
+                          ] ++ loweredIndex.instructions ++ [
+                            PsWasmInstruction.localSet indexLocal
+                          ] ++ loweredValue.instructions ++ [
+                            PsWasmInstruction.localSet valueLocal,
+                            PsWasmInstruction.localGet indexLocal,
+                            PsWasmInstruction.call psWasmNatFitsU32Fn,
+                            PsWasmInstruction.ifStart (some info.refType),
+                              PsWasmInstruction.localGet indexLocal,
+                              PsWasmInstruction.call psWasmNatToU32Fn,
+                              PsWasmInstruction.localGet arrayLocal,
+                              PsWasmInstruction.arrayLen,
+                              PsWasmInstruction.i32LtU,
+                              PsWasmInstruction.ifStart (some info.refType),
+                                PsWasmInstruction.localGet valueLocal,
+                                PsWasmInstruction.localGet arrayLocal,
+                                PsWasmInstruction.arrayLen,
+                                PsWasmInstruction.arrayNew info.typeName,
+                                PsWasmInstruction.localSet outputLocal,
+                                PsWasmInstruction.localGet outputLocal,
+                                PsWasmInstruction.i32Const 0,
+                                PsWasmInstruction.localGet arrayLocal,
+                                PsWasmInstruction.i32Const 0,
+                                PsWasmInstruction.localGet arrayLocal,
+                                PsWasmInstruction.arrayLen,
+                                PsWasmInstruction.arrayCopy
+                                  info.typeName info.typeName,
+                                PsWasmInstruction.localGet outputLocal,
+                                PsWasmInstruction.localGet indexLocal,
+                                PsWasmInstruction.call psWasmNatToU32Fn,
+                                PsWasmInstruction.localGet valueLocal,
+                                PsWasmInstruction.arraySet info.typeName,
+                                PsWasmInstruction.localGet outputLocal,
+                              PsWasmInstruction.else_,
+                                PsWasmInstruction.localGet arrayLocal,
+                              PsWasmInstruction.end_,
+                            PsWasmInstruction.else_,
+                              PsWasmInstruction.localGet arrayLocal,
+                            PsWasmInstruction.end_
+                          ]
+                        state := allocatedOutput.2
+                      }
+      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
@@ -1545,6 +2024,27 @@ def psWasmLowerIntrinsicWith
   | .intLt =>
       psWasmLowerIntCompareWith
         lower state PsWasmInstruction.i32LtS arguments
+  | .arrayEmptyWithCapacity =>
+      psWasmLowerArrayEmptyWithCapacityWith
+        profile lower state typeArguments arguments
+  | .arraySize =>
+      psWasmLowerArraySizeWith
+        profile lower state typeArguments arguments
+  | .arrayPush =>
+      psWasmLowerArrayPushWith
+        profile lower state typeArguments arguments
+  | .arrayGet =>
+      psWasmLowerArrayGetWith
+        profile lower state typeArguments arguments
+  | .arrayGetD =>
+      psWasmLowerArrayGetDWith
+        profile lower state typeArguments arguments
+  | .arraySet =>
+      psWasmLowerArraySetWith
+        profile lower state typeArguments arguments
+  | .arraySetIfInBounds =>
+      psWasmLowerArraySetIfInBoundsWith
+        profile lower state typeArguments arguments
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
 def psWasmLowerTypedArgumentsWith

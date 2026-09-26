@@ -3,7 +3,9 @@ name: PSC1 Lean checker session
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-lean-checker-session]
+    branches:
+      - perf/psc1-lean-checker-session
+      - perf/psc1-lean-checker-cache
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"

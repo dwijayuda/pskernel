@@ -297,3 +297,6 @@ jobs:
 
       - name: Run PSCKernel declaration admission differential
         run: node scripts/psckernel-declaration-admission-differential.mjs
+
+      - name: Run PSCKernel quotient admission differential
+        run: node scripts/psckernel-quotient-admission-differential.mjs

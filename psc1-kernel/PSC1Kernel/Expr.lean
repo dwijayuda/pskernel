@@ -45,28 +45,92 @@ def Level.listEq : List Level → List Level → Bool
   | a :: as, b :: bs => Level.eq a b && Level.listEq as bs
   | _, _ => false
 
+private theorem nameEqSelf : ∀ n : Name, Name.eq n n = true
+  | .anonymous => rfl
+  | .str parent value => by
+      simp [Name.eq, nameEqSelf parent]
+  | .num parent value => by
+      simp [Name.eq, nameEqSelf parent]
+
+private theorem levelEqSelf : ∀ level : Level, Level.eq level level = true
+  | .zero => rfl
+  | .succ of => levelEqSelf of
+  | .max left right => by
+      simp [Level.eq, levelEqSelf left, levelEqSelf right]
+  | .imax left right => by
+      simp [Level.eq, levelEqSelf left, levelEqSelf right]
+  | .param name => nameEqSelf name
+  | .mvar name => nameEqSelf name
+
+private theorem levelListEqSelf : ∀ levels : List Level, Level.listEq levels levels = true
+  | [] => rfl
+  | level :: rest => by
+      simp [Level.listEq, levelEqSelf level, levelListEqSelf rest]
+
+private theorem literalEqSelf : ∀ value : Literal, Literal.eq value value = true
+  | .nat value => by simp [Literal.eq]
+  | .str value => by simp [Literal.eq]
+
 /--
-Lean 4.34 `Expr.eqv`-compatible structural equality. Binder display names and
-binder annotations on lambda/forall/let nodes are deliberately ignored; they
-are not part of kernel alpha-equivalence. Metadata payloads remain structural.
+Pure structural specification for Lean 4.34 `Expr.eqv`. Binder display names
+and binder annotations on lambda/forall/let nodes are deliberately ignored;
+they are not part of kernel alpha-equivalence. Metadata payloads remain
+structural.
 -/
-partial def Expr.eq : Expr → Expr → Bool
+def Expr.eqCore : Expr → Expr → Bool
   | .bvar a, .bvar b => a == b
   | .fvar a, .fvar b => Name.eq a b
   | .mvar a, .mvar b => Name.eq a b
   | .sort a, .sort b => Level.eq a b
   | .const n₁ ls₁, .const n₂ ls₂ => Name.eq n₁ n₂ && Level.listEq ls₁ ls₂
-  | .app f₁ a₁, .app f₂ a₂ => Expr.eq f₁ f₂ && Expr.eq a₁ a₂
+  | .app f₁ a₁, .app f₂ a₂ => Expr.eqCore f₁ f₂ && Expr.eqCore a₁ a₂
   | .lam _ t₁ b₁ _, .lam _ t₂ b₂ _ =>
-    Expr.eq t₁ t₂ && Expr.eq b₁ b₂
+    Expr.eqCore t₁ t₂ && Expr.eqCore b₁ b₂
   | .forallE _ t₁ b₁ _, .forallE _ t₂ b₂ _ =>
-    Expr.eq t₁ t₂ && Expr.eq b₁ b₂
+    Expr.eqCore t₁ t₂ && Expr.eqCore b₁ b₂
   | .letE _ t₁ v₁ b₁ d₁, .letE _ t₂ v₂ b₂ d₂ =>
-    Expr.eq t₁ t₂ && Expr.eq v₁ v₂ && Expr.eq b₁ b₂ && d₁ == d₂
+    Expr.eqCore t₁ t₂ && Expr.eqCore v₁ v₂ && Expr.eqCore b₁ b₂ && d₁ == d₂
   | .lit a, .lit b => Literal.eq a b
-  | .mdata m₁ e₁, .mdata m₂ e₂ => m₁ == m₂ && Expr.eq e₁ e₂
-  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ => Name.eq n₁ n₂ && i₁ == i₂ && Expr.eq e₁ e₂
+  | .mdata m₁ e₁, .mdata m₂ e₂ => m₁ == m₂ && Expr.eqCore e₁ e₂
+  | .proj n₁ i₁ e₁, .proj n₂ i₂ e₂ =>
+    Name.eq n₁ n₂ && i₁ == i₂ && Expr.eqCore e₁ e₂
   | _, _ => false
+
+private theorem exprEqCoreSelf : ∀ e : Expr, Expr.eqCore e e = true
+  | .bvar index => by simp [Expr.eqCore]
+  | .fvar name => nameEqSelf name
+  | .mvar name => nameEqSelf name
+  | .sort level => levelEqSelf level
+  | .const name levels => by
+      simp [Expr.eqCore, nameEqSelf name, levelListEqSelf levels]
+  | .app fn arg => by
+      simp [Expr.eqCore, exprEqCoreSelf fn, exprEqCoreSelf arg]
+  | .lam _ type body _ => by
+      simp [Expr.eqCore, exprEqCoreSelf type, exprEqCoreSelf body]
+  | .forallE _ type body _ => by
+      simp [Expr.eqCore, exprEqCoreSelf type, exprEqCoreSelf body]
+  | .letE _ type value body _ => by
+      simp [Expr.eqCore, exprEqCoreSelf type, exprEqCoreSelf value, exprEqCoreSelf body]
+  | .lit value => literalEqSelf value
+  | .mdata metadata expr => by
+      simp [Expr.eqCore, exprEqCoreSelf expr]
+  | .proj typeName index expr => by
+      simp [Expr.eqCore, nameEqSelf typeName, exprEqCoreSelf expr]
+
+/--
+Lean 4.34 `Expr.eqv`-compatible structural equality with a semantics-preserving
+identity fast path. The logical definition of `withPtrEq` is exactly the
+structural fallback below; Lean's runtime may return `true` immediately when
+`left` and `right` are the same immutable node. Backends without pointer
+identity can execute the fallback unchanged.
+-/
+def Expr.eq (left right : Expr) : Bool :=
+  withPtrEq left right
+    (fun _ => Expr.eqCore left right)
+    (by
+      intro h
+      subst right
+      exact exprEqCoreSelf left)
 
 /--
 Lean 4.34 `Expr.equal`-compatible binder-aware structural equality. Use this

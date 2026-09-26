@@ -157,24 +157,24 @@ unsafe def checkerWhnfCoreCacheResultImpl
     (lctx : LocalContext)
     (maxRecDepth maxNatSize : Nat)
     (enabled : Bool)
-    (expr result : Expr) : Expr :=
+    (expr result : Expr) : Except String Expr :=
   if !enabled then
-    result
+    .ok result
   else
-    checkerWhnfRunIO result do
+    checkerWhnfRunIO (.ok result) do
       let state ← checkerWhnfStateFor env maxRecDepth maxNatSize
       checkerWhnfRuntimeRef.set
         { state with whnfCore := state.whnfCore.insert lctx expr result }
-      pure result
+      pure (.ok result)
 
-/-- Pure semantics: identity. Native code records the WHNF-core result. -/
+/-- Pure semantics: successful identity. Native code records the WHNF-core result. -/
 @[implemented_by checkerWhnfCoreCacheResultImpl]
 opaque checkerWhnfCoreCacheResult
     (env : Environment)
     (lctx : LocalContext)
     (maxRecDepth maxNatSize : Nat)
     (enabled : Bool)
-    (expr result : Expr) : Expr := result
+    (expr result : Expr) : Except String Expr := .ok result
 
 unsafe def checkerWhnfCachedImpl
     (env : Environment)
@@ -203,23 +203,23 @@ unsafe def checkerWhnfCacheResultImpl
     (lctx : LocalContext)
     (maxRecDepth maxNatSize : Nat)
     (enabled : Bool)
-    (expr result : Expr) : Expr :=
+    (expr result : Expr) : Except String Expr :=
   if !enabled then
-    result
+    .ok result
   else
-    checkerWhnfRunIO result do
+    checkerWhnfRunIO (.ok result) do
       let state ← checkerWhnfStateFor env maxRecDepth maxNatSize
       checkerWhnfRuntimeRef.set
         { state with whnf := state.whnf.insert lctx expr result }
-      pure result
+      pure (.ok result)
 
-/-- Pure semantics: identity. Native code records the public WHNF result. -/
+/-- Pure semantics: successful identity. Native code records the public WHNF result. -/
 @[implemented_by checkerWhnfCacheResultImpl]
 opaque checkerWhnfCacheResult
     (env : Environment)
     (lctx : LocalContext)
     (maxRecDepth maxNatSize : Nat)
     (enabled : Bool)
-    (expr result : Expr) : Expr := result
+    (expr result : Expr) : Except String Expr := .ok result
 
 end PSC1Kernel

@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - diagnostic/psc1-recursor-pre-lazy-defeq
+      - perf/psc1-lean-stateful-dag-sharing
     paths:
       - ".github/workflows/psc1-lean-recursor-profile.yml"
       - "psc1-kernel/**"

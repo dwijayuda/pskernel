@@ -6,9 +6,11 @@ on:
     branches:
       - perf/psc1-lean-checker-session
       - perf/psc1-lean-checker-cache
+      - perf/psc1-lean-stateful-checker
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
+      - "scripts/apply-psc1-stateful-checker.mjs"
 
 permissions:
   contents: read
@@ -25,6 +27,13 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Apply experimental stateful checker wiring
+        if: github.ref_name == 'perf/psc1-lean-stateful-checker'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/apply-psc1-stateful-checker.mjs
+          git diff --check
       - name: Build PSC1 kernel
         working-directory: psc1-kernel
         run: lake build
@@ -47,6 +56,9 @@ jobs:
       - name: Checker-state cache invariants
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerStateSmoke.lean
+      - name: Stateful recursive checker
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerStatefulSmoke.lean
       - name: Checker-session smoke
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerSessionSmoke.lean

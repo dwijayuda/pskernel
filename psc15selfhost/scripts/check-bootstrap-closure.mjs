@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
@@ -51,7 +51,33 @@ function sourceForModule(moduleName) {
   throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_IMPORT: ${moduleName}`);
 }
 
-const psconfig = JSON.parse(await readFile(path.join(root, "psconfig.json"), "utf8"));
+async function readJson(file) {
+  return JSON.parse(await readFile(file, "utf8"));
+}
+
+async function workspaceManifests() {
+  const byFolder = new Map();
+  const byName = new Map();
+  const packageEntries = await readdir(path.join(root, "packages"), {
+    withFileTypes: true,
+  });
+  const directories = packageEntries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => ({ folder: entry.name, directory: path.join(root, "packages", entry.name) }));
+  directories.push({ folder: "stdlib", directory: path.join(root, "stdlib") });
+
+  for (const { folder, directory } of directories) {
+    const manifestPath = path.join(directory, "package.json");
+    if (!existsSync(manifestPath)) continue;
+    const manifest = await readJson(manifestPath);
+    const record = { folder, directory, manifest };
+    byFolder.set(folder, record);
+    if (typeof manifest.name === "string") byName.set(manifest.name, record);
+  }
+  return { byFolder, byName };
+}
+
+const psconfig = await readJson(path.join(root, "psconfig.json"));
 const requiredEntry = "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean";
 if (psconfig.entry !== requiredEntry) {
   throw new Error(
@@ -113,6 +139,34 @@ for (const packageName of packageNames) {
   }
   if (!allowedBootstrapPackages.has(packageName)) {
     throw new Error(`PSC2_BOOTSTRAP_UNAPPROVED_PACKAGE: ${packageName}`);
+  }
+}
+
+const manifests = await workspaceManifests();
+for (const packageName of packageNames) {
+  const record = manifests.byFolder.get(packageName);
+  if (!record) {
+    throw new Error(`PSC2_BOOTSTRAP_MANIFEST_MISSING: ${packageName}`);
+  }
+  const config = record.manifest.proofscript;
+  if (config?.bootstrap !== true || config?.portable === false) {
+    throw new Error(`PSC2_BOOTSTRAP_MANIFEST_NOT_PORTABLE: ${packageName}`);
+  }
+
+  for (const dependencyName of Object.keys(record.manifest.dependencies ?? {})) {
+    const dependency = manifests.byName.get(dependencyName);
+    if (!dependency) continue;
+    const dependencyConfig = dependency.manifest.proofscript;
+    if (
+      forbiddenBootstrapPackages.has(dependency.folder) ||
+      !allowedBootstrapPackages.has(dependency.folder) ||
+      dependencyConfig?.bootstrap !== true ||
+      dependencyConfig?.portable === false
+    ) {
+      throw new Error(
+        `PSC2_BOOTSTRAP_MANIFEST_DEPENDENCY: ${packageName} -> ${dependency.folder}`,
+      );
+    }
   }
 }
 

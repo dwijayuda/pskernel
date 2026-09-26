@@ -149,6 +149,13 @@ jobs:
           cd selfhost
           lake env lean --run packages/psckernel/test/DefEqBasicTests.lean
 
+      - name: Run PSCKernel proof irrelevance defeq tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake env lean --run packages/psckernel/test/DefEqProofIrrelevanceTests.lean
+
       - name: Run PSCKernel checked inference basic tests
         shell: bash
         run: |

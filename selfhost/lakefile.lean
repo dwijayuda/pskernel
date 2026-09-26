@@ -233,3 +233,7 @@ lean_exe psckernel_name_fixture where
 lean_exe psckernel_level_basic_tests where
   srcDir := "packages/psckernel/test"
   root := `LevelBasicTests
+
+lean_exe psckernel_level_kernel_tests where
+  srcDir := "packages/psckernel/test"
+  root := `LevelKernelTests

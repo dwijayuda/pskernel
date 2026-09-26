@@ -105,9 +105,10 @@ def psExprContainsMVar (target : Nat) : PsExpr -> Bool
   | .letE _ type value body =>
       if psExprContainsMVar target type then
         true
+      else if psExprContainsMVar target value then
+        true
       else
-        psExprContainsMVar target value
-          || psExprContainsMVar target body
+        psExprContainsMVar target body
   | .proj _ _ value => psExprContainsMVar target value
   | _ => false
 

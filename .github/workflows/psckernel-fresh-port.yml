@@ -114,6 +114,13 @@ jobs:
           cd selfhost
           lake env lean --run packages/psckernel/test/DeclarationTests.lean
 
+      - name: Run PSCKernel Environment tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake env lean --run packages/psckernel/test/EnvironmentTests.lean
+
       - name: Install TypeScript kernel dependencies
         run: npm ci --no-audit --no-fund
 

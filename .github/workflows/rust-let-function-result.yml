@@ -7,6 +7,7 @@ on:
     paths:
       - selfhost/packages/backend-rust/**
       - selfhost/test/BackendRustLetFunctionResultTests.lean
+      - selfhost/test/BackendRustLetFunctionResultFixture.lean
       - selfhost/lakefile.lean
       - .github/workflows/rust-let-function-result.yml
   workflow_dispatch:
@@ -33,7 +34,10 @@ jobs:
         run: |
           set -euo pipefail
           cd selfhost
-          lake build PsBackendRust psc1_backend_rust_let_function_result_tests
+          lake build \
+            PsBackendRust \
+            psc1_backend_rust_let_function_result_tests \
+            psc1_backend_rust_let_function_result_fixture
 
       - name: Run regression
         shell: bash
@@ -41,3 +45,61 @@ jobs:
           set -euo pipefail
           cd selfhost
           lake exe psc1_backend_rust_let_function_result_tests
+
+      - name: Compile generated Rust fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/psc-rust-let-result
+          mkdir -p /tmp/psc-rust-let-result/src
+          cd selfhost
+          lake exe psc1_backend_rust_let_function_result_fixture \
+            > /tmp/psc-rust-let-result/src/lib.rs
+          lake exe psc1_backend_rust_let_function_result_fixture \
+            > /tmp/psc-rust-let-result/lib.second.rs
+          cmp \
+            /tmp/psc-rust-let-result/src/lib.rs \
+            /tmp/psc-rust-let-result/lib.second.rs
+          cat > /tmp/psc-rust-let-result/Cargo.toml <<'EOF'
+          [package]
+          name = "psc-rust-let-result"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          num-bigint = "0.4"
+          num-traits = "0.2"
+          EOF
+          cargo check --manifest-path /tmp/psc-rust-let-result/Cargo.toml
+          echo "PSC1_BACKEND_RUST_LET_FUNCTION_RESULT_CARGO_CHECK: PASS"
+
+      - name: Execute generated Rust semantic smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/psc-rust-let-result/tests
+          cat > /tmp/psc-rust-let-result/tests/runtime.rs <<'EOF'
+          use num_bigint::BigUint;
+          use psc_rust_let_result::{
+              forwardCallbackViaLet,
+              makeAdderViaLet,
+          };
+
+          fn n(value: u32) -> BigUint {
+              BigUint::from(value)
+          }
+
+          #[test]
+          fn let_function_result_semantics() {
+              let add_six = makeAdderViaLet(n(6));
+              assert_eq!(add_six(n(7)), n(13));
+              assert_eq!(add_six(n(8)), n(14));
+
+              let forwarded = forwardCallbackViaLet(makeAdderViaLet(n(3)));
+              assert_eq!(forwarded(n(39)), n(42));
+              assert_eq!(forwarded(n(40)), n(43));
+          }
+          EOF
+          cd selfhost
+          cargo test --manifest-path /tmp/psc-rust-let-result/Cargo.toml
+          echo "PSC1_BACKEND_RUST_LET_FUNCTION_RESULT_RUNTIME: PASS"

@@ -19,11 +19,23 @@ def main : IO Unit := do
   let closed : Expr := .app (.lam (.str .anonymous "x") (.sort .zero) (.bvar 0) .default) (.sort .zero)
   let closedResult : Expr := .sort .zero
 
+  let pureMap := CheckerScopedExprMap.empty.insert lctx closed closedResult
+  expectWhnfCache "pure scoped map hit"
+    (match pureMap.get? lctx closed with
+     | some value => Expr.eq value closedResult
+     | none => false)
+
   expectWhnfCache "initial WHNF miss"
     ((checkerWhnfCached env lctx 0 whnfSmokeNatMax true closed).isNone)
   let stored ← expectStored "WHNF store failed" <| checkerWhnfCacheResult
     env lctx 0 whnfSmokeNatMax true closed closedResult
   expectWhnfCache "WHNF store is identity" (Expr.eq stored closedResult)
+  expectWhnfCache "raw WHNF map retains store"
+    (match checkerWhnfRawCached lctx closed with
+     | some value => Expr.eq value closedResult
+     | none => false)
+  expectWhnfCache "WHNF scope remains stable after store"
+    (checkerWhnfScopeMatchesCurrent env 0 whnfSmokeNatMax)
   expectWhnfCache "WHNF hit"
     (match checkerWhnfCached env lctx 0 whnfSmokeNatMax true closed with
      | some value => Expr.eq value closedResult

@@ -11,6 +11,7 @@ on:
       - perf/psc1-lean-stateful-infer-binders
       - perf/psc1-lean-stateful-infer-proj
       - perf/psc1-lean-stateful-recursor
+      - perf/psc1-lean-stateful-infer-whnf
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
@@ -75,6 +76,9 @@ jobs:
       - name: Reduced defeq Nat-state regression
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerReducedDefEqSmoke.lean
+      - name: Stateful inference WHNF reduction
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerInferWhnfStatefulSmoke.lean
       - name: Recursive stateful defeq
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerDefEqStatefulSmoke.lean

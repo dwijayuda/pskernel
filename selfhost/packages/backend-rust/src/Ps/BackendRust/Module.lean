@@ -270,16 +270,30 @@ def psRustDeclarationIsGenericValue
   | List.cons _ _ =>
       false
 
+def psRustFunctionResultExprSupported : PsVerifiedIrExpr -> Bool
+  | PsVerifiedIrExpr.lambda _ _ _ =>
+      true
+  | PsVerifiedIrExpr.var _ =>
+      true
+  | PsVerifiedIrExpr.letE _ type value body =>
+      if psRustTypeContainsFunction type then
+        if psRustFunctionTypeIsFirstOrder type then
+          match value with
+          | PsVerifiedIrExpr.var _ =>
+              psRustFunctionResultExprSupported body
+          | _ =>
+              false
+        else
+          false
+      else
+        psRustFunctionResultExprSupported body
+  | _ =>
+      false
+
 def psRustDeclarationDirectFunctionResultSupported
     (declaration : PsVerifiedIrDeclaration) : Bool :=
   if psRustFunctionTypeIsFirstOrder declaration.resultType then
-    match declaration.body with
-    | PsVerifiedIrExpr.lambda _ _ _ =>
-        true
-    | PsVerifiedIrExpr.var _ =>
-        true
-    | _ =>
-        false
+    psRustFunctionResultExprSupported declaration.body
   else
     false
 
@@ -306,6 +320,59 @@ def psRustPrepareDeclarationBody
         printedBody
   else
     printedBody
+
+def psRustEmitFunctionResultExprWithFuel
+    (declarationName : String) :
+    Nat ->
+    PsVerifiedIrExpr ->
+    Except PsRustEmitError String
+  | 0, _ =>
+      Except.error PsRustEmitError.fuelExhausted
+  | fuel + 1, expr =>
+      match expr with
+      | PsVerifiedIrExpr.lambda _ _ _ =>
+          match psRustEmitExprWithFuel fuel expr with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printed =>
+              Except.ok (psRustConcat2 "move " printed)
+      | PsVerifiedIrExpr.var _ =>
+          psRustEmitExprWithFuel fuel expr
+      | PsVerifiedIrExpr.letE name _ value body =>
+          match psRustEmitExprWithFuel fuel value with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedValue =>
+              match
+                  psRustEmitFunctionResultExprWithFuel
+                    declarationName
+                    fuel
+                    body with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok printedBody =>
+                  Except.ok
+                    (psRustConcat4
+                      "{ let "
+                      (psRustIdentifier name)
+                      " = "
+                      (psRustConcat4
+                        (psRustClonePrinted printedValue)
+                        "; "
+                        printedBody
+                        " }"))
+      | _ =>
+          Except.error
+            (PsRustEmitError.functionResultUnsupported declarationName)
+
+def psRustEmitFunctionResultExpr
+    (declarationName : String)
+    (expr : PsVerifiedIrExpr) :
+    Except PsRustEmitError String :=
+  psRustEmitFunctionResultExprWithFuel
+    declarationName
+    4096
+    expr
 
 def psRustEmitDeclaration
     (valueNames : List String)
@@ -335,7 +402,14 @@ def psRustEmitDeclaration
             | Except.error error =>
                 Except.error error
             | Except.ok rewrittenBody =>
-                match psRustEmitExpr rewrittenBody with
+                let emittedBody :=
+                  if psRustTypeContainsFunction declaration.resultType then
+                    psRustEmitFunctionResultExpr
+                      declaration.name
+                      rewrittenBody
+                  else
+                    psRustEmitExpr rewrittenBody;
+                match emittedBody with
                 | Except.error error =>
                     Except.error error
                 | Except.ok printedBody =>
@@ -353,9 +427,7 @@ def psRustEmitDeclaration
                           (psRustConcat4
                             printedResult
                             " { "
-                            (psRustPrepareDeclarationBody
-                              declaration
-                              printedBody)
+                            printedBody
                             " }")))
 
 def psRustEmitStructureList

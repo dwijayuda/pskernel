@@ -50,6 +50,8 @@ jobs:
             -o .lake/build/lib/lean/PSC1Kernel/CheckerStateful.olean
           lake env lean PSC1Kernel/CheckerReductionStateful.lean \
             -o .lake/build/lib/lean/PSC1Kernel/CheckerReductionStateful.olean
+          lake env lean PSC1Kernel/CheckerInferenceStatefulReduced.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/CheckerInferenceStatefulReduced.olean
           lake env lean PSC1Kernel/CheckerDefEqStateful.lean \
             -o .lake/build/lib/lean/PSC1Kernel/CheckerDefEqStateful.olean
           lake env lean PSC1Kernel/CheckerDefEqStatefulClosed.lean \

@@ -863,7 +863,7 @@ def psRustValidateStorageExprWithFuel
           Except.ok true
       | PsVerifiedIrExpr.var _ =>
           Except.ok true
-      | PsVerifiedIrExpr.intrinsic _ arguments =>
+      | PsVerifiedIrExpr.intrinsic _ _ arguments =>
           psRustValidateExprListWith validateNested arguments
       | PsVerifiedIrExpr.lambda parameters _ body =>
           psRustValidateStorageExprWithFuel

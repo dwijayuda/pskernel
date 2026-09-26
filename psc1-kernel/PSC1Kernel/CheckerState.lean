@@ -28,37 +28,78 @@ partial def checkerLevelsHash (levels : List Level) : UInt64 :=
   levels.foldl (fun acc level => checkerMixHash acc (checkerLevelHash level)) 43
 
 /--
-Hash compatible with `Expr.eq`, not `Expr.equal`: binder display names and
-binder annotations are intentionally ignored, while let nondep and metadata
-remain structural. This matches the equality contract required by Lean's
-kernel expression maps.
+Lean stores an expression hash in every native Expr node, so `expr_hash` is an
+O(1) read after construction. PSC1's portable Expr is deliberately a plain
+inductive value and has no host identity/cache field. Bound the amount of tree
+inspection performed by a checker-table hash instead of recursively traversing
+an arbitrarily large term on every memo lookup. Structural `Expr.eq` remains the
+final key discriminator, so additional hash collisions cannot change semantics.
 -/
-partial def checkerExprHash : Expr → UInt64
-  | .bvar index => checkerMixHash 47 (hash index)
-  | .fvar name => checkerMixHash 53 (checkerNameHash name)
-  | .mvar name => checkerMixHash 59 (checkerNameHash name)
-  | .sort level => checkerMixHash 61 (checkerLevelHash level)
-  | .const name levels =>
-      checkerMixHash 67 (checkerMixHash (checkerNameHash name) (checkerLevelsHash levels))
-  | .app fn arg =>
-      checkerMixHash 71 (checkerMixHash (checkerExprHash fn) (checkerExprHash arg))
-  | .lam _ type body _ =>
-      checkerMixHash 73 (checkerMixHash (checkerExprHash type) (checkerExprHash body))
-  | .forallE _ type body _ =>
-      checkerMixHash 79 (checkerMixHash (checkerExprHash type) (checkerExprHash body))
-  | .letE _ type value body nondep =>
-      checkerMixHash 83 <|
-        checkerMixHash (checkerExprHash type) <|
-          checkerMixHash (checkerExprHash value) <|
-            checkerMixHash (checkerExprHash body) (hash nondep)
-  | .lit (.nat value) => checkerMixHash 89 (hash value)
-  | .lit (.str value) => checkerMixHash 97 (hash value)
-  | .mdata metadata expr =>
-      checkerMixHash 101 (checkerMixHash (hash metadata) (checkerExprHash expr))
-  | .proj typeName index expr =>
-      checkerMixHash 103 <|
-        checkerMixHash (checkerNameHash typeName) <|
-          checkerMixHash (hash index) (checkerExprHash expr)
+def checkerExprHashDepth : Nat := 4
+
+def checkerExprTagHash : Expr → UInt64
+  | .bvar _ => 47
+  | .fvar _ => 53
+  | .mvar _ => 59
+  | .sort _ => 61
+  | .const _ _ => 67
+  | .app _ _ => 71
+  | .lam _ _ _ _ => 73
+  | .forallE _ _ _ _ => 79
+  | .letE _ _ _ _ _ => 83
+  | .lit (.nat _) => 89
+  | .lit (.str _) => 97
+  | .mdata _ _ => 101
+  | .proj _ _ _ => 103
+
+def checkerExprHashCore : Nat → Expr → UInt64
+  | 0, expr => checkerExprTagHash expr
+  | fuel + 1, expr =>
+      match expr with
+      | .bvar index => checkerMixHash 47 (hash index)
+      | .fvar name => checkerMixHash 53 (checkerNameHash name)
+      | .mvar name => checkerMixHash 59 (checkerNameHash name)
+      | .sort level => checkerMixHash 61 (checkerLevelHash level)
+      | .const name levels =>
+          checkerMixHash 67
+            (checkerMixHash (checkerNameHash name) (checkerLevelsHash levels))
+      | .app fn arg =>
+          checkerMixHash 71
+            (checkerMixHash
+              (checkerExprHashCore fuel fn)
+              (checkerExprHashCore fuel arg))
+      | .lam _ type body _ =>
+          checkerMixHash 73
+            (checkerMixHash
+              (checkerExprHashCore fuel type)
+              (checkerExprHashCore fuel body))
+      | .forallE _ type body _ =>
+          checkerMixHash 79
+            (checkerMixHash
+              (checkerExprHashCore fuel type)
+              (checkerExprHashCore fuel body))
+      | .letE _ type value body nondep =>
+          checkerMixHash 83 <|
+            checkerMixHash (checkerExprHashCore fuel type) <|
+              checkerMixHash (checkerExprHashCore fuel value) <|
+                checkerMixHash (checkerExprHashCore fuel body) (hash nondep)
+      | .lit (.nat value) => checkerMixHash 89 (hash value)
+      | .lit (.str value) => checkerMixHash 97 (hash value)
+      | .mdata metadata body =>
+          checkerMixHash 101
+            (checkerMixHash (hash metadata) (checkerExprHashCore fuel body))
+      | .proj typeName index body =>
+          checkerMixHash 103 <|
+            checkerMixHash (checkerNameHash typeName) <|
+              checkerMixHash (hash index) (checkerExprHashCore fuel body)
+
+/--
+Bounded structural hash compatible with `Expr.eq`, not `Expr.equal`. Equal
+expressions always hash equally. Unequal deep expressions may intentionally
+collide; `Std.HashMap` resolves such collisions with the `BEq` instance below.
+-/
+def checkerExprHash (expr : Expr) : UInt64 :=
+  checkerExprHashCore checkerExprHashDepth expr
 
 structure CheckerExprKey where
   value : Expr

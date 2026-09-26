@@ -34,7 +34,27 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/wasm3-backend.yml')
+          text = path.read_text()
+          old = "console.log('PSC1_WASM3_INTEGRATION: PASS');"
+          new = "console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');"
+          if text.count(old) != 1:
+              raise SystemExit('expected one Wasm3 integration marker')
+          path.write_text(text.replace(old, new, 1))
+          PY
           python3 .github/dev/apply_wasm_array_runtime.py
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/wasm3-backend.yml')
+          text = path.read_text()
+          old = "console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');"
+          new = "console.log('PSC1_WASM3_INTEGRATION: PASS');"
+          if text.count(old) != 1:
+              raise SystemExit('expected one normalized Wasm3 integration marker')
+          path.write_text(text.replace(old, new, 1))
+          PY
           git diff --check
 
       - name: Enforce portable source and target-neutral IR

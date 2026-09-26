@@ -150,6 +150,10 @@ lean_lib PsElab where
     `Ps.Elab.Declaration
   ]
 
+lean_lib PsPSCKernel where
+  srcDir := "packages/psckernel/src"
+  roots := #[`Ps.PSCKernel.Core.Name]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"
@@ -214,3 +218,7 @@ lean_exe psc1_erasure_tests where
 lean_exe psc1_bridge_host_tests where
   srcDir := "test"
   root := `BridgeHostTests
+
+lean_exe psckernel_name_tests where
+  srcDir := "packages/psckernel/test"
+  root := `NameTests

@@ -1,0 +1,17 @@
+{
+  "name": "@proofscript/psckernel",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "role": "trusted-kernel",
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist"
+  }
+}

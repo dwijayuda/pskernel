@@ -3,7 +3,9 @@ name: PSC1 Lean stateful root 100015 progress
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-lean-stateful-checker]
+    branches:
+      - perf/psc1-lean-stateful-checker
+      - perf/psc1-lean-stateful-infer-app
     paths:
       - ".github/workflows/psc1-lean-stateful-root100015-progress.yml"
       - "psc1-kernel/PSC1Kernel.lean"
@@ -11,6 +13,7 @@ on:
       - "psc1-kernel/PSC1Kernel/CheckerStateful.lean"
       - "psc1-kernel/PSC1Kernel/CheckerLazyDeltaStateful.lean"
       - "psc1-kernel/PSC1Kernel/CheckerDefEqStateful.lean"
+      - "psc1-kernel/PSC1Kernel/CheckerDefEqStatefulClosed.lean"
       - "psc1-kernel/PSC1Kernel/CheckerSession.lean"
       - "psc1-kernel/PSC1Kernel/Kernel.lean"
       - "psc1-kernel/PSC1Kernel/Test/ReplayFile.lean"

@@ -1,0 +1,64 @@
+name: PSC1 WHNF pointer cache
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [perf/psc1-whnf-pointer-cache]
+    paths:
+      - ".github/workflows/psc1-whnf-pointer-cache.yml"
+      - "psc1-kernel/**"
+      - "scripts/apply-psc1-whnf-pointer-cache.mjs"
+      - "oracle/replay-probe/DependencyExport.lean"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-whnf-pointer-cache-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  whnf-cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          lean_bin="$("$HOME/.elan/bin/elan" which lean)"
+          echo "$(dirname "$lean_bin")" >> "$GITHUB_PATH"
+          test "$("$lean_bin" --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - name: Apply experimental WHNF pointer cache wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/apply-psc1-whnf-pointer-cache.mjs
+          git diff --check
+      - name: Build kernel and native cache probes
+        working-directory: psc1-kernel
+        run: |
+          lake build
+          lake build psc1_whnf_pointer_cache_smoke
+          lake build psc1_target_profile
+      - name: WHNF pointer cache isolation
+        working-directory: psc1-kernel
+        run: .lake/build/bin/psc1_whnf_pointer_cache_smoke
+      - name: Existing differential oracle
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/Oracle.lean
+      - name: Export exact Std root 100015 closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean oracle/replay-probe/DependencyExport.lean
+          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 100015 1 > /tmp/root100015.ndjson
+          echo "bytes=$(wc -c < /tmp/root100015.ndjson)"
+      - name: Native replay through declaration 2277
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v timeout 300s .lake/build/bin/psc1_target_profile /tmp/root100015.ndjson

@@ -259,8 +259,7 @@ partial def inferCoreStatefulWith
                     loop (i + 1) i body next
               else
                 let result := current.instantiateRev (args.drop j)
-                return
-                  (result, cacheInferStatefulResult currentState true e result)
+                return (result, cacheInferStatefulResult currentState true e result)
             loop 0 0 fnType state1
           else do
             -- This branch replaces pure `inferCore`, so it must own the one

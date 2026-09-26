@@ -65,8 +65,7 @@ so it remains part of the scope key.
 -/
 private unsafe def checkerWhnfEnvironmentMatches
     (left right : Environment) : Bool :=
-  ptrEq left.constants right.constants &&
-    left.quotInitialized == right.quotInitialized
+  checkerEnvironmentSameVersion left right
 
 /-- Native runtime counterpart of Lean 4.34's `m_whnf_core` and `m_whnf`. -/
 structure CheckerWhnfRuntimeState where
@@ -91,6 +90,9 @@ end CheckerWhnfRuntimeState
 
 private initialize checkerWhnfRuntimeRef : IO.Ref CheckerWhnfRuntimeState ←
   IO.mkRef CheckerWhnfRuntimeState.empty
+
+private initialize checkerWhnfMemoStatsRef : IO.Ref (Nat × Nat) ←
+  IO.mkRef (0, 0)
 
 private unsafe def checkerWhnfRunIO
     {α : Type}
@@ -128,6 +130,69 @@ private unsafe def checkerWhnfStateFor
       }
     checkerWhnfRuntimeRef.set fresh
     pure fresh
+
+unsafe def checkerWhnfMemoResetStatsIO : IO Unit :=
+  checkerWhnfMemoStatsRef.set (0, 0)
+
+unsafe def checkerWhnfMemoStatsIO : IO (Nat × Nat) :=
+  checkerWhnfMemoStatsRef.get
+
+private unsafe def checkerWhnfMemoRecordHit : IO Unit := do
+  let (hits, misses) ← checkerWhnfMemoStatsRef.get
+  checkerWhnfMemoStatsRef.set (hits + 1, misses)
+
+private unsafe def checkerWhnfMemoRecordMiss : IO Unit := do
+  let (hits, misses) ← checkerWhnfMemoStatsRef.get
+  checkerWhnfMemoStatsRef.set (hits, misses + 1)
+
+/--
+Atomic native WHNF memoization. Lookup, computation, and successful insertion
+are one implementation boundary, so the pure specification remains simply
+`compute ()`. After a miss, the state is re-read after recursive computation
+before inserting the outer result so nested memo calls cannot be overwritten.
+Errors are never cached.
+-/
+unsafe def checkerWhnfMemoImpl
+    (env : Environment)
+    (lctx : LocalContext)
+    (maxRecDepth maxNatSize : Nat)
+    (enabled : Bool)
+    (expr : Expr)
+    (compute : Unit → Except String Expr) : Except String Expr :=
+  if !enabled then
+    compute ()
+  else
+    checkerWhnfRunIO (compute ()) do
+      let state ← checkerWhnfStateFor env maxRecDepth maxNatSize
+      match state.whnf.get? lctx expr with
+      | some value =>
+          checkerWhnfMemoRecordHit
+          pure (.ok value)
+      | none =>
+          checkerWhnfMemoRecordMiss
+          match compute () with
+          | .error err =>
+              pure (.error err)
+          | .ok value =>
+              let latest ← checkerWhnfStateFor env maxRecDepth maxNatSize
+              checkerWhnfRuntimeRef.set
+                { latest with whnf := latest.whnf.insert lctx expr value }
+              pure (.ok value)
+
+/--
+Pure semantic definition of WHNF memoization: perform the computation.
+The native implementation may reuse a previously successful result from the
+same immutable checker scope, but must be extensionally equal to this function.
+-/
+@[implemented_by checkerWhnfMemoImpl]
+opaque checkerWhnfMemo
+    (env : Environment)
+    (lctx : LocalContext)
+    (maxRecDepth maxNatSize : Nat)
+    (enabled : Bool)
+    (expr : Expr)
+    (compute : Unit → Except String Expr) : Except String Expr :=
+  compute ()
 
 unsafe def checkerWhnfCoreCachedImpl
     (env : Environment)

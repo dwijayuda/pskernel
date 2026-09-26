@@ -61,6 +61,7 @@ partial def psCKernelIsDefEq
     true
   else
     match left, right with
+    | PsCKernelExpr.lam _ _ _ _, PsCKernelExpr.lam _ _ _ _ => false
     | PsCKernelExpr.lam _ _ _ _, _ =>
         match psCKernelEtaExpand? env lctx right with
         | none => false

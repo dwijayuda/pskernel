@@ -54,6 +54,26 @@ jobs:
           if text.count(old) != 1:
               raise SystemExit('expected one normalized Wasm3 integration marker')
           path.write_text(text.replace(old, new, 1))
+
+          smoke = Path('selfhost/test/WasmBinarySmoke.lean')
+          text = smoke.read_text()
+          old = '''      | Except.error _ =>
+          throw (IO.userError "PSC1_BACKEND_WASM_BINARY_SMOKE: encode failed")
+'''
+          new = '''      | Except.error error =>
+          let detail :=
+            match error with
+            | PsWasmEncodeError.unsupportedValueType => "unsupportedValueType"
+            | PsWasmEncodeError.unsupportedInstruction => "unsupportedInstruction"
+            | PsWasmEncodeError.negativeIntegerConstant => "negativeIntegerConstant"
+            | PsWasmEncodeError.unknownFunction name => "unknownFunction:" ++ name
+            | PsWasmEncodeError.unknownFunctionType name => "unknownFunctionType:" ++ name
+            | PsWasmEncodeError.unknownStructure name => "unknownStructure:" ++ name
+          throw (IO.userError ("PSC1_BACKEND_WASM_BINARY_SMOKE: encode failed: " ++ detail))
+'''
+          if text.count(old) != 1:
+              raise SystemExit('expected one Wasm smoke encode-error arm')
+          smoke.write_text(text.replace(old, new, 1))
           PY
           git diff --check
 

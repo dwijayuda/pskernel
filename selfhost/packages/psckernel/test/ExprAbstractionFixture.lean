@@ -22,8 +22,8 @@ def psCKernelExprAbstractionFixtureLevelListKey
 def psCKernelExprAbstractionFixtureExprKey (expr : PsCKernelExpr) : String :=
   match expr with
   | PsCKernelExpr.bvar index => "b" ++ toString index
-  | PsCKernelExpr.fvar id => "f{" ++ psCKernelNameKey id.name ++ "}"
-  | PsCKernelExpr.mvar id => "v{" ++ psCKernelNameKey id.name ++ "}"
+  | PsCKernelExpr.fvar id => "f{" ++ psCKernelNameToString id.name ++ "}"
+  | PsCKernelExpr.mvar id => "v{" ++ psCKernelNameToString id.name ++ "}"
   | PsCKernelExpr.sortE level => "S{" ++ psCKernelLevelToString level ++ "}"
   | PsCKernelExpr.constE name levels =>
       "C{" ++ psCKernelNameKey name ++ "}[" ++

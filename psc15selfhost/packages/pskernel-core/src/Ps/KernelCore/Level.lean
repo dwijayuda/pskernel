@@ -8,6 +8,13 @@ inductive PsKernelCoreLevel where
   | param (name : PsKernelCoreName)
   | mvar (name : PsKernelCoreName)
 
+inductive PsKernelCoreLevelSubst where
+  | nil
+  | cons
+      (name : PsKernelCoreName)
+      (value : PsKernelCoreLevel)
+      (rest : PsKernelCoreLevelSubst)
+
 def psKernelCoreLevelEq
     (left : PsKernelCoreLevel) : PsKernelCoreLevel -> Bool :=
   match left with
@@ -176,44 +183,36 @@ partial def psKernelCoreLevelEquivalent
           | _ => false
       | _ => false
 
-def psKernelCoreNameLookupLevel
-    (name : PsKernelCoreName)
-    (params : PsKernelCoreList PsKernelCoreName)
-    (values : PsKernelCoreList PsKernelCoreLevel) : PsKernelCoreOption PsKernelCoreLevel :=
-  match params with
-  | PsKernelCoreList.nil => PsKernelCoreOption.none
-  | PsKernelCoreList.cons param remainingParams =>
-      match values with
-      | PsKernelCoreList.nil => PsKernelCoreOption.none
-      | PsKernelCoreList.cons value remainingValues =>
-          if psKernelCoreNameEq name param then
-            PsKernelCoreOption.some value
-          else
-            psKernelCoreNameLookupLevel
-              name
-              remainingParams
-              remainingValues
+def psKernelCoreLevelSubstLookup
+    (target : PsKernelCoreName)
+    (subst : PsKernelCoreLevelSubst) : PsKernelCoreOption PsKernelCoreLevel :=
+  match subst with
+  | PsKernelCoreLevelSubst.nil => PsKernelCoreOption.none
+  | PsKernelCoreLevelSubst.cons name value rest =>
+      if psKernelCoreNameEq target name then
+        PsKernelCoreOption.some value
+      else
+        psKernelCoreLevelSubstLookup target rest
 
 def psKernelCoreLevelInstantiateParams
     (root : PsKernelCoreLevel)
-    (params : PsKernelCoreList PsKernelCoreName)
-    (values : PsKernelCoreList PsKernelCoreLevel) : PsKernelCoreLevel :=
+    (subst : PsKernelCoreLevelSubst) : PsKernelCoreLevel :=
   match root with
   | PsKernelCoreLevel.zero => root
   | PsKernelCoreLevel.mvar _ => root
   | PsKernelCoreLevel.param name =>
-      match psKernelCoreNameLookupLevel name params values with
+      match psKernelCoreLevelSubstLookup name subst with
       | PsKernelCoreOption.some value => value
       | PsKernelCoreOption.none => root
   | PsKernelCoreLevel.succ child =>
-      let next := psKernelCoreLevelInstantiateParams child params values;
+      let next := psKernelCoreLevelInstantiateParams child subst;
       if psKernelCoreLevelEq child next then
         root
       else
         PsKernelCoreLevel.succ next
   | PsKernelCoreLevel.max left right =>
-      let nextLeft := psKernelCoreLevelInstantiateParams left params values;
-      let nextRight := psKernelCoreLevelInstantiateParams right params values;
+      let nextLeft := psKernelCoreLevelInstantiateParams left subst;
+      let nextRight := psKernelCoreLevelInstantiateParams right subst;
       if psKernelCoreLevelEq left nextLeft then
         if psKernelCoreLevelEq right nextRight then
           root
@@ -222,8 +221,8 @@ def psKernelCoreLevelInstantiateParams
       else
         psKernelCoreLevelMkMax nextLeft nextRight
   | PsKernelCoreLevel.imax left right =>
-      let nextLeft := psKernelCoreLevelInstantiateParams left params values;
-      let nextRight := psKernelCoreLevelInstantiateParams right params values;
+      let nextLeft := psKernelCoreLevelInstantiateParams left subst;
+      let nextRight := psKernelCoreLevelInstantiateParams right subst;
       if psKernelCoreLevelEq left nextLeft then
         if psKernelCoreLevelEq right nextRight then
           root

@@ -1,4 +1,5 @@
 import PSC1Kernel.CheckerDefEqStatefulReduced
+import PSC1Kernel.CheckerInferenceStatefulReduced
 
 namespace PSC1Kernel
 
@@ -34,14 +35,13 @@ def isDefEq (session : CheckerSession) (a b : Expr) : Except String Bool :=
 
 /--
 Pure stateful checked inference. Application checks use the same recursive
-defeq algorithm as the session. Defeq normalization and recursive reduction
-share one declaration-scoped CheckerState.
+defeq algorithm and stateful reduction method as the session.
 -/
 def checkStateful
     (session : CheckerSession)
     (e : Expr) : Except String (Expr × CheckerSession) := do
   let (result, state) ←
-    PSC1Kernel.checkStatefulWith StatefulDefEqReduced.isDefEq
+    StatefulInferenceReduced.checkStateful StatefulDefEqReduced.isDefEq
       session.context session.state e
   pure (result, { session with state := state })
 
@@ -50,7 +50,7 @@ def inferStateful
     (session : CheckerSession)
     (e : Expr) : Except String (Expr × CheckerSession) := do
   let (result, state) ←
-    PSC1Kernel.inferStatefulWith StatefulDefEqReduced.isDefEq
+    StatefulInferenceReduced.inferStateful StatefulDefEqReduced.isDefEq
       session.context session.state e
   pure (result, { session with state := state })
 

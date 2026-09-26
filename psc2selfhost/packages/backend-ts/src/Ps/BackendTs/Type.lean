@@ -1,0 +1,110 @@
+import Ps.CompilerIr.Model
+import Ps.Bridge.Json
+
+inductive PsTsEmitError where
+  | fuelExhausted
+  | unsupportedIntrinsic
+  | intrinsicArity
+  | unknownStructure (name : String)
+  | unknownInductive (name : String)
+  | genericValueUnsupported (name : String)
+  | targetWordSizeRequired
+
+def psTsJoin (separator : String) : List String -> String
+  | [] => ""
+  | [value] => value
+  | value :: rest =>
+      value ++ separator ++ psTsJoin separator rest
+
+def psTsEmitPrimitiveType
+    (type : PsVerifiedIrPrimitiveType) : String :=
+  match type with
+  | .nat => "bigint"
+  | .int => "bigint"
+  | .uint8 => "number"
+  | .uint16 => "number"
+  | .uint32 => "number"
+  | .uint64 => "bigint"
+  | .usize => "bigint"
+  | .int8 => "number"
+  | .int16 => "number"
+  | .int32 => "number"
+  | .int64 => "bigint"
+  | .isize => "bigint"
+  | .float => "number"
+  | .float32 => "number"
+  | .bool => "boolean"
+  | .char => "string"
+  | .string => "string"
+  | .unit => "undefined"
+
+def psTsIndexTypes : Nat -> List String -> List String
+  | _, [] => []
+  | index, value :: rest =>
+      ("_arg" ++ toString index ++ ": " ++ value) ::
+        psTsIndexTypes (index + 1) rest
+
+def psTsEmitTypeWithFuel :
+    Nat -> PsVerifiedIrType -> Except PsTsEmitError String
+  | 0, _ => Except.error PsTsEmitError.fuelExhausted
+  | fuel + 1, type =>
+      match type with
+      | .unknown => Except.ok "unknown"
+      | .typeParameter name => Except.ok name
+      | .primitive primitive =>
+          Except.ok (psTsEmitPrimitiveType primitive)
+      | .function parameters result =>
+          match parameters.mapM (psTsEmitTypeWithFuel fuel) with
+          | Except.error error => Except.error error
+          | Except.ok printedParameters =>
+              match psTsEmitTypeWithFuel fuel result with
+              | Except.error error => Except.error error
+              | Except.ok printedResult =>
+                  let indexed :=
+                    psTsIndexTypes 0 printedParameters
+                  Except.ok
+                    ("(" ++ psTsJoin ", " indexed ++
+                      ") => " ++ printedResult)
+      | .named name arguments =>
+          match arguments.mapM (psTsEmitTypeWithFuel fuel) with
+          | Except.error error => Except.error error
+          | Except.ok printedArguments =>
+              if printedArguments.isEmpty then
+                Except.ok name
+              else
+                Except.ok
+                  (name ++ "<" ++
+                    psTsJoin ", " printedArguments ++ ">")
+
+def psTsEmitType
+    (type : PsVerifiedIrType) :
+    Except PsTsEmitError String :=
+  psTsEmitTypeWithFuel 4096 type
+
+def psTsMachineIntegerUsesBigInt :
+    PsVerifiedIrMachineIntegerType -> Bool
+  | .uint64 => true
+  | .int64 => true
+  | .usize => true
+  | .isize => true
+  | _ => false
+
+def psTsEmitLiteral
+    (literal : PsVerifiedIrLiteral) :
+    Except PsTsEmitError String :=
+  match literal with
+  | .natural value => Except.ok (toString value ++ "n")
+  | .integer value => Except.ok (toString value ++ "n")
+  | .machineInteger type value =>
+      match type with
+      | .usize => Except.error PsTsEmitError.targetWordSizeRequired
+      | .isize => Except.error PsTsEmitError.targetWordSizeRequired
+      | _ =>
+          if psTsMachineIntegerUsesBigInt type then
+            Except.ok (toString value ++ "n")
+          else
+            Except.ok (toString value)
+  | .string value => Except.ok (psJsonQuote value)
+  | .bool value =>
+      Except.ok (if value then "true" else "false")
+  | .unit => Except.ok "undefined"

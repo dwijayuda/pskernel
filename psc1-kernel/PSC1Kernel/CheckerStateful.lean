@@ -8,157 +8,167 @@ Pure declaration-scoped stateful counterpart of the recursive checker layer.
 The established TypeChecker remains the semantic reference; this module adds
 Lean-4.34-style memo state without process-global mutation.
 -/
-mutual
-  partial def whnfCoreStateful
-      (ctx : CheckerContext)
-      (state : CheckerState)
-      (e : Expr)
-      (cheapRec cheapProj : Bool) : Except String (Expr × CheckerState) := do
-    let ctx ← ctx.enterKernelRecDepth
-    -- Match Lean/Lean4Lean: easy cases and metadata/let-FVar forwarding do not
-    -- create entries under the outer expression.
-    match e with
-    | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _
-    | .const _ _ | .lam _ _ _ _ | .lit _ =>
-        return (e, state)
-    | .mdata _ body =>
-        return ← whnfCoreStateful ctx state body cheapRec cheapProj
-    | .fvar name =>
-        match ctx.lctx.find? name with
-        | some decl =>
-            match decl.value? with
-            | some value =>
-                return ← whnfCoreStateful ctx state value cheapRec cheapProj
-            | none => return (e, state)
-        | none => return (e, state)
-    | .app _ _ | .letE _ _ _ _ _ | .proj _ _ _ =>
-        pure ()
+partial def whnfCoreStatefulWith
+    (publicWhnf : CheckerContext → CheckerState → Expr →
+      Except String (Expr × CheckerState))
+    (ctx : CheckerContext)
+    (state : CheckerState)
+    (e : Expr)
+    (cheapRec cheapProj : Bool) : Except String (Expr × CheckerState) := do
+  let ctx ← ctx.enterKernelRecDepth
+  -- Match Lean/Lean4Lean: easy cases and metadata/let-FVar forwarding do not
+  -- create entries under the outer expression.
+  match e with
+  | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _
+  | .const _ _ | .lam _ _ _ _ | .lit _ =>
+      return (e, state)
+  | .mdata _ body =>
+      return ← whnfCoreStatefulWith publicWhnf ctx state body cheapRec cheapProj
+  | .fvar name =>
+      match ctx.lctx.find? name with
+      | some decl =>
+          match decl.value? with
+          | some value =>
+              return ← whnfCoreStatefulWith publicWhnf ctx state value cheapRec cheapProj
+          | none => return (e, state)
+      | none => return (e, state)
+  | .app _ _ | .letE _ _ _ _ _ | .proj _ _ _ =>
+      pure ()
 
-    match CheckerExprMap.get? state.whnfCore e with
-    | some cached => return (cached, state)
-    | none => pure ()
+  match CheckerExprMap.get? state.whnfCore e with
+  | some cached => return (cached, state)
+  | none => pure ()
 
-    let save (result : Expr) (next : CheckerState) :
-        Except String (Expr × CheckerState) :=
-      if cheapProj then
-        .ok (result, next)
-      else
-        .ok (result, {
-          next with whnfCore := CheckerExprMap.insert next.whnfCore e result
-        })
+  let save (result : Expr) (next : CheckerState) :
+      Except String (Expr × CheckerState) :=
+    if cheapProj then
+      .ok (result, next)
+    else
+      .ok (result, {
+        next with whnfCore := CheckerExprMap.insert next.whnfCore e result
+      })
 
-    match e with
-    | .letE _ _ value body _ => do
-        let (result, next) ←
-          whnfCoreStateful ctx state (body.instantiate1 value) cheapRec cheapProj
-        save result next
-    | .proj typeName idx struct => do
-        let (struct', state1) ←
-          if cheapProj then
-            whnfCoreStateful ctx state struct cheapRec cheapProj
-          else
-            whnfStateful ctx state struct
-        let (struct'', state2) ←
-          match struct' with
-          | .lit (.str value) =>
-              whnfStateful ctx state1 (stringLitToConstructor value)
-          | _ => pure (struct', state1)
-        match reduceProjCore ctx typeName idx struct'' with
-        | some value => do
-            let (result, state3) ←
-              whnfCoreStateful ctx state2 value cheapRec cheapProj
-            save result state3
-        | none => save e state2
-    | .app _ _ => do
-        let fn0 := e.getAppFn
-        let args := e.getAppArgs
-        let (fn, state1) ←
-          whnfCoreStateful ctx state fn0 cheapRec cheapProj
-        match fn with
-        | .lam _ _ _ _ =>
-            let rec countLambdas (current : Expr) (count : Nat) : Expr × Nat :=
-              match current with
-              | .lam _ _ body _ =>
-                  if count < args.length then
-                    if count + 1 < args.length then
-                      match body with
-                      | .lam _ _ _ _ => countLambdas body (count + 1)
-                      | _ => (current, count + 1)
-                    else
-                      (current, count + 1)
+  match e with
+  | .letE _ _ value body _ => do
+      let (result, next) ←
+        whnfCoreStatefulWith publicWhnf ctx state
+          (body.instantiate1 value) cheapRec cheapProj
+      save result next
+  | .proj typeName idx struct => do
+      let (struct', state1) ←
+        if cheapProj then
+          whnfCoreStatefulWith publicWhnf ctx state struct cheapRec cheapProj
+        else
+          publicWhnf ctx state struct
+      let (struct'', state2) ←
+        match struct' with
+        | .lit (.str value) =>
+            publicWhnf ctx state1 (stringLitToConstructor value)
+        | _ => pure (struct', state1)
+      match reduceProjCore ctx typeName idx struct'' with
+      | some value => do
+          let (result, state3) ←
+            whnfCoreStatefulWith publicWhnf ctx state2 value cheapRec cheapProj
+          save result state3
+      | none => save e state2
+  | .app _ _ => do
+      let fn0 := e.getAppFn
+      let args := e.getAppArgs
+      let (fn, state1) ←
+        whnfCoreStatefulWith publicWhnf ctx state fn0 cheapRec cheapProj
+      match fn with
+      | .lam _ _ _ _ =>
+          let rec countLambdas (current : Expr) (count : Nat) : Expr × Nat :=
+            match current with
+            | .lam _ _ body _ =>
+                if count < args.length then
+                  if count + 1 < args.length then
+                    match body with
+                    | .lam _ _ _ _ => countLambdas body (count + 1)
+                    | _ => (current, count + 1)
                   else
-                    (current, count)
-              | _ => (current, count)
-            let (lastLam, consumed) := countLambdas fn 0
-            let .lam _ _ body _ := lastLam
-              | return (e, state1)
-            let reducedBody := body.instantiateRev (args.take consumed)
-            let reduced := Expr.applyArgsCheap reducedBody (args.drop consumed)
+                    (current, count + 1)
+                else
+                  (current, count)
+            | _ => (current, count)
+          let (lastLam, consumed) := countLambdas fn 0
+          let .lam _ _ body _ := lastLam
+            | return (e, state1)
+          let reducedBody := body.instantiateRev (args.take consumed)
+          let reduced := Expr.applyArgsCheap reducedBody (args.drop consumed)
+          let (result, state2) ←
+            whnfCoreStatefulWith publicWhnf ctx state1 reduced cheapRec cheapProj
+          save result state2
+      | _ =>
+          if Expr.eq fn fn0 then
+            let reduced ← reduceRecursor ctx e cheapRec cheapProj
+            match reduced with
+            | some value =>
+                -- Lean4Lean does not save the original recursor application
+                -- here; recursive normalization owns any cache entries.
+                whnfCoreStatefulWith publicWhnf ctx state1 value cheapRec cheapProj
+            | none => pure (e, state1)
+          else
+            let rebuilt := Expr.applyArgsCheap fn args
             let (result, state2) ←
-              whnfCoreStateful ctx state1 reduced cheapRec cheapProj
+              whnfCoreStatefulWith publicWhnf ctx state1 rebuilt cheapRec cheapProj
             save result state2
-        | _ =>
-            if Expr.eq fn fn0 then
-              let reduced ← reduceRecursor ctx e cheapRec cheapProj
-              match reduced with
-              | some value =>
-                  -- Lean4Lean does not save the original recursor application
-                  -- here; recursive normalization owns any cache entries.
-                  whnfCoreStateful ctx state1 value cheapRec cheapProj
-              | none => pure (e, state1)
-            else
-              let rebuilt := Expr.applyArgsCheap fn args
-              let (result, state2) ←
-                whnfCoreStateful ctx state1 rebuilt cheapRec cheapProj
-              save result state2
-    | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _
-    | .const _ _ | .lam _ _ _ _ | .lit _ | .mdata _ _ | .fvar _ =>
-        unreachable!
+  | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _
+  | .const _ _ | .lam _ _ _ _ | .lit _ | .mdata _ _ | .fvar _ =>
+      unreachable!
 
-  partial def whnfStateful
-      (ctx : CheckerContext)
-      (state : CheckerState)
-      (e : Expr) : Except String (Expr × CheckerState) := do
-    -- Match the public Lean checker: trivial WHNF cases are not cached.
-    match e with
-    | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _ | .lit _ =>
-        return (e, state)
-    | .mdata _ body =>
-        return ← whnfStateful ctx state body
-    | .fvar name =>
-        match ctx.lctx.find? name with
-        | some decl =>
-            if decl.value?.isNone then return (e, state)
-        | none => return (e, state)
-    | .lam _ _ _ _ | .app _ _ | .const _ _ | .letE _ _ _ _ _ | .proj _ _ _ =>
-        pure ()
+partial def whnfStateful
+    (ctx : CheckerContext)
+    (state : CheckerState)
+    (e : Expr) : Except String (Expr × CheckerState) := do
+  -- Match the public Lean checker: trivial WHNF cases are not cached.
+  match e with
+  | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _ | .lit _ =>
+      return (e, state)
+  | .mdata _ body =>
+      return ← whnfStateful ctx state body
+  | .fvar name =>
+      match ctx.lctx.find? name with
+      | some decl =>
+          if decl.value?.isNone then return (e, state)
+      | none => return (e, state)
+  | .lam _ _ _ _ | .app _ _ | .const _ _ | .letE _ _ _ _ _ | .proj _ _ _ =>
+      pure ()
 
-    match CheckerExprMap.get? state.whnf e with
-    | some cached => return (cached, state)
+  match CheckerExprMap.get? state.whnf e with
+  | some cached => return (cached, state)
+  | none => pure ()
+
+  let rec loop
+      (t : Expr)
+      (current : CheckerState) : Except String (Expr × CheckerState) := do
+    let (core, state1) ←
+      whnfCoreStatefulWith whnfStateful ctx current t false false
+    let native ← reduceNative ctx core
+    match native with
+    | some value => return (value, state1)
     | none => pure ()
+    let nat ← reduceNat ctx core
+    match nat with
+    | some value => return (value, state1)
+    | none =>
+        match unfoldDefinition ctx core with
+        | some value => loop value state1
+        | none => return (core, state1)
 
-    let rec loop
-        (t : Expr)
-        (current : CheckerState) : Except String (Expr × CheckerState) := do
-      let (core, state1) ← whnfCoreStateful ctx current t false false
-      let native ← reduceNative ctx core
-      match native with
-      | some value => return (value, state1)
-      | none => pure ()
-      let nat ← reduceNat ctx core
-      match nat with
-      | some value => return (value, state1)
-      | none =>
-          match unfoldDefinition ctx core with
-          | some value => loop value state1
-          | none => return (core, state1)
+  let (result, next) ← loop e state
+  let next := {
+    next with whnf := CheckerExprMap.insert next.whnf e result
+  }
+  pure (result, next)
 
-    let (result, next) ← loop e state
-    let next := {
-      next with whnf := CheckerExprMap.insert next.whnf e result
-    }
-    pure (result, next)
-end
+/-- Stateful WHNF-core entry point with the public-WHNF callback fixed. -/
+partial def whnfCoreStateful
+    (ctx : CheckerContext)
+    (state : CheckerState)
+    (e : Expr)
+    (cheapRec cheapProj : Bool) : Except String (Expr × CheckerState) :=
+  whnfCoreStatefulWith whnfStateful ctx state e cheapRec cheapProj
 
 private def cacheInferStatefulResult
     (state : CheckerState)

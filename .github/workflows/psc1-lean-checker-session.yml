@@ -47,10 +47,14 @@ jobs:
             -o .lake/build/lib/lean/PSC1Kernel/CheckerState.olean
           lake env lean PSC1Kernel/CheckerStateful.lean \
             -o .lake/build/lib/lean/PSC1Kernel/CheckerStateful.olean
+          lake env lean PSC1Kernel/CheckerReductionStateful.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/CheckerReductionStateful.olean
           lake env lean PSC1Kernel/CheckerDefEqStateful.lean \
             -o .lake/build/lib/lean/PSC1Kernel/CheckerDefEqStateful.olean
           lake env lean PSC1Kernel/CheckerDefEqStatefulClosed.lean \
             -o .lake/build/lib/lean/PSC1Kernel/CheckerDefEqStatefulClosed.olean
+          lake env lean PSC1Kernel/CheckerDefEqStatefulReduced.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/CheckerDefEqStatefulReduced.olean
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash
@@ -68,6 +72,9 @@ jobs:
       - name: Stateful recursor reduction
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerRecursorStatefulSmoke.lean
+      - name: Reduced defeq Nat-state regression
+        working-directory: psc1-kernel
+        run: lake env lean --run PSC1Kernel/Test/CheckerReducedDefEqSmoke.lean
       - name: Recursive stateful defeq
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/CheckerDefEqStatefulSmoke.lean

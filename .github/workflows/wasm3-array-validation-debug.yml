@@ -1,0 +1,62 @@
+name: Wasm Array validation debug
+
+on:
+  push:
+    branches:
+      - backend/wasm3-array-runtime
+    paths:
+      - .github/workflows/wasm3-array-validation-debug.yml
+
+jobs:
+  validate-debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply current Array implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/wasm3-backend.yml')
+          text = path.read_text()
+          old = "console.log('PSC1_WASM3_INTEGRATION: PASS');"
+          new = "console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');"
+          if text.count(old) != 1:
+              raise SystemExit('expected one Wasm3 integration marker')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          python3 .github/dev/apply_wasm_array_runtime.py
+          python3 .github/dev/apply_wasm_array_collection_fix.py
+
+      - name: Compile generated Wasm for detailed validation error
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv = readFileSync('/tmp/psc1-wasm-bytes.txt', 'utf8').trim();
+          const bytes = Uint8Array.from(csv.split(',').map(Number));
+          console.log(`validate=${WebAssembly.validate(bytes)} bytes=${bytes.length}`);
+          try {
+            await WebAssembly.compile(bytes);
+            console.log('WASM_ARRAY_VALIDATION_DEBUG: unexpectedly valid');
+          } catch (error) {
+            console.error('WASM_ARRAY_COMPILE_ERROR:', error?.stack ?? error);
+            process.exit(1);
+          }
+          NODE

@@ -82,7 +82,9 @@ jobs:
           use num_bigint::BigUint;
           use psc_rust_let_result::{
               forwardCallbackViaLet,
+              makeAdderViaCall,
               makeAdderViaLet,
+              makeAdderViaLetThenCall,
           };
 
           fn n(value: u32) -> BigUint {
@@ -98,6 +100,14 @@ jobs:
               let forwarded = forwardCallbackViaLet(makeAdderViaLet(n(3)));
               assert_eq!(forwarded(n(39)), n(42));
               assert_eq!(forwarded(n(40)), n(43));
+
+              let direct = makeAdderViaCall(n(5));
+              assert_eq!(direct(n(7)), n(12));
+              assert_eq!(direct(n(8)), n(13));
+
+              let via_let = makeAdderViaLetThenCall(n(4));
+              assert_eq!(via_let(n(38)), n(42));
+              assert_eq!(via_let(n(39)), n(43));
           }
           EOF
           cd selfhost

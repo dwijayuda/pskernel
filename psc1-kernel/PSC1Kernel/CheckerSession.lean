@@ -53,6 +53,14 @@ def whnfStateful
   let (result, state) ← PSC1Kernel.whnfStateful session.context session.state e
   pure (result, { session with state := state })
 
+/-- Pure stateful positive-memo definitional equality. -/
+def isDefEqStateful
+    (session : CheckerSession)
+    (a b : Expr) : Except String (Bool × CheckerSession) := do
+  let (result, state) ←
+    PSC1Kernel.isDefEqStateful session.context session.state a b
+  pure (result, { session with state := state })
+
 end CheckerSession
 
 namespace Kernel

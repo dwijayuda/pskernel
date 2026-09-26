@@ -40,7 +40,7 @@ def psLevelFindAssignment (context : PsLevelMetaContext) (id : Nat) : Option PsL
   psLevelFindAssignmentInList id context.assignments
 
 def psLevelMetaFresh (context : PsLevelMetaContext) : PsLevelFreshResult :=
-  let id := context.nextId
+  let id := context.nextId;
   {
     context := {
       nextId := Nat.succ id

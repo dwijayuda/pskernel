@@ -1,0 +1,73 @@
+import Init.System.IO
+import PSC1Kernel.Environment
+import PSC1Kernel.CheckerState
+
+namespace PSC1Kernel
+
+/--
+Opaque-by-convention runtime handle for declaration-scoped checker memo state.
+
+Its pure/reference meaning is intentionally empty: memoization is an execution
+optimization only. The compiled implementation stores an `IO.Ref CheckerState`
+behind this handle. A fresh handle must be created for each immutable checker
+environment/session.
+-/
+structure CheckerRuntimeCache where
+  marker : Nat
+
+namespace CheckerRuntimeCache
+
+private unsafe def freshForImpl (_env : Environment) : CheckerRuntimeCache :=
+  match unsafeIO (IO.mkRef CheckerState.empty) with
+  | .ok ref => unsafeCast ref
+  | .error _ => { marker := 0 }
+
+/--
+Create declaration-scoped runtime memo state. The pure specification carries
+no mutable state; the compiled implementation allocates the cache.
+-/
+@[implemented_by freshForImpl]
+def freshFor (_env : Environment) : CheckerRuntimeCache :=
+  { marker := 0 }
+
+private unsafe def withClosedSuccessImpl
+    (cache : CheckerRuntimeCache)
+    (left right : Expr)
+    (compute : Unit → Except String Bool) : Except String Bool :=
+  -- Current CheckerContext local-name allocation may reuse sibling FVar ids.
+  -- Until fresh ids are session-global, only closed pairs are safe cache keys.
+  if left.hasFVar || right.hasFVar then
+    compute ()
+  else
+    let ref : IO.Ref CheckerState := unsafeCast cache
+    match unsafeIO ref.get with
+    | .error _ => compute ()
+    | .ok state =>
+        if state.success.contains left right then
+          .ok true
+        else
+          match compute () with
+          | .ok true =>
+              -- Modify the latest state instead of writing the snapshot above:
+              -- recursive defeq calls may have inserted entries in the meantime.
+              match unsafeIO (ref.modify fun current =>
+                  { current with success := current.success.insert left right }) with
+              | .ok _ => .ok true
+              | .error _ => .ok true
+          | result => result
+
+/--
+Run one definitional-equality computation with declaration-scoped successful
+pair reuse. The reference definition is exactly `compute ()`; therefore the
+cache cannot alter the pure checker semantics.
+-/
+@[implemented_by withClosedSuccessImpl]
+def withClosedSuccess
+    (_cache : CheckerRuntimeCache)
+    (_left _right : Expr)
+    (compute : Unit → Except String Bool) : Except String Bool :=
+  compute ()
+
+end CheckerRuntimeCache
+
+end PSC1Kernel

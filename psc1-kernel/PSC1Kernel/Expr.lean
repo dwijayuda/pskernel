@@ -228,22 +228,25 @@ partial def Expr.hasFVar (e : Expr) : Bool :=
 
 partial def Expr.instantiateLevelParams
     (e : Expr) (params : List Name) (values : List Level) : Expr :=
-  match e with
-  | .sort u => .sort (u.instantiateParams params values)
-  | .const n ls => .const n (ls.map fun u => u.instantiateParams params values)
-  | .app f a => .app (f.instantiateLevelParams params values) (a.instantiateLevelParams params values)
-  | .lam n t b bi =>
-    .lam n (t.instantiateLevelParams params values) (b.instantiateLevelParams params values) bi
-  | .forallE n t b bi =>
-    .forallE n (t.instantiateLevelParams params values) (b.instantiateLevelParams params values) bi
-  | .letE n t v b nd =>
-    .letE n
-      (t.instantiateLevelParams params values)
-      (v.instantiateLevelParams params values)
-      (b.instantiateLevelParams params values)
-      nd
-  | .mdata m b => .mdata m (b.instantiateLevelParams params values)
-  | .proj n i b => .proj n i (b.instantiateLevelParams params values)
-  | .bvar _ | .fvar _ | .mvar _ | .lit _ => e
+  if params.isEmpty then
+    e
+  else
+    match e with
+    | .sort u => .sort (u.instantiateParams params values)
+    | .const n ls => .const n (ls.map fun u => u.instantiateParams params values)
+    | .app f a => .app (f.instantiateLevelParams params values) (a.instantiateLevelParams params values)
+    | .lam n t b bi =>
+      .lam n (t.instantiateLevelParams params values) (b.instantiateLevelParams params values) bi
+    | .forallE n t b bi =>
+      .forallE n (t.instantiateLevelParams params values) (b.instantiateLevelParams params values) bi
+    | .letE n t v b nd =>
+      .letE n
+        (t.instantiateLevelParams params values)
+        (v.instantiateLevelParams params values)
+        (b.instantiateLevelParams params values)
+        nd
+    | .mdata m b => .mdata m (b.instantiateLevelParams params values)
+    | .proj n i b => .proj n i (b.instantiateLevelParams params values)
+    | .bvar _ | .fvar _ | .mvar _ | .lit _ => e
 
 end PSC1Kernel

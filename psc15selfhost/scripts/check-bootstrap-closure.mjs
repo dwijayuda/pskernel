@@ -3,33 +3,13 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import {
+  allowedBootstrapPackages,
+  forbiddenBootstrapPackages,
+} from "./bootstrap-closure-contract.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
-
-const allowedBootstrapPackages = new Set([
-  "bootstrap",
-  "foundation",
-  "syntax",
-  "core",
-  "environment",
-  "meta",
-  "elab",
-  "bridge",
-  "compiler-ir",
-  "erasure",
-  "compiler",
-  "backend-ts",
-  "stdlib",
-]);
-
-const forbiddenBootstrapPackages = new Set([
-  "project",
-  "backend-rust",
-  "backend-wasm",
-  "pskernel",
-  "pskernel-core",
-]);
 
 function sourceForModule(moduleName) {
   const parts = moduleName.split(".");

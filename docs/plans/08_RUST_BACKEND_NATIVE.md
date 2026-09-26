@@ -171,20 +171,26 @@ As of the current branch checkpoint:
   `impl Fn(...) -> ... + Clone` with an owned `move` closure, including
   captured portable values. A first-order function parameter/value may also be
   forwarded directly as the declaration result under the same representation.
-  Let-bound first-order declaration results are supported when a chain of
-  ordinary `let` bindings terminates in a supported lambda or function value;
-  a terminal lambda is emitted as an owned `move` closure so values introduced
-  by the `let` chain can be captured. A function-typed `let` is intentionally
-  narrower: it must be first-order and may only forward an existing function
-  variable. Local closure storage through `let`, arbitrary conditional function
-  selection, and other function unification cases remain fail-closed rather
-  than forcing distinct Rust closure types into one opaque return type.
+  A direct call to a named function may likewise be the terminal expression of
+  a first-order function-valued declaration result, including after supported
+  ordinary `let` bindings; the existing call emitter preserves clone-on-consume
+  argument semantics and forwards the callee's opaque `impl Fn(...) -> ... + Clone`
+  result unchanged. Let-bound first-order declaration results are supported when
+  a chain of ordinary `let` bindings terminates in a supported lambda, function
+  value, or named call. A terminal lambda is emitted as an owned `move` closure
+  so values introduced by the `let` chain can be captured. A function-typed
+  `let` is intentionally narrower: it must be first-order and may only forward
+  an existing function variable. Local closure storage through `let`, arbitrary
+  callee expressions, conditional function selection, and other function
+  unification cases remain fail-closed rather than forcing distinct Rust closure
+  types into one opaque return type.
   Monomorphic first-order top-level function items may also be stored in
   structure fields and inductive constructor fields as Rust
   `fn(...) -> ...` pointers. The module validator rejects local or capturing
   closures in those fields before Rust emission. Capturing/general function
-  storage, arbitrary conditional/otherwise-computed or nested function-valued
-  declaration results, nested higher-order parameter shapes,
+  storage, arbitrary conditional/otherwise-computed function-valued declaration
+  results outside the supported lambda/value/named-call forms, nested
+  function-valued declaration results, nested higher-order parameter shapes,
   function-typed lambda parameters, and function-valued lambda results remain
   fail-closed until they have an explicit ownership/runtime representation;
 - emitted Rust follows a clone-on-consume ownership rule for portable values:
@@ -246,14 +252,16 @@ silently using different semantics.
 
 The census currently treats external imports, unknown runtime types, traversal
 fuel exhaustion, generic top-level values, arbitrary conditional or otherwise
-computed function-valued declaration results outside the supported `let` chain,
-nested function-valued declaration results, capturing/general function storage,
-nested higher-order parameter shapes, function-typed lambda parameters,
-function-valued lambda results, malformed intrinsic arity, unknown structure
-references, and unknown inductive references as explicit blockers. If the real
-compiler census reaches one of these, the next step is either a target-neutral/
-shared semantic change or a deliberate Rust representation that preserves the
-existing CompilerIR meaning—not a backend-specific semantic shortcut.
+computed function-valued declaration results outside the supported direct
+lambda/value/named-call and ordinary-`let` forms, arbitrary function-callee
+expressions, nested function-valued declaration results, capturing/general
+function storage, nested higher-order parameter shapes, function-typed lambda
+parameters, function-valued lambda results, malformed intrinsic arity, unknown
+structure references, and unknown inductive references as explicit blockers. If
+the real compiler census reaches one of these, the next step is either a
+target-neutral/shared semantic change or a deliberate Rust representation that
+preserves the existing CompilerIR meaning—not a backend-specific semantic
+shortcut.
 
 ### R4 — native compiler bootstrap
 

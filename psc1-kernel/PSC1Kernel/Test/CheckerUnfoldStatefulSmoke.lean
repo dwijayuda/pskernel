@@ -32,7 +32,7 @@ def main : IO Unit := do
          | some value => Expr.eq value expected
          | none => false)
       let unfoldSize := next.state.unfold.size
-      match StatefulReduction.unfoldDefinitionStateful next.context next.state input with
+      match StatefulReductionCached.unfoldDefinitionStateful next.context next.state input with
       | .error err => throw <| IO.userError err
       | .ok (some value, finalState) =>
           expectUnfold "memoized unfold result" (Expr.eq value expected)

@@ -120,7 +120,10 @@ def psExprFVarsInContext (localContext : PsLocalContext) : PsExpr -> Bool
       else
         false
   | .lam _ type body _ =>
-      psExprFVarsInContext localContext type && psExprFVarsInContext localContext body
+      if psExprFVarsInContext localContext type then
+        psExprFVarsInContext localContext body
+      else
+        false
   | .forallE _ type body _ =>
       psExprFVarsInContext localContext type && psExprFVarsInContext localContext body
   | .letE _ type value body =>

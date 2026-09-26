@@ -6,13 +6,14 @@ on:
       - backend/wasm3-array-runtime
     paths:
       - .github/workflows/wasm3-array-runtime-dev.yml
+      - .github/dev/apply_wasm_array_runtime.py
       - selfhost/**
 
 permissions:
   contents: write
 
 jobs:
-  array-red:
+  array-green:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
@@ -25,50 +26,77 @@ jobs:
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      - name: Prove Array lowering is RED before implementation
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply Array runtime implementation and regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/dev/apply_wasm_array_runtime.py
+          git diff --check
+
+      - name: Enforce portable source and target-neutral IR
         shell: bash
         run: |
           set -euo pipefail
           cd selfhost
-          lake build PsBackendWasm
-          cat > /tmp/WasmArrayRed.lean <<'LEAN'
-          import Ps.BackendWasm.Lower
+          node check-psc1-source.mjs
+          node scripts/check-ir-neutrality.mjs
 
-          def profile : PsWasmTargetProfile := { wordSize := .wasm32 }
-          def u32 : PsVerifiedIrType := .primitive .uint32
-          def arrayU32 : PsVerifiedIrType := .named "Array" [u32]
+      - name: Build complete Lean self-host workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build
 
-          def redModule : PsVerifiedIrModule := {
-            imports := []
-            structures := []
-            inductives := []
-            declarations := [
-              {
-                name := "empty"
-                typeParameters := []
-                parameters := []
-                resultType := arrayU32
-                body := .intrinsic .arrayEmptyWithCapacity [u32]
-                  [.literal (.natural 0)]
-              }
-            ]
-          }
+      - name: Run shared and owned backend regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_ts_tests
+          lake exe psc1_erasure_tests
+          lake exe psc1_ir_specialize_tests
+          lake exe psc1_backend_wasm_tests
 
-          def main : IO Unit := do
-            match psWasmLowerModule profile redModule with
-            | Except.ok _ =>
-                throw (IO.userError "WASM_ARRAY_RED_UNEXPECTEDLY_GREEN")
-            | Except.error PsWasmLowerError.unsupportedIntrinsic =>
-                throw (IO.userError "WASM_ARRAY_RED_UNSUPPORTED_INTRINSIC")
-            | Except.error _ =>
-                throw (IO.userError "WASM_ARRAY_RED_WRONG_FAILURE")
-          LEAN
+      - name: Execute complete Wasm Node runtime matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('../.github/workflows/wasm3-backend.yml').read_text()
+          marker = "          node --input-type=module <<'NODE'\n"
+          if text.count(marker) != 1:
+              raise SystemExit('expected one Node runtime heredoc')
+          body = text.split(marker, 1)[1].split("\n          NODE", 1)[0]
+          lines = []
+          for line in body.splitlines():
+              lines.append(line[10:] if line.startswith('          ') else line)
+          Path('/tmp/psc1-wasm-runtime.mjs').write_text('\n'.join(lines) + '\n')
+          PY
+          node /tmp/psc1-wasm-runtime.mjs
 
-          set +e
-          lake env lean --run /tmp/WasmArrayRed.lean >/tmp/array-red.log 2>&1
-          status=$?
-          set -e
-          cat /tmp/array-red.log
-          test "$status" -ne 0
-          grep -q 'WASM_ARRAY_RED_UNSUPPORTED_INTRINSIC' /tmp/array-red.log
-          echo 'WASM_ARRAY_TDD_RED: PASS'
+      - name: Commit tested Array runtime implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          git add \
+            selfhost/packages/backend-wasm/src/Ps/BackendWasm/Model.lean \
+            selfhost/packages/backend-wasm/src/Ps/BackendWasm/Binary.lean \
+            selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean \
+            selfhost/packages/backend-wasm/src/Ps/BackendWasm/Lower.lean \
+            selfhost/test/WasmBinarySmoke.lean \
+            .github/workflows/wasm3-backend.yml \
+            .github/workflows/psc1-lean-bootstrap.yml
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat(wasm): add persistent Array runtime lowering'
+          git push origin HEAD:backend/wasm3-array-runtime

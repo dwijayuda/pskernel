@@ -43,4 +43,28 @@ def main : IO Unit := do
       expectStateful "checked cache remains empty in infer-only run"
         (state.checkedInfer.size == 0)
 
+  let whnfInput : Expr :=
+    .app
+      (.lam (.str .anonymous "x") (.sort .zero) (.bvar 0) .default)
+      (.sort .zero)
+  let whnfExpected : Expr := .sort .zero
+  match whnfStateful ctx initial whnfInput with
+  | .error err =>
+      throw <| IO.userError ("stateful whnf failed: " ++ err)
+  | .ok (actual, state1) =>
+      expectStateful "whnf result" (Expr.eq actual whnfExpected)
+      expectStateful "whnf result is cached"
+        (match CheckerExprMap.get? state1.whnf whnfInput with
+         | some cached => Expr.eq cached whnfExpected
+         | none => false)
+      expectStateful "whnf-core table remains separate"
+        (state1.whnfCore.size == 0)
+      match whnfStateful ctx state1 whnfInput with
+      | .error err =>
+          throw <| IO.userError ("second stateful whnf failed: " ++ err)
+      | .ok (actual2, state2) =>
+          expectStateful "second whnf result" (Expr.eq actual2 whnfExpected)
+          expectStateful "whnf cache cardinality is stable"
+            (state2.whnf.size == state1.whnf.size)
+
   IO.println "PSC1 stateful recursive checker smoke: PASS"

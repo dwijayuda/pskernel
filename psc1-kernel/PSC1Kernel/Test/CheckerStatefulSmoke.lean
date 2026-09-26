@@ -79,6 +79,35 @@ def main : IO Unit := do
       expectStateful "cheap-proj whnf-core result" (Expr.eq actual whnfExpected)
       expectStateful "cheap-proj suppresses whnf-core cache" (state.whnfCore.size == 0)
 
+  -- Successful defeq pairs are declaration-scoped reusable facts. Negative
+  -- full-defeq results are deliberately not globally memoized: Lean's failure
+  -- table is narrower and will be migrated at its lazy-delta call site.
+  match isDefEqStateful ctx initial whnfInput whnfExpected with
+  | .error err =>
+      throw <| IO.userError ("stateful defeq failed: " ++ err)
+  | .ok (equal1, state1) =>
+      expectStateful "stateful defeq succeeds" equal1
+      expectStateful "successful defeq pair is cached"
+        (CheckerExprPairSet.contains state1.success whnfInput whnfExpected)
+      let successSize := state1.success.entries.size
+      match isDefEqStateful ctx state1 whnfExpected whnfInput with
+      | .error err =>
+          throw <| IO.userError ("symmetric stateful defeq failed: " ++ err)
+      | .ok (equal2, state2) =>
+          expectStateful "symmetric successful defeq reuses cache" equal2
+          expectStateful "successful defeq cache cardinality is stable"
+            (state2.success.entries.size == successSize)
+          expectStateful "positive memo does not populate failure set"
+            (state2.failure.entries.size == 0)
+
+  match isDefEqStateful ctx initial (.sort .zero) (.sort (.succ .zero)) with
+  | .error err =>
+      throw <| IO.userError ("negative stateful defeq failed: " ++ err)
+  | .ok (equal, state) =>
+      expectStateful "negative stateful defeq remains false" (!equal)
+      expectStateful "negative full defeq is not globally memoized"
+        (state.failure.entries.size == 0 && state.success.entries.size == 0)
+
   -- This term forces checked application inference to expose a function type
   -- through public WHNF. A merely outer checkStateful wrapper cannot populate
   -- this internal WHNF entry; recursive checker state must flow through infer.

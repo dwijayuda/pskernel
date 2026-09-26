@@ -247,6 +247,9 @@ jobs:
       - name: Run PSCKernel Nat literal recursor differential
         run: node scripts/psckernel-recursor-nat-literal-differential.mjs
 
+      - name: Run PSCKernel quotient reduction differential
+        run: node scripts/psckernel-quot-reduction-differential.mjs
+
       - name: Run PSCKernel basic type inference differential
         run: node scripts/psckernel-type-inference-basic-differential.mjs
 

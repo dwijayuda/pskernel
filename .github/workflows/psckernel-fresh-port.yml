@@ -150,3 +150,6 @@ jobs:
 
       - name: Run PSCKernel Declaration differential
         run: node scripts/psckernel-declaration-differential.mjs
+
+      - name: Run PSCKernel Environment differential
+        run: node scripts/psckernel-environment-differential.mjs

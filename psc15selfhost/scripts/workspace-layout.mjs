@@ -90,3 +90,17 @@ export function resolveModuleSource(
     bases.map((base) => base + alternateExtension),
   );
 }
+
+export function resolveCompilerModuleSource(workspaceRoot, moduleName) {
+  const bases = moduleBaseCandidates(workspaceRoot, moduleName);
+  const lean = firstExisting(bases.map((base) => base + ".lean"));
+  const proofScript = firstExisting(bases.map((base) => base + ".ps"));
+
+  if (lean && proofScript) {
+    if (moduleName.startsWith("Ps.") || moduleName.startsWith("ProofScript.")) {
+      return lean;
+    }
+    throw new Error(`PSC2_LAYOUT_SOURCE_AMBIGUITY: ${moduleName}`);
+  }
+  return lean ?? proofScript;
+}

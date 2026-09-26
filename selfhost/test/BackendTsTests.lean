@@ -105,6 +105,7 @@ def psBackendTsIntrinsicModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natAdd
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)
@@ -219,6 +220,7 @@ def psBackendTsSharedNumericModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.machineIntBinary
               PsVerifiedIrMachineIntegerType.uint32
               PsVerifiedIrIntegerBinaryOp.add)
+            []
             [
               PsVerifiedIrExpr.var "left",
               PsVerifiedIrExpr.var "right"
@@ -248,6 +250,7 @@ def psBackendTsSharedNumericModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.floatBinary
               PsVerifiedIrFloatingType.float32
               PsVerifiedIrFloatBinaryOp.add)
+            []
             [
               PsVerifiedIrExpr.var "left",
               PsVerifiedIrExpr.var "right"

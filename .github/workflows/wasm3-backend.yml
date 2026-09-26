@@ -8,6 +8,7 @@ on:
       - integrate/wasm3-owned
       - backend/wasm3-gc-adts
       - backend/wasm3-closures
+      - backend/wasm3-runtime-core
       - compiler-ir/generic-specialization
       - integrate/generic-specialization
       - integrate/wasm3-closures
@@ -152,6 +153,75 @@ jobs:
           }
           if (instance.exports.genericLengthTwo() !== 2) {
             throw new Error('PSC1_WASM_RUNTIME_GENERIC_RECURSIVE_ADT_RESULT');
+          }
+          if (instance.exports.natAddLargeExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_ADD_LARGE_RESULT');
+          }
+          if (instance.exports.natSubFloorsAtZero() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_SUB_RESULT');
+          }
+          if (instance.exports.natLiteralEqExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_LITERAL_EQ_RESULT');
+          }
+          if (instance.exports.natAddOneOneExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_ADD_ONE_ONE_RESULT');
+          }
+          if (instance.exports.natAddCarrySmallExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_ADD_CARRY_SMALL_RESULT');
+          }
+          if (instance.exports.natAddCarryMidExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_ADD_CARRY_MID_RESULT');
+          }
+          if (instance.exports.natAddCarryExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_ADD_CARRY_RESULT');
+          }
+          if (instance.exports.natMulOneExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_MUL_ONE_RESULT');
+          }
+          if (instance.exports.natMulOddExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_MUL_ODD_RESULT');
+          }
+          if (instance.exports.natMulExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_MUL_RESULT');
+          }
+          if (instance.exports.natDivExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_DIV_RESULT');
+          }
+          if (instance.exports.natModExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_MOD_RESULT');
+          }
+          if (instance.exports.natDivZero() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_DIV_ZERO_RESULT');
+          }
+          if (instance.exports.natModZero() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_MOD_ZERO_RESULT');
+          }
+          if (instance.exports.natLtExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_NAT_COMPARE_RESULT');
+          }
+          if (instance.exports.intOfNatExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_OF_NAT_RESULT');
+          }
+          if (instance.exports.intNegSuccExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_NEG_SUCC_RESULT');
+          }
+          if (instance.exports.intNegExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_NEG_RESULT');
+          }
+          if (instance.exports.intAddMixedExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_ADD_RESULT');
+          }
+          if (instance.exports.intSubMixedExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_SUB_RESULT');
+          }
+          if (instance.exports.intMulSignedExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_MUL_RESULT');
+          }
+          if (instance.exports.intLargeExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_LARGE_RESULT');
+          }
+          if (instance.exports.intLtExact() !== 1) {
+            throw new Error('PSC1_WASM_RUNTIME_INT_COMPARE_RESULT');
           }
           console.log('PSC1_WASM3_INTEGRATION: PASS');
           NODE

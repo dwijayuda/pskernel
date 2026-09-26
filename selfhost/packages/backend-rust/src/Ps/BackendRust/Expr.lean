@@ -780,7 +780,7 @@ def psRustEmitExprWithFuel :
           Except.ok (psRustEmitLiteral literal)
       | PsVerifiedIrExpr.var name =>
           Except.ok (psRustIdentifier name)
-      | PsVerifiedIrExpr.intrinsic operation arguments =>
+      | PsVerifiedIrExpr.intrinsic operation _ arguments =>
           match psRustEmitExprListWith emitNested arguments with
           | Except.error error =>
               Except.error error

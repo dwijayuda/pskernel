@@ -172,6 +172,7 @@ def psWasmAddU32IrModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.machineIntBinary
               PsVerifiedIrMachineIntegerType.uint32
               PsVerifiedIrIntegerBinaryOp.add)
+            []
             [
               PsVerifiedIrExpr.var "left",
               PsVerifiedIrExpr.var "right"
@@ -230,6 +231,7 @@ def psWasmLetIrModule : PsVerifiedIrModule :=
               (PsVerifiedIrIntrinsic.machineIntBinary
                 PsVerifiedIrMachineIntegerType.uint32
                 PsVerifiedIrIntegerBinaryOp.add)
+              []
               [
                 PsVerifiedIrExpr.var "saved",
                 PsVerifiedIrExpr.literal
@@ -690,6 +692,7 @@ def psWasmRecursiveListIrModule : PsVerifiedIrModule :=
                   (PsVerifiedIrIntrinsic.machineIntBinary
                     PsVerifiedIrMachineIntegerType.uint32
                     PsVerifiedIrIntegerBinaryOp.add)
+                  []
                   [
                     PsVerifiedIrExpr.literal
                       (PsVerifiedIrLiteral.machineInteger
@@ -851,6 +854,7 @@ def psWasmClosureIrModule : PsVerifiedIrModule :=
               (PsVerifiedIrIntrinsic.machineIntBinary
                 PsVerifiedIrMachineIntegerType.uint32
                 PsVerifiedIrIntegerBinaryOp.add)
+              []
               [
                 PsVerifiedIrExpr.var "base",
                 PsVerifiedIrExpr.var "value"
@@ -969,6 +973,7 @@ def psTestWasmClosureLowering : Bool :=
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
+    arrays := []
     functionTypes := []
     functions := [
       {
@@ -1042,8 +1047,18 @@ def psTestWasmBinaryModule : Bool :=
   | Except.error _ => false
   | Except.ok bytes => bytes == psWasmExpectedAnswerBytes
 
-def main : IO Unit := do
+def psTestWasmNatConstructorIdentityInvariant : Bool :=
+      match psWasmNatRuntimeStructures with
+      | _ :: _ :: bit0 :: bit1 :: _ =>
+          bit0.name == psWasmNatBit0Name
+            && bit1.name == psWasmNatBit1Name
+            && bit0.fields.length == 1
+            && bit1.fields.length == 2
+      | _ => false
+
+    def main : IO Unit := do
   if psTestWasmScalarLowering
+      && psTestWasmNatConstructorIdentityInvariant
       && psTestWasmWordProfiles
       && psTestWasmMachineIntegerOps
       && psTestWasmMachineIntegerLiterals

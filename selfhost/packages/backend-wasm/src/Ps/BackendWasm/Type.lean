@@ -43,8 +43,14 @@ def psWasmIrTypeKeyWithFuel :
             | .char => "Char"
             | .string => "String"
             | .unit => "Unit")
-      | .named name [] => some ("N{" ++ name ++ "}")
-      | .named _ (_ :: _) => none
+      | .named name arguments =>
+          let argumentKeys :=
+            arguments.map (psWasmIrTypeKeyWithFuel fuel)
+          match psWasmJoinTypeKeys argumentKeys with
+          | none => none
+          | some "" => some ("N{" ++ name ++ "}")
+          | some keys =>
+              some ("N{" ++ name ++ "}<" ++ keys ++ ">")
       | .function parameters result =>
           let parameterKeys :=
             parameters.map (psWasmIrTypeKeyWithFuel fuel)
@@ -77,6 +83,12 @@ def psWasmClosureCodeTypeName
       | none => none
       | some key => some ("ProofScript.ClosureCode$" ++ key)
   | _ => none
+
+def psWasmArrayTypeName
+    (elementType : PsVerifiedIrType) : Option String :=
+  match psWasmIrTypeKey elementType with
+  | none => none
+  | some key => some ("ProofScript.Array$" ++ key)
 
 def psWasmWordValueType (profile : PsWasmTargetProfile) : PsWasmValueType :=
   match profile.wordSize with
@@ -132,6 +144,10 @@ def psWasmValueTypeOfIrType?
       match psWasmValueTypeOfPrimitive profile primitive with
       | .noValue => none
       | valueType => some valueType
+  | .named "Array" [elementType] =>
+      match psWasmArrayTypeName elementType with
+      | none => none
+      | some name => some (.refT name)
   | .named name [] => some (.refT name)
   | .function parameters result =>
       match
@@ -148,6 +164,10 @@ def psWasmStorageTypeOfIrType?
       match psWasmValueTypeOfPrimitive profile primitive with
       | .noValue => none
       | _ => some (psWasmStorageTypeOfPrimitive profile primitive)
+  | .named "Array" [elementType] =>
+      match psWasmArrayTypeName elementType with
+      | none => none
+      | some name => some (.value (.refT name))
   | .named name [] => some (.value (.refT name))
   | .function parameters result =>
       match

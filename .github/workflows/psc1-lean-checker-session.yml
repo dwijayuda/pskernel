@@ -7,6 +7,7 @@ on:
       - perf/psc1-lean-checker-session
       - perf/psc1-lean-checker-cache
       - perf/psc1-lean-stateful-checker
+      - perf/psc1-lean-stateful-infer-app
     paths:
       - ".github/workflows/psc1-lean-checker-session.yml"
       - "psc1-kernel/**"
@@ -45,6 +46,8 @@ jobs:
             -o .lake/build/lib/lean/PSC1Kernel/CheckerStateful.olean
           lake env lean PSC1Kernel/CheckerDefEqStateful.lean \
             -o .lake/build/lib/lean/PSC1Kernel/CheckerDefEqStateful.olean
+          lake env lean PSC1Kernel/CheckerDefEqStatefulClosed.lean \
+            -o .lake/build/lib/lean/PSC1Kernel/CheckerDefEqStatefulClosed.olean
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash

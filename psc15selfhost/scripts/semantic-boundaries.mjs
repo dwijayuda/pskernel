@@ -33,7 +33,7 @@ export function semanticBoundaryViolations(relativePath, source) {
   }
 
   if (isCompiler && /\bpsEraseCoreModule\b/u.test(source)) {
-    if (!/\bpsValidatePreparedAdmissions\b/u.test(source)) {
+    if (!/\bpsCompilerValidatePrepared\b/u.test(source)) {
       violations.push("PSC2_SEMANTIC_BOUNDARY_ERASURE_WITHOUT_ADMISSION_VALIDATION");
     }
     if (!/\bpsCompilerVerifiedIrFromPrepared\b/u.test(source)) {

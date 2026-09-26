@@ -1,14 +1,14 @@
 import Ps.PSCKernel.Core.Expr
 
 inductive PsCKernelReducibilityHints where
-  | opaque
-  | abbrev
+  | opaqueHint
+  | abbreviation
   | regular (height : Nat)
 
 inductive PsCKernelDefinitionSafety where
-  | «unsafe»
+  | unsafeDef
   | safe
-  | «partial»
+  | partial
 
 structure PsCKernelConstantVal where
   name : PsCKernelName
@@ -96,8 +96,8 @@ def psCKernelReducibilityHintsEq
     (left : PsCKernelReducibilityHints)
     (right : PsCKernelReducibilityHints) : Bool :=
   match left, right with
-  | PsCKernelReducibilityHints.opaque, PsCKernelReducibilityHints.opaque => true
-  | PsCKernelReducibilityHints.abbrev, PsCKernelReducibilityHints.abbrev => true
+  | PsCKernelReducibilityHints.opaqueHint, PsCKernelReducibilityHints.opaqueHint => true
+  | PsCKernelReducibilityHints.abbreviation, PsCKernelReducibilityHints.abbreviation => true
   | PsCKernelReducibilityHints.regular leftHeight,
       PsCKernelReducibilityHints.regular rightHeight =>
       Nat.beq leftHeight rightHeight
@@ -107,18 +107,18 @@ def psCKernelReducibilityHintsLt
     (left : PsCKernelReducibilityHints)
     (right : PsCKernelReducibilityHints) : Bool :=
   match left, right with
-  | PsCKernelReducibilityHints.abbrev, PsCKernelReducibilityHints.abbrev => false
-  | PsCKernelReducibilityHints.abbrev, _ => true
+  | PsCKernelReducibilityHints.abbreviation, PsCKernelReducibilityHints.abbreviation => false
+  | PsCKernelReducibilityHints.abbreviation, _ => true
   | PsCKernelReducibilityHints.regular leftHeight,
       PsCKernelReducibilityHints.regular rightHeight =>
       Nat.blt rightHeight leftHeight
-  | PsCKernelReducibilityHints.regular _, PsCKernelReducibilityHints.opaque => true
+  | PsCKernelReducibilityHints.regular _, PsCKernelReducibilityHints.opaqueHint => true
   | _, _ => false
 
 def psCKernelReducibilityHintsIsAbbrev
     (hints : PsCKernelReducibilityHints) : Bool :=
   match hints with
-  | PsCKernelReducibilityHints.abbrev => true
+  | PsCKernelReducibilityHints.abbreviation => true
   | _ => false
 
 def psCKernelReducibilityHintsIsRegular
@@ -131,7 +131,7 @@ def psCKernelDefinitionSafetyEq
     (left : PsCKernelDefinitionSafety)
     (right : PsCKernelDefinitionSafety) : Bool :=
   match left, right with
-  | PsCKernelDefinitionSafety.unsafe, PsCKernelDefinitionSafety.unsafe => true
+  | PsCKernelDefinitionSafety.unsafeDef, PsCKernelDefinitionSafety.unsafeDef => true
   | PsCKernelDefinitionSafety.safe, PsCKernelDefinitionSafety.safe => true
   | PsCKernelDefinitionSafety.partial, PsCKernelDefinitionSafety.partial => true
   | _, _ => false
@@ -163,7 +163,7 @@ def psCKernelConstantInfoType (info : PsCKernelConstantInfo) : PsCKernelExpr :=
 def psCKernelConstantInfoIsUnsafe (info : PsCKernelConstantInfo) : Bool :=
   match info with
   | PsCKernelConstantInfo.defnInfo value =>
-      psCKernelDefinitionSafetyEq value.safety PsCKernelDefinitionSafety.unsafe
+      psCKernelDefinitionSafetyEq value.safety PsCKernelDefinitionSafety.unsafeDef
   | PsCKernelConstantInfo.axiomInfo value => value.isUnsafe
   | PsCKernelConstantInfo.thmInfo _ => false
   | PsCKernelConstantInfo.opaqueInfo value => value.isUnsafe
@@ -202,7 +202,7 @@ def psCKernelConstantInfoHints
     (info : PsCKernelConstantInfo) : PsCKernelReducibilityHints :=
   match info with
   | PsCKernelConstantInfo.defnInfo value => value.hints
-  | _ => PsCKernelReducibilityHints.opaque
+  | _ => PsCKernelReducibilityHints.opaqueHint
 
 def psCKernelConstantInfoIsCtor (info : PsCKernelConstantInfo) : Bool :=
   match info with

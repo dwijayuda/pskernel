@@ -154,7 +154,8 @@ lean_lib PsPSCKernel where
   srcDir := "packages/psckernel/src"
   roots := #[
     `Ps.PSCKernel.Core.Name,
-    `Ps.PSCKernel.Core.Level
+    `Ps.PSCKernel.Core.Level,
+    `Ps.PSCKernel.Core.Expr
   ]
 
 @[default_target]

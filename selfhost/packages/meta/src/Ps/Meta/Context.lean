@@ -238,7 +238,10 @@ def psExprHasUnresolvedMeta : PsExpr -> Bool
   | .sortE level => psLevelHasMVar level
   | .constE _ levels => psLevelListHasMVar levels
   | .app fn arg =>
-      psExprHasUnresolvedMeta fn || psExprHasUnresolvedMeta arg
+      if psExprHasUnresolvedMeta fn then
+        true
+      else
+        psExprHasUnresolvedMeta arg
   | .lam _ type body _ =>
       psExprHasUnresolvedMeta type || psExprHasUnresolvedMeta body
   | .forallE _ type body _ =>

@@ -24,6 +24,7 @@
     "test:bootstrap-manifest": "node scripts/bootstrap-manifest-tests.mjs",
     "test:semantic-boundaries": "node scripts/semantic-boundary-tests.mjs",
     "check:semantic-boundaries": "npm run test:semantic-boundaries && node scripts/check-semantic-boundaries.mjs",
+    "test:fixed-point-command": "node scripts/fixed-point-command-tests.mjs",
     "check:bootstrap-closure": "npm run test:bootstrap-closure-contract && node scripts/check-bootstrap-closure.mjs",
     "build:lean": "npm run build:lake",
     "test:kernel-core": "lake exe psc2_kernel_core_boundary_tests && lake exe psc2_kernel_core_name_parity_tests",

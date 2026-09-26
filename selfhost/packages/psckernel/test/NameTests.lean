@@ -92,8 +92,10 @@ def psCKernelTestNumeralBeforeString : Bool :=
   psCKernelNameCmp numeral text == -1
 
 def psCKernelTestUnicodeScalarOrdering : Bool :=
-  let bmp : PsCKernelName := psCKernelStrName psCKernelTestNameA "\u{E000}"
-  let astral : PsCKernelName := psCKernelStrName psCKernelTestNameA "\u{10000}"
+  let bmpText : String := String.singleton (Char.ofNat 57344)
+  let astralText : String := String.singleton (Char.ofNat 65536)
+  let bmp : PsCKernelName := psCKernelStrName psCKernelTestNameA bmpText
+  let astral : PsCKernelName := psCKernelStrName psCKernelTestNameA astralText
   psCKernelNameCmp bmp astral == -1
 
 def psCKernelNameTests : List PsCKernelNameNamedTest := [

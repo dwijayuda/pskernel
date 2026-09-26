@@ -1,0 +1,113 @@
+name: Wasm Nat Add Carry Fix Diagnostic
+
+on:
+  push:
+    branches:
+      - debug/wasm3-nat-carry
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-fix:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply carry-aware Nat runtime candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean')
+          text = path.read_text()
+
+          succ_start_marker = '''    {
+                name := psWasmNatSuccFn'''
+          cmp_start_marker = '''    {
+                name := psWasmNatCmpFn'''
+          succ_start = text.index(succ_start_marker)
+          cmp_start = text.index(cmp_start_marker, succ_start)
+          new_succ = '''    {
+                name := psWasmNatSuccFn
+                typeName := none
+                parameters := [psWasmNatRef]
+                results := [psWasmNatRef]
+                locals := []
+                body := [
+                  PsWasmInstruction.localGet 0,
+                  PsWasmInstruction.call psWasmNatZeroFn,
+                  PsWasmInstruction.call psWasmNatBit1Fn,
+                  PsWasmInstruction.call psWasmNatAddFn
+                ]
+              },
+          '''
+          text = text[:succ_start] + new_succ + text[cmp_start:]
+
+          old_carry = '''            PsWasmInstruction.localGet 2,
+                      PsWasmInstruction.call psWasmNatSuccFn,
+                      PsWasmInstruction.call psWasmNatMkBit0Fn,'''
+          new_carry = '''            PsWasmInstruction.localGet 2,
+                      PsWasmInstruction.call psWasmNatZeroFn,
+                      PsWasmInstruction.call psWasmNatBit1Fn,
+                      PsWasmInstruction.call psWasmNatAddFn,
+                      PsWasmInstruction.call psWasmNatMkBit0Fn,'''
+          count = text.count(old_carry)
+          if count != 1:
+              raise SystemExit(f'carry patch expected one match, found {count}')
+          text = text.replace(old_carry, new_carry, 1)
+          path.write_text(text)
+          PY
+
+      - name: Build Wasm binary smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+
+      - name: Execute runtime regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv = readFileSync('/tmp/psc1-wasm-bytes.txt', 'utf8').trim();
+          const bytes = Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) throw new Error('PSC1_WASM_VALIDATE_FAILED');
+          const {instance} = await WebAssembly.instantiate(bytes);
+          const boolChecks = [
+            'natAddLargeExact','natSubFloorsAtZero','natLiteralEqExact',
+            'natAddOneOneExact','natAddCarrySmallExact','natAddCarryMidExact',
+            'natAddCarryExact','natMulOneExact','natMulOddExact','natMulExact',
+            'natDivExact','natModExact','natDivZero','natModZero','natLtExact',
+            'intOfNatExact','intNegSuccExact','intNegExact','intAddMixedExact',
+            'intSubMixedExact','intMulSignedExact','intLargeExact','intLtExact'
+          ];
+          const values = {};
+          for (const name of boolChecks) {
+            const value = instance.exports[name]();
+            values[name] = value;
+            if (value !== 1) throw new Error(`${name}=${value}`);
+          }
+          if (instance.exports.addU32(20,22) !== 42) throw new Error('addU32');
+          if (instance.exports.listLengthTwo() !== 2) throw new Error('listLengthTwo');
+          if (instance.exports.applyReturnedAdder(40,2) !== 42) throw new Error('closure');
+          if (instance.exports.genericLengthTwo() !== 2) throw new Error('genericLengthTwo');
+          console.log('PSC1_WASM_NAT_ADDCARRY_FIX_OK', JSON.stringify(values));
+          NODE

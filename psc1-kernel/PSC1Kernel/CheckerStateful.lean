@@ -16,8 +16,6 @@ partial def whnfCoreStatefulWith
     (e : Expr)
     (cheapRec cheapProj : Bool) : Except String (Expr × CheckerState) := do
   let ctx ← ctx.enterKernelRecDepth
-  -- Match Lean/Lean4Lean: easy cases and metadata/let-FVar forwarding do not
-  -- create entries under the outer expression.
   match e with
   | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _
   | .const _ _ | .lam _ _ _ _ | .lit _ =>
@@ -104,8 +102,6 @@ partial def whnfCoreStatefulWith
             let reduced ← reduceRecursor ctx e cheapRec cheapProj
             match reduced with
             | some value =>
-                -- Lean4Lean does not save the original recursor application
-                -- here; recursive normalization owns any cache entries.
                 whnfCoreStatefulWith publicWhnf ctx state1 value cheapRec cheapProj
             | none => pure (e, state1)
           else
@@ -121,7 +117,6 @@ partial def whnfStateful
     (ctx : CheckerContext)
     (state : CheckerState)
     (e : Expr) : Except String (Expr × CheckerState) := do
-  -- Match the public Lean checker: trivial WHNF cases are not cached.
   match e with
   | .bvar _ | .sort _ | .mvar _ | .forallE _ _ _ _ | .lit _ =>
       return (e, state)
@@ -162,7 +157,6 @@ partial def whnfStateful
   }
   pure (result, next)
 
-/-- Stateful WHNF-core entry point with the public-WHNF callback fixed. -/
 partial def whnfCoreStateful
     (ctx : CheckerContext)
     (state : CheckerState)
@@ -170,16 +164,6 @@ partial def whnfCoreStateful
     (cheapRec cheapProj : Bool) : Except String (Expr × CheckerState) :=
   whnfCoreStatefulWith whnfStateful ctx state e cheapRec cheapProj
 
-/--
-Declaration-scoped positive definitional-equality memoization. Successful pairs
-are reusable throughout one immutable checker environment and the pair set is
-symmetric. Arbitrary negative full-defeq results are intentionally not cached:
-Lean 4.34's failure table is narrower and belongs at the lazy-delta argument
-comparison site.
-
-This compatibility wrapper remains for incremental callers. Fully migrated
-callers inject `StatefulDefEq.isDefEq` through `inferCoreStatefulWith` instead.
--/
 partial def isDefEqStateful
     (ctx : CheckerContext)
     (state : CheckerState)
@@ -205,16 +189,44 @@ private def cacheInferStatefulResult
     { state with checkedInfer := CheckerExprMap.insert state.checkedInfer e result }
 
 /--
-Incremental stateful counterpart of Lean 4.34 `infer_type_core` with an explicit
-definitional-equality callback. This breaks the module cycle between inference
-and the full recursive stateful defeq algorithm while still letting both share
-one `CheckerState`.
+Lean-4.34 infer-only application-spine traversal. It recursively infers the
+flattened application head through the shared infer-only cache, delays binder
+instantiation across syntactic Pi binders, and only exposes a non-Pi head with
+stateful WHNF when needed.
+-/
+partial def inferAppOnlyStatefulWith
+    (defeq : CheckerContext → CheckerState → Expr → Expr →
+      Except String (Bool × CheckerState))
+    (ctx : CheckerContext)
+    (state : CheckerState)
+    (e : Expr) : Except String (Expr × CheckerState) := do
+  let fn := e.getAppFn
+  let args := e.getAppArgs
+  let (fnType, state1) ← inferCoreStatefulWith defeq ctx state fn true
+  let rec loop
+      (fType : Expr)
+      (j i : Nat)
+      (current : CheckerState) : Except String (Expr × CheckerState) := do
+    if i < args.length then
+      match fType with
+      | .forallE _ _ body _ =>
+          loop body j (i + 1) current
+      | _ => do
+          let pending := (args.drop j).take (i - j)
+          let exposedInput := fType.instantiateRev pending
+          let (exposed, next) ← whnfStateful ctx current exposedInput
+          let .forallE _ _ body _ := exposed
+            | throw "expected function type"
+          loop body i (i + 1) next
+    else
+      return (fType.instantiateRev (args.drop j), current)
+  loop fnType 0 0 state1
 
-Final Lean 4.34 enters `scope_rec_depth` before the infer-cache lookup. During
-this incremental migration, cache hits and the custom checked-application path
-therefore enter the PSC1 recursion guard explicitly. Non-migrated misses still
-delegate to the established pure `inferCore`, which already enters that guard;
-charging them here as well would incorrectly double-count recursion depth.
+/--
+Incremental stateful counterpart of Lean 4.34 `infer_type_core` with an explicit
+definitional-equality callback. Cache hits and migrated misses enter the same
+kernel recursion boundary as final Lean 4.34. Non-migrated misses still defer
+to the established pure checker until their stateful equivalents are added.
 -/
 partial def inferCoreStatefulWith
     (defeq : CheckerContext → CheckerState → Expr → Expr →
@@ -230,18 +242,12 @@ partial def inferCoreStatefulWith
       return (cached, state)
   | none =>
       match e with
-      | .app fn arg =>
+      | .app fn arg => do
+          let ctx ← ctx.enterKernelRecDepth
           if inferOnly then
-            -- This branch is not migrated yet. Pure `inferCore` owns exactly
-            -- one recursion-depth scope, matching the C++ miss path.
-            match inferCore ctx e true with
-            | .error err => .error err
-            | .ok result =>
-                .ok (result, cacheInferStatefulResult state true e result)
-          else do
-            -- This branch replaces pure `inferCore`, so it must own the one
-            -- `scope_rec_depth` that Lean C++ charges before recursive work.
-            let ctx ← ctx.enterKernelRecDepth
+            let (result, next) ← inferAppOnlyStatefulWith defeq ctx state e
+            return (result, cacheInferStatefulResult next true e result)
+          else
             let (fnType, state1) ← inferCoreStatefulWith defeq ctx state fn false
             let (fnTypeWhnf, state2) ← whnfStateful ctx state1 fnType
             let .forallE _ domain body _ := fnTypeWhnf
@@ -258,13 +264,11 @@ partial def inferCoreStatefulWith
             let result := body.instantiate1 arg
             return (result, cacheInferStatefulResult state4 false e result)
       | _ =>
-          -- Non-migrated forms retain the proven pure resource accounting.
           match inferCore ctx e inferOnly with
           | .error err => .error err
           | .ok result =>
               .ok (result, cacheInferStatefulResult state inferOnly e result)
 
-/-- Compatibility stateful inference using the older positive-cache wrapper. -/
 partial def inferCoreStateful
     (ctx : CheckerContext)
     (state : CheckerState)
@@ -272,7 +276,6 @@ partial def inferCoreStateful
     (inferOnly : Bool) : Except String (Expr × CheckerState) :=
   inferCoreStatefulWith isDefEqStateful ctx state e inferOnly
 
-/-- Stateful checked-inference entry point with an injected defeq algorithm. -/
 def checkStatefulWith
     (defeq : CheckerContext → CheckerState → Expr → Expr →
       Except String (Bool × CheckerState))
@@ -281,7 +284,6 @@ def checkStatefulWith
     (e : Expr) : Except String (Expr × CheckerState) :=
   inferCoreStatefulWith defeq ctx state e false
 
-/-- Stateful infer-only entry point with an injected defeq algorithm. -/
 def inferStatefulWith
     (defeq : CheckerContext → CheckerState → Expr → Expr →
       Except String (Bool × CheckerState))
@@ -290,14 +292,12 @@ def inferStatefulWith
     (e : Expr) : Except String (Expr × CheckerState) :=
   inferCoreStatefulWith defeq ctx state e true
 
-/-- Compatibility checked-inference entry point. -/
 def checkStateful
     (ctx : CheckerContext)
     (state : CheckerState)
     (e : Expr) : Except String (Expr × CheckerState) :=
   checkStatefulWith isDefEqStateful ctx state e
 
-/-- Compatibility infer-only entry point with a cache separate from checked inference. -/
 def inferStateful
     (ctx : CheckerContext)
     (state : CheckerState)

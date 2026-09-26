@@ -1,0 +1,79 @@
+name: Patch PSC15 bootstrap fixtures once
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase1
+    paths:
+      - .github/workflows/patch-psc15-bootstrap-fixtures-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase1
+
+      - name: Patch stale declaration metadata fixtures
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("psc15selfhost/test/BootstrapTests.lean")
+          text = path.read_text(encoding="utf-8")
+
+          sections = [
+              ("psTestInductiveMetadataLookup", "psTestBasicMatchShape", [
+                  ("    constructors := [ctorName]\n", "    constructors := [ctorName]\n    isStructure := false\n", 1),
+                  ("    numFields := 0\n", "    numFields := 0\n    recursiveFields := []\n", 1),
+              ]),
+              ("psTestChoiceEnvironment", "psTestBasicMatchDeclarationShape", [
+                  ("    constructors := [leftName, rightName]\n", "    constructors := [leftName, rightName]\n    isStructure := false\n", 1),
+                  ("    numFields := 0\n", "    numFields := 0\n    recursiveFields := []\n", 2),
+              ]),
+              ("psTestBoxNatEnvironment", "psTestFieldMatchDeclarationShape", [
+                  ("    constructors := [ctorName]\n", "    constructors := [ctorName]\n    isStructure := false\n", 1),
+                  ("    numFields := 1\n", "    numFields := 1\n    recursiveFields := []\n", 1),
+              ]),
+          ]
+
+          total = 0
+          for start_name, end_name, replacements in sections:
+              start = text.index(f"def {start_name}")
+              end = text.index(f"def {end_name}", start)
+              before = text[:start]
+              section = text[start:end]
+              after = text[end:]
+              for old, new, expected in replacements:
+                  count = section.count(old)
+                  if count != expected:
+                      raise SystemExit(
+                          f"{start_name}: expected {expected} occurrences of {old!r}, found {count}"
+                      )
+                  section = section.replace(old, new)
+                  total += expected
+              text = before + section + after
+
+          if total != 7:
+              raise SystemExit(f"expected exactly 7 metadata insertions, got {total}")
+
+          path.write_text(text, encoding="utf-8")
+          print("BOOTSTRAP_FIXTURE_PATCH: PASS (7 metadata insertions)")
+
+      - name: Verify and commit exact fixture patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          changed="$(git diff --name-only)"
+          test "$changed" = "psc15selfhost/test/BootstrapTests.lean"
+          git diff --stat
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/test/BootstrapTests.lean
+          git commit -m "test(selfhost): update bootstrap declaration metadata fixtures"
+          git push origin HEAD:psc2/kernel-core-phase1

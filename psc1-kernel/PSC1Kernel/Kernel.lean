@@ -1,4 +1,5 @@
 import PSC1Kernel.Quot
+import PSC1Kernel.CheckerSession
 
 namespace PSC1Kernel
 
@@ -100,17 +101,20 @@ def mkChecker
     (maxRecDepth : Nat := 0)
     (maxNatSize : Nat := leanNatMaxSizeDefault)
     (nativeEvaluator : Option NativeEvaluator := none) : CheckerContext :=
-  {
-    env := env
-    lctx := .empty
-    levelParams := levelParams
-    safety := safety
-    eagerReduce := false
-    nativeEvaluator := nativeEvaluator
-    maxRecDepth := maxRecDepth
-    maxNatSize := maxNatSize
-    recDepth := 0
-  }
+  (mkCheckerSession env levelParams safety maxRecDepth maxNatSize nativeEvaluator).context
+
+private def checkConstantBaseWithSession
+    (session : CheckerSession)
+    (base : ConstantBase) : Except String Unit := do
+  if session.context.env.contains base.name then
+    throw "already declared"
+  if Name.hasDuplicates base.levelParams then
+    throw "duplicate universe parameter"
+  checkNoMVarNoFVar base.type
+  checkLevelParams base.type base.levelParams
+  let typeType ← session.check base.type
+  let _ ← session.ensureSort typeType
+  pure ()
 
 def checkConstantBase
     (env : Environment)
@@ -119,16 +123,18 @@ def checkConstantBase
     (maxRecDepth : Nat := 0)
     (maxNatSize : Nat := leanNatMaxSizeDefault)
     (nativeEvaluator : Option NativeEvaluator := none) : Except String Unit := do
-  if env.contains base.name then
-    throw "already declared"
-  if Name.hasDuplicates base.levelParams then
-    throw "duplicate universe parameter"
-  checkNoMVarNoFVar base.type
-  checkLevelParams base.type base.levelParams
-  let ctx := mkChecker env base.levelParams safety maxRecDepth maxNatSize nativeEvaluator
-  let typeType ← check ctx base.type
-  let _ ← ensureSort ctx typeType
-  pure ()
+  let session :=
+    mkCheckerSession env base.levelParams safety maxRecDepth maxNatSize nativeEvaluator
+  checkConstantBaseWithSession session base
+
+private def checkDefinitionBodyWithSession
+    (session : CheckerSession)
+    (value : DefinitionInfo) : Except String Unit := do
+  checkNoMVarNoFVar value.value
+  checkLevelParams value.value value.base.levelParams
+  let valueType ← session.check value.value
+  unless ← session.isDefEq valueType value.base.type do
+    throw "definition type mismatch"
 
 def checkDefinitionBody
     (env : Environment)
@@ -137,12 +143,9 @@ def checkDefinitionBody
     (maxRecDepth : Nat := 0)
     (maxNatSize : Nat := leanNatMaxSizeDefault)
     (nativeEvaluator : Option NativeEvaluator := none) : Except String Unit := do
-  checkNoMVarNoFVar value.value
-  checkLevelParams value.value value.base.levelParams
-  let ctx := mkChecker env value.base.levelParams safety maxRecDepth maxNatSize nativeEvaluator
-  let valueType ← check ctx value.value
-  unless ← isDefEq ctx valueType value.base.type do
-    throw "definition type mismatch"
+  let session :=
+    mkCheckerSession env value.base.levelParams safety maxRecDepth maxNatSize nativeEvaluator
+  checkDefinitionBodyWithSession session value
 
 def addAxiom
     (env : Environment)
@@ -164,13 +167,21 @@ def addDefinition
   | .unsafeDef =>
       -- Final Lean 4.34 adds the *full definition* before checking the body,
       -- so recursive unsafe code may unfold itself while being checked.
-      checkConstantBase env value.base .unsafeDef maxRecDepth maxNatSize nativeEvaluator
+      let headerSession :=
+        mkCheckerSession env value.base.levelParams .unsafeDef maxRecDepth maxNatSize nativeEvaluator
+      checkConstantBaseWithSession headerSession value.base
       let work ← env.add (.defnInfo value)
-      checkDefinitionBody work value .unsafeDef maxRecDepth maxNatSize nativeEvaluator
+      -- The environment changed. A checker session must never cross this
+      -- boundary; the recursive body gets a fresh session bound to `work`.
+      let bodySession :=
+        mkCheckerSession work value.base.levelParams .unsafeDef maxRecDepth maxNatSize nativeEvaluator
+      checkDefinitionBodyWithSession bodySession value
       pure work
   | .safe | .partialDef =>
-      checkConstantBase env value.base .safe maxRecDepth maxNatSize nativeEvaluator
-      checkDefinitionBody env value .safe maxRecDepth maxNatSize nativeEvaluator
+      let session :=
+        mkCheckerSession env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
+      checkConstantBaseWithSession session value.base
+      checkDefinitionBodyWithSession session value
       env.add (.defnInfo value)
 
 def addTheorem
@@ -179,14 +190,15 @@ def addTheorem
     (maxRecDepth : Nat := 0)
     (maxNatSize : Nat := leanNatMaxSizeDefault)
     (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
-  checkConstantBase env value.base .safe maxRecDepth maxNatSize nativeEvaluator
-  let ctx := mkChecker env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
-  unless ← isProp ctx value.base.type do
+  let session :=
+    mkCheckerSession env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
+  checkConstantBaseWithSession session value.base
+  unless ← session.isProp value.base.type do
     throw "theorem type is not a proposition"
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
-  let valueType ← check ctx value.value
-  unless ← isDefEq ctx valueType value.base.type do
+  let valueType ← session.check value.value
+  unless ← session.isDefEq valueType value.base.type do
     throw "theorem proof type mismatch"
   env.add (.thmInfo value)
 
@@ -198,12 +210,13 @@ def addOpaque
     (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
   -- Matches final Lean 4.34 environment.cpp: opaque bodies are checked by the
   -- ordinary safe checker even though ConstantInfo retains an isUnsafe bit.
-  checkConstantBase env value.base .safe maxRecDepth maxNatSize nativeEvaluator
+  let session :=
+    mkCheckerSession env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
+  checkConstantBaseWithSession session value.base
   checkNoMVarNoFVar value.value
   checkLevelParams value.value value.base.levelParams
-  let ctx := mkChecker env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
-  let valueType ← check ctx value.value
-  unless ← isDefEq ctx valueType value.base.type do
+  let valueType ← session.check value.value
+  unless ← session.isDefEq valueType value.base.type do
     throw "opaque value type mismatch"
   env.add (.opaqueInfo value)
 

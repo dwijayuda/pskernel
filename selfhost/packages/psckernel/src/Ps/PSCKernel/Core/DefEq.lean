@@ -48,14 +48,6 @@ def psCKernelEtaExpand?
               binderInfo)
       | _ => none
 
-def psCKernelExprListGet?
-    (values : List PsCKernelExpr)
-    (index : Nat) : Option PsCKernelExpr :=
-  match values, index with
-  | [], _ => none
-  | value :: _, 0 => some value
-  | _ :: rest, Nat.succ next => psCKernelExprListGet? rest next
-
 def psCKernelStructEtaFieldsEqual
     (typeName : PsCKernelName)
     (target : PsCKernelExpr)

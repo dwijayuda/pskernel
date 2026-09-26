@@ -45,6 +45,11 @@ const anon = n('_');
 const arrow = (a, b) => forallE(anon, a, b);
 const boolText = (value) => value ? 'true' : 'false';
 
+function nameKey(name) {
+  const rendered = nameToString(name);
+  return rendered === '_' ? '[anonymous]' : rendered;
+}
+
 function expectedEqType(uName) {
   const u = levelParam(uName);
   return forallE(
@@ -117,8 +122,8 @@ function levelKey(level) {
     case 'succ': return `s(${levelKey(level.of)})`;
     case 'max': return `m(${levelKey(level.left)},${levelKey(level.right)})`;
     case 'imax': return `i(${levelKey(level.left)},${levelKey(level.right)})`;
-    case 'param': return `p{${nameToString(level.name)}}`;
-    case 'mvar': return `v{${nameToString(level.name)}}`;
+    case 'param': return `p{${nameKey(level.name)}}`;
+    case 'mvar': return `v{${nameKey(level.name)}}`;
   }
 }
 
@@ -137,14 +142,14 @@ function exprKey(expr) {
     case 'fvar': return `f{${expr.id}}`;
     case 'mvar': return `v{${expr.id}}`;
     case 'sort': return `S{${levelKey(expr.level)}}`;
-    case 'const': return `C{${nameToString(expr.name)}}[${expr.levels.map(levelKey).join(',')}]`;
+    case 'const': return `C{${nameKey(expr.name)}}[${expr.levels.map(levelKey).join(',')}]`;
     case 'app': return `A(${exprKey(expr.fn)},${exprKey(expr.arg)})`;
-    case 'lam': return `L{${nameToString(expr.name)};${binderKey(expr.binderInfo)}}(${exprKey(expr.type)},${exprKey(expr.body)})`;
-    case 'forall': return `P{${nameToString(expr.name)};${binderKey(expr.binderInfo)}}(${exprKey(expr.type)},${exprKey(expr.body)})`;
-    case 'let': return `T{${nameToString(expr.name)};${expr.nondep ? '1' : '0'}}(${exprKey(expr.type)},${exprKey(expr.value)},${exprKey(expr.body)})`;
+    case 'lam': return `L{${nameKey(expr.name)};${binderKey(expr.binderInfo)}}(${exprKey(expr.type)},${exprKey(expr.body)})`;
+    case 'forall': return `P{${nameKey(expr.name)};${binderKey(expr.binderInfo)}}(${exprKey(expr.type)},${exprKey(expr.body)})`;
+    case 'let': return `T{${nameKey(expr.name)};${expr.nondep ? '1' : '0'}}(${exprKey(expr.type)},${exprKey(expr.value)},${exprKey(expr.body)})`;
     case 'lit': return expr.literal.kind === 'nat' ? `N${expr.literal.value}` : `Q${expr.literal.value}`;
     case 'mdata': return `M(${exprKey(expr.expr)})`;
-    case 'proj': return `R{${nameToString(expr.typeName)};${expr.index}}(${exprKey(expr.expr)})`;
+    case 'proj': return `R{${nameKey(expr.typeName)};${expr.index}}(${exprKey(expr.expr)})`;
   }
 }
 
@@ -153,7 +158,7 @@ function quotInfoKey(env, name) {
   if (!info || info.kind !== 'quot') return 'none';
   return [
     info.quotKind,
-    info.levelParams.map(nameToString).join(','),
+    info.levelParams.map(nameKey).join(','),
     exprKey(info.type),
   ].join('|');
 }

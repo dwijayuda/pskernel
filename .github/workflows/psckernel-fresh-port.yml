@@ -142,6 +142,13 @@ jobs:
           cd selfhost
           lake env lean --run packages/psckernel/test/RecursorNatLiteralTests.lean
 
+      - name: Run PSCKernel quotient reduction tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake env lean --run packages/psckernel/test/QuotReductionTests.lean
+
       - name: Run PSCKernel basic type inference tests
         shell: bash
         run: |

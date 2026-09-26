@@ -60,6 +60,116 @@ def psCKernelExprContainsFVar
       psCKernelExprContainsFVar value target
   | _ => false
 
+def psCKernelTypeInferenceApplyProjectionParams
+    (env : PsCKernelEnvironment)
+    (lctx : PsCKernelLocalContext)
+    (cursor : PsCKernelExpr)
+    (args : List PsCKernelExpr)
+    (remaining : Nat) : Option PsCKernelExpr :=
+  match remaining, args with
+  | 0, _ => some cursor
+  | Nat.succ _, [] => none
+  | Nat.succ restCount, arg :: restArgs =>
+      match psCKernelExprWhnfBasic env lctx cursor with
+      | PsCKernelExpr.forallE _ _ body _ =>
+          psCKernelTypeInferenceApplyProjectionParams
+            env
+            lctx
+            (psCKernelExprInstantiate1 body arg)
+            restArgs
+            restCount
+      | _ => none
+
+def psCKernelTypeInferenceProjectionField
+    (env : PsCKernelEnvironment)
+    (lctx : PsCKernelLocalContext)
+    (typeName : PsCKernelName)
+    (target : PsCKernelExpr)
+    (requestedIndex : Nat)
+    (fieldIndex : Nat)
+    (cursor : PsCKernelExpr) : Option PsCKernelExpr :=
+  match psCKernelExprWhnfBasic env lctx cursor, requestedIndex with
+  | PsCKernelExpr.forallE _ domain _ _, 0 => some domain
+  | PsCKernelExpr.forallE _ _ body _, Nat.succ rest =>
+      psCKernelTypeInferenceProjectionField
+        env
+        lctx
+        typeName
+        target
+        rest
+        (Nat.add fieldIndex 1)
+        (psCKernelExprInstantiate1
+          body
+          (PsCKernelExpr.proj typeName fieldIndex target))
+  | _, _ => none
+
+def psCKernelTypeInferenceProjectionRaw?
+    (env : PsCKernelEnvironment)
+    (lctx : PsCKernelLocalContext)
+    (targetType : PsCKernelExpr)
+    (typeName : PsCKernelName)
+    (index : Nat)
+    (target : PsCKernelExpr) : Option PsCKernelExpr :=
+  let reducedTargetType := psCKernelExprWhnfBasic env lctx targetType
+  let head := psCKernelExprGetAppFn reducedTargetType
+  let args := psCKernelExprGetAppArgs reducedTargetType
+  match head with
+  | PsCKernelExpr.constE actualName levels =>
+      if psCKernelNameEq actualName typeName then
+        match psCKernelEnvironmentFind? env typeName with
+        | some info =>
+            match info with
+            | PsCKernelConstantInfo.inductInfo inductiveInfo =>
+                if Nat.beq args.length
+                    (Nat.add inductiveInfo.numParams inductiveInfo.numIndices) then
+                  match inductiveInfo.ctors with
+                  | [ctorName] =>
+                      match psCKernelEnvironmentFind? env ctorName with
+                      | some ctorInfo =>
+                          match ctorInfo with
+                          | PsCKernelConstantInfo.ctorInfo constructorInfo =>
+                              if Nat.beq constructorInfo.numParams inductiveInfo.numParams then
+                                if Nat.blt index constructorInfo.numFields then
+                                  if Nat.beq levels.length constructorInfo.base.levelParams.length then
+                                    let instantiatedCtorType :=
+                                      psCKernelInstantiateExprLevels
+                                        constructorInfo.base.declType
+                                        constructorInfo.base.levelParams
+                                        levels
+                                    match
+                                        psCKernelTypeInferenceApplyProjectionParams
+                                          env
+                                          lctx
+                                          instantiatedCtorType
+                                          args
+                                          inductiveInfo.numParams with
+                                    | none => none
+                                    | some fieldCursor =>
+                                        psCKernelTypeInferenceProjectionField
+                                          env
+                                          lctx
+                                          typeName
+                                          target
+                                          index
+                                          0
+                                          fieldCursor
+                                  else
+                                    none
+                                else
+                                  none
+                              else
+                                none
+                          | _ => none
+                      | none => none
+                  | _ => none
+                else
+                  none
+            | _ => none
+        | none => none
+      else
+        none
+  | _ => none
+
 partial def psCKernelInfer?
     (env : PsCKernelEnvironment)
     (lctx : PsCKernelLocalContext)
@@ -174,4 +284,31 @@ partial def psCKernelInfer?
           some (PsCKernelExpr.constE psCKernelBuiltinNatName [])
       | PsCKernelLiteral.strVal _ =>
           some (PsCKernelExpr.constE psCKernelBuiltinStringName [])
-  | PsCKernelExpr.proj _ _ _ => none
+  | PsCKernelExpr.proj typeName index target =>
+      match psCKernelInfer? env lctx target with
+      | none => none
+      | some targetType =>
+          match
+              psCKernelTypeInferenceProjectionRaw?
+                env lctx targetType typeName index target with
+          | none => none
+          | some fieldType =>
+              match psCKernelInfer? env lctx targetType with
+              | none => none
+              | some targetTypeType =>
+                  match psCKernelExprWhnfBasic env lctx targetTypeType with
+                  | PsCKernelExpr.sortE targetLevel =>
+                      if psCKernelLevelEquivalent targetLevel psCKernelLevelZero then
+                        match psCKernelInfer? env lctx fieldType with
+                        | none => none
+                        | some fieldTypeType =>
+                            match psCKernelExprWhnfBasic env lctx fieldTypeType with
+                            | PsCKernelExpr.sortE fieldLevel =>
+                                if psCKernelLevelEquivalent fieldLevel psCKernelLevelZero then
+                                  some fieldType
+                                else
+                                  none
+                            | _ => none
+                      else
+                        some fieldType
+                  | _ => none

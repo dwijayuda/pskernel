@@ -119,14 +119,15 @@ jobs:
         run: |
           set -euo pipefail
           git status --short
+          git restore \
+            .github/workflows/wasm3-backend.yml \
+            .github/workflows/psc1-lean-bootstrap.yml
           git add \
             selfhost/packages/backend-wasm/src/Ps/BackendWasm/Model.lean \
             selfhost/packages/backend-wasm/src/Ps/BackendWasm/Binary.lean \
             selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean \
             selfhost/packages/backend-wasm/src/Ps/BackendWasm/Lower.lean \
-            selfhost/test/WasmBinarySmoke.lean \
-            .github/workflows/wasm3-backend.yml \
-            .github/workflows/psc1-lean-bootstrap.yml
+            selfhost/test/WasmBinarySmoke.lean
           git diff --cached --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'

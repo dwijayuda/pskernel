@@ -215,9 +215,10 @@ private def ensureSortStatefulResult
 
 /--
 Incremental stateful counterpart of Lean 4.34 `infer_type_core` with an explicit
-definitional-equality callback. The migrated application and binder paths share
-one declaration-scoped state through recursive inference, WHNF, and defeq.
-Non-migrated misses still delegate to the established pure semantic checker.
+definitional-equality callback. The migrated application, binder, and projection
+paths share one declaration-scoped state through recursive inference, WHNF, and
+defeq. Non-migrated misses still delegate to the established pure semantic
+checker.
 -/
 partial def inferCoreStatefulWith
     (defeq : CheckerContext → CheckerState → Expr → Expr →
@@ -407,6 +408,93 @@ partial def inferCoreStatefulWith
                 return (result, next)
           let (result, next) ← loopLet ctx state e [] []
           return (result, cacheInferStatefulResult next inferOnly e result)
+
+      | .proj typeName idx struct => do
+          let ctx ← ctx.enterKernelRecDepth
+          let (structType, state1) ←
+            inferCoreStatefulWith defeq ctx state struct inferOnly
+          let (type, state2) ← whnfStateful ctx state1 structType
+          if idx > leanUInt32Max then
+            throw "invalid projection index"
+          let fn := type.getAppFn
+          let args := type.getAppArgs
+          let (.const inductName inductLevels) := fn
+            | .error "invalid projection: projected expression type is not an inductive application"
+          if !Name.eq inductName typeName then
+            .error "invalid projection: structure type mismatch"
+          else
+            let some (.inductInfo induct) := ctx.env.find? inductName
+              | .error "invalid projection: structure name is not inductive"
+            match induct.ctors with
+            | [ctorName] =>
+              if args.length != induct.numParams + induct.numIndices then
+                .error "invalid projection: inductive type is not fully applied"
+              else
+                let some (.ctorInfo ctor) := ctx.env.find? ctorName
+                  | .error "invalid projection: constructor metadata missing"
+                let r0 :=
+                  ctor.base.type.instantiateLevelParams ctor.base.levelParams inductLevels
+                let rec applyParams
+                    (i : Nat)
+                    (r : Expr)
+                    (currentState : CheckerState) :
+                    Except String (Expr × CheckerState) := do
+                  if i < induct.numParams then
+                    let (r', next) ← whnfStateful ctx currentState r
+                    let .forallE _ _ body _ := r'
+                      | .error "invalid projection: constructor parameter is not a forall"
+                    let some arg := listGet? args i
+                      | .error "invalid projection: missing structure parameter"
+                    applyParams (i + 1) (body.instantiate1 arg) next
+                  else
+                    .ok (r, currentState)
+                let (r1, state3) ← applyParams 0 r0 state2
+                let isPropStateful
+                    (currentState : CheckerState)
+                    (term : Expr) : Except String (Bool × CheckerState) := do
+                  let (termType, next1) ←
+                    inferCoreStatefulWith defeq ctx currentState term true
+                  let (level, next2) ←
+                    ensureSortStatefulResult ctx next1 termType
+                  return (Level.normalizesToZero level, next2)
+                let (propType, state4) ← isPropStateful state3 type
+                let rec skipFields
+                    (i : Nat)
+                    (r : Expr)
+                    (currentState : CheckerState) :
+                    Except String (Expr × CheckerState) := do
+                  if i < idx then
+                    let (r', next1) ← whnfStateful ctx currentState r
+                    let .forallE _ domain body _ := r'
+                      | .error "invalid projection index"
+                    if body.hasLooseBVar then
+                      if propType then
+                        let (domainProp, next2) ← isPropStateful next1 domain
+                        if !domainProp then
+                          .error "invalid projection: proof structure depends on data field"
+                        else
+                          skipFields (i + 1)
+                            (body.instantiate1 (.proj inductName i struct)) next2
+                      else
+                        skipFields (i + 1)
+                          (body.instantiate1 (.proj inductName i struct)) next1
+                    else
+                      skipFields (i + 1) body next1
+                  else
+                    .ok (r, currentState)
+                let (r2, state5) ← skipFields 0 r1 state4
+                let (r3, state6) ← whnfStateful ctx state5 r2
+                let .forallE _ domain _ _ := r3
+                  | .error "invalid projection index"
+                if propType then
+                  let (domainProp, state7) ← isPropStateful state6 domain
+                  if !domainProp then
+                    .error "invalid projection: proof structure field is not a proposition"
+                  else
+                    return (domain, cacheInferStatefulResult state7 inferOnly e domain)
+                else
+                  return (domain, cacheInferStatefulResult state6 inferOnly e domain)
+            | _ => .error "invalid projection: inductive must have exactly one constructor"
 
       | _ =>
           -- Non-migrated forms retain the proven pure resource accounting.

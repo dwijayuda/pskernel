@@ -130,9 +130,11 @@ def psExprFVarsInContext (localContext : PsLocalContext) : PsExpr -> Bool
       else
         false
   | .letE _ type value body =>
-      psExprFVarsInContext localContext type
-        && psExprFVarsInContext localContext value
-        && psExprFVarsInContext localContext body
+      if psExprFVarsInContext localContext type then
+        psExprFVarsInContext localContext value
+          && psExprFVarsInContext localContext body
+      else
+        false
   | .proj _ _ value => psExprFVarsInContext localContext value
   | _ => true
 

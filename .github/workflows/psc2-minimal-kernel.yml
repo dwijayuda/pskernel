@@ -12,6 +12,7 @@ on:
       - psc15selfhost/package.json
       - psc15selfhost/scripts/check-kernel-core-source.mjs
       - psc15selfhost/scripts/check-bootstrap-closure.mjs
+      - psc15selfhost/scripts/report-kernel-core-size.mjs
       - .github/workflows/psc2-minimal-kernel.yml
   workflow_dispatch:
 
@@ -84,3 +85,17 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           node scripts/check-kernel-core-source.mjs
+
+      - name: Phase 1 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase1
+
+      - name: Existing PSC2 regression gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run check

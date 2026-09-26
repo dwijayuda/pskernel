@@ -4,6 +4,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import {
+  bootstrapManifestSchemaVersion,
+  canonicalGeneratedPaths,
+  computeBootstrapWorkspaceClosureSha256,
+  assertBootstrapManifestShape,
+} from "./bootstrap-manifest.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -128,13 +134,22 @@ for (const sourcePath of sources) {
   generated.push(relative.replaceAll(path.sep, "/"));
 }
 
-const entryRelative = translatedRelativePath(entryPath);
+const entryRelative = translatedRelativePath(entryPath).replaceAll(path.sep, "/");
+const canonicalGenerated = canonicalGeneratedPaths(generated);
+const closureSha256 = await computeBootstrapWorkspaceClosureSha256(
+  outWorkspace,
+  entryRelative,
+  canonicalGenerated,
+);
 const manifest = {
-  schemaVersion: 1,
-  entry: entryRelative.replaceAll(path.sep, "/"),
-  sourceCount: sources.length,
-  generated,
+  schemaVersion: bootstrapManifestSchemaVersion,
+  generation: "bootstrap",
+  entry: entryRelative,
+  sourceCount: canonicalGenerated.length,
+  generated: canonicalGenerated,
+  closureSha256,
 };
+assertBootstrapManifestShape(manifest, "bootstrap");
 
 await mkdir(outWorkspace, { recursive: true });
 await writeFile(
@@ -147,6 +162,7 @@ process.stdout.write(
   [
     `PSC2_BOOTSTRAP_PS_WORKSPACE: ${path.relative(selfhostRoot, outWorkspace)}`,
     `PSC2_BOOTSTRAP_PS_ENTRY: ${path.join(path.relative(selfhostRoot, outWorkspace), entryRelative)}`,
-    `PSC2_BOOTSTRAP_PS_SOURCES: ${sources.length}`,
+    `PSC2_BOOTSTRAP_PS_SOURCES: ${canonicalGenerated.length}`,
+    `PSC2_BOOTSTRAP_PS_CLOSURE_SHA256: ${closureSha256}`,
   ].join("\n") + "\n",
 );

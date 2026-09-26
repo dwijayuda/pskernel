@@ -220,10 +220,14 @@ def psMetaAssign (context : PsMetaContext) (id : Nat) (value : PsExpr) : Option 
           if psExprContainsMVar id resolved then
             Option.none
           else if psExprFVarsInContext declaration.localContext resolved then
+            let assignment : PsMetaAssignment := {
+              id := id
+              value := resolved
+            };
             Option.some {
               nextId := context.nextId
               declarations := context.declarations
-              assignments := List.cons { id := id, value := resolved } context.assignments
+              assignments := List.cons assignment context.assignments
               levels := context.levels
             }
           else

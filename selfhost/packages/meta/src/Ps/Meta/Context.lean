@@ -216,7 +216,7 @@ def psMetaAssign (context : PsMetaContext) (id : Nat) (value : PsExpr) : Option 
       match psMetaFindAssignment context id with
       | Option.some _ => Option.none
       | Option.none =>
-          let resolved := psMetaInstantiate context value
+          let resolved := psMetaInstantiate context value;
           if psExprContainsMVar id resolved then
             Option.none
           else if psExprFVarsInContext declaration.localContext resolved then

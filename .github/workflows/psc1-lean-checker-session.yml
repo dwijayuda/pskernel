@@ -52,8 +52,13 @@ jobs:
         run: |
           set -euo pipefail
           lake build PSC1Kernel.CheckerCacheRuntime:c.o
-          echo "=== defined checkerDefEq symbols ==="
-          nm -C .lake/build/ir/PSC1Kernel/CheckerCacheRuntime.c.o | grep 'checkerDefEq' || true
+          echo "=== CheckerCacheRuntime artifacts ==="
+          find .lake/build -type f -name '*CheckerCacheRuntime*' -print
+          echo "=== checkerDefEq symbols ==="
+          while IFS= read -r obj; do
+            echo "--- $obj"
+            nm -C "$obj" 2>/dev/null | grep 'checkerDefEq' || true
+          done < <(find .lake/build -type f \( -name '*CheckerCacheRuntime*.o' -o -name '*CheckerCacheRuntime*.export' \) -print)
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash

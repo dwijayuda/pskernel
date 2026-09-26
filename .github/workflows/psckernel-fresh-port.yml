@@ -232,6 +232,9 @@ jobs:
       - name: Run PSCKernel proof irrelevance defeq differential
         run: node scripts/psckernel-defeq-proof-irrelevance-differential.mjs
 
+      - name: Run PSCKernel structure eta defeq differential
+        run: node scripts/psckernel-defeq-struct-eta-differential.mjs
+
       - name: Run PSCKernel checked inference basic differential
         run: node scripts/psckernel-checked-inference-basic-differential.mjs
 

@@ -23,6 +23,10 @@ jobs:
             | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Verify pinned Lean toolchain
         shell: bash
         run: |
@@ -50,3 +54,12 @@ jobs:
           set -euo pipefail
           cd selfhost
           lake env lean --run packages/psckernel/test/InductiveAdmissionUniverseTests.lean
+
+      - name: Install TypeScript kernel dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build TypeScript kernel
+        run: npm run build --silent
+
+      - name: Run inductive field universe differential
+        run: node scripts/psckernel-inductive-admission-universe-differential.mjs

@@ -130,3 +130,6 @@ jobs:
 
       - name: Run PSCKernel Expr abstraction differential
         run: node scripts/psckernel-expr-abstraction-differential.mjs
+
+      - name: Run PSCKernel LocalContext differential
+        run: node scripts/psckernel-local-context-differential.mjs

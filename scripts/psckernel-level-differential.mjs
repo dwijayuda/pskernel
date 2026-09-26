@@ -27,10 +27,14 @@ function fail(message) {
   process.exit(1);
 }
 
-const fixtureRun = spawnSync('lake', ['exe', 'psckernel_level_fixture'], {
-  cwd: selfhost,
-  encoding: 'utf8',
-});
+const fixtureRun = spawnSync(
+  'lake',
+  ['env', 'lean', '--run', 'packages/psckernel/test/LevelFixture.lean'],
+  {
+    cwd: selfhost,
+    encoding: 'utf8',
+  },
+);
 
 if (fixtureRun.error) {
   fail(`could not run Lean fixture: ${fixtureRun.error.message}`);

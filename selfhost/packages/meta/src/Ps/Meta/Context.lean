@@ -198,7 +198,7 @@ structure PsMetaFreshLevelResult where
   level : PsLevel
 
 def psMetaFreshLevel (context : PsMetaContext) : PsMetaFreshLevelResult :=
-  let fresh := psLevelMetaFresh context.levels
+  let fresh := psLevelMetaFresh context.levels;
   {
     context := {
       nextId := context.nextId

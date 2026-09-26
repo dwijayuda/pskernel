@@ -75,7 +75,7 @@ def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLeve
   psLevelInstantiateWithFuel context (Nat.add context.assignments.length 1) level
 
 def psLevelOccursResolved (target : Nat) : PsLevel -> Bool
-  | .mvar id => id == target
+  | .mvar id => Nat.beq id target
   | .succ value => psLevelOccursResolved target value
   | .max left right =>
       psLevelOccursResolved target left || psLevelOccursResolved target right

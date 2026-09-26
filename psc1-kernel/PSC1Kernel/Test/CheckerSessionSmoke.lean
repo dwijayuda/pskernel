@@ -87,4 +87,19 @@ def main : IO Unit := do
                 ((CheckerExprMap.get? session3.state.inferOnly cacheInput).isSome &&
                  session3.state.checkedInfer.size == checkedSize)
 
+  -- Lean 4.34 infer-only application inference is recursive: the application
+  -- and the function head are both inferred through the same checker state.
+  -- A wrapper that delegates the whole application to pure `inferCore` only
+  -- caches the outer application and therefore fails this regression.
+  let inferApp : Expr := .app (.const F []) (.const NatN [])
+  match session.inferStateful inferApp with
+  | .error err =>
+      throw <| IO.userError ("stateful infer-only application failed: " ++ err)
+  | .ok (actual, next) =>
+      expectSession "stateful infer-only application result" (Expr.eq actual natT)
+      expectSession "stateful infer-only caches outer application"
+        ((CheckerExprMap.get? next.state.inferOnly inferApp).isSome)
+      expectSession "stateful infer-only recursively caches function head"
+        ((CheckerExprMap.get? next.state.inferOnly (.const F [])).isSome)
+
   IO.println "PSC1 declaration checker-session smoke: PASS"

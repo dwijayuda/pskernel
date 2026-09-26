@@ -99,6 +99,76 @@ def replayFileFrom
       throw <| IO.userError (
         "Lean4Export replay failed for " ++ path ++ ": " ++ err)
 
+def liftReplayResult
+    (path : String)
+    (lineNo : Nat)
+    (result : Except String α) : IO α :=
+  match result with
+  | .ok value => pure value
+  | .error err =>
+      throw <| IO.userError (
+        "Lean4Export replay failed for " ++ path ++
+        " at line " ++ toString lineNo ++ ": " ++ err)
+
+/--
+Diagnostics-only replay loop. It executes the same `ReplayJson.replayLine`
+operation as normal replay and only adds periodic progress output.
+-/
+partial def replaySegmentedLinesFromProgress
+    (path : String)
+    (base : Environment)
+    (lines : List String)
+    (progressEvery : Nat := 10000)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) :
+    IO (Environment × ReplayTotals) := do
+  let rec go
+      (shared : Environment)
+      (current : Option Replay.State)
+      (totals : ReplayTotals)
+      (lineNo : Nat)
+      (remaining : List String) :
+      IO (Environment × ReplayTotals) := do
+    match remaining with
+    | [] =>
+        liftReplayResult path lineNo
+          (finishReplaySegment shared current totals)
+    | line :: rest =>
+        let trimmed := line.trim
+        if trimmed.isEmpty || isReplayContainerMarker trimmed then
+          go shared current totals (lineNo + 1) rest
+        else if isReplaySegmentMarker trimmed then
+          let (shared', totals') ←
+            liftReplayResult path lineNo
+              (finishReplaySegment shared current totals)
+          go shared'
+            (some (Replay.State.empty shared' maxRecDepth maxNatSize nativeEvaluator))
+            totals' (lineNo + 1) rest
+        else
+          let state :=
+            match current with
+            | some value => value
+            | none => Replay.State.empty shared maxRecDepth maxNatSize nativeEvaluator
+          let next ←
+            liftReplayResult path lineNo (ReplayJson.replayLine state line)
+          if progressEvery > 0 && lineNo % progressEvery == 0 then
+            IO.println s!"PSC1 Lean replay PROGRESS file={path} line={lineNo} segmentDecls={next.declarations} totalDecls={totals.declarations + next.declarations} env={next.env.size}"
+          go shared (some next) totals (lineNo + 1) rest
+  go base none {} 1 lines
+
+def replayFileFromProgress
+    (base : Environment)
+    (path : String)
+    (progressEvery : Nat := 10000)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) :
+    IO (Environment × ReplayTotals) := do
+  let content ← IO.FS.readFile path
+  replaySegmentedLinesFromProgress path base (content.splitOn "\n")
+    progressEvery maxRecDepth maxNatSize nativeEvaluator
+
 def printReplayTotals (path : String) (totals : ReplayTotals) : IO Unit :=
   IO.println s!"PSC1 Lean replay PASS file={path} records={totals.records} names={totals.names} levels={totals.levels} exprs={totals.expressions} declarations={totals.declarations} segments={totals.segments}"
 
@@ -118,6 +188,9 @@ partial def replayTargets
 
 def main (args : List String) : IO Unit := do
   match args with
+  | ["--progress", path] => do
+      let (_, totals) ← replayFileFromProgress .empty path
+      printReplayTotals path totals
   | [path] => do
       let (_, totals) ← replayFileFrom .empty path
       printReplayTotals path totals
@@ -138,6 +211,7 @@ def main (args : List String) : IO Unit := do
   | _ =>
       throw <| IO.userError (
         "usage: ReplayFile <lean4export.ndjson> | " ++
+        "ReplayFile --progress <lean4export.ndjson> | " ++
         "ReplayFile --base <base.ndjson> <delta.ndjson> [delta.ndjson ...] | " ++
         "ReplayFile --native-map <native.tsv> <lean4export.ndjson> | " ++
         "ReplayFile --native-map <native.tsv> --base <base.ndjson> " ++

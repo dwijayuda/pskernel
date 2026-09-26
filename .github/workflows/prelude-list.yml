@@ -1,0 +1,37 @@
+name: Prelude List constructors
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - selfhost/list-prelude-constructors
+    paths:
+      - selfhost/packages/core/**
+      - selfhost/packages/environment/**
+      - selfhost/test/PreludeListTests.lean
+      - .github/workflows/prelude-list.yml
+
+permissions:
+  contents: read
+
+jobs:
+  prelude-list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Run Prelude List constructor regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build PsEnvironment
+          lake env lean --run test/PreludeListTests.lean

@@ -139,4 +139,31 @@ def main : IO Unit := do
          | some cached => Expr.eq cached exposedFnType
          | none => false)
 
+  -- Lean 4.34 infer-only application traversal infers the flattened head
+  -- through the same infer-only cache before consuming Pi binders. Delegating
+  -- the whole application to the old pure checker can only cache the outer app
+  -- and therefore cannot satisfy this assertion.
+  let inferHeadName : Name := .str .anonymous "inferHead"
+  let inferArgName : Name := .str .anonymous "inferArg"
+  let inferHeadType : Expr :=
+    .forallE inferArgName (.sort .zero) (.sort .zero) .default
+  let inferOnlyCtx := {
+    ctx with
+      lctx := LocalContext.empty.addLocal
+        inferHeadName inferHeadName inferHeadType .default
+  }
+  let inferOnlyHead : Expr := .fvar inferHeadName
+  let inferOnlyApp : Expr := .app inferOnlyHead (.sort .zero)
+  match inferStateful inferOnlyCtx initial inferOnlyApp with
+  | .error err =>
+      throw <| IO.userError ("infer-only application spine failed: " ++ err)
+  | .ok (actual, state) =>
+      expectStateful "infer-only application result" (Expr.eq actual (.sort .zero))
+      expectStateful "infer-only application caches outer app"
+        ((CheckerExprMap.get? state.inferOnly inferOnlyApp).isSome)
+      expectStateful "infer-only application recursively caches head"
+        (match CheckerExprMap.get? state.inferOnly inferOnlyHead with
+         | some cached => Expr.eq cached inferHeadType
+         | none => false)
+
   IO.println "PSC1 stateful recursive checker smoke: PASS"

@@ -1,4 +1,4 @@
-import Ps.PSCKernel.Core.ExprInstantiation
+import Ps.PSCKernel.Core.ExprAbstraction
 
 structure PsCKernelExprAbstractionNamedTest where
   name : String

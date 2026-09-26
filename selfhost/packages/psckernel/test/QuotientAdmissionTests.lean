@@ -4,18 +4,18 @@ structure PsCKernelQuotientAdmissionNamedTest where
   name : String
   passed : Bool
 
-def psCKernelQuotAdmissionName (text : String) : PsCKernelName :=
+def psCKernelQuotAdmissionTestName (text : String) : PsCKernelName :=
   psCKernelNameFromDotted text
 
 def psCKernelQuotAdmissionArrow
     (domain codomain : PsCKernelExpr) : PsCKernelExpr :=
   PsCKernelExpr.forallE
-    (psCKernelQuotAdmissionName "_") domain codomain PsCKernelBinderInfo.default
+    (psCKernelQuotAdmissionTestName "_") domain codomain PsCKernelBinderInfo.default
 
 def psCKernelQuotAdmissionEqType (uName : PsCKernelName) : PsCKernelExpr :=
   let u := PsCKernelLevel.param uName
   PsCKernelExpr.forallE
-    (psCKernelQuotAdmissionName "α")
+    (psCKernelQuotAdmissionTestName "α")
     (PsCKernelExpr.sortE u)
     (psCKernelQuotAdmissionArrow
       (PsCKernelExpr.bvar 0)
@@ -27,13 +27,13 @@ def psCKernelQuotAdmissionEqType (uName : PsCKernelName) : PsCKernelExpr :=
 def psCKernelQuotAdmissionEqReflType (uName : PsCKernelName) : PsCKernelExpr :=
   let u := PsCKernelLevel.param uName
   PsCKernelExpr.forallE
-    (psCKernelQuotAdmissionName "α")
+    (psCKernelQuotAdmissionTestName "α")
     (PsCKernelExpr.sortE u)
     (PsCKernelExpr.forallE
-      (psCKernelQuotAdmissionName "a")
+      (psCKernelQuotAdmissionTestName "a")
       (PsCKernelExpr.bvar 0)
       (psCKernelExprMkAppN
-        (PsCKernelExpr.constE (psCKernelQuotAdmissionName "Eq") [u])
+        (PsCKernelExpr.constE (psCKernelQuotAdmissionTestName "Eq") [u])
         [PsCKernelExpr.bvar 1, PsCKernelExpr.bvar 0, PsCKernelExpr.bvar 0])
       PsCKernelBinderInfo.default)
     PsCKernelBinderInfo.implicit
@@ -59,14 +59,14 @@ def psCKernelQuotAdmissionSeedEq
     (reflTypeOverride : Option PsCKernelExpr := none)
     (extraCtor : Bool := false)
     (eqAsAxiom : Bool := false)
-    (uParams : List PsCKernelName := [psCKernelQuotAdmissionName "u"]) : PsCKernelEnvironment :=
+    (uParams : List PsCKernelName := [psCKernelQuotAdmissionTestName "u"]) : PsCKernelEnvironment :=
   let uName :=
     match uParams with
     | head :: _ => head
-    | [] => psCKernelQuotAdmissionName "u"
-  let eqName := psCKernelQuotAdmissionName "Eq"
-  let reflName := psCKernelQuotAdmissionName "Eq.refl"
-  let extraName := psCKernelQuotAdmissionName "Eq.extra"
+    | [] => psCKernelQuotAdmissionTestName "u"
+  let eqName := psCKernelQuotAdmissionTestName "Eq"
+  let reflName := psCKernelQuotAdmissionTestName "Eq.refl"
+  let extraName := psCKernelQuotAdmissionTestName "Eq.extra"
   let eqType :=
     match eqTypeOverride with
     | some type => type
@@ -117,10 +117,10 @@ def psCKernelQuotAdmissionSeedEq
     env2
 
 def psCKernelQuotAdmissionContainsAll (env : PsCKernelEnvironment) : Bool :=
-  psCKernelEnvironmentContains env (psCKernelQuotAdmissionName "Quot") &&
-  psCKernelEnvironmentContains env (psCKernelQuotAdmissionName "Quot.mk") &&
-  psCKernelEnvironmentContains env (psCKernelQuotAdmissionName "Quot.lift") &&
-  psCKernelEnvironmentContains env (psCKernelQuotAdmissionName "Quot.ind")
+  psCKernelEnvironmentContains env (psCKernelQuotAdmissionTestName "Quot") &&
+  psCKernelEnvironmentContains env (psCKernelQuotAdmissionTestName "Quot.mk") &&
+  psCKernelEnvironmentContains env (psCKernelQuotAdmissionTestName "Quot.lift") &&
+  psCKernelEnvironmentContains env (psCKernelQuotAdmissionTestName "Quot.ind")
 
 def psCKernelQuotAdmissionTestValid : Bool :=
   match psCKernelAddQuot? psCKernelQuotAdmissionSeedEq with
@@ -135,10 +135,10 @@ def psCKernelQuotAdmissionTestKinds : Bool :=
   | none => false
   | some env =>
       match
-        psCKernelEnvironmentFind? env (psCKernelQuotAdmissionName "Quot"),
-        psCKernelEnvironmentFind? env (psCKernelQuotAdmissionName "Quot.mk"),
-        psCKernelEnvironmentFind? env (psCKernelQuotAdmissionName "Quot.lift"),
-        psCKernelEnvironmentFind? env (psCKernelQuotAdmissionName "Quot.ind") with
+        psCKernelEnvironmentFind? env (psCKernelQuotAdmissionTestName "Quot"),
+        psCKernelEnvironmentFind? env (psCKernelQuotAdmissionTestName "Quot.mk"),
+        psCKernelEnvironmentFind? env (psCKernelQuotAdmissionTestName "Quot.lift"),
+        psCKernelEnvironmentFind? env (psCKernelQuotAdmissionTestName "Quot.ind") with
       | some (PsCKernelConstantInfo.quotInfo q),
         some (PsCKernelConstantInfo.quotInfo mk),
         some (PsCKernelConstantInfo.quotInfo lift),
@@ -172,8 +172,8 @@ def psCKernelQuotAdmissionTestEqWrongKind : Bool :=
   | some _ => false
 
 def psCKernelQuotAdmissionTestEqWrongUniverseArity : Bool :=
-  let u := psCKernelQuotAdmissionName "u"
-  let v := psCKernelQuotAdmissionName "v"
+  let u := psCKernelQuotAdmissionTestName "u"
+  let v := psCKernelQuotAdmissionTestName "v"
   match psCKernelAddQuot? (psCKernelQuotAdmissionSeedEq (uParams := [u, v])) with
   | none => true
   | some _ => false
@@ -199,7 +199,7 @@ def psCKernelQuotAdmissionConflict (name : String) : Bool :=
   let env0 := psCKernelQuotAdmissionSeedEq
   let conflict := PsCKernelConstantInfo.axiomInfo {
     base := psCKernelQuotAdmissionBase
-      (psCKernelQuotAdmissionName name)
+      (psCKernelQuotAdmissionTestName name)
       []
       (PsCKernelExpr.sortE psCKernelLevelZero)
     isUnsafe := false

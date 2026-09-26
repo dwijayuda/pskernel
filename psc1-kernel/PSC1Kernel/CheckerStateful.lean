@@ -189,40 +189,6 @@ private def cacheInferStatefulResult
     { state with checkedInfer := CheckerExprMap.insert state.checkedInfer e result }
 
 /--
-Lean-4.34 infer-only application-spine traversal. It recursively infers the
-flattened application head through the shared infer-only cache, delays binder
-instantiation across syntactic Pi binders, and only exposes a non-Pi head with
-stateful WHNF when needed.
--/
-partial def inferAppOnlyStatefulWith
-    (defeq : CheckerContext → CheckerState → Expr → Expr →
-      Except String (Bool × CheckerState))
-    (ctx : CheckerContext)
-    (state : CheckerState)
-    (e : Expr) : Except String (Expr × CheckerState) := do
-  let fn := e.getAppFn
-  let args := e.getAppArgs
-  let (fnType, state1) ← inferCoreStatefulWith defeq ctx state fn true
-  let rec loop
-      (fType : Expr)
-      (j i : Nat)
-      (current : CheckerState) : Except String (Expr × CheckerState) := do
-    if i < args.length then
-      match fType with
-      | .forallE _ _ body _ =>
-          loop body j (i + 1) current
-      | _ => do
-          let pending := (args.drop j).take (i - j)
-          let exposedInput := fType.instantiateRev pending
-          let (exposed, next) ← whnfStateful ctx current exposedInput
-          let .forallE _ _ body _ := exposed
-            | throw "expected function type"
-          loop body i (i + 1) next
-    else
-      return (fType.instantiateRev (args.drop j), current)
-  loop fnType 0 0 state1
-
-/--
 Incremental stateful counterpart of Lean 4.34 `infer_type_core` with an explicit
 definitional-equality callback. Cache hits and migrated misses enter the same
 kernel recursion boundary as final Lean 4.34. Non-migrated misses still defer
@@ -245,7 +211,27 @@ partial def inferCoreStatefulWith
       | .app fn arg => do
           let ctx ← ctx.enterKernelRecDepth
           if inferOnly then
-            let (result, next) ← inferAppOnlyStatefulWith defeq ctx state e
+            let appFn := e.getAppFn
+            let args := e.getAppArgs
+            let (fnType, state1) ← inferCoreStatefulWith defeq ctx state appFn true
+            let rec loop
+                (fType : Expr)
+                (j i : Nat)
+                (current : CheckerState) : Except String (Expr × CheckerState) := do
+              if i < args.length then
+                match fType with
+                | .forallE _ _ body _ =>
+                    loop body j (i + 1) current
+                | _ => do
+                    let pending := (args.drop j).take (i - j)
+                    let exposedInput := fType.instantiateRev pending
+                    let (exposed, next) ← whnfStateful ctx current exposedInput
+                    let .forallE _ _ body _ := exposed
+                      | throw "expected function type"
+                    loop body i (i + 1) next
+              else
+                return (fType.instantiateRev (args.drop j), current)
+            let (result, next) ← loop fnType 0 0 state1
             return (result, cacheInferStatefulResult next true e result)
           else
             let (fnType, state1) ← inferCoreStatefulWith defeq ctx state fn false

@@ -138,6 +138,13 @@ Every executable backend exposed by the bootstrap compiler MUST consume Verified
 created through this preparation boundary. No public compiler-service path may go
 straight from arbitrary elaborated declarations to backend emission.
 
+`PsCompilerAdmissionReadyModule` deliberately stores only the declarations and their
+canonical admissions encoding. It does not carry a caller-provided environment as
+hidden authority. Before erasure, the compiler re-encodes the declarations and rejects
+a mismatched canonical payload, then reconstructs the environment deterministically
+from the bootstrap prelude plus those declarations. This keeps the current boundary
+fail-closed even though it is still weaker than genuine kernel admission.
+
 When the independent kernel provider is wired into this directory, the stable seam is:
 
 ```text
@@ -170,15 +177,18 @@ milestone by renaming codec validation to `CheckedCore`.
 Bootstrap-critical gates are intentionally narrower than whole-workspace regression:
 
 ```text
-test:bootstrap  -> only semantic compiler + TS fixed-point prerequisites
-test:regression -> broad legacy/core/project regression suite
-test:extensions -> Rust/Wasm backend extension suites
-test:all        -> all three layers
+check:source:bootstrap -> PSC1 source-profile audit for fixed-point packages
+check:source:all       -> source-profile audit for every portable package
+test:bootstrap         -> semantic compiler + TS fixed-point prerequisites
+test:regression        -> broad legacy/core/project regression suite
+test:extensions        -> Rust/Wasm backend extension suites
+test:all               -> all three test layers
 ```
 
-`bootstrap` and `fixed-point` depend only on `test:bootstrap`. `npm test` and
-`npm run check` retain the broader `test:all` assurance, so shrinking the fixed-point
-closure does not delete or silently weaken existing regression coverage.
+`bootstrap` and `fixed-point` depend only on the bootstrap source audit and
+`test:bootstrap`. `npm test` and `npm run check` retain the broader all-portable source
+audit and `test:all` assurance, so shrinking the fixed-point closure does not delete or
+silently weaken existing regression coverage.
 
 ## Growth rules
 

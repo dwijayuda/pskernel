@@ -107,6 +107,7 @@ def psIrSpecModule : PsVerifiedIrModule :=
                   (PsVerifiedIrIntrinsic.machineIntBinary
                     PsVerifiedIrMachineIntegerType.uint32
                     PsVerifiedIrIntegerBinaryOp.add)
+                  []
                   [
                     PsVerifiedIrExpr.literal
                       (PsVerifiedIrLiteral.machineInteger

@@ -112,8 +112,36 @@ def psWasmFindStructureIndex
     (name : String) : Option Nat :=
   psWasmFindStructureIndexLoop name 0 structures
 
+def psWasmFindArrayIndexLoop
+    (name : String) :
+    Nat -> List PsWasmArrayType -> Option Nat
+  | _, [] => none
+  | index, arrayType :: rest =>
+      if arrayType.name == name then
+        some index
+      else
+        psWasmFindArrayIndexLoop name (index + 1) rest
+
+def psWasmFindArrayIndex
+    (arrays : List PsWasmArrayType)
+    (name : String) : Option Nat :=
+  psWasmFindArrayIndexLoop name 0 arrays
+
+def psWasmFindHeapTypeIndex
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
+    (name : String) : Option Nat :=
+  match psWasmFindStructureIndex structures name with
+  | some index => some index
+  | none =>
+      match psWasmFindArrayIndex arrays name with
+      | none => none
+      | some index =>
+          some (structures.length + index)
+
 def psWasmEncodeValueType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (type : PsWasmValueType) :
     Except PsWasmEncodeError (List UInt8) :=
   match type with
@@ -122,7 +150,7 @@ def psWasmEncodeValueType
   | .f32 => Except.ok [psWasmByte 125]
   | .f64 => Except.ok [psWasmByte 124]
   | .refT name =>
-      match psWasmFindStructureIndex structures name with
+      match psWasmFindHeapTypeIndex structures arrays name with
       | none =>
           Except.error (PsWasmEncodeError.unknownStructure name)
       | some index =>
@@ -133,15 +161,16 @@ def psWasmEncodeValueType
   | .noValue => Except.error PsWasmEncodeError.unsupportedValueType
 
 def psWasmEncodeValueTypes
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmValueType ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | type :: rest =>
-      match psWasmEncodeValueType structures type with
+      match psWasmEncodeValueType structures arrays type with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeValueTypes structures rest with
+          match psWasmEncodeValueTypes structures arrays rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
@@ -166,20 +195,23 @@ def psWasmFindFunctionTypeIndexLoop
 
 def psWasmFindFunctionTypeIndex
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (name : String) : Option Nat :=
   match psWasmFindFunctionTypeIndexLoop name 0 functionTypes with
   | none => none
-  | some index => some (structures.length + index)
+  | some index =>
+      some (structures.length + arrays.length + index)
 
 def psWasmEncodeNamedFunctionType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionType : PsWasmFunctionType) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeValueTypes structures functionType.parameters with
+  match psWasmEncodeValueTypes structures arrays functionType.parameters with
   | Except.error error => Except.error error
   | Except.ok parameters =>
-      match psWasmEncodeValueTypes structures functionType.results with
+      match psWasmEncodeValueTypes structures arrays functionType.results with
       | Except.error error => Except.error error
       | Except.ok results =>
           Except.ok
@@ -192,27 +224,29 @@ def psWasmEncodeNamedFunctionType
                 functionType.results.length)
 
 def psWasmEncodeNamedFunctionTypes
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmFunctionType ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | functionType :: rest =>
-      match psWasmEncodeNamedFunctionType structures functionType with
+      match psWasmEncodeNamedFunctionType structures arrays functionType with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeNamedFunctionTypes structures rest with
+          match psWasmEncodeNamedFunctionTypes structures arrays rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
 
 def psWasmEncodeFunctionType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (function : PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeValueTypes structures function.parameters with
+  match psWasmEncodeValueTypes structures arrays function.parameters with
   | Except.error error => Except.error error
   | Except.ok parameters =>
-      match psWasmEncodeValueTypes structures function.results with
+      match psWasmEncodeValueTypes structures arrays function.results with
       | Except.error error => Except.error error
       | Except.ok results =>
           Except.ok
@@ -221,15 +255,16 @@ def psWasmEncodeFunctionType
               ++ psWasmEncodeVector results function.results.length)
 
 def psWasmEncodeFunctionTypes
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmFunction ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | function :: rest =>
-      match psWasmEncodeFunctionType structures function with
+      match psWasmEncodeFunctionType structures arrays function with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeFunctionTypes structures rest with
+          match psWasmEncodeFunctionTypes structures arrays rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
@@ -251,6 +286,7 @@ def psWasmFindFunctionIndex
 
 def psWasmEncodeInstruction
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction)
     (instruction : PsWasmInstruction) :
@@ -271,7 +307,7 @@ def psWasmEncodeInstruction
       | none =>
           Except.ok [psWasmByte 4, psWasmByte 64]
       | some valueType =>
-          match psWasmEncodeValueType structures valueType with
+          match psWasmEncodeValueType structures arrays valueType with
           | Except.error error => Except.error error
           | Except.ok encodedType =>
               Except.ok ([psWasmByte 4] ++ encodedType)
@@ -376,6 +412,97 @@ def psWasmEncodeInstruction
               ++ psWasmEncodeUleb 4
               ++ psWasmEncodeUleb typeIndex
               ++ psWasmEncodeUleb fieldIndex)
+  | .arrayNew typeName =>
+      match psWasmFindHeapTypeIndex structures arrays typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 6
+              ++ psWasmEncodeUleb typeIndex)
+  | .arrayNewDefault typeName =>
+      match psWasmFindHeapTypeIndex structures arrays typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 7
+              ++ psWasmEncodeUleb typeIndex)
+  | .arrayNewFixed typeName length =>
+      match psWasmFindHeapTypeIndex structures arrays typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 8
+              ++ psWasmEncodeUleb typeIndex
+              ++ psWasmEncodeUleb length)
+  | .arrayGet typeName =>
+      match psWasmFindHeapTypeIndex structures arrays typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 11
+              ++ psWasmEncodeUleb typeIndex)
+  | .arrayGetS typeName =>
+      match psWasmFindHeapTypeIndex structures arrays typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 12
+              ++ psWasmEncodeUleb typeIndex)
+  | .arrayGetU typeName =>
+      match psWasmFindHeapTypeIndex structures arrays typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 13
+              ++ psWasmEncodeUleb typeIndex)
+  | .arraySet typeName =>
+      match psWasmFindHeapTypeIndex structures arrays typeName with
+      | none =>
+          Except.error (PsWasmEncodeError.unknownStructure typeName)
+      | some typeIndex =>
+          Except.ok
+            ([psWasmByte 251]
+              ++ psWasmEncodeUleb 14
+              ++ psWasmEncodeUleb typeIndex)
+  | .arrayLen =>
+      Except.ok
+        ([psWasmByte 251] ++ psWasmEncodeUleb 15)
+  | .arrayCopy destinationType sourceType =>
+      match
+          psWasmFindHeapTypeIndex
+            structures
+            arrays
+            destinationType with
+      | none =>
+          Except.error
+            (PsWasmEncodeError.unknownStructure destinationType)
+      | some destinationIndex =>
+          match
+              psWasmFindHeapTypeIndex
+                structures
+                arrays
+                sourceType with
+          | none =>
+              Except.error
+                (PsWasmEncodeError.unknownStructure sourceType)
+          | some sourceIndex =>
+              Except.ok
+                ([psWasmByte 251]
+                  ++ psWasmEncodeUleb 17
+                  ++ psWasmEncodeUleb destinationIndex
+                  ++ psWasmEncodeUleb sourceIndex)
   | .refTest typeName =>
       match psWasmFindStructureIndex structures typeName with
       | none =>
@@ -406,6 +533,7 @@ def psWasmEncodeInstruction
       match
           psWasmFindFunctionTypeIndex
             structures
+            arrays
             functionTypes
             typeName with
       | none =>
@@ -419,6 +547,7 @@ def psWasmEncodeInstruction
       match
           psWasmFindFunctionTypeIndex
             structures
+            arrays
             functionTypes
             typeName with
       | none =>
@@ -434,6 +563,7 @@ def psWasmEncodeInstruction
 
 def psWasmEncodeInstructions
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction) :
     List PsWasmInstruction ->
@@ -442,6 +572,7 @@ def psWasmEncodeInstructions
   | instruction :: rest =>
       match psWasmEncodeInstruction
           structures
+          arrays
           functionTypes
           functions
           instruction with
@@ -449,6 +580,7 @@ def psWasmEncodeInstructions
       | Except.ok encoded =>
           match psWasmEncodeInstructions
               structures
+              arrays
               functionTypes
               functions
               rest with
@@ -457,15 +589,16 @@ def psWasmEncodeInstructions
               Except.ok (encoded ++ encodedRest)
 
 def psWasmEncodeLocalDeclarations
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmValueType ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | type :: rest =>
-      match psWasmEncodeValueType structures type with
+      match psWasmEncodeValueType structures arrays type with
       | Except.error error => Except.error error
       | Except.ok encodedType =>
-          match psWasmEncodeLocalDeclarations structures rest with
+          match psWasmEncodeLocalDeclarations structures arrays rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok
@@ -475,15 +608,21 @@ def psWasmEncodeLocalDeclarations
 
 def psWasmEncodeFunctionBody
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction)
     (function : PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeLocalDeclarations structures function.locals with
+  match
+      psWasmEncodeLocalDeclarations
+        structures
+        arrays
+        function.locals with
   | Except.error error => Except.error error
   | Except.ok encodedLocals =>
       match psWasmEncodeInstructions
           structures
+          arrays
           functionTypes
           functions
           function.body with
@@ -498,6 +637,7 @@ def psWasmEncodeFunctionBody
 
 def psWasmEncodeFunctionBodies
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction) :
     List PsWasmFunction ->
@@ -506,6 +646,7 @@ def psWasmEncodeFunctionBodies
   | function :: rest =>
       match psWasmEncodeFunctionBody
           structures
+          arrays
           functionTypes
           functions
           function with
@@ -513,6 +654,7 @@ def psWasmEncodeFunctionBodies
       | Except.ok encoded =>
           match psWasmEncodeFunctionBodies
               structures
+              arrays
               functionTypes
               functions
               rest with
@@ -522,42 +664,46 @@ def psWasmEncodeFunctionBodies
 
 def psWasmEncodeStorageType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (type : PsWasmStorageType) :
     Except PsWasmEncodeError (List UInt8) :=
   match type with
   | .packedI8 => Except.ok [psWasmByte 120]
   | .packedI16 => Except.ok [psWasmByte 119]
   | .value valueType =>
-      psWasmEncodeValueType structures valueType
+      psWasmEncodeValueType structures arrays valueType
 
 def psWasmEncodeStructField
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (field : PsWasmStructField) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeStorageType structures field.storageType with
+  match psWasmEncodeStorageType structures arrays field.storageType with
   | Except.error error => Except.error error
   | Except.ok storage =>
       Except.ok (storage ++ [psWasmByte 0])
 
 def psWasmEncodeStructFields
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmStructField ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | field :: rest =>
-      match psWasmEncodeStructField structures field with
+      match psWasmEncodeStructField structures arrays field with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeStructFields structures rest with
+          match psWasmEncodeStructFields structures arrays rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
 
 def psWasmEncodeStructCompositeType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (structType : PsWasmStructType) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeStructFields structures structType.fields with
+  match psWasmEncodeStructFields structures arrays structType.fields with
   | Except.error error => Except.error error
   | Except.ok fields =>
       Except.ok
@@ -567,9 +713,10 @@ def psWasmEncodeStructCompositeType
 
 def psWasmEncodeStructType
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (structType : PsWasmStructType) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeStructCompositeType structures structType with
+  match psWasmEncodeStructCompositeType structures arrays structType with
   | Except.error error => Except.error error
   | Except.ok composite =>
       match structType.superType with
@@ -598,21 +745,66 @@ def psWasmEncodeStructType
                   ++ composite)
 
 def psWasmEncodeStructTypes
-    (structures : List PsWasmStructType) :
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
     List PsWasmStructType ->
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | structType :: rest =>
-      match psWasmEncodeStructType structures structType with
+      match psWasmEncodeStructType structures arrays structType with
       | Except.error error => Except.error error
       | Except.ok encoded =>
-          match psWasmEncodeStructTypes structures rest with
+          match psWasmEncodeStructTypes structures arrays rest with
+          | Except.error error => Except.error error
+          | Except.ok encodedRest =>
+              Except.ok (encoded ++ encodedRest)
+
+def psWasmEncodeArrayType
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
+    (arrayType : PsWasmArrayType) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match
+      psWasmEncodeStorageType
+        structures
+        arrays
+        arrayType.elementType with
+  | Except.error error => Except.error error
+  | Except.ok elementType =>
+      let mutability :=
+        if arrayType.mutable then psWasmByte 1
+        else psWasmByte 0
+      Except.ok
+        ([psWasmByte 94]
+          ++ elementType
+          ++ [mutability])
+
+def psWasmEncodeArrayTypes
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) :
+    List PsWasmArrayType ->
+    Except PsWasmEncodeError (List UInt8)
+  | [] => Except.ok []
+  | arrayType :: rest =>
+      match
+          psWasmEncodeArrayType
+            structures
+            arrays
+            arrayType with
+      | Except.error error => Except.error error
+      | Except.ok encoded =>
+          match
+              psWasmEncodeArrayTypes
+                structures
+                arrays
+                rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok (encoded ++ encodedRest)
 
 def psWasmFunctionTypeIndex
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (functionIndex : Nat)
     (function : PsWasmFunction) :
@@ -621,12 +813,14 @@ def psWasmFunctionTypeIndex
   | none =>
       Except.ok
         (structures.length
+          + arrays.length
           + functionTypes.length
           + functionIndex)
   | some typeName =>
       match
           psWasmFindFunctionTypeIndex
             structures
+            arrays
             functionTypes
             typeName with
       | none =>
@@ -636,6 +830,7 @@ def psWasmFunctionTypeIndex
 
 def psWasmEncodeFunctionTypeIndicesLoop
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType) :
     Nat ->
     List PsWasmFunction ->
@@ -645,6 +840,7 @@ def psWasmEncodeFunctionTypeIndicesLoop
       match
           psWasmFunctionTypeIndex
             structures
+            arrays
             functionTypes
             functionIndex
             function with
@@ -653,6 +849,7 @@ def psWasmEncodeFunctionTypeIndicesLoop
           match
               psWasmEncodeFunctionTypeIndicesLoop
                 structures
+                arrays
                 functionTypes
                 (functionIndex + 1)
                 rest with
@@ -663,11 +860,12 @@ def psWasmEncodeFunctionTypeIndicesLoop
 
 def psWasmEncodeFunctionTypeIndices
     (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
     (functions : List PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
   psWasmEncodeFunctionTypeIndicesLoop
-    structures functionTypes 0 functions
+    structures arrays functionTypes 0 functions
 
 def psWasmEncodeFunctionRefIndices
     (functions : List PsWasmFunction) :
@@ -736,90 +934,107 @@ def psWasmEncodeSection
 def psWasmEncodeModule
     (module : PsWasmModule) :
     Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeStructTypes module.structures module.structures with
+  match
+      psWasmEncodeStructTypes
+        module.structures
+        module.arrays
+        module.structures with
   | Except.error error => Except.error error
   | Except.ok encodedStructTypes =>
       match
-          psWasmEncodeNamedFunctionTypes
+          psWasmEncodeArrayTypes
             module.structures
-            module.functionTypes with
+            module.arrays
+            module.arrays with
       | Except.error error => Except.error error
-      | Except.ok encodedNamedFunctionTypes =>
+      | Except.ok encodedArrayTypes =>
           match
-              psWasmEncodeFunctionTypes
+              psWasmEncodeNamedFunctionTypes
                 module.structures
-                module.functions with
+                module.arrays
+                module.functionTypes with
           | Except.error error => Except.error error
-          | Except.ok encodedFunctionTypes =>
+          | Except.ok encodedNamedFunctionTypes =>
               match
-                  psWasmEncodeFunctionTypeIndices
+                  psWasmEncodeFunctionTypes
                     module.structures
-                    module.functionTypes
+                    module.arrays
                     module.functions with
               | Except.error error => Except.error error
-              | Except.ok encodedFunctionTypeIndices =>
+              | Except.ok encodedFunctionTypes =>
                   match
-                      psWasmEncodeExports
-                        module.functions
-                        module.exports with
+                      psWasmEncodeFunctionTypeIndices
+                        module.structures
+                        module.arrays
+                        module.functionTypes
+                        module.functions with
                   | Except.error error => Except.error error
-                  | Except.ok encodedExports =>
+                  | Except.ok encodedFunctionTypeIndices =>
                       match
-                          psWasmEncodeDeclarativeFunctionRefs
+                          psWasmEncodeExports
                             module.functions
-                            module.functionRefs with
+                            module.exports with
                       | Except.error error => Except.error error
-                      | Except.ok encodedFunctionRefs =>
+                      | Except.ok encodedExports =>
                           match
-                              psWasmEncodeFunctionBodies
-                                module.structures
-                                module.functionTypes
+                              psWasmEncodeDeclarativeFunctionRefs
                                 module.functions
-                                module.functions with
+                                module.functionRefs with
                           | Except.error error => Except.error error
-                          | Except.ok encodedBodies =>
-                              let typeCount :=
-                                module.structures.length
-                                  + module.functionTypes.length
-                                  + module.functions.length
-                              let typePayload :=
-                                psWasmEncodeVector
-                                  (encodedStructTypes
-                                    ++ encodedNamedFunctionTypes
-                                    ++ encodedFunctionTypes)
-                                  typeCount
-                              let functionPayload :=
-                                psWasmEncodeVector
-                                  encodedFunctionTypeIndices
-                                  module.functions.length
-                              let exportPayload :=
-                                psWasmEncodeVector
-                                  encodedExports
-                                  module.exports.length
-                              let elementSection :=
-                                match module.functionRefs with
-                                | [] => []
-                                | _ =>
-                                    psWasmEncodeSection
-                                      9
-                                      encodedFunctionRefs
-                              let codePayload :=
-                                psWasmEncodeVector
-                                  encodedBodies
-                                  module.functions.length
-                              Except.ok
-                                ([
-                                  psWasmByte 0,
-                                  psWasmByte 97,
-                                  psWasmByte 115,
-                                  psWasmByte 109,
-                                  psWasmByte 1,
-                                  psWasmByte 0,
-                                  psWasmByte 0,
-                                  psWasmByte 0
-                                ]
-                                  ++ psWasmEncodeSection 1 typePayload
-                                  ++ psWasmEncodeSection 3 functionPayload
-                                  ++ psWasmEncodeSection 7 exportPayload
-                                  ++ elementSection
-                                  ++ psWasmEncodeSection 10 codePayload)
+                          | Except.ok encodedFunctionRefs =>
+                              match
+                                  psWasmEncodeFunctionBodies
+                                    module.structures
+                                    module.arrays
+                                    module.functionTypes
+                                    module.functions
+                                    module.functions with
+                              | Except.error error => Except.error error
+                              | Except.ok encodedBodies =>
+                                  let typeCount :=
+                                    module.structures.length
+                                      + module.arrays.length
+                                      + module.functionTypes.length
+                                      + module.functions.length
+                                  let typePayload :=
+                                    psWasmEncodeVector
+                                      (encodedStructTypes
+                                        ++ encodedArrayTypes
+                                        ++ encodedNamedFunctionTypes
+                                        ++ encodedFunctionTypes)
+                                      typeCount
+                                  let functionPayload :=
+                                    psWasmEncodeVector
+                                      encodedFunctionTypeIndices
+                                      module.functions.length
+                                  let exportPayload :=
+                                    psWasmEncodeVector
+                                      encodedExports
+                                      module.exports.length
+                                  let elementSection :=
+                                    match module.functionRefs with
+                                    | [] => []
+                                    | _ =>
+                                        psWasmEncodeSection
+                                          9
+                                          encodedFunctionRefs
+                                  let codePayload :=
+                                    psWasmEncodeVector
+                                      encodedBodies
+                                      module.functions.length
+                                  Except.ok
+                                    ([
+                                      psWasmByte 0,
+                                      psWasmByte 97,
+                                      psWasmByte 115,
+                                      psWasmByte 109,
+                                      psWasmByte 1,
+                                      psWasmByte 0,
+                                      psWasmByte 0,
+                                      psWasmByte 0
+                                    ]
+                                      ++ psWasmEncodeSection 1 typePayload
+                                      ++ psWasmEncodeSection 3 functionPayload
+                                      ++ psWasmEncodeSection 7 exportPayload
+                                      ++ elementSection
+                                      ++ psWasmEncodeSection 10 codePayload)

@@ -16,7 +16,7 @@ def psTsExprUsesNameWithFuel :
       match expr with
       | .literal _ => false
       | .var value => value == name
-      | .intrinsic _ arguments =>
+      | .intrinsic _ _ arguments =>
           arguments.any
             (fun argument =>
               psTsExprUsesNameWithFuel fuel argument name)
@@ -378,7 +378,7 @@ def psTsEmitExprWithFuel
           psTsEmitLiteral literal
       | .var name =>
           Except.ok name
-      | .intrinsic operation arguments =>
+      | .intrinsic operation _ arguments =>
           match arguments.mapM
               (psTsEmitExprWithFuel brands tags fuel) with
           | Except.error error => Except.error error

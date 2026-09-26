@@ -157,6 +157,7 @@ inductive PsVerifiedIrExpr where
   | var (name : String)
   | intrinsic
       (operation : PsVerifiedIrIntrinsic)
+      (typeArguments : List PsVerifiedIrType)
       (arguments : List PsVerifiedIrExpr)
   | lambda
       (parameters : List PsVerifiedIrParameter)

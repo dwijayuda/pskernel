@@ -20,7 +20,7 @@ concurrency:
 jobs:
   whnf-cache:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - name: Install pinned Lean 4.34
@@ -42,23 +42,27 @@ jobs:
         run: |
           lake build
           lake build psc1_whnf_pointer_cache_smoke
-          lake build psc1_target_profile
+          lake build psc1_replay
       - name: WHNF pointer cache isolation
         working-directory: psc1-kernel
         run: .lake/build/bin/psc1_whnf_pointer_cache_smoke
       - name: Existing differential oracle
         working-directory: psc1-kernel
         run: lake env lean --run PSC1Kernel/Test/Oracle.lean
-      - name: Export exact Std root 100015 closure
+      - name: Export hot declaration dependency closure
         shell: bash
         run: |
           set -euo pipefail
           lean oracle/replay-probe/DependencyExport.lean
-          lean --run oracle/replay-probe/DependencyExport.lean Std --root-range 100015 1 > /tmp/root100015.ndjson
-          echo "bytes=$(wc -c < /tmp/root100015.ndjson)"
-      - name: Native replay through declaration 2277
+          lean --run oracle/replay-probe/DependencyExport.lean Std \
+            Lean.Omega.Decidable.not_iff_iff_and_not_or_not_and \
+            > /tmp/hot2277.ndjson
+          echo "bytes=$(wc -c < /tmp/hot2277.ndjson)"
+          echo "lines=$(wc -l < /tmp/hot2277.ndjson)"
+      - name: Native replay hot declaration closure
         working-directory: psc1-kernel
         shell: bash
         run: |
           set -euo pipefail
-          /usr/bin/time -v timeout 300s .lake/build/bin/psc1_target_profile /tmp/root100015.ndjson
+          /usr/bin/time -v timeout 240s \
+            .lake/build/bin/psc1_replay --progress /tmp/hot2277.ndjson

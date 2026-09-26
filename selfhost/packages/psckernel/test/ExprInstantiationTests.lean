@@ -1,4 +1,4 @@
-import Ps.PSCKernel.Core.Expr
+import Ps.PSCKernel.Core.ExprInstantiation
 
 structure PsCKernelExprInstantiationNamedTest where
   name : String

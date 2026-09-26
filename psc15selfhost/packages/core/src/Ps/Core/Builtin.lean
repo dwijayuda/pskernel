@@ -1,0 +1,226 @@
+import Ps.Foundation.Name
+
+def psRootName (value : String) : PsName :=
+  PsName.str PsName.anonymous value
+
+def psNatName : PsName :=
+  psRootName "Nat"
+
+def psNatZeroName : PsName :=
+  psNameAppendStr psNatName "zero"
+
+def psNatSuccName : PsName :=
+  psNameAppendStr psNatName "succ"
+
+def psNatRecName : PsName :=
+  psNameAppendStr psNatName "rec"
+
+def psNatAddName : PsName :=
+  psNameAppendStr psNatName "add"
+
+def psNatSubName : PsName :=
+  psNameAppendStr psNatName "sub"
+
+def psNatMulName : PsName :=
+  psNameAppendStr psNatName "mul"
+
+def psNatDivName : PsName :=
+  psNameAppendStr psNatName "div"
+
+def psNatModName : PsName :=
+  psNameAppendStr psNatName "mod"
+
+def psNatBeqName : PsName :=
+  psNameAppendStr psNatName "beq"
+
+def psNatBleName : PsName :=
+  psNameAppendStr psNatName "ble"
+
+def psNatBltName : PsName :=
+  psNameAppendStr psNatName "blt"
+
+def psIntName : PsName :=
+  psRootName "Int"
+
+def psUInt8Name : PsName :=
+  psRootName "UInt8"
+
+def psUInt16Name : PsName :=
+  psRootName "UInt16"
+
+def psUInt32Name : PsName :=
+  psRootName "UInt32"
+
+def psUInt64Name : PsName :=
+  psRootName "UInt64"
+
+def psUSizeName : PsName :=
+  psRootName "USize"
+
+def psInt8Name : PsName :=
+  psRootName "Int8"
+
+def psInt16Name : PsName :=
+  psRootName "Int16"
+
+def psInt32Name : PsName :=
+  psRootName "Int32"
+
+def psInt64Name : PsName :=
+  psRootName "Int64"
+
+def psISizeName : PsName :=
+  psRootName "ISize"
+
+def psFloatName : PsName :=
+  psRootName "Float"
+
+def psFloat32Name : PsName :=
+  psRootName "Float32"
+
+def psIntOfNatName : PsName :=
+  psNameAppendStr psIntName "ofNat"
+
+def psIntNegSuccName : PsName :=
+  psNameAppendStr psIntName "negSucc"
+
+def psIntNegName : PsName :=
+  psNameAppendStr psIntName "neg"
+
+def psIntAddName : PsName :=
+  psNameAppendStr psIntName "add"
+
+def psIntSubName : PsName :=
+  psNameAppendStr psIntName "sub"
+
+def psIntMulName : PsName :=
+  psNameAppendStr psIntName "mul"
+
+def psListName : PsName :=
+  psRootName "List"
+
+def psOptionName : PsName :=
+  psRootName "Option"
+
+def psProdName : PsName :=
+  psRootName "Prod"
+
+def psProdMkName : PsName :=
+  psNameAppendStr psProdName "mk"
+
+def psProdFstName : PsName :=
+  psNameAppendStr psProdName "fst"
+
+def psProdSndName : PsName :=
+  psNameAppendStr psProdName "snd"
+
+def psArrayName : PsName :=
+  psRootName "Array"
+
+def psArrayEmptyWithCapacityName : PsName :=
+  psNameAppendStr psArrayName "emptyWithCapacity"
+
+def psArraySizeName : PsName :=
+  psNameAppendStr psArrayName "size"
+
+def psArrayPushName : PsName :=
+  psNameAppendStr psArrayName "push"
+
+def psArrayGetInternalName : PsName :=
+  psNameAppendStr psArrayName "getInternal"
+
+def psArrayGetDName : PsName :=
+  psNameAppendStr psArrayName "getD"
+
+def psArraySetName : PsName :=
+  psNameAppendStr psArrayName "set"
+
+def psArraySetIfInBoundsName : PsName :=
+  psNameAppendStr psArrayName "setIfInBounds"
+
+def psArrayMapName : PsName :=
+  psNameAppendStr psArrayName "map"
+
+def psArrayFoldlName : PsName :=
+  psNameAppendStr psArrayName "foldl"
+
+def psStringName : PsName :=
+  psRootName "String"
+
+def psBoolName : PsName :=
+  psRootName "Bool"
+
+def psUnitName : PsName :=
+  psRootName "Unit"
+
+def psBoolTrueName : PsName :=
+  psNameAppendStr psBoolName "true"
+
+def psBoolFalseName : PsName :=
+  psNameAppendStr psBoolName "false"
+
+def psEqName : PsName :=
+  psRootName "Eq"
+
+def psDecidableName : PsName :=
+  psRootName "Decidable"
+
+def psBoolDecEqName : PsName :=
+  psNameAppendStr psBoolName "decEq"
+
+def psIteName : PsName :=
+  psRootName "ite"
+
+def psUnitUnitName : PsName :=
+  psNameAppendStr psUnitName "unit"
+
+def psCharName : PsName :=
+  psRootName "Char"
+
+def psCharOfNatName : PsName :=
+  psNameAppendStr psCharName "ofNat"
+
+def psCharToNatName : PsName :=
+  psNameAppendStr psCharName "toNat"
+
+def psStringPushName : PsName :=
+  psNameAppendStr psStringName "push"
+
+def psStringSingletonName : PsName :=
+  psNameAppendStr psStringName "singleton"
+
+def psStringInternalName : PsName :=
+  psNameAppendStr psStringName "Internal"
+
+def psStringPosName : PsName :=
+  psNameAppendStr psStringName "Pos"
+
+def psStringPosRawName : PsName :=
+  psNameAppendStr psStringPosName "Raw"
+
+def psStringPosRawMkName : PsName :=
+  psNameAppendStr psStringPosRawName "mk"
+
+def psStringPosRawByteIdxName : PsName :=
+  psNameAppendStr psStringPosRawName "byteIdx"
+
+def psStringLengthName : PsName :=
+  psNameAppendStr psStringInternalName "length"
+
+def psStringAppendName : PsName :=
+  psNameAppendStr psStringInternalName "append"
+
+def psStringUtf8ByteSizeName : PsName :=
+  psNameAppendStr psStringName "utf8ByteSize"
+
+def psStringNextName : PsName :=
+  psNameAppendStr psStringInternalName "next"
+
+def psStringGetName : PsName :=
+  psNameAppendStr psStringInternalName "get"
+
+def psStringAtEndName : PsName :=
+  psNameAppendStr psStringInternalName "atEnd"
+
+def psStringExtractName : PsName :=
+  psNameAppendStr psStringInternalName "extract"

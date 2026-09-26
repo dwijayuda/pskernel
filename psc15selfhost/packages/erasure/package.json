@@ -1,0 +1,23 @@
+{
+  "name": "@proofscript/erasure-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "verified-erasure"
+  },
+  "dependencies": {
+    "@proofscript/compiler-ir-next": "0.0.0-dev",
+    "@proofscript/core": "0.0.0-dev",
+    "@proofscript/environment-next": "0.0.0-dev",
+    "@proofscript/meta-next": "0.0.0-dev"
+  }
+}

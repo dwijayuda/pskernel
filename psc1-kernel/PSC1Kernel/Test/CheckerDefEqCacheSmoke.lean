@@ -1,4 +1,5 @@
 import PSC1Kernel.CheckerCacheRuntime
+import PSC1Kernel.TypeChecker
 
 open PSC1Kernel
 

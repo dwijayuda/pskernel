@@ -46,6 +46,14 @@ jobs:
             -o .lake/build/lib/lean/PSC1Kernel/CheckerState.olean
           lake env lean PSC1Kernel/CheckerCacheRuntime.lean \
             -o .lake/build/lib/lean/PSC1Kernel/CheckerCacheRuntime.olean
+      - name: Inspect native cache symbols
+        working-directory: psc1-kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build PSC1Kernel.CheckerCacheRuntime:c.o
+          echo "=== defined checkerDefEq symbols ==="
+          nm -C .lake/build/ir/PSC1Kernel/CheckerCacheRuntime.c.o | grep 'checkerDefEq' || true
       - name: Build oracle-only structure fixture
         working-directory: psc1-kernel
         shell: bash

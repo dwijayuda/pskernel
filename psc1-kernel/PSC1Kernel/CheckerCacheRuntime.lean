@@ -51,6 +51,15 @@ partial def checkerLocalDeclsHash : List LocalDecl → UInt64
 def checkerLocalContextHash (ctx : LocalContext) : UInt64 :=
   checkerMixHash (hash ctx.nextIndex) (checkerLocalDeclsHash ctx.decls)
 
+/--
+Closed defeq pairs are independent of the local context. Open pairs still need
+it because PSC1's current pure checker can reuse temporary FVar names in sibling
+local scopes; until fresh-name generation is fully checker-state scoped, that
+context component prevents false cache hits.
+-/
+def checkerDefEqPairNeedsLocalContext (left right : Expr) : Bool :=
+  left.hasFVar || right.hasFVar
+
 structure CheckerScopedExprPairKey where
   lctx : LocalContext
   left : Expr
@@ -58,16 +67,25 @@ structure CheckerScopedExprPairKey where
 
 instance : BEq CheckerScopedExprPairKey where
   beq a b :=
-    checkerLocalContextEq a.lctx b.lctx &&
-      ((Expr.eq a.left b.left && Expr.eq a.right b.right) ||
-       (Expr.eq a.left b.right && Expr.eq a.right b.left))
+    let samePair :=
+      (Expr.eq a.left b.left && Expr.eq a.right b.right) ||
+      (Expr.eq a.left b.right && Expr.eq a.right b.left)
+    if !samePair then
+      false
+    else if checkerDefEqPairNeedsLocalContext a.left a.right then
+      checkerLocalContextEq a.lctx b.lctx
+    else
+      true
 
 instance : Hashable CheckerScopedExprPairKey where
   hash key :=
     let left := checkerExprHash key.left
     let right := checkerExprHash key.right
-    checkerMixHash (checkerLocalContextHash key.lctx)
-      (checkerMixHash 131 (left + right + left * right))
+    let pairHash := checkerMixHash 131 (left + right + left * right)
+    if checkerDefEqPairNeedsLocalContext key.left key.right then
+      checkerMixHash (checkerLocalContextHash key.lctx) pairHash
+    else
+      checkerMixHash 137 pairHash
 
 abbrev CheckerScopedExprPairSet := Std.HashMap CheckerScopedExprPairKey Unit
 

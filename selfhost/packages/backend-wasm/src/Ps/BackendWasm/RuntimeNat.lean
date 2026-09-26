@@ -52,6 +52,9 @@ def psWasmNatRuntimeStructures : List PsWasmStructType :=
         }
       ]
     },
+    -- Wasm GC canonicalization is structural rather than nominal.
+    -- Keep Bit1 structurally distinct from Bit0 so ref.test/ref.cast
+    -- preserve Nat constructor identity after canonicalization.
     {
       name := psWasmNatBit1Name
       superType := some psWasmNatName
@@ -60,10 +63,14 @@ def psWasmNatRuntimeStructures : List PsWasmStructType :=
         {
           name := "half"
           storageType := PsWasmStorageType.value psWasmNatRef
+        },
+        {
+          name := "constructorTag"
+          storageType := PsWasmStorageType.packedI8
         }
       ]
     },
-    {
+        {
       name := psWasmNatDivModName
       superType := none
       isFinal := true
@@ -154,6 +161,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
+        PsWasmInstruction.i32Const 1,
         PsWasmInstruction.structNew psWasmNatBit1Name
       ]
     },
@@ -168,7 +176,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
         PsWasmInstruction.refTest psWasmNatZeroName,
         PsWasmInstruction.ifStart (some psWasmNatRef),
           PsWasmInstruction.localGet 0,
-          PsWasmInstruction.structNew psWasmNatBit1Name,
+          PsWasmInstruction.call psWasmNatBit1Fn,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.refTest psWasmNatBit0Name,
@@ -176,7 +184,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
             PsWasmInstruction.localGet 0,
             PsWasmInstruction.refCast psWasmNatBit0Name,
             PsWasmInstruction.structGet psWasmNatBit0Name 0,
-            PsWasmInstruction.structNew psWasmNatBit1Name,
+            PsWasmInstruction.call psWasmNatBit1Fn,
           PsWasmInstruction.else_,
             PsWasmInstruction.localGet 0,
             PsWasmInstruction.refCast psWasmNatBit1Name,
@@ -520,9 +528,10 @@ def psWasmNatLiteralInstructionsWithFuel :
       let half := value / 2
       let low := value % 2
       psWasmNatLiteralInstructionsWithFuel fuel half ++
-        [PsWasmInstruction.structNew
-          (if low == 0 then psWasmNatBit0Name
-           else psWasmNatBit1Name)]
+      (if low == 0 then
+        [PsWasmInstruction.structNew psWasmNatBit0Name]
+      else
+        [PsWasmInstruction.call psWasmNatBit1Fn])
 
 def psWasmNatLiteralInstructions
     (value : Nat) : List PsWasmInstruction :=

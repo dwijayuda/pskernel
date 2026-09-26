@@ -1047,8 +1047,18 @@ def psTestWasmBinaryModule : Bool :=
   | Except.error _ => false
   | Except.ok bytes => bytes == psWasmExpectedAnswerBytes
 
-def main : IO Unit := do
+def psTestWasmNatConstructorIdentityInvariant : Bool :=
+      match psWasmNatRuntimeStructures with
+      | _ :: _ :: bit0 :: bit1 :: _ =>
+          bit0.name == psWasmNatBit0Name
+            && bit1.name == psWasmNatBit1Name
+            && bit0.fields.length == 1
+            && bit1.fields.length == 2
+      | _ => false
+
+    def main : IO Unit := do
   if psTestWasmScalarLowering
+      && psTestWasmNatConstructorIdentityInvariant
       && psTestWasmWordProfiles
       && psTestWasmMachineIntegerOps
       && psTestWasmMachineIntegerLiterals

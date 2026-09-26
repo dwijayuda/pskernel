@@ -170,7 +170,8 @@ lean_lib PsPSCKernel where
     `Ps.PSCKernel.Core.CheckedInferenceBasic,
     `Ps.PSCKernel.Core.DeclarationAdmission,
     `Ps.PSCKernel.Core.QuotientAdmission,
-    `Ps.PSCKernel.Core.InductiveAdmission
+    `Ps.PSCKernel.Core.InductiveAdmission,
+    `Ps.PSCKernel.Core.InductiveAdmissionUniverse
   ]
 
 @[default_target]

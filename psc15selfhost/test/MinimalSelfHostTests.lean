@@ -24,6 +24,19 @@ def psTestMinimalSelfHostVerifiedIr : Bool :=
       | Except.error _ => false
       | Except.ok _ => true
 
+def psTestForgedAdmissionReadyRejected : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostLeanSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      let forged : PsCompilerAdmissionReadyModule :=
+        { prepared with canonicalAdmissions := "forged" }
+      match psCompilerVerifiedIrFromPrepared forged with
+      | Except.error _ => true
+      | Except.ok _ => false
+
 def psTestMinimalSelfHostTypeScript : Bool :=
   match
       psCompilerTypeScriptSource
@@ -45,6 +58,12 @@ def main : IO Unit := do
     throw
       (IO.userError
         "PSC2_MINIMAL_SELFHOST_FAIL: prepared core -> VerifiedIR")
+  if psTestForgedAdmissionReadyRejected then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: forged admission-ready artifact rejected"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: forged admission-ready artifact was accepted")
   if psTestMinimalSelfHostTypeScript then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: TypeScript bootstrap backend"
   else

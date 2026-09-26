@@ -14,14 +14,11 @@ def psKernelCoreLevelParity : Bool :=
   let kcIMaxZero := PsKernelCoreLevel.imax kcOne kcZero
   let kcNested := PsKernelCoreLevel.succ (PsKernelCoreLevel.max kcUParam kcVParam)
   let kcMVar := PsKernelCoreLevel.mvar kcU
-  let kcUParams := PsKernelCoreList.cons kcU PsKernelCoreList.nil
-  let kcOneValues := PsKernelCoreList.cons kcOne PsKernelCoreList.nil
-  let kcUVParams :=
-    PsKernelCoreList.cons kcU
-      (PsKernelCoreList.cons kcV PsKernelCoreList.nil)
-  let kcOneZeroValues :=
-    PsKernelCoreList.cons kcOne
-      (PsKernelCoreList.cons kcZero PsKernelCoreList.nil)
+  let kcUSubst :=
+    PsKernelCoreLevelSubst.cons kcU kcOne PsKernelCoreLevelSubst.nil
+  let kcUVSubst :=
+    PsKernelCoreLevelSubst.cons kcU kcOne
+      (PsKernelCoreLevelSubst.cons kcV kcZero PsKernelCoreLevelSubst.nil)
   let refAnon := PSC1Kernel.Name.anonymous
   let refU := PSC1Kernel.Name.str refAnon "u"
   let refV := PSC1Kernel.Name.str refAnon "v"
@@ -38,19 +35,19 @@ def psKernelCoreLevelParity : Bool :=
   (psKernelCoreLevelEquivalent kcMaxUV kcMaxVU == PSC1Kernel.Level.equivalent refMaxUV refMaxVU) &&
   (psKernelCoreLevelEquivalent kcIMaxZero kcZero == PSC1Kernel.Level.equivalent refIMaxZero refZero) &&
   (psKernelCoreLevelEq
-      (psKernelCoreLevelInstantiateParams kcUParam kcUParams kcOneValues)
+      (psKernelCoreLevelInstantiateParams kcUParam kcUSubst)
       kcOne ==
     PSC1Kernel.Level.eq
       (PSC1Kernel.Level.instantiateParams refUParam [refU] [refOne])
       refOne) &&
   (psKernelCoreLevelEq
-      (psKernelCoreLevelInstantiateParams kcVParam kcUParams kcOneValues)
+      (psKernelCoreLevelInstantiateParams kcVParam kcUSubst)
       kcVParam ==
     PSC1Kernel.Level.eq
       (PSC1Kernel.Level.instantiateParams refVParam [refU] [refOne])
       refVParam) &&
   (psKernelCoreLevelEq
-      (psKernelCoreLevelInstantiateParams kcNested kcUVParams kcOneZeroValues)
+      (psKernelCoreLevelInstantiateParams kcNested kcUVSubst)
       (PsKernelCoreLevel.succ kcOne) ==
     PSC1Kernel.Level.eq
       (PSC1Kernel.Level.instantiateParams refNested [refU, refV] [refOne, refZero])

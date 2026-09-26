@@ -181,6 +181,14 @@ lean_exe psc1_backend_rust_tests where
   srcDir := "test"
   root := `BackendRustTests
 
+lean_exe psc1_backend_rust_let_function_result_tests where
+  srcDir := "test"
+  root := `BackendRustLetFunctionResultTests
+
+lean_exe psc1_backend_rust_let_function_result_fixture where
+  srcDir := "test"
+  root := `BackendRustLetFunctionResultFixture
+
 lean_exe psc1_backend_rust_fixture where
   srcDir := "test"
   root := `BackendRustFixture

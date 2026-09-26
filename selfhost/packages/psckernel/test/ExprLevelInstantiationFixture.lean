@@ -70,8 +70,8 @@ def main : IO Unit := do
   let nameX : PsCKernelName := psCKernelNameFromDotted "x"
   let u : PsCKernelLevel := psCKernelLevelParam nameU
   let v : PsCKernelLevel := psCKernelLevelParam nameV
-  let zero : PsCKernelLevel := psCKernelLevelZero
-  let one : PsCKernelLevel := psCKernelLevelSucc zero
+  let zeroLevel : PsCKernelLevel := psCKernelLevelZero
+  let oneLevel : PsCKernelLevel := psCKernelLevelSucc zeroLevel
 
   psCKernelExprLevelFixtureEmit
     "empty"
@@ -81,13 +81,13 @@ def main : IO Unit := do
     (psCKernelInstantiateExprLevels
       (PsCKernelExpr.sortE (psCKernelLevelSucc u))
       [nameU]
-      [zero])
+      [zeroLevel])
   psCKernelExprLevelFixtureEmit
     "const"
     (psCKernelInstantiateExprLevels
       (PsCKernelExpr.constE nameC [u, v])
       [nameU, nameV]
-      [zero, one])
+      [zeroLevel, oneLevel])
   psCKernelExprLevelFixtureEmit
     "nested"
     (psCKernelInstantiateExprLevels
@@ -103,7 +103,7 @@ def main : IO Unit := do
             (PsCKernelExpr.sortE v)))
         true)
       [nameU]
-      [zero])
+      [zeroLevel])
   psCKernelExprLevelFixtureEmit
     "binders"
     (psCKernelInstantiateExprLevels
@@ -117,16 +117,16 @@ def main : IO Unit := do
           PsCKernelBinderInfo.implicit)
         PsCKernelBinderInfo.default)
       [nameU]
-      [zero])
+      [zeroLevel])
   psCKernelExprLevelFixtureEmit
     "missing"
     (psCKernelInstantiateExprLevels
       (PsCKernelExpr.constE nameC [v])
       [nameU]
-      [zero])
+      [zeroLevel])
   psCKernelExprLevelFixtureEmit
     "duplicate"
     (psCKernelInstantiateExprLevels
       (PsCKernelExpr.sortE u)
       [nameU, nameU]
-      [zero, one])
+      [zeroLevel, oneLevel])

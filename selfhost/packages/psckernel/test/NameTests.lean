@@ -43,16 +43,16 @@ def psCKernelTestPrefix : Bool :=
   psCKernelNameIsPrefixOf psCKernelTestNameA psCKernelTestNameAB3
 
 def psCKernelTestStructuralAppend : Bool :=
-  let prefix : PsCKernelName := psCKernelNumName psCKernelTestNameA 2
+  let base : PsCKernelName := psCKernelNumName psCKernelTestNameA 2
   let suffix : PsCKernelName :=
     psCKernelNumName
       (psCKernelStrName psCKernelAnonymous "B")
       3
   let expected : PsCKernelName :=
     psCKernelNumName
-      (psCKernelStrName prefix "B")
+      (psCKernelStrName base "B")
       3
-  psCKernelNameEq (psCKernelNameAppend prefix suffix) expected
+  psCKernelNameEq (psCKernelNameAppend base suffix) expected
 
 def psCKernelTestReplacePrefix : Bool :=
   let expected : PsCKernelName :=

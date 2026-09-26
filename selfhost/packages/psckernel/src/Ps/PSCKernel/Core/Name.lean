@@ -1,7 +1,7 @@
 inductive PsCKernelName where
   | anonymous
-  | str (prefix : PsCKernelName) (value : String)
-  | num (prefix : PsCKernelName) (value : Nat)
+  | str (parent : PsCKernelName) (value : String)
+  | num (parent : PsCKernelName) (value : Nat)
 
 inductive PsCKernelNameComponent where
   | str (value : String)
@@ -10,11 +10,11 @@ inductive PsCKernelNameComponent where
 def psCKernelAnonymous : PsCKernelName :=
   PsCKernelName.anonymous
 
-def psCKernelStrName (prefix : PsCKernelName) (value : String) : PsCKernelName :=
-  PsCKernelName.str prefix value
+def psCKernelStrName (parent : PsCKernelName) (value : String) : PsCKernelName :=
+  PsCKernelName.str parent value
 
-def psCKernelNumName (prefix : PsCKernelName) (value : Nat) : PsCKernelName :=
-  PsCKernelName.num prefix value
+def psCKernelNumName (parent : PsCKernelName) (value : Nat) : PsCKernelName :=
+  PsCKernelName.num parent value
 
 partial def psCKernelStringEqFrom
     (left : String)
@@ -60,22 +60,22 @@ def psCKernelNameEq (left : PsCKernelName) : PsCKernelName -> Bool :=
         match right with
         | PsCKernelName.anonymous => true
         | _ => false
-  | PsCKernelName.str leftPrefix leftValue =>
-      let comparePrefix : PsCKernelName -> Bool := psCKernelNameEq leftPrefix
+  | PsCKernelName.str leftParent leftValue =>
+      let compareParent : PsCKernelName -> Bool := psCKernelNameEq leftParent
       fun (right : PsCKernelName) =>
         match right with
-        | PsCKernelName.str rightPrefix rightValue =>
-            if comparePrefix rightPrefix then
+        | PsCKernelName.str rightParent rightValue =>
+            if compareParent rightParent then
               psCKernelStringEq leftValue rightValue
             else
               false
         | _ => false
-  | PsCKernelName.num leftPrefix leftValue =>
-      let comparePrefix : PsCKernelName -> Bool := psCKernelNameEq leftPrefix
+  | PsCKernelName.num leftParent leftValue =>
+      let compareParent : PsCKernelName -> Bool := psCKernelNameEq leftParent
       fun (right : PsCKernelName) =>
         match right with
-        | PsCKernelName.num rightPrefix rightValue =>
-            if comparePrefix rightPrefix then
+        | PsCKernelName.num rightParent rightValue =>
+            if compareParent rightParent then
               Nat.beq leftValue rightValue
             else
               false
@@ -84,13 +84,13 @@ def psCKernelNameEq (left : PsCKernelName) : PsCKernelName -> Bool :=
 partial def psCKernelNameFromDottedGo
     (source : String)
     (position : Nat)
-    (prefix : PsCKernelName)
+    (parent : PsCKernelName)
     (part : String) : PsCKernelName :=
   if String.Internal.atEnd source (String.Pos.Raw.mk position) then
     if Nat.beq (String.Internal.length part) 0 then
-      prefix
+      parent
     else
-      PsCKernelName.str prefix part
+      PsCKernelName.str parent part
   else
     let current : Char :=
       String.Internal.get source (String.Pos.Raw.mk position)
@@ -98,17 +98,17 @@ partial def psCKernelNameFromDottedGo
       String.Pos.Raw.byteIdx
         (String.Internal.next source (String.Pos.Raw.mk position))
     if Nat.beq (Char.toNat current) 46 then
-      let nextPrefix : PsCKernelName :=
+      let nextParent : PsCKernelName :=
         if Nat.beq (String.Internal.length part) 0 then
-          prefix
+          parent
         else
-          PsCKernelName.str prefix part
-      psCKernelNameFromDottedGo source nextPosition nextPrefix ""
+          PsCKernelName.str parent part
+      psCKernelNameFromDottedGo source nextPosition nextParent ""
     else
       psCKernelNameFromDottedGo
         source
         nextPosition
-        prefix
+        parent
         (String.Internal.append part (String.singleton current))
 
 def psCKernelNameFromDotted (source : String) : PsCKernelName :=
@@ -123,8 +123,8 @@ def psCKernelNameAppendAfter
     (name : PsCKernelName)
     (suffix : String) : PsCKernelName :=
   match name with
-  | PsCKernelName.str prefix value =>
-      PsCKernelName.str prefix (String.Internal.append value suffix)
+  | PsCKernelName.str parent value =>
+      PsCKernelName.str parent (String.Internal.append value suffix)
   | _ => PsCKernelName.str name suffix
 
 def psCKernelNameAppendIndexAfter
@@ -135,44 +135,44 @@ def psCKernelNameAppendIndexAfter
     (String.Internal.append "_" (psCKernelNatToString index))
 
 def psCKernelNameIsPrefixOf
-    (prefix : PsCKernelName)
+    (candidate : PsCKernelName)
     (name : PsCKernelName) : Bool :=
-  if psCKernelNameEq prefix name then
+  if psCKernelNameEq candidate name then
     true
   else
     match name with
     | PsCKernelName.anonymous => false
     | PsCKernelName.str parent _ =>
-        psCKernelNameIsPrefixOf prefix parent
+        psCKernelNameIsPrefixOf candidate parent
     | PsCKernelName.num parent _ =>
-        psCKernelNameIsPrefixOf prefix parent
+        psCKernelNameIsPrefixOf candidate parent
 
 def psCKernelNameAppend
-    (prefix : PsCKernelName)
+    (base : PsCKernelName)
     (suffix : PsCKernelName) : PsCKernelName :=
   match suffix with
-  | PsCKernelName.anonymous => prefix
+  | PsCKernelName.anonymous => base
   | PsCKernelName.str parent value =>
-      PsCKernelName.str (psCKernelNameAppend prefix parent) value
+      PsCKernelName.str (psCKernelNameAppend base parent) value
   | PsCKernelName.num parent value =>
-      PsCKernelName.num (psCKernelNameAppend prefix parent) value
+      PsCKernelName.num (psCKernelNameAppend base parent) value
 
 def psCKernelNameReplacePrefix
     (name : PsCKernelName)
-    (prefix : PsCKernelName)
+    (query : PsCKernelName)
     (replacement : PsCKernelName) : PsCKernelName :=
-  if psCKernelNameEq name prefix then
+  if psCKernelNameEq name query then
     replacement
   else
     match name with
     | PsCKernelName.anonymous => PsCKernelName.anonymous
     | PsCKernelName.str parent value =>
         PsCKernelName.str
-          (psCKernelNameReplacePrefix parent prefix replacement)
+          (psCKernelNameReplacePrefix parent query replacement)
           value
     | PsCKernelName.num parent value =>
         PsCKernelName.num
-          (psCKernelNameReplacePrefix parent prefix replacement)
+          (psCKernelNameReplacePrefix parent query replacement)
           value
 
 partial def psCKernelStringUtf16LengthFrom
@@ -198,17 +198,17 @@ def psCKernelStringUtf16Length (source : String) : Nat :=
 def psCKernelNameKey (name : PsCKernelName) : String :=
   match name with
   | PsCKernelName.anonymous => "a"
-  | PsCKernelName.str prefix value =>
+  | PsCKernelName.str parent value =>
       String.Internal.append
-        (psCKernelNameKey prefix)
+        (psCKernelNameKey parent)
         (String.Internal.append
           "/s:"
           (String.Internal.append
             (psCKernelNatToString (psCKernelStringUtf16Length value))
             (String.Internal.append ":" value)))
-  | PsCKernelName.num prefix value =>
+  | PsCKernelName.num parent value =>
       String.Internal.append
-        (psCKernelNameKey prefix)
+        (psCKernelNameKey parent)
         (String.Internal.append "/n:" (psCKernelNatToString value))
 
 partial def psCKernelStringCmpFrom
@@ -258,13 +258,13 @@ def psCKernelNameComponents
     (name : PsCKernelName) : List PsCKernelNameComponent :=
   match name with
   | PsCKernelName.anonymous => []
-  | PsCKernelName.str prefix value =>
+  | PsCKernelName.str parent value =>
       psCKernelNameComponentListAppend
-        (psCKernelNameComponents prefix)
+        (psCKernelNameComponents parent)
         [PsCKernelNameComponent.str value]
-  | PsCKernelName.num prefix value =>
+  | PsCKernelName.num parent value =>
       psCKernelNameComponentListAppend
-        (psCKernelNameComponents prefix)
+        (psCKernelNameComponents parent)
         [PsCKernelNameComponent.num value]
 
 def psCKernelNameComponentCmp
@@ -316,14 +316,17 @@ def psCKernelNameCmp
 def psCKernelNameToString (name : PsCKernelName) : String :=
   match name with
   | PsCKernelName.anonymous => "[anonymous]"
-  | PsCKernelName.str PsCKernelName.anonymous value => value
-  | PsCKernelName.num PsCKernelName.anonymous value =>
-      psCKernelNatToString value
-  | PsCKernelName.str prefix value =>
-      String.Internal.append
-        (String.Internal.append (psCKernelNameToString prefix) ".")
-        value
-  | PsCKernelName.num prefix value =>
-      String.Internal.append
-        (String.Internal.append (psCKernelNameToString prefix) ".")
-        (psCKernelNatToString value)
+  | PsCKernelName.str parent value =>
+      match parent with
+      | PsCKernelName.anonymous => value
+      | _ =>
+          String.Internal.append
+            (String.Internal.append (psCKernelNameToString parent) ".")
+            value
+  | PsCKernelName.num parent value =>
+      match parent with
+      | PsCKernelName.anonymous => psCKernelNatToString value
+      | _ =>
+          String.Internal.append
+            (String.Internal.append (psCKernelNameToString parent) ".")
+            (psCKernelNatToString value)

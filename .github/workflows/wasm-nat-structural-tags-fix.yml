@@ -40,6 +40,9 @@ jobs:
           path = Path('selfhost/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean')
           text = path.read_text()
 
+          # Wasm GC defined types are structural. Keep the binary Nat variants
+          # observably distinct to ref.test/ref.cast by giving the sibling
+          # structs different private marker field types. `half` stays field 0.
           if 'name := "bit0Marker"' not in text:
               old = '''    {
                 name := psWasmNatBit0Name
@@ -104,25 +107,39 @@ jobs:
                   raise SystemExit('Bit1 structure marker not found')
               text = text.replace(old, new, 1)
 
-          if 'bit0Marker' in text and 'bit1Marker' in text and 'PSC1_NAT_MARKER_CONSTANTS_APPLIED' not in text:
-              lines = text.splitlines()
-              out = []
-              for line in lines:
-                  stripped = line.strip()
-                  indent = line[:len(line) - len(line.lstrip())]
-                  if stripped == 'PsWasmInstruction.structNew psWasmNatBit0Name,':
-                      out.append(indent + 'PsWasmInstruction.i32Const 0,')
-                  elif stripped == 'PsWasmInstruction.structNew psWasmNatBit1Name,':
-                      out.append(indent + 'PsWasmInstruction.i64Const 1,')
-                  out.append(line)
-              text = '\n'.join(out) + '\n'
+          # Add the private marker operand before every direct Bit0/Bit1
+          # construction. This is idempotent so the exact persisted HEAD can
+          # run this workflow again without producing another change.
+          lines = text.splitlines()
+          out = []
+          for line in lines:
+              stripped = line.strip()
+              constructor = stripped[:-1] if stripped.endswith(',') else stripped
+              indent = line[:len(line) - len(line.lstrip())]
+              if constructor == 'PsWasmInstruction.structNew psWasmNatBit0Name':
+                  marker = 'PsWasmInstruction.i32Const 0,'
+                  if not out or out[-1].strip() != marker:
+                      out.append(indent + marker)
+              elif constructor == 'PsWasmInstruction.structNew psWasmNatBit1Name':
+                  marker = 'PsWasmInstruction.i64Const 1,'
+                  if not out or out[-1].strip() != marker:
+                      out.append(indent + marker)
+              out.append(line)
+          text = '\n'.join(out) + '\n'
 
-              old_literal = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
+          # The literal builder previously chose the constructor name inside a
+          # single struct.new, so it needs a branch that also chooses the
+          # corresponding marker operand.
+          literal_def = text.index('def psWasmNatLiteralInstructionsWithFuel')
+          next_def = text.index('\n\ndef psWasmNatLiteralInstructions\n', literal_def)
+          body_start_marker = '      psWasmNatLiteralInstructionsWithFuel fuel half ++\n'
+          body_start = text.index(body_start_marker, literal_def, next_def)
+          literal_tail = text[body_start:next_def]
+          old_dynamic = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
                 [PsWasmInstruction.structNew
                   (if low == 0 then psWasmNatBit0Name
-                   else psWasmNatBit1Name)]
-              '''
-              new_literal = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
+                   else psWasmNatBit1Name)]'''
+          new_dynamic = '''      psWasmNatLiteralInstructionsWithFuel fuel half ++
                 (if low == 0 then
                   [
                     PsWasmInstruction.i32Const 0,
@@ -132,12 +149,25 @@ jobs:
                   [
                     PsWasmInstruction.i64Const 1,
                     PsWasmInstruction.structNew psWasmNatBit1Name
-                  ])
-              '''
-              if old_literal not in text:
-                  raise SystemExit('Nat literal constructor marker not found')
-              text = text.replace(old_literal, new_literal, 1)
-              text = text.rstrip() + '\n\n-- PSC1_NAT_MARKER_CONSTANTS_APPLIED\n'
+                  ])'''
+          if old_dynamic in literal_tail:
+              text = text[:body_start] + new_dynamic + text[next_def:]
+          elif 'PsWasmInstruction.i32Const 0' not in literal_tail or \
+               'PsWasmInstruction.i64Const 1' not in literal_tail:
+              raise SystemExit('Nat literal constructor shape is neither old nor fixed')
+
+          # Fail closed if any direct constructor is still missing its matching
+          # marker operand.
+          final_lines = text.splitlines()
+          for index, line in enumerate(final_lines):
+              stripped = line.strip()
+              constructor = stripped[:-1] if stripped.endswith(',') else stripped
+              if constructor == 'PsWasmInstruction.structNew psWasmNatBit0Name':
+                  if index == 0 or final_lines[index - 1].strip() != 'PsWasmInstruction.i32Const 0,':
+                      raise SystemExit(f'Bit0 constructor without marker at line {index + 1}')
+              if constructor == 'PsWasmInstruction.structNew psWasmNatBit1Name':
+                  if index == 0 or final_lines[index - 1].strip() != 'PsWasmInstruction.i64Const 1,':
+                      raise SystemExit(f'Bit1 constructor without marker at line {index + 1}')
 
           path.write_text(text)
           PY

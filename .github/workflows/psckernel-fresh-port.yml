@@ -58,6 +58,13 @@ jobs:
           cd selfhost
           lake exe psckernel_name_tests
 
+      - name: Run PSCKernel Level basic tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psckernel_level_basic_tests
+
       - name: Install TypeScript kernel dependencies
         run: npm ci --no-audit --no-fund
 

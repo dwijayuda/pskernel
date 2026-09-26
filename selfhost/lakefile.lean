@@ -152,7 +152,10 @@ lean_lib PsElab where
 
 lean_lib PsPSCKernel where
   srcDir := "packages/psckernel/src"
-  roots := #[`Ps.PSCKernel.Core.Name]
+  roots := #[
+    `Ps.PSCKernel.Core.Name,
+    `Ps.PSCKernel.Core.Level
+  ]
 
 @[default_target]
 lean_exe psc1 where
@@ -226,3 +229,7 @@ lean_exe psckernel_name_tests where
 lean_exe psckernel_name_fixture where
   srcDir := "packages/psckernel/test"
   root := `NameFixture
+
+lean_exe psckernel_level_basic_tests where
+  srcDir := "packages/psckernel/test"
+  root := `LevelBasicTests

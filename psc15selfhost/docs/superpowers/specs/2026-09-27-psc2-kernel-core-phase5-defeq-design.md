@@ -96,7 +96,7 @@ If the two KernelCore expressions are structurally identical, return `ok true` b
 
 The structural comparator used here must be trusted KernelCore code or an already accepted equivalent. If Phase 5 needs a new expression structural-equality helper, it must be introduced explicitly, tested before DefEq depends on it, and pass the real PSC1 source gate.
 
-Structural identity includes exact binder metadata and exact expression structure; later DefEq rules may equate terms that are not structurally identical.
+Structural identity includes exact expression structure. Later DefEq rules may equate terms that are not structurally identical.
 
 ### 5.2 Metadata transparency
 
@@ -169,7 +169,7 @@ Binder user names are not semantically significant.
 
 The common fresh local must be generated deterministically from the current local context and a stable user-name choice. The test suite must include lambdas with different binder names and populated local contexts.
 
-Binder metadata follows the mature DefEq overlap: DefEq must not reject otherwise equal lambdas merely because their binder names differ. Any binder-info sensitivity or insensitivity must be pinned directly against the oracle rather than assumed.
+Binder info does **not** participate directly in the equality decision on this Phase-5 overlap surface. When extending the local context, use the right-hand binder info, matching the mature spine algorithm. A fixture must prove that otherwise equal lambdas with differing binder info remain DefEq if the mature oracle does.
 
 ### 5.10 Foralls
 
@@ -181,11 +181,13 @@ Two forall expressions compare analogously to lambdas:
 
 Different binder names alone do not make foralls non-DefEq.
 
+Binder info does **not** participate directly in the equality decision on this Phase-5 overlap surface; local-context extension uses the right-hand binder info as in the mature oracle.
+
 ### 5.11 Proof irrelevance
 
 Proof irrelevance is included because its dependencies now exist.
 
-For residual terms `a` and `b`, Phase 5 may use Phase-4 inference to determine whether `a` is a proof:
+For residual terms `a` and `b`, Phase 5 uses Phase-4 inference to determine whether `a` is a proof:
 
 1. infer `a` to obtain `aType`;
 2. infer `aType` and reduce that inferred type with accepted WHNF;
@@ -194,9 +196,9 @@ For residual terms `a` and `b`, Phase 5 may use Phase-4 inference to determine w
 5. compare `aType` and `bType` recursively with Phase-5 DefEq;
 6. if the types are DefEq, the proof terms are DefEq regardless of proof bodies.
 
-If the first term is not recognized as a proof, continue with ordinary equality rules.
+If the first term is successfully shown not to be a proof, continue with ordinary equality rules.
 
-Inference errors required to establish proof irrelevance are handled conservatively: Phase 5 must not turn an inference failure into `true`. The detailed implementation plan must pin whether an overlapping oracle case propagates an error or continues to ordinary comparison.
+If inference or WHNF needed for this proof-irrelevance path returns an error, **propagate that error**. Do not silently reinterpret an inference failure as “not a proof,” and never turn it into `true`. This matches the mature checker’s monadic failure behavior.
 
 ### 5.12 Function eta
 
@@ -217,6 +219,8 @@ f ≡ (fun x => f x)
 ```
 
 when `f` has a function type.
+
+If inference or WHNF required by eta returns an error, **propagate that error**. If inference succeeds but the reduced type is not a forall, eta simply does not prove equality and ordinary comparison continues.
 
 Phase 5 does not implement structure eta.
 
@@ -264,16 +268,25 @@ Budget `0` returns exactly:
 defeq budget exhausted
 ```
 
-Each recursive DefEq descent consumes budget deterministically.
+For `psKernelCoreIsDefEq (Nat.succ remaining)`, the current call owns one DefEq step. Every recursive DefEq call receives exactly `remaining`.
+
+When that call invokes accepted Phase-3 WHNF or Phase-4 inference, those lower-layer calls also receive exactly `remaining`. They retain their own established budget error strings if they exhaust their budgets.
+
+This gives a deterministic rule:
+
+```text
+DefEq recursion: Nat.succ remaining -> recursive DefEq remaining
+Lower-layer work from that frame: budget remaining
+```
 
 The implementation plan must pin at least one threshold fixture where the same term pair:
 
-- fails at budget `N - 1` with `defeq budget exhausted`; and
+- fails at budget `N - 1`; and
 - succeeds at budget `N`.
 
-The budget is a KernelCore totality/resource contract. It is not claimed to match Lean's internal recursion-depth counter.
+If the failing threshold is caused by a lower layer, the fixture must pin that lower-layer error. If it is caused by DefEq recursion itself, it must pin `defeq budget exhausted`.
 
-When Phase-5 DefEq invokes accepted WHNF or inference, it must use a deterministic remaining-budget policy documented in the implementation plan. Tests must make the policy observable enough that future refactors cannot silently convert a terminating accepted case into unbounded recursion.
+The budget is a KernelCore totality/resource contract. It is not claimed to match Lean's internal recursion-depth counter.
 
 ## 9. Error behavior
 
@@ -284,7 +297,7 @@ defeq budget exhausted
 projection definitional equality unavailable before inductive metadata
 ```
 
-Errors from accepted lower layers may propagate when required to decide an explicitly supported DefEq rule.
+Errors from accepted lower layers propagate when required to decide an explicitly supported DefEq rule.
 
 A negative equality decision is represented as:
 
@@ -294,7 +307,7 @@ PsKernelCoreResult.ok false
 
 not as an error.
 
-Unsupported semantics whose absence could make `false` unsound should fail closed with an explicit error instead of silently returning `false`.
+Unsupported semantics whose absence could make `false` unsound must fail closed with an explicit error instead of silently returning `false`.
 
 ## 10. Differential oracle
 
@@ -324,35 +337,39 @@ Before production `DefEq.lean` exists, create a failing Phase-5 parity executabl
 12. application equality;
 13. lambda equality;
 14. lambdas with different binder user names;
-15. forall equality;
-16. foralls with different binder user names;
-17. nested/dependent lambda equality;
-18. nested/dependent forall equality;
-19. proof irrelevance for two distinct proof bodies of the same proposition;
-20. proof terms whose proposition types are themselves DefEq after accepted reduction;
-21. function eta, lambda-left orientation;
-22. function eta, lambda-right orientation.
+15. lambdas with differing binder info when accepted by the oracle;
+16. forall equality;
+17. foralls with different binder user names;
+18. foralls with differing binder info when accepted by the oracle;
+19. nested/dependent lambda equality;
+20. nested/dependent forall equality;
+21. proof irrelevance for two distinct proof bodies of the same proposition;
+22. proof terms whose proposition types are themselves DefEq after accepted reduction;
+23. function eta, lambda-left orientation;
+24. function eta, lambda-right orientation.
 
 ### Negative overlap
 
-23. different residual constant names;
-24. same constant name with non-equivalent levels;
-25. different free variables;
-26. unequal Nat literals;
-27. Nat literal versus String literal;
-28. applications with unequal arguments;
-29. lambdas with non-DefEq domains;
-30. foralls with non-DefEq domains;
-31. proof-like terms whose proposition types are not DefEq;
-32. function eta attempted on a non-function term does not yield equality;
-33. two different opaque constants remain unequal when no accepted rule proves equality.
+25. different residual constant names;
+26. same constant name with non-equivalent levels;
+27. different free variables;
+28. unequal Nat literals;
+29. Nat literal versus String literal;
+30. applications with unequal arguments;
+31. lambdas with non-DefEq domains;
+32. foralls with non-DefEq domains;
+33. proof-like terms whose proposition types are not DefEq;
+34. function eta attempted on a successfully inferred non-function term does not yield equality;
+35. two different opaque constants remain unequal when no accepted rule proves equality.
 
-### KernelCore boundary cases
+### Error-propagation and KernelCore boundary cases
 
-34. budget zero -> exact `defeq budget exhausted`;
-35. pinned success/failure budget threshold;
-36. structurally identical projection -> `ok true` via fast path;
-37. residual non-identical projection requiring deferred metadata -> exact projection-deferred error.
+36. proof-irrelevance inference failure propagates the lower-layer error;
+37. eta inference failure propagates the lower-layer error;
+38. budget zero -> exact `defeq budget exhausted`;
+39. pinned success/failure budget threshold;
+40. structurally identical projection -> `ok true` via fast path;
+41. residual non-identical projection requiring deferred metadata -> exact projection-deferred error.
 
 If a proposed fixture depends on recursor, Quot, structure, native, or primitive behavior deferred from this phase, remove it from the Phase-5 matrix rather than widening the trusted scope.
 

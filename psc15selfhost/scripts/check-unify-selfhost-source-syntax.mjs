@@ -11,6 +11,12 @@ const unify = await readFile(
 
 const required = [
   "let unified := psLevelUnify context.levels left right;\n      if unified.success then",
+  "let leftValue := psWhnf environment context localContext left;\n      let rightValue := psWhnf environment context localContext right;\n      if psExprAlphaEq leftValue rightValue then",
+  "let unified := psLevelUnify context.levels leftLevel rightLevel;\n            if unified.success then",
+  "                rightFn;\n            if fnResult.success then",
+  "                rightType;\n            if typeResult.success then",
+  "                  PsBinderInfo.explicit;\n              let fvar := PsExpr.fvar pushed.id;\n              psUnifyWithFuel",
+  "    psUnifyWithFuel environment localContext context 512 left right;\n  if result.success then",
 ];
 for (const marker of required) {
   if (!unify.includes(marker)) {
@@ -20,6 +26,14 @@ for (const marker of required) {
 
 const forbidden = [
   "let unified := psLevelUnify context.levels left right\n      if unified.success then",
+  "let leftValue := psWhnf environment context localContext left\n      let rightValue :=",
+  "let rightValue := psWhnf environment context localContext right\n      if psExprAlphaEq",
+  "let unified := psLevelUnify context.levels leftLevel rightLevel\n            if unified.success then",
+  "                rightFn\n            if fnResult.success then",
+  "                rightType\n            if typeResult.success then",
+  "                  PsBinderInfo.explicit\n              let fvar :=",
+  "let fvar := PsExpr.fvar pushed.id\n              psUnifyWithFuel",
+  "    psUnifyWithFuel environment localContext context 512 left right\n  if result.success then",
 ];
 for (const marker of forbidden) {
   if (unify.includes(marker)) {
@@ -28,5 +42,5 @@ for (const marker of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX: PASS (explicit let sequencing before conditional continuation)\n",
+  "PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX: PASS (all term-level let continuations explicitly sequenced)\n",
 );

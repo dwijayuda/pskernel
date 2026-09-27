@@ -180,6 +180,8 @@ for expressions in which `x` is the free variable being abstracted and the surro
 
 Do not add general multi-free-variable abstraction, maps, sets, or binder utility libraries in this phase.
 
+Implementation note for PSC1 totality: any abstraction worker whose binder depth changes during traversal must curry that changing depth after structurally matching the expression, following the already accepted KernelCore recursion pattern. Do not weaken the source gate to admit a Lean-only recursive shape.
+
 ## Fresh local names
 
 Use the same observable name strategy as the mature checker:
@@ -301,6 +303,8 @@ forallE name domain closedBodyType binderInfo
 
 This preserves the key mature infer-only behavior without invoking DefEq.
 
+A direct differential case MUST use a domain that would fail checked domain validation and still show that infer-only computes the lambda type, proving Phase 4 did not accidentally become checked inference.
+
 ### Foralls
 
 Unlike lambda-domain validation, forall formation still needs universe information even in infer-only mode.
@@ -349,6 +353,8 @@ letE name type value closedBodyType nondep
 ```
 
 This matches the mature infer-only intent of removing dead type-level lets while retaining dependent ones.
+
+A direct differential case MUST use an intentionally non-inferable let value (and, separately if useful, an unchecked declared type) while the body remains inferable, proving infer-only does not validate the let value/type.
 
 Phase 4 does not attempt to reproduce every `cheapBetaReduce` micro-ordering case outside its direct fixtures. Such differences, if any, are expanded under later differential/corpus gates rather than by importing broad reducer logic here.
 
@@ -447,19 +453,23 @@ At minimum:
 3. local let-variable lookup returns its declared type;
 4. constant with no universe parameters;
 5. polymorphic constant with universe instantiation;
-6. Nat literal typing;
-7. String literal typing;
-8. metadata transparency;
-9. nondependent lambda type;
-10. dependent/nested lambda closure using fresh locals and abstraction;
-11. forall universe result using `imax`;
-12. nested/dependent forall;
-13. nondependent let removes the dead type-level let;
-14. dependent let retains the type-level let;
-15. visible forall application;
-16. dependent multi-application;
-17. hidden forall exposed by accepted basic delta reduction;
-18. infer-only application with an intentionally non-inferable argument still returns the function result type.
+6. infer-only use of an unsafe constant still returns its type;
+7. infer-only use of a partial constant still returns its type;
+8. Nat literal typing;
+9. String literal typing;
+10. metadata transparency;
+11. nondependent lambda type;
+12. dependent/nested lambda closure using fresh locals and abstraction;
+13. lambda whose domain would fail checked validation still infers in infer-only mode;
+14. forall universe result using `imax`;
+15. nested/dependent forall;
+16. nondependent let removes the dead type-level let;
+17. dependent let retains the type-level let;
+18. let with an intentionally non-inferable value still infers its body type in infer-only mode;
+19. visible forall application;
+20. dependent multi-application;
+21. hidden forall exposed by accepted basic delta reduction;
+22. infer-only application with an intentionally non-inferable argument still returns the function result type.
 
 ### Negative parity cases
 
@@ -510,14 +520,18 @@ For overlapping reference errors, the direct fixture should compare the stable s
 
 ## Required gate order
 
-Every Phase-4 implementation checkpoint follows:
+Preserve the established lower-to-upper workflow ordering. Every Phase-4 implementation checkpoint follows:
 
 ```text
 Lean compilation
 ↓
-Phase-4 direct inference differential parity
+Phase-1 direct parity
 ↓
-Phase-1/2/3 direct parity remains green
+Phase-2 direct parity
+↓
+Phase-3 basic-reduction parity
+↓
+Phase-4 direct inference differential parity
 ↓
 KernelCore boundary/bootstrap isolation
 ↓
@@ -581,7 +595,7 @@ Phase 4 is accepted only when all of the following are true:
 2. only the minimal binder-closing helpers needed by inference are added to `Subst.lean`;
 3. the complete trusted closure passes the actual PSC1 self-host source check;
 4. direct overlap fixtures agree with `PSC1Kernel.infer` for the accepted infer-only surface;
-5. infer-only application nonchecking is explicitly proven by regression;
+5. infer-only nonchecking of application arguments, lambda domains, let type/values, and unsafe/partial constant restrictions is explicitly proven by regression;
 6. lambda and let binder closing is capture-safe under the direct helper fixtures;
 7. projection behavior fails closed rather than trusting absent inductive metadata;
 8. Phase-1/2/3 gates remain green;

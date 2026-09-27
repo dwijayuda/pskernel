@@ -121,7 +121,10 @@ def psExprContainsMVar
   | .proj _ _ value => psExprContainsMVar target value
   | _ => false
 
-def psExprFVarsInContext (localContext : PsLocalContext) : PsExpr -> Bool
+def psExprFVarsInContext
+    (localContext : PsLocalContext)
+    (expr : PsExpr) : Bool :=
+  match expr with
   | .fvar id => psLocalContainsId localContext id
   | .app fn arg =>
       if psExprFVarsInContext localContext fn then
@@ -150,7 +153,9 @@ def psExprFVarsInContext (localContext : PsLocalContext) : PsExpr -> Bool
   | _ => true
 
 def psMetaInstantiateStep
-    (context : PsMetaContext) : PsExpr -> PsExpr
+    (context : PsMetaContext)
+    (expr : PsExpr) : PsExpr :=
+  match expr with
   | .mvar id =>
       match psMetaFindAssignment context id with
       | Option.none => PsExpr.mvar id
@@ -182,13 +187,15 @@ def psMetaInstantiateStep
         typeName
         index
         (psMetaInstantiateStep context value)
-  | expr => expr
+  | _ => expr
 
 def psMetaInstantiateRounds
-    (context : PsMetaContext) :
-    Nat -> PsExpr -> PsExpr
-  | 0, expr => expr
-  | remaining + 1, expr =>
+    (context : PsMetaContext)
+    (fuel : Nat)
+    (expr : PsExpr) : PsExpr :=
+  match fuel with
+  | Nat.zero => expr
+  | Nat.succ remaining =>
       psMetaInstantiateRounds
         context
         remaining
@@ -242,7 +249,9 @@ def psMetaAssign (context : PsMetaContext) (id : Nat) (value : PsExpr) : Option 
           else
             Option.none
 
-def psExprHasUnresolvedMeta : PsExpr -> Bool
+def psExprHasUnresolvedMeta
+    (expr : PsExpr) : Bool :=
+  match expr with
   | .mvar _ => true
   | .sortE level => psLevelHasMVar level
   | .constE _ levels => psLevelListHasMVar levels

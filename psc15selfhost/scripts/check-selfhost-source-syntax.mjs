@@ -151,10 +151,12 @@ const reduce = await read(
 requireMarkers("Reduce", reduce, [
   'let instantiated := psMetaInstantiate metaContext expr;\n      match instantiated with',
   '| some declaration =>\n              match declaration with\n              | .letDecl _ _ _ value =>',
+  'let reducedFn := psWhnfCoreWithFuel metaContext localContext fuel fn;\n          match reducedFn with',
 ]);
 forbidMarkers("Reduce", reduce, [
   'let instantiated := psMetaInstantiate metaContext expr\n      match instantiated with',
   '| some (.letDecl _ _ _ value) =>',
+  'let reducedFn := psWhnfCoreWithFuel metaContext localContext fuel fn\n          match reducedFn with',
 ]);
 
 process.stdout.write(

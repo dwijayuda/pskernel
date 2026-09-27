@@ -75,6 +75,8 @@ requireMarkers("LevelContext", levelContext, [
   'let first := smaller context leftA rightA;',
   'smaller first.context leftB rightB',
   'psLevelUnifyWithFuelWorker fuel context left right',
+  'def psLevelInstantiateExpr\n    (context : PsLevelMetaContext)\n    (expr : PsExpr) : PsExpr :=\n  match expr with',
+  '| _ => expr',
   'if psLevelHasMVar left then',
   'if psLevelHasMVar level then',
 ]);
@@ -89,6 +91,8 @@ forbidMarkers("LevelContext", levelContext, [
   'match psLevelAssign context id value with',
   'psLevelUnifyWithFuel context fuel leftA rightA',
   'psLevelUnifyWithFuel first.context fuel leftB rightB',
+  'def psLevelInstantiateExpr (context : PsLevelMetaContext) : PsExpr -> PsExpr',
+  '| expr => expr',
   '||',
 ]);
 

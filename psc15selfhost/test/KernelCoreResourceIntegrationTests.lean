@@ -1,5 +1,6 @@
 import Ps.KernelCore.Admission
 import Ps.KernelCore.Primitive
+import PSC1Kernel.TypeChecker
 
 def psKernelCoreResourceIntegrationName (value : String) : PsKernelCoreName :=
   PsKernelCoreName.str PsKernelCoreName.anonymous value
@@ -140,6 +141,13 @@ def psKernelCoreResourceIntegrationBoolResultEq
   | PsKernelCoreResult.ok l, PsKernelCoreResult.ok r => psKernelCoreBoolEq l r
   | _, _ => false
 
+def psKernelCoreResourceIntegrationLevelResultEq
+    (left right : PsKernelCoreResult String PsKernelCoreLevel) : Bool :=
+  match left, right with
+  | PsKernelCoreResult.error l, PsKernelCoreResult.error r => l == r
+  | PsKernelCoreResult.ok l, PsKernelCoreResult.ok r => psKernelCoreLevelEq l r
+  | _, _ => false
+
 def psKernelCoreResourceIntegrationEnvResultEq
     (target : PsKernelCoreName)
     (left right : PsKernelCoreResult String PsKernelCoreEnvironment) : Bool :=
@@ -260,6 +268,64 @@ def psKernelCoreResourceIntegrationWhnf : Bool :=
       (psKernelCoreWhnfWithResources 0 tiny f.env psKernelCoreLocalContextEmpty f.add23)
       "reduction budget exhausted"
 
+def psKernelCoreResourceIntegrationMatureWhnfOverlap : Bool :=
+  let coreAdd :=
+    psKernelCoreResourceIntegrationApp2
+      (psKernelCoreResourceIntegrationConst psKernelCorePrimitiveNatAddName)
+      (psKernelCoreResourceIntegrationNat 2)
+      (psKernelCoreResourceIntegrationNat 3)
+  let referenceAdd :=
+    PSC1Kernel.Expr.app
+      (PSC1Kernel.Expr.app
+        (PSC1Kernel.Expr.const PSC1Kernel.kernelNatAddName [])
+        (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.nat 2)))
+      (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.nat 3))
+  let referenceDefault :=
+    { PSC1Kernel.CheckerContext.empty PSC1Kernel.Environment.empty with
+      maxNatSize := PSC1Kernel.leanNatMaxSizeDefault }
+  let coreOk :=
+    match psKernelCoreWhnfWithResources
+        64 psKernelCoreResourceConfigDefault
+        psKernelCoreEnvironmentEmpty psKernelCoreLocalContextEmpty coreAdd with
+    | PsKernelCoreResult.ok
+        (PsKernelCoreExpr.lit (PsKernelCoreLiteral.nat value)) =>
+        Nat.beq value 5
+    | _ => false
+  let referenceOk :=
+    match PSC1Kernel.whnf referenceDefault referenceAdd with
+    | Except.ok (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.nat value)) =>
+        Nat.beq value 5
+    | _ => false
+  let maxOneWord := Nat.sub psKernelCoreNatHeapLimbDivisor 1
+  let coreOverflow :=
+    psKernelCoreResourceIntegrationApp2
+      (psKernelCoreResourceIntegrationConst psKernelCorePrimitiveNatAddName)
+      (psKernelCoreResourceIntegrationNat maxOneWord)
+      (psKernelCoreResourceIntegrationNat 1)
+  let referenceOverflow :=
+    PSC1Kernel.Expr.app
+      (PSC1Kernel.Expr.app
+        (PSC1Kernel.Expr.const PSC1Kernel.kernelNatAddName [])
+        (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.nat maxOneWord)))
+      (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.nat 1))
+  let coreTiny : PsKernelCoreResourceConfig := { maxNatSize := 8 }
+  let referenceTiny :=
+    { PSC1Kernel.CheckerContext.empty PSC1Kernel.Environment.empty with
+      maxNatSize := 8 }
+  let sizeError :=
+    "the kernel refused a Nat numeral because its size exceeds the maximum"
+  let coreError :=
+    match psKernelCoreWhnfWithResources
+        64 coreTiny psKernelCoreEnvironmentEmpty
+        psKernelCoreLocalContextEmpty coreOverflow with
+    | PsKernelCoreResult.error message => message == sizeError
+    | _ => false
+  let referenceError :=
+    match PSC1Kernel.whnf referenceTiny referenceOverflow with
+    | Except.error message => message == sizeError
+    | _ => false
+  coreOk && referenceOk && coreError && referenceError
+
 def psKernelCoreResourceIntegrationInferCheck : Bool :=
   let f := psKernelCoreResourceIntegrationFixture
   let tiny : PsKernelCoreResourceConfig := { maxNatSize := 8 }
@@ -361,6 +427,10 @@ def psKernelCoreResourceIntegrationDefaultWrappers : Bool :=
   let f := psKernelCoreResourceIntegrationFixture
   let n := psKernelCoreResourceIntegrationName
   let sort1 := PsKernelCoreExpr.sort (PsKernelCoreLevel.succ PsKernelCoreLevel.zero)
+  let directSort := PsKernelCoreExpr.sort PsKernelCoreLevel.zero
+  let directForall :=
+    PsKernelCoreExpr.forallE
+      (n "x") f.natType f.natType PsKernelCoreBinderInfo.default
   let aName := n "Adefault"
   let pName := n "Pdefault"
   let aExpr := psKernelCoreResourceIntegrationConst aName
@@ -391,6 +461,14 @@ def psKernelCoreResourceIntegrationDefaultWrappers : Bool :=
       (psKernelCoreWhnf 64 f.env psKernelCoreLocalContextEmpty f.add23)
       (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
         f.env psKernelCoreLocalContextEmpty f.add23) &&
+  psKernelCoreResourceIntegrationLevelResultEq
+      (psKernelCoreEnsureSort 64 f.env psKernelCoreLocalContextEmpty directSort)
+      (psKernelCoreEnsureSortWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty directSort) &&
+  psKernelCoreResourceIntegrationExprResultEq
+      (psKernelCoreEnsureForall 64 f.env psKernelCoreLocalContextEmpty directForall)
+      (psKernelCoreEnsureForallWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty directForall) &&
   psKernelCoreResourceIntegrationExprResultEq
       (psKernelCoreInfer 64 f.env psKernelCoreLocalContextEmpty
         (psKernelCoreResourceIntegrationNat 2))
@@ -450,6 +528,7 @@ def psKernelCoreResourceIntegrationDefaultWrappers : Bool :=
 
 def psKernelCoreResourceIntegration : Bool :=
   psKernelCoreResourceIntegrationWhnf &&
+  psKernelCoreResourceIntegrationMatureWhnfOverlap &&
   psKernelCoreResourceIntegrationInferCheck &&
   psKernelCoreResourceIntegrationDefEq &&
   psKernelCoreResourceIntegrationAdmission &&

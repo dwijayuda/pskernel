@@ -440,45 +440,53 @@ def psKernelCoreAddQuot
         else
           let uName := psKernelCoreQuotUName;
           let vName := psKernelCoreQuotVName;
+          let quotBase : PsKernelCoreConstantBase := {
+            name := psKernelCoreQuotName
+            levelParams := psKernelCoreQuotOneName uName
+            type := psKernelCoreMakeQuotType uName
+          };
+          let quotInfo : PsKernelCoreQuotInfo := {
+            base := quotBase
+            kind := PsKernelCoreQuotKind.typeQ
+          };
           let env1 :=
             psKernelCoreEnvironmentAddUnchecked env
-              (PsKernelCoreConstantInfo.quotInfo {
-                base := {
-                  name := psKernelCoreQuotName
-                  levelParams := psKernelCoreQuotOneName uName
-                  type := psKernelCoreMakeQuotType uName
-                }
-                kind := PsKernelCoreQuotKind.typeQ
-              });
+              (PsKernelCoreConstantInfo.quotInfo quotInfo);
+          let mkBase : PsKernelCoreConstantBase := {
+            name := psKernelCoreQuotMkName
+            levelParams := psKernelCoreQuotOneName uName
+            type := psKernelCoreMakeQuotMkType uName
+          };
+          let mkInfo : PsKernelCoreQuotInfo := {
+            base := mkBase
+            kind := PsKernelCoreQuotKind.ctorQ
+          };
           let env2 :=
             psKernelCoreEnvironmentAddUnchecked env1
-              (PsKernelCoreConstantInfo.quotInfo {
-                base := {
-                  name := psKernelCoreQuotMkName
-                  levelParams := psKernelCoreQuotOneName uName
-                  type := psKernelCoreMakeQuotMkType uName
-                }
-                kind := PsKernelCoreQuotKind.ctorQ
-              });
+              (PsKernelCoreConstantInfo.quotInfo mkInfo);
+          let liftBase : PsKernelCoreConstantBase := {
+            name := psKernelCoreQuotLiftName
+            levelParams := psKernelCoreQuotTwoNames uName vName
+            type := psKernelCoreMakeQuotLiftType uName vName
+          };
+          let liftInfo : PsKernelCoreQuotInfo := {
+            base := liftBase
+            kind := PsKernelCoreQuotKind.liftQ
+          };
           let env3 :=
             psKernelCoreEnvironmentAddUnchecked env2
-              (PsKernelCoreConstantInfo.quotInfo {
-                base := {
-                  name := psKernelCoreQuotLiftName
-                  levelParams := psKernelCoreQuotTwoNames uName vName
-                  type := psKernelCoreMakeQuotLiftType uName vName
-                }
-                kind := PsKernelCoreQuotKind.liftQ
-              });
+              (PsKernelCoreConstantInfo.quotInfo liftInfo);
+          let indBase : PsKernelCoreConstantBase := {
+            name := psKernelCoreQuotIndName
+            levelParams := psKernelCoreQuotOneName uName
+            type := psKernelCoreMakeQuotIndType uName
+          };
+          let indInfo : PsKernelCoreQuotInfo := {
+            base := indBase
+            kind := PsKernelCoreQuotKind.indQ
+          };
           let env4 :=
             psKernelCoreEnvironmentAddUnchecked env3
-              (PsKernelCoreConstantInfo.quotInfo {
-                base := {
-                  name := psKernelCoreQuotIndName
-                  levelParams := psKernelCoreQuotOneName uName
-                  type := psKernelCoreMakeQuotIndType uName
-                }
-                kind := PsKernelCoreQuotKind.indQ
-              });
+              (PsKernelCoreConstantInfo.quotInfo indInfo);
           PsKernelCoreResult.ok
             (psKernelCoreEnvironmentMarkQuotInitialized env4)

@@ -607,20 +607,28 @@ def psCloseElabTypedBinders
           smaller closedValue closedType
 
 def psElabLambdaExpectedBody
-    (context : PsElabContext)
     (binders : List PsElabTypedBinder) :
+    PsElabContext ->
     PsExpr ->
-    Except PsElabError (Prod PsElabContext PsExpr)
-  | expectedType =>
-      match binders with
-      | [] =>
+    Except PsElabError (Prod PsElabContext PsExpr) :=
+  match binders with
+  | [] =>
+      fun (context : PsElabContext) =>
+        fun (expectedType : PsExpr) =>
           Except.ok
             (Prod.mk
               context
               (psMetaInstantiate
                 context.metaContext
                 expectedType))
-      | binder :: rest =>
+  | binder :: rest =>
+      let smaller :
+          PsElabContext ->
+          PsExpr ->
+          Except PsElabError (Prod PsElabContext PsExpr) :=
+        psElabLambdaExpectedBody rest;
+      fun (context : PsElabContext) =>
+        fun (expectedType : PsExpr) =>
           match
               psInferEnsureForall
                 context.environment
@@ -650,10 +658,7 @@ def psElabLambdaExpectedBody
                       unified.context
                       forallView.body)
                     (PsExpr.fvar binder.id);
-                psElabLambdaExpectedBody
-                  nextContext
-                  rest
-                  nextExpected
+                smaller nextContext nextExpected
 
 def psElabLambdaBodyExpected
     (context : PsElabContext)
@@ -668,8 +673,8 @@ def psElabLambdaBodyExpected
   | some expectedType =>
       match
           psElabLambdaExpectedBody
-            context
             binders
+            context
             expectedType with
       | Except.error error => Except.error error
       | Except.ok prepared =>

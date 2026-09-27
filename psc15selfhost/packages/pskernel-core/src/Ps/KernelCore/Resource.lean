@@ -57,7 +57,7 @@ def psKernelCoreCheckCountArg
     PsKernelCoreResult.ok Unit.unit
   else
     PsKernelCoreResult.error
-      (String.append
+      (String.Internal.append
         "the kernel refused to evaluate "
-        (String.append operation
+        (String.Internal.append operation
           " because its second argument does not fit in a 32-bit unsigned integer"))

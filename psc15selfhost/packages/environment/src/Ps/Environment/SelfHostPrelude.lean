@@ -9,6 +9,15 @@ def psSelfHostListConsName : PsName :=
 def psSelfHostListRecName : PsName :=
   psNameAppendStr psListName "rec"
 
+def psSelfHostOptionNoneName : PsName :=
+  psNameAppendStr psOptionName "none"
+
+def psSelfHostOptionSomeName : PsName :=
+  psNameAppendStr psOptionName "some"
+
+def psSelfHostOptionRecName : PsName :=
+  psNameAppendStr psOptionName "rec"
+
 def psSelfHostListOf (alpha : PsExpr) : PsExpr :=
   PsExpr.app
     (PsExpr.constE psListName [])
@@ -29,6 +38,24 @@ def psSelfHostListConsOf
       head)
     tail
 
+def psSelfHostOptionOf (alpha : PsExpr) : PsExpr :=
+  PsExpr.app
+    (PsExpr.constE psOptionName [])
+    alpha
+
+def psSelfHostOptionNoneOf (alpha : PsExpr) : PsExpr :=
+  PsExpr.app
+    (PsExpr.constE psSelfHostOptionNoneName [])
+    alpha
+
+def psSelfHostOptionSomeOf
+    (alpha value : PsExpr) : PsExpr :=
+  PsExpr.app
+    (PsExpr.app
+      (PsExpr.constE psSelfHostOptionSomeName [])
+      alpha)
+    value
+
 def psSelfHostReplacePreludeAxiom
     (environment : PsEnvironment)
     (declaration : PsDeclaration) : PsEnvironment :=
@@ -42,8 +69,11 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
   let motiveName := psRootName "_motive"
   let nilMinorName := psRootName "_nil"
   let consMinorName := psRootName "_cons"
+  let noneMinorName := psRootName "_none"
+  let someMinorName := psRootName "_some"
   let headName := psRootName "head"
   let tailName := psRootName "tail"
+  let valueName := psRootName "value"
   let hypothesisName := psRootName "_ih"
   let majorName := psRootName "_major"
   let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero)
@@ -73,7 +103,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           PsBinderInfo.explicit)
         PsBinderInfo.explicit)
       PsBinderInfo.implicit
-  let motiveType :=
+  let listMotiveType :=
     PsExpr.forallE
       majorName
       (psSelfHostListOf (PsExpr.bvar 0))
@@ -104,13 +134,13 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           PsBinderInfo.explicit)
         PsBinderInfo.explicit)
       PsBinderInfo.explicit
-  let recType :=
+  let listRecType :=
     PsExpr.forallE
       alphaName
       typeType
       (PsExpr.forallE
         motiveName
-        motiveType
+        listMotiveType
         (PsExpr.forallE
           nilMinorName
           nilMinorType
@@ -120,6 +150,72 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
             (PsExpr.forallE
               majorName
               (psSelfHostListOf (PsExpr.bvar 3))
+              (PsExpr.app
+                (PsExpr.bvar 3)
+                (PsExpr.bvar 0))
+              PsBinderInfo.explicit)
+            PsBinderInfo.explicit)
+          PsBinderInfo.explicit)
+        PsBinderInfo.explicit)
+      PsBinderInfo.implicit
+  let optionType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      typeType
+      PsBinderInfo.explicit
+  let noneType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (psSelfHostOptionOf (PsExpr.bvar 0))
+      PsBinderInfo.implicit
+  let someType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        valueName
+        (PsExpr.bvar 0)
+        (psSelfHostOptionOf (PsExpr.bvar 1))
+        PsBinderInfo.explicit)
+      PsBinderInfo.implicit
+  let optionMotiveType :=
+    PsExpr.forallE
+      majorName
+      (psSelfHostOptionOf (PsExpr.bvar 0))
+      (PsExpr.sortE (PsLevel.param uName))
+      PsBinderInfo.explicit
+  let noneMinorType :=
+    PsExpr.app
+      (PsExpr.bvar 0)
+      (psSelfHostOptionNoneOf (PsExpr.bvar 1))
+  let someMinorType :=
+    PsExpr.forallE
+      valueName
+      (PsExpr.bvar 2)
+      (PsExpr.app
+        (PsExpr.bvar 2)
+        (psSelfHostOptionSomeOf
+          (PsExpr.bvar 3)
+          (PsExpr.bvar 0)))
+      PsBinderInfo.explicit
+  let optionRecType :=
+    PsExpr.forallE
+      alphaName
+      typeType
+      (PsExpr.forallE
+        motiveName
+        optionMotiveType
+        (PsExpr.forallE
+          noneMinorName
+          noneMinorType
+          (PsExpr.forallE
+            someMinorName
+            someMinorType
+            (PsExpr.forallE
+              majorName
+              (psSelfHostOptionOf (PsExpr.bvar 3))
               (PsExpr.app
                 (PsExpr.bvar 3)
                 (PsExpr.bvar 0))
@@ -164,13 +260,61 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           1
           2
           [1]))
-  psPreludeAdd withCons
+  let withListRec :=
+    psPreludeAdd withCons
+      (PsDeclaration.recursorDecl
+        (PsRecursorInfo.mk
+          psSelfHostListRecName
+          [uName]
+          listRecType
+          [psListName]
+          1
+          0
+          1
+          2))
+  let withOption :=
+    psSelfHostReplacePreludeAxiom
+      withListRec
+      (PsDeclaration.inductiveDecl
+        (PsInductiveInfo.mk
+          psOptionName
+          []
+          optionType
+          1
+          0
+          [psSelfHostOptionNoneName, psSelfHostOptionSomeName]
+          false))
+  let withNone :=
+    psPreludeAdd withOption
+      (PsDeclaration.constructorDecl
+        (PsConstructorInfo.mk
+          psSelfHostOptionNoneName
+          []
+          noneType
+          psOptionName
+          0
+          1
+          0
+          []))
+  let withSome :=
+    psPreludeAdd withNone
+      (PsDeclaration.constructorDecl
+        (PsConstructorInfo.mk
+          psSelfHostOptionSomeName
+          []
+          someType
+          psOptionName
+          1
+          1
+          1
+          []))
+  psPreludeAdd withSome
     (PsDeclaration.recursorDecl
       (PsRecursorInfo.mk
-        psSelfHostListRecName
+        psSelfHostOptionRecName
         [uName]
-        recType
-        [psListName]
+        optionRecType
+        [psOptionName]
         1
         0
         1
@@ -200,11 +344,38 @@ def psSelfHostRuntimePreludeDeclarations : List PsDeclaration :=
                     psSelfHostPreludeEnvironment
                     psSelfHostListRecName with
               | none => List.nil
-              | some recDeclaration =>
-                  List.cons
-                    listDeclaration
-                    (List.cons
-                      nilDeclaration
-                      (List.cons
-                        consDeclaration
-                        (List.cons recDeclaration List.nil)))
+              | some listRecDeclaration =>
+                  match
+                      psEnvironmentFind
+                        psSelfHostPreludeEnvironment
+                        psOptionName with
+                  | none => List.nil
+                  | some optionDeclaration =>
+                      match
+                          psEnvironmentFind
+                            psSelfHostPreludeEnvironment
+                            psSelfHostOptionNoneName with
+                      | none => List.nil
+                      | some noneDeclaration =>
+                          match
+                              psEnvironmentFind
+                                psSelfHostPreludeEnvironment
+                                psSelfHostOptionSomeName with
+                          | none => List.nil
+                          | some someDeclaration =>
+                              match
+                                  psEnvironmentFind
+                                    psSelfHostPreludeEnvironment
+                                    psSelfHostOptionRecName with
+                              | none => List.nil
+                              | some optionRecDeclaration =>
+                                  [
+                                    listDeclaration,
+                                    nilDeclaration,
+                                    consDeclaration,
+                                    listRecDeclaration,
+                                    optionDeclaration,
+                                    noneDeclaration,
+                                    someDeclaration,
+                                    optionRecDeclaration
+                                  ]

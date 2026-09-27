@@ -48,6 +48,11 @@ def psKernelCoreQuotMetadataCase
     | PsKernelCoreConstantInfo.quotInfo value =>
         psKernelCoreQuotKindParity value.kind refKind
     | _ => false
+  let levelsStored :=
+    match psKernelCoreConstantInfoLevelParams kcInfo with
+    | PsKernelCoreList.cons only PsKernelCoreList.nil =>
+        psKernelCoreNameEq only kcU
+    | _ => false
   let typeStored :=
     match psKernelCoreConstantInfoType kcInfo with
     | PsKernelCoreExpr.sort PsKernelCoreLevel.zero => true
@@ -66,9 +71,7 @@ def psKernelCoreQuotMetadataCase
     | PsKernelCoreOption.some _ => false
 
   psKernelCoreNameEq (psKernelCoreConstantInfoName kcInfo) kcName &&
-  psKernelCoreLevelListEq
-    (psKernelCoreConstantInfoLevelParams kcInfo)
-    (PsKernelCoreList.cons kcU PsKernelCoreList.nil) &&
+  levelsStored &&
   typeStored &&
   kcKindStored &&
   (psKernelCoreConstantInfoIsUnsafe kcInfo == PSC1Kernel.ConstantInfo.isUnsafe refInfo) &&

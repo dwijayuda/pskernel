@@ -19,6 +19,8 @@ on:
       - psc2/kernel-core-phase7-primitives-work
       - psc2/kernel-core-phase8-inductive
       - psc2/kernel-core-phase8-inductive-work
+      - psc2/kernel-core-phase9-quot
+      - psc2/kernel-core-phase9-quot-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
@@ -214,6 +216,34 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_eq_inductive_tests
 
+      - name: Phase 9 Quot metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreQuotMetadataTests.lean
+
+      - name: Phase 9 Quot admission parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreQuotAdmissionParityTests.lean
+
+      - name: Phase 9 Quot rejection matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreQuotRejectionTests.lean
+
+      - name: Phase 9 Quot reduction parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreQuotReductionParityTests.lean
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |
@@ -283,6 +313,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run assurance:kernel-core:phase8
+
+      - name: Phase 9 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase9
 
       - name: Existing PSC2 regression gate
         shell: bash

@@ -205,7 +205,7 @@ def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
   let value :=
     psMetaInstantiateRounds
       context
-      (Nat.add context.assignments.length 1)
+      (Nat.add (List.length context.assignments) 1)
       expr;
   psLevelInstantiateExpr context.levels value
 

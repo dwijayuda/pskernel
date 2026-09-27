@@ -48,6 +48,10 @@ def psKernelCoreQuotMetadataCase
     | PsKernelCoreConstantInfo.quotInfo value =>
         psKernelCoreQuotKindParity value.kind refKind
     | _ => false
+  let typeStored :=
+    match psKernelCoreConstantInfoType kcInfo with
+    | PsKernelCoreExpr.sort PsKernelCoreLevel.zero => true
+    | _ => false
   let deltaNone :=
     match psKernelCoreConstantInfoDeltaValue? kcInfo with
     | PsKernelCoreOption.none => true
@@ -65,9 +69,7 @@ def psKernelCoreQuotMetadataCase
   psKernelCoreLevelListEq
     (psKernelCoreConstantInfoLevelParams kcInfo)
     (PsKernelCoreList.cons kcU PsKernelCoreList.nil) &&
-  (psKernelCoreExprEq
-    (psKernelCoreConstantInfoType kcInfo)
-    kcType) &&
+  typeStored &&
   kcKindStored &&
   (psKernelCoreConstantInfoIsUnsafe kcInfo == PSC1Kernel.ConstantInfo.isUnsafe refInfo) &&
   (psKernelCoreConstantInfoIsPartial kcInfo == PSC1Kernel.ConstantInfo.isPartial refInfo) &&

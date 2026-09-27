@@ -257,7 +257,9 @@ def psLevelHasMVar
         psLevelHasMVar right
   | _ => false
 
-def psLevelListHasMVar : List PsLevel -> Bool
+def psLevelListHasMVar
+    (levels : List PsLevel) : Bool :=
+  match levels with
   | [] => false
   | level :: rest =>
       if psLevelHasMVar level then

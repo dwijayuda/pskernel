@@ -122,6 +122,7 @@ requireMarkers("MetaContext", metaContext, [
   '| Nat.zero =>\n      fun (expr : PsExpr) => expr',
   'let smaller : PsExpr -> PsExpr :=\n        psMetaInstantiateRounds context remaining;',
   'fun (expr : PsExpr) =>\n        smaller (psMetaInstantiateStep context expr)',
+  'psMetaInstantiateRounds\n      context\n      (Nat.add context.assignments.length 1)\n      expr;',
   'def psExprHasUnresolvedMeta\n    (expr : PsExpr) : Bool :=\n  match expr with',
   'psExprHasUnresolvedMeta body',
 ]);

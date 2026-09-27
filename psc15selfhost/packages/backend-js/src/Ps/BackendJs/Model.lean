@@ -17,8 +17,10 @@ inductive PsJsLiteral where
 inductive PsJsExpr where
   | literal (value : PsJsLiteral)
   | local (index : Nat)
+  | global (index : Nat)
   | letE (index : Nat) (value : PsJsExpr) (body : PsJsExpr)
   | lambda (parameters : List Nat) (body : PsJsExpr)
+  | call (fn : PsJsExpr) (arguments : List PsJsExpr)
   | ifE (condition : PsJsExpr) (thenBranch : PsJsExpr) (elseBranch : PsJsExpr)
 
 structure PsJsConstant where

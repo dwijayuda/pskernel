@@ -131,11 +131,18 @@ for (const symbol of [
   "psSelfHostListNilName",
   "psSelfHostListConsName",
   "psSelfHostListRecName",
+  "psSelfHostOptionNoneName",
+  "psSelfHostOptionSomeName",
+  "psSelfHostOptionRecName",
+  "psSelfHostExceptName",
+  "psSelfHostExceptErrorName",
+  "psSelfHostExceptOkName",
+  "psSelfHostExceptRecName",
   "psSelfHostRuntimePreludeDeclarations",
   "psEnvironmentAddReplacingAxiom",
 ]) {
   if (!selfHostPrelude.includes(symbol)) {
-    throw new Error(`PSC2_SELFHOST_PRELUDE_LIST_FOUNDATION_MISSING: ${symbol}`);
+    throw new Error(`PSC2_SELFHOST_PRELUDE_FOUNDATION_MISSING: ${symbol}`);
   }
 }
 
@@ -166,9 +173,15 @@ for (const marker of [
   "foundational List erasure missing match runtime",
   "foundational List -> VerifiedIR",
   "foundational List -> TypeScript",
+  "foundational Option preparation",
+  "foundational Option -> VerifiedIR",
+  "foundational Option -> TypeScript",
+  "foundational Except preparation",
+  "foundational Except -> VerifiedIR",
+  "foundational Except -> TypeScript",
 ]) {
   if (!minimalSelfHostTests.includes(marker)) {
-    throw new Error(`PSC2_MINIMAL_SELFHOST_LIST_DIAGNOSTIC_MISSING: ${marker}`);
+    throw new Error(`PSC2_MINIMAL_SELFHOST_FOUNDATION_DIAGNOSTIC_MISSING: ${marker}`);
   }
 }
 

@@ -1,4 +1,4 @@
-import Ps.KernelCore.Inductive
+import Ps.KernelCore
 
 def psKcIndAnon : PsKernelCoreName := PsKernelCoreName.anonymous
 

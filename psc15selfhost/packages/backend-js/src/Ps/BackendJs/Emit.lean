@@ -75,6 +75,33 @@ def psJsEmitAtomicExpr (expr : PsJsExpr) : Except PsJsError String :=
   | PsJsExpr.literal value => psJsEmitLiteral value
   | PsJsExpr.local index => psJsLocalName index
   | PsJsExpr.global index => psJsGlobalName index
+  | PsJsExpr.letE index value body =>
+      match psJsLocalName index with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          match psJsEmitAtomicExpr body with
+          | Except.error error => Except.error error
+          | Except.ok printedBody =>
+              match psJsEmitAtomicExpr value with
+              | Except.error error => Except.error error
+              | Except.ok printedValue =>
+                  let start := psJsonConcat3 "((" name ") => ";
+                  let withBody := psJsonConcat3 start printedBody ")(";
+                  Except.ok (psJsonConcat3 withBody printedValue ")")
+  | PsJsExpr.ifE condition thenBranch elseBranch =>
+      match psJsEmitAtomicExpr condition with
+      | Except.error error => Except.error error
+      | Except.ok printedCondition =>
+          match psJsEmitAtomicExpr thenBranch with
+          | Except.error error => Except.error error
+          | Except.ok printedThen =>
+              match psJsEmitAtomicExpr elseBranch with
+              | Except.error error => Except.error error
+              | Except.ok printedElse =>
+                  let start := psJsonConcat2 "(" printedCondition;
+                  let withThen := psJsonConcat3 start " ? " printedThen;
+                  let withElse := psJsonConcat3 withThen " : " printedElse;
+                  Except.ok (psJsonConcat2 withElse ")")
   | _ => Except.error PsJsError.unsupportedExpression
 
 def psJsEmitAtomicArguments (arguments : List PsJsExpr) : Except PsJsError String :=

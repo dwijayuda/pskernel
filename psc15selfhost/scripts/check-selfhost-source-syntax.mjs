@@ -162,6 +162,17 @@ requireMarkers("Reduce", reduce, [
   'let reducedFn :=\n            psWhnfWithFuel environment metaContext localContext fuel fn;\n          if psExprAlphaEq reducedFn fn then',
   'let leftValue :=\n        psWhnf environment metaContext localContext left;\n      let rightValue :=\n        psWhnf environment metaContext localContext right;',
   'Nat.beq leftIndex rightIndex',
+  'def psDefEqReadOnlyWithEnvFuel\n    (environment : PsEnvironment)\n    (metaContext : PsMetaContext)\n    (localContext : PsLocalContext)\n    (fuel : Nat) : PsExpr -> PsExpr -> Bool :=\n  match fuel with',
+  '| Nat.zero =>\n      fun (left : PsExpr) (right : PsExpr) =>',
+  'let smaller : PsExpr -> PsExpr -> Bool :=\n        psDefEqReadOnlyWithEnvFuel environment metaContext localContext remaining;',
+  'fun (left : PsExpr) (right : PsExpr) =>',
+  'match leftValue with',
+  '| .app leftFn leftArg =>\n              match rightValue with\n              | .app rightFn rightArg =>',
+  'if smaller leftFn rightFn then\n                  smaller leftArg rightArg\n                else\n                  false',
+  '| .lam _ rightType rightBody _ =>',
+  '| .forallE _ rightType rightBody _ =>',
+  '| .proj rightType rightIndex rightValue =>',
+  'if psNameEq leftType rightType then\n                  if Nat.beq leftIndex rightIndex then\n                    smaller leftValue rightValue',
 ]);
 forbidMarkers("Reduce", reduce, [
   'let instantiated := psMetaInstantiate metaContext expr\n      match instantiated with',
@@ -177,6 +188,11 @@ forbidMarkers("Reduce", reduce, [
   'psWhnf environment metaContext localContext left\n      let rightValue :=',
   'psWhnf environment metaContext localContext right\n      if psExprAlphaEq leftValue rightValue then',
   '==',
+  'Nat -> PsExpr -> PsExpr -> Bool\n  | 0, left, right =>',
+  '| remaining + 1, left, right =>',
+  'match leftValue, rightValue with',
+  '| _, _ => false',
+  '&&',
 ]);
 
 process.stdout.write(

@@ -38,6 +38,7 @@ jobs:
         run: |
           set -o pipefail
           cd psc15selfhost
+          lake build PsKernelCore PSC1KernelReferenceFoundations
           lake env lean --run test/KernelCoreQuotMetadataTests.lean 2>&1 | tee ../phase9-quot-metadata.log
 
       - name: Upload Quot metadata diagnostics

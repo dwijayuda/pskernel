@@ -99,15 +99,18 @@ def psKernelCoreConstantInfoBase
 
 def psKernelCoreConstantInfoName
     (info : PsKernelCoreConstantInfo) : PsKernelCoreName :=
-  (psKernelCoreConstantInfoBase info).name
+  let base := psKernelCoreConstantInfoBase info;
+  base.name
 
 def psKernelCoreConstantInfoLevelParams
     (info : PsKernelCoreConstantInfo) : PsKernelCoreList PsKernelCoreName :=
-  (psKernelCoreConstantInfoBase info).levelParams
+  let base := psKernelCoreConstantInfoBase info;
+  base.levelParams
 
 def psKernelCoreConstantInfoType
     (info : PsKernelCoreConstantInfo) : PsKernelCoreExpr :=
-  (psKernelCoreConstantInfoBase info).type
+  let base := psKernelCoreConstantInfoBase info;
+  base.type
 
 def psKernelCoreConstantInfoDeltaValue?
     (info : PsKernelCoreConstantInfo) : PsKernelCoreOption PsKernelCoreExpr :=

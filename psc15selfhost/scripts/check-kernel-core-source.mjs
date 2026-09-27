@@ -8,6 +8,9 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
 const sourceRoot = path.join(root, "packages", "pskernel-core", "src");
 const modulePrefix = "Ps.KernelCore";
+const selfHostTimeoutMs = 120_000;
+const psc1BuildTimeoutMs = 180_000;
+const aggregateFile = path.join(sourceRoot, "Ps", "KernelCore.lean");
 
 const files = [];
 function walk(directory) {
@@ -18,7 +21,11 @@ function walk(directory) {
   }
 }
 walk(sourceRoot);
-files.sort();
+files.sort((left, right) => {
+  if (left === aggregateFile && right !== aggregateFile) return 1;
+  if (right === aggregateFile && left !== aggregateFile) return -1;
+  return left.localeCompare(right);
+});
 
 function maskLeanNonCode(source) {
   let output = "";
@@ -124,7 +131,7 @@ function parseImports(source) {
 
 function sourceForModule(moduleName) {
   if (moduleName === modulePrefix) {
-    return path.join(sourceRoot, "Ps", "KernelCore.lean");
+    return aggregateFile;
   }
   const prefix = `${modulePrefix}.`;
   if (!moduleName.startsWith(prefix)) {
@@ -165,6 +172,11 @@ function flattenEntry(entry) {
   return chunks.join("\n\n") + "\n";
 }
 
+function writeSpawnOutput(result) {
+  process.stderr.write(result.stdout ?? "");
+  process.stderr.write(result.stderr ?? "");
+}
+
 let failed = false;
 for (const file of files) {
   const source = maskLeanNonCode(fs.readFileSync(file, "utf8"));
@@ -191,6 +203,37 @@ if (files.length === 0) {
 }
 if (failed) process.exit(1);
 
+process.stdout.write("KERNEL_CORE_SELFHOST_CHECK: BUILD psc1\n");
+const buildResult = spawnSync("lake", ["build", "psc1"], {
+  cwd: root,
+  encoding: "utf8",
+  timeout: psc1BuildTimeoutMs,
+  killSignal: "SIGKILL",
+});
+if (buildResult.error) {
+  writeSpawnOutput(buildResult);
+  console.error(`KERNEL_CORE_SELFHOST_CHECK: BUILD ERROR: ${buildResult.error.message}`);
+  process.exit(1);
+}
+if (buildResult.status !== 0) {
+  writeSpawnOutput(buildResult);
+  console.error("KERNEL_CORE_SELFHOST_CHECK: BUILD FAIL");
+  process.exit(buildResult.status ?? 1);
+}
+process.stdout.write("KERNEL_CORE_SELFHOST_CHECK: BUILD PASS\n");
+
+const psc1Binary = path.join(
+  root,
+  ".lake",
+  "build",
+  "bin",
+  process.platform === "win32" ? "psc1.exe" : "psc1",
+);
+if (!fs.existsSync(psc1Binary)) {
+  console.error(`KERNEL_CORE_SELFHOST_CHECK: missing psc1 binary ${psc1Binary}`);
+  process.exit(1);
+}
+
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "proofscript-kernel-core-"));
 try {
   for (let index = 0; index < files.length; index += 1) {
@@ -198,13 +241,22 @@ try {
     const relative = path.relative(root, file);
     const flatPath = path.join(tempRoot, `KernelCoreCheck${index}.lean`);
     fs.writeFileSync(flatPath, flattenEntry(file), "utf8");
-    const result = spawnSync("lake", ["exe", "psc1", "check", flatPath], {
+    process.stdout.write(`KERNEL_CORE_SELFHOST_CHECK: START ${relative}\n`);
+    const result = spawnSync(psc1Binary, ["check", flatPath], {
       cwd: root,
       encoding: "utf8",
+      timeout: selfHostTimeoutMs,
+      killSignal: "SIGKILL",
     });
+    if (result.error) {
+      writeSpawnOutput(result);
+      console.error(
+        `KERNEL_CORE_SELFHOST_CHECK: ERROR ${relative}: ${result.error.message}`,
+      );
+      process.exit(1);
+    }
     if (result.status !== 0) {
-      process.stderr.write(result.stdout ?? "");
-      process.stderr.write(result.stderr ?? "");
+      writeSpawnOutput(result);
       console.error(`KERNEL_CORE_SELFHOST_CHECK: FAIL ${relative}`);
       process.exit(result.status ?? 1);
     }

@@ -11,6 +11,8 @@ on:
       - psc2/kernel-core-phase3-reduce-work
       - psc2/kernel-core-phase4-infer
       - psc2/kernel-core-phase4-infer-work
+      - psc2/kernel-core-phase5-defeq
+      - psc2/kernel-core-phase5-defeq-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
@@ -122,6 +124,13 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_infer_parity_tests
 
+      - name: Minimal DefEq parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_defeq_parity_tests
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |
@@ -163,6 +172,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run assurance:kernel-core:phase4
+
+      - name: Phase 5 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase5
 
       - name: Existing PSC2 regression gate
         shell: bash

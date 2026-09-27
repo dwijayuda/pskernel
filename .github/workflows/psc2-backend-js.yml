@@ -25,6 +25,10 @@ jobs:
         run: PATH=/tmp/psc-ts/node_modules/.bin:$PATH node scripts/backend-js-tests.mjs
       - name: Structural isolation
         working-directory: psc15selfhost
+        env:
+          # Parallel JS work checks the structural contract, not the parent's
+          # one-shot TS fixed-point probe. The user authorized this separation.
+          PSC2_FIXED_POINT_PROBE_ACTIVE: '1'
         run: |
           npm run check:workspace
           npm run check:source:all
@@ -33,7 +37,7 @@ jobs:
           npm run check:ir-neutrality
       - name: PSC1 source and canonical PS admission
         working-directory: psc15selfhost
-        run: npm run check:backend-js-source
+        run: PATH=/tmp/psc-ts/node_modules/.bin:$PATH npm run check:backend-js-source
       - name: Existing regression suites
         if: always()
         working-directory: psc15selfhost

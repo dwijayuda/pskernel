@@ -3,20 +3,35 @@ import Ps.KernelCore.Data
 structure PsKernelCoreResourceConfig where
   maxNatSize : Nat
 
+def psKernelCoreNatTwo8 : Nat :=
+  256
+
+def psKernelCoreNatTwo16 : Nat :=
+  Nat.mul psKernelCoreNatTwo8 psKernelCoreNatTwo8
+
+def psKernelCoreNatTwo20 : Nat :=
+  Nat.mul psKernelCoreNatTwo16 16
+
+def psKernelCoreNatTwo32 : Nat :=
+  Nat.mul psKernelCoreNatTwo16 psKernelCoreNatTwo16
+
+def psKernelCoreNatTwo64 : Nat :=
+  Nat.mul psKernelCoreNatTwo32 psKernelCoreNatTwo32
+
 def psKernelCoreLeanNatMaxSizeDefault : Nat :=
-  134217728
+  Nat.mul 128 psKernelCoreNatTwo20
 
 def psKernelCoreResourceConfigDefault : PsKernelCoreResourceConfig :=
   { maxNatSize := psKernelCoreLeanNatMaxSizeDefault }
 
 def psKernelCoreLeanUInt32Max : Nat :=
-  4294967295
+  Nat.sub psKernelCoreNatTwo32 1
 
 def psKernelCoreLeanMaxSmallNat : Nat :=
-  9223372036854775807
+  Nat.sub (Nat.div psKernelCoreNatTwo64 2) 1
 
 def psKernelCoreNatHeapLimbDivisor : Nat :=
-  18446744073709551616
+  psKernelCoreNatTwo64
 
 def psKernelCoreNatHeapWordCountFuel
     (fuel : Nat) : Nat -> Nat :=

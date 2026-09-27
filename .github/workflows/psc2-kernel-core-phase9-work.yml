@@ -41,6 +41,20 @@ jobs:
           lake build PsKernelCore PSC1KernelReferenceFoundations
           lake env lean --run test/KernelCoreQuotMetadataTests.lean 2>&1 | tee ../phase9-quot-metadata.log
 
+      - name: Existing declaration parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_declaration_parity_tests
+
+      - name: KernelCore PSC1 source profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run check:kernel-core-source
+
       - name: Upload Quot metadata diagnostics
         if: always()
         uses: actions/upload-artifact@v4

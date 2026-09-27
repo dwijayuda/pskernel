@@ -97,11 +97,80 @@ def psKernelCoreRecursorCanonicalTypeShapeValid
   else
     false
 
+def psKernelCoreRecursorDropForalls
+    (expr : PsKernelCoreExpr) : Nat -> PsKernelCoreOption PsKernelCoreExpr :=
+  match expr with
+  | PsKernelCoreExpr.forallE _ _ body _ =>
+      let dropBody := psKernelCoreRecursorDropForalls body;
+      fun (count : Nat) =>
+        match count with
+        | Nat.zero => PsKernelCoreOption.some expr
+        | Nat.succ remaining => dropBody remaining
+  | _ =>
+      fun (count : Nat) =>
+        match count with
+        | Nat.zero => PsKernelCoreOption.some expr
+        | Nat.succ _ => PsKernelCoreOption.none
+
+def psKernelCoreRecursorForallDomainAt
+    (expr : PsKernelCoreExpr) : Nat -> PsKernelCoreOption PsKernelCoreExpr :=
+  match expr with
+  | PsKernelCoreExpr.forallE _ domain body _ =>
+      let findBody := psKernelCoreRecursorForallDomainAt body;
+      fun (index : Nat) =>
+        match index with
+        | Nat.zero => PsKernelCoreOption.some domain
+        | Nat.succ previous => findBody previous
+  | _ =>
+      fun (_index : Nat) => PsKernelCoreOption.none
+
+def psKernelCoreRecursorClosePrefix
+    (expr : PsKernelCoreExpr) :
+    Nat -> PsKernelCoreExpr -> PsKernelCoreOption PsKernelCoreExpr :=
+  match expr with
+  | PsKernelCoreExpr.forallE name domain body binderInfo =>
+      let closeBody := psKernelCoreRecursorClosePrefix body;
+      fun (count : Nat) (result : PsKernelCoreExpr) =>
+        match count with
+        | Nat.zero => PsKernelCoreOption.some result
+        | Nat.succ remaining =>
+            match closeBody remaining result with
+            | PsKernelCoreOption.none => PsKernelCoreOption.none
+            | PsKernelCoreOption.some closedBody =>
+                PsKernelCoreOption.some
+                  (PsKernelCoreExpr.forallE name domain closedBody binderInfo)
+  | _ =>
+      fun (count : Nat) (result : PsKernelCoreExpr) =>
+        match count with
+        | Nat.zero => PsKernelCoreOption.some result
+        | Nat.succ _ => PsKernelCoreOption.none
+
+def psKernelCoreRecursorExpectedRuleType?
+    (info : PsKernelCoreRecursorInfo)
+    (ruleIndex : Nat) : PsKernelCoreOption PsKernelCoreExpr :=
+  let beforeMinors := Nat.add info.numParams info.numMotives;
+  match psKernelCoreRecursorDropForalls info.base.type beforeMinors with
+  | PsKernelCoreOption.none => PsKernelCoreOption.none
+  | PsKernelCoreOption.some minorTelescope =>
+      match psKernelCoreRecursorForallDomainAt minorTelescope ruleIndex with
+      | PsKernelCoreOption.none => PsKernelCoreOption.none
+      | PsKernelCoreOption.some minorDomain =>
+          let remainingMinors := Nat.sub info.numMinors ruleIndex;
+          let liftedMinor :=
+            psKernelCoreExprLiftBVars minorDomain 0 remainingMinors;
+          let fixedCount :=
+            Nat.add
+              (Nat.add info.numParams info.numMotives)
+              info.numMinors;
+          psKernelCoreRecursorClosePrefix
+            info.base.type fixedCount liftedMinor
+
 def psKernelCoreRecursorValidateRuleRhsWithResources
     (budget : Nat)
     (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (info : PsKernelCoreRecursorInfo)
+    (ruleIndex : Nat)
     (rule : PsKernelCoreRecursorRule) :
     PsKernelCoreResult String Unit :=
   match psKernelCoreAdmissionCheckClosed rule.rhs with
@@ -121,8 +190,22 @@ def psKernelCoreRecursorValidateRuleRhsWithResources
               safety rule.rhs with
           | PsKernelCoreResult.error message =>
               PsKernelCoreResult.error message
-          | PsKernelCoreResult.ok _ =>
-              PsKernelCoreResult.ok Unit.unit
+          | PsKernelCoreResult.ok ruleType =>
+              match psKernelCoreRecursorExpectedRuleType? info ruleIndex with
+              | PsKernelCoreOption.none =>
+                  PsKernelCoreResult.error "invalid recursor minor telescope"
+              | PsKernelCoreOption.some expectedType =>
+                  match psKernelCoreIsDefEqWithResources
+                      budget resources env psKernelCoreLocalContextEmpty
+                      ruleType expectedType with
+                  | PsKernelCoreResult.error message =>
+                      PsKernelCoreResult.error message
+                  | PsKernelCoreResult.ok equal =>
+                      if equal then
+                        PsKernelCoreResult.ok Unit.unit
+                      else
+                        PsKernelCoreResult.error
+                          "recursor rule type does not match branch"
 
 def psKernelCoreRecursorValidateRulesWithResources
     (ctorNames : PsKernelCoreList PsKernelCoreName) :
@@ -173,7 +256,7 @@ def psKernelCoreRecursorValidateRulesWithResources
                             if Nat.beq rule.nFields ctor.numFields then
                               if psKernelCoreBoolEq ctor.isUnsafe family.isUnsafe then
                                 match psKernelCoreRecursorValidateRuleRhsWithResources
-                                    budget resources env info rule with
+                                    budget resources env info index rule with
                                 | PsKernelCoreResult.error message =>
                                     PsKernelCoreResult.error message
                                 | PsKernelCoreResult.ok _ =>

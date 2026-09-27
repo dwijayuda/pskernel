@@ -204,6 +204,21 @@ if (levelContext.includes("def psLevelOccursResolved (target : Nat) : PsLevel ->
 if (!levelContext.includes("def psLevelOccursResolved\n    (target : Nat)\n    (level : PsLevel) : Bool :=\n  match level with")) {
   throw new Error("PSC2_LEVEL_OCCURS_EXPLICIT_RECURSION_PARAMETER_MISSING");
 }
+if (levelContext.includes("def psLevelUnifyWithFuel\n    (context : PsLevelMetaContext) : Nat -> PsLevel -> PsLevel -> PsLevelUnifyResult")) {
+  throw new Error("PSC2_LEVEL_UNIFY_HIDDEN_RECURSION_PARAMETERS_FORBIDDEN");
+}
+if (!levelContext.includes("def psLevelUnifyWithFuelWorker\n    (fuel : Nat) :\n    PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=\n  match fuel with")) {
+  throw new Error("PSC2_LEVEL_UNIFY_FUEL_WORKER_MISSING");
+}
+if (!levelContext.includes("psLevelUnifyWithFuelWorker remaining;")) {
+  throw new Error("PSC2_LEVEL_UNIFY_SINGLE_FUEL_SELF_CALL_MISSING");
+}
+if (!levelContext.includes("psLevelUnifyWithFuelWorker fuel context left right")) {
+  throw new Error("PSC2_LEVEL_UNIFY_PUBLIC_WRAPPER_MISSING");
+}
+if (levelContext.includes("partial def psLevelUnifyWithFuelWorker")) {
+  throw new Error("PSC2_LEVEL_UNIFY_WORKER_MUST_REMAIN_TOTAL");
+}
 
 const bridgeTestsPath = path.join(root, "test", "BridgeTests.lean");
 if (!existsSync(bridgeTestsPath)) {

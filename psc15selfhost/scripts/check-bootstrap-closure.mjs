@@ -94,6 +94,20 @@ if (/\bPs\.Backend/u.test(semanticApi)) {
   throw new Error("PSC2_BOOTSTRAP_COMPILER_API_BACKEND_COUPLING");
 }
 
+const bridgeTestsPath = path.join(root, "test", "BridgeTests.lean");
+if (!existsSync(bridgeTestsPath)) {
+  throw new Error("PSC2_BRIDGE_REGRESSION_SOURCE_MISSING");
+}
+const bridgeTests = await readFile(bridgeTestsPath, "utf8");
+for (const marker of [
+  "content omitted in summary context",
+  "Complete file content omitted",
+]) {
+  if (bridgeTests.includes(marker)) {
+    throw new Error(`PSC2_BRIDGE_REGRESSION_SOURCE_TRUNCATED: ${marker}`);
+  }
+}
+
 const entry = path.join(root, psconfig.entry);
 if (!existsSync(entry)) {
   throw new Error(`PSC2_BOOTSTRAP_ENTRY_MISSING: ${psconfig.entry}`);

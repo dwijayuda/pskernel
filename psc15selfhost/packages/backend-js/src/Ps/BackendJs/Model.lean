@@ -5,6 +5,7 @@ inductive PsJsError where
   | literalTypeMismatch
   | invalidExportName (name : String)
   | duplicateExport (name : String)
+  | fuelExhausted
 
 inductive PsJsLiteral where
   | natural (value : Nat)

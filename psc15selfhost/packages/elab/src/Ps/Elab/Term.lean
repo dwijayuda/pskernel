@@ -571,6 +571,24 @@ def psElabTypedBinders
     Except PsElabError PsElabTypedBindersResult :=
   psElabTypedBindersAcc elaborate binders context []
 
+def psElabTypedBinderListReverseAux
+    (remaining : List PsElabTypedBinder) :
+    List PsElabTypedBinder -> List PsElabTypedBinder :=
+  match remaining with
+  | List.nil =>
+      fun (acc : List PsElabTypedBinder) => acc
+  | List.cons head tail =>
+      let smaller :
+          List PsElabTypedBinder -> List PsElabTypedBinder :=
+        psElabTypedBinderListReverseAux tail;
+      fun (acc : List PsElabTypedBinder) =>
+        smaller (List.cons head acc)
+
+def psElabTypedBinderListReverse
+    (values : List PsElabTypedBinder) :
+    List PsElabTypedBinder :=
+  psElabTypedBinderListReverseAux values List.nil
+
 def psCloseElabTypedBinders
     (metaContext : PsMetaContext)
     (binders : List PsElabTypedBinder) :
@@ -700,7 +718,7 @@ def psElabLambda
       match
           psElabLambdaBodyExpected
             binderResult.context
-            (List.reverse binderResult.bindersRev)
+            (psElabTypedBinderListReverse binderResult.bindersRev)
             expected with
       | Except.error error => Except.error error
       | Except.ok prepared =>

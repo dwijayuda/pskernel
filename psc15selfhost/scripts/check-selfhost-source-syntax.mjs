@@ -152,11 +152,23 @@ requireMarkers("Reduce", reduce, [
   'let instantiated := psMetaInstantiate metaContext expr;\n      match instantiated with',
   '| some declaration =>\n              match declaration with\n              | .letDecl _ _ _ value =>',
   'let reducedFn := psWhnfCoreWithFuel metaContext localContext fuel fn;\n          match reducedFn with',
+  'let leftValue := psWhnfCore metaContext localContext left;\n  let rightValue := psWhnfCore metaContext localContext right;',
+  'let core := psWhnfCoreWithFuel metaContext localContext fuel expr;\n      match core with',
+  'let parameters := psDeclarationLevelParams declaration;\n                  if parameters.length == levels.length then',
+  'let reducedFn :=\n            psWhnfWithFuel environment metaContext localContext fuel fn;\n          if psExprAlphaEq reducedFn fn then',
+  'let leftValue :=\n        psWhnf environment metaContext localContext left;\n      let rightValue :=\n        psWhnf environment metaContext localContext right;',
 ]);
 forbidMarkers("Reduce", reduce, [
   'let instantiated := psMetaInstantiate metaContext expr\n      match instantiated with',
   '| some (.letDecl _ _ _ value) =>',
   'let reducedFn := psWhnfCoreWithFuel metaContext localContext fuel fn\n          match reducedFn with',
+  'let leftValue := psWhnfCore metaContext localContext left\n  let rightValue :=',
+  'let rightValue := psWhnfCore metaContext localContext right\n  psExprAlphaEq',
+  'let core := psWhnfCoreWithFuel metaContext localContext fuel expr\n      match core with',
+  'let parameters := psDeclarationLevelParams declaration\n                  if parameters.length == levels.length then',
+  'psWhnfWithFuel environment metaContext localContext fuel fn\n          if psExprAlphaEq reducedFn fn then',
+  'psWhnf environment metaContext localContext left\n      let rightValue :=',
+  'psWhnf environment metaContext localContext right\n      if psExprAlphaEq leftValue rightValue then',
 ]);
 
 process.stdout.write(

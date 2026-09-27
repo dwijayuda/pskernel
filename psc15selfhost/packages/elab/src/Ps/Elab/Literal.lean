@@ -26,22 +26,24 @@ def psDecimalDigitValue (char : Char) : Option Nat :=
     Option.none
 
 def psParseNaturalChars
-    (chars : List Char)
-    (value : Nat) : Option Nat :=
+    (chars : List Char) :
+    Nat -> Option Nat :=
   match chars with
   | [] =>
-      Option.some value
+      fun (value : Nat) =>
+        Option.some value
   | char :: rest =>
-      if psCharCodeEq char 95 then
-        psParseNaturalChars rest value
-      else
-        match psDecimalDigitValue char with
-        | Option.none =>
-            Option.none
-        | Option.some digit =>
-            psParseNaturalChars
-              rest
-              (Nat.add (Nat.mul value 10) digit)
+      let smaller : Nat -> Option Nat :=
+        psParseNaturalChars rest;
+      fun (value : Nat) =>
+        if psCharCodeEq char 95 then
+          smaller value
+        else
+          match psDecimalDigitValue char with
+          | Option.none =>
+              Option.none
+          | Option.some digit =>
+              smaller (Nat.add (Nat.mul value 10) digit)
 
 def psParseNaturalText (text : String) : Option Nat :=
   psParseNaturalChars (String.toList text) 0

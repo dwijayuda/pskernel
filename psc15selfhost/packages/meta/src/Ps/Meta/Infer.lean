@@ -68,11 +68,8 @@ def psInferAppViewAcc
   match expr with
   | .app fn arg =>
       psInferAppViewAcc fn (List.cons arg args)
-  | head =>
-      {
-        head := head
-        args := args
-      }
+  | _ =>
+      PsInferAppView.mk expr args
 
 def psInferAppView (expr : PsExpr) : PsInferAppView :=
   psInferAppViewAcc expr []

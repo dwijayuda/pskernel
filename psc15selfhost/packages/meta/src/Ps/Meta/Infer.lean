@@ -41,6 +41,20 @@ def psInferExprListLength
   | _ :: rest =>
       Nat.succ (psInferExprListLength rest)
 
+def psInferNameListLength
+    (values : List PsName) : Nat :=
+  match values with
+  | [] => 0
+  | _ :: rest =>
+      Nat.succ (psInferNameListLength rest)
+
+def psInferLevelListLength
+    (values : List PsLevel) : Nat :=
+  match values with
+  | [] => 0
+  | _ :: rest =>
+      Nat.succ (psInferLevelListLength rest)
+
 def psInferEnsureSort
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -301,154 +315,183 @@ def psInferProjectionType
                       Except.error PsInferError.projectionUnsupported
   | _ => Except.error PsInferError.projectionUnsupported
 
+def psInferTypeWithFuelWorker
+    (remainingFuel : Nat) :
+    PsEnvironment ->
+    PsMetaContext ->
+    PsLocalContext ->
+    PsExpr ->
+    Except PsInferError PsExpr :=
+  match remainingFuel with
+  | Nat.zero =>
+      fun (_environment : PsEnvironment) =>
+        fun (_metaContext : PsMetaContext) =>
+          fun (_localContext : PsLocalContext) =>
+            fun (_expr : PsExpr) =>
+              Except.error PsInferError.fuelExhausted
+  | Nat.succ fuel =>
+      let smaller :
+          PsEnvironment ->
+          PsMetaContext ->
+          PsLocalContext ->
+          PsExpr ->
+          Except PsInferError PsExpr :=
+        psInferTypeWithFuelWorker fuel;
+      fun (environment : PsEnvironment) =>
+        fun (metaContext : PsMetaContext) =>
+          fun (localContext : PsLocalContext) =>
+            fun (expr : PsExpr) =>
+              match expr with
+              | .bvar index =>
+                  Except.error (PsInferError.looseBoundVariable index)
+              | .fvar id =>
+                  match psLocalFindById localContext id with
+                  | none => Except.error (PsInferError.unknownFreeVariable id)
+                  | some declaration =>
+                      Except.ok (psMetaInstantiate metaContext (psLocalDeclType declaration))
+              | .mvar id =>
+                  match psMetaFindDecl metaContext id with
+                  | none => Except.error (PsInferError.unknownMetavariable id)
+                  | some declaration =>
+                      Except.ok (psMetaInstantiate metaContext declaration.type)
+              | .sortE level =>
+                  Except.ok (PsExpr.sortE (PsLevel.succ level))
+              | .constE name levels =>
+                  match psEnvironmentFind environment name with
+                  | none => Except.error (PsInferError.unknownConstant name)
+                  | some declaration =>
+                      let parameters := psDeclarationLevelParams declaration;
+                      if
+                          Nat.beq
+                            (psInferNameListLength parameters)
+                            (psInferLevelListLength levels) then
+                        Except.ok
+                          (psExprInstantiateLevelParams
+                            parameters
+                            levels
+                            (psDeclarationType declaration))
+                      else
+                        Except.error (PsInferError.incorrectUniverseArity name)
+              | .lit literal =>
+                  match literal with
+                  | .natural _ => Except.ok (PsExpr.constE psNatName [])
+                  | .string _ => Except.ok (PsExpr.constE psStringName [])
+              | .app fn arg =>
+                  match smaller environment metaContext localContext fn with
+                  | Except.error error => Except.error error
+                  | Except.ok fnType =>
+                      match psInferEnsureForall environment metaContext localContext fnType with
+                      | Except.error error => Except.error error
+                      | Except.ok forallView =>
+                          match smaller environment metaContext localContext arg with
+                          | Except.error error => Except.error error
+                          | Except.ok argType =>
+                              if psDefEqReadOnlyWithEnv
+                                  environment
+                                  metaContext
+                                  localContext
+                                  forallView.domain
+                                  argType then
+                                Except.ok (psExprInstantiate1 forallView.body arg)
+                              else
+                                Except.error PsInferError.applicationTypeMismatch
+              | .lam name type body binder =>
+                  match smaller environment metaContext localContext type with
+                  | Except.error error => Except.error error
+                  | Except.ok typeType =>
+                      match psInferEnsureSort environment metaContext localContext typeType with
+                      | Except.error error => Except.error error
+                      | Except.ok _ =>
+                          let pushed := psLocalPushBinding localContext name type binder;
+                          let openedBody := psExprInstantiate1 body (PsExpr.fvar pushed.id);
+                          match
+                              smaller
+                                environment
+                                metaContext
+                                pushed.context
+                                openedBody with
+                          | Except.error error => Except.error error
+                          | Except.ok bodyType =>
+                              Except.ok
+                                (PsExpr.forallE
+                                  name
+                                  type
+                                  (psExprAbstractFVar pushed.id bodyType)
+                                  binder)
+              | .forallE name type body binder =>
+                  match smaller environment metaContext localContext type with
+                  | Except.error error => Except.error error
+                  | Except.ok typeType =>
+                      match psInferEnsureSort environment metaContext localContext typeType with
+                      | Except.error error => Except.error error
+                      | Except.ok domainLevel =>
+                          let pushed := psLocalPushBinding localContext name type binder;
+                          let openedBody := psExprInstantiate1 body (PsExpr.fvar pushed.id);
+                          match
+                              smaller
+                                environment
+                                metaContext
+                                pushed.context
+                                openedBody with
+                          | Except.error error => Except.error error
+                          | Except.ok bodyType =>
+                              match psInferEnsureSort
+                                  environment
+                                  metaContext
+                                  pushed.context
+                                  bodyType with
+                              | Except.error error => Except.error error
+                              | Except.ok bodyLevel =>
+                                  Except.ok
+                                    (PsExpr.sortE (PsLevel.imax domainLevel bodyLevel))
+              | .letE _ type value body =>
+                  match smaller environment metaContext localContext type with
+                  | Except.error error => Except.error error
+                  | Except.ok typeType =>
+                      match psInferEnsureSort environment metaContext localContext typeType with
+                      | Except.error error => Except.error error
+                      | Except.ok _ =>
+                          match smaller environment metaContext localContext value with
+                          | Except.error error => Except.error error
+                          | Except.ok valueType =>
+                              if psDefEqReadOnlyWithEnv
+                                  environment
+                                  metaContext
+                                  localContext
+                                  type
+                                  valueType then
+                                smaller
+                                  environment
+                                  metaContext
+                                  localContext
+                                  (psExprInstantiate1 body value)
+                              else
+                                Except.error PsInferError.letTypeMismatch
+              | .proj typeName index target =>
+                  match smaller environment metaContext localContext target with
+                  | Except.error error => Except.error error
+                  | Except.ok targetType =>
+                      psInferProjectionType
+                        environment
+                        metaContext
+                        localContext
+                        targetType
+                        typeName
+                        index
+                        target
+
 def psInferTypeWithFuel
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
-    (localContext : PsLocalContext) : Nat -> PsExpr -> Except PsInferError PsExpr
-  | 0, _ => Except.error PsInferError.fuelExhausted
-  | fuel + 1, expr =>
-      match expr with
-      | .bvar index =>
-          Except.error (PsInferError.looseBoundVariable index)
-      | .fvar id =>
-          match psLocalFindById localContext id with
-          | none => Except.error (PsInferError.unknownFreeVariable id)
-          | some declaration =>
-              Except.ok (psMetaInstantiate metaContext (psLocalDeclType declaration))
-      | .mvar id =>
-          match psMetaFindDecl metaContext id with
-          | none => Except.error (PsInferError.unknownMetavariable id)
-          | some declaration =>
-              Except.ok (psMetaInstantiate metaContext declaration.type)
-      | .sortE level =>
-          Except.ok (PsExpr.sortE (PsLevel.succ level))
-      | .constE name levels =>
-          match psEnvironmentFind environment name with
-          | none => Except.error (PsInferError.unknownConstant name)
-          | some declaration =>
-              let parameters := psDeclarationLevelParams declaration;
-              if Nat.beq parameters.length levels.length then
-                Except.ok
-                  (psExprInstantiateLevelParams
-                    parameters
-                    levels
-                    (psDeclarationType declaration))
-              else
-                Except.error (PsInferError.incorrectUniverseArity name)
-      | .lit literal =>
-          match literal with
-          | .natural _ => Except.ok (PsExpr.constE psNatName [])
-          | .string _ => Except.ok (PsExpr.constE psStringName [])
-      | .app fn arg =>
-          match psInferTypeWithFuel environment metaContext localContext fuel fn with
-          | Except.error error => Except.error error
-          | Except.ok fnType =>
-              match psInferEnsureForall environment metaContext localContext fnType with
-              | Except.error error => Except.error error
-              | Except.ok forallView =>
-                  match psInferTypeWithFuel environment metaContext localContext fuel arg with
-                  | Except.error error => Except.error error
-                  | Except.ok argType =>
-                      if psDefEqReadOnlyWithEnv
-                          environment
-                          metaContext
-                          localContext
-                          forallView.domain
-                          argType then
-                        Except.ok (psExprInstantiate1 forallView.body arg)
-                      else
-                        Except.error PsInferError.applicationTypeMismatch
-      | .lam name type body binder =>
-          match psInferTypeWithFuel environment metaContext localContext fuel type with
-          | Except.error error => Except.error error
-          | Except.ok typeType =>
-              match psInferEnsureSort environment metaContext localContext typeType with
-              | Except.error error => Except.error error
-              | Except.ok _ =>
-                  let pushed := psLocalPushBinding localContext name type binder;
-                  let openedBody := psExprInstantiate1 body (PsExpr.fvar pushed.id);
-                  match psInferTypeWithFuel
-                      environment
-                      metaContext
-                      pushed.context
-                      fuel
-                      openedBody with
-                  | Except.error error => Except.error error
-                  | Except.ok bodyType =>
-                      Except.ok
-                        (PsExpr.forallE
-                          name
-                          type
-                          (psExprAbstractFVar pushed.id bodyType)
-                          binder)
-      | .forallE name type body binder =>
-          match psInferTypeWithFuel environment metaContext localContext fuel type with
-          | Except.error error => Except.error error
-          | Except.ok typeType =>
-              match psInferEnsureSort environment metaContext localContext typeType with
-              | Except.error error => Except.error error
-              | Except.ok domainLevel =>
-                  let pushed := psLocalPushBinding localContext name type binder;
-                  let openedBody := psExprInstantiate1 body (PsExpr.fvar pushed.id);
-                  match psInferTypeWithFuel
-                      environment
-                      metaContext
-                      pushed.context
-                      fuel
-                      openedBody with
-                  | Except.error error => Except.error error
-                  | Except.ok bodyType =>
-                      match psInferEnsureSort
-                          environment
-                          metaContext
-                          pushed.context
-                          bodyType with
-                      | Except.error error => Except.error error
-                      | Except.ok bodyLevel =>
-                          Except.ok
-                            (PsExpr.sortE (PsLevel.imax domainLevel bodyLevel))
-      | .letE _ type value body =>
-          match psInferTypeWithFuel environment metaContext localContext fuel type with
-          | Except.error error => Except.error error
-          | Except.ok typeType =>
-              match psInferEnsureSort environment metaContext localContext typeType with
-              | Except.error error => Except.error error
-              | Except.ok _ =>
-                  match psInferTypeWithFuel environment metaContext localContext fuel value with
-                  | Except.error error => Except.error error
-                  | Except.ok valueType =>
-                      if psDefEqReadOnlyWithEnv
-                          environment
-                          metaContext
-                          localContext
-                          type
-                          valueType then
-                        psInferTypeWithFuel
-                          environment
-                          metaContext
-                          localContext
-                          fuel
-                          (psExprInstantiate1 body value)
-                      else
-                        Except.error PsInferError.letTypeMismatch
-      | .proj typeName index target =>
-          match
-              psInferTypeWithFuel
-                environment
-                metaContext
-                localContext
-                fuel
-                target with
-          | Except.error error => Except.error error
-          | Except.ok targetType =>
-              psInferProjectionType
-                environment
-                metaContext
-                localContext
-                targetType
-                typeName
-                index
-                target
+    (localContext : PsLocalContext)
+    (fuel : Nat)
+    (expr : PsExpr) : Except PsInferError PsExpr :=
+  psInferTypeWithFuelWorker
+    fuel
+    environment
+    metaContext
+    localContext
+    expr
 
 def psInferDefaultFuel : Nat :=
   4096

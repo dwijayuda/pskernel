@@ -132,6 +132,72 @@ def psInferApplyStructureParameters
     localContext
     cursor
 
+def psInferStructureProjectionFieldWorker
+    (remainingFuel : Nat) :
+    PsEnvironment ->
+    PsMetaContext ->
+    PsLocalContext ->
+    PsName ->
+    PsExpr ->
+    Nat ->
+    Nat ->
+    PsExpr ->
+    Except PsInferError PsExpr :=
+  match remainingFuel with
+  | Nat.zero =>
+      fun (_environment : PsEnvironment) =>
+        fun (_metaContext : PsMetaContext) =>
+          fun (_localContext : PsLocalContext) =>
+            fun (_typeName : PsName) =>
+              fun (_target : PsExpr) =>
+                fun (_requestedIndex : Nat) =>
+                  fun (_fieldIndex : Nat) =>
+                    fun (_cursor : PsExpr) =>
+                      Except.error PsInferError.fuelExhausted
+  | Nat.succ fuel =>
+      let smaller :
+          PsEnvironment ->
+          PsMetaContext ->
+          PsLocalContext ->
+          PsName ->
+          PsExpr ->
+          Nat ->
+          Nat ->
+          PsExpr ->
+          Except PsInferError PsExpr :=
+        psInferStructureProjectionFieldWorker fuel;
+      fun (environment : PsEnvironment) =>
+        fun (metaContext : PsMetaContext) =>
+          fun (localContext : PsLocalContext) =>
+            fun (typeName : PsName) =>
+              fun (target : PsExpr) =>
+                fun (requestedIndex : Nat) =>
+                  fun (fieldIndex : Nat) =>
+                    fun (cursor : PsExpr) =>
+                      match
+                          psWhnf
+                            environment
+                            metaContext
+                            localContext
+                            cursor with
+                      | .forallE _ domain body _ =>
+                          if Nat.beq requestedIndex fieldIndex then
+                            Except.ok domain
+                          else
+                            smaller
+                              environment
+                              metaContext
+                              localContext
+                              typeName
+                              target
+                              requestedIndex
+                              (Nat.succ fieldIndex)
+                              (psExprInstantiate1
+                                body
+                                (PsExpr.proj typeName fieldIndex target))
+                      | _ =>
+                          Except.error PsInferError.projectionUnsupported
+
 def psInferStructureProjectionField
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -143,34 +209,16 @@ def psInferStructureProjectionField
     (fieldIndex : Nat)
     (cursor : PsExpr) :
     Except PsInferError PsExpr :=
-  match remainingFuel with
-  | 0 =>
-      Except.error PsInferError.fuelExhausted
-  | fuel + 1 =>
-      match
-          psWhnf
-            environment
-            metaContext
-            localContext
-            cursor with
-      | .forallE _ domain body _ =>
-          if Nat.beq requestedIndex fieldIndex then
-            Except.ok domain
-          else
-            psInferStructureProjectionField
-              environment
-              metaContext
-              localContext
-              typeName
-              target
-              fuel
-              requestedIndex
-              (Nat.succ fieldIndex)
-              (psExprInstantiate1
-                body
-                (PsExpr.proj typeName fieldIndex target))
-      | _ =>
-          Except.error PsInferError.projectionUnsupported
+  psInferStructureProjectionFieldWorker
+    remainingFuel
+    environment
+    metaContext
+    localContext
+    typeName
+    target
+    requestedIndex
+    fieldIndex
+    cursor
 
 def psInferProjectionType
     (environment : PsEnvironment)

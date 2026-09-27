@@ -3,6 +3,9 @@ import Ps.Environment.SelfHostPrelude
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
 
+def psSelfHostIntReprName : PsName :=
+  psNameAppendStr psIntName "repr"
+
 def psSelfHostProdOf
     (alpha beta : PsExpr) : PsExpr :=
   PsExpr.app
@@ -32,7 +35,16 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
   let majorName := psRootName "_major";
   let fstName := psRootName "fst";
   let sndName := psRootName "snd";
+  let valueName := psRootName "value";
   let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero);
+  let intType := PsExpr.constE psIntName [];
+  let stringType := PsExpr.constE psStringName [];
+  let intReprType :=
+    PsExpr.forallE
+      valueName
+      intType
+      stringType
+      PsBinderInfo.explicit;
   let prodType :=
     PsExpr.forallE
       alphaName
@@ -137,17 +149,20 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psPreludeAdd withProdMk
-    (PsDeclaration.recursorDecl
-      (PsRecursorInfo.mk
-        psSelfHostProdRecName
-        [uName]
-        recType
-        [psProdName]
-        2
-        0
-        1
-        1))
+  let withProdRec :=
+    psPreludeAdd withProdMk
+      (PsDeclaration.recursorDecl
+        (PsRecursorInfo.mk
+          psSelfHostProdRecName
+          [uName]
+          recType
+          [psProdName]
+          2
+          0
+          1
+          1));
+  psPreludeAdd withProdRec
+    (PsDeclaration.axiomDecl psSelfHostIntReprName [] intReprType)
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

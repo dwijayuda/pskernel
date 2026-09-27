@@ -4,7 +4,7 @@ structure PsKernelCoreResourceConfig where
   maxNatSize : Nat
 
 def psKernelCoreLeanNatMaxSizeDefault : Nat :=
-  128 * 1024 * 1024
+  134217728
 
 def psKernelCoreResourceConfigDefault : PsKernelCoreResourceConfig :=
   { maxNatSize := psKernelCoreLeanNatMaxSizeDefault }
@@ -27,35 +27,37 @@ def psKernelCoreNatHeapWordCountFuel
       let smaller : Nat -> Nat :=
         psKernelCoreNatHeapWordCountFuel remaining;
       fun (current : Nat) =>
-        if current == 0 then
+        if Nat.beq current 0 then
           0
         else
-          1 + smaller (current / psKernelCoreNatHeapLimbDivisor)
+          Nat.add 1 (smaller (Nat.div current psKernelCoreNatHeapLimbDivisor))
 
 def psKernelCoreNatHeapWordCount (value : Nat) : Nat :=
   psKernelCoreNatHeapWordCountFuel value value
 
 def psKernelCoreNatSizeInBytes (value : Nat) : Nat :=
-  if value <= psKernelCoreLeanMaxSmallNat then
+  if Nat.ble value psKernelCoreLeanMaxSmallNat then
     8
   else
-    psKernelCoreNatHeapWordCount value * 8
+    Nat.mul (psKernelCoreNatHeapWordCount value) 8
 
 def psKernelCoreCheckNatSize
     (resources : PsKernelCoreResourceConfig)
     (value : Nat) : PsKernelCoreResult String Unit :=
-  if psKernelCoreNatSizeInBytes value > resources.maxNatSize then
+  if Nat.ble (psKernelCoreNatSizeInBytes value) resources.maxNatSize then
+    PsKernelCoreResult.ok Unit.unit
+  else
     PsKernelCoreResult.error
       "the kernel refused a Nat numeral because its size exceeds the maximum"
-  else
-    PsKernelCoreResult.ok Unit.unit
 
 def psKernelCoreCheckCountArg
     (operation : String)
     (count : Nat) : PsKernelCoreResult String Unit :=
-  if count > psKernelCoreLeanUInt32Max then
-    PsKernelCoreResult.error
-      ("the kernel refused to evaluate " ++ operation ++
-        " because its second argument does not fit in a 32-bit unsigned integer")
-  else
+  if Nat.ble count psKernelCoreLeanUInt32Max then
     PsKernelCoreResult.ok Unit.unit
+  else
+    PsKernelCoreResult.error
+      (String.append
+        "the kernel refused to evaluate "
+        (String.append operation
+          " because its second argument does not fit in a 32-bit unsigned integer"))

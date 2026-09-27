@@ -17,6 +17,8 @@ on:
       - psc2/kernel-core-phase6-admission-work
       - psc2/kernel-core-phase7-primitives
       - psc2/kernel-core-phase7-primitives-work
+      - psc2/kernel-core-phase8-inductive
+      - psc2/kernel-core-phase8-inductive-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
@@ -177,6 +179,41 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_admission_parity_tests
 
+      - name: Phase 8 inductive metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreInductiveMetadataTests.lean
+
+      - name: Phase 8 inductive shape
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_inductive_shape_tests
+
+      - name: Phase 8 inductive admission parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_inductive_admission_parity_tests
+
+      - name: Phase 8 inductive rejection matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreInductiveRejectionTests.lean
+
+      - name: Phase 8 Eq inductive compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_eq_inductive_tests
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |
@@ -239,6 +276,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run assurance:kernel-core:phase7
+
+      - name: Phase 8 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase8
 
       - name: Existing PSC2 regression gate
         shell: bash

@@ -136,7 +136,7 @@ forbidMarkers("MetaContext", metaContext, [
   '(fuel : Nat)\n    (expr : PsExpr) : PsExpr :=',
   '| remaining + 1, expr =>',
   'psMetaInstantiateRounds\n        context\n        remaining\n        (psMetaInstantiateStep context expr)',
-  'Nat.add context.assignments.length 1',
+  'context.assignments.length',
   'def psExprHasUnresolvedMeta : PsExpr -> Bool',
   '| expr => expr',
 ]);

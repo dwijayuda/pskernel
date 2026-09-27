@@ -264,12 +264,12 @@ def psKernelCoreReduceRecursorPrefixInfo?
 
 def psKernelCoreReduceRecursorMajor?
     (env : PsKernelCoreEnvironment)
-    (prefix : PsKernelCoreExpr)
+    (prefixExpr : PsKernelCoreExpr)
     (major : PsKernelCoreExpr) : PsKernelCoreOption PsKernelCoreExpr :=
-  match psKernelCoreReduceRecursorPrefixInfo? env prefix with
+  match psKernelCoreReduceRecursorPrefixInfo? env prefixExpr with
   | PsKernelCoreOption.none => PsKernelCoreOption.none
   | PsKernelCoreOption.some info =>
-      let prefixView := psKernelCoreAppViewOf prefix;
+      let prefixView := psKernelCoreAppViewOf prefixExpr;
       let majorView := psKernelCoreAppViewOf major;
       match majorView.fn with
       | PsKernelCoreExpr.const ctorName _ =>

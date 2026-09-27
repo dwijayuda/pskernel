@@ -50,6 +50,11 @@ def psJsLocalName (index : Nat) : Except PsJsError String :=
   | Except.error error => Except.error error
   | Except.ok text => Except.ok (psJsonConcat2 "__psc_js_l_" text)
 
+def psJsGlobalName (index : Nat) : Except PsJsError String :=
+  match psJsNatDecimal index with
+  | Except.error error => Except.error error
+  | Except.ok text => Except.ok (psJsonConcat2 "__psc_js_" text)
+
 def psJsEmitParameterNames (parameters : List Nat) : Except PsJsError String :=
   match parameters with
   | List.nil => Except.ok ""
@@ -69,6 +74,7 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
   match expr with
   | PsJsExpr.literal value => psJsEmitLiteral value
   | PsJsExpr.local index => psJsLocalName index
+  | PsJsExpr.global index => psJsGlobalName index
   | PsJsExpr.letE index value body =>
       match psJsLocalName index with
       | Except.error error => Except.error error
@@ -91,6 +97,19 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
           | Except.ok printedBody =>
               let start := psJsonConcat3 "((" names ") => ";
               Except.ok (psJsonConcat3 start printedBody ")")
+  | PsJsExpr.call fn arguments =>
+      match arguments with
+      | List.cons argument List.nil =>
+          match psJsEmitExpr fn with
+          | Except.error error => Except.error error
+          | Except.ok printedFn =>
+              match psJsEmitExpr argument with
+              | Except.error error => Except.error error
+              | Except.ok printedArgument =>
+                  let start := psJsonConcat2 "(" printedFn;
+                  let middle := psJsonConcat3 start ")(" printedArgument;
+                  Except.ok (psJsonConcat2 middle ")")
+      | _ => Except.error PsJsError.unsupportedExpression
   | PsJsExpr.ifE condition thenBranch elseBranch =>
       match psJsEmitExpr condition with
       | Except.error error => Except.error error
@@ -114,16 +133,15 @@ def psJsEmitConstants (constants : List PsJsConstant) :
   | List.cons constant rest =>
       let smaller : Nat -> Except PsJsError String := psJsEmitConstants rest;
       fun (index : Nat) =>
-        match psJsNatDecimal index with
+        match psJsGlobalName index with
         | Except.error error => Except.error error
-        | Except.ok indexText =>
+        | Except.ok internalName =>
             match psJsEmitExpr constant.body with
             | Except.error error => Except.error error
             | Except.ok printedBody =>
                 match smaller (Nat.succ index) with
                 | Except.error error => Except.error error
                 | Except.ok printedRest =>
-                    let internalName := psJsonConcat2 "__psc_js_" indexText;
                     let definition := psJsonConcat3 "const " internalName " = ";
                     let value := psJsonConcat3 definition printedBody ";\n";
                     let exportStart := psJsonConcat3 "export { " internalName " as ";

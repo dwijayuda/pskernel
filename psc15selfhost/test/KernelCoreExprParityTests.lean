@@ -126,8 +126,133 @@ def psKernelCoreExprParity : Bool :=
   (psKernelCoreExprTag kcProj == psReferenceExprTag refProj) &&
   (psKernelCoreLevelEq kcZero PsKernelCoreLevel.zero)
 
+def psKernelCoreExprEqParity : Bool :=
+  let kcAnon := PsKernelCoreName.anonymous
+  let kcX := PsKernelCoreName.str kcAnon "x"
+  let kcY := PsKernelCoreName.str kcAnon "y"
+  let kcA := PsKernelCoreName.str kcAnon "A"
+  let kcLevelOne := PsKernelCoreLevel.succ PsKernelCoreLevel.zero
+  let kcLevelEquivalent :=
+    PsKernelCoreLevel.max kcLevelOne PsKernelCoreLevel.zero
+  let kcNilLevels : PsKernelCoreList PsKernelCoreLevel := PsKernelCoreList.nil
+  let kcOneLevel := PsKernelCoreList.cons kcLevelOne PsKernelCoreList.nil
+  let kcEquivalentLevel :=
+    PsKernelCoreList.cons kcLevelEquivalent PsKernelCoreList.nil
+  let kcType := PsKernelCoreExpr.sort kcLevelOne
+  let kcBody := PsKernelCoreExpr.bvar 0
+  let kcConst := PsKernelCoreExpr.const kcA kcNilLevels
+  let kcApp := PsKernelCoreExpr.app kcConst (PsKernelCoreExpr.bvar 1)
+  let refAnon := PSC1Kernel.Name.anonymous
+  let refX := PSC1Kernel.Name.str refAnon "x"
+  let refY := PSC1Kernel.Name.str refAnon "y"
+  let refA := PSC1Kernel.Name.str refAnon "A"
+  let refLevelOne := PSC1Kernel.Level.succ PSC1Kernel.Level.zero
+  let refLevelEquivalent :=
+    PSC1Kernel.Level.max refLevelOne PSC1Kernel.Level.zero
+  let refType := PSC1Kernel.Expr.sort refLevelOne
+  let refBody := PSC1Kernel.Expr.bvar 0
+  let refConst := PSC1Kernel.Expr.const refA []
+  let refApp := PSC1Kernel.Expr.app refConst (PSC1Kernel.Expr.bvar 1)
+  let sameBvar :=
+    psKernelCoreExprEq (PsKernelCoreExpr.bvar 2) (PsKernelCoreExpr.bvar 2) ==
+      PSC1Kernel.Expr.eq (PSC1Kernel.Expr.bvar 2) (PSC1Kernel.Expr.bvar 2)
+  let differentBvar :=
+    psKernelCoreExprEq (PsKernelCoreExpr.bvar 2) (PsKernelCoreExpr.bvar 3) ==
+      PSC1Kernel.Expr.eq (PSC1Kernel.Expr.bvar 2) (PSC1Kernel.Expr.bvar 3)
+  let sameFvar :=
+    psKernelCoreExprEq (PsKernelCoreExpr.fvar kcX) (PsKernelCoreExpr.fvar kcX) ==
+      PSC1Kernel.Expr.eq (PSC1Kernel.Expr.fvar refX) (PSC1Kernel.Expr.fvar refX)
+  let differentMvar :=
+    psKernelCoreExprEq (PsKernelCoreExpr.mvar kcX) (PsKernelCoreExpr.mvar kcY) ==
+      PSC1Kernel.Expr.eq (PSC1Kernel.Expr.mvar refX) (PSC1Kernel.Expr.mvar refY)
+  let equivalentButNotStructuralSort :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.sort kcLevelEquivalent)
+        (PsKernelCoreExpr.sort kcLevelOne) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.sort refLevelEquivalent)
+        (PSC1Kernel.Expr.sort refLevelOne)
+  let constLevelDifference :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.const kcA kcOneLevel)
+        (PsKernelCoreExpr.const kcA kcEquivalentLevel) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.const refA [refLevelOne])
+        (PSC1Kernel.Expr.const refA [refLevelEquivalent])
+  let nestedApp :=
+    psKernelCoreExprEq kcApp kcApp == PSC1Kernel.Expr.eq refApp refApp
+  let lambdaNamesAndBindersIgnored :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.lam kcX kcType kcBody PsKernelCoreBinderInfo.default)
+        (PsKernelCoreExpr.lam kcY kcType kcBody PsKernelCoreBinderInfo.implicit) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.lam refX refType refBody PSC1Kernel.BinderInfo.default)
+        (PSC1Kernel.Expr.lam refY refType refBody PSC1Kernel.BinderInfo.implicit)
+  let lambdaBodyDifference :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.lam kcX kcType kcBody PsKernelCoreBinderInfo.default)
+        (PsKernelCoreExpr.lam kcY kcType (PsKernelCoreExpr.bvar 1) PsKernelCoreBinderInfo.implicit) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.lam refX refType refBody PSC1Kernel.BinderInfo.default)
+        (PSC1Kernel.Expr.lam refY refType (PSC1Kernel.Expr.bvar 1) PSC1Kernel.BinderInfo.implicit)
+  let forallNamesAndBindersIgnored :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.forallE kcX kcType kcBody PsKernelCoreBinderInfo.default)
+        (PsKernelCoreExpr.forallE kcY kcType kcBody PsKernelCoreBinderInfo.instImplicit) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.forallE refX refType refBody PSC1Kernel.BinderInfo.default)
+        (PSC1Kernel.Expr.forallE refY refType refBody PSC1Kernel.BinderInfo.instImplicit)
+  let letNameIgnored :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.letE kcX kcType kcConst kcBody true)
+        (PsKernelCoreExpr.letE kcY kcType kcConst kcBody true) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.letE refX refType refConst refBody true)
+        (PSC1Kernel.Expr.letE refY refType refConst refBody true)
+  let letNondepDifference :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.letE kcX kcType kcConst kcBody true)
+        (PsKernelCoreExpr.letE kcY kcType kcConst kcBody false) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.letE refX refType refConst refBody true)
+        (PSC1Kernel.Expr.letE refY refType refConst refBody false)
+  let natLiteralDifference :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.lit (PsKernelCoreLiteral.nat 7))
+        (PsKernelCoreExpr.lit (PsKernelCoreLiteral.nat 8)) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.nat 7))
+        (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.nat 8))
+  let utf8StringLiteral :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.lit (PsKernelCoreLiteral.str "λ日本"))
+        (PsKernelCoreExpr.lit (PsKernelCoreLiteral.str "λ日本")) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.str "λ日本"))
+        (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.str "λ日本"))
+  let metadataDifference :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.mdata 1 kcConst)
+        (PsKernelCoreExpr.mdata 2 kcConst) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.mdata 1 refConst)
+        (PSC1Kernel.Expr.mdata 2 refConst)
+  let projectionIndexDifference :=
+    psKernelCoreExprEq
+        (PsKernelCoreExpr.proj kcA 0 kcConst)
+        (PsKernelCoreExpr.proj kcA 1 kcConst) ==
+      PSC1Kernel.Expr.eq
+        (PSC1Kernel.Expr.proj refA 0 refConst)
+        (PSC1Kernel.Expr.proj refA 1 refConst)
+  sameBvar && differentBvar && sameFvar && differentMvar &&
+    equivalentButNotStructuralSort && constLevelDifference && nestedApp &&
+    lambdaNamesAndBindersIgnored && lambdaBodyDifference &&
+    forallNamesAndBindersIgnored && letNameIgnored && letNondepDifference &&
+    natLiteralDifference && utf8StringLiteral && metadataDifference &&
+    projectionIndexDifference
+
 def main : IO Unit := do
-  if psKernelCoreExprParity then
+  if psKernelCoreExprParity && psKernelCoreExprEqParity then
     IO.println "PSC2_KERNEL_CORE_EXPR_PARITY: PASS"
   else
     throw (IO.userError "PSC2_KERNEL_CORE_EXPR_PARITY: FAIL")

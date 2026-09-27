@@ -13,6 +13,11 @@ const required = [
   /def psCharCodeEq\s*\(char : Char\)\s*\(code : Nat\) : Bool :=\s*Nat\.beq \(Char\.toNat char\) code/,
   /if psCharCodeEq char 48 then/,
   /if psCharCodeEq char 95 then/,
+  /Nat\.add \(Nat\.mul value 10\) digit/,
+  /Nat\.add \(Nat\.mul value 16\) digit/,
+  /if Nat\.blt value 55296 then/,
+  /else if Nat\.blt 57343 value then/,
+  /Nat\.blt value 1114112/,
   /Char\.ofNat 34/,
   /Char\.ofNat 39/,
   /Char\.ofNat 92/,
@@ -26,11 +31,18 @@ for (const pattern of required) {
   }
 }
 
-const characterLiteral = /'(?:\\.|[^'\\])+'/;
-if (characterLiteral.test(source)) {
-  throw new Error("PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: character literal syntax");
+const forbidden = [
+  /'(?:\\.|[^'\\])+'/,                  // character literal syntax
+  /value\s*\*\s*(?:10|16)/,             // arithmetic infix in literal accumulators
+  /value\s*<\s*(?:55296|1114112)/,       // scalar-bound infix comparison
+  /57343\s*<\s*value/,
+];
+for (const pattern of forbidden) {
+  if (pattern.test(source)) {
+    throw new Error(`PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: ${pattern}`);
+  }
 }
 
 process.stdout.write(
-  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (explicit Char.toNat comparisons and Char.ofNat construction)\n",
+  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (explicit Char and Nat operations for PSC1 bootstrap)\n",
 );

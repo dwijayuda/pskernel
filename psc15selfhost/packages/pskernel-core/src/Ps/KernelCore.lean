@@ -5,6 +5,7 @@ import Ps.KernelCore.Subst
 import Ps.KernelCore.Declaration
 import Ps.KernelCore.Environment
 import Ps.KernelCore.LocalContext
+import Ps.KernelCore.Resource
 import Ps.KernelCore.Reduce
 import Ps.KernelCore.Infer
 import Ps.KernelCore.DefEq

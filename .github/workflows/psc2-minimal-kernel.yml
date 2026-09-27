@@ -26,6 +26,7 @@ on:
       - psc15selfhost/scripts/check-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-infer-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-synth-instance-selfhost-source-syntax.mjs
+      - psc15selfhost/scripts/check-instances-selfhost-source-syntax.mjs
       - .github/workflows/psc2-minimal-kernel.yml
   workflow_dispatch:
 

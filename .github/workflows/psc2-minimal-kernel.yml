@@ -13,6 +13,8 @@ on:
       - psc2/kernel-core-phase4-infer-work
       - psc2/kernel-core-phase5-defeq
       - psc2/kernel-core-phase5-defeq-work
+      - psc2/kernel-core-phase6-admission
+      - psc2/kernel-core-phase6-admission-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
@@ -131,6 +133,27 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_defeq_parity_tests
 
+      - name: Checked inference parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_check_parity_tests
+
+      - name: Checked inference ordering regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreCheckOrderingTests.lean
+
+      - name: Ordinary admission parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_admission_parity_tests
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |
@@ -179,6 +202,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run assurance:kernel-core:phase5
+
+      - name: Phase 6 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase6
 
       - name: Existing PSC2 regression gate
         shell: bash

@@ -8,3 +8,5 @@ import Ps.KernelCore.LocalContext
 import Ps.KernelCore.Reduce
 import Ps.KernelCore.Infer
 import Ps.KernelCore.DefEq
+import Ps.KernelCore.Check
+import Ps.KernelCore.Admission

@@ -11,6 +11,11 @@ structure PsJsLoweredExpr where
   expr : PsJsExpr
   nextLocal : Nat
 
+structure PsJsLoweredParameters where
+  locals : List PsJsLocalBinding
+  indexes : List Nat
+  nextLocal : Nat
+
 def psJsNameHead (value : Char) : Bool :=
   let code := Char.toNat value;
   if psJsonNatInRange code 65 90 then true
@@ -89,6 +94,15 @@ def psJsPrimitiveTypeEq (left right : PsVerifiedIrPrimitiveType) : Bool :=
   | PsVerifiedIrPrimitiveType.unit =>
       match right with | PsVerifiedIrPrimitiveType.unit => true | _ => false
 
+def psJsPrimitiveTypeSupported (type : PsVerifiedIrPrimitiveType) : Bool :=
+  match type with
+  | PsVerifiedIrPrimitiveType.nat => true
+  | PsVerifiedIrPrimitiveType.int => true
+  | PsVerifiedIrPrimitiveType.bool => true
+  | PsVerifiedIrPrimitiveType.string => true
+  | PsVerifiedIrPrimitiveType.unit => true
+  | _ => false
+
 def psJsLookupLocal (locals : List PsJsLocalBinding)
     (name : String) : Option PsJsLocalBinding :=
   match locals with
@@ -96,6 +110,33 @@ def psJsLookupLocal (locals : List PsJsLocalBinding)
   | List.cons local rest =>
       if psJsonStringEq local.sourceName name then Option.some local
       else psJsLookupLocal rest name
+
+def psJsLowerParameters (parameters : List PsVerifiedIrParameter)
+    (locals : List PsJsLocalBinding) (nextLocal : Nat) :
+    Except PsJsError PsJsLoweredParameters :=
+  match parameters with
+  | List.nil =>
+      Except.ok (PsJsLoweredParameters.mk locals List.nil nextLocal)
+  | List.cons parameter rest =>
+      match parameter.type with
+      | PsVerifiedIrType.primitive primitive =>
+          if psJsPrimitiveTypeSupported primitive then
+            match psJsLookupLocal locals parameter.name with
+            | Option.some _ => Except.error PsJsError.unsupportedExpression
+            | Option.none =>
+                let local := PsJsLocalBinding.mk parameter.name primitive nextLocal;
+                match psJsLowerParameters
+                  rest
+                  (List.cons local locals)
+                  (Nat.succ nextLocal) with
+                | Except.error error => Except.error error
+                | Except.ok lowered =>
+                    Except.ok (PsJsLoweredParameters.mk
+                      lowered.locals
+                      (List.cons nextLocal lowered.indexes)
+                      lowered.nextLocal)
+          else Except.error PsJsError.unsupportedExpression
+      | _ => Except.error PsJsError.unsupportedExpression
 
 def psJsLowerLiteral (value : PsVerifiedIrLiteral)
     (type : PsVerifiedIrPrimitiveType) : Except PsJsError PsJsLiteral :=
@@ -160,28 +201,46 @@ def psJsLowerExpr (locals : List PsJsLocalBinding) (nextLocal : Nat)
       | _ => Except.error PsJsError.unsupportedExpression
   | _ => Except.error PsJsError.unsupportedExpression
 
-def psJsLowerBody (type : PsVerifiedIrType)
-    (body : PsVerifiedIrExpr) : Except PsJsError PsJsExpr :=
+def psJsLowerDeclarationBody (parameters : List PsVerifiedIrParameter)
+    (type : PsVerifiedIrType) (body : PsVerifiedIrExpr) :
+    Except PsJsError PsJsExpr :=
   match type with
   | PsVerifiedIrType.primitive primitive =>
-      match psJsLowerExpr List.nil 0 primitive body with
-      | Except.error error => Except.error error
-      | Except.ok lowered => Except.ok lowered.expr
+      if psJsPrimitiveTypeSupported primitive then
+        match psJsLowerParameters parameters List.nil 0 with
+        | Except.error error => Except.error error
+        | Except.ok loweredParameters =>
+            match psJsLowerExpr
+              loweredParameters.locals
+              loweredParameters.nextLocal
+              primitive
+              body with
+            | Except.error error => Except.error error
+            | Except.ok loweredBody =>
+                match loweredParameters.indexes with
+                | List.nil => Except.ok loweredBody.expr
+                | List.cons _ _ =>
+                    Except.ok (PsJsExpr.lambda
+                      loweredParameters.indexes
+                      loweredBody.expr)
+      else Except.error PsJsError.unsupportedExpression
   | _ => Except.error PsJsError.literalTypeMismatch
+
+def psJsLowerBody (type : PsVerifiedIrType)
+    (body : PsVerifiedIrExpr) : Except PsJsError PsJsExpr :=
+  psJsLowerDeclarationBody List.nil type body
 
 def psJsLowerConstant (declaration : PsVerifiedIrDeclaration) :
     Except PsJsError PsJsConstant :=
   match declaration.typeParameters with
   | List.cons _ _ => Except.error (PsJsError.unsupportedDeclaration declaration.name)
   | List.nil =>
-      match declaration.parameters with
-      | List.cons _ _ => Except.error (PsJsError.unsupportedDeclaration declaration.name)
-      | List.nil =>
-          if psJsValidExportName declaration.name then
-            match psJsLowerBody declaration.resultType declaration.body with
-            | Except.error error => Except.error error
-            | Except.ok body => Except.ok (PsJsConstant.mk declaration.name body)
-          else Except.error (PsJsError.invalidExportName declaration.name)
+      if psJsValidExportName declaration.name then
+        match psJsLowerDeclarationBody
+          declaration.parameters declaration.resultType declaration.body with
+        | Except.error error => Except.error error
+        | Except.ok body => Except.ok (PsJsConstant.mk declaration.name body)
+      else Except.error (PsJsError.invalidExportName declaration.name)
 
 def psJsLowerConstants (declarations : List PsVerifiedIrDeclaration) :
     List String -> Except PsJsError (List PsJsConstant) :=

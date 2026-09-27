@@ -175,12 +175,13 @@ def psKernelCoreWhnfWithResources
                                       resources operation value with
                                   | PsKernelCoreResult.error message =>
                                       PsKernelCoreResult.error message
-                                  | PsKernelCoreResult.ok PsKernelCoreOption.none =>
-                                      PsKernelCoreResult.ok
-                                        (PsKernelCoreExpr.app reducedFn reducedArg)
-                                  | PsKernelCoreResult.ok
-                                      (PsKernelCoreOption.some result) =>
-                                      PsKernelCoreResult.ok result
+                                  | PsKernelCoreResult.ok primitiveResult =>
+                                      match primitiveResult with
+                                      | PsKernelCoreOption.none =>
+                                          PsKernelCoreResult.ok
+                                            (PsKernelCoreExpr.app reducedFn reducedArg)
+                                      | PsKernelCoreOption.some result =>
+                                          PsKernelCoreResult.ok result
                         else
                           PsKernelCoreResult.ok
                             (PsKernelCoreExpr.app reducedFn arg)
@@ -221,15 +222,16 @@ def psKernelCoreWhnfWithResources
                                                   resources operation leftValue rightValue with
                                               | PsKernelCoreResult.error message =>
                                                   PsKernelCoreResult.error message
-                                              | PsKernelCoreResult.ok PsKernelCoreOption.none =>
-                                                  PsKernelCoreResult.ok
-                                                    (PsKernelCoreExpr.app
-                                                      (PsKernelCoreExpr.app
-                                                        binaryFn reducedLeft)
-                                                      reducedRight)
-                                              | PsKernelCoreResult.ok
-                                                  (PsKernelCoreOption.some result) =>
-                                                  PsKernelCoreResult.ok result
+                                              | PsKernelCoreResult.ok primitiveResult =>
+                                                  match primitiveResult with
+                                                  | PsKernelCoreOption.none =>
+                                                      PsKernelCoreResult.ok
+                                                        (PsKernelCoreExpr.app
+                                                          (PsKernelCoreExpr.app
+                                                            binaryFn reducedLeft)
+                                                          reducedRight)
+                                                  | PsKernelCoreOption.some result =>
+                                                      PsKernelCoreResult.ok result
                             else
                               PsKernelCoreResult.ok
                                 (PsKernelCoreExpr.app reducedFn arg)

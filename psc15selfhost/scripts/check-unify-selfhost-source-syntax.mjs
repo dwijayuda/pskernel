@@ -10,7 +10,11 @@ const unify = await readFile(
 );
 
 const required = [
-  /let unified := psLevelUnify context\.levels left right;\s*if unified\.success then/,
+  /def psUnifyLevelLists\s*\(leftLevels : List PsLevel\) :\s*PsMetaContext -> List PsLevel -> PsUnifyResult :=\s*match leftLevels with/,
+  /let smaller :\s*PsMetaContext ->\s*List PsLevel ->\s*PsUnifyResult :=\s*psUnifyLevelLists leftRest;/,
+  /fun \(context : PsMetaContext\) \(rightLevels : List PsLevel\) =>/,
+  /smaller\s*\(psMetaSetLevels context unified\.context\)\s*rightRest/,
+  /psUnifyLevelLists leftLevels context rightLevels/,
   /let leftValue := psWhnf environment context localContext left;\s*let rightValue := psWhnf environment context localContext right;\s*if psExprAlphaEq leftValue rightValue then/,
   /match leftValue with\s*\| \.mvar leftId =>\s*match rightValue with/,
   /\| leftOther =>\s*match rightValue with\s*\| \.mvar id =>/,
@@ -31,11 +35,12 @@ for (const pattern of required) {
 }
 
 const forbidden = [
+  /def psUnifyLevelLists\s*\(context : PsMetaContext\) :\s*List PsLevel -> List PsLevel -> PsUnifyResult/,
+  /psUnifyLevelLists\s*\(psMetaSetLevels context unified\.context\)/,
   /match leftValue\s*,\s*rightValue with/,
   /==/,
   /&&/,
   /!\s*psMetaVarIsNatural/,
-  /let unified := psLevelUnify context\.levels left right\s+if unified\.success then/,
   /let leftValue := psWhnf environment context localContext left\s+let rightValue :=/,
   /let rightValue := psWhnf environment context localContext right\s+if psExprAlphaEq/,
   /let unified := psLevelUnify context\.levels leftLevel rightLevel\s+if unified\.success then/,
@@ -52,5 +57,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX: PASS (explicit let sequencing, unary matching, explicit Nat equality, explicit boolean control flow)\n",
+  "PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe list recursion, explicit sequencing, unary matching, explicit Nat equality, explicit boolean control flow)\n",
 );

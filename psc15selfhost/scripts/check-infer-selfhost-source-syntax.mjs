@@ -11,6 +11,8 @@ const infer = await readFile(
 
 const required = [
   'def psInferExprListLength\n    (values : List PsExpr) : Nat :=\n  match values with',
+  'def psInferNameListLength\n    (values : List PsName) : Nat :=\n  match values with',
+  'def psInferLevelListLength\n    (values : List PsLevel) : Nat :=\n  match values with',
   '| [] => 0',
   '| _ :: rest =>\n      Nat.succ (psInferExprListLength rest)',
   'def psInferAppViewAcc\n    (expr : PsExpr) : List PsExpr -> PsInferAppView :=\n  match expr with',
@@ -23,6 +25,11 @@ const required = [
   'psInferStructureProjectionFieldWorker fuel;',
   'psInferStructureProjectionFieldWorker\n    remainingFuel\n    environment\n    metaContext\n    localContext\n    typeName\n    target\n    requestedIndex\n    fieldIndex\n    cursor',
   '(psInferNatNe (psInferExprListLength view.args) info.numParams)',
+  'def psInferTypeWithFuelWorker\n    (remainingFuel : Nat) :',
+  'let smaller :\n          PsEnvironment ->\n          PsMetaContext ->\n          PsLocalContext ->\n          PsExpr ->\n          Except PsInferError PsExpr :=\n        psInferTypeWithFuelWorker fuel;',
+  'def psInferTypeWithFuel\n    (environment : PsEnvironment)\n    (metaContext : PsMetaContext)\n    (localContext : PsLocalContext)\n    (fuel : Nat)\n    (expr : PsExpr) : Except PsInferError PsExpr :=\n  psInferTypeWithFuelWorker\n    fuel\n    environment\n    metaContext\n    localContext\n    expr',
+  '(psInferNameListLength parameters)',
+  '(psInferLevelListLength levels)',
 ];
 for (const marker of required) {
   if (!infer.includes(marker)) {
@@ -37,6 +44,10 @@ const forbidden = [
   'psInferStructureProjectionField\n              environment\n              metaContext\n              localContext\n              typeName\n              target\n              fuel\n              requestedIndex\n              (Nat.succ fieldIndex)',
   'view.args.length',
   'List.length view.args',
+  'parameters.length',
+  'levels.length',
+  ': Nat -> PsExpr -> Except PsInferError PsExpr\n  | 0, _ =>',
+  '| fuel + 1, expr =>',
   '| head =>',
   'head := head',
 ];
@@ -47,5 +58,5 @@ for (const marker of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_INFER_SELFHOST_SOURCE_SYNTAX: PASS (arity-safe recursion and local list length)\n",
+  "PSC2_INFER_SELFHOST_SOURCE_SYNTAX: PASS (local list ops and invariant-safe Infer recursion)\n",
 );

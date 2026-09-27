@@ -2,6 +2,7 @@
   "name": "@proofscript/psc2-selfhost-workspace",
   "private": true,
   "version": "0.0.0-dev",
+  "description": "Minimal PSC2 self-host workspace bootstrapped from PSC1-compatible Lean",
   "type": "module",
   "bin": {
     "psc": "./packages/cli/bin/psc.mjs"

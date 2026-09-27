@@ -164,6 +164,12 @@ if (!/let baseTerm : PsExpr :=\s*match resolved with\s*\| \.local id => PsExpr\.
 if (/let baseTerm :=\s*match resolved with/.test(projectionReference)) {
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabProjectionReference untyped baseTerm match");
 }
+if (!/psElabResolvedTerm\s+context\s+baseTerm\s+Option\.none/.test(projectionReference)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionReference explicit Option.none");
+}
+if (/psElabResolvedTerm\s+context\s+baseTerm\s+none/.test(projectionReference)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabProjectionReference bare none result expectation");
+}
 
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
@@ -179,5 +185,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection recursion, typed projection-reference match, local list length, and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection recursion, typed projection-reference match, explicit projection-reference expectation, local list length, and explicit Option constructors)\n",
 );

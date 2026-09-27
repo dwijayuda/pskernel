@@ -503,55 +503,62 @@ def psElabTypedBindersAcc
       PsSyntaxTerm ->
       Option PsExpr ->
       Except PsElabError PsElabTermResult)
-    (context : PsElabContext)
-    (entries : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
-    (bindersRev : List PsElabTypedBinder) :
+    (entries : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
+    PsElabContext ->
+    List PsElabTypedBinder ->
     Except PsElabError PsElabTypedBindersResult :=
   match entries with
   | [] =>
-      Except.ok {
-        context := context
-        bindersRev := bindersRev
-      }
+      fun (context : PsElabContext) =>
+        fun (bindersRev : List PsElabTypedBinder) =>
+          Except.ok {
+            context := context
+            bindersRev := bindersRev
+          }
   | List.cons entry rest =>
-      let head := Prod.fst entry;
-      let sourceType := Prod.snd entry;
-      match psSyntaxNameToName head.name with
-      | none => Except.error PsElabError.emptyName
-      | some name =>
-          match elaborate context sourceType Option.none with
-          | Except.error error => Except.error error
-          | Except.ok typeResult =>
-              match psInferEnsureSort
-                  typeResult.context.environment
-                  typeResult.context.metaContext
-                  typeResult.context.localContext
-                  typeResult.type with
-              | Except.error error =>
-                  Except.error (PsElabError.infer error)
-              | Except.ok _ =>
-                  let binder := psElabBinderKindToCore head.kind;
-                  let pushed :=
-                    psLocalPushBinding
+      let smaller :
+          PsElabContext ->
+          List PsElabTypedBinder ->
+          Except PsElabError PsElabTypedBindersResult :=
+        psElabTypedBindersAcc elaborate rest;
+      fun (context : PsElabContext) =>
+        fun (bindersRev : List PsElabTypedBinder) =>
+          let head := Prod.fst entry;
+          let sourceType := Prod.snd entry;
+          match psSyntaxNameToName head.name with
+          | none => Except.error PsElabError.emptyName
+          | some name =>
+              match elaborate context sourceType Option.none with
+              | Except.error error => Except.error error
+              | Except.ok typeResult =>
+                  match psInferEnsureSort
+                      typeResult.context.environment
+                      typeResult.context.metaContext
                       typeResult.context.localContext
-                      name
-                      typeResult.term
-                      binder;
-                  let nextContext :=
-                    psElabContextWithLocal
-                      typeResult.context
-                      pushed.context;
-                  let binderEntry : PsElabTypedBinder := {
-                    id := pushed.id
-                    name := name
-                    type := typeResult.term
-                    binder := binder
-                  };
-                  psElabTypedBindersAcc
-                    elaborate
-                    nextContext
-                    rest
-                    (List.cons binderEntry bindersRev)
+                      typeResult.type with
+                  | Except.error error =>
+                      Except.error (PsElabError.infer error)
+                  | Except.ok _ =>
+                      let binder := psElabBinderKindToCore head.kind;
+                      let pushed :=
+                        psLocalPushBinding
+                          typeResult.context.localContext
+                          name
+                          typeResult.term
+                          binder;
+                      let nextContext :=
+                        psElabContextWithLocal
+                          typeResult.context
+                          pushed.context;
+                      let binderEntry : PsElabTypedBinder := {
+                        id := pushed.id
+                        name := name
+                        type := typeResult.term
+                        binder := binder
+                      };
+                      smaller
+                        nextContext
+                        (List.cons binderEntry bindersRev)
 
 def psElabTypedBinders
     (elaborate :
@@ -562,7 +569,7 @@ def psElabTypedBinders
     (context : PsElabContext)
     (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
     Except PsElabError PsElabTypedBindersResult :=
-  psElabTypedBindersAcc elaborate context binders []
+  psElabTypedBindersAcc elaborate binders context []
 
 def psCloseElabTypedBinders
     (metaContext : PsMetaContext)
@@ -2288,6 +2295,10 @@ def psElabNatListAt
           some value
       | nextIndex + 1 =>
           psElabNatListAt rest nextIndex
+
+structure PsElabMatchHypothesesResult where
+  context : PsElabContext
+  hypothesesRev : List PsElabMatchField
 
 def psElabValidateStructuralCall
     (context : PsElabContext)

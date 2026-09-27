@@ -9,6 +9,8 @@ on:
       - psc2/kernel-core-phase2-work
       - psc2/kernel-core-phase3-reduce
       - psc2/kernel-core-phase3-reduce-work
+      - psc2/kernel-core-phase4-infer
+      - psc2/kernel-core-phase4-infer-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
@@ -112,6 +114,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           lake exe psc2_kernel_core_reduction_parity_tests
+
+      - name: Minimal inference parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_infer_parity_tests
 
       - name: Bootstrap closure remains isolated
         shell: bash

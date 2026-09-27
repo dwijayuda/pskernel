@@ -69,6 +69,13 @@ def psMetaFindAssignmentInList
 def psMetaFindAssignment (context : PsMetaContext) (id : Nat) : Option PsExpr :=
   psMetaFindAssignmentInList id context.assignments
 
+def psMetaAssignmentListLength
+    (assignments : List PsMetaAssignment) : Nat :=
+  match assignments with
+  | [] => 0
+  | _ :: rest =>
+      Nat.succ (psMetaAssignmentListLength rest)
+
 def psMetaFresh
     (context : PsMetaContext)
     (localContext : PsLocalContext)
@@ -205,7 +212,7 @@ def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
   let value :=
     psMetaInstantiateRounds
       context
-      (Nat.add (List.length context.assignments) 1)
+      (Nat.add (psMetaAssignmentListLength context.assignments) 1)
       expr;
   psLevelInstantiateExpr context.levels value
 

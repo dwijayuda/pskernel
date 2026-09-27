@@ -27,7 +27,8 @@ def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
     jsFixtureDecl "text" .string (.string "quote\" slash\\ newline\n tab\t 😀 é"),
     jsFixtureDecl "empty" .string (.string ""),
     jsFixtureDecl "control" .string (.string (String.singleton (Char.ofNat 0))),
-    jsFixtureDecl "lineSeparators" .string (.string "  "),
+    jsFixtureDecl "lineSeparators" .string
+      (.string ((String.singleton (Char.ofNat 8232)) ++ (String.singleton (Char.ofNat 8233)))),
     jsFixtureDecl "nothing" .unit .unit,
     jsFixtureDecl "__psc_js_0" .nat (.natural 7),
     jsFixtureExprDecl "letAlias" .nat
@@ -35,7 +36,12 @@ def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
     jsFixtureExprDecl "shadowed" .nat
       (.letE "x" (.primitive .nat) (.literal (.natural 1))
         (.letE "x" (.primitive .nat) (.literal (.natural 2)) (.var "x"))),
-    jsFixtureFunctionDecl "identity" "value" .nat .nat (.var "value")
+    jsFixtureFunctionDecl "identity" "value" .nat .nat (.var "value"),
+    jsFixtureFunctionDecl "choose" "flag" .bool .nat
+      (.ifE
+        (.var "flag")
+        (.literal (.natural 10))
+        (.literal (.natural 20)))
   ]
 
 def jsDifferentialFixtureModule : PsVerifiedIrModule :=
@@ -69,6 +75,9 @@ def main (args : List String) : IO Unit := do
   jsRequireError "let value type mismatch" { psVerifiedIrModuleEmpty with
     declarations := [jsFixtureExprDecl "badLet" .nat
       (.letE "x" (.primitive .int) (.literal (.natural 1)) (.var "x"))] }
+  jsRequireError "if condition type mismatch" { psVerifiedIrModuleEmpty with
+    declarations := [jsFixtureExprDecl "badIf" .nat
+      (.ifE (.literal (.natural 1)) (.literal (.natural 2)) (.literal (.natural 3)))] }
   jsRequireError "nonprimitive parameter" { psVerifiedIrModuleEmpty with
     declarations := [{ declaration with parameters := [
       { name := "a", type := .function [.primitive .nat] (.primitive .nat) }] }] }

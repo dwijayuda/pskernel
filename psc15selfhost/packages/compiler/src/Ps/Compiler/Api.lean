@@ -1,6 +1,6 @@
 import Ps.Syntax.Translate
 import Ps.Bridge.CheckedAdmissions
-import Ps.Environment.Prelude
+import Ps.Environment.SelfHostPrelude
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
 
@@ -66,7 +66,7 @@ def psCompilerParseSource
 def psCompilerElaborateModule
     (sourceModule : PsSyntaxModule) :
     Except PsCompilerError PsElabModuleResult :=
-  match psElabModule psBootstrapPreludeEnvironment sourceModule with
+  match psElabModule psSelfHostPreludeEnvironment sourceModule with
   | Except.error error =>
       Except.error (PsCompilerError.elaboration error)
   | Except.ok elaborated =>
@@ -168,7 +168,7 @@ def psCompilerEnvironmentFromPrepared
   | Except.ok _ =>
       match
           psAddDeclarationList
-            psBootstrapPreludeEnvironment
+            psSelfHostPreludeEnvironment
             prepared.declarations with
       | Except.error error =>
           Except.error (PsCompilerError.elaboration error)

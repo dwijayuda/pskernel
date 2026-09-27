@@ -3,6 +3,7 @@ import "./semantic-boundary-tests.mjs";
 import "./check-semantic-boundaries.mjs";
 import "./fixed-point-command-tests.mjs";
 import "./bootstrap-root-minimality-tests.mjs";
+import "./check-selfhost-source-syntax.mjs";
 import { existsSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";

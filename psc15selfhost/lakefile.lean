@@ -104,6 +104,7 @@ lean_lib PsBackendJs where
   srcDir := "packages/backend-js/src"
   roots := #[
     `Ps.BackendJs.Model,
+    `Ps.BackendJs.Normalize,
     `Ps.BackendJs.Lower,
     `Ps.BackendJs.Emit,
     `Ps.BackendJs.Module

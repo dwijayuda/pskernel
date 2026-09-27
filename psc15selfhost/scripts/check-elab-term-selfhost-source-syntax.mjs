@@ -15,7 +15,7 @@ const required = [
   /let smaller : PsName -> PsName :=\s*psSyntaxNameAppendSegments rest;/,
   /fun \(name : PsName\) =>\s*smaller \(psNameAppendStr name segment\)/,
   /psSyntaxNameAppendSegments\s+rest\s*\(psNameAppendStr PsName\.anonymous first\)/,
-  /def psElabListLength\s*\{α : Type\}\s*:\s*List α -> Nat\s*\| \[\] => 0\s*\| _ :: rest => Nat\.succ \(psElabListLength rest\)/,
+  /def psElabListLength\s*\{α : Type\}\s*\(values : List α\) : Nat :=\s*match values with\s*\| \[\] => 0\s*\| _ :: rest => Nat\.succ \(psElabListLength rest\)/,
 ];
 
 for (const pattern of required) {
@@ -117,6 +117,7 @@ if (!/Nat\.beq \(psElabListLength view\.args\) info\.numParams/.test(projectionS
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
   /psSyntaxNameAppendSegments\s*\(psNameAppendStr name segment\)\s*rest/,
+  /def psElabListLength\s*\{α : Type\}\s*:\s*List α -> Nat/,
   /\bList\.length\b/,
 ];
 
@@ -127,5 +128,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name/projection/field recursion, local structural list length, and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name/projection/field/list-length recursion and explicit Option constructors)\n",
 );

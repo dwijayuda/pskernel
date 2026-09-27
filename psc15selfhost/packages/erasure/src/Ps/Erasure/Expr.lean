@@ -361,6 +361,17 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
+      else if text == "Int.repr" then
+        if view.args.length == 1 then
+          match
+              psEraseMappedIntrinsic
+                erase
+                PsVerifiedIrIntrinsic.intRepr
+                view.args with
+          | Except.error error => Except.error error
+          | Except.ok result => Except.ok (some result)
+        else
+          Except.error PsErasureError.unsupportedApplication
       else if text == "Int.add" then
         binary PsVerifiedIrIntrinsic.intAdd
       else if text == "Int.sub" then

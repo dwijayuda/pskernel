@@ -227,6 +227,40 @@ def psJsLowerExprWorker (body : PsVerifiedIrExpr) :
                             loweredBody.expr)
                           loweredBody.nextLocal)
             | _ => Except.error PsJsError.unsupportedExpression
+  | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
+      let lowerCondition :
+          List PsJsLocalBinding -> Nat -> PsVerifiedIrPrimitiveType ->
+          Except PsJsError PsJsLoweredExpr :=
+        psJsLowerExprWorker condition;
+      let lowerThen :
+          List PsJsLocalBinding -> Nat -> PsVerifiedIrPrimitiveType ->
+          Except PsJsError PsJsLoweredExpr :=
+        psJsLowerExprWorker thenBranch;
+      let lowerElse :
+          List PsJsLocalBinding -> Nat -> PsVerifiedIrPrimitiveType ->
+          Except PsJsError PsJsLoweredExpr :=
+        psJsLowerExprWorker elseBranch;
+      fun (locals : List PsJsLocalBinding) =>
+        fun (nextLocal : Nat) =>
+          fun (expectedType : PsVerifiedIrPrimitiveType) =>
+            match lowerCondition
+              locals nextLocal PsVerifiedIrPrimitiveType.bool with
+            | Except.error error => Except.error error
+            | Except.ok loweredCondition =>
+                match lowerThen
+                  locals loweredCondition.nextLocal expectedType with
+                | Except.error error => Except.error error
+                | Except.ok loweredThen =>
+                    match lowerElse
+                      locals loweredThen.nextLocal expectedType with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredElse =>
+                        Except.ok (PsJsLoweredExpr.mk
+                          (PsJsExpr.ifE
+                            loweredCondition.expr
+                            loweredThen.expr
+                            loweredElse.expr)
+                          loweredElse.nextLocal)
   | _ =>
       fun (_locals : List PsJsLocalBinding) =>
         fun (_nextLocal : Nat) =>

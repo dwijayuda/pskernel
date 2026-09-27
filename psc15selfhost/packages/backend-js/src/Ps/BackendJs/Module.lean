@@ -1,3 +1,4 @@
+import Ps.BackendJs.Normalize
 import Ps.BackendJs.Lower
 import Ps.BackendJs.Emit
 
@@ -112,7 +113,8 @@ def psJsValidateInitializationOrder
     (declarations : List PsVerifiedIrDeclaration) : Except PsJsError Unit :=
   psJsValidateInitializationOrderAux declarations List.nil
 
-def psJsEmitModule (module : PsVerifiedIrModule) : Except PsJsError String :=
+def psJsEmitNormalizedModule (module : PsVerifiedIrModule) :
+    Except PsJsError String :=
   match psJsValidateDeclarationCallTargetsList module.declarations with
   | Except.error error => Except.error error
   | Except.ok _ =>
@@ -122,3 +124,8 @@ def psJsEmitModule (module : PsVerifiedIrModule) : Except PsJsError String :=
           match psJsLowerModule module with
           | Except.error error => Except.error error
           | Except.ok lowered => psJsEmitTargetModule lowered
+
+def psJsEmitModule (module : PsVerifiedIrModule) : Except PsJsError String :=
+  match psJsNormalizeModule module with
+  | Except.error error => Except.error error
+  | Except.ok normalized => psJsEmitNormalizedModule normalized

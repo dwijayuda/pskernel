@@ -113,6 +113,9 @@ requireMarkers("MetaContext", metaContext, [
   'psMetaFindDeclInList id rest',
   'def psMetaFindAssignmentInList\n    (id : Nat)\n    (assignments : List PsMetaAssignment) : Option PsExpr :=\n  match assignments with',
   'psMetaFindAssignmentInList id rest',
+  'def psMetaAssignmentListLength\n    (assignments : List PsMetaAssignment) : Nat :=\n  match assignments with',
+  '| [] => 0',
+  '| _ :: rest =>\n      Nat.succ (psMetaAssignmentListLength rest)',
   'def psExprContainsMVar\n    (target : Nat)\n    (expr : PsExpr) : Bool :=\n  match expr with',
   'def psExprFVarsInContext\n    (localContext : PsLocalContext)\n    (expr : PsExpr) : Bool :=\n  match expr with',
   'psExprFVarsInContext localContext body',
@@ -122,7 +125,7 @@ requireMarkers("MetaContext", metaContext, [
   '| Nat.zero =>\n      fun (expr : PsExpr) => expr',
   'let smaller : PsExpr -> PsExpr :=\n        psMetaInstantiateRounds context remaining;',
   'fun (expr : PsExpr) =>\n        smaller (psMetaInstantiateStep context expr)',
-  'psMetaInstantiateRounds\n      context\n      (Nat.add (List.length context.assignments) 1)\n      expr;',
+  'psMetaInstantiateRounds\n      context\n      (Nat.add (psMetaAssignmentListLength context.assignments) 1)\n      expr;',
   'def psExprHasUnresolvedMeta\n    (expr : PsExpr) : Bool :=\n  match expr with',
   'psExprHasUnresolvedMeta body',
 ]);
@@ -137,10 +140,11 @@ forbidMarkers("MetaContext", metaContext, [
   '| remaining + 1, expr =>',
   'psMetaInstantiateRounds\n        context\n        remaining\n        (psMetaInstantiateStep context expr)',
   'context.assignments.length',
+  'List.length context.assignments',
   'def psExprHasUnresolvedMeta : PsExpr -> Bool',
   '| expr => expr',
 ]);
 
 process.stdout.write(
-  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 explicit-recursion/invariant-fuel/explicit-list-ops/let/application/unary-match/no-bool-infix subset)\n",
+  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 explicit-recursion/invariant-fuel/local-list-ops/let/application/unary-match/no-bool-infix subset)\n",
 );

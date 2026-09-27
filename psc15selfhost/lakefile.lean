@@ -164,7 +164,8 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.Instantiate,
     `PSC1Kernel.Declaration,
     `PSC1Kernel.Environment,
-    `PSC1Kernel.LocalContext
+    `PSC1Kernel.LocalContext,
+    `PSC1Kernel.TypeChecker
   ]
 
 @[default_target]
@@ -263,3 +264,7 @@ lean_exe psc2_kernel_core_environment_parity_tests where
 lean_exe psc2_kernel_core_local_context_parity_tests where
   srcDir := "test"
   root := `KernelCoreLocalContextParityTests
+
+lean_exe psc2_kernel_core_reduction_parity_tests where
+  srcDir := "test"
+  root := `KernelCoreReductionParityTests

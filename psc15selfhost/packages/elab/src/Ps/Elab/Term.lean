@@ -720,11 +720,11 @@ def psElabLambda
                   openType;
               let outerContext :=
                 psElabContextWithMeta context metaContext;
-              let finalResult : PsElabTermResult := {
-                context := outerContext
-                term := Prod.fst closed
-                type := Prod.snd closed
-              };
+              let finalResult :=
+                PsElabTermResult.mk
+                  outerContext
+                  (Prod.fst closed)
+                  (Prod.snd closed);
               psElabFinalizeExpected
                 finalResult
                 expected

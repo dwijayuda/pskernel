@@ -50,7 +50,7 @@
     "test:lean": "npm run test:all",
     "test:all": "npm run test:bootstrap && npm run test:regression && npm run test:extensions",
     "bootstrap:lean": "npm run check:workspace && npm run check:source:bootstrap && npm run check:layout && npm run check:selfhost-project-prelude && npm run check:selfhost-foundation && npm run check:selfhost-source-syntax && npm run check:structure-recursor-normalization && npm run check:bootstrap-closure && npm run check:ir-neutrality && npm run build:lean && npm run test:bootstrap",
-    "bootstrap:check": "lake exe psc1 check packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+    "bootstrap:check": "node scripts/diagnose-elab-lambda-projections.mjs && lake exe psc1 check packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
     "bootstrap:emit": "node scripts/bootstrap-project.mjs",
     "bootstrap:compiler": "lake exe psc1 build dist/bootstrap/workspace/packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps --out dist/bootstrap/packages/compiler/index.js",
     "bootstrap": "npm run bootstrap:lean && npm run bootstrap:check && npm run bootstrap:emit && npm run bootstrap:compiler",

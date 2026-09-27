@@ -234,6 +234,10 @@ lean_exe psc2_minimal_selfhost_tests where
   srcDir := "test"
   root := `MinimalSelfHostTests
 
+lean_exe psc2_prod_match_selfhost_tests where
+  srcDir := "test"
+  root := `ProdMatchSelfHostTests
+
 lean_exe psc2_kernel_core_boundary_tests where
   srcDir := "test"
   root := `KernelCoreBoundaryTests

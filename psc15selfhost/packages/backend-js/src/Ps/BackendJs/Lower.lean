@@ -238,54 +238,43 @@ def psJsLowerLiteral (value : PsVerifiedIrLiteral)
   | PsVerifiedIrLiteral.machineInteger _ _ =>
       Except.error PsJsError.unsupportedExpression
 
+def psJsLowerAtomicExpr (body : PsVerifiedIrExpr)
+    (locals : List PsJsLocalBinding) (nextLocal : Nat)
+    (expectedType : PsVerifiedIrPrimitiveType) : Except PsJsError PsJsLoweredExpr :=
+  match body with
+  | PsVerifiedIrExpr.literal value =>
+      match psJsLowerLiteral value expectedType with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok (PsJsLoweredExpr.mk (PsJsExpr.literal lowered) nextLocal)
+  | PsVerifiedIrExpr.var name =>
+      match psJsLookupLocal locals name with
+      | Option.none => Except.error PsJsError.unsupportedExpression
+      | Option.some binding =>
+          if psJsPrimitiveTypeEq binding.type expectedType then
+            Except.ok (PsJsLoweredExpr.mk (PsJsExpr.local binding.index) nextLocal)
+          else Except.error PsJsError.literalTypeMismatch
+  | _ => Except.error PsJsError.unsupportedExpression
+
 def psJsLowerExprWorker (body : PsVerifiedIrExpr) :
     List PsJsGlobalBinding -> List PsJsLocalBinding -> Nat ->
     PsVerifiedIrPrimitiveType -> Except PsJsError PsJsLoweredExpr :=
   match body with
   | PsVerifiedIrExpr.literal value =>
       fun (_globals : List PsJsGlobalBinding) =>
-        fun (_locals : List PsJsLocalBinding) =>
+        fun (locals : List PsJsLocalBinding) =>
           fun (nextLocal : Nat) =>
             fun (expectedType : PsVerifiedIrPrimitiveType) =>
-              match psJsLowerLiteral value expectedType with
-              | Except.error error => Except.error error
-              | Except.ok lowered =>
-                  Except.ok (PsJsLoweredExpr.mk
-                    (PsJsExpr.literal lowered)
-                    nextLocal)
+              psJsLowerAtomicExpr
+                (PsVerifiedIrExpr.literal value) locals nextLocal expectedType
   | PsVerifiedIrExpr.var name =>
       fun (_globals : List PsJsGlobalBinding) =>
         fun (locals : List PsJsLocalBinding) =>
           fun (nextLocal : Nat) =>
             fun (expectedType : PsVerifiedIrPrimitiveType) =>
-              match psJsLookupLocal locals name with
-              | Option.none => Except.error PsJsError.unsupportedExpression
-              | Option.some binding =>
-                  if psJsPrimitiveTypeEq binding.type expectedType then
-                    Except.ok (PsJsLoweredExpr.mk
-                      (PsJsExpr.local binding.index)
-                      nextLocal)
-                  else Except.error PsJsError.literalTypeMismatch
+              psJsLowerAtomicExpr
+                (PsVerifiedIrExpr.var name) locals nextLocal expectedType
   | PsVerifiedIrExpr.call fn typeArguments arguments =>
-      let lowerArgument :
-          List PsJsGlobalBinding -> List PsJsLocalBinding -> Nat ->
-          PsVerifiedIrPrimitiveType -> Except PsJsError PsJsLoweredExpr :=
-        match arguments with
-        | List.nil =>
-            fun (_globals : List PsJsGlobalBinding) =>
-              fun (_locals : List PsJsLocalBinding) =>
-                fun (_nextLocal : Nat) =>
-                  fun (_expectedType : PsVerifiedIrPrimitiveType) =>
-                    Except.error PsJsError.unsupportedExpression
-        | List.cons argument rest =>
-            match rest with
-            | List.nil => psJsLowerExprWorker argument
-            | List.cons _ _ =>
-                fun (_globals : List PsJsGlobalBinding) =>
-                  fun (_locals : List PsJsLocalBinding) =>
-                    fun (_nextLocal : Nat) =>
-                      fun (_expectedType : PsVerifiedIrPrimitiveType) =>
-                        Except.error PsJsError.unsupportedExpression;
       fun (globals : List PsJsGlobalBinding) =>
         fun (locals : List PsJsLocalBinding) =>
           fun (nextLocal : Nat) =>
@@ -301,19 +290,25 @@ def psJsLowerExprWorker (body : PsVerifiedIrExpr) :
                           if psJsPrimitiveTypeEq global.resultType expectedType then
                             match global.parameterTypes with
                             | List.nil => Except.error PsJsError.unsupportedExpression
-                            | List.cons parameterType rest =>
-                                match rest with
-                                | List.nil =>
-                                    match lowerArgument
-                                      globals locals nextLocal parameterType with
-                                    | Except.error error => Except.error error
-                                    | Except.ok loweredArgument =>
-                                        Except.ok (PsJsLoweredExpr.mk
-                                          (PsJsExpr.call
-                                            (PsJsExpr.global global.index)
-                                            (List.cons loweredArgument.expr List.nil))
-                                          loweredArgument.nextLocal)
+                            | List.cons parameterType parameterRest =>
+                                match parameterRest with
                                 | List.cons _ _ => Except.error PsJsError.unsupportedExpression
+                                | List.nil =>
+                                    match arguments with
+                                    | List.nil => Except.error PsJsError.unsupportedExpression
+                                    | List.cons argument argumentRest =>
+                                        match argumentRest with
+                                        | List.cons _ _ => Except.error PsJsError.unsupportedExpression
+                                        | List.nil =>
+                                            match psJsLowerAtomicExpr
+                                              argument locals nextLocal parameterType with
+                                            | Except.error error => Except.error error
+                                            | Except.ok loweredArgument =>
+                                                Except.ok (PsJsLoweredExpr.mk
+                                                  (PsJsExpr.call
+                                                    (PsJsExpr.global global.index)
+                                                    (List.cons loweredArgument.expr List.nil))
+                                                  loweredArgument.nextLocal)
                           else Except.error PsJsError.literalTypeMismatch
                   | _ => Except.error PsJsError.unsupportedExpression
   | PsVerifiedIrExpr.letE name type value innerBody =>

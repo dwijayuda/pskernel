@@ -22,6 +22,7 @@ try {
     zero: 0n, yes: true, no: false,
     text: 'quote" slash\\ newline\n tab\t 😀 é', empty: '', control: '\0',
     lineSeparators: '\u2028\u2029', nothing: undefined, __psc_js_0: 7n,
+    letAlias: 42n, shadowed: 2n, renamedLocal: 3n,
   });
   assert.deepEqual(Object.keys(await import(pathToFileURL(path.join(out, 'empty.mjs')))), []);
   run('tsc', [path.join(out, 'reference.ts'), '--target', 'ES2020', '--module', 'ES2020',

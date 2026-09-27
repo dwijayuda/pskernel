@@ -122,6 +122,35 @@ if (projectionBareNone.test(projectionStep)) {
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabProjectionStep bare none result expectation");
 }
 
+const projectionChainMatch = source.match(
+  /def psElabProjectionChainWorker([\s\S]*?)(?=\ndef psElabProjectionReference)/,
+);
+if (projectionChainMatch === null) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionChainWorker block");
+}
+const projectionChain = projectionChainMatch[0];
+const projectionChainRequired = [
+  /def psElabProjectionChainWorker\s*\(fields : List String\)\s*:\s*PsElabContext ->\s*PsElabTermResult ->\s*Except PsElabError PsElabTermResult :=/,
+  /let smaller : PsElabContext -> PsElabTermResult -> Except PsElabError PsElabTermResult :=\s*psElabProjectionChainWorker rest;/,
+  /fun \(context : PsElabContext\) =>\s*fun \(current : PsElabTermResult\) =>/,
+  /smaller projected\.context projected/,
+  /def psElabProjectionChain\s*\(context : PsElabContext\)\s*\(current : PsElabTermResult\)\s*\(fields : List String\)[\s\S]*?psElabProjectionChainWorker fields context current/,
+];
+for (const pattern of projectionChainRequired) {
+  if (!pattern.test(projectionChain)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionChain ${pattern}`);
+  }
+}
+const projectionChainForbidden = [
+  /psElabProjectionChain\s+projected\.context\s+projected\s+rest/,
+  /psElabProjectionChainWorker\s+rest\s+projected\.context\s+projected/,
+];
+for (const pattern of projectionChainForbidden) {
+  if (pattern.test(projectionChain)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabProjectionChain ${pattern}`);
+  }
+}
+
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
   /psSyntaxNameAppendSegments\s*\(psNameAppendStr name segment\)\s*rest/,
@@ -136,5 +165,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name/projection/field/list-length recursion and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name/projection/field/chain/list-length recursion and explicit Option constructors)\n",
 );

@@ -276,3 +276,7 @@ lean_exe psc2_kernel_core_infer_parity_tests where
 lean_exe psc2_kernel_core_defeq_parity_tests where
   srcDir := "test"
   root := `KernelCoreDefEqParityTests
+
+lean_exe psc2_kernel_core_check_parity_tests where
+  srcDir := "test"
+  root := `KernelCoreCheckParityTests

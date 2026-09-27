@@ -1,0 +1,38 @@
+name: PSC2 KernelCore Phase 8 work
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase8-inductive-work
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/test/KernelCore*.lean
+      - psc15selfhost/lakefile.lean
+      - psc15selfhost/package.json
+      - .github/workflows/psc2-kernel-core-phase8-work.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase8-work:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Declaration parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_declaration_parity_tests

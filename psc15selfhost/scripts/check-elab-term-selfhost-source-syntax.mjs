@@ -171,6 +171,20 @@ if (/psElabResolvedTerm\s+context\s+baseTerm\s+none/.test(projectionReference)) 
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabProjectionReference bare none result expectation");
 }
 
+const characterMatch = source.match(
+  /def psElabCharacter([\s\S]*?)(?=\ndef psElabUnit)/,
+);
+if (characterMatch === null) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabCharacter block");
+}
+const character = characterMatch[0];
+if (!/PsLiteral\.natural\s*\(Char\.toNat value\)/.test(character)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabCharacter explicit Char.toNat application");
+}
+if (/\bvalue\.toNat\b/.test(character)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabCharacter method-style Char.toNat");
+}
+
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
   /psSyntaxNameAppendSegments\s*\(psNameAppendStr name segment\)\s*rest/,
@@ -185,5 +199,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection recursion, typed projection-reference match, explicit projection-reference expectation, local list length, and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection recursion, typed projection-reference match, explicit projection-reference expectation, explicit character conversion, local list length, and explicit Option constructors)\n",
 );

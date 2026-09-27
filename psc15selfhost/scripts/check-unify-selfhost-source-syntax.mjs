@@ -17,7 +17,9 @@ const required = [
   /psUnifyLevelLists leftLevels context rightLevels/,
   /let leftValue := psWhnf environment context localContext left;\s*let rightValue := psWhnf environment context localContext right;\s*if psExprAlphaEq leftValue rightValue then/,
   /match leftValue with\s*\| \.mvar leftId =>\s*match rightValue with/,
-  /\| leftOther =>\s*match rightValue with\s*\| \.mvar id =>/,
+  /\| _ =>\s*psUnifyAssign context leftId rightValue/,
+  /\| \.sortE leftLevel =>\s*match rightValue with\s*\| \.mvar id =>\s*psUnifyAssign context id leftValue/,
+  /\| \.letE _ _ _ _ =>\s*match rightValue with\s*\| \.mvar id =>\s*psUnifyAssign context id leftValue\s*\| _ => psUnifyFailure context/,
   /if Nat\.beq leftId rightId then/,
   /else if psMetaVarIsNatural context rightId then\s*if psMetaVarIsNatural context leftId then\s*if psMetaVarAssignable context leftId then/,
   /if Nat\.beq leftIndex rightIndex then/,
@@ -38,6 +40,8 @@ const forbidden = [
   /def psUnifyLevelLists\s*\(context : PsMetaContext\) :\s*List PsLevel -> List PsLevel -> PsUnifyResult/,
   /psUnifyLevelLists\s*\(psMetaSetLevels context unified\.context\)/,
   /match leftValue\s*,\s*rightValue with/,
+  /\|\s+leftOther\s*=>/,
+  /\|\s+rightOther\s*=>/,
   /==/,
   /&&/,
   /!\s*psMetaVarIsNatural/,
@@ -57,5 +61,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe list recursion, explicit sequencing, unary matching, explicit Nat equality, explicit boolean control flow)\n",
+  "PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 match patterns, invariant-safe recursion, explicit sequencing/equality/boolean control flow)\n",
 );

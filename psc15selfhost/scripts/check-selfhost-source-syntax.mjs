@@ -111,9 +111,12 @@ const metaContext = await read(
 requireMarkers("MetaContext", metaContext, [
   'def psMetaFindDeclInList\n    (id : Nat)\n    (declarations : List PsMetaVarDecl) : Option PsMetaVarDecl :=\n  match declarations with',
   'psMetaFindDeclInList id rest',
+  'def psMetaFindAssignmentInList\n    (id : Nat)\n    (assignments : List PsMetaAssignment) : Option PsExpr :=\n  match assignments with',
+  'psMetaFindAssignmentInList id rest',
 ]);
 forbidMarkers("MetaContext", metaContext, [
   'def psMetaFindDeclInList (id : Nat) : List PsMetaVarDecl -> Option PsMetaVarDecl',
+  'def psMetaFindAssignmentInList (id : Nat) : List PsMetaAssignment -> Option PsExpr',
 ]);
 
 process.stdout.write(

@@ -259,3 +259,7 @@ lean_exe psc2_kernel_core_declaration_parity_tests where
 lean_exe psc2_kernel_core_environment_parity_tests where
   srcDir := "test"
   root := `KernelCoreEnvironmentParityTests
+
+lean_exe psc2_kernel_core_local_context_parity_tests where
+  srcDir := "test"
+  root := `KernelCoreLocalContextParityTests

@@ -79,6 +79,9 @@ if (psconfig.implementationProfile !== "PSC1") {
 if (psconfig.acceptedLanguageProfile !== "PSC2-bootstrap") {
   throw new Error("PSC2_BOOTSTRAP_ACCEPTED_PROFILE: expected PSC2-bootstrap");
 }
+if (JSON.stringify(psconfig.sourceRoots ?? []) !== JSON.stringify(["packages"])) {
+  throw new Error("PSC2_BOOTSTRAP_SOURCE_ROOTS: expected packages-only bootstrap roots");
+}
 
 const semanticApiPath = path.join(
   root,
@@ -140,6 +143,17 @@ for (const packageName of packageNames) {
 }
 
 const manifests = await workspaceManifests();
+const stdlibRecord = manifests.byFolder.get("stdlib");
+if (!stdlibRecord) {
+  throw new Error("PSC2_STDLIB_MANIFEST_MISSING");
+}
+if (
+  stdlibRecord.manifest.proofscript?.bootstrap !== false ||
+  stdlibRecord.manifest.proofscript?.portable !== true
+) {
+  throw new Error("PSC2_STDLIB_MUST_REMAIN_PORTABLE_POST_BOOTSTRAP");
+}
+
 for (const packageName of packageNames) {
   const record = manifests.byFolder.get(packageName);
   if (!record) {

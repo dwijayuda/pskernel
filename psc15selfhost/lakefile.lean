@@ -48,7 +48,8 @@ lean_lib PsEnvironment where
     `Ps.Environment.LocalContext,
     `Ps.Environment.Instances,
     `Ps.Environment.Resolve,
-    `Ps.Environment.Prelude
+    `Ps.Environment.Prelude,
+    `Ps.Environment.SelfHostPrelude
   ]
 
 lean_lib PsBridge where

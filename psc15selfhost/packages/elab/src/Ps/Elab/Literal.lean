@@ -39,7 +39,9 @@ def psParseNaturalChars
         | Option.none =>
             Option.none
         | Option.some digit =>
-            psParseNaturalChars rest (value * 10 + digit)
+            psParseNaturalChars
+              rest
+              (Nat.add (Nat.mul value 10) digit)
 
 def psParseNaturalText (text : String) : Option Nat :=
   psParseNaturalChars (String.toList text) 0
@@ -112,13 +114,13 @@ def psReadFixedHex
               psReadFixedHex
                 nextCount
                 rest
-                (value * 16 + digit)
+                (Nat.add (Nat.mul value 16) digit)
 
 def psValidUnicodeScalar (value : Nat) : Bool :=
-  if value < 55296 then
+  if Nat.blt value 55296 then
     true
-  else if 57343 < value then
-    value < 1114112
+  else if Nat.blt 57343 value then
+    Nat.blt value 1114112
   else
     false
 

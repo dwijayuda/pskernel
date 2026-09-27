@@ -66,8 +66,10 @@ def psInferAppViewAcc
     (expr : PsExpr) : List PsExpr -> PsInferAppView :=
   match expr with
   | .app fn arg =>
+      let smaller : List PsExpr -> PsInferAppView :=
+        psInferAppViewAcc fn;
       fun (args : List PsExpr) =>
-        psInferAppViewAcc fn (List.cons arg args)
+        smaller (List.cons arg args)
   | _ =>
       fun (args : List PsExpr) =>
         PsInferAppView.mk expr args

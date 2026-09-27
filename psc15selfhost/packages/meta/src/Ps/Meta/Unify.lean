@@ -79,131 +79,164 @@ def psUnifyWithFuel
       if psExprAlphaEq leftValue rightValue then
         psUnifySuccess context
       else
-        match leftValue, rightValue with
-        | .mvar leftId, .mvar rightId =>
-            if leftId == rightId then
-              psUnifySuccess context
-            else if
-                psMetaVarIsNatural context rightId
-                  && !psMetaVarIsNatural context leftId then
-              psUnifyAssign context rightId leftValue
-            else if psMetaVarAssignable context leftId then
-              psUnifyAssign context leftId rightValue
-            else
-              psUnifyAssign context rightId leftValue
-        | .mvar id, value =>
-            psUnifyAssign context id value
-        | value, .mvar id =>
-            psUnifyAssign context id value
-        | .sortE leftLevel, .sortE rightLevel =>
-            let unified := psLevelUnify context.levels leftLevel rightLevel;
-            if unified.success then
-              psUnifySuccess (psMetaSetLevels context unified.context)
-            else
-              psUnifyFailure context
-        | .constE leftName leftLevels, .constE rightName rightLevels =>
-            if psNameEq leftName rightName then
-              psUnifyLevelLists context leftLevels rightLevels
-            else
-              psUnifyFailure context
-        | .app leftFn leftArg, .app rightFn rightArg =>
-            let fnResult :=
-              psUnifyWithFuel
-                environment
-                localContext
-                context
-                fuel
-                leftFn
-                rightFn;
-            if fnResult.success then
-              psUnifyWithFuel
-                environment
-                localContext
-                fnResult.context
-                fuel
-                leftArg
-                rightArg
-            else
-              psUnifyFailure context
-        | .lam leftName leftType leftBody _, .lam rightName rightType rightBody _ =>
-            let typeResult :=
-              psUnifyWithFuel
-                environment
-                localContext
-                context
-                fuel
-                leftType
-                rightType;
-            if typeResult.success then
-              let pushed :=
-                psLocalPushBinding
-                  localContext
-                  rightName
-                  rightType
-                  PsBinderInfo.explicit;
-              let fvar := PsExpr.fvar pushed.id;
-              psUnifyWithFuel
-                environment
-                pushed.context
-                typeResult.context
-                fuel
-                (psExprInstantiate1 leftBody fvar)
-                (psExprInstantiate1 rightBody fvar)
-            else
-              psUnifyFailure context
-        | .forallE leftName leftType leftBody _, .forallE rightName rightType rightBody _ =>
-            let typeResult :=
-              psUnifyWithFuel
-                environment
-                localContext
-                context
-                fuel
-                leftType
-                rightType;
-            if typeResult.success then
-              let pushed :=
-                psLocalPushBinding
-                  localContext
-                  rightName
-                  rightType
-                  PsBinderInfo.explicit;
-              let fvar := PsExpr.fvar pushed.id;
-              psUnifyWithFuel
-                environment
-                pushed.context
-                typeResult.context
-                fuel
-                (psExprInstantiate1 leftBody fvar)
-                (psExprInstantiate1 rightBody fvar)
-            else
-              psUnifyFailure context
-        | .lit leftLiteral, .lit rightLiteral =>
-            if psLiteralEq leftLiteral rightLiteral then
-              psUnifySuccess context
-            else
-              psUnifyFailure context
-        | .fvar leftId, .fvar rightId =>
-            if leftId == rightId then
-              psUnifySuccess context
-            else
-              psUnifyFailure context
-        | .bvar leftIndex, .bvar rightIndex =>
-            if leftIndex == rightIndex then
-              psUnifySuccess context
-            else
-              psUnifyFailure context
-        | .proj leftType leftIndex leftValue, .proj rightType rightIndex rightValue =>
-            if psNameEq leftType rightType && leftIndex == rightIndex then
-              psUnifyWithFuel
-                environment
-                localContext
-                context
-                fuel
-                leftValue
-                rightValue
-            else
-              psUnifyFailure context
-        | _, _ => psUnifyFailure context
+        match leftValue with
+        | .mvar leftId =>
+            match rightValue with
+            | .mvar rightId =>
+                if leftId == rightId then
+                  psUnifySuccess context
+                else if
+                    psMetaVarIsNatural context rightId
+                      && !psMetaVarIsNatural context leftId then
+                  psUnifyAssign context rightId leftValue
+                else if psMetaVarAssignable context leftId then
+                  psUnifyAssign context leftId rightValue
+                else
+                  psUnifyAssign context rightId leftValue
+            | rightOther =>
+                psUnifyAssign context leftId rightOther
+        | leftOther =>
+            match rightValue with
+            | .mvar id =>
+                psUnifyAssign context id leftOther
+            | rightOther =>
+                match leftOther with
+                | .sortE leftLevel =>
+                    match rightOther with
+                    | .sortE rightLevel =>
+                        let unified := psLevelUnify context.levels leftLevel rightLevel;
+                        if unified.success then
+                          psUnifySuccess (psMetaSetLevels context unified.context)
+                        else
+                          psUnifyFailure context
+                    | _ => psUnifyFailure context
+                | .constE leftName leftLevels =>
+                    match rightOther with
+                    | .constE rightName rightLevels =>
+                        if psNameEq leftName rightName then
+                          psUnifyLevelLists context leftLevels rightLevels
+                        else
+                          psUnifyFailure context
+                    | _ => psUnifyFailure context
+                | .app leftFn leftArg =>
+                    match rightOther with
+                    | .app rightFn rightArg =>
+                        let fnResult :=
+                          psUnifyWithFuel
+                            environment
+                            localContext
+                            context
+                            fuel
+                            leftFn
+                            rightFn;
+                        if fnResult.success then
+                          psUnifyWithFuel
+                            environment
+                            localContext
+                            fnResult.context
+                            fuel
+                            leftArg
+                            rightArg
+                        else
+                          psUnifyFailure context
+                    | _ => psUnifyFailure context
+                | .lam leftName leftType leftBody _ =>
+                    match rightOther with
+                    | .lam rightName rightType rightBody _ =>
+                        let typeResult :=
+                          psUnifyWithFuel
+                            environment
+                            localContext
+                            context
+                            fuel
+                            leftType
+                            rightType;
+                        if typeResult.success then
+                          let pushed :=
+                            psLocalPushBinding
+                              localContext
+                              rightName
+                              rightType
+                              PsBinderInfo.explicit;
+                          let fvar := PsExpr.fvar pushed.id;
+                          psUnifyWithFuel
+                            environment
+                            pushed.context
+                            typeResult.context
+                            fuel
+                            (psExprInstantiate1 leftBody fvar)
+                            (psExprInstantiate1 rightBody fvar)
+                        else
+                          psUnifyFailure context
+                    | _ => psUnifyFailure context
+                | .forallE leftName leftType leftBody _ =>
+                    match rightOther with
+                    | .forallE rightName rightType rightBody _ =>
+                        let typeResult :=
+                          psUnifyWithFuel
+                            environment
+                            localContext
+                            context
+                            fuel
+                            leftType
+                            rightType;
+                        if typeResult.success then
+                          let pushed :=
+                            psLocalPushBinding
+                              localContext
+                              rightName
+                              rightType
+                              PsBinderInfo.explicit;
+                          let fvar := PsExpr.fvar pushed.id;
+                          psUnifyWithFuel
+                            environment
+                            pushed.context
+                            typeResult.context
+                            fuel
+                            (psExprInstantiate1 leftBody fvar)
+                            (psExprInstantiate1 rightBody fvar)
+                        else
+                          psUnifyFailure context
+                    | _ => psUnifyFailure context
+                | .lit leftLiteral =>
+                    match rightOther with
+                    | .lit rightLiteral =>
+                        if psLiteralEq leftLiteral rightLiteral then
+                          psUnifySuccess context
+                        else
+                          psUnifyFailure context
+                    | _ => psUnifyFailure context
+                | .fvar leftId =>
+                    match rightOther with
+                    | .fvar rightId =>
+                        if leftId == rightId then
+                          psUnifySuccess context
+                        else
+                          psUnifyFailure context
+                    | _ => psUnifyFailure context
+                | .bvar leftIndex =>
+                    match rightOther with
+                    | .bvar rightIndex =>
+                        if leftIndex == rightIndex then
+                          psUnifySuccess context
+                        else
+                          psUnifyFailure context
+                    | _ => psUnifyFailure context
+                | .proj leftType leftIndex leftValue =>
+                    match rightOther with
+                    | .proj rightType rightIndex rightValue =>
+                        if psNameEq leftType rightType && leftIndex == rightIndex then
+                          psUnifyWithFuel
+                            environment
+                            localContext
+                            context
+                            fuel
+                            leftValue
+                            rightValue
+                        else
+                          psUnifyFailure context
+                    | _ => psUnifyFailure context
+                | _ => psUnifyFailure context
 
 def psUnify
     (environment : PsEnvironment)

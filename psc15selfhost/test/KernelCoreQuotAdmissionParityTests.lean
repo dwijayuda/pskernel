@@ -41,7 +41,7 @@ def psKcQuotToRefLiteral : PsKernelCoreLiteral → PSC1Kernel.Literal
   | PsKernelCoreLiteral.nat value => PSC1Kernel.Literal.nat value
   | PsKernelCoreLiteral.str value => PSC1Kernel.Literal.str value
 
-partial def psKcQuotToRefExpr : PsKernelCoreExpr → PSC1Kernel.Expr
+def psKcQuotToRefExpr : PsKernelCoreExpr → PSC1Kernel.Expr
   | PsKernelCoreExpr.bvar index => PSC1Kernel.Expr.bvar index
   | PsKernelCoreExpr.fvar name =>
       PSC1Kernel.Expr.fvar (psKcQuotToRefName name)

@@ -33,7 +33,7 @@ const required = [
   /smaller\s*environment\s*localContext\s*fnResult\.context\s*leftArg\s*rightArg/,
   /smaller\s*environment\s*pushed\.context\s*typeResult\.context/,
   /smaller\s*environment\s*localContext\s*context\s*leftProjValue\s*rightProjValue/,
-  /def psUnifyWithFuel\s*\(environment : PsEnvironment\)\s*\(localContext : PsLocalContext\)\s*\(context : PsMetaContext\)\s*\(fuel : Nat\)\s*\(left : PsExpr\)\s*\(right : PsExpr\) : PsUnifyResult :=\s*psUnifyWithFuelWorker fuel environment localContext context left right/,
+  /def psUnifyWithFuel\s*\(environment : PsEnvironment\)\s*\(localContext : PsLocalContext\)\s*\(context : PsMetaContext\)\s*\(fuel : Nat\)\s*\(left : PsExpr\)\s*\(right : PsExpr\) : PsUnifyResult :=\s*psUnifyWithFuelWorker\s*fuel\s*environment\s*localContext\s*context\s*left\s*right/,
   /psUnifyWithFuel environment localContext context 512 left right;\s*if result\.success then/,
 ];
 for (const pattern of required) {

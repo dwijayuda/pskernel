@@ -175,3 +175,36 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
         0
         1
         2))
+
+def psSelfHostRuntimePreludeDeclarations : List PsDeclaration :=
+  match
+      psEnvironmentFind
+        psSelfHostPreludeEnvironment
+        psListName with
+  | none => List.nil
+  | some listDeclaration =>
+      match
+          psEnvironmentFind
+            psSelfHostPreludeEnvironment
+            psSelfHostListNilName with
+      | none => List.nil
+      | some nilDeclaration =>
+          match
+              psEnvironmentFind
+                psSelfHostPreludeEnvironment
+                psSelfHostListConsName with
+          | none => List.nil
+          | some consDeclaration =>
+              match
+                  psEnvironmentFind
+                    psSelfHostPreludeEnvironment
+                    psSelfHostListRecName with
+              | none => List.nil
+              | some recDeclaration =>
+                  List.cons
+                    listDeclaration
+                    (List.cons
+                      nilDeclaration
+                      (List.cons
+                        consDeclaration
+                        (List.cons recDeclaration List.nil)))

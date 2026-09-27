@@ -96,12 +96,39 @@ const semanticApi = await readFile(semanticApiPath, "utf8");
 if (/\bPs\.Backend/u.test(semanticApi)) {
   throw new Error("PSC2_BOOTSTRAP_COMPILER_API_BACKEND_COUPLING");
 }
+if (!semanticApi.includes("import Ps.Environment.SelfHostPrelude")) {
+  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_SELFHOST_PRELUDE_MISSING");
+}
 for (const [operator, label] of [
   ["==", "EQUALITY"],
   ["++", "APPEND"],
 ]) {
   if (semanticApi.includes(operator)) {
     throw new Error(`PSC2_BOOTSTRAP_COMPILER_API_UNSUPPORTED_INFIX_${label}`);
+  }
+}
+
+const selfHostPreludePath = path.join(
+  root,
+  "packages",
+  "environment",
+  "src",
+  "Ps",
+  "Environment",
+  "SelfHostPrelude.lean",
+);
+if (!existsSync(selfHostPreludePath)) {
+  throw new Error("PSC2_SELFHOST_PRELUDE_MISSING");
+}
+const selfHostPrelude = await readFile(selfHostPreludePath, "utf8");
+for (const symbol of [
+  "psSelfHostListNilName",
+  "psSelfHostListConsName",
+  "psSelfHostListRecName",
+  "psEnvironmentAddReplacingAxiom",
+]) {
+  if (!selfHostPrelude.includes(symbol)) {
+    throw new Error(`PSC2_SELFHOST_PRELUDE_LIST_FOUNDATION_MISSING: ${symbol}`);
   }
 }
 

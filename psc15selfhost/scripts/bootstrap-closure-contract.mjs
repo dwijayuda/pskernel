@@ -11,10 +11,10 @@ export const allowedBootstrapPackageNames = Object.freeze([
   "erasure",
   "compiler",
   "backend-ts",
-  "stdlib",
 ]);
 
 export const forbiddenBootstrapPackageNames = Object.freeze([
+  "stdlib",
   "project",
   "backend-rust",
   "backend-wasm",
@@ -59,6 +59,7 @@ export function assertBootstrapPolicyWellFormed() {
     throw new Error("PSC2_BOOTSTRAP_POLICY_MISSING_TYPESCRIPT_BACKEND");
   }
   for (const packageName of [
+    "stdlib",
     "project",
     "backend-rust",
     "backend-wasm",

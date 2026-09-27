@@ -16,15 +16,20 @@ try {
   run('lake', ['exe', 'psc2_backend_js_tests', out]);
   run('node', ['--check', path.join(out, 'direct.mjs')]);
   const direct = await import(pathToFileURL(path.join(out, 'direct.mjs')));
-  const { identity: directIdentity, ...directValues } = direct;
+  const {
+    identity: directIdentity,
+    renamedLocal: directRenamedLocal,
+    ...directValues
+  } = direct;
   assert.deepEqual(directValues, {
     largeNat: 9007199254740993123456789n,
     negativeInt: -9007199254740993123456789n,
     zero: 0n, yes: true, no: false,
     text: 'quote" slash\\ newline\n tab\t 😀 é', empty: '', control: '\0',
     lineSeparators: '\u2028\u2029', nothing: undefined, __psc_js_0: 7n,
-    letAlias: 42n, shadowed: 2n, renamedLocal: 3n,
+    letAlias: 42n, shadowed: 2n,
   });
+  assert.equal(directRenamedLocal, 3n);
   assert.equal(directIdentity(37n), 37n);
   assert.deepEqual(Object.keys(await import(pathToFileURL(path.join(out, 'empty.mjs')))), []);
   run('tsc', [path.join(out, 'reference.ts'), '--target', 'ES2020', '--module', 'ES2020',

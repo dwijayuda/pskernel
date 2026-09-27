@@ -64,11 +64,15 @@ requireMarkers("LevelContext", levelContext, [
   '| Option.some value => smaller value',
   'let resolved := psLevelInstantiate context value;',
   'PsLevelAssignment.mk id resolved',
+  'def psLevelUnifyWithFuelWorker\n    (fuel : Nat) :\n    PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=\n  match fuel with',
+  'let smaller : PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=\n        psLevelUnifyWithFuelWorker remaining;',
   'let leftValue := psLevelInstantiate context left;',
   'let rightValue := psLevelInstantiate context right;',
   'match leftValue with',
   'match rightValue with',
-  'let first := psLevelUnifyWithFuel context fuel leftA rightA;',
+  'let first := smaller context leftA rightA;',
+  'smaller first.context leftB rightB',
+  'psLevelUnifyWithFuelWorker fuel context left right',
   'if psLevelHasMVar left then',
   'if psLevelHasMVar level then',
 ]);
@@ -79,6 +83,8 @@ forbidMarkers("LevelContext", levelContext, [
   'psLevelInstantiateWithFuel context remaining value',
   'List.cons { id := id, value := resolved } context.assignments',
   'match leftValue, rightValue with',
+  'psLevelUnifyWithFuel context fuel leftA rightA',
+  'psLevelUnifyWithFuel first.context fuel leftB rightB',
   '||',
 ]);
 

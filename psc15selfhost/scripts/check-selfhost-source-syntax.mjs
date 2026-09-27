@@ -122,7 +122,7 @@ requireMarkers("MetaContext", metaContext, [
   '| Nat.zero =>\n      fun (expr : PsExpr) => expr',
   'let smaller : PsExpr -> PsExpr :=\n        psMetaInstantiateRounds context remaining;',
   'fun (expr : PsExpr) =>\n        smaller (psMetaInstantiateStep context expr)',
-  'psMetaInstantiateRounds\n      context\n      (Nat.add context.assignments.length 1)\n      expr;',
+  'psMetaInstantiateRounds\n      context\n      (Nat.add (List.length context.assignments) 1)\n      expr;',
   'def psExprHasUnresolvedMeta\n    (expr : PsExpr) : Bool :=\n  match expr with',
   'psExprHasUnresolvedMeta body',
 ]);
@@ -136,10 +136,11 @@ forbidMarkers("MetaContext", metaContext, [
   '(fuel : Nat)\n    (expr : PsExpr) : PsExpr :=',
   '| remaining + 1, expr =>',
   'psMetaInstantiateRounds\n        context\n        remaining\n        (psMetaInstantiateStep context expr)',
+  'Nat.add context.assignments.length 1',
   'def psExprHasUnresolvedMeta : PsExpr -> Bool',
   '| expr => expr',
 ]);
 
 process.stdout.write(
-  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 explicit-recursion/invariant-fuel/let/application/unary-match/no-bool-infix subset)\n",
+  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 explicit-recursion/invariant-fuel/explicit-list-ops/let/application/unary-match/no-bool-infix subset)\n",
 );

@@ -233,6 +233,13 @@ def psDecodeStringBodyWithFuel
                   restAfterChar
                   (List.cons char charsRev)
 
+def psCharListLength (chars : List Char) : Nat :=
+  match chars with
+  | [] =>
+      0
+  | _ :: rest =>
+      Nat.succ (psCharListLength rest)
+
 def psDecodeStringLiteral (text : String) : Option String :=
   match psLexStringToList text with
   | [] =>
@@ -240,7 +247,7 @@ def psDecodeStringLiteral (text : String) : Option String :=
   | first :: rest =>
       if psCharCodeEq first 34 then
         psDecodeStringBodyWithFuel
-          (Nat.succ (List.length rest))
+          (Nat.succ (psCharListLength rest))
           rest
           []
       else

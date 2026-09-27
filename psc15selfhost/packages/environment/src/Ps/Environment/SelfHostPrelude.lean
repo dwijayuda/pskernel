@@ -86,19 +86,19 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
   let consMinorType :=
     PsExpr.forallE
       headName
-      (PsExpr.bvar 1)
+      (PsExpr.bvar 2)
       (PsExpr.forallE
         tailName
-        (psSelfHostListOf (PsExpr.bvar 2))
+        (psSelfHostListOf (PsExpr.bvar 3))
         (PsExpr.forallE
           hypothesisName
           (PsExpr.app
-            (PsExpr.bvar 2)
+            (PsExpr.bvar 3)
             (PsExpr.bvar 0))
           (PsExpr.app
-            (PsExpr.bvar 3)
+            (PsExpr.bvar 4)
             (psSelfHostListConsOf
-              (PsExpr.bvar 4)
+              (PsExpr.bvar 5)
               (PsExpr.bvar 2)
               (PsExpr.bvar 1)))
           PsBinderInfo.explicit)

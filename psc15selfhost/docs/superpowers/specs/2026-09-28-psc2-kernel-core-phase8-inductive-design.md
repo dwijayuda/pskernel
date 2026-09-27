@@ -64,15 +64,15 @@ Recommended fields mirror only the semantic subset needed by this phase and futu
 
 ```text
 PsKernelCoreInductiveInfo {
-  base       : PsKernelCoreConstantBase
-  numParams  : Nat
-  numIndices : Nat
-  all        : PsKernelCoreList PsKernelCoreName
-  ctors      : PsKernelCoreList PsKernelCoreName
-  numNested  : Nat
-  isRec      : Bool
-  isReflexive: Bool
-  isUnsafe   : Bool
+  base        : PsKernelCoreConstantBase
+  numParams   : Nat
+  numIndices  : Nat
+  all         : PsKernelCoreList PsKernelCoreName
+  ctors       : PsKernelCoreList PsKernelCoreName
+  numNested   : Nat
+  isRec       : Bool
+  isReflexive : Bool
+  isUnsafe    : Bool
 }
 
 PsKernelCoreConstructorInfo {
@@ -99,6 +99,17 @@ with:
 ```
 
 Existing accessors (`base`, `name`, `levelParams`, `type`, unsafe/partial flags) must be updated conservatively.
+
+For the Phase-8 single-family subset, the accepted metadata is pinned to:
+
+```text
+inductive.all = [inductive.name]
+inductive.numNested = 0
+inductive.isRec = false
+inductive.isReflexive = false
+```
+
+This removes ambiguity about mutual-family, nested, recursive, or reflexive-recursion semantics. More general values are fail-closed in this phase.
 
 No recursor metadata is added in Phase 8.
 
@@ -143,13 +154,14 @@ The checker must validate at least:
 - constructor result has the expected parameter/index arity;
 - parameter prefix agrees with the inductive family;
 - `constructor.induct` names the new inductive;
-- `constructor.cidx` matches its position;
+- `constructor.cidx` matches its zero-based position in the constructor sequence;
 - `constructor.numParams` agrees with the inductive;
 - `constructor.numFields` agrees with the constructor telescope after parameters;
 - `inductive.ctors` agrees exactly with the admitted constructor sequence;
-- `inductive.all` is valid for the bounded single-family case;
+- `inductive.all` is exactly the singleton list containing the inductive name;
 - `numNested = 0`;
 - `isRec = false`;
+- `isReflexive = false`;
 - no recursive occurrence of the new inductive appears in constructor domains or other forbidden positions;
 - unsafe metadata is propagated consistently with existing safety rules;
 - failure leaves the caller's original environment unchanged.
@@ -163,6 +175,8 @@ Phase 8 deliberately avoids implementing strict positivity.
 Instead, it enforces the stronger bounded rule:
 
 > The newly declared inductive constant may not occur recursively in any constructor field/domain/type position, except as the constructor result head applied to the declared parameters/indices.
+
+The result-head occurrence is allowed only as that final result head; occurrences nested inside result parameters or indices are not granted a general recursive exception and must satisfy the same fail-closed non-recursion policy.
 
 This rule is sufficient for `Eq`, which is indexed but not recursive.
 
@@ -189,6 +203,7 @@ Phase 8 must prove, through its own trusted representation, that:
 
 - `Eq` is an `inductInfo`;
 - it has one universe parameter;
+- its single-family metadata obeys `all = [Eq]`, `numNested = 0`, `isRec = false`, and `isReflexive = false`;
 - it has the expected parameter/index counts;
 - it has exactly the expected constructor name list;
 - `Eq.refl` is a `ctorInfo` referring to `Eq`;
@@ -285,11 +300,16 @@ Required direct fixtures should include at least:
 - constructor whose result is not the new inductive;
 - wrong result arity;
 - wrong parameter prefix;
+- recursive occurrence hidden inside a result parameter or index;
 - wrong `induct` field;
 - wrong constructor index;
 - wrong `numParams`;
 - wrong `numFields`;
 - inconsistent `ctors` list;
+- `all` not exactly `[name]`;
+- nonzero `numNested`;
+- `isRec = true`;
+- `isReflexive = true`;
 - unsupported nested/mutual metadata;
 - any recursive occurrence in a constructor domain;
 - malformed `Eq` / `Eq.refl` variants;

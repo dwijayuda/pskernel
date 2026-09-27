@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  quot-metadata-red-green:
+  quot-red-green:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,15 +33,29 @@ jobs:
         with:
           node-version: 22
 
+      - name: Build KernelCore and reference libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake build PsKernelCore PSC1KernelReferenceFoundations
+
       - name: Quot metadata parity
         shell: bash
         run: |
           set -o pipefail
           cd psc15selfhost
-          lake build PsKernelCore PSC1KernelReferenceFoundations
           lake env lean --run test/KernelCoreQuotMetadataTests.lean 2>&1 | tee ../phase9-quot-metadata.log
 
+      - name: Quot admission parity
+        shell: bash
+        run: |
+          set -o pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreQuotAdmissionParityTests.lean 2>&1 | tee ../phase9-quot-admission.log
+
       - name: Existing declaration parity
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
@@ -49,15 +63,18 @@ jobs:
           lake exe psc2_kernel_core_declaration_parity_tests
 
       - name: KernelCore PSC1 source profile
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
           cd psc15selfhost
           npm run check:kernel-core-source
 
-      - name: Upload Quot metadata diagnostics
+      - name: Upload Quot diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase9-quot-metadata-diagnostics
-          path: phase9-quot-metadata.log
+          name: phase9-quot-diagnostics
+          path: |
+            phase9-quot-metadata.log
+            phase9-quot-admission.log

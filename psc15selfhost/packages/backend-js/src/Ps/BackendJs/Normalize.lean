@@ -1,9 +1,6 @@
 import Ps.CompilerIr.Model
 import Ps.BackendJs.Model
 
-structure PsJsNormalizedExprList where
-  values : List PsVerifiedIrExpr
-
 
 def psJsWrapLambdaArguments (parameters : List PsVerifiedIrParameter) :
     List PsVerifiedIrExpr -> PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr :=
@@ -34,31 +31,6 @@ def psJsWrapLambdaArguments (parameters : List PsVerifiedIrParameter) :
                       argument
                       inner)
 
-def psJsNormalizeExprListWithFuel (fuel : Nat) :
-    List PsVerifiedIrExpr -> Except PsJsError (List PsVerifiedIrExpr) :=
-  match fuel with
-  | Nat.zero =>
-      fun (_values : List PsVerifiedIrExpr) =>
-        Except.error PsJsError.fuelExhausted
-  | Nat.succ remaining =>
-      let normalizeOne :
-          PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr :=
-        psJsNormalizeExprWithFuel remaining;
-      let normalizeRest :
-          List PsVerifiedIrExpr -> Except PsJsError (List PsVerifiedIrExpr) :=
-        psJsNormalizeExprListWithFuel remaining;
-      fun (values : List PsVerifiedIrExpr) =>
-        match values with
-        | List.nil => Except.ok List.nil
-        | List.cons value rest =>
-            match normalizeOne value with
-            | Except.error error => Except.error error
-            | Except.ok normalized =>
-                match normalizeRest rest with
-                | Except.error error => Except.error error
-                | Except.ok normalizedRest =>
-                    Except.ok (List.cons normalized normalizedRest)
-
 
 def psJsNormalizeExprWithFuel (fuel : Nat) :
     PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr :=
@@ -68,9 +40,6 @@ def psJsNormalizeExprWithFuel (fuel : Nat) :
   | Nat.succ remaining =>
       let smaller : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr :=
         psJsNormalizeExprWithFuel remaining;
-      let normalizeList :
-          List PsVerifiedIrExpr -> Except PsJsError (List PsVerifiedIrExpr) :=
-        psJsNormalizeExprListWithFuel remaining;
       fun (expr : PsVerifiedIrExpr) =>
         match expr with
         | PsVerifiedIrExpr.letE name type value body =>
@@ -109,26 +78,21 @@ def psJsNormalizeExprWithFuel (fuel : Nat) :
             match smaller fn with
             | Except.error error => Except.error error
             | Except.ok normalizedFn =>
-                match normalizeList arguments with
-                | Except.error error => Except.error error
-                | Except.ok normalizedArguments =>
-                    match typeArguments with
-                    | List.cons _ _ =>
+                match typeArguments with
+                | List.cons _ _ =>
+                    Except.ok
+                      (PsVerifiedIrExpr.call
+                        normalizedFn typeArguments arguments)
+                | List.nil =>
+                    match normalizedFn with
+                    | PsVerifiedIrExpr.lambda parameters _ body =>
+                        match parameters with
+                        | List.nil => Except.error PsJsError.unsupportedExpression
+                        | List.cons _ _ =>
+                            psJsWrapLambdaArguments parameters arguments body
+                    | _ =>
                         Except.ok
-                          (PsVerifiedIrExpr.call
-                            normalizedFn typeArguments normalizedArguments)
-                    | List.nil =>
-                        match normalizedFn with
-                        | PsVerifiedIrExpr.lambda parameters _ body =>
-                            match parameters with
-                            | List.nil => Except.error PsJsError.unsupportedExpression
-                            | List.cons _ _ =>
-                                psJsWrapLambdaArguments
-                                  parameters normalizedArguments body
-                        | _ =>
-                            Except.ok
-                              (PsVerifiedIrExpr.call
-                                normalizedFn List.nil normalizedArguments)
+                          (PsVerifiedIrExpr.call normalizedFn List.nil arguments)
         | _ => Except.ok expr
 
 

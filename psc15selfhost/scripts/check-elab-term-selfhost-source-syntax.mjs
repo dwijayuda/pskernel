@@ -113,6 +113,14 @@ if (/psElabFindStructureField\s+current\.context\s+typeName\s+current\.term\s+fi
 if (!/Nat\.beq \(psElabListLength view\.args\) info\.numParams/.test(projectionStep)) {
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionStep local list length");
 }
+const projectionResolvedTerm = /psElabResolvedTerm\s+current\.context\s*\(PsExpr\.proj\s+typeName\s+index\s+current\.term\)\s+Option\.none/;
+if (!projectionResolvedTerm.test(projectionStep)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionStep explicit Option.none");
+}
+const projectionBareNone = /psElabResolvedTerm\s+current\.context\s*\(PsExpr\.proj\s+typeName\s+index\s+current\.term\)\s+none/;
+if (projectionBareNone.test(projectionStep)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabProjectionStep bare none result expectation");
+}
 
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,

@@ -99,6 +99,12 @@ if (/\bPs\.Backend/u.test(semanticApi)) {
 if (!semanticApi.includes("import Ps.Environment.SelfHostPrelude")) {
   throw new Error("PSC2_BOOTSTRAP_COMPILER_API_SELFHOST_PRELUDE_MISSING");
 }
+if (!semanticApi.includes("psEraseCoreModuleWithRuntimePrelude")) {
+  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_RUNTIME_PRELUDE_ERASURE_MISSING");
+}
+if (!semanticApi.includes("psSelfHostRuntimePreludeDeclarations")) {
+  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_RUNTIME_PRELUDE_SELECTION_MISSING");
+}
 for (const [operator, label] of [
   ["==", "EQUALITY"],
   ["++", "APPEND"],
@@ -125,6 +131,7 @@ for (const symbol of [
   "psSelfHostListNilName",
   "psSelfHostListConsName",
   "psSelfHostListRecName",
+  "psSelfHostRuntimePreludeDeclarations",
   "psEnvironmentAddReplacingAxiom",
 ]) {
   if (!selfHostPrelude.includes(symbol)) {

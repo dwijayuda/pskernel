@@ -8,6 +8,7 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
 const sourceRoot = path.join(root, "packages", "pskernel-core", "src");
 const modulePrefix = "Ps.KernelCore";
+const selfHostTimeoutMs = 120_000;
 
 const files = [];
 function walk(directory) {
@@ -198,10 +199,21 @@ try {
     const relative = path.relative(root, file);
     const flatPath = path.join(tempRoot, `KernelCoreCheck${index}.lean`);
     fs.writeFileSync(flatPath, flattenEntry(file), "utf8");
+    process.stdout.write(`KERNEL_CORE_SELFHOST_CHECK: START ${relative}\n`);
     const result = spawnSync("lake", ["exe", "psc1", "check", flatPath], {
       cwd: root,
       encoding: "utf8",
+      timeout: selfHostTimeoutMs,
+      killSignal: "SIGKILL",
     });
+    if (result.error) {
+      process.stderr.write(result.stdout ?? "");
+      process.stderr.write(result.stderr ?? "");
+      console.error(
+        `KERNEL_CORE_SELFHOST_CHECK: ERROR ${relative}: ${result.error.message}`,
+      );
+      process.exit(1);
+    }
     if (result.status !== 0) {
       process.stderr.write(result.stdout ?? "");
       process.stderr.write(result.stderr ?? "");

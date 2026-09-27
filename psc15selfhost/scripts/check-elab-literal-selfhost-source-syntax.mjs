@@ -10,6 +10,7 @@ const source = await readFile(
 );
 
 const required = [
+  /import Ps\.Syntax\.Cursor/,
   /def psCharCodeEq\s*\(char : Char\)\s*\(code : Nat\) : Bool :=\s*Nat\.beq \(Char\.toNat char\) code/,
   /if psCharCodeEq char 48 then/,
   /if psCharCodeEq char 95 then/,
@@ -18,7 +19,8 @@ const required = [
   /fun \(value : Nat\) =>/,
   /smaller value/,
   /smaller\s*\(Nat\.add \(Nat\.mul value 10\) digit\)/,
-  /psParseNaturalChars \(String\.toList text\) 0/,
+  /psParseNaturalChars \(psLexStringToList text\) 0/,
+  /match psLexStringToList text with/,
   /Nat\.add \(Nat\.mul value 10\) digit/,
   /Nat\.add \(Nat\.mul value 16\) digit/,
   /if Nat\.blt value 55296 then/,
@@ -41,6 +43,7 @@ for (const pattern of required) {
 }
 
 const forbidden = [
+  /String\.toList/,
   /'(?:\\.|[^'\\])+'/,                  // character literal syntax
   /def psParseNaturalChars\s*\(chars : List Char\)\s*\(value : Nat\)/,
   /psParseNaturalChars\s+rest\s+value/,
@@ -59,5 +62,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (explicit Char/Nat/List operations and invariant-safe natural recursion)\n",
+  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (bootstrap string traversal, explicit Char/Nat/List operations, invariant-safe natural recursion)\n",
 );

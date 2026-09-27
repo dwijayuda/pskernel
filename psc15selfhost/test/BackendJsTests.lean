@@ -17,6 +17,16 @@ def jsFixtureFunctionDecl (name parameterName : String)
     parameters := [{ name := parameterName, type := .primitive parameterType }],
     resultType := .primitive resultType, body := body }
 
+def jsFixtureBinaryFunctionDecl (name firstName secondName : String)
+    (firstType secondType resultType : PsVerifiedIrPrimitiveType)
+    (body : PsVerifiedIrExpr) : PsVerifiedIrDeclaration :=
+  { name := name, typeParameters := [],
+    parameters := [
+      { name := firstName, type := .primitive firstType },
+      { name := secondName, type := .primitive secondType }
+    ],
+    resultType := .primitive resultType, body := body }
+
 def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
   [
     jsFixtureDecl "largeNat" .nat (.natural 9007199254740993123456789),
@@ -43,7 +53,11 @@ def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
         (.literal (.natural 10))
         (.literal (.natural 20))),
     jsFixtureFunctionDecl "callIdentity" "value" .nat .nat
-      (.call (.var "identity") [] [(.var "value")])
+      (.call (.var "identity") [] [(.var "value")]),
+    jsFixtureFunctionDecl "callSecond" "value" .nat .nat
+      (.call (.var "second") [] [(.literal (.natural 11)), (.var "value")]),
+    jsFixtureBinaryFunctionDecl "second" "left" "right" .nat .nat .nat
+      (.var "right")
   ]
 
 def jsDifferentialFixtureModule : PsVerifiedIrModule :=

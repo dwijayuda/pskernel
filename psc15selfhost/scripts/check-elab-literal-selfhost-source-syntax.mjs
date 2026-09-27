@@ -21,6 +21,9 @@ const required = [
   /smaller\s*\(Nat\.add \(Nat\.mul value 10\) digit\)/,
   /psParseNaturalChars \(psLexStringToList text\) 0/,
   /match psLexStringToList text with/,
+  /def psReadFixedHex\s*\(count : Nat\) :\s*List Char ->\s*Nat ->\s*Option \(Prod Nat \(List Char\)\) :=\s*match count with/,
+  /let smaller : List Char -> Nat -> Option \(Prod Nat \(List Char\)\) :=\s*psReadFixedHex nextCount;/,
+  /smaller\s+rest\s*\(Nat\.add \(Nat\.mul value 16\) digit\)/,
   /Nat\.add \(Nat\.mul value 10\) digit/,
   /Nat\.add \(Nat\.mul value 16\) digit/,
   /if Nat\.blt value 55296 then/,
@@ -48,6 +51,8 @@ const forbidden = [
   /def psParseNaturalChars\s*\(chars : List Char\)\s*\(value : Nat\)/,
   /psParseNaturalChars\s+rest\s+value/,
   /psParseNaturalChars\s+rest\s*\(Nat\.add/,
+  /def psReadFixedHex\s*\(count : Nat\)\s*\(chars : List Char\)\s*\(value : Nat\)/,
+  /psReadFixedHex\s+nextCount\s+rest/,
   /value\s*\*\s*(?:10|16)/,             // arithmetic infix in literal accumulators
   /value\s*<\s*(?:55296|1114112)/,       // scalar-bound infix comparison
   /57343\s*<\s*value/,
@@ -62,5 +67,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (bootstrap string traversal, explicit Char/Nat/List operations, invariant-safe natural recursion)\n",
+  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (bootstrap string traversal, explicit Char/Nat/List operations, invariant-safe natural/fixed-hex recursion)\n",
 );

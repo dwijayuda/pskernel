@@ -96,6 +96,9 @@ const semanticApi = await readFile(semanticApiPath, "utf8");
 if (/\bPs\.Backend/u.test(semanticApi)) {
   throw new Error("PSC2_BOOTSTRAP_COMPILER_API_BACKEND_COUPLING");
 }
+if (semanticApi.includes("==")) {
+  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_UNSUPPORTED_INFIX_EQUALITY");
+}
 
 const bridgeTestsPath = path.join(root, "test", "BridgeTests.lean");
 if (!existsSync(bridgeTestsPath)) {

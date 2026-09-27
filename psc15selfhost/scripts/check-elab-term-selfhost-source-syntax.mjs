@@ -23,6 +23,23 @@ for (const pattern of required) {
   }
 }
 
+const syntaxNameToNameMatch = source.match(
+  /def psSyntaxNameToName\s*\(name : PsSyntaxName\) : Option PsName :=([\s\S]*?)(?=\ndef psElabResultWithMeta)/,
+);
+if (syntaxNameToNameMatch === null) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psSyntaxNameToName block");
+}
+const syntaxNameToName = syntaxNameToNameMatch[1];
+const syntaxNameToNameRequired = [
+  /\| \[\] =>\s*Option\.none/,
+  /\| first :: rest =>\s*Option\.some\s*\(psSyntaxNameAppendSegments/,
+];
+for (const pattern of syntaxNameToNameRequired) {
+  if (!pattern.test(syntaxNameToName)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psSyntaxNameToName ${pattern}`);
+  }
+}
+
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
   /psSyntaxNameAppendSegments\s*\(psNameAppendStr name segment\)\s*rest/,
@@ -35,5 +52,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name segment recursion)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name recursion and explicit Option constructors)\n",
 );

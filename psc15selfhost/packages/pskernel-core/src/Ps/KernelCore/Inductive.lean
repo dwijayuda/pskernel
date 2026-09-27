@@ -254,20 +254,23 @@ def psKernelCoreInductiveConstructorNames
 def psKernelCoreInductiveSingleFamilyMetadataValid
     (info : PsKernelCoreInductiveInfo) : Bool :=
   match info.all with
-  | PsKernelCoreList.cons onlyName PsKernelCoreList.nil =>
-      if psKernelCoreNameEq onlyName info.base.name then
-        if Nat.beq info.numNested 0 then
-          if info.isRec then
-            false
-          else if info.isReflexive then
-            false
+  | PsKernelCoreList.nil => false
+  | PsKernelCoreList.cons onlyName rest =>
+      match rest with
+      | PsKernelCoreList.nil =>
+          if psKernelCoreNameEq onlyName info.base.name then
+            if Nat.beq info.numNested 0 then
+              if info.isRec then
+                false
+              else if info.isReflexive then
+                false
+              else
+                true
+            else
+              false
           else
-            true
-        else
-          false
-      else
-        false
-  | _ => false
+            false
+      | PsKernelCoreList.cons _ _ => false
 
 def psKernelCoreInductiveHeaderShapeValid
     (info : PsKernelCoreInductiveInfo) : Bool :=

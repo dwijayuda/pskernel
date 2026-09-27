@@ -40,7 +40,8 @@ def psJsEmitLiteral (value : PsJsLiteral) : Except PsJsError String :=
       | Except.error error => Except.error error
       | Except.ok text => Except.ok (psJsonConcat2 text "n")
   | PsJsLiteral.boolean boolean =>
-      Except.ok (if boolean then "true" else "false")
+      if boolean then Except.ok "true"
+      else Except.ok "false"
   | PsJsLiteral.string text => Except.ok (psJsonQuote text)
   | PsJsLiteral.undefined => Except.ok "undefined"
 

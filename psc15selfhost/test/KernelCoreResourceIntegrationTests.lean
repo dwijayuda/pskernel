@@ -19,11 +19,7 @@ def psKernelCoreResourceIntegrationAxiom
     (name : PsKernelCoreName)
     (type : PsKernelCoreExpr) : PsKernelCoreAxiomInfo :=
   {
-    base := {
-      name := name
-      levelParams := PsKernelCoreList.nil
-      type := type
-    }
+    base := { name := name, levelParams := PsKernelCoreList.nil, type := type }
     isUnsafe := false
   }
 
@@ -31,11 +27,7 @@ def psKernelCoreResourceIntegrationDefinition
     (name : PsKernelCoreName)
     (type value : PsKernelCoreExpr) : PsKernelCoreDefinitionInfo :=
   {
-    base := {
-      name := name
-      levelParams := PsKernelCoreList.nil
-      type := type
-    }
+    base := { name := name, levelParams := PsKernelCoreList.nil, type := type }
     value := value
     hints := PsKernelCoreReducibilityHints.regular 0
     safety := PsKernelCoreDefinitionSafety.safe
@@ -45,11 +37,7 @@ def psKernelCoreResourceIntegrationTheorem
     (name : PsKernelCoreName)
     (type value : PsKernelCoreExpr) : PsKernelCoreTheoremInfo :=
   {
-    base := {
-      name := name
-      levelParams := PsKernelCoreList.nil
-      type := type
-    }
+    base := { name := name, levelParams := PsKernelCoreList.nil, type := type }
     value := value
   }
 
@@ -57,11 +45,7 @@ def psKernelCoreResourceIntegrationOpaque
     (name : PsKernelCoreName)
     (type value : PsKernelCoreExpr) : PsKernelCoreOpaqueInfo :=
   {
-    base := {
-      name := name
-      levelParams := PsKernelCoreList.nil
-      type := type
-    }
+    base := { name := name, levelParams := PsKernelCoreList.nil, type := type }
     value := value
     isUnsafe := false
   }
@@ -82,71 +66,14 @@ def psKernelCoreResourceIntegrationAddDefinitionUnchecked
     (PsKernelCoreConstantInfo.defnInfo
       (psKernelCoreResourceIntegrationDefinition name type value))
 
-def psKernelCoreResourceIntegrationExprResultEq
-    (left right : PsKernelCoreResult String PsKernelCoreExpr) : Bool :=
-  match left, right with
-  | PsKernelCoreResult.error l, PsKernelCoreResult.error r => l == r
-  | PsKernelCoreResult.ok l, PsKernelCoreResult.ok r => psKernelCoreExprEq l r
-  | _, _ => false
+structure PsKernelCoreResourceIntegrationFixture where
+  env : PsKernelCoreEnvironment
+  natType : PsKernelCoreExpr
+  p5 : PsKernelCoreExpr
+  add23 : PsKernelCoreExpr
+  checkApp : PsKernelCoreExpr
 
-def psKernelCoreResourceIntegrationBoolResultEq
-    (left right : PsKernelCoreResult String Bool) : Bool :=
-  match left, right with
-  | PsKernelCoreResult.error l, PsKernelCoreResult.error r => l == r
-  | PsKernelCoreResult.ok l, PsKernelCoreResult.ok r => psKernelCoreBoolEq l r
-  | _, _ => false
-
-def psKernelCoreResourceIntegrationLevelResultEq
-    (left right : PsKernelCoreResult String PsKernelCoreLevel) : Bool :=
-  match left, right with
-  | PsKernelCoreResult.error l, PsKernelCoreResult.error r => l == r
-  | PsKernelCoreResult.ok l, PsKernelCoreResult.ok r => psKernelCoreLevelEq l r
-  | _, _ => false
-
-def psKernelCoreResourceIntegrationEnvResultEq
-    (target : PsKernelCoreName)
-    (left right : PsKernelCoreResult String PsKernelCoreEnvironment) : Bool :=
-  match left, right with
-  | PsKernelCoreResult.error l, PsKernelCoreResult.error r => l == r
-  | PsKernelCoreResult.ok l, PsKernelCoreResult.ok r =>
-      Nat.beq (psKernelCoreEnvironmentSize l) (psKernelCoreEnvironmentSize r) &&
-      psKernelCoreBoolEq
-        (psKernelCoreEnvironmentContains l target)
-        (psKernelCoreEnvironmentContains r target) &&
-      psKernelCoreBoolEq l.quotInitialized r.quotInitialized
-  | _, _ => false
-
-def psKernelCoreResourceIntegrationExactExpr
-    (result : PsKernelCoreResult String PsKernelCoreExpr)
-    (expected : PsKernelCoreExpr) : Bool :=
-  match result with
-  | PsKernelCoreResult.ok actual => psKernelCoreExprEq actual expected
-  | PsKernelCoreResult.error _ => false
-
-def psKernelCoreResourceIntegrationExactBool
-    (result : PsKernelCoreResult String Bool)
-    (expected : Bool) : Bool :=
-  match result with
-  | PsKernelCoreResult.ok actual => psKernelCoreBoolEq actual expected
-  | PsKernelCoreResult.error _ => false
-
-def psKernelCoreResourceIntegrationExactErrorExpr
-    (result : PsKernelCoreResult String PsKernelCoreExpr)
-    (expected : String) : Bool :=
-  match result with
-  | PsKernelCoreResult.error actual => actual == expected
-  | PsKernelCoreResult.ok _ => false
-
-def psKernelCoreResourceIntegrationExactErrorEnv
-    (result : PsKernelCoreResult String PsKernelCoreEnvironment)
-    (expected : String) : Bool :=
-  match result with
-  | PsKernelCoreResult.error actual => actual == expected
-  | PsKernelCoreResult.ok _ => false
-
-def psKernelCoreResourceIntegrationFixtures :
-    PsKernelCoreEnvironment × PsKernelCoreExpr × PsKernelCoreExpr ×
-    PsKernelCoreExpr × PsKernelCoreExpr × PsKernelCoreExpr :=
+def psKernelCoreResourceIntegrationFixture : PsKernelCoreResourceIntegrationFixture :=
   let n := psKernelCoreResourceIntegrationName
   let natName := psKernelCorePrimitiveNatName
   let pName := n "P"
@@ -188,41 +115,90 @@ def psKernelCoreResourceIntegrationFixtures :
   let env6 :=
     psKernelCoreResourceIntegrationAddDefinitionUnchecked
       env5 twoName natType (psKernelCoreResourceIntegrationNat 2)
-  let checkApp :=
-    PsKernelCoreExpr.app
-      (psKernelCoreResourceIntegrationConst acceptName)
-      (psKernelCoreResourceIntegrationConst argName)
-  (env6, add23, p5, pAdd, checkApp, natType)
+  {
+    env := env6
+    natType := natType
+    p5 := p5
+    add23 := add23
+    checkApp :=
+      PsKernelCoreExpr.app
+        (psKernelCoreResourceIntegrationConst acceptName)
+        (psKernelCoreResourceIntegrationConst argName)
+  }
+
+def psKernelCoreResourceIntegrationExprResultEq
+    (left right : PsKernelCoreResult String PsKernelCoreExpr) : Bool :=
+  match left, right with
+  | PsKernelCoreResult.error l, PsKernelCoreResult.error r => l == r
+  | PsKernelCoreResult.ok l, PsKernelCoreResult.ok r => psKernelCoreExprEq l r
+  | _, _ => false
+
+def psKernelCoreResourceIntegrationBoolResultEq
+    (left right : PsKernelCoreResult String Bool) : Bool :=
+  match left, right with
+  | PsKernelCoreResult.error l, PsKernelCoreResult.error r => l == r
+  | PsKernelCoreResult.ok l, PsKernelCoreResult.ok r => psKernelCoreBoolEq l r
+  | _, _ => false
+
+def psKernelCoreResourceIntegrationEnvResultEq
+    (target : PsKernelCoreName)
+    (left right : PsKernelCoreResult String PsKernelCoreEnvironment) : Bool :=
+  match left, right with
+  | PsKernelCoreResult.error l, PsKernelCoreResult.error r => l == r
+  | PsKernelCoreResult.ok l, PsKernelCoreResult.ok r =>
+      Nat.beq (psKernelCoreEnvironmentSize l) (psKernelCoreEnvironmentSize r) &&
+      psKernelCoreBoolEq
+        (psKernelCoreEnvironmentContains l target)
+        (psKernelCoreEnvironmentContains r target) &&
+      psKernelCoreBoolEq l.quotInitialized r.quotInitialized
+  | _, _ => false
+
+def psKernelCoreResourceIntegrationExactExpr
+    (result : PsKernelCoreResult String PsKernelCoreExpr)
+    (expected : PsKernelCoreExpr) : Bool :=
+  match result with
+  | PsKernelCoreResult.ok actual => psKernelCoreExprEq actual expected
+  | _ => false
+
+def psKernelCoreResourceIntegrationExactBool
+    (result : PsKernelCoreResult String Bool)
+    (expected : Bool) : Bool :=
+  match result with
+  | PsKernelCoreResult.ok actual => psKernelCoreBoolEq actual expected
+  | _ => false
+
+def psKernelCoreResourceIntegrationExactExprError
+    (result : PsKernelCoreResult String PsKernelCoreExpr)
+    (expected : String) : Bool :=
+  match result with
+  | PsKernelCoreResult.error actual => actual == expected
+  | _ => false
+
+def psKernelCoreResourceIntegrationExactEnvError
+    (result : PsKernelCoreResult String PsKernelCoreEnvironment)
+    (expected : String) : Bool :=
+  match result with
+  | PsKernelCoreResult.error actual => actual == expected
+  | _ => false
 
 def psKernelCoreResourceIntegrationWhnf : Bool :=
-  let fixtures := psKernelCoreResourceIntegrationFixtures
-  let env := fixtures.1
-  let add23 := fixtures.2.1
-  let natType := fixtures.2.2.2.2.2
+  let f := psKernelCoreResourceIntegrationFixture
   let n := psKernelCoreResourceIntegrationName
   let addConst := psKernelCoreResourceIntegrationConst psKernelCorePrimitiveNatAddName
   let expected5 := psKernelCoreResourceIntegrationNat 5
-  let tiny : PsKernelCoreResourceConfig := { maxNatSize := 8 }
-  let maxOneWord := Nat.sub psKernelCoreNatHeapLimbDivisor 1
-  let sizeError :=
-    "the kernel refused a Nat numeral because its size exceeds the maximum"
   let beta :=
     PsKernelCoreExpr.app
       (PsKernelCoreExpr.lam
-        (n "x") natType
+        (n "x") f.natType
         (psKernelCoreResourceIntegrationApp2
-          addConst
-          (PsKernelCoreExpr.bvar 0)
-          (psKernelCoreResourceIntegrationNat 3))
+          addConst (PsKernelCoreExpr.bvar 0) (psKernelCoreResourceIntegrationNat 3))
         PsKernelCoreBinderInfo.default)
       (psKernelCoreResourceIntegrationNat 2)
   let zeta :=
     PsKernelCoreExpr.letE
-      (n "x") natType (psKernelCoreResourceIntegrationNat 2)
+      (n "x") f.natType (psKernelCoreResourceIntegrationNat 2)
       (psKernelCoreResourceIntegrationApp2
-        addConst
-        (PsKernelCoreExpr.bvar 0)
-        (psKernelCoreResourceIntegrationNat 3))
+        addConst (PsKernelCoreExpr.bvar 0) (psKernelCoreResourceIntegrationNat 3))
       false
   let aliasExpr :=
     psKernelCoreResourceIntegrationApp2
@@ -234,12 +210,10 @@ def psKernelCoreResourceIntegrationWhnf : Bool :=
       addConst
       (psKernelCoreResourceIntegrationConst (n "two"))
       (psKernelCoreResourceIntegrationNat 3)
-  let malformed :=
-    PsKernelCoreExpr.app addConst (psKernelCoreResourceIntegrationNat 2)
+  let malformed := PsKernelCoreExpr.app addConst (psKernelCoreResourceIntegrationNat 2)
   let leveled :=
     psKernelCoreResourceIntegrationApp2
-      (PsKernelCoreExpr.const
-        psKernelCorePrimitiveNatAddName
+      (PsKernelCoreExpr.const psKernelCorePrimitiveNatAddName
         (PsKernelCoreList.cons PsKernelCoreLevel.zero PsKernelCoreList.nil))
       (psKernelCoreResourceIntegrationNat 2)
       (psKernelCoreResourceIntegrationNat 3)
@@ -248,148 +222,117 @@ def psKernelCoreResourceIntegrationWhnf : Bool :=
       addConst
       (PsKernelCoreExpr.fvar (n "free"))
       (psKernelCoreResourceIntegrationNat 3)
+  let tiny : PsKernelCoreResourceConfig := { maxNatSize := 8 }
+  let maxOneWord := Nat.sub psKernelCoreNatHeapLimbDivisor 1
+  let sizeError :=
+    "the kernel refused a Nat numeral because its size exceeds the maximum"
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreWhnfWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty add23)
-      expected5 &&
+      (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty f.add23) expected5 &&
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreWhnfWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty beta)
-      expected5 &&
+      (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty beta) expected5 &&
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreWhnfWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty zeta)
-      expected5 &&
+      (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty zeta) expected5 &&
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreWhnfWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty aliasExpr)
-      expected5 &&
+      (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty aliasExpr) expected5 &&
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreWhnfWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty deltaOperand)
-      expected5 &&
+      (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty deltaOperand) expected5 &&
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreWhnfWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty malformed)
-      malformed &&
+      (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty malformed) malformed &&
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreWhnfWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty leveled)
-      leveled &&
+      (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty leveled) leveled &&
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreWhnfWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty nonliteral)
-      nonliteral &&
-  psKernelCoreResourceIntegrationExactErrorExpr
-      (psKernelCoreWhnfWithResources
-        64 tiny env psKernelCoreLocalContextEmpty
+      (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty nonliteral) nonliteral &&
+  psKernelCoreResourceIntegrationExactExprError
+      (psKernelCoreWhnfWithResources 64 tiny f.env psKernelCoreLocalContextEmpty
         (psKernelCoreResourceIntegrationApp2
           addConst
           (psKernelCoreResourceIntegrationNat maxOneWord)
-          (psKernelCoreResourceIntegrationNat 1)))
-      sizeError &&
-  psKernelCoreResourceIntegrationExactErrorExpr
-      (psKernelCoreWhnfWithResources
-        0 tiny env psKernelCoreLocalContextEmpty add23)
+          (psKernelCoreResourceIntegrationNat 1))) sizeError &&
+  psKernelCoreResourceIntegrationExactExprError
+      (psKernelCoreWhnfWithResources 0 tiny f.env psKernelCoreLocalContextEmpty f.add23)
       "reduction budget exhausted"
 
 def psKernelCoreResourceIntegrationInferCheck : Bool :=
-  let fixtures := psKernelCoreResourceIntegrationFixtures
-  let env := fixtures.1
-  let checkApp := fixtures.2.2.2.2.1
-  let natType := fixtures.2.2.2.2.2
+  let f := psKernelCoreResourceIntegrationFixture
   let tiny : PsKernelCoreResourceConfig := { maxNatSize := 8 }
   let exact := Nat.sub psKernelCoreNatHeapLimbDivisor 1
   let over := psKernelCoreNatHeapLimbDivisor
   let sizeError :=
     "the kernel refused a Nat numeral because its size exceeds the maximum"
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreInferWithResources
-        64 tiny env psKernelCoreLocalContextEmpty
-        (psKernelCoreResourceIntegrationNat exact))
-      natType &&
-  psKernelCoreResourceIntegrationExactErrorExpr
-      (psKernelCoreInferWithResources
-        64 tiny env psKernelCoreLocalContextEmpty
-        (psKernelCoreResourceIntegrationNat over))
-      sizeError &&
+      (psKernelCoreInferWithResources 64 tiny f.env psKernelCoreLocalContextEmpty
+        (psKernelCoreResourceIntegrationNat exact)) f.natType &&
+  psKernelCoreResourceIntegrationExactExprError
+      (psKernelCoreInferWithResources 64 tiny f.env psKernelCoreLocalContextEmpty
+        (psKernelCoreResourceIntegrationNat over)) sizeError &&
   psKernelCoreResourceIntegrationExactExpr
-      (psKernelCoreCheckWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty
-        PsKernelCoreDefinitionSafety.safe checkApp)
-      natType &&
-  psKernelCoreResourceIntegrationExactErrorExpr
-      (psKernelCoreCheckWithResources
-        64 tiny env psKernelCoreLocalContextEmpty
-        PsKernelCoreDefinitionSafety.safe
-        (psKernelCoreResourceIntegrationNat over))
+      (psKernelCoreCheckWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty PsKernelCoreDefinitionSafety.safe f.checkApp)
+      f.natType &&
+  psKernelCoreResourceIntegrationExactExprError
+      (psKernelCoreCheckWithResources 64 tiny f.env psKernelCoreLocalContextEmpty
+        PsKernelCoreDefinitionSafety.safe (psKernelCoreResourceIntegrationNat over))
       sizeError
 
 def psKernelCoreResourceIntegrationDefEq : Bool :=
-  let fixtures := psKernelCoreResourceIntegrationFixtures
-  let env := fixtures.1
-  let add23 := fixtures.2.1
-  let addConst := psKernelCoreResourceIntegrationConst psKernelCorePrimitiveNatAddName
-  let mulConst := psKernelCoreResourceIntegrationConst psKernelCorePrimitiveNatMulName
-  let beqConst := psKernelCoreResourceIntegrationConst psKernelCorePrimitiveNatBeqName
+  let f := psKernelCoreResourceIntegrationFixture
   let mul34 :=
     psKernelCoreResourceIntegrationApp2
-      mulConst
+      (psKernelCoreResourceIntegrationConst psKernelCorePrimitiveNatMulName)
       (psKernelCoreResourceIntegrationNat 3)
       (psKernelCoreResourceIntegrationNat 4)
   let beq22 :=
     psKernelCoreResourceIntegrationApp2
-      beqConst
+      (psKernelCoreResourceIntegrationConst psKernelCorePrimitiveNatBeqName)
       (psKernelCoreResourceIntegrationNat 2)
       (psKernelCoreResourceIntegrationNat 2)
-  let boolTrue :=
-    psKernelCoreResourceIntegrationConst psKernelCorePrimitiveBoolTrueName
+  let boolTrue := psKernelCoreResourceIntegrationConst psKernelCorePrimitiveBoolTrueName
   psKernelCoreResourceIntegrationExactBool
-      (psKernelCoreIsDefEqWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty
-        add23 (psKernelCoreResourceIntegrationNat 5))
+      (psKernelCoreIsDefEqWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty f.add23 (psKernelCoreResourceIntegrationNat 5))
       true &&
   psKernelCoreResourceIntegrationExactBool
-      (psKernelCoreIsDefEqWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty
-        mul34 (psKernelCoreResourceIntegrationNat 12))
+      (psKernelCoreIsDefEqWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty mul34 (psKernelCoreResourceIntegrationNat 12))
       true &&
   psKernelCoreResourceIntegrationExactBool
-      (psKernelCoreIsDefEqWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty
-        beq22 boolTrue)
+      (psKernelCoreIsDefEqWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty beq22 boolTrue)
       true
 
 def psKernelCoreResourceIntegrationAdmission : Bool :=
-  let fixtures := psKernelCoreResourceIntegrationFixtures
-  let env := fixtures.1
-  let p5 := fixtures.2.2.1
-  let natType := fixtures.2.2.2.2.2
+  let f := psKernelCoreResourceIntegrationFixture
   let n := psKernelCoreResourceIntegrationName
   let tiny : PsKernelCoreResourceConfig := { maxNatSize := 8 }
-  let argExpr := psKernelCoreResourceIntegrationConst (n "argComputed")
   let normalizedName := n "normalizedDef"
   let normalized :=
-    psKernelCoreResourceIntegrationDefinition normalizedName p5 argExpr
+    psKernelCoreResourceIntegrationDefinition
+      normalizedName f.p5 (psKernelCoreResourceIntegrationConst (n "argComputed"))
   let hugeName := n "oversizedDef"
-  let huge := psKernelCoreNatHeapLimbDivisor
   let oversized :=
     psKernelCoreResourceIntegrationDefinition
-      hugeName natType (psKernelCoreResourceIntegrationNat huge)
-  let originalSize := psKernelCoreEnvironmentSize env
-  let oversizedResult :=
-    psKernelCoreAddDefinitionWithResources 96 tiny env oversized
+      hugeName f.natType (psKernelCoreResourceIntegrationNat psKernelCoreNatHeapLimbDivisor)
+  let originalSize := psKernelCoreEnvironmentSize f.env
   let sizeError :=
     "the kernel refused a Nat numeral because its size exceeds the maximum"
-  let powName := n "powArg"
+  let pConst := psKernelCoreResourceIntegrationConst (n "P")
   let powExpr :=
     psKernelCoreResourceIntegrationApp2
       (psKernelCoreResourceIntegrationConst psKernelCorePrimitiveNatPowName)
       (psKernelCoreResourceIntegrationNat 2)
       (psKernelCoreResourceIntegrationNat 64)
-  let pConst := psKernelCoreResourceIntegrationConst (n "P")
-  let pPow := PsKernelCoreExpr.app pConst powExpr
-  let envNested := psKernelCoreResourceIntegrationAddAxiomUnchecked env powName pPow
+  let powName := n "powArg"
+  let envNested :=
+    psKernelCoreResourceIntegrationAddAxiomUnchecked
+      f.env powName (PsKernelCoreExpr.app pConst powExpr)
   let nestedName := n "nestedFail"
   let nested :=
     psKernelCoreResourceIntegrationDefinition
@@ -398,37 +341,33 @@ def psKernelCoreResourceIntegrationAdmission : Bool :=
       (psKernelCoreResourceIntegrationConst powName)
   let growthError :=
     "the kernel refused to evaluate Nat.pow because the result would exceed the maximum numeral size"
-  let normalizedResult :=
-    psKernelCoreAddDefinitionWithResources
-      96 psKernelCoreResourceConfigDefault env normalized
-  match normalizedResult with
+  match
+      psKernelCoreAddDefinitionWithResources
+        96 psKernelCoreResourceConfigDefault f.env normalized with
   | PsKernelCoreResult.error _ => false
   | PsKernelCoreResult.ok normalizedEnv =>
       psKernelCoreEnvironmentContains normalizedEnv normalizedName &&
       Nat.beq (psKernelCoreEnvironmentSize normalizedEnv) (Nat.succ originalSize) &&
-      psKernelCoreResourceIntegrationExactErrorEnv oversizedResult sizeError &&
-      Nat.beq (psKernelCoreEnvironmentSize env) originalSize &&
-      psKernelCoreEnvironmentContains env (n "argComputed") &&
-      !psKernelCoreEnvironmentContains env hugeName &&
-      !env.quotInitialized &&
-      psKernelCoreResourceIntegrationExactErrorEnv
-        (psKernelCoreAddDefinitionWithResources 96 tiny envNested nested)
-        growthError
+      psKernelCoreResourceIntegrationExactEnvError
+        (psKernelCoreAddDefinitionWithResources 96 tiny f.env oversized) sizeError &&
+      Nat.beq (psKernelCoreEnvironmentSize f.env) originalSize &&
+      psKernelCoreEnvironmentContains f.env (n "argComputed") &&
+      !psKernelCoreEnvironmentContains f.env hugeName &&
+      !f.env.quotInitialized &&
+      psKernelCoreResourceIntegrationExactEnvError
+        (psKernelCoreAddDefinitionWithResources 96 tiny envNested nested) growthError
 
 def psKernelCoreResourceIntegrationDefaultWrappers : Bool :=
-  let fixtures := psKernelCoreResourceIntegrationFixtures
-  let env := fixtures.1
-  let add23 := fixtures.2.1
-  let checkApp := fixtures.2.2.2.2.1
+  let f := psKernelCoreResourceIntegrationFixture
   let n := psKernelCoreResourceIntegrationName
   let sort1 := PsKernelCoreExpr.sort (PsKernelCoreLevel.succ PsKernelCoreLevel.zero)
   let aName := n "Adefault"
-  let aExpr := psKernelCoreResourceIntegrationConst aName
   let pName := n "Pdefault"
+  let aExpr := psKernelCoreResourceIntegrationConst aName
   let pExpr := psKernelCoreResourceIntegrationConst pName
   let aValName := n "adefault"
   let pValName := n "pdefault"
-  let env1 := psKernelCoreResourceIntegrationAddAxiomUnchecked env aName sort1
+  let env1 := psKernelCoreResourceIntegrationAddAxiomUnchecked f.env aName sort1
   let env2 :=
     psKernelCoreResourceIntegrationAddAxiomUnchecked
       env1 pName (PsKernelCoreExpr.sort PsKernelCoreLevel.zero)
@@ -445,83 +384,69 @@ def psKernelCoreResourceIntegrationDefaultWrappers : Bool :=
   let thm :=
     psKernelCoreResourceIntegrationTheorem
       thmName pExpr (psKernelCoreResourceIntegrationConst pValName)
-  let opaque :=
+  let opaqueInfo :=
     psKernelCoreResourceIntegrationOpaque
       opaqueName aExpr (psKernelCoreResourceIntegrationConst aValName)
   psKernelCoreResourceIntegrationExprResultEq
-      (psKernelCoreWhnf 64 env psKernelCoreLocalContextEmpty add23)
-      (psKernelCoreWhnfWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty add23) &&
+      (psKernelCoreWhnf 64 f.env psKernelCoreLocalContextEmpty f.add23)
+      (psKernelCoreWhnfWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty f.add23) &&
   psKernelCoreResourceIntegrationExprResultEq
-      (psKernelCoreInfer 64 env psKernelCoreLocalContextEmpty
+      (psKernelCoreInfer 64 f.env psKernelCoreLocalContextEmpty
         (psKernelCoreResourceIntegrationNat 2))
-      (psKernelCoreInferWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty
-        (psKernelCoreResourceIntegrationNat 2)) &&
+      (psKernelCoreInferWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty (psKernelCoreResourceIntegrationNat 2)) &&
   psKernelCoreResourceIntegrationBoolResultEq
-      (psKernelCoreIsDefEq
-        64 env psKernelCoreLocalContextEmpty add23
-        (psKernelCoreResourceIntegrationNat 5))
-      (psKernelCoreIsDefEqWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty
-        add23 (psKernelCoreResourceIntegrationNat 5)) &&
+      (psKernelCoreIsDefEq 64 f.env psKernelCoreLocalContextEmpty
+        f.add23 (psKernelCoreResourceIntegrationNat 5))
+      (psKernelCoreIsDefEqWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty f.add23 (psKernelCoreResourceIntegrationNat 5)) &&
   psKernelCoreResourceIntegrationExprResultEq
-      (psKernelCoreCheck
-        64 env psKernelCoreLocalContextEmpty PsKernelCoreDefinitionSafety.safe checkApp)
-      (psKernelCoreCheckWithResources
-        64 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty
-        PsKernelCoreDefinitionSafety.safe checkApp) &&
+      (psKernelCoreCheck 64 f.env psKernelCoreLocalContextEmpty
+        PsKernelCoreDefinitionSafety.safe f.checkApp)
+      (psKernelCoreCheckWithResources 64 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty PsKernelCoreDefinitionSafety.safe f.checkApp) &&
   psKernelCoreResourceIntegrationEnvResultEq axName
       (psKernelCoreAddAxiom 96 env4 ax)
-      (psKernelCoreAddAxiomWithResources
-        96 psKernelCoreResourceConfigDefault env4 ax) &&
+      (psKernelCoreAddAxiomWithResources 96 psKernelCoreResourceConfigDefault env4 ax) &&
   psKernelCoreResourceIntegrationEnvResultEq defName
       (psKernelCoreAddDefinition 96 env4 defn)
-      (psKernelCoreAddDefinitionWithResources
-        96 psKernelCoreResourceConfigDefault env4 defn) &&
+      (psKernelCoreAddDefinitionWithResources 96 psKernelCoreResourceConfigDefault env4 defn) &&
   psKernelCoreResourceIntegrationEnvResultEq thmName
       (psKernelCoreAddTheorem 96 env4 thm)
-      (psKernelCoreAddTheoremWithResources
-        96 psKernelCoreResourceConfigDefault env4 thm) &&
+      (psKernelCoreAddTheoremWithResources 96 psKernelCoreResourceConfigDefault env4 thm) &&
   psKernelCoreResourceIntegrationEnvResultEq opaqueName
-      (psKernelCoreAddOpaque 96 env4 opaque)
-      (psKernelCoreAddOpaqueWithResources
-        96 psKernelCoreResourceConfigDefault env4 opaque) &&
+      (psKernelCoreAddOpaque 96 env4 opaqueInfo)
+      (psKernelCoreAddOpaqueWithResources 96 psKernelCoreResourceConfigDefault env4 opaqueInfo) &&
   psKernelCoreResourceIntegrationExprResultEq
-      (psKernelCoreWhnf 0 env psKernelCoreLocalContextEmpty add23)
-      (psKernelCoreWhnfWithResources
-        0 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty add23) &&
+      (psKernelCoreWhnf 0 f.env psKernelCoreLocalContextEmpty f.add23)
+      (psKernelCoreWhnfWithResources 0 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty f.add23) &&
   psKernelCoreResourceIntegrationExprResultEq
-      (psKernelCoreInfer 0 env psKernelCoreLocalContextEmpty add23)
-      (psKernelCoreInferWithResources
-        0 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty add23) &&
+      (psKernelCoreInfer 0 f.env psKernelCoreLocalContextEmpty f.add23)
+      (psKernelCoreInferWithResources 0 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty f.add23) &&
   psKernelCoreResourceIntegrationBoolResultEq
-      (psKernelCoreIsDefEq
-        0 env psKernelCoreLocalContextEmpty add23 add23)
-      (psKernelCoreIsDefEqWithResources
-        0 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty add23 add23) &&
+      (psKernelCoreIsDefEq 0 f.env psKernelCoreLocalContextEmpty f.add23 f.add23)
+      (psKernelCoreIsDefEqWithResources 0 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty f.add23 f.add23) &&
   psKernelCoreResourceIntegrationExprResultEq
-      (psKernelCoreCheck
-        0 env psKernelCoreLocalContextEmpty PsKernelCoreDefinitionSafety.safe checkApp)
-      (psKernelCoreCheckWithResources
-        0 psKernelCoreResourceConfigDefault env psKernelCoreLocalContextEmpty
-        PsKernelCoreDefinitionSafety.safe checkApp) &&
+      (psKernelCoreCheck 0 f.env psKernelCoreLocalContextEmpty
+        PsKernelCoreDefinitionSafety.safe f.checkApp)
+      (psKernelCoreCheckWithResources 0 psKernelCoreResourceConfigDefault
+        f.env psKernelCoreLocalContextEmpty PsKernelCoreDefinitionSafety.safe f.checkApp) &&
   psKernelCoreResourceIntegrationEnvResultEq axName
       (psKernelCoreAddAxiom 0 env4 ax)
-      (psKernelCoreAddAxiomWithResources
-        0 psKernelCoreResourceConfigDefault env4 ax) &&
+      (psKernelCoreAddAxiomWithResources 0 psKernelCoreResourceConfigDefault env4 ax) &&
   psKernelCoreResourceIntegrationEnvResultEq defName
       (psKernelCoreAddDefinition 0 env4 defn)
-      (psKernelCoreAddDefinitionWithResources
-        0 psKernelCoreResourceConfigDefault env4 defn) &&
+      (psKernelCoreAddDefinitionWithResources 0 psKernelCoreResourceConfigDefault env4 defn) &&
   psKernelCoreResourceIntegrationEnvResultEq thmName
       (psKernelCoreAddTheorem 0 env4 thm)
-      (psKernelCoreAddTheoremWithResources
-        0 psKernelCoreResourceConfigDefault env4 thm) &&
+      (psKernelCoreAddTheoremWithResources 0 psKernelCoreResourceConfigDefault env4 thm) &&
   psKernelCoreResourceIntegrationEnvResultEq opaqueName
-      (psKernelCoreAddOpaque 0 env4 opaque)
-      (psKernelCoreAddOpaqueWithResources
-        0 psKernelCoreResourceConfigDefault env4 opaque)
+      (psKernelCoreAddOpaque 0 env4 opaqueInfo)
+      (psKernelCoreAddOpaqueWithResources 0 psKernelCoreResourceConfigDefault env4 opaqueInfo)
 
 def psKernelCoreResourceIntegration : Bool :=
   psKernelCoreResourceIntegrationWhnf &&

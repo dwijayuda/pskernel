@@ -149,14 +149,19 @@ const reduce = await read(
   "packages/meta/src/Ps/Meta/Reduce.lean",
 );
 requireMarkers("Reduce", reduce, [
+  'def psReduceNameListLength\n    (values : List PsName) : Nat :=\n  match values with',
+  'psReduceNameListLength rest',
+  'def psReduceLevelListLength\n    (values : List PsLevel) : Nat :=\n  match values with',
+  'psReduceLevelListLength rest',
   'let instantiated := psMetaInstantiate metaContext expr;\n      match instantiated with',
   '| some declaration =>\n              match declaration with\n              | .letDecl _ _ _ value =>',
   'let reducedFn := psWhnfCoreWithFuel metaContext localContext fuel fn;\n          match reducedFn with',
   'let leftValue := psWhnfCore metaContext localContext left;\n  let rightValue := psWhnfCore metaContext localContext right;',
   'let core := psWhnfCoreWithFuel metaContext localContext fuel expr;\n      match core with',
-  'let parameters := psDeclarationLevelParams declaration;\n                  if parameters.length == levels.length then',
+  'if Nat.beq\n                      (psReduceNameListLength parameters)\n                      (psReduceLevelListLength levels) then',
   'let reducedFn :=\n            psWhnfWithFuel environment metaContext localContext fuel fn;\n          if psExprAlphaEq reducedFn fn then',
   'let leftValue :=\n        psWhnf environment metaContext localContext left;\n      let rightValue :=\n        psWhnf environment metaContext localContext right;',
+  'Nat.beq leftIndex rightIndex',
 ]);
 forbidMarkers("Reduce", reduce, [
   'let instantiated := psMetaInstantiate metaContext expr\n      match instantiated with',
@@ -166,11 +171,14 @@ forbidMarkers("Reduce", reduce, [
   'let rightValue := psWhnfCore metaContext localContext right\n  psExprAlphaEq',
   'let core := psWhnfCoreWithFuel metaContext localContext fuel expr\n      match core with',
   'let parameters := psDeclarationLevelParams declaration\n                  if parameters.length == levels.length then',
+  'parameters.length',
+  'levels.length',
   'psWhnfWithFuel environment metaContext localContext fuel fn\n          if psExprAlphaEq reducedFn fn then',
   'psWhnf environment metaContext localContext left\n      let rightValue :=',
   'psWhnf environment metaContext localContext right\n      if psExprAlphaEq leftValue rightValue then',
+  '==',
 ]);
 
 process.stdout.write(
-  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 explicit-recursion/invariant-fuel/local-list-ops/let/application/unary-match/no-bool-infix subset)\n",
+  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 explicit-recursion/invariant-fuel/local-list-ops/explicit-nat-equality/let/application/unary-match/no-bool-infix subset)\n",
 );

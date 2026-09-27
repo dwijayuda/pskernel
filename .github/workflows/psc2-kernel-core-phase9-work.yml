@@ -61,6 +61,13 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreQuotRejectionTests.lean 2>&1 | tee ../phase9-quot-rejections.log
 
+      - name: Quot reduction parity
+        shell: bash
+        run: |
+          set -o pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreQuotReductionParityTests.lean 2>&1 | tee ../phase9-quot-reduction.log
+
       - name: Existing declaration parity
         if: success()
         shell: bash
@@ -86,3 +93,4 @@ jobs:
             phase9-quot-metadata.log
             phase9-quot-admission.log
             phase9-quot-rejections.log
+            phase9-quot-reduction.log

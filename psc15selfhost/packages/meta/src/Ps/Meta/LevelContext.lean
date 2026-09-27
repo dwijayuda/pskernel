@@ -197,7 +197,10 @@ def psLevelUnify
     (right : PsLevel) : PsLevelUnifyResult :=
   psLevelUnifyWithFuel context 256 left right
 
-def psLevelInstantiateExpr (context : PsLevelMetaContext) : PsExpr -> PsExpr
+def psLevelInstantiateExpr
+    (context : PsLevelMetaContext)
+    (expr : PsExpr) : PsExpr :=
+  match expr with
   | .sortE level => PsExpr.sortE (psLevelInstantiate context level)
   | .constE name levels =>
       PsExpr.constE name (levels.map (psLevelInstantiate context))
@@ -225,7 +228,7 @@ def psLevelInstantiateExpr (context : PsLevelMetaContext) : PsExpr -> PsExpr
         (psLevelInstantiateExpr context body)
   | .proj typeName index value =>
       PsExpr.proj typeName index (psLevelInstantiateExpr context value)
-  | expr => expr
+  | _ => expr
 
 def psLevelHasMVar : PsLevel -> Bool
   | .mvar _ => true

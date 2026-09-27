@@ -63,12 +63,15 @@ requireMarkers("LevelContext", levelContext, [
   'match leftValue with',
   'match rightValue with',
   'let first := psLevelUnifyWithFuel context fuel leftA rightA;',
+  'if psLevelHasMVar left then',
+  'if psLevelHasMVar level then',
 ]);
 forbidMarkers("LevelContext", levelContext, [
   'List.cons { id := id, value := resolved } context.assignments',
   'match leftValue, rightValue with',
+  '||',
 ]);
 
 process.stdout.write(
-  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 let/application/unary-match subset)\n",
+  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 let/application/unary-match/no-bool-infix subset)\n",
 );

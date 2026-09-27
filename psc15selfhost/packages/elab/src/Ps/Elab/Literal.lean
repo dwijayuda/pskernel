@@ -148,6 +148,13 @@ def psDecodeEscapedChar
       else
         Option.none
 
+def psStringFromReversedChars (charsRev : List Char) : String :=
+  match charsRev with
+  | [] =>
+      ""
+  | char :: rest =>
+      String.push (psStringFromReversedChars rest) char
+
 def psDecodeStringBodyWithFuel
     (fuel : Nat)
     (chars : List Char)
@@ -164,7 +171,7 @@ def psDecodeStringBodyWithFuel
           if psCharCodeEq char 34 then
             match restAfterChar with
             | [] =>
-                Option.some (String.ofList (List.reverse charsRev))
+                Option.some (psStringFromReversedChars charsRev)
             | _ :: _ =>
                 Option.none
           else if psCharCodeEq char 92 then

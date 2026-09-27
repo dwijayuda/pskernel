@@ -146,6 +146,21 @@ for (const marker of [
   }
 }
 
+const minimalSelfHostTestsPath = path.join(root, "test", "MinimalSelfHostTests.lean");
+if (!existsSync(minimalSelfHostTestsPath)) {
+  throw new Error("PSC2_MINIMAL_SELFHOST_TEST_SOURCE_MISSING");
+}
+const minimalSelfHostTests = await readFile(minimalSelfHostTestsPath, "utf8");
+for (const marker of [
+  "foundational List preparation",
+  "foundational List -> VerifiedIR",
+  "foundational List -> TypeScript",
+]) {
+  if (!minimalSelfHostTests.includes(marker)) {
+    throw new Error(`PSC2_MINIMAL_SELFHOST_LIST_DIAGNOSTIC_MISSING: ${marker}`);
+  }
+}
+
 const entry = path.join(root, psconfig.entry);
 if (!existsSync(entry)) {
   throw new Error(`PSC2_BOOTSTRAP_ENTRY_MISSING: ${psconfig.entry}`);

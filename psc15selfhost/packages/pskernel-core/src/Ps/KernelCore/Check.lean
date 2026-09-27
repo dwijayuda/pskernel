@@ -14,8 +14,9 @@ def psKernelCoreCheckAllowsPartial
   | PsKernelCoreDefinitionSafety.unsafeDef => true
   | PsKernelCoreDefinitionSafety.partialDef => true
 
-def psKernelCoreCheck
-    (budget : Nat) :
+def psKernelCoreCheckWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig) :
     PsKernelCoreEnvironment ->
     PsKernelCoreLocalContext ->
     PsKernelCoreDefinitionSafety ->
@@ -35,7 +36,7 @@ def psKernelCoreCheck
           PsKernelCoreDefinitionSafety ->
           PsKernelCoreExpr ->
           PsKernelCoreResult String PsKernelCoreExpr :=
-        psKernelCoreCheck remaining;
+        psKernelCoreCheckWithResources remaining resources;
       fun (env : PsKernelCoreEnvironment)
           (lctx : PsKernelCoreLocalContext)
           (safety : PsKernelCoreDefinitionSafety)
@@ -83,17 +84,7 @@ def psKernelCoreCheck
                     else
                       PsKernelCoreResult.ok instantiatedType
         | PsKernelCoreExpr.lit literal =>
-            match literal with
-            | PsKernelCoreLiteral.nat _ =>
-                PsKernelCoreResult.ok
-                  (PsKernelCoreExpr.const
-                    psKernelCoreInferNatName
-                    PsKernelCoreList.nil)
-            | PsKernelCoreLiteral.str _ =>
-                PsKernelCoreResult.ok
-                  (PsKernelCoreExpr.const
-                    psKernelCoreInferStringName
-                    PsKernelCoreList.nil)
+            psKernelCoreInferLiteralWithResources resources literal
         | PsKernelCoreExpr.mdata _ body =>
             smaller env lctx safety body
         | PsKernelCoreExpr.app fn arg =>
@@ -101,7 +92,8 @@ def psKernelCoreCheck
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok fnType =>
-                match psKernelCoreEnsureForall remaining env lctx fnType with
+                match psKernelCoreEnsureForallWithResources
+                    remaining resources env lctx fnType with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
                 | PsKernelCoreResult.ok exposed =>
@@ -111,8 +103,8 @@ def psKernelCoreCheck
                         | PsKernelCoreResult.error message =>
                             PsKernelCoreResult.error message
                         | PsKernelCoreResult.ok argType =>
-                            match psKernelCoreIsDefEq
-                                remaining env lctx argType domain with
+                            match psKernelCoreIsDefEqWithResources
+                                remaining resources env lctx argType domain with
                             | PsKernelCoreResult.error message =>
                                 PsKernelCoreResult.error message
                             | PsKernelCoreResult.ok equal =>
@@ -129,7 +121,8 @@ def psKernelCoreCheck
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok domainType =>
-                match psKernelCoreEnsureSort remaining env lctx domainType with
+                match psKernelCoreEnsureSortWithResources
+                    remaining resources env lctx domainType with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
                 | PsKernelCoreResult.ok _ =>
@@ -156,7 +149,8 @@ def psKernelCoreCheck
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok domainType =>
-                match psKernelCoreEnsureSort remaining env lctx domainType with
+                match psKernelCoreEnsureSortWithResources
+                    remaining resources env lctx domainType with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
                 | PsKernelCoreResult.ok domainLevel =>
@@ -172,8 +166,8 @@ def psKernelCoreCheck
                     | PsKernelCoreResult.error message =>
                         PsKernelCoreResult.error message
                     | PsKernelCoreResult.ok bodyType =>
-                        match psKernelCoreEnsureSort
-                            remaining env child bodyType with
+                        match psKernelCoreEnsureSortWithResources
+                            remaining resources env child bodyType with
                         | PsKernelCoreResult.error message =>
                             PsKernelCoreResult.error message
                         | PsKernelCoreResult.ok bodyLevel =>
@@ -186,7 +180,8 @@ def psKernelCoreCheck
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok typeType =>
-                match psKernelCoreEnsureSort remaining env lctx typeType with
+                match psKernelCoreEnsureSortWithResources
+                    remaining resources env lctx typeType with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
                 | PsKernelCoreResult.ok _ =>
@@ -194,8 +189,8 @@ def psKernelCoreCheck
                     | PsKernelCoreResult.error message =>
                         PsKernelCoreResult.error message
                     | PsKernelCoreResult.ok valueType =>
-                        match psKernelCoreIsDefEq
-                            remaining env lctx valueType type with
+                        match psKernelCoreIsDefEqWithResources
+                            remaining resources env lctx valueType type with
                         | PsKernelCoreResult.error message =>
                             PsKernelCoreResult.error message
                         | PsKernelCoreResult.ok equal =>
@@ -228,3 +223,12 @@ def psKernelCoreCheck
         | PsKernelCoreExpr.proj _ _ _ =>
             PsKernelCoreResult.error
               "projection checking unavailable before inductive metadata"
+
+def psKernelCoreCheck
+    (budget : Nat) :
+    PsKernelCoreEnvironment ->
+    PsKernelCoreLocalContext ->
+    PsKernelCoreDefinitionSafety ->
+    PsKernelCoreExpr ->
+    PsKernelCoreResult String PsKernelCoreExpr :=
+  psKernelCoreCheckWithResources budget psKernelCoreResourceConfigDefault

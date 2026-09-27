@@ -63,6 +63,13 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreRecursorAdmissionParityTests.lean
 
+      - name: Phase 10 recursor rejection matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorRejectionTests.lean
+
       - name: KernelCore PSC1 source profile
         shell: bash
         run: |

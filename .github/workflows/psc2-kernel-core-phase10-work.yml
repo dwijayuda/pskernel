@@ -1,0 +1,50 @@
+name: PSC2 KernelCore Phase 10 work
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase10-recursor-work
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/test/KernelCoreRecursor*.lean
+      - psc15selfhost/test/KernelCoreEqRecursorCompatibilityTests.lean
+      - psc15selfhost/lakefile.lean
+      - psc15selfhost/package.json
+      - psc15selfhost/scripts/check-kernel-core-source.mjs
+      - .github/workflows/psc2-kernel-core-phase10-work.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase10-work:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build recursor metadata dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake build PsKernelCore PSC1KernelReferenceFoundations
+
+      - name: Phase 10 recursor metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorMetadataTests.lean

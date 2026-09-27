@@ -156,6 +156,162 @@ def psKernelCoreExprListGet?
         | Nat.zero => PsKernelCoreOption.some head
         | Nat.succ previous => getRest previous
 
+def psKernelCoreReduceLevelListSize
+    (items : PsKernelCoreList PsKernelCoreLevel) : Nat :=
+  match items with
+  | PsKernelCoreList.nil => 0
+  | PsKernelCoreList.cons _ rest =>
+      Nat.succ (psKernelCoreReduceLevelListSize rest)
+
+def psKernelCoreReduceNameListSize
+    (items : PsKernelCoreList PsKernelCoreName) : Nat :=
+  match items with
+  | PsKernelCoreList.nil => 0
+  | PsKernelCoreList.cons _ rest =>
+      Nat.succ (psKernelCoreReduceNameListSize rest)
+
+def psKernelCoreExprListTake
+    (count : Nat) :
+    PsKernelCoreList PsKernelCoreExpr -> PsKernelCoreList PsKernelCoreExpr :=
+  match count with
+  | Nat.zero =>
+      fun (_items : PsKernelCoreList PsKernelCoreExpr) => PsKernelCoreList.nil
+  | Nat.succ remaining =>
+      let takeRemaining := psKernelCoreExprListTake remaining;
+      fun (items : PsKernelCoreList PsKernelCoreExpr) =>
+        match items with
+        | PsKernelCoreList.nil => PsKernelCoreList.nil
+        | PsKernelCoreList.cons head rest =>
+            PsKernelCoreList.cons head (takeRemaining rest)
+
+def psKernelCoreExprListDrop
+    (count : Nat) :
+    PsKernelCoreList PsKernelCoreExpr -> PsKernelCoreList PsKernelCoreExpr :=
+  match count with
+  | Nat.zero =>
+      fun (items : PsKernelCoreList PsKernelCoreExpr) => items
+  | Nat.succ remaining =>
+      let dropRemaining := psKernelCoreExprListDrop remaining;
+      fun (items : PsKernelCoreList PsKernelCoreExpr) =>
+        match items with
+        | PsKernelCoreList.nil => PsKernelCoreList.nil
+        | PsKernelCoreList.cons _ rest => dropRemaining rest
+
+def psKernelCoreExprApplyList
+    (args : PsKernelCoreList PsKernelCoreExpr) : PsKernelCoreExpr -> PsKernelCoreExpr :=
+  match args with
+  | PsKernelCoreList.nil =>
+      fun (fn : PsKernelCoreExpr) => fn
+  | PsKernelCoreList.cons arg rest =>
+      let applyRest := psKernelCoreExprApplyList rest;
+      fun (fn : PsKernelCoreExpr) =>
+        applyRest (PsKernelCoreExpr.app fn arg)
+
+def psKernelCoreReduceRecursorMajorIndex
+    (info : PsKernelCoreRecursorInfo) : Nat :=
+  Nat.add
+    (Nat.add
+      (Nat.add info.numParams info.numMotives)
+      info.numMinors)
+    info.numIndices
+
+def psKernelCoreReduceFindRecursorRule?
+    (rules : PsKernelCoreList PsKernelCoreRecursorRule) :
+    PsKernelCoreName -> PsKernelCoreOption PsKernelCoreRecursorRule :=
+  match rules with
+  | PsKernelCoreList.nil =>
+      fun (_ctor : PsKernelCoreName) => PsKernelCoreOption.none
+  | PsKernelCoreList.cons rule rest =>
+      let findRest := psKernelCoreReduceFindRecursorRule? rest;
+      fun (ctor : PsKernelCoreName) =>
+        if psKernelCoreNameEq rule.ctor ctor then
+          PsKernelCoreOption.some rule
+        else
+          findRest ctor
+
+def psKernelCoreReduceRecursorTarget?
+    (info : PsKernelCoreRecursorInfo) : PsKernelCoreOption PsKernelCoreName :=
+  match info.all with
+  | PsKernelCoreList.nil => PsKernelCoreOption.none
+  | PsKernelCoreList.cons target rest =>
+      match rest with
+      | PsKernelCoreList.nil => PsKernelCoreOption.some target
+      | PsKernelCoreList.cons _ _ => PsKernelCoreOption.none
+
+def psKernelCoreReduceRecursorPrefixInfo?
+    (env : PsKernelCoreEnvironment)
+    (expr : PsKernelCoreExpr) : PsKernelCoreOption PsKernelCoreRecursorInfo :=
+  let view := psKernelCoreAppViewOf expr;
+  match view.fn with
+  | PsKernelCoreExpr.const name levels =>
+      match psKernelCoreEnvironmentFind? env name with
+      | PsKernelCoreOption.some (PsKernelCoreConstantInfo.recInfo info) =>
+          if info.k then
+            PsKernelCoreOption.none
+          else if Nat.beq
+              (psKernelCoreExprListSize view.args)
+              (psKernelCoreReduceRecursorMajorIndex info) then
+            if Nat.beq
+                (psKernelCoreReduceLevelListSize levels)
+                (psKernelCoreReduceNameListSize info.base.levelParams) then
+              PsKernelCoreOption.some info
+            else
+              PsKernelCoreOption.none
+          else
+            PsKernelCoreOption.none
+      | _ => PsKernelCoreOption.none
+  | _ => PsKernelCoreOption.none
+
+def psKernelCoreReduceRecursorMajor?
+    (env : PsKernelCoreEnvironment)
+    (prefix : PsKernelCoreExpr)
+    (major : PsKernelCoreExpr) : PsKernelCoreOption PsKernelCoreExpr :=
+  match psKernelCoreReduceRecursorPrefixInfo? env prefix with
+  | PsKernelCoreOption.none => PsKernelCoreOption.none
+  | PsKernelCoreOption.some info =>
+      let prefixView := psKernelCoreAppViewOf prefix;
+      let majorView := psKernelCoreAppViewOf major;
+      match majorView.fn with
+      | PsKernelCoreExpr.const ctorName _ =>
+          match psKernelCoreReduceFindRecursorRule? info.rules ctorName with
+          | PsKernelCoreOption.none => PsKernelCoreOption.none
+          | PsKernelCoreOption.some rule =>
+              match psKernelCoreReduceRecursorTarget? info with
+              | PsKernelCoreOption.none => PsKernelCoreOption.none
+              | PsKernelCoreOption.some target =>
+                  match psKernelCoreEnvironmentFind? env ctorName with
+                  | PsKernelCoreOption.some
+                      (PsKernelCoreConstantInfo.ctorInfo ctor) =>
+                      if psKernelCoreNameEq ctor.induct target then
+                        let majorCount := psKernelCoreExprListSize majorView.args;
+                        if Nat.ble rule.nFields majorCount then
+                          match prefixView.fn with
+                          | PsKernelCoreExpr.const _ recLevels =>
+                              match psKernelCoreExprInstantiateLevelParams
+                                  rule.rhs info.base.levelParams recLevels with
+                              | PsKernelCoreOption.none => PsKernelCoreOption.none
+                              | PsKernelCoreOption.some rhs0 =>
+                                  let fixedCount :=
+                                    Nat.add
+                                      (Nat.add info.numParams info.numMotives)
+                                      info.numMinors;
+                                  let fixedArgs :=
+                                    psKernelCoreExprListTake fixedCount prefixView.args;
+                                  let fieldStart := Nat.sub majorCount rule.nFields;
+                                  let fields :=
+                                    psKernelCoreExprListTake rule.nFields
+                                      (psKernelCoreExprListDrop fieldStart majorView.args);
+                                  let rhs1 := psKernelCoreExprApplyList fixedArgs rhs0;
+                                  PsKernelCoreOption.some
+                                    (psKernelCoreExprApplyList fields rhs1)
+                          | _ => PsKernelCoreOption.none
+                        else
+                          PsKernelCoreOption.none
+                      else
+                        PsKernelCoreOption.none
+                  | _ => PsKernelCoreOption.none
+      | _ => PsKernelCoreOption.none
+
 def psKernelCoreQuotFunctionFromPrefix?
     (env : PsKernelCoreEnvironment)
     (expr : PsKernelCoreExpr) : PsKernelCoreOption PsKernelCoreExpr :=
@@ -327,7 +483,6 @@ def psKernelCoreWhnfWithResources
                         PsKernelCoreResult.ok
                           (PsKernelCoreExpr.app reducedFn arg);
                 match psKernelCoreQuotFunctionFromPrefix? env reducedFn with
-                | PsKernelCoreOption.none => ordinary Unit.unit
                 | PsKernelCoreOption.some quotientFn =>
                     match smaller env lctx arg with
                     | PsKernelCoreResult.error message =>
@@ -338,6 +493,19 @@ def psKernelCoreWhnfWithResources
                         | PsKernelCoreOption.some representative =>
                             smaller env lctx
                               (PsKernelCoreExpr.app quotientFn representative)
+                | PsKernelCoreOption.none =>
+                    match psKernelCoreReduceRecursorPrefixInfo? env reducedFn with
+                    | PsKernelCoreOption.none => ordinary Unit.unit
+                    | PsKernelCoreOption.some _ =>
+                        match smaller env lctx arg with
+                        | PsKernelCoreResult.error message =>
+                            PsKernelCoreResult.error message
+                        | PsKernelCoreResult.ok reducedMajor =>
+                            match psKernelCoreReduceRecursorMajor?
+                                env reducedFn reducedMajor with
+                            | PsKernelCoreOption.none => ordinary Unit.unit
+                            | PsKernelCoreOption.some reduced =>
+                                smaller env lctx reduced
         | PsKernelCoreExpr.const name levels =>
             match psKernelCoreEnvironmentFind? env name with
             | PsKernelCoreOption.none => PsKernelCoreResult.ok expr

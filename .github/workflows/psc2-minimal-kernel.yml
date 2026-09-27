@@ -140,6 +140,13 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_check_parity_tests
 
+      - name: Checked inference ordering regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreCheckOrderingTests.lean
+
       - name: Ordinary admission parity test
         shell: bash
         run: |

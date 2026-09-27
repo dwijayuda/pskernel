@@ -14,10 +14,10 @@ def psElabStructuralRecursionFindCall
     (fieldId : Nat) : Option Nat :=
   match calls with
   | [] =>
-      none
+      Option.none
   | entry :: rest =>
       if Nat.beq (Prod.fst entry) fieldId then
-        some (Prod.snd entry)
+        Option.some (Prod.snd entry)
       else
         psElabStructuralRecursionFindCall rest fieldId
 
@@ -34,7 +34,7 @@ def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
     localContext := psLocalEmpty
     instances := psInstanceIndexEmpty
     metaContext := psMetaEmpty
-    structuralRecursion := none
+    structuralRecursion := Option.none
   }
 
 def psElabContextWithLocal

@@ -13,6 +13,12 @@ const required = [
   /def psCharCodeEq\s*\(char : Char\)\s*\(code : Nat\) : Bool :=\s*Nat\.beq \(Char\.toNat char\) code/,
   /if psCharCodeEq char 48 then/,
   /if psCharCodeEq char 95 then/,
+  /def psParseNaturalChars\s*\(chars : List Char\) :\s*Nat -> Option Nat :=\s*match chars with/,
+  /let smaller : Nat -> Option Nat :=\s*psParseNaturalChars rest;/,
+  /fun \(value : Nat\) =>/,
+  /smaller value/,
+  /smaller\s*\(Nat\.add \(Nat\.mul value 10\) digit\)/,
+  /psParseNaturalChars \(String\.toList text\) 0/,
   /Nat\.add \(Nat\.mul value 10\) digit/,
   /Nat\.add \(Nat\.mul value 16\) digit/,
   /if Nat\.blt value 55296 then/,
@@ -36,6 +42,9 @@ for (const pattern of required) {
 
 const forbidden = [
   /'(?:\\.|[^'\\])+'/,                  // character literal syntax
+  /def psParseNaturalChars\s*\(chars : List Char\)\s*\(value : Nat\)/,
+  /psParseNaturalChars\s+rest\s+value/,
+  /psParseNaturalChars\s+rest\s*\(Nat\.add/,
   /value\s*\*\s*(?:10|16)/,             // arithmetic infix in literal accumulators
   /value\s*<\s*(?:55296|1114112)/,       // scalar-bound infix comparison
   /57343\s*<\s*value/,
@@ -50,5 +59,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (explicit Char, Nat, and List operations for PSC1 bootstrap)\n",
+  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (explicit Char/Nat/List operations and invariant-safe natural recursion)\n",
 );

@@ -191,15 +191,15 @@ def psMetaInstantiateStep
 
 def psMetaInstantiateRounds
     (context : PsMetaContext)
-    (fuel : Nat)
-    (expr : PsExpr) : PsExpr :=
+    (fuel : Nat) : PsExpr -> PsExpr :=
   match fuel with
-  | Nat.zero => expr
+  | Nat.zero =>
+      fun (expr : PsExpr) => expr
   | Nat.succ remaining =>
-      psMetaInstantiateRounds
-        context
-        remaining
-        (psMetaInstantiateStep context expr)
+      let smaller : PsExpr -> PsExpr :=
+        psMetaInstantiateRounds context remaining;
+      fun (expr : PsExpr) =>
+        smaller (psMetaInstantiateStep context expr)
 
 def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
   let value :=

@@ -98,6 +98,15 @@ def main (args : List String) : IO Unit := do
   jsRequireError "unknown call target" { psVerifiedIrModuleEmpty with
     declarations := [jsFixtureFunctionDecl "caller" "value" .nat .nat
       (.call (.var "missing") [] [(.var "value")])] }
+  jsRequireError "shadowed call target" { psVerifiedIrModuleEmpty with
+    declarations := [identity,
+      jsFixtureFunctionDecl "caller" "identity" .nat .nat
+        (.call (.var "identity") [] [(.literal (.natural 1))])] }
+  jsRequireError "let-shadowed call target" { psVerifiedIrModuleEmpty with
+    declarations := [identity,
+      jsFixtureFunctionDecl "caller" "value" .nat .nat
+        (.letE "identity" (.primitive .nat) (.var "value")
+          (.call (.var "identity") [] [(.literal (.natural 1))]))] }
   jsRequireError "call type arguments" { psVerifiedIrModuleEmpty with
     declarations := [identity,
       jsFixtureFunctionDecl "caller" "value" .nat .nat

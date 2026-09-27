@@ -5,6 +5,18 @@ on:
     branches:
       - psc2/minimal-selfhost-psc15
     paths:
+      - psc15selfhost/packages/backend-ts/**
+      - psc15selfhost/packages/bootstrap/**
+      - psc15selfhost/packages/bridge/**
+      - psc15selfhost/packages/compiler/**
+      - psc15selfhost/packages/compiler-ir/**
+      - psc15selfhost/packages/core/**
+      - psc15selfhost/packages/elab/**
+      - psc15selfhost/packages/environment/**
+      - psc15selfhost/packages/erasure/**
+      - psc15selfhost/packages/foundation/**
+      - psc15selfhost/packages/meta/**
+      - psc15selfhost/packages/syntax/**
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
       - psc15selfhost/lakefile.lean

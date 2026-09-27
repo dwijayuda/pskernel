@@ -18,6 +18,7 @@ inductive PsJsExpr where
   | local (index : Nat)
   | letE (index : Nat) (value : PsJsExpr) (body : PsJsExpr)
   | lambda (parameters : List Nat) (body : PsJsExpr)
+  | ifE (condition : PsJsExpr) (thenBranch : PsJsExpr) (elseBranch : PsJsExpr)
 
 structure PsJsConstant where
   exportName : String

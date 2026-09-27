@@ -11,7 +11,7 @@ const infer = await readFile(
 
 const required = [
   'def psInferAppViewAcc\n    (expr : PsExpr) : List PsExpr -> PsInferAppView :=\n  match expr with',
-  '| .app fn arg =>\n      fun (args : List PsExpr) =>\n        psInferAppViewAcc fn (List.cons arg args)',
+  '| .app fn arg =>\n      let smaller : List PsExpr -> PsInferAppView :=\n        psInferAppViewAcc fn;\n      fun (args : List PsExpr) =>\n        smaller (List.cons arg args)',
   '| _ =>\n      fun (args : List PsExpr) =>\n        PsInferAppView.mk expr args',
 ];
 for (const marker of required) {
@@ -22,6 +22,7 @@ for (const marker of required) {
 
 const forbidden = [
   'def psInferAppViewAcc\n    (expr : PsExpr)\n    (args : List PsExpr) : PsInferAppView :=',
+  'psInferAppViewAcc fn (List.cons arg args)',
   '| head =>',
   'head := head',
 ];
@@ -32,5 +33,5 @@ for (const marker of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_INFER_SELFHOST_SOURCE_SYNTAX: PASS (explicit invariant-safe app-view fallback)\n",
+  "PSC2_INFER_SELFHOST_SOURCE_SYNTAX: PASS (explicit arity-safe app-view recursion)\n",
 );

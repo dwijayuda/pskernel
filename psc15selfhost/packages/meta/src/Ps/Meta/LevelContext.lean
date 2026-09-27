@@ -28,7 +28,10 @@ def psNatListContains (values : List Nat) (target : Nat) : Bool :=
   | value :: rest =>
       if Nat.beq value target then true else psNatListContains rest target
 
-def psLevelFindAssignmentInList (id : Nat) : List PsLevelAssignment -> Option PsLevel
+def psLevelFindAssignmentInList
+    (id : Nat)
+    (assignments : List PsLevelAssignment) : Option PsLevel :=
+  match assignments with
   | [] => Option.none
   | assignment :: rest =>
       if Nat.beq assignment.id id then

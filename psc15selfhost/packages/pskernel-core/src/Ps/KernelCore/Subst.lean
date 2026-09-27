@@ -240,3 +240,128 @@ def psKernelCoreExprInstantiateRev
     (expr : PsKernelCoreExpr)
     (subst : PsKernelCoreList PsKernelCoreExpr) : PsKernelCoreExpr :=
   psKernelCoreExprInstantiate expr (psKernelCoreExprListReverse subst)
+
+def psKernelCoreExprHasFVarName
+    (expr : PsKernelCoreExpr) : PsKernelCoreName -> Bool :=
+  match expr with
+  | PsKernelCoreExpr.bvar _ => fun (_target : PsKernelCoreName) => false
+  | PsKernelCoreExpr.fvar name =>
+      fun (target : PsKernelCoreName) => psKernelCoreNameEq name target
+  | PsKernelCoreExpr.mvar _ => fun (_target : PsKernelCoreName) => false
+  | PsKernelCoreExpr.sort _ => fun (_target : PsKernelCoreName) => false
+  | PsKernelCoreExpr.const _ _ => fun (_target : PsKernelCoreName) => false
+  | PsKernelCoreExpr.app fn arg =>
+      let hasFn : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName fn;
+      let hasArg : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName arg;
+      fun (target : PsKernelCoreName) =>
+        if hasFn target then true else hasArg target
+  | PsKernelCoreExpr.lam _ type body _ =>
+      let hasType : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName type;
+      let hasBody : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName body;
+      fun (target : PsKernelCoreName) =>
+        if hasType target then true else hasBody target
+  | PsKernelCoreExpr.forallE _ type body _ =>
+      let hasType : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName type;
+      let hasBody : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName body;
+      fun (target : PsKernelCoreName) =>
+        if hasType target then true else hasBody target
+  | PsKernelCoreExpr.letE _ type value body _ =>
+      let hasType : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName type;
+      let hasValue : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName value;
+      let hasBody : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName body;
+      fun (target : PsKernelCoreName) =>
+        if hasType target then true
+        else if hasValue target then true
+        else hasBody target
+  | PsKernelCoreExpr.lit _ => fun (_target : PsKernelCoreName) => false
+  | PsKernelCoreExpr.mdata _ body =>
+      let hasBody : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName body;
+      fun (target : PsKernelCoreName) => hasBody target
+  | PsKernelCoreExpr.proj _ _ body =>
+      let hasBody : PsKernelCoreName -> Bool := psKernelCoreExprHasFVarName body;
+      fun (target : PsKernelCoreName) => hasBody target
+
+def psKernelCoreExprAbstractFVarWorker
+    (expr : PsKernelCoreExpr) :
+    PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+  match expr with
+  | PsKernelCoreExpr.bvar index =>
+      fun (_target : PsKernelCoreName) (depth : Nat) =>
+        if Nat.ble depth index then
+          PsKernelCoreExpr.bvar (Nat.succ index)
+        else
+          PsKernelCoreExpr.bvar index
+  | PsKernelCoreExpr.fvar name =>
+      fun (target : PsKernelCoreName) (depth : Nat) =>
+        if psKernelCoreNameEq name target then
+          PsKernelCoreExpr.bvar depth
+        else
+          PsKernelCoreExpr.fvar name
+  | PsKernelCoreExpr.mvar name =>
+      fun (_target : PsKernelCoreName) (_depth : Nat) => PsKernelCoreExpr.mvar name
+  | PsKernelCoreExpr.sort level =>
+      fun (_target : PsKernelCoreName) (_depth : Nat) => PsKernelCoreExpr.sort level
+  | PsKernelCoreExpr.const name levels =>
+      fun (_target : PsKernelCoreName) (_depth : Nat) => PsKernelCoreExpr.const name levels
+  | PsKernelCoreExpr.app fn arg =>
+      let abstractFn : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker fn;
+      let abstractArg : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker arg;
+      fun (target : PsKernelCoreName) (depth : Nat) =>
+        PsKernelCoreExpr.app
+          (abstractFn target depth)
+          (abstractArg target depth)
+  | PsKernelCoreExpr.lam name type body binderInfo =>
+      let abstractType : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker type;
+      let abstractBody : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker body;
+      fun (target : PsKernelCoreName) (depth : Nat) =>
+        PsKernelCoreExpr.lam
+          name
+          (abstractType target depth)
+          (abstractBody target (Nat.succ depth))
+          binderInfo
+  | PsKernelCoreExpr.forallE name type body binderInfo =>
+      let abstractType : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker type;
+      let abstractBody : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker body;
+      fun (target : PsKernelCoreName) (depth : Nat) =>
+        PsKernelCoreExpr.forallE
+          name
+          (abstractType target depth)
+          (abstractBody target (Nat.succ depth))
+          binderInfo
+  | PsKernelCoreExpr.letE name type value body nondep =>
+      let abstractType : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker type;
+      let abstractValue : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker value;
+      let abstractBody : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker body;
+      fun (target : PsKernelCoreName) (depth : Nat) =>
+        PsKernelCoreExpr.letE
+          name
+          (abstractType target depth)
+          (abstractValue target depth)
+          (abstractBody target (Nat.succ depth))
+          nondep
+  | PsKernelCoreExpr.lit value =>
+      fun (_target : PsKernelCoreName) (_depth : Nat) => PsKernelCoreExpr.lit value
+  | PsKernelCoreExpr.mdata metadata body =>
+      let abstractBody : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker body;
+      fun (target : PsKernelCoreName) (depth : Nat) =>
+        PsKernelCoreExpr.mdata metadata (abstractBody target depth)
+  | PsKernelCoreExpr.proj typeName index body =>
+      let abstractBody : PsKernelCoreName -> Nat -> PsKernelCoreExpr :=
+        psKernelCoreExprAbstractFVarWorker body;
+      fun (target : PsKernelCoreName) (depth : Nat) =>
+        PsKernelCoreExpr.proj typeName index (abstractBody target depth)
+
+def psKernelCoreExprAbstractFVar
+    (expr : PsKernelCoreExpr)
+    (target : PsKernelCoreName) : PsKernelCoreExpr :=
+  psKernelCoreExprAbstractFVarWorker expr target Nat.zero

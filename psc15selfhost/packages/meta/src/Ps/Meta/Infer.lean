@@ -63,13 +63,14 @@ structure PsInferAppView where
   args : List PsExpr
 
 def psInferAppViewAcc
-    (expr : PsExpr)
-    (args : List PsExpr) : PsInferAppView :=
+    (expr : PsExpr) : List PsExpr -> PsInferAppView :=
   match expr with
   | .app fn arg =>
-      psInferAppViewAcc fn (List.cons arg args)
+      fun (args : List PsExpr) =>
+        psInferAppViewAcc fn (List.cons arg args)
   | _ =>
-      PsInferAppView.mk expr args
+      fun (args : List PsExpr) =>
+        PsInferAppView.mk expr args
 
 def psInferAppView (expr : PsExpr) : PsInferAppView :=
   psInferAppViewAcc expr []

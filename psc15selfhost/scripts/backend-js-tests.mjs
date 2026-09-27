@@ -18,6 +18,7 @@ try {
   const direct = await import(pathToFileURL(path.join(out, 'direct.mjs')));
   const {
     identity: directIdentity,
+    choose: directChoose,
     renamedLocal: directRenamedLocal,
     ...directValues
   } = direct;
@@ -31,6 +32,8 @@ try {
   });
   assert.equal(directRenamedLocal, 3n);
   assert.equal(directIdentity(37n), 37n);
+  assert.equal(directChoose(true), 10n);
+  assert.equal(directChoose(false), 20n);
   assert.deepEqual(Object.keys(await import(pathToFileURL(path.join(out, 'empty.mjs')))), []);
   run('tsc', [path.join(out, 'reference.ts'), '--target', 'ES2020', '--module', 'ES2020',
     '--outDir', path.join(out, 'reference'), '--strict', '--skipLibCheck']);
@@ -38,10 +41,16 @@ try {
   const { copyFileSync } = await import('node:fs');
   copyFileSync(path.join(out, 'reference/reference.js'), path.join(out, 'reference.mjs'));
   const reference = await import(pathToFileURL(path.join(out, 'reference.mjs')));
-  const { identity: referenceIdentity, ...referenceValues } = reference;
+  const {
+    identity: referenceIdentity,
+    choose: referenceChoose,
+    ...referenceValues
+  } = reference;
   assert.deepEqual(directValues, referenceValues);
   assert.equal(directIdentity(9007199254740993123456789n),
     referenceIdentity(9007199254740993123456789n));
+  assert.equal(directChoose(true), referenceChoose(true));
+  assert.equal(directChoose(false), referenceChoose(false));
   console.log('BACKEND_JS_EXECUTION_DIFFERENTIAL: PASS');
 } finally {
   rmSync(out, { recursive: true, force: true });

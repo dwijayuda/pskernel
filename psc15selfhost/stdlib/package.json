@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "proofscript": {
-    "bootstrap": true,
+    "bootstrap": false,
     "sourceRoots": [
       "."
     ],

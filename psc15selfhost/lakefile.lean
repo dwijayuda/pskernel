@@ -173,7 +173,8 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.CheckerDefEqStatefulReduced,
     `PSC1Kernel.CheckerSession,
     `PSC1Kernel.Quot,
-    `PSC1Kernel.Kernel
+    `PSC1Kernel.Kernel,
+    `PSC1Kernel.Inductive
   ]
 
 @[default_target]
@@ -304,3 +305,15 @@ lean_exe psc2_kernel_core_check_parity_tests where
 lean_exe psc2_kernel_core_admission_parity_tests where
   srcDir := "test"
   root := `KernelCoreAdmissionParityTests
+
+lean_exe psc2_kernel_core_inductive_shape_tests where
+  srcDir := "test"
+  root := `KernelCoreInductiveShapeTests
+
+lean_exe psc2_kernel_core_inductive_admission_parity_tests where
+  srcDir := "test"
+  root := `KernelCoreInductiveAdmissionParityTests
+
+lean_exe psc2_kernel_core_eq_inductive_tests where
+  srcDir := "test"
+  root := `KernelCoreEqInductiveTests

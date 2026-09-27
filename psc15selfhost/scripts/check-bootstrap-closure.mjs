@@ -152,6 +152,8 @@ if (!existsSync(minimalSelfHostTestsPath)) {
 }
 const minimalSelfHostTests = await readFile(minimalSelfHostTestsPath, "utf8");
 for (const marker of [
+  "foundational List construction preparation",
+  "foundational List match preparation",
   "foundational List preparation",
   "foundational List -> VerifiedIR",
   "foundational List -> TypeScript",

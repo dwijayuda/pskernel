@@ -12,6 +12,18 @@ def psJsEmitLiteral (value : PsJsLiteral) : String :=
 def psJsLocalName (index : Nat) : String :=
   psJsonConcat2 "__psc_js_l_" (toString index)
 
+def psJsEmitParameterNames (parameters : List Nat) : String :=
+  match parameters with
+  | List.nil => ""
+  | List.cons index rest =>
+      match rest with
+      | List.nil => psJsLocalName index
+      | List.cons _ _ =>
+          psJsonConcat3
+            (psJsLocalName index)
+            ", "
+            (psJsEmitParameterNames rest)
+
 def psJsEmitExpr (expr : PsJsExpr) : String :=
   match expr with
   | PsJsExpr.literal value => psJsEmitLiteral value
@@ -21,6 +33,10 @@ def psJsEmitExpr (expr : PsJsExpr) : String :=
       let start := psJsonConcat3 "((" name ") => ";
       let withBody := psJsonConcat3 start (psJsEmitExpr body) ")(";
       psJsonConcat3 withBody (psJsEmitExpr value) ")"
+  | PsJsExpr.lambda parameters body =>
+      let names := psJsEmitParameterNames parameters;
+      let start := psJsonConcat3 "((" names ") => ";
+      psJsonConcat3 start (psJsEmitExpr body) ")"
 
 def psJsEmitConstants (constants : List PsJsConstant) : Nat -> String :=
   match constants with

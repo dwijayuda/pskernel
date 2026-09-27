@@ -14,9 +14,9 @@ def psJsNatDecimalWithFuel (fuel : Nat) : Nat -> Except PsJsError String :=
         else
           match smaller (Nat.div value 10) with
           | Except.error error => Except.error error
-          | Except.ok prefix =>
+          | Except.ok higherDigits =>
               Except.ok
-                (psJsonConcat2 prefix (psJsonHexDigit (Nat.mod value 10)))
+                (psJsonConcat2 higherDigits (psJsonHexDigit (Nat.mod value 10)))
 
 def psJsNatDecimal (value : Nat) : Except PsJsError String :=
   psJsNatDecimalWithFuel (Nat.succ value) value

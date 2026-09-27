@@ -10,6 +10,9 @@ const infer = await readFile(
 );
 
 const required = [
+  'def psInferExprListLength\n    (values : List PsExpr) : Nat :=\n  match values with',
+  '| [] => 0',
+  '| _ :: rest =>\n      Nat.succ (psInferExprListLength rest)',
   'def psInferAppViewAcc\n    (expr : PsExpr) : List PsExpr -> PsInferAppView :=\n  match expr with',
   '| .app fn arg =>\n      let smaller : List PsExpr -> PsInferAppView :=\n        psInferAppViewAcc fn;\n      fun (args : List PsExpr) =>\n        smaller (List.cons arg args)',
   '| _ =>\n      fun (args : List PsExpr) =>\n        PsInferAppView.mk expr args',
@@ -19,7 +22,7 @@ const required = [
   'def psInferStructureProjectionFieldWorker\n    (remainingFuel : Nat) :',
   'psInferStructureProjectionFieldWorker fuel;',
   'psInferStructureProjectionFieldWorker\n    remainingFuel\n    environment\n    metaContext\n    localContext\n    typeName\n    target\n    requestedIndex\n    fieldIndex\n    cursor',
-  '(psInferNatNe (List.length view.args) info.numParams)',
+  '(psInferNatNe (psInferExprListLength view.args) info.numParams)',
 ];
 for (const marker of required) {
   if (!infer.includes(marker)) {
@@ -33,6 +36,7 @@ const forbidden = [
   'psInferApplyStructureParameters\n            environment\n            metaContext\n            localContext\n            (psExprInstantiate1 body argument)\n            rest',
   'psInferStructureProjectionField\n              environment\n              metaContext\n              localContext\n              typeName\n              target\n              fuel\n              requestedIndex\n              (Nat.succ fieldIndex)',
   'view.args.length',
+  'List.length view.args',
   '| head =>',
   'head := head',
 ];
@@ -43,5 +47,5 @@ for (const marker of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_INFER_SELFHOST_SOURCE_SYNTAX: PASS (arity-safe recursion and explicit List length)\n",
+  "PSC2_INFER_SELFHOST_SOURCE_SYNTAX: PASS (arity-safe recursion and local list length)\n",
 );

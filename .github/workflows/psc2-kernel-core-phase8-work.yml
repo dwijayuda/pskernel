@@ -49,12 +49,18 @@ jobs:
           cd psc15selfhost
           lake build PsKernelCore
           lake env lean --run test/KernelCoreInductiveShapeTests.lean
-      - name: Phase 8 inductive admission RED/GREEN
+      - name: Phase 8 inductive admission
         shell: bash
         run: |
           set -euo pipefail
           cd psc15selfhost
           lake env lean --run test/KernelCoreInductiveAdmissionParityTests.lean
+      - name: Phase 8 Eq inductive compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreEqInductiveTests.lean
       - name: KernelCore PSC1 source profile
         shell: bash
         run: |

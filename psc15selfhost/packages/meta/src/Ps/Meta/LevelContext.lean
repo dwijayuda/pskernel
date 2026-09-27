@@ -240,7 +240,9 @@ def psLevelInstantiateExpr
       PsExpr.proj typeName index (psLevelInstantiateExpr context value)
   | _ => expr
 
-def psLevelHasMVar : PsLevel -> Bool
+def psLevelHasMVar
+    (level : PsLevel) : Bool :=
+  match level with
   | .mvar _ => true
   | .succ value => psLevelHasMVar value
   | .max left right =>

@@ -55,6 +55,10 @@ def psElabBoolAnd (left right : Bool) : Bool :=
 def psElabNatNe (left right : Nat) : Bool :=
   if Nat.beq left right then false else true
 
+def psElabListLength {α : Type} : List α -> Nat
+  | [] => 0
+  | _ :: rest => Nat.succ (psElabListLength rest)
+
 def psSyntaxNameAppendSegments
     (segments : List String) :
     PsName -> PsName :=
@@ -222,7 +226,7 @@ def psElabProjectionStep
           let projectionInvalid :=
             if info.isStructure then
               if Nat.beq info.numIndices 0 then
-                if Nat.beq (List.length view.args) info.numParams then
+                if Nat.beq (psElabListLength view.args) info.numParams then
                   false
                 else
                   true
@@ -1417,15 +1421,15 @@ def psElabMatchConstructorMinor
       if psElabBoolNot (psNameEq ctorInfo.inductiveName inductiveInfo.name) then
         Except.error
           (PsElabError.matchConstructorUnknown constructorName)
-      else if psElabNatNe ctorInfo.numParams (List.length parameterArgs) then
+      else if psElabNatNe ctorInfo.numParams (psElabListLength parameterArgs) then
         Except.error PsElabError.matchParameterArity
-      else if psElabNatNe ctorInfo.numFields (List.length binders) then
+      else if psElabNatNe ctorInfo.numFields (psElabListLength binders) then
         Except.error
           (PsElabError.matchConstructorArity constructorName)
       else if psSyntaxNameListHasDuplicate binders then
         Except.error
           (PsElabError.matchConstructorArity constructorName)
-      else if psElabNatNe (List.length ctorInfo.levelParams) (List.length inductiveLevels) then
+      else if psElabNatNe (psElabListLength ctorInfo.levelParams) (psElabListLength inductiveLevels) then
         Except.error PsElabError.matchRecursorLevels
       else
         let ctorType :=
@@ -1621,7 +1625,7 @@ def psElabMatch
               | some inductiveInfo =>
                   if psElabNatNe inductiveInfo.numIndices 0 then
                     Except.error PsElabError.matchInductiveUnsupported
-                  else if psElabNatNe (List.length typeView.args) inductiveInfo.numParams then
+                  else if psElabNatNe (psElabListLength typeView.args) inductiveInfo.numParams then
                     Except.error PsElabError.matchParameterArity
                   else
                     match psElabPrepareMatchAlternatives
@@ -1649,7 +1653,7 @@ def psElabMatch
                                       (psElabNatNe recInfo.numMotives 1)
                                       (psElabNatNe
                                         recInfo.numMinors
-                                        (List.length inductiveInfo.constructors)))) then
+                                        (psElabListLength inductiveInfo.constructors)))) then
                               Except.error
                                 PsElabError.matchRecursorUnsupported
                             else
@@ -1674,13 +1678,13 @@ def psElabMatch
                                       Except.error (PsElabError.infer error)
                                   | Except.ok resultLevel =>
                                       let recursorLevels :=
-                                        if Nat.beq (List.length recInfo.levelParams) 0 then
+                                        if Nat.beq (psElabListLength recInfo.levelParams) 0 then
                                           []
-                                        else if Nat.beq (List.length recInfo.levelParams) 1 then
+                                        else if Nat.beq (psElabListLength recInfo.levelParams) 1 then
                                           [resultLevel]
                                         else
                                           [];
-                                      if Nat.blt 1 (List.length recInfo.levelParams) then
+                                      if Nat.blt 1 (psElabListLength recInfo.levelParams) then
                                         Except.error
                                           PsElabError.matchRecursorLevels
                                       else
@@ -2011,7 +2015,7 @@ def psSyntaxRecordFieldsMatch
       List (Prod PsSyntaxName PsSyntaxTerm))
     (names : List String) : Bool :=
   psElabBoolAnd
-    (Nat.beq (List.length fields) (List.length names))
+    (Nat.beq (psElabListLength fields) (psElabListLength names))
     (List.all names (psSyntaxRecordHasNamedField fields))
 
 def psSyntaxRecordFindField
@@ -2106,7 +2110,7 @@ def psElabRecordCandidateFromExpected
             typeName with
       | none => none
       | some info =>
-          if psElabNatNe (List.length view.args) info.numParams then
+          if psElabNatNe (psElabListLength view.args) info.numParams then
             none
           else
             psElabRecordCandidateForInfo
@@ -2346,8 +2350,8 @@ def psTryElabStructuralSelfCall
                 Except.ok none
               else if
                   psElabNatNe
-                    (List.length arguments)
-                    (List.length recursion.explicitParameterIds) then
+                    (psElabListLength arguments)
+                    (psElabListLength recursion.explicitParameterIds) then
                 Except.error PsElabError.structuralRecursionArity
               else
                 match

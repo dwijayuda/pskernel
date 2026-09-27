@@ -173,6 +173,23 @@ for (const symbol of [
   }
 }
 
+const levelContextPath = path.join(
+  root,
+  "packages",
+  "meta",
+  "src",
+  "Ps",
+  "Meta",
+  "LevelContext.lean",
+);
+const levelContext = await readFile(levelContextPath, "utf8");
+if (levelContext.includes("partial def psLevelInstantiateWithFuel")) {
+  throw new Error("PSC2_LEVEL_INSTANTIATE_MUST_REMAIN_TOTAL");
+}
+if (!levelContext.includes("let smaller : PsLevel -> PsLevel :=\n        psLevelInstantiateWithFuel context remaining;")) {
+  throw new Error("PSC2_LEVEL_INSTANTIATE_INVARIANT_FUEL_WORKER_MISSING");
+}
+
 const bridgeTestsPath = path.join(root, "test", "BridgeTests.lean");
 if (!existsSync(bridgeTestsPath)) {
   throw new Error("PSC2_BRIDGE_REGRESSION_SOURCE_MISSING");

@@ -155,6 +155,8 @@ for (const marker of [
   "foundational List construction preparation",
   "foundational List match preparation",
   "foundational List preparation",
+  "foundational List erasure missing constructor runtime",
+  "foundational List erasure missing match runtime",
   "foundational List -> VerifiedIR",
   "foundational List -> TypeScript",
 ]) {

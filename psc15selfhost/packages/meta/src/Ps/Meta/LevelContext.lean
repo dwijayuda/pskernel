@@ -54,24 +54,29 @@ def psLevelMetaFresh (context : PsLevelMetaContext) : PsLevelFreshResult :=
   }
 
 def psLevelInstantiateWithFuel
-    (context : PsLevelMetaContext) : Nat -> PsLevel -> PsLevel
-  | 0, level => level
-  | fuel + 1, level =>
+    (context : PsLevelMetaContext)
+    (fuel : Nat)
+    (level : PsLevel) : PsLevel :=
+  match fuel with
+  | Nat.zero => level
+  | Nat.succ remaining =>
       match level with
       | .mvar id =>
           match psLevelFindAssignment context id with
           | Option.none => level
-          | Option.some value => psLevelInstantiateWithFuel context fuel value
+          | Option.some value =>
+              psLevelInstantiateWithFuel context remaining value
       | .succ value =>
-          PsLevel.succ (psLevelInstantiateWithFuel context fuel value)
+          PsLevel.succ
+            (psLevelInstantiateWithFuel context remaining value)
       | .max left right =>
           PsLevel.max
-            (psLevelInstantiateWithFuel context fuel left)
-            (psLevelInstantiateWithFuel context fuel right)
+            (psLevelInstantiateWithFuel context remaining left)
+            (psLevelInstantiateWithFuel context remaining right)
       | .imax left right =>
           PsLevel.imax
-            (psLevelInstantiateWithFuel context fuel left)
-            (psLevelInstantiateWithFuel context fuel right)
+            (psLevelInstantiateWithFuel context remaining left)
+            (psLevelInstantiateWithFuel context remaining right)
       | _ => level
 
 def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLevel :=

@@ -155,6 +155,7 @@ def psStringFromReversedChars (charsRev : List Char) : String :=
   | char :: rest =>
       String.push (psStringFromReversedChars rest) char
 
+-- PSC1 self-host keeps only fuel as the structural recursion parameter.
 def psDecodeStringBodyWithFuel
     (fuel : Nat) :
     List Char ->

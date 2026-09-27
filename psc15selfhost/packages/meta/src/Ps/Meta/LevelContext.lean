@@ -132,50 +132,64 @@ def psLevelAssign
   else
     Option.none
 
+def psLevelUnifyWithFuelWorker
+    (fuel : Nat) :
+    PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=
+  match fuel with
+  | Nat.zero =>
+      fun (context : PsLevelMetaContext) (_left : PsLevel) (_right : PsLevel) =>
+        { context := context, success := false }
+  | Nat.succ remaining =>
+      let smaller : PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=
+        psLevelUnifyWithFuelWorker remaining;
+      fun (context : PsLevelMetaContext) (left : PsLevel) (right : PsLevel) =>
+        let leftValue := psLevelInstantiate context left;
+        let rightValue := psLevelInstantiate context right;
+        if psLevelStructuralEq leftValue rightValue then
+          { context := context, success := true }
+        else
+          match leftValue with
+          | .mvar id =>
+              match psLevelAssign context id rightValue with
+              | Option.none => { context := context, success := false }
+              | Option.some next => { context := next, success := true }
+          | value =>
+              match rightValue with
+              | .mvar id =>
+                  match psLevelAssign context id value with
+                  | Option.none => { context := context, success := false }
+                  | Option.some next => { context := next, success := true }
+              | .succ rightInner =>
+                  match value with
+                  | .succ leftInner =>
+                      smaller context leftInner rightInner
+                  | _ => { context := context, success := false }
+              | .max rightA rightB =>
+                  match value with
+                  | .max leftA leftB =>
+                      let first := smaller context leftA rightA;
+                      if first.success then
+                        smaller first.context leftB rightB
+                      else
+                        first
+                  | _ => { context := context, success := false }
+              | .imax rightA rightB =>
+                  match value with
+                  | .imax leftA leftB =>
+                      let first := smaller context leftA rightA;
+                      if first.success then
+                        smaller first.context leftB rightB
+                      else
+                        first
+                  | _ => { context := context, success := false }
+              | _ => { context := context, success := false }
+
 def psLevelUnifyWithFuel
-    (context : PsLevelMetaContext) : Nat -> PsLevel -> PsLevel -> PsLevelUnifyResult
-  | 0, _, _ => { context := context, success := false }
-  | fuel + 1, left, right =>
-      let leftValue := psLevelInstantiate context left;
-      let rightValue := psLevelInstantiate context right;
-      if psLevelStructuralEq leftValue rightValue then
-        { context := context, success := true }
-      else
-        match leftValue with
-        | .mvar id =>
-            match psLevelAssign context id rightValue with
-            | Option.none => { context := context, success := false }
-            | Option.some next => { context := next, success := true }
-        | value =>
-            match rightValue with
-            | .mvar id =>
-                match psLevelAssign context id value with
-                | Option.none => { context := context, success := false }
-                | Option.some next => { context := next, success := true }
-            | .succ rightInner =>
-                match value with
-                | .succ leftInner =>
-                    psLevelUnifyWithFuel context fuel leftInner rightInner
-                | _ => { context := context, success := false }
-            | .max rightA rightB =>
-                match value with
-                | .max leftA leftB =>
-                    let first := psLevelUnifyWithFuel context fuel leftA rightA;
-                    if first.success then
-                      psLevelUnifyWithFuel first.context fuel leftB rightB
-                    else
-                      first
-                | _ => { context := context, success := false }
-            | .imax rightA rightB =>
-                match value with
-                | .imax leftA leftB =>
-                    let first := psLevelUnifyWithFuel context fuel leftA rightA;
-                    if first.success then
-                      psLevelUnifyWithFuel first.context fuel leftB rightB
-                    else
-                      first
-                | _ => { context := context, success := false }
-            | _ => { context := context, success := false }
+    (context : PsLevelMetaContext)
+    (fuel : Nat)
+    (left : PsLevel)
+    (right : PsLevel) : PsLevelUnifyResult :=
+  psLevelUnifyWithFuelWorker fuel context left right
 
 def psLevelUnify
     (context : PsLevelMetaContext)

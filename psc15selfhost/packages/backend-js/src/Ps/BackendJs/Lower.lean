@@ -2,6 +2,15 @@ import Ps.CompilerIr.Model
 import Ps.Bridge.Json
 import Ps.BackendJs.Model
 
+structure PsJsLocalBinding where
+  sourceName : String
+  type : PsVerifiedIrPrimitiveType
+  index : Nat
+
+structure PsJsLoweredExpr where
+  expr : PsJsExpr
+  nextLocal : Nat
+
 def psJsNameHead (value : Char) : Bool :=
   let code := Char.toNat value;
   if psJsonNatInRange code 65 90 then true
@@ -41,6 +50,53 @@ def psJsValidExportName (name : String) : Bool :=
     | List.cons head tail =>
         if psJsNameHead head then psJsNameTail tail else false
 
+def psJsPrimitiveTypeEq (left right : PsVerifiedIrPrimitiveType) : Bool :=
+  match left with
+  | PsVerifiedIrPrimitiveType.nat =>
+      match right with | PsVerifiedIrPrimitiveType.nat => true | _ => false
+  | PsVerifiedIrPrimitiveType.int =>
+      match right with | PsVerifiedIrPrimitiveType.int => true | _ => false
+  | PsVerifiedIrPrimitiveType.uint8 =>
+      match right with | PsVerifiedIrPrimitiveType.uint8 => true | _ => false
+  | PsVerifiedIrPrimitiveType.uint16 =>
+      match right with | PsVerifiedIrPrimitiveType.uint16 => true | _ => false
+  | PsVerifiedIrPrimitiveType.uint32 =>
+      match right with | PsVerifiedIrPrimitiveType.uint32 => true | _ => false
+  | PsVerifiedIrPrimitiveType.uint64 =>
+      match right with | PsVerifiedIrPrimitiveType.uint64 => true | _ => false
+  | PsVerifiedIrPrimitiveType.usize =>
+      match right with | PsVerifiedIrPrimitiveType.usize => true | _ => false
+  | PsVerifiedIrPrimitiveType.int8 =>
+      match right with | PsVerifiedIrPrimitiveType.int8 => true | _ => false
+  | PsVerifiedIrPrimitiveType.int16 =>
+      match right with | PsVerifiedIrPrimitiveType.int16 => true | _ => false
+  | PsVerifiedIrPrimitiveType.int32 =>
+      match right with | PsVerifiedIrPrimitiveType.int32 => true | _ => false
+  | PsVerifiedIrPrimitiveType.int64 =>
+      match right with | PsVerifiedIrPrimitiveType.int64 => true | _ => false
+  | PsVerifiedIrPrimitiveType.isize =>
+      match right with | PsVerifiedIrPrimitiveType.isize => true | _ => false
+  | PsVerifiedIrPrimitiveType.float =>
+      match right with | PsVerifiedIrPrimitiveType.float => true | _ => false
+  | PsVerifiedIrPrimitiveType.float32 =>
+      match right with | PsVerifiedIrPrimitiveType.float32 => true | _ => false
+  | PsVerifiedIrPrimitiveType.bool =>
+      match right with | PsVerifiedIrPrimitiveType.bool => true | _ => false
+  | PsVerifiedIrPrimitiveType.char =>
+      match right with | PsVerifiedIrPrimitiveType.char => true | _ => false
+  | PsVerifiedIrPrimitiveType.string =>
+      match right with | PsVerifiedIrPrimitiveType.string => true | _ => false
+  | PsVerifiedIrPrimitiveType.unit =>
+      match right with | PsVerifiedIrPrimitiveType.unit => true | _ => false
+
+def psJsLookupLocal (locals : List PsJsLocalBinding)
+    (name : String) : Option PsJsLocalBinding :=
+  match locals with
+  | List.nil => Option.none
+  | List.cons local rest =>
+      if psJsonStringEq local.sourceName name then Option.some local
+      else psJsLookupLocal rest name
+
 def psJsLowerLiteral (value : PsVerifiedIrLiteral)
     (type : PsVerifiedIrPrimitiveType) : Except PsJsError PsJsLiteral :=
   match value with
@@ -67,13 +123,50 @@ def psJsLowerLiteral (value : PsVerifiedIrLiteral)
   | PsVerifiedIrLiteral.machineInteger _ _ =>
       Except.error PsJsError.unsupportedExpression
 
+def psJsLowerExpr (locals : List PsJsLocalBinding) (nextLocal : Nat)
+    (expectedType : PsVerifiedIrPrimitiveType) (body : PsVerifiedIrExpr) :
+    Except PsJsError PsJsLoweredExpr :=
+  match body with
+  | PsVerifiedIrExpr.literal value =>
+      match psJsLowerLiteral value expectedType with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok (PsJsLoweredExpr.mk (PsJsExpr.literal lowered) nextLocal)
+  | PsVerifiedIrExpr.var name =>
+      match psJsLookupLocal locals name with
+      | Option.none => Except.error PsJsError.unsupportedExpression
+      | Option.some local =>
+          if psJsPrimitiveTypeEq local.type expectedType then
+            Except.ok (PsJsLoweredExpr.mk (PsJsExpr.local local.index) nextLocal)
+          else Except.error PsJsError.literalTypeMismatch
+  | PsVerifiedIrExpr.letE name type value innerBody =>
+      match type with
+      | PsVerifiedIrType.primitive localType =>
+          match psJsLowerExpr locals nextLocal localType value with
+          | Except.error error => Except.error error
+          | Except.ok loweredValue =>
+              let localIndex := loweredValue.nextLocal;
+              let local := PsJsLocalBinding.mk name localType localIndex;
+              match psJsLowerExpr
+                (List.cons local locals)
+                (Nat.succ localIndex)
+                expectedType
+                innerBody with
+              | Except.error error => Except.error error
+              | Except.ok loweredBody =>
+                  Except.ok (PsJsLoweredExpr.mk
+                    (PsJsExpr.letE localIndex loweredValue.expr loweredBody.expr)
+                    loweredBody.nextLocal)
+      | _ => Except.error PsJsError.unsupportedExpression
+  | _ => Except.error PsJsError.unsupportedExpression
+
 def psJsLowerBody (type : PsVerifiedIrType)
-    (body : PsVerifiedIrExpr) : Except PsJsError PsJsLiteral :=
+    (body : PsVerifiedIrExpr) : Except PsJsError PsJsExpr :=
   match type with
   | PsVerifiedIrType.primitive primitive =>
-      match body with
-      | PsVerifiedIrExpr.literal value => psJsLowerLiteral value primitive
-      | _ => Except.error PsJsError.unsupportedExpression
+      match psJsLowerExpr List.nil 0 primitive body with
+      | Except.error error => Except.error error
+      | Except.ok lowered => Except.ok lowered.expr
   | _ => Except.error PsJsError.literalTypeMismatch
 
 def psJsLowerConstant (declaration : PsVerifiedIrDeclaration) :
@@ -87,7 +180,7 @@ def psJsLowerConstant (declaration : PsVerifiedIrDeclaration) :
           if psJsValidExportName declaration.name then
             match psJsLowerBody declaration.resultType declaration.body with
             | Except.error error => Except.error error
-            | Except.ok value => Except.ok (PsJsConstant.mk declaration.name value)
+            | Except.ok body => Except.ok (PsJsConstant.mk declaration.name body)
           else Except.error (PsJsError.invalidExportName declaration.name)
 
 def psJsLowerConstants (declarations : List PsVerifiedIrDeclaration) :

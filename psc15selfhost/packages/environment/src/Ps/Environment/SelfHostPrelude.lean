@@ -104,36 +104,36 @@ def psSelfHostReplacePreludeAxiom
   | some next => next
 
 def psSelfHostPreludeEnvironment : PsEnvironment :=
-  let uName := psRootName "u"
-  let alphaName := psRootName "α"
-  let errorTypeName := psRootName "ε"
-  let valueTypeName := psRootName "α"
-  let motiveName := psRootName "_motive"
-  let nilMinorName := psRootName "_nil"
-  let consMinorName := psRootName "_cons"
-  let noneMinorName := psRootName "_none"
-  let someMinorName := psRootName "_some"
-  let errorMinorName := psRootName "_error"
-  let okMinorName := psRootName "_ok"
-  let headName := psRootName "head"
-  let tailName := psRootName "tail"
-  let valueName := psRootName "value"
-  let errorName := psRootName "error"
-  let hypothesisName := psRootName "_ih"
-  let majorName := psRootName "_major"
-  let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let uName := psRootName "u";
+  let alphaName := psRootName "α";
+  let errorTypeName := psRootName "ε";
+  let valueTypeName := psRootName "α";
+  let motiveName := psRootName "_motive";
+  let nilMinorName := psRootName "_nil";
+  let consMinorName := psRootName "_cons";
+  let noneMinorName := psRootName "_none";
+  let someMinorName := psRootName "_some";
+  let errorMinorName := psRootName "_error";
+  let okMinorName := psRootName "_ok";
+  let headName := psRootName "head";
+  let tailName := psRootName "tail";
+  let valueName := psRootName "value";
+  let errorName := psRootName "error";
+  let hypothesisName := psRootName "_ih";
+  let majorName := psRootName "_major";
+  let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero);
   let listType :=
     PsExpr.forallE
       alphaName
       typeType
       typeType
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let nilType :=
     PsExpr.forallE
       alphaName
       typeType
       (psSelfHostListOf (PsExpr.bvar 0))
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let consType :=
     PsExpr.forallE
       alphaName
@@ -147,17 +147,17 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           (psSelfHostListOf (PsExpr.bvar 2))
           PsBinderInfo.explicit)
         PsBinderInfo.explicit)
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let listMotiveType :=
     PsExpr.forallE
       majorName
       (psSelfHostListOf (PsExpr.bvar 0))
       (PsExpr.sortE (PsLevel.param uName))
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let nilMinorType :=
     PsExpr.app
       (PsExpr.bvar 0)
-      (psSelfHostListNilOf (PsExpr.bvar 1))
+      (psSelfHostListNilOf (PsExpr.bvar 1));
   let consMinorType :=
     PsExpr.forallE
       headName
@@ -178,7 +178,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
               (PsExpr.bvar 1)))
           PsBinderInfo.explicit)
         PsBinderInfo.explicit)
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let listRecType :=
     PsExpr.forallE
       alphaName
@@ -202,19 +202,19 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
             PsBinderInfo.explicit)
           PsBinderInfo.explicit)
         PsBinderInfo.explicit)
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let optionType :=
     PsExpr.forallE
       alphaName
       typeType
       typeType
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let noneType :=
     PsExpr.forallE
       alphaName
       typeType
       (psSelfHostOptionOf (PsExpr.bvar 0))
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let someType :=
     PsExpr.forallE
       alphaName
@@ -224,17 +224,17 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
         (PsExpr.bvar 0)
         (psSelfHostOptionOf (PsExpr.bvar 1))
         PsBinderInfo.explicit)
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let optionMotiveType :=
     PsExpr.forallE
       majorName
       (psSelfHostOptionOf (PsExpr.bvar 0))
       (PsExpr.sortE (PsLevel.param uName))
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let noneMinorType :=
     PsExpr.app
       (PsExpr.bvar 0)
-      (psSelfHostOptionNoneOf (PsExpr.bvar 1))
+      (psSelfHostOptionNoneOf (PsExpr.bvar 1));
   let someMinorType :=
     PsExpr.forallE
       valueName
@@ -244,7 +244,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
         (psSelfHostOptionSomeOf
           (PsExpr.bvar 3)
           (PsExpr.bvar 0)))
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let optionRecType :=
     PsExpr.forallE
       alphaName
@@ -268,7 +268,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
             PsBinderInfo.explicit)
           PsBinderInfo.explicit)
         PsBinderInfo.explicit)
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let exceptType :=
     PsExpr.forallE
       errorTypeName
@@ -278,7 +278,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
         typeType
         typeType
         PsBinderInfo.explicit)
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let exceptErrorType :=
     PsExpr.forallE
       errorTypeName
@@ -294,7 +294,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
             (PsExpr.bvar 1))
           PsBinderInfo.explicit)
         PsBinderInfo.implicit)
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let exceptOkType :=
     PsExpr.forallE
       errorTypeName
@@ -310,7 +310,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
             (PsExpr.bvar 1))
           PsBinderInfo.explicit)
         PsBinderInfo.implicit)
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let exceptMotiveType :=
     PsExpr.forallE
       majorName
@@ -318,7 +318,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
         (PsExpr.bvar 1)
         (PsExpr.bvar 0))
       (PsExpr.sortE (PsLevel.param uName))
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let exceptErrorMinorType :=
     PsExpr.forallE
       errorName
@@ -329,7 +329,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           (PsExpr.bvar 3)
           (PsExpr.bvar 2)
           (PsExpr.bvar 0)))
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let exceptOkMinorType :=
     PsExpr.forallE
       valueName
@@ -340,7 +340,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           (PsExpr.bvar 4)
           (PsExpr.bvar 3)
           (PsExpr.bvar 0)))
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let exceptRecType :=
     PsExpr.forallE
       errorTypeName
@@ -370,7 +370,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
             PsBinderInfo.explicit)
           PsBinderInfo.explicit)
         PsBinderInfo.implicit)
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let withList :=
     psSelfHostReplacePreludeAxiom
       psBootstrapPreludeEnvironment
@@ -382,7 +382,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           1
           0
           [psSelfHostListNilName, psSelfHostListConsName]
-          false))
+          false));
   let withNil :=
     psPreludeAdd withList
       (PsDeclaration.constructorDecl
@@ -394,7 +394,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           0
           1
           0
-          []))
+          []));
   let withCons :=
     psPreludeAdd withNil
       (PsDeclaration.constructorDecl
@@ -406,7 +406,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           1
           1
           2
-          [1]))
+          [1]));
   let withListRec :=
     psPreludeAdd withCons
       (PsDeclaration.recursorDecl
@@ -418,7 +418,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           1
           0
           1
-          2))
+          2));
   let withOption :=
     psSelfHostReplacePreludeAxiom
       withListRec
@@ -430,7 +430,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           1
           0
           [psSelfHostOptionNoneName, psSelfHostOptionSomeName]
-          false))
+          false));
   let withNone :=
     psPreludeAdd withOption
       (PsDeclaration.constructorDecl
@@ -442,7 +442,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           0
           1
           0
-          []))
+          []));
   let withSome :=
     psPreludeAdd withNone
       (PsDeclaration.constructorDecl
@@ -454,7 +454,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           1
           1
           1
-          []))
+          []));
   let withOptionRec :=
     psPreludeAdd withSome
       (PsDeclaration.recursorDecl
@@ -466,7 +466,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           1
           0
           1
-          2))
+          2));
   let withExcept :=
     psSelfHostReplacePreludeAxiom
       withOptionRec
@@ -478,7 +478,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           2
           0
           [psSelfHostExceptErrorName, psSelfHostExceptOkName]
-          false))
+          false));
   let withExceptError :=
     psPreludeAdd withExcept
       (PsDeclaration.constructorDecl
@@ -490,7 +490,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           0
           2
           1
-          []))
+          []));
   let withExceptOk :=
     psPreludeAdd withExceptError
       (PsDeclaration.constructorDecl
@@ -502,7 +502,7 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           1
           2
           1
-          []))
+          []));
   psPreludeAdd withExceptOk
     (PsDeclaration.recursorDecl
       (PsRecursorInfo.mk

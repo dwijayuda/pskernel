@@ -3,20 +3,6 @@ open Lake DSL
 
 package proofscriptSelfhost
 
-lean_lib ProofScriptBootstrapStdlib where
-  srcDir := "stdlib"
-  roots := #[
-    `ProofScript.Data.Prod,
-    `ProofScript.Data.Option,
-    `ProofScript.Data.Ordering,
-    `ProofScript.Data.Result,
-    `ProofScript.Data.Except,
-    `ProofScript.Data.List,
-    `ProofScript.Data.Array,
-    `ProofScript.Data.Map,
-    `ProofScript.Data.Set
-  ]
-
 lean_lib PsFoundation where
   srcDir := "packages/foundation/src"
   roots := #[

@@ -183,8 +183,9 @@ def psCompilerVerifiedIrFromPrepared
       Except.error error
   | Except.ok environment =>
       match
-          psEraseCoreModule
+          psEraseCoreModuleWithRuntimePrelude
             environment
+            psSelfHostRuntimePreludeDeclarations
             prepared.declarations with
       | Except.error error =>
           Except.error (PsCompilerError.erasure error)

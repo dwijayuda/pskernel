@@ -55,7 +55,9 @@ def psElabBoolAnd (left right : Bool) : Bool :=
 def psElabNatNe (left right : Nat) : Bool :=
   if Nat.beq left right then false else true
 
-def psElabListLength {α : Type} : List α -> Nat
+def psElabListLength {α : Type}
+    (values : List α) : Nat :=
+  match values with
   | [] => 0
   | _ :: rest => Nat.succ (psElabListLength rest)
 

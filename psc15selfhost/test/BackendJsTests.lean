@@ -1,10 +1,14 @@
 import Ps.BackendJs.Module
 import Ps.BackendTs.Module
 
+def jsFixtureExprDecl (name : String) (type : PsVerifiedIrPrimitiveType)
+    (body : PsVerifiedIrExpr) : PsVerifiedIrDeclaration :=
+  { name := name, typeParameters := [], parameters := [],
+    resultType := .primitive type, body := body }
+
 def jsFixtureDecl (name : String) (type : PsVerifiedIrPrimitiveType)
     (literal : PsVerifiedIrLiteral) : PsVerifiedIrDeclaration :=
-  { name := name, typeParameters := [], parameters := [],
-    resultType := .primitive type, body := .literal literal }
+  jsFixtureExprDecl name type (.literal literal)
 
 def jsFixtureModule : PsVerifiedIrModule :=
   { psVerifiedIrModuleEmpty with declarations := [
@@ -18,7 +22,14 @@ def jsFixtureModule : PsVerifiedIrModule :=
     jsFixtureDecl "control" .string (.string (String.singleton (Char.ofNat 0))),
     jsFixtureDecl "lineSeparators" .string (.string "  "),
     jsFixtureDecl "nothing" .unit .unit,
-    jsFixtureDecl "__psc_js_0" .nat (.natural 7)
+    jsFixtureDecl "__psc_js_0" .nat (.natural 7),
+    jsFixtureExprDecl "letAlias" .nat
+      (.letE "x" (.primitive .nat) (.literal (.natural 42)) (.var "x")),
+    jsFixtureExprDecl "shadowed" .nat
+      (.letE "x" (.primitive .nat) (.literal (.natural 1))
+        (.letE "x" (.primitive .nat) (.literal (.natural 2)) (.var "x"))),
+    jsFixtureExprDecl "renamedLocal" .nat
+      (.letE "a-b" (.primitive .nat) (.literal (.natural 3)) (.var "a-b"))
   ] }
 
 def jsRequireError (label : String) (module : PsVerifiedIrModule) : IO Unit := do
@@ -39,6 +50,9 @@ def main (args : List String) : IO Unit := do
     declarations := [{ declaration with resultType := .unknown }] }
   jsRequireError "free variable" { psVerifiedIrModuleEmpty with
     declarations := [{ declaration with body := .var "missing" }] }
+  jsRequireError "let value type mismatch" { psVerifiedIrModuleEmpty with
+    declarations := [jsFixtureExprDecl "badLet" .nat
+      (.letE "x" (.primitive .int) (.literal (.natural 1)) (.var "x"))] }
   jsRequireError "function" { psVerifiedIrModuleEmpty with
     declarations := [{ declaration with parameters := [{ name := "a", type := .primitive .nat }] }] }
   jsRequireError "generic" { psVerifiedIrModuleEmpty with
@@ -51,7 +65,7 @@ def main (args : List String) : IO Unit := do
     { name := "S", typeParameters := [], fields := [] }] }
   jsRequireError "inductive" { psVerifiedIrModuleEmpty with inductives := [
     { name := "I", typeParameters := [], constructors := [] }] }
-  let .ok direct := psJsEmitModule jsFixtureModule | throw (IO.userError "JS literal emission failed")
+  let .ok direct := psJsEmitModule jsFixtureModule | throw (IO.userError "JS lexical emission failed")
   let .ok again := psJsEmitModule jsFixtureModule | throw (IO.userError "second emission failed")
   unless direct == again do throw (IO.userError "nondeterministic emission")
   let .ok empty := psJsEmitModule psVerifiedIrModuleEmpty | throw (IO.userError "empty module failed")

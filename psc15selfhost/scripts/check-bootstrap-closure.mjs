@@ -96,14 +96,17 @@ const semanticApi = await readFile(semanticApiPath, "utf8");
 if (/\bPs\.Backend/u.test(semanticApi)) {
   throw new Error("PSC2_BOOTSTRAP_COMPILER_API_BACKEND_COUPLING");
 }
-if (!semanticApi.includes("import Ps.Environment.SelfHostPrelude")) {
-  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_SELFHOST_PRELUDE_MISSING");
+if (!semanticApi.includes("import Ps.Environment.SelfHostProd")) {
+  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_SELFHOST_PROD_FOUNDATION_MISSING");
+}
+if (!semanticApi.includes("psSelfHostProdPreludeEnvironment")) {
+  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_PROD_ENVIRONMENT_SELECTION_MISSING");
 }
 if (!semanticApi.includes("psEraseCoreModuleWithRuntimePrelude")) {
   throw new Error("PSC2_BOOTSTRAP_COMPILER_API_RUNTIME_PRELUDE_ERASURE_MISSING");
 }
-if (!semanticApi.includes("psSelfHostRuntimePreludeDeclarations")) {
-  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_RUNTIME_PRELUDE_SELECTION_MISSING");
+if (!semanticApi.includes("psSelfHostRuntimePreludeDeclarationsWithProd")) {
+  throw new Error("PSC2_BOOTSTRAP_COMPILER_API_PROD_RUNTIME_PRELUDE_SELECTION_MISSING");
 }
 for (const [operator, label] of [
   ["==", "EQUALITY"],
@@ -146,6 +149,29 @@ for (const symbol of [
   }
 }
 
+const selfHostProdPath = path.join(
+  root,
+  "packages",
+  "environment",
+  "src",
+  "Ps",
+  "Environment",
+  "SelfHostProd.lean",
+);
+if (!existsSync(selfHostProdPath)) {
+  throw new Error("PSC2_SELFHOST_PROD_FOUNDATION_MISSING");
+}
+const selfHostProd = await readFile(selfHostProdPath, "utf8");
+for (const symbol of [
+  "psSelfHostProdPreludeEnvironment",
+  "psProdMkName",
+  "psSelfHostRuntimePreludeDeclarationsWithProd",
+]) {
+  if (!selfHostProd.includes(symbol)) {
+    throw new Error(`PSC2_SELFHOST_PROD_FOUNDATION_SYMBOL_MISSING: ${symbol}`);
+  }
+}
+
 const bridgeTestsPath = path.join(root, "test", "BridgeTests.lean");
 if (!existsSync(bridgeTestsPath)) {
   throw new Error("PSC2_BRIDGE_REGRESSION_SOURCE_MISSING");
@@ -179,6 +205,9 @@ for (const marker of [
   "foundational Except preparation",
   "foundational Except -> VerifiedIR",
   "foundational Except -> TypeScript",
+  "foundational Prod preparation",
+  "foundational Prod -> VerifiedIR",
+  "foundational Prod -> TypeScript",
 ]) {
   if (!minimalSelfHostTests.includes(marker)) {
     throw new Error(`PSC2_MINIMAL_SELFHOST_FOUNDATION_DIAGNOSTIC_MISSING: ${marker}`);

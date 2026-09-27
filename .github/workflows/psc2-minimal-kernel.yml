@@ -15,6 +15,8 @@ on:
       - psc2/kernel-core-phase5-defeq-work
       - psc2/kernel-core-phase6-admission
       - psc2/kernel-core-phase6-admission-work
+      - psc2/kernel-core-phase7-primitives
+      - psc2/kernel-core-phase7-primitives-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
@@ -111,6 +113,27 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           lake exe psc2_kernel_core_local_context_parity_tests
+
+      - name: Resource parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_resource_parity_tests
+
+      - name: Mandatory Nat primitive parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_primitive_parity_tests
+
+      - name: Configured primitive/resource integration test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_resource_integration_tests
 
       - name: Basic reduction parity test
         shell: bash
@@ -209,6 +232,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run assurance:kernel-core:phase6
+
+      - name: Phase 7 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase7
 
       - name: Existing PSC2 regression gate
         shell: bash

@@ -144,13 +144,21 @@ def psKernelCoreAdmissionFindUndefinedLevels
         PsKernelCoreOption.none
   | PsKernelCoreList.cons level rest =>
       let restFind :
+          PsKernelCoreList PsKernelCoreLevel ->
+          PsKernelCoreOption PsKernelCoreName :=
+        fun (_unused : PsKernelCoreList PsKernelCoreLevel) =>
+          PsKernelCoreOption.none;
+      let nextFind :
           PsKernelCoreList PsKernelCoreName ->
           PsKernelCoreOption PsKernelCoreName :=
         psKernelCoreAdmissionFindUndefinedLevels rest;
       fun (allowed : PsKernelCoreList PsKernelCoreName) =>
         match psKernelCoreAdmissionFindUndefinedLevelParam level allowed with
         | PsKernelCoreOption.some name => PsKernelCoreOption.some name
-        | PsKernelCoreOption.none => restFind allowed
+        | PsKernelCoreOption.none =>
+            match restFind PsKernelCoreList.nil with
+            | PsKernelCoreOption.some name => PsKernelCoreOption.some name
+            | PsKernelCoreOption.none => nextFind allowed
 
 def psKernelCoreAdmissionFindUndefinedExprLevelParam
     (expr : PsKernelCoreExpr) :
@@ -257,8 +265,9 @@ def psKernelCoreAdmissionCheckLevelParams
   | PsKernelCoreOption.none =>
       PsKernelCoreResult.ok Unit.unit
 
-def psKernelCoreAdmissionCheckBase
+def psKernelCoreAdmissionCheckBaseWithResources
     (budget : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (base : PsKernelCoreConstantBase)
     (safety : PsKernelCoreDefinitionSafety) :
@@ -274,20 +283,21 @@ def psKernelCoreAdmissionCheckBase
         match psKernelCoreAdmissionCheckLevelParams base.type base.levelParams with
         | PsKernelCoreResult.error message => PsKernelCoreResult.error message
         | PsKernelCoreResult.ok _ =>
-            match psKernelCoreCheck
-                budget env psKernelCoreLocalContextEmpty safety base.type with
+            match psKernelCoreCheckWithResources
+                budget resources env psKernelCoreLocalContextEmpty safety base.type with
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok typeType =>
-                match psKernelCoreEnsureSort
-                    budget env psKernelCoreLocalContextEmpty typeType with
+                match psKernelCoreEnsureSortWithResources
+                    budget resources env psKernelCoreLocalContextEmpty typeType with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
                 | PsKernelCoreResult.ok _ =>
                     PsKernelCoreResult.ok Unit.unit
 
-def psKernelCoreAdmissionCheckDefinitionBody
+def psKernelCoreAdmissionCheckDefinitionBodyWithResources
     (budget : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (value : PsKernelCoreDefinitionInfo)
     (safety : PsKernelCoreDefinitionSafety) :
@@ -299,13 +309,13 @@ def psKernelCoreAdmissionCheckDefinitionBody
           value.value value.base.levelParams with
       | PsKernelCoreResult.error message => PsKernelCoreResult.error message
       | PsKernelCoreResult.ok _ =>
-          match psKernelCoreCheck
-              budget env psKernelCoreLocalContextEmpty safety value.value with
+          match psKernelCoreCheckWithResources
+              budget resources env psKernelCoreLocalContextEmpty safety value.value with
           | PsKernelCoreResult.error message =>
               PsKernelCoreResult.error message
           | PsKernelCoreResult.ok valueType =>
-              match psKernelCoreIsDefEq
-                  budget env psKernelCoreLocalContextEmpty
+              match psKernelCoreIsDefEqWithResources
+                  budget resources env psKernelCoreLocalContextEmpty
                   valueType value.base.type with
               | PsKernelCoreResult.error message =>
                   PsKernelCoreResult.error message
@@ -315,19 +325,20 @@ def psKernelCoreAdmissionCheckDefinitionBody
                   else
                     PsKernelCoreResult.error "definition type mismatch"
 
-def psKernelCoreAdmissionIsProp
+def psKernelCoreAdmissionIsPropWithResources
     (budget : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (expr : PsKernelCoreExpr) :
     PsKernelCoreResult String Bool :=
-  match psKernelCoreCheck
-      budget env psKernelCoreLocalContextEmpty
+  match psKernelCoreCheckWithResources
+      budget resources env psKernelCoreLocalContextEmpty
       PsKernelCoreDefinitionSafety.safe expr with
   | PsKernelCoreResult.error message =>
       PsKernelCoreResult.error message
   | PsKernelCoreResult.ok inferredType =>
-      match psKernelCoreWhnf
-          budget env psKernelCoreLocalContextEmpty inferredType with
+      match psKernelCoreWhnfWithResources
+          budget resources env psKernelCoreLocalContextEmpty inferredType with
       | PsKernelCoreResult.error message =>
           PsKernelCoreResult.error message
       | PsKernelCoreResult.ok reduced =>
@@ -337,8 +348,9 @@ def psKernelCoreAdmissionIsProp
                 (psKernelCoreLevelNormalizesToZero level)
           | _ => PsKernelCoreResult.error "expected sort"
 
-def psKernelCoreAddAxiom
-    (budget : Nat) :
+def psKernelCoreAddAxiomWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig) :
     PsKernelCoreEnvironment ->
     PsKernelCoreAxiomInfo ->
     PsKernelCoreResult String PsKernelCoreEnvironment :=
@@ -355,8 +367,8 @@ def psKernelCoreAddAxiom
             PsKernelCoreDefinitionSafety.unsafeDef
           else
             PsKernelCoreDefinitionSafety.safe;
-        match psKernelCoreAdmissionCheckBase
-            remaining env value.base safety with
+        match psKernelCoreAdmissionCheckBaseWithResources
+            remaining resources env value.base safety with
         | PsKernelCoreResult.error message =>
             PsKernelCoreResult.error message
         | PsKernelCoreResult.ok _ =>
@@ -364,8 +376,9 @@ def psKernelCoreAddAxiom
               (psKernelCoreEnvironmentAddUnchecked
                 env (PsKernelCoreConstantInfo.axiomInfo value))
 
-def psKernelCoreAddDefinition
-    (budget : Nat) :
+def psKernelCoreAddDefinitionWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig) :
     PsKernelCoreEnvironment ->
     PsKernelCoreDefinitionInfo ->
     PsKernelCoreResult String PsKernelCoreEnvironment :=
@@ -379,8 +392,8 @@ def psKernelCoreAddDefinition
           (value : PsKernelCoreDefinitionInfo) =>
         match value.safety with
         | PsKernelCoreDefinitionSafety.unsafeDef =>
-            match psKernelCoreAdmissionCheckBase
-                remaining env value.base
+            match psKernelCoreAdmissionCheckBaseWithResources
+                remaining resources env value.base
                 PsKernelCoreDefinitionSafety.unsafeDef with
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
@@ -388,22 +401,22 @@ def psKernelCoreAddDefinition
                 let work :=
                   psKernelCoreEnvironmentAddUnchecked
                     env (PsKernelCoreConstantInfo.defnInfo value);
-                match psKernelCoreAdmissionCheckDefinitionBody
-                    remaining work value
+                match psKernelCoreAdmissionCheckDefinitionBodyWithResources
+                    remaining resources work value
                     PsKernelCoreDefinitionSafety.unsafeDef with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
                 | PsKernelCoreResult.ok _ =>
                     PsKernelCoreResult.ok work
         | PsKernelCoreDefinitionSafety.safe =>
-            match psKernelCoreAdmissionCheckBase
-                remaining env value.base
+            match psKernelCoreAdmissionCheckBaseWithResources
+                remaining resources env value.base
                 PsKernelCoreDefinitionSafety.safe with
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok _ =>
-                match psKernelCoreAdmissionCheckDefinitionBody
-                    remaining env value
+                match psKernelCoreAdmissionCheckDefinitionBodyWithResources
+                    remaining resources env value
                     PsKernelCoreDefinitionSafety.safe with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
@@ -412,14 +425,14 @@ def psKernelCoreAddDefinition
                       (psKernelCoreEnvironmentAddUnchecked
                         env (PsKernelCoreConstantInfo.defnInfo value))
         | PsKernelCoreDefinitionSafety.partialDef =>
-            match psKernelCoreAdmissionCheckBase
-                remaining env value.base
+            match psKernelCoreAdmissionCheckBaseWithResources
+                remaining resources env value.base
                 PsKernelCoreDefinitionSafety.safe with
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok _ =>
-                match psKernelCoreAdmissionCheckDefinitionBody
-                    remaining env value
+                match psKernelCoreAdmissionCheckDefinitionBodyWithResources
+                    remaining resources env value
                     PsKernelCoreDefinitionSafety.safe with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
@@ -428,8 +441,9 @@ def psKernelCoreAddDefinition
                       (psKernelCoreEnvironmentAddUnchecked
                         env (PsKernelCoreConstantInfo.defnInfo value))
 
-def psKernelCoreAddTheorem
-    (budget : Nat) :
+def psKernelCoreAddTheoremWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig) :
     PsKernelCoreEnvironment ->
     PsKernelCoreTheoremInfo ->
     PsKernelCoreResult String PsKernelCoreEnvironment :=
@@ -441,13 +455,13 @@ def psKernelCoreAddTheorem
   | Nat.succ remaining =>
       fun (env : PsKernelCoreEnvironment)
           (value : PsKernelCoreTheoremInfo) =>
-        match psKernelCoreAdmissionCheckBase
-            remaining env value.base PsKernelCoreDefinitionSafety.safe with
+        match psKernelCoreAdmissionCheckBaseWithResources
+            remaining resources env value.base PsKernelCoreDefinitionSafety.safe with
         | PsKernelCoreResult.error message =>
             PsKernelCoreResult.error message
         | PsKernelCoreResult.ok _ =>
-            match psKernelCoreAdmissionIsProp
-                remaining env value.base.type with
+            match psKernelCoreAdmissionIsPropWithResources
+                remaining resources env value.base.type with
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok isProp =>
@@ -461,14 +475,14 @@ def psKernelCoreAddTheorem
                       | PsKernelCoreResult.error message =>
                           PsKernelCoreResult.error message
                       | PsKernelCoreResult.ok _ =>
-                          match psKernelCoreCheck
-                              remaining env psKernelCoreLocalContextEmpty
+                          match psKernelCoreCheckWithResources
+                              remaining resources env psKernelCoreLocalContextEmpty
                               PsKernelCoreDefinitionSafety.safe value.value with
                           | PsKernelCoreResult.error message =>
                               PsKernelCoreResult.error message
                           | PsKernelCoreResult.ok proofType =>
-                              match psKernelCoreIsDefEq
-                                  remaining env psKernelCoreLocalContextEmpty
+                              match psKernelCoreIsDefEqWithResources
+                                  remaining resources env psKernelCoreLocalContextEmpty
                                   proofType value.base.type with
                               | PsKernelCoreResult.error message =>
                                   PsKernelCoreResult.error message
@@ -485,8 +499,9 @@ def psKernelCoreAddTheorem
                   PsKernelCoreResult.error
                     "theorem type is not a proposition"
 
-def psKernelCoreAddOpaque
-    (budget : Nat) :
+def psKernelCoreAddOpaqueWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig) :
     PsKernelCoreEnvironment ->
     PsKernelCoreOpaqueInfo ->
     PsKernelCoreResult String PsKernelCoreEnvironment :=
@@ -498,8 +513,8 @@ def psKernelCoreAddOpaque
   | Nat.succ remaining =>
       fun (env : PsKernelCoreEnvironment)
           (value : PsKernelCoreOpaqueInfo) =>
-        match psKernelCoreAdmissionCheckBase
-            remaining env value.base PsKernelCoreDefinitionSafety.safe with
+        match psKernelCoreAdmissionCheckBaseWithResources
+            remaining resources env value.base PsKernelCoreDefinitionSafety.safe with
         | PsKernelCoreResult.error message =>
             PsKernelCoreResult.error message
         | PsKernelCoreResult.ok _ =>
@@ -512,14 +527,14 @@ def psKernelCoreAddOpaque
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
                 | PsKernelCoreResult.ok _ =>
-                    match psKernelCoreCheck
-                        remaining env psKernelCoreLocalContextEmpty
+                    match psKernelCoreCheckWithResources
+                        remaining resources env psKernelCoreLocalContextEmpty
                         PsKernelCoreDefinitionSafety.safe value.value with
                     | PsKernelCoreResult.error message =>
                         PsKernelCoreResult.error message
                     | PsKernelCoreResult.ok valueType =>
-                        match psKernelCoreIsDefEq
-                            remaining env psKernelCoreLocalContextEmpty
+                        match psKernelCoreIsDefEqWithResources
+                            remaining resources env psKernelCoreLocalContextEmpty
                             valueType value.base.type with
                         | PsKernelCoreResult.error message =>
                             PsKernelCoreResult.error message
@@ -532,3 +547,57 @@ def psKernelCoreAddOpaque
                             else
                               PsKernelCoreResult.error
                                 "opaque value type mismatch"
+
+def psKernelCoreAdmissionCheckBase
+    (budget : Nat)
+    (env : PsKernelCoreEnvironment)
+    (base : PsKernelCoreConstantBase)
+    (safety : PsKernelCoreDefinitionSafety) :
+    PsKernelCoreResult String Unit :=
+  psKernelCoreAdmissionCheckBaseWithResources
+    budget psKernelCoreResourceConfigDefault env base safety
+
+def psKernelCoreAdmissionCheckDefinitionBody
+    (budget : Nat)
+    (env : PsKernelCoreEnvironment)
+    (value : PsKernelCoreDefinitionInfo)
+    (safety : PsKernelCoreDefinitionSafety) :
+    PsKernelCoreResult String Unit :=
+  psKernelCoreAdmissionCheckDefinitionBodyWithResources
+    budget psKernelCoreResourceConfigDefault env value safety
+
+def psKernelCoreAdmissionIsProp
+    (budget : Nat)
+    (env : PsKernelCoreEnvironment)
+    (expr : PsKernelCoreExpr) :
+    PsKernelCoreResult String Bool :=
+  psKernelCoreAdmissionIsPropWithResources
+    budget psKernelCoreResourceConfigDefault env expr
+
+def psKernelCoreAddAxiom
+    (budget : Nat) :
+    PsKernelCoreEnvironment ->
+    PsKernelCoreAxiomInfo ->
+    PsKernelCoreResult String PsKernelCoreEnvironment :=
+  psKernelCoreAddAxiomWithResources budget psKernelCoreResourceConfigDefault
+
+def psKernelCoreAddDefinition
+    (budget : Nat) :
+    PsKernelCoreEnvironment ->
+    PsKernelCoreDefinitionInfo ->
+    PsKernelCoreResult String PsKernelCoreEnvironment :=
+  psKernelCoreAddDefinitionWithResources budget psKernelCoreResourceConfigDefault
+
+def psKernelCoreAddTheorem
+    (budget : Nat) :
+    PsKernelCoreEnvironment ->
+    PsKernelCoreTheoremInfo ->
+    PsKernelCoreResult String PsKernelCoreEnvironment :=
+  psKernelCoreAddTheoremWithResources budget psKernelCoreResourceConfigDefault
+
+def psKernelCoreAddOpaque
+    (budget : Nat) :
+    PsKernelCoreEnvironment ->
+    PsKernelCoreOpaqueInfo ->
+    PsKernelCoreResult String PsKernelCoreEnvironment :=
+  psKernelCoreAddOpaqueWithResources budget psKernelCoreResourceConfigDefault

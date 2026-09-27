@@ -21,17 +21,18 @@ def psKernelCoreLevelListEquivalent
             else
               false
 
-def psKernelCoreDefEqIsProp
+def psKernelCoreDefEqIsPropWithResources
     (budget : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (lctx : PsKernelCoreLocalContext)
     (typeExpr : PsKernelCoreExpr) :
     PsKernelCoreResult String Bool :=
-  match psKernelCoreInfer budget env lctx typeExpr with
+  match psKernelCoreInferWithResources budget resources env lctx typeExpr with
   | PsKernelCoreResult.error message =>
       PsKernelCoreResult.error message
   | PsKernelCoreResult.ok inferredType =>
-      match psKernelCoreWhnf budget env lctx inferredType with
+      match psKernelCoreWhnfWithResources budget resources env lctx inferredType with
       | PsKernelCoreResult.error message =>
           PsKernelCoreResult.error message
       | PsKernelCoreResult.ok reduced =>
@@ -83,18 +84,19 @@ def psKernelCoreDefEqCompareBinderPlan
     lctx leftDomain rightDomain
     child openedLeft openedRight
 
-def psKernelCoreDefEqEtaLeftPlan
+def psKernelCoreDefEqEtaLeftPlanWithResources
     (remaining : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (lctx : PsKernelCoreLocalContext)
     (left : PsKernelCoreExpr)
     (right : PsKernelCoreExpr) :
     PsKernelCoreDefEqPlan :=
-  match psKernelCoreInfer remaining env lctx right with
+  match psKernelCoreInferWithResources remaining resources env lctx right with
   | PsKernelCoreResult.error message =>
       psKernelCoreDefEqDoneError message
   | PsKernelCoreResult.ok rightType =>
-      match psKernelCoreWhnf remaining env lctx rightType with
+      match psKernelCoreWhnfWithResources remaining resources env lctx rightType with
       | PsKernelCoreResult.error message =>
           psKernelCoreDefEqDoneError message
       | PsKernelCoreResult.ok exposed =>
@@ -109,18 +111,19 @@ def psKernelCoreDefEqEtaLeftPlan
               PsKernelCoreDefEqPlan.compare lctx left eta
           | _ => psKernelCoreDefEqDoneBool false
 
-def psKernelCoreDefEqEtaRightPlan
+def psKernelCoreDefEqEtaRightPlanWithResources
     (remaining : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (lctx : PsKernelCoreLocalContext)
     (left : PsKernelCoreExpr)
     (right : PsKernelCoreExpr) :
     PsKernelCoreDefEqPlan :=
-  match psKernelCoreInfer remaining env lctx left with
+  match psKernelCoreInferWithResources remaining resources env lctx left with
   | PsKernelCoreResult.error message =>
       psKernelCoreDefEqDoneError message
   | PsKernelCoreResult.ok leftType =>
-      match psKernelCoreWhnf remaining env lctx leftType with
+      match psKernelCoreWhnfWithResources remaining resources env lctx leftType with
       | PsKernelCoreResult.error message =>
           psKernelCoreDefEqDoneError message
       | PsKernelCoreResult.ok exposed =>
@@ -150,8 +153,9 @@ def psKernelCoreDefEqApplicationPlan
       | _ => psKernelCoreDefEqDoneBool false
   | _ => psKernelCoreDefEqDoneBool false
 
-def psKernelCoreDefEqAfterProofPlan
+def psKernelCoreDefEqAfterProofPlanWithResources
     (remaining : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (lctx : PsKernelCoreLocalContext)
     (left : PsKernelCoreExpr)
@@ -159,15 +163,18 @@ def psKernelCoreDefEqAfterProofPlan
     PsKernelCoreDefEqPlan :=
   match left with
   | PsKernelCoreExpr.lam _ _ _ _ =>
-      psKernelCoreDefEqEtaLeftPlan remaining env lctx left right
+      psKernelCoreDefEqEtaLeftPlanWithResources
+        remaining resources env lctx left right
   | _ =>
       match right with
       | PsKernelCoreExpr.lam _ _ _ _ =>
-          psKernelCoreDefEqEtaRightPlan remaining env lctx left right
+          psKernelCoreDefEqEtaRightPlanWithResources
+            remaining resources env lctx left right
       | _ => psKernelCoreDefEqApplicationPlan lctx left right
 
-def psKernelCoreDefEqFallbackPlan
+def psKernelCoreDefEqFallbackPlanWithResources
     (remaining : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (lctx : PsKernelCoreLocalContext)
     (left : PsKernelCoreExpr)
@@ -183,27 +190,30 @@ def psKernelCoreDefEqFallbackPlan
           psKernelCoreDefEqDoneError
             "projection definitional equality unavailable before inductive metadata"
       | _ =>
-          match psKernelCoreInfer remaining env lctx left with
+          match psKernelCoreInferWithResources remaining resources env lctx left with
           | PsKernelCoreResult.error message =>
               psKernelCoreDefEqDoneError message
           | PsKernelCoreResult.ok leftType =>
-              match psKernelCoreDefEqIsProp remaining env lctx leftType with
+              match psKernelCoreDefEqIsPropWithResources
+                  remaining resources env lctx leftType with
               | PsKernelCoreResult.error message =>
                   psKernelCoreDefEqDoneError message
               | PsKernelCoreResult.ok isProof =>
                   if isProof then
-                    match psKernelCoreInfer remaining env lctx right with
+                    match psKernelCoreInferWithResources
+                        remaining resources env lctx right with
                     | PsKernelCoreResult.error message =>
                         psKernelCoreDefEqDoneError message
                     | PsKernelCoreResult.ok rightType =>
                         PsKernelCoreDefEqPlan.compare
                           lctx leftType rightType
                   else
-                    psKernelCoreDefEqAfterProofPlan
-                      remaining env lctx left right
+                    psKernelCoreDefEqAfterProofPlanWithResources
+                      remaining resources env lctx left right
 
-def psKernelCoreDefEqReducedPlan
+def psKernelCoreDefEqReducedPlanWithResources
     (remaining : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (lctx : PsKernelCoreLocalContext)
     (left : PsKernelCoreExpr)
@@ -216,16 +226,16 @@ def psKernelCoreDefEqReducedPlan
           psKernelCoreDefEqDoneBool
             (psKernelCoreLevelEquivalent leftLevel rightLevel)
       | _ =>
-          psKernelCoreDefEqFallbackPlan
-            remaining env lctx left right
+          psKernelCoreDefEqFallbackPlanWithResources
+            remaining resources env lctx left right
   | PsKernelCoreExpr.lit leftLiteral =>
       match right with
       | PsKernelCoreExpr.lit rightLiteral =>
           psKernelCoreDefEqDoneBool
             (psKernelCoreLiteralEq leftLiteral rightLiteral)
       | _ =>
-          psKernelCoreDefEqFallbackPlan
-            remaining env lctx left right
+          psKernelCoreDefEqFallbackPlanWithResources
+            remaining resources env lctx left right
   | PsKernelCoreExpr.lam _ leftDomain leftBody _ =>
       match right with
       | PsKernelCoreExpr.lam
@@ -235,8 +245,8 @@ def psKernelCoreDefEqReducedPlan
             leftDomain leftBody
             rightName rightDomain rightBody rightBinderInfo
       | _ =>
-          psKernelCoreDefEqFallbackPlan
-            remaining env lctx left right
+          psKernelCoreDefEqFallbackPlanWithResources
+            remaining resources env lctx left right
   | PsKernelCoreExpr.forallE _ leftDomain leftBody _ =>
       match right with
       | PsKernelCoreExpr.forallE
@@ -246,8 +256,8 @@ def psKernelCoreDefEqReducedPlan
             leftDomain leftBody
             rightName rightDomain rightBody rightBinderInfo
       | _ =>
-          psKernelCoreDefEqFallbackPlan
-            remaining env lctx left right
+          psKernelCoreDefEqFallbackPlanWithResources
+            remaining resources env lctx left right
   | PsKernelCoreExpr.const leftName leftLevels =>
       match right with
       | PsKernelCoreExpr.const rightName rightLevels =>
@@ -255,30 +265,32 @@ def psKernelCoreDefEqReducedPlan
             if psKernelCoreLevelListEquivalent leftLevels rightLevels then
               psKernelCoreDefEqDoneBool true
             else
-              psKernelCoreDefEqFallbackPlan
-                remaining env lctx left right
+              psKernelCoreDefEqFallbackPlanWithResources
+                remaining resources env lctx left right
           else
-            psKernelCoreDefEqFallbackPlan
-              remaining env lctx left right
+            psKernelCoreDefEqFallbackPlanWithResources
+              remaining resources env lctx left right
       | _ =>
-          psKernelCoreDefEqFallbackPlan
-            remaining env lctx left right
+          psKernelCoreDefEqFallbackPlanWithResources
+            remaining resources env lctx left right
   | PsKernelCoreExpr.fvar leftName =>
       match right with
       | PsKernelCoreExpr.fvar rightName =>
           if psKernelCoreNameEq leftName rightName then
             psKernelCoreDefEqDoneBool true
           else
-            psKernelCoreDefEqFallbackPlan
-              remaining env lctx left right
+            psKernelCoreDefEqFallbackPlanWithResources
+              remaining resources env lctx left right
       | _ =>
-          psKernelCoreDefEqFallbackPlan
-            remaining env lctx left right
+          psKernelCoreDefEqFallbackPlanWithResources
+            remaining resources env lctx left right
   | _ =>
-      psKernelCoreDefEqFallbackPlan remaining env lctx left right
+      psKernelCoreDefEqFallbackPlanWithResources
+        remaining resources env lctx left right
 
-def psKernelCoreIsDefEq
-    (budget : Nat) :
+def psKernelCoreIsDefEqWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig) :
     PsKernelCoreEnvironment ->
     PsKernelCoreLocalContext ->
     PsKernelCoreExpr ->
@@ -298,7 +310,7 @@ def psKernelCoreIsDefEq
           PsKernelCoreExpr ->
           PsKernelCoreExpr ->
           PsKernelCoreResult String Bool :=
-        psKernelCoreIsDefEq remaining;
+        psKernelCoreIsDefEqWithResources remaining resources;
       fun (env : PsKernelCoreEnvironment)
           (lctx : PsKernelCoreLocalContext)
           (left : PsKernelCoreExpr)
@@ -306,11 +318,11 @@ def psKernelCoreIsDefEq
         if psKernelCoreExprEq left right then
           PsKernelCoreResult.ok true
         else
-          match psKernelCoreWhnf remaining env lctx left with
+          match psKernelCoreWhnfWithResources remaining resources env lctx left with
           | PsKernelCoreResult.error message =>
               PsKernelCoreResult.error message
           | PsKernelCoreResult.ok leftReduced =>
-              match psKernelCoreWhnf remaining env lctx right with
+              match psKernelCoreWhnfWithResources remaining resources env lctx right with
               | PsKernelCoreResult.error message =>
                   PsKernelCoreResult.error message
               | PsKernelCoreResult.ok rightReduced =>
@@ -318,8 +330,8 @@ def psKernelCoreIsDefEq
                     PsKernelCoreResult.ok true
                   else
                     let plan :=
-                      psKernelCoreDefEqReducedPlan
-                        remaining env lctx leftReduced rightReduced;
+                      psKernelCoreDefEqReducedPlanWithResources
+                        remaining resources env lctx leftReduced rightReduced;
                     match plan with
                     | PsKernelCoreDefEqPlan.done result => result
                     | PsKernelCoreDefEqPlan.compare
@@ -336,3 +348,66 @@ def psKernelCoreIsDefEq
                               smaller env secondLctx secondLeft secondRight
                             else
                               PsKernelCoreResult.ok false
+
+def psKernelCoreDefEqIsProp
+    (budget : Nat)
+    (env : PsKernelCoreEnvironment)
+    (lctx : PsKernelCoreLocalContext)
+    (typeExpr : PsKernelCoreExpr) :
+    PsKernelCoreResult String Bool :=
+  psKernelCoreDefEqIsPropWithResources
+    budget psKernelCoreResourceConfigDefault env lctx typeExpr
+
+def psKernelCoreDefEqEtaLeftPlan
+    (remaining : Nat)
+    (env : PsKernelCoreEnvironment)
+    (lctx : PsKernelCoreLocalContext)
+    (left : PsKernelCoreExpr)
+    (right : PsKernelCoreExpr) : PsKernelCoreDefEqPlan :=
+  psKernelCoreDefEqEtaLeftPlanWithResources
+    remaining psKernelCoreResourceConfigDefault env lctx left right
+
+def psKernelCoreDefEqEtaRightPlan
+    (remaining : Nat)
+    (env : PsKernelCoreEnvironment)
+    (lctx : PsKernelCoreLocalContext)
+    (left : PsKernelCoreExpr)
+    (right : PsKernelCoreExpr) : PsKernelCoreDefEqPlan :=
+  psKernelCoreDefEqEtaRightPlanWithResources
+    remaining psKernelCoreResourceConfigDefault env lctx left right
+
+def psKernelCoreDefEqAfterProofPlan
+    (remaining : Nat)
+    (env : PsKernelCoreEnvironment)
+    (lctx : PsKernelCoreLocalContext)
+    (left : PsKernelCoreExpr)
+    (right : PsKernelCoreExpr) : PsKernelCoreDefEqPlan :=
+  psKernelCoreDefEqAfterProofPlanWithResources
+    remaining psKernelCoreResourceConfigDefault env lctx left right
+
+def psKernelCoreDefEqFallbackPlan
+    (remaining : Nat)
+    (env : PsKernelCoreEnvironment)
+    (lctx : PsKernelCoreLocalContext)
+    (left : PsKernelCoreExpr)
+    (right : PsKernelCoreExpr) : PsKernelCoreDefEqPlan :=
+  psKernelCoreDefEqFallbackPlanWithResources
+    remaining psKernelCoreResourceConfigDefault env lctx left right
+
+def psKernelCoreDefEqReducedPlan
+    (remaining : Nat)
+    (env : PsKernelCoreEnvironment)
+    (lctx : PsKernelCoreLocalContext)
+    (left : PsKernelCoreExpr)
+    (right : PsKernelCoreExpr) : PsKernelCoreDefEqPlan :=
+  psKernelCoreDefEqReducedPlanWithResources
+    remaining psKernelCoreResourceConfigDefault env lctx left right
+
+def psKernelCoreIsDefEq
+    (budget : Nat) :
+    PsKernelCoreEnvironment ->
+    PsKernelCoreLocalContext ->
+    PsKernelCoreExpr ->
+    PsKernelCoreExpr ->
+    PsKernelCoreResult String Bool :=
+  psKernelCoreIsDefEqWithResources budget psKernelCoreResourceConfigDefault

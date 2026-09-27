@@ -12,6 +12,9 @@ const source = await readFile(
 const required = [
   "List.cons entry (psInstanceListAppend rest right)",
   "psInstanceListAppend index.entries (List.cons entry [])",
+  "| .binding id _ type binder =>",
+  "match binder with",
+  "| .instanceImplicit =>",
   "let instanceEntry : PsInstanceEntry := {",
   "List.cons instanceEntry (psLocalInstanceEntriesFromList rest)",
 ];
@@ -25,6 +28,7 @@ for (const marker of required) {
 const forbidden = [
   "=> entry :: psInstanceListAppend rest right",
   "index.entries [entry]",
+  "| .binding id _ type .instanceImplicit =>",
   "} :: psLocalInstanceEntriesFromList rest",
 ];
 
@@ -35,5 +39,5 @@ for (const marker of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_INSTANCES_SELFHOST_SOURCE_SYNTAX: PASS (explicit term-side List.cons construction)\n",
+  "PSC2_INSTANCES_SELFHOST_SOURCE_SYNTAX: PASS (explicit List.cons terms and unary binder matching)\n",
 );

@@ -150,9 +150,11 @@ const reduce = await read(
 );
 requireMarkers("Reduce", reduce, [
   'let instantiated := psMetaInstantiate metaContext expr;\n      match instantiated with',
+  '| some declaration =>\n              match declaration with\n              | .letDecl _ _ _ value =>',
 ]);
 forbidMarkers("Reduce", reduce, [
   'let instantiated := psMetaInstantiate metaContext expr\n      match instantiated with',
+  '| some (.letDecl _ _ _ value) =>',
 ]);
 
 process.stdout.write(

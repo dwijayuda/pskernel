@@ -82,7 +82,9 @@ requireMarkers("LevelContext", levelContext, [
   '| _ => expr',
   'def psLevelHasMVar\n    (level : PsLevel) : Bool :=\n  match level with',
   'if psLevelHasMVar left then',
+  'def psLevelListHasMVar\n    (levels : List PsLevel) : Bool :=\n  match levels with',
   'if psLevelHasMVar level then',
+  'psLevelListHasMVar rest',
 ]);
 forbidMarkers("LevelContext", levelContext, [
   'def psLevelFindAssignmentInList (id : Nat) : List PsLevelAssignment -> Option PsLevel',
@@ -99,6 +101,7 @@ forbidMarkers("LevelContext", levelContext, [
   'levels.map (psLevelInstantiate context)',
   '| expr => expr',
   'def psLevelHasMVar : PsLevel -> Bool',
+  'def psLevelListHasMVar : List PsLevel -> Bool',
   '||',
 ]);
 

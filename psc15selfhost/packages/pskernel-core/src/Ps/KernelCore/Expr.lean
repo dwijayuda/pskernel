@@ -48,17 +48,13 @@ inductive PsKernelCoreExpr where
 
 def psKernelCoreBoolEq
     (left : Bool) : Bool -> Bool :=
-  match left with
-  | false =>
-      fun (right : Bool) =>
-        match right with
-        | false => true
-        | true => false
-  | true =>
-      fun (right : Bool) =>
-        match right with
-        | false => false
-        | true => true
+  fun (right : Bool) =>
+    if left then
+      right
+    else if right then
+      false
+    else
+      true
 
 def psKernelCoreLiteralEq
     (left : PsKernelCoreLiteral) : PsKernelCoreLiteral -> Bool :=

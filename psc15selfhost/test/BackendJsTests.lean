@@ -54,6 +54,9 @@ def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
         (.literal (.natural 20))),
     jsFixtureFunctionDecl "callIdentity" "value" .nat .nat
       (.call (.var "identity") [] [(.var "value")]),
+    jsFixtureFunctionDecl "callIdentityLet" "value" .nat .nat
+      (.call (.var "identity") [] [
+        (.letE "temporary" (.primitive .nat) (.var "value") (.var "temporary"))]),
     jsFixtureFunctionDecl "callSecond" "value" .nat .nat
       (.call (.var "second") [] [(.literal (.natural 11)), (.var "value")]),
     jsFixtureBinaryFunctionDecl "second" "left" "right" .nat .nat .nat
@@ -128,11 +131,6 @@ def main (args : List String) : IO Unit := do
     declarations := [identity,
       jsFixtureFunctionDecl "caller" "value" .nat .int
         (.call (.var "identity") [] [(.var "value")])] }
-  jsRequireError "call non-atomic argument" { psVerifiedIrModuleEmpty with
-    declarations := [identity,
-      jsFixtureFunctionDecl "caller" "value" .nat .nat
-        (.call (.var "identity") [] [
-          (.letE "temporary" (.primitive .nat) (.var "value") (.var "temporary"))])] }
   jsRequireError "nonprimitive parameter" { psVerifiedIrModuleEmpty with
     declarations := [{ declaration with parameters := [
       { name := "a", type := .function [.primitive .nat] (.primitive .nat) }] }] }

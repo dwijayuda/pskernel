@@ -36,12 +36,18 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           lake exe psc2_kernel_core_declaration_parity_tests
-      - name: Phase 8 inductive metadata RED/GREEN
+      - name: Phase 8 inductive metadata
         shell: bash
         run: |
           set -euo pipefail
           cd psc15selfhost
           lake env lean --run test/KernelCoreInductiveMetadataTests.lean
+      - name: Phase 8 inductive shape RED/GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreInductiveShapeTests.lean
       - name: KernelCore PSC1 source profile
         shell: bash
         run: |

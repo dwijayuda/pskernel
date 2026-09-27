@@ -57,9 +57,11 @@ const levelContext = await read(
 );
 requireMarkers("LevelContext", levelContext, [
   'def psLevelFindAssignmentInList\n    (id : Nat)\n    (assignments : List PsLevelAssignment) : Option PsLevel :=\n  match assignments with',
-  'def psLevelInstantiateWithFuel\n    (context : PsLevelMetaContext)\n    (fuel : Nat)\n    (level : PsLevel) : PsLevel :=\n  match fuel with',
-  '| Nat.succ remaining =>\n      match level with',
-  'psLevelInstantiateWithFuel context remaining value',
+  'def psLevelInstantiateWithFuel\n    (context : PsLevelMetaContext)\n    (fuel : Nat) : PsLevel -> PsLevel :=\n  match fuel with',
+  '| Nat.zero =>\n      fun (level : PsLevel) => level',
+  'let smaller : PsLevel -> PsLevel :=\n        psLevelInstantiateWithFuel context remaining;',
+  'fun (level : PsLevel) =>\n        match level with',
+  '| Option.some value => smaller value',
   'let resolved := psLevelInstantiate context value;',
   'PsLevelAssignment.mk id resolved',
   'let leftValue := psLevelInstantiate context left;',
@@ -73,11 +75,13 @@ requireMarkers("LevelContext", levelContext, [
 forbidMarkers("LevelContext", levelContext, [
   'def psLevelFindAssignmentInList (id : Nat) : List PsLevelAssignment -> Option PsLevel',
   'def psLevelInstantiateWithFuel\n    (context : PsLevelMetaContext) : Nat -> PsLevel -> PsLevel',
+  '(fuel : Nat)\n    (level : PsLevel) : PsLevel :=',
+  'psLevelInstantiateWithFuel context remaining value',
   'List.cons { id := id, value := resolved } context.assignments',
   'match leftValue, rightValue with',
   '||',
 ]);
 
 process.stdout.write(
-  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 visible-recursion/let/application/unary-match/no-bool-infix subset)\n",
+  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 invariant-fuel/let/application/unary-match/no-bool-infix subset)\n",
 );

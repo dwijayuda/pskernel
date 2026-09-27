@@ -573,33 +573,38 @@ def psElabTypedBinders
 
 def psCloseElabTypedBinders
     (metaContext : PsMetaContext)
-    (binders : List PsElabTypedBinder)
-    (value : PsExpr)
-    (type : PsExpr) :
+    (binders : List PsElabTypedBinder) :
+    PsExpr ->
+    PsExpr ->
     Prod PsExpr PsExpr :=
   match binders with
   | [] =>
-      Prod.mk value type
+      fun (value : PsExpr) =>
+        fun (type : PsExpr) =>
+          Prod.mk value type
   | binder :: rest =>
-      let binderType :=
-        psMetaInstantiate metaContext binder.type;
-      let closedValue :=
-        PsExpr.lam
-          binder.name
-          binderType
-          (psExprAbstractFVar binder.id value)
-          binder.binder;
-      let closedType :=
-        PsExpr.forallE
-          binder.name
-          binderType
-          (psExprAbstractFVar binder.id type)
-          binder.binder;
-      psCloseElabTypedBinders
-        metaContext
-        rest
-        closedValue
-        closedType
+      let smaller :
+          PsExpr ->
+          PsExpr ->
+          Prod PsExpr PsExpr :=
+        psCloseElabTypedBinders metaContext rest;
+      fun (value : PsExpr) =>
+        fun (type : PsExpr) =>
+          let binderType :=
+            psMetaInstantiate metaContext binder.type;
+          let closedValue :=
+            PsExpr.lam
+              binder.name
+              binderType
+              (psExprAbstractFVar binder.id value)
+              binder.binder;
+          let closedType :=
+            PsExpr.forallE
+              binder.name
+              binderType
+              (psExprAbstractFVar binder.id type)
+              binder.binder;
+          smaller closedValue closedType
 
 def psElabLambdaExpectedBody
     (context : PsElabContext)

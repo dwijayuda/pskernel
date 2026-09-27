@@ -31,7 +31,7 @@
 - **Argument laziness:** reducing an application head must not normalize the argument unless beta substitution later makes that argument the new head expression.
 - **Universe arity mismatch:** delta unfolding with mismatched `levelParams` / supplied universe levels must fail closed by leaving the original constant residual; it must not partially substitute levels.
 - **Deep universe substitution:** a delta body containing levels under lambdas/foralls/lets/apps/mdata/projections and constant level lists must receive the same substitution as the reference traversal.
-- **Budget determinism:** budget `0` must always return exactly `reduction budget exhausted`, while sufficient-budget differential fixtures must not compare budget accounting to Lean/PSC1Kernel because the explicit budget is KernelCore-specific.
+- **Budget determinism:** budget `0` must always return exactly `reduction budget exhausted`, and a pinned reducible term must fail at its documented threshold minus one and succeed at the threshold; budget accounting is KernelCore-specific and is not compared to Lean/PSC1Kernel.
 
 ---
 
@@ -44,7 +44,7 @@
 
 ### Differential test
 
-- Create `psc15selfhost/test/KernelCoreReductionParityTests.lean` — cross-representation differential fixtures against `PSC1Kernel.TypeChecker.whnf` plus KernelCore-only budget tests.
+- Create `psc15selfhost/test/KernelCoreReductionParityTests.lean` — cross-representation differential fixtures against `PSC1Kernel.whnf` from the reference `PSC1Kernel.TypeChecker` module, plus KernelCore-only budget tests.
 
 ### Build / assurance wiring
 
@@ -65,7 +65,7 @@
 - Modify: `.github/workflows/psc2-minimal-kernel.yml`
 
 **Interfaces:**
-- Consumes: accepted Phase-1/2 KernelCore `Expr`, `Subst`, `Declaration`, `Environment`, `LocalContext`; reference `PSC1Kernel.TypeChecker`.
+- Consumes: accepted Phase-1/2 KernelCore `Expr`, `Subst`, `Declaration`, `Environment`, `LocalContext`; reference module `PSC1Kernel.TypeChecker` and function `PSC1Kernel.whnf`.
 - Produces: a failing fixture that pins the complete Phase-3 public behavior before `Ps.KernelCore.Reduce` exists.
 
 - [ ] **Step 1: Extend test-only reference/build wiring**
@@ -130,7 +130,7 @@ The fixture must compare KernelCore to `PSC1Kernel.whnf` for at least:
 10. direct delta unfolding of a definition;
 11. delta unfolding in function position enables beta;
 12. delta universe substitution in a direct body;
-13. universe substitution reaches nested binder children and constant universe argument lists;
+13. universe substitution through a nested delta body that contains `app`, `lam`, `forallE`, `letE`, `mdata`, and `proj`, with substituted levels visible both in `sort` nodes and in `const` universe argument lists;
 14. universe arity mismatch leaves the original constant residual;
 15. theorem remains residual;
 16. opaque remains residual;
@@ -142,14 +142,22 @@ The argument-laziness case must place a visibly reducible term such as `mdata` o
 
 - [ ] **Step 5: Pin KernelCore-only budget behavior**
 
-Add a separate assertion, not a reference-comparison assertion:
+Add separate assertions, not reference-comparison assertions:
 
 ```text
 psKernelCoreWhnf 0 ... expr
   == error "reduction budget exhausted"
 ```
 
-Also choose one reducible expression whose insufficient positive budget deterministically reaches the same exact error. Do not claim the budget value matches Lean semantics.
+Pin an exact positive threshold with a simple one-step metadata term:
+
+```text
+expr = mdata tag easyValue
+budget 1 -> error "reduction budget exhausted"
+budget 2 -> ok easyValue
+```
+
+This threshold becomes a deterministic Phase-3 resource contract. Do not claim it matches Lean's recursion-depth accounting.
 
 - [ ] **Step 6: Run and verify RED**
 
@@ -227,7 +235,7 @@ psKernelCoreWhnf
 
 `psKernelCoreLevelSubstFromLists` must return `some` only when parameter/value list lengths match exactly. Recurse structurally on the parameter list and curry the varying level-value list behind the smaller recursive function. Preserve parameter order in the resulting lookup spine so each parameter maps to its paired supplied level.
 
-Review-focus tests owned here: empty/empty succeeds; one side empty while the other is non-empty returns `none`; non-empty equal-length lists map every parameter to the corresponding level.
+The Task-1 fixture must exercise: empty/empty succeeds; one side empty while the other is non-empty returns `none`; non-empty equal-length lists map every parameter to the corresponding level through delta behavior.
 
 - [ ] **Step 2: Implement level-list and expression traversal**
 

@@ -47,20 +47,19 @@ jobs:
         run: |
           set -euo pipefail
           cd psc15selfhost
-          lake build PsKernelCore
-          lake env lean --run test/KernelCoreInductiveShapeTests.lean
-      - name: Phase 8 inductive admission
+          lake exe psc2_kernel_core_inductive_shape_tests
+      - name: Phase 8 inductive admission parity
         shell: bash
         run: |
           set -euo pipefail
           cd psc15selfhost
-          lake env lean --run test/KernelCoreInductiveAdmissionParityTests.lean
+          lake exe psc2_kernel_core_inductive_admission_parity_tests
       - name: Phase 8 Eq inductive compatibility
         shell: bash
         run: |
           set -euo pipefail
           cd psc15selfhost
-          lake env lean --run test/KernelCoreEqInductiveTests.lean
+          lake exe psc2_kernel_core_eq_inductive_tests
       - name: KernelCore PSC1 source profile
         shell: bash
         run: |

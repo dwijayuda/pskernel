@@ -166,6 +166,13 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.Environment,
     `PSC1Kernel.LocalContext,
     `PSC1Kernel.TypeChecker,
+    `PSC1Kernel.CheckerState,
+    `PSC1Kernel.CheckerStateful,
+    `PSC1Kernel.CheckerDefEqStateful,
+    `PSC1Kernel.CheckerReductionStateful,
+    `PSC1Kernel.CheckerDefEqStatefulReduced,
+    `PSC1Kernel.CheckerSession,
+    `PSC1Kernel.Quot,
     `PSC1Kernel.Kernel
   ]
 

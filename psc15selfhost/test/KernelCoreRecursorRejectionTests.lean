@@ -162,7 +162,7 @@ def psKcRejectEnvironmentUnchanged
   match afterAttempt with
   | PsKernelCoreResult.ok _ => false
   | PsKernelCoreResult.error _ =>
-      (psKernelCoreEnvironmentSize before == 3) && before.quotInitialized &&
+      (psKernelCoreEnvironmentSize before == 4) && before.quotInitialized &&
       match psKernelCoreEnvironmentFind? before psKcRejectOther with
       | PsKernelCoreOption.none => false
       | PsKernelCoreOption.some _ =>

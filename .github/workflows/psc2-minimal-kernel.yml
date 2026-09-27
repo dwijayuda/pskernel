@@ -5,6 +5,7 @@ on:
     branches:
       - psc2/minimal-selfhost-psc15
       - psc2/kernel-core-phase1
+      - psc2/kernel-core-phase2
       - psc2/kernel-core-phase2-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
@@ -123,6 +124,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run assurance:kernel-core:phase1
+
+      - name: Phase 2 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase2
 
       - name: Existing PSC2 regression gate
         shell: bash

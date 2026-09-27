@@ -20,6 +20,8 @@ try {
     identity: directIdentity,
     choose: directChoose,
     callIdentity: directCallIdentity,
+    callSecond: directCallSecond,
+    second: directSecond,
     renamedLocal: directRenamedLocal,
     ...directValues
   } = direct;
@@ -36,6 +38,8 @@ try {
   assert.equal(directChoose(true), 10n);
   assert.equal(directChoose(false), 20n);
   assert.equal(directCallIdentity(73n), 73n);
+  assert.equal(directSecond(11n, 73n), 73n);
+  assert.equal(directCallSecond(73n), 73n);
   assert.deepEqual(Object.keys(await import(pathToFileURL(path.join(out, 'empty.mjs')))), []);
   run('tsc', [path.join(out, 'reference.ts'), '--target', 'ES2020', '--module', 'ES2020',
     '--outDir', path.join(out, 'reference'), '--strict', '--skipLibCheck']);
@@ -47,6 +51,8 @@ try {
     identity: referenceIdentity,
     choose: referenceChoose,
     callIdentity: referenceCallIdentity,
+    callSecond: referenceCallSecond,
+    second: referenceSecond,
     ...referenceValues
   } = reference;
   assert.deepEqual(directValues, referenceValues);
@@ -56,6 +62,10 @@ try {
   assert.equal(directChoose(false), referenceChoose(false));
   assert.equal(directCallIdentity(9007199254740993123456789n),
     referenceCallIdentity(9007199254740993123456789n));
+  assert.equal(directSecond(11n, 9007199254740993123456789n),
+    referenceSecond(11n, 9007199254740993123456789n));
+  assert.equal(directCallSecond(9007199254740993123456789n),
+    referenceCallSecond(9007199254740993123456789n));
   console.log('BACKEND_JS_EXECUTION_DIFFERENTIAL: PASS');
 } finally {
   rmSync(out, { recursive: true, force: true });

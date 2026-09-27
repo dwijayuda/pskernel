@@ -99,26 +99,31 @@ def psHexDigitValue (char : Char) : Option Nat :=
     Option.none
 
 def psReadFixedHex
-    (count : Nat)
-    (chars : List Char)
-    (value : Nat) :
+    (count : Nat) :
+    List Char ->
+    Nat ->
     Option (Prod Nat (List Char)) :=
   match count with
   | 0 =>
-      Option.some (Prod.mk value chars)
+      fun (chars : List Char) =>
+        fun (value : Nat) =>
+          Option.some (Prod.mk value chars)
   | nextCount + 1 =>
-      match chars with
-      | [] =>
-          Option.none
-      | char :: rest =>
-          match psHexDigitValue char with
-          | Option.none =>
+      let smaller : List Char -> Nat -> Option (Prod Nat (List Char)) :=
+        psReadFixedHex nextCount;
+      fun (chars : List Char) =>
+        fun (value : Nat) =>
+          match chars with
+          | [] =>
               Option.none
-          | Option.some digit =>
-              psReadFixedHex
-                nextCount
-                rest
-                (Nat.add (Nat.mul value 16) digit)
+          | char :: rest =>
+              match psHexDigitValue char with
+              | Option.none =>
+                  Option.none
+              | Option.some digit =>
+                  smaller
+                    rest
+                    (Nat.add (Nat.mul value 16) digit)
 
 def psValidUnicodeScalar (value : Nat) : Bool :=
   if Nat.blt value 55296 then

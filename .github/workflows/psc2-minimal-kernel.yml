@@ -141,6 +141,13 @@ jobs:
           cd psc15selfhost
           npm run assurance:kernel-core:phase2
 
+      - name: Phase 3 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase3
+
       - name: Existing PSC2 regression gate
         shell: bash
         run: |

@@ -27,7 +27,7 @@ def psWhnfCoreWithFuel
             fuel
             (psExprInstantiate1 body value)
       | .app fn arg =>
-          let reducedFn := psWhnfCoreWithFuel metaContext localContext fuel fn
+          let reducedFn := psWhnfCoreWithFuel metaContext localContext fuel fn;
           match reducedFn with
           | .lam _ _ body _ =>
               psWhnfCoreWithFuel

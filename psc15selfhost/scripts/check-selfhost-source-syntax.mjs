@@ -115,12 +115,15 @@ requireMarkers("MetaContext", metaContext, [
   'psMetaFindAssignmentInList id rest',
   'def psExprContainsMVar\n    (target : Nat)\n    (expr : PsExpr) : Bool :=\n  match expr with',
   'def psExprFVarsInContext\n    (localContext : PsLocalContext)\n    (expr : PsExpr) : Bool :=\n  match expr with',
+  'psExprFVarsInContext localContext body',
   'def psMetaInstantiateStep\n    (context : PsMetaContext)\n    (expr : PsExpr) : PsExpr :=\n  match expr with',
+  'psMetaInstantiateStep context body',
   'def psMetaInstantiateRounds\n    (context : PsMetaContext)\n    (fuel : Nat)\n    (expr : PsExpr) : PsExpr :=\n  match fuel with',
   '| Nat.zero => expr',
   '| Nat.succ remaining =>',
   'psMetaInstantiateRounds\n        context\n        remaining\n        (psMetaInstantiateStep context expr)',
   'def psExprHasUnresolvedMeta\n    (expr : PsExpr) : Bool :=\n  match expr with',
+  'psExprHasUnresolvedMeta body',
 ]);
 forbidMarkers("MetaContext", metaContext, [
   'def psMetaFindDeclInList (id : Nat) : List PsMetaVarDecl -> Option PsMetaVarDecl',

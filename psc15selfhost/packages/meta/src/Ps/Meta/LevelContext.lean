@@ -88,7 +88,10 @@ def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLeve
     (Nat.succ (psLevelAssignmentCount context.assignments))
     level
 
-def psLevelOccursResolved (target : Nat) : PsLevel -> Bool
+def psLevelOccursResolved
+    (target : Nat)
+    (level : PsLevel) : Bool :=
+  match level with
   | .mvar id => Nat.beq id target
   | .succ value => psLevelOccursResolved target value
   | .max left right =>

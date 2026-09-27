@@ -107,8 +107,8 @@ def psJsLookupLocal (locals : List PsJsLocalBinding)
     (name : String) : Option PsJsLocalBinding :=
   match locals with
   | List.nil => Option.none
-  | List.cons local rest =>
-      if psJsonStringEq local.sourceName name then Option.some local
+  | List.cons binding rest =>
+      if psJsonStringEq binding.sourceName name then Option.some binding
       else psJsLookupLocal rest name
 
 def psJsLowerParameters (parameters : List PsVerifiedIrParameter)
@@ -124,10 +124,10 @@ def psJsLowerParameters (parameters : List PsVerifiedIrParameter)
             match psJsLookupLocal locals parameter.name with
             | Option.some _ => Except.error PsJsError.unsupportedExpression
             | Option.none =>
-                let local := PsJsLocalBinding.mk parameter.name primitive nextLocal;
+                let binding := PsJsLocalBinding.mk parameter.name primitive nextLocal;
                 match psJsLowerParameters
                   rest
-                  (List.cons local locals)
+                  (List.cons binding locals)
                   (Nat.succ nextLocal) with
                 | Except.error error => Except.error error
                 | Except.ok lowered =>
@@ -176,9 +176,9 @@ def psJsLowerExpr (locals : List PsJsLocalBinding) (nextLocal : Nat)
   | PsVerifiedIrExpr.var name =>
       match psJsLookupLocal locals name with
       | Option.none => Except.error PsJsError.unsupportedExpression
-      | Option.some local =>
-          if psJsPrimitiveTypeEq local.type expectedType then
-            Except.ok (PsJsLoweredExpr.mk (PsJsExpr.local local.index) nextLocal)
+      | Option.some binding =>
+          if psJsPrimitiveTypeEq binding.type expectedType then
+            Except.ok (PsJsLoweredExpr.mk (PsJsExpr.local binding.index) nextLocal)
           else Except.error PsJsError.literalTypeMismatch
   | PsVerifiedIrExpr.letE name type value innerBody =>
       match type with
@@ -187,9 +187,9 @@ def psJsLowerExpr (locals : List PsJsLocalBinding) (nextLocal : Nat)
           | Except.error error => Except.error error
           | Except.ok loweredValue =>
               let localIndex := loweredValue.nextLocal;
-              let local := PsJsLocalBinding.mk name localType localIndex;
+              let binding := PsJsLocalBinding.mk name localType localIndex;
               match psJsLowerExpr
-                (List.cons local locals)
+                (List.cons binding locals)
                 (Nat.succ localIndex)
                 expectedType
                 innerBody with

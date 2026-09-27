@@ -133,10 +133,11 @@ def psKernelCoreDefEqAfterProof
                   match smaller env lctx leftFn rightFn with
                   | PsKernelCoreResult.error message =>
                       PsKernelCoreResult.error message
-                  | PsKernelCoreResult.ok false =>
-                      PsKernelCoreResult.ok false
-                  | PsKernelCoreResult.ok true =>
-                      smaller env lctx leftArg rightArg
+                  | PsKernelCoreResult.ok value =>
+                      if value then
+                        smaller env lctx leftArg rightArg
+                      else
+                        PsKernelCoreResult.ok false
               | _ => PsKernelCoreResult.ok false
           | _ => PsKernelCoreResult.ok false
 
@@ -170,15 +171,16 @@ def psKernelCoreDefEqFallback
               match psKernelCoreDefEqIsProp remaining env lctx leftType with
               | PsKernelCoreResult.error message =>
                   PsKernelCoreResult.error message
-              | PsKernelCoreResult.ok true =>
-                  match psKernelCoreInfer remaining env lctx right with
-                  | PsKernelCoreResult.error message =>
-                      PsKernelCoreResult.error message
-                  | PsKernelCoreResult.ok rightType =>
-                      smaller env lctx leftType rightType
-              | PsKernelCoreResult.ok false =>
-                  psKernelCoreDefEqAfterProof
-                    remaining smaller env lctx left right
+              | PsKernelCoreResult.ok isProof =>
+                  if isProof then
+                    match psKernelCoreInfer remaining env lctx right with
+                    | PsKernelCoreResult.error message =>
+                        PsKernelCoreResult.error message
+                    | PsKernelCoreResult.ok rightType =>
+                        smaller env lctx leftType rightType
+                  else
+                    psKernelCoreDefEqAfterProof
+                      remaining smaller env lctx left right
 
 def psKernelCoreDefEqCompareLambda
     (smaller :
@@ -197,17 +199,18 @@ def psKernelCoreDefEqCompareLambda
   match smaller env lctx leftDomain rightDomain with
   | PsKernelCoreResult.error message =>
       PsKernelCoreResult.error message
-  | PsKernelCoreResult.ok false =>
-      PsKernelCoreResult.ok false
-  | PsKernelCoreResult.ok true =>
-      let fresh := psKernelCoreInferFreshName lctx rightName;
-      let child :=
-        psKernelCoreLocalContextAddLocal
-          lctx fresh rightName rightDomain rightBinderInfo;
-      let freshExpr := PsKernelCoreExpr.fvar fresh;
-      let openedLeft := psKernelCoreExprInstantiate1 leftBody freshExpr;
-      let openedRight := psKernelCoreExprInstantiate1 rightBody freshExpr;
-      smaller env child openedLeft openedRight
+  | PsKernelCoreResult.ok domainsEqual =>
+      if domainsEqual then
+        let fresh := psKernelCoreInferFreshName lctx rightName;
+        let child :=
+          psKernelCoreLocalContextAddLocal
+            lctx fresh rightName rightDomain rightBinderInfo;
+        let freshExpr := PsKernelCoreExpr.fvar fresh;
+        let openedLeft := psKernelCoreExprInstantiate1 leftBody freshExpr;
+        let openedRight := psKernelCoreExprInstantiate1 rightBody freshExpr;
+        smaller env child openedLeft openedRight
+      else
+        PsKernelCoreResult.ok false
 
 def psKernelCoreIsDefEq
     (budget : Nat) :

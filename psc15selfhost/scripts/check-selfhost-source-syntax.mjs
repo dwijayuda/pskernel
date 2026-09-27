@@ -105,6 +105,17 @@ forbidMarkers("LevelContext", levelContext, [
   '||',
 ]);
 
+const metaContext = await read(
+  "packages/meta/src/Ps/Meta/Context.lean",
+);
+requireMarkers("MetaContext", metaContext, [
+  'def psMetaFindDeclInList\n    (id : Nat)\n    (declarations : List PsMetaVarDecl) : Option PsMetaVarDecl :=\n  match declarations with',
+  'psMetaFindDeclInList id rest',
+]);
+forbidMarkers("MetaContext", metaContext, [
+  'def psMetaFindDeclInList (id : Nat) : List PsMetaVarDecl -> Option PsMetaVarDecl',
+]);
+
 process.stdout.write(
   "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 invariant-fuel/let/application/unary-match/no-bool-infix subset)\n",
 );

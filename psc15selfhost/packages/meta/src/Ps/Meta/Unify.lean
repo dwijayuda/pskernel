@@ -74,8 +74,8 @@ def psUnifyWithFuel
     Nat -> PsExpr -> PsExpr -> PsUnifyResult
   | 0, _, _ => psUnifyFailure context
   | fuel + 1, left, right =>
-      let leftValue := psWhnf environment context localContext left
-      let rightValue := psWhnf environment context localContext right
+      let leftValue := psWhnf environment context localContext left;
+      let rightValue := psWhnf environment context localContext right;
       if psExprAlphaEq leftValue rightValue then
         psUnifySuccess context
       else
@@ -96,7 +96,7 @@ def psUnifyWithFuel
         | value, .mvar id =>
             psUnifyAssign context id value
         | .sortE leftLevel, .sortE rightLevel =>
-            let unified := psLevelUnify context.levels leftLevel rightLevel
+            let unified := psLevelUnify context.levels leftLevel rightLevel;
             if unified.success then
               psUnifySuccess (psMetaSetLevels context unified.context)
             else
@@ -114,7 +114,7 @@ def psUnifyWithFuel
                 context
                 fuel
                 leftFn
-                rightFn
+                rightFn;
             if fnResult.success then
               psUnifyWithFuel
                 environment
@@ -133,15 +133,15 @@ def psUnifyWithFuel
                 context
                 fuel
                 leftType
-                rightType
+                rightType;
             if typeResult.success then
               let pushed :=
                 psLocalPushBinding
                   localContext
                   rightName
                   rightType
-                  PsBinderInfo.explicit
-              let fvar := PsExpr.fvar pushed.id
+                  PsBinderInfo.explicit;
+              let fvar := PsExpr.fvar pushed.id;
               psUnifyWithFuel
                 environment
                 pushed.context
@@ -159,15 +159,15 @@ def psUnifyWithFuel
                 context
                 fuel
                 leftType
-                rightType
+                rightType;
             if typeResult.success then
               let pushed :=
                 psLocalPushBinding
                   localContext
                   rightName
                   rightType
-                  PsBinderInfo.explicit
-              let fvar := PsExpr.fvar pushed.id
+                  PsBinderInfo.explicit;
+              let fvar := PsExpr.fvar pushed.id;
               psUnifyWithFuel
                 environment
                 pushed.context
@@ -212,5 +212,5 @@ def psUnify
     (left : PsExpr)
     (right : PsExpr) : PsUnifyResult :=
   let result :=
-    psUnifyWithFuel environment localContext context 512 left right
+    psUnifyWithFuel environment localContext context 512 left right;
   if result.success then result else psUnifyFailure context

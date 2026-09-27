@@ -60,43 +60,27 @@ def psKernelCoreCheck
             | PsKernelCoreOption.none =>
                 PsKernelCoreResult.error "unknown constant"
             | PsKernelCoreOption.some info =>
-                if psKernelCoreConstantInfoIsUnsafe info then
-                  if psKernelCoreCheckAllowsUnsafe safety then
-                    match psKernelCoreExprInstantiateLevelParams
-                        (psKernelCoreConstantInfoType info)
-                        (psKernelCoreConstantInfoLevelParams info)
-                        levels with
-                    | PsKernelCoreOption.none =>
-                        PsKernelCoreResult.error
-                          "incorrect number of universe levels"
-                    | PsKernelCoreOption.some instantiatedType =>
-                        PsKernelCoreResult.ok instantiatedType
-                  else
+                match psKernelCoreExprInstantiateLevelParams
+                    (psKernelCoreConstantInfoType info)
+                    (psKernelCoreConstantInfoLevelParams info)
+                    levels with
+                | PsKernelCoreOption.none =>
                     PsKernelCoreResult.error
-                      "safe declaration uses unsafe constant"
-                else if psKernelCoreConstantInfoIsPartial info then
-                  if psKernelCoreCheckAllowsPartial safety then
-                    match psKernelCoreExprInstantiateLevelParams
-                        (psKernelCoreConstantInfoType info)
-                        (psKernelCoreConstantInfoLevelParams info)
-                        levels with
-                    | PsKernelCoreOption.none =>
-                        PsKernelCoreResult.error
-                          "incorrect number of universe levels"
-                    | PsKernelCoreOption.some instantiatedType =>
+                      "incorrect number of universe levels"
+                | PsKernelCoreOption.some instantiatedType =>
+                    if psKernelCoreConstantInfoIsUnsafe info then
+                      if psKernelCoreCheckAllowsUnsafe safety then
                         PsKernelCoreResult.ok instantiatedType
-                  else
-                    PsKernelCoreResult.error
-                      "safe declaration uses partial constant"
-                else
-                  match psKernelCoreExprInstantiateLevelParams
-                      (psKernelCoreConstantInfoType info)
-                      (psKernelCoreConstantInfoLevelParams info)
-                      levels with
-                  | PsKernelCoreOption.none =>
-                      PsKernelCoreResult.error
-                        "incorrect number of universe levels"
-                  | PsKernelCoreOption.some instantiatedType =>
+                      else
+                        PsKernelCoreResult.error
+                          "safe declaration uses unsafe constant"
+                    else if psKernelCoreConstantInfoIsPartial info then
+                      if psKernelCoreCheckAllowsPartial safety then
+                        PsKernelCoreResult.ok instantiatedType
+                      else
+                        PsKernelCoreResult.error
+                          "safe declaration uses partial constant"
+                    else
                       PsKernelCoreResult.ok instantiatedType
         | PsKernelCoreExpr.lit literal =>
             match literal with

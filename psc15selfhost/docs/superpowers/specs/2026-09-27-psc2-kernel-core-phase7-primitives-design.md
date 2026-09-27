@@ -16,7 +16,7 @@ The phase is intentionally narrower than the mature `PSC1Kernel.CheckerContext` 
 
 The primary success criterion is:
 
-> a PSC1-subset trusted core can type-check Nat literals and normalize the selected named Nat primitives under an explicit, pure resource configuration, while preserving all accepted Phase-1 through Phase-6 behavior and public APIs through default-resource wrappers.
+> a PSC1-subset trusted core can type-check Nat literals and normalize the mandatory Phase-7 Nat primitives under an explicit, pure resource configuration, while preserving all accepted Phase-1 through Phase-6 behavior and public APIs through default-resource wrappers.
 
 ## 2. Constraints
 
@@ -37,7 +37,7 @@ The mature Lean-4.34-oriented reference checker has resource behavior that is ob
 
 1. Nat literals are rejected when their runtime numeral size exceeds `maxNatSize`.
 2. Nat primitive reduction uses the same resource bound for results.
-3. `Nat.pow` and `Nat.shiftLeft` reject counts that do not fit a 32-bit unsigned integer.
+3. `Nat.pow` rejects counts that do not fit a 32-bit unsigned integer; the mature bitwise extension applies the same boundary to `Nat.shiftLeft`.
 4. Some operations can reject before constructing an oversized result.
 5. Primitive reduction is a distinct stage from ordinary beta/zeta/delta WHNF, native evaluation, Quot reduction, and inductive recursor reduction.
 
@@ -135,13 +135,13 @@ Semantics:
 - small Nat values up to the accepted immediate-scalar boundary occupy one 64-bit word for resource accounting;
 - larger naturals are measured in whole 64-bit limbs;
 - a numeral/result larger than `maxNatSize` returns the mature-compatible resource error;
-- operation counts for `Nat.pow` and `Nat.shiftLeft` must fit UInt32.
+- operation counts that use the mature UInt32 boundary are checked through the shared count helper.
 
 The trusted code must express these helpers using recursion forms accepted by PSC1. If the direct reference recursion shape is rejected by the PSC1 gate, rewrite the algorithm structurally without weakening the source profile.
 
 ## 6. Primitive names and recognition
 
-`Primitive` defines trusted local names for:
+`Primitive` defines trusted local names for the mandatory Phase-7 surface:
 
 ```text
 Nat
@@ -159,11 +159,6 @@ Nat.mod
 Nat.div
 Nat.beq
 Nat.ble
-Nat.land
-Nat.lor
-Nat.xor
-Nat.shiftLeft
-Nat.shiftRight
 ```
 
 The module also owns pure helpers equivalent to the selected mature surface:
@@ -177,7 +172,19 @@ psKernelCoreNatPredExpr?
 
 Primitive recognition must be exact enough to avoid reducing a similarly named or incorrectly universe-instantiated application.
 
-## 7. Selected Nat primitive semantics
+The mature bitwise family is a separately gated Phase-7B extension:
+
+```text
+Nat.land
+Nat.lor
+Nat.xor
+Nat.shiftLeft
+Nat.shiftRight
+```
+
+Phase 7 acceptance does **not** depend on Phase 7B. Phase 7B may be included in the same implementation cycle only if its trusted implementation passes the unchanged PSC1 source profile without `Std`/Lean implementation imports, host/native callbacks, termination machinery, or source-gate weakening.
+
+## 7. Mandatory Nat primitive semantics
 
 ### 7.1 Unary primitive
 
@@ -190,9 +197,9 @@ Primitive recognition must be exact enough to avoid reducing a similarly named o
 
 Otherwise the primitive stage returns `none` rather than inventing a reduction.
 
-### 7.2 Binary primitives
+### 7.2 Mandatory binary primitives
 
-For two recognized Nat operands, Phase 7 supports:
+For two recognized Nat operands, Phase 7 must support:
 
 ```text
 Nat.add
@@ -204,11 +211,6 @@ Nat.mod
 Nat.div
 Nat.beq
 Nat.ble
-Nat.land
-Nat.lor
-Nat.xor
-Nat.shiftLeft
-Nat.shiftRight
 ```
 
 Required reference behavior includes:
@@ -218,29 +220,43 @@ Required reference behavior includes:
 - `Nat.div a 0` returns `0`;
 - `Nat.beq` returns `Bool.true` or `Bool.false`;
 - `Nat.ble` returns `Bool.true` or `Bool.false`;
-- arithmetic/bitwise results that produce a Nat literal obey the configured Nat-size boundary;
+- Nat-producing results obey the configured Nat-size boundary;
 - `Nat.pow` rejects an exponent larger than UInt32;
-- `Nat.shiftLeft` returns zero immediately for zero input, otherwise rejects a count larger than UInt32;
-- `Nat.pow` and `Nat.shiftLeft` use the mature reference's conservative pre-result size guard before constructing a result that would exceed the configured maximum;
-- `Nat.shiftRight` remains bounded by the input and does not require the same growth precheck.
+- `Nat.pow` uses the mature reference's conservative pre-result size guard before constructing a result that would exceed the configured maximum.
 
 ### 7.3 GCD implementation
 
-The mature reference uses Euclidean recursion. KernelCore may use any PSC1-accepted structurally equivalent formulation that is extensionally equal on the tested Nat domain.
+The mature reference uses Euclidean recursion. KernelCore may use a PSC1-accepted fuel/structural formulation that is extensionally equal on the tested Nat domain. Varying algorithm state must be carried in a shape accepted by the existing PSC1 structural-recursion rules rather than by adding termination annotations or `partial`.
 
-The implementation must remain pure and trusted; no host primitive or native callback is allowed.
+The implementation remains pure and trusted; no host primitive or native callback is allowed.
 
-### 7.4 Bitwise implementation gate
+### 7.4 Phase 7B bitwise extension
 
-`land`, `lor`, `xor`, `shiftLeft`, and `shiftRight` are in the desired Phase-7 surface only if they can be expressed through the existing PSC1 accepted foundation without adding forbidden `Std`/Lean implementation dependencies or weakening the source gate.
+If included, Phase 7B must match the mature reference for:
 
-If one or more bitwise operations cannot satisfy the current source profile, Phase 7 must split them into an explicitly deferred sub-slice. The phase may not broaden the TCB merely to retain a checklist item.
+```text
+Nat.land
+Nat.lor
+Nat.xor
+Nat.shiftLeft
+Nat.shiftRight
+```
+
+including:
+
+- configured Nat-size checks on Nat-producing results;
+- zero-left `Nat.shiftLeft` reducing to zero before count rejection;
+- UInt32 count rejection for nonzero `Nat.shiftLeft`;
+- conservative shift-left growth rejection;
+- no corresponding growth precheck for `Nat.shiftRight`.
+
+If this cannot be expressed within the unchanged PSC1 trusted-source profile, it remains explicitly deferred. The core gate may not be broadened merely to include these operations.
 
 ## 8. Resource-aware API threading
 
 Phase 7 adds explicit-resource variants while preserving the accepted APIs as default wrappers.
 
-Conceptual configured entry points:
+Configured entry points:
 
 ```text
 psKernelCoreWhnfWithResources
@@ -255,34 +271,45 @@ psKernelCoreAddOpaqueWithResources
 
 Each receives `PsKernelCoreResourceConfig` in addition to its current parameters.
 
-Current entry points remain valid and must be definitionally/simple-wrapper equivalent to the default configuration:
+Current entry points remain valid and must be simple wrappers over the default configuration:
 
 ```text
 oldAPI args = configuredAPI PsKernelCoreResourceConfigDefault args
 ```
 
-The exact argument order will be chosen consistently with the existing KernelCore style in the implementation plan, but the resource parameter must be explicit in configured APIs and must not be hidden in mutable/global state.
+The implementation plan must pin one consistent argument order following existing KernelCore style. The resource parameter is explicit in configured APIs and is never hidden in mutable/global state.
 
-## 9. Reduction data flow
+## 9. Reduction decomposition and data flow
 
-The configured public WHNF path becomes:
+The current Phase-4 reducer combines basic WHNF behavior with delta unfolding. Phase 7 must internally separate those concerns closely enough to preserve the mature selected ordering without changing the public Phase-4 contract.
+
+The configured path is conceptually:
 
 ```text
 expression
-  -> existing basic WHNF behavior
+  -> core WHNF step
        metadata transparency
        local-let lookup
        zeta
        beta
-       ordinary delta unfolding
-  -> Nat primitive attempt
-       recursively WHNF primitive operands using the same resource config
+       no native/Quot/recursor/projection primitive work
+  -> mandatory Nat primitive attempt
+       WHNF primitive operands with the same resource config
        apply pure primitive reduction
-  -> continue ordinary reduction as needed
+  -> if no primitive step: ordinary delta unfold when available
+  -> repeat until no selected Phase-7 step applies
   -> result
 ```
 
-The key semantic requirement is not an arbitrary syntactic ordering but parity with the mature reference for the selected overlap. In particular, primitive operands may need ordinary WHNF/delta exposure before primitive recognition succeeds.
+This mirrors the selected mature ordering: ordinary core reduction exposes the head, the primitive stage is attempted, and delta unfolding is then allowed to expose another reducible form for the next loop.
+
+Required compatibility rule:
+
+- the existing `psKernelCoreWhnf` remains a default-resource wrapper;
+- all previously accepted Phase-4 reduction parity cases must stay green;
+- the internal decomposition may change, but it may not alter previously accepted observable behavior merely to simplify Phase 7.
+
+Primitive operands may themselves require beta/zeta/delta exposure. The same resource configuration must be threaded through those recursive WHNF calls.
 
 Phase 7 must not add native, Quot, recursor/iota, projection, structure-eta, or string-constructor reduction to satisfy a primitive test.
 
@@ -317,25 +344,25 @@ Nat.beq 2 2  ≡  Bool.true
 
 provided the required declarations/names are represented in the test environment as needed by the existing KernelCore fixtures.
 
-This phase does not attempt to clone all mature Nat-offset defeq rules beyond what is already present or directly required by the selected primitive overlap.
+This phase does not attempt to clone additional mature Nat-offset defeq rules beyond what is already accepted or directly required by the mandatory primitive overlap.
 
 ## 12. Errors and fail-closed behavior
 
-The trusted layer should preserve stable mature-compatible messages where Phase 7 explicitly models the boundary.
+The trusted layer preserves stable mature-compatible messages where Phase 7 explicitly models the boundary.
 
-Required resource error meanings:
+Required Nat-size error:
 
 ```text
 the kernel refused a Nat numeral because its size exceeds the maximum
 ```
 
-and for oversized count arguments:
+Required oversized-count form:
 
 ```text
 the kernel refused to evaluate <operation> because its second argument does not fit in a 32-bit unsigned integer
 ```
 
-`Nat.pow` may additionally use the mature-compatible pre-result overflow message when the predicted result exceeds the maximum numeral size.
+`Nat.pow` additionally uses the mature-compatible pre-result overflow message when the predicted result exceeds the maximum numeral size.
 
 Existing budget errors remain distinct, for example:
 
@@ -351,7 +378,7 @@ Unknown/malformed primitive shapes fail closed as "no primitive reduction" unles
 
 ## 13. Differential evidence
 
-Phase 7 requires direct comparison against mature `PSC1Kernel` behavior for the selected overlap.
+Phase 7 requires direct comparison against mature `PSC1Kernel` behavior for the mandatory overlap. Phase 7B, if implemented, gets separate evidence and cannot substitute for missing mandatory evidence.
 
 ### 13.1 Resource parity fixture
 
@@ -362,10 +389,12 @@ Pin:
 - heap Nat word-count examples;
 - exact-at-limit acceptance;
 - just-over-limit rejection;
-- UInt32 count boundary acceptance/rejection;
+- UInt32 count boundary acceptance/rejection through the shared helper;
 - stable error strings for selected resource failures.
 
-### 13.2 Primitive parity fixture
+Large-limit behavior should be tested through size helpers and small custom configurations where practical; the suite does not need to allocate a 128 MiB numeral merely to prove the default constant exists.
+
+### 13.2 Mandatory primitive parity fixture
 
 Pin:
 
@@ -374,16 +403,26 @@ Pin:
 - add/sub/mul;
 - pow/gcd/mod/div;
 - beq/ble;
-- bitwise operations that survive the PSC1 source-profile feasibility gate;
 - divide/mod by zero;
 - malformed arity;
 - nonzero universe-argument rejection from primitive reduction;
 - unreduced/nonliteral operand behavior;
 - maxNatSize failures;
-- UInt32 count failures;
-- conservative pow/shift-left growth rejection.
+- UInt32 exponent failure;
+- conservative pow growth rejection.
 
-### 13.3 Integrated parity fixture
+### 13.3 Optional Phase-7B parity fixture
+
+Only if Phase 7B is included, pin:
+
+- land/lor/xor;
+- shiftLeft/shiftRight;
+- zero-left shiftLeft ordering;
+- UInt32 shift count boundary;
+- configured growth rejection;
+- malformed/unreduced behavior.
+
+### 13.4 Integrated parity fixture
 
 Pin configured behavior through:
 
@@ -404,15 +443,16 @@ Representative scenarios:
 
 ## 14. TDD and assurance order
 
-Implementation must proceed RED-first per semantic island.
+Implementation proceeds RED-first per semantic island.
 
 Expected gate order:
 
 ```text
 Lean compilation
   -> Resource direct parity
-  -> Primitive direct parity
-  -> configured integration parity
+  -> Mandatory primitive direct parity
+  -> Optional Phase-7B direct parity, only if included
+  -> Configured integration parity
   -> Phase-1 through Phase-6 direct gates
   -> bootstrap isolation
   -> actual PSC1 self-host source profile
@@ -436,7 +476,7 @@ The Phase-7 acceptance record must report:
 - actual PSC1 self-host closure count;
 - no new host runtime dependencies in the trusted core.
 
-A larger LOC count is acceptable when required for explicit pure semantics, but the design should prefer semantic clarity over importing mature runtime machinery.
+A larger LOC count is acceptable when required for explicit pure semantics, but the design prefers semantic clarity over importing mature runtime machinery.
 
 ## 16. Explicit non-scope
 
@@ -457,7 +497,7 @@ Phase 7 does not implement or claim:
 - string-literal constructor expansion;
 - mutual-definition admission;
 - nested/mutual inductive lowering;
-- complete Lean primitive set outside the explicitly selected Nat family;
+- complete Lean primitive coverage outside the mandatory Nat family and any separately evidenced Phase-7B extension;
 - native evaluation;
 - K7/K8 corpus parity through KernelCore;
 - compiler `CheckedCore` provider cutover;
@@ -471,12 +511,12 @@ Phase 7 does not implement or claim:
 Phase 7 is accepted only when all of the following hold:
 
 1. `Resource.lean` exists and contains only the explicit pure resource policy needed by this phase.
-2. `Primitive.lean` exists and owns the selected Nat primitive recognition/reduction semantics.
+2. `Primitive.lean` exists and owns the mandatory Nat primitive recognition/reduction semantics.
 3. configured resource-aware variants exist through Reduce, Infer, DefEq, Check, and ordinary Admission.
 4. accepted Phase-1 through Phase-6 APIs remain available as default-resource wrappers.
 5. Nat literals observe configured `maxNatSize` in the configured inference/check/admission path.
-6. selected Nat primitives directly match mature `PSC1Kernel` behavior for the tested overlap.
-7. configured DefEq can observe selected primitive normalization.
+6. `Nat.succ`, add/sub/mul, pow/gcd/mod/div, and beq/ble directly match mature `PSC1Kernel` behavior for the tested overlap.
+7. configured DefEq can observe mandatory primitive normalization.
 8. resource errors remain distinct from explicit KernelCore budget errors.
 9. no native, Quot, inductive/recursor, projection, structure-eta, or string-constructor semantics are pulled into the trusted core.
 10. all trusted KernelCore source passes the actual PSC1 self-host gate.
@@ -485,16 +525,19 @@ Phase 7 is accepted only when all of the following hold:
 13. full existing repository `npm run check` is green.
 14. an exact-head acceptance document records CI, trusted-source, size, allowed-claim, and non-claim evidence.
 
+Phase 7B bitwise support is additional acceptance evidence if present, but absence of Phase 7B does not weaken or block the mandatory Phase-7 acceptance criteria above.
+
 ## 18. Allowed claims after acceptance
 
 If all acceptance criteria pass, it will be valid to claim:
 
 - KernelCore has an explicit PSC1-self-hostable Nat resource configuration for the Phase-7 surface;
 - configured Nat literal checking enforces the tested `maxNatSize` behavior;
-- the selected named Nat primitives reduce in trusted KernelCore with direct differential evidence against mature `PSC1Kernel`;
+- the mandatory named Nat primitives reduce in trusted KernelCore with direct differential evidence against mature `PSC1Kernel`;
 - configured WHNF/Infer/DefEq/Check/ordinary Admission propagate the Phase-7 resource/primitive semantics for the explicitly covered surface;
 - existing APIs preserve default-resource behavior through wrappers;
-- all trusted Phase-7 source passes the actual PSC1 self-host checker.
+- all trusted Phase-7 source passes the actual PSC1 self-host checker;
+- if Phase 7B is implemented and separately green, the accepted claim may additionally name the tested bitwise/shift primitives.
 
 It will still not be valid to claim complete Lean kernel primitive coverage, complete Lean resource semantics, complete Lean 4.34 equivalence, inductive/Quot correctness, corpus parity, compiler cutover, or fixed-point self-hosting.
 
@@ -502,12 +545,13 @@ It will still not be valid to claim complete Lean kernel primitive coverage, com
 
 After Phase 7, the dependency-ordered roadmap is expected to continue with separate design/spec/plan cycles for:
 
-1. Quot semantics;
-2. primitive inductive/constructor/recursor metadata and admission, including strict positivity;
-3. recursor/iota/projection/structure-eta computation;
-4. mutual/nested source lowering outside the TCB;
-5. broader K7/K8 corpus and adversarial parity;
-6. compiler checked-core provider cutover;
-7. executable portable self-host/fixed-point evidence.
+1. Phase 7B bitwise primitives if they were not included with Phase 7;
+2. Quot semantics;
+3. primitive inductive/constructor/recursor metadata and admission, including strict positivity;
+4. recursor/iota/projection/structure-eta computation;
+5. mutual/nested source lowering outside the TCB;
+6. broader K7/K8 corpus and adversarial parity;
+7. compiler checked-core provider cutover;
+8. executable portable self-host/fixed-point evidence.
 
 This ordering is provisional and may be adjusted by measured corpus/dependency pressure, but later phases may not bypass missing semantic gates merely to reach compiler integration sooner.

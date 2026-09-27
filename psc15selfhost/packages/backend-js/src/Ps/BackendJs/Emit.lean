@@ -37,6 +37,11 @@ def psJsEmitExpr (expr : PsJsExpr) : String :=
       let names := psJsEmitParameterNames parameters;
       let start := psJsonConcat3 "((" names ") => ";
       psJsonConcat3 start (psJsEmitExpr body) ")"
+  | PsJsExpr.ifE condition thenBranch elseBranch =>
+      let start := psJsonConcat2 "(" (psJsEmitExpr condition);
+      let withThen := psJsonConcat3 start " ? " (psJsEmitExpr thenBranch);
+      let withElse := psJsonConcat3 withThen " : " (psJsEmitExpr elseBranch);
+      psJsonConcat2 withElse ")"
 
 def psJsEmitConstants (constants : List PsJsConstant) : Nat -> String :=
   match constants with

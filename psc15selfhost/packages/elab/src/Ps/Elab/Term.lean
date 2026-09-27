@@ -2296,10 +2296,6 @@ def psElabNatListAt
       | nextIndex + 1 =>
           psElabNatListAt rest nextIndex
 
-structure PsElabMatchHypothesesResult where
-  context : PsElabContext
-  hypothesesRev : List PsElabMatchField
-
 def psElabValidateStructuralCall
     (context : PsElabContext)
     (recursion : PsElabStructuralRecursion)

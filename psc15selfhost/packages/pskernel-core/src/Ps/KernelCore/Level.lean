@@ -108,7 +108,18 @@ def psKernelCoreLevelAddOffset
       PsKernelCoreLevel.succ
         (psKernelCoreLevelAddOffset level remaining)
 
-def psKernelCoreLevelMkMax
+def psKernelCoreLevelExplicitOffset?
+    (level : PsKernelCoreLevel) : PsKernelCoreOption Nat :=
+  match level with
+  | PsKernelCoreLevel.zero => PsKernelCoreOption.some Nat.zero
+  | PsKernelCoreLevel.succ child =>
+      match psKernelCoreLevelExplicitOffset? child with
+      | PsKernelCoreOption.none => PsKernelCoreOption.none
+      | PsKernelCoreOption.some offset =>
+          PsKernelCoreOption.some (Nat.succ offset)
+  | _ => PsKernelCoreOption.none
+
+def psKernelCoreLevelMkMaxFallback
     (left right : PsKernelCoreLevel) : PsKernelCoreLevel :=
   if psKernelCoreLevelEq left right then
     left
@@ -118,6 +129,18 @@ def psKernelCoreLevelMkMax
     left
   else
     PsKernelCoreLevel.max left right
+
+def psKernelCoreLevelMkMax
+    (left right : PsKernelCoreLevel) : PsKernelCoreLevel :=
+  match psKernelCoreLevelExplicitOffset? left with
+  | PsKernelCoreOption.none =>
+      psKernelCoreLevelMkMaxFallback left right
+  | PsKernelCoreOption.some leftOffset =>
+      match psKernelCoreLevelExplicitOffset? right with
+      | PsKernelCoreOption.none =>
+          psKernelCoreLevelMkMaxFallback left right
+      | PsKernelCoreOption.some rightOffset =>
+          if Nat.ble rightOffset leftOffset then left else right
 
 def psKernelCoreLevelMkIMax
     (left right : PsKernelCoreLevel) : PsKernelCoreLevel :=

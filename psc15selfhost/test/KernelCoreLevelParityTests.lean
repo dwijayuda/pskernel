@@ -7,6 +7,7 @@ def psKernelCoreLevelParity : Bool :=
   let kcV := PsKernelCoreName.str kcAnon "v"
   let kcZero := PsKernelCoreLevel.zero
   let kcOne := PsKernelCoreLevel.succ kcZero
+  let kcTwo := PsKernelCoreLevel.succ kcOne
   let kcUParam := PsKernelCoreLevel.param kcU
   let kcVParam := PsKernelCoreLevel.param kcV
   let kcMaxUV := PsKernelCoreLevel.max kcUParam kcVParam
@@ -24,6 +25,7 @@ def psKernelCoreLevelParity : Bool :=
   let refV := PSC1Kernel.Name.str refAnon "v"
   let refZero := PSC1Kernel.Level.zero
   let refOne := PSC1Kernel.Level.succ refZero
+  let refTwo := PSC1Kernel.Level.succ refOne
   let refUParam := PSC1Kernel.Level.param refU
   let refVParam := PSC1Kernel.Level.param refV
   let refMaxUV := PSC1Kernel.Level.max refUParam refVParam
@@ -34,6 +36,18 @@ def psKernelCoreLevelParity : Bool :=
   (psKernelCoreLevelEquivalent kcOne kcOne == PSC1Kernel.Level.equivalent refOne refOne) &&
   (psKernelCoreLevelEquivalent kcMaxUV kcMaxVU == PSC1Kernel.Level.equivalent refMaxUV refMaxVU) &&
   (psKernelCoreLevelEquivalent kcIMaxZero kcZero == PSC1Kernel.Level.equivalent refIMaxZero refZero) &&
+  (psKernelCoreLevelEq
+      (psKernelCoreLevelMkMax kcTwo kcOne)
+      kcTwo ==
+    PSC1Kernel.Level.eq
+      (PSC1Kernel.Level.mkMax refTwo refOne)
+      refTwo) &&
+  (psKernelCoreLevelEq
+      (psKernelCoreLevelMkIMax kcTwo kcOne)
+      kcTwo ==
+    PSC1Kernel.Level.eq
+      (PSC1Kernel.Level.mkIMax refTwo refOne)
+      refTwo) &&
   (psKernelCoreLevelEq
       (psKernelCoreLevelInstantiateParams kcUParam kcUSubst)
       kcOne ==

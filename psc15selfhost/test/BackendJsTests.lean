@@ -57,6 +57,15 @@ def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
     jsFixtureFunctionDecl "callIdentityLet" "value" .nat .nat
       (.call (.var "identity") [] [
         (.letE "temporary" (.primitive .nat) (.var "value") (.var "temporary"))]),
+    jsFixtureFunctionDecl "callCapturedLambda" "value" .nat .nat
+      (.letE "captured" (.primitive .nat) (.var "value")
+        (.call
+          (.lambda
+            [{ name := "ignored", type := .primitive .nat }]
+            (.primitive .nat)
+            (.var "captured"))
+          []
+          [(.literal (.natural 0))])),
     jsFixtureFunctionDecl "callSecond" "value" .nat .nat
       (.call (.var "second") [] [(.literal (.natural 11)), (.var "value")]),
     jsFixtureBinaryFunctionDecl "second" "left" "right" .nat .nat .nat

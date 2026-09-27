@@ -31,6 +31,9 @@ def psMinimalSelfHostExceptSource : String :=
   "  | Except.error message => 0\n" ++
   "  | Except.ok current => current\n"
 
+def psMinimalSelfHostProdSource : String :=
+  "def pairValue : Prod Nat Nat := Prod.mk 1 2\n"
+
 def psTestMinimalSelfHostPreparation : Bool :=
   match
       psCompilerPrepareSource
@@ -211,6 +214,16 @@ def psTestMinimalSelfHostExceptTypeScript : Bool :=
   | Except.error _ => false
   | Except.ok _ => true
 
+def psTestMinimalSelfHostProdPreparation : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostProdSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      prepared.declarations.length > 0
+        && prepared.canonicalAdmissions.length > 0
+
 def main : IO Unit := do
   if psTestMinimalSelfHostPreparation then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: admission-ready boundary"
@@ -310,3 +323,9 @@ def main : IO Unit := do
     throw
       (IO.userError
         "PSC2_MINIMAL_SELFHOST_FAIL: foundational Except -> TypeScript")
+  if psTestMinimalSelfHostProdPreparation then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational Prod preparation"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational Prod preparation")

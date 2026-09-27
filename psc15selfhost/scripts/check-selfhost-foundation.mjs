@@ -26,6 +26,10 @@ for (const symbol of [
   "psSelfHostOptionNoneName",
   "psSelfHostOptionSomeName",
   "psSelfHostOptionRecName",
+  "psSelfHostExceptName",
+  "psSelfHostExceptErrorName",
+  "psSelfHostExceptOkName",
+  "psSelfHostExceptRecName",
   "psSelfHostRuntimePreludeDeclarations",
 ]) {
   if (!prelude.includes(symbol)) {
@@ -38,10 +42,13 @@ for (const marker of [
   "foundational Option preparation",
   "foundational Option -> VerifiedIR",
   "foundational Option -> TypeScript",
+  "foundational Except preparation",
+  "foundational Except -> VerifiedIR",
+  "foundational Except -> TypeScript",
 ]) {
   if (!tests.includes(marker)) {
     throw new Error(`PSC2_SELFHOST_FOUNDATION_TEST_MISSING: ${marker}`);
   }
 }
 
-process.stdout.write("PSC2_SELFHOST_FOUNDATION_CONTRACT: PASS (List, Option)\n");
+process.stdout.write("PSC2_SELFHOST_FOUNDATION_CONTRACT: PASS (List, Option, Except)\n");

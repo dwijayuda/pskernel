@@ -36,9 +36,9 @@ const expectedAllowed = [
   "erasure",
   "compiler",
   "backend-ts",
-  "stdlib",
 ];
 const expectedForbidden = [
+  "stdlib",
   "project",
   "backend-rust",
   "backend-wasm",

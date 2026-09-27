@@ -11,6 +11,12 @@ on:
       - psc15selfhost/test/BridgeTests.lean
       - psc15selfhost/test/BootstrapTests.lean
       - psc15selfhost/test/MinimalSelfHostTests.lean
+      - psc15selfhost/test/BackendRustTests.lean
+      - psc15selfhost/test/BackendRustSourceTests.lean
+      - psc15selfhost/test/BackendRustLetFunctionResultTests.lean
+      - psc15selfhost/test/BackendRustFixture.lean
+      - psc15selfhost/test/BackendRustLetFunctionResultFixture.lean
+      - psc15selfhost/test/BackendDifferentialFixture.lean
       - psc15selfhost/lakefile.lean
       - psc15selfhost/package.json
       - psc15selfhost/scripts/check-kernel-core-source.mjs

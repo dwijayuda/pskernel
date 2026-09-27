@@ -49,8 +49,8 @@ def psDefEqReadOnly
     (localContext : PsLocalContext)
     (left : PsExpr)
     (right : PsExpr) : Bool :=
-  let leftValue := psWhnfCore metaContext localContext left
-  let rightValue := psWhnfCore metaContext localContext right
+  let leftValue := psWhnfCore metaContext localContext left;
+  let rightValue := psWhnfCore metaContext localContext right;
   psExprAlphaEq leftValue rightValue
 
 def psWhnfWithFuel
@@ -59,7 +59,7 @@ def psWhnfWithFuel
     (localContext : PsLocalContext) : Nat -> PsExpr -> PsExpr
   | 0, expr => psWhnfCore metaContext localContext expr
   | fuel + 1, expr =>
-      let core := psWhnfCoreWithFuel metaContext localContext fuel expr
+      let core := psWhnfCoreWithFuel metaContext localContext fuel expr;
       match core with
       | .constE name levels =>
           match psEnvironmentFind environment name with
@@ -68,7 +68,7 @@ def psWhnfWithFuel
               match psDeclarationValue declaration with
               | none => core
               | some value =>
-                  let parameters := psDeclarationLevelParams declaration
+                  let parameters := psDeclarationLevelParams declaration;
                   if parameters.length == levels.length then
                     psWhnfWithFuel
                       environment
@@ -80,7 +80,7 @@ def psWhnfWithFuel
                     core
       | .app fn arg =>
           let reducedFn :=
-            psWhnfWithFuel environment metaContext localContext fuel fn
+            psWhnfWithFuel environment metaContext localContext fuel fn;
           if psExprAlphaEq reducedFn fn then
             core
           else
@@ -110,9 +110,9 @@ def psDefEqReadOnlyWithEnvFuel
         (psWhnf environment metaContext localContext right)
   | remaining + 1, left, right =>
       let leftValue :=
-        psWhnf environment metaContext localContext left
+        psWhnf environment metaContext localContext left;
       let rightValue :=
-        psWhnf environment metaContext localContext right
+        psWhnf environment metaContext localContext right;
       if psExprAlphaEq leftValue rightValue then
         true
       else

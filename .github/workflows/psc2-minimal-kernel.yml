@@ -121,6 +121,13 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_resource_parity_tests
 
+      - name: Mandatory Nat primitive parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_primitive_parity_tests
+
       - name: Basic reduction parity test
         shell: bash
         run: |

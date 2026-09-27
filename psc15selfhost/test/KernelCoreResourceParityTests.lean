@@ -48,8 +48,8 @@ def psKernelCoreResourceSizeParity : Bool :=
 
 def psKernelCoreResourceLimitParity : Bool :=
   let tiny : PsKernelCoreResourceConfig := { maxNatSize := 8 }
-  let exactValue : Nat := PSC1Kernel.leanMaxSmallNat
-  let overValue : Nat := PSC1Kernel.leanMaxSmallNat + 1
+  let exactValue : Nat := (2 ^ 64) - 1
+  let overValue : Nat := 2 ^ 64
   let expected :=
     "the kernel refused a Nat numeral because its size exceeds the maximum"
   psKernelCoreResourceOkUnit (psKernelCoreCheckNatSize tiny exactValue) &&
@@ -75,7 +75,7 @@ def psKernelCoreResourceCountParity : Bool :=
 def psKernelCoreResourceErrorDistinctFromBudget : Bool :=
   let tiny : PsKernelCoreResourceConfig := { maxNatSize := 8 }
   let result :=
-    psKernelCoreCheckNatSize tiny (PSC1Kernel.leanMaxSmallNat + 1)
+    psKernelCoreCheckNatSize tiny (2 ^ 64)
   match result with
   | PsKernelCoreResult.error message =>
       message != "reduction budget exhausted" &&

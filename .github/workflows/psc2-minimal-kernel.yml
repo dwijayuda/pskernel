@@ -140,6 +140,13 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_check_parity_tests
 
+      - name: Ordinary admission parity test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_admission_parity_tests
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |

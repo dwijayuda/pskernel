@@ -224,6 +224,25 @@ def psTestMinimalSelfHostProdPreparation : Bool :=
       prepared.declarations.length > 0
         && prepared.canonicalAdmissions.length > 0
 
+def psTestMinimalSelfHostProdVerifiedIr : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostProdSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      match psCompilerVerifiedIrFromPrepared prepared with
+      | Except.error _ => false
+      | Except.ok _ => true
+
+def psTestMinimalSelfHostProdTypeScript : Bool :=
+  match
+      psCompilerTypeScriptSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostProdSource with
+  | Except.error _ => false
+  | Except.ok _ => true
+
 def main : IO Unit := do
   if psTestMinimalSelfHostPreparation then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: admission-ready boundary"
@@ -329,3 +348,15 @@ def main : IO Unit := do
     throw
       (IO.userError
         "PSC2_MINIMAL_SELFHOST_FAIL: foundational Prod preparation")
+  if psTestMinimalSelfHostProdVerifiedIr then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational Prod -> VerifiedIR"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational Prod -> VerifiedIR")
+  if psTestMinimalSelfHostProdTypeScript then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational Prod -> TypeScript"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational Prod -> TypeScript")

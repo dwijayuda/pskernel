@@ -39,7 +39,7 @@
 - Create `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Declaration.lean` — initial global declaration metadata and semantic accessors.
 - Create `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Environment.lean` — linear semantic global environment.
 - Create `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/LocalContext.lean` — local declaration/context substrate.
-- Modify `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Data.lean` — add only a tiny kernel-local result carrier if required by `Environment.add`.
+- Modify `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Data.lean` — add only a tiny kernel-local result carrier when Environment implementation begins.
 - Modify `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore.lean` — export Phase 2 modules.
 
 ### Differential tests
@@ -94,31 +94,32 @@ The fixture must import `Ps.KernelCore.Declaration` and compare the planned trus
 
 ```text
 DefinitionSafety: unsafeDef / safe / partialDef
-  isUnsafe
-  isSafe
-
 ReducibilityHints: opaqueHint / abbrevHint / regular(height)
-  lt
-  isRegular
-
 ConstantBase
 AxiomInfo
 DefinitionInfo
 TheoremInfo
 OpaqueInfo
 ConstantInfo: axiomInfo / defnInfo / thmInfo / opaqueInfo
+```
 
-accessors:
-  base
-  name
-  levelParams
-  type
-  deltaValue?
-  hints?
-  isUnsafe
-  isPartial
-  isDefinition
-  definition?
+Pin these accessors/classifiers:
+
+```text
+psKernelCoreDefinitionSafetyIsUnsafe
+psKernelCoreDefinitionSafetyIsSafe
+psKernelCoreReducibilityHintsLt
+psKernelCoreReducibilityHintsIsRegular
+psKernelCoreConstantInfoBase
+psKernelCoreConstantInfoName
+psKernelCoreConstantInfoLevelParams
+psKernelCoreConstantInfoType
+psKernelCoreConstantInfoDeltaValue?
+psKernelCoreConstantInfoHints?
+psKernelCoreConstantInfoIsUnsafe
+psKernelCoreConstantInfoIsPartial
+psKernelCoreConstantInfoIsDefinition
+psKernelCoreConstantInfoDefinition?
 ```
 
 Review-focus assertions must include:
@@ -142,8 +143,6 @@ lake exe psc2_kernel_core_declaration_parity_tests
 Expected: FAIL because `Ps.KernelCore.Declaration` does not exist.
 
 - [ ] **Step 4: Commit the RED fixture**
-
-Commit message:
 
 ```text
 test(pskernel-core): add declaration parity red gate
@@ -180,29 +179,43 @@ structure PsKernelCoreConstantBase
   type : PsKernelCoreExpr
 
 structure PsKernelCoreAxiomInfo
+  base : PsKernelCoreConstantBase
+  isUnsafe : Bool
+
 structure PsKernelCoreDefinitionInfo
+  base : PsKernelCoreConstantBase
+  value : PsKernelCoreExpr
+  hints : PsKernelCoreReducibilityHints
+  safety : PsKernelCoreDefinitionSafety
+
 structure PsKernelCoreTheoremInfo
+  base : PsKernelCoreConstantBase
+  value : PsKernelCoreExpr
+
 structure PsKernelCoreOpaqueInfo
+  base : PsKernelCoreConstantBase
+  value : PsKernelCoreExpr
+  isUnsafe : Bool
 
 inductive PsKernelCoreConstantInfo
-  axiomInfo
-  defnInfo
-  thmInfo
-  opaqueInfo
+  axiomInfo (value : PsKernelCoreAxiomInfo)
+  defnInfo (value : PsKernelCoreDefinitionInfo)
+  thmInfo (value : PsKernelCoreTheoremInfo)
+  opaqueInfo (value : PsKernelCoreOpaqueInfo)
 
-psKernelCoreConstantInfoBase
-psKernelCoreConstantInfoName
-psKernelCoreConstantInfoLevelParams
-psKernelCoreConstantInfoType
-psKernelCoreConstantInfoDeltaValue?
-psKernelCoreConstantInfoHints?
-psKernelCoreConstantInfoIsUnsafe
-psKernelCoreConstantInfoIsPartial
-psKernelCoreConstantInfoIsDefinition
-psKernelCoreConstantInfoDefinition?
+psKernelCoreConstantInfoBase : PsKernelCoreConstantInfo -> PsKernelCoreConstantBase
+psKernelCoreConstantInfoName : PsKernelCoreConstantInfo -> PsKernelCoreName
+psKernelCoreConstantInfoLevelParams : PsKernelCoreConstantInfo -> PsKernelCoreList PsKernelCoreName
+psKernelCoreConstantInfoType : PsKernelCoreConstantInfo -> PsKernelCoreExpr
+psKernelCoreConstantInfoDeltaValue? : PsKernelCoreConstantInfo -> PsKernelCoreOption PsKernelCoreExpr
+psKernelCoreConstantInfoHints? : PsKernelCoreConstantInfo -> PsKernelCoreOption PsKernelCoreReducibilityHints
+psKernelCoreConstantInfoIsUnsafe : PsKernelCoreConstantInfo -> Bool
+psKernelCoreConstantInfoIsPartial : PsKernelCoreConstantInfo -> Bool
+psKernelCoreConstantInfoIsDefinition : PsKernelCoreConstantInfo -> Bool
+psKernelCoreConstantInfoDefinition? : PsKernelCoreConstantInfo -> PsKernelCoreOption PsKernelCoreDefinitionInfo
 ```
 
-Use the same semantic fields as the corresponding initial four reference variants. Do not add inductive/constructor/recursor/Quot variants.
+Do not add inductive/constructor/recursor/Quot variants.
 
 - [ ] **Step 1: Implement only the Phase-2A declaration surface**
 
@@ -218,8 +231,6 @@ import Ps.KernelCore.Declaration
 
 - [ ] **Step 3: Verify direct parity GREEN**
 
-Run:
-
 ```bash
 cd psc15selfhost
 lake exe psc2_kernel_core_declaration_parity_tests
@@ -229,8 +240,6 @@ Expected: `PSC2_KERNEL_CORE_DECLARATION_PARITY: PASS`.
 
 - [ ] **Step 4: Verify actual PSC1 self-hostability**
 
-Run:
-
 ```bash
 node scripts/check-kernel-core-source.mjs
 ```
@@ -239,8 +248,6 @@ Expected: every KernelCore source module, including `Declaration.lean`, reports 
 
 - [ ] **Step 5: Run Phase-1 assurance unchanged**
 
-Run:
-
 ```bash
 npm run assurance:kernel-core:phase1
 ```
@@ -248,8 +255,6 @@ npm run assurance:kernel-core:phase1
 Expected: PASS.
 
 - [ ] **Step 6: Commit Phase 2A GREEN**
-
-Commit message:
 
 ```text
 feat(pskernel-core): add minimal declaration semantics
@@ -260,33 +265,20 @@ feat(pskernel-core): add minimal declaration semantics
 ### Task 3: Phase 2B RED gate — Environment behavior
 
 **Files:**
-- Modify: `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Data.lean`
 - Create: `psc15selfhost/test/KernelCoreEnvironmentParityTests.lean`
 - Modify: `psc15selfhost/lakefile.lean`
 
 **Interfaces:**
 - Consumes: Task 2 declaration API and Phase-1 Name/List/Option.
-- Produces: `PsKernelCoreResult error ok` carrier and a failing fixture for the planned Environment API.
+- Produces: a failing fixture for the planned Environment API. Production `Data.lean` remains unchanged until RED is confirmed.
 
-- [ ] **Step 1: Add a minimal trusted result carrier**
-
-Add to `Data.lean`:
-
-```text
-inductive PsKernelCoreResult (error : Type) (ok : Type)
-  error (value : error)
-  ok (value : ok)
-```
-
-No helper API beyond what Environment needs.
-
-- [ ] **Step 2: Add the Environment parity executable**
+- [ ] **Step 1: Add the Environment parity executable**
 
 ```text
 psc2_kernel_core_environment_parity_tests -> KernelCoreEnvironmentParityTests
 ```
 
-- [ ] **Step 3: Write the failing Environment parity test**
+- [ ] **Step 2: Write the failing Environment parity test**
 
 Import `Ps.KernelCore.Environment` and pin:
 
@@ -312,16 +304,14 @@ Test cases:
 - newest-first lookup returns the latest same-name item under `addUnchecked`;
 - `add` rejects duplicate constant name with error string `already declared`;
 - `add` rejects duplicate universe parameter names with error string `duplicate universe parameter`;
-- duplicate universe test must use a non-adjacent sequence such as `[u, v, u]`;
+- duplicate universe test uses a non-adjacent sequence `[u, v, u]`;
 - replace changes only the first/newest matching declaration and preserves unrelated declarations/order;
 - size matches reference observable size;
 - `markQuotInitialized` is false -> true and idempotent on true.
 
 Compare outcomes through test-only adapters because the trusted representation intentionally differs from the indexed reference representation.
 
-- [ ] **Step 4: Run and verify RED**
-
-Run:
+- [ ] **Step 3: Run and verify RED**
 
 ```bash
 lake exe psc2_kernel_core_environment_parity_tests
@@ -329,9 +319,7 @@ lake exe psc2_kernel_core_environment_parity_tests
 
 Expected: FAIL because `Ps.KernelCore.Environment` does not exist.
 
-- [ ] **Step 5: Commit the RED fixture**
-
-Commit message:
+- [ ] **Step 4: Commit the RED fixture**
 
 ```text
 test(pskernel-core): add environment parity red gate
@@ -342,14 +330,19 @@ test(pskernel-core): add environment parity red gate
 ### Task 4: Phase 2B GREEN — Linear semantic Environment
 
 **Files:**
+- Modify: `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Data.lean`
 - Create: `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Environment.lean`
 - Modify: `psc15selfhost/packages/pskernel-core/src/Ps/KernelCore.lean`
 
 **Interfaces:**
-- Consumes: `PsKernelCoreResult`, `PsKernelCoreList`, `PsKernelCoreOption`, `PsKernelCoreName`, `PsKernelCoreConstantInfo` and declaration accessors.
+- Consumes: `PsKernelCoreList`, `PsKernelCoreOption`, `PsKernelCoreName`, `PsKernelCoreConstantInfo` and declaration accessors.
 - Produces:
 
 ```text
+inductive PsKernelCoreResult (errorType : Type) (okType : Type)
+  error (value : errorType)
+  ok (value : okType)
+
 structure PsKernelCoreEnvironment
   constants : PsKernelCoreList PsKernelCoreConstantInfo
   quotInitialized : Bool
@@ -364,7 +357,11 @@ psKernelCoreEnvironmentAdd : PsKernelCoreEnvironment -> PsKernelCoreConstantInfo
 psKernelCoreEnvironmentMarkQuotInitialized : PsKernelCoreEnvironment -> PsKernelCoreEnvironment
 ```
 
-- [ ] **Step 1: Implement structural list helpers locally in `Environment.lean`**
+- [ ] **Step 1: Add the minimal trusted `PsKernelCoreResult` carrier to `Data.lean`**
+
+No helpers beyond the two constructors.
+
+- [ ] **Step 2: Implement structural list helpers locally in `Environment.lean`**
 
 Required behavior only:
 
@@ -377,7 +374,7 @@ replace first matching constant
 
 Do not add generic collection APIs unless another trusted module already needs them.
 
-- [ ] **Step 2: Implement the Environment API with newest-first linear semantics**
+- [ ] **Step 3: Implement the Environment API with newest-first linear semantics**
 
 No arrays, hashes, buckets, caches, indexes, or fallback index synchronization logic.
 
@@ -389,11 +386,9 @@ No arrays, hashes, buckets, caches, indexes, or fallback index synchronization l
 3. otherwise ok(addUnchecked ...)
 ```
 
-- [ ] **Step 3: Export `Environment` from `Ps.KernelCore`**
+- [ ] **Step 4: Export `Environment` from `Ps.KernelCore`**
 
-- [ ] **Step 4: Verify environment parity**
-
-Run:
+- [ ] **Step 5: Verify environment parity**
 
 ```bash
 lake exe psc2_kernel_core_environment_parity_tests
@@ -401,9 +396,7 @@ lake exe psc2_kernel_core_environment_parity_tests
 
 Expected: `PSC2_KERNEL_CORE_ENVIRONMENT_PARITY: PASS`.
 
-- [ ] **Step 5: Verify PSC1 source/self-host gate**
-
-Run:
+- [ ] **Step 6: Verify PSC1 source/self-host gate**
 
 ```bash
 node scripts/check-kernel-core-source.mjs
@@ -413,13 +406,11 @@ Expected: PASS for every trusted module including Environment.
 
 If PSC1 rejects a Lean-valid recursion shape, rewrite the trusted helper into a structurally recursive single-changing-argument form; do not weaken the compiler gate.
 
-- [ ] **Step 6: Run prior parity gates**
+- [ ] **Step 7: Run prior parity gates**
 
 Run all Phase-1 tests plus declaration parity. Expected: PASS.
 
-- [ ] **Step 7: Commit Phase 2B GREEN**
-
-Commit message:
+- [ ] **Step 8: Commit Phase 2B GREEN**
 
 ```text
 feat(pskernel-core): add linear semantic environment
@@ -444,20 +435,20 @@ inductive PsKernelCoreLocalDecl
   localDecl(index, name, userName, type, binderInfo)
   letDecl(index, name, userName, type, value)
 
-psKernelCoreLocalDeclName
-psKernelCoreLocalDeclUserName
-psKernelCoreLocalDeclType
-psKernelCoreLocalDeclValue?
-psKernelCoreLocalDeclBinderInfo
+psKernelCoreLocalDeclName : PsKernelCoreLocalDecl -> PsKernelCoreName
+psKernelCoreLocalDeclUserName : PsKernelCoreLocalDecl -> PsKernelCoreName
+psKernelCoreLocalDeclType : PsKernelCoreLocalDecl -> PsKernelCoreExpr
+psKernelCoreLocalDeclValue? : PsKernelCoreLocalDecl -> PsKernelCoreOption PsKernelCoreExpr
+psKernelCoreLocalDeclBinderInfo : PsKernelCoreLocalDecl -> PsKernelCoreBinderInfo
 
 structure PsKernelCoreLocalContext
   decls : PsKernelCoreList PsKernelCoreLocalDecl
   nextIndex : Nat
 
-psKernelCoreLocalContextEmpty
-psKernelCoreLocalContextFind?
-psKernelCoreLocalContextAddLocal
-psKernelCoreLocalContextAddLet
+psKernelCoreLocalContextEmpty : PsKernelCoreLocalContext
+psKernelCoreLocalContextFind? : PsKernelCoreLocalContext -> PsKernelCoreName -> PsKernelCoreOption PsKernelCoreLocalDecl
+psKernelCoreLocalContextAddLocal : PsKernelCoreLocalContext -> PsKernelCoreName -> PsKernelCoreName -> PsKernelCoreExpr -> PsKernelCoreBinderInfo -> PsKernelCoreLocalContext
+psKernelCoreLocalContextAddLet : PsKernelCoreLocalContext -> PsKernelCoreName -> PsKernelCoreName -> PsKernelCoreExpr -> PsKernelCoreExpr -> PsKernelCoreLocalContext
 ```
 
 - [ ] **Step 1: Add LocalContext parity executable and failing fixture**
@@ -471,9 +462,15 @@ Test:
 - let declaration `value?` returns the stored expression;
 - let declaration binder info is `.default`;
 - local lookup finds the correct declaration;
-- shadowing case with the same internal name returns the newest declaration.
+- shadowing with the same internal name returns the newest declaration.
 
-Run and confirm RED because `Ps.KernelCore.LocalContext` is missing.
+Run:
+
+```bash
+lake exe psc2_kernel_core_local_context_parity_tests
+```
+
+Expected: RED because `Ps.KernelCore.LocalContext` is missing.
 
 - [ ] **Step 2: Implement minimal LocalContext semantics**
 
@@ -483,8 +480,6 @@ Use newest-first `PsKernelCoreList` storage and structural Name equality. No map
 
 - [ ] **Step 4: Verify parity and self-hostability**
 
-Run:
-
 ```bash
 lake exe psc2_kernel_core_local_context_parity_tests
 node scripts/check-kernel-core-source.mjs
@@ -493,8 +488,6 @@ node scripts/check-kernel-core-source.mjs
 Expected: PASS.
 
 - [ ] **Step 5: Commit Phase 2C GREEN**
-
-Commit message:
 
 ```text
 feat(pskernel-core): add local context semantics
@@ -538,8 +531,6 @@ Keep the existing full `npm run check` as the final regression step.
 
 - [ ] **Step 3: Run Phase-2 aggregate assurance**
 
-Run:
-
 ```bash
 npm run assurance:kernel-core:phase2
 ```
@@ -548,8 +539,6 @@ Expected: all semantic/self-host gates PASS and the size reporter includes all n
 
 - [ ] **Step 4: Run complete existing regression suite**
 
-Run:
-
 ```bash
 npm run check
 ```
@@ -557,8 +546,6 @@ npm run check
 Expected: PASS. Fix only real integration regressions; do not weaken or skip gates.
 
 - [ ] **Step 5: Commit assurance wiring**
-
-Commit message:
 
 ```text
 ci(pskernel-core): add Phase 2 assurance gate
@@ -601,8 +588,6 @@ GitHub Actions PSC2 minimal kernel run on exact head -> success
 - explicit non-claim of full Lean 4 equivalence.
 
 - [ ] **Step 3: Commit acceptance record**
-
-Commit message:
 
 ```text
 docs(pskernel-core): accept Phase 2 semantic substrate

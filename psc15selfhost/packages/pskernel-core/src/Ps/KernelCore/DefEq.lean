@@ -41,6 +41,152 @@ def psKernelCoreDefEqIsProp
                 (psKernelCoreLevelNormalizesToZero level)
           | _ => PsKernelCoreResult.error "expected sort"
 
+inductive PsKernelCoreDefEqPlan where
+  | done (result : PsKernelCoreResult String Bool)
+  | compare
+      (lctx : PsKernelCoreLocalContext)
+      (left : PsKernelCoreExpr)
+      (right : PsKernelCoreExpr)
+  | compareThen
+      (firstLctx : PsKernelCoreLocalContext)
+      (firstLeft : PsKernelCoreExpr)
+      (firstRight : PsKernelCoreExpr)
+      (secondLctx : PsKernelCoreLocalContext)
+      (secondLeft : PsKernelCoreExpr)
+      (secondRight : PsKernelCoreExpr)
+
+def psKernelCoreDefEqCompareBinderPlan
+    (lctx : PsKernelCoreLocalContext)
+    (leftDomain : PsKernelCoreExpr)
+    (leftBody : PsKernelCoreExpr)
+    (rightName : PsKernelCoreName)
+    (rightDomain : PsKernelCoreExpr)
+    (rightBody : PsKernelCoreExpr)
+    (rightBinderInfo : PsKernelCoreBinderInfo) :
+    PsKernelCoreDefEqPlan :=
+  let fresh := psKernelCoreInferFreshName lctx rightName;
+  let child :=
+    psKernelCoreLocalContextAddLocal
+      lctx fresh rightName rightDomain rightBinderInfo;
+  let freshExpr := PsKernelCoreExpr.fvar fresh;
+  let openedLeft := psKernelCoreExprInstantiate1 leftBody freshExpr;
+  let openedRight := psKernelCoreExprInstantiate1 rightBody freshExpr;
+  PsKernelCoreDefEqPlan.compareThen
+    lctx leftDomain rightDomain
+    child openedLeft openedRight
+
+def psKernelCoreDefEqFallbackPlan
+    (remaining : Nat)
+    (env : PsKernelCoreEnvironment)
+    (lctx : PsKernelCoreLocalContext)
+    (left : PsKernelCoreExpr)
+    (right : PsKernelCoreExpr) :
+    PsKernelCoreDefEqPlan :=
+  match left with
+  | PsKernelCoreExpr.proj _ _ _ =>
+      PsKernelCoreDefEqPlan.done
+        (PsKernelCoreResult.error
+          "projection definitional equality unavailable before inductive metadata")
+  | _ =>
+      match right with
+      | PsKernelCoreExpr.proj _ _ _ =>
+          PsKernelCoreDefEqPlan.done
+            (PsKernelCoreResult.error
+              "projection definitional equality unavailable before inductive metadata")
+      | _ =>
+          match psKernelCoreInfer remaining env lctx left with
+          | PsKernelCoreResult.error message =>
+              PsKernelCoreDefEqPlan.done
+                (PsKernelCoreResult.error message)
+          | PsKernelCoreResult.ok leftType =>
+              match psKernelCoreDefEqIsProp remaining env lctx leftType with
+              | PsKernelCoreResult.error message =>
+                  PsKernelCoreDefEqPlan.done
+                    (PsKernelCoreResult.error message)
+              | PsKernelCoreResult.ok isProof =>
+                  if isProof then
+                    match psKernelCoreInfer remaining env lctx right with
+                    | PsKernelCoreResult.error message =>
+                        PsKernelCoreDefEqPlan.done
+                          (PsKernelCoreResult.error message)
+                    | PsKernelCoreResult.ok rightType =>
+                        PsKernelCoreDefEqPlan.compare
+                          lctx leftType rightType
+                  else
+                    match left with
+                    | PsKernelCoreExpr.lam _ _ _ _ =>
+                        match psKernelCoreInfer remaining env lctx right with
+                        | PsKernelCoreResult.error message =>
+                            PsKernelCoreDefEqPlan.done
+                              (PsKernelCoreResult.error message)
+                        | PsKernelCoreResult.ok rightType =>
+                            match psKernelCoreWhnf
+                                remaining env lctx rightType with
+                            | PsKernelCoreResult.error message =>
+                                PsKernelCoreDefEqPlan.done
+                                  (PsKernelCoreResult.error message)
+                            | PsKernelCoreResult.ok exposed =>
+                                match exposed with
+                                | PsKernelCoreExpr.forallE
+                                    name domain _ binderInfo =>
+                                    let eta :=
+                                      PsKernelCoreExpr.lam
+                                        name
+                                        domain
+                                        (PsKernelCoreExpr.app
+                                          right
+                                          (PsKernelCoreExpr.bvar 0))
+                                        binderInfo;
+                                    PsKernelCoreDefEqPlan.compare
+                                      lctx left eta
+                                | _ =>
+                                    PsKernelCoreDefEqPlan.done
+                                      (PsKernelCoreResult.ok false)
+                    | _ =>
+                        match right with
+                        | PsKernelCoreExpr.lam _ _ _ _ =>
+                            match psKernelCoreInfer remaining env lctx left with
+                            | PsKernelCoreResult.error message =>
+                                PsKernelCoreDefEqPlan.done
+                                  (PsKernelCoreResult.error message)
+                            | PsKernelCoreResult.ok leftOrdinaryType =>
+                                match psKernelCoreWhnf
+                                    remaining env lctx leftOrdinaryType with
+                                | PsKernelCoreResult.error message =>
+                                    PsKernelCoreDefEqPlan.done
+                                      (PsKernelCoreResult.error message)
+                                | PsKernelCoreResult.ok exposed =>
+                                    match exposed with
+                                    | PsKernelCoreExpr.forallE
+                                        name domain _ binderInfo =>
+                                        let eta :=
+                                          PsKernelCoreExpr.lam
+                                            name
+                                            domain
+                                            (PsKernelCoreExpr.app
+                                              left
+                                              (PsKernelCoreExpr.bvar 0))
+                                            binderInfo;
+                                        PsKernelCoreDefEqPlan.compare
+                                          lctx eta right
+                                    | _ =>
+                                        PsKernelCoreDefEqPlan.done
+                                          (PsKernelCoreResult.ok false)
+                        | _ =>
+                            match left with
+                            | PsKernelCoreExpr.app leftFn leftArg =>
+                                match right with
+                                | PsKernelCoreExpr.app rightFn rightArg =>
+                                    PsKernelCoreDefEqPlan.compareThen
+                                      lctx leftFn rightFn
+                                      lctx leftArg rightArg
+                                | _ =>
+                                    PsKernelCoreDefEqPlan.done
+                                      (PsKernelCoreResult.ok false)
+                            | _ =>
+                                PsKernelCoreDefEqPlan.done
+                                  (PsKernelCoreResult.ok false)
+
 def psKernelCoreIsDefEq
     (budget : Nat) :
     PsKernelCoreEnvironment ->
@@ -67,140 +213,6 @@ def psKernelCoreIsDefEq
           (lctx : PsKernelCoreLocalContext)
           (left : PsKernelCoreExpr)
           (right : PsKernelCoreExpr) =>
-        let compareBinder :
-            PsKernelCoreExpr ->
-            PsKernelCoreExpr ->
-            PsKernelCoreName ->
-            PsKernelCoreExpr ->
-            PsKernelCoreExpr ->
-            PsKernelCoreBinderInfo ->
-            PsKernelCoreResult String Bool :=
-          fun (leftDomain : PsKernelCoreExpr)
-              (leftBody : PsKernelCoreExpr)
-              (rightName : PsKernelCoreName)
-              (rightDomain : PsKernelCoreExpr)
-              (rightBody : PsKernelCoreExpr)
-              (rightBinderInfo : PsKernelCoreBinderInfo) =>
-            match smaller env lctx leftDomain rightDomain with
-            | PsKernelCoreResult.error message =>
-                PsKernelCoreResult.error message
-            | PsKernelCoreResult.ok domainsEqual =>
-                if domainsEqual then
-                  let fresh := psKernelCoreInferFreshName lctx rightName;
-                  let child :=
-                    psKernelCoreLocalContextAddLocal
-                      lctx fresh rightName rightDomain rightBinderInfo;
-                  let freshExpr := PsKernelCoreExpr.fvar fresh;
-                  let openedLeft :=
-                    psKernelCoreExprInstantiate1 leftBody freshExpr;
-                  let openedRight :=
-                    psKernelCoreExprInstantiate1 rightBody freshExpr;
-                  smaller env child openedLeft openedRight
-                else
-                  PsKernelCoreResult.ok false;
-        let fallback :
-            PsKernelCoreExpr ->
-            PsKernelCoreExpr ->
-            PsKernelCoreResult String Bool :=
-          fun (leftReduced : PsKernelCoreExpr)
-              (rightReduced : PsKernelCoreExpr) =>
-            match leftReduced with
-            | PsKernelCoreExpr.proj _ _ _ =>
-                PsKernelCoreResult.error
-                  "projection definitional equality unavailable before inductive metadata"
-            | _ =>
-                match rightReduced with
-                | PsKernelCoreExpr.proj _ _ _ =>
-                    PsKernelCoreResult.error
-                      "projection definitional equality unavailable before inductive metadata"
-                | _ =>
-                    match psKernelCoreInfer remaining env lctx leftReduced with
-                    | PsKernelCoreResult.error message =>
-                        PsKernelCoreResult.error message
-                    | PsKernelCoreResult.ok leftType =>
-                        match psKernelCoreDefEqIsProp
-                            remaining env lctx leftType with
-                        | PsKernelCoreResult.error message =>
-                            PsKernelCoreResult.error message
-                        | PsKernelCoreResult.ok isProof =>
-                            if isProof then
-                              match psKernelCoreInfer
-                                  remaining env lctx rightReduced with
-                              | PsKernelCoreResult.error message =>
-                                  PsKernelCoreResult.error message
-                              | PsKernelCoreResult.ok rightType =>
-                                  smaller env lctx leftType rightType
-                            else
-                              match leftReduced with
-                              | PsKernelCoreExpr.lam _ _ _ _ =>
-                                  match psKernelCoreInfer
-                                      remaining env lctx rightReduced with
-                                  | PsKernelCoreResult.error message =>
-                                      PsKernelCoreResult.error message
-                                  | PsKernelCoreResult.ok rightType =>
-                                      match psKernelCoreWhnf
-                                          remaining env lctx rightType with
-                                      | PsKernelCoreResult.error message =>
-                                          PsKernelCoreResult.error message
-                                      | PsKernelCoreResult.ok exposed =>
-                                          match exposed with
-                                          | PsKernelCoreExpr.forallE
-                                              name domain _ binderInfo =>
-                                              let eta :=
-                                                PsKernelCoreExpr.lam
-                                                  name
-                                                  domain
-                                                  (PsKernelCoreExpr.app
-                                                    rightReduced
-                                                    (PsKernelCoreExpr.bvar 0))
-                                                  binderInfo;
-                                              smaller
-                                                env lctx leftReduced eta
-                                          | _ => PsKernelCoreResult.ok false
-                              | _ =>
-                                  match rightReduced with
-                                  | PsKernelCoreExpr.lam _ _ _ _ =>
-                                      match psKernelCoreInfer
-                                          remaining env lctx leftReduced with
-                                      | PsKernelCoreResult.error message =>
-                                          PsKernelCoreResult.error message
-                                      | PsKernelCoreResult.ok leftOrdinaryType =>
-                                          match psKernelCoreWhnf
-                                              remaining env lctx leftOrdinaryType with
-                                          | PsKernelCoreResult.error message =>
-                                              PsKernelCoreResult.error message
-                                          | PsKernelCoreResult.ok exposed =>
-                                              match exposed with
-                                              | PsKernelCoreExpr.forallE
-                                                  name domain _ binderInfo =>
-                                                  let eta :=
-                                                    PsKernelCoreExpr.lam
-                                                      name
-                                                      domain
-                                                      (PsKernelCoreExpr.app
-                                                        leftReduced
-                                                        (PsKernelCoreExpr.bvar 0))
-                                                      binderInfo;
-                                                  smaller
-                                                    env lctx eta rightReduced
-                                              | _ => PsKernelCoreResult.ok false
-                                  | _ =>
-                                      match leftReduced with
-                                      | PsKernelCoreExpr.app leftFn leftArg =>
-                                          match rightReduced with
-                                          | PsKernelCoreExpr.app rightFn rightArg =>
-                                              match smaller
-                                                  env lctx leftFn rightFn with
-                                              | PsKernelCoreResult.error message =>
-                                                  PsKernelCoreResult.error message
-                                              | PsKernelCoreResult.ok functionsEqual =>
-                                                  if functionsEqual then
-                                                    smaller
-                                                      env lctx leftArg rightArg
-                                                  else
-                                                    PsKernelCoreResult.ok false
-                                          | _ => PsKernelCoreResult.ok false
-                                      | _ => PsKernelCoreResult.ok false;
         if psKernelCoreExprEq left right then
           PsKernelCoreResult.ok true
         else
@@ -215,53 +227,98 @@ def psKernelCoreIsDefEq
                   if psKernelCoreExprEq leftReduced rightReduced then
                     PsKernelCoreResult.ok true
                   else
-                    match leftReduced with
-                    | PsKernelCoreExpr.sort leftLevel =>
-                        match rightReduced with
-                        | PsKernelCoreExpr.sort rightLevel =>
-                            PsKernelCoreResult.ok
-                              (psKernelCoreLevelEquivalent leftLevel rightLevel)
-                        | _ => fallback leftReduced rightReduced
-                    | PsKernelCoreExpr.lit leftLiteral =>
-                        match rightReduced with
-                        | PsKernelCoreExpr.lit rightLiteral =>
-                            PsKernelCoreResult.ok
-                              (psKernelCoreLiteralEq leftLiteral rightLiteral)
-                        | _ => fallback leftReduced rightReduced
-                    | PsKernelCoreExpr.lam _ leftDomain leftBody _ =>
-                        match rightReduced with
-                        | PsKernelCoreExpr.lam
-                            rightName rightDomain rightBody rightBinderInfo =>
-                            compareBinder
-                              leftDomain leftBody
-                              rightName rightDomain rightBody rightBinderInfo
-                        | _ => fallback leftReduced rightReduced
-                    | PsKernelCoreExpr.forallE _ leftDomain leftBody _ =>
-                        match rightReduced with
-                        | PsKernelCoreExpr.forallE
-                            rightName rightDomain rightBody rightBinderInfo =>
-                            compareBinder
-                              leftDomain leftBody
-                              rightName rightDomain rightBody rightBinderInfo
-                        | _ => fallback leftReduced rightReduced
-                    | PsKernelCoreExpr.const leftName leftLevels =>
-                        match rightReduced with
-                        | PsKernelCoreExpr.const rightName rightLevels =>
-                            if psKernelCoreNameEq leftName rightName then
-                              if psKernelCoreLevelListEquivalent
-                                  leftLevels rightLevels then
-                                PsKernelCoreResult.ok true
+                    let plan : PsKernelCoreDefEqPlan :=
+                      match leftReduced with
+                      | PsKernelCoreExpr.sort leftLevel =>
+                          match rightReduced with
+                          | PsKernelCoreExpr.sort rightLevel =>
+                              PsKernelCoreDefEqPlan.done
+                                (PsKernelCoreResult.ok
+                                  (psKernelCoreLevelEquivalent
+                                    leftLevel rightLevel))
+                          | _ =>
+                              psKernelCoreDefEqFallbackPlan
+                                remaining env lctx leftReduced rightReduced
+                      | PsKernelCoreExpr.lit leftLiteral =>
+                          match rightReduced with
+                          | PsKernelCoreExpr.lit rightLiteral =>
+                              PsKernelCoreDefEqPlan.done
+                                (PsKernelCoreResult.ok
+                                  (psKernelCoreLiteralEq
+                                    leftLiteral rightLiteral))
+                          | _ =>
+                              psKernelCoreDefEqFallbackPlan
+                                remaining env lctx leftReduced rightReduced
+                      | PsKernelCoreExpr.lam _ leftDomain leftBody _ =>
+                          match rightReduced with
+                          | PsKernelCoreExpr.lam
+                              rightName rightDomain rightBody rightBinderInfo =>
+                              psKernelCoreDefEqCompareBinderPlan
+                                lctx
+                                leftDomain leftBody
+                                rightName rightDomain rightBody rightBinderInfo
+                          | _ =>
+                              psKernelCoreDefEqFallbackPlan
+                                remaining env lctx leftReduced rightReduced
+                      | PsKernelCoreExpr.forallE _ leftDomain leftBody _ =>
+                          match rightReduced with
+                          | PsKernelCoreExpr.forallE
+                              rightName rightDomain rightBody rightBinderInfo =>
+                              psKernelCoreDefEqCompareBinderPlan
+                                lctx
+                                leftDomain leftBody
+                                rightName rightDomain rightBody rightBinderInfo
+                          | _ =>
+                              psKernelCoreDefEqFallbackPlan
+                                remaining env lctx leftReduced rightReduced
+                      | PsKernelCoreExpr.const leftName leftLevels =>
+                          match rightReduced with
+                          | PsKernelCoreExpr.const rightName rightLevels =>
+                              if psKernelCoreNameEq leftName rightName then
+                                if psKernelCoreLevelListEquivalent
+                                    leftLevels rightLevels then
+                                  PsKernelCoreDefEqPlan.done
+                                    (PsKernelCoreResult.ok true)
+                                else
+                                  psKernelCoreDefEqFallbackPlan
+                                    remaining env lctx
+                                    leftReduced rightReduced
                               else
-                                fallback leftReduced rightReduced
+                                psKernelCoreDefEqFallbackPlan
+                                  remaining env lctx
+                                  leftReduced rightReduced
+                          | _ =>
+                              psKernelCoreDefEqFallbackPlan
+                                remaining env lctx leftReduced rightReduced
+                      | PsKernelCoreExpr.fvar leftName =>
+                          match rightReduced with
+                          | PsKernelCoreExpr.fvar rightName =>
+                              if psKernelCoreNameEq leftName rightName then
+                                PsKernelCoreDefEqPlan.done
+                                  (PsKernelCoreResult.ok true)
+                              else
+                                psKernelCoreDefEqFallbackPlan
+                                  remaining env lctx
+                                  leftReduced rightReduced
+                          | _ =>
+                              psKernelCoreDefEqFallbackPlan
+                                remaining env lctx leftReduced rightReduced
+                      | _ =>
+                          psKernelCoreDefEqFallbackPlan
+                            remaining env lctx leftReduced rightReduced;
+                    match plan with
+                    | PsKernelCoreDefEqPlan.done result => result
+                    | PsKernelCoreDefEqPlan.compare
+                        compareLctx compareLeft compareRight =>
+                        smaller env compareLctx compareLeft compareRight
+                    | PsKernelCoreDefEqPlan.compareThen
+                        firstLctx firstLeft firstRight
+                        secondLctx secondLeft secondRight =>
+                        match smaller env firstLctx firstLeft firstRight with
+                        | PsKernelCoreResult.error message =>
+                            PsKernelCoreResult.error message
+                        | PsKernelCoreResult.ok firstEqual =>
+                            if firstEqual then
+                              smaller env secondLctx secondLeft secondRight
                             else
-                              fallback leftReduced rightReduced
-                        | _ => fallback leftReduced rightReduced
-                    | PsKernelCoreExpr.fvar leftName =>
-                        match rightReduced with
-                        | PsKernelCoreExpr.fvar rightName =>
-                            if psKernelCoreNameEq leftName rightName then
-                              PsKernelCoreResult.ok true
-                            else
-                              fallback leftReduced rightReduced
-                        | _ => fallback leftReduced rightReduced
-                    | _ => fallback leftReduced rightReduced
+                              PsKernelCoreResult.ok false

@@ -225,6 +225,35 @@ if (!/psElabTypedBindersAcc\s+elaborate\s+binders\s+context\s+\[\]/.test(typedBi
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabTypedBinders worker call order");
 }
 
+const closeTypedBindersMatch = source.match(
+  /def psCloseElabTypedBinders([\s\S]*?)(?=\ndef psElabLambdaExpectedBody)/,
+);
+if (closeTypedBindersMatch === null) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psCloseElabTypedBinders block");
+}
+const closeTypedBinders = closeTypedBindersMatch[0];
+const closeTypedBindersRequired = [
+  /\(binders : List PsElabTypedBinder\)\s*:\s*PsExpr ->\s*PsExpr ->\s*Prod PsExpr PsExpr :=/,
+  /\| \[\] =>\s*fun \(value : PsExpr\) =>\s*fun \(type : PsExpr\) =>\s*Prod\.mk value type/,
+  /let smaller\s*:\s*PsExpr ->\s*PsExpr ->\s*Prod PsExpr PsExpr :=\s*psCloseElabTypedBinders metaContext rest;/,
+  /fun \(value : PsExpr\) =>\s*fun \(type : PsExpr\) =>/,
+  /smaller\s+closedValue\s+closedType/,
+];
+for (const pattern of closeTypedBindersRequired) {
+  if (!pattern.test(closeTypedBinders)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psCloseElabTypedBinders ${pattern}`);
+  }
+}
+const closeTypedBindersForbidden = [
+  /\(binders : List PsElabTypedBinder\)\s*\(value : PsExpr\)\s*\(type : PsExpr\)/,
+  /psCloseElabTypedBinders\s+metaContext\s+rest\s+closedValue\s+closedType/,
+];
+for (const pattern of closeTypedBindersForbidden) {
+  if (pattern.test(closeTypedBinders)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psCloseElabTypedBinders ${pattern}`);
+  }
+}
+
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
   /psSyntaxNameAppendSegments\s*\(psNameAppendStr name segment\)\s*rest/,
@@ -239,5 +268,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection and typed-binder recursion, typed projection-reference match, explicit projection-reference expectation, explicit character conversion, explicit typed-binder expectation, local list length, and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection, typed-binder accumulation and typed-binder closing recursion, typed projection-reference match, explicit projection-reference expectation, explicit character conversion, explicit typed-binder expectation, local list length, and explicit Option constructors)\n",
 );

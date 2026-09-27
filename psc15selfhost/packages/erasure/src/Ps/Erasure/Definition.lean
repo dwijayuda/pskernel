@@ -1,6 +1,6 @@
 import Ps.Erasure.Expr
 import Ps.Erasure.Inductive
-import Ps.Erasure.Structure
+import Ps.Erasure.StructureRecursor
 
 structure PsOpenedErasedDefinition where
   typeParameters : List PsVerifiedIrTypeParameter
@@ -289,22 +289,25 @@ def psEraseDefinition
         runtimeParameters := []
       }
     }
-    match
-        psEraseOpenDefinition
-          environment
-          definitionScope
-          type
-          value with
+    match psLowerStructureRecursors environment value with
     | Except.error error => Except.error error
-    | Except.ok opened =>
-        Except.ok
-          (some {
-            name := outputName
-            typeParameters := opened.typeParameters
-            parameters := opened.parameters
-            resultType := opened.resultType
-            body := opened.body
-          })
+    | Except.ok normalizedValue =>
+        match
+            psEraseOpenDefinition
+              environment
+              definitionScope
+              type
+              normalizedValue with
+        | Except.error error => Except.error error
+        | Except.ok opened =>
+            Except.ok
+              (some {
+                name := outputName
+                typeParameters := opened.typeParameters
+                parameters := opened.parameters
+                resultType := opened.resultType
+                body := opened.body
+              })
 
 def psEraseDefinitionsLoop
     (environment : PsEnvironment)

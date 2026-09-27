@@ -3,12 +3,18 @@ import Ps.Bootstrap.SelfHost
 def psMinimalSelfHostLeanSource : String :=
   "def answer : Nat := 42"
 
-def psMinimalSelfHostListSource : String :=
-  "def singleton : List Nat := List.cons 1 List.nil\n" ++
+def psMinimalSelfHostListConstructionSource : String :=
+  "def singleton : List Nat := List.cons 1 List.nil\n"
+
+def psMinimalSelfHostListMatchSource : String :=
   "def headOrZero (xs : List Nat) : Nat :=\n" ++
   "  match xs with\n" ++
   "  | List.nil => 0\n" ++
   "  | List.cons head tail => head\n"
+
+def psMinimalSelfHostListSource : String :=
+  psMinimalSelfHostListConstructionSource ++
+  psMinimalSelfHostListMatchSource
 
 def psTestMinimalSelfHostPreparation : Bool :=
   match
@@ -51,6 +57,26 @@ def psTestMinimalSelfHostTypeScript : Bool :=
         psMinimalSelfHostLeanSource with
   | Except.error _ => false
   | Except.ok output => output.contains "answer"
+
+def psTestMinimalSelfHostListConstructionPreparation : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostListConstructionSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      prepared.declarations.length > 0
+        && prepared.canonicalAdmissions.length > 0
+
+def psTestMinimalSelfHostListMatchPreparation : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostListMatchSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      prepared.declarations.length > 0
+        && prepared.canonicalAdmissions.length > 0
 
 def psTestMinimalSelfHostListPreparation : Bool :=
   match
@@ -106,6 +132,18 @@ def main : IO Unit := do
     throw
       (IO.userError
         "PSC2_MINIMAL_SELFHOST_FAIL: TypeScript bootstrap backend")
+  if psTestMinimalSelfHostListConstructionPreparation then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational List construction preparation"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational List construction preparation")
+  if psTestMinimalSelfHostListMatchPreparation then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational List match preparation"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational List match preparation")
   if psTestMinimalSelfHostListPreparation then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational List preparation"
   else

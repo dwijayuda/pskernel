@@ -19,6 +19,7 @@ const required = [
   'def psInferStructureProjectionFieldWorker\n    (remainingFuel : Nat) :',
   'psInferStructureProjectionFieldWorker fuel;',
   'psInferStructureProjectionFieldWorker\n    remainingFuel\n    environment\n    metaContext\n    localContext\n    typeName\n    target\n    requestedIndex\n    fieldIndex\n    cursor',
+  '(psInferNatNe (List.length view.args) info.numParams)',
 ];
 for (const marker of required) {
   if (!infer.includes(marker)) {
@@ -31,6 +32,7 @@ const forbidden = [
   'psInferAppViewAcc fn (List.cons arg args)',
   'psInferApplyStructureParameters\n            environment\n            metaContext\n            localContext\n            (psExprInstantiate1 body argument)\n            rest',
   'psInferStructureProjectionField\n              environment\n              metaContext\n              localContext\n              typeName\n              target\n              fuel\n              requestedIndex\n              (Nat.succ fieldIndex)',
+  'view.args.length',
   '| head =>',
   'head := head',
 ];
@@ -41,5 +43,5 @@ for (const marker of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_INFER_SELFHOST_SOURCE_SYNTAX: PASS (arity-safe app-view and invariant-safe structure recursion)\n",
+  "PSC2_INFER_SELFHOST_SOURCE_SYNTAX: PASS (arity-safe recursion and explicit List length)\n",
 );

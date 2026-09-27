@@ -13,9 +13,14 @@ inductive PsJsLiteral where
   | string (value : String)
   | undefined
 
+inductive PsJsExpr where
+  | literal (value : PsJsLiteral)
+  | local (index : Nat)
+  | letE (index : Nat) (value : PsJsExpr) (body : PsJsExpr)
+
 structure PsJsConstant where
   exportName : String
-  value : PsJsLiteral
+  body : PsJsExpr
 
 structure PsJsModule where
   constants : List PsJsConstant

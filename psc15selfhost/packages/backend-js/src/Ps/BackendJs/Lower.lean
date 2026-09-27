@@ -111,32 +111,37 @@ def psJsLookupLocal (locals : List PsJsLocalBinding)
       if psJsonStringEq binding.sourceName name then Option.some binding
       else psJsLookupLocal rest name
 
-def psJsLowerParameters (parameters : List PsVerifiedIrParameter)
-    (locals : List PsJsLocalBinding) (nextLocal : Nat) :
-    Except PsJsError PsJsLoweredParameters :=
+def psJsLowerParameters (parameters : List PsVerifiedIrParameter) :
+    List PsJsLocalBinding -> Nat -> Except PsJsError PsJsLoweredParameters :=
   match parameters with
   | List.nil =>
-      Except.ok (PsJsLoweredParameters.mk locals List.nil nextLocal)
+      fun (locals : List PsJsLocalBinding) =>
+        fun (nextLocal : Nat) =>
+          Except.ok (PsJsLoweredParameters.mk locals List.nil nextLocal)
   | List.cons parameter rest =>
-      match parameter.type with
-      | PsVerifiedIrType.primitive primitive =>
-          if psJsPrimitiveTypeSupported primitive then
-            match psJsLookupLocal locals parameter.name with
-            | Option.some _ => Except.error PsJsError.unsupportedExpression
-            | Option.none =>
-                let binding := PsJsLocalBinding.mk parameter.name primitive nextLocal;
-                match psJsLowerParameters
-                  rest
-                  (List.cons binding locals)
-                  (Nat.succ nextLocal) with
-                | Except.error error => Except.error error
-                | Except.ok lowered =>
-                    Except.ok (PsJsLoweredParameters.mk
-                      lowered.locals
-                      (List.cons nextLocal lowered.indexes)
-                      lowered.nextLocal)
-          else Except.error PsJsError.unsupportedExpression
-      | _ => Except.error PsJsError.unsupportedExpression
+      let smaller :
+          List PsJsLocalBinding -> Nat -> Except PsJsError PsJsLoweredParameters :=
+        psJsLowerParameters rest;
+      fun (locals : List PsJsLocalBinding) =>
+        fun (nextLocal : Nat) =>
+          match parameter.type with
+          | PsVerifiedIrType.primitive primitive =>
+              if psJsPrimitiveTypeSupported primitive then
+                match psJsLookupLocal locals parameter.name with
+                | Option.some _ => Except.error PsJsError.unsupportedExpression
+                | Option.none =>
+                    let binding := PsJsLocalBinding.mk parameter.name primitive nextLocal;
+                    match smaller
+                      (List.cons binding locals)
+                      (Nat.succ nextLocal) with
+                    | Except.error error => Except.error error
+                    | Except.ok lowered =>
+                        Except.ok (PsJsLoweredParameters.mk
+                          lowered.locals
+                          (List.cons nextLocal lowered.indexes)
+                          lowered.nextLocal)
+              else Except.error PsJsError.unsupportedExpression
+          | _ => Except.error PsJsError.unsupportedExpression
 
 def psJsLowerLiteral (value : PsVerifiedIrLiteral)
     (type : PsVerifiedIrPrimitiveType) : Except PsJsError PsJsLiteral :=

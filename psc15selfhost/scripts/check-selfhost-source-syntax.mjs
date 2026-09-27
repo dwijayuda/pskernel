@@ -80,6 +80,7 @@ requireMarkers("LevelContext", levelContext, [
   'def psLevelInstantiateExpr\n    (context : PsLevelMetaContext)\n    (expr : PsExpr) : PsExpr :=\n  match expr with',
   'PsExpr.constE name (psLevelInstantiateList context levels)',
   '| _ => expr',
+  'def psLevelHasMVar\n    (level : PsLevel) : Bool :=\n  match level with',
   'if psLevelHasMVar left then',
   'if psLevelHasMVar level then',
 ]);
@@ -97,6 +98,7 @@ forbidMarkers("LevelContext", levelContext, [
   'def psLevelInstantiateExpr (context : PsLevelMetaContext) : PsExpr -> PsExpr',
   'levels.map (psLevelInstantiate context)',
   '| expr => expr',
+  'def psLevelHasMVar : PsLevel -> Bool',
   '||',
 ]);
 

@@ -14,3 +14,4 @@ import Ps.KernelCore.Check
 import Ps.KernelCore.Admission
 import Ps.KernelCore.Inductive
 import Ps.KernelCore.Quot
+import Ps.KernelCore.Recursor

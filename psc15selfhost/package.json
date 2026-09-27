@@ -30,7 +30,7 @@
     "check:semantic-boundaries": "npm run test:semantic-boundaries && node scripts/check-semantic-boundaries.mjs",
     "test:fixed-point-command": "node scripts/fixed-point-command-tests.mjs",
     "test:bootstrap-root-minimality": "node scripts/bootstrap-root-minimality-tests.mjs",
-    "check:bootstrap-closure": "npm run test:bootstrap-closure-contract && npm run test:bootstrap-root-minimality && node scripts/check-bootstrap-closure.mjs",
+    "check:bootstrap-closure": "npm run check:selfhost-source-syntax && npm run test:bootstrap-closure-contract && npm run test:bootstrap-root-minimality && node scripts/check-bootstrap-closure.mjs",
     "build:lean": "npm run build:lake",
     "test:kernel-core": "lake exe psc2_kernel_core_boundary_tests && lake exe psc2_kernel_core_name_parity_tests",
     "test:selfhost-foundation": "npm run check:selfhost-foundation && npm run check:selfhost-source-syntax && npm run check:structure-recursor-normalization && lake exe psc2_minimal_selfhost_tests && lake exe psc2_prod_match_selfhost_tests",

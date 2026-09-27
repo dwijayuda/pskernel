@@ -10,6 +10,13 @@ def jsFixtureDecl (name : String) (type : PsVerifiedIrPrimitiveType)
     (literal : PsVerifiedIrLiteral) : PsVerifiedIrDeclaration :=
   jsFixtureExprDecl name type (.literal literal)
 
+def jsFixtureFunctionDecl (name parameterName : String)
+    (parameterType resultType : PsVerifiedIrPrimitiveType)
+    (body : PsVerifiedIrExpr) : PsVerifiedIrDeclaration :=
+  { name := name, typeParameters := [],
+    parameters := [{ name := parameterName, type := .primitive parameterType }],
+    resultType := .primitive resultType, body := body }
+
 def jsFixtureModule : PsVerifiedIrModule :=
   { psVerifiedIrModuleEmpty with declarations := [
     jsFixtureDecl "largeNat" .nat (.natural 9007199254740993123456789),
@@ -29,7 +36,8 @@ def jsFixtureModule : PsVerifiedIrModule :=
       (.letE "x" (.primitive .nat) (.literal (.natural 1))
         (.letE "x" (.primitive .nat) (.literal (.natural 2)) (.var "x"))),
     jsFixtureExprDecl "renamedLocal" .nat
-      (.letE "a-b" (.primitive .nat) (.literal (.natural 3)) (.var "a-b"))
+      (.letE "a-b" (.primitive .nat) (.literal (.natural 3)) (.var "a-b")),
+    jsFixtureFunctionDecl "identity" "value" .nat .nat (.var "value")
   ] }
 
 def jsRequireError (label : String) (module : PsVerifiedIrModule) : IO Unit := do
@@ -53,8 +61,9 @@ def main (args : List String) : IO Unit := do
   jsRequireError "let value type mismatch" { psVerifiedIrModuleEmpty with
     declarations := [jsFixtureExprDecl "badLet" .nat
       (.letE "x" (.primitive .int) (.literal (.natural 1)) (.var "x"))] }
-  jsRequireError "function" { psVerifiedIrModuleEmpty with
-    declarations := [{ declaration with parameters := [{ name := "a", type := .primitive .nat }] }] }
+  jsRequireError "nonprimitive parameter" { psVerifiedIrModuleEmpty with
+    declarations := [{ declaration with parameters := [
+      { name := "a", type := .function [.primitive .nat] (.primitive .nat) }] }] }
   jsRequireError "generic" { psVerifiedIrModuleEmpty with
     declarations := [{ declaration with typeParameters := [{name := "T"}] }] }
   jsRequireError "machine integer" { psVerifiedIrModuleEmpty with

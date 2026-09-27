@@ -71,12 +71,12 @@ def psKernelCoreExprAppArgs
     (psKernelCoreExprAppArgsRev expr)
     PsKernelCoreList.nil
 
-def psKernelCoreExprListLength
+def psKernelCoreInductiveExprListLength
     (values : PsKernelCoreList PsKernelCoreExpr) : Nat :=
   match values with
   | PsKernelCoreList.nil => 0
   | PsKernelCoreList.cons _ tail =>
-      Nat.succ (psKernelCoreExprListLength tail)
+      Nat.succ (psKernelCoreInductiveExprListLength tail)
 
 def psKernelCoreExprListTake
     (count : Nat) :
@@ -140,7 +140,7 @@ def psKernelCoreInductiveResultMatches
       if psKernelCoreNameEq target name then
         if psKernelCoreLevelListEq levels resultLevels then
           if Nat.beq
-              (psKernelCoreExprListLength args)
+              (psKernelCoreInductiveExprListLength args)
               (Nat.add numParams numIndices) then
             let paramArgs := psKernelCoreExprListTake numParams args;
             if psKernelCoreInductiveUniformParamArgsMatch

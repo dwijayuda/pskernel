@@ -10,37 +10,37 @@ const unify = await readFile(
 );
 
 const required = [
-  "let unified := psLevelUnify context.levels left right;\n      if unified.success then",
-  "let leftValue := psWhnf environment context localContext left;\n      let rightValue := psWhnf environment context localContext right;\n      if psExprAlphaEq leftValue rightValue then",
-  "match leftValue with\n        | .mvar leftId =>\n            match rightValue with",
-  "        | leftOther =>\n            match rightValue with\n            | .mvar id =>",
-  "let unified := psLevelUnify context.levels leftLevel rightLevel;\n                if unified.success then",
-  "                    rightFn;\n                if fnResult.success then",
-  "                    rightType;\n                if typeResult.success then",
-  "                      PsBinderInfo.explicit;\n                  let fvar := PsExpr.fvar pushed.id;\n                  psUnifyWithFuel",
-  "    psUnifyWithFuel environment localContext context 512 left right;\n  if result.success then",
+  /let unified := psLevelUnify context\.levels left right;\s*if unified\.success then/,
+  /let leftValue := psWhnf environment context localContext left;\s*let rightValue := psWhnf environment context localContext right;\s*if psExprAlphaEq leftValue rightValue then/,
+  /match leftValue with\s*\| \.mvar leftId =>\s*match rightValue with/,
+  /\| leftOther =>\s*match rightValue with\s*\| \.mvar id =>/,
+  /let unified := psLevelUnify context\.levels leftLevel rightLevel;\s*if unified\.success then/,
+  /rightFn;\s*if fnResult\.success then/,
+  /rightType;\s*if typeResult\.success then/,
+  /PsBinderInfo\.explicit;\s*let fvar := PsExpr\.fvar pushed\.id;\s*psUnifyWithFuel/,
+  /psUnifyWithFuel environment localContext context 512 left right;\s*if result\.success then/,
 ];
-for (const marker of required) {
-  if (!unify.includes(marker)) {
-    throw new Error(`PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX_MISSING: ${marker}`);
+for (const pattern of required) {
+  if (!pattern.test(unify)) {
+    throw new Error(`PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`);
   }
 }
 
 const forbidden = [
-  "match leftValue, rightValue with",
-  "let unified := psLevelUnify context.levels left right\n      if unified.success then",
-  "let leftValue := psWhnf environment context localContext left\n      let rightValue :=",
-  "let rightValue := psWhnf environment context localContext right\n      if psExprAlphaEq",
-  "let unified := psLevelUnify context.levels leftLevel rightLevel\n                if unified.success then",
-  "                    rightFn\n                if fnResult.success then",
-  "                    rightType\n                if typeResult.success then",
-  "                      PsBinderInfo.explicit\n                  let fvar :=",
-  "let fvar := PsExpr.fvar pushed.id\n                  psUnifyWithFuel",
-  "    psUnifyWithFuel environment localContext context 512 left right\n  if result.success then",
+  /match leftValue\s*,\s*rightValue with/,
+  /let unified := psLevelUnify context\.levels left right\s+if unified\.success then/,
+  /let leftValue := psWhnf environment context localContext left\s+let rightValue :=/,
+  /let rightValue := psWhnf environment context localContext right\s+if psExprAlphaEq/,
+  /let unified := psLevelUnify context\.levels leftLevel rightLevel\s+if unified\.success then/,
+  /rightFn\s+if fnResult\.success then/,
+  /rightType\s+if typeResult\.success then/,
+  /PsBinderInfo\.explicit\s+let fvar :=/,
+  /let fvar := PsExpr\.fvar pushed\.id\s+psUnifyWithFuel/,
+  /psUnifyWithFuel environment localContext context 512 left right\s+if result\.success then/,
 ];
-for (const marker of forbidden) {
-  if (unify.includes(marker)) {
-    throw new Error(`PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: ${marker}`);
+for (const pattern of forbidden) {
+  if (pattern.test(unify)) {
+    throw new Error(`PSC2_UNIFY_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: ${pattern}`);
   }
 }
 

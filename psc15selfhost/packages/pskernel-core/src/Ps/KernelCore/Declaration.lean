@@ -24,6 +24,17 @@ inductive PsKernelCoreReducibilityHints where
   | abbrevHint
   | regular (height : Nat)
 
+def psKernelCoreNatGt (left : Nat) : Nat -> Bool :=
+  match left with
+  | Nat.zero =>
+      fun (_right : Nat) => false
+  | Nat.succ leftRest =>
+      let restGt : Nat -> Bool := psKernelCoreNatGt leftRest;
+      fun (right : Nat) =>
+        match right with
+        | Nat.zero => true
+        | Nat.succ rightRest => restGt rightRest
+
 def psKernelCoreReducibilityHintsLt
     (left : PsKernelCoreReducibilityHints)
     (right : PsKernelCoreReducibilityHints) : Bool :=
@@ -38,7 +49,7 @@ def psKernelCoreReducibilityHintsLt
       | PsKernelCoreReducibilityHints.abbrevHint => false
       | PsKernelCoreReducibilityHints.opaqueHint => true
       | PsKernelCoreReducibilityHints.regular rightHeight =>
-          leftHeight > rightHeight
+          psKernelCoreNatGt leftHeight rightHeight
   | PsKernelCoreReducibilityHints.opaqueHint => false
 
 def psKernelCoreReducibilityHintsIsRegular

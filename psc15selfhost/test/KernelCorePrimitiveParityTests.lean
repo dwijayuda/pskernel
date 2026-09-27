@@ -66,7 +66,7 @@ def psKernelCorePrimitiveExpectedError
   | PsKernelCoreResult.error actual => actual == expected
   | _ => false
 
-def psKernelCorePrimitiveNone
+def psKernelCorePrimitiveResultIsNone
     (left : PsKernelCoreResult String (PsKernelCoreOption PsKernelCoreExpr)) : Bool :=
   match left with
   | PsKernelCoreResult.ok PsKernelCoreOption.none => true
@@ -207,7 +207,7 @@ def psKernelCorePrimitiveOrdinaryParity : Bool :=
 def psKernelCorePrimitiveUnknownIsResidual : Bool :=
   let unknown :=
     PsKernelCoreName.str PsKernelCoreName.anonymous "notAPrimitive"
-  psKernelCorePrimitiveNone
+  psKernelCorePrimitiveResultIsNone
     (psKernelCoreReduceNatBinary
       psKernelCoreResourceConfigDefault unknown 2 3)
 

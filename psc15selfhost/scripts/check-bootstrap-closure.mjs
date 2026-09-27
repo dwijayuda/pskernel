@@ -198,6 +198,12 @@ if (!levelContext.includes("def psLevelAssignmentCount (assignments : List PsLev
 if (!levelContext.includes("Nat.succ (psLevelAssignmentCount context.assignments)")) {
   throw new Error("PSC2_LEVEL_INSTANTIATE_EXPLICIT_ASSIGNMENT_FUEL_MISSING");
 }
+if (levelContext.includes("def psLevelOccursResolved (target : Nat) : PsLevel -> Bool")) {
+  throw new Error("PSC2_LEVEL_OCCURS_HIDDEN_RECURSION_PARAMETER_FORBIDDEN");
+}
+if (!levelContext.includes("def psLevelOccursResolved\n    (target : Nat)\n    (level : PsLevel) : Bool :=\n  match level with")) {
+  throw new Error("PSC2_LEVEL_OCCURS_EXPLICIT_RECURSION_PARAMETER_MISSING");
+}
 
 const bridgeTestsPath = path.join(root, "test", "BridgeTests.lean");
 if (!existsSync(bridgeTestsPath)) {

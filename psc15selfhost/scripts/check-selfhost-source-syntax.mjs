@@ -56,6 +56,7 @@ const levelContext = await read(
   "packages/meta/src/Ps/Meta/LevelContext.lean",
 );
 requireMarkers("LevelContext", levelContext, [
+  'def psLevelFindAssignmentInList\n    (id : Nat)\n    (assignments : List PsLevelAssignment) : Option PsLevel :=\n  match assignments with',
   'let resolved := psLevelInstantiate context value;',
   'PsLevelAssignment.mk id resolved',
   'let leftValue := psLevelInstantiate context left;',
@@ -67,11 +68,12 @@ requireMarkers("LevelContext", levelContext, [
   'if psLevelHasMVar level then',
 ]);
 forbidMarkers("LevelContext", levelContext, [
+  'def psLevelFindAssignmentInList (id : Nat) : List PsLevelAssignment -> Option PsLevel',
   'List.cons { id := id, value := resolved } context.assignments',
   'match leftValue, rightValue with',
   '||',
 ]);
 
 process.stdout.write(
-  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 let/application/unary-match/no-bool-infix subset)\n",
+  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 visible-recursion/let/application/unary-match/no-bool-infix subset)\n",
 );

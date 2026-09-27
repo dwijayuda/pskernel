@@ -70,7 +70,7 @@ def psTryLowerStructureRecursorApplication
                                 let expectedArity :=
                                   Nat.add info.numParams 3;
                                 if view.args.length != expectedArity then
-                                  Except.error PsErasureError.unsupportedApplication
+                                  Except.ok Option.none
                                 else
                                   let motiveIndex := info.numParams;
                                   let minorIndex := Nat.add info.numParams 1;

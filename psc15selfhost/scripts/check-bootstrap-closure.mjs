@@ -189,6 +189,15 @@ if (levelContext.includes("partial def psLevelInstantiateWithFuel")) {
 if (!levelContext.includes("let smaller : PsLevel -> PsLevel :=\n        psLevelInstantiateWithFuel context remaining;")) {
   throw new Error("PSC2_LEVEL_INSTANTIATE_INVARIANT_FUEL_WORKER_MISSING");
 }
+if (levelContext.includes("context.assignments.length")) {
+  throw new Error("PSC2_LEVEL_INSTANTIATE_LIST_LENGTH_PROJECTION_FORBIDDEN");
+}
+if (!levelContext.includes("def psLevelAssignmentCount (assignments : List PsLevelAssignment) : Nat :=")) {
+  throw new Error("PSC2_LEVEL_ASSIGNMENT_COUNT_HELPER_MISSING");
+}
+if (!levelContext.includes("Nat.succ (psLevelAssignmentCount context.assignments)")) {
+  throw new Error("PSC2_LEVEL_INSTANTIATE_EXPLICIT_ASSIGNMENT_FUEL_MISSING");
+}
 
 const bridgeTestsPath = path.join(root, "test", "BridgeTests.lean");
 if (!existsSync(bridgeTestsPath)) {

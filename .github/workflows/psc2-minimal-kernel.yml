@@ -128,6 +128,13 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_primitive_parity_tests
 
+      - name: Configured primitive/resource integration test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_kernel_core_resource_integration_tests
+
       - name: Basic reduction parity test
         shell: bash
         run: |

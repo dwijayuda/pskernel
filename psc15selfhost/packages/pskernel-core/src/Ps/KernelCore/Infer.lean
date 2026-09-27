@@ -11,13 +11,34 @@ def psKernelCoreInferFreshName
     (userName : PsKernelCoreName) : PsKernelCoreName :=
   PsKernelCoreName.num userName lctx.nextIndex
 
-def psKernelCoreEnsureSort
+def psKernelCoreInferLiteralWithResources
+    (resources : PsKernelCoreResourceConfig)
+    (literal : PsKernelCoreLiteral) :
+    PsKernelCoreResult String PsKernelCoreExpr :=
+  match literal with
+  | PsKernelCoreLiteral.nat value =>
+      match psKernelCoreCheckNatSize resources value with
+      | PsKernelCoreResult.error message =>
+          PsKernelCoreResult.error message
+      | PsKernelCoreResult.ok _ =>
+          PsKernelCoreResult.ok
+            (PsKernelCoreExpr.const
+              psKernelCoreInferNatName
+              PsKernelCoreList.nil)
+  | PsKernelCoreLiteral.str _ =>
+      PsKernelCoreResult.ok
+        (PsKernelCoreExpr.const
+          psKernelCoreInferStringName
+          PsKernelCoreList.nil)
+
+def psKernelCoreEnsureSortWithResources
     (budget : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (lctx : PsKernelCoreLocalContext)
     (expr : PsKernelCoreExpr) :
     PsKernelCoreResult String PsKernelCoreLevel :=
-  match psKernelCoreWhnf budget env lctx expr with
+  match psKernelCoreWhnfWithResources budget resources env lctx expr with
   | PsKernelCoreResult.error message =>
       PsKernelCoreResult.error message
   | PsKernelCoreResult.ok reduced =>
@@ -25,13 +46,14 @@ def psKernelCoreEnsureSort
       | PsKernelCoreExpr.sort level => PsKernelCoreResult.ok level
       | _ => PsKernelCoreResult.error "expected sort"
 
-def psKernelCoreEnsureForall
+def psKernelCoreEnsureForallWithResources
     (budget : Nat)
+    (resources : PsKernelCoreResourceConfig)
     (env : PsKernelCoreEnvironment)
     (lctx : PsKernelCoreLocalContext)
     (expr : PsKernelCoreExpr) :
     PsKernelCoreResult String PsKernelCoreExpr :=
-  match psKernelCoreWhnf budget env lctx expr with
+  match psKernelCoreWhnfWithResources budget resources env lctx expr with
   | PsKernelCoreResult.error message =>
       PsKernelCoreResult.error message
   | PsKernelCoreResult.ok reduced =>
@@ -39,8 +61,9 @@ def psKernelCoreEnsureForall
       | PsKernelCoreExpr.forallE _ _ _ _ => PsKernelCoreResult.ok reduced
       | _ => PsKernelCoreResult.error "expected function type"
 
-def psKernelCoreInfer
-    (budget : Nat) :
+def psKernelCoreInferWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig) :
     PsKernelCoreEnvironment ->
     PsKernelCoreLocalContext ->
     PsKernelCoreExpr ->
@@ -57,7 +80,7 @@ def psKernelCoreInfer
           PsKernelCoreLocalContext ->
           PsKernelCoreExpr ->
           PsKernelCoreResult String PsKernelCoreExpr :=
-        psKernelCoreInfer remaining;
+        psKernelCoreInferWithResources remaining resources;
       fun (env : PsKernelCoreEnvironment)
           (lctx : PsKernelCoreLocalContext)
           (expr : PsKernelCoreExpr) =>
@@ -91,17 +114,7 @@ def psKernelCoreInfer
                 | PsKernelCoreOption.some instantiatedType =>
                     PsKernelCoreResult.ok instantiatedType
         | PsKernelCoreExpr.lit literal =>
-            match literal with
-            | PsKernelCoreLiteral.nat _ =>
-                PsKernelCoreResult.ok
-                  (PsKernelCoreExpr.const
-                    psKernelCoreInferNatName
-                    PsKernelCoreList.nil)
-            | PsKernelCoreLiteral.str _ =>
-                PsKernelCoreResult.ok
-                  (PsKernelCoreExpr.const
-                    psKernelCoreInferStringName
-                    PsKernelCoreList.nil)
+            psKernelCoreInferLiteralWithResources resources literal
         | PsKernelCoreExpr.mdata _ body =>
             smaller env lctx body
         | PsKernelCoreExpr.app fn arg =>
@@ -109,7 +122,8 @@ def psKernelCoreInfer
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok fnType =>
-                match psKernelCoreEnsureForall remaining env lctx fnType with
+                match psKernelCoreEnsureForallWithResources
+                    remaining resources env lctx fnType with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
                 | PsKernelCoreResult.ok exposed =>
@@ -143,7 +157,8 @@ def psKernelCoreInfer
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok domainType =>
-                match psKernelCoreEnsureSort remaining env lctx domainType with
+                match psKernelCoreEnsureSortWithResources
+                    remaining resources env lctx domainType with
                 | PsKernelCoreResult.error message =>
                     PsKernelCoreResult.error message
                 | PsKernelCoreResult.ok domainLevel =>
@@ -159,8 +174,8 @@ def psKernelCoreInfer
                     | PsKernelCoreResult.error message =>
                         PsKernelCoreResult.error message
                     | PsKernelCoreResult.ok bodyType =>
-                        match psKernelCoreEnsureSort
-                            remaining env child bodyType with
+                        match psKernelCoreEnsureSortWithResources
+                            remaining resources env child bodyType with
                         | PsKernelCoreResult.error message =>
                             PsKernelCoreResult.error message
                         | PsKernelCoreResult.ok bodyLevel =>
@@ -194,3 +209,29 @@ def psKernelCoreInfer
         | PsKernelCoreExpr.proj _ _ _ =>
             PsKernelCoreResult.error
               "projection inference unavailable before inductive metadata"
+
+def psKernelCoreEnsureSort
+    (budget : Nat)
+    (env : PsKernelCoreEnvironment)
+    (lctx : PsKernelCoreLocalContext)
+    (expr : PsKernelCoreExpr) :
+    PsKernelCoreResult String PsKernelCoreLevel :=
+  psKernelCoreEnsureSortWithResources
+    budget psKernelCoreResourceConfigDefault env lctx expr
+
+def psKernelCoreEnsureForall
+    (budget : Nat)
+    (env : PsKernelCoreEnvironment)
+    (lctx : PsKernelCoreLocalContext)
+    (expr : PsKernelCoreExpr) :
+    PsKernelCoreResult String PsKernelCoreExpr :=
+  psKernelCoreEnsureForallWithResources
+    budget psKernelCoreResourceConfigDefault env lctx expr
+
+def psKernelCoreInfer
+    (budget : Nat) :
+    PsKernelCoreEnvironment ->
+    PsKernelCoreLocalContext ->
+    PsKernelCoreExpr ->
+    PsKernelCoreResult String PsKernelCoreExpr :=
+  psKernelCoreInferWithResources budget psKernelCoreResourceConfigDefault

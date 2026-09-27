@@ -1,58 +1,96 @@
-def psDecimalDigitValue : Char -> Option Nat
-  | '0' => some 0
-  | '1' => some 1
-  | '2' => some 2
-  | '3' => some 3
-  | '4' => some 4
-  | '5' => some 5
-  | '6' => some 6
-  | '7' => some 7
-  | '8' => some 8
-  | '9' => some 9
-  | _ => none
+def psCharCodeEq (char : Char) (code : Nat) : Bool :=
+  Nat.beq (Char.toNat char) code
+
+def psDecimalDigitValue (char : Char) : Option Nat :=
+  if psCharCodeEq char 48 then
+    Option.some 0
+  else if psCharCodeEq char 49 then
+    Option.some 1
+  else if psCharCodeEq char 50 then
+    Option.some 2
+  else if psCharCodeEq char 51 then
+    Option.some 3
+  else if psCharCodeEq char 52 then
+    Option.some 4
+  else if psCharCodeEq char 53 then
+    Option.some 5
+  else if psCharCodeEq char 54 then
+    Option.some 6
+  else if psCharCodeEq char 55 then
+    Option.some 7
+  else if psCharCodeEq char 56 then
+    Option.some 8
+  else if psCharCodeEq char 57 then
+    Option.some 9
+  else
+    Option.none
 
 def psParseNaturalChars
     (chars : List Char)
     (value : Nat) : Option Nat :=
   match chars with
   | [] =>
-      some value
-  | '_' :: rest =>
-      psParseNaturalChars rest value
+      Option.some value
   | char :: rest =>
-      match psDecimalDigitValue char with
-      | none =>
-          none
-      | some digit =>
-          psParseNaturalChars rest (value * 10 + digit)
+      if psCharCodeEq char 95 then
+        psParseNaturalChars rest value
+      else
+        match psDecimalDigitValue char with
+        | Option.none =>
+            Option.none
+        | Option.some digit =>
+            psParseNaturalChars rest (value * 10 + digit)
 
 def psParseNaturalText (text : String) : Option Nat :=
   psParseNaturalChars (String.toList text) 0
 
-def psHexDigitValue : Char -> Option Nat
-  | '0' => some 0
-  | '1' => some 1
-  | '2' => some 2
-  | '3' => some 3
-  | '4' => some 4
-  | '5' => some 5
-  | '6' => some 6
-  | '7' => some 7
-  | '8' => some 8
-  | '9' => some 9
-  | 'a' => some 10
-  | 'b' => some 11
-  | 'c' => some 12
-  | 'd' => some 13
-  | 'e' => some 14
-  | 'f' => some 15
-  | 'A' => some 10
-  | 'B' => some 11
-  | 'C' => some 12
-  | 'D' => some 13
-  | 'E' => some 14
-  | 'F' => some 15
-  | _ => none
+def psHexDigitValue (char : Char) : Option Nat :=
+  if psCharCodeEq char 48 then
+    Option.some 0
+  else if psCharCodeEq char 49 then
+    Option.some 1
+  else if psCharCodeEq char 50 then
+    Option.some 2
+  else if psCharCodeEq char 51 then
+    Option.some 3
+  else if psCharCodeEq char 52 then
+    Option.some 4
+  else if psCharCodeEq char 53 then
+    Option.some 5
+  else if psCharCodeEq char 54 then
+    Option.some 6
+  else if psCharCodeEq char 55 then
+    Option.some 7
+  else if psCharCodeEq char 56 then
+    Option.some 8
+  else if psCharCodeEq char 57 then
+    Option.some 9
+  else if psCharCodeEq char 97 then
+    Option.some 10
+  else if psCharCodeEq char 98 then
+    Option.some 11
+  else if psCharCodeEq char 99 then
+    Option.some 12
+  else if psCharCodeEq char 100 then
+    Option.some 13
+  else if psCharCodeEq char 101 then
+    Option.some 14
+  else if psCharCodeEq char 102 then
+    Option.some 15
+  else if psCharCodeEq char 65 then
+    Option.some 10
+  else if psCharCodeEq char 66 then
+    Option.some 11
+  else if psCharCodeEq char 67 then
+    Option.some 12
+  else if psCharCodeEq char 68 then
+    Option.some 13
+  else if psCharCodeEq char 69 then
+    Option.some 14
+  else if psCharCodeEq char 70 then
+    Option.some 15
+  else
+    Option.none
 
 def psReadFixedHex
     (count : Nat)
@@ -61,16 +99,16 @@ def psReadFixedHex
     Option (Prod Nat (List Char)) :=
   match count with
   | 0 =>
-      some (Prod.mk value chars)
+      Option.some (Prod.mk value chars)
   | nextCount + 1 =>
       match chars with
       | [] =>
-          none
+          Option.none
       | char :: rest =>
           match psHexDigitValue char with
-          | none =>
-              none
-          | some digit =>
+          | Option.none =>
+              Option.none
+          | Option.some digit =>
               psReadFixedHex
                 nextCount
                 rest
@@ -89,15 +127,15 @@ def psDecodeEscapedChar
     (rest : List Char) :
     Option (Prod Char (List Char)) :=
   match psReadFixedHex count rest 0 with
-  | none =>
-      none
-  | some decoded =>
+  | Option.none =>
+      Option.none
+  | Option.some decoded =>
       let value := Prod.fst decoded;
       let tail := Prod.snd decoded;
       if psValidUnicodeScalar value then
-        some (Prod.mk (Char.ofNat value) tail)
+        Option.some (Prod.mk (Char.ofNat value) tail)
       else
-        none
+        Option.none
 
 def psDecodeStringBodyWithFuel
     (fuel : Nat)
@@ -106,122 +144,175 @@ def psDecodeStringBodyWithFuel
     Option String :=
   match fuel with
   | 0 =>
-      none
+      Option.none
   | nextFuel + 1 =>
       match chars with
       | [] =>
-          none
-      | '"' :: restAfterQuote =>
-          match restAfterQuote with
-          | [] =>
-              some (String.ofList (List.reverse charsRev))
-          | _ :: _ =>
-              none
-      | '\\' :: restAfterSlash =>
-          match restAfterSlash with
-          | [] =>
-              none
-          | '"' :: rest =>
-              psDecodeStringBodyWithFuel
-                nextFuel
-                rest
-                ('"' :: charsRev)
-          | '\\' :: rest =>
-              psDecodeStringBodyWithFuel
-                nextFuel
-                rest
-                ('\\' :: charsRev)
-          | 'n' :: rest =>
-              psDecodeStringBodyWithFuel
-                nextFuel
-                rest
-                ('\n' :: charsRev)
-          | 'r' :: rest =>
-              psDecodeStringBodyWithFuel
-                nextFuel
-                rest
-                ('\r' :: charsRev)
-          | 't' :: rest =>
-              psDecodeStringBodyWithFuel
-                nextFuel
-                rest
-                ('\t' :: charsRev)
-          | '0' :: rest =>
-              psDecodeStringBodyWithFuel
-                nextFuel
-                rest
-                (Char.ofNat 0 :: charsRev)
-          | 'x' :: rest =>
-              match psDecodeEscapedChar 2 rest with
-              | none =>
-                  none
-              | some decoded =>
+          Option.none
+      | char :: restAfterChar =>
+          if psCharCodeEq char 34 then
+            match restAfterChar with
+            | [] =>
+                Option.some (String.ofList (List.reverse charsRev))
+            | _ :: _ =>
+                Option.none
+          else if psCharCodeEq char 92 then
+            match restAfterChar with
+            | [] =>
+                Option.none
+            | escaped :: rest =>
+                if psCharCodeEq escaped 34 then
                   psDecodeStringBodyWithFuel
                     nextFuel
-                    (Prod.snd decoded)
-                    (Prod.fst decoded :: charsRev)
-          | 'u' :: rest =>
-              match psDecodeEscapedChar 4 rest with
-              | none =>
-                  none
-              | some decoded =>
+                    rest
+                    (Char.ofNat 34 :: charsRev)
+                else if psCharCodeEq escaped 92 then
                   psDecodeStringBodyWithFuel
                     nextFuel
-                    (Prod.snd decoded)
-                    (Prod.fst decoded :: charsRev)
-          | _ :: _ =>
-              none
-      | char :: rest =>
-          psDecodeStringBodyWithFuel
-            nextFuel
-            rest
-            (char :: charsRev)
+                    rest
+                    (Char.ofNat 92 :: charsRev)
+                else if psCharCodeEq escaped 110 then
+                  psDecodeStringBodyWithFuel
+                    nextFuel
+                    rest
+                    (Char.ofNat 10 :: charsRev)
+                else if psCharCodeEq escaped 114 then
+                  psDecodeStringBodyWithFuel
+                    nextFuel
+                    rest
+                    (Char.ofNat 13 :: charsRev)
+                else if psCharCodeEq escaped 116 then
+                  psDecodeStringBodyWithFuel
+                    nextFuel
+                    rest
+                    (Char.ofNat 9 :: charsRev)
+                else if psCharCodeEq escaped 48 then
+                  psDecodeStringBodyWithFuel
+                    nextFuel
+                    rest
+                    (Char.ofNat 0 :: charsRev)
+                else if psCharCodeEq escaped 120 then
+                  match psDecodeEscapedChar 2 rest with
+                  | Option.none =>
+                      Option.none
+                  | Option.some decoded =>
+                      psDecodeStringBodyWithFuel
+                        nextFuel
+                        (Prod.snd decoded)
+                        (Prod.fst decoded :: charsRev)
+                else if psCharCodeEq escaped 117 then
+                  match psDecodeEscapedChar 4 rest with
+                  | Option.none =>
+                      Option.none
+                  | Option.some decoded =>
+                      psDecodeStringBodyWithFuel
+                        nextFuel
+                        (Prod.snd decoded)
+                        (Prod.fst decoded :: charsRev)
+                else
+                  Option.none
+          else
+            psDecodeStringBodyWithFuel
+              nextFuel
+              restAfterChar
+              (char :: charsRev)
 
 def psDecodeStringLiteral (text : String) : Option String :=
   match String.toList text with
-  | '"' :: rest =>
-      psDecodeStringBodyWithFuel
-        (Nat.succ (List.length rest))
-        rest
-        []
-  | _ =>
-      none
+  | [] =>
+      Option.none
+  | first :: rest =>
+      if psCharCodeEq first 34 then
+        psDecodeStringBodyWithFuel
+          (Nat.succ (List.length rest))
+          rest
+          []
+      else
+        Option.none
 
 def psDecodeCharacterEscape
     (escaped : Char) : Option Char :=
-  match escaped with
-  | '\'' => some '\''
-  | '"' => some '"'
-  | '\\' => some '\\'
-  | 'n' => some '\n'
-  | 'r' => some '\r'
-  | 't' => some '\t'
-  | _ => none
+  if psCharCodeEq escaped 39 then
+    Option.some (Char.ofNat 39)
+  else if psCharCodeEq escaped 34 then
+    Option.some (Char.ofNat 34)
+  else if psCharCodeEq escaped 92 then
+    Option.some (Char.ofNat 92)
+  else if psCharCodeEq escaped 110 then
+    Option.some (Char.ofNat 10)
+  else if psCharCodeEq escaped 114 then
+    Option.some (Char.ofNat 13)
+  else if psCharCodeEq escaped 116 then
+    Option.some (Char.ofNat 9)
+  else
+    Option.none
 
 def psDecodeCharacterEscapedTail
     (decoded : Option (Prod Char (List Char))) :
     Option Char :=
   match decoded with
-  | none =>
-      none
-  | some pair =>
+  | Option.none =>
+      Option.none
+  | Option.some pair =>
       match Prod.snd pair with
-      | '\'' :: [] =>
-          some (Prod.fst pair)
-      | _ =>
-          none
+      | [] =>
+          Option.none
+      | closing :: rest =>
+          match rest with
+          | [] =>
+              if psCharCodeEq closing 39 then
+                Option.some (Prod.fst pair)
+              else
+                Option.none
+          | _ :: _ =>
+              Option.none
 
 def psDecodeCharacterLiteral (text : String) : Option Char :=
   match String.toList text with
-  | '\'' :: char :: '\'' :: [] =>
-      some char
-  | '\'' :: '\\' :: escaped :: '\'' :: [] =>
-      psDecodeCharacterEscape escaped
-  | '\'' :: '\\' :: 'x' :: rest =>
-      psDecodeCharacterEscapedTail
-        (psDecodeEscapedChar 2 rest)
-  | '\'' :: '\\' :: 'u' :: rest =>
-      psDecodeCharacterEscapedTail
-        (psDecodeEscapedChar 4 rest)
-  | _ =>
-      none
+  | [] =>
+      Option.none
+  | opening :: rest =>
+      if psCharCodeEq opening 39 then
+        match rest with
+        | [] =>
+            Option.none
+        | value :: tail =>
+            if psCharCodeEq value 92 then
+              match tail with
+              | [] =>
+                  Option.none
+              | escaped :: escapedTail =>
+                  if psCharCodeEq escaped 120 then
+                    psDecodeCharacterEscapedTail
+                      (psDecodeEscapedChar 2 escapedTail)
+                  else if psCharCodeEq escaped 117 then
+                    psDecodeCharacterEscapedTail
+                      (psDecodeEscapedChar 4 escapedTail)
+                  else
+                    match escapedTail with
+                    | [] =>
+                        Option.none
+                    | closing :: afterClosing =>
+                        match afterClosing with
+                        | [] =>
+                            if psCharCodeEq closing 39 then
+                              psDecodeCharacterEscape escaped
+                            else
+                              Option.none
+                        | _ :: _ =>
+                            Option.none
+            else
+              match tail with
+              | [] =>
+                  Option.none
+              | closing :: afterClosing =>
+                  match afterClosing with
+                  | [] =>
+                      if psCharCodeEq closing 39 then
+                        Option.some value
+                      else
+                        Option.none
+                  | _ :: _ =>
+                      Option.none
+      else
+        Option.none

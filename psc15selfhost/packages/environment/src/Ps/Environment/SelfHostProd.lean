@@ -24,15 +24,15 @@ def psSelfHostProdMkOf
     snd
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  let uName := psRootName "u"
-  let alphaName := psRootName "α"
-  let betaName := psRootName "β"
-  let motiveName := psRootName "_motive"
-  let minorName := psRootName "_mk"
-  let majorName := psRootName "_major"
-  let fstName := psRootName "fst"
-  let sndName := psRootName "snd"
-  let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+  let uName := psRootName "u";
+  let alphaName := psRootName "α";
+  let betaName := psRootName "β";
+  let motiveName := psRootName "_motive";
+  let minorName := psRootName "_mk";
+  let majorName := psRootName "_major";
+  let fstName := psRootName "fst";
+  let sndName := psRootName "snd";
+  let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero);
   let prodType :=
     PsExpr.forallE
       alphaName
@@ -42,7 +42,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
         typeType
         typeType
         PsBinderInfo.explicit)
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let prodMkType :=
     PsExpr.forallE
       alphaName
@@ -62,7 +62,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
             PsBinderInfo.explicit)
           PsBinderInfo.explicit)
         PsBinderInfo.implicit)
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let motiveType :=
     PsExpr.forallE
       majorName
@@ -70,7 +70,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
         (PsExpr.bvar 1)
         (PsExpr.bvar 0))
       (PsExpr.sortE (PsLevel.param uName))
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let minorType :=
     PsExpr.forallE
       fstName
@@ -86,7 +86,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
             (PsExpr.bvar 1)
             (PsExpr.bvar 0)))
         PsBinderInfo.explicit)
-      PsBinderInfo.explicit
+      PsBinderInfo.explicit;
   let recType :=
     PsExpr.forallE
       alphaName
@@ -112,7 +112,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
             PsBinderInfo.explicit)
           PsBinderInfo.explicit)
         PsBinderInfo.implicit)
-      PsBinderInfo.implicit
+      PsBinderInfo.implicit;
   let withProd :=
     psSelfHostReplacePreludeAxiom
       psSelfHostPreludeEnvironment
@@ -124,7 +124,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           0
           [psProdMkName]
-          true))
+          true));
   let withProdMk :=
     psPreludeAdd withProd
       (PsDeclaration.constructorDecl
@@ -136,7 +136,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           0
           2
           2
-          []))
+          []));
   psPreludeAdd withProdMk
     (PsDeclaration.recursorDecl
       (PsRecursorInfo.mk

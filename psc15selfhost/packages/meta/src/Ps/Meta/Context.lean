@@ -91,7 +91,10 @@ def psMetaFresh
     expr := PsExpr.mvar id
   }
 
-def psExprContainsMVar (target : Nat) : PsExpr -> Bool
+def psExprContainsMVar
+    (target : Nat)
+    (expr : PsExpr) : Bool :=
+  match expr with
   | .mvar id => Nat.beq id target
   | .app fn arg =>
       if psExprContainsMVar target fn then

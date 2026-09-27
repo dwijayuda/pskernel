@@ -16,6 +16,13 @@ def psMinimalSelfHostListSource : String :=
   psMinimalSelfHostListConstructionSource ++
   psMinimalSelfHostListMatchSource
 
+def psMinimalSelfHostOptionSource : String :=
+  "def oneOption : Option Nat := Option.some 1\n" ++
+  "def optionOrZero (value : Option Nat) : Nat :=\n" ++
+  "  match value with\n" ++
+  "  | Option.none => 0\n" ++
+  "  | Option.some current => current\n"
+
 def psTestMinimalSelfHostPreparation : Bool :=
   match
       psCompilerPrepareSource
@@ -138,6 +145,35 @@ def psTestMinimalSelfHostListTypeScript : Bool :=
   | Except.error _ => false
   | Except.ok _ => true
 
+def psTestMinimalSelfHostOptionPreparation : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostOptionSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      prepared.declarations.length > 0
+        && prepared.canonicalAdmissions.length > 0
+
+def psTestMinimalSelfHostOptionVerifiedIr : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostOptionSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      match psCompilerVerifiedIrFromPrepared prepared with
+      | Except.error _ => false
+      | Except.ok _ => true
+
+def psTestMinimalSelfHostOptionTypeScript : Bool :=
+  match
+      psCompilerTypeScriptSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostOptionSource with
+  | Except.error _ => false
+  | Except.ok _ => true
+
 def main : IO Unit := do
   if psTestMinimalSelfHostPreparation then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: admission-ready boundary"
@@ -201,3 +237,21 @@ def main : IO Unit := do
     throw
       (IO.userError
         "PSC2_MINIMAL_SELFHOST_FAIL: foundational List -> TypeScript")
+  if psTestMinimalSelfHostOptionPreparation then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational Option preparation"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational Option preparation")
+  if psTestMinimalSelfHostOptionVerifiedIr then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational Option -> VerifiedIR"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational Option -> VerifiedIR")
+  if psTestMinimalSelfHostOptionTypeScript then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational Option -> TypeScript"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational Option -> TypeScript")

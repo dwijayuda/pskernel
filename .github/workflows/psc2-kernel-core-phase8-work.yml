@@ -54,6 +54,12 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           lake exe psc2_kernel_core_inductive_admission_parity_tests
+      - name: Phase 8 inductive rejection matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreInductiveRejectionTests.lean
       - name: Phase 8 Eq inductive compatibility
         shell: bash
         run: |

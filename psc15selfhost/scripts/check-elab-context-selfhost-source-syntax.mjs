@@ -11,7 +11,9 @@ const source = await readFile(
 
 const required = [
   /structure PsElabContext where\s*environment : PsEnvironment\s*localContext : PsLocalContext\s*instances : PsInstanceIndex\s*metaContext : PsMetaContext\s*structuralRecursion : Option PsElabStructuralRecursion(?:\s|$)/,
-  /def psElabContextEmpty[\s\S]*structuralRecursion := none/,
+  /def psElabStructuralRecursionFindCall[\s\S]*\| \[\] =>\s*Option\.none/,
+  /if Nat\.beq \(Prod\.fst entry\) fieldId then\s*Option\.some \(Prod\.snd entry\)/,
+  /def psElabContextEmpty[\s\S]*structuralRecursion := Option\.none/,
 ];
 
 for (const pattern of required) {
@@ -22,6 +24,9 @@ for (const pattern of required) {
 
 const forbidden = [
   /structuralRecursion : Option PsElabStructuralRecursion := none/,
+  /\| \[\] =>\s*none(?:\s|$)/,
+  /\bthen\s*some \(/,
+  /structuralRecursion := none/,
 ];
 
 for (const pattern of forbidden) {
@@ -31,5 +36,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_CONTEXT_SELFHOST_SOURCE_SYNTAX: PASS (explicit structure fields; no Lean field defaults)\n",
+  "PSC2_ELAB_CONTEXT_SELFHOST_SOURCE_SYNTAX: PASS (explicit structure fields and Option constructors)\n",
 );

@@ -24,6 +24,10 @@ const required = [
   /def psReadFixedHex\s*\(count : Nat\) :\s*List Char ->\s*Nat ->\s*Option \(Prod Nat \(List Char\)\) :=\s*match count with/,
   /let smaller : List Char -> Nat -> Option \(Prod Nat \(List Char\)\) :=\s*psReadFixedHex nextCount;/,
   /smaller\s+rest\s*\(Nat\.add \(Nat\.mul value 16\) digit\)/,
+  /def psStringFromReversedChars\s*\(charsRev : List Char\) : String :=\s*match charsRev with/,
+  /\| \[\] =>\s*""/,
+  /\| char :: rest =>\s*String\.push \(psStringFromReversedChars rest\) char/,
+  /Option\.some \(psStringFromReversedChars charsRev\)/,
   /Nat\.add \(Nat\.mul value 10\) digit/,
   /Nat\.add \(Nat\.mul value 16\) digit/,
   /if Nat\.blt value 55296 then/,
@@ -47,6 +51,8 @@ for (const pattern of required) {
 
 const forbidden = [
   /String\.toList/,
+  /String\.ofList/,
+  /List\.reverse/,
   /'(?:\\.|[^'\\])+'/,                  // character literal syntax
   /def psParseNaturalChars\s*\(chars : List Char\)\s*\(value : Nat\)/,
   /psParseNaturalChars\s+rest\s+value/,
@@ -67,5 +73,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (bootstrap string traversal, explicit Char/Nat/List operations, invariant-safe natural/fixed-hex recursion)\n",
+  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (bootstrap string traversal/rebuild, explicit Char/Nat/List operations, invariant-safe natural/fixed-hex recursion)\n",
 );

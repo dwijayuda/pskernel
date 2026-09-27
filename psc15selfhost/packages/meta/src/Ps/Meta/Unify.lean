@@ -83,7 +83,7 @@ def psUnifyWithFuel
         | .mvar leftId =>
             match rightValue with
             | .mvar rightId =>
-                if leftId == rightId then
+                if Nat.beq leftId rightId then
                   psUnifySuccess context
                 else if
                     psMetaVarIsNatural context rightId
@@ -209,7 +209,7 @@ def psUnifyWithFuel
                 | .fvar leftId =>
                     match rightOther with
                     | .fvar rightId =>
-                        if leftId == rightId then
+                        if Nat.beq leftId rightId then
                           psUnifySuccess context
                         else
                           psUnifyFailure context
@@ -217,7 +217,7 @@ def psUnifyWithFuel
                 | .bvar leftIndex =>
                     match rightOther with
                     | .bvar rightIndex =>
-                        if leftIndex == rightIndex then
+                        if Nat.beq leftIndex rightIndex then
                           psUnifySuccess context
                         else
                           psUnifyFailure context
@@ -225,7 +225,7 @@ def psUnifyWithFuel
                 | .proj leftType leftIndex leftValue =>
                     match rightOther with
                     | .proj rightType rightIndex rightValue =>
-                        if psNameEq leftType rightType && leftIndex == rightIndex then
+                        if psNameEq leftType rightType && Nat.beq leftIndex rightIndex then
                           psUnifyWithFuel
                             environment
                             localContext

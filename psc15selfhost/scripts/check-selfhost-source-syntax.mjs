@@ -57,6 +57,7 @@ const levelContext = await read(
 );
 requireMarkers("LevelContext", levelContext, [
   'def psLevelFindAssignmentInList\n    (id : Nat)\n    (assignments : List PsLevelAssignment) : Option PsLevel :=\n  match assignments with',
+  'psLevelFindAssignmentInList id rest',
   'def psLevelInstantiateWithFuel\n    (context : PsLevelMetaContext)\n    (fuel : Nat) : PsLevel -> PsLevel :=\n  match fuel with',
   '| Nat.zero =>\n      fun (level : PsLevel) => level',
   'let smaller : PsLevel -> PsLevel :=\n        psLevelInstantiateWithFuel context remaining;',
@@ -166,7 +167,9 @@ requireMarkers("Reduce", reduce, [
   '| Nat.zero =>\n      fun (expr : PsExpr) => psWhnfCore metaContext localContext expr',
   'let smaller : PsExpr -> PsExpr :=\n        psWhnfWithFuel environment metaContext localContext remaining;',
   'fun (expr : PsExpr) =>\n        let core := psWhnfCoreWithFuel metaContext localContext remaining expr;',
-  'if Nat.beq\n                      (psReduceNameListLength parameters)\n                      (psReduceLevelListLength levels) then\n                    smaller',
+  '(psReduceNameListLength parameters)',
+  '(psReduceLevelListLength levels) then',
+  'smaller\n                        (psExprInstantiateLevelParams parameters levels value)',
   'let reducedFn := smaller fn;',
   'smaller (PsExpr.app reducedFn arg)',
   'let leftValue :=\n          psWhnf environment metaContext localContext left;\n        let rightValue :=\n          psWhnf environment metaContext localContext right;',

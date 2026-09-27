@@ -1,3 +1,5 @@
+import Ps.Syntax.Cursor
+
 def psCharCodeEq (char : Char) (code : Nat) : Bool :=
   Nat.beq (Char.toNat char) code
 
@@ -46,7 +48,7 @@ def psParseNaturalChars
               smaller (Nat.add (Nat.mul value 10) digit)
 
 def psParseNaturalText (text : String) : Option Nat :=
-  psParseNaturalChars (String.toList text) 0
+  psParseNaturalChars (psLexStringToList text) 0
 
 def psHexDigitValue (char : Char) : Option Nat :=
   if psCharCodeEq char 48 then
@@ -222,7 +224,7 @@ def psDecodeStringBodyWithFuel
               (List.cons char charsRev)
 
 def psDecodeStringLiteral (text : String) : Option String :=
-  match String.toList text with
+  match psLexStringToList text with
   | [] =>
       Option.none
   | first :: rest =>
@@ -272,7 +274,7 @@ def psDecodeCharacterEscapedTail
               Option.none
 
 def psDecodeCharacterLiteral (text : String) : Option Char :=
-  match String.toList text with
+  match psLexStringToList text with
   | [] =>
       Option.none
   | opening :: rest =>

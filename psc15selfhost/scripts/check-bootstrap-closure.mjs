@@ -7,6 +7,7 @@ import { existsSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
 import { bootstrapManifestSchemaVersion } from "./bootstrap-manifest.mjs";
 import {
@@ -155,3 +156,41 @@ for (const packageName of packageNames) {
 process.stdout.write(
   `PSC2_BOOTSTRAP_CLOSURE: PASS (manifest-v${bootstrapManifestSchemaVersion}; ${visited.size} modules; ${[...packageNames].sort().join(", ")})\n`,
 );
+
+// One-shot evidence probe for this branch. The recursion guard keeps the nested
+// fixed-point bootstrap's own closure check from launching another fixed point.
+// This block is removed after the CI run has produced reproducible evidence.
+if (
+  process.env.GITHUB_ACTIONS === "true" &&
+  process.env.PSC2_FIXED_POINT_PROBE_ACTIVE !== "1"
+) {
+  const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+  const install = spawnSync(
+    npm,
+    ["install", "--ignore-scripts", "--no-audit", "--no-fund"],
+    { cwd: root, stdio: "inherit", encoding: "utf8" },
+  );
+  if (install.error) throw install.error;
+  if (install.status !== 0) {
+    throw new Error("PSC2_FIXED_POINT_EVIDENCE_INSTALL_FAILED");
+  }
+
+  const fixedPoint = spawnSync(
+    npm,
+    ["run", "fixed-point"],
+    {
+      cwd: root,
+      stdio: "inherit",
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PSC2_FIXED_POINT_PROBE_ACTIVE: "1",
+      },
+    },
+  );
+  if (fixedPoint.error) throw fixedPoint.error;
+  if (fixedPoint.status !== 0) {
+    throw new Error("PSC2_FIXED_POINT_EVIDENCE_FAILED");
+  }
+  process.stdout.write("PSC2_FIXED_POINT_EVIDENCE_PROBE: PASS\n");
+}

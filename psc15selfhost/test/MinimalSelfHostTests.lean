@@ -88,6 +88,37 @@ def psTestMinimalSelfHostListPreparation : Bool :=
       prepared.declarations.length > 0
         && prepared.canonicalAdmissions.length > 0
 
+def psTestMinimalSelfHostListConstructionMissingRuntime : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostListConstructionSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      match psCompilerVerifiedIrFromPrepared prepared with
+      | Except.error
+          (PsCompilerError.erasure
+            (PsErasureError.unknownConstant name)) =>
+          psNameEq name psSelfHostListConsName
+            || psNameEq name psSelfHostListNilName
+      | _ => false
+
+def psTestMinimalSelfHostListMatchMissingRuntime : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostListMatchSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      match psCompilerVerifiedIrFromPrepared prepared with
+      | Except.error
+          (PsCompilerError.erasure
+            (PsErasureError.unknownConstant name)) =>
+          psNameEq name psSelfHostListRecName
+            || psNameEq name psSelfHostListConsName
+            || psNameEq name psSelfHostListNilName
+      | _ => false
+
 def psTestMinimalSelfHostListVerifiedIr : Bool :=
   match
       psCompilerPrepareSource
@@ -152,6 +183,14 @@ def main : IO Unit := do
         "PSC2_MINIMAL_SELFHOST_FAIL: foundational List preparation")
   if psTestMinimalSelfHostListVerifiedIr then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational List -> VerifiedIR"
+  else if psTestMinimalSelfHostListConstructionMissingRuntime then
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational List erasure missing constructor runtime")
+  else if psTestMinimalSelfHostListMatchMissingRuntime then
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational List erasure missing match runtime")
   else
     throw
       (IO.userError

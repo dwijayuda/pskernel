@@ -2,6 +2,7 @@ import "./bootstrap-manifest-tests.mjs";
 import "./semantic-boundary-tests.mjs";
 import "./check-semantic-boundaries.mjs";
 import "./fixed-point-command-tests.mjs";
+import "./bootstrap-root-minimality-tests.mjs";
 import { existsSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";

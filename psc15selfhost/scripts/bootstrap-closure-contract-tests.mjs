@@ -44,6 +44,7 @@ const expectedForbidden = [
   "backend-wasm",
   "pskernel",
   "pskernel-core",
+  "pskernel-lean",
 ];
 
 assertBootstrapPolicyWellFormed();

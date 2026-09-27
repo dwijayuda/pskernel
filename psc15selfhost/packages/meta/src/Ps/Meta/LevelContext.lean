@@ -39,9 +39,6 @@ def psLevelFindAssignmentInList
       else
         psLevelFindAssignmentInList id rest
 
-def psLevelFindAssignment (context : PsLevelMetaContext) (id : Nat) : Option PsLevel :=
-  psLevelFindAssignmentInList id context.assignments
-
 def psLevelMetaFresh (context : PsLevelMetaContext) : PsLevelFreshResult :=
   let id := context.nextId;
   {
@@ -52,6 +49,15 @@ def psLevelMetaFresh (context : PsLevelMetaContext) : PsLevelFreshResult :=
     }
     level := PsLevel.mvar id
   }
+
+def psLevelFindAssignment (context : PsLevelMetaContext) (id : Nat) : Option PsLevel :=
+  psLevelFindAssignmentInList id context.assignments
+
+def psLevelAssignmentCount (assignments : List PsLevelAssignment) : Nat :=
+  match assignments with
+  | [] => Nat.zero
+  | assignment :: rest =>
+      Nat.succ (psLevelAssignmentCount rest)
 
 def psLevelInstantiateWithFuel
     (context : PsLevelMetaContext)
@@ -77,7 +83,10 @@ def psLevelInstantiateWithFuel
         | _ => level
 
 def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLevel :=
-  psLevelInstantiateWithFuel context (Nat.add context.assignments.length 1) level
+  psLevelInstantiateWithFuel
+    context
+    (Nat.succ (psLevelAssignmentCount context.assignments))
+    level
 
 def psLevelOccursResolved (target : Nat) : PsLevel -> Bool
   | .mvar id => Nat.beq id target

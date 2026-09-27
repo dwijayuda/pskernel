@@ -10,7 +10,7 @@ const source = await readFile(
 );
 
 const required = [
-  /def psSyntaxNameAppendSegments\s*\(segments : List String\) : PsName -> PsName :=\s*match segments with/,
+  /def psSyntaxNameAppendSegments\s*\(segments : List String\)\s*:\s*PsName -> PsName :=\s*match segments with/,
   /\| \[\] =>\s*fun \(name : PsName\) =>\s*name/,
   /let smaller : PsName -> PsName :=\s*psSyntaxNameAppendSegments rest;/,
   /fun \(name : PsName\) =>\s*smaller \(psNameAppendStr name segment\)/,

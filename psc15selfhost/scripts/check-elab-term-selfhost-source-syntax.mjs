@@ -192,11 +192,37 @@ if (typedBindersAccMatch === null) {
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabTypedBindersAcc block");
 }
 const typedBindersAcc = typedBindersAccMatch[0];
-if (!/elaborate\s+context\s+sourceType\s+Option\.none/.test(typedBindersAcc)) {
-  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabTypedBindersAcc explicit Option.none");
+const typedBindersAccRequired = [
+  /\(entries : List \(Prod PsSyntaxBinderHead PsSyntaxTerm\)\)\s*:\s*PsElabContext ->\s*List PsElabTypedBinder ->\s*Except PsElabError PsElabTypedBindersResult :=/,
+  /let smaller\s*:\s*PsElabContext ->\s*List PsElabTypedBinder ->\s*Except PsElabError PsElabTypedBindersResult :=\s*psElabTypedBindersAcc elaborate rest;/,
+  /fun \(context : PsElabContext\) =>\s*fun \(bindersRev : List PsElabTypedBinder\) =>/,
+  /elaborate\s+context\s+sourceType\s+Option\.none/,
+  /smaller\s+nextContext\s*\(List\.cons binderEntry bindersRev\)/,
+];
+for (const pattern of typedBindersAccRequired) {
+  if (!pattern.test(typedBindersAcc)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabTypedBindersAcc ${pattern}`);
+  }
 }
-if (/elaborate\s+context\s+sourceType\s+none/.test(typedBindersAcc)) {
-  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabTypedBindersAcc bare none expected type");
+const typedBindersAccForbidden = [
+  /\(context : PsElabContext\)\s*\(entries : List \(Prod PsSyntaxBinderHead PsSyntaxTerm\)\)\s*\(bindersRev : List PsElabTypedBinder\)/,
+  /psElabTypedBindersAcc\s+elaborate\s+nextContext\s+rest/,
+  /elaborate\s+context\s+sourceType\s+none/,
+];
+for (const pattern of typedBindersAccForbidden) {
+  if (pattern.test(typedBindersAcc)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabTypedBindersAcc ${pattern}`);
+  }
+}
+
+const typedBindersMatch = source.match(
+  /def psElabTypedBinders([\s\S]*?)(?=\ndef psCloseElabTypedBinders)/,
+);
+if (typedBindersMatch === null) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabTypedBinders block");
+}
+if (!/psElabTypedBindersAcc\s+elaborate\s+binders\s+context\s+\[\]/.test(typedBindersMatch[0])) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabTypedBinders worker call order");
 }
 
 const forbidden = [
@@ -213,5 +239,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection recursion, typed projection-reference match, explicit projection-reference expectation, explicit character conversion, explicit typed-binder expectation, local list length, and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection and typed-binder recursion, typed projection-reference match, explicit projection-reference expectation, explicit character conversion, explicit typed-binder expectation, local list length, and explicit Option constructors)\n",
 );

@@ -414,6 +414,8 @@ def psKernelCoreAddNonRecursiveInductiveWithResources
                     psKernelCoreInductiveLevelsFromNames info.base.levelParams;
                   psKernelCoreInductiveAddConstructorsWithResources
                     constructors remaining resources info levels workEnv 0
+            else
+              PsKernelCoreResult.error "invalid inductive header"
           else
             PsKernelCoreResult.error "constructor list does not match metadata"
         else

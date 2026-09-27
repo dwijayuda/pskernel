@@ -5,6 +5,18 @@ import Ps.Environment.Basic
 import Ps.Environment.LocalContext
 import Ps.Meta.Context
 
+def psReduceNameListLength
+    (values : List PsName) : Nat :=
+  match values with
+  | [] => 0
+  | _ :: rest => Nat.succ (psReduceNameListLength rest)
+
+def psReduceLevelListLength
+    (values : List PsLevel) : Nat :=
+  match values with
+  | [] => 0
+  | _ :: rest => Nat.succ (psReduceLevelListLength rest)
+
 def psWhnfCoreWithFuel
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext) : Nat -> PsExpr -> PsExpr
@@ -69,7 +81,9 @@ def psWhnfWithFuel
               | none => core
               | some value =>
                   let parameters := psDeclarationLevelParams declaration;
-                  if parameters.length == levels.length then
+                  if Nat.beq
+                      (psReduceNameListLength parameters)
+                      (psReduceLevelListLength levels) then
                     psWhnfWithFuel
                       environment
                       metaContext
@@ -167,7 +181,7 @@ def psDefEqReadOnlyWithEnvFuel
         | .proj leftType leftIndex leftValue,
           .proj rightType rightIndex rightValue =>
             psNameEq leftType rightType
-              && leftIndex == rightIndex
+              && Nat.beq leftIndex rightIndex
               && psDefEqReadOnlyWithEnvFuel
                 environment
                 metaContext

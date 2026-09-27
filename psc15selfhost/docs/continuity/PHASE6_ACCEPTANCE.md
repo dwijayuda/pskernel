@@ -1,6 +1,8 @@
 # PSC2 KernelCore Phase 6 Acceptance
 
-Status date: 2026-09-27
+Status: accepted
+
+Date: 2026-09-27
 
 Execution branch: `psc2/kernel-core-phase6-admission-work`
 
@@ -9,20 +11,20 @@ Reviewed branch: `psc2/kernel-core-phase6-admission`
 Accepted implementation/assurance SHA:
 
 ```text
-1a29d021b2fff626c08373fd32f245fcff8bca0b
+d51edfd519f8b050f6a31b3549af32a85ca7fa4c
 ```
 
 Exact acceptance evidence:
 
 ```text
 GitHub Actions workflow: PSC2 minimal kernel
-run: 36315698085
-job: 108609861841
+run: 36316555109
+job: 108612234497
 conclusion: success
 Lean: 4.34.0
 ```
 
-This acceptance record is intentionally committed after the exact tested implementation/assurance SHA. The acceptance commit must contain documentation only.
+This acceptance record is intentionally committed after the exact tested implementation/assurance SHA. The acceptance commit contains documentation only relative to the accepted semantic head except for the already-tested review regression/workflow wiring that is part of `d51edfd...`.
 
 ## Accepted Phase 6 scope
 
@@ -50,21 +52,10 @@ psKernelCoreCheck :
 Primary ordinary-admission entry points:
 
 ```text
-psKernelCoreAddAxiom :
-  Nat -> PsKernelCoreEnvironment -> PsKernelCoreAxiomInfo ->
-  PsKernelCoreResult String PsKernelCoreEnvironment
-
-psKernelCoreAddDefinition :
-  Nat -> PsKernelCoreEnvironment -> PsKernelCoreDefinitionInfo ->
-  PsKernelCoreResult String PsKernelCoreEnvironment
-
-psKernelCoreAddTheorem :
-  Nat -> PsKernelCoreEnvironment -> PsKernelCoreTheoremInfo ->
-  PsKernelCoreResult String PsKernelCoreEnvironment
-
-psKernelCoreAddOpaque :
-  Nat -> PsKernelCoreEnvironment -> PsKernelCoreOpaqueInfo ->
-  PsKernelCoreResult String PsKernelCoreEnvironment
+psKernelCoreAddAxiom
+psKernelCoreAddDefinition
+psKernelCoreAddTheorem
+psKernelCoreAddOpaque
 ```
 
 Phase 6 deliberately keeps accepted `Ps.KernelCore.Infer` semantics unchanged.
@@ -75,34 +66,10 @@ The exact acceptance run reports:
 
 ```text
 PSC2_KERNEL_CORE_CHECK_PARITY: PASS
+PSC2_KERNEL_CORE_CHECK_ORDERING: PASS
 ```
 
-The differential fixture compares the supported checked surface with `PSC1Kernel.check` and covers:
-
-- sorts, locals, monomorphic and polymorphic constants;
-- Nat and String literal typing on the bounded ordinary surface;
-- metadata transparency;
-- ordinary and dependent applications;
-- lambda-domain checking;
-- forall domain/codomain checking;
-- let declared-type/value checking;
-- Phase-5 DefEq for application and let compatibility;
-- safe/unsafe/partial constant-use restrictions;
-- malformed applications, domains, codomains, lets, unknown names and universe arity;
-- loose bound variables and expression metavariables;
-- explicit budget boundaries and lower-layer error propagation;
-- fail-closed projection behavior before trusted inductive metadata.
-
-Stable Phase-6 boundary errors include:
-
-```text
-check budget exhausted
-safe declaration uses unsafe constant
-safe declaration uses partial constant
-application type mismatch
-let value type mismatch
-projection checking unavailable before inductive metadata
-```
+The differential fixture compares the supported checked surface with `PSC1Kernel.check` and covers the explicitly selected non-inductive overlap: sorts, locals, constants and universe instantiation, literals, metadata, applications, lambdas, foralls, lets, safety restrictions, malformed terms, lower-layer error propagation, projection fail-closed behavior and explicit KernelCore budget boundaries.
 
 The accepted safety matrix is:
 
@@ -112,6 +79,28 @@ partial context : safe + partial, but not unsafe
 unsafe context  : safe + partial + unsafe
 ```
 
+### Final-review ordering correction
+
+The final whole-branch self-review found one Important semantic-ordering gap that the initial Phase-6 parity fixture did not pin.
+
+For an unsafe polymorphic constant referenced with the wrong universe arity from a safe context, the first candidate checked safety before universe arity. The mature checker and approved Phase-6 specification require universe-arity validation first.
+
+The finding received its own TDD cycle:
+
+```text
+RED:   KernelCoreCheckOrderingTests.lean failed on the pre-fix candidate
+GREEN: PSC2_KERNEL_CORE_CHECK_ORDERING: PASS
+fix:   d51edfd519f8b050f6a31b3549af32a85ca7fa4c
+```
+
+The accepted constant-validation order is:
+
+1. declaration lookup;
+2. universe arity / level instantiation validation;
+3. unsafe restriction;
+4. partial restriction;
+5. successful instantiated type.
+
 ## Ordinary declaration-admission evidence
 
 The exact acceptance run reports:
@@ -120,7 +109,7 @@ The exact acceptance run reports:
 PSC2_KERNEL_CORE_ADMISSION_PARITY: PASS
 ```
 
-The differential fixture compares the supported surface with:
+The differential fixture compares the supported admission surface with:
 
 ```text
 PSC1Kernel.Kernel.addAxiom
@@ -129,56 +118,9 @@ PSC1Kernel.Kernel.addTheorem
 PSC1Kernel.Kernel.addOpaque
 ```
 
-Accepted overlap includes:
+The covered admission surface includes ordinary axiom/definition/theorem/opaque success and failure cases; duplicate names and universe parameters; expression/universe metavariables; free variables; undefined universe parameters including nested occurrences; declared-type well-formedness; definition/proof/opaque body compatibility; safety restrictions; immutable rejected-environment behavior; `quotInitialized` preservation; and bounded unsafe single-definition self-reference through a temporary work environment.
 
-- safe and unsafe axioms;
-- ordinary safe definitions;
-- polymorphic safe definitions;
-- theorem admission when the declared type is a proposition and the proof type is compatible;
-- opaque declaration admission;
-- bounded unsafe single-definition self-reference through a temporary work environment.
-
-Rejected overlap includes:
-
-- duplicate declaration names;
-- adjacent and non-adjacent duplicate universe parameters;
-- expression metavariables;
-- universe metavariables;
-- free variables;
-- undefined universe parameters, including nested occurrences;
-- declaration types that are not themselves types;
-- definition body mismatch;
-- safe definitions using unsafe or partial dependencies;
-- malformed unsafe self-reference;
-- theorem type that is not a proposition;
-- theorem proof mismatch or forbidden dependency;
-- opaque body mismatch or forbidden dependency even when `OpaqueInfo.isUnsafe` is set.
-
-Admission owns trusted structural closure/universe validation rather than trusting an unchecked host adapter.
-
-## Functional environment behavior
-
-Admission remains pure and functional.
-
-The fixture pins that rejected admission leaves the caller's original environment unchanged, including:
-
-```text
-size
-pre-existing membership
-absence of the rejected declaration name
-quotInitialized
-```
-
-Unsafe single-definition admission uses the mature reference boundary:
-
-1. validate the header against the original environment under unsafe checking context;
-2. add the complete definition to a temporary work environment;
-3. check the body in that work environment so bounded self-reference is visible;
-4. return the work environment only on success.
-
-A failed unsafe definition does not mutate or replace the caller's original environment.
-
-Safe and ordinary single partial definitions are checked before they are added to the returned environment, matching the selected mature ordinary-definition overlap.
+Admission remains pure and functional. A rejected declaration does not mutate the caller's original environment.
 
 ## Trusted source and PSC1 self-host evidence
 
@@ -209,16 +151,28 @@ packages/pskernel-core/src/Ps/KernelCore/Subst.lean
 
 The hardened Phase-5 source-profile contract remains unchanged: build PSC1 once, flatten each trusted closure, invoke the actual PSC1 compiler on each closure, emit per-entry progress, and fail closed on compiler/process timeout or failure.
 
-No source restriction or timeout was weakened for Phase 6.
+No source restriction or timeout was weakened for Phase 6. On the accepted run, the new `Admission.lean`, `Check.lean`, and aggregate closure all completed comfortably below the existing 120-second per-entry bound.
 
-`PSC1Kernel.Kernel`, `Quot`, `CheckerSession`, and the stateful checker modules added to the Lake reference root set are **test-oracle dependencies only**. They are not imported by or trusted inside `pskernel-core`.
+`PSC1Kernel.Kernel`, `Quot`, checker-session, and stateful checker modules used by Lake/reference tests remain **test-oracle dependencies only** and are not imported by the trusted KernelCore implementation.
 
 ## Preserved assurance evidence
 
-The exact acceptance SHA passes all direct lower-layer gates plus:
+The exact accepted implementation SHA passed:
 
 ```text
+PSC2_KERNEL_CORE_BOUNDARY: PASS
+PSC2_KERNEL_CORE_NAME_PARITY: PASS
+PSC2_KERNEL_CORE_LEVEL_PARITY: PASS
+PSC2_KERNEL_CORE_EXPR_PARITY: PASS
+PSC2_KERNEL_CORE_SUBST_PARITY: PASS
+PSC2_KERNEL_CORE_DECLARATION_PARITY: PASS
+PSC2_KERNEL_CORE_ENVIRONMENT_PARITY: PASS
+PSC2_KERNEL_CORE_LOCAL_CONTEXT_PARITY: PASS
+PSC2_KERNEL_CORE_REDUCTION_PARITY: PASS
+PSC2_KERNEL_CORE_INFER_PARITY: PASS
+PSC2_KERNEL_CORE_DEFEQ_PARITY: PASS
 PSC2_KERNEL_CORE_CHECK_PARITY: PASS
+PSC2_KERNEL_CORE_CHECK_ORDERING: PASS
 PSC2_KERNEL_CORE_ADMISSION_PARITY: PASS
 PSC2_BOOTSTRAP_CLOSURE: PASS
 KERNEL_CORE_SOURCE_PROFILE: PASS (14 PSC1-subset, self-host-checkable modules)
@@ -231,6 +185,8 @@ Phase 6 aggregate assurance: success
 Existing PSC2 regression gate (`npm run check`): success
 ```
 
+No prior phase aggregate command was weakened or redefined to make Phase 6 pass.
+
 The compiler bootstrap closure remains isolated from `pskernel-core`. Phase 6 does not make KernelCore the compiler's active `CheckedCore` provider.
 
 ## Exact size evidence
@@ -240,13 +196,13 @@ From the exact accepted implementation/assurance SHA:
 ```text
 KERNEL_CORE_SIZE_REPORT: PASS
 KernelCore trusted .lean file count: 14
-KernelCore trusted source bytes: 114418
-KernelCore trusted nonblank/noncomment LOC: 2680
+KernelCore trusted source bytes: 113534
+KernelCore trusted nonblank/noncomment LOC: 2664
 PSC1Kernel comparable .lean file count: 22
 PSC1Kernel comparable semantic-source bytes: 306641
 PSC1Kernel comparable nonblank/noncomment LOC: 7403
-KernelCore/reference byte ratio: 0.3731
-KernelCore/reference LOC ratio: 0.3620
+KernelCore/reference byte ratio: 0.3703
+KernelCore/reference LOC ratio: 0.3599
 ```
 
 Reference exclusions remain:
@@ -258,7 +214,13 @@ ReplayJson.lean
 NativeMap.lean
 ```
 
-The current accepted trusted slice is therefore approximately 37.31% of the comparable reference bytes and 36.20% of its nonblank/noncomment LOC. These are measurements of the current Phase-6 slice, not predictions for the final completed kernel.
+These numbers measure the currently accepted Phase-6 semantic slice only. They are not a prediction for the final complete kernel.
+
+## Review/process evidence
+
+The final whole-branch review was a **self-review because this harness has no subagent-dispatch tool**. This is weaker than an independent fresh-context reviewer and must not be represented otherwise.
+
+During execution, another worker advanced the same Phase-6 work branch while this chat was waiting on the initial RED gate. The branch was not overwritten. The incoming implementation was reconciled against the approved Phase-6 specification/plan and fresh exact-head CI. The self-review then found the universe-arity-before-safety issue documented above; that finding received an observed RED→GREEN regression and a complete green suite before acceptance.
 
 ## Allowed claims
 
@@ -268,9 +230,9 @@ After this acceptance it is valid to claim:
 - KernelCore can validate and functionally admit the explicitly covered axiom, definition, theorem and opaque declarations.
 - Phase-6 application, let and declaration-body compatibility uses the accepted Phase-5 DefEq layer.
 - safe/unsafe/partial constant-use restrictions are enforced on the explicitly covered checked surface.
-- ordinary admission validates closure, universe-parameter use, declared-type well-formedness and body/proof/value compatibility for the explicitly covered cases.
+- ordinary admission validates the covered closure, universe-parameter, declared-type well-formedness and body/proof/value compatibility conditions.
 - unsafe single-definition self-reference is supported through the explicitly tested temporary-environment behavior.
-- all trusted Phase-6 source passes the actual PSC1 self-host checker.
+- all 14 trusted Phase-6 KernelCore `.lean` modules pass the actual PSC1 self-host checker.
 - Phase-1 through Phase-6 assurance and the full existing repository regression are green on the exact accepted implementation/assurance SHA.
 
 ## Explicit non-claims
@@ -304,6 +266,4 @@ The strongest valid Phase-6 summary is:
 
 ## Recommended next phase
 
-The next dependency-ordered architectural slice should be selected from the remaining mature semantic islands based on corpus/dependency pressure.
-
-The expected Phase 7 is **primitive/resource handling**: explicit bounded behavior needed for the mature checker/reducer's Nat/resource and related primitive surface, while keeping native evaluation, Quot and inductive/recursor semantics separately gated unless the Phase-7 design proves a tighter dependency is necessary.
+The expected next dependency-ordered architectural slice is **primitive/resource handling** required by mature checking/reduction before broader corpus parity, while keeping native evaluation, Quot and inductive/recursor semantics separately gated unless the Phase-7 design proves a tighter dependency is necessary.

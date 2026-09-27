@@ -100,6 +100,14 @@ lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
   roots := #[`Ps.Bootstrap.SelfHost]
 
+lean_lib PsBackendJs where
+  srcDir := "packages/backend-js/src"
+  roots := #[`Ps.BackendJs.Module]
+
+lean_exe psc2_backend_js_tests where
+  srcDir := "test"
+  root := `BackendJsTests
+
 lean_lib PsBackendRust where
   srcDir := "packages/backend-rust/src"
   roots := #[

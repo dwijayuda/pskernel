@@ -1,0 +1,25 @@
+name: PSC2 direct JS backend
+on:
+  push:
+    branches: [psc2/backend-js]
+    paths: ['psc15selfhost/**', '.github/workflows/psc2-backend-js.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  literal-differential:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Lean
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install TypeScript oracle
+        run: npm install --prefix /tmp/psc-ts typescript@5.8.3 --ignore-scripts
+      - name: Execute literal and rejection fixtures
+        working-directory: psc15selfhost
+        run: PATH=/tmp/psc-ts/node_modules/.bin:$PATH node scripts/backend-js-tests.mjs

@@ -15,7 +15,15 @@ PSC1-compatible `.lean` subset so it can participate in self-hosting.
 This branch owns direct JS work. It must not push its changes to the active
 minimal-selfhost or kernel-core branches. Preserve npm package boundaries.
 
-## Current result and prerequisite
+## Authorization update (2026-09-27)
+
+The user instructed: "Safely ignore the requirement of freezing TS first, work
+on backend js now to be merge later". This supersedes the development-order
+restriction recorded below. Implement on this branch now, preserve the TS root,
+and leave integration and authority cutover gated. No merge is authorized by this
+instruction. The next-bootstrap architecture and semantic requirements still apply.
+
+## Initial study result and original prerequisite
 
 This commit establishes the workstream and design, not an implemented backend.
 There is no `backend-js` package or direct-JS fixed point yet.

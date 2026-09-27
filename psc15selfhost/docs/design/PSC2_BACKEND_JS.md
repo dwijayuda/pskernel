@@ -1,6 +1,8 @@
 # Direct JavaScript backend design
 
-Status: proposed implementation design; Generation A freeze is a prerequisite.
+Status: parallel implementation authorized by the user on 2026-09-27.
+The user explicitly superseded the TS-freeze-before-development requirement.
+Preserve the TS bootstrap; merge and authority cutover remain separately gated.
 Authority: `../continuity/PSC2_NEXT_BOOTSTRAP.md`, `../../ARCHITECTURE.md`, and
 `../../packages/compiler-ir/CONTRACT.md`.
 

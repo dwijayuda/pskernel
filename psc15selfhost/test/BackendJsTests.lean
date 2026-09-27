@@ -64,6 +64,7 @@ def jsRequireError (label : String) (module : PsVerifiedIrModule) : IO Unit := d
 def main (args : List String) : IO Unit := do
   let out := args.head!
   let declaration := jsFixtureDecl "x" .nat (.natural 1)
+  let identity := jsFixtureFunctionDecl "identity" "value" .nat .nat (.var "value")
   for name in ["", "default", "class", "await", "x;throw 1;//", "a-b", "a.b", "1x", "é"] do
     jsRequireError s!"name {name}" { psVerifiedIrModuleEmpty with
       declarations := [{ declaration with name := name }] }
@@ -80,6 +81,29 @@ def main (args : List String) : IO Unit := do
   jsRequireError "if condition type mismatch" { psVerifiedIrModuleEmpty with
     declarations := [jsFixtureExprDecl "badIf" .nat
       (.ifE (.literal (.natural 1)) (.literal (.natural 2)) (.literal (.natural 3)))] }
+  jsRequireError "unknown call target" { psVerifiedIrModuleEmpty with
+    declarations := [jsFixtureFunctionDecl "caller" "value" .nat .nat
+      (.call (.var "missing") [] [(.var "value")])] }
+  jsRequireError "call type arguments" { psVerifiedIrModuleEmpty with
+    declarations := [identity,
+      jsFixtureFunctionDecl "caller" "value" .nat .nat
+        (.call (.var "identity") [(.primitive .nat)] [(.var "value")])] }
+  jsRequireError "call zero arguments" { psVerifiedIrModuleEmpty with
+    declarations := [identity,
+      jsFixtureExprDecl "caller" .nat (.call (.var "identity") [] [])] }
+  jsRequireError "call too many arguments" { psVerifiedIrModuleEmpty with
+    declarations := [identity,
+      jsFixtureFunctionDecl "caller" "value" .nat .nat
+        (.call (.var "identity") [] [(.var "value"), (.var "value")])] }
+  jsRequireError "call result type mismatch" { psVerifiedIrModuleEmpty with
+    declarations := [identity,
+      jsFixtureFunctionDecl "caller" "value" .nat .int
+        (.call (.var "identity") [] [(.var "value")])] }
+  jsRequireError "call non-atomic argument" { psVerifiedIrModuleEmpty with
+    declarations := [identity,
+      jsFixtureFunctionDecl "caller" "value" .nat .nat
+        (.call (.var "identity") [] [
+          (.letE "temporary" (.primitive .nat) (.var "value") (.var "temporary"))])] }
   jsRequireError "nonprimitive parameter" { psVerifiedIrModuleEmpty with
     declarations := [{ declaration with parameters := [
       { name := "a", type := .function [.primitive .nat] (.primitive .nat) }] }] }

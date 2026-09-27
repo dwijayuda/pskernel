@@ -49,6 +49,21 @@ for (const marker of required) {
   }
 }
 
+const requiredPatterns = [
+  /def psPreparedInstanceArgumentListReverseAux\s*\(remaining : List PsPreparedInstanceArgument\) :\s*List PsPreparedInstanceArgument -> List PsPreparedInstanceArgument :=\s*match remaining with/,
+  /\| List\.nil =>\s*fun \(acc : List PsPreparedInstanceArgument\) => acc/,
+  /\| List\.cons head tail =>\s*let smaller :\s*List PsPreparedInstanceArgument -> List PsPreparedInstanceArgument :=\s*psPreparedInstanceArgumentListReverseAux tail;/,
+  /fun \(acc : List PsPreparedInstanceArgument\) =>\s*smaller \(List\.cons head acc\)/,
+  /def psPreparedInstanceArgumentListReverse\s*\(values : List PsPreparedInstanceArgument\) :\s*List PsPreparedInstanceArgument :=\s*psPreparedInstanceArgumentListReverseAux values List\.nil/,
+  /arguments := psPreparedInstanceArgumentListReverse arguments/,
+];
+
+for (const pattern of requiredPatterns) {
+  if (!pattern.test(source)) {
+    throw new Error(`PSC2_SYNTH_INSTANCE_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`);
+  }
+}
+
 const forbidden = [
   ":\n    Nat -> PsPreparedInstance\n  | 0 =>",
   "let typeValue := psWhnf environment context localContext type\n      match typeValue with",
@@ -61,6 +76,8 @@ const forbidden = [
   ":\n    Nat -> PsExpr -> PsSynthInstanceResult\n  | 0, _ =>",
   "| fuel + 1, target =>",
   "fun nextContext nextTarget =>",
+  ".reverse",
+  "List.reverse",
 ];
 
 for (const marker of forbidden) {
@@ -70,5 +87,5 @@ for (const marker of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_SYNTH_INSTANCE_SELFHOST_SOURCE_SYNTAX: PASS (explicit sequencing and invariant-safe instance recursion)\n",
+  "PSC2_SYNTH_INSTANCE_SELFHOST_SOURCE_SYNTAX: PASS (explicit sequencing, local List reverse, and invariant-safe instance recursion)\n",
 );

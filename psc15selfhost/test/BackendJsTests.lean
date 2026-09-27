@@ -41,7 +41,9 @@ def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
       (.ifE
         (.var "flag")
         (.literal (.natural 10))
-        (.literal (.natural 20)))
+        (.literal (.natural 20))),
+    jsFixtureFunctionDecl "callIdentity" "value" .nat .nat
+      (.call (.var "identity") [] [(.var "value")])
   ]
 
 def jsDifferentialFixtureModule : PsVerifiedIrModule :=

@@ -13,6 +13,7 @@ export const packageBySection = new Map([
   ["Compiler", "compiler"],
   ["Erasure", "erasure"],
   ["BackendTs", "backend-ts"],
+  ["BackendJs", "backend-js"],
   ["BackendRust", "backend-rust"],
   ["BackendWasm", "backend-wasm"],
 ]);

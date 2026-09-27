@@ -23,3 +23,18 @@ jobs:
       - name: Execute literal and rejection fixtures
         working-directory: psc15selfhost
         run: PATH=/tmp/psc-ts/node_modules/.bin:$PATH node scripts/backend-js-tests.mjs
+      - name: Structural isolation
+        working-directory: psc15selfhost
+        run: |
+          npm run check:workspace
+          npm run check:source:all
+          npm run check:backend-js-dependencies
+          npm run check:bootstrap-closure
+          npm run check:ir-neutrality
+      - name: PSC1 source and canonical PS admission
+        working-directory: psc15selfhost
+        run: npm run check:backend-js-source
+      - name: Existing regression suites
+        if: always()
+        working-directory: psc15selfhost
+        run: npm test

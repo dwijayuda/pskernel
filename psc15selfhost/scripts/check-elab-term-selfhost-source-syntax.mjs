@@ -68,6 +68,48 @@ for (const pattern of projectionApplyForbidden) {
   }
 }
 
+const findStructureFieldMatch = source.match(
+  /def psElabFindStructureField([\s\S]*?)(?=\ndef psElabProjectionStep)/,
+);
+if (findStructureFieldMatch === null) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabFindStructureField block");
+}
+const findStructureField = findStructureFieldMatch[0];
+const findStructureFieldRequired = [
+  /def psElabFindStructureField\s*\(context : PsElabContext\)\s*\(typeName : PsName\)\s*\(target : PsExpr\)\s*\(fieldName : String\)\s*\(remaining : Nat\)\s*:\s*Nat ->\s*PsExpr ->\s*Except PsElabError Nat :=/,
+  /let smaller : Nat -> PsExpr -> Except PsElabError Nat :=\s*psElabFindStructureField\s+context\s+typeName\s+target\s+fieldName\s+nextRemaining;/,
+  /fun \(index : Nat\) =>\s*fun \(cursor : PsExpr\) =>/,
+  /smaller\s*\(Nat\.succ index\)\s*\(psExprInstantiate1\s+forallView\.body\s*\(PsExpr\.proj typeName index target\)\)/,
+];
+for (const pattern of findStructureFieldRequired) {
+  if (!pattern.test(findStructureField)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabFindStructureField ${pattern}`);
+  }
+}
+const findStructureFieldForbidden = [
+  /def psElabFindStructureField[\s\S]*?\(index : Nat\)\s*\(remaining : Nat\)\s*\(cursor : PsExpr\)/,
+  /psElabFindStructureField\s+context\s+typeName\s+target\s+fieldName\s*\(Nat\.succ index\)\s+nextRemaining/,
+];
+for (const pattern of findStructureFieldForbidden) {
+  if (pattern.test(findStructureField)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabFindStructureField ${pattern}`);
+  }
+}
+
+const projectionStepMatch = source.match(
+  /def psElabProjectionStep([\s\S]*?)(?=\ndef psElabProjectionChain)/,
+);
+if (projectionStepMatch === null) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionStep block");
+}
+const projectionStep = projectionStepMatch[0];
+if (!/psElabFindStructureField\s+current\.context\s+typeName\s+current\.term\s+fieldName\s+constructorInfo\.numFields\s+0\s+fieldCursor/.test(projectionStep)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionStep reordered psElabFindStructureField call");
+}
+if (/psElabFindStructureField\s+current\.context\s+typeName\s+current\.term\s+fieldName\s+0\s+constructorInfo\.numFields\s+fieldCursor/.test(projectionStep)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabProjectionStep old psElabFindStructureField call order");
+}
+
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
   /psSyntaxNameAppendSegments\s*\(psNameAppendStr name segment\)\s*rest/,
@@ -80,5 +122,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name/projection recursion and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name/projection/field recursion and explicit Option constructors)\n",
 );

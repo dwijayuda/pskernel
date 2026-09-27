@@ -70,17 +70,6 @@ def psJsEmitParameterNames (parameters : List Nat) : Except PsJsError String :=
               | Except.ok names =>
                   Except.ok (psJsonConcat3 name ", " names)
 
-def psJsEmitUnaryCall (fn argument : PsJsExpr) : Except PsJsError String :=
-  match psJsEmitExpr fn with
-  | Except.error error => Except.error error
-  | Except.ok printedFn =>
-      match psJsEmitExpr argument with
-      | Except.error error => Except.error error
-      | Except.ok printedArgument =>
-          let start := psJsonConcat2 "(" printedFn;
-          let middle := psJsonConcat3 start ")(" printedArgument;
-          Except.ok (psJsonConcat2 middle ")")
-
 def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
   match expr with
   | PsJsExpr.literal value => psJsEmitLiteral value
@@ -113,7 +102,16 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
       | List.nil => Except.error PsJsError.unsupportedExpression
       | List.cons argument rest =>
           match rest with
-          | List.nil => psJsEmitUnaryCall fn argument
+          | List.nil =>
+              match psJsEmitExpr fn with
+              | Except.error error => Except.error error
+              | Except.ok printedFn =>
+                  match psJsEmitExpr argument with
+                  | Except.error error => Except.error error
+                  | Except.ok printedArgument =>
+                      let start := psJsonConcat2 "(" printedFn;
+                      let middle := psJsonConcat3 start ")(" printedArgument;
+                      Except.ok (psJsonConcat2 middle ")")
           | List.cons _ _ => Except.error PsJsError.unsupportedExpression
   | PsJsExpr.ifE condition thenBranch elseBranch =>
       match psJsEmitExpr condition with

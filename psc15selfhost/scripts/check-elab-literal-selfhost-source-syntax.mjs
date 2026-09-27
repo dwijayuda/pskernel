@@ -28,6 +28,12 @@ const required = [
   /\| \[\] =>\s*""/,
   /\| char :: rest =>\s*String\.push \(psStringFromReversedChars rest\) char/,
   /Option\.some \(psStringFromReversedChars charsRev\)/,
+  /def psDecodeStringBodyWithFuel\s*\(fuel : Nat\) :\s*List Char ->\s*List Char ->\s*Option String :=\s*match fuel with/,
+  /let smaller : List Char -> List Char -> Option String :=\s*psDecodeStringBodyWithFuel nextFuel;/,
+  /smaller\s+rest\s*\(List\.cons \(Char\.ofNat 34\) charsRev\)/,
+  /smaller\s+rest\s*\(List\.cons \(Char\.ofNat 92\) charsRev\)/,
+  /smaller\s+\(Prod\.snd decoded\)\s*\(List\.cons \(Prod\.fst decoded\) charsRev\)/,
+  /smaller\s+restAfterChar\s*\(List\.cons char charsRev\)/,
   /Nat\.add \(Nat\.mul value 10\) digit/,
   /Nat\.add \(Nat\.mul value 16\) digit/,
   /if Nat\.blt value 55296 then/,
@@ -59,6 +65,8 @@ const forbidden = [
   /psParseNaturalChars\s+rest\s*\(Nat\.add/,
   /def psReadFixedHex\s*\(count : Nat\)\s*\(chars : List Char\)\s*\(value : Nat\)/,
   /psReadFixedHex\s+nextCount\s+rest/,
+  /def psDecodeStringBodyWithFuel\s*\(fuel : Nat\)\s*\(chars : List Char\)\s*\(charsRev : List Char\)/,
+  /psDecodeStringBodyWithFuel\s+nextFuel/,
   /value\s*\*\s*(?:10|16)/,             // arithmetic infix in literal accumulators
   /value\s*<\s*(?:55296|1114112)/,       // scalar-bound infix comparison
   /57343\s*<\s*value/,
@@ -73,5 +81,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (bootstrap string traversal/rebuild, explicit Char/Nat/List operations, invariant-safe natural/fixed-hex recursion)\n",
+  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (bootstrap string traversal/rebuild, explicit Char/Nat/List operations, invariant-safe natural/fixed-hex/string-decode recursion)\n",
 );

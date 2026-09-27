@@ -66,7 +66,7 @@ def psHostCompilerTranslateToFile
 def psHostCompilerElaborateProject
     (inputPath : String) : IO PsElabModuleResult :=
   psHostLoadProject
-    psSelfHostPreludeEnvironment
+    psSelfHostProdPreludeEnvironment
     inputPath
 
 def psHostCompilerCheck

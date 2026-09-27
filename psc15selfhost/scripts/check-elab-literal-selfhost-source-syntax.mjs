@@ -18,12 +18,15 @@ const required = [
   /if Nat\.blt value 55296 then/,
   /else if Nat\.blt 57343 value then/,
   /Nat\.blt value 1114112/,
-  /Char\.ofNat 34/,
+  /List\.cons \(Char\.ofNat 34\) charsRev/,
+  /List\.cons \(Char\.ofNat 92\) charsRev/,
+  /List\.cons \(Char\.ofNat 10\) charsRev/,
+  /List\.cons \(Char\.ofNat 13\) charsRev/,
+  /List\.cons \(Char\.ofNat 9\) charsRev/,
+  /List\.cons \(Char\.ofNat 0\) charsRev/,
+  /List\.cons \(Prod\.fst decoded\) charsRev/,
+  /List\.cons char charsRev/,
   /Char\.ofNat 39/,
-  /Char\.ofNat 92/,
-  /Char\.ofNat 10/,
-  /Char\.ofNat 13/,
-  /Char\.ofNat 9/,
 ];
 for (const pattern of required) {
   if (!pattern.test(source)) {
@@ -36,6 +39,9 @@ const forbidden = [
   /value\s*\*\s*(?:10|16)/,             // arithmetic infix in literal accumulators
   /value\s*<\s*(?:55296|1114112)/,       // scalar-bound infix comparison
   /57343\s*<\s*value/,
+  /Char\.ofNat\s+\d+\s*::\s*charsRev/, // term-level cons in decoded strings
+  /Prod\.fst decoded\s*::\s*charsRev/,
+  /\(char\s*::\s*charsRev\)/,
 ];
 for (const pattern of forbidden) {
   if (pattern.test(source)) {
@@ -44,5 +50,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (explicit Char and Nat operations for PSC1 bootstrap)\n",
+  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (explicit Char, Nat, and List operations for PSC1 bootstrap)\n",
 );

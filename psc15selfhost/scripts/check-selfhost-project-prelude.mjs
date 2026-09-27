@@ -14,11 +14,14 @@ if (elaborateProjectStart < 0 || checkStart <= elaborateProjectStart) {
 }
 
 const elaborateProject = source.slice(elaborateProjectStart, checkStart);
-if (!elaborateProject.includes("psSelfHostPreludeEnvironment")) {
-  throw new Error("PSC2_SELFHOST_PROJECT_PRELUDE: project elaboration must use selfhost prelude");
+if (!elaborateProject.includes("psSelfHostProdPreludeEnvironment")) {
+  throw new Error("PSC2_SELFHOST_PROJECT_PRELUDE: project elaboration must use current selfhost foundation");
 }
 if (elaborateProject.includes("psBootstrapPreludeEnvironment")) {
   throw new Error("PSC2_SELFHOST_PROJECT_PRELUDE: project elaboration regressed to bootstrap prelude");
 }
+if (elaborateProject.includes("psSelfHostPreludeEnvironment")) {
+  throw new Error("PSC2_SELFHOST_PROJECT_PRELUDE: project elaboration regressed to pre-Prod selfhost prelude");
+}
 
-process.stdout.write("PSC2_SELFHOST_PROJECT_PRELUDE: PASS\n");
+process.stdout.write("PSC2_SELFHOST_PROJECT_PRELUDE: PASS (Prod foundation)\n");

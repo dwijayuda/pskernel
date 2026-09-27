@@ -365,17 +365,20 @@ def psEraseDefinitionsLoop
             rest
             declarationsRev
 
-def psEraseCoreModule
+def psEraseCoreModuleWithRuntimePrelude
     (environment : PsEnvironment)
+    (runtimePreludeDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
     Except PsErasureError PsVerifiedIrModule :=
-  let names := psErasureDeclarationNames declarations
+  let runtimeDeclarations :=
+    List.append runtimePreludeDeclarations declarations
+  let names := psErasureDeclarationNames runtimeDeclarations
   let baseScope := psErasureScopeEmpty names
   match
       psPrepareRuntimeStructures
         environment
-        declarations
-        declarations
+        runtimeDeclarations
+        runtimeDeclarations
         baseScope
         [] with
   | Except.error error => Except.error error
@@ -383,8 +386,8 @@ def psEraseCoreModule
       match
           psPrepareRuntimeInductives
             environment
-            declarations
-            declarations
+            runtimeDeclarations
+            runtimeDeclarations
             preparedStructures.scope
             [] with
       | Except.error error => Except.error error
@@ -403,3 +406,12 @@ def psEraseCoreModule
                 inductives := preparedInductives.ir
                 declarations := lowered
               }
+
+def psEraseCoreModule
+    (environment : PsEnvironment)
+    (declarations : List PsDeclaration) :
+    Except PsErasureError PsVerifiedIrModule :=
+  psEraseCoreModuleWithRuntimePrelude
+    environment
+    List.nil
+    declarations

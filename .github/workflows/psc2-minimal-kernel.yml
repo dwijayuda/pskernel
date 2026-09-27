@@ -11,6 +11,8 @@ on:
       - psc2/kernel-core-phase3-reduce-work
       - psc2/kernel-core-phase4-infer
       - psc2/kernel-core-phase4-infer-work
+      - psc2/kernel-core-phase5-defeq
+      - psc2/kernel-core-phase5-defeq-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean

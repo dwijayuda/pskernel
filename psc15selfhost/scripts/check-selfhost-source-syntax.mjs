@@ -57,6 +57,9 @@ const levelContext = await read(
 );
 requireMarkers("LevelContext", levelContext, [
   'def psLevelFindAssignmentInList\n    (id : Nat)\n    (assignments : List PsLevelAssignment) : Option PsLevel :=\n  match assignments with',
+  'def psLevelInstantiateWithFuel\n    (context : PsLevelMetaContext)\n    (fuel : Nat)\n    (level : PsLevel) : PsLevel :=\n  match fuel with',
+  '| Nat.succ remaining =>\n      match level with',
+  'psLevelInstantiateWithFuel context remaining value',
   'let resolved := psLevelInstantiate context value;',
   'PsLevelAssignment.mk id resolved',
   'let leftValue := psLevelInstantiate context left;',
@@ -69,6 +72,7 @@ requireMarkers("LevelContext", levelContext, [
 ]);
 forbidMarkers("LevelContext", levelContext, [
   'def psLevelFindAssignmentInList (id : Nat) : List PsLevelAssignment -> Option PsLevel',
+  'def psLevelInstantiateWithFuel\n    (context : PsLevelMetaContext) : Nat -> PsLevel -> PsLevel',
   'List.cons { id := id, value := resolved } context.assignments',
   'match leftValue, rightValue with',
   '||',

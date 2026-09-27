@@ -40,6 +40,34 @@ for (const pattern of syntaxNameToNameRequired) {
   }
 }
 
+const projectionApplyMatch = source.match(
+  /def psElabProjectionApplyParameters([\s\S]*?)(?=\ndef psElabFindStructureField)/,
+);
+if (projectionApplyMatch === null) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionApplyParameters block");
+}
+const projectionApply = projectionApplyMatch[0];
+const projectionApplyRequired = [
+  /def psElabProjectionApplyParameters\s*\(context : PsElabContext\)\s*\(parameters : List PsExpr\)\s*:\s*PsExpr ->\s*Except PsElabError PsExpr :=/,
+  /let smaller : PsExpr -> Except PsElabError PsExpr :=\s*psElabProjectionApplyParameters context rest;/,
+  /fun \(cursor : PsExpr\) =>/,
+  /smaller\s*\(psExprInstantiate1 forallView\.body parameter\)/,
+];
+for (const pattern of projectionApplyRequired) {
+  if (!pattern.test(projectionApply)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionApplyParameters ${pattern}`);
+  }
+}
+const projectionApplyForbidden = [
+  /def psElabProjectionApplyParameters\s*\(context : PsElabContext\)\s*\(parameters : List PsExpr\)\s*\(cursor : PsExpr\)/,
+  /psElabProjectionApplyParameters\s+context\s+rest\s*\(psExprInstantiate1 forallView\.body parameter\)/,
+];
+for (const pattern of projectionApplyForbidden) {
+  if (pattern.test(projectionApply)) {
+    throw new Error(`PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabProjectionApplyParameters ${pattern}`);
+  }
+}
+
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
   /psSyntaxNameAppendSegments\s*\(psNameAppendStr name segment\)\s*rest/,
@@ -52,5 +80,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name recursion and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name/projection recursion and explicit Option constructors)\n",
 );

@@ -83,11 +83,32 @@ structure PsKernelCoreOpaqueInfo where
   value : PsKernelCoreExpr
   isUnsafe : Bool
 
+structure PsKernelCoreInductiveInfo where
+  base : PsKernelCoreConstantBase
+  numParams : Nat
+  numIndices : Nat
+  all : PsKernelCoreList PsKernelCoreName
+  ctors : PsKernelCoreList PsKernelCoreName
+  numNested : Nat
+  isRec : Bool
+  isReflexive : Bool
+  isUnsafe : Bool
+
+structure PsKernelCoreConstructorInfo where
+  base : PsKernelCoreConstantBase
+  induct : PsKernelCoreName
+  cidx : Nat
+  numParams : Nat
+  numFields : Nat
+  isUnsafe : Bool
+
 inductive PsKernelCoreConstantInfo where
   | axiomInfo (value : PsKernelCoreAxiomInfo)
   | defnInfo (value : PsKernelCoreDefinitionInfo)
   | thmInfo (value : PsKernelCoreTheoremInfo)
   | opaqueInfo (value : PsKernelCoreOpaqueInfo)
+  | inductInfo (value : PsKernelCoreInductiveInfo)
+  | ctorInfo (value : PsKernelCoreConstructorInfo)
 
 def psKernelCoreConstantInfoBase
     (info : PsKernelCoreConstantInfo) : PsKernelCoreConstantBase :=
@@ -96,6 +117,8 @@ def psKernelCoreConstantInfoBase
   | PsKernelCoreConstantInfo.defnInfo value => value.base
   | PsKernelCoreConstantInfo.thmInfo value => value.base
   | PsKernelCoreConstantInfo.opaqueInfo value => value.base
+  | PsKernelCoreConstantInfo.inductInfo value => value.base
+  | PsKernelCoreConstantInfo.ctorInfo value => value.base
 
 def psKernelCoreConstantInfoName
     (info : PsKernelCoreConstantInfo) : PsKernelCoreName :=
@@ -120,6 +143,8 @@ def psKernelCoreConstantInfoDeltaValue?
   | PsKernelCoreConstantInfo.axiomInfo _ => PsKernelCoreOption.none
   | PsKernelCoreConstantInfo.thmInfo _ => PsKernelCoreOption.none
   | PsKernelCoreConstantInfo.opaqueInfo _ => PsKernelCoreOption.none
+  | PsKernelCoreConstantInfo.inductInfo _ => PsKernelCoreOption.none
+  | PsKernelCoreConstantInfo.ctorInfo _ => PsKernelCoreOption.none
 
 def psKernelCoreConstantInfoHints?
     (info : PsKernelCoreConstantInfo) :
@@ -130,6 +155,8 @@ def psKernelCoreConstantInfoHints?
   | PsKernelCoreConstantInfo.axiomInfo _ => PsKernelCoreOption.none
   | PsKernelCoreConstantInfo.thmInfo _ => PsKernelCoreOption.none
   | PsKernelCoreConstantInfo.opaqueInfo _ => PsKernelCoreOption.none
+  | PsKernelCoreConstantInfo.inductInfo _ => PsKernelCoreOption.none
+  | PsKernelCoreConstantInfo.ctorInfo _ => PsKernelCoreOption.none
 
 def psKernelCoreConstantInfoIsUnsafe
     (info : PsKernelCoreConstantInfo) : Bool :=
@@ -139,6 +166,8 @@ def psKernelCoreConstantInfoIsUnsafe
       psKernelCoreDefinitionSafetyIsUnsafe value.safety
   | PsKernelCoreConstantInfo.thmInfo _ => false
   | PsKernelCoreConstantInfo.opaqueInfo value => value.isUnsafe
+  | PsKernelCoreConstantInfo.inductInfo value => value.isUnsafe
+  | PsKernelCoreConstantInfo.ctorInfo value => value.isUnsafe
 
 def psKernelCoreConstantInfoIsPartial
     (info : PsKernelCoreConstantInfo) : Bool :=
@@ -151,6 +180,8 @@ def psKernelCoreConstantInfoIsPartial
   | PsKernelCoreConstantInfo.axiomInfo _ => false
   | PsKernelCoreConstantInfo.thmInfo _ => false
   | PsKernelCoreConstantInfo.opaqueInfo _ => false
+  | PsKernelCoreConstantInfo.inductInfo _ => false
+  | PsKernelCoreConstantInfo.ctorInfo _ => false
 
 def psKernelCoreConstantInfoIsDefinition
     (info : PsKernelCoreConstantInfo) : Bool :=
@@ -159,6 +190,8 @@ def psKernelCoreConstantInfoIsDefinition
   | PsKernelCoreConstantInfo.axiomInfo _ => false
   | PsKernelCoreConstantInfo.thmInfo _ => false
   | PsKernelCoreConstantInfo.opaqueInfo _ => false
+  | PsKernelCoreConstantInfo.inductInfo _ => false
+  | PsKernelCoreConstantInfo.ctorInfo _ => false
 
 def psKernelCoreConstantInfoDefinition?
     (info : PsKernelCoreConstantInfo) :
@@ -168,3 +201,5 @@ def psKernelCoreConstantInfoDefinition?
   | PsKernelCoreConstantInfo.axiomInfo _ => PsKernelCoreOption.none
   | PsKernelCoreConstantInfo.thmInfo _ => PsKernelCoreOption.none
   | PsKernelCoreConstantInfo.opaqueInfo _ => PsKernelCoreOption.none
+  | PsKernelCoreConstantInfo.inductInfo _ => PsKernelCoreOption.none
+  | PsKernelCoreConstantInfo.ctorInfo _ => PsKernelCoreOption.none

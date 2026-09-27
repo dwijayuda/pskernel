@@ -34,6 +34,10 @@ const required = [
   /smaller\s+rest\s*\(List\.cons \(Char\.ofNat 92\) charsRev\)/,
   /smaller\s+\(Prod\.snd decoded\)\s*\(List\.cons \(Prod\.fst decoded\) charsRev\)/,
   /smaller\s+restAfterChar\s*\(List\.cons char charsRev\)/,
+  /def psCharListLength\s*\(chars : List Char\) : Nat :=\s*match chars with/,
+  /\| \[\] =>\s*0/,
+  /\| _ :: rest =>\s*Nat\.succ \(psCharListLength rest\)/,
+  /Nat\.succ \(psCharListLength rest\)/,
   /Nat\.add \(Nat\.mul value 10\) digit/,
   /Nat\.add \(Nat\.mul value 16\) digit/,
   /if Nat\.blt value 55296 then/,
@@ -59,6 +63,7 @@ const forbidden = [
   /String\.toList/,
   /String\.ofList/,
   /List\.reverse/,
+  /List\.length/,
   /'(?:\\.|[^'\\])+'/,                  // character literal syntax
   /def psParseNaturalChars\s*\(chars : List Char\)\s*\(value : Nat\)/,
   /psParseNaturalChars\s+rest\s+value/,
@@ -88,5 +93,5 @@ if (decodeFuelSelfReferences.length !== 1) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (bootstrap string traversal/rebuild, explicit Char/Nat/List operations, invariant-safe natural/fixed-hex/string-decode recursion)\n",
+  "PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX: PASS (bootstrap string traversal/rebuild/fuel, explicit Char/Nat/List operations, invariant-safe natural/fixed-hex/string-decode recursion)\n",
 );

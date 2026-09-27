@@ -34,6 +34,17 @@ def psElabTermResultTypeProjectionProbe
     (result : PsElabTermResult) : PsExpr :=
   result.type
 
+def psElabLambdaReverseBindersProbe
+    (result : PsElabTypedBindersResult) : List PsElabTypedBinder :=
+  List.reverse result.bindersRev
+
+def psElabLambdaBodyExpectedDirectProbe
+    (context : PsElabContext)
+    (binders : List PsElabTypedBinder)
+    (expected : Option PsExpr) :
+    Except PsElabError (Prod PsElabContext (Option PsExpr)) :=
+  psElabLambdaBodyExpected context binders expected
+
 def psElabLambdaPrepareProbe
     (elaborate :
       PsElabContext ->
@@ -137,6 +148,8 @@ try {
     "psElabTermResultMetaContextProjectionProbe",
     "psElabTermResultTermProjectionProbe",
     "psElabTermResultTypeProjectionProbe",
+    "psElabLambdaReverseBindersProbe",
+    "psElabLambdaBodyExpectedDirectProbe",
     "psElabLambdaPrepareProbe",
     "psElabLambdaBodyProbe",
     "psElabLambdaCloseProbe",

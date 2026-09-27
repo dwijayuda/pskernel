@@ -17,8 +17,8 @@ def jsFixtureFunctionDecl (name parameterName : String)
     parameters := [{ name := parameterName, type := .primitive parameterType }],
     resultType := .primitive resultType, body := body }
 
-def jsFixtureModule : PsVerifiedIrModule :=
-  { psVerifiedIrModuleEmpty with declarations := [
+def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
+  [
     jsFixtureDecl "largeNat" .nat (.natural 9007199254740993123456789),
     jsFixtureDecl "negativeInt" .int (.integer (-9007199254740993123456789)),
     jsFixtureDecl "zero" .nat (.natural 0),
@@ -35,10 +35,18 @@ def jsFixtureModule : PsVerifiedIrModule :=
     jsFixtureExprDecl "shadowed" .nat
       (.letE "x" (.primitive .nat) (.literal (.natural 1))
         (.letE "x" (.primitive .nat) (.literal (.natural 2)) (.var "x"))),
-    jsFixtureExprDecl "renamedLocal" .nat
-      (.letE "a-b" (.primitive .nat) (.literal (.natural 3)) (.var "a-b")),
     jsFixtureFunctionDecl "identity" "value" .nat .nat (.var "value")
-  ] }
+  ]
+
+def jsDifferentialFixtureModule : PsVerifiedIrModule :=
+  { psVerifiedIrModuleEmpty with declarations := jsDifferentialDeclarations }
+
+def jsFixtureModule : PsVerifiedIrModule :=
+  { psVerifiedIrModuleEmpty with declarations :=
+      jsDifferentialDeclarations ++ [
+        jsFixtureExprDecl "renamedLocal" .nat
+          (.letE "a-b" (.primitive .nat) (.literal (.natural 3)) (.var "a-b"))
+      ] }
 
 def jsRequireError (label : String) (module : PsVerifiedIrModule) : IO Unit := do
   match psJsEmitModule module with
@@ -78,7 +86,7 @@ def main (args : List String) : IO Unit := do
   let .ok again := psJsEmitModule jsFixtureModule | throw (IO.userError "second emission failed")
   unless direct == again do throw (IO.userError "nondeterministic emission")
   let .ok empty := psJsEmitModule psVerifiedIrModuleEmpty | throw (IO.userError "empty module failed")
-  let .ok reference := psTsEmitModule jsFixtureModule | throw (IO.userError "TS oracle failed")
+  let .ok reference := psTsEmitModule jsDifferentialFixtureModule | throw (IO.userError "TS oracle failed")
   IO.FS.writeFile (out ++ "/direct.mjs") direct
   IO.FS.writeFile (out ++ "/empty.mjs") empty
   IO.FS.writeFile (out ++ "/reference.ts") reference

@@ -85,10 +85,14 @@ def psUnifyWithFuel
             | .mvar rightId =>
                 if Nat.beq leftId rightId then
                   psUnifySuccess context
-                else if
-                    psMetaVarIsNatural context rightId
-                      && !psMetaVarIsNatural context leftId then
-                  psUnifyAssign context rightId leftValue
+                else if psMetaVarIsNatural context rightId then
+                  if psMetaVarIsNatural context leftId then
+                    if psMetaVarAssignable context leftId then
+                      psUnifyAssign context leftId rightValue
+                    else
+                      psUnifyAssign context rightId leftValue
+                  else
+                    psUnifyAssign context rightId leftValue
                 else if psMetaVarAssignable context leftId then
                   psUnifyAssign context leftId rightValue
                 else
@@ -225,14 +229,17 @@ def psUnifyWithFuel
                 | .proj leftType leftIndex leftValue =>
                     match rightOther with
                     | .proj rightType rightIndex rightValue =>
-                        if psNameEq leftType rightType && Nat.beq leftIndex rightIndex then
-                          psUnifyWithFuel
-                            environment
-                            localContext
-                            context
-                            fuel
-                            leftValue
-                            rightValue
+                        if psNameEq leftType rightType then
+                          if Nat.beq leftIndex rightIndex then
+                            psUnifyWithFuel
+                              environment
+                              localContext
+                              context
+                              fuel
+                              leftValue
+                              rightValue
+                          else
+                            psUnifyFailure context
                         else
                           psUnifyFailure context
                     | _ => psUnifyFailure context

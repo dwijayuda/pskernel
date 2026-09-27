@@ -11,6 +11,7 @@ on:
       - psc15selfhost/package.json
       - psc15selfhost/scripts/check-kernel-core-source.mjs
       - psc15selfhost/scripts/check-bootstrap-closure.mjs
+      - psc15selfhost/scripts/check-selfhost-source-syntax.mjs
       - .github/workflows/psc2-minimal-kernel.yml
   workflow_dispatch:
 

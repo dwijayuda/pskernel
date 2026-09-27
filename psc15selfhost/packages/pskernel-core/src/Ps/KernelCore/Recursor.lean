@@ -44,6 +44,59 @@ def psKernelCoreRecursorTarget?
       | PsKernelCoreList.nil => PsKernelCoreOption.some target
       | PsKernelCoreList.cons _ _ => PsKernelCoreOption.none
 
+def psKernelCoreRecursorResultArgsMatch
+    (args : PsKernelCoreList PsKernelCoreExpr) : Nat -> Bool :=
+  match args with
+  | PsKernelCoreList.nil =>
+      fun (_remainingIndices : Nat) => false
+  | PsKernelCoreList.cons head rest =>
+      fun (remainingIndices : Nat) =>
+        match remainingIndices with
+        | Nat.zero =>
+            match head with
+            | PsKernelCoreExpr.bvar index =>
+                if Nat.beq index 0 then
+                  match rest with
+                  | PsKernelCoreList.nil => true
+                  | PsKernelCoreList.cons _ _ => false
+                else
+                  false
+            | _ => false
+        | Nat.succ previous =>
+            match head with
+            | PsKernelCoreExpr.bvar index =>
+                if Nat.beq index (Nat.succ previous) then
+                  psKernelCoreRecursorResultArgsMatch rest previous
+                else
+                  false
+            | _ => false
+
+def psKernelCoreRecursorCanonicalTypeShapeValid
+    (info : PsKernelCoreRecursorInfo) : Bool :=
+  let summary := psKernelCoreInductiveSummarizeTelescope info.base.type;
+  let expectedBinders :=
+    Nat.add
+      (Nat.add
+        (Nat.add
+          (Nat.add info.numParams info.numMotives)
+          info.numMinors)
+        info.numIndices)
+      1;
+  if Nat.beq summary.binderCount expectedBinders then
+    let head := psKernelCoreExprAppHead summary.result;
+    let args := psKernelCoreExprAppArgs summary.result;
+    let expectedMotiveIndex :=
+      Nat.add (Nat.add info.numMinors info.numIndices) 1;
+    match head with
+    | PsKernelCoreExpr.bvar motiveIndex =>
+        if Nat.beq motiveIndex expectedMotiveIndex then
+          psKernelCoreRecursorResultArgsMatch args info.numIndices
+        else
+          false
+    | _ => false
+  else
+    false
+
 def psKernelCoreRecursorValidateRuleRhsWithResources
     (budget : Nat)
     (resources : PsKernelCoreResourceConfig)
@@ -181,19 +234,23 @@ def psKernelCoreValidateRecursorWithResources
                                   PsKernelCoreResult.error
                                     "K recursors are not supported in this phase"
                                 else if psKernelCoreBoolEq info.isUnsafe family.isUnsafe then
-                                  let safety :=
-                                    if info.isUnsafe then
-                                      PsKernelCoreDefinitionSafety.unsafeDef
-                                    else
-                                      PsKernelCoreDefinitionSafety.safe;
-                                  match psKernelCoreAdmissionCheckBaseWithResources
-                                      remaining resources env info.base safety with
-                                  | PsKernelCoreResult.error message =>
-                                      PsKernelCoreResult.error message
-                                  | PsKernelCoreResult.ok _ =>
-                                      psKernelCoreRecursorValidateRulesWithResources
-                                        family.ctors info.rules 0 remaining resources
-                                        env info family
+                                  if psKernelCoreRecursorCanonicalTypeShapeValid info then
+                                    let safety :=
+                                      if info.isUnsafe then
+                                        PsKernelCoreDefinitionSafety.unsafeDef
+                                      else
+                                        PsKernelCoreDefinitionSafety.safe;
+                                    match psKernelCoreAdmissionCheckBaseWithResources
+                                        remaining resources env info.base safety with
+                                    | PsKernelCoreResult.error message =>
+                                        PsKernelCoreResult.error message
+                                    | PsKernelCoreResult.ok _ =>
+                                        psKernelCoreRecursorValidateRulesWithResources
+                                          family.ctors info.rules 0 remaining resources
+                                          env info family
+                                  else
+                                    PsKernelCoreResult.error
+                                      "invalid recursor type shape"
                                 else
                                   PsKernelCoreResult.error
                                     "recursor safety does not match inductive"

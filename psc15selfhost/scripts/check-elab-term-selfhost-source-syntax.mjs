@@ -185,6 +185,20 @@ if (/\bvalue\.toNat\b/.test(character)) {
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabCharacter method-style Char.toNat");
 }
 
+const typedBindersAccMatch = source.match(
+  /def psElabTypedBindersAcc([\s\S]*?)(?=\ndef psElabTypedBinders)/,
+);
+if (typedBindersAccMatch === null) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabTypedBindersAcc block");
+}
+const typedBindersAcc = typedBindersAccMatch[0];
+if (!/elaborate\s+context\s+sourceType\s+Option\.none/.test(typedBindersAcc)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabTypedBindersAcc explicit Option.none");
+}
+if (/elaborate\s+context\s+sourceType\s+none/.test(typedBindersAcc)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabTypedBindersAcc bare none expected type");
+}
+
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
   /psSyntaxNameAppendSegments\s*\(psNameAppendStr name segment\)\s*rest/,
@@ -199,5 +213,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection recursion, typed projection-reference match, explicit projection-reference expectation, explicit character conversion, local list length, and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection recursion, typed projection-reference match, explicit projection-reference expectation, explicit character conversion, explicit typed-binder expectation, local list length, and explicit Option constructors)\n",
 );

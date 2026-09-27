@@ -26,7 +26,7 @@ structure PsElabContext where
   localContext : PsLocalContext
   instances : PsInstanceIndex
   metaContext : PsMetaContext
-  structuralRecursion : Option PsElabStructuralRecursion := none
+  structuralRecursion : Option PsElabStructuralRecursion
 
 def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
   {

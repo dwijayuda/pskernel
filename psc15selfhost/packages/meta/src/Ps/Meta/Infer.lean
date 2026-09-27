@@ -77,6 +77,47 @@ def psInferAppViewAcc
 def psInferAppView (expr : PsExpr) : PsInferAppView :=
   psInferAppViewAcc expr []
 
+def psInferApplyStructureParametersWorker
+    (arguments : List PsExpr) :
+    PsEnvironment ->
+    PsMetaContext ->
+    PsLocalContext ->
+    PsExpr ->
+    Except PsInferError PsExpr :=
+  match arguments with
+  | [] =>
+      fun (_environment : PsEnvironment) =>
+        fun (_metaContext : PsMetaContext) =>
+          fun (_localContext : PsLocalContext) =>
+            fun (cursor : PsExpr) =>
+              Except.ok cursor
+  | argument :: rest =>
+      let smaller :
+          PsEnvironment ->
+          PsMetaContext ->
+          PsLocalContext ->
+          PsExpr ->
+          Except PsInferError PsExpr :=
+        psInferApplyStructureParametersWorker rest;
+      fun (environment : PsEnvironment) =>
+        fun (metaContext : PsMetaContext) =>
+          fun (localContext : PsLocalContext) =>
+            fun (cursor : PsExpr) =>
+              match
+                  psWhnf
+                    environment
+                    metaContext
+                    localContext
+                    cursor with
+              | .forallE _ _ body _ =>
+                  smaller
+                    environment
+                    metaContext
+                    localContext
+                    (psExprInstantiate1 body argument)
+              | _ =>
+                  Except.error PsInferError.projectionUnsupported
+
 def psInferApplyStructureParameters
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -84,25 +125,12 @@ def psInferApplyStructureParameters
     (cursor : PsExpr)
     (arguments : List PsExpr) :
     Except PsInferError PsExpr :=
-  match arguments with
-  | [] =>
-      Except.ok cursor
-  | argument :: rest =>
-      match
-          psWhnf
-            environment
-            metaContext
-            localContext
-            cursor with
-      | .forallE _ _ body _ =>
-          psInferApplyStructureParameters
-            environment
-            metaContext
-            localContext
-            (psExprInstantiate1 body argument)
-            rest
-      | _ =>
-          Except.error PsInferError.projectionUnsupported
+  psInferApplyStructureParametersWorker
+    arguments
+    environment
+    metaContext
+    localContext
+    cursor
 
 def psInferStructureProjectionField
     (environment : PsEnvironment)

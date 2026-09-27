@@ -156,84 +156,81 @@ def psStringFromReversedChars (charsRev : List Char) : String :=
       String.push (psStringFromReversedChars rest) char
 
 def psDecodeStringBodyWithFuel
-    (fuel : Nat)
-    (chars : List Char)
-    (charsRev : List Char) :
+    (fuel : Nat) :
+    List Char ->
+    List Char ->
     Option String :=
   match fuel with
   | 0 =>
-      Option.none
-  | nextFuel + 1 =>
-      match chars with
-      | [] =>
+      fun (chars : List Char) =>
+        fun (charsRev : List Char) =>
           Option.none
-      | char :: restAfterChar =>
-          if psCharCodeEq char 34 then
-            match restAfterChar with
-            | [] =>
-                Option.some (psStringFromReversedChars charsRev)
-            | _ :: _ =>
-                Option.none
-          else if psCharCodeEq char 92 then
-            match restAfterChar with
-            | [] =>
-                Option.none
-            | escaped :: rest =>
-                if psCharCodeEq escaped 34 then
-                  psDecodeStringBodyWithFuel
-                    nextFuel
-                    rest
-                    (List.cons (Char.ofNat 34) charsRev)
-                else if psCharCodeEq escaped 92 then
-                  psDecodeStringBodyWithFuel
-                    nextFuel
-                    rest
-                    (List.cons (Char.ofNat 92) charsRev)
-                else if psCharCodeEq escaped 110 then
-                  psDecodeStringBodyWithFuel
-                    nextFuel
-                    rest
-                    (List.cons (Char.ofNat 10) charsRev)
-                else if psCharCodeEq escaped 114 then
-                  psDecodeStringBodyWithFuel
-                    nextFuel
-                    rest
-                    (List.cons (Char.ofNat 13) charsRev)
-                else if psCharCodeEq escaped 116 then
-                  psDecodeStringBodyWithFuel
-                    nextFuel
-                    rest
-                    (List.cons (Char.ofNat 9) charsRev)
-                else if psCharCodeEq escaped 48 then
-                  psDecodeStringBodyWithFuel
-                    nextFuel
-                    rest
-                    (List.cons (Char.ofNat 0) charsRev)
-                else if psCharCodeEq escaped 120 then
-                  match psDecodeEscapedChar 2 rest with
-                  | Option.none =>
+  | nextFuel + 1 =>
+      let smaller : List Char -> List Char -> Option String :=
+        psDecodeStringBodyWithFuel nextFuel;
+      fun (chars : List Char) =>
+        fun (charsRev : List Char) =>
+          match chars with
+          | [] =>
+              Option.none
+          | char :: restAfterChar =>
+              if psCharCodeEq char 34 then
+                match restAfterChar with
+                | [] =>
+                    Option.some (psStringFromReversedChars charsRev)
+                | _ :: _ =>
+                    Option.none
+              else if psCharCodeEq char 92 then
+                match restAfterChar with
+                | [] =>
+                    Option.none
+                | escaped :: rest =>
+                    if psCharCodeEq escaped 34 then
+                      smaller
+                        rest
+                        (List.cons (Char.ofNat 34) charsRev)
+                    else if psCharCodeEq escaped 92 then
+                      smaller
+                        rest
+                        (List.cons (Char.ofNat 92) charsRev)
+                    else if psCharCodeEq escaped 110 then
+                      smaller
+                        rest
+                        (List.cons (Char.ofNat 10) charsRev)
+                    else if psCharCodeEq escaped 114 then
+                      smaller
+                        rest
+                        (List.cons (Char.ofNat 13) charsRev)
+                    else if psCharCodeEq escaped 116 then
+                      smaller
+                        rest
+                        (List.cons (Char.ofNat 9) charsRev)
+                    else if psCharCodeEq escaped 48 then
+                      smaller
+                        rest
+                        (List.cons (Char.ofNat 0) charsRev)
+                    else if psCharCodeEq escaped 120 then
+                      match psDecodeEscapedChar 2 rest with
+                      | Option.none =>
+                          Option.none
+                      | Option.some decoded =>
+                          smaller
+                            (Prod.snd decoded)
+                            (List.cons (Prod.fst decoded) charsRev)
+                    else if psCharCodeEq escaped 117 then
+                      match psDecodeEscapedChar 4 rest with
+                      | Option.none =>
+                          Option.none
+                      | Option.some decoded =>
+                          smaller
+                            (Prod.snd decoded)
+                            (List.cons (Prod.fst decoded) charsRev)
+                    else
                       Option.none
-                  | Option.some decoded =>
-                      psDecodeStringBodyWithFuel
-                        nextFuel
-                        (Prod.snd decoded)
-                        (List.cons (Prod.fst decoded) charsRev)
-                else if psCharCodeEq escaped 117 then
-                  match psDecodeEscapedChar 4 rest with
-                  | Option.none =>
-                      Option.none
-                  | Option.some decoded =>
-                      psDecodeStringBodyWithFuel
-                        nextFuel
-                        (Prod.snd decoded)
-                        (List.cons (Prod.fst decoded) charsRev)
-                else
-                  Option.none
-          else
-            psDecodeStringBodyWithFuel
-              nextFuel
-              restAfterChar
-              (List.cons char charsRev)
+              else
+                smaller
+                  restAfterChar
+                  (List.cons char charsRev)
 
 def psDecodeStringLiteral (text : String) : Option String :=
   match psLexStringToList text with

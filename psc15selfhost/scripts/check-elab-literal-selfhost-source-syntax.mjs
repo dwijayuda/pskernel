@@ -66,7 +66,6 @@ const forbidden = [
   /def psReadFixedHex\s*\(count : Nat\)\s*\(chars : List Char\)\s*\(value : Nat\)/,
   /psReadFixedHex\s+nextCount\s+rest/,
   /def psDecodeStringBodyWithFuel\s*\(fuel : Nat\)\s*\(chars : List Char\)\s*\(charsRev : List Char\)/,
-  /psDecodeStringBodyWithFuel\s+nextFuel/,
   /value\s*\*\s*(?:10|16)/,             // arithmetic infix in literal accumulators
   /value\s*<\s*(?:55296|1114112)/,       // scalar-bound infix comparison
   /57343\s*<\s*value/,
@@ -78,6 +77,14 @@ for (const pattern of forbidden) {
   if (pattern.test(source)) {
     throw new Error(`PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: ${pattern}`);
   }
+}
+
+const decodeFuelSelfReferences =
+  source.match(/psDecodeStringBodyWithFuel\s+nextFuel/g) ?? [];
+if (decodeFuelSelfReferences.length !== 1) {
+  throw new Error(
+    `PSC2_ELAB_LITERAL_SELFHOST_SOURCE_SYNTAX_RECURSION_REFERENCE_COUNT: ${decodeFuelSelfReferences.length}`,
+  );
 }
 
 process.stdout.write(

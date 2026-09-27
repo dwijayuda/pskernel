@@ -56,15 +56,17 @@ def psElabNatNe (left right : Nat) : Bool :=
   if Nat.beq left right then false else true
 
 def psSyntaxNameAppendSegments
-    (name : PsName)
-    (segments : List String) : PsName :=
+    (segments : List String) :
+    PsName -> PsName :=
   match segments with
   | [] =>
-      name
+      fun (name : PsName) =>
+        name
   | segment :: rest =>
-      psSyntaxNameAppendSegments
-        (psNameAppendStr name segment)
-        rest
+      let smaller : PsName -> PsName :=
+        psSyntaxNameAppendSegments rest;
+      fun (name : PsName) =>
+        smaller (psNameAppendStr name segment)
 
 def psSyntaxNameToName (name : PsSyntaxName) : Option PsName :=
   match name.segments with
@@ -72,8 +74,8 @@ def psSyntaxNameToName (name : PsSyntaxName) : Option PsName :=
   | first :: rest =>
       some
         (psSyntaxNameAppendSegments
-          (psNameAppendStr PsName.anonymous first)
-          rest)
+          rest
+          (psNameAppendStr PsName.anonymous first))
 
 def psElabResultWithMeta
     (result : PsElabTermResult)

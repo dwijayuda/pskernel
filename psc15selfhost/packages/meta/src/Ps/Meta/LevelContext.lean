@@ -153,19 +153,19 @@ def psLevelUnifyWithFuelWorker
               match psLevelAssign context id rightValue with
               | Option.none => { context := context, success := false }
               | Option.some next => { context := next, success := true }
-          | value =>
+          | _ =>
               match rightValue with
               | .mvar id =>
-                  match psLevelAssign context id value with
+                  match psLevelAssign context id leftValue with
                   | Option.none => { context := context, success := false }
                   | Option.some next => { context := next, success := true }
               | .succ rightInner =>
-                  match value with
+                  match leftValue with
                   | .succ leftInner =>
                       smaller context leftInner rightInner
                   | _ => { context := context, success := false }
               | .max rightA rightB =>
-                  match value with
+                  match leftValue with
                   | .max leftA leftB =>
                       let first := smaller context leftA rightA;
                       if first.success then
@@ -174,7 +174,7 @@ def psLevelUnifyWithFuelWorker
                         first
                   | _ => { context := context, success := false }
               | .imax rightA rightB =>
-                  match value with
+                  match leftValue with
                   | .imax leftA leftB =>
                       let first := smaller context leftA rightA;
                       if first.success then

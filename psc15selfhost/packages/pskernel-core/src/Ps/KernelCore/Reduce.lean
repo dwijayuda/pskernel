@@ -2,6 +2,7 @@ import Ps.KernelCore.Subst
 import Ps.KernelCore.Environment
 import Ps.KernelCore.LocalContext
 import Ps.KernelCore.Primitive
+import Ps.KernelCore.Quot
 
 def psKernelCoreLevelSubstFromLists
     (params : PsKernelCoreList PsKernelCoreName) :
@@ -113,6 +114,85 @@ def psKernelCoreIsNatBinaryPrimitiveName
   else
     psKernelCoreNameEq name psKernelCorePrimitiveNatBleName
 
+structure PsKernelCoreAppView where
+  fn : PsKernelCoreExpr
+  args : PsKernelCoreList PsKernelCoreExpr
+
+def psKernelCoreCollectAppView
+    (expr : PsKernelCoreExpr) :
+    PsKernelCoreList PsKernelCoreExpr -> PsKernelCoreAppView :=
+  match expr with
+  | PsKernelCoreExpr.app fn arg =>
+      let collectFn :
+          PsKernelCoreList PsKernelCoreExpr -> PsKernelCoreAppView :=
+        psKernelCoreCollectAppView fn;
+      fun (args : PsKernelCoreList PsKernelCoreExpr) =>
+        collectFn (PsKernelCoreList.cons arg args)
+  | _ =>
+      fun (args : PsKernelCoreList PsKernelCoreExpr) =>
+        PsKernelCoreAppView.mk expr args
+
+def psKernelCoreAppViewOf (expr : PsKernelCoreExpr) : PsKernelCoreAppView :=
+  psKernelCoreCollectAppView expr PsKernelCoreList.nil
+
+def psKernelCoreExprListSize
+    (items : PsKernelCoreList PsKernelCoreExpr) : Nat :=
+  match items with
+  | PsKernelCoreList.nil => Nat.zero
+  | PsKernelCoreList.cons _ rest =>
+      Nat.succ (psKernelCoreExprListSize rest)
+
+def psKernelCoreExprListGet?
+    (items : PsKernelCoreList PsKernelCoreExpr) :
+    Nat -> PsKernelCoreOption PsKernelCoreExpr :=
+  match items with
+  | PsKernelCoreList.nil =>
+      fun (_index : Nat) => PsKernelCoreOption.none
+  | PsKernelCoreList.cons head rest =>
+      let getRest : Nat -> PsKernelCoreOption PsKernelCoreExpr :=
+        psKernelCoreExprListGet? rest;
+      fun (index : Nat) =>
+        match index with
+        | Nat.zero => PsKernelCoreOption.some head
+        | Nat.succ previous => getRest previous
+
+def psKernelCoreQuotFunctionFromPrefix?
+    (env : PsKernelCoreEnvironment)
+    (expr : PsKernelCoreExpr) : PsKernelCoreOption PsKernelCoreExpr :=
+  if env.quotInitialized then
+    let view := psKernelCoreAppViewOf expr;
+    match view.fn with
+    | PsKernelCoreExpr.const name _ =>
+        if psKernelCoreNameEq name psKernelCoreQuotLiftName then
+          if Nat.beq (psKernelCoreExprListSize view.args) 5 then
+            psKernelCoreExprListGet? view.args 3
+          else
+            PsKernelCoreOption.none
+        else if psKernelCoreNameEq name psKernelCoreQuotIndName then
+          if Nat.beq (psKernelCoreExprListSize view.args) 4 then
+            psKernelCoreExprListGet? view.args 3
+          else
+            PsKernelCoreOption.none
+        else
+          PsKernelCoreOption.none
+    | _ => PsKernelCoreOption.none
+  else
+    PsKernelCoreOption.none
+
+def psKernelCoreQuotRepresentative?
+    (expr : PsKernelCoreExpr) : PsKernelCoreOption PsKernelCoreExpr :=
+  let view := psKernelCoreAppViewOf expr;
+  match view.fn with
+  | PsKernelCoreExpr.const name _ =>
+      if psKernelCoreNameEq name psKernelCoreQuotMkName then
+        if Nat.beq (psKernelCoreExprListSize view.args) 3 then
+          psKernelCoreExprListGet? view.args 2
+        else
+          PsKernelCoreOption.none
+      else
+        PsKernelCoreOption.none
+  | _ => PsKernelCoreOption.none
+
 def psKernelCoreWhnfWithResources
     (budget : Nat)
     (resources : PsKernelCoreResourceConfig) :
@@ -153,97 +233,111 @@ def psKernelCoreWhnfWithResources
             | PsKernelCoreResult.error message =>
                 PsKernelCoreResult.error message
             | PsKernelCoreResult.ok reducedFn =>
-                match reducedFn with
-                | PsKernelCoreExpr.lam _ _ body _ =>
-                    smaller env lctx
-                      (psKernelCoreExprInstantiate1 body arg)
-                | PsKernelCoreExpr.const operation levels =>
-                    match levels with
-                    | PsKernelCoreList.nil =>
-                        if psKernelCoreNameEq
-                            operation psKernelCorePrimitiveNatSuccName then
-                          match smaller env lctx arg with
-                          | PsKernelCoreResult.error message =>
-                              PsKernelCoreResult.error message
-                          | PsKernelCoreResult.ok reducedArg =>
-                              match psKernelCoreNatLiteralValue? reducedArg with
-                              | PsKernelCoreOption.none =>
-                                  PsKernelCoreResult.ok
-                                    (PsKernelCoreExpr.app reducedFn reducedArg)
-                              | PsKernelCoreOption.some value =>
-                                  match psKernelCoreReduceNatUnary
-                                      resources operation value with
-                                  | PsKernelCoreResult.error message =>
-                                      PsKernelCoreResult.error message
-                                  | PsKernelCoreResult.ok primitiveResult =>
-                                      match primitiveResult with
-                                      | PsKernelCoreOption.none =>
-                                          PsKernelCoreResult.ok
-                                            (PsKernelCoreExpr.app reducedFn reducedArg)
-                                      | PsKernelCoreOption.some result =>
-                                          PsKernelCoreResult.ok result
-                        else
-                          PsKernelCoreResult.ok
-                            (PsKernelCoreExpr.app reducedFn arg)
-                    | PsKernelCoreList.cons _ _ =>
-                        PsKernelCoreResult.ok
-                          (PsKernelCoreExpr.app reducedFn arg)
-                | PsKernelCoreExpr.app binaryFn leftArg =>
-                    match binaryFn with
+                let ordinary : Unit -> PsKernelCoreResult String PsKernelCoreExpr :=
+                  fun (_unused : Unit) =>
+                    match reducedFn with
+                    | PsKernelCoreExpr.lam _ _ body _ =>
+                        smaller env lctx
+                          (psKernelCoreExprInstantiate1 body arg)
                     | PsKernelCoreExpr.const operation levels =>
                         match levels with
                         | PsKernelCoreList.nil =>
-                            if psKernelCoreIsNatBinaryPrimitiveName operation then
-                              match smaller env lctx leftArg with
+                            if psKernelCoreNameEq
+                                operation psKernelCorePrimitiveNatSuccName then
+                              match smaller env lctx arg with
                               | PsKernelCoreResult.error message =>
                                   PsKernelCoreResult.error message
-                              | PsKernelCoreResult.ok reducedLeft =>
-                                  match smaller env lctx arg with
-                                  | PsKernelCoreResult.error message =>
-                                      PsKernelCoreResult.error message
-                                  | PsKernelCoreResult.ok reducedRight =>
-                                      match psKernelCoreNatLiteralValue? reducedLeft with
-                                      | PsKernelCoreOption.none =>
-                                          PsKernelCoreResult.ok
-                                            (PsKernelCoreExpr.app
-                                              (PsKernelCoreExpr.app
-                                                binaryFn reducedLeft)
-                                              reducedRight)
-                                      | PsKernelCoreOption.some leftValue =>
-                                          match psKernelCoreNatLiteralValue? reducedRight with
+                              | PsKernelCoreResult.ok reducedArg =>
+                                  match psKernelCoreNatLiteralValue? reducedArg with
+                                  | PsKernelCoreOption.none =>
+                                      PsKernelCoreResult.ok
+                                        (PsKernelCoreExpr.app reducedFn reducedArg)
+                                  | PsKernelCoreOption.some value =>
+                                      match psKernelCoreReduceNatUnary
+                                          resources operation value with
+                                      | PsKernelCoreResult.error message =>
+                                          PsKernelCoreResult.error message
+                                      | PsKernelCoreResult.ok primitiveResult =>
+                                          match primitiveResult with
                                           | PsKernelCoreOption.none =>
                                               PsKernelCoreResult.ok
-                                                (PsKernelCoreExpr.app
-                                                  (PsKernelCoreExpr.app
-                                                    binaryFn reducedLeft)
-                                                  reducedRight)
-                                          | PsKernelCoreOption.some rightValue =>
-                                              match psKernelCoreReduceNatBinary
-                                                  resources operation leftValue rightValue with
-                                              | PsKernelCoreResult.error message =>
-                                                  PsKernelCoreResult.error message
-                                              | PsKernelCoreResult.ok primitiveResult =>
-                                                  match primitiveResult with
-                                                  | PsKernelCoreOption.none =>
-                                                      PsKernelCoreResult.ok
-                                                        (PsKernelCoreExpr.app
-                                                          (PsKernelCoreExpr.app
-                                                            binaryFn reducedLeft)
-                                                          reducedRight)
-                                                  | PsKernelCoreOption.some result =>
-                                                      PsKernelCoreResult.ok result
+                                                (PsKernelCoreExpr.app reducedFn reducedArg)
+                                          | PsKernelCoreOption.some result =>
+                                              PsKernelCoreResult.ok result
                             else
                               PsKernelCoreResult.ok
                                 (PsKernelCoreExpr.app reducedFn arg)
                         | PsKernelCoreList.cons _ _ =>
                             PsKernelCoreResult.ok
                               (PsKernelCoreExpr.app reducedFn arg)
+                    | PsKernelCoreExpr.app binaryFn leftArg =>
+                        match binaryFn with
+                        | PsKernelCoreExpr.const operation levels =>
+                            match levels with
+                            | PsKernelCoreList.nil =>
+                                if psKernelCoreIsNatBinaryPrimitiveName operation then
+                                  match smaller env lctx leftArg with
+                                  | PsKernelCoreResult.error message =>
+                                      PsKernelCoreResult.error message
+                                  | PsKernelCoreResult.ok reducedLeft =>
+                                      match smaller env lctx arg with
+                                      | PsKernelCoreResult.error message =>
+                                          PsKernelCoreResult.error message
+                                      | PsKernelCoreResult.ok reducedRight =>
+                                          match psKernelCoreNatLiteralValue? reducedLeft with
+                                          | PsKernelCoreOption.none =>
+                                              PsKernelCoreResult.ok
+                                                (PsKernelCoreExpr.app
+                                                  (PsKernelCoreExpr.app
+                                                    binaryFn reducedLeft)
+                                                  reducedRight)
+                                          | PsKernelCoreOption.some leftValue =>
+                                              match psKernelCoreNatLiteralValue? reducedRight with
+                                              | PsKernelCoreOption.none =>
+                                                  PsKernelCoreResult.ok
+                                                    (PsKernelCoreExpr.app
+                                                      (PsKernelCoreExpr.app
+                                                        binaryFn reducedLeft)
+                                                      reducedRight)
+                                              | PsKernelCoreOption.some rightValue =>
+                                                  match psKernelCoreReduceNatBinary
+                                                      resources operation leftValue rightValue with
+                                                  | PsKernelCoreResult.error message =>
+                                                      PsKernelCoreResult.error message
+                                                  | PsKernelCoreResult.ok primitiveResult =>
+                                                      match primitiveResult with
+                                                      | PsKernelCoreOption.none =>
+                                                          PsKernelCoreResult.ok
+                                                            (PsKernelCoreExpr.app
+                                                              (PsKernelCoreExpr.app
+                                                                binaryFn reducedLeft)
+                                                              reducedRight)
+                                                      | PsKernelCoreOption.some result =>
+                                                          PsKernelCoreResult.ok result
+                                else
+                                  PsKernelCoreResult.ok
+                                    (PsKernelCoreExpr.app reducedFn arg)
+                            | PsKernelCoreList.cons _ _ =>
+                                PsKernelCoreResult.ok
+                                  (PsKernelCoreExpr.app reducedFn arg)
+                        | _ =>
+                            PsKernelCoreResult.ok
+                              (PsKernelCoreExpr.app reducedFn arg)
                     | _ =>
                         PsKernelCoreResult.ok
-                          (PsKernelCoreExpr.app reducedFn arg)
-                | _ =>
-                    PsKernelCoreResult.ok
-                      (PsKernelCoreExpr.app reducedFn arg)
+                          (PsKernelCoreExpr.app reducedFn arg);
+                match psKernelCoreQuotFunctionFromPrefix? env reducedFn with
+                | PsKernelCoreOption.none => ordinary Unit.unit
+                | PsKernelCoreOption.some quotientFn =>
+                    match smaller env lctx arg with
+                    | PsKernelCoreResult.error message =>
+                        PsKernelCoreResult.error message
+                    | PsKernelCoreResult.ok reducedMajor =>
+                        match psKernelCoreQuotRepresentative? reducedMajor with
+                        | PsKernelCoreOption.none => ordinary Unit.unit
+                        | PsKernelCoreOption.some representative =>
+                            smaller env lctx
+                              (PsKernelCoreExpr.app quotientFn representative)
         | PsKernelCoreExpr.const name levels =>
             match psKernelCoreEnvironmentFind? env name with
             | PsKernelCoreOption.none => PsKernelCoreResult.ok expr

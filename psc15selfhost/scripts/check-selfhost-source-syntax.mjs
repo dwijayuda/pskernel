@@ -145,6 +145,16 @@ forbidMarkers("MetaContext", metaContext, [
   '| expr => expr',
 ]);
 
+const reduce = await read(
+  "packages/meta/src/Ps/Meta/Reduce.lean",
+);
+requireMarkers("Reduce", reduce, [
+  'let instantiated := psMetaInstantiate metaContext expr;\n      match instantiated with',
+]);
+forbidMarkers("Reduce", reduce, [
+  'let instantiated := psMetaInstantiate metaContext expr\n      match instantiated with',
+]);
+
 process.stdout.write(
   "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 explicit-recursion/invariant-fuel/local-list-ops/let/application/unary-match/no-bool-infix subset)\n",
 );

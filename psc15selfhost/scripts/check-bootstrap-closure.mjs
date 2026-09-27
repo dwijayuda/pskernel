@@ -165,16 +165,25 @@ if (
   process.env.PSC2_FIXED_POINT_PROBE_ACTIVE !== "1"
 ) {
   const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+  const toolPrefix = path.join("/tmp", "psc2-fixed-point-tools");
   const install = spawnSync(
     npm,
-    ["install", "--ignore-scripts", "--no-audit", "--no-fund"],
+    [
+      "install",
+      "--prefix",
+      toolPrefix,
+      "--no-audit",
+      "--no-fund",
+      "typescript@5.8.3",
+    ],
     { cwd: root, stdio: "inherit", encoding: "utf8" },
   );
   if (install.error) throw install.error;
   if (install.status !== 0) {
-    throw new Error("PSC2_FIXED_POINT_EVIDENCE_INSTALL_FAILED");
+    throw new Error("PSC2_FIXED_POINT_EVIDENCE_TOOL_INSTALL_FAILED");
   }
 
+  const toolBin = path.join(toolPrefix, "node_modules", ".bin");
   const fixedPoint = spawnSync(
     npm,
     ["run", "fixed-point"],
@@ -184,6 +193,7 @@ if (
       encoding: "utf8",
       env: {
         ...process.env,
+        PATH: `${toolBin}${path.delimiter}${process.env.PATH ?? ""}`,
         PSC2_FIXED_POINT_PROBE_ACTIVE: "1",
       },
     },
